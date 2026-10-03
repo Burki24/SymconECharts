@@ -31,10 +31,10 @@ IPSView-Ausgabe und ohne deren WebHook-Zugriff funktionieren.
 
 ### 2. Voraussetzungen
 
-Das Entwicklungsziel ist **Symcon 9.0 / PHP 8.5**. Im aktuellen
-[`library.json`](../library.json) steht noch die Generator-Mindestversion
-`7.1`. Sie ist kein Nachweis getesteter Kompatibilität und muss vor einer
-Funktionsfreigabe mit dem tatsächlichen Implementierungsziel abgeglichen werden.
+Das Entwicklungsziel und die deklarierte Mindestversion sind
+**Symcon 9.0 / PHP 8.5**. Eine Kompatibilität zu älteren Symcon-Versionen wird
+nicht versprochen. Die Laufzeitfähigkeit des aktuellen Modulgerüsts ist damit
+noch nicht belegt.
 
 Historische Diagramme sollen das vorhandene Symcon-Archiv verwenden. Eine
 zusätzliche Archivinstanz oder eigene Datenbank ist nicht vorgesehen.

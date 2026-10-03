@@ -55,6 +55,11 @@ requireContract(
     'The library URL changed.',
     $errors
 );
+requireContract(
+    ($library['compatibility'] ?? null) === ['version' => '9.0'],
+    'The library must target IP-Symcon 9.0.',
+    $errors
+);
 
 $expectedModules = [
     'EChartsGateway' => [

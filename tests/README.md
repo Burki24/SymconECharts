@@ -10,16 +10,19 @@ php tests/run.php
 Der GitHub-Workflow `.github/workflows/tests.yml` verwendet zusätzlich
 `Burki24/Symcon_ModuleCI/php-tests@v1.0.0`. Die gemeinsame Action prüft unter
 PHP 8.5 alle PHP-Dateien auf Syntax, validiert die JSON-Dateien und startet
-anschließend denselben lokalen Testeinstieg.
+anschließend denselben lokalen Testeinstieg. Der Workflow
+`.github/workflows/style.yml` verwendet
+`Burki24/Symcon_ModuleCI/style@v1.0.0` für die offiziellen Symcon-Prüfungen mit
+StylePHP und PHP CS Fixer.
 
 ## Enthaltene Prüfungen
 
 - `validate_structure.php` prüft die erwarteten Projekt-, Modul-, Test- und
   Workflowdateien, JSON-Grundstrukturen und die Einbindung der gemeinsamen
-  CI-Basis.
+  CI-Basis einschließlich des Style-Workflows.
 - `module_contracts.php` charakterisiert die vorhandenen Library- und
-  Modulidentitäten sowie die beiden Datenflussrichtungen des aktuellen
-  Gerüsts.
+  Modulidentitäten, die Symcon-9.0-Mindestversion sowie die beiden
+  Datenflussrichtungen des aktuellen Gerüsts.
 - `test_update_library_metadata.py` prüft Versionsfortschreibung, Build- und
   Datumsableitung sowie den Schutz vor einer Versionsrückstufung.
 

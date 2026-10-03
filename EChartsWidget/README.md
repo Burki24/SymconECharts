@@ -35,10 +35,10 @@ Chart innerhalb einer einzigen Widget-Instanz sein.
 
 ### 2. Voraussetzungen
 
-Das Entwicklungsziel ist **Symcon 9.0 / PHP 8.5**. Die noch in
-[`library.json`](../library.json) eingetragene Generator-Mindestversion `7.1`
-ist kein Nachweis getesteter Kompatibilität. Die Zielversion muss vor einer
-Funktionsfreigabe konsistent in Metadaten, Code, Tests und Dokumentation stehen.
+Das Entwicklungsziel und die deklarierte Mindestversion sind
+**Symcon 9.0 / PHP 8.5**. Eine Kompatibilität zu älteren Symcon-Versionen wird
+nicht versprochen. Die Laufzeitfähigkeit des aktuellen Modulgerüsts ist damit
+noch nicht belegt.
 
 Vorgesehen ist eine Verbindung zu einer [EChartsGateway-Instanz](../EChartsGateway).
 Für historische Daten werden aufgezeichnete Werte im Symcon-Archiv benötigt;

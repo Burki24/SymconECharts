@@ -14,6 +14,7 @@ $requiredFiles = [
     'library.json',
     '.gitmodules',
     '.github/scripts/update_library_metadata.py',
+    '.github/workflows/style.yml',
     '.github/workflows/tests.yml',
     '.github/workflows/update-library-metadata.yml',
     'tests/README.md',
@@ -190,6 +191,22 @@ if (is_file($testsWorkflowPath)) {
     ] as $requiredWorkflowContent) {
         if (!str_contains($testsWorkflow, $requiredWorkflowContent)) {
             $errors[] = 'Tests workflow is missing required content: ' . $requiredWorkflowContent;
+        }
+    }
+}
+
+$styleWorkflowPath = $root . '/.github/workflows/style.yml';
+if (is_file($styleWorkflowPath)) {
+    $styleWorkflow = (string) file_get_contents($styleWorkflowPath);
+    foreach ([
+        'jobs:',
+        '  style:',
+        'name: style',
+        'uses: actions/checkout@v6',
+        'uses: Burki24/Symcon_ModuleCI/style@v1.0.0'
+    ] as $requiredWorkflowContent) {
+        if (!str_contains($styleWorkflow, $requiredWorkflowContent)) {
+            $errors[] = 'Style workflow is missing required content: ' . $requiredWorkflowContent;
         }
     }
 }

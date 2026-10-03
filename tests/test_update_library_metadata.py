@@ -43,7 +43,7 @@ def main() -> None:
                 {
                     "id": "{00000000-0000-0000-0000-000000000000}",
                     "name": "SymconECharts",
-                    "compatibility": {"version": "7.1"},
+                    "compatibility": {"version": "9.0"},
                     "version": "1.0",
                     "build": 0,
                     "date": 0,
@@ -68,7 +68,7 @@ def main() -> None:
         if updated.get("name") != "SymconECharts":
             raise SystemExit("Library name metadata was not preserved.")
 
-        if updated.get("compatibility") != {"version": "7.1"}:
+        if updated.get("compatibility") != {"version": "9.0"}:
             raise SystemExit("Symcon compatibility metadata was not preserved.")
 
         updated = run_update(library_file, base_version="1.1", increment=2)

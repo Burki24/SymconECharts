@@ -67,9 +67,8 @@ darf den nativen Ausgabeweg nicht beeinträchtigen.
 
 ## Plattform und Modulbasis
 
-Entwicklungsziel ist **Symcon 9.0 / PHP 8.5**. Im Generatorgerüst steht noch
-`compatibility.version: 7.1`; die neue Implementierung darf deshalb nicht
-ungeprüft Kompatibilität zu Symcon 7.1 versprechen.
+Entwicklungsziel und deklarierte Mindestversion sind **Symcon 9.0 / PHP 8.5**.
+Eine Kompatibilität zu älteren Symcon-Versionen wird nicht versprochen.
 
 Für die technische Umsetzung ist die moderne Modulbasis `IPSModuleStrict`
 mit passenden Typdeklarationen vorgesehen. Die Parent-Auswahl wird über den
@@ -116,7 +115,7 @@ Veröffentlichungen bleiben manuelle, ausdrücklich freizugebende Schritte.
 
 Für die technische Projektbasis sind Struktur- und JSON-Prüfungen,
 PHP-Syntaxprüfungen, Modultests und der gemeinsame StylePHP-/CI-Ablauf
-vorzusehen. Änderungen an den Visualisierungen benötigen zusätzlich
+eingerichtet. Änderungen an den Visualisierungen benötigen zusätzlich
 Browserprüfungen in beiden Ausgabewegen. Ein PHP-Lint ersetzt keinen
 Symcon-Laufzeittest und keine Visualisierungsprüfung.
 
