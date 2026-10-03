@@ -120,6 +120,10 @@ vorzusehen. Änderungen an den Visualisierungen benötigen zusätzlich
 Browserprüfungen in beiden Ausgabewegen. Ein PHP-Lint ersetzt keinen
 Symcon-Laufzeittest und keine Visualisierungsprüfung.
 
+Die offizielle Symcon-Stylekonfiguration wird als Git-Submodul unter `.style`
+eingebunden. Sie bleibt dadurch auf einen nachvollziehbaren StylePHP-Commit
+festgeschrieben und kann über den normalen Submodulablauf aktualisiert werden.
+
 Der erste Funktionsumfang umfasst ein radiales Messinstrument und ein
 Liniendiagramm mit mehreren Datenreihen. Bereits dabei werden mehrere
 getrennte Charts, beide Ausgabewege gleichzeitig, Größenwechsel sowie

@@ -12,6 +12,7 @@ $requiredFiles = [
     'THIRD_PARTY_NOTICES.md',
     'docs/ENTWICKLUNG.md',
     'library.json',
+    '.gitmodules',
     '.github/scripts/update_library_metadata.py',
     '.github/workflows/tests.yml',
     '.github/workflows/update-library-metadata.yml',
@@ -31,6 +32,26 @@ foreach ($requiredFiles as $requiredFile) {
 foreach (['.shared', '.tests'] as $forbiddenDirectory) {
     if (is_dir($root . '/' . $forbiddenDirectory)) {
         $errors[] = 'Forbidden repository directory: ' . $forbiddenDirectory;
+    }
+}
+
+$gitmodulesPath = $root . '/.gitmodules';
+if (is_file($gitmodulesPath)) {
+    $gitmodules = (string) file_get_contents($gitmodulesPath);
+    foreach ([
+        '[submodule ".style"]',
+        'path = .style',
+        'url = https://github.com/symcon/StylePHP'
+    ] as $requiredSubmoduleContent) {
+        if (!str_contains($gitmodules, $requiredSubmoduleContent)) {
+            $errors[] = '.gitmodules is missing required content: ' . $requiredSubmoduleContent;
+        }
+    }
+}
+
+foreach (['.style/.php-cs-fixer.php', '.style/json-check.php'] as $requiredStyleFile) {
+    if (!is_file($root . '/' . $requiredStyleFile)) {
+        $errors[] = 'StylePHP submodule is not initialized: ' . $requiredStyleFile;
     }
 }
 

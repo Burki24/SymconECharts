@@ -3,6 +3,7 @@
 Die lokale Testsuite wird aus dem Repository-Stamm gestartet:
 
 ```text
+git submodule update --init --recursive
 php tests/run.php
 ```
 
