@@ -14,9 +14,11 @@ $requiredFiles = [
     'docs/adr/0001-chart-family-modules.md',
     'docs/adr/0002-gateway-gauge-contract.md',
     'library.json',
+    'libs/EChartsDataProtocol.php',
     'libs/helper/DataFlowHelper.php',
-    'libs/helper/EChartsDataProtocol.php',
+    'libs/helper/README.md',
     'libs/helper/manifest.json',
+    '.helper-sync.json',
     '.gitmodules',
     '.github/scripts/update_library_metadata.py',
     '.github/workflows/style.yml',
@@ -43,6 +45,10 @@ foreach (['.shared', '.tests'] as $forbiddenDirectory) {
     if (is_dir($root . '/' . $forbiddenDirectory)) {
         $errors[] = 'Forbidden repository directory: ' . $forbiddenDirectory;
     }
+}
+
+if (is_file($root . '/libs/helper/EChartsDataProtocol.php')) {
+    $errors[] = 'Project-specific EChartsDataProtocol.php must not be stored with synchronized ModuleHelpers.';
 }
 
 $gitmodulesPath = $root . '/.gitmodules';
@@ -138,6 +144,29 @@ if ($library !== null) {
 
     if (!is_int($library['date'] ?? null) || $library['date'] < 0) {
         $errors[] = 'library.json date must be a non-negative integer.';
+    }
+}
+
+$helperSync = is_file($root . '/.helper-sync.json')
+    ? readJsonObject($root . '/.helper-sync.json', $errors)
+    : null;
+if ($helperSync !== null) {
+    if (($helperSync['schema'] ?? null) !== 1) {
+        $errors[] = '.helper-sync.json must use schema 1.';
+    }
+    if (($helperSync['source_repository'] ?? null) !== 'Burki24/Symcon_ModuleHelper') {
+        $errors[] = '.helper-sync.json contains an unexpected source repository.';
+    }
+    if (($helperSync['base_branch'] ?? null) !== 'dev') {
+        $errors[] = '.helper-sync.json must target the dev branch.';
+    }
+    if (($helperSync['readme_language'] ?? null) !== 'de') {
+        $errors[] = '.helper-sync.json must generate German helper documentation.';
+    }
+    if (($helperSync['helpers'] ?? null) !== [
+        'DataFlowHelper' => ['target' => 'libs/helper/DataFlowHelper.php']
+    ]) {
+        $errors[] = '.helper-sync.json must subscribe exactly to DataFlowHelper.';
     }
 }
 

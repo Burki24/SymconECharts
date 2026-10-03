@@ -30,8 +30,9 @@ StylePHP und PHP CS Fixer.
   des internen Gateway-Protokolls.
 - `gateway_gauge.php` führt den ersten vollständigen Momentanwertabruf mit
   Symcon-Test-Doppeln aus und prüft Referenzen, Status sowie Fehlerfälle.
-- `helper_integrity.py` stellt sicher, dass der zentrale `DataFlowHelper`
-  unverändert und mit nachvollziehbarer Herkunft eingebunden ist.
+- `helper_integrity.py` stellt sicher, dass Subscription, Manifest,
+  Helper-Dokumentation und der zentrale `DataFlowHelper` vollständig
+  übereinstimmen.
 - `test_update_library_metadata.py` prüft Versionsfortschreibung, Build- und
   Datumsableitung sowie den Schutz vor einer Versionsrückstufung.
 

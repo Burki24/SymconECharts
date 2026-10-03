@@ -102,7 +102,9 @@ geladen. Der verwendete Build und seine Abhängigkeiten werden dokumentiert.
 Vorhandene zentrale Helper aus `Symcon_ModuleHelper` werden wiederverwendet
 und über den vorgesehenen Synchronisierungsweg eingebunden. Allgemeine
 Erweiterungen gehören in das zentrale Helper-Projekt, nicht in abweichende
-lokale Kopien. Projektspezifische Chart-Logik bleibt in SymconECharts.
+lokale Kopien. Synchronisierte Helper liegen ausschließlich unter
+`libs/helper`; projektspezifische Verträge und Chart-Logik liegen direkt unter
+`libs` beziehungsweise in den zuständigen Modulen.
 
 Eine gemeinsame Dateiauslieferung bedeutet nicht, dass mehrere getrennte
 Browserflächen eine einzige ECharts-Laufzeit teilen. Ressourcenbedarf und

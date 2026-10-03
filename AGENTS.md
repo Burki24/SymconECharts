@@ -48,9 +48,11 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Ausgabeadapter und ECharts-Renderer werden als getrennte Zuständigkeiten
   behandelt. Gemeinsame Abstraktionen entstehen nur für belegte gemeinsame
   Anwendungsfälle.
-- Repositoryweit geteilter Code liegt unter `libs/helper`; Tests liegen unter
-  `tests`. Vorhandene Funktionen aus `Symcon_ModuleHelper` werden
-  wiederverwendet und nicht lokal kopiert.
+- Repositoryweit geteilter projektspezifischer Code liegt direkt unter `libs`;
+  `libs/helper` enthält ausschließlich die über `.helper-sync.json`
+  abonnierten Kopien aus `Symcon_ModuleHelper`. Tests liegen unter `tests`.
+  Vorhandene zentrale Funktionen werden wiederverwendet und synchronisierte
+  Helper nicht lokal verändert.
 
 ## Modulpräfixe
 

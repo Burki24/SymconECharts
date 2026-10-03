@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use SymconECharts\EChartsDataProtocol;
 
-require_once dirname(__DIR__) . '/libs/helper/EChartsDataProtocol.php';
+require_once dirname(__DIR__) . '/libs/EChartsDataProtocol.php';
 
 function assertProtocol(bool $condition, string $message): void
 {
