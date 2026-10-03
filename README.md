@@ -33,6 +33,10 @@ Nach normalen Pushes auf `dev` pflegt ein Workflow Version, Build und Datum in
 `library.json` und legt die Metadaten als getrennten Bot-Commit ab. Tags und
 Releases werden dadurch nicht automatisch erzeugt.
 
+Die Basistests werden lokal mit `php tests/run.php` ausgeführt. Der
+Tests-Workflow prüft dieselbe Suite unter PHP 8.5 und ergänzt PHP-Syntax- sowie
+JSON-Validierung über die gemeinsame `Symcon_ModuleCI`-Basis.
+
 ## Lizenz
 
 Die eigenen Beiträge stehen unter der

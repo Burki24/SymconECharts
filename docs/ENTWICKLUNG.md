@@ -16,10 +16,11 @@ nicht eine eigene große Dashboard-Seite des Moduls.
 
 Die Library und beide Module sind als Grundgerüste vorhanden. ECharts,
 fachliche Datenverarbeitung, Visualisierung, zentrale Helper-Anbindung sowie
-fachliche Tests und die vollständige Projekt-CI sind noch nicht eingebunden.
-Die automatische Pflege der Library-Metadaten auf `dev` ist bereits
-vorhanden. Die folgenden Festlegungen beschreiben das Entwicklungsziel, keine
-bereits ausgelieferten Funktionen.
+fachliche Laufzeit- und Browsertests sind noch nicht eingebunden. Eine
+Basistestsuite charakterisiert Projektstruktur, Modulidentitäten, Datenflüsse
+und Metadatenautomatik; der Tests-Workflow führt sie unter PHP 8.5 über die
+gemeinsame CI-Basis aus. Die folgenden Festlegungen beschreiben das
+Entwicklungsziel, keine bereits ausgelieferten Funktionen.
 
 | Bestandteil | Name | Aufgabe |
 |---|---|---|

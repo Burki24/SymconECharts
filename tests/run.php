@@ -8,30 +8,29 @@ if (!chdir($root)) {
     exit(1);
 }
 
-/**
- * Runs one repository-specific test command.
- *
- * @param string $label   Human-readable test label
- * @param string $command Command line to execute
- */
-function runTestCommand(string $label, string $command): void
-{
-    echo $label . "...\n";
-    passthru($command, $exitCode);
+$tests = [
+    __DIR__ . '/validate_structure.php',
+    __DIR__ . '/module_contracts.php'
+];
 
+$commands = [
+    ['Test library metadata updater', 'python3 tests/test_update_library_metadata.py']
+];
+
+foreach ($tests as $test) {
+    echo 'Running ' . basename($test) . "...\n";
+    passthru(PHP_BINARY . ' ' . escapeshellarg($test), $exitCode);
     if ($exitCode !== 0) {
-        fwrite(STDERR, $label . ' failed with exit code ' . $exitCode . ".\n");
         exit($exitCode);
     }
 }
 
-$commands = [
-    ['Validate versioning structure', 'php tests/validate_versioning.php'],
-    ['Test library metadata updater', 'python3 tests/test_update_library_metadata.py']
-];
-
 foreach ($commands as [$label, $command]) {
-    runTestCommand($label, $command);
+    echo $label . "...\n";
+    passthru($command, $exitCode);
+    if ($exitCode !== 0) {
+        exit($exitCode);
+    }
 }
 
 echo "All SymconECharts tests passed.\n";
