@@ -13,6 +13,7 @@ $requiredFiles = [
     'docs/ENTWICKLUNG.md',
     'docs/adr/0001-chart-family-modules.md',
     'docs/adr/0002-gateway-gauge-contract.md',
+    'docs/adr/0003-single-and-multi-gauge-modules.md',
     'library.json',
     'libs/EChartsDataProtocol.php',
     'libs/helper/DataFlowHelper.php',
@@ -26,7 +27,7 @@ $requiredFiles = [
     '.github/workflows/update-library-metadata.yml',
     'tests/README.md',
     'tests/data_protocol.php',
-    'tests/gateway_gauge.php',
+    'tests/gateway_gauges.php',
     'tests/helper_integrity.py',
     'tests/module_contracts.php',
     'tests/run.php',
@@ -170,7 +171,7 @@ if ($helperSync !== null) {
     }
 }
 
-$expectedModules = ['EChartsGateway', 'EChartsGauge'];
+$expectedModules = ['EChartsGateway', 'EChartsGaugeMulti', 'EChartsGaugeSingle'];
 $discoveredModules = [];
 foreach (glob($root . '/*/module.json') ?: [] as $modulePath) {
     $discoveredModules[] = basename(dirname($modulePath));
@@ -277,7 +278,7 @@ if ($runner === false) {
         "__DIR__ . '/module_contracts.php'",
         "__DIR__ . '/symcon_strict.php'",
         "__DIR__ . '/data_protocol.php'",
-        "__DIR__ . '/gateway_gauge.php'",
+        "__DIR__ . '/gateway_gauges.php'",
         'python3 tests/helper_integrity.py',
         'python3 tests/test_update_library_metadata.py'
     ] as $requiredTest) {

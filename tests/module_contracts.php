@@ -70,10 +70,18 @@ $expectedModules = [
         'childRequirements'  => ['{E4749B72-912B-E3E3-1C57-D19019FFDD84}'],
         'implemented'        => ['{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}']
     ],
-    'EChartsGauge' => [
+    'EChartsGaugeSingle' => [
         'id'                 => '{0CAA2780-342F-E5B9-2865-CB8DCED0BE7C}',
         'type'               => 3,
-        'prefix'             => 'ECGA',
+        'prefix'             => 'ECGS',
+        'parentRequirements' => ['{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}'],
+        'childRequirements'  => [],
+        'implemented'        => ['{E4749B72-912B-E3E3-1C57-D19019FFDD84}']
+    ],
+    'EChartsGaugeMulti' => [
+        'id'                 => '{E667D9C1-379D-44ED-A313-FF21FEFC355F}',
+        'type'               => 3,
+        'prefix'             => 'ECGM',
         'parentRequirements' => ['{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}'],
         'childRequirements'  => [],
         'implemented'        => ['{E4749B72-912B-E3E3-1C57-D19019FFDD84}']
@@ -135,17 +143,19 @@ foreach ($expectedModules as $moduleName => $expected) {
 }
 
 $gateway = $moduleContracts['EChartsGateway'];
-$gauge = $moduleContracts['EChartsGauge'];
-requireContract(
-    ($gateway['implemented'] ?? null) === ($gauge['parentRequirements'] ?? null),
-    'Gauge-to-gateway data flow is inconsistent.',
-    $errors
-);
-requireContract(
-    ($gateway['childRequirements'] ?? null) === ($gauge['implemented'] ?? null),
-    'Gateway-to-gauge data flow is inconsistent.',
-    $errors
-);
+foreach (['EChartsGaugeSingle', 'EChartsGaugeMulti'] as $gaugeModuleName) {
+    $gauge = $moduleContracts[$gaugeModuleName];
+    requireContract(
+        ($gateway['implemented'] ?? null) === ($gauge['parentRequirements'] ?? null),
+        $gaugeModuleName . '-to-gateway data flow is inconsistent.',
+        $errors
+    );
+    requireContract(
+        ($gateway['childRequirements'] ?? null) === ($gauge['implemented'] ?? null),
+        'Gateway-to-' . $gaugeModuleName . ' data flow is inconsistent.',
+        $errors
+    );
+}
 
 if ($errors !== []) {
     fwrite(STDERR, "SymconECharts module contract validation failed:\n - " . implode("\n - ", $errors) . "\n");

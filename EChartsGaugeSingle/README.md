@@ -1,7 +1,8 @@
-# EChartsGauge
+# EChartsGaugeSingle
 
-Gerätemodul der SymconECharts-Library für ein einzelnes Gauge-Diagramm. Eine
-Gauge-Instanz soll die native Symcon-Kacheldarstellung und ein separat
+Gerätemodul der SymconECharts-Library für ein Gauge-Diagramm mit genau einer
+numerischen Quellvariable. Eine Gauge-Single-Instanz soll die native
+Symcon-Kacheldarstellung und ein separat
 platzierbares HTML-Widget in IPSView bereitstellen können. Datenquelle und
 Diagrammkonfiguration werden dabei nur einmal gepflegt.
 
@@ -34,9 +35,10 @@ Gestaltungsoptionen sowie die Ausgabe als native Symcon-Kachel und optionales
 IPSView-Widget. Archivdarstellung wird erst mit einem dafür festgelegten
 Chart-Anwendungsfall umgesetzt.
 
-Eine Instanz bildet genau einen unabhängig konfigurierbaren Gauge-Chart ab.
-Weitere Chartfamilien werden bei Bedarf als eigene Gerätemodule ergänzt und
-nicht als umschaltbare Modi dieser Instanz implementiert.
+Eine Instanz bildet genau einen unabhängig konfigurierbaren Single-Gauge-Chart
+ab. Zusammengesetzte Gauges mit mehreren Werten gehören zu
+[EChartsGaugeMulti](../EChartsGaugeMulti). Weitere Chartfamilien werden bei
+Bedarf als eigene Gerätemodule ergänzt.
 
 ### 2. Voraussetzungen
 
@@ -70,7 +72,7 @@ im Module Store wird nicht vorausgesetzt.
 
 ### 4. Einrichten der Instanzen in Symcon
 
-**Zielmodell:** Eine EChartsGauge-Instanz je unabhängig konfigurierbarem
+**Zielmodell:** Eine EChartsGaugeSingle-Instanz je unabhängig konfigurierbarem
 Gauge-Chart. Mehrere Gauge-Instanzen sollen ein gemeinsames Gateway verwenden
 können. Für die parallele Anzeige desselben Charts als Kachel und in IPSView
 ist keine zweite Gauge-Instanz vorgesehen.
@@ -129,13 +131,13 @@ Visualisierung unbeabsichtigt zu verändern.
 
 ### 7. PHP-Befehlsreferenz
 
-Das festgelegte Funktionspräfix lautet `ECGA`.
+Das festgelegte Funktionspräfix lautet `ECGS`.
 
 ```php
-$json = ECGA_GetGaugeData($InstanceID);
+$json = ECGS_GetGaugeData($InstanceID);
 ```
 
-`ECGA_GetGaugeData()` validiert Konfiguration und aktive Gateway-Verbindung
+`ECGS_GetGaugeData()` validiert Konfiguration und aktive Gateway-Verbindung
 und liefert das aktuelle Gauge-Datenmodell als JSON. Das Modell enthält
 `schemaVersion`, `family`, Quellvariable und Zeitstempel, die minimale
 Gauge-Konfiguration sowie den numerischen Wert. Es ist die technische Grenze

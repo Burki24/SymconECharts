@@ -1,10 +1,10 @@
 # ADR 0001: Gerätemodule nach Chartfamilien strukturieren
 
-- Status: Angenommen
+- Status: Teilweise ersetzt
 - Datum: 2026-10-03
 - Entscheider: Burki24
 - Ersetzt: –
-- Ersetzt durch: –
+- Ersetzt durch: ADR 0003 hinsichtlich der Gauge-Aufteilung und Präfixe
 
 ## Kontext
 

@@ -27,8 +27,9 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
 ## Architekturgrenzen
 
 - Die Modulstruktur besteht aus `EChartsGateway` und getrennten
-  Geräteinstanzen je Diagrammfamilie. `EChartsGauge` ist die erste Familie;
-  eine Instanz bildet genau einen unabhängig konfigurierbaren Gauge-Chart ab.
+  Geräteinstanzen je Diagrammfamilie. Die erste Familie ist in
+  `EChartsGaugeSingle` für genau eine Quellvariable und `EChartsGaugeMulti`
+  für erweiterte Mehrquellenmodelle aufgeteilt.
 - Das Gateway stellt ausschließlich familienübergreifende Infrastruktur wie
   Archivzugriff, begrenztes Caching, gemeinsame Ressourcen und gegebenenfalls
   abgesicherte IPSView-Kommunikation bereit. Familienbezogene Properties,
@@ -36,11 +37,13 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
 - Weitere Diagrammfamilien erhalten bei belegtem Bedarf ein eigenes
   Gerätemodul. Sie werden nicht als Modi einer universellen Widget-Instanz
   ergänzt.
-- Die vorhandenen Modul-GUIDs und Datenfluss-IDs werden beibehalten. Namen,
-  Präfixe und Zuständigkeiten aus
-  [`ADR 0001`](docs/adr/0001-chart-family-modules.md) sind verbindliche
-  Verträge und ändern sich nur mit einer ausdrücklichen Architektur- und
-  Kompatibilitätsentscheidung.
+- Die bestehende Gauge-Modul-GUID gehört nach der Aufteilung zu
+  `EChartsGaugeSingle`; `EChartsGaugeMulti` besitzt eine eigene Modul-GUID.
+  Datenfluss-IDs werden von beiden Geräten gemeinsam verwendet. Namen,
+  Präfixe und Zuständigkeiten aus [`ADR 0001`](docs/adr/0001-chart-family-modules.md)
+  und [`ADR 0003`](docs/adr/0003-single-and-multi-gauge-modules.md) sind
+  verbindliche Verträge und ändern sich nur mit einer ausdrücklichen
+  Architektur- und Kompatibilitätsentscheidung.
 - Parent-Auswahl, Zuständigkeiten und das versionierte Datenprotokoll aus
   [`ADR 0002`](docs/adr/0002-gateway-gauge-contract.md) sind verbindliche
   technische Verträge und werden kompatibel weiterentwickelt.
@@ -60,7 +63,10 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   ECharts; die dritte und vierte Stelle kennzeichnen Aufgabe oder
   Diagrammfamilie.
 - `ECGW` ist dem `EChartsGateway` zugeordnet (`GW` = Gateway).
-- `ECGA` ist `EChartsGauge` zugeordnet (`GA` = Gauge).
+- `ECGS` ist `EChartsGaugeSingle` zugeordnet (`GS` = Gauge Single).
+- `ECGM` ist `EChartsGaugeMulti` zugeordnet (`GM` = Gauge Multi).
+- Das zuvor für das unveröffentlichte Gauge-Gerüst verwendete Kürzel `ECGA`
+  ist abgelöst und wird nicht für ein anderes Modul wiederverwendet.
 - Neue Kürzel werden vor ihrer Verwendung eindeutig festgelegt und in dieser
   Datei sowie im zugehörigen Architekturkontext dokumentiert. Ein bestehendes
   Kürzel wird nicht für eine andere Bestimmung wiederverwendet.

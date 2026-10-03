@@ -8,23 +8,31 @@ Folgende Module beinhaltet das SymconECharts Repository:
   Zwischenspeicherung und weitere gemeinsame Dienste folgen bei belegtem Bedarf.
   Das Gateway benötigt keine eigene I/O-Instanz.
 
-- __EChartsGauge__ ([Dokumentation](EChartsGauge))
-  Gerätemodul für ein einzelnes, unabhängig konfigurierbares Gauge-Diagramm.
+- __EChartsGaugeSingle__ ([Dokumentation](EChartsGaugeSingle))
+  Gerätemodul für ein einzelnes, unabhängig konfigurierbares Gauge-Diagramm
+  mit genau einer numerischen Quellvariable.
   Vorgesehen für die native Symcon-Kacheldarstellung und zusätzlich für ein
   separat platzierbares HTML-Widget in IPSView. Beide Ausgabewege sollen
   dieselbe Diagrammkonfiguration und Datenaufbereitung verwenden.
 
+- __EChartsGaugeMulti__ ([Dokumentation](EChartsGaugeMulti))
+  Gerätemodul für zusammengesetzte Gauge-Darstellungen mit künftig mehreren
+  Datenquellen, etwa Multi Title, Ring oder Car. Das Modulgerüst ist vorhanden;
+  das erweiterte Mehrquellenmodell ist noch nicht implementiert.
+
 ## Entwicklungsstand
 
-**Technische Datenbasis – noch keine sichtbaren Diagramme.** Gateway und Gauge
-verwenden `IPSModuleStrict`, ein versioniertes Datenprotokoll und eine
-wiederverwendbare Parent-Verbindung. Eine Gauge-Instanz kann eine numerische
+**Technische Datenbasis – noch keine sichtbaren Diagramme.** Gateway und die
+Gauge-Module verwenden `IPSModuleStrict`, ein versioniertes Datenprotokoll und eine
+wiederverwendbare Parent-Verbindung. Gauge Single kann eine numerische
 Quellvariable konfigurieren und deren Momentanwert als validiertes
-familienbezogenes Datenmodell abrufen. Apache ECharts, Archivverarbeitung,
-native Kachelausgabe und IPSView-HTML-Ausgabe sind noch nicht implementiert.
+familienbezogenes Datenmodell abrufen. Das Gauge-Multi-Gerüst prüft derzeit
+denselben technischen Vertrag. Apache ECharts, das Mehrquellenmodell,
+Archivverarbeitung, native Kachelausgabe und IPSView-HTML-Ausgabe sind noch
+nicht implementiert.
 
-Als erste Chartfamilie ist ein radiales Messinstrument vorgesehen. Eine
-Gauge-Instanz soll jeweils einen Chart liefern; eine gemeinsame Dashboard-Seite
+Als erste Chartfamilie sind Single- und Multi-Gauges vorgesehen. Eine
+Geräteinstanz soll jeweils einen Chart liefern; eine gemeinsame Dashboard-Seite
 ist nicht vorgesehen. Weitere Chartfamilien erhalten eigene Gerätemodule.
 
 ## Entwicklung

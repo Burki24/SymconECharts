@@ -14,12 +14,13 @@ nicht eine eigene große Dashboard-Seite des Moduls.
 
 ## Aktueller Stand und Zielarchitektur
 
-Die Library besitzt mit Gateway und Gauge eine erste technische Vertikale.
-Beide Module verwenden `IPSModuleStrict`; Gauge-Instanzen können vorhandene
-Gateways wiederverwenden. Ein versioniertes Protokoll liefert geprüfte
-numerische Momentanwerte an ein minimales Gauge-Datenmodell. Der zentrale
-`DataFlowHelper` ist eingebunden. ECharts, Archivverarbeitung, Visualisierung
-sowie reale Symcon-Laufzeit- und Browsertests fehlen noch. Die Testsuite prüft
+Die Library besitzt mit Gateway sowie Gauge Single und Gauge Multi eine erste
+technische Modulstruktur. Alle drei Module verwenden `IPSModuleStrict`;
+Gauge-Instanzen können vorhandene Gateways wiederverwenden. Ein versioniertes
+Protokoll liefert geprüfte numerische Momentanwerte an ein minimales
+Gauge-Datenmodell. Der zentrale `DataFlowHelper` ist eingebunden. ECharts,
+das persistente Mehrquellenmodell, Archivverarbeitung, Visualisierung sowie
+reale Symcon-Laufzeit- und Browsertests fehlen noch. Die Testsuite prüft
 zusätzlich zu Struktur und Metadaten die Strict-Verträge, das Protokoll und den
 Gauge→Gateway-Datenweg unter PHP 8.5.
 
@@ -27,12 +28,13 @@ Gauge→Gateway-Datenweg unter PHP 8.5.
 |---|---|---|
 | Library | SymconECharts | Gemeinsames installierbares Paket |
 | Splitter | EChartsGateway | Gemeinsame Dienste für mehrere Chart-Instanzen |
-| Gerät | EChartsGauge | Ein unabhängig konfigurierbarer Gauge-Chart mit zwei Ausgabewegen |
+| Gerät | EChartsGaugeSingle | Ein Gauge-Chart mit genau einer Quellvariable und zwei Ausgabewegen |
+| Gerät | EChartsGaugeMulti | Ein zusammengesetzter Gauge-Chart; Mehrquellenmodell noch ausstehend |
 
 Eine eigene I/O-Instanz, ein Konfigurator und Discovery gehören nicht zum
-Anfangsumfang. Eine Datenquelle ist Teil der Gauge-Konfiguration und keine
-eigene Geräteinstanz. Mehrere Gauge-Instanzen sollen einen vorhandenen Gateway
-gemeinsam verwenden können. Weitere Chartfamilien erhalten eigene
+Anfangsumfang. Datenquellen sind Teil der jeweiligen Gauge-Konfiguration und
+keine eigenen Geräteinstanzen. Mehrere Gauge-Instanzen sollen einen vorhandenen
+Gateway gemeinsam verwenden können. Weitere Chartfamilien erhalten eigene
 Gerätemodule; sie werden nicht als Modi eines universellen Widgets ergänzt.
 
 ## Festgelegte Identitäten
@@ -44,15 +46,17 @@ Modul-IDs und Datenfluss-IDs haben unterschiedliche Aufgaben.
 |---|---|
 | Library SymconECharts | `{66BE21BE-988A-10EB-1BBB-1E2F444E9F85}` |
 | Modul EChartsGateway | `{33C9DF44-6F6D-5916-4AAE-CCB24BD6928D}` |
-| Modul EChartsGauge | `{0CAA2780-342F-E5B9-2865-CB8DCED0BE7C}` |
+| Modul EChartsGaugeSingle | `{0CAA2780-342F-E5B9-2865-CB8DCED0BE7C}` |
+| Modul EChartsGaugeMulti | `{E667D9C1-379D-44ED-A313-FF21FEFC355F}` |
 | Datenfluss Gauge → Gateway | `{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}` |
 | Datenfluss Gateway → Gauge | `{E4749B72-912B-E3E3-1C57-D19019FFDD84}` |
 
-Die Funktionspräfixe sind `ECGW` für das Gateway und `ECGA` für Gauge. Nach der
-verbindlichen Präfixkonvention steht `EC` für ECharts; die letzten zwei
-Buchstaben bezeichnen Aufgabe oder Chartfamilie. Die Entscheidung zur
-Modulstruktur und zum Erhalt der GUIDs dokumentiert
-[`ADR 0001`](adr/0001-chart-family-modules.md).
+Die Funktionspräfixe sind `ECGW` für das Gateway, `ECGS` für Gauge Single und
+`ECGM` für Gauge Multi. Nach der verbindlichen Präfixkonvention steht `EC` für
+ECharts; die letzten zwei Buchstaben bezeichnen Aufgabe oder Modultyp. Die
+Entscheidungen zur Modulstruktur und zu den GUIDs dokumentieren
+[`ADR 0001`](adr/0001-chart-family-modules.md) und
+[`ADR 0003`](adr/0003-single-and-multi-gauge-modules.md).
 Den Parent-, Zuständigkeits- und Datenvertrag der ersten technischen Vertikale
 dokumentiert [`ADR 0002`](adr/0002-gateway-gauge-contract.md).
 
@@ -133,16 +137,17 @@ eingebunden. Sie bleibt dadurch auf einen nachvollziehbaren StylePHP-Commit
 festgeschrieben und kann über den normalen Submodulablauf aktualisiert werden.
 
 Der erste Funktionsumfang umfasst ein radiales Messinstrument in
-`EChartsGauge`. Bereits dabei werden mehrere getrennte Gauge-Instanzen, beide
-Ausgabewege gleichzeitig, Größenwechsel sowie abgeschaltete IPSView-Ausgabe
-getestet. Zeitreihen und weitere Chartfamilien sind spätere, getrennt zu
-entscheidende Ausbaustufen.
+`EChartsGaugeSingle`. `EChartsGaugeMulti` erhält danach sein eigenes
+Mehrquellenmodell für zusammengesetzte Gauges. Bereits dabei werden mehrere
+getrennte Gauge-Instanzen, beide Ausgabewege gleichzeitig, Größenwechsel sowie
+abgeschaltete IPSView-Ausgabe getestet. Zeitreihen und weitere Chartfamilien
+sind spätere, getrennt zu entscheidende Ausbaustufen.
 
 ## Dokumentation und Lizenzen
 
 Die [Haupt-README](../README.md) folgt dem Aufbau der bereitgestellten
 `README1.md`: Modulübersicht mit Kurzbeschreibungen und Links. Die ausführliche
-Nutzungsdokumentation steht in den README-Dateien der beiden Modulordner.
+Nutzungsdokumentation steht in den README-Dateien der Modulordner.
 `README1.md` bleibt als unveränderte Vorlage erhalten.
 
 Geplanter und tatsächlich vorhandener Funktionsumfang werden ausdrücklich

@@ -43,15 +43,15 @@
     "actions": [
         {
             "type": "Button",
-            "caption": "Read current Gauge data",
-            "onClick": "echo ECGA_GetGaugeData($id);"
+            "caption": "Read current Gauge Multi data",
+            "onClick": "echo ECGM_GetGaugeData($id);"
         }
     ],
     "status": [
         {
             "code": 102,
             "icon": "active",
-            "caption": "Gauge is ready"
+            "caption": "Gauge Multi is ready"
         },
         {
             "code": 201,
@@ -75,3 +75,4 @@
         }
     ]
 }
+

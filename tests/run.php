@@ -13,7 +13,7 @@ $tests = [
     __DIR__ . '/module_contracts.php',
     __DIR__ . '/symcon_strict.php',
     __DIR__ . '/data_protocol.php',
-    __DIR__ . '/gateway_gauge.php'
+    __DIR__ . '/gateway_gauges.php'
 ];
 
 $commands = [

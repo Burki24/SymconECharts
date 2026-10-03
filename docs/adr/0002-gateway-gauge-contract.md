@@ -1,10 +1,10 @@
 # ADR 0002: Gateway- und Gauge-Vertrag festlegen
 
-- Status: Angenommen
+- Status: Teilweise ersetzt
 - Datum: 2026-10-03
 - Entscheider: Burki24
 - Ersetzt: –
-- Ersetzt durch: –
+- Ersetzt durch: ADR 0003 hinsichtlich der Gauge-Modulnamen
 
 ## Kontext
 
@@ -83,5 +83,6 @@ Implementierung und Browser- beziehungsweise Laufzeitnachweise.
 - Offizielle Symcon-Dokumentation zu `IPSModuleStrict` und
   `GetCompatibleParents()`
 - Protokolltests unter `tests/data_protocol.php`
-- Gateway-/Gauge-Integrationstest unter `tests/gateway_gauge.php`
+- Historischer Gateway-/Gauge-Vertrag, heute geprüft unter
+  `tests/gateway_gauges.php`
 - Strict- und Formularverträge unter `tests/symcon_strict.php`

@@ -233,7 +233,8 @@ abstract class IPSModuleStrict
 }
 
 require_once dirname(__DIR__) . '/EChartsGateway/module.php';
-require_once dirname(__DIR__) . '/EChartsGauge/module.php';
+require_once dirname(__DIR__) . '/EChartsGaugeSingle/module.php';
+require_once dirname(__DIR__) . '/EChartsGaugeMulti/module.php';
 
 function assertGatewayGauge(bool $condition, string $message): void
 {
@@ -247,35 +248,41 @@ $gateway->Create();
 $gateway->ApplyChanges();
 IPSModuleStrict::$ParentResponder = static fn (string $json): string => $gateway->ForwardData($json);
 
-$gauge = new EChartsGauge();
-$gauge->Create();
-$gauge->SetTestProperty('SourceVariableID', 4711);
-$gauge->SetTestProperty('Minimum', -20.0);
-$gauge->SetTestProperty('Maximum', 80.0);
-$gauge->SetTestProperty('Title', 'Room climate');
-$gauge->SetTestProperty('Unit', '°C');
-$gauge->SetTestProperty('Decimals', 1);
-$gauge->ApplyChanges();
+foreach ([EChartsGaugeSingle::class, EChartsGaugeMulti::class] as $gaugeClass) {
+    $gauge = new $gaugeClass();
+    $gauge->Create();
+    $gauge->SetTestProperty('SourceVariableID', 4711);
+    $gauge->SetTestProperty('Minimum', -20.0);
+    $gauge->SetTestProperty('Maximum', 80.0);
+    $gauge->SetTestProperty('Title', 'Room climate');
+    $gauge->SetTestProperty('Unit', '°C');
+    $gauge->SetTestProperty('Decimals', 1);
+    $gauge->ApplyChanges();
 
-assertGatewayGauge($gauge->GetTestStatus() === IS_ACTIVE, 'Valid Gauge configuration must become active.');
-assertGatewayGauge($gauge->GetTestReferences() === [4711], 'Gauge must register its source variable reference.');
-assertGatewayGauge($gauge->GetTestSummary() === 'Living room temperature', 'Gauge summary must identify its source.');
+    assertGatewayGauge($gauge->GetTestStatus() === IS_ACTIVE, $gaugeClass . ' must become active.');
+    assertGatewayGauge($gauge->GetTestReferences() === [4711], $gaugeClass . ' must register its source reference.');
+    assertGatewayGauge($gauge->GetTestSummary() === 'Living room temperature', $gaugeClass . ' summary changed.');
 
-$gaugeData = json_decode($gauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
-assertGatewayGauge(($gaugeData['schemaVersion'] ?? null) === 1, 'Gauge data schema version changed.');
-assertGatewayGauge(($gaugeData['family'] ?? null) === 'gauge', 'Gauge data family changed.');
-assertGatewayGauge(($gaugeData['value'] ?? null) === 42.5, 'Gauge did not receive the current source value.');
-assertGatewayGauge(($gaugeData['source']['timestamp'] ?? null) === 1780000000, 'Gauge timestamp changed.');
-assertGatewayGauge(($gaugeData['gauge']['minimum'] ?? null) === -20.0, 'Gauge minimum changed.');
-assertGatewayGauge(($gaugeData['gauge']['maximum'] ?? null) === 80.0, 'Gauge maximum changed.');
+    $gaugeData = json_decode($gauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
+    assertGatewayGauge(($gaugeData['schemaVersion'] ?? null) === 1, $gaugeClass . ' data schema version changed.');
+    assertGatewayGauge(($gaugeData['family'] ?? null) === 'gauge', $gaugeClass . ' data family changed.');
+    assertGatewayGauge(($gaugeData['value'] ?? null) === 42.5, $gaugeClass . ' did not receive the source value.');
+    assertGatewayGauge(($gaugeData['source']['timestamp'] ?? null) === 1780000000, $gaugeClass . ' timestamp changed.');
+    assertGatewayGauge(($gaugeData['gauge']['minimum'] ?? null) === -20.0, $gaugeClass . ' minimum changed.');
+    assertGatewayGauge(($gaugeData['gauge']['maximum'] ?? null) === 80.0, $gaugeClass . ' maximum changed.');
+}
 
-$gauge->SetTestProperty('SourceVariableID', 4712);
-$gauge->ApplyChanges();
-assertGatewayGauge($gauge->GetTestStatus() === 201, 'Non-numeric Gauge source must set status 201.');
-assertGatewayGauge($gauge->GetTestReferences() === [4712], 'Gauge must replace its source reference.');
-assertGatewayGauge($gauge->GetTestSummary() === '', 'Invalid Gauge configuration must clear the source summary.');
+$singleGauge = new EChartsGaugeSingle();
+$singleGauge->Create();
+$singleGauge->SetTestProperty('SourceVariableID', 4711);
+$singleGauge->ApplyChanges();
+$singleGauge->SetTestProperty('SourceVariableID', 4712);
+$singleGauge->ApplyChanges();
+assertGatewayGauge($singleGauge->GetTestStatus() === 201, 'Non-numeric Gauge source must set status 201.');
+assertGatewayGauge($singleGauge->GetTestReferences() === [4712], 'Gauge must replace its source reference.');
+assertGatewayGauge($singleGauge->GetTestSummary() === '', 'Invalid Gauge configuration must clear the source summary.');
 
-$invalidRange = new EChartsGauge();
+$invalidRange = new EChartsGaugeSingle();
 $invalidRange->Create();
 $invalidRange->SetTestProperty('SourceVariableID', 4711);
 $invalidRange->SetTestProperty('Minimum', 100.0);
@@ -283,7 +290,7 @@ $invalidRange->SetTestProperty('Maximum', 0.0);
 $invalidRange->ApplyChanges();
 assertGatewayGauge($invalidRange->GetTestStatus() === 202, 'Invalid Gauge range must set status 202.');
 
-$missingParent = new EChartsGauge();
+$missingParent = new EChartsGaugeSingle();
 $missingParent->Create();
 $missingParent->SetTestProperty('SourceVariableID', 4711);
 $missingParent->SetTestParentActive(false);
@@ -303,4 +310,4 @@ assertGatewayGauge(
     'Gateway returned the wrong non-numeric-variable error.'
 );
 
-echo "Gateway and Gauge integration verified.\n";
+echo "Gateway and Gauge module integration verified.\n";

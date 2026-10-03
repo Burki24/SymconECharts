@@ -8,7 +8,7 @@ use SymconECharts\EChartsDataProtocol;
 require_once __DIR__ . '/../libs/helper/DataFlowHelper.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 
-class EChartsGauge extends IPSModuleStrict
+class EChartsGaugeMulti extends IPSModuleStrict
 {
     use DataFlowHelper;
 
@@ -232,3 +232,4 @@ class EChartsGauge extends IPSModuleStrict
         }
     }
 }
+
