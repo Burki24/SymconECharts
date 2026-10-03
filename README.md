@@ -1,53 +1,44 @@
 # SymconECharts
 
-Eigenständiges Symcon-Projekt für konfigurierbare Visualisierungen auf Basis von
-Apache ECharts.
+Folgende Module beinhaltet das SymconECharts Repository:
 
-**Status: Projektstart.** Dieser Stand enthält die Lizenz und die
-Projektdokumentation. Es gibt noch kein installierbares Symcon-Modul,
-keine eingebundene ECharts-Bibliothek und keinen veröffentlichten Funktionsumfang.
+- __EChartsGateway__ ([Dokumentation](EChartsGateway))  
+  Gemeinsame Zentrale als Splitter. Vorgesehen für Datenbereitstellung,
+  Archivabfragen, Zwischenspeicherung und die technische Anbindung der einzelnen
+  Chart-Instanzen. Das Gateway benötigt keine eigene I/O-Instanz.
 
-## Ziel
+- __EChartsWidget__ ([Dokumentation](EChartsWidget))  
+  Gerätemodul für ein einzelnes, unabhängig konfigurierbares Diagramm.
+  Vorgesehen für die native Symcon-Kacheldarstellung und zusätzlich für ein
+  separat platzierbares HTML-Widget in IPSView. Beide Ausgabewege sollen dieselbe
+  Diagrammkonfiguration und Datenaufbereitung verwenden.
 
-Symcon-Variablen und Archivdaten sollen ohne eigene JavaScript-Programmierung
-als Messinstrumente und Diagramme dargestellt werden können. Das Projekt entsteht
-unabhängig von JSLive; bestehende JSLive-Installationen werden nicht verändert.
+## Entwicklungsstand
 
-Als erster Umsetzungsschritt sind ein radiales Messinstrument und ein
-Liniendiagramm mit mehreren Datenreihen vorgesehen. Weitere Diagrammtypen sind
-spätere Ausbaustufen.
+**Grundgerüst – noch keine nutzbaren Diagramme.** Die Library und beide
+Modulgerüste sind angelegt. Apache ECharts, Daten- und Archivverarbeitung,
+native Kachelausgabe und IPSView-HTML-Ausgabe sind noch nicht implementiert.
 
-## Entwicklungsgrundsätze
+Als erste Diagrammtypen sind ein radiales Messinstrument und ein Liniendiagramm
+mit mehreren Datenreihen vorgesehen. Eine Widget-Instanz soll jeweils einen
+Chart liefern; eine gemeinsame Dashboard-Seite ist nicht vorgesehen.
 
-- Entwicklung und Erprobung erfolgen auf `dev`. Geprüfte Stände gelangen per
-  Pull Request von `dev` nach `main`; der Entwicklungsbranch bleibt erhalten.
-- Symcon-Datenanbindung, ECharts-Konfiguration und Darstellung werden getrennt.
-  ECharts soll ohne projektspezifische Änderungen am Bibliothekskern verwendet werden.
-- Bibliotheksversionen werden festgeschrieben, mit dem Modul ausgeliefert und
-  vor Aktualisierungen getestet. Im Betrieb wird nicht automatisch `latest` geladen.
-- Vorhandene zentrale Helper werden wiederverwendet. Allgemeine Erweiterungen
-  gehören in `Symcon_ModuleHelper`, nicht in abweichende lokale Helper-Kopien.
+## Entwicklung
+
+Die Entwicklung erfolgt auf `dev`. Geprüfte Stände gelangen später per Pull
+Request nach `main`; `dev` bleibt erhalten. Projektziele, Architektur und
+Entwicklungsgrundsätze stehen in [Entwicklung](docs/ENTWICKLUNG.md).
 
 ## Lizenz
 
-Die eigenen Beiträge zu SymconECharts stehen unter der
-**PolyForm Noncommercial License 1.0.0**.
-
-SPDX-Identifier: `PolyForm-Noncommercial-1.0.0`
+Die eigenen Beiträge stehen unter der
+[PolyForm Noncommercial License 1.0.0](LICENSE).
+SPDX-Identifier: `PolyForm-Noncommercial-1.0.0`.
 
 Required Notice: Copyright 2026 Burkhard Kneiseler. SymconECharts.
 
-Der vollständige Lizenztext steht in [LICENSE](LICENSE). Er ist maßgeblich für
-die erlaubten Nutzungen, Änderungen und Weitergaben. Für Nutzungen außerhalb der
-dort eingeräumten Rechte ist eine gesonderte Genehmigung des Rechteinhabers erforderlich.
-
-Fremdkomponenten behalten ihre jeweiligen Lizenzen. Insbesondere wird Apache
-ECharts nicht unter PolyForm neu lizenziert. Details zur vorgesehenen Trennung
-stehen in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
-
-## Projekt
-
-Ursprüngliche Entwicklung: Burkhard Kneiseler  
-Repository: [Burki24/SymconECharts](https://github.com/Burki24/SymconECharts)
+Fremdkomponenten behalten ihre Originallizenzen. Hinweise zur vorgesehenen
+Einbindung von Apache ECharts stehen in
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 SymconECharts ist kein offizielles Projekt der Apache Software Foundation.

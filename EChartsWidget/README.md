@@ -1,5 +1,12 @@
 # EChartsWidget
-Beschreibung des Moduls.
+
+Gerätemodul der SymconECharts-Library für ein einzelnes Diagramm. Eine
+Widget-Instanz soll die native Symcon-Kacheldarstellung und ein separat
+platzierbares HTML-Widget in IPSView bereitstellen können. Datenquellen und
+Diagrammkonfiguration werden dabei nur einmal gepflegt.
+
+**Entwicklungsstand:** Modulgerüst. Es werden noch keine Diagramme, Kacheln
+oder IPSView-HTML-Ausgabevariablen erzeugt.
 
 ### Inhaltsverzeichnis
 
@@ -8,60 +15,120 @@ Beschreibung des Moduls.
 3. [Software-Installation](#3-software-installation)
 4. [Einrichten der Instanzen in Symcon](#4-einrichten-der-instanzen-in-symcon)
 5. [Statusvariablen und Profile](#5-statusvariablen-und-profile)
-6. [WebFront](#6-webfront)
+6. [Visualisierung](#6-visualisierung)
 7. [PHP-Befehlsreferenz](#7-php-befehlsreferenz)
 
 ### 1. Funktionsumfang
 
-*
+**Vorhanden:** Moduldefinition als Gerät (`type: 3`), Datenfluss-Zuordnung zu
+EChartsGateway und ein PHP-Grundgerüst mit generierten Sende- und
+Empfangsbeispielen. Die Konfigurationsform ist noch leer.
+
+**Geplant:** Auswahl und Konfiguration eines Diagrammtyps, Referenzierung
+bestehender Symcon-Variablen, mehrere Datenreihen pro Chart, Live- und
+Archivdarstellung sowie gemeinsame Gestaltungsoptionen. Die ersten Typen sollen
+ein radiales Messinstrument und ein Liniendiagramm sein.
+
+Eine eigene Instanz pro Datenreihe ist nicht vorgesehen. Ein Heizungsverlauf
+mit Vorlauf, Rücklauf und Außentemperatur soll beispielsweise ein gemeinsamer
+Chart innerhalb einer einzigen Widget-Instanz sein.
 
 ### 2. Voraussetzungen
 
-- Symcon ab Version 7.1
+Das Entwicklungsziel ist **Symcon 9.0 / PHP 8.5**. Die noch in
+[`library.json`](../library.json) eingetragene Generator-Mindestversion `7.1`
+ist kein Nachweis getesteter Kompatibilität. Die Zielversion muss vor einer
+Funktionsfreigabe konsistent in Metadaten, Code, Tests und Dokumentation stehen.
+
+Vorgesehen ist eine Verbindung zu einer [EChartsGateway-Instanz](../EChartsGateway).
+Für historische Daten werden aufgezeichnete Werte im Symcon-Archiv benötigt;
+ein reines Momentanwert-Widget benötigt keine Historie. IPSView soll nur für
+den zusätzlichen IPSView-Ausgabeweg erforderlich sein, nicht für native Kacheln.
 
 ### 3. Software-Installation
 
-* Über den Module Store das 'EChartsWidget'-Modul installieren.
-* Alternativ über das Module Control folgende URL hinzufügen
+Das Widget wird gemeinsam mit EChartsGateway über die Library
+**SymconECharts** eingebunden. Es gibt kein separat zu installierendes
+Gerätepaket.
+
+Für Entwicklungsarbeiten im Module Control das Repository hinzufügen und
+`dev` auswählen:
+
+```text
+https://github.com/Burki24/SymconECharts
+```
+
+Die Beschreibung gilt für das Entwicklungsgerüst, nicht für eine bereits
+funktionsfähige oder produktiv freigegebene Visualisierung. Eine Veröffentlichung
+im Module Store wird nicht vorausgesetzt.
 
 ### 4. Einrichten der Instanzen in Symcon
 
- Unter 'Instanz hinzufügen' kann das 'EChartsWidget'-Modul mithilfe des Schnellfilters gefunden werden.  
-	- Weitere Informationen zum Hinzufügen von Instanzen in der [Dokumentation der Instanzen](https://www.symcon.de/service/dokumentation/konzepte/instanzen/#Instanz_hinzufügen)
+**Zielmodell:** Ein EChartsWidget je unabhängig konfigurierbarem Chart.
+Mehrere Widgets sollen ein gemeinsames Gateway verwenden können. Für die
+parallele Anzeige desselben Charts als Kachel und in IPSView ist keine zweite
+Widget-Instanz vorgesehen.
 
-__Konfigurationsseite__:
+**Aktueller Stand:** Der Code verbindet sich über `RequireParent()` mit einer
+neu erzeugten Gateway-Instanz, sofern noch keine Verbindung besteht. Auch ein
+bereits vorhandenes Gateway verhindert dessen Neuanlage nicht. Dieser
+Generatorcode ist vor der vorgesehenen komfortablen Mehrfachanlage anzupassen.
+Siehe [offizielle RequireParent-Dokumentation](https://www.symcon.de/de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/module/requireparent/).
 
-Name     | Beschreibung
--------- | ------------------
-         |
-         |
+**Konfigurationsseite:** Noch keine Variablenauswahl, Diagrammeinstellungen
+oder Ausgabeschalter vorhanden.
 
 ### 5. Statusvariablen und Profile
 
-Die Statusvariablen/Kategorien werden automatisch angelegt. Das Löschen einzelner kann zu Fehlfunktionen führen.
-
 #### Statusvariablen
 
-Name   | Typ     | Beschreibung
------- | ------- | ------------
-       |         |
-       |         |
+Aktuell werden noch keine eigenen Variablen angelegt. Für IPSView ist künftig
+je aktivierter Widget-Ausgabe eine eigene Stringvariable mit HTML-Inhalt
+vorgesehen. Die native Kachel soll diese Variable nicht benötigen.
+
+Quellvariablen sollen referenziert und nicht als Messwertkopien unter dem
+Widget dupliziert werden. Beim späteren Abschalten der IPSView-Ausgabe sollen
+bestehende HTML-Variablen erhalten bleiben; ein Löschen soll ausdrücklich
+bestätigt werden müssen.
 
 #### Profile
 
-Name   | Typ
------- | -------
-       |
-       |
+Aktuell werden noch keine Profile oder eigenen Variablendarstellungen angelegt.
+Die künftige Ausgabe soll auf den gemeinsamen Variablen- und
+Darstellungs-Helpern aufbauen.
 
 ### 6. Visualisierung
 
-Die Funktionalität, die das Modul in der Visualisierung bietet.
+**Beide Ausgabewege gehören zum Projektziel und sind noch nicht implementiert.**
+
+#### Native Symcon-Kachel
+
+Vorgesehen ist eine eigene Darstellung der Chart-Instanz über das Symcon-HTML-SDK.
+Sie soll ohne aktivierte IPSView-Ausgabe funktionieren. Datenaktualisierungen
+und Interaktionen erhalten eine native Anbindung, getrennt vom IPSView-Datenkanal.
+
+#### IPSView
+
+Vorgesehen ist ein kleines, eigenständig platzierbares HTML-Widget pro Chart,
+keine gemeinsame Dashboard-Seite. Die Größe und Platzierung werden in IPSView
+festgelegt; das Diagramm soll sich an die verfügbare Fläche anpassen.
+
+#### Gemeinsame Darstellung
+
+ECharts-Konfiguration, Datenaufbereitung und Zeichenlogik sollen gemeinsam
+verwendet werden. Ausgabespezifische Anpassungen wie Hintergrund, Transparenz
+und Schriftgrößen dürfen getrennt eingestellt werden, ohne die andere
+Visualisierung unbeabsichtigt zu verändern.
 
 ### 7. PHP-Befehlsreferenz
 
-`boolean SECW_BeispielFunktion(integer $InstanzID);`
-Erklärung der Funktion.
+Es ist noch keine fachliche PHP-Befehlsschnittstelle für Charts freigegeben.
+Das vorgesehene Funktionspräfix lautet `SECW`.
 
-Beispiel:
-`SECW_BeispielFunktion(12345);`
+`Send()` und `ReceiveData()` stammen noch aus der generierten Vorlage. Sie
+implementieren kein vollständiges Chart-Protokoll und sind nicht als stabile
+Anwenderbefehle zu verwenden. Die dokumentierte Schnittstelle wird mit der
+jeweiligen tatsächlichen Implementierung ergänzt.
+
+Weitere Projektgrundsätze: [Entwicklung](../docs/ENTWICKLUNG.md).  
+Lizenz der eigenen Beiträge: [PolyForm Noncommercial License 1.0.0](../LICENSE).
