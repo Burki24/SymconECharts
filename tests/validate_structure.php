@@ -11,6 +11,7 @@ $requiredFiles = [
     'README1.md',
     'THIRD_PARTY_NOTICES.md',
     'docs/ENTWICKLUNG.md',
+    'docs/adr/0001-chart-family-modules.md',
     'library.json',
     '.gitmodules',
     '.github/scripts/update_library_metadata.py',
@@ -132,7 +133,7 @@ if ($library !== null) {
     }
 }
 
-$expectedModules = ['EChartsGateway', 'EChartsWidget'];
+$expectedModules = ['EChartsGateway', 'EChartsGauge'];
 $discoveredModules = [];
 foreach (glob($root . '/*/module.json') ?: [] as $modulePath) {
     $discoveredModules[] = basename(dirname($modulePath));

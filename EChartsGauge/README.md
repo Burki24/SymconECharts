@@ -1,8 +1,8 @@
-# EChartsWidget
+# EChartsGauge
 
-Gerätemodul der SymconECharts-Library für ein einzelnes Diagramm. Eine
-Widget-Instanz soll die native Symcon-Kacheldarstellung und ein separat
-platzierbares HTML-Widget in IPSView bereitstellen können. Datenquellen und
+Gerätemodul der SymconECharts-Library für ein einzelnes Gauge-Diagramm. Eine
+Gauge-Instanz soll die native Symcon-Kacheldarstellung und ein separat
+platzierbares HTML-Widget in IPSView bereitstellen können. Datenquelle und
 Diagrammkonfiguration werden dabei nur einmal gepflegt.
 
 **Entwicklungsstand:** Modulgerüst. Es werden noch keine Diagramme, Kacheln
@@ -24,14 +24,13 @@ oder IPSView-HTML-Ausgabevariablen erzeugt.
 EChartsGateway und ein PHP-Grundgerüst mit generierten Sende- und
 Empfangsbeispielen. Die Konfigurationsform ist noch leer.
 
-**Geplant:** Auswahl und Konfiguration eines Diagrammtyps, Referenzierung
-bestehender Symcon-Variablen, mehrere Datenreihen pro Chart, Live- und
-Archivdarstellung sowie gemeinsame Gestaltungsoptionen. Die ersten Typen sollen
-ein radiales Messinstrument und ein Liniendiagramm sein.
+**Geplant:** Konfiguration eines radialen Messinstruments, Referenzierung
+bestehender Symcon-Variablen, Live- und Archivdarstellung sowie
+Gauge-spezifische Skalen-, Wertebereichs- und Gestaltungsoptionen.
 
-Eine eigene Instanz pro Datenreihe ist nicht vorgesehen. Ein Heizungsverlauf
-mit Vorlauf, Rücklauf und Außentemperatur soll beispielsweise ein gemeinsamer
-Chart innerhalb einer einzigen Widget-Instanz sein.
+Eine Instanz bildet genau einen unabhängig konfigurierbaren Gauge-Chart ab.
+Weitere Chartfamilien werden bei Bedarf als eigene Gerätemodule ergänzt und
+nicht als umschaltbare Modi dieser Instanz implementiert.
 
 ### 2. Voraussetzungen
 
@@ -47,7 +46,7 @@ den zusätzlichen IPSView-Ausgabeweg erforderlich sein, nicht für native Kachel
 
 ### 3. Software-Installation
 
-Das Widget wird gemeinsam mit EChartsGateway über die Library
+Das Gauge-Modul wird gemeinsam mit EChartsGateway über die Library
 **SymconECharts** eingebunden. Es gibt kein separat zu installierendes
 Gerätepaket.
 
@@ -64,10 +63,10 @@ im Module Store wird nicht vorausgesetzt.
 
 ### 4. Einrichten der Instanzen in Symcon
 
-**Zielmodell:** Ein EChartsWidget je unabhängig konfigurierbarem Chart.
-Mehrere Widgets sollen ein gemeinsames Gateway verwenden können. Für die
-parallele Anzeige desselben Charts als Kachel und in IPSView ist keine zweite
-Widget-Instanz vorgesehen.
+**Zielmodell:** Eine EChartsGauge-Instanz je unabhängig konfigurierbarem
+Gauge-Chart. Mehrere Gauge-Instanzen sollen ein gemeinsames Gateway verwenden
+können. Für die parallele Anzeige desselben Charts als Kachel und in IPSView
+ist keine zweite Gauge-Instanz vorgesehen.
 
 **Aktueller Stand:** Der Code verbindet sich über `RequireParent()` mit einer
 neu erzeugten Gateway-Instanz, sofern noch keine Verbindung besteht. Auch ein
@@ -87,7 +86,7 @@ je aktivierter Widget-Ausgabe eine eigene Stringvariable mit HTML-Inhalt
 vorgesehen. Die native Kachel soll diese Variable nicht benötigen.
 
 Quellvariablen sollen referenziert und nicht als Messwertkopien unter dem
-Widget dupliziert werden. Beim späteren Abschalten der IPSView-Ausgabe sollen
+Gauge-Modul dupliziert werden. Beim späteren Abschalten der IPSView-Ausgabe sollen
 bestehende HTML-Variablen erhalten bleiben; ein Löschen soll ausdrücklich
 bestätigt werden müssen.
 
@@ -123,7 +122,7 @@ Visualisierung unbeabsichtigt zu verändern.
 ### 7. PHP-Befehlsreferenz
 
 Es ist noch keine fachliche PHP-Befehlsschnittstelle für Charts freigegeben.
-Das vorgesehene Funktionspräfix lautet `SECW`.
+Das festgelegte Funktionspräfix lautet `ECGA`.
 
 `Send()` und `ReceiveData()` stammen noch aus der generierten Vorlage. Sie
 implementieren kein vollständiges Chart-Protokoll und sind nicht als stabile

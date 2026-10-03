@@ -1,8 +1,8 @@
 # EChartsGateway
 
 Gemeinsame Zentrale der SymconECharts-Library. Das Modul ist als Splitter
-angelegt und soll mehrere EChartsWidget-Instanzen mit gemeinsamen Diensten
-versorgen. Eine eigene I/O-Instanz ist nicht vorgesehen.
+angelegt und soll mehrere Geräteinstanzen verschiedener Chartfamilien mit
+gemeinsamen Diensten versorgen. Eine eigene I/O-Instanz ist nicht vorgesehen.
 
 **Entwicklungsstand:** Modulgerüst. Die unten als geplant beschriebenen Dienste
 stehen noch nicht zur Verfügung.
@@ -20,7 +20,7 @@ stehen noch nicht zur Verfügung.
 ### 1. Funktionsumfang
 
 **Vorhanden:** Moduldefinition als Splitter (`type: 2`), festgelegte
-Datenfluss-IDs für EChartsWidget und ein PHP-Grundgerüst. Die
+Datenfluss-IDs für Chartfamilien-Geräte und ein PHP-Grundgerüst. Die
 Konfigurationsform ist noch leer. Eine eigene `ForwardData()`-Verarbeitung
 ist noch nicht implementiert.
 
@@ -58,10 +58,11 @@ produktiven Einsatz dar.
 ### 4. Einrichten der Instanzen in Symcon
 
 Das vorgesehene Modell ist eine gemeinsame EChartsGateway-Instanz mit einer
-oder mehreren EChartsWidget-Instanzen. Das Gateway hat keinen übergeordneten
-Datenfluss; die Widgets werden mit ihm verbunden.
+oder mehreren EChartsGauge-Instanzen sowie späteren weiteren
+Chartfamilien-Geräten. Das Gateway hat keinen übergeordneten Datenfluss; die
+Geräteinstanzen werden mit ihm verbunden.
 
-**Hinweis zum aktuellen Gerüst:** EChartsWidget verwendet noch
+**Hinweis zum aktuellen Gerüst:** EChartsGauge verwendet noch
 `RequireParent()`. Bei fehlender Verbindung wird damit eine neue Gateway-Instanz
 angelegt, auch wenn bereits ein kompatibles Gateway existiert. Die
 Wiederverwendung eines gemeinsamen Gateways muss im nächsten technischen
@@ -86,13 +87,13 @@ Das Gateway ist ein Hintergrunddienst. Es soll weder eine eigene Chart-Kachel
 noch eine große HTML-Dashboard-Seite erzeugen.
 
 Die native Symcon-Kachel und das optionale IPSView-HTML-Widget gehören zur
-jeweiligen [EChartsWidget-Instanz](../EChartsWidget). Beide Ausgabewege sind
+jeweiligen [EChartsGauge-Instanz](../EChartsGauge). Beide Ausgabewege sind
 noch zu implementieren.
 
 ### 7. PHP-Befehlsreferenz
 
 Für das Gateway ist noch keine fachliche PHP-Befehlsschnittstelle freigegeben.
-Das vorgesehene Funktionspräfix lautet `SECG`.
+Das festgelegte Funktionspräfix lautet `ECGW`.
 
 Die Lebenszyklusmethoden des Gerüsts sind keine dokumentierte
 Anwenderschnittstelle. Beispielbefehle ohne Implementierung werden nicht als

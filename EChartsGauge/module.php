@@ -1,7 +1,7 @@
 <?php
 
 declare(strict_types=1);
-class EChartsWidget extends IPSModule
+class EChartsGauge extends IPSModule
 {
     public function Create()
     {

@@ -65,15 +65,15 @@ $expectedModules = [
     'EChartsGateway' => [
         'id'                 => '{33C9DF44-6F6D-5916-4AAE-CCB24BD6928D}',
         'type'               => 2,
-        'prefix'             => 'SECG',
+        'prefix'             => 'ECGW',
         'parentRequirements' => [],
         'childRequirements'  => ['{E4749B72-912B-E3E3-1C57-D19019FFDD84}'],
         'implemented'        => ['{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}']
     ],
-    'EChartsWidget' => [
+    'EChartsGauge' => [
         'id'                 => '{0CAA2780-342F-E5B9-2865-CB8DCED0BE7C}',
         'type'               => 3,
-        'prefix'             => 'SECW',
+        'prefix'             => 'ECGA',
         'parentRequirements' => ['{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}'],
         'childRequirements'  => [],
         'implemented'        => ['{E4749B72-912B-E3E3-1C57-D19019FFDD84}']
@@ -135,15 +135,15 @@ foreach ($expectedModules as $moduleName => $expected) {
 }
 
 $gateway = $moduleContracts['EChartsGateway'];
-$widget = $moduleContracts['EChartsWidget'];
+$gauge = $moduleContracts['EChartsGauge'];
 requireContract(
-    ($gateway['implemented'] ?? null) === ($widget['parentRequirements'] ?? null),
-    'Widget-to-gateway data flow is inconsistent.',
+    ($gateway['implemented'] ?? null) === ($gauge['parentRequirements'] ?? null),
+    'Gauge-to-gateway data flow is inconsistent.',
     $errors
 );
 requireContract(
-    ($gateway['childRequirements'] ?? null) === ($widget['implemented'] ?? null),
-    'Gateway-to-widget data flow is inconsistent.',
+    ($gateway['childRequirements'] ?? null) === ($gauge['implemented'] ?? null),
+    'Gateway-to-gauge data flow is inconsistent.',
     $errors
 );
 

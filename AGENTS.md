@@ -25,17 +25,21 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
 
 ## Architekturgrenzen
 
-- Die eingecheckten Module `EChartsGateway` und `EChartsWidget`, ihre GUIDs,
-  Präfixe und Datenfluss-IDs sind der vorhandene Ausgangsstand. Sie werden
-  nicht beiläufig umbenannt, umgewidmet oder ersetzt.
-- Noch offen sind insbesondere die Aufteilung in eine Universalinstanz oder
-  getrennte Diagrammfamilien sowie Notwendigkeit und genaue Zuständigkeit eines
-  Splitters. Vor einer fachlichen Implementierung ist diese Entscheidung mit
-  dem Eigentümer abzustimmen und bei langfristiger Wirkung als ADR zu
-  dokumentieren.
-- Gauge ist der bevorzugte Pilot. Daraus folgt noch keine Entscheidung über
-  Modulaufteilung, Splitter, öffentliche Properties oder weitere
-  Diagrammfamilien.
+- Die Modulstruktur besteht aus `EChartsGateway` und getrennten
+  Geräteinstanzen je Diagrammfamilie. `EChartsGauge` ist die erste Familie;
+  eine Instanz bildet genau einen unabhängig konfigurierbaren Gauge-Chart ab.
+- Das Gateway stellt ausschließlich familienübergreifende Infrastruktur wie
+  Archivzugriff, begrenztes Caching, gemeinsame Ressourcen und gegebenenfalls
+  abgesicherte IPSView-Kommunikation bereit. Familienbezogene Properties,
+  Validierung und ECharts-Optionen verbleiben im jeweiligen Gerätemodul.
+- Weitere Diagrammfamilien erhalten bei belegtem Bedarf ein eigenes
+  Gerätemodul. Sie werden nicht als Modi einer universellen Widget-Instanz
+  ergänzt.
+- Die vorhandenen Modul-GUIDs und Datenfluss-IDs werden beibehalten. Namen,
+  Präfixe und Zuständigkeiten aus
+  [`ADR 0001`](docs/adr/0001-chart-family-modules.md) sind verbindliche
+  Verträge und ändern sich nur mit einer ausdrücklichen Architektur- und
+  Kompatibilitätsentscheidung.
 - Symcon-Datenanbindung, Archivzugriff, fachliches Chart-Modell, Formatierung,
   Ausgabeadapter und ECharts-Renderer werden als getrennte Zuständigkeiten
   behandelt. Gemeinsame Abstraktionen entstehen nur für belegte gemeinsame
@@ -43,6 +47,17 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
 - Repositoryweit geteilter Code liegt unter `libs/helper`; Tests liegen unter
   `tests`. Vorhandene Funktionen aus `Symcon_ModuleHelper` werden
   wiederverwendet und nicht lokal kopiert.
+
+## Modulpräfixe
+
+- Modulpräfixe bestehen aus vier Großbuchstaben. `EC` bezeichnet stets
+  ECharts; die dritte und vierte Stelle kennzeichnen Aufgabe oder
+  Diagrammfamilie.
+- `ECGW` ist dem `EChartsGateway` zugeordnet (`GW` = Gateway).
+- `ECGA` ist `EChartsGauge` zugeordnet (`GA` = Gauge).
+- Neue Kürzel werden vor ihrer Verwendung eindeutig festgelegt und in dieser
+  Datei sowie im zugehörigen Architekturkontext dokumentiert. Ein bestehendes
+  Kürzel wird nicht für eine andere Bestimmung wiederverwendet.
 
 ## ECharts und Fremdkomponenten
 

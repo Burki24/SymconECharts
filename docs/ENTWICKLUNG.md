@@ -26,12 +26,13 @@ Entwicklungsziel, keine bereits ausgelieferten Funktionen.
 |---|---|---|
 | Library | SymconECharts | Gemeinsames installierbares Paket |
 | Splitter | EChartsGateway | Gemeinsame Dienste für mehrere Chart-Instanzen |
-| Gerät | EChartsWidget | Ein unabhängig konfigurierbarer Chart mit zwei Ausgabewegen |
+| Gerät | EChartsGauge | Ein unabhängig konfigurierbarer Gauge-Chart mit zwei Ausgabewegen |
 
 Eine eigene I/O-Instanz, ein Konfigurator und Discovery gehören nicht zum
-Anfangsumfang. Eine Datenreihe ist Teil der Widget-Konfiguration und keine
-eigene Geräteinstanz. Mehrere Widget-Instanzen sollen einen vorhandenen
-Gateway gemeinsam verwenden können.
+Anfangsumfang. Eine Datenquelle ist Teil der Gauge-Konfiguration und keine
+eigene Geräteinstanz. Mehrere Gauge-Instanzen sollen einen vorhandenen Gateway
+gemeinsam verwenden können. Weitere Chartfamilien erhalten eigene
+Gerätemodule; sie werden nicht als Modi eines universellen Widgets ergänzt.
 
 ## Festgelegte Identitäten
 
@@ -42,16 +43,20 @@ Modul-IDs und Datenfluss-IDs haben unterschiedliche Aufgaben.
 |---|---|
 | Library SymconECharts | `{66BE21BE-988A-10EB-1BBB-1E2F444E9F85}` |
 | Modul EChartsGateway | `{33C9DF44-6F6D-5916-4AAE-CCB24BD6928D}` |
-| Modul EChartsWidget | `{0CAA2780-342F-E5B9-2865-CB8DCED0BE7C}` |
-| Datenfluss Widget → Gateway | `{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}` |
-| Datenfluss Gateway → Widget | `{E4749B72-912B-E3E3-1C57-D19019FFDD84}` |
+| Modul EChartsGauge | `{0CAA2780-342F-E5B9-2865-CB8DCED0BE7C}` |
+| Datenfluss Gauge → Gateway | `{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}` |
+| Datenfluss Gateway → Gauge | `{E4749B72-912B-E3E3-1C57-D19019FFDD84}` |
 
-Die Funktionspräfixe sind `SECG` für das Gateway und `SECW` für das Widget.
+Die Funktionspräfixe sind `ECGW` für das Gateway und `ECGA` für Gauge. Nach der
+verbindlichen Präfixkonvention steht `EC` für ECharts; die letzten zwei
+Buchstaben bezeichnen Aufgabe oder Chartfamilie. Die Entscheidung zur
+Modulstruktur und zum Erhalt der GUIDs dokumentiert
+[`ADR 0001`](adr/0001-chart-family-modules.md).
 
 ## Daten, Konfiguration und Ausgabe
 
 Symcon-Datenanbindung, Diagrammkonfiguration und ECharts-Darstellung werden
-getrennt. Die Konfiguration der jeweiligen Widget-Instanz bleibt die
+getrennt. Die Konfiguration der jeweiligen Chartfamilien-Instanz bleibt die
 maßgebliche Quelle für ihre Variablen, Datenreihen und Auswertungsregeln.
 
 Das Gateway soll wiederverwendbare Archivabfragen und begrenzte Caches
@@ -74,7 +79,7 @@ Für die technische Umsetzung ist die moderne Modulbasis `IPSModuleStrict`
 mit passenden Typdeklarationen vorgesehen. Die Parent-Auswahl wird über den
 Datenfluss und bei Bedarf `GetCompatibleParents()` mit `type: connect`
 aufgebaut. Der bisherige `RequireParent()`-Aufruf des Generatorgerüsts darf
-nicht unverändert übernommen werden, da er für neue Widgets zusätzliche
+nicht unverändert übernommen werden, da er für neue Geräteinstanzen zusätzliche
 Gateways erzeugt. Ein bloßer Wechsel der Basisklasse reicht nicht aus:
 Legacy-Methoden und ihre Verträge müssen dabei ebenfalls angepasst werden.
 
@@ -123,11 +128,11 @@ Die offizielle Symcon-Stylekonfiguration wird als Git-Submodul unter `.style`
 eingebunden. Sie bleibt dadurch auf einen nachvollziehbaren StylePHP-Commit
 festgeschrieben und kann über den normalen Submodulablauf aktualisiert werden.
 
-Der erste Funktionsumfang umfasst ein radiales Messinstrument und ein
-Liniendiagramm mit mehreren Datenreihen. Bereits dabei werden mehrere
-getrennte Charts, beide Ausgabewege gleichzeitig, Größenwechsel sowie
-abgeschaltete IPSView-Ausgabe getestet. Weitere Diagrammtypen sind spätere
-Ausbaustufen.
+Der erste Funktionsumfang umfasst ein radiales Messinstrument in
+`EChartsGauge`. Bereits dabei werden mehrere getrennte Gauge-Instanzen, beide
+Ausgabewege gleichzeitig, Größenwechsel sowie abgeschaltete IPSView-Ausgabe
+getestet. Zeitreihen und weitere Chartfamilien sind spätere, getrennt zu
+entscheidende Ausbaustufen.
 
 ## Dokumentation und Lizenzen
 

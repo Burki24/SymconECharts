@@ -7,11 +7,11 @@ Folgende Module beinhaltet das SymconECharts Repository:
   Archivabfragen, Zwischenspeicherung und die technische Anbindung der einzelnen
   Chart-Instanzen. Das Gateway benötigt keine eigene I/O-Instanz.
 
-- __EChartsWidget__ ([Dokumentation](EChartsWidget))  
-  Gerätemodul für ein einzelnes, unabhängig konfigurierbares Diagramm.
+- __EChartsGauge__ ([Dokumentation](EChartsGauge))
+  Gerätemodul für ein einzelnes, unabhängig konfigurierbares Gauge-Diagramm.
   Vorgesehen für die native Symcon-Kacheldarstellung und zusätzlich für ein
-  separat platzierbares HTML-Widget in IPSView. Beide Ausgabewege sollen dieselbe
-  Diagrammkonfiguration und Datenaufbereitung verwenden.
+  separat platzierbares HTML-Widget in IPSView. Beide Ausgabewege sollen
+  dieselbe Diagrammkonfiguration und Datenaufbereitung verwenden.
 
 ## Entwicklungsstand
 
@@ -19,9 +19,9 @@ Folgende Module beinhaltet das SymconECharts Repository:
 Modulgerüste sind angelegt. Apache ECharts, Daten- und Archivverarbeitung,
 native Kachelausgabe und IPSView-HTML-Ausgabe sind noch nicht implementiert.
 
-Als erste Diagrammtypen sind ein radiales Messinstrument und ein Liniendiagramm
-mit mehreren Datenreihen vorgesehen. Eine Widget-Instanz soll jeweils einen
-Chart liefern; eine gemeinsame Dashboard-Seite ist nicht vorgesehen.
+Als erste Chartfamilie ist ein radiales Messinstrument vorgesehen. Eine
+Gauge-Instanz soll jeweils einen Chart liefern; eine gemeinsame Dashboard-Seite
+ist nicht vorgesehen. Weitere Chartfamilien erhalten eigene Gerätemodule.
 
 ## Entwicklung
 
