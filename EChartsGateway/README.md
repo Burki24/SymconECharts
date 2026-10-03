@@ -4,8 +4,9 @@ Gemeinsame Zentrale der SymconECharts-Library. Das Modul ist als Splitter
 angelegt und soll mehrere Geräteinstanzen verschiedener Chartfamilien mit
 gemeinsamen Diensten versorgen. Eine eigene I/O-Instanz ist nicht vorgesehen.
 
-**Entwicklungsstand:** Modulgerüst. Die unten als geplant beschriebenen Dienste
-stehen noch nicht zur Verfügung.
+**Entwicklungsstand:** Technische Datenbasis. Das Gateway verarbeitet den
+versionierten `current.read`-Vertrag für numerische Symcon-Variablen. Archiv-,
+Cache-, Renderer- und HTTP-Dienste sind noch nicht implementiert.
 
 ### Inhaltsverzeichnis
 
@@ -19,10 +20,12 @@ stehen noch nicht zur Verfügung.
 
 ### 1. Funktionsumfang
 
-**Vorhanden:** Moduldefinition als Splitter (`type: 2`), festgelegte
-Datenfluss-IDs für Chartfamilien-Geräte und ein PHP-Grundgerüst. Die
-Konfigurationsform ist noch leer. Eine eigene `ForwardData()`-Verarbeitung
-ist noch nicht implementiert.
+**Vorhanden:** Moduldefinition als Splitter (`type: 2`) auf Basis von
+`IPSModuleStrict`, festgelegte Datenfluss-IDs für Chartfamilien-Geräte und ein
+versionierter Gateway-Vertrag. `ForwardData()` verarbeitet `current.read`,
+prüft Variablen-ID und numerischen Variablentyp und liefert Wert, Typ und
+Änderungszeitpunkt als strukturierte Antwort. Die Transporthülle nutzt den
+zentralen `DataFlowHelper`.
 
 **Geplant:** Gemeinsame Daten- und Archivdienste, begrenzte Zwischenspeicherung,
 zentrale technische Vorgaben, Diagnose und die bei IPSView-Nutzung benötigten
@@ -33,8 +36,8 @@ IPSView-Ausgabe und ohne deren WebHook-Zugriff funktionieren.
 
 Das Entwicklungsziel und die deklarierte Mindestversion sind
 **Symcon 9.0 / PHP 8.5**. Eine Kompatibilität zu älteren Symcon-Versionen wird
-nicht versprochen. Die Laufzeitfähigkeit des aktuellen Modulgerüsts ist damit
-noch nicht belegt.
+nicht versprochen. Die Modulverträge werden lokal mit Test-Doppeln geprüft;
+ein Laufzeitnachweis in einer realen Symcon-Installation steht noch aus.
 
 Historische Diagramme sollen das vorhandene Symcon-Archiv verwenden. Eine
 zusätzliche Archivinstanz oder eigene Datenbank ist nicht vorgesehen.
@@ -62,23 +65,23 @@ oder mehreren EChartsGauge-Instanzen sowie späteren weiteren
 Chartfamilien-Geräten. Das Gateway hat keinen übergeordneten Datenfluss; die
 Geräteinstanzen werden mit ihm verbunden.
 
-**Hinweis zum aktuellen Gerüst:** EChartsGauge verwendet noch
-`RequireParent()`. Bei fehlender Verbindung wird damit eine neue Gateway-Instanz
-angelegt, auch wenn bereits ein kompatibles Gateway existiert. Die
-Wiederverwendung eines gemeinsamen Gateways muss im nächsten technischen
-Schritt berücksichtigt werden. Siehe [offizielle RequireParent-Dokumentation](https://www.symcon.de/de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/module/requireparent/).
+EChartsGauge bietet über `GetCompatibleParents()` vorhandene kompatible
+Gateway-Instanzen zur Verbindung an. Mehrere Chart-Instanzen können dadurch
+bewusst dasselbe Gateway verwenden; das Gauge erzeugt nicht über
+`RequireParent()` automatisch ein weiteres Gateway.
 
-**Konfigurationsseite:** Noch keine konfigurierbaren Felder oder Aktionen.
+**Konfigurationsseite:** Das Gateway benötigt aktuell keine eigenen
+Einstellungen. Die Seite zeigt seinen Bereitschaftsstatus.
 
 ### 5. Statusvariablen und Profile
 
 #### Statusvariablen
 
-Das Modulgerüst legt noch keine eigenen Statusvariablen an.
+Das Modul legt keine eigenen Statusvariablen an.
 
 #### Profile
 
-Das Modulgerüst legt noch keine Variablenprofile oder eigenen
+Das Modul legt keine Variablenprofile oder eigenen
 Variablendarstellungen an.
 
 ### 6. Visualisierung
@@ -92,12 +95,13 @@ noch zu implementieren.
 
 ### 7. PHP-Befehlsreferenz
 
-Für das Gateway ist noch keine fachliche PHP-Befehlsschnittstelle freigegeben.
-Das festgelegte Funktionspräfix lautet `ECGW`.
+Für das Gateway ist keine direkte fachliche Anwenderschnittstelle freigegeben.
+Das festgelegte Funktionspräfix lautet `ECGW`. Der synchrone Datenfluss über
+`ForwardData()` ist ein interner Vertrag für verbundene Chartfamilien-Module.
 
-Die Lebenszyklusmethoden des Gerüsts sind keine dokumentierte
-Anwenderschnittstelle. Beispielbefehle ohne Implementierung werden nicht als
-verfügbare Funktionen ausgewiesen.
+Lebenszyklus- und Datenflussmethoden sind keine PHP-Befehle für Anwender.
+Beispielbefehle ohne Implementierung werden nicht als verfügbare Funktionen
+ausgewiesen.
 
 Weitere Projektgrundsätze: [Entwicklung](../docs/ENTWICKLUNG.md).  
 Lizenz der eigenen Beiträge: [PolyForm Noncommercial License 1.0.0](../LICENSE).

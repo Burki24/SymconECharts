@@ -16,9 +16,10 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   IP-Symcon-9.0-Testinstallation ist nicht erforderlich; nicht auf der
   erreichbaren Testebene geprüfte Varianten werden sichtbar als Testlücke
   benannt.
-- Der aktuelle Repository-Stand ist ein Modulgerüst. Nicht implementierte
-  Funktionen, Store-Freigaben oder Laufzeitkompatibilität dürfen nicht als
-  vorhanden dargestellt werden.
+- Der aktuelle Repository-Stand besitzt eine getestete technische
+  Gauge→Gateway-Datenbasis, aber noch keine sichtbare Diagrammausgabe. Nicht
+  implementierte Funktionen, Store-Freigaben oder Laufzeitkompatibilität
+  dürfen nicht als vorhanden dargestellt werden.
 - Native Symcon-Kacheln und einzelne IPSView-HTML-Widgets sind vorgesehene
   Ausgabewege. IPSView-Laufzeittests sind auf der vorhandenen Testebene mangels
   Lizenz nicht möglich und bleiben ausdrücklich als Lücke dokumentiert.
@@ -40,6 +41,9 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   [`ADR 0001`](docs/adr/0001-chart-family-modules.md) sind verbindliche
   Verträge und ändern sich nur mit einer ausdrücklichen Architektur- und
   Kompatibilitätsentscheidung.
+- Parent-Auswahl, Zuständigkeiten und das versionierte Datenprotokoll aus
+  [`ADR 0002`](docs/adr/0002-gateway-gauge-contract.md) sind verbindliche
+  technische Verträge und werden kompatibel weiterentwickelt.
 - Symcon-Datenanbindung, Archivzugriff, fachliches Chart-Modell, Formatierung,
   Ausgabeadapter und ECharts-Renderer werden als getrennte Zuständigkeiten
   behandelt. Gemeinsame Abstraktionen entstehen nur für belegte gemeinsame

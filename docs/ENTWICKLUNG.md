@@ -14,13 +14,14 @@ nicht eine eigene große Dashboard-Seite des Moduls.
 
 ## Aktueller Stand und Zielarchitektur
 
-Die Library und beide Module sind als Grundgerüste vorhanden. ECharts,
-fachliche Datenverarbeitung, Visualisierung, zentrale Helper-Anbindung sowie
-fachliche Laufzeit- und Browsertests sind noch nicht eingebunden. Eine
-Basistestsuite charakterisiert Projektstruktur, Modulidentitäten, Datenflüsse
-und Metadatenautomatik; der Tests-Workflow führt sie unter PHP 8.5 über die
-gemeinsame CI-Basis aus. Die folgenden Festlegungen beschreiben das
-Entwicklungsziel, keine bereits ausgelieferten Funktionen.
+Die Library besitzt mit Gateway und Gauge eine erste technische Vertikale.
+Beide Module verwenden `IPSModuleStrict`; Gauge-Instanzen können vorhandene
+Gateways wiederverwenden. Ein versioniertes Protokoll liefert geprüfte
+numerische Momentanwerte an ein minimales Gauge-Datenmodell. Der zentrale
+`DataFlowHelper` ist eingebunden. ECharts, Archivverarbeitung, Visualisierung
+sowie reale Symcon-Laufzeit- und Browsertests fehlen noch. Die Testsuite prüft
+zusätzlich zu Struktur und Metadaten die Strict-Verträge, das Protokoll und den
+Gauge→Gateway-Datenweg unter PHP 8.5.
 
 | Bestandteil | Name | Aufgabe |
 |---|---|---|
@@ -52,6 +53,8 @@ verbindlichen Präfixkonvention steht `EC` für ECharts; die letzten zwei
 Buchstaben bezeichnen Aufgabe oder Chartfamilie. Die Entscheidung zur
 Modulstruktur und zum Erhalt der GUIDs dokumentiert
 [`ADR 0001`](adr/0001-chart-family-modules.md).
+Den Parent-, Zuständigkeits- und Datenvertrag der ersten technischen Vertikale
+dokumentiert [`ADR 0002`](adr/0002-gateway-gauge-contract.md).
 
 ## Daten, Konfiguration und Ausgabe
 
@@ -59,10 +62,12 @@ Symcon-Datenanbindung, Diagrammkonfiguration und ECharts-Darstellung werden
 getrennt. Die Konfiguration der jeweiligen Chartfamilien-Instanz bleibt die
 maßgebliche Quelle für ihre Variablen, Datenreihen und Auswertungsregeln.
 
-Das Gateway soll wiederverwendbare Archivabfragen und begrenzte Caches
-bereitstellen. Ein HTML-Dokument wird nicht bei jeder Messwertänderung neu
-erzeugt. Datenmenge, Aktualisierungsrate und Animationen werden insbesondere
-für mehrere gleichzeitig sichtbare Charts begrenzt und getestet.
+Das Gateway stellt aktuell den gemeinsamen Zugriff auf numerische Momentanwerte
+bereit. Wiederverwendbare Archivabfragen und begrenzte Caches werden erst für
+einen tatsächlich festgelegten historischen Anwendungsfall ergänzt. Ein
+HTML-Dokument wird nicht bei jeder Messwertänderung neu erzeugt. Datenmenge,
+Aktualisierungsrate und Animationen werden insbesondere für mehrere
+gleichzeitig sichtbare Charts begrenzt und getestet.
 
 Die native Kachel und IPSView erhalten getrennte Kommunikationsadapter zum
 gemeinsamen Darstellungskern. Der IPSView-Datenkanal benötigt eine eigene
@@ -75,20 +80,17 @@ darf den nativen Ausgabeweg nicht beeinträchtigen.
 Entwicklungsziel und deklarierte Mindestversion sind **Symcon 9.0 / PHP 8.5**.
 Eine Kompatibilität zu älteren Symcon-Versionen wird nicht versprochen.
 
-Für die technische Umsetzung ist die moderne Modulbasis `IPSModuleStrict`
-mit passenden Typdeklarationen vorgesehen. Die Parent-Auswahl wird über den
-Datenfluss und bei Bedarf `GetCompatibleParents()` mit `type: connect`
-aufgebaut. Der bisherige `RequireParent()`-Aufruf des Generatorgerüsts darf
-nicht unverändert übernommen werden, da er für neue Geräteinstanzen zusätzliche
-Gateways erzeugt. Ein bloßer Wechsel der Basisklasse reicht nicht aus:
-Legacy-Methoden und ihre Verträge müssen dabei ebenfalls angepasst werden.
+Die technische Umsetzung verwendet die moderne Modulbasis `IPSModuleStrict`
+mit passenden Typdeklarationen. Die Parent-Auswahl wird über
+`GetCompatibleParents()` mit `type: connect` aufgebaut. Dadurch können neue
+Geräteinstanzen bestehende Gateways mit bereits verbundenen Kindern
+wiederverwenden. `RequireParent()` wird nicht verwendet.
 
 Die zugehörigen Schnittstellen sind in der
 [Symcon-Moduldokumentation](https://www.symcon.de/de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/module/)
 und unter
 [GetCompatibleParents](https://www.symcon.de/de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/module/getcompatibleparents/)
-beschrieben. Siehe auch
-[RequireParent](https://www.symcon.de/de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/module/requireparent/).
+beschrieben.
 
 ## Bibliotheken und gemeinsame Helper
 

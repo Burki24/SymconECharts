@@ -10,10 +10,14 @@ if (!chdir($root)) {
 
 $tests = [
     __DIR__ . '/validate_structure.php',
-    __DIR__ . '/module_contracts.php'
+    __DIR__ . '/module_contracts.php',
+    __DIR__ . '/symcon_strict.php',
+    __DIR__ . '/data_protocol.php',
+    __DIR__ . '/gateway_gauge.php'
 ];
 
 $commands = [
+    ['Verify vendored helper integrity', 'python3 tests/helper_integrity.py'],
     ['Test library metadata updater', 'python3 tests/test_update_library_metadata.py']
 ];
 

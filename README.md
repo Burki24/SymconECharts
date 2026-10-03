@@ -3,9 +3,10 @@
 Folgende Module beinhaltet das SymconECharts Repository:
 
 - __EChartsGateway__ ([Dokumentation](EChartsGateway))  
-  Gemeinsame Zentrale als Splitter. Vorgesehen für Datenbereitstellung,
-  Archivabfragen, Zwischenspeicherung und die technische Anbindung der einzelnen
-  Chart-Instanzen. Das Gateway benötigt keine eigene I/O-Instanz.
+  Gemeinsame Zentrale als Splitter. Sie stellt den Chartfamilien aktuell den
+  validierten Zugriff auf numerische Momentanwerte bereit. Archivabfragen,
+  Zwischenspeicherung und weitere gemeinsame Dienste folgen bei belegtem Bedarf.
+  Das Gateway benötigt keine eigene I/O-Instanz.
 
 - __EChartsGauge__ ([Dokumentation](EChartsGauge))
   Gerätemodul für ein einzelnes, unabhängig konfigurierbares Gauge-Diagramm.
@@ -15,8 +16,11 @@ Folgende Module beinhaltet das SymconECharts Repository:
 
 ## Entwicklungsstand
 
-**Grundgerüst – noch keine nutzbaren Diagramme.** Die Library und beide
-Modulgerüste sind angelegt. Apache ECharts, Daten- und Archivverarbeitung,
+**Technische Datenbasis – noch keine sichtbaren Diagramme.** Gateway und Gauge
+verwenden `IPSModuleStrict`, ein versioniertes Datenprotokoll und eine
+wiederverwendbare Parent-Verbindung. Eine Gauge-Instanz kann eine numerische
+Quellvariable konfigurieren und deren Momentanwert als validiertes
+familienbezogenes Datenmodell abrufen. Apache ECharts, Archivverarbeitung,
 native Kachelausgabe und IPSView-HTML-Ausgabe sind noch nicht implementiert.
 
 Als erste Chartfamilie ist ein radiales Messinstrument vorgesehen. Eine

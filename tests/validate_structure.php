@@ -12,15 +12,23 @@ $requiredFiles = [
     'THIRD_PARTY_NOTICES.md',
     'docs/ENTWICKLUNG.md',
     'docs/adr/0001-chart-family-modules.md',
+    'docs/adr/0002-gateway-gauge-contract.md',
     'library.json',
+    'libs/helper/DataFlowHelper.php',
+    'libs/helper/EChartsDataProtocol.php',
+    'libs/helper/manifest.json',
     '.gitmodules',
     '.github/scripts/update_library_metadata.py',
     '.github/workflows/style.yml',
     '.github/workflows/tests.yml',
     '.github/workflows/update-library-metadata.yml',
     'tests/README.md',
+    'tests/data_protocol.php',
+    'tests/gateway_gauge.php',
+    'tests/helper_integrity.py',
     'tests/module_contracts.php',
     'tests/run.php',
+    'tests/symcon_strict.php',
     'tests/test_update_library_metadata.py',
     'tests/validate_structure.php'
 ];
@@ -238,6 +246,10 @@ if ($runner === false) {
     foreach ([
         "__DIR__ . '/validate_structure.php'",
         "__DIR__ . '/module_contracts.php'",
+        "__DIR__ . '/symcon_strict.php'",
+        "__DIR__ . '/data_protocol.php'",
+        "__DIR__ . '/gateway_gauge.php'",
+        'python3 tests/helper_integrity.py',
         'python3 tests/test_update_library_metadata.py'
     ] as $requiredTest) {
         if (!str_contains($runner, $requiredTest)) {

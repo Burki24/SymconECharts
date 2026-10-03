@@ -5,8 +5,10 @@ Gauge-Instanz soll die native Symcon-Kacheldarstellung und ein separat
 platzierbares HTML-Widget in IPSView bereitstellen können. Datenquelle und
 Diagrammkonfiguration werden dabei nur einmal gepflegt.
 
-**Entwicklungsstand:** Modulgerüst. Es werden noch keine Diagramme, Kacheln
-oder IPSView-HTML-Ausgabevariablen erzeugt.
+**Entwicklungsstand:** Technische Datenbasis. Quellvariable und minimale
+Gauge-Einstellungen sind konfigurierbar; das Modul ruft den Momentanwert über
+EChartsGateway ab und erzeugt daraus ein versioniertes Gauge-Datenmodell. Es
+werden noch keine Diagramme, Kacheln oder IPSView-HTML-Ausgabevariablen erzeugt.
 
 ### Inhaltsverzeichnis
 
@@ -20,13 +22,17 @@ oder IPSView-HTML-Ausgabevariablen erzeugt.
 
 ### 1. Funktionsumfang
 
-**Vorhanden:** Moduldefinition als Gerät (`type: 3`), Datenfluss-Zuordnung zu
-EChartsGateway und ein PHP-Grundgerüst mit generierten Sende- und
-Empfangsbeispielen. Die Konfigurationsform ist noch leer.
+**Vorhanden:** Moduldefinition als Gerät (`type: 3`) auf Basis von
+`IPSModuleStrict`, wiederverwendbare Verbindung zu EChartsGateway,
+Variablenauswahl, Wertebereich, Titel, Einheit und Nachkommastellen. Die
+Quellvariable wird als Symcon-Referenz registriert. `GetGaugeData()` liest den
+aktuellen Wert über das versionierte Gateway-Protokoll und liefert ein
+familienbezogenes JSON-Datenmodell.
 
-**Geplant:** Konfiguration eines radialen Messinstruments, Referenzierung
-bestehender Symcon-Variablen, Live- und Archivdarstellung sowie
-Gauge-spezifische Skalen-, Wertebereichs- und Gestaltungsoptionen.
+**Geplant:** Sichtbare Live-Darstellung, ECharts-spezifische Skalen- und
+Gestaltungsoptionen sowie die Ausgabe als native Symcon-Kachel und optionales
+IPSView-Widget. Archivdarstellung wird erst mit einem dafür festgelegten
+Chart-Anwendungsfall umgesetzt.
 
 Eine Instanz bildet genau einen unabhängig konfigurierbaren Gauge-Chart ab.
 Weitere Chartfamilien werden bei Bedarf als eigene Gerätemodule ergänzt und
@@ -36,13 +42,14 @@ nicht als umschaltbare Modi dieser Instanz implementiert.
 
 Das Entwicklungsziel und die deklarierte Mindestversion sind
 **Symcon 9.0 / PHP 8.5**. Eine Kompatibilität zu älteren Symcon-Versionen wird
-nicht versprochen. Die Laufzeitfähigkeit des aktuellen Modulgerüsts ist damit
-noch nicht belegt.
+nicht versprochen. Die Modulverträge werden lokal mit Test-Doppeln geprüft;
+ein Laufzeitnachweis in einer realen Symcon-Installation steht noch aus.
 
-Vorgesehen ist eine Verbindung zu einer [EChartsGateway-Instanz](../EChartsGateway).
-Für historische Daten werden aufgezeichnete Werte im Symcon-Archiv benötigt;
-ein reines Momentanwert-Widget benötigt keine Historie. IPSView soll nur für
-den zusätzlichen IPSView-Ausgabeweg erforderlich sein, nicht für native Kacheln.
+Erforderlich sind eine Verbindung zu einer aktiven
+[EChartsGateway-Instanz](../EChartsGateway) und eine vorhandene Integer- oder
+Float-Variable als Datenquelle. Ein reines Momentanwert-Widget benötigt keine
+Historie. IPSView soll nur für den zusätzlichen IPSView-Ausgabeweg erforderlich
+sein, nicht für native Kacheln.
 
 ### 3. Software-Installation
 
@@ -68,20 +75,21 @@ Gauge-Chart. Mehrere Gauge-Instanzen sollen ein gemeinsames Gateway verwenden
 können. Für die parallele Anzeige desselben Charts als Kachel und in IPSView
 ist keine zweite Gauge-Instanz vorgesehen.
 
-**Aktueller Stand:** Der Code verbindet sich über `RequireParent()` mit einer
-neu erzeugten Gateway-Instanz, sofern noch keine Verbindung besteht. Auch ein
-bereits vorhandenes Gateway verhindert dessen Neuanlage nicht. Dieser
-Generatorcode ist vor der vorgesehenen komfortablen Mehrfachanlage anzupassen.
-Siehe [offizielle RequireParent-Dokumentation](https://www.symcon.de/de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/module/requireparent/).
+**Aktueller Stand:** Über die kompatiblen Parent-Verbindungen kann eine
+vorhandene EChartsGateway-Instanz ausgewählt und von mehreren Gauges verwendet
+werden. Ohne aktive Verbindung bleibt die Gauge-Instanz in einem eindeutigen
+Fehlerstatus.
 
-**Konfigurationsseite:** Noch keine Variablenauswahl, Diagrammeinstellungen
-oder Ausgabeschalter vorhanden.
+**Konfigurationsseite:** Ausgewählt werden eine numerische Quellvariable,
+Minimum und Maximum, Titel, Einheit sowie 0 bis 6 Nachkommastellen. Die Aktion
+„Aktuelle Gauge-Daten lesen“ gibt das gegenwärtige JSON-Datenmodell zu
+Diagnosezwecken aus. Minimum muss kleiner als Maximum sein.
 
 ### 5. Statusvariablen und Profile
 
 #### Statusvariablen
 
-Aktuell werden noch keine eigenen Variablen angelegt. Für IPSView ist künftig
+Aktuell werden keine eigenen Variablen angelegt. Für IPSView ist künftig
 je aktivierter Widget-Ausgabe eine eigene Stringvariable mit HTML-Inhalt
 vorgesehen. Die native Kachel soll diese Variable nicht benötigen.
 
@@ -121,13 +129,17 @@ Visualisierung unbeabsichtigt zu verändern.
 
 ### 7. PHP-Befehlsreferenz
 
-Es ist noch keine fachliche PHP-Befehlsschnittstelle für Charts freigegeben.
 Das festgelegte Funktionspräfix lautet `ECGA`.
 
-`Send()` und `ReceiveData()` stammen noch aus der generierten Vorlage. Sie
-implementieren kein vollständiges Chart-Protokoll und sind nicht als stabile
-Anwenderbefehle zu verwenden. Die dokumentierte Schnittstelle wird mit der
-jeweiligen tatsächlichen Implementierung ergänzt.
+```php
+$json = ECGA_GetGaugeData($InstanceID);
+```
+
+`ECGA_GetGaugeData()` validiert Konfiguration und aktive Gateway-Verbindung
+und liefert das aktuelle Gauge-Datenmodell als JSON. Das Modell enthält
+`schemaVersion`, `family`, Quellvariable und Zeitstempel, die minimale
+Gauge-Konfiguration sowie den numerischen Wert. Es ist die technische Grenze
+für die späteren Ausgabeadapter und noch kein gerendertes ECharts-Diagramm.
 
 Weitere Projektgrundsätze: [Entwicklung](../docs/ENTWICKLUNG.md).  
 Lizenz der eigenen Beiträge: [PolyForm Noncommercial License 1.0.0](../LICENSE).

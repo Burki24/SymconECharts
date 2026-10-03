@@ -22,10 +22,20 @@ StylePHP und PHP CS Fixer.
   CI-Basis einschließlich des Style-Workflows.
 - `module_contracts.php` charakterisiert die vorhandenen Library- und
   Modulidentitäten, die Symcon-9.0-Mindestversion sowie die beiden
-  Datenflussrichtungen des aktuellen Gerüsts.
+  Datenflussrichtungen.
+- `symcon_strict.php` prüft Strict-Modulbasis, typisierte öffentliche
+  Verträge, wiederverwendbare Gateway-Verbindung und die minimale
+  Gauge-Konfiguration.
+- `data_protocol.php` prüft Versionierung sowie Erfolgs- und Fehlerantworten
+  des internen Gateway-Protokolls.
+- `gateway_gauge.php` führt den ersten vollständigen Momentanwertabruf mit
+  Symcon-Test-Doppeln aus und prüft Referenzen, Status sowie Fehlerfälle.
+- `helper_integrity.py` stellt sicher, dass der zentrale `DataFlowHelper`
+  unverändert und mit nachvollziehbarer Herkunft eingebunden ist.
 - `test_update_library_metadata.py` prüft Versionsfortschreibung, Build- und
   Datumsableitung sowie den Schutz vor einer Versionsrückstufung.
 
-Die Suite belegt noch keine Symcon-Lauffähigkeit, Diagrammfunktion oder
-Browserdarstellung. Fachliche Modul-, Renderer- und Browsertests werden mit
+Die Suite belegt die PHP-seitigen Verträge und den Datenweg nur gegen lokale
+Symcon-Test-Doppel. Sie ersetzt keinen Laufzeittest in Symcon und belegt noch
+keine Diagramm- oder Browserdarstellung. Renderer- und Browsertests werden mit
 der jeweiligen Implementierung ergänzt.
