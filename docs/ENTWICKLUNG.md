@@ -16,8 +16,10 @@ nicht eine eigene große Dashboard-Seite des Moduls.
 
 Die Library und beide Module sind als Grundgerüste vorhanden. ECharts,
 fachliche Datenverarbeitung, Visualisierung, zentrale Helper-Anbindung sowie
-Tests und CI sind noch nicht eingebunden. Die folgenden Festlegungen
-beschreiben das Entwicklungsziel, keine bereits ausgelieferten Funktionen.
+fachliche Tests und die vollständige Projekt-CI sind noch nicht eingebunden.
+Die automatische Pflege der Library-Metadaten auf `dev` ist bereits
+vorhanden. Die folgenden Festlegungen beschreiben das Entwicklungsziel, keine
+bereits ausgelieferten Funktionen.
 
 | Bestandteil | Name | Aufgabe |
 |---|---|---|
@@ -104,6 +106,12 @@ Aktualisierungsverhalten werden auf den Zielgeräten geprüft.
 Die Entwicklung und Erprobung erfolgen auf `dev`. Geprüfte Stände gelangen
 per Pull Request nach `main`; der Entwicklungsbranch wird nicht automatisch
 gelöscht.
+
+Nach einem normalen Push auf `dev` erhöht der Metadatenworkflow die gemeinsame
+Library-Version im Format `Hauptversion.Nebenstand`, leitet `build` aus dem
+Quellcommit ab und setzt `date` auf dessen Commit-Zeit. Der getrennte
+Metadatencommit löst keine weitere Erhöhung aus. Tags, Releases und
+Veröffentlichungen bleiben manuelle, ausdrücklich freizugebende Schritte.
 
 Für die technische Projektbasis sind Struktur- und JSON-Prüfungen,
 PHP-Syntaxprüfungen, Modultests und der gemeinsame StylePHP-/CI-Ablauf

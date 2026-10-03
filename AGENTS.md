@@ -95,6 +95,13 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Eigentümer aus.
 - Entwicklung erfolgt auf dem dauerhaften Branch `dev`; freigegebene Stände
   gelangen per Pull Request nach `main`.
+- Die Library verwendet eine gemeinsame Version im Format
+  `Hauptversion.Nebenstand`. Nach normalen Pushes auf `dev` pflegt der
+  Metadatenworkflow `version`, `build` und `date` in `library.json` und erzeugt
+  dafür einen getrennten Bot-Commit. Manuelle Änderungen dieser Felder erfolgen
+  nur als ausdrücklich beauftragter Versions- oder Migrationsschritt.
+- Der Metadatenworkflow erzeugt keine Tags, Releases oder Veröffentlichungen.
+  Solche Schritte bleiben eine gesonderte Entscheidung des Eigentümers.
 - Prüfungen folgen den dokumentierten Repositorybefehlen und der gemeinsamen
   CI-Basis. Abschlussberichte nennen ausgeführte Prüfungen und verbleibende
   Testlücken getrennt; Syntax-, Style- und Strukturprüfungen ersetzen keine

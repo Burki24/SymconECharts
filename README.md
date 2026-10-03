@@ -29,6 +29,10 @@ Die Entwicklung erfolgt auf `dev`. Geprüfte Stände gelangen später per Pull
 Request nach `main`; `dev` bleibt erhalten. Projektziele, Architektur und
 Entwicklungsgrundsätze stehen in [Entwicklung](docs/ENTWICKLUNG.md).
 
+Nach normalen Pushes auf `dev` pflegt ein Workflow Version, Build und Datum in
+`library.json` und legt die Metadaten als getrennten Bot-Commit ab. Tags und
+Releases werden dadurch nicht automatisch erzeugt.
+
 ## Lizenz
 
 Die eigenen Beiträge stehen unter der
