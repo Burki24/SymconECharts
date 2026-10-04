@@ -7,7 +7,9 @@
         "node": ">=18"
     },
     "scripts": {
-        "build": "esbuild src/gauge-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.gauge.min.js"
+        "build": "npm run build:runtime && npm run build:themes",
+        "build:runtime": "esbuild src/gauge-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.gauge.min.js",
+        "build:themes": "node scripts/copy-themes.mjs"
     },
     "dependencies": {
         "echarts": "6.1.0"

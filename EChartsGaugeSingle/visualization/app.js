@@ -3,9 +3,13 @@
 
     var bootstrap = window.SYMC_VISUALIZATION || {};
     var translations = bootstrap.translations || {};
+    var themePalettes = bootstrap.options && bootstrap.options.echartsThemes
+        ? bootstrap.options.echartsThemes
+        : {};
     var chartElement = document.getElementById('echarts-gauge-chart');
     var errorElement = document.getElementById('echarts-gauge-error');
     var chart = null;
+    var currentTheme = null;
     var currentState = bootstrap.state || null;
     var reduceMotion = window.matchMedia
         && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -68,7 +72,47 @@
         return ['basic', 'simple', 'progress', 'speed'].indexOf(value) >= 0 ? value : 'simple';
     }
 
-    function applyPreset(series, preset, width, lineWidth, text, muted, surface) {
+    function normalizeTheme(value) {
+        return ['auto', 'dark', 'vintage', 'macarons', 'infographic', 'shine', 'roma'].indexOf(value) >= 0
+            ? value
+            : 'auto';
+    }
+
+    function resolveThemeColors(theme) {
+        if (theme !== 'auto' && themePalettes[theme]) {
+            return themePalettes[theme];
+        }
+
+        return {
+            background: 'transparent',
+            text: resolveColor('--symc-text', '#f4f5f7'),
+            muted: resolveColor('--symc-muted', '#a7a9ae'),
+            subtle: resolveColor('--symc-subtle', '#777a80'),
+            border: resolveColor('--symc-border-strong', '#606268'),
+            track: resolveColor('--symc-surface-raised', '#45474c'),
+            surface: resolveColor('--symc-surface-raised', '#45474c'),
+            accent: resolveColor('--symc-accent', '#55cbb5')
+        };
+    }
+
+    function applyThemeColors(series, colors, automaticTheme) {
+        series.progress.itemStyle = { color: colors.accent };
+        if (automaticTheme) {
+            series.axisLine.lineStyle.color = [[1, colors.track]];
+        }
+        series.pointer.itemStyle = { color: colors.accent };
+        series.anchor.itemStyle.color = colors.accent;
+        series.anchor.itemStyle.borderColor = colors.text;
+        series.axisTick.lineStyle.color = colors.border;
+        series.splitLine.lineStyle.color = colors.muted;
+        series.axisLabel.color = colors.subtle || colors.muted;
+        series.title.color = colors.muted;
+        series.detail.color = colors.text;
+
+        return series;
+    }
+
+    function applyPreset(series, preset, width, lineWidth, colors) {
         switch (preset) {
             case 'basic':
                 series.progress.show = false;
@@ -101,11 +145,11 @@
                 series.detail.height = Math.max(34, Math.min(48, Math.round(width * 0.12)));
                 series.detail.lineHeight = Math.max(34, Math.min(48, Math.round(width * 0.12)));
                 series.detail.fontSize = Math.max(18, Math.min(32, Math.round(width * 0.075)));
-                series.detail.backgroundColor = surface;
-                series.detail.borderColor = muted;
+                series.detail.backgroundColor = colors.surface;
+                series.detail.borderColor = colors.muted;
                 series.detail.borderWidth = 2;
                 series.detail.borderRadius = 8;
-                series.detail.color = text;
+                series.detail.color = colors.text;
                 break;
 
             default:
@@ -115,7 +159,7 @@
         return series;
     }
 
-    function buildOption(payload) {
+    function buildOption(payload, theme) {
         var gauge = payload.gauge || {};
         var minimum = Number(gauge.minimum);
         var maximum = Number(gauge.maximum);
@@ -127,12 +171,8 @@
         var width = Math.max(chartElement.clientWidth, 240);
         var lineWidth = Math.max(10, Math.min(22, Math.round(width * 0.055)));
         var pointerWidth = Math.max(4, Math.min(8, Math.round(width * 0.018)));
-        var text = resolveColor('--symc-text', '#f4f5f7');
-        var muted = resolveColor('--symc-muted', '#a7a9ae');
-        var subtle = resolveColor('--symc-subtle', '#777a80');
-        var border = resolveColor('--symc-border-strong', '#606268');
-        var surface = resolveColor('--symc-surface-raised', '#45474c');
-        var accent = resolveColor('--symc-accent', '#55cbb5');
+        var automaticTheme = theme === 'auto';
+        var colors = resolveThemeColors(theme);
 
         chartElement.setAttribute(
             'aria-label',
@@ -153,29 +193,24 @@
             progress: {
                 show: true,
                 roundCap: true,
-                width: lineWidth,
-                itemStyle: { color: accent }
+                width: lineWidth
             },
             axisLine: {
                 roundCap: true,
                 lineStyle: {
-                    width: lineWidth,
-                    color: [[1, surface]]
+                    width: lineWidth
                 }
             },
             pointer: {
                 show: true,
                 length: '57%',
-                width: pointerWidth,
-                itemStyle: { color: accent }
+                width: pointerWidth
             },
             anchor: {
                 show: true,
                 showAbove: true,
                 size: Math.max(10, Math.min(18, Math.round(width * 0.045))),
                 itemStyle: {
-                    color: accent,
-                    borderColor: text,
                     borderWidth: 2
                 }
             },
@@ -184,29 +219,26 @@
                 distance: -lineWidth - 7,
                 splitNumber: 5,
                 length: 5,
-                lineStyle: { color: border, width: 1 }
+                lineStyle: { width: 1 }
             },
             splitLine: {
                 distance: -lineWidth - 8,
                 length: 10,
-                lineStyle: { color: muted, width: 2 }
+                lineStyle: { width: 2 }
             },
             axisLabel: {
                 distance: lineWidth + 13,
-                color: subtle,
                 fontSize: Math.max(9, Math.min(13, Math.round(width * 0.034))),
                 formatter: formatAxisValue
             },
             title: {
                 show: title !== '',
                 offsetCenter: [0, '72%'],
-                color: muted,
                 fontSize: Math.max(11, Math.min(16, Math.round(width * 0.041)))
             },
             detail: {
                 valueAnimation: !reduceMotion,
                 offsetCenter: [0, '38%'],
-                color: text,
                 fontSize: Math.max(20, Math.min(38, Math.round(width * 0.095))),
                 fontWeight: 600,
                 formatter: function () {
@@ -216,9 +248,10 @@
             data: [{ value: value, name: title }]
         };
 
-        series = applyPreset(series, preset, width, lineWidth, text, muted, surface);
+        series = applyThemeColors(series, colors, automaticTheme);
+        series = applyPreset(series, preset, width, lineWidth, colors);
 
-        return {
+        var option = {
             animation: !reduceMotion,
             animationDuration: reduceMotion ? 0 : 500,
             aria: {
@@ -233,6 +266,11 @@
             },
             series: [series]
         };
+        if (!automaticTheme) {
+            option.backgroundColor = colors.background;
+        }
+
+        return option;
     }
 
     function render(state) {
@@ -248,10 +286,16 @@
 
         errorElement.hidden = true;
         chartElement.hidden = false;
-        if (!chart) {
-            chart = window.echarts.init(chartElement, null, { renderer: 'canvas' });
+        var theme = normalizeTheme(state.chart.theme);
+        if (chart && currentTheme !== theme) {
+            chart.dispose();
+            chart = null;
         }
-        chart.setOption(buildOption(state.chart), true);
+        if (!chart) {
+            chart = window.echarts.init(chartElement, theme === 'auto' ? null : theme, { renderer: 'canvas' });
+            currentTheme = theme;
+        }
+        chart.setOption(buildOption(state.chart, theme), true);
     }
 
     window.handleMessage = function (message) {
@@ -266,7 +310,7 @@
             if (chart) {
                 chart.resize();
                 if (currentState && currentState.status === 'ready') {
-                    chart.setOption(buildOption(currentState.chart), true);
+                    chart.setOption(buildOption(currentState.chart, currentTheme || 'auto'), true);
                 }
             }
         }).observe(chartElement);
@@ -282,6 +326,7 @@
         if (chart) {
             chart.dispose();
             chart = null;
+            currentTheme = null;
         }
     });
 

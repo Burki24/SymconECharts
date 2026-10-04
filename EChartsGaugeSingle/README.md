@@ -13,8 +13,9 @@ und rendert es mit Apache ECharts 6.1.0 in einer responsiven Symcon-Kachel.
 Wertänderungen werden live an die geöffnete Kachel übertragen. Das
 Konfigurationsformular wählt zwischen vier layoutbezogenen Presets und zeigt
 zusätzlich eine live aktualisierte SVG-Vorschau der noch nicht übernommenen
-Einstellungen. ECharts-Themes und IPSView-HTML-Ausgabevariablen sind noch nicht
-implementiert.
+Einstellungen. Davon unabhängig stehen das automatische Symcon-Design und
+sechs lokal gebündelte offizielle ECharts-Themes zur Auswahl.
+IPSView-HTML-Ausgabevariablen sind noch nicht implementiert.
 
 ### Inhaltsverzeichnis
 
@@ -35,13 +36,17 @@ Quellvariable wird als Symcon-Referenz registriert und auf Wertänderungen
 überwacht. `GetGaugeData()` liest den aktuellen Wert über das versionierte
 Gateway-Protokoll und liefert ein familienbezogenes JSON-Datenmodell. Die
 native HTML-SDK-Kachel stellt dieses Modell als responsive Gauge dar und
-übernimmt Symcon-Farbvariablen für helle und dunkle Oberflächen. Der
+übernimmt im Theme-Modus `auto` Symcon-Farbvariablen für helle und dunkle
+Oberflächen. Der
 Kacheldesigner bietet Basic, Simple, Progress und Speed; Simple ist aus
 Kompatibilitätsgründen die Standardauswahl und entspricht der bisherigen
-Darstellung.
+Darstellung. Die unabhängige Theme-Auswahl bietet `auto`, Dark, Vintage,
+Macarons, Infographic, Shine und Roma. Alle sechs Apache-Themes werden lokal
+und mit festgeschriebener Integrität ausgeliefert.
 
-**Geplant:** Zusätzliche Gauge-Single-Presets, ECharts-Themes, weitere
-Skalen- und Gestaltungsoptionen sowie die Ausgabe als optionales IPSView-Widget.
+**Geplant:** Zusätzliche Gauge-Single-Presets, ein sicherer Importvertrag für
+eigene Theme-Builder-Dateien, weitere Skalen- und Gestaltungsoptionen sowie die
+Ausgabe als optionales IPSView-Widget.
 Archivdarstellung wird erst mit einem dafür
 festgelegten Chart-Anwendungsfall umgesetzt.
 
@@ -100,9 +105,11 @@ werden. Ohne aktive Verbindung bleibt die Gauge-Instanz in einem eindeutigen
 Fehlerstatus.
 
 **Konfigurationsseite:** Ausgewählt werden eine numerische Quellvariable,
-Minimum und Maximum, Titel, Einheit, 0 bis 6 Nachkommastellen sowie ein
-Gauge-Preset. Die stabilen Preset-IDs sind `basic`, `simple`, `progress` und
-`speed`. Die Aktion
+Minimum und Maximum, Titel, Einheit, 0 bis 6 Nachkommastellen, ein Gauge-Preset
+sowie ein ECharts-Theme. Die stabilen Preset-IDs sind `basic`, `simple`,
+`progress` und `speed`. Als Themes stehen `auto`, `dark`, `vintage`,
+`macarons`, `infographic`, `shine` und `roma` zur Verfügung. `auto` ist der
+kompatible Standard und folgt dem Symcon-Design. Die Aktion
 „Aktuelle Gauge-Daten lesen“ gibt das gegenwärtige JSON-Datenmodell zu
 Diagnosezwecken aus. Minimum muss kleiner als Maximum sein. Eine SVG-Vorschau
 reagiert unmittelbar auf Änderungen im geöffneten Formular, ohne diese Werte
@@ -142,9 +149,11 @@ HTML-Dokument neu aufzubauen. Bei ungültiger Konfiguration oder fehlendem
 Gateway zeigt die Kachel einen übersetzten Hinweis statt eines leeren Charts.
 
 Die Darstellung verwendet die lokal mitgelieferte und per SHA-256 geprüfte
-Apache-ECharts-Runtime 6.1.0. Sie lädt im Betrieb keine CDN-Ressource. Die
-aktuelle Implementierung ist technisch gegen Test-Doppel geprüft; die visuelle
-Prüfung in realen Symcon-Clients bleibt offen.
+Apache-ECharts-Runtime 6.1.0. Die sechs offiziellen Theme-Dateien stammen aus
+derselben festgeschriebenen Abhängigkeit und werden ebenfalls vor der
+Einbettung geprüft. Die Visualisierung lädt im Betrieb keine CDN-Ressource.
+Die aktuelle Implementierung ist technisch gegen Test-Doppel geprüft; die
+visuelle Prüfung in realen Symcon-Clients bleibt offen.
 
 #### Kacheldesigner und Konfigurationsvorschau
 
@@ -153,8 +162,17 @@ und lädt nicht die vollständige ECharts-Browser-Runtime. Dadurch bleibt das
 Formular schnell und die noch nicht gespeicherte Konfiguration kann unmittelbar
 dargestellt werden. Die Kachel bleibt für die tatsächliche, interaktive
 ECharts-Ausgabe maßgeblich; die SVG-Vorschau bildet das ausgewählte Layout
-gezielt nach. Die Presets verändern noch keine Farbpalette; dieser Vertrag
-bleibt der getrennten Theme-Ausbaustufe vorbehalten.
+gezielt nach. Sie verwendet außerdem eine stabile, dem ausgewählten Theme
+zugeordnete Vorschaupalette. Die native Kachel registriert dagegen die
+unveränderte offizielle Theme-Datei und bleibt für die exakte Darstellung
+maßgeblich. Für unsere vom Originalbeispiel abweichenden Layouts ergänzt sie
+lediglich Hintergrund- und Kontrastfarben aus dem gemeinsamen Theme-Katalog.
+Layout-Preset und Theme können frei kombiniert werden.
+
+Der offizielle ECharts Theme Builder erzeugt ausführbare JavaScript-Dateien.
+Eigene Builder-Dateien werden in dieser Stufe noch nicht importiert oder
+ausgeführt; dafür ist vorab ein eigener validierter und ausdrücklich
+bestätigter Importvertrag erforderlich.
 
 #### IPSView
 
@@ -180,7 +198,7 @@ $json = ECGS_GetGaugeData($InstanceID);
 
 `ECGS_GetGaugeData()` validiert Konfiguration und aktive Gateway-Verbindung
 und liefert das aktuelle Gauge-Datenmodell als JSON. Das Modell enthält
-`schemaVersion`, `family`, Quellvariable und Zeitstempel, die minimale
+`schemaVersion`, `family`, Theme, Quellvariable und Zeitstempel, die minimale
 Gauge-Konfiguration sowie den numerischen Wert. Dasselbe fachliche Modell wird
 vom nativen Gauge-Single-Renderer verwendet.
 

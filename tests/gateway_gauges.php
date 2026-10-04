@@ -357,6 +357,7 @@ $gauge->SetTestProperty('Title', 'Room climate');
 $gauge->SetTestProperty('Unit', '°C');
 $gauge->SetTestProperty('Decimals', 1);
 $gauge->SetTestProperty('GaugePreset', 'progress');
+$gauge->SetTestProperty('EChartsTheme', 'vintage');
 $gauge->ApplyChanges();
 
 assertGatewayGauge($gauge->GetTestStatus() === IS_ACTIVE, 'Gauge Single must become active.');
@@ -373,6 +374,13 @@ assertGatewayGauge(str_contains($visualizationTile, 'window.echarts'), 'Gauge Si
 assertGatewayGauge(str_contains($visualizationTile, 'echarts-gauge-chart'), 'Gauge Single tile root is missing.');
 assertGatewayGauge(str_contains($visualizationTile, '"echartsVersion":"6.1.0"'), 'Gauge Single ECharts version changed.');
 assertGatewayGauge(str_contains($visualizationTile, '"preset":"progress"'), 'Gauge Single tile must receive the selected preset.');
+assertGatewayGauge(str_contains($visualizationTile, '"theme":"vintage"'), 'Gauge Single tile must receive the selected theme.');
+assertGatewayGauge(str_contains($visualizationTile, '"echartsThemes":'), 'Gauge Single tile must receive the shared theme palettes.');
+assertGatewayGauge(str_contains($visualizationTile, "registerTheme('vintage'"), 'Gauge Single tile must register official ECharts themes.');
+assertGatewayGauge(
+    str_contains($visualizationTile, 'option.backgroundColor = colors.background'),
+    'Official light themes must receive an explicit readable background.'
+);
 assertGatewayGauge(str_contains($visualizationTile, "case 'speed':"), 'Gauge Single tile must render the Speed preset.');
 assertGatewayGauge(!str_contains($visualizationTile, '<script src="http'), 'Gauge Single must not load ECharts from a CDN.');
 assertGatewayGauge(
@@ -405,6 +413,8 @@ $initialPreviewSvg = base64_decode(
 );
 assertGatewayGauge(is_string($initialPreviewSvg), 'Gauge Single preview SVG must be valid Base64.');
 assertGatewayGauge(str_contains($initialPreviewSvg, 'data-preset="progress"'), 'Gauge Single preview must use the selected preset.');
+assertGatewayGauge(str_contains($initialPreviewSvg, 'data-theme="vintage"'), 'Gauge Single preview must use the selected theme.');
+assertGatewayGauge(str_contains($initialPreviewSvg, '#FEF8EF'), 'Gauge Single preview must apply the Vintage background.');
 assertGatewayGauge(str_contains($initialPreviewSvg, 'Room climate'), 'Gauge Single preview must contain the title.');
 assertGatewayGauge(str_contains($initialPreviewSvg, '42.5 °C'), 'Gauge Single preview must use the current source value.');
 
@@ -450,7 +460,7 @@ $speedPresetSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
 );
 assertGatewayGauge(str_contains($speedPresetSvg, 'class="detail-box"'), 'Speed Gauge must render its value box.');
 
-$gauge->UpdateGaugePreview(4711, 0.0, 200.0, 'Wind & weather', 'km/h', 2, 'speed');
+$gauge->UpdateGaugePreview(4711, 0.0, 200.0, 'Wind & weather', 'km/h', 2, 'speed', 'dark');
 $formUpdates = $gauge->GetTestFormUpdates();
 $latestFormUpdate = end($formUpdates);
 assertGatewayGauge(
@@ -466,6 +476,7 @@ $updatedPreviewSvg = base64_decode(
 );
 assertGatewayGauge(is_string($updatedPreviewSvg), 'Updated Gauge Single preview must be valid Base64.');
 assertGatewayGauge(str_contains($updatedPreviewSvg, 'data-preset="speed"'), 'Updated Gauge Single preview must switch presets.');
+assertGatewayGauge(str_contains($updatedPreviewSvg, 'data-theme="dark"'), 'Updated Gauge Single preview must switch themes.');
 assertGatewayGauge(
     str_contains($updatedPreviewSvg, 'Wind &amp; weather'),
     'Gauge Single preview must XML-escape user-provided labels.'
@@ -497,6 +508,7 @@ assertGatewayGauge(($gaugeData['source']['timestamp'] ?? null) === 1780000000, '
 assertGatewayGauge(($gaugeData['gauge']['minimum'] ?? null) === -20.0, 'Gauge Single minimum changed.');
 assertGatewayGauge(($gaugeData['gauge']['maximum'] ?? null) === 80.0, 'Gauge Single maximum changed.');
 assertGatewayGauge(($gaugeData['gauge']['preset'] ?? null) === 'progress', 'Gauge Single preset changed.');
+assertGatewayGauge(($gaugeData['theme'] ?? null) === 'vintage', 'Gauge Single theme changed.');
 
 $GLOBALS['symconTestVariables'][4711]['Value'] = 44.75;
 $GLOBALS['symconTestVariables'][4711]['VariableUpdated'] = 1780000100;
@@ -510,7 +522,8 @@ assertGatewayGauge(
 $latestVisualizationState = json_decode($latestVisualization, true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
     ($latestVisualizationState['status'] ?? null) === 'ready'
-        && ($latestVisualizationState['chart']['value'] ?? null) === 44.75,
+        && ($latestVisualizationState['chart']['value'] ?? null) === 44.75
+        && ($latestVisualizationState['chart']['theme'] ?? null) === 'vintage',
     'Gauge Single must publish changed source values to the HTML-SDK tile.'
 );
 $GLOBALS['symconTestVariables'][4711]['Value'] = 42.5;
@@ -643,6 +656,13 @@ $invalidDesign->SetTestProperty('SourceVariableID', 4711);
 $invalidDesign->SetTestProperty('GaugePreset', 'unknown');
 $invalidDesign->ApplyChanges();
 assertGatewayGauge($invalidDesign->GetTestStatus() === 205, 'Unknown Gauge presets must set status 205.');
+
+$invalidTheme = new EChartsGaugeSingle();
+$invalidTheme->Create();
+$invalidTheme->SetTestProperty('SourceVariableID', 4711);
+$invalidTheme->SetTestProperty('EChartsTheme', 'unknown');
+$invalidTheme->ApplyChanges();
+assertGatewayGauge($invalidTheme->GetTestStatus() === 206, 'Unknown ECharts themes must set status 206.');
 
 $missingParent = new EChartsGaugeSingle();
 $missingParent->Create();

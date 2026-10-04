@@ -19,8 +19,9 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
 - Der aktuelle Repository-Stand besitzt eine getestete technische
   Gauge→Gateway-Datenbasis und eine native HTML-SDK-Gauge für
   `EChartsGaugeSingle` sowie einen ersten Kacheldesigner mit live aktualisierter
-  SVG-Vorschau und vier layoutbezogenen Gauge-Presets. Gauge-Multi-Renderer,
-  ECharts-Themes und IPSView-Ausgabe sind noch nicht implementiert. Nicht
+  SVG-Vorschau, vier layoutbezogenen Gauge-Presets und einer davon getrennten
+  Auswahl lokal gebündelter offizieller ECharts-Themes. Gauge-Multi-Renderer
+  und IPSView-Ausgabe sind noch nicht implementiert. Nicht
   implementierte Funktionen, Store-Freigaben oder nicht real geprüfte
   Laufzeitkompatibilität dürfen nicht als vorhanden dargestellt werden.
 - Native Symcon-Kacheln und einzelne IPSView-HTML-Widgets sind vorgesehene
@@ -94,6 +95,15 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
 - Der ECharts-Kern wird nicht projektspezifisch verändert. Herkunft, Version,
   Integrität und Lizenz der ausgelieferten Fremdkomponenten werden
   dokumentiert.
+- Offizielle ECharts-Themes liegen versioniert bei der ECharts-Runtime unter
+  `libs/echarts`; ihre gemeinsamen IDs, Integritätswerte und
+  layoutkompatiblen Grundfarben verwaltet `libs/EChartsAsset.php`. Die Auswahl bleibt
+  eine Property der jeweiligen Diagramminstanz und ist keine
+  Gateway-Konfiguration. Layout-Preset und Theme sind getrennte Verträge.
+- Theme-Builder-Dateien sind ausführbarer JavaScript-Code. Ein späterer Import
+  eigener Themes benötigt deshalb einen ausdrücklich festgelegten,
+  validierten Importvertrag und wird nicht als ungeprüfter Dateiinhalt in eine
+  Visualisierung übernommen.
 - Die festgelegte Runtime- und Rendererbasis aus
   [`ADR 0005`](docs/adr/0005-echarts-runtime-and-native-renderer.md) ist ein
   technischer Vertrag. Aktualisierungen der ECharts-Version oder Änderungen am

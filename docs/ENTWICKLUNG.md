@@ -25,7 +25,9 @@ Wertänderungen ohne einen vollständigen Neuaufbau der Seite an den Browser.
 Das Gauge-Single-Formular besitzt außerdem einen ersten Kacheldesigner. Er
 wählt die layoutbezogenen Presets Basic, Simple, Progress und Speed und erzeugt
 eine live aktualisierte SVG-Vorschau der noch nicht gespeicherten Einstellungen.
-Der Multi-Renderer, ECharts-Themes, Archivverarbeitung, IPSView-Ausgabe sowie reale
+Unabhängig davon kann die Instanz zwischen dem automatischen Symcon-Design und
+sechs lokal gebündelten offiziellen ECharts-Themes wählen. Der Multi-Renderer,
+Archivverarbeitung, IPSView-Ausgabe sowie reale
 Symcon-Laufzeit- und Browsertests fehlen noch. Die Testsuite prüft zusätzlich
 zu Struktur und Metadaten die Strict-Verträge, das Protokoll, die
 ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
@@ -76,12 +78,17 @@ Die festgeschriebene ECharts-Runtime und den ersten nativen Renderer
 dokumentiert [`ADR 0005`](adr/0005-echarts-runtime-and-native-renderer.md).
 Den Vertrag des ersten Kacheldesigners dokumentiert
 [`ADR 0006`](adr/0006-gauge-single-tile-designer.md).
+Die gemeinsame Theme-Assetbasis und die instanzbezogene Auswahl dokumentiert
+[`ADR 0007`](adr/0007-echarts-theme-assets-and-selection.md).
 
 ## Daten, Konfiguration und Ausgabe
 
 Symcon-Datenanbindung, Diagrammkonfiguration und ECharts-Darstellung werden
 getrennt. Die Konfiguration der jeweiligen Chartfamilien-Instanz bleibt die
 maßgebliche Quelle für ihre Variablen, Datenreihen und Auswertungsregeln.
+Layout-Presets und ECharts-Themes bleiben getrennte Konfigurationsachsen. Die
+Theme-Auswahl gehört zur Diagramminstanz, während die geprüften offiziellen
+Theme-Assets und ihre stabilen IDs repositoryweit gemeinsam genutzt werden.
 
 Das Gateway stellt aktuell den gemeinsamen Zugriff auf numerische Momentanwerte
 bereit. Wiederverwendbare Archivabfragen und begrenzte Caches werden erst für
@@ -124,6 +131,12 @@ und Canvas Renderer hält das vollständige HTML-Dokument unter dem
 Symcon-Output-Buffer-Limit. Im Betrieb wird weder `latest` noch eine externe
 CDN-Ressource geladen. Aktualisierungen werden erneut gegen APIs, Lizenz,
 Lieferartefakte, Größe und die vorhandenen Renderer geprüft.
+
+Dark, Vintage, Macarons, Infographic, Shine und Roma werden unverändert aus
+demselben ECharts-6.1.0-Paket übernommen, mit eigenen SHA-256-Werten geprüft
+und lokal registriert. Der gemeinsame projektspezifische Katalog liegt in
+`libs/EChartsAsset.php`; die synchronisierten Helper enthalten weder
+ECharts-Theme-Dateien noch Theme-IDs.
 
 Vorhandene zentrale Helper aus `Symcon_ModuleHelper` werden wiederverwendet
 und über den vorgesehenen Synchronisierungsweg eingebunden. Allgemeine

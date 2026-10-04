@@ -23,7 +23,8 @@ final class EChartsGaugeSinglePreview
         string $unit,
         int $decimals,
         string $language,
-        string $preset = 'simple'
+        string $preset = 'simple',
+        string $theme = EChartsAsset::THEME_AUTO
     ): string {
         if (!is_finite($value) || !is_finite($minimum) || !is_finite($maximum) || $minimum >= $maximum) {
             throw new InvalidArgumentException('A finite Gauge value and a valid range are required.');
@@ -31,8 +32,12 @@ final class EChartsGaugeSinglePreview
         if (!in_array($preset, self::SUPPORTED_PRESETS, true)) {
             throw new InvalidArgumentException('A supported Gauge preset is required.');
         }
+        if (!EChartsAsset::IsSupportedTheme($theme)) {
+            throw new InvalidArgumentException('A supported ECharts theme is required.');
+        }
 
         $design = self::PresetDesign($preset);
+        $palette = EChartsAsset::ThemePreviewPalette($theme);
         $decimals = max(0, min(6, $decimals));
         $ratio = max(0.0, min(1.0, ($value - $minimum) / ($maximum - $minimum)));
         $backgroundPath = self::ArcPath(1.0, $design);
@@ -63,9 +68,9 @@ final class EChartsGaugeSinglePreview
             : '';
 
         return <<<SVG
-<svg xmlns="http://www.w3.org/2000/svg" width="720" height="400" viewBox="0 0 720 400" role="img" aria-label="{$ariaLabel}" data-preset="{$preset}">
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="400" viewBox="0 0 720 400" role="img" aria-label="{$ariaLabel}" data-preset="{$preset}" data-theme="{$theme}">
   <style>
-    .surface{fill:#151619}.track{fill:none;stroke:#34363b;stroke-linecap:round;stroke-linejoin:round}.progress{fill:none;stroke:#55cbb5;stroke-linecap:round;stroke-linejoin:round}.minor{stroke:#62666d;stroke-width:1}.major{stroke:#a5a9b0;stroke-width:2}.axis{fill:#969aa2;font:14px 'Segoe UI',Arial,sans-serif;text-anchor:middle;dominant-baseline:middle}.pointer{fill:#55cbb5}.anchor{fill:#55cbb5;stroke:#f4f5f7;stroke-width:2}.detail-box{fill:#25272b;stroke:#62666d;stroke-width:2}.value{fill:#f4f5f7;font:600 38px 'Segoe UI',Arial,sans-serif;text-anchor:middle}.title{fill:#b7bac1;font:18px 'Segoe UI',Arial,sans-serif;text-anchor:middle}svg[data-preset="progress"] .value{font-size:46px}svg[data-preset="speed"] .value{font-size:32px}
+    .surface{fill:{$palette['background']}}.track{fill:none;stroke:{$palette['track']};stroke-linecap:round;stroke-linejoin:round}.progress{fill:none;stroke:{$palette['accent']};stroke-linecap:round;stroke-linejoin:round}.minor{stroke:{$palette['muted']};stroke-width:1}.major{stroke:{$palette['border']};stroke-width:2}.axis{fill:{$palette['muted']};font:14px 'Segoe UI',Arial,sans-serif;text-anchor:middle;dominant-baseline:middle}.pointer{fill:{$palette['accent']}}.anchor{fill:{$palette['accent']};stroke:{$palette['text']};stroke-width:2}.detail-box{fill:{$palette['surface']};stroke:{$palette['border']};stroke-width:2}.value{fill:{$palette['text']};font:600 38px 'Segoe UI',Arial,sans-serif;text-anchor:middle}.title{fill:{$palette['muted']};font:18px 'Segoe UI',Arial,sans-serif;text-anchor:middle}svg[data-preset="progress"] .value{font-size:46px}svg[data-preset="speed"] .value{font-size:32px}
   </style>
   <rect class="surface" width="720" height="400" rx="12"/>
   <path d="{$backgroundPath}" class="track" style="stroke-width:{$design['lineWidth']}px"/>

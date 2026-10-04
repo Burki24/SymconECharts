@@ -115,7 +115,8 @@ foreach ([
             "RegisterPropertyString('Title', '')",
             "RegisterPropertyString('Unit', '')",
             "RegisterPropertyInteger('Decimals', 1)",
-            "RegisterPropertyString('GaugePreset', self::PRESET_SIMPLE)"
+            "RegisterPropertyString('GaugePreset', self::PRESET_SIMPLE)",
+            "RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO)"
         ]
         : [
             "RegisterPropertyString('Sources', '[]')",
@@ -215,6 +216,39 @@ foreach ([
                     'speed'
                 ],
             'EChartsGaugeSingle tile designer must expose the four stable Gauge presets.',
+            $errors
+        );
+
+        $themeElement = null;
+        $findTheme = static function (array $items) use (&$findTheme, &$themeElement): void
+        {
+            foreach ($items as $item) {
+                if (!is_array($item)) {
+                    continue;
+                }
+                if (($item['name'] ?? null) === 'EChartsTheme') {
+                    $themeElement = $item;
+                    return;
+                }
+                if (is_array($item['items'] ?? null)) {
+                    $findTheme($item['items']);
+                }
+            }
+        };
+        $findTheme($gaugeForm['elements'] ?? []);
+        requireStrictContract(
+            is_array($themeElement)
+                && ($themeElement['type'] ?? null) === 'Select'
+                && array_column($themeElement['options'] ?? [], 'value') === [
+                    'auto',
+                    'dark',
+                    'vintage',
+                    'macarons',
+                    'infographic',
+                    'shine',
+                    'roma'
+                ],
+            'EChartsGaugeSingle tile designer must expose the supported ECharts themes.',
             $errors
         );
     } else {

@@ -4,7 +4,8 @@
 - Datum: 2026-10-04
 - Entscheider: Burki24
 - Ergänzt: ADR 0002 und ADR 0003
-- Ergänzt durch: ADR 0006 hinsichtlich des Gauge-Single-Kacheldesigners
+- Ergänzt durch: ADR 0006 hinsichtlich des Gauge-Single-Kacheldesigners und
+  ADR 0007 hinsichtlich offizieller ECharts-Themes
 - Ersetzt durch: –
 
 ## Kontext
@@ -81,9 +82,9 @@ Multi-Gauge-Darstellung und eine IPSView-Ausgabevariable fehlen weiterhin. Das g
 HTML-Seitenmodell ist für IPSView wiederverwendbar; der abgesicherte
 IPSView-Datenkanal und dessen Laufzeitprüfung bleiben eine eigene Ausbaustufe.
 
-ECharts-Themes sind keine zentralen ModuleHelper. Später ausgewählte Themes
-werden als versionierte Projektressourcen geführt und von den jeweiligen
-Chartfamilien bewusst angewendet. Der erste Renderer verwendet stattdessen die
+ECharts-Themes sind keine zentralen ModuleHelper. Ihre später ergänzte
+Assetbasis und Auswahl sind in [`ADR 0007`](0007-echarts-theme-assets-and-selection.md)
+festgelegt. Der erste Renderer verwendete zunächst ausschließlich die
 Symcon-Farbtokens.
 
 ## Folgen

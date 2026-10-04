@@ -4,6 +4,7 @@
 - Datum: 2026-10-04
 - Entscheider: Burki24
 - Ergänzt: ADR 0003 und ADR 0005
+- Ergänzt durch: ADR 0007 hinsichtlich der getrennten Theme-Auswahl
 - Ersetzt durch: –
 
 ## Kontext
@@ -44,9 +45,10 @@ nur Layoutoptionen wie Winkel, Fortschrittsbogen, Skalenaufteilung und
 Wertposition.
 
 Farben bleiben in dieser Stufe bei den gemeinsamen Symcon-Designtokens. Die
-spätere Auswahl offizieller oder eigener ECharts-Themes wird als eigener
-Vertrag ergänzt. Auch IPSView bleibt ein separater Ausgabeadapter und wird
-nicht durch Designer-Properties vorweggenommen.
+später ergänzte Auswahl offizieller ECharts-Themes ist als eigener Vertrag in
+[`ADR 0007`](0007-echarts-theme-assets-and-selection.md) festgelegt. Auch
+IPSView bleibt ein separater Ausgabeadapter und wird nicht durch
+Designer-Properties vorweggenommen.
 
 ## Alternativen
 

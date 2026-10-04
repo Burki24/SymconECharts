@@ -42,6 +42,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
     private const STATUS_PARENT_MISSING = 203;
     private const STATUS_GATEWAY_FAILED = 204;
     private const STATUS_DESIGN_INVALID = 205;
+    private const STATUS_THEME_INVALID = 206;
 
     private const PRESET_SIMPLE = 'simple';
     private const SUPPORTED_PRESETS = ['basic', self::PRESET_SIMPLE, 'progress', 'speed'];
@@ -59,6 +60,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
         $this->RegisterPropertyString('Unit', '');
         $this->RegisterPropertyInteger('Decimals', 1);
         $this->RegisterPropertyString('GaugePreset', self::PRESET_SIMPLE);
+        $this->RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO);
         $this->RegisterAttributeInteger('RegisteredSourceVariableID', 0);
         $this->RegisterAttributeString('LastError', '');
     }
@@ -95,7 +97,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 $this->ReadPropertyString('Title'),
                 $this->ReadPropertyString('Unit'),
                 $this->ReadPropertyInteger('Decimals'),
-                $this->ReadPropertyString('GaugePreset')
+                $this->ReadPropertyString('GaugePreset'),
+                $this->ReadPropertyString('EChartsTheme')
             )
         );
 
@@ -112,7 +115,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
         string $Title,
         string $Unit,
         int $Decimals,
-        string $GaugePreset = self::PRESET_SIMPLE
+        string $GaugePreset = self::PRESET_SIMPLE,
+        string $EChartsTheme = EChartsAsset::THEME_AUTO
     ): void {
         $this->UpdateFormField(
             'GaugePreview',
@@ -124,7 +128,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 $Title,
                 $Unit,
                 $Decimals,
-                $GaugePreset
+                $GaugePreset,
+                $EChartsTheme
             ))
         );
     }
@@ -182,6 +187,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
         return json_encode([
             'schemaVersion' => 1,
             'family'        => 'gauge',
+            'theme'         => $this->ReadPropertyString('EChartsTheme'),
             'source'        => [
                 'variableID' => $this->ReadPropertyInteger('SourceVariableID'),
                 'timestamp'  => $timestamp
@@ -213,15 +219,18 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 'Configure a numeric source variable.',
                 'Configure a valid Gauge range.',
                 'Configure a valid Gauge design.',
+                'Configure a valid ECharts theme.',
                 'Connect an active EChartsGateway.',
                 'The Gauge value could not be loaded.',
                 'Apache ECharts could not be initialized.'
             ]),
             'options'            => [
-                'echartsVersion' => EChartsAsset::VERSION
+                'echartsVersion' => EChartsAsset::VERSION,
+                'echartsThemes'  => EChartsAsset::ThemePalettes()
             ],
             'replacements'       => [
-                '{{ECHARTS_SCRIPT}}' => EChartsAsset::JavaScript()
+                '{{ECHARTS_SCRIPT}}'       => EChartsAsset::JavaScript(),
+                '{{ECHARTS_THEME_SCRIPT}}' => EChartsAsset::ThemeJavaScript()
             ]
         ]);
     }
@@ -292,7 +301,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
         string $title,
         string $unit,
         int $decimals,
-        string $preset
+        string $preset,
+        string $theme
     ): string {
         if (!is_finite($minimum) || !is_finite($maximum) || $minimum >= $maximum) {
             return EChartsGaugeSinglePreview::CreateErrorSvg(
@@ -302,6 +312,11 @@ class EChartsGaugeSingle extends IPSModuleStrict
         if (!in_array($preset, self::SUPPORTED_PRESETS, true)) {
             return EChartsGaugeSinglePreview::CreateErrorSvg(
                 $this->Translate('Select a supported Gauge preset.')
+            );
+        }
+        if (!EChartsAsset::IsSupportedTheme($theme)) {
+            return EChartsGaugeSinglePreview::CreateErrorSvg(
+                $this->Translate('Select a supported ECharts theme.')
             );
         }
 
@@ -318,7 +333,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
             $unit,
             $decimals,
             $language,
-            $preset
+            $preset,
+            $theme
         );
     }
 
@@ -386,6 +402,13 @@ class EChartsGaugeSingle extends IPSModuleStrict
             ];
         }
 
+        if (!EChartsAsset::IsSupportedTheme($this->ReadPropertyString('EChartsTheme'))) {
+            return [
+                'Status'  => self::STATUS_THEME_INVALID,
+                'Message' => 'The selected ECharts theme is not supported.'
+            ];
+        }
+
         return null;
     }
 
@@ -425,6 +448,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 'error'         => match ($configurationError['Status']) {
                     self::STATUS_SOURCE_INVALID => 'Configure a numeric source variable.',
                     self::STATUS_DESIGN_INVALID => 'Configure a valid Gauge design.',
+                    self::STATUS_THEME_INVALID  => 'Configure a valid ECharts theme.',
                     default                     => 'Configure a valid Gauge range.'
                 }
             ];

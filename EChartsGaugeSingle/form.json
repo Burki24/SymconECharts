@@ -13,33 +13,33 @@
                 1,
                 2
             ],
-            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset);"
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme);"
         },
         {
             "type": "NumberSpinner",
             "name": "Minimum",
             "caption": "Minimum",
             "digits": 3,
-            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset);"
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme);"
         },
         {
             "type": "NumberSpinner",
             "name": "Maximum",
             "caption": "Maximum",
             "digits": 3,
-            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset);"
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme);"
         },
         {
             "type": "ValidationTextBox",
             "name": "Title",
             "caption": "Title",
-            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset);"
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme);"
         },
         {
             "type": "ValidationTextBox",
             "name": "Unit",
             "caption": "Unit",
-            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset);"
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme);"
         },
         {
             "type": "NumberSpinner",
@@ -47,7 +47,7 @@
             "caption": "Decimal places",
             "minimum": 0,
             "maximum": 6,
-            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset);"
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme);"
         },
         {
             "type": "ExpansionPanel",
@@ -57,7 +57,7 @@
             "items": [
                 {
                     "type": "Label",
-                    "caption": "Choose a Gauge layout. Colors continue to follow the Symcon design until themes are configured."
+                    "caption": "Choose the Gauge layout and its independent ECharts theme. Automatic follows the Symcon design."
                 },
                 {
                     "type": "Select",
@@ -82,7 +82,44 @@
                             "value": "speed"
                         }
                     ],
-                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset);"
+                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme);"
+                },
+                {
+                    "type": "Select",
+                    "name": "EChartsTheme",
+                    "caption": "ECharts theme",
+                    "width": "300px",
+                    "options": [
+                        {
+                            "caption": "Automatic (Symcon design)",
+                            "value": "auto"
+                        },
+                        {
+                            "caption": "Dark",
+                            "value": "dark"
+                        },
+                        {
+                            "caption": "Vintage",
+                            "value": "vintage"
+                        },
+                        {
+                            "caption": "Macarons",
+                            "value": "macarons"
+                        },
+                        {
+                            "caption": "Infographic",
+                            "value": "infographic"
+                        },
+                        {
+                            "caption": "Shine",
+                            "value": "shine"
+                        },
+                        {
+                            "caption": "Roma",
+                            "value": "roma"
+                        }
+                    ],
+                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme);"
                 },
                 {
                     "type": "Image",
@@ -131,6 +168,11 @@
             "code": 205,
             "icon": "error",
             "caption": "Gauge design is invalid"
+        },
+        {
+            "code": 206,
+            "icon": "error",
+            "caption": "ECharts theme is invalid"
         }
     ]
 }

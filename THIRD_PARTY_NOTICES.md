@@ -25,6 +25,23 @@ Ausgelieferte Dateien:
   Gauge-spezifischer Browser-Build aus ECharts Core, Gauge Chart, Aria,
   Tooltip und Canvas Renderer; 473.672 Byte; SHA-256
   `0eef7a38f5bd44691e0d629756166ba0a7c3024a781746c1acd58d8d6b0a3f8b`;
+- `libs/echarts/6.1.0/themes/dark.js` – offizielles Theme Dark; 5.981 Byte;
+  SHA-256 `ae60e563617cb87514690c1946ee202e78c9f1487820490614b58934ed037458`;
+- `libs/echarts/6.1.0/themes/vintage.js` – offizielles Theme Vintage;
+  1.922 Byte; SHA-256
+  `15c22b1f26961f972d23a9297362d42c4e59764e4b38025364f341cf144fb84f`;
+- `libs/echarts/6.1.0/themes/macarons.js` – offizielles Theme Macarons;
+  5.869 Byte; SHA-256
+  `1aa73f933f0fd92b02e3e1de18299b15a2d536eb29c4b9755b8ab25d54f5640d`;
+- `libs/echarts/6.1.0/themes/infographic.js` – offizielles Theme
+  Infographic; 5.829 Byte; SHA-256
+  `43f803926e8625a1f1cbf6b6189d1735c0526e3e9e7e12aa8531a8296550c1b4`;
+- `libs/echarts/6.1.0/themes/shine.js` – offizielles Theme Shine;
+  4.412 Byte; SHA-256
+  `33f28aaec40952dbad84de2d8cb3d58f49ea131806fad9497f06ad4d46f2a8f3`;
+- `libs/echarts/6.1.0/themes/roma.js` – offizielles Theme Roma;
+  3.044 Byte; SHA-256
+  `01303d34787f242664d5ad35bb1d535bb21d701ff60f6f1412e8c872008b5a05`;
 - `libs/echarts/6.1.0/LICENSE.txt` – Originallizenz aus demselben Paket;
 - `libs/echarts/6.1.0/NOTICE.txt` – Originalhinweise aus demselben Paket.
 
@@ -32,11 +49,13 @@ Der Build wird lokal ausgeliefert und zur Laufzeit nicht von einem CDN geladen.
 Sein Einstiegspunkt, die exakt festgeschriebenen npm-Abhängigkeiten und der
 Buildbefehl liegen unter `.tools/echarts-runtime`. Die ECharts-Quellen werden
 nicht inhaltlich verändert, sondern über die offizielle Tree-Shaking-API auf
-die von Gauge Single benötigten Bestandteile begrenzt.
+die von Gauge Single benötigten Bestandteile begrenzt. Die Theme-Dateien werden
+unverändert aus dem Paket übernommen.
 `.gitattributes` verhindert eine Zeilenendenkonvertierung der Fremdartefakte.
-`libs/EChartsAsset.php` normalisiert zusätzlich eine bereits durch einen
-Windows-Modulcheckout erfolgte CRLF-Konvertierung zurück auf die originalen
-LF-Zeilenenden und prüft anschließend die SHA-256-Prüfsumme. Andere
+`libs/EChartsAsset.php` normalisiert bei Runtime und Theme-Dateien zusätzlich
+eine bereits durch einen Windows-Modulcheckout erfolgte CRLF-Konvertierung
+zurück auf die originalen LF-Zeilenenden und prüft anschließend die
+SHA-256-Prüfsumme. Andere
 Byteabweichungen werden abgelehnt. Der ECharts-Kern und die genannten
 Fremddateien wurden nicht projektspezifisch verändert. ECharts und die im
 offiziellen Bundle enthaltenen Komponenten bleiben unter ihren in
