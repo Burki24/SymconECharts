@@ -915,10 +915,9 @@ assertGatewayGauge(
     'Gauge Single designer must preserve every preset default for existing instances.'
 );
 
-$customPointerFile = base64_encode(
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-8 0 16 100">'
-    . '<path d="M0 0 L8 100 L0 88 L-8 100 Z"/></svg>'
-);
+$customPointerSvg = file_get_contents(__DIR__ . '/fixtures/gauge-pointer-ornate.svg');
+assertGatewayGauge(is_string($customPointerSvg), 'The ornate custom SVG pointer fixture must be readable.');
+$customPointerFile = base64_encode($customPointerSvg);
 $customPointerGauge = new EChartsGaugeSingle();
 $customPointerGauge->Create();
 $customPointerGauge->SetTestProperty('SourceVariableID', 4711);
@@ -928,15 +927,16 @@ $customPointerGauge->ApplyChanges();
 assertGatewayGauge($customPointerGauge->GetTestStatus() === IS_ACTIVE, 'A valid custom SVG pointer must be accepted.');
 $customPointerData = json_decode($customPointerGauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
-    ($customPointerData['gauge']['style']['pointerPath'] ?? null) === 'M0 0 L8 100 L0 88 L-8 100 Z'
-        && ($customPointerData['gauge']['style']['pointerViewBox'] ?? null) === '-8 0 16 100'
+    str_contains((string) ($customPointerData['gauge']['style']['pointerPath'] ?? ''), 'M50 397 A27 27')
+        && str_contains((string) ($customPointerData['gauge']['style']['pointerPath'] ?? ''), 'M48.5 57 C48.8 40')
+        && ($customPointerData['gauge']['style']['pointerViewBox'] ?? null) === '0 0 100 400'
         && !str_contains(json_encode($customPointerData, JSON_THROW_ON_ERROR), '<svg'),
     'Gauge Single must expose only the validated path and viewBox, never the imported SVG markup.'
 );
 $customPointerTile = $customPointerGauge->GetVisualizationTile();
 assertGatewayGauge(
-    str_contains($customPointerTile, 'M0 0 L8 100 L0 88 L-8 100 Z')
-        && !str_contains($customPointerTile, '<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-8 0 16 100\"')
+    str_contains($customPointerTile, 'M50 397 A27 27')
+        && !str_contains($customPointerTile, '<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 400\"')
         && strlen($customPointerTile) < SYMCON_OUTPUT_BUFFER_LIMIT,
     'The custom pointer tile must embed only its bounded path and remain below the output-buffer limit.'
 );

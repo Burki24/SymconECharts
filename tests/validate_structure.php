@@ -53,6 +53,7 @@ $requiredFiles = [
     'tests/README.md',
     'tests/data_protocol.php',
     'tests/echarts_assets.php',
+    'tests/fixtures/gauge-pointer-ornate.svg',
     'tests/gateway_gauges.php',
     'tests/helper_integrity.py',
     'tests/module_contracts.php',

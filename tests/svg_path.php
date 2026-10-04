@@ -27,6 +27,16 @@ assertSvgPath(
     'SVG data-URI import changed.'
 );
 
+$ornatePointerSvg = file_get_contents(__DIR__ . '/fixtures/gauge-pointer-ornate.svg');
+assertSvgPath(is_string($ornatePointerSvg), 'Ornate Gauge pointer fixture cannot be read.');
+$ornatePointer = EChartsSvgPath::Import($ornatePointerSvg);
+assertSvgPath(
+    $ornatePointer['viewBox'] === '0 0 100 400'
+        && str_contains($ornatePointer['path'], 'M50 397 A27 27')
+        && str_contains($ornatePointer['path'], 'M48.5 57 C48.8 40'),
+    'Ornate Gauge pointer fixture changed or cannot be imported.'
+);
+
 $multiple = EChartsSvgPath::Import(
     '<svg viewBox="0,0,10,20"><path d="M0 0L10 20Z"/><path d="M2 2L8 18Z"/></svg>'
 );

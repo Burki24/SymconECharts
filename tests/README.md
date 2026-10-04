@@ -45,7 +45,9 @@ StylePHP und PHP CS Fixer.
   Zusätzlich werden der Gauge-spezifische Browser-Export, das gemeinsame
   512-KiB-Budget und der tolerierte Windows-Zeilenendenfall geprüft.
 - `svg_path.php` prüft Rohtext-, Base64- und Data-URI-Importe sowie die
-  Ablehnung nicht unterstützter oder aktiver SVG-Inhalte.
+  Ablehnung nicht unterstützter oder aktiver SVG-Inhalte. Die ornamentale
+  Beispielnadel unter `fixtures/gauge-pointer-ornate.svg` wird zusätzlich als
+  direkt importierbare Testdatei geprüft.
 - `helper_integrity.py` stellt sicher, dass Subscription, Manifest,
   Helper-Dokumentation und alle abonnierten Datenfluss- und
   Visualisierungshelper vollständig übereinstimmen.
