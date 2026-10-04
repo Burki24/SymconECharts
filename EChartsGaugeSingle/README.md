@@ -90,7 +90,13 @@ oder als an Start und Ende des Skalenbogens angepasste Fläche erscheinen.
 Größe und Randstärke sind mit 50 bis 150 % skalierbar; Füllung und Rand folgen
 wahlweise dem Theme oder eigenen Farben. Die Füllung kann unabhängig davon
 transparent sein, und ein optionaler responsiver Schatten hebt die Platte vom
-Kachelhintergrund ab. `Ausgeblendet` bleibt der kompatible Standard.
+Kachelhintergrund ab. `Ausgeblendet` bleibt der kompatible Standard und
+deaktiviert sämtliche anderen Platteneinstellungen. Damit Farben, Größe, Rand,
+Transparenz oder Schatten sichtbar werden, muss zuerst `Kreis` oder
+`Dem Skalenbogen folgen` als Plattenform gewählt werden. `100 %` ist die
+empfohlene Ausgangsgröße. `150 %` vergrößert den Radius tatsächlich auf das
+Eineinhalbfache und kann den Kreis deshalb deutlich über den Gauge-Bereich
+hinaus bis an den Kachelrand führen.
 Der Skalenbogen bleibt wahlweise bei der Presetvorgabe oder
 wird als Voll-, Dreiviertel-, Halb-, Viertelkreis beziehungsweise mit eigenem
 Start und Ende definiert. Die Positionen folgen einem Zifferblatt (`0°` oben,
@@ -167,7 +173,8 @@ Gauge-spezifische Farbrollen das Theme gezielt überschreiben. Das
 „Nabendesign“ steuert Form, optionales SVG, Größe, Randstärke und Farben der
 Nabe, ohne ihren Drehpunkt vom Zeiger zu lösen. „Zifferblattplatte“ steuert
 Form, Transparenz, Theme- oder eigene Farben, Größe, Rand und Schatten der
-Hintergrundfläche. Unter
+Hintergrundfläche. Solange ihre Form auf `Ausgeblendet` steht, haben die
+übrigen Plattenfelder bewusst keine sichtbare Wirkung. Unter
 „Feinabstimmung“ können die vier Schriftgrößen, Ringstärke, Zeigerstärke und
 Zeigerlänge sowie Nebenstrich- und Hauptteilerlänge jeweils von 50 bis 150 %
 der Presetvorgabe angepasst werden. Für eigene SVG-Zeiger lässt sich zusätzlich
@@ -181,6 +188,20 @@ Diagnosezwecken aus. Minimum muss kleiner als Maximum sein. Eine SVG-Vorschau
 reagiert unmittelbar auf Änderungen im geöffneten Formular, ohne diese Werte
 vorzeitig zu speichern. Bei einer gültigen numerischen Quellvariable verwendet
 sie deren aktuellen Wert, andernfalls die Mitte des konfigurierten Bereichs.
+
+**Zifferblattplatte einstellen:**
+
+1. Zuerst die Plattenform auf `Kreis` oder `Dem Skalenbogen folgen` stellen.
+   Bei `Ausgeblendet` bleiben alle nachfolgenden Einstellungen ohne sichtbare
+   Wirkung.
+2. Für eigene Farben die Farbquelle auf `Eigene Plattenfarben` umstellen.
+   Bei aktivierter transparenter Füllung bleibt die gewählte Füllfarbe
+   erwartungsgemäß unsichtbar; Randfarbe und Schatten wirken weiterhin.
+3. Mit `100 %` Plattengröße beginnen. Der Kreis umfasst dabei bewusst auch
+   Wert und Titel. Größere Werte skalieren den gesamten Radius; `150 %` kann
+   deshalb bis an oder über den Kachelrand reichen.
+4. Die Formularvorschau reagiert sofort. Erst `Übernehmen` speichert die
+   Auswahl und aktualisiert damit die native Kachel dauerhaft.
 
 ### 5. Statusvariablen und Profile
 
