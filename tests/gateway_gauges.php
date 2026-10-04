@@ -19,6 +19,18 @@ $GLOBALS['symconTestVariables'] = [
         'VariableUpdated' => 1780000001,
         'Value'           => 'not numeric',
         'Name'            => 'Text value'
+    ],
+    4713 => [
+        'VariableType'    => 1,
+        'VariableUpdated' => 1780000002,
+        'Value'           => 58,
+        'Name'            => 'Living room humidity'
+    ],
+    4714 => [
+        'VariableType'    => 2,
+        'VariableUpdated' => 1780000003,
+        'Value'           => 1013.25,
+        'Name'            => 'Air pressure'
     ]
 ];
 
@@ -174,6 +186,11 @@ abstract class IPSModuleStrict
         return true;
     }
 
+    protected function ReadAttributeString(string $name): string
+    {
+        return (string) $this->attributes[$name];
+    }
+
     protected function RegisterMessage(int $senderID, int $message): bool
     {
         return true;
@@ -248,29 +265,123 @@ $gateway->Create();
 $gateway->ApplyChanges();
 IPSModuleStrict::$ParentResponder = static fn (string $json): string => $gateway->ForwardData($json);
 
-foreach ([EChartsGaugeSingle::class, EChartsGaugeMulti::class] as $gaugeClass) {
-    $gauge = new $gaugeClass();
-    $gauge->Create();
-    $gauge->SetTestProperty('SourceVariableID', 4711);
-    $gauge->SetTestProperty('Minimum', -20.0);
-    $gauge->SetTestProperty('Maximum', 80.0);
-    $gauge->SetTestProperty('Title', 'Room climate');
-    $gauge->SetTestProperty('Unit', '°C');
-    $gauge->SetTestProperty('Decimals', 1);
-    $gauge->ApplyChanges();
+$gauge = new EChartsGaugeSingle();
+$gauge->Create();
+$gauge->SetTestProperty('SourceVariableID', 4711);
+$gauge->SetTestProperty('Minimum', -20.0);
+$gauge->SetTestProperty('Maximum', 80.0);
+$gauge->SetTestProperty('Title', 'Room climate');
+$gauge->SetTestProperty('Unit', '°C');
+$gauge->SetTestProperty('Decimals', 1);
+$gauge->ApplyChanges();
 
-    assertGatewayGauge($gauge->GetTestStatus() === IS_ACTIVE, $gaugeClass . ' must become active.');
-    assertGatewayGauge($gauge->GetTestReferences() === [4711], $gaugeClass . ' must register its source reference.');
-    assertGatewayGauge($gauge->GetTestSummary() === 'Living room temperature', $gaugeClass . ' summary changed.');
+assertGatewayGauge($gauge->GetTestStatus() === IS_ACTIVE, 'Gauge Single must become active.');
+assertGatewayGauge($gauge->GetTestReferences() === [4711], 'Gauge Single must register its source reference.');
+assertGatewayGauge($gauge->GetTestSummary() === 'Living room temperature', 'Gauge Single summary changed.');
 
-    $gaugeData = json_decode($gauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
-    assertGatewayGauge(($gaugeData['schemaVersion'] ?? null) === 1, $gaugeClass . ' data schema version changed.');
-    assertGatewayGauge(($gaugeData['family'] ?? null) === 'gauge', $gaugeClass . ' data family changed.');
-    assertGatewayGauge(($gaugeData['value'] ?? null) === 42.5, $gaugeClass . ' did not receive the source value.');
-    assertGatewayGauge(($gaugeData['source']['timestamp'] ?? null) === 1780000000, $gaugeClass . ' timestamp changed.');
-    assertGatewayGauge(($gaugeData['gauge']['minimum'] ?? null) === -20.0, $gaugeClass . ' minimum changed.');
-    assertGatewayGauge(($gaugeData['gauge']['maximum'] ?? null) === 80.0, $gaugeClass . ' maximum changed.');
-}
+$gaugeData = json_decode($gauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(($gaugeData['schemaVersion'] ?? null) === 1, 'Gauge Single data schema version changed.');
+assertGatewayGauge(($gaugeData['family'] ?? null) === 'gauge', 'Gauge Single data family changed.');
+assertGatewayGauge(($gaugeData['value'] ?? null) === 42.5, 'Gauge Single did not receive the source value.');
+assertGatewayGauge(($gaugeData['source']['timestamp'] ?? null) === 1780000000, 'Gauge Single timestamp changed.');
+assertGatewayGauge(($gaugeData['gauge']['minimum'] ?? null) === -20.0, 'Gauge Single minimum changed.');
+assertGatewayGauge(($gaugeData['gauge']['maximum'] ?? null) === 80.0, 'Gauge Single maximum changed.');
+
+$multiSources = json_encode([
+    [
+        'VariableID' => 4711,
+        'Label'      => 'Temperature',
+        'Minimum'    => -20.0,
+        'Maximum'    => 80.0,
+        'Unit'       => '°C',
+        'Decimals'   => 1
+    ],
+    [
+        'VariableID' => 4713,
+        'Label'      => '',
+        'Minimum'    => 0.0,
+        'Maximum'    => 100.0,
+        'Unit'       => '%',
+        'Decimals'   => 0
+    ]
+], JSON_THROW_ON_ERROR);
+$multiGauge = new EChartsGaugeMulti();
+$multiGauge->Create();
+$multiGauge->SetTestProperty('Sources', $multiSources);
+$multiGauge->SetTestProperty('Title', 'Room climate');
+$multiGauge->ApplyChanges();
+
+assertGatewayGauge($multiGauge->GetTestStatus() === IS_ACTIVE, 'Gauge Multi must become active with two valid sources.');
+assertGatewayGauge($multiGauge->GetTestReferences() === [4711, 4713], 'Gauge Multi must register every source reference.');
+assertGatewayGauge($multiGauge->GetTestSummary() === '2 sources', 'Gauge Multi summary must identify its source count.');
+
+$multiData = json_decode($multiGauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(($multiData['schemaVersion'] ?? null) === 1, 'Gauge Multi data schema version changed.');
+assertGatewayGauge(($multiData['family'] ?? null) === 'gauge', 'Gauge Multi data family changed.');
+assertGatewayGauge(($multiData['variant'] ?? null) === 'multi', 'Gauge Multi variant is missing.');
+assertGatewayGauge(($multiData['gauge']['title'] ?? null) === 'Room climate', 'Gauge Multi title changed.');
+assertGatewayGauge(count($multiData['items'] ?? []) === 2, 'Gauge Multi must return every configured source.');
+assertGatewayGauge(($multiData['items'][0]['id'] ?? null) === 'variable-4711', 'Gauge Multi item ID changed.');
+assertGatewayGauge(($multiData['items'][0]['gauge']['label'] ?? null) === 'Temperature', 'Gauge Multi label changed.');
+assertGatewayGauge(($multiData['items'][0]['value'] ?? null) === 42.5, 'Gauge Multi first value changed.');
+assertGatewayGauge(
+    ($multiData['items'][1]['gauge']['label'] ?? null) === 'Living room humidity',
+    'Gauge Multi must fall back to the variable name for an empty label.'
+);
+assertGatewayGauge(($multiData['items'][1]['value'] ?? null) === 58.0, 'Gauge Multi second value changed.');
+
+$multiGauge->SetTestProperty('Sources', json_encode([
+    json_decode($multiSources, true, 512, JSON_THROW_ON_ERROR)[1],
+    [
+        'VariableID' => 4714,
+        'Label'      => 'Pressure',
+        'Minimum'    => 900.0,
+        'Maximum'    => 1100.0,
+        'Unit'       => 'hPa',
+        'Decimals'   => 1
+    ]
+], JSON_THROW_ON_ERROR));
+$multiGauge->ApplyChanges();
+assertGatewayGauge($multiGauge->GetTestReferences() === [4713, 4714], 'Gauge Multi must replace removed source references.');
+
+$multiGauge->SetTestProperty('Sources', '{invalid');
+$multiGauge->ApplyChanges();
+assertGatewayGauge($multiGauge->GetTestStatus() === 201, 'Gauge Multi must reject malformed source JSON.');
+assertGatewayGauge($multiGauge->GetTestReferences() === [], 'Gauge Multi must remove references for malformed source JSON.');
+
+$tooFewSources = new EChartsGaugeMulti();
+$tooFewSources->Create();
+$tooFewSources->SetTestProperty('Sources', json_encode([
+    json_decode($multiSources, true, 512, JSON_THROW_ON_ERROR)[0]
+], JSON_THROW_ON_ERROR));
+$tooFewSources->ApplyChanges();
+assertGatewayGauge($tooFewSources->GetTestStatus() === 201, 'Gauge Multi must reject fewer than two sources.');
+
+$duplicateSources = new EChartsGaugeMulti();
+$duplicateSources->Create();
+$duplicateSources->SetTestProperty('Sources', json_encode([
+    json_decode($multiSources, true, 512, JSON_THROW_ON_ERROR)[0],
+    json_decode($multiSources, true, 512, JSON_THROW_ON_ERROR)[0]
+], JSON_THROW_ON_ERROR));
+$duplicateSources->ApplyChanges();
+assertGatewayGauge($duplicateSources->GetTestStatus() === 201, 'Gauge Multi must reject duplicate source variables.');
+
+$invalidMultiRange = new EChartsGaugeMulti();
+$invalidMultiRange->Create();
+$invalidSources = json_decode($multiSources, true, 512, JSON_THROW_ON_ERROR);
+$invalidSources[1]['Minimum'] = 100.0;
+$invalidSources[1]['Maximum'] = 10.0;
+$invalidMultiRange->SetTestProperty('Sources', json_encode($invalidSources, JSON_THROW_ON_ERROR));
+$invalidMultiRange->ApplyChanges();
+assertGatewayGauge($invalidMultiRange->GetTestStatus() === 202, 'Gauge Multi must reject an invalid item range.');
+
+$invalidMultiDecimals = new EChartsGaugeMulti();
+$invalidMultiDecimals->Create();
+$invalidSources = json_decode($multiSources, true, 512, JSON_THROW_ON_ERROR);
+$invalidSources[1]['Decimals'] = 7;
+$invalidMultiDecimals->SetTestProperty('Sources', json_encode($invalidSources, JSON_THROW_ON_ERROR));
+$invalidMultiDecimals->ApplyChanges();
+assertGatewayGauge($invalidMultiDecimals->GetTestStatus() === 202, 'Gauge Multi must reject invalid item decimals.');
 
 $singleGauge = new EChartsGaugeSingle();
 $singleGauge->Create();

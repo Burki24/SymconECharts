@@ -41,6 +41,8 @@ Single-Vertrag abgeleitet. Dadurch ist das Modul eigenständig installier- und
 prüfbar. Das persistente Mehrquellenmodell wird in einer nachfolgenden
 Entscheidung festgelegt; bis dahin ist die derzeitige Einzelquellenkonfiguration
 des Multi-Moduls ausdrücklich nur ein technisches Gerüst.
+Die nachfolgende Entscheidung ist in
+[`ADR 0004`](0004-gauge-multi-source-contract.md) dokumentiert.
 
 ## Alternativen
 

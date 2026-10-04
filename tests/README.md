@@ -29,8 +29,9 @@ StylePHP und PHP CS Fixer.
 - `data_protocol.php` prüft Versionierung sowie Erfolgs- und Fehlerantworten
   des internen Gateway-Protokolls.
 - `gateway_gauges.php` führt den vollständigen Momentanwertabruf für Gauge
-  Single und das vorläufige Gauge-Multi-Gerüst mit Symcon-Test-Doppeln aus und
-  prüft Referenzen, Status sowie Fehlerfälle.
+  Single und Gauge Multi mit Symcon-Test-Doppeln aus. Für Multi werden außerdem
+  geordnete Quellen, Referenzwechsel, stabile Item-IDs, Beschriftungen,
+  Duplikate, Wertebereiche und fehlerhafte Konfigurationen geprüft.
 - `helper_integrity.py` stellt sicher, dass Subscription, Manifest,
   Helper-Dokumentation und der zentrale `DataFlowHelper` vollständig
   übereinstimmen.

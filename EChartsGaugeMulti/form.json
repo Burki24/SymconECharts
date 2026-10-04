@@ -2,42 +2,86 @@
     "$schema": "https://www.symcon.de/assets/files/validation/formSchema.json",
     "elements": [
         {
-            "type": "SelectVariable",
-            "name": "SourceVariableID",
-            "caption": "Source variable",
-            "validVariableTypes": [
-                1,
-                2
-            ]
-        },
-        {
-            "type": "NumberSpinner",
-            "name": "Minimum",
-            "caption": "Minimum",
-            "digits": 3
-        },
-        {
-            "type": "NumberSpinner",
-            "name": "Maximum",
-            "caption": "Maximum",
-            "digits": 3
-        },
-        {
             "type": "ValidationTextBox",
             "name": "Title",
             "caption": "Title"
         },
         {
-            "type": "ValidationTextBox",
-            "name": "Unit",
-            "caption": "Unit"
+            "type": "Label",
+            "caption": "Configure 2 to 16 unique numeric sources. Their order determines their position in the selected Gauge template."
         },
         {
-            "type": "NumberSpinner",
-            "name": "Decimals",
-            "caption": "Decimal places",
-            "minimum": 0,
-            "maximum": 6
+            "type": "List",
+            "name": "Sources",
+            "caption": "Gauge sources",
+            "rowCount": 6,
+            "add": true,
+            "delete": true,
+            "changeOrder": true,
+            "columns": [
+                {
+                    "caption": "Variable",
+                    "name": "VariableID",
+                    "width": "250px",
+                    "add": 0,
+                    "edit": {
+                        "type": "SelectVariable",
+                        "validVariableTypes": [
+                            1,
+                            2
+                        ]
+                    }
+                },
+                {
+                    "caption": "Label",
+                    "name": "Label",
+                    "width": "auto",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "caption": "Minimum",
+                    "name": "Minimum",
+                    "width": "100px",
+                    "add": 0.0,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "digits": 3
+                    }
+                },
+                {
+                    "caption": "Maximum",
+                    "name": "Maximum",
+                    "width": "100px",
+                    "add": 100.0,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "digits": 3
+                    }
+                },
+                {
+                    "caption": "Unit",
+                    "name": "Unit",
+                    "width": "90px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "caption": "Decimal places",
+                    "name": "Decimals",
+                    "width": "120px",
+                    "add": 1,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "minimum": 0,
+                        "maximum": 6
+                    }
+                }
+            ]
         }
     ],
     "actions": [
@@ -56,12 +100,12 @@
         {
             "code": 201,
             "icon": "error",
-            "caption": "Select a numeric source variable"
+            "caption": "Configure 2 to 16 unique numeric sources"
         },
         {
             "code": 202,
             "icon": "error",
-            "caption": "Gauge range is invalid"
+            "caption": "One or more Gauge ranges are invalid"
         },
         {
             "code": 203,
@@ -75,4 +119,3 @@
         }
     ]
 }
-

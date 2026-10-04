@@ -18,9 +18,10 @@ Die Library besitzt mit Gateway sowie Gauge Single und Gauge Multi eine erste
 technische Modulstruktur. Alle drei Module verwenden `IPSModuleStrict`;
 Gauge-Instanzen können vorhandene Gateways wiederverwenden. Ein versioniertes
 Protokoll liefert geprüfte numerische Momentanwerte an ein minimales
-Gauge-Datenmodell. Der zentrale `DataFlowHelper` ist eingebunden. ECharts,
-das persistente Mehrquellenmodell, Archivverarbeitung, Visualisierung sowie
-reale Symcon-Laufzeit- und Browsertests fehlen noch. Die Testsuite prüft
+Gauge-Datenmodell. Gauge Multi besitzt eine geordnete und validierte Liste aus
+2 bis 16 Quellen. Der zentrale `DataFlowHelper` ist eingebunden. ECharts,
+Archivverarbeitung, Visualisierung sowie reale Symcon-Laufzeit- und
+Browsertests fehlen noch. Die Testsuite prüft
 zusätzlich zu Struktur und Metadaten die Strict-Verträge, das Protokoll und den
 Gauge→Gateway-Datenweg unter PHP 8.5.
 
@@ -29,7 +30,7 @@ Gauge→Gateway-Datenweg unter PHP 8.5.
 | Library | SymconECharts | Gemeinsames installierbares Paket |
 | Splitter | EChartsGateway | Gemeinsame Dienste für mehrere Chart-Instanzen |
 | Gerät | EChartsGaugeSingle | Ein Gauge-Chart mit genau einer Quellvariable und zwei Ausgabewegen |
-| Gerät | EChartsGaugeMulti | Ein zusammengesetzter Gauge-Chart; Mehrquellenmodell noch ausstehend |
+| Gerät | EChartsGaugeMulti | Ein zusammengesetzter Gauge-Chart mit 2 bis 16 Quellen |
 
 Eine eigene I/O-Instanz, ein Konfigurator und Discovery gehören nicht zum
 Anfangsumfang. Datenquellen sind Teil der jeweiligen Gauge-Konfiguration und
@@ -59,6 +60,8 @@ Entscheidungen zur Modulstruktur und zu den GUIDs dokumentieren
 [`ADR 0003`](adr/0003-single-and-multi-gauge-modules.md).
 Den Parent-, Zuständigkeits- und Datenvertrag der ersten technischen Vertikale
 dokumentiert [`ADR 0002`](adr/0002-gateway-gauge-contract.md).
+Das persistente Multi-Quellenmodell dokumentiert
+[`ADR 0004`](adr/0004-gauge-multi-source-contract.md).
 
 ## Daten, Konfiguration und Ausgabe
 
@@ -137,11 +140,11 @@ eingebunden. Sie bleibt dadurch auf einen nachvollziehbaren StylePHP-Commit
 festgeschrieben und kann über den normalen Submodulablauf aktualisiert werden.
 
 Der erste Funktionsumfang umfasst ein radiales Messinstrument in
-`EChartsGaugeSingle`. `EChartsGaugeMulti` erhält danach sein eigenes
-Mehrquellenmodell für zusammengesetzte Gauges. Bereits dabei werden mehrere
-getrennte Gauge-Instanzen, beide Ausgabewege gleichzeitig, Größenwechsel sowie
-abgeschaltete IPSView-Ausgabe getestet. Zeitreihen und weitere Chartfamilien
-sind spätere, getrennt zu entscheidende Ausbaustufen.
+`EChartsGaugeSingle` und zusammengesetzte Gauges auf Basis des vorhandenen
+Mehrquellenmodells in `EChartsGaugeMulti`. Bei der sichtbaren Umsetzung werden
+mehrere getrennte Gauge-Instanzen, beide Ausgabewege gleichzeitig,
+Größenwechsel sowie abgeschaltete IPSView-Ausgabe getestet. Zeitreihen und
+weitere Chartfamilien sind spätere, getrennt zu entscheidende Ausbaustufen.
 
 ## Dokumentation und Lizenzen
 

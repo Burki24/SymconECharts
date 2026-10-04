@@ -74,14 +74,19 @@ foreach ([
         $errors
     );
 
-    $propertyContracts = [
-        "RegisterPropertyInteger('SourceVariableID', 0)",
-        "RegisterPropertyFloat('Minimum', 0.0)",
-        "RegisterPropertyFloat('Maximum', 100.0)",
-        "RegisterPropertyString('Title', '')",
-        "RegisterPropertyString('Unit', '')",
-        "RegisterPropertyInteger('Decimals', 1)"
-    ];
+    $propertyContracts = $gaugeModuleName === 'EChartsGaugeSingle'
+        ? [
+            "RegisterPropertyInteger('SourceVariableID', 0)",
+            "RegisterPropertyFloat('Minimum', 0.0)",
+            "RegisterPropertyFloat('Maximum', 100.0)",
+            "RegisterPropertyString('Title', '')",
+            "RegisterPropertyString('Unit', '')",
+            "RegisterPropertyInteger('Decimals', 1)"
+        ]
+        : [
+            "RegisterPropertyString('Sources', '[]')",
+            "RegisterPropertyString('Title', '')"
+        ];
     foreach ($propertyContracts as $propertyContract) {
         requireStrictContract(
             str_contains($gauge, $propertyContract),
@@ -103,7 +108,9 @@ foreach ([
         }
     }
     sort($formNames);
-    $expectedFormNames = ['Decimals', 'Maximum', 'Minimum', 'SourceVariableID', 'Title', 'Unit'];
+    $expectedFormNames = $gaugeModuleName === 'EChartsGaugeSingle'
+        ? ['Decimals', 'Maximum', 'Minimum', 'SourceVariableID', 'Title', 'Unit']
+        : ['Sources', 'Title'];
     sort($expectedFormNames);
     requireStrictContract(
         $formNames === $expectedFormNames,
@@ -111,19 +118,38 @@ foreach ([
         $errors
     );
 
-    $sourceSelector = null;
+    $sourceElement = null;
     foreach ($gaugeForm['elements'] ?? [] as $element) {
-        if (($element['name'] ?? null) === 'SourceVariableID') {
-            $sourceSelector = $element;
+        $expectedSourceName = $gaugeModuleName === 'EChartsGaugeSingle' ? 'SourceVariableID' : 'Sources';
+        if (($element['name'] ?? null) === $expectedSourceName) {
+            $sourceElement = $element;
         }
     }
-    requireStrictContract(
-        is_array($sourceSelector)
-            && ($sourceSelector['type'] ?? null) === 'SelectVariable'
-            && ($sourceSelector['validVariableTypes'] ?? null) === [1, 2],
-        $gaugeModuleName . ' source selection must accept only integer and float variables.',
-        $errors
-    );
+    if ($gaugeModuleName === 'EChartsGaugeSingle') {
+        requireStrictContract(
+            is_array($sourceElement)
+                && ($sourceElement['type'] ?? null) === 'SelectVariable'
+                && ($sourceElement['validVariableTypes'] ?? null) === [1, 2],
+            'EChartsGaugeSingle source selection must accept only integer and float variables.',
+            $errors
+        );
+    } else {
+        requireStrictContract(
+            is_array($sourceElement)
+                && ($sourceElement['type'] ?? null) === 'List'
+                && ($sourceElement['changeOrder'] ?? null) === true,
+            'EChartsGaugeMulti sources must be an ordered configuration list.',
+            $errors
+        );
+        $columns = array_column($sourceElement['columns'] ?? [], null, 'name');
+        requireStrictContract(
+            isset($columns['VariableID'])
+                && (($columns['VariableID']['edit']['type'] ?? null) === 'SelectVariable')
+                && (($columns['VariableID']['edit']['validVariableTypes'] ?? null) === [1, 2]),
+            'EChartsGaugeMulti source rows must select numeric variables.',
+            $errors
+        );
+    }
 
     $expectedAction = 'echo ' . $gaugeContract['prefix'] . '_GetGaugeData($id);';
     $actionScripts = array_column($gaugeForm['actions'] ?? [], 'onClick');

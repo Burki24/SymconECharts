@@ -14,6 +14,7 @@ $requiredFiles = [
     'docs/adr/0001-chart-family-modules.md',
     'docs/adr/0002-gateway-gauge-contract.md',
     'docs/adr/0003-single-and-multi-gauge-modules.md',
+    'docs/adr/0004-gauge-multi-source-contract.md',
     'library.json',
     'libs/EChartsDataProtocol.php',
     'libs/helper/DataFlowHelper.php',

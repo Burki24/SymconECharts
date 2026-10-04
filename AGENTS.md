@@ -41,9 +41,11 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   `EChartsGaugeSingle`; `EChartsGaugeMulti` besitzt eine eigene Modul-GUID.
   Datenfluss-IDs werden von beiden Geräten gemeinsam verwendet. Namen,
   Präfixe und Zuständigkeiten aus [`ADR 0001`](docs/adr/0001-chart-family-modules.md)
-  und [`ADR 0003`](docs/adr/0003-single-and-multi-gauge-modules.md) sind
-  verbindliche Verträge und ändern sich nur mit einer ausdrücklichen
-  Architektur- und Kompatibilitätsentscheidung.
+  und [`ADR 0003`](docs/adr/0003-single-and-multi-gauge-modules.md) sowie das
+  Multi-Quellenmodell aus
+  [`ADR 0004`](docs/adr/0004-gauge-multi-source-contract.md) sind verbindliche
+  Verträge und ändern sich nur mit einer ausdrücklichen Architektur- und
+  Kompatibilitätsentscheidung.
 - Parent-Auswahl, Zuständigkeiten und das versionierte Datenprotokoll aus
   [`ADR 0002`](docs/adr/0002-gateway-gauge-contract.md) sind verbindliche
   technische Verträge und werden kompatibel weiterentwickelt.

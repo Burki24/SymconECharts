@@ -6,10 +6,10 @@ Symcon-Kacheldarstellung und ein separat platzierbares HTML-Widget in IPSView
 bereitstellen können. Datenquellen und Diagrammkonfiguration werden dabei nur
 einmal gepflegt.
 
-**Entwicklungsstand:** Eigenständiges technisches Modulgerüst. Es besitzt
-vorläufig noch den Einzelquellenvertrag des Gauge-Single-Moduls, damit
-Parent-Verbindung, Datenfluss und Modulidentität bereits geprüft werden können.
-Das persistente Mehrquellenmodell sowie Diagramme, Kacheln und
+**Entwicklungsstand:** Technische Mehrquellenbasis. Eine geordnete Liste aus
+2 bis 16 numerischen Quellvariablen ist konfigurierbar, wird als Referenzen
+registriert und über EChartsGateway gelesen. Das Modul erzeugt daraus ein
+versioniertes Multi-Datenmodell. Diagramme, Kacheln und
 IPSView-HTML-Ausgabevariablen sind noch nicht implementiert.
 
 ### Inhaltsverzeichnis
@@ -26,13 +26,13 @@ IPSView-HTML-Ausgabevariablen sind noch nicht implementiert.
 
 **Vorhanden:** Eigene Moduldefinition als Gerät (`type: 3`) auf Basis von
 `IPSModuleStrict`, eigene GUID und eigenes Präfix sowie eine wiederverwendbare
-Verbindung zu EChartsGateway. Der aus Gauge Single abgeleitete vorläufige
-Einzelquellenvertrag liest einen aktuellen Wert über das versionierte
-Gateway-Protokoll.
+Verbindung zu EChartsGateway. Jede konfigurierte Quelle besitzt eine eindeutige
+numerische Variable, Beschriftung, Minimum, Maximum, Einheit und 0 bis 6
+Nachkommastellen. `GetGaugeData()` liest alle aktuellen Werte über das
+versionierte Gateway-Protokoll und liefert sie in der konfigurierten Reihenfolge.
 
-**Geplant:** Ein persistentes Mehrquellenmodell für Vorlagen wie Multi Title,
-Ring und Car, zugehörige Validierung, sichtbare Live-Darstellung sowie die
-Ausgabe als native Symcon-Kachel und optionales IPSView-Widget.
+**Geplant:** Vorlagen wie Multi Title, Ring und Car, sichtbare Live-Darstellung
+sowie die Ausgabe als native Symcon-Kachel und optionales IPSView-Widget.
 
 Eine Instanz bildet genau einen zusammengesetzten Gauge-Chart ab. Gauges mit
 genau einer numerischen Quellvariable gehören zu
@@ -46,9 +46,8 @@ nicht versprochen. Die Modulverträge werden lokal mit Test-Doppeln geprüft;
 ein Laufzeitnachweis in einer realen Symcon-Installation steht noch aus.
 
 Erforderlich ist eine Verbindung zu einer aktiven
-[EChartsGateway-Instanz](../EChartsGateway). Das derzeitige technische Gerüst
-benötigt vorläufig noch eine Integer- oder Float-Variable; die Voraussetzungen
-des endgültigen Mehrquellenmodells werden mit dessen Vertrag dokumentiert.
+[EChartsGateway-Instanz](../EChartsGateway) sowie mindestens zwei vorhandene
+Integer- oder Float-Variablen als Datenquellen.
 
 ### 3. Software-Installation
 
@@ -79,10 +78,17 @@ vorhandene EChartsGateway-Instanz ausgewählt und von mehreren Gauges verwendet
 werden. Ohne aktive Verbindung bleibt die Gauge-Instanz in einem eindeutigen
 Fehlerstatus.
 
-**Vorläufige Konfigurationsseite:** Ausgewählt werden noch eine numerische
-Quellvariable, Minimum und Maximum, Titel, Einheit sowie 0 bis 6
-Nachkommastellen. Diese Struktur wird mit der Festlegung des Mehrquellenmodells
-ersetzt und ist noch kein freigegebener Multi-Konfigurationsvertrag.
+**Konfigurationsseite:** Neben dem gemeinsamen Titel wird eine geordnete Liste
+aus 2 bis 16 Quellen gepflegt. Jede Variable darf nur einmal vorkommen. Pro
+Quelle werden Beschriftung, Minimum, Maximum, Einheit und 0 bis 6
+Nachkommastellen festgelegt. Eine leere Beschriftung verwendet automatisch den
+Namen der Symcon-Variable. Die Reihenfolge bestimmt später die Zuordnung zu den
+Positionen der gewählten Multi-Vorlage.
+
+Das in Version 1.8 kurzzeitig enthaltene Einzelquellen-Gerüst wird nicht
+automatisch übernommen: Eine einzelne Quelle erfüllt den Multi-Vertrag nicht.
+Bereits angelegte Entwicklungsinstanzen müssen ihre Quellenliste neu
+konfigurieren.
 
 ### 5. Statusvariablen und Profile
 
@@ -92,8 +98,9 @@ Aktuell werden keine eigenen Variablen angelegt. Für IPSView ist künftig
 je aktivierter Widget-Ausgabe eine eigene Stringvariable mit HTML-Inhalt
 vorgesehen. Die native Kachel soll diese Variable nicht benötigen.
 
-Quellvariablen sollen referenziert und nicht als Messwertkopien unter dem
-Gauge-Modul dupliziert werden. Beim späteren Abschalten der IPSView-Ausgabe sollen
+Quellvariablen werden als Referenzen registriert und bei Änderungen der Liste
+deterministisch ergänzt oder entfernt. Messwertkopien unter dem Gauge-Modul
+werden nicht angelegt. Beim späteren Abschalten der IPSView-Ausgabe sollen
 bestehende HTML-Variablen erhalten bleiben; ein Löschen soll ausdrücklich
 bestätigt werden müssen.
 
@@ -136,9 +143,11 @@ $json = ECGM_GetGaugeData($InstanceID);
 
 `ECGM_GetGaugeData()` validiert Konfiguration und aktive Gateway-Verbindung
 und liefert das aktuelle Gauge-Datenmodell als JSON. Das Modell enthält
-`schemaVersion`, `family`, Quellvariable und Zeitstempel, die minimale
-Gauge-Konfiguration sowie den numerischen Wert. Es ist die technische Grenze
-für die späteren Ausgabeadapter und noch kein gerendertes ECharts-Diagramm.
+`schemaVersion: 1`, `family: gauge`, `variant: multi`, den gemeinsamen Titel
+und eine geordnete `items`-Liste. Jeder Eintrag enthält eine aus der
+Variablen-ID abgeleitete stabile ID, Quellvariable, Zeitstempel,
+Gauge-Konfiguration und numerischen Wert. Es ist die technische Grenze für die
+späteren Ausgabeadapter und noch kein gerendertes ECharts-Diagramm.
 
 Weitere Projektgrundsätze: [Entwicklung](../docs/ENTWICKLUNG.md).  
 Lizenz der eigenen Beiträge: [PolyForm Noncommercial License 1.0.0](../LICENSE).

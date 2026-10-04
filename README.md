@@ -16,9 +16,9 @@ Folgende Module beinhaltet das SymconECharts Repository:
   dieselbe Diagrammkonfiguration und Datenaufbereitung verwenden.
 
 - __EChartsGaugeMulti__ ([Dokumentation](EChartsGaugeMulti))
-  Gerätemodul für zusammengesetzte Gauge-Darstellungen mit künftig mehreren
-  Datenquellen, etwa Multi Title, Ring oder Car. Das Modulgerüst ist vorhanden;
-  das erweiterte Mehrquellenmodell ist noch nicht implementiert.
+  Gerätemodul für zusammengesetzte Gauge-Darstellungen mit 2 bis 16
+  Datenquellen, etwa Multi Title, Ring oder Car. Jede Quelle besitzt eine
+  eigene Beschriftung, Skala, Einheit und Formatierung.
 
 ## Entwicklungsstand
 
@@ -26,10 +26,10 @@ Folgende Module beinhaltet das SymconECharts Repository:
 Gauge-Module verwenden `IPSModuleStrict`, ein versioniertes Datenprotokoll und eine
 wiederverwendbare Parent-Verbindung. Gauge Single kann eine numerische
 Quellvariable konfigurieren und deren Momentanwert als validiertes
-familienbezogenes Datenmodell abrufen. Das Gauge-Multi-Gerüst prüft derzeit
-denselben technischen Vertrag. Apache ECharts, das Mehrquellenmodell,
-Archivverarbeitung, native Kachelausgabe und IPSView-HTML-Ausgabe sind noch
-nicht implementiert.
+familienbezogenes Datenmodell abrufen. Gauge Multi verwaltet eine geordnete
+Quellenliste und liefert alle Momentanwerte in einem versionierten Multi-Modell.
+Apache ECharts, Archivverarbeitung, native Kachelausgabe und
+IPSView-HTML-Ausgabe sind noch nicht implementiert.
 
 Als erste Chartfamilie sind Single- und Multi-Gauges vorgesehen. Eine
 Geräteinstanz soll jeweils einen Chart liefern; eine gemeinsame Dashboard-Seite
