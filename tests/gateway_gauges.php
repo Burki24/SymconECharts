@@ -423,6 +423,7 @@ foreach ([
     'function applyArcDesign(series, style)',
     'series.startAngle = 90 - startPosition;',
     'function applyPointerShape(series, style, layout)',
+    "series.pointer.icon = 'path://' + path;",
     'function applyCustomColors(series, style, colors)'
 ] as $responsiveLayoutContract) {
     assertGatewayGauge(
@@ -913,6 +914,55 @@ assertGatewayGauge(
         && ($defaultSingleData['gauge']['style']['colorMode'] ?? null) === 'theme',
     'Gauge Single designer must preserve every preset default for existing instances.'
 );
+
+$customPointerFile = base64_encode(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-8 0 16 100">'
+    . '<path d="M0 0 L8 100 L0 88 L-8 100 Z"/></svg>'
+);
+$customPointerGauge = new EChartsGaugeSingle();
+$customPointerGauge->Create();
+$customPointerGauge->SetTestProperty('SourceVariableID', 4711);
+$customPointerGauge->SetTestProperty('PointerShape', 'custom');
+$customPointerGauge->SetTestProperty('CustomPointerSVG', $customPointerFile);
+$customPointerGauge->ApplyChanges();
+assertGatewayGauge($customPointerGauge->GetTestStatus() === IS_ACTIVE, 'A valid custom SVG pointer must be accepted.');
+$customPointerData = json_decode($customPointerGauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    ($customPointerData['gauge']['style']['pointerPath'] ?? null) === 'M0 0 L8 100 L0 88 L-8 100 Z'
+        && ($customPointerData['gauge']['style']['pointerViewBox'] ?? null) === '-8 0 16 100'
+        && !str_contains(json_encode($customPointerData, JSON_THROW_ON_ERROR), '<svg'),
+    'Gauge Single must expose only the validated path and viewBox, never the imported SVG markup.'
+);
+$customPointerTile = $customPointerGauge->GetVisualizationTile();
+assertGatewayGauge(
+    str_contains($customPointerTile, 'M0 0 L8 100 L0 88 L-8 100 Z')
+        && !str_contains($customPointerTile, '<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-8 0 16 100\"')
+        && strlen($customPointerTile) < SYMCON_OUTPUT_BUFFER_LIMIT,
+    'The custom pointer tile must embed only its bounded path and remain below the output-buffer limit.'
+);
+$customPointerForm = json_decode($customPointerGauge->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+$customPointerPreview = null;
+foreach ($customPointerForm['elements'] ?? [] as $element) {
+    if (($element['caption'] ?? null) !== 'Tile designer') {
+        continue;
+    }
+    foreach ($element['items'] ?? [] as $item) {
+        if (($item['name'] ?? null) === 'GaugePreview') {
+            $customPointerPreview = $item;
+            break 2;
+        }
+    }
+}
+$customPointerPreviewSvg = is_array($customPointerPreview)
+    ? base64_decode(
+        substr((string) ($customPointerPreview['image'] ?? ''), strlen('data:image/svg+xml;base64,')),
+        true
+    )
+    : false;
+assertGatewayGauge(
+    is_string($customPointerPreviewSvg) && str_contains($customPointerPreviewSvg, 'data-pointer-shape="custom"'),
+    'The Gauge form preview must render the imported custom SVG pointer.'
+);
 $singleGauge->SetTestProperty('SourceVariableID', 4712);
 $singleGauge->ApplyChanges();
 assertGatewayGauge($singleGauge->GetTestStatus() === 201, 'Non-numeric Gauge source must set status 201.');
@@ -963,6 +1013,17 @@ $invalidPointer->SetTestProperty('SourceVariableID', 4711);
 $invalidPointer->SetTestProperty('PointerShape', 'unknown');
 $invalidPointer->ApplyChanges();
 assertGatewayGauge($invalidPointer->GetTestStatus() === 205, 'Unknown Gauge pointer shapes must set status 205.');
+
+$invalidCustomPointer = new EChartsGaugeSingle();
+$invalidCustomPointer->Create();
+$invalidCustomPointer->SetTestProperty('SourceVariableID', 4711);
+$invalidCustomPointer->SetTestProperty('PointerShape', 'custom');
+$invalidCustomPointer->SetTestProperty(
+    'CustomPointerSVG',
+    base64_encode('<svg viewBox="0 0 10 10"><script>alert(1)</script><path d="M0 0L1 1Z"/></svg>')
+);
+$invalidCustomPointer->ApplyChanges();
+assertGatewayGauge($invalidCustomPointer->GetTestStatus() === 205, 'Unsafe custom SVG pointers must set status 205.');
 
 $invalidColor = new EChartsGaugeSingle();
 $invalidColor->Create();

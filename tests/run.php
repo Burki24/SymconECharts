@@ -14,6 +14,7 @@ $tests = [
     __DIR__ . '/symcon_strict.php',
     __DIR__ . '/data_protocol.php',
     __DIR__ . '/echarts_assets.php',
+    __DIR__ . '/svg_path.php',
     __DIR__ . '/gateway_gauges.php'
 ];
 

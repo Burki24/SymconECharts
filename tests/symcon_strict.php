@@ -118,6 +118,7 @@ foreach ([
             "RegisterPropertyString('GaugePreset', self::PRESET_SIMPLE)",
             "RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO)",
             "RegisterPropertyString('PointerShape', 'preset')",
+            "RegisterPropertyString('CustomPointerSVG', '')",
             "RegisterPropertyString('GaugeArcMode', 'preset')",
             "RegisterPropertyFloat('GaugeStartPosition', 270.0)",
             "RegisterPropertyFloat('GaugeEndPosition', 90.0)",
@@ -308,7 +309,8 @@ foreach ([
         }
 
         foreach ([
-            'PointerShape'       => ['type' => 'Select', 'values' => ['preset', 'needle', 'line', 'arrow']],
+            'PointerShape'       => ['type' => 'Select', 'values' => ['preset', 'needle', 'line', 'arrow', 'custom']],
+            'CustomPointerSVG'   => ['type' => 'SelectFile'],
             'GaugeArcMode'       => ['type' => 'Select', 'values' => ['preset', 'full', 'three-quarter', 'half', 'quarter', 'custom']],
             'GaugeStartPosition' => ['type' => 'Select'],
             'GaugeEndPosition'   => ['type' => 'Select'],
@@ -330,6 +332,9 @@ foreach ([
                     && count($designerElement['options'] ?? []) === 16
                     && (float) array_column($designerElement['options'] ?? [], 'value')[0] === 0.0
                     && (float) array_column($designerElement['options'] ?? [], 'value')[15] === 337.5;
+            }
+            if ($designerName === 'CustomPointerSVG') {
+                $valid = $valid && ($designerElement['extensions'] ?? null) === '.svg';
             }
             requireStrictContract(
                 $valid,

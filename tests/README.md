@@ -33,7 +33,8 @@ StylePHP und PHP CS Fixer.
   Single und Gauge Multi mit Symcon-Test-Doppeln aus. Für Multi werden außerdem
   geordnete Quellen, Referenzwechsel, stabile Item-IDs, Beschriftungen,
   Duplikate, Wertebereiche und fehlerhafte Konfigurationen geprüft. Für Gauge
-  Single werden außerdem Kacheldesigner-Presets, Theme-Auswahl, Zeigerformen,
+  Single werden außerdem Kacheldesigner-Presets, Theme-Auswahl, Zeigerformen
+  einschließlich des abgesicherten SVG-Pfadimports,
   Skalenbögen, Farbrollen, SVG-Vorschau, HTML-Erzeugung, lokale
   ECharts-Einbettung und die Zustandsaktualisierung nach
   `VM_UPDATE` charakterisiert. Das erzeugte
@@ -43,6 +44,8 @@ StylePHP und PHP CS Fixer.
   lokal gebündelten Apache-ECharts-Runtime und der sechs offiziellen Themes.
   Zusätzlich werden der Gauge-spezifische Browser-Export, das gemeinsame
   512-KiB-Budget und der tolerierte Windows-Zeilenendenfall geprüft.
+- `svg_path.php` prüft Rohtext-, Base64- und Data-URI-Importe sowie die
+  Ablehnung nicht unterstützter oder aktiver SVG-Inhalte.
 - `helper_integrity.py` stellt sicher, dass Subscription, Manifest,
   Helper-Dokumentation und alle abonnierten Datenfluss- und
   Visualisierungshelper vollständig übereinstimmen.

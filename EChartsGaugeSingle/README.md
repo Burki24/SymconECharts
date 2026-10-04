@@ -60,8 +60,13 @@ zulässig sind 50 bis 150 %. Dadurch bleiben individuelle Einstellungen auch
 bei anderen Kachelgrößen responsiv. Freie ECharts-JSON- oder
 JavaScript-Einstellungen werden nicht ausgeführt.
 
-Zusätzlich kann die Zeigerform als Presetvorgabe, Nadel, Linie oder Pfeil
-gewählt werden. Der Skalenbogen bleibt wahlweise bei der Presetvorgabe oder
+Zusätzlich kann die Zeigerform als Presetvorgabe, Nadel, Linie, Pfeil oder
+importiertes SVG gewählt werden. Der SVG-Import akzeptiert ausschließlich
+eine `viewBox` und reine Pfadgeometrie aus bis zu 32 `path`-Elementen. Das
+SVG darf höchstens 128 KiB groß sein; Transformationen, Skripte, Ereignisse,
+externe Referenzen und andere Elemente werden nicht übernommen. An ECharts
+wird niemals das SVG-Dokument, sondern nur der validierte Pfad übergeben. Der
+Skalenbogen bleibt wahlweise bei der Presetvorgabe oder
 wird als Voll-, Dreiviertel-, Halb-, Viertelkreis beziehungsweise mit eigenem
 Start und Ende definiert. Die Positionen folgen einem Zifferblatt (`0°` oben,
 `90°` rechts, `180°` unten, `270°` links) und stehen in 22,5-Grad-Schritten
@@ -132,7 +137,7 @@ Fehlerstatus.
 **Konfigurationsseite:** Ausgewählt werden eine numerische Quellvariable,
 Minimum und Maximum, Titel, Einheit, 0 bis 6 Nachkommastellen, ein Gauge-Preset
 sowie ein ECharts-Theme. Unter „Geometrie und Zeiger“ werden Zeigerform,
-Skalenbogen und Positionen gewählt; unter „Gauge-Farben“ können sechs
+eine optionale SVG-Datei, Skalenbogen und Positionen gewählt; unter „Gauge-Farben“ können sechs
 Gauge-spezifische Farbrollen das Theme gezielt überschreiben. Unter
 „Feinabstimmung“ können die vier Schriftgrößen,
 Ring- und Zeigerstärke sowie Nebenstrich- und Hauptteilerlänge jeweils von
@@ -241,8 +246,9 @@ $json = ECGS_GetGaugeData($InstanceID);
 und liefert das aktuelle Gauge-Datenmodell als JSON. Das Modell enthält
 `schemaVersion`, `family`, Theme, Quellvariable und Zeitstempel, die minimale
 Gauge-Konfiguration sowie die validierten Geometrie-, Farb- und relativen
-Designwerte unter `gauge.style`
-sowie den numerischen Wert. Dasselbe fachliche Modell wird
+Designwerte unter `gauge.style`. Bei einem eigenen SVG-Zeiger enthält das
+Modell nur die validierten Pfaddaten und die `viewBox`, nicht das hochgeladene
+SVG-Dokument. Außerdem enthält es den numerischen Wert. Dasselbe fachliche Modell wird
 vom nativen Gauge-Single-Renderer verwendet.
 
 Weitere Projektgrundsätze: [Entwicklung](../docs/ENTWICKLUNG.md).  

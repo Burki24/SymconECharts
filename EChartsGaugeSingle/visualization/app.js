@@ -424,14 +424,22 @@
     }
 
     function applyPointerShape(series, style, layout) {
-        var shape = ['preset', 'needle', 'line', 'arrow'].indexOf(style.pointerShape) >= 0
+        var shape = ['preset', 'needle', 'line', 'arrow', 'custom'].indexOf(style.pointerShape) >= 0
             ? style.pointerShape
             : 'preset';
         if (shape === 'preset') {
             return series;
         }
 
-        series.pointer.icon = pointerIcons[shape];
+        if (shape === 'custom') {
+            var path = typeof style.pointerPath === 'string' ? style.pointerPath.trim() : '';
+            if (!path || !/^[MmZzLlHhVvCcSsQqTtAa0-9eE+.,\-\s]+$/.test(path)) {
+                return series;
+            }
+            series.pointer.icon = 'path://' + path;
+        } else {
+            series.pointer.icon = pointerIcons[shape];
+        }
         series.pointer.length = layout.pointerLength;
         series.pointer.width = layout.pointerWidth;
         series.pointer.offsetCenter = [0, 0];

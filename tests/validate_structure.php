@@ -23,6 +23,7 @@ $requiredFiles = [
     'library.json',
     'libs/EChartsAsset.php',
     'libs/EChartsDataProtocol.php',
+    'libs/EChartsSvgPath.php',
     'libs/echarts/6.1.0/echarts.gauge.min.js',
     'libs/echarts/6.1.0/themes/dark.js',
     'libs/echarts/6.1.0/themes/vintage.js',
@@ -55,6 +56,7 @@ $requiredFiles = [
     'tests/gateway_gauges.php',
     'tests/helper_integrity.py',
     'tests/module_contracts.php',
+    'tests/svg_path.php',
     'tests/run.php',
     'tests/symcon_strict.php',
     'tests/test_update_library_metadata.py',
@@ -367,6 +369,7 @@ if ($runner === false) {
         "__DIR__ . '/symcon_strict.php'",
         "__DIR__ . '/data_protocol.php'",
         "__DIR__ . '/echarts_assets.php'",
+        "__DIR__ . '/svg_path.php'",
         "__DIR__ . '/gateway_gauges.php'",
         'python3 tests/helper_integrity.py',
         'python3 tests/test_update_library_metadata.py'

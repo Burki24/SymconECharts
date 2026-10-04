@@ -14,6 +14,7 @@ final class EChartsGaugeSinglePreview
 {
     private const CENTER_X = 360.0;
     private const SUPPORTED_PRESETS = ['basic', 'simple', 'progress', 'speed'];
+    private const SUPPORTED_POINTER_SHAPES = ['preset', 'needle', 'line', 'arrow', 'custom'];
 
     public static function CreateSvg(
         float $value,
@@ -35,6 +36,10 @@ final class EChartsGaugeSinglePreview
         }
         if (!EChartsAsset::IsSupportedTheme($theme)) {
             throw new InvalidArgumentException('A supported ECharts theme is required.');
+        }
+        $pointerShape = (string) ($style['pointerShape'] ?? 'preset');
+        if (!in_array($pointerShape, self::SUPPORTED_POINTER_SHAPES, true)) {
+            throw new InvalidArgumentException('A supported Gauge pointer shape is required.');
         }
 
         $design = self::ApplyArcDesign(
@@ -66,7 +71,7 @@ final class EChartsGaugeSinglePreview
         );
         $progressPath = $design['showProgress'] ? self::ArcPath($ratio, $design) : '';
         $ticks = self::Ticks($minimum, $maximum, $language, $design);
-        $pointer = self::Pointer($ratio, $design, (string) ($style['pointerShape'] ?? 'preset'));
+        $pointer = self::Pointer($ratio, $design, $pointerShape, $style);
         $rawValue = self::FormatNumber($value, $decimals, $language);
         $rawUnit = trim($unit);
         $rawTitle = trim($title);
@@ -435,8 +440,11 @@ SVG;
     }
 
     /** @param array<string, float|bool|int> $design */
-    private static function Pointer(float $ratio, array $design, string $shape): string
+    private static function Pointer(float $ratio, array $design, string $shape, array $style): string
     {
+        if ($shape === 'custom') {
+            return self::CustomPointer($ratio, $design, $style);
+        }
         if ($shape === 'preset' && $design['speedPointer']) {
             return self::SpeedPointer($ratio, $design);
         }
@@ -484,6 +492,36 @@ SVG;
         return '<polygon points="' . implode(' ', $serialized) . '" class="pointer'
             . ($design['speedPointer'] ? ' speed-pointer-shadow' : '') . '" data-pointer-shape="'
             . SVGPreviewHelper::escape($shape) . '"/>'
+            . '<circle cx="360" cy="' . self::Coordinate($centerY) . '" r="11" class="anchor"/>';
+    }
+
+    /**
+     * @param array<string, float|bool|int> $design
+     * @param array<string, mixed> $style
+     */
+    private static function CustomPointer(float $ratio, array $design, array $style): string
+    {
+        $path = (string) ($style['pointerPath'] ?? '');
+        $viewBox = (string) ($style['pointerViewBox'] ?? '');
+        if ($path === ''
+            || preg_match('/^[MmZzLlHhVvCcSsQqTtAa0-9eE+.,\-\s]+$/D', $path) !== 1
+            || preg_match('/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?(?:\s+[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?){3}$/D', $viewBox) !== 1) {
+            throw new InvalidArgumentException('A validated custom SVG pointer is required.');
+        }
+
+        $angle = self::Angle($ratio, $design);
+        $rotation = 90.0 - $angle;
+        $centerY = (float) $design['centerY'];
+        $width = max(2.0, (float) $design['pointerWidth']);
+        $length = (float) $design['pointerLength'];
+        $shadowClass = $design['speedPointer'] ? ' speed-pointer-shadow' : '';
+
+        return '<g transform="rotate(' . self::Coordinate($rotation) . ' 360 '
+            . self::Coordinate($centerY) . ')"><svg x="' . self::Coordinate(self::CENTER_X - $width / 2.0)
+            . '" y="' . self::Coordinate($centerY - $length) . '" width="' . self::Coordinate($width)
+            . '" height="' . self::Coordinate($length) . '" viewBox="' . SVGPreviewHelper::escape($viewBox)
+            . '" preserveAspectRatio="none" overflow="visible"><path d="' . SVGPreviewHelper::escape($path)
+            . '" class="pointer' . $shadowClass . '" data-pointer-shape="custom"/></svg></g>'
             . '<circle cx="360" cy="' . self::Coordinate($centerY) . '" r="11" class="anchor"/>';
     }
 

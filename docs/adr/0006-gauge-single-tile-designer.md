@@ -68,7 +68,14 @@ von der konkreten Kachelgröße unabhängig. Eine freie ECharts-Option wird dara
 nicht abgeleitet.
 
 Als additive, validierte Designwerte stehen die Zeigerformen `preset`,
-`needle`, `line` und `arrow` zur Verfügung. Der Skalenbogen verwendet entweder
+`needle`, `line`, `arrow` und `custom` zur Verfügung. `custom` verwendet eine
+über `SelectFile` gespeicherte SVG-Datei. Der Import akzeptiert höchstens
+128 KiB große SVGs mit endlicher `viewBox` und maximal 32 reinen
+`path`-Elementen. Transformationen, Dokumenttypen, Entitäten, Skripte,
+Ereignishandler, externe Referenzen und sonstige SVG-Elemente werden
+abgewiesen. Nur ein auf 64 KiB begrenzter validierter Pfad und die `viewBox`
+gelangen in das Gauge-Datenmodell; das Originalmarkup wird weder an Vorschau
+noch Kachel weitergegeben. Der Skalenbogen verwendet entweder
 die Presetgeometrie oder einen Voll-, Dreiviertel-, Halb-, Viertel- oder
 benutzerdefinierten Bogen. Anwenderpositionen werden wie auf einem Zifferblatt
 gespeichert (`0°` oben, im Uhrzeigersinn) und sind auf 22,5-Grad-Schritte
@@ -126,6 +133,7 @@ konfigurierten Bereichen schlecht lesbare Zwischenwerte zu erzwingen.
 - Property-, Formular- und Statusverträge unter `tests/symcon_strict.php`
 - Preset-Datenmodell, SVG-Vorschau und native Kachel unter
   `tests/gateway_gauges.php`
+- SVG-Dekodierung, Allowlist und Größenlimits unter `tests/svg_path.php`
 - Formularschema und Repositorystruktur unter `tests/validate_structure.php`
 - Offizielle Gauge-Beispiele unter
   `https://echarts.apache.org/examples/en/index.html#chart-type-gauge`

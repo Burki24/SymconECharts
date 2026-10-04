@@ -12,6 +12,7 @@ use Burki24\SymconModuleHelper\VisualizationThemeHelper;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsDataProtocol;
 use SymconECharts\EChartsGaugeSinglePreview;
+use SymconECharts\EChartsSvgPath;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
 require_once __DIR__ . '/../libs/helper/DataFlowHelper.php';
@@ -22,6 +23,7 @@ require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
+require_once __DIR__ . '/../libs/EChartsSvgPath.php';
 require_once __DIR__ . '/GaugePreview.php';
 
 class EChartsGaugeSingle extends IPSModuleStrict
@@ -46,7 +48,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
 
     private const PRESET_SIMPLE = 'simple';
     private const SUPPORTED_PRESETS = ['basic', self::PRESET_SIMPLE, 'progress', 'speed'];
-    private const SUPPORTED_POINTER_SHAPES = ['preset', 'needle', 'line', 'arrow'];
+    private const SUPPORTED_POINTER_SHAPES = ['preset', 'needle', 'line', 'arrow', 'custom'];
     private const SUPPORTED_ARC_MODES = ['preset', 'full', 'three-quarter', 'half', 'quarter', 'custom'];
     private const SUPPORTED_COLOR_MODES = ['theme', 'custom'];
     private const ANGLE_STEP = 22.5;
@@ -79,6 +81,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
         $this->RegisterPropertyString('GaugePreset', self::PRESET_SIMPLE);
         $this->RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO);
         $this->RegisterPropertyString('PointerShape', 'preset');
+        $this->RegisterPropertyString('CustomPointerSVG', '');
         $this->RegisterPropertyString('GaugeArcMode', 'preset');
         $this->RegisterPropertyFloat('GaugeStartPosition', 270.0);
         $this->RegisterPropertyFloat('GaugeEndPosition', 90.0);
@@ -167,7 +170,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
         int $RingColor = 0x45474C,
         int $ScaleColor = 0xA7A9AE,
         int $ValueColor = 0xF4F5F7,
-        int $TitleColor = 0xA7A9AE
+        int $TitleColor = 0xA7A9AE,
+        string $CustomPointerSVG = ''
     ): void {
         $this->UpdateFormField(
             'GaugePreview',
@@ -200,7 +204,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
                     'ringColor'              => self::ColorToHex($RingColor),
                     'scaleColor'             => self::ColorToHex($ScaleColor),
                     'valueColor'             => self::ColorToHex($ValueColor),
-                    'titleColor'             => self::ColorToHex($TitleColor)
+                    'titleColor'             => self::ColorToHex($TitleColor),
+                    ...$this->ResolveCustomPointerStyle($PointerShape, $CustomPointerSVG)
                 ]
             ))
         );
@@ -400,6 +405,12 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 $this->Translate('Select supported Gauge design options.')
             );
         }
+        if (($style['pointerShape'] ?? 'preset') === 'custom'
+            && ((string) ($style['pointerPath'] ?? '') === '' || (string) ($style['pointerViewBox'] ?? '') === '')) {
+            return EChartsGaugeSinglePreview::CreateErrorSvg(
+                $this->Translate((string) ($style['pointerError'] ?? 'Select a supported path-only SVG pointer.'))
+            );
+        }
         $startPosition = (float) ($style['startPosition'] ?? 270.0);
         $endPosition = (float) ($style['endPosition'] ?? 90.0);
         if (!self::IsAnglePosition($startPosition)
@@ -519,6 +530,17 @@ class EChartsGaugeSingle extends IPSModuleStrict
             ];
         }
 
+        if ($this->ReadPropertyString('PointerShape') === 'custom') {
+            try {
+                EChartsSvgPath::Import($this->ReadPropertyString('CustomPointerSVG'));
+            } catch (InvalidArgumentException $exception) {
+                return [
+                    'Status'  => self::STATUS_DESIGN_INVALID,
+                    'Message' => $exception->getMessage()
+                ];
+            }
+        }
+
         if (!self::IsAnglePosition($this->ReadPropertyFloat('GaugeStartPosition'))
             || !self::IsAnglePosition($this->ReadPropertyFloat('GaugeEndPosition'))
             || ($this->ReadPropertyString('GaugeArcMode') === 'custom'
@@ -565,8 +587,37 @@ class EChartsGaugeSingle extends IPSModuleStrict
         ] as $fieldName => $propertyName) {
             $style[$fieldName] = self::ColorToHex($this->ReadPropertyInteger($propertyName));
         }
+        $style = array_merge(
+            $style,
+            $this->ResolveCustomPointerStyle(
+                $style['pointerShape'],
+                $this->ReadPropertyString('CustomPointerSVG')
+            )
+        );
 
         return $style;
+    }
+
+    /** @return array{pointerPath?: string, pointerViewBox?: string, pointerError?: string} */
+    private function ResolveCustomPointerStyle(string $pointerShape, string $fileData): array
+    {
+        if ($pointerShape !== 'custom') {
+            return [];
+        }
+
+        try {
+            $pointer = EChartsSvgPath::Import($fileData);
+
+            return ['pointerPath' => $pointer['path'], 'pointerViewBox' => $pointer['viewBox']];
+        } catch (InvalidArgumentException $exception) {
+            $this->SendDebug('ResolveCustomPointerStyle', $exception->getMessage(), 0);
+
+            return [
+                'pointerPath'    => '',
+                'pointerViewBox' => '',
+                'pointerError'   => $exception->getMessage()
+            ];
+        }
     }
 
     private static function IsAnglePosition(float $position): bool
