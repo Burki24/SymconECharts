@@ -23,7 +23,15 @@
             detailY: 294,
             titleY: 352,
             splitLength: 10,
-            detailFontSize: 38
+            labelGap: 13,
+            detailFontSize: 38,
+            unitFontSize: 38,
+            pointerWidth: 8,
+            pointerMinimum: 4,
+            pointerMaximum: 10,
+            valueMinimum: 20,
+            unitMinimum: 20,
+            unitMaximum: 50
         },
         simple: {
             centerY: 196,
@@ -33,7 +41,15 @@
             detailY: 294,
             titleY: 352,
             splitLength: 10,
-            detailFontSize: 38
+            labelGap: 12,
+            detailFontSize: 38,
+            unitFontSize: 38,
+            pointerWidth: 8,
+            pointerMinimum: 4,
+            pointerMaximum: 10,
+            valueMinimum: 20,
+            unitMinimum: 20,
+            unitMaximum: 50
         },
         progress: {
             centerY: 190,
@@ -43,7 +59,15 @@
             detailY: 306,
             titleY: 360,
             splitLength: 14,
-            detailFontSize: 46
+            labelGap: 10,
+            detailFontSize: 46,
+            unitFontSize: 46,
+            pointerWidth: 8,
+            pointerMinimum: 4,
+            pointerMaximum: 10,
+            valueMinimum: 20,
+            unitMinimum: 20,
+            unitMaximum: 50
         },
         speed: {
             centerY: 232,
@@ -53,7 +77,15 @@
             detailY: 319,
             titleY: 370,
             splitLength: 12,
-            detailFontSize: 42
+            labelGap: 12,
+            detailFontSize: 42,
+            unitFontSize: 18,
+            pointerWidth: 16,
+            pointerMinimum: 10,
+            pointerMaximum: 16,
+            valueMinimum: 28,
+            unitMinimum: 14,
+            unitMaximum: 20
         }
     };
 
@@ -157,11 +189,33 @@
         return Math.max(minimum, Math.min(maximum, value));
     }
 
-    function resolveGaugeLayout(preset, width, height) {
+    function resolveStyleScale(style, name) {
+        var percent = Number(style && style[name]);
+
+        return Number.isFinite(percent) ? clamp(percent, 50, 150) / 100 : 1;
+    }
+
+    function resolveScaledMetric(value, factor, defaultMinimum, defaultMaximum, customMinimum, customMaximum) {
+        return factor === 1
+            ? clamp(Math.round(value), defaultMinimum, defaultMaximum)
+            : clamp(Math.round(value * factor), customMinimum, customMaximum);
+    }
+
+    function resolveGaugeLayout(preset, width, height, style) {
         var definition = gaugeLayoutDefinitions[preset] || gaugeLayoutDefinitions.simple;
         var scale = Math.min(width / 440, height / 400);
         var contentOffsetY = (height - 400 * scale) / 2;
-        var lineWidth = clamp(Math.round(definition.lineWidth * scale), 8, 24);
+        var scaleFontSize = resolveStyleScale(style, 'scaleFontSizePercent');
+        var valueFontSize = resolveStyleScale(style, 'valueFontSizePercent');
+        var unitFontSize = resolveStyleScale(style, 'unitFontSizePercent');
+        var titleFontSize = resolveStyleScale(style, 'titleFontSizePercent');
+        var ringWidth = resolveStyleScale(style, 'ringWidthPercent');
+        var pointerWidth = resolveStyleScale(style, 'pointerWidthPercent');
+        var minorTickLength = resolveStyleScale(style, 'minorTickLengthPercent');
+        var majorTickLength = resolveStyleScale(style, 'majorTickLengthPercent');
+        var lineWidth = resolveScaledMetric(definition.lineWidth * scale, ringWidth, 8, 24, 4, 40);
+        var detailTypographyScale = Math.max(valueFontSize, unitFontSize);
+        var detailHeight = resolveScaledMetric(58 * scale, detailTypographyScale, 34, 64, 28, 88);
 
         return {
             centerX: Math.round(width / 2),
@@ -169,22 +223,49 @@
             radius: Math.round(definition.radius * scale + lineWidth / 2),
             lineWidth: lineWidth,
             tickDistance: clamp(Math.round(4 * scale), 2, 8),
-            tickLength: clamp(Math.round(5 * scale), 4, 10),
+            tickLength: resolveScaledMetric(5 * scale, minorTickLength, 4, 10, 2, 20),
             splitDistance: clamp(Math.round(4 * scale), 2, 8),
-            splitLength: clamp(Math.round(definition.splitLength * scale), 8, 20),
-            labelDistance: clamp(Math.round(30 * scale), 18, 42),
-            axisFontSize: clamp(Math.round(14 * scale), 9, 18),
+            splitLength: resolveScaledMetric(definition.splitLength * scale, majorTickLength, 8, 20, 4, 36),
+            labelDistance: clamp(lineWidth + Math.round(definition.labelGap * scale), 10, 64),
+            axisFontSize: resolveScaledMetric(14 * scale, scaleFontSize, 9, 18, 6, 30),
             pointerLength: definition.pointerLength,
-            pointerWidth: clamp(Math.round(8 * scale), 4, 10),
+            pointerWidth: resolveScaledMetric(
+                definition.pointerWidth * scale,
+                pointerWidth,
+                definition.pointerMinimum,
+                definition.pointerMaximum,
+                2,
+                24
+            ),
             anchorSize: clamp(Math.round(18 * scale), 10, 24),
             detailOffset: Math.round((definition.detailY - definition.centerY) * scale),
-            detailFontSize: clamp(Math.round(definition.detailFontSize * scale), 20, 50),
             titleOffset: Math.round((definition.titleY - definition.centerY) * scale),
-            titleFontSize: clamp(Math.round(18 * scale), 11, 20),
-            detailWidth: clamp(Math.round(244 * scale), 120, 280),
-            detailHeight: clamp(Math.round(58 * scale), 34, 64),
-            valueFontSize: clamp(Math.round(42 * scale), 28, 50),
-            unitFontSize: clamp(Math.round(18 * scale), 14, 20)
+            titleFontSize: resolveScaledMetric(18 * scale, titleFontSize, 11, 20, 7, 36),
+            detailWidth: resolveScaledMetric(
+                244 * scale,
+                detailTypographyScale,
+                120,
+                280,
+                100,
+                Math.max(100, width - 24)
+            ),
+            detailHeight: detailHeight,
+            valueFontSize: resolveScaledMetric(
+                definition.detailFontSize * scale,
+                valueFontSize,
+                definition.valueMinimum,
+                50,
+                10,
+                72
+            ),
+            unitFontSize: resolveScaledMetric(
+                definition.unitFontSize * scale,
+                unitFontSize,
+                definition.unitMinimum,
+                definition.unitMaximum,
+                7,
+                48
+            )
         };
     }
 
@@ -264,7 +345,7 @@
                 series.axisTick.lineStyle.width = 2;
                 series.splitLine.lineStyle.width = 3;
                 series.pointer.icon = speedPointerIcon;
-                series.pointer.width = clamp(Math.round(16 * Math.min(layout.lineWidth / 18, 1)), 10, 16);
+                series.pointer.width = layout.pointerWidth;
                 series.pointer.offsetCenter = [0, '5%'];
                 series.pointer.itemStyle.shadowColor = colorWithAlpha(colors.accent, 0.45);
                 series.pointer.itemStyle.shadowBlur = 10;
@@ -309,9 +390,10 @@
         var title = typeof gauge.title === 'string' ? gauge.title : '';
         var unit = typeof gauge.unit === 'string' ? gauge.unit : '';
         var preset = normalizePreset(gauge.preset);
+        var style = gauge.style && typeof gauge.style === 'object' ? gauge.style : {};
         var width = Math.max(chartElement.clientWidth, 1);
         var height = Math.max(chartElement.clientHeight, 160);
-        var layout = resolveGaugeLayout(preset, width, height);
+        var layout = resolveGaugeLayout(preset, width, height, style);
         var automaticTheme = theme === 'auto';
         var colors = resolveThemeColors(theme);
 
@@ -380,12 +462,22 @@
             detail: {
                 valueAnimation: !reduceMotion,
                 offsetCenter: [0, layout.detailOffset],
-                fontSize: layout.detailFontSize,
                 fontWeight: 600,
+                rich: {
+                    value: {
+                        fontSize: layout.valueFontSize,
+                        fontWeight: 600,
+                        color: colors.text
+                    },
+                    unit: {
+                        fontSize: layout.unitFontSize,
+                        fontWeight: 600,
+                        color: colors.text,
+                        padding: [0, 0, 0, 8]
+                    }
+                },
                 formatter: function () {
-                    return preset === 'speed'
-                        ? formatSpeedValue(value, decimals, unit)
-                        : formatValue(value, decimals, unit);
+                    return formatSpeedValue(value, decimals, unit);
                 }
             },
             data: [{ value: value, name: title }]

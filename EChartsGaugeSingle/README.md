@@ -52,6 +52,13 @@ die Hauptteilung wird dafür auf gut lesbare Schritte angepasst. Farben stammen
 weiterhin aus dem unabhängig gewählten Theme und der optionale Instanztitel
 bleibt erhalten.
 
+Die Feinabstimmung im Kacheldesigner skaliert Schriftgrößen für Skala, Wert,
+Einheit und Titel sowie Ring, Zeiger, Nebenstriche und Hauptteiler relativ zur
+gewählten Vorlage. `100 %` entspricht immer der getesteten Presetvorgabe;
+zulässig sind 50 bis 150 %. Dadurch bleiben individuelle Einstellungen auch
+bei anderen Kachelgrößen responsiv. Freie ECharts-JSON- oder
+JavaScript-Einstellungen werden nicht ausgeführt.
+
 **Geplant:** Zusätzliche Gauge-Single-Presets, ein sicherer Importvertrag für
 eigene Theme-Builder-Dateien, weitere Skalen- und Gestaltungsoptionen sowie die
 Ausgabe als optionales IPSView-Widget.
@@ -114,7 +121,10 @@ Fehlerstatus.
 
 **Konfigurationsseite:** Ausgewählt werden eine numerische Quellvariable,
 Minimum und Maximum, Titel, Einheit, 0 bis 6 Nachkommastellen, ein Gauge-Preset
-sowie ein ECharts-Theme. Die stabilen Preset-IDs sind `basic`, `simple`,
+sowie ein ECharts-Theme. Unter „Feinabstimmung“ können die vier Schriftgrößen,
+Ring- und Zeigerstärke sowie Nebenstrich- und Hauptteilerlänge jeweils von
+50 bis 150 % der Presetvorgabe angepasst werden. Die stabilen Preset-IDs sind
+`basic`, `simple`,
 `progress` und `speed`. Als Themes stehen `auto`, `dark`, `vintage`,
 `macarons`, `infographic`, `shine` und `roma` zur Verfügung. `auto` ist der
 kompatible Standard und folgt dem Symcon-Design. Die Aktion
@@ -177,7 +187,9 @@ dargestellt werden. Die Kachel bleibt für die tatsächliche, interaktive
 ECharts-Ausgabe maßgeblich; die SVG-Vorschau bildet das ausgewählte Layout
 gezielt nach. Die grundlegenden Layoutproportionen werden zwischen Vorschau und
 Kachel angeglichen, einschließlich der Anordnung von Achslinie, Teilern und
-Skalenwerten. Sie verwendet außerdem eine stabile, dem ausgewählten Theme
+Skalenwerten. Noch nicht gespeicherte Feinabstimmungen werden ebenfalls sofort
+in der Vorschau dargestellt. Sie verwendet außerdem eine stabile, dem
+ausgewählten Theme
 zugeordnete Vorschaupalette und übernimmt die Gauge-Achssegmente der
 offiziellen Themes. Die native Kachel registriert dagegen die unveränderte
 offizielle Theme-Datei und bleibt für die exakte Darstellung maßgeblich. Für
@@ -215,7 +227,8 @@ $json = ECGS_GetGaugeData($InstanceID);
 `ECGS_GetGaugeData()` validiert Konfiguration und aktive Gateway-Verbindung
 und liefert das aktuelle Gauge-Datenmodell als JSON. Das Modell enthält
 `schemaVersion`, `family`, Theme, Quellvariable und Zeitstempel, die minimale
-Gauge-Konfiguration sowie den numerischen Wert. Dasselbe fachliche Modell wird
+Gauge-Konfiguration, die validierten relativen Designwerte unter `gauge.style`
+sowie den numerischen Wert. Dasselbe fachliche Modell wird
 vom nativen Gauge-Single-Renderer verwendet.
 
 Weitere Projektgrundsätze: [Entwicklung](../docs/ENTWICKLUNG.md).  

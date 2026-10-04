@@ -116,7 +116,8 @@ foreach ([
             "RegisterPropertyString('Unit', '')",
             "RegisterPropertyInteger('Decimals', 1)",
             "RegisterPropertyString('GaugePreset', self::PRESET_SIMPLE)",
-            "RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO)"
+            "RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO)",
+            'RegisterPropertyInteger($propertyName, self::DESIGN_SCALE_DEFAULT)'
         ]
         : [
             "RegisterPropertyString('Sources', '[]')",
@@ -251,6 +252,49 @@ foreach ([
             'EChartsGaugeSingle tile designer must expose the supported ECharts themes.',
             $errors
         );
+
+        $fineTuningElements = [];
+        $findFineTuningElements = static function (array $items) use (&$findFineTuningElements, &$fineTuningElements): void
+        {
+            foreach ($items as $item) {
+                if (!is_array($item)) {
+                    continue;
+                }
+                if (is_string($item['name'] ?? null)) {
+                    $fineTuningElements[$item['name']] = $item;
+                }
+                if (is_array($item['items'] ?? null)) {
+                    $findFineTuningElements($item['items']);
+                }
+            }
+        };
+        $findFineTuningElements($gaugeForm['elements'] ?? []);
+        foreach ([
+            'ScaleFontSizePercent',
+            'ValueFontSizePercent',
+            'UnitFontSizePercent',
+            'TitleFontSizePercent',
+            'RingWidthPercent',
+            'PointerWidthPercent',
+            'MinorTickLengthPercent',
+            'MajorTickLengthPercent'
+        ] as $fineTuningName) {
+            $fineTuningElement = $fineTuningElements[$fineTuningName] ?? null;
+            requireStrictContract(
+                is_array($fineTuningElement)
+                    && ($fineTuningElement['type'] ?? null) === 'NumberSpinner'
+                    && ($fineTuningElement['minimum'] ?? null) === 50
+                    && ($fineTuningElement['maximum'] ?? null) === 150
+                    && ($fineTuningElement['suffix'] ?? null) === '%',
+                'EChartsGaugeSingle tile designer fine tuning is invalid for ' . $fineTuningName . '.',
+                $errors
+            );
+            requireStrictContract(
+                str_contains($gauge, "'" . lcfirst($fineTuningName) . "'"),
+                'EChartsGaugeSingle is missing the fine-tuning property contract for ' . $fineTuningName . '.',
+                $errors
+            );
+        }
     } else {
         requireStrictContract(
             is_array($sourceElement)

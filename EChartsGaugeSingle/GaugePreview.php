@@ -24,7 +24,8 @@ final class EChartsGaugeSinglePreview
         int $decimals,
         string $language,
         string $preset = 'simple',
-        string $theme = EChartsAsset::THEME_AUTO
+        string $theme = EChartsAsset::THEME_AUTO,
+        array $style = []
     ): string {
         if (!is_finite($value) || !is_finite($minimum) || !is_finite($maximum) || $minimum >= $maximum) {
             throw new InvalidArgumentException('A finite Gauge value and a valid range are required.');
@@ -36,8 +37,11 @@ final class EChartsGaugeSinglePreview
             throw new InvalidArgumentException('A supported ECharts theme is required.');
         }
 
-        $design = self::PresetDesign($preset, $minimum, $maximum);
+        $design = self::ApplyStyleScales(self::PresetDesign($preset, $minimum, $maximum), $style);
         $palette = EChartsAsset::ThemePreviewPalette($theme);
+        $unitColor = $preset === 'speed' ? $palette['muted'] : $palette['text'];
+        $valueFontWeight = $preset === 'speed' ? 800 : 600;
+        $unitFontWeight = $preset === 'speed' ? 400 : 600;
         $decimals = max(0, min(6, $decimals));
         $ratio = max(0.0, min(1.0, ($value - $minimum) / ($maximum - $minimum)));
         $trackElements = self::TrackSegments($palette['gaugeAxisLine'], $design);
@@ -50,13 +54,10 @@ final class EChartsGaugeSinglePreview
         $formattedValue = SVGPreviewHelper::escape($rawValue);
         $formattedUnit = SVGPreviewHelper::escape($rawUnit);
         $formattedTitle = SVGPreviewHelper::escape($rawTitle);
-        $valueText = trim($formattedValue . ($formattedUnit === '' ? '' : ' ' . $formattedUnit));
-        $valueElement = $preset === 'speed'
-            ? '<text x="360" y="' . self::Coordinate($design['detailY']) . '" class="value"><tspan class="value-number">'
-                . $formattedValue . '</tspan>'
-                . ($formattedUnit === '' ? '' : '<tspan class="value-unit" dx="8">' . $formattedUnit . '</tspan>')
-                . '</text>'
-            : '<text x="360" y="' . self::Coordinate($design['detailY']) . '" class="value">' . $valueText . '</text>';
+        $valueElement = '<text x="360" y="' . self::Coordinate($design['detailY'])
+            . '" class="value"><tspan class="value-number">' . $formattedValue . '</tspan>'
+            . ($formattedUnit === '' ? '' : '<tspan class="value-unit" dx="8">' . $formattedUnit . '</tspan>')
+            . '</text>';
         $ariaLabel = SVGPreviewHelper::escape(trim(
             ($rawTitle === '' ? '' : $rawTitle . ': ')
             . $rawValue
@@ -78,7 +79,7 @@ final class EChartsGaugeSinglePreview
 <svg xmlns="http://www.w3.org/2000/svg" width="720" height="400" viewBox="0 0 720 400" role="img" aria-label="{$ariaLabel}" data-preset="{$preset}" data-theme="{$theme}" data-major-splits="{$design['majorSplits']}">
   <defs><filter id="speed-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="2" dy="2" stdDeviation="4" flood-color="{$palette['accent']}" flood-opacity="0.45"/></filter></defs>
   <style>
-    .surface{fill:{$palette['background']}}.theme-track-segment{fill:none;stroke-linecap:round;stroke-linejoin:round}.progress{fill:none;stroke:{$palette['accent']};stroke-linecap:round;stroke-linejoin:round}.speed-shadow{filter:url(#speed-shadow)}.minor{stroke:{$palette['muted']};stroke-width:1}.major{stroke:{$palette['border']};stroke-width:2}.axis{fill:{$palette['muted']};font:14px 'Segoe UI',Arial,sans-serif;text-anchor:middle;dominant-baseline:middle}.pointer,.speed-pointer{fill:{$palette['accent']}}.anchor{fill:{$palette['accent']};stroke:{$palette['text']};stroke-width:2}.detail-box{fill:{$palette['surface']};stroke:{$palette['border']};stroke-width:2}.value{fill:{$palette['text']};font:600 38px 'Segoe UI',Arial,sans-serif;text-anchor:middle}.value-number{font-size:42px;font-weight:800}.value-unit{fill:{$palette['muted']};font-size:18px;font-weight:400}.title{fill:{$palette['muted']};font:18px 'Segoe UI',Arial,sans-serif;text-anchor:middle}svg[data-preset="progress"] .value{font-size:46px}svg[data-preset="speed"] .axis{font-size:18px}svg[data-preset="speed"] .minor{stroke-width:2}svg[data-preset="speed"] .major{stroke-width:3}
+    .surface{fill:{$palette['background']}}.theme-track-segment{fill:none;stroke-linecap:round;stroke-linejoin:round}.progress{fill:none;stroke:{$palette['accent']};stroke-linecap:round;stroke-linejoin:round}.speed-shadow{filter:url(#speed-shadow)}.minor{stroke:{$palette['muted']};stroke-width:1}.major{stroke:{$palette['border']};stroke-width:2}.axis{fill:{$palette['muted']};font-size:{$design['axisFontSize']}px;font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle;dominant-baseline:middle}.pointer,.speed-pointer{fill:{$palette['accent']}}.anchor{fill:{$palette['accent']};stroke:{$palette['text']};stroke-width:2}.detail-box{fill:{$palette['surface']};stroke:{$palette['border']};stroke-width:2}.value{fill:{$palette['text']};font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle}.value-number{font-size:{$design['valueFontSize']}px;font-weight:{$valueFontWeight}}.value-unit{fill:{$unitColor};font-size:{$design['unitFontSize']}px;font-weight:{$unitFontWeight}}.title{fill:{$palette['muted']};font-size:{$design['titleFontSize']}px;font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle}svg[data-preset="speed"] .minor{stroke-width:2}svg[data-preset="speed"] .major{stroke-width:3}
   </style>
   <rect class="surface" width="720" height="400" rx="12"/>
   {$trackElements}
@@ -118,6 +119,11 @@ SVG;
      *     tickDistance: float,
      *     tickLength: float,
      *     splitLength: float,
+     *     axisFontSize: float,
+     *     valueFontSize: float,
+     *     unitFontSize: float,
+     *     titleFontSize: float,
+     *     pointerWidth: float,
      *     detailY: float,
      *     titleY: float,
      *     showProgress: bool,
@@ -132,86 +138,140 @@ SVG;
     {
         return match ($preset) {
             'basic' => [
-                'startAngle'     => 210.0,
-                'endAngle'       => -30.0,
-                'centerY'        => 196.0,
-                'radius'         => 132.0,
-                'labelRadius'    => 97.0,
-                'pointerLength'  => 102.0,
-                'lineWidth'      => 16.0,
-                'tickDistance'   => 4.0,
-                'tickLength'     => 5.0,
-                'splitLength'    => 10.0,
-                'detailY'        => 294.0,
-                'titleY'         => 352.0,
-                'showProgress'   => false,
-                'showMinorTicks' => true,
-                'detailBox'      => false,
-                'speedPointer'   => false,
-                'majorSplits'    => 10,
-                'minorSplits'    => 5
+                'startAngle'      => 210.0,
+                'endAngle'        => -30.0,
+                'centerY'         => 196.0,
+                'radius'          => 132.0,
+                'labelRadius'     => 97.0,
+                'pointerLength'   => 102.0,
+                'lineWidth'       => 16.0,
+                'tickDistance'    => 4.0,
+                'tickLength'      => 5.0,
+                'splitLength'     => 10.0,
+                'axisFontSize'    => 14.0,
+                'valueFontSize'   => 38.0,
+                'unitFontSize'    => 38.0,
+                'titleFontSize'   => 18.0,
+                'pointerWidth'    => 14.0,
+                'detailY'         => 294.0,
+                'titleY'          => 352.0,
+                'showProgress'    => false,
+                'showMinorTicks'  => true,
+                'detailBox'       => false,
+                'speedPointer'    => false,
+                'majorSplits'     => 10,
+                'minorSplits'     => 5
             ],
             'progress' => [
-                'startAngle'     => 210.0,
-                'endAngle'       => -30.0,
-                'centerY'        => 190.0,
-                'radius'         => 132.0,
-                'labelRadius'    => 94.0,
-                'pointerLength'  => 94.0,
-                'lineWidth'      => 20.0,
-                'tickDistance'   => 4.0,
-                'tickLength'     => 5.0,
-                'splitLength'    => 14.0,
-                'detailY'        => 306.0,
-                'titleY'         => 360.0,
-                'showProgress'   => true,
-                'showMinorTicks' => false,
-                'detailBox'      => false,
-                'speedPointer'   => false,
-                'majorSplits'    => 10,
-                'minorSplits'    => 5
+                'startAngle'      => 210.0,
+                'endAngle'        => -30.0,
+                'centerY'         => 190.0,
+                'radius'          => 132.0,
+                'labelRadius'     => 94.0,
+                'pointerLength'   => 94.0,
+                'lineWidth'       => 20.0,
+                'tickDistance'    => 4.0,
+                'tickLength'      => 5.0,
+                'splitLength'     => 14.0,
+                'axisFontSize'    => 14.0,
+                'valueFontSize'   => 46.0,
+                'unitFontSize'    => 46.0,
+                'titleFontSize'   => 18.0,
+                'pointerWidth'    => 14.0,
+                'detailY'         => 306.0,
+                'titleY'          => 360.0,
+                'showProgress'    => true,
+                'showMinorTicks'  => false,
+                'detailBox'       => false,
+                'speedPointer'    => false,
+                'majorSplits'     => 10,
+                'minorSplits'     => 5
             ],
             'speed' => [
-                'startAngle'     => 180.0,
-                'endAngle'       => 0.0,
-                'centerY'        => 232.0,
-                'radius'         => 142.0,
-                'labelRadius'    => 105.0,
-                'pointerLength'  => 113.25,
-                'lineWidth'      => 18.0,
-                'tickDistance'   => 4.0,
-                'tickLength'     => 5.0,
-                'splitLength'    => 12.0,
-                'detailY'        => 319.0,
-                'titleY'         => 370.0,
-                'showProgress'   => true,
-                'showMinorTicks' => true,
-                'detailBox'      => true,
-                'speedPointer'   => true,
-                'majorSplits'    => self::ResolveSpeedSplitNumber($minimum, $maximum),
-                'minorSplits'    => 2
+                'startAngle'      => 180.0,
+                'endAngle'        => 0.0,
+                'centerY'         => 232.0,
+                'radius'          => 142.0,
+                'labelRadius'     => 105.0,
+                'pointerLength'   => 113.25,
+                'lineWidth'       => 18.0,
+                'tickDistance'    => 4.0,
+                'tickLength'      => 5.0,
+                'splitLength'     => 12.0,
+                'axisFontSize'    => 18.0,
+                'valueFontSize'   => 42.0,
+                'unitFontSize'    => 18.0,
+                'titleFontSize'   => 18.0,
+                'pointerWidth'    => 16.0,
+                'detailY'         => 319.0,
+                'titleY'          => 370.0,
+                'showProgress'    => true,
+                'showMinorTicks'  => true,
+                'detailBox'       => true,
+                'speedPointer'    => true,
+                'majorSplits'     => self::ResolveSpeedSplitNumber($minimum, $maximum),
+                'minorSplits'     => 2
             ],
             default => [
-                'startAngle'     => 210.0,
-                'endAngle'       => -30.0,
-                'centerY'        => 196.0,
-                'radius'         => 132.0,
-                'labelRadius'    => 97.0,
-                'pointerLength'  => 98.0,
-                'lineWidth'      => 18.0,
-                'tickDistance'   => 4.0,
-                'tickLength'     => 5.0,
-                'splitLength'    => 10.0,
-                'detailY'        => 294.0,
-                'titleY'         => 352.0,
-                'showProgress'   => true,
-                'showMinorTicks' => true,
-                'detailBox'      => false,
-                'speedPointer'   => false,
-                'majorSplits'    => 10,
-                'minorSplits'    => 5
+                'startAngle'      => 210.0,
+                'endAngle'        => -30.0,
+                'centerY'         => 196.0,
+                'radius'          => 132.0,
+                'labelRadius'     => 97.0,
+                'pointerLength'   => 98.0,
+                'lineWidth'       => 18.0,
+                'tickDistance'    => 4.0,
+                'tickLength'      => 5.0,
+                'splitLength'     => 10.0,
+                'axisFontSize'    => 14.0,
+                'valueFontSize'   => 38.0,
+                'unitFontSize'    => 38.0,
+                'titleFontSize'   => 18.0,
+                'pointerWidth'    => 14.0,
+                'detailY'         => 294.0,
+                'titleY'          => 352.0,
+                'showProgress'    => true,
+                'showMinorTicks'  => true,
+                'detailBox'       => false,
+                'speedPointer'    => false,
+                'majorSplits'     => 10,
+                'minorSplits'     => 5
             ]
         };
+    }
+
+    /**
+     * @param array<string, float|bool|int> $design
+     * @param array<string, int> $style
+     * @return array<string, float|bool|int>
+     */
+    private static function ApplyStyleScales(array $design, array $style): array
+    {
+        $labelGap = (float) $design['radius']
+            - (float) $design['lineWidth'] / 2.0
+            - (float) $design['tickDistance']
+            - (float) $design['splitLength']
+            - (float) $design['labelRadius'];
+        foreach ([
+            'scaleFontSizePercent'   => 'axisFontSize',
+            'valueFontSizePercent'   => 'valueFontSize',
+            'unitFontSizePercent'    => 'unitFontSize',
+            'titleFontSizePercent'   => 'titleFontSize',
+            'ringWidthPercent'       => 'lineWidth',
+            'pointerWidthPercent'    => 'pointerWidth',
+            'minorTickLengthPercent' => 'tickLength',
+            'majorTickLengthPercent' => 'splitLength'
+        ] as $styleName => $designName) {
+            $percent = max(50, min(150, (int) ($style[$styleName] ?? 100)));
+            $design[$designName] = (float) $design[$designName] * $percent / 100;
+        }
+        $design['labelRadius'] = (float) $design['radius']
+            - (float) $design['lineWidth'] / 2.0
+            - (float) $design['tickDistance']
+            - (float) $design['splitLength']
+            - $labelGap;
+
+        return $design;
     }
 
     /** @param array<string, float|bool|int> $design */
@@ -329,8 +389,9 @@ SVG;
         $centerY = (float) $design['centerY'];
         $tip = self::Point((float) $design['pointerLength'], $angle, $centerY);
         $radians = deg2rad($angle);
-        $perpendicularX = sin($radians) * 7.0;
-        $perpendicularY = cos($radians) * 7.0;
+        $halfPointerWidth = (float) $design['pointerWidth'] / 2.0;
+        $perpendicularX = sin($radians) * $halfPointerWidth;
+        $perpendicularY = cos($radians) * $halfPointerWidth;
         $leftX = self::CENTER_X - $perpendicularX;
         $leftY = $centerY - $perpendicularY;
         $rightX = self::CENTER_X + $perpendicularX;
@@ -353,11 +414,12 @@ SVG;
         $tip = self::Point((float) $design['pointerLength'], $angle, $centerY);
         $perpendicularX = sin($radians);
         $perpendicularY = cos($radians);
+        $pointerScale = (float) $design['pointerWidth'] / 16.0;
         $points = [
-            [$tip[0] - $perpendicularX * 2.0, $tip[1] - $perpendicularY * 2.0],
-            [$tip[0] + $perpendicularX * 2.0, $tip[1] + $perpendicularY * 2.0],
-            [self::CENTER_X + $perpendicularX * 8.0, $centerY + $perpendicularY * 8.0],
-            [self::CENTER_X - $perpendicularX * 8.0, $centerY - $perpendicularY * 8.0]
+            [$tip[0] - $perpendicularX * 2.0 * $pointerScale, $tip[1] - $perpendicularY * 2.0 * $pointerScale],
+            [$tip[0] + $perpendicularX * 2.0 * $pointerScale, $tip[1] + $perpendicularY * 2.0 * $pointerScale],
+            [self::CENTER_X + $perpendicularX * 8.0 * $pointerScale, $centerY + $perpendicularY * 8.0 * $pointerScale],
+            [self::CENTER_X - $perpendicularX * 8.0 * $pointerScale, $centerY - $perpendicularY * 8.0 * $pointerScale]
         ];
         $serialized = array_map(
             static fn (array $point): string => self::Coordinate($point[0]) . ',' . self::Coordinate($point[1]),

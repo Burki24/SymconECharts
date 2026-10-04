@@ -58,6 +58,15 @@ Teilstriche, Hauptteiler und Beschriftung werden mit positiven ECharts-Abstände
 in dieser Reihenfolge innerhalb der Achslinie angeordnet. Die SVG-Vorschau
 verwendet dieselbe radiale Reihenfolge.
 
+Der Kacheldesigner erlaubt zusätzlich validierte relative Anpassungen für
+Skalen-, Wert-, Einheiten- und Titelschrift sowie Ringstärke, Zeigerstärke,
+Nebenstrichlänge und Hauptteilerlänge. Alle Werte werden als Prozentwert der
+jeweiligen Presetvorgabe im Bereich von 50 bis 150 gespeichert. `100` ist der
+kompatible Standardwert und stellt die Presetvorgabe wieder her. Die relativen
+Werte werden erst nach der responsiven Skalierung angewendet und bleiben damit
+von der konkreten Kachelgröße unabhängig. Eine freie ECharts-Option wird daraus
+nicht abgeleitet.
+
 Farben bleiben in dieser Stufe bei den gemeinsamen Symcon-Designtokens. Die
 später ergänzte Auswahl offizieller ECharts-Themes ist als eigener Vertrag in
 [`ADR 0007`](0007-echarts-theme-assets-and-selection.md) festgelegt. Auch
@@ -79,7 +88,8 @@ Designer-Properties vorweggenommen.
 
 Benutzer können das Gauge-Layout im Instanzformular auswählen und unmittelbar
 in der SVG-Vorschau beurteilen. Nach dem Übernehmen verwendet die native Kachel
-dieselbe Auswahl. Weitere Single-Presets können unter neuen stabilen IDs
+dieselbe Auswahl und dieselben relativen Feinabstimmungen. Weitere
+Single-Presets können unter neuen stabilen IDs
 ergänzt werden; bestehende IDs ändern ihre grundlegende Bedeutung nicht.
 
 Die SVG-Vorschau bleibt eine gezielte Annäherung an den Canvas-Renderer und

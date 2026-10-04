@@ -13,33 +13,33 @@
                 1,
                 2
             ],
-            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme);"
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent);"
         },
         {
             "type": "NumberSpinner",
             "name": "Minimum",
             "caption": "Minimum",
             "digits": 3,
-            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme);"
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent);"
         },
         {
             "type": "NumberSpinner",
             "name": "Maximum",
             "caption": "Maximum",
             "digits": 3,
-            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme);"
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent);"
         },
         {
             "type": "ValidationTextBox",
             "name": "Title",
             "caption": "Title",
-            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme);"
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent);"
         },
         {
             "type": "ValidationTextBox",
             "name": "Unit",
             "caption": "Unit",
-            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme);"
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent);"
         },
         {
             "type": "NumberSpinner",
@@ -47,7 +47,7 @@
             "caption": "Decimal places",
             "minimum": 0,
             "maximum": 6,
-            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme);"
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent);"
         },
         {
             "type": "ExpansionPanel",
@@ -82,7 +82,7 @@
                             "value": "speed"
                         }
                     ],
-                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme);"
+                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent);"
                 },
                 {
                     "type": "Select",
@@ -119,7 +119,118 @@
                             "value": "roma"
                         }
                     ],
-                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme);"
+                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent);"
+                },
+                {
+                    "type": "ExpansionPanel",
+                    "caption": "Fine tuning",
+                    "expanded": false,
+                    "items": [
+                        {
+                            "type": "Label",
+                            "caption": "All values range from 50% to 150% of the selected preset. 100% restores the preset default."
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "ScaleFontSizePercent",
+                                    "caption": "Scale font size",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent);"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "ValueFontSizePercent",
+                                    "caption": "Value font size",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent);"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "UnitFontSizePercent",
+                                    "caption": "Unit font size",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent);"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "TitleFontSizePercent",
+                                    "caption": "Title font size",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent);"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "RingWidthPercent",
+                                    "caption": "Ring width",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent);"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PointerWidthPercent",
+                                    "caption": "Pointer width",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent);"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "MinorTickLengthPercent",
+                                    "caption": "Minor tick length",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent);"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "MajorTickLengthPercent",
+                                    "caption": "Major tick length",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent);"
+                                }
+                            ]
+                        }
+                    ]
                 },
                 {
                     "type": "Image",

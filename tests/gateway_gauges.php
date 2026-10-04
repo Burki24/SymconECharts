@@ -358,6 +358,14 @@ $gauge->SetTestProperty('Unit', '°C');
 $gauge->SetTestProperty('Decimals', 1);
 $gauge->SetTestProperty('GaugePreset', 'progress');
 $gauge->SetTestProperty('EChartsTheme', 'vintage');
+$gauge->SetTestProperty('ScaleFontSizePercent', 150);
+$gauge->SetTestProperty('ValueFontSizePercent', 125);
+$gauge->SetTestProperty('UnitFontSizePercent', 75);
+$gauge->SetTestProperty('TitleFontSizePercent', 110);
+$gauge->SetTestProperty('RingWidthPercent', 120);
+$gauge->SetTestProperty('PointerWidthPercent', 80);
+$gauge->SetTestProperty('MinorTickLengthPercent', 75);
+$gauge->SetTestProperty('MajorTickLengthPercent', 150);
 $gauge->ApplyChanges();
 
 assertGatewayGauge($gauge->GetTestStatus() === IS_ACTIVE, 'Gauge Single must become active.');
@@ -383,7 +391,15 @@ assertGatewayGauge(
 );
 assertGatewayGauge(str_contains($visualizationTile, "case 'speed':"), 'Gauge Single tile must render the Speed preset.');
 foreach ([
-    'function resolveGaugeLayout(preset, width, height)',
+    'function resolveGaugeLayout(preset, width, height, style)',
+    "resolveStyleScale(style, 'scaleFontSizePercent')",
+    "resolveStyleScale(style, 'valueFontSizePercent')",
+    "resolveStyleScale(style, 'unitFontSizePercent')",
+    "resolveStyleScale(style, 'titleFontSizePercent')",
+    "resolveStyleScale(style, 'ringWidthPercent')",
+    "resolveStyleScale(style, 'pointerWidthPercent')",
+    "resolveStyleScale(style, 'minorTickLengthPercent')",
+    "resolveStyleScale(style, 'majorTickLengthPercent')",
     'var scale = Math.min(width / 440, height / 400);',
     'var height = Math.max(chartElement.clientHeight, 160);',
     'center: [layout.centerX, layout.centerY]',
@@ -452,6 +468,12 @@ assertGatewayGauge(str_contains($initialPreviewSvg, 'data-theme="vintage"'), 'Ga
 assertGatewayGauge(str_contains($initialPreviewSvg, '#FEF8EF'), 'Gauge Single preview must apply the Vintage background.');
 assertGatewayGauge(str_contains($initialPreviewSvg, 'Room climate'), 'Gauge Single preview must contain the title.');
 assertGatewayGauge(str_contains($initialPreviewSvg, '42.5 °C'), 'Gauge Single preview must use the current source value.');
+foreach (['font-size:21px', 'font-size:57.5px', 'font-size:34.5px', 'font-size:19.8px', 'stroke-width:24.00px'] as $customPreviewStyle) {
+    assertGatewayGauge(
+        str_contains($initialPreviewSvg, $customPreviewStyle),
+        'Gauge Single preview must apply the configured fine tuning: ' . $customPreviewStyle
+    );
+}
 
 foreach (['basic', 'simple', 'progress', 'speed'] as $preset) {
     $presetSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
@@ -637,6 +659,19 @@ assertGatewayGauge(($gaugeData['source']['timestamp'] ?? null) === 1780000000, '
 assertGatewayGauge(($gaugeData['gauge']['minimum'] ?? null) === -20.0, 'Gauge Single minimum changed.');
 assertGatewayGauge(($gaugeData['gauge']['maximum'] ?? null) === 80.0, 'Gauge Single maximum changed.');
 assertGatewayGauge(($gaugeData['gauge']['preset'] ?? null) === 'progress', 'Gauge Single preset changed.');
+assertGatewayGauge(
+    ($gaugeData['gauge']['style'] ?? null) === [
+        'scaleFontSizePercent'   => 150,
+        'valueFontSizePercent'   => 125,
+        'unitFontSizePercent'    => 75,
+        'titleFontSizePercent'   => 110,
+        'ringWidthPercent'       => 120,
+        'pointerWidthPercent'    => 80,
+        'minorTickLengthPercent' => 75,
+        'majorTickLengthPercent' => 150
+    ],
+    'Gauge Single must expose the validated tile-designer fine tuning in its chart model.'
+);
 assertGatewayGauge(($gaugeData['theme'] ?? null) === 'vintage', 'Gauge Single theme changed.');
 
 $GLOBALS['symconTestVariables'][4711]['Value'] = 44.75;
@@ -758,6 +793,11 @@ $singleGauge = new EChartsGaugeSingle();
 $singleGauge->Create();
 $singleGauge->SetTestProperty('SourceVariableID', 4711);
 $singleGauge->ApplyChanges();
+$defaultSingleData = json_decode($singleGauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    array_values(array_unique($defaultSingleData['gauge']['style'] ?? [])) === [100],
+    'Gauge Single fine tuning must preserve every preset default for existing instances.'
+);
 $singleGauge->SetTestProperty('SourceVariableID', 4712);
 $singleGauge->ApplyChanges();
 assertGatewayGauge($singleGauge->GetTestStatus() === 201, 'Non-numeric Gauge source must set status 201.');
@@ -785,6 +825,13 @@ $invalidDesign->SetTestProperty('SourceVariableID', 4711);
 $invalidDesign->SetTestProperty('GaugePreset', 'unknown');
 $invalidDesign->ApplyChanges();
 assertGatewayGauge($invalidDesign->GetTestStatus() === 205, 'Unknown Gauge presets must set status 205.');
+
+$invalidDesignScale = new EChartsGaugeSingle();
+$invalidDesignScale->Create();
+$invalidDesignScale->SetTestProperty('SourceVariableID', 4711);
+$invalidDesignScale->SetTestProperty('RingWidthPercent', 151);
+$invalidDesignScale->ApplyChanges();
+assertGatewayGauge($invalidDesignScale->GetTestStatus() === 205, 'Invalid Gauge design scales must set status 205.');
 
 $invalidTheme = new EChartsGaugeSingle();
 $invalidTheme->Create();

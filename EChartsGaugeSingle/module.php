@@ -46,6 +46,19 @@ class EChartsGaugeSingle extends IPSModuleStrict
 
     private const PRESET_SIMPLE = 'simple';
     private const SUPPORTED_PRESETS = ['basic', self::PRESET_SIMPLE, 'progress', 'speed'];
+    private const DESIGN_SCALE_DEFAULT = 100;
+    private const DESIGN_SCALE_MINIMUM = 50;
+    private const DESIGN_SCALE_MAXIMUM = 150;
+    private const DESIGN_SCALE_PROPERTIES = [
+        'scaleFontSizePercent'    => 'ScaleFontSizePercent',
+        'valueFontSizePercent'    => 'ValueFontSizePercent',
+        'unitFontSizePercent'     => 'UnitFontSizePercent',
+        'titleFontSizePercent'    => 'TitleFontSizePercent',
+        'ringWidthPercent'        => 'RingWidthPercent',
+        'pointerWidthPercent'     => 'PointerWidthPercent',
+        'minorTickLengthPercent'  => 'MinorTickLengthPercent',
+        'majorTickLengthPercent'  => 'MajorTickLengthPercent'
+    ];
 
     public function Create(): void
     {
@@ -61,6 +74,9 @@ class EChartsGaugeSingle extends IPSModuleStrict
         $this->RegisterPropertyInteger('Decimals', 1);
         $this->RegisterPropertyString('GaugePreset', self::PRESET_SIMPLE);
         $this->RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO);
+        foreach (self::DESIGN_SCALE_PROPERTIES as $propertyName) {
+            $this->RegisterPropertyInteger($propertyName, self::DESIGN_SCALE_DEFAULT);
+        }
         $this->RegisterAttributeInteger('RegisteredSourceVariableID', 0);
         $this->RegisterAttributeString('LastError', '');
     }
@@ -98,7 +114,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 $this->ReadPropertyString('Unit'),
                 $this->ReadPropertyInteger('Decimals'),
                 $this->ReadPropertyString('GaugePreset'),
-                $this->ReadPropertyString('EChartsTheme')
+                $this->ReadPropertyString('EChartsTheme'),
+                $this->ReadGaugeStyle()
             )
         );
 
@@ -116,7 +133,15 @@ class EChartsGaugeSingle extends IPSModuleStrict
         string $Unit,
         int $Decimals,
         string $GaugePreset = self::PRESET_SIMPLE,
-        string $EChartsTheme = EChartsAsset::THEME_AUTO
+        string $EChartsTheme = EChartsAsset::THEME_AUTO,
+        int $ScaleFontSizePercent = self::DESIGN_SCALE_DEFAULT,
+        int $ValueFontSizePercent = self::DESIGN_SCALE_DEFAULT,
+        int $UnitFontSizePercent = self::DESIGN_SCALE_DEFAULT,
+        int $TitleFontSizePercent = self::DESIGN_SCALE_DEFAULT,
+        int $RingWidthPercent = self::DESIGN_SCALE_DEFAULT,
+        int $PointerWidthPercent = self::DESIGN_SCALE_DEFAULT,
+        int $MinorTickLengthPercent = self::DESIGN_SCALE_DEFAULT,
+        int $MajorTickLengthPercent = self::DESIGN_SCALE_DEFAULT
     ): void {
         $this->UpdateFormField(
             'GaugePreview',
@@ -129,7 +154,17 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 $Unit,
                 $Decimals,
                 $GaugePreset,
-                $EChartsTheme
+                $EChartsTheme,
+                [
+                    'scaleFontSizePercent'   => $ScaleFontSizePercent,
+                    'valueFontSizePercent'   => $ValueFontSizePercent,
+                    'unitFontSizePercent'    => $UnitFontSizePercent,
+                    'titleFontSizePercent'   => $TitleFontSizePercent,
+                    'ringWidthPercent'       => $RingWidthPercent,
+                    'pointerWidthPercent'    => $PointerWidthPercent,
+                    'minorTickLengthPercent' => $MinorTickLengthPercent,
+                    'majorTickLengthPercent' => $MajorTickLengthPercent
+                ]
             ))
         );
     }
@@ -198,7 +233,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 'maximum'  => $this->ReadPropertyFloat('Maximum'),
                 'unit'     => $this->ReadPropertyString('Unit'),
                 'decimals' => $this->ReadPropertyInteger('Decimals'),
-                'preset'   => $this->ReadPropertyString('GaugePreset')
+                'preset'   => $this->ReadPropertyString('GaugePreset'),
+                'style'    => $this->ReadGaugeStyle()
             ],
             'value'         => (float) $value
         ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
@@ -302,7 +338,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
         string $unit,
         int $decimals,
         string $preset,
-        string $theme
+        string $theme,
+        array $style
     ): string {
         if (!is_finite($minimum) || !is_finite($maximum) || $minimum >= $maximum) {
             return EChartsGaugeSinglePreview::CreateErrorSvg(
@@ -334,7 +371,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
             $decimals,
             $language,
             $preset,
-            $theme
+            $theme,
+            $style
         );
     }
 
@@ -409,7 +447,27 @@ class EChartsGaugeSingle extends IPSModuleStrict
             ];
         }
 
+        foreach ($this->ReadGaugeStyle() as $value) {
+            if ($value < self::DESIGN_SCALE_MINIMUM || $value > self::DESIGN_SCALE_MAXIMUM) {
+                return [
+                    'Status'  => self::STATUS_DESIGN_INVALID,
+                    'Message' => 'Gauge design scale values must be between 50 and 150 percent.'
+                ];
+            }
+        }
+
         return null;
+    }
+
+    /** @return array<string, int> */
+    private function ReadGaugeStyle(): array
+    {
+        $style = [];
+        foreach (self::DESIGN_SCALE_PROPERTIES as $fieldName => $propertyName) {
+            $style[$fieldName] = $this->ReadPropertyInteger($propertyName);
+        }
+
+        return $style;
     }
 
     private function SynchronizeSourceReference(): void
