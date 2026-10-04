@@ -13,33 +13,33 @@
                 1,
                 2
             ],
-            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG);"
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent);"
         },
         {
             "type": "NumberSpinner",
             "name": "Minimum",
             "caption": "Minimum",
             "digits": 3,
-            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG);"
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent);"
         },
         {
             "type": "NumberSpinner",
             "name": "Maximum",
             "caption": "Maximum",
             "digits": 3,
-            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG);"
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent);"
         },
         {
             "type": "ValidationTextBox",
             "name": "Title",
             "caption": "Title",
-            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG);"
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent);"
         },
         {
             "type": "ValidationTextBox",
             "name": "Unit",
             "caption": "Unit",
-            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG);"
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent);"
         },
         {
             "type": "NumberSpinner",
@@ -47,7 +47,7 @@
             "caption": "Decimal places",
             "minimum": 0,
             "maximum": 6,
-            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG);"
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent);"
         },
         {
             "type": "ExpansionPanel",
@@ -82,7 +82,7 @@
                             "value": "speed"
                         }
                     ],
-                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG);"
+                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent);"
                 },
                 {
                     "type": "Select",
@@ -119,7 +119,7 @@
                             "value": "roma"
                         }
                     ],
-                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG);"
+                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent);"
                 },
                 {
                     "type": "ExpansionPanel",
@@ -160,7 +160,7 @@
                                             "value": "custom"
                                         }
                                     ],
-                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG);"
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent);"
                                 },
                                 {
                                     "type": "Select",
@@ -193,7 +193,7 @@
                                             "value": "custom"
                                         }
                                     ],
-                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG);"
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent);"
                                 }
                             ]
                         },
@@ -203,7 +203,7 @@
                             "caption": "Custom pointer SVG",
                             "extensions": ".svg",
                             "width": "540px",
-                            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG);"
+                            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent);"
                         },
                         {
                             "type": "Label",
@@ -283,7 +283,7 @@
                                             "value": 337.5
                                         }
                                     ],
-                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG);"
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent);"
                                 },
                                 {
                                     "type": "Select",
@@ -356,7 +356,7 @@
                                             "value": 337.5
                                         }
                                     ],
-                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG);"
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent);"
                                 }
                             ]
                         }
@@ -386,7 +386,7 @@
                                     "value": "custom"
                                 }
                             ],
-                            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG);"
+                            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent);"
                         },
                         {
                             "type": "RowLayout",
@@ -397,7 +397,7 @@
                                     "caption": "Pointer",
                                     "allowTransparent": false,
                                     "width": "260px",
-                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG);"
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent);"
                                 },
                                 {
                                     "type": "SelectColor",
@@ -405,7 +405,7 @@
                                     "caption": "Progress",
                                     "allowTransparent": false,
                                     "width": "260px",
-                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG);"
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent);"
                                 }
                             ]
                         },
@@ -418,7 +418,7 @@
                                     "caption": "Ring",
                                     "allowTransparent": false,
                                     "width": "260px",
-                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG);"
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent);"
                                 },
                                 {
                                     "type": "SelectColor",
@@ -426,7 +426,7 @@
                                     "caption": "Scale and ticks",
                                     "allowTransparent": false,
                                     "width": "260px",
-                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG);"
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent);"
                                 }
                             ]
                         },
@@ -439,7 +439,7 @@
                                     "caption": "Value and unit",
                                     "allowTransparent": false,
                                     "width": "260px",
-                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG);"
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent);"
                                 },
                                 {
                                     "type": "SelectColor",
@@ -447,7 +447,7 @@
                                     "caption": "Title",
                                     "allowTransparent": false,
                                     "width": "260px",
-                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG);"
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent);"
                                 }
                             ]
                         }
@@ -473,7 +473,7 @@
                                     "maximum": 150,
                                     "suffix": "%",
                                     "width": "260px",
-                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG);"
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent);"
                                 },
                                 {
                                     "type": "NumberSpinner",
@@ -483,7 +483,7 @@
                                     "maximum": 150,
                                     "suffix": "%",
                                     "width": "260px",
-                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG);"
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent);"
                                 }
                             ]
                         },
@@ -498,7 +498,7 @@
                                     "maximum": 150,
                                     "suffix": "%",
                                     "width": "260px",
-                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG);"
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent);"
                                 },
                                 {
                                     "type": "NumberSpinner",
@@ -508,7 +508,7 @@
                                     "maximum": 150,
                                     "suffix": "%",
                                     "width": "260px",
-                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG);"
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent);"
                                 }
                             ]
                         },
@@ -523,7 +523,7 @@
                                     "maximum": 150,
                                     "suffix": "%",
                                     "width": "260px",
-                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG);"
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent);"
                                 },
                                 {
                                     "type": "NumberSpinner",
@@ -533,7 +533,22 @@
                                     "maximum": 150,
                                     "suffix": "%",
                                     "width": "260px",
-                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG);"
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent);"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PointerLengthPercent",
+                                    "caption": "Pointer length",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent);"
                                 }
                             ]
                         },
@@ -548,7 +563,7 @@
                                     "maximum": 150,
                                     "suffix": "%",
                                     "width": "260px",
-                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG);"
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent);"
                                 },
                                 {
                                     "type": "NumberSpinner",
@@ -558,7 +573,7 @@
                                     "maximum": 150,
                                     "suffix": "%",
                                     "width": "260px",
-                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG);"
+                                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent);"
                                 }
                             ]
                         }

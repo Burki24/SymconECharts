@@ -60,6 +60,7 @@ final class EChartsGaugeSinglePreview
         $arcMode = SVGPreviewHelper::escape((string) ($style['arcMode'] ?? 'preset'));
         $startPosition = self::Coordinate(self::NormalizePosition($style['startPosition'] ?? 270.0));
         $endPosition = self::Coordinate(self::NormalizePosition($style['endPosition'] ?? 90.0));
+        $pointerLengthPercent = max(50, min(150, (int) ($style['pointerLengthPercent'] ?? 100)));
         $unitColor = $customColors ? $valueColor : ($preset === 'speed' ? $palette['muted'] : $palette['text']);
         $valueFontWeight = $preset === 'speed' ? 800 : 600;
         $unitFontWeight = $preset === 'speed' ? 400 : 600;
@@ -100,7 +101,7 @@ final class EChartsGaugeSinglePreview
             : '';
 
         return <<<SVG
-<svg xmlns="http://www.w3.org/2000/svg" width="720" height="400" viewBox="0 0 720 400" role="img" aria-label="{$ariaLabel}" data-preset="{$preset}" data-theme="{$theme}" data-arc-mode="{$arcMode}" data-start-position="{$startPosition}" data-end-position="{$endPosition}" data-major-splits="{$design['majorSplits']}">
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="400" viewBox="0 0 720 400" role="img" aria-label="{$ariaLabel}" data-preset="{$preset}" data-theme="{$theme}" data-arc-mode="{$arcMode}" data-start-position="{$startPosition}" data-end-position="{$endPosition}" data-pointer-length-percent="{$pointerLengthPercent}" data-major-splits="{$design['majorSplits']}">
   <defs><filter id="speed-progress-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="2" dy="2" stdDeviation="4" flood-color="{$progressColor}" flood-opacity="0.45"/></filter><filter id="speed-pointer-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="2" dy="2" stdDeviation="4" flood-color="{$pointerColor}" flood-opacity="0.45"/></filter></defs>
   <style>
     .surface{fill:{$palette['background']}}.theme-track-segment{fill:none;stroke-linecap:round;stroke-linejoin:round}.progress{fill:none;stroke:{$progressColor};stroke-linecap:round;stroke-linejoin:round}.speed-progress-shadow{filter:url(#speed-progress-shadow)}.speed-pointer-shadow{filter:url(#speed-pointer-shadow)}.minor{stroke:{$minorColor};stroke-width:1}.major{stroke:{$majorColor};stroke-width:2}.axis{fill:{$scaleColor};font-size:{$design['axisFontSize']}px;font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle;dominant-baseline:middle}.pointer,.speed-pointer{fill:{$pointerColor}}.anchor{fill:{$pointerColor};stroke:{$valueColor};stroke-width:2}.detail-box{fill:{$palette['surface']};stroke:{$detailBorderColor};stroke-width:2}.value{fill:{$valueColor};font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle}.value-number{font-size:{$design['valueFontSize']}px;font-weight:{$valueFontWeight}}.value-unit{fill:{$unitColor};font-size:{$design['unitFontSize']}px;font-weight:{$unitFontWeight}}.title{fill:{$titleColor};font-size:{$design['titleFontSize']}px;font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle}svg[data-preset="speed"] .minor{stroke-width:2}svg[data-preset="speed"] .major{stroke-width:3}
@@ -283,6 +284,7 @@ SVG;
             'titleFontSizePercent'   => 'titleFontSize',
             'ringWidthPercent'       => 'lineWidth',
             'pointerWidthPercent'    => 'pointerWidth',
+            'pointerLengthPercent'   => 'pointerLength',
             'minorTickLengthPercent' => 'tickLength',
             'majorTickLengthPercent' => 'splitLength'
         ] as $styleName => $designName) {

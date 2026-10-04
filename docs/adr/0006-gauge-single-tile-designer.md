@@ -60,7 +60,7 @@ verwendet dieselbe radiale Reihenfolge.
 
 Der Kacheldesigner erlaubt zusätzlich validierte relative Anpassungen für
 Skalen-, Wert-, Einheiten- und Titelschrift sowie Ringstärke, Zeigerstärke,
-Nebenstrichlänge und Hauptteilerlänge. Alle Werte werden als Prozentwert der
+Zeigerlänge, Nebenstrichlänge und Hauptteilerlänge. Alle Werte werden als Prozentwert der
 jeweiligen Presetvorgabe im Bereich von 50 bis 150 gespeichert. `100` ist der
 kompatible Standardwert und stellt die Presetvorgabe wieder her. Die relativen
 Werte werden erst nach der responsiven Skalierung angewendet und bleiben damit

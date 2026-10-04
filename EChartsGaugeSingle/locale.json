@@ -62,6 +62,7 @@
             "Title font size": "Schriftgröße des Titels",
             "Ring width": "Ringstärke",
             "Pointer width": "Zeigerstärke",
+            "Pointer length": "Zeigerlänge",
             "Minor tick length": "Länge der Nebenstriche",
             "Major tick length": "Länge der Hauptteiler",
             "Minimum must be lower than maximum.": "Minimum muss kleiner als Maximum sein.",

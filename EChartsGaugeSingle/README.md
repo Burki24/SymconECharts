@@ -54,8 +54,8 @@ weiterhin aus dem unabhängig gewählten Theme und der optionale Instanztitel
 bleibt erhalten.
 
 Die Feinabstimmung im Kacheldesigner skaliert Schriftgrößen für Skala, Wert,
-Einheit und Titel sowie Ring, Zeiger, Nebenstriche und Hauptteiler relativ zur
-gewählten Vorlage. `100 %` entspricht immer der getesteten Presetvorgabe;
+Einheit und Titel sowie Ringstärke, Zeigerstärke, Zeigerlänge, Nebenstriche und
+Hauptteiler relativ zur gewählten Vorlage. `100 %` entspricht immer der getesteten Presetvorgabe;
 zulässig sind 50 bis 150 %. Dadurch bleiben individuelle Einstellungen auch
 bei anderen Kachelgrößen responsiv. Freie ECharts-JSON- oder
 JavaScript-Einstellungen werden nicht ausgeführt.
@@ -139,9 +139,9 @@ Minimum und Maximum, Titel, Einheit, 0 bis 6 Nachkommastellen, ein Gauge-Preset
 sowie ein ECharts-Theme. Unter „Geometrie und Zeiger“ werden Zeigerform,
 eine optionale SVG-Datei, Skalenbogen und Positionen gewählt; unter „Gauge-Farben“ können sechs
 Gauge-spezifische Farbrollen das Theme gezielt überschreiben. Unter
-„Feinabstimmung“ können die vier Schriftgrößen,
-Ring- und Zeigerstärke sowie Nebenstrich- und Hauptteilerlänge jeweils von
-50 bis 150 % der Presetvorgabe angepasst werden. Die stabilen Preset-IDs sind
+„Feinabstimmung“ können die vier Schriftgrößen, Ringstärke, Zeigerstärke und
+Zeigerlänge sowie Nebenstrich- und Hauptteilerlänge jeweils von 50 bis 150 %
+der Presetvorgabe angepasst werden. Die stabilen Preset-IDs sind
 `basic`, `simple`,
 `progress` und `speed`. Als Themes stehen `auto`, `dark`, `vintage`,
 `macarons`, `infographic`, `shine` und `roma` zur Verfügung. `auto` ist der

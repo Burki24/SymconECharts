@@ -364,6 +364,7 @@ $gauge->SetTestProperty('UnitFontSizePercent', 75);
 $gauge->SetTestProperty('TitleFontSizePercent', 110);
 $gauge->SetTestProperty('RingWidthPercent', 120);
 $gauge->SetTestProperty('PointerWidthPercent', 80);
+$gauge->SetTestProperty('PointerLengthPercent', 130);
 $gauge->SetTestProperty('MinorTickLengthPercent', 75);
 $gauge->SetTestProperty('MajorTickLengthPercent', 150);
 $gauge->SetTestProperty('PointerShape', 'arrow');
@@ -409,6 +410,8 @@ foreach ([
     "resolveStyleScale(style, 'titleFontSizePercent')",
     "resolveStyleScale(style, 'ringWidthPercent')",
     "resolveStyleScale(style, 'pointerWidthPercent')",
+    "resolveStyleScale(style, 'pointerLengthPercent')",
+    "pointerLength: Math.round(parseFloat(definition.pointerLength) * pointerLength * 100) / 100 + '%'",
     "resolveStyleScale(style, 'minorTickLengthPercent')",
     "resolveStyleScale(style, 'majorTickLengthPercent')",
     'var scale = Math.min(width / 440, height / 400);',
@@ -481,6 +484,10 @@ $initialPreviewSvg = base64_decode(
 assertGatewayGauge(is_string($initialPreviewSvg), 'Gauge Single preview SVG must be valid Base64.');
 assertGatewayGauge(str_contains($initialPreviewSvg, 'data-preset="progress"'), 'Gauge Single preview must use the selected preset.');
 assertGatewayGauge(str_contains($initialPreviewSvg, 'data-theme="vintage"'), 'Gauge Single preview must use the selected theme.');
+assertGatewayGauge(
+    str_contains($initialPreviewSvg, 'data-pointer-length-percent="130"'),
+    'Gauge Single preview must apply the configured pointer length.'
+);
 assertGatewayGauge(str_contains($initialPreviewSvg, '#FEF8EF'), 'Gauge Single preview must apply the Vintage background.');
 assertGatewayGauge(str_contains($initialPreviewSvg, 'Room climate'), 'Gauge Single preview must contain the title.');
 assertGatewayGauge(str_contains($initialPreviewSvg, '42.5 °C'), 'Gauge Single preview must use the current source value.');
@@ -507,6 +514,45 @@ foreach (['basic', 'simple', 'progress', 'speed'] as $preset) {
         'Gauge Single preview must render the ' . $preset . ' preset.'
     );
 }
+$shortCustomPointerSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
+    50.0,
+    0.0,
+    100.0,
+    '',
+    '',
+    0,
+    'en',
+    'simple',
+    'auto',
+    [
+        'pointerShape'         => 'custom',
+        'pointerPath'          => 'M0 0L10 100L0 90Z',
+        'pointerViewBox'       => '0 0 10 100',
+        'pointerLengthPercent' => 50
+    ]
+);
+$longCustomPointerSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
+    50.0,
+    0.0,
+    100.0,
+    '',
+    '',
+    0,
+    'en',
+    'simple',
+    'auto',
+    [
+        'pointerShape'         => 'custom',
+        'pointerPath'          => 'M0 0L10 100L0 90Z',
+        'pointerViewBox'       => '0 0 10 100',
+        'pointerLengthPercent' => 150
+    ]
+);
+assertGatewayGauge(
+    str_contains($shortCustomPointerSvg, 'height="49.00"')
+        && str_contains($longCustomPointerSvg, 'height="147.00"'),
+    'Gauge Single preview must scale custom pointer length from 50 to 150 percent.'
+);
 foreach ([
     'basic'    => ['centerY' => 196.0, 'radius' => 132.0],
     'simple'   => ['centerY' => 196.0, 'radius' => 132.0],
@@ -769,6 +815,7 @@ assertGatewayGauge(
         'titleFontSizePercent'   => 110,
         'ringWidthPercent'       => 120,
         'pointerWidthPercent'    => 80,
+        'pointerLengthPercent'   => 130,
         'minorTickLengthPercent' => 75,
         'majorTickLengthPercent' => 150,
         'pointerShape'           => 'arrow',
@@ -908,7 +955,7 @@ $singleGauge->SetTestProperty('SourceVariableID', 4711);
 $singleGauge->ApplyChanges();
 $defaultSingleData = json_decode($singleGauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
-    array_values(array_slice($defaultSingleData['gauge']['style'] ?? [], 0, 8)) === array_fill(0, 8, 100)
+    array_values(array_slice($defaultSingleData['gauge']['style'] ?? [], 0, 9)) === array_fill(0, 9, 100)
         && ($defaultSingleData['gauge']['style']['pointerShape'] ?? null) === 'preset'
         && ($defaultSingleData['gauge']['style']['arcMode'] ?? null) === 'preset'
         && ($defaultSingleData['gauge']['style']['colorMode'] ?? null) === 'theme',
@@ -997,6 +1044,13 @@ $invalidDesignScale->SetTestProperty('SourceVariableID', 4711);
 $invalidDesignScale->SetTestProperty('RingWidthPercent', 151);
 $invalidDesignScale->ApplyChanges();
 assertGatewayGauge($invalidDesignScale->GetTestStatus() === 205, 'Invalid Gauge design scales must set status 205.');
+
+$invalidPointerLength = new EChartsGaugeSingle();
+$invalidPointerLength->Create();
+$invalidPointerLength->SetTestProperty('SourceVariableID', 4711);
+$invalidPointerLength->SetTestProperty('PointerLengthPercent', 151);
+$invalidPointerLength->ApplyChanges();
+assertGatewayGauge($invalidPointerLength->GetTestStatus() === 205, 'Invalid Gauge pointer length must set status 205.');
 
 $invalidArc = new EChartsGaugeSingle();
 $invalidArc->Create();

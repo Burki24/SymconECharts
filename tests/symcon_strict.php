@@ -288,6 +288,7 @@ foreach ([
             'TitleFontSizePercent',
             'RingWidthPercent',
             'PointerWidthPercent',
+            'PointerLengthPercent',
             'MinorTickLengthPercent',
             'MajorTickLengthPercent'
         ] as $fineTuningName) {

@@ -62,6 +62,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
         'titleFontSizePercent'    => 'TitleFontSizePercent',
         'ringWidthPercent'        => 'RingWidthPercent',
         'pointerWidthPercent'     => 'PointerWidthPercent',
+        'pointerLengthPercent'    => 'PointerLengthPercent',
         'minorTickLengthPercent'  => 'MinorTickLengthPercent',
         'majorTickLengthPercent'  => 'MajorTickLengthPercent'
     ];
@@ -171,7 +172,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
         int $ScaleColor = 0xA7A9AE,
         int $ValueColor = 0xF4F5F7,
         int $TitleColor = 0xA7A9AE,
-        string $CustomPointerSVG = ''
+        string $CustomPointerSVG = '',
+        int $PointerLengthPercent = self::DESIGN_SCALE_DEFAULT
     ): void {
         $this->UpdateFormField(
             'GaugePreview',
@@ -192,6 +194,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
                     'titleFontSizePercent'   => $TitleFontSizePercent,
                     'ringWidthPercent'       => $RingWidthPercent,
                     'pointerWidthPercent'    => $PointerWidthPercent,
+                    'pointerLengthPercent'   => $PointerLengthPercent,
                     'minorTickLengthPercent' => $MinorTickLengthPercent,
                     'majorTickLengthPercent' => $MajorTickLengthPercent,
                     'pointerShape'           => $PointerShape,

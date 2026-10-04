@@ -216,6 +216,7 @@
         var titleFontSize = resolveStyleScale(style, 'titleFontSizePercent');
         var ringWidth = resolveStyleScale(style, 'ringWidthPercent');
         var pointerWidth = resolveStyleScale(style, 'pointerWidthPercent');
+        var pointerLength = resolveStyleScale(style, 'pointerLengthPercent');
         var minorTickLength = resolveStyleScale(style, 'minorTickLengthPercent');
         var majorTickLength = resolveStyleScale(style, 'majorTickLengthPercent');
         var lineWidth = resolveScaledMetric(definition.lineWidth * scale, ringWidth, 8, 24, 4, 40);
@@ -233,7 +234,7 @@
             splitLength: resolveScaledMetric(definition.splitLength * scale, majorTickLength, 8, 20, 4, 36),
             labelDistance: clamp(lineWidth + Math.round(definition.labelGap * scale), 10, 64),
             axisFontSize: resolveScaledMetric(14 * scale, scaleFontSize, 9, 18, 6, 30),
-            pointerLength: definition.pointerLength,
+            pointerLength: Math.round(parseFloat(definition.pointerLength) * pointerLength * 100) / 100 + '%',
             pointerWidth: resolveScaledMetric(
                 definition.pointerWidth * scale,
                 pointerWidth,
