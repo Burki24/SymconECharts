@@ -6,6 +6,18 @@
     "helpers": {
         "DataFlowHelper": {
             "target": "libs/helper/DataFlowHelper.php"
+        },
+        "IPSViewHTMLPageHelper": {
+            "target": "libs/helper/IPSViewHTMLPageHelper.php"
+        },
+        "ResponsiveVisualizationHelper": {
+            "target": "libs/helper/ResponsiveVisualizationHelper.php"
+        },
+        "VisualizationAssetHelper": {
+            "target": "libs/helper/VisualizationAssetHelper.php"
+        },
+        "VisualizationThemeHelper": {
+            "target": "libs/helper/VisualizationThemeHelper.php"
         }
     }
 }

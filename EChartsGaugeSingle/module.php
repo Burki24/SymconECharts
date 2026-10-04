@@ -3,14 +3,28 @@
 declare(strict_types=1);
 
 use Burki24\SymconModuleHelper\DataFlowHelper;
+use Burki24\SymconModuleHelper\IPSViewHTMLPageHelper;
+use Burki24\SymconModuleHelper\ResponsiveVisualizationHelper;
+use Burki24\SymconModuleHelper\VisualizationAssetHelper;
+use Burki24\SymconModuleHelper\VisualizationThemeHelper;
+use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsDataProtocol;
 
 require_once __DIR__ . '/../libs/helper/DataFlowHelper.php';
+require_once __DIR__ . '/../libs/helper/IPSViewHTMLPageHelper.php';
+require_once __DIR__ . '/../libs/helper/ResponsiveVisualizationHelper.php';
+require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
+require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
+require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 
 class EChartsGaugeSingle extends IPSModuleStrict
 {
     use DataFlowHelper;
+    use IPSViewHTMLPageHelper;
+    use ResponsiveVisualizationHelper;
+    use VisualizationAssetHelper;
+    use VisualizationThemeHelper;
 
     private const GATEWAY_MODULE_ID = '{33C9DF44-6F6D-5916-4AAE-CCB24BD6928D}';
     private const DATA_ID_TO_PARENT = '{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}';
@@ -25,6 +39,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
     {
         parent::Create();
 
+        $this->SetVisualizationType(1);
         $this->RegisterMessage(0, IPS_KERNELSTARTED);
         $this->RegisterPropertyInteger('SourceVariableID', 0);
         $this->RegisterPropertyFloat('Minimum', 0.0);
@@ -42,6 +57,9 @@ class EChartsGaugeSingle extends IPSModuleStrict
 
         $this->RegisterMessage(0, IPS_KERNELSTARTED);
         $this->Initialize();
+        if (IPS_GetKernelRunlevel() === KR_READY) {
+            $this->PublishVisualizationState();
+        }
     }
 
     public function GetCompatibleParents(): string
@@ -61,6 +79,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
             throw new RuntimeException($configurationError['Message']);
         }
         if (!$this->HasActiveParent()) {
+            $this->WriteAttributeString('LastError', 'No active EChartsGateway is connected.');
             $this->SetStatus(self::STATUS_PARENT_MISSING);
             throw new RuntimeException('No active EChartsGateway is connected.');
         }
@@ -119,6 +138,33 @@ class EChartsGaugeSingle extends IPSModuleStrict
         ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
     }
 
+    public function GetVisualizationTile(): string
+    {
+        return $this->RenderVisualizationHTMLPage(false, [
+            'language'           => $this->NormalizeHelperTranslationLanguage(
+                $this->ResolveHelperTranslationLanguage()
+            ),
+            'title'              => 'ECharts Gauge Single',
+            'visualizationTheme' => $this->VisualizationThemeCSS()
+                . "\n\n"
+                . $this->ResponsiveVisualizationCSS('#echarts-gauge-root', 'echarts-gauge'),
+            'state'              => $this->BuildVisualizationState(),
+            'translations'       => $this->IPSViewTranslationsFor([
+                'Configure a numeric source variable.',
+                'Configure a valid Gauge range.',
+                'Connect an active EChartsGateway.',
+                'The Gauge value could not be loaded.',
+                'Apache ECharts could not be initialized.'
+            ]),
+            'options'            => [
+                'echartsVersion' => EChartsAsset::VERSION
+            ],
+            'replacements'       => [
+                '{{ECHARTS_SCRIPT}}' => EChartsAsset::JavaScript()
+            ]
+        ]);
+    }
+
     public function ReceiveData(string $JSONString): string
     {
         try {
@@ -140,6 +186,13 @@ class EChartsGaugeSingle extends IPSModuleStrict
     {
         if ($SenderID === 0 && $Message === IPS_KERNELSTARTED) {
             $this->Initialize();
+            $this->PublishVisualizationState();
+
+            return;
+        }
+
+        if ($Message === VM_UPDATE && $SenderID === $this->ReadPropertyInteger('SourceVariableID')) {
+            $this->PublishVisualizationState();
         }
     }
 
@@ -216,19 +269,89 @@ class EChartsGaugeSingle extends IPSModuleStrict
     {
         $previousVariableID = $this->ReadAttributeInteger('RegisteredSourceVariableID');
         $variableID = $this->ReadPropertyInteger('SourceVariableID');
-        if ($previousVariableID === $variableID) {
-            return;
-        }
+        $variableExists = $variableID > 0 && IPS_VariableExists($variableID);
 
-        if ($previousVariableID > 0) {
+        if ($previousVariableID > 0 && ($previousVariableID !== $variableID || !$variableExists)) {
             $this->UnregisterReference($previousVariableID);
+            $this->UnregisterMessage($previousVariableID, VM_UPDATE);
         }
 
-        if ($variableID > 0 && IPS_VariableExists($variableID)) {
-            $this->RegisterReference($variableID);
+        if ($variableExists) {
+            if ($previousVariableID !== $variableID) {
+                $this->RegisterReference($variableID);
+            }
+            $this->RegisterMessage($variableID, VM_UPDATE);
             $this->WriteAttributeInteger('RegisteredSourceVariableID', $variableID);
         } else {
             $this->WriteAttributeInteger('RegisteredSourceVariableID', 0);
+        }
+    }
+
+    /** @return array<string, mixed> */
+    private function BuildVisualizationState(): array
+    {
+        $configurationError = $this->GetConfigurationError();
+        if ($configurationError !== null) {
+            return [
+                'schemaVersion' => 1,
+                'family'        => 'gauge',
+                'variant'       => 'single',
+                'status'        => 'error',
+                'chart'         => null,
+                'error'         => $configurationError['Status'] === self::STATUS_SOURCE_INVALID
+                    ? 'Configure a numeric source variable.'
+                    : 'Configure a valid Gauge range.'
+            ];
+        }
+
+        if (!$this->HasActiveParent()) {
+            return [
+                'schemaVersion' => 1,
+                'family'        => 'gauge',
+                'variant'       => 'single',
+                'status'        => 'error',
+                'chart'         => null,
+                'error'         => 'Connect an active EChartsGateway.'
+            ];
+        }
+
+        try {
+            $chart = json_decode($this->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
+        } catch (Throwable $exception) {
+            $this->SendDebug('BuildVisualizationState', $exception::class, 0);
+
+            return [
+                'schemaVersion' => 1,
+                'family'        => 'gauge',
+                'variant'       => 'single',
+                'status'        => 'error',
+                'chart'         => null,
+                'error'         => 'The Gauge value could not be loaded.'
+            ];
+        }
+
+        return [
+            'schemaVersion' => 1,
+            'family'        => 'gauge',
+            'variant'       => 'single',
+            'status'        => 'ready',
+            'chart'         => $chart,
+            'error'         => null
+        ];
+    }
+
+    private function PublishVisualizationState(): void
+    {
+        try {
+            $this->UpdateVisualizationValue(json_encode(
+                $this->BuildVisualizationState(),
+                JSON_THROW_ON_ERROR
+                | JSON_UNESCAPED_SLASHES
+                | JSON_UNESCAPED_UNICODE
+                | JSON_PRESERVE_ZERO_FRACTION
+            ));
+        } catch (Throwable $exception) {
+            $this->SendDebug('PublishVisualizationState', $exception::class, 0);
         }
     }
 }

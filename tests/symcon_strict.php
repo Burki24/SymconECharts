@@ -51,6 +51,34 @@ foreach ([
 }
 
 foreach ([
+    'SetVisualizationType(1)',
+    'public function GetVisualizationTile(): string',
+    'UpdateVisualizationValue(',
+    'JSON_UNESCAPED_UNICODE',
+    'RegisterMessage($variableID, VM_UPDATE)',
+    'IPSViewHTMLPageHelper.php',
+    'ResponsiveVisualizationHelper.php',
+    'VisualizationAssetHelper.php',
+    'VisualizationThemeHelper.php',
+    'use IPSViewHTMLPageHelper;',
+    'use ResponsiveVisualizationHelper;',
+    'use VisualizationAssetHelper;',
+    'use VisualizationThemeHelper;'
+] as $visualizationContract) {
+    requireStrictContract(
+        str_contains($gaugeSingle, $visualizationContract),
+        'EChartsGaugeSingle is missing visualization contract: ' . $visualizationContract,
+        $errors
+    );
+}
+
+requireStrictContract(
+    !str_contains($gaugeMulti, 'SetVisualizationType('),
+    'EChartsGaugeMulti must not claim a visualization before its renderer is implemented.',
+    $errors
+);
+
+foreach ([
     'EChartsGaugeSingle' => ['source' => $gaugeSingle, 'prefix' => 'ECGS'],
     'EChartsGaugeMulti'  => ['source' => $gaugeMulti, 'prefix' => 'ECGM']
 ] as $gaugeModuleName => $gaugeContract) {

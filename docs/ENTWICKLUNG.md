@@ -19,11 +19,14 @@ technische Modulstruktur. Alle drei Module verwenden `IPSModuleStrict`;
 Gauge-Instanzen können vorhandene Gateways wiederverwenden. Ein versioniertes
 Protokoll liefert geprüfte numerische Momentanwerte an ein minimales
 Gauge-Datenmodell. Gauge Multi besitzt eine geordnete und validierte Liste aus
-2 bis 16 Quellen. Der zentrale `DataFlowHelper` ist eingebunden. ECharts,
-Archivverarbeitung, Visualisierung sowie reale Symcon-Laufzeit- und
-Browsertests fehlen noch. Die Testsuite prüft
-zusätzlich zu Struktur und Metadaten die Strict-Verträge, das Protokoll und den
-Gauge→Gateway-Datenweg unter PHP 8.5.
+2 bis 16 Quellen. Gauge Single rendert sein Modell mit der lokal gebündelten
+Apache-ECharts-Runtime 6.1.0 als responsive native HTML-SDK-Kachel und sendet
+Wertänderungen ohne einen vollständigen Neuaufbau der Seite an den Browser.
+Der Multi-Renderer, Preset-Auswahl, Archivverarbeitung, IPSView-Ausgabe sowie
+reale Symcon-Laufzeit- und Browsertests fehlen noch. Die Testsuite prüft
+zusätzlich zu Struktur und Metadaten die Strict-Verträge, das Protokoll, die
+ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
+8.5 mit Test-Doppeln.
 
 | Bestandteil | Name | Aufgabe |
 |---|---|---|
@@ -66,6 +69,8 @@ Den Parent-, Zuständigkeits- und Datenvertrag der ersten technischen Vertikale
 dokumentiert [`ADR 0002`](adr/0002-gateway-gauge-contract.md).
 Das persistente Multi-Quellenmodell dokumentiert
 [`ADR 0004`](adr/0004-gauge-multi-source-contract.md).
+Die festgeschriebene ECharts-Runtime und den ersten nativen Renderer
+dokumentiert [`ADR 0005`](adr/0005-echarts-runtime-and-native-renderer.md).
 
 ## Daten, Konfiguration und Ausgabe
 
@@ -106,9 +111,11 @@ beschrieben.
 ## Bibliotheken und gemeinsame Helper
 
 ECharts wird ohne projektspezifische Änderungen am Bibliothekskern verwendet.
-Bibliotheksversionen werden festgeschrieben, mit dem Modul ausgeliefert und
-vor Aktualisierungen getestet. Im Betrieb wird nicht automatisch `latest`
-geladen. Der verwendete Build und seine Abhängigkeiten werden dokumentiert.
+Der vollständige Browser-Build 6.1.0 ist lokal festgeschrieben, wird mit
+Prüfsumme, Originallizenz und NOTICE ausgeliefert und vor der Einbettung auf
+Integrität geprüft. Im Betrieb wird weder `latest` noch eine externe
+CDN-Ressource geladen. Aktualisierungen werden erneut gegen APIs, Lizenz,
+Lieferartefakte und die vorhandenen Renderer geprüft.
 
 Vorhandene zentrale Helper aus `Symcon_ModuleHelper` werden wiederverwendet
 und über den vorgesehenen Synchronisierungsweg eingebunden. Allgemeine

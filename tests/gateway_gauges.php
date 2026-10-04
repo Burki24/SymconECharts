@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 const IPS_KERNELSTARTED = 10001;
+const VM_UPDATE = 10603;
 const KR_READY = 10103;
 const IS_ACTIVE = 102;
 const IS_INACTIVE = 104;
@@ -79,9 +80,16 @@ abstract class IPSModuleStrict
     /** @var list<int> */
     private array $references = [];
 
+    /** @var list<array{SenderID:int, Message:int}> */
+    private array $messages = [];
+
+    /** @var list<mixed> */
+    private array $visualizationUpdates = [];
+
     private int $status = IS_INACTIVE;
     private bool $parentActive = true;
     private string $summary = '';
+    private int $visualizationType = 0;
 
     public function Create(): void
     {
@@ -115,6 +123,23 @@ abstract class IPSModuleStrict
     public function GetTestSummary(): string
     {
         return $this->summary;
+    }
+
+    public function GetTestVisualizationType(): int
+    {
+        return $this->visualizationType;
+    }
+
+    /** @return list<array{SenderID:int, Message:int}> */
+    public function GetTestMessages(): array
+    {
+        return $this->messages;
+    }
+
+    /** @return list<mixed> */
+    public function GetTestVisualizationUpdates(): array
+    {
+        return $this->visualizationUpdates;
     }
 
     protected function RegisterPropertyInteger(string $name, int $default): bool
@@ -193,7 +218,44 @@ abstract class IPSModuleStrict
 
     protected function RegisterMessage(int $senderID, int $message): bool
     {
+        $registration = ['SenderID' => $senderID, 'Message' => $message];
+        if (!in_array($registration, $this->messages, true)) {
+            $this->messages[] = $registration;
+        }
+
         return true;
+    }
+
+    protected function UnregisterMessage(int $senderID, int $message): bool
+    {
+        $this->messages = array_values(array_filter(
+            $this->messages,
+            static fn (array $registration): bool => $registration !== [
+                'SenderID' => $senderID,
+                'Message'  => $message
+            ]
+        ));
+
+        return true;
+    }
+
+    protected function SetVisualizationType(int $visualizationType): bool
+    {
+        $this->visualizationType = $visualizationType;
+
+        return true;
+    }
+
+    protected function UpdateVisualizationValue(mixed $value): bool
+    {
+        $this->visualizationUpdates[] = $value;
+
+        return true;
+    }
+
+    protected function Translate(string $text): string
+    {
+        return $text;
     }
 
     protected function SetStatus(int $status): bool
@@ -278,6 +340,17 @@ $gauge->ApplyChanges();
 assertGatewayGauge($gauge->GetTestStatus() === IS_ACTIVE, 'Gauge Single must become active.');
 assertGatewayGauge($gauge->GetTestReferences() === [4711], 'Gauge Single must register its source reference.');
 assertGatewayGauge($gauge->GetTestSummary() === 'Living room temperature', 'Gauge Single summary changed.');
+assertGatewayGauge($gauge->GetTestVisualizationType() === 1, 'Gauge Single must expose an HTML-SDK tile.');
+assertGatewayGauge(
+    in_array(['SenderID' => 4711, 'Message' => VM_UPDATE], $gauge->GetTestMessages(), true),
+    'Gauge Single must subscribe to source value updates.'
+);
+
+$visualizationTile = $gauge->GetVisualizationTile();
+assertGatewayGauge(str_contains($visualizationTile, 'window.echarts'), 'Gauge Single tile must embed Apache ECharts.');
+assertGatewayGauge(str_contains($visualizationTile, 'echarts-gauge-chart'), 'Gauge Single tile root is missing.');
+assertGatewayGauge(str_contains($visualizationTile, '"echartsVersion":"6.1.0"'), 'Gauge Single ECharts version changed.');
+assertGatewayGauge(!str_contains($visualizationTile, '<script src="http'), 'Gauge Single must not load ECharts from a CDN.');
 
 $gaugeData = json_decode($gauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(($gaugeData['schemaVersion'] ?? null) === 1, 'Gauge Single data schema version changed.');
@@ -286,6 +359,24 @@ assertGatewayGauge(($gaugeData['value'] ?? null) === 42.5, 'Gauge Single did not
 assertGatewayGauge(($gaugeData['source']['timestamp'] ?? null) === 1780000000, 'Gauge Single timestamp changed.');
 assertGatewayGauge(($gaugeData['gauge']['minimum'] ?? null) === -20.0, 'Gauge Single minimum changed.');
 assertGatewayGauge(($gaugeData['gauge']['maximum'] ?? null) === 80.0, 'Gauge Single maximum changed.');
+
+$GLOBALS['symconTestVariables'][4711]['Value'] = 44.75;
+$GLOBALS['symconTestVariables'][4711]['VariableUpdated'] = 1780000100;
+$gauge->MessageSink(1780000100, 4711, VM_UPDATE, []);
+$visualizationUpdates = $gauge->GetTestVisualizationUpdates();
+$latestVisualization = end($visualizationUpdates);
+assertGatewayGauge(
+    is_string($latestVisualization),
+    'Gauge Single must publish HTML-SDK updates as a JSON scalar string.'
+);
+$latestVisualizationState = json_decode($latestVisualization, true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    ($latestVisualizationState['status'] ?? null) === 'ready'
+        && ($latestVisualizationState['chart']['value'] ?? null) === 44.75,
+    'Gauge Single must publish changed source values to the HTML-SDK tile.'
+);
+$GLOBALS['symconTestVariables'][4711]['Value'] = 42.5;
+$GLOBALS['symconTestVariables'][4711]['VariableUpdated'] = 1780000000;
 
 $multiSources = json_encode([
     [
@@ -392,6 +483,13 @@ $singleGauge->ApplyChanges();
 assertGatewayGauge($singleGauge->GetTestStatus() === 201, 'Non-numeric Gauge source must set status 201.');
 assertGatewayGauge($singleGauge->GetTestReferences() === [4712], 'Gauge must replace its source reference.');
 assertGatewayGauge($singleGauge->GetTestSummary() === '', 'Invalid Gauge configuration must clear the source summary.');
+$singleGauge->SetTestProperty('SourceVariableID', 9999);
+$singleGauge->ApplyChanges();
+assertGatewayGauge($singleGauge->GetTestReferences() === [], 'Gauge must remove a reference to a missing source.');
+assertGatewayGauge(
+    !in_array(['SenderID' => 4712, 'Message' => VM_UPDATE], $singleGauge->GetTestMessages(), true),
+    'Gauge must unsubscribe from the replaced source value.'
+);
 
 $invalidRange = new EChartsGaugeSingle();
 $invalidRange->Create();

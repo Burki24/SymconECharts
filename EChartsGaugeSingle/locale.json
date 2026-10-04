@@ -13,7 +13,12 @@
             "Select a numeric source variable": "Numerische Quellvariable auswählen",
             "Gauge range is invalid": "Gauge-Wertebereich ist ungültig",
             "No active EChartsGateway is connected": "Kein aktives EChartsGateway verbunden",
-            "EChartsGateway request failed": "EChartsGateway-Abfrage fehlgeschlagen"
+            "EChartsGateway request failed": "EChartsGateway-Abfrage fehlgeschlagen",
+            "Configure a numeric source variable.": "Eine numerische Quellvariable konfigurieren.",
+            "Configure a valid Gauge range.": "Einen gültigen Gauge-Wertebereich konfigurieren.",
+            "Connect an active EChartsGateway.": "Ein aktives EChartsGateway verbinden.",
+            "The Gauge value could not be loaded.": "Der Gauge-Wert konnte nicht geladen werden.",
+            "Apache ECharts could not be initialized.": "Apache ECharts konnte nicht initialisiert werden."
         }
     }
 }

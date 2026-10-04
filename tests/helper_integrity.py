@@ -25,32 +25,66 @@ def main() -> None:
 
     subscriptions = config.get("helpers")
     helpers = manifest.get("helpers")
-    if not isinstance(subscriptions, dict) or set(subscriptions) != {"DataFlowHelper"}:
-        raise SystemExit("Expected exactly the DataFlowHelper subscription.")
+    expected = {
+        "DataFlowHelper",
+        "IPSViewHTMLPageHelper",
+        "ResponsiveVisualizationHelper",
+        "VisualizationAssetHelper",
+        "VisualizationThemeHelper",
+    }
+    if not isinstance(subscriptions, dict) or set(subscriptions) != expected:
+        raise SystemExit("Unexpected helper subscriptions.")
     if not isinstance(helpers, dict) or set(helpers) != set(subscriptions):
-        raise SystemExit("Expected exactly the DataFlowHelper vendor contract.")
-
-    contract = helpers["DataFlowHelper"]
-    target = subscriptions["DataFlowHelper"].get("target")
-    if contract.get("path") != target:
-        raise SystemExit("DataFlowHelper subscription and manifest paths differ.")
-
-    helper_path = ROOT / contract["path"]
-    source = helper_path.read_text(encoding="utf-8")
-    version = VERSION_PATTERN.search(source)
-    if version is None or version.group(1) != contract.get("version"):
-        raise SystemExit("Vendored DataFlowHelper version mismatch.")
-
-    actual_hash = hashlib.sha256(helper_path.read_bytes()).hexdigest()
-    if actual_hash != contract.get("sha256"):
-        raise SystemExit("Vendored DataFlowHelper checksum mismatch.")
+        raise SystemExit("Helper subscriptions and vendor manifest differ.")
 
     readme = README.read_text(encoding="utf-8")
-    for value in (helper_path.name, contract.get("version"), contract.get("sha256")):
-        if not isinstance(value, str) or value not in readme:
-            raise SystemExit("Vendored helper README is incomplete.")
 
-    print("Vendored helper subscription and integrity verified")
+    def verify_contract(name: str, contract: dict[str, object]) -> None:
+        path_value = contract.get("path")
+        if not isinstance(path_value, str):
+            raise SystemExit(f"Vendored {name} path is missing.")
+
+        helper_path = ROOT / path_value
+        source = helper_path.read_text(encoding="utf-8")
+        version = VERSION_PATTERN.search(source)
+        if version is None or version.group(1) != contract.get("version"):
+            raise SystemExit(f"Vendored {name} version mismatch.")
+
+        actual_hash = hashlib.sha256(helper_path.read_bytes()).hexdigest()
+        if actual_hash != contract.get("sha256"):
+            raise SystemExit(f"Vendored {name} checksum mismatch.")
+
+        for value in (helper_path.name, contract.get("version"), contract.get("sha256")):
+            if not isinstance(value, str) or value not in readme:
+                raise SystemExit("Vendored helper README is incomplete.")
+
+        assets = contract.get("assets", [])
+        if not isinstance(assets, list):
+            raise SystemExit(f"Vendored {name} assets are invalid.")
+        for asset in assets:
+            if not isinstance(asset, dict) or not isinstance(asset.get("path"), str):
+                raise SystemExit(f"Vendored {name} asset contract is invalid.")
+            asset_path = ROOT / asset["path"]
+            if hashlib.sha256(asset_path.read_bytes()).hexdigest() != asset.get("sha256"):
+                raise SystemExit(f"Vendored {name} asset checksum mismatch: {asset_path.name}.")
+
+        dependencies = contract.get("dependencies", [])
+        if not isinstance(dependencies, list):
+            raise SystemExit(f"Vendored {name} dependencies are invalid.")
+        for dependency in dependencies:
+            if not isinstance(dependency, dict) or not isinstance(dependency.get("name"), str):
+                raise SystemExit(f"Vendored {name} dependency contract is invalid.")
+            verify_contract(dependency["name"], dependency)
+
+    for name, contract in helpers.items():
+        if not isinstance(contract, dict):
+            raise SystemExit(f"Vendored {name} contract is invalid.")
+        target = subscriptions[name].get("target")
+        if contract.get("path") != target:
+            raise SystemExit(f"{name} subscription and manifest paths differ.")
+        verify_contract(name, contract)
+
+    print("Vendored helper subscriptions and integrity verified")
 
 
 if __name__ == "__main__":

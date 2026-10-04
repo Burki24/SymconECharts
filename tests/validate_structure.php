@@ -15,9 +15,20 @@ $requiredFiles = [
     'docs/adr/0002-gateway-gauge-contract.md',
     'docs/adr/0003-single-and-multi-gauge-modules.md',
     'docs/adr/0004-gauge-multi-source-contract.md',
+    'docs/adr/0005-echarts-runtime-and-native-renderer.md',
     'library.json',
+    'libs/EChartsAsset.php',
     'libs/EChartsDataProtocol.php',
+    'libs/echarts/6.1.0/echarts.min.js',
+    'libs/echarts/6.1.0/LICENSE.txt',
+    'libs/echarts/6.1.0/NOTICE.txt',
     'libs/helper/DataFlowHelper.php',
+    'libs/helper/HelperTranslationHelper.php',
+    'libs/helper/IPSViewHTMLPageHelper.php',
+    'libs/helper/ResponsiveVisualizationHelper.php',
+    'libs/helper/VisualizationAssetHelper.php',
+    'libs/helper/VisualizationThemeHelper.php',
+    'libs/helper/translations/IPSViewHTMLPageHelper.json',
     'libs/helper/README.md',
     'libs/helper/manifest.json',
     '.helper-sync.json',
@@ -28,13 +39,17 @@ $requiredFiles = [
     '.github/workflows/update-library-metadata.yml',
     'tests/README.md',
     'tests/data_protocol.php',
+    'tests/echarts_assets.php',
     'tests/gateway_gauges.php',
     'tests/helper_integrity.py',
     'tests/module_contracts.php',
     'tests/run.php',
     'tests/symcon_strict.php',
     'tests/test_update_library_metadata.py',
-    'tests/validate_structure.php'
+    'tests/validate_structure.php',
+    'EChartsGaugeSingle/visualization/index.html',
+    'EChartsGaugeSingle/visualization/style.css',
+    'EChartsGaugeSingle/visualization/app.js'
 ];
 
 foreach ($requiredFiles as $requiredFile) {
@@ -166,9 +181,13 @@ if ($helperSync !== null) {
         $errors[] = '.helper-sync.json must generate German helper documentation.';
     }
     if (($helperSync['helpers'] ?? null) !== [
-        'DataFlowHelper' => ['target' => 'libs/helper/DataFlowHelper.php']
+        'DataFlowHelper'                => ['target' => 'libs/helper/DataFlowHelper.php'],
+        'IPSViewHTMLPageHelper'         => ['target' => 'libs/helper/IPSViewHTMLPageHelper.php'],
+        'ResponsiveVisualizationHelper' => ['target' => 'libs/helper/ResponsiveVisualizationHelper.php'],
+        'VisualizationAssetHelper'      => ['target' => 'libs/helper/VisualizationAssetHelper.php'],
+        'VisualizationThemeHelper'      => ['target' => 'libs/helper/VisualizationThemeHelper.php']
     ]) {
-        $errors[] = '.helper-sync.json must subscribe exactly to DataFlowHelper.';
+        $errors[] = '.helper-sync.json does not contain the required visualization helper subscriptions.';
     }
 }
 
@@ -279,6 +298,7 @@ if ($runner === false) {
         "__DIR__ . '/module_contracts.php'",
         "__DIR__ . '/symcon_strict.php'",
         "__DIR__ . '/data_protocol.php'",
+        "__DIR__ . '/echarts_assets.php'",
         "__DIR__ . '/gateway_gauges.php'",
         'python3 tests/helper_integrity.py',
         'python3 tests/test_update_library_metadata.py'

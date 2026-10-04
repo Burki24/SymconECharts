@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="{{HTML_LANGUAGE}}" class="{{HTML_CLASSES}}" style="font-size: {{ROOT_FONT_SIZE}};">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="{{VIEWPORT_CONTENT}}">
+    <title>{{DOCUMENT_TITLE}}</title>
+    <style>
+{{VISUALIZATION_THEME}}
+{{MODULE_STYLE}}
+{{IPSVIEW_STYLE}}
+    </style>
+</head>
+<body>
+    <main id="echarts-gauge-root" class="echarts-gauge-root">
+        <div id="echarts-gauge-chart" class="echarts-gauge-chart" role="img"></div>
+        <div id="echarts-gauge-error" class="echarts-gauge-error" role="status" hidden></div>
+    </main>
+    <script>{{ECHARTS_SCRIPT}}</script>
+    <script>window.SYMC_VISUALIZATION = {{BOOTSTRAP_JSON}};</script>
+    <script>{{MODULE_SCRIPT}}</script>
+</body>
+</html>

@@ -10,10 +10,10 @@ Folgende Module beinhaltet das SymconECharts Repository:
 
 - __EChartsGaugeSingle__ ([Dokumentation](EChartsGaugeSingle))
   Gerätemodul für ein einzelnes, unabhängig konfigurierbares Gauge-Diagramm
-  mit genau einer numerischen Quellvariable.
-  Vorgesehen für die native Symcon-Kacheldarstellung und zusätzlich für ein
-  separat platzierbares HTML-Widget in IPSView. Beide Ausgabewege sollen
-  dieselbe Diagrammkonfiguration und Datenaufbereitung verwenden.
+  mit genau einer numerischen Quellvariable. Die erste responsive Basic Gauge
+  wird als native Symcon-Kachel ausgegeben und bei Wertänderungen aktualisiert.
+  Ein separat platzierbares HTML-Widget in IPSView bleibt ein weiterer
+  Ausgabeweg auf derselben Diagrammkonfiguration und Datenaufbereitung.
 
 - __EChartsGaugeMulti__ ([Dokumentation](EChartsGaugeMulti))
   Gerätemodul für zusammengesetzte Gauge-Darstellungen mit 2 bis 16
@@ -28,14 +28,14 @@ eines Parents ist für den Normalbetrieb nicht erforderlich.
 
 ## Entwicklungsstand
 
-**Technische Datenbasis – noch keine sichtbaren Diagramme.** Gateway und die
-Gauge-Module verwenden `IPSModuleStrict`, ein versioniertes Datenprotokoll und eine
-wiederverwendbare Parent-Verbindung. Gauge Single kann eine numerische
-Quellvariable konfigurieren und deren Momentanwert als validiertes
-familienbezogenes Datenmodell abrufen. Gauge Multi verwaltet eine geordnete
-Quellenliste und liefert alle Momentanwerte in einem versionierten Multi-Modell.
-Apache ECharts, Archivverarbeitung, native Kachelausgabe und
-IPSView-HTML-Ausgabe sind noch nicht implementiert.
+**Erste sichtbare Gauge-Single-Vertikale.** Gateway und die Gauge-Module
+verwenden `IPSModuleStrict`, ein versioniertes Datenprotokoll und eine
+wiederverwendbare Parent-Verbindung. Gauge Single rendert sein validiertes
+Momentanwertmodell mit dem lokal gebündelten Apache ECharts 6.1.0 als native,
+responsive Symcon-Kachel. Gauge Multi verwaltet bereits eine geordnete
+Quellenliste und liefert ein versioniertes Multi-Modell, besitzt aber noch
+keinen Renderer. Preset-Auswahl, Archivverarbeitung und IPSView-HTML-Ausgabe
+sind noch nicht implementiert.
 
 Als erste Chartfamilie sind Single- und Multi-Gauges vorgesehen. Eine
 Geräteinstanz soll jeweils einen Chart liefern; eine gemeinsame Dashboard-Seite
@@ -65,8 +65,8 @@ SPDX-Identifier: `PolyForm-Noncommercial-1.0.0`.
 
 Required Notice: Copyright 2026 Burkhard Kneiseler. SymconECharts.
 
-Fremdkomponenten behalten ihre Originallizenzen. Hinweise zur vorgesehenen
-Einbindung von Apache ECharts stehen in
+Fremdkomponenten behalten ihre Originallizenzen. Version, Herkunft, Integrität
+und Lizenz der eingebundenen Apache-ECharts-Runtime stehen in
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 SymconECharts ist kein offizielles Projekt der Apache Software Foundation.

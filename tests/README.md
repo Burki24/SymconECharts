@@ -24,21 +24,26 @@ StylePHP und PHP CS Fixer.
   Modulidentitäten, die Symcon-9.0-Mindestversion sowie die beiden
   Datenflussrichtungen.
 - `symcon_strict.php` prüft Strict-Modulbasis, typisierte öffentliche
-  Verträge, wiederverwendbare Gateway-Verbindung und die minimale
-  Gauge-Konfiguration.
+  Verträge, wiederverwendbare Gateway-Verbindung, die minimale
+  Gauge-Konfiguration und den HTML-SDK-Vertrag von Gauge Single.
 - `data_protocol.php` prüft Versionierung sowie Erfolgs- und Fehlerantworten
   des internen Gateway-Protokolls.
 - `gateway_gauges.php` führt den vollständigen Momentanwertabruf für Gauge
   Single und Gauge Multi mit Symcon-Test-Doppeln aus. Für Multi werden außerdem
   geordnete Quellen, Referenzwechsel, stabile Item-IDs, Beschriftungen,
-  Duplikate, Wertebereiche und fehlerhafte Konfigurationen geprüft.
+  Duplikate, Wertebereiche und fehlerhafte Konfigurationen geprüft. Für Gauge
+  Single werden außerdem HTML-Erzeugung, lokale ECharts-Einbettung und die
+  Zustandsaktualisierung nach `VM_UPDATE` charakterisiert.
+- `echarts_assets.php` prüft Version, SHA-256-Integrität, Lizenz und NOTICE der
+  lokal gebündelten Apache-ECharts-Runtime.
 - `helper_integrity.py` stellt sicher, dass Subscription, Manifest,
-  Helper-Dokumentation und der zentrale `DataFlowHelper` vollständig
-  übereinstimmen.
+  Helper-Dokumentation und alle abonnierten Datenfluss- und
+  Visualisierungshelper vollständig übereinstimmen.
 - `test_update_library_metadata.py` prüft Versionsfortschreibung, Build- und
   Datumsableitung sowie den Schutz vor einer Versionsrückstufung.
 
 Die Suite belegt die PHP-seitigen Verträge und den Datenweg nur gegen lokale
-Symcon-Test-Doppel. Sie ersetzt keinen Laufzeittest in Symcon und belegt noch
-keine Diagramm- oder Browserdarstellung. Renderer- und Browsertests werden mit
-der jeweiligen Implementierung ergänzt.
+Symcon-Test-Doppel. Sie ersetzt keinen Laufzeittest in Symcon und keinen
+visuellen Browsertest. Insbesondere die tatsächliche native Kacheldarstellung,
+Größenwechsel in den Symcon-Clients und IPSView bleiben auf der erreichbaren
+Testebene offen.

@@ -1,0 +1,54 @@
+html,
+body {
+    inline-size: 100%;
+    block-size: 100%;
+    min-inline-size: 0;
+    margin: 0;
+    overflow: hidden;
+    color: var(--symc-text);
+    background: transparent;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+.echarts-gauge-root {
+    position: relative;
+    inline-size: 100%;
+    block-size: 100%;
+    min-block-size: 12rem;
+    overflow: hidden;
+}
+
+.echarts-gauge-chart {
+    inline-size: 100%;
+    block-size: 100%;
+    min-inline-size: 0;
+    min-block-size: 12rem;
+}
+
+.echarts-gauge-error {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: var(--symc-responsive-padding, 1rem);
+    color: var(--symc-muted);
+    font-size: clamp(0.875rem, 4cqi, 1rem);
+    line-height: 1.4;
+    text-align: center;
+}
+
+.echarts-gauge-error[hidden] {
+    display: none;
+}
+
+@container echarts-gauge (max-width: 20rem) {
+    .echarts-gauge-root,
+    .echarts-gauge-chart {
+        min-block-size: 10rem;
+    }
+}

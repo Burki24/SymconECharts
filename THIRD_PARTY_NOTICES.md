@@ -1,30 +1,37 @@
 # Fremdkomponenten und Lizenzabgrenzung
 
-## Aktueller Stand
-
-Diese Projektbasis enthält noch keine Bibliotheken, Builds, Schriftarten oder
-sonstigen Fremdkomponenten. Die folgenden Angaben beschreiben die vorgesehene
-Einbindung; sie sind kein Nachweis einer bereits ausgelieferten Abhängigkeit.
-
 Die Projektlizenz [LICENSE](LICENSE) gilt für die eigenen Beiträge zu
 SymconECharts. Sie ersetzt oder beschränkt nicht die Originallizenzen separat
 gekennzeichneter Fremdkomponenten.
 
-## Apache ECharts – zur Einbindung vorgesehen
+## Apache ECharts
 
-Projekt: [Apache ECharts](https://github.com/apache/echarts)  
-Lizenz: [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)  
-SPDX-Identifier: `Apache-2.0`  
-Ausgelieferte Version: noch keine
+Projekt: [Apache ECharts](https://github.com/apache/echarts)
 
-Bei der tatsächlichen Einbindung werden die Lizenz- und NOTICE-Dateien des
-konkret verwendeten Releases sowie weitere erforderliche Drittanbieterhinweise
-zusammen mit den Bibliotheksdateien ausgeliefert. Die Dokumentation wird dann um
-Version, Herkunft und enthaltene Abhängigkeiten ergänzt.
+Lizenz: [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 
-ECharts bleibt unter seiner Originallizenz. Ein Build darf erforderliche
-Copyright-, Lizenz- und Herkunftshinweise nicht entfernen. Etwaige Änderungen
-an Fremddateien sind entsprechend deren Lizenzbedingungen zu kennzeichnen.
+SPDX-Identifier: `Apache-2.0`
+
+Ausgelieferte Version: `6.1.0`
+
+Herkunft: offizielles npm-Paket `echarts@6.1.0`
+(`https://registry.npmjs.org/echarts/-/echarts-6.1.0.tgz`)
+
+Paket-SHA-1 laut npm: `ae0f68590f5ebbd728d900907c27acde7c5456d1`
+
+Ausgelieferte Dateien:
+
+- `libs/echarts/6.1.0/echarts.min.js` – unveränderter vollständiger
+  Browser-Build, SHA-256
+  `b66b25aeb4df84e33199dc21694014d336d222cbd9deb0e5a7c14bd6aa0d0fd0`;
+- `libs/echarts/6.1.0/LICENSE.txt` – Originallizenz aus demselben Paket;
+- `libs/echarts/6.1.0/NOTICE.txt` – Originalhinweise aus demselben Paket.
+
+Der Build wird lokal ausgeliefert und zur Laufzeit nicht von einem CDN geladen.
+`libs/EChartsAsset.php` prüft vor der Einbettung seine SHA-256-Prüfsumme. Der
+ECharts-Kern und die genannten Fremddateien wurden nicht projektspezifisch
+verändert. ECharts und die im offiziellen Bundle enthaltenen Komponenten
+bleiben unter ihren in `LICENSE.txt` und `NOTICE.txt` genannten Bedingungen.
 
 ## Weitere Komponenten
 
@@ -33,5 +40,4 @@ werden deren Herkunft, Lizenz und Weitergabebedingungen geprüft und dokumentier
 Vorhandene Copyright- und Lizenzhinweise bleiben erhalten. Fremdcode wird nicht
 pauschal mit dem PolyForm-Lizenzkopf des Projekts versehen.
 
-Insbesondere werden mit einer späteren ECharts-Bündelung enthaltene Abhängigkeiten
-separat erfasst; allein die Nennung von ECharts ersetzt deren Hinweise nicht.
+Vorhandene Copyright-, Lizenz- und Herkunftshinweise werden nicht entfernt.
