@@ -84,6 +84,13 @@ gelten dieselben Größen- und Sicherheitsgrenzen wie für den Zeigerimport.
 Größe und Randstärke werden mit 50 bis 150 % relativ zur Presetvorgabe
 skaliert. Füllung und Rand folgen standardmäßig den Gauge- beziehungsweise
 Theme-Farben und lassen sich optional unabhängig überschreiben.
+Eine optionale Zifferblattplatte wird als native ECharts-Graphic hinter allen
+Gauge-Elementen gezeichnet. Sie kann kreisförmig einschließlich Wert und Titel
+oder als an Start und Ende des Skalenbogens angepasste Fläche erscheinen.
+Größe und Randstärke sind mit 50 bis 150 % skalierbar; Füllung und Rand folgen
+wahlweise dem Theme oder eigenen Farben. Die Füllung kann unabhängig davon
+transparent sein, und ein optionaler responsiver Schatten hebt die Platte vom
+Kachelhintergrund ab. `Ausgeblendet` bleibt der kompatible Standard.
 Der Skalenbogen bleibt wahlweise bei der Presetvorgabe oder
 wird als Voll-, Dreiviertel-, Halb-, Viertelkreis beziehungsweise mit eigenem
 Start und Ende definiert. Die Positionen folgen einem Zifferblatt (`0°` oben,
@@ -158,7 +165,9 @@ sowie ein ECharts-Theme. Unter „Geometrie und Zeiger“ werden Zeigerform,
 eine optionale SVG-Datei, Skalenbogen und Positionen gewählt; unter „Gauge-Farben“ können sechs
 Gauge-spezifische Farbrollen das Theme gezielt überschreiben. Das
 „Nabendesign“ steuert Form, optionales SVG, Größe, Randstärke und Farben der
-Nabe, ohne ihren Drehpunkt vom Zeiger zu lösen. Unter
+Nabe, ohne ihren Drehpunkt vom Zeiger zu lösen. „Zifferblattplatte“ steuert
+Form, Transparenz, Theme- oder eigene Farben, Größe, Rand und Schatten der
+Hintergrundfläche. Unter
 „Feinabstimmung“ können die vier Schriftgrößen, Ringstärke, Zeigerstärke und
 Zeigerlänge sowie Nebenstrich- und Hauptteilerlänge jeweils von 50 bis 150 %
 der Presetvorgabe angepasst werden. Für eigene SVG-Zeiger lässt sich zusätzlich
@@ -226,7 +235,8 @@ dargestellt werden. Die Kachel bleibt für die tatsächliche, interaktive
 ECharts-Ausgabe maßgeblich; die SVG-Vorschau bildet das ausgewählte Layout
 gezielt nach. Die grundlegenden Layoutproportionen werden zwischen Vorschau und
 Kachel angeglichen, einschließlich der Anordnung von Achslinie, Teilern und
-Skalenwerten. Noch nicht gespeicherte Geometrie-, Farb- und Feinabstimmungen werden ebenfalls sofort
+Skalenwerten. Noch nicht gespeicherte Geometrie-, Platten-, Farb- und
+Feinabstimmungen werden ebenfalls sofort
 in der Vorschau dargestellt. Sie verwendet außerdem eine stabile, dem
 ausgewählten Theme
 zugeordnete Vorschaupalette und übernimmt die Gauge-Achssegmente der

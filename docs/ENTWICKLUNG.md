@@ -29,7 +29,9 @@ Unabhängig davon kann die Instanz zwischen dem automatischen Symcon-Design und
 sechs lokal gebündelten offiziellen ECharts-Themes wählen. Zeigerform samt
 abgesichertem pfadbasiertem SVG-Import, Skalenbogen mit Start- und
 Endpositionen in 22,5-Grad-Schritten sowie sechs
-Gauge-spezifische Farbrollen sind ebenfalls validiert konfigurierbar. Der Multi-Renderer,
+Gauge-spezifische Farbrollen sind ebenfalls validiert konfigurierbar. Eine
+optionale native ECharts-Graphic bildet eine runde oder dem Skalenbogen
+folgende Zifferblattplatte mit eigener Gestaltung. Der Multi-Renderer,
 Archivverarbeitung, IPSView-Ausgabe sowie reale
 Symcon-Laufzeit- und Browsertests fehlen noch. Die Testsuite prüft zusätzlich
 zu Struktur und Metadaten die Strict-Verträge, das Protokoll, die

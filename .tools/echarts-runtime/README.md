@@ -7,7 +7,7 @@ den tatsächlich benötigten Bestandteilen:
 
 - ECharts Core;
 - Gauge Chart;
-- Aria und Tooltip;
+- Aria, Tooltip und Graphic Component;
 - Canvas Renderer.
 
 Zusätzlich kopiert der Build die sechs im Modul angebotenen offiziellen

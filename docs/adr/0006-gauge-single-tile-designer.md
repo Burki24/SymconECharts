@@ -100,6 +100,17 @@ Rand der Nabe. `custom` verwendet denselben abgesicherten SVG-Pfadimport wie
 der eigene Zeiger und überträgt ebenfalls nur Pfad und `viewBox`, niemals das
 SVG-Dokument oder aktiven Inhalt.
 
+Die Zifferblattplatte erhält ebenfalls einen additiven Designvertrag und ist
+im kompatiblen Standard `hidden`. `circle` umfasst die Gauge einschließlich
+Wert und Titel; `arc` bildet aus dem konfigurierten Start- und Endwinkel eine
+geschlossene Fläche hinter der Skala. Größe und Randstärke sind auf 50 bis
+150 % begrenzt. Füllung und Rand folgen standardmäßig dem Theme oder verwenden
+validierte eigene RGB-Farben; die Füllung kann unabhängig davon transparent
+sein. Ein optionaler Schatten skaliert mit dem responsiven Layout. Die native
+Kachel verwendet dafür den offiziellen ECharts `GraphicComponent` mit Kreis-
+beziehungsweise Polygonform und fester Zeichenreihenfolge hinter der
+Gauge-Serie. Die Formularvorschau zeichnet dieselbe Geometrie als SVG.
+
 Der Skalenbogen
 verwendet entweder die Presetgeometrie oder einen Voll-, Dreiviertel-, Halb-, Viertel- oder
 benutzerdefinierten Bogen. Anwenderpositionen werden wie auf einem Zifferblatt
@@ -130,7 +141,8 @@ Designer-Properties vorweggenommen.
 
 ## Folgen
 
-Benutzer können Gauge-Layout, Zeiger, Bogen und Farben im Instanzformular auswählen und unmittelbar
+Benutzer können Gauge-Layout, Zeiger, Nabe, Zifferblattplatte, Bogen und Farben
+im Instanzformular auswählen und unmittelbar
 in der SVG-Vorschau beurteilen. Nach dem Übernehmen verwendet die native Kachel
 dieselbe Auswahl und dieselben relativen Feinabstimmungen. Weitere
 Single-Presets können unter neuen stabilen IDs

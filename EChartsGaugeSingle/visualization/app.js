@@ -222,11 +222,21 @@
         var lineWidth = resolveScaledMetric(definition.lineWidth * scale, ringWidth, 8, 24, 4, 40);
         var detailTypographyScale = Math.max(valueFontSize, unitFontSize);
         var detailHeight = resolveScaledMetric(58 * scale, detailTypographyScale, 34, 64, 28, 88);
+        var arcPlateRadius = definition.radius * scale + lineWidth / 2 + 10 * scale;
+        var circlePlateRadius = Math.max(
+            arcPlateRadius,
+            Math.abs(definition.detailY - definition.centerY) * scale + detailHeight / 2 + 10 * scale,
+            Math.abs(definition.titleY - definition.centerY) * scale
+                + resolveScaledMetric(18 * scale, titleFontSize, 11, 20, 7, 36)
+                + 8 * scale
+        );
 
         return {
             centerX: Math.round(width / 2),
             centerY: Math.round(contentOffsetY + definition.centerY * scale),
             radius: Math.round(definition.radius * scale + lineWidth / 2),
+            arcPlateRadius: Math.round(arcPlateRadius),
+            circlePlateRadius: Math.round(circlePlateRadius),
             lineWidth: lineWidth,
             tickDistance: clamp(Math.round(4 * scale), 2, 8),
             tickLength: resolveScaledMetric(5 * scale, minorTickLength, 4, 10, 2, 20),
@@ -524,6 +534,65 @@
         return series;
     }
 
+    function buildPlateGraphic(style, layout, series, colors) {
+        var shape = ['hidden', 'circle', 'arc'].indexOf(style.plateShape) >= 0
+            ? style.plateShape
+            : 'hidden';
+        if (shape === 'hidden') {
+            return [];
+        }
+
+        var sizeScale = resolveStyleScale(style, 'plateSizePercent');
+        var customColors = style.plateColorMode === 'custom';
+        var sweep = Math.abs(series.startAngle - series.endAngle);
+        var renderCircle = shape === 'circle' || sweep >= 359.999;
+        var fill = style.plateTransparent
+            ? 'rgba(0,0,0,0)'
+            : normalizeStyleColor(customColors ? style.plateColor : colors.surface, colors.surface);
+        var border = normalizeStyleColor(customColors ? style.plateBorderColor : colors.border, colors.border);
+        var graphic = {
+            id: 'gauge-plate',
+            type: renderCircle ? 'circle' : 'polygon',
+            silent: true,
+            z: -10,
+            style: {
+                fill: fill,
+                stroke: border,
+                lineWidth: Math.round(2 * resolveStyleScale(style, 'plateBorderWidthPercent') * 100) / 100,
+                lineJoin: 'round'
+            }
+        };
+        if (style.plateShadow) {
+            graphic.style.shadowColor = 'rgba(0,0,0,0.35)';
+            graphic.style.shadowBlur = Math.max(6, Math.round(layout.lineWidth * 0.7));
+            graphic.style.shadowOffsetY = Math.max(2, Math.round(layout.lineWidth * 0.2));
+        }
+        if (renderCircle) {
+            graphic.shape = {
+                cx: layout.centerX,
+                cy: layout.centerY,
+                r: (shape === 'circle' ? layout.circlePlateRadius : layout.arcPlateRadius) * sizeScale
+            };
+            return [graphic];
+        }
+
+        var radius = layout.arcPlateRadius * sizeScale;
+        var segments = Math.max(12, Math.ceil(sweep / 5));
+        var points = [[layout.centerX, layout.centerY]];
+        for (var index = 0; index <= segments; index += 1) {
+            var fraction = index / segments;
+            var angle = series.startAngle + (series.endAngle - series.startAngle) * fraction;
+            var radians = angle * Math.PI / 180;
+            points.push([
+                layout.centerX + radius * Math.cos(radians),
+                layout.centerY - radius * Math.sin(radians)
+            ]);
+        }
+        graphic.shape = { points: points };
+
+        return [graphic];
+    }
+
     function normalizeStyleColor(value, fallback) {
         return /^#[0-9a-f]{6}$/i.test(String(value || '')) ? value : fallback;
     }
@@ -688,6 +757,7 @@
                     return formatValue(value, decimals, unit);
                 }
             },
+            graphic: buildPlateGraphic(style, layout, series, colors),
             series: [series]
         };
         if (!automaticTheme) {

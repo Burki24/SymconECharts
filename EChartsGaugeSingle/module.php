@@ -52,6 +52,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
     private const SUPPORTED_CUSTOM_POINTER_PIVOT_MODES = ['svg', 'custom'];
     private const SUPPORTED_ANCHOR_SHAPES = ['preset', 'circle', 'ring', 'custom', 'hidden'];
     private const SUPPORTED_ANCHOR_COLOR_MODES = ['theme', 'custom'];
+    private const SUPPORTED_PLATE_SHAPES = ['hidden', 'circle', 'arc'];
+    private const SUPPORTED_PLATE_COLOR_MODES = ['theme', 'custom'];
     private const SUPPORTED_ARC_MODES = ['preset', 'full', 'three-quarter', 'half', 'quarter', 'custom'];
     private const SUPPORTED_COLOR_MODES = ['theme', 'custom'];
     private const ANGLE_STEP = 22.5;
@@ -68,6 +70,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
         'pointerLengthPercent'     => 'PointerLengthPercent',
         'anchorSizePercent'        => 'AnchorSizePercent',
         'anchorBorderWidthPercent' => 'AnchorBorderWidthPercent',
+        'plateSizePercent'         => 'PlateSizePercent',
+        'plateBorderWidthPercent'  => 'PlateBorderWidthPercent',
         'minorTickLengthPercent'   => 'MinorTickLengthPercent',
         'majorTickLengthPercent'   => 'MajorTickLengthPercent'
     ];
@@ -96,6 +100,12 @@ class EChartsGaugeSingle extends IPSModuleStrict
         $this->RegisterPropertyString('AnchorColorMode', 'theme');
         $this->RegisterPropertyInteger('AnchorColor', 0x55CBB5);
         $this->RegisterPropertyInteger('AnchorBorderColor', 0xF4F5F7);
+        $this->RegisterPropertyString('PlateShape', 'hidden');
+        $this->RegisterPropertyString('PlateColorMode', 'theme');
+        $this->RegisterPropertyBoolean('PlateTransparent', false);
+        $this->RegisterPropertyBoolean('PlateShadow', false);
+        $this->RegisterPropertyInteger('PlateColor', 0x25272B);
+        $this->RegisterPropertyInteger('PlateBorderColor', 0xA5A9B0);
         $this->RegisterPropertyString('GaugeArcMode', 'preset');
         $this->RegisterPropertyFloat('GaugeStartPosition', 270.0);
         $this->RegisterPropertyFloat('GaugeEndPosition', 90.0);
@@ -196,7 +206,15 @@ class EChartsGaugeSingle extends IPSModuleStrict
         int $AnchorColor = 0x55CBB5,
         int $AnchorBorderColor = 0xF4F5F7,
         int $AnchorSizePercent = self::DESIGN_SCALE_DEFAULT,
-        int $AnchorBorderWidthPercent = self::DESIGN_SCALE_DEFAULT
+        int $AnchorBorderWidthPercent = self::DESIGN_SCALE_DEFAULT,
+        string $PlateShape = 'hidden',
+        string $PlateColorMode = 'theme',
+        bool $PlateTransparent = false,
+        bool $PlateShadow = false,
+        int $PlateColor = 0x25272B,
+        int $PlateBorderColor = 0xA5A9B0,
+        int $PlateSizePercent = self::DESIGN_SCALE_DEFAULT,
+        int $PlateBorderWidthPercent = self::DESIGN_SCALE_DEFAULT
     ): void {
         $this->UpdateFormField(
             'GaugePreview',
@@ -220,6 +238,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
                     'pointerLengthPercent'     => $PointerLengthPercent,
                     'anchorSizePercent'        => $AnchorSizePercent,
                     'anchorBorderWidthPercent' => $AnchorBorderWidthPercent,
+                    'plateSizePercent'         => $PlateSizePercent,
+                    'plateBorderWidthPercent'  => $PlateBorderWidthPercent,
                     'minorTickLengthPercent'   => $MinorTickLengthPercent,
                     'majorTickLengthPercent'   => $MajorTickLengthPercent,
                     'pointerShape'             => $PointerShape,
@@ -237,6 +257,12 @@ class EChartsGaugeSingle extends IPSModuleStrict
                     'anchorColorMode'          => $AnchorColorMode,
                     'anchorColor'              => self::ColorToHex($AnchorColor),
                     'anchorBorderColor'        => self::ColorToHex($AnchorBorderColor),
+                    'plateShape'               => $PlateShape,
+                    'plateColorMode'           => $PlateColorMode,
+                    'plateTransparent'         => $PlateTransparent,
+                    'plateShadow'              => $PlateShadow,
+                    'plateColor'               => self::ColorToHex($PlateColor),
+                    'plateBorderColor'         => self::ColorToHex($PlateBorderColor),
                     ...$this->ResolveCustomPointerStyle(
                         $PointerShape,
                         $CustomPointerSVG,
@@ -440,6 +466,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
         if (!in_array((string) ($style['pointerShape'] ?? 'preset'), self::SUPPORTED_POINTER_SHAPES, true)
             || !in_array((string) ($style['anchorShape'] ?? 'preset'), self::SUPPORTED_ANCHOR_SHAPES, true)
             || !in_array((string) ($style['anchorColorMode'] ?? 'theme'), self::SUPPORTED_ANCHOR_COLOR_MODES, true)
+            || !in_array((string) ($style['plateShape'] ?? 'hidden'), self::SUPPORTED_PLATE_SHAPES, true)
+            || !in_array((string) ($style['plateColorMode'] ?? 'theme'), self::SUPPORTED_PLATE_COLOR_MODES, true)
             || !in_array((string) ($style['arcMode'] ?? 'preset'), self::SUPPORTED_ARC_MODES, true)
             || !in_array((string) ($style['colorMode'] ?? 'theme'), self::SUPPORTED_COLOR_MODES, true)) {
             return EChartsGaugeSinglePreview::CreateErrorSvg(
@@ -576,6 +604,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
             )
             || !in_array($this->ReadPropertyString('AnchorShape'), self::SUPPORTED_ANCHOR_SHAPES, true)
             || !in_array($this->ReadPropertyString('AnchorColorMode'), self::SUPPORTED_ANCHOR_COLOR_MODES, true)
+            || !in_array($this->ReadPropertyString('PlateShape'), self::SUPPORTED_PLATE_SHAPES, true)
+            || !in_array($this->ReadPropertyString('PlateColorMode'), self::SUPPORTED_PLATE_COLOR_MODES, true)
             || !in_array($this->ReadPropertyString('GaugeArcMode'), self::SUPPORTED_ARC_MODES, true)
             || !in_array($this->ReadPropertyString('GaugeColorMode'), self::SUPPORTED_COLOR_MODES, true)) {
             return [
@@ -633,7 +663,9 @@ class EChartsGaugeSingle extends IPSModuleStrict
             'ValueColor',
             'TitleColor',
             'AnchorColor',
-            'AnchorBorderColor'
+            'AnchorBorderColor',
+            'PlateColor',
+            'PlateBorderColor'
         ] as $propertyName) {
             $color = $this->ReadPropertyInteger($propertyName);
             if ($color < 0 || $color > 0xFFFFFF) {
@@ -658,6 +690,10 @@ class EChartsGaugeSingle extends IPSModuleStrict
         $style['pointerShape'] = $this->ReadPropertyString('PointerShape');
         $style['anchorShape'] = $this->ReadPropertyString('AnchorShape');
         $style['anchorColorMode'] = $this->ReadPropertyString('AnchorColorMode');
+        $style['plateShape'] = $this->ReadPropertyString('PlateShape');
+        $style['plateColorMode'] = $this->ReadPropertyString('PlateColorMode');
+        $style['plateTransparent'] = $this->ReadPropertyBoolean('PlateTransparent');
+        $style['plateShadow'] = $this->ReadPropertyBoolean('PlateShadow');
         $style['arcMode'] = $this->ReadPropertyString('GaugeArcMode');
         $style['startPosition'] = $this->ReadPropertyFloat('GaugeStartPosition');
         $style['endPosition'] = $this->ReadPropertyFloat('GaugeEndPosition');
@@ -670,7 +706,9 @@ class EChartsGaugeSingle extends IPSModuleStrict
             'valueColor'        => 'ValueColor',
             'titleColor'        => 'TitleColor',
             'anchorColor'       => 'AnchorColor',
-            'anchorBorderColor' => 'AnchorBorderColor'
+            'anchorBorderColor' => 'AnchorBorderColor',
+            'plateColor'        => 'PlateColor',
+            'plateBorderColor'  => 'PlateBorderColor'
         ] as $fieldName => $propertyName) {
             $style[$fieldName] = self::ColorToHex($this->ReadPropertyInteger($propertyName));
         }

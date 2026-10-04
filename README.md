@@ -17,7 +17,8 @@ Folgende Module beinhaltet das SymconECharts Repository:
   optionale Gauge-Farben lassen sich im Kacheldesigner mit live aktualisierter
   SVG-Vorschau festlegen. Die am Zeigerdrehpunkt gebundene Nabe kann als Kreis,
   Ring oder validiertes eigenes SVG gestaltet beziehungsweise ausgeblendet
-  werden.
+  werden. Eine optionale runde oder dem Skalenbogen folgende Zifferblattplatte
+  besitzt eigene Füllung, Kontur, Größe und Schatten.
   Ein separat platzierbares HTML-Widget in IPSView bleibt ein weiterer
   Ausgabeweg auf derselben Diagrammkonfiguration und Datenaufbereitung.
 
@@ -42,7 +43,8 @@ responsive Symcon-Kachel. Der erste Kacheldesigner wählt zwischen Basic,
 Simple, Progress und Speed sowie `auto` und sechs lokal gebündelten offiziellen
 Apache-ECharts-Themes. Dazu kommen validierte Zeigerformen einschließlich
 eines pfadbasierten SVG-Imports, Skalenbögen mit
-22,5-Grad-Positionen und optionale Farbrollen. Simple, `auto` und die jeweiligen
+22,5-Grad-Positionen, ein konfigurierbares Zifferblatt und optionale Farbrollen.
+Simple, `auto` und die jeweiligen
 Presetvorgaben erhalten die bisherige
 Standarddarstellung.
 

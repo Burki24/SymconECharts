@@ -18,6 +18,7 @@ $runtimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.gaug
 $licensePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/LICENSE.txt';
 $noticePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/NOTICE.txt';
 $runtime = (string) file_get_contents($runtimePath);
+$runtimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/gauge-runtime.js');
 $windowsCheckoutRuntime = str_replace("\n", "\r\n", $runtime);
 $expectedThemeIDs = ['auto', 'dark', 'vintage', 'macarons', 'infographic', 'shine', 'roma'];
 
@@ -32,6 +33,10 @@ assertEChartsAsset(
     'The Gauge-specific ECharts runtime must remain below 512 KiB.'
 );
 assertEChartsAsset(str_contains($runtime, 'window.echarts'), 'The Gauge runtime must expose the ECharts browser API.');
+assertEChartsAsset(
+    str_contains($runtimeSource, 'GraphicComponent'),
+    'The Gauge runtime must include the native ECharts Graphic Component used by dial plates.'
+);
 assertEChartsAsset(
     hash('sha256', $windowsCheckoutRuntime) !== EChartsAsset::SHA256,
     'The Windows-checkout regression fixture must differ byte-for-byte.'

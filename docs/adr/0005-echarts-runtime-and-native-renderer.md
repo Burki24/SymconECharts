@@ -29,14 +29,15 @@ Apache ECharts wird in Version **6.1.0** aus dem offiziellen npm-Paket
 `GetVisualizationTile()` auf 1.048.576 Byte begrenzt und der vollständige
 minimierte Browser-Build dieses Budget bereits allein überschreitet, wird die
 offizielle Tree-Shaking-Schnittstelle verwendet. Der Gauge-spezifische Build
-enthält ECharts Core, Gauge Chart, Aria, Tooltip und Canvas Renderer. Er wird
+enthält ECharts Core, Gauge Chart, Aria, Tooltip, Graphic Component und Canvas
+Renderer. Er wird
 mit den unter `.tools/echarts-runtime` festgeschriebenen Abhängigkeiten
 reproduzierbar erzeugt.
 
 Der Build liegt als `echarts.gauge.min.js` unter `libs/echarts/6.1.0`, ist
-473.672 Byte groß, wird nicht von einem CDN geladen und ist über den
+486.506 Byte groß, wird nicht von einem CDN geladen und ist über den
 SHA-256-Wert
-`0eef7a38f5bd44691e0d629756166ba0a7c3024a781746c1acd58d8d6b0a3f8b`
+`37d8c9774f27fc12e048e269e8ec6a114782529fb85262a6be8c6b887207c07f`
 festgeschrieben. `LICENSE.txt` und `NOTICE.txt` aus demselben ECharts-Paket
 werden mitgeliefert. Herkunft, Buildweg und Prüfsumme stehen zusätzlich in
 `THIRD_PARTY_NOTICES.md`.

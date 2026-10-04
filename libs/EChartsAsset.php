@@ -12,7 +12,7 @@ use RuntimeException;
 final class EChartsAsset
 {
     public const VERSION = '6.1.0';
-    public const SHA256 = '0eef7a38f5bd44691e0d629756166ba0a7c3024a781746c1acd58d8d6b0a3f8b';
+    public const SHA256 = '37d8c9774f27fc12e048e269e8ec6a114782529fb85262a6be8c6b887207c07f';
     public const THEME_AUTO = 'auto';
     public const THEME_SHA256 = [
         'dark'        => 'ae60e563617cb87514690c1946ee202e78c9f1487820490614b58934ed037458',

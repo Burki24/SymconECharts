@@ -53,6 +53,9 @@ StylePHP und PHP CS Fixer.
   zentriert. Kreis, Ring, ausgeblendete und eigene SVG-Naben werden über
   denselben Vorschau- und Datenmodellvertrag abgesichert; aktiver Inhalt in
   einem Naben-SVG wird abgewiesen.
+  Runde und skalenbogenabhängige Zifferblattplatten werden einschließlich
+  Theme- oder eigener Farben, transparenter Füllung, Rand, Größe und Schatten
+  in Datenmodell, SVG-Vorschau und nativem ECharts-Renderer geprüft.
 - `helper_integrity.py` stellt sicher, dass Subscription, Manifest,
   Helper-Dokumentation und alle abonnierten Datenfluss- und
   Visualisierungshelper vollständig übereinstimmen.

@@ -2,12 +2,13 @@
 
 import * as echarts from 'echarts/core';
 import { GaugeChart } from 'echarts/charts';
-import { AriaComponent, TooltipComponent } from 'echarts/components';
+import { AriaComponent, GraphicComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 
 echarts.use([
     GaugeChart,
     AriaComponent,
+    GraphicComponent,
     TooltipComponent,
     CanvasRenderer
 ]);

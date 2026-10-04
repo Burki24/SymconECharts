@@ -173,6 +173,13 @@ abstract class IPSModuleStrict
         return true;
     }
 
+    protected function RegisterPropertyBoolean(string $name, bool $default): bool
+    {
+        $this->properties[$name] ??= $default;
+
+        return true;
+    }
+
     protected function ReadPropertyInteger(string $name): int
     {
         return (int) $this->properties[$name];
@@ -186,6 +193,11 @@ abstract class IPSModuleStrict
     protected function ReadPropertyString(string $name): string
     {
         return (string) $this->properties[$name];
+    }
+
+    protected function ReadPropertyBoolean(string $name): bool
+    {
+        return (bool) $this->properties[$name];
     }
 
     protected function RegisterAttributeInteger(string $name, int $default): bool
@@ -367,6 +379,8 @@ $gauge->SetTestProperty('PointerWidthPercent', 80);
 $gauge->SetTestProperty('PointerLengthPercent', 130);
 $gauge->SetTestProperty('AnchorSizePercent', 125);
 $gauge->SetTestProperty('AnchorBorderWidthPercent', 75);
+$gauge->SetTestProperty('PlateSizePercent', 125);
+$gauge->SetTestProperty('PlateBorderWidthPercent', 75);
 $gauge->SetTestProperty('MinorTickLengthPercent', 75);
 $gauge->SetTestProperty('MajorTickLengthPercent', 150);
 $gauge->SetTestProperty('PointerShape', 'arrow');
@@ -374,6 +388,11 @@ $gauge->SetTestProperty('AnchorShape', 'ring');
 $gauge->SetTestProperty('AnchorColorMode', 'custom');
 $gauge->SetTestProperty('AnchorColor', 0x778899);
 $gauge->SetTestProperty('AnchorBorderColor', 0x8899AA);
+$gauge->SetTestProperty('PlateShape', 'arc');
+$gauge->SetTestProperty('PlateColorMode', 'custom');
+$gauge->SetTestProperty('PlateShadow', true);
+$gauge->SetTestProperty('PlateColor', 0x202830);
+$gauge->SetTestProperty('PlateBorderColor', 0x90A0B0);
 $gauge->SetTestProperty('GaugeArcMode', 'custom');
 $gauge->SetTestProperty('GaugeStartPosition', 270.0);
 $gauge->SetTestProperty('GaugeEndPosition', 67.5);
@@ -441,6 +460,11 @@ foreach ([
     "series.anchor.icon = 'path://' + path;",
     "if (shape === 'hidden')",
     "series.anchor.itemStyle.color = 'transparent';",
+    'function buildPlateGraphic(style, layout, series, colors)',
+    "type: renderCircle ? 'circle' : 'polygon'",
+    'fill: fill',
+    'stroke: border',
+    'graphic: buildPlateGraphic(style, layout, series, colors)',
     'function applyCustomColors(series, style, colors)'
 ] as $responsiveLayoutContract) {
     assertGatewayGauge(
@@ -508,6 +532,12 @@ assertGatewayGauge(
         && str_contains($initialPreviewSvg, 'style="fill:none"')
         && str_contains($initialPreviewSvg, 'fill:#778899;stroke:#8899AA;stroke-width:1.5'),
     'Gauge Single preview must apply the configured hub design.'
+);
+assertGatewayGauge(
+    str_contains($initialPreviewSvg, 'data-plate-shape="arc"')
+        && str_contains($initialPreviewSvg, 'class="plate plate-shadow"')
+        && str_contains($initialPreviewSvg, 'fill:#202830;stroke:#90A0B0;stroke-width:1.5'),
+    'Gauge Single preview must draw the configured dial plate behind the Gauge.'
 );
 assertGatewayGauge(str_contains($initialPreviewSvg, '#FEF8EF'), 'Gauge Single preview must apply the Vintage background.');
 assertGatewayGauge(str_contains($initialPreviewSvg, 'Room climate'), 'Gauge Single preview must contain the title.');
@@ -839,11 +869,17 @@ assertGatewayGauge(
         'pointerLengthPercent'     => 130,
         'anchorSizePercent'        => 125,
         'anchorBorderWidthPercent' => 75,
+        'plateSizePercent'         => 125,
+        'plateBorderWidthPercent'  => 75,
         'minorTickLengthPercent'   => 75,
         'majorTickLengthPercent'   => 150,
         'pointerShape'             => 'arrow',
         'anchorShape'              => 'ring',
         'anchorColorMode'          => 'custom',
+        'plateShape'               => 'arc',
+        'plateColorMode'           => 'custom',
+        'plateTransparent'         => false,
+        'plateShadow'              => true,
         'arcMode'                  => 'custom',
         'startPosition'            => 270.0,
         'endPosition'              => 67.5,
@@ -855,7 +891,9 @@ assertGatewayGauge(
         'valueColor'               => '#556677',
         'titleColor'               => '#667788',
         'anchorColor'              => '#778899',
-        'anchorBorderColor'        => '#8899AA'
+        'anchorBorderColor'        => '#8899AA',
+        'plateColor'               => '#202830',
+        'plateBorderColor'         => '#90A0B0'
     ],
     'Gauge Single must expose the validated tile-designer fine tuning in its chart model.'
 );
@@ -1110,6 +1148,29 @@ assertGatewayGauge(
     !str_contains($hiddenAnchorPreviewSvg, 'class="anchor"'),
     'Gauge Single preview must hide the hub when explicitly configured.'
 );
+$transparentPlatePreviewSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
+    50.0,
+    0.0,
+    100.0,
+    '',
+    '',
+    0,
+    'en',
+    'simple',
+    'auto',
+    [
+        'plateShape'              => 'circle',
+        'plateTransparent'        => true,
+        'plateSizePercent'        => 100,
+        'plateBorderWidthPercent' => 150
+    ]
+);
+assertGatewayGauge(
+    str_contains($transparentPlatePreviewSvg, 'data-plate-shape="circle"')
+        && str_contains($transparentPlatePreviewSvg, '.plate{fill:none;')
+        && str_contains($transparentPlatePreviewSvg, 'stroke-width:3'),
+    'Gauge Single preview must support a transparent circular plate with a visible border.'
+);
 $singleGauge->SetTestProperty('SourceVariableID', 4712);
 $singleGauge->ApplyChanges();
 assertGatewayGauge($singleGauge->GetTestStatus() === 201, 'Non-numeric Gauge source must set status 201.');
@@ -1174,6 +1235,20 @@ $invalidAnchor->SetTestProperty('SourceVariableID', 4711);
 $invalidAnchor->SetTestProperty('AnchorShape', 'unknown');
 $invalidAnchor->ApplyChanges();
 assertGatewayGauge($invalidAnchor->GetTestStatus() === 205, 'Unknown Gauge hub shapes must set status 205.');
+
+$invalidPlate = new EChartsGaugeSingle();
+$invalidPlate->Create();
+$invalidPlate->SetTestProperty('SourceVariableID', 4711);
+$invalidPlate->SetTestProperty('PlateShape', 'unknown');
+$invalidPlate->ApplyChanges();
+assertGatewayGauge($invalidPlate->GetTestStatus() === 205, 'Unknown Gauge plate shapes must set status 205.');
+
+$invalidPlateColorMode = new EChartsGaugeSingle();
+$invalidPlateColorMode->Create();
+$invalidPlateColorMode->SetTestProperty('SourceVariableID', 4711);
+$invalidPlateColorMode->SetTestProperty('PlateColorMode', 'unknown');
+$invalidPlateColorMode->ApplyChanges();
+assertGatewayGauge($invalidPlateColorMode->GetTestStatus() === 205, 'Unknown Gauge plate color modes must set status 205.');
 
 $invalidPointerPivotMode = new EChartsGaugeSingle();
 $invalidPointerPivotMode->Create();

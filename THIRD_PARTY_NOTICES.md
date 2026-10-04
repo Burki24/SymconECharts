@@ -23,8 +23,8 @@ Ausgelieferte Dateien:
 
 - `libs/echarts/6.1.0/echarts.gauge.min.js` – reproduzierbarer,
   Gauge-spezifischer Browser-Build aus ECharts Core, Gauge Chart, Aria,
-  Tooltip und Canvas Renderer; 473.672 Byte; SHA-256
-  `0eef7a38f5bd44691e0d629756166ba0a7c3024a781746c1acd58d8d6b0a3f8b`;
+  Tooltip, Graphic Component und Canvas Renderer; 486.506 Byte; SHA-256
+  `37d8c9774f27fc12e048e269e8ec6a114782529fb85262a6be8c6b887207c07f`;
 - `libs/echarts/6.1.0/themes/dark.js` – offizielles Theme Dark; 5.981 Byte;
   SHA-256 `ae60e563617cb87514690c1946ee202e78c9f1487820490614b58934ed037458`;
 - `libs/echarts/6.1.0/themes/vintage.js` – offizielles Theme Vintage;
