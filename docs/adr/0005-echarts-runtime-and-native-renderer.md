@@ -28,7 +28,7 @@ Apache ECharts wird in Version **6.1.0** aus dem offiziellen npm-Paket
 minimierte Browser-Build dieses Budget bereits allein überschreitet, wird die
 offizielle Tree-Shaking-Schnittstelle verwendet. Der Gauge-spezifische Build
 enthält ECharts Core, Gauge Chart, Aria, Tooltip und Canvas Renderer. Er wird
-mit den unter `tools/echarts-runtime` festgeschriebenen Abhängigkeiten
+mit den unter `.tools/echarts-runtime` festgeschriebenen Abhängigkeiten
 reproduzierbar erzeugt.
 
 Der Build liegt als `echarts.gauge.min.js` unter `libs/echarts/6.1.0`, ist

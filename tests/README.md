@@ -18,8 +18,9 @@ StylePHP und PHP CS Fixer.
 ## Enthaltene Prüfungen
 
 - `validate_structure.php` prüft die erwarteten Projekt-, Modul-, Test- und
-  Workflowdateien, JSON-Grundstrukturen und die Einbindung der gemeinsamen
-  CI-Basis einschließlich des Style-Workflows.
+  Workflowdateien, die von Symcon erlaubten Verzeichnisse im Library-Stamm,
+  JSON-Grundstrukturen und die Einbindung der gemeinsamen CI-Basis
+  einschließlich des Style-Workflows.
 - `module_contracts.php` charakterisiert die vorhandenen Library- und
   Modulidentitäten, die Symcon-9.0-Mindestversion sowie die beiden
   Datenflussrichtungen.

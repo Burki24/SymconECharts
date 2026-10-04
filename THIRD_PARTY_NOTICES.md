@@ -30,7 +30,7 @@ Ausgelieferte Dateien:
 
 Der Build wird lokal ausgeliefert und zur Laufzeit nicht von einem CDN geladen.
 Sein Einstiegspunkt, die exakt festgeschriebenen npm-Abhängigkeiten und der
-Buildbefehl liegen unter `tools/echarts-runtime`. Die ECharts-Quellen werden
+Buildbefehl liegen unter `.tools/echarts-runtime`. Die ECharts-Quellen werden
 nicht inhaltlich verändert, sondern über die offizielle Tree-Shaking-API auf
 die von Gauge Single benötigten Bestandteile begrenzt.
 `.gitattributes` verhindert eine Zeilenendenkonvertierung der Fremdartefakte.

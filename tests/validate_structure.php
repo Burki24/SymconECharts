@@ -51,10 +51,10 @@ $requiredFiles = [
     'tests/symcon_strict.php',
     'tests/test_update_library_metadata.py',
     'tests/validate_structure.php',
-    'tools/echarts-runtime/package.json',
-    'tools/echarts-runtime/package-lock.json',
-    'tools/echarts-runtime/README.md',
-    'tools/echarts-runtime/src/gauge-runtime.js',
+    '.tools/echarts-runtime/package.json',
+    '.tools/echarts-runtime/package-lock.json',
+    '.tools/echarts-runtime/README.md',
+    '.tools/echarts-runtime/src/gauge-runtime.js',
     'EChartsGaugeSingle/visualization/index.html',
     'EChartsGaugeSingle/visualization/style.css',
     'EChartsGaugeSingle/visualization/app.js',
@@ -71,6 +71,42 @@ foreach (['.shared', '.tests'] as $forbiddenDirectory) {
     if (is_dir($root . '/' . $forbiddenDirectory)) {
         $errors[] = 'Forbidden repository directory: ' . $forbiddenDirectory;
     }
+}
+
+$symconLibraryDirectories = ['actions', 'docs', 'imgs', 'libs', 'tests'];
+foreach (new DirectoryIterator($root) as $entry) {
+    if ($entry->isDot() || !$entry->isDir()) {
+        continue;
+    }
+
+    $directoryName = $entry->getFilename();
+    if (str_starts_with($directoryName, '.')
+        || in_array($directoryName, $symconLibraryDirectories, true)
+        || is_file($entry->getPathname() . '/module.json')
+    ) {
+        continue;
+    }
+
+    $containsFiles = false;
+    $contents = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($entry->getPathname(), FilesystemIterator::SKIP_DOTS)
+    );
+    foreach ($contents as $content) {
+        if ($content->isFile()) {
+            $containsFiles = true;
+            break;
+        }
+    }
+
+    // Git does not distribute empty directories, so local empty placeholders
+    // cannot invalidate the installed library package.
+    if (!$containsFiles) {
+        continue;
+    }
+
+    $errors[] = 'Unsupported top-level directory for an IP-Symcon library: '
+        . $directoryName
+        . ' (non-dot directories must be a supported library directory or contain module.json).';
 }
 
 $gitAttributesPath = $root . '/.gitattributes';
