@@ -10,8 +10,10 @@ dabei nur einmal gepflegt.
 minimale Gauge-Einstellungen sind konfigurierbar; das Modul ruft den
 Momentanwert über EChartsGateway ab, erzeugt ein versioniertes Gauge-Datenmodell
 und rendert es mit Apache ECharts 6.1.0 in einer responsiven Symcon-Kachel.
-Wertänderungen werden live an die geöffnete Kachel übertragen. Preset-Auswahl
-und IPSView-HTML-Ausgabevariablen sind noch nicht implementiert.
+Wertänderungen werden live an die geöffnete Kachel übertragen. Das
+Konfigurationsformular zeigt zusätzlich eine live aktualisierte SVG-Vorschau
+der noch nicht übernommenen Basic-Gauge-Einstellungen. Preset-Auswahl und
+IPSView-HTML-Ausgabevariablen sind noch nicht implementiert.
 
 ### Inhaltsverzeichnis
 
@@ -96,7 +98,10 @@ Fehlerstatus.
 **Konfigurationsseite:** Ausgewählt werden eine numerische Quellvariable,
 Minimum und Maximum, Titel, Einheit sowie 0 bis 6 Nachkommastellen. Die Aktion
 „Aktuelle Gauge-Daten lesen“ gibt das gegenwärtige JSON-Datenmodell zu
-Diagnosezwecken aus. Minimum muss kleiner als Maximum sein.
+Diagnosezwecken aus. Minimum muss kleiner als Maximum sein. Eine SVG-Vorschau
+reagiert unmittelbar auf Änderungen im geöffneten Formular, ohne diese Werte
+vorzeitig zu speichern. Bei einer gültigen numerischen Quellvariable verwendet
+sie deren aktuellen Wert, andernfalls die Mitte des konfigurierten Bereichs.
 
 ### 5. Statusvariablen und Profile
 
@@ -134,6 +139,15 @@ Die Darstellung verwendet die lokal mitgelieferte und per SHA-256 geprüfte
 Apache-ECharts-Runtime 6.1.0. Sie lädt im Betrieb keine CDN-Ressource. Die
 aktuelle Implementierung ist technisch gegen Test-Doppel geprüft; die visuelle
 Prüfung in realen Symcon-Clients bleibt offen.
+
+#### Konfigurationsvorschau
+
+Die Vorschau im Instanzformular ist ein leichtgewichtiges, eigenständiges SVG
+und lädt nicht die vollständige ECharts-Browser-Runtime. Dadurch bleibt das
+Formular schnell und die noch nicht gespeicherte Konfiguration kann unmittelbar
+dargestellt werden. Die Kachel bleibt für die tatsächliche, interaktive
+ECharts-Ausgabe maßgeblich; die SVG-Vorschau bildet deren Basic-Gauge-Aufbau
+gezielt nach.
 
 #### IPSView
 

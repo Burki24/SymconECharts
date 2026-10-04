@@ -26,9 +26,11 @@ def main() -> None:
     subscriptions = config.get("helpers")
     helpers = manifest.get("helpers")
     expected = {
+        "ConfigurationFormHelper",
         "DataFlowHelper",
         "IPSViewHTMLPageHelper",
         "ResponsiveVisualizationHelper",
+        "SVGPreviewHelper",
         "VisualizationAssetHelper",
         "VisualizationThemeHelper",
     }

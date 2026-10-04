@@ -11,7 +11,8 @@ Folgende Module beinhaltet das SymconECharts Repository:
 - __EChartsGaugeSingle__ ([Dokumentation](EChartsGaugeSingle))
   Gerätemodul für ein einzelnes, unabhängig konfigurierbares Gauge-Diagramm
   mit genau einer numerischen Quellvariable. Die erste responsive Basic Gauge
-  wird als native Symcon-Kachel ausgegeben und bei Wertänderungen aktualisiert.
+  wird als native Symcon-Kachel ausgegeben und bei Wertänderungen aktualisiert;
+  das Instanzformular bietet eine live aktualisierte SVG-Vorschau.
   Ein separat platzierbares HTML-Widget in IPSView bleibt ein weiterer
   Ausgabeweg auf derselben Diagrammkonfiguration und Datenaufbereitung.
 

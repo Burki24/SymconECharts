@@ -4,6 +4,9 @@
     "base_branch": "dev",
     "readme_language": "de",
     "helpers": {
+        "ConfigurationFormHelper": {
+            "target": "libs/helper/ConfigurationFormHelper.php"
+        },
         "DataFlowHelper": {
             "target": "libs/helper/DataFlowHelper.php"
         },
@@ -12,6 +15,9 @@
         },
         "ResponsiveVisualizationHelper": {
             "target": "libs/helper/ResponsiveVisualizationHelper.php"
+        },
+        "SVGPreviewHelper": {
+            "target": "libs/helper/SVGPreviewHelper.php"
         },
         "VisualizationAssetHelper": {
             "target": "libs/helper/VisualizationAssetHelper.php"

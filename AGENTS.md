@@ -18,8 +18,9 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   benannt.
 - Der aktuelle Repository-Stand besitzt eine getestete technische
   Gauge→Gateway-Datenbasis und eine native HTML-SDK-Basic-Gauge für
-  `EChartsGaugeSingle`. Preset-Auswahl, Gauge-Multi-Renderer und IPSView-Ausgabe
-  sind noch nicht implementiert. Nicht implementierte Funktionen,
+  `EChartsGaugeSingle` sowie eine live aktualisierte SVG-Vorschau im
+  Instanzformular. Preset-Auswahl, Gauge-Multi-Renderer und IPSView-Ausgabe sind
+  noch nicht implementiert. Nicht implementierte Funktionen,
   Store-Freigaben oder nicht real geprüfte Laufzeitkompatibilität dürfen nicht
   als vorhanden dargestellt werden.
 - Native Symcon-Kacheln und einzelne IPSView-HTML-Widgets sind vorgesehene

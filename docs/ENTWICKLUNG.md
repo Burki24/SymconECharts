@@ -22,9 +22,11 @@ Gauge-Datenmodell. Gauge Multi besitzt eine geordnete und validierte Liste aus
 2 bis 16 Quellen. Gauge Single rendert sein Modell mit der lokal gebündelten
 Apache-ECharts-Runtime 6.1.0 als responsive native HTML-SDK-Kachel und sendet
 Wertänderungen ohne einen vollständigen Neuaufbau der Seite an den Browser.
-Der Multi-Renderer, Preset-Auswahl, Archivverarbeitung, IPSView-Ausgabe sowie
-reale Symcon-Laufzeit- und Browsertests fehlen noch. Die Testsuite prüft
-zusätzlich zu Struktur und Metadaten die Strict-Verträge, das Protokoll, die
+Das Gauge-Single-Formular erzeugt außerdem eine live aktualisierte
+SVG-Vorschau der noch nicht gespeicherten Basic-Gauge-Einstellungen. Der
+Multi-Renderer, Preset-Auswahl, Archivverarbeitung, IPSView-Ausgabe sowie reale
+Symcon-Laufzeit- und Browsertests fehlen noch. Die Testsuite prüft zusätzlich
+zu Struktur und Metadaten die Strict-Verträge, das Protokoll, die
 ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 8.5 mit Test-Doppeln.
 

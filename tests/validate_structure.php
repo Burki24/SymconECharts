@@ -24,10 +24,12 @@ $requiredFiles = [
     'libs/echarts/6.1.0/echarts.gauge.min.js',
     'libs/echarts/6.1.0/LICENSE.txt',
     'libs/echarts/6.1.0/NOTICE.txt',
+    'libs/helper/ConfigurationFormHelper.php',
     'libs/helper/DataFlowHelper.php',
     'libs/helper/HelperTranslationHelper.php',
     'libs/helper/IPSViewHTMLPageHelper.php',
     'libs/helper/ResponsiveVisualizationHelper.php',
+    'libs/helper/SVGPreviewHelper.php',
     'libs/helper/VisualizationAssetHelper.php',
     'libs/helper/VisualizationThemeHelper.php',
     'libs/helper/translations/IPSViewHTMLPageHelper.json',
@@ -55,7 +57,8 @@ $requiredFiles = [
     'tools/echarts-runtime/src/gauge-runtime.js',
     'EChartsGaugeSingle/visualization/index.html',
     'EChartsGaugeSingle/visualization/style.css',
-    'EChartsGaugeSingle/visualization/app.js'
+    'EChartsGaugeSingle/visualization/app.js',
+    'EChartsGaugeSingle/GaugePreview.php'
 ];
 
 foreach ($requiredFiles as $requiredFile) {
@@ -199,11 +202,13 @@ if ($helperSync !== null) {
         $errors[] = '.helper-sync.json must generate German helper documentation.';
     }
     if (($helperSync['helpers'] ?? null) !== [
-        'DataFlowHelper'                => ['target' => 'libs/helper/DataFlowHelper.php'],
-        'IPSViewHTMLPageHelper'         => ['target' => 'libs/helper/IPSViewHTMLPageHelper.php'],
-        'ResponsiveVisualizationHelper' => ['target' => 'libs/helper/ResponsiveVisualizationHelper.php'],
-        'VisualizationAssetHelper'      => ['target' => 'libs/helper/VisualizationAssetHelper.php'],
-        'VisualizationThemeHelper'      => ['target' => 'libs/helper/VisualizationThemeHelper.php']
+        'ConfigurationFormHelper'        => ['target' => 'libs/helper/ConfigurationFormHelper.php'],
+        'DataFlowHelper'                 => ['target' => 'libs/helper/DataFlowHelper.php'],
+        'IPSViewHTMLPageHelper'          => ['target' => 'libs/helper/IPSViewHTMLPageHelper.php'],
+        'ResponsiveVisualizationHelper'  => ['target' => 'libs/helper/ResponsiveVisualizationHelper.php'],
+        'SVGPreviewHelper'               => ['target' => 'libs/helper/SVGPreviewHelper.php'],
+        'VisualizationAssetHelper'       => ['target' => 'libs/helper/VisualizationAssetHelper.php'],
+        'VisualizationThemeHelper'       => ['target' => 'libs/helper/VisualizationThemeHelper.php']
     ]) {
         $errors[] = '.helper-sync.json does not contain the required visualization helper subscriptions.';
     }

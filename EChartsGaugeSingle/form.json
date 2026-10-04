@@ -12,36 +12,57 @@
             "validVariableTypes": [
                 1,
                 2
-            ]
+            ],
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals);"
         },
         {
             "type": "NumberSpinner",
             "name": "Minimum",
             "caption": "Minimum",
-            "digits": 3
+            "digits": 3,
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals);"
         },
         {
             "type": "NumberSpinner",
             "name": "Maximum",
             "caption": "Maximum",
-            "digits": 3
+            "digits": 3,
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals);"
         },
         {
             "type": "ValidationTextBox",
             "name": "Title",
-            "caption": "Title"
+            "caption": "Title",
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals);"
         },
         {
             "type": "ValidationTextBox",
             "name": "Unit",
-            "caption": "Unit"
+            "caption": "Unit",
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals);"
         },
         {
             "type": "NumberSpinner",
             "name": "Decimals",
             "caption": "Decimal places",
             "minimum": 0,
-            "maximum": 6
+            "maximum": 6,
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals);"
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Preview",
+            "expanded": true,
+            "width": "700px",
+            "items": [
+                {
+                    "type": "Image",
+                    "name": "GaugePreview",
+                    "image": "",
+                    "center": true,
+                    "width": "100%"
+                }
+            ]
         }
     ],
     "actions": [

@@ -2,6 +2,12 @@
     "schema": 1,
     "source_repository": "Burki24/Symcon_ModuleHelper",
     "helpers": {
+        "ConfigurationFormHelper": {
+            "version": "1.0.0",
+            "sha256": "fa87dd4c67f43a3838fe87110387e4c1a1b98685c13403eeb52c189246045678",
+            "path": "libs/helper/ConfigurationFormHelper.php",
+            "source_sha": "7a28a4d68fdb81d1c4edc492628ae2f2ae256940"
+        },
         "DataFlowHelper": {
             "version": "1.0.0",
             "sha256": "4c25828b283367692d0db1631d2b7d71ba6012883798bc5ffddb8f2d551d6dfb",
@@ -41,6 +47,12 @@
             "sha256": "0cebd0f08e6416a6d7d4d5fdbb19bf96d457d3e2d51fcf2a1d3e6adf5e967451",
             "path": "libs/helper/ResponsiveVisualizationHelper.php",
             "source_sha": "8e3df7e07ede7a7e298a6d69f132bc4cb697ab91"
+        },
+        "SVGPreviewHelper": {
+            "version": "1.0.0",
+            "sha256": "14313a55020df27931e1ffe071fa599a39152493c6305ab2ef5322922981817b",
+            "path": "libs/helper/SVGPreviewHelper.php",
+            "source_sha": "7a28a4d68fdb81d1c4edc492628ae2f2ae256940"
         },
         "VisualizationAssetHelper": {
             "version": "1.0.0",

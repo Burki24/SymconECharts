@@ -87,6 +87,9 @@ abstract class IPSModuleStrict
     /** @var list<mixed> */
     private array $visualizationUpdates = [];
 
+    /** @var list<array{Field:string, Parameter:string, Value:mixed}> */
+    private array $formUpdates = [];
+
     private int $status = IS_INACTIVE;
     private bool $parentActive = true;
     private string $summary = '';
@@ -141,6 +144,12 @@ abstract class IPSModuleStrict
     public function GetTestVisualizationUpdates(): array
     {
         return $this->visualizationUpdates;
+    }
+
+    /** @return list<array{Field:string, Parameter:string, Value:mixed}> */
+    public function GetTestFormUpdates(): array
+    {
+        return $this->formUpdates;
     }
 
     protected function RegisterPropertyInteger(string $name, int $default): bool
@@ -254,6 +263,17 @@ abstract class IPSModuleStrict
         return true;
     }
 
+    protected function UpdateFormField(string $field, string $parameter, mixed $value): bool
+    {
+        $this->formUpdates[] = [
+            'Field'     => $field,
+            'Parameter' => $parameter,
+            'Value'     => $value
+        ];
+
+        return true;
+    }
+
     protected function Translate(string $text): string
     {
         return $text;
@@ -355,6 +375,67 @@ assertGatewayGauge(!str_contains($visualizationTile, '<script src="http'), 'Gaug
 assertGatewayGauge(
     strlen($visualizationTile) < SYMCON_OUTPUT_BUFFER_LIMIT,
     'Gauge Single tile must remain below the Symcon output-buffer limit.'
+);
+
+$configurationForm = json_decode($gauge->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+$previewElement = null;
+foreach ($configurationForm['elements'] ?? [] as $element) {
+    if (($element['type'] ?? null) !== 'ExpansionPanel' || ($element['caption'] ?? null) !== 'Preview') {
+        continue;
+    }
+
+    foreach ($element['items'] ?? [] as $item) {
+        if (($item['name'] ?? null) === 'GaugePreview') {
+            $previewElement = $item;
+            break 2;
+        }
+    }
+}
+assertGatewayGauge(is_array($previewElement), 'Gauge Single configuration form must contain a preview image.');
+assertGatewayGauge(
+    str_starts_with((string) ($previewElement['image'] ?? ''), 'data:image/svg+xml;base64,'),
+    'Gauge Single configuration form must initialize the preview as an SVG data URI.'
+);
+$initialPreviewSvg = base64_decode(
+    substr((string) $previewElement['image'], strlen('data:image/svg+xml;base64,')),
+    true
+);
+assertGatewayGauge(is_string($initialPreviewSvg), 'Gauge Single preview SVG must be valid Base64.');
+assertGatewayGauge(str_contains($initialPreviewSvg, 'Room climate'), 'Gauge Single preview must contain the title.');
+assertGatewayGauge(str_contains($initialPreviewSvg, '42.5 °C'), 'Gauge Single preview must use the current source value.');
+
+$gauge->UpdateGaugePreview(4711, 0.0, 200.0, 'Wind & weather', 'km/h', 2);
+$formUpdates = $gauge->GetTestFormUpdates();
+$latestFormUpdate = end($formUpdates);
+assertGatewayGauge(
+    is_array($latestFormUpdate)
+        && ($latestFormUpdate['Field'] ?? null) === 'GaugePreview'
+        && ($latestFormUpdate['Parameter'] ?? null) === 'image',
+    'Gauge Single must update the preview image when form values change.'
+);
+$updatedPreviewUri = is_array($latestFormUpdate) ? (string) ($latestFormUpdate['Value'] ?? '') : '';
+$updatedPreviewSvg = base64_decode(
+    substr($updatedPreviewUri, strlen('data:image/svg+xml;base64,')),
+    true
+);
+assertGatewayGauge(is_string($updatedPreviewSvg), 'Updated Gauge Single preview must be valid Base64.');
+assertGatewayGauge(
+    str_contains($updatedPreviewSvg, 'Wind &amp; weather'),
+    'Gauge Single preview must XML-escape user-provided labels.'
+);
+assertGatewayGauge(str_contains($updatedPreviewSvg, '42.50 km/h'), 'Gauge Single preview formatting changed.');
+
+$gauge->UpdateGaugePreview(4711, 100.0, 0.0, 'Invalid', '', 1);
+$formUpdates = $gauge->GetTestFormUpdates();
+$invalidPreviewUpdate = end($formUpdates);
+$invalidPreviewUri = is_array($invalidPreviewUpdate) ? (string) ($invalidPreviewUpdate['Value'] ?? '') : '';
+$invalidPreviewSvg = base64_decode(
+    substr($invalidPreviewUri, strlen('data:image/svg+xml;base64,')),
+    true
+);
+assertGatewayGauge(
+    is_string($invalidPreviewSvg) && str_contains($invalidPreviewSvg, 'Minimum must be lower than maximum.'),
+    'Gauge Single preview must explain an invalid range without persisting the form values.'
 );
 
 $gaugeData = json_decode($gauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);

@@ -8,6 +8,8 @@
             "Title": "Titel",
             "Unit": "Einheit",
             "Decimal places": "Nachkommastellen",
+            "Preview": "Vorschau",
+            "Minimum must be lower than maximum.": "Minimum muss kleiner als Maximum sein.",
             "Read current Gauge Single data": "Aktuelle Gauge-Single-Daten lesen",
             "Gauge Single is ready": "Gauge Single ist bereit",
             "Select a numeric source variable": "Numerische Quellvariable auswählen",

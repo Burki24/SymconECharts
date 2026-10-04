@@ -2,24 +2,31 @@
 
 declare(strict_types=1);
 
+use Burki24\SymconModuleHelper\ConfigurationFormHelper;
 use Burki24\SymconModuleHelper\DataFlowHelper;
 use Burki24\SymconModuleHelper\IPSViewHTMLPageHelper;
 use Burki24\SymconModuleHelper\ResponsiveVisualizationHelper;
+use Burki24\SymconModuleHelper\SVGPreviewHelper;
 use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsDataProtocol;
+use SymconECharts\EChartsGaugeSinglePreview;
 
+require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
 require_once __DIR__ . '/../libs/helper/DataFlowHelper.php';
 require_once __DIR__ . '/../libs/helper/IPSViewHTMLPageHelper.php';
 require_once __DIR__ . '/../libs/helper/ResponsiveVisualizationHelper.php';
+require_once __DIR__ . '/../libs/helper/SVGPreviewHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
+require_once __DIR__ . '/GaugePreview.php';
 
 class EChartsGaugeSingle extends IPSModuleStrict
 {
+    use ConfigurationFormHelper;
     use DataFlowHelper;
     use IPSViewHTMLPageHelper;
     use ResponsiveVisualizationHelper;
@@ -68,6 +75,50 @@ class EChartsGaugeSingle extends IPSModuleStrict
             'type'      => 'connect',
             'moduleIDs' => [self::GATEWAY_MODULE_ID]
         ], JSON_THROW_ON_ERROR);
+    }
+
+    public function GetConfigurationForm(): string
+    {
+        $form = $this->LoadConfigurationForm();
+        $form = SVGPreviewHelper::withImage(
+            $form,
+            'GaugePreview',
+            $this->BuildGaugePreviewSvg(
+                $this->ReadPropertyInteger('SourceVariableID'),
+                $this->ReadPropertyFloat('Minimum'),
+                $this->ReadPropertyFloat('Maximum'),
+                $this->ReadPropertyString('Title'),
+                $this->ReadPropertyString('Unit'),
+                $this->ReadPropertyInteger('Decimals')
+            )
+        );
+
+        return $this->EncodeConfigurationForm($form);
+    }
+
+    /**
+     * Refreshes the configuration-form preview with values that are not persisted yet.
+     */
+    public function UpdateGaugePreview(
+        int $VariableID,
+        float $Minimum,
+        float $Maximum,
+        string $Title,
+        string $Unit,
+        int $Decimals
+    ): void {
+        $this->UpdateFormField(
+            'GaugePreview',
+            'image',
+            SVGPreviewHelper::dataUri($this->BuildGaugePreviewSvg(
+                $VariableID,
+                $Minimum,
+                $Maximum,
+                $Title,
+                $Unit,
+                $Decimals
+            ))
+        );
     }
 
     public function GetGaugeData(): string
@@ -222,6 +273,55 @@ class EChartsGaugeSingle extends IPSModuleStrict
         $this->WriteAttributeString('LastError', '');
         $this->SetSummary(IPS_GetName($this->ReadPropertyInteger('SourceVariableID')));
         $this->SetStatus(IS_ACTIVE);
+    }
+
+    private function BuildGaugePreviewSvg(
+        int $variableID,
+        float $minimum,
+        float $maximum,
+        string $title,
+        string $unit,
+        int $decimals
+    ): string {
+        if (!is_finite($minimum) || !is_finite($maximum) || $minimum >= $maximum) {
+            return EChartsGaugeSinglePreview::CreateErrorSvg(
+                $this->Translate('Minimum must be lower than maximum.')
+            );
+        }
+
+        $value = $this->ResolveGaugePreviewValue($variableID, $minimum, $maximum);
+        $language = $this->NormalizeHelperTranslationLanguage(
+            $this->ResolveHelperTranslationLanguage()
+        );
+
+        return EChartsGaugeSinglePreview::CreateSvg(
+            $value,
+            $minimum,
+            $maximum,
+            $title,
+            $unit,
+            $decimals,
+            $language
+        );
+    }
+
+    private function ResolveGaugePreviewValue(int $variableID, float $minimum, float $maximum): float
+    {
+        if ($variableID > 0 && IPS_VariableExists($variableID)) {
+            try {
+                $variable = IPS_GetVariable($variableID);
+                if (in_array($variable['VariableType'] ?? null, [1, 2], true)) {
+                    $value = GetValue($variableID);
+                    if ((is_int($value) || is_float($value)) && is_finite((float) $value)) {
+                        return (float) $value;
+                    }
+                }
+            } catch (Throwable $exception) {
+                $this->SendDebug('ResolveGaugePreviewValue', $exception::class, 0);
+            }
+        }
+
+        return $minimum + (($maximum - $minimum) / 2);
     }
 
     /**
