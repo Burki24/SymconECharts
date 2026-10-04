@@ -426,7 +426,11 @@ foreach ([
     'function applyArcDesign(series, style)',
     'series.startAngle = 90 - startPosition;',
     'function applyPointerShape(series, style, layout)',
+    'function resolveCustomPointerGeometry(style, layout)',
+    'pointerLength * viewBoxWidth / viewBoxHeight',
+    '(1 - (pivotY - minimumY) / viewBoxHeight) * pointerLength',
     "series.pointer.icon = 'path://' + path;",
+    "series.anchor.show = shape !== 'custom' || !geometry.hasPivot;",
     'function applyCustomColors(series, style, colors)'
 ] as $responsiveLayoutContract) {
     assertGatewayGauge(
@@ -976,14 +980,16 @@ $customPointerData = json_decode($customPointerGauge->GetGaugeData(), true, 512,
 assertGatewayGauge(
     str_contains((string) ($customPointerData['gauge']['style']['pointerPath'] ?? ''), 'M50 397 A27 27')
         && str_contains((string) ($customPointerData['gauge']['style']['pointerPath'] ?? ''), 'M48.5 57 C48.8 40')
-        && ($customPointerData['gauge']['style']['pointerViewBox'] ?? null) === '0 0 100 400'
+        && ($customPointerData['gauge']['style']['pointerViewBox'] ?? null) === '22 0 56 397'
+        && ($customPointerData['gauge']['style']['pointerPivotX'] ?? null) === 50.0
+        && ($customPointerData['gauge']['style']['pointerPivotY'] ?? null) === 370.0
         && !str_contains(json_encode($customPointerData, JSON_THROW_ON_ERROR), '<svg'),
     'Gauge Single must expose only the validated path and viewBox, never the imported SVG markup.'
 );
 $customPointerTile = $customPointerGauge->GetVisualizationTile();
 assertGatewayGauge(
     str_contains($customPointerTile, 'M50 397 A27 27')
-        && !str_contains($customPointerTile, '<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 400\"')
+        && !str_contains($customPointerTile, '<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"22 0 56 397\"')
         && strlen($customPointerTile) < SYMCON_OUTPUT_BUFFER_LIMIT,
     'The custom pointer tile must embed only its bounded path and remain below the output-buffer limit.'
 );
@@ -1007,8 +1013,13 @@ $customPointerPreviewSvg = is_array($customPointerPreview)
     )
     : false;
 assertGatewayGauge(
-    is_string($customPointerPreviewSvg) && str_contains($customPointerPreviewSvg, 'data-pointer-shape="custom"'),
-    'The Gauge form preview must render the imported custom SVG pointer.'
+    is_string($customPointerPreviewSvg)
+        && str_contains($customPointerPreviewSvg, 'data-pointer-shape="custom"')
+        && str_contains($customPointerPreviewSvg, 'data-pointer-pivot-x="50.00"')
+        && str_contains($customPointerPreviewSvg, 'data-pointer-pivot-y="370.00"')
+        && str_contains($customPointerPreviewSvg, 'x="353.09" y="104.66" width="13.82" height="98.00"')
+        && !str_contains($customPointerPreviewSvg, 'class="anchor"'),
+    'The Gauge form preview must render the imported custom SVG pointer around its own pivot.'
 );
 $singleGauge->SetTestProperty('SourceVariableID', 4712);
 $singleGauge->ApplyChanges();

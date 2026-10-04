@@ -424,6 +424,38 @@
         return series;
     }
 
+    function resolveCustomPointerGeometry(style, layout) {
+        var parts = String(style.pointerViewBox || '').trim().split(/[\s,]+/).map(Number);
+        if (parts.length !== 4 || parts.some(function (value) { return !Number.isFinite(value); })
+            || parts[2] <= 0 || parts[3] <= 0) {
+            return null;
+        }
+
+        var minimumX = parts[0];
+        var minimumY = parts[1];
+        var viewBoxWidth = parts[2];
+        var viewBoxHeight = parts[3];
+        var pointerLength = layout.radius * parseFloat(layout.pointerLength) / 100;
+        var pointerWidth = Math.max(
+            2,
+            pointerLength * viewBoxWidth / viewBoxHeight * resolveStyleScale(style, 'pointerWidthPercent')
+        );
+        var pivotX = Number(style.pointerPivotX);
+        var pivotY = Number(style.pointerPivotY);
+        var hasPivot = Number.isFinite(pivotX) && Number.isFinite(pivotY);
+        pivotX = hasPivot ? clamp(pivotX, minimumX, minimumX + viewBoxWidth) : minimumX + viewBoxWidth / 2;
+        pivotY = hasPivot ? clamp(pivotY, minimumY, minimumY + viewBoxHeight) : minimumY + viewBoxHeight;
+
+        return {
+            width: pointerWidth,
+            hasPivot: hasPivot,
+            offsetCenter: [
+                (0.5 - (pivotX - minimumX) / viewBoxWidth) * pointerWidth,
+                (1 - (pivotY - minimumY) / viewBoxHeight) * pointerLength
+            ]
+        };
+    }
+
     function applyPointerShape(series, style, layout) {
         var shape = ['preset', 'needle', 'line', 'arrow', 'custom'].indexOf(style.pointerShape) >= 0
             ? style.pointerShape
@@ -434,17 +466,20 @@
 
         if (shape === 'custom') {
             var path = typeof style.pointerPath === 'string' ? style.pointerPath.trim() : '';
-            if (!path || !/^[MmZzLlHhVvCcSsQqTtAa0-9eE+.,\-\s]+$/.test(path)) {
+            var geometry = resolveCustomPointerGeometry(style, layout);
+            if (!path || !geometry || !/^[MmZzLlHhVvCcSsQqTtAa0-9eE+.,\-\s]+$/.test(path)) {
                 return series;
             }
             series.pointer.icon = 'path://' + path;
+            series.pointer.width = geometry.width;
+            series.pointer.offsetCenter = geometry.offsetCenter;
         } else {
             series.pointer.icon = pointerIcons[shape];
+            series.pointer.width = layout.pointerWidth;
+            series.pointer.offsetCenter = [0, 0];
         }
         series.pointer.length = layout.pointerLength;
-        series.pointer.width = layout.pointerWidth;
-        series.pointer.offsetCenter = [0, 0];
-        series.anchor.show = true;
+        series.anchor.show = shape !== 'custom' || !geometry.hasPivot;
 
         return series;
     }

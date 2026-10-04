@@ -75,8 +75,14 @@ Als additive, validierte Designwerte stehen die Zeigerformen `preset`,
 Ereignishandler, externe Referenzen und sonstige SVG-Elemente werden
 abgewiesen. Nur ein auf 64 KiB begrenzter validierter Pfad und die `viewBox`
 gelangen in das Gauge-Datenmodell; das Originalmarkup wird weder an Vorschau
-noch Kachel weitergegeben. Der Skalenbogen verwendet entweder
-die Presetgeometrie oder einen Voll-, Dreiviertel-, Halb-, Viertel- oder
+noch Kachel weitergegeben. Eine optionale numerische Wurzelangabe
+`data-echarts-pivot="x y"` wird nur übernommen, wenn beide Koordinaten innerhalb
+der `viewBox` liegen. Sie definiert den Drehpunkt des Pfades; ohne Angabe gilt
+unten mittig. Bei `100 %` Zeigerstärke wird die `viewBox` proportional auf die
+konfigurierte Zeigerlänge skaliert. Ein eigener SVG-Zeiger zeichnet seine Nabe
+bei ausdrücklich gesetztem Drehpunkt selbst, sodass für ihn der zusätzliche
+ECharts-Anker entfällt. Der Skalenbogen
+verwendet entweder die Presetgeometrie oder einen Voll-, Dreiviertel-, Halb-, Viertel- oder
 benutzerdefinierten Bogen. Anwenderpositionen werden wie auf einem Zifferblatt
 gespeichert (`0°` oben, im Uhrzeigersinn) und sind auf 22,5-Grad-Schritte
 begrenzt. Der Renderer übersetzt diese Positionen in die ECharts-Winkel; die

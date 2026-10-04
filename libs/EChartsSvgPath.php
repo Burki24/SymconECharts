@@ -20,7 +20,7 @@ final class EChartsSvgPath
     private const MAX_PATHS = 32;
     private const ALLOWED_ELEMENTS = ['svg', 'g', 'path'];
 
-    /** @return array{path: string, viewBox: string} */
+    /** @return array{path: string, viewBox: string, pivotX?: float, pivotY?: float} */
     public static function Import(string $fileData): array
     {
         $svg = self::DecodeFileData($fileData);
@@ -52,6 +52,7 @@ final class EChartsSvgPath
             throw new InvalidArgumentException('The SVG requires a finite viewBox with positive width and height.');
         }
         $viewBox = self::NormalizeViewBox($viewBoxMatch[2]);
+        $pivot = self::ReadPivot($svgMatch[1], $viewBox);
 
         preg_match_all('/<\s*path\b([^>]*)\/?>/is', $svg, $pathMatches);
         if (count($pathMatches[1] ?? []) === 0 || count($pathMatches[1]) > self::MAX_PATHS) {
@@ -83,7 +84,13 @@ final class EChartsSvgPath
             throw new InvalidArgumentException('The combined SVG path exceeds the 64 KiB import limit.');
         }
 
-        return ['path' => $path, 'viewBox' => $viewBox];
+        $result = ['path' => $path, 'viewBox' => $viewBox];
+        if ($pivot !== null) {
+            $result['pivotX'] = $pivot[0];
+            $result['pivotY'] = $pivot[1];
+        }
+
+        return $result;
     }
 
     private static function DecodeFileData(string $fileData): string
@@ -132,6 +139,39 @@ final class EChartsSvgPath
         }
 
         return implode(' ', array_map(self::FormatNumber(...), $numbers));
+    }
+
+    /** @return array{float, float}|null */
+    private static function ReadPivot(string $svgAttributes, string $viewBox): ?array
+    {
+        if (preg_match('/\bdata-echarts-pivot\s*=/i', $svgAttributes) !== 1) {
+            return null;
+        }
+        if (preg_match('/\bdata-echarts-pivot\s*=\s*(["\'])(.*?)\1/is', $svgAttributes, $pivotMatch) !== 1) {
+            throw new InvalidArgumentException('The optional ECharts pivot must contain two finite coordinates.');
+        }
+
+        $parts = preg_split('/[\s,]+/', trim($pivotMatch[2])) ?: [];
+        if (count($parts) !== 2) {
+            throw new InvalidArgumentException('The optional ECharts pivot must contain two finite coordinates.');
+        }
+        $pivot = [];
+        foreach ($parts as $part) {
+            if (preg_match('/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/D', $part) !== 1
+                || !is_finite((float) $part)) {
+                throw new InvalidArgumentException('The optional ECharts pivot must contain two finite coordinates.');
+            }
+            $pivot[] = (float) $part;
+        }
+
+        $viewBoxParts = array_map('floatval', explode(' ', $viewBox));
+        [$minimumX, $minimumY, $width, $height] = $viewBoxParts;
+        if ($pivot[0] < $minimumX || $pivot[0] > $minimumX + $width
+            || $pivot[1] < $minimumY || $pivot[1] > $minimumY + $height) {
+            throw new InvalidArgumentException('The optional ECharts pivot must be inside the SVG viewBox.');
+        }
+
+        return [$pivot[0], $pivot[1]];
     }
 
     private static function FormatNumber(float $number): string

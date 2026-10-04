@@ -65,8 +65,15 @@ importiertes SVG gewählt werden. Der SVG-Import akzeptiert ausschließlich
 eine `viewBox` und reine Pfadgeometrie aus bis zu 32 `path`-Elementen. Das
 SVG darf höchstens 128 KiB groß sein; Transformationen, Skripte, Ereignisse,
 externe Referenzen und andere Elemente werden nicht übernommen. An ECharts
-wird niemals das SVG-Dokument, sondern nur der validierte Pfad übergeben. Der
-Skalenbogen bleibt wahlweise bei der Presetvorgabe oder
+wird niemals das SVG-Dokument, sondern nur der validierte Pfad übergeben.
+Eine eng an der Pfadgeometrie liegende `viewBox` erhält bei `100 %`
+Zeigerstärke die ursprünglichen Proportionen; die Spitze zeigt im SVG nach
+oben. Optional legt
+`data-echarts-pivot="x y"` am Wurzel-SVG den Drehpunkt in viewBox-Koordinaten
+fest; ohne diese Angabe wird unten mittig verwendet. Eigene SVG-Zeiger bringen
+mit einem ausdrücklich gesetzten Drehpunkt ihre Nabe selbst mit, weshalb der
+zusätzliche ECharts-Anker für sie ausgeblendet wird.
+Der Skalenbogen bleibt wahlweise bei der Presetvorgabe oder
 wird als Voll-, Dreiviertel-, Halb-, Viertelkreis beziehungsweise mit eigenem
 Start und Ende definiert. Die Positionen folgen einem Zifferblatt (`0°` oben,
 `90°` rechts, `180°` unten, `270°` links) und stehen in 22,5-Grad-Schritten

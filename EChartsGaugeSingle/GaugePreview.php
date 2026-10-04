@@ -514,17 +514,32 @@ SVG;
         $angle = self::Angle($ratio, $design);
         $rotation = 90.0 - $angle;
         $centerY = (float) $design['centerY'];
-        $width = max(2.0, (float) $design['pointerWidth']);
         $length = (float) $design['pointerLength'];
+        [$minimumX, $minimumY, $viewBoxWidth, $viewBoxHeight] = array_map('floatval', explode(' ', $viewBox));
+        $widthScale = max(50, min(150, (int) ($style['pointerWidthPercent'] ?? 100))) / 100;
+        $width = max(2.0, $length * $viewBoxWidth / $viewBoxHeight * $widthScale);
+        $hasPivot = isset($style['pointerPivotX'], $style['pointerPivotY']);
+        $pivotX = max(
+            $minimumX,
+            min($minimumX + $viewBoxWidth, (float) ($style['pointerPivotX'] ?? $minimumX + $viewBoxWidth / 2.0))
+        );
+        $pivotY = max(
+            $minimumY,
+            min($minimumY + $viewBoxHeight, (float) ($style['pointerPivotY'] ?? $minimumY + $viewBoxHeight))
+        );
+        $x = self::CENTER_X - ($pivotX - $minimumX) / $viewBoxWidth * $width;
+        $y = $centerY - ($pivotY - $minimumY) / $viewBoxHeight * $length;
         $shadowClass = $design['speedPointer'] ? ' speed-pointer-shadow' : '';
 
         return '<g transform="rotate(' . self::Coordinate($rotation) . ' 360 '
-            . self::Coordinate($centerY) . ')"><svg x="' . self::Coordinate(self::CENTER_X - $width / 2.0)
-            . '" y="' . self::Coordinate($centerY - $length) . '" width="' . self::Coordinate($width)
+            . self::Coordinate($centerY) . ')"><svg x="' . self::Coordinate($x)
+            . '" y="' . self::Coordinate($y) . '" width="' . self::Coordinate($width)
             . '" height="' . self::Coordinate($length) . '" viewBox="' . SVGPreviewHelper::escape($viewBox)
-            . '" preserveAspectRatio="none" overflow="visible"><path d="' . SVGPreviewHelper::escape($path)
+            . '" preserveAspectRatio="none" overflow="visible" data-pointer-pivot-x="'
+            . self::Coordinate($pivotX) . '" data-pointer-pivot-y="' . self::Coordinate($pivotY)
+            . '"><path d="' . SVGPreviewHelper::escape($path)
             . '" class="pointer' . $shadowClass . '" data-pointer-shape="custom"/></svg></g>'
-            . '<circle cx="360" cy="' . self::Coordinate($centerY) . '" r="11" class="anchor"/>';
+            . ($hasPivot ? '' : '<circle cx="360" cy="' . self::Coordinate($centerY) . '" r="11" class="anchor"/>');
     }
 
     /** @param array<string, float|bool|int> $design */

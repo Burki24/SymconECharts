@@ -601,7 +601,15 @@ class EChartsGaugeSingle extends IPSModuleStrict
         return $style;
     }
 
-    /** @return array{pointerPath?: string, pointerViewBox?: string, pointerError?: string} */
+    /**
+     * @return array{
+     *     pointerPath?: string,
+     *     pointerViewBox?: string,
+     *     pointerPivotX?: float,
+     *     pointerPivotY?: float,
+     *     pointerError?: string
+     * }
+     */
     private function ResolveCustomPointerStyle(string $pointerShape, string $fileData): array
     {
         if ($pointerShape !== 'custom') {
@@ -611,7 +619,13 @@ class EChartsGaugeSingle extends IPSModuleStrict
         try {
             $pointer = EChartsSvgPath::Import($fileData);
 
-            return ['pointerPath' => $pointer['path'], 'pointerViewBox' => $pointer['viewBox']];
+            $style = ['pointerPath' => $pointer['path'], 'pointerViewBox' => $pointer['viewBox']];
+            if (isset($pointer['pivotX'], $pointer['pivotY'])) {
+                $style['pointerPivotX'] = $pointer['pivotX'];
+                $style['pointerPivotY'] = $pointer['pivotY'];
+            }
+
+            return $style;
         } catch (InvalidArgumentException $exception) {
             $this->SendDebug('ResolveCustomPointerStyle', $exception->getMessage(), 0);
 

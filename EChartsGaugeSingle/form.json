@@ -207,7 +207,7 @@
                         },
                         {
                             "type": "Label",
-                            "caption": "Custom SVG pointers require a viewBox and path-only geometry. The pointer should face upward; scripts, external content and transformations are not imported."
+                            "caption": "Custom SVG pointers require a tightly fitted viewBox and path-only geometry and should face upward. At 100% pointer width their proportions are retained. The optional data-echarts-pivot attribute defines the rotation point; otherwise bottom center is used."
                         },
                         {
                             "type": "RowLayout",

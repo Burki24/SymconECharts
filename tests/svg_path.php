@@ -31,9 +31,11 @@ $ornatePointerSvg = file_get_contents(__DIR__ . '/fixtures/gauge-pointer-ornate.
 assertSvgPath(is_string($ornatePointerSvg), 'Ornate Gauge pointer fixture cannot be read.');
 $ornatePointer = EChartsSvgPath::Import($ornatePointerSvg);
 assertSvgPath(
-    $ornatePointer['viewBox'] === '0 0 100 400'
+    $ornatePointer['viewBox'] === '22 0 56 397'
         && str_contains($ornatePointer['path'], 'M50 397 A27 27')
-        && str_contains($ornatePointer['path'], 'M48.5 57 C48.8 40'),
+        && str_contains($ornatePointer['path'], 'M48.5 57 C48.8 40')
+        && ($ornatePointer['pivotX'] ?? null) === 50.0
+        && ($ornatePointer['pivotY'] ?? null) === 370.0,
     'Ornate Gauge pointer fixture changed or cannot be imported.'
 );
 
@@ -53,6 +55,8 @@ foreach ([
     'transformation' => '<svg viewBox="0 0 10 10"><path transform="rotate(90)" d="M0 0L1 1Z"/></svg>',
     'event'          => '<svg viewBox="0 0 10 10"><path onload="alert(1)" d="M0 0L1 1Z"/></svg>',
     'path-data'      => '<svg viewBox="0 0 10 10"><path d="javascript:alert(1)"/></svg>',
+    'pivot-format'   => '<svg viewBox="0 0 10 10" data-echarts-pivot="center"><path d="M0 0L1 1Z"/></svg>',
+    'pivot-outside'  => '<svg viewBox="0 0 10 10" data-echarts-pivot="5 11"><path d="M0 0L1 1Z"/></svg>',
     'viewBox-size'   => '<svg viewBox="0 0 0 10"><path d="M0 0L1 1Z"/></svg>',
     'path-size'      => '<svg viewBox="0 0 10 10"><path d="M0 0 ' . str_repeat('L1 1 ', 14000) . 'Z"/></svg>',
     'file-size'      => '<svg viewBox="0 0 10 10"><!--' . str_repeat('x', 131073)
