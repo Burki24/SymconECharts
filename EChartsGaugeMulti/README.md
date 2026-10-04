@@ -73,6 +73,12 @@ zusammengesetztem Gauge-Chart. Mehrere Gauge-Instanzen sollen ein gemeinsames
 Gateway verwenden können. Für die parallele Anzeige desselben Charts als
 Kachel und in IPSView ist keine zweite Gauge-Instanz vorgesehen.
 
+Bei der ersten ECharts-Diagramminstanz wird ein EChartsGateway neu angelegt.
+Bei allen weiteren Gauge- oder anderen ECharts-Diagramminstanzen wird dieses
+vorhandene Gateway ausgewählt. Symcon bietet aufgrund des Verbindungstyps
+zusätzlich weiterhin eine Neuanlage an; sie ist für den regulären Betrieb nicht
+notwendig.
+
 **Aktueller Stand:** Über die kompatiblen Parent-Verbindungen kann eine
 vorhandene EChartsGateway-Instanz ausgewählt und von mehreren Gauges verwendet
 werden. Ohne aktive Verbindung bleibt die Gauge-Instanz in einem eindeutigen

@@ -20,6 +20,12 @@ Folgende Module beinhaltet das SymconECharts Repository:
   Datenquellen, etwa Multi Title, Ring oder Car. Jede Quelle besitzt eine
   eigene Beschriftung, Skala, Einheit und Formatierung.
 
+Für eine reguläre Installation genügt eine gemeinsame EChartsGateway-Instanz
+für alle Gauge- und späteren Diagramminstanzen. Beim ersten Diagramm kann ein
+neues Gateway angelegt werden; bei jedem weiteren Diagramm wird das bereits
+vorhandene Gateway ausgewählt. Die von Symcon weiterhin angebotene Neuanlage
+eines Parents ist für den Normalbetrieb nicht erforderlich.
+
 ## Entwicklungsstand
 
 **Technische Datenbasis – noch keine sichtbaren Diagramme.** Gateway und die

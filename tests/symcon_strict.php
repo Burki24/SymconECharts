@@ -20,6 +20,8 @@ function requireStrictContract(bool $condition, string $message, array &$errors)
 $gateway = (string) file_get_contents($root . '/EChartsGateway/module.php');
 $gaugeSingle = (string) file_get_contents($root . '/EChartsGaugeSingle/module.php');
 $gaugeMulti = (string) file_get_contents($root . '/EChartsGaugeMulti/module.php');
+$sharedGatewayGuidance = 'One shared EChartsGateway is sufficient for all ECharts chart instances. '
+    . 'When adding further charts, select the existing gateway instead of creating another one.';
 
 foreach ([
     'EChartsGateway'     => $gateway,
@@ -100,6 +102,26 @@ foreach ([
         true,
         512,
         JSON_THROW_ON_ERROR
+    );
+    requireStrictContract(
+        in_array(
+            ['type' => 'Label', 'caption' => $sharedGatewayGuidance],
+            $gaugeForm['elements'] ?? [],
+            true
+        ),
+        $gaugeModuleName . ' form must explain that one shared gateway is sufficient.',
+        $errors
+    );
+    $gaugeLocale = json_decode(
+        (string) file_get_contents($root . '/' . $gaugeModuleName . '/locale.json'),
+        true,
+        512,
+        JSON_THROW_ON_ERROR
+    );
+    requireStrictContract(
+        isset($gaugeLocale['translations']['de'][$sharedGatewayGuidance]),
+        $gaugeModuleName . ' must translate the shared gateway guidance.',
+        $errors
     );
     $formNames = [];
     foreach ($gaugeForm['elements'] ?? [] as $element) {

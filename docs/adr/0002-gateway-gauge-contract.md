@@ -21,7 +21,12 @@ Beide Module verwenden `IPSModuleStrict` und vollständig typisierte öffentlich
 Methoden. `EChartsGauge::GetCompatibleParents()` beschreibt ausschließlich
 `EChartsGateway` mit `type: connect`. Dadurch bietet die Verwaltungskonsole
 bereits vorhandene Gateway-Instanzen auch dann an, wenn andere Geräte mit ihnen
-verbunden sind. `RequireParent()` wird nicht mehr verwendet.
+verbunden sind. Im regulären Betrieb verwenden alle ECharts-Geräte eine
+gemeinsame Gateway-Instanz. Das erste Gerät kann sie neu anlegen; jedes weitere
+Gerät soll das vorhandene Gateway auswählen. Die von Symcon bei `connect`
+weiterhin angebotene Neuanlage wird nicht technisch verhindert, weil mehrere
+Gateways zulässig bleiben und keine harte Singleton-Abhängigkeit eingeführt
+wird. `RequireParent()` wird nicht mehr verwendet.
 
 Der Symcon-Datenfluss behält seine vorhandenen GUIDs. Die Transporthülle wird
 über `DataFlowHelper` aus `Symcon_ModuleHelper` validiert. Innerhalb der Hülle
@@ -73,6 +78,11 @@ Mehrere Gauge-Instanzen können bewusst dasselbe Gateway verwenden. Ungültige
 Variablen, Wertebereiche, Elternverbindungen und Gateway-Antworten führen zu
 eindeutigen Instanzstatuswerten. Die Quellvariable wird als Symcon-Referenz
 registriert und bei Konfigurationsänderungen deterministisch ersetzt.
+
+Zusätzliche Gateways bilden voneinander getrennte Infrastruktur und später
+auch getrennte Caches. Sie sind technisch möglich, aber nicht der dokumentierte
+Standard. Die Geräteformulare weisen deshalb sichtbar auf die gemeinsame
+Gateway-Nutzung hin.
 
 Das erste Datenmodell ist noch keine sichtbare Gauge. Native HTML-SDK-Ausgabe,
 IPSView-Ausgabe und ECharts-Auslieferung benötigen eigene nachfolgende

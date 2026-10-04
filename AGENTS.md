@@ -34,6 +34,11 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Archivzugriff, begrenztes Caching, gemeinsame Ressourcen und gegebenenfalls
   abgesicherte IPSView-Kommunikation bereit. Familienbezogene Properties,
   Validierung und ECharts-Optionen verbleiben im jeweiligen Gerätemodul.
+- Im regulären Betrieb verwenden alle ECharts-Geräte eine gemeinsame
+  Gateway-Instanz. Das erste Gerät kann sie neu anlegen, weitere Geräte wählen
+  das vorhandene Gateway. Zusätzliche Gateways bleiben technisch zulässig,
+  werden aber weder als Standard empfohlen noch durch eine harte
+  Singleton-Logik verhindert.
 - Weitere Diagrammfamilien erhalten bei belegtem Bedarf ein eigenes
   Gerätemodul. Sie werden nicht als Modi einer universellen Widget-Instanz
   ergänzt.

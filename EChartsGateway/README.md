@@ -65,6 +65,13 @@ oder mehreren EChartsGaugeSingle- und EChartsGaugeMulti-Instanzen sowie
 späteren weiteren Chartfamilien-Geräten. Das Gateway hat keinen übergeordneten
 Datenfluss; die Geräteinstanzen werden mit ihm verbunden.
 
+Im regulären Betrieb genügt eine Gateway-Instanz für alle ECharts-Geräte. Sie
+wird beim Anlegen des ersten Diagramms erstellt; bei weiteren Diagrammen wird
+das vorhandene Gateway ausgewählt. Symcon bietet im Parent-Dialog technisch
+weiterhin die Erstellung eines zusätzlichen Gateways an. Mehrere Gateways sind
+zulässig, bilden aber getrennte Infrastruktur und sind nicht der vorgesehene
+Standard.
+
 Beide Gauge-Module bieten über `GetCompatibleParents()` vorhandene kompatible
 Gateway-Instanzen zur Verbindung an. Mehrere Chart-Instanzen können dadurch
 bewusst dasselbe Gateway verwenden; die Geräte erzeugen nicht über

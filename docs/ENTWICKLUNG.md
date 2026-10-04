@@ -35,8 +35,12 @@ Gauge→Gateway-Datenweg unter PHP 8.5.
 Eine eigene I/O-Instanz, ein Konfigurator und Discovery gehören nicht zum
 Anfangsumfang. Datenquellen sind Teil der jeweiligen Gauge-Konfiguration und
 keine eigenen Geräteinstanzen. Mehrere Gauge-Instanzen sollen einen vorhandenen
-Gateway gemeinsam verwenden können. Weitere Chartfamilien erhalten eigene
-Gerätemodule; sie werden nicht als Modi eines universellen Widgets ergänzt.
+Gateway gemeinsam verwenden. Im regulären Betrieb genügt eine gemeinsame
+Gateway-Instanz für sämtliche ECharts-Diagramminstanzen. Die von Symcon bei
+`type: connect` weiterhin angebotene Neuanlage wird nicht technisch gesperrt;
+zusätzliche Gateways bilden jedoch getrennte Infrastruktur und sind kein
+Standard. Weitere Chartfamilien erhalten eigene Gerätemodule; sie werden nicht
+als Modi eines universellen Widgets ergänzt.
 
 ## Festgelegte Identitäten
 

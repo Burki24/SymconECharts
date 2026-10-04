@@ -2,6 +2,10 @@
     "$schema": "https://www.symcon.de/assets/files/validation/formSchema.json",
     "elements": [
         {
+            "type": "Label",
+            "caption": "One shared EChartsGateway is sufficient for all ECharts chart instances. When adding further charts, select the existing gateway instead of creating another one."
+        },
+        {
             "type": "ValidationTextBox",
             "name": "Title",
             "caption": "Title"

@@ -1,6 +1,7 @@
 {
     "translations": {
         "de": {
+            "One shared EChartsGateway is sufficient for all ECharts chart instances. When adding further charts, select the existing gateway instead of creating another one.": "Ein gemeinsames EChartsGateway genügt für alle ECharts-Diagramminstanzen. Bei weiteren Diagrammen das vorhandene Gateway auswählen, anstatt ein neues anzulegen.",
             "Source variable": "Quellvariable",
             "Minimum": "Minimum",
             "Maximum": "Maximum",

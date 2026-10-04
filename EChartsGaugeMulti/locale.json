@@ -1,6 +1,7 @@
 {
     "translations": {
         "de": {
+            "One shared EChartsGateway is sufficient for all ECharts chart instances. When adding further charts, select the existing gateway instead of creating another one.": "Ein gemeinsames EChartsGateway genügt für alle ECharts-Diagramminstanzen. Bei weiteren Diagrammen das vorhandene Gateway auswählen, anstatt ein neues anzulegen.",
             "Title": "Titel",
             "Configure 2 to 16 unique numeric sources. Their order determines their position in the selected Gauge template.": "2 bis 16 eindeutige numerische Quellen konfigurieren. Ihre Reihenfolge bestimmt ihre Position in der gewählten Gauge-Vorlage.",
             "Gauge sources": "Gauge-Quellen",
