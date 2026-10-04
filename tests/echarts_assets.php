@@ -83,6 +83,14 @@ assertEChartsAsset(
     'The Vintage preview must use the official theme background.'
 );
 assertEChartsAsset(
+    EChartsAsset::ThemePreviewPalette('shine')['gaugeAxisLine'] === [
+        [0.2, '#2B821D'],
+        [0.8, '#005EAA'],
+        [1.0, '#C12E34']
+    ],
+    'The Shine preview must use the official segmented Gauge axis line.'
+);
+assertEChartsAsset(
     !EChartsAsset::HasExpectedThemeIntegrity('vintage', (string) file_get_contents(
         $root . '/libs/echarts/' . EChartsAsset::VERSION . '/themes/vintage.js'
     ) . 'changed'),

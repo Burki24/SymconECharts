@@ -95,11 +95,11 @@
         };
     }
 
-    function applyThemeColors(series, colors, automaticTheme) {
+    function applyThemeColors(series, colors) {
         series.progress.itemStyle = { color: colors.accent };
-        if (automaticTheme) {
-            series.axisLine.lineStyle.color = [[1, colors.track]];
-        }
+        series.axisLine.lineStyle.color = Array.isArray(colors.gaugeAxisLine)
+            ? colors.gaugeAxisLine
+            : [[1, colors.track]];
         series.pointer.itemStyle = { color: colors.accent };
         series.anchor.itemStyle.color = colors.accent;
         series.anchor.itemStyle.borderColor = colors.text;
@@ -248,7 +248,7 @@
             data: [{ value: value, name: title }]
         };
 
-        series = applyThemeColors(series, colors, automaticTheme);
+        series = applyThemeColors(series, colors);
         series = applyPreset(series, preset, width, lineWidth, colors);
 
         var option = {

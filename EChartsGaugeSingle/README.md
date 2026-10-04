@@ -163,10 +163,11 @@ Formular schnell und die noch nicht gespeicherte Konfiguration kann unmittelbar
 dargestellt werden. Die Kachel bleibt für die tatsächliche, interaktive
 ECharts-Ausgabe maßgeblich; die SVG-Vorschau bildet das ausgewählte Layout
 gezielt nach. Sie verwendet außerdem eine stabile, dem ausgewählten Theme
-zugeordnete Vorschaupalette. Die native Kachel registriert dagegen die
-unveränderte offizielle Theme-Datei und bleibt für die exakte Darstellung
-maßgeblich. Für unsere vom Originalbeispiel abweichenden Layouts ergänzt sie
-lediglich Hintergrund- und Kontrastfarben aus dem gemeinsamen Theme-Katalog.
+zugeordnete Vorschaupalette und übernimmt die Gauge-Achssegmente der
+offiziellen Themes. Die native Kachel registriert dagegen die unveränderte
+offizielle Theme-Datei und bleibt für die exakte Darstellung maßgeblich. Für
+unsere vom Originalbeispiel abweichenden Layouts ergänzt sie Hintergrund-,
+Kontrast- und identische Achsfarben aus dem gemeinsamen Theme-Katalog.
 Layout-Preset und Theme können frei kombiniert werden.
 
 Der offizielle ECharts Theme Builder erzeugt ausführbare JavaScript-Dateien.

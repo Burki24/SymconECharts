@@ -53,14 +53,17 @@ kann. Bei `auto` bleibt ECharts ohne benanntes Theme und der Renderer setzt die
 Symcon-Farbtokens ausdrücklich. Bei offiziellen Themes bleiben die
 Theme-Konfiguration und insbesondere ihre Palette sowie Gauge-Segmentierung
 maßgeblich. Der Renderer ergänzt aus dem gemeinsamen Katalog Hintergrund- und
-Kontrastfarben für Text, Skala und das Speed-Detail. Das ist erforderlich,
-weil mehrere offizielle Themes einen hellen Hintergrund oder die Geometrie
-ihres ursprünglichen Gauge-Defaults voraussetzen. Die Apache-Dateien selbst
-bleiben unverändert.
+Kontrastfarben für Text, Skala und das Speed-Detail. Die im offiziellen Theme
+vorhandene Gauge-Segmentierung wird ebenfalls im gemeinsamen Katalog
+abgebildet und von Kachel und SVG-Vorschau identisch verwendet. Das ist
+erforderlich, weil mehrere offizielle Themes einen hellen Hintergrund oder die
+Geometrie ihres ursprünglichen Gauge-Defaults voraussetzen. Die Apache-Dateien
+selbst bleiben unverändert.
 
 Die SVG-Formularvorschau führt die Browser-Runtime nicht aus. Sie verwendet
-deshalb dieselben festgelegten Grundfarben und bleibt eine Annäherung. Die
-native Canvas-Kachel ist für die tatsächliche Theme-Ausgabe maßgeblich.
+deshalb dieselben festgelegten Grundfarben und Gauge-Achssegmente. Geometrie
+und Interaktion bleiben eine Annäherung; die native Canvas-Kachel ist für die
+tatsächliche Theme-Ausgabe maßgeblich.
 
 Die Theme-Auswahl gehört zur jeweiligen Diagramminstanz. Das Gateway erhält
 keine globale Theme-Property, weil mehrere Diagramme am selben Gateway

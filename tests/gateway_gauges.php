@@ -460,6 +460,41 @@ $speedPresetSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
 );
 assertGatewayGauge(str_contains($speedPresetSvg, 'class="detail-box"'), 'Speed Gauge must render its value box.');
 
+$shineSpeedSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
+    1.0,
+    0.0,
+    1000.0,
+    'Wind speed',
+    'km/h',
+    2,
+    'de',
+    'speed',
+    'shine'
+);
+assertGatewayGauge(
+    substr_count($shineSpeedSvg, 'class="theme-track-segment"') === 3,
+    'The Shine form preview must reproduce all three official Gauge axis-line segments.'
+);
+foreach (['#2B821D', '#005EAA', '#C12E34'] as $segmentColor) {
+    assertGatewayGauge(
+        str_contains($shineSpeedSvg, 'stroke:' . $segmentColor),
+        'The Shine form preview is missing Gauge axis-line color ' . $segmentColor . '.'
+    );
+}
+$middleLabelMatches = [];
+assertGatewayGauge(
+    preg_match(
+        '/<text x="[^"]+" y="([^"]+)" class="axis" data-label-index="25">500<\/text>/',
+        $shineSpeedSvg,
+        $middleLabelMatches
+    ) === 1,
+    'The Speed form preview must retain the middle scale label for layout comparison.'
+);
+assertGatewayGauge(
+    (float) $middleLabelMatches[1] > 90.0 && (float) $middleLabelMatches[1] < 232.0,
+    'The Speed form preview must place scale labels inside the Gauge arc like the native renderer.'
+);
+
 $gauge->UpdateGaugePreview(4711, 0.0, 200.0, 'Wind & weather', 'km/h', 2, 'speed', 'dark');
 $formUpdates = $gauge->GetTestFormUpdates();
 $latestFormUpdate = end($formUpdates);

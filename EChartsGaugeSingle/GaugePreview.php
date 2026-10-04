@@ -40,7 +40,7 @@ final class EChartsGaugeSinglePreview
         $palette = EChartsAsset::ThemePreviewPalette($theme);
         $decimals = max(0, min(6, $decimals));
         $ratio = max(0.0, min(1.0, ($value - $minimum) / ($maximum - $minimum)));
-        $backgroundPath = self::ArcPath(1.0, $design);
+        $trackElements = self::TrackSegments($palette['gaugeAxisLine'], $design);
         $progressPath = $design['showProgress'] ? self::ArcPath($ratio, $design) : '';
         $ticks = self::Ticks($minimum, $maximum, $language, $design);
         $pointer = self::Pointer($ratio, $design);
@@ -70,10 +70,10 @@ final class EChartsGaugeSinglePreview
         return <<<SVG
 <svg xmlns="http://www.w3.org/2000/svg" width="720" height="400" viewBox="0 0 720 400" role="img" aria-label="{$ariaLabel}" data-preset="{$preset}" data-theme="{$theme}">
   <style>
-    .surface{fill:{$palette['background']}}.track{fill:none;stroke:{$palette['track']};stroke-linecap:round;stroke-linejoin:round}.progress{fill:none;stroke:{$palette['accent']};stroke-linecap:round;stroke-linejoin:round}.minor{stroke:{$palette['muted']};stroke-width:1}.major{stroke:{$palette['border']};stroke-width:2}.axis{fill:{$palette['muted']};font:14px 'Segoe UI',Arial,sans-serif;text-anchor:middle;dominant-baseline:middle}.pointer{fill:{$palette['accent']}}.anchor{fill:{$palette['accent']};stroke:{$palette['text']};stroke-width:2}.detail-box{fill:{$palette['surface']};stroke:{$palette['border']};stroke-width:2}.value{fill:{$palette['text']};font:600 38px 'Segoe UI',Arial,sans-serif;text-anchor:middle}.title{fill:{$palette['muted']};font:18px 'Segoe UI',Arial,sans-serif;text-anchor:middle}svg[data-preset="progress"] .value{font-size:46px}svg[data-preset="speed"] .value{font-size:32px}
+    .surface{fill:{$palette['background']}}.theme-track-segment{fill:none;stroke-linecap:round;stroke-linejoin:round}.progress{fill:none;stroke:{$palette['accent']};stroke-linecap:round;stroke-linejoin:round}.minor{stroke:{$palette['muted']};stroke-width:1}.major{stroke:{$palette['border']};stroke-width:2}.axis{fill:{$palette['muted']};font:14px 'Segoe UI',Arial,sans-serif;text-anchor:middle;dominant-baseline:middle}.pointer{fill:{$palette['accent']}}.anchor{fill:{$palette['accent']};stroke:{$palette['text']};stroke-width:2}.detail-box{fill:{$palette['surface']};stroke:{$palette['border']};stroke-width:2}.value{fill:{$palette['text']};font:600 38px 'Segoe UI',Arial,sans-serif;text-anchor:middle}.title{fill:{$palette['muted']};font:18px 'Segoe UI',Arial,sans-serif;text-anchor:middle}svg[data-preset="progress"] .value{font-size:46px}svg[data-preset="speed"] .value{font-size:32px}
   </style>
   <rect class="surface" width="720" height="400" rx="12"/>
-  <path d="{$backgroundPath}" class="track" style="stroke-width:{$design['lineWidth']}px"/>
+  {$trackElements}
   {$progressElement}
   {$ticks}
   {$pointer}
@@ -122,7 +122,7 @@ SVG;
                 'endAngle'       => -30.0,
                 'centerY'        => 196.0,
                 'radius'         => 132.0,
-                'labelRadius'    => 180.0,
+                'labelRadius'    => 108.0,
                 'pointerLength'  => 102.0,
                 'lineWidth'      => 16.0,
                 'detailY'        => 294.0,
@@ -136,7 +136,7 @@ SVG;
                 'endAngle'       => -30.0,
                 'centerY'        => 190.0,
                 'radius'         => 132.0,
-                'labelRadius'    => 180.0,
+                'labelRadius'    => 108.0,
                 'pointerLength'  => 94.0,
                 'lineWidth'      => 20.0,
                 'detailY'        => 306.0,
@@ -150,7 +150,7 @@ SVG;
                 'endAngle'       => 0.0,
                 'centerY'        => 232.0,
                 'radius'         => 142.0,
-                'labelRadius'    => 184.0,
+                'labelRadius'    => 118.0,
                 'pointerLength'  => 108.0,
                 'lineWidth'      => 18.0,
                 'detailY'        => 319.0,
@@ -164,7 +164,7 @@ SVG;
                 'endAngle'       => -30.0,
                 'centerY'        => 196.0,
                 'radius'         => 132.0,
-                'labelRadius'    => 180.0,
+                'labelRadius'    => 108.0,
                 'pointerLength'  => 98.0,
                 'lineWidth'      => 18.0,
                 'detailY'        => 294.0,
@@ -179,14 +179,44 @@ SVG;
     /** @param array<string, float|bool> $design */
     private static function ArcPath(float $ratio, array $design): string
     {
-        if ($ratio <= 0.0) {
+        return self::ArcSegmentPath(0.0, $ratio, $design);
+    }
+
+    /**
+     * @param list<array{float,string}> $segments
+     * @param array<string, float|bool> $design
+     */
+    private static function TrackSegments(array $segments, array $design): string
+    {
+        $elements = [];
+        $start = 0.0;
+        foreach ($segments as $segment) {
+            $end = max($start, min(1.0, (float) $segment[0]));
+            if ($end <= $start) {
+                continue;
+            }
+
+            $elements[] = '<path d="' . self::ArcSegmentPath($start, $end, $design)
+                . '" class="theme-track-segment" style="stroke:' . SVGPreviewHelper::escape($segment[1])
+                . ';stroke-width:' . self::Coordinate($design['lineWidth']) . 'px"/>';
+            $start = $end;
+        }
+
+        return implode("\n  ", $elements);
+    }
+
+    /** @param array<string, float|bool> $design */
+    private static function ArcSegmentPath(float $startRatio, float $endRatio, array $design): string
+    {
+        if ($endRatio <= $startRatio) {
             return '';
         }
 
+        $ratio = $endRatio - $startRatio;
         $segments = max(1, (int) ceil(80 * $ratio));
         $points = [];
         for ($index = 0; $index <= $segments; ++$index) {
-            $fraction = $ratio * $index / $segments;
+            $fraction = $startRatio + $ratio * $index / $segments;
             $points[] = self::Point(
                 (float) $design['radius'],
                 self::Angle($fraction, $design),
@@ -236,7 +266,7 @@ SVG;
             $labelValue = $minimum + ($maximum - $minimum) * $fraction;
             $elements[] = '<text x="' . self::Coordinate($label[0])
                 . '" y="' . self::Coordinate($label[1])
-                . '" class="axis">'
+                . '" class="axis" data-label-index="' . $index . '">'
                 . SVGPreviewHelper::escape(self::FormatAxisNumber($labelValue, $language))
                 . '</text>';
         }

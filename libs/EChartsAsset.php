@@ -25,67 +25,90 @@ final class EChartsAsset
 
     private const THEME_PALETTES = [
         self::THEME_AUTO => [
-            'background' => '#151619',
-            'text'       => '#F4F5F7',
-            'muted'      => '#969AA2',
-            'border'     => '#A5A9B0',
-            'track'      => '#34363B',
-            'accent'     => '#55CBB5',
-            'surface'    => '#25272B'
+            'background'    => '#151619',
+            'text'          => '#F4F5F7',
+            'muted'         => '#969AA2',
+            'border'        => '#A5A9B0',
+            'track'         => '#34363B',
+            'accent'        => '#55CBB5',
+            'surface'       => '#25272B',
+            'gaugeAxisLine' => [[1.0, '#34363B']]
         ],
         'dark' => [
-            'background' => '#100C2A',
-            'text'       => '#B9B8CE',
-            'muted'      => '#817F91',
-            'border'     => '#EEF1FA',
-            'track'      => '#484753',
-            'accent'     => '#4992FF',
-            'surface'    => '#353450'
+            'background'    => '#100C2A',
+            'text'          => '#B9B8CE',
+            'muted'         => '#817F91',
+            'border'        => '#EEF1FA',
+            'track'         => '#484753',
+            'accent'        => '#4992FF',
+            'surface'       => '#353450',
+            'gaugeAxisLine' => [[1.0, '#484753']]
         ],
         'vintage' => [
-            'background' => '#FEF8EF',
-            'text'       => '#333333',
-            'muted'      => '#6E7074',
-            'border'     => '#919E8B',
-            'track'      => '#E5DDD2',
-            'accent'     => '#D87C7C',
-            'surface'    => '#FFFDF9'
+            'background'    => '#FEF8EF',
+            'text'          => '#333333',
+            'muted'         => '#6E7074',
+            'border'        => '#919E8B',
+            'track'         => '#E5DDD2',
+            'accent'        => '#D87C7C',
+            'surface'       => '#FFFDF9',
+            'gaugeAxisLine' => [[1.0, '#E5DDD2']]
         ],
         'macarons' => [
-            'background' => '#FFFFFF',
-            'text'       => '#008ACD',
-            'muted'      => '#8D98B3',
-            'border'     => '#5AB1EF',
-            'track'      => '#E6F4F5',
-            'accent'     => '#2EC7C9',
-            'surface'    => '#F6FBFC'
+            'background'    => '#FFFFFF',
+            'text'          => '#008ACD',
+            'muted'         => '#8D98B3',
+            'border'        => '#5AB1EF',
+            'track'         => '#E6F4F5',
+            'accent'        => '#2EC7C9',
+            'surface'       => '#F6FBFC',
+            'gaugeAxisLine' => [
+                [0.2, '#2EC7C9'],
+                [0.8, '#5AB1EF'],
+                [1.0, '#D87A80']
+            ]
         ],
         'infographic' => [
-            'background' => '#FFFFFF',
-            'text'       => '#27727B',
-            'muted'      => '#6E7074',
-            'border'     => '#27727B',
-            'track'      => '#DEE6E7',
-            'accent'     => '#C1232B',
-            'surface'    => '#F7F9F9'
+            'background'    => '#FFFFFF',
+            'text'          => '#27727B',
+            'muted'         => '#6E7074',
+            'border'        => '#27727B',
+            'track'         => '#DEE6E7',
+            'accent'        => '#C1232B',
+            'surface'       => '#F7F9F9',
+            'gaugeAxisLine' => [
+                [0.2, '#B5C334'],
+                [0.8, '#27727B'],
+                [1.0, '#C1232B']
+            ]
         ],
         'shine' => [
-            'background' => '#FFFFFF',
-            'text'       => '#333333',
-            'muted'      => '#6E7074',
-            'border'     => '#005EAA',
-            'track'      => '#DEEAF2',
-            'accent'     => '#C12E34',
-            'surface'    => '#F5F9FC'
+            'background'    => '#FFFFFF',
+            'text'          => '#333333',
+            'muted'         => '#6E7074',
+            'border'        => '#005EAA',
+            'track'         => '#DEEAF2',
+            'accent'        => '#C12E34',
+            'surface'       => '#F5F9FC',
+            'gaugeAxisLine' => [
+                [0.2, '#2B821D'],
+                [0.8, '#005EAA'],
+                [1.0, '#C12E34']
+            ]
         ],
         'roma' => [
-            'background' => '#FFFFFF',
-            'text'       => '#333333',
-            'muted'      => '#2E4783',
-            'border'     => '#B8D2C7',
-            'track'      => '#EEF2EF',
-            'accent'     => '#E01F54',
-            'surface'    => '#F7F5EF'
+            'background'    => '#FFFFFF',
+            'text'          => '#333333',
+            'muted'         => '#2E4783',
+            'border'        => '#B8D2C7',
+            'track'         => '#EEF2EF',
+            'accent'        => '#E01F54',
+            'surface'       => '#F7F5EF',
+            'gaugeAxisLine' => [
+                [0.2, '#E01F54'],
+                [0.8, '#B8D2C7'],
+                [1.0, '#001852']
+            ]
         ]
     ];
 
@@ -156,7 +179,7 @@ final class EChartsAsset
      * Returns stable colors for the lightweight SVG form preview. The native
      * tile continues to use the actual registered Apache ECharts theme.
      *
-     * @return array{background:string,text:string,muted:string,border:string,track:string,accent:string,surface:string}
+     * @return array{background:string,text:string,muted:string,border:string,track:string,accent:string,surface:string,gaugeAxisLine:list<array{float,string}>}
      */
     public static function ThemePreviewPalette(string $themeID): array
     {
@@ -172,7 +195,7 @@ final class EChartsAsset
      * Returns all stable palettes used to keep custom layouts readable when an
      * upstream theme assumes a different background or component geometry.
      *
-     * @return array<string,array{background:string,text:string,muted:string,border:string,track:string,accent:string,surface:string}>
+     * @return array<string,array{background:string,text:string,muted:string,border:string,track:string,accent:string,surface:string,gaugeAxisLine:list<array{float,string}>}>
      */
     public static function ThemePalettes(): array
     {
