@@ -366,6 +366,17 @@ $gauge->SetTestProperty('RingWidthPercent', 120);
 $gauge->SetTestProperty('PointerWidthPercent', 80);
 $gauge->SetTestProperty('MinorTickLengthPercent', 75);
 $gauge->SetTestProperty('MajorTickLengthPercent', 150);
+$gauge->SetTestProperty('PointerShape', 'arrow');
+$gauge->SetTestProperty('GaugeArcMode', 'custom');
+$gauge->SetTestProperty('GaugeStartPosition', 270.0);
+$gauge->SetTestProperty('GaugeEndPosition', 67.5);
+$gauge->SetTestProperty('GaugeColorMode', 'custom');
+$gauge->SetTestProperty('PointerColor', 0x112233);
+$gauge->SetTestProperty('ProgressColor', 0x223344);
+$gauge->SetTestProperty('RingColor', 0x334455);
+$gauge->SetTestProperty('ScaleColor', 0x445566);
+$gauge->SetTestProperty('ValueColor', 0x556677);
+$gauge->SetTestProperty('TitleColor', 0x667788);
 $gauge->ApplyChanges();
 
 assertGatewayGauge($gauge->GetTestStatus() === IS_ACTIVE, 'Gauge Single must become active.');
@@ -408,7 +419,11 @@ foreach ([
     'distance: layout.splitDistance',
     'distance: layout.labelDistance',
     'offsetCenter: [0, layout.detailOffset]',
-    'offsetCenter: [0, layout.titleOffset]'
+    'offsetCenter: [0, layout.titleOffset]',
+    'function applyArcDesign(series, style)',
+    'series.startAngle = 90 - startPosition;',
+    'function applyPointerShape(series, style, layout)',
+    'function applyCustomColors(series, style, colors)'
 ] as $responsiveLayoutContract) {
     assertGatewayGauge(
         str_contains($visualizationTile, $responsiveLayoutContract),
@@ -551,11 +566,52 @@ $speedPresetSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
 );
 assertGatewayGauge(str_contains($speedPresetSvg, 'class="detail-box"'), 'Speed Gauge must render its value box.');
 assertGatewayGauge(
-    str_contains($speedPresetSvg, 'class="speed-pointer speed-shadow"'),
+    str_contains($speedPresetSvg, 'class="speed-pointer speed-pointer-shadow"'),
     'Speed Gauge preview must use the sample pointer.'
 );
 assertGatewayGauge(str_contains($speedPresetSvg, 'class="value-unit"'), 'Speed Gauge preview must style the unit separately.');
 assertGatewayGauge(str_contains($speedPresetSvg, 'data-major-splits="10"'), 'A 0–100 scale must keep ten readable divisions.');
+
+$customDesignSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
+    42.5,
+    -20.0,
+    80.0,
+    'Custom design',
+    '°C',
+    1,
+    'de',
+    'simple',
+    'dark',
+    [
+        'pointerShape'  => 'arrow',
+        'arcMode'       => 'custom',
+        'startPosition' => 270.0,
+        'endPosition'   => 67.5,
+        'colorMode'     => 'custom',
+        'pointerColor'  => '#112233',
+        'progressColor' => '#223344',
+        'ringColor'     => '#334455',
+        'scaleColor'    => '#445566',
+        'valueColor'    => '#556677',
+        'titleColor'    => '#667788'
+    ]
+);
+assertGatewayGauge(
+    str_contains($customDesignSvg, 'data-pointer-shape="arrow"'),
+    'Gauge preview must render the selected pointer shape.'
+);
+assertGatewayGauge(
+    str_contains($customDesignSvg, 'data-arc-mode="custom"')
+        && str_contains($customDesignSvg, 'data-start-position="270.00"')
+        && str_contains($customDesignSvg, 'data-end-position="67.50"'),
+    'Gauge preview must render the selected clockwise arc positions.'
+);
+foreach (['#112233', '#223344', '#334455', '#445566', '#556677', '#667788'] as $customColor) {
+    assertGatewayGauge(
+        str_contains($customDesignSvg, $customColor),
+        'Gauge preview must render custom color ' . $customColor . '.'
+    );
+}
 
 $officialSpeedRangeSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
     100.0,
@@ -638,6 +694,51 @@ assertGatewayGauge(
 );
 assertGatewayGauge(str_contains($updatedPreviewSvg, '42.50 km/h'), 'Gauge Single preview formatting changed.');
 
+$gauge->UpdateGaugePreview(
+    4711,
+    0.0,
+    200.0,
+    'Configured design',
+    'km/h',
+    1,
+    'simple',
+    'dark',
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    'line',
+    'half',
+    0.0,
+    180.0,
+    'custom',
+    0x102030,
+    0x203040,
+    0x304050,
+    0x405060,
+    0x506070,
+    0x607080
+);
+$formUpdates = $gauge->GetTestFormUpdates();
+$configuredPreviewUpdate = end($formUpdates);
+$configuredPreviewUri = is_array($configuredPreviewUpdate) ? (string) ($configuredPreviewUpdate['Value'] ?? '') : '';
+$configuredPreviewSvg = base64_decode(
+    substr($configuredPreviewUri, strlen('data:image/svg+xml;base64,')),
+    true
+);
+assertGatewayGauge(
+    is_string($configuredPreviewSvg)
+        && str_contains($configuredPreviewSvg, 'data-pointer-shape="line"')
+        && str_contains($configuredPreviewSvg, 'data-arc-mode="half"')
+        && str_contains($configuredPreviewSvg, '#102030')
+        && str_contains($configuredPreviewSvg, '#607080'),
+    'Gauge Single form preview must apply pointer, arc and custom color values before they are persisted.'
+);
+
 $gauge->UpdateGaugePreview(4711, 100.0, 0.0, 'Invalid', '', 1);
 $formUpdates = $gauge->GetTestFormUpdates();
 $invalidPreviewUpdate = end($formUpdates);
@@ -668,7 +769,18 @@ assertGatewayGauge(
         'ringWidthPercent'       => 120,
         'pointerWidthPercent'    => 80,
         'minorTickLengthPercent' => 75,
-        'majorTickLengthPercent' => 150
+        'majorTickLengthPercent' => 150,
+        'pointerShape'           => 'arrow',
+        'arcMode'                => 'custom',
+        'startPosition'          => 270.0,
+        'endPosition'            => 67.5,
+        'colorMode'              => 'custom',
+        'pointerColor'           => '#112233',
+        'progressColor'          => '#223344',
+        'ringColor'              => '#334455',
+        'scaleColor'             => '#445566',
+        'valueColor'             => '#556677',
+        'titleColor'             => '#667788'
     ],
     'Gauge Single must expose the validated tile-designer fine tuning in its chart model.'
 );
@@ -795,8 +907,11 @@ $singleGauge->SetTestProperty('SourceVariableID', 4711);
 $singleGauge->ApplyChanges();
 $defaultSingleData = json_decode($singleGauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
-    array_values(array_unique($defaultSingleData['gauge']['style'] ?? [])) === [100],
-    'Gauge Single fine tuning must preserve every preset default for existing instances.'
+    array_values(array_slice($defaultSingleData['gauge']['style'] ?? [], 0, 8)) === array_fill(0, 8, 100)
+        && ($defaultSingleData['gauge']['style']['pointerShape'] ?? null) === 'preset'
+        && ($defaultSingleData['gauge']['style']['arcMode'] ?? null) === 'preset'
+        && ($defaultSingleData['gauge']['style']['colorMode'] ?? null) === 'theme',
+    'Gauge Single designer must preserve every preset default for existing instances.'
 );
 $singleGauge->SetTestProperty('SourceVariableID', 4712);
 $singleGauge->ApplyChanges();
@@ -832,6 +947,29 @@ $invalidDesignScale->SetTestProperty('SourceVariableID', 4711);
 $invalidDesignScale->SetTestProperty('RingWidthPercent', 151);
 $invalidDesignScale->ApplyChanges();
 assertGatewayGauge($invalidDesignScale->GetTestStatus() === 205, 'Invalid Gauge design scales must set status 205.');
+
+$invalidArc = new EChartsGaugeSingle();
+$invalidArc->Create();
+$invalidArc->SetTestProperty('SourceVariableID', 4711);
+$invalidArc->SetTestProperty('GaugeArcMode', 'custom');
+$invalidArc->SetTestProperty('GaugeStartPosition', 45.0);
+$invalidArc->SetTestProperty('GaugeEndPosition', 45.0);
+$invalidArc->ApplyChanges();
+assertGatewayGauge($invalidArc->GetTestStatus() === 205, 'A zero-length custom Gauge arc must set status 205.');
+
+$invalidPointer = new EChartsGaugeSingle();
+$invalidPointer->Create();
+$invalidPointer->SetTestProperty('SourceVariableID', 4711);
+$invalidPointer->SetTestProperty('PointerShape', 'unknown');
+$invalidPointer->ApplyChanges();
+assertGatewayGauge($invalidPointer->GetTestStatus() === 205, 'Unknown Gauge pointer shapes must set status 205.');
+
+$invalidColor = new EChartsGaugeSingle();
+$invalidColor->Create();
+$invalidColor->SetTestProperty('SourceVariableID', 4711);
+$invalidColor->SetTestProperty('PointerColor', 0x1000000);
+$invalidColor->ApplyChanges();
+assertGatewayGauge($invalidColor->GetTestStatus() === 205, 'Invalid Gauge RGB colors must set status 205.');
 
 $invalidTheme = new EChartsGaugeSingle();
 $invalidTheme->Create();

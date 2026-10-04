@@ -14,6 +14,11 @@
     var reduceMotion = window.matchMedia
         && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var speedPointerIcon = 'path://M2090.36389,615.30999 L2090.36389,615.30999 C2091.48372,615.30999 2092.40383,616.194028 2092.44859,617.312956 L2096.90698,728.755929 C2097.05155,732.369577 2094.2393,735.416212 2090.62566,735.56078 C2090.53845,735.564269 2090.45117,735.566014 2090.36389,735.566014 L2090.36389,735.566014 C2086.74736,735.566014 2083.81557,732.63423 2083.81557,729.017692 C2083.81557,728.930412 2083.81732,728.84314 2083.82081,728.755929 L2088.2792,617.312956 C2088.32396,616.194028 2089.24407,615.30999 2090.36389,615.30999 Z';
+    var pointerIcons = {
+        needle: 'path://M0,-100 L7,10 L-7,10 Z',
+        line: 'path://M-2,-100 L2,-100 L2,10 L-2,10 Z',
+        arrow: 'path://M0,-100 L12,-72 L4,-72 L4,10 L-4,10 L-4,-72 L-12,-72 Z'
+    };
     var gaugeLayoutDefinitions = {
         basic: {
             centerY: 196,
@@ -381,6 +386,102 @@
         return series;
     }
 
+    function normalizePosition(value, fallback) {
+        var position = Number(value);
+        if (!Number.isFinite(position)) {
+            position = fallback;
+        }
+
+        return ((position % 360) + 360) % 360;
+    }
+
+    function applyArcDesign(series, style) {
+        var mode = ['preset', 'full', 'three-quarter', 'half', 'quarter', 'custom'].indexOf(style.arcMode) >= 0
+            ? style.arcMode
+            : 'preset';
+        if (mode === 'preset') {
+            return series;
+        }
+
+        var startPosition = normalizePosition(style.startPosition, 0);
+        var sweep = {
+            full: 360,
+            'three-quarter': 270,
+            half: 180,
+            quarter: 90
+        }[mode];
+        if (mode === 'custom') {
+            sweep = (normalizePosition(style.endPosition, 90) - startPosition + 360) % 360;
+        }
+        if (!sweep) {
+            return series;
+        }
+
+        series.startAngle = 90 - startPosition;
+        series.endAngle = series.startAngle - sweep;
+
+        return series;
+    }
+
+    function applyPointerShape(series, style, layout) {
+        var shape = ['preset', 'needle', 'line', 'arrow'].indexOf(style.pointerShape) >= 0
+            ? style.pointerShape
+            : 'preset';
+        if (shape === 'preset') {
+            return series;
+        }
+
+        series.pointer.icon = pointerIcons[shape];
+        series.pointer.length = layout.pointerLength;
+        series.pointer.width = layout.pointerWidth;
+        series.pointer.offsetCenter = [0, 0];
+        series.anchor.show = true;
+
+        return series;
+    }
+
+    function normalizeStyleColor(value, fallback) {
+        return /^#[0-9a-f]{6}$/i.test(String(value || '')) ? value : fallback;
+    }
+
+    function applyCustomColors(series, style, colors) {
+        if (style.colorMode !== 'custom') {
+            return series;
+        }
+
+        var pointer = normalizeStyleColor(style.pointerColor, colors.accent);
+        var progress = normalizeStyleColor(style.progressColor, colors.accent);
+        var ring = normalizeStyleColor(style.ringColor, colors.track);
+        var scale = normalizeStyleColor(style.scaleColor, colors.muted);
+        var value = normalizeStyleColor(style.valueColor, colors.text);
+        var title = normalizeStyleColor(style.titleColor, colors.muted);
+        series.progress.itemStyle.color = progress;
+        series.axisLine.lineStyle.color = [[1, ring]];
+        series.pointer.itemStyle.color = pointer;
+        series.anchor.itemStyle.color = pointer;
+        series.anchor.itemStyle.borderColor = value;
+        series.axisTick.lineStyle.color = scale;
+        series.splitLine.lineStyle.color = scale;
+        series.axisLabel.color = scale;
+        series.title.color = title;
+        series.detail.color = value;
+        if (series.detail.rich) {
+            series.detail.rich.value.color = value;
+            series.detail.rich.unit.color = value;
+        }
+        if (series.detail.borderColor) {
+            series.detail.borderColor = scale;
+        }
+        if (series.progress.itemStyle.shadowColor) {
+            series.progress.itemStyle.shadowColor = colorWithAlpha(progress, 0.45);
+        }
+        if (series.pointer.itemStyle.shadowColor) {
+            series.pointer.itemStyle.shadowColor = colorWithAlpha(pointer, 0.45);
+        }
+
+        return series;
+    }
+
     function buildOption(payload, theme) {
         var gauge = payload.gauge || {};
         var minimum = Number(gauge.minimum);
@@ -485,6 +586,9 @@
 
         series = applyThemeColors(series, colors);
         series = applyPreset(series, preset, layout, colors, minimum, maximum);
+        series = applyArcDesign(series, style);
+        series = applyPointerShape(series, style, layout);
+        series = applyCustomColors(series, style, colors);
 
         var option = {
             animation: !reduceMotion,

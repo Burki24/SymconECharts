@@ -117,6 +117,17 @@ foreach ([
             "RegisterPropertyInteger('Decimals', 1)",
             "RegisterPropertyString('GaugePreset', self::PRESET_SIMPLE)",
             "RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO)",
+            "RegisterPropertyString('PointerShape', 'preset')",
+            "RegisterPropertyString('GaugeArcMode', 'preset')",
+            "RegisterPropertyFloat('GaugeStartPosition', 270.0)",
+            "RegisterPropertyFloat('GaugeEndPosition', 90.0)",
+            "RegisterPropertyString('GaugeColorMode', 'theme')",
+            "RegisterPropertyInteger('PointerColor', 0x55CBB5)",
+            "RegisterPropertyInteger('ProgressColor', 0x55CBB5)",
+            "RegisterPropertyInteger('RingColor', 0x45474C)",
+            "RegisterPropertyInteger('ScaleColor', 0xA7A9AE)",
+            "RegisterPropertyInteger('ValueColor', 0xF4F5F7)",
+            "RegisterPropertyInteger('TitleColor', 0xA7A9AE)",
             'RegisterPropertyInteger($propertyName, self::DESIGN_SCALE_DEFAULT)'
         ]
         : [
@@ -292,6 +303,37 @@ foreach ([
             requireStrictContract(
                 str_contains($gauge, "'" . lcfirst($fineTuningName) . "'"),
                 'EChartsGaugeSingle is missing the fine-tuning property contract for ' . $fineTuningName . '.',
+                $errors
+            );
+        }
+
+        foreach ([
+            'PointerShape'       => ['type' => 'Select', 'values' => ['preset', 'needle', 'line', 'arrow']],
+            'GaugeArcMode'       => ['type' => 'Select', 'values' => ['preset', 'full', 'three-quarter', 'half', 'quarter', 'custom']],
+            'GaugeStartPosition' => ['type' => 'Select'],
+            'GaugeEndPosition'   => ['type' => 'Select'],
+            'GaugeColorMode'     => ['type' => 'Select', 'values' => ['theme', 'custom']],
+            'PointerColor'       => ['type' => 'SelectColor'],
+            'ProgressColor'      => ['type' => 'SelectColor'],
+            'RingColor'          => ['type' => 'SelectColor'],
+            'ScaleColor'         => ['type' => 'SelectColor'],
+            'ValueColor'         => ['type' => 'SelectColor'],
+            'TitleColor'         => ['type' => 'SelectColor']
+        ] as $designerName => $contract) {
+            $designerElement = $fineTuningElements[$designerName] ?? null;
+            $valid = is_array($designerElement) && ($designerElement['type'] ?? null) === $contract['type'];
+            if (isset($contract['values'])) {
+                $valid = $valid && array_column($designerElement['options'] ?? [], 'value') === $contract['values'];
+            }
+            if (in_array($designerName, ['GaugeStartPosition', 'GaugeEndPosition'], true)) {
+                $valid = $valid
+                    && count($designerElement['options'] ?? []) === 16
+                    && (float) array_column($designerElement['options'] ?? [], 'value')[0] === 0.0
+                    && (float) array_column($designerElement['options'] ?? [], 'value')[15] === 337.5;
+            }
+            requireStrictContract(
+                $valid,
+                'EChartsGaugeSingle tile designer contract is invalid for ' . $designerName . '.',
                 $errors
             );
         }

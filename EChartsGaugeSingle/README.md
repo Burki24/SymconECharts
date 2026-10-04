@@ -11,7 +11,8 @@ Quellvariable und minimale Gauge-Einstellungen sind konfigurierbar; das Modul ru
 Momentanwert über EChartsGateway ab, erzeugt ein versioniertes Gauge-Datenmodell
 und rendert es mit Apache ECharts 6.1.0 in einer responsiven Symcon-Kachel.
 Wertänderungen werden live an die geöffnete Kachel übertragen. Das
-Konfigurationsformular wählt zwischen vier layoutbezogenen Presets und zeigt
+Konfigurationsformular wählt zwischen vier layoutbezogenen Presets, Zeigerformen,
+Skalenbögen und optionalen Gauge-Farben und zeigt
 zusätzlich eine live aktualisierte SVG-Vorschau der noch nicht übernommenen
 Einstellungen. Davon unabhängig stehen das automatische Symcon-Design und
 sechs lokal gebündelte offizielle ECharts-Themes zur Auswahl.
@@ -59,8 +60,17 @@ zulässig sind 50 bis 150 %. Dadurch bleiben individuelle Einstellungen auch
 bei anderen Kachelgrößen responsiv. Freie ECharts-JSON- oder
 JavaScript-Einstellungen werden nicht ausgeführt.
 
+Zusätzlich kann die Zeigerform als Presetvorgabe, Nadel, Linie oder Pfeil
+gewählt werden. Der Skalenbogen bleibt wahlweise bei der Presetvorgabe oder
+wird als Voll-, Dreiviertel-, Halb-, Viertelkreis beziehungsweise mit eigenem
+Start und Ende definiert. Die Positionen folgen einem Zifferblatt (`0°` oben,
+`90°` rechts, `180°` unten, `270°` links) und stehen in 22,5-Grad-Schritten
+zur Verfügung. Eigene Farben für Zeiger, Fortschritt, Ring, Skala, Wert und
+Titel sind ausdrücklich zuschaltbar; ohne diese Umschaltung bleiben die
+Farben des ausgewählten ECharts-Themes maßgeblich.
+
 **Geplant:** Zusätzliche Gauge-Single-Presets, ein sicherer Importvertrag für
-eigene Theme-Builder-Dateien, weitere Skalen- und Gestaltungsoptionen sowie die
+eigene Theme-Builder-Dateien, weitere Gestaltungsoptionen sowie die
 Ausgabe als optionales IPSView-Widget.
 Archivdarstellung wird erst mit einem dafür
 festgelegten Chart-Anwendungsfall umgesetzt.
@@ -121,7 +131,10 @@ Fehlerstatus.
 
 **Konfigurationsseite:** Ausgewählt werden eine numerische Quellvariable,
 Minimum und Maximum, Titel, Einheit, 0 bis 6 Nachkommastellen, ein Gauge-Preset
-sowie ein ECharts-Theme. Unter „Feinabstimmung“ können die vier Schriftgrößen,
+sowie ein ECharts-Theme. Unter „Geometrie und Zeiger“ werden Zeigerform,
+Skalenbogen und Positionen gewählt; unter „Gauge-Farben“ können sechs
+Gauge-spezifische Farbrollen das Theme gezielt überschreiben. Unter
+„Feinabstimmung“ können die vier Schriftgrößen,
 Ring- und Zeigerstärke sowie Nebenstrich- und Hauptteilerlänge jeweils von
 50 bis 150 % der Presetvorgabe angepasst werden. Die stabilen Preset-IDs sind
 `basic`, `simple`,
@@ -187,7 +200,7 @@ dargestellt werden. Die Kachel bleibt für die tatsächliche, interaktive
 ECharts-Ausgabe maßgeblich; die SVG-Vorschau bildet das ausgewählte Layout
 gezielt nach. Die grundlegenden Layoutproportionen werden zwischen Vorschau und
 Kachel angeglichen, einschließlich der Anordnung von Achslinie, Teilern und
-Skalenwerten. Noch nicht gespeicherte Feinabstimmungen werden ebenfalls sofort
+Skalenwerten. Noch nicht gespeicherte Geometrie-, Farb- und Feinabstimmungen werden ebenfalls sofort
 in der Vorschau dargestellt. Sie verwendet außerdem eine stabile, dem
 ausgewählten Theme
 zugeordnete Vorschaupalette und übernimmt die Gauge-Achssegmente der
@@ -227,7 +240,8 @@ $json = ECGS_GetGaugeData($InstanceID);
 `ECGS_GetGaugeData()` validiert Konfiguration und aktive Gateway-Verbindung
 und liefert das aktuelle Gauge-Datenmodell als JSON. Das Modell enthält
 `schemaVersion`, `family`, Theme, Quellvariable und Zeitstempel, die minimale
-Gauge-Konfiguration, die validierten relativen Designwerte unter `gauge.style`
+Gauge-Konfiguration sowie die validierten Geometrie-, Farb- und relativen
+Designwerte unter `gauge.style`
 sowie den numerischen Wert. Dasselbe fachliche Modell wird
 vom nativen Gauge-Single-Renderer verwendet.
 

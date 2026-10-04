@@ -46,6 +46,10 @@ class EChartsGaugeSingle extends IPSModuleStrict
 
     private const PRESET_SIMPLE = 'simple';
     private const SUPPORTED_PRESETS = ['basic', self::PRESET_SIMPLE, 'progress', 'speed'];
+    private const SUPPORTED_POINTER_SHAPES = ['preset', 'needle', 'line', 'arrow'];
+    private const SUPPORTED_ARC_MODES = ['preset', 'full', 'three-quarter', 'half', 'quarter', 'custom'];
+    private const SUPPORTED_COLOR_MODES = ['theme', 'custom'];
+    private const ANGLE_STEP = 22.5;
     private const DESIGN_SCALE_DEFAULT = 100;
     private const DESIGN_SCALE_MINIMUM = 50;
     private const DESIGN_SCALE_MAXIMUM = 150;
@@ -74,6 +78,17 @@ class EChartsGaugeSingle extends IPSModuleStrict
         $this->RegisterPropertyInteger('Decimals', 1);
         $this->RegisterPropertyString('GaugePreset', self::PRESET_SIMPLE);
         $this->RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO);
+        $this->RegisterPropertyString('PointerShape', 'preset');
+        $this->RegisterPropertyString('GaugeArcMode', 'preset');
+        $this->RegisterPropertyFloat('GaugeStartPosition', 270.0);
+        $this->RegisterPropertyFloat('GaugeEndPosition', 90.0);
+        $this->RegisterPropertyString('GaugeColorMode', 'theme');
+        $this->RegisterPropertyInteger('PointerColor', 0x55CBB5);
+        $this->RegisterPropertyInteger('ProgressColor', 0x55CBB5);
+        $this->RegisterPropertyInteger('RingColor', 0x45474C);
+        $this->RegisterPropertyInteger('ScaleColor', 0xA7A9AE);
+        $this->RegisterPropertyInteger('ValueColor', 0xF4F5F7);
+        $this->RegisterPropertyInteger('TitleColor', 0xA7A9AE);
         foreach (self::DESIGN_SCALE_PROPERTIES as $propertyName) {
             $this->RegisterPropertyInteger($propertyName, self::DESIGN_SCALE_DEFAULT);
         }
@@ -141,7 +156,18 @@ class EChartsGaugeSingle extends IPSModuleStrict
         int $RingWidthPercent = self::DESIGN_SCALE_DEFAULT,
         int $PointerWidthPercent = self::DESIGN_SCALE_DEFAULT,
         int $MinorTickLengthPercent = self::DESIGN_SCALE_DEFAULT,
-        int $MajorTickLengthPercent = self::DESIGN_SCALE_DEFAULT
+        int $MajorTickLengthPercent = self::DESIGN_SCALE_DEFAULT,
+        string $PointerShape = 'preset',
+        string $GaugeArcMode = 'preset',
+        float $GaugeStartPosition = 270.0,
+        float $GaugeEndPosition = 90.0,
+        string $GaugeColorMode = 'theme',
+        int $PointerColor = 0x55CBB5,
+        int $ProgressColor = 0x55CBB5,
+        int $RingColor = 0x45474C,
+        int $ScaleColor = 0xA7A9AE,
+        int $ValueColor = 0xF4F5F7,
+        int $TitleColor = 0xA7A9AE
     ): void {
         $this->UpdateFormField(
             'GaugePreview',
@@ -163,7 +189,18 @@ class EChartsGaugeSingle extends IPSModuleStrict
                     'ringWidthPercent'       => $RingWidthPercent,
                     'pointerWidthPercent'    => $PointerWidthPercent,
                     'minorTickLengthPercent' => $MinorTickLengthPercent,
-                    'majorTickLengthPercent' => $MajorTickLengthPercent
+                    'majorTickLengthPercent' => $MajorTickLengthPercent,
+                    'pointerShape'           => $PointerShape,
+                    'arcMode'                => $GaugeArcMode,
+                    'startPosition'          => $GaugeStartPosition,
+                    'endPosition'            => $GaugeEndPosition,
+                    'colorMode'              => $GaugeColorMode,
+                    'pointerColor'           => self::ColorToHex($PointerColor),
+                    'progressColor'          => self::ColorToHex($ProgressColor),
+                    'ringColor'              => self::ColorToHex($RingColor),
+                    'scaleColor'             => self::ColorToHex($ScaleColor),
+                    'valueColor'             => self::ColorToHex($ValueColor),
+                    'titleColor'             => self::ColorToHex($TitleColor)
                 ]
             ))
         );
@@ -356,6 +393,22 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 $this->Translate('Select a supported ECharts theme.')
             );
         }
+        if (!in_array((string) ($style['pointerShape'] ?? 'preset'), self::SUPPORTED_POINTER_SHAPES, true)
+            || !in_array((string) ($style['arcMode'] ?? 'preset'), self::SUPPORTED_ARC_MODES, true)
+            || !in_array((string) ($style['colorMode'] ?? 'theme'), self::SUPPORTED_COLOR_MODES, true)) {
+            return EChartsGaugeSinglePreview::CreateErrorSvg(
+                $this->Translate('Select supported Gauge design options.')
+            );
+        }
+        $startPosition = (float) ($style['startPosition'] ?? 270.0);
+        $endPosition = (float) ($style['endPosition'] ?? 90.0);
+        if (!self::IsAnglePosition($startPosition)
+            || !self::IsAnglePosition($endPosition)
+            || (($style['arcMode'] ?? 'preset') === 'custom' && abs($startPosition - $endPosition) < 0.000001)) {
+            return EChartsGaugeSinglePreview::CreateErrorSvg(
+                $this->Translate('Select distinct start and end positions in 22.5 degree steps.')
+            );
+        }
 
         $value = $this->ResolveGaugePreviewValue($variableID, $minimum, $maximum);
         $language = $this->NormalizeHelperTranslationLanguage(
@@ -447,7 +500,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
             ];
         }
 
-        foreach ($this->ReadGaugeStyle() as $value) {
+        foreach (self::DESIGN_SCALE_PROPERTIES as $propertyName) {
+            $value = $this->ReadPropertyInteger($propertyName);
             if ($value < self::DESIGN_SCALE_MINIMUM || $value > self::DESIGN_SCALE_MAXIMUM) {
                 return [
                     'Status'  => self::STATUS_DESIGN_INVALID,
@@ -456,10 +510,39 @@ class EChartsGaugeSingle extends IPSModuleStrict
             }
         }
 
+        if (!in_array($this->ReadPropertyString('PointerShape'), self::SUPPORTED_POINTER_SHAPES, true)
+            || !in_array($this->ReadPropertyString('GaugeArcMode'), self::SUPPORTED_ARC_MODES, true)
+            || !in_array($this->ReadPropertyString('GaugeColorMode'), self::SUPPORTED_COLOR_MODES, true)) {
+            return [
+                'Status'  => self::STATUS_DESIGN_INVALID,
+                'Message' => 'The selected Gauge design option is not supported.'
+            ];
+        }
+
+        if (!self::IsAnglePosition($this->ReadPropertyFloat('GaugeStartPosition'))
+            || !self::IsAnglePosition($this->ReadPropertyFloat('GaugeEndPosition'))
+            || ($this->ReadPropertyString('GaugeArcMode') === 'custom'
+                && abs($this->ReadPropertyFloat('GaugeStartPosition') - $this->ReadPropertyFloat('GaugeEndPosition')) < 0.000001)) {
+            return [
+                'Status'  => self::STATUS_DESIGN_INVALID,
+                'Message' => 'Gauge positions must be distinct 22.5 degree steps between 0 and 337.5 degrees.'
+            ];
+        }
+
+        foreach (['PointerColor', 'ProgressColor', 'RingColor', 'ScaleColor', 'ValueColor', 'TitleColor'] as $propertyName) {
+            $color = $this->ReadPropertyInteger($propertyName);
+            if ($color < 0 || $color > 0xFFFFFF) {
+                return [
+                    'Status'  => self::STATUS_DESIGN_INVALID,
+                    'Message' => 'Gauge colors must be valid RGB colors.'
+                ];
+            }
+        }
+
         return null;
     }
 
-    /** @return array<string, int> */
+    /** @return array<string, int|float|string> */
     private function ReadGaugeStyle(): array
     {
         $style = [];
@@ -467,7 +550,36 @@ class EChartsGaugeSingle extends IPSModuleStrict
             $style[$fieldName] = $this->ReadPropertyInteger($propertyName);
         }
 
+        $style['pointerShape'] = $this->ReadPropertyString('PointerShape');
+        $style['arcMode'] = $this->ReadPropertyString('GaugeArcMode');
+        $style['startPosition'] = $this->ReadPropertyFloat('GaugeStartPosition');
+        $style['endPosition'] = $this->ReadPropertyFloat('GaugeEndPosition');
+        $style['colorMode'] = $this->ReadPropertyString('GaugeColorMode');
+        foreach ([
+            'pointerColor'  => 'PointerColor',
+            'progressColor' => 'ProgressColor',
+            'ringColor'     => 'RingColor',
+            'scaleColor'    => 'ScaleColor',
+            'valueColor'    => 'ValueColor',
+            'titleColor'    => 'TitleColor'
+        ] as $fieldName => $propertyName) {
+            $style[$fieldName] = self::ColorToHex($this->ReadPropertyInteger($propertyName));
+        }
+
         return $style;
+    }
+
+    private static function IsAnglePosition(float $position): bool
+    {
+        return is_finite($position)
+            && $position >= 0.0
+            && $position < 360.0
+            && abs(($position / self::ANGLE_STEP) - round($position / self::ANGLE_STEP)) < 0.000001;
+    }
+
+    private static function ColorToHex(int $color): string
+    {
+        return sprintf('#%06X', max(0, min(0xFFFFFF, $color)));
     }
 
     private function SynchronizeSourceReference(): void

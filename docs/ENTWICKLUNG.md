@@ -26,7 +26,9 @@ Das Gauge-Single-Formular besitzt außerdem einen ersten Kacheldesigner. Er
 wählt die layoutbezogenen Presets Basic, Simple, Progress und Speed und erzeugt
 eine live aktualisierte SVG-Vorschau der noch nicht gespeicherten Einstellungen.
 Unabhängig davon kann die Instanz zwischen dem automatischen Symcon-Design und
-sechs lokal gebündelten offiziellen ECharts-Themes wählen. Der Multi-Renderer,
+sechs lokal gebündelten offiziellen ECharts-Themes wählen. Zeigerform,
+Skalenbogen mit Start- und Endpositionen in 22,5-Grad-Schritten sowie sechs
+Gauge-spezifische Farbrollen sind ebenfalls validiert konfigurierbar. Der Multi-Renderer,
 Archivverarbeitung, IPSView-Ausgabe sowie reale
 Symcon-Laufzeit- und Browsertests fehlen noch. Die Testsuite prüft zusätzlich
 zu Struktur und Metadaten die Strict-Verträge, das Protokoll, die

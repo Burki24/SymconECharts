@@ -67,9 +67,21 @@ Werte werden erst nach der responsiven Skalierung angewendet und bleiben damit
 von der konkreten Kachelgröße unabhängig. Eine freie ECharts-Option wird daraus
 nicht abgeleitet.
 
-Farben bleiben in dieser Stufe bei den gemeinsamen Symcon-Designtokens. Die
-später ergänzte Auswahl offizieller ECharts-Themes ist als eigener Vertrag in
-[`ADR 0007`](0007-echarts-theme-assets-and-selection.md) festgelegt. Auch
+Als additive, validierte Designwerte stehen die Zeigerformen `preset`,
+`needle`, `line` und `arrow` zur Verfügung. Der Skalenbogen verwendet entweder
+die Presetgeometrie oder einen Voll-, Dreiviertel-, Halb-, Viertel- oder
+benutzerdefinierten Bogen. Anwenderpositionen werden wie auf einem Zifferblatt
+gespeichert (`0°` oben, im Uhrzeigersinn) und sind auf 22,5-Grad-Schritte
+begrenzt. Der Renderer übersetzt diese Positionen in die ECharts-Winkel; die
+Formulardaten legen damit keine Bibliothekskoordinaten als öffentlichen Vertrag
+fest. Bei benutzerdefinierten Bögen müssen Start und Ende verschieden sein.
+
+Die später ergänzte Auswahl offizieller ECharts-Themes ist als eigener Vertrag in
+[`ADR 0007`](0007-echarts-theme-assets-and-selection.md) festgelegt. Farben
+folgen standardmäßig weiterhin diesem Theme. Ein ausdrücklich aktivierter
+Custom-Modus überschreibt ausschließlich die Gauge-Rollen Zeiger,
+Fortschrittsbogen, Ring, Skala und Teiler, Wert und Einheit sowie Titel mit
+validierten RGB-Werten. Auch
 IPSView bleibt ein separater Ausgabeadapter und wird nicht durch
 Designer-Properties vorweggenommen.
 
@@ -86,7 +98,7 @@ Designer-Properties vorweggenommen.
 
 ## Folgen
 
-Benutzer können das Gauge-Layout im Instanzformular auswählen und unmittelbar
+Benutzer können Gauge-Layout, Zeiger, Bogen und Farben im Instanzformular auswählen und unmittelbar
 in der SVG-Vorschau beurteilen. Nach dem Übernehmen verwendet die native Kachel
 dieselbe Auswahl und dieselben relativen Feinabstimmungen. Weitere
 Single-Presets können unter neuen stabilen IDs

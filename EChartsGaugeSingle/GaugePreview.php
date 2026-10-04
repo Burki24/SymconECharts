@@ -37,17 +37,36 @@ final class EChartsGaugeSinglePreview
             throw new InvalidArgumentException('A supported ECharts theme is required.');
         }
 
-        $design = self::ApplyStyleScales(self::PresetDesign($preset, $minimum, $maximum), $style);
+        $design = self::ApplyArcDesign(
+            self::ApplyStyleScales(self::PresetDesign($preset, $minimum, $maximum), $style),
+            $style
+        );
         $palette = EChartsAsset::ThemePreviewPalette($theme);
-        $unitColor = $preset === 'speed' ? $palette['muted'] : $palette['text'];
+        $customColors = ($style['colorMode'] ?? 'theme') === 'custom';
+        $pointerColor = $customColors ? self::StyleColor($style, 'pointerColor', $palette['accent']) : $palette['accent'];
+        $progressColor = $customColors ? self::StyleColor($style, 'progressColor', $palette['accent']) : $palette['accent'];
+        $ringColor = $customColors ? self::StyleColor($style, 'ringColor', $palette['track']) : null;
+        $scaleColor = $customColors ? self::StyleColor($style, 'scaleColor', $palette['muted']) : $palette['muted'];
+        $minorColor = $customColors ? $scaleColor : $palette['muted'];
+        $majorColor = $customColors ? $scaleColor : $palette['border'];
+        $detailBorderColor = $customColors ? $scaleColor : $palette['border'];
+        $valueColor = $customColors ? self::StyleColor($style, 'valueColor', $palette['text']) : $palette['text'];
+        $titleColor = $customColors ? self::StyleColor($style, 'titleColor', $palette['muted']) : $palette['muted'];
+        $arcMode = SVGPreviewHelper::escape((string) ($style['arcMode'] ?? 'preset'));
+        $startPosition = self::Coordinate(self::NormalizePosition($style['startPosition'] ?? 270.0));
+        $endPosition = self::Coordinate(self::NormalizePosition($style['endPosition'] ?? 90.0));
+        $unitColor = $customColors ? $valueColor : ($preset === 'speed' ? $palette['muted'] : $palette['text']);
         $valueFontWeight = $preset === 'speed' ? 800 : 600;
         $unitFontWeight = $preset === 'speed' ? 400 : 600;
         $decimals = max(0, min(6, $decimals));
         $ratio = max(0.0, min(1.0, ($value - $minimum) / ($maximum - $minimum)));
-        $trackElements = self::TrackSegments($palette['gaugeAxisLine'], $design);
+        $trackElements = self::TrackSegments(
+            $ringColor === null ? $palette['gaugeAxisLine'] : [[1.0, $ringColor]],
+            $design
+        );
         $progressPath = $design['showProgress'] ? self::ArcPath($ratio, $design) : '';
         $ticks = self::Ticks($minimum, $maximum, $language, $design);
-        $pointer = self::Pointer($ratio, $design);
+        $pointer = self::Pointer($ratio, $design, (string) ($style['pointerShape'] ?? 'preset'));
         $rawValue = self::FormatNumber($value, $decimals, $language);
         $rawUnit = trim($unit);
         $rawTitle = trim($title);
@@ -68,7 +87,7 @@ final class EChartsGaugeSinglePreview
             : '<text x="360" y="' . self::Coordinate($design['titleY']) . '" class="title">' . $formattedTitle . '</text>';
         $progressElement = $progressPath === ''
             ? ''
-            : '<path d="' . $progressPath . '" class="progress' . ($preset === 'speed' ? ' speed-shadow' : '')
+            : '<path d="' . $progressPath . '" class="progress' . ($preset === 'speed' ? ' speed-progress-shadow' : '')
                 . '" style="stroke-width:'
                 . self::Coordinate($design['lineWidth']) . 'px"/>';
         $detailBackground = $design['detailBox']
@@ -76,10 +95,10 @@ final class EChartsGaugeSinglePreview
             : '';
 
         return <<<SVG
-<svg xmlns="http://www.w3.org/2000/svg" width="720" height="400" viewBox="0 0 720 400" role="img" aria-label="{$ariaLabel}" data-preset="{$preset}" data-theme="{$theme}" data-major-splits="{$design['majorSplits']}">
-  <defs><filter id="speed-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="2" dy="2" stdDeviation="4" flood-color="{$palette['accent']}" flood-opacity="0.45"/></filter></defs>
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="400" viewBox="0 0 720 400" role="img" aria-label="{$ariaLabel}" data-preset="{$preset}" data-theme="{$theme}" data-arc-mode="{$arcMode}" data-start-position="{$startPosition}" data-end-position="{$endPosition}" data-major-splits="{$design['majorSplits']}">
+  <defs><filter id="speed-progress-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="2" dy="2" stdDeviation="4" flood-color="{$progressColor}" flood-opacity="0.45"/></filter><filter id="speed-pointer-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="2" dy="2" stdDeviation="4" flood-color="{$pointerColor}" flood-opacity="0.45"/></filter></defs>
   <style>
-    .surface{fill:{$palette['background']}}.theme-track-segment{fill:none;stroke-linecap:round;stroke-linejoin:round}.progress{fill:none;stroke:{$palette['accent']};stroke-linecap:round;stroke-linejoin:round}.speed-shadow{filter:url(#speed-shadow)}.minor{stroke:{$palette['muted']};stroke-width:1}.major{stroke:{$palette['border']};stroke-width:2}.axis{fill:{$palette['muted']};font-size:{$design['axisFontSize']}px;font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle;dominant-baseline:middle}.pointer,.speed-pointer{fill:{$palette['accent']}}.anchor{fill:{$palette['accent']};stroke:{$palette['text']};stroke-width:2}.detail-box{fill:{$palette['surface']};stroke:{$palette['border']};stroke-width:2}.value{fill:{$palette['text']};font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle}.value-number{font-size:{$design['valueFontSize']}px;font-weight:{$valueFontWeight}}.value-unit{fill:{$unitColor};font-size:{$design['unitFontSize']}px;font-weight:{$unitFontWeight}}.title{fill:{$palette['muted']};font-size:{$design['titleFontSize']}px;font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle}svg[data-preset="speed"] .minor{stroke-width:2}svg[data-preset="speed"] .major{stroke-width:3}
+    .surface{fill:{$palette['background']}}.theme-track-segment{fill:none;stroke-linecap:round;stroke-linejoin:round}.progress{fill:none;stroke:{$progressColor};stroke-linecap:round;stroke-linejoin:round}.speed-progress-shadow{filter:url(#speed-progress-shadow)}.speed-pointer-shadow{filter:url(#speed-pointer-shadow)}.minor{stroke:{$minorColor};stroke-width:1}.major{stroke:{$majorColor};stroke-width:2}.axis{fill:{$scaleColor};font-size:{$design['axisFontSize']}px;font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle;dominant-baseline:middle}.pointer,.speed-pointer{fill:{$pointerColor}}.anchor{fill:{$pointerColor};stroke:{$valueColor};stroke-width:2}.detail-box{fill:{$palette['surface']};stroke:{$detailBorderColor};stroke-width:2}.value{fill:{$valueColor};font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle}.value-number{font-size:{$design['valueFontSize']}px;font-weight:{$valueFontWeight}}.value-unit{fill:{$unitColor};font-size:{$design['unitFontSize']}px;font-weight:{$unitFontWeight}}.title{fill:{$titleColor};font-size:{$design['titleFontSize']}px;font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle}svg[data-preset="speed"] .minor{stroke-width:2}svg[data-preset="speed"] .major{stroke-width:3}
   </style>
   <rect class="surface" width="720" height="400" rx="12"/>
   {$trackElements}
@@ -274,6 +293,43 @@ SVG;
         return $design;
     }
 
+    /**
+     * Converts the user-facing clock position (0° at the top, clockwise) to
+     * the mathematical angles used by the SVG preview.
+     *
+     * @param array<string, float|bool|int> $design
+     * @param array<string, mixed> $style
+     * @return array<string, float|bool|int>
+     */
+    private static function ApplyArcDesign(array $design, array $style): array
+    {
+        $mode = (string) ($style['arcMode'] ?? 'preset');
+        if ($mode === 'preset') {
+            return $design;
+        }
+
+        $startPosition = self::NormalizePosition($style['startPosition'] ?? 0.0);
+        $sweep = match ($mode) {
+            'full'          => 360.0,
+            'three-quarter' => 270.0,
+            'half'          => 180.0,
+            'quarter'       => 90.0,
+            'custom'        => fmod(
+                self::NormalizePosition($style['endPosition'] ?? 90.0) - $startPosition + 360.0,
+                360.0
+            ),
+            default         => 0.0
+        };
+        if ($sweep <= 0.0) {
+            return $design;
+        }
+
+        $design['startAngle'] = 90.0 - $startPosition;
+        $design['endAngle'] = (float) $design['startAngle'] - $sweep;
+
+        return $design;
+    }
+
     /** @param array<string, float|bool|int> $design */
     private static function ArcPath(float $ratio, array $design): string
     {
@@ -379,28 +435,55 @@ SVG;
     }
 
     /** @param array<string, float|bool|int> $design */
-    private static function Pointer(float $ratio, array $design): string
+    private static function Pointer(float $ratio, array $design, string $shape): string
     {
-        if ($design['speedPointer']) {
+        if ($shape === 'preset' && $design['speedPointer']) {
             return self::SpeedPointer($ratio, $design);
         }
 
         $angle = self::Angle($ratio, $design);
         $centerY = (float) $design['centerY'];
-        $tip = self::Point((float) $design['pointerLength'], $angle, $centerY);
         $radians = deg2rad($angle);
         $halfPointerWidth = (float) $design['pointerWidth'] / 2.0;
-        $perpendicularX = sin($radians) * $halfPointerWidth;
-        $perpendicularY = cos($radians) * $halfPointerWidth;
-        $leftX = self::CENTER_X - $perpendicularX;
-        $leftY = $centerY - $perpendicularY;
-        $rightX = self::CENTER_X + $perpendicularX;
-        $rightY = $centerY + $perpendicularY;
-        $points = self::Coordinate($tip[0]) . ',' . self::Coordinate($tip[1])
-            . ' ' . self::Coordinate($leftX) . ',' . self::Coordinate($leftY)
-            . ' ' . self::Coordinate($rightX) . ',' . self::Coordinate($rightY);
+        $length = (float) $design['pointerLength'];
+        $point = static function (float $axial, float $perpendicular) use ($radians, $centerY): array
+        {
+            return [
+                self::CENTER_X + cos($radians) * $axial + sin($radians) * $perpendicular,
+                $centerY - sin($radians) * $axial + cos($radians) * $perpendicular
+            ];
+        };
+        $points = match ($shape) {
+            'line' => [
+                $point($length, -$halfPointerWidth / 2.0),
+                $point($length, $halfPointerWidth / 2.0),
+                $point(-10.0, $halfPointerWidth / 2.0),
+                $point(-10.0, -$halfPointerWidth / 2.0)
+            ],
+            'arrow' => [
+                $point($length, 0.0),
+                $point($length * 0.78, $halfPointerWidth),
+                $point($length * 0.78, $halfPointerWidth * 0.32),
+                $point(-10.0, $halfPointerWidth * 0.32),
+                $point(-10.0, -$halfPointerWidth * 0.32),
+                $point($length * 0.78, -$halfPointerWidth * 0.32),
+                $point($length * 0.78, -$halfPointerWidth)
+            ],
+            default => [
+                $point($length, 0.0),
+                $point(0.0, $halfPointerWidth),
+                $point(0.0, -$halfPointerWidth)
+            ]
+        };
+        $serialized = array_map(
+            static fn (array $coordinates): string => self::Coordinate($coordinates[0])
+                . ',' . self::Coordinate($coordinates[1]),
+            $points
+        );
 
-        return '<polygon points="' . $points . '" class="pointer"/>'
+        return '<polygon points="' . implode(' ', $serialized) . '" class="pointer'
+            . ($design['speedPointer'] ? ' speed-pointer-shadow' : '') . '" data-pointer-shape="'
+            . SVGPreviewHelper::escape($shape) . '"/>'
             . '<circle cx="360" cy="' . self::Coordinate($centerY) . '" r="11" class="anchor"/>';
     }
 
@@ -426,7 +509,7 @@ SVG;
             $points
         );
 
-        return '<polygon points="' . implode(' ', $serialized) . '" class="speed-pointer speed-shadow"/>';
+        return '<polygon points="' . implode(' ', $serialized) . '" class="speed-pointer speed-pointer-shadow"/>';
     }
 
     private static function ResolveSpeedSplitNumber(float $minimum, float $maximum): int
@@ -469,6 +552,21 @@ SVG;
     private static function Coordinate(float $value): string
     {
         return number_format($value, 2, '.', '');
+    }
+
+    private static function NormalizePosition(mixed $position): float
+    {
+        $normalized = fmod((float) $position, 360.0);
+
+        return $normalized < 0.0 ? $normalized + 360.0 : $normalized;
+    }
+
+    /** @param array<string, mixed> $style */
+    private static function StyleColor(array $style, string $name, string $fallback): string
+    {
+        $color = strtoupper((string) ($style[$name] ?? ''));
+
+        return preg_match('/^#[0-9A-F]{6}$/', $color) === 1 ? $color : $fallback;
     }
 
     private static function FormatAxisNumber(float $value, string $language): string
