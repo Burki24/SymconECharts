@@ -36,7 +36,7 @@ final class EChartsGaugeSinglePreview
             throw new InvalidArgumentException('A supported ECharts theme is required.');
         }
 
-        $design = self::PresetDesign($preset);
+        $design = self::PresetDesign($preset, $minimum, $maximum);
         $palette = EChartsAsset::ThemePreviewPalette($theme);
         $decimals = max(0, min(6, $decimals));
         $ratio = max(0.0, min(1.0, ($value - $minimum) / ($maximum - $minimum)));
@@ -51,6 +51,12 @@ final class EChartsGaugeSinglePreview
         $formattedUnit = SVGPreviewHelper::escape($rawUnit);
         $formattedTitle = SVGPreviewHelper::escape($rawTitle);
         $valueText = trim($formattedValue . ($formattedUnit === '' ? '' : ' ' . $formattedUnit));
+        $valueElement = $preset === 'speed'
+            ? '<text x="360" y="' . self::Coordinate($design['detailY']) . '" class="value"><tspan class="value-number">'
+                . $formattedValue . '</tspan>'
+                . ($formattedUnit === '' ? '' : '<tspan class="value-unit" dx="8">' . $formattedUnit . '</tspan>')
+                . '</text>'
+            : '<text x="360" y="' . self::Coordinate($design['detailY']) . '" class="value">' . $valueText . '</text>';
         $ariaLabel = SVGPreviewHelper::escape(trim(
             ($rawTitle === '' ? '' : $rawTitle . ': ')
             . $rawValue
@@ -61,16 +67,18 @@ final class EChartsGaugeSinglePreview
             : '<text x="360" y="' . self::Coordinate($design['titleY']) . '" class="title">' . $formattedTitle . '</text>';
         $progressElement = $progressPath === ''
             ? ''
-            : '<path d="' . $progressPath . '" class="progress" style="stroke-width:'
+            : '<path d="' . $progressPath . '" class="progress' . ($preset === 'speed' ? ' speed-shadow' : '')
+                . '" style="stroke-width:'
                 . self::Coordinate($design['lineWidth']) . 'px"/>';
         $detailBackground = $design['detailBox']
             ? '<rect x="238" y="280" width="244" height="58" rx="10" class="detail-box"/>'
             : '';
 
         return <<<SVG
-<svg xmlns="http://www.w3.org/2000/svg" width="720" height="400" viewBox="0 0 720 400" role="img" aria-label="{$ariaLabel}" data-preset="{$preset}" data-theme="{$theme}">
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="400" viewBox="0 0 720 400" role="img" aria-label="{$ariaLabel}" data-preset="{$preset}" data-theme="{$theme}" data-major-splits="{$design['majorSplits']}">
+  <defs><filter id="speed-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="2" dy="2" stdDeviation="4" flood-color="{$palette['accent']}" flood-opacity="0.45"/></filter></defs>
   <style>
-    .surface{fill:{$palette['background']}}.theme-track-segment{fill:none;stroke-linecap:round;stroke-linejoin:round}.progress{fill:none;stroke:{$palette['accent']};stroke-linecap:round;stroke-linejoin:round}.minor{stroke:{$palette['muted']};stroke-width:1}.major{stroke:{$palette['border']};stroke-width:2}.axis{fill:{$palette['muted']};font:14px 'Segoe UI',Arial,sans-serif;text-anchor:middle;dominant-baseline:middle}.pointer{fill:{$palette['accent']}}.anchor{fill:{$palette['accent']};stroke:{$palette['text']};stroke-width:2}.detail-box{fill:{$palette['surface']};stroke:{$palette['border']};stroke-width:2}.value{fill:{$palette['text']};font:600 38px 'Segoe UI',Arial,sans-serif;text-anchor:middle}.title{fill:{$palette['muted']};font:18px 'Segoe UI',Arial,sans-serif;text-anchor:middle}svg[data-preset="progress"] .value{font-size:46px}svg[data-preset="speed"] .value{font-size:32px}
+    .surface{fill:{$palette['background']}}.theme-track-segment{fill:none;stroke-linecap:round;stroke-linejoin:round}.progress{fill:none;stroke:{$palette['accent']};stroke-linecap:round;stroke-linejoin:round}.speed-shadow{filter:url(#speed-shadow)}.minor{stroke:{$palette['muted']};stroke-width:1}.major{stroke:{$palette['border']};stroke-width:2}.axis{fill:{$palette['muted']};font:14px 'Segoe UI',Arial,sans-serif;text-anchor:middle;dominant-baseline:middle}.pointer,.speed-pointer{fill:{$palette['accent']}}.anchor{fill:{$palette['accent']};stroke:{$palette['text']};stroke-width:2}.detail-box{fill:{$palette['surface']};stroke:{$palette['border']};stroke-width:2}.value{fill:{$palette['text']};font:600 38px 'Segoe UI',Arial,sans-serif;text-anchor:middle}.value-number{font-size:42px;font-weight:800}.value-unit{fill:{$palette['muted']};font-size:18px;font-weight:400}.title{fill:{$palette['muted']};font:18px 'Segoe UI',Arial,sans-serif;text-anchor:middle}svg[data-preset="progress"] .value{font-size:46px}svg[data-preset="speed"] .axis{font-size:18px}svg[data-preset="speed"] .minor{stroke-width:2}svg[data-preset="speed"] .major{stroke-width:3}
   </style>
   <rect class="surface" width="720" height="400" rx="12"/>
   {$trackElements}
@@ -78,7 +86,7 @@ final class EChartsGaugeSinglePreview
   {$ticks}
   {$pointer}
   {$detailBackground}
-  <text x="360" y="{$design['detailY']}" class="value">{$valueText}</text>
+  {$valueElement}
   {$titleElement}
 </svg>
 SVG;
@@ -111,10 +119,13 @@ SVG;
      *     titleY: float,
      *     showProgress: bool,
      *     showMinorTicks: bool,
-     *     detailBox: bool
+     *     detailBox: bool,
+     *     speedPointer: bool,
+     *     majorSplits: int,
+     *     minorSplits: int
      * }
      */
-    private static function PresetDesign(string $preset): array
+    private static function PresetDesign(string $preset, float $minimum, float $maximum): array
     {
         return match ($preset) {
             'basic' => [
@@ -129,7 +140,10 @@ SVG;
                 'titleY'         => 352.0,
                 'showProgress'   => false,
                 'showMinorTicks' => true,
-                'detailBox'      => false
+                'detailBox'      => false,
+                'speedPointer'   => false,
+                'majorSplits'    => 10,
+                'minorSplits'    => 5
             ],
             'progress' => [
                 'startAngle'     => 210.0,
@@ -143,7 +157,10 @@ SVG;
                 'titleY'         => 360.0,
                 'showProgress'   => true,
                 'showMinorTicks' => false,
-                'detailBox'      => false
+                'detailBox'      => false,
+                'speedPointer'   => false,
+                'majorSplits'    => 10,
+                'minorSplits'    => 5
             ],
             'speed' => [
                 'startAngle'     => 180.0,
@@ -151,13 +168,16 @@ SVG;
                 'centerY'        => 232.0,
                 'radius'         => 142.0,
                 'labelRadius'    => 118.0,
-                'pointerLength'  => 108.0,
+                'pointerLength'  => 106.5,
                 'lineWidth'      => 18.0,
                 'detailY'        => 319.0,
                 'titleY'         => 370.0,
                 'showProgress'   => true,
                 'showMinorTicks' => true,
-                'detailBox'      => true
+                'detailBox'      => true,
+                'speedPointer'   => true,
+                'majorSplits'    => self::ResolveSpeedSplitNumber($minimum, $maximum),
+                'minorSplits'    => 2
             ],
             default => [
                 'startAngle'     => 210.0,
@@ -171,12 +191,15 @@ SVG;
                 'titleY'         => 352.0,
                 'showProgress'   => true,
                 'showMinorTicks' => true,
-                'detailBox'      => false
+                'detailBox'      => false,
+                'speedPointer'   => false,
+                'majorSplits'    => 10,
+                'minorSplits'    => 5
             ]
         };
     }
 
-    /** @param array<string, float|bool> $design */
+    /** @param array<string, float|bool|int> $design */
     private static function ArcPath(float $ratio, array $design): string
     {
         return self::ArcSegmentPath(0.0, $ratio, $design);
@@ -184,7 +207,7 @@ SVG;
 
     /**
      * @param list<array{float,string}> $segments
-     * @param array<string, float|bool> $design
+     * @param array<string, float|bool|int> $design
      */
     private static function TrackSegments(array $segments, array $design): string
     {
@@ -205,7 +228,7 @@ SVG;
         return implode("\n  ", $elements);
     }
 
-    /** @param array<string, float|bool> $design */
+    /** @param array<string, float|bool|int> $design */
     private static function ArcSegmentPath(float $startRatio, float $endRatio, array $design): string
     {
         if ($endRatio <= $startRatio) {
@@ -232,13 +255,16 @@ SVG;
         return $path;
     }
 
-    /** @param array<string, float|bool> $design */
+    /** @param array<string, float|bool|int> $design */
     private static function Ticks(float $minimum, float $maximum, string $language, array $design): string
     {
         $elements = [];
-        for ($index = 0; $index <= 50; ++$index) {
-            $fraction = $index / 50;
-            $major = $index % 5 === 0;
+        $majorSplits = (int) $design['majorSplits'];
+        $minorSplits = (int) $design['minorSplits'];
+        $totalSplits = $majorSplits * $minorSplits;
+        for ($index = 0; $index <= $totalSplits; ++$index) {
+            $fraction = $index / $totalSplits;
+            $major = $index % $minorSplits === 0;
             if (!$major && !$design['showMinorTicks']) {
                 continue;
             }
@@ -274,9 +300,13 @@ SVG;
         return implode("\n  ", $elements);
     }
 
-    /** @param array<string, float|bool> $design */
+    /** @param array<string, float|bool|int> $design */
     private static function Pointer(float $ratio, array $design): string
     {
+        if ($design['speedPointer']) {
+            return self::SpeedPointer($ratio, $design);
+        }
+
         $angle = self::Angle($ratio, $design);
         $centerY = (float) $design['centerY'];
         $tip = self::Point((float) $design['pointerLength'], $angle, $centerY);
@@ -295,6 +325,48 @@ SVG;
             . '<circle cx="360" cy="' . self::Coordinate($centerY) . '" r="11" class="anchor"/>';
     }
 
+    /** @param array<string, float|bool|int> $design */
+    private static function SpeedPointer(float $ratio, array $design): string
+    {
+        $angle = self::Angle($ratio, $design);
+        $radians = deg2rad($angle);
+        $offsetY = (float) $design['radius'] * 0.05;
+        $centerY = (float) $design['centerY'] + $offsetY;
+        $tip = self::Point((float) $design['pointerLength'], $angle, $centerY);
+        $perpendicularX = sin($radians);
+        $perpendicularY = cos($radians);
+        $points = [
+            [$tip[0] - $perpendicularX * 2.0, $tip[1] - $perpendicularY * 2.0],
+            [$tip[0] + $perpendicularX * 2.0, $tip[1] + $perpendicularY * 2.0],
+            [self::CENTER_X + $perpendicularX * 8.0, $centerY + $perpendicularY * 8.0],
+            [self::CENTER_X - $perpendicularX * 8.0, $centerY - $perpendicularY * 8.0]
+        ];
+        $serialized = array_map(
+            static fn (array $point): string => self::Coordinate($point[0]) . ',' . self::Coordinate($point[1]),
+            $points
+        );
+
+        return '<polygon points="' . implode(' ', $serialized) . '" class="speed-pointer speed-shadow"/>';
+    }
+
+    private static function ResolveSpeedSplitNumber(float $minimum, float $maximum): int
+    {
+        $range = abs($maximum - $minimum);
+        $niceSteps = [1.0, 2.0, 2.5, 3.0, 5.0, 10.0];
+        foreach ([12, 10, 8, 6, 5, 4] as $candidate) {
+            $step = $range / $candidate;
+            $magnitude = 10 ** floor(log10($step));
+            $normalized = $step / $magnitude;
+            foreach ($niceSteps as $niceStep) {
+                if (abs($normalized - $niceStep) < 0.000000001) {
+                    return $candidate;
+                }
+            }
+        }
+
+        return 10;
+    }
+
     /** @return array{float,float} */
     private static function Point(float $radius, float $angle, float $centerY): array
     {
@@ -306,7 +378,7 @@ SVG;
         ];
     }
 
-    /** @param array<string, float|bool> $design */
+    /** @param array<string, float|bool|int> $design */
     private static function Angle(float $ratio, array $design): float
     {
         $startAngle = (float) $design['startAngle'];

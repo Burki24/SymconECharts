@@ -13,6 +13,7 @@
     var currentState = bootstrap.state || null;
     var reduceMotion = window.matchMedia
         && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var speedPointerIcon = 'path://M2090.36389,615.30999 L2090.36389,615.30999 C2091.48372,615.30999 2092.40383,616.194028 2092.44859,617.312956 L2096.90698,728.755929 C2097.05155,732.369577 2094.2393,735.416212 2090.62566,735.56078 C2090.53845,735.564269 2090.45117,735.566014 2090.36389,735.566014 L2090.36389,735.566014 C2086.74736,735.566014 2083.81557,732.63423 2083.81557,729.017692 C2083.81557,728.930412 2083.81732,728.84314 2083.82081,728.755929 L2088.2792,617.312956 C2088.32396,616.194028 2089.24407,615.30999 2090.36389,615.30999 Z';
 
     function translate(text) {
         return typeof translations[text] === 'string' ? translations[text] : text;
@@ -50,13 +51,64 @@
         errorElement.hidden = false;
     }
 
-    function formatValue(value, decimals, unit) {
-        var formatted = Number(value).toLocaleString(undefined, {
+    function formatNumber(value, decimals) {
+        return Number(value).toLocaleString(undefined, {
             minimumFractionDigits: decimals,
             maximumFractionDigits: decimals
         });
+    }
+
+    function formatValue(value, decimals, unit) {
+        var formatted = formatNumber(value, decimals);
 
         return unit ? formatted + ' ' + unit : formatted;
+    }
+
+    function formatRichTextPart(value) {
+        return String(value).replace(/[{}|]/g, '');
+    }
+
+    function formatSpeedValue(value, decimals, unit) {
+        var formatted = '{value|' + formatRichTextPart(formatNumber(value, decimals)) + '}';
+
+        return unit ? formatted + '{unit| ' + formatRichTextPart(unit) + '}' : formatted;
+    }
+
+    function colorWithAlpha(color, alpha) {
+        var hex = /^#([0-9a-f]{6})$/i.exec(color);
+        if (hex) {
+            return 'rgba('
+                + parseInt(hex[1].substring(0, 2), 16) + ','
+                + parseInt(hex[1].substring(2, 4), 16) + ','
+                + parseInt(hex[1].substring(4, 6), 16) + ','
+                + alpha + ')';
+        }
+
+        var rgb = /^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i.exec(color);
+        if (rgb) {
+            return 'rgba(' + rgb[1] + ',' + rgb[2] + ',' + rgb[3] + ',' + alpha + ')';
+        }
+
+        return color;
+    }
+
+    function resolveSpeedSplitNumber(minimum, maximum) {
+        var range = Math.abs(maximum - minimum);
+        var candidates = [12, 10, 8, 6, 5, 4];
+        var niceSteps = [1, 2, 2.5, 3, 5, 10];
+
+        for (var index = 0; index < candidates.length; index += 1) {
+            var step = range / candidates[index];
+            var magnitude = Math.pow(10, Math.floor(Math.log(step) / Math.LN10));
+            var normalized = step / magnitude;
+            for (var niceIndex = 0; niceIndex < niceSteps.length; niceIndex += 1) {
+                if (Math.abs(normalized - niceSteps[niceIndex]) < 0.000000001) {
+                    return candidates[index];
+                }
+            }
+        }
+
+        return 10;
     }
 
     function formatAxisValue(value) {
@@ -112,7 +164,7 @@
         return series;
     }
 
-    function applyPreset(series, preset, width, lineWidth, colors) {
+    function applyPreset(series, preset, width, lineWidth, colors, minimum, maximum) {
         switch (preset) {
             case 'basic':
                 series.progress.show = false;
@@ -137,14 +189,33 @@
                 var speedLineWidth = Math.min(lineWidth, 18);
                 series.startAngle = 180;
                 series.endAngle = 0;
+                series.splitNumber = resolveSpeedSplitNumber(minimum, maximum);
                 series.center = ['50%', '58%'];
                 series.radius = width < 320 ? '76%' : '72%';
                 series.progress.width = speedLineWidth;
+                series.progress.itemStyle.shadowColor = colorWithAlpha(colors.accent, 0.45);
+                series.progress.itemStyle.shadowBlur = 10;
+                series.progress.itemStyle.shadowOffsetX = 2;
+                series.progress.itemStyle.shadowOffsetY = 2;
                 series.axisLine.lineStyle.width = speedLineWidth;
                 series.axisTick.distance = -speedLineWidth - 7;
+                series.axisTick.splitNumber = 2;
+                series.axisTick.length = 6;
+                series.axisTick.lineStyle.width = 2;
                 series.splitLine.distance = -speedLineWidth - 8;
-                series.pointer.length = '76%';
+                series.splitLine.length = 12;
+                series.splitLine.lineStyle.width = 3;
+                series.pointer.icon = speedPointerIcon;
+                series.pointer.length = '75%';
+                series.pointer.width = Math.max(10, Math.min(16, Math.round(width * 0.04)));
+                series.pointer.offsetCenter = [0, '5%'];
+                series.pointer.itemStyle.shadowColor = colorWithAlpha(colors.accent, 0.45);
+                series.pointer.itemStyle.shadowBlur = 10;
+                series.pointer.itemStyle.shadowOffsetX = 2;
+                series.pointer.itemStyle.shadowOffsetY = 2;
+                series.anchor.show = false;
                 series.axisLabel.distance = speedLineWidth + 20;
+                series.axisLabel.fontSize = Math.max(12, Math.min(18, Math.round(width * 0.035)));
                 series.title.offsetCenter = [0, '82%'];
                 series.detail.offsetCenter = [0, '52%'];
                 series.detail.width = Math.max(130, Math.min(240, Math.round(width * 0.58)));
@@ -156,6 +227,18 @@
                 series.detail.borderWidth = 2;
                 series.detail.borderRadius = 8;
                 series.detail.color = colors.text;
+                series.detail.rich = {
+                    value: {
+                        fontSize: Math.max(28, Math.min(50, Math.round(width * 0.1))),
+                        fontWeight: 'bolder',
+                        color: colors.text
+                    },
+                    unit: {
+                        fontSize: Math.max(14, Math.min(20, Math.round(width * 0.04))),
+                        color: colors.muted,
+                        padding: [0, 0, -12, 8]
+                    }
+                };
                 break;
 
             default:
@@ -248,14 +331,16 @@
                 fontSize: Math.max(20, Math.min(38, Math.round(width * 0.095))),
                 fontWeight: 600,
                 formatter: function () {
-                    return formatValue(value, decimals, unit);
+                    return preset === 'speed'
+                        ? formatSpeedValue(value, decimals, unit)
+                        : formatValue(value, decimals, unit);
                 }
             },
             data: [{ value: value, name: title }]
         };
 
         series = applyThemeColors(series, colors);
-        series = applyPreset(series, preset, width, lineWidth, colors);
+        series = applyPreset(series, preset, width, lineWidth, colors, minimum, maximum);
 
         var option = {
             animation: !reduceMotion,

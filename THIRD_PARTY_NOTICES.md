@@ -51,6 +51,14 @@ Buildbefehl liegen unter `.tools/echarts-runtime`. Die ECharts-Quellen werden
 nicht inhaltlich verändert, sondern über die offizielle Tree-Shaking-API auf
 die von Gauge Single benötigten Bestandteile begrenzt. Die Theme-Dateien werden
 unverändert aus dem Paket übernommen.
+
+Das Preset `speed` adaptiert die charakteristische Konfiguration und den
+SVG-Zeigerpfad aus dem offiziellen Apache-ECharts-Beispiel
+[`gauge-speed`](https://echarts.apache.org/examples/en/editor.html?c=gauge-speed).
+Wertebereich, Skalenteilung, Theme-Farben, Beschriftung und responsive
+Dimensionierung werden projektspezifisch ergänzt; Beispiel und übernommener
+Zeigerpfad verbleiben unter der Apache License 2.0.
+
 `.gitattributes` verhindert eine Zeilenendenkonvertierung der Fremdartefakte.
 `libs/EChartsAsset.php` normalisiert bei Runtime und Theme-Dateien zusätzlich
 eine bereits durch einen Windows-Modulcheckout erfolgte CRLF-Konvertierung

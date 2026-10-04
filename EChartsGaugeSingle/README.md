@@ -44,6 +44,14 @@ Darstellung. Die unabhängige Theme-Auswahl bietet `auto`, Dark, Vintage,
 Macarons, Infographic, Shine und Roma. Alle sechs Apache-Themes werden lokal
 und mit festgeschriebener Integrität ausgeliefert.
 
+Das Speed-Preset übernimmt die charakteristischen Layoutmerkmale des
+offiziellen Apache-ECharts-Beispiels: den eigenen SVG-Zeiger, Schatten an
+Fortschritt und Zeiger, zwei Unterteilungen je Hauptabschnitt sowie getrennte
+Typografie für Wert und Einheit. Der Wertebereich bleibt frei konfigurierbar;
+die Hauptteilung wird dafür auf gut lesbare Schritte angepasst. Farben stammen
+weiterhin aus dem unabhängig gewählten Theme und der optionale Instanztitel
+bleibt erhalten.
+
 **Geplant:** Zusätzliche Gauge-Single-Presets, ein sicherer Importvertrag für
 eigene Theme-Builder-Dateien, weitere Skalen- und Gestaltungsoptionen sowie die
 Ausgabe als optionales IPSView-Widget.

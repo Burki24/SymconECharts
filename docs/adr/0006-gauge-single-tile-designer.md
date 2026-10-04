@@ -30,7 +30,10 @@ stabilen Preset-IDs der ersten Stufe sind:
 - `basic`: klassische Gauge mit Zeiger ohne Fortschrittsbogen;
 - `simple`: Gauge mit Zeiger und Fortschrittsbogen;
 - `progress`: stärker auf Fortschritt und Wert fokussierte Gauge;
-- `speed`: halbkreisförmige Speed-Gauge mit hervorgehobener Wertbox.
+- `speed`: halbkreisförmige Speed-Gauge, die den charakteristischen
+  SVG-Zeiger, den Schatten am Fortschrittsbogen, die feine Tick-Geometrie und
+  die getrennte Typografie für Wert und Einheit aus dem offiziellen
+  ECharts-Beispiel übernimmt.
 
 `simple` ist der Default und erhält die bisherige sichtbare Darstellung. Damit
 ändern vorhandene Instanzen beim Modulupdate ihr Layout nicht unbeabsichtigt.
@@ -75,6 +78,12 @@ Radius, Zeigerlänge, Skalenabstand sowie Wert- und Titelposition werden jedoch
 zwischen Vorschau und nativer Kachel bewusst angeglichen. Erst wenn mindestens
 ein weiterer Diagrammtyp denselben allgemeinen Designervertrag benötigt, wird
 eine Ergänzung der zentralen ModuleHelper erneut geprüft.
+
+Die Anzahl der Hauptabschnitte des Speed-Presets wird an den konfigurierten
+Wertebereich angepasst. Der Demo-Bereich 0 bis 240 erhält zwölf Abschnitte mit
+20er-Schritten; beispielsweise 0 bis 1000 erhält zehn Abschnitte mit
+100er-Schritten. Dadurch bleibt das Beispiel wiedererkennbar, ohne bei frei
+konfigurierten Bereichen schlecht lesbare Zwischenwerte zu erzwingen.
 
 ## Nachweise
 

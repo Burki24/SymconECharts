@@ -385,7 +385,7 @@ assertGatewayGauge(str_contains($visualizationTile, "case 'speed':"), 'Gauge Sin
 foreach ([
     "series.center = ['50%', '58%'];",
     "series.radius = width < 320 ? '76%' : '72%';",
-    "series.pointer.length = '76%';",
+    "series.pointer.length = '75%';",
     'series.axisLabel.distance = speedLineWidth + 20;',
     "series.detail.offsetCenter = [0, '52%'];",
     "series.title.offsetCenter = [0, '82%'];"
@@ -393,6 +393,20 @@ foreach ([
     assertGatewayGauge(
         str_contains($visualizationTile, $speedLayoutContract),
         'Gauge Single tile must keep the balanced Speed preview geometry: ' . $speedLayoutContract
+    );
+}
+foreach ([
+    "var speedPointerIcon = 'path://M2090.36389,615.30999",
+    'series.pointer.icon = speedPointerIcon;',
+    'series.pointer.offsetCenter = [0, \'5%\'];',
+    'series.anchor.show = false;',
+    'series.axisTick.splitNumber = 2;',
+    'series.splitNumber = resolveSpeedSplitNumber(minimum, maximum);',
+    'series.detail.rich = {'
+] as $speedExampleContract) {
+    assertGatewayGauge(
+        str_contains($visualizationTile, $speedExampleContract),
+        'Gauge Single must retain the characteristic official Speed Gauge option: ' . $speedExampleContract
     );
 }
 assertGatewayGauge(!str_contains($visualizationTile, '<script src="http'), 'Gauge Single must not load ECharts from a CDN.');
@@ -472,6 +486,31 @@ $speedPresetSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
     'speed'
 );
 assertGatewayGauge(str_contains($speedPresetSvg, 'class="detail-box"'), 'Speed Gauge must render its value box.');
+assertGatewayGauge(
+    str_contains($speedPresetSvg, 'class="speed-pointer speed-shadow"'),
+    'Speed Gauge preview must use the sample pointer.'
+);
+assertGatewayGauge(str_contains($speedPresetSvg, 'class="value-unit"'), 'Speed Gauge preview must style the unit separately.');
+assertGatewayGauge(str_contains($speedPresetSvg, 'data-major-splits="10"'), 'A 0–100 scale must keep ten readable divisions.');
+
+$officialSpeedRangeSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
+    100.0,
+    0.0,
+    240.0,
+    '',
+    'km/h',
+    0,
+    'en',
+    'speed'
+);
+assertGatewayGauge(
+    str_contains($officialSpeedRangeSvg, 'data-major-splits="12"'),
+    'The official 0–240 Speed Gauge range must use twelve major divisions.'
+);
+assertGatewayGauge(
+    str_contains($officialSpeedRangeSvg, '>20</text>'),
+    'The official Speed Gauge preview must expose the characteristic 20-unit scale steps.'
+);
 
 $shineSpeedSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
     1.0,
@@ -497,7 +536,7 @@ foreach (['#2B821D', '#005EAA', '#C12E34'] as $segmentColor) {
 $middleLabelMatches = [];
 assertGatewayGauge(
     preg_match(
-        '/<text x="[^"]+" y="([^"]+)" class="axis" data-label-index="25">500<\/text>/',
+        '/<text x="[^"]+" y="([^"]+)" class="axis" data-label-index="10">500<\/text>/',
         $shineSpeedSvg,
         $middleLabelMatches
     ) === 1,
