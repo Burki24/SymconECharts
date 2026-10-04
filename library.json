@@ -1,0 +1,12 @@
+{
+    "id": "{66BE21BE-988A-10EB-1BBB-1E2F444E9F85}",
+    "name": "SymconECharts",
+    "author": "Burkhard Kneiseler",
+    "url": "https://github.com/Burki24/SymconECharts",
+    "compatibility": {
+        "version": "9.0"
+    },
+    "version": "1.9",
+    "build": 223205803,
+    "date": 1791088505
+}

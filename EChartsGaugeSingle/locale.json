@@ -1,0 +1,18 @@
+{
+    "translations": {
+        "de": {
+            "Source variable": "Quellvariable",
+            "Minimum": "Minimum",
+            "Maximum": "Maximum",
+            "Title": "Titel",
+            "Unit": "Einheit",
+            "Decimal places": "Nachkommastellen",
+            "Read current Gauge Single data": "Aktuelle Gauge-Single-Daten lesen",
+            "Gauge Single is ready": "Gauge Single ist bereit",
+            "Select a numeric source variable": "Numerische Quellvariable auswählen",
+            "Gauge range is invalid": "Gauge-Wertebereich ist ungültig",
+            "No active EChartsGateway is connected": "Kein aktives EChartsGateway verbunden",
+            "EChartsGateway request failed": "EChartsGateway-Abfrage fehlgeschlagen"
+        }
+    }
+}

@@ -1,0 +1,77 @@
+{
+    "$schema": "https://www.symcon.de/assets/files/validation/formSchema.json",
+    "elements": [
+        {
+            "type": "SelectVariable",
+            "name": "SourceVariableID",
+            "caption": "Source variable",
+            "validVariableTypes": [
+                1,
+                2
+            ]
+        },
+        {
+            "type": "NumberSpinner",
+            "name": "Minimum",
+            "caption": "Minimum",
+            "digits": 3
+        },
+        {
+            "type": "NumberSpinner",
+            "name": "Maximum",
+            "caption": "Maximum",
+            "digits": 3
+        },
+        {
+            "type": "ValidationTextBox",
+            "name": "Title",
+            "caption": "Title"
+        },
+        {
+            "type": "ValidationTextBox",
+            "name": "Unit",
+            "caption": "Unit"
+        },
+        {
+            "type": "NumberSpinner",
+            "name": "Decimals",
+            "caption": "Decimal places",
+            "minimum": 0,
+            "maximum": 6
+        }
+    ],
+    "actions": [
+        {
+            "type": "Button",
+            "caption": "Read current Gauge Single data",
+            "onClick": "echo ECGS_GetGaugeData($id);"
+        }
+    ],
+    "status": [
+        {
+            "code": 102,
+            "icon": "active",
+            "caption": "Gauge Single is ready"
+        },
+        {
+            "code": 201,
+            "icon": "error",
+            "caption": "Select a numeric source variable"
+        },
+        {
+            "code": 202,
+            "icon": "error",
+            "caption": "Gauge range is invalid"
+        },
+        {
+            "code": 203,
+            "icon": "error",
+            "caption": "No active EChartsGateway is connected"
+        },
+        {
+            "code": 204,
+            "icon": "error",
+            "caption": "EChartsGateway request failed"
+        }
+    ]
+}

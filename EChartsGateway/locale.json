@@ -1,0 +1,8 @@
+{
+    "translations": {
+        "de": {
+            "The gateway provides shared data access for ECharts chart families.": "Das Gateway stellt den gemeinsamen Datenzugriff für ECharts-Chartfamilien bereit.",
+            "Gateway is ready": "Gateway ist bereit"
+        }
+    }
+}

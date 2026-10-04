@@ -1,0 +1,21 @@
+{
+    "translations": {
+        "de": {
+            "Title": "Titel",
+            "Configure 2 to 16 unique numeric sources. Their order determines their position in the selected Gauge template.": "2 bis 16 eindeutige numerische Quellen konfigurieren. Ihre Reihenfolge bestimmt ihre Position in der gewählten Gauge-Vorlage.",
+            "Gauge sources": "Gauge-Quellen",
+            "Variable": "Variable",
+            "Label": "Beschriftung",
+            "Minimum": "Minimum",
+            "Maximum": "Maximum",
+            "Unit": "Einheit",
+            "Decimal places": "Nachkommastellen",
+            "Read current Gauge Multi data": "Aktuelle Gauge-Multi-Daten lesen",
+            "Gauge Multi is ready": "Gauge Multi ist bereit",
+            "Configure 2 to 16 unique numeric sources": "2 bis 16 eindeutige numerische Quellen konfigurieren",
+            "One or more Gauge ranges are invalid": "Mindestens ein Gauge-Wertebereich ist ungültig",
+            "No active EChartsGateway is connected": "Kein aktives EChartsGateway verbunden",
+            "EChartsGateway request failed": "EChartsGateway-Abfrage fehlgeschlagen"
+        }
+    }
+}

@@ -1,0 +1,121 @@
+{
+    "$schema": "https://www.symcon.de/assets/files/validation/formSchema.json",
+    "elements": [
+        {
+            "type": "ValidationTextBox",
+            "name": "Title",
+            "caption": "Title"
+        },
+        {
+            "type": "Label",
+            "caption": "Configure 2 to 16 unique numeric sources. Their order determines their position in the selected Gauge template."
+        },
+        {
+            "type": "List",
+            "name": "Sources",
+            "caption": "Gauge sources",
+            "rowCount": 6,
+            "add": true,
+            "delete": true,
+            "changeOrder": true,
+            "columns": [
+                {
+                    "caption": "Variable",
+                    "name": "VariableID",
+                    "width": "250px",
+                    "add": 0,
+                    "edit": {
+                        "type": "SelectVariable",
+                        "validVariableTypes": [
+                            1,
+                            2
+                        ]
+                    }
+                },
+                {
+                    "caption": "Label",
+                    "name": "Label",
+                    "width": "auto",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "caption": "Minimum",
+                    "name": "Minimum",
+                    "width": "100px",
+                    "add": 0.0,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "digits": 3
+                    }
+                },
+                {
+                    "caption": "Maximum",
+                    "name": "Maximum",
+                    "width": "100px",
+                    "add": 100.0,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "digits": 3
+                    }
+                },
+                {
+                    "caption": "Unit",
+                    "name": "Unit",
+                    "width": "90px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "caption": "Decimal places",
+                    "name": "Decimals",
+                    "width": "120px",
+                    "add": 1,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "minimum": 0,
+                        "maximum": 6
+                    }
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "type": "Button",
+            "caption": "Read current Gauge Multi data",
+            "onClick": "echo ECGM_GetGaugeData($id);"
+        }
+    ],
+    "status": [
+        {
+            "code": 102,
+            "icon": "active",
+            "caption": "Gauge Multi is ready"
+        },
+        {
+            "code": 201,
+            "icon": "error",
+            "caption": "Configure 2 to 16 unique numeric sources"
+        },
+        {
+            "code": 202,
+            "icon": "error",
+            "caption": "One or more Gauge ranges are invalid"
+        },
+        {
+            "code": 203,
+            "icon": "error",
+            "caption": "No active EChartsGateway is connected"
+        },
+        {
+            "code": 204,
+            "icon": "error",
+            "caption": "EChartsGateway request failed"
+        }
+    ]
+}

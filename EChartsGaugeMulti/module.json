@@ -1,0 +1,17 @@
+{
+    "id": "{E667D9C1-379D-44ED-A313-FF21FEFC355F}",
+    "name": "EChartsGaugeMulti",
+    "type": 3,
+    "vendor": "",
+    "aliases": [],
+    "parentRequirements": [
+        "{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}"
+    ],
+    "childRequirements": [],
+    "implemented": [
+        "{E4749B72-912B-E3E3-1C57-D19019FFDD84}"
+    ],
+    "prefix": "ECGM",
+    "url": "https://github.com/Burki24/SymconECharts"
+}
+
