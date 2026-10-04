@@ -32,7 +32,8 @@ Endpositionen in 22,5-Grad-Schritten sowie sechs
 Gauge-spezifische Farbrollen sind ebenfalls validiert konfigurierbar. Eine
 optionale native ECharts-Graphic bildet eine runde oder dem Skalenbogen
 folgende Zifferblattplatte mit eigener Gestaltung einschließlich linearer und
-radialer Farbverläufe. Der Multi-Renderer,
+radialer Farbverläufe sowie eines bereinigten, auf die Plattenform
+zugeschnittenen SVG-Hintergrunds. Der Multi-Renderer,
 Archivverarbeitung, IPSView-Ausgabe sowie reale
 Symcon-Laufzeit- und Browsertests fehlen noch. Die Testsuite prüft zusätzlich
 zu Struktur und Metadaten die Strict-Verträge, das Protokoll, die

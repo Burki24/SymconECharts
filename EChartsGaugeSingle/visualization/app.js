@@ -625,24 +625,125 @@
                 cy: layout.centerY,
                 r: (shape === 'circle' ? layout.circlePlateRadius : layout.arcPlateRadius) * sizeScale
             };
+        } else {
+            var radius = layout.arcPlateRadius * sizeScale;
+            var segments = Math.max(12, Math.ceil(sweep / 5));
+            var points = [[layout.centerX, layout.centerY]];
+            for (var index = 0; index <= segments; index += 1) {
+                var fraction = index / segments;
+                var angle = series.startAngle + (series.endAngle - series.startAngle) * fraction;
+                var radians = angle * Math.PI / 180;
+                points.push([
+                    layout.centerX + radius * Math.cos(radians),
+                    layout.centerY - radius * Math.sin(radians)
+                ]);
+            }
+            graphic.shape = { points: points };
+        }
+
+        if (!style.plateBackgroundEnabled
+            || !/^data:image\/svg\+xml;base64,[a-z0-9+/=]+$/i.test(String(style.plateBackgroundImage || ''))) {
             return [graphic];
         }
 
-        var radius = layout.arcPlateRadius * sizeScale;
-        var segments = Math.max(12, Math.ceil(sweep / 5));
-        var points = [[layout.centerX, layout.centerY]];
-        for (var index = 0; index <= segments; index += 1) {
-            var fraction = index / segments;
-            var angle = series.startAngle + (series.endAngle - series.startAngle) * fraction;
-            var radians = angle * Math.PI / 180;
-            points.push([
-                layout.centerX + radius * Math.cos(radians),
-                layout.centerY - radius * Math.sin(radians)
-            ]);
+        var bounds;
+        if (renderCircle) {
+            bounds = {
+                x: graphic.shape.cx - graphic.shape.r,
+                y: graphic.shape.cy - graphic.shape.r,
+                width: graphic.shape.r * 2,
+                height: graphic.shape.r * 2
+            };
+        } else {
+            var xValues = graphic.shape.points.map(function (point) { return point[0]; });
+            var yValues = graphic.shape.points.map(function (point) { return point[1]; });
+            var minimumX = Math.min.apply(Math, xValues);
+            var maximumX = Math.max.apply(Math, xValues);
+            var minimumY = Math.min.apply(Math, yValues);
+            var maximumY = Math.max.apply(Math, yValues);
+            bounds = {
+                x: minimumX,
+                y: minimumY,
+                width: maximumX - minimumX,
+                height: maximumY - minimumY
+            };
         }
-        graphic.shape = { points: points };
 
-        return [graphic];
+        var aspectRatio = Number(style.plateBackgroundAspectRatio);
+        aspectRatio = Number.isFinite(aspectRatio) && aspectRatio > 0 ? aspectRatio : 1;
+        var fit = ['contain', 'cover', 'stretch'].indexOf(style.plateBackgroundFit) >= 0
+            ? style.plateBackgroundFit
+            : 'cover';
+        var imageWidth = bounds.width;
+        var imageHeight = bounds.height;
+        var boundsAspectRatio = bounds.width / Math.max(1, bounds.height);
+        if (fit === 'contain') {
+            if (boundsAspectRatio > aspectRatio) {
+                imageWidth = bounds.height * aspectRatio;
+            } else {
+                imageHeight = bounds.width / aspectRatio;
+            }
+        } else if (fit === 'cover') {
+            if (boundsAspectRatio > aspectRatio) {
+                imageHeight = bounds.width / aspectRatio;
+            } else {
+                imageWidth = bounds.height * aspectRatio;
+            }
+        }
+        var backgroundScale = clamp(Number(style.plateBackgroundSizePercent) || 100, 25, 200) / 100;
+        imageWidth *= backgroundScale;
+        imageHeight *= backgroundScale;
+        var centerX = bounds.x + bounds.width / 2
+            + bounds.width * clamp(Number(style.plateBackgroundOffsetXPercent) || 0, -100, 100) / 100;
+        var centerY = bounds.y + bounds.height / 2
+            + bounds.height * clamp(Number(style.plateBackgroundOffsetYPercent) || 0, -100, 100) / 100;
+        var opacity = clamp(Number(style.plateBackgroundOpacityPercent), 0, 100) / 100;
+        if (!Number.isFinite(opacity)) {
+            opacity = 1;
+        }
+        var rotation = clamp(Number(style.plateBackgroundRotation) || 0, -180, 180) * Math.PI / 180;
+        var clipPath = {
+            type: renderCircle ? 'circle' : 'polygon',
+            shape: renderCircle
+                ? { cx: graphic.shape.cx, cy: graphic.shape.cy, r: graphic.shape.r }
+                : { points: graphic.shape.points.map(function (point) { return point.slice(); }) }
+        };
+        var imageGraphic = {
+            id: 'gauge-plate-background',
+            type: 'group',
+            silent: true,
+            z: -9,
+            clipPath: clipPath,
+            children: [{
+                type: 'image',
+                rotation: rotation,
+                originX: centerX,
+                originY: centerY,
+                style: {
+                    image: style.plateBackgroundImage,
+                    x: centerX - imageWidth / 2,
+                    y: centerY - imageHeight / 2,
+                    width: imageWidth,
+                    height: imageHeight,
+                    opacity: opacity
+                }
+            }]
+        };
+        var outline = {
+            id: 'gauge-plate-outline',
+            type: renderCircle ? 'circle' : 'polygon',
+            silent: true,
+            z: -8,
+            shape: clipPath.shape,
+            style: {
+                fill: 'rgba(0,0,0,0)',
+                stroke: border,
+                lineWidth: graphic.style.lineWidth,
+                lineJoin: 'round'
+            }
+        };
+
+        return [graphic, imageGraphic, outline];
     }
 
     function normalizeStyleColor(value, fallback) {

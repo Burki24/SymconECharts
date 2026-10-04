@@ -510,8 +510,11 @@ assertGatewayGauge(
 $configurationForm = json_decode($gauge->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
     str_contains(json_encode($configurationForm, JSON_THROW_ON_ERROR), '$PlateFillMode')
-        && str_contains(json_encode($configurationForm, JSON_THROW_ON_ERROR), '$PlateGradientRadiusPercent'),
-    'Gauge Single form preview actions must forward the complete plate-gradient state.'
+        && str_contains(json_encode($configurationForm, JSON_THROW_ON_ERROR), '$PlateGradientRadiusPercent')
+        && str_contains(json_encode($configurationForm, JSON_THROW_ON_ERROR), '$PlateBackgroundEnabled')
+        && str_contains(json_encode($configurationForm, JSON_THROW_ON_ERROR), '$PlateBackgroundSVG')
+        && str_contains(json_encode($configurationForm, JSON_THROW_ON_ERROR), '$PlateBackgroundRotation'),
+    'Gauge Single form preview actions must forward the complete plate and SVG-background state.'
 );
 $previewElement = null;
 foreach ($configurationForm['elements'] ?? [] as $element) {
@@ -1228,6 +1231,155 @@ assertGatewayGauge(
         && !str_contains($linearPlatePreviewSvg, '<stop offset="50%"'),
     'Gauge Single preview must support a two-color linear plate gradient in the selected direction.'
 );
+$plateBackgroundFile = base64_encode(<<<'SVG'
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100">
+  <defs><linearGradient id="background"><stop offset="0%" stop-color="#102030"/><stop offset="100%" stop-color="#90A0B0"/></linearGradient></defs>
+  <rect x="0" y="0" width="200" height="100" fill="url(#background)"/>
+  <circle cx="100" cy="50" r="25" fill="none" stroke="#FFFFFF" stroke-width="3"/>
+</svg>
+SVG);
+$plateBackgroundGauge = new EChartsGaugeSingle();
+$plateBackgroundGauge->Create();
+$plateBackgroundGauge->SetTestProperty('SourceVariableID', 4711);
+$plateBackgroundGauge->SetTestProperty('PlateShape', 'circle');
+$plateBackgroundGauge->SetTestProperty('PlateFillMode', 'linear');
+$plateBackgroundGauge->SetTestProperty('PlateBackgroundEnabled', true);
+$plateBackgroundGauge->SetTestProperty('PlateBackgroundSVG', $plateBackgroundFile);
+$plateBackgroundGauge->SetTestProperty('PlateBackgroundFit', 'contain');
+$plateBackgroundGauge->SetTestProperty('PlateBackgroundSizePercent', 120);
+$plateBackgroundGauge->SetTestProperty('PlateBackgroundOffsetXPercent', 10);
+$plateBackgroundGauge->SetTestProperty('PlateBackgroundOffsetYPercent', -5);
+$plateBackgroundGauge->SetTestProperty('PlateBackgroundOpacityPercent', 65);
+$plateBackgroundGauge->SetTestProperty('PlateBackgroundRotation', 15.0);
+$plateBackgroundGauge->ApplyChanges();
+assertGatewayGauge(
+    $plateBackgroundGauge->GetTestStatus() === IS_ACTIVE,
+    'A valid SVG plate background must be accepted.'
+);
+$plateBackgroundData = json_decode($plateBackgroundGauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
+$plateBackgroundStyle = $plateBackgroundData['gauge']['style'] ?? [];
+assertGatewayGauge(
+    ($plateBackgroundStyle['plateFillMode'] ?? null) === 'linear'
+        && ($plateBackgroundStyle['plateBackgroundEnabled'] ?? null) === true
+        && ($plateBackgroundStyle['plateBackgroundFit'] ?? null) === 'contain'
+        && ($plateBackgroundStyle['plateBackgroundSizePercent'] ?? null) === 120
+        && ($plateBackgroundStyle['plateBackgroundOffsetXPercent'] ?? null) === 10
+        && ($plateBackgroundStyle['plateBackgroundOffsetYPercent'] ?? null) === -5
+        && ($plateBackgroundStyle['plateBackgroundOpacityPercent'] ?? null) === 65
+        && ($plateBackgroundStyle['plateBackgroundRotation'] ?? null) === 15.0
+        && ($plateBackgroundStyle['plateBackgroundAspectRatio'] ?? null) === 2.0
+        && str_starts_with(
+            (string) ($plateBackgroundStyle['plateBackgroundImage'] ?? ''),
+            'data:image/svg+xml;base64,'
+        )
+        && !str_contains(json_encode($plateBackgroundData, JSON_THROW_ON_ERROR), '<svg'),
+    'Gauge Single must expose the sanitized SVG plate background and its layout settings.'
+);
+$plateBackgroundForm = json_decode(
+    $plateBackgroundGauge->GetConfigurationForm(),
+    true,
+    512,
+    JSON_THROW_ON_ERROR
+);
+$plateBackgroundFormPreview = null;
+foreach ($plateBackgroundForm['elements'] ?? [] as $element) {
+    if (($element['caption'] ?? null) !== 'Tile designer') {
+        continue;
+    }
+    foreach ($element['items'] ?? [] as $item) {
+        if (($item['name'] ?? null) === 'GaugePreview') {
+            $plateBackgroundFormPreview = $item;
+            break 2;
+        }
+    }
+}
+$plateBackgroundFormSvg = is_array($plateBackgroundFormPreview)
+    ? base64_decode(
+        substr(
+            (string) ($plateBackgroundFormPreview['image'] ?? ''),
+            strlen('data:image/svg+xml;base64,')
+        ),
+        true
+    )
+    : false;
+assertGatewayGauge(
+    is_string($plateBackgroundFormSvg)
+        && str_contains($plateBackgroundFormSvg, '<clipPath id="plate-background-clip">')
+        && str_contains($plateBackgroundFormSvg, '<image href="data:image/svg+xml;base64,'),
+    'The Gauge configuration form must preview the imported and clipped SVG plate background.'
+);
+$plateBackgroundPreview = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
+    50.0,
+    0.0,
+    100.0,
+    '',
+    '',
+    0,
+    'en',
+    'simple',
+    'auto',
+    $plateBackgroundStyle
+);
+assertGatewayGauge(
+    str_contains($plateBackgroundPreview, '<clipPath id="plate-background-clip">')
+        && str_contains($plateBackgroundPreview, '<image href="data:image/svg+xml;base64,')
+        && str_contains($plateBackgroundPreview, 'clip-path="url(#plate-background-clip)"')
+        && str_contains($plateBackgroundPreview, 'opacity="0.65"')
+        && str_contains($plateBackgroundPreview, 'transform="rotate(15.00 ')
+        && str_contains($plateBackgroundPreview, 'class="plate-outline"'),
+    'Gauge Single preview must position and clip the SVG background inside the dial plate.'
+);
+$arcPlateBackgroundPreview = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
+    50.0,
+    0.0,
+    100.0,
+    '',
+    '',
+    0,
+    'en',
+    'simple',
+    'auto',
+    [
+        ...$plateBackgroundStyle,
+        'plateShape'   => 'arc',
+        'arcMode'      => 'half',
+        'startPosition'=> 270.0,
+        'endPosition'  => 90.0
+    ]
+);
+assertGatewayGauge(
+    preg_match(
+        '/<clipPath id="plate-background-clip"><path d="M360 [^"]+ Z"\/><\/clipPath>/',
+        $arcPlateBackgroundPreview
+    ) === 1,
+    'Gauge Single preview must clip an SVG background to the configured scale arc.'
+);
+assertGatewayGauge(
+    str_contains($plateBackgroundGauge->GetVisualizationTile(), "id: 'gauge-plate-background'")
+        && str_contains($plateBackgroundGauge->GetVisualizationTile(), 'clipPath: clipPath')
+        && strlen($plateBackgroundGauge->GetVisualizationTile()) < SYMCON_OUTPUT_BUFFER_LIMIT,
+    'The Gauge tile must render the clipped SVG background and remain below the output-buffer limit.'
+);
+$largeBackgroundPath = 'M0 0 ' . str_repeat('L1 1 ', 9500);
+$largeBackgroundSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">'
+    . str_repeat('<path d="' . $largeBackgroundPath . '" fill="none" stroke="#123456"/>', 5)
+    . '</svg>';
+assertGatewayGauge(
+    strlen($largeBackgroundSvg) > 230000 && strlen($largeBackgroundSvg) < 262144,
+    'The large SVG background fixture must exercise the documented import boundary.'
+);
+$largeBackgroundGauge = new EChartsGaugeSingle();
+$largeBackgroundGauge->Create();
+$largeBackgroundGauge->SetTestProperty('SourceVariableID', 4711);
+$largeBackgroundGauge->SetTestProperty('PlateShape', 'circle');
+$largeBackgroundGauge->SetTestProperty('PlateBackgroundEnabled', true);
+$largeBackgroundGauge->SetTestProperty('PlateBackgroundSVG', base64_encode($largeBackgroundSvg));
+$largeBackgroundGauge->ApplyChanges();
+assertGatewayGauge(
+    $largeBackgroundGauge->GetTestStatus() === IS_ACTIVE
+        && strlen($largeBackgroundGauge->GetVisualizationTile()) < SYMCON_OUTPUT_BUFFER_LIMIT,
+    'A near-limit SVG plate background must keep the complete tile below the Symcon output-buffer limit.'
+);
 $singleGauge->SetTestProperty('SourceVariableID', 4712);
 $singleGauge->ApplyChanges();
 assertGatewayGauge($singleGauge->GetTestStatus() === 201, 'Non-numeric Gauge source must set status 201.');
@@ -1322,6 +1474,40 @@ $invalidPlateGradientRadius->ApplyChanges();
 assertGatewayGauge(
     $invalidPlateGradientRadius->GetTestStatus() === 205,
     'Out-of-range Gauge plate gradient radii must set status 205.'
+);
+
+$invalidPlateBackgroundFit = new EChartsGaugeSingle();
+$invalidPlateBackgroundFit->Create();
+$invalidPlateBackgroundFit->SetTestProperty('SourceVariableID', 4711);
+$invalidPlateBackgroundFit->SetTestProperty('PlateBackgroundFit', 'unknown');
+$invalidPlateBackgroundFit->ApplyChanges();
+assertGatewayGauge(
+    $invalidPlateBackgroundFit->GetTestStatus() === 205,
+    'Unknown SVG plate background fitting modes must set status 205.'
+);
+
+$invalidPlateBackgroundSize = new EChartsGaugeSingle();
+$invalidPlateBackgroundSize->Create();
+$invalidPlateBackgroundSize->SetTestProperty('SourceVariableID', 4711);
+$invalidPlateBackgroundSize->SetTestProperty('PlateBackgroundSizePercent', 201);
+$invalidPlateBackgroundSize->ApplyChanges();
+assertGatewayGauge(
+    $invalidPlateBackgroundSize->GetTestStatus() === 205,
+    'Out-of-range SVG plate background sizes must set status 205.'
+);
+
+$invalidPlateBackground = new EChartsGaugeSingle();
+$invalidPlateBackground->Create();
+$invalidPlateBackground->SetTestProperty('SourceVariableID', 4711);
+$invalidPlateBackground->SetTestProperty('PlateBackgroundEnabled', true);
+$invalidPlateBackground->SetTestProperty(
+    'PlateBackgroundSVG',
+    base64_encode('<svg viewBox="0 0 10 10"><script>alert(1)</script><path d="M0 0L10 10"/></svg>')
+);
+$invalidPlateBackground->ApplyChanges();
+assertGatewayGauge(
+    $invalidPlateBackground->GetTestStatus() === 205,
+    'Unsafe SVG plate backgrounds must set status 205.'
 );
 
 $invalidPointerPivotMode = new EChartsGaugeSingle();

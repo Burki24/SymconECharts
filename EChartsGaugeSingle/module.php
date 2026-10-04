@@ -12,6 +12,7 @@ use Burki24\SymconModuleHelper\VisualizationThemeHelper;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsDataProtocol;
 use SymconECharts\EChartsGaugeSinglePreview;
+use SymconECharts\EChartsSvgImage;
 use SymconECharts\EChartsSvgPath;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
@@ -23,6 +24,7 @@ require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
+require_once __DIR__ . '/../libs/EChartsSvgImage.php';
 require_once __DIR__ . '/../libs/EChartsSvgPath.php';
 require_once __DIR__ . '/GaugePreview.php';
 
@@ -55,6 +57,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
     private const SUPPORTED_PLATE_SHAPES = ['hidden', 'circle', 'arc'];
     private const SUPPORTED_PLATE_COLOR_MODES = ['theme', 'custom'];
     private const SUPPORTED_PLATE_FILL_MODES = ['solid', 'linear', 'radial'];
+    private const SUPPORTED_PLATE_BACKGROUND_FITS = ['contain', 'cover', 'stretch'];
     private const SUPPORTED_PLATE_GRADIENT_DIRECTIONS = [
         'top-bottom',
         'left-right',
@@ -117,6 +120,14 @@ class EChartsGaugeSingle extends IPSModuleStrict
         $this->RegisterPropertyInteger('PlateGradientCenterXPercent', 50);
         $this->RegisterPropertyInteger('PlateGradientCenterYPercent', 50);
         $this->RegisterPropertyInteger('PlateGradientRadiusPercent', 75);
+        $this->RegisterPropertyBoolean('PlateBackgroundEnabled', false);
+        $this->RegisterPropertyString('PlateBackgroundSVG', '');
+        $this->RegisterPropertyString('PlateBackgroundFit', 'cover');
+        $this->RegisterPropertyInteger('PlateBackgroundSizePercent', 100);
+        $this->RegisterPropertyInteger('PlateBackgroundOffsetXPercent', 0);
+        $this->RegisterPropertyInteger('PlateBackgroundOffsetYPercent', 0);
+        $this->RegisterPropertyInteger('PlateBackgroundOpacityPercent', 100);
+        $this->RegisterPropertyFloat('PlateBackgroundRotation', 0.0);
         $this->RegisterPropertyBoolean('PlateTransparent', false);
         $this->RegisterPropertyBoolean('PlateShadow', false);
         $this->RegisterPropertyInteger('PlateColor', 0x25272B);
@@ -243,7 +254,15 @@ class EChartsGaugeSingle extends IPSModuleStrict
         string $PlateGradientDirection = 'top-bottom',
         int $PlateGradientCenterXPercent = 50,
         int $PlateGradientCenterYPercent = 50,
-        int $PlateGradientRadiusPercent = 75
+        int $PlateGradientRadiusPercent = 75,
+        bool $PlateBackgroundEnabled = false,
+        string $PlateBackgroundSVG = '',
+        string $PlateBackgroundFit = 'cover',
+        int $PlateBackgroundSizePercent = 100,
+        int $PlateBackgroundOffsetXPercent = 0,
+        int $PlateBackgroundOffsetYPercent = 0,
+        int $PlateBackgroundOpacityPercent = 100,
+        float $PlateBackgroundRotation = 0.0
     ): void {
         $this->UpdateFormField(
             'GaugePreview',
@@ -307,7 +326,17 @@ class EChartsGaugeSingle extends IPSModuleStrict
                         $CustomPointerPivotXPercent,
                         $CustomPointerPivotYPercent
                     ),
-                    ...$this->ResolveCustomAnchorStyle($AnchorShape, $CustomAnchorSVG)
+                    ...$this->ResolveCustomAnchorStyle($AnchorShape, $CustomAnchorSVG),
+                    ...$this->ResolvePlateBackgroundStyle(
+                        $PlateBackgroundEnabled,
+                        $PlateBackgroundSVG,
+                        $PlateBackgroundFit,
+                        $PlateBackgroundSizePercent,
+                        $PlateBackgroundOffsetXPercent,
+                        $PlateBackgroundOffsetYPercent,
+                        $PlateBackgroundOpacityPercent,
+                        $PlateBackgroundRotation
+                    )
                 ]
             ))
         );
@@ -504,7 +533,15 @@ class EChartsGaugeSingle extends IPSModuleStrict
             '$PlateGradientDirection',
             '$PlateGradientCenterXPercent',
             '$PlateGradientCenterYPercent',
-            '$PlateGradientRadiusPercent'
+            '$PlateGradientRadiusPercent',
+            '$PlateBackgroundEnabled',
+            '$PlateBackgroundSVG',
+            '$PlateBackgroundFit',
+            '$PlateBackgroundSizePercent',
+            '$PlateBackgroundOffsetXPercent',
+            '$PlateBackgroundOffsetYPercent',
+            '$PlateBackgroundOpacityPercent',
+            '$PlateBackgroundRotation'
         ];
 
         return 'ECGS_UpdateGaugePreview(' . implode(', ', $parameters) . ');';
@@ -596,6 +633,11 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 self::SUPPORTED_PLATE_GRADIENT_DIRECTIONS,
                 true
             )
+            || !in_array(
+                (string) ($style['plateBackgroundFit'] ?? 'cover'),
+                self::SUPPORTED_PLATE_BACKGROUND_FITS,
+                true
+            )
             || !in_array((string) ($style['arcMode'] ?? 'preset'), self::SUPPORTED_ARC_MODES, true)
             || !in_array((string) ($style['colorMode'] ?? 'theme'), self::SUPPORTED_COLOR_MODES, true)) {
             return EChartsGaugeSinglePreview::CreateErrorSvg(
@@ -614,6 +656,12 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 $this->Translate((string) ($style['anchorError'] ?? 'Select a supported path-only SVG anchor.'))
             );
         }
+        if ((bool) ($style['plateBackgroundEnabled'] ?? false)
+            && (string) ($style['plateBackgroundImage'] ?? '') === '') {
+            return EChartsGaugeSinglePreview::CreateErrorSvg(
+                $this->Translate((string) ($style['plateBackgroundError'] ?? 'Select a supported SVG plate background.'))
+            );
+        }
         foreach (['plateGradientCenterXPercent', 'plateGradientCenterYPercent'] as $fieldName) {
             $position = (int) ($style[$fieldName] ?? 50);
             if ($position < 0 || $position > 100) {
@@ -627,6 +675,21 @@ class EChartsGaugeSingle extends IPSModuleStrict
             return EChartsGaugeSinglePreview::CreateErrorSvg(
                 $this->Translate('Select supported Gauge design options.')
             );
+        }
+        $backgroundRanges = [
+            'plateBackgroundSizePercent'     => [25, 200],
+            'plateBackgroundOffsetXPercent'  => [-100, 100],
+            'plateBackgroundOffsetYPercent'  => [-100, 100],
+            'plateBackgroundOpacityPercent'  => [0, 100],
+            'plateBackgroundRotation'        => [-180, 180]
+        ];
+        foreach ($backgroundRanges as $fieldName => [$minimumValue, $maximumValue]) {
+            $value = (float) ($style[$fieldName] ?? ($fieldName === 'plateBackgroundSizePercent' ? 100 : 0));
+            if (!is_finite($value) || $value < $minimumValue || $value > $maximumValue) {
+                return EChartsGaugeSinglePreview::CreateErrorSvg(
+                    $this->Translate('Select supported Gauge design options.')
+                );
+            }
         }
         $startPosition = (float) ($style['startPosition'] ?? 270.0);
         $endPosition = (float) ($style['endPosition'] ?? 90.0);
@@ -754,6 +817,11 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 self::SUPPORTED_PLATE_GRADIENT_DIRECTIONS,
                 true
             )
+            || !in_array(
+                $this->ReadPropertyString('PlateBackgroundFit'),
+                self::SUPPORTED_PLATE_BACKGROUND_FITS,
+                true
+            )
             || !in_array($this->ReadPropertyString('GaugeArcMode'), self::SUPPORTED_ARC_MODES, true)
             || !in_array($this->ReadPropertyString('GaugeColorMode'), self::SUPPORTED_COLOR_MODES, true)) {
             return [
@@ -808,6 +876,37 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 'Status'  => self::STATUS_DESIGN_INVALID,
                 'Message' => 'Plate gradient radius must be between 25 and 150 percent.'
             ];
+        }
+        foreach ([
+            'PlateBackgroundSizePercent'    => [25, 200],
+            'PlateBackgroundOffsetXPercent' => [-100, 100],
+            'PlateBackgroundOffsetYPercent' => [-100, 100],
+            'PlateBackgroundOpacityPercent' => [0, 100]
+        ] as $propertyName => [$minimumValue, $maximumValue]) {
+            $value = $this->ReadPropertyInteger($propertyName);
+            if ($value < $minimumValue || $value > $maximumValue) {
+                return [
+                    'Status'  => self::STATUS_DESIGN_INVALID,
+                    'Message' => 'Plate SVG background values are outside their supported ranges.'
+                ];
+            }
+        }
+        $backgroundRotation = $this->ReadPropertyFloat('PlateBackgroundRotation');
+        if (!is_finite($backgroundRotation) || $backgroundRotation < -180.0 || $backgroundRotation > 180.0) {
+            return [
+                'Status'  => self::STATUS_DESIGN_INVALID,
+                'Message' => 'Plate SVG background rotation must be between -180 and 180 degrees.'
+            ];
+        }
+        if ($this->ReadPropertyBoolean('PlateBackgroundEnabled')) {
+            try {
+                EChartsSvgImage::Import($this->ReadPropertyString('PlateBackgroundSVG'));
+            } catch (InvalidArgumentException $exception) {
+                return [
+                    'Status'  => self::STATUS_DESIGN_INVALID,
+                    'Message' => $exception->getMessage()
+                ];
+            }
         }
 
         if (!self::IsAnglePosition($this->ReadPropertyFloat('GaugeStartPosition'))
@@ -899,6 +998,16 @@ class EChartsGaugeSingle extends IPSModuleStrict
             $this->ResolveCustomAnchorStyle(
                 $style['anchorShape'],
                 $this->ReadPropertyString('CustomAnchorSVG')
+            ),
+            $this->ResolvePlateBackgroundStyle(
+                $this->ReadPropertyBoolean('PlateBackgroundEnabled'),
+                $this->ReadPropertyString('PlateBackgroundSVG'),
+                $this->ReadPropertyString('PlateBackgroundFit'),
+                $this->ReadPropertyInteger('PlateBackgroundSizePercent'),
+                $this->ReadPropertyInteger('PlateBackgroundOffsetXPercent'),
+                $this->ReadPropertyInteger('PlateBackgroundOffsetYPercent'),
+                $this->ReadPropertyInteger('PlateBackgroundOpacityPercent'),
+                $this->ReadPropertyFloat('PlateBackgroundRotation')
             )
         );
 
@@ -972,6 +1081,66 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 'anchorPath'    => '',
                 'anchorViewBox' => '',
                 'anchorError'   => $exception->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * @return array{
+     *     plateBackgroundEnabled?: bool,
+     *     plateBackgroundFit?: string,
+     *     plateBackgroundSizePercent?: int,
+     *     plateBackgroundOffsetXPercent?: int,
+     *     plateBackgroundOffsetYPercent?: int,
+     *     plateBackgroundOpacityPercent?: int,
+     *     plateBackgroundRotation?: float,
+     *     plateBackgroundImage?: string,
+     *     plateBackgroundAspectRatio?: float,
+     *     plateBackgroundError?: string
+     * }
+     */
+    private function ResolvePlateBackgroundStyle(
+        bool $enabled,
+        string $fileData,
+        string $fit,
+        int $sizePercent,
+        int $offsetXPercent,
+        int $offsetYPercent,
+        int $opacityPercent,
+        float $rotation
+    ): array {
+        if (!$enabled) {
+            return [];
+        }
+
+        try {
+            $background = EChartsSvgImage::Import($fileData);
+
+            return [
+                'plateBackgroundEnabled'        => true,
+                'plateBackgroundFit'            => $fit,
+                'plateBackgroundSizePercent'    => $sizePercent,
+                'plateBackgroundOffsetXPercent' => $offsetXPercent,
+                'plateBackgroundOffsetYPercent' => $offsetYPercent,
+                'plateBackgroundOpacityPercent' => $opacityPercent,
+                'plateBackgroundRotation'       => $rotation,
+                'plateBackgroundImage'          => $background['dataUri'],
+                'plateBackgroundAspectRatio'    => $background['width'] / $background['height']
+            ];
+        } catch (InvalidArgumentException $exception) {
+            $this->SendDebug('ResolvePlateBackgroundStyle', $exception->getMessage(), 0);
+
+            return [
+                'plateBackgroundEnabled'        => true,
+                'plateBackgroundFit'            => $fit,
+                'plateBackgroundSizePercent'    => $sizePercent,
+                'plateBackgroundOffsetXPercent' => $offsetXPercent,
+                'plateBackgroundOffsetYPercent' => $offsetYPercent,
+                'plateBackgroundOpacityPercent' => $opacityPercent,
+                'plateBackgroundRotation'       => $rotation,
+                'plateBackgroundImage'          => '',
+                'plateBackgroundAspectRatio'    => 1.0,
+                'plateBackgroundError'          => $exception->getMessage()
             ];
         }
     }

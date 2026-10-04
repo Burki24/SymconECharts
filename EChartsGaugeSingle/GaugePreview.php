@@ -18,6 +18,7 @@ final class EChartsGaugeSinglePreview
     private const SUPPORTED_ANCHOR_SHAPES = ['preset', 'circle', 'ring', 'custom', 'hidden'];
     private const SUPPORTED_PLATE_SHAPES = ['hidden', 'circle', 'arc'];
     private const SUPPORTED_PLATE_FILL_MODES = ['solid', 'linear', 'radial'];
+    private const SUPPORTED_PLATE_BACKGROUND_FITS = ['contain', 'cover', 'stretch'];
     private const SUPPORTED_PLATE_GRADIENT_DIRECTIONS = [
         'top-bottom',
         'left-right',
@@ -65,6 +66,10 @@ final class EChartsGaugeSinglePreview
         $plateGradientDirection = (string) ($style['plateGradientDirection'] ?? 'top-bottom');
         if (!in_array($plateGradientDirection, self::SUPPORTED_PLATE_GRADIENT_DIRECTIONS, true)) {
             throw new InvalidArgumentException('A supported Gauge plate gradient direction is required.');
+        }
+        $plateBackgroundFit = (string) ($style['plateBackgroundFit'] ?? 'cover');
+        if (!in_array($plateBackgroundFit, self::SUPPORTED_PLATE_BACKGROUND_FITS, true)) {
+            throw new InvalidArgumentException('A supported Gauge plate background fit is required.');
         }
 
         $design = self::ApplyArcDesign(
@@ -115,7 +120,9 @@ final class EChartsGaugeSinglePreview
                 ? self::StyleColor($style, 'plateColor', $palette['surface'])
                 : $palette['surface']);
         $plateGradientDefinition = '';
-        if (!$plateTransparent && $plateColorMode === 'custom' && $plateFillMode !== 'solid') {
+        if (!$plateTransparent
+            && $plateColorMode === 'custom'
+            && in_array($plateFillMode, ['linear', 'radial'], true)) {
             $gradientStops = '<stop offset="0%" stop-color="' . $plateColor . '"/>';
             if ((bool) ($style['plateGradientMiddleEnabled'] ?? false)) {
                 $gradientStops .= '<stop offset="50%" stop-color="'
@@ -148,6 +155,13 @@ final class EChartsGaugeSinglePreview
             : $palette['border'];
         $plateBorderWidth = 2.0 * max(50, min(150, (int) ($style['plateBorderWidthPercent'] ?? 100))) / 100;
         $plate = self::Plate($design, $plateShape, $style);
+        [$plateBackgroundDefinition, $plateBackground] = self::PlateBackground(
+            $design,
+            $plateShape,
+            $style,
+            $plateBackgroundFit
+        );
+        $plateOutline = $plateBackground === '' ? '' : self::Plate($design, $plateShape, $style, 'outline');
         $rawValue = self::FormatNumber($value, $decimals, $language);
         $rawUnit = trim($unit);
         $rawTitle = trim($title);
@@ -177,12 +191,14 @@ final class EChartsGaugeSinglePreview
 
         return <<<SVG
 <svg xmlns="http://www.w3.org/2000/svg" width="720" height="400" viewBox="0 0 720 400" role="img" aria-label="{$ariaLabel}" data-preset="{$preset}" data-theme="{$theme}" data-arc-mode="{$arcMode}" data-start-position="{$startPosition}" data-end-position="{$endPosition}" data-pointer-length-percent="{$pointerLengthPercent}" data-major-splits="{$design['majorSplits']}">
-  <defs><filter id="speed-progress-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="2" dy="2" stdDeviation="4" flood-color="{$progressColor}" flood-opacity="0.45"/></filter><filter id="speed-pointer-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="2" dy="2" stdDeviation="4" flood-color="{$pointerColor}" flood-opacity="0.45"/></filter><filter id="plate-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.35"/></filter>{$plateGradientDefinition}</defs>
+  <defs><filter id="speed-progress-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="2" dy="2" stdDeviation="4" flood-color="{$progressColor}" flood-opacity="0.45"/></filter><filter id="speed-pointer-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="2" dy="2" stdDeviation="4" flood-color="{$pointerColor}" flood-opacity="0.45"/></filter><filter id="plate-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.35"/></filter>{$plateGradientDefinition}{$plateBackgroundDefinition}</defs>
   <style>
-    .surface{fill:{$palette['background']}}.plate{fill:{$plateColor};stroke:{$plateBorderColor};stroke-width:{$plateBorderWidth}}.plate-shadow{filter:url(#plate-shadow)}.theme-track-segment{fill:none;stroke-linecap:round;stroke-linejoin:round}.progress{fill:none;stroke:{$progressColor};stroke-linecap:round;stroke-linejoin:round}.speed-progress-shadow{filter:url(#speed-progress-shadow)}.speed-pointer-shadow{filter:url(#speed-pointer-shadow)}.minor{stroke:{$minorColor};stroke-width:1}.major{stroke:{$majorColor};stroke-width:2}.axis{fill:{$scaleColor};font-size:{$design['axisFontSize']}px;font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle;dominant-baseline:middle}.pointer,.speed-pointer{fill:{$pointerColor}}.anchor{fill:{$anchorColor};stroke:{$anchorBorderColor};stroke-width:{$anchorBorderWidth}}.detail-box{fill:{$palette['surface']};stroke:{$detailBorderColor};stroke-width:2}.value{fill:{$valueColor};font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle}.value-number{font-size:{$design['valueFontSize']}px;font-weight:{$valueFontWeight}}.value-unit{fill:{$unitColor};font-size:{$design['unitFontSize']}px;font-weight:{$unitFontWeight}}.title{fill:{$titleColor};font-size:{$design['titleFontSize']}px;font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle}svg[data-preset="speed"] .minor{stroke-width:2}svg[data-preset="speed"] .major{stroke-width:3}
+    .surface{fill:{$palette['background']}}.plate{fill:{$plateColor};stroke:{$plateBorderColor};stroke-width:{$plateBorderWidth}}.plate-outline{fill:none;stroke:{$plateBorderColor};stroke-width:{$plateBorderWidth}}.plate-shadow{filter:url(#plate-shadow)}.theme-track-segment{fill:none;stroke-linecap:round;stroke-linejoin:round}.progress{fill:none;stroke:{$progressColor};stroke-linecap:round;stroke-linejoin:round}.speed-progress-shadow{filter:url(#speed-progress-shadow)}.speed-pointer-shadow{filter:url(#speed-pointer-shadow)}.minor{stroke:{$minorColor};stroke-width:1}.major{stroke:{$majorColor};stroke-width:2}.axis{fill:{$scaleColor};font-size:{$design['axisFontSize']}px;font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle;dominant-baseline:middle}.pointer,.speed-pointer{fill:{$pointerColor}}.anchor{fill:{$anchorColor};stroke:{$anchorBorderColor};stroke-width:{$anchorBorderWidth}}.detail-box{fill:{$palette['surface']};stroke:{$detailBorderColor};stroke-width:2}.value{fill:{$valueColor};font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle}.value-number{font-size:{$design['valueFontSize']}px;font-weight:{$valueFontWeight}}.value-unit{fill:{$unitColor};font-size:{$design['unitFontSize']}px;font-weight:{$unitFontWeight}}.title{fill:{$titleColor};font-size:{$design['titleFontSize']}px;font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle}svg[data-preset="speed"] .minor{stroke-width:2}svg[data-preset="speed"] .major{stroke-width:3}
   </style>
   <rect class="surface" width="720" height="400" rx="12"/>
   {$plate}
+  {$plateBackground}
+  {$plateOutline}
   {$trackElements}
   {$progressElement}
   {$ticks}
@@ -418,7 +434,7 @@ SVG;
      * @param array<string, float|bool|int> $design
      * @param array<string, mixed> $style
      */
-    private static function Plate(array $design, string $shape, array $style): string
+    private static function Plate(array $design, string $shape, array $style, string $role = 'plate'): string
     {
         if ($shape === 'hidden') {
             return '';
@@ -435,17 +451,20 @@ SVG;
                 + (float) $design['titleFontSize']
                 + 8.0) * $sizeScale
         );
-        $class = 'plate' . ((bool) ($style['plateShadow'] ?? false) ? ' plate-shadow' : '');
+        $attributes = match ($role) {
+            'clip'    => '',
+            'outline' => ' class="plate-outline"',
+            default   => ' class="plate' . ((bool) ($style['plateShadow'] ?? false) ? ' plate-shadow' : '')
+                . '" data-plate-shape="' . $shape . '"'
+        };
         if ($shape === 'circle') {
             return '<circle cx="360" cy="' . self::Coordinate((float) $design['centerY'])
-                . '" r="' . self::Coordinate($circleRadius) . '" class="' . $class
-                . '" data-plate-shape="circle"/>';
+                . '" r="' . self::Coordinate($circleRadius) . '"' . $attributes . '/>';
         }
 
         if (abs((float) $design['startAngle'] - (float) $design['endAngle']) >= 359.999) {
             return '<circle cx="360" cy="' . self::Coordinate((float) $design['centerY'])
-                . '" r="' . self::Coordinate($arcRadius) . '" class="' . $class
-                . '" data-plate-shape="arc"/>';
+                . '" r="' . self::Coordinate($arcRadius) . '"' . $attributes . '/>';
         }
 
         $segments = max(12, (int) ceil(abs((float) $design['startAngle'] - (float) $design['endAngle']) / 5.0));
@@ -458,7 +477,108 @@ SVG;
             $path .= ' L' . self::Coordinate($point[0]) . ' ' . self::Coordinate($point[1]);
         }
 
-        return '<path d="' . $path . ' Z" class="' . $class . '" data-plate-shape="arc"/>';
+        return '<path d="' . $path . ' Z"' . $attributes . '/>';
+    }
+
+    /**
+     * @param array<string, float|bool|int> $design
+     * @param array<string, mixed> $style
+     * @return array{string, string}
+     */
+    private static function PlateBackground(
+        array $design,
+        string $shape,
+        array $style,
+        string $fit
+    ): array {
+        if ($shape === 'hidden' || !(bool) ($style['plateBackgroundEnabled'] ?? false)) {
+            return ['', ''];
+        }
+
+        $image = (string) ($style['plateBackgroundImage'] ?? '');
+        $aspectRatio = (float) ($style['plateBackgroundAspectRatio'] ?? 0.0);
+        if (preg_match('/^data:image\/svg\+xml;base64,[A-Za-z0-9+\/=]+$/D', $image) !== 1
+            || !is_finite($aspectRatio)
+            || $aspectRatio <= 0.0) {
+            throw new InvalidArgumentException('A validated SVG plate background is required.');
+        }
+
+        $sizeScale = max(50, min(150, (int) ($style['plateSizePercent'] ?? 100))) / 100;
+        $arcRadius = ((float) $design['radius'] + (float) $design['lineWidth'] / 2.0 + 10.0) * $sizeScale;
+        $circleRadius = max(
+            $arcRadius,
+            (abs((float) $design['detailY'] - (float) $design['centerY'])
+                + ((bool) $design['detailBox'] ? 29.0 : (float) $design['valueFontSize'] * 0.6)
+                + 10.0) * $sizeScale,
+            (abs((float) $design['titleY'] - (float) $design['centerY'])
+                + (float) $design['titleFontSize']
+                + 8.0) * $sizeScale
+        );
+        $centerX = self::CENTER_X;
+        $centerY = (float) $design['centerY'];
+        $sweep = abs((float) $design['startAngle'] - (float) $design['endAngle']);
+        $renderCircle = $shape === 'circle' || $sweep >= 359.999;
+        $radius = $shape === 'circle' ? $circleRadius : $arcRadius;
+        if ($renderCircle) {
+            $minimumX = $centerX - $radius;
+            $minimumY = $centerY - $radius;
+            $boxWidth = 2.0 * $radius;
+            $boxHeight = 2.0 * $radius;
+        } else {
+            $points = [[$centerX, $centerY]];
+            $segments = max(12, (int) ceil($sweep / 5.0));
+            for ($index = 0; $index <= $segments; ++$index) {
+                $fraction = $index / $segments;
+                $angle = (float) $design['startAngle']
+                    + ((float) $design['endAngle'] - (float) $design['startAngle']) * $fraction;
+                $points[] = self::Point($radius, $angle, $centerY);
+            }
+            $xValues = array_column($points, 0);
+            $yValues = array_column($points, 1);
+            $minimumX = min($xValues);
+            $minimumY = min($yValues);
+            $boxWidth = max($xValues) - $minimumX;
+            $boxHeight = max($yValues) - $minimumY;
+        }
+
+        $imageWidth = $boxWidth;
+        $imageHeight = $boxHeight;
+        $boxAspectRatio = $boxWidth / max(1.0, $boxHeight);
+        if ($fit === 'contain') {
+            if ($boxAspectRatio > $aspectRatio) {
+                $imageWidth = $boxHeight * $aspectRatio;
+            } else {
+                $imageHeight = $boxWidth / $aspectRatio;
+            }
+        } elseif ($fit === 'cover') {
+            if ($boxAspectRatio > $aspectRatio) {
+                $imageHeight = $boxWidth / $aspectRatio;
+            } else {
+                $imageWidth = $boxHeight * $aspectRatio;
+            }
+        }
+        $backgroundScale = max(25, min(200, (int) ($style['plateBackgroundSizePercent'] ?? 100))) / 100;
+        $imageWidth *= $backgroundScale;
+        $imageHeight *= $backgroundScale;
+        $imageCenterX = $minimumX + $boxWidth / 2.0
+            + $boxWidth * max(-100, min(100, (int) ($style['plateBackgroundOffsetXPercent'] ?? 0))) / 100.0;
+        $imageCenterY = $minimumY + $boxHeight / 2.0
+            + $boxHeight * max(-100, min(100, (int) ($style['plateBackgroundOffsetYPercent'] ?? 0))) / 100.0;
+        $rotation = max(-180.0, min(180.0, (float) ($style['plateBackgroundRotation'] ?? 0.0)));
+        $opacity = max(0, min(100, (int) ($style['plateBackgroundOpacityPercent'] ?? 100))) / 100;
+        $definition = '<clipPath id="plate-background-clip">'
+            . self::Plate($design, $shape, $style, 'clip') . '</clipPath>';
+        $element = '<image href="' . SVGPreviewHelper::escape($image)
+            . '" x="' . self::Coordinate($imageCenterX - $imageWidth / 2.0)
+            . '" y="' . self::Coordinate($imageCenterY - $imageHeight / 2.0)
+            . '" width="' . self::Coordinate($imageWidth)
+            . '" height="' . self::Coordinate($imageHeight)
+            . '" opacity="' . self::Coordinate($opacity)
+            . '" preserveAspectRatio="none" clip-path="url(#plate-background-clip)" transform="rotate('
+            . self::Coordinate($rotation) . ' ' . self::Coordinate($imageCenterX) . ' '
+            . self::Coordinate($imageCenterY) . ')"/>';
+
+        return [$definition, $element];
     }
 
     /** @param array<string, float|bool|int> $design */

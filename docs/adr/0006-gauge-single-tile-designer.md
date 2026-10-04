@@ -116,6 +116,17 @@ verwendet eine validierte Richtung; der radiale Verlauf einen validierten
 Mittelpunkt und Radius. Die Formularvorschau zeichnet dieselbe Geometrie und
 dieselben Verlaufsparameter als SVG.
 
+Ein SVG-Hintergrund ist eine additive Ebene über dieser Füllung und ersetzt
+Vollfarbe oder Verlauf nicht. Das importierte Dokument wird auf eine begrenzte
+Größe und Komplexität geprüft, auf sichere SVG-Elemente und -Attribute
+beschränkt und ohne aktive oder externe Inhalte als lokale Data-URI an die
+Visualisierung übergeben. ECharts zeichnet das Motiv als stilles
+`GraphicComponent`-Bildelement hinter der Gauge-Serie und beschneidet es mit
+derselben Kreis- oder Polygongeometrie wie die Platte. Einpassen, Ausfüllen
+oder Strecken sowie Größe, Versatz, Deckkraft und Drehung sind validierte
+additive Einstellungen. Die SVG-Formularvorschau verwendet dieselben
+Parameter und dieselbe Schnittgeometrie.
+
 Der Skalenbogen
 verwendet entweder die Presetgeometrie oder einen Voll-, Dreiviertel-, Halb-, Viertel- oder
 benutzerdefinierten Bogen. Anwenderpositionen werden wie auf einem Zifferblatt

@@ -104,6 +104,15 @@ Plattenfüllung als Startfarbe und eine eigene Endfarbe; optional wird bei
 Richtungen. Beim radialen Verlauf sind horizontaler und vertikaler Mittelpunkt
 von 0 bis 100 % sowie der Radius von 25 bis 150 % einstellbar. Die
 Formularvorschau bildet dieselben Verlaufsparameter mit SVG-Verläufen nach.
+Zusätzlich kann ein eigenes SVG als Hintergrundmotiv über Vollfarbe oder
+Verlauf gelegt werden. Das Motiv wird auf die gewählte Plattenform begrenzt
+und lässt sich einpassen, flächenfüllend beschneiden oder strecken. Größe,
+horizontaler und vertikaler Versatz, Deckkraft und Drehung bleiben unabhängig
+einstellbar. Der Import akzeptiert bis zu 256 KiB große SVGs mit `viewBox`,
+sicheren Grundformen, Pfaden, Gruppen, Transformationen und SVG-Verläufen.
+Skripte, Ereignisattribute, externe Referenzen, Bilder, Texte, CSS-Blöcke und
+`foreignObject` werden abgewiesen. Farben innerhalb des SVG folgen nicht
+automatisch dem ECharts-Theme.
 Der Skalenbogen bleibt wahlweise bei der Presetvorgabe oder
 wird als Voll-, Dreiviertel-, Halb-, Viertelkreis beziehungsweise mit eigenem
 Start und Ende definiert. Die Positionen folgen einem Zifferblatt (`0°` oben,
@@ -134,8 +143,9 @@ Symcon-Installation und den verschiedenen Symcon-Clients steht noch aus.
 Erforderlich sind eine Verbindung zu einer aktiven
 [EChartsGateway-Instanz](../EChartsGateway) und eine vorhandene Integer- oder
 Float-Variable als Datenquelle. Ein reines Momentanwert-Widget benötigt keine
-Historie. IPSView soll nur für den zusätzlichen IPSView-Ausgabeweg erforderlich
-sein, nicht für native Kacheln.
+Historie. Für die Bereinigung eigener SVG-Hintergründe wird die PHP-DOM-
+Erweiterung benötigt. IPSView soll nur für den zusätzlichen
+IPSView-Ausgabeweg erforderlich sein, nicht für native Kacheln.
 
 ### 3. Software-Installation
 
@@ -180,7 +190,8 @@ Gauge-spezifische Farbrollen das Theme gezielt überschreiben. Das
 „Nabendesign“ steuert Form, optionales SVG, Größe, Randstärke und Farben der
 Nabe, ohne ihren Drehpunkt vom Zeiger zu lösen. „Zifferblattplatte“ steuert
 Form, Transparenz, Theme- oder eigene Farben, Größe, Rand und Schatten der
-Hintergrundfläche sowie Vollfarbe, linearen oder radialen Verlauf. Solange
+Hintergrundfläche sowie Vollfarbe, linearen oder radialen Verlauf und ein
+optional darüberliegendes, zugeschnittenes SVG-Motiv. Solange
 ihre Form auf `Ausgeblendet` steht, haben die übrigen Plattenfelder bewusst
 keine sichtbare Wirkung. Unter
 „Feinabstimmung“ können die vier Schriftgrößen, Ringstärke, Zeigerstärke und
@@ -212,7 +223,13 @@ sie deren aktuellen Wert, andernfalls die Mitte des konfigurierten Bereichs.
 4. Mit `100 %` Plattengröße beginnen. Der Kreis umfasst dabei bewusst auch
    Wert und Titel. Größere Werte skalieren den gesamten Radius; `150 %` kann
    deshalb bis an oder über den Kachelrand reichen.
-5. Die Formularvorschau reagiert sofort. Erst `Übernehmen` speichert die
+5. Für ein SVG-Motiv `SVG-Hintergrund der Platte verwenden` aktivieren und
+   eine `.svg`-Datei auswählen. `Einpassen` zeigt das vollständige Motiv,
+   `Ausfüllen` füllt die Platte ohne Verzerrung und beschneidet Überstände,
+   `Strecken` füllt sie gegebenenfalls mit verändertem Seitenverhältnis.
+   Größe, Versatz, Deckkraft und Drehung wirken nur auf das Motiv; die zuvor
+   gewählte Farbe oder der Verlauf bleibt darunter erhalten.
+6. Die Formularvorschau reagiert sofort. Erst `Übernehmen` speichert die
    Auswahl und aktualisiert damit die native Kachel dauerhaft.
 
 ### 5. Statusvariablen und Profile

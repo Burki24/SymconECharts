@@ -621,6 +621,112 @@
                             "caption": "Gradients require Custom plate colors. The plate fill color is used as the gradient start color."
                         },
                         {
+                            "type": "CheckBox",
+                            "name": "PlateBackgroundEnabled",
+                            "caption": "Use SVG plate background",
+                            "width": "260px",
+                            "onChange": "ECGS_UpdateGaugePreview();"
+                        },
+                        {
+                            "type": "SelectFile",
+                            "name": "PlateBackgroundSVG",
+                            "caption": "Plate background SVG",
+                            "extensions": ".svg",
+                            "width": "540px",
+                            "onChange": "ECGS_UpdateGaugePreview();"
+                        },
+                        {
+                            "type": "Label",
+                            "caption": "SVG backgrounds are sanitized, clipped to the selected plate shape and rendered above its color or gradient. External resources, scripts, text and CSS blocks are not supported."
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "Select",
+                                    "name": "PlateBackgroundFit",
+                                    "caption": "SVG fitting",
+                                    "width": "260px",
+                                    "options": [
+                                        {
+                                            "caption": "Contain",
+                                            "value": "contain"
+                                        },
+                                        {
+                                            "caption": "Cover",
+                                            "value": "cover"
+                                        },
+                                        {
+                                            "caption": "Stretch",
+                                            "value": "stretch"
+                                        }
+                                    ],
+                                    "onChange": "ECGS_UpdateGaugePreview();"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PlateBackgroundOpacityPercent",
+                                    "caption": "SVG opacity",
+                                    "minimum": 0,
+                                    "maximum": 100,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview();"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PlateBackgroundSizePercent",
+                                    "caption": "SVG size",
+                                    "minimum": 25,
+                                    "maximum": 200,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview();"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PlateBackgroundRotation",
+                                    "caption": "SVG rotation",
+                                    "minimum": -180,
+                                    "maximum": 180,
+                                    "suffix": "°",
+                                    "digits": 1,
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview();"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PlateBackgroundOffsetXPercent",
+                                    "caption": "SVG horizontal offset",
+                                    "minimum": -100,
+                                    "maximum": 100,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview();"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PlateBackgroundOffsetYPercent",
+                                    "caption": "SVG vertical offset",
+                                    "minimum": -100,
+                                    "maximum": 100,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview();"
+                                }
+                            ]
+                        },
+                        {
                             "type": "RowLayout",
                             "items": [
                                 {
