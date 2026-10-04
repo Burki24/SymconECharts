@@ -50,7 +50,9 @@ StylePHP und PHP CS Fixer.
   direkt importierbare Testdatei einschließlich ihres optionalen Drehpunkts
   geprüft. Die Gauge-Integration prüft außerdem, dass die prozentuale
   Pivot-Justierung die native ECharts-Nabe sichtbar in ihrem Zeigerring
-  zentriert.
+  zentriert. Kreis, Ring, ausgeblendete und eigene SVG-Naben werden über
+  denselben Vorschau- und Datenmodellvertrag abgesichert; aktiver Inhalt in
+  einem Naben-SVG wird abgewiesen.
 - `helper_integrity.py` stellt sicher, dass Subscription, Manifest,
   Helper-Dokumentation und alle abonnierten Datenfluss- und
   Visualisierungshelper vollständig übereinstimmen.

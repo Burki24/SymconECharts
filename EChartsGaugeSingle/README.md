@@ -77,6 +77,13 @@ den SVG-Drehpunkt und hält die native ECharts-Nabe sichtbar, sodass sie etwa
 mittig über einem gezeichneten Zeigerring liegen kann. Im kompatiblen Modus
 `SVG oder unten mittig` bleibt ein ausdrücklich im SVG gesetzter Drehpunkt
 maßgeblich und die SVG-Geometrie zeichnet ihre eigene Nabe.
+Die sichtbare Nabe bleibt stets an diesem Drehpunkt gebunden. Ihre Form kann
+bei der Presetvorgabe bleiben, als Kreis oder Ring gezeichnet, ausgeblendet
+oder über ein eigenes pfadbasiertes SVG festgelegt werden. Für das Naben-SVG
+gelten dieselben Größen- und Sicherheitsgrenzen wie für den Zeigerimport.
+Größe und Randstärke werden mit 50 bis 150 % relativ zur Presetvorgabe
+skaliert. Füllung und Rand folgen standardmäßig den Gauge- beziehungsweise
+Theme-Farben und lassen sich optional unabhängig überschreiben.
 Der Skalenbogen bleibt wahlweise bei der Presetvorgabe oder
 wird als Voll-, Dreiviertel-, Halb-, Viertelkreis beziehungsweise mit eigenem
 Start und Ende definiert. Die Positionen folgen einem Zifferblatt (`0°` oben,
@@ -149,7 +156,9 @@ Fehlerstatus.
 Minimum und Maximum, Titel, Einheit, 0 bis 6 Nachkommastellen, ein Gauge-Preset
 sowie ein ECharts-Theme. Unter „Geometrie und Zeiger“ werden Zeigerform,
 eine optionale SVG-Datei, Skalenbogen und Positionen gewählt; unter „Gauge-Farben“ können sechs
-Gauge-spezifische Farbrollen das Theme gezielt überschreiben. Unter
+Gauge-spezifische Farbrollen das Theme gezielt überschreiben. Das
+„Nabendesign“ steuert Form, optionales SVG, Größe, Randstärke und Farben der
+Nabe, ohne ihren Drehpunkt vom Zeiger zu lösen. Unter
 „Feinabstimmung“ können die vier Schriftgrößen, Ringstärke, Zeigerstärke und
 Zeigerlänge sowie Nebenstrich- und Hauptteilerlänge jeweils von 50 bis 150 %
 der Presetvorgabe angepasst werden. Für eigene SVG-Zeiger lässt sich zusätzlich

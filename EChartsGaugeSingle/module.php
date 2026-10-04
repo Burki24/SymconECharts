@@ -50,6 +50,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
     private const SUPPORTED_PRESETS = ['basic', self::PRESET_SIMPLE, 'progress', 'speed'];
     private const SUPPORTED_POINTER_SHAPES = ['preset', 'needle', 'line', 'arrow', 'custom'];
     private const SUPPORTED_CUSTOM_POINTER_PIVOT_MODES = ['svg', 'custom'];
+    private const SUPPORTED_ANCHOR_SHAPES = ['preset', 'circle', 'ring', 'custom', 'hidden'];
+    private const SUPPORTED_ANCHOR_COLOR_MODES = ['theme', 'custom'];
     private const SUPPORTED_ARC_MODES = ['preset', 'full', 'three-quarter', 'half', 'quarter', 'custom'];
     private const SUPPORTED_COLOR_MODES = ['theme', 'custom'];
     private const ANGLE_STEP = 22.5;
@@ -57,15 +59,17 @@ class EChartsGaugeSingle extends IPSModuleStrict
     private const DESIGN_SCALE_MINIMUM = 50;
     private const DESIGN_SCALE_MAXIMUM = 150;
     private const DESIGN_SCALE_PROPERTIES = [
-        'scaleFontSizePercent'    => 'ScaleFontSizePercent',
-        'valueFontSizePercent'    => 'ValueFontSizePercent',
-        'unitFontSizePercent'     => 'UnitFontSizePercent',
-        'titleFontSizePercent'    => 'TitleFontSizePercent',
-        'ringWidthPercent'        => 'RingWidthPercent',
-        'pointerWidthPercent'     => 'PointerWidthPercent',
-        'pointerLengthPercent'    => 'PointerLengthPercent',
-        'minorTickLengthPercent'  => 'MinorTickLengthPercent',
-        'majorTickLengthPercent'  => 'MajorTickLengthPercent'
+        'scaleFontSizePercent'     => 'ScaleFontSizePercent',
+        'valueFontSizePercent'     => 'ValueFontSizePercent',
+        'unitFontSizePercent'      => 'UnitFontSizePercent',
+        'titleFontSizePercent'     => 'TitleFontSizePercent',
+        'ringWidthPercent'         => 'RingWidthPercent',
+        'pointerWidthPercent'      => 'PointerWidthPercent',
+        'pointerLengthPercent'     => 'PointerLengthPercent',
+        'anchorSizePercent'        => 'AnchorSizePercent',
+        'anchorBorderWidthPercent' => 'AnchorBorderWidthPercent',
+        'minorTickLengthPercent'   => 'MinorTickLengthPercent',
+        'majorTickLengthPercent'   => 'MajorTickLengthPercent'
     ];
 
     public function Create(): void
@@ -87,6 +91,11 @@ class EChartsGaugeSingle extends IPSModuleStrict
         $this->RegisterPropertyString('CustomPointerPivotMode', 'svg');
         $this->RegisterPropertyFloat('CustomPointerPivotXPercent', 50.0);
         $this->RegisterPropertyFloat('CustomPointerPivotYPercent', 100.0);
+        $this->RegisterPropertyString('AnchorShape', 'preset');
+        $this->RegisterPropertyString('CustomAnchorSVG', '');
+        $this->RegisterPropertyString('AnchorColorMode', 'theme');
+        $this->RegisterPropertyInteger('AnchorColor', 0x55CBB5);
+        $this->RegisterPropertyInteger('AnchorBorderColor', 0xF4F5F7);
         $this->RegisterPropertyString('GaugeArcMode', 'preset');
         $this->RegisterPropertyFloat('GaugeStartPosition', 270.0);
         $this->RegisterPropertyFloat('GaugeEndPosition', 90.0);
@@ -180,7 +189,14 @@ class EChartsGaugeSingle extends IPSModuleStrict
         int $PointerLengthPercent = self::DESIGN_SCALE_DEFAULT,
         string $CustomPointerPivotMode = 'svg',
         float $CustomPointerPivotXPercent = 50.0,
-        float $CustomPointerPivotYPercent = 100.0
+        float $CustomPointerPivotYPercent = 100.0,
+        string $AnchorShape = 'preset',
+        string $CustomAnchorSVG = '',
+        string $AnchorColorMode = 'theme',
+        int $AnchorColor = 0x55CBB5,
+        int $AnchorBorderColor = 0xF4F5F7,
+        int $AnchorSizePercent = self::DESIGN_SCALE_DEFAULT,
+        int $AnchorBorderWidthPercent = self::DESIGN_SCALE_DEFAULT
     ): void {
         $this->UpdateFormField(
             'GaugePreview',
@@ -195,33 +211,40 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 $GaugePreset,
                 $EChartsTheme,
                 [
-                    'scaleFontSizePercent'   => $ScaleFontSizePercent,
-                    'valueFontSizePercent'   => $ValueFontSizePercent,
-                    'unitFontSizePercent'    => $UnitFontSizePercent,
-                    'titleFontSizePercent'   => $TitleFontSizePercent,
-                    'ringWidthPercent'       => $RingWidthPercent,
-                    'pointerWidthPercent'    => $PointerWidthPercent,
-                    'pointerLengthPercent'   => $PointerLengthPercent,
-                    'minorTickLengthPercent' => $MinorTickLengthPercent,
-                    'majorTickLengthPercent' => $MajorTickLengthPercent,
-                    'pointerShape'           => $PointerShape,
-                    'arcMode'                => $GaugeArcMode,
-                    'startPosition'          => $GaugeStartPosition,
-                    'endPosition'            => $GaugeEndPosition,
-                    'colorMode'              => $GaugeColorMode,
-                    'pointerColor'           => self::ColorToHex($PointerColor),
-                    'progressColor'          => self::ColorToHex($ProgressColor),
-                    'ringColor'              => self::ColorToHex($RingColor),
-                    'scaleColor'             => self::ColorToHex($ScaleColor),
-                    'valueColor'             => self::ColorToHex($ValueColor),
-                    'titleColor'             => self::ColorToHex($TitleColor),
+                    'scaleFontSizePercent'     => $ScaleFontSizePercent,
+                    'valueFontSizePercent'     => $ValueFontSizePercent,
+                    'unitFontSizePercent'      => $UnitFontSizePercent,
+                    'titleFontSizePercent'     => $TitleFontSizePercent,
+                    'ringWidthPercent'         => $RingWidthPercent,
+                    'pointerWidthPercent'      => $PointerWidthPercent,
+                    'pointerLengthPercent'     => $PointerLengthPercent,
+                    'anchorSizePercent'        => $AnchorSizePercent,
+                    'anchorBorderWidthPercent' => $AnchorBorderWidthPercent,
+                    'minorTickLengthPercent'   => $MinorTickLengthPercent,
+                    'majorTickLengthPercent'   => $MajorTickLengthPercent,
+                    'pointerShape'             => $PointerShape,
+                    'arcMode'                  => $GaugeArcMode,
+                    'startPosition'            => $GaugeStartPosition,
+                    'endPosition'              => $GaugeEndPosition,
+                    'colorMode'                => $GaugeColorMode,
+                    'pointerColor'             => self::ColorToHex($PointerColor),
+                    'progressColor'            => self::ColorToHex($ProgressColor),
+                    'ringColor'                => self::ColorToHex($RingColor),
+                    'scaleColor'               => self::ColorToHex($ScaleColor),
+                    'valueColor'               => self::ColorToHex($ValueColor),
+                    'titleColor'               => self::ColorToHex($TitleColor),
+                    'anchorShape'              => $AnchorShape,
+                    'anchorColorMode'          => $AnchorColorMode,
+                    'anchorColor'              => self::ColorToHex($AnchorColor),
+                    'anchorBorderColor'        => self::ColorToHex($AnchorBorderColor),
                     ...$this->ResolveCustomPointerStyle(
                         $PointerShape,
                         $CustomPointerSVG,
                         $CustomPointerPivotMode,
                         $CustomPointerPivotXPercent,
                         $CustomPointerPivotYPercent
-                    )
+                    ),
+                    ...$this->ResolveCustomAnchorStyle($AnchorShape, $CustomAnchorSVG)
                 ]
             ))
         );
@@ -415,6 +438,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
             );
         }
         if (!in_array((string) ($style['pointerShape'] ?? 'preset'), self::SUPPORTED_POINTER_SHAPES, true)
+            || !in_array((string) ($style['anchorShape'] ?? 'preset'), self::SUPPORTED_ANCHOR_SHAPES, true)
+            || !in_array((string) ($style['anchorColorMode'] ?? 'theme'), self::SUPPORTED_ANCHOR_COLOR_MODES, true)
             || !in_array((string) ($style['arcMode'] ?? 'preset'), self::SUPPORTED_ARC_MODES, true)
             || !in_array((string) ($style['colorMode'] ?? 'theme'), self::SUPPORTED_COLOR_MODES, true)) {
             return EChartsGaugeSinglePreview::CreateErrorSvg(
@@ -425,6 +450,12 @@ class EChartsGaugeSingle extends IPSModuleStrict
             && ((string) ($style['pointerPath'] ?? '') === '' || (string) ($style['pointerViewBox'] ?? '') === '')) {
             return EChartsGaugeSinglePreview::CreateErrorSvg(
                 $this->Translate((string) ($style['pointerError'] ?? 'Select a supported path-only SVG pointer.'))
+            );
+        }
+        if (($style['anchorShape'] ?? 'preset') === 'custom'
+            && ((string) ($style['anchorPath'] ?? '') === '' || (string) ($style['anchorViewBox'] ?? '') === '')) {
+            return EChartsGaugeSinglePreview::CreateErrorSvg(
+                $this->Translate((string) ($style['anchorError'] ?? 'Select a supported path-only SVG anchor.'))
             );
         }
         $startPosition = (float) ($style['startPosition'] ?? 270.0);
@@ -543,6 +574,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 self::SUPPORTED_CUSTOM_POINTER_PIVOT_MODES,
                 true
             )
+            || !in_array($this->ReadPropertyString('AnchorShape'), self::SUPPORTED_ANCHOR_SHAPES, true)
+            || !in_array($this->ReadPropertyString('AnchorColorMode'), self::SUPPORTED_ANCHOR_COLOR_MODES, true)
             || !in_array($this->ReadPropertyString('GaugeArcMode'), self::SUPPORTED_ARC_MODES, true)
             || !in_array($this->ReadPropertyString('GaugeColorMode'), self::SUPPORTED_COLOR_MODES, true)) {
             return [
@@ -571,6 +604,17 @@ class EChartsGaugeSingle extends IPSModuleStrict
             }
         }
 
+        if ($this->ReadPropertyString('AnchorShape') === 'custom') {
+            try {
+                EChartsSvgPath::Import($this->ReadPropertyString('CustomAnchorSVG'));
+            } catch (InvalidArgumentException $exception) {
+                return [
+                    'Status'  => self::STATUS_DESIGN_INVALID,
+                    'Message' => $exception->getMessage()
+                ];
+            }
+        }
+
         if (!self::IsAnglePosition($this->ReadPropertyFloat('GaugeStartPosition'))
             || !self::IsAnglePosition($this->ReadPropertyFloat('GaugeEndPosition'))
             || ($this->ReadPropertyString('GaugeArcMode') === 'custom'
@@ -581,7 +625,16 @@ class EChartsGaugeSingle extends IPSModuleStrict
             ];
         }
 
-        foreach (['PointerColor', 'ProgressColor', 'RingColor', 'ScaleColor', 'ValueColor', 'TitleColor'] as $propertyName) {
+        foreach ([
+            'PointerColor',
+            'ProgressColor',
+            'RingColor',
+            'ScaleColor',
+            'ValueColor',
+            'TitleColor',
+            'AnchorColor',
+            'AnchorBorderColor'
+        ] as $propertyName) {
             $color = $this->ReadPropertyInteger($propertyName);
             if ($color < 0 || $color > 0xFFFFFF) {
                 return [
@@ -603,17 +656,21 @@ class EChartsGaugeSingle extends IPSModuleStrict
         }
 
         $style['pointerShape'] = $this->ReadPropertyString('PointerShape');
+        $style['anchorShape'] = $this->ReadPropertyString('AnchorShape');
+        $style['anchorColorMode'] = $this->ReadPropertyString('AnchorColorMode');
         $style['arcMode'] = $this->ReadPropertyString('GaugeArcMode');
         $style['startPosition'] = $this->ReadPropertyFloat('GaugeStartPosition');
         $style['endPosition'] = $this->ReadPropertyFloat('GaugeEndPosition');
         $style['colorMode'] = $this->ReadPropertyString('GaugeColorMode');
         foreach ([
-            'pointerColor'  => 'PointerColor',
-            'progressColor' => 'ProgressColor',
-            'ringColor'     => 'RingColor',
-            'scaleColor'    => 'ScaleColor',
-            'valueColor'    => 'ValueColor',
-            'titleColor'    => 'TitleColor'
+            'pointerColor'      => 'PointerColor',
+            'progressColor'     => 'ProgressColor',
+            'ringColor'         => 'RingColor',
+            'scaleColor'        => 'ScaleColor',
+            'valueColor'        => 'ValueColor',
+            'titleColor'        => 'TitleColor',
+            'anchorColor'       => 'AnchorColor',
+            'anchorBorderColor' => 'AnchorBorderColor'
         ] as $fieldName => $propertyName) {
             $style[$fieldName] = self::ColorToHex($this->ReadPropertyInteger($propertyName));
         }
@@ -625,6 +682,10 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 $this->ReadPropertyString('CustomPointerPivotMode'),
                 $this->ReadPropertyFloat('CustomPointerPivotXPercent'),
                 $this->ReadPropertyFloat('CustomPointerPivotYPercent')
+            ),
+            $this->ResolveCustomAnchorStyle(
+                $style['anchorShape'],
+                $this->ReadPropertyString('CustomAnchorSVG')
             )
         );
 
@@ -674,6 +735,30 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 'pointerPath'    => '',
                 'pointerViewBox' => '',
                 'pointerError'   => $exception->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * @return array{anchorPath?: string, anchorViewBox?: string, anchorError?: string}
+     */
+    private function ResolveCustomAnchorStyle(string $anchorShape, string $fileData): array
+    {
+        if ($anchorShape !== 'custom') {
+            return [];
+        }
+
+        try {
+            $anchor = EChartsSvgPath::Import($fileData);
+
+            return ['anchorPath' => $anchor['path'], 'anchorViewBox' => $anchor['viewBox']];
+        } catch (InvalidArgumentException $exception) {
+            $this->SendDebug('ResolveCustomAnchorStyle', $exception->getMessage(), 0);
+
+            return [
+                'anchorPath'    => '',
+                'anchorViewBox' => '',
+                'anchorError'   => $exception->getMessage()
             ];
         }
     }

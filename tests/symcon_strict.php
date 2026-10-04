@@ -122,6 +122,11 @@ foreach ([
             "RegisterPropertyString('CustomPointerPivotMode', 'svg')",
             "RegisterPropertyFloat('CustomPointerPivotXPercent', 50.0)",
             "RegisterPropertyFloat('CustomPointerPivotYPercent', 100.0)",
+            "RegisterPropertyString('AnchorShape', 'preset')",
+            "RegisterPropertyString('CustomAnchorSVG', '')",
+            "RegisterPropertyString('AnchorColorMode', 'theme')",
+            "RegisterPropertyInteger('AnchorColor', 0x55CBB5)",
+            "RegisterPropertyInteger('AnchorBorderColor', 0xF4F5F7)",
             "RegisterPropertyString('GaugeArcMode', 'preset')",
             "RegisterPropertyFloat('GaugeStartPosition', 270.0)",
             "RegisterPropertyFloat('GaugeEndPosition', 90.0)",
@@ -292,6 +297,8 @@ foreach ([
             'RingWidthPercent',
             'PointerWidthPercent',
             'PointerLengthPercent',
+            'AnchorSizePercent',
+            'AnchorBorderWidthPercent',
             'MinorTickLengthPercent',
             'MajorTickLengthPercent'
         ] as $fineTuningName) {
@@ -318,6 +325,11 @@ foreach ([
             'CustomPointerPivotMode'     => ['type' => 'Select', 'values' => ['svg', 'custom']],
             'CustomPointerPivotXPercent' => ['type' => 'NumberSpinner'],
             'CustomPointerPivotYPercent' => ['type' => 'NumberSpinner'],
+            'AnchorShape'                => ['type' => 'Select', 'values' => ['preset', 'circle', 'ring', 'custom', 'hidden']],
+            'CustomAnchorSVG'            => ['type' => 'SelectFile'],
+            'AnchorColorMode'            => ['type' => 'Select', 'values' => ['theme', 'custom']],
+            'AnchorColor'                => ['type' => 'SelectColor'],
+            'AnchorBorderColor'          => ['type' => 'SelectColor'],
             'GaugeArcMode'               => ['type' => 'Select', 'values' => ['preset', 'full', 'three-quarter', 'half', 'quarter', 'custom']],
             'GaugeStartPosition'         => ['type' => 'Select'],
             'GaugeEndPosition'           => ['type' => 'Select'],
@@ -340,7 +352,7 @@ foreach ([
                     && (float) array_column($designerElement['options'] ?? [], 'value')[0] === 0.0
                     && (float) array_column($designerElement['options'] ?? [], 'value')[15] === 337.5;
             }
-            if ($designerName === 'CustomPointerSVG') {
+            if (in_array($designerName, ['CustomPointerSVG', 'CustomAnchorSVG'], true)) {
                 $valid = $valid && ($designerElement['extensions'] ?? null) === '.svg';
             }
             if (in_array($designerName, ['CustomPointerPivotXPercent', 'CustomPointerPivotYPercent'], true)) {

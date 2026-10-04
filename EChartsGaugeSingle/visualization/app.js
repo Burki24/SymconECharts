@@ -485,6 +485,45 @@
         return series;
     }
 
+    function applyAnchorDesign(series, style, layout, colors) {
+        var shape = ['preset', 'circle', 'ring', 'custom', 'hidden'].indexOf(style.anchorShape) >= 0
+            ? style.anchorShape
+            : 'preset';
+        series.anchor.size = Math.round(
+            layout.anchorSize * resolveStyleScale(style, 'anchorSizePercent') * 100
+        ) / 100;
+        series.anchor.itemStyle.borderWidth = Math.round(
+            2 * resolveStyleScale(style, 'anchorBorderWidthPercent') * 100
+        ) / 100;
+
+        if (style.anchorColorMode === 'custom') {
+            series.anchor.itemStyle.color = normalizeStyleColor(style.anchorColor, colors.accent);
+            series.anchor.itemStyle.borderColor = normalizeStyleColor(style.anchorBorderColor, colors.text);
+        }
+        if (shape === 'preset') {
+            return series;
+        }
+        if (shape === 'hidden') {
+            series.anchor.show = false;
+            return series;
+        }
+
+        series.anchor.show = true;
+        series.anchor.icon = 'circle';
+        if (shape === 'ring') {
+            series.anchor.itemStyle.color = 'transparent';
+        } else if (shape === 'custom') {
+            var path = typeof style.anchorPath === 'string' ? style.anchorPath.trim() : '';
+            if (!path || !/^[MmZzLlHhVvCcSsQqTtAa0-9eE+.,\-\s]+$/.test(path)) {
+                series.anchor.show = false;
+                return series;
+            }
+            series.anchor.icon = 'path://' + path;
+        }
+
+        return series;
+    }
+
     function normalizeStyleColor(value, fallback) {
         return /^#[0-9a-f]{6}$/i.test(String(value || '')) ? value : fallback;
     }
@@ -634,6 +673,7 @@
         series = applyArcDesign(series, style);
         series = applyPointerShape(series, style, layout);
         series = applyCustomColors(series, style, colors);
+        series = applyAnchorDesign(series, style, layout, colors);
 
         var option = {
             animation: !reduceMotion,

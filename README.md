@@ -15,7 +15,9 @@ Folgende Module beinhaltet das SymconECharts Repository:
   ausgegeben und bei Wertänderungen aktualisiert; Zeigerform einschließlich
   eines abgesicherten pfadbasierten SVG-Imports, Skalenbogen und
   optionale Gauge-Farben lassen sich im Kacheldesigner mit live aktualisierter
-  SVG-Vorschau festlegen.
+  SVG-Vorschau festlegen. Die am Zeigerdrehpunkt gebundene Nabe kann als Kreis,
+  Ring oder validiertes eigenes SVG gestaltet beziehungsweise ausgeblendet
+  werden.
   Ein separat platzierbares HTML-Widget in IPSView bleibt ein weiterer
   Ausgabeweg auf derselben Diagrammkonfiguration und Datenaufbereitung.
 

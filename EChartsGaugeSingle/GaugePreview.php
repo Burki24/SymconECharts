@@ -15,6 +15,7 @@ final class EChartsGaugeSinglePreview
     private const CENTER_X = 360.0;
     private const SUPPORTED_PRESETS = ['basic', 'simple', 'progress', 'speed'];
     private const SUPPORTED_POINTER_SHAPES = ['preset', 'needle', 'line', 'arrow', 'custom'];
+    private const SUPPORTED_ANCHOR_SHAPES = ['preset', 'circle', 'ring', 'custom', 'hidden'];
 
     public static function CreateSvg(
         float $value,
@@ -40,6 +41,10 @@ final class EChartsGaugeSinglePreview
         $pointerShape = (string) ($style['pointerShape'] ?? 'preset');
         if (!in_array($pointerShape, self::SUPPORTED_POINTER_SHAPES, true)) {
             throw new InvalidArgumentException('A supported Gauge pointer shape is required.');
+        }
+        $anchorShape = (string) ($style['anchorShape'] ?? 'preset');
+        if (!in_array($anchorShape, self::SUPPORTED_ANCHOR_SHAPES, true)) {
+            throw new InvalidArgumentException('A supported Gauge anchor shape is required.');
         }
 
         $design = self::ApplyArcDesign(
@@ -73,6 +78,15 @@ final class EChartsGaugeSinglePreview
         $progressPath = $design['showProgress'] ? self::ArcPath($ratio, $design) : '';
         $ticks = self::Ticks($minimum, $maximum, $language, $design);
         $pointer = self::Pointer($ratio, $design, $pointerShape, $style);
+        $anchorColorMode = (string) ($style['anchorColorMode'] ?? 'theme');
+        $anchorColor = $anchorColorMode === 'custom'
+            ? self::StyleColor($style, 'anchorColor', $pointerColor)
+            : $pointerColor;
+        $anchorBorderColor = $anchorColorMode === 'custom'
+            ? self::StyleColor($style, 'anchorBorderColor', $valueColor)
+            : $valueColor;
+        $anchorBorderWidth = 2.0 * max(50, min(150, (int) ($style['anchorBorderWidthPercent'] ?? 100))) / 100;
+        $anchor = self::Anchor($design, $pointerShape, $anchorShape, $style);
         $rawValue = self::FormatNumber($value, $decimals, $language);
         $rawUnit = trim($unit);
         $rawTitle = trim($title);
@@ -104,13 +118,14 @@ final class EChartsGaugeSinglePreview
 <svg xmlns="http://www.w3.org/2000/svg" width="720" height="400" viewBox="0 0 720 400" role="img" aria-label="{$ariaLabel}" data-preset="{$preset}" data-theme="{$theme}" data-arc-mode="{$arcMode}" data-start-position="{$startPosition}" data-end-position="{$endPosition}" data-pointer-length-percent="{$pointerLengthPercent}" data-major-splits="{$design['majorSplits']}">
   <defs><filter id="speed-progress-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="2" dy="2" stdDeviation="4" flood-color="{$progressColor}" flood-opacity="0.45"/></filter><filter id="speed-pointer-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="2" dy="2" stdDeviation="4" flood-color="{$pointerColor}" flood-opacity="0.45"/></filter></defs>
   <style>
-    .surface{fill:{$palette['background']}}.theme-track-segment{fill:none;stroke-linecap:round;stroke-linejoin:round}.progress{fill:none;stroke:{$progressColor};stroke-linecap:round;stroke-linejoin:round}.speed-progress-shadow{filter:url(#speed-progress-shadow)}.speed-pointer-shadow{filter:url(#speed-pointer-shadow)}.minor{stroke:{$minorColor};stroke-width:1}.major{stroke:{$majorColor};stroke-width:2}.axis{fill:{$scaleColor};font-size:{$design['axisFontSize']}px;font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle;dominant-baseline:middle}.pointer,.speed-pointer{fill:{$pointerColor}}.anchor{fill:{$pointerColor};stroke:{$valueColor};stroke-width:2}.detail-box{fill:{$palette['surface']};stroke:{$detailBorderColor};stroke-width:2}.value{fill:{$valueColor};font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle}.value-number{font-size:{$design['valueFontSize']}px;font-weight:{$valueFontWeight}}.value-unit{fill:{$unitColor};font-size:{$design['unitFontSize']}px;font-weight:{$unitFontWeight}}.title{fill:{$titleColor};font-size:{$design['titleFontSize']}px;font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle}svg[data-preset="speed"] .minor{stroke-width:2}svg[data-preset="speed"] .major{stroke-width:3}
+    .surface{fill:{$palette['background']}}.theme-track-segment{fill:none;stroke-linecap:round;stroke-linejoin:round}.progress{fill:none;stroke:{$progressColor};stroke-linecap:round;stroke-linejoin:round}.speed-progress-shadow{filter:url(#speed-progress-shadow)}.speed-pointer-shadow{filter:url(#speed-pointer-shadow)}.minor{stroke:{$minorColor};stroke-width:1}.major{stroke:{$majorColor};stroke-width:2}.axis{fill:{$scaleColor};font-size:{$design['axisFontSize']}px;font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle;dominant-baseline:middle}.pointer,.speed-pointer{fill:{$pointerColor}}.anchor{fill:{$anchorColor};stroke:{$anchorBorderColor};stroke-width:{$anchorBorderWidth}}.detail-box{fill:{$palette['surface']};stroke:{$detailBorderColor};stroke-width:2}.value{fill:{$valueColor};font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle}.value-number{font-size:{$design['valueFontSize']}px;font-weight:{$valueFontWeight}}.value-unit{fill:{$unitColor};font-size:{$design['unitFontSize']}px;font-weight:{$unitFontWeight}}.title{fill:{$titleColor};font-size:{$design['titleFontSize']}px;font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle}svg[data-preset="speed"] .minor{stroke-width:2}svg[data-preset="speed"] .major{stroke-width:3}
   </style>
   <rect class="surface" width="720" height="400" rx="12"/>
   {$trackElements}
   {$progressElement}
   {$ticks}
   {$pointer}
+  {$anchor}
   {$detailBackground}
   {$valueElement}
   {$titleElement}
@@ -493,8 +508,7 @@ SVG;
 
         return '<polygon points="' . implode(' ', $serialized) . '" class="pointer'
             . ($design['speedPointer'] ? ' speed-pointer-shadow' : '') . '" data-pointer-shape="'
-            . SVGPreviewHelper::escape($shape) . '"/>'
-            . '<circle cx="360" cy="' . self::Coordinate($centerY) . '" r="11" class="anchor"/>';
+            . SVGPreviewHelper::escape($shape) . '"/>';
     }
 
     /**
@@ -519,7 +533,6 @@ SVG;
         $widthScale = max(50, min(150, (int) ($style['pointerWidthPercent'] ?? 100))) / 100;
         $width = max(2.0, $length * $viewBoxWidth / $viewBoxHeight * $widthScale);
         $hasPivot = isset($style['pointerPivotX'], $style['pointerPivotY']);
-        $showAnchor = isset($style['pointerShowAnchor']) ? (bool) $style['pointerShowAnchor'] : !$hasPivot;
         $pivotX = max(
             $minimumX,
             min($minimumX + $viewBoxWidth, (float) ($style['pointerPivotX'] ?? $minimumX + $viewBoxWidth / 2.0))
@@ -539,8 +552,48 @@ SVG;
             . '" preserveAspectRatio="none" overflow="visible" data-pointer-pivot-x="'
             . self::Coordinate($pivotX) . '" data-pointer-pivot-y="' . self::Coordinate($pivotY)
             . '"><path d="' . SVGPreviewHelper::escape($path)
-            . '" class="pointer' . $shadowClass . '" data-pointer-shape="custom"/></svg></g>'
-            . ($showAnchor ? '<circle cx="360" cy="' . self::Coordinate($centerY) . '" r="11" class="anchor"/>' : '');
+            . '" class="pointer' . $shadowClass . '" data-pointer-shape="custom"/></svg></g>';
+    }
+
+    /**
+     * @param array<string, float|bool|int> $design
+     * @param array<string, mixed> $style
+     */
+    private static function Anchor(array $design, string $pointerShape, string $anchorShape, array $style): string
+    {
+        $pointerDefaultShowsAnchor = $pointerShape === 'custom'
+            ? (isset($style['pointerShowAnchor'])
+                ? (bool) $style['pointerShowAnchor']
+                : !isset($style['pointerPivotX'], $style['pointerPivotY']))
+            : !($pointerShape === 'preset' && (bool) $design['speedPointer']);
+        if ($anchorShape === 'hidden' || ($anchorShape === 'preset' && !$pointerDefaultShowsAnchor)) {
+            return '';
+        }
+
+        $size = 22.0 * max(50, min(150, (int) ($style['anchorSizePercent'] ?? 100))) / 100;
+        $halfSize = $size / 2.0;
+        $centerY = (float) $design['centerY'];
+        if ($anchorShape === 'custom') {
+            $path = (string) ($style['anchorPath'] ?? '');
+            $viewBox = (string) ($style['anchorViewBox'] ?? '');
+            if ($path === ''
+                || preg_match('/^[MmZzLlHhVvCcSsQqTtAa0-9eE+.,\-\s]+$/D', $path) !== 1
+                || preg_match('/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?(?:\s+[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?){3}$/D', $viewBox) !== 1) {
+                throw new InvalidArgumentException('A validated custom SVG anchor is required.');
+            }
+
+            return '<svg x="' . self::Coordinate(self::CENTER_X - $halfSize)
+                . '" y="' . self::Coordinate($centerY - $halfSize)
+                . '" width="' . self::Coordinate($size) . '" height="' . self::Coordinate($size)
+                . '" viewBox="' . SVGPreviewHelper::escape($viewBox)
+                . '" preserveAspectRatio="xMidYMid meet" overflow="visible" data-anchor-shape="custom"><path d="'
+                . SVGPreviewHelper::escape($path) . '" class="anchor" vector-effect="non-scaling-stroke"/></svg>';
+        }
+
+        return '<circle cx="360" cy="' . self::Coordinate($centerY) . '" r="'
+            . self::Coordinate($halfSize) . '" class="anchor" data-anchor-shape="'
+            . SVGPreviewHelper::escape($anchorShape) . '"'
+            . ($anchorShape === 'ring' ? ' style="fill:none"' : '') . '/>';
     }
 
     /** @param array<string, float|bool|int> $design */

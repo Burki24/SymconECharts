@@ -365,9 +365,15 @@ $gauge->SetTestProperty('TitleFontSizePercent', 110);
 $gauge->SetTestProperty('RingWidthPercent', 120);
 $gauge->SetTestProperty('PointerWidthPercent', 80);
 $gauge->SetTestProperty('PointerLengthPercent', 130);
+$gauge->SetTestProperty('AnchorSizePercent', 125);
+$gauge->SetTestProperty('AnchorBorderWidthPercent', 75);
 $gauge->SetTestProperty('MinorTickLengthPercent', 75);
 $gauge->SetTestProperty('MajorTickLengthPercent', 150);
 $gauge->SetTestProperty('PointerShape', 'arrow');
+$gauge->SetTestProperty('AnchorShape', 'ring');
+$gauge->SetTestProperty('AnchorColorMode', 'custom');
+$gauge->SetTestProperty('AnchorColor', 0x778899);
+$gauge->SetTestProperty('AnchorBorderColor', 0x8899AA);
 $gauge->SetTestProperty('GaugeArcMode', 'custom');
 $gauge->SetTestProperty('GaugeStartPosition', 270.0);
 $gauge->SetTestProperty('GaugeEndPosition', 67.5);
@@ -431,6 +437,10 @@ foreach ([
     '(1 - (pivotY - minimumY) / viewBoxHeight) * pointerLength',
     "series.pointer.icon = 'path://' + path;",
     "series.anchor.show = shape !== 'custom' || geometry.showAnchor;",
+    'function applyAnchorDesign(series, style, layout, colors)',
+    "series.anchor.icon = 'path://' + path;",
+    "if (shape === 'hidden')",
+    "series.anchor.itemStyle.color = 'transparent';",
     'function applyCustomColors(series, style, colors)'
 ] as $responsiveLayoutContract) {
     assertGatewayGauge(
@@ -491,6 +501,13 @@ assertGatewayGauge(str_contains($initialPreviewSvg, 'data-theme="vintage"'), 'Ga
 assertGatewayGauge(
     str_contains($initialPreviewSvg, 'data-pointer-length-percent="130"'),
     'Gauge Single preview must apply the configured pointer length.'
+);
+assertGatewayGauge(
+    str_contains($initialPreviewSvg, 'data-anchor-shape="ring"')
+        && str_contains($initialPreviewSvg, 'r="13.75"')
+        && str_contains($initialPreviewSvg, 'style="fill:none"')
+        && str_contains($initialPreviewSvg, 'fill:#778899;stroke:#8899AA;stroke-width:1.5'),
+    'Gauge Single preview must apply the configured hub design.'
 );
 assertGatewayGauge(str_contains($initialPreviewSvg, '#FEF8EF'), 'Gauge Single preview must apply the Vintage background.');
 assertGatewayGauge(str_contains($initialPreviewSvg, 'Room climate'), 'Gauge Single preview must contain the title.');
@@ -813,26 +830,32 @@ assertGatewayGauge(($gaugeData['gauge']['maximum'] ?? null) === 80.0, 'Gauge Sin
 assertGatewayGauge(($gaugeData['gauge']['preset'] ?? null) === 'progress', 'Gauge Single preset changed.');
 assertGatewayGauge(
     ($gaugeData['gauge']['style'] ?? null) === [
-        'scaleFontSizePercent'   => 150,
-        'valueFontSizePercent'   => 125,
-        'unitFontSizePercent'    => 75,
-        'titleFontSizePercent'   => 110,
-        'ringWidthPercent'       => 120,
-        'pointerWidthPercent'    => 80,
-        'pointerLengthPercent'   => 130,
-        'minorTickLengthPercent' => 75,
-        'majorTickLengthPercent' => 150,
-        'pointerShape'           => 'arrow',
-        'arcMode'                => 'custom',
-        'startPosition'          => 270.0,
-        'endPosition'            => 67.5,
-        'colorMode'              => 'custom',
-        'pointerColor'           => '#112233',
-        'progressColor'          => '#223344',
-        'ringColor'              => '#334455',
-        'scaleColor'             => '#445566',
-        'valueColor'             => '#556677',
-        'titleColor'             => '#667788'
+        'scaleFontSizePercent'     => 150,
+        'valueFontSizePercent'     => 125,
+        'unitFontSizePercent'      => 75,
+        'titleFontSizePercent'     => 110,
+        'ringWidthPercent'         => 120,
+        'pointerWidthPercent'      => 80,
+        'pointerLengthPercent'     => 130,
+        'anchorSizePercent'        => 125,
+        'anchorBorderWidthPercent' => 75,
+        'minorTickLengthPercent'   => 75,
+        'majorTickLengthPercent'   => 150,
+        'pointerShape'             => 'arrow',
+        'anchorShape'              => 'ring',
+        'anchorColorMode'          => 'custom',
+        'arcMode'                  => 'custom',
+        'startPosition'            => 270.0,
+        'endPosition'              => 67.5,
+        'colorMode'                => 'custom',
+        'pointerColor'             => '#112233',
+        'progressColor'            => '#223344',
+        'ringColor'                => '#334455',
+        'scaleColor'               => '#445566',
+        'valueColor'               => '#556677',
+        'titleColor'               => '#667788',
+        'anchorColor'              => '#778899',
+        'anchorBorderColor'        => '#8899AA'
     ],
     'Gauge Single must expose the validated tile-designer fine tuning in its chart model.'
 );
@@ -1034,6 +1057,59 @@ assertGatewayGauge(
         && str_contains($customPointerPreviewSvg, 'class="anchor"'),
     'The Gauge form preview must place the native ECharts anchor at the configured custom SVG pivot.'
 );
+
+$customAnchorFile = base64_encode(
+    '<svg viewBox="0 0 100 100"><path d="M50 0L100 50L50 100L0 50Z M50 25L75 50L50 75L25 50Z"/></svg>'
+);
+$customAnchorGauge = new EChartsGaugeSingle();
+$customAnchorGauge->Create();
+$customAnchorGauge->SetTestProperty('SourceVariableID', 4711);
+$customAnchorGauge->SetTestProperty('AnchorShape', 'custom');
+$customAnchorGauge->SetTestProperty('CustomAnchorSVG', $customAnchorFile);
+$customAnchorGauge->ApplyChanges();
+assertGatewayGauge($customAnchorGauge->GetTestStatus() === IS_ACTIVE, 'A valid custom SVG hub must be accepted.');
+$customAnchorData = json_decode($customAnchorGauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    ($customAnchorData['gauge']['style']['anchorPath'] ?? null)
+        === 'M50 0L100 50L50 100L0 50Z M50 25L75 50L50 75L25 50Z'
+        && ($customAnchorData['gauge']['style']['anchorViewBox'] ?? null) === '0 0 100 100'
+        && !str_contains(json_encode($customAnchorData, JSON_THROW_ON_ERROR), '<svg'),
+    'Gauge Single must expose only the validated custom hub path and viewBox.'
+);
+$customAnchorPreviewSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
+    50.0,
+    0.0,
+    100.0,
+    '',
+    '',
+    0,
+    'en',
+    'simple',
+    'auto',
+    $customAnchorData['gauge']['style']
+);
+assertGatewayGauge(
+    str_contains($customAnchorPreviewSvg, 'data-anchor-shape="custom"')
+        && str_contains($customAnchorPreviewSvg, 'preserveAspectRatio="xMidYMid meet"')
+        && str_contains($customAnchorPreviewSvg, 'M50 0L100 50L50 100L0 50Z'),
+    'Gauge Single preview must render a validated custom SVG hub at the pointer pivot.'
+);
+$hiddenAnchorPreviewSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
+    50.0,
+    0.0,
+    100.0,
+    '',
+    '',
+    0,
+    'en',
+    'simple',
+    'auto',
+    ['anchorShape' => 'hidden']
+);
+assertGatewayGauge(
+    !str_contains($hiddenAnchorPreviewSvg, 'class="anchor"'),
+    'Gauge Single preview must hide the hub when explicitly configured.'
+);
 $singleGauge->SetTestProperty('SourceVariableID', 4712);
 $singleGauge->ApplyChanges();
 assertGatewayGauge($singleGauge->GetTestStatus() === 201, 'Non-numeric Gauge source must set status 201.');
@@ -1092,6 +1168,13 @@ $invalidPointer->SetTestProperty('PointerShape', 'unknown');
 $invalidPointer->ApplyChanges();
 assertGatewayGauge($invalidPointer->GetTestStatus() === 205, 'Unknown Gauge pointer shapes must set status 205.');
 
+$invalidAnchor = new EChartsGaugeSingle();
+$invalidAnchor->Create();
+$invalidAnchor->SetTestProperty('SourceVariableID', 4711);
+$invalidAnchor->SetTestProperty('AnchorShape', 'unknown');
+$invalidAnchor->ApplyChanges();
+assertGatewayGauge($invalidAnchor->GetTestStatus() === 205, 'Unknown Gauge hub shapes must set status 205.');
+
 $invalidPointerPivotMode = new EChartsGaugeSingle();
 $invalidPointerPivotMode->Create();
 $invalidPointerPivotMode->SetTestProperty('SourceVariableID', 4711);
@@ -1118,6 +1201,17 @@ $invalidCustomPointer->SetTestProperty(
 );
 $invalidCustomPointer->ApplyChanges();
 assertGatewayGauge($invalidCustomPointer->GetTestStatus() === 205, 'Unsafe custom SVG pointers must set status 205.');
+
+$invalidCustomAnchor = new EChartsGaugeSingle();
+$invalidCustomAnchor->Create();
+$invalidCustomAnchor->SetTestProperty('SourceVariableID', 4711);
+$invalidCustomAnchor->SetTestProperty('AnchorShape', 'custom');
+$invalidCustomAnchor->SetTestProperty(
+    'CustomAnchorSVG',
+    base64_encode('<svg viewBox="0 0 10 10"><script>alert(1)</script><path d="M0 0L1 1Z"/></svg>')
+);
+$invalidCustomAnchor->ApplyChanges();
+assertGatewayGauge($invalidCustomAnchor->GetTestStatus() === 205, 'Unsafe custom SVG hubs must set status 205.');
 
 $invalidColor = new EChartsGaugeSingle();
 $invalidColor->Create();

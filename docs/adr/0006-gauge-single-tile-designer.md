@@ -87,7 +87,20 @@ horizontale und vertikale Prozentwerte von 0 bis 100 in `viewBox`-Koordinaten,
 überschreibt damit einen eingebetteten SVG-Drehpunkt und hält die native
 ECharts-Nabe sichtbar. So kann sie mit einem gezeichneten Zeigerring zur
 Deckung gebracht werden, ohne die Nabe unabhängig vom rotierenden Zeiger zu
-verschieben. Der Skalenbogen
+verschieben.
+
+Die Nabe erhält einen eigenen additiven Designvertrag. `preset` bewahrt Form
+und Sichtbarkeit des gewählten Gauge- und Zeiger-Presets. `circle`, `ring`,
+`custom` und `hidden` überschreiben diese Darstellung ausdrücklich, ohne den
+Drehpunkt zu verändern. Größe und Randstärke werden wie die anderen
+Feinabstimmungen auf 50 bis 150 % der responsiv berechneten Presetwerte
+begrenzt. Farben folgen standardmäßig den bereits aufgelösten Gauge- oder
+Theme-Farben; ein eigener Farbmodus überschreibt ausschließlich Füllung und
+Rand der Nabe. `custom` verwendet denselben abgesicherten SVG-Pfadimport wie
+der eigene Zeiger und überträgt ebenfalls nur Pfad und `viewBox`, niemals das
+SVG-Dokument oder aktiven Inhalt.
+
+Der Skalenbogen
 verwendet entweder die Presetgeometrie oder einen Voll-, Dreiviertel-, Halb-, Viertel- oder
 benutzerdefinierten Bogen. Anwenderpositionen werden wie auf einem Zifferblatt
 gespeichert (`0°` oben, im Uhrzeigersinn) und sind auf 22,5-Grad-Schritte
