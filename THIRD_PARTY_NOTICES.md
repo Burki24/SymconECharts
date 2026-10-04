@@ -21,13 +21,18 @@ Paket-SHA-1 laut npm: `ae0f68590f5ebbd728d900907c27acde7c5456d1`
 
 Ausgelieferte Dateien:
 
-- `libs/echarts/6.1.0/echarts.min.js` – unveränderter vollständiger
-  Browser-Build, SHA-256
-  `b66b25aeb4df84e33199dc21694014d336d222cbd9deb0e5a7c14bd6aa0d0fd0`;
+- `libs/echarts/6.1.0/echarts.gauge.min.js` – reproduzierbarer,
+  Gauge-spezifischer Browser-Build aus ECharts Core, Gauge Chart, Aria,
+  Tooltip und Canvas Renderer; 473.672 Byte; SHA-256
+  `0eef7a38f5bd44691e0d629756166ba0a7c3024a781746c1acd58d8d6b0a3f8b`;
 - `libs/echarts/6.1.0/LICENSE.txt` – Originallizenz aus demselben Paket;
 - `libs/echarts/6.1.0/NOTICE.txt` – Originalhinweise aus demselben Paket.
 
 Der Build wird lokal ausgeliefert und zur Laufzeit nicht von einem CDN geladen.
+Sein Einstiegspunkt, die exakt festgeschriebenen npm-Abhängigkeiten und der
+Buildbefehl liegen unter `tools/echarts-runtime`. Die ECharts-Quellen werden
+nicht inhaltlich verändert, sondern über die offizielle Tree-Shaking-API auf
+die von Gauge Single benötigten Bestandteile begrenzt.
 `.gitattributes` verhindert eine Zeilenendenkonvertierung der Fremdartefakte.
 `libs/EChartsAsset.php` normalisiert zusätzlich eine bereits durch einen
 Windows-Modulcheckout erfolgte CRLF-Konvertierung zurück auf die originalen

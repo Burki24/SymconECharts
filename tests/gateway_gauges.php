@@ -7,6 +7,7 @@ const VM_UPDATE = 10603;
 const KR_READY = 10103;
 const IS_ACTIVE = 102;
 const IS_INACTIVE = 104;
+const SYMCON_OUTPUT_BUFFER_LIMIT = 1048576;
 
 $GLOBALS['symconTestVariables'] = [
     4711 => [
@@ -351,6 +352,10 @@ assertGatewayGauge(str_contains($visualizationTile, 'window.echarts'), 'Gauge Si
 assertGatewayGauge(str_contains($visualizationTile, 'echarts-gauge-chart'), 'Gauge Single tile root is missing.');
 assertGatewayGauge(str_contains($visualizationTile, '"echartsVersion":"6.1.0"'), 'Gauge Single ECharts version changed.');
 assertGatewayGauge(!str_contains($visualizationTile, '<script src="http'), 'Gauge Single must not load ECharts from a CDN.');
+assertGatewayGauge(
+    strlen($visualizationTile) < SYMCON_OUTPUT_BUFFER_LIMIT,
+    'Gauge Single tile must remain below the Symcon output-buffer limit.'
+);
 
 $gaugeData = json_decode($gauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(($gaugeData['schemaVersion'] ?? null) === 1, 'Gauge Single data schema version changed.');

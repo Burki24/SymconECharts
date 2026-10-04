@@ -111,11 +111,14 @@ beschrieben.
 ## Bibliotheken und gemeinsame Helper
 
 ECharts wird ohne projektspezifische Änderungen am Bibliothekskern verwendet.
-Der vollständige Browser-Build 6.1.0 ist lokal festgeschrieben, wird mit
-Prüfsumme, Originallizenz und NOTICE ausgeliefert und vor der Einbettung auf
-Integrität geprüft. Im Betrieb wird weder `latest` noch eine externe
+Der Gauge-spezifische Browser-Build 6.1.0 ist lokal festgeschrieben, wird aus
+der offiziellen Tree-Shaking-API reproduzierbar erzeugt und mit Prüfsumme,
+Originallizenz sowie NOTICE ausgeliefert. Vor der Einbettung wird er auf
+Integrität geprüft. Seine Auswahl aus ECharts Core, Gauge Chart, Aria, Tooltip
+und Canvas Renderer hält das vollständige HTML-Dokument unter dem
+Symcon-Output-Buffer-Limit. Im Betrieb wird weder `latest` noch eine externe
 CDN-Ressource geladen. Aktualisierungen werden erneut gegen APIs, Lizenz,
-Lieferartefakte und die vorhandenen Renderer geprüft.
+Lieferartefakte, Größe und die vorhandenen Renderer geprüft.
 
 Vorhandene zentrale Helper aus `Symcon_ModuleHelper` werden wiederverwendet
 und über den vorgesehenen Synchronisierungsweg eingebunden. Allgemeine

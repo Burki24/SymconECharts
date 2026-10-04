@@ -22,13 +22,21 @@ lokale Symcon-Installation verlässlich verfügbar.
 
 ## Entscheidung
 
-Apache ECharts wird in Version **6.1.0** als unveränderter vollständiger
-Browser-Build `echarts.min.js` aus dem offiziellen npm-Paket `echarts@6.1.0`
-eingebunden. Der Build liegt unter `libs/echarts/6.1.0`, wird nicht von einem
-CDN geladen und ist über den SHA-256-Wert
-`b66b25aeb4df84e33199dc21694014d336d222cbd9deb0e5a7c14bd6aa0d0fd0`
-festgeschrieben. `LICENSE.txt` und `NOTICE.txt` aus demselben Paket werden
-mitgeliefert. Herkunft und Prüfsumme stehen zusätzlich in
+Apache ECharts wird in Version **6.1.0** aus dem offiziellen npm-Paket
+`echarts@6.1.0` eingebunden. Da Symcon die Ausgabe von
+`GetVisualizationTile()` auf 1.048.576 Byte begrenzt und der vollständige
+minimierte Browser-Build dieses Budget bereits allein überschreitet, wird die
+offizielle Tree-Shaking-Schnittstelle verwendet. Der Gauge-spezifische Build
+enthält ECharts Core, Gauge Chart, Aria, Tooltip und Canvas Renderer. Er wird
+mit den unter `tools/echarts-runtime` festgeschriebenen Abhängigkeiten
+reproduzierbar erzeugt.
+
+Der Build liegt als `echarts.gauge.min.js` unter `libs/echarts/6.1.0`, ist
+473.672 Byte groß, wird nicht von einem CDN geladen und ist über den
+SHA-256-Wert
+`0eef7a38f5bd44691e0d629756166ba0a7c3024a781746c1acd58d8d6b0a3f8b`
+festgeschrieben. `LICENSE.txt` und `NOTICE.txt` aus demselben ECharts-Paket
+werden mitgeliefert. Herkunft, Buildweg und Prüfsumme stehen zusätzlich in
 `THIRD_PARTY_NOTICES.md`.
 
 `libs/EChartsAsset.php` ist der projektspezifische Loader. Er prüft die

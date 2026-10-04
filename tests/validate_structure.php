@@ -8,6 +8,7 @@ $errors = [];
 $requiredFiles = [
     'AGENTS.md',
     '.gitattributes',
+    '.gitignore',
     'README.md',
     'README1.md',
     'THIRD_PARTY_NOTICES.md',
@@ -20,7 +21,7 @@ $requiredFiles = [
     'library.json',
     'libs/EChartsAsset.php',
     'libs/EChartsDataProtocol.php',
-    'libs/echarts/6.1.0/echarts.min.js',
+    'libs/echarts/6.1.0/echarts.gauge.min.js',
     'libs/echarts/6.1.0/LICENSE.txt',
     'libs/echarts/6.1.0/NOTICE.txt',
     'libs/helper/DataFlowHelper.php',
@@ -48,6 +49,10 @@ $requiredFiles = [
     'tests/symcon_strict.php',
     'tests/test_update_library_metadata.py',
     'tests/validate_structure.php',
+    'tools/echarts-runtime/package.json',
+    'tools/echarts-runtime/package-lock.json',
+    'tools/echarts-runtime/README.md',
+    'tools/echarts-runtime/src/gauge-runtime.js',
     'EChartsGaugeSingle/visualization/index.html',
     'EChartsGaugeSingle/visualization/style.css',
     'EChartsGaugeSingle/visualization/app.js'
@@ -75,6 +80,10 @@ if (is_file($gitAttributesPath)) {
 
 if (is_file($root . '/libs/helper/EChartsDataProtocol.php')) {
     $errors[] = 'Project-specific EChartsDataProtocol.php must not be stored with synchronized ModuleHelpers.';
+}
+
+if (is_file($root . '/libs/echarts/6.1.0/echarts.min.js')) {
+    $errors[] = 'The full ECharts build exceeds the Symcon tile output-buffer budget and must not be distributed.';
 }
 
 $gitmodulesPath = $root . '/.gitmodules';

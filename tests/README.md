@@ -33,9 +33,13 @@ StylePHP und PHP CS Fixer.
   geordnete Quellen, Referenzwechsel, stabile Item-IDs, Beschriftungen,
   Duplikate, Wertebereiche und fehlerhafte Konfigurationen geprüft. Für Gauge
   Single werden außerdem HTML-Erzeugung, lokale ECharts-Einbettung und die
-  Zustandsaktualisierung nach `VM_UPDATE` charakterisiert.
+  Zustandsaktualisierung nach `VM_UPDATE` charakterisiert. Das erzeugte
+  HTML-Dokument muss unter dem Symcon-Output-Buffer-Limit von 1.048.576 Byte
+  bleiben.
 - `echarts_assets.php` prüft Version, SHA-256-Integrität, Lizenz und NOTICE der
-  lokal gebündelten Apache-ECharts-Runtime.
+  lokal gebündelten Apache-ECharts-Runtime. Zusätzlich werden der
+  Gauge-spezifische Browser-Export, das 512-KiB-Budget und der tolerierte
+  Windows-Zeilenendenfall geprüft.
 - `helper_integrity.py` stellt sicher, dass Subscription, Manifest,
   Helper-Dokumentation und alle abonnierten Datenfluss- und
   Visualisierungshelper vollständig übereinstimmen.

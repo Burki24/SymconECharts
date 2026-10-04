@@ -14,7 +14,7 @@ function assertEChartsAsset(bool $condition, string $message): void
 }
 
 $root = dirname(__DIR__);
-$runtimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.min.js';
+$runtimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.gauge.min.js';
 $licensePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/LICENSE.txt';
 $noticePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/NOTICE.txt';
 $runtime = (string) file_get_contents($runtimePath);
@@ -26,6 +26,11 @@ assertEChartsAsset(
     'The pinned Apache ECharts runtime checksum changed.'
 );
 assertEChartsAsset(EChartsAsset::JavaScript() === $runtime, 'The asset loader changed the runtime.');
+assertEChartsAsset(
+    strlen($runtime) < 524288,
+    'The Gauge-specific ECharts runtime must remain below 512 KiB.'
+);
+assertEChartsAsset(str_contains($runtime, 'window.echarts'), 'The Gauge runtime must expose the ECharts browser API.');
 assertEChartsAsset(
     hash('sha256', $windowsCheckoutRuntime) !== EChartsAsset::SHA256,
     'The Windows-checkout regression fixture must differ byte-for-byte.'
