@@ -71,8 +71,10 @@ Zeigerstärke die ursprünglichen Proportionen; die Spitze zeigt im SVG nach
 oben. Optional legt
 `data-echarts-pivot="x y"` am Wurzel-SVG den Drehpunkt in viewBox-Koordinaten
 fest; ohne diese Angabe wird unten mittig verwendet. Eigene SVG-Zeiger bringen
-mit einem ausdrücklich gesetzten Drehpunkt ihre Nabe selbst mit, weshalb der
-zusätzliche ECharts-Anker für sie ausgeblendet wird.
+im Normalfall keine eigene Nabe mit: Der Pfad endet unten mittig und die native
+ECharts-Nabe deckt das Schaftende ab. Nur Zeiger mit einem ausdrücklich
+gesetzten Drehpunkt bringen ihre Nabe selbst mit, weshalb der zusätzliche
+ECharts-Anker für sie ausgeblendet wird.
 Der Skalenbogen bleibt wahlweise bei der Presetvorgabe oder
 wird als Voll-, Dreiviertel-, Halb-, Viertelkreis beziehungsweise mit eigenem
 Start und Ende definiert. Die Positionen folgen einem Zifferblatt (`0°` oben,

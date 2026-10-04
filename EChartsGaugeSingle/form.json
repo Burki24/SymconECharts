@@ -207,7 +207,7 @@
                         },
                         {
                             "type": "Label",
-                            "caption": "Custom SVG pointers require a tightly fitted viewBox and path-only geometry and should face upward. At 100% pointer width their proportions are retained. The optional data-echarts-pivot attribute defines the rotation point; otherwise bottom center is used."
+                            "caption": "Custom SVG pointers require a tightly fitted viewBox and path-only geometry and should face upward. At 100% pointer width their proportions are retained. By default the shaft ends at bottom center and uses the native ECharts anchor. The optional data-echarts-pivot attribute is for pointers with their own hub."
                         },
                         {
                             "type": "RowLayout",

@@ -32,7 +32,7 @@
             "Arrow": "Pfeil",
             "Custom SVG": "Eigenes SVG",
             "Custom pointer SVG": "Eigenes Zeiger-SVG",
-            "Custom SVG pointers require a tightly fitted viewBox and path-only geometry and should face upward. At 100% pointer width their proportions are retained. The optional data-echarts-pivot attribute defines the rotation point; otherwise bottom center is used.": "Eigene SVG-Zeiger benötigen eine eng anliegende viewBox und reine Pfadgeometrie und sollten nach oben zeigen. Bei 100 % Zeigerstärke bleiben ihre Proportionen erhalten. Das optionale Attribut data-echarts-pivot legt den Drehpunkt fest; andernfalls wird unten mittig verwendet.",
+            "Custom SVG pointers require a tightly fitted viewBox and path-only geometry and should face upward. At 100% pointer width their proportions are retained. By default the shaft ends at bottom center and uses the native ECharts anchor. The optional data-echarts-pivot attribute is for pointers with their own hub.": "Eigene SVG-Zeiger benötigen eine eng anliegende viewBox und reine Pfadgeometrie und sollten nach oben zeigen. Bei 100 % Zeigerstärke bleiben ihre Proportionen erhalten. Standardmäßig endet der Schaft unten mittig und verwendet die native ECharts-Nabe. Das optionale Attribut data-echarts-pivot ist für Zeiger mit eigener Nabe vorgesehen.",
             "Scale arc": "Skalenbogen",
             "Full circle": "Vollkreis",
             "Three-quarter circle": "Dreiviertelkreis",
