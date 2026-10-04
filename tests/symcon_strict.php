@@ -324,7 +324,14 @@ foreach ([
             'PlateSizePercent',
             'PlateBorderWidthPercent',
             'MinorTickLengthPercent',
-            'MajorTickLengthPercent'
+            'MajorTickLengthPercent',
+            'ProgressWidthPercent',
+            'MinorTickDistancePercent',
+            'MajorTickDistancePercent',
+            'ScaleLabelDistancePercent',
+            'GaugeRadiusPercent',
+            'DetailBorderWidthPercent',
+            'DetailCornerRadiusPercent'
         ] as $fineTuningName) {
             $fineTuningElement = $fineTuningElements[$fineTuningName] ?? null;
             requireStrictContract(
@@ -385,7 +392,38 @@ foreach ([
             'RingColor'                     => ['type' => 'SelectColor'],
             'ScaleColor'                    => ['type' => 'SelectColor'],
             'ValueColor'                    => ['type' => 'SelectColor'],
-            'TitleColor'                    => ['type' => 'SelectColor']
+            'TitleColor'                    => ['type' => 'SelectColor'],
+            'ScaleZonesEnabled'             => ['type' => 'CheckBox'],
+            'ScaleZones'                    => ['type' => 'List'],
+            'MajorSplitCount'               => ['type' => 'NumberSpinner'],
+            'MinorSplitCount'               => ['type' => 'NumberSpinner'],
+            'ScaleLabelRotation'            => ['type' => 'Select', 'values' => ['horizontal', 'tangential', 'radial']],
+            'GaugeDirection'                => ['type' => 'Select', 'values' => ['clockwise', 'counterclockwise']],
+            'GaugeRadiusPercent'            => ['type' => 'NumberSpinner'],
+            'GaugeOffsetXPercent'           => ['type' => 'NumberSpinner'],
+            'GaugeOffsetYPercent'           => ['type' => 'NumberSpinner'],
+            'ValueOffsetXPercent'           => ['type' => 'NumberSpinner'],
+            'ValueOffsetYPercent'           => ['type' => 'NumberSpinner'],
+            'TitleOffsetXPercent'           => ['type' => 'NumberSpinner'],
+            'TitleOffsetYPercent'           => ['type' => 'NumberSpinner'],
+            'PointerVisibility'             => ['type' => 'Select', 'values' => ['preset', 'show', 'hide']],
+            'ProgressVisibility'            => ['type' => 'Select', 'values' => ['preset', 'show', 'hide']],
+            'RingVisibility'                => ['type' => 'Select', 'values' => ['preset', 'show', 'hide']],
+            'MinorTicksVisibility'          => ['type' => 'Select', 'values' => ['preset', 'show', 'hide']],
+            'MajorTicksVisibility'          => ['type' => 'Select', 'values' => ['preset', 'show', 'hide']],
+            'ScaleLabelsVisibility'         => ['type' => 'Select', 'values' => ['preset', 'show', 'hide']],
+            'ValueVisibility'               => ['type' => 'Select', 'values' => ['preset', 'show', 'hide']],
+            'UnitVisibility'                => ['type' => 'Select', 'values' => ['preset', 'show', 'hide']],
+            'TitleVisibility'               => ['type' => 'Select', 'values' => ['preset', 'show', 'hide']],
+            'DetailBoxVisibility'           => ['type' => 'Select', 'values' => ['preset', 'show', 'hide']],
+            'DetailColorMode'               => ['type' => 'Select', 'values' => ['theme', 'custom']],
+            'DetailBackgroundColor'         => ['type' => 'SelectColor'],
+            'DetailBorderColor'             => ['type' => 'SelectColor'],
+            'DetailShadow'                  => ['type' => 'CheckBox'],
+            'PointerShadow'                 => ['type' => 'CheckBox'],
+            'ProgressShadow'                => ['type' => 'CheckBox'],
+            'RingShadow'                    => ['type' => 'CheckBox'],
+            'AnchorShadow'                  => ['type' => 'CheckBox']
         ] as $designerName => $contract) {
             $designerElement = $fineTuningElements[$designerName] ?? null;
             $valid = is_array($designerElement) && ($designerElement['type'] ?? null) === $contract['type'];

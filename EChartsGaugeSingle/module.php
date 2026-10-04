@@ -66,24 +66,34 @@ class EChartsGaugeSingle extends IPSModuleStrict
     ];
     private const SUPPORTED_ARC_MODES = ['preset', 'full', 'three-quarter', 'half', 'quarter', 'custom'];
     private const SUPPORTED_COLOR_MODES = ['theme', 'custom'];
+    private const SUPPORTED_VISIBILITY_MODES = ['preset', 'show', 'hide'];
+    private const SUPPORTED_GAUGE_DIRECTIONS = ['clockwise', 'counterclockwise'];
+    private const SUPPORTED_SCALE_LABEL_ROTATIONS = ['horizontal', 'tangential', 'radial'];
     private const ANGLE_STEP = 22.5;
     private const DESIGN_SCALE_DEFAULT = 100;
     private const DESIGN_SCALE_MINIMUM = 50;
     private const DESIGN_SCALE_MAXIMUM = 150;
     private const DESIGN_SCALE_PROPERTIES = [
-        'scaleFontSizePercent'     => 'ScaleFontSizePercent',
-        'valueFontSizePercent'     => 'ValueFontSizePercent',
-        'unitFontSizePercent'      => 'UnitFontSizePercent',
-        'titleFontSizePercent'     => 'TitleFontSizePercent',
-        'ringWidthPercent'         => 'RingWidthPercent',
-        'pointerWidthPercent'      => 'PointerWidthPercent',
-        'pointerLengthPercent'     => 'PointerLengthPercent',
-        'anchorSizePercent'        => 'AnchorSizePercent',
-        'anchorBorderWidthPercent' => 'AnchorBorderWidthPercent',
-        'plateSizePercent'         => 'PlateSizePercent',
-        'plateBorderWidthPercent'  => 'PlateBorderWidthPercent',
-        'minorTickLengthPercent'   => 'MinorTickLengthPercent',
-        'majorTickLengthPercent'   => 'MajorTickLengthPercent'
+        'scaleFontSizePercent'      => 'ScaleFontSizePercent',
+        'valueFontSizePercent'      => 'ValueFontSizePercent',
+        'unitFontSizePercent'       => 'UnitFontSizePercent',
+        'titleFontSizePercent'      => 'TitleFontSizePercent',
+        'ringWidthPercent'          => 'RingWidthPercent',
+        'pointerWidthPercent'       => 'PointerWidthPercent',
+        'pointerLengthPercent'      => 'PointerLengthPercent',
+        'anchorSizePercent'         => 'AnchorSizePercent',
+        'anchorBorderWidthPercent'  => 'AnchorBorderWidthPercent',
+        'plateSizePercent'          => 'PlateSizePercent',
+        'plateBorderWidthPercent'   => 'PlateBorderWidthPercent',
+        'minorTickLengthPercent'    => 'MinorTickLengthPercent',
+        'majorTickLengthPercent'    => 'MajorTickLengthPercent',
+        'progressWidthPercent'      => 'ProgressWidthPercent',
+        'minorTickDistancePercent'  => 'MinorTickDistancePercent',
+        'majorTickDistancePercent'  => 'MajorTickDistancePercent',
+        'scaleLabelDistancePercent' => 'ScaleLabelDistancePercent',
+        'gaugeRadiusPercent'        => 'GaugeRadiusPercent',
+        'detailBorderWidthPercent'  => 'DetailBorderWidthPercent',
+        'detailCornerRadiusPercent' => 'DetailCornerRadiusPercent'
     ];
 
     public function Create(): void
@@ -142,6 +152,40 @@ class EChartsGaugeSingle extends IPSModuleStrict
         $this->RegisterPropertyInteger('ScaleColor', 0xA7A9AE);
         $this->RegisterPropertyInteger('ValueColor', 0xF4F5F7);
         $this->RegisterPropertyInteger('TitleColor', 0xA7A9AE);
+        $this->RegisterPropertyBoolean('ScaleZonesEnabled', false);
+        $this->RegisterPropertyString('ScaleZones', '[]');
+        $this->RegisterPropertyInteger('MajorSplitCount', 0);
+        $this->RegisterPropertyInteger('MinorSplitCount', 0);
+        $this->RegisterPropertyString('ScaleLabelRotation', 'horizontal');
+        $this->RegisterPropertyString('GaugeDirection', 'clockwise');
+        $this->RegisterPropertyInteger('GaugeOffsetXPercent', 0);
+        $this->RegisterPropertyInteger('GaugeOffsetYPercent', 0);
+        $this->RegisterPropertyInteger('ValueOffsetXPercent', 0);
+        $this->RegisterPropertyInteger('ValueOffsetYPercent', 0);
+        $this->RegisterPropertyInteger('TitleOffsetXPercent', 0);
+        $this->RegisterPropertyInteger('TitleOffsetYPercent', 0);
+        foreach ([
+            'PointerVisibility',
+            'ProgressVisibility',
+            'RingVisibility',
+            'MinorTicksVisibility',
+            'MajorTicksVisibility',
+            'ScaleLabelsVisibility',
+            'ValueVisibility',
+            'UnitVisibility',
+            'TitleVisibility',
+            'DetailBoxVisibility'
+        ] as $propertyName) {
+            $this->RegisterPropertyString($propertyName, 'preset');
+        }
+        $this->RegisterPropertyString('DetailColorMode', 'theme');
+        $this->RegisterPropertyInteger('DetailBackgroundColor', 0x25272B);
+        $this->RegisterPropertyInteger('DetailBorderColor', 0xA5A9B0);
+        $this->RegisterPropertyBoolean('DetailShadow', false);
+        $this->RegisterPropertyBoolean('PointerShadow', false);
+        $this->RegisterPropertyBoolean('ProgressShadow', false);
+        $this->RegisterPropertyBoolean('RingShadow', false);
+        $this->RegisterPropertyBoolean('AnchorShadow', false);
         foreach (self::DESIGN_SCALE_PROPERTIES as $propertyName) {
             $this->RegisterPropertyInteger($propertyName, self::DESIGN_SCALE_DEFAULT);
         }
@@ -176,6 +220,10 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 $form['elements'],
                 $this->GaugePreviewAction()
             );
+            $form['elements'] = $this->WithGaugePreviewCallbacks(
+                $form['elements'],
+                $this->GaugePreviewFormAction()
+            );
         }
         $form = SVGPreviewHelper::withImage(
             $form,
@@ -194,6 +242,39 @@ class EChartsGaugeSingle extends IPSModuleStrict
         );
 
         return $this->EncodeConfigurationForm($form);
+    }
+
+    /**
+     * Refreshes the preview from one snapshot of all currently edited form values.
+     */
+    public function UpdateGaugePreviewFromForm(string $Configuration): void
+    {
+        try {
+            $values = json_decode($Configuration, true, 64, JSON_THROW_ON_ERROR);
+        } catch (JsonException) {
+            $values = [];
+        }
+        if (!is_array($values)) {
+            $values = [];
+        }
+
+        $minimum = self::FiniteFloat($values['Minimum'] ?? 0.0, 0.0);
+        $maximum = self::FiniteFloat($values['Maximum'] ?? 100.0, 100.0);
+        $this->UpdateFormField(
+            'GaugePreview',
+            'image',
+            SVGPreviewHelper::dataUri($this->BuildGaugePreviewSvg(
+                (int) ($values['SourceVariableID'] ?? 0),
+                $minimum,
+                $maximum,
+                (string) ($values['Title'] ?? ''),
+                (string) ($values['Unit'] ?? ''),
+                (int) ($values['Decimals'] ?? 1),
+                (string) ($values['GaugePreset'] ?? self::PRESET_SIMPLE),
+                (string) ($values['EChartsTheme'] ?? EChartsAsset::THEME_AUTO),
+                $this->GaugeStyleFromFormValues($values, $minimum, $maximum)
+            ))
+        );
     }
 
     /**
@@ -568,6 +649,70 @@ class EChartsGaugeSingle extends IPSModuleStrict
         return $items;
     }
 
+    private function GaugePreviewFormAction(): string
+    {
+        $fieldNames = [
+            'SourceVariableID', 'Minimum', 'Maximum', 'Title', 'Unit', 'Decimals',
+            'GaugePreset', 'EChartsTheme', 'PointerShape', 'CustomPointerSVG',
+            'CustomPointerPivotMode', 'CustomPointerPivotXPercent', 'CustomPointerPivotYPercent',
+            'AnchorShape', 'CustomAnchorSVG', 'AnchorColorMode', 'AnchorColor', 'AnchorBorderColor',
+            'PlateShape', 'PlateColorMode', 'PlateFillMode', 'PlateGradientMiddleEnabled',
+            'PlateGradientMiddleColor', 'PlateGradientEndColor', 'PlateGradientDirection',
+            'PlateGradientCenterXPercent', 'PlateGradientCenterYPercent', 'PlateGradientRadiusPercent',
+            'PlateBackgroundEnabled', 'PlateBackgroundSVG', 'PlateBackgroundFit',
+            'PlateBackgroundSizePercent', 'PlateBackgroundOffsetXPercent',
+            'PlateBackgroundOffsetYPercent', 'PlateBackgroundOpacityPercent', 'PlateBackgroundRotation',
+            'PlateTransparent', 'PlateShadow', 'PlateColor', 'PlateBorderColor',
+            'GaugeArcMode', 'GaugeStartPosition', 'GaugeEndPosition', 'GaugeColorMode',
+            'PointerColor', 'ProgressColor', 'RingColor', 'ScaleColor', 'ValueColor', 'TitleColor',
+            'ScaleZonesEnabled', 'ScaleZones', 'MajorSplitCount', 'MinorSplitCount',
+            'ScaleLabelRotation', 'GaugeDirection', 'GaugeOffsetXPercent', 'GaugeOffsetYPercent',
+            'ValueOffsetXPercent', 'ValueOffsetYPercent', 'TitleOffsetXPercent', 'TitleOffsetYPercent',
+            'PointerVisibility', 'ProgressVisibility', 'RingVisibility', 'MinorTicksVisibility',
+            'MajorTicksVisibility', 'ScaleLabelsVisibility', 'ValueVisibility', 'UnitVisibility',
+            'TitleVisibility', 'DetailBoxVisibility', 'DetailColorMode',
+            'DetailBackgroundColor', 'DetailBorderColor', 'DetailShadow',
+            'PointerShadow', 'ProgressShadow', 'RingShadow', 'AnchorShadow',
+            ...array_values(self::DESIGN_SCALE_PROPERTIES)
+        ];
+        $pairs = array_map(
+            static fn (string $name): string => "'{$name}' => \${$name}",
+            array_values(array_unique($fieldNames))
+        );
+
+        return 'ECGS_UpdateGaugePreviewFromForm($id, json_encode([' . implode(', ', $pairs) . ']));';
+    }
+
+    /**
+     * @param list<array<string, mixed>> $items
+     * @return list<array<string, mixed>>
+     */
+    private function WithGaugePreviewCallbacks(array $items, string $action): array
+    {
+        $inputTypes = [
+            'CheckBox', 'NumberSpinner', 'Select', 'SelectColor', 'SelectFile',
+            'SelectVariable', 'ValidationTextBox'
+        ];
+        foreach ($items as &$item) {
+            if (isset($item['name'], $item['type'])
+                && is_string($item['name'])
+                && in_array($item['type'], $inputTypes, true)) {
+                $item['onChange'] = $action;
+            }
+            if (($item['type'] ?? null) === 'List' && ($item['name'] ?? null) === 'ScaleZones') {
+                foreach (['onAdd', 'onDelete', 'onEdit', 'onChangeOrder'] as $event) {
+                    $item[$event] = $action;
+                }
+            }
+            if (isset($item['items']) && is_array($item['items'])) {
+                $item['items'] = $this->WithGaugePreviewCallbacks($item['items'], $action);
+            }
+        }
+        unset($item);
+
+        return $items;
+    }
+
     private function Initialize(): void
     {
         $this->SetStatus(IS_INACTIVE);
@@ -823,10 +968,61 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 true
             )
             || !in_array($this->ReadPropertyString('GaugeArcMode'), self::SUPPORTED_ARC_MODES, true)
-            || !in_array($this->ReadPropertyString('GaugeColorMode'), self::SUPPORTED_COLOR_MODES, true)) {
+            || !in_array($this->ReadPropertyString('GaugeColorMode'), self::SUPPORTED_COLOR_MODES, true)
+            || !in_array($this->ReadPropertyString('DetailColorMode'), self::SUPPORTED_COLOR_MODES, true)
+            || !in_array($this->ReadPropertyString('GaugeDirection'), self::SUPPORTED_GAUGE_DIRECTIONS, true)
+            || !in_array(
+                $this->ReadPropertyString('ScaleLabelRotation'),
+                self::SUPPORTED_SCALE_LABEL_ROTATIONS,
+                true
+            )) {
             return [
                 'Status'  => self::STATUS_DESIGN_INVALID,
                 'Message' => 'The selected Gauge design option is not supported.'
+            ];
+        }
+
+        foreach ([
+            'PointerVisibility', 'ProgressVisibility', 'RingVisibility',
+            'MinorTicksVisibility', 'MajorTicksVisibility', 'ScaleLabelsVisibility',
+            'ValueVisibility', 'UnitVisibility', 'TitleVisibility', 'DetailBoxVisibility'
+        ] as $propertyName) {
+            if (!in_array($this->ReadPropertyString($propertyName), self::SUPPORTED_VISIBILITY_MODES, true)) {
+                return [
+                    'Status'  => self::STATUS_DESIGN_INVALID,
+                    'Message' => 'The selected Gauge visibility option is not supported.'
+                ];
+            }
+        }
+        foreach ([
+            'MajorSplitCount'     => [0, 24], 'MinorSplitCount' => [0, 10],
+            'GaugeOffsetXPercent' => [-50, 50], 'GaugeOffsetYPercent' => [-50, 50],
+            'ValueOffsetXPercent' => [-100, 100], 'ValueOffsetYPercent' => [-100, 100],
+            'TitleOffsetXPercent' => [-100, 100], 'TitleOffsetYPercent' => [-100, 100]
+        ] as $propertyName => [$minimumValue, $maximumValue]) {
+            $value = $this->ReadPropertyInteger($propertyName);
+            if ($value < $minimumValue || $value > $maximumValue) {
+                return [
+                    'Status'  => self::STATUS_DESIGN_INVALID,
+                    'Message' => 'Gauge layout values are outside their supported ranges.'
+                ];
+            }
+        }
+        if ($this->ReadPropertyInteger('MajorSplitCount') === 1) {
+            return [
+                'Status'  => self::STATUS_DESIGN_INVALID,
+                'Message' => 'Gauge major sections must be zero for the preset or between 2 and 24.'
+            ];
+        }
+        if ($this->ReadPropertyBoolean('ScaleZonesEnabled')
+            && !self::ScaleZonesAreValid(
+                $this->ReadPropertyString('ScaleZones'),
+                $this->ReadPropertyFloat('Minimum'),
+                $this->ReadPropertyFloat('Maximum')
+            )) {
+            return [
+                'Status'  => self::STATUS_DESIGN_INVALID,
+                'Message' => 'Gauge value ranges must contain up to eight ascending end values inside the Gauge range.'
             ];
         }
 
@@ -931,7 +1127,9 @@ class EChartsGaugeSingle extends IPSModuleStrict
             'PlateColor',
             'PlateBorderColor',
             'PlateGradientMiddleColor',
-            'PlateGradientEndColor'
+            'PlateGradientEndColor',
+            'DetailBackgroundColor',
+            'DetailBorderColor'
         ] as $propertyName) {
             $color = $this->ReadPropertyInteger($propertyName);
             if ($color < 0 || $color > 0xFFFFFF) {
@@ -945,7 +1143,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
         return null;
     }
 
-    /** @return array<string, bool|int|float|string> */
+    /** @return array<string, mixed> */
     private function ReadGaugeStyle(): array
     {
         $style = [];
@@ -970,6 +1168,44 @@ class EChartsGaugeSingle extends IPSModuleStrict
         $style['startPosition'] = $this->ReadPropertyFloat('GaugeStartPosition');
         $style['endPosition'] = $this->ReadPropertyFloat('GaugeEndPosition');
         $style['colorMode'] = $this->ReadPropertyString('GaugeColorMode');
+        $style['scaleZonesEnabled'] = $this->ReadPropertyBoolean('ScaleZonesEnabled');
+        $style['scaleZones'] = self::ResolveScaleZones(
+            $this->ReadPropertyString('ScaleZones'),
+            $this->ReadPropertyFloat('Minimum'),
+            $this->ReadPropertyFloat('Maximum')
+        );
+        foreach ([
+            'majorSplitCount'     => 'MajorSplitCount',
+            'minorSplitCount'     => 'MinorSplitCount',
+            'gaugeOffsetXPercent' => 'GaugeOffsetXPercent',
+            'gaugeOffsetYPercent' => 'GaugeOffsetYPercent',
+            'valueOffsetXPercent' => 'ValueOffsetXPercent',
+            'valueOffsetYPercent' => 'ValueOffsetYPercent',
+            'titleOffsetXPercent' => 'TitleOffsetXPercent',
+            'titleOffsetYPercent' => 'TitleOffsetYPercent'
+        ] as $fieldName => $propertyName) {
+            $style[$fieldName] = $this->ReadPropertyInteger($propertyName);
+        }
+        foreach ([
+            'scaleLabelRotation'   => 'ScaleLabelRotation',
+            'gaugeDirection'       => 'GaugeDirection',
+            'pointerVisibility'    => 'PointerVisibility',
+            'progressVisibility'   => 'ProgressVisibility',
+            'ringVisibility'       => 'RingVisibility',
+            'minorTicksVisibility' => 'MinorTicksVisibility',
+            'majorTicksVisibility' => 'MajorTicksVisibility',
+            'scaleLabelsVisibility'=> 'ScaleLabelsVisibility',
+            'valueVisibility'      => 'ValueVisibility',
+            'unitVisibility'       => 'UnitVisibility',
+            'titleVisibility'      => 'TitleVisibility',
+            'detailBoxVisibility'  => 'DetailBoxVisibility',
+            'detailColorMode'      => 'DetailColorMode'
+        ] as $fieldName => $propertyName) {
+            $style[$fieldName] = $this->ReadPropertyString($propertyName);
+        }
+        foreach (['detailShadow', 'pointerShadow', 'progressShadow', 'ringShadow', 'anchorShadow'] as $fieldName) {
+            $style[$fieldName] = $this->ReadPropertyBoolean(ucfirst($fieldName));
+        }
         foreach ([
             'pointerColor'             => 'PointerColor',
             'progressColor'            => 'ProgressColor',
@@ -982,7 +1218,9 @@ class EChartsGaugeSingle extends IPSModuleStrict
             'plateColor'               => 'PlateColor',
             'plateBorderColor'         => 'PlateBorderColor',
             'plateGradientMiddleColor' => 'PlateGradientMiddleColor',
-            'plateGradientEndColor'    => 'PlateGradientEndColor'
+            'plateGradientEndColor'    => 'PlateGradientEndColor',
+            'detailBackgroundColor'    => 'DetailBackgroundColor',
+            'detailBorderColor'        => 'DetailBorderColor'
         ] as $fieldName => $propertyName) {
             $style[$fieldName] = self::ColorToHex($this->ReadPropertyInteger($propertyName));
         }
@@ -1012,6 +1250,161 @@ class EChartsGaugeSingle extends IPSModuleStrict
         );
 
         return $style;
+    }
+
+    /** @param array<string, mixed> $values */
+    private function GaugeStyleFromFormValues(array $values, float $minimum, float $maximum): array
+    {
+        $style = $this->ReadGaugeStyle();
+        foreach (self::DESIGN_SCALE_PROPERTIES as $fieldName => $propertyName) {
+            $style[$fieldName] = (int) ($values[$propertyName] ?? $style[$fieldName]);
+        }
+        $stringFields = [
+            'pointerShape'           => 'PointerShape', 'anchorShape' => 'AnchorShape',
+            'anchorColorMode'        => 'AnchorColorMode', 'plateShape' => 'PlateShape',
+            'plateColorMode'         => 'PlateColorMode', 'plateFillMode' => 'PlateFillMode',
+            'plateGradientDirection' => 'PlateGradientDirection', 'plateBackgroundFit' => 'PlateBackgroundFit',
+            'arcMode'                => 'GaugeArcMode', 'colorMode' => 'GaugeColorMode',
+            'scaleLabelRotation'     => 'ScaleLabelRotation', 'gaugeDirection' => 'GaugeDirection',
+            'pointerVisibility'      => 'PointerVisibility', 'progressVisibility' => 'ProgressVisibility',
+            'ringVisibility'         => 'RingVisibility', 'minorTicksVisibility' => 'MinorTicksVisibility',
+            'majorTicksVisibility'   => 'MajorTicksVisibility', 'scaleLabelsVisibility' => 'ScaleLabelsVisibility',
+            'valueVisibility'        => 'ValueVisibility', 'unitVisibility' => 'UnitVisibility',
+            'titleVisibility'        => 'TitleVisibility', 'detailBoxVisibility' => 'DetailBoxVisibility',
+            'detailColorMode'        => 'DetailColorMode'
+        ];
+        $stringDefaults = [
+            'pointerShape'           => 'preset', 'anchorShape' => 'preset', 'anchorColorMode' => 'theme',
+            'plateShape'             => 'hidden', 'plateColorMode' => 'theme', 'plateFillMode' => 'solid',
+            'plateGradientDirection' => 'top-bottom', 'plateBackgroundFit' => 'cover',
+            'arcMode'                => 'preset', 'colorMode' => 'theme', 'scaleLabelRotation' => 'horizontal',
+            'gaugeDirection'         => 'clockwise', 'detailColorMode' => 'theme'
+        ];
+        foreach ($stringFields as $fieldName => $propertyName) {
+            $style[$fieldName] = (string) (
+                $values[$propertyName]
+                ?? $style[$fieldName]
+                ?? $stringDefaults[$fieldName]
+                ?? 'preset'
+            );
+        }
+        foreach ([
+            'majorSplitCount'             => 'MajorSplitCount', 'minorSplitCount' => 'MinorSplitCount',
+            'gaugeOffsetXPercent'         => 'GaugeOffsetXPercent', 'gaugeOffsetYPercent' => 'GaugeOffsetYPercent',
+            'valueOffsetXPercent'         => 'ValueOffsetXPercent', 'valueOffsetYPercent' => 'ValueOffsetYPercent',
+            'titleOffsetXPercent'         => 'TitleOffsetXPercent', 'titleOffsetYPercent' => 'TitleOffsetYPercent',
+            'plateGradientCenterXPercent' => 'PlateGradientCenterXPercent',
+            'plateGradientCenterYPercent' => 'PlateGradientCenterYPercent',
+            'plateGradientRadiusPercent'  => 'PlateGradientRadiusPercent'
+        ] as $fieldName => $propertyName) {
+            $style[$fieldName] = (int) ($values[$propertyName] ?? $style[$fieldName]);
+        }
+        foreach ([
+            'plateGradientMiddleEnabled' => 'PlateGradientMiddleEnabled',
+            'plateTransparent'           => 'PlateTransparent', 'plateShadow' => 'PlateShadow',
+            'scaleZonesEnabled'          => 'ScaleZonesEnabled', 'detailShadow' => 'DetailShadow',
+            'pointerShadow'              => 'PointerShadow', 'progressShadow' => 'ProgressShadow',
+            'ringShadow'                 => 'RingShadow', 'anchorShadow' => 'AnchorShadow'
+        ] as $fieldName => $propertyName) {
+            $style[$fieldName] = (bool) ($values[$propertyName] ?? $style[$fieldName]);
+        }
+        $style['startPosition'] = self::FiniteFloat($values['GaugeStartPosition'] ?? $style['startPosition'], 270.0);
+        $style['endPosition'] = self::FiniteFloat($values['GaugeEndPosition'] ?? $style['endPosition'], 90.0);
+        foreach ([
+            'pointerColor'             => 'PointerColor', 'progressColor' => 'ProgressColor', 'ringColor' => 'RingColor',
+            'scaleColor'               => 'ScaleColor', 'valueColor' => 'ValueColor', 'titleColor' => 'TitleColor',
+            'anchorColor'              => 'AnchorColor', 'anchorBorderColor' => 'AnchorBorderColor',
+            'plateColor'               => 'PlateColor', 'plateBorderColor' => 'PlateBorderColor',
+            'plateGradientMiddleColor' => 'PlateGradientMiddleColor',
+            'plateGradientEndColor'    => 'PlateGradientEndColor',
+            'detailBackgroundColor'    => 'DetailBackgroundColor', 'detailBorderColor' => 'DetailBorderColor'
+        ] as $fieldName => $propertyName) {
+            if (array_key_exists($propertyName, $values)) {
+                $style[$fieldName] = self::ColorToHex((int) $values[$propertyName]);
+            }
+        }
+        $zoneValues = $values['ScaleZones'] ?? '[]';
+        $zones = is_array($zoneValues)
+            ? json_encode($zoneValues, JSON_THROW_ON_ERROR)
+            : (string) $zoneValues;
+        $style['scaleZones'] = self::ResolveScaleZones($zones, $minimum, $maximum);
+        $style = array_merge(
+            $style,
+            $this->ResolveCustomPointerStyle(
+                $style['pointerShape'],
+                (string) ($values['CustomPointerSVG'] ?? ''),
+                (string) ($values['CustomPointerPivotMode'] ?? 'svg'),
+                self::FiniteFloat($values['CustomPointerPivotXPercent'] ?? 50.0, 50.0),
+                self::FiniteFloat($values['CustomPointerPivotYPercent'] ?? 100.0, 100.0)
+            ),
+            $this->ResolveCustomAnchorStyle($style['anchorShape'], (string) ($values['CustomAnchorSVG'] ?? '')),
+            $this->ResolvePlateBackgroundStyle(
+                (bool) ($values['PlateBackgroundEnabled'] ?? false),
+                (string) ($values['PlateBackgroundSVG'] ?? ''),
+                (string) ($values['PlateBackgroundFit'] ?? 'cover'),
+                (int) ($values['PlateBackgroundSizePercent'] ?? 100),
+                (int) ($values['PlateBackgroundOffsetXPercent'] ?? 0),
+                (int) ($values['PlateBackgroundOffsetYPercent'] ?? 0),
+                (int) ($values['PlateBackgroundOpacityPercent'] ?? 100),
+                self::FiniteFloat($values['PlateBackgroundRotation'] ?? 0.0, 0.0)
+            )
+        );
+
+        return $style;
+    }
+
+    /** @return list<array{0: float, 1: string}> */
+    private static function ResolveScaleZones(string $json, float $minimum, float $maximum): array
+    {
+        if (!is_finite($minimum) || !is_finite($maximum) || $minimum >= $maximum) {
+            return [];
+        }
+        try {
+            $rows = json_decode($json, true, 32, JSON_THROW_ON_ERROR);
+        } catch (JsonException) {
+            return [];
+        }
+        if (!is_array($rows) || count($rows) > 8) {
+            return [];
+        }
+        $zones = [];
+        $lastRatio = 0.0;
+        foreach ($rows as $row) {
+            if (!is_array($row)) {
+                return [];
+            }
+            $end = self::FiniteFloat($row['EndValue'] ?? NAN, NAN);
+            $color = (int) ($row['Color'] ?? -1);
+            $ratio = ($end - $minimum) / ($maximum - $minimum);
+            if (!is_finite($end) || $ratio <= $lastRatio || $ratio > 1.0 || $color < 0 || $color > 0xFFFFFF) {
+                return [];
+            }
+            $zones[] = [$ratio, self::ColorToHex($color)];
+            $lastRatio = $ratio;
+        }
+
+        return $zones;
+    }
+
+    private static function ScaleZonesAreValid(string $json, float $minimum, float $maximum): bool
+    {
+        try {
+            $rows = json_decode($json, true, 32, JSON_THROW_ON_ERROR);
+        } catch (JsonException) {
+            return false;
+        }
+        if (!is_array($rows) || $rows === [] || count($rows) > 8) {
+            return false;
+        }
+
+        return count(self::ResolveScaleZones($json, $minimum, $maximum)) === count($rows);
+    }
+
+    private static function FiniteFloat(mixed $value, float $fallback): float
+    {
+        $number = (float) $value;
+
+        return is_finite($number) ? $number : $fallback;
     }
 
     /**

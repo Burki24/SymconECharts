@@ -219,10 +219,20 @@
         var pointerLength = resolveStyleScale(style, 'pointerLengthPercent');
         var minorTickLength = resolveStyleScale(style, 'minorTickLengthPercent');
         var majorTickLength = resolveStyleScale(style, 'majorTickLengthPercent');
+        var minorTickDistance = resolveStyleScale(style, 'minorTickDistancePercent');
+        var majorTickDistance = resolveStyleScale(style, 'majorTickDistancePercent');
+        var scaleLabelDistance = resolveStyleScale(style, 'scaleLabelDistancePercent');
+        var radiusScale = resolveStyleScale(style, 'gaugeRadiusPercent');
+        var gaugeOffsetX = clamp(Number(style.gaugeOffsetXPercent) || 0, -50, 50) * 2 * scale;
+        var gaugeOffsetY = clamp(Number(style.gaugeOffsetYPercent) || 0, -50, 50) * 2 * scale;
+        var valueOffsetX = clamp(Number(style.valueOffsetXPercent) || 0, -100, 100) * scale;
+        var valueOffsetY = clamp(Number(style.valueOffsetYPercent) || 0, -100, 100) * scale;
+        var titleOffsetX = clamp(Number(style.titleOffsetXPercent) || 0, -100, 100) * scale;
+        var titleOffsetY = clamp(Number(style.titleOffsetYPercent) || 0, -100, 100) * scale;
         var lineWidth = resolveScaledMetric(definition.lineWidth * scale, ringWidth, 8, 24, 4, 40);
         var detailTypographyScale = Math.max(valueFontSize, unitFontSize);
         var detailHeight = resolveScaledMetric(58 * scale, detailTypographyScale, 34, 64, 28, 88);
-        var arcPlateRadius = definition.radius * scale + lineWidth / 2 + 10 * scale;
+        var arcPlateRadius = definition.radius * scale * radiusScale + lineWidth / 2 + 10 * scale;
         var circlePlateRadius = Math.max(
             arcPlateRadius,
             Math.abs(definition.detailY - definition.centerY) * scale + detailHeight / 2 + 10 * scale,
@@ -232,17 +242,24 @@
         );
 
         return {
-            centerX: Math.round(width / 2),
-            centerY: Math.round(contentOffsetY + definition.centerY * scale),
-            radius: Math.round(definition.radius * scale + lineWidth / 2),
+            centerX: Math.round(width / 2 + gaugeOffsetX),
+            centerY: Math.round(contentOffsetY + definition.centerY * scale + gaugeOffsetY),
+            radius: Math.round(definition.radius * scale * radiusScale + lineWidth / 2),
             arcPlateRadius: Math.round(arcPlateRadius),
             circlePlateRadius: Math.round(circlePlateRadius),
             lineWidth: lineWidth,
-            tickDistance: clamp(Math.round(4 * scale), 2, 8),
+            tickDistance: resolveScaledMetric(4 * scale, minorTickDistance, 2, 8, 1, 16),
             tickLength: resolveScaledMetric(5 * scale, minorTickLength, 4, 10, 2, 20),
-            splitDistance: clamp(Math.round(4 * scale), 2, 8),
+            splitDistance: resolveScaledMetric(4 * scale, majorTickDistance, 2, 8, 1, 16),
             splitLength: resolveScaledMetric(definition.splitLength * scale, majorTickLength, 8, 20, 4, 36),
-            labelDistance: clamp(lineWidth + Math.round(definition.labelGap * scale), 10, 64),
+            labelDistance: resolveScaledMetric(
+                lineWidth + Math.round(definition.labelGap * scale),
+                scaleLabelDistance,
+                10,
+                64,
+                5,
+                96
+            ),
             axisFontSize: resolveScaledMetric(14 * scale, scaleFontSize, 9, 18, 6, 30),
             pointerLength: Math.round(parseFloat(definition.pointerLength) * pointerLength * 100) / 100 + '%',
             pointerWidth: resolveScaledMetric(
@@ -254,8 +271,8 @@
                 24
             ),
             anchorSize: clamp(Math.round(18 * scale), 10, 24),
-            detailOffset: Math.round((definition.detailY - definition.centerY) * scale),
-            titleOffset: Math.round((definition.titleY - definition.centerY) * scale),
+            detailOffset: [Math.round(valueOffsetX), Math.round((definition.detailY - definition.centerY) * scale + valueOffsetY)],
+            titleOffset: [Math.round(titleOffsetX), Math.round((definition.titleY - definition.centerY) * scale + titleOffsetY)],
             titleFontSize: resolveScaledMetric(18 * scale, titleFontSize, 11, 20, 7, 36),
             detailWidth: resolveScaledMetric(
                 244 * scale,
@@ -788,6 +805,108 @@
         return series;
     }
 
+    function resolveVisibility(mode, presetValue) {
+        if (mode === 'show') {
+            return true;
+        }
+        if (mode === 'hide') {
+            return false;
+        }
+
+        return presetValue;
+    }
+
+    function applyAdvancedDesign(series, style, layout, colors) {
+        var majorSplitCount = Number(style.majorSplitCount);
+        var minorSplitCount = Number(style.minorSplitCount);
+        if (Number.isInteger(majorSplitCount) && majorSplitCount >= 2 && majorSplitCount <= 24) {
+            series.splitNumber = majorSplitCount;
+        }
+        if (Number.isInteger(minorSplitCount) && minorSplitCount >= 1 && minorSplitCount <= 10) {
+            series.axisTick.splitNumber = minorSplitCount;
+        }
+
+        series.clockwise = style.gaugeDirection !== 'counterclockwise';
+        series.axisLabel.rotate = ['tangential', 'radial'].indexOf(style.scaleLabelRotation) >= 0
+            ? style.scaleLabelRotation
+            : 0;
+        series.pointer.show = resolveVisibility(style.pointerVisibility, series.pointer.show !== false);
+        series.progress.show = resolveVisibility(style.progressVisibility, series.progress.show !== false);
+        series.axisLine.show = resolveVisibility(style.ringVisibility, series.axisLine.show !== false);
+        series.axisTick.show = resolveVisibility(style.minorTicksVisibility, series.axisTick.show !== false);
+        series.splitLine.show = resolveVisibility(style.majorTicksVisibility, series.splitLine.show !== false);
+        series.axisLabel.show = resolveVisibility(style.scaleLabelsVisibility, series.axisLabel.show !== false);
+        series.detail.show = resolveVisibility(style.valueVisibility, series.detail.show !== false);
+        series.title.show = resolveVisibility(style.titleVisibility, series.title.show !== false);
+        series.progress.width = resolveScaledMetric(
+            layout.lineWidth,
+            resolveStyleScale(style, 'progressWidthPercent'),
+            8,
+            24,
+            4,
+            40
+        );
+
+        var detailBox = resolveVisibility(style.detailBoxVisibility, Boolean(series.detail.backgroundColor));
+        if (detailBox) {
+            series.detail.width = layout.detailWidth;
+            series.detail.height = layout.detailHeight;
+            series.detail.lineHeight = layout.detailHeight;
+            series.detail.backgroundColor = style.detailColorMode === 'custom'
+                ? normalizeStyleColor(style.detailBackgroundColor, colors.surface)
+                : colors.surface;
+            series.detail.borderColor = style.detailColorMode === 'custom'
+                ? normalizeStyleColor(style.detailBorderColor, colors.muted)
+                : colors.muted;
+            series.detail.borderWidth = Math.max(1, Math.round(2 * resolveStyleScale(style, 'detailBorderWidthPercent') * 100) / 100);
+            series.detail.borderRadius = Math.max(1, Math.round(8 * resolveStyleScale(style, 'detailCornerRadiusPercent') * 100) / 100);
+        } else {
+            delete series.detail.backgroundColor;
+            delete series.detail.borderColor;
+            delete series.detail.borderWidth;
+            delete series.detail.borderRadius;
+        }
+
+        var shadowColor = colorWithAlpha(colors.accent, 0.45);
+        [
+            [series.pointer.itemStyle, style.pointerShadow],
+            [series.progress.itemStyle, style.progressShadow],
+            [series.axisLine.lineStyle, style.ringShadow],
+            [series.anchor.itemStyle, style.anchorShadow],
+            [series.detail, style.detailShadow]
+        ].forEach(function (entry) {
+            if (entry[1]) {
+                entry[0].shadowColor = shadowColor;
+                entry[0].shadowBlur = 10;
+                entry[0].shadowOffsetX = 2;
+                entry[0].shadowOffsetY = 2;
+            }
+        });
+
+        if (style.scaleZonesEnabled && Array.isArray(style.scaleZones) && style.scaleZones.length) {
+            var zones = [];
+            style.scaleZones.forEach(function (zone) {
+                if (Array.isArray(zone) && Number.isFinite(Number(zone[0]))
+                    && Number(zone[0]) > 0 && Number(zone[0]) <= 1
+                    && /^#[0-9a-f]{6}$/i.test(String(zone[1] || ''))) {
+                    zones.push([Number(zone[0]), zone[1]]);
+                }
+            });
+            if (zones.length && zones[zones.length - 1][0] < 1) {
+                var baseColor = series.axisLine.lineStyle.color;
+                var fallback = Array.isArray(baseColor) && baseColor.length
+                    ? baseColor[baseColor.length - 1][1]
+                    : colors.track;
+                zones.push([1, fallback]);
+            }
+            if (zones.length) {
+                series.axisLine.lineStyle.color = zones;
+            }
+        }
+
+        return series;
+    }
+
     function buildOption(payload, theme) {
         var gauge = payload.gauge || {};
         var minimum = Number(gauge.minimum);
@@ -863,12 +982,12 @@
             },
             title: {
                 show: title !== '',
-                offsetCenter: [0, layout.titleOffset],
+                offsetCenter: layout.titleOffset,
                 fontSize: layout.titleFontSize
             },
             detail: {
                 valueAnimation: !reduceMotion,
-                offsetCenter: [0, layout.detailOffset],
+                offsetCenter: layout.detailOffset,
                 fontWeight: 600,
                 rich: {
                     value: {
@@ -884,7 +1003,8 @@
                     }
                 },
                 formatter: function () {
-                    return formatSpeedValue(value, decimals, unit);
+                    var shownUnit = style.unitVisibility === 'hide' ? '' : unit;
+                    return formatSpeedValue(value, decimals, shownUnit);
                 }
             },
             data: [{ value: value, name: title }]
@@ -896,6 +1016,7 @@
         series = applyPointerShape(series, style, layout);
         series = applyCustomColors(series, style, colors);
         series = applyAnchorDesign(series, style, layout, colors);
+        series = applyAdvancedDesign(series, style, layout, colors);
 
         var option = {
             animation: !reduceMotion,

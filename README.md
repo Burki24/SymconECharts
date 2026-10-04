@@ -20,7 +20,9 @@ Folgende Module beinhaltet das SymconECharts Repository:
   werden. Eine optionale runde oder dem Skalenbogen folgende Zifferblattplatte
   besitzt eine eigene Füllung einschließlich linearer und radialer
   Farbverläufe, ein sicher importiertes und zugeschnittenes SVG-Motiv,
-  Kontur, Größe und Schatten.
+  Kontur, Größe und Schatten. Farbige Wertebereiche, frei abstimmbare Skalen,
+  responsive Positionierung, elementweise Sichtbarkeit und ein gestaltbarer
+  Wertekasten vervollständigen den Designer.
   Ein separat platzierbares HTML-Widget in IPSView bleibt ein weiterer
   Ausgabeweg auf derselben Diagrammkonfiguration und Datenaufbereitung.
 

@@ -121,6 +121,23 @@ zur Verfügung. Eigene Farben für Zeiger, Fortschritt, Ring, Skala, Wert und
 Titel sind ausdrücklich zuschaltbar; ohne diese Umschaltung bleiben die
 Farben des ausgewählten ECharts-Themes maßgeblich.
 
+Die Skala lässt sich darüber hinaus in bis zu acht aufsteigende Wertebereiche
+mit jeweils eigener Farbe gliedern. Nicht durch den letzten Bereich erfasste
+Werte behalten die normale Ringfarbe. Anzahl der Haupt- und Nebenabschnitte,
+Abstände von Strichen und Beschriftung sowie horizontale, tangentiale oder
+radiale Beschriftung sind unabhängig vom Preset einstellbar. Der Bogen kann im
+oder gegen den Uhrzeigersinn verlaufen.
+
+Für die Anordnung stehen ein relativer Gauge-Radius, horizontale und vertikale
+Gauge-Versätze sowie eigene Versätze für Wert und Titel zur Verfügung. Zeiger,
+Fortschrittsbogen, Grundring, Nebenstriche, Hauptteiler, Skalenwerte, Messwert,
+Einheit und Titel können jeweils die Presetvorgabe übernehmen oder ausdrücklich
+ein- beziehungsweise ausgeblendet werden. Der Wertekasten lässt sich ebenfalls
+unabhängig ein- und ausblenden und besitzt eigene Füllung, Rand, Randstärke,
+Eckenradius und Schatten. Optionale Schatten beziehungsweise Leuchteffekte
+stehen zusätzlich für Zeiger, Fortschritt, Skalenring und Nabe bereit. Alle
+Positionen und Größen bleiben Bestandteil der responsiven Layoutberechnung.
+
 **Geplant:** Zusätzliche Gauge-Single-Presets, ein sicherer Importvertrag für
 eigene Theme-Builder-Dateien, weitere Gestaltungsoptionen sowie die
 Ausgabe als optionales IPSView-Widget.
@@ -208,6 +225,15 @@ reagiert unmittelbar auf Änderungen im geöffneten Formular, ohne diese Werte
 vorzeitig zu speichern. Bei einer gültigen numerischen Quellvariable verwendet
 sie deren aktuellen Wert, andernfalls die Mitte des konfigurierten Bereichs.
 
+Unter „Skala und Wertebereiche“ werden farbige Grenzbereiche, Teilungen,
+Beschriftungsausrichtung und Abstände gepflegt. Die Endwerte der Farbbereiche
+müssen streng aufsteigend innerhalb des Gauge-Bereichs liegen. `0` bei Haupt-
+oder Nebenabschnitten übernimmt die Presetvorgabe. „Position und Sichtbarkeit“
+verändert das responsive Layout und erlaubt eine ausdrückliche Sichtbarkeit je
+Element. „Wertanzeige und Effekte“ gestaltet den Wertekasten sowie optionale
+Schatten. `Vorlage` erhält überall das bisherige Verhalten, sodass vorhandene
+Instanzen nach dem Modulupdate unverändert dargestellt werden.
+
 **Zifferblattplatte einstellen:**
 
 1. Zuerst die Plattenform auf `Kreis` oder `Dem Skalenbogen folgen` stellen.
@@ -228,7 +254,9 @@ sie deren aktuellen Wert, andernfalls die Mitte des konfigurierten Bereichs.
    `Ausfüllen` füllt die Platte ohne Verzerrung und beschneidet Überstände,
    `Strecken` füllt sie gegebenenfalls mit verändertem Seitenverhältnis.
    Größe, Versatz, Deckkraft und Drehung wirken nur auf das Motiv; die zuvor
-   gewählte Farbe oder der Verlauf bleibt darunter erhalten.
+   gewählte Farbe oder der Verlauf bleibt darunter erhalten. Als direkt
+   importierbare Testdatei liegt ein transparentes
+   [Fantasy-Astrolabium](examples/fantasy-astrolabe-background.svg) bei.
 6. Die Formularvorschau reagiert sofort. Erst `Übernehmen` speichert die
    Auswahl und aktualisiert damit die native Kachel dauerhaft.
 

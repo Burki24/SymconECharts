@@ -967,6 +967,517 @@
                 },
                 {
                     "type": "ExpansionPanel",
+                    "caption": "Scale and value ranges",
+                    "expanded": false,
+                    "items": [
+                        {
+                            "type": "Label",
+                            "caption": "Optional value ranges color the scale ring up to their ascending end values. A remaining range keeps the Gauge ring color. Zero split counts retain the selected preset."
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ScaleZonesEnabled",
+                            "caption": "Use colored value ranges"
+                        },
+                        {
+                            "type": "List",
+                            "name": "ScaleZones",
+                            "caption": "Value ranges",
+                            "rowCount": 4,
+                            "add": true,
+                            "delete": true,
+                            "changeOrder": true,
+                            "columns": [
+                                {
+                                    "caption": "End value",
+                                    "name": "EndValue",
+                                    "width": "180px",
+                                    "add": 100.0,
+                                    "edit": {
+                                        "type": "NumberSpinner",
+                                        "digits": 3
+                                    }
+                                },
+                                {
+                                    "caption": "Color",
+                                    "name": "Color",
+                                    "width": "180px",
+                                    "add": 16711680,
+                                    "edit": {
+                                        "type": "SelectColor"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "MajorSplitCount",
+                                    "caption": "Major sections (0 = preset)",
+                                    "minimum": 0,
+                                    "maximum": 24
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "MinorSplitCount",
+                                    "caption": "Minor sections (0 = preset)",
+                                    "minimum": 0,
+                                    "maximum": 10
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "Select",
+                                    "name": "ScaleLabelRotation",
+                                    "caption": "Scale label orientation",
+                                    "options": [
+                                        {
+                                            "caption": "Horizontal",
+                                            "value": "horizontal"
+                                        },
+                                        {
+                                            "caption": "Tangential",
+                                            "value": "tangential"
+                                        },
+                                        {
+                                            "caption": "Radial",
+                                            "value": "radial"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Select",
+                                    "name": "GaugeDirection",
+                                    "caption": "Direction",
+                                    "options": [
+                                        {
+                                            "caption": "Clockwise",
+                                            "value": "clockwise"
+                                        },
+                                        {
+                                            "caption": "Counterclockwise",
+                                            "value": "counterclockwise"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "MinorTickDistancePercent",
+                                    "caption": "Minor tick distance",
+                                    "suffix": "%",
+                                    "minimum": 50,
+                                    "maximum": 150
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "MajorTickDistancePercent",
+                                    "caption": "Major tick distance",
+                                    "suffix": "%",
+                                    "minimum": 50,
+                                    "maximum": 150
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "ScaleLabelDistancePercent",
+                                    "caption": "Scale label distance",
+                                    "suffix": "%",
+                                    "minimum": 50,
+                                    "maximum": 150
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "ExpansionPanel",
+                    "caption": "Position and visibility",
+                    "expanded": false,
+                    "items": [
+                        {
+                            "type": "Label",
+                            "caption": "Offsets are relative to the responsive Gauge size. Preset visibility keeps the behavior of the selected layout."
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "GaugeRadiusPercent",
+                                    "caption": "Gauge radius",
+                                    "suffix": "%",
+                                    "minimum": 50,
+                                    "maximum": 150
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "GaugeOffsetXPercent",
+                                    "caption": "Gauge horizontal offset",
+                                    "suffix": "%",
+                                    "minimum": -50,
+                                    "maximum": 50
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "GaugeOffsetYPercent",
+                                    "caption": "Gauge vertical offset",
+                                    "suffix": "%",
+                                    "minimum": -50,
+                                    "maximum": 50
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "ValueOffsetXPercent",
+                                    "caption": "Value horizontal offset",
+                                    "suffix": "%",
+                                    "minimum": -100,
+                                    "maximum": 100
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "ValueOffsetYPercent",
+                                    "caption": "Value vertical offset",
+                                    "suffix": "%",
+                                    "minimum": -100,
+                                    "maximum": 100
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "TitleOffsetXPercent",
+                                    "caption": "Title horizontal offset",
+                                    "suffix": "%",
+                                    "minimum": -100,
+                                    "maximum": 100
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "TitleOffsetYPercent",
+                                    "caption": "Title vertical offset",
+                                    "suffix": "%",
+                                    "minimum": -100,
+                                    "maximum": 100
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "Select",
+                                    "name": "PointerVisibility",
+                                    "caption": "Pointer",
+                                    "options": [
+                                        {
+                                            "caption": "Preset",
+                                            "value": "preset"
+                                        },
+                                        {
+                                            "caption": "Show",
+                                            "value": "show"
+                                        },
+                                        {
+                                            "caption": "Hide",
+                                            "value": "hide"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Select",
+                                    "name": "ProgressVisibility",
+                                    "caption": "Progress",
+                                    "options": [
+                                        {
+                                            "caption": "Preset",
+                                            "value": "preset"
+                                        },
+                                        {
+                                            "caption": "Show",
+                                            "value": "show"
+                                        },
+                                        {
+                                            "caption": "Hide",
+                                            "value": "hide"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Select",
+                                    "name": "RingVisibility",
+                                    "caption": "Scale ring",
+                                    "options": [
+                                        {
+                                            "caption": "Preset",
+                                            "value": "preset"
+                                        },
+                                        {
+                                            "caption": "Show",
+                                            "value": "show"
+                                        },
+                                        {
+                                            "caption": "Hide",
+                                            "value": "hide"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "Select",
+                                    "name": "MinorTicksVisibility",
+                                    "caption": "Minor ticks",
+                                    "options": [
+                                        {
+                                            "caption": "Preset",
+                                            "value": "preset"
+                                        },
+                                        {
+                                            "caption": "Show",
+                                            "value": "show"
+                                        },
+                                        {
+                                            "caption": "Hide",
+                                            "value": "hide"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Select",
+                                    "name": "MajorTicksVisibility",
+                                    "caption": "Major ticks",
+                                    "options": [
+                                        {
+                                            "caption": "Preset",
+                                            "value": "preset"
+                                        },
+                                        {
+                                            "caption": "Show",
+                                            "value": "show"
+                                        },
+                                        {
+                                            "caption": "Hide",
+                                            "value": "hide"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Select",
+                                    "name": "ScaleLabelsVisibility",
+                                    "caption": "Scale labels",
+                                    "options": [
+                                        {
+                                            "caption": "Preset",
+                                            "value": "preset"
+                                        },
+                                        {
+                                            "caption": "Show",
+                                            "value": "show"
+                                        },
+                                        {
+                                            "caption": "Hide",
+                                            "value": "hide"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "Select",
+                                    "name": "ValueVisibility",
+                                    "caption": "Value",
+                                    "options": [
+                                        {
+                                            "caption": "Preset",
+                                            "value": "preset"
+                                        },
+                                        {
+                                            "caption": "Show",
+                                            "value": "show"
+                                        },
+                                        {
+                                            "caption": "Hide",
+                                            "value": "hide"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Select",
+                                    "name": "UnitVisibility",
+                                    "caption": "Unit",
+                                    "options": [
+                                        {
+                                            "caption": "Preset",
+                                            "value": "preset"
+                                        },
+                                        {
+                                            "caption": "Show",
+                                            "value": "show"
+                                        },
+                                        {
+                                            "caption": "Hide",
+                                            "value": "hide"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Select",
+                                    "name": "TitleVisibility",
+                                    "caption": "Title",
+                                    "options": [
+                                        {
+                                            "caption": "Preset",
+                                            "value": "preset"
+                                        },
+                                        {
+                                            "caption": "Show",
+                                            "value": "show"
+                                        },
+                                        {
+                                            "caption": "Hide",
+                                            "value": "hide"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "ExpansionPanel",
+                    "caption": "Value display and effects",
+                    "expanded": false,
+                    "items": [
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "ProgressWidthPercent",
+                                    "caption": "Progress width",
+                                    "suffix": "%",
+                                    "minimum": 50,
+                                    "maximum": 150
+                                },
+                                {
+                                    "type": "Select",
+                                    "name": "DetailBoxVisibility",
+                                    "caption": "Value box",
+                                    "options": [
+                                        {
+                                            "caption": "Preset",
+                                            "value": "preset"
+                                        },
+                                        {
+                                            "caption": "Show",
+                                            "value": "show"
+                                        },
+                                        {
+                                            "caption": "Hide",
+                                            "value": "hide"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Select",
+                                    "name": "DetailColorMode",
+                                    "caption": "Value box colors",
+                                    "options": [
+                                        {
+                                            "caption": "ECharts theme",
+                                            "value": "theme"
+                                        },
+                                        {
+                                            "caption": "Custom colors",
+                                            "value": "custom"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "SelectColor",
+                                    "name": "DetailBackgroundColor",
+                                    "caption": "Value box fill"
+                                },
+                                {
+                                    "type": "SelectColor",
+                                    "name": "DetailBorderColor",
+                                    "caption": "Value box border"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "DetailBorderWidthPercent",
+                                    "caption": "Value box border width",
+                                    "suffix": "%",
+                                    "minimum": 50,
+                                    "maximum": 150
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "DetailCornerRadiusPercent",
+                                    "caption": "Value box corner radius",
+                                    "suffix": "%",
+                                    "minimum": 50,
+                                    "maximum": 150
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "CheckBox",
+                                    "name": "DetailShadow",
+                                    "caption": "Value box shadow"
+                                },
+                                {
+                                    "type": "CheckBox",
+                                    "name": "PointerShadow",
+                                    "caption": "Pointer glow"
+                                },
+                                {
+                                    "type": "CheckBox",
+                                    "name": "ProgressShadow",
+                                    "caption": "Progress glow"
+                                },
+                                {
+                                    "type": "CheckBox",
+                                    "name": "RingShadow",
+                                    "caption": "Scale ring shadow"
+                                },
+                                {
+                                    "type": "CheckBox",
+                                    "name": "AnchorShadow",
+                                    "caption": "Hub shadow"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "ExpansionPanel",
                     "caption": "Fine tuning",
                     "expanded": false,
                     "items": [

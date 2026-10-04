@@ -411,6 +411,26 @@ $gauge->SetTestProperty('RingColor', 0x334455);
 $gauge->SetTestProperty('ScaleColor', 0x445566);
 $gauge->SetTestProperty('ValueColor', 0x556677);
 $gauge->SetTestProperty('TitleColor', 0x667788);
+$gauge->SetTestProperty('ScaleZonesEnabled', true);
+$gauge->SetTestProperty('ScaleZones', '[{"EndValue":0,"Color":65280},{"EndValue":50,"Color":16776960}]');
+$gauge->SetTestProperty('MajorSplitCount', 8);
+$gauge->SetTestProperty('MinorSplitCount', 4);
+$gauge->SetTestProperty('ScaleLabelRotation', 'radial');
+$gauge->SetTestProperty('GaugeDirection', 'counterclockwise');
+$gauge->SetTestProperty('GaugeRadiusPercent', 110);
+$gauge->SetTestProperty('GaugeOffsetXPercent', 5);
+$gauge->SetTestProperty('GaugeOffsetYPercent', -5);
+$gauge->SetTestProperty('ValueOffsetXPercent', 10);
+$gauge->SetTestProperty('ValueOffsetYPercent', -10);
+$gauge->SetTestProperty('TitleOffsetXPercent', -10);
+$gauge->SetTestProperty('TitleOffsetYPercent', 10);
+$gauge->SetTestProperty('PointerVisibility', 'show');
+$gauge->SetTestProperty('ProgressVisibility', 'hide');
+$gauge->SetTestProperty('DetailBoxVisibility', 'show');
+$gauge->SetTestProperty('DetailColorMode', 'custom');
+$gauge->SetTestProperty('DetailBackgroundColor', 0x101820);
+$gauge->SetTestProperty('DetailBorderColor', 0x708090);
+$gauge->SetTestProperty('PointerShadow', true);
 $gauge->ApplyChanges();
 
 assertGatewayGauge($gauge->GetTestStatus() === IS_ACTIVE, 'Gauge Single must become active.');
@@ -454,8 +474,8 @@ foreach ([
     'distance: layout.tickDistance',
     'distance: layout.splitDistance',
     'distance: layout.labelDistance',
-    'offsetCenter: [0, layout.detailOffset]',
-    'offsetCenter: [0, layout.titleOffset]',
+    'offsetCenter: layout.detailOffset',
+    'offsetCenter: layout.titleOffset',
     'function applyArcDesign(series, style)',
     'series.startAngle = 90 - startPosition;',
     'function applyPointerShape(series, style, layout)',
@@ -476,7 +496,11 @@ foreach ([
     'fill: fill',
     'stroke: border',
     'graphic: buildPlateGraphic(style, layout, series, colors)',
-    'function applyCustomColors(series, style, colors)'
+    'function applyCustomColors(series, style, colors)',
+    'function applyAdvancedDesign(series, style, layout, colors)',
+    'series.axisLine.lineStyle.color = zones;',
+    'series.axisLabel.rotate =',
+    'series.clockwise ='
 ] as $responsiveLayoutContract) {
     assertGatewayGauge(
         str_contains($visualizationTile, $responsiveLayoutContract),
@@ -513,8 +537,15 @@ assertGatewayGauge(
         && str_contains(json_encode($configurationForm, JSON_THROW_ON_ERROR), '$PlateGradientRadiusPercent')
         && str_contains(json_encode($configurationForm, JSON_THROW_ON_ERROR), '$PlateBackgroundEnabled')
         && str_contains(json_encode($configurationForm, JSON_THROW_ON_ERROR), '$PlateBackgroundSVG')
-        && str_contains(json_encode($configurationForm, JSON_THROW_ON_ERROR), '$PlateBackgroundRotation'),
-    'Gauge Single form preview actions must forward the complete plate and SVG-background state.'
+        && str_contains(json_encode($configurationForm, JSON_THROW_ON_ERROR), '$PlateBackgroundRotation')
+        && str_contains(json_encode($configurationForm, JSON_THROW_ON_ERROR), '$ScaleZones')
+        && str_contains(json_encode($configurationForm, JSON_THROW_ON_ERROR), '$GaugeRadiusPercent')
+        && str_contains(json_encode($configurationForm, JSON_THROW_ON_ERROR), '$DetailBoxVisibility')
+        && str_contains(
+            json_encode($configurationForm, JSON_THROW_ON_ERROR),
+            'ECGS_UpdateGaugePreviewFromForm'
+        ),
+    'Gauge Single form preview actions must forward the complete advanced design state.'
 );
 $previewElement = null;
 foreach ($configurationForm['elements'] ?? [] as $element) {
@@ -860,6 +891,48 @@ assertGatewayGauge(
     'Gauge Single form preview must apply pointer, arc and custom color values before they are persisted.'
 );
 
+$gauge->UpdateGaugePreviewFromForm(json_encode([
+    'SourceVariableID'        => 4711,
+    'Minimum'                 => -20.0,
+    'Maximum'                 => 80.0,
+    'Title'                   => 'Advanced preview',
+    'Unit'                    => '°C',
+    'Decimals'                => 1,
+    'GaugePreset'             => 'simple',
+    'EChartsTheme'            => 'dark',
+    'ScaleZonesEnabled'       => true,
+    'ScaleZones'              => '[{"EndValue":0,"Color":65280},{"EndValue":50,"Color":16776960}]',
+    'MajorSplitCount'         => 4,
+    'MinorSplitCount'         => 2,
+    'GaugeOffsetXPercent'     => 10,
+    'GaugeOffsetYPercent'     => 5,
+    'PointerVisibility'       => 'hide',
+    'ProgressVisibility'      => 'hide',
+    'DetailBoxVisibility'     => 'show',
+    'DetailColorMode'         => 'custom',
+    'DetailBackgroundColor'   => 0x102030,
+    'DetailBorderColor'       => 0x405060,
+    'DetailShadow'            => true
+], JSON_THROW_ON_ERROR));
+$formUpdates = $gauge->GetTestFormUpdates();
+$advancedPreviewUpdate = end($formUpdates);
+$advancedPreviewUri = is_array($advancedPreviewUpdate) ? (string) ($advancedPreviewUpdate['Value'] ?? '') : '';
+$advancedPreviewSvg = base64_decode(
+    substr($advancedPreviewUri, strlen('data:image/svg+xml;base64,')),
+    true
+);
+assertGatewayGauge(
+    is_string($advancedPreviewSvg)
+        && str_contains($advancedPreviewSvg, 'data-major-splits="4"')
+        && str_contains($advancedPreviewSvg, 'translate(20.00 0)')
+        && str_contains($advancedPreviewSvg, '#00FF00')
+        && str_contains($advancedPreviewSvg, '#FFFF00')
+        && str_contains($advancedPreviewSvg, 'fill:#102030')
+        && str_contains($advancedPreviewSvg, 'detail-shadow')
+        && !str_contains($advancedPreviewSvg, 'data-pointer-shape='),
+    'Gauge Single advanced form preview must apply zones, layout, visibility and value-box styling.'
+);
+
 $gauge->UpdateGaugePreview(4711, 100.0, 0.0, 'Invalid', '', 1);
 $formUpdates = $gauge->GetTestFormUpdates();
 $invalidPreviewUpdate = end($formUpdates);
@@ -896,6 +969,13 @@ assertGatewayGauge(
         'plateBorderWidthPercent'     => 75,
         'minorTickLengthPercent'      => 75,
         'majorTickLengthPercent'      => 150,
+        'progressWidthPercent'        => 100,
+        'minorTickDistancePercent'    => 100,
+        'majorTickDistancePercent'    => 100,
+        'scaleLabelDistancePercent'   => 100,
+        'gaugeRadiusPercent'          => 110,
+        'detailBorderWidthPercent'    => 100,
+        'detailCornerRadiusPercent'   => 100,
         'pointerShape'                => 'arrow',
         'anchorShape'                 => 'ring',
         'anchorColorMode'             => 'custom',
@@ -913,6 +993,34 @@ assertGatewayGauge(
         'startPosition'               => 270.0,
         'endPosition'                 => 67.5,
         'colorMode'                   => 'custom',
+        'scaleZonesEnabled'           => true,
+        'scaleZones'                  => [[0.2, '#00FF00'], [0.7, '#FFFF00']],
+        'majorSplitCount'             => 8,
+        'minorSplitCount'             => 4,
+        'gaugeOffsetXPercent'         => 5,
+        'gaugeOffsetYPercent'         => -5,
+        'valueOffsetXPercent'         => 10,
+        'valueOffsetYPercent'         => -10,
+        'titleOffsetXPercent'         => -10,
+        'titleOffsetYPercent'         => 10,
+        'scaleLabelRotation'          => 'radial',
+        'gaugeDirection'              => 'counterclockwise',
+        'pointerVisibility'           => 'show',
+        'progressVisibility'          => 'hide',
+        'ringVisibility'              => 'preset',
+        'minorTicksVisibility'        => 'preset',
+        'majorTicksVisibility'        => 'preset',
+        'scaleLabelsVisibility'       => 'preset',
+        'valueVisibility'             => 'preset',
+        'unitVisibility'              => 'preset',
+        'titleVisibility'             => 'preset',
+        'detailBoxVisibility'         => 'show',
+        'detailColorMode'             => 'custom',
+        'detailShadow'                => false,
+        'pointerShadow'               => true,
+        'progressShadow'              => false,
+        'ringShadow'                  => false,
+        'anchorShadow'                => false,
         'pointerColor'                => '#112233',
         'progressColor'               => '#223344',
         'ringColor'                   => '#334455',
@@ -924,7 +1032,9 @@ assertGatewayGauge(
         'plateColor'                  => '#202830',
         'plateBorderColor'            => '#90A0B0',
         'plateGradientMiddleColor'    => '#405060',
-        'plateGradientEndColor'       => '#607080'
+        'plateGradientEndColor'       => '#607080',
+        'detailBackgroundColor'       => '#101820',
+        'detailBorderColor'           => '#708090'
     ],
     'Gauge Single must expose the validated tile-designer fine tuning in its chart model.'
 );
@@ -1414,6 +1524,22 @@ $invalidDesignScale->SetTestProperty('SourceVariableID', 4711);
 $invalidDesignScale->SetTestProperty('RingWidthPercent', 151);
 $invalidDesignScale->ApplyChanges();
 assertGatewayGauge($invalidDesignScale->GetTestStatus() === 205, 'Invalid Gauge design scales must set status 205.');
+
+$invalidScaleZones = new EChartsGaugeSingle();
+$invalidScaleZones->Create();
+$invalidScaleZones->SetTestProperty('SourceVariableID', 4711);
+$invalidScaleZones->SetTestProperty('Minimum', 0.0);
+$invalidScaleZones->SetTestProperty('Maximum', 100.0);
+$invalidScaleZones->SetTestProperty('ScaleZonesEnabled', true);
+$invalidScaleZones->SetTestProperty(
+    'ScaleZones',
+    '[{"EndValue":80,"Color":65280},{"EndValue":40,"Color":16711680}]'
+);
+$invalidScaleZones->ApplyChanges();
+assertGatewayGauge(
+    $invalidScaleZones->GetTestStatus() === 205,
+    'Descending Gauge value ranges must set status 205.'
+);
 
 $invalidPointerLength = new EChartsGaugeSingle();
 $invalidPointerLength->Create();

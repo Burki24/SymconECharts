@@ -72,8 +72,11 @@ final class EChartsGaugeSinglePreview
             throw new InvalidArgumentException('A supported Gauge plate background fit is required.');
         }
 
-        $design = self::ApplyArcDesign(
-            self::ApplyStyleScales(self::PresetDesign($preset, $minimum, $maximum), $style),
+        $design = self::ApplyAdvancedDesign(
+            self::ApplyArcDesign(
+                self::ApplyStyleScales(self::PresetDesign($preset, $minimum, $maximum), $style),
+                $style
+            ),
             $style
         );
         $palette = EChartsAsset::ThemePreviewPalette($theme);
@@ -96,13 +99,20 @@ final class EChartsGaugeSinglePreview
         $unitFontWeight = $preset === 'speed' ? 400 : 600;
         $decimals = max(0, min(6, $decimals));
         $ratio = max(0.0, min(1.0, ($value - $minimum) / ($maximum - $minimum)));
-        $trackElements = self::TrackSegments(
-            $ringColor === null ? $palette['gaugeAxisLine'] : [[1.0, $ringColor]],
-            $design
-        );
+        $trackSegments = $ringColor === null ? $palette['gaugeAxisLine'] : [[1.0, $ringColor]];
+        if ((bool) ($style['scaleZonesEnabled'] ?? false)
+            && is_array($style['scaleZones'] ?? null)
+            && $style['scaleZones'] !== []) {
+            $trackSegments = $style['scaleZones'];
+            $lastZone = end($trackSegments);
+            if (is_array($lastZone) && (float) ($lastZone[0] ?? 0.0) < 1.0) {
+                $trackSegments[] = [1.0, $ringColor ?? $palette['track']];
+            }
+        }
+        $trackElements = $design['showRing'] ? self::TrackSegments($trackSegments, $design) : '';
         $progressPath = $design['showProgress'] ? self::ArcPath($ratio, $design) : '';
         $ticks = self::Ticks($minimum, $maximum, $language, $design);
-        $pointer = self::Pointer($ratio, $design, $pointerShape, $style);
+        $pointer = $design['showPointer'] ? self::Pointer($ratio, $design, $pointerShape, $style) : '';
         $anchorColorMode = (string) ($style['anchorColorMode'] ?? 'theme');
         $anchorColor = $anchorColorMode === 'custom'
             ? self::StyleColor($style, 'anchorColor', $pointerColor)
@@ -168,34 +178,59 @@ final class EChartsGaugeSinglePreview
         $formattedValue = SVGPreviewHelper::escape($rawValue);
         $formattedUnit = SVGPreviewHelper::escape($rawUnit);
         $formattedTitle = SVGPreviewHelper::escape($rawTitle);
-        $valueElement = '<text x="360" y="' . self::Coordinate($design['detailY'])
-            . '" class="value"><tspan class="value-number">' . $formattedValue . '</tspan>'
-            . ($formattedUnit === '' ? '' : '<tspan class="value-unit" dx="8">' . $formattedUnit . '</tspan>')
-            . '</text>';
+        $gaugeOffsetXValue = (float) $design['gaugeOffsetX'];
+        $valueElement = !$design['showValue']
+            ? ''
+            : '<text x="' . self::Coordinate(
+                self::CENTER_X + $gaugeOffsetXValue + (float) $design['valueOffsetX']
+            )
+                . '" y="' . self::Coordinate($design['detailY'])
+                . '" class="value"><tspan class="value-number">' . $formattedValue . '</tspan>'
+                . (!$design['showUnit'] || $formattedUnit === ''
+                    ? ''
+                    : '<tspan class="value-unit" dx="8">' . $formattedUnit . '</tspan>')
+                . '</text>';
         $ariaLabel = SVGPreviewHelper::escape(trim(
             ($rawTitle === '' ? '' : $rawTitle . ': ')
             . $rawValue
             . ($rawUnit === '' ? '' : ' ' . $rawUnit)
         ));
-        $titleElement = $formattedTitle === ''
+        $titleElement = $formattedTitle === '' || !$design['showTitle']
             ? ''
-            : '<text x="360" y="' . self::Coordinate($design['titleY']) . '" class="title">' . $formattedTitle . '</text>';
+            : '<text x="' . self::Coordinate(
+                self::CENTER_X + $gaugeOffsetXValue + (float) $design['titleOffsetX']
+            )
+                . '" y="' . self::Coordinate($design['titleY']) . '" class="title">' . $formattedTitle . '</text>';
         $progressElement = $progressPath === ''
             ? ''
             : '<path d="' . $progressPath . '" class="progress' . ($preset === 'speed' ? ' speed-progress-shadow' : '')
+                . ((bool) ($design['progressShadow'] ?? false) ? ' effect-shadow' : '')
                 . '" style="stroke-width:'
-                . self::Coordinate($design['lineWidth']) . 'px"/>';
-        $detailBackground = $design['detailBox']
-            ? '<rect x="238" y="280" width="244" height="58" rx="10" class="detail-box"/>'
+                . self::Coordinate($design['progressWidth']) . 'px"/>';
+        $detailBackground = $design['detailBox'] && $design['showValue']
+            ? '<rect x="' . self::Coordinate(238.0 + $gaugeOffsetXValue + (float) $design['valueOffsetX'])
+                . '" y="' . self::Coordinate((float) $design['detailY'] - 39.0)
+                . '" width="244" height="58" rx="' . self::Coordinate(10.0 * max(50, min(150, (int) ($style['detailCornerRadiusPercent'] ?? 100))) / 100)
+                . '" class="detail-box' . ((bool) ($style['detailShadow'] ?? false) ? ' detail-shadow' : '') . '"/>'
             : '';
+        $gaugeOffsetX = self::Coordinate((float) $design['gaugeOffsetX']);
+        $detailBackgroundColor = ($style['detailColorMode'] ?? 'theme') === 'custom'
+            ? self::StyleColor($style, 'detailBackgroundColor', $palette['surface'])
+            : $palette['surface'];
+        $detailBorderColor = ($style['detailColorMode'] ?? 'theme') === 'custom'
+            ? self::StyleColor($style, 'detailBorderColor', $detailBorderColor)
+            : $detailBorderColor;
+        $detailBorderWidth = 2.0 * max(50, min(150, (int) ($style['detailBorderWidthPercent'] ?? 100))) / 100;
+        $effectShadow = 'url(#effect-shadow)';
 
         return <<<SVG
 <svg xmlns="http://www.w3.org/2000/svg" width="720" height="400" viewBox="0 0 720 400" role="img" aria-label="{$ariaLabel}" data-preset="{$preset}" data-theme="{$theme}" data-arc-mode="{$arcMode}" data-start-position="{$startPosition}" data-end-position="{$endPosition}" data-pointer-length-percent="{$pointerLengthPercent}" data-major-splits="{$design['majorSplits']}">
-  <defs><filter id="speed-progress-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="2" dy="2" stdDeviation="4" flood-color="{$progressColor}" flood-opacity="0.45"/></filter><filter id="speed-pointer-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="2" dy="2" stdDeviation="4" flood-color="{$pointerColor}" flood-opacity="0.45"/></filter><filter id="plate-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.35"/></filter>{$plateGradientDefinition}{$plateBackgroundDefinition}</defs>
+  <defs><filter id="speed-progress-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="2" dy="2" stdDeviation="4" flood-color="{$progressColor}" flood-opacity="0.45"/></filter><filter id="speed-pointer-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="2" dy="2" stdDeviation="4" flood-color="{$pointerColor}" flood-opacity="0.45"/></filter><filter id="effect-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="2" dy="2" stdDeviation="4" flood-color="{$pointerColor}" flood-opacity="0.45"/></filter><filter id="plate-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.35"/></filter>{$plateGradientDefinition}{$plateBackgroundDefinition}</defs>
   <style>
-    .surface{fill:{$palette['background']}}.plate{fill:{$plateColor};stroke:{$plateBorderColor};stroke-width:{$plateBorderWidth}}.plate-outline{fill:none;stroke:{$plateBorderColor};stroke-width:{$plateBorderWidth}}.plate-shadow{filter:url(#plate-shadow)}.theme-track-segment{fill:none;stroke-linecap:round;stroke-linejoin:round}.progress{fill:none;stroke:{$progressColor};stroke-linecap:round;stroke-linejoin:round}.speed-progress-shadow{filter:url(#speed-progress-shadow)}.speed-pointer-shadow{filter:url(#speed-pointer-shadow)}.minor{stroke:{$minorColor};stroke-width:1}.major{stroke:{$majorColor};stroke-width:2}.axis{fill:{$scaleColor};font-size:{$design['axisFontSize']}px;font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle;dominant-baseline:middle}.pointer,.speed-pointer{fill:{$pointerColor}}.anchor{fill:{$anchorColor};stroke:{$anchorBorderColor};stroke-width:{$anchorBorderWidth}}.detail-box{fill:{$palette['surface']};stroke:{$detailBorderColor};stroke-width:2}.value{fill:{$valueColor};font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle}.value-number{font-size:{$design['valueFontSize']}px;font-weight:{$valueFontWeight}}.value-unit{fill:{$unitColor};font-size:{$design['unitFontSize']}px;font-weight:{$unitFontWeight}}.title{fill:{$titleColor};font-size:{$design['titleFontSize']}px;font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle}svg[data-preset="speed"] .minor{stroke-width:2}svg[data-preset="speed"] .major{stroke-width:3}
+    .surface{fill:{$palette['background']}}.plate{fill:{$plateColor};stroke:{$plateBorderColor};stroke-width:{$plateBorderWidth}}.plate-outline{fill:none;stroke:{$plateBorderColor};stroke-width:{$plateBorderWidth}}.plate-shadow{filter:url(#plate-shadow)}.theme-track-segment{fill:none;stroke-linecap:round;stroke-linejoin:round}.progress{fill:none;stroke:{$progressColor};stroke-linecap:round;stroke-linejoin:round}.speed-progress-shadow{filter:url(#speed-progress-shadow)}.speed-pointer-shadow{filter:url(#speed-pointer-shadow)}.effect-shadow{filter:{$effectShadow}}.detail-shadow{filter:{$effectShadow}}.minor{stroke:{$minorColor};stroke-width:1}.major{stroke:{$majorColor};stroke-width:2}.axis{fill:{$scaleColor};font-size:{$design['axisFontSize']}px;font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle;dominant-baseline:middle}.pointer,.speed-pointer{fill:{$pointerColor}}.anchor{fill:{$anchorColor};stroke:{$anchorBorderColor};stroke-width:{$anchorBorderWidth}}.detail-box{fill:{$detailBackgroundColor};stroke:{$detailBorderColor};stroke-width:{$detailBorderWidth}}.value{fill:{$valueColor};font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle}.value-number{font-size:{$design['valueFontSize']}px;font-weight:{$valueFontWeight}}.value-unit{fill:{$unitColor};font-size:{$design['unitFontSize']}px;font-weight:{$unitFontWeight}}.title{fill:{$titleColor};font-size:{$design['titleFontSize']}px;font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle}svg[data-preset="speed"] .minor{stroke-width:2}svg[data-preset="speed"] .major{stroke-width:3}
   </style>
   <rect class="surface" width="720" height="400" rx="12"/>
+  <g transform="translate({$gaugeOffsetX} 0)">
   {$plate}
   {$plateBackground}
   {$plateOutline}
@@ -204,6 +239,7 @@ final class EChartsGaugeSinglePreview
   {$ticks}
   {$pointer}
   {$anchor}
+  </g>
   {$detailBackground}
   {$valueElement}
   {$titleElement}
@@ -389,6 +425,68 @@ SVG;
             - (float) $design['tickDistance']
             - (float) $design['splitLength']
             - $labelGap;
+
+        return $design;
+    }
+
+    /**
+     * @param array<string, float|bool|int> $design
+     * @param array<string, mixed> $style
+     * @return array<string, float|bool|int|string>
+     */
+    private static function ApplyAdvancedDesign(array $design, array $style): array
+    {
+        $visibility = static function (mixed $mode, bool $preset): bool
+        {
+            return match ((string) $mode) {
+                'show'  => true,
+                'hide'  => false,
+                default => $preset
+            };
+        };
+        $radiusScale = max(50, min(150, (int) ($style['gaugeRadiusPercent'] ?? 100))) / 100;
+        $design['radius'] = (float) $design['radius'] * $radiusScale;
+        $design['pointerLength'] = (float) $design['pointerLength'] * $radiusScale;
+        $gaugeOffsetY = max(-50, min(50, (int) ($style['gaugeOffsetYPercent'] ?? 0))) * 2.0;
+        $design['centerY'] = (float) $design['centerY'] + $gaugeOffsetY;
+        $design['detailY'] = (float) $design['detailY'] + $gaugeOffsetY
+            + max(-100, min(100, (int) ($style['valueOffsetYPercent'] ?? 0)));
+        $design['titleY'] = (float) $design['titleY'] + $gaugeOffsetY
+            + max(-100, min(100, (int) ($style['titleOffsetYPercent'] ?? 0)));
+        $design['gaugeOffsetX'] = max(-50, min(50, (int) ($style['gaugeOffsetXPercent'] ?? 0))) * 2.0;
+        $design['valueOffsetX'] = max(-100, min(100, (int) ($style['valueOffsetXPercent'] ?? 0)));
+        $design['titleOffsetX'] = max(-100, min(100, (int) ($style['titleOffsetXPercent'] ?? 0)));
+        $design['majorSplits'] = max(2, min(24, (int) ($style['majorSplitCount'] ?? 0) ?: (int) $design['majorSplits']));
+        $design['minorSplits'] = max(1, min(10, (int) ($style['minorSplitCount'] ?? 0) ?: (int) $design['minorSplits']));
+        $baseTickDistance = (float) $design['tickDistance'];
+        $design['tickDistance'] = $baseTickDistance
+            * max(50, min(150, (int) ($style['minorTickDistancePercent'] ?? 100))) / 100;
+        $majorDistanceScale = max(50, min(150, (int) ($style['majorTickDistancePercent'] ?? 100))) / 100;
+        $design['majorTickDistance'] = $baseTickDistance * $majorDistanceScale;
+        $labelDistanceScale = max(50, min(150, (int) ($style['scaleLabelDistancePercent'] ?? 100))) / 100;
+        $design['labelRadius'] = (float) $design['radius']
+            - ((float) $design['radius'] - (float) $design['labelRadius']) * $labelDistanceScale;
+        $design['showPointer'] = $visibility($style['pointerVisibility'] ?? 'preset', true);
+        $design['showProgress'] = $visibility($style['progressVisibility'] ?? 'preset', (bool) $design['showProgress']);
+        $design['showRing'] = $visibility($style['ringVisibility'] ?? 'preset', true);
+        $design['showMinorTicks'] = $visibility(
+            $style['minorTicksVisibility'] ?? 'preset',
+            (bool) $design['showMinorTicks']
+        );
+        $design['showMajorTicks'] = $visibility($style['majorTicksVisibility'] ?? 'preset', true);
+        $design['showScaleLabels'] = $visibility($style['scaleLabelsVisibility'] ?? 'preset', true);
+        $design['showValue'] = $visibility($style['valueVisibility'] ?? 'preset', true);
+        $design['showUnit'] = $visibility($style['unitVisibility'] ?? 'preset', true);
+        $design['showTitle'] = $visibility($style['titleVisibility'] ?? 'preset', true);
+        $design['detailBox'] = $visibility($style['detailBoxVisibility'] ?? 'preset', (bool) $design['detailBox']);
+        $design['labelRotation'] = (string) ($style['scaleLabelRotation'] ?? 'horizontal');
+        $design['counterclockwise'] = ($style['gaugeDirection'] ?? 'clockwise') === 'counterclockwise';
+        $design['ringShadow'] = (bool) ($style['ringShadow'] ?? false);
+        $design['pointerShadow'] = (bool) ($style['pointerShadow'] ?? false);
+        $design['progressShadow'] = (bool) ($style['progressShadow'] ?? false);
+        $design['anchorShadow'] = (bool) ($style['anchorShadow'] ?? false);
+        $design['progressWidth'] = (float) $design['lineWidth']
+            * max(50, min(150, (int) ($style['progressWidthPercent'] ?? 100))) / 100;
 
         return $design;
     }
@@ -602,7 +700,8 @@ SVG;
             }
 
             $elements[] = '<path d="' . self::ArcSegmentPath($start, $end, $design)
-                . '" class="theme-track-segment" style="stroke:' . SVGPreviewHelper::escape($segment[1])
+                . '" class="theme-track-segment' . ((bool) ($design['ringShadow'] ?? false) ? ' effect-shadow' : '')
+                . '" style="stroke:' . SVGPreviewHelper::escape($segment[1])
                 . ';stroke-width:' . self::Coordinate($design['lineWidth']) . 'px"/>';
             $start = $end;
         }
@@ -647,14 +746,14 @@ SVG;
         for ($index = 0; $index <= $totalSplits; ++$index) {
             $fraction = $index / $totalSplits;
             $major = $index % $minorSplits === 0;
-            if (!$major && !$design['showMinorTicks']) {
+            if ((!$major && !$design['showMinorTicks']) || ($major && !$design['showMajorTicks'])) {
                 continue;
             }
 
             $angle = self::Angle($fraction, $design);
             $outerRadius = (float) $design['radius']
                 - (float) $design['lineWidth'] / 2.0
-                - (float) $design['tickDistance'];
+                - (float) ($major ? $design['majorTickDistance'] : $design['tickDistance']);
             $outer = self::Point($outerRadius, $angle, (float) $design['centerY']);
             $lineLength = $major ? (float) $design['splitLength'] : (float) $design['tickLength'];
             $inner = self::Point($outerRadius - $lineLength, $angle, (float) $design['centerY']);
@@ -665,7 +764,7 @@ SVG;
                 . '" y2="' . self::Coordinate($outer[1])
                 . '" class="' . $class . '"/>';
 
-            if (!$major) {
+            if (!$major || !$design['showScaleLabels']) {
                 continue;
             }
 
@@ -675,8 +774,15 @@ SVG;
                 (float) $design['centerY']
             );
             $labelValue = $minimum + ($maximum - $minimum) * $fraction;
+            $rotation = match ($design['labelRotation'] ?? 'horizontal') {
+                'tangential' => 90.0 - $angle,
+                'radial'     => -$angle,
+                default      => 0.0
+            };
             $elements[] = '<text x="' . self::Coordinate($label[0])
                 . '" y="' . self::Coordinate($label[1])
+                . ($rotation === 0.0 ? '' : ' transform="rotate(' . self::Coordinate($rotation) . ' '
+                    . self::Coordinate($label[0]) . ' ' . self::Coordinate($label[1]) . ')"')
                 . '" class="axis" data-label-index="' . $index . '">'
                 . SVGPreviewHelper::escape(self::FormatAxisNumber($labelValue, $language))
                 . '</text>';
@@ -736,7 +842,8 @@ SVG;
         );
 
         return '<polygon points="' . implode(' ', $serialized) . '" class="pointer'
-            . ($design['speedPointer'] ? ' speed-pointer-shadow' : '') . '" data-pointer-shape="'
+            . ($design['speedPointer'] ? ' speed-pointer-shadow' : '')
+            . ((bool) ($design['pointerShadow'] ?? false) ? ' effect-shadow' : '') . '" data-pointer-shape="'
             . SVGPreviewHelper::escape($shape) . '"/>';
     }
 
@@ -773,6 +880,7 @@ SVG;
         $x = self::CENTER_X - ($pivotX - $minimumX) / $viewBoxWidth * $width;
         $y = $centerY - ($pivotY - $minimumY) / $viewBoxHeight * $length;
         $shadowClass = $design['speedPointer'] ? ' speed-pointer-shadow' : '';
+        $shadowClass .= (bool) ($design['pointerShadow'] ?? false) ? ' effect-shadow' : '';
 
         return '<g transform="rotate(' . self::Coordinate($rotation) . ' 360 '
             . self::Coordinate($centerY) . ')"><svg x="' . self::Coordinate($x)
@@ -816,11 +924,15 @@ SVG;
                 . '" width="' . self::Coordinate($size) . '" height="' . self::Coordinate($size)
                 . '" viewBox="' . SVGPreviewHelper::escape($viewBox)
                 . '" preserveAspectRatio="xMidYMid meet" overflow="visible" data-anchor-shape="custom"><path d="'
-                . SVGPreviewHelper::escape($path) . '" class="anchor" vector-effect="non-scaling-stroke"/></svg>';
+                . SVGPreviewHelper::escape($path) . '" class="anchor'
+                . ((bool) ($design['anchorShadow'] ?? false) ? ' effect-shadow' : '')
+                . '" vector-effect="non-scaling-stroke"/></svg>';
         }
 
         return '<circle cx="360" cy="' . self::Coordinate($centerY) . '" r="'
-            . self::Coordinate($halfSize) . '" class="anchor" data-anchor-shape="'
+            . self::Coordinate($halfSize) . '" class="anchor'
+            . ((bool) ($design['anchorShadow'] ?? false) ? ' effect-shadow' : '')
+            . '" data-anchor-shape="'
             . SVGPreviewHelper::escape($anchorShape) . '"'
             . ($anchorShape === 'ring' ? ' style="fill:none"' : '') . '/>';
     }
@@ -847,7 +959,8 @@ SVG;
             $points
         );
 
-        return '<polygon points="' . implode(' ', $serialized) . '" class="speed-pointer speed-pointer-shadow"/>';
+        return '<polygon points="' . implode(' ', $serialized) . '" class="speed-pointer speed-pointer-shadow'
+            . ((bool) ($design['pointerShadow'] ?? false) ? ' effect-shadow' : '') . '"/>';
     }
 
     private static function ResolveSpeedSplitNumber(float $minimum, float $maximum): int
@@ -883,6 +996,19 @@ SVG;
     private static function Angle(float $ratio, array $design): float
     {
         $startAngle = (float) $design['startAngle'];
+
+        if ((bool) ($design['counterclockwise'] ?? false)) {
+            $clockwiseSweep = $startAngle - (float) $design['endAngle'];
+            if ($clockwiseSweep <= 0.0) {
+                $clockwiseSweep += 360.0;
+            }
+
+            if ($clockwiseSweep >= 359.999) {
+                return $startAngle + 360.0 * $ratio;
+            }
+
+            return $startAngle + (360.0 - $clockwiseSweep) * $ratio;
+        }
 
         return $startAngle + ((float) $design['endAngle'] - $startAngle) * $ratio;
     }

@@ -127,6 +127,25 @@ oder Strecken sowie Größe, Versatz, Deckkraft und Drehung sind validierte
 additive Einstellungen. Die SVG-Formularvorschau verwendet dieselben
 Parameter und dieselbe Schnittgeometrie.
 
+Die abschließende Single-Gauge-Designstufe ergänzt bis zu acht streng
+aufsteigende Wertebereiche. Gespeichert werden Endwert und RGB-Farbe; erst das
+familienbezogene Modell normiert die Endwerte relativ zum aktuellen Minimum
+und Maximum für ECharts. Haupt- und Nebenabschnitte können die Presetvorgabe
+übernehmen oder innerhalb begrenzter Ganzzahlbereiche überschreiben. Abstände
+von Nebenstrichen, Hauptteilern und Beschriftung bleiben relative Werte der
+responsiven Presetgeometrie. Beschriftungen sind horizontal, tangential oder
+radial ausrichtbar; der Bogen kann im oder gegen den Uhrzeigersinn verlaufen.
+
+Radius und Versätze werden ebenfalls relativ zur responsiven Referenzfläche
+gespeichert. Zeiger, Fortschritt, Ring, Striche, Beschriftung, Wert, Einheit,
+Titel und Wertekasten besitzen einen dreistufigen Sichtbarkeitsvertrag:
+`preset` erhält das bisherige Verhalten, `show` zeigt und `hide` verbirgt das
+Element ausdrücklich. Der Wertekasten erhält validierte Theme- oder eigene
+Farben, relative Randstärke und Eckenradius sowie optionalen Schatten.
+Zeiger, Fortschritt, Ring und Nabe können zusätzlich einen begrenzten,
+responsiv skalierten Schatten erhalten. Freie Formatter, beliebige
+ECharts-Optionen und ausführbarer Benutzer-Code bleiben ausgeschlossen.
+
 Der Skalenbogen
 verwendet entweder die Presetgeometrie oder einen Voll-, Dreiviertel-, Halb-, Viertel- oder
 benutzerdefinierten Bogen. Anwenderpositionen werden wie auf einem Zifferblatt

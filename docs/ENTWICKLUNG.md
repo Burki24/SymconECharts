@@ -33,7 +33,10 @@ Gauge-spezifische Farbrollen sind ebenfalls validiert konfigurierbar. Eine
 optionale native ECharts-Graphic bildet eine runde oder dem Skalenbogen
 folgende Zifferblattplatte mit eigener Gestaltung einschließlich linearer und
 radialer Farbverläufe sowie eines bereinigten, auf die Plattenform
-zugeschnittenen SVG-Hintergrunds. Der Multi-Renderer,
+zugeschnittenen SVG-Hintergrunds. Gauge Single unterstützt außerdem validierte farbige Wertebereiche,
+konfigurierbare Skalenunterteilungen und -abstände, beide Drehrichtungen,
+responsive Positionsversätze, elementweise Sichtbarkeit sowie einen
+gestaltbaren Wertekasten und optionale Schatteneffekte. Der Multi-Renderer,
 Archivverarbeitung, IPSView-Ausgabe sowie reale
 Symcon-Laufzeit- und Browsertests fehlen noch. Die Testsuite prüft zusätzlich
 zu Struktur und Metadaten die Strict-Verträge, das Protokoll, die
