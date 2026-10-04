@@ -383,18 +383,26 @@ assertGatewayGauge(
 );
 assertGatewayGauge(str_contains($visualizationTile, "case 'speed':"), 'Gauge Single tile must render the Speed preset.');
 foreach ([
-    "series.center = ['50%', '58%'];",
-    "series.radius = width < 320 ? '76%' : '72%';",
-    "series.pointer.length = '75%';",
-    'series.axisLabel.distance = speedLineWidth + 20;',
-    "series.detail.offsetCenter = [0, '52%'];",
-    "series.title.offsetCenter = [0, '82%'];"
-] as $speedLayoutContract) {
+    'function resolveGaugeLayout(preset, width, height)',
+    'var scale = Math.min(width / 520, height / 400);',
+    'var height = Math.max(chartElement.clientHeight, 160);',
+    'center: [layout.centerX, layout.centerY]',
+    'radius: layout.radius',
+    'distance: layout.tickDistance',
+    'distance: layout.splitDistance',
+    'distance: layout.labelDistance',
+    'offsetCenter: [0, layout.detailOffset]',
+    'offsetCenter: [0, layout.titleOffset]'
+] as $responsiveLayoutContract) {
     assertGatewayGauge(
-        str_contains($visualizationTile, $speedLayoutContract),
-        'Gauge Single tile must keep the balanced Speed preview geometry: ' . $speedLayoutContract
+        str_contains($visualizationTile, $responsiveLayoutContract),
+        'Gauge Single tile must derive every preset from the shared responsive layout: ' . $responsiveLayoutContract
     );
 }
+assertGatewayGauge(
+    !str_contains($visualizationTile, 'distance: -lineWidth'),
+    'Gauge ticks and split lines must not be pushed outside the progress ring.'
+);
 foreach ([
     "var speedPointerIcon = 'path://M2090.36389,615.30999",
     'series.pointer.icon = speedPointerIcon;',
@@ -459,6 +467,40 @@ foreach (['basic', 'simple', 'progress', 'speed'] as $preset) {
     assertGatewayGauge(
         str_contains($presetSvg, 'data-preset="' . $preset . '"'),
         'Gauge Single preview must render the ' . $preset . ' preset.'
+    );
+}
+foreach ([
+    'basic'    => ['centerY' => 196.0, 'radius' => 132.0],
+    'simple'   => ['centerY' => 196.0, 'radius' => 132.0],
+    'progress' => ['centerY' => 190.0, 'radius' => 132.0],
+    'speed'    => ['centerY' => 232.0, 'radius' => 142.0]
+] as $preset => $geometry) {
+    $presetSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
+        42.5,
+        -20.0,
+        80.0,
+        '',
+        '°C',
+        1,
+        'en',
+        $preset
+    );
+    $firstSplitMatches = [];
+    assertGatewayGauge(
+        preg_match(
+            '/<line x1="([^"]+)" y1="([^"]+)" x2="[^"]+" y2="[^"]+" class="major"\/>/',
+            $presetSvg,
+            $firstSplitMatches
+        ) === 1,
+        'Gauge preview must expose a major split line for ' . $preset . '.'
+    );
+    $splitRadius = sqrt(
+        ((float) $firstSplitMatches[1] - 360.0) ** 2
+        + ((float) $firstSplitMatches[2] - $geometry['centerY']) ** 2
+    );
+    assertGatewayGauge(
+        $splitRadius < $geometry['radius'],
+        'Gauge preview must place split lines inside the progress ring for ' . $preset . '.'
     );
 }
 $basicPresetSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(

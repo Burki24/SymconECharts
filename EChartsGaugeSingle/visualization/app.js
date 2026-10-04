@@ -14,6 +14,48 @@
     var reduceMotion = window.matchMedia
         && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var speedPointerIcon = 'path://M2090.36389,615.30999 L2090.36389,615.30999 C2091.48372,615.30999 2092.40383,616.194028 2092.44859,617.312956 L2096.90698,728.755929 C2097.05155,732.369577 2094.2393,735.416212 2090.62566,735.56078 C2090.53845,735.564269 2090.45117,735.566014 2090.36389,735.566014 L2090.36389,735.566014 C2086.74736,735.566014 2083.81557,732.63423 2083.81557,729.017692 C2083.81557,728.930412 2083.81732,728.84314 2083.82081,728.755929 L2088.2792,617.312956 C2088.32396,616.194028 2089.24407,615.30999 2090.36389,615.30999 Z';
+    var gaugeLayoutDefinitions = {
+        basic: {
+            centerY: 196,
+            radius: 132,
+            lineWidth: 16,
+            pointerLength: '73%',
+            detailY: 294,
+            titleY: 352,
+            splitLength: 10,
+            detailFontSize: 38
+        },
+        simple: {
+            centerY: 196,
+            radius: 132,
+            lineWidth: 18,
+            pointerLength: '70%',
+            detailY: 294,
+            titleY: 352,
+            splitLength: 10,
+            detailFontSize: 38
+        },
+        progress: {
+            centerY: 190,
+            radius: 132,
+            lineWidth: 20,
+            pointerLength: '66%',
+            detailY: 306,
+            titleY: 360,
+            splitLength: 14,
+            detailFontSize: 46
+        },
+        speed: {
+            centerY: 232,
+            radius: 142,
+            lineWidth: 18,
+            pointerLength: '75%',
+            detailY: 319,
+            titleY: 370,
+            splitLength: 12,
+            detailFontSize: 42
+        }
+    };
 
     function translate(text) {
         return typeof translations[text] === 'string' ? translations[text] : text;
@@ -111,6 +153,41 @@
         return 10;
     }
 
+    function clamp(value, minimum, maximum) {
+        return Math.max(minimum, Math.min(maximum, value));
+    }
+
+    function resolveGaugeLayout(preset, width, height) {
+        var definition = gaugeLayoutDefinitions[preset] || gaugeLayoutDefinitions.simple;
+        var scale = Math.min(width / 520, height / 400);
+        var contentOffsetY = (height - 400 * scale) / 2;
+        var lineWidth = clamp(Math.round(definition.lineWidth * scale), 8, 24);
+
+        return {
+            centerX: Math.round(width / 2),
+            centerY: Math.round(contentOffsetY + definition.centerY * scale),
+            radius: Math.round(definition.radius * scale + lineWidth / 2),
+            lineWidth: lineWidth,
+            tickDistance: clamp(Math.round(4 * scale), 2, 8),
+            tickLength: clamp(Math.round(5 * scale), 4, 10),
+            splitDistance: clamp(Math.round(4 * scale), 2, 8),
+            splitLength: clamp(Math.round(definition.splitLength * scale), 8, 20),
+            labelDistance: clamp(Math.round(30 * scale), 18, 42),
+            axisFontSize: clamp(Math.round(14 * scale), 9, 18),
+            pointerLength: definition.pointerLength,
+            pointerWidth: clamp(Math.round(8 * scale), 4, 10),
+            anchorSize: clamp(Math.round(18 * scale), 10, 24),
+            detailOffset: Math.round((definition.detailY - definition.centerY) * scale),
+            detailFontSize: clamp(Math.round(definition.detailFontSize * scale), 20, 50),
+            titleOffset: Math.round((definition.titleY - definition.centerY) * scale),
+            titleFontSize: clamp(Math.round(18 * scale), 11, 20),
+            detailWidth: clamp(Math.round(244 * scale), 120, 280),
+            detailHeight: clamp(Math.round(58 * scale), 34, 64),
+            valueFontSize: clamp(Math.round(42 * scale), 28, 50),
+            unitFontSize: clamp(Math.round(18 * scale), 14, 20)
+        };
+    }
+
     function formatAxisValue(value) {
         var absolute = Math.abs(Number(value));
         if (absolute >= 1000) {
@@ -164,64 +241,39 @@
         return series;
     }
 
-    function applyPreset(series, preset, width, lineWidth, colors, minimum, maximum) {
+    function applyPreset(series, preset, layout, colors, minimum, maximum) {
         switch (preset) {
             case 'basic':
                 series.progress.show = false;
                 series.axisLine.roundCap = false;
-                series.pointer.length = '62%';
                 break;
 
             case 'progress':
-                series.center = ['50%', '53%'];
-                series.progress.width = lineWidth + 2;
-                series.axisLine.lineStyle.width = lineWidth + 2;
                 series.axisTick.show = false;
-                series.splitLine.length = 14;
-                series.anchor.size = Math.max(14, Math.min(24, Math.round(width * 0.058)));
-                series.detail.offsetCenter = [0, '44%'];
-                series.detail.fontSize = Math.max(24, Math.min(46, Math.round(width * 0.115)));
-                series.title.offsetCenter = [0, '76%'];
                 break;
 
             case 'speed':
-                // Keep the native proportions aligned with the 720 x 400 SVG preview.
-                var speedLineWidth = Math.min(lineWidth, 18);
                 series.startAngle = 180;
                 series.endAngle = 0;
                 series.splitNumber = resolveSpeedSplitNumber(minimum, maximum);
-                series.center = ['50%', '58%'];
-                series.radius = width < 320 ? '76%' : '72%';
-                series.progress.width = speedLineWidth;
                 series.progress.itemStyle.shadowColor = colorWithAlpha(colors.accent, 0.45);
                 series.progress.itemStyle.shadowBlur = 10;
                 series.progress.itemStyle.shadowOffsetX = 2;
                 series.progress.itemStyle.shadowOffsetY = 2;
-                series.axisLine.lineStyle.width = speedLineWidth;
-                series.axisTick.distance = -speedLineWidth - 7;
                 series.axisTick.splitNumber = 2;
-                series.axisTick.length = 6;
                 series.axisTick.lineStyle.width = 2;
-                series.splitLine.distance = -speedLineWidth - 8;
-                series.splitLine.length = 12;
                 series.splitLine.lineStyle.width = 3;
                 series.pointer.icon = speedPointerIcon;
-                series.pointer.length = '75%';
-                series.pointer.width = Math.max(10, Math.min(16, Math.round(width * 0.04)));
+                series.pointer.width = clamp(Math.round(16 * Math.min(layout.lineWidth / 18, 1)), 10, 16);
                 series.pointer.offsetCenter = [0, '5%'];
                 series.pointer.itemStyle.shadowColor = colorWithAlpha(colors.accent, 0.45);
                 series.pointer.itemStyle.shadowBlur = 10;
                 series.pointer.itemStyle.shadowOffsetX = 2;
                 series.pointer.itemStyle.shadowOffsetY = 2;
                 series.anchor.show = false;
-                series.axisLabel.distance = speedLineWidth + 20;
-                series.axisLabel.fontSize = Math.max(12, Math.min(18, Math.round(width * 0.035)));
-                series.title.offsetCenter = [0, '82%'];
-                series.detail.offsetCenter = [0, '52%'];
-                series.detail.width = Math.max(130, Math.min(240, Math.round(width * 0.58)));
-                series.detail.height = Math.max(34, Math.min(48, Math.round(width * 0.12)));
-                series.detail.lineHeight = Math.max(34, Math.min(48, Math.round(width * 0.12)));
-                series.detail.fontSize = Math.max(18, Math.min(32, Math.round(width * 0.075)));
+                series.detail.width = layout.detailWidth;
+                series.detail.height = layout.detailHeight;
+                series.detail.lineHeight = layout.detailHeight;
                 series.detail.backgroundColor = colors.surface;
                 series.detail.borderColor = colors.muted;
                 series.detail.borderWidth = 2;
@@ -229,12 +281,12 @@
                 series.detail.color = colors.text;
                 series.detail.rich = {
                     value: {
-                        fontSize: Math.max(28, Math.min(50, Math.round(width * 0.1))),
+                        fontSize: layout.valueFontSize,
                         fontWeight: 'bolder',
                         color: colors.text
                     },
                     unit: {
-                        fontSize: Math.max(14, Math.min(20, Math.round(width * 0.04))),
+                        fontSize: layout.unitFontSize,
                         color: colors.muted,
                         padding: [0, 0, -12, 8]
                     }
@@ -257,9 +309,9 @@
         var title = typeof gauge.title === 'string' ? gauge.title : '';
         var unit = typeof gauge.unit === 'string' ? gauge.unit : '';
         var preset = normalizePreset(gauge.preset);
-        var width = Math.max(chartElement.clientWidth, 240);
-        var lineWidth = Math.max(10, Math.min(22, Math.round(width * 0.055)));
-        var pointerWidth = Math.max(4, Math.min(8, Math.round(width * 0.018)));
+        var width = Math.max(chartElement.clientWidth, 1);
+        var height = Math.max(chartElement.clientHeight, 160);
+        var layout = resolveGaugeLayout(preset, width, height);
         var automaticTheme = theme === 'auto';
         var colors = resolveThemeColors(theme);
 
@@ -276,59 +328,59 @@
             max: maximum,
             startAngle: 210,
             endAngle: -30,
-            center: ['50%', '54%'],
-            radius: width < 320 ? '84%' : '88%',
+            center: [layout.centerX, layout.centerY],
+            radius: layout.radius,
             splitNumber: 10,
             progress: {
                 show: true,
                 roundCap: true,
-                width: lineWidth
+                width: layout.lineWidth
             },
             axisLine: {
                 roundCap: true,
                 lineStyle: {
-                    width: lineWidth
+                    width: layout.lineWidth
                 }
             },
             pointer: {
                 show: true,
-                length: '57%',
-                width: pointerWidth
+                length: layout.pointerLength,
+                width: layout.pointerWidth
             },
             anchor: {
                 show: true,
                 showAbove: true,
-                size: Math.max(10, Math.min(18, Math.round(width * 0.045))),
+                size: layout.anchorSize,
                 itemStyle: {
                     borderWidth: 2
                 }
             },
             axisTick: {
                 show: true,
-                distance: -lineWidth - 7,
+                distance: layout.tickDistance,
                 splitNumber: 5,
-                length: 5,
+                length: layout.tickLength,
                 lineStyle: { width: 1 }
             },
             splitLine: {
-                distance: -lineWidth - 8,
-                length: 10,
+                distance: layout.splitDistance,
+                length: layout.splitLength,
                 lineStyle: { width: 2 }
             },
             axisLabel: {
-                distance: lineWidth + 13,
-                fontSize: Math.max(9, Math.min(13, Math.round(width * 0.034))),
+                distance: layout.labelDistance,
+                fontSize: layout.axisFontSize,
                 formatter: formatAxisValue
             },
             title: {
                 show: title !== '',
-                offsetCenter: [0, '72%'],
-                fontSize: Math.max(11, Math.min(16, Math.round(width * 0.041)))
+                offsetCenter: [0, layout.titleOffset],
+                fontSize: layout.titleFontSize
             },
             detail: {
                 valueAnimation: !reduceMotion,
-                offsetCenter: [0, '38%'],
-                fontSize: Math.max(20, Math.min(38, Math.round(width * 0.095))),
+                offsetCenter: [0, layout.detailOffset],
+                fontSize: layout.detailFontSize,
                 fontWeight: 600,
                 formatter: function () {
                     return preset === 'speed'
@@ -340,7 +392,7 @@
         };
 
         series = applyThemeColors(series, colors);
-        series = applyPreset(series, preset, width, lineWidth, colors, minimum, maximum);
+        series = applyPreset(series, preset, layout, colors, minimum, maximum);
 
         var option = {
             animation: !reduceMotion,

@@ -115,6 +115,9 @@ SVG;
      *     labelRadius: float,
      *     pointerLength: float,
      *     lineWidth: float,
+     *     tickDistance: float,
+     *     tickLength: float,
+     *     splitLength: float,
      *     detailY: float,
      *     titleY: float,
      *     showProgress: bool,
@@ -133,9 +136,12 @@ SVG;
                 'endAngle'       => -30.0,
                 'centerY'        => 196.0,
                 'radius'         => 132.0,
-                'labelRadius'    => 108.0,
+                'labelRadius'    => 97.0,
                 'pointerLength'  => 102.0,
                 'lineWidth'      => 16.0,
+                'tickDistance'   => 4.0,
+                'tickLength'     => 5.0,
+                'splitLength'    => 10.0,
                 'detailY'        => 294.0,
                 'titleY'         => 352.0,
                 'showProgress'   => false,
@@ -150,9 +156,12 @@ SVG;
                 'endAngle'       => -30.0,
                 'centerY'        => 190.0,
                 'radius'         => 132.0,
-                'labelRadius'    => 108.0,
+                'labelRadius'    => 94.0,
                 'pointerLength'  => 94.0,
                 'lineWidth'      => 20.0,
+                'tickDistance'   => 4.0,
+                'tickLength'     => 5.0,
+                'splitLength'    => 14.0,
                 'detailY'        => 306.0,
                 'titleY'         => 360.0,
                 'showProgress'   => true,
@@ -167,9 +176,12 @@ SVG;
                 'endAngle'       => 0.0,
                 'centerY'        => 232.0,
                 'radius'         => 142.0,
-                'labelRadius'    => 118.0,
-                'pointerLength'  => 106.5,
+                'labelRadius'    => 105.0,
+                'pointerLength'  => 113.25,
                 'lineWidth'      => 18.0,
+                'tickDistance'   => 4.0,
+                'tickLength'     => 5.0,
+                'splitLength'    => 12.0,
                 'detailY'        => 319.0,
                 'titleY'         => 370.0,
                 'showProgress'   => true,
@@ -184,9 +196,12 @@ SVG;
                 'endAngle'       => -30.0,
                 'centerY'        => 196.0,
                 'radius'         => 132.0,
-                'labelRadius'    => 108.0,
+                'labelRadius'    => 97.0,
                 'pointerLength'  => 98.0,
                 'lineWidth'      => 18.0,
+                'tickDistance'   => 4.0,
+                'tickLength'     => 5.0,
+                'splitLength'    => 10.0,
                 'detailY'        => 294.0,
                 'titleY'         => 352.0,
                 'showProgress'   => true,
@@ -270,9 +285,12 @@ SVG;
             }
 
             $angle = self::Angle($fraction, $design);
-            $outerRadius = (float) $design['radius'] + 28.0;
+            $outerRadius = (float) $design['radius']
+                - (float) $design['lineWidth'] / 2.0
+                - (float) $design['tickDistance'];
             $outer = self::Point($outerRadius, $angle, (float) $design['centerY']);
-            $inner = self::Point($outerRadius - ($major ? 11.0 : 6.0), $angle, (float) $design['centerY']);
+            $lineLength = $major ? (float) $design['splitLength'] : (float) $design['tickLength'];
+            $inner = self::Point($outerRadius - $lineLength, $angle, (float) $design['centerY']);
             $class = $major ? 'major' : 'minor';
             $elements[] = '<line x1="' . self::Coordinate($inner[0])
                 . '" y1="' . self::Coordinate($inner[1])

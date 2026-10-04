@@ -47,6 +47,16 @@ Formularwerte; erst das Übernehmen persistiert die Property. Presets definieren
 nur Layoutoptionen wie Winkel, Fortschrittsbogen, Skalenaufteilung und
 Wertposition.
 
+Die native Kachel berechnet die Gauge-Geometrie aus einer gemeinsamen
+virtuellen Referenzfläche von 520 x 400 Einheiten. Der kleinere Skalierungswert
+aus tatsächlicher Breite und Höhe bestimmt Radius, Linienstärken, Zeiger,
+Typografie und vertikale Abstände. Freie Resthöhe wird gleichmäßig verteilt.
+Damit bleiben die Preset-Proportionen in schmalen, quadratischen und breiten
+Kacheln stabil. Fortschrittsbogen und Achslinie teilen sich denselben Radius;
+Teilstriche, Hauptteiler und Beschriftung werden mit positiven ECharts-Abständen
+in dieser Reihenfolge innerhalb der Achslinie angeordnet. Die SVG-Vorschau
+verwendet dieselbe radiale Reihenfolge.
+
 Farben bleiben in dieser Stufe bei den gemeinsamen Symcon-Designtokens. Die
 später ergänzte Auswahl offizieller ECharts-Themes ist als eigener Vertrag in
 [`ADR 0007`](0007-echarts-theme-assets-and-selection.md) festgelegt. Auch
@@ -75,7 +85,10 @@ Die SVG-Vorschau bleibt eine gezielte Annäherung an den Canvas-Renderer und
 kein pixelidentischer Browserersatz. Reale Symcon-Client- und Browserprüfungen
 bleiben erforderlich. Die grundlegenden Preset-Proportionen wie Mittelpunkt,
 Radius, Zeigerlänge, Skalenabstand sowie Wert- und Titelposition werden jedoch
-zwischen Vorschau und nativer Kachel bewusst angeglichen. Erst wenn mindestens
+zwischen Vorschau und nativer Kachel bewusst angeglichen. Gemischte
+prozentuale und ausschließlich breitenabhängige Positionen werden dabei
+vermieden, weil sie bei unterschiedlichen Seitenverhältnissen zu voneinander
+abweichenden Radien und Abständen führen. Erst wenn mindestens
 ein weiterer Diagrammtyp denselben allgemeinen Designervertrag benötigt, wird
 eine Ergänzung der zentralen ModuleHelper erneut geprüft.
 

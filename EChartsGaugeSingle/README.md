@@ -151,6 +151,10 @@ Darstellungs-Helpern aufbauen.
 
 Implementiert sind vier Gauge-Layouts über das Symcon-HTML-SDK. Sie funktionieren
 ohne aktivierte IPSView-Ausgabe und passen sich an die verfügbare Kachelgröße an.
+Die Kachel skaliert dazu eine gemeinsame virtuelle Referenzfläche anhand ihrer
+tatsächlichen Breite und Höhe. Fortschrittsbogen und Achslinie bleiben dadurch
+deckungsgleich; Teilstriche, Hauptteiler und Skalenwerte behalten auch bei
+unterschiedlichen Seitenverhältnissen ihre festgelegte radiale Reihenfolge.
 Die Quellvariable wird über `VM_UPDATE` beobachtet; neue Werte gelangen über
 den HTML-SDK-Nachrichtenkanal in die bestehende Kachel, ohne das gesamte
 HTML-Dokument neu aufzubauen. Bei ungültiger Konfiguration oder fehlendem
@@ -171,7 +175,8 @@ Formular schnell und die noch nicht gespeicherte Konfiguration kann unmittelbar
 dargestellt werden. Die Kachel bleibt für die tatsächliche, interaktive
 ECharts-Ausgabe maßgeblich; die SVG-Vorschau bildet das ausgewählte Layout
 gezielt nach. Die grundlegenden Layoutproportionen werden zwischen Vorschau und
-Kachel angeglichen. Sie verwendet außerdem eine stabile, dem ausgewählten Theme
+Kachel angeglichen, einschließlich der Anordnung von Achslinie, Teilern und
+Skalenwerten. Sie verwendet außerdem eine stabile, dem ausgewählten Theme
 zugeordnete Vorschaupalette und übernimmt die Gauge-Achssegmente der
 offiziellen Themes. Die native Kachel registriert dagegen die unveränderte
 offizielle Theme-Datei und bleibt für die exakte Darstellung maßgeblich. Für
