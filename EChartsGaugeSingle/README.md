@@ -162,7 +162,8 @@ und lädt nicht die vollständige ECharts-Browser-Runtime. Dadurch bleibt das
 Formular schnell und die noch nicht gespeicherte Konfiguration kann unmittelbar
 dargestellt werden. Die Kachel bleibt für die tatsächliche, interaktive
 ECharts-Ausgabe maßgeblich; die SVG-Vorschau bildet das ausgewählte Layout
-gezielt nach. Sie verwendet außerdem eine stabile, dem ausgewählten Theme
+gezielt nach. Die grundlegenden Layoutproportionen werden zwischen Vorschau und
+Kachel angeglichen. Sie verwendet außerdem eine stabile, dem ausgewählten Theme
 zugeordnete Vorschaupalette und übernimmt die Gauge-Achssegmente der
 offiziellen Themes. Die native Kachel registriert dagegen die unveränderte
 offizielle Theme-Datei und bleibt für die exakte Darstellung maßgeblich. Für

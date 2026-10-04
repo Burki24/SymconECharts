@@ -133,14 +133,20 @@
                 break;
 
             case 'speed':
+                // Keep the native proportions aligned with the 720 x 400 SVG preview.
+                var speedLineWidth = Math.min(lineWidth, 18);
                 series.startAngle = 180;
                 series.endAngle = 0;
-                series.center = ['50%', '68%'];
-                series.radius = width < 320 ? '82%' : '90%';
-                series.pointer.length = '68%';
-                series.axisLabel.distance = lineWidth + 15;
-                series.title.offsetCenter = [0, '68%'];
-                series.detail.offsetCenter = [0, '36%'];
+                series.center = ['50%', '58%'];
+                series.radius = width < 320 ? '76%' : '72%';
+                series.progress.width = speedLineWidth;
+                series.axisLine.lineStyle.width = speedLineWidth;
+                series.axisTick.distance = -speedLineWidth - 7;
+                series.splitLine.distance = -speedLineWidth - 8;
+                series.pointer.length = '76%';
+                series.axisLabel.distance = speedLineWidth + 20;
+                series.title.offsetCenter = [0, '82%'];
+                series.detail.offsetCenter = [0, '52%'];
                 series.detail.width = Math.max(130, Math.min(240, Math.round(width * 0.58)));
                 series.detail.height = Math.max(34, Math.min(48, Math.round(width * 0.12)));
                 series.detail.lineHeight = Math.max(34, Math.min(48, Math.round(width * 0.12)));

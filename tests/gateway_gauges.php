@@ -382,6 +382,19 @@ assertGatewayGauge(
     'Official light themes must receive an explicit readable background.'
 );
 assertGatewayGauge(str_contains($visualizationTile, "case 'speed':"), 'Gauge Single tile must render the Speed preset.');
+foreach ([
+    "series.center = ['50%', '58%'];",
+    "series.radius = width < 320 ? '76%' : '72%';",
+    "series.pointer.length = '76%';",
+    'series.axisLabel.distance = speedLineWidth + 20;',
+    "series.detail.offsetCenter = [0, '52%'];",
+    "series.title.offsetCenter = [0, '82%'];"
+] as $speedLayoutContract) {
+    assertGatewayGauge(
+        str_contains($visualizationTile, $speedLayoutContract),
+        'Gauge Single tile must keep the balanced Speed preview geometry: ' . $speedLayoutContract
+    );
+}
 assertGatewayGauge(!str_contains($visualizationTile, '<script src="http'), 'Gauge Single must not load ECharts from a CDN.');
 assertGatewayGauge(
     strlen($visualizationTile) < SYMCON_OUTPUT_BUFFER_LIMIT,

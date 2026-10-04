@@ -70,9 +70,11 @@ ergänzt werden; bestehende IDs ändern ihre grundlegende Bedeutung nicht.
 
 Die SVG-Vorschau bleibt eine gezielte Annäherung an den Canvas-Renderer und
 kein pixelidentischer Browserersatz. Reale Symcon-Client- und Browserprüfungen
-bleiben erforderlich. Erst wenn mindestens ein weiterer Diagrammtyp denselben
-allgemeinen Designervertrag benötigt, wird eine Ergänzung der zentralen
-ModuleHelper erneut geprüft.
+bleiben erforderlich. Die grundlegenden Preset-Proportionen wie Mittelpunkt,
+Radius, Zeigerlänge, Skalenabstand sowie Wert- und Titelposition werden jedoch
+zwischen Vorschau und nativer Kachel bewusst angeglichen. Erst wenn mindestens
+ein weiterer Diagrammtyp denselben allgemeinen Designervertrag benötigt, wird
+eine Ergänzung der zentralen ModuleHelper erneut geprüft.
 
 ## Nachweise
 
