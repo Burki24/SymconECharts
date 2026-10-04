@@ -17,6 +17,13 @@ final class EChartsGaugeSinglePreview
     private const SUPPORTED_POINTER_SHAPES = ['preset', 'needle', 'line', 'arrow', 'custom'];
     private const SUPPORTED_ANCHOR_SHAPES = ['preset', 'circle', 'ring', 'custom', 'hidden'];
     private const SUPPORTED_PLATE_SHAPES = ['hidden', 'circle', 'arc'];
+    private const SUPPORTED_PLATE_FILL_MODES = ['solid', 'linear', 'radial'];
+    private const SUPPORTED_PLATE_GRADIENT_DIRECTIONS = [
+        'top-bottom',
+        'left-right',
+        'diagonal-down',
+        'diagonal-up'
+    ];
 
     public static function CreateSvg(
         float $value,
@@ -50,6 +57,14 @@ final class EChartsGaugeSinglePreview
         $plateShape = (string) ($style['plateShape'] ?? 'hidden');
         if (!in_array($plateShape, self::SUPPORTED_PLATE_SHAPES, true)) {
             throw new InvalidArgumentException('A supported Gauge plate shape is required.');
+        }
+        $plateFillMode = (string) ($style['plateFillMode'] ?? 'solid');
+        if (!in_array($plateFillMode, self::SUPPORTED_PLATE_FILL_MODES, true)) {
+            throw new InvalidArgumentException('A supported Gauge plate fill mode is required.');
+        }
+        $plateGradientDirection = (string) ($style['plateGradientDirection'] ?? 'top-bottom');
+        if (!in_array($plateGradientDirection, self::SUPPORTED_PLATE_GRADIENT_DIRECTIONS, true)) {
+            throw new InvalidArgumentException('A supported Gauge plate gradient direction is required.');
         }
 
         $design = self::ApplyArcDesign(
@@ -93,11 +108,41 @@ final class EChartsGaugeSinglePreview
         $anchorBorderWidth = 2.0 * max(50, min(150, (int) ($style['anchorBorderWidthPercent'] ?? 100))) / 100;
         $anchor = self::Anchor($design, $pointerShape, $anchorShape, $style);
         $plateColorMode = (string) ($style['plateColorMode'] ?? 'theme');
-        $plateColor = (bool) ($style['plateTransparent'] ?? false)
+        $plateTransparent = (bool) ($style['plateTransparent'] ?? false);
+        $plateColor = $plateTransparent
             ? 'none'
             : ($plateColorMode === 'custom'
                 ? self::StyleColor($style, 'plateColor', $palette['surface'])
                 : $palette['surface']);
+        $plateGradientDefinition = '';
+        if (!$plateTransparent && $plateColorMode === 'custom' && $plateFillMode !== 'solid') {
+            $gradientStops = '<stop offset="0%" stop-color="' . $plateColor . '"/>';
+            if ((bool) ($style['plateGradientMiddleEnabled'] ?? false)) {
+                $gradientStops .= '<stop offset="50%" stop-color="'
+                    . self::StyleColor($style, 'plateGradientMiddleColor', $plateColor) . '"/>';
+            }
+            $gradientStops .= '<stop offset="100%" stop-color="'
+                . self::StyleColor($style, 'plateGradientEndColor', $plateColor) . '"/>';
+            if ($plateFillMode === 'linear') {
+                [$x1, $y1, $x2, $y2] = match ($plateGradientDirection) {
+                    'left-right'    => ['0%', '50%', '100%', '50%'],
+                    'diagonal-down' => ['0%', '0%', '100%', '100%'],
+                    'diagonal-up'   => ['0%', '100%', '100%', '0%'],
+                    default         => ['50%', '0%', '50%', '100%']
+                };
+                $plateGradientDefinition = '<linearGradient id="plate-fill-gradient" x1="' . $x1
+                    . '" y1="' . $y1 . '" x2="' . $x2 . '" y2="' . $y2 . '">'
+                    . $gradientStops . '</linearGradient>';
+            } else {
+                $centerX = max(0, min(100, (int) ($style['plateGradientCenterXPercent'] ?? 50)));
+                $centerY = max(0, min(100, (int) ($style['plateGradientCenterYPercent'] ?? 50)));
+                $radius = max(25, min(150, (int) ($style['plateGradientRadiusPercent'] ?? 75)));
+                $plateGradientDefinition = '<radialGradient id="plate-fill-gradient" cx="' . $centerX
+                    . '%" cy="' . $centerY . '%" r="' . $radius . '%">'
+                    . $gradientStops . '</radialGradient>';
+            }
+            $plateColor = 'url(#plate-fill-gradient)';
+        }
         $plateBorderColor = $plateColorMode === 'custom'
             ? self::StyleColor($style, 'plateBorderColor', $palette['border'])
             : $palette['border'];
@@ -132,7 +177,7 @@ final class EChartsGaugeSinglePreview
 
         return <<<SVG
 <svg xmlns="http://www.w3.org/2000/svg" width="720" height="400" viewBox="0 0 720 400" role="img" aria-label="{$ariaLabel}" data-preset="{$preset}" data-theme="{$theme}" data-arc-mode="{$arcMode}" data-start-position="{$startPosition}" data-end-position="{$endPosition}" data-pointer-length-percent="{$pointerLengthPercent}" data-major-splits="{$design['majorSplits']}">
-  <defs><filter id="speed-progress-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="2" dy="2" stdDeviation="4" flood-color="{$progressColor}" flood-opacity="0.45"/></filter><filter id="speed-pointer-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="2" dy="2" stdDeviation="4" flood-color="{$pointerColor}" flood-opacity="0.45"/></filter><filter id="plate-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.35"/></filter></defs>
+  <defs><filter id="speed-progress-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="2" dy="2" stdDeviation="4" flood-color="{$progressColor}" flood-opacity="0.45"/></filter><filter id="speed-pointer-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="2" dy="2" stdDeviation="4" flood-color="{$pointerColor}" flood-opacity="0.45"/></filter><filter id="plate-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.35"/></filter>{$plateGradientDefinition}</defs>
   <style>
     .surface{fill:{$palette['background']}}.plate{fill:{$plateColor};stroke:{$plateBorderColor};stroke-width:{$plateBorderWidth}}.plate-shadow{filter:url(#plate-shadow)}.theme-track-segment{fill:none;stroke-linecap:round;stroke-linejoin:round}.progress{fill:none;stroke:{$progressColor};stroke-linecap:round;stroke-linejoin:round}.speed-progress-shadow{filter:url(#speed-progress-shadow)}.speed-pointer-shadow{filter:url(#speed-pointer-shadow)}.minor{stroke:{$minorColor};stroke-width:1}.major{stroke:{$majorColor};stroke-width:2}.axis{fill:{$scaleColor};font-size:{$design['axisFontSize']}px;font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle;dominant-baseline:middle}.pointer,.speed-pointer{fill:{$pointerColor}}.anchor{fill:{$anchorColor};stroke:{$anchorBorderColor};stroke-width:{$anchorBorderWidth}}.detail-box{fill:{$palette['surface']};stroke:{$detailBorderColor};stroke-width:2}.value{fill:{$valueColor};font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle}.value-number{font-size:{$design['valueFontSize']}px;font-weight:{$valueFontWeight}}.value-unit{fill:{$unitColor};font-size:{$design['unitFontSize']}px;font-weight:{$unitFontWeight}}.title{fill:{$titleColor};font-size:{$design['titleFontSize']}px;font-family:'Segoe UI',Arial,sans-serif;text-anchor:middle}svg[data-preset="speed"] .minor{stroke-width:2}svg[data-preset="speed"] .major{stroke-width:3}
   </style>

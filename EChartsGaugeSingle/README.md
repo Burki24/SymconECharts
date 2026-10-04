@@ -97,6 +97,13 @@ Transparenz oder Schatten sichtbar werden, muss zuerst `Kreis` oder
 empfohlene Ausgangsgröße. `150 %` vergrößert den Radius tatsächlich auf das
 Eineinhalbfache und kann den Kreis deshalb deutlich über den Gauge-Bereich
 hinaus bis an den Kachelrand führen.
+Bei eigenen Plattenfarben stehen zusätzlich Vollfarbe sowie lineare und
+radiale Farbverläufe zur Verfügung. Beide Verlaufsarten verwenden die
+Plattenfüllung als Startfarbe und eine eigene Endfarbe; optional wird bei
+50 % eine Mittelfarbe eingefügt. Lineare Verläufe besitzen vier feste
+Richtungen. Beim radialen Verlauf sind horizontaler und vertikaler Mittelpunkt
+von 0 bis 100 % sowie der Radius von 25 bis 150 % einstellbar. Die
+Formularvorschau bildet dieselben Verlaufsparameter mit SVG-Verläufen nach.
 Der Skalenbogen bleibt wahlweise bei der Presetvorgabe oder
 wird als Voll-, Dreiviertel-, Halb-, Viertelkreis beziehungsweise mit eigenem
 Start und Ende definiert. Die Positionen folgen einem Zifferblatt (`0°` oben,
@@ -173,8 +180,9 @@ Gauge-spezifische Farbrollen das Theme gezielt überschreiben. Das
 „Nabendesign“ steuert Form, optionales SVG, Größe, Randstärke und Farben der
 Nabe, ohne ihren Drehpunkt vom Zeiger zu lösen. „Zifferblattplatte“ steuert
 Form, Transparenz, Theme- oder eigene Farben, Größe, Rand und Schatten der
-Hintergrundfläche. Solange ihre Form auf `Ausgeblendet` steht, haben die
-übrigen Plattenfelder bewusst keine sichtbare Wirkung. Unter
+Hintergrundfläche sowie Vollfarbe, linearen oder radialen Verlauf. Solange
+ihre Form auf `Ausgeblendet` steht, haben die übrigen Plattenfelder bewusst
+keine sichtbare Wirkung. Unter
 „Feinabstimmung“ können die vier Schriftgrößen, Ringstärke, Zeigerstärke und
 Zeigerlänge sowie Nebenstrich- und Hauptteilerlänge jeweils von 50 bis 150 %
 der Presetvorgabe angepasst werden. Für eigene SVG-Zeiger lässt sich zusätzlich
@@ -197,10 +205,14 @@ sie deren aktuellen Wert, andernfalls die Mitte des konfigurierten Bereichs.
 2. Für eigene Farben die Farbquelle auf `Eigene Plattenfarben` umstellen.
    Bei aktivierter transparenter Füllung bleibt die gewählte Füllfarbe
    erwartungsgemäß unsichtbar; Randfarbe und Schatten wirken weiterhin.
-3. Mit `100 %` Plattengröße beginnen. Der Kreis umfasst dabei bewusst auch
+3. Für einen Verlauf den Füllstil auf `Linearer Farbverlauf` oder `Radialer
+   Farbverlauf` stellen. Die Plattenfüllung ist die Startfarbe; anschließend
+   Endfarbe und optional die Mittelfarbe festlegen. Richtung gilt nur für den
+   linearen, Mittelpunkt und Radius gelten nur für den radialen Verlauf.
+4. Mit `100 %` Plattengröße beginnen. Der Kreis umfasst dabei bewusst auch
    Wert und Titel. Größere Werte skalieren den gesamten Radius; `150 %` kann
    deshalb bis an oder über den Kachelrand reichen.
-4. Die Formularvorschau reagiert sofort. Erst `Übernehmen` speichert die
+5. Die Formularvorschau reagiert sofort. Erst `Übernehmen` speichert die
    Auswahl und aktualisiert damit die native Kachel dauerhaft.
 
 ### 5. Statusvariablen und Profile

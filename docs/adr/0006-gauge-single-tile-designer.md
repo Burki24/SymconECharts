@@ -109,7 +109,12 @@ validierte eigene RGB-Farben; die Füllung kann unabhängig davon transparent
 sein. Ein optionaler Schatten skaliert mit dem responsiven Layout. Die native
 Kachel verwendet dafür den offiziellen ECharts `GraphicComponent` mit Kreis-
 beziehungsweise Polygonform und fester Zeichenreihenfolge hinter der
-Gauge-Serie. Die Formularvorschau zeichnet dieselbe Geometrie als SVG.
+Gauge-Serie. Bei eigenen Plattenfarben kann die Füllung als Vollfarbe sowie
+als linearer oder radialer Verlauf ausgegeben werden. Verläufe besitzen Start-
+und Endfarbe sowie eine optionale Mittelfarbe bei 50 %. Der lineare Verlauf
+verwendet eine validierte Richtung; der radiale Verlauf einen validierten
+Mittelpunkt und Radius. Die Formularvorschau zeichnet dieselbe Geometrie und
+dieselben Verlaufsparameter als SVG.
 
 Der Skalenbogen
 verwendet entweder die Presetgeometrie oder einen Voll-, Dreiviertel-, Halb-, Viertel- oder

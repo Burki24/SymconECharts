@@ -390,6 +390,14 @@ $gauge->SetTestProperty('AnchorColor', 0x778899);
 $gauge->SetTestProperty('AnchorBorderColor', 0x8899AA);
 $gauge->SetTestProperty('PlateShape', 'arc');
 $gauge->SetTestProperty('PlateColorMode', 'custom');
+$gauge->SetTestProperty('PlateFillMode', 'radial');
+$gauge->SetTestProperty('PlateGradientMiddleEnabled', true);
+$gauge->SetTestProperty('PlateGradientMiddleColor', 0x405060);
+$gauge->SetTestProperty('PlateGradientEndColor', 0x607080);
+$gauge->SetTestProperty('PlateGradientDirection', 'diagonal-down');
+$gauge->SetTestProperty('PlateGradientCenterXPercent', 40);
+$gauge->SetTestProperty('PlateGradientCenterYPercent', 35);
+$gauge->SetTestProperty('PlateGradientRadiusPercent', 85);
 $gauge->SetTestProperty('PlateShadow', true);
 $gauge->SetTestProperty('PlateColor', 0x202830);
 $gauge->SetTestProperty('PlateBorderColor', 0x90A0B0);
@@ -461,6 +469,9 @@ foreach ([
     "if (shape === 'hidden')",
     "series.anchor.itemStyle.color = 'transparent';",
     'function buildPlateGraphic(style, layout, series, colors)',
+    'function buildPlateFill(style, colors)',
+    "type: 'radial'",
+    'colorStops: colorStops',
     "type: renderCircle ? 'circle' : 'polygon'",
     'fill: fill',
     'stroke: border',
@@ -497,6 +508,11 @@ assertGatewayGauge(
 );
 
 $configurationForm = json_decode($gauge->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    str_contains(json_encode($configurationForm, JSON_THROW_ON_ERROR), '$PlateFillMode')
+        && str_contains(json_encode($configurationForm, JSON_THROW_ON_ERROR), '$PlateGradientRadiusPercent'),
+    'Gauge Single form preview actions must forward the complete plate-gradient state.'
+);
 $previewElement = null;
 foreach ($configurationForm['elements'] ?? [] as $element) {
     if (($element['type'] ?? null) !== 'ExpansionPanel' || ($element['caption'] ?? null) !== 'Tile designer') {
@@ -536,8 +552,12 @@ assertGatewayGauge(
 assertGatewayGauge(
     str_contains($initialPreviewSvg, 'data-plate-shape="arc"')
         && str_contains($initialPreviewSvg, 'class="plate plate-shadow"')
-        && str_contains($initialPreviewSvg, 'fill:#202830;stroke:#90A0B0;stroke-width:1.5'),
-    'Gauge Single preview must draw the configured dial plate behind the Gauge.'
+        && str_contains($initialPreviewSvg, '<radialGradient id="plate-fill-gradient" cx="40%" cy="35%" r="85%">')
+        && str_contains($initialPreviewSvg, '<stop offset="0%" stop-color="#202830"/>')
+        && str_contains($initialPreviewSvg, '<stop offset="50%" stop-color="#405060"/>')
+        && str_contains($initialPreviewSvg, '<stop offset="100%" stop-color="#607080"/>')
+        && str_contains($initialPreviewSvg, 'fill:url(#plate-fill-gradient);stroke:#90A0B0;stroke-width:1.5'),
+    'Gauge Single preview must draw the configured radial-gradient dial plate behind the Gauge.'
 );
 assertGatewayGauge(str_contains($initialPreviewSvg, '#FEF8EF'), 'Gauge Single preview must apply the Vintage background.');
 assertGatewayGauge(str_contains($initialPreviewSvg, 'Room climate'), 'Gauge Single preview must contain the title.');
@@ -860,40 +880,48 @@ assertGatewayGauge(($gaugeData['gauge']['maximum'] ?? null) === 80.0, 'Gauge Sin
 assertGatewayGauge(($gaugeData['gauge']['preset'] ?? null) === 'progress', 'Gauge Single preset changed.');
 assertGatewayGauge(
     ($gaugeData['gauge']['style'] ?? null) === [
-        'scaleFontSizePercent'     => 150,
-        'valueFontSizePercent'     => 125,
-        'unitFontSizePercent'      => 75,
-        'titleFontSizePercent'     => 110,
-        'ringWidthPercent'         => 120,
-        'pointerWidthPercent'      => 80,
-        'pointerLengthPercent'     => 130,
-        'anchorSizePercent'        => 125,
-        'anchorBorderWidthPercent' => 75,
-        'plateSizePercent'         => 125,
-        'plateBorderWidthPercent'  => 75,
-        'minorTickLengthPercent'   => 75,
-        'majorTickLengthPercent'   => 150,
-        'pointerShape'             => 'arrow',
-        'anchorShape'              => 'ring',
-        'anchorColorMode'          => 'custom',
-        'plateShape'               => 'arc',
-        'plateColorMode'           => 'custom',
-        'plateTransparent'         => false,
-        'plateShadow'              => true,
-        'arcMode'                  => 'custom',
-        'startPosition'            => 270.0,
-        'endPosition'              => 67.5,
-        'colorMode'                => 'custom',
-        'pointerColor'             => '#112233',
-        'progressColor'            => '#223344',
-        'ringColor'                => '#334455',
-        'scaleColor'               => '#445566',
-        'valueColor'               => '#556677',
-        'titleColor'               => '#667788',
-        'anchorColor'              => '#778899',
-        'anchorBorderColor'        => '#8899AA',
-        'plateColor'               => '#202830',
-        'plateBorderColor'         => '#90A0B0'
+        'scaleFontSizePercent'        => 150,
+        'valueFontSizePercent'        => 125,
+        'unitFontSizePercent'         => 75,
+        'titleFontSizePercent'        => 110,
+        'ringWidthPercent'            => 120,
+        'pointerWidthPercent'         => 80,
+        'pointerLengthPercent'        => 130,
+        'anchorSizePercent'           => 125,
+        'anchorBorderWidthPercent'    => 75,
+        'plateSizePercent'            => 125,
+        'plateBorderWidthPercent'     => 75,
+        'minorTickLengthPercent'      => 75,
+        'majorTickLengthPercent'      => 150,
+        'pointerShape'                => 'arrow',
+        'anchorShape'                 => 'ring',
+        'anchorColorMode'             => 'custom',
+        'plateShape'                  => 'arc',
+        'plateColorMode'              => 'custom',
+        'plateFillMode'               => 'radial',
+        'plateGradientMiddleEnabled'  => true,
+        'plateGradientDirection'      => 'diagonal-down',
+        'plateGradientCenterXPercent' => 40,
+        'plateGradientCenterYPercent' => 35,
+        'plateGradientRadiusPercent'  => 85,
+        'plateTransparent'            => false,
+        'plateShadow'                 => true,
+        'arcMode'                     => 'custom',
+        'startPosition'               => 270.0,
+        'endPosition'                 => 67.5,
+        'colorMode'                   => 'custom',
+        'pointerColor'                => '#112233',
+        'progressColor'               => '#223344',
+        'ringColor'                   => '#334455',
+        'scaleColor'                  => '#445566',
+        'valueColor'                  => '#556677',
+        'titleColor'                  => '#667788',
+        'anchorColor'                 => '#778899',
+        'anchorBorderColor'           => '#8899AA',
+        'plateColor'                  => '#202830',
+        'plateBorderColor'            => '#90A0B0',
+        'plateGradientMiddleColor'    => '#405060',
+        'plateGradientEndColor'       => '#607080'
     ],
     'Gauge Single must expose the validated tile-designer fine tuning in its chart model.'
 );
@@ -1171,6 +1199,35 @@ assertGatewayGauge(
         && str_contains($transparentPlatePreviewSvg, 'stroke-width:3'),
     'Gauge Single preview must support a transparent circular plate with a visible border.'
 );
+$linearPlatePreviewSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
+    50.0,
+    0.0,
+    100.0,
+    '',
+    '',
+    0,
+    'en',
+    'simple',
+    'auto',
+    [
+        'plateShape'             => 'circle',
+        'plateColorMode'         => 'custom',
+        'plateFillMode'          => 'linear',
+        'plateColor'             => '#102030',
+        'plateGradientEndColor'  => '#A0B0C0',
+        'plateGradientDirection' => 'diagonal-up'
+    ]
+);
+assertGatewayGauge(
+    str_contains(
+        $linearPlatePreviewSvg,
+        '<linearGradient id="plate-fill-gradient" x1="0%" y1="100%" x2="100%" y2="0%">'
+    )
+        && str_contains($linearPlatePreviewSvg, '<stop offset="0%" stop-color="#102030"/>')
+        && str_contains($linearPlatePreviewSvg, '<stop offset="100%" stop-color="#A0B0C0"/>')
+        && !str_contains($linearPlatePreviewSvg, '<stop offset="50%"'),
+    'Gauge Single preview must support a two-color linear plate gradient in the selected direction.'
+);
 $singleGauge->SetTestProperty('SourceVariableID', 4712);
 $singleGauge->ApplyChanges();
 assertGatewayGauge($singleGauge->GetTestStatus() === 201, 'Non-numeric Gauge source must set status 201.');
@@ -1249,6 +1306,23 @@ $invalidPlateColorMode->SetTestProperty('SourceVariableID', 4711);
 $invalidPlateColorMode->SetTestProperty('PlateColorMode', 'unknown');
 $invalidPlateColorMode->ApplyChanges();
 assertGatewayGauge($invalidPlateColorMode->GetTestStatus() === 205, 'Unknown Gauge plate color modes must set status 205.');
+
+$invalidPlateFillMode = new EChartsGaugeSingle();
+$invalidPlateFillMode->Create();
+$invalidPlateFillMode->SetTestProperty('SourceVariableID', 4711);
+$invalidPlateFillMode->SetTestProperty('PlateFillMode', 'unknown');
+$invalidPlateFillMode->ApplyChanges();
+assertGatewayGauge($invalidPlateFillMode->GetTestStatus() === 205, 'Unknown Gauge plate fill modes must set status 205.');
+
+$invalidPlateGradientRadius = new EChartsGaugeSingle();
+$invalidPlateGradientRadius->Create();
+$invalidPlateGradientRadius->SetTestProperty('SourceVariableID', 4711);
+$invalidPlateGradientRadius->SetTestProperty('PlateGradientRadiusPercent', 151);
+$invalidPlateGradientRadius->ApplyChanges();
+assertGatewayGauge(
+    $invalidPlateGradientRadius->GetTestStatus() === 205,
+    'Out-of-range Gauge plate gradient radii must set status 205.'
+);
 
 $invalidPointerPivotMode = new EChartsGaugeSingle();
 $invalidPointerPivotMode->Create();

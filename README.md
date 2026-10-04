@@ -18,7 +18,8 @@ Folgende Module beinhaltet das SymconECharts Repository:
   SVG-Vorschau festlegen. Die am Zeigerdrehpunkt gebundene Nabe kann als Kreis,
   Ring oder validiertes eigenes SVG gestaltet beziehungsweise ausgeblendet
   werden. Eine optionale runde oder dem Skalenbogen folgende Zifferblattplatte
-  besitzt eigene Füllung, Kontur, Größe und Schatten.
+  besitzt eine eigene Füllung einschließlich linearer und radialer
+  Farbverläufe, Kontur, Größe und Schatten.
   Ein separat platzierbares HTML-Widget in IPSView bleibt ein weiterer
   Ausgabeweg auf derselben Diagrammkonfiguration und Datenaufbereitung.
 

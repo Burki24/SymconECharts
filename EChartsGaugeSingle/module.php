@@ -54,6 +54,13 @@ class EChartsGaugeSingle extends IPSModuleStrict
     private const SUPPORTED_ANCHOR_COLOR_MODES = ['theme', 'custom'];
     private const SUPPORTED_PLATE_SHAPES = ['hidden', 'circle', 'arc'];
     private const SUPPORTED_PLATE_COLOR_MODES = ['theme', 'custom'];
+    private const SUPPORTED_PLATE_FILL_MODES = ['solid', 'linear', 'radial'];
+    private const SUPPORTED_PLATE_GRADIENT_DIRECTIONS = [
+        'top-bottom',
+        'left-right',
+        'diagonal-down',
+        'diagonal-up'
+    ];
     private const SUPPORTED_ARC_MODES = ['preset', 'full', 'three-quarter', 'half', 'quarter', 'custom'];
     private const SUPPORTED_COLOR_MODES = ['theme', 'custom'];
     private const ANGLE_STEP = 22.5;
@@ -102,6 +109,14 @@ class EChartsGaugeSingle extends IPSModuleStrict
         $this->RegisterPropertyInteger('AnchorBorderColor', 0xF4F5F7);
         $this->RegisterPropertyString('PlateShape', 'hidden');
         $this->RegisterPropertyString('PlateColorMode', 'theme');
+        $this->RegisterPropertyString('PlateFillMode', 'solid');
+        $this->RegisterPropertyBoolean('PlateGradientMiddleEnabled', false);
+        $this->RegisterPropertyInteger('PlateGradientMiddleColor', 0x45474C);
+        $this->RegisterPropertyInteger('PlateGradientEndColor', 0x111317);
+        $this->RegisterPropertyString('PlateGradientDirection', 'top-bottom');
+        $this->RegisterPropertyInteger('PlateGradientCenterXPercent', 50);
+        $this->RegisterPropertyInteger('PlateGradientCenterYPercent', 50);
+        $this->RegisterPropertyInteger('PlateGradientRadiusPercent', 75);
         $this->RegisterPropertyBoolean('PlateTransparent', false);
         $this->RegisterPropertyBoolean('PlateShadow', false);
         $this->RegisterPropertyInteger('PlateColor', 0x25272B);
@@ -145,6 +160,12 @@ class EChartsGaugeSingle extends IPSModuleStrict
     public function GetConfigurationForm(): string
     {
         $form = $this->LoadConfigurationForm();
+        if (isset($form['elements']) && is_array($form['elements'])) {
+            $form['elements'] = $this->WithGaugePreviewActions(
+                $form['elements'],
+                $this->GaugePreviewAction()
+            );
+        }
         $form = SVGPreviewHelper::withImage(
             $form,
             'GaugePreview',
@@ -214,7 +235,15 @@ class EChartsGaugeSingle extends IPSModuleStrict
         int $PlateColor = 0x25272B,
         int $PlateBorderColor = 0xA5A9B0,
         int $PlateSizePercent = self::DESIGN_SCALE_DEFAULT,
-        int $PlateBorderWidthPercent = self::DESIGN_SCALE_DEFAULT
+        int $PlateBorderWidthPercent = self::DESIGN_SCALE_DEFAULT,
+        string $PlateFillMode = 'solid',
+        bool $PlateGradientMiddleEnabled = false,
+        int $PlateGradientMiddleColor = 0x45474C,
+        int $PlateGradientEndColor = 0x111317,
+        string $PlateGradientDirection = 'top-bottom',
+        int $PlateGradientCenterXPercent = 50,
+        int $PlateGradientCenterYPercent = 50,
+        int $PlateGradientRadiusPercent = 75
     ): void {
         $this->UpdateFormField(
             'GaugePreview',
@@ -229,40 +258,48 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 $GaugePreset,
                 $EChartsTheme,
                 [
-                    'scaleFontSizePercent'     => $ScaleFontSizePercent,
-                    'valueFontSizePercent'     => $ValueFontSizePercent,
-                    'unitFontSizePercent'      => $UnitFontSizePercent,
-                    'titleFontSizePercent'     => $TitleFontSizePercent,
-                    'ringWidthPercent'         => $RingWidthPercent,
-                    'pointerWidthPercent'      => $PointerWidthPercent,
-                    'pointerLengthPercent'     => $PointerLengthPercent,
-                    'anchorSizePercent'        => $AnchorSizePercent,
-                    'anchorBorderWidthPercent' => $AnchorBorderWidthPercent,
-                    'plateSizePercent'         => $PlateSizePercent,
-                    'plateBorderWidthPercent'  => $PlateBorderWidthPercent,
-                    'minorTickLengthPercent'   => $MinorTickLengthPercent,
-                    'majorTickLengthPercent'   => $MajorTickLengthPercent,
-                    'pointerShape'             => $PointerShape,
-                    'arcMode'                  => $GaugeArcMode,
-                    'startPosition'            => $GaugeStartPosition,
-                    'endPosition'              => $GaugeEndPosition,
-                    'colorMode'                => $GaugeColorMode,
-                    'pointerColor'             => self::ColorToHex($PointerColor),
-                    'progressColor'            => self::ColorToHex($ProgressColor),
-                    'ringColor'                => self::ColorToHex($RingColor),
-                    'scaleColor'               => self::ColorToHex($ScaleColor),
-                    'valueColor'               => self::ColorToHex($ValueColor),
-                    'titleColor'               => self::ColorToHex($TitleColor),
-                    'anchorShape'              => $AnchorShape,
-                    'anchorColorMode'          => $AnchorColorMode,
-                    'anchorColor'              => self::ColorToHex($AnchorColor),
-                    'anchorBorderColor'        => self::ColorToHex($AnchorBorderColor),
-                    'plateShape'               => $PlateShape,
-                    'plateColorMode'           => $PlateColorMode,
-                    'plateTransparent'         => $PlateTransparent,
-                    'plateShadow'              => $PlateShadow,
-                    'plateColor'               => self::ColorToHex($PlateColor),
-                    'plateBorderColor'         => self::ColorToHex($PlateBorderColor),
+                    'scaleFontSizePercent'        => $ScaleFontSizePercent,
+                    'valueFontSizePercent'        => $ValueFontSizePercent,
+                    'unitFontSizePercent'         => $UnitFontSizePercent,
+                    'titleFontSizePercent'        => $TitleFontSizePercent,
+                    'ringWidthPercent'            => $RingWidthPercent,
+                    'pointerWidthPercent'         => $PointerWidthPercent,
+                    'pointerLengthPercent'        => $PointerLengthPercent,
+                    'anchorSizePercent'           => $AnchorSizePercent,
+                    'anchorBorderWidthPercent'    => $AnchorBorderWidthPercent,
+                    'plateSizePercent'            => $PlateSizePercent,
+                    'plateBorderWidthPercent'     => $PlateBorderWidthPercent,
+                    'minorTickLengthPercent'      => $MinorTickLengthPercent,
+                    'majorTickLengthPercent'      => $MajorTickLengthPercent,
+                    'pointerShape'                => $PointerShape,
+                    'arcMode'                     => $GaugeArcMode,
+                    'startPosition'               => $GaugeStartPosition,
+                    'endPosition'                 => $GaugeEndPosition,
+                    'colorMode'                   => $GaugeColorMode,
+                    'pointerColor'                => self::ColorToHex($PointerColor),
+                    'progressColor'               => self::ColorToHex($ProgressColor),
+                    'ringColor'                   => self::ColorToHex($RingColor),
+                    'scaleColor'                  => self::ColorToHex($ScaleColor),
+                    'valueColor'                  => self::ColorToHex($ValueColor),
+                    'titleColor'                  => self::ColorToHex($TitleColor),
+                    'anchorShape'                 => $AnchorShape,
+                    'anchorColorMode'             => $AnchorColorMode,
+                    'anchorColor'                 => self::ColorToHex($AnchorColor),
+                    'anchorBorderColor'           => self::ColorToHex($AnchorBorderColor),
+                    'plateShape'                  => $PlateShape,
+                    'plateColorMode'              => $PlateColorMode,
+                    'plateFillMode'               => $PlateFillMode,
+                    'plateGradientMiddleEnabled'  => $PlateGradientMiddleEnabled,
+                    'plateGradientMiddleColor'    => self::ColorToHex($PlateGradientMiddleColor),
+                    'plateGradientEndColor'       => self::ColorToHex($PlateGradientEndColor),
+                    'plateGradientDirection'      => $PlateGradientDirection,
+                    'plateGradientCenterXPercent' => $PlateGradientCenterXPercent,
+                    'plateGradientCenterYPercent' => $PlateGradientCenterYPercent,
+                    'plateGradientRadiusPercent'  => $PlateGradientRadiusPercent,
+                    'plateTransparent'            => $PlateTransparent,
+                    'plateShadow'                 => $PlateShadow,
+                    'plateColor'                  => self::ColorToHex($PlateColor),
+                    'plateBorderColor'            => self::ColorToHex($PlateBorderColor),
                     ...$this->ResolveCustomPointerStyle(
                         $PointerShape,
                         $CustomPointerSVG,
@@ -409,6 +446,91 @@ class EChartsGaugeSingle extends IPSModuleStrict
         }
     }
 
+    private function GaugePreviewAction(): string
+    {
+        $parameters = [
+            '$id',
+            '$SourceVariableID',
+            '$Minimum',
+            '$Maximum',
+            '$Title',
+            '$Unit',
+            '$Decimals',
+            '$GaugePreset',
+            '$EChartsTheme',
+            '$ScaleFontSizePercent',
+            '$ValueFontSizePercent',
+            '$UnitFontSizePercent',
+            '$TitleFontSizePercent',
+            '$RingWidthPercent',
+            '$PointerWidthPercent',
+            '$MinorTickLengthPercent',
+            '$MajorTickLengthPercent',
+            '$PointerShape',
+            '$GaugeArcMode',
+            '$GaugeStartPosition',
+            '$GaugeEndPosition',
+            '$GaugeColorMode',
+            '$PointerColor',
+            '$ProgressColor',
+            '$RingColor',
+            '$ScaleColor',
+            '$ValueColor',
+            '$TitleColor',
+            '$CustomPointerSVG',
+            '$PointerLengthPercent',
+            '$CustomPointerPivotMode',
+            '$CustomPointerPivotXPercent',
+            '$CustomPointerPivotYPercent',
+            '$AnchorShape',
+            '$CustomAnchorSVG',
+            '$AnchorColorMode',
+            '$AnchorColor',
+            '$AnchorBorderColor',
+            '$AnchorSizePercent',
+            '$AnchorBorderWidthPercent',
+            '$PlateShape',
+            '$PlateColorMode',
+            '$PlateTransparent',
+            '$PlateShadow',
+            '$PlateColor',
+            '$PlateBorderColor',
+            '$PlateSizePercent',
+            '$PlateBorderWidthPercent',
+            '$PlateFillMode',
+            '$PlateGradientMiddleEnabled',
+            '$PlateGradientMiddleColor',
+            '$PlateGradientEndColor',
+            '$PlateGradientDirection',
+            '$PlateGradientCenterXPercent',
+            '$PlateGradientCenterYPercent',
+            '$PlateGradientRadiusPercent'
+        ];
+
+        return 'ECGS_UpdateGaugePreview(' . implode(', ', $parameters) . ');';
+    }
+
+    /**
+     * @param list<array<string, mixed>> $items
+     * @return list<array<string, mixed>>
+     */
+    private function WithGaugePreviewActions(array $items, string $action): array
+    {
+        foreach ($items as &$item) {
+            if (isset($item['onChange'])
+                && is_string($item['onChange'])
+                && str_starts_with($item['onChange'], 'ECGS_UpdateGaugePreview(')) {
+                $item['onChange'] = $action;
+            }
+            if (isset($item['items']) && is_array($item['items'])) {
+                $item['items'] = $this->WithGaugePreviewActions($item['items'], $action);
+            }
+        }
+        unset($item);
+
+        return $items;
+    }
+
     private function Initialize(): void
     {
         $this->SetStatus(IS_INACTIVE);
@@ -468,6 +590,12 @@ class EChartsGaugeSingle extends IPSModuleStrict
             || !in_array((string) ($style['anchorColorMode'] ?? 'theme'), self::SUPPORTED_ANCHOR_COLOR_MODES, true)
             || !in_array((string) ($style['plateShape'] ?? 'hidden'), self::SUPPORTED_PLATE_SHAPES, true)
             || !in_array((string) ($style['plateColorMode'] ?? 'theme'), self::SUPPORTED_PLATE_COLOR_MODES, true)
+            || !in_array((string) ($style['plateFillMode'] ?? 'solid'), self::SUPPORTED_PLATE_FILL_MODES, true)
+            || !in_array(
+                (string) ($style['plateGradientDirection'] ?? 'top-bottom'),
+                self::SUPPORTED_PLATE_GRADIENT_DIRECTIONS,
+                true
+            )
             || !in_array((string) ($style['arcMode'] ?? 'preset'), self::SUPPORTED_ARC_MODES, true)
             || !in_array((string) ($style['colorMode'] ?? 'theme'), self::SUPPORTED_COLOR_MODES, true)) {
             return EChartsGaugeSinglePreview::CreateErrorSvg(
@@ -484,6 +612,20 @@ class EChartsGaugeSingle extends IPSModuleStrict
             && ((string) ($style['anchorPath'] ?? '') === '' || (string) ($style['anchorViewBox'] ?? '') === '')) {
             return EChartsGaugeSinglePreview::CreateErrorSvg(
                 $this->Translate((string) ($style['anchorError'] ?? 'Select a supported path-only SVG anchor.'))
+            );
+        }
+        foreach (['plateGradientCenterXPercent', 'plateGradientCenterYPercent'] as $fieldName) {
+            $position = (int) ($style[$fieldName] ?? 50);
+            if ($position < 0 || $position > 100) {
+                return EChartsGaugeSinglePreview::CreateErrorSvg(
+                    $this->Translate('Select supported Gauge design options.')
+                );
+            }
+        }
+        $gradientRadius = (int) ($style['plateGradientRadiusPercent'] ?? 75);
+        if ($gradientRadius < 25 || $gradientRadius > 150) {
+            return EChartsGaugeSinglePreview::CreateErrorSvg(
+                $this->Translate('Select supported Gauge design options.')
             );
         }
         $startPosition = (float) ($style['startPosition'] ?? 270.0);
@@ -606,6 +748,12 @@ class EChartsGaugeSingle extends IPSModuleStrict
             || !in_array($this->ReadPropertyString('AnchorColorMode'), self::SUPPORTED_ANCHOR_COLOR_MODES, true)
             || !in_array($this->ReadPropertyString('PlateShape'), self::SUPPORTED_PLATE_SHAPES, true)
             || !in_array($this->ReadPropertyString('PlateColorMode'), self::SUPPORTED_PLATE_COLOR_MODES, true)
+            || !in_array($this->ReadPropertyString('PlateFillMode'), self::SUPPORTED_PLATE_FILL_MODES, true)
+            || !in_array(
+                $this->ReadPropertyString('PlateGradientDirection'),
+                self::SUPPORTED_PLATE_GRADIENT_DIRECTIONS,
+                true
+            )
             || !in_array($this->ReadPropertyString('GaugeArcMode'), self::SUPPORTED_ARC_MODES, true)
             || !in_array($this->ReadPropertyString('GaugeColorMode'), self::SUPPORTED_COLOR_MODES, true)) {
             return [
@@ -645,6 +793,23 @@ class EChartsGaugeSingle extends IPSModuleStrict
             }
         }
 
+        foreach (['PlateGradientCenterXPercent', 'PlateGradientCenterYPercent'] as $propertyName) {
+            $position = $this->ReadPropertyInteger($propertyName);
+            if ($position < 0 || $position > 100) {
+                return [
+                    'Status'  => self::STATUS_DESIGN_INVALID,
+                    'Message' => 'Plate gradient center values must be between 0 and 100 percent.'
+                ];
+            }
+        }
+        $gradientRadius = $this->ReadPropertyInteger('PlateGradientRadiusPercent');
+        if ($gradientRadius < 25 || $gradientRadius > 150) {
+            return [
+                'Status'  => self::STATUS_DESIGN_INVALID,
+                'Message' => 'Plate gradient radius must be between 25 and 150 percent.'
+            ];
+        }
+
         if (!self::IsAnglePosition($this->ReadPropertyFloat('GaugeStartPosition'))
             || !self::IsAnglePosition($this->ReadPropertyFloat('GaugeEndPosition'))
             || ($this->ReadPropertyString('GaugeArcMode') === 'custom'
@@ -665,7 +830,9 @@ class EChartsGaugeSingle extends IPSModuleStrict
             'AnchorColor',
             'AnchorBorderColor',
             'PlateColor',
-            'PlateBorderColor'
+            'PlateBorderColor',
+            'PlateGradientMiddleColor',
+            'PlateGradientEndColor'
         ] as $propertyName) {
             $color = $this->ReadPropertyInteger($propertyName);
             if ($color < 0 || $color > 0xFFFFFF) {
@@ -692,6 +859,12 @@ class EChartsGaugeSingle extends IPSModuleStrict
         $style['anchorColorMode'] = $this->ReadPropertyString('AnchorColorMode');
         $style['plateShape'] = $this->ReadPropertyString('PlateShape');
         $style['plateColorMode'] = $this->ReadPropertyString('PlateColorMode');
+        $style['plateFillMode'] = $this->ReadPropertyString('PlateFillMode');
+        $style['plateGradientMiddleEnabled'] = $this->ReadPropertyBoolean('PlateGradientMiddleEnabled');
+        $style['plateGradientDirection'] = $this->ReadPropertyString('PlateGradientDirection');
+        $style['plateGradientCenterXPercent'] = $this->ReadPropertyInteger('PlateGradientCenterXPercent');
+        $style['plateGradientCenterYPercent'] = $this->ReadPropertyInteger('PlateGradientCenterYPercent');
+        $style['plateGradientRadiusPercent'] = $this->ReadPropertyInteger('PlateGradientRadiusPercent');
         $style['plateTransparent'] = $this->ReadPropertyBoolean('PlateTransparent');
         $style['plateShadow'] = $this->ReadPropertyBoolean('PlateShadow');
         $style['arcMode'] = $this->ReadPropertyString('GaugeArcMode');
@@ -699,16 +872,18 @@ class EChartsGaugeSingle extends IPSModuleStrict
         $style['endPosition'] = $this->ReadPropertyFloat('GaugeEndPosition');
         $style['colorMode'] = $this->ReadPropertyString('GaugeColorMode');
         foreach ([
-            'pointerColor'      => 'PointerColor',
-            'progressColor'     => 'ProgressColor',
-            'ringColor'         => 'RingColor',
-            'scaleColor'        => 'ScaleColor',
-            'valueColor'        => 'ValueColor',
-            'titleColor'        => 'TitleColor',
-            'anchorColor'       => 'AnchorColor',
-            'anchorBorderColor' => 'AnchorBorderColor',
-            'plateColor'        => 'PlateColor',
-            'plateBorderColor'  => 'PlateBorderColor'
+            'pointerColor'             => 'PointerColor',
+            'progressColor'            => 'ProgressColor',
+            'ringColor'                => 'RingColor',
+            'scaleColor'               => 'ScaleColor',
+            'valueColor'               => 'ValueColor',
+            'titleColor'               => 'TitleColor',
+            'anchorColor'              => 'AnchorColor',
+            'anchorBorderColor'        => 'AnchorBorderColor',
+            'plateColor'               => 'PlateColor',
+            'plateBorderColor'         => 'PlateBorderColor',
+            'plateGradientMiddleColor' => 'PlateGradientMiddleColor',
+            'plateGradientEndColor'    => 'PlateGradientEndColor'
         ] as $fieldName => $propertyName) {
             $style[$fieldName] = self::ColorToHex($this->ReadPropertyInteger($propertyName));
         }

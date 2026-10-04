@@ -587,6 +587,43 @@
                             "type": "RowLayout",
                             "items": [
                                 {
+                                    "type": "Select",
+                                    "name": "PlateFillMode",
+                                    "caption": "Plate fill style",
+                                    "width": "260px",
+                                    "options": [
+                                        {
+                                            "caption": "Solid color",
+                                            "value": "solid"
+                                        },
+                                        {
+                                            "caption": "Linear gradient",
+                                            "value": "linear"
+                                        },
+                                        {
+                                            "caption": "Radial gradient",
+                                            "value": "radial"
+                                        }
+                                    ],
+                                    "onChange": "ECGS_UpdateGaugePreview();"
+                                },
+                                {
+                                    "type": "CheckBox",
+                                    "name": "PlateGradientMiddleEnabled",
+                                    "caption": "Use middle gradient color",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview();"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Label",
+                            "caption": "Gradients require Custom plate colors. The plate fill color is used as the gradient start color."
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
                                     "type": "CheckBox",
                                     "name": "PlateTransparent",
                                     "caption": "Transparent plate fill",
@@ -633,7 +670,7 @@
                                 {
                                     "type": "SelectColor",
                                     "name": "PlateColor",
-                                    "caption": "Plate fill",
+                                    "caption": "Plate fill / gradient start",
                                     "allowTransparent": false,
                                     "width": "260px",
                                     "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
@@ -647,6 +684,87 @@
                                     "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
                                 }
                             ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "SelectColor",
+                                    "name": "PlateGradientMiddleColor",
+                                    "caption": "Gradient middle",
+                                    "allowTransparent": false,
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview();"
+                                },
+                                {
+                                    "type": "SelectColor",
+                                    "name": "PlateGradientEndColor",
+                                    "caption": "Gradient end",
+                                    "allowTransparent": false,
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview();"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Select",
+                            "name": "PlateGradientDirection",
+                            "caption": "Linear gradient direction",
+                            "width": "540px",
+                            "options": [
+                                {
+                                    "caption": "Top to bottom",
+                                    "value": "top-bottom"
+                                },
+                                {
+                                    "caption": "Left to right",
+                                    "value": "left-right"
+                                },
+                                {
+                                    "caption": "Top left to bottom right",
+                                    "value": "diagonal-down"
+                                },
+                                {
+                                    "caption": "Bottom left to top right",
+                                    "value": "diagonal-up"
+                                }
+                            ],
+                            "onChange": "ECGS_UpdateGaugePreview();"
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PlateGradientCenterXPercent",
+                                    "caption": "Radial center horizontal",
+                                    "minimum": 0,
+                                    "maximum": 100,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview();"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PlateGradientCenterYPercent",
+                                    "caption": "Radial center vertical",
+                                    "minimum": 0,
+                                    "maximum": 100,
+                                    "suffix": "%",
+                                    "width": "260px",
+                                    "onChange": "ECGS_UpdateGaugePreview();"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "PlateGradientRadiusPercent",
+                            "caption": "Radial gradient radius",
+                            "minimum": 25,
+                            "maximum": 150,
+                            "suffix": "%",
+                            "width": "260px",
+                            "onChange": "ECGS_UpdateGaugePreview();"
                         }
                     ]
                 },

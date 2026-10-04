@@ -534,6 +534,58 @@
         return series;
     }
 
+    function buildPlateFill(style, colors) {
+        var startColor = normalizeStyleColor(style.plateColor, colors.surface);
+        if (style.plateColorMode !== 'custom'
+            || ['linear', 'radial'].indexOf(style.plateFillMode) < 0) {
+            return style.plateColorMode === 'custom' ? startColor : colors.surface;
+        }
+
+        var colorStops = [{ offset: 0, color: startColor }];
+        if (style.plateGradientMiddleEnabled) {
+            colorStops.push({
+                offset: 0.5,
+                color: normalizeStyleColor(style.plateGradientMiddleColor, startColor)
+            });
+        }
+        colorStops.push({
+            offset: 1,
+            color: normalizeStyleColor(style.plateGradientEndColor, startColor)
+        });
+
+        if (style.plateFillMode === 'radial') {
+            var centerX = Number(style.plateGradientCenterXPercent);
+            var centerY = Number(style.plateGradientCenterYPercent);
+            var radius = Number(style.plateGradientRadiusPercent);
+            return {
+                type: 'radial',
+                x: clamp(Number.isFinite(centerX) ? centerX : 50, 0, 100) / 100,
+                y: clamp(Number.isFinite(centerY) ? centerY : 50, 0, 100) / 100,
+                r: clamp(Number.isFinite(radius) ? radius : 75, 25, 150) / 100,
+                colorStops: colorStops,
+                global: false
+            };
+        }
+
+        var directions = {
+            'left-right': [0, 0.5, 1, 0.5],
+            'diagonal-down': [0, 0, 1, 1],
+            'diagonal-up': [0, 1, 1, 0],
+            'top-bottom': [0.5, 0, 0.5, 1]
+        };
+        var direction = directions[style.plateGradientDirection] || directions['top-bottom'];
+
+        return {
+            type: 'linear',
+            x: direction[0],
+            y: direction[1],
+            x2: direction[2],
+            y2: direction[3],
+            colorStops: colorStops,
+            global: false
+        };
+    }
+
     function buildPlateGraphic(style, layout, series, colors) {
         var shape = ['hidden', 'circle', 'arc'].indexOf(style.plateShape) >= 0
             ? style.plateShape
@@ -548,7 +600,7 @@
         var renderCircle = shape === 'circle' || sweep >= 359.999;
         var fill = style.plateTransparent
             ? 'rgba(0,0,0,0)'
-            : normalizeStyleColor(customColors ? style.plateColor : colors.surface, colors.surface);
+            : buildPlateFill(style, colors);
         var border = normalizeStyleColor(customColors ? style.plateBorderColor : colors.border, colors.border);
         var graphic = {
             id: 'gauge-plate',
