@@ -48,11 +48,12 @@ nur Layoutoptionen wie Winkel, Fortschrittsbogen, Skalenaufteilung und
 Wertposition.
 
 Die native Kachel berechnet die Gauge-Geometrie aus einer gemeinsamen
-virtuellen Referenzfläche von 520 x 400 Einheiten. Der kleinere Skalierungswert
+virtuellen Referenzfläche von 440 x 400 Einheiten. Der kleinere Skalierungswert
 aus tatsächlicher Breite und Höhe bestimmt Radius, Linienstärken, Zeiger,
 Typografie und vertikale Abstände. Freie Resthöhe wird gleichmäßig verteilt.
 Damit bleiben die Preset-Proportionen in schmalen, quadratischen und breiten
-Kacheln stabil. Fortschrittsbogen und Achslinie teilen sich denselben Radius;
+Kacheln stabil und quadratische Kacheln nutzen ihre Breite besser aus.
+Fortschrittsbogen und Achslinie teilen sich denselben Radius;
 Teilstriche, Hauptteiler und Beschriftung werden mit positiven ECharts-Abständen
 in dieser Reihenfolge innerhalb der Achslinie angeordnet. Die SVG-Vorschau
 verwendet dieselbe radiale Reihenfolge.

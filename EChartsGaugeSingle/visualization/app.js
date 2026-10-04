@@ -159,7 +159,7 @@
 
     function resolveGaugeLayout(preset, width, height) {
         var definition = gaugeLayoutDefinitions[preset] || gaugeLayoutDefinitions.simple;
-        var scale = Math.min(width / 520, height / 400);
+        var scale = Math.min(width / 440, height / 400);
         var contentOffsetY = (height - 400 * scale) / 2;
         var lineWidth = clamp(Math.round(definition.lineWidth * scale), 8, 24);
 

@@ -384,7 +384,7 @@ assertGatewayGauge(
 assertGatewayGauge(str_contains($visualizationTile, "case 'speed':"), 'Gauge Single tile must render the Speed preset.');
 foreach ([
     'function resolveGaugeLayout(preset, width, height)',
-    'var scale = Math.min(width / 520, height / 400);',
+    'var scale = Math.min(width / 440, height / 400);',
     'var height = Math.max(chartElement.clientHeight, 160);',
     'center: [layout.centerX, layout.centerY]',
     'radius: layout.radius',

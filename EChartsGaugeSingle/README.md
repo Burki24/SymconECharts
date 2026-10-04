@@ -155,6 +155,7 @@ Die Kachel skaliert dazu eine gemeinsame virtuelle Referenzfläche anhand ihrer
 tatsächlichen Breite und Höhe. Fortschrittsbogen und Achslinie bleiben dadurch
 deckungsgleich; Teilstriche, Hauptteiler und Skalenwerte behalten auch bei
 unterschiedlichen Seitenverhältnissen ihre festgelegte radiale Reihenfolge.
+Quadratische Kacheln nutzen dabei einen größeren Anteil der verfügbaren Breite.
 Die Quellvariable wird über `VM_UPDATE` beobachtet; neue Werte gelangen über
 den HTML-SDK-Nachrichtenkanal in die bestehende Kachel, ohne das gesamte
 HTML-Dokument neu aufzubauen. Bei ungültiger Konfiguration oder fehlendem
