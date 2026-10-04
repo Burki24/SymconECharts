@@ -449,6 +449,7 @@
         return {
             width: pointerWidth,
             hasPivot: hasPivot,
+            showAnchor: typeof style.pointerShowAnchor === 'boolean' ? style.pointerShowAnchor : !hasPivot,
             offsetCenter: [
                 (0.5 - (pivotX - minimumX) / viewBoxWidth) * pointerWidth,
                 (1 - (pivotY - minimumY) / viewBoxHeight) * pointerLength
@@ -479,7 +480,7 @@
             series.pointer.offsetCenter = [0, 0];
         }
         series.pointer.length = layout.pointerLength;
-        series.anchor.show = shape !== 'custom' || !geometry.hasPivot;
+        series.anchor.show = shape !== 'custom' || geometry.showAnchor;
 
         return series;
     }

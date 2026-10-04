@@ -70,11 +70,13 @@ Eine eng an der Pfadgeometrie liegende `viewBox` erhält bei `100 %`
 Zeigerstärke die ursprünglichen Proportionen; die Spitze zeigt im SVG nach
 oben. Optional legt
 `data-echarts-pivot="x y"` am Wurzel-SVG den Drehpunkt in viewBox-Koordinaten
-fest; ohne diese Angabe wird unten mittig verwendet. Eigene SVG-Zeiger bringen
-im Normalfall keine eigene Nabe mit: Der Pfad endet unten mittig und die native
-ECharts-Nabe deckt das Schaftende ab. Nur Zeiger mit einem ausdrücklich
-gesetzten Drehpunkt bringen ihre Nabe selbst mit, weshalb der zusätzliche
-ECharts-Anker für sie ausgeblendet wird.
+fest; ohne diese Angabe wird unten mittig verwendet. Alternativ kann der
+Drehpunkt im Kacheldesigner horizontal und vertikal mit 0 bis 100 % der
+`viewBox` festgelegt werden. Diese benutzerdefinierte Justierung überschreibt
+den SVG-Drehpunkt und hält die native ECharts-Nabe sichtbar, sodass sie etwa
+mittig über einem gezeichneten Zeigerring liegen kann. Im kompatiblen Modus
+`SVG oder unten mittig` bleibt ein ausdrücklich im SVG gesetzter Drehpunkt
+maßgeblich und die SVG-Geometrie zeichnet ihre eigene Nabe.
 Der Skalenbogen bleibt wahlweise bei der Presetvorgabe oder
 wird als Voll-, Dreiviertel-, Halb-, Viertelkreis beziehungsweise mit eigenem
 Start und Ende definiert. Die Positionen folgen einem Zifferblatt (`0°` oben,
@@ -150,7 +152,8 @@ eine optionale SVG-Datei, Skalenbogen und Positionen gewählt; unter „Gauge-Fa
 Gauge-spezifische Farbrollen das Theme gezielt überschreiben. Unter
 „Feinabstimmung“ können die vier Schriftgrößen, Ringstärke, Zeigerstärke und
 Zeigerlänge sowie Nebenstrich- und Hauptteilerlänge jeweils von 50 bis 150 %
-der Presetvorgabe angepasst werden. Die stabilen Preset-IDs sind
+der Presetvorgabe angepasst werden. Für eigene SVG-Zeiger lässt sich zusätzlich
+der Drehpunkt in Prozent der `viewBox` justieren. Die stabilen Preset-IDs sind
 `basic`, `simple`,
 `progress` und `speed`. Als Themes stehen `auto`, `dark`, `vintage`,
 `macarons`, `infographic`, `shine` und `roma` zur Verfügung. `auto` ist der

@@ -32,9 +32,10 @@ assertSvgPath(is_string($ornatePointerSvg), 'Ornate Gauge pointer fixture cannot
 $ornatePointer = EChartsSvgPath::Import($ornatePointerSvg);
 assertSvgPath(
     $ornatePointer['viewBox'] === '22 0 56 397'
-        && str_contains($ornatePointer['path'], 'M46 397 C45 350')
+        && str_contains($ornatePointer['path'], 'M50 397 A27 27')
         && str_contains($ornatePointer['path'], 'M48.5 57 C48.8 40')
-        && !isset($ornatePointer['pivotX'], $ornatePointer['pivotY']),
+        && ($ornatePointer['pivotX'] ?? null) === 50.0
+        && ($ornatePointer['pivotY'] ?? null) === 370.0,
     'Ornate Gauge pointer fixture changed or cannot be imported.'
 );
 

@@ -79,10 +79,15 @@ noch Kachel weitergegeben. Eine optionale numerische Wurzelangabe
 `data-echarts-pivot="x y"` wird nur übernommen, wenn beide Koordinaten innerhalb
 der `viewBox` liegen. Sie definiert den Drehpunkt des Pfades; ohne Angabe gilt
 unten mittig. Bei `100 %` Zeigerstärke wird die `viewBox` proportional auf die
-konfigurierte Zeigerlänge skaliert. Ohne eigenen Drehpunkt endet der SVG-Pfad
-unten mittig und wird von der nativen ECharts-Nabe abgeschlossen. Ein eigener
-SVG-Zeiger zeichnet seine Nabe nur bei ausdrücklich gesetztem Drehpunkt selbst,
-sodass für ihn der zusätzliche ECharts-Anker entfällt. Der Skalenbogen
+konfigurierte Zeigerlänge skaliert. Die additive Pivot-Konfiguration bietet
+einen kompatiblen Modus `svg` und einen Modus `custom`. `svg` übernimmt den
+SVG-Drehpunkt beziehungsweise unten mittig und blendet die native Nabe bei
+einem ausdrücklich gesetzten SVG-Drehpunkt wie bisher aus. `custom` übersetzt
+horizontale und vertikale Prozentwerte von 0 bis 100 in `viewBox`-Koordinaten,
+überschreibt damit einen eingebetteten SVG-Drehpunkt und hält die native
+ECharts-Nabe sichtbar. So kann sie mit einem gezeichneten Zeigerring zur
+Deckung gebracht werden, ohne die Nabe unabhängig vom rotierenden Zeiger zu
+verschieben. Der Skalenbogen
 verwendet entweder die Presetgeometrie oder einen Voll-, Dreiviertel-, Halb-, Viertel- oder
 benutzerdefinierten Bogen. Anwenderpositionen werden wie auf einem Zifferblatt
 gespeichert (`0°` oben, im Uhrzeigersinn) und sind auf 22,5-Grad-Schritte

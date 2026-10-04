@@ -119,6 +119,9 @@ foreach ([
             "RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO)",
             "RegisterPropertyString('PointerShape', 'preset')",
             "RegisterPropertyString('CustomPointerSVG', '')",
+            "RegisterPropertyString('CustomPointerPivotMode', 'svg')",
+            "RegisterPropertyFloat('CustomPointerPivotXPercent', 50.0)",
+            "RegisterPropertyFloat('CustomPointerPivotYPercent', 100.0)",
             "RegisterPropertyString('GaugeArcMode', 'preset')",
             "RegisterPropertyFloat('GaugeStartPosition', 270.0)",
             "RegisterPropertyFloat('GaugeEndPosition', 90.0)",
@@ -310,18 +313,21 @@ foreach ([
         }
 
         foreach ([
-            'PointerShape'       => ['type' => 'Select', 'values' => ['preset', 'needle', 'line', 'arrow', 'custom']],
-            'CustomPointerSVG'   => ['type' => 'SelectFile'],
-            'GaugeArcMode'       => ['type' => 'Select', 'values' => ['preset', 'full', 'three-quarter', 'half', 'quarter', 'custom']],
-            'GaugeStartPosition' => ['type' => 'Select'],
-            'GaugeEndPosition'   => ['type' => 'Select'],
-            'GaugeColorMode'     => ['type' => 'Select', 'values' => ['theme', 'custom']],
-            'PointerColor'       => ['type' => 'SelectColor'],
-            'ProgressColor'      => ['type' => 'SelectColor'],
-            'RingColor'          => ['type' => 'SelectColor'],
-            'ScaleColor'         => ['type' => 'SelectColor'],
-            'ValueColor'         => ['type' => 'SelectColor'],
-            'TitleColor'         => ['type' => 'SelectColor']
+            'PointerShape'               => ['type' => 'Select', 'values' => ['preset', 'needle', 'line', 'arrow', 'custom']],
+            'CustomPointerSVG'           => ['type' => 'SelectFile'],
+            'CustomPointerPivotMode'     => ['type' => 'Select', 'values' => ['svg', 'custom']],
+            'CustomPointerPivotXPercent' => ['type' => 'NumberSpinner'],
+            'CustomPointerPivotYPercent' => ['type' => 'NumberSpinner'],
+            'GaugeArcMode'               => ['type' => 'Select', 'values' => ['preset', 'full', 'three-quarter', 'half', 'quarter', 'custom']],
+            'GaugeStartPosition'         => ['type' => 'Select'],
+            'GaugeEndPosition'           => ['type' => 'Select'],
+            'GaugeColorMode'             => ['type' => 'Select', 'values' => ['theme', 'custom']],
+            'PointerColor'               => ['type' => 'SelectColor'],
+            'ProgressColor'              => ['type' => 'SelectColor'],
+            'RingColor'                  => ['type' => 'SelectColor'],
+            'ScaleColor'                 => ['type' => 'SelectColor'],
+            'ValueColor'                 => ['type' => 'SelectColor'],
+            'TitleColor'                 => ['type' => 'SelectColor']
         ] as $designerName => $contract) {
             $designerElement = $fineTuningElements[$designerName] ?? null;
             $valid = is_array($designerElement) && ($designerElement['type'] ?? null) === $contract['type'];
@@ -336,6 +342,13 @@ foreach ([
             }
             if ($designerName === 'CustomPointerSVG') {
                 $valid = $valid && ($designerElement['extensions'] ?? null) === '.svg';
+            }
+            if (in_array($designerName, ['CustomPointerPivotXPercent', 'CustomPointerPivotYPercent'], true)) {
+                $valid = $valid
+                    && ($designerElement['minimum'] ?? null) === 0
+                    && ($designerElement['maximum'] ?? null) === 100
+                    && ($designerElement['digits'] ?? null) === 1
+                    && ($designerElement['suffix'] ?? null) === '%';
             }
             requireStrictContract(
                 $valid,

@@ -49,6 +49,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
     private const PRESET_SIMPLE = 'simple';
     private const SUPPORTED_PRESETS = ['basic', self::PRESET_SIMPLE, 'progress', 'speed'];
     private const SUPPORTED_POINTER_SHAPES = ['preset', 'needle', 'line', 'arrow', 'custom'];
+    private const SUPPORTED_CUSTOM_POINTER_PIVOT_MODES = ['svg', 'custom'];
     private const SUPPORTED_ARC_MODES = ['preset', 'full', 'three-quarter', 'half', 'quarter', 'custom'];
     private const SUPPORTED_COLOR_MODES = ['theme', 'custom'];
     private const ANGLE_STEP = 22.5;
@@ -83,6 +84,9 @@ class EChartsGaugeSingle extends IPSModuleStrict
         $this->RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO);
         $this->RegisterPropertyString('PointerShape', 'preset');
         $this->RegisterPropertyString('CustomPointerSVG', '');
+        $this->RegisterPropertyString('CustomPointerPivotMode', 'svg');
+        $this->RegisterPropertyFloat('CustomPointerPivotXPercent', 50.0);
+        $this->RegisterPropertyFloat('CustomPointerPivotYPercent', 100.0);
         $this->RegisterPropertyString('GaugeArcMode', 'preset');
         $this->RegisterPropertyFloat('GaugeStartPosition', 270.0);
         $this->RegisterPropertyFloat('GaugeEndPosition', 90.0);
@@ -173,7 +177,10 @@ class EChartsGaugeSingle extends IPSModuleStrict
         int $ValueColor = 0xF4F5F7,
         int $TitleColor = 0xA7A9AE,
         string $CustomPointerSVG = '',
-        int $PointerLengthPercent = self::DESIGN_SCALE_DEFAULT
+        int $PointerLengthPercent = self::DESIGN_SCALE_DEFAULT,
+        string $CustomPointerPivotMode = 'svg',
+        float $CustomPointerPivotXPercent = 50.0,
+        float $CustomPointerPivotYPercent = 100.0
     ): void {
         $this->UpdateFormField(
             'GaugePreview',
@@ -208,7 +215,13 @@ class EChartsGaugeSingle extends IPSModuleStrict
                     'scaleColor'             => self::ColorToHex($ScaleColor),
                     'valueColor'             => self::ColorToHex($ValueColor),
                     'titleColor'             => self::ColorToHex($TitleColor),
-                    ...$this->ResolveCustomPointerStyle($PointerShape, $CustomPointerSVG)
+                    ...$this->ResolveCustomPointerStyle(
+                        $PointerShape,
+                        $CustomPointerSVG,
+                        $CustomPointerPivotMode,
+                        $CustomPointerPivotXPercent,
+                        $CustomPointerPivotYPercent
+                    )
                 ]
             ))
         );
@@ -525,6 +538,11 @@ class EChartsGaugeSingle extends IPSModuleStrict
         }
 
         if (!in_array($this->ReadPropertyString('PointerShape'), self::SUPPORTED_POINTER_SHAPES, true)
+            || !in_array(
+                $this->ReadPropertyString('CustomPointerPivotMode'),
+                self::SUPPORTED_CUSTOM_POINTER_PIVOT_MODES,
+                true
+            )
             || !in_array($this->ReadPropertyString('GaugeArcMode'), self::SUPPORTED_ARC_MODES, true)
             || !in_array($this->ReadPropertyString('GaugeColorMode'), self::SUPPORTED_COLOR_MODES, true)) {
             return [
@@ -534,6 +552,15 @@ class EChartsGaugeSingle extends IPSModuleStrict
         }
 
         if ($this->ReadPropertyString('PointerShape') === 'custom') {
+            foreach (['CustomPointerPivotXPercent', 'CustomPointerPivotYPercent'] as $propertyName) {
+                $pivot = $this->ReadPropertyFloat($propertyName);
+                if (!is_finite($pivot) || $pivot < 0.0 || $pivot > 100.0) {
+                    return [
+                        'Status'  => self::STATUS_DESIGN_INVALID,
+                        'Message' => 'Custom SVG pointer pivot values must be between 0 and 100 percent.'
+                    ];
+                }
+            }
             try {
                 EChartsSvgPath::Import($this->ReadPropertyString('CustomPointerSVG'));
             } catch (InvalidArgumentException $exception) {
@@ -567,7 +594,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
         return null;
     }
 
-    /** @return array<string, int|float|string> */
+    /** @return array<string, bool|int|float|string> */
     private function ReadGaugeStyle(): array
     {
         $style = [];
@@ -594,7 +621,10 @@ class EChartsGaugeSingle extends IPSModuleStrict
             $style,
             $this->ResolveCustomPointerStyle(
                 $style['pointerShape'],
-                $this->ReadPropertyString('CustomPointerSVG')
+                $this->ReadPropertyString('CustomPointerSVG'),
+                $this->ReadPropertyString('CustomPointerPivotMode'),
+                $this->ReadPropertyFloat('CustomPointerPivotXPercent'),
+                $this->ReadPropertyFloat('CustomPointerPivotYPercent')
             )
         );
 
@@ -607,11 +637,17 @@ class EChartsGaugeSingle extends IPSModuleStrict
      *     pointerViewBox?: string,
      *     pointerPivotX?: float,
      *     pointerPivotY?: float,
+     *     pointerShowAnchor?: bool,
      *     pointerError?: string
      * }
      */
-    private function ResolveCustomPointerStyle(string $pointerShape, string $fileData): array
-    {
+    private function ResolveCustomPointerStyle(
+        string $pointerShape,
+        string $fileData,
+        string $pivotMode = 'svg',
+        float $pivotXPercent = 50.0,
+        float $pivotYPercent = 100.0
+    ): array {
         if ($pointerShape !== 'custom') {
             return [];
         }
@@ -620,7 +656,12 @@ class EChartsGaugeSingle extends IPSModuleStrict
             $pointer = EChartsSvgPath::Import($fileData);
 
             $style = ['pointerPath' => $pointer['path'], 'pointerViewBox' => $pointer['viewBox']];
-            if (isset($pointer['pivotX'], $pointer['pivotY'])) {
+            if ($pivotMode === 'custom') {
+                [$minimumX, $minimumY, $width, $height] = array_map('floatval', explode(' ', $pointer['viewBox']));
+                $style['pointerPivotX'] = $minimumX + $width * max(0.0, min(100.0, $pivotXPercent)) / 100.0;
+                $style['pointerPivotY'] = $minimumY + $height * max(0.0, min(100.0, $pivotYPercent)) / 100.0;
+                $style['pointerShowAnchor'] = true;
+            } elseif (isset($pointer['pivotX'], $pointer['pivotY'])) {
                 $style['pointerPivotX'] = $pointer['pivotX'];
                 $style['pointerPivotY'] = $pointer['pivotY'];
             }

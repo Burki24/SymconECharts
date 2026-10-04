@@ -47,8 +47,10 @@ StylePHP und PHP CS Fixer.
 - `svg_path.php` prüft Rohtext-, Base64- und Data-URI-Importe sowie die
   Ablehnung nicht unterstützter oder aktiver SVG-Inhalte. Die ornamentale
   Beispielnadel unter `fixtures/gauge-pointer-ornate.svg` wird zusätzlich als
-  direkt importierbare Testdatei mit unten mittig endendem Schaft geprüft; der
-  optionale abweichende Drehpunkt besitzt einen eigenen Importfall.
+  direkt importierbare Testdatei einschließlich ihres optionalen Drehpunkts
+  geprüft. Die Gauge-Integration prüft außerdem, dass die prozentuale
+  Pivot-Justierung die native ECharts-Nabe sichtbar in ihrem Zeigerring
+  zentriert.
 - `helper_integrity.py` stellt sicher, dass Subscription, Manifest,
   Helper-Dokumentation und alle abonnierten Datenfluss- und
   Visualisierungshelper vollständig übereinstimmen.

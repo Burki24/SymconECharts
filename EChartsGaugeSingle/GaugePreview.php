@@ -519,6 +519,7 @@ SVG;
         $widthScale = max(50, min(150, (int) ($style['pointerWidthPercent'] ?? 100))) / 100;
         $width = max(2.0, $length * $viewBoxWidth / $viewBoxHeight * $widthScale);
         $hasPivot = isset($style['pointerPivotX'], $style['pointerPivotY']);
+        $showAnchor = isset($style['pointerShowAnchor']) ? (bool) $style['pointerShowAnchor'] : !$hasPivot;
         $pivotX = max(
             $minimumX,
             min($minimumX + $viewBoxWidth, (float) ($style['pointerPivotX'] ?? $minimumX + $viewBoxWidth / 2.0))
@@ -539,7 +540,7 @@ SVG;
             . self::Coordinate($pivotX) . '" data-pointer-pivot-y="' . self::Coordinate($pivotY)
             . '"><path d="' . SVGPreviewHelper::escape($path)
             . '" class="pointer' . $shadowClass . '" data-pointer-shape="custom"/></svg></g>'
-            . ($hasPivot ? '' : '<circle cx="360" cy="' . self::Coordinate($centerY) . '" r="11" class="anchor"/>');
+            . ($showAnchor ? '<circle cx="360" cy="' . self::Coordinate($centerY) . '" r="11" class="anchor"/>' : '');
     }
 
     /** @param array<string, float|bool|int> $design */
