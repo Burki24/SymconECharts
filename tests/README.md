@@ -33,8 +33,9 @@ StylePHP und PHP CS Fixer.
   Single und Gauge Multi mit Symcon-Test-Doppeln aus. Für Multi werden außerdem
   geordnete Quellen, Referenzwechsel, stabile Item-IDs, Beschriftungen,
   Duplikate, Wertebereiche und fehlerhafte Konfigurationen geprüft. Für Gauge
-  Single werden außerdem HTML-Erzeugung, lokale ECharts-Einbettung und die
-  Zustandsaktualisierung nach `VM_UPDATE` charakterisiert. Das erzeugte
+  Single werden außerdem Kacheldesigner-Presets, SVG-Vorschau, HTML-Erzeugung,
+  lokale ECharts-Einbettung und die Zustandsaktualisierung nach `VM_UPDATE`
+  charakterisiert. Das erzeugte
   HTML-Dokument muss unter dem Symcon-Output-Buffer-Limit von 1.048.576 Byte
   bleiben.
 - `echarts_assets.php` prüft Version, SHA-256-Integrität, Lizenz und NOTICE der

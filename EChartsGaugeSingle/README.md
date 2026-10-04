@@ -6,14 +6,15 @@ Symcon-Kacheldarstellung und künftig ein separat platzierbares HTML-Widget in
 IPSView bereitstellen können. Datenquelle und Diagrammkonfiguration werden
 dabei nur einmal gepflegt.
 
-**Entwicklungsstand:** Erste sichtbare native Basic Gauge. Quellvariable und
-minimale Gauge-Einstellungen sind konfigurierbar; das Modul ruft den
+**Entwicklungsstand:** Erste sichtbare native Gauge mit Kacheldesigner.
+Quellvariable und minimale Gauge-Einstellungen sind konfigurierbar; das Modul ruft den
 Momentanwert über EChartsGateway ab, erzeugt ein versioniertes Gauge-Datenmodell
 und rendert es mit Apache ECharts 6.1.0 in einer responsiven Symcon-Kachel.
 Wertänderungen werden live an die geöffnete Kachel übertragen. Das
-Konfigurationsformular zeigt zusätzlich eine live aktualisierte SVG-Vorschau
-der noch nicht übernommenen Basic-Gauge-Einstellungen. Preset-Auswahl und
-IPSView-HTML-Ausgabevariablen sind noch nicht implementiert.
+Konfigurationsformular wählt zwischen vier layoutbezogenen Presets und zeigt
+zusätzlich eine live aktualisierte SVG-Vorschau der noch nicht übernommenen
+Einstellungen. ECharts-Themes und IPSView-HTML-Ausgabevariablen sind noch nicht
+implementiert.
 
 ### Inhaltsverzeichnis
 
@@ -33,12 +34,15 @@ Variablenauswahl, Wertebereich, Titel, Einheit und Nachkommastellen. Die
 Quellvariable wird als Symcon-Referenz registriert und auf Wertänderungen
 überwacht. `GetGaugeData()` liest den aktuellen Wert über das versionierte
 Gateway-Protokoll und liefert ein familienbezogenes JSON-Datenmodell. Die
-native HTML-SDK-Kachel stellt dieses Modell als responsive Basic Gauge dar und
-übernimmt Symcon-Farbvariablen für helle und dunkle Oberflächen.
+native HTML-SDK-Kachel stellt dieses Modell als responsive Gauge dar und
+übernimmt Symcon-Farbvariablen für helle und dunkle Oberflächen. Der
+Kacheldesigner bietet Basic, Simple, Progress und Speed; Simple ist aus
+Kompatibilitätsgründen die Standardauswahl und entspricht der bisherigen
+Darstellung.
 
-**Geplant:** Auswahl weiterer Gauge-Single-Presets, zusätzliche
-ECharts-spezifische Skalen- und Gestaltungsoptionen sowie die Ausgabe als
-optionales IPSView-Widget. Archivdarstellung wird erst mit einem dafür
+**Geplant:** Zusätzliche Gauge-Single-Presets, ECharts-Themes, weitere
+Skalen- und Gestaltungsoptionen sowie die Ausgabe als optionales IPSView-Widget.
+Archivdarstellung wird erst mit einem dafür
 festgelegten Chart-Anwendungsfall umgesetzt.
 
 Eine Instanz bildet genau einen unabhängig konfigurierbaren Single-Gauge-Chart
@@ -96,7 +100,9 @@ werden. Ohne aktive Verbindung bleibt die Gauge-Instanz in einem eindeutigen
 Fehlerstatus.
 
 **Konfigurationsseite:** Ausgewählt werden eine numerische Quellvariable,
-Minimum und Maximum, Titel, Einheit sowie 0 bis 6 Nachkommastellen. Die Aktion
+Minimum und Maximum, Titel, Einheit, 0 bis 6 Nachkommastellen sowie ein
+Gauge-Preset. Die stabilen Preset-IDs sind `basic`, `simple`, `progress` und
+`speed`. Die Aktion
 „Aktuelle Gauge-Daten lesen“ gibt das gegenwärtige JSON-Datenmodell zu
 Diagnosezwecken aus. Minimum muss kleiner als Maximum sein. Eine SVG-Vorschau
 reagiert unmittelbar auf Änderungen im geöffneten Formular, ohne diese Werte
@@ -128,8 +134,8 @@ Darstellungs-Helpern aufbauen.
 
 #### Native Symcon-Kachel
 
-Implementiert ist eine Basic Gauge über das Symcon-HTML-SDK. Sie funktioniert
-ohne aktivierte IPSView-Ausgabe und passt sich an die verfügbare Kachelgröße an.
+Implementiert sind vier Gauge-Layouts über das Symcon-HTML-SDK. Sie funktionieren
+ohne aktivierte IPSView-Ausgabe und passen sich an die verfügbare Kachelgröße an.
 Die Quellvariable wird über `VM_UPDATE` beobachtet; neue Werte gelangen über
 den HTML-SDK-Nachrichtenkanal in die bestehende Kachel, ohne das gesamte
 HTML-Dokument neu aufzubauen. Bei ungültiger Konfiguration oder fehlendem
@@ -140,14 +146,15 @@ Apache-ECharts-Runtime 6.1.0. Sie lädt im Betrieb keine CDN-Ressource. Die
 aktuelle Implementierung ist technisch gegen Test-Doppel geprüft; die visuelle
 Prüfung in realen Symcon-Clients bleibt offen.
 
-#### Konfigurationsvorschau
+#### Kacheldesigner und Konfigurationsvorschau
 
-Die Vorschau im Instanzformular ist ein leichtgewichtiges, eigenständiges SVG
+Die Vorschau im Kacheldesigner ist ein leichtgewichtiges, eigenständiges SVG
 und lädt nicht die vollständige ECharts-Browser-Runtime. Dadurch bleibt das
 Formular schnell und die noch nicht gespeicherte Konfiguration kann unmittelbar
 dargestellt werden. Die Kachel bleibt für die tatsächliche, interaktive
-ECharts-Ausgabe maßgeblich; die SVG-Vorschau bildet deren Basic-Gauge-Aufbau
-gezielt nach.
+ECharts-Ausgabe maßgeblich; die SVG-Vorschau bildet das ausgewählte Layout
+gezielt nach. Die Presets verändern noch keine Farbpalette; dieser Vertrag
+bleibt der getrennten Theme-Ausbaustufe vorbehalten.
 
 #### IPSView
 

@@ -13,10 +13,7 @@ use InvalidArgumentException;
 final class EChartsGaugeSinglePreview
 {
     private const CENTER_X = 360.0;
-    private const CENTER_Y = 196.0;
-    private const RADIUS = 132.0;
-    private const START_ANGLE = 210.0;
-    private const ANGLE_RANGE = 240.0;
+    private const SUPPORTED_PRESETS = ['basic', 'simple', 'progress', 'speed'];
 
     public static function CreateSvg(
         float $value,
@@ -25,40 +22,58 @@ final class EChartsGaugeSinglePreview
         string $title,
         string $unit,
         int $decimals,
-        string $language
+        string $language,
+        string $preset = 'simple'
     ): string {
         if (!is_finite($value) || !is_finite($minimum) || !is_finite($maximum) || $minimum >= $maximum) {
             throw new InvalidArgumentException('A finite Gauge value and a valid range are required.');
         }
+        if (!in_array($preset, self::SUPPORTED_PRESETS, true)) {
+            throw new InvalidArgumentException('A supported Gauge preset is required.');
+        }
 
+        $design = self::PresetDesign($preset);
         $decimals = max(0, min(6, $decimals));
         $ratio = max(0.0, min(1.0, ($value - $minimum) / ($maximum - $minimum)));
-        $backgroundPath = self::ArcPath(1.0);
-        $progressPath = self::ArcPath($ratio);
-        $ticks = self::Ticks($minimum, $maximum, $language);
-        $pointer = self::Pointer($ratio);
-        $formattedValue = SVGPreviewHelper::escape(self::FormatNumber($value, $decimals, $language));
-        $formattedUnit = SVGPreviewHelper::escape(trim($unit));
-        $formattedTitle = SVGPreviewHelper::escape(trim($title));
+        $backgroundPath = self::ArcPath(1.0, $design);
+        $progressPath = $design['showProgress'] ? self::ArcPath($ratio, $design) : '';
+        $ticks = self::Ticks($minimum, $maximum, $language, $design);
+        $pointer = self::Pointer($ratio, $design);
+        $rawValue = self::FormatNumber($value, $decimals, $language);
+        $rawUnit = trim($unit);
+        $rawTitle = trim($title);
+        $formattedValue = SVGPreviewHelper::escape($rawValue);
+        $formattedUnit = SVGPreviewHelper::escape($rawUnit);
+        $formattedTitle = SVGPreviewHelper::escape($rawTitle);
         $valueText = trim($formattedValue . ($formattedUnit === '' ? '' : ' ' . $formattedUnit));
+        $ariaLabel = SVGPreviewHelper::escape(trim(
+            ($rawTitle === '' ? '' : $rawTitle . ': ')
+            . $rawValue
+            . ($rawUnit === '' ? '' : ' ' . $rawUnit)
+        ));
         $titleElement = $formattedTitle === ''
             ? ''
-            : '<text x="360" y="352" class="title">' . $formattedTitle . '</text>';
+            : '<text x="360" y="' . self::Coordinate($design['titleY']) . '" class="title">' . $formattedTitle . '</text>';
         $progressElement = $progressPath === ''
             ? ''
-            : '<path d="' . $progressPath . '" class="progress"/>';
+            : '<path d="' . $progressPath . '" class="progress" style="stroke-width:'
+                . self::Coordinate($design['lineWidth']) . 'px"/>';
+        $detailBackground = $design['detailBox']
+            ? '<rect x="238" y="280" width="244" height="58" rx="10" class="detail-box"/>'
+            : '';
 
         return <<<SVG
-<svg xmlns="http://www.w3.org/2000/svg" width="720" height="400" viewBox="0 0 720 400" role="img" aria-label="{$valueText}">
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="400" viewBox="0 0 720 400" role="img" aria-label="{$ariaLabel}" data-preset="{$preset}">
   <style>
-    .surface{fill:#151619}.track{fill:none;stroke:#34363b;stroke-width:18;stroke-linecap:round;stroke-linejoin:round}.progress{fill:none;stroke:#55cbb5;stroke-width:18;stroke-linecap:round;stroke-linejoin:round}.minor{stroke:#62666d;stroke-width:1}.major{stroke:#a5a9b0;stroke-width:2}.axis{fill:#969aa2;font:14px 'Segoe UI',Arial,sans-serif;text-anchor:middle;dominant-baseline:middle}.pointer{fill:#55cbb5}.anchor{fill:#55cbb5;stroke:#f4f5f7;stroke-width:2}.value{fill:#f4f5f7;font:600 38px 'Segoe UI',Arial,sans-serif;text-anchor:middle}.title{fill:#b7bac1;font:18px 'Segoe UI',Arial,sans-serif;text-anchor:middle}
+    .surface{fill:#151619}.track{fill:none;stroke:#34363b;stroke-linecap:round;stroke-linejoin:round}.progress{fill:none;stroke:#55cbb5;stroke-linecap:round;stroke-linejoin:round}.minor{stroke:#62666d;stroke-width:1}.major{stroke:#a5a9b0;stroke-width:2}.axis{fill:#969aa2;font:14px 'Segoe UI',Arial,sans-serif;text-anchor:middle;dominant-baseline:middle}.pointer{fill:#55cbb5}.anchor{fill:#55cbb5;stroke:#f4f5f7;stroke-width:2}.detail-box{fill:#25272b;stroke:#62666d;stroke-width:2}.value{fill:#f4f5f7;font:600 38px 'Segoe UI',Arial,sans-serif;text-anchor:middle}.title{fill:#b7bac1;font:18px 'Segoe UI',Arial,sans-serif;text-anchor:middle}svg[data-preset="progress"] .value{font-size:46px}svg[data-preset="speed"] .value{font-size:32px}
   </style>
   <rect class="surface" width="720" height="400" rx="12"/>
-  <path d="{$backgroundPath}" class="track"/>
+  <path d="{$backgroundPath}" class="track" style="stroke-width:{$design['lineWidth']}px"/>
   {$progressElement}
   {$ticks}
   {$pointer}
-  <text x="360" y="294" class="value">{$valueText}</text>
+  {$detailBackground}
+  <text x="360" y="{$design['detailY']}" class="value">{$valueText}</text>
   {$titleElement}
 </svg>
 SVG;
@@ -78,7 +93,86 @@ SVG;
 SVG;
     }
 
-    private static function ArcPath(float $ratio): string
+    /**
+     * @return array{
+     *     startAngle: float,
+     *     endAngle: float,
+     *     centerY: float,
+     *     radius: float,
+     *     labelRadius: float,
+     *     pointerLength: float,
+     *     lineWidth: float,
+     *     detailY: float,
+     *     titleY: float,
+     *     showProgress: bool,
+     *     showMinorTicks: bool,
+     *     detailBox: bool
+     * }
+     */
+    private static function PresetDesign(string $preset): array
+    {
+        return match ($preset) {
+            'basic' => [
+                'startAngle'     => 210.0,
+                'endAngle'       => -30.0,
+                'centerY'        => 196.0,
+                'radius'         => 132.0,
+                'labelRadius'    => 180.0,
+                'pointerLength'  => 102.0,
+                'lineWidth'      => 16.0,
+                'detailY'        => 294.0,
+                'titleY'         => 352.0,
+                'showProgress'   => false,
+                'showMinorTicks' => true,
+                'detailBox'      => false
+            ],
+            'progress' => [
+                'startAngle'     => 210.0,
+                'endAngle'       => -30.0,
+                'centerY'        => 190.0,
+                'radius'         => 132.0,
+                'labelRadius'    => 180.0,
+                'pointerLength'  => 94.0,
+                'lineWidth'      => 20.0,
+                'detailY'        => 306.0,
+                'titleY'         => 360.0,
+                'showProgress'   => true,
+                'showMinorTicks' => false,
+                'detailBox'      => false
+            ],
+            'speed' => [
+                'startAngle'     => 180.0,
+                'endAngle'       => 0.0,
+                'centerY'        => 232.0,
+                'radius'         => 142.0,
+                'labelRadius'    => 184.0,
+                'pointerLength'  => 108.0,
+                'lineWidth'      => 18.0,
+                'detailY'        => 319.0,
+                'titleY'         => 370.0,
+                'showProgress'   => true,
+                'showMinorTicks' => true,
+                'detailBox'      => true
+            ],
+            default => [
+                'startAngle'     => 210.0,
+                'endAngle'       => -30.0,
+                'centerY'        => 196.0,
+                'radius'         => 132.0,
+                'labelRadius'    => 180.0,
+                'pointerLength'  => 98.0,
+                'lineWidth'      => 18.0,
+                'detailY'        => 294.0,
+                'titleY'         => 352.0,
+                'showProgress'   => true,
+                'showMinorTicks' => true,
+                'detailBox'      => false
+            ]
+        };
+    }
+
+    /** @param array<string, float|bool> $design */
+    private static function ArcPath(float $ratio, array $design): string
     {
         if ($ratio <= 0.0) {
             return '';
@@ -88,7 +182,11 @@ SVG;
         $points = [];
         for ($index = 0; $index <= $segments; ++$index) {
             $fraction = $ratio * $index / $segments;
-            $points[] = self::Point(self::RADIUS, self::Angle($fraction));
+            $points[] = self::Point(
+                (float) $design['radius'],
+                self::Angle($fraction, $design),
+                (float) $design['centerY']
+            );
         }
 
         $path = '';
@@ -99,14 +197,21 @@ SVG;
         return $path;
     }
 
-    private static function Ticks(float $minimum, float $maximum, string $language): string
+    /** @param array<string, float|bool> $design */
+    private static function Ticks(float $minimum, float $maximum, string $language, array $design): string
     {
         $elements = [];
         for ($index = 0; $index <= 50; ++$index) {
             $fraction = $index / 50;
             $major = $index % 5 === 0;
-            $outer = self::Point(160.0, self::Angle($fraction));
-            $inner = self::Point($major ? 149.0 : 154.0, self::Angle($fraction));
+            if (!$major && !$design['showMinorTicks']) {
+                continue;
+            }
+
+            $angle = self::Angle($fraction, $design);
+            $outerRadius = (float) $design['radius'] + 28.0;
+            $outer = self::Point($outerRadius, $angle, (float) $design['centerY']);
+            $inner = self::Point($outerRadius - ($major ? 11.0 : 6.0), $angle, (float) $design['centerY']);
             $class = $major ? 'major' : 'minor';
             $elements[] = '<line x1="' . self::Coordinate($inner[0])
                 . '" y1="' . self::Coordinate($inner[1])
@@ -118,7 +223,11 @@ SVG;
                 continue;
             }
 
-            $label = self::Point(180.0, self::Angle($fraction));
+            $label = self::Point(
+                (float) $design['labelRadius'],
+                $angle,
+                (float) $design['centerY']
+            );
             $labelValue = $minimum + ($maximum - $minimum) * $fraction;
             $elements[] = '<text x="' . self::Coordinate($label[0])
                 . '" y="' . self::Coordinate($label[1])
@@ -130,39 +239,44 @@ SVG;
         return implode("\n  ", $elements);
     }
 
-    private static function Pointer(float $ratio): string
+    /** @param array<string, float|bool> $design */
+    private static function Pointer(float $ratio, array $design): string
     {
-        $angle = self::Angle($ratio);
-        $tip = self::Point(98.0, $angle);
+        $angle = self::Angle($ratio, $design);
+        $centerY = (float) $design['centerY'];
+        $tip = self::Point((float) $design['pointerLength'], $angle, $centerY);
         $radians = deg2rad($angle);
         $perpendicularX = sin($radians) * 7.0;
         $perpendicularY = cos($radians) * 7.0;
         $leftX = self::CENTER_X - $perpendicularX;
-        $leftY = self::CENTER_Y - $perpendicularY;
+        $leftY = $centerY - $perpendicularY;
         $rightX = self::CENTER_X + $perpendicularX;
-        $rightY = self::CENTER_Y + $perpendicularY;
+        $rightY = $centerY + $perpendicularY;
         $points = self::Coordinate($tip[0]) . ',' . self::Coordinate($tip[1])
             . ' ' . self::Coordinate($leftX) . ',' . self::Coordinate($leftY)
             . ' ' . self::Coordinate($rightX) . ',' . self::Coordinate($rightY);
 
         return '<polygon points="' . $points . '" class="pointer"/>'
-            . '<circle cx="360" cy="196" r="11" class="anchor"/>';
+            . '<circle cx="360" cy="' . self::Coordinate($centerY) . '" r="11" class="anchor"/>';
     }
 
     /** @return array{float,float} */
-    private static function Point(float $radius, float $angle): array
+    private static function Point(float $radius, float $angle, float $centerY): array
     {
         $radians = deg2rad($angle);
 
         return [
             self::CENTER_X + $radius * cos($radians),
-            self::CENTER_Y - $radius * sin($radians)
+            $centerY - $radius * sin($radians)
         ];
     }
 
-    private static function Angle(float $ratio): float
+    /** @param array<string, float|bool> $design */
+    private static function Angle(float $ratio, array $design): float
     {
-        return self::START_ANGLE - self::ANGLE_RANGE * $ratio;
+        $startAngle = (float) $design['startAngle'];
+
+        return $startAngle + ((float) $design['endAngle'] - $startAngle) * $ratio;
     }
 
     private static function Coordinate(float $value): string

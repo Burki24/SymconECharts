@@ -114,7 +114,8 @@ foreach ([
             "RegisterPropertyFloat('Maximum', 100.0)",
             "RegisterPropertyString('Title', '')",
             "RegisterPropertyString('Unit', '')",
-            "RegisterPropertyInteger('Decimals', 1)"
+            "RegisterPropertyInteger('Decimals', 1)",
+            "RegisterPropertyString('GaugePreset', self::PRESET_SIMPLE)"
         ]
         : [
             "RegisterPropertyString('Sources', '[]')",
@@ -184,6 +185,36 @@ foreach ([
                 && ($sourceElement['type'] ?? null) === 'SelectVariable'
                 && ($sourceElement['validVariableTypes'] ?? null) === [1, 2],
             'EChartsGaugeSingle source selection must accept only integer and float variables.',
+            $errors
+        );
+
+        $gaugePresetElement = null;
+        $findGaugePreset = static function (array $items) use (&$findGaugePreset, &$gaugePresetElement): void
+        {
+            foreach ($items as $item) {
+                if (!is_array($item)) {
+                    continue;
+                }
+                if (($item['name'] ?? null) === 'GaugePreset') {
+                    $gaugePresetElement = $item;
+                    return;
+                }
+                if (is_array($item['items'] ?? null)) {
+                    $findGaugePreset($item['items']);
+                }
+            }
+        };
+        $findGaugePreset($gaugeForm['elements'] ?? []);
+        requireStrictContract(
+            is_array($gaugePresetElement)
+                && ($gaugePresetElement['type'] ?? null) === 'Select'
+                && array_column($gaugePresetElement['options'] ?? [], 'value') === [
+                    'basic',
+                    'simple',
+                    'progress',
+                    'speed'
+                ],
+            'EChartsGaugeSingle tile designer must expose the four stable Gauge presets.',
             $errors
         );
     } else {

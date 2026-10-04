@@ -18,6 +18,7 @@ $requiredFiles = [
     'docs/adr/0003-single-and-multi-gauge-modules.md',
     'docs/adr/0004-gauge-multi-source-contract.md',
     'docs/adr/0005-echarts-runtime-and-native-renderer.md',
+    'docs/adr/0006-gauge-single-tile-designer.md',
     'library.json',
     'libs/EChartsAsset.php',
     'libs/EChartsDataProtocol.php',

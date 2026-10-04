@@ -356,6 +356,7 @@ $gauge->SetTestProperty('Maximum', 80.0);
 $gauge->SetTestProperty('Title', 'Room climate');
 $gauge->SetTestProperty('Unit', '°C');
 $gauge->SetTestProperty('Decimals', 1);
+$gauge->SetTestProperty('GaugePreset', 'progress');
 $gauge->ApplyChanges();
 
 assertGatewayGauge($gauge->GetTestStatus() === IS_ACTIVE, 'Gauge Single must become active.');
@@ -371,6 +372,8 @@ $visualizationTile = $gauge->GetVisualizationTile();
 assertGatewayGauge(str_contains($visualizationTile, 'window.echarts'), 'Gauge Single tile must embed Apache ECharts.');
 assertGatewayGauge(str_contains($visualizationTile, 'echarts-gauge-chart'), 'Gauge Single tile root is missing.');
 assertGatewayGauge(str_contains($visualizationTile, '"echartsVersion":"6.1.0"'), 'Gauge Single ECharts version changed.');
+assertGatewayGauge(str_contains($visualizationTile, '"preset":"progress"'), 'Gauge Single tile must receive the selected preset.');
+assertGatewayGauge(str_contains($visualizationTile, "case 'speed':"), 'Gauge Single tile must render the Speed preset.');
 assertGatewayGauge(!str_contains($visualizationTile, '<script src="http'), 'Gauge Single must not load ECharts from a CDN.');
 assertGatewayGauge(
     strlen($visualizationTile) < SYMCON_OUTPUT_BUFFER_LIMIT,
@@ -380,7 +383,7 @@ assertGatewayGauge(
 $configurationForm = json_decode($gauge->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
 $previewElement = null;
 foreach ($configurationForm['elements'] ?? [] as $element) {
-    if (($element['type'] ?? null) !== 'ExpansionPanel' || ($element['caption'] ?? null) !== 'Preview') {
+    if (($element['type'] ?? null) !== 'ExpansionPanel' || ($element['caption'] ?? null) !== 'Tile designer') {
         continue;
     }
 
@@ -401,10 +404,53 @@ $initialPreviewSvg = base64_decode(
     true
 );
 assertGatewayGauge(is_string($initialPreviewSvg), 'Gauge Single preview SVG must be valid Base64.');
+assertGatewayGauge(str_contains($initialPreviewSvg, 'data-preset="progress"'), 'Gauge Single preview must use the selected preset.');
 assertGatewayGauge(str_contains($initialPreviewSvg, 'Room climate'), 'Gauge Single preview must contain the title.');
 assertGatewayGauge(str_contains($initialPreviewSvg, '42.5 °C'), 'Gauge Single preview must use the current source value.');
 
-$gauge->UpdateGaugePreview(4711, 0.0, 200.0, 'Wind & weather', 'km/h', 2);
+foreach (['basic', 'simple', 'progress', 'speed'] as $preset) {
+    $presetSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
+        42.5,
+        -20.0,
+        80.0,
+        'Room climate',
+        '°C',
+        1,
+        'en',
+        $preset
+    );
+    assertGatewayGauge(
+        str_contains($presetSvg, 'data-preset="' . $preset . '"'),
+        'Gauge Single preview must render the ' . $preset . ' preset.'
+    );
+}
+$basicPresetSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
+    42.5,
+    -20.0,
+    80.0,
+    'Room climate',
+    '°C',
+    1,
+    'en',
+    'basic'
+);
+assertGatewayGauge(
+    preg_match('/<path d="[^"]+" class="progress"/', $basicPresetSvg) !== 1,
+    'Basic Gauge must not render a progress arc.'
+);
+$speedPresetSvg = \SymconECharts\EChartsGaugeSinglePreview::CreateSvg(
+    42.5,
+    -20.0,
+    80.0,
+    'Room climate',
+    '°C',
+    1,
+    'en',
+    'speed'
+);
+assertGatewayGauge(str_contains($speedPresetSvg, 'class="detail-box"'), 'Speed Gauge must render its value box.');
+
+$gauge->UpdateGaugePreview(4711, 0.0, 200.0, 'Wind & weather', 'km/h', 2, 'speed');
 $formUpdates = $gauge->GetTestFormUpdates();
 $latestFormUpdate = end($formUpdates);
 assertGatewayGauge(
@@ -419,9 +465,14 @@ $updatedPreviewSvg = base64_decode(
     true
 );
 assertGatewayGauge(is_string($updatedPreviewSvg), 'Updated Gauge Single preview must be valid Base64.');
+assertGatewayGauge(str_contains($updatedPreviewSvg, 'data-preset="speed"'), 'Updated Gauge Single preview must switch presets.');
 assertGatewayGauge(
     str_contains($updatedPreviewSvg, 'Wind &amp; weather'),
     'Gauge Single preview must XML-escape user-provided labels.'
+);
+assertGatewayGauge(
+    !str_contains($updatedPreviewSvg, '&amp;amp;'),
+    'Gauge Single preview must not double-escape its accessible label.'
 );
 assertGatewayGauge(str_contains($updatedPreviewSvg, '42.50 km/h'), 'Gauge Single preview formatting changed.');
 
@@ -445,6 +496,7 @@ assertGatewayGauge(($gaugeData['value'] ?? null) === 42.5, 'Gauge Single did not
 assertGatewayGauge(($gaugeData['source']['timestamp'] ?? null) === 1780000000, 'Gauge Single timestamp changed.');
 assertGatewayGauge(($gaugeData['gauge']['minimum'] ?? null) === -20.0, 'Gauge Single minimum changed.');
 assertGatewayGauge(($gaugeData['gauge']['maximum'] ?? null) === 80.0, 'Gauge Single maximum changed.');
+assertGatewayGauge(($gaugeData['gauge']['preset'] ?? null) === 'progress', 'Gauge Single preset changed.');
 
 $GLOBALS['symconTestVariables'][4711]['Value'] = 44.75;
 $GLOBALS['symconTestVariables'][4711]['VariableUpdated'] = 1780000100;
@@ -584,6 +636,13 @@ $invalidRange->SetTestProperty('Minimum', 100.0);
 $invalidRange->SetTestProperty('Maximum', 0.0);
 $invalidRange->ApplyChanges();
 assertGatewayGauge($invalidRange->GetTestStatus() === 202, 'Invalid Gauge range must set status 202.');
+
+$invalidDesign = new EChartsGaugeSingle();
+$invalidDesign->Create();
+$invalidDesign->SetTestProperty('SourceVariableID', 4711);
+$invalidDesign->SetTestProperty('GaugePreset', 'unknown');
+$invalidDesign->ApplyChanges();
+assertGatewayGauge($invalidDesign->GetTestStatus() === 205, 'Unknown Gauge presets must set status 205.');
 
 $missingParent = new EChartsGaugeSingle();
 $missingParent->Create();

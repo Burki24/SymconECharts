@@ -41,6 +41,10 @@ class EChartsGaugeSingle extends IPSModuleStrict
     private const STATUS_RANGE_INVALID = 202;
     private const STATUS_PARENT_MISSING = 203;
     private const STATUS_GATEWAY_FAILED = 204;
+    private const STATUS_DESIGN_INVALID = 205;
+
+    private const PRESET_SIMPLE = 'simple';
+    private const SUPPORTED_PRESETS = ['basic', self::PRESET_SIMPLE, 'progress', 'speed'];
 
     public function Create(): void
     {
@@ -54,6 +58,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
         $this->RegisterPropertyString('Title', '');
         $this->RegisterPropertyString('Unit', '');
         $this->RegisterPropertyInteger('Decimals', 1);
+        $this->RegisterPropertyString('GaugePreset', self::PRESET_SIMPLE);
         $this->RegisterAttributeInteger('RegisteredSourceVariableID', 0);
         $this->RegisterAttributeString('LastError', '');
     }
@@ -89,7 +94,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 $this->ReadPropertyFloat('Maximum'),
                 $this->ReadPropertyString('Title'),
                 $this->ReadPropertyString('Unit'),
-                $this->ReadPropertyInteger('Decimals')
+                $this->ReadPropertyInteger('Decimals'),
+                $this->ReadPropertyString('GaugePreset')
             )
         );
 
@@ -105,7 +111,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
         float $Maximum,
         string $Title,
         string $Unit,
-        int $Decimals
+        int $Decimals,
+        string $GaugePreset = self::PRESET_SIMPLE
     ): void {
         $this->UpdateFormField(
             'GaugePreview',
@@ -116,7 +123,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 $Maximum,
                 $Title,
                 $Unit,
-                $Decimals
+                $Decimals,
+                $GaugePreset
             ))
         );
     }
@@ -183,7 +191,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 'minimum'  => $this->ReadPropertyFloat('Minimum'),
                 'maximum'  => $this->ReadPropertyFloat('Maximum'),
                 'unit'     => $this->ReadPropertyString('Unit'),
-                'decimals' => $this->ReadPropertyInteger('Decimals')
+                'decimals' => $this->ReadPropertyInteger('Decimals'),
+                'preset'   => $this->ReadPropertyString('GaugePreset')
             ],
             'value'         => (float) $value
         ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
@@ -203,6 +212,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
             'translations'       => $this->IPSViewTranslationsFor([
                 'Configure a numeric source variable.',
                 'Configure a valid Gauge range.',
+                'Configure a valid Gauge design.',
                 'Connect an active EChartsGateway.',
                 'The Gauge value could not be loaded.',
                 'Apache ECharts could not be initialized.'
@@ -281,11 +291,17 @@ class EChartsGaugeSingle extends IPSModuleStrict
         float $maximum,
         string $title,
         string $unit,
-        int $decimals
+        int $decimals,
+        string $preset
     ): string {
         if (!is_finite($minimum) || !is_finite($maximum) || $minimum >= $maximum) {
             return EChartsGaugeSinglePreview::CreateErrorSvg(
                 $this->Translate('Minimum must be lower than maximum.')
+            );
+        }
+        if (!in_array($preset, self::SUPPORTED_PRESETS, true)) {
+            return EChartsGaugeSinglePreview::CreateErrorSvg(
+                $this->Translate('Select a supported Gauge preset.')
             );
         }
 
@@ -301,7 +317,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
             $title,
             $unit,
             $decimals,
-            $language
+            $language,
+            $preset
         );
     }
 
@@ -362,6 +379,13 @@ class EChartsGaugeSingle extends IPSModuleStrict
             ];
         }
 
+        if (!in_array($this->ReadPropertyString('GaugePreset'), self::SUPPORTED_PRESETS, true)) {
+            return [
+                'Status'  => self::STATUS_DESIGN_INVALID,
+                'Message' => 'The selected Gauge preset is not supported.'
+            ];
+        }
+
         return null;
     }
 
@@ -398,9 +422,11 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 'variant'       => 'single',
                 'status'        => 'error',
                 'chart'         => null,
-                'error'         => $configurationError['Status'] === self::STATUS_SOURCE_INVALID
-                    ? 'Configure a numeric source variable.'
-                    : 'Configure a valid Gauge range.'
+                'error'         => match ($configurationError['Status']) {
+                    self::STATUS_SOURCE_INVALID => 'Configure a numeric source variable.',
+                    self::STATUS_DESIGN_INVALID => 'Configure a valid Gauge design.',
+                    default                     => 'Configure a valid Gauge range.'
+                }
             ];
         }
 

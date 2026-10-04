@@ -13,33 +13,33 @@
                 1,
                 2
             ],
-            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals);"
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset);"
         },
         {
             "type": "NumberSpinner",
             "name": "Minimum",
             "caption": "Minimum",
             "digits": 3,
-            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals);"
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset);"
         },
         {
             "type": "NumberSpinner",
             "name": "Maximum",
             "caption": "Maximum",
             "digits": 3,
-            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals);"
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset);"
         },
         {
             "type": "ValidationTextBox",
             "name": "Title",
             "caption": "Title",
-            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals);"
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset);"
         },
         {
             "type": "ValidationTextBox",
             "name": "Unit",
             "caption": "Unit",
-            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals);"
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset);"
         },
         {
             "type": "NumberSpinner",
@@ -47,14 +47,43 @@
             "caption": "Decimal places",
             "minimum": 0,
             "maximum": 6,
-            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals);"
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset);"
         },
         {
             "type": "ExpansionPanel",
-            "caption": "Preview",
+            "caption": "Tile designer",
             "expanded": true,
             "width": "700px",
             "items": [
+                {
+                    "type": "Label",
+                    "caption": "Choose a Gauge layout. Colors continue to follow the Symcon design until themes are configured."
+                },
+                {
+                    "type": "Select",
+                    "name": "GaugePreset",
+                    "caption": "Gauge preset",
+                    "width": "300px",
+                    "options": [
+                        {
+                            "caption": "Basic Gauge",
+                            "value": "basic"
+                        },
+                        {
+                            "caption": "Simple Gauge",
+                            "value": "simple"
+                        },
+                        {
+                            "caption": "Progress Gauge",
+                            "value": "progress"
+                        },
+                        {
+                            "caption": "Speed Gauge",
+                            "value": "speed"
+                        }
+                    ],
+                    "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset);"
+                },
                 {
                     "type": "Image",
                     "name": "GaugePreview",
@@ -97,6 +126,11 @@
             "code": 204,
             "icon": "error",
             "caption": "EChartsGateway request failed"
+        },
+        {
+            "code": 205,
+            "icon": "error",
+            "caption": "Gauge design is invalid"
         }
     ]
 }

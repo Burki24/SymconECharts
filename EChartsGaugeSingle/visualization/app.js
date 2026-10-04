@@ -64,6 +64,57 @@
         return Number(value).toLocaleString(undefined, { maximumFractionDigits: 1 });
     }
 
+    function normalizePreset(value) {
+        return ['basic', 'simple', 'progress', 'speed'].indexOf(value) >= 0 ? value : 'simple';
+    }
+
+    function applyPreset(series, preset, width, lineWidth, text, muted, surface) {
+        switch (preset) {
+            case 'basic':
+                series.progress.show = false;
+                series.axisLine.roundCap = false;
+                series.pointer.length = '62%';
+                break;
+
+            case 'progress':
+                series.center = ['50%', '53%'];
+                series.progress.width = lineWidth + 2;
+                series.axisLine.lineStyle.width = lineWidth + 2;
+                series.axisTick.show = false;
+                series.splitLine.length = 14;
+                series.anchor.size = Math.max(14, Math.min(24, Math.round(width * 0.058)));
+                series.detail.offsetCenter = [0, '44%'];
+                series.detail.fontSize = Math.max(24, Math.min(46, Math.round(width * 0.115)));
+                series.title.offsetCenter = [0, '76%'];
+                break;
+
+            case 'speed':
+                series.startAngle = 180;
+                series.endAngle = 0;
+                series.center = ['50%', '68%'];
+                series.radius = width < 320 ? '82%' : '90%';
+                series.pointer.length = '68%';
+                series.axisLabel.distance = lineWidth + 15;
+                series.title.offsetCenter = [0, '68%'];
+                series.detail.offsetCenter = [0, '36%'];
+                series.detail.width = Math.max(130, Math.min(240, Math.round(width * 0.58)));
+                series.detail.height = Math.max(34, Math.min(48, Math.round(width * 0.12)));
+                series.detail.lineHeight = Math.max(34, Math.min(48, Math.round(width * 0.12)));
+                series.detail.fontSize = Math.max(18, Math.min(32, Math.round(width * 0.075)));
+                series.detail.backgroundColor = surface;
+                series.detail.borderColor = muted;
+                series.detail.borderWidth = 2;
+                series.detail.borderRadius = 8;
+                series.detail.color = text;
+                break;
+
+            default:
+                break;
+        }
+
+        return series;
+    }
+
     function buildOption(payload) {
         var gauge = payload.gauge || {};
         var minimum = Number(gauge.minimum);
@@ -72,6 +123,7 @@
         var decimals = Math.max(0, Math.min(6, Number(gauge.decimals) || 0));
         var title = typeof gauge.title === 'string' ? gauge.title : '';
         var unit = typeof gauge.unit === 'string' ? gauge.unit : '';
+        var preset = normalizePreset(gauge.preset);
         var width = Math.max(chartElement.clientWidth, 240);
         var lineWidth = Math.max(10, Math.min(22, Math.round(width * 0.055)));
         var pointerWidth = Math.max(4, Math.min(8, Math.round(width * 0.018)));
@@ -89,6 +141,83 @@
                 + ' (' + formatAxisValue(minimum) + '–' + formatAxisValue(maximum) + ')'
         );
 
+        var series = {
+            type: 'gauge',
+            min: minimum,
+            max: maximum,
+            startAngle: 210,
+            endAngle: -30,
+            center: ['50%', '54%'],
+            radius: width < 320 ? '84%' : '88%',
+            splitNumber: 10,
+            progress: {
+                show: true,
+                roundCap: true,
+                width: lineWidth,
+                itemStyle: { color: accent }
+            },
+            axisLine: {
+                roundCap: true,
+                lineStyle: {
+                    width: lineWidth,
+                    color: [[1, surface]]
+                }
+            },
+            pointer: {
+                show: true,
+                length: '57%',
+                width: pointerWidth,
+                itemStyle: { color: accent }
+            },
+            anchor: {
+                show: true,
+                showAbove: true,
+                size: Math.max(10, Math.min(18, Math.round(width * 0.045))),
+                itemStyle: {
+                    color: accent,
+                    borderColor: text,
+                    borderWidth: 2
+                }
+            },
+            axisTick: {
+                show: true,
+                distance: -lineWidth - 7,
+                splitNumber: 5,
+                length: 5,
+                lineStyle: { color: border, width: 1 }
+            },
+            splitLine: {
+                distance: -lineWidth - 8,
+                length: 10,
+                lineStyle: { color: muted, width: 2 }
+            },
+            axisLabel: {
+                distance: lineWidth + 13,
+                color: subtle,
+                fontSize: Math.max(9, Math.min(13, Math.round(width * 0.034))),
+                formatter: formatAxisValue
+            },
+            title: {
+                show: title !== '',
+                offsetCenter: [0, '72%'],
+                color: muted,
+                fontSize: Math.max(11, Math.min(16, Math.round(width * 0.041)))
+            },
+            detail: {
+                valueAnimation: !reduceMotion,
+                offsetCenter: [0, '38%'],
+                color: text,
+                fontSize: Math.max(20, Math.min(38, Math.round(width * 0.095))),
+                fontWeight: 600,
+                formatter: function () {
+                    return formatValue(value, decimals, unit);
+                }
+            },
+            data: [{ value: value, name: title }]
+        };
+
+        series = applyPreset(series, preset, width, lineWidth, text, muted, surface);
+
         return {
             animation: !reduceMotion,
             animationDuration: reduceMotion ? 0 : 500,
@@ -102,79 +231,7 @@
                     return formatValue(value, decimals, unit);
                 }
             },
-            series: [{
-                type: 'gauge',
-                min: minimum,
-                max: maximum,
-                startAngle: 210,
-                endAngle: -30,
-                center: ['50%', '54%'],
-                radius: width < 320 ? '84%' : '88%',
-                splitNumber: 10,
-                progress: {
-                    show: true,
-                    roundCap: true,
-                    width: lineWidth,
-                    itemStyle: { color: accent }
-                },
-                axisLine: {
-                    roundCap: true,
-                    lineStyle: {
-                        width: lineWidth,
-                        color: [[1, surface]]
-                    }
-                },
-                pointer: {
-                    show: true,
-                    length: '57%',
-                    width: pointerWidth,
-                    itemStyle: { color: accent }
-                },
-                anchor: {
-                    show: true,
-                    showAbove: true,
-                    size: Math.max(10, Math.min(18, Math.round(width * 0.045))),
-                    itemStyle: {
-                        color: accent,
-                        borderColor: text,
-                        borderWidth: 2
-                    }
-                },
-                axisTick: {
-                    distance: -lineWidth - 7,
-                    splitNumber: 5,
-                    length: 5,
-                    lineStyle: { color: border, width: 1 }
-                },
-                splitLine: {
-                    distance: -lineWidth - 8,
-                    length: 10,
-                    lineStyle: { color: muted, width: 2 }
-                },
-                axisLabel: {
-                    distance: lineWidth + 13,
-                    color: subtle,
-                    fontSize: Math.max(9, Math.min(13, Math.round(width * 0.034))),
-                    formatter: formatAxisValue
-                },
-                title: {
-                    show: title !== '',
-                    offsetCenter: [0, '72%'],
-                    color: muted,
-                    fontSize: Math.max(11, Math.min(16, Math.round(width * 0.041)))
-                },
-                detail: {
-                    valueAnimation: !reduceMotion,
-                    offsetCenter: [0, '38%'],
-                    color: text,
-                    fontSize: Math.max(20, Math.min(38, Math.round(width * 0.095))),
-                    fontWeight: 600,
-                    formatter: function () {
-                        return formatValue(value, decimals, unit);
-                    }
-                },
-                data: [{ value: value, name: title }]
-            }]
+            series: [series]
         };
     }
 

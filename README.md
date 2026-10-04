@@ -10,9 +10,9 @@ Folgende Module beinhaltet das SymconECharts Repository:
 
 - __EChartsGaugeSingle__ ([Dokumentation](EChartsGaugeSingle))
   Gerätemodul für ein einzelnes, unabhängig konfigurierbares Gauge-Diagramm
-  mit genau einer numerischen Quellvariable. Die erste responsive Basic Gauge
-  wird als native Symcon-Kachel ausgegeben und bei Wertänderungen aktualisiert;
-  das Instanzformular bietet eine live aktualisierte SVG-Vorschau.
+  mit genau einer numerischen Quellvariable. Vier responsive Layout-Presets
+  werden als native Symcon-Kachel ausgegeben und bei Wertänderungen aktualisiert;
+  der Kacheldesigner bietet eine live aktualisierte SVG-Vorschau.
   Ein separat platzierbares HTML-Widget in IPSView bleibt ein weiterer
   Ausgabeweg auf derselben Diagrammkonfiguration und Datenaufbereitung.
 
@@ -33,10 +33,11 @@ eines Parents ist für den Normalbetrieb nicht erforderlich.
 verwenden `IPSModuleStrict`, ein versioniertes Datenprotokoll und eine
 wiederverwendbare Parent-Verbindung. Gauge Single rendert sein validiertes
 Momentanwertmodell mit dem lokal gebündelten Apache ECharts 6.1.0 als native,
-responsive Symcon-Kachel. Gauge Multi verwaltet bereits eine geordnete
-Quellenliste und liefert ein versioniertes Multi-Modell, besitzt aber noch
-keinen Renderer. Preset-Auswahl, Archivverarbeitung und IPSView-HTML-Ausgabe
-sind noch nicht implementiert.
+responsive Symcon-Kachel. Der erste Kacheldesigner wählt zwischen Basic,
+Simple, Progress und Speed; Simple erhält die bisherige Standarddarstellung.
+Gauge Multi verwaltet bereits eine geordnete Quellenliste und liefert ein
+versioniertes Multi-Modell, besitzt aber noch keinen Renderer. ECharts-Themes,
+Archivverarbeitung und IPSView-HTML-Ausgabe sind noch nicht implementiert.
 
 Als erste Chartfamilie sind Single- und Multi-Gauges vorgesehen. Eine
 Geräteinstanz soll jeweils einen Chart liefern; eine gemeinsame Dashboard-Seite

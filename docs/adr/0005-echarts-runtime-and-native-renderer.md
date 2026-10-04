@@ -4,6 +4,7 @@
 - Datum: 2026-10-04
 - Entscheider: Burki24
 - Ergänzt: ADR 0002 und ADR 0003
+- Ergänzt durch: ADR 0006 hinsichtlich des Gauge-Single-Kacheldesigners
 - Ersetzt durch: –
 
 ## Kontext
@@ -73,8 +74,10 @@ projektspezifischer Integritätsloader liegen direkt unter `libs`, nicht unter
 
 ## Abgrenzung
 
-Diese Entscheidung implementiert noch keine Preset-Auswahl, keine
-Multi-Gauge-Darstellung und keine IPSView-Ausgabevariable. Das gemeinsame
+Diese Entscheidung selbst umfasst noch keine Preset-Auswahl; der später
+ergänzte Gauge-Single-Kacheldesigner ist in
+[`ADR 0006`](0006-gauge-single-tile-designer.md) festgelegt. Eine
+Multi-Gauge-Darstellung und eine IPSView-Ausgabevariable fehlen weiterhin. Das gemeinsame
 HTML-Seitenmodell ist für IPSView wiederverwendbar; der abgesicherte
 IPSView-Datenkanal und dessen Laufzeitprüfung bleiben eine eigene Ausbaustufe.
 
