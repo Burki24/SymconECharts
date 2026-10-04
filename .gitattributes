@@ -1,0 +1,2 @@
+# Vendored ECharts artifacts must retain the exact upstream bytes on checkout.
+/libs/echarts/** -text

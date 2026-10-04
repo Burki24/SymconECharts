@@ -17,13 +17,27 @@ $root = dirname(__DIR__);
 $runtimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.min.js';
 $licensePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/LICENSE.txt';
 $noticePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/NOTICE.txt';
+$runtime = (string) file_get_contents($runtimePath);
+$windowsCheckoutRuntime = str_replace("\n", "\r\n", $runtime);
 
 assertEChartsAsset(is_file($runtimePath), 'The pinned Apache ECharts runtime is missing.');
 assertEChartsAsset(
     hash_file('sha256', $runtimePath) === EChartsAsset::SHA256,
     'The pinned Apache ECharts runtime checksum changed.'
 );
-assertEChartsAsset(EChartsAsset::JavaScript() === file_get_contents($runtimePath), 'The asset loader changed the runtime.');
+assertEChartsAsset(EChartsAsset::JavaScript() === $runtime, 'The asset loader changed the runtime.');
+assertEChartsAsset(
+    hash('sha256', $windowsCheckoutRuntime) !== EChartsAsset::SHA256,
+    'The Windows-checkout regression fixture must differ byte-for-byte.'
+);
+assertEChartsAsset(
+    EChartsAsset::HasExpectedIntegrity($windowsCheckoutRuntime),
+    'The loader must accept the pinned runtime after a Windows CRLF checkout.'
+);
+assertEChartsAsset(
+    !EChartsAsset::HasExpectedIntegrity($windowsCheckoutRuntime . 'changed'),
+    'The loader must reject content changes beyond line-ending normalization.'
+);
 assertEChartsAsset(str_contains((string) file_get_contents($licensePath), 'Apache License'), 'ECharts license is missing.');
 assertEChartsAsset(str_contains((string) file_get_contents($noticePath), 'Apache ECharts'), 'ECharts NOTICE is missing.');
 

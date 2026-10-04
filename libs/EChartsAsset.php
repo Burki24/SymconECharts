@@ -21,10 +21,29 @@ final class EChartsAsset
         if ($content === false || $content === '') {
             throw new RuntimeException('The bundled Apache ECharts runtime could not be loaded.');
         }
-        if (!hash_equals(self::SHA256, hash('sha256', $content))) {
+        if (!self::HasExpectedIntegrity($content)) {
             throw new RuntimeException('The bundled Apache ECharts runtime failed its integrity check.');
         }
 
-        return $content;
+        return self::NormalizeLineEndings($content);
+    }
+
+    /**
+     * Verifies the upstream bytes while tolerating a Windows checkout that
+     * converted the original LF line endings to CRLF.
+     */
+    public static function HasExpectedIntegrity(string $content): bool
+    {
+        $canonicalContent = self::NormalizeLineEndings($content);
+        if (str_contains($canonicalContent, "\r")) {
+            return false;
+        }
+
+        return hash_equals(self::SHA256, hash('sha256', $canonicalContent));
+    }
+
+    private static function NormalizeLineEndings(string $content): string
+    {
+        return str_replace("\r\n", "\n", $content);
     }
 }

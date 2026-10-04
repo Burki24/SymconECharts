@@ -7,6 +7,7 @@ $errors = [];
 
 $requiredFiles = [
     'AGENTS.md',
+    '.gitattributes',
     'README.md',
     'README1.md',
     'THIRD_PARTY_NOTICES.md',
@@ -61,6 +62,14 @@ foreach ($requiredFiles as $requiredFile) {
 foreach (['.shared', '.tests'] as $forbiddenDirectory) {
     if (is_dir($root . '/' . $forbiddenDirectory)) {
         $errors[] = 'Forbidden repository directory: ' . $forbiddenDirectory;
+    }
+}
+
+$gitAttributesPath = $root . '/.gitattributes';
+if (is_file($gitAttributesPath)) {
+    $gitAttributes = (string) file_get_contents($gitAttributesPath);
+    if (!str_contains($gitAttributes, '/libs/echarts/** -text')) {
+        $errors[] = '.gitattributes must disable line-ending conversion for vendored ECharts artifacts.';
     }
 }
 

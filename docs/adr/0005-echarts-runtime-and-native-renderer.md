@@ -33,7 +33,11 @@ mitgeliefert. Herkunft und Prüfsumme stehen zusätzlich in
 
 `libs/EChartsAsset.php` ist der projektspezifische Loader. Er prüft die
 Prüfsumme beim Laden und gibt ausschließlich den festgeschriebenen lokalen
-Build zurück. Der ECharts-Kern wird nicht verändert.
+Build zurück. `.gitattributes` deaktiviert die Textkonvertierung für die
+Fremdartefakte. Falls ein bestehender Windows-Modulcheckout die 45 originalen
+LF-Zeilenenden bereits in CRLF umgewandelt hat, normalisiert der Loader sie vor
+der Prüfung und Einbettung zurück. Jede darüber hinausgehende Byteänderung
+schlägt weiterhin fehl. Der ECharts-Kern wird nicht verändert.
 
 `EChartsGaugeSingle` bildet die erste sichtbare vertikale Umsetzung:
 

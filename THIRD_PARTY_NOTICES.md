@@ -28,10 +28,14 @@ Ausgelieferte Dateien:
 - `libs/echarts/6.1.0/NOTICE.txt` – Originalhinweise aus demselben Paket.
 
 Der Build wird lokal ausgeliefert und zur Laufzeit nicht von einem CDN geladen.
-`libs/EChartsAsset.php` prüft vor der Einbettung seine SHA-256-Prüfsumme. Der
-ECharts-Kern und die genannten Fremddateien wurden nicht projektspezifisch
-verändert. ECharts und die im offiziellen Bundle enthaltenen Komponenten
-bleiben unter ihren in `LICENSE.txt` und `NOTICE.txt` genannten Bedingungen.
+`.gitattributes` verhindert eine Zeilenendenkonvertierung der Fremdartefakte.
+`libs/EChartsAsset.php` normalisiert zusätzlich eine bereits durch einen
+Windows-Modulcheckout erfolgte CRLF-Konvertierung zurück auf die originalen
+LF-Zeilenenden und prüft anschließend die SHA-256-Prüfsumme. Andere
+Byteabweichungen werden abgelehnt. Der ECharts-Kern und die genannten
+Fremddateien wurden nicht projektspezifisch verändert. ECharts und die im
+offiziellen Bundle enthaltenen Komponenten bleiben unter ihren in
+`LICENSE.txt` und `NOTICE.txt` genannten Bedingungen.
 
 ## Weitere Komponenten
 
