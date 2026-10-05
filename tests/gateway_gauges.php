@@ -1369,10 +1369,10 @@ $ringGauge = new EChartsGaugeMulti();
 $ringGauge->Create();
 $ringGauge->SetTestProperty('Sources', $multiSources);
 $ringGauge->SetTestProperty('EnableIPSView', true);
-foreach (['ring-grid', 'ring-concentric'] as $ringPreset) {
+foreach (['ring-grid', 'ring-concentric', 'weather-station'] as $ringPreset) {
     $ringGauge->SetTestProperty('GaugePreset', $ringPreset);
     $ringGauge->ApplyChanges();
-    assertGatewayGauge($ringGauge->GetTestStatus() === IS_ACTIVE, 'Gauge Multi must accept both ring presets.');
+    assertGatewayGauge($ringGauge->GetTestStatus() === IS_ACTIVE, 'Gauge Multi must accept all additional presets.');
     $ringData = json_decode($ringGauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
     assertGatewayGauge(
         ($ringData['gauge']['preset'] ?? null) === $ringPreset
@@ -1399,9 +1399,9 @@ foreach (['ring-grid', 'ring-concentric'] as $ringPreset) {
 $ringGauge->SetTestProperty('IPSViewUseTileDesign', false);
 $ringGauge->SetTestProperty('IPSViewGaugePreset', 'ring-grid');
 assertGatewayGauge(
-    str_contains($ringGauge->GetVisualizationTile(), '"preset":"ring-concentric"')
+    str_contains($ringGauge->GetVisualizationTile(), '"preset":"weather-station"')
         && str_contains($ringGauge->GetIPSViewHTML(), '"preset":"ring-grid"'),
-    'An independent IPSView ring preset must not change the tile preset.'
+    'An independent IPSView preset must not change the tile preset.'
 );
 
 $multiTile = $multiGauge->GetVisualizationTile();

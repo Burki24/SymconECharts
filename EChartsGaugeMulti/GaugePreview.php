@@ -18,6 +18,9 @@ final class EChartsGaugeMultiPreview
         if ($preset === 'ring-concentric') {
             return self::CreateConcentricSvg($items, $title, $palette);
         }
+        if ($preset === 'weather-station') {
+            return self::CreateWeatherStationSvg($items, $title, $palette);
+        }
 
         $items = array_slice($items, 0, 4);
         $count = count($items);
@@ -142,6 +145,81 @@ final class EChartsGaugeMultiPreview
         }
 
         return self::SvgDocument($title, $palette, $content, 'ring-concentric');
+    }
+
+    /** @param list<array<string, mixed>> $items @param array<string, string> $palette */
+    private static function CreateWeatherStationSvg(array $items, string $title, array $palette): string
+    {
+        $items = array_slice($items, 0, 4);
+        $count = count($items);
+        $positions = match ($count) {
+            2       => [[215.0, 215.0, 140.0], [540.0, 215.0, 95.0]],
+            3       => [[215.0, 215.0, 140.0], [540.0, 125.0, 68.0], [540.0, 295.0, 68.0]],
+            default => [[215.0, 215.0, 140.0], [460.0, 125.0, 62.0],
+                [610.0, 125.0, 62.0], [535.0, 290.0, 62.0]]
+        };
+        $content = '';
+        foreach ($items as $index => $item) {
+            [$x, $y, $radius] = $positions[$index];
+            $content .= self::WeatherDialSvg($item, $x, $y, $radius, $palette, self::RingColor($index, $palette));
+        }
+
+        return self::SvgDocument($title, $palette, $content, 'weather-station');
+    }
+
+    /** @param array<string, mixed> $item @param array<string, string> $palette */
+    private static function WeatherDialSvg(
+        array $item,
+        float $x,
+        float $y,
+        float $radius,
+        array $palette,
+        string $color
+    ): string {
+        $angle = deg2rad(225.0 - 270.0 * self::ValueRatio($item));
+        $startX = $x - $radius * 0.707;
+        $endX = $x + $radius * 0.707;
+        $arcY = $y + $radius * 0.707;
+        $result = '<circle cx="' . self::N($x) . '" cy="' . self::N($y)
+            . '" r="' . self::N($radius * 1.14) . '" fill="' . SVGPreviewHelper::escape($palette['background'])
+            . '" stroke="' . SVGPreviewHelper::escape($palette['border']) . '" stroke-width="2"/>';
+        $result .= '<circle cx="' . self::N($x) . '" cy="' . self::N($y)
+            . '" r="' . self::N($radius * 1.04) . '" fill="none" stroke="'
+            . SVGPreviewHelper::escape($palette['track']) . '" stroke-width="3"/>';
+        $result .= '<path d="M ' . self::N($startX) . ' ' . self::N($arcY)
+            . ' A ' . self::N($radius) . ' ' . self::N($radius) . ' 0 1 1 '
+            . self::N($endX) . ' ' . self::N($arcY) . '" fill="none" stroke="'
+            . SVGPreviewHelper::escape($palette['track']) . '" stroke-width="'
+            . self::N(max(5.0, $radius * 0.09)) . '"/>';
+        for ($tick = 0; $tick <= 10; $tick++) {
+            $tickAngle = deg2rad(225.0 - 27.0 * $tick);
+            $inner = $radius * 0.86;
+            $outer = $radius * 0.97;
+            $result .= '<line x1="' . self::N($x + cos($tickAngle) * $inner)
+                . '" y1="' . self::N($y - sin($tickAngle) * $inner)
+                . '" x2="' . self::N($x + cos($tickAngle) * $outer)
+                . '" y2="' . self::N($y - sin($tickAngle) * $outer)
+                . '" stroke="' . SVGPreviewHelper::escape($palette['border']) . '" stroke-width="2"/>';
+        }
+        $result .= '<line x1="' . self::N($x) . '" y1="' . self::N($y)
+            . '" x2="' . self::N($x + cos($angle) * $radius * 0.65)
+            . '" y2="' . self::N($y - sin($angle) * $radius * 0.65)
+            . '" stroke="' . SVGPreviewHelper::escape($color)
+            . '" stroke-width="' . self::N(max(3.0, $radius * 0.04)) . '" stroke-linecap="round"/>';
+        $result .= '<circle cx="' . self::N($x) . '" cy="' . self::N($y)
+            . '" r="' . self::N(max(4.0, $radius * 0.07)) . '" fill="'
+            . SVGPreviewHelper::escape($color) . '"/>';
+        $result .= '<text x="' . self::N($x) . '" y="' . self::N($y - $radius * 0.22)
+            . '" fill="' . SVGPreviewHelper::escape($palette['muted'])
+            . '" font-size="' . self::N(max(10.0, $radius * 0.12)) . '" text-anchor="middle">'
+            . SVGPreviewHelper::escape((string) ($item['label'] ?? '')) . '</text>';
+        $result .= '<text x="' . self::N($x) . '" y="' . self::N($y + $radius * 0.47)
+            . '" fill="' . SVGPreviewHelper::escape($palette['text'])
+            . '" font-size="' . self::N(max(12.0, $radius * 0.16))
+            . '" font-weight="700" text-anchor="middle">'
+            . SVGPreviewHelper::escape(self::FormattedValue($item)) . '</text>';
+
+        return $result;
     }
 
     /** @param array<string, string> $palette */

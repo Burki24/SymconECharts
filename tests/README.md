@@ -11,7 +11,8 @@ Der Multi-Gauge-Layouttest benötigt zusätzlich Node.js und wird separat mit
 `node tests/gauge_multi_layout.js` ausgeführt. Er prüft die freigehaltene
 Kachelkopfzeile sowie das unveränderte IPSView-Layout anhand gerenderter
 ECharts-Optionen. Sie deckt auch Ringraster und konzentrische Ringe mit 2 bzw.
-16 Quellen ab. Die PHP-Basissuite benötigt weiterhin kein Node.js.
+16 Quellen sowie das Wetterstations-Panel mit 2, 3 und 16 Quellen ab. Die
+PHP-Basissuite benötigt weiterhin kein Node.js.
 
 Der GitHub-Workflow `.github/workflows/tests.yml` verwendet zusätzlich
 `Burki24/Symcon_ModuleCI/php-tests@v1.0.0`. Die gemeinsame Action prüft unter

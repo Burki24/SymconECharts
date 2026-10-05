@@ -116,4 +116,32 @@ for (const preset of ['ring-grid', 'ring-concentric']) {
     assert.ok(crowdedRingTile.series.every(series => series.radius > 0), `${preset} radii must remain positive.`);
 }
 
-process.stdout.write('Gauge Multi dial and ring layouts verified.\n');
+for (const count of [2, 3, 16]) {
+    for (const [mode, width, height] of [['symcon', 416, 720], ['ipsview', 900, 460]]) {
+        const weather = render(mode, width, height, count, 'Weather', 'weather-station');
+        assert.equal(weather.series.length, count, 'Weather station must render every source.');
+        assert.ok(weather.series[0].radius > weather.series[1].radius, 'The first source needs the main instrument.');
+        assert.ok(topOfFirstGauge(weather) >= (mode === 'symcon' ? 64 : 0), 'The weather dial must clear the header.');
+        assert.equal(weather.graphic.length, count * 2, 'Each weather dial needs its bezel and inner frame.');
+        weather.series.forEach((series, index) => {
+            assert.equal(series.id, `variable-${index}`);
+            assert.equal(series.min, index * 10);
+            assert.equal(series.max, index * 10 + 100);
+            assert.equal(series.data[0].value, index * 10 + 50);
+            assert.equal(series.pointer.show, true);
+            assert.equal(series.progress.show, false);
+            assert.ok(series.radius > 0);
+            assert.ok(series.center[0] - series.radius * 1.14 >= 0);
+            assert.ok(series.center[0] + series.radius * 1.14 <= width);
+            assert.ok(series.center[1] - series.radius * 1.14 >= (mode === 'symcon' ? 64 : 0));
+            assert.ok(series.center[1] + series.radius * 1.14 <= height);
+        });
+        assert.equal(new Set(weather.series.map(series => series.itemStyle.color)).size, count);
+    }
+}
+const compactWeather = render('symcon', 320, 192, 16, 'Weather', 'weather-station');
+assert.equal(compactWeather.series.length, 16);
+assert.ok(compactWeather.series.every(series => series.center[1] - series.radius * 1.14 >= 64));
+assert.ok(compactWeather.series.every(series => series.axisLine.lineStyle.width <= series.radius));
+
+process.stdout.write('Gauge Multi dial, ring and weather-station layouts verified.\n');

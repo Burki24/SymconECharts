@@ -108,12 +108,12 @@
         return palette[index % palette.length];
     }
 
-    function buildSeries(item, index, grid, colors, style) {
-        var column = index % grid.columns;
-        var row = Math.floor(index / grid.columns);
-        var centerX = column * grid.cellWidth + grid.cellWidth / 2;
-        var centerY = grid.top + row * grid.cellHeight + grid.cellHeight * 0.48;
-        var radius = grid.radius;
+    function buildSeries(item, index, grid, colors, style, position) {
+        var column = grid ? index % grid.columns : 0;
+        var row = grid ? Math.floor(index / grid.columns) : 0;
+        var centerX = position ? position.center[0] : column * grid.cellWidth + grid.cellWidth / 2;
+        var centerY = position ? position.center[1] : grid.top + row * grid.cellHeight + grid.cellHeight * 0.48;
+        var radius = position ? position.radius : grid.radius;
         var scale = clamp(Number(style.scaleFontSizePercent) || 100, 50, 150) / 100;
         var valueScale = clamp(Number(style.valueFontSizePercent) || 100, 50, 150) / 100;
         var titleScale = clamp(Number(style.titleFontSizePercent) || 100, 50, 150) / 100;
@@ -309,6 +309,93 @@
         return { series: series, graphic: graphic };
     }
 
+    function resolveWeatherLayout(count, width, height, headerInset, hasTitle) {
+        var top = headerInset + (hasTitle ? Math.max(32, height * 0.1) : 4);
+        var availableHeight = Math.max(1, height - top);
+        var beside = width >= 620 && width >= availableHeight * 1.2;
+        var mainWidth = beside ? width * 0.52 : width;
+        var mainHeight = beside ? availableHeight : availableHeight * 0.52;
+        var main = {
+            center: [mainWidth * 0.5, top + mainHeight * 0.5],
+            radius: Math.max(1, Math.min(mainWidth * 0.34, mainHeight * 0.39))
+        };
+        var otherCount = count - 1;
+        var area = {
+            left: beside ? mainWidth : 0,
+            top: beside ? top : top + mainHeight,
+            width: beside ? width - mainWidth : width,
+            height: beside ? availableHeight : availableHeight - mainHeight
+        };
+        var best = null;
+        for (var columns = 1; columns <= Math.min(otherCount, 4); columns += 1) {
+            var rows = Math.ceil(otherCount / columns);
+            var cellWidth = area.width / columns;
+            var cellHeight = area.height / rows;
+            var radius = Math.min(cellWidth * 0.34, cellHeight * 0.36, main.radius * 0.75);
+            if (!best || radius > best.radius) {
+                best = { columns: columns, cellWidth: cellWidth, cellHeight: cellHeight, radius: radius };
+            }
+        }
+        var positions = [main];
+        for (var index = 0; index < otherCount; index += 1) {
+            positions.push({
+                center: [
+                    area.left + (index % best.columns + 0.5) * best.cellWidth,
+                    area.top + (Math.floor(index / best.columns) + 0.5) * best.cellHeight
+                ],
+                radius: Math.max(1, best.radius)
+            });
+        }
+        return positions;
+    }
+
+    function buildWeatherLayout(items, width, height, headerInset, hasTitle, colors, style) {
+        var positions = resolveWeatherLayout(items.length, width, height, headerInset, hasTitle);
+        var series = [];
+        var graphic = [];
+        items.forEach(function (item, index) {
+            var position = positions[index];
+            var color = itemColor(index, colors);
+            var gauge = buildSeries(item, index, null, colors, style, position);
+            gauge.itemStyle = { color: color };
+            gauge.pointer.itemStyle.color = color;
+            gauge.anchor.itemStyle.color = color;
+            var ringScale = clamp(Number(style.ringWidthPercent) || 100, 50, 150) / 100;
+            var ringWidth = clamp(position.radius * 0.1 * ringScale, 1, 24);
+            gauge.axisLine.lineStyle.width = ringWidth;
+            gauge.axisTick.distance = -ringWidth;
+            gauge.splitLine.distance = -ringWidth;
+            gauge.pointer.width = clamp(position.radius * 0.045, 1, 8);
+            gauge.anchor.size = clamp(position.radius * 0.12, 2, 15);
+            gauge.axisLabel.fontSize = clamp(position.radius * 0.105
+                * clamp(Number(style.scaleFontSizePercent) || 100, 50, 150) / 100, 4, 16);
+            gauge.title.offsetCenter = [0, '-27%'];
+            gauge.title.fontSize = clamp(position.radius * 0.14
+                * clamp(Number(style.titleFontSizePercent) || 100, 50, 150) / 100, 5, 20);
+            gauge.detail.offsetCenter = [0, '44%'];
+            gauge.detail.fontSize = clamp(position.radius * 0.16
+                * clamp(Number(style.valueFontSizePercent) || 100, 50, 150) / 100, 6, 28);
+            series.push(gauge);
+            graphic.push({
+                id: 'weather-bezel-' + item.id,
+                type: 'circle',
+                z: 0,
+                shape: { cx: position.center[0], cy: position.center[1], r: position.radius * 1.14 },
+                style: { fill: colors.background, stroke: colors.border, lineWidth: Math.max(1, position.radius * 0.018) },
+                silent: true
+            });
+            graphic.push({
+                id: 'weather-inner-' + item.id,
+                type: 'circle',
+                z: 0,
+                shape: { cx: position.center[0], cy: position.center[1], r: position.radius * 1.04 },
+                style: { fill: 'none', stroke: colors.track, lineWidth: Math.max(1, position.radius * 0.025) },
+                silent: true
+            });
+        });
+        return { series: series, graphic: graphic };
+    }
+
     function buildOption(model, theme) {
         var items = Array.isArray(model.items) ? model.items : [];
         var gauge = model.gauge || {};
@@ -319,11 +406,14 @@
         var title = String(gauge.title || '');
         var headerInset = bootstrap.mode === 'symcon' ? 64 : 0;
         var preset = String(gauge.preset || 'multi-title');
-        var grid = preset === 'ring-concentric'
+        var grid = preset === 'ring-concentric' || preset === 'weather-station'
             ? null
             : resolveGrid(items.length, width, height, title !== '', headerInset);
         var concentric = preset === 'ring-concentric'
             ? buildConcentricLayout(items, width, height, headerInset, title !== '', colors, style)
+            : null;
+        var weather = preset === 'weather-station'
+            ? buildWeatherLayout(items, width, height, headerInset, title !== '', colors, style)
             : null;
 
         return {
@@ -347,8 +437,8 @@
                         + formatValue(item.value, Number(itemGauge.decimals) || 0, String(itemGauge.unit || ''));
                 }
             },
-            graphic: concentric ? concentric.graphic : [],
-            series: concentric ? concentric.series : items.map(function (item, index) {
+            graphic: concentric ? concentric.graphic : weather ? weather.graphic : [],
+            series: concentric ? concentric.series : weather ? weather.series : items.map(function (item, index) {
                 return preset === 'ring-grid'
                     ? buildRingGridSeries(item, index, grid, colors, style)
                     : buildSeries(item, index, grid, colors, style);

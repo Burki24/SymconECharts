@@ -37,10 +37,10 @@ zugeschnittenen SVG-Hintergrunds. Gauge Single unterstützt außerdem validierte
 konfigurierbare Skalenunterteilungen und -abstände, beide Drehrichtungen,
 responsive Positionsversätze, elementweise Sichtbarkeit sowie einen
 gestaltbaren Wertekasten und optionale Schatteneffekte. Gauge Multi besitzt
-mit Multi Title, Ringraster und konzentrischen Ringen responsive native Kacheln
+mit Multi Title, Ringraster, konzentrischen Ringen und einer Wetterstations-Vorlage responsive native Kacheln
 für 2 bis 16 unabhängige Wertebereiche. Beide Gauge-Module erzeugen optional
 eine IPSView-WebContent-Variable mit vererbtem oder unabhängigem Design auf
-demselben Renderer. Klassische Multi-Instrumentenpanel-Vorlagen,
+demselben Renderer. Weitere klassische Multi-Instrumentenpanel-Vorlagen,
 Archivverarbeitung sowie reale Symcon-Laufzeit- und Browsertests fehlen noch.
 Die Testsuite prüft zusätzlich
 zu Struktur und Metadaten die Strict-Verträge, das Protokoll, die
@@ -100,6 +100,8 @@ Den ersten sichtbaren Gauge-Multi-Renderer dokumentiert
 [`ADR 0009`](adr/0009-gauge-multi-title-renderer.md).
 Die beiden ergänzenden Ring-Vorlagen dokumentiert
 [`ADR 0010`](adr/0010-gauge-multi-ring-presets.md).
+Die erste analoge Wetterstations-Vorlage dokumentiert
+[`ADR 0011`](adr/0011-weather-station-gauge-preset.md).
 
 ## Daten, Konfiguration und Ausgabe
 
