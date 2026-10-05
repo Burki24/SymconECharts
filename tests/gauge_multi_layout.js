@@ -15,7 +15,7 @@ const palette = {
     accent: '#55cbb5'
 };
 
-function render(mode, width, height, count, title = '') {
+function render(mode, width, height, count, title = '', preset = 'multi-title') {
     const chartElement = { clientWidth: width, clientHeight: height, hidden: false };
     const errorElement = { hidden: true, textContent: '' };
     let option;
@@ -26,11 +26,17 @@ function render(mode, width, height, count, title = '') {
                 status: 'ready',
                 chart: {
                     theme: 'dark',
-                    gauge: { title, style: {} },
+                    gauge: { title, preset, style: {} },
                     items: Array.from({ length: count }, (_, index) => ({
                         id: `variable-${index}`,
-                        gauge: { minimum: 0, maximum: 100, label: `Source ${index}` },
-                        value: 50
+                        gauge: {
+                            minimum: index * 10,
+                            maximum: index * 10 + 100,
+                            label: `Source ${index}`,
+                            unit: `u${index}`,
+                            decimals: 1
+                        },
+                        value: index * 10 + 50
                     }))
                 }
             },
@@ -67,4 +73,47 @@ assert.equal(titledIPSView.title.top, 6, 'The IPSView chart title must retain it
 const crowdedTile = render('symcon', 320, 192, 16);
 assert.ok(topOfFirstGauge(crowdedTile) >= 64, 'A crowded tile must not overlap the header.');
 
-process.stdout.write('Gauge Multi tile header layout verified.\n');
+for (const preset of ['ring-grid', 'ring-concentric']) {
+    for (const count of [2, 16]) {
+        const tile = render('symcon', 416, 1048, count, '', preset);
+        const ipsView = render('ipsview', 416, 1048, count, '', preset);
+        assert.equal(tile.series.length, count, `${preset} must render all ${count} sources.`);
+        assert.ok(topOfFirstGauge(tile) >= 64, `${preset} must clear the native header.`);
+        assert.ok(topOfFirstGauge(ipsView) < topOfFirstGauge(tile), `${preset} must use the IPSView space.`);
+        tile.series.forEach((series, index) => {
+            assert.equal(series.id, `variable-${index}`);
+            assert.equal(series.min, index * 10);
+            assert.equal(series.max, index * 10 + 100);
+            assert.equal(series.data[0].value, index * 10 + 50);
+            assert.equal(series.progress.show, true);
+            assert.equal(series.pointer.show, false);
+        });
+        assert.equal(
+            new Set(tile.series.map(series => series.itemStyle.color)).size,
+            count,
+            `${preset} needs a distinct color per source.`
+        );
+        if (preset === 'ring-grid') {
+            assert.notDeepEqual(
+                Array.from(tile.series[0].center), Array.from(tile.series[1].center),
+                'Grid rings need separate cells.'
+            );
+            assert.match(tile.series[1].detail.formatter(), /^60[,.]0 u1$/);
+        } else {
+            assert.equal(tile.series[0].center[0], tile.series[1].center[0], 'Concentric rings share a center.');
+            assert.ok(tile.series[0].radius > tile.series[1].radius, 'Concentric radii must decrease.');
+            assert.equal(tile.graphic.length, count * 3, 'Concentric rings need a value legend.');
+            assert.ok(tile.graphic.some(element => element.style && /^60[,.]0 u1$/.test(element.style.text)));
+        }
+    }
+    const titledRingTile = render('symcon', 416, 420, 3, 'Climate', preset);
+    const titledRingIPSView = render('ipsview', 416, 420, 3, 'Climate', preset);
+    assert.ok(titledRingTile.title.top >= 64, `${preset} title must clear the native header.`);
+    assert.ok(topOfFirstGauge(titledRingTile) >= 64, `${preset} rings must clear the native header.`);
+    assert.equal(titledRingIPSView.title.top, 6, `${preset} title must use the IPSView space.`);
+    const crowdedRingTile = render('symcon', 320, 192, 16, '', preset);
+    assert.ok(topOfFirstGauge(crowdedRingTile) >= 64, `${preset} must clear a small tile header.`);
+    assert.ok(crowdedRingTile.series.every(series => series.radius > 0), `${preset} radii must remain positive.`);
+}
+
+process.stdout.write('Gauge Multi dial and ring layouts verified.\n');

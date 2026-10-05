@@ -47,7 +47,11 @@ class EChartsGaugeMulti extends IPSModuleStrict
     private const STATUS_DESIGN_INVALID = 205;
 
     private const PRESET_MULTI_TITLE = 'multi-title';
-    private const SUPPORTED_PRESETS = [self::PRESET_MULTI_TITLE];
+    private const PRESET_RING_GRID = 'ring-grid';
+    private const PRESET_RING_CONCENTRIC = 'ring-concentric';
+    private const SUPPORTED_PRESETS = [
+        self::PRESET_MULTI_TITLE, self::PRESET_RING_GRID, self::PRESET_RING_CONCENTRIC
+    ];
     private const IPSVIEW_OUTPUT_IDENT = 'IPSViewGauge';
     private const DESIGN_SCALE_PROPERTIES = [
         'RingWidthPercent', 'ScaleFontSizePercent', 'ValueFontSizePercent', 'TitleFontSizePercent'
@@ -111,7 +115,8 @@ class EChartsGaugeMulti extends IPSModuleStrict
             EChartsGaugeMultiPreview::CreateSvg(
                 $this->PreviewItems(),
                 $this->ReadPropertyString('Title'),
-                $this->ReadPropertyString('EChartsTheme')
+                $this->ReadPropertyString('EChartsTheme'),
+                $this->ReadPropertyString('GaugePreset')
             )
         );
         $form = SVGPreviewHelper::withImage(
@@ -120,7 +125,10 @@ class EChartsGaugeMulti extends IPSModuleStrict
             EChartsGaugeMultiPreview::CreateSvg(
                 $this->PreviewItems(),
                 $this->ReadPropertyString('Title'),
-                $this->EffectiveIPSViewTheme()
+                $this->EffectiveIPSViewTheme(),
+                $this->ReadPropertyBoolean('IPSViewUseTileDesign')
+                    ? $this->ReadPropertyString('GaugePreset')
+                    : $this->ReadPropertyString('IPSViewGaugePreset')
             )
         );
 
@@ -213,6 +221,39 @@ class EChartsGaugeMulti extends IPSModuleStrict
         return $this->RenderGaugeHTMLPage(true);
     }
 
+    public function ReceiveData(string $JSONString): string
+    {
+        try {
+            $message = $this->DecodeDataFlowMessage($JSONString, self::DATA_ID_FROM_PARENT);
+            EChartsDataProtocol::DecodeRequest($message);
+        } catch (Throwable $exception) {
+            $this->SendDebug('ReceiveData', $exception::class, 0);
+        }
+
+        return '';
+    }
+
+    /**
+     * Revalidates the module after the Symcon kernel becomes ready.
+     *
+     * @param array<int, mixed> $Data
+     */
+    public function MessageSink(int $TimeStamp, int $SenderID, int $Message, array $Data): void
+    {
+        if ($SenderID === 0 && $Message === IPS_KERNELSTARTED) {
+            $this->Initialize();
+            $this->PublishVisualizationState();
+            $this->PublishIPSViewHTML();
+
+            return;
+        }
+
+        if ($Message === VM_UPDATE && in_array($SenderID, $this->ConfiguredVariableIDs(), true)) {
+            $this->PublishVisualizationState();
+            $this->PublishIPSViewHTML();
+        }
+    }
+
     private function RenderGaugeHTMLPage(bool $ipsView): string
     {
         return $this->RenderVisualizationHTMLPage($ipsView, [
@@ -248,39 +289,6 @@ class EChartsGaugeMulti extends IPSModuleStrict
                 '{{ECHARTS_THEME_SCRIPT}}' => EChartsAsset::ThemeJavaScript()
             ]
         ]);
-    }
-
-    public function ReceiveData(string $JSONString): string
-    {
-        try {
-            $message = $this->DecodeDataFlowMessage($JSONString, self::DATA_ID_FROM_PARENT);
-            EChartsDataProtocol::DecodeRequest($message);
-        } catch (Throwable $exception) {
-            $this->SendDebug('ReceiveData', $exception::class, 0);
-        }
-
-        return '';
-    }
-
-    /**
-     * Revalidates the module after the Symcon kernel becomes ready.
-     *
-     * @param array<int, mixed> $Data
-     */
-    public function MessageSink(int $TimeStamp, int $SenderID, int $Message, array $Data): void
-    {
-        if ($SenderID === 0 && $Message === IPS_KERNELSTARTED) {
-            $this->Initialize();
-            $this->PublishVisualizationState();
-            $this->PublishIPSViewHTML();
-
-            return;
-        }
-
-        if ($Message === VM_UPDATE && in_array($SenderID, $this->ConfiguredVariableIDs(), true)) {
-            $this->PublishVisualizationState();
-            $this->PublishIPSViewHTML();
-        }
     }
 
     private function Initialize(): void

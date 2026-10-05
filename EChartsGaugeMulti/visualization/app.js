@@ -98,6 +98,16 @@
         return best;
     }
 
+    function itemColor(index, colors) {
+        var palette = [
+            colors.accent, '#5C83E9', '#DB7393', '#E6A547',
+            '#8F6BD7', '#5BAE79', '#E5754F', '#3EA8C1',
+            '#C482C7', '#86A646', '#D96C68', '#5B92B1',
+            '#B98955', '#7493DD', '#A77DBC', '#64B8A4'
+        ];
+        return palette[index % palette.length];
+    }
+
     function buildSeries(item, index, grid, colors, style) {
         var column = index % grid.columns;
         var row = Math.floor(index / grid.columns);
@@ -183,6 +193,122 @@
         };
     }
 
+    function buildRingGridSeries(item, index, grid, colors, style) {
+        var series = buildSeries(item, index, grid, colors, style);
+        var radius = grid.radius * 0.9;
+        var ringScale = clamp(Number(style.ringWidthPercent) || 100, 50, 150) / 100;
+        var ringWidth = clamp(radius * 0.13 * ringScale, 2, 24);
+        var color = itemColor(index, colors);
+        series.radius = radius;
+        series.startAngle = 90;
+        series.endAngle = -270;
+        series.progress = { show: true, roundCap: true, width: ringWidth, itemStyle: { color: color } };
+        series.axisLine = {
+            roundCap: true,
+            lineStyle: { width: ringWidth, color: [[1, colors.track]] }
+        };
+        series.pointer = { show: false };
+        series.anchor = { show: false };
+        series.axisTick = { show: false };
+        series.splitLine = { show: false };
+        series.axisLabel = { show: false };
+        series.title.offsetCenter = [0, '-18%'];
+        series.detail.offsetCenter = [0, '20%'];
+        series.itemStyle = { color: color };
+        return series;
+    }
+
+    function buildConcentricLayout(items, width, height, headerInset, hasTitle, colors, style) {
+        var top = headerInset + (hasTitle ? Math.max(32, height * 0.1) : 4);
+        var availableHeight = Math.max(1, height - top);
+        var beside = width >= 560 && width >= availableHeight * 1.15;
+        var ringAreaWidth = beside ? width * 0.53 : width;
+        var ringAreaHeight = beside ? availableHeight : availableHeight * 0.58;
+        var center = [ringAreaWidth * 0.5, top + ringAreaHeight * 0.5];
+        var outerRadius = Math.max(1, Math.min(ringAreaWidth * 0.42, ringAreaHeight * 0.43));
+        var spacing = outerRadius / (items.length + 0.5);
+        var ringScale = clamp(Number(style.ringWidthPercent) || 100, 50, 150) / 100;
+        var ringWidth = spacing * clamp(0.65 * ringScale, 0.3, 0.85);
+        var legendColumns = beside || items.length <= 8 ? 1 : 2;
+        var legendRows = Math.ceil(items.length / legendColumns);
+        var legendLeft = beside ? ringAreaWidth + 12 : 10;
+        var legendTop = beside ? top : top + ringAreaHeight + 6;
+        var legendWidth = beside ? width - ringAreaWidth - 22 : width - 20;
+        var legendHeight = beside ? availableHeight : availableHeight - ringAreaHeight - 6;
+        var columnWidth = legendWidth / legendColumns;
+        var rowHeight = Math.max(1, Math.min(28, legendHeight / legendRows));
+        var labelScale = clamp(Number(style.titleFontSizePercent) || 100, 50, 150) / 100;
+        var valueScale = clamp(Number(style.valueFontSizePercent) || 100, 50, 150) / 100;
+        var series = [];
+        var graphic = [];
+
+        items.forEach(function (item, index) {
+            var gauge = item.gauge || {};
+            var color = itemColor(index, colors);
+            var legendX = legendLeft + (index % legendColumns) * columnWidth;
+            var legendY = legendTop + Math.floor(index / legendColumns) * rowHeight;
+            var valueText = formatValue(Number(item.value), clamp(Number(gauge.decimals) || 0, 0, 6), String(gauge.unit || ''));
+            var labelWidth = Math.max(1, columnWidth * 0.52 - 16);
+            var valueWidth = Math.max(1, columnWidth - labelWidth - 24);
+            series.push({
+                id: item.id,
+                type: 'gauge',
+                min: Number(gauge.minimum),
+                max: Number(gauge.maximum),
+                center: center,
+                radius: outerRadius - index * spacing,
+                startAngle: 90,
+                endAngle: -270,
+                progress: { show: true, roundCap: true, width: ringWidth, itemStyle: { color: color } },
+                axisLine: { roundCap: true, lineStyle: { width: ringWidth, color: [[1, colors.track]] } },
+                pointer: { show: false },
+                anchor: { show: false },
+                axisTick: { show: false },
+                splitLine: { show: false },
+                axisLabel: { show: false },
+                title: { show: false },
+                detail: { show: false },
+                itemStyle: { color: color },
+                data: [{ value: Number(item.value), name: String(gauge.label || '') }]
+            });
+            graphic.push({
+                id: 'legend-swatch-' + item.id,
+                type: 'rect',
+                left: legendX,
+                top: legendY + Math.max(0, (rowHeight - 7) / 2),
+                shape: { x: 0, y: 0, width: 7, height: 7 },
+                style: { fill: color },
+                silent: true
+            });
+            graphic.push({
+                id: 'legend-label-' + item.id,
+                type: 'text',
+                left: legendX + 13,
+                top: legendY,
+                style: {
+                    text: String(gauge.label || ''), fill: colors.muted,
+                    fontSize: clamp(rowHeight * 0.52 * labelScale, 5, 15),
+                    width: labelWidth, overflow: 'truncate'
+                },
+                silent: true
+            });
+            graphic.push({
+                id: 'legend-value-' + item.id,
+                type: 'text',
+                left: legendX + 17 + labelWidth,
+                top: legendY,
+                style: {
+                    text: valueText, fill: colors.text,
+                    fontSize: clamp(rowHeight * 0.54 * valueScale, 5, 16),
+                    width: valueWidth, overflow: 'truncate'
+                },
+                silent: true
+            });
+        });
+
+        return { series: series, graphic: graphic };
+    }
+
     function buildOption(model, theme) {
         var items = Array.isArray(model.items) ? model.items : [];
         var gauge = model.gauge || {};
@@ -192,7 +318,13 @@
         var height = Math.max(chartElement.clientHeight, 180);
         var title = String(gauge.title || '');
         var headerInset = bootstrap.mode === 'symcon' ? 64 : 0;
-        var grid = resolveGrid(items.length, width, height, title !== '', headerInset);
+        var preset = String(gauge.preset || 'multi-title');
+        var grid = preset === 'ring-concentric'
+            ? null
+            : resolveGrid(items.length, width, height, title !== '', headerInset);
+        var concentric = preset === 'ring-concentric'
+            ? buildConcentricLayout(items, width, height, headerInset, title !== '', colors, style)
+            : null;
 
         return {
             backgroundColor: colors.background,
@@ -215,8 +347,11 @@
                         + formatValue(item.value, Number(itemGauge.decimals) || 0, String(itemGauge.unit || ''));
                 }
             },
-            series: items.map(function (item, index) {
-                return buildSeries(item, index, grid, colors, style);
+            graphic: concentric ? concentric.graphic : [],
+            series: concentric ? concentric.series : items.map(function (item, index) {
+                return preset === 'ring-grid'
+                    ? buildRingGridSeries(item, index, grid, colors, style)
+                    : buildSeries(item, index, grid, colors, style);
             })
         };
     }

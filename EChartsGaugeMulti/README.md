@@ -6,7 +6,7 @@ Symcon-Kacheldarstellung und ein separat platzierbares HTML-Widget in IPSView
 bereitstellen können. Datenquellen und Diagrammkonfiguration werden dabei nur
 einmal gepflegt.
 
-**Entwicklungsstand:** Erste sichtbare Multi-Title-Kachel und optionale
+**Entwicklungsstand:** Multi-Title- und zwei Ring-Vorlagen mit optionaler
 IPSView-WebContent-Ausgabe. Eine geordnete Liste aus
 2 bis 16 numerischen Quellvariablen ist konfigurierbar, wird als Referenzen
 registriert und über EChartsGateway gelesen. Das Modul erzeugt daraus ein
@@ -34,10 +34,11 @@ numerische Variable, Beschriftung, Minimum, Maximum, Einheit und 0 bis 6
 Nachkommastellen. `GetGaugeData()` liest alle aktuellen Werte über das
 versionierte Gateway-Protokoll und liefert sie in der konfigurierten Reihenfolge.
 
-**Vorhanden:** Multi Title als native Symcon-Kachel mit automatischem Raster,
-offiziellen ECharts-Themes, Live-Aktualisierung und erster Feinabstimmung.
+**Vorhanden:** Multi Title, Ringraster und konzentrische Ringe als native
+Symcon-Kachel und optionales IPSView-Widget mit offiziellen ECharts-Themes,
+Live-Aktualisierung und erster Feinabstimmung.
 
-**Geplant:** Ring- und klassische Instrumentenpanel-Vorlagen.
+**Geplant:** Klassische Instrumentenpanel-Vorlagen.
 
 Eine Instanz bildet genau einen zusammengesetzten Gauge-Chart ab. Gauges mit
 genau einer numerischen Quellvariable gehören zu
@@ -129,22 +130,28 @@ Darstellungs-Helpern aufbauen.
 
 ### 6. Visualisierung
 
-**Die native Multi-Title-Kachel und die optionale IPSView-Ausgabe sind implementiert.**
+**Drei Multi-Vorlagen und die optionale IPSView-Ausgabe sind implementiert.**
 
 #### Native Symcon-Kachel
 
 Die Chart-Instanz wird über das Symcon-HTML-SDK dargestellt und benötigt keine
-IPSView-Ausgabe. Jede Quelle besitzt eine eigene ECharts-Gauge-Serie. Ein
-responsives Raster wählt abhängig von Quellenanzahl, Breite und Höhe die
-lesbarste Spalten- und Zeilenaufteilung. Änderungen einer Quellvariable werden
-über `VM_UPDATE` direkt an die Kachel übertragen.
+IPSView-Ausgabe. Jede Quelle besitzt eine eigene ECharts-Gauge-Serie mit
+eigenem Wertebereich. **Multi Title** zeigt Zifferblätter, **Ringraster**
+einzelne Fortschrittsringe und **konzentrische Ringe** ein gemeinsames
+Ringinstrument mit einer beschrifteten Werteliste. Raster-Vorlagen wählen
+abhängig von Quellenanzahl, Breite und Höhe eine passende Spalten- und
+Zeilenaufteilung. Änderungen einer Quellvariable werden über `VM_UPDATE`
+direkt an die Kachel übertragen.
 Das Multi-Raster lässt in der nativen Kachel Platz für die von Symcon
 eingeblendete Kopfzeile; IPSView nutzt die gesamte Widgetfläche.
 
-Der eingeklappte Kacheldesigner bietet zunächst Multi Title, das automatische
+Der eingeklappte Kacheldesigner bietet die drei Vorlagen, das automatische
 Symcon-Design und sechs gebündelte offizielle ECharts-Themes. Ringstärke sowie
 Schriftgrößen von Skala, Wert und Titel sind zwischen 50 und 150 Prozent
-einstellbar. Eine SVG-Vorschau zeigt bis zu vier Instrumente exemplarisch.
+einstellbar; Skalenbeschriftungen betreffen nur Multi Title. Eine SVG-Vorschau
+zeigt bis zu vier Quellen exemplarisch. Bei vielen konzentrischen Ringen ist
+für lesbare Beschriftungen eine ausreichend große Kachel bzw. ein großes
+IPSView-Widget erforderlich.
 
 #### IPSView
 

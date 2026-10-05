@@ -104,7 +104,7 @@
             "items": [
                 {
                     "type": "Label",
-                    "caption": "Multi Title arranges every source as an independent Gauge with its own range and unit. The grid adapts automatically to the available tile size."
+                    "caption": "Choose independent dial Gauges, ring Gauges in a grid, or concentric rings. Every source keeps its own range and unit."
                 },
                 {
                     "type": "RowLayout",
@@ -118,6 +118,14 @@
                                 {
                                     "caption": "Multi Title",
                                     "value": "multi-title"
+                                },
+                                {
+                                    "caption": "Ring grid",
+                                    "value": "ring-grid"
+                                },
+                                {
+                                    "caption": "Concentric rings",
+                                    "value": "ring-concentric"
                                 }
                             ]
                         },

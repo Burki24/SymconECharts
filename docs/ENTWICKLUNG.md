@@ -37,11 +37,12 @@ zugeschnittenen SVG-Hintergrunds. Gauge Single unterstützt außerdem validierte
 konfigurierbare Skalenunterteilungen und -abstände, beide Drehrichtungen,
 responsive Positionsversätze, elementweise Sichtbarkeit sowie einen
 gestaltbaren Wertekasten und optionale Schatteneffekte. Gauge Multi besitzt
-mit Multi Title eine erste responsive native Kachel für 2 bis 16 unabhängige
-Skalen. Gauge Single erzeugt
-optional eine IPSView-WebContent-Variable mit vererbtem oder unabhängigem
-Design auf demselben Renderer. Weitere Multi-Vorlagen, Archivverarbeitung sowie reale
-Symcon-Laufzeit- und Browsertests fehlen noch. Die Testsuite prüft zusätzlich
+mit Multi Title, Ringraster und konzentrischen Ringen responsive native Kacheln
+für 2 bis 16 unabhängige Wertebereiche. Beide Gauge-Module erzeugen optional
+eine IPSView-WebContent-Variable mit vererbtem oder unabhängigem Design auf
+demselben Renderer. Klassische Multi-Instrumentenpanel-Vorlagen,
+Archivverarbeitung sowie reale Symcon-Laufzeit- und Browsertests fehlen noch.
+Die Testsuite prüft zusätzlich
 zu Struktur und Metadaten die Strict-Verträge, das Protokoll, die
 ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 8.5 mit Test-Doppeln.
@@ -97,6 +98,8 @@ Die optionale IPSView-WebContent-Ausgabe und ihr getrenntes Design dokumentiert
 [`ADR 0008`](adr/0008-gauge-single-ipsview-output.md).
 Den ersten sichtbaren Gauge-Multi-Renderer dokumentiert
 [`ADR 0009`](adr/0009-gauge-multi-title-renderer.md).
+Die beiden ergänzenden Ring-Vorlagen dokumentiert
+[`ADR 0010`](adr/0010-gauge-multi-ring-presets.md).
 
 ## Daten, Konfiguration und Ausgabe
 

@@ -1365,6 +1365,45 @@ assertGatewayGauge(
 );
 assertGatewayGauge(($multiData['items'][1]['value'] ?? null) === 58.0, 'Gauge Multi second value changed.');
 
+$ringGauge = new EChartsGaugeMulti();
+$ringGauge->Create();
+$ringGauge->SetTestProperty('Sources', $multiSources);
+$ringGauge->SetTestProperty('EnableIPSView', true);
+foreach (['ring-grid', 'ring-concentric'] as $ringPreset) {
+    $ringGauge->SetTestProperty('GaugePreset', $ringPreset);
+    $ringGauge->ApplyChanges();
+    assertGatewayGauge($ringGauge->GetTestStatus() === IS_ACTIVE, 'Gauge Multi must accept both ring presets.');
+    $ringData = json_decode($ringGauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
+    assertGatewayGauge(
+        ($ringData['gauge']['preset'] ?? null) === $ringPreset
+            && ($ringData['items'][0]['gauge']['minimum'] ?? null) === -20.0
+            && ($ringData['items'][1]['gauge']['maximum'] ?? null) === 100.0,
+        'Ring presets must preserve the per-source Gauge contract.'
+    );
+    assertGatewayGauge(
+        str_contains($ringGauge->GetVisualizationTile(), '"preset":"' . $ringPreset . '"')
+            && str_contains($ringGauge->GetIPSViewHTML(), '"preset":"' . $ringPreset . '"'),
+        'Both output adapters must receive the selected ring preset.'
+    );
+    $ringForm = json_decode($ringGauge->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+    $ringPreview = $ringForm['elements'][4]['items'][5]['image'] ?? '';
+    assertGatewayGauge(
+        is_string($ringPreview) && str_starts_with($ringPreview, 'data:image/svg+xml;base64,')
+            && str_contains(
+                (string) base64_decode(substr($ringPreview, strlen('data:image/svg+xml;base64,')), true),
+                'data-preset="' . $ringPreset . '"'
+            ),
+        'Ring presets must provide an SVG form preview.'
+    );
+}
+$ringGauge->SetTestProperty('IPSViewUseTileDesign', false);
+$ringGauge->SetTestProperty('IPSViewGaugePreset', 'ring-grid');
+assertGatewayGauge(
+    str_contains($ringGauge->GetVisualizationTile(), '"preset":"ring-concentric"')
+        && str_contains($ringGauge->GetIPSViewHTML(), '"preset":"ring-grid"'),
+    'An independent IPSView ring preset must not change the tile preset.'
+);
+
 $multiTile = $multiGauge->GetVisualizationTile();
 $multiGauge->SetTestProperty('EChartsTheme', 'vintage');
 $inheritedMultiIPSView = $multiGauge->GetIPSViewHTML();
