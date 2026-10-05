@@ -284,6 +284,10 @@
                                             "value": "ring"
                                         },
                                         {
+                                            "caption": "Custom SVG",
+                                            "value": "custom"
+                                        },
+                                        {
                                             "caption": "Hidden",
                                             "value": "none"
                                         }
@@ -299,8 +303,15 @@
                             "width": "540px"
                         },
                         {
+                            "type": "SelectFile",
+                            "name": "CustomAnchorSVG",
+                            "caption": "Custom hub SVG",
+                            "extensions": ".svg",
+                            "width": "540px"
+                        },
+                        {
                             "type": "Label",
-                            "caption": "SVG pointer files are sanitized and converted to an ECharts path. The same pointer is used for every Gauge in this output."
+                            "caption": "SVG pointer and hub files are sanitized and converted to ECharts paths. The same assets are used for every Gauge in this output."
                         },
                         {
                             "type": "RowLayout",

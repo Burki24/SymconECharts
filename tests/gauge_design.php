@@ -28,6 +28,15 @@ assertGaugeDesign(
     'The shared Gauge pointer import contract changed.'
 );
 
+$anchor = EChartsGaugeDesign::ImportAnchor(
+    '<svg viewBox="0 0 100 100"><path d="M50 0L100 50L50 100L0 50Z"/></svg>'
+);
+assertGaugeDesign(
+    $anchor['anchorPath'] === 'M50 0L100 50L50 100L0 50Z'
+        && $anchor['anchorViewBox'] === '0 0 100 100',
+    'The shared Gauge anchor import contract changed.'
+);
+
 $background = EChartsGaugeDesign::ImportPlateBackground(
     '<svg viewBox="0 0 200 100"><rect width="200" height="100" fill="#123456"/></svg>',
     'contain',
@@ -65,6 +74,8 @@ $sourceStyle = EChartsGaugeDesign::StyleFromSource(array_merge($sourceDefaults, 
     'CustomPointerPivotMode'     => 'custom',
     'CustomPointerPivotXPercent' => 25.0,
     'CustomPointerPivotYPercent' => 75.0,
+    'AnchorShape'                => 'custom',
+    'CustomAnchorSVG'            => '<svg viewBox="0 0 100 100"><path d="M50 0L100 50L50 100L0 50Z"/></svg>',
     'PlateDesignMode'            => 'custom',
     'PlateBackgroundEnabled'     => true,
     'PlateBackgroundSVG'         => '<svg viewBox="0 0 200 100"><rect width="200" height="100"/></svg>',
@@ -76,6 +87,8 @@ $ipsViewSourceStyle = EChartsGaugeDesign::StyleFromSource([
 ], 'IPSView');
 assertGaugeDesign(
     ($sourceStyle['pointerPivotX'] ?? null) === 20.0
+        && ($sourceStyle['anchorPath'] ?? null) === 'M50 0L100 50L50 100L0 50Z'
+        && ($sourceStyle['anchorViewBox'] ?? null) === '0 0 100 100'
         && ($sourceStyle['plateMode'] ?? null) === 'custom'
         && ($sourceStyle['plateBackgroundAspectRatio'] ?? null) === 2.0
         && ($ipsViewSourceStyle['pointerShape'] ?? null) === 'line'
@@ -85,6 +98,9 @@ assertGaugeDesign(
 
 foreach ([
     static fn (): array => EChartsGaugeDesign::ImportPointer('<svg/>', 'invalid'),
+    static fn (): array => EChartsGaugeDesign::ImportAnchor(
+        '<svg viewBox="0 0 10 10"><script>alert(1)</script><path d="M0 0L10 10Z"/></svg>'
+    ),
     static fn (): array => EChartsGaugeDesign::ImportPointer(
         '<svg viewBox="0 0 10 10"><path d="M0 0L10 10Z"/></svg>',
         'custom',

@@ -317,9 +317,11 @@ const hiddenChronograph = render('symcon', 720, 560, 3, 'Climate', 'chronograph'
 assert.equal(hiddenChronograph.graphic.length, 0, 'Hidden plates must remove every chronograph bezel.');
 
 const individualChronograph = render('symcon', 720, 560, 3, 'Climate', 'chronograph', true, {}, [{
-    colorMode: 'custom', pointerColor: '#010203', plateMode: 'hidden'
+    colorMode: 'custom', pointerColor: '#010203', plateMode: 'hidden',
+    anchorShape: 'custom', anchorPath: 'M50 0L100 50L50 100L0 50Z'
 }]);
 assert.equal(individualChronograph.series[0].pointer.itemStyle.color, '#010203');
+assert.equal(individualChronograph.series[0].anchor.icon, 'path://M50 0L100 50L50 100L0 50Z');
 assert.notEqual(individualChronograph.series[1].pointer.itemStyle.color, '#010203');
 assert.ok(!individualChronograph.graphic.some(element => element.id === 'chronograph-main-bezel'));
 assert.ok(individualChronograph.graphic.some(element => element.id === 'chronograph-sub-bezel-variable-1'));

@@ -1533,6 +1533,8 @@ $individualSources[0] = array_merge($individualSources[0], [
     'CustomPointerPivotMode'     => 'custom',
     'CustomPointerPivotXPercent' => 40.0,
     'CustomPointerPivotYPercent' => 90.0,
+    'AnchorShape'                => 'custom',
+    'CustomAnchorSVG'            => $multiPointerSvg,
     'PlateDesignMode'            => 'custom',
     'PlateBackgroundEnabled'     => true,
     'PlateBackgroundSVG'         => $multiPlateSvg,
@@ -1548,18 +1550,26 @@ foreach ([
     $dedicatedGauge = new $dedicatedClass();
     $dedicatedGauge->Create();
     $dedicatedGauge->SetTestProperty('Sources', json_encode($individualSources, JSON_THROW_ON_ERROR));
+    $dedicatedGauge->SetTestProperty('AnchorShape', 'custom');
+    $dedicatedGauge->SetTestProperty('CustomAnchorSVG', $multiPointerSvg);
     $dedicatedGauge->SetTestProperty('IPSViewUseTileDesign', false);
+    $dedicatedGauge->SetTestProperty('IPSViewAnchorShape', 'custom');
+    $dedicatedGauge->SetTestProperty('IPSViewCustomAnchorSVG', $multiPointerSvg);
     $dedicatedGauge->ApplyChanges();
     assertGatewayGauge($dedicatedGauge->GetTestStatus() === IS_ACTIVE, $dedicatedClass . ' must accept two sources.');
     $dedicatedData = json_decode($dedicatedGauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
     assertGatewayGauge(
         ($dedicatedData['variant'] ?? null) === $contract['variant']
-            && ($dedicatedData['gauge']['preset'] ?? null) === $contract['preset'],
+            && ($dedicatedData['gauge']['preset'] ?? null) === $contract['preset']
+            && ($dedicatedData['gauge']['style']['anchorPath'] ?? null) !== ''
+            && ($dedicatedData['gauge']['style']['anchorViewBox'] ?? null) === '22 0 56 397',
         $dedicatedClass . ' must expose its fixed layout contract.'
     );
     assertGatewayGauge(
         ($dedicatedData['items'][0]['style']['pointerShape'] ?? null) === 'custom'
             && ($dedicatedData['items'][0]['style']['pointerViewBox'] ?? null) === '22 0 56 397'
+            && ($dedicatedData['items'][0]['style']['anchorShape'] ?? null) === 'custom'
+            && ($dedicatedData['items'][0]['style']['anchorViewBox'] ?? null) === '22 0 56 397'
             && ($dedicatedData['items'][0]['style']['plateBackgroundFit'] ?? null) === 'contain'
             && ($dedicatedData['items'][1]['style'] ?? null) === [],
         $dedicatedClass . ' must attach individual SVG design only to the configured source.'
@@ -1582,6 +1592,7 @@ foreach ([
         str_contains($dedicatedFormJson, '"form":[')
             && str_contains($dedicatedFormJson, 'UseIndividualDesign')
             && str_contains($dedicatedFormJson, 'CustomPointerSVG')
+            && str_contains($dedicatedFormJson, 'CustomAnchorSVG')
             && str_contains($dedicatedFormJson, 'PlateBackgroundSVG')
             && str_contains($dedicatedFormJson, '_UpdateGaugePreviewSourceFromForm')
             && !str_contains($dedicatedFormJson, '"name":"GaugePreset"')
@@ -1603,7 +1614,9 @@ foreach ([
         true
     );
     assertGatewayGauge(
-        is_string($sourceTilePreview) && str_contains($sourceTilePreview, '<polygon points="'),
+        is_string($sourceTilePreview)
+            && str_contains($sourceTilePreview, '<polygon points="')
+            && str_contains($sourceTilePreview, 'data-anchor-shape="custom"'),
         $dedicatedClass . ' must refresh its preview when an individual source design is confirmed.'
     );
 }

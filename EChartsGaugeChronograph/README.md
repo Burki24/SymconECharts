@@ -14,8 +14,8 @@ Der Kacheldesigner definiert das gemeinsame Grunddesign. Im Dialog einer
 Quellenzeile kann **Individuelles Gauge-Design** aktiviert werden. Für dieses
 Instrument lassen sich Zeiger und Nabe, Skala und Schrift, Farbrollen sowie
 Zifferblatt und Kontur abweichend gestalten. Eigene SVG-Zeiger mit justierbarem
-Drehpunkt und zugeschnittene SVG-Zifferblattmotive werden über die zentralen,
-validierten ECharts-Importadapter verarbeitet. Die Designwerte gehören zur
+Drehpunkt, eigene SVG-Naben und zugeschnittene SVG-Zifferblattmotive werden
+über die zentralen, validierten ECharts-Importadapter verarbeitet. Die Designwerte gehören zur
 Quellenzeile und bleiben auch nach einer Umsortierung dem Instrument zugeordnet.
 Für das unabhängige IPSView-Grunddesign kann jede Quelle ihr Kacheldesign
 übernehmen oder eine eigene individuelle IPSView-Variante speichern.

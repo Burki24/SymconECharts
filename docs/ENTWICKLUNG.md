@@ -43,7 +43,8 @@ Vorlage responsive native Kacheln für 2 bis 16 Quellen. Seine gemeinsame
 Designschicht steuert Zeiger, Naben, Skalenunterteilungen, Farbrollen und
 Zifferblattplatten für alle Instrumente einer Ausgabe. Tacho und Chronograph
 sind eigenständige Module für 2 bis 5 Quellen. Dort können einzelne Quellen
-das Grunddesign einschließlich SVG-Zeiger und SVG-Zifferblatt überschreiben.
+das Grunddesign einschließlich SVG-Zeiger, SVG-Nabe und SVG-Zifferblatt
+überschreiben.
 Alle Gauge-Module erzeugen optional
 eine IPSView-WebContent-Variable mit vererbtem oder unabhängigem Design auf
 demselben Renderer. Weitere klassische Multi-Instrumentenpanel-Vorlagen,

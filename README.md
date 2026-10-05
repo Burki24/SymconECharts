@@ -81,7 +81,7 @@ Skalenunterteilungen, Farbrollen und Zifferblattplatten einschließlich
 bereinigtem SVG-Hintergrund
 für alle Instrumente einer Ausgabe. Tacho und Chronograph sind eigenständige
 Module für jeweils 2 bis 5 Quellen und ergänzen diese Basis um quellbezogene
-Designüberschreibungen einschließlich SVG-Zeiger und SVG-Zifferblatt. Archivverarbeitung
+Designüberschreibungen einschließlich SVG-Zeiger, SVG-Nabe und SVG-Zifferblatt. Archivverarbeitung
 und weitere klassische Instrumentenpanel-Vorlagen sind noch nicht implementiert.
 Alle Gauge-Module besitzen optionale IPSView-WebContent-Ausgaben und können
 ihr Kacheldesign erben oder unabhängig gestaltet werden. Der reale

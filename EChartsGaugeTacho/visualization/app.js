@@ -182,6 +182,12 @@
                     series.anchor.itemStyle.color = colors.background;
                     series.anchor.itemStyle.borderWidth = Math.max(2, series.anchor.itemStyle.borderWidth);
                 }
+            } else if (style.anchorShape === 'custom') {
+                var anchorPath = typeof style.anchorPath === 'string' ? style.anchorPath.trim() : '';
+                series.anchor.show = !!anchorPath && /^[MmZzLlHhVvCcSsQqTtAa0-9eE+.,\-\s]+$/.test(anchorPath);
+                if (series.anchor.show) {
+                    series.anchor.icon = 'path://' + anchorPath;
+                }
             }
         }
 

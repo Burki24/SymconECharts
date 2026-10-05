@@ -82,6 +82,7 @@ class EChartsGaugeChronograph extends IPSModuleStrict
     private const DESIGN_ASSET_STRING_DEFAULTS = [
         'CustomPointerSVG'       => '',
         'CustomPointerPivotMode' => 'svg',
+        'CustomAnchorSVG'        => '',
         'PlateBackgroundSVG'     => '',
         'PlateBackgroundFit'     => 'cover'
     ];
@@ -564,7 +565,7 @@ class EChartsGaugeChronograph extends IPSModuleStrict
         }
 
         if (!in_array($this->ReadPropertyString($prefix . 'PointerShape'), EChartsGaugeDesign::POINTER_SHAPES, true)
-            || !in_array($this->ReadPropertyString($prefix . 'AnchorShape'), ['preset', 'circle', 'ring', 'none'], true)
+            || !in_array($this->ReadPropertyString($prefix . 'AnchorShape'), ['preset', 'circle', 'ring', 'custom', 'none'], true)
             || !in_array($this->ReadPropertyString($prefix . 'GaugeColorMode'), ['theme', 'custom'], true)
             || !in_array($this->ReadPropertyString($prefix . 'PlateDesignMode'), ['preset', 'custom', 'hidden'], true)
             || !in_array(
@@ -605,6 +606,14 @@ class EChartsGaugeChronograph extends IPSModuleStrict
                     $this->ReadPropertyFloat($prefix . 'CustomPointerPivotXPercent'),
                     $this->ReadPropertyFloat($prefix . 'CustomPointerPivotYPercent')
                 );
+            } catch (InvalidArgumentException $exception) {
+                return $exception->getMessage();
+            }
+        }
+
+        if ($this->ReadPropertyString($prefix . 'AnchorShape') === 'custom') {
+            try {
+                EChartsGaugeDesign::ImportAnchor($this->ReadPropertyString($prefix . 'CustomAnchorSVG'));
             } catch (InvalidArgumentException $exception) {
                 return $exception->getMessage();
             }
@@ -1211,6 +1220,8 @@ class EChartsGaugeChronograph extends IPSModuleStrict
             $this->ReadPropertyString($prefix . 'CustomPointerPivotMode'),
             $this->ReadPropertyFloat($prefix . 'CustomPointerPivotXPercent'),
             $this->ReadPropertyFloat($prefix . 'CustomPointerPivotYPercent'),
+            $this->ReadPropertyString($prefix . 'AnchorShape'),
+            $this->ReadPropertyString($prefix . 'CustomAnchorSVG'),
             $this->ReadPropertyBoolean($prefix . 'PlateBackgroundEnabled'),
             $this->ReadPropertyString($prefix . 'PlateBackgroundSVG'),
             $this->ReadPropertyString($prefix . 'PlateBackgroundFit'),
@@ -1255,6 +1266,8 @@ class EChartsGaugeChronograph extends IPSModuleStrict
             (string) ($values[$prefix . 'CustomPointerPivotMode'] ?? $this->ReadPropertyString($prefix . 'CustomPointerPivotMode')),
             (float) ($values[$prefix . 'CustomPointerPivotXPercent'] ?? $this->ReadPropertyFloat($prefix . 'CustomPointerPivotXPercent')),
             (float) ($values[$prefix . 'CustomPointerPivotYPercent'] ?? $this->ReadPropertyFloat($prefix . 'CustomPointerPivotYPercent')),
+            (string) ($values[$prefix . 'AnchorShape'] ?? $this->ReadPropertyString($prefix . 'AnchorShape')),
+            (string) ($values[$prefix . 'CustomAnchorSVG'] ?? $this->ReadPropertyString($prefix . 'CustomAnchorSVG')),
             (bool) ($values[$prefix . 'PlateBackgroundEnabled'] ?? $this->ReadPropertyBoolean($prefix . 'PlateBackgroundEnabled')),
             (string) ($values[$prefix . 'PlateBackgroundSVG'] ?? $this->ReadPropertyString($prefix . 'PlateBackgroundSVG')),
             (string) ($values[$prefix . 'PlateBackgroundFit'] ?? $this->ReadPropertyString($prefix . 'PlateBackgroundFit')),
@@ -1273,6 +1286,8 @@ class EChartsGaugeChronograph extends IPSModuleStrict
         string $pointerPivotMode,
         float $pointerPivotXPercent,
         float $pointerPivotYPercent,
+        string $anchorShape,
+        string $anchorFileData,
         bool $plateBackgroundEnabled,
         string $plateBackgroundFileData,
         string $plateBackgroundFit,
@@ -1297,6 +1312,19 @@ class EChartsGaugeChronograph extends IPSModuleStrict
                     'pointerPath'    => '',
                     'pointerViewBox' => '',
                     'pointerError'   => $exception->getMessage()
+                ];
+            }
+        }
+        if ($anchorShape === 'custom') {
+            try {
+                $style = array_merge($style, EChartsGaugeDesign::ImportAnchor($anchorFileData));
+            } catch (InvalidArgumentException $exception) {
+                $this->SendDebug('ResolveCustomAnchorStyle', $exception->getMessage(), 0);
+                $style = [
+                    ...$style,
+                    'anchorPath'    => '',
+                    'anchorViewBox' => '',
+                    'anchorError'   => $exception->getMessage()
                 ];
             }
         }

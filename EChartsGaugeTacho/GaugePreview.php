@@ -391,6 +391,24 @@ final class EChartsGaugeTachoPreview
         $anchorRadius = max(4.0, $radius * 0.07) * self::Scale($style, 'anchorSizePercent');
         $borderWidth = max(1.0, $radius * 0.01) * self::Scale($style, 'anchorBorderWidthPercent');
 
+        if ($anchorShape === 'custom') {
+            $anchorPath = trim((string) ($style['anchorPath'] ?? ''));
+            $anchorViewBox = trim((string) ($style['anchorViewBox'] ?? ''));
+            if ($anchorPath === '' || $anchorViewBox === ''
+                || preg_match('/^[MmZzLlHhVvCcSsQqTtAa0-9eE+.,\-\s]+$/D', $anchorPath) !== 1) {
+                return $pointer;
+            }
+            $anchorSize = $anchorRadius * 2.0;
+
+            return $pointer . '<svg x="' . self::N($x - $anchorRadius) . '" y="' . self::N($y - $anchorRadius)
+                . '" width="' . self::N($anchorSize) . '" height="' . self::N($anchorSize)
+                . '" viewBox="' . SVGPreviewHelper::escape($anchorViewBox)
+                . '" preserveAspectRatio="xMidYMid meet" overflow="visible"><path d="'
+                . SVGPreviewHelper::escape($anchorPath) . '" fill="' . SVGPreviewHelper::escape($anchorColor)
+                . '" stroke="' . SVGPreviewHelper::escape($anchorBorder) . '" stroke-width="'
+                . self::N($borderWidth) . '" vector-effect="non-scaling-stroke" data-anchor-shape="custom"/></svg>';
+        }
+
         return $pointer . '<circle cx="' . self::N($x) . '" cy="' . self::N($y)
             . '" r="' . self::N($anchorRadius) . '" fill="'
             . ($anchorShape === 'ring' ? 'none' : SVGPreviewHelper::escape($anchorColor))

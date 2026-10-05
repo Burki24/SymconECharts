@@ -30,8 +30,9 @@ Tacho- oder Chronograph-Konfigurationen ist daher nicht erforderlich.
   weiteren Quellen bestimmt die Nebeninstrumente.
 - Das gemeinsame Moduldesign bleibt die Basis. Eine Quellenzeile kann eine
   individuelle Überschreibung für Zeiger, Nabe, Skala, Farben und Zifferblatt
-  aktivieren. SVG-Zeiger und SVG-Zifferblatt werden mit denselben zentralen,
-  validierten Importadaptern wie die übrigen Gauge-Module verarbeitet.
+  aktivieren. SVG-Zeiger, SVG-Naben und SVG-Zifferblätter werden mit denselben
+  zentralen, validierten Importadaptern wie die übrigen Gauge-Module
+  verarbeitet.
 - Bei unabhängigem IPSView-Grunddesign kann jede Quelle ihr Kacheldesign
   übernehmen oder eine eigene IPSView-Überschreibung verwenden.
 - Die Designwerte werden in der Quellenzeile gespeichert, damit sie beim

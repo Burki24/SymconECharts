@@ -516,9 +516,19 @@ foreach ([
             }
         };
         $findMultiDesignerElements($gaugeForm['elements'] ?? []);
-        foreach ([
+        $supportsCustomAnchor = in_array(
+            $gaugeModuleName,
+            ['EChartsGaugeTacho', 'EChartsGaugeChronograph'],
+            true
+        );
+        $designerContracts = [
             'PointerShape'            => ['type' => 'Select', 'values' => ['preset', 'needle', 'line', 'arrow', 'custom']],
-            'AnchorShape'             => ['type' => 'Select', 'values' => ['preset', 'circle', 'ring', 'none']],
+            'AnchorShape'             => [
+                'type'   => 'Select',
+                'values' => $supportsCustomAnchor
+                    ? ['preset', 'circle', 'ring', 'custom', 'none']
+                    : ['preset', 'circle', 'ring', 'none']
+            ],
             'GaugeColorMode'          => ['type' => 'Select', 'values' => ['theme', 'custom']],
             'PlateDesignMode'         => ['type' => 'Select', 'values' => ['preset', 'custom', 'hidden']],
             'PointerColor'            => ['type' => 'SelectColor'],
@@ -530,7 +540,11 @@ foreach ([
             'PlateBackgroundEnabled'  => ['type' => 'CheckBox'],
             'PlateBackgroundSVG'      => ['type' => 'SelectFile'],
             'PlateBackgroundFit'      => ['type' => 'Select', 'values' => ['contain', 'cover', 'stretch']]
-        ] as $designerName => $contract) {
+        ];
+        if ($supportsCustomAnchor) {
+            $designerContracts['CustomAnchorSVG'] = ['type' => 'SelectFile'];
+        }
+        foreach ($designerContracts as $designerName => $contract) {
             $designerElement = $multiDesignerElements[$designerName] ?? null;
             $valid = is_array($designerElement) && ($designerElement['type'] ?? null) === $contract['type'];
             if (isset($contract['values'])) {
@@ -538,7 +552,7 @@ foreach ([
             }
             requireStrictContract(
                 $valid,
-                'EChartsGaugeMulti shared designer contract is invalid for ' . $designerName . '.',
+                $gaugeModuleName . ' shared designer contract is invalid for ' . $designerName . '.',
                 $errors
             );
         }

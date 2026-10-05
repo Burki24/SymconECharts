@@ -26,7 +26,8 @@ final class EChartsGaugeDesign
         'PointerShape'                  => 'preset', 'PointerWidthPercent' => 100, 'PointerLengthPercent' => 100,
         'CustomPointerSVG'              => '', 'CustomPointerPivotMode' => 'svg',
         'CustomPointerPivotXPercent'    => 50.0, 'CustomPointerPivotYPercent' => 100.0,
-        'AnchorShape'                   => 'preset', 'AnchorSizePercent' => 100, 'AnchorBorderWidthPercent' => 100,
+        'AnchorShape'                   => 'preset', 'CustomAnchorSVG' => '',
+        'AnchorSizePercent'             => 100, 'AnchorBorderWidthPercent' => 100,
         'GaugeColorMode'                => 'theme', 'PointerColor' => 0x55CBB5, 'AnchorColor' => 0x55CBB5,
         'AnchorBorderColor'             => 0xF4F5F7, 'RingColor' => 0x45474C, 'ScaleColor' => 0xA7A9AE,
         'ValueColor'                    => 0xF4F5F7, 'TitleColor' => 0xA7A9AE, 'ProgressColor' => 0x55CBB5,
@@ -103,10 +104,11 @@ final class EChartsGaugeDesign
             ['type' => 'ExpansionPanel', 'caption' => 'Pointer and anchor', 'expanded' => false, 'items' => [
                 ['type' => 'RowLayout', 'items' => [
                     ['type' => 'Select', 'name' => 'PointerShape', 'caption' => 'Pointer shape', 'options' => self::Options(['preset', 'needle', 'line', 'arrow', 'custom'])],
-                    ['type' => 'Select', 'name' => 'AnchorShape', 'caption' => 'Hub design', 'options' => self::Options(['preset', 'circle', 'ring', 'none'])]
+                    ['type' => 'Select', 'name' => 'AnchorShape', 'caption' => 'Hub design', 'options' => self::Options(['preset', 'circle', 'ring', 'custom', 'none'])]
                 ]],
                 ['type' => 'RowLayout', 'items' => [$percent('PointerWidthPercent', 'Pointer width'), $percent('PointerLengthPercent', 'Pointer length')]],
                 ['type' => 'SelectFile', 'name' => 'CustomPointerSVG', 'caption' => 'Custom pointer SVG', 'extensions' => '.svg'],
+                ['type' => 'SelectFile', 'name' => 'CustomAnchorSVG', 'caption' => 'Custom hub SVG', 'extensions' => '.svg'],
                 ['type' => 'RowLayout', 'items' => [
                     ['type' => 'Select', 'name' => 'CustomPointerPivotMode', 'caption' => 'SVG pivot', 'options' => self::Options(['svg', 'custom'])],
                     ['type' => 'NumberSpinner', 'name' => 'CustomPointerPivotXPercent', 'caption' => 'Pivot X', 'minimum' => 0, 'maximum' => 100, 'digits' => 1, 'suffix' => ' %'],
@@ -167,7 +169,7 @@ final class EChartsGaugeDesign
             $values[$name] = $source[$prefix . $name] ?? $default;
         }
         if (!in_array($values['PointerShape'], self::POINTER_SHAPES, true)
-            || !in_array($values['AnchorShape'], ['preset', 'circle', 'ring', 'none'], true)
+            || !in_array($values['AnchorShape'], ['preset', 'circle', 'ring', 'custom', 'none'], true)
             || !in_array($values['GaugeColorMode'], ['theme', 'custom'], true)
             || !in_array($values['PlateDesignMode'], ['preset', 'custom', 'hidden'], true)) {
             throw new \InvalidArgumentException('The selected individual Gauge element design is not supported.');
@@ -188,6 +190,7 @@ final class EChartsGaugeDesign
         $style = [];
         foreach ($values as $name => $value) {
             if ($name === 'UseIndividualDesign' || str_starts_with($name, 'CustomPointer')
+                || $name === 'CustomAnchorSVG'
                 || str_starts_with($name, 'PlateBackground')) {
                 continue;
             }
@@ -211,6 +214,9 @@ final class EChartsGaugeDesign
                 (float) $values['CustomPointerPivotYPercent']
             ));
         }
+        if ((string) $values['AnchorShape'] === 'custom') {
+            $style = array_merge($style, self::ImportAnchor((string) $values['CustomAnchorSVG']));
+        }
         if ((bool) $values['PlateBackgroundEnabled']) {
             $style = array_merge($style, self::ImportPlateBackground(
                 (string) $values['PlateBackgroundSVG'],
@@ -229,6 +235,17 @@ final class EChartsGaugeDesign
     public static function ColorToHex(int $color): string
     {
         return sprintf('#%06X', max(0, min(0xFFFFFF, $color)));
+    }
+
+    /** @return array{anchorPath: string, anchorViewBox: string} */
+    public static function ImportAnchor(string $fileData): array
+    {
+        $anchor = EChartsSvgPath::Import($fileData);
+
+        return [
+            'anchorPath'    => $anchor['path'],
+            'anchorViewBox' => $anchor['viewBox']
+        ];
     }
 
     /**
