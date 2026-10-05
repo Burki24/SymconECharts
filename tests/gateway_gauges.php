@@ -1330,12 +1330,18 @@ $multiGauge = new EChartsGaugeMulti();
 $multiGauge->Create();
 $multiGauge->SetTestProperty('Sources', $multiSources);
 $multiGauge->SetTestProperty('Title', 'Room climate');
+$multiGauge->SetTestProperty('EnableIPSView', true);
 $multiGauge->ApplyChanges();
 
 assertGatewayGauge($multiGauge->GetTestStatus() === IS_ACTIVE, 'Gauge Multi must become active with two valid sources.');
 assertGatewayGauge($multiGauge->GetTestReferences() === [4711, 4713], 'Gauge Multi must register every source reference.');
 assertGatewayGauge($multiGauge->GetTestSummary() === '2 sources', 'Gauge Multi summary must identify its source count.');
 assertGatewayGauge($multiGauge->GetTestVisualizationType() === 1, 'Gauge Multi must expose an HTML-SDK tile.');
+assertGatewayGauge(
+    is_string($multiGauge->GetTestVariableValue('IPSViewGauge'))
+        && str_contains($multiGauge->GetTestVariableValue('IPSViewGauge'), '"mode":"ipsview"'),
+    'Enabled Gauge Multi IPSView output must maintain and populate its WebContent variable.'
+);
 assertGatewayGauge(
     in_array(['SenderID' => 4711, 'Message' => VM_UPDATE], $multiGauge->GetTestMessages(), true)
         && in_array(['SenderID' => 4713, 'Message' => VM_UPDATE], $multiGauge->GetTestMessages(), true),
@@ -1360,6 +1366,32 @@ assertGatewayGauge(
 assertGatewayGauge(($multiData['items'][1]['value'] ?? null) === 58.0, 'Gauge Multi second value changed.');
 
 $multiTile = $multiGauge->GetVisualizationTile();
+$multiGauge->SetTestProperty('EChartsTheme', 'vintage');
+$inheritedMultiIPSView = $multiGauge->GetIPSViewHTML();
+assertGatewayGauge(
+    str_contains($inheritedMultiIPSView, '"theme":"vintage"')
+        && str_contains($inheritedMultiIPSView, '"preset":"multi-title"'),
+    'Gauge Multi IPSView must inherit the tile design by default.'
+);
+assertGatewayGauge(
+    strlen($inheritedMultiIPSView) < SYMCON_OUTPUT_BUFFER_LIMIT,
+    'Gauge Multi IPSView HTML must remain below the Symcon output-buffer limit.'
+);
+$multiGauge->SetTestProperty('IPSViewUseTileDesign', false);
+$multiGauge->SetTestProperty('IPSViewEChartsTheme', 'roma');
+$multiGauge->SetTestProperty('IPSViewRingWidthPercent', 125);
+$independentMultiIPSView = $multiGauge->GetIPSViewHTML();
+assertGatewayGauge(
+    str_contains($independentMultiIPSView, '"theme":"roma"')
+        && str_contains($independentMultiIPSView, '"ringWidthPercent":125'),
+    'Gauge Multi IPSView must render its independent design.'
+);
+assertGatewayGauge(
+    str_contains($multiGauge->GetVisualizationTile(), '"theme":"vintage"')
+        && str_contains($multiGauge->GetVisualizationTile(), '"ringWidthPercent":100'),
+    'Independent IPSView settings must not change the Gauge Multi tile.'
+);
+$multiGauge->SetTestProperty('IPSViewUseTileDesign', true);
 assertGatewayGauge(str_contains($multiTile, 'window.echarts'), 'Gauge Multi tile must embed Apache ECharts.');
 assertGatewayGauge(str_contains($multiTile, 'echarts-gauge-chart'), 'Gauge Multi tile root is missing.');
 assertGatewayGauge(str_contains($multiTile, '"preset":"multi-title"'), 'Gauge Multi tile must receive its preset.');
@@ -1387,12 +1419,39 @@ assertGatewayGauge(
         && str_contains($multiFormJson, 'data:image\\/svg+xml;base64,'),
     'Gauge Multi form must expose a collapsed designer with an SVG preview.'
 );
+assertGatewayGauge(
+    str_contains($multiFormJson, '"caption":"IPSView design","expanded":false')
+        && str_contains($multiFormJson, '"name":"EnableIPSView"')
+        && str_contains($multiFormJson, '"name":"IPSViewUseTileDesign"')
+        && str_contains($multiFormJson, '"name":"IPSViewEChartsTheme"')
+        && str_contains($multiFormJson, '"name":"IPSViewGaugePreview"'),
+    'Gauge Multi form must expose the helper-backed independent IPSView designer.'
+);
+assertGatewayGauge(
+    strlen($multiGauge->GetConfigurationForm()) < SYMCON_OUTPUT_BUFFER_LIMIT,
+    'Gauge Multi form must remain below the Symcon output-buffer limit.'
+);
+$multiIPSViewBeforeUpdate = $multiGauge->GetTestVariableValue('IPSViewGauge');
 $multiUpdateCount = count($multiGauge->GetTestVisualizationUpdates());
+$GLOBALS['symconTestVariables'][4711]['Value'] = 43.5;
 $multiGauge->MessageSink(1780000200, 4711, VM_UPDATE, []);
 assertGatewayGauge(
     count($multiGauge->GetTestVisualizationUpdates()) === $multiUpdateCount + 1,
     'Gauge Multi must publish a fresh visualization state when a source changes.'
 );
+assertGatewayGauge(
+    $multiGauge->GetTestVariableValue('IPSViewGauge') !== $multiIPSViewBeforeUpdate
+        && str_contains($multiGauge->GetTestVariableValue('IPSViewGauge'), '"value":43.5'),
+    'Gauge Multi must refresh IPSView HTML when a source changes.'
+);
+$retainedMultiIPSView = $multiGauge->GetTestVariableValue('IPSViewGauge');
+$multiGauge->SetTestProperty('EnableIPSView', false);
+$multiGauge->ApplyChanges();
+assertGatewayGauge(
+    $multiGauge->GetTestVariableValue('IPSViewGauge') === $retainedMultiIPSView,
+    'Disabling Gauge Multi IPSView must retain the existing WebContent variable.'
+);
+$GLOBALS['symconTestVariables'][4711]['Value'] = 42.5;
 
 $presentedMultiGauge = new EChartsGaugeMulti();
 $presentedMultiGauge->Create();
@@ -1417,6 +1476,10 @@ $presentedMultiGauge->SetTestProperty('Sources', json_encode([
     ]
 ], JSON_THROW_ON_ERROR));
 $presentedMultiGauge->ApplyChanges();
+assertGatewayGauge(
+    $presentedMultiGauge->GetTestVariableValue('IPSViewGauge') === null,
+    'Gauge Multi must not create an IPSView output variable by default.'
+);
 $presentedMultiData = json_decode($presentedMultiGauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
     ($presentedMultiData['items'][0]['gauge'] ?? null) === [

@@ -64,7 +64,8 @@ Standarddarstellung.
 Gauge Multi verwaltet eine geordnete Quellenliste, liefert ein versioniertes
 Multi-Modell und rendert die Quellen als responsive Multi-Title-Kachel.
 Archivverarbeitung sowie weitere Multi-Vorlagen sind noch nicht implementiert.
-Gauge Single besitzt eine optionale IPSView-WebContent-Ausgabe; der reale
+Gauge Single und Gauge Multi besitzen optionale IPSView-WebContent-Ausgaben;
+beide können ihr Kacheldesign erben oder unabhängig gestaltet werden. Der reale
 IPSView-Laufzeittest bleibt mangels Lizenz eine dokumentierte Testlücke.
 
 Als erste Chartfamilie sind Single- und Multi-Gauges vorgesehen. Eine

@@ -48,6 +48,10 @@ class EChartsGaugeMulti extends IPSModuleStrict
 
     private const PRESET_MULTI_TITLE = 'multi-title';
     private const SUPPORTED_PRESETS = [self::PRESET_MULTI_TITLE];
+    private const IPSVIEW_OUTPUT_IDENT = 'IPSViewGauge';
+    private const DESIGN_SCALE_PROPERTIES = [
+        'RingWidthPercent', 'ScaleFontSizePercent', 'ValueFontSizePercent', 'TitleFontSizePercent'
+    ];
 
     public function Create(): void
     {
@@ -63,6 +67,13 @@ class EChartsGaugeMulti extends IPSModuleStrict
         $this->RegisterPropertyInteger('ScaleFontSizePercent', 100);
         $this->RegisterPropertyInteger('ValueFontSizePercent', 100);
         $this->RegisterPropertyInteger('TitleFontSizePercent', 100);
+        $this->RegisterIPSViewHTMLPageProperties();
+        $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
+        $this->RegisterPropertyString('IPSViewGaugePreset', self::PRESET_MULTI_TITLE);
+        $this->RegisterPropertyString('IPSViewEChartsTheme', EChartsAsset::THEME_AUTO);
+        foreach (self::DESIGN_SCALE_PROPERTIES as $name) {
+            $this->RegisterPropertyInteger('IPSView' . $name, 100);
+        }
         $this->RegisterAttributeString('RegisteredSourceVariableIDs', '[]');
         $this->RegisterAttributeString('LastError', '');
     }
@@ -72,9 +83,11 @@ class EChartsGaugeMulti extends IPSModuleStrict
         parent::ApplyChanges();
 
         $this->RegisterMessage(0, IPS_KERNELSTARTED);
+        $this->MaintainIPSViewHTMLVariable(self::IPSVIEW_OUTPUT_IDENT, $this->Translate('Gauge for IPSView'), 90);
         $this->Initialize();
         if (IPS_GetKernelRunlevel() === KR_READY) {
             $this->PublishVisualizationState();
+            $this->PublishIPSViewHTML();
         }
     }
 
@@ -89,6 +102,9 @@ class EChartsGaugeMulti extends IPSModuleStrict
     public function GetConfigurationForm(): string
     {
         $form = $this->LoadConfigurationForm();
+        if (isset($form['elements']) && is_array($form['elements'])) {
+            $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
+        }
         $form = SVGPreviewHelper::withImage(
             $form,
             'GaugePreview',
@@ -98,8 +114,37 @@ class EChartsGaugeMulti extends IPSModuleStrict
                 $this->ReadPropertyString('EChartsTheme')
             )
         );
+        $form = SVGPreviewHelper::withImage(
+            $form,
+            'IPSViewGaugePreview',
+            EChartsGaugeMultiPreview::CreateSvg(
+                $this->PreviewItems(),
+                $this->ReadPropertyString('Title'),
+                $this->EffectiveIPSViewTheme()
+            )
+        );
 
         return $this->EncodeConfigurationForm($form);
+    }
+
+    public function RequestAction(string $Ident, mixed $Value): void
+    {
+        if ($this->HandleIPSViewHTMLPageAction($Ident, $Value)) {
+            return;
+        }
+
+        throw new InvalidArgumentException('Unknown action: ' . $Ident);
+    }
+
+    public function CopyTileDesignToIPSView(): void
+    {
+        IPS_SetProperty($this->InstanceID, 'IPSViewGaugePreset', $this->ReadPropertyString('GaugePreset'));
+        IPS_SetProperty($this->InstanceID, 'IPSViewEChartsTheme', $this->ReadPropertyString('EChartsTheme'));
+        foreach (self::DESIGN_SCALE_PROPERTIES as $name) {
+            IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyInteger($name));
+        }
+        IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
+        IPS_ApplyChanges($this->InstanceID);
     }
 
     public function GetGaugeData(): string
@@ -160,7 +205,17 @@ class EChartsGaugeMulti extends IPSModuleStrict
 
     public function GetVisualizationTile(): string
     {
-        return $this->RenderVisualizationHTMLPage(false, [
+        return $this->RenderGaugeHTMLPage(false);
+    }
+
+    public function GetIPSViewHTML(): string
+    {
+        return $this->RenderGaugeHTMLPage(true);
+    }
+
+    private function RenderGaugeHTMLPage(bool $ipsView): string
+    {
+        return $this->RenderVisualizationHTMLPage($ipsView, [
             'language'           => $this->NormalizeHelperTranslationLanguage(
                 $this->ResolveHelperTranslationLanguage()
             ),
@@ -168,7 +223,8 @@ class EChartsGaugeMulti extends IPSModuleStrict
             'visualizationTheme' => $this->VisualizationThemeCSS()
                 . "\n\n"
                 . $this->ResponsiveVisualizationCSS('#echarts-gauge-root', 'echarts-gauge'),
-            'state'              => $this->BuildVisualizationState(),
+            'ipsViewStyle'       => $ipsView ? $this->IPSViewThemeCSS() : '',
+            'state'              => $this->BuildVisualizationState($ipsView),
             'translations'       => [
                 'Configure 2 to 16 unique numeric sources.' => $this->Translate(
                     'Configure 2 to 16 unique numeric sources.'
@@ -216,12 +272,14 @@ class EChartsGaugeMulti extends IPSModuleStrict
         if ($SenderID === 0 && $Message === IPS_KERNELSTARTED) {
             $this->Initialize();
             $this->PublishVisualizationState();
+            $this->PublishIPSViewHTML();
 
             return;
         }
 
         if ($Message === VM_UPDATE && in_array($SenderID, $this->ConfiguredVariableIDs(), true)) {
             $this->PublishVisualizationState();
+            $this->PublishIPSViewHTML();
         }
     }
 
@@ -289,6 +347,25 @@ class EChartsGaugeMulti extends IPSModuleStrict
                     'Status'  => self::STATUS_DESIGN_INVALID,
                     'Message' => 'Multi Gauge design scale values must be between 50 and 150 percent.'
                 ];
+            }
+        }
+
+        if ($this->IsIPSViewHTMLPageEnabled() && !$this->ReadPropertyBoolean('IPSViewUseTileDesign')) {
+            if (!in_array($this->ReadPropertyString('IPSViewGaugePreset'), self::SUPPORTED_PRESETS, true)
+                || !EChartsAsset::IsSupportedTheme($this->ReadPropertyString('IPSViewEChartsTheme'))) {
+                return [
+                    'Status'  => self::STATUS_DESIGN_INVALID,
+                    'Message' => 'The selected IPSView Multi Gauge design is not supported.'
+                ];
+            }
+            foreach (self::DESIGN_SCALE_PROPERTIES as $name) {
+                $value = $this->ReadPropertyInteger('IPSView' . $name);
+                if ($value < 50 || $value > 150) {
+                    return [
+                        'Status'  => self::STATUS_DESIGN_INVALID,
+                        'Message' => 'IPSView Multi Gauge design scale values must be between 50 and 150 percent.'
+                    ];
+                }
             }
         }
 
@@ -650,7 +727,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
     }
 
     /** @return array<string, mixed> */
-    private function BuildVisualizationState(): array
+    private function BuildVisualizationState(bool $ipsView = false): array
     {
         $configurationError = $this->GetConfigurationError();
         if ($configurationError !== null) {
@@ -678,6 +755,14 @@ class EChartsGaugeMulti extends IPSModuleStrict
 
         try {
             $chart = json_decode($this->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
+            if ($ipsView && !$this->ReadPropertyBoolean('IPSViewUseTileDesign')) {
+                $chart['theme'] = $this->ReadPropertyString('IPSViewEChartsTheme');
+                $chart['gauge']['preset'] = $this->ReadPropertyString('IPSViewGaugePreset');
+                foreach (self::DESIGN_SCALE_PROPERTIES as $name) {
+                    $key = lcfirst($name);
+                    $chart['gauge']['style'][$key] = $this->ReadPropertyInteger('IPSView' . $name);
+                }
+            }
         } catch (Throwable $exception) {
             $this->SendDebug('BuildVisualizationState', $exception::class, 0);
 
@@ -711,5 +796,108 @@ class EChartsGaugeMulti extends IPSModuleStrict
         } catch (Throwable $exception) {
             $this->SendDebug('PublishVisualizationState', $exception::class, 0);
         }
+    }
+
+    private function PublishIPSViewHTML(): void
+    {
+        if (!$this->IsIPSViewHTMLPageEnabled()) {
+            return;
+        }
+
+        try {
+            $this->UpdateIPSViewHTMLVariable(self::IPSVIEW_OUTPUT_IDENT, $this->GetIPSViewHTML());
+        } catch (Throwable $exception) {
+            $this->SendDebug('PublishIPSViewHTML', $exception::class, 0);
+        }
+    }
+
+    private function EffectiveIPSViewTheme(): string
+    {
+        return $this->ReadPropertyBoolean('IPSViewUseTileDesign')
+            ? $this->ReadPropertyString('EChartsTheme')
+            : $this->ReadPropertyString('IPSViewEChartsTheme');
+    }
+
+    private function IPSViewThemeCSS(): string
+    {
+        $palette = EChartsAsset::ThemePreviewPalette($this->EffectiveIPSViewTheme());
+
+        return ':root {'
+            . '--symc-background:' . $palette['background'] . ';'
+            . '--symc-text:' . $palette['text'] . ';'
+            . '--symc-text-muted:' . $palette['muted'] . ';'
+            . '--symc-border:' . $palette['border'] . ';'
+            . '--symc-accent:' . $palette['accent'] . ';'
+            . '--symc-surface:' . $palette['surface'] . ';'
+            . '} html, body { background:' . $palette['background'] . '; }';
+    }
+
+    /** @param list<array<string, mixed>> $elements @return array<string, mixed> */
+    private function BuildIPSViewDesigner(array $elements): array
+    {
+        $tileDesigner = null;
+        foreach ($elements as $element) {
+            if (($element['type'] ?? null) === 'ExpansionPanel'
+                && ($element['caption'] ?? null) === 'Tile designer') {
+                $tileDesigner = $element;
+                break;
+            }
+        }
+        if (!is_array($tileDesigner)) {
+            throw new RuntimeException('The Tile designer form section is missing.');
+        }
+
+        $designerItems = $this->PrefixIPSViewDesignerItems($tileDesigner['items'] ?? []);
+
+        return [
+            'type'     => 'ExpansionPanel',
+            'caption'  => 'IPSView design',
+            'expanded' => false,
+            'width'    => '700px',
+            'items'    => [
+                ...$this->IPSViewHTMLPageFormItems(
+                    'Creates a standalone WebContent variable for use as an IPSView HTML widget.'
+                ),
+                [
+                    'type'    => 'CheckBox',
+                    'name'    => 'IPSViewUseTileDesign',
+                    'caption' => 'Use Tile design'
+                ],
+                [
+                    'type'    => 'Label',
+                    'caption' => 'Inherited mode follows every Tile design change. Disable it for an independent IPSView appearance.'
+                ],
+                [
+                    'type'    => 'Button',
+                    'caption' => 'Copy Tile design to IPSView and edit independently',
+                    'onClick' => 'ECGM_CopyTileDesignToIPSView($id); return "MESSAGE:Tile design copied to IPSView.";'
+                ],
+                [
+                    'type'     => 'ExpansionPanel',
+                    'caption'  => 'Independent IPSView designer',
+                    'expanded' => false,
+                    'items'    => $designerItems
+                ]
+            ]
+        ];
+    }
+
+    /** @param list<array<string, mixed>> $items @return list<array<string, mixed>> */
+    private function PrefixIPSViewDesignerItems(array $items): array
+    {
+        $designNames = ['GaugePreset', 'EChartsTheme', ...self::DESIGN_SCALE_PROPERTIES];
+        foreach ($items as &$item) {
+            if (($item['name'] ?? null) === 'GaugePreview') {
+                $item['name'] = 'IPSViewGaugePreview';
+            } elseif (isset($item['name']) && in_array($item['name'], $designNames, true)) {
+                $item['name'] = 'IPSView' . $item['name'];
+            }
+            if (isset($item['items']) && is_array($item['items'])) {
+                $item['items'] = $this->PrefixIPSViewDesignerItems($item['items']);
+            }
+        }
+        unset($item);
+
+        return $items;
     }
 }

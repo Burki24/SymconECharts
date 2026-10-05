@@ -6,12 +6,14 @@ Symcon-Kacheldarstellung und ein separat platzierbares HTML-Widget in IPSView
 bereitstellen können. Datenquellen und Diagrammkonfiguration werden dabei nur
 einmal gepflegt.
 
-**Entwicklungsstand:** Erste sichtbare Multi-Title-Kachel. Eine geordnete Liste aus
+**Entwicklungsstand:** Erste sichtbare Multi-Title-Kachel und optionale
+IPSView-WebContent-Ausgabe. Eine geordnete Liste aus
 2 bis 16 numerischen Quellvariablen ist konfigurierbar, wird als Referenzen
 registriert und über EChartsGateway gelesen. Das Modul erzeugt daraus ein
 versioniertes Multi-Datenmodell und rendert jede Quelle mit eigener Skala,
-Einheit und Wertanzeige in einem responsiven Instrumentenraster. Eine
-IPSView-HTML-Ausgabe ist noch nicht implementiert.
+Einheit und Wertanzeige in einem responsiven Instrumentenraster. Beide
+Ausgaben verwenden dieselben Quellen und denselben Renderer; IPSView kann
+das Kacheldesign erben oder ein eigenes Design verwenden.
 
 ### Inhaltsverzeichnis
 
@@ -35,8 +37,7 @@ versionierte Gateway-Protokoll und liefert sie in der konfigurierten Reihenfolge
 **Vorhanden:** Multi Title als native Symcon-Kachel mit automatischem Raster,
 offiziellen ECharts-Themes, Live-Aktualisierung und erster Feinabstimmung.
 
-**Geplant:** Ring- und klassische Instrumentenpanel-Vorlagen sowie die Ausgabe
-als optionales IPSView-Widget.
+**Geplant:** Ring- und klassische Instrumentenpanel-Vorlagen.
 
 Eine Instanz bildet genau einen zusammengesetzten Gauge-Chart ab. Gauges mit
 genau einer numerischen Quellvariable gehören zu
@@ -110,15 +111,15 @@ konfigurieren.
 
 #### Statusvariablen
 
-Aktuell werden keine eigenen Variablen angelegt. Für IPSView ist künftig
-je aktivierter Widget-Ausgabe eine eigene Stringvariable mit HTML-Inhalt
-vorgesehen. Die native Kachel soll diese Variable nicht benötigen.
+Standardmäßig werden keine eigenen Variablen angelegt. Bei aktivierter
+IPSView-Ausgabe entsteht eine Stringvariable mit WebContent-Darstellung und
+vollständigem HTML-Inhalt. Die native Kachel benötigt diese Variable nicht.
 
 Quellvariablen werden als Referenzen registriert und bei Änderungen der Liste
 deterministisch ergänzt oder entfernt. Messwertkopien unter dem Gauge-Modul
-werden nicht angelegt. Beim späteren Abschalten der IPSView-Ausgabe sollen
-bestehende HTML-Variablen erhalten bleiben; ein Löschen soll ausdrücklich
-bestätigt werden müssen.
+werden nicht angelegt. Beim Abschalten der IPSView-Ausgabe bleibt eine
+bestehende HTML-Variable erhalten. Sie wird nur über die ausdrücklich
+bestätigte Löschfunktion des gemeinsamen Helpers entfernt.
 
 #### Profile
 
@@ -128,7 +129,7 @@ Darstellungs-Helpern aufbauen.
 
 ### 6. Visualisierung
 
-**Die native Multi-Title-Kachel ist implementiert; IPSView folgt später.**
+**Die native Multi-Title-Kachel und die optionale IPSView-Ausgabe sind implementiert.**
 
 #### Native Symcon-Kachel
 
@@ -145,9 +146,16 @@ einstellbar. Eine SVG-Vorschau zeigt bis zu vier Instrumente exemplarisch.
 
 #### IPSView
 
-Vorgesehen ist ein kleines, eigenständig platzierbares HTML-Widget pro Chart,
-keine gemeinsame Dashboard-Seite. Die Größe und Platzierung werden in IPSView
-festgelegt; das Diagramm soll sich an die verfügbare Fläche anpassen.
+Im Abschnitt **IPSView-Design** wird die WebContent-Ausgabe aktiviert. Die
+erzeugte Variable wird in IPSView als HTML-Widget platziert; Größe und Position
+bestimmt IPSView. Standardmäßig erbt sie das Kacheldesign. Für eine abweichende
+Gestaltung kann das Kacheldesign kopiert und der unabhängige IPSView-Designer
+bearbeitet werden. Beide Ausgaben behalten dieselben Quellen, Wertebereiche,
+Einheiten und Live-Daten.
+
+Die HTML-Erzeugung und Aktualisierung bei Quellwertänderungen sind lokal
+getestet. Die tatsächliche Einbindung in IPSView bleibt mangels Lizenz auf der
+verfügbaren Testinstallation ungeprüft.
 
 #### Gemeinsame Darstellung
 
@@ -170,7 +178,8 @@ und liefert das aktuelle Gauge-Datenmodell als JSON. Das Modell enthält
 und eine geordnete `items`-Liste. Jeder Eintrag enthält eine aus der
 Variablen-ID abgeleitete stabile ID, Quellvariable, Zeitstempel,
 Gauge-Konfiguration und numerischen Wert. Es ist die technische Grenze für die
-späteren Ausgabeadapter und noch kein gerendertes ECharts-Diagramm.
+beiden Ausgabeadapter und noch kein gerendertes ECharts-Diagramm.
+`ECGM_GetIPSViewHTML($InstanceID)` liefert die eigenständige HTML-Seite für IPSView.
 
 Weitere Projektgrundsätze: [Entwicklung](../docs/ENTWICKLUNG.md).  
 Lizenz der eigenen Beiträge: [PolyForm Noncommercial License 1.0.0](../LICENSE).
