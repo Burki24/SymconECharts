@@ -1381,7 +1381,7 @@ $ringGauge = new EChartsGaugeMulti();
 $ringGauge->Create();
 $ringGauge->SetTestProperty('Sources', $multiSources);
 $ringGauge->SetTestProperty('EnableIPSView', true);
-foreach (['ring-grid', 'ring-concentric', 'weather-station', 'tacho'] as $ringPreset) {
+foreach (['ring-grid', 'ring-concentric', 'weather-station', 'tacho', 'chronograph'] as $ringPreset) {
     $ringGauge->SetTestProperty('GaugePreset', $ringPreset);
     $ringGauge->ApplyChanges();
     assertGatewayGauge($ringGauge->GetTestStatus() === IS_ACTIVE, 'Gauge Multi must accept all additional presets.');
@@ -1411,10 +1411,51 @@ foreach (['ring-grid', 'ring-concentric', 'weather-station', 'tacho'] as $ringPr
 $ringGauge->SetTestProperty('IPSViewUseTileDesign', false);
 $ringGauge->SetTestProperty('IPSViewGaugePreset', 'ring-grid');
 assertGatewayGauge(
-    str_contains($ringGauge->GetVisualizationTile(), '"preset":"tacho"')
+    str_contains($ringGauge->GetVisualizationTile(), '"preset":"chronograph"')
         && str_contains($ringGauge->GetIPSViewHTML(), '"preset":"ring-grid"'),
     'An independent IPSView preset must not change the tile preset.'
 );
+
+$sevenSources = [];
+for ($index = 0; $index < 7; $index++) {
+    $variableID = 4800 + $index;
+    $GLOBALS['symconTestVariables'][$variableID] = [
+        'VariableType' => 2, 'VariableUpdated' => 1780000000, 'Value' => 10.0, 'Name' => 'Chronograph ' . $index
+    ];
+    $sevenSources[] = [
+        'VariableID' => $variableID, 'Label' => 'Source ' . $index,
+        'Minimum' => 0.0, 'Maximum' => 100.0, 'Unit' => 'u', 'Decimals' => 0
+    ];
+}
+$chronographLimit = new EChartsGaugeMulti();
+$chronographLimit->Create();
+$chronographLimit->SetTestProperty('Sources', json_encode($sevenSources, JSON_THROW_ON_ERROR));
+$chronographLimit->SetTestProperty('GaugePreset', 'chronograph');
+$chronographLimit->ApplyChanges();
+assertGatewayGauge($chronographLimit->GetTestStatus() === 205, 'Chronograph must reject more than six sources.');
+$chronographLimit->SetTestProperty('GaugePreset', 'multi-title');
+$chronographLimit->ApplyChanges();
+assertGatewayGauge($chronographLimit->GetTestStatus() === IS_ACTIVE, 'Other presets must continue to accept seven sources.');
+$chronographLimit->SetTestProperty('EnableIPSView', true);
+$chronographLimit->SetTestProperty('IPSViewUseTileDesign', false);
+$chronographLimit->SetTestProperty('IPSViewGaugePreset', 'chronograph');
+$chronographLimit->ApplyChanges();
+assertGatewayGauge($chronographLimit->GetTestStatus() === 205, 'Independent IPSView chronograph must enforce the same limit.');
+$chronographLimit->SetTestProperty('IPSViewUseTileDesign', true);
+$chronographLimit->SetTestProperty('GaugePreset', 'chronograph');
+$chronographLimit->SetTestProperty('Sources', json_encode(array_slice($sevenSources, 0, 6), JSON_THROW_ON_ERROR));
+$chronographLimit->ApplyChanges();
+assertGatewayGauge($chronographLimit->GetTestStatus() === IS_ACTIVE, 'Chronograph must accept six sources.');
+$chronographForm = json_decode($chronographLimit->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+$chronographPreview = $chronographForm['elements'][4]['items'][5]['image'] ?? '';
+assertGatewayGauge(
+    is_string($chronographPreview)
+        && str_contains((string) base64_decode(substr($chronographPreview, strlen('data:image/svg+xml;base64,')), true), 'Source 5'),
+    'The chronograph preview must include the sixth source.'
+);
+foreach ($sevenSources as $source) {
+    unset($GLOBALS['symconTestVariables'][$source['VariableID']]);
+}
 
 $multiTile = $multiGauge->GetVisualizationTile();
 assertGatewayGauge(

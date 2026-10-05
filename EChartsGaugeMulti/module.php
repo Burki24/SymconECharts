@@ -51,9 +51,10 @@ class EChartsGaugeMulti extends IPSModuleStrict
     private const PRESET_RING_CONCENTRIC = 'ring-concentric';
     private const PRESET_WEATHER_STATION = 'weather-station';
     private const PRESET_TACHO = 'tacho';
+    private const PRESET_CHRONOGRAPH = 'chronograph';
     private const SUPPORTED_PRESETS = [
         self::PRESET_MULTI_TITLE, self::PRESET_RING_GRID, self::PRESET_RING_CONCENTRIC,
-        self::PRESET_WEATHER_STATION, self::PRESET_TACHO
+        self::PRESET_WEATHER_STATION, self::PRESET_TACHO, self::PRESET_CHRONOGRAPH
     ];
     private const IPSVIEW_OUTPUT_IDENT = 'IPSViewGauge';
     private const DESIGN_SCALE_PROPERTIES = [
@@ -337,7 +338,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
     private function GetConfigurationError(): ?array
     {
         try {
-            $this->GetValidatedSources();
+            $sources = $this->GetValidatedSources();
         } catch (UnexpectedValueException $exception) {
             $status = $exception->getCode();
             if (!in_array($status, [self::STATUS_SOURCE_INVALID, self::STATUS_RANGE_INVALID], true)) {
@@ -347,6 +348,15 @@ class EChartsGaugeMulti extends IPSModuleStrict
             return [
                 'Status'  => $status,
                 'Message' => $exception->getMessage()
+            ];
+        }
+
+        if (count($sources) > 6 && ($this->ReadPropertyString('GaugePreset') === self::PRESET_CHRONOGRAPH
+            || ($this->IsIPSViewHTMLPageEnabled() && !$this->ReadPropertyBoolean('IPSViewUseTileDesign')
+                && $this->ReadPropertyString('IPSViewGaugePreset') === self::PRESET_CHRONOGRAPH))) {
+            return [
+                'Status'  => self::STATUS_DESIGN_INVALID,
+                'Message' => 'The chronograph preset supports 2 to 6 Gauge sources.'
             ];
         }
 
@@ -740,7 +750,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
                 'decimals' => $source['Decimals'],
                 'value'    => is_int($value) || is_float($value) ? (float) $value : $source['Minimum']
             ];
-        }, array_slice($sources, 0, 4));
+        }, array_slice($sources, 0, 6));
     }
 
     /** @return array<string, mixed> */

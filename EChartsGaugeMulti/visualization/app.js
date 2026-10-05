@@ -497,6 +497,77 @@
         return { series: series, graphic: graphic };
     }
 
+    function buildChronographLayout(items, width, height, headerInset, hasTitle, colors, style) {
+        var top = headerInset + (hasTitle ? Math.max(32, height * 0.1) : 4);
+        var availableHeight = Math.max(1, height - top);
+        var radius = Math.max(1, Math.min(width * 0.43, availableHeight * 0.44));
+        var center = [width * 0.5, top + availableHeight * 0.5];
+        var subCount = items.length - 1;
+        var offsets = {
+            1: [[0, 0.52]],
+            2: [[-0.48, 0.28], [0.48, 0.28]],
+            3: [[-0.48, -0.08], [0.48, -0.08], [0, 0.53]],
+            4: [[-0.43, -0.32], [0.43, -0.32], [-0.43, 0.36], [0.43, 0.36]],
+            5: [[-0.48, -0.18], [0.48, -0.18], [-0.46, 0.43], [0.46, 0.43], [0, 0.55]]
+        }[subCount] || [];
+        var subRadius = radius * (subCount <= 3 ? 0.23 : 0.19);
+        var ringScale = clamp(Number(style.ringWidthPercent) || 100, 50, 150) / 100;
+        var scale = clamp(Number(style.scaleFontSizePercent) || 100, 50, 150) / 100;
+        var titleScale = clamp(Number(style.titleFontSizePercent) || 100, 50, 150) / 100;
+        var valueScale = clamp(Number(style.valueFontSizePercent) || 100, 50, 150) / 100;
+        var graphic = [{
+            id: 'chronograph-main-bezel', type: 'circle', z: 0,
+            shape: { cx: center[0], cy: center[1], r: radius * 1.06 },
+            style: { fill: colors.background, stroke: colors.border, lineWidth: Math.max(1, radius * 0.022) },
+            silent: true
+        }];
+        var series = items.map(function (item, index) {
+            var position = index === 0
+                ? { center: center, radius: radius }
+                : {
+                    center: [center[0] + offsets[index - 1][0] * radius,
+                        center[1] + offsets[index - 1][1] * radius],
+                    radius: subRadius
+                };
+            var gauge = buildSeries(item, index, null, colors, style, position);
+            var color = itemColor(index, colors);
+            var dialRadius = position.radius;
+            var axisWidth = clamp(dialRadius * (index === 0 ? 0.055 : 0.09) * ringScale, 1, 18);
+            gauge.z = index === 0 ? 2 : 5;
+            gauge.splitNumber = index === 0 ? 8 : 2;
+            gauge.axisLine.lineStyle.width = axisWidth;
+            gauge.axisLine.lineStyle.color = [[1, colors.track]];
+            gauge.axisTick.distance = -axisWidth;
+            gauge.axisTick.splitNumber = index === 0 ? 4 : 2;
+            gauge.axisTick.length = clamp(dialRadius * 0.05, 1, 9);
+            gauge.splitLine.distance = -axisWidth;
+            gauge.splitLine.length = clamp(dialRadius * 0.1, 2, 16);
+            gauge.axisLabel.fontSize = clamp(dialRadius * 0.105 * scale, index === 0 ? 6 : 4, 18);
+            gauge.axisLabel.distance = clamp(dialRadius * 0.13, 2, 20);
+            gauge.pointer.length = index === 0 ? '69%' : '58%';
+            gauge.pointer.width = clamp(dialRadius * 0.045, 1, 10);
+            gauge.pointer.itemStyle.color = color;
+            gauge.anchor.size = clamp(dialRadius * 0.11, 2, 16);
+            gauge.anchor.itemStyle.color = color;
+            gauge.itemStyle = { color: color };
+            gauge.title.offsetCenter = [0, index === 0 ? '-16%' : '-24%'];
+            gauge.title.width = dialRadius * (index === 0 ? 0.65 : 1.3);
+            gauge.title.fontSize = clamp(dialRadius * 0.12 * titleScale, index === 0 ? 7 : 4, 20);
+            gauge.detail.offsetCenter = [0, index === 0 ? '15%' : '40%'];
+            gauge.detail.fontSize = clamp(dialRadius * 0.16 * valueScale, index === 0 ? 8 : 4, 30);
+            if (index > 0) {
+                graphic.push({
+                    id: 'chronograph-sub-bezel-' + item.id, type: 'circle', z: 4,
+                    shape: { cx: position.center[0], cy: position.center[1], r: subRadius * 1.08 },
+                    style: { fill: colors.background, stroke: color, lineWidth: Math.max(1, subRadius * 0.045) },
+                    silent: true
+                });
+            }
+            return gauge;
+        });
+        return { series: series, graphic: graphic };
+    }
+
     function buildOption(model, theme) {
         var items = Array.isArray(model.items) ? model.items : [];
         var gauge = model.gauge || {};
@@ -508,6 +579,7 @@
         var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 64 : 0;
         var preset = String(gauge.preset || 'multi-title');
         var grid = preset === 'ring-concentric' || preset === 'weather-station' || preset === 'tacho'
+            || preset === 'chronograph'
             ? null
             : resolveGrid(items.length, width, height, title !== '', headerInset);
         var concentric = preset === 'ring-concentric'
@@ -518,6 +590,9 @@
             : null;
         var tacho = preset === 'tacho'
             ? buildTachoLayout(items, width, height, headerInset, title !== '', colors, style)
+            : null;
+        var chronograph = preset === 'chronograph'
+            ? buildChronographLayout(items, width, height, headerInset, title !== '', colors, style)
             : null;
 
         return {
@@ -541,8 +616,10 @@
                         + formatValue(item.value, Number(itemGauge.decimals) || 0, String(itemGauge.unit || ''));
                 }
             },
-            graphic: concentric ? concentric.graphic : weather ? weather.graphic : tacho ? tacho.graphic : [],
-            series: concentric ? concentric.series : weather ? weather.series : tacho ? tacho.series : items.map(function (item, index) {
+            graphic: concentric ? concentric.graphic : weather ? weather.graphic : tacho ? tacho.graphic
+                : chronograph ? chronograph.graphic : [],
+            series: concentric ? concentric.series : weather ? weather.series : tacho ? tacho.series
+                : chronograph ? chronograph.series : items.map(function (item, index) {
                 return preset === 'ring-grid'
                     ? buildRingGridSeries(item, index, grid, colors, style)
                     : buildSeries(item, index, grid, colors, style);

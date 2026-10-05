@@ -73,7 +73,7 @@ assert.ok(titledTile.title.top >= 64, 'The chart title must follow the native he
 assert.equal(titledIPSView.title.top, 6, 'The IPSView chart title must retain its original position.');
 assert.equal(render('symcon', 416, 1048, 3, 'Climate', 'multi-title', false).title.top, 6);
 
-for (const preset of ['multi-title', 'ring-grid', 'ring-concentric', 'weather-station', 'tacho']) {
+for (const preset of ['multi-title', 'ring-grid', 'ring-concentric', 'weather-station', 'tacho', 'chronograph']) {
     const withHeader = render('symcon', 416, 720, 3, 'Climate', preset);
     const withoutHeader = render('symcon', 416, 720, 3, 'Climate', preset, false);
     assert.ok(topOfFirstGauge(withHeader) >= 64, `${preset} must clear a visible Symcon header.`);
@@ -204,4 +204,38 @@ const compactTacho = render('symcon', 320, 192, 16, 'Cockpit', 'tacho');
 assert.equal(compactTacho.series.length, 16);
 assert.ok(compactTacho.series.every(series => series.radius > 0));
 
-process.stdout.write('Gauge Multi dial, ring, weather-station and tacho layouts verified.\n');
+for (const count of [2, 3, 4, 5, 6]) {
+    for (const [mode, width, height] of [['symcon', 720, 560], ['ipsview', 720, 560], ['symcon', 320, 192]]) {
+        const option = render(mode, width, height, count, 'Climate', 'chronograph');
+        const main = option.series[0];
+        assert.equal(option.series.length, count);
+        assert.equal(option.graphic.length, count, 'Main and embedded dials need their bezels.');
+        assert.ok(main.radius > option.series[1].radius * 3, 'The first source must dominate the dial.');
+        assert.ok(main.center[1] - main.radius * 1.06 >= (mode === 'symcon' ? 64 : 0));
+        assert.ok(main.center[1] + main.radius * 1.06 <= height);
+        option.series.forEach((series, index) => {
+            assert.equal(series.id, `variable-${index}`);
+            assert.equal(series.min, index * 10);
+            assert.equal(series.max, index * 10 + 100);
+            assert.equal(series.data[0].value, index * 10 + 50);
+            assert.equal(series.pointer.show, true);
+            assert.match(series.detail.formatter(), new RegExp(`u${index}$`));
+            if (index > 0) {
+                const distance = Math.hypot(series.center[0] - main.center[0], series.center[1] - main.center[1]);
+                assert.ok(distance + series.radius * 1.08 < main.radius,
+                    'Every secondary scale must remain inside the main dial.');
+            }
+        });
+        for (let left = 1; left < count; left += 1) {
+            for (let right = left + 1; right < count; right += 1) {
+                const a = option.series[left];
+                const b = option.series[right];
+                assert.ok(Math.hypot(a.center[0] - b.center[0], a.center[1] - b.center[1])
+                    > (a.radius + b.radius) * 1.08, 'Subdial bezels must not overlap.');
+            }
+        }
+        assert.equal(new Set(option.series.map(series => series.itemStyle.color)).size, count);
+    }
+}
+
+process.stdout.write('Gauge Multi dial, ring, weather-station, tacho and chronograph layouts verified.\n');

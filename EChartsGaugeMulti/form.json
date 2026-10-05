@@ -104,7 +104,7 @@
             "items": [
                 {
                     "type": "Label",
-                    "caption": "Choose independent dials, ring Gauges, concentric rings, a weather station, or a tacho cockpit. Source order determines placement; every source keeps its own range and unit."
+                    "caption": "Choose independent dials, ring Gauges, concentric rings, a weather station, a tacho cockpit, or a chronograph. The chronograph supports 2 to 6 sources; other presets support up to 16. Source order determines placement; every source keeps its own range and unit."
                 },
                 {
                     "type": "RowLayout",
@@ -134,6 +134,10 @@
                                 {
                                     "caption": "Tacho cockpit",
                                     "value": "tacho"
+                                },
+                                {
+                                    "caption": "Chronograph",
+                                    "value": "chronograph"
                                 }
                             ]
                         },

@@ -13,7 +13,8 @@ ausgeführt. Der Single-Test prüft die vergrößerte Darstellung und die Grenze
 der Zifferblattplatte in Kachel und IPSView. Der Multi-Test prüft die freigehaltene
 Kachelkopfzeile sowie die Layouts beider Ausgabewege anhand gerenderter
 ECharts-Optionen. Er deckt auch Ringraster und konzentrische Ringe mit 2 bzw.
-16 Quellen sowie Wetterstations- und Tacho-Panel mit 2, 3 und 16 Quellen ab. Die
+16 Quellen, Wetterstations- und Tacho-Panel mit 2, 3 und 16 Quellen sowie den
+Chronographen mit 2 bis 6 Quellen ab. Die
 PHP-Basissuite benötigt weiterhin kein Node.js.
 
 `tests/fixtures/tacho-browser.html` ist eine manuelle Browser-Fixierung für

@@ -24,6 +24,9 @@ final class EChartsGaugeMultiPreview
         if ($preset === 'tacho') {
             return self::CreateTachoSvg($items, $title, $palette);
         }
+        if ($preset === 'chronograph') {
+            return self::CreateChronographSvg($items, $title, $palette);
+        }
 
         $items = array_slice($items, 0, 4);
         $count = count($items);
@@ -184,6 +187,38 @@ final class EChartsGaugeMultiPreview
         return self::SvgDocument($title, $palette, $content, 'tacho');
     }
 
+    /** @param list<array<string, mixed>> $items @param array<string, string> $palette */
+    private static function CreateChronographSvg(array $items, string $title, array $palette): string
+    {
+        $items = array_slice($items, 0, 6);
+        $subCount = count($items) - 1;
+        $offsets = match ($subCount) {
+            1       => [[0.0, 0.52]],
+            2       => [[-0.48, 0.28], [0.48, 0.28]],
+            3       => [[-0.48, -0.08], [0.48, -0.08], [0.0, 0.53]],
+            4       => [[-0.43, -0.32], [0.43, -0.32], [-0.43, 0.36], [0.43, 0.36]],
+            5       => [[-0.48, -0.18], [0.48, -0.18], [-0.46, 0.43], [0.46, 0.43], [0.0, 0.55]],
+            default => []
+        };
+        $centerY = $title === '' ? 205.0 : 219.0;
+        $radius = $title === '' ? 170.0 : 155.0;
+        $content = self::InstrumentDialSvg($items[0], 360.0, $centerY, $radius, $palette, self::RingColor(0, $palette), true, true);
+        $subRadius = $radius * ($subCount <= 3 ? 0.23 : 0.19);
+        foreach ($offsets as $index => [$offsetX, $offsetY]) {
+            $content .= self::InstrumentDialSvg(
+                $items[$index + 1],
+                360.0 + $offsetX * $radius,
+                $centerY + $offsetY * $radius,
+                $subRadius,
+                $palette,
+                self::RingColor($index + 1, $palette),
+                true
+            );
+        }
+
+        return self::SvgDocument($title, $palette, $content, 'chronograph');
+    }
+
     /** @param array<string, mixed> $item @param array<string, string> $palette */
     private static function InstrumentDialSvg(
         array $item,
@@ -191,7 +226,9 @@ final class EChartsGaugeMultiPreview
         float $y,
         float $radius,
         array $palette,
-        string $color
+        string $color,
+        bool $embedded = false,
+        bool $primary = false
     ): string {
         $angle = deg2rad(225.0 - 270.0 * self::ValueRatio($item));
         $startX = $x - $radius * 0.707;
@@ -226,13 +263,22 @@ final class EChartsGaugeMultiPreview
         $result .= '<circle cx="' . self::N($x) . '" cy="' . self::N($y)
             . '" r="' . self::N(max(4.0, $radius * 0.07)) . '" fill="'
             . SVGPreviewHelper::escape($color) . '"/>';
-        $result .= '<text x="' . self::N($x) . '" y="' . self::N($y - $radius * 0.22)
+        if ($embedded) {
+            foreach ([[$startX, $arcY, $item['minimum'] ?? 0.0], [$endX, $arcY, $item['maximum'] ?? 100.0]] as [$labelX, $labelY, $limit]) {
+                $result .= '<text x="' . self::N((float) $labelX) . '" y="' . self::N((float) $labelY)
+                    . '" fill="' . SVGPreviewHelper::escape($palette['muted'])
+                    . '" font-size="' . self::N(max(5.0, $radius * 0.09)) . '" text-anchor="middle">'
+                    . SVGPreviewHelper::escape((string) $limit) . '</text>';
+            }
+        }
+        $result .= '<text x="' . self::N($x) . '" y="' . self::N($y - $radius * ($primary ? 0.16 : 0.22))
             . '" fill="' . SVGPreviewHelper::escape($palette['muted'])
-            . '" font-size="' . self::N(max(10.0, $radius * 0.12)) . '" text-anchor="middle">'
+            . '" font-size="' . self::N(max($embedded ? 5.0 : 10.0, $radius * 0.12))
+            . '" text-anchor="middle">'
             . SVGPreviewHelper::escape((string) ($item['label'] ?? '')) . '</text>';
-        $result .= '<text x="' . self::N($x) . '" y="' . self::N($y + $radius * 0.47)
+        $result .= '<text x="' . self::N($x) . '" y="' . self::N($y + $radius * ($primary ? 0.17 : 0.47))
             . '" fill="' . SVGPreviewHelper::escape($palette['text'])
-            . '" font-size="' . self::N(max(12.0, $radius * 0.16))
+            . '" font-size="' . self::N(max($embedded ? 6.0 : 12.0, $radius * 0.16))
             . '" font-weight="700" text-anchor="middle">'
             . SVGPreviewHelper::escape(self::FormattedValue($item)) . '</text>';
 

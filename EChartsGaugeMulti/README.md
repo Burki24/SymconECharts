@@ -6,7 +6,7 @@ Symcon-Kacheldarstellung und ein separat platzierbares HTML-Widget in IPSView
 bereitstellen können. Datenquellen und Diagrammkonfiguration werden dabei nur
 einmal gepflegt.
 
-**Entwicklungsstand:** Multi-Title-, zwei Ring-, Wetterstations- und Tacho-Vorlage mit optionaler
+**Entwicklungsstand:** Multi-Title-, zwei Ring-, Wetterstations-, Tacho- und Chronographen-Vorlage mit optionaler
 IPSView-WebContent-Ausgabe. Eine geordnete Liste aus
 2 bis 16 numerischen Quellvariablen ist konfigurierbar, wird als Referenzen
 registriert und über EChartsGateway gelesen. Das Modul erzeugt daraus ein
@@ -34,8 +34,8 @@ numerische Variable, Beschriftung, Minimum, Maximum, Einheit und 0 bis 6
 Nachkommastellen. `GetGaugeData()` liest alle aktuellen Werte über das
 versionierte Gateway-Protokoll und liefert sie in der konfigurierten Reihenfolge.
 
-**Vorhanden:** Multi Title, Ringraster, konzentrische Ringe, Wetterstation und
-Tacho-Cockpit als native
+**Vorhanden:** Multi Title, Ringraster, konzentrische Ringe, Wetterstation,
+Tacho-Cockpit und Chronograph als native
 Symcon-Kachel und optionales IPSView-Widget mit offiziellen ECharts-Themes,
 Live-Aktualisierung und erster Feinabstimmung.
 
@@ -152,6 +152,12 @@ beigefügten ECharts-Beispiel, aber keine dort fest eingetragenen Werte,
 Einheiten oder Beschriftungen. Auf schmalen Flächen rücken die beiden
 Nebeninstrumente unter das Hauptinstrument. Für einen dunklen Look das
 ECharts-Theme **Dark** wählen; dessen Hintergrund ist nicht rein schwarz.
+**Chronograph** bettet die Zifferblätter der Quellen 2 bis 6 in das große
+Hauptinstrument der ersten Quelle ein. Jedes besitzt einen eigenen Zeiger,
+Wertebereich, Skala und Einheit. Die Vorlage unterstützt 2 bis 6 Quellen;
+bei mehr Quellen meldet die Konfiguration einen Fehler, statt Werte zu
+verbergen. Kachel und eigenständiges IPSView-Design können die Vorlage
+unabhängig wählen. Für gut lesbare Nebenskalen ist eine große Kachel sinnvoll.
 Raster-Vorlagen wählen
 abhängig von Quellenanzahl, Breite und Höhe eine passende Spalten- und
 Zeilenaufteilung. Multi Title und Ringraster füllen ihre Zellen in Kachel und
@@ -162,11 +168,11 @@ eingeblendete Kopfzeile. Wird der Objekttitel unter Symcon 9.1 ausgeblendet,
 nutzt es den frei werdenden Platz automatisch. Unter Symcon 9.0 bleibt der
 Abstand wie bisher erhalten; IPSView nutzt die gesamte Widgetfläche.
 
-Der eingeklappte Kacheldesigner bietet die fünf Vorlagen, das automatische
+Der eingeklappte Kacheldesigner bietet die sechs Vorlagen, das automatische
 Symcon-Design und sechs gebündelte offizielle ECharts-Themes. Ringstärke sowie
 Schriftgrößen von Skala, Wert und Titel sind zwischen 50 und 150 Prozent
-einstellbar; Skalenbeschriftungen betreffen nur Multi Title. Eine SVG-Vorschau
-zeigt bis zu vier Quellen exemplarisch. Bei vielen konzentrischen Ringen oder
+einstellbar. Eine SVG-Vorschau zeigt beim Chronographen bis zu sechs, bei den
+anderen Vorlagen bis zu vier Quellen exemplarisch (beim Tacho drei). Bei vielen konzentrischen Ringen oder
 Wetterstations- oder Tacho-Instrumenten ist für lesbare Beschriftungen eine
 ausreichend große Kachel bzw. ein großes IPSView-Widget erforderlich. Die
 Tacho-Vorschau zeigt die ersten drei Quellen; zur Laufzeit werden alle 2 bis
