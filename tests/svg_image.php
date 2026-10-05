@@ -79,4 +79,19 @@ assertSvgImageRejected(
     'SVG image import must reject foreign objects.'
 );
 
+foreach ([
+    'temperature-esoteric-dial.svg',
+    'humidity-esoteric-dial.svg',
+    'pressure-esoteric-dial.svg'
+] as $exampleFile) {
+    $example = file_get_contents(__DIR__ . '/../EChartsGaugeChronograph/examples/' . $exampleFile);
+    assertSvgImage(is_string($example), 'Chronograph example SVG could not be read: ' . $exampleFile);
+    $exampleImport = EChartsSvgImage::Import(base64_encode($example));
+    assertSvgImage(
+        $exampleImport['viewBox'] === '0 0 600 600'
+            && str_starts_with($exampleImport['dataUri'], 'data:image/svg+xml;base64,'),
+        'Chronograph example SVG is not importable: ' . $exampleFile
+    );
+}
+
 echo "ECharts SVG image import verified.\n";

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <radialGradient id="pressure-aura" cx="50%" cy="50%" r="54%">
+      <stop offset="0%" stop-color="#697d99" stop-opacity="0.16"/>
+      <stop offset="64%" stop-color="#625e78" stop-opacity="0.07"/>
+      <stop offset="100%" stop-color="#29303d" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="pressure-air" x1="5%" y1="80%" x2="95%" y2="20%">
+      <stop offset="0%" stop-color="#9aa9b8"/>
+      <stop offset="48%" stop-color="#718aa0"/>
+      <stop offset="100%" stop-color="#aa9673"/>
+    </linearGradient>
+  </defs>
+
+  <circle cx="300" cy="300" r="286" fill="url(#pressure-aura)"/>
+  <g fill="none" stroke-linecap="round">
+    <circle cx="300" cy="300" r="274" stroke="url(#pressure-air)" stroke-width="3" opacity="0.4"/>
+    <circle cx="300" cy="300" r="253" stroke="#9aa9b8" stroke-width="1.5" stroke-dasharray="2 12" opacity="0.38"/>
+    <circle cx="300" cy="300" r="224" stroke="#718aa0" stroke-width="1.5" stroke-dasharray="16 10 2 10" opacity="0.26"/>
+  </g>
+
+  <!-- Nested isobars, intentionally asymmetric like a weather map. -->
+  <g transform="rotate(-14 300 300)" fill="none" stroke="url(#pressure-air)" opacity="0.23">
+    <ellipse cx="300" cy="300" rx="183" ry="126" stroke-width="3"/>
+    <ellipse cx="300" cy="300" rx="145" ry="92" stroke-width="2.5"/>
+    <ellipse cx="300" cy="300" rx="105" ry="59" stroke-width="2"/>
+    <ellipse cx="300" cy="300" rx="66" ry="31" stroke-width="1.5"/>
+  </g>
+
+  <!-- Air triangle and barometric column form the esoteric technical sigil. -->
+  <g fill="none" stroke="url(#pressure-air)" stroke-linejoin="round" opacity="0.27">
+    <path d="M300 150 L405 351 L195 351 Z" stroke-width="4"/>
+    <path d="M226 294 H374" stroke-width="4"/>
+    <path d="M300 229 V405" stroke-width="4"/>
+    <circle cx="300" cy="418" r="22" stroke-width="4"/>
+  </g>
+
+  <!-- Curved wind traces keep the center open for values and titles. -->
+  <g fill="none" stroke-linecap="round" opacity="0.25">
+    <path d="M118 231 C171 188 226 190 263 216 C283 230 276 255 253 255"
+          stroke="#9aa9b8" stroke-width="4"/>
+    <path d="M482 365 C429 408 374 406 337 380 C317 366 324 341 347 341"
+          stroke="#aa9673" stroke-width="4"/>
+    <path d="M141 389 C183 423 224 420 250 399" stroke="#718aa0" stroke-width="3"/>
+    <path d="M459 210 C417 176 376 179 350 200" stroke="#9aa9b8" stroke-width="3"/>
+  </g>
+
+  <g fill="url(#pressure-air)" opacity="0.34">
+    <polygon points="300,46 308,59 300,73 292,59"/>
+    <polygon points="554,300 541,308 527,300 541,292"/>
+    <polygon points="300,554 292,541 300,527 308,541"/>
+    <polygon points="46,300 59,292 73,300 59,308"/>
+  </g>
+  <circle cx="300" cy="300" r="50" fill="none" stroke="#9aa9b8" stroke-width="1.5" opacity="0.15"/>
+</svg>

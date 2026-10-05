@@ -35,3 +35,10 @@ $html = ECGC_GetIPSViewHTML($InstanceID);
 ```
 
 Eine gemeinsame `EChartsGateway`-Instanz genügt für alle Chart-Instanzen.
+
+## Beispielhintergründe
+
+Unter `examples` liegen drei zurückhaltende SVG-Zifferblattmotive für
+Temperatur, Luftfeuchtigkeit und Luftdruck. Sie besitzen einen transparenten
+Grund und sind für die Kombination mit einer eigenen Plattenfarbe oder einem
+Plattenverlauf vorgesehen.
