@@ -683,6 +683,20 @@ assertGatewayGauge(
 
 $configurationForm = json_decode($gauge->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
 $encodedConfigurationForm = json_encode($configurationForm, JSON_THROW_ON_ERROR);
+$designerExpansionStates = [];
+foreach ($configurationForm['elements'] as $element) {
+    $caption = $element['caption'] ?? null;
+    if (in_array($caption, ['Tile designer', 'IPSView design'], true)) {
+        $designerExpansionStates[$caption] = $element['expanded'] ?? null;
+    }
+}
+assertGatewayGauge(
+    $designerExpansionStates === [
+        'Tile designer'  => false,
+        'IPSView design' => false
+    ],
+    'Tile and IPSView designers must both start collapsed.'
+);
 assertGatewayGauge(
     str_contains($encodedConfigurationForm, '"caption":"IPSView design"')
         && str_contains($encodedConfigurationForm, '"name":"EnableIPSView"')

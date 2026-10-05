@@ -76,7 +76,7 @@
         {
             "type": "ExpansionPanel",
             "caption": "Tile designer",
-            "expanded": true,
+            "expanded": false,
             "width": "700px",
             "items": [
                 {
