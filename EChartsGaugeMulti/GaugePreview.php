@@ -275,7 +275,7 @@ final class EChartsGaugeMultiPreview
             . '" font-size="' . self::N(max($embedded ? 5.0 : 10.0, $radius * 0.12))
             . '" text-anchor="middle">'
             . SVGPreviewHelper::escape((string) ($item['label'] ?? '')) . '</text>';
-        $result .= '<text x="' . self::N($x) . '" y="' . self::N($y + $radius * ($primary ? 0.17 : 0.47))
+        $result .= '<text x="' . self::N($x) . '" y="' . self::N($y + $radius * ($primary ? 0.74 : 0.47))
             . '" fill="' . SVGPreviewHelper::escape($palette['text'])
             . '" font-size="' . self::N(max($embedded ? 6.0 : 12.0, $radius * 0.16))
             . '" font-weight="700" text-anchor="middle">'

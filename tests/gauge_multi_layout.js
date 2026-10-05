@@ -211,6 +211,10 @@ for (const count of [2, 3, 4, 5, 6]) {
         assert.equal(option.series.length, count);
         assert.equal(option.graphic.length, count, 'Main and embedded dials need their bezels.');
         assert.ok(main.radius > option.series[1].radius * 3, 'The first source must dominate the dial.');
+        assert.deepEqual(Array.from(main.detail.offsetCenter), [0, '74%'],
+            'The primary value must use the lower Single Gauge position.');
+        assert.ok(option.series.slice(1).every(series => series.detail.offsetCenter[1] === '40%'),
+            'Every embedded value must remain inside its own dial.');
         assert.ok(option.series.slice(1).every(series => main.z > series.z),
             'The main pointer layer must remain above every embedded dial.');
         assert.ok(option.graphic.slice(1).every(element => main.z > element.z),

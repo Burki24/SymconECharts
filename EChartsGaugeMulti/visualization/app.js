@@ -553,7 +553,7 @@
             gauge.title.offsetCenter = [0, index === 0 ? '-16%' : '-24%'];
             gauge.title.width = dialRadius * (index === 0 ? 0.65 : 1.3);
             gauge.title.fontSize = clamp(dialRadius * 0.12 * titleScale, index === 0 ? 7 : 4, 20);
-            gauge.detail.offsetCenter = [0, index === 0 ? '15%' : '40%'];
+            gauge.detail.offsetCenter = [0, index === 0 ? '74%' : '40%'];
             gauge.detail.fontSize = clamp(dialRadius * 0.16 * valueScale, index === 0 ? 8 : 4, 30);
             if (index > 0) {
                 graphic.push({
