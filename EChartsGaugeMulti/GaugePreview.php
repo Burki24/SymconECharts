@@ -215,6 +215,13 @@ final class EChartsGaugeMultiPreview
                 true
             );
         }
+        $content .= self::InstrumentPointerSvg(
+            $items[0],
+            360.0,
+            $centerY,
+            $radius,
+            self::RingColor(0, $palette)
+        );
 
         return self::SvgDocument($title, $palette, $content, 'chronograph');
     }
@@ -230,7 +237,6 @@ final class EChartsGaugeMultiPreview
         bool $embedded = false,
         bool $primary = false
     ): string {
-        $angle = deg2rad(225.0 - 270.0 * self::ValueRatio($item));
         $startX = $x - $radius * 0.707;
         $endX = $x + $radius * 0.707;
         $arcY = $y + $radius * 0.707;
@@ -255,14 +261,7 @@ final class EChartsGaugeMultiPreview
                 . '" y2="' . self::N($y - sin($tickAngle) * $outer)
                 . '" stroke="' . SVGPreviewHelper::escape($palette['border']) . '" stroke-width="2"/>';
         }
-        $result .= '<line x1="' . self::N($x) . '" y1="' . self::N($y)
-            . '" x2="' . self::N($x + cos($angle) * $radius * 0.65)
-            . '" y2="' . self::N($y - sin($angle) * $radius * 0.65)
-            . '" stroke="' . SVGPreviewHelper::escape($color)
-            . '" stroke-width="' . self::N(max(3.0, $radius * 0.04)) . '" stroke-linecap="round"/>';
-        $result .= '<circle cx="' . self::N($x) . '" cy="' . self::N($y)
-            . '" r="' . self::N(max(4.0, $radius * 0.07)) . '" fill="'
-            . SVGPreviewHelper::escape($color) . '"/>';
+        $result .= self::InstrumentPointerSvg($item, $x, $y, $radius, $color);
         if ($embedded) {
             foreach ([[$startX, $arcY, $item['minimum'] ?? 0.0], [$endX, $arcY, $item['maximum'] ?? 100.0]] as [$labelX, $labelY, $limit]) {
                 $result .= '<text x="' . self::N((float) $labelX) . '" y="' . self::N((float) $labelY)
@@ -283,6 +282,26 @@ final class EChartsGaugeMultiPreview
             . SVGPreviewHelper::escape(self::FormattedValue($item)) . '</text>';
 
         return $result;
+    }
+
+    /** @param array<string, mixed> $item */
+    private static function InstrumentPointerSvg(
+        array $item,
+        float $x,
+        float $y,
+        float $radius,
+        string $color
+    ): string {
+        $angle = deg2rad(225.0 - 270.0 * self::ValueRatio($item));
+
+        return '<line x1="' . self::N($x) . '" y1="' . self::N($y)
+            . '" x2="' . self::N($x + cos($angle) * $radius * 0.65)
+            . '" y2="' . self::N($y - sin($angle) * $radius * 0.65)
+            . '" stroke="' . SVGPreviewHelper::escape($color)
+            . '" stroke-width="' . self::N(max(3.0, $radius * 0.04)) . '" stroke-linecap="round"/>'
+            . '<circle cx="' . self::N($x) . '" cy="' . self::N($y)
+            . '" r="' . self::N(max(4.0, $radius * 0.07)) . '" fill="'
+            . SVGPreviewHelper::escape($color) . '"/>';
     }
 
     /** @param array<string, string> $palette */

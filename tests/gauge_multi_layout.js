@@ -211,6 +211,10 @@ for (const count of [2, 3, 4, 5, 6]) {
         assert.equal(option.series.length, count);
         assert.equal(option.graphic.length, count, 'Main and embedded dials need their bezels.');
         assert.ok(main.radius > option.series[1].radius * 3, 'The first source must dominate the dial.');
+        assert.ok(option.series.slice(1).every(series => main.z > series.z),
+            'The main pointer layer must remain above every embedded dial.');
+        assert.ok(option.graphic.slice(1).every(element => main.z > element.z),
+            'The main pointer layer must remain above every embedded bezel.');
         assert.ok(main.center[1] - main.radius * 1.06 >= (mode === 'symcon' ? 64 : 0));
         assert.ok(main.center[1] + main.radius * 1.06 <= height);
         option.series.forEach((series, index) => {

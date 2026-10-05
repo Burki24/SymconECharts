@@ -533,7 +533,7 @@
             var color = itemColor(index, colors);
             var dialRadius = position.radius;
             var axisWidth = clamp(dialRadius * (index === 0 ? 0.055 : 0.09) * ringScale, 1, 18);
-            gauge.z = index === 0 ? 2 : 5;
+            gauge.z = index === 0 ? 6 : 5;
             gauge.splitNumber = index === 0 ? 8 : 2;
             gauge.axisLine.lineStyle.width = axisWidth;
             gauge.axisLine.lineStyle.color = [[1, colors.track]];
