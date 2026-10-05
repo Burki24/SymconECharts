@@ -25,6 +25,9 @@ these visual roles can be user-configurable without changing the source model.
 - Apply the shared layer after constructing a preset. Presets continue to own
   responsive placement and their characteristic geometry; user choices replace
   only the selected visual roles.
+- Render the same design roles on every dial in the SVG configuration preview
+  and refresh both tile and IPSView previews immediately from unsaved form
+  values, matching the Gauge Single interaction model.
 - Ring-grid and concentric presets retain their ring layout and do not receive
   dial-plate graphics. Custom progress and ring colors still apply.
 - Keep per-source overrides out of this increment. They require an explicit,
@@ -37,5 +40,6 @@ All instruments in one Gauge Multi output can now be restyled consistently,
 including the main and embedded chronograph dials. Validation rejects unknown
 modes, out-of-range percentages and invalid division counts before rendering.
 PHP integration tests cover persistence and output separation; JavaScript tests
-cover renderer behavior. Real IPSView runtime verification remains unavailable
+cover renderer behavior. The form contract additionally covers immediate,
+independent tile and IPSView SVG preview updates. Real IPSView runtime verification remains unavailable
 without a license, and source-specific overrides remain a documented follow-up.

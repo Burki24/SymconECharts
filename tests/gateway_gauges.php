@@ -1587,6 +1587,7 @@ assertGatewayGauge(
         && str_contains($multiFormJson, '"name":"GaugeColorMode"')
         && str_contains($multiFormJson, '"name":"PlateDesignMode"')
         && str_contains($multiFormJson, '"name":"GaugePreview"')
+        && str_contains($multiFormJson, 'ECGM_UpdateGaugePreviewFromForm')
         && str_contains($multiFormJson, 'data:image\\/svg+xml;base64,'),
     'Gauge Multi form must expose a collapsed designer with an SVG preview.'
 );
@@ -1604,6 +1605,81 @@ assertGatewayGauge(
 assertGatewayGauge(
     strlen($multiGauge->GetConfigurationForm()) < SYMCON_OUTPUT_BUFFER_LIMIT,
     'Gauge Multi form must remain below the Symcon output-buffer limit.'
+);
+$multiGauge->UpdateGaugePreviewFromForm(json_encode([
+    'Title'                        => 'Live preview',
+    'GaugePreset'                  => 'chronograph',
+    'EChartsTheme'                 => 'dark',
+    'PointerShape'                 => 'arrow',
+    'PointerWidthPercent'          => 150,
+    'PointerLengthPercent'         => 120,
+    'AnchorShape'                  => 'ring',
+    'GaugeColorMode'               => 'custom',
+    'PointerColor'                 => 0x112233,
+    'ProgressColor'                => 0x223344,
+    'RingColor'                    => 0x334455,
+    'ScaleColor'                   => 0x445566,
+    'ValueColor'                   => 0x556677,
+    'TitleColor'                   => 0x667788,
+    'AnchorColor'                  => 0x778899,
+    'AnchorBorderColor'            => 0x8899AA,
+    'PlateDesignMode'              => 'custom',
+    'PlateColor'                   => 0x99AABB,
+    'PlateBorderColor'             => 0xAABBCC,
+    'IPSViewUseTileDesign'         => false,
+    'IPSViewGaugePreset'           => 'weather-station',
+    'IPSViewEChartsTheme'          => 'roma',
+    'IPSViewPointerShape'          => 'line',
+    'IPSViewAnchorShape'           => 'none',
+    'IPSViewGaugeColorMode'        => 'custom',
+    'IPSViewPointerColor'          => 0x010203,
+    'IPSViewPlateDesignMode'       => 'hidden'
+], JSON_THROW_ON_ERROR));
+$multiPreviewUpdates = array_slice($multiGauge->GetTestFormUpdates(), -2);
+assertGatewayGauge(
+    array_column($multiPreviewUpdates, 'Field') === ['GaugePreview', 'IPSViewGaugePreview'],
+    'Gauge Multi must refresh both previews immediately when form values change.'
+);
+$tilePreviewSvg = base64_decode(
+    substr((string) ($multiPreviewUpdates[0]['Value'] ?? ''), strlen('data:image/svg+xml;base64,')),
+    true
+);
+$ipsViewPreviewSvg = base64_decode(
+    substr((string) ($multiPreviewUpdates[1]['Value'] ?? ''), strlen('data:image/svg+xml;base64,')),
+    true
+);
+assertGatewayGauge(
+    is_string($tilePreviewSvg)
+        && str_contains($tilePreviewSvg, 'data-preset="chronograph"')
+        && str_contains($tilePreviewSvg, 'data-pointer-shape="arrow"')
+        && str_contains($tilePreviewSvg, 'data-anchor-shape="ring"')
+        && str_contains($tilePreviewSvg, 'data-plate-mode="custom"')
+        && str_contains($tilePreviewSvg, '#112233')
+        && str_contains($tilePreviewSvg, '#99AABB'),
+    'Gauge Multi tile preview must render the currently edited shared design on its dials.'
+);
+assertGatewayGauge(
+    is_string($ipsViewPreviewSvg)
+        && str_contains($ipsViewPreviewSvg, 'data-preset="weather-station"')
+        && str_contains($ipsViewPreviewSvg, 'data-pointer-shape="line"')
+        && str_contains($ipsViewPreviewSvg, 'data-anchor-shape="none"')
+        && str_contains($ipsViewPreviewSvg, 'data-plate-mode="hidden"')
+        && str_contains($ipsViewPreviewSvg, '#010203'),
+    'Gauge Multi IPSView preview must render its independently edited design immediately.'
+);
+$ringPreviewSvg = \SymconECharts\EChartsGaugeMultiPreview::CreateSvg(
+    [
+        ['label' => 'A', 'minimum' => 0.0, 'maximum' => 100.0, 'unit' => '%', 'decimals' => 0, 'value' => 25.0],
+        ['label' => 'B', 'minimum' => 0.0, 'maximum' => 100.0, 'unit' => '%', 'decimals' => 0, 'value' => 75.0]
+    ],
+    '',
+    'dark',
+    'ring-grid',
+    ['colorMode' => 'custom', 'progressColor' => '#223344', 'ringColor' => '#334455']
+);
+assertGatewayGauge(
+    substr_count($ringPreviewSvg, '#223344') >= 2 && substr_count($ringPreviewSvg, '#334455') >= 2,
+    'Gauge Multi ring preview must apply shared progress and ring colors to every Gauge.'
 );
 $multiIPSViewBeforeUpdate = $multiGauge->GetTestVariableValue('IPSViewGauge');
 $multiUpdateCount = count($multiGauge->GetTestVisualizationUpdates());

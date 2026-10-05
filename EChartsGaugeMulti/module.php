@@ -145,6 +145,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
         $form = $this->LoadConfigurationForm();
         if (isset($form['elements']) && is_array($form['elements'])) {
             $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
+            $form['elements'] = $this->AttachGaugePreviewActions($form['elements']);
         }
         $form = SVGPreviewHelper::withImage(
             $form,
@@ -153,7 +154,8 @@ class EChartsGaugeMulti extends IPSModuleStrict
                 $this->PreviewItems(),
                 $this->ReadPropertyString('Title'),
                 $this->ReadPropertyString('EChartsTheme'),
-                $this->ReadPropertyString('GaugePreset')
+                $this->ReadPropertyString('GaugePreset'),
+                $this->ReadGaugeStyle()
             )
         );
         $form = SVGPreviewHelper::withImage(
@@ -165,7 +167,10 @@ class EChartsGaugeMulti extends IPSModuleStrict
                 $this->EffectiveIPSViewTheme(),
                 $this->ReadPropertyBoolean('IPSViewUseTileDesign')
                     ? $this->ReadPropertyString('GaugePreset')
-                    : $this->ReadPropertyString('IPSViewGaugePreset')
+                    : $this->ReadPropertyString('IPSViewGaugePreset'),
+                $this->ReadPropertyBoolean('IPSViewUseTileDesign')
+                    ? $this->ReadGaugeStyle()
+                    : $this->ReadGaugeStyle('IPSView')
             )
         );
 
@@ -196,6 +201,47 @@ class EChartsGaugeMulti extends IPSModuleStrict
         }
         IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
         IPS_ApplyChanges($this->InstanceID);
+    }
+
+    /** Refreshes both SVG previews from one snapshot of the currently edited form values. */
+    public function UpdateGaugePreviewFromForm(string $Configuration): void
+    {
+        try {
+            $values = json_decode($Configuration, true, 64, JSON_THROW_ON_ERROR);
+        } catch (JsonException) {
+            $values = [];
+        }
+        if (!is_array($values)) {
+            $values = [];
+        }
+
+        $items = $this->PreviewItems();
+        $title = (string) ($values['Title'] ?? $this->ReadPropertyString('Title'));
+        $tileStyle = $this->GaugeStyleFromFormValues($values);
+        $this->UpdateFormField('GaugePreview', 'image', SVGPreviewHelper::dataUri(
+            EChartsGaugeMultiPreview::CreateSvg(
+                $items,
+                $title,
+                (string) ($values['EChartsTheme'] ?? $this->ReadPropertyString('EChartsTheme')),
+                (string) ($values['GaugePreset'] ?? $this->ReadPropertyString('GaugePreset')),
+                $tileStyle
+            )
+        ));
+
+        $useTileDesign = (bool) ($values['IPSViewUseTileDesign'] ?? true);
+        $this->UpdateFormField('IPSViewGaugePreview', 'image', SVGPreviewHelper::dataUri(
+            EChartsGaugeMultiPreview::CreateSvg(
+                $items,
+                $title,
+                $useTileDesign
+                    ? (string) ($values['EChartsTheme'] ?? $this->ReadPropertyString('EChartsTheme'))
+                    : (string) ($values['IPSViewEChartsTheme'] ?? $this->ReadPropertyString('IPSViewEChartsTheme')),
+                $useTileDesign
+                    ? (string) ($values['GaugePreset'] ?? $this->ReadPropertyString('GaugePreset'))
+                    : (string) ($values['IPSViewGaugePreset'] ?? $this->ReadPropertyString('IPSViewGaugePreset')),
+                $useTileDesign ? $tileStyle : $this->GaugeStyleFromFormValues($values, 'IPSView')
+            )
+        ));
     }
 
     public function GetGaugeData(): string
@@ -934,6 +980,78 @@ class EChartsGaugeMulti extends IPSModuleStrict
     private static function ColorToHex(int $color): string
     {
         return sprintf('#%06X', max(0, min(0xFFFFFF, $color)));
+    }
+
+    /** @param array<string, mixed> $values @return array<string, int|string> */
+    private function GaugeStyleFromFormValues(array $values, string $prefix = ''): array
+    {
+        $style = [];
+        foreach (self::DESIGN_SCALE_PROPERTIES as $name) {
+            $style[lcfirst($name)] = (int) ($values[$prefix . $name]
+                ?? $this->ReadPropertyInteger($prefix . $name));
+        }
+        foreach (self::DESIGN_STRING_DEFAULTS as $name => $_default) {
+            $fieldName = match ($name) {
+                'GaugeColorMode'  => 'colorMode',
+                'PlateDesignMode' => 'plateMode',
+                default           => lcfirst($name)
+            };
+            $style[$fieldName] = (string) ($values[$prefix . $name]
+                ?? $this->ReadPropertyString($prefix . $name));
+        }
+        foreach (self::DESIGN_INTEGER_DEFAULTS as $name => $_default) {
+            $value = (int) ($values[$prefix . $name] ?? $this->ReadPropertyInteger($prefix . $name));
+            $style[lcfirst($name)] = str_ends_with($name, 'Color') ? self::ColorToHex($value) : $value;
+        }
+
+        return $style;
+    }
+
+    /** @param list<array<string, mixed>> $items @return list<array<string, mixed>> */
+    private function AttachGaugePreviewActions(array $items): array
+    {
+        $fieldNames = [
+            'Title', 'GaugePreset', 'EChartsTheme', 'IPSViewUseTileDesign',
+            'IPSViewGaugePreset', 'IPSViewEChartsTheme', ...self::DESIGN_SCALE_PROPERTIES,
+            ...array_keys(self::DESIGN_STRING_DEFAULTS), ...array_keys(self::DESIGN_INTEGER_DEFAULTS)
+        ];
+        foreach ([self::DESIGN_SCALE_PROPERTIES, array_keys(self::DESIGN_STRING_DEFAULTS), array_keys(self::DESIGN_INTEGER_DEFAULTS)] as $names) {
+            foreach ($names as $name) {
+                $fieldNames[] = 'IPSView' . $name;
+            }
+        }
+        $action = $this->GaugePreviewFormAction();
+        foreach ($items as &$item) {
+            if (isset($item['name']) && in_array($item['name'], $fieldNames, true)) {
+                $item['onChange'] = $action;
+            }
+            if (isset($item['items']) && is_array($item['items'])) {
+                $item['items'] = $this->AttachGaugePreviewActions($item['items']);
+            }
+        }
+        unset($item);
+
+        return $items;
+    }
+
+    private function GaugePreviewFormAction(): string
+    {
+        $fieldNames = [
+            'Title', 'GaugePreset', 'EChartsTheme', 'IPSViewUseTileDesign',
+            'IPSViewGaugePreset', 'IPSViewEChartsTheme', ...self::DESIGN_SCALE_PROPERTIES,
+            ...array_keys(self::DESIGN_STRING_DEFAULTS), ...array_keys(self::DESIGN_INTEGER_DEFAULTS)
+        ];
+        foreach ([self::DESIGN_SCALE_PROPERTIES, array_keys(self::DESIGN_STRING_DEFAULTS), array_keys(self::DESIGN_INTEGER_DEFAULTS)] as $names) {
+            foreach ($names as $name) {
+                $fieldNames[] = 'IPSView' . $name;
+            }
+        }
+        $pairs = array_map(
+            static fn (string $name): string => "'" . $name . "' => $" . $name,
+            $fieldNames
+        );
+
+        return 'ECGM_UpdateGaugePreviewFromForm($id, json_encode([' . implode(', ', $pairs) . ']));';
     }
 
     private function IPSViewThemeCSS(): string

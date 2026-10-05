@@ -177,8 +177,10 @@ Zifferblatt kann außerdem die Vorlagenplatte beibehalten, ausgeblendet oder
 durch eine gemeinsam gestaltete runde Platte ersetzt werden. Ringstärke,
 Schriftgrößen und geometrische Feinabstimmungen sind zwischen 50 und 150 Prozent
 einstellbar. Die Standardwerte `preset` und `theme` erhalten die bisherige
-Darstellung vollständig. Eine SVG-Vorschau zeigt beim Chronographen bis zu sechs, bei den
-anderen Vorlagen bis zu vier Quellen exemplarisch (beim Tacho drei). Bei vielen konzentrischen Ringen oder
+Darstellung vollständig. Die SVG-Vorschau übernimmt die aktuell bearbeiteten
+Designwerte sofort und wendet sie auf jedes dargestellte Instrument an. Sie
+zeigt beim Chronographen bis zu sechs, bei den anderen Vorlagen bis zu vier
+Quellen exemplarisch (beim Tacho drei). Bei vielen konzentrischen Ringen oder
 Wetterstations- oder Tacho-Instrumenten ist für lesbare Beschriftungen eine
 ausreichend große Kachel bzw. ein großes IPSView-Widget erforderlich. Die
 Tacho-Vorschau zeigt die ersten drei Quellen; zur Laufzeit werden alle 2 bis

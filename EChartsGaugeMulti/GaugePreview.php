@@ -8,24 +8,29 @@ use Burki24\SymconModuleHelper\SVGPreviewHelper;
 
 final class EChartsGaugeMultiPreview
 {
-    /** @param list<array<string, mixed>> $items */
-    public static function CreateSvg(array $items, string $title, string $theme, string $preset = 'multi-title'): string
-    {
-        $palette = EChartsAsset::ThemePreviewPalette($theme);
+    /** @param list<array<string, mixed>> $items @param array<string, int|string> $style */
+    public static function CreateSvg(
+        array $items,
+        string $title,
+        string $theme,
+        string $preset = 'multi-title',
+        array $style = []
+    ): string {
+        $palette = self::StyledPalette(EChartsAsset::ThemePreviewPalette($theme), $style);
         if ($preset === 'ring-grid') {
-            return self::CreateRingGridSvg($items, $title, $palette);
+            return self::CreateRingGridSvg($items, $title, $palette, $style);
         }
         if ($preset === 'ring-concentric') {
-            return self::CreateConcentricSvg($items, $title, $palette);
+            return self::CreateConcentricSvg($items, $title, $palette, $style);
         }
         if ($preset === 'weather-station') {
-            return self::CreateWeatherStationSvg($items, $title, $palette);
+            return self::CreateWeatherStationSvg($items, $title, $palette, $style);
         }
         if ($preset === 'tacho') {
-            return self::CreateTachoSvg($items, $title, $palette);
+            return self::CreateTachoSvg($items, $title, $palette, $style);
         }
         if ($preset === 'chronograph') {
-            return self::CreateChronographSvg($items, $title, $palette);
+            return self::CreateChronographSvg($items, $title, $palette, $style);
         }
 
         $items = array_slice($items, 0, 4);
@@ -42,13 +47,7 @@ final class EChartsGaugeMultiPreview
             $centerX = $column * $cellWidth + $cellWidth / 2;
             $centerY = $row * $cellHeight + $cellHeight * 0.56;
             $radius = min($cellWidth * 0.31, $cellHeight * 0.36);
-            $minimum = (float) ($item['minimum'] ?? 0.0);
-            $maximum = (float) ($item['maximum'] ?? 100.0);
-            $value = (float) ($item['value'] ?? $minimum);
-            $ratio = $maximum > $minimum ? max(0.0, min(1.0, ($value - $minimum) / ($maximum - $minimum))) : 0.0;
-            $angle = deg2rad(225.0 - 270.0 * $ratio);
-            $pointerX = $centerX + cos($angle) * $radius * 0.68;
-            $pointerY = $centerY - sin($angle) * $radius * 0.68;
+            $value = (float) ($item['value'] ?? 0.0);
             $decimals = max(0, min(6, (int) ($item['decimals'] ?? 1)));
             $formatted = number_format($value, $decimals, ',', '.');
             $unit = trim((string) ($item['unit'] ?? ''));
@@ -58,33 +57,30 @@ final class EChartsGaugeMultiPreview
             $endX = $centerX + $radius * 0.707;
             $endY = $startY;
 
+            $content .= self::DialPlateSvg($centerX, $centerY, $radius, $palette, $style, false);
             $content .= '<path d="M ' . self::N($startX) . ' ' . self::N($startY)
                 . ' A ' . self::N($radius) . ' ' . self::N($radius) . ' 0 1 1 '
                 . self::N($endX) . ' ' . self::N($endY) . '" fill="none" stroke="'
                 . SVGPreviewHelper::escape($palette['track']) . '" stroke-width="' . self::N(max(8.0, $radius * 0.12))
                 . '" stroke-linecap="round"/>';
-            $content .= '<line x1="' . self::N($centerX) . '" y1="' . self::N($centerY)
-                . '" x2="' . self::N($pointerX) . '" y2="' . self::N($pointerY)
-                . '" stroke="' . SVGPreviewHelper::escape($palette['accent'])
-                . '" stroke-width="' . self::N(max(3.0, $radius * 0.045)) . '" stroke-linecap="round"/>';
-            $content .= '<circle cx="' . self::N($centerX) . '" cy="' . self::N($centerY)
-                . '" r="' . self::N(max(5.0, $radius * 0.07)) . '" fill="'
-                . SVGPreviewHelper::escape($palette['accent']) . '"/>';
+            $content .= self::InstrumentPointerSvg($item, $centerX, $centerY, $radius, $palette['accent'], $style);
             $content .= '<text x="' . self::N($centerX) . '" y="' . self::N($centerY + $radius * 0.98)
                 . '" fill="' . SVGPreviewHelper::escape($palette['text'])
-                . '" font-size="' . self::N(max(14.0, $radius * 0.18)) . '" font-weight="700" text-anchor="middle">'
+                . '" font-size="' . self::N(max(14.0, $radius * 0.18) * self::Scale($style, 'valueFontSizePercent'))
+                . '" font-weight="700" text-anchor="middle">'
                 . SVGPreviewHelper::escape(trim($formatted . ' ' . $unit)) . '</text>';
             $content .= '<text x="' . self::N($centerX) . '" y="' . self::N($centerY - $radius * 0.18)
                 . '" fill="' . SVGPreviewHelper::escape($palette['muted'])
-                . '" font-size="' . self::N(max(11.0, $radius * 0.13)) . '" text-anchor="middle">'
+                . '" font-size="' . self::N(max(11.0, $radius * 0.13) * self::Scale($style, 'titleFontSizePercent'))
+                . '" text-anchor="middle">'
                 . SVGPreviewHelper::escape($label) . '</text>';
         }
 
-        return self::SvgDocument($title, $palette, $content, 'multi-title');
+        return self::SvgDocument($title, $palette, $content, 'multi-title', $style);
     }
 
-    /** @param list<array<string, mixed>> $items @param array<string, string> $palette */
-    private static function CreateRingGridSvg(array $items, string $title, array $palette): string
+    /** @param list<array<string, mixed>> $items @param array<string, string> $palette @param array<string, int|string> $style */
+    private static function CreateRingGridSvg(array $items, string $title, array $palette, array $style): string
     {
         $items = array_slice($items, 0, 4);
         $count = count($items);
@@ -98,42 +94,47 @@ final class EChartsGaugeMultiPreview
             $centerX = ($index % $columns) * $cellWidth + $cellWidth / 2;
             $centerY = intdiv($index, $columns) * $cellHeight + $cellHeight * 0.55;
             $radius = min($cellWidth * 0.31, $cellHeight * 0.36);
-            $color = self::RingColor($index, $palette);
+            $color = ($style['colorMode'] ?? 'theme') === 'custom'
+                ? self::StyleColor($style, 'progressColor', $palette['accent'])
+                : self::RingColor($index, $palette);
             $content .= self::RingCircles(
                 $centerX,
                 $centerY,
                 $radius,
-                max(6.0, $radius * 0.13),
+                max(6.0, $radius * 0.13) * self::Scale($style, 'ringWidthPercent'),
                 self::ValueRatio($item),
                 $color,
                 $palette['track']
             );
             $content .= '<text x="' . self::N($centerX) . '" y="' . self::N($centerY - 8.0)
                 . '" fill="' . SVGPreviewHelper::escape($palette['muted'])
-                . '" font-size="13" text-anchor="middle">'
+                . '" font-size="' . self::N(13.0 * self::Scale($style, 'titleFontSizePercent')) . '" text-anchor="middle">'
                 . SVGPreviewHelper::escape((string) ($item['label'] ?? '')) . '</text>';
             $content .= '<text x="' . self::N($centerX) . '" y="' . self::N($centerY + 20.0)
                 . '" fill="' . SVGPreviewHelper::escape($palette['text'])
-                . '" font-size="18" font-weight="700" text-anchor="middle">'
+                . '" font-size="' . self::N(18.0 * self::Scale($style, 'valueFontSizePercent'))
+                . '" font-weight="700" text-anchor="middle">'
                 . SVGPreviewHelper::escape(self::FormattedValue($item)) . '</text>';
         }
 
-        return self::SvgDocument($title, $palette, $content, 'ring-grid');
+        return self::SvgDocument($title, $palette, $content, 'ring-grid', $style);
     }
 
-    /** @param list<array<string, mixed>> $items @param array<string, string> $palette */
-    private static function CreateConcentricSvg(array $items, string $title, array $palette): string
+    /** @param list<array<string, mixed>> $items @param array<string, string> $palette @param array<string, int|string> $style */
+    private static function CreateConcentricSvg(array $items, string $title, array $palette, array $style): string
     {
         $items = array_slice($items, 0, 4);
         $content = '';
         foreach ($items as $index => $item) {
             $radius = 150.0 - $index * 30.0;
-            $color = self::RingColor($index, $palette);
+            $color = ($style['colorMode'] ?? 'theme') === 'custom'
+                ? self::StyleColor($style, 'progressColor', $palette['accent'])
+                : self::RingColor($index, $palette);
             $content .= self::RingCircles(
                 215.0,
                 210.0,
                 $radius,
-                18.0,
+                18.0 * self::Scale($style, 'ringWidthPercent'),
                 self::ValueRatio($item),
                 $color,
                 $palette['track']
@@ -143,18 +144,19 @@ final class EChartsGaugeMultiPreview
                 . '" r="7" fill="' . SVGPreviewHelper::escape($color) . '"/>';
             $content .= '<text x="438" y="' . self::N($legendY - 3.0)
                 . '" fill="' . SVGPreviewHelper::escape($palette['muted'])
-                . '" font-size="14">' . SVGPreviewHelper::escape((string) ($item['label'] ?? '')) . '</text>';
+                . '" font-size="' . self::N(14.0 * self::Scale($style, 'titleFontSizePercent')) . '">'
+                . SVGPreviewHelper::escape((string) ($item['label'] ?? '')) . '</text>';
             $content .= '<text x="438" y="' . self::N($legendY + 20.0)
                 . '" fill="' . SVGPreviewHelper::escape($palette['text'])
-                . '" font-size="17" font-weight="700">'
+                . '" font-size="' . self::N(17.0 * self::Scale($style, 'valueFontSizePercent')) . '" font-weight="700">'
                 . SVGPreviewHelper::escape(self::FormattedValue($item)) . '</text>';
         }
 
-        return self::SvgDocument($title, $palette, $content, 'ring-concentric');
+        return self::SvgDocument($title, $palette, $content, 'ring-concentric', $style);
     }
 
-    /** @param list<array<string, mixed>> $items @param array<string, string> $palette */
-    private static function CreateWeatherStationSvg(array $items, string $title, array $palette): string
+    /** @param list<array<string, mixed>> $items @param array<string, string> $palette @param array<string, int|string> $style */
+    private static function CreateWeatherStationSvg(array $items, string $title, array $palette, array $style): string
     {
         $items = array_slice($items, 0, 4);
         $count = count($items);
@@ -167,28 +169,36 @@ final class EChartsGaugeMultiPreview
         $content = '';
         foreach ($items as $index => $item) {
             [$x, $y, $radius] = $positions[$index];
-            $content .= self::InstrumentDialSvg($item, $x, $y, $radius, $palette, self::RingColor($index, $palette));
+            $content .= self::InstrumentDialSvg(
+                $item,
+                $x,
+                $y,
+                $radius,
+                $palette,
+                self::RingColor($index, $palette),
+                $style
+            );
         }
 
-        return self::SvgDocument($title, $palette, $content, 'weather-station');
+        return self::SvgDocument($title, $palette, $content, 'weather-station', $style);
     }
 
-    /** @param list<array<string, mixed>> $items @param array<string, string> $palette */
-    private static function CreateTachoSvg(array $items, string $title, array $palette): string
+    /** @param list<array<string, mixed>> $items @param array<string, string> $palette @param array<string, int|string> $style */
+    private static function CreateTachoSvg(array $items, string $title, array $palette, array $style): string
     {
         $items = array_slice($items, 0, 3);
         $positions = [[360.0, 205.0, 125.0], [110.0, 215.0, 78.0], [610.0, 215.0, 78.0]];
         $content = '';
         foreach ($items as $index => $item) {
             [$x, $y, $radius] = $positions[$index];
-            $content .= self::InstrumentDialSvg($item, $x, $y, $radius, $palette, '#F0442D');
+            $content .= self::InstrumentDialSvg($item, $x, $y, $radius, $palette, '#F0442D', $style);
         }
 
-        return self::SvgDocument($title, $palette, $content, 'tacho');
+        return self::SvgDocument($title, $palette, $content, 'tacho', $style);
     }
 
-    /** @param list<array<string, mixed>> $items @param array<string, string> $palette */
-    private static function CreateChronographSvg(array $items, string $title, array $palette): string
+    /** @param list<array<string, mixed>> $items @param array<string, string> $palette @param array<string, int|string> $style */
+    private static function CreateChronographSvg(array $items, string $title, array $palette, array $style): string
     {
         $items = array_slice($items, 0, 6);
         $subCount = count($items) - 1;
@@ -202,7 +212,17 @@ final class EChartsGaugeMultiPreview
         };
         $centerY = $title === '' ? 205.0 : 219.0;
         $radius = $title === '' ? 170.0 : 155.0;
-        $content = self::InstrumentDialSvg($items[0], 360.0, $centerY, $radius, $palette, self::RingColor(0, $palette), true, true);
+        $content = self::InstrumentDialSvg(
+            $items[0],
+            360.0,
+            $centerY,
+            $radius,
+            $palette,
+            self::RingColor(0, $palette),
+            $style,
+            true,
+            true
+        );
         $subRadius = $radius * ($subCount <= 3 ? 0.23 : 0.19);
         foreach ($offsets as $index => [$offsetX, $offsetY]) {
             $content .= self::InstrumentDialSvg(
@@ -212,6 +232,7 @@ final class EChartsGaugeMultiPreview
                 $subRadius,
                 $palette,
                 self::RingColor($index + 1, $palette),
+                $style,
                 true
             );
         }
@@ -220,13 +241,14 @@ final class EChartsGaugeMultiPreview
             360.0,
             $centerY,
             $radius,
-            self::RingColor(0, $palette)
+            self::RingColor(0, $palette),
+            $style
         );
 
-        return self::SvgDocument($title, $palette, $content, 'chronograph');
+        return self::SvgDocument($title, $palette, $content, 'chronograph', $style);
     }
 
-    /** @param array<string, mixed> $item @param array<string, string> $palette */
+    /** @param array<string, mixed> $item @param array<string, string> $palette @param array<string, int|string> $style */
     private static function InstrumentDialSvg(
         array $item,
         float $x,
@@ -234,25 +256,23 @@ final class EChartsGaugeMultiPreview
         float $radius,
         array $palette,
         string $color,
+        array $style,
         bool $embedded = false,
         bool $primary = false
     ): string {
         $startX = $x - $radius * 0.707;
         $endX = $x + $radius * 0.707;
         $arcY = $y + $radius * 0.707;
-        $result = '<circle cx="' . self::N($x) . '" cy="' . self::N($y)
-            . '" r="' . self::N($radius * 1.14) . '" fill="' . SVGPreviewHelper::escape($palette['background'])
-            . '" stroke="' . SVGPreviewHelper::escape($palette['border']) . '" stroke-width="2"/>';
-        $result .= '<circle cx="' . self::N($x) . '" cy="' . self::N($y)
-            . '" r="' . self::N($radius * 1.04) . '" fill="none" stroke="'
-            . SVGPreviewHelper::escape($palette['track']) . '" stroke-width="3"/>';
+        $result = self::DialPlateSvg($x, $y, $radius, $palette, $style, true);
         $result .= '<path d="M ' . self::N($startX) . ' ' . self::N($arcY)
             . ' A ' . self::N($radius) . ' ' . self::N($radius) . ' 0 1 1 '
             . self::N($endX) . ' ' . self::N($arcY) . '" fill="none" stroke="'
             . SVGPreviewHelper::escape($palette['track']) . '" stroke-width="'
             . self::N(max(5.0, $radius * 0.09)) . '"/>';
-        for ($tick = 0; $tick <= 10; $tick++) {
-            $tickAngle = deg2rad(225.0 - 27.0 * $tick);
+        $majorSplitCount = (int) ($style['majorSplitCount'] ?? 0);
+        $majorSplitCount = $majorSplitCount >= 2 && $majorSplitCount <= 24 ? $majorSplitCount : 10;
+        for ($tick = 0; $tick <= $majorSplitCount; $tick++) {
+            $tickAngle = deg2rad(225.0 - 270.0 / $majorSplitCount * $tick);
             $inner = $radius * 0.86;
             $outer = $radius * 0.97;
             $result .= '<line x1="' . self::N($x + cos($tickAngle) * $inner)
@@ -261,51 +281,83 @@ final class EChartsGaugeMultiPreview
                 . '" y2="' . self::N($y - sin($tickAngle) * $outer)
                 . '" stroke="' . SVGPreviewHelper::escape($palette['border']) . '" stroke-width="2"/>';
         }
-        $result .= self::InstrumentPointerSvg($item, $x, $y, $radius, $color);
+        $result .= self::InstrumentPointerSvg($item, $x, $y, $radius, $color, $style);
         if ($embedded) {
             foreach ([[$startX, $arcY, $item['minimum'] ?? 0.0], [$endX, $arcY, $item['maximum'] ?? 100.0]] as [$labelX, $labelY, $limit]) {
                 $result .= '<text x="' . self::N((float) $labelX) . '" y="' . self::N((float) $labelY)
                     . '" fill="' . SVGPreviewHelper::escape($palette['muted'])
-                    . '" font-size="' . self::N(max(5.0, $radius * 0.09)) . '" text-anchor="middle">'
+                    . '" font-size="' . self::N(max(5.0, $radius * 0.09) * self::Scale($style, 'scaleFontSizePercent'))
+                    . '" text-anchor="middle">'
                     . SVGPreviewHelper::escape((string) $limit) . '</text>';
             }
         }
         $result .= '<text x="' . self::N($x) . '" y="' . self::N($y - $radius * ($primary ? 0.16 : 0.22))
             . '" fill="' . SVGPreviewHelper::escape($palette['muted'])
-            . '" font-size="' . self::N(max($embedded ? 5.0 : 10.0, $radius * 0.12))
+            . '" font-size="' . self::N(max($embedded ? 5.0 : 10.0, $radius * 0.12)
+                * self::Scale($style, 'titleFontSizePercent'))
             . '" text-anchor="middle">'
             . SVGPreviewHelper::escape((string) ($item['label'] ?? '')) . '</text>';
         $result .= '<text x="' . self::N($x) . '" y="' . self::N($y + $radius * ($primary ? 0.74 : 0.47))
             . '" fill="' . SVGPreviewHelper::escape($palette['text'])
-            . '" font-size="' . self::N(max($embedded ? 6.0 : 12.0, $radius * 0.16))
+            . '" font-size="' . self::N(max($embedded ? 6.0 : 12.0, $radius * 0.16)
+                * self::Scale($style, 'valueFontSizePercent'))
             . '" font-weight="700" text-anchor="middle">'
             . SVGPreviewHelper::escape(self::FormattedValue($item)) . '</text>';
 
         return $result;
     }
 
-    /** @param array<string, mixed> $item */
+    /** @param array<string, mixed> $item @param array<string, int|string> $style */
     private static function InstrumentPointerSvg(
         array $item,
         float $x,
         float $y,
         float $radius,
-        string $color
+        string $color,
+        array $style
     ): string {
         $angle = deg2rad(225.0 - 270.0 * self::ValueRatio($item));
+        $length = $radius * 0.65 * self::Scale($style, 'pointerLengthPercent');
+        $width = max(2.0, $radius * 0.04) * self::Scale($style, 'pointerWidthPercent');
+        $customColors = ($style['colorMode'] ?? 'theme') === 'custom';
+        $pointerColor = $customColors ? self::StyleColor($style, 'pointerColor', $color) : $color;
+        $pointerX = $x + cos($angle) * $length;
+        $pointerY = $y - sin($angle) * $length;
+        $shape = (string) ($style['pointerShape'] ?? 'preset');
+        if (in_array($shape, ['needle', 'arrow'], true)) {
+            $normalX = sin($angle) * $width;
+            $normalY = cos($angle) * $width;
+            $backX = $x - cos($angle) * $length * ($shape === 'arrow' ? 0.12 : 0.06);
+            $backY = $y + sin($angle) * $length * ($shape === 'arrow' ? 0.12 : 0.06);
+            $pointer = '<polygon points="' . self::N($pointerX) . ',' . self::N($pointerY)
+                . ' ' . self::N($backX + $normalX) . ',' . self::N($backY + $normalY)
+                . ' ' . self::N($backX - $normalX) . ',' . self::N($backY - $normalY)
+                . '" fill="' . SVGPreviewHelper::escape($pointerColor) . '"/>';
+        } else {
+            $pointer = '<line x1="' . self::N($x) . '" y1="' . self::N($y)
+                . '" x2="' . self::N($pointerX) . '" y2="' . self::N($pointerY)
+                . '" stroke="' . SVGPreviewHelper::escape($pointerColor)
+                . '" stroke-width="' . self::N($width) . '" stroke-linecap="round"/>';
+        }
 
-        return '<line x1="' . self::N($x) . '" y1="' . self::N($y)
-            . '" x2="' . self::N($x + cos($angle) * $radius * 0.65)
-            . '" y2="' . self::N($y - sin($angle) * $radius * 0.65)
-            . '" stroke="' . SVGPreviewHelper::escape($color)
-            . '" stroke-width="' . self::N(max(3.0, $radius * 0.04)) . '" stroke-linecap="round"/>'
-            . '<circle cx="' . self::N($x) . '" cy="' . self::N($y)
-            . '" r="' . self::N(max(4.0, $radius * 0.07)) . '" fill="'
-            . SVGPreviewHelper::escape($color) . '"/>';
+        $anchorShape = (string) ($style['anchorShape'] ?? 'preset');
+        if ($anchorShape === 'none') {
+            return $pointer;
+        }
+        $anchorColor = $customColors ? self::StyleColor($style, 'anchorColor', $pointerColor) : $pointerColor;
+        $anchorBorder = $customColors ? self::StyleColor($style, 'anchorBorderColor', $pointerColor) : $pointerColor;
+        $anchorRadius = max(4.0, $radius * 0.07) * self::Scale($style, 'anchorSizePercent');
+        $borderWidth = max(1.0, $radius * 0.01) * self::Scale($style, 'anchorBorderWidthPercent');
+
+        return $pointer . '<circle cx="' . self::N($x) . '" cy="' . self::N($y)
+            . '" r="' . self::N($anchorRadius) . '" fill="'
+            . ($anchorShape === 'ring' ? 'none' : SVGPreviewHelper::escape($anchorColor))
+            . '" stroke="' . SVGPreviewHelper::escape($anchorBorder)
+            . '" stroke-width="' . self::N($borderWidth) . '"/>';
     }
 
-    /** @param array<string, string> $palette */
-    private static function SvgDocument(string $title, array $palette, string $content, string $preset): string
+    /** @param array<string, string> $palette @param array<string, int|string> $style */
+    private static function SvgDocument(string $title, array $palette, string $content, string $preset, array $style): string
     {
         $titleElement = trim($title) === '' ? '' : '<text x="360" y="28" fill="'
             . SVGPreviewHelper::escape($palette['text'])
@@ -313,7 +365,10 @@ final class EChartsGaugeMultiPreview
             . SVGPreviewHelper::escape($title) . '</text>';
 
         return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 400" role="img" data-preset="'
-            . SVGPreviewHelper::escape($preset) . '">'
+            . SVGPreviewHelper::escape($preset) . '" data-pointer-shape="'
+            . SVGPreviewHelper::escape((string) ($style['pointerShape'] ?? 'preset')) . '" data-anchor-shape="'
+            . SVGPreviewHelper::escape((string) ($style['anchorShape'] ?? 'preset')) . '" data-plate-mode="'
+            . SVGPreviewHelper::escape((string) ($style['plateMode'] ?? 'preset')) . '">'
             . '<rect width="720" height="400" rx="16" fill="' . SVGPreviewHelper::escape($palette['background']) . '"/>'
             . $titleElement . $content . '</svg>';
     }
@@ -335,6 +390,64 @@ final class EChartsGaugeMultiPreview
             . $base . ' stroke="' . SVGPreviewHelper::escape($color)
             . '" stroke-dasharray="' . self::N($circumference * $ratio) . ' ' . self::N($circumference)
             . '" transform="rotate(-90 ' . self::N($centerX) . ' ' . self::N($centerY) . ')"/>';
+    }
+
+    /** @param array<string, string> $palette @param array<string, int|string> $style */
+    private static function DialPlateSvg(
+        float $x,
+        float $y,
+        float $radius,
+        array $palette,
+        array $style,
+        bool $presetHasPlate
+    ): string {
+        $mode = (string) ($style['plateMode'] ?? 'preset');
+        if ($mode === 'hidden' || ($mode === 'preset' && !$presetHasPlate)) {
+            return '';
+        }
+        if ($mode === 'preset') {
+            return '<circle cx="' . self::N($x) . '" cy="' . self::N($y)
+                . '" r="' . self::N($radius * 1.14) . '" fill="' . SVGPreviewHelper::escape($palette['background'])
+                . '" stroke="' . SVGPreviewHelper::escape($palette['border']) . '" stroke-width="2"/>'
+                . '<circle cx="' . self::N($x) . '" cy="' . self::N($y)
+                . '" r="' . self::N($radius * 1.04) . '" fill="none" stroke="'
+                . SVGPreviewHelper::escape($palette['track']) . '" stroke-width="3"/>';
+        }
+
+        return '<circle cx="' . self::N($x) . '" cy="' . self::N($y)
+            . '" r="' . self::N($radius * 1.08 * self::Scale($style, 'plateSizePercent'))
+            . '" fill="' . SVGPreviewHelper::escape(self::StyleColor($style, 'plateColor', $palette['background']))
+            . '" stroke="' . SVGPreviewHelper::escape(self::StyleColor($style, 'plateBorderColor', $palette['border']))
+            . '" stroke-width="' . self::N(2.0 * self::Scale($style, 'plateBorderWidthPercent')) . '"/>';
+    }
+
+    /** @param array<string, string> $palette @param array<string, int|string> $style @return array<string, string> */
+    private static function StyledPalette(array $palette, array $style): array
+    {
+        if (($style['colorMode'] ?? 'theme') !== 'custom') {
+            return $palette;
+        }
+        $palette['accent'] = self::StyleColor($style, 'progressColor', $palette['accent']);
+        $palette['track'] = self::StyleColor($style, 'ringColor', $palette['track']);
+        $palette['border'] = self::StyleColor($style, 'scaleColor', $palette['border']);
+        $palette['text'] = self::StyleColor($style, 'valueColor', $palette['text']);
+        $palette['muted'] = self::StyleColor($style, 'titleColor', $palette['muted']);
+
+        return $palette;
+    }
+
+    /** @param array<string, int|string> $style */
+    private static function StyleColor(array $style, string $name, string $fallback): string
+    {
+        $color = (string) ($style[$name] ?? '');
+
+        return preg_match('/^#[0-9A-F]{6}$/i', $color) === 1 ? strtoupper($color) : $fallback;
+    }
+
+    /** @param array<string, int|string> $style */
+    private static function Scale(array $style, string $name): float
+    {
+        return max(50, min(150, (int) ($style[$name] ?? 100))) / 100.0;
     }
 
     /** @param array<string, mixed> $item */

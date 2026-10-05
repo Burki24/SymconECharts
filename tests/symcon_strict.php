@@ -82,7 +82,8 @@ foreach ([
     'use ResponsiveVisualizationHelper;',
     'use VisualizationAssetHelper;',
     'use VisualizationThemeHelper;',
-    'public function GetVisualizationTile(): string'
+    'public function GetVisualizationTile(): string',
+    'public function UpdateGaugePreviewFromForm(string $Configuration): void'
 ] as $visualizationContract) {
     requireStrictContract(
         str_contains($gaugeMulti, $visualizationContract),
@@ -546,6 +547,11 @@ foreach ([
                 $errors
             );
         }
+        requireStrictContract(
+            str_contains($gaugeMulti, 'ECGM_UpdateGaugePreviewFromForm'),
+            'EChartsGaugeMulti designer fields must refresh the SVG previews immediately.',
+            $errors
+        );
     }
 
     $expectedAction = 'echo ' . $gaugeContract['prefix'] . '_GetGaugeData($id);';

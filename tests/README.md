@@ -58,7 +58,9 @@ StylePHP und PHP CS Fixer.
   Skalen-, Farb- und Plattengestaltung, deren Validierung sowie getrennte
   Kachel- und IPSView-Einstellungen geprüft. Der JavaScript-Layouttest sichert
   die Anwendung dieser Designschicht auf Raster-, Ring- und Chronographenserie
-  einschließlich der Zeichenreihenfolge ab.
+  einschließlich der Zeichenreihenfolge ab. Die Formularintegration prüft,
+  dass ungespeicherte Änderungen beide SVG-Vorschauen sofort und bei
+  unabhängigem IPSView-Design getrennt aktualisieren.
 - `echarts_assets.php` prüft Version, SHA-256-Integrität, Lizenz und NOTICE der
   lokal gebündelten Apache-ECharts-Runtime und der sechs offiziellen Themes.
   Zusätzlich werden der Gauge-spezifische Browser-Export, das gemeinsame
