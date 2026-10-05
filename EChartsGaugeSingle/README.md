@@ -1,10 +1,10 @@
 # EChartsGaugeSingle
 
 Gerätemodul der SymconECharts-Library für ein Gauge-Diagramm mit genau einer
-numerischen Quellvariable. Eine Gauge-Single-Instanz soll die native
-Symcon-Kacheldarstellung und künftig ein separat platzierbares HTML-Widget in
-IPSView bereitstellen können. Datenquelle und Diagrammkonfiguration werden
-dabei nur einmal gepflegt.
+numerischen Quellvariable. Eine Gauge-Single-Instanz stellt die native
+Symcon-Kacheldarstellung und optional ein separat platzierbares WebContent-
+Widget für IPSView bereit. Datenquelle und fachliche Diagrammkonfiguration
+werden dabei nur einmal gepflegt.
 
 **Entwicklungsstand:** Erste sichtbare native Gauge mit Kacheldesigner.
 Quellvariable und minimale Gauge-Einstellungen sind konfigurierbar; das Modul ruft den
@@ -16,7 +16,8 @@ Skalenbögen und optionalen Gauge-Farben und zeigt
 zusätzlich eine live aktualisierte SVG-Vorschau der noch nicht übernommenen
 Einstellungen. Davon unabhängig stehen das automatische Symcon-Design und
 sechs lokal gebündelte offizielle ECharts-Themes zur Auswahl.
-IPSView-HTML-Ausgabevariablen sind noch nicht implementiert.
+IPSView kann das Kacheldesign vollständig erben oder ein eigenes Gauge-Design
+mit separater Vorschau verwenden.
 
 ### Inhaltsverzeichnis
 
@@ -138,9 +139,8 @@ Eckenradius und Schatten. Optionale Schatten beziehungsweise Leuchteffekte
 stehen zusätzlich für Zeiger, Fortschritt, Skalenring und Nabe bereit. Alle
 Positionen und Größen bleiben Bestandteil der responsiven Layoutberechnung.
 
-**Geplant:** Zusätzliche Gauge-Single-Presets, ein sicherer Importvertrag für
-eigene Theme-Builder-Dateien, weitere Gestaltungsoptionen sowie die
-Ausgabe als optionales IPSView-Widget.
+**Geplant:** Zusätzliche Gauge-Single-Presets und ein sicherer Importvertrag für
+eigene Theme-Builder-Dateien.
 Archivdarstellung wird erst mit einem dafür
 festgelegten Chart-Anwendungsfall umgesetzt.
 
@@ -161,8 +161,8 @@ Erforderlich sind eine Verbindung zu einer aktiven
 [EChartsGateway-Instanz](../EChartsGateway) und eine vorhandene Integer- oder
 Float-Variable als Datenquelle. Ein reines Momentanwert-Widget benötigt keine
 Historie. Für die Bereinigung eigener SVG-Hintergründe wird die PHP-DOM-
-Erweiterung benötigt. IPSView soll nur für den zusätzlichen
-IPSView-Ausgabeweg erforderlich sein, nicht für native Kacheln.
+Erweiterung benötigt. IPSView wird nur für den zusätzlichen
+IPSView-Ausgabeweg benötigt, nicht für native Kacheln.
 
 ### 3. Software-Installation
 
@@ -274,14 +274,14 @@ Grundposition; unten bleibt die kompatible Standardposition.
 
 #### Statusvariablen
 
-Für die native Kachel werden keine eigenen Variablen angelegt. Für IPSView ist künftig
-je aktivierter Widget-Ausgabe eine eigene Stringvariable mit HTML-Inhalt
-vorgesehen. Die native Kachel benötigt diese Variable nicht.
+Für die native Kachel werden keine eigenen Variablen angelegt. Bei aktivierter
+IPSView-Ausgabe erzeugt das Modul eine Stringvariable mit WebContent-
+Darstellung und vollständigem HTML-Inhalt. Die native Kachel benötigt diese
+Variable nicht.
 
-Quellvariablen sollen referenziert und nicht als Messwertkopien unter dem
-Gauge-Modul dupliziert werden. Beim späteren Abschalten der IPSView-Ausgabe sollen
-bestehende HTML-Variablen erhalten bleiben; ein Löschen soll ausdrücklich
-bestätigt werden müssen.
+Quellvariablen werden referenziert und nicht als Messwertkopien unter dem
+Gauge-Modul dupliziert. Beim Abschalten der IPSView-Ausgabe bleibt die
+HTML-Variable erhalten; ein Löschen muss ausdrücklich bestätigt werden.
 
 #### Profile
 
@@ -291,7 +291,7 @@ Darstellungs-Helpern aufbauen.
 
 ### 6. Visualisierung
 
-**Die native Kachel ist als erster Ausgabeweg implementiert; IPSView folgt.**
+**Native Kachel und optionale IPSView-WebContent-Ausgabe sind implementiert.**
 
 #### Native Symcon-Kachel
 
@@ -341,17 +341,32 @@ bestätigter Importvertrag erforderlich.
 
 #### IPSView
 
-Weiterhin vorgesehen ist ein kleines, eigenständig platzierbares HTML-Widget pro Chart,
-keine gemeinsame Dashboard-Seite. Die Größe und Platzierung werden in IPSView
-festgelegt; das Diagramm soll sich an die verfügbare Fläche anpassen.
+Das Modul erzeugt auf Wunsch ein kleines, eigenständig platzierbares
+WebContent-Widget pro Chart, keine gemeinsame Dashboard-Seite. Die Größe und
+Platzierung werden in IPSView festgelegt; das Diagramm passt sich an die
+verfügbare Fläche an. Dazu wird die WebContent-Variable in IPSView als HTML-
+Element eingebunden.
+
+Im Abschnitt **IPSView-Design** ist zunächst **Kacheldesign verwenden** aktiv.
+Damit folgt das Widget jeder späteren Änderung am Kacheldesigner. Für eine
+andere Optik kann diese Vererbung abgeschaltet oder das aktuelle Kacheldesign
+über die Kopieraktion als Ausgangspunkt übernommen werden. Danach stehen
+Preset, Theme, Zeiger, Nabe, Platte, Skala, Farben, SVGs und Feinabstimmung
+unabhängig zur Verfügung. Datenquelle, Titeltext, Wertebereich, Einheit und
+Nachkommastellen bleiben bewusst gemeinsame fachliche Einstellungen.
 
 #### Gemeinsame Darstellung
 
-Das gemeinsame HTML-Seitenmodell und die Gauge-Zeichenlogik sind für beide
-Ausgabewege vorgesehen. Der IPSView-Datenkanal und die dafür benötigte
-Zugriffsprüfung sind noch nicht implementiert. Ausgabespezifische Anpassungen
-wie Hintergrund, Transparenz und Schriftgrößen dürfen getrennt eingestellt
-werden, ohne die andere Visualisierung unbeabsichtigt zu verändern.
+Das gemeinsame HTML-Seitenmodell und die Gauge-Zeichenlogik werden für beide
+Ausgabewege verwendet. IPSView enthält den aktuellen Zustand direkt im
+vollständigen WebContent-Dokument; es wird kein externer Datenendpunkt
+geöffnet. Ausgabespezifische Anpassungen wie Hintergrund, Transparenz und
+Schriftgrößen können getrennt eingestellt werden, ohne die andere
+Visualisierung zu verändern.
+
+Mangels IPSView-Lizenz auf der vorhandenen Testinstallation ist die reale
+Einbindung in IPSView nicht laufzeitgeprüft. Getestet sind die erzeugten HTML-
+Modelle, die Designvererbung und die Trennung beider Designs.
 
 ### 7. PHP-Befehlsreferenz
 

@@ -8,6 +8,8 @@ const KR_READY = 10103;
 const IS_ACTIVE = 102;
 const IS_INACTIVE = 104;
 const SYMCON_OUTPUT_BUFFER_LIMIT = 1048576;
+const VARIABLETYPE_STRING = 3;
+const VARIABLE_PRESENTATION_WEB_CONTENT = '{6B9CAEEC-5958-C223-30F7-BD36569FC57A}';
 
 $GLOBALS['symconTestVariables'] = [
     4711 => [
@@ -139,6 +141,9 @@ abstract class IPSModuleStrict
     private bool $parentActive = true;
     private string $summary = '';
     private int $visualizationType = 0;
+    /** @var array<string, int> */
+    private array $variableIDs = [];
+    private static int $nextVariableID = 9000;
 
     public function Create(): void
     {
@@ -177,6 +182,13 @@ abstract class IPSModuleStrict
     public function GetTestVisualizationType(): int
     {
         return $this->visualizationType;
+    }
+
+    public function GetTestVariableValue(string $ident): mixed
+    {
+        $variableID = $this->variableIDs[$ident] ?? 0;
+
+        return $GLOBALS['symconTestVariables'][$variableID]['Value'] ?? null;
     }
 
     /** @return list<array{SenderID:int, Message:int}> */
@@ -223,6 +235,54 @@ abstract class IPSModuleStrict
         $this->properties[$name] ??= $default;
 
         return true;
+    }
+
+    protected function MaintainVariable(
+        string $ident,
+        string $name,
+        int $type,
+        array $presentation,
+        int $position,
+        bool $keep
+    ): bool {
+        if (isset($this->variableIDs[$ident])) {
+            return false;
+        }
+        $variableID = ++self::$nextVariableID;
+        $this->variableIDs[$ident] = $variableID;
+        $GLOBALS['symconTestVariables'][$variableID] = [
+            'VariableType'    => $type,
+            'VariableUpdated' => 1780000100,
+            'Value'           => '',
+            'Name'            => $name,
+            'Presentation'    => $presentation,
+            'Position'        => $position,
+            'Keep'            => $keep
+        ];
+
+        return true;
+    }
+
+    protected function SetValue(string $ident, mixed $value): bool
+    {
+        $variableID = $this->GetIDForIdent($ident);
+        $GLOBALS['symconTestVariables'][$variableID]['Value'] = $value;
+
+        return true;
+    }
+
+    protected function GetIDForIdent(string $ident): int
+    {
+        if (!isset($this->variableIDs[$ident])) {
+            throw new RuntimeException('Unknown ident.');
+        }
+
+        return $this->variableIDs[$ident];
+    }
+
+    protected function VariableExists(string $ident): bool
+    {
+        return isset($this->variableIDs[$ident]);
     }
 
     protected function ReadPropertyInteger(string $name): int
@@ -477,6 +537,7 @@ $gauge->SetTestProperty('DetailColorMode', 'custom');
 $gauge->SetTestProperty('DetailBackgroundColor', 0x101820);
 $gauge->SetTestProperty('DetailBorderColor', 0x708090);
 $gauge->SetTestProperty('PointerShadow', true);
+$gauge->SetTestProperty('EnableIPSView', true);
 $gauge->ApplyChanges();
 
 assertGatewayGauge($gauge->GetTestStatus() === IS_ACTIVE, 'Gauge Single must become active.');
@@ -486,6 +547,11 @@ assertGatewayGauge($gauge->GetTestVisualizationType() === 1, 'Gauge Single must 
 assertGatewayGauge(
     in_array(['SenderID' => 4711, 'Message' => VM_UPDATE], $gauge->GetTestMessages(), true),
     'Gauge Single must subscribe to source value updates.'
+);
+assertGatewayGauge(
+    is_string($gauge->GetTestVariableValue('IPSViewGauge'))
+        && str_contains($gauge->GetTestVariableValue('IPSViewGauge'), '"mode":"ipsview"'),
+    'Enabled IPSView output must maintain and populate its WebContent variable.'
 );
 
 $visualizationTile = $gauge->GetVisualizationTile();
@@ -509,6 +575,35 @@ assertGatewayGauge(
     'The automatic Gauge theme must resolve its canvas background from the Symcon design tokens.'
 );
 assertGatewayGauge(str_contains($visualizationTile, "case 'speed':"), 'Gauge Single tile must render the Speed preset.');
+
+$inheritedIPSViewHTML = $gauge->GetIPSViewHTML();
+assertGatewayGauge(
+    str_contains($inheritedIPSViewHTML, '"mode":"ipsview"')
+        && str_contains($inheritedIPSViewHTML, '"preset":"progress"')
+        && str_contains($inheritedIPSViewHTML, '"theme":"vintage"'),
+    'IPSView must inherit the Tile design by default.'
+);
+assertGatewayGauge(
+    strlen($inheritedIPSViewHTML) < SYMCON_OUTPUT_BUFFER_LIMIT,
+    'Gauge Single IPSView HTML must remain below the Symcon output-buffer limit.'
+);
+$gauge->SetTestProperty('IPSViewUseTileDesign', false);
+$gauge->SetTestProperty('IPSViewGaugePreset', 'speed');
+$gauge->SetTestProperty('IPSViewEChartsTheme', 'roma');
+$gauge->SetTestProperty('IPSViewPointerColor', 0xA04020);
+$independentIPSViewHTML = $gauge->GetIPSViewHTML();
+assertGatewayGauge(
+    str_contains($independentIPSViewHTML, '"preset":"speed"')
+        && str_contains($independentIPSViewHTML, '"theme":"roma"')
+        && str_contains($independentIPSViewHTML, '"pointerColor":"#A04020"'),
+    'IPSView must render its independent design without changing the Tile design.'
+);
+assertGatewayGauge(
+    str_contains($gauge->GetVisualizationTile(), '"preset":"progress"')
+        && str_contains($gauge->GetVisualizationTile(), '"theme":"vintage"'),
+    'An independent IPSView design must not alter the Tile design.'
+);
+$gauge->SetTestProperty('IPSViewUseTileDesign', true);
 foreach ([
     'function resolveGaugeLayout(preset, width, height, style)',
     "resolveStyleScale(style, 'scaleFontSizePercent')",
@@ -587,6 +682,20 @@ assertGatewayGauge(
 );
 
 $configurationForm = json_decode($gauge->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+$encodedConfigurationForm = json_encode($configurationForm, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    str_contains($encodedConfigurationForm, '"caption":"IPSView design"')
+        && str_contains($encodedConfigurationForm, '"name":"EnableIPSView"')
+        && str_contains($encodedConfigurationForm, '"name":"IPSViewUseTileDesign"')
+        && str_contains($encodedConfigurationForm, '"name":"IPSViewGaugePreset"')
+        && str_contains($encodedConfigurationForm, '"name":"IPSViewGaugePreview"')
+        && str_contains($encodedConfigurationForm, 'ECGS_UpdateIPSViewGaugePreviewFromForm'),
+    'Gauge Single form must expose the helper-backed IPSView output and independent designer.'
+);
+assertGatewayGauge(
+    strlen($encodedConfigurationForm) < SYMCON_OUTPUT_BUFFER_LIMIT,
+    'The duplicated IPSView designer must remain below the Symcon output-buffer limit.'
+);
 assertGatewayGauge(
     str_contains(json_encode($configurationForm, JSON_THROW_ON_ERROR), '$PlateFillMode')
         && str_contains(json_encode($configurationForm, JSON_THROW_ON_ERROR), '$PlateGradientRadiusPercent')

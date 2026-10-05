@@ -26,8 +26,10 @@ Folgende Module beinhaltet das SymconECharts Repository:
   unten wählbar; optional übernimmt Gauge Single Wertebereich, Einheit und
   Nachkommastellen aus der nativen Variablendarstellung beziehungsweise einem
   kompatiblen Legacy-Profil.
-  Ein separat platzierbares HTML-Widget in IPSView bleibt ein weiterer
-  Ausgabeweg auf derselben Diagrammkonfiguration und Datenaufbereitung.
+  Ein optionales, separat platzierbares WebContent-Widget in IPSView verwendet
+  dieselbe Datenkonfiguration und denselben Renderer. Sein Design erbt
+  standardmäßig das Kacheldesign oder kann vollständig unabhängig gestaltet
+  werden.
 
 - __EChartsGaugeMulti__ ([Dokumentation](EChartsGaugeMulti))
   Gerätemodul für zusammengesetzte Gauge-Darstellungen mit 2 bis 16
@@ -58,7 +60,9 @@ Standarddarstellung.
 
 Gauge Multi verwaltet bereits eine geordnete Quellenliste und liefert ein
 versioniertes Multi-Modell, besitzt aber noch keinen Renderer.
-Archivverarbeitung und IPSView-HTML-Ausgabe sind noch nicht implementiert.
+Archivverarbeitung und der Gauge-Multi-Renderer sind noch nicht implementiert.
+Gauge Single besitzt eine optionale IPSView-WebContent-Ausgabe; der reale
+IPSView-Laufzeittest bleibt mangels Lizenz eine dokumentierte Testlücke.
 
 Als erste Chartfamilie sind Single- und Multi-Gauges vorgesehen. Eine
 Geräteinstanz soll jeweils einen Chart liefern; eine gemeinsame Dashboard-Seite

@@ -36,8 +36,9 @@ radialer Farbverläufe sowie eines bereinigten, auf die Plattenform
 zugeschnittenen SVG-Hintergrunds. Gauge Single unterstützt außerdem validierte farbige Wertebereiche,
 konfigurierbare Skalenunterteilungen und -abstände, beide Drehrichtungen,
 responsive Positionsversätze, elementweise Sichtbarkeit sowie einen
-gestaltbaren Wertekasten und optionale Schatteneffekte. Der Multi-Renderer,
-Archivverarbeitung, IPSView-Ausgabe sowie reale
+gestaltbaren Wertekasten und optionale Schatteneffekte. Gauge Single erzeugt
+optional eine IPSView-WebContent-Variable mit vererbtem oder unabhängigem
+Design auf demselben Renderer. Der Multi-Renderer, Archivverarbeitung sowie reale
 Symcon-Laufzeit- und Browsertests fehlen noch. Die Testsuite prüft zusätzlich
 zu Struktur und Metadaten die Strict-Verträge, das Protokoll, die
 ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
@@ -90,6 +91,8 @@ Den Vertrag des ersten Kacheldesigners dokumentiert
 [`ADR 0006`](adr/0006-gauge-single-tile-designer.md).
 Die gemeinsame Theme-Assetbasis und die instanzbezogene Auswahl dokumentiert
 [`ADR 0007`](adr/0007-echarts-theme-assets-and-selection.md).
+Die optionale IPSView-WebContent-Ausgabe und ihr getrenntes Design dokumentiert
+[`ADR 0008`](adr/0008-gauge-single-ipsview-output.md).
 
 ## Daten, Konfiguration und Ausgabe
 
@@ -107,11 +110,12 @@ HTML-Dokument wird nicht bei jeder Messwertänderung neu erzeugt. Datenmenge,
 Aktualisierungsrate und Animationen werden insbesondere für mehrere
 gleichzeitig sichtbare Charts begrenzt und getestet.
 
-Die native Kachel und IPSView erhalten getrennte Kommunikationsadapter zum
-gemeinsamen Darstellungskern. Der IPSView-Datenkanal benötigt eine eigene
-Zugriffsprüfung; seine Berechtigungen werden nicht einfach aus der Anmeldung
-an einer anderen Oberfläche abgeleitet. Eine abgeschaltete IPSView-Ausgabe
-darf den nativen Ausgabeweg nicht beeinträchtigen.
+Die native Kachel und IPSView erhalten getrennte Ausgabeadapter zum gemeinsamen
+Darstellungskern. Gauge Single schreibt ein vollständiges, eigenständiges
+Dokument in eine lokale WebContent-Variable und führt deshalb keinen externen
+Datenendpunkt ein. Eine abgeschaltete IPSView-Ausgabe beeinträchtigt den
+nativen Ausgabeweg nicht und lässt eine bereits angelegte Ausgabevariable bis
+zu einer ausdrücklich bestätigten Löschung bestehen.
 
 ## Plattform und Modulbasis
 

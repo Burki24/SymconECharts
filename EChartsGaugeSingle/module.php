@@ -96,6 +96,91 @@ class EChartsGaugeSingle extends IPSModuleStrict
         'detailBorderWidthPercent'  => 'DetailBorderWidthPercent',
         'detailCornerRadiusPercent' => 'DetailCornerRadiusPercent'
     ];
+    private const IPSVIEW_OUTPUT_IDENT = 'IPSViewGauge';
+    private const IPSVIEW_PROPERTY_PREFIX = 'IPSView';
+    private const IPSVIEW_STRING_DESIGN_DEFAULTS = [
+        'TitlePosition'           => 'bottom',
+        'GaugePreset'             => self::PRESET_SIMPLE,
+        'EChartsTheme'            => EChartsAsset::THEME_AUTO,
+        'PointerShape'            => 'preset',
+        'CustomPointerSVG'        => '',
+        'CustomPointerPivotMode'  => 'svg',
+        'AnchorShape'             => 'preset',
+        'CustomAnchorSVG'         => '',
+        'AnchorColorMode'         => 'theme',
+        'PlateShape'              => 'hidden',
+        'PlateColorMode'          => 'theme',
+        'PlateFillMode'           => 'solid',
+        'PlateGradientDirection'  => 'top-bottom',
+        'PlateBackgroundSVG'      => '',
+        'PlateBackgroundFit'      => 'cover',
+        'GaugeArcMode'            => 'preset',
+        'GaugeColorMode'          => 'theme',
+        'ScaleZones'              => '[]',
+        'ScaleLabelRotation'      => 'horizontal',
+        'GaugeDirection'          => 'clockwise',
+        'PointerVisibility'       => 'preset',
+        'ProgressVisibility'      => 'preset',
+        'RingVisibility'          => 'preset',
+        'MinorTicksVisibility'    => 'preset',
+        'MajorTicksVisibility'    => 'preset',
+        'ScaleLabelsVisibility'   => 'preset',
+        'ValueVisibility'         => 'preset',
+        'UnitVisibility'          => 'preset',
+        'TitleVisibility'         => 'preset',
+        'DetailBoxVisibility'     => 'preset',
+        'DetailColorMode'         => 'theme'
+    ];
+    private const IPSVIEW_FLOAT_DESIGN_DEFAULTS = [
+        'CustomPointerPivotXPercent' => 50.0,
+        'CustomPointerPivotYPercent' => 100.0,
+        'PlateBackgroundRotation'    => 0.0,
+        'GaugeStartPosition'         => 270.0,
+        'GaugeEndPosition'           => 90.0
+    ];
+    private const IPSVIEW_BOOLEAN_DESIGN_DEFAULTS = [
+        'PlateGradientMiddleEnabled' => false,
+        'PlateBackgroundEnabled'     => false,
+        'PlateTransparent'           => false,
+        'PlateShadow'                => false,
+        'ScaleZonesEnabled'          => false,
+        'DetailShadow'               => false,
+        'PointerShadow'              => false,
+        'ProgressShadow'             => false,
+        'RingShadow'                 => false,
+        'AnchorShadow'               => false
+    ];
+    private const IPSVIEW_INTEGER_DESIGN_DEFAULTS = [
+        'AnchorColor'                    => 0x55CBB5,
+        'AnchorBorderColor'              => 0xF4F5F7,
+        'PlateGradientMiddleColor'       => 0x45474C,
+        'PlateGradientEndColor'          => 0x111317,
+        'PlateGradientCenterXPercent'    => 50,
+        'PlateGradientCenterYPercent'    => 50,
+        'PlateGradientRadiusPercent'     => 75,
+        'PlateBackgroundSizePercent'     => 100,
+        'PlateBackgroundOffsetXPercent'  => 0,
+        'PlateBackgroundOffsetYPercent'  => 0,
+        'PlateBackgroundOpacityPercent'  => 100,
+        'PlateColor'                     => 0x25272B,
+        'PlateBorderColor'               => 0xA5A9B0,
+        'PointerColor'                   => 0x55CBB5,
+        'ProgressColor'                  => 0x55CBB5,
+        'RingColor'                      => 0x45474C,
+        'ScaleColor'                     => 0xA7A9AE,
+        'ValueColor'                     => 0xF4F5F7,
+        'TitleColor'                     => 0xA7A9AE,
+        'MajorSplitCount'                => 0,
+        'MinorSplitCount'                => 0,
+        'GaugeOffsetXPercent'            => 0,
+        'GaugeOffsetYPercent'            => 0,
+        'ValueOffsetXPercent'            => 0,
+        'ValueOffsetYPercent'            => 0,
+        'TitleOffsetXPercent'            => 0,
+        'TitleOffsetYPercent'            => 0,
+        'DetailBackgroundColor'          => 0x25272B,
+        'DetailBorderColor'              => 0xA5A9B0
+    ];
 
     public function Create(): void
     {
@@ -192,6 +277,26 @@ class EChartsGaugeSingle extends IPSModuleStrict
         foreach (self::DESIGN_SCALE_PROPERTIES as $propertyName) {
             $this->RegisterPropertyInteger($propertyName, self::DESIGN_SCALE_DEFAULT);
         }
+        $this->RegisterIPSViewHTMLPageProperties();
+        $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
+        foreach (self::IPSVIEW_STRING_DESIGN_DEFAULTS as $propertyName => $default) {
+            $this->RegisterPropertyString(self::IPSVIEW_PROPERTY_PREFIX . $propertyName, $default);
+        }
+        foreach (self::IPSVIEW_FLOAT_DESIGN_DEFAULTS as $propertyName => $default) {
+            $this->RegisterPropertyFloat(self::IPSVIEW_PROPERTY_PREFIX . $propertyName, $default);
+        }
+        foreach (self::IPSVIEW_BOOLEAN_DESIGN_DEFAULTS as $propertyName => $default) {
+            $this->RegisterPropertyBoolean(self::IPSVIEW_PROPERTY_PREFIX . $propertyName, $default);
+        }
+        foreach (self::IPSVIEW_INTEGER_DESIGN_DEFAULTS as $propertyName => $default) {
+            $this->RegisterPropertyInteger(self::IPSVIEW_PROPERTY_PREFIX . $propertyName, $default);
+        }
+        foreach (self::DESIGN_SCALE_PROPERTIES as $propertyName) {
+            $this->RegisterPropertyInteger(
+                self::IPSVIEW_PROPERTY_PREFIX . $propertyName,
+                self::DESIGN_SCALE_DEFAULT
+            );
+        }
         $this->RegisterAttributeInteger('RegisteredSourceVariableID', 0);
         $this->RegisterAttributeString('LastError', '');
     }
@@ -201,9 +306,15 @@ class EChartsGaugeSingle extends IPSModuleStrict
         parent::ApplyChanges();
 
         $this->RegisterMessage(0, IPS_KERNELSTARTED);
+        $this->MaintainIPSViewHTMLVariable(
+            self::IPSVIEW_OUTPUT_IDENT,
+            $this->Translate('Gauge for IPSView'),
+            90
+        );
         $this->Initialize();
         if (IPS_GetKernelRunlevel() === KR_READY) {
             $this->PublishVisualizationState();
+            $this->PublishIPSViewHTML();
         }
     }
 
@@ -227,6 +338,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 $form['elements'],
                 $this->GaugePreviewFormAction()
             );
+            $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
         }
         $gaugeConfiguration = $this->ReadEffectiveGaugeConfiguration();
         $form = SVGPreviewHelper::withImage(
@@ -244,8 +356,85 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 $this->ReadGaugeStyle()
             )
         );
+        $form = SVGPreviewHelper::withImage(
+            $form,
+            'IPSViewGaugePreview',
+            $this->BuildIPSViewGaugePreviewSvg()
+        );
 
         return $this->EncodeConfigurationForm($form);
+    }
+
+    public function RequestAction(string $Ident, mixed $Value): void
+    {
+        if ($this->HandleIPSViewHTMLPageAction($Ident, $Value)) {
+            return;
+        }
+
+        throw new InvalidArgumentException('Unknown action: ' . $Ident);
+    }
+
+    public function CopyTileDesignToIPSView(): void
+    {
+        foreach (self::GaugeDesignPropertyNames() as $propertyName) {
+            $sourceName = $propertyName;
+            $targetName = self::IPSVIEW_PROPERTY_PREFIX . $propertyName;
+            if (array_key_exists($propertyName, self::IPSVIEW_STRING_DESIGN_DEFAULTS)) {
+                IPS_SetProperty($this->InstanceID, $targetName, $this->ReadPropertyString($sourceName));
+            } elseif (array_key_exists($propertyName, self::IPSVIEW_FLOAT_DESIGN_DEFAULTS)) {
+                IPS_SetProperty($this->InstanceID, $targetName, $this->ReadPropertyFloat($sourceName));
+            } elseif (array_key_exists($propertyName, self::IPSVIEW_BOOLEAN_DESIGN_DEFAULTS)) {
+                IPS_SetProperty($this->InstanceID, $targetName, $this->ReadPropertyBoolean($sourceName));
+            } else {
+                IPS_SetProperty($this->InstanceID, $targetName, $this->ReadPropertyInteger($sourceName));
+            }
+        }
+        IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
+        IPS_ApplyChanges($this->InstanceID);
+    }
+
+    public function UpdateIPSViewGaugePreviewFromForm(string $Configuration): void
+    {
+        try {
+            $values = json_decode($Configuration, true, 64, JSON_THROW_ON_ERROR);
+        } catch (JsonException) {
+            $values = [];
+        }
+        if (!is_array($values)) {
+            $values = [];
+        }
+
+        $gaugeConfiguration = $this->ResolveGaugeConfiguration(
+            (int) ($values['SourceVariableID'] ?? 0),
+            self::FiniteFloat($values['Minimum'] ?? 0.0, 0.0),
+            self::FiniteFloat($values['Maximum'] ?? 100.0, 100.0),
+            (string) ($values['Unit'] ?? ''),
+            (int) ($values['Decimals'] ?? 1),
+            (bool) ($values['UseVariablePresentation'] ?? false)
+        );
+        $useTileDesign = (bool) ($values['IPSViewUseTileDesign'] ?? true);
+        $designValues = $useTileDesign
+            ? $values
+            : $this->UnprefixIPSViewDesignValues($values);
+        $this->UpdateFormField(
+            'IPSViewGaugePreview',
+            'image',
+            SVGPreviewHelper::dataUri($this->BuildGaugePreviewSvg(
+                (int) ($values['SourceVariableID'] ?? 0),
+                $gaugeConfiguration['minimum'],
+                $gaugeConfiguration['maximum'],
+                (string) ($values['Title'] ?? ''),
+                $gaugeConfiguration['unit'],
+                $gaugeConfiguration['decimals'],
+                (string) ($designValues['GaugePreset'] ?? self::PRESET_SIMPLE),
+                (string) ($designValues['EChartsTheme'] ?? EChartsAsset::THEME_AUTO),
+                $this->GaugeStyleFromFormValues(
+                    $designValues,
+                    $gaugeConfiguration['minimum'],
+                    $gaugeConfiguration['maximum']
+                )
+            ))
+        );
     }
 
     /**
@@ -510,33 +699,12 @@ class EChartsGaugeSingle extends IPSModuleStrict
 
     public function GetVisualizationTile(): string
     {
-        return $this->RenderVisualizationHTMLPage(false, [
-            'language'           => $this->NormalizeHelperTranslationLanguage(
-                $this->ResolveHelperTranslationLanguage()
-            ),
-            'title'              => 'ECharts Gauge Single',
-            'visualizationTheme' => $this->VisualizationThemeCSS()
-                . "\n\n"
-                . $this->ResponsiveVisualizationCSS('#echarts-gauge-root', 'echarts-gauge'),
-            'state'              => $this->BuildVisualizationState(),
-            'translations'       => $this->IPSViewTranslationsFor([
-                'Configure a numeric source variable.',
-                'Configure a valid Gauge range.',
-                'Configure a valid Gauge design.',
-                'Configure a valid ECharts theme.',
-                'Connect an active EChartsGateway.',
-                'The Gauge value could not be loaded.',
-                'Apache ECharts could not be initialized.'
-            ]),
-            'options'            => [
-                'echartsVersion' => EChartsAsset::VERSION,
-                'echartsThemes'  => EChartsAsset::ThemePalettes()
-            ],
-            'replacements'       => [
-                '{{ECHARTS_SCRIPT}}'       => EChartsAsset::JavaScript(),
-                '{{ECHARTS_THEME_SCRIPT}}' => EChartsAsset::ThemeJavaScript()
-            ]
-        ]);
+        return $this->RenderGaugeHTMLPage(false);
+    }
+
+    public function GetIPSViewHTML(): string
+    {
+        return $this->RenderGaugeHTMLPage(true);
     }
 
     public function ReceiveData(string $JSONString): string
@@ -561,13 +729,47 @@ class EChartsGaugeSingle extends IPSModuleStrict
         if ($SenderID === 0 && $Message === IPS_KERNELSTARTED) {
             $this->Initialize();
             $this->PublishVisualizationState();
+            $this->PublishIPSViewHTML();
 
             return;
         }
 
         if ($Message === VM_UPDATE && $SenderID === $this->ReadPropertyInteger('SourceVariableID')) {
             $this->PublishVisualizationState();
+            $this->PublishIPSViewHTML();
         }
+    }
+
+    private function RenderGaugeHTMLPage(bool $ipsView): string
+    {
+        return $this->RenderVisualizationHTMLPage($ipsView, [
+            'language'           => $this->NormalizeHelperTranslationLanguage(
+                $this->ResolveHelperTranslationLanguage()
+            ),
+            'title'              => 'ECharts Gauge Single',
+            'visualizationTheme' => $this->VisualizationThemeCSS()
+                . "\n\n"
+                . $this->ResponsiveVisualizationCSS('#echarts-gauge-root', 'echarts-gauge'),
+            'ipsViewStyle'       => $ipsView ? $this->IPSViewThemeCSS() : '',
+            'state'              => $this->BuildVisualizationState($ipsView),
+            'translations'       => $this->IPSViewTranslationsFor([
+                'Configure a numeric source variable.',
+                'Configure a valid Gauge range.',
+                'Configure a valid Gauge design.',
+                'Configure a valid ECharts theme.',
+                'Connect an active EChartsGateway.',
+                'The Gauge value could not be loaded.',
+                'Apache ECharts could not be initialized.'
+            ]),
+            'options'            => [
+                'echartsVersion' => EChartsAsset::VERSION,
+                'echartsThemes'  => EChartsAsset::ThemePalettes()
+            ],
+            'replacements'       => [
+                '{{ECHARTS_SCRIPT}}'       => EChartsAsset::JavaScript(),
+                '{{ECHARTS_THEME_SCRIPT}}' => EChartsAsset::ThemeJavaScript()
+            ]
+        ]);
     }
 
     private function GaugePreviewAction(): string
@@ -714,7 +916,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 && in_array($item['type'], $inputTypes, true)) {
                 $item['onChange'] = $action;
             }
-            if (($item['type'] ?? null) === 'List' && ($item['name'] ?? null) === 'ScaleZones') {
+            if (($item['type'] ?? null) === 'List'
+                && in_array(($item['name'] ?? null), ['ScaleZones', 'IPSViewScaleZones'], true)) {
                 foreach (['onAdd', 'onDelete', 'onEdit', 'onChangeOrder'] as $event) {
                     $item[$event] = $action;
                 }
@@ -726,6 +929,139 @@ class EChartsGaugeSingle extends IPSModuleStrict
         unset($item);
 
         return $items;
+    }
+
+    /** @param list<array<string, mixed>> $elements */
+    private function BuildIPSViewDesigner(array $elements): array
+    {
+        $tileDesigner = null;
+        foreach ($elements as $element) {
+            if (($element['type'] ?? null) === 'ExpansionPanel'
+                && ($element['caption'] ?? null) === 'Tile designer') {
+                $tileDesigner = $element;
+                break;
+            }
+        }
+        if (!is_array($tileDesigner)) {
+            throw new RuntimeException('The Tile designer form section is missing.');
+        }
+
+        $designerItems = $this->PrefixIPSViewDesignerItems($tileDesigner['items'] ?? []);
+        array_unshift(
+            $designerItems,
+            [
+                'type'    => 'Select',
+                'name'    => 'IPSViewTitlePosition',
+                'caption' => 'Title position',
+                'options' => [
+                    ['caption' => 'Top', 'value' => 'top'],
+                    ['caption' => 'Bottom', 'value' => 'bottom']
+                ]
+            ]
+        );
+        array_splice($designerItems, max(0, count($designerItems) - 1), 0, [[
+            'type'    => 'Button',
+            'caption' => 'Update IPSView preview',
+            'onClick' => $this->IPSViewGaugePreviewFormAction()
+        ]]);
+
+        return [
+            'type'     => 'ExpansionPanel',
+            'caption'  => 'IPSView design',
+            'expanded' => false,
+            'width'    => '700px',
+            'items'    => [
+                ...$this->IPSViewHTMLPageFormItems(
+                    'Creates a standalone WebContent variable for use as an IPSView HTML widget.'
+                ),
+                [
+                    'type'     => 'CheckBox',
+                    'name'     => 'IPSViewUseTileDesign',
+                    'caption'  => 'Use Tile design',
+                    'onChange' => $this->IPSViewGaugePreviewFormAction()
+                ],
+                [
+                    'type'    => 'Label',
+                    'caption' => 'Inherited mode follows every Tile design change. Disable it for an independent IPSView appearance.'
+                ],
+                [
+                    'type'    => 'Button',
+                    'caption' => 'Copy Tile design to IPSView and edit independently',
+                    'onClick' => 'ECGS_CopyTileDesignToIPSView($id); return "MESSAGE:Tile design copied to IPSView.";'
+                ],
+                [
+                    'type'     => 'ExpansionPanel',
+                    'caption'  => 'Independent IPSView designer',
+                    'expanded' => false,
+                    'items'    => $designerItems
+                ]
+            ]
+        ];
+    }
+
+    /** @param list<array<string, mixed>> $items @return list<array<string, mixed>> */
+    private function PrefixIPSViewDesignerItems(array $items): array
+    {
+        $designNames = self::GaugeDesignPropertyNames();
+        foreach ($items as &$item) {
+            if (($item['name'] ?? null) === 'GaugePreview') {
+                $item['name'] = 'IPSViewGaugePreview';
+            } elseif (isset($item['name']) && in_array($item['name'], $designNames, true)) {
+                $item['name'] = self::IPSVIEW_PROPERTY_PREFIX . $item['name'];
+            }
+            unset($item['onChange'], $item['onAdd'], $item['onDelete'], $item['onEdit'], $item['onChangeOrder']);
+            if (isset($item['items']) && is_array($item['items'])) {
+                $item['items'] = $this->PrefixIPSViewDesignerItems($item['items']);
+            }
+        }
+        unset($item);
+
+        return $items;
+    }
+
+    private function IPSViewGaugePreviewFormAction(): string
+    {
+        $fieldNames = [
+            'SourceVariableID', 'UseVariablePresentation', 'Minimum', 'Maximum', 'Title', 'Unit', 'Decimals',
+            'IPSViewUseTileDesign',
+            ...self::GaugeDesignPropertyNames(),
+            ...array_map(
+                static fn (string $name): string => self::IPSVIEW_PROPERTY_PREFIX . $name,
+                self::GaugeDesignPropertyNames()
+            )
+        ];
+        $pairs = array_map(
+            static fn (string $name): string => "'{$name}' => \${$name}",
+            array_values(array_unique($fieldNames))
+        );
+
+        return 'ECGS_UpdateIPSViewGaugePreviewFromForm($id, json_encode([' . implode(', ', $pairs) . ']));';
+    }
+
+    /** @return list<string> */
+    private static function GaugeDesignPropertyNames(): array
+    {
+        return array_values(array_unique([
+            ...array_keys(self::IPSVIEW_STRING_DESIGN_DEFAULTS),
+            ...array_keys(self::IPSVIEW_FLOAT_DESIGN_DEFAULTS),
+            ...array_keys(self::IPSVIEW_BOOLEAN_DESIGN_DEFAULTS),
+            ...array_keys(self::IPSVIEW_INTEGER_DESIGN_DEFAULTS),
+            ...array_values(self::DESIGN_SCALE_PROPERTIES)
+        ]));
+    }
+
+    /** @param array<string, mixed> $values @return array<string, mixed> */
+    private function UnprefixIPSViewDesignValues(array $values): array
+    {
+        $result = [];
+        foreach (self::GaugeDesignPropertyNames() as $name) {
+            $prefixedName = self::IPSVIEW_PROPERTY_PREFIX . $name;
+            if (array_key_exists($prefixedName, $values)) {
+                $result[$name] = $values[$prefixedName];
+            }
+        }
+
+        return $result;
     }
 
     private function Initialize(): void
@@ -1247,6 +1583,54 @@ class EChartsGaugeSingle extends IPSModuleStrict
             }
         }
 
+        if ($this->IsIPSViewHTMLPageEnabled() && !$this->ReadPropertyBoolean('IPSViewUseTileDesign')) {
+            $values = $this->ReadIPSViewDesignValues();
+            if (!in_array($values['GaugePreset'], self::SUPPORTED_PRESETS, true)) {
+                return [
+                    'Status'  => self::STATUS_DESIGN_INVALID,
+                    'Message' => 'The selected IPSView Gauge preset is not supported.'
+                ];
+            }
+            if (!EChartsAsset::IsSupportedTheme((string) $values['EChartsTheme'])) {
+                return [
+                    'Status'  => self::STATUS_THEME_INVALID,
+                    'Message' => 'The selected IPSView ECharts theme is not supported.'
+                ];
+            }
+            foreach (self::DESIGN_SCALE_PROPERTIES as $propertyName) {
+                $value = (int) $values[$propertyName];
+                if ($value < self::DESIGN_SCALE_MINIMUM || $value > self::DESIGN_SCALE_MAXIMUM) {
+                    return [
+                        'Status'  => self::STATUS_DESIGN_INVALID,
+                        'Message' => 'IPSView Gauge design scale values must be between 50 and 150 percent.'
+                    ];
+                }
+            }
+            if (!in_array($values['PointerShape'], self::SUPPORTED_POINTER_SHAPES, true)
+                || !in_array($values['AnchorShape'], self::SUPPORTED_ANCHOR_SHAPES, true)
+                || !in_array($values['PlateShape'], self::SUPPORTED_PLATE_SHAPES, true)
+                || !in_array($values['GaugeArcMode'], self::SUPPORTED_ARC_MODES, true)
+                || !in_array($values['GaugeColorMode'], self::SUPPORTED_COLOR_MODES, true)
+                || !in_array($values['TitlePosition'], self::SUPPORTED_TITLE_POSITIONS, true)) {
+                return [
+                    'Status'  => self::STATUS_DESIGN_INVALID,
+                    'Message' => 'The selected IPSView Gauge design option is not supported.'
+                ];
+            }
+            try {
+                $this->GaugeStyleFromFormValues(
+                    $values,
+                    $gaugeConfiguration['minimum'],
+                    $gaugeConfiguration['maximum']
+                );
+            } catch (InvalidArgumentException $exception) {
+                return [
+                    'Status'  => self::STATUS_DESIGN_INVALID,
+                    'Message' => $exception->getMessage()
+                ];
+            }
+        }
+
         return null;
     }
 
@@ -1359,6 +1743,74 @@ class EChartsGaugeSingle extends IPSModuleStrict
         );
 
         return $style;
+    }
+
+    /** @return array<string, mixed> */
+    private function ReadIPSViewDesignValues(): array
+    {
+        $values = [];
+        foreach (self::IPSVIEW_STRING_DESIGN_DEFAULTS as $name => $_default) {
+            $values[$name] = $this->ReadPropertyString(self::IPSVIEW_PROPERTY_PREFIX . $name);
+        }
+        foreach (self::IPSVIEW_FLOAT_DESIGN_DEFAULTS as $name => $_default) {
+            $values[$name] = $this->ReadPropertyFloat(self::IPSVIEW_PROPERTY_PREFIX . $name);
+        }
+        foreach (self::IPSVIEW_BOOLEAN_DESIGN_DEFAULTS as $name => $_default) {
+            $values[$name] = $this->ReadPropertyBoolean(self::IPSVIEW_PROPERTY_PREFIX . $name);
+        }
+        foreach (self::IPSVIEW_INTEGER_DESIGN_DEFAULTS as $name => $_default) {
+            $values[$name] = $this->ReadPropertyInteger(self::IPSVIEW_PROPERTY_PREFIX . $name);
+        }
+        foreach (self::DESIGN_SCALE_PROPERTIES as $propertyName) {
+            $values[$propertyName] = $this->ReadPropertyInteger(self::IPSVIEW_PROPERTY_PREFIX . $propertyName);
+        }
+
+        return $values;
+    }
+
+    /** @return array<string, mixed> */
+    private function EffectiveIPSViewDesignValues(): array
+    {
+        if (!$this->ReadPropertyBoolean('IPSViewUseTileDesign')) {
+            return $this->ReadIPSViewDesignValues();
+        }
+
+        $values = [];
+        foreach (self::IPSVIEW_STRING_DESIGN_DEFAULTS as $name => $_default) {
+            $values[$name] = $this->ReadPropertyString($name);
+        }
+        foreach (self::IPSVIEW_FLOAT_DESIGN_DEFAULTS as $name => $_default) {
+            $values[$name] = $this->ReadPropertyFloat($name);
+        }
+        foreach (self::IPSVIEW_BOOLEAN_DESIGN_DEFAULTS as $name => $_default) {
+            $values[$name] = $this->ReadPropertyBoolean($name);
+        }
+        foreach (self::IPSVIEW_INTEGER_DESIGN_DEFAULTS as $name => $_default) {
+            $values[$name] = $this->ReadPropertyInteger($name);
+        }
+        foreach (self::DESIGN_SCALE_PROPERTIES as $propertyName) {
+            $values[$propertyName] = $this->ReadPropertyInteger($propertyName);
+        }
+
+        return $values;
+    }
+
+    private function BuildIPSViewGaugePreviewSvg(): string
+    {
+        $configuration = $this->ReadEffectiveGaugeConfiguration();
+        $values = $this->EffectiveIPSViewDesignValues();
+
+        return $this->BuildGaugePreviewSvg(
+            $this->ReadPropertyInteger('SourceVariableID'),
+            $configuration['minimum'],
+            $configuration['maximum'],
+            $this->ReadPropertyString('Title'),
+            $configuration['unit'],
+            $configuration['decimals'],
+            (string) $values['GaugePreset'],
+            (string) $values['EChartsTheme'],
+            $this->GaugeStyleFromFormValues($values, $configuration['minimum'], $configuration['maximum'])
+        );
     }
 
     /** @param array<string, mixed> $values */
@@ -1685,7 +2137,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
     }
 
     /** @return array<string, mixed> */
-    private function BuildVisualizationState(): array
+    private function BuildVisualizationState(bool $ipsView = false): array
     {
         $configurationError = $this->GetConfigurationError();
         if ($configurationError !== null) {
@@ -1717,6 +2169,17 @@ class EChartsGaugeSingle extends IPSModuleStrict
 
         try {
             $chart = json_decode($this->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
+            if ($ipsView && !$this->ReadPropertyBoolean('IPSViewUseTileDesign')) {
+                $configuration = $this->ReadEffectiveGaugeConfiguration();
+                $values = $this->ReadIPSViewDesignValues();
+                $chart['theme'] = (string) $values['EChartsTheme'];
+                $chart['gauge']['preset'] = (string) $values['GaugePreset'];
+                $chart['gauge']['style'] = $this->GaugeStyleFromFormValues(
+                    $values,
+                    $configuration['minimum'],
+                    $configuration['maximum']
+                );
+            }
         } catch (Throwable $exception) {
             $this->SendDebug('BuildVisualizationState', $exception::class, 0);
 
@@ -1753,5 +2216,33 @@ class EChartsGaugeSingle extends IPSModuleStrict
         } catch (Throwable $exception) {
             $this->SendDebug('PublishVisualizationState', $exception::class, 0);
         }
+    }
+
+    private function PublishIPSViewHTML(): void
+    {
+        if (!$this->IsIPSViewHTMLPageEnabled()) {
+            return;
+        }
+
+        try {
+            $this->UpdateIPSViewHTMLVariable(self::IPSVIEW_OUTPUT_IDENT, $this->GetIPSViewHTML());
+        } catch (Throwable $exception) {
+            $this->SendDebug('PublishIPSViewHTML', $exception::class, 0);
+        }
+    }
+
+    private function IPSViewThemeCSS(): string
+    {
+        $values = $this->EffectiveIPSViewDesignValues();
+        $palette = EChartsAsset::ThemePreviewPalette((string) $values['EChartsTheme']);
+
+        return ':root {'
+            . '--symc-background:' . $palette['background'] . ';'
+            . '--symc-text:' . $palette['text'] . ';'
+            . '--symc-text-muted:' . $palette['muted'] . ';'
+            . '--symc-border:' . $palette['border'] . ';'
+            . '--symc-accent:' . $palette['accent'] . ';'
+            . '--symc-surface:' . $palette['surface'] . ';'
+            . '} html, body { background:' . $palette['background'] . '; }';
     }
 }
