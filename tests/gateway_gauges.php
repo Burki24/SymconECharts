@@ -454,6 +454,14 @@ assertGatewayGauge(
     str_contains($visualizationTile, 'option.backgroundColor = colors.background'),
     'Official light themes must receive an explicit readable background.'
 );
+assertGatewayGauge(
+    str_contains($visualizationTile, 'background: var(--symc-background);'),
+    'Gauge Single must paint the Symcon card background while the automatic theme is active.'
+);
+assertGatewayGauge(
+    str_contains($visualizationTile, "background: resolveColor('--symc-background', '#333438')"),
+    'The automatic Gauge theme must resolve its canvas background from the Symcon design tokens.'
+);
 assertGatewayGauge(str_contains($visualizationTile, "case 'speed':"), 'Gauge Single tile must render the Speed preset.');
 foreach ([
     'function resolveGaugeLayout(preset, width, height, style)',

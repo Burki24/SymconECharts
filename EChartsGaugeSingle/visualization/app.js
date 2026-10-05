@@ -327,7 +327,7 @@
         }
 
         return {
-            background: 'transparent',
+            background: resolveColor('--symc-background', '#333438'),
             text: resolveColor('--symc-text', '#f4f5f7'),
             muted: resolveColor('--symc-muted', '#a7a9ae'),
             subtle: resolveColor('--symc-subtle', '#777a80'),
@@ -920,7 +920,6 @@
         var width = Math.max(chartElement.clientWidth, 1);
         var height = Math.max(chartElement.clientHeight, 160);
         var layout = resolveGaugeLayout(preset, width, height, style);
-        var automaticTheme = theme === 'auto';
         var colors = resolveThemeColors(theme);
 
         chartElement.setAttribute(
@@ -1034,9 +1033,7 @@
             graphic: buildPlateGraphic(style, layout, series, colors),
             series: [series]
         };
-        if (!automaticTheme) {
-            option.backgroundColor = colors.background;
-        }
+        option.backgroundColor = colors.background;
 
         return option;
     }
