@@ -138,6 +138,8 @@ IPSView-Ausgabe. Jede Quelle besitzt eine eigene ECharts-Gauge-Serie. Ein
 responsives Raster wählt abhängig von Quellenanzahl, Breite und Höhe die
 lesbarste Spalten- und Zeilenaufteilung. Änderungen einer Quellvariable werden
 über `VM_UPDATE` direkt an die Kachel übertragen.
+Das Multi-Raster lässt in der nativen Kachel Platz für die von Symcon
+eingeblendete Kopfzeile; IPSView nutzt die gesamte Widgetfläche.
 
 Der eingeklappte Kacheldesigner bietet zunächst Multi Title, das automatische
 Symcon-Design und sechs gebündelte offizielle ECharts-Themes. Ringstärke sowie

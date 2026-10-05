@@ -1400,7 +1400,8 @@ assertGatewayGauge(
     'Gauge Multi tile must receive every configured source.'
 );
 assertGatewayGauge(
-    str_contains($multiTile, 'function resolveGrid(count, width, height, hasTitle)')
+    str_contains($multiTile, 'function resolveGrid(count, width, height, hasTitle, headerInset)')
+        && str_contains($multiTile, "bootstrap.mode === 'symcon' ? 64 : 0")
         && str_contains($multiTile, "type: 'gauge'")
         && str_contains($multiTile, 'items.map(function (item, index)'),
     'Gauge Multi tile must render responsive independent Gauge series.'

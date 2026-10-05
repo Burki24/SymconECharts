@@ -74,9 +74,9 @@
         return unit ? formatted + ' ' + unit : formatted;
     }
 
-    function resolveGrid(count, width, height, hasTitle) {
-        var top = hasTitle ? Math.max(32, height * 0.1) : 4;
-        var usableHeight = Math.max(120, height - top);
+    function resolveGrid(count, width, height, hasTitle, headerInset) {
+        var top = headerInset + (hasTitle ? Math.max(32, height * 0.1) : 4);
+        var usableHeight = Math.max(1, height - top);
         var best = null;
         for (var columns = 1; columns <= Math.min(count, 4); columns += 1) {
             var rows = Math.ceil(count / columns);
@@ -103,7 +103,7 @@
         var row = Math.floor(index / grid.columns);
         var centerX = column * grid.cellWidth + grid.cellWidth / 2;
         var centerY = grid.top + row * grid.cellHeight + grid.cellHeight * 0.48;
-        var radius = Math.max(38, grid.radius);
+        var radius = grid.radius;
         var scale = clamp(Number(style.scaleFontSizePercent) || 100, 50, 150) / 100;
         var valueScale = clamp(Number(style.valueFontSizePercent) || 100, 50, 150) / 100;
         var titleScale = clamp(Number(style.titleFontSizePercent) || 100, 50, 150) / 100;
@@ -191,7 +191,8 @@
         var width = Math.max(chartElement.clientWidth, 240);
         var height = Math.max(chartElement.clientHeight, 180);
         var title = String(gauge.title || '');
-        var grid = resolveGrid(items.length, width, height, title !== '');
+        var headerInset = bootstrap.mode === 'symcon' ? 64 : 0;
+        var grid = resolveGrid(items.length, width, height, title !== '', headerInset);
 
         return {
             backgroundColor: colors.background,
@@ -202,7 +203,7 @@
                 show: title !== '',
                 text: title,
                 left: 'center',
-                top: 6,
+                top: headerInset + 6,
                 textStyle: { color: colors.text, fontSize: clamp(height * 0.045, 14, 24) }
             },
             tooltip: {
