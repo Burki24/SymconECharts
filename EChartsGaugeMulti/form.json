@@ -104,7 +104,7 @@
             "items": [
                 {
                     "type": "Label",
-                    "caption": "Choose independent dials, ring Gauges, concentric rings, or a weather-station instrument panel. Source order determines placement; every source keeps its own range and unit."
+                    "caption": "Choose independent dials, ring Gauges, concentric rings, a weather station, or a tacho cockpit. Source order determines placement; every source keeps its own range and unit."
                 },
                 {
                     "type": "RowLayout",
@@ -130,6 +130,10 @@
                                 {
                                     "caption": "Weather station",
                                     "value": "weather-station"
+                                },
+                                {
+                                    "caption": "Tacho cockpit",
+                                    "value": "tacho"
                                 }
                             ]
                         },

@@ -37,7 +37,7 @@ zugeschnittenen SVG-Hintergrunds. Gauge Single unterstützt außerdem validierte
 konfigurierbare Skalenunterteilungen und -abstände, beide Drehrichtungen,
 responsive Positionsversätze, elementweise Sichtbarkeit sowie einen
 gestaltbaren Wertekasten und optionale Schatteneffekte. Gauge Multi besitzt
-mit Multi Title, Ringraster, konzentrischen Ringen und einer Wetterstations-Vorlage responsive native Kacheln
+mit Multi Title, Ringraster, konzentrischen Ringen, einer Wetterstations- und einer Tacho-Vorlage responsive native Kacheln
 für 2 bis 16 unabhängige Wertebereiche. Beide Gauge-Module erzeugen optional
 eine IPSView-WebContent-Variable mit vererbtem oder unabhängigem Design auf
 demselben Renderer. Weitere klassische Multi-Instrumentenpanel-Vorlagen,
@@ -102,6 +102,8 @@ Die beiden ergänzenden Ring-Vorlagen dokumentiert
 [`ADR 0010`](adr/0010-gauge-multi-ring-presets.md).
 Die erste analoge Wetterstations-Vorlage dokumentiert
 [`ADR 0011`](adr/0011-weather-station-gauge-preset.md).
+Das zusätzliche Tacho-Cockpit dokumentiert
+[`ADR 0012`](adr/0012-tacho-cockpit-gauge-preset.md).
 
 ## Daten, Konfiguration und Ausgabe
 

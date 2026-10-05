@@ -21,6 +21,9 @@ final class EChartsGaugeMultiPreview
         if ($preset === 'weather-station') {
             return self::CreateWeatherStationSvg($items, $title, $palette);
         }
+        if ($preset === 'tacho') {
+            return self::CreateTachoSvg($items, $title, $palette);
+        }
 
         $items = array_slice($items, 0, 4);
         $count = count($items);
@@ -161,14 +164,28 @@ final class EChartsGaugeMultiPreview
         $content = '';
         foreach ($items as $index => $item) {
             [$x, $y, $radius] = $positions[$index];
-            $content .= self::WeatherDialSvg($item, $x, $y, $radius, $palette, self::RingColor($index, $palette));
+            $content .= self::InstrumentDialSvg($item, $x, $y, $radius, $palette, self::RingColor($index, $palette));
         }
 
         return self::SvgDocument($title, $palette, $content, 'weather-station');
     }
 
+    /** @param list<array<string, mixed>> $items @param array<string, string> $palette */
+    private static function CreateTachoSvg(array $items, string $title, array $palette): string
+    {
+        $items = array_slice($items, 0, 3);
+        $positions = [[360.0, 205.0, 125.0], [110.0, 215.0, 78.0], [610.0, 215.0, 78.0]];
+        $content = '';
+        foreach ($items as $index => $item) {
+            [$x, $y, $radius] = $positions[$index];
+            $content .= self::InstrumentDialSvg($item, $x, $y, $radius, $palette, '#F0442D');
+        }
+
+        return self::SvgDocument($title, $palette, $content, 'tacho');
+    }
+
     /** @param array<string, mixed> $item @param array<string, string> $palette */
-    private static function WeatherDialSvg(
+    private static function InstrumentDialSvg(
         array $item,
         float $x,
         float $y,

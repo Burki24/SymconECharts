@@ -396,6 +396,107 @@
         return { series: series, graphic: graphic };
     }
 
+    function resolveTachoLayout(count, width, height, headerInset, hasTitle) {
+        var top = headerInset + (hasTitle ? Math.max(32, height * 0.1) : 4);
+        var availableHeight = Math.max(1, height - top);
+        var primaryHeight = count > 3 ? availableHeight * 0.68 : availableHeight;
+        var wide = width >= 650 && width >= primaryHeight * 1.4;
+        var mainRadius = Math.max(1, Math.min(width * (wide ? 0.19 : 0.32), primaryHeight * (wide ? 0.39 : 0.27)));
+        var sideRadius = Math.max(1, Math.min(width * (wide ? 0.115 : 0.21),
+            primaryHeight * (wide ? 0.28 : 0.17), mainRadius * 0.7));
+        var positions = [
+            { center: [width * 0.5, top + primaryHeight * (wide ? 0.5 : 0.32)], radius: mainRadius },
+            { center: [width * (wide ? 0.17 : 0.25), top + primaryHeight * (wide ? 0.55 : 0.77)], radius: sideRadius },
+            { center: [width * (wide ? 0.83 : 0.75), top + primaryHeight * (wide ? 0.55 : 0.77)], radius: sideRadius }
+        ].slice(0, count);
+        var extraCount = count - 3;
+        if (extraCount <= 0) {
+            return positions;
+        }
+
+        var extraHeight = availableHeight - primaryHeight;
+        var best = null;
+        for (var columns = 1; columns <= Math.min(extraCount, 6); columns += 1) {
+            var rows = Math.ceil(extraCount / columns);
+            var cellWidth = width / columns;
+            var cellHeight = extraHeight / rows;
+            var radius = Math.min(cellWidth * 0.34, cellHeight * 0.36, mainRadius * 0.5);
+            if (!best || radius > best.radius) {
+                best = { columns: columns, cellWidth: cellWidth, cellHeight: cellHeight, radius: radius };
+            }
+        }
+        for (var index = 0; index < extraCount; index += 1) {
+            positions.push({
+                center: [
+                    (index % best.columns + 0.5) * best.cellWidth,
+                    top + primaryHeight + (Math.floor(index / best.columns) + 0.5) * best.cellHeight
+                ],
+                radius: Math.max(1, best.radius)
+            });
+        }
+        return positions;
+    }
+
+    function buildTachoLayout(items, width, height, headerInset, hasTitle, colors, style) {
+        var positions = resolveTachoLayout(items.length, width, height, headerInset, hasTitle);
+        var needle = '#F0442D';
+        var series = [];
+        var graphic = [];
+        items.forEach(function (item, index) {
+            var position = positions[index];
+            var radius = position.radius;
+            var gauge = buildSeries(item, index, null, colors, style, position);
+            var ringScale = clamp(Number(style.ringWidthPercent) || 100, 50, 150) / 100;
+            var axisWidth = clamp(radius * 0.05 * ringScale, 1, 14);
+            gauge.startAngle = index === 0 ? 210 : 225;
+            gauge.endAngle = index === 0 ? -30 : -45;
+            gauge.splitNumber = index === 0 ? 8 : 5;
+            gauge.axisLine.lineStyle.width = axisWidth;
+            gauge.axisLine.lineStyle.color = [[1, colors.border]];
+            gauge.axisTick.distance = -axisWidth;
+            gauge.axisTick.length = clamp(radius * 0.065, 1, 9);
+            gauge.axisTick.lineStyle.color = colors.text;
+            gauge.splitLine.distance = -axisWidth;
+            gauge.splitLine.length = clamp(radius * 0.1, 2, 16);
+            gauge.splitLine.lineStyle.color = colors.text;
+            gauge.axisLabel.color = colors.text;
+            gauge.axisLabel.fontWeight = 700;
+            gauge.axisLabel.fontSize = clamp(radius * 0.12
+                * clamp(Number(style.scaleFontSizePercent) || 100, 50, 150) / 100, 4, 24);
+            gauge.pointer.length = '65%';
+            gauge.pointer.width = clamp(radius * 0.05, 1, 10);
+            gauge.pointer.itemStyle = { color: needle, shadowColor: needle, shadowBlur: Math.min(8, radius * 0.04) };
+            gauge.anchor.size = clamp(radius * 0.1, 2, 16);
+            gauge.anchor.itemStyle = { color: needle, borderColor: colors.text, borderWidth: 1 };
+            gauge.itemStyle = { color: needle };
+            gauge.title.offsetCenter = [0, '-36%'];
+            gauge.title.color = colors.text;
+            gauge.title.fontSize = clamp(radius * 0.12
+                * clamp(Number(style.titleFontSizePercent) || 100, 50, 150) / 100, 5, 18);
+            gauge.detail.offsetCenter = [0, '49%'];
+            gauge.detail.fontSize = clamp(radius * 0.2
+                * clamp(Number(style.valueFontSizePercent) || 100, 50, 150) / 100, 6, 38);
+            series.push(gauge);
+            graphic.push({
+                id: 'tacho-bezel-' + item.id,
+                type: 'circle',
+                z: 0,
+                shape: { cx: position.center[0], cy: position.center[1], r: radius * 1.08 },
+                style: { fill: colors.background, stroke: colors.track, lineWidth: Math.max(1, radius * 0.02) },
+                silent: true
+            });
+            graphic.push({
+                id: 'tacho-inner-' + item.id,
+                type: 'circle',
+                z: 0,
+                shape: { cx: position.center[0], cy: position.center[1], r: radius * 0.96 },
+                style: { fill: 'none', stroke: colors.border, lineWidth: Math.max(1, radius * 0.012) },
+                silent: true
+            });
+        });
+        return { series: series, graphic: graphic };
+    }
+
     function buildOption(model, theme) {
         var items = Array.isArray(model.items) ? model.items : [];
         var gauge = model.gauge || {};
@@ -406,7 +507,7 @@
         var title = String(gauge.title || '');
         var headerInset = bootstrap.mode === 'symcon' ? 64 : 0;
         var preset = String(gauge.preset || 'multi-title');
-        var grid = preset === 'ring-concentric' || preset === 'weather-station'
+        var grid = preset === 'ring-concentric' || preset === 'weather-station' || preset === 'tacho'
             ? null
             : resolveGrid(items.length, width, height, title !== '', headerInset);
         var concentric = preset === 'ring-concentric'
@@ -414,6 +515,9 @@
             : null;
         var weather = preset === 'weather-station'
             ? buildWeatherLayout(items, width, height, headerInset, title !== '', colors, style)
+            : null;
+        var tacho = preset === 'tacho'
+            ? buildTachoLayout(items, width, height, headerInset, title !== '', colors, style)
             : null;
 
         return {
@@ -437,8 +541,8 @@
                         + formatValue(item.value, Number(itemGauge.decimals) || 0, String(itemGauge.unit || ''));
                 }
             },
-            graphic: concentric ? concentric.graphic : weather ? weather.graphic : [],
-            series: concentric ? concentric.series : weather ? weather.series : items.map(function (item, index) {
+            graphic: concentric ? concentric.graphic : weather ? weather.graphic : tacho ? tacho.graphic : [],
+            series: concentric ? concentric.series : weather ? weather.series : tacho ? tacho.series : items.map(function (item, index) {
                 return preset === 'ring-grid'
                     ? buildRingGridSeries(item, index, grid, colors, style)
                     : buildSeries(item, index, grid, colors, style);

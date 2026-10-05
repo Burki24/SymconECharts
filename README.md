@@ -35,7 +35,8 @@ Folgende Module beinhaltet das SymconECharts Repository:
   Gerätemodul für zusammengesetzte Gauge-Darstellungen mit 2 bis 16
   Datenquellen, etwa Multi Title, Ring oder Car. Jede Quelle besitzt eine
   eigene Beschriftung, Skala, Einheit und Formatierung. Multi Title,
-  Ringraster, konzentrische Ringe und ein Wetterstations-Instrumentenpanel sind
+  Ringraster, konzentrische Ringe, ein Wetterstations-Instrumentenpanel und ein
+  Tacho-Cockpit sind
   als responsive Vorlagen implementiert.
   Wertebereich, Einheit und
   Nachkommastellen können je Quelle optional aus deren Variablendarstellung
@@ -65,7 +66,7 @@ Standarddarstellung.
 
 Gauge Multi verwaltet eine geordnete Quellenliste, liefert ein versioniertes
 Multi-Modell und rendert die Quellen als Multi-Title-Zifferblätter, Ringraster,
-konzentrische Ringe oder als Wetterstations-Instrumentenpanel. Archivverarbeitung
+konzentrische Ringe, als Wetterstations-Instrumentenpanel oder Tacho-Cockpit. Archivverarbeitung
 und weitere klassische Instrumentenpanel-Vorlagen sind noch nicht implementiert.
 Gauge Single und Gauge Multi besitzen optionale IPSView-WebContent-Ausgaben;
 beide können ihr Kacheldesign erben oder unabhängig gestaltet werden. Der reale

@@ -144,4 +144,38 @@ assert.equal(compactWeather.series.length, 16);
 assert.ok(compactWeather.series.every(series => series.center[1] - series.radius * 1.14 >= 64));
 assert.ok(compactWeather.series.every(series => series.axisLine.lineStyle.width <= series.radius));
 
-process.stdout.write('Gauge Multi dial, ring and weather-station layouts verified.\n');
+for (const count of [2, 3, 16]) {
+    for (const [mode, width, height] of [['symcon', 1120, 600], ['ipsview', 416, 720]]) {
+        const tacho = render(mode, width, height, count, 'Cockpit', 'tacho');
+        assert.equal(tacho.series.length, count, 'Tacho must retain all configured sources.');
+        assert.ok(tacho.series[0].radius > tacho.series[1].radius, 'Tacho needs a dominant middle dial.');
+        assert.ok(tacho.series[1].center[0] < tacho.series[0].center[0], 'The second source goes left.');
+        if (count >= 3) {
+            assert.ok(tacho.series[2].center[0] > tacho.series[0].center[0], 'The third source goes right.');
+            assert.equal(tacho.series[1].radius, tacho.series[2].radius);
+        }
+        assert.equal(tacho.graphic.length, count * 2, 'Every dial needs a frame.');
+        tacho.series.forEach((series, index) => {
+            assert.equal(series.id, `variable-${index}`);
+            assert.equal(series.min, index * 10);
+            assert.equal(series.max, index * 10 + 100);
+            assert.equal(series.data[0].value, index * 10 + 50);
+            assert.equal(series.pointer.show, true);
+            assert.equal(series.pointer.itemStyle.color, '#F0442D');
+            assert.equal(series.axisLabel.color, palette.text);
+            assert.match(series.detail.formatter(), new RegExp(`u${index}$`));
+            assert.ok(series.center[0] - series.radius * 1.08 >= 0);
+            assert.ok(series.center[0] + series.radius * 1.08 <= width);
+            assert.ok(series.center[1] - series.radius * 1.08 >= (mode === 'symcon' ? 64 : 0));
+            assert.ok(series.center[1] + series.radius * 1.08 <= height);
+        });
+        if (count > 3) {
+            assert.ok(tacho.series[3].center[1] > tacho.series[0].center[1], 'Additional sources go below the cockpit.');
+        }
+    }
+}
+const compactTacho = render('symcon', 320, 192, 16, 'Cockpit', 'tacho');
+assert.equal(compactTacho.series.length, 16);
+assert.ok(compactTacho.series.every(series => series.radius > 0));
+
+process.stdout.write('Gauge Multi dial, ring, weather-station and tacho layouts verified.\n');

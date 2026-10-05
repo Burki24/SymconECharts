@@ -50,9 +50,10 @@ class EChartsGaugeMulti extends IPSModuleStrict
     private const PRESET_RING_GRID = 'ring-grid';
     private const PRESET_RING_CONCENTRIC = 'ring-concentric';
     private const PRESET_WEATHER_STATION = 'weather-station';
+    private const PRESET_TACHO = 'tacho';
     private const SUPPORTED_PRESETS = [
         self::PRESET_MULTI_TITLE, self::PRESET_RING_GRID, self::PRESET_RING_CONCENTRIC,
-        self::PRESET_WEATHER_STATION
+        self::PRESET_WEATHER_STATION, self::PRESET_TACHO
     ];
     private const IPSVIEW_OUTPUT_IDENT = 'IPSViewGauge';
     private const DESIGN_SCALE_PROPERTIES = [
