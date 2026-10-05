@@ -40,7 +40,11 @@ gestaltbaren Wertekasten und optionale Schatteneffekte. Gauge Multi besitzt
 mit Multi Title, Ringraster, konzentrischen Ringen, einer Wetterstations-,
 einer Tacho- und einer Chronographen-Vorlage responsive native Kacheln.
 Die ersten fünf Vorlagen unterstützen 2 bis 16, der Chronograph 2 bis 6
-unabhängige Wertebereiche. Beide Gauge-Module erzeugen optional
+unabhängige Wertebereiche. Eine additive gemeinsame Multi-Designschicht steuert
+Zeiger, Naben, Skalenunterteilungen, Farbrollen und Zifferblattplatten für alle
+Instrumente einer Ausgabe; `preset` und `theme` erhalten die vorhandenen
+Vorlagenvorgaben. Quellenspezifische Überschreibungen sind noch nicht umgesetzt.
+Beide Gauge-Module erzeugen optional
 eine IPSView-WebContent-Variable mit vererbtem oder unabhängigem Design auf
 demselben Renderer. Weitere klassische Multi-Instrumentenpanel-Vorlagen,
 Archivverarbeitung sowie reale Symcon-Laufzeit- und Browsertests fehlen noch.

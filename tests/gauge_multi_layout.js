@@ -15,7 +15,7 @@ const palette = {
     accent: '#55cbb5'
 };
 
-function render(mode, width, height, count, title = '', preset = 'multi-title', tileHeaderVisible = true) {
+function render(mode, width, height, count, title = '', preset = 'multi-title', tileHeaderVisible = true, style = {}) {
     const chartElement = { clientWidth: width, clientHeight: height, hidden: false };
     const errorElement = { hidden: true, textContent: '' };
     let option;
@@ -26,7 +26,7 @@ function render(mode, width, height, count, title = '', preset = 'multi-title', 
                 status: 'ready',
                 chart: {
                     theme: 'dark',
-                    gauge: { title, preset, style: {} },
+                    gauge: { title, preset, style },
                     items: Array.from({ length: count }, (_, index) => ({
                         id: `variable-${index}`,
                         gauge: {
@@ -245,5 +245,40 @@ for (const count of [2, 3, 4, 5, 6]) {
         assert.equal(new Set(option.series.map(series => series.itemStyle.color)).size, count);
     }
 }
+
+const customStyle = {
+    pointerShape: 'arrow', pointerWidthPercent: 150, pointerLengthPercent: 120,
+    anchorShape: 'ring', anchorSizePercent: 130, anchorBorderWidthPercent: 150,
+    majorSplitCount: 12, minorSplitCount: 3, colorMode: 'custom',
+    pointerColor: '#112233', progressColor: '#223344', anchorColor: '#334455',
+    anchorBorderColor: '#445566', ringColor: '#556677', scaleColor: '#667788',
+    valueColor: '#778899', titleColor: '#8899AA', plateMode: 'custom',
+    plateSizePercent: 110, plateBorderWidthPercent: 125,
+    plateColor: '#99AABB', plateBorderColor: '#AABBCC'
+};
+const customChronograph = render('symcon', 720, 560, 3, 'Climate', 'chronograph', true, customStyle);
+const defaultChronograph = render('symcon', 720, 560, 3, 'Climate', 'chronograph');
+customChronograph.series.forEach((series, index) => {
+    assert.match(series.pointer.icon, /^path:\/\//);
+    assert.ok(series.pointer.width > defaultChronograph.series[index].pointer.width);
+    assert.equal(series.splitNumber, 12);
+    assert.equal(series.axisTick.splitNumber, 3);
+    assert.equal(series.pointer.itemStyle.color, '#112233');
+    assert.equal(series.axisLine.lineStyle.color[0][1], '#556677');
+    assert.equal(series.axisLabel.color, '#667788');
+    assert.equal(series.detail.color, '#778899');
+    assert.equal(series.title.color, '#8899AA');
+    assert.equal(series.anchor.itemStyle.color, palette.background);
+    assert.equal(series.anchor.itemStyle.borderColor, '#445566');
+});
+assert.equal(customChronograph.graphic.length, 3);
+assert.ok(customChronograph.graphic.every(element => String(element.id).startsWith('custom-plate-')));
+assert.ok(customChronograph.graphic.every(element => element.style.fill === '#99AABB'));
+assert.ok(customChronograph.graphic.every(element => element.style.stroke === '#AABBCC'));
+const hiddenChronograph = render('symcon', 720, 560, 3, 'Climate', 'chronograph', true, { plateMode: 'hidden' });
+assert.equal(hiddenChronograph.graphic.length, 0, 'Hidden plates must remove every chronograph bezel.');
+const customRing = render('symcon', 720, 560, 3, '', 'ring-grid', true, customStyle);
+assert.equal(customRing.graphic.length, 0, 'Plate settings must not replace ring layouts.');
+assert.equal(customRing.series[0].progress.itemStyle.color, '#223344');
 
 process.stdout.write('Gauge Multi dial, ring, weather-station, tacho and chronograph layouts verified.\n');

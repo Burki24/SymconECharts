@@ -54,7 +54,11 @@ StylePHP und PHP CS Fixer.
   ECharts-Einbettung und die Zustandsaktualisierung nach
   `VM_UPDATE` charakterisiert. Das erzeugte
   HTML-Dokument muss unter dem Symcon-Output-Buffer-Limit von 1.048.576 Byte
-  bleiben.
+  bleiben. Für Gauge Multi werden außerdem die gemeinsame Zeiger-, Naben-,
+  Skalen-, Farb- und Plattengestaltung, deren Validierung sowie getrennte
+  Kachel- und IPSView-Einstellungen geprüft. Der JavaScript-Layouttest sichert
+  die Anwendung dieser Designschicht auf Raster-, Ring- und Chronographenserie
+  einschließlich der Zeichenreihenfolge ab.
 - `echarts_assets.php` prüft Version, SHA-256-Integrität, Lizenz und NOTICE der
   lokal gebündelten Apache-ECharts-Runtime und der sechs offiziellen Themes.
   Zusätzlich werden der Gauge-spezifische Browser-Export, das gemeinsame

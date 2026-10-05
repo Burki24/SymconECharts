@@ -13,6 +13,11 @@
     var currentTheme = null;
     var reduceMotion = window.matchMedia
         && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var pointerIcons = {
+        needle: 'path://M0,-100 L7,10 L-7,10 Z',
+        line: 'path://M-2,-100 L2,-100 L2,10 L-2,10 Z',
+        arrow: 'path://M0,-100 L12,-72 L4,-72 L4,10 L-4,10 L-4,-72 L-12,-72 Z'
+    };
 
     function translate(text) {
         return typeof translations[text] === 'string' ? translations[text] : text;
@@ -106,6 +111,119 @@
             '#B98955', '#7493DD', '#A77DBC', '#64B8A4'
         ];
         return palette[index % palette.length];
+    }
+
+    function styleColor(style, name, fallback) {
+        var value = String(style[name] || '');
+        return /^#[0-9a-f]{6}$/i.test(value) ? value : fallback;
+    }
+
+    function applySeriesDesign(series, style, colors) {
+        var pointerScale = clamp(Number(style.pointerWidthPercent) || 100, 50, 150) / 100;
+        var pointerLengthScale = clamp(Number(style.pointerLengthPercent) || 100, 50, 150) / 100;
+        var anchorScale = clamp(Number(style.anchorSizePercent) || 100, 50, 150) / 100;
+        var anchorBorderScale = clamp(Number(style.anchorBorderWidthPercent) || 100, 50, 150) / 100;
+        if (series.pointer.show !== false) {
+            var pointerLength = parseFloat(series.pointer.length);
+            series.pointer.width = Math.max(1, (Number(series.pointer.width) || 1) * pointerScale);
+            if (Number.isFinite(pointerLength)) {
+                series.pointer.length = clamp(pointerLength * pointerLengthScale, 10, 100) + '%';
+            }
+            if (Object.prototype.hasOwnProperty.call(pointerIcons, style.pointerShape)) {
+                series.pointer.icon = pointerIcons[style.pointerShape];
+            }
+            series.anchor.itemStyle = series.anchor.itemStyle || {};
+            series.anchor.size = Math.max(1, (Number(series.anchor.size) || 1) * anchorScale);
+            series.anchor.itemStyle.borderWidth = Math.max(0,
+                (series.anchor.itemStyle.borderWidth || 1) * anchorBorderScale);
+            if (style.anchorShape === 'none') {
+                series.anchor.show = false;
+            } else if (style.anchorShape === 'circle' || style.anchorShape === 'ring') {
+                series.anchor.show = true;
+                if (style.anchorShape === 'ring') {
+                    series.anchor.itemStyle.color = colors.background;
+                    series.anchor.itemStyle.borderWidth = Math.max(2, series.anchor.itemStyle.borderWidth);
+                }
+            }
+        }
+
+        var majorSplitCount = Number(style.majorSplitCount);
+        var minorSplitCount = Number(style.minorSplitCount);
+        if (Number.isInteger(majorSplitCount) && majorSplitCount >= 2 && majorSplitCount <= 24) {
+            series.splitNumber = majorSplitCount;
+        }
+        if (Number.isInteger(minorSplitCount) && minorSplitCount >= 1 && minorSplitCount <= 10) {
+            series.axisTick.splitNumber = minorSplitCount;
+        }
+        if (style.colorMode === 'custom') {
+            var pointer = styleColor(style, 'pointerColor', colors.accent);
+            var progress = styleColor(style, 'progressColor', colors.accent);
+            var ring = styleColor(style, 'ringColor', colors.track);
+            var scale = styleColor(style, 'scaleColor', colors.muted);
+            var value = styleColor(style, 'valueColor', colors.text);
+            var title = styleColor(style, 'titleColor', colors.muted);
+            var anchor = styleColor(style, 'anchorColor', pointer);
+            var anchorBorder = styleColor(style, 'anchorBorderColor', value);
+            series.pointer.itemStyle = series.pointer.itemStyle || {};
+            series.pointer.itemStyle.color = pointer;
+            series.progress.itemStyle = series.progress.itemStyle || {};
+            series.progress.itemStyle.color = progress;
+            series.axisLine.lineStyle.color = [[1, ring]];
+            if (series.axisTick.lineStyle) {
+                series.axisTick.lineStyle.color = scale;
+            }
+            if (series.splitLine.lineStyle) {
+                series.splitLine.lineStyle.color = scale;
+            }
+            series.axisLabel.color = scale;
+            series.detail.color = value;
+            series.title.color = title;
+            if (series.anchor.itemStyle) {
+                series.anchor.itemStyle.color = style.anchorShape === 'ring' ? colors.background : anchor;
+                series.anchor.itemStyle.borderColor = anchorBorder;
+            }
+            series.itemStyle = { color: pointer };
+        }
+        return series;
+    }
+
+    function applyPlateDesign(graphic, series, preset, style, colors, width, height, headerInset) {
+        var plateMode = style.plateMode || 'preset';
+        if (preset === 'ring-grid' || preset === 'ring-concentric' || plateMode === 'preset') {
+            return graphic;
+        }
+        var retained = graphic.filter(function (element) {
+            var id = String(element.id || '');
+            return id.indexOf('bezel') === -1 && id.indexOf('-inner-') === -1;
+        });
+        if (plateMode === 'hidden') {
+            return retained;
+        }
+
+        var sizeScale = clamp(Number(style.plateSizePercent) || 100, 50, 150) / 100;
+        var borderScale = clamp(Number(style.plateBorderWidthPercent) || 100, 50, 150) / 100;
+        var fill = styleColor(style, 'plateColor', colors.background);
+        var border = styleColor(style, 'plateBorderColor', colors.border);
+        series.forEach(function (gauge, index) {
+            var maximumRadius = Math.max(1, Math.min(
+                gauge.center[0], width - gauge.center[0],
+                gauge.center[1] - headerInset, height - gauge.center[1]
+            ));
+            var plateRadius = Math.min(gauge.radius * 1.08 * sizeScale, maximumRadius);
+            retained.push({
+                id: 'custom-plate-' + gauge.id,
+                type: 'circle',
+                z: preset === 'chronograph' && index > 0 ? 4 : 0,
+                shape: { cx: gauge.center[0], cy: gauge.center[1], r: plateRadius },
+                style: {
+                    fill: fill,
+                    stroke: border,
+                    lineWidth: clamp(gauge.radius * 0.02 * borderScale, 1, 12)
+                },
+                silent: true
+            });
+        });
+        return retained;
     }
 
     function buildSeries(item, index, grid, colors, style, position) {
@@ -594,6 +712,18 @@
         var chronograph = preset === 'chronograph'
             ? buildChronographLayout(items, width, height, headerInset, title !== '', colors, style)
             : null;
+        var graphic = concentric ? concentric.graphic : weather ? weather.graphic : tacho ? tacho.graphic
+            : chronograph ? chronograph.graphic : [];
+        var series = concentric ? concentric.series : weather ? weather.series : tacho ? tacho.series
+            : chronograph ? chronograph.series : items.map(function (item, index) {
+                return preset === 'ring-grid'
+                    ? buildRingGridSeries(item, index, grid, colors, style)
+                    : buildSeries(item, index, grid, colors, style);
+            });
+        series = series.map(function (gaugeSeries) {
+            return applySeriesDesign(gaugeSeries, style, colors);
+        });
+        graphic = applyPlateDesign(graphic, series, preset, style, colors, width, height, headerInset);
 
         return {
             backgroundColor: colors.background,
@@ -616,14 +746,8 @@
                         + formatValue(item.value, Number(itemGauge.decimals) || 0, String(itemGauge.unit || ''));
                 }
             },
-            graphic: concentric ? concentric.graphic : weather ? weather.graphic : tacho ? tacho.graphic
-                : chronograph ? chronograph.graphic : [],
-            series: concentric ? concentric.series : weather ? weather.series : tacho ? tacho.series
-                : chronograph ? chronograph.series : items.map(function (item, index) {
-                return preset === 'ring-grid'
-                    ? buildRingGridSeries(item, index, grid, colors, style)
-                    : buildSeries(item, index, grid, colors, style);
-            })
+            graphic: graphic,
+            series: series
         };
     }
 

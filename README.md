@@ -68,7 +68,10 @@ Gauge Multi verwaltet eine geordnete Quellenliste, liefert ein versioniertes
 Multi-Modell und rendert die Quellen als Multi-Title-Zifferblätter, Ringraster,
 konzentrische Ringe, als Wetterstations-Instrumentenpanel, Tacho-Cockpit oder
 Chronograph mit einem Haupt- und bis zu fünf eingebetteten Nebeninstrumenten.
-Der Chronograph ist auf 2 bis 6 Quellen begrenzt. Archivverarbeitung
+Der Chronograph ist auf 2 bis 6 Quellen begrenzt. Eine gemeinsame Designschicht
+konfiguriert Zeiger, Naben, Skalenunterteilungen, Farbrollen und Zifferblattplatten
+für alle Instrumente einer Ausgabe, ohne die bisherigen Vorlagenvorgaben zu
+verändern. Archivverarbeitung
 und weitere klassische Instrumentenpanel-Vorlagen sind noch nicht implementiert.
 Gauge Single und Gauge Multi besitzen optionale IPSView-WebContent-Ausgaben;
 beide können ihr Kacheldesign erben oder unabhängig gestaltet werden. Der reale

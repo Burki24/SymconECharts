@@ -230,6 +230,294 @@
                     ]
                 },
                 {
+                    "type": "ExpansionPanel",
+                    "caption": "Pointer and hub",
+                    "expanded": false,
+                    "items": [
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "Select",
+                                    "name": "PointerShape",
+                                    "caption": "Pointer shape",
+                                    "width": "260px",
+                                    "options": [
+                                        {
+                                            "caption": "Preset",
+                                            "value": "preset"
+                                        },
+                                        {
+                                            "caption": "Needle",
+                                            "value": "needle"
+                                        },
+                                        {
+                                            "caption": "Line",
+                                            "value": "line"
+                                        },
+                                        {
+                                            "caption": "Arrow",
+                                            "value": "arrow"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Select",
+                                    "name": "AnchorShape",
+                                    "caption": "Hub shape",
+                                    "width": "260px",
+                                    "options": [
+                                        {
+                                            "caption": "Preset",
+                                            "value": "preset"
+                                        },
+                                        {
+                                            "caption": "Circle",
+                                            "value": "circle"
+                                        },
+                                        {
+                                            "caption": "Ring",
+                                            "value": "ring"
+                                        },
+                                        {
+                                            "caption": "Hidden",
+                                            "value": "none"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PointerWidthPercent",
+                                    "caption": "Pointer width",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PointerLengthPercent",
+                                    "caption": "Pointer length",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "AnchorSizePercent",
+                                    "caption": "Hub size",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "AnchorBorderWidthPercent",
+                                    "caption": "Hub border width",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "ExpansionPanel",
+                    "caption": "Scale and colors",
+                    "expanded": false,
+                    "items": [
+                        {
+                            "type": "Label",
+                            "caption": "Zero divisions keep the selected preset default. Custom colors apply to every Gauge in this output."
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "MajorSplitCount",
+                                    "caption": "Major divisions",
+                                    "minimum": 0,
+                                    "maximum": 24,
+                                    "width": "260px"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "MinorSplitCount",
+                                    "caption": "Minor divisions",
+                                    "minimum": 0,
+                                    "maximum": 10,
+                                    "width": "260px"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Select",
+                            "name": "GaugeColorMode",
+                            "caption": "Color assignment",
+                            "width": "260px",
+                            "options": [
+                                {
+                                    "caption": "Theme / preset",
+                                    "value": "theme"
+                                },
+                                {
+                                    "caption": "Custom",
+                                    "value": "custom"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "SelectColor",
+                                    "name": "PointerColor",
+                                    "caption": "Pointer color",
+                                    "width": "170px"
+                                },
+                                {
+                                    "type": "SelectColor",
+                                    "name": "ProgressColor",
+                                    "caption": "Progress color",
+                                    "width": "170px"
+                                },
+                                {
+                                    "type": "SelectColor",
+                                    "name": "RingColor",
+                                    "caption": "Ring color",
+                                    "width": "170px"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "SelectColor",
+                                    "name": "ScaleColor",
+                                    "caption": "Scale color",
+                                    "width": "170px"
+                                },
+                                {
+                                    "type": "SelectColor",
+                                    "name": "ValueColor",
+                                    "caption": "Value color",
+                                    "width": "170px"
+                                },
+                                {
+                                    "type": "SelectColor",
+                                    "name": "TitleColor",
+                                    "caption": "Title color",
+                                    "width": "170px"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "SelectColor",
+                                    "name": "AnchorColor",
+                                    "caption": "Hub color",
+                                    "width": "260px"
+                                },
+                                {
+                                    "type": "SelectColor",
+                                    "name": "AnchorBorderColor",
+                                    "caption": "Hub border color",
+                                    "width": "260px"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "ExpansionPanel",
+                    "caption": "Dial plate",
+                    "expanded": false,
+                    "items": [
+                        {
+                            "type": "Label",
+                            "caption": "Preset preserves the current template. Custom draws a circular plate behind each dial; Hidden removes template bezels. Ring presets keep their ring layout."
+                        },
+                        {
+                            "type": "Select",
+                            "name": "PlateDesignMode",
+                            "caption": "Plate mode",
+                            "width": "260px",
+                            "options": [
+                                {
+                                    "caption": "Preset",
+                                    "value": "preset"
+                                },
+                                {
+                                    "caption": "Custom",
+                                    "value": "custom"
+                                },
+                                {
+                                    "caption": "Hidden",
+                                    "value": "hidden"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PlateSizePercent",
+                                    "caption": "Plate size",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "PlateBorderWidthPercent",
+                                    "caption": "Plate border width",
+                                    "minimum": 50,
+                                    "maximum": 150,
+                                    "suffix": "%",
+                                    "width": "260px"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "SelectColor",
+                                    "name": "PlateColor",
+                                    "caption": "Plate color",
+                                    "width": "260px"
+                                },
+                                {
+                                    "type": "SelectColor",
+                                    "name": "PlateBorderColor",
+                                    "caption": "Plate border color",
+                                    "width": "260px"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
                     "type": "Image",
                     "name": "GaugePreview",
                     "image": "",

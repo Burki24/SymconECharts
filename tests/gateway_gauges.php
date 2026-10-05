@@ -1377,6 +1377,50 @@ assertGatewayGauge(
 );
 assertGatewayGauge(($multiData['items'][1]['value'] ?? null) === 58.0, 'Gauge Multi second value changed.');
 
+$designedMultiGauge = new EChartsGaugeMulti();
+$designedMultiGauge->Create();
+$designedMultiGauge->SetTestProperty('Sources', $multiSources);
+$designedMultiGauge->SetTestProperty('GaugePreset', 'chronograph');
+$designedMultiGauge->SetTestProperty('PointerShape', 'arrow');
+$designedMultiGauge->SetTestProperty('AnchorShape', 'ring');
+$designedMultiGauge->SetTestProperty('PointerWidthPercent', 140);
+$designedMultiGauge->SetTestProperty('PointerLengthPercent', 120);
+$designedMultiGauge->SetTestProperty('AnchorSizePercent', 110);
+$designedMultiGauge->SetTestProperty('MajorSplitCount', 12);
+$designedMultiGauge->SetTestProperty('MinorSplitCount', 3);
+$designedMultiGauge->SetTestProperty('GaugeColorMode', 'custom');
+$designedMultiGauge->SetTestProperty('PointerColor', 0x112233);
+$designedMultiGauge->SetTestProperty('PlateDesignMode', 'custom');
+$designedMultiGauge->SetTestProperty('PlateSizePercent', 115);
+$designedMultiGauge->SetTestProperty('PlateColor', 0x223344);
+$designedMultiGauge->SetTestProperty('EnableIPSView', true);
+$designedMultiGauge->SetTestProperty('IPSViewUseTileDesign', false);
+$designedMultiGauge->SetTestProperty('IPSViewPointerShape', 'line');
+$designedMultiGauge->SetTestProperty('IPSViewPlateDesignMode', 'hidden');
+$designedMultiGauge->ApplyChanges();
+assertGatewayGauge($designedMultiGauge->GetTestStatus() === IS_ACTIVE, 'Gauge Multi must accept the shared design layer.');
+$designedMultiData = json_decode($designedMultiGauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    ($designedMultiData['gauge']['style']['pointerShape'] ?? null) === 'arrow'
+        && ($designedMultiData['gauge']['style']['anchorShape'] ?? null) === 'ring'
+        && ($designedMultiData['gauge']['style']['pointerWidthPercent'] ?? null) === 140
+        && ($designedMultiData['gauge']['style']['pointerLengthPercent'] ?? null) === 120
+        && ($designedMultiData['gauge']['style']['majorSplitCount'] ?? null) === 12
+        && ($designedMultiData['gauge']['style']['minorSplitCount'] ?? null) === 3
+        && ($designedMultiData['gauge']['style']['colorMode'] ?? null) === 'custom'
+        && ($designedMultiData['gauge']['style']['pointerColor'] ?? null) === '#112233'
+        && ($designedMultiData['gauge']['style']['plateMode'] ?? null) === 'custom'
+        && ($designedMultiData['gauge']['style']['plateColor'] ?? null) === '#223344',
+    'Gauge Multi must expose the complete shared design in its chart model.'
+);
+assertGatewayGauge(
+    str_contains($designedMultiGauge->GetVisualizationTile(), '"pointerShape":"arrow"')
+        && str_contains($designedMultiGauge->GetVisualizationTile(), '"plateMode":"custom"')
+        && str_contains($designedMultiGauge->GetIPSViewHTML(), '"pointerShape":"line"')
+        && str_contains($designedMultiGauge->GetIPSViewHTML(), '"plateMode":"hidden"'),
+    'Tile and independent IPSView outputs must keep separate shared Gauge Multi designs.'
+);
+
 $ringGauge = new EChartsGaugeMulti();
 $ringGauge->Create();
 $ringGauge->SetTestProperty('Sources', $multiSources);
@@ -1398,7 +1442,13 @@ foreach (['ring-grid', 'ring-concentric', 'weather-station', 'tacho', 'chronogra
         'Both output adapters must receive the selected ring preset.'
     );
     $ringForm = json_decode($ringGauge->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
-    $ringPreview = $ringForm['elements'][4]['items'][5]['image'] ?? '';
+    $ringPreview = '';
+    foreach ($ringForm['elements'][4]['items'] ?? [] as $ringFormItem) {
+        if (($ringFormItem['name'] ?? null) === 'GaugePreview') {
+            $ringPreview = $ringFormItem['image'] ?? '';
+            break;
+        }
+    }
     assertGatewayGauge(
         is_string($ringPreview) && str_starts_with($ringPreview, 'data:image/svg+xml;base64,')
             && str_contains(
@@ -1447,7 +1497,13 @@ $chronographLimit->SetTestProperty('Sources', json_encode(array_slice($sevenSour
 $chronographLimit->ApplyChanges();
 assertGatewayGauge($chronographLimit->GetTestStatus() === IS_ACTIVE, 'Chronograph must accept six sources.');
 $chronographForm = json_decode($chronographLimit->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
-$chronographPreview = $chronographForm['elements'][4]['items'][5]['image'] ?? '';
+$chronographPreview = '';
+foreach ($chronographForm['elements'][4]['items'] ?? [] as $chronographFormItem) {
+    if (($chronographFormItem['name'] ?? null) === 'GaugePreview') {
+        $chronographPreview = $chronographFormItem['image'] ?? '';
+        break;
+    }
+}
 assertGatewayGauge(
     is_string($chronographPreview)
         && str_contains((string) base64_decode(substr($chronographPreview, strlen('data:image/svg+xml;base64,')), true), 'Source 5'),
@@ -1526,6 +1582,10 @@ assertGatewayGauge(
     str_contains($multiFormJson, '"caption":"Tile designer","expanded":false')
         && str_contains($multiFormJson, '"name":"GaugePreset"')
         && str_contains($multiFormJson, '"name":"EChartsTheme"')
+        && str_contains($multiFormJson, '"name":"PointerShape"')
+        && str_contains($multiFormJson, '"name":"AnchorShape"')
+        && str_contains($multiFormJson, '"name":"GaugeColorMode"')
+        && str_contains($multiFormJson, '"name":"PlateDesignMode"')
         && str_contains($multiFormJson, '"name":"GaugePreview"')
         && str_contains($multiFormJson, 'data:image\\/svg+xml;base64,'),
     'Gauge Multi form must expose a collapsed designer with an SVG preview.'
@@ -1535,6 +1595,9 @@ assertGatewayGauge(
         && str_contains($multiFormJson, '"name":"EnableIPSView"')
         && str_contains($multiFormJson, '"name":"IPSViewUseTileDesign"')
         && str_contains($multiFormJson, '"name":"IPSViewEChartsTheme"')
+        && str_contains($multiFormJson, '"name":"IPSViewPointerShape"')
+        && str_contains($multiFormJson, '"name":"IPSViewGaugeColorMode"')
+        && str_contains($multiFormJson, '"name":"IPSViewPlateDesignMode"')
         && str_contains($multiFormJson, '"name":"IPSViewGaugePreview"'),
     'Gauge Multi form must expose the helper-backed independent IPSView designer.'
 );
@@ -1672,6 +1735,16 @@ $invalidMultiDesign->SetTestProperty('Sources', $multiSources);
 $invalidMultiDesign->SetTestProperty('EChartsTheme', 'unsupported');
 $invalidMultiDesign->ApplyChanges();
 assertGatewayGauge($invalidMultiDesign->GetTestStatus() === 205, 'Gauge Multi must reject an unsupported design.');
+
+$invalidMultiDesign->SetTestProperty('EChartsTheme', 'auto');
+$invalidMultiDesign->SetTestProperty('PointerShape', 'unsupported');
+$invalidMultiDesign->ApplyChanges();
+assertGatewayGauge($invalidMultiDesign->GetTestStatus() === 205, 'Gauge Multi must reject an unsupported pointer shape.');
+
+$invalidMultiDesign->SetTestProperty('PointerShape', 'preset');
+$invalidMultiDesign->SetTestProperty('MajorSplitCount', 1);
+$invalidMultiDesign->ApplyChanges();
+assertGatewayGauge($invalidMultiDesign->GetTestStatus() === 205, 'Gauge Multi must reject a single major division.');
 
 $singleGauge = new EChartsGaugeSingle();
 $singleGauge->Create();

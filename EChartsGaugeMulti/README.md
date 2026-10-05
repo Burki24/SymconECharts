@@ -169,17 +169,23 @@ nutzt es den frei werdenden Platz automatisch. Unter Symcon 9.0 bleibt der
 Abstand wie bisher erhalten; IPSView nutzt die gesamte Widgetfläche.
 
 Der eingeklappte Kacheldesigner bietet die sechs Vorlagen, das automatische
-Symcon-Design und sechs gebündelte offizielle ECharts-Themes. Ringstärke sowie
-Schriftgrößen von Skala, Wert und Titel sind zwischen 50 und 150 Prozent
-einstellbar. Eine SVG-Vorschau zeigt beim Chronographen bis zu sechs, bei den
+Symcon-Design und sechs gebündelte offizielle ECharts-Themes. Eine gemeinsame
+Designschicht gestaltet alle Instrumente einer Ausgabe: Zeigerform, Zeigerlänge
+und -stärke, Nabenform und -größe, Haupt- und Nebenunterteilungen sowie die
+Farbrollen für Zeiger, Fortschritt, Ring, Skala, Wert, Titel und Nabe. Für jedes
+Zifferblatt kann außerdem die Vorlagenplatte beibehalten, ausgeblendet oder
+durch eine gemeinsam gestaltete runde Platte ersetzt werden. Ringstärke,
+Schriftgrößen und geometrische Feinabstimmungen sind zwischen 50 und 150 Prozent
+einstellbar. Die Standardwerte `preset` und `theme` erhalten die bisherige
+Darstellung vollständig. Eine SVG-Vorschau zeigt beim Chronographen bis zu sechs, bei den
 anderen Vorlagen bis zu vier Quellen exemplarisch (beim Tacho drei). Bei vielen konzentrischen Ringen oder
 Wetterstations- oder Tacho-Instrumenten ist für lesbare Beschriftungen eine
 ausreichend große Kachel bzw. ein großes IPSView-Widget erforderlich. Die
 Tacho-Vorschau zeigt die ersten drei Quellen; zur Laufzeit werden alle 2 bis
 16 konfigurierten Quellen ausgegeben.
-Die Feinabstimmung des Multi-Designers ist noch nicht abgeschlossen; insbesondere
-Zeiger, Skalen und Zifferblätter bieten noch nicht die Einstellmöglichkeiten
-von Gauge Single.
+Die gemeinsamen Einstellungen gelten zunächst für alle Quellen der jeweiligen
+Ausgabe. Abweichende Einstellungen je einzelner Quelle sind noch nicht Teil
+dieses Schritts.
 
 #### IPSView
 

@@ -58,7 +58,29 @@ class EChartsGaugeMulti extends IPSModuleStrict
     ];
     private const IPSVIEW_OUTPUT_IDENT = 'IPSViewGauge';
     private const DESIGN_SCALE_PROPERTIES = [
-        'RingWidthPercent', 'ScaleFontSizePercent', 'ValueFontSizePercent', 'TitleFontSizePercent'
+        'RingWidthPercent', 'ScaleFontSizePercent', 'ValueFontSizePercent', 'TitleFontSizePercent',
+        'PointerWidthPercent', 'PointerLengthPercent', 'AnchorSizePercent', 'AnchorBorderWidthPercent',
+        'PlateSizePercent', 'PlateBorderWidthPercent'
+    ];
+    private const DESIGN_STRING_DEFAULTS = [
+        'PointerShape'    => 'preset',
+        'AnchorShape'     => 'preset',
+        'GaugeColorMode'  => 'theme',
+        'PlateDesignMode' => 'preset'
+    ];
+    private const DESIGN_INTEGER_DEFAULTS = [
+        'MajorSplitCount'   => 0,
+        'MinorSplitCount'   => 0,
+        'PointerColor'      => 0x55CBB5,
+        'ProgressColor'     => 0x55CBB5,
+        'AnchorColor'       => 0x55CBB5,
+        'AnchorBorderColor' => 0xF4F5F7,
+        'RingColor'         => 0x45474C,
+        'ScaleColor'        => 0xA7A9AE,
+        'ValueColor'        => 0xF4F5F7,
+        'TitleColor'        => 0xA7A9AE,
+        'PlateColor'        => 0x25272B,
+        'PlateBorderColor'  => 0xA5A9B0
     ];
 
     public function Create(): void
@@ -71,16 +93,27 @@ class EChartsGaugeMulti extends IPSModuleStrict
         $this->RegisterPropertyString('Title', '');
         $this->RegisterPropertyString('GaugePreset', self::PRESET_MULTI_TITLE);
         $this->RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO);
-        $this->RegisterPropertyInteger('RingWidthPercent', 100);
-        $this->RegisterPropertyInteger('ScaleFontSizePercent', 100);
-        $this->RegisterPropertyInteger('ValueFontSizePercent', 100);
-        $this->RegisterPropertyInteger('TitleFontSizePercent', 100);
+        foreach (self::DESIGN_SCALE_PROPERTIES as $name) {
+            $this->RegisterPropertyInteger($name, 100);
+        }
+        foreach (self::DESIGN_STRING_DEFAULTS as $name => $default) {
+            $this->RegisterPropertyString($name, $default);
+        }
+        foreach (self::DESIGN_INTEGER_DEFAULTS as $name => $default) {
+            $this->RegisterPropertyInteger($name, $default);
+        }
         $this->RegisterIPSViewHTMLPageProperties();
         $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
         $this->RegisterPropertyString('IPSViewGaugePreset', self::PRESET_MULTI_TITLE);
         $this->RegisterPropertyString('IPSViewEChartsTheme', EChartsAsset::THEME_AUTO);
         foreach (self::DESIGN_SCALE_PROPERTIES as $name) {
             $this->RegisterPropertyInteger('IPSView' . $name, 100);
+        }
+        foreach (self::DESIGN_STRING_DEFAULTS as $name => $default) {
+            $this->RegisterPropertyString('IPSView' . $name, $default);
+        }
+        foreach (self::DESIGN_INTEGER_DEFAULTS as $name => $default) {
+            $this->RegisterPropertyInteger('IPSView' . $name, $default);
         }
         $this->RegisterAttributeString('RegisteredSourceVariableIDs', '[]');
         $this->RegisterAttributeString('LastError', '');
@@ -155,6 +188,12 @@ class EChartsGaugeMulti extends IPSModuleStrict
         foreach (self::DESIGN_SCALE_PROPERTIES as $name) {
             IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyInteger($name));
         }
+        foreach (self::DESIGN_STRING_DEFAULTS as $name => $_default) {
+            IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyString($name));
+        }
+        foreach (self::DESIGN_INTEGER_DEFAULTS as $name => $_default) {
+            IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyInteger($name));
+        }
         IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
         IPS_ApplyChanges($this->InstanceID);
     }
@@ -204,12 +243,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
             'gauge'         => [
                 'title'  => $this->ReadPropertyString('Title'),
                 'preset' => $this->ReadPropertyString('GaugePreset'),
-                'style'  => [
-                    'ringWidthPercent'     => $this->ReadPropertyInteger('RingWidthPercent'),
-                    'scaleFontSizePercent' => $this->ReadPropertyInteger('ScaleFontSizePercent'),
-                    'valueFontSizePercent' => $this->ReadPropertyInteger('ValueFontSizePercent'),
-                    'titleFontSizePercent' => $this->ReadPropertyInteger('TitleFontSizePercent')
-                ]
+                'style'  => $this->ReadGaugeStyle()
             ],
             'items'         => $items
         ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
@@ -367,14 +401,12 @@ class EChartsGaugeMulti extends IPSModuleStrict
                 'Message' => 'The selected Multi Gauge design is not supported.'
             ];
         }
-        foreach (['RingWidthPercent', 'ScaleFontSizePercent', 'ValueFontSizePercent', 'TitleFontSizePercent'] as $name) {
-            $value = $this->ReadPropertyInteger($name);
-            if ($value < 50 || $value > 150) {
-                return [
-                    'Status'  => self::STATUS_DESIGN_INVALID,
-                    'Message' => 'Multi Gauge design scale values must be between 50 and 150 percent.'
-                ];
-            }
+        $designError = $this->ValidateGaugeDesign();
+        if ($designError !== null) {
+            return [
+                'Status'  => self::STATUS_DESIGN_INVALID,
+                'Message' => $designError
+            ];
         }
 
         if ($this->IsIPSViewHTMLPageEnabled() && !$this->ReadPropertyBoolean('IPSViewUseTileDesign')) {
@@ -385,14 +417,48 @@ class EChartsGaugeMulti extends IPSModuleStrict
                     'Message' => 'The selected IPSView Multi Gauge design is not supported.'
                 ];
             }
-            foreach (self::DESIGN_SCALE_PROPERTIES as $name) {
-                $value = $this->ReadPropertyInteger('IPSView' . $name);
-                if ($value < 50 || $value > 150) {
-                    return [
-                        'Status'  => self::STATUS_DESIGN_INVALID,
-                        'Message' => 'IPSView Multi Gauge design scale values must be between 50 and 150 percent.'
-                    ];
-                }
+            $designError = $this->ValidateGaugeDesign('IPSView');
+            if ($designError !== null) {
+                return [
+                    'Status'  => self::STATUS_DESIGN_INVALID,
+                    'Message' => 'IPSView ' . $designError
+                ];
+            }
+        }
+
+        return null;
+    }
+
+    private function ValidateGaugeDesign(string $prefix = ''): ?string
+    {
+        foreach (self::DESIGN_SCALE_PROPERTIES as $name) {
+            $value = $this->ReadPropertyInteger($prefix . $name);
+            if ($value < 50 || $value > 150) {
+                return 'Multi Gauge design scale values must be between 50 and 150 percent.';
+            }
+        }
+
+        if (!in_array($this->ReadPropertyString($prefix . 'PointerShape'), ['preset', 'needle', 'line', 'arrow'], true)
+            || !in_array($this->ReadPropertyString($prefix . 'AnchorShape'), ['preset', 'circle', 'ring', 'none'], true)
+            || !in_array($this->ReadPropertyString($prefix . 'GaugeColorMode'), ['theme', 'custom'], true)
+            || !in_array($this->ReadPropertyString($prefix . 'PlateDesignMode'), ['preset', 'custom', 'hidden'], true)) {
+            return 'The selected Multi Gauge element design is not supported.';
+        }
+
+        $majorSplitCount = $this->ReadPropertyInteger($prefix . 'MajorSplitCount');
+        $minorSplitCount = $this->ReadPropertyInteger($prefix . 'MinorSplitCount');
+        if (($majorSplitCount !== 0 && ($majorSplitCount < 2 || $majorSplitCount > 24))
+            || $minorSplitCount < 0 || $minorSplitCount > 10) {
+            return 'Multi Gauge scale divisions are invalid.';
+        }
+        foreach (array_keys(array_filter(
+            self::DESIGN_INTEGER_DEFAULTS,
+            static fn (int $default, string $name): bool => str_ends_with($name, 'Color'),
+            ARRAY_FILTER_USE_BOTH
+        )) as $name) {
+            $color = $this->ReadPropertyInteger($prefix . $name);
+            if ($color < 0 || $color > 0xFFFFFF) {
+                return 'Multi Gauge colors must be valid RGB colors.';
             }
         }
 
@@ -785,10 +851,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
             if ($ipsView && !$this->ReadPropertyBoolean('IPSViewUseTileDesign')) {
                 $chart['theme'] = $this->ReadPropertyString('IPSViewEChartsTheme');
                 $chart['gauge']['preset'] = $this->ReadPropertyString('IPSViewGaugePreset');
-                foreach (self::DESIGN_SCALE_PROPERTIES as $name) {
-                    $key = lcfirst($name);
-                    $chart['gauge']['style'][$key] = $this->ReadPropertyInteger('IPSView' . $name);
-                }
+                $chart['gauge']['style'] = $this->ReadGaugeStyle('IPSView');
             }
         } catch (Throwable $exception) {
             $this->SendDebug('BuildVisualizationState', $exception::class, 0);
@@ -843,6 +906,34 @@ class EChartsGaugeMulti extends IPSModuleStrict
         return $this->ReadPropertyBoolean('IPSViewUseTileDesign')
             ? $this->ReadPropertyString('EChartsTheme')
             : $this->ReadPropertyString('IPSViewEChartsTheme');
+    }
+
+    /** @return array<string, int|string> */
+    private function ReadGaugeStyle(string $prefix = ''): array
+    {
+        $style = [];
+        foreach (self::DESIGN_SCALE_PROPERTIES as $name) {
+            $style[lcfirst($name)] = $this->ReadPropertyInteger($prefix . $name);
+        }
+        foreach (self::DESIGN_STRING_DEFAULTS as $name => $_default) {
+            $fieldName = match ($name) {
+                'GaugeColorMode'  => 'colorMode',
+                'PlateDesignMode' => 'plateMode',
+                default           => lcfirst($name)
+            };
+            $style[$fieldName] = $this->ReadPropertyString($prefix . $name);
+        }
+        foreach (self::DESIGN_INTEGER_DEFAULTS as $name => $_default) {
+            $value = $this->ReadPropertyInteger($prefix . $name);
+            $style[lcfirst($name)] = str_ends_with($name, 'Color') ? self::ColorToHex($value) : $value;
+        }
+
+        return $style;
+    }
+
+    private static function ColorToHex(int $color): string
+    {
+        return sprintf('#%06X', max(0, min(0xFFFFFF, $color)));
     }
 
     private function IPSViewThemeCSS(): string
@@ -912,7 +1003,10 @@ class EChartsGaugeMulti extends IPSModuleStrict
     /** @param list<array<string, mixed>> $items @return list<array<string, mixed>> */
     private function PrefixIPSViewDesignerItems(array $items): array
     {
-        $designNames = ['GaugePreset', 'EChartsTheme', ...self::DESIGN_SCALE_PROPERTIES];
+        $designNames = [
+            'GaugePreset', 'EChartsTheme', ...self::DESIGN_SCALE_PROPERTIES,
+            ...array_keys(self::DESIGN_STRING_DEFAULTS), ...array_keys(self::DESIGN_INTEGER_DEFAULTS)
+        ];
         foreach ($items as &$item) {
             if (($item['name'] ?? null) === 'GaugePreview') {
                 $item['name'] = 'IPSViewGaugePreview';

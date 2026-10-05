@@ -492,6 +492,60 @@ foreach ([
             'EChartsGaugeMulti source rows must optionally inherit their variable presentation.',
             $errors
         );
+
+        $multiDesignerElements = [];
+        $findMultiDesignerElements = static function (array $items) use (&$findMultiDesignerElements, &$multiDesignerElements): void
+        {
+            foreach ($items as $item) {
+                if (!is_array($item)) {
+                    continue;
+                }
+                if (is_string($item['name'] ?? null)) {
+                    $multiDesignerElements[$item['name']] = $item;
+                }
+                if (is_array($item['items'] ?? null)) {
+                    $findMultiDesignerElements($item['items']);
+                }
+            }
+        };
+        $findMultiDesignerElements($gaugeForm['elements'] ?? []);
+        foreach ([
+            'PointerShape'    => ['type' => 'Select', 'values' => ['preset', 'needle', 'line', 'arrow']],
+            'AnchorShape'     => ['type' => 'Select', 'values' => ['preset', 'circle', 'ring', 'none']],
+            'GaugeColorMode'  => ['type' => 'Select', 'values' => ['theme', 'custom']],
+            'PlateDesignMode' => ['type' => 'Select', 'values' => ['preset', 'custom', 'hidden']],
+            'PointerColor'    => ['type' => 'SelectColor'],
+            'PlateColor'      => ['type' => 'SelectColor'],
+            'MajorSplitCount' => ['type' => 'NumberSpinner'],
+            'MinorSplitCount' => ['type' => 'NumberSpinner']
+        ] as $designerName => $contract) {
+            $designerElement = $multiDesignerElements[$designerName] ?? null;
+            $valid = is_array($designerElement) && ($designerElement['type'] ?? null) === $contract['type'];
+            if (isset($contract['values'])) {
+                $valid = $valid && array_column($designerElement['options'] ?? [], 'value') === $contract['values'];
+            }
+            requireStrictContract(
+                $valid,
+                'EChartsGaugeMulti shared designer contract is invalid for ' . $designerName . '.',
+                $errors
+            );
+        }
+        foreach ([
+            'RingWidthPercent', 'ScaleFontSizePercent', 'ValueFontSizePercent', 'TitleFontSizePercent',
+            'PointerWidthPercent', 'PointerLengthPercent', 'AnchorSizePercent', 'AnchorBorderWidthPercent',
+            'PlateSizePercent', 'PlateBorderWidthPercent'
+        ] as $fineTuningName) {
+            $fineTuningElement = $multiDesignerElements[$fineTuningName] ?? null;
+            requireStrictContract(
+                is_array($fineTuningElement)
+                    && ($fineTuningElement['type'] ?? null) === 'NumberSpinner'
+                    && ($fineTuningElement['minimum'] ?? null) === 50
+                    && ($fineTuningElement['maximum'] ?? null) === 150
+                    && ($fineTuningElement['suffix'] ?? null) === '%',
+                'EChartsGaugeMulti shared fine tuning is invalid for ' . $fineTuningName . '.',
+                $errors
+            );
+        }
     }
 
     $expectedAction = 'echo ' . $gaugeContract['prefix'] . '_GetGaugeData($id);';
