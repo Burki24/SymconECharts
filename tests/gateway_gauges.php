@@ -617,7 +617,7 @@ assertGatewayGauge(
 );
 $gauge->SetTestProperty('IPSViewUseTileDesign', true);
 foreach ([
-    'function resolveGaugeLayout(preset, width, height, style)',
+    'function resolveGaugeLayout(preset, width, height, style, scaleMultiplier)',
     "resolveStyleScale(style, 'scaleFontSizePercent')",
     "resolveStyleScale(style, 'valueFontSizePercent')",
     "resolveStyleScale(style, 'unitFontSizePercent')",
@@ -628,7 +628,7 @@ foreach ([
     "pointerLength: Math.round(parseFloat(definition.pointerLength) * pointerLength * 100) / 100 + '%'",
     "resolveStyleScale(style, 'minorTickLengthPercent')",
     "resolveStyleScale(style, 'majorTickLengthPercent')",
-    'var scale = Math.min(width / 440, height / 400);',
+    'var scale = Math.min(width / 440, height / 400) * (scaleMultiplier || 1);',
     'var height = Math.max(chartElement.clientHeight, 160);',
     'center: [layout.centerX, layout.centerY]',
     'radius: layout.radius',

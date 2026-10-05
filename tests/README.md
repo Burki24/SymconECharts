@@ -7,10 +7,12 @@ git submodule update --init --recursive
 php tests/run.php
 ```
 
-Der Multi-Gauge-Layouttest benötigt zusätzlich Node.js und wird separat mit
-`node tests/gauge_multi_layout.js` ausgeführt. Er prüft die freigehaltene
-Kachelkopfzeile sowie das unveränderte IPSView-Layout anhand gerenderter
-ECharts-Optionen. Sie deckt auch Ringraster und konzentrische Ringe mit 2 bzw.
+Die Gauge-Layouttests benötigen zusätzlich Node.js und werden separat mit
+`node tests/gauge_single_layout.js` und `node tests/gauge_multi_layout.js`
+ausgeführt. Der Single-Test prüft die vergrößerte Darstellung und die Grenzen
+der Zifferblattplatte in Kachel und IPSView. Der Multi-Test prüft die freigehaltene
+Kachelkopfzeile sowie die Layouts beider Ausgabewege anhand gerenderter
+ECharts-Optionen. Er deckt auch Ringraster und konzentrische Ringe mit 2 bzw.
 16 Quellen sowie Wetterstations- und Tacho-Panel mit 2, 3 und 16 Quellen ab. Die
 PHP-Basissuite benötigt weiterhin kein Node.js.
 

@@ -84,6 +84,21 @@ for (const preset of ['multi-title', 'ring-grid', 'ring-concentric', 'weather-st
 const crowdedTile = render('symcon', 320, 192, 16);
 assert.ok(topOfFirstGauge(crowdedTile) >= 64, 'A crowded tile must not overlap the header.');
 
+for (const mode of ['symcon', 'ipsview']) {
+    const ring = render(mode, 1260, 310, 3, '', 'ring-grid', false);
+    const dial = render(mode, 1260, 630, 3, '', 'multi-title', false);
+    assert.ok(ring.series[0].radius > 118, `${mode} rings should use more of a wide tile.`);
+    assert.ok(dial.series[0].radius > 175, `${mode} dials should use more of a wide tile.`);
+    for (const [option, height] of [[ring, 310], [dial, 630]]) {
+        for (const series of option.series) {
+            assert.ok(series.center[0] - series.radius >= 0);
+            assert.ok(series.center[0] + series.radius <= 1260);
+            assert.ok(series.center[1] - series.radius >= 0);
+            assert.ok(series.center[1] + series.radius <= height);
+        }
+    }
+}
+
 for (const preset of ['ring-grid', 'ring-concentric']) {
     for (const count of [2, 16]) {
         const tile = render('symcon', 416, 1048, count, '', preset);

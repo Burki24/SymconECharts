@@ -82,7 +82,7 @@
             var rows = Math.ceil(count / columns);
             var cellWidth = width / columns;
             var cellHeight = usableHeight / rows;
-            var radius = Math.min(cellWidth * 0.38, cellHeight * 0.4);
+            var radius = Math.min(cellWidth * 0.43, cellHeight * 0.44);
             if (!best || radius > best.radius) {
                 best = {
                     columns: columns,
@@ -195,7 +195,7 @@
 
     function buildRingGridSeries(item, index, grid, colors, style) {
         var series = buildSeries(item, index, grid, colors, style);
-        var radius = grid.radius * 0.9;
+        var radius = grid.radius * 0.95;
         var ringScale = clamp(Number(style.ringWidthPercent) || 100, 50, 150) / 100;
         var ringWidth = clamp(radius * 0.13 * ringScale, 2, 24);
         var color = itemColor(index, colors);

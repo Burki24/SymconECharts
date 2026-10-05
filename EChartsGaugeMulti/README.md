@@ -154,8 +154,9 @@ Nebeninstrumente unter das Hauptinstrument. Für einen dunklen Look das
 ECharts-Theme **Dark** wählen; dessen Hintergrund ist nicht rein schwarz.
 Raster-Vorlagen wählen
 abhängig von Quellenanzahl, Breite und Höhe eine passende Spalten- und
-Zeilenaufteilung. Änderungen einer Quellvariable werden über `VM_UPDATE`
-direkt an die Kachel übertragen.
+Zeilenaufteilung. Multi Title und Ringraster füllen ihre Zellen in Kachel und
+IPSView stärker aus, ohne die Instrumente zu strecken. Änderungen einer
+Quellvariable werden über `VM_UPDATE` direkt an die Kachel übertragen.
 Das Multi-Raster lässt in der nativen Kachel Platz für die von Symcon
 eingeblendete Kopfzeile. Wird der Objekttitel unter Symcon 9.1 ausgeblendet,
 nutzt es den frei werdenden Platz automatisch. Unter Symcon 9.0 bleibt der

@@ -60,6 +60,11 @@ Hauptteiler relativ zur gewählten Vorlage. `100 %` entspricht immer der geteste
 zulässig sind 50 bis 150 %. Dadurch bleiben individuelle Einstellungen auch
 bei anderen Kachelgrößen responsiv. Freie ECharts-JSON- oder
 JavaScript-Einstellungen werden nicht ausgeführt.
+Kachel und IPSView nutzen bei ausreichend Platz nun einen größeren, weiterhin
+proportionalen Maßstab. Die Berechnung berücksichtigt Zifferblattplatte,
+Wert und Titelposition innerhalb der verfügbaren Fläche; individuelle Größen
+und Versätze bleiben wirksam. In engen Widgets bleibt die bisherige
+Presetgröße als Rückfall erhalten.
 
 Zusätzlich kann die Zeigerform als Presetvorgabe, Nadel, Linie, Pfeil oder
 importiertes SVG gewählt werden. Der SVG-Import akzeptiert ausschließlich

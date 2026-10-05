@@ -210,9 +210,46 @@
             : clamp(Math.round(value * factor), customMinimum, customMaximum);
     }
 
-    function resolveGaugeLayout(preset, width, height, style) {
+    function gaugeLayoutFits(layout, style, width, height) {
+        var margin = 8;
+        var plateRadius = style.plateShape === 'circle'
+            ? layout.circlePlateRadius * resolveStyleScale(style, 'plateSizePercent')
+            : style.plateShape === 'arc'
+                ? layout.arcPlateRadius * resolveStyleScale(style, 'plateSizePercent')
+                : 0;
+        var horizontalRadius = Math.max(layout.radius + layout.axisFontSize / 2,
+            plateRadius, layout.detailWidth / 2);
+        var verticalRadius = Math.max(layout.radius + layout.axisFontSize / 2, plateRadius);
+        var detailX = layout.centerX + layout.detailOffset[0];
+        var titleX = layout.centerX + layout.titleOffset[0];
+        var detailY = layout.centerY + layout.detailOffset[1];
+        var titleY = layout.centerY + layout.titleOffset[1];
+        var minimumY = Math.min(layout.centerY - verticalRadius,
+            detailY - layout.detailHeight / 2, titleY - layout.titleFontSize);
+        var maximumY = Math.max(layout.centerY + verticalRadius,
+            detailY + layout.detailHeight / 2, titleY + layout.titleFontSize);
+        if (maximumY - minimumY > height - 2 * margin) {
+            return false;
+        }
+        if (minimumY < margin) {
+            layout.centerY += margin - minimumY;
+        } else if (maximumY > height - margin) {
+            layout.centerY -= maximumY - (height - margin);
+        }
+
+        return layout.centerX - horizontalRadius >= margin
+            && layout.centerX + horizontalRadius <= width - margin
+            && detailX - layout.detailWidth / 2 >= margin
+            && detailX + layout.detailWidth / 2 <= width - margin
+            && titleX >= margin
+            && titleX <= width - margin
+            && layout.centerY - verticalRadius >= margin
+            && layout.centerY + verticalRadius <= height - margin;
+    }
+
+    function resolveGaugeLayout(preset, width, height, style, scaleMultiplier) {
         var definition = gaugeLayoutDefinitions[preset] || gaugeLayoutDefinitions.simple;
-        var scale = Math.min(width / 440, height / 400);
+        var scale = Math.min(width / 440, height / 400) * (scaleMultiplier || 1);
         var contentOffsetY = (height - 400 * scale) / 2;
         var scaleFontSize = resolveStyleScale(style, 'scaleFontSizePercent');
         var valueFontSize = resolveStyleScale(style, 'valueFontSizePercent');
@@ -246,7 +283,7 @@
                 + 8 * scale
         );
 
-        return {
+        var layout = {
             centerX: Math.round(width / 2 + gaugeOffsetX),
             centerY: Math.round(contentOffsetY + definition.centerY * scale + gaugeOffsetY),
             radius: Math.round(definition.radius * scale * radiusScale + lineWidth / 2),
@@ -305,6 +342,17 @@
                 48
             )
         };
+
+        if (scaleMultiplier === undefined) {
+            for (var factor = 1.2; factor > 1; factor -= 0.05) {
+                var expanded = resolveGaugeLayout(preset, width, height, style, factor);
+                if (gaugeLayoutFits(expanded, style, width, height)) {
+                    return expanded;
+                }
+            }
+        }
+
+        return layout;
     }
 
     function formatAxisValue(value) {
