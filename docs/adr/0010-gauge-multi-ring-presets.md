@@ -30,7 +30,9 @@ output contract.
   sources in a small area, the layout remains complete but text and ring
   strokes become small; users should enlarge the tile or widget.
 - The native tile reserves its Symcon header area; IPSView does not.
-  Automatic detection of the optional Symcon 9.1 header remains a later task.
+  Symcon 9.1 title visibility is now read from `IPS_GetObject()` when the tile
+  HTML is generated, so a hidden title releases the reserved area. Symcon 9.0
+  retains the previous inset.
 
 ## Consequences
 

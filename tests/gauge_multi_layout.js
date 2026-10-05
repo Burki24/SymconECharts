@@ -15,7 +15,7 @@ const palette = {
     accent: '#55cbb5'
 };
 
-function render(mode, width, height, count, title = '', preset = 'multi-title') {
+function render(mode, width, height, count, title = '', preset = 'multi-title', tileHeaderVisible = true) {
     const chartElement = { clientWidth: width, clientHeight: height, hidden: false };
     const errorElement = { hidden: true, textContent: '' };
     let option;
@@ -40,7 +40,7 @@ function render(mode, width, height, count, title = '', preset = 'multi-title') 
                     }))
                 }
             },
-            options: { echartsThemes: { dark: palette } }
+            options: { echartsThemes: { dark: palette }, tileHeaderVisible }
         },
         echarts: {
             init: () => ({ setOption: next => { option = next; } })
@@ -62,13 +62,24 @@ function topOfFirstGauge(option) {
 
 const tallTile = render('symcon', 416, 1048, 3);
 const tallIPSView = render('ipsview', 416, 1048, 3);
+const tallTileWithoutHeader = render('symcon', 416, 1048, 3, '', 'multi-title', false);
 assert.ok(topOfFirstGauge(tallTile) >= 64, 'The native header must remain clear.');
 assert.ok(topOfFirstGauge(tallIPSView) < 64, 'IPSView must not reserve the native header.');
+assert.ok(topOfFirstGauge(tallTileWithoutHeader) < 64, 'A tile without a title must use the released space.');
 
 const titledTile = render('symcon', 416, 1048, 3, 'Climate');
 const titledIPSView = render('ipsview', 416, 1048, 3, 'Climate');
 assert.ok(titledTile.title.top >= 64, 'The chart title must follow the native header.');
 assert.equal(titledIPSView.title.top, 6, 'The IPSView chart title must retain its original position.');
+assert.equal(render('symcon', 416, 1048, 3, 'Climate', 'multi-title', false).title.top, 6);
+
+for (const preset of ['multi-title', 'ring-grid', 'ring-concentric', 'weather-station', 'tacho']) {
+    const withHeader = render('symcon', 416, 720, 3, 'Climate', preset);
+    const withoutHeader = render('symcon', 416, 720, 3, 'Climate', preset, false);
+    assert.ok(topOfFirstGauge(withHeader) >= 64, `${preset} must clear a visible Symcon header.`);
+    assert.ok(topOfFirstGauge(withoutHeader) < topOfFirstGauge(withHeader), `${preset} must use hidden-header space.`);
+    assert.equal(withoutHeader.title.top, 6);
+}
 
 const crowdedTile = render('symcon', 320, 192, 16);
 assert.ok(topOfFirstGauge(crowdedTile) >= 64, 'A crowded tile must not overlap the header.');

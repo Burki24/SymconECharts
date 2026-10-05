@@ -109,6 +109,16 @@ function IPS_GetName(int $objectID): string
     return (string) $GLOBALS['symconTestVariables'][$objectID]['Name'];
 }
 
+/** @return array<string, bool> */
+function IPS_GetObject(int $objectID): array
+{
+    if ($GLOBALS['symconTestLegacyObject'] ?? false) {
+        return [];
+    }
+
+    return ['ObjectIsHiddenTitle' => $GLOBALS['symconTestHiddenTitles'][$objectID] ?? false];
+}
+
 function GetValue(int $variableID): mixed
 {
     return $GLOBALS['symconTestVariables'][$variableID]['Value'];
@@ -116,6 +126,8 @@ function GetValue(int $variableID): mixed
 
 abstract class IPSModuleStrict
 {
+    public int $InstanceID = 5000;
+
     /** @var null|callable(string): string */
     public static $ParentResponder = null;
 
@@ -1405,6 +1417,24 @@ assertGatewayGauge(
 );
 
 $multiTile = $multiGauge->GetVisualizationTile();
+assertGatewayGauge(
+    str_contains($multiTile, '"tileHeaderVisible":true'),
+    'Gauge Multi must reserve space when the Symcon tile title is visible.'
+);
+$GLOBALS['symconTestHiddenTitles'][$multiGauge->InstanceID] = true;
+$hiddenHeaderTile = $multiGauge->GetVisualizationTile();
+assertGatewayGauge(
+    str_contains($hiddenHeaderTile, '"tileHeaderVisible":false')
+        && str_contains($multiGauge->GetIPSViewHTML(), '"tileHeaderVisible":true'),
+    'A hidden Symcon title must release tile space without changing IPSView.'
+);
+unset($GLOBALS['symconTestHiddenTitles'][$multiGauge->InstanceID]);
+$GLOBALS['symconTestLegacyObject'] = true;
+assertGatewayGauge(
+    str_contains($multiGauge->GetVisualizationTile(), '"tileHeaderVisible":true'),
+    'Symcon 9.0 object data must retain the previous header clearance.'
+);
+unset($GLOBALS['symconTestLegacyObject']);
 $multiGauge->SetTestProperty('EChartsTheme', 'vintage');
 $inheritedMultiIPSView = $multiGauge->GetIPSViewHTML();
 assertGatewayGauge(
@@ -1440,7 +1470,7 @@ assertGatewayGauge(
 );
 assertGatewayGauge(
     str_contains($multiTile, 'function resolveGrid(count, width, height, hasTitle, headerInset)')
-        && str_contains($multiTile, "bootstrap.mode === 'symcon' ? 64 : 0")
+        && str_contains($multiTile, "bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 64 : 0")
         && str_contains($multiTile, "type: 'gauge'")
         && str_contains($multiTile, 'items.map(function (item, index)'),
     'Gauge Multi tile must render responsive independent Gauge series.'

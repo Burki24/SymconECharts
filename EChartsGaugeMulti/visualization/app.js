@@ -505,7 +505,7 @@
         var width = Math.max(chartElement.clientWidth, 240);
         var height = Math.max(chartElement.clientHeight, 180);
         var title = String(gauge.title || '');
-        var headerInset = bootstrap.mode === 'symcon' ? 64 : 0;
+        var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 64 : 0;
         var preset = String(gauge.preset || 'multi-title');
         var grid = preset === 'ring-concentric' || preset === 'weather-station' || preset === 'tacho'
             ? null

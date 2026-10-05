@@ -157,7 +157,9 @@ abhängig von Quellenanzahl, Breite und Höhe eine passende Spalten- und
 Zeilenaufteilung. Änderungen einer Quellvariable werden über `VM_UPDATE`
 direkt an die Kachel übertragen.
 Das Multi-Raster lässt in der nativen Kachel Platz für die von Symcon
-eingeblendete Kopfzeile; IPSView nutzt die gesamte Widgetfläche.
+eingeblendete Kopfzeile. Wird der Objekttitel unter Symcon 9.1 ausgeblendet,
+nutzt es den frei werdenden Platz automatisch. Unter Symcon 9.0 bleibt der
+Abstand wie bisher erhalten; IPSView nutzt die gesamte Widgetfläche.
 
 Der eingeklappte Kacheldesigner bietet die fünf Vorlagen, das automatische
 Symcon-Design und sechs gebündelte offizielle ECharts-Themes. Ringstärke sowie
@@ -168,6 +170,9 @@ Wetterstations- oder Tacho-Instrumenten ist für lesbare Beschriftungen eine
 ausreichend große Kachel bzw. ein großes IPSView-Widget erforderlich. Die
 Tacho-Vorschau zeigt die ersten drei Quellen; zur Laufzeit werden alle 2 bis
 16 konfigurierten Quellen ausgegeben.
+Die Feinabstimmung des Multi-Designers ist noch nicht abgeschlossen; insbesondere
+Zeiger, Skalen und Zifferblätter bieten noch nicht die Einstellmöglichkeiten
+von Gauge Single.
 
 #### IPSView
 

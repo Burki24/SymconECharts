@@ -259,6 +259,11 @@ class EChartsGaugeMulti extends IPSModuleStrict
 
     private function RenderGaugeHTMLPage(bool $ipsView): string
     {
+        $hiddenTileTitle = false;
+        if (!$ipsView && function_exists('IPS_GetObject')) {
+            $hiddenTileTitle = (bool) (IPS_GetObject($this->InstanceID)['ObjectIsHiddenTitle'] ?? false);
+        }
+
         return $this->RenderVisualizationHTMLPage($ipsView, [
             'language'           => $this->NormalizeHelperTranslationLanguage(
                 $this->ResolveHelperTranslationLanguage()
@@ -284,8 +289,9 @@ class EChartsGaugeMulti extends IPSModuleStrict
                 )
             ],
             'options'            => [
-                'echartsVersion' => EChartsAsset::VERSION,
-                'echartsThemes'  => EChartsAsset::ThemePalettes()
+                'echartsVersion'    => EChartsAsset::VERSION,
+                'echartsThemes'     => EChartsAsset::ThemePalettes(),
+                'tileHeaderVisible' => !$hiddenTileTitle
             ],
             'replacements'       => [
                 '{{ECHARTS_SCRIPT}}'       => EChartsAsset::JavaScript(),
