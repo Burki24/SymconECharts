@@ -53,6 +53,11 @@ Erforderlich ist eine Verbindung zu einer aktiven
 [EChartsGateway-Instanz](../EChartsGateway) sowie mindestens zwei vorhandene
 Integer- oder Float-Variablen als Datenquellen.
 
+Optional kann jeder Listeneintrag Wertebereich, Einheit und Nachkommastellen
+aus der nativen Variablendarstellung übernehmen. Kompatible Legacy-Profile
+werden ebenfalls ausgewertet. Fehlen einzelne gültige Darstellungsangaben,
+bleiben die manuellen Werte der betreffenden Zeile als Rückfall erhalten.
+
 ### 3. Software-Installation
 
 Das Gauge-Modul wird gemeinsam mit EChartsGateway über die Library
@@ -90,9 +95,11 @@ Fehlerstatus.
 **Konfigurationsseite:** Neben dem gemeinsamen Titel wird eine geordnete Liste
 aus 2 bis 16 Quellen gepflegt. Jede Variable darf nur einmal vorkommen. Pro
 Quelle werden Beschriftung, Minimum, Maximum, Einheit und 0 bis 6
-Nachkommastellen festgelegt. Eine leere Beschriftung verwendet automatisch den
-Namen der Symcon-Variable. Die Reihenfolge bestimmt später die Zuordnung zu den
-Positionen der gewählten Multi-Vorlage.
+Nachkommastellen festgelegt. Mit **Variablendarstellung verwenden** können
+Wertebereich, Einheit und Nachkommastellen stattdessen aus der Quellvariable
+übernommen werden. Eine leere Beschriftung verwendet automatisch den Namen der
+Symcon-Variable. Die Reihenfolge bestimmt später die Zuordnung zu den Positionen
+der gewählten Multi-Vorlage.
 
 Das in Version 1.8 kurzzeitig enthaltene Einzelquellen-Gerüst wird nicht
 automatisch übernommen: Eine einzelne Quelle erfüllt den Multi-Vertrag nicht.

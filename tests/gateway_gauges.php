@@ -1394,6 +1394,51 @@ assertGatewayGauge(
     'Gauge Multi must publish a fresh visualization state when a source changes.'
 );
 
+$presentedMultiGauge = new EChartsGaugeMulti();
+$presentedMultiGauge->Create();
+$presentedMultiGauge->SetTestProperty('Sources', json_encode([
+    [
+        'VariableID'              => 4715,
+        'Label'                   => 'Pressure',
+        'Minimum'                 => 0.0,
+        'Maximum'                 => 1.0,
+        'Unit'                    => 'fallback',
+        'Decimals'                => 4,
+        'UseVariablePresentation' => true
+    ],
+    [
+        'VariableID'              => 4716,
+        'Label'                   => 'Wind',
+        'Minimum'                 => 0.0,
+        'Maximum'                 => 1.0,
+        'Unit'                    => 'fallback',
+        'Decimals'                => 4,
+        'UseVariablePresentation' => true
+    ]
+], JSON_THROW_ON_ERROR));
+$presentedMultiGauge->ApplyChanges();
+$presentedMultiData = json_decode($presentedMultiGauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    ($presentedMultiData['items'][0]['gauge'] ?? null) === [
+        'label'    => 'Pressure',
+        'minimum'  => 950.0,
+        'maximum'  => 1050.0,
+        'unit'     => 'hPa',
+        'decimals' => 1
+    ],
+    'Gauge Multi must use the native presentation of an opted-in source.'
+);
+assertGatewayGauge(
+    ($presentedMultiData['items'][1]['gauge'] ?? null) === [
+        'label'    => 'Wind',
+        'minimum'  => 0.0,
+        'maximum'  => 50.0,
+        'unit'     => 'm/s',
+        'decimals' => 2
+    ],
+    'Gauge Multi must support opted-in legacy variable profiles.'
+);
+
 $multiGauge->SetTestProperty('Sources', json_encode([
     json_decode($multiSources, true, 512, JSON_THROW_ON_ERROR)[1],
     [

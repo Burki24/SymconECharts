@@ -46,6 +46,15 @@
                     }
                 },
                 {
+                    "caption": "Use variable presentation",
+                    "name": "UseVariablePresentation",
+                    "width": "160px",
+                    "add": false,
+                    "edit": {
+                        "type": "CheckBox"
+                    }
+                },
+                {
                     "caption": "Minimum",
                     "name": "Minimum",
                     "width": "100px",

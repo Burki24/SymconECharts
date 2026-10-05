@@ -35,7 +35,9 @@ Folgende Module beinhaltet das SymconECharts Repository:
   Gerätemodul für zusammengesetzte Gauge-Darstellungen mit 2 bis 16
   Datenquellen, etwa Multi Title, Ring oder Car. Jede Quelle besitzt eine
   eigene Beschriftung, Skala, Einheit und Formatierung. Multi Title ist als
-  erste responsive native Kachel implementiert.
+  erste responsive native Kachel implementiert. Wertebereich, Einheit und
+  Nachkommastellen können je Quelle optional aus deren Variablendarstellung
+  übernommen werden.
 
 Für eine reguläre Installation genügt eine gemeinsame EChartsGateway-Instanz
 für alle Gauge- und späteren Diagramminstanzen. Beim ersten Diagramm kann ein

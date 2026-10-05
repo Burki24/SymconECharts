@@ -302,7 +302,8 @@ class EChartsGaugeMulti extends IPSModuleStrict
      *     Minimum: float,
      *     Maximum: float,
      *     Unit: string,
-     *     Decimals: int
+     *     Decimals: int,
+     *     UseVariablePresentation: bool
      * }>
      */
     private function GetValidatedSources(): array
@@ -354,6 +355,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
             $maximum = $source['Maximum'] ?? null;
             $unit = $source['Unit'] ?? '';
             $decimals = $source['Decimals'] ?? null;
+            $useVariablePresentation = $source['UseVariablePresentation'] ?? false;
 
             if (!is_int($variableID) || $variableID <= 0 || !IPS_VariableExists($variableID)) {
                 throw new UnexpectedValueException(
@@ -375,7 +377,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
                     self::STATUS_SOURCE_INVALID
                 );
             }
-            if (!is_string($label) || !is_string($unit)) {
+            if (!is_string($label) || !is_string($unit) || !is_bool($useVariablePresentation)) {
                 throw new UnexpectedValueException(
                     'Gauge source ' . $sourceNumber . ' contains invalid text fields.',
                     self::STATUS_SOURCE_INVALID
@@ -397,18 +399,102 @@ class EChartsGaugeMulti extends IPSModuleStrict
                 );
             }
 
+            $effectiveConfiguration = $this->ResolveSourceConfiguration(
+                $variableID,
+                (float) $minimum,
+                (float) $maximum,
+                $unit,
+                $decimals,
+                $useVariablePresentation
+            );
+
             $variableIDs[$variableID] = true;
             $validatedSources[] = [
-                'VariableID' => $variableID,
-                'Label'      => trim($label),
-                'Minimum'    => (float) $minimum,
-                'Maximum'    => (float) $maximum,
-                'Unit'       => trim($unit),
-                'Decimals'   => $decimals
+                'VariableID'               => $variableID,
+                'Label'                    => trim($label),
+                'Minimum'                  => $effectiveConfiguration['minimum'],
+                'Maximum'                  => $effectiveConfiguration['maximum'],
+                'Unit'                     => $effectiveConfiguration['unit'],
+                'Decimals'                 => $effectiveConfiguration['decimals'],
+                'UseVariablePresentation'  => $useVariablePresentation
             ];
         }
 
         return $validatedSources;
+    }
+
+    /** @return array{minimum: float, maximum: float, unit: string, decimals: int} */
+    private function ResolveSourceConfiguration(
+        int $variableID,
+        float $minimum,
+        float $maximum,
+        string $unit,
+        int $decimals,
+        bool $useVariablePresentation
+    ): array {
+        $configuration = [
+            'minimum'  => $minimum,
+            'maximum'  => $maximum,
+            'unit'     => trim($unit),
+            'decimals' => $decimals
+        ];
+        if (!$useVariablePresentation) {
+            return $configuration;
+        }
+
+        try {
+            $presentation = IPS_GetVariablePresentation($variableID);
+            if (!is_array($presentation)) {
+                return $configuration;
+            }
+
+            $profileName = $presentation['PROFILE'] ?? null;
+            if (is_string($profileName) && $profileName !== '') {
+                $profile = IPS_GetVariableProfile($profileName);
+                if (is_array($profile)) {
+                    $configuration = self::ApplyPresentationValues($configuration, [
+                        'MIN'    => $profile['MinValue'] ?? null,
+                        'MAX'    => $profile['MaxValue'] ?? null,
+                        'SUFFIX' => $profile['Suffix'] ?? null,
+                        'DIGITS' => $profile['Digits'] ?? null
+                    ]);
+                }
+            }
+
+            return self::ApplyPresentationValues($configuration, $presentation);
+        } catch (Throwable $exception) {
+            $this->SendDebug('ResolveSourceConfiguration', $exception::class, 0);
+
+            return $configuration;
+        }
+    }
+
+    /**
+     * @param array{minimum: float, maximum: float, unit: string, decimals: int} $configuration
+     * @param array<string, mixed> $presentation
+     * @return array{minimum: float, maximum: float, unit: string, decimals: int}
+     */
+    private static function ApplyPresentationValues(array $configuration, array $presentation): array
+    {
+        $presentationMinimum = $presentation['MIN'] ?? null;
+        $presentationMaximum = $presentation['MAX'] ?? null;
+        if ((is_int($presentationMinimum) || is_float($presentationMinimum))
+            && (is_int($presentationMaximum) || is_float($presentationMaximum))
+            && is_finite((float) $presentationMinimum)
+            && is_finite((float) $presentationMaximum)
+            && (float) $presentationMinimum < (float) $presentationMaximum) {
+            $configuration['minimum'] = (float) $presentationMinimum;
+            $configuration['maximum'] = (float) $presentationMaximum;
+        }
+        if (array_key_exists('SUFFIX', $presentation) && is_string($presentation['SUFFIX'])) {
+            $configuration['unit'] = trim($presentation['SUFFIX']);
+        }
+        $presentationDigits = $presentation['DIGITS'] ?? null;
+        if (is_int($presentationDigits) && $presentationDigits >= 0 && $presentationDigits <= 6) {
+            $configuration['decimals'] = $presentationDigits;
+        }
+
+        return $configuration;
     }
 
     /**

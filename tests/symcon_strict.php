@@ -485,6 +485,13 @@ foreach ([
             'EChartsGaugeMulti source rows must select numeric variables.',
             $errors
         );
+        requireStrictContract(
+            isset($columns['UseVariablePresentation'])
+                && (($columns['UseVariablePresentation']['edit']['type'] ?? null) === 'CheckBox')
+                && (($columns['UseVariablePresentation']['add'] ?? null) === false),
+            'EChartsGaugeMulti source rows must optionally inherit their variable presentation.',
+            $errors
+        );
     }
 
     $expectedAction = 'echo ' . $gaugeContract['prefix'] . '_GetGaugeData($id);';
