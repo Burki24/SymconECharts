@@ -1424,7 +1424,7 @@ for ($index = 0; $index < 7; $index++) {
     ];
     $sevenSources[] = [
         'VariableID' => $variableID, 'Label' => 'Source ' . $index,
-        'Minimum' => 0.0, 'Maximum' => 100.0, 'Unit' => 'u', 'Decimals' => 0
+        'Minimum'    => 0.0, 'Maximum' => 100.0, 'Unit' => 'u', 'Decimals' => 0
     ];
 }
 $chronographLimit = new EChartsGaugeMulti();
