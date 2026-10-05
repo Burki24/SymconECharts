@@ -275,6 +275,7 @@
             });
             if (plateStyle.plateBackgroundEnabled
                 && /^data:image\/svg\+xml;base64,[a-z0-9+/=]+$/i.test(String(plateStyle.plateBackgroundImage || ''))) {
+                var backgroundZ = preset === 'chronograph' && index > 0 ? 4 : 1;
                 var diameter = plateRadius * 2;
                 var aspectRatio = Number(plateStyle.plateBackgroundAspectRatio);
                 aspectRatio = Number.isFinite(aspectRatio) && aspectRatio > 0 ? aspectRatio : 1;
@@ -309,7 +310,7 @@
                 retained.push({
                     id: 'custom-plate-background-' + gauge.id,
                     type: 'group',
-                    z: preset === 'chronograph' && index > 0 ? 4 : 1,
+                    z: backgroundZ,
                     silent: true,
                     clipPath: {
                         type: 'circle',
@@ -317,6 +318,7 @@
                     },
                     children: [{
                         type: 'image',
+                        z: backgroundZ,
                         rotation: clamp(Number(plateStyle.plateBackgroundRotation) || 0, -180, 180) * Math.PI / 180,
                         originX: centerX,
                         originY: centerY,
@@ -333,7 +335,7 @@
                 retained.push({
                     id: 'custom-plate-outline-' + gauge.id,
                     type: 'circle',
-                    z: preset === 'chronograph' && index > 0 ? 4 : 1,
+                    z: backgroundZ,
                     silent: true,
                     shape: { cx: gauge.center[0], cy: gauge.center[1], r: plateRadius },
                     style: {

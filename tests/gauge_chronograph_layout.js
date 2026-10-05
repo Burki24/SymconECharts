@@ -302,6 +302,17 @@ assert.equal(svgChronograph.graphic.filter(
 assert.ok(svgChronograph.graphic.filter(
     element => String(element.id).startsWith('custom-plate-background-')
 ).every(element => element.children[0].style.opacity === 0.6));
+svgChronograph.graphic.filter(
+    element => String(element.id).startsWith('custom-plate-background-')
+).forEach(background => {
+    const gaugeId = String(background.id).replace('custom-plate-background-', '');
+    const plate = svgChronograph.graphic.find(element => element.id === `custom-plate-${gaugeId}`);
+    assert.ok(plate, `Custom plate for ${gaugeId} must exist.`);
+    assert.ok(
+        Number(background.children[0].z) > Number(plate.z),
+        `SVG background for ${gaugeId} must render above its opaque plate.`
+    );
+});
 const hiddenChronograph = render('symcon', 720, 560, 3, 'Climate', 'chronograph', true, { plateMode: 'hidden' });
 assert.equal(hiddenChronograph.graphic.length, 0, 'Hidden plates must remove every chronograph bezel.');
 

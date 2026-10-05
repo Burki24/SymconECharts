@@ -19,10 +19,12 @@ Tacho- und Chronograph-Module einschließlich quellbezogener Designwerte und
 SVG-Verarbeitung für ihre maximal fünf Quellen. Die
 PHP-Basissuite benötigt weiterhin kein Node.js.
 
-`tests/fixtures/tacho-browser.html` ist eine manuelle Browser-Fixierung für
-die Tacho-Vorlage. Sie lädt die lokal gebündelte ECharts-Runtime und den echten
-Gauge-Multi-Renderer mit drei synthetischen Quellen, ohne eine Symcon-Instanz
-zu benötigen. Sie ersetzt keinen Test in der nativen Kachel oder in IPSView.
+`tests/fixtures/tacho-browser.html` und
+`tests/fixtures/chronograph-browser.html` sind manuelle Browser-Fixierungen
+für die Tacho- und Chronograph-Vorlagen. Sie laden die lokal gebündelte
+ECharts-Runtime und den jeweiligen echten Renderer mit drei synthetischen
+Quellen, ohne eine Symcon-Instanz zu benötigen. Sie ersetzen keinen Test in
+der nativen Kachel oder in IPSView.
 
 Der GitHub-Workflow `.github/workflows/tests.yml` verwendet zusätzlich
 `Burki24/Symcon_ModuleCI/php-tests@v1.0.0`. Die gemeinsame Action prüft unter
