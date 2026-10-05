@@ -14,8 +14,9 @@ nicht eine eigene große Dashboard-Seite des Moduls.
 
 ## Aktueller Stand und Zielarchitektur
 
-Die Library besitzt mit Gateway sowie Gauge Single und Gauge Multi eine erste
-technische Modulstruktur. Alle drei Module verwenden `IPSModuleStrict`;
+Die Library besitzt mit Gateway sowie Gauge Single, Gauge Multi, Gauge Tacho
+und Gauge Chronograph eine erste technische Modulstruktur. Alle fünf Module
+verwenden `IPSModuleStrict`;
 Gauge-Instanzen können vorhandene Gateways wiederverwenden. Ein versioniertes
 Protokoll liefert geprüfte numerische Momentanwerte an ein minimales
 Gauge-Datenmodell. Gauge Multi besitzt eine geordnete und validierte Liste aus
@@ -37,14 +38,13 @@ zugeschnittenen SVG-Hintergrunds. Gauge Single unterstützt außerdem validierte
 konfigurierbare Skalenunterteilungen und -abstände, beide Drehrichtungen,
 responsive Positionsversätze, elementweise Sichtbarkeit sowie einen
 gestaltbaren Wertekasten und optionale Schatteneffekte. Gauge Multi besitzt
-mit Multi Title, Ringraster, konzentrischen Ringen, einer Wetterstations-,
-einer Tacho- und einer Chronographen-Vorlage responsive native Kacheln.
-Die ersten fünf Vorlagen unterstützen 2 bis 16, der Chronograph 2 bis 6
-unabhängige Wertebereiche. Eine additive gemeinsame Multi-Designschicht steuert
-Zeiger, Naben, Skalenunterteilungen, Farbrollen und Zifferblattplatten für alle
-Instrumente einer Ausgabe; `preset` und `theme` erhalten die vorhandenen
-Vorlagenvorgaben. Quellenspezifische Überschreibungen sind noch nicht umgesetzt.
-Beide Gauge-Module erzeugen optional
+mit Multi Title, Ringraster, konzentrischen Ringen und einer Wetterstations-
+Vorlage responsive native Kacheln für 2 bis 16 Quellen. Seine gemeinsame
+Designschicht steuert Zeiger, Naben, Skalenunterteilungen, Farbrollen und
+Zifferblattplatten für alle Instrumente einer Ausgabe. Tacho und Chronograph
+sind eigenständige Module für 2 bis 5 Quellen. Dort können einzelne Quellen
+das Grunddesign einschließlich SVG-Zeiger und SVG-Zifferblatt überschreiben.
+Alle Gauge-Module erzeugen optional
 eine IPSView-WebContent-Variable mit vererbtem oder unabhängigem Design auf
 demselben Renderer. Weitere klassische Multi-Instrumentenpanel-Vorlagen,
 Archivverarbeitung sowie reale Symcon-Laufzeit- und Browsertests fehlen noch.
@@ -59,6 +59,8 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 | Splitter | EChartsGateway | Gemeinsame Dienste für mehrere Chart-Instanzen |
 | Gerät | EChartsGaugeSingle | Ein Gauge-Chart mit genau einer Quellvariable und zwei Ausgabewegen |
 | Gerät | EChartsGaugeMulti | Ein zusammengesetzter Gauge-Chart mit 2 bis 16 Quellen |
+| Gerät | EChartsGaugeTacho | Tacho-Cockpit mit 2 bis 5 individuell gestaltbaren Instrumenten |
+| Gerät | EChartsGaugeChronograph | Chronograph mit 2 bis 5 individuell gestaltbaren Instrumenten |
 
 Eine eigene I/O-Instanz, ein Konfigurator und Discovery gehören nicht zum
 Anfangsumfang. Datenquellen sind Teil der jeweiligen Gauge-Konfiguration und
@@ -80,12 +82,15 @@ Modul-IDs und Datenfluss-IDs haben unterschiedliche Aufgaben.
 | Library SymconECharts | `{66BE21BE-988A-10EB-1BBB-1E2F444E9F85}` |
 | Modul EChartsGateway | `{33C9DF44-6F6D-5916-4AAE-CCB24BD6928D}` |
 | Modul EChartsGaugeSingle | `{0CAA2780-342F-E5B9-2865-CB8DCED0BE7C}` |
-| Modul EChartsGaugeMulti | `{E667D9C1-379D-44ED-A313-FF21FEFC355F}` |
+| Modul EChartsGaugeMulti | {E667D9C1-379D-44ED-A313-FF21FEFC355F} |
+| Modul EChartsGaugeTacho | `{9D072BFE-45B4-4442-B1D2-4FC458C3BABD}` |
+| Modul EChartsGaugeChronograph | `{B99C3ADA-9A90-486F-97E3-96C39554D9A6}` |
 | Datenfluss Gauge → Gateway | `{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}` |
 | Datenfluss Gateway → Gauge | `{E4749B72-912B-E3E3-1C57-D19019FFDD84}` |
 
-Die Funktionspräfixe sind `ECGW` für das Gateway, `ECGS` für Gauge Single und
-`ECGM` für Gauge Multi. Nach der verbindlichen Präfixkonvention steht `EC` für
+Die Funktionspräfixe sind `ECGW` für das Gateway, `ECGS` für Gauge Single,
+`ECGM` für Gauge Multi, `ECGT` für Gauge Tacho und `ECGC` für Gauge
+Chronograph. Nach der verbindlichen Präfixkonvention steht `EC` für
 ECharts; die letzten zwei Buchstaben bezeichnen Aufgabe oder Modultyp. Die
 Entscheidungen zur Modulstruktur und zu den GUIDs dokumentieren
 [`ADR 0001`](adr/0001-chart-family-modules.md) und
@@ -112,6 +117,8 @@ Das zusätzliche Tacho-Cockpit dokumentiert
 [`ADR 0012`](adr/0012-tacho-cockpit-gauge-preset.md).
 Den eingebetteten Chronographen dokumentiert
 [`ADR 0014`](adr/0014-embedded-chronograph-gauge-preset.md).
+Die eigenständigen Tacho- und Chronograph-Module dokumentiert
+[`ADR 0016`](adr/0016-dedicated-tacho-and-chronograph-modules.md).
 
 ## Daten, Konfiguration und Ausgabe
 

@@ -48,6 +48,41 @@ assertGaugeDesign(EChartsGaugeDesign::ColorToHex(-1) === '#000000', 'Negative co
 assertGaugeDesign(EChartsGaugeDesign::ColorToHex(0x123456) === '#123456', 'RGB conversion changed.');
 assertGaugeDesign(EChartsGaugeDesign::ColorToHex(0xFFFFFF + 1) === '#FFFFFF', 'Large colors must be clamped.');
 
+$sourceDefaults = EChartsGaugeDesign::SourceDesignDefaults();
+$sourceColumns = EChartsGaugeDesign::SourceDesignColumns();
+$sourceForm = EChartsGaugeDesign::SourceEditorForm();
+assertGaugeDesign(
+    ($sourceDefaults['UseIndividualDesign'] ?? null) === false
+        && count($sourceColumns) === count($sourceDefaults) * 2
+        && ($sourceColumns[0]['name'] ?? null) === 'UseIndividualDesign'
+        && ($sourceColumns[0]['save'] ?? null) === true
+        && array_is_list($sourceForm),
+    'The shared source-row Gauge design form contract changed.'
+);
+$sourceStyle = EChartsGaugeDesign::StyleFromSource(array_merge($sourceDefaults, [
+    'PointerShape'               => 'custom',
+    'CustomPointerSVG'           => '<svg viewBox="10 20 40 80"><path d="M30 20L50 100L10 100Z"/></svg>',
+    'CustomPointerPivotMode'     => 'custom',
+    'CustomPointerPivotXPercent' => 25.0,
+    'CustomPointerPivotYPercent' => 75.0,
+    'PlateDesignMode'            => 'custom',
+    'PlateBackgroundEnabled'     => true,
+    'PlateBackgroundSVG'         => '<svg viewBox="0 0 200 100"><rect width="200" height="100"/></svg>',
+    'PlateBackgroundFit'         => 'contain'
+]));
+$ipsViewSourceStyle = EChartsGaugeDesign::StyleFromSource([
+    'IPSViewPointerShape'    => 'line',
+    'IPSViewPlateDesignMode' => 'hidden'
+], 'IPSView');
+assertGaugeDesign(
+    ($sourceStyle['pointerPivotX'] ?? null) === 20.0
+        && ($sourceStyle['plateMode'] ?? null) === 'custom'
+        && ($sourceStyle['plateBackgroundAspectRatio'] ?? null) === 2.0
+        && ($ipsViewSourceStyle['pointerShape'] ?? null) === 'line'
+        && ($ipsViewSourceStyle['plateMode'] ?? null) === 'hidden',
+    'The shared source-row SVG design could not be materialized.'
+);
+
 foreach ([
     static fn (): array => EChartsGaugeDesign::ImportPointer('<svg/>', 'invalid'),
     static fn (): array => EChartsGaugeDesign::ImportPointer(

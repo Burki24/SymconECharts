@@ -6,7 +6,7 @@
 
 ## Context
 
-Gauge Multi has six responsive presets, but its designer previously exposed
+Gauge Multi originally had six responsive presets, but its designer previously exposed
 only ring width and font sizes. Pointer, hub, scale, color and dial-plate
 decisions were fixed inside each preset. Gauge Single already demonstrates that
 these visual roles can be user-configurable without changing the source model.

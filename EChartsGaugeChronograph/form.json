@@ -12,7 +12,7 @@
         },
         {
             "type": "Label",
-            "caption": "Configure 2 to 16 unique numeric sources. Their order determines their position in the selected Gauge template."
+            "caption": "Configure 2 to 5 unique numeric sources. Their order determines their position in the chronograph."
         },
         {
             "type": "List",
@@ -104,7 +104,7 @@
             "items": [
                 {
                     "type": "Label",
-                    "caption": "Choose independent dials, ring Gauges, concentric rings, or a weather station. Up to 16 sources share the selected design; source order determines placement and every source keeps its own range and unit."
+                    "caption": "The Chronograph Gauge uses one shared base design. Enable the individual design in a source row to override pointer, hub, colors, scale, dial plate, or SVG assets for that instrument."
                 },
                 {
                     "type": "RowLayout",
@@ -130,6 +130,14 @@
                                 {
                                     "caption": "Weather station",
                                     "value": "weather-station"
+                                },
+                                {
+                                    "caption": "Tacho cockpit",
+                                    "value": "tacho"
+                                },
+                                {
+                                    "caption": "Chronograph",
+                                    "value": "chronograph"
                                 }
                             ]
                         },
@@ -670,20 +678,20 @@
     "actions": [
         {
             "type": "Button",
-            "caption": "Read current Gauge Multi data",
-            "onClick": "echo ECGM_GetGaugeData($id);"
+            "caption": "Read current Chronograph Gauge data",
+            "onClick": "echo ECGC_GetGaugeData($id);"
         }
     ],
     "status": [
         {
             "code": 102,
             "icon": "active",
-            "caption": "Gauge Multi is ready"
+            "caption": "Chronograph Gauge is ready"
         },
         {
             "code": 201,
             "icon": "error",
-            "caption": "Configure 2 to 16 unique numeric sources"
+            "caption": "Configure 2 to 5 unique numeric sources"
         },
         {
             "code": 202,
@@ -703,7 +711,7 @@
         {
             "code": 205,
             "icon": "error",
-            "caption": "Multi Gauge design is invalid"
+            "caption": "Chronograph Gauge design is invalid"
         }
     ]
 }

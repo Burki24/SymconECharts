@@ -20,6 +20,7 @@ $requiredFiles = [
     'docs/adr/0005-echarts-runtime-and-native-renderer.md',
     'docs/adr/0006-gauge-single-tile-designer.md',
     'docs/adr/0007-echarts-theme-assets-and-selection.md',
+    'docs/adr/0016-dedicated-tacho-and-chronograph-modules.md',
     'library.json',
     'libs/EChartsAsset.php',
     'libs/EChartsDataProtocol.php',
@@ -56,6 +57,9 @@ $requiredFiles = [
     'tests/data_protocol.php',
     'tests/echarts_assets.php',
     'tests/gauge_design.php',
+    'tests/gauge_multi_layout.js',
+    'tests/gauge_tacho_layout.js',
+    'tests/gauge_chronograph_layout.js',
     'tests/fixtures/gauge-pointer-ornate.svg',
     'tests/gateway_gauges.php',
     'tests/helper_integrity.py',
@@ -265,7 +269,9 @@ if ($helperSync !== null) {
     }
 }
 
-$expectedModules = ['EChartsGateway', 'EChartsGaugeMulti', 'EChartsGaugeSingle'];
+$expectedModules = [
+    'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti', 'EChartsGaugeSingle', 'EChartsGaugeTacho'
+];
 $discoveredModules = [];
 foreach (glob($root . '/*/module.json') ?: [] as $modulePath) {
     $discoveredModules[] = basename(dirname($modulePath));

@@ -8,13 +8,15 @@ php tests/run.php
 ```
 
 Die Gauge-Layouttests benötigen zusätzlich Node.js und werden separat mit
-`node tests/gauge_single_layout.js` und `node tests/gauge_multi_layout.js`
+`node tests/gauge_single_layout.js`, `node tests/gauge_multi_layout.js`,
+`node tests/gauge_tacho_layout.js` und `node tests/gauge_chronograph_layout.js`
 ausgeführt. Der Single-Test prüft die vergrößerte Darstellung und die Grenzen
 der Zifferblattplatte in Kachel und IPSView. Der Multi-Test prüft die freigehaltene
 Kachelkopfzeile sowie die Layouts beider Ausgabewege anhand gerenderter
 ECharts-Optionen. Er deckt auch Ringraster und konzentrische Ringe mit 2 bzw.
-16 Quellen, Wetterstations- und Tacho-Panel mit 2, 3 und 16 Quellen sowie den
-Chronographen mit 2 bis 6 Quellen ab. Die
+16 Quellen und das Wetterstationspanel ab. Eigene Renderer-Suiten prüfen die
+Tacho- und Chronograph-Module einschließlich quellbezogener Designwerte und
+SVG-Verarbeitung für ihre maximal fünf Quellen. Die
 PHP-Basissuite benötigt weiterhin kein Node.js.
 
 `tests/fixtures/tacho-browser.html` ist eine manuelle Browser-Fixierung für

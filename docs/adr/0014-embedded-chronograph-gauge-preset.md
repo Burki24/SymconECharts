@@ -1,6 +1,6 @@
 # ADR 0014: Embedded chronograph as a Gauge Multi preset
 
-- Status: Accepted
+- Status: Superseded by ADR 0016
 - Date: 2026-10-05
 - Extends: ADR 0004, ADR 0009 and ADR 0012
 

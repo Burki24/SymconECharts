@@ -85,6 +85,22 @@ $expectedModules = [
         'parentRequirements' => ['{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}'],
         'childRequirements'  => [],
         'implemented'        => ['{E4749B72-912B-E3E3-1C57-D19019FFDD84}']
+    ],
+    'EChartsGaugeTacho' => [
+        'id'                 => '{9D072BFE-45B4-4442-B1D2-4FC458C3BABD}',
+        'type'               => 3,
+        'prefix'             => 'ECGT',
+        'parentRequirements' => ['{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}'],
+        'childRequirements'  => [],
+        'implemented'        => ['{E4749B72-912B-E3E3-1C57-D19019FFDD84}']
+    ],
+    'EChartsGaugeChronograph' => [
+        'id'                 => '{B99C3ADA-9A90-486F-97E3-96C39554D9A6}',
+        'type'               => 3,
+        'prefix'             => 'ECGC',
+        'parentRequirements' => ['{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}'],
+        'childRequirements'  => [],
+        'implemented'        => ['{E4749B72-912B-E3E3-1C57-D19019FFDD84}']
     ]
 ];
 
@@ -143,7 +159,7 @@ foreach ($expectedModules as $moduleName => $expected) {
 }
 
 $gateway = $moduleContracts['EChartsGateway'];
-foreach (['EChartsGaugeSingle', 'EChartsGaugeMulti'] as $gaugeModuleName) {
+foreach (['EChartsGaugeSingle', 'EChartsGaugeMulti', 'EChartsGaugeTacho', 'EChartsGaugeChronograph'] as $gaugeModuleName) {
     $gauge = $moduleContracts[$gaugeModuleName];
     requireContract(
         ($gateway['implemented'] ?? null) === ($gauge['parentRequirements'] ?? null),

@@ -1,0 +1,37 @@
+# EChartsGaugeChronograph
+
+`EChartsGaugeChronograph` rendert zwei bis fünf numerische Symcon-Variablen in
+einem gemeinsamen Chronographen. Die erste Quelle bildet das Hauptinstrument;
+bis zu vier weitere Quellen erscheinen als eingebettete Hilfszifferblätter.
+
+## Konfiguration
+
+Jede Quellenzeile enthält Variable, Beschriftung, Minimum, Maximum, Einheit
+und Nachkommastellen. Optional werden Wertebereich, Einheit und Formatierung
+aus der Variablendarstellung übernommen.
+
+Der Kacheldesigner definiert das gemeinsame Grunddesign. Im Dialog einer
+Quellenzeile kann **Individuelles Gauge-Design** aktiviert werden. Für dieses
+Instrument lassen sich Zeiger und Nabe, Skala und Schrift, Farbrollen sowie
+Zifferblatt und Kontur abweichend gestalten. Eigene SVG-Zeiger mit justierbarem
+Drehpunkt und zugeschnittene SVG-Zifferblattmotive werden über die zentralen,
+validierten ECharts-Importadapter verarbeitet. Die Designwerte gehören zur
+Quellenzeile und bleiben auch nach einer Umsortierung dem Instrument zugeordnet.
+Für das unabhängige IPSView-Grunddesign kann jede Quelle ihr Kacheldesign
+übernehmen oder eine eigene individuelle IPSView-Variante speichern.
+
+Das optionale IPSView-WebContent-Widget nutzt dieselben Quellen. Sein
+Grunddesign erbt standardmäßig das Kacheldesign oder kann unabhängig
+konfiguriert werden. Ein realer IPSView-Laufzeittest ist mangels Lizenz nicht
+möglich.
+
+## Funktionen
+
+Das Modulpräfix ist `ECGC`:
+
+```php
+$json = ECGC_GetGaugeData($InstanceID);
+$html = ECGC_GetIPSViewHTML($InstanceID);
+```
+
+Eine gemeinsame `EChartsGateway`-Instanz genügt für alle Chart-Instanzen.

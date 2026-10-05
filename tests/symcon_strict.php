@@ -20,13 +20,17 @@ function requireStrictContract(bool $condition, string $message, array &$errors)
 $gateway = (string) file_get_contents($root . '/EChartsGateway/module.php');
 $gaugeSingle = (string) file_get_contents($root . '/EChartsGaugeSingle/module.php');
 $gaugeMulti = (string) file_get_contents($root . '/EChartsGaugeMulti/module.php');
+$gaugeTacho = (string) file_get_contents($root . '/EChartsGaugeTacho/module.php');
+$gaugeChronograph = (string) file_get_contents($root . '/EChartsGaugeChronograph/module.php');
 $sharedGatewayGuidance = 'One shared EChartsGateway is sufficient for all ECharts chart instances. '
     . 'When adding further charts, select the existing gateway instead of creating another one.';
 
 foreach ([
-    'EChartsGateway'     => $gateway,
-    'EChartsGaugeSingle' => $gaugeSingle,
-    'EChartsGaugeMulti'  => $gaugeMulti
+    'EChartsGateway'          => $gateway,
+    'EChartsGaugeSingle'      => $gaugeSingle,
+    'EChartsGaugeMulti'       => $gaugeMulti,
+    'EChartsGaugeTacho'       => $gaugeTacho,
+    'EChartsGaugeChronograph' => $gaugeChronograph
 ] as $moduleName => $source) {
     requireStrictContract(
         preg_match('/class\s+' . $moduleName . '\s+extends\s+IPSModuleStrict\b/', $source) === 1,
@@ -93,8 +97,10 @@ foreach ([
 }
 
 foreach ([
-    'EChartsGaugeSingle' => ['source' => $gaugeSingle, 'prefix' => 'ECGS'],
-    'EChartsGaugeMulti'  => ['source' => $gaugeMulti, 'prefix' => 'ECGM']
+    'EChartsGaugeSingle'      => ['source' => $gaugeSingle, 'prefix' => 'ECGS'],
+    'EChartsGaugeMulti'       => ['source' => $gaugeMulti, 'prefix' => 'ECGM'],
+    'EChartsGaugeTacho'       => ['source' => $gaugeTacho, 'prefix' => 'ECGT'],
+    'EChartsGaugeChronograph' => ['source' => $gaugeChronograph, 'prefix' => 'ECGC']
 ] as $gaugeModuleName => $gaugeContract) {
     $gauge = $gaugeContract['source'];
     foreach ([

@@ -12,7 +12,7 @@ use Burki24\SymconModuleHelper\VisualizationThemeHelper;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsDataProtocol;
 use SymconECharts\EChartsGaugeDesign;
-use SymconECharts\EChartsGaugeMultiPreview;
+use SymconECharts\EChartsGaugeTachoPreview;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
 require_once __DIR__ . '/../libs/helper/DataFlowHelper.php';
@@ -26,7 +26,7 @@ require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsGaugeDesign.php';
 require_once __DIR__ . '/GaugePreview.php';
 
-class EChartsGaugeMulti extends IPSModuleStrict
+class EChartsGaugeTacho extends IPSModuleStrict
 {
     use ConfigurationFormHelper;
     use DataFlowHelper;
@@ -40,7 +40,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
     private const DATA_ID_FROM_PARENT = '{E4749B72-912B-E3E3-1C57-D19019FFDD84}';
 
     private const MINIMUM_SOURCE_COUNT = 2;
-    private const MAXIMUM_SOURCE_COUNT = 16;
+    private const MAXIMUM_SOURCE_COUNT = 5;
 
     private const STATUS_SOURCE_INVALID = 201;
     private const STATUS_RANGE_INVALID = 202;
@@ -48,14 +48,11 @@ class EChartsGaugeMulti extends IPSModuleStrict
     private const STATUS_GATEWAY_FAILED = 204;
     private const STATUS_DESIGN_INVALID = 205;
 
-    private const PRESET_MULTI_TITLE = 'multi-title';
-    private const PRESET_RING_GRID = 'ring-grid';
-    private const PRESET_RING_CONCENTRIC = 'ring-concentric';
-    private const PRESET_WEATHER_STATION = 'weather-station';
+    private const PRESET_TACHO = 'tacho';
     private const SUPPORTED_PRESETS = [
-        self::PRESET_MULTI_TITLE, self::PRESET_RING_GRID, self::PRESET_RING_CONCENTRIC,
-        self::PRESET_WEATHER_STATION
+        self::PRESET_TACHO
     ];
+    private const FIXED_PRESET = self::PRESET_TACHO;
     private const IPSVIEW_OUTPUT_IDENT = 'IPSViewGauge';
     private const DESIGN_SCALE_PROPERTIES = [
         'RingWidthPercent', 'ScaleFontSizePercent', 'ValueFontSizePercent', 'TitleFontSizePercent',
@@ -111,7 +108,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
         $this->RegisterMessage(0, IPS_KERNELSTARTED);
         $this->RegisterPropertyString('Sources', '[]');
         $this->RegisterPropertyString('Title', '');
-        $this->RegisterPropertyString('GaugePreset', self::PRESET_MULTI_TITLE);
+        $this->RegisterPropertyString('GaugePreset', self::PRESET_TACHO);
         $this->RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO);
         foreach (self::DESIGN_SCALE_PROPERTIES as $name) {
             $this->RegisterPropertyInteger($name, 100);
@@ -136,7 +133,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
         }
         $this->RegisterIPSViewHTMLPageProperties();
         $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
-        $this->RegisterPropertyString('IPSViewGaugePreset', self::PRESET_MULTI_TITLE);
+        $this->RegisterPropertyString('IPSViewGaugePreset', self::PRESET_TACHO);
         $this->RegisterPropertyString('IPSViewEChartsTheme', EChartsAsset::THEME_AUTO);
         foreach (self::DESIGN_SCALE_PROPERTIES as $name) {
             $this->RegisterPropertyInteger('IPSView' . $name, 100);
@@ -188,30 +185,32 @@ class EChartsGaugeMulti extends IPSModuleStrict
     {
         $form = $this->LoadConfigurationForm();
         if (isset($form['elements']) && is_array($form['elements'])) {
+            $form['elements'] = $this->AttachSourceDesigner($form['elements']);
             $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
+            $form['elements'] = $this->RemovePresetSelectors($form['elements']);
             $form['elements'] = $this->AttachGaugePreviewActions($form['elements']);
         }
         $form = SVGPreviewHelper::withImage(
             $form,
             'GaugePreview',
-            EChartsGaugeMultiPreview::CreateSvg(
+            EChartsGaugeTachoPreview::CreateSvg(
                 $this->PreviewItems(),
                 $this->ReadPropertyString('Title'),
                 $this->ReadPropertyString('EChartsTheme'),
-                $this->ReadPropertyString('GaugePreset'),
+                self::FIXED_PRESET,
                 $this->ReadGaugeStyle()
             )
         );
         $form = SVGPreviewHelper::withImage(
             $form,
             'IPSViewGaugePreview',
-            EChartsGaugeMultiPreview::CreateSvg(
-                $this->PreviewItems(),
+            EChartsGaugeTachoPreview::CreateSvg(
+                $this->PreviewItems(!$this->ReadPropertyBoolean('IPSViewUseTileDesign')),
                 $this->ReadPropertyString('Title'),
                 $this->EffectiveIPSViewTheme(),
                 $this->ReadPropertyBoolean('IPSViewUseTileDesign')
-                    ? $this->ReadPropertyString('GaugePreset')
-                    : $this->ReadPropertyString('IPSViewGaugePreset'),
+                    ? self::FIXED_PRESET
+                    : self::FIXED_PRESET,
                 $this->ReadPropertyBoolean('IPSViewUseTileDesign')
                     ? $this->ReadGaugeStyle()
                     : $this->ReadGaugeStyle('IPSView')
@@ -232,7 +231,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
 
     public function CopyTileDesignToIPSView(): void
     {
-        IPS_SetProperty($this->InstanceID, 'IPSViewGaugePreset', $this->ReadPropertyString('GaugePreset'));
+        IPS_SetProperty($this->InstanceID, 'IPSViewGaugePreset', self::FIXED_PRESET);
         IPS_SetProperty($this->InstanceID, 'IPSViewEChartsTheme', $this->ReadPropertyString('EChartsTheme'));
         foreach (self::DESIGN_SCALE_PROPERTIES as $name) {
             IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyInteger($name));
@@ -271,33 +270,63 @@ class EChartsGaugeMulti extends IPSModuleStrict
             $values = [];
         }
 
-        $items = $this->PreviewItems();
+        $items = $this->PreviewItemsFromForm($values['Sources'] ?? null);
         $title = (string) ($values['Title'] ?? $this->ReadPropertyString('Title'));
         $tileStyle = $this->GaugeStyleFromFormValues($values);
         $this->UpdateFormField('GaugePreview', 'image', SVGPreviewHelper::dataUri(
-            EChartsGaugeMultiPreview::CreateSvg(
+            EChartsGaugeTachoPreview::CreateSvg(
                 $items,
                 $title,
                 (string) ($values['EChartsTheme'] ?? $this->ReadPropertyString('EChartsTheme')),
-                (string) ($values['GaugePreset'] ?? $this->ReadPropertyString('GaugePreset')),
+                self::FIXED_PRESET,
                 $tileStyle
             )
         ));
 
         $useTileDesign = (bool) ($values['IPSViewUseTileDesign'] ?? true);
+        $ipsViewItems = $this->PreviewItemsFromForm($values['Sources'] ?? null, !$useTileDesign);
         $this->UpdateFormField('IPSViewGaugePreview', 'image', SVGPreviewHelper::dataUri(
-            EChartsGaugeMultiPreview::CreateSvg(
-                $items,
+            EChartsGaugeTachoPreview::CreateSvg(
+                $ipsViewItems,
                 $title,
                 $useTileDesign
                     ? (string) ($values['EChartsTheme'] ?? $this->ReadPropertyString('EChartsTheme'))
                     : (string) ($values['IPSViewEChartsTheme'] ?? $this->ReadPropertyString('IPSViewEChartsTheme')),
                 $useTileDesign
-                    ? (string) ($values['GaugePreset'] ?? $this->ReadPropertyString('GaugePreset'))
-                    : (string) ($values['IPSViewGaugePreset'] ?? $this->ReadPropertyString('IPSViewGaugePreset')),
+                    ? self::FIXED_PRESET
+                    : self::FIXED_PRESET,
                 $useTileDesign ? $tileStyle : $this->GaugeStyleFromFormValues($values, 'IPSView')
             )
         ));
+    }
+
+    public function UpdateGaugePreviewSourceFromForm(string $Configuration, string $Action): void
+    {
+        try {
+            $values = json_decode($Configuration, true, 64, JSON_THROW_ON_ERROR);
+        } catch (JsonException) {
+            $values = [];
+        }
+        $row = is_array($values) && is_array($values['Sources'] ?? null) ? $values['Sources'] : [];
+        $sources = json_decode($this->ReadPropertyString('Sources'), true);
+        $sources = is_array($sources) && array_is_list($sources) ? $sources : [];
+        $variableID = (int) ($row['VariableID'] ?? 0);
+        $matchingIndex = null;
+        foreach ($sources as $index => $source) {
+            if (is_array($source) && (int) ($source['VariableID'] ?? 0) === $variableID) {
+                $matchingIndex = $index;
+                break;
+            }
+        }
+        if ($Action === 'delete' && $matchingIndex !== null) {
+            array_splice($sources, $matchingIndex, 1);
+        } elseif ($Action === 'add') {
+            $sources[] = $row;
+        } elseif ($matchingIndex !== null) {
+            $sources[$matchingIndex] = $row;
+        }
+        $values['Sources'] = $sources;
+        $this->UpdateGaugePreviewFromForm(json_encode($values, JSON_THROW_ON_ERROR));
     }
 
     public function GetGaugeData(): string
@@ -330,7 +359,8 @@ class EChartsGaugeMulti extends IPSModuleStrict
                     'unit'     => $source['Unit'],
                     'decimals' => $source['Decimals']
                 ],
-                'value'  => $current['Value']
+                'value'  => $current['Value'],
+                'style'  => $source['Style']
             ];
         }
 
@@ -340,11 +370,11 @@ class EChartsGaugeMulti extends IPSModuleStrict
         return json_encode([
             'schemaVersion' => 1,
             'family'        => 'gauge',
-            'variant'       => 'multi',
+            'variant'       => 'tacho',
             'theme'         => $this->ReadPropertyString('EChartsTheme'),
             'gauge'         => [
                 'title'  => $this->ReadPropertyString('Title'),
-                'preset' => $this->ReadPropertyString('GaugePreset'),
+                'preset' => self::FIXED_PRESET,
                 'style'  => $this->ReadGaugeStyle()
             ],
             'items'         => $items
@@ -405,24 +435,24 @@ class EChartsGaugeMulti extends IPSModuleStrict
             'language'           => $this->NormalizeHelperTranslationLanguage(
                 $this->ResolveHelperTranslationLanguage()
             ),
-            'title'              => 'ECharts Gauge Multi',
+            'title'              => 'ECharts Gauge Tacho',
             'visualizationTheme' => $this->VisualizationThemeCSS()
                 . "\n\n"
                 . $this->ResponsiveVisualizationCSS('#echarts-gauge-root', 'echarts-gauge'),
             'ipsViewStyle'       => $ipsView ? $this->IPSViewThemeCSS() : '',
             'state'              => $this->BuildVisualizationState($ipsView),
             'translations'       => [
-                'Configure 2 to 16 unique numeric sources.' => $this->Translate(
-                    'Configure 2 to 16 unique numeric sources.'
+                'Configure 2 to 5 unique numeric sources.' => $this->Translate(
+                    'Configure 2 to 5 unique numeric sources.'
                 ),
-                'Configure a valid Multi Gauge design.' => $this->Translate(
-                    'Configure a valid Multi Gauge design.'
+                'Configure a valid Tacho Gauge design.' => $this->Translate(
+                    'Configure a valid Tacho Gauge design.'
                 ),
                 'Connect an active EChartsGateway.' => $this->Translate(
                     'Connect an active EChartsGateway.'
                 ),
-                'The Multi Gauge values could not be loaded.' => $this->Translate(
-                    'The Multi Gauge values could not be loaded.'
+                'The Tacho Gauge values could not be loaded.' => $this->Translate(
+                    'The Tacho Gauge values could not be loaded.'
                 )
             ],
             'options'            => [
@@ -477,7 +507,9 @@ class EChartsGaugeMulti extends IPSModuleStrict
             $sources = $this->GetValidatedSources();
         } catch (UnexpectedValueException $exception) {
             $status = $exception->getCode();
-            if (!in_array($status, [self::STATUS_SOURCE_INVALID, self::STATUS_RANGE_INVALID], true)) {
+            if (!in_array($status, [
+                self::STATUS_SOURCE_INVALID, self::STATUS_RANGE_INVALID, self::STATUS_DESIGN_INVALID
+            ], true)) {
                 $status = self::STATUS_SOURCE_INVALID;
             }
 
@@ -487,11 +519,11 @@ class EChartsGaugeMulti extends IPSModuleStrict
             ];
         }
 
-        if (!in_array($this->ReadPropertyString('GaugePreset'), self::SUPPORTED_PRESETS, true)
+        if (!in_array(self::FIXED_PRESET, self::SUPPORTED_PRESETS, true)
             || !EChartsAsset::IsSupportedTheme($this->ReadPropertyString('EChartsTheme'))) {
             return [
                 'Status'  => self::STATUS_DESIGN_INVALID,
-                'Message' => 'The selected Multi Gauge design is not supported.'
+                'Message' => 'The selected Tacho Gauge design is not supported.'
             ];
         }
         $designError = $this->ValidateGaugeDesign();
@@ -503,11 +535,11 @@ class EChartsGaugeMulti extends IPSModuleStrict
         }
 
         if ($this->IsIPSViewHTMLPageEnabled() && !$this->ReadPropertyBoolean('IPSViewUseTileDesign')) {
-            if (!in_array($this->ReadPropertyString('IPSViewGaugePreset'), self::SUPPORTED_PRESETS, true)
+            if (!in_array(self::FIXED_PRESET, self::SUPPORTED_PRESETS, true)
                 || !EChartsAsset::IsSupportedTheme($this->ReadPropertyString('IPSViewEChartsTheme'))) {
                 return [
                     'Status'  => self::STATUS_DESIGN_INVALID,
-                    'Message' => 'The selected IPSView Multi Gauge design is not supported.'
+                    'Message' => 'The selected IPSView Tacho Gauge design is not supported.'
                 ];
             }
             $designError = $this->ValidateGaugeDesign('IPSView');
@@ -527,7 +559,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
         foreach (self::DESIGN_SCALE_PROPERTIES as $name) {
             $value = $this->ReadPropertyInteger($prefix . $name);
             if ($value < 50 || $value > 150) {
-                return 'Multi Gauge design scale values must be between 50 and 150 percent.';
+                return 'Tacho Gauge design scale values must be between 50 and 150 percent.';
             }
         }
 
@@ -545,14 +577,14 @@ class EChartsGaugeMulti extends IPSModuleStrict
                 EChartsGaugeDesign::PLATE_BACKGROUND_FITS,
                 true
             )) {
-            return 'The selected Multi Gauge element design is not supported.';
+            return 'The selected Tacho Gauge element design is not supported.';
         }
 
         $majorSplitCount = $this->ReadPropertyInteger($prefix . 'MajorSplitCount');
         $minorSplitCount = $this->ReadPropertyInteger($prefix . 'MinorSplitCount');
         if (($majorSplitCount !== 0 && ($majorSplitCount < 2 || $majorSplitCount > 24))
             || $minorSplitCount < 0 || $minorSplitCount > 10) {
-            return 'Multi Gauge scale divisions are invalid.';
+            return 'Tacho Gauge scale divisions are invalid.';
         }
         foreach (array_keys(array_filter(
             self::DESIGN_INTEGER_DEFAULTS,
@@ -561,7 +593,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
         )) as $name) {
             $color = $this->ReadPropertyInteger($prefix . $name);
             if ($color < 0 || $color > 0xFFFFFF) {
-                return 'Multi Gauge colors must be valid RGB colors.';
+                return 'Tacho Gauge colors must be valid RGB colors.';
             }
         }
 
@@ -635,7 +667,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
         $sourceCount = count($sources);
         if ($sourceCount < self::MINIMUM_SOURCE_COUNT || $sourceCount > self::MAXIMUM_SOURCE_COUNT) {
             throw new UnexpectedValueException(
-                'Configure between 2 and 16 Gauge sources.',
+                'Configure between 2 and 5 Gauge sources.',
                 self::STATUS_SOURCE_INVALID
             );
         }
@@ -658,6 +690,8 @@ class EChartsGaugeMulti extends IPSModuleStrict
             $unit = $source['Unit'] ?? '';
             $decimals = $source['Decimals'] ?? null;
             $useVariablePresentation = $source['UseVariablePresentation'] ?? false;
+            $useIndividualDesign = $source['UseIndividualDesign'] ?? false;
+            $ipsViewUseTileDesign = $source['IPSViewUseTileDesign'] ?? true;
 
             if (!is_int($variableID) || $variableID <= 0 || !IPS_VariableExists($variableID)) {
                 throw new UnexpectedValueException(
@@ -679,7 +713,8 @@ class EChartsGaugeMulti extends IPSModuleStrict
                     self::STATUS_SOURCE_INVALID
                 );
             }
-            if (!is_string($label) || !is_string($unit) || !is_bool($useVariablePresentation)) {
+            if (!is_string($label) || !is_string($unit) || !is_bool($useVariablePresentation)
+                || !is_bool($useIndividualDesign) || !is_bool($ipsViewUseTileDesign)) {
                 throw new UnexpectedValueException(
                     'Gauge source ' . $sourceNumber . ' contains invalid text fields.',
                     self::STATUS_SOURCE_INVALID
@@ -710,6 +745,24 @@ class EChartsGaugeMulti extends IPSModuleStrict
                 $useVariablePresentation
             );
 
+            $individualStyle = [];
+            $individualIPSViewStyle = [];
+            if ($useIndividualDesign) {
+                try {
+                    $individualStyle = EChartsGaugeDesign::StyleFromSource($source);
+                    $individualIPSViewStyle = $ipsViewUseTileDesign
+                        ? $individualStyle
+                        : EChartsGaugeDesign::StyleFromSource($source, 'IPSView');
+                } catch (InvalidArgumentException $exception) {
+                    throw new UnexpectedValueException(
+                        'Gauge source ' . $sourceNumber . ' contains an invalid individual design: '
+                            . $exception->getMessage(),
+                        self::STATUS_DESIGN_INVALID,
+                        $exception
+                    );
+                }
+            }
+
             $variableIDs[$variableID] = true;
             $validatedSources[] = [
                 'VariableID'               => $variableID,
@@ -718,7 +771,11 @@ class EChartsGaugeMulti extends IPSModuleStrict
                 'Maximum'                  => $effectiveConfiguration['maximum'],
                 'Unit'                     => $effectiveConfiguration['unit'],
                 'Decimals'                 => $effectiveConfiguration['decimals'],
-                'UseVariablePresentation'  => $useVariablePresentation
+                'UseVariablePresentation'  => $useVariablePresentation,
+                'UseIndividualDesign'      => $useIndividualDesign,
+                'IPSViewUseTileDesign'     => $ipsViewUseTileDesign,
+                'Style'                    => $individualStyle,
+                'IPSViewStyle'             => $individualIPSViewStyle
             ];
         }
 
@@ -925,7 +982,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
     }
 
     /** @return list<array<string, mixed>> */
-    private function PreviewItems(): array
+    private function PreviewItems(bool $ipsView = false): array
     {
         try {
             $sources = $this->GetValidatedSources();
@@ -936,7 +993,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
             ];
         }
 
-        return array_map(static function (array $source): array
+        return array_map(static function (array $source) use ($ipsView): array
         {
             $value = GetValue($source['VariableID']);
 
@@ -946,9 +1003,94 @@ class EChartsGaugeMulti extends IPSModuleStrict
                 'maximum'  => $source['Maximum'],
                 'unit'     => $source['Unit'],
                 'decimals' => $source['Decimals'],
-                'value'    => is_int($value) || is_float($value) ? (float) $value : $source['Minimum']
+                'value'    => is_int($value) || is_float($value) ? (float) $value : $source['Minimum'],
+                'style'    => $ipsView ? $source['IPSViewStyle'] : $source['Style']
             ];
-        }, array_slice($sources, 0, 6));
+        }, array_slice($sources, 0, self::MAXIMUM_SOURCE_COUNT));
+    }
+
+    /** @return list<array<string, mixed>> */
+    private function PreviewItemsFromForm(mixed $sources, bool $ipsView = false): array
+    {
+        if (is_string($sources)) {
+            $sources = json_decode($sources, true);
+        }
+        if (!is_array($sources) || !array_is_list($sources)) {
+            return $this->PreviewItems($ipsView);
+        }
+
+        $items = [];
+        foreach (array_slice($sources, 0, self::MAXIMUM_SOURCE_COUNT) as $source) {
+            if (!is_array($source)) {
+                continue;
+            }
+            $variableID = (int) ($source['VariableID'] ?? 0);
+            $minimum = (float) ($source['Minimum'] ?? 0.0);
+            $maximum = (float) ($source['Maximum'] ?? 100.0);
+            $value = $variableID > 0 && IPS_VariableExists($variableID) ? GetValue($variableID) : $minimum;
+            $style = [];
+            if (($source['UseIndividualDesign'] ?? false) === true) {
+                try {
+                    $style = $ipsView && (($source['IPSViewUseTileDesign'] ?? true) === false)
+                        ? EChartsGaugeDesign::StyleFromSource($source, 'IPSView')
+                        : EChartsGaugeDesign::StyleFromSource($source);
+                } catch (InvalidArgumentException) {
+                    $style = [];
+                }
+            }
+            $items[] = [
+                'label'    => trim((string) ($source['Label'] ?? '')) ?: ($variableID > 0 ? IPS_GetName($variableID) : 'Gauge'),
+                'minimum'  => $minimum,
+                'maximum'  => $maximum > $minimum ? $maximum : $minimum + 1.0,
+                'unit'     => (string) ($source['Unit'] ?? ''),
+                'decimals' => max(0, min(6, (int) ($source['Decimals'] ?? 1))),
+                'value'    => is_int($value) || is_float($value) ? (float) $value : $minimum,
+                'style'    => $style
+            ];
+        }
+
+        return $items !== [] ? $items : $this->PreviewItems($ipsView);
+    }
+
+    /** @param list<array<string, mixed>> $items @return list<array<string, mixed>> */
+    private function AttachSourceDesigner(array $items): array
+    {
+        foreach ($items as &$item) {
+            if (($item['type'] ?? '') === 'List' && ($item['name'] ?? '') === 'Sources') {
+                $item['form'] = EChartsGaugeDesign::SourceEditorForm();
+                $item['columns'] = array_merge(
+                    is_array($item['columns'] ?? null) ? $item['columns'] : [],
+                    EChartsGaugeDesign::SourceDesignColumns()
+                );
+                $item['onAdd'] = $this->GaugePreviewFormAction('add');
+                $item['onEdit'] = $this->GaugePreviewFormAction('edit');
+                $item['onDelete'] = $this->GaugePreviewFormAction('delete');
+                continue;
+            }
+            if (isset($item['items']) && is_array($item['items'])) {
+                $item['items'] = $this->AttachSourceDesigner($item['items']);
+            }
+        }
+        unset($item);
+
+        return $items;
+    }
+
+    /** @param list<array<string, mixed>> $items @return list<array<string, mixed>> */
+    private function RemovePresetSelectors(array $items): array
+    {
+        $result = [];
+        foreach ($items as $item) {
+            if (in_array($item['name'] ?? '', ['GaugePreset', 'IPSViewGaugePreset'], true)) {
+                continue;
+            }
+            if (isset($item['items']) && is_array($item['items'])) {
+                $item['items'] = $this->RemovePresetSelectors($item['items']);
+            }
+            $result[] = $item;
+        }
+
+        return $result;
     }
 
     /** @return array<string, mixed> */
@@ -959,19 +1101,19 @@ class EChartsGaugeMulti extends IPSModuleStrict
             return [
                 'schemaVersion' => 1,
                 'family'        => 'gauge',
-                'variant'       => 'multi',
+                'variant'       => 'tacho',
                 'status'        => 'error',
                 'chart'         => null,
                 'error'         => $configurationError['Status'] === self::STATUS_DESIGN_INVALID
-                    ? 'Configure a valid Multi Gauge design.'
-                    : 'Configure 2 to 16 unique numeric sources.'
+                    ? 'Configure a valid Tacho Gauge design.'
+                    : 'Configure 2 to 5 unique numeric sources.'
             ];
         }
         if (!$this->HasActiveParent()) {
             return [
                 'schemaVersion' => 1,
                 'family'        => 'gauge',
-                'variant'       => 'multi',
+                'variant'       => 'tacho',
                 'status'        => 'error',
                 'chart'         => null,
                 'error'         => 'Connect an active EChartsGateway.'
@@ -982,8 +1124,11 @@ class EChartsGaugeMulti extends IPSModuleStrict
             $chart = json_decode($this->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
             if ($ipsView && !$this->ReadPropertyBoolean('IPSViewUseTileDesign')) {
                 $chart['theme'] = $this->ReadPropertyString('IPSViewEChartsTheme');
-                $chart['gauge']['preset'] = $this->ReadPropertyString('IPSViewGaugePreset');
+                $chart['gauge']['preset'] = self::FIXED_PRESET;
                 $chart['gauge']['style'] = $this->ReadGaugeStyle('IPSView');
+                foreach ($this->GetValidatedSources() as $index => $source) {
+                    $chart['items'][$index]['style'] = $source['IPSViewStyle'];
+                }
             }
         } catch (Throwable $exception) {
             $this->SendDebug('BuildVisualizationState', $exception::class, 0);
@@ -991,17 +1136,17 @@ class EChartsGaugeMulti extends IPSModuleStrict
             return [
                 'schemaVersion' => 1,
                 'family'        => 'gauge',
-                'variant'       => 'multi',
+                'variant'       => 'tacho',
                 'status'        => 'error',
                 'chart'         => null,
-                'error'         => 'The Multi Gauge values could not be loaded.'
+                'error'         => 'The Tacho Gauge values could not be loaded.'
             ];
         }
 
         return [
             'schemaVersion' => 1,
             'family'        => 'gauge',
-            'variant'       => 'multi',
+            'variant'       => 'tacho',
             'status'        => 'ready',
             'chart'         => $chart,
             'error'         => null
@@ -1191,8 +1336,8 @@ class EChartsGaugeMulti extends IPSModuleStrict
     private function AttachGaugePreviewActions(array $items): array
     {
         $fieldNames = [
-            'Title', 'GaugePreset', 'EChartsTheme', 'IPSViewUseTileDesign',
-            'IPSViewGaugePreset', 'IPSViewEChartsTheme', ...self::DESIGN_SCALE_PROPERTIES,
+            'Sources', 'Title', 'EChartsTheme', 'IPSViewUseTileDesign',
+            'IPSViewEChartsTheme', ...self::DESIGN_SCALE_PROPERTIES,
             ...array_keys(self::DESIGN_STRING_DEFAULTS), ...array_keys(self::DESIGN_INTEGER_DEFAULTS),
             ...array_keys(self::DESIGN_ASSET_STRING_DEFAULTS), ...array_keys(self::DESIGN_ASSET_FLOAT_DEFAULTS),
             ...array_keys(self::DESIGN_ASSET_BOOLEAN_DEFAULTS), ...array_keys(self::DESIGN_ASSET_INTEGER_DEFAULTS)
@@ -1221,11 +1366,11 @@ class EChartsGaugeMulti extends IPSModuleStrict
         return $items;
     }
 
-    private function GaugePreviewFormAction(): string
+    private function GaugePreviewFormAction(string $sourceAction = ''): string
     {
         $fieldNames = [
-            'Title', 'GaugePreset', 'EChartsTheme', 'IPSViewUseTileDesign',
-            'IPSViewGaugePreset', 'IPSViewEChartsTheme', ...self::DESIGN_SCALE_PROPERTIES,
+            'Sources', 'Title', 'EChartsTheme', 'IPSViewUseTileDesign',
+            'IPSViewEChartsTheme', ...self::DESIGN_SCALE_PROPERTIES,
             ...array_keys(self::DESIGN_STRING_DEFAULTS), ...array_keys(self::DESIGN_INTEGER_DEFAULTS),
             ...array_keys(self::DESIGN_ASSET_STRING_DEFAULTS), ...array_keys(self::DESIGN_ASSET_FLOAT_DEFAULTS),
             ...array_keys(self::DESIGN_ASSET_BOOLEAN_DEFAULTS), ...array_keys(self::DESIGN_ASSET_INTEGER_DEFAULTS)
@@ -1245,7 +1390,12 @@ class EChartsGaugeMulti extends IPSModuleStrict
             $fieldNames
         );
 
-        return 'ECGM_UpdateGaugePreviewFromForm($id, json_encode([' . implode(', ', $pairs) . ']));';
+        if ($sourceAction !== '') {
+            return 'ECGT_UpdateGaugePreviewSourceFromForm($id, json_encode([' . implode(', ', $pairs)
+                . ']), ' . var_export($sourceAction, true) . ');';
+        }
+
+        return 'ECGT_UpdateGaugePreviewFromForm($id, json_encode([' . implode(', ', $pairs) . ']));';
     }
 
     private function IPSViewThemeCSS(): string
@@ -1300,7 +1450,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
                 [
                     'type'    => 'Button',
                     'caption' => 'Copy Tile design to IPSView and edit independently',
-                    'onClick' => 'ECGM_CopyTileDesignToIPSView($id); return "MESSAGE:Tile design copied to IPSView.";'
+                    'onClick' => 'ECGT_CopyTileDesignToIPSView($id); return "MESSAGE:Tile design copied to IPSView.";'
                 ],
                 [
                     'type'     => 'ExpansionPanel',

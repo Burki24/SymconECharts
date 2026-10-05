@@ -464,6 +464,8 @@ abstract class IPSModuleStrict
 require_once dirname(__DIR__) . '/EChartsGateway/module.php';
 require_once dirname(__DIR__) . '/EChartsGaugeSingle/module.php';
 require_once dirname(__DIR__) . '/EChartsGaugeMulti/module.php';
+require_once dirname(__DIR__) . '/EChartsGaugeTacho/module.php';
+require_once dirname(__DIR__) . '/EChartsGaugeChronograph/module.php';
 
 function assertGatewayGauge(bool $condition, string $message): void
 {
@@ -1380,7 +1382,7 @@ assertGatewayGauge(($multiData['items'][1]['value'] ?? null) === 58.0, 'Gauge Mu
 $designedMultiGauge = new EChartsGaugeMulti();
 $designedMultiGauge->Create();
 $designedMultiGauge->SetTestProperty('Sources', $multiSources);
-$designedMultiGauge->SetTestProperty('GaugePreset', 'chronograph');
+$designedMultiGauge->SetTestProperty('GaugePreset', 'weather-station');
 $designedMultiGauge->SetTestProperty('PointerShape', 'arrow');
 $designedMultiGauge->SetTestProperty('AnchorShape', 'ring');
 $designedMultiGauge->SetTestProperty('PointerWidthPercent', 140);
@@ -1482,7 +1484,7 @@ $ringGauge = new EChartsGaugeMulti();
 $ringGauge->Create();
 $ringGauge->SetTestProperty('Sources', $multiSources);
 $ringGauge->SetTestProperty('EnableIPSView', true);
-foreach (['ring-grid', 'ring-concentric', 'weather-station', 'tacho', 'chronograph'] as $ringPreset) {
+foreach (['ring-grid', 'ring-concentric', 'weather-station'] as $ringPreset) {
     $ringGauge->SetTestProperty('GaugePreset', $ringPreset);
     $ringGauge->ApplyChanges();
     assertGatewayGauge($ringGauge->GetTestStatus() === IS_ACTIVE, 'Gauge Multi must accept all additional presets.');
@@ -1518,55 +1520,112 @@ foreach (['ring-grid', 'ring-concentric', 'weather-station', 'tacho', 'chronogra
 $ringGauge->SetTestProperty('IPSViewUseTileDesign', false);
 $ringGauge->SetTestProperty('IPSViewGaugePreset', 'ring-grid');
 assertGatewayGauge(
-    str_contains($ringGauge->GetVisualizationTile(), '"preset":"chronograph"')
+    str_contains($ringGauge->GetVisualizationTile(), '"preset":"weather-station"')
         && str_contains($ringGauge->GetIPSViewHTML(), '"preset":"ring-grid"'),
     'An independent IPSView preset must not change the tile preset.'
 );
 
-$sevenSources = [];
-for ($index = 0; $index < 7; $index++) {
+$individualSources = json_decode($multiSources, true, 512, JSON_THROW_ON_ERROR);
+$individualSources[0] = array_merge($individualSources[0], [
+    'UseIndividualDesign'        => true,
+    'PointerShape'               => 'custom',
+    'CustomPointerSVG'           => $multiPointerSvg,
+    'CustomPointerPivotMode'     => 'custom',
+    'CustomPointerPivotXPercent' => 40.0,
+    'CustomPointerPivotYPercent' => 90.0,
+    'PlateDesignMode'            => 'custom',
+    'PlateBackgroundEnabled'     => true,
+    'PlateBackgroundSVG'         => $multiPlateSvg,
+    'PlateBackgroundFit'         => 'contain',
+    'IPSViewUseTileDesign'       => false,
+    'IPSViewPointerShape'        => 'line',
+    'IPSViewPlateDesignMode'     => 'hidden'
+]);
+foreach ([
+    EChartsGaugeTacho::class       => ['preset' => 'tacho', 'variant' => 'tacho'],
+    EChartsGaugeChronograph::class => ['preset' => 'chronograph', 'variant' => 'chronograph']
+] as $dedicatedClass => $contract) {
+    $dedicatedGauge = new $dedicatedClass();
+    $dedicatedGauge->Create();
+    $dedicatedGauge->SetTestProperty('Sources', json_encode($individualSources, JSON_THROW_ON_ERROR));
+    $dedicatedGauge->SetTestProperty('IPSViewUseTileDesign', false);
+    $dedicatedGauge->ApplyChanges();
+    assertGatewayGauge($dedicatedGauge->GetTestStatus() === IS_ACTIVE, $dedicatedClass . ' must accept two sources.');
+    $dedicatedData = json_decode($dedicatedGauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
+    assertGatewayGauge(
+        ($dedicatedData['variant'] ?? null) === $contract['variant']
+            && ($dedicatedData['gauge']['preset'] ?? null) === $contract['preset'],
+        $dedicatedClass . ' must expose its fixed layout contract.'
+    );
+    assertGatewayGauge(
+        ($dedicatedData['items'][0]['style']['pointerShape'] ?? null) === 'custom'
+            && ($dedicatedData['items'][0]['style']['pointerViewBox'] ?? null) === '22 0 56 397'
+            && ($dedicatedData['items'][0]['style']['plateBackgroundFit'] ?? null) === 'contain'
+            && ($dedicatedData['items'][1]['style'] ?? null) === [],
+        $dedicatedClass . ' must attach individual SVG design only to the configured source.'
+    );
+    assertGatewayGauge(
+        str_contains($dedicatedGauge->GetVisualizationTile(), 'Object.assign({}, style, items[index].style || {})'),
+        $dedicatedClass . ' renderer must merge source-specific design settings.'
+    );
+    assertGatewayGauge(
+        str_contains($dedicatedGauge->GetVisualizationTile(), '"pointerShape":"custom"')
+            && str_contains($dedicatedGauge->GetIPSViewHTML(), '"pointerShape":"line"')
+            && str_contains($dedicatedGauge->GetIPSViewHTML(), '"plateMode":"hidden"'),
+        $dedicatedClass . ' must keep source-specific tile and IPSView designs independent.'
+    );
+    $dedicatedForm = json_decode($dedicatedGauge->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+    $dedicatedFormJson = json_encode($dedicatedForm, JSON_THROW_ON_ERROR);
+    assertGatewayGauge(
+        strlen($dedicatedFormJson) < SYMCON_OUTPUT_BUFFER_LIMIT
+            &&
+        str_contains($dedicatedFormJson, '"form":[')
+            && str_contains($dedicatedFormJson, 'UseIndividualDesign')
+            && str_contains($dedicatedFormJson, 'CustomPointerSVG')
+            && str_contains($dedicatedFormJson, 'PlateBackgroundSVG')
+            && str_contains($dedicatedFormJson, '_UpdateGaugePreviewSourceFromForm')
+            && !str_contains($dedicatedFormJson, '"name":"GaugePreset"')
+            && !str_contains($dedicatedFormJson, '"name":"IPSViewGaugePreset"'),
+        $dedicatedClass . ' source editor must offer individual pointer and dial SVG configuration.'
+    );
+    $editedSource = $individualSources[0];
+    $editedSource['PointerShape'] = 'arrow';
+    $dedicatedGauge->UpdateGaugePreviewSourceFromForm(json_encode([
+        'Sources'              => $editedSource,
+        'Title'                => 'Edited instrument',
+        'EChartsTheme'         => 'auto',
+        'IPSViewUseTileDesign' => false,
+        'IPSViewEChartsTheme'  => 'auto'
+    ], JSON_THROW_ON_ERROR), 'edit');
+    $sourcePreviewUpdates = array_slice($dedicatedGauge->GetTestFormUpdates(), -2);
+    $sourceTilePreview = base64_decode(
+        substr((string) ($sourcePreviewUpdates[0]['Value'] ?? ''), strlen('data:image/svg+xml;base64,')),
+        true
+    );
+    assertGatewayGauge(
+        is_string($sourceTilePreview) && str_contains($sourceTilePreview, '<polygon points="'),
+        $dedicatedClass . ' must refresh its preview when an individual source design is confirmed.'
+    );
+}
+$sixSources = [];
+for ($index = 0; $index < 6; $index++) {
     $variableID = 4800 + $index;
     $GLOBALS['symconTestVariables'][$variableID] = [
-        'VariableType' => 2, 'VariableUpdated' => 1780000000, 'Value' => 10.0, 'Name' => 'Chronograph ' . $index
+        'VariableType' => 2, 'VariableUpdated' => 1780000000, 'Value' => 10.0, 'Name' => 'Instrument ' . $index
     ];
-    $sevenSources[] = [
-        'VariableID' => $variableID, 'Label' => 'Source ' . $index,
-        'Minimum'    => 0.0, 'Maximum' => 100.0, 'Unit' => 'u', 'Decimals' => 0
+    $sixSources[] = [
+        'VariableID' => $variableID, 'Label' => '', 'Minimum' => 0.0, 'Maximum' => 100.0,
+        'Unit'       => 'u', 'Decimals' => 0
     ];
 }
-$chronographLimit = new EChartsGaugeMulti();
-$chronographLimit->Create();
-$chronographLimit->SetTestProperty('Sources', json_encode($sevenSources, JSON_THROW_ON_ERROR));
-$chronographLimit->SetTestProperty('GaugePreset', 'chronograph');
-$chronographLimit->ApplyChanges();
-assertGatewayGauge($chronographLimit->GetTestStatus() === 205, 'Chronograph must reject more than six sources.');
-$chronographLimit->SetTestProperty('GaugePreset', 'multi-title');
-$chronographLimit->ApplyChanges();
-assertGatewayGauge($chronographLimit->GetTestStatus() === IS_ACTIVE, 'Other presets must continue to accept seven sources.');
-$chronographLimit->SetTestProperty('EnableIPSView', true);
-$chronographLimit->SetTestProperty('IPSViewUseTileDesign', false);
-$chronographLimit->SetTestProperty('IPSViewGaugePreset', 'chronograph');
-$chronographLimit->ApplyChanges();
-assertGatewayGauge($chronographLimit->GetTestStatus() === 205, 'Independent IPSView chronograph must enforce the same limit.');
-$chronographLimit->SetTestProperty('IPSViewUseTileDesign', true);
-$chronographLimit->SetTestProperty('GaugePreset', 'chronograph');
-$chronographLimit->SetTestProperty('Sources', json_encode(array_slice($sevenSources, 0, 6), JSON_THROW_ON_ERROR));
-$chronographLimit->ApplyChanges();
-assertGatewayGauge($chronographLimit->GetTestStatus() === IS_ACTIVE, 'Chronograph must accept six sources.');
-$chronographForm = json_decode($chronographLimit->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
-$chronographPreview = '';
-foreach ($chronographForm['elements'][4]['items'] ?? [] as $chronographFormItem) {
-    if (($chronographFormItem['name'] ?? null) === 'GaugePreview') {
-        $chronographPreview = $chronographFormItem['image'] ?? '';
-        break;
-    }
+foreach ([EChartsGaugeTacho::class, EChartsGaugeChronograph::class] as $dedicatedClass) {
+    $limitedGauge = new $dedicatedClass();
+    $limitedGauge->Create();
+    $limitedGauge->SetTestProperty('Sources', json_encode($sixSources, JSON_THROW_ON_ERROR));
+    $limitedGauge->ApplyChanges();
+    assertGatewayGauge($limitedGauge->GetTestStatus() === 201, $dedicatedClass . ' must reject a sixth source.');
 }
-assertGatewayGauge(
-    is_string($chronographPreview)
-        && str_contains((string) base64_decode(substr($chronographPreview, strlen('data:image/svg+xml;base64,')), true), 'Source 5'),
-    'The chronograph preview must include the sixth source.'
-);
-foreach ($sevenSources as $source) {
+foreach ($sixSources as $source) {
     unset($GLOBALS['symconTestVariables'][$source['VariableID']]);
 }
 
@@ -1671,7 +1730,7 @@ assertGatewayGauge(
 );
 $multiGauge->UpdateGaugePreviewFromForm(json_encode([
     'Title'                        => 'Live preview',
-    'GaugePreset'                  => 'chronograph',
+    'GaugePreset'                  => 'multi-title',
     'EChartsTheme'                 => 'dark',
     'PointerShape'                 => 'arrow',
     'PointerWidthPercent'          => 150,
@@ -1713,7 +1772,7 @@ $ipsViewPreviewSvg = base64_decode(
 );
 assertGatewayGauge(
     is_string($tilePreviewSvg)
-        && str_contains($tilePreviewSvg, 'data-preset="chronograph"')
+        && str_contains($tilePreviewSvg, 'data-preset="multi-title"')
         && str_contains($tilePreviewSvg, 'data-pointer-shape="arrow"')
         && str_contains($tilePreviewSvg, 'data-anchor-shape="ring"')
         && str_contains($tilePreviewSvg, 'data-plate-mode="custom"')

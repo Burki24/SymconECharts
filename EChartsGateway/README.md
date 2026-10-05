@@ -61,7 +61,8 @@ produktiven Einsatz dar.
 ### 4. Einrichten der Instanzen in Symcon
 
 Das vorgesehene Modell ist eine gemeinsame EChartsGateway-Instanz mit einer
-oder mehreren EChartsGaugeSingle- und EChartsGaugeMulti-Instanzen sowie
+oder mehreren Gauge-Single-, Gauge-Multi-, Gauge-Tacho- und
+Gauge-Chronograph-Instanzen sowie
 späteren weiteren Chartfamilien-Geräten. Das Gateway hat keinen übergeordneten
 Datenfluss; die Geräteinstanzen werden mit ihm verbunden.
 
@@ -98,7 +99,9 @@ noch eine große HTML-Dashboard-Seite erzeugen.
 
 Die native Symcon-Kachel und das optionale IPSView-HTML-Widget gehören zur
 jeweiligen Geräteinstanz
-([Gauge Single](../EChartsGaugeSingle), [Gauge Multi](../EChartsGaugeMulti)).
+([Gauge Single](../EChartsGaugeSingle), [Gauge Multi](../EChartsGaugeMulti),
+[Gauge Tacho](../EChartsGaugeTacho),
+[Gauge Chronograph](../EChartsGaugeChronograph)).
 Beide Ausgabewege sind noch zu implementieren.
 
 ### 7. PHP-Befehlsreferenz

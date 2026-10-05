@@ -33,14 +33,23 @@ Folgende Module beinhaltet das SymconECharts Repository:
 
 - __EChartsGaugeMulti__ ([Dokumentation](EChartsGaugeMulti))
   Gerätemodul für zusammengesetzte Gauge-Darstellungen mit 2 bis 16
-  Datenquellen, etwa Multi Title, Ring oder Car. Jede Quelle besitzt eine
+  Datenquellen. Jede Quelle besitzt eine
   eigene Beschriftung, Skala, Einheit und Formatierung. Multi Title,
-  Ringraster, konzentrische Ringe, ein Wetterstations-Instrumentenpanel, ein
-  Tacho-Cockpit und ein eingebetteter Chronograph sind
-  als responsive Vorlagen implementiert.
+  Ringraster, konzentrische Ringe und ein Wetterstations-Instrumentenpanel
+  sind als responsive Vorlagen mit gemeinsamem Design implementiert.
   Wertebereich, Einheit und
   Nachkommastellen können je Quelle optional aus deren Variablendarstellung
   übernommen werden.
+
+- __EChartsGaugeTacho__ ([Dokumentation](EChartsGaugeTacho))
+  Responsives Tacho-Cockpit für 2 bis 5 Quellen. Jedes Instrument kann Zeiger,
+  Nabe, Skala, Farben und Zifferblatt einschließlich eigener SVG-Assets
+  unabhängig vom gemeinsamen Grunddesign überschreiben.
+
+- __EChartsGaugeChronograph__ ([Dokumentation](EChartsGaugeChronograph))
+  Chronograph mit einem Hauptinstrument und bis zu vier eingebetteten
+  Nebeninstrumenten. Für jede der 2 bis 5 Quellen steht dieselbe individuelle
+  Design- und SVG-Konfiguration wie beim Tacho zur Verfügung.
 
 Für eine reguläre Installation genügt eine gemeinsame EChartsGateway-Instanz
 für alle Gauge- und späteren Diagramminstanzen. Beim ersten Diagramm kann ein
@@ -66,17 +75,16 @@ Standarddarstellung.
 
 Gauge Multi verwaltet eine geordnete Quellenliste, liefert ein versioniertes
 Multi-Modell und rendert die Quellen als Multi-Title-Zifferblätter, Ringraster,
-konzentrische Ringe, als Wetterstations-Instrumentenpanel, Tacho-Cockpit oder
-Chronograph mit einem Haupt- und bis zu fünf eingebetteten Nebeninstrumenten.
-Der Chronograph ist auf 2 bis 6 Quellen begrenzt. Eine gemeinsame Designschicht
+konzentrische Ringe oder als Wetterstations-Instrumentenpanel. Eine gemeinsame Designschicht
 konfiguriert Zeiger einschließlich validiertem SVG-Import, Naben,
 Skalenunterteilungen, Farbrollen und Zifferblattplatten einschließlich
 bereinigtem SVG-Hintergrund
-für alle Instrumente einer Ausgabe, ohne die bisherigen Vorlagenvorgaben zu
-verändern. Archivverarbeitung
+für alle Instrumente einer Ausgabe. Tacho und Chronograph sind eigenständige
+Module für jeweils 2 bis 5 Quellen und ergänzen diese Basis um quellbezogene
+Designüberschreibungen einschließlich SVG-Zeiger und SVG-Zifferblatt. Archivverarbeitung
 und weitere klassische Instrumentenpanel-Vorlagen sind noch nicht implementiert.
-Gauge Single und Gauge Multi besitzen optionale IPSView-WebContent-Ausgaben;
-beide können ihr Kacheldesign erben oder unabhängig gestaltet werden. Der reale
+Alle Gauge-Module besitzen optionale IPSView-WebContent-Ausgaben und können
+ihr Kacheldesign erben oder unabhängig gestaltet werden. Der reale
 IPSView-Laufzeittest bleibt mangels Lizenz eine dokumentierte Testlücke.
 
 Als erste Chartfamilie sind Single- und Multi-Gauges vorgesehen. Eine
