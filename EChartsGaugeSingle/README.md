@@ -201,7 +201,14 @@ Fehlerstatus.
 
 **Konfigurationsseite:** Ausgewählt werden eine numerische Quellvariable,
 Minimum und Maximum, Titel, Einheit, 0 bis 6 Nachkommastellen, ein Gauge-Preset
-sowie ein ECharts-Theme. Unter „Geometrie und Zeiger“ werden Zeigerform,
+sowie ein ECharts-Theme. Optional übernimmt das Modul Minimum, Maximum, Einheit
+und Nachkommastellen aus der Darstellung der Quellvariable. Unterstützt werden
+sowohl native IP-Symcon-9-Darstellungen mit `MIN`, `MAX`, `SUFFIX` und `DIGITS`
+als auch Legacy-Darstellungen, die auf ein Variablenprofil verweisen. Nur ein
+vollständiges gültiges Minimum-/Maximum-Paar ersetzt den manuellen Bereich;
+fehlende oder ungültige Angaben fallen feldweise auf die manuellen Werte zurück.
+Diese Übernahme ist standardmäßig ausgeschaltet, damit vorhandene Instanzen
+unverändert bleiben. Unter „Geometrie und Zeiger“ werden Zeigerform,
 eine optionale SVG-Datei, Skalenbogen und Positionen gewählt; unter „Gauge-Farben“ können sechs
 Gauge-spezifische Farbrollen das Theme gezielt überschreiben. Das
 „Nabendesign“ steuert Form, optionales SVG, Größe, Randstärke und Farben der
@@ -233,6 +240,9 @@ verändert das responsive Layout und erlaubt eine ausdrückliche Sichtbarkeit je
 Element. „Wertanzeige und Effekte“ gestaltet den Wertekasten sowie optionale
 Schatten. `Vorlage` erhält überall das bisherige Verhalten, sodass vorhandene
 Instanzen nach dem Modulupdate unverändert dargestellt werden.
+Der Titel kann unabhängig davon oben oder unten am Gauge stehen. Die vorhandenen
+horizontalen und vertikalen Titelversätze wirken anschließend relativ zu dieser
+Grundposition; unten bleibt die kompatible Standardposition.
 
 **Zifferblattplatte einstellen:**
 

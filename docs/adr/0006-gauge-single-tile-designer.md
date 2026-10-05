@@ -146,6 +146,16 @@ Zeiger, Fortschritt, Ring und Nabe können zusätzlich einen begrenzten,
 responsiv skalierten Schatten erhalten. Freie Formatter, beliebige
 ECharts-Optionen und ausführbarer Benutzer-Code bleiben ausgeschlossen.
 
+Die Titelposition besitzt zusätzlich die stabilen Werte `top` und `bottom`.
+`bottom` bleibt der Default; die vorhandenen Titelversätze werden relativ zur
+gewählten Grundposition angewendet. Die persistente Option
+`UseVariablePresentation` kann Wertebereich, Einheit und Nachkommastellen aus
+der Darstellung der ausgewählten Quellvariable übernehmen. Sie bleibt
+standardmäßig deaktiviert. Bei Aktivierung werden native Darstellungsparameter
+und kompatible Legacy-Profile gelesen; unvollständige oder ungültige Angaben
+überschreiben die manuellen Rückfallwerte nicht. Damit ändern ältere Instanzen
+ihr sichtbares Verhalten nicht allein durch ein Modulupdate.
+
 Der Skalenbogen
 verwendet entweder die Presetgeometrie oder einen Voll-, Dreiviertel-, Halb-, Viertel- oder
 benutzerdefinierten Bogen. Anwenderpositionen werden wie auf einem Zifferblatt

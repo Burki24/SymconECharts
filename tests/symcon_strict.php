@@ -110,9 +110,11 @@ foreach ([
     $propertyContracts = $gaugeModuleName === 'EChartsGaugeSingle'
         ? [
             "RegisterPropertyInteger('SourceVariableID', 0)",
+            "RegisterPropertyBoolean('UseVariablePresentation', false)",
             "RegisterPropertyFloat('Minimum', 0.0)",
             "RegisterPropertyFloat('Maximum', 100.0)",
             "RegisterPropertyString('Title', '')",
+            "RegisterPropertyString('TitlePosition', 'bottom')",
             "RegisterPropertyString('Unit', '')",
             "RegisterPropertyInteger('Decimals', 1)",
             "RegisterPropertyString('GaugePreset', self::PRESET_SIMPLE)",
@@ -207,7 +209,10 @@ foreach ([
     }
     sort($formNames);
     $expectedFormNames = $gaugeModuleName === 'EChartsGaugeSingle'
-        ? ['Decimals', 'Maximum', 'Minimum', 'SourceVariableID', 'Title', 'Unit']
+        ? [
+            'Decimals', 'Maximum', 'Minimum', 'SourceVariableID', 'Title', 'TitlePosition',
+            'Unit', 'UseVariablePresentation'
+        ]
         : ['Sources', 'Title'];
     sort($expectedFormNames);
     requireStrictContract(
@@ -406,6 +411,8 @@ foreach ([
             'ValueOffsetYPercent'           => ['type' => 'NumberSpinner'],
             'TitleOffsetXPercent'           => ['type' => 'NumberSpinner'],
             'TitleOffsetYPercent'           => ['type' => 'NumberSpinner'],
+            'UseVariablePresentation'       => ['type' => 'CheckBox'],
+            'TitlePosition'                 => ['type' => 'Select', 'values' => ['top', 'bottom']],
             'PointerVisibility'             => ['type' => 'Select', 'values' => ['preset', 'show', 'hide']],
             'ProgressVisibility'            => ['type' => 'Select', 'values' => ['preset', 'show', 'hide']],
             'RingVisibility'                => ['type' => 'Select', 'values' => ['preset', 'show', 'hide']],

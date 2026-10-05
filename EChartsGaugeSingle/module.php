@@ -69,6 +69,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
     private const SUPPORTED_VISIBILITY_MODES = ['preset', 'show', 'hide'];
     private const SUPPORTED_GAUGE_DIRECTIONS = ['clockwise', 'counterclockwise'];
     private const SUPPORTED_SCALE_LABEL_ROTATIONS = ['horizontal', 'tangential', 'radial'];
+    private const SUPPORTED_TITLE_POSITIONS = ['top', 'bottom'];
     private const ANGLE_STEP = 22.5;
     private const DESIGN_SCALE_DEFAULT = 100;
     private const DESIGN_SCALE_MINIMUM = 50;
@@ -103,9 +104,11 @@ class EChartsGaugeSingle extends IPSModuleStrict
         $this->SetVisualizationType(1);
         $this->RegisterMessage(0, IPS_KERNELSTARTED);
         $this->RegisterPropertyInteger('SourceVariableID', 0);
+        $this->RegisterPropertyBoolean('UseVariablePresentation', false);
         $this->RegisterPropertyFloat('Minimum', 0.0);
         $this->RegisterPropertyFloat('Maximum', 100.0);
         $this->RegisterPropertyString('Title', '');
+        $this->RegisterPropertyString('TitlePosition', 'bottom');
         $this->RegisterPropertyString('Unit', '');
         $this->RegisterPropertyInteger('Decimals', 1);
         $this->RegisterPropertyString('GaugePreset', self::PRESET_SIMPLE);
@@ -225,16 +228,17 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 $this->GaugePreviewFormAction()
             );
         }
+        $gaugeConfiguration = $this->ReadEffectiveGaugeConfiguration();
         $form = SVGPreviewHelper::withImage(
             $form,
             'GaugePreview',
             $this->BuildGaugePreviewSvg(
                 $this->ReadPropertyInteger('SourceVariableID'),
-                $this->ReadPropertyFloat('Minimum'),
-                $this->ReadPropertyFloat('Maximum'),
+                $gaugeConfiguration['minimum'],
+                $gaugeConfiguration['maximum'],
                 $this->ReadPropertyString('Title'),
-                $this->ReadPropertyString('Unit'),
-                $this->ReadPropertyInteger('Decimals'),
+                $gaugeConfiguration['unit'],
+                $gaugeConfiguration['decimals'],
                 $this->ReadPropertyString('GaugePreset'),
                 $this->ReadPropertyString('EChartsTheme'),
                 $this->ReadGaugeStyle()
@@ -258,8 +262,16 @@ class EChartsGaugeSingle extends IPSModuleStrict
             $values = [];
         }
 
-        $minimum = self::FiniteFloat($values['Minimum'] ?? 0.0, 0.0);
-        $maximum = self::FiniteFloat($values['Maximum'] ?? 100.0, 100.0);
+        $gaugeConfiguration = $this->ResolveGaugeConfiguration(
+            (int) ($values['SourceVariableID'] ?? 0),
+            self::FiniteFloat($values['Minimum'] ?? 0.0, 0.0),
+            self::FiniteFloat($values['Maximum'] ?? 100.0, 100.0),
+            (string) ($values['Unit'] ?? ''),
+            (int) ($values['Decimals'] ?? 1),
+            (bool) ($values['UseVariablePresentation'] ?? false)
+        );
+        $minimum = $gaugeConfiguration['minimum'];
+        $maximum = $gaugeConfiguration['maximum'];
         $this->UpdateFormField(
             'GaugePreview',
             'image',
@@ -268,8 +280,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 $minimum,
                 $maximum,
                 (string) ($values['Title'] ?? ''),
-                (string) ($values['Unit'] ?? ''),
-                (int) ($values['Decimals'] ?? 1),
+                $gaugeConfiguration['unit'],
+                $gaugeConfiguration['decimals'],
                 (string) ($values['GaugePreset'] ?? self::PRESET_SIMPLE),
                 (string) ($values['EChartsTheme'] ?? EChartsAsset::THEME_AUTO),
                 $this->GaugeStyleFromFormValues($values, $minimum, $maximum)
@@ -473,6 +485,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
         $this->WriteAttributeString('LastError', '');
         $this->SetStatus(IS_ACTIVE);
 
+        $gaugeConfiguration = $this->ReadEffectiveGaugeConfiguration();
+
         return json_encode([
             'schemaVersion' => 1,
             'family'        => 'gauge',
@@ -483,10 +497,10 @@ class EChartsGaugeSingle extends IPSModuleStrict
             ],
             'gauge'         => [
                 'title'    => $this->ReadPropertyString('Title'),
-                'minimum'  => $this->ReadPropertyFloat('Minimum'),
-                'maximum'  => $this->ReadPropertyFloat('Maximum'),
-                'unit'     => $this->ReadPropertyString('Unit'),
-                'decimals' => $this->ReadPropertyInteger('Decimals'),
+                'minimum'  => $gaugeConfiguration['minimum'],
+                'maximum'  => $gaugeConfiguration['maximum'],
+                'unit'     => $gaugeConfiguration['unit'],
+                'decimals' => $gaugeConfiguration['decimals'],
                 'preset'   => $this->ReadPropertyString('GaugePreset'),
                 'style'    => $this->ReadGaugeStyle()
             ],
@@ -652,7 +666,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
     private function GaugePreviewFormAction(): string
     {
         $fieldNames = [
-            'SourceVariableID', 'Minimum', 'Maximum', 'Title', 'Unit', 'Decimals',
+            'SourceVariableID', 'UseVariablePresentation', 'Minimum', 'Maximum', 'Title', 'TitlePosition',
+            'Unit', 'Decimals',
             'GaugePreset', 'EChartsTheme', 'PointerShape', 'CustomPointerSVG',
             'CustomPointerPivotMode', 'CustomPointerPivotXPercent', 'CustomPointerPivotYPercent',
             'AnchorShape', 'CustomAnchorSVG', 'AnchorColorMode', 'AnchorColor', 'AnchorBorderColor',
@@ -784,7 +799,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 true
             )
             || !in_array((string) ($style['arcMode'] ?? 'preset'), self::SUPPORTED_ARC_MODES, true)
-            || !in_array((string) ($style['colorMode'] ?? 'theme'), self::SUPPORTED_COLOR_MODES, true)) {
+            || !in_array((string) ($style['colorMode'] ?? 'theme'), self::SUPPORTED_COLOR_MODES, true)
+            || !in_array((string) ($style['titlePosition'] ?? 'bottom'), self::SUPPORTED_TITLE_POSITIONS, true)) {
             return EChartsGaugeSinglePreview::CreateErrorSvg(
                 $this->Translate('Select supported Gauge design options.')
             );
@@ -884,6 +900,95 @@ class EChartsGaugeSingle extends IPSModuleStrict
         return $minimum + (($maximum - $minimum) / 2);
     }
 
+    /** @return array{minimum: float, maximum: float, unit: string, decimals: int} */
+    private function ReadEffectiveGaugeConfiguration(): array
+    {
+        return $this->ResolveGaugeConfiguration(
+            $this->ReadPropertyInteger('SourceVariableID'),
+            $this->ReadPropertyFloat('Minimum'),
+            $this->ReadPropertyFloat('Maximum'),
+            $this->ReadPropertyString('Unit'),
+            $this->ReadPropertyInteger('Decimals'),
+            $this->ReadPropertyBoolean('UseVariablePresentation')
+        );
+    }
+
+    /** @return array{minimum: float, maximum: float, unit: string, decimals: int} */
+    private function ResolveGaugeConfiguration(
+        int $variableID,
+        float $minimum,
+        float $maximum,
+        string $unit,
+        int $decimals,
+        bool $useVariablePresentation
+    ): array {
+        $configuration = [
+            'minimum'  => $minimum,
+            'maximum'  => $maximum,
+            'unit'     => $unit,
+            'decimals' => $decimals
+        ];
+        if (!$useVariablePresentation || $variableID <= 0 || !IPS_VariableExists($variableID)) {
+            return $configuration;
+        }
+
+        try {
+            $presentation = IPS_GetVariablePresentation($variableID);
+            if (!is_array($presentation)) {
+                return $configuration;
+            }
+
+            $profileName = $presentation['PROFILE'] ?? null;
+            if (is_string($profileName) && $profileName !== '') {
+                $profile = IPS_GetVariableProfile($profileName);
+                if (is_array($profile)) {
+                    $configuration = self::ApplyPresentationValues($configuration, [
+                        'MIN'    => $profile['MinValue'] ?? null,
+                        'MAX'    => $profile['MaxValue'] ?? null,
+                        'SUFFIX' => $profile['Suffix'] ?? null,
+                        'DIGITS' => $profile['Digits'] ?? null
+                    ]);
+                }
+            }
+
+            return self::ApplyPresentationValues($configuration, $presentation);
+        } catch (Throwable $exception) {
+            $this->SendDebug('ResolveGaugeConfiguration', $exception::class, 0);
+
+            return $configuration;
+        }
+    }
+
+    /**
+     * @param array{minimum: float, maximum: float, unit: string, decimals: int} $configuration
+     * @param array<string, mixed> $presentation
+     * @return array{minimum: float, maximum: float, unit: string, decimals: int}
+     */
+    private static function ApplyPresentationValues(array $configuration, array $presentation): array
+    {
+        $presentationMinimum = $presentation['MIN'] ?? null;
+        $presentationMaximum = $presentation['MAX'] ?? null;
+        if ((is_int($presentationMinimum) || is_float($presentationMinimum))
+            && (is_int($presentationMaximum) || is_float($presentationMaximum))
+            && is_finite((float) $presentationMinimum)
+            && is_finite((float) $presentationMaximum)
+            && (float) $presentationMinimum < (float) $presentationMaximum) {
+            $configuration['minimum'] = (float) $presentationMinimum;
+            $configuration['maximum'] = (float) $presentationMaximum;
+        }
+
+        if (array_key_exists('SUFFIX', $presentation) && is_string($presentation['SUFFIX'])) {
+            $configuration['unit'] = trim($presentation['SUFFIX']);
+        }
+
+        $presentationDigits = $presentation['DIGITS'] ?? null;
+        if (is_int($presentationDigits) && $presentationDigits >= 0 && $presentationDigits <= 6) {
+            $configuration['decimals'] = $presentationDigits;
+        }
+
+        return $configuration;
+    }
+
     /**
      * Returns the first invalid configuration field and its module status.
      *
@@ -907,14 +1012,15 @@ class EChartsGaugeSingle extends IPSModuleStrict
             ];
         }
 
-        if ($this->ReadPropertyFloat('Minimum') >= $this->ReadPropertyFloat('Maximum')) {
+        $gaugeConfiguration = $this->ReadEffectiveGaugeConfiguration();
+        if ($gaugeConfiguration['minimum'] >= $gaugeConfiguration['maximum']) {
             return [
                 'Status'  => self::STATUS_RANGE_INVALID,
                 'Message' => 'Gauge range minimum must be lower than maximum.'
             ];
         }
 
-        $decimals = $this->ReadPropertyInteger('Decimals');
+        $decimals = $gaugeConfiguration['decimals'];
         if ($decimals < 0 || $decimals > 6) {
             return [
                 'Status'  => self::STATUS_RANGE_INVALID,
@@ -971,6 +1077,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
             || !in_array($this->ReadPropertyString('GaugeColorMode'), self::SUPPORTED_COLOR_MODES, true)
             || !in_array($this->ReadPropertyString('DetailColorMode'), self::SUPPORTED_COLOR_MODES, true)
             || !in_array($this->ReadPropertyString('GaugeDirection'), self::SUPPORTED_GAUGE_DIRECTIONS, true)
+            || !in_array($this->ReadPropertyString('TitlePosition'), self::SUPPORTED_TITLE_POSITIONS, true)
             || !in_array(
                 $this->ReadPropertyString('ScaleLabelRotation'),
                 self::SUPPORTED_SCALE_LABEL_ROTATIONS,
@@ -1017,8 +1124,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
         if ($this->ReadPropertyBoolean('ScaleZonesEnabled')
             && !self::ScaleZonesAreValid(
                 $this->ReadPropertyString('ScaleZones'),
-                $this->ReadPropertyFloat('Minimum'),
-                $this->ReadPropertyFloat('Maximum')
+                $gaugeConfiguration['minimum'],
+                $gaugeConfiguration['maximum']
             )) {
             return [
                 'Status'  => self::STATUS_DESIGN_INVALID,
@@ -1152,6 +1259,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
         }
 
         $style['pointerShape'] = $this->ReadPropertyString('PointerShape');
+        $style['titlePosition'] = $this->ReadPropertyString('TitlePosition');
         $style['anchorShape'] = $this->ReadPropertyString('AnchorShape');
         $style['anchorColorMode'] = $this->ReadPropertyString('AnchorColorMode');
         $style['plateShape'] = $this->ReadPropertyString('PlateShape');
@@ -1169,10 +1277,11 @@ class EChartsGaugeSingle extends IPSModuleStrict
         $style['endPosition'] = $this->ReadPropertyFloat('GaugeEndPosition');
         $style['colorMode'] = $this->ReadPropertyString('GaugeColorMode');
         $style['scaleZonesEnabled'] = $this->ReadPropertyBoolean('ScaleZonesEnabled');
+        $gaugeConfiguration = $this->ReadEffectiveGaugeConfiguration();
         $style['scaleZones'] = self::ResolveScaleZones(
             $this->ReadPropertyString('ScaleZones'),
-            $this->ReadPropertyFloat('Minimum'),
-            $this->ReadPropertyFloat('Maximum')
+            $gaugeConfiguration['minimum'],
+            $gaugeConfiguration['maximum']
         );
         foreach ([
             'majorSplitCount'     => 'MajorSplitCount',
@@ -1260,7 +1369,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
             $style[$fieldName] = (int) ($values[$propertyName] ?? $style[$fieldName]);
         }
         $stringFields = [
-            'pointerShape'           => 'PointerShape', 'anchorShape' => 'AnchorShape',
+            'pointerShape'           => 'PointerShape', 'titlePosition' => 'TitlePosition',
+            'anchorShape'            => 'AnchorShape',
             'anchorColorMode'        => 'AnchorColorMode', 'plateShape' => 'PlateShape',
             'plateColorMode'         => 'PlateColorMode', 'plateFillMode' => 'PlateFillMode',
             'plateGradientDirection' => 'PlateGradientDirection', 'plateBackgroundFit' => 'PlateBackgroundFit',
@@ -1274,7 +1384,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
             'detailColorMode'        => 'DetailColorMode'
         ];
         $stringDefaults = [
-            'pointerShape'           => 'preset', 'anchorShape' => 'preset', 'anchorColorMode' => 'theme',
+            'pointerShape'           => 'preset', 'titlePosition' => 'bottom',
+            'anchorShape'            => 'preset', 'anchorColorMode' => 'theme',
             'plateShape'             => 'hidden', 'plateColorMode' => 'theme', 'plateFillMode' => 'solid',
             'plateGradientDirection' => 'top-bottom', 'plateBackgroundFit' => 'cover',
             'arcMode'                => 'preset', 'colorMode' => 'theme', 'scaleLabelRotation' => 'horizontal',

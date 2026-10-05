@@ -26,6 +26,7 @@
             lineWidth: 16,
             pointerLength: '73%',
             detailY: 294,
+            titleTopY: 28,
             titleY: 352,
             splitLength: 10,
             labelGap: 13,
@@ -44,6 +45,7 @@
             lineWidth: 18,
             pointerLength: '70%',
             detailY: 294,
+            titleTopY: 28,
             titleY: 352,
             splitLength: 10,
             labelGap: 12,
@@ -62,6 +64,7 @@
             lineWidth: 20,
             pointerLength: '66%',
             detailY: 306,
+            titleTopY: 28,
             titleY: 360,
             splitLength: 14,
             labelGap: 10,
@@ -80,6 +83,7 @@
             lineWidth: 18,
             pointerLength: '75%',
             detailY: 319,
+            titleTopY: 28,
             titleY: 370,
             splitLength: 12,
             labelGap: 12,
@@ -229,6 +233,7 @@
         var valueOffsetY = clamp(Number(style.valueOffsetYPercent) || 0, -100, 100) * scale;
         var titleOffsetX = clamp(Number(style.titleOffsetXPercent) || 0, -100, 100) * scale;
         var titleOffsetY = clamp(Number(style.titleOffsetYPercent) || 0, -100, 100) * scale;
+        var titleY = style.titlePosition === 'top' ? definition.titleTopY : definition.titleY;
         var lineWidth = resolveScaledMetric(definition.lineWidth * scale, ringWidth, 8, 24, 4, 40);
         var detailTypographyScale = Math.max(valueFontSize, unitFontSize);
         var detailHeight = resolveScaledMetric(58 * scale, detailTypographyScale, 34, 64, 28, 88);
@@ -236,7 +241,7 @@
         var circlePlateRadius = Math.max(
             arcPlateRadius,
             Math.abs(definition.detailY - definition.centerY) * scale + detailHeight / 2 + 10 * scale,
-            Math.abs(definition.titleY - definition.centerY) * scale
+            Math.abs(titleY - definition.centerY) * scale
                 + resolveScaledMetric(18 * scale, titleFontSize, 11, 20, 7, 36)
                 + 8 * scale
         );
@@ -272,7 +277,7 @@
             ),
             anchorSize: clamp(Math.round(18 * scale), 10, 24),
             detailOffset: [Math.round(valueOffsetX), Math.round((definition.detailY - definition.centerY) * scale + valueOffsetY)],
-            titleOffset: [Math.round(titleOffsetX), Math.round((definition.titleY - definition.centerY) * scale + titleOffsetY)],
+            titleOffset: [Math.round(titleOffsetX), Math.round((titleY - definition.centerY) * scale + titleOffsetY)],
             titleFontSize: resolveScaledMetric(18 * scale, titleFontSize, 11, 20, 7, 36),
             detailWidth: resolveScaledMetric(
                 244 * scale,

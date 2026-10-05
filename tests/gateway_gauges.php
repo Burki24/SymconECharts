@@ -33,6 +33,35 @@ $GLOBALS['symconTestVariables'] = [
         'VariableUpdated' => 1780000003,
         'Value'           => 1013.25,
         'Name'            => 'Air pressure'
+    ],
+    4715 => [
+        'VariableType'    => 2,
+        'VariableUpdated' => 1780000004,
+        'Value'           => 1013.25,
+        'Name'            => 'Presented air pressure',
+        'Presentation'    => [
+            'MIN'    => 950.0,
+            'MAX'    => 1050.0,
+            'DIGITS' => 1,
+            'SUFFIX' => ' hPa'
+        ]
+    ],
+    4716 => [
+        'VariableType'    => 2,
+        'VariableUpdated' => 1780000005,
+        'Value'           => 12.34,
+        'Name'            => 'Legacy wind speed',
+        'Presentation'    => [
+            'PROFILE' => 'Test.Wind'
+        ]
+    ]
+];
+$GLOBALS['symconTestProfiles'] = [
+    'Test.Wind' => [
+        'MinValue' => 0.0,
+        'MaxValue' => 50.0,
+        'Digits'   => 2,
+        'Suffix'   => ' m/s'
     ]
 ];
 
@@ -55,6 +84,22 @@ function IPS_GetVariable(int $variableID): array
         'VariableType'    => $variable['VariableType'],
         'VariableUpdated' => $variable['VariableUpdated']
     ];
+}
+
+/** @return array<string, mixed> */
+function IPS_GetVariablePresentation(int $variableID): array
+{
+    return $GLOBALS['symconTestVariables'][$variableID]['Presentation'] ?? [];
+}
+
+/** @return array<string, mixed> */
+function IPS_GetVariableProfile(string $profileName): array
+{
+    if (!isset($GLOBALS['symconTestProfiles'][$profileName])) {
+        throw new RuntimeException('Unknown test variable profile.');
+    }
+
+    return $GLOBALS['symconTestProfiles'][$profileName];
 }
 
 function IPS_GetName(int $objectID): string
@@ -366,6 +411,7 @@ $gauge->SetTestProperty('SourceVariableID', 4711);
 $gauge->SetTestProperty('Minimum', -20.0);
 $gauge->SetTestProperty('Maximum', 80.0);
 $gauge->SetTestProperty('Title', 'Room climate');
+$gauge->SetTestProperty('TitlePosition', 'top');
 $gauge->SetTestProperty('Unit', '°C');
 $gauge->SetTestProperty('Decimals', 1);
 $gauge->SetTestProperty('GaugePreset', 'progress');
@@ -484,6 +530,7 @@ foreach ([
     'distance: layout.labelDistance',
     'offsetCenter: layout.detailOffset',
     'offsetCenter: layout.titleOffset',
+    "var titleY = style.titlePosition === 'top' ? definition.titleTopY : definition.titleY;",
     'function applyArcDesign(series, style)',
     'series.startAngle = 90 - startPosition;',
     'function applyPointerShape(series, style, layout)',
@@ -549,6 +596,8 @@ assertGatewayGauge(
         && str_contains(json_encode($configurationForm, JSON_THROW_ON_ERROR), '$ScaleZones')
         && str_contains(json_encode($configurationForm, JSON_THROW_ON_ERROR), '$GaugeRadiusPercent')
         && str_contains(json_encode($configurationForm, JSON_THROW_ON_ERROR), '$DetailBoxVisibility')
+        && str_contains(json_encode($configurationForm, JSON_THROW_ON_ERROR), '$UseVariablePresentation')
+        && str_contains(json_encode($configurationForm, JSON_THROW_ON_ERROR), '$TitlePosition')
         && str_contains(
             json_encode($configurationForm, JSON_THROW_ON_ERROR),
             'ECGS_UpdateGaugePreviewFromForm'
@@ -603,6 +652,10 @@ assertGatewayGauge(
 );
 assertGatewayGauge(str_contains($initialPreviewSvg, '#FEF8EF'), 'Gauge Single preview must apply the Vintage background.');
 assertGatewayGauge(str_contains($initialPreviewSvg, 'Room climate'), 'Gauge Single preview must contain the title.');
+assertGatewayGauge(
+    str_contains($initialPreviewSvg, 'y="28.00" class="title"'),
+    'Gauge Single preview must place the title at the selected top position.'
+);
 assertGatewayGauge(str_contains($initialPreviewSvg, '42.5 °C'), 'Gauge Single preview must use the current source value.');
 foreach (['font-size:21px', 'font-size:57.5px', 'font-size:34.5px', 'font-size:19.8px', 'stroke-width:24.00px'] as $customPreviewStyle) {
     assertGatewayGauge(
@@ -941,6 +994,34 @@ assertGatewayGauge(
     'Gauge Single advanced form preview must apply zones, layout, visibility and value-box styling.'
 );
 
+$gauge->UpdateGaugePreviewFromForm(json_encode([
+    'SourceVariableID'        => 4715,
+    'UseVariablePresentation' => true,
+    'Minimum'                 => 100.0,
+    'Maximum'                 => 0.0,
+    'Title'                   => 'Presented pressure',
+    'TitlePosition'           => 'top',
+    'Unit'                    => 'manual',
+    'Decimals'                => 6,
+    'GaugePreset'             => 'simple',
+    'EChartsTheme'            => 'dark'
+], JSON_THROW_ON_ERROR));
+$formUpdates = $gauge->GetTestFormUpdates();
+$presentedPreviewUpdate = end($formUpdates);
+$presentedPreviewUri = is_array($presentedPreviewUpdate)
+    ? (string) ($presentedPreviewUpdate['Value'] ?? '')
+    : '';
+$presentedPreviewSvg = base64_decode(
+    substr($presentedPreviewUri, strlen('data:image/svg+xml;base64,')),
+    true
+);
+assertGatewayGauge(
+    is_string($presentedPreviewSvg)
+        && str_contains($presentedPreviewSvg, '1,013.3 hPa')
+        && str_contains($presentedPreviewSvg, 'y="28.00" class="title"'),
+    'Gauge Single form preview must apply the selected variable presentation and title position.'
+);
+
 $gauge->UpdateGaugePreview(4711, 100.0, 0.0, 'Invalid', '', 1);
 $formUpdates = $gauge->GetTestFormUpdates();
 $invalidPreviewUpdate = end($formUpdates);
@@ -985,6 +1066,7 @@ assertGatewayGauge(
         'detailBorderWidthPercent'    => 100,
         'detailCornerRadiusPercent'   => 100,
         'pointerShape'                => 'arrow',
+        'titlePosition'               => 'top',
         'anchorShape'                 => 'ring',
         'anchorColorMode'             => 'custom',
         'plateShape'                  => 'arc',
@@ -1066,6 +1148,42 @@ assertGatewayGauge(
 );
 $GLOBALS['symconTestVariables'][4711]['Value'] = 42.5;
 $GLOBALS['symconTestVariables'][4711]['VariableUpdated'] = 1780000000;
+
+$presentedGauge = new EChartsGaugeSingle();
+$presentedGauge->Create();
+$presentedGauge->SetTestProperty('SourceVariableID', 4715);
+$presentedGauge->SetTestProperty('UseVariablePresentation', true);
+$presentedGauge->SetTestProperty('Minimum', 100.0);
+$presentedGauge->SetTestProperty('Maximum', 0.0);
+$presentedGauge->SetTestProperty('Unit', 'manual');
+$presentedGauge->SetTestProperty('Decimals', 6);
+$presentedGauge->ApplyChanges();
+assertGatewayGauge(
+    $presentedGauge->GetTestStatus() === IS_ACTIVE,
+    'A valid source-variable presentation must override an invalid manual Gauge range.'
+);
+$presentedData = json_decode($presentedGauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    ($presentedData['gauge']['minimum'] ?? null) === 950.0
+        && ($presentedData['gauge']['maximum'] ?? null) === 1050.0
+        && ($presentedData['gauge']['unit'] ?? null) === 'hPa'
+        && ($presentedData['gauge']['decimals'] ?? null) === 1,
+    'Gauge Single must inherit range, unit and decimals from a modern source-variable presentation.'
+);
+
+$legacyPresentedGauge = new EChartsGaugeSingle();
+$legacyPresentedGauge->Create();
+$legacyPresentedGauge->SetTestProperty('SourceVariableID', 4716);
+$legacyPresentedGauge->SetTestProperty('UseVariablePresentation', true);
+$legacyPresentedGauge->ApplyChanges();
+$legacyPresentedData = json_decode($legacyPresentedGauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    ($legacyPresentedData['gauge']['minimum'] ?? null) === 0.0
+        && ($legacyPresentedData['gauge']['maximum'] ?? null) === 50.0
+        && ($legacyPresentedData['gauge']['unit'] ?? null) === 'm/s'
+        && ($legacyPresentedData['gauge']['decimals'] ?? null) === 2,
+    'Gauge Single must inherit range, unit and decimals through a legacy variable profile.'
+);
 
 $multiSources = json_encode([
     [
@@ -1171,6 +1289,7 @@ $defaultSingleData = json_decode($singleGauge->GetGaugeData(), true, 512, JSON_T
 assertGatewayGauge(
     array_values(array_slice($defaultSingleData['gauge']['style'] ?? [], 0, 9)) === array_fill(0, 9, 100)
         && ($defaultSingleData['gauge']['style']['pointerShape'] ?? null) === 'preset'
+        && ($defaultSingleData['gauge']['style']['titlePosition'] ?? null) === 'bottom'
         && ($defaultSingleData['gauge']['style']['arcMode'] ?? null) === 'preset'
         && ($defaultSingleData['gauge']['style']['colorMode'] ?? null) === 'theme',
     'Gauge Single designer must preserve every preset default for existing instances.'

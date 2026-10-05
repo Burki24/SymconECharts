@@ -22,7 +22,10 @@ Folgende Module beinhaltet das SymconECharts Repository:
   Farbverläufe, ein sicher importiertes und zugeschnittenes SVG-Motiv,
   Kontur, Größe und Schatten. Farbige Wertebereiche, frei abstimmbare Skalen,
   responsive Positionierung, elementweise Sichtbarkeit und ein gestaltbarer
-  Wertekasten vervollständigen den Designer.
+  Wertekasten vervollständigen den Designer. Die Titelposition ist oben oder
+  unten wählbar; optional übernimmt Gauge Single Wertebereich, Einheit und
+  Nachkommastellen aus der nativen Variablendarstellung beziehungsweise einem
+  kompatiblen Legacy-Profil.
   Ein separat platzierbares HTML-Widget in IPSView bleibt ein weiterer
   Ausgabeweg auf derselben Diagrammkonfiguration und Datenaufbereitung.
 

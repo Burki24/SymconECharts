@@ -279,6 +279,7 @@ SVG;
      *     titleFontSize: float,
      *     pointerWidth: float,
      *     detailY: float,
+     *     titleTopY: float,
      *     titleY: float,
      *     showProgress: bool,
      *     showMinorTicks: bool,
@@ -308,6 +309,7 @@ SVG;
                 'titleFontSize'   => 18.0,
                 'pointerWidth'    => 14.0,
                 'detailY'         => 294.0,
+                'titleTopY'       => 28.0,
                 'titleY'          => 352.0,
                 'showProgress'    => false,
                 'showMinorTicks'  => true,
@@ -333,6 +335,7 @@ SVG;
                 'titleFontSize'   => 18.0,
                 'pointerWidth'    => 14.0,
                 'detailY'         => 306.0,
+                'titleTopY'       => 28.0,
                 'titleY'          => 360.0,
                 'showProgress'    => true,
                 'showMinorTicks'  => false,
@@ -358,6 +361,7 @@ SVG;
                 'titleFontSize'   => 18.0,
                 'pointerWidth'    => 16.0,
                 'detailY'         => 319.0,
+                'titleTopY'       => 28.0,
                 'titleY'          => 370.0,
                 'showProgress'    => true,
                 'showMinorTicks'  => true,
@@ -383,6 +387,7 @@ SVG;
                 'titleFontSize'   => 18.0,
                 'pointerWidth'    => 14.0,
                 'detailY'         => 294.0,
+                'titleTopY'       => 28.0,
                 'titleY'          => 352.0,
                 'showProgress'    => true,
                 'showMinorTicks'  => true,
@@ -451,7 +456,10 @@ SVG;
         $design['centerY'] = (float) $design['centerY'] + $gaugeOffsetY;
         $design['detailY'] = (float) $design['detailY'] + $gaugeOffsetY
             + max(-100, min(100, (int) ($style['valueOffsetYPercent'] ?? 0)));
-        $design['titleY'] = (float) $design['titleY'] + $gaugeOffsetY
+        $titleY = ($style['titlePosition'] ?? 'bottom') === 'top'
+            ? (float) $design['titleTopY']
+            : (float) $design['titleY'];
+        $design['titleY'] = $titleY + $gaugeOffsetY
             + max(-100, min(100, (int) ($style['titleOffsetYPercent'] ?? 0)));
         $design['gaugeOffsetX'] = max(-50, min(50, (int) ($style['gaugeOffsetXPercent'] ?? 0))) * 2.0;
         $design['valueOffsetX'] = max(-100, min(100, (int) ($style['valueOffsetXPercent'] ?? 0)));
