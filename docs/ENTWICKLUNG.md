@@ -36,9 +36,11 @@ radialer Farbverläufe sowie eines bereinigten, auf die Plattenform
 zugeschnittenen SVG-Hintergrunds. Gauge Single unterstützt außerdem validierte farbige Wertebereiche,
 konfigurierbare Skalenunterteilungen und -abstände, beide Drehrichtungen,
 responsive Positionsversätze, elementweise Sichtbarkeit sowie einen
-gestaltbaren Wertekasten und optionale Schatteneffekte. Gauge Single erzeugt
+gestaltbaren Wertekasten und optionale Schatteneffekte. Gauge Multi besitzt
+mit Multi Title eine erste responsive native Kachel für 2 bis 16 unabhängige
+Skalen. Gauge Single erzeugt
 optional eine IPSView-WebContent-Variable mit vererbtem oder unabhängigem
-Design auf demselben Renderer. Der Multi-Renderer, Archivverarbeitung sowie reale
+Design auf demselben Renderer. Weitere Multi-Vorlagen, Archivverarbeitung sowie reale
 Symcon-Laufzeit- und Browsertests fehlen noch. Die Testsuite prüft zusätzlich
 zu Struktur und Metadaten die Strict-Verträge, das Protokoll, die
 ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
@@ -93,6 +95,8 @@ Die gemeinsame Theme-Assetbasis und die instanzbezogene Auswahl dokumentiert
 [`ADR 0007`](adr/0007-echarts-theme-assets-and-selection.md).
 Die optionale IPSView-WebContent-Ausgabe und ihr getrenntes Design dokumentiert
 [`ADR 0008`](adr/0008-gauge-single-ipsview-output.md).
+Den ersten sichtbaren Gauge-Multi-Renderer dokumentiert
+[`ADR 0009`](adr/0009-gauge-multi-title-renderer.md).
 
 ## Daten, Konfiguration und Ausgabe
 

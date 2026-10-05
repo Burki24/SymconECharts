@@ -2,15 +2,36 @@
 
 declare(strict_types=1);
 
+use Burki24\SymconModuleHelper\ConfigurationFormHelper;
 use Burki24\SymconModuleHelper\DataFlowHelper;
+use Burki24\SymconModuleHelper\IPSViewHTMLPageHelper;
+use Burki24\SymconModuleHelper\ResponsiveVisualizationHelper;
+use Burki24\SymconModuleHelper\SVGPreviewHelper;
+use Burki24\SymconModuleHelper\VisualizationAssetHelper;
+use Burki24\SymconModuleHelper\VisualizationThemeHelper;
+use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsDataProtocol;
+use SymconECharts\EChartsGaugeMultiPreview;
 
+require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
 require_once __DIR__ . '/../libs/helper/DataFlowHelper.php';
+require_once __DIR__ . '/../libs/helper/IPSViewHTMLPageHelper.php';
+require_once __DIR__ . '/../libs/helper/ResponsiveVisualizationHelper.php';
+require_once __DIR__ . '/../libs/helper/SVGPreviewHelper.php';
+require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
+require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
+require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
+require_once __DIR__ . '/GaugePreview.php';
 
 class EChartsGaugeMulti extends IPSModuleStrict
 {
+    use ConfigurationFormHelper;
     use DataFlowHelper;
+    use IPSViewHTMLPageHelper;
+    use ResponsiveVisualizationHelper;
+    use VisualizationAssetHelper;
+    use VisualizationThemeHelper;
 
     private const GATEWAY_MODULE_ID = '{33C9DF44-6F6D-5916-4AAE-CCB24BD6928D}';
     private const DATA_ID_TO_PARENT = '{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}';
@@ -23,14 +44,25 @@ class EChartsGaugeMulti extends IPSModuleStrict
     private const STATUS_RANGE_INVALID = 202;
     private const STATUS_PARENT_MISSING = 203;
     private const STATUS_GATEWAY_FAILED = 204;
+    private const STATUS_DESIGN_INVALID = 205;
+
+    private const PRESET_MULTI_TITLE = 'multi-title';
+    private const SUPPORTED_PRESETS = [self::PRESET_MULTI_TITLE];
 
     public function Create(): void
     {
         parent::Create();
 
+        $this->SetVisualizationType(1);
         $this->RegisterMessage(0, IPS_KERNELSTARTED);
         $this->RegisterPropertyString('Sources', '[]');
         $this->RegisterPropertyString('Title', '');
+        $this->RegisterPropertyString('GaugePreset', self::PRESET_MULTI_TITLE);
+        $this->RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO);
+        $this->RegisterPropertyInteger('RingWidthPercent', 100);
+        $this->RegisterPropertyInteger('ScaleFontSizePercent', 100);
+        $this->RegisterPropertyInteger('ValueFontSizePercent', 100);
+        $this->RegisterPropertyInteger('TitleFontSizePercent', 100);
         $this->RegisterAttributeString('RegisteredSourceVariableIDs', '[]');
         $this->RegisterAttributeString('LastError', '');
     }
@@ -41,6 +73,9 @@ class EChartsGaugeMulti extends IPSModuleStrict
 
         $this->RegisterMessage(0, IPS_KERNELSTARTED);
         $this->Initialize();
+        if (IPS_GetKernelRunlevel() === KR_READY) {
+            $this->PublishVisualizationState();
+        }
     }
 
     public function GetCompatibleParents(): string
@@ -49,6 +84,22 @@ class EChartsGaugeMulti extends IPSModuleStrict
             'type'      => 'connect',
             'moduleIDs' => [self::GATEWAY_MODULE_ID]
         ], JSON_THROW_ON_ERROR);
+    }
+
+    public function GetConfigurationForm(): string
+    {
+        $form = $this->LoadConfigurationForm();
+        $form = SVGPreviewHelper::withImage(
+            $form,
+            'GaugePreview',
+            EChartsGaugeMultiPreview::CreateSvg(
+                $this->PreviewItems(),
+                $this->ReadPropertyString('Title'),
+                $this->ReadPropertyString('EChartsTheme')
+            )
+        );
+
+        return $this->EncodeConfigurationForm($form);
     }
 
     public function GetGaugeData(): string
@@ -92,11 +143,55 @@ class EChartsGaugeMulti extends IPSModuleStrict
             'schemaVersion' => 1,
             'family'        => 'gauge',
             'variant'       => 'multi',
+            'theme'         => $this->ReadPropertyString('EChartsTheme'),
             'gauge'         => [
-                'title' => $this->ReadPropertyString('Title')
+                'title'  => $this->ReadPropertyString('Title'),
+                'preset' => $this->ReadPropertyString('GaugePreset'),
+                'style'  => [
+                    'ringWidthPercent'     => $this->ReadPropertyInteger('RingWidthPercent'),
+                    'scaleFontSizePercent' => $this->ReadPropertyInteger('ScaleFontSizePercent'),
+                    'valueFontSizePercent' => $this->ReadPropertyInteger('ValueFontSizePercent'),
+                    'titleFontSizePercent' => $this->ReadPropertyInteger('TitleFontSizePercent')
+                ]
             ],
             'items'         => $items
         ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
+    }
+
+    public function GetVisualizationTile(): string
+    {
+        return $this->RenderVisualizationHTMLPage(false, [
+            'language'           => $this->NormalizeHelperTranslationLanguage(
+                $this->ResolveHelperTranslationLanguage()
+            ),
+            'title'              => 'ECharts Gauge Multi',
+            'visualizationTheme' => $this->VisualizationThemeCSS()
+                . "\n\n"
+                . $this->ResponsiveVisualizationCSS('#echarts-gauge-root', 'echarts-gauge'),
+            'state'              => $this->BuildVisualizationState(),
+            'translations'       => [
+                'Configure 2 to 16 unique numeric sources.' => $this->Translate(
+                    'Configure 2 to 16 unique numeric sources.'
+                ),
+                'Configure a valid Multi Gauge design.' => $this->Translate(
+                    'Configure a valid Multi Gauge design.'
+                ),
+                'Connect an active EChartsGateway.' => $this->Translate(
+                    'Connect an active EChartsGateway.'
+                ),
+                'The Multi Gauge values could not be loaded.' => $this->Translate(
+                    'The Multi Gauge values could not be loaded.'
+                )
+            ],
+            'options'            => [
+                'echartsVersion' => EChartsAsset::VERSION,
+                'echartsThemes'  => EChartsAsset::ThemePalettes()
+            ],
+            'replacements'       => [
+                '{{ECHARTS_SCRIPT}}'       => EChartsAsset::JavaScript(),
+                '{{ECHARTS_THEME_SCRIPT}}' => EChartsAsset::ThemeJavaScript()
+            ]
+        ]);
     }
 
     public function ReceiveData(string $JSONString): string
@@ -120,6 +215,13 @@ class EChartsGaugeMulti extends IPSModuleStrict
     {
         if ($SenderID === 0 && $Message === IPS_KERNELSTARTED) {
             $this->Initialize();
+            $this->PublishVisualizationState();
+
+            return;
+        }
+
+        if ($Message === VM_UPDATE && in_array($SenderID, $this->ConfiguredVariableIDs(), true)) {
+            $this->PublishVisualizationState();
         }
     }
 
@@ -171,6 +273,23 @@ class EChartsGaugeMulti extends IPSModuleStrict
                 'Status'  => $status,
                 'Message' => $exception->getMessage()
             ];
+        }
+
+        if (!in_array($this->ReadPropertyString('GaugePreset'), self::SUPPORTED_PRESETS, true)
+            || !EChartsAsset::IsSupportedTheme($this->ReadPropertyString('EChartsTheme'))) {
+            return [
+                'Status'  => self::STATUS_DESIGN_INVALID,
+                'Message' => 'The selected Multi Gauge design is not supported.'
+            ];
+        }
+        foreach (['RingWidthPercent', 'ScaleFontSizePercent', 'ValueFontSizePercent', 'TitleFontSizePercent'] as $name) {
+            $value = $this->ReadPropertyInteger($name);
+            if ($value < 50 || $value > 150) {
+                return [
+                    'Status'  => self::STATUS_DESIGN_INVALID,
+                    'Message' => 'Multi Gauge design scale values must be between 50 and 150 percent.'
+                ];
+            }
         }
 
         return null;
@@ -353,9 +472,14 @@ class EChartsGaugeMulti extends IPSModuleStrict
 
         foreach (array_diff($previousVariableIDs, $registeredVariableIDs) as $variableID) {
             $this->UnregisterReference($variableID);
+            $this->UnregisterMessage($variableID, VM_UPDATE);
         }
         foreach (array_diff($registeredVariableIDs, $previousVariableIDs) as $variableID) {
             $this->RegisterReference($variableID);
+        }
+        foreach ($registeredVariableIDs as $variableID) {
+            // Register idempotently so existing instances gain live updates after a module update.
+            $this->RegisterMessage($variableID, VM_UPDATE);
         }
 
         $this->WriteAttributeString(
@@ -410,5 +534,96 @@ class EChartsGaugeMulti extends IPSModuleStrict
         sort($result);
 
         return $result;
+    }
+
+    /** @return list<array<string, mixed>> */
+    private function PreviewItems(): array
+    {
+        try {
+            $sources = $this->GetValidatedSources();
+        } catch (Throwable) {
+            return [
+                ['label' => 'Temperature', 'minimum' => 0.0, 'maximum' => 40.0, 'unit' => '°C', 'decimals' => 1, 'value' => 21.5],
+                ['label' => 'Humidity', 'minimum' => 0.0, 'maximum' => 100.0, 'unit' => '%', 'decimals' => 0, 'value' => 54.0]
+            ];
+        }
+
+        return array_map(static function (array $source): array
+        {
+            $value = GetValue($source['VariableID']);
+
+            return [
+                'label'    => $source['Label'] !== '' ? $source['Label'] : IPS_GetName($source['VariableID']),
+                'minimum'  => $source['Minimum'],
+                'maximum'  => $source['Maximum'],
+                'unit'     => $source['Unit'],
+                'decimals' => $source['Decimals'],
+                'value'    => is_int($value) || is_float($value) ? (float) $value : $source['Minimum']
+            ];
+        }, array_slice($sources, 0, 4));
+    }
+
+    /** @return array<string, mixed> */
+    private function BuildVisualizationState(): array
+    {
+        $configurationError = $this->GetConfigurationError();
+        if ($configurationError !== null) {
+            return [
+                'schemaVersion' => 1,
+                'family'        => 'gauge',
+                'variant'       => 'multi',
+                'status'        => 'error',
+                'chart'         => null,
+                'error'         => $configurationError['Status'] === self::STATUS_DESIGN_INVALID
+                    ? 'Configure a valid Multi Gauge design.'
+                    : 'Configure 2 to 16 unique numeric sources.'
+            ];
+        }
+        if (!$this->HasActiveParent()) {
+            return [
+                'schemaVersion' => 1,
+                'family'        => 'gauge',
+                'variant'       => 'multi',
+                'status'        => 'error',
+                'chart'         => null,
+                'error'         => 'Connect an active EChartsGateway.'
+            ];
+        }
+
+        try {
+            $chart = json_decode($this->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
+        } catch (Throwable $exception) {
+            $this->SendDebug('BuildVisualizationState', $exception::class, 0);
+
+            return [
+                'schemaVersion' => 1,
+                'family'        => 'gauge',
+                'variant'       => 'multi',
+                'status'        => 'error',
+                'chart'         => null,
+                'error'         => 'The Multi Gauge values could not be loaded.'
+            ];
+        }
+
+        return [
+            'schemaVersion' => 1,
+            'family'        => 'gauge',
+            'variant'       => 'multi',
+            'status'        => 'ready',
+            'chart'         => $chart,
+            'error'         => null
+        ];
+    }
+
+    private function PublishVisualizationState(): void
+    {
+        try {
+            $this->UpdateVisualizationValue(json_encode(
+                $this->BuildVisualizationState(),
+                JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION
+            ));
+        } catch (Throwable $exception) {
+            $this->SendDebug('PublishVisualizationState', $exception::class, 0);
+        }
     }
 }

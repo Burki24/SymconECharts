@@ -1335,12 +1335,20 @@ $multiGauge->ApplyChanges();
 assertGatewayGauge($multiGauge->GetTestStatus() === IS_ACTIVE, 'Gauge Multi must become active with two valid sources.');
 assertGatewayGauge($multiGauge->GetTestReferences() === [4711, 4713], 'Gauge Multi must register every source reference.');
 assertGatewayGauge($multiGauge->GetTestSummary() === '2 sources', 'Gauge Multi summary must identify its source count.');
+assertGatewayGauge($multiGauge->GetTestVisualizationType() === 1, 'Gauge Multi must expose an HTML-SDK tile.');
+assertGatewayGauge(
+    in_array(['SenderID' => 4711, 'Message' => VM_UPDATE], $multiGauge->GetTestMessages(), true)
+        && in_array(['SenderID' => 4713, 'Message' => VM_UPDATE], $multiGauge->GetTestMessages(), true),
+    'Gauge Multi must subscribe to every source value update.'
+);
 
 $multiData = json_decode($multiGauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(($multiData['schemaVersion'] ?? null) === 1, 'Gauge Multi data schema version changed.');
 assertGatewayGauge(($multiData['family'] ?? null) === 'gauge', 'Gauge Multi data family changed.');
 assertGatewayGauge(($multiData['variant'] ?? null) === 'multi', 'Gauge Multi variant is missing.');
+assertGatewayGauge(($multiData['theme'] ?? null) === 'auto', 'Gauge Multi default theme changed.');
 assertGatewayGauge(($multiData['gauge']['title'] ?? null) === 'Room climate', 'Gauge Multi title changed.');
+assertGatewayGauge(($multiData['gauge']['preset'] ?? null) === 'multi-title', 'Gauge Multi preset changed.');
 assertGatewayGauge(count($multiData['items'] ?? []) === 2, 'Gauge Multi must return every configured source.');
 assertGatewayGauge(($multiData['items'][0]['id'] ?? null) === 'variable-4711', 'Gauge Multi item ID changed.');
 assertGatewayGauge(($multiData['items'][0]['gauge']['label'] ?? null) === 'Temperature', 'Gauge Multi label changed.');
@@ -1350,6 +1358,41 @@ assertGatewayGauge(
     'Gauge Multi must fall back to the variable name for an empty label.'
 );
 assertGatewayGauge(($multiData['items'][1]['value'] ?? null) === 58.0, 'Gauge Multi second value changed.');
+
+$multiTile = $multiGauge->GetVisualizationTile();
+assertGatewayGauge(str_contains($multiTile, 'window.echarts'), 'Gauge Multi tile must embed Apache ECharts.');
+assertGatewayGauge(str_contains($multiTile, 'echarts-gauge-chart'), 'Gauge Multi tile root is missing.');
+assertGatewayGauge(str_contains($multiTile, '"preset":"multi-title"'), 'Gauge Multi tile must receive its preset.');
+assertGatewayGauge(
+    str_contains($multiTile, '"id":"variable-4711"') && str_contains($multiTile, '"id":"variable-4713"'),
+    'Gauge Multi tile must receive every configured source.'
+);
+assertGatewayGauge(
+    str_contains($multiTile, 'function resolveGrid(count, width, height, hasTitle)')
+        && str_contains($multiTile, "type: 'gauge'")
+        && str_contains($multiTile, 'items.map(function (item, index)'),
+    'Gauge Multi tile must render responsive independent Gauge series.'
+);
+assertGatewayGauge(
+    strlen($multiTile) < SYMCON_OUTPUT_BUFFER_LIMIT,
+    'Gauge Multi tile must remain below the Symcon output-buffer limit.'
+);
+$multiForm = json_decode($multiGauge->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+$multiFormJson = json_encode($multiForm, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    str_contains($multiFormJson, '"caption":"Tile designer","expanded":false')
+        && str_contains($multiFormJson, '"name":"GaugePreset"')
+        && str_contains($multiFormJson, '"name":"EChartsTheme"')
+        && str_contains($multiFormJson, '"name":"GaugePreview"')
+        && str_contains($multiFormJson, 'data:image\\/svg+xml;base64,'),
+    'Gauge Multi form must expose a collapsed designer with an SVG preview.'
+);
+$multiUpdateCount = count($multiGauge->GetTestVisualizationUpdates());
+$multiGauge->MessageSink(1780000200, 4711, VM_UPDATE, []);
+assertGatewayGauge(
+    count($multiGauge->GetTestVisualizationUpdates()) === $multiUpdateCount + 1,
+    'Gauge Multi must publish a fresh visualization state when a source changes.'
+);
 
 $multiGauge->SetTestProperty('Sources', json_encode([
     json_decode($multiSources, true, 512, JSON_THROW_ON_ERROR)[1],
@@ -1403,6 +1446,13 @@ $invalidSources[1]['Decimals'] = 7;
 $invalidMultiDecimals->SetTestProperty('Sources', json_encode($invalidSources, JSON_THROW_ON_ERROR));
 $invalidMultiDecimals->ApplyChanges();
 assertGatewayGauge($invalidMultiDecimals->GetTestStatus() === 202, 'Gauge Multi must reject invalid item decimals.');
+
+$invalidMultiDesign = new EChartsGaugeMulti();
+$invalidMultiDesign->Create();
+$invalidMultiDesign->SetTestProperty('Sources', $multiSources);
+$invalidMultiDesign->SetTestProperty('EChartsTheme', 'unsupported');
+$invalidMultiDesign->ApplyChanges();
+assertGatewayGauge($invalidMultiDesign->GetTestStatus() === 205, 'Gauge Multi must reject an unsupported design.');
 
 $singleGauge = new EChartsGaugeSingle();
 $singleGauge->Create();

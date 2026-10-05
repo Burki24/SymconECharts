@@ -34,7 +34,8 @@ Folgende Module beinhaltet das SymconECharts Repository:
 - __EChartsGaugeMulti__ ([Dokumentation](EChartsGaugeMulti))
   Gerätemodul für zusammengesetzte Gauge-Darstellungen mit 2 bis 16
   Datenquellen, etwa Multi Title, Ring oder Car. Jede Quelle besitzt eine
-  eigene Beschriftung, Skala, Einheit und Formatierung.
+  eigene Beschriftung, Skala, Einheit und Formatierung. Multi Title ist als
+  erste responsive native Kachel implementiert.
 
 Für eine reguläre Installation genügt eine gemeinsame EChartsGateway-Instanz
 für alle Gauge- und späteren Diagramminstanzen. Beim ersten Diagramm kann ein
@@ -58,9 +59,9 @@ Simple, `auto` und die jeweiligen
 Presetvorgaben erhalten die bisherige
 Standarddarstellung.
 
-Gauge Multi verwaltet bereits eine geordnete Quellenliste und liefert ein
-versioniertes Multi-Modell, besitzt aber noch keinen Renderer.
-Archivverarbeitung und der Gauge-Multi-Renderer sind noch nicht implementiert.
+Gauge Multi verwaltet eine geordnete Quellenliste, liefert ein versioniertes
+Multi-Modell und rendert die Quellen als responsive Multi-Title-Kachel.
+Archivverarbeitung sowie weitere Multi-Vorlagen sind noch nicht implementiert.
 Gauge Single besitzt eine optionale IPSView-WebContent-Ausgabe; der reale
 IPSView-Laufzeittest bleibt mangels Lizenz eine dokumentierte Testlücke.
 

@@ -86,6 +86,128 @@
                     }
                 }
             ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Tile designer",
+            "expanded": false,
+            "width": "700px",
+            "items": [
+                {
+                    "type": "Label",
+                    "caption": "Multi Title arranges every source as an independent Gauge with its own range and unit. The grid adapts automatically to the available tile size."
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "GaugePreset",
+                            "caption": "Gauge preset",
+                            "width": "260px",
+                            "options": [
+                                {
+                                    "caption": "Multi Title",
+                                    "value": "multi-title"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Select",
+                            "name": "EChartsTheme",
+                            "caption": "ECharts theme",
+                            "width": "260px",
+                            "options": [
+                                {
+                                    "caption": "Automatic (Symcon design)",
+                                    "value": "auto"
+                                },
+                                {
+                                    "caption": "Dark",
+                                    "value": "dark"
+                                },
+                                {
+                                    "caption": "Vintage",
+                                    "value": "vintage"
+                                },
+                                {
+                                    "caption": "Macarons",
+                                    "value": "macarons"
+                                },
+                                {
+                                    "caption": "Infographic",
+                                    "value": "infographic"
+                                },
+                                {
+                                    "caption": "Shine",
+                                    "value": "shine"
+                                },
+                                {
+                                    "caption": "Roma",
+                                    "value": "roma"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Label",
+                    "caption": "Fine tuning values range from 50% to 150%. 100% restores the preset default."
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "RingWidthPercent",
+                            "caption": "Ring width",
+                            "minimum": 50,
+                            "maximum": 150,
+                            "suffix": "%",
+                            "width": "260px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ScaleFontSizePercent",
+                            "caption": "Scale font size",
+                            "minimum": 50,
+                            "maximum": 150,
+                            "suffix": "%",
+                            "width": "260px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ValueFontSizePercent",
+                            "caption": "Value font size",
+                            "minimum": 50,
+                            "maximum": 150,
+                            "suffix": "%",
+                            "width": "260px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "TitleFontSizePercent",
+                            "caption": "Title font size",
+                            "minimum": 50,
+                            "maximum": 150,
+                            "suffix": "%",
+                            "width": "260px"
+                        }
+                    ]
+                },
+                {
+                    "type": "Image",
+                    "name": "GaugePreview",
+                    "image": "",
+                    "center": true,
+                    "width": "100%"
+                }
+            ]
         }
     ],
     "actions": [
@@ -120,6 +242,11 @@
             "code": 204,
             "icon": "error",
             "caption": "EChartsGateway request failed"
+        },
+        {
+            "code": 205,
+            "icon": "error",
+            "caption": "Multi Gauge design is invalid"
         }
     ]
 }

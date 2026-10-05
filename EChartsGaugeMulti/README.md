@@ -6,11 +6,12 @@ Symcon-Kacheldarstellung und ein separat platzierbares HTML-Widget in IPSView
 bereitstellen können. Datenquellen und Diagrammkonfiguration werden dabei nur
 einmal gepflegt.
 
-**Entwicklungsstand:** Technische Mehrquellenbasis. Eine geordnete Liste aus
+**Entwicklungsstand:** Erste sichtbare Multi-Title-Kachel. Eine geordnete Liste aus
 2 bis 16 numerischen Quellvariablen ist konfigurierbar, wird als Referenzen
 registriert und über EChartsGateway gelesen. Das Modul erzeugt daraus ein
-versioniertes Multi-Datenmodell. Diagramme, Kacheln und
-IPSView-HTML-Ausgabevariablen sind noch nicht implementiert.
+versioniertes Multi-Datenmodell und rendert jede Quelle mit eigener Skala,
+Einheit und Wertanzeige in einem responsiven Instrumentenraster. Eine
+IPSView-HTML-Ausgabe ist noch nicht implementiert.
 
 ### Inhaltsverzeichnis
 
@@ -31,8 +32,11 @@ numerische Variable, Beschriftung, Minimum, Maximum, Einheit und 0 bis 6
 Nachkommastellen. `GetGaugeData()` liest alle aktuellen Werte über das
 versionierte Gateway-Protokoll und liefert sie in der konfigurierten Reihenfolge.
 
-**Geplant:** Vorlagen wie Multi Title, Ring und Car, sichtbare Live-Darstellung
-sowie die Ausgabe als native Symcon-Kachel und optionales IPSView-Widget.
+**Vorhanden:** Multi Title als native Symcon-Kachel mit automatischem Raster,
+offiziellen ECharts-Themes, Live-Aktualisierung und erster Feinabstimmung.
+
+**Geplant:** Ring- und klassische Instrumentenpanel-Vorlagen sowie die Ausgabe
+als optionales IPSView-Widget.
 
 Eine Instanz bildet genau einen zusammengesetzten Gauge-Chart ab. Gauges mit
 genau einer numerischen Quellvariable gehören zu
@@ -62,9 +66,8 @@ Für Entwicklungsarbeiten im Module Control das Repository hinzufügen und
 https://github.com/Burki24/SymconECharts
 ```
 
-Die Beschreibung gilt für das Entwicklungsgerüst, nicht für eine bereits
-funktionsfähige oder produktiv freigegebene Visualisierung. Eine Veröffentlichung
-im Module Store wird nicht vorausgesetzt.
+Die Beschreibung gilt für den Entwicklungsstand der ersten sichtbaren
+Multi-Kachel. Eine Veröffentlichung im Module Store wird nicht vorausgesetzt.
 
 ### 4. Einrichten der Instanzen in Symcon
 
@@ -118,13 +121,20 @@ Darstellungs-Helpern aufbauen.
 
 ### 6. Visualisierung
 
-**Beide Ausgabewege gehören zum Projektziel und sind noch nicht implementiert.**
+**Die native Multi-Title-Kachel ist implementiert; IPSView folgt später.**
 
 #### Native Symcon-Kachel
 
-Vorgesehen ist eine eigene Darstellung der Chart-Instanz über das Symcon-HTML-SDK.
-Sie soll ohne aktivierte IPSView-Ausgabe funktionieren. Datenaktualisierungen
-und Interaktionen erhalten eine native Anbindung, getrennt vom IPSView-Datenkanal.
+Die Chart-Instanz wird über das Symcon-HTML-SDK dargestellt und benötigt keine
+IPSView-Ausgabe. Jede Quelle besitzt eine eigene ECharts-Gauge-Serie. Ein
+responsives Raster wählt abhängig von Quellenanzahl, Breite und Höhe die
+lesbarste Spalten- und Zeilenaufteilung. Änderungen einer Quellvariable werden
+über `VM_UPDATE` direkt an die Kachel übertragen.
+
+Der eingeklappte Kacheldesigner bietet zunächst Multi Title, das automatische
+Symcon-Design und sechs gebündelte offizielle ECharts-Themes. Ringstärke sowie
+Schriftgrößen von Skala, Wert und Titel sind zwischen 50 und 150 Prozent
+einstellbar. Eine SVG-Vorschau zeigt bis zu vier Instrumente exemplarisch.
 
 #### IPSView
 
