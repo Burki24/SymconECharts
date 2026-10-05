@@ -118,6 +118,31 @@
         return /^#[0-9a-f]{6}$/i.test(value) ? value : fallback;
     }
 
+    function resolveCustomPointerGeometry(style, radius, pointerLength) {
+        var parts = String(style.pointerViewBox || '').trim().split(/[\s,]+/).map(Number);
+        if (parts.length !== 4 || parts.some(function (value) { return !Number.isFinite(value); })
+            || parts[2] <= 0 || parts[3] <= 0) {
+            return null;
+        }
+        var length = radius * pointerLength / 100;
+        var width = Math.max(2, length * parts[2] / parts[3]
+            * clamp(Number(style.pointerWidthPercent) || 100, 50, 150) / 100);
+        var pivotX = Number(style.pointerPivotX);
+        var pivotY = Number(style.pointerPivotY);
+        var hasPivot = Number.isFinite(pivotX) && Number.isFinite(pivotY);
+        pivotX = hasPivot ? clamp(pivotX, parts[0], parts[0] + parts[2]) : parts[0] + parts[2] / 2;
+        pivotY = hasPivot ? clamp(pivotY, parts[1], parts[1] + parts[3]) : parts[1] + parts[3];
+
+        return {
+            width: width,
+            offsetCenter: [
+                (0.5 - (pivotX - parts[0]) / parts[2]) * width,
+                (1 - (pivotY - parts[1]) / parts[3]) * length
+            ],
+            showAnchor: typeof style.pointerShowAnchor === 'boolean' ? style.pointerShowAnchor : !hasPivot
+        };
+    }
+
     function applySeriesDesign(series, style, colors) {
         var pointerScale = clamp(Number(style.pointerWidthPercent) || 100, 50, 150) / 100;
         var pointerLengthScale = clamp(Number(style.pointerLengthPercent) || 100, 50, 150) / 100;
@@ -129,7 +154,20 @@
             if (Number.isFinite(pointerLength)) {
                 series.pointer.length = clamp(pointerLength * pointerLengthScale, 10, 100) + '%';
             }
-            if (Object.prototype.hasOwnProperty.call(pointerIcons, style.pointerShape)) {
+            if (style.pointerShape === 'custom') {
+                var path = typeof style.pointerPath === 'string' ? style.pointerPath.trim() : '';
+                var geometry = resolveCustomPointerGeometry(
+                    style,
+                    Number(series.radius) || 1,
+                    Number.isFinite(pointerLength) ? clamp(pointerLength * pointerLengthScale, 10, 100) : 65
+                );
+                if (path && geometry && /^[MmZzLlHhVvCcSsQqTtAa0-9eE+.,\-\s]+$/.test(path)) {
+                    series.pointer.icon = 'path://' + path;
+                    series.pointer.width = geometry.width;
+                    series.pointer.offsetCenter = geometry.offsetCenter;
+                    series.anchor.show = geometry.showAnchor;
+                }
+            } else if (Object.prototype.hasOwnProperty.call(pointerIcons, style.pointerShape)) {
                 series.pointer.icon = pointerIcons[style.pointerShape];
             }
             series.anchor.itemStyle = series.anchor.itemStyle || {};
@@ -213,7 +251,7 @@
             retained.push({
                 id: 'custom-plate-' + gauge.id,
                 type: 'circle',
-                z: preset === 'chronograph' && index > 0 ? 4 : 0,
+                z: preset === 'chronograph' && index > 0 ? 3 : 0,
                 shape: { cx: gauge.center[0], cy: gauge.center[1], r: plateRadius },
                 style: {
                     fill: fill,
@@ -222,6 +260,76 @@
                 },
                 silent: true
             });
+            if (style.plateBackgroundEnabled
+                && /^data:image\/svg\+xml;base64,[a-z0-9+/=]+$/i.test(String(style.plateBackgroundImage || ''))) {
+                var diameter = plateRadius * 2;
+                var aspectRatio = Number(style.plateBackgroundAspectRatio);
+                aspectRatio = Number.isFinite(aspectRatio) && aspectRatio > 0 ? aspectRatio : 1;
+                var fit = ['contain', 'cover', 'stretch'].indexOf(style.plateBackgroundFit) >= 0
+                    ? style.plateBackgroundFit : 'cover';
+                var imageWidth = diameter;
+                var imageHeight = diameter;
+                if (fit === 'contain') {
+                    if (aspectRatio > 1) {
+                        imageHeight = diameter / aspectRatio;
+                    } else {
+                        imageWidth = diameter * aspectRatio;
+                    }
+                } else if (fit === 'cover') {
+                    if (aspectRatio > 1) {
+                        imageWidth = diameter * aspectRatio;
+                    } else {
+                        imageHeight = diameter / aspectRatio;
+                    }
+                }
+                var backgroundScale = clamp(Number(style.plateBackgroundSizePercent) || 100, 25, 200) / 100;
+                imageWidth *= backgroundScale;
+                imageHeight *= backgroundScale;
+                var centerX = gauge.center[0] + diameter
+                    * clamp(Number(style.plateBackgroundOffsetXPercent) || 0, -100, 100) / 100;
+                var centerY = gauge.center[1] + diameter
+                    * clamp(Number(style.plateBackgroundOffsetYPercent) || 0, -100, 100) / 100;
+                var opacity = clamp(Number(style.plateBackgroundOpacityPercent), 0, 100) / 100;
+                if (!Number.isFinite(opacity)) {
+                    opacity = 1;
+                }
+                retained.push({
+                    id: 'custom-plate-background-' + gauge.id,
+                    type: 'group',
+                    z: preset === 'chronograph' && index > 0 ? 4 : 1,
+                    silent: true,
+                    clipPath: {
+                        type: 'circle',
+                        shape: { cx: gauge.center[0], cy: gauge.center[1], r: plateRadius }
+                    },
+                    children: [{
+                        type: 'image',
+                        rotation: clamp(Number(style.plateBackgroundRotation) || 0, -180, 180) * Math.PI / 180,
+                        originX: centerX,
+                        originY: centerY,
+                        style: {
+                            image: style.plateBackgroundImage,
+                            x: centerX - imageWidth / 2,
+                            y: centerY - imageHeight / 2,
+                            width: imageWidth,
+                            height: imageHeight,
+                            opacity: opacity
+                        }
+                    }]
+                });
+                retained.push({
+                    id: 'custom-plate-outline-' + gauge.id,
+                    type: 'circle',
+                    z: preset === 'chronograph' && index > 0 ? 4 : 1,
+                    silent: true,
+                    shape: { cx: gauge.center[0], cy: gauge.center[1], r: plateRadius },
+                    style: {
+                        fill: 'rgba(0,0,0,0)',
+                        stroke: border,
+                        lineWidth: clamp(gauge.radius * 0.02 * borderScale, 1, 12)
+                    }
+                });
+            }
         });
         return retained;
     }

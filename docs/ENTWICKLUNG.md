@@ -178,6 +178,13 @@ lokale Kopien. Synchronisierte Helper liegen ausschließlich unter
 `libs/helper`; projektspezifische Verträge und Chart-Logik liegen direkt unter
 `libs` beziehungsweise in den zuständigen Modulen.
 
+Gemeinsame ECharts-Gauge-Designsemantik liegt in
+`libs/EChartsGaugeDesign.php`. Der Baustein vereinheitlicht für Single und
+Multi insbesondere RGB-Farben sowie den validierten Import von SVG-Zeigern
+einschließlich Ankerpunkt und von bereinigten SVG-Zifferblatthintergründen.
+Property-Registrierung, Formulare, Vorlagengeometrie und Renderer bleiben im
+jeweiligen Gerätemodul, weil sie dessen öffentlichen Vertrag bestimmen.
+
 Eine gemeinsame Dateiauslieferung bedeutet nicht, dass mehrere getrennte
 Browserflächen eine einzige ECharts-Laufzeit teilen. Ressourcenbedarf und
 Aktualisierungsverhalten werden auf den Zielgeräten geprüft.

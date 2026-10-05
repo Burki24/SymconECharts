@@ -1421,6 +1421,63 @@ assertGatewayGauge(
     'Tile and independent IPSView outputs must keep separate shared Gauge Multi designs.'
 );
 
+$multiPointerSvg = file_get_contents(__DIR__ . '/fixtures/gauge-pointer-ornate.svg');
+assertGatewayGauge(is_string($multiPointerSvg), 'The shared SVG pointer fixture must be readable.');
+$multiPlateSvg = '<svg viewBox="0 0 200 100"><rect width="200" height="100" fill="#123456"/></svg>';
+$svgMultiGauge = new EChartsGaugeMulti();
+$svgMultiGauge->Create();
+$svgMultiGauge->SetTestProperty('Sources', $multiSources);
+$svgMultiGauge->SetTestProperty('PointerShape', 'custom');
+$svgMultiGauge->SetTestProperty('CustomPointerSVG', $multiPointerSvg);
+$svgMultiGauge->SetTestProperty('CustomPointerPivotMode', 'custom');
+$svgMultiGauge->SetTestProperty('CustomPointerPivotXPercent', 40.0);
+$svgMultiGauge->SetTestProperty('CustomPointerPivotYPercent', 90.0);
+$svgMultiGauge->SetTestProperty('PlateDesignMode', 'custom');
+$svgMultiGauge->SetTestProperty('PlateBackgroundEnabled', true);
+$svgMultiGauge->SetTestProperty('PlateBackgroundSVG', $multiPlateSvg);
+$svgMultiGauge->SetTestProperty('PlateBackgroundFit', 'contain');
+$svgMultiGauge->SetTestProperty('PlateBackgroundSizePercent', 125);
+$svgMultiGauge->SetTestProperty('PlateBackgroundOpacityPercent', 60);
+$svgMultiGauge->ApplyChanges();
+assertGatewayGauge($svgMultiGauge->GetTestStatus() === IS_ACTIVE, 'Gauge Multi must accept shared SVG design assets.');
+$svgMultiData = json_decode($svgMultiGauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    ($svgMultiData['gauge']['style']['pointerShape'] ?? null) === 'custom'
+        && ($svgMultiData['gauge']['style']['pointerViewBox'] ?? null) === '22 0 56 397'
+        && ($svgMultiData['gauge']['style']['pointerPivotX'] ?? null) === 44.4
+        && ($svgMultiData['gauge']['style']['pointerPivotY'] ?? null) === 357.3
+        && ($svgMultiData['gauge']['style']['plateBackgroundFit'] ?? null) === 'contain'
+        && ($svgMultiData['gauge']['style']['plateBackgroundAspectRatio'] ?? null) === 2.0
+        && str_starts_with(
+            (string) ($svgMultiData['gauge']['style']['plateBackgroundImage'] ?? ''),
+            'data:image/svg+xml;base64,'
+        ),
+    'Gauge Multi must expose sanitized SVG pointer and plate assets through the shared design contract.'
+);
+assertGatewayGauge(
+    str_contains($svgMultiGauge->GetVisualizationTile(), 'function resolveCustomPointerGeometry')
+        && str_contains($svgMultiGauge->GetVisualizationTile(), 'custom-plate-background-'),
+    'Gauge Multi runtime must render shared SVG pointer and plate assets.'
+);
+$svgMultiForm = json_decode($svgMultiGauge->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+$svgMultiPreview = '';
+foreach ($svgMultiForm['elements'][4]['items'] ?? [] as $svgMultiFormItem) {
+    if (($svgMultiFormItem['name'] ?? null) === 'GaugePreview') {
+        $svgMultiPreview = (string) ($svgMultiFormItem['image'] ?? '');
+        break;
+    }
+}
+$svgMultiPreviewSource = base64_decode(
+    substr($svgMultiPreview, strlen('data:image/svg+xml;base64,')),
+    true
+);
+assertGatewayGauge(
+    is_string($svgMultiPreviewSource)
+        && str_contains($svgMultiPreviewSource, 'data-pointer-shape="custom"')
+        && str_contains($svgMultiPreviewSource, '<image href="data:image/svg+xml;base64,'),
+    'Gauge Multi SVG assets must be visible in the configuration preview.'
+);
+
 $ringGauge = new EChartsGaugeMulti();
 $ringGauge->Create();
 $ringGauge->SetTestProperty('Sources', $multiSources);
@@ -1583,9 +1640,13 @@ assertGatewayGauge(
         && str_contains($multiFormJson, '"name":"GaugePreset"')
         && str_contains($multiFormJson, '"name":"EChartsTheme"')
         && str_contains($multiFormJson, '"name":"PointerShape"')
+        && str_contains($multiFormJson, '"name":"CustomPointerSVG"')
+        && str_contains($multiFormJson, '"name":"CustomPointerPivotMode"')
         && str_contains($multiFormJson, '"name":"AnchorShape"')
         && str_contains($multiFormJson, '"name":"GaugeColorMode"')
         && str_contains($multiFormJson, '"name":"PlateDesignMode"')
+        && str_contains($multiFormJson, '"name":"PlateBackgroundEnabled"')
+        && str_contains($multiFormJson, '"name":"PlateBackgroundSVG"')
         && str_contains($multiFormJson, '"name":"GaugePreview"')
         && str_contains($multiFormJson, 'ECGM_UpdateGaugePreviewFromForm')
         && str_contains($multiFormJson, 'data:image\\/svg+xml;base64,'),
@@ -1597,8 +1658,10 @@ assertGatewayGauge(
         && str_contains($multiFormJson, '"name":"IPSViewUseTileDesign"')
         && str_contains($multiFormJson, '"name":"IPSViewEChartsTheme"')
         && str_contains($multiFormJson, '"name":"IPSViewPointerShape"')
+        && str_contains($multiFormJson, '"name":"IPSViewCustomPointerSVG"')
         && str_contains($multiFormJson, '"name":"IPSViewGaugeColorMode"')
         && str_contains($multiFormJson, '"name":"IPSViewPlateDesignMode"')
+        && str_contains($multiFormJson, '"name":"IPSViewPlateBackgroundSVG"')
         && str_contains($multiFormJson, '"name":"IPSViewGaugePreview"'),
     'Gauge Multi form must expose the helper-backed independent IPSView designer.'
 );

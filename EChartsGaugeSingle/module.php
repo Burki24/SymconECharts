@@ -11,8 +11,8 @@ use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsDataProtocol;
+use SymconECharts\EChartsGaugeDesign;
 use SymconECharts\EChartsGaugeSinglePreview;
-use SymconECharts\EChartsSvgImage;
 use SymconECharts\EChartsSvgPath;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
@@ -24,7 +24,7 @@ require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
-require_once __DIR__ . '/../libs/EChartsSvgImage.php';
+require_once __DIR__ . '/../libs/EChartsGaugeDesign.php';
 require_once __DIR__ . '/../libs/EChartsSvgPath.php';
 require_once __DIR__ . '/GaugePreview.php';
 
@@ -50,14 +50,11 @@ class EChartsGaugeSingle extends IPSModuleStrict
 
     private const PRESET_SIMPLE = 'simple';
     private const SUPPORTED_PRESETS = ['basic', self::PRESET_SIMPLE, 'progress', 'speed'];
-    private const SUPPORTED_POINTER_SHAPES = ['preset', 'needle', 'line', 'arrow', 'custom'];
-    private const SUPPORTED_CUSTOM_POINTER_PIVOT_MODES = ['svg', 'custom'];
     private const SUPPORTED_ANCHOR_SHAPES = ['preset', 'circle', 'ring', 'custom', 'hidden'];
     private const SUPPORTED_ANCHOR_COLOR_MODES = ['theme', 'custom'];
     private const SUPPORTED_PLATE_SHAPES = ['hidden', 'circle', 'arc'];
     private const SUPPORTED_PLATE_COLOR_MODES = ['theme', 'custom'];
     private const SUPPORTED_PLATE_FILL_MODES = ['solid', 'linear', 'radial'];
-    private const SUPPORTED_PLATE_BACKGROUND_FITS = ['contain', 'cover', 'stretch'];
     private const SUPPORTED_PLATE_GRADIENT_DIRECTIONS = [
         'top-bottom',
         'left-right',
@@ -1118,7 +1115,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 $this->Translate('Select a supported ECharts theme.')
             );
         }
-        if (!in_array((string) ($style['pointerShape'] ?? 'preset'), self::SUPPORTED_POINTER_SHAPES, true)
+        if (!in_array((string) ($style['pointerShape'] ?? 'preset'), EChartsGaugeDesign::POINTER_SHAPES, true)
             || !in_array((string) ($style['anchorShape'] ?? 'preset'), self::SUPPORTED_ANCHOR_SHAPES, true)
             || !in_array((string) ($style['anchorColorMode'] ?? 'theme'), self::SUPPORTED_ANCHOR_COLOR_MODES, true)
             || !in_array((string) ($style['plateShape'] ?? 'hidden'), self::SUPPORTED_PLATE_SHAPES, true)
@@ -1131,7 +1128,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
             )
             || !in_array(
                 (string) ($style['plateBackgroundFit'] ?? 'cover'),
-                self::SUPPORTED_PLATE_BACKGROUND_FITS,
+                EChartsGaugeDesign::PLATE_BACKGROUND_FITS,
                 true
             )
             || !in_array((string) ($style['arcMode'] ?? 'preset'), self::SUPPORTED_ARC_MODES, true)
@@ -1388,10 +1385,10 @@ class EChartsGaugeSingle extends IPSModuleStrict
             }
         }
 
-        if (!in_array($this->ReadPropertyString('PointerShape'), self::SUPPORTED_POINTER_SHAPES, true)
+        if (!in_array($this->ReadPropertyString('PointerShape'), EChartsGaugeDesign::POINTER_SHAPES, true)
             || !in_array(
                 $this->ReadPropertyString('CustomPointerPivotMode'),
-                self::SUPPORTED_CUSTOM_POINTER_PIVOT_MODES,
+                EChartsGaugeDesign::POINTER_PIVOT_MODES,
                 true
             )
             || !in_array($this->ReadPropertyString('AnchorShape'), self::SUPPORTED_ANCHOR_SHAPES, true)
@@ -1406,7 +1403,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
             )
             || !in_array(
                 $this->ReadPropertyString('PlateBackgroundFit'),
-                self::SUPPORTED_PLATE_BACKGROUND_FITS,
+                EChartsGaugeDesign::PLATE_BACKGROUND_FITS,
                 true
             )
             || !in_array($this->ReadPropertyString('GaugeArcMode'), self::SUPPORTED_ARC_MODES, true)
@@ -1480,7 +1477,12 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 }
             }
             try {
-                EChartsSvgPath::Import($this->ReadPropertyString('CustomPointerSVG'));
+                EChartsGaugeDesign::ImportPointer(
+                    $this->ReadPropertyString('CustomPointerSVG'),
+                    $this->ReadPropertyString('CustomPointerPivotMode'),
+                    $this->ReadPropertyFloat('CustomPointerPivotXPercent'),
+                    $this->ReadPropertyFloat('CustomPointerPivotYPercent')
+                );
             } catch (InvalidArgumentException $exception) {
                 return [
                     'Status'  => self::STATUS_DESIGN_INVALID,
@@ -1539,7 +1541,15 @@ class EChartsGaugeSingle extends IPSModuleStrict
         }
         if ($this->ReadPropertyBoolean('PlateBackgroundEnabled')) {
             try {
-                EChartsSvgImage::Import($this->ReadPropertyString('PlateBackgroundSVG'));
+                EChartsGaugeDesign::ImportPlateBackground(
+                    $this->ReadPropertyString('PlateBackgroundSVG'),
+                    $this->ReadPropertyString('PlateBackgroundFit'),
+                    $this->ReadPropertyInteger('PlateBackgroundSizePercent'),
+                    $this->ReadPropertyInteger('PlateBackgroundOffsetXPercent'),
+                    $this->ReadPropertyInteger('PlateBackgroundOffsetYPercent'),
+                    $this->ReadPropertyInteger('PlateBackgroundOpacityPercent'),
+                    $this->ReadPropertyFloat('PlateBackgroundRotation')
+                );
             } catch (InvalidArgumentException $exception) {
                 return [
                     'Status'  => self::STATUS_DESIGN_INVALID,
@@ -1606,7 +1616,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
                     ];
                 }
             }
-            if (!in_array($values['PointerShape'], self::SUPPORTED_POINTER_SHAPES, true)
+            if (!in_array($values['PointerShape'], EChartsGaugeDesign::POINTER_SHAPES, true)
                 || !in_array($values['AnchorShape'], self::SUPPORTED_ANCHOR_SHAPES, true)
                 || !in_array($values['PlateShape'], self::SUPPORTED_PLATE_SHAPES, true)
                 || !in_array($values['GaugeArcMode'], self::SUPPORTED_ARC_MODES, true)
@@ -1992,20 +2002,12 @@ class EChartsGaugeSingle extends IPSModuleStrict
         }
 
         try {
-            $pointer = EChartsSvgPath::Import($fileData);
-
-            $style = ['pointerPath' => $pointer['path'], 'pointerViewBox' => $pointer['viewBox']];
-            if ($pivotMode === 'custom') {
-                [$minimumX, $minimumY, $width, $height] = array_map('floatval', explode(' ', $pointer['viewBox']));
-                $style['pointerPivotX'] = $minimumX + $width * max(0.0, min(100.0, $pivotXPercent)) / 100.0;
-                $style['pointerPivotY'] = $minimumY + $height * max(0.0, min(100.0, $pivotYPercent)) / 100.0;
-                $style['pointerShowAnchor'] = true;
-            } elseif (isset($pointer['pivotX'], $pointer['pivotY'])) {
-                $style['pointerPivotX'] = $pointer['pivotX'];
-                $style['pointerPivotY'] = $pointer['pivotY'];
-            }
-
-            return $style;
+            return EChartsGaugeDesign::ImportPointer(
+                $fileData,
+                $pivotMode,
+                $pivotXPercent,
+                $pivotYPercent
+            );
         } catch (InvalidArgumentException $exception) {
             $this->SendDebug('ResolveCustomPointerStyle', $exception->getMessage(), 0);
 
@@ -2070,19 +2072,15 @@ class EChartsGaugeSingle extends IPSModuleStrict
         }
 
         try {
-            $background = EChartsSvgImage::Import($fileData);
-
-            return [
-                'plateBackgroundEnabled'        => true,
-                'plateBackgroundFit'            => $fit,
-                'plateBackgroundSizePercent'    => $sizePercent,
-                'plateBackgroundOffsetXPercent' => $offsetXPercent,
-                'plateBackgroundOffsetYPercent' => $offsetYPercent,
-                'plateBackgroundOpacityPercent' => $opacityPercent,
-                'plateBackgroundRotation'       => $rotation,
-                'plateBackgroundImage'          => $background['dataUri'],
-                'plateBackgroundAspectRatio'    => $background['width'] / $background['height']
-            ];
+            return EChartsGaugeDesign::ImportPlateBackground(
+                $fileData,
+                $fit,
+                $sizePercent,
+                $offsetXPercent,
+                $offsetYPercent,
+                $opacityPercent,
+                $rotation
+            );
         } catch (InvalidArgumentException $exception) {
             $this->SendDebug('ResolvePlateBackgroundStyle', $exception->getMessage(), 0);
 
@@ -2111,7 +2109,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
 
     private static function ColorToHex(int $color): string
     {
-        return sprintf('#%06X', max(0, min(0xFFFFFF, $color)));
+        return EChartsGaugeDesign::ColorToHex($color);
     }
 
     private function SynchronizeSourceReference(): void

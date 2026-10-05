@@ -511,14 +511,19 @@ foreach ([
         };
         $findMultiDesignerElements($gaugeForm['elements'] ?? []);
         foreach ([
-            'PointerShape'    => ['type' => 'Select', 'values' => ['preset', 'needle', 'line', 'arrow']],
-            'AnchorShape'     => ['type' => 'Select', 'values' => ['preset', 'circle', 'ring', 'none']],
-            'GaugeColorMode'  => ['type' => 'Select', 'values' => ['theme', 'custom']],
-            'PlateDesignMode' => ['type' => 'Select', 'values' => ['preset', 'custom', 'hidden']],
-            'PointerColor'    => ['type' => 'SelectColor'],
-            'PlateColor'      => ['type' => 'SelectColor'],
-            'MajorSplitCount' => ['type' => 'NumberSpinner'],
-            'MinorSplitCount' => ['type' => 'NumberSpinner']
+            'PointerShape'            => ['type' => 'Select', 'values' => ['preset', 'needle', 'line', 'arrow', 'custom']],
+            'AnchorShape'             => ['type' => 'Select', 'values' => ['preset', 'circle', 'ring', 'none']],
+            'GaugeColorMode'          => ['type' => 'Select', 'values' => ['theme', 'custom']],
+            'PlateDesignMode'         => ['type' => 'Select', 'values' => ['preset', 'custom', 'hidden']],
+            'PointerColor'            => ['type' => 'SelectColor'],
+            'PlateColor'              => ['type' => 'SelectColor'],
+            'MajorSplitCount'         => ['type' => 'NumberSpinner'],
+            'MinorSplitCount'         => ['type' => 'NumberSpinner'],
+            'CustomPointerSVG'        => ['type' => 'SelectFile'],
+            'CustomPointerPivotMode'  => ['type' => 'Select', 'values' => ['svg', 'custom']],
+            'PlateBackgroundEnabled'  => ['type' => 'CheckBox'],
+            'PlateBackgroundSVG'      => ['type' => 'SelectFile'],
+            'PlateBackgroundFit'      => ['type' => 'Select', 'values' => ['contain', 'cover', 'stretch']]
         ] as $designerName => $contract) {
             $designerElement = $multiDesignerElements[$designerName] ?? null;
             $valid = is_array($designerElement) && ($designerElement['type'] ?? null) === $contract['type'];

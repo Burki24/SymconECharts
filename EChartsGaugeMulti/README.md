@@ -174,7 +174,13 @@ Designschicht gestaltet alle Instrumente einer Ausgabe: Zeigerform, Zeigerlänge
 und -stärke, Nabenform und -größe, Haupt- und Nebenunterteilungen sowie die
 Farbrollen für Zeiger, Fortschritt, Ring, Skala, Wert, Titel und Nabe. Für jedes
 Zifferblatt kann außerdem die Vorlagenplatte beibehalten, ausgeblendet oder
-durch eine gemeinsam gestaltete runde Platte ersetzt werden. Ringstärke,
+durch eine gemeinsam gestaltete runde Platte ersetzt werden. Zeiger können
+alternativ als bereinigte SVG-Pfade importiert und mit einem SVG-eigenen oder
+prozentual gesetzten Ankerpunkt ausgerichtet werden. Eine benutzerdefinierte
+Platte kann zusätzlich ein bereinigtes, zugeschnittenes SVG-Motiv mit
+einstellbarer Anpassung, Größe, Deckkraft, Drehung und Position erhalten. Die
+Import- und Sicherheitsregeln sind mit Gauge Single über den zentralen
+ECharts-Gauge-Design-Helper identisch. Ringstärke,
 Schriftgrößen und geometrische Feinabstimmungen sind zwischen 50 und 150 Prozent
 einstellbar. Die Standardwerte `preset` und `theme` erhalten die bisherige
 Darstellung vollständig. Die SVG-Vorschau übernimmt die aktuell bearbeiteten
@@ -185,7 +191,7 @@ Wetterstations- oder Tacho-Instrumenten ist für lesbare Beschriftungen eine
 ausreichend große Kachel bzw. ein großes IPSView-Widget erforderlich. Die
 Tacho-Vorschau zeigt die ersten drei Quellen; zur Laufzeit werden alle 2 bis
 16 konfigurierten Quellen ausgegeben.
-Die gemeinsamen Einstellungen gelten zunächst für alle Quellen der jeweiligen
+Die gemeinsamen Einstellungen einschließlich der SVG-Assets gelten zunächst für alle Quellen der jeweiligen
 Ausgabe. Abweichende Einstellungen je einzelner Quelle sind noch nicht Teil
 dieses Schritts.
 

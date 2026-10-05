@@ -77,6 +77,9 @@ StylePHP und PHP CS Fixer.
   Runde und skalenbogenabhängige Zifferblattplatten werden einschließlich
   Theme- oder eigener Farben, transparenter Füllung, Rand, Größe und Schatten
   in Datenmodell, SVG-Vorschau und nativem ECharts-Renderer geprüft.
+- `gauge_design.php` prüft den ausschließlich für ECharts bestimmten,
+  gemeinsamen Gauge-Designvertrag für Farben, SVG-Zeiger, Ankerpunkte und
+  bereinigte SVG-Zifferblatthintergründe.
 - `helper_integrity.py` stellt sicher, dass Subscription, Manifest,
   Helper-Dokumentation und alle abonnierten Datenfluss- und
   Visualisierungshelper vollständig übereinstimmen.

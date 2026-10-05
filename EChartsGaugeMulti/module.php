@@ -11,6 +11,7 @@ use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsDataProtocol;
+use SymconECharts\EChartsGaugeDesign;
 use SymconECharts\EChartsGaugeMultiPreview;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
@@ -22,6 +23,7 @@ require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
+require_once __DIR__ . '/../libs/EChartsGaugeDesign.php';
 require_once __DIR__ . '/GaugePreview.php';
 
 class EChartsGaugeMulti extends IPSModuleStrict
@@ -82,6 +84,26 @@ class EChartsGaugeMulti extends IPSModuleStrict
         'PlateColor'        => 0x25272B,
         'PlateBorderColor'  => 0xA5A9B0
     ];
+    private const DESIGN_ASSET_STRING_DEFAULTS = [
+        'CustomPointerSVG'       => '',
+        'CustomPointerPivotMode' => 'svg',
+        'PlateBackgroundSVG'     => '',
+        'PlateBackgroundFit'     => 'cover'
+    ];
+    private const DESIGN_ASSET_FLOAT_DEFAULTS = [
+        'CustomPointerPivotXPercent' => 50.0,
+        'CustomPointerPivotYPercent' => 100.0,
+        'PlateBackgroundRotation'    => 0.0
+    ];
+    private const DESIGN_ASSET_BOOLEAN_DEFAULTS = [
+        'PlateBackgroundEnabled' => false
+    ];
+    private const DESIGN_ASSET_INTEGER_DEFAULTS = [
+        'PlateBackgroundSizePercent'    => 100,
+        'PlateBackgroundOffsetXPercent' => 0,
+        'PlateBackgroundOffsetYPercent' => 0,
+        'PlateBackgroundOpacityPercent' => 100
+    ];
 
     public function Create(): void
     {
@@ -102,6 +124,18 @@ class EChartsGaugeMulti extends IPSModuleStrict
         foreach (self::DESIGN_INTEGER_DEFAULTS as $name => $default) {
             $this->RegisterPropertyInteger($name, $default);
         }
+        foreach (self::DESIGN_ASSET_STRING_DEFAULTS as $name => $default) {
+            $this->RegisterPropertyString($name, $default);
+        }
+        foreach (self::DESIGN_ASSET_FLOAT_DEFAULTS as $name => $default) {
+            $this->RegisterPropertyFloat($name, $default);
+        }
+        foreach (self::DESIGN_ASSET_BOOLEAN_DEFAULTS as $name => $default) {
+            $this->RegisterPropertyBoolean($name, $default);
+        }
+        foreach (self::DESIGN_ASSET_INTEGER_DEFAULTS as $name => $default) {
+            $this->RegisterPropertyInteger($name, $default);
+        }
         $this->RegisterIPSViewHTMLPageProperties();
         $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
         $this->RegisterPropertyString('IPSViewGaugePreset', self::PRESET_MULTI_TITLE);
@@ -113,6 +147,18 @@ class EChartsGaugeMulti extends IPSModuleStrict
             $this->RegisterPropertyString('IPSView' . $name, $default);
         }
         foreach (self::DESIGN_INTEGER_DEFAULTS as $name => $default) {
+            $this->RegisterPropertyInteger('IPSView' . $name, $default);
+        }
+        foreach (self::DESIGN_ASSET_STRING_DEFAULTS as $name => $default) {
+            $this->RegisterPropertyString('IPSView' . $name, $default);
+        }
+        foreach (self::DESIGN_ASSET_FLOAT_DEFAULTS as $name => $default) {
+            $this->RegisterPropertyFloat('IPSView' . $name, $default);
+        }
+        foreach (self::DESIGN_ASSET_BOOLEAN_DEFAULTS as $name => $default) {
+            $this->RegisterPropertyBoolean('IPSView' . $name, $default);
+        }
+        foreach (self::DESIGN_ASSET_INTEGER_DEFAULTS as $name => $default) {
             $this->RegisterPropertyInteger('IPSView' . $name, $default);
         }
         $this->RegisterAttributeString('RegisteredSourceVariableIDs', '[]');
@@ -197,6 +243,18 @@ class EChartsGaugeMulti extends IPSModuleStrict
             IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyString($name));
         }
         foreach (self::DESIGN_INTEGER_DEFAULTS as $name => $_default) {
+            IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyInteger($name));
+        }
+        foreach (self::DESIGN_ASSET_STRING_DEFAULTS as $name => $_default) {
+            IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyString($name));
+        }
+        foreach (self::DESIGN_ASSET_FLOAT_DEFAULTS as $name => $_default) {
+            IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyFloat($name));
+        }
+        foreach (self::DESIGN_ASSET_BOOLEAN_DEFAULTS as $name => $_default) {
+            IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyBoolean($name));
+        }
+        foreach (self::DESIGN_ASSET_INTEGER_DEFAULTS as $name => $_default) {
             IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyInteger($name));
         }
         IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
@@ -484,10 +542,20 @@ class EChartsGaugeMulti extends IPSModuleStrict
             }
         }
 
-        if (!in_array($this->ReadPropertyString($prefix . 'PointerShape'), ['preset', 'needle', 'line', 'arrow'], true)
+        if (!in_array($this->ReadPropertyString($prefix . 'PointerShape'), EChartsGaugeDesign::POINTER_SHAPES, true)
             || !in_array($this->ReadPropertyString($prefix . 'AnchorShape'), ['preset', 'circle', 'ring', 'none'], true)
             || !in_array($this->ReadPropertyString($prefix . 'GaugeColorMode'), ['theme', 'custom'], true)
-            || !in_array($this->ReadPropertyString($prefix . 'PlateDesignMode'), ['preset', 'custom', 'hidden'], true)) {
+            || !in_array($this->ReadPropertyString($prefix . 'PlateDesignMode'), ['preset', 'custom', 'hidden'], true)
+            || !in_array(
+                $this->ReadPropertyString($prefix . 'CustomPointerPivotMode'),
+                EChartsGaugeDesign::POINTER_PIVOT_MODES,
+                true
+            )
+            || !in_array(
+                $this->ReadPropertyString($prefix . 'PlateBackgroundFit'),
+                EChartsGaugeDesign::PLATE_BACKGROUND_FITS,
+                true
+            )) {
             return 'The selected Multi Gauge element design is not supported.';
         }
 
@@ -505,6 +573,35 @@ class EChartsGaugeMulti extends IPSModuleStrict
             $color = $this->ReadPropertyInteger($prefix . $name);
             if ($color < 0 || $color > 0xFFFFFF) {
                 return 'Multi Gauge colors must be valid RGB colors.';
+            }
+        }
+
+        if ($this->ReadPropertyString($prefix . 'PointerShape') === 'custom') {
+            try {
+                EChartsGaugeDesign::ImportPointer(
+                    $this->ReadPropertyString($prefix . 'CustomPointerSVG'),
+                    $this->ReadPropertyString($prefix . 'CustomPointerPivotMode'),
+                    $this->ReadPropertyFloat($prefix . 'CustomPointerPivotXPercent'),
+                    $this->ReadPropertyFloat($prefix . 'CustomPointerPivotYPercent')
+                );
+            } catch (InvalidArgumentException $exception) {
+                return $exception->getMessage();
+            }
+        }
+
+        if ($this->ReadPropertyBoolean($prefix . 'PlateBackgroundEnabled')) {
+            try {
+                EChartsGaugeDesign::ImportPlateBackground(
+                    $this->ReadPropertyString($prefix . 'PlateBackgroundSVG'),
+                    $this->ReadPropertyString($prefix . 'PlateBackgroundFit'),
+                    $this->ReadPropertyInteger($prefix . 'PlateBackgroundSizePercent'),
+                    $this->ReadPropertyInteger($prefix . 'PlateBackgroundOffsetXPercent'),
+                    $this->ReadPropertyInteger($prefix . 'PlateBackgroundOffsetYPercent'),
+                    $this->ReadPropertyInteger($prefix . 'PlateBackgroundOpacityPercent'),
+                    $this->ReadPropertyFloat($prefix . 'PlateBackgroundRotation')
+                );
+            } catch (InvalidArgumentException $exception) {
+                return $exception->getMessage();
             }
         }
 
@@ -954,7 +1051,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
             : $this->ReadPropertyString('IPSViewEChartsTheme');
     }
 
-    /** @return array<string, int|string> */
+    /** @return array<string, mixed> */
     private function ReadGaugeStyle(string $prefix = ''): array
     {
         $style = [];
@@ -974,15 +1071,29 @@ class EChartsGaugeMulti extends IPSModuleStrict
             $style[lcfirst($name)] = str_ends_with($name, 'Color') ? self::ColorToHex($value) : $value;
         }
 
-        return $style;
+        return array_merge($style, $this->ResolveGaugeAssetStyle(
+            $this->ReadPropertyString($prefix . 'PointerShape'),
+            $this->ReadPropertyString($prefix . 'CustomPointerSVG'),
+            $this->ReadPropertyString($prefix . 'CustomPointerPivotMode'),
+            $this->ReadPropertyFloat($prefix . 'CustomPointerPivotXPercent'),
+            $this->ReadPropertyFloat($prefix . 'CustomPointerPivotYPercent'),
+            $this->ReadPropertyBoolean($prefix . 'PlateBackgroundEnabled'),
+            $this->ReadPropertyString($prefix . 'PlateBackgroundSVG'),
+            $this->ReadPropertyString($prefix . 'PlateBackgroundFit'),
+            $this->ReadPropertyInteger($prefix . 'PlateBackgroundSizePercent'),
+            $this->ReadPropertyInteger($prefix . 'PlateBackgroundOffsetXPercent'),
+            $this->ReadPropertyInteger($prefix . 'PlateBackgroundOffsetYPercent'),
+            $this->ReadPropertyInteger($prefix . 'PlateBackgroundOpacityPercent'),
+            $this->ReadPropertyFloat($prefix . 'PlateBackgroundRotation')
+        ));
     }
 
     private static function ColorToHex(int $color): string
     {
-        return sprintf('#%06X', max(0, min(0xFFFFFF, $color)));
+        return EChartsGaugeDesign::ColorToHex($color);
     }
 
-    /** @param array<string, mixed> $values @return array<string, int|string> */
+    /** @param array<string, mixed> $values @return array<string, mixed> */
     private function GaugeStyleFromFormValues(array $values, string $prefix = ''): array
     {
         $style = [];
@@ -1004,7 +1115,87 @@ class EChartsGaugeMulti extends IPSModuleStrict
             $style[lcfirst($name)] = str_ends_with($name, 'Color') ? self::ColorToHex($value) : $value;
         }
 
-        return $style;
+        return array_merge($style, $this->ResolveGaugeAssetStyle(
+            (string) ($values[$prefix . 'PointerShape'] ?? $this->ReadPropertyString($prefix . 'PointerShape')),
+            (string) ($values[$prefix . 'CustomPointerSVG'] ?? $this->ReadPropertyString($prefix . 'CustomPointerSVG')),
+            (string) ($values[$prefix . 'CustomPointerPivotMode'] ?? $this->ReadPropertyString($prefix . 'CustomPointerPivotMode')),
+            (float) ($values[$prefix . 'CustomPointerPivotXPercent'] ?? $this->ReadPropertyFloat($prefix . 'CustomPointerPivotXPercent')),
+            (float) ($values[$prefix . 'CustomPointerPivotYPercent'] ?? $this->ReadPropertyFloat($prefix . 'CustomPointerPivotYPercent')),
+            (bool) ($values[$prefix . 'PlateBackgroundEnabled'] ?? $this->ReadPropertyBoolean($prefix . 'PlateBackgroundEnabled')),
+            (string) ($values[$prefix . 'PlateBackgroundSVG'] ?? $this->ReadPropertyString($prefix . 'PlateBackgroundSVG')),
+            (string) ($values[$prefix . 'PlateBackgroundFit'] ?? $this->ReadPropertyString($prefix . 'PlateBackgroundFit')),
+            (int) ($values[$prefix . 'PlateBackgroundSizePercent'] ?? $this->ReadPropertyInteger($prefix . 'PlateBackgroundSizePercent')),
+            (int) ($values[$prefix . 'PlateBackgroundOffsetXPercent'] ?? $this->ReadPropertyInteger($prefix . 'PlateBackgroundOffsetXPercent')),
+            (int) ($values[$prefix . 'PlateBackgroundOffsetYPercent'] ?? $this->ReadPropertyInteger($prefix . 'PlateBackgroundOffsetYPercent')),
+            (int) ($values[$prefix . 'PlateBackgroundOpacityPercent'] ?? $this->ReadPropertyInteger($prefix . 'PlateBackgroundOpacityPercent')),
+            (float) ($values[$prefix . 'PlateBackgroundRotation'] ?? $this->ReadPropertyFloat($prefix . 'PlateBackgroundRotation'))
+        ));
+    }
+
+    /** @return array<string, mixed> */
+    private function ResolveGaugeAssetStyle(
+        string $pointerShape,
+        string $pointerFileData,
+        string $pointerPivotMode,
+        float $pointerPivotXPercent,
+        float $pointerPivotYPercent,
+        bool $plateBackgroundEnabled,
+        string $plateBackgroundFileData,
+        string $plateBackgroundFit,
+        int $plateBackgroundSizePercent,
+        int $plateBackgroundOffsetXPercent,
+        int $plateBackgroundOffsetYPercent,
+        int $plateBackgroundOpacityPercent,
+        float $plateBackgroundRotation
+    ): array {
+        $style = [];
+        if ($pointerShape === 'custom') {
+            try {
+                $style = EChartsGaugeDesign::ImportPointer(
+                    $pointerFileData,
+                    $pointerPivotMode,
+                    $pointerPivotXPercent,
+                    $pointerPivotYPercent
+                );
+            } catch (InvalidArgumentException $exception) {
+                $this->SendDebug('ResolveCustomPointerStyle', $exception->getMessage(), 0);
+                $style = [
+                    'pointerPath'    => '',
+                    'pointerViewBox' => '',
+                    'pointerError'   => $exception->getMessage()
+                ];
+            }
+        }
+        if (!$plateBackgroundEnabled) {
+            return $style;
+        }
+
+        try {
+            return array_merge($style, EChartsGaugeDesign::ImportPlateBackground(
+                $plateBackgroundFileData,
+                $plateBackgroundFit,
+                $plateBackgroundSizePercent,
+                $plateBackgroundOffsetXPercent,
+                $plateBackgroundOffsetYPercent,
+                $plateBackgroundOpacityPercent,
+                $plateBackgroundRotation
+            ));
+        } catch (InvalidArgumentException $exception) {
+            $this->SendDebug('ResolvePlateBackgroundStyle', $exception->getMessage(), 0);
+
+            return array_merge($style, [
+                'plateBackgroundEnabled'        => true,
+                'plateBackgroundFit'            => $plateBackgroundFit,
+                'plateBackgroundSizePercent'    => $plateBackgroundSizePercent,
+                'plateBackgroundOffsetXPercent' => $plateBackgroundOffsetXPercent,
+                'plateBackgroundOffsetYPercent' => $plateBackgroundOffsetYPercent,
+                'plateBackgroundOpacityPercent' => $plateBackgroundOpacityPercent,
+                'plateBackgroundRotation'       => $plateBackgroundRotation,
+                'plateBackgroundImage'          => '',
+                'plateBackgroundAspectRatio'    => 1.0,
+                'plateBackgroundError'          => $exception->getMessage()
+            ]);
+        }
     }
 
     /** @param list<array<string, mixed>> $items @return list<array<string, mixed>> */
@@ -1013,9 +1204,16 @@ class EChartsGaugeMulti extends IPSModuleStrict
         $fieldNames = [
             'Title', 'GaugePreset', 'EChartsTheme', 'IPSViewUseTileDesign',
             'IPSViewGaugePreset', 'IPSViewEChartsTheme', ...self::DESIGN_SCALE_PROPERTIES,
-            ...array_keys(self::DESIGN_STRING_DEFAULTS), ...array_keys(self::DESIGN_INTEGER_DEFAULTS)
+            ...array_keys(self::DESIGN_STRING_DEFAULTS), ...array_keys(self::DESIGN_INTEGER_DEFAULTS),
+            ...array_keys(self::DESIGN_ASSET_STRING_DEFAULTS), ...array_keys(self::DESIGN_ASSET_FLOAT_DEFAULTS),
+            ...array_keys(self::DESIGN_ASSET_BOOLEAN_DEFAULTS), ...array_keys(self::DESIGN_ASSET_INTEGER_DEFAULTS)
         ];
-        foreach ([self::DESIGN_SCALE_PROPERTIES, array_keys(self::DESIGN_STRING_DEFAULTS), array_keys(self::DESIGN_INTEGER_DEFAULTS)] as $names) {
+        foreach ([
+            self::DESIGN_SCALE_PROPERTIES, array_keys(self::DESIGN_STRING_DEFAULTS),
+            array_keys(self::DESIGN_INTEGER_DEFAULTS), array_keys(self::DESIGN_ASSET_STRING_DEFAULTS),
+            array_keys(self::DESIGN_ASSET_FLOAT_DEFAULTS), array_keys(self::DESIGN_ASSET_BOOLEAN_DEFAULTS),
+            array_keys(self::DESIGN_ASSET_INTEGER_DEFAULTS)
+        ] as $names) {
             foreach ($names as $name) {
                 $fieldNames[] = 'IPSView' . $name;
             }
@@ -1039,9 +1237,16 @@ class EChartsGaugeMulti extends IPSModuleStrict
         $fieldNames = [
             'Title', 'GaugePreset', 'EChartsTheme', 'IPSViewUseTileDesign',
             'IPSViewGaugePreset', 'IPSViewEChartsTheme', ...self::DESIGN_SCALE_PROPERTIES,
-            ...array_keys(self::DESIGN_STRING_DEFAULTS), ...array_keys(self::DESIGN_INTEGER_DEFAULTS)
+            ...array_keys(self::DESIGN_STRING_DEFAULTS), ...array_keys(self::DESIGN_INTEGER_DEFAULTS),
+            ...array_keys(self::DESIGN_ASSET_STRING_DEFAULTS), ...array_keys(self::DESIGN_ASSET_FLOAT_DEFAULTS),
+            ...array_keys(self::DESIGN_ASSET_BOOLEAN_DEFAULTS), ...array_keys(self::DESIGN_ASSET_INTEGER_DEFAULTS)
         ];
-        foreach ([self::DESIGN_SCALE_PROPERTIES, array_keys(self::DESIGN_STRING_DEFAULTS), array_keys(self::DESIGN_INTEGER_DEFAULTS)] as $names) {
+        foreach ([
+            self::DESIGN_SCALE_PROPERTIES, array_keys(self::DESIGN_STRING_DEFAULTS),
+            array_keys(self::DESIGN_INTEGER_DEFAULTS), array_keys(self::DESIGN_ASSET_STRING_DEFAULTS),
+            array_keys(self::DESIGN_ASSET_FLOAT_DEFAULTS), array_keys(self::DESIGN_ASSET_BOOLEAN_DEFAULTS),
+            array_keys(self::DESIGN_ASSET_INTEGER_DEFAULTS)
+        ] as $names) {
             foreach ($names as $name) {
                 $fieldNames[] = 'IPSView' . $name;
             }
@@ -1123,7 +1328,9 @@ class EChartsGaugeMulti extends IPSModuleStrict
     {
         $designNames = [
             'GaugePreset', 'EChartsTheme', ...self::DESIGN_SCALE_PROPERTIES,
-            ...array_keys(self::DESIGN_STRING_DEFAULTS), ...array_keys(self::DESIGN_INTEGER_DEFAULTS)
+            ...array_keys(self::DESIGN_STRING_DEFAULTS), ...array_keys(self::DESIGN_INTEGER_DEFAULTS),
+            ...array_keys(self::DESIGN_ASSET_STRING_DEFAULTS), ...array_keys(self::DESIGN_ASSET_FLOAT_DEFAULTS),
+            ...array_keys(self::DESIGN_ASSET_BOOLEAN_DEFAULTS), ...array_keys(self::DESIGN_ASSET_INTEGER_DEFAULTS)
         ];
         foreach ($items as &$item) {
             if (($item['name'] ?? null) === 'GaugePreview') {

@@ -69,7 +69,9 @@ Multi-Modell und rendert die Quellen als Multi-Title-Zifferblätter, Ringraster,
 konzentrische Ringe, als Wetterstations-Instrumentenpanel, Tacho-Cockpit oder
 Chronograph mit einem Haupt- und bis zu fünf eingebetteten Nebeninstrumenten.
 Der Chronograph ist auf 2 bis 6 Quellen begrenzt. Eine gemeinsame Designschicht
-konfiguriert Zeiger, Naben, Skalenunterteilungen, Farbrollen und Zifferblattplatten
+konfiguriert Zeiger einschließlich validiertem SVG-Import, Naben,
+Skalenunterteilungen, Farbrollen und Zifferblattplatten einschließlich
+bereinigtem SVG-Hintergrund
 für alle Instrumente einer Ausgabe, ohne die bisherigen Vorlagenvorgaben zu
 verändern. Archivverarbeitung
 und weitere klassische Instrumentenpanel-Vorlagen sind noch nicht implementiert.

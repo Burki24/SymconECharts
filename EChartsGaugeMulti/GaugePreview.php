@@ -324,7 +324,37 @@ final class EChartsGaugeMultiPreview
         $pointerX = $x + cos($angle) * $length;
         $pointerY = $y - sin($angle) * $length;
         $shape = (string) ($style['pointerShape'] ?? 'preset');
-        if (in_array($shape, ['needle', 'arrow'], true)) {
+        if ($shape === 'custom') {
+            $path = (string) ($style['pointerPath'] ?? '');
+            $viewBox = (string) ($style['pointerViewBox'] ?? '');
+            if ($path !== ''
+                && preg_match('/^[MmZzLlHhVvCcSsQqTtAa0-9eE+.,\-\s]+$/D', $path) === 1
+                && preg_match('/^[+\-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+\-]?\d+)?(?:\s+[+\-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+\-]?\d+)?){3}$/D', $viewBox) === 1) {
+                [$minimumX, $minimumY, $viewBoxWidth, $viewBoxHeight] = array_map('floatval', explode(' ', $viewBox));
+                $customWidth = max(2.0, $length * $viewBoxWidth / $viewBoxHeight
+                    * self::Scale($style, 'pointerWidthPercent'));
+                $pivotX = max($minimumX, min(
+                    $minimumX + $viewBoxWidth,
+                    (float) ($style['pointerPivotX'] ?? $minimumX + $viewBoxWidth / 2.0)
+                ));
+                $pivotY = max($minimumY, min(
+                    $minimumY + $viewBoxHeight,
+                    (float) ($style['pointerPivotY'] ?? $minimumY + $viewBoxHeight)
+                ));
+                $customX = $x - ($pivotX - $minimumX) / $viewBoxWidth * $customWidth;
+                $customY = $y - ($pivotY - $minimumY) / $viewBoxHeight * $length;
+                $rotation = 90.0 - rad2deg($angle);
+                $pointer = '<g transform="rotate(' . self::N($rotation) . ' ' . self::N($x) . ' ' . self::N($y)
+                    . ')"><svg x="' . self::N($customX) . '" y="' . self::N($customY)
+                    . '" width="' . self::N($customWidth) . '" height="' . self::N($length)
+                    . '" viewBox="' . SVGPreviewHelper::escape($viewBox)
+                    . '" preserveAspectRatio="none" overflow="visible"><path d="'
+                    . SVGPreviewHelper::escape($path) . '" fill="'
+                    . SVGPreviewHelper::escape($pointerColor) . '" data-pointer-shape="custom"/></svg></g>';
+            } else {
+                $pointer = '';
+            }
+        } elseif (in_array($shape, ['needle', 'arrow'], true)) {
             $normalX = sin($angle) * $width;
             $normalY = cos($angle) * $width;
             $backX = $x - cos($angle) * $length * ($shape === 'arrow' ? 0.12 : 0.06);
@@ -341,7 +371,10 @@ final class EChartsGaugeMultiPreview
         }
 
         $anchorShape = (string) ($style['anchorShape'] ?? 'preset');
-        if ($anchorShape === 'none') {
+        $customPointerShowsAnchor = (bool) ($style['pointerShowAnchor']
+            ?? !isset($style['pointerPivotX'], $style['pointerPivotY']));
+        if ($anchorShape === 'none'
+            || ($shape === 'custom' && $anchorShape === 'preset' && !$customPointerShowsAnchor)) {
             return $pointer;
         }
         $anchorColor = $customColors ? self::StyleColor($style, 'anchorColor', $pointerColor) : $pointerColor;
@@ -414,11 +447,63 @@ final class EChartsGaugeMultiPreview
                 . SVGPreviewHelper::escape($palette['track']) . '" stroke-width="3"/>';
         }
 
-        return '<circle cx="' . self::N($x) . '" cy="' . self::N($y)
-            . '" r="' . self::N($radius * 1.08 * self::Scale($style, 'plateSizePercent'))
-            . '" fill="' . SVGPreviewHelper::escape(self::StyleColor($style, 'plateColor', $palette['background']))
-            . '" stroke="' . SVGPreviewHelper::escape(self::StyleColor($style, 'plateBorderColor', $palette['border']))
-            . '" stroke-width="' . self::N(2.0 * self::Scale($style, 'plateBorderWidthPercent')) . '"/>';
+        $plateRadius = $radius * 1.08 * self::Scale($style, 'plateSizePercent');
+        $fill = SVGPreviewHelper::escape(self::StyleColor($style, 'plateColor', $palette['background']));
+        $border = SVGPreviewHelper::escape(self::StyleColor($style, 'plateBorderColor', $palette['border']));
+        $borderWidth = self::N(2.0 * self::Scale($style, 'plateBorderWidthPercent'));
+        $plate = '<circle cx="' . self::N($x) . '" cy="' . self::N($y)
+            . '" r="' . self::N($plateRadius) . '" fill="' . $fill
+            . '" stroke="' . $border . '" stroke-width="' . $borderWidth . '"/>';
+        if (!(bool) ($style['plateBackgroundEnabled'] ?? false)) {
+            return $plate;
+        }
+
+        $image = (string) ($style['plateBackgroundImage'] ?? '');
+        $aspectRatio = (float) ($style['plateBackgroundAspectRatio'] ?? 0.0);
+        if (preg_match('/^data:image\/svg\+xml;base64,[A-Za-z0-9+\/=]+$/D', $image) !== 1
+            || !is_finite($aspectRatio) || $aspectRatio <= 0.0) {
+            return $plate;
+        }
+        $diameter = 2.0 * $plateRadius;
+        $imageWidth = $diameter;
+        $imageHeight = $diameter;
+        $fit = (string) ($style['plateBackgroundFit'] ?? 'cover');
+        if ($fit === 'contain') {
+            if ($aspectRatio > 1.0) {
+                $imageHeight = $diameter / $aspectRatio;
+            } else {
+                $imageWidth = $diameter * $aspectRatio;
+            }
+        } elseif ($fit === 'cover') {
+            if ($aspectRatio > 1.0) {
+                $imageWidth = $diameter * $aspectRatio;
+            } else {
+                $imageHeight = $diameter / $aspectRatio;
+            }
+        }
+        $backgroundScale = max(25, min(200, (int) ($style['plateBackgroundSizePercent'] ?? 100))) / 100.0;
+        $imageWidth *= $backgroundScale;
+        $imageHeight *= $backgroundScale;
+        $imageCenterX = $x + $diameter
+            * max(-100, min(100, (int) ($style['plateBackgroundOffsetXPercent'] ?? 0))) / 100.0;
+        $imageCenterY = $y + $diameter
+            * max(-100, min(100, (int) ($style['plateBackgroundOffsetYPercent'] ?? 0))) / 100.0;
+        $opacity = max(0, min(100, (int) ($style['plateBackgroundOpacityPercent'] ?? 100))) / 100.0;
+        $rotation = max(-180.0, min(180.0, (float) ($style['plateBackgroundRotation'] ?? 0.0)));
+        $clipID = 'multi-plate-' . str_replace(['-', '.'], ['n', 'p'], self::N($x) . '-' . self::N($y));
+        $background = '<defs><clipPath id="' . $clipID . '"><circle cx="' . self::N($x)
+            . '" cy="' . self::N($y) . '" r="' . self::N($plateRadius) . '"/></clipPath></defs>'
+            . '<image href="' . SVGPreviewHelper::escape($image) . '" x="'
+            . self::N($imageCenterX - $imageWidth / 2.0) . '" y="'
+            . self::N($imageCenterY - $imageHeight / 2.0) . '" width="' . self::N($imageWidth)
+            . '" height="' . self::N($imageHeight) . '" opacity="' . self::N($opacity)
+            . '" preserveAspectRatio="none" clip-path="url(#' . $clipID . ')" transform="rotate('
+            . self::N($rotation) . ' ' . self::N($imageCenterX) . ' ' . self::N($imageCenterY) . ')"/>'
+            . '<circle cx="' . self::N($x) . '" cy="' . self::N($y) . '" r="'
+            . self::N($plateRadius) . '" fill="none" stroke="' . $border
+            . '" stroke-width="' . $borderWidth . '"/>';
+
+        return $plate . $background;
     }
 
     /** @param array<string, string> $palette @param array<string, int|string> $style @return array<string, string> */

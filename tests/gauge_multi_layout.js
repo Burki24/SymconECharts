@@ -275,6 +275,32 @@ assert.equal(customChronograph.graphic.length, 3);
 assert.ok(customChronograph.graphic.every(element => String(element.id).startsWith('custom-plate-')));
 assert.ok(customChronograph.graphic.every(element => element.style.fill === '#99AABB'));
 assert.ok(customChronograph.graphic.every(element => element.style.stroke === '#AABBCC'));
+const customSvgStyle = {
+    pointerShape: 'custom', pointerWidthPercent: 100, pointerLengthPercent: 100,
+    pointerPath: 'M50 0L60 90L50 100L40 90Z', pointerViewBox: '0 0 100 100',
+    pointerPivotX: 50, pointerPivotY: 90, pointerShowAnchor: true,
+    plateMode: 'custom', plateBackgroundEnabled: true,
+    plateBackgroundImage: `data:image/svg+xml;base64,${Buffer.from(
+        '<svg viewBox="0 0 200 100"><rect width="200" height="100" fill="#123456"/></svg>'
+    ).toString('base64')}`,
+    plateBackgroundAspectRatio: 2, plateBackgroundFit: 'contain',
+    plateBackgroundSizePercent: 120, plateBackgroundOffsetXPercent: 10,
+    plateBackgroundOffsetYPercent: -5, plateBackgroundOpacityPercent: 60,
+    plateBackgroundRotation: 15
+};
+const svgChronograph = render('symcon', 720, 560, 3, 'Climate', 'chronograph', true, customSvgStyle);
+svgChronograph.series.forEach(series => {
+    assert.equal(series.pointer.icon, 'path://M50 0L60 90L50 100L40 90Z');
+    assert.ok(Array.isArray(series.pointer.offsetCenter));
+    assert.equal(series.anchor.show, true);
+});
+assert.equal(svgChronograph.graphic.filter(element => String(element.id).startsWith('custom-plate-')).length, 9);
+assert.equal(svgChronograph.graphic.filter(
+    element => String(element.id).startsWith('custom-plate-background-')
+).length, 3);
+assert.ok(svgChronograph.graphic.filter(
+    element => String(element.id).startsWith('custom-plate-background-')
+).every(element => element.children[0].style.opacity === 0.6));
 const hiddenChronograph = render('symcon', 720, 560, 3, 'Climate', 'chronograph', true, { plateMode: 'hidden' });
 assert.equal(hiddenChronograph.graphic.length, 0, 'Hidden plates must remove every chronograph bezel.');
 const customRing = render('symcon', 720, 560, 3, '', 'ring-grid', true, customStyle);

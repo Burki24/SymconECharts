@@ -16,6 +16,13 @@ these visual roles can be user-configurable without changing the source model.
 - Add one shared design layer per output. It controls pointer shape and size,
   hub shape and size, major and minor divisions, semantic color roles and the
   optional circular dial plate.
+- Use the project-specific `libs/EChartsGaugeDesign.php` contract for behavior
+  shared with Gauge Single: RGB conversion, validated SVG pointer import and
+  pivot resolution, and sanitized SVG plate-background import. Synchronized
+  general-purpose helpers under `libs/helper` remain unchanged.
+- Allow one validated SVG pointer and one sanitized SVG plate background per
+  output. They apply consistently to every dial; per-source overrides remain a
+  separate source-contract extension.
 - Keep the tile and an independently designed IPSView output separate. The
   existing copy action copies all shared design properties together with preset
   and theme.
