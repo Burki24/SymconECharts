@@ -120,6 +120,9 @@ Den eingebetteten Chronographen dokumentiert
 [`ADR 0014`](adr/0014-embedded-chronograph-gauge-preset.md).
 Die eigenständigen Tacho- und Chronograph-Module dokumentiert
 [`ADR 0016`](adr/0016-dedicated-tacho-and-chronograph-modules.md).
+Die verbindliche Prüfung und Zentralisierung bereits vorhandener
+Chart-Funktionen vor einer Neuentwicklung dokumentiert
+[`ADR 0017`](adr/0017-reuse-before-new-chart-development.md).
 
 ## Daten, Konfiguration und Ausgabe
 
@@ -186,6 +189,16 @@ lokale Kopien. Synchronisierte Helper liegen ausschließlich unter
 `libs/helper`; projektspezifische Verträge und Chart-Logik liegen direkt unter
 `libs` beziehungsweise in den zuständigen Modulen.
 
+Vor der Programmierung einer neuen Funktion oder Chartfamilie werden die
+fertigen Charts und vorhandenen Bibliotheken auf eine bereits bewährte Lösung
+geprüft. Eine kompatible, innerhalb von SymconECharts wiederverwendbare
+Funktion wird als projektspezifischer Baustein direkt unter `libs`
+zentralisiert. ECharts-unabhängige Funktionen mit Nutzen für weitere
+Symcon-Module entstehen dagegen in `Symcon_ModuleHelper` und gelangen nur über
+den festgelegten Synchronisierungsweg nach `libs/helper`. Die Abgrenzung und
+die erforderlichen Vertragsprüfungen legt
+[`ADR 0017`](adr/0017-reuse-before-new-chart-development.md) fest.
+
 Gemeinsame ECharts-Gauge-Designsemantik liegt in
 `libs/EChartsGaugeDesign.php`. Der Baustein vereinheitlicht für Single und
 Multi insbesondere RGB-Farben sowie den validierten Import von SVG-Zeigern
@@ -225,6 +238,8 @@ Mehrquellenmodells in `EChartsGaugeMulti`. Bei der sichtbaren Umsetzung werden
 mehrere getrennte Gauge-Instanzen, beide Ausgabewege gleichzeitig,
 Größenwechsel sowie abgeschaltete IPSView-Ausgabe getestet. Zeitreihen und
 weitere Chartfamilien sind spätere, getrennt zu entscheidende Ausbaustufen.
+Vor ihrer Umsetzung erfolgt die Wiederverwendungsprüfung nach
+[`ADR 0017`](adr/0017-reuse-before-new-chart-development.md).
 
 ## Dokumentation und Lizenzen
 
