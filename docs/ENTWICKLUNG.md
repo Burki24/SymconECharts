@@ -123,6 +123,9 @@ Die eigenständigen Tacho- und Chronograph-Module dokumentiert
 Die verbindliche Prüfung und Zentralisierung bereits vorhandener
 Chart-Funktionen vor einer Neuentwicklung dokumentiert
 [`ADR 0017`](adr/0017-reuse-before-new-chart-development.md).
+Den vorgeschlagenen Umfang der ersten Zeitreihenfamilie und der dafür
+benötigten Gateway-Archivoperation dokumentiert
+[`ADR 0018`](adr/0018-first-time-series-family-and-archive-contract.md).
 
 ## Daten, Konfiguration und Ausgabe
 
@@ -240,6 +243,10 @@ Größenwechsel sowie abgeschaltete IPSView-Ausgabe getestet. Zeitreihen und
 weitere Chartfamilien sind spätere, getrennt zu entscheidende Ausbaustufen.
 Vor ihrer Umsetzung erfolgt die Wiederverwendungsprüfung nach
 [`ADR 0017`](adr/0017-reuse-before-new-chart-development.md).
+Für die erste Zeitreihenfamilie liegt mit
+[`ADR 0018`](adr/0018-first-time-series-family-and-archive-contract.md) ein
+Entscheidungsvorschlag vor; daraus wird vor Annahme noch kein implementierter
+Modul- oder Gateway-Vertrag abgeleitet.
 
 ## Dokumentation und Lizenzen
 
