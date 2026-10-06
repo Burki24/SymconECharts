@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Partially superseded by ADR 0024 for runtime value updates
 
 ## Context
 
@@ -27,8 +27,8 @@ data binding and make both representations drift apart.
 - The IPSView output is one stable String/WebContent variable. Disabling the
   output retains the variable; deletion remains an explicit helper-owned
   action.
-- Value changes regenerate the standalone HTML document. No external endpoint
-  or separate unauthenticated data channel is introduced.
+- Runtime value updates use the persistent Gateway transport defined by ADR
+  0024 and no longer regenerate the standalone HTML document.
 - IPSView receives explicit standalone color tokens from its effective ECharts
   theme because Symcon visualization CSS variables are not available there.
 

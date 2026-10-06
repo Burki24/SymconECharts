@@ -1,6 +1,6 @@
 # ADR 0022: Zeitreihe getrennt in IPSView ausgeben und gestalten
 
-- Status: Angenommen
+- Status: Teilweise ersetzt durch ADR 0024 für Laufzeitaktualisierungen
 - Datum: 2026-10-06
 - Entscheider: Burki24
 - Ergänzt: ADR 0008, ADR 0017, ADR 0018, ADR 0019 und ADR 0020
@@ -44,12 +44,10 @@ verbleiben im Gerätemodul.
 - Aktivierung, Beibehaltung beim Abschalten, bestätigte Löschung und manuelle
   Regeneration der WebContent-Variable verbleiben beim unveränderten
   `IPSViewHTMLPageHelper`.
-- Archiv- und Rohwertausgaben werden als vollständiges eigenständiges
-  HTML-Dokument erneuert. Im Modus `realtime` enthält jedes neu erzeugte
-  IPSView-Dokument nur den aktuellen Startpunkt. Die ausschließlich im
-  geöffneten Browser gesammelte, nicht persistierte Punktfolge aus ADR 0019
-  bleibt damit eine Eigenschaft der nativen Kachel und wird nicht als
-  IPSView-Historie versprochen.
+- Das initiale WebContent bleibt ein vollständiges eigenständiges
+  HTML-Dokument. Laufzeitaktualisierungen erfolgen gemäß ADR 0024 persistent;
+  `raw` und `realtime` ergänzen neue Punkte im geöffneten IPSView-Browser per
+  `append`, ohne das Dokument und seine lokale Punktfolge neu zu laden.
 
 ## Folgen
 

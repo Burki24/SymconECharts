@@ -16,6 +16,8 @@ final class EChartsDataProtocol
     public const VERSION = 1;
     public const OPERATION_ARCHIVE_READ = 'archive.read';
     public const OPERATION_CURRENT_READ = 'current.read';
+    public const OPERATION_IPSVIEW_PUSH = 'ipsview.push';
+    public const OPERATION_IPSVIEW_STATE = 'ipsview.state';
 
     private const JSON_FLAGS = JSON_THROW_ON_ERROR
         | JSON_UNESCAPED_SLASHES

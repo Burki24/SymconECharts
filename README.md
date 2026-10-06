@@ -31,7 +31,8 @@ Folgende Module beinhaltet das SymconECharts Repository:
   Ein optionales, separat platzierbares WebContent-Widget in IPSView verwendet
   dieselbe Datenkonfiguration und denselben Renderer. Sein Design erbt
   standardmäßig das Kacheldesign oder kann vollständig unabhängig gestaltet
-  werden.
+  werden. Laufzeitwerte aktualisieren das bestehende Diagramm über den
+  gemeinsamen Gateway-Transport, ohne das WebContent-Dokument neu zu laden.
 
 - __EChartsGaugeMulti__ ([Dokumentation](EChartsGaugeMulti))
   Gerätemodul für zusammengesetzte Gauge-Darstellungen mit 2 bis 16
@@ -103,6 +104,8 @@ Basis.
 Alle Gauge-Module besitzen optionale IPSView-WebContent-Ausgaben und können
 ihr Kacheldesign erben oder unabhängig gestaltet werden. Der reale
 IPSView-Laufzeittest bleibt mangels Lizenz eine dokumentierte Testlücke.
+Gauge- und Time-Series-Ausgaben behalten ihr geöffnetes IPSView-Dokument bei
+Wertänderungen bei und aktualisieren nur den ECharts-Zustand.
 
 Als erste Chartfamilie sind Single- und Multi-Gauges vorgesehen. Eine
 Geräteinstanz soll jeweils einen Chart liefern; eine gemeinsame Dashboard-Seite

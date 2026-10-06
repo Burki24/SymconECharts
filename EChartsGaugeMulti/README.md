@@ -115,6 +115,8 @@ konfigurieren.
 Standardmäßig werden keine eigenen Variablen angelegt. Bei aktivierter
 IPSView-Ausgabe entsteht eine Stringvariable mit WebContent-Darstellung und
 vollständigem HTML-Inhalt. Die native Kachel benötigt diese Variable nicht.
+Wertänderungen werden anschließend über das gemeinsame Gateway an das
+bestehende Diagramm übertragen; die Stringvariable bleibt dabei unverändert.
 
 Quellvariablen werden als Referenzen registriert und bei Änderungen der Liste
 deterministisch ergänzt oder entfernt. Messwertkopien unter dem Gauge-Modul

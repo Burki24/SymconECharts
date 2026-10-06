@@ -13,6 +13,7 @@ use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsDataProtocol;
 use SymconECharts\EChartsGaugeDesign;
 use SymconECharts\EChartsGaugeSinglePreview;
+use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsSvgPath;
 use SymconECharts\EChartsVariablePresentation;
 
@@ -26,6 +27,7 @@ require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsGaugeDesign.php';
+require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
 require_once __DIR__ . '/../libs/EChartsSvgPath.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 require_once __DIR__ . '/GaugePreview.php';
@@ -35,6 +37,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
     use ConfigurationFormHelper;
     use DataFlowHelper;
     use IPSViewHTMLPageHelper;
+    use EChartsIPSViewTransport;
     use ResponsiveVisualizationHelper;
     use VisualizationAssetHelper;
     use VisualizationThemeHelper;
@@ -277,6 +280,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
             $this->RegisterPropertyInteger($propertyName, self::DESIGN_SCALE_DEFAULT);
         }
         $this->RegisterIPSViewHTMLPageProperties();
+        $this->RegisterEChartsIPSViewTransport();
         $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
         foreach (self::IPSVIEW_STRING_DESIGN_DEFAULTS as $propertyName => $default) {
             $this->RegisterPropertyString(self::IPSVIEW_PROPERTY_PREFIX . $propertyName, $default);
@@ -708,14 +712,11 @@ class EChartsGaugeSingle extends IPSModuleStrict
 
     public function ReceiveData(string $JSONString): string
     {
-        try {
-            $message = $this->DecodeDataFlowMessage($JSONString, self::DATA_ID_FROM_PARENT);
-            EChartsDataProtocol::DecodeRequest($message);
-        } catch (Throwable $exception) {
-            $this->SendDebug('ReceiveData', $exception::class, 0);
-        }
-
-        return '';
+        return $this->HandleEChartsIPSViewRequest(
+            $JSONString,
+            self::DATA_ID_FROM_PARENT,
+            fn (): array => $this->BuildVisualizationState(true)
+        );
     }
 
     /**
@@ -735,7 +736,6 @@ class EChartsGaugeSingle extends IPSModuleStrict
 
         if ($Message === VM_UPDATE && $SenderID === $this->ReadPropertyInteger('SourceVariableID')) {
             $this->PublishVisualizationState();
-            $this->PublishIPSViewHTML();
         }
     }
 
@@ -761,12 +761,14 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 'Apache ECharts could not be initialized.'
             ]),
             'options'            => [
-                'echartsVersion' => EChartsAsset::VERSION,
-                'echartsThemes'  => EChartsAsset::ThemePalettes()
+                'echartsVersion'   => EChartsAsset::VERSION,
+                'echartsThemes'    => EChartsAsset::ThemePalettes(),
+                'ipsViewTransport' => $ipsView ? $this->EChartsIPSViewTransportOptions() : null
             ],
             'replacements'       => [
-                '{{ECHARTS_SCRIPT}}'       => EChartsAsset::JavaScript(),
-                '{{ECHARTS_THEME_SCRIPT}}' => EChartsAsset::ThemeJavaScript()
+                '{{ECHARTS_SCRIPT}}'           => EChartsAsset::JavaScript(),
+                '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
+                '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
         ]);
     }
@@ -2156,6 +2158,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 | JSON_UNESCAPED_UNICODE
                 | JSON_PRESERVE_ZERO_FRACTION
             ));
+            $this->PushEChartsIPSViewState(fn (): array => $this->BuildVisualizationState(true));
         } catch (Throwable $exception) {
             $this->SendDebug('PublishVisualizationState', $exception::class, 0);
         }

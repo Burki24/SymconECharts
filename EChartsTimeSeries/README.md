@@ -95,8 +95,9 @@ Verdichtungsstufe.
 Die Vertikale vom Archivvertrag bis zur nativen Kachel und zur optionalen
 IPSView-Ausgabe ist implementiert und durch lokale Vertrags- und
 Integrationstests abgesichert. Ein realer Symcon-Archiv- und Browsertest sowie
-ein IPSView-Laufzeittest stehen noch aus. Im Echtzeitmodus wird das
-WebContent-Dokument bei einer Wertänderung mit dem aktuellen Punkt erneuert;
-eine fortlaufende, nicht persistierte Browserhistorie sammelt weiterhin nur
-die geöffnete native Kachel. Die Zielplattform bleibt Symcon 9.0/9.1 mit PHP
-8.5.
+ein IPSView-Laufzeittest stehen noch aus. Im Echtzeitmodus wird bei einer
+Wertänderung nur der aktuelle Punkt über den persistenten Gateway-Transport
+an das geöffnete Diagramm angehängt. Die fortlaufende, nicht persistierte
+Browserhistorie bleibt damit in der nativen Kachel und in IPSView erhalten,
+solange die jeweilige Darstellung geöffnet ist. Die Zielplattform bleibt
+Symcon 9.0/9.1 mit PHP 8.5.

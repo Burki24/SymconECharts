@@ -13,6 +13,7 @@ use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsDataProtocol;
 use SymconECharts\EChartsGaugeChronographPreview;
 use SymconECharts\EChartsGaugeDesign;
+use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsVariablePresentation;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
@@ -25,6 +26,7 @@ require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsGaugeDesign.php';
+require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 require_once __DIR__ . '/GaugePreview.php';
 
@@ -33,6 +35,7 @@ class EChartsGaugeChronograph extends IPSModuleStrict
     use ConfigurationFormHelper;
     use DataFlowHelper;
     use IPSViewHTMLPageHelper;
+    use EChartsIPSViewTransport;
     use ResponsiveVisualizationHelper;
     use VisualizationAssetHelper;
     use VisualizationThemeHelper;
@@ -135,6 +138,7 @@ class EChartsGaugeChronograph extends IPSModuleStrict
             $this->RegisterPropertyInteger($name, $default);
         }
         $this->RegisterIPSViewHTMLPageProperties();
+        $this->RegisterEChartsIPSViewTransport();
         $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
         $this->RegisterPropertyString('IPSViewGaugePreset', self::PRESET_CHRONOGRAPH);
         $this->RegisterPropertyString('IPSViewEChartsTheme', EChartsAsset::THEME_AUTO);
@@ -396,14 +400,11 @@ class EChartsGaugeChronograph extends IPSModuleStrict
 
     public function ReceiveData(string $JSONString): string
     {
-        try {
-            $message = $this->DecodeDataFlowMessage($JSONString, self::DATA_ID_FROM_PARENT);
-            EChartsDataProtocol::DecodeRequest($message);
-        } catch (Throwable $exception) {
-            $this->SendDebug('ReceiveData', $exception::class, 0);
-        }
-
-        return '';
+        return $this->HandleEChartsIPSViewRequest(
+            $JSONString,
+            self::DATA_ID_FROM_PARENT,
+            fn (): array => $this->BuildVisualizationState(true)
+        );
     }
 
     /**
@@ -423,7 +424,6 @@ class EChartsGaugeChronograph extends IPSModuleStrict
 
         if ($Message === VM_UPDATE && in_array($SenderID, $this->ConfiguredVariableIDs(), true)) {
             $this->PublishVisualizationState();
-            $this->PublishIPSViewHTML();
         }
     }
 
@@ -461,11 +461,13 @@ class EChartsGaugeChronograph extends IPSModuleStrict
             'options'            => [
                 'echartsVersion'    => EChartsAsset::VERSION,
                 'echartsThemes'     => EChartsAsset::ThemePalettes(),
-                'tileHeaderVisible' => !$hiddenTileTitle
+                'tileHeaderVisible' => !$hiddenTileTitle,
+                'ipsViewTransport'  => $ipsView ? $this->EChartsIPSViewTransportOptions() : null
             ],
             'replacements'       => [
-                '{{ECHARTS_SCRIPT}}'       => EChartsAsset::JavaScript(),
-                '{{ECHARTS_THEME_SCRIPT}}' => EChartsAsset::ThemeJavaScript()
+                '{{ECHARTS_SCRIPT}}'           => EChartsAsset::JavaScript(),
+                '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
+                '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
         ]);
     }
@@ -1116,6 +1118,7 @@ class EChartsGaugeChronograph extends IPSModuleStrict
                 $this->BuildVisualizationState(),
                 JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION
             ));
+            $this->PushEChartsIPSViewState(fn (): array => $this->BuildVisualizationState(true));
         } catch (Throwable $exception) {
             $this->SendDebug('PublishVisualizationState', $exception::class, 0);
         }

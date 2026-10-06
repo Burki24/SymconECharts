@@ -117,6 +117,8 @@ Die gemeinsame Theme-Assetbasis und die instanzbezogene Auswahl dokumentiert
 [`ADR 0007`](adr/0007-echarts-theme-assets-and-selection.md).
 Die optionale IPSView-WebContent-Ausgabe und ihr getrenntes Design dokumentiert
 [`ADR 0008`](adr/0008-gauge-single-ipsview-output.md).
+Den persistenten Gateway-Transport für flackerfreie IPSView-Aktualisierungen
+dokumentiert [`ADR 0024`](adr/0024-persistent-ipsview-transport.md).
 Den ersten sichtbaren Gauge-Multi-Renderer dokumentiert
 [`ADR 0009`](adr/0009-gauge-multi-title-renderer.md).
 Die beiden ergänzenden Ring-Vorlagen dokumentiert
@@ -161,10 +163,12 @@ Archivabfrage.
 
 Die native Kachel und IPSView erhalten getrennte Ausgabeadapter zum gemeinsamen
 Darstellungskern. Gauge Single schreibt ein vollständiges, eigenständiges
-Dokument in eine lokale WebContent-Variable und führt deshalb keinen externen
-Datenendpunkt ein. Eine abgeschaltete IPSView-Ausgabe beeinträchtigt den
-nativen Ausgabeweg nicht und lässt eine bereits angelegte Ausgabevariable bis
-zu einer ausdrücklich bestätigten Löschung bestehen.
+Startdokument in eine lokale WebContent-Variable. Laufzeitwerte erreichen das
+bestehende ECharts-Objekt anschließend über den zentralen, kanalgebundenen
+Gateway-WebHook und WebSocket, ohne die Variable neu zu schreiben. Eine
+abgeschaltete IPSView-Ausgabe beeinträchtigt den nativen Ausgabeweg nicht und
+lässt eine bereits angelegte Ausgabevariable bis zu einer ausdrücklich
+bestätigten Löschung bestehen.
 
 ## Plattform und Modulbasis
 
@@ -270,6 +274,8 @@ den Kacheldesigner und [`ADR 0021`](adr/0021-timeseries-multiple-value-axes.md)
 die Mehr-Achsen-Anordnung. Die getrennte IPSView-Ausgabe und ihr unabhängiger
 Designvertrag sind in
 [`ADR 0022`](adr/0022-timeseries-ipsview-output.md) festgelegt.
+Der gemeinsame persistente IPSView-Transport ist in
+[`ADR 0024`](adr/0024-persistent-ipsview-transport.md) festgelegt.
 Das quellenbezogene Einzeldesign einschließlich sicherer SVG-Flächenmuster
 dokumentiert
 [`ADR 0023`](adr/0023-timeseries-source-design-and-svg-area-patterns.md).

@@ -18,6 +18,9 @@ class EChartsGateway extends IPSModuleStrict
     private const ARCHIVE_CONTROL_MODULE_ID = '{43192F0B-135B-4CE7-A0A7-1475603F3060}';
     private const ARCHIVE_MAX_LIMIT = 2000;
     private const DATA_ID_FROM_CHILD = '{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}';
+    private const DATA_ID_TO_CHILD = '{E4749B72-912B-E3E3-1C57-D19019FFDD84}';
+    private const WEBHOOK_CONTROL_MODULE_ID = '{015A6EB8-D6E5-4B93-B496-0D3F77AE9FE1}';
+    private const WEBHOOK_NAME = 'SymconECharts';
 
     /** @var list<int> */
     private const ARCHIVE_AGGREGATION_LEVELS = [0, 1, 5, 6, 8];
@@ -28,6 +31,8 @@ class EChartsGateway extends IPSModuleStrict
     public function Create(): void
     {
         parent::Create();
+
+        $this->RegisterHook(self::WEBHOOK_NAME);
     }
 
     public function ApplyChanges(): void
@@ -57,12 +62,129 @@ class EChartsGateway extends IPSModuleStrict
         return match ($operation) {
             EChartsDataProtocol::OPERATION_CURRENT_READ => $this->ReadCurrentValue($request['Payload']),
             EChartsDataProtocol::OPERATION_ARCHIVE_READ => $this->ReadArchiveValues($request['Payload']),
+            EChartsDataProtocol::OPERATION_IPSVIEW_PUSH => $this->PushIPSViewMessage($request['Payload']),
             default                                     => EChartsDataProtocol::EncodeErrorResponse(
                 $operation,
                 'UNSUPPORTED_OPERATION',
                 'The gateway operation is not supported.'
             )
         };
+    }
+
+    protected function ProcessHookData(): void
+    {
+        $path = (string) ($_SERVER['SCRIPT_NAME'] ?? '');
+        if (preg_match('#^/hook/SymconECharts/WS/[1-9][0-9]*/[a-f0-9]{32}$#D', $path) === 1) {
+            return;
+        }
+
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET'
+            || preg_match(
+                '#^/hook/SymconECharts/state/([1-9][0-9]*)/([a-f0-9]{32})$#D',
+                $path,
+                $matches
+            ) !== 1
+        ) {
+            $this->SendHookResponse(404, '');
+
+            return;
+        }
+
+        $request = EChartsDataProtocol::CreateRequest(EChartsDataProtocol::OPERATION_IPSVIEW_STATE, [
+            'InstanceID' => (int) $matches[1],
+            'Channel'    => $matches[2]
+        ]);
+        $responses = $this->SendDataToChildren($this->EncodeDataFlowMessage(self::DATA_ID_TO_CHILD, $request));
+        if (!is_array($responses)) {
+            $this->SendHookResponse(404, '');
+
+            return;
+        }
+
+        foreach ($responses as $response) {
+            if (!is_string($response) || $response === '') {
+                continue;
+            }
+            try {
+                $decoded = EChartsDataProtocol::DecodeResponse(
+                    $response,
+                    EChartsDataProtocol::OPERATION_IPSVIEW_STATE
+                );
+                $state = $decoded['Payload']['State'] ?? null;
+                if (($decoded['Success'] ?? false) === true && is_array($state)) {
+                    $this->SendHookResponse(200, json_encode(
+                        $state,
+                        JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+                    ), 'application/json; charset=utf-8');
+
+                    return;
+                }
+            } catch (Throwable) {
+                continue;
+            }
+        }
+
+        $this->SendHookResponse(404, '');
+    }
+
+    /** @param array<string, mixed> $payload */
+    private function PushIPSViewMessage(array $payload): string
+    {
+        $operation = EChartsDataProtocol::OPERATION_IPSVIEW_PUSH;
+        $instanceID = $payload['InstanceID'] ?? null;
+        $channel = $payload['Channel'] ?? null;
+        $message = $payload['Message'] ?? null;
+        if (!is_int($instanceID) || $instanceID <= 0
+            || !is_string($channel) || preg_match('/^[a-f0-9]{32}$/D', $channel) !== 1
+            || !is_array($message)
+        ) {
+            return EChartsDataProtocol::EncodeErrorResponse(
+                $operation,
+                'INVALID_IPSVIEW_MESSAGE',
+                'The IPSView update is invalid.'
+            );
+        }
+
+        $webHookControls = IPS_GetInstanceListByModuleID(self::WEBHOOK_CONTROL_MODULE_ID);
+        sort($webHookControls, SORT_NUMERIC);
+        $webHookControlID = $webHookControls[0] ?? null;
+        if (!is_int($webHookControlID) || $webHookControlID <= 0) {
+            return EChartsDataProtocol::EncodeErrorResponse(
+                $operation,
+                'WEBHOOK_CONTROL_NOT_FOUND',
+                'No WebHook Control instance is available.'
+            );
+        }
+
+        try {
+            $encodedMessage = json_encode(
+                $message,
+                JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+            );
+            WC_PushMessage(
+                $webHookControlID,
+                '/hook/SymconECharts/WS/' . $instanceID . '/' . $channel,
+                $encodedMessage
+            );
+        } catch (Throwable) {
+            return EChartsDataProtocol::EncodeErrorResponse(
+                $operation,
+                'IPSVIEW_PUSH_FAILED',
+                'The IPSView update could not be sent.'
+            );
+        }
+
+        return EChartsDataProtocol::EncodeSuccessResponse($operation, ['Delivered' => true]);
+    }
+
+    private function SendHookResponse(int $status, string $body, string $contentType = 'text/plain; charset=utf-8'): void
+    {
+        http_response_code($status);
+        header('Content-Type: ' . $contentType);
+        header('Access-Control-Allow-Origin: *');
+        header('Cache-Control: no-store, max-age=0');
+        header('X-Content-Type-Options: nosniff');
+        echo $body;
     }
 
     /** @param array<string, mixed> $payload */

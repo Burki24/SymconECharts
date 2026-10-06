@@ -363,9 +363,11 @@ Nachkommastellen bleiben bewusst gemeinsame fachliche Einstellungen.
 #### Gemeinsame Darstellung
 
 Das gemeinsame HTML-Seitenmodell und die Gauge-Zeichenlogik werden für beide
-Ausgabewege verwendet. IPSView enthält den aktuellen Zustand direkt im
-vollständigen WebContent-Dokument; es wird kein externer Datenendpunkt
-geöffnet. Ausgabespezifische Anpassungen wie Hintergrund, Transparenz und
+Ausgabewege verwendet. IPSView enthält einen vollständigen Startzustand im
+WebContent-Dokument. Beim Öffnen und nach Wiederverbindungen lädt es den
+aktuellen Zustand über den gemeinsamen Gateway-Endpunkt; weitere Werte
+aktualisieren das bestehende ECharts-Objekt per WebSocket, ohne das Dokument
+neu zu laden. Ausgabespezifische Anpassungen wie Hintergrund, Transparenz und
 Schriftgrößen können getrennt eingestellt werden, ohne die andere
 Visualisierung zu verändern.
 

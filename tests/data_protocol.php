@@ -45,6 +45,23 @@ assertProtocol(
     'Archive request operation changed.'
 );
 
+$ipsViewPush = EChartsDataProtocol::CreateRequest(
+    EChartsDataProtocol::OPERATION_IPSVIEW_PUSH,
+    ['InstanceID' => 5000, 'Channel' => str_repeat('a', 32), 'Message' => ['status' => 'ready']]
+);
+assertProtocol(
+    $ipsViewPush['Operation'] === 'ipsview.push',
+    'Persistent IPSView push operation changed.'
+);
+$ipsViewState = EChartsDataProtocol::CreateRequest(
+    EChartsDataProtocol::OPERATION_IPSVIEW_STATE,
+    ['InstanceID' => 5000, 'Channel' => str_repeat('a', 32)]
+);
+assertProtocol(
+    $ipsViewState['Operation'] === 'ipsview.state',
+    'Persistent IPSView state operation changed.'
+);
+
 $success = EChartsDataProtocol::EncodeSuccessResponse(
     EChartsDataProtocol::OPERATION_CURRENT_READ,
     ['VariableID' => 4711, 'Value' => 0.0, 'Timestamp' => 1780000000]

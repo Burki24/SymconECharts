@@ -8,8 +8,9 @@ gemeinsamen Diensten versorgen. Eine eigene I/O-Instanz ist nicht vorgesehen.
 versionierten `current.read`-Vertrag für numerische Symcon-Variablen sowie
 `archive.read` für rohe und aggregierte Archivwerte. Erfolgreiche identische
 Archivabfragen werden bis zu 15 Sekunden in einem auf 32 Einträge begrenzten
-Speichercache gehalten. Renderer- und HTTP-Dienste sind nicht Bestandteil des
-Gateways.
+Speichercache gehalten. Zusätzlich stellt das Gateway den gemeinsamen,
+kanalgebundenen WebHook- und WebSocket-Transport für persistente
+IPSView-Diagramme bereit. Renderer bleiben Bestandteil der Gerätemodule.
 
 ### Inhaltsverzeichnis
 
@@ -25,8 +26,10 @@ Gateways.
 
 **Vorhanden:** Moduldefinition als Splitter (`type: 2`) auf Basis von
 `IPSModuleStrict`, festgelegte Datenfluss-IDs für Chartfamilien-Geräte und ein
-versionierter Gateway-Vertrag. `ForwardData()` verarbeitet `current.read` und
-`archive.read`. Momentanwerte werden mit Typ und Änderungszeitpunkt geliefert.
+versionierter Gateway-Vertrag. `ForwardData()` verarbeitet `current.read`,
+`archive.read` und `ipsview.push`; `ipsview.state` wird vom WebHook gezielt an
+die zuständige Geräteinstanz weitergeleitet. Momentanwerte werden mit Typ und
+Änderungszeitpunkt geliefert.
 Archivabfragen validieren Variable, Zeitraum, Datenmodus, Verdichtungsstufe,
 Reducer und Punktlimit. Rohwerte sowie aggregierte Durchschnitts-, Summen-,
 Minimum- und Maximumwerte werden einheitlich zeitlich aufsteigend ausgegeben;
@@ -34,8 +37,7 @@ gekürzte Antworten sind explizit gekennzeichnet. Die Transporthülle nutzt den
 zentralen `DataFlowHelper`.
 
 **Geplant:** Weitere gemeinsame Datenfunktionen entstehen nur bei belegtem
-Bedarf. Das geplante Zeitreihen-Gerätemodul wird erster Consumer von
-`archive.read`. Die reine Kachelnutzung bleibt unabhängig von einer optionalen
+Bedarf. Die reine Kachelnutzung bleibt unabhängig von einer optionalen
 IPSView-Ausgabe.
 
 ### 2. Voraussetzungen
@@ -69,8 +71,8 @@ produktiven Einsatz dar.
 Das vorgesehene Modell ist eine gemeinsame EChartsGateway-Instanz mit einer
 oder mehreren Gauge-Single-, Gauge-Multi-, Gauge-Tacho- und
 Gauge-Chronograph-Instanzen sowie
-späteren weiteren Chartfamilien-Geräten. Das Gateway hat keinen übergeordneten
-Datenfluss; die Geräteinstanzen werden mit ihm verbunden.
+EChartsTimeSeries und späteren weiteren Chartfamilien-Geräten. Das Gateway hat
+keinen übergeordneten Datenfluss; die Geräteinstanzen werden mit ihm verbunden.
 
 Im regulären Betrieb genügt eine Gateway-Instanz für alle ECharts-Geräte. Sie
 wird beim Anlegen des ersten Diagramms erstellt; bei weiteren Diagrammen wird
@@ -108,9 +110,9 @@ jeweiligen Geräteinstanz
 ([Gauge Single](../EChartsGaugeSingle), [Gauge Multi](../EChartsGaugeMulti),
 [Gauge Tacho](../EChartsGaugeTacho),
 [Gauge Chronograph](../EChartsGaugeChronograph)).
-Beide Ausgabewege sind in den Gauge-Gerätemodulen implementiert. Das geplante
-Zeitreihenmodul erhält eigene Ausgabeadapter auf seinem gemeinsamen
-Zeitreihenmodell.
+Beide Ausgabewege sind in den Gerätemodulen implementiert. Der Gateway liefert
+dabei ausschließlich die gemeinsame Laufzeitkommunikation; das jeweilige
+Diagrammmodell und seine Darstellung verbleiben im Gerät.
 
 ### 7. PHP-Befehlsreferenz
 

@@ -24,8 +24,9 @@ Für das unabhängige IPSView-Grunddesign kann jede Quelle ihr Kacheldesign
 
 Das optionale IPSView-WebContent-Widget nutzt dieselben Quellen. Sein
 Grunddesign erbt standardmäßig das Kacheldesign oder kann unabhängig
-konfiguriert werden. Ein realer IPSView-Laufzeittest ist mangels Lizenz nicht
-möglich.
+konfiguriert werden. Wertänderungen aktualisieren das bestehende Diagramm über
+den gemeinsamen Gateway-WebSocket, ohne das WebContent-Dokument neu zu laden.
+Ein realer IPSView-Laufzeittest ist mangels Lizenz nicht möglich.
 
 ## Funktionen
 

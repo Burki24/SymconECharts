@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use SymconECharts\EChartsDataProtocol;
+
 const IPS_KERNELSTARTED = 10001;
 const VM_UPDATE = 10603;
 const KR_READY = 10103;
@@ -73,6 +75,8 @@ $GLOBALS['symconTestProfiles'] = [
     ]
 ];
 $GLOBALS['symconTestArchiveInstances'] = [6000];
+$GLOBALS['symconTestWebHookInstances'] = [6100];
+$GLOBALS['symconTestWebSocketMessages'] = [];
 $GLOBALS['symconTestArchiveQueryCount'] = 0;
 $GLOBALS['symconTestArchiveVariables'] = [
     4711 => [
@@ -133,11 +137,23 @@ function IPS_VariableExists(int $variableID): bool
 /** @return list<int> */
 function IPS_GetInstanceListByModuleID(string $moduleID): array
 {
+    if ($moduleID === '{015A6EB8-D6E5-4B93-B496-0D3F77AE9FE1}') {
+        return $GLOBALS['symconTestWebHookInstances'];
+    }
     if ($moduleID !== '{43192F0B-135B-4CE7-A0A7-1475603F3060}') {
         return [];
     }
 
     return $GLOBALS['symconTestArchiveInstances'];
+}
+
+function WC_PushMessage(int $instanceID, string $path, string $message): void
+{
+    $GLOBALS['symconTestWebSocketMessages'][] = [
+        'InstanceID' => $instanceID,
+        'Path'       => $path,
+        'Message'    => $message
+    ];
 }
 
 /** @return list<array<string, mixed>> */
@@ -261,6 +277,9 @@ abstract class IPSModuleStrict
     /** @var null|callable(string): string */
     public static $ParentResponder = null;
 
+    /** @var list<callable(string): string> */
+    public static array $ChildResponders = [];
+
     /** @var array<string, mixed> */
     private array $properties = [];
 
@@ -289,6 +308,8 @@ abstract class IPSModuleStrict
     private bool $parentActive = true;
     private string $summary = '';
     private int $visualizationType = 0;
+    /** @var list<string> */
+    private array $hooks = [];
     /** @var array<string, int> */
     private array $variableIDs = [];
     private static int $nextVariableID = 9000;
@@ -330,6 +351,12 @@ abstract class IPSModuleStrict
     public function GetTestVisualizationType(): int
     {
         return $this->visualizationType;
+    }
+
+    /** @return list<string> */
+    public function GetTestHooks(): array
+    {
+        return $this->hooks;
     }
 
     public function GetTestVariableValue(string $ident): mixed
@@ -620,6 +647,22 @@ abstract class IPSModuleStrict
         return (self::$ParentResponder)($data);
     }
 
+    /** @return list<string> */
+    protected function SendDataToChildren(string $data): array
+    {
+        return array_map(
+            static fn (callable $responder): string => $responder($data),
+            self::$ChildResponders
+        );
+    }
+
+    protected function RegisterHook(string $hook): void
+    {
+        if (!in_array($hook, $this->hooks, true)) {
+            $this->hooks[] = $hook;
+        }
+    }
+
     protected function SendDebug(string $message, string $data, int $format): bool
     {
         return true;
@@ -633,6 +676,17 @@ require_once dirname(__DIR__) . '/EChartsGaugeTacho/module.php';
 require_once dirname(__DIR__) . '/EChartsGaugeChronograph/module.php';
 require_once dirname(__DIR__) . '/EChartsTimeSeries/module.php';
 
+final class TestableEChartsGateway extends EChartsGateway
+{
+    public function ProcessTestHook(): string
+    {
+        ob_start();
+        $this->ProcessHookData();
+
+        return (string) ob_get_clean();
+    }
+}
+
 function assertGatewayGauge(bool $condition, string $message): void
 {
     if (!$condition) {
@@ -643,6 +697,10 @@ function assertGatewayGauge(bool $condition, string $message): void
 $gateway = new EChartsGateway();
 $gateway->Create();
 $gateway->ApplyChanges();
+assertGatewayGauge(
+    $gateway->GetTestHooks() === ['SymconECharts'],
+    'The Gateway must own the shared SymconECharts WebHook.'
+);
 IPSModuleStrict::$ParentResponder = static fn (string $json): string => $gateway->ForwardData($json);
 
 $gauge = new EChartsGaugeSingle();
@@ -1854,6 +1912,47 @@ assertGatewayGauge(
     strlen($inheritedMultiIPSView) < SYMCON_OUTPUT_BUFFER_LIMIT,
     'Gauge Multi IPSView HTML must remain below the Symcon output-buffer limit.'
 );
+assertGatewayGauge(
+    preg_match(
+        '#/hook/SymconECharts/state/5000/([a-f0-9]{32})#',
+        $inheritedMultiIPSView,
+        $multiTransportMatch
+    ) === 1
+        && str_contains($inheritedMultiIPSView, 'new WebSocket')
+        && str_contains($inheritedMultiIPSView, '/hook/SymconECharts/WS/5000/'),
+    'Gauge Multi IPSView HTML must bootstrap the shared persistent transport.'
+);
+$multiStateRequest = ['DataID' => '{E4749B72-912B-E3E3-1C57-D19019FFDD84}']
+    + EChartsDataProtocol::CreateRequest(EChartsDataProtocol::OPERATION_IPSVIEW_STATE, [
+        'InstanceID' => 5000,
+        'Channel'    => $multiTransportMatch[1]
+    ]);
+$multiStateResponse = EChartsDataProtocol::DecodeResponse(
+    $multiGauge->ReceiveData(json_encode($multiStateRequest, JSON_THROW_ON_ERROR)),
+    EChartsDataProtocol::OPERATION_IPSVIEW_STATE
+);
+assertGatewayGauge(
+    ($multiStateResponse['Payload']['State']['status'] ?? null) === 'ready',
+    'The targeted Gauge must return a fresh IPSView state through the Gateway data contract.'
+);
+$hookGateway = new TestableEChartsGateway();
+$hookGateway->Create();
+$hookGateway->ApplyChanges();
+IPSModuleStrict::$ChildResponders = [static fn (string $json): string => $multiGauge->ReceiveData($json)];
+$_SERVER['REQUEST_METHOD'] = 'GET';
+$_SERVER['SCRIPT_NAME'] = '/hook/SymconECharts/state/5000/' . $multiTransportMatch[1];
+$hookState = json_decode($hookGateway->ProcessTestHook(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    ($hookState['status'] ?? null) === 'ready',
+    'The Gateway state endpoint must route a fresh state from the targeted chart.'
+);
+IPSModuleStrict::$ChildResponders = [];
+unset($_SERVER['REQUEST_METHOD'], $_SERVER['SCRIPT_NAME']);
+$multiStateRequest['Payload']['Channel'] = str_repeat('0', 32);
+assertGatewayGauge(
+    $multiGauge->ReceiveData(json_encode($multiStateRequest, JSON_THROW_ON_ERROR)) === '',
+    'A Gauge must reject IPSView state requests for another transport channel.'
+);
 $multiGauge->SetTestProperty('IPSViewUseTileDesign', false);
 $multiGauge->SetTestProperty('IPSViewEChartsTheme', 'roma');
 $multiGauge->SetTestProperty('IPSViewRingWidthPercent', 125);
@@ -2000,6 +2099,7 @@ assertGatewayGauge(
 );
 $multiIPSViewBeforeUpdate = $multiGauge->GetTestVariableValue('IPSViewGauge');
 $multiUpdateCount = count($multiGauge->GetTestVisualizationUpdates());
+$multiSocketUpdateCount = count($GLOBALS['symconTestWebSocketMessages']);
 $GLOBALS['symconTestVariables'][4711]['Value'] = 43.5;
 $multiGauge->MessageSink(1780000200, 4711, VM_UPDATE, []);
 assertGatewayGauge(
@@ -2007,9 +2107,16 @@ assertGatewayGauge(
     'Gauge Multi must publish a fresh visualization state when a source changes.'
 );
 assertGatewayGauge(
-    $multiGauge->GetTestVariableValue('IPSViewGauge') !== $multiIPSViewBeforeUpdate
-        && str_contains($multiGauge->GetTestVariableValue('IPSViewGauge'), '"value":43.5'),
-    'Gauge Multi must refresh IPSView HTML when a source changes.'
+    $multiGauge->GetTestVariableValue('IPSViewGauge') === $multiIPSViewBeforeUpdate,
+    'Gauge Multi must keep the persistent IPSView document unchanged when a source changes.'
+);
+$multiSocketUpdate = $GLOBALS['symconTestWebSocketMessages'][$multiSocketUpdateCount] ?? null;
+assertGatewayGauge(
+    is_array($multiSocketUpdate)
+        && $multiSocketUpdate['InstanceID'] === 6100
+        && str_starts_with($multiSocketUpdate['Path'], '/hook/SymconECharts/WS/5000/')
+        && str_contains($multiSocketUpdate['Message'], '"value":43.5'),
+    'Gauge Multi must send source changes to the persistent IPSView chart through the Gateway.'
 );
 $retainedMultiIPSView = $multiGauge->GetTestVariableValue('IPSViewGauge');
 $multiGauge->SetTestProperty('EnableIPSView', false);

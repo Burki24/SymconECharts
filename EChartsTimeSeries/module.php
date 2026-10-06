@@ -11,6 +11,7 @@ use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsDataProtocol;
+use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsTimeSeriesDesign;
 use SymconECharts\EChartsTimeSeriesPreview;
 use SymconECharts\EChartsVariablePresentation;
@@ -24,6 +25,7 @@ require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
+require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
 require_once __DIR__ . '/../libs/EChartsTimeSeriesDesign.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 require_once __DIR__ . '/TimeSeriesPreview.php';
@@ -33,6 +35,7 @@ class EChartsTimeSeries extends IPSModuleStrict
     use ConfigurationFormHelper;
     use DataFlowHelper;
     use IPSViewHTMLPageHelper;
+    use EChartsIPSViewTransport;
     use ResponsiveVisualizationHelper;
     use VisualizationAssetHelper;
     use VisualizationThemeHelper;
@@ -112,6 +115,7 @@ class EChartsTimeSeries extends IPSModuleStrict
         $this->RegisterPropertyBoolean('ShowXAxis', true);
         $this->RegisterPropertyBoolean('ShowYAxis', true);
         $this->RegisterIPSViewHTMLPageProperties();
+        $this->RegisterEChartsIPSViewTransport();
         $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
         $this->RegisterPropertyBoolean('IPSViewAdaptToBackground', false);
         $this->RegisterPropertyInteger('IPSViewBackgroundColor', -1);
@@ -392,14 +396,11 @@ class EChartsTimeSeries extends IPSModuleStrict
 
     public function ReceiveData(string $JSONString): string
     {
-        try {
-            $message = $this->DecodeDataFlowMessage($JSONString, self::DATA_ID_FROM_PARENT);
-            EChartsDataProtocol::DecodeRequest($message);
-        } catch (Throwable $exception) {
-            $this->SendDebug('ReceiveData', $exception::class, 0);
-        }
-
-        return '';
+        return $this->HandleEChartsIPSViewRequest(
+            $JSONString,
+            self::DATA_ID_FROM_PARENT,
+            fn (): array => $this->BuildVisualizationState(true)
+        );
     }
 
     /** @param array<int, mixed> $Data */
@@ -427,19 +428,22 @@ class EChartsTimeSeries extends IPSModuleStrict
         if (!is_int($timestamp) || $timestamp <= 0) {
             $timestamp = $TimeStamp;
         }
-        $this->UpdateVisualizationValue(json_encode([
+        $appendMessage = [
             'messageType' => 'append',
             'variableID'  => $SenderID,
             'timestamp'   => $timestamp,
             'value'       => (float) $value
-        ], JSON_THROW_ON_ERROR | JSON_PRESERVE_ZERO_FRACTION));
-        $this->PublishIPSViewHTML();
+        ];
+        $this->UpdateVisualizationValue(json_encode(
+            $appendMessage,
+            JSON_THROW_ON_ERROR | JSON_PRESERVE_ZERO_FRACTION
+        ));
+        $this->PushEChartsIPSViewMessage($appendMessage);
     }
 
     public function RefreshArchive(): void
     {
         $this->PublishVisualizationState();
-        $this->PublishIPSViewHTML();
         $this->ScheduleArchiveRefresh();
     }
 
@@ -477,11 +481,13 @@ class EChartsTimeSeries extends IPSModuleStrict
                 'echartsVersion'    => EChartsAsset::VERSION,
                 'echartsThemes'     => EChartsAsset::ThemePalettes(),
                 'tileHeaderVisible' => !$hiddenTileTitle,
-                'adaptToBackground' => $ipsView && $this->ReadPropertyBoolean('IPSViewAdaptToBackground')
+                'adaptToBackground' => $ipsView && $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
+                'ipsViewTransport'  => $ipsView ? $this->EChartsIPSViewTransportOptions() : null
             ],
             'replacements'       => [
-                '{{ECHARTS_SCRIPT}}'       => EChartsAsset::TimeSeriesJavaScript(),
-                '{{ECHARTS_THEME_SCRIPT}}' => EChartsAsset::ThemeJavaScript()
+                '{{ECHARTS_SCRIPT}}'           => EChartsAsset::TimeSeriesJavaScript(),
+                '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
+                '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
         ]);
     }
@@ -894,6 +900,7 @@ class EChartsTimeSeries extends IPSModuleStrict
                 $this->BuildVisualizationState(),
                 JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
             ));
+            $this->PushEChartsIPSViewState(fn (): array => $this->BuildVisualizationState(true));
         } catch (Throwable $exception) {
             $this->SendDebug('PublishVisualizationState', $exception::class, 0);
         }
