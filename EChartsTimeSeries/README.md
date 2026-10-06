@@ -20,6 +20,8 @@ optional ein eigenständiges IPSView-WebContent-Widget.
   Variablendarstellung mit manuellen Rückfallwerten;
 - eine gemeinsame Y-Achse je effektiver Einheit mit automatischer oder
   expliziter Anordnung links beziehungsweise rechts;
+- automatische Wertachsenbereiche sowie wahlweise die Übernahme von Minimum
+  und Maximum aus der Variablendarstellung oder eine manuelle Vorgabe;
 - farblich gekoppelte Wertachsen: Achsenlinie, Teilstriche, Skalenwerte und
   Einheit übernehmen die Farbe der ersten zugeordneten Datenreihe;
 - gemeinsames Punktbudget von 200 bis 8.000 Punkten, maximal 2.000 je Reihe;
@@ -57,10 +59,14 @@ Kachel einen Hinweis auf das wirksame Punktbudget.
 2. Eine bis acht Integer- oder Float-Variablen konfigurieren. Archivmodi
    benötigen archivierte Quellen; `realtime` funktioniert auch ohne Archiv.
 3. Zeitraum, Datenmodus und Punktbudget wählen.
-4. Optional Beschriftung, Einheit, Nachkommastellen, Farbe, Stil, Reducer und
-   Achsenseite pro Quelle anpassen. Quellen mit derselben effektiven Einheit
-   teilen eine Achse und verwenden deshalb dieselbe ausdrücklich gewählte
-   Seite. Der Farbwähler verwendet **Automatisch** für die Farbfolge des
+4. Optional Beschriftung, Einheit, Nachkommastellen, Farbe, Stil, Reducer,
+   Achsenseite und Achsenbereich pro Quelle anpassen. Der Bereich bleibt
+   standardmäßig automatisch, kann aber aus der Variablendarstellung oder aus
+   manuell eingegebenem Minimum und Maximum stammen. Quellen mit derselben
+   effektiven Einheit teilen eine Achse und verwenden deshalb dieselbe
+   ausdrücklich gewählte Seite und denselben expliziten Bereich. Automatische
+   Quellen übernehmen dabei den expliziten Bereich ihrer Einheitengruppe.
+   Der Farbwähler verwendet **Automatisch** für die Farbfolge des
    gewählten Themes; eine ausgewählte Farbe überschreibt sie für diese Reihe.
    Über das Zahnrad einer Quelle kann außerdem das **Einzeldesign** aktiviert
    werden. Ohne Einzeldesign erbt die Reihe weiterhin alle gemeinsamen Werte

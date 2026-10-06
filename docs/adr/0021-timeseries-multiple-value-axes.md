@@ -27,6 +27,17 @@ nicht als unbehandelten Fehler ausgeben.
 - Eine Zeitreiheninstanz unterstützt weiterhin höchstens acht Quellen und
   damit höchstens acht effektive Einheitengruppen und Y-Achsen.
 - Quellen mit derselben effektiven Einheit teilen immer dieselbe Y-Achse.
+- Der Wertebereich einer Quelle ist wahlweise automatisch, aus der
+  Variablendarstellung übernommen oder manuell festgelegt. Fehlende Felder in
+  vorhandenen Konfigurationen gelten kompatibel als automatisch.
+- Ein expliziter Bereich gilt für die gesamte Einheitengruppe. Automatische
+  Quellen derselben Einheit übernehmen ihn; mehrere explizite Bereiche müssen
+  übereinstimmen. Widersprüche sowie ein Minimum größer oder gleich dem
+  Maximum sind kontrolliert ungültige Konfigurationen.
+- Bei der Übernahme aus der Variablendarstellung werden deren gültige
+  `MIN`-/`MAX`-Werte beziehungsweise die Werte des referenzierten Profils
+  verwendet. Fehlen sie, dienen die im Listeneintrag gespeicherten Werte als
+  Rückfall.
 - Jeder Quelleneintrag erhält `AxisPosition` mit den Werten `auto`, `left`
   oder `right`. Für vorhandene Konfigurationen ohne dieses Feld gilt
   kompatibel `auto`.
@@ -59,6 +70,11 @@ wenn jede Quelle eine eigene Einheit besitzt. Bei vielen Achsen wird der
 eigentliche Zeichenbereich naturgemäß schmaler; die harte Quellen- und
 Punktbudgetgrenze bleibt deshalb bestehen. Die neue Listeneigenschaft ist
 ohne Migration kompatibel, weil fehlende Werte als `auto` ausgewertet werden.
+
+Die Bereichswahl erweitert nur das bereits vorhandene Achsenmodell; sie ist
+kein eigener Renderer- oder Gateway-Vertrag. Automatische Achsen bleiben
+echartsseitig datenabhängig skaliert, explizite Bereiche werden als
+`minimum` und `maximum` im fachlichen Achsenmodell transportiert.
 
 Die Änderung erweitert nur das Zeitreihen-Gerätemodul. Archivzugriff,
 Punktbudget, Reducer, Echtzeitsemantik und Gateway-Vertrag bleiben

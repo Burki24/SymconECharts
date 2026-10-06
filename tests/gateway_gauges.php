@@ -3069,6 +3069,9 @@ $timeSeriesForm = $timeSeries->GetConfigurationForm();
 assertGatewayGauge(
     str_contains($timeSeriesForm, 'ECTS_UpdateTimeSeriesPreviewFromForm')
         && str_contains($timeSeriesForm, 'AxisPosition')
+        && str_contains($timeSeriesForm, 'AxisRangeMode')
+        && str_contains($timeSeriesForm, 'AxisMinimum')
+        && str_contains($timeSeriesForm, 'AxisMaximum')
         && str_contains($timeSeriesForm, 'SelectColor')
         && str_contains($timeSeriesForm, 'transparentCaption')
         && str_contains($timeSeriesForm, 'UseIndividualDesign')
@@ -3319,6 +3322,115 @@ $longRangeData = json_decode($longRangeTimeSeries->GetTimeSeriesData(), true, 51
 assertGatewayGauge(
     $longRangeData['range']['aggregationLevel'] === 1,
     'Automatic aggregation must select the finest level that fits the per-series point budget.'
+);
+
+$axisRangeTimeSeries = new EChartsTimeSeries();
+$axisRangeTimeSeries->Create();
+$axisRangeTimeSeries->SetTestProperty('Sources', json_encode([
+    [
+        'VariableID'              => 4711,
+        'Label'                   => 'Manual temperature range',
+        'UseVariablePresentation' => false,
+        'Unit'                    => '°C',
+        'Decimals'                => 1,
+        'Color'                   => '',
+        'Style'                   => 'line',
+        'Reducer'                 => 'auto',
+        'AxisRangeMode'           => 'manual',
+        'AxisMinimum'             => -20.0,
+        'AxisMaximum'             => 50.0
+    ],
+    [
+        'VariableID'              => 4717,
+        'Label'                   => 'Automatic temperature range',
+        'UseVariablePresentation' => false,
+        'Unit'                    => '°C',
+        'Decimals'                => 1,
+        'Color'                   => '',
+        'Style'                   => 'line',
+        'Reducer'                 => 'auto',
+        'AxisRangeMode'           => 'auto'
+    ]
+], JSON_THROW_ON_ERROR));
+$axisRangeTimeSeries->SetTestProperty('DataMode', 'realtime');
+$axisRangeTimeSeries->ApplyChanges();
+$axisRangeData = json_decode($axisRangeTimeSeries->GetTimeSeriesData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $axisRangeTimeSeries->GetTestStatus() === IS_ACTIVE
+        && count($axisRangeData['axes']) === 1
+        && $axisRangeData['axes'][0]['minimum'] === -20.0
+        && $axisRangeData['axes'][0]['maximum'] === 50.0
+        && $axisRangeData['series'][0]['axisIndex'] === 0
+        && $axisRangeData['series'][1]['axisIndex'] === 0,
+    'An explicit manual range must govern the shared unit axis while automatic sources adopt it.'
+);
+
+$presentationRangeTimeSeries = new EChartsTimeSeries();
+$presentationRangeTimeSeries->Create();
+$presentationRangeTimeSeries->SetTestProperty('Sources', json_encode([[
+    'VariableID'              => 4715,
+    'Label'                   => 'Presented pressure range',
+    'UseVariablePresentation' => false,
+    'Unit'                    => 'hPa',
+    'Decimals'                => 2,
+    'Color'                   => '',
+    'Style'                   => 'line',
+    'Reducer'                 => 'auto',
+    'AxisRangeMode'           => 'presentation',
+    'AxisMinimum'             => 0.0,
+    'AxisMaximum'             => 100.0
+]], JSON_THROW_ON_ERROR));
+$presentationRangeTimeSeries->SetTestProperty('DataMode', 'realtime');
+$presentationRangeTimeSeries->ApplyChanges();
+$presentationRangeData = json_decode(
+    $presentationRangeTimeSeries->GetTimeSeriesData(),
+    true,
+    512,
+    JSON_THROW_ON_ERROR
+);
+assertGatewayGauge(
+    $presentationRangeTimeSeries->GetTestStatus() === IS_ACTIVE
+        && $presentationRangeData['axes'][0]['minimum'] === 950.0
+        && $presentationRangeData['axes'][0]['maximum'] === 1050.0
+        && $presentationRangeData['axes'][0]['unit'] === 'hPa',
+    'Presentation axis mode must read its range independently from unit and decimal presentation settings.'
+);
+
+$conflictingRangeTimeSeries = new EChartsTimeSeries();
+$conflictingRangeTimeSeries->Create();
+$conflictingRangeTimeSeries->SetTestProperty('Sources', json_encode([
+    [
+        'VariableID'              => 4711,
+        'Label'                   => '',
+        'UseVariablePresentation' => false,
+        'Unit'                    => '°C',
+        'Decimals'                => 1,
+        'Color'                   => '',
+        'Style'                   => 'line',
+        'Reducer'                 => 'auto',
+        'AxisRangeMode'           => 'manual',
+        'AxisMinimum'             => -20.0,
+        'AxisMaximum'             => 50.0
+    ],
+    [
+        'VariableID'              => 4717,
+        'Label'                   => '',
+        'UseVariablePresentation' => false,
+        'Unit'                    => '°C',
+        'Decimals'                => 1,
+        'Color'                   => '',
+        'Style'                   => 'line',
+        'Reducer'                 => 'auto',
+        'AxisRangeMode'           => 'manual',
+        'AxisMinimum'             => -10.0,
+        'AxisMaximum'             => 40.0
+    ]
+], JSON_THROW_ON_ERROR));
+$conflictingRangeTimeSeries->SetTestProperty('DataMode', 'realtime');
+$conflictingRangeTimeSeries->ApplyChanges();
+assertGatewayGauge(
+    $conflictingRangeTimeSeries->GetTestStatus() === 202,
+    'Time Series must reject conflicting explicit ranges for a shared unit axis.'
 );
 
 $multiAxesTimeSeries = new EChartsTimeSeries();

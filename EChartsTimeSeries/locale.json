@@ -20,6 +20,12 @@
             "Minimum": "Minimum",
             "Maximum": "Maximum",
             "Axis side": "Achsenseite",
+            "Value axis range": "Wertachsenbereich",
+            "Axis range": "Achsenbereich",
+            "Axis minimum": "Achsenminimum",
+            "Axis maximum": "Achsenmaximum",
+            "Manual": "Manuell",
+            "Automatic sources adopt an explicit range of their unit group. Conflicting explicit ranges for the same unit are invalid.": "Automatische Quellen übernehmen einen expliziten Bereich ihrer Einheitengruppe. Widersprüchliche explizite Bereiche derselben Einheit sind ungültig.",
             "Individual design": "Einzeldesign",
             "Use individual series design": "Individuelles Reihendesign verwenden",
             "Line and data points": "Linie und Datenpunkte",
@@ -100,7 +106,9 @@
             "EChartsGateway archive request failed": "EChartsGateway-Archivabfrage fehlgeschlagen",
             "The selected raw range was truncated by the point budget.": "Der gewählte Rohdatenzeitraum wurde durch das Punktbudget gekürzt.",
             "The time series could not be loaded.": "Die Zeitreihe konnte nicht geladen werden.",
-            "Sources with the same unit must use the same axis side.": "Quellen mit derselben Einheit müssen dieselbe Achsenseite verwenden."
+            "Sources with the same unit must use the same axis side.": "Quellen mit derselben Einheit müssen dieselbe Achsenseite verwenden.",
+            "Sources with the same unit must use the same explicit axis range.": "Quellen mit derselben Einheit müssen denselben expliziten Achsenbereich verwenden.",
+            "The value axis minimum must be smaller than its maximum.": "Das Wertachsenminimum muss kleiner als das Maximum sein."
         }
     }
 }

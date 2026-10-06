@@ -97,10 +97,11 @@ bereinigtem SVG-Hintergrund
 für alle Instrumente einer Ausgabe. Tacho und Chronograph sind eigenständige
 Module für jeweils 2 bis 5 Quellen und ergänzen diese Basis um quellbezogene
 Designüberschreibungen einschließlich SVG-Zeiger, SVG-Nabe und SVG-Zifferblatt.
-Der Gateway-Vertrag für Archivdaten und die erste darauf aufbauende native
+Der Gateway-Vertrag für Archivdaten und die darauf aufbauende native
 Zeitreihen-Kachel sowie ihre getrennt gestaltbare IPSView-WebContent-Ausgabe
-sind implementiert. Weiterführende Zeitreihen-Designoptionen folgen auf dieser
-Basis.
+sind implementiert. Wertachsen können je Einheitengruppe automatisch, anhand
+der Variablendarstellung oder mit manuellem Minimum und Maximum skaliert
+werden. Weiterführende Zeitreihen-Designoptionen folgen auf dieser Basis.
 Alle Gauge-Module besitzen optionale IPSView-WebContent-Ausgaben und können
 ihr Kacheldesign erben oder unabhängig gestaltet werden. Wie TimeSeries können
 sie den IPSView-Hintergrund transparent durchscheinen lassen und ihn mit einer

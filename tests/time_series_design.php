@@ -20,14 +20,19 @@ function assertTimeSeriesDesign(bool $condition, string $message): void
 
 $defaults = EChartsTimeSeriesDesign::SourceDesignDefaults();
 $columns = EChartsTimeSeriesDesign::SourceDesignColumns();
+$axisColumns = EChartsTimeSeriesDesign::AxisRangeColumns();
 $form = EChartsTimeSeriesDesign::SourceEditorForm();
 assertTimeSeriesDesign(
     ($defaults['UseIndividualDesign'] ?? null) === false
         && ($columns[0]['name'] ?? null) === 'UseIndividualDesign'
         && ($columns[0]['visible'] ?? null) === true
         && ($columns[1]['visible'] ?? null) === false
+        && array_column($axisColumns, 'name') === ['AxisRangeMode', 'AxisMinimum', 'AxisMaximum']
+        && array_column($axisColumns, 'add') === ['auto', 0.0, 100.0]
+        && EChartsTimeSeriesDesign::AXIS_RANGE_MODES === ['auto', 'presentation', 'manual']
+        && str_contains(json_encode($form, JSON_THROW_ON_ERROR), 'AxisRangeMode')
         && array_is_list($form),
-    'The individual Time Series source designer contract changed.'
+    'The Time Series source designer or axis-range contract changed.'
 );
 
 $style = EChartsTimeSeriesDesign::StyleFromSource(array_merge($defaults, [

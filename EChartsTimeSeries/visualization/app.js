@@ -240,7 +240,7 @@
             yAxis: normalizedAxes.map(function (entry, index) {
                 var axis = entry.axis;
                 var axisColor = axisColors[index] || colors.border;
-                return {
+                var valueAxis = {
                     type: 'value',
                     name: design.showYAxis !== false ? axis.unit || '' : '',
                     position: entry.position,
@@ -261,6 +261,13 @@
                     },
                     nameTextStyle: { color: axisColor }
                 };
+                var minimum = Number(axis.minimum);
+                var maximum = Number(axis.maximum);
+                if (Number.isFinite(minimum) && Number.isFinite(maximum) && minimum < maximum) {
+                    valueAxis.min = minimum;
+                    valueAxis.max = maximum;
+                }
+                return valueAxis;
             }),
             series: series.map(function (item, index) {
                 var seriesColor = seriesColors[index];

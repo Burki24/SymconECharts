@@ -207,7 +207,7 @@ assert.equal(automaticTheme.backgroundColor, '#ffffff');
 assert.equal(automaticTheme.title.textStyle.color, '#202124');
 
 const positioned = render(undefined, [
-    { unit: '°C', position: 'left', positionIndex: 0 },
+    { unit: '°C', position: 'left', positionIndex: 0, minimum: -40, maximum: 60 },
     { unit: '%', position: 'right', positionIndex: 0 },
     { unit: 'hPa', position: 'left', positionIndex: 1 },
     { unit: 'm/s', position: 'right', positionIndex: 1 },
@@ -219,6 +219,10 @@ assert.deepEqual(
     ['left', 'right', 'left', 'right', 'left', 'right']
 );
 assert.equal(positioned.yAxis[0].offset, 0);
+assert.equal(positioned.yAxis[0].min, -40);
+assert.equal(positioned.yAxis[0].max, 60);
+assert.equal(Object.hasOwn(positioned.yAxis[1], 'min'), false);
+assert.equal(Object.hasOwn(positioned.yAxis[1], 'max'), false);
 assert.equal(positioned.yAxis[1].offset, 0);
 assert.ok(positioned.yAxis[2].offset > 0);
 assert.equal(positioned.yAxis[2].offset, positioned.yAxis[3].offset);

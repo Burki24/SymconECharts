@@ -59,6 +59,10 @@ Quellen können den gemeinsamen Designer optional durch einen zentral in
 `libs/EChartsTimeSeriesDesign.php` geführten Einzelvertrag für Linie,
 Datenpunkte und Fläche überschreiben. Eigene SVG-Flächenmuster passieren dabei
 ausschließlich den vorhandenen sicheren Import aus `EChartsSvgImage`.
+Der gleiche quellbezogene Vertrag führt die persistierten Optionen für
+automatische, aus der Variablendarstellung gelesene oder manuell festgelegte
+Wertachsenbereiche. Die Zusammenführung je effektiver Einheit verbleibt als
+fachliche Validierung im Zeitreihenmodul.
 Die Testsuite prüft zusätzlich
 zu Struktur und Metadaten die Strict-Verträge, das Protokoll, die
 ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP

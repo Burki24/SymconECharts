@@ -16,6 +16,7 @@ final class EChartsTimeSeriesDesign
     public const LINE_TYPES = ['solid', 'dashed', 'dotted'];
     public const POINT_SYMBOLS = ['none', 'circle', 'rect', 'roundRect', 'triangle', 'diamond', 'pin', 'arrow'];
     public const AREA_FILL_MODES = ['color', 'gradient', 'svg'];
+    public const AXIS_RANGE_MODES = ['auto', 'presentation', 'manual'];
 
     /** @var array<string, int|string|bool> */
     private const SOURCE_DESIGN_DEFAULTS = [
@@ -58,6 +59,37 @@ final class EChartsTimeSeriesDesign
     }
 
     /** @return list<array<string, mixed>> */
+    public static function AxisRangeColumns(): array
+    {
+        return [
+            [
+                'caption' => 'AxisRangeMode',
+                'name'    => 'AxisRangeMode',
+                'width'   => '1px',
+                'visible' => false,
+                'save'    => true,
+                'add'     => 'auto'
+            ],
+            [
+                'caption' => 'AxisMinimum',
+                'name'    => 'AxisMinimum',
+                'width'   => '1px',
+                'visible' => false,
+                'save'    => true,
+                'add'     => 0.0
+            ],
+            [
+                'caption' => 'AxisMaximum',
+                'name'    => 'AxisMaximum',
+                'width'   => '1px',
+                'visible' => false,
+                'save'    => true,
+                'add'     => 100.0
+            ]
+        ];
+    }
+
+    /** @return list<array<string, mixed>> */
     public static function SourceEditorForm(): array
     {
         return [
@@ -73,6 +105,14 @@ final class EChartsTimeSeriesDesign
                 ['type' => 'Select', 'name' => 'Style', 'caption' => 'Style', 'options' => self::Options(['line', 'area'])],
                 ['type' => 'Select', 'name' => 'Reducer', 'caption' => 'Reducer', 'options' => self::Options(['auto', 'average', 'sum', 'minimum', 'maximum'])],
                 ['type' => 'Select', 'name' => 'AxisPosition', 'caption' => 'Axis side', 'options' => self::Options(['auto', 'left', 'right'])]
+            ]],
+            ['type' => 'ExpansionPanel', 'caption' => 'Value axis range', 'expanded' => false, 'items' => [
+                ['type' => 'RowLayout', 'items' => [
+                    ['type' => 'Select', 'name' => 'AxisRangeMode', 'caption' => 'Axis range', 'options' => self::Options(self::AXIS_RANGE_MODES)],
+                    ['type' => 'NumberSpinner', 'name' => 'AxisMinimum', 'caption' => 'Axis minimum', 'digits' => 3],
+                    ['type' => 'NumberSpinner', 'name' => 'AxisMaximum', 'caption' => 'Axis maximum', 'digits' => 3]
+                ]],
+                ['type' => 'Label', 'caption' => 'Automatic sources adopt an explicit range of their unit group. Conflicting explicit ranges for the same unit are invalid.']
             ]],
             ['type' => 'CheckBox', 'name' => 'UseIndividualDesign', 'caption' => 'Use individual series design'],
             ['type' => 'ExpansionPanel', 'caption' => 'Line and data points', 'expanded' => false, 'items' => [
@@ -158,9 +198,11 @@ final class EChartsTimeSeriesDesign
     private static function Options(array $values): array
     {
         $captions = [
-            'auto'      => 'Automatic',
-            'roundRect' => 'RoundRect',
-            'svg'       => 'SVG'
+            'auto'         => 'Automatic',
+            'presentation' => 'Variable presentation',
+            'manual'       => 'Manual',
+            'roundRect'    => 'RoundRect',
+            'svg'          => 'SVG'
         ];
 
         return array_map(
