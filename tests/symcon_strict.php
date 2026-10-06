@@ -101,8 +101,11 @@ foreach ([
     "RegisterPropertyBoolean('ShowYAxis', true)",
     'use Burki24\SymconModuleHelper\SVGPreviewHelper;',
     'public function UpdateTimeSeriesPreviewFromForm(string $Configuration): void',
+    'public function UpdateTimeSeriesPreviewSourceFromForm(string $Configuration, string $Action): void',
     'public function CopyTileDesignToIPSView(): void',
     'EChartsAsset::TimeSeriesJavaScript()',
+    'EChartsTimeSeriesDesign::SourceEditorForm()',
+    'EChartsTimeSeriesDesign::StyleFromSource($source)',
     'EChartsVariablePresentation::Resolve('
 ] as $timeSeriesContract) {
     requireStrictContract(

@@ -8,6 +8,7 @@
     var chart = null;
     var currentState = bootstrap.state || null;
     var currentTheme = null;
+    var areaPatternCache = Object.create(null);
 
     function translate(text) {
         return (bootstrap.translations || {})[text] || text;
@@ -52,6 +53,59 @@
             surface: resolveColor('--symc-surface', colors.surface || colors.background),
             seriesColors: colors.seriesColors
         };
+    }
+
+    function schedulePatternRender() {
+        if (!currentState) { return; }
+        if (typeof window.requestAnimationFrame === 'function') {
+            window.requestAnimationFrame(function () { render(currentState); });
+            return;
+        }
+        if (typeof window.setTimeout === 'function') {
+            window.setTimeout(function () { render(currentState); }, 0);
+        }
+    }
+
+    function resolveAreaPattern(design) {
+        var source = design && design.areaPatternImage;
+        if (typeof source !== 'string' || source.indexOf('data:image/svg+xml;base64,') !== 0
+            || typeof window.Image !== 'function') {
+            return null;
+        }
+        var sizePercent = Math.max(25, Math.min(400, Number(design.areaSVGSizePercent) || 100));
+        var key = source + '|' + sizePercent;
+        var cached = areaPatternCache[key];
+        if (cached && cached.status === 'ready') { return cached.pattern; }
+        if (cached) { return null; }
+
+        var image = new window.Image();
+        areaPatternCache[key] = { status: 'loading', pattern: null };
+        image.onload = function () {
+            var patternImage = image;
+            var size = Math.max(8, Math.round(64 * sizePercent / 100));
+            var aspectRatio = Math.max(0.05, Math.min(20, Number(design.areaPatternAspectRatio) || 1));
+            if (typeof document.createElement === 'function') {
+                var canvas = document.createElement('canvas');
+                if (canvas && typeof canvas.getContext === 'function') {
+                    canvas.width = size;
+                    canvas.height = Math.max(8, Math.round(size / aspectRatio));
+                    var context = canvas.getContext('2d');
+                    if (context && typeof context.drawImage === 'function') {
+                        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+                        patternImage = canvas;
+                    }
+                }
+            }
+            areaPatternCache[key] = {
+                status: 'ready',
+                pattern: { image: patternImage, repeat: 'repeat' }
+            };
+            schedulePatternRender();
+        };
+        image.onerror = function () { areaPatternCache[key] = { status: 'failed', pattern: null }; };
+        image.src = source;
+
+        return null;
     }
 
     function buildOption(model, theme) {
@@ -191,22 +245,59 @@
             }),
             series: series.map(function (item, index) {
                 var seriesColor = seriesColors[index];
+                var sourceDesign = item.design
+                    && typeof item.design === 'object'
+                    && !Array.isArray(item.design)
+                    && Object.keys(item.design).length > 0
+                    ? item.design : null;
+                var sourceLineWidth = sourceDesign
+                    ? 2 * Math.max(50, Math.min(200, Number(sourceDesign.lineWidthPercent) || 100)) / 100
+                    : lineWidth;
+                var sourceSymbolSize = sourceDesign
+                    ? 6 * Math.max(50, Math.min(200, Number(sourceDesign.pointSizePercent) || 100)) / 100
+                    : symbolSize;
+                var sourceSymbol = sourceDesign ? String(sourceDesign.pointSymbol || 'none') : 'circle';
+                var sourceShowSymbol = sourceDesign ? sourceSymbol !== 'none' : design.showSymbols === true;
                 var result = {
                     id: item.id,
                     name: item.label,
                     type: 'line',
                     yAxisIndex: item.axisIndex,
-                    showSymbol: design.showSymbols === true,
-                    symbolSize: symbolSize,
-                    smooth: design.smoothLines === true,
+                    showSymbol: sourceShowSymbol,
+                    symbol: sourceSymbol === 'none' ? 'circle' : sourceSymbol,
+                    symbolSize: sourceSymbolSize,
+                    smooth: sourceDesign ? sourceDesign.smoothLine === true : design.smoothLines === true,
                     connectNulls: false,
                     sampling: 'lttb',
-                    lineStyle: { width: lineWidth, color: seriesColor },
+                    lineStyle: {
+                        width: sourceLineWidth,
+                        type: sourceDesign ? String(sourceDesign.lineType || 'solid') : 'solid',
+                        color: seriesColor
+                    },
                     itemStyle: { color: seriesColor },
                     data: item.points.map(function (point) { return [point[0] * 1000, point[1]]; })
                 };
                 if (item.style === 'area') {
-                    result.areaStyle = { opacity: areaOpacity };
+                    var sourceAreaOpacity = sourceDesign
+                        ? Math.max(0, Math.min(100, Number(sourceDesign.areaOpacityPercent) || 0)) / 100
+                        : areaOpacity;
+                    if (sourceDesign && sourceDesign.areaOpacityPercent === undefined) {
+                        sourceAreaOpacity = 0.22;
+                    }
+                    result.areaStyle = { opacity: sourceAreaOpacity };
+                    if (sourceDesign && sourceDesign.areaFillMode === 'gradient') {
+                        result.areaStyle.color = {
+                            type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+                            colorStops: [
+                                { offset: 0, color: seriesColor },
+                                { offset: 1, color: sourceDesign.areaGradientColor || 'transparent' }
+                            ],
+                            global: false
+                        };
+                    } else if (sourceDesign && sourceDesign.areaFillMode === 'svg') {
+                        var pattern = resolveAreaPattern(sourceDesign);
+                        if (pattern) { result.areaStyle.color = pattern; }
+                    }
                 }
                 return result;
             })

@@ -2828,15 +2828,25 @@ $timeSeries = new EChartsTimeSeries();
 $timeSeries->Create();
 $timeSeries->SetTestProperty('Sources', json_encode([
     [
-        'VariableID'              => 4711,
-        'Label'                   => 'Temperature',
-        'UseVariablePresentation' => false,
-        'Unit'                    => '°C',
-        'Decimals'                => 1,
-        'Color'                   => 0x55CBB5,
-        'Style'                   => 'area',
-        'Reducer'                 => 'auto',
-        'AxisPosition'            => 'left'
+        'VariableID'               => 4711,
+        'Label'                    => 'Temperature',
+        'UseVariablePresentation'  => false,
+        'Unit'                     => '°C',
+        'Decimals'                 => 1,
+        'Color'                    => 0x55CBB5,
+        'Style'                    => 'area',
+        'Reducer'                  => 'auto',
+        'AxisPosition'             => 'left',
+        'UseIndividualDesign'      => true,
+        'SeriesLineType'           => 'dashed',
+        'SeriesLineWidthPercent'   => 175,
+        'SeriesSmoothLine'         => false,
+        'SeriesPointSymbol'        => 'diamond',
+        'SeriesPointSizePercent'   => 150,
+        'SeriesAreaOpacityPercent' => 55,
+        'SeriesAreaFillMode'       => 'svg',
+        'SeriesAreaSVG'            => '<svg viewBox="0 0 40 20"><circle cx="10" cy="10" r="4" fill="#AABBCC"/></svg>',
+        'SeriesAreaSVGSizePercent' => 125
     ],
     [
         'VariableID'              => 4713,
@@ -2881,8 +2891,15 @@ assertGatewayGauge(
         && $timeSeriesData['axes'][1]['positionIndex'] === 0
         && $timeSeriesData['series'][0]['effectiveReducer'] === 'average'
         && $timeSeriesData['series'][0]['color'] === '#55CBB5'
+        && $timeSeriesData['series'][0]['design']['lineType'] === 'dashed'
+        && $timeSeriesData['series'][0]['design']['lineWidthPercent'] === 175
+        && $timeSeriesData['series'][0]['design']['pointSymbol'] === 'diamond'
+        && $timeSeriesData['series'][0]['design']['areaFillMode'] === 'svg'
+        && str_starts_with($timeSeriesData['series'][0]['design']['areaPatternImage'], 'data:image/svg+xml;base64,')
+        && $timeSeriesData['series'][0]['design']['areaPatternAspectRatio'] === 2.0
         && $timeSeriesData['series'][1]['effectiveReducer'] === 'sum'
         && $timeSeriesData['series'][1]['color'] === ''
+        && $timeSeriesData['series'][1]['design'] === []
         && $timeSeriesData['chart']['design'] === [
             'legendPosition'     => 'bottom',
             'lineWidthPercent'   => 150,
@@ -2902,6 +2919,12 @@ assertGatewayGauge(
         && str_contains($timeSeriesForm, 'AxisPosition')
         && str_contains($timeSeriesForm, 'SelectColor')
         && str_contains($timeSeriesForm, 'transparentCaption')
+        && str_contains($timeSeriesForm, 'UseIndividualDesign')
+        && str_contains($timeSeriesForm, 'SeriesLineType')
+        && str_contains($timeSeriesForm, 'SeriesPointSymbol')
+        && str_contains($timeSeriesForm, 'SeriesAreaFillMode')
+        && str_contains($timeSeriesForm, 'SeriesAreaSVG')
+        && str_contains($timeSeriesForm, 'ECTS_UpdateTimeSeriesPreviewSourceFromForm')
         && str_contains($timeSeriesForm, 'ECTS_GetTimeSeriesDiagnostic')
         && str_contains($timeSeriesForm, 'ECTS_CopyTileDesignToIPSView')
         && str_contains($timeSeriesForm, 'IPSViewUseTileDesign')
@@ -3244,6 +3267,27 @@ $invalidDesignTimeSeries->ApplyChanges();
 assertGatewayGauge(
     $invalidDesignTimeSeries->GetTestStatus() === 202,
     'Time Series must reject unsupported tile design values.'
+);
+
+$invalidSourceDesignTimeSeries = new EChartsTimeSeries();
+$invalidSourceDesignTimeSeries->Create();
+$invalidSourceDesignTimeSeries->SetTestProperty('Sources', json_encode([[
+    'VariableID'              => 4711,
+    'Label'                   => '',
+    'UseVariablePresentation' => false,
+    'Unit'                    => '°C',
+    'Decimals'                => 1,
+    'Color'                   => '',
+    'Style'                   => 'area',
+    'Reducer'                 => 'auto',
+    'UseIndividualDesign'     => true,
+    'SeriesAreaFillMode'      => 'svg',
+    'SeriesAreaSVG'           => '<svg viewBox="0 0 10 10"><script>alert(1)</script></svg>'
+]], JSON_THROW_ON_ERROR));
+$invalidSourceDesignTimeSeries->ApplyChanges();
+assertGatewayGauge(
+    $invalidSourceDesignTimeSeries->GetTestStatus() === 202,
+    'Time Series must reject unsafe SVG area patterns in an active individual source design.'
 );
 
 echo "Gateway and Gauge module integration verified.\n";

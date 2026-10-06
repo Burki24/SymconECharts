@@ -61,7 +61,9 @@ Folgende Module beinhaltet das SymconECharts Repository:
   Tooltip und einen eigenen Kacheldesigner für Legende, Zoom,
   Linien, Flächen, Raster und Achsen in einer nativen Kachel bereit. Ein
   eigener Echtzeitmodus zeichnet auch nicht archivierte Variablen ab dem
-  Öffnen der Kachel fort.
+  Öffnen der Kachel fort. Optional kann jede Reihe Linie, Datenpunkte und
+  Flächenfüllung einschließlich Verlauf oder sicher importiertem SVG-Muster
+  individuell gestalten.
 
 Für eine reguläre Installation genügt eine gemeinsame EChartsGateway-Instanz
 für alle Gauge- und späteren Diagramminstanzen. Beim ersten Diagramm kann ein

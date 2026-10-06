@@ -52,6 +52,10 @@ reale Symcon-Laufzeit- und Browsertests fehlen noch. Das Time-Series-Modul
 nutzt den Gateway-Vertrag `archive.read` für rohe oder aggregierte Werte und
 rendert daraus die erste native Zeitreihen-Kachel sowie optional eine getrennt
 gestaltbare IPSView-WebContent-Ausgabe.
+Quellen können den gemeinsamen Designer optional durch einen zentral in
+`libs/EChartsTimeSeriesDesign.php` geführten Einzelvertrag für Linie,
+Datenpunkte und Fläche überschreiben. Eigene SVG-Flächenmuster passieren dabei
+ausschließlich den vorhandenen sicheren Import aus `EChartsSvgImage`.
 Die Testsuite prüft zusätzlich
 zu Struktur und Metadaten die Strict-Verträge, das Protokoll, die
 ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
@@ -266,6 +270,9 @@ den Kacheldesigner und [`ADR 0021`](adr/0021-timeseries-multiple-value-axes.md)
 die Mehr-Achsen-Anordnung. Die getrennte IPSView-Ausgabe und ihr unabhängiger
 Designvertrag sind in
 [`ADR 0022`](adr/0022-timeseries-ipsview-output.md) festgelegt.
+Das quellenbezogene Einzeldesign einschließlich sicherer SVG-Flächenmuster
+dokumentiert
+[`ADR 0023`](adr/0023-timeseries-source-design-and-svg-area-patterns.md).
 Das Gerätemodul setzt davon Quellen, Roh-, Aggregat- und Echtzeitmodus,
 Punktbudget, Mehr-Achsen-Modell, native Kachel und die optionale IPSView-
 Ausgabe um. Reale Laufzeitmessungen bleiben als nächster Schritt offen.

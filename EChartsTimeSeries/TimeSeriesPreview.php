@@ -8,7 +8,7 @@ use Burki24\SymconModuleHelper\SVGPreviewHelper;
 
 final class EChartsTimeSeriesPreview
 {
-    /** @param list<array{label:string,color:string,style:string}> $series @param array<string,mixed> $design */
+    /** @param list<array{label:string,color:string,style:string,design?:array<string,mixed>}> $series @param array<string,mixed> $design */
     public static function CreateSvg(
         array $series,
         string $title,
@@ -46,6 +46,7 @@ final class EChartsTimeSeriesPreview
         $plotTop = $legendPosition === 'top' ? 92 : 62;
         $plotBottom = $legendPosition === 'bottom' ? 300 : 330;
         $content = '';
+        $definitions = '';
 
         if ($showGrid) {
             for ($index = 0; $index < 5; ++$index) {
@@ -66,8 +67,24 @@ final class EChartsTimeSeriesPreview
 
         foreach ($series as $index => $item) {
             $color = $effectiveColors[$index];
+            $sourceDesign = is_array($item['design'] ?? null) ? $item['design'] : [];
+            $sourceLineWidth = $sourceDesign !== []
+                ? 2.5 * max(50, min(200, (int) ($sourceDesign['lineWidthPercent'] ?? 100))) / 100
+                : $lineWidth;
+            $sourceSmooth = $sourceDesign !== []
+                ? (bool) ($sourceDesign['smoothLine'] ?? false)
+                : $smoothLines;
+            $sourceSymbol = $sourceDesign !== []
+                ? (string) ($sourceDesign['pointSymbol'] ?? 'none')
+                : ($showSymbols ? 'circle' : 'none');
+            $sourceSymbolRadius = $sourceDesign !== []
+                ? 3.5 * max(50, min(200, (int) ($sourceDesign['pointSizePercent'] ?? 100))) / 100
+                : $symbolRadius;
+            $sourceAreaOpacity = $sourceDesign !== []
+                ? max(0, min(100, (int) ($sourceDesign['areaOpacityPercent'] ?? 22))) / 100
+                : $areaOpacity;
             $offset = $index * 24.0;
-            $path = $smoothLines
+            $path = $sourceSmooth
                 ? 'M 70 ' . self::N(250 - $offset)
                     . ' C 155 ' . self::N(210 + $offset) . ', 225 ' . self::N(270 - $offset)
                     . ', 310 ' . self::N(185 + $offset / 2)
@@ -80,15 +97,52 @@ final class EChartsTimeSeriesPreview
                     . ' L 540 ' . self::N(135 + $offset)
                     . ' L 680 ' . self::N(105 + $offset);
             if (($item['style'] ?? 'line') === 'area') {
+                $fill = $color;
+                $fillMode = (string) ($sourceDesign['areaFillMode'] ?? 'color');
+                if ($fillMode === 'gradient') {
+                    $gradientID = 'area-gradient-' . $index;
+                    $gradientEnd = preg_match('/^#[0-9A-F]{6}$/i', (string) ($sourceDesign['areaGradientColor'] ?? '')) === 1
+                        ? (string) $sourceDesign['areaGradientColor']
+                        : $color;
+                    $gradientEndOpacity = $gradientEnd === $color ? '0' : '1';
+                    $definitions .= '<linearGradient id="' . $gradientID . '" x1="0" y1="0" x2="0" y2="1">'
+                        . '<stop offset="0%" stop-color="' . SVGPreviewHelper::escape($color) . '"/>'
+                        . '<stop offset="100%" stop-color="' . SVGPreviewHelper::escape($gradientEnd)
+                        . '" stop-opacity="' . $gradientEndOpacity . '"/></linearGradient>';
+                    $fill = 'url(#' . $gradientID . ')';
+                } elseif ($fillMode === 'svg'
+                    && str_starts_with((string) ($sourceDesign['areaPatternImage'] ?? ''), 'data:image/svg+xml;base64,')) {
+                    $patternID = 'area-pattern-' . $index;
+                    $patternWidth = 64.0 * max(25, min(400, (int) ($sourceDesign['areaSVGSizePercent'] ?? 100))) / 100;
+                    $aspectRatio = max(0.05, min(20.0, (float) ($sourceDesign['areaPatternAspectRatio'] ?? 1.0)));
+                    $patternHeight = $patternWidth / $aspectRatio;
+                    $definitions .= '<pattern id="' . $patternID . '" width="' . self::N($patternWidth)
+                        . '" height="' . self::N($patternHeight) . '" patternUnits="userSpaceOnUse">'
+                        . '<image href="' . SVGPreviewHelper::escape((string) $sourceDesign['areaPatternImage'])
+                        . '" width="' . self::N($patternWidth) . '" height="' . self::N($patternHeight)
+                        . '" preserveAspectRatio="xMidYMid meet"/></pattern>';
+                    $fill = 'url(#' . $patternID . ')';
+                }
                 $content .= '<path d="' . $path . ' L 680 ' . self::N($plotBottom) . ' L 70 '
-                    . self::N($plotBottom) . ' Z" fill="' . SVGPreviewHelper::escape($color)
-                    . '" opacity="' . self::N($areaOpacity) . '"/>';
+                    . self::N($plotBottom) . ' Z" fill="' . SVGPreviewHelper::escape($fill)
+                    . '" opacity="' . self::N($sourceAreaOpacity) . '"/>';
             }
+            $dashArray = match ((string) ($sourceDesign['lineType'] ?? 'solid')) {
+                'dashed' => '10 7',
+                'dotted' => '2 6',
+                default  => ''
+            };
             $content .= '<path d="' . $path . '" fill="none" stroke="' . SVGPreviewHelper::escape($color)
-                . '" stroke-width="' . self::N($lineWidth) . '" stroke-linecap="round"/>';
-            if ($showSymbols) {
-                $content .= '<circle cx="310" cy="' . self::N(185 + $offset / 2) . '" r="'
-                    . self::N($symbolRadius) . '" fill="' . SVGPreviewHelper::escape($color) . '"/>';
+                . '" stroke-width="' . self::N($sourceLineWidth) . '" stroke-linecap="round"'
+                . ($dashArray !== '' ? ' stroke-dasharray="' . $dashArray . '"' : '') . '/>';
+            if ($sourceSymbol !== 'none') {
+                $content .= self::Symbol(
+                    $sourceSymbol,
+                    310.0,
+                    185 + $offset / 2,
+                    $sourceSymbolRadius,
+                    $color
+                );
             }
         }
 
@@ -119,10 +173,38 @@ final class EChartsTimeSeriesPreview
             . SVGPreviewHelper::escape($effectiveColors[0] ?? $palette['border']) . '">'
             . '<rect width="750" height="390" rx="18" fill="' . SVGPreviewHelper::escape($backgroundColor) . '"'
             . ($adaptToBackground ? ' fill-opacity="' . self::N($backgroundOpacityPercent / 100) . '"' : '') . '/>'
+            . ($definitions !== '' ? '<defs>' . $definitions . '</defs>' : '')
             . '<text x="375" y="31" fill="' . SVGPreviewHelper::escape($palette['text'])
             . '" font-size="20" font-weight="600" text-anchor="middle">'
             . SVGPreviewHelper::escape(trim($title) !== '' ? $title : 'Time Series') . '</text>'
             . $content . '</svg>';
+    }
+
+    private static function Symbol(string $symbol, float $x, float $y, float $radius, string $color): string
+    {
+        $fill = SVGPreviewHelper::escape($color);
+        $xValue = self::N($x);
+        $yValue = self::N($y);
+        $radiusValue = self::N($radius);
+
+        return match ($symbol) {
+            'rect', 'roundRect' => '<rect x="' . self::N($x - $radius) . '" y="' . self::N($y - $radius)
+                . '" width="' . self::N($radius * 2) . '" height="' . self::N($radius * 2) . '"'
+                . ($symbol === 'roundRect' ? ' rx="' . self::N($radius * 0.45) . '"' : '') . ' fill="' . $fill . '"/>',
+            'triangle' => '<path d="M ' . $xValue . ' ' . self::N($y - $radius)
+                . ' L ' . self::N($x + $radius) . ' ' . self::N($y + $radius)
+                . ' L ' . self::N($x - $radius) . ' ' . self::N($y + $radius) . ' Z" fill="' . $fill . '"/>',
+            'diamond' => '<path d="M ' . $xValue . ' ' . self::N($y - $radius)
+                . ' L ' . self::N($x + $radius) . ' ' . $yValue
+                . ' L ' . $xValue . ' ' . self::N($y + $radius)
+                . ' L ' . self::N($x - $radius) . ' ' . $yValue . ' Z" fill="' . $fill . '"/>',
+            'pin', 'arrow' => '<path d="M ' . $xValue . ' ' . self::N($y - $radius)
+                . ' L ' . self::N($x + $radius) . ' ' . $yValue
+                . ' L ' . $xValue . ' ' . self::N($y + $radius)
+                . ' L ' . self::N($x - $radius) . ' ' . $yValue . ' Z" fill="' . $fill . '"/>',
+            default => '<circle cx="' . $xValue . '" cy="' . $yValue . '" r="' . $radiusValue
+                . '" fill="' . $fill . '"/>'
+        };
     }
 
     private static function N(float $value): string

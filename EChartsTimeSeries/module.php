@@ -11,6 +11,7 @@ use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsDataProtocol;
+use SymconECharts\EChartsTimeSeriesDesign;
 use SymconECharts\EChartsTimeSeriesPreview;
 use SymconECharts\EChartsVariablePresentation;
 
@@ -23,6 +24,7 @@ require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
+require_once __DIR__ . '/../libs/EChartsTimeSeriesDesign.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 require_once __DIR__ . '/TimeSeriesPreview.php';
 
@@ -162,6 +164,7 @@ class EChartsTimeSeries extends IPSModuleStrict
     {
         $form = $this->LoadConfigurationForm();
         if (isset($form['elements']) && is_array($form['elements'])) {
+            $form['elements'] = $this->AttachSourceDesigner($form['elements']);
             $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
             $form['elements'] = $this->AttachTimeSeriesPreviewActions($form['elements']);
         }
@@ -234,6 +237,36 @@ class EChartsTimeSeries extends IPSModuleStrict
         ));
     }
 
+    /** Refreshes both previews after a source-row editor was confirmed. */
+    public function UpdateTimeSeriesPreviewSourceFromForm(string $Configuration, string $Action): void
+    {
+        try {
+            $values = json_decode($Configuration, true, 64, JSON_THROW_ON_ERROR);
+        } catch (JsonException) {
+            $values = [];
+        }
+        $row = is_array($values) && is_array($values['Sources'] ?? null) ? $values['Sources'] : [];
+        $sources = json_decode($this->ReadPropertyString('Sources'), true);
+        $sources = is_array($sources) && array_is_list($sources) ? $sources : [];
+        $variableID = (int) ($row['VariableID'] ?? 0);
+        $matchingIndex = null;
+        foreach ($sources as $index => $source) {
+            if (is_array($source) && (int) ($source['VariableID'] ?? 0) === $variableID) {
+                $matchingIndex = $index;
+                break;
+            }
+        }
+        if ($Action === 'delete' && $matchingIndex !== null) {
+            array_splice($sources, $matchingIndex, 1);
+        } elseif ($Action === 'add') {
+            $sources[] = $row;
+        } elseif ($matchingIndex !== null) {
+            $sources[$matchingIndex] = $row;
+        }
+        $values['Sources'] = $sources;
+        $this->UpdateTimeSeriesPreviewFromForm(json_encode($values, JSON_THROW_ON_ERROR));
+    }
+
     public function RequestAction(string $Ident, mixed $Value): void
     {
         if ($this->HandleIPSViewHTMLPageAction($Ident, $Value)) {
@@ -292,6 +325,7 @@ class EChartsTimeSeries extends IPSModuleStrict
                 'decimals'               => $source['Decimals'],
                 'color'                  => $source['Color'],
                 'style'                  => $source['Style'],
+                'design'                 => $source['Design'],
                 'axisIndex'              => $axisIndexes[$source['Unit']],
                 'effectiveReducer'       => $archive['EffectiveReducer'],
                 'archiveAggregationType' => $archive['ArchiveAggregationType'],
@@ -529,7 +563,7 @@ class EChartsTimeSeries extends IPSModuleStrict
         return null;
     }
 
-    /** @return list<array{VariableID:int,Label:string,Unit:string,Decimals:int,Color:string,Style:string,Reducer:string,AxisPosition:string}> */
+    /** @return list<array{VariableID:int,Label:string,Unit:string,Decimals:int,Color:string,Style:string,Reducer:string,AxisPosition:string,Design:array<string,mixed>}> */
     private function GetValidatedSources(): array
     {
         try {
@@ -565,10 +599,11 @@ class EChartsTimeSeries extends IPSModuleStrict
             $reducer = $source['Reducer'] ?? 'auto';
             $axisPosition = $source['AxisPosition'] ?? 'auto';
             $usePresentation = $source['UseVariablePresentation'] ?? true;
+            $useIndividualDesign = $source['UseIndividualDesign'] ?? false;
             $normalizedColor = self::NormalizeSourceColor($color);
             if (!is_string($label) || !is_string($unit) || !is_int($decimals)
                 || $normalizedColor === null || !is_string($style) || !is_string($reducer) || !is_string($axisPosition)
-                || !is_bool($usePresentation) || $decimals < 0 || $decimals > 6
+                || !is_bool($usePresentation) || !is_bool($useIndividualDesign) || $decimals < 0 || $decimals > 6
                 || !in_array($style, self::STYLES, true) || !in_array($reducer, self::REDUCERS, true)
                 || !in_array($axisPosition, self::AXIS_POSITIONS, true)
             ) {
@@ -583,6 +618,13 @@ class EChartsTimeSeries extends IPSModuleStrict
                 $usePresentation
             );
             $effectiveUnit = $presentation['unit'];
+            try {
+                $sourceDesign = $useIndividualDesign
+                    ? EChartsTimeSeriesDesign::StyleFromSource($source)
+                    : [];
+            } catch (InvalidArgumentException $exception) {
+                throw new UnexpectedValueException($exception->getMessage(), self::STATUS_CONFIGURATION_INVALID, $exception);
+            }
             $variableIDs[$variableID] = true;
             $result[] = [
                 'VariableID'   => $variableID,
@@ -592,7 +634,8 @@ class EChartsTimeSeries extends IPSModuleStrict
                 'Color'        => $normalizedColor,
                 'Style'        => $style,
                 'Reducer'      => $reducer,
-                'AxisPosition' => $axisPosition
+                'AxisPosition' => $axisPosition,
+                'Design'       => $sourceDesign
             ];
         }
 
@@ -977,7 +1020,7 @@ class EChartsTimeSeries extends IPSModuleStrict
         return $design;
     }
 
-    /** @return list<array{label:string,color:string,style:string}> */
+    /** @return list<array{label:string,color:string,style:string,design:array<string,mixed>}> */
     private function PreviewSeries(mixed $formSources = null): array
     {
         $sources = $formSources;
@@ -1005,10 +1048,19 @@ class EChartsTimeSeries extends IPSModuleStrict
             $style = is_string($source['Style'] ?? null) && in_array($source['Style'], self::STYLES, true)
                 ? $source['Style']
                 : 'line';
+            $sourceDesign = [];
+            if (($source['UseIndividualDesign'] ?? false) === true) {
+                try {
+                    $sourceDesign = EChartsTimeSeriesDesign::StyleFromSource($source);
+                } catch (InvalidArgumentException) {
+                    $sourceDesign = [];
+                }
+            }
             $result[] = [
-                'label' => $label !== '' ? $label : 'Series ' . ($index + 1),
-                'color' => $color ?? '',
-                'style' => $style
+                'label'  => $label !== '' ? $label : 'Series ' . ($index + 1),
+                'color'  => $color ?? '',
+                'style'  => $style,
+                'design' => $sourceDesign
             ];
         }
 
@@ -1039,6 +1091,30 @@ class EChartsTimeSeries extends IPSModuleStrict
     }
 
     /** @param list<array<string,mixed>> $items @return list<array<string,mixed>> */
+    private function AttachSourceDesigner(array $items): array
+    {
+        foreach ($items as &$item) {
+            if (($item['type'] ?? '') === 'List' && ($item['name'] ?? '') === 'Sources') {
+                $item['form'] = EChartsTimeSeriesDesign::SourceEditorForm();
+                $item['columns'] = array_merge(
+                    is_array($item['columns'] ?? null) ? $item['columns'] : [],
+                    EChartsTimeSeriesDesign::SourceDesignColumns()
+                );
+                $item['onAdd'] = $this->TimeSeriesPreviewFormAction('add');
+                $item['onEdit'] = $this->TimeSeriesPreviewFormAction('edit');
+                $item['onDelete'] = $this->TimeSeriesPreviewFormAction('delete');
+                continue;
+            }
+            if (isset($item['items']) && is_array($item['items'])) {
+                $item['items'] = $this->AttachSourceDesigner($item['items']);
+            }
+        }
+        unset($item);
+
+        return $items;
+    }
+
+    /** @param list<array<string,mixed>> $items @return list<array<string,mixed>> */
     private function AttachTimeSeriesPreviewActions(array $items): array
     {
         $action = $this->TimeSeriesPreviewFormAction();
@@ -1055,12 +1131,17 @@ class EChartsTimeSeries extends IPSModuleStrict
         return $items;
     }
 
-    private function TimeSeriesPreviewFormAction(): string
+    private function TimeSeriesPreviewFormAction(string $sourceAction = ''): string
     {
         $pairs = array_map(
             static fn (string $name): string => "'" . $name . "' => $" . $name,
             self::DESIGN_FORM_FIELDS
         );
+
+        if ($sourceAction !== '') {
+            return 'ECTS_UpdateTimeSeriesPreviewSourceFromForm($id, json_encode([' . implode(', ', $pairs)
+                . ']), ' . var_export($sourceAction, true) . ');';
+        }
 
         return 'ECTS_UpdateTimeSeriesPreviewFromForm($id, json_encode([' . implode(', ', $pairs) . ']));';
     }

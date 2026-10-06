@@ -12,6 +12,10 @@ optional ein eigenständiges IPSView-WebContent-Widget.
   Verdichtung auf Minute, 5 Minuten, 15 Minuten, Stunde oder Tag;
 - Echtzeitdarstellung nicht archivierter Variablen ab dem Öffnen der Kachel;
 - Linien- oder Flächendarstellung je Quelle;
+- optionales Einzeldesign je Quelle für Linienart, Linienstärke, Glättung,
+  Punktsymbol und Punktgröße sowie Flächendeckkraft;
+- einfarbige Flächen, lineare Farbverläufe oder sicher importierte,
+  größenverstellbare SVG-Flächenmuster;
 - automatische Übernahme von Einheit und Nachkommastellen aus der
   Variablendarstellung mit manuellen Rückfallwerten;
 - eine gemeinsame Y-Achse je effektiver Einheit mit automatischer oder
@@ -58,6 +62,10 @@ Kachel einen Hinweis auf das wirksame Punktbudget.
    teilen eine Achse und verwenden deshalb dieselbe ausdrücklich gewählte
    Seite. Der Farbwähler verwendet **Automatisch** für die Farbfolge des
    gewählten Themes; eine ausgewählte Farbe überschreibt sie für diese Reihe.
+   Über das Zahnrad einer Quelle kann außerdem das **Einzeldesign** aktiviert
+   werden. Ohne Einzeldesign erbt die Reihe weiterhin alle gemeinsamen Werte
+   des Kachel- beziehungsweise IPSView-Designers. SVG-Flächenmuster werden nur
+   für den Flächenstil verwendet und vor der Ausgabe sicher validiert.
 5. Optional den Kacheldesigner öffnen und Darstellung sowie Vorschau anpassen.
 6. Optional im Abschnitt **IPSView-Design** die WebContent-Ausgabe aktivieren.
    Standardmäßig übernimmt sie das Kacheldesign. Für eine abweichende

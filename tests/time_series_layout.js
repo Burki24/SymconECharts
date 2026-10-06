@@ -22,9 +22,11 @@ function render(
     theme = 'dark',
     resolvedColors = {},
     mode = 'symcon',
-    adaptToBackground = false
+    adaptToBackground = false,
+    enableImages = false
 ) {
     const listeners = {};
+    const scheduled = [];
     const chartElement = {
         hidden: false,
         clientWidth: width,
@@ -43,6 +45,16 @@ function render(
         resize: () => {},
         dispose: () => {}
     };
+    function TestImage() {
+        this.onload = null;
+        this.onerror = null;
+    }
+    Object.defineProperty(TestImage.prototype, 'src', {
+        set(value) {
+            this.source = value;
+            if (typeof this.onload === 'function') { this.onload(); }
+        }
+    });
     const window = {
         SYMC_VISUALIZATION: {
             mode,
@@ -56,7 +68,8 @@ function render(
                     series: chartSeries || [
                         {
                             id: 'temperature', label: 'Temperature', axisIndex: 0, decimals: 1,
-                            unit: '°C', color: '#E5754F', style: 'area', points: [[1000, 20], [2000, 21]]
+                            unit: '°C', color: '#E5754F', style: 'area', design: [],
+                            points: [[1000, 20], [2000, 21]]
                         },
                         {
                             id: 'humidity', label: 'Humidity', axisIndex: 1, decimals: 0,
@@ -74,15 +87,21 @@ function render(
             }
         },
         echarts: { init: () => chart },
+        Image: enableImages ? TestImage : undefined,
         getComputedStyle: probe => ({
             color: resolvedColors[probe.variable] || probe.fallback || ''
         }),
+        setTimeout: callback => { scheduled.push(callback); },
         addEventListener: () => {}
     };
     const document = {
         documentElement: { classList: { contains: () => false } },
         body: { appendChild: () => {} },
-        createElement: () => ({
+        createElement: tagName => tagName === 'canvas' ? {
+            width: 0,
+            height: 0,
+            getContext: () => ({ drawImage: () => {} })
+        } : ({
             style: {
                 set color(value) {
                     const match = /^var\((--[^,]+),\s*(.+)\)$/.exec(value);
@@ -103,13 +122,15 @@ function render(
         })[id]
     };
     const originalCreateElement = document.createElement;
-    document.createElement = () => {
-        const probe = originalCreateElement();
+    document.createElement = tagName => {
+        const probe = originalCreateElement(tagName);
+        if (tagName === 'canvas') { return probe; }
         probe.style.owner = probe;
         return probe;
     };
 
     vm.runInNewContext(source, { window, document });
+    while (scheduled.length > 0) { scheduled.shift()(); }
     assert.ok(option, 'The time-series chart should be rendered.');
     Object.defineProperties(option, {
         testListeners: { value: listeners },
@@ -216,6 +237,46 @@ const sharedAxis = render(undefined, [{ unit: '°C', position: 'left', positionI
 ]);
 assert.equal(sharedAxis.yAxis[0].axisLine.lineStyle.color, '#AABBCC');
 assert.equal(sharedAxis.series[1].lineStyle.color, '#DDEEFF');
+
+const individual = render(undefined, [{ unit: '°C', position: 'left', positionIndex: 0 }], 750, [
+    {
+        id: 'individual', label: 'Individual', axisIndex: 0, decimals: 1,
+        unit: '°C', color: '#AABBCC', style: 'area', points: [[1000, 20], [2000, 21]],
+        design: {
+            lineType: 'dotted', lineWidthPercent: 175, smoothLine: true,
+            pointSymbol: 'diamond', pointSizePercent: 150,
+            areaOpacityPercent: 55, areaFillMode: 'gradient', areaGradientColor: '#123456'
+        }
+    }
+]);
+assert.equal(individual.series[0].lineStyle.type, 'dotted');
+assert.equal(individual.series[0].lineStyle.width, 3.5);
+assert.equal(individual.series[0].smooth, true);
+assert.equal(individual.series[0].showSymbol, true);
+assert.equal(individual.series[0].symbol, 'diamond');
+assert.equal(individual.series[0].symbolSize, 9);
+assert.equal(individual.series[0].areaStyle.opacity, 0.55);
+assert.equal(individual.series[0].areaStyle.color.type, 'linear');
+assert.equal(individual.series[0].areaStyle.color.colorStops[1].color, '#123456');
+
+const svgArea = render(undefined, [{ unit: '%', position: 'left', positionIndex: 0 }], 750, [
+    {
+        id: 'svg-area', label: 'SVG area', axisIndex: 0, decimals: 0,
+        unit: '%', color: '#55CBB5', style: 'area', points: [[1000, 40], [2000, 60]],
+        design: {
+            lineType: 'solid', lineWidthPercent: 100, smoothLine: false,
+            pointSymbol: 'none', pointSizePercent: 100,
+            areaOpacityPercent: 35, areaFillMode: 'svg',
+            areaPatternImage: 'data:image/svg+xml;base64,PHN2Zy8+',
+            areaPatternAspectRatio: 2, areaSVGSizePercent: 125
+        }
+    }
+], 'dark', {}, 'symcon', false, true);
+assert.equal(svgArea.series[0].showSymbol, false);
+assert.equal(svgArea.series[0].areaStyle.opacity, 0.35);
+assert.equal(svgArea.series[0].areaStyle.color.repeat, 'repeat');
+assert.equal(svgArea.series[0].areaStyle.color.image.width, 80);
+assert.equal(svgArea.series[0].areaStyle.color.image.height, 40);
 
 const ipsViewZoom = render(undefined, undefined, 750, undefined, 'dark', {}, 'ipsview');
 assert.equal(ipsViewZoom.dataZoom[0].zoomOnMouseWheel, false);
