@@ -13,8 +13,8 @@ const palette = {
     background: '#202020', text: '#ffffff', muted: '#aaaaaa', border: '#cccccc', track: '#444444'
 };
 
-function render(design) {
-    const chartElement = { hidden: false };
+function render(design, axes, width = 750) {
+    const chartElement = { hidden: false, clientWidth: width };
     const warningElement = { hidden: true, textContent: '' };
     const errorElement = { hidden: true, textContent: '' };
     let option;
@@ -33,7 +33,7 @@ function render(design) {
                     theme: 'dark',
                     chart: { title: 'Climate', enableZoom: true, design },
                     range: { startTimestamp: 1000, endTimestamp: 2000 },
-                    axes: [{ unit: '°C' }, { unit: '%' }],
+                    axes: axes || [{ unit: '°C' }, { unit: '%' }],
                     series: [
                         {
                             id: 'temperature', label: 'Temperature', axisIndex: 0, decimals: 1,
@@ -85,6 +85,10 @@ assert.equal(custom.xAxis.axisLine.show, false);
 assert.equal(custom.xAxis.splitLine.show, false);
 assert.equal(custom.yAxis[0].axisLine.show, true);
 assert.equal(custom.yAxis[0].splitLine.show, false);
+assert.equal(custom.yAxis[0].position, 'left');
+assert.equal(custom.yAxis[1].position, 'right');
+assert.equal(custom.yAxis[0].offset, 0);
+assert.equal(custom.yAxis[1].offset, 0);
 
 const hidden = render({ legendPosition: 'hidden', showGrid: true, showXAxis: true, showYAxis: false });
 assert.equal(hidden.legend.show, false);
@@ -92,6 +96,9 @@ assert.equal(hidden.xAxis.axisLine.show, true);
 assert.equal(hidden.xAxis.splitLine.show, false);
 assert.equal(hidden.yAxis[0].axisLine.show, false);
 assert.equal(hidden.yAxis[0].splitLine.show, true);
+assert.equal(hidden.yAxis[1].splitLine.show, false);
+assert.equal(hidden.grid.left, 22);
+assert.equal(hidden.grid.right, 22);
 
 const compatible = render(undefined);
 assert.equal(compatible.legend.show, true);
@@ -102,5 +109,26 @@ assert.equal(compatible.series[0].showSymbol, false);
 assert.equal(compatible.series[0].areaStyle.opacity, 0.22);
 assert.equal(compatible.xAxis.axisLine.show, true);
 assert.equal(compatible.yAxis[0].axisLine.show, true);
+
+const positioned = render(undefined, [
+    { unit: '°C', position: 'left', positionIndex: 0 },
+    { unit: '%', position: 'right', positionIndex: 0 },
+    { unit: 'hPa', position: 'left', positionIndex: 1 },
+    { unit: 'm/s', position: 'right', positionIndex: 1 },
+    { unit: 'W/m²', position: 'left', positionIndex: 2 },
+    { unit: 'mm', position: 'right', positionIndex: 2 }
+], 600);
+assert.deepEqual(
+    Array.from(positioned.yAxis, axis => axis.position),
+    ['left', 'right', 'left', 'right', 'left', 'right']
+);
+assert.equal(positioned.yAxis[0].offset, 0);
+assert.equal(positioned.yAxis[1].offset, 0);
+assert.ok(positioned.yAxis[2].offset > 0);
+assert.equal(positioned.yAxis[2].offset, positioned.yAxis[3].offset);
+assert.ok(positioned.yAxis[4].offset > positioned.yAxis[2].offset);
+assert.equal(positioned.grid.left, positioned.grid.right);
+assert.ok(positioned.grid.left <= 192);
+assert.equal(positioned.yAxis.filter(axis => axis.splitLine.show).length, 1);
 
 process.stdout.write('Time Series tile design layout verified.\n');

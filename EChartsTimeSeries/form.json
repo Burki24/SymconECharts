@@ -128,8 +128,35 @@
                             }
                         ]
                     }
+                },
+                {
+                    "caption": "Axis side",
+                    "name": "AxisPosition",
+                    "width": "105px",
+                    "add": "auto",
+                    "edit": {
+                        "type": "Select",
+                        "options": [
+                            {
+                                "caption": "Automatic",
+                                "value": "auto"
+                            },
+                            {
+                                "caption": "Left",
+                                "value": "left"
+                            },
+                            {
+                                "caption": "Right",
+                                "value": "right"
+                            }
+                        ]
+                    }
                 }
             ]
+        },
+        {
+            "type": "Label",
+            "caption": "Sources with the same unit share one value axis and must use the same explicitly selected side. Automatic distributes unit axes between left and right."
         },
         {
             "type": "RowLayout",
@@ -364,7 +391,7 @@
         {
             "type": "Button",
             "caption": "Read current time series data",
-            "onClick": "echo ECTS_GetTimeSeriesData($id);"
+            "onClick": "echo ECTS_GetTimeSeriesDiagnostic($id);"
         }
     ],
     "status": [

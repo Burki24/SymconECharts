@@ -44,6 +44,26 @@
         var titleVisible = Boolean(model.chart && model.chart.title);
         var gridTop = headerInset + (legendPosition === 'top' ? 64 : (titleVisible ? 48 : 20));
         var gridBottom = bottomLegend ? (zoom ? 94 : 58) : (zoom ? 64 : 34);
+        var axisCounts = { left: 0, right: 0 };
+        var normalizedAxes = axes.map(function (axis, index) {
+            var position = axis.position === 'left' || axis.position === 'right'
+                ? axis.position : (index === 0 ? 'left' : 'right');
+            var positionIndex = Number.isInteger(axis.positionIndex) && axis.positionIndex >= 0
+                ? axis.positionIndex : axisCounts[position];
+            axisCounts[position] = Math.max(axisCounts[position], positionIndex + 1);
+            return { axis: axis, position: position, positionIndex: positionIndex };
+        });
+        var chartWidth = Math.max(320, Number(chartElement.clientWidth) || 750);
+        var maximumAxisMargin = Math.max(58, Math.min(190, chartWidth * 0.32));
+        var maximumSideCount = Math.max(axisCounts.left, axisCounts.right);
+        var axisOffsetStep = maximumSideCount > 1
+            ? Math.min(54, (maximumAxisMargin - 58) / (maximumSideCount - 1)) : 0;
+        var leftMargin = axisCounts.left > 0 ? 58 + axisOffsetStep * (axisCounts.left - 1) : 22;
+        var rightMargin = axisCounts.right > 0 ? 58 + axisOffsetStep * (axisCounts.right - 1) : 22;
+        if (design.showYAxis === false) {
+            leftMargin = 22;
+            rightMargin = 22;
+        }
 
         return {
             backgroundColor: colors.background,
@@ -63,7 +83,7 @@
                 textStyle: { color: colors.text },
                 data: series.map(function (item) { return item.label; })
             },
-            grid: { left: 58, right: axes.length > 1 ? 58 : 22, top: gridTop, bottom: gridBottom },
+            grid: { left: leftMargin, right: rightMargin, top: gridTop, bottom: gridBottom },
             tooltip: {
                 trigger: 'axis',
                 axisPointer: { type: 'cross' },
@@ -98,11 +118,13 @@
                 axisLabel: { show: design.showXAxis !== false, color: colors.muted },
                 splitLine: { show: false }
             },
-            yAxis: axes.map(function (axis, index) {
+            yAxis: normalizedAxes.map(function (entry, index) {
+                var axis = entry.axis;
                 return {
                     type: 'value',
                     name: design.showYAxis !== false ? axis.unit || '' : '',
-                    position: index === 0 ? 'left' : 'right',
+                    position: entry.position,
+                    offset: entry.positionIndex * axisOffsetStep,
                     axisLine: { show: design.showYAxis !== false, lineStyle: { color: colors.border } },
                     axisTick: { show: design.showYAxis !== false },
                     axisLabel: {
@@ -111,7 +133,7 @@
                         formatter: '{value}' + (axis.unit ? ' ' + axis.unit : '')
                     },
                     splitLine: {
-                        show: design.showGrid !== false,
+                        show: index === 0 && design.showGrid !== false,
                         lineStyle: { color: colors.track || colors.border, opacity: 0.35 }
                     },
                     nameTextStyle: { color: colors.muted }
@@ -210,7 +232,13 @@
     };
 
     if (window.ResizeObserver) {
-        new ResizeObserver(function () { if (chart) { chart.resize(); } }).observe(chartElement);
+        new ResizeObserver(function () {
+            if (!chart) { return; }
+            chart.resize();
+            if (currentState && currentState.status === 'ready' && currentState.chart) {
+                chart.setOption(buildOption(currentState.chart, currentTheme), true);
+            }
+        }).observe(chartElement);
     } else {
         window.addEventListener('resize', function () { if (chart) { chart.resize(); } });
     }

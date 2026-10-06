@@ -61,6 +61,7 @@ class EChartsTimeSeries extends IPSModuleStrict
     private const AGGREGATION_SECONDS = [6 => 60, 5 => 300, 8 => 900, 0 => 3600, 1 => 86400];
     private const REDUCERS = ['auto', 'average', 'sum', 'minimum', 'maximum'];
     private const STYLES = ['line', 'area'];
+    private const AXIS_POSITIONS = ['auto', 'left', 'right'];
     private const LEGEND_POSITIONS = ['top', 'bottom', 'hidden'];
     private const DESIGN_FORM_FIELDS = [
         'Title', 'Sources', 'EChartsTheme', 'LegendPosition', 'EnableZoom',
@@ -170,15 +171,12 @@ class EChartsTimeSeries extends IPSModuleStrict
 
         $sources = $this->GetValidatedSources();
         $query = $this->ResolveArchiveQuery(count($sources));
-        $axes = [];
-        $axisIndexes = [];
+        $axisModel = $this->BuildAxisModel($sources);
+        $axes = $axisModel['Axes'];
+        $axisIndexes = $axisModel['Indexes'];
         $series = [];
         $truncated = false;
         foreach ($sources as $source) {
-            if (!array_key_exists($source['Unit'], $axisIndexes)) {
-                $axisIndexes[$source['Unit']] = count($axes);
-                $axes[] = ['unit' => $source['Unit']];
-            }
             $archive = $query['Mode'] === 'realtime'
                 ? $this->ReadRealtimeSource($source['VariableID'], $query['EndTimestamp'])
                 : $this->ReadArchiveSource($source, $query);
@@ -227,6 +225,24 @@ class EChartsTimeSeries extends IPSModuleStrict
             'series'        => $series,
             'truncated'     => $truncated
         ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
+    }
+
+    public function GetTimeSeriesDiagnostic(): string
+    {
+        try {
+            return $this->GetTimeSeriesData();
+        } catch (Throwable $exception) {
+            $this->SendDebug('GetTimeSeriesDiagnostic', $exception::class, 0);
+            $error = $this->GetConfigurationError();
+            $status = $error['Status']
+                ?? ($this->HasActiveParent() ? self::STATUS_GATEWAY_FAILED : self::STATUS_PARENT_MISSING);
+
+            return json_encode([
+                'success' => false,
+                'status'  => $status,
+                'error'   => $this->Translate($exception->getMessage())
+            ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        }
     }
 
     public function GetVisualizationTile(): string
@@ -388,7 +404,7 @@ class EChartsTimeSeries extends IPSModuleStrict
         return null;
     }
 
-    /** @return list<array{VariableID:int,Label:string,Unit:string,Decimals:int,Color:string,Style:string,Reducer:string}> */
+    /** @return list<array{VariableID:int,Label:string,Unit:string,Decimals:int,Color:string,Style:string,Reducer:string,AxisPosition:string}> */
     private function GetValidatedSources(): array
     {
         try {
@@ -405,7 +421,6 @@ class EChartsTimeSeries extends IPSModuleStrict
 
         $result = [];
         $variableIDs = [];
-        $units = [];
         foreach ($sources as $index => $source) {
             if (!is_array($source)) {
                 throw new UnexpectedValueException('Time series source ' . ($index + 1) . ' is invalid.', 201);
@@ -423,12 +438,14 @@ class EChartsTimeSeries extends IPSModuleStrict
             $color = $source['Color'] ?? '';
             $style = $source['Style'] ?? 'line';
             $reducer = $source['Reducer'] ?? 'auto';
+            $axisPosition = $source['AxisPosition'] ?? 'auto';
             $usePresentation = $source['UseVariablePresentation'] ?? true;
             if (!is_string($label) || !is_string($unit) || !is_int($decimals)
-                || !is_string($color) || !is_string($style) || !is_string($reducer)
+                || !is_string($color) || !is_string($style) || !is_string($reducer) || !is_string($axisPosition)
                 || !is_bool($usePresentation) || $decimals < 0 || $decimals > 6
                 || ($color !== '' && preg_match('/^#[0-9A-F]{6}$/i', $color) !== 1)
                 || !in_array($style, self::STYLES, true) || !in_array($reducer, self::REDUCERS, true)
+                || !in_array($axisPosition, self::AXIS_POSITIONS, true)
             ) {
                 throw new UnexpectedValueException('Time series source settings are invalid.', 202);
             }
@@ -441,23 +458,77 @@ class EChartsTimeSeries extends IPSModuleStrict
                 $usePresentation
             );
             $effectiveUnit = $presentation['unit'];
-            $units[$effectiveUnit] = true;
-            if (count($units) > 2) {
-                throw new UnexpectedValueException('A time series supports at most two unit groups.', 202);
-            }
             $variableIDs[$variableID] = true;
             $result[] = [
-                'VariableID' => $variableID,
-                'Label'      => trim($label),
-                'Unit'       => $effectiveUnit,
-                'Decimals'   => $presentation['decimals'],
-                'Color'      => strtoupper($color),
-                'Style'      => $style,
-                'Reducer'    => $reducer
+                'VariableID'   => $variableID,
+                'Label'        => trim($label),
+                'Unit'         => $effectiveUnit,
+                'Decimals'     => $presentation['decimals'],
+                'Color'        => strtoupper($color),
+                'Style'        => $style,
+                'Reducer'      => $reducer,
+                'AxisPosition' => $axisPosition
             ];
         }
 
+        $this->BuildAxisModel($result);
+
         return $result;
+    }
+
+    /**
+     * @param list<array{Unit:string,AxisPosition:string}> $sources
+     * @return array{Axes:list<array{unit:string,position:string,positionIndex:int}>,Indexes:array<string,int>}
+     */
+    private function BuildAxisModel(array $sources): array
+    {
+        $groups = [];
+        foreach ($sources as $source) {
+            $unit = $source['Unit'];
+            $requestedPosition = $source['AxisPosition'];
+            if (!array_key_exists($unit, $groups)) {
+                $groups[$unit] = ['unit' => $unit, 'position' => 'auto'];
+            }
+            $groupPosition = $groups[$unit]['position'];
+            if ($requestedPosition !== 'auto' && $groupPosition !== 'auto' && $groupPosition !== $requestedPosition) {
+                throw new UnexpectedValueException(
+                    'Sources with the same unit must use the same axis side.',
+                    self::STATUS_CONFIGURATION_INVALID
+                );
+            }
+            if ($requestedPosition !== 'auto') {
+                $groups[$unit]['position'] = $requestedPosition;
+            }
+        }
+
+        $counts = ['left' => 0, 'right' => 0];
+        foreach ($groups as $group) {
+            if ($group['position'] !== 'auto') {
+                ++$counts[$group['position']];
+            }
+        }
+        foreach ($groups as &$group) {
+            if ($group['position'] === 'auto') {
+                $group['position'] = $counts['left'] <= $counts['right'] ? 'left' : 'right';
+                ++$counts[$group['position']];
+            }
+        }
+        unset($group);
+
+        $axes = [];
+        $indexes = [];
+        $positionIndexes = ['left' => 0, 'right' => 0];
+        foreach ($groups as $unit => $group) {
+            $position = $group['position'];
+            $indexes[$unit] = count($axes);
+            $axes[] = [
+                'unit'          => $group['unit'],
+                'position'      => $position,
+                'positionIndex' => $positionIndexes[$position]++
+            ];
+        }
+
+        return ['Axes' => $axes, 'Indexes' => $indexes];
     }
 
     /** @return array{DurationSeconds:int,StartTimestamp:int,EndTimestamp:int,Mode:string,AggregationLevel:int|null,Limit:int} */

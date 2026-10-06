@@ -4,7 +4,7 @@
 - Datum: 2026-10-06
 - Entscheider: Burki24
 - Ergänzt: ADR 0001, ADR 0002, ADR 0005 und ADR 0017
-- Ersetzt durch: –
+- Teilweise ersetzt durch: ADR 0021
 
 ## Kontext
 
@@ -88,6 +88,11 @@ Der nachträglich ergänzte Echtzeitmodus für Variablen ohne aktivierte
 Archivierung ist als eigenständige Semantik in
 [`ADR 0019`](0019-timeseries-realtime-without-archive.md) festgelegt. Er
 verändert insbesondere nicht die hier definierte Bedeutung von `raw`.
+
+Die hier festgelegte Begrenzung auf zwei Einheitengruppen wurde nach der
+ersten Laufzeiterprobung durch
+[`ADR 0021`](0021-timeseries-multiple-value-axes.md) ersetzt. Die übrigen
+Verträge dieser ADR bleiben unverändert.
 
 Kreis-, Balken-, Kalender-, Streu- und kombinierte Diagramme, frei gewählte
 absolute Zeiträume, serverseitige Formeln sowie mehr als zwei Einheitengruppen

@@ -85,6 +85,7 @@ foreach ([
     'SetVisualizationType(1)',
     'public function GetVisualizationTile(): string',
     'public function GetTimeSeriesData(): string',
+    'public function GetTimeSeriesDiagnostic(): string',
     "RegisterPropertyString('DataMode', 'auto')",
     "['realtime', 'raw', 'auto'",
     "RegisterPropertyInteger('PointBudget', 2000)",

@@ -19,6 +19,10 @@
             "Sum": "Summe",
             "Minimum": "Minimum",
             "Maximum": "Maximum",
+            "Axis side": "Achsenseite",
+            "Left": "Links",
+            "Right": "Rechts",
+            "Sources with the same unit share one value axis and must use the same explicitly selected side. Automatic distributes unit axes between left and right.": "Quellen mit derselben Einheit teilen sich eine Wertachse und müssen dieselbe ausdrücklich gewählte Seite verwenden. Automatisch verteilt Einheitenachsen auf links und rechts.",
             "Time range": "Zeitraum",
             "1 hour": "1 Stunde",
             "6 hours": "6 Stunden",
@@ -58,7 +62,8 @@
             "No active EChartsGateway is connected": "Kein aktives EChartsGateway verbunden",
             "EChartsGateway archive request failed": "EChartsGateway-Archivabfrage fehlgeschlagen",
             "The selected raw range was truncated by the point budget.": "Der gewählte Rohdatenzeitraum wurde durch das Punktbudget gekürzt.",
-            "The time series could not be loaded.": "Die Zeitreihe konnte nicht geladen werden."
+            "The time series could not be loaded.": "Die Zeitreihe konnte nicht geladen werden.",
+            "Sources with the same unit must use the same axis side.": "Quellen mit derselben Einheit müssen dieselbe Achsenseite verwenden."
         }
     }
 }

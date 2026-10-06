@@ -2,7 +2,7 @@
 
 Gerätemodul für historische numerische Symcon-Werte als responsive Apache-
 ECharts-Zeitreihe. Eine Instanz verarbeitet eine bis acht eindeutige Quellen,
-höchstens zwei Einheitengruppen und rendert eine native Symcon-Kachel.
+bis zu acht Einheitengruppen und rendert eine native Symcon-Kachel.
 
 ## Aktueller Funktionsumfang
 
@@ -13,7 +13,8 @@ höchstens zwei Einheitengruppen und rendert eine native Symcon-Kachel.
 - Linien- oder Flächendarstellung je Quelle;
 - automatische Übernahme von Einheit und Nachkommastellen aus der
   Variablendarstellung mit manuellen Rückfallwerten;
-- maximal zwei Y-Achsen nach effektiver Einheit;
+- eine gemeinsame Y-Achse je effektiver Einheit mit automatischer oder
+  expliziter Anordnung links beziehungsweise rechts;
 - gemeinsames Punktbudget von 200 bis 8.000 Punkten, maximal 2.000 je Reihe;
 - Durchschnitt, Zählersumme, Minimum und Maximum entsprechend dem
   versionierten Archivvertrag;
@@ -41,11 +42,15 @@ Kachel einen Hinweis auf das wirksame Punktbudget.
 2. Eine bis acht Integer- oder Float-Variablen konfigurieren. Archivmodi
    benötigen archivierte Quellen; `realtime` funktioniert auch ohne Archiv.
 3. Zeitraum, Datenmodus und Punktbudget wählen.
-4. Optional Beschriftung, Einheit, Nachkommastellen, Farbe, Stil und Reducer
-   pro Quelle anpassen.
+4. Optional Beschriftung, Einheit, Nachkommastellen, Farbe, Stil, Reducer und
+   Achsenseite pro Quelle anpassen. Quellen mit derselben effektiven Einheit
+   teilen eine Achse und verwenden deshalb dieselbe ausdrücklich gewählte
+   Seite.
 5. Optional den Kacheldesigner öffnen und Darstellung sowie Vorschau anpassen.
 
-Mehr als zwei unterschiedliche effektive Einheiten werden bewusst abgelehnt.
+Bis zu acht unterschiedliche effektive Einheiten sind möglich. Automatisch
+verteilt die Einheitenachsen auf beide Seiten; mehrere Achsen derselben Seite
+werden versetzt dargestellt.
 `raw` bleibt immer eine echte Rohwertabfrage; `realtime` ist der ausdrücklich
 archivfreie Live-Modus und nur `auto` wählt selbstständig eine
 Verdichtungsstufe.

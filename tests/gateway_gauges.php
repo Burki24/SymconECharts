@@ -2835,7 +2835,8 @@ $timeSeries->SetTestProperty('Sources', json_encode([
         'Decimals'                => 1,
         'Color'                   => '#55CBB5',
         'Style'                   => 'area',
-        'Reducer'                 => 'auto'
+        'Reducer'                 => 'auto',
+        'AxisPosition'            => 'left'
     ],
     [
         'VariableID'              => 4713,
@@ -2845,7 +2846,8 @@ $timeSeries->SetTestProperty('Sources', json_encode([
         'Decimals'                => 0,
         'Color'                   => '',
         'Style'                   => 'line',
-        'Reducer'                 => 'auto'
+        'Reducer'                 => 'auto',
+        'AxisPosition'            => 'right'
     ]
 ], JSON_THROW_ON_ERROR));
 $timeSeries->SetTestProperty('Range', '1h');
@@ -2872,6 +2874,10 @@ assertGatewayGauge(
     $timeSeriesData['family'] === 'time-series'
         && $timeSeriesData['range']['aggregationLevel'] === 6
         && count($timeSeriesData['axes']) === 2
+        && $timeSeriesData['axes'][0]['position'] === 'left'
+        && $timeSeriesData['axes'][0]['positionIndex'] === 0
+        && $timeSeriesData['axes'][1]['position'] === 'right'
+        && $timeSeriesData['axes'][1]['positionIndex'] === 0
         && $timeSeriesData['series'][0]['effectiveReducer'] === 'average'
         && $timeSeriesData['series'][1]['effectiveReducer'] === 'sum'
         && $timeSeriesData['chart']['design'] === [
@@ -2885,13 +2891,15 @@ assertGatewayGauge(
             'showXAxis'          => false,
             'showYAxis'          => true
         ],
-    'Time Series must build the accepted two-axis aggregated chart model.'
+    'Time Series must build the accepted positioned-axis aggregated chart model.'
 );
 $timeSeriesForm = $timeSeries->GetConfigurationForm();
 assertGatewayGauge(
     str_contains($timeSeriesForm, 'ECTS_UpdateTimeSeriesPreviewFromForm')
+        && str_contains($timeSeriesForm, 'AxisPosition')
+        && str_contains($timeSeriesForm, 'ECTS_GetTimeSeriesDiagnostic')
         && str_contains($timeSeriesForm, 'data:image/svg+xml;base64,'),
-    'Time Series form must provide a live SVG tile preview.'
+    'Time Series form must provide axis positioning, a safe diagnostic action and a live SVG tile preview.'
 );
 $timeSeries->UpdateTimeSeriesPreviewFromForm(json_encode([
     'Title'              => 'Edited preview',
@@ -3038,26 +3046,85 @@ assertGatewayGauge(
     'Automatic aggregation must select the finest level that fits the per-series point budget.'
 );
 
-$invalidAxesTimeSeries = new EChartsTimeSeries();
-$invalidAxesTimeSeries->Create();
-$invalidAxesTimeSeries->SetTestProperty('Sources', json_encode(array_map(
-    static fn (int $variableID, string $unit): array => [
+$multiAxesTimeSeries = new EChartsTimeSeries();
+$multiAxesTimeSeries->Create();
+$multiAxisSources = [];
+foreach (range(0, 7) as $axisIndex) {
+    $variableID = 4800 + $axisIndex;
+    $GLOBALS['symconTestVariables'][$variableID] = [
+        'VariableType'    => 2,
+        'VariableUpdated' => 1780000700 + $axisIndex,
+        'Value'           => 10.0 + $axisIndex,
+        'Name'            => 'Axis source ' . ($axisIndex + 1)
+    ];
+    $multiAxisSources[] = [
         'VariableID'              => $variableID,
         'Label'                   => '',
         'UseVariablePresentation' => false,
-        'Unit'                    => $unit,
+        'Unit'                    => 'unit-' . ($axisIndex + 1),
         'Decimals'                => 1,
         'Color'                   => '',
         'Style'                   => 'line',
-        'Reducer'                 => 'auto'
-    ],
-    [4711, 4713, 4714],
-    ['°C', '%', 'hPa']
-), JSON_THROW_ON_ERROR));
-$invalidAxesTimeSeries->ApplyChanges();
+        'Reducer'                 => 'auto',
+        'AxisPosition'            => ['auto', 'right', 'left', 'auto', 'auto', 'auto', 'auto', 'auto'][$axisIndex]
+    ];
+}
+$multiAxesTimeSeries->SetTestProperty('Sources', json_encode($multiAxisSources, JSON_THROW_ON_ERROR));
+$multiAxesTimeSeries->SetTestProperty('DataMode', 'realtime');
+$multiAxesTimeSeries->ApplyChanges();
+$multiAxesData = json_decode($multiAxesTimeSeries->GetTimeSeriesData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
-    $invalidAxesTimeSeries->GetTestStatus() === 202,
-    'Time Series must reject configurations with more than two effective unit groups.'
+    $multiAxesTimeSeries->GetTestStatus() === IS_ACTIVE
+        && count($multiAxesData['axes']) === 8
+        && array_column($multiAxesData['axes'], 'position')
+            === ['left', 'right', 'left', 'right', 'left', 'right', 'left', 'right']
+        && array_column($multiAxesData['axes'], 'positionIndex') === [0, 0, 1, 1, 2, 2, 3, 3]
+        && array_column($multiAxesData['series'], 'axisIndex') === range(0, 7),
+    'Time Series must support one positioned value axis for every one of its eight allowed sources.'
+);
+foreach (array_column($multiAxisSources, 'VariableID') as $variableID) {
+    unset($GLOBALS['symconTestVariables'][$variableID]);
+}
+
+$conflictingAxesTimeSeries = new EChartsTimeSeries();
+$conflictingAxesTimeSeries->Create();
+$conflictingAxesTimeSeries->SetTestProperty('Sources', json_encode([
+    [
+        'VariableID'              => 4711,
+        'Label'                   => '',
+        'UseVariablePresentation' => false,
+        'Unit'                    => '°C',
+        'Decimals'                => 1,
+        'Color'                   => '',
+        'Style'                   => 'line',
+        'Reducer'                 => 'auto',
+        'AxisPosition'            => 'left'
+    ],
+    [
+        'VariableID'              => 4713,
+        'Label'                   => '',
+        'UseVariablePresentation' => false,
+        'Unit'                    => '°C',
+        'Decimals'                => 1,
+        'Color'                   => '',
+        'Style'                   => 'line',
+        'Reducer'                 => 'auto',
+        'AxisPosition'            => 'right'
+    ]
+], JSON_THROW_ON_ERROR));
+$conflictingAxesTimeSeries->ApplyChanges();
+$conflictingAxesDiagnostic = json_decode(
+    $conflictingAxesTimeSeries->GetTimeSeriesDiagnostic(),
+    true,
+    512,
+    JSON_THROW_ON_ERROR
+);
+assertGatewayGauge(
+    $conflictingAxesTimeSeries->GetTestStatus() === 202
+        && $conflictingAxesDiagnostic['success'] === false
+        && $conflictingAxesDiagnostic['status'] === 202
+        && str_contains($conflictingAxesDiagnostic['error'], 'same unit'),
+    'Time Series must reject conflicting sides for a shared unit and return the error diagnostically.'
 );
 
 $invalidDesignTimeSeries = new EChartsTimeSeries();
