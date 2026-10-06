@@ -38,6 +38,11 @@ nicht als unbehandelten Fehler ausgeben.
 - Mehrere Achsen auf derselben Seite werden mit responsiven Offsets
   auseinandergezogen. Der Zeichenbereich reserviert entsprechend Platz; nur
   die erste Achse zeichnet Rasterlinien, damit sich Raster nicht überlagern.
+- Achsenlinie, Teilstriche, Skalenwerte und Einheitenbezeichnung übernehmen
+  die effektive Farbe der ersten zugeordneten Datenreihe. Explizite
+  Serienfarben haben Vorrang; andernfalls verwendet der Renderer die zentral
+  dokumentierte Farbfolge des gewählten ECharts-Themes. Rasterlinien bleiben
+  neutral.
 - Das fachliche Datenmodell liefert `position` und `positionIndex` je Achse.
   Der Browser besitzt für ältere Modelle ohne diese Felder weiterhin die
   bisherige Rückfallanordnung: erste Achse links, weitere Achsen rechts.

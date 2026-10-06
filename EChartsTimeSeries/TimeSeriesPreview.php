@@ -16,7 +16,13 @@ final class EChartsTimeSeriesPreview
             ['label' => 'Temperature', 'color' => '', 'style' => 'line'],
             ['label' => 'Humidity', 'color' => '', 'style' => 'area']
         ];
-        $colors = ['#55CBB5', '#5C83E9', '#DB7393', '#E6A547'];
+        $fallbackColors = $palette['seriesColors'];
+        $effectiveColors = [];
+        foreach ($series as $index => $item) {
+            $effectiveColors[] = preg_match('/^#[0-9A-F]{6}$/i', $item['color']) === 1
+                ? $item['color']
+                : $fallbackColors[$index % count($fallbackColors)];
+        }
         $legendPosition = (string) ($design['legendPosition'] ?? 'top');
         $lineWidth = 2.5 * max(50, min(200, (int) ($design['lineWidthPercent'] ?? 100))) / 100;
         $symbolRadius = 3.5 * max(50, min(200, (int) ($design['symbolSizePercent'] ?? 100))) / 100;
@@ -43,11 +49,12 @@ final class EChartsTimeSeriesPreview
         }
         if ($showYAxis) {
             $content .= '<line x1="70" y1="' . self::N($plotTop) . '" x2="70" y2="'
-                . self::N($plotBottom) . '" stroke="' . SVGPreviewHelper::escape($palette['border']) . '"/>';
+                . self::N($plotBottom) . '" stroke="'
+                . SVGPreviewHelper::escape($effectiveColors[0] ?? $palette['border']) . '"/>';
         }
 
         foreach ($series as $index => $item) {
-            $color = preg_match('/^#[0-9A-F]{6}$/i', $item['color']) === 1 ? $item['color'] : $colors[$index % 4];
+            $color = $effectiveColors[$index];
             $offset = $index * 24.0;
             $path = $smoothLines
                 ? 'M 70 ' . self::N(250 - $offset)
@@ -78,8 +85,7 @@ final class EChartsTimeSeriesPreview
             $legendY = $legendPosition === 'bottom' ? 352 : 64;
             $legendX = 80.0;
             foreach ($series as $index => $item) {
-                $color = preg_match('/^#[0-9A-F]{6}$/i', $item['color']) === 1
-                    ? $item['color'] : $colors[$index % 4];
+                $color = $effectiveColors[$index];
                 $label = trim($item['label']) !== '' ? $item['label'] : 'Series ' . ($index + 1);
                 $content .= '<line x1="' . self::N($legendX) . '" y1="' . self::N($legendY)
                     . '" x2="' . self::N($legendX + 22) . '" y2="' . self::N($legendY)
@@ -95,7 +101,9 @@ final class EChartsTimeSeriesPreview
             . ' data-legend-position="' . SVGPreviewHelper::escape($legendPosition) . '"'
             . ' data-smooth-lines="' . ($smoothLines ? 'true' : 'false') . '"'
             . ' data-show-symbols="' . ($showSymbols ? 'true' : 'false') . '"'
-            . ' data-area-opacity="' . self::N($areaOpacity) . '">'
+            . ' data-area-opacity="' . self::N($areaOpacity) . '"'
+            . ' data-axis-color="'
+            . SVGPreviewHelper::escape($effectiveColors[0] ?? $palette['border']) . '">'
             . '<rect width="750" height="390" rx="18" fill="' . SVGPreviewHelper::escape($palette['background']) . '"/>'
             . '<text x="375" y="31" fill="' . SVGPreviewHelper::escape($palette['text'])
             . '" font-size="20" font-weight="600" text-anchor="middle">'

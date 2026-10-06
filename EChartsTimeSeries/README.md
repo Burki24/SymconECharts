@@ -15,6 +15,8 @@ bis zu acht Einheitengruppen und rendert eine native Symcon-Kachel.
   Variablendarstellung mit manuellen Rückfallwerten;
 - eine gemeinsame Y-Achse je effektiver Einheit mit automatischer oder
   expliziter Anordnung links beziehungsweise rechts;
+- farblich gekoppelte Wertachsen: Achsenlinie, Teilstriche, Skalenwerte und
+  Einheit übernehmen die Farbe der ersten zugeordneten Datenreihe;
 - gemeinsames Punktbudget von 200 bis 8.000 Punkten, maximal 2.000 je Reihe;
 - Durchschnitt, Zählersumme, Minimum und Maximum entsprechend dem
   versionierten Archivvertrag;

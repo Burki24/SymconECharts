@@ -2936,7 +2936,8 @@ assertGatewayGauge(
         && str_contains($timeSeriesPreviewSvg, 'data-legend-position="hidden"')
         && str_contains($timeSeriesPreviewSvg, 'data-smooth-lines="false"')
         && str_contains($timeSeriesPreviewSvg, 'data-show-symbols="true"')
-        && str_contains($timeSeriesPreviewSvg, 'data-area-opacity="0.55"'),
+        && str_contains($timeSeriesPreviewSvg, 'data-area-opacity="0.55"')
+        && str_contains($timeSeriesPreviewSvg, 'data-axis-color="#E5754F"'),
     'Time Series preview must react immediately to unpersisted source and design values.'
 );
 $timeSeriesTile = $timeSeries->GetVisualizationTile();

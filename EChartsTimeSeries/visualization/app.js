@@ -30,6 +30,15 @@
         var colors = palette(theme);
         var axes = Array.isArray(model.axes) ? model.axes : [];
         var series = Array.isArray(model.series) ? model.series : [];
+        var seriesPalette = Array.isArray(colors.seriesColors) && colors.seriesColors.length > 0
+            ? colors.seriesColors : [colors.accent || colors.border];
+        var seriesColors = series.map(function (item, index) {
+            return item.color || seriesPalette[index % seriesPalette.length];
+        });
+        var axisColors = axes.map(function (axis, axisIndex) {
+            var seriesIndex = series.findIndex(function (item) { return item.axisIndex === axisIndex; });
+            return seriesIndex >= 0 ? seriesColors[seriesIndex] : colors.border;
+        });
         var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 10;
         var zoom = model.chart && model.chart.enableZoom === true;
         var design = model.chart && model.chart.design || {};
@@ -67,6 +76,7 @@
 
         return {
             backgroundColor: colors.background,
+            color: seriesPalette,
             animation: false,
             aria: { enabled: true, decal: { show: false } },
             title: {
@@ -120,26 +130,31 @@
             },
             yAxis: normalizedAxes.map(function (entry, index) {
                 var axis = entry.axis;
+                var axisColor = axisColors[index] || colors.border;
                 return {
                     type: 'value',
                     name: design.showYAxis !== false ? axis.unit || '' : '',
                     position: entry.position,
                     offset: entry.positionIndex * axisOffsetStep,
-                    axisLine: { show: design.showYAxis !== false, lineStyle: { color: colors.border } },
-                    axisTick: { show: design.showYAxis !== false },
+                    axisLine: { show: design.showYAxis !== false, lineStyle: { color: axisColor } },
+                    axisTick: {
+                        show: design.showYAxis !== false,
+                        lineStyle: { color: axisColor }
+                    },
                     axisLabel: {
                         show: design.showYAxis !== false,
-                        color: colors.muted,
+                        color: axisColor,
                         formatter: '{value}' + (axis.unit ? ' ' + axis.unit : '')
                     },
                     splitLine: {
                         show: index === 0 && design.showGrid !== false,
                         lineStyle: { color: colors.track || colors.border, opacity: 0.35 }
                     },
-                    nameTextStyle: { color: colors.muted }
+                    nameTextStyle: { color: axisColor }
                 };
             }),
-            series: series.map(function (item) {
+            series: series.map(function (item, index) {
+                var seriesColor = seriesColors[index];
                 var result = {
                     id: item.id,
                     name: item.label,
@@ -150,13 +165,10 @@
                     smooth: design.smoothLines === true,
                     connectNulls: false,
                     sampling: 'lttb',
-                    lineStyle: { width: lineWidth },
+                    lineStyle: { width: lineWidth, color: seriesColor },
+                    itemStyle: { color: seriesColor },
                     data: item.points.map(function (point) { return [point[0] * 1000, point[1]]; })
                 };
-                if (item.color) {
-                    result.lineStyle.color = item.color;
-                    result.itemStyle = { color: item.color };
-                }
                 if (item.style === 'area') {
                     result.areaStyle = { opacity: areaOpacity };
                 }

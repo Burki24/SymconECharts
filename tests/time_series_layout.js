@@ -10,10 +10,11 @@ const source = fs.readFileSync(
     'utf8'
 );
 const palette = {
-    background: '#202020', text: '#ffffff', muted: '#aaaaaa', border: '#cccccc', track: '#444444'
+    background: '#202020', text: '#ffffff', muted: '#aaaaaa', border: '#cccccc', track: '#444444',
+    accent: '#55cbb5', seriesColors: ['#111111', '#222222', '#333333']
 };
 
-function render(design, axes, width = 750) {
+function render(design, axes, width = 750, chartSeries) {
     const chartElement = { hidden: false, clientWidth: width };
     const warningElement = { hidden: true, textContent: '' };
     const errorElement = { hidden: true, textContent: '' };
@@ -34,7 +35,7 @@ function render(design, axes, width = 750) {
                     chart: { title: 'Climate', enableZoom: true, design },
                     range: { startTimestamp: 1000, endTimestamp: 2000 },
                     axes: axes || [{ unit: '°C' }, { unit: '%' }],
-                    series: [
+                    series: chartSeries || [
                         {
                             id: 'temperature', label: 'Temperature', axisIndex: 0, decimals: 1,
                             unit: '°C', color: '#E5754F', style: 'area', points: [[1000, 20], [2000, 21]]
@@ -77,6 +78,9 @@ assert.equal(custom.legend.bottom, 6);
 assert.equal(custom.dataZoom[1].bottom, 38);
 assert.equal(custom.series[0].lineStyle.width, 3);
 assert.equal(custom.series[0].lineStyle.color, '#E5754F');
+assert.equal(custom.series[0].itemStyle.color, '#E5754F');
+assert.equal(custom.series[1].lineStyle.color, '#222222');
+assert.equal(custom.series[1].itemStyle.color, '#222222');
 assert.equal(custom.series[0].smooth, true);
 assert.equal(custom.series[0].showSymbol, true);
 assert.equal(custom.series[0].symbolSize, 7.5);
@@ -84,6 +88,14 @@ assert.equal(custom.series[0].areaStyle.opacity, 0.4);
 assert.equal(custom.xAxis.axisLine.show, false);
 assert.equal(custom.xAxis.splitLine.show, false);
 assert.equal(custom.yAxis[0].axisLine.show, true);
+assert.equal(custom.yAxis[0].axisLine.lineStyle.color, '#E5754F');
+assert.equal(custom.yAxis[0].axisTick.lineStyle.color, '#E5754F');
+assert.equal(custom.yAxis[0].axisLabel.color, '#E5754F');
+assert.equal(custom.yAxis[0].nameTextStyle.color, '#E5754F');
+assert.equal(custom.yAxis[1].axisLine.lineStyle.color, '#222222');
+assert.equal(custom.yAxis[1].axisTick.lineStyle.color, '#222222');
+assert.equal(custom.yAxis[1].axisLabel.color, '#222222');
+assert.equal(custom.yAxis[1].nameTextStyle.color, '#222222');
 assert.equal(custom.yAxis[0].splitLine.show, false);
 assert.equal(custom.yAxis[0].position, 'left');
 assert.equal(custom.yAxis[1].position, 'right');
@@ -130,5 +142,18 @@ assert.ok(positioned.yAxis[4].offset > positioned.yAxis[2].offset);
 assert.equal(positioned.grid.left, positioned.grid.right);
 assert.ok(positioned.grid.left <= 192);
 assert.equal(positioned.yAxis.filter(axis => axis.splitLine.show).length, 1);
+
+const sharedAxis = render(undefined, [{ unit: '°C', position: 'left', positionIndex: 0 }], 750, [
+    {
+        id: 'inside', label: 'Inside', axisIndex: 0, decimals: 1,
+        unit: '°C', color: '#AABBCC', style: 'line', points: [[1000, 20], [2000, 21]]
+    },
+    {
+        id: 'outside', label: 'Outside', axisIndex: 0, decimals: 1,
+        unit: '°C', color: '#DDEEFF', style: 'line', points: [[1000, 10], [2000, 11]]
+    }
+]);
+assert.equal(sharedAxis.yAxis[0].axisLine.lineStyle.color, '#AABBCC');
+assert.equal(sharedAxis.series[1].lineStyle.color, '#DDEEFF');
 
 process.stdout.write('Time Series tile design layout verified.\n');

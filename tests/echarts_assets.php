@@ -72,6 +72,12 @@ assertEChartsAsset(
     array_keys(EChartsAsset::ThemePalettes()) === $expectedThemeIDs,
     'Every supported ECharts theme must provide a readable renderer palette.'
 );
+foreach (EChartsAsset::ThemePalettes() as $themeID => $palette) {
+    assertEChartsAsset(
+        count($palette['seriesColors']) >= 8,
+        'Every ECharts theme must expose enough series colors for all Time Series sources: ' . $themeID
+    );
+}
 $themeBundle = EChartsAsset::ThemeJavaScript();
 foreach (array_slice($expectedThemeIDs, 1) as $themeID) {
     $themePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/themes/' . $themeID . '.js';
@@ -97,6 +103,11 @@ assertEChartsAsset(
 assertEChartsAsset(
     EChartsAsset::ThemePreviewPalette('auto')['accent'] === '#55CBB5',
     'The automatic Symcon theme preview palette changed.'
+);
+assertEChartsAsset(
+    EChartsAsset::ThemePreviewPalette('auto')['seriesColors'][0] === '#5070DD'
+        && EChartsAsset::ThemePreviewPalette('dark')['seriesColors'][0] === '#4992FF',
+    'The automatic and dark Time Series palettes must match the pinned ECharts runtime and theme.'
 );
 assertEChartsAsset(
     EChartsAsset::ThemePreviewPalette('vintage')['background'] === '#FEF8EF',
