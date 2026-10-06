@@ -117,6 +117,7 @@
                     "caption": "Data mode",
                     "width": "230px",
                     "options": [
+                        {"caption": "Real-time values (no archive required)", "value": "realtime"},
                         {"caption": "Raw values", "value": "raw"},
                         {"caption": "Automatic aggregation", "value": "auto"},
                         {"caption": "1 minute", "value": "minute"},
@@ -135,6 +136,10 @@
                     "width": "170px"
                 }
             ]
+        },
+        {
+            "type": "Label",
+            "caption": "Real-time mode starts with the current value and only records changes while the chart is open. Reloading does not restore earlier real-time points."
         },
         {
             "type": "RowLayout",

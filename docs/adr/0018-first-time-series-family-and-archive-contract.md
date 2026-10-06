@@ -84,6 +84,11 @@ Die erste Version umfasst:
   darzustellenden aggregierten Wert;
 - getrenntes Kachel- und IPSView-Design auf demselben fachlichen Datenmodell.
 
+Der nachträglich ergänzte Echtzeitmodus für Variablen ohne aktivierte
+Archivierung ist als eigenständige Semantik in
+[`ADR 0019`](0019-timeseries-realtime-without-archive.md) festgelegt. Er
+verändert insbesondere nicht die hier definierte Bedeutung von `raw`.
+
 Kreis-, Balken-, Kalender-, Streu- und kombinierte Diagramme, frei gewählte
 absolute Zeiträume, serverseitige Formeln sowie mehr als zwei Einheitengruppen
 sind nicht Teil der ersten vertikalen Umsetzung. Sie benötigen erst nach der

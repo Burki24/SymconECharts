@@ -9,6 +9,7 @@ höchstens zwei Einheitengruppen und rendert eine native Symcon-Kachel.
 - rollende Zeiträume von 1 Stunde, 6 Stunden, 24 Stunden, 7 Tagen und 30 Tagen;
 - ausdrücklich wählbare Rohwerte, automatische Verdichtung oder feste
   Verdichtung auf Minute, 5 Minuten, 15 Minuten, Stunde oder Tag;
+- Echtzeitdarstellung nicht archivierter Variablen ab dem Öffnen der Kachel;
 - Linien- oder Flächendarstellung je Quelle;
 - automatische Übernahme von Einheit und Nachkommastellen aus der
   Variablendarstellung mit manuellen Rückfallwerten;
@@ -22,8 +23,11 @@ höchstens zwei Einheitengruppen und rendert eine native Symcon-Kachel.
 - aggregierte Reihen enden am letzten abgeschlossenen Zeitfenster und werden
   nach der nächsten Intervallgrenze neu geladen.
 
-Das Modul liest das Symcon-Archiv ausschließlich über die gemeinsame
-`EChartsGateway`-Operation `archive.read`. Es aktiviert kein Logging und
+Archivmodi lesen das Symcon-Archiv ausschließlich über die gemeinsame
+`EChartsGateway`-Operation `archive.read`. Der getrennte Echtzeitmodus beginnt
+mit `current.read` und sammelt danach Variablenänderungen nur im geöffneten
+Browser. Er benötigt kein Archiv, besitzt nach einem Neuladen aber bewusst
+keine rückwirkende Historie. Das Modul aktiviert kein Logging und
 verändert weder Archivkonfiguration noch Archivdaten. Eine leere gültige
 Archivantwort bleibt eine leere Datenreihe. Bei gekürzten Rohwerten zeigt die
 Kachel einen Hinweis auf das wirksame Punktbudget.
@@ -37,8 +41,9 @@ Kachel einen Hinweis auf das wirksame Punktbudget.
    pro Quelle anpassen.
 
 Mehr als zwei unterschiedliche effektive Einheiten werden bewusst abgelehnt.
-`raw` bleibt immer eine echte Rohwertabfrage; nur `auto` wählt selbstständig
-eine Verdichtungsstufe.
+`raw` bleibt immer eine echte Rohwertabfrage; `realtime` ist der ausdrücklich
+archivfreie Live-Modus und nur `auto` wählt selbstständig eine
+Verdichtungsstufe.
 
 ## Entwicklungsstand und Testgrenzen
 

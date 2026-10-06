@@ -74,6 +74,8 @@
             dataZoom: zoom ? [{ type: 'inside', xAxisIndex: 0 }, { type: 'slider', xAxisIndex: 0, bottom: 12 }] : [],
             xAxis: {
                 type: 'time',
+                min: model.range.startTimestamp * 1000,
+                max: model.range.endTimestamp * 1000,
                 axisLine: { lineStyle: { color: colors.border } },
                 axisLabel: { color: colors.muted },
                 splitLine: { show: false }
@@ -160,6 +162,10 @@
         }
         var cutoff = message.timestamp - model.range.durationSeconds;
         item.points = points.filter(function (point) { return point[0] >= cutoff; });
+        var limit = Math.max(1, Number(model.range.pointLimitPerSeries) || 1);
+        if (item.points.length > limit) {
+            item.points = item.points.slice(item.points.length - limit);
+        }
         model.range.startTimestamp = cutoff;
         model.range.endTimestamp = message.timestamp;
         render(currentState);

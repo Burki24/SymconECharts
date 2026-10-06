@@ -57,7 +57,9 @@ Folgende Module beinhaltet das SymconECharts Repository:
   Erste historische Chartfamilie für 1 bis 8 archivierte numerische Quellen.
   Rohwerte bleiben ausdrücklich wählbar; alternativ stehen automatische oder
   feste Symcon-Aggregationsstufen, Linien und Flächen, zwei Einheitengruppen,
-  Punktbudget, Legende, Tooltip und Zoom in einer nativen Kachel bereit.
+  Punktbudget, Legende, Tooltip und Zoom in einer nativen Kachel bereit. Ein
+  eigener Echtzeitmodus zeichnet auch nicht archivierte Variablen ab dem
+  Öffnen der Kachel fort.
 
 Für eine reguläre Installation genügt eine gemeinsame EChartsGateway-Instanz
 für alle Gauge- und späteren Diagramminstanzen. Beim ersten Diagramm kann ein

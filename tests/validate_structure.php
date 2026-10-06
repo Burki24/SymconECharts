@@ -21,6 +21,7 @@ $requiredFiles = [
     'docs/adr/0006-gauge-single-tile-designer.md',
     'docs/adr/0007-echarts-theme-assets-and-selection.md',
     'docs/adr/0016-dedicated-tacho-and-chronograph-modules.md',
+    'docs/adr/0019-timeseries-realtime-without-archive.md',
     'library.json',
     'libs/EChartsAsset.php',
     'libs/EChartsDataProtocol.php',

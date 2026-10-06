@@ -56,6 +56,12 @@ $GLOBALS['symconTestVariables'] = [
         'Presentation'    => [
             'PROFILE' => 'Test.Wind'
         ]
+    ],
+    4717 => [
+        'VariableType'    => 2,
+        'VariableUpdated' => 1780000006,
+        'Value'           => 23.75,
+        'Name'            => 'Unarchived real-time temperature'
     ]
 ];
 $GLOBALS['symconTestProfiles'] = [
@@ -2905,6 +2911,45 @@ assertGatewayGauge(
     $lastTimeSeriesUpdate['messageType'] === 'append'
         && $lastTimeSeriesUpdate['variableID'] === 4711,
     'Raw Time Series updates must append one live point instead of reloading the archive.'
+);
+
+$archiveQueriesBeforeRealtime = $GLOBALS['symconTestArchiveQueryCount'];
+$realtimeSeries = new EChartsTimeSeries();
+$realtimeSeries->Create();
+$realtimeSeries->SetTestProperty('Sources', json_encode([[
+    'VariableID'              => 4717,
+    'Label'                   => 'Live temperature',
+    'UseVariablePresentation' => false,
+    'Unit'                    => '°C',
+    'Decimals'                => 2,
+    'Color'                   => '#E5754F',
+    'Style'                   => 'line',
+    'Reducer'                 => 'auto'
+]], JSON_THROW_ON_ERROR));
+$realtimeSeries->SetTestProperty('Range', '1h');
+$realtimeSeries->SetTestProperty('DataMode', 'realtime');
+$realtimeSeries->ApplyChanges();
+$realtimeData = json_decode($realtimeSeries->GetTimeSeriesData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    !isset($GLOBALS['symconTestArchiveVariables'][4717])
+        && $realtimeSeries->GetTestStatus() === IS_ACTIVE
+        && $realtimeData['range']['dataMode'] === 'realtime'
+        && $realtimeData['series'][0]['archiveAggregationType'] === 'none'
+        && $realtimeData['series'][0]['effectiveReducer'] === 'realtime'
+        && count($realtimeData['series'][0]['points']) === 1
+        && $realtimeData['series'][0]['points'][0][1] === 23.75
+        && $realtimeData['series'][0]['points'][0][0] === $realtimeData['range']['endTimestamp']
+        && $GLOBALS['symconTestArchiveQueryCount'] === $archiveQueriesBeforeRealtime,
+    'Real-time mode must start from the current value without requiring or querying an archive.'
+);
+$realtimeSeries->MessageSink(1780000600, 4717, VM_UPDATE, []);
+$realtimeUpdates = $realtimeSeries->GetTestVisualizationUpdates();
+$realtimeUpdate = json_decode((string) end($realtimeUpdates), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $realtimeUpdate['messageType'] === 'append'
+        && $realtimeUpdate['variableID'] === 4717
+        && $realtimeUpdate['value'] === 23.75,
+    'Unarchived real-time sources must append VM_UPDATE values to the open chart.'
 );
 
 $longRangeTimeSeries = new EChartsTimeSeries();

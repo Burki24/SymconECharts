@@ -86,6 +86,7 @@ foreach ([
     'public function GetVisualizationTile(): string',
     'public function GetTimeSeriesData(): string',
     "RegisterPropertyString('DataMode', 'auto')",
+    "['realtime', 'raw', 'auto'",
     "RegisterPropertyInteger('PointBudget', 2000)",
     'EChartsAsset::TimeSeriesJavaScript()',
     'EChartsVariablePresentation::Resolve('

@@ -149,6 +149,12 @@ HTML-Dokument wird nicht bei jeder Messwertänderung neu erzeugt. Datenmenge,
 Aktualisierungsrate und Animationen werden insbesondere für mehrere
 gleichzeitig sichtbare Charts begrenzt und getestet.
 
+Time Series trennt archivfreie Echtzeitwerte gemäß
+[`ADR 0019`](adr/0019-timeseries-realtime-without-archive.md) ausdrücklich von
+Rohwerten. `realtime` beginnt mit `current.read` und sammelt nachfolgende
+`VM_UPDATE`-Punkte nur im offenen Browser; `raw` bleibt eine unveränderte
+Archivabfrage.
+
 Die native Kachel und IPSView erhalten getrennte Ausgabeadapter zum gemeinsamen
 Darstellungskern. Gauge Single schreibt ein vollständiges, eigenständiges
 Dokument in eine lokale WebContent-Variable und führt deshalb keinen externen

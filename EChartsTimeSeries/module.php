@@ -123,7 +123,9 @@ class EChartsTimeSeries extends IPSModuleStrict
                 $axisIndexes[$source['Unit']] = count($axes);
                 $axes[] = ['unit' => $source['Unit']];
             }
-            $archive = $this->ReadArchiveSource($source, $query);
+            $archive = $query['Mode'] === 'realtime'
+                ? $this->ReadRealtimeSource($source['VariableID'], $query['EndTimestamp'])
+                : $this->ReadArchiveSource($source, $query);
             $truncated = $truncated || $archive['Truncated'];
             $series[] = [
                 'id'                     => 'variable-' . $source['VariableID'],
@@ -229,7 +231,7 @@ class EChartsTimeSeries extends IPSModuleStrict
         if ($Message !== VM_UPDATE || !in_array($SenderID, $this->ConfiguredVariableIDs(), true)) {
             return;
         }
-        if ($this->ReadPropertyString('DataMode') !== 'raw') {
+        if (!in_array($this->ReadPropertyString('DataMode'), ['raw', 'realtime'], true)) {
             return;
         }
 
@@ -306,7 +308,7 @@ class EChartsTimeSeries extends IPSModuleStrict
         if (!array_key_exists($this->ReadPropertyString('Range'), self::RANGE_SECONDS)
             || !in_array(
                 $this->ReadPropertyString('DataMode'),
-                ['raw', 'auto', ...array_keys(self::AGGREGATION_LEVELS)],
+                ['realtime', 'raw', 'auto', ...array_keys(self::AGGREGATION_LEVELS)],
                 true
             )
             || $this->ReadPropertyInteger('PointBudget') < 200
@@ -401,7 +403,7 @@ class EChartsTimeSeries extends IPSModuleStrict
         $mode = $this->ReadPropertyString('DataMode');
         $limit = max(1, min(2000, intdiv($this->ReadPropertyInteger('PointBudget'), $sourceCount)));
         $level = null;
-        if ($mode !== 'raw') {
+        if (!in_array($mode, ['raw', 'realtime'], true)) {
             if ($mode === 'auto') {
                 foreach (self::AGGREGATION_SECONDS as $candidate => $seconds) {
                     $level = $candidate;
@@ -423,7 +425,7 @@ class EChartsTimeSeries extends IPSModuleStrict
             'DurationSeconds'  => $duration,
             'StartTimestamp'   => max(1, $end - $duration + ($level === null ? 0 : 1)),
             'EndTimestamp'     => $end,
-            'Mode'             => $level === null ? 'raw' : 'aggregated',
+            'Mode'             => $mode === 'realtime' ? 'realtime' : ($level === null ? 'raw' : 'aggregated'),
             'AggregationLevel' => $level,
             'Limit'            => $limit
         ];
@@ -491,6 +493,48 @@ class EChartsTimeSeries extends IPSModuleStrict
         return $archive;
     }
 
+    /** @return array{ArchiveAggregationType:string,EffectiveReducer:string,Points:list<array{int,float}>,Truncated:bool} */
+    private function ReadRealtimeSource(int $variableID, int $observationTimestamp): array
+    {
+        $operation = EChartsDataProtocol::OPERATION_CURRENT_READ;
+        try {
+            $response = EChartsDataProtocol::DecodeResponse(
+                $this->SendDataToParent($this->EncodeDataFlowMessage(
+                    self::DATA_ID_TO_PARENT,
+                    EChartsDataProtocol::CreateRequest($operation, ['VariableID' => $variableID])
+                )),
+                $operation
+            );
+        } catch (Throwable $exception) {
+            $this->SetStatus(self::STATUS_GATEWAY_FAILED);
+            $this->SendDebug('ReadRealtimeSource', $exception::class, 0);
+            throw new RuntimeException('The gateway returned an invalid current-value response.');
+        }
+        if (!$response['Success']) {
+            $errorCode = (string) ($response['Error']['Code'] ?? 'GATEWAY_REQUEST_FAILED');
+            $this->WriteAttributeString('LastError', $errorCode);
+            $this->SetStatus(self::STATUS_GATEWAY_FAILED);
+            throw new RuntimeException('The gateway current-value request failed: ' . $errorCode);
+        }
+
+        $payload = $response['Payload'];
+        $value = $payload['Value'] ?? null;
+        $timestamp = $payload['Timestamp'] ?? null;
+        if (($payload['VariableID'] ?? null) !== $variableID
+            || (!is_int($value) && !is_float($value)) || !is_finite((float) $value)
+            || !is_int($timestamp) || $timestamp <= 0
+        ) {
+            throw new RuntimeException('The gateway returned invalid current-value data.');
+        }
+
+        return [
+            'ArchiveAggregationType' => 'none',
+            'EffectiveReducer'       => 'realtime',
+            'Points'                 => [[$observationTimestamp, (float) $value]],
+            'Truncated'              => false
+        ];
+    }
+
     /** @return array<string,mixed> */
     private function BuildVisualizationState(): array
     {
@@ -550,7 +594,9 @@ class EChartsTimeSeries extends IPSModuleStrict
     private function ScheduleArchiveRefresh(): void
     {
         $mode = $this->ReadPropertyString('DataMode');
-        if ($mode === 'raw' || !in_array($mode, ['auto', ...array_keys(self::AGGREGATION_LEVELS)], true)) {
+        if (in_array($mode, ['raw', 'realtime'], true)
+            || !in_array($mode, ['auto', ...array_keys(self::AGGREGATION_LEVELS)], true)
+        ) {
             $this->SetTimerInterval('ArchiveRefresh', 0);
             return;
         }
