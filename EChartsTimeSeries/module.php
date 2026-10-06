@@ -40,6 +40,7 @@ class EChartsTimeSeries extends IPSModuleStrict
     private const DATA_ID_FROM_PARENT = '{E4749B72-912B-E3E3-1C57-D19019FFDD84}';
     private const MINIMUM_SOURCE_COUNT = 1;
     private const MAXIMUM_SOURCE_COUNT = 8;
+    private const IPSVIEW_OUTPUT_IDENT = 'IPSViewTimeSeries';
     private const STATUS_SOURCE_INVALID = 201;
     private const STATUS_CONFIGURATION_INVALID = 202;
     private const STATUS_PARENT_MISSING = 203;
@@ -66,7 +67,22 @@ class EChartsTimeSeries extends IPSModuleStrict
     private const DESIGN_FORM_FIELDS = [
         'Title', 'Sources', 'EChartsTheme', 'LegendPosition', 'EnableZoom',
         'LineWidthPercent', 'SmoothLines', 'ShowSymbols', 'SymbolSizePercent',
-        'AreaOpacityPercent', 'ShowGrid', 'ShowXAxis', 'ShowYAxis'
+        'AreaOpacityPercent', 'ShowGrid', 'ShowXAxis', 'ShowYAxis',
+        'IPSViewUseTileDesign', 'IPSViewEChartsTheme', 'IPSViewLegendPosition', 'IPSViewEnableZoom',
+        'IPSViewLineWidthPercent', 'IPSViewSmoothLines', 'IPSViewShowSymbols', 'IPSViewSymbolSizePercent',
+        'IPSViewAreaOpacityPercent', 'IPSViewShowGrid', 'IPSViewShowXAxis', 'IPSViewShowYAxis'
+    ];
+    private const DESIGN_PROPERTY_TYPES = [
+        'LegendPosition'     => 'string',
+        'EnableZoom'         => 'boolean',
+        'LineWidthPercent'   => 'integer',
+        'SmoothLines'        => 'boolean',
+        'ShowSymbols'        => 'boolean',
+        'SymbolSizePercent'  => 'integer',
+        'AreaOpacityPercent' => 'integer',
+        'ShowGrid'           => 'boolean',
+        'ShowXAxis'          => 'boolean',
+        'ShowYAxis'          => 'boolean'
     ];
 
     public function Create(): void
@@ -92,6 +108,23 @@ class EChartsTimeSeries extends IPSModuleStrict
         $this->RegisterPropertyBoolean('ShowGrid', true);
         $this->RegisterPropertyBoolean('ShowXAxis', true);
         $this->RegisterPropertyBoolean('ShowYAxis', true);
+        $this->RegisterIPSViewHTMLPageProperties();
+        $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
+        $this->RegisterPropertyString('IPSViewEChartsTheme', EChartsAsset::THEME_AUTO);
+        foreach (self::DESIGN_PROPERTY_TYPES as $name => $type) {
+            $default = match ($name) {
+                'LegendPosition'                        => 'top',
+                'LineWidthPercent', 'SymbolSizePercent' => 100,
+                'AreaOpacityPercent'                    => 22,
+                'SmoothLines', 'ShowSymbols'            => false,
+                default                                 => true
+            };
+            match ($type) {
+                'string'  => $this->RegisterPropertyString('IPSView' . $name, $default),
+                'integer' => $this->RegisterPropertyInteger('IPSView' . $name, $default),
+                'boolean' => $this->RegisterPropertyBoolean('IPSView' . $name, $default)
+            };
+        }
         $this->RegisterAttributeString('RegisteredSourceVariableIDs', '[]');
         $this->RegisterAttributeString('LastError', '');
     }
@@ -101,9 +134,15 @@ class EChartsTimeSeries extends IPSModuleStrict
         parent::ApplyChanges();
 
         $this->RegisterMessage(0, IPS_KERNELSTARTED);
+        $this->MaintainIPSViewHTMLVariable(
+            self::IPSVIEW_OUTPUT_IDENT,
+            $this->Translate('Time series for IPSView'),
+            90
+        );
         $this->Initialize();
         if (IPS_GetKernelRunlevel() === KR_READY) {
             $this->PublishVisualizationState();
+            $this->PublishIPSViewHTML();
         }
     }
 
@@ -119,6 +158,7 @@ class EChartsTimeSeries extends IPSModuleStrict
     {
         $form = $this->LoadConfigurationForm();
         if (isset($form['elements']) && is_array($form['elements'])) {
+            $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
             $form['elements'] = $this->AttachTimeSeriesPreviewActions($form['elements']);
         }
         $form = SVGPreviewHelper::withImage(
@@ -129,6 +169,16 @@ class EChartsTimeSeries extends IPSModuleStrict
                 $this->ReadPropertyString('Title'),
                 $this->ReadPropertyString('EChartsTheme'),
                 $this->ReadTimeSeriesDesign()
+            )
+        );
+        $form = SVGPreviewHelper::withImage(
+            $form,
+            'IPSViewTimeSeriesPreview',
+            EChartsTimeSeriesPreview::CreateSvg(
+                $this->PreviewSeries(),
+                $this->ReadPropertyString('Title'),
+                $this->EffectiveIPSViewTheme(),
+                $this->EffectiveIPSViewDesign()
             )
         );
 
@@ -155,6 +205,44 @@ class EChartsTimeSeries extends IPSModuleStrict
                 $this->TimeSeriesDesignFromFormValues($values)
             )
         ));
+
+        $useTileDesign = (bool) ($values['IPSViewUseTileDesign'] ?? true);
+        $this->UpdateFormField('IPSViewTimeSeriesPreview', 'image', SVGPreviewHelper::dataUri(
+            EChartsTimeSeriesPreview::CreateSvg(
+                $this->PreviewSeries($values['Sources'] ?? null),
+                (string) ($values['Title'] ?? $this->ReadPropertyString('Title')),
+                $useTileDesign
+                    ? (string) ($values['EChartsTheme'] ?? $this->ReadPropertyString('EChartsTheme'))
+                    : (string) ($values['IPSViewEChartsTheme'] ?? $this->ReadPropertyString('IPSViewEChartsTheme')),
+                $useTileDesign
+                    ? $this->TimeSeriesDesignFromFormValues($values)
+                    : $this->TimeSeriesDesignFromFormValues($values, 'IPSView')
+            )
+        ));
+    }
+
+    public function RequestAction(string $Ident, mixed $Value): void
+    {
+        if ($this->HandleIPSViewHTMLPageAction($Ident, $Value)) {
+            return;
+        }
+
+        throw new InvalidArgumentException('Unknown action: ' . $Ident);
+    }
+
+    public function CopyTileDesignToIPSView(): void
+    {
+        IPS_SetProperty($this->InstanceID, 'IPSViewEChartsTheme', $this->ReadPropertyString('EChartsTheme'));
+        foreach (self::DESIGN_PROPERTY_TYPES as $name => $type) {
+            $value = match ($type) {
+                'string'  => $this->ReadPropertyString($name),
+                'integer' => $this->ReadPropertyInteger($name),
+                'boolean' => $this->ReadPropertyBoolean($name)
+            };
+            IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
+        }
+        IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
+        IPS_ApplyChanges($this->InstanceID);
     }
 
     public function GetTimeSeriesData(): string
@@ -247,38 +335,12 @@ class EChartsTimeSeries extends IPSModuleStrict
 
     public function GetVisualizationTile(): string
     {
-        $hiddenTileTitle = false;
-        if (function_exists('IPS_GetObject')) {
-            $hiddenTileTitle = (bool) (IPS_GetObject($this->InstanceID)['ObjectIsHiddenTitle'] ?? false);
-        }
+        return $this->RenderTimeSeriesHTMLPage(false);
+    }
 
-        return $this->RenderVisualizationHTMLPage(false, [
-            'language'           => $this->NormalizeHelperTranslationLanguage(
-                $this->ResolveHelperTranslationLanguage()
-            ),
-            'title'              => 'ECharts Time Series',
-            'visualizationTheme' => $this->VisualizationThemeCSS()
-                . "\n\n"
-                . $this->ResponsiveVisualizationCSS('#echarts-timeseries-root', 'echarts-timeseries'),
-            'state'              => $this->BuildVisualizationState(),
-            'translations'       => [
-                'The selected raw range was truncated by the point budget.' => $this->Translate(
-                    'The selected raw range was truncated by the point budget.'
-                ),
-                'The time series could not be loaded.' => $this->Translate(
-                    'The time series could not be loaded.'
-                )
-            ],
-            'options'            => [
-                'echartsVersion'    => EChartsAsset::VERSION,
-                'echartsThemes'     => EChartsAsset::ThemePalettes(),
-                'tileHeaderVisible' => !$hiddenTileTitle
-            ],
-            'replacements'       => [
-                '{{ECHARTS_SCRIPT}}'       => EChartsAsset::TimeSeriesJavaScript(),
-                '{{ECHARTS_THEME_SCRIPT}}' => EChartsAsset::ThemeJavaScript()
-            ]
-        ]);
+    public function GetIPSViewHTML(): string
+    {
+        return $this->RenderTimeSeriesHTMLPage(true);
     }
 
     public function ReceiveData(string $JSONString): string
@@ -299,6 +361,7 @@ class EChartsTimeSeries extends IPSModuleStrict
         if ($SenderID === 0 && $Message === IPS_KERNELSTARTED) {
             $this->Initialize();
             $this->PublishVisualizationState();
+            $this->PublishIPSViewHTML();
             return;
         }
         if ($Message !== VM_UPDATE || !in_array($SenderID, $this->ConfiguredVariableIDs(), true)) {
@@ -323,17 +386,56 @@ class EChartsTimeSeries extends IPSModuleStrict
             'timestamp'   => $timestamp,
             'value'       => (float) $value
         ], JSON_THROW_ON_ERROR | JSON_PRESERVE_ZERO_FRACTION));
+        $this->PublishIPSViewHTML();
     }
 
     public function RefreshArchive(): void
     {
         $this->PublishVisualizationState();
+        $this->PublishIPSViewHTML();
         $this->ScheduleArchiveRefresh();
     }
 
     protected function CurrentTimestamp(): int
     {
         return time();
+    }
+
+    private function RenderTimeSeriesHTMLPage(bool $ipsView): string
+    {
+        $hiddenTileTitle = false;
+        if (!$ipsView && function_exists('IPS_GetObject')) {
+            $hiddenTileTitle = (bool) (IPS_GetObject($this->InstanceID)['ObjectIsHiddenTitle'] ?? false);
+        }
+
+        return $this->RenderVisualizationHTMLPage($ipsView, [
+            'language'           => $this->NormalizeHelperTranslationLanguage(
+                $this->ResolveHelperTranslationLanguage()
+            ),
+            'title'              => 'ECharts Time Series',
+            'visualizationTheme' => $this->VisualizationThemeCSS()
+                . "\n\n"
+                . $this->ResponsiveVisualizationCSS('#echarts-timeseries-root', 'echarts-timeseries'),
+            'ipsViewStyle'       => $ipsView ? $this->IPSViewThemeCSS() : '',
+            'state'              => $this->BuildVisualizationState($ipsView),
+            'translations'       => [
+                'The selected raw range was truncated by the point budget.' => $this->Translate(
+                    'The selected raw range was truncated by the point budget.'
+                ),
+                'The time series could not be loaded.' => $this->Translate(
+                    'The time series could not be loaded.'
+                )
+            ],
+            'options'            => [
+                'echartsVersion'    => EChartsAsset::VERSION,
+                'echartsThemes'     => EChartsAsset::ThemePalettes(),
+                'tileHeaderVisible' => !$hiddenTileTitle
+            ],
+            'replacements'       => [
+                '{{ECHARTS_SCRIPT}}'       => EChartsAsset::TimeSeriesJavaScript(),
+                '{{ECHARTS_THEME_SCRIPT}}' => EChartsAsset::ThemeJavaScript()
+            ]
+        ]);
     }
 
     private function Initialize(): void
@@ -387,18 +489,23 @@ class EChartsTimeSeries extends IPSModuleStrict
             || $this->ReadPropertyInteger('PointBudget') < 200
             || $this->ReadPropertyInteger('PointBudget') > 8000
             || !EChartsAsset::IsSupportedTheme($this->ReadPropertyString('EChartsTheme'))
-            || !in_array($this->ReadPropertyString('LegendPosition'), self::LEGEND_POSITIONS, true)
-            || $this->ReadPropertyInteger('LineWidthPercent') < 50
-            || $this->ReadPropertyInteger('LineWidthPercent') > 200
-            || $this->ReadPropertyInteger('SymbolSizePercent') < 50
-            || $this->ReadPropertyInteger('SymbolSizePercent') > 200
-            || $this->ReadPropertyInteger('AreaOpacityPercent') < 0
-            || $this->ReadPropertyInteger('AreaOpacityPercent') > 100
+            || !$this->IsValidTimeSeriesDesign()
         ) {
             return [
                 'Status'  => self::STATUS_CONFIGURATION_INVALID,
                 'Message' => 'The time series settings are invalid.'
             ];
+        }
+
+        if ($this->IsIPSViewHTMLPageEnabled() && !$this->ReadPropertyBoolean('IPSViewUseTileDesign')) {
+            if (!EChartsAsset::IsSupportedTheme($this->ReadPropertyString('IPSViewEChartsTheme'))
+                || !$this->IsValidTimeSeriesDesign('IPSView')
+            ) {
+                return [
+                    'Status'  => self::STATUS_CONFIGURATION_INVALID,
+                    'Message' => 'The IPSView time series settings are invalid.'
+                ];
+            }
         }
 
         return null;
@@ -671,7 +778,7 @@ class EChartsTimeSeries extends IPSModuleStrict
     }
 
     /** @return array<string,mixed> */
-    private function BuildVisualizationState(): array
+    private function BuildVisualizationState(bool $ipsView = false): array
     {
         $error = $this->GetConfigurationError();
         if ($error !== null) {
@@ -694,6 +801,11 @@ class EChartsTimeSeries extends IPSModuleStrict
         }
         try {
             $chart = json_decode($this->GetTimeSeriesData(), true, 512, JSON_THROW_ON_ERROR);
+            if ($ipsView) {
+                $chart['theme'] = $this->EffectiveIPSViewTheme();
+                $chart['chart']['enableZoom'] = $this->EffectiveIPSViewEnableZoom();
+                $chart['chart']['design'] = $this->EffectiveIPSViewDesign();
+            }
         } catch (Throwable $exception) {
             $this->SendDebug('BuildVisualizationState', $exception::class, 0);
             return [
@@ -723,6 +835,19 @@ class EChartsTimeSeries extends IPSModuleStrict
             ));
         } catch (Throwable $exception) {
             $this->SendDebug('PublishVisualizationState', $exception::class, 0);
+        }
+    }
+
+    private function PublishIPSViewHTML(): void
+    {
+        if (!$this->IsIPSViewHTMLPageEnabled()) {
+            return;
+        }
+
+        try {
+            $this->UpdateIPSViewHTMLVariable(self::IPSVIEW_OUTPUT_IDENT, $this->GetIPSViewHTML());
+        } catch (Throwable $exception) {
+            $this->SendDebug('PublishIPSViewHTML', $exception::class, 0);
         }
     }
 
@@ -796,25 +921,25 @@ class EChartsTimeSeries extends IPSModuleStrict
     }
 
     /** @return array{legendPosition:string,lineWidthPercent:int,smoothLines:bool,showSymbols:bool,symbolSizePercent:int,areaOpacityPercent:int,showGrid:bool,showXAxis:bool,showYAxis:bool} */
-    private function ReadTimeSeriesDesign(): array
+    private function ReadTimeSeriesDesign(string $prefix = ''): array
     {
         return [
-            'legendPosition'     => $this->ReadPropertyString('LegendPosition'),
-            'lineWidthPercent'   => $this->ReadPropertyInteger('LineWidthPercent'),
-            'smoothLines'        => $this->ReadPropertyBoolean('SmoothLines'),
-            'showSymbols'        => $this->ReadPropertyBoolean('ShowSymbols'),
-            'symbolSizePercent'  => $this->ReadPropertyInteger('SymbolSizePercent'),
-            'areaOpacityPercent' => $this->ReadPropertyInteger('AreaOpacityPercent'),
-            'showGrid'           => $this->ReadPropertyBoolean('ShowGrid'),
-            'showXAxis'          => $this->ReadPropertyBoolean('ShowXAxis'),
-            'showYAxis'          => $this->ReadPropertyBoolean('ShowYAxis')
+            'legendPosition'     => $this->ReadPropertyString($prefix . 'LegendPosition'),
+            'lineWidthPercent'   => $this->ReadPropertyInteger($prefix . 'LineWidthPercent'),
+            'smoothLines'        => $this->ReadPropertyBoolean($prefix . 'SmoothLines'),
+            'showSymbols'        => $this->ReadPropertyBoolean($prefix . 'ShowSymbols'),
+            'symbolSizePercent'  => $this->ReadPropertyInteger($prefix . 'SymbolSizePercent'),
+            'areaOpacityPercent' => $this->ReadPropertyInteger($prefix . 'AreaOpacityPercent'),
+            'showGrid'           => $this->ReadPropertyBoolean($prefix . 'ShowGrid'),
+            'showXAxis'          => $this->ReadPropertyBoolean($prefix . 'ShowXAxis'),
+            'showYAxis'          => $this->ReadPropertyBoolean($prefix . 'ShowYAxis')
         ];
     }
 
     /** @param array<string,mixed> $values @return array<string,mixed> */
-    private function TimeSeriesDesignFromFormValues(array $values): array
+    private function TimeSeriesDesignFromFormValues(array $values, string $prefix = ''): array
     {
-        $design = $this->ReadTimeSeriesDesign();
+        $design = $this->ReadTimeSeriesDesign($prefix);
         foreach ([
             'LegendPosition'     => 'legendPosition',
             'LineWidthPercent'   => 'lineWidthPercent',
@@ -826,8 +951,8 @@ class EChartsTimeSeries extends IPSModuleStrict
             'ShowXAxis'          => 'showXAxis',
             'ShowYAxis'          => 'showYAxis'
         ] as $property => $key) {
-            if (array_key_exists($property, $values)) {
-                $design[$key] = $values[$property];
+            if (array_key_exists($prefix . $property, $values)) {
+                $design[$key] = $values[$prefix . $property];
             }
         }
 
@@ -897,6 +1022,121 @@ class EChartsTimeSeries extends IPSModuleStrict
         );
 
         return 'ECTS_UpdateTimeSeriesPreviewFromForm($id, json_encode([' . implode(', ', $pairs) . ']));';
+    }
+
+    private function EffectiveIPSViewTheme(): string
+    {
+        return $this->ReadPropertyBoolean('IPSViewUseTileDesign')
+            ? $this->ReadPropertyString('EChartsTheme')
+            : $this->ReadPropertyString('IPSViewEChartsTheme');
+    }
+
+    private function EffectiveIPSViewEnableZoom(): bool
+    {
+        return $this->ReadPropertyBoolean('IPSViewUseTileDesign')
+            ? $this->ReadPropertyBoolean('EnableZoom')
+            : $this->ReadPropertyBoolean('IPSViewEnableZoom');
+    }
+
+    /** @return array<string,mixed> */
+    private function EffectiveIPSViewDesign(): array
+    {
+        return $this->ReadPropertyBoolean('IPSViewUseTileDesign')
+            ? $this->ReadTimeSeriesDesign()
+            : $this->ReadTimeSeriesDesign('IPSView');
+    }
+
+    private function IsValidTimeSeriesDesign(string $prefix = ''): bool
+    {
+        return in_array($this->ReadPropertyString($prefix . 'LegendPosition'), self::LEGEND_POSITIONS, true)
+            && $this->ReadPropertyInteger($prefix . 'LineWidthPercent') >= 50
+            && $this->ReadPropertyInteger($prefix . 'LineWidthPercent') <= 200
+            && $this->ReadPropertyInteger($prefix . 'SymbolSizePercent') >= 50
+            && $this->ReadPropertyInteger($prefix . 'SymbolSizePercent') <= 200
+            && $this->ReadPropertyInteger($prefix . 'AreaOpacityPercent') >= 0
+            && $this->ReadPropertyInteger($prefix . 'AreaOpacityPercent') <= 100;
+    }
+
+    private function IPSViewThemeCSS(): string
+    {
+        $palette = EChartsAsset::ThemePreviewPalette($this->EffectiveIPSViewTheme());
+
+        return ':root {'
+            . '--symc-background:' . $palette['background'] . ';'
+            . '--symc-text:' . $palette['text'] . ';'
+            . '--symc-text-muted:' . $palette['muted'] . ';'
+            . '--symc-border:' . $palette['border'] . ';'
+            . '--symc-accent:' . $palette['accent'] . ';'
+            . '--symc-surface:' . $palette['surface'] . ';'
+            . '} html, body { background:' . $palette['background'] . '; }';
+    }
+
+    /** @param list<array<string,mixed>> $elements @return array<string,mixed> */
+    private function BuildIPSViewDesigner(array $elements): array
+    {
+        $tileDesigner = null;
+        foreach ($elements as $element) {
+            if (($element['type'] ?? null) === 'ExpansionPanel'
+                && ($element['caption'] ?? null) === 'Tile designer'
+            ) {
+                $tileDesigner = $element;
+                break;
+            }
+        }
+        if (!is_array($tileDesigner)) {
+            throw new RuntimeException('The Tile designer form section is missing.');
+        }
+
+        return [
+            'type'     => 'ExpansionPanel',
+            'caption'  => 'IPSView design',
+            'expanded' => false,
+            'width'    => '760px',
+            'items'    => [
+                ...$this->IPSViewHTMLPageFormItems(
+                    'Creates a standalone WebContent variable for use as an IPSView HTML widget.'
+                ),
+                [
+                    'type'    => 'CheckBox',
+                    'name'    => 'IPSViewUseTileDesign',
+                    'caption' => 'Use Tile design'
+                ],
+                [
+                    'type'    => 'Label',
+                    'caption' => 'Inherited mode follows every Tile design change. Disable it for an independent IPSView appearance.'
+                ],
+                [
+                    'type'    => 'Button',
+                    'caption' => 'Copy Tile design to IPSView and edit independently',
+                    'onClick' => 'ECTS_CopyTileDesignToIPSView($id); return "MESSAGE:Tile design copied to IPSView.";'
+                ],
+                [
+                    'type'     => 'ExpansionPanel',
+                    'caption'  => 'Independent IPSView designer',
+                    'expanded' => false,
+                    'items'    => $this->PrefixIPSViewDesignerItems($tileDesigner['items'] ?? [])
+                ]
+            ]
+        ];
+    }
+
+    /** @param list<array<string,mixed>> $items @return list<array<string,mixed>> */
+    private function PrefixIPSViewDesignerItems(array $items): array
+    {
+        $designNames = ['EChartsTheme', ...array_keys(self::DESIGN_PROPERTY_TYPES)];
+        foreach ($items as &$item) {
+            if (($item['name'] ?? null) === 'TimeSeriesPreview') {
+                $item['name'] = 'IPSViewTimeSeriesPreview';
+            } elseif (isset($item['name']) && in_array($item['name'], $designNames, true)) {
+                $item['name'] = 'IPSView' . $item['name'];
+            }
+            if (isset($item['items']) && is_array($item['items'])) {
+                $item['items'] = $this->PrefixIPSViewDesignerItems($item['items']);
+            }
+        }
+        unset($item);
+
+        return $items;
     }
 
     /** @return list<int> */

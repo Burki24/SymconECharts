@@ -50,8 +50,8 @@ eine IPSView-WebContent-Variable mit vererbtem oder unabhängigem Design auf
 demselben Renderer. Weitere klassische Multi-Instrumentenpanel-Vorlagen,
 reale Symcon-Laufzeit- und Browsertests fehlen noch. Das Time-Series-Modul
 nutzt den Gateway-Vertrag `archive.read` für rohe oder aggregierte Werte und
-rendert daraus die erste native Zeitreihen-Kachel. Die getrennte IPSView-
-Ausgabe der neuen Familie steht noch aus.
+rendert daraus die erste native Zeitreihen-Kachel sowie optional eine getrennt
+gestaltbare IPSView-WebContent-Ausgabe.
 Die Testsuite prüft zusätzlich
 zu Struktur und Metadaten die Strict-Verträge, das Protokoll, die
 ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
@@ -65,7 +65,7 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 | Gerät | EChartsGaugeMulti | Ein zusammengesetzter Gauge-Chart mit 2 bis 16 Quellen |
 | Gerät | EChartsGaugeTacho | Tacho-Cockpit mit 2 bis 5 individuell gestaltbaren Instrumenten |
 | Gerät | EChartsGaugeChronograph | Chronograph mit 2 bis 5 individuell gestaltbaren Instrumenten |
-| Gerät | EChartsTimeSeries | Historische und live fortgeschriebene Linien und Flächen für 1 bis 8 Quellen, bis zu acht links/rechts angeordnete Einheitengruppen und einen eigenen Kacheldesigner |
+| Gerät | EChartsTimeSeries | Historische und live fortgeschriebene Linien und Flächen für 1 bis 8 Quellen, bis zu acht links/rechts angeordnete Einheitengruppen sowie getrenntes Kachel- und IPSView-Design |
 
 Eine eigene I/O-Instanz, ein Konfigurator und Discovery gehören nicht zum
 Anfangsumfang. Datenquellen sind Teil der jeweiligen Gauge-Konfiguration und
@@ -251,17 +251,24 @@ Der erste Funktionsumfang umfasst ein radiales Messinstrument in
 `EChartsGaugeSingle` und zusammengesetzte Gauges auf Basis des vorhandenen
 Mehrquellenmodells in `EChartsGaugeMulti`. Bei der sichtbaren Umsetzung werden
 mehrere getrennte Gauge-Instanzen, beide Ausgabewege gleichzeitig,
-Größenwechsel sowie abgeschaltete IPSView-Ausgabe getestet. Die erste native
-Zeitreihen-Vertikale ist ebenfalls implementiert; weitere Chartfamilien sind
+Größenwechsel sowie abgeschaltete IPSView-Ausgabe getestet. Die erste
+Zeitreihen-Vertikale einschließlich optionaler IPSView-Ausgabe ist ebenfalls
+implementiert; weitere Chartfamilien sind
 spätere, getrennt zu entscheidende Ausbaustufen.
 Vor ihrer Umsetzung erfolgt die Wiederverwendungsprüfung nach
 [`ADR 0017`](adr/0017-reuse-before-new-chart-development.md).
 Für die erste Zeitreihenfamilie legt
 [`ADR 0018`](adr/0018-first-time-series-family-and-archive-contract.md) den
 Ausgangsumfang und den implementierten Gateway-Vertrag `archive.read` fest.
-Das Gerätemodul setzt davon zunächst Quellen, Roh- und Aggregatmodus,
-Punktbudget, Zwei-Achsen-Modell und native Kachel um. IPSView und reale
-Laufzeitmessungen bleiben als nächste Schritte offen.
+[`ADR 0019`](adr/0019-timeseries-realtime-without-archive.md) ergänzt den
+archivfreien Echtzeitmodus, [`ADR 0020`](adr/0020-timeseries-tile-designer.md)
+den Kacheldesigner und [`ADR 0021`](adr/0021-timeseries-multiple-value-axes.md)
+die Mehr-Achsen-Anordnung. Die getrennte IPSView-Ausgabe und ihr unabhängiger
+Designvertrag sind in
+[`ADR 0022`](adr/0022-timeseries-ipsview-output.md) festgelegt.
+Das Gerätemodul setzt davon Quellen, Roh-, Aggregat- und Echtzeitmodus,
+Punktbudget, Mehr-Achsen-Modell, native Kachel und die optionale IPSView-
+Ausgabe um. Reale Laufzeitmessungen bleiben als nächster Schritt offen.
 
 ## Dokumentation und Lizenzen
 

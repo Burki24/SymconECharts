@@ -67,6 +67,10 @@ StylePHP und PHP CS Fixer.
   einschließlich der Zeichenreihenfolge ab. Die Formularintegration prüft,
   dass ungespeicherte Änderungen beide SVG-Vorschauen sofort und bei
   unabhängigem IPSView-Design getrennt aktualisieren.
+- Für TimeSeries prüft derselbe Integrationstest zusätzlich die optionale
+  WebContent-Variable, die Vererbung des Kacheldesigns, ein unabhängiges
+  IPSView-Theme und -Design sowie die sofortige Aktualisierung beider
+  Formularvorschauen.
 - `echarts_assets.php` prüft Version, SHA-256-Integrität, Lizenz und NOTICE der
   lokal gebündelten Apache-ECharts-Runtime und der sechs offiziellen Themes.
   Zusätzlich werden der Gauge-spezifische Browser-Export, das gemeinsame

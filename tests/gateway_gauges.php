@@ -2862,6 +2862,7 @@ $timeSeries->SetTestProperty('AreaOpacityPercent', 40);
 $timeSeries->SetTestProperty('ShowGrid', false);
 $timeSeries->SetTestProperty('ShowXAxis', false);
 $timeSeries->SetTestProperty('ShowYAxis', true);
+$timeSeries->SetTestProperty('EnableIPSView', true);
 $timeSeries->ApplyChanges();
 $timeSeriesData = json_decode($timeSeries->GetTimeSeriesData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
@@ -2898,8 +2899,11 @@ assertGatewayGauge(
     str_contains($timeSeriesForm, 'ECTS_UpdateTimeSeriesPreviewFromForm')
         && str_contains($timeSeriesForm, 'AxisPosition')
         && str_contains($timeSeriesForm, 'ECTS_GetTimeSeriesDiagnostic')
+        && str_contains($timeSeriesForm, 'ECTS_CopyTileDesignToIPSView')
+        && str_contains($timeSeriesForm, 'IPSViewUseTileDesign')
+        && str_contains($timeSeriesForm, 'IPSViewTimeSeriesPreview')
         && str_contains($timeSeriesForm, 'data:image/svg+xml;base64,'),
-    'Time Series form must provide axis positioning, a safe diagnostic action and a live SVG tile preview.'
+    'Time Series form must provide axis positioning, diagnostics and separate live Tile/IPSView previews.'
 );
 $timeSeries->UpdateTimeSeriesPreviewFromForm(json_encode([
     'Title'              => 'Edited preview',
@@ -2921,6 +2925,7 @@ $timeSeries->UpdateTimeSeriesPreviewFromForm(json_encode([
     'ShowYAxis'          => false
 ], JSON_THROW_ON_ERROR));
 $timeSeriesPreviewUpdates = $timeSeries->GetTestFormUpdates();
+$timeSeriesPreviewFields = array_column(array_slice($timeSeriesPreviewUpdates, -2), 'Field');
 $timeSeriesPreviewUpdate = end($timeSeriesPreviewUpdates);
 $timeSeriesPreviewUri = is_array($timeSeriesPreviewUpdate)
     ? (string) ($timeSeriesPreviewUpdate['Value'] ?? '')
@@ -2930,7 +2935,8 @@ $timeSeriesPreviewSvg = base64_decode(
     true
 );
 assertGatewayGauge(
-    is_string($timeSeriesPreviewSvg)
+    $timeSeriesPreviewFields === ['TimeSeriesPreview', 'IPSViewTimeSeriesPreview']
+        && is_string($timeSeriesPreviewSvg)
         && str_contains($timeSeriesPreviewSvg, 'Edited preview')
         && str_contains($timeSeriesPreviewSvg, '#E5754F')
         && str_contains($timeSeriesPreviewSvg, 'data-legend-position="hidden"')
@@ -2938,7 +2944,7 @@ assertGatewayGauge(
         && str_contains($timeSeriesPreviewSvg, 'data-show-symbols="true"')
         && str_contains($timeSeriesPreviewSvg, 'data-area-opacity="0.55"')
         && str_contains($timeSeriesPreviewSvg, 'data-axis-color="#E5754F"'),
-    'Time Series preview must react immediately to unpersisted source and design values.'
+    'Time Series Tile and IPSView previews must react immediately to unpersisted source and design values.'
 );
 $timeSeriesTile = $timeSeries->GetVisualizationTile();
 assertGatewayGauge(
@@ -2953,6 +2959,77 @@ assertGatewayGauge(
     strlen($timeSeriesTile) < SYMCON_OUTPUT_BUFFER_LIMIT,
     'Time Series native tile must remain below the Symcon output limit (actual: '
         . strlen($timeSeriesTile) . ').'
+);
+$inheritedTimeSeriesIPSView = $timeSeries->GetIPSViewHTML();
+assertGatewayGauge(
+    is_string($timeSeries->GetTestVariableValue('IPSViewTimeSeries'))
+        && str_contains((string) $timeSeries->GetTestVariableValue('IPSViewTimeSeries'), '"mode":"ipsview"')
+        && str_contains($inheritedTimeSeriesIPSView, '"legendPosition":"bottom"')
+        && str_contains($inheritedTimeSeriesIPSView, '"lineWidthPercent":150')
+        && strlen($inheritedTimeSeriesIPSView) < SYMCON_OUTPUT_BUFFER_LIMIT,
+    'Time Series must publish an optional IPSView WebContent page that inherits the Tile design.'
+);
+$timeSeries->SetTestProperty('IPSViewUseTileDesign', false);
+$timeSeries->SetTestProperty('IPSViewEChartsTheme', 'dark');
+$timeSeries->SetTestProperty('IPSViewLegendPosition', 'hidden');
+$timeSeries->SetTestProperty('IPSViewEnableZoom', false);
+$timeSeries->SetTestProperty('IPSViewLineWidthPercent', 80);
+$timeSeries->SetTestProperty('IPSViewSmoothLines', false);
+$timeSeries->SetTestProperty('IPSViewShowSymbols', false);
+$timeSeries->SetTestProperty('IPSViewSymbolSizePercent', 75);
+$timeSeries->SetTestProperty('IPSViewAreaOpacityPercent', 10);
+$timeSeries->SetTestProperty('IPSViewShowGrid', true);
+$timeSeries->SetTestProperty('IPSViewShowXAxis', true);
+$timeSeries->SetTestProperty('IPSViewShowYAxis', false);
+$timeSeries->UpdateTimeSeriesPreviewFromForm(json_encode([
+    'Title'                     => 'Independent IPSView preview',
+    'Sources'                   => [[
+        'VariableID' => 4711,
+        'Label'      => 'Outdoor temperature',
+        'Color'      => '#E5754F',
+        'Style'      => 'line'
+    ]],
+    'EChartsTheme'              => 'vintage',
+    'LegendPosition'            => 'bottom',
+    'IPSViewUseTileDesign'      => false,
+    'IPSViewEChartsTheme'       => 'dark',
+    'IPSViewLegendPosition'     => 'hidden',
+    'IPSViewLineWidthPercent'   => 80,
+    'IPSViewSmoothLines'        => false,
+    'IPSViewShowSymbols'        => false,
+    'IPSViewSymbolSizePercent'  => 75,
+    'IPSViewAreaOpacityPercent' => 10,
+    'IPSViewShowGrid'           => true,
+    'IPSViewShowXAxis'          => true,
+    'IPSViewShowYAxis'          => false
+], JSON_THROW_ON_ERROR));
+$independentPreviewUpdates = $timeSeries->GetTestFormUpdates();
+$independentPreviewUpdate = end($independentPreviewUpdates);
+$independentPreviewUri = is_array($independentPreviewUpdate)
+    ? (string) ($independentPreviewUpdate['Value'] ?? '')
+    : '';
+$independentPreviewSvg = base64_decode(
+    substr($independentPreviewUri, strlen('data:image/svg+xml;base64,')),
+    true
+);
+assertGatewayGauge(
+    is_string($independentPreviewSvg)
+        && str_contains($independentPreviewSvg, 'Independent IPSView preview')
+        && str_contains($independentPreviewSvg, 'data-legend-position="hidden"')
+        && str_contains($independentPreviewSvg, 'data-area-opacity="0.1"')
+        && str_contains($independentPreviewSvg, 'stroke-width="2"'),
+    'Time Series preview must render unsaved independent IPSView design values.'
+);
+$timeSeries->ApplyChanges();
+$independentTimeSeriesIPSView = $timeSeries->GetIPSViewHTML();
+assertGatewayGauge(
+    str_contains($independentTimeSeriesIPSView, '"theme":"dark"')
+        && str_contains($independentTimeSeriesIPSView, '"enableZoom":false')
+        && str_contains($independentTimeSeriesIPSView, '"legendPosition":"hidden"')
+        && str_contains($independentTimeSeriesIPSView, '"lineWidthPercent":80')
+        && str_contains($independentTimeSeriesIPSView, '"showYAxis":false')
+        && str_contains($timeSeries->GetVisualizationTile(), '"legendPosition":"bottom"'),
+    'Time Series must keep independent IPSView theme and design settings separate from the Tile.'
 );
 
 $rawTimeSeries = new EChartsTimeSeries();

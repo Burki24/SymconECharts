@@ -1,0 +1,61 @@
+# ADR 0022: Zeitreihe getrennt in IPSView ausgeben und gestalten
+
+- Status: Angenommen
+- Datum: 2026-10-06
+- Entscheider: Burki24
+- Ergänzt: ADR 0008, ADR 0017, ADR 0018, ADR 0019 und ADR 0020
+- Ersetzt durch: –
+
+## Kontext
+
+`EChartsTimeSeries` besitzt ein gemeinsames Quellen-, Archiv-, Achsen- und
+Punktbudgetmodell sowie einen nativen Kacheldesigner. Dieselbe Zeitreihe soll
+zusätzlich als frei platzierbares IPSView-HTML-Widget verwendbar sein, ohne
+eine zweite Diagramminstanz und damit eine doppelte Datenkonfiguration
+anzulegen. Kachel und IPSView können jedoch unterschiedliche visuelle
+Umgebungen besitzen.
+
+Die Gauge-Module haben die benötigte Ausgabe bereits praktisch erprobt. Nach
+ADR 0017 werden deshalb der synchronisierte `IPSViewHTMLPageHelper`, der
+gemeinsame HTML-Renderer und das Muster eines vererbten oder unabhängigen
+Designs wiederverwendet. Zeitreihenspezifische Properties und Vorschauen
+verbleiben im Gerätemodul.
+
+## Entscheidung
+
+- Eine TimeSeries-Instanz kann optional genau eine Stringvariable mit
+  WebContent-Darstellung und dem stabilen Ident `IPSViewTimeSeries` verwalten.
+- Die Ausgabe verwendet dieselben Quellen, Zeiträume, Datenmodi, Achsen,
+  Reducer und Punktbudgets wie die native Kachel.
+- Standardmäßig erbt IPSView Theme, Zoom und den vollständigen
+  Zeitreihen-Designvertrag der Kachel.
+- Der Anwender kann die Vererbung deaktivieren. Theme, Legendenposition, Zoom,
+  Linienstärke, Glättung, Datenpunkte, Flächendeckkraft, Raster und
+  Achsensichtbarkeit werden dann als eigene typisierte IPSView-Properties
+  gespeichert.
+- Eine Formularaktion kopiert das aktuelle Kacheldesign in die unabhängigen
+  IPSView-Properties. Beide Designer bleiben standardmäßig kollabiert und
+  besitzen eine sofort aktualisierte SVG-Vorschau.
+- Aktivierung, Beibehaltung beim Abschalten, bestätigte Löschung und manuelle
+  Regeneration der WebContent-Variable verbleiben beim unveränderten
+  `IPSViewHTMLPageHelper`.
+- Archiv- und Rohwertausgaben werden als vollständiges eigenständiges
+  HTML-Dokument erneuert. Im Modus `realtime` enthält jedes neu erzeugte
+  IPSView-Dokument nur den aktuellen Startpunkt. Die ausschließlich im
+  geöffneten Browser gesammelte, nicht persistierte Punktfolge aus ADR 0019
+  bleibt damit eine Eigenschaft der nativen Kachel und wird nicht als
+  IPSView-Historie versprochen.
+
+## Folgen
+
+Kachel und IPSView können dasselbe Diagramm mit unterschiedlicher Gestaltung
+zeigen, ohne Datenquellen zu duplizieren. Der kurze Gateway-Cache aus ADR 0018
+fasst nahezu gleichzeitige identische Archivabfragen beider Ausgabewege
+weiterhin zusammen.
+
+Der persistente Vertrag wächst additiv um IPSView-Properties. Bestehende
+Instanzen bleiben kompatibel, weil die Ausgabe standardmäßig deaktiviert ist
+und das IPSView-Design bei Aktivierung zunächst das Kacheldesign erbt. Die
+lokalen Integrationstests prüfen WebContent-Erzeugung, Vererbung, unabhängiges
+Design und beide Formularvorschauen. Ein realer IPSView-Laufzeittest bleibt
+mangels Lizenz als Testlücke dokumentiert.

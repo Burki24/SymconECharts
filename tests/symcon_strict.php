@@ -84,6 +84,7 @@ foreach ([
 foreach ([
     'SetVisualizationType(1)',
     'public function GetVisualizationTile(): string',
+    'public function GetIPSViewHTML(): string',
     'public function GetTimeSeriesData(): string',
     'public function GetTimeSeriesDiagnostic(): string',
     "RegisterPropertyString('DataMode', 'auto')",
@@ -100,6 +101,7 @@ foreach ([
     "RegisterPropertyBoolean('ShowYAxis', true)",
     'use Burki24\SymconModuleHelper\SVGPreviewHelper;',
     'public function UpdateTimeSeriesPreviewFromForm(string $Configuration): void',
+    'public function CopyTileDesignToIPSView(): void',
     'EChartsAsset::TimeSeriesJavaScript()',
     'EChartsVariablePresentation::Resolve('
 ] as $timeSeriesContract) {

@@ -2,7 +2,8 @@
 
 Gerätemodul für historische numerische Symcon-Werte als responsive Apache-
 ECharts-Zeitreihe. Eine Instanz verarbeitet eine bis acht eindeutige Quellen,
-bis zu acht Einheitengruppen und rendert eine native Symcon-Kachel.
+bis zu acht Einheitengruppen und rendert eine native Symcon-Kachel sowie
+optional ein eigenständiges IPSView-WebContent-Widget.
 
 ## Aktueller Funktionsumfang
 
@@ -24,6 +25,8 @@ bis zu acht Einheitengruppen und rendert eine native Symcon-Kachel.
 - kollabierter Kacheldesigner mit sofortiger SVG-Vorschau für Theme,
   Legendenposition, Zoom, Linienstärke, Glättung, Datenpunkte,
   Flächendeckkraft, Raster und Achsensichtbarkeit;
+- optionales IPSView-WebContent-Widget mit demselben Datenmodell und wahlweise
+  geerbtem oder vollständig unabhängigem Zeitreihendesign;
 - Rohwertfortschreibung über `VM_UPDATE`, ohne bei jedem Messwert das Archiv
   erneut zu laden;
 - aggregierte Reihen enden am letzten abgeschlossenen Zeitfenster und werden
@@ -49,6 +52,17 @@ Kachel einen Hinweis auf das wirksame Punktbudget.
    teilen eine Achse und verwenden deshalb dieselbe ausdrücklich gewählte
    Seite.
 5. Optional den Kacheldesigner öffnen und Darstellung sowie Vorschau anpassen.
+6. Optional im Abschnitt **IPSView-Design** die WebContent-Ausgabe aktivieren.
+   Standardmäßig übernimmt sie das Kacheldesign. Für eine abweichende
+   Gestaltung das Kacheldesign kopieren und anschließend den unabhängigen
+   IPSView-Designer bearbeiten. Die erzeugte Variable **Zeitreihe für
+   IPSView** wird als HTML-Widget in IPSView platziert.
+
+Beim Abschalten bleibt eine bereits angelegte WebContent-Variable erhalten,
+wird aber nicht weiter aktualisiert. Sie kann im selben Formular ausdrücklich
+gelöscht oder bei aktivierter Ausgabe neu erzeugt werden. Für eigene Skripte
+liefert `ECTS_GetIPSViewHTML($InstanceID)` das vollständige eigenständige
+HTML-Dokument.
 
 Bis zu acht unterschiedliche effektive Einheiten sind möglich. Automatisch
 verteilt die Einheitenachsen auf beide Seiten; mehrere Achsen derselben Seite
@@ -59,10 +73,11 @@ Verdichtungsstufe.
 
 ## Entwicklungsstand und Testgrenzen
 
-Die erste native Vertikale vom Archivvertrag bis zur Kachel ist implementiert
-und durch lokale Vertrags- und Integrationstests abgesichert. Ein realer
-Symcon-Archiv- und Browsertest sowie die getrennte IPSView-Ausgabe stehen noch
-aus. Der aktuelle Designer wirkt ausschließlich auf die native Kachel; das
-spätere IPSView-Design verwendet denselben fachlichen Designvertrag, bleibt
-aber unabhängig konfigurierbar. Die Zielplattform bleibt Symcon 9.0/9.1 mit
-PHP 8.5.
+Die Vertikale vom Archivvertrag bis zur nativen Kachel und zur optionalen
+IPSView-Ausgabe ist implementiert und durch lokale Vertrags- und
+Integrationstests abgesichert. Ein realer Symcon-Archiv- und Browsertest sowie
+ein IPSView-Laufzeittest stehen noch aus. Im Echtzeitmodus wird das
+WebContent-Dokument bei einer Wertänderung mit dem aktuellen Punkt erneuert;
+eine fortlaufende, nicht persistierte Browserhistorie sammelt weiterhin nur
+die geöffnete native Kachel. Die Zielplattform bleibt Symcon 9.0/9.1 mit PHP
+8.5.
