@@ -13,6 +13,7 @@ use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsDataProtocol;
 use SymconECharts\EChartsGaugeDesign;
 use SymconECharts\EChartsGaugeSinglePreview;
+use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsSvgPath;
 use SymconECharts\EChartsVariablePresentation;
@@ -27,6 +28,7 @@ require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsGaugeDesign.php';
+require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
 require_once __DIR__ . '/../libs/EChartsSvgPath.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
@@ -282,6 +284,12 @@ class EChartsGaugeSingle extends IPSModuleStrict
         $this->RegisterIPSViewHTMLPageProperties();
         $this->RegisterEChartsIPSViewTransport();
         $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
+        $this->RegisterPropertyBoolean('IPSViewAdaptToBackground', false);
+        $this->RegisterPropertyInteger('IPSViewBackgroundColor', EChartsIPSViewBackground::DEFAULT_COLOR);
+        $this->RegisterPropertyInteger(
+            'IPSViewBackgroundOpacityPercent',
+            EChartsIPSViewBackground::DEFAULT_OPACITY_PERCENT
+        );
         foreach (self::IPSVIEW_STRING_DESIGN_DEFAULTS as $propertyName => $default) {
             $this->RegisterPropertyString(self::IPSVIEW_PROPERTY_PREFIX . $propertyName, $default);
         }
@@ -431,10 +439,18 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 $gaugeConfiguration['decimals'],
                 (string) ($designValues['GaugePreset'] ?? self::PRESET_SIMPLE),
                 (string) ($designValues['EChartsTheme'] ?? EChartsAsset::THEME_AUTO),
-                $this->GaugeStyleFromFormValues(
-                    $designValues,
-                    $gaugeConfiguration['minimum'],
-                    $gaugeConfiguration['maximum']
+                EChartsIPSViewBackground::WithPreviewStyle(
+                    $this->GaugeStyleFromFormValues(
+                        $designValues,
+                        $gaugeConfiguration['minimum'],
+                        $gaugeConfiguration['maximum']
+                    ),
+                    (bool) ($values['IPSViewAdaptToBackground']
+                        ?? $this->ReadPropertyBoolean('IPSViewAdaptToBackground')),
+                    (int) ($values['IPSViewBackgroundColor']
+                        ?? $this->ReadPropertyInteger('IPSViewBackgroundColor')),
+                    (int) ($values['IPSViewBackgroundOpacityPercent']
+                        ?? $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent'))
                 )
             ))
         );
@@ -761,9 +777,10 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 'Apache ECharts could not be initialized.'
             ]),
             'options'            => [
-                'echartsVersion'   => EChartsAsset::VERSION,
-                'echartsThemes'    => EChartsAsset::ThemePalettes(),
-                'ipsViewTransport' => $ipsView ? $this->EChartsIPSViewTransportOptions() : null
+                'echartsVersion'    => EChartsAsset::VERSION,
+                'echartsThemes'     => EChartsAsset::ThemePalettes(),
+                'adaptToBackground' => $ipsView && $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
+                'ipsViewTransport'  => $ipsView ? $this->EChartsIPSViewTransportOptions() : null
             ],
             'replacements'       => [
                 '{{ECHARTS_SCRIPT}}'           => EChartsAsset::JavaScript(),
@@ -975,6 +992,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 ...$this->IPSViewHTMLPageFormItems(
                     'Creates a standalone WebContent variable for use as an IPSView HTML widget.'
                 ),
+                EChartsIPSViewBackground::FormRow($this->IPSViewGaugePreviewFormAction()),
                 [
                     'type'     => 'CheckBox',
                     'name'     => 'IPSViewUseTileDesign',
@@ -1025,6 +1043,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
         $fieldNames = [
             'SourceVariableID', 'UseVariablePresentation', 'Minimum', 'Maximum', 'Title', 'Unit', 'Decimals',
             'IPSViewUseTileDesign',
+            'IPSViewAdaptToBackground', 'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent',
             ...self::GaugeDesignPropertyNames(),
             ...array_map(
                 static fn (string $name): string => self::IPSVIEW_PROPERTY_PREFIX . $name,
@@ -1276,6 +1295,16 @@ class EChartsGaugeSingle extends IPSModuleStrict
      */
     private function GetConfigurationError(): ?array
     {
+        if (!EChartsIPSViewBackground::IsValid(
+            $this->ReadPropertyInteger('IPSViewBackgroundColor'),
+            $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent')
+        )) {
+            return [
+                'Status'  => self::STATUS_DESIGN_INVALID,
+                'Message' => 'The IPSView background configuration is invalid.'
+            ];
+        }
+
         $variableID = $this->ReadPropertyInteger('SourceVariableID');
         if ($variableID <= 0 || !IPS_VariableExists($variableID)) {
             return [
@@ -1766,7 +1795,12 @@ class EChartsGaugeSingle extends IPSModuleStrict
             $configuration['decimals'],
             (string) $values['GaugePreset'],
             (string) $values['EChartsTheme'],
-            $this->GaugeStyleFromFormValues($values, $configuration['minimum'], $configuration['maximum'])
+            EChartsIPSViewBackground::WithPreviewStyle(
+                $this->GaugeStyleFromFormValues($values, $configuration['minimum'], $configuration['maximum']),
+                $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
+                $this->ReadPropertyInteger('IPSViewBackgroundColor'),
+                $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent')
+            )
         );
     }
 
@@ -2182,13 +2216,12 @@ class EChartsGaugeSingle extends IPSModuleStrict
         $values = $this->EffectiveIPSViewDesignValues();
         $palette = EChartsAsset::ThemePreviewPalette((string) $values['EChartsTheme']);
 
-        return ':root {'
-            . '--symc-background:' . $palette['background'] . ';'
-            . '--symc-text:' . $palette['text'] . ';'
-            . '--symc-text-muted:' . $palette['muted'] . ';'
-            . '--symc-border:' . $palette['border'] . ';'
-            . '--symc-accent:' . $palette['accent'] . ';'
-            . '--symc-surface:' . $palette['surface'] . ';'
-            . '} html, body { background:' . $palette['background'] . '; }';
+        return EChartsIPSViewBackground::ThemeCSS(
+            $palette,
+            '#echarts-gauge-root',
+            $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
+            $this->ReadPropertyInteger('IPSViewBackgroundColor'),
+            $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent')
+        );
     }
 }

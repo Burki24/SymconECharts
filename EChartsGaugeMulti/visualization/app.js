@@ -834,7 +834,9 @@
         graphic = applyPlateDesign(graphic, series, preset, style, colors, width, height, headerInset);
 
         return {
-            backgroundColor: colors.background,
+            backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
+                ? 'transparent'
+                : colors.background,
             animation: !reduceMotion,
             animationDuration: reduceMotion ? 0 : 500,
             aria: { enabled: true, decal: { show: false } },

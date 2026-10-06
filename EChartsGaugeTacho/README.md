@@ -26,6 +26,8 @@ Das optionale IPSView-WebContent-Widget nutzt dieselben Quellen. Sein
 Grunddesign erbt standardmäßig das Kacheldesign oder kann unabhängig
 konfiguriert werden. Wertänderungen aktualisieren das bestehende Diagramm über
 den gemeinsamen Gateway-WebSocket, ohne das WebContent-Dokument neu zu laden.
+Der Hintergrund kann transparent an IPSView angepasst und mit einer Theme-
+oder Benutzerfarbe in frei wählbarer Deckkraft getönt werden.
 Ein realer IPSView-Laufzeittest ist mangels Lizenz nicht möglich.
 
 ## Funktionen

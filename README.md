@@ -102,7 +102,9 @@ Zeitreihen-Kachel sowie ihre getrennt gestaltbare IPSView-WebContent-Ausgabe
 sind implementiert. Weiterführende Zeitreihen-Designoptionen folgen auf dieser
 Basis.
 Alle Gauge-Module besitzen optionale IPSView-WebContent-Ausgaben und können
-ihr Kacheldesign erben oder unabhängig gestaltet werden. Der reale
+ihr Kacheldesign erben oder unabhängig gestaltet werden. Wie TimeSeries können
+sie den IPSView-Hintergrund transparent durchscheinen lassen und ihn mit einer
+Theme- oder Benutzerfarbe in einstellbarer Deckkraft tönen. Der reale
 IPSView-Laufzeittest bleibt mangels Lizenz eine dokumentierte Testlücke.
 Gauge- und Time-Series-Ausgaben behalten ihr geöffnetes IPSView-Dokument bei
 Wertänderungen bei und aktualisieren nur den ECharts-Zustand.

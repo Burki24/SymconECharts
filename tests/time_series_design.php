@@ -7,6 +7,7 @@ use SymconECharts\EChartsTimeSeriesPreview;
 
 require_once __DIR__ . '/../libs/helper/SVGPreviewHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
+require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsTimeSeriesDesign.php';
 require_once __DIR__ . '/../EChartsTimeSeries/TimeSeriesPreview.php';
 

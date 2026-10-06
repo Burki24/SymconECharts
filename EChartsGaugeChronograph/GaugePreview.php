@@ -419,6 +419,7 @@ final class EChartsGaugeChronographPreview
     /** @param array<string, string> $palette @param array<string, int|string> $style */
     private static function SvgDocument(string $title, array $palette, string $content, string $preset, array $style): string
     {
+        $background = EChartsIPSViewBackground::PreviewBackground($palette, $style);
         $titleElement = trim($title) === '' ? '' : '<text x="360" y="28" fill="'
             . SVGPreviewHelper::escape($palette['text'])
             . '" font-size="18" font-weight="600" text-anchor="middle">'
@@ -429,7 +430,8 @@ final class EChartsGaugeChronographPreview
             . SVGPreviewHelper::escape((string) ($style['pointerShape'] ?? 'preset')) . '" data-anchor-shape="'
             . SVGPreviewHelper::escape((string) ($style['anchorShape'] ?? 'preset')) . '" data-plate-mode="'
             . SVGPreviewHelper::escape((string) ($style['plateMode'] ?? 'preset')) . '">'
-            . '<rect width="720" height="400" rx="16" fill="' . SVGPreviewHelper::escape($palette['background']) . '"/>'
+            . '<rect width="720" height="400" rx="16" fill="' . SVGPreviewHelper::escape($background['color'])
+            . '" fill-opacity="' . self::N($background['opacity']) . '"/>'
             . $titleElement . $content . '</svg>';
     }
 

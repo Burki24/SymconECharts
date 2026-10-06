@@ -39,10 +39,13 @@ final class EChartsTimeSeriesPreview
         $showXAxis = (bool) ($design['showXAxis'] ?? true);
         $showYAxis = (bool) ($design['showYAxis'] ?? true);
         $areaOpacity = max(0, min(100, (int) ($design['areaOpacityPercent'] ?? 22))) / 100;
-        $backgroundOpacityPercent = max(0, min(100, $backgroundOpacityPercent));
-        $backgroundColor = $adaptToBackground && preg_match('/^#[0-9A-F]{6}$/i', $backgroundColor) === 1
-            ? strtoupper($backgroundColor)
-            : $palette['background'];
+        $background = EChartsIPSViewBackground::ResolvedPreviewBackground(
+            $palette,
+            $adaptToBackground,
+            $backgroundColor,
+            $backgroundOpacityPercent
+        );
+        $backgroundOpacityPercent = (int) round($background['opacity'] * 100);
         $plotTop = $legendPosition === 'top' ? 92 : 62;
         $plotBottom = $legendPosition === 'bottom' ? 300 : 330;
         $content = '';
@@ -171,7 +174,7 @@ final class EChartsTimeSeriesPreview
             . ' data-area-opacity="' . self::N($areaOpacity) . '"'
             . ' data-axis-color="'
             . SVGPreviewHelper::escape($effectiveColors[0] ?? $palette['border']) . '">'
-            . '<rect width="750" height="390" rx="18" fill="' . SVGPreviewHelper::escape($backgroundColor) . '"'
+            . '<rect width="750" height="390" rx="18" fill="' . SVGPreviewHelper::escape($background['color']) . '"'
             . ($adaptToBackground ? ' fill-opacity="' . self::N($backgroundOpacityPercent / 100) . '"' : '') . '/>'
             . ($definitions !== '' ? '<defs>' . $definitions . '</defs>' : '')
             . '<text x="375" y="31" fill="' . SVGPreviewHelper::escape($palette['text'])

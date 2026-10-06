@@ -801,8 +801,13 @@ assertGatewayGauge(str_contains($visualizationTile, '"theme":"vintage"'), 'Gauge
 assertGatewayGauge(str_contains($visualizationTile, '"echartsThemes":'), 'Gauge Single tile must receive the shared theme palettes.');
 assertGatewayGauge(str_contains($visualizationTile, "registerTheme('vintage'"), 'Gauge Single tile must register official ECharts themes.');
 assertGatewayGauge(
-    str_contains($visualizationTile, 'option.backgroundColor = colors.background'),
-    'Official light themes must receive an explicit readable background.'
+    str_contains(
+        $visualizationTile,
+        "bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true"
+    )
+        && str_contains($visualizationTile, "? 'transparent'")
+        && str_contains($visualizationTile, ': colors.background'),
+    'Gauges must keep a readable theme background unless IPSView background adaptation is enabled.'
 );
 assertGatewayGauge(
     str_contains($visualizationTile, 'background: var(--symc-background);'),
@@ -829,11 +834,20 @@ $gauge->SetTestProperty('IPSViewUseTileDesign', false);
 $gauge->SetTestProperty('IPSViewGaugePreset', 'speed');
 $gauge->SetTestProperty('IPSViewEChartsTheme', 'roma');
 $gauge->SetTestProperty('IPSViewPointerColor', 0xA04020);
+$gauge->SetTestProperty('IPSViewAdaptToBackground', true);
+$gauge->SetTestProperty('IPSViewBackgroundColor', 0x6B4423);
+$gauge->SetTestProperty('IPSViewBackgroundOpacityPercent', 35);
 $independentIPSViewHTML = $gauge->GetIPSViewHTML();
 assertGatewayGauge(
     str_contains($independentIPSViewHTML, '"preset":"speed"')
         && str_contains($independentIPSViewHTML, '"theme":"roma"')
-        && str_contains($independentIPSViewHTML, '"pointerColor":"#A04020"'),
+        && str_contains($independentIPSViewHTML, '"pointerColor":"#A04020"')
+        && str_contains($independentIPSViewHTML, '"adaptToBackground":true')
+        && str_contains($independentIPSViewHTML, 'html, body { background:transparent; }')
+        && str_contains(
+            $independentIPSViewHTML,
+            '#echarts-gauge-root { background:color-mix(in srgb, #6B4423 35%, transparent); }'
+        ),
     'IPSView must render its independent design without changing the Tile design.'
 );
 assertGatewayGauge(
@@ -939,6 +953,9 @@ assertGatewayGauge(
     str_contains($encodedConfigurationForm, '"caption":"IPSView design"')
         && str_contains($encodedConfigurationForm, '"name":"EnableIPSView"')
         && str_contains($encodedConfigurationForm, '"name":"IPSViewUseTileDesign"')
+        && str_contains($encodedConfigurationForm, '"name":"IPSViewAdaptToBackground"')
+        && str_contains($encodedConfigurationForm, '"name":"IPSViewBackgroundColor"')
+        && str_contains($encodedConfigurationForm, '"name":"IPSViewBackgroundOpacityPercent"')
         && str_contains($encodedConfigurationForm, '"name":"IPSViewGaugePreset"')
         && str_contains($encodedConfigurationForm, '"name":"IPSViewGaugePreview"')
         && str_contains($encodedConfigurationForm, 'ECGS_UpdateIPSViewGaugePreviewFromForm'),
@@ -1777,6 +1794,9 @@ foreach ([
     $dedicatedGauge->SetTestProperty('AnchorShape', 'custom');
     $dedicatedGauge->SetTestProperty('CustomAnchorSVG', $multiPointerSvg);
     $dedicatedGauge->SetTestProperty('IPSViewUseTileDesign', false);
+    $dedicatedGauge->SetTestProperty('IPSViewAdaptToBackground', true);
+    $dedicatedGauge->SetTestProperty('IPSViewBackgroundColor', 0x6B4423);
+    $dedicatedGauge->SetTestProperty('IPSViewBackgroundOpacityPercent', 35);
     $dedicatedGauge->SetTestProperty('IPSViewAnchorShape', 'custom');
     $dedicatedGauge->SetTestProperty('IPSViewCustomAnchorSVG', $multiPointerSvg);
     $dedicatedGauge->ApplyChanges();
@@ -1821,7 +1841,13 @@ foreach ([
     assertGatewayGauge(
         str_contains($dedicatedGauge->GetVisualizationTile(), '"pointerShape":"custom"')
             && str_contains($dedicatedGauge->GetIPSViewHTML(), '"pointerShape":"line"')
-            && str_contains($dedicatedGauge->GetIPSViewHTML(), '"plateMode":"hidden"'),
+            && str_contains($dedicatedGauge->GetIPSViewHTML(), '"plateMode":"hidden"')
+            && str_contains($dedicatedGauge->GetIPSViewHTML(), '"adaptToBackground":true')
+            && str_contains($dedicatedGauge->GetIPSViewHTML(), 'html, body { background:transparent; }')
+            && str_contains(
+                $dedicatedGauge->GetIPSViewHTML(),
+                '#echarts-gauge-root { background:color-mix(in srgb, #6B4423 35%, transparent); }'
+            ),
         $dedicatedClass . ' must keep source-specific tile and IPSView designs independent.'
     );
     $dedicatedForm = json_decode($dedicatedGauge->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
@@ -1834,6 +1860,9 @@ foreach ([
             && str_contains($dedicatedFormJson, 'CustomPointerSVG')
             && str_contains($dedicatedFormJson, 'CustomAnchorSVG')
             && str_contains($dedicatedFormJson, 'PlateBackgroundSVG')
+            && str_contains($dedicatedFormJson, 'IPSViewAdaptToBackground')
+            && str_contains($dedicatedFormJson, 'IPSViewBackgroundColor')
+            && str_contains($dedicatedFormJson, 'IPSViewBackgroundOpacityPercent')
             && str_contains($dedicatedFormJson, '_UpdateGaugePreviewSourceFromForm')
             && !str_contains($dedicatedFormJson, '"name":"GaugePreset"')
             && !str_contains($dedicatedFormJson, '"name":"IPSViewGaugePreset"'),
@@ -1956,10 +1985,19 @@ assertGatewayGauge(
 $multiGauge->SetTestProperty('IPSViewUseTileDesign', false);
 $multiGauge->SetTestProperty('IPSViewEChartsTheme', 'roma');
 $multiGauge->SetTestProperty('IPSViewRingWidthPercent', 125);
+$multiGauge->SetTestProperty('IPSViewAdaptToBackground', true);
+$multiGauge->SetTestProperty('IPSViewBackgroundColor', 0x6B4423);
+$multiGauge->SetTestProperty('IPSViewBackgroundOpacityPercent', 35);
 $independentMultiIPSView = $multiGauge->GetIPSViewHTML();
 assertGatewayGauge(
     str_contains($independentMultiIPSView, '"theme":"roma"')
-        && str_contains($independentMultiIPSView, '"ringWidthPercent":125'),
+        && str_contains($independentMultiIPSView, '"ringWidthPercent":125')
+        && str_contains($independentMultiIPSView, '"adaptToBackground":true')
+        && str_contains($independentMultiIPSView, 'html, body { background:transparent; }')
+        && str_contains(
+            $independentMultiIPSView,
+            '#echarts-gauge-root { background:color-mix(in srgb, #6B4423 35%, transparent); }'
+        ),
     'Gauge Multi IPSView must render its independent design.'
 );
 assertGatewayGauge(
@@ -2009,6 +2047,9 @@ assertGatewayGauge(
     str_contains($multiFormJson, '"caption":"IPSView design","expanded":false')
         && str_contains($multiFormJson, '"name":"EnableIPSView"')
         && str_contains($multiFormJson, '"name":"IPSViewUseTileDesign"')
+        && str_contains($multiFormJson, '"name":"IPSViewAdaptToBackground"')
+        && str_contains($multiFormJson, '"name":"IPSViewBackgroundColor"')
+        && str_contains($multiFormJson, '"name":"IPSViewBackgroundOpacityPercent"')
         && str_contains($multiFormJson, '"name":"IPSViewEChartsTheme"')
         && str_contains($multiFormJson, '"name":"IPSViewPointerShape"')
         && str_contains($multiFormJson, '"name":"IPSViewCustomPointerSVG"')
@@ -2023,33 +2064,36 @@ assertGatewayGauge(
     'Gauge Multi form must remain below the Symcon output-buffer limit.'
 );
 $multiGauge->UpdateGaugePreviewFromForm(json_encode([
-    'Title'                        => 'Live preview',
-    'GaugePreset'                  => 'multi-title',
-    'EChartsTheme'                 => 'dark',
-    'PointerShape'                 => 'arrow',
-    'PointerWidthPercent'          => 150,
-    'PointerLengthPercent'         => 120,
-    'AnchorShape'                  => 'ring',
-    'GaugeColorMode'               => 'custom',
-    'PointerColor'                 => 0x112233,
-    'ProgressColor'                => 0x223344,
-    'RingColor'                    => 0x334455,
-    'ScaleColor'                   => 0x445566,
-    'ValueColor'                   => 0x556677,
-    'TitleColor'                   => 0x667788,
-    'AnchorColor'                  => 0x778899,
-    'AnchorBorderColor'            => 0x8899AA,
-    'PlateDesignMode'              => 'custom',
-    'PlateColor'                   => 0x99AABB,
-    'PlateBorderColor'             => 0xAABBCC,
-    'IPSViewUseTileDesign'         => false,
-    'IPSViewGaugePreset'           => 'weather-station',
-    'IPSViewEChartsTheme'          => 'roma',
-    'IPSViewPointerShape'          => 'line',
-    'IPSViewAnchorShape'           => 'none',
-    'IPSViewGaugeColorMode'        => 'custom',
-    'IPSViewPointerColor'          => 0x010203,
-    'IPSViewPlateDesignMode'       => 'hidden'
+    'Title'                           => 'Live preview',
+    'GaugePreset'                     => 'multi-title',
+    'EChartsTheme'                    => 'dark',
+    'PointerShape'                    => 'arrow',
+    'PointerWidthPercent'             => 150,
+    'PointerLengthPercent'            => 120,
+    'AnchorShape'                     => 'ring',
+    'GaugeColorMode'                  => 'custom',
+    'PointerColor'                    => 0x112233,
+    'ProgressColor'                   => 0x223344,
+    'RingColor'                       => 0x334455,
+    'ScaleColor'                      => 0x445566,
+    'ValueColor'                      => 0x556677,
+    'TitleColor'                      => 0x667788,
+    'AnchorColor'                     => 0x778899,
+    'AnchorBorderColor'               => 0x8899AA,
+    'PlateDesignMode'                 => 'custom',
+    'PlateColor'                      => 0x99AABB,
+    'PlateBorderColor'                => 0xAABBCC,
+    'IPSViewUseTileDesign'            => false,
+    'IPSViewAdaptToBackground'        => true,
+    'IPSViewBackgroundColor'          => 0x6B4423,
+    'IPSViewBackgroundOpacityPercent' => 35,
+    'IPSViewGaugePreset'              => 'weather-station',
+    'IPSViewEChartsTheme'             => 'roma',
+    'IPSViewPointerShape'             => 'line',
+    'IPSViewAnchorShape'              => 'none',
+    'IPSViewGaugeColorMode'           => 'custom',
+    'IPSViewPointerColor'             => 0x010203,
+    'IPSViewPlateDesignMode'          => 'hidden'
 ], JSON_THROW_ON_ERROR));
 $multiPreviewUpdates = array_slice($multiGauge->GetTestFormUpdates(), -2);
 assertGatewayGauge(
@@ -2080,7 +2124,8 @@ assertGatewayGauge(
         && str_contains($ipsViewPreviewSvg, 'data-pointer-shape="line"')
         && str_contains($ipsViewPreviewSvg, 'data-anchor-shape="none"')
         && str_contains($ipsViewPreviewSvg, 'data-plate-mode="hidden"')
-        && str_contains($ipsViewPreviewSvg, '#010203'),
+        && str_contains($ipsViewPreviewSvg, '#010203')
+        && str_contains($ipsViewPreviewSvg, 'fill="#6B4423" fill-opacity="0.35"'),
     'Gauge Multi IPSView preview must render its independently edited design immediately.'
 );
 $ringPreviewSvg = \SymconECharts\EChartsGaugeMultiPreview::CreateSvg(

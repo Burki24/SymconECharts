@@ -11,6 +11,7 @@ use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsDataProtocol;
+use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsTimeSeriesDesign;
 use SymconECharts\EChartsTimeSeriesPreview;
@@ -25,6 +26,7 @@ require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
+require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
 require_once __DIR__ . '/../libs/EChartsTimeSeriesDesign.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
@@ -118,8 +120,11 @@ class EChartsTimeSeries extends IPSModuleStrict
         $this->RegisterEChartsIPSViewTransport();
         $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
         $this->RegisterPropertyBoolean('IPSViewAdaptToBackground', false);
-        $this->RegisterPropertyInteger('IPSViewBackgroundColor', -1);
-        $this->RegisterPropertyInteger('IPSViewBackgroundOpacityPercent', 35);
+        $this->RegisterPropertyInteger('IPSViewBackgroundColor', EChartsIPSViewBackground::DEFAULT_COLOR);
+        $this->RegisterPropertyInteger(
+            'IPSViewBackgroundOpacityPercent',
+            EChartsIPSViewBackground::DEFAULT_OPACITY_PERCENT
+        );
         $this->RegisterPropertyString('IPSViewEChartsTheme', EChartsAsset::THEME_AUTO);
         foreach (self::DESIGN_PROPERTY_TYPES as $name => $type) {
             $default = match ($name) {
@@ -191,7 +196,7 @@ class EChartsTimeSeries extends IPSModuleStrict
                 $this->EffectiveIPSViewTheme(),
                 $this->EffectiveIPSViewDesign(),
                 $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
-                $this->IPSViewBackgroundColor(),
+                EChartsIPSViewBackground::Color($this->ReadPropertyInteger('IPSViewBackgroundColor')),
                 $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent')
             )
         );
@@ -233,7 +238,7 @@ class EChartsTimeSeries extends IPSModuleStrict
                     : $this->TimeSeriesDesignFromFormValues($values, 'IPSView'),
                 (bool) ($values['IPSViewAdaptToBackground']
                     ?? $this->ReadPropertyBoolean('IPSViewAdaptToBackground')),
-                $this->IPSViewBackgroundColor((int) ($values['IPSViewBackgroundColor']
+                EChartsIPSViewBackground::Color((int) ($values['IPSViewBackgroundColor']
                     ?? $this->ReadPropertyInteger('IPSViewBackgroundColor'))),
                 (int) ($values['IPSViewBackgroundOpacityPercent']
                     ?? $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent'))
@@ -544,10 +549,10 @@ class EChartsTimeSeries extends IPSModuleStrict
             || $this->ReadPropertyInteger('PointBudget') > 8000
             || !EChartsAsset::IsSupportedTheme($this->ReadPropertyString('EChartsTheme'))
             || !$this->IsValidTimeSeriesDesign()
-            || $this->ReadPropertyInteger('IPSViewBackgroundColor') < -1
-            || $this->ReadPropertyInteger('IPSViewBackgroundColor') > 0xFFFFFF
-            || $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent') < 0
-            || $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent') > 100
+            || !EChartsIPSViewBackground::IsValid(
+                $this->ReadPropertyInteger('IPSViewBackgroundColor'),
+                $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent')
+            )
         ) {
             return [
                 'Status'  => self::STATUS_CONFIGURATION_INVALID,
@@ -1189,32 +1194,14 @@ class EChartsTimeSeries extends IPSModuleStrict
     private function IPSViewThemeCSS(): string
     {
         $palette = EChartsAsset::ThemePreviewPalette($this->EffectiveIPSViewTheme());
-        $adaptToBackground = $this->ReadPropertyBoolean('IPSViewAdaptToBackground');
-        $configuredBackground = $this->IPSViewBackgroundColor();
-        $backgroundColor = $adaptToBackground && $configuredBackground !== ''
-            ? $configuredBackground
-            : $palette['background'];
-        $background = $adaptToBackground
-            ? 'color-mix(in srgb, ' . $backgroundColor . ' '
-                . $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent') . '%, transparent)'
-            : $backgroundColor;
 
-        return ':root {'
-            . '--symc-background:' . $palette['background'] . ';'
-            . '--symc-text:' . $palette['text'] . ';'
-            . '--symc-text-muted:' . $palette['muted'] . ';'
-            . '--symc-border:' . $palette['border'] . ';'
-            . '--symc-accent:' . $palette['accent'] . ';'
-            . '--symc-surface:' . $palette['surface'] . ';'
-            . '} html, body { background:' . ($adaptToBackground ? 'transparent' : $background) . '; }'
-            . ' #echarts-timeseries-root { background:' . $background . '; }';
-    }
-
-    private function IPSViewBackgroundColor(?int $color = null): string
-    {
-        $color ??= $this->ReadPropertyInteger('IPSViewBackgroundColor');
-
-        return $color < 0 ? '' : EChartsAsset::ColorToHex($color);
+        return EChartsIPSViewBackground::ThemeCSS(
+            $palette,
+            '#echarts-timeseries-root',
+            $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
+            $this->ReadPropertyInteger('IPSViewBackgroundColor'),
+            $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent')
+        );
     }
 
     /** @param list<array<string,mixed>> $elements @return array<string,mixed> */
@@ -1242,33 +1229,7 @@ class EChartsTimeSeries extends IPSModuleStrict
                 ...$this->IPSViewHTMLPageFormItems(
                     'Creates a standalone WebContent variable for use as an IPSView HTML widget.'
                 ),
-                [
-                    'type'  => 'RowLayout',
-                    'items' => [
-                        [
-                            'type'    => 'CheckBox',
-                            'name'    => 'IPSViewAdaptToBackground',
-                            'caption' => 'Adapt to IPSView background'
-                        ],
-                        [
-                            'type'               => 'SelectColor',
-                            'name'               => 'IPSViewBackgroundColor',
-                            'caption'            => 'Background color',
-                            'allowTransparent'   => true,
-                            'transparentCaption' => 'Automatic (theme)',
-                            'width'              => '180px'
-                        ],
-                        [
-                            'type'    => 'NumberSpinner',
-                            'name'    => 'IPSViewBackgroundOpacityPercent',
-                            'caption' => 'Background opacity',
-                            'minimum' => 0,
-                            'maximum' => 100,
-                            'suffix'  => '%',
-                            'width'   => '180px'
-                        ]
-                    ]
-                ],
+                EChartsIPSViewBackground::FormRow(),
                 [
                     'type'    => 'CheckBox',
                     'name'    => 'IPSViewUseTileDesign',

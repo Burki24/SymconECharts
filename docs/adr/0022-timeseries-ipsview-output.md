@@ -1,6 +1,6 @@
 # ADR 0022: Zeitreihe getrennt in IPSView ausgeben und gestalten
 
-- Status: Teilweise ersetzt durch ADR 0024 für Laufzeitaktualisierungen
+- Status: Teilweise ersetzt durch ADR 0024 für Laufzeitaktualisierungen und ADR 0025 für den gemeinsamen Hintergrundvertrag
 - Datum: 2026-10-06
 - Entscheider: Burki24
 - Ergänzt: ADR 0008, ADR 0017, ADR 0018, ADR 0019 und ADR 0020

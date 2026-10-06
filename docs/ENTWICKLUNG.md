@@ -47,7 +47,10 @@ das Grunddesign einschließlich SVG-Zeiger, SVG-Nabe und SVG-Zifferblatt
 überschreiben.
 Alle Gauge-Module erzeugen optional
 eine IPSView-WebContent-Variable mit vererbtem oder unabhängigem Design auf
-demselben Renderer. Weitere klassische Multi-Instrumentenpanel-Vorlagen,
+demselben Renderer. Die gemeinsame ECharts-Hintergrundlogik unter
+`libs/EChartsIPSViewBackground.php` steuert für Gauge und TimeSeries das
+Durchscheinen des IPSView-Hintergrunds sowie optionale Farbe und Deckkraft.
+Weitere klassische Multi-Instrumentenpanel-Vorlagen,
 reale Symcon-Laufzeit- und Browsertests fehlen noch. Das Time-Series-Modul
 nutzt den Gateway-Vertrag `archive.read` für rohe oder aggregierte Werte und
 rendert daraus die erste native Zeitreihen-Kachel sowie optional eine getrennt

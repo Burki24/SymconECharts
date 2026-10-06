@@ -14,6 +14,9 @@ versioniertes Multi-Datenmodell und rendert jede Quelle mit eigener Skala,
 Einheit und Wertanzeige in einem responsiven Instrumentenraster. Beide
 Ausgaben verwenden dieselben Quellen und denselben Renderer; IPSView kann
 das Kacheldesign erben oder ein eigenes Design verwenden.
+Der IPSView-Designer kann den Dokumenthintergrund transparent schalten und
+eine automatische Theme-Farbe oder eigene Hintergrundfarbe mit einstellbarer
+Deckkraft über den tatsächlichen IPSView-Hintergrund legen.
 
 ### Inhaltsverzeichnis
 

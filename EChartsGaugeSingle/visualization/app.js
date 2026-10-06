@@ -1086,7 +1086,9 @@
             graphic: buildPlateGraphic(style, layout, series, colors),
             series: [series]
         };
-        option.backgroundColor = colors.background;
+        option.backgroundColor = bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
+            ? 'transparent'
+            : colors.background;
 
         return option;
     }

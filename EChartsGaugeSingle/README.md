@@ -18,6 +18,9 @@ Einstellungen. Davon unabhängig stehen das automatische Symcon-Design und
 sechs lokal gebündelte offizielle ECharts-Themes zur Auswahl.
 IPSView kann das Kacheldesign vollständig erben oder ein eigenes Gauge-Design
 mit separater Vorschau verwenden.
+Zusätzlich kann der IPSView-Dokumenthintergrund transparent werden; eine
+automatische Theme-Farbe oder frei gewählte Hintergrundfarbe lässt sich dabei
+mit 0 bis 100 Prozent Deckkraft über den tatsächlichen IPSView-Hintergrund legen.
 
 ### Inhaltsverzeichnis
 
