@@ -547,10 +547,10 @@ class EChartsTimeSeries extends IPSModuleStrict
             $reducer = $source['Reducer'] ?? 'auto';
             $axisPosition = $source['AxisPosition'] ?? 'auto';
             $usePresentation = $source['UseVariablePresentation'] ?? true;
+            $normalizedColor = self::NormalizeSourceColor($color);
             if (!is_string($label) || !is_string($unit) || !is_int($decimals)
-                || !is_string($color) || !is_string($style) || !is_string($reducer) || !is_string($axisPosition)
+                || $normalizedColor === null || !is_string($style) || !is_string($reducer) || !is_string($axisPosition)
                 || !is_bool($usePresentation) || $decimals < 0 || $decimals > 6
-                || ($color !== '' && preg_match('/^#[0-9A-F]{6}$/i', $color) !== 1)
                 || !in_array($style, self::STYLES, true) || !in_array($reducer, self::REDUCERS, true)
                 || !in_array($axisPosition, self::AXIS_POSITIONS, true)
             ) {
@@ -571,7 +571,7 @@ class EChartsTimeSeries extends IPSModuleStrict
                 'Label'        => trim($label),
                 'Unit'         => $effectiveUnit,
                 'Decimals'     => $presentation['decimals'],
-                'Color'        => strtoupper($color),
+                'Color'        => $normalizedColor,
                 'Style'        => $style,
                 'Reducer'      => $reducer,
                 'AxisPosition' => $axisPosition
@@ -983,18 +983,41 @@ class EChartsTimeSeries extends IPSModuleStrict
             if ($label === '' && is_int($variableID) && $variableID > 0 && IPS_VariableExists($variableID)) {
                 $label = IPS_GetName($variableID);
             }
-            $color = is_string($source['Color'] ?? null) ? $source['Color'] : '';
+            $color = self::NormalizeSourceColor($source['Color'] ?? '');
             $style = is_string($source['Style'] ?? null) && in_array($source['Style'], self::STYLES, true)
                 ? $source['Style']
                 : 'line';
             $result[] = [
                 'label' => $label !== '' ? $label : 'Series ' . ($index + 1),
-                'color' => preg_match('/^#[0-9A-F]{6}$/i', $color) === 1 ? strtoupper($color) : '',
+                'color' => $color ?? '',
                 'style' => $style
             ];
         }
 
         return $result;
+    }
+
+    private static function NormalizeSourceColor(mixed $color): ?string
+    {
+        if (is_int($color)) {
+            if ($color === -1) {
+                return '';
+            }
+            if ($color >= 0 && $color <= 0xFFFFFF) {
+                return sprintf('#%06X', $color);
+            }
+
+            return null;
+        }
+        if (!is_string($color)) {
+            return null;
+        }
+        $color = trim($color);
+        if ($color === '') {
+            return '';
+        }
+
+        return preg_match('/^#[0-9A-F]{6}$/i', $color) === 1 ? strtoupper($color) : null;
     }
 
     /** @param list<array<string,mixed>> $items @return list<array<string,mixed>> */

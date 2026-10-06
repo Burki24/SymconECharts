@@ -2833,7 +2833,7 @@ $timeSeries->SetTestProperty('Sources', json_encode([
         'UseVariablePresentation' => false,
         'Unit'                    => '°C',
         'Decimals'                => 1,
-        'Color'                   => '#55CBB5',
+        'Color'                   => 0x55CBB5,
         'Style'                   => 'area',
         'Reducer'                 => 'auto',
         'AxisPosition'            => 'left'
@@ -2844,7 +2844,7 @@ $timeSeries->SetTestProperty('Sources', json_encode([
         'UseVariablePresentation' => false,
         'Unit'                    => '%',
         'Decimals'                => 0,
-        'Color'                   => '',
+        'Color'                   => -1,
         'Style'                   => 'line',
         'Reducer'                 => 'auto',
         'AxisPosition'            => 'right'
@@ -2880,7 +2880,9 @@ assertGatewayGauge(
         && $timeSeriesData['axes'][1]['position'] === 'right'
         && $timeSeriesData['axes'][1]['positionIndex'] === 0
         && $timeSeriesData['series'][0]['effectiveReducer'] === 'average'
+        && $timeSeriesData['series'][0]['color'] === '#55CBB5'
         && $timeSeriesData['series'][1]['effectiveReducer'] === 'sum'
+        && $timeSeriesData['series'][1]['color'] === ''
         && $timeSeriesData['chart']['design'] === [
             'legendPosition'     => 'bottom',
             'lineWidthPercent'   => 150,
@@ -2898,6 +2900,8 @@ $timeSeriesForm = $timeSeries->GetConfigurationForm();
 assertGatewayGauge(
     str_contains($timeSeriesForm, 'ECTS_UpdateTimeSeriesPreviewFromForm')
         && str_contains($timeSeriesForm, 'AxisPosition')
+        && str_contains($timeSeriesForm, 'SelectColor')
+        && str_contains($timeSeriesForm, 'transparentCaption')
         && str_contains($timeSeriesForm, 'ECTS_GetTimeSeriesDiagnostic')
         && str_contains($timeSeriesForm, 'ECTS_CopyTileDesignToIPSView')
         && str_contains($timeSeriesForm, 'IPSViewUseTileDesign')
@@ -2910,7 +2914,7 @@ $timeSeries->UpdateTimeSeriesPreviewFromForm(json_encode([
     'Sources'            => [[
         'VariableID' => 4711,
         'Label'      => 'Outdoor temperature',
-        'Color'      => '#E5754F',
+        'Color'      => 0xE5754F,
         'Style'      => 'area'
     ]],
     'EChartsTheme'       => 'dark',
@@ -2986,7 +2990,7 @@ $timeSeries->UpdateTimeSeriesPreviewFromForm(json_encode([
     'Sources'                   => [[
         'VariableID' => 4711,
         'Label'      => 'Outdoor temperature',
-        'Color'      => '#E5754F',
+        'Color'      => 0xE5754F,
         'Style'      => 'line'
     ]],
     'EChartsTheme'              => 'vintage',

@@ -50,7 +50,8 @@ Kachel einen Hinweis auf das wirksame Punktbudget.
 4. Optional Beschriftung, Einheit, Nachkommastellen, Farbe, Stil, Reducer und
    Achsenseite pro Quelle anpassen. Quellen mit derselben effektiven Einheit
    teilen eine Achse und verwenden deshalb dieselbe ausdrücklich gewählte
-   Seite.
+   Seite. Der Farbwähler verwendet **Automatisch** für die Farbfolge des
+   gewählten Themes; eine ausgewählte Farbe überschreibt sie für diese Reihe.
 5. Optional den Kacheldesigner öffnen und Darstellung sowie Vorschau anpassen.
 6. Optional im Abschnitt **IPSView-Design** die WebContent-Ausgabe aktivieren.
    Standardmäßig übernimmt sie das Kacheldesign. Für eine abweichende

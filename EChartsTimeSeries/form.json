@@ -74,9 +74,11 @@
                     "caption": "Color",
                     "name": "Color",
                     "width": "100px",
-                    "add": "",
+                    "add": -1,
                     "edit": {
-                        "type": "ValidationTextBox"
+                        "type": "SelectColor",
+                        "allowTransparent": true,
+                        "transparentCaption": "Automatic"
                     }
                 },
                 {
