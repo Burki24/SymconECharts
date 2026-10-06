@@ -649,6 +649,23 @@
         var mainRadius = Math.max(1, Math.min(width * (wide ? 0.19 : 0.32), primaryHeight * (wide ? 0.39 : 0.27)));
         var sideRadius = Math.max(1, Math.min(width * (wide ? 0.115 : 0.21),
             primaryHeight * (wide ? 0.28 : 0.17), mainRadius * 0.7));
+        if (wide && count === 4) {
+            return [
+                { center: [width * 0.465, top + availableHeight * 0.5], radius: mainRadius },
+                { center: [width * 0.125, top + availableHeight * 0.5], radius: sideRadius },
+                { center: [width * 0.85, top + availableHeight * 0.25], radius: sideRadius },
+                { center: [width * 0.85, top + availableHeight * 0.75], radius: sideRadius }
+            ];
+        }
+        if (wide && count === 5) {
+            return [
+                { center: [width * 0.5, top + availableHeight * 0.5], radius: mainRadius },
+                { center: [width * 0.17, top + availableHeight * 0.25], radius: sideRadius },
+                { center: [width * 0.83, top + availableHeight * 0.25], radius: sideRadius },
+                { center: [width * 0.17, top + availableHeight * 0.75], radius: sideRadius },
+                { center: [width * 0.83, top + availableHeight * 0.75], radius: sideRadius }
+            ];
+        }
         var positions = [
             { center: [width * 0.5, top + primaryHeight * (wide ? 0.5 : 0.32)], radius: mainRadius },
             { center: [width * (wide ? 0.17 : 0.25), top + primaryHeight * (wide ? 0.55 : 0.77)], radius: sideRadius },
@@ -670,13 +687,19 @@
                 best = { columns: columns, cellWidth: cellWidth, cellHeight: cellHeight, radius: radius };
             }
         }
+        var extraRadius = best.radius;
+        if (count <= 5) {
+            extraRadius = Math.min(sideRadius, best.radius);
+            positions[1].radius = extraRadius;
+            positions[2].radius = extraRadius;
+        }
         for (var index = 0; index < extraCount; index += 1) {
             positions.push({
                 center: [
                     (index % best.columns + 0.5) * best.cellWidth,
                     top + primaryHeight + (Math.floor(index / best.columns) + 0.5) * best.cellHeight
                 ],
-                radius: Math.max(1, best.radius)
+                radius: Math.max(1, extraRadius)
             });
         }
         return positions;

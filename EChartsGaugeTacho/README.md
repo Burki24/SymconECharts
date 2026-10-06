@@ -2,7 +2,9 @@
 
 `EChartsGaugeTacho` rendert zwei bis fünf numerische Symcon-Variablen als
 responsives Tacho-Cockpit. Die erste Quelle bildet das Hauptinstrument; bis zu
-vier weitere Quellen werden als Nebeninstrumente angeordnet.
+vier weitere Quellen werden als gleich große Nebeninstrumente angeordnet. Bei
+vier und fünf Quellen nutzt eine eigene Anordnung den verfügbaren Platz breiter
+Kacheln aus, ohne das Hauptinstrument zu verkleinern.
 
 ## Konfiguration
 

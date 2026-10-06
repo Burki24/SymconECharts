@@ -205,6 +205,40 @@ const compactTacho = render('symcon', 320, 192, 16, 'Cockpit', 'tacho');
 assert.equal(compactTacho.series.length, 16);
 assert.ok(compactTacho.series.every(series => series.radius > 0));
 
+for (const count of [4, 5]) {
+    const wideTacho = render('symcon', 1260, 630, count, '', 'tacho', false);
+    const secondary = wideTacho.series.slice(1);
+    assert.ok(wideTacho.series[0].radius > secondary[0].radius,
+        'The main Tacho dial must remain dominant.');
+    assert.ok(secondary.every(series => series.radius === secondary[0].radius),
+        'Every secondary Tacho dial must use the same available size.');
+    assert.ok(secondary[0].radius > 100,
+        'Wide tiles must give every secondary Tacho dial useful space.');
+    for (let left = 0; left < wideTacho.series.length; left += 1) {
+        const a = wideTacho.series[left];
+        assert.ok(a.center[0] - a.radius * 1.08 >= 0);
+        assert.ok(a.center[0] + a.radius * 1.08 <= 1260);
+        assert.ok(a.center[1] - a.radius * 1.08 >= 0);
+        assert.ok(a.center[1] + a.radius * 1.08 <= 630);
+        for (let right = left + 1; right < wideTacho.series.length; right += 1) {
+            const b = wideTacho.series[right];
+            assert.ok(Math.hypot(a.center[0] - b.center[0], a.center[1] - b.center[1])
+                > (a.radius + b.radius) * 1.08, 'Tacho dial bezels must not overlap.');
+        }
+    }
+    const portraitTacho = render('symcon', 416, 720, count, 'Cockpit', 'tacho');
+    const portraitSecondary = portraitTacho.series.slice(1);
+    assert.ok(portraitSecondary.every(series => series.radius === portraitSecondary[0].radius),
+        'Portrait tiles must keep every secondary Tacho dial equally sized.');
+    assert.ok(portraitTacho.series.every(series => series.center[1] - series.radius * 1.08 >= 64),
+        'Portrait Tacho dials must clear the native tile header.');
+}
+const fiveDialTacho = render('symcon', 1260, 630, 5, '', 'tacho', false);
+assert.equal(fiveDialTacho.series[1].center[0], fiveDialTacho.series[3].center[0]);
+assert.equal(fiveDialTacho.series[2].center[0], fiveDialTacho.series[4].center[0]);
+assert.ok(fiveDialTacho.series[3].center[1] > fiveDialTacho.series[1].center[1]);
+assert.ok(fiveDialTacho.series[4].center[1] > fiveDialTacho.series[2].center[1]);
+
 for (const count of [2, 3, 4, 5, 6]) {
     for (const [mode, width, height] of [['symcon', 720, 560], ['ipsview', 720, 560], ['symcon', 320, 192]]) {
         const option = render(mode, width, height, count, 'Climate', 'chronograph');

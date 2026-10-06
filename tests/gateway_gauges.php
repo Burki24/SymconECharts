@@ -1574,6 +1574,22 @@ foreach ([
             && ($dedicatedData['items'][1]['style'] ?? null) === [],
         $dedicatedClass . ' must attach individual SVG design only to the configured source.'
     );
+    if ($dedicatedClass === EChartsGaugeTacho::class) {
+        $fivePreviewItems = array_fill(0, 5, $dedicatedData['items'][1]);
+        $fiveGaugePreview = \SymconECharts\EChartsGaugeTachoPreview::CreateSvg(
+            $fivePreviewItems,
+            '',
+            'auto',
+            'tacho',
+            []
+        );
+        assertGatewayGauge(
+            substr_count($fiveGaugePreview, 'r="82.08"') === 4
+                && str_contains($fiveGaugePreview, 'cx="125.00" cy="110.00"')
+                && str_contains($fiveGaugePreview, 'cx="595.00" cy="300.00"'),
+            'Gauge Tacho preview must give all four secondary instruments the same useful size.'
+        );
+    }
     assertGatewayGauge(
         str_contains($dedicatedGauge->GetVisualizationTile(), 'Object.assign({}, style, items[index].style || {})'),
         $dedicatedClass . ' renderer must merge source-specific design settings.'

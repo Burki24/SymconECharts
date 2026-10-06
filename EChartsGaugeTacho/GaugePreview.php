@@ -187,8 +187,13 @@ final class EChartsGaugeTachoPreview
     private static function CreateTachoSvg(array $items, string $title, array $palette, array $style): string
     {
         $items = array_slice($items, 0, 5);
-        $positions = [[360.0, 165.0, 115.0], [125.0, 180.0, 72.0], [595.0, 180.0, 72.0],
-            [250.0, 340.0, 55.0], [470.0, 340.0, 55.0]];
+        $positions = match (count($items)) {
+            4       => [[335.0, 205.0, 115.0], [95.0, 205.0, 72.0], [610.0, 110.0, 72.0],
+                [610.0, 300.0, 72.0]],
+            5       => [[360.0, 205.0, 115.0], [125.0, 110.0, 72.0], [595.0, 110.0, 72.0],
+                [125.0, 300.0, 72.0], [595.0, 300.0, 72.0]],
+            default => [[360.0, 165.0, 115.0], [125.0, 180.0, 72.0], [595.0, 180.0, 72.0]]
+        };
         $content = '';
         foreach ($items as $index => $item) {
             [$x, $y, $radius] = $positions[$index];

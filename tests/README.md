@@ -16,7 +16,9 @@ Kachelkopfzeile sowie die Layouts beider Ausgabewege anhand gerenderter
 ECharts-Optionen. Er deckt auch Ringraster und konzentrische Ringe mit 2 bzw.
 16 Quellen und das Wetterstationspanel ab. Eigene Renderer-Suiten prüfen die
 Tacho- und Chronograph-Module einschließlich quellbezogener Designwerte und
-SVG-Verarbeitung für ihre maximal fünf Quellen. Die
+SVG-Verarbeitung für ihre maximal fünf Quellen. Der Tacho-Test prüft außerdem,
+dass breite Kacheln mit vier oder fünf Quellen alle Nebeninstrumente gleich
+groß, überlappungsfrei und innerhalb der verfügbaren Fläche anordnen. Die
 PHP-Basissuite benötigt weiterhin kein Node.js.
 
 `tests/fixtures/tacho-browser.html` und
