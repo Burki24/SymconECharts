@@ -6,21 +6,25 @@ use Burki24\SymconModuleHelper\ConfigurationFormHelper;
 use Burki24\SymconModuleHelper\DataFlowHelper;
 use Burki24\SymconModuleHelper\IPSViewHTMLPageHelper;
 use Burki24\SymconModuleHelper\ResponsiveVisualizationHelper;
+use Burki24\SymconModuleHelper\SVGPreviewHelper;
 use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsDataProtocol;
+use SymconECharts\EChartsTimeSeriesPreview;
 use SymconECharts\EChartsVariablePresentation;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
 require_once __DIR__ . '/../libs/helper/DataFlowHelper.php';
 require_once __DIR__ . '/../libs/helper/IPSViewHTMLPageHelper.php';
 require_once __DIR__ . '/../libs/helper/ResponsiveVisualizationHelper.php';
+require_once __DIR__ . '/../libs/helper/SVGPreviewHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
+require_once __DIR__ . '/TimeSeriesPreview.php';
 
 class EChartsTimeSeries extends IPSModuleStrict
 {
@@ -57,6 +61,12 @@ class EChartsTimeSeries extends IPSModuleStrict
     private const AGGREGATION_SECONDS = [6 => 60, 5 => 300, 8 => 900, 0 => 3600, 1 => 86400];
     private const REDUCERS = ['auto', 'average', 'sum', 'minimum', 'maximum'];
     private const STYLES = ['line', 'area'];
+    private const LEGEND_POSITIONS = ['top', 'bottom', 'hidden'];
+    private const DESIGN_FORM_FIELDS = [
+        'Title', 'Sources', 'EChartsTheme', 'LegendPosition', 'EnableZoom',
+        'LineWidthPercent', 'SmoothLines', 'ShowSymbols', 'SymbolSizePercent',
+        'AreaOpacityPercent', 'ShowGrid', 'ShowXAxis', 'ShowYAxis'
+    ];
 
     public function Create(): void
     {
@@ -71,7 +81,16 @@ class EChartsTimeSeries extends IPSModuleStrict
         $this->RegisterPropertyString('DataMode', 'auto');
         $this->RegisterPropertyInteger('PointBudget', 2000);
         $this->RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO);
+        $this->RegisterPropertyString('LegendPosition', 'top');
         $this->RegisterPropertyBoolean('EnableZoom', true);
+        $this->RegisterPropertyInteger('LineWidthPercent', 100);
+        $this->RegisterPropertyBoolean('SmoothLines', false);
+        $this->RegisterPropertyBoolean('ShowSymbols', false);
+        $this->RegisterPropertyInteger('SymbolSizePercent', 100);
+        $this->RegisterPropertyInteger('AreaOpacityPercent', 22);
+        $this->RegisterPropertyBoolean('ShowGrid', true);
+        $this->RegisterPropertyBoolean('ShowXAxis', true);
+        $this->RegisterPropertyBoolean('ShowYAxis', true);
         $this->RegisterAttributeString('RegisteredSourceVariableIDs', '[]');
         $this->RegisterAttributeString('LastError', '');
     }
@@ -97,7 +116,44 @@ class EChartsTimeSeries extends IPSModuleStrict
 
     public function GetConfigurationForm(): string
     {
-        return $this->EncodeConfigurationForm($this->LoadConfigurationForm());
+        $form = $this->LoadConfigurationForm();
+        if (isset($form['elements']) && is_array($form['elements'])) {
+            $form['elements'] = $this->AttachTimeSeriesPreviewActions($form['elements']);
+        }
+        $form = SVGPreviewHelper::withImage(
+            $form,
+            'TimeSeriesPreview',
+            EChartsTimeSeriesPreview::CreateSvg(
+                $this->PreviewSeries(),
+                $this->ReadPropertyString('Title'),
+                $this->ReadPropertyString('EChartsTheme'),
+                $this->ReadTimeSeriesDesign()
+            )
+        );
+
+        return $this->EncodeConfigurationForm($form);
+    }
+
+    /** Refreshes the SVG preview from the values currently edited in the configuration form. */
+    public function UpdateTimeSeriesPreviewFromForm(string $Configuration): void
+    {
+        try {
+            $values = json_decode($Configuration, true, 64, JSON_THROW_ON_ERROR);
+        } catch (JsonException) {
+            $values = [];
+        }
+        if (!is_array($values)) {
+            $values = [];
+        }
+
+        $this->UpdateFormField('TimeSeriesPreview', 'image', SVGPreviewHelper::dataUri(
+            EChartsTimeSeriesPreview::CreateSvg(
+                $this->PreviewSeries($values['Sources'] ?? null),
+                (string) ($values['Title'] ?? $this->ReadPropertyString('Title')),
+                (string) ($values['EChartsTheme'] ?? $this->ReadPropertyString('EChartsTheme')),
+                $this->TimeSeriesDesignFromFormValues($values)
+            )
+        ));
     }
 
     public function GetTimeSeriesData(): string
@@ -154,7 +210,8 @@ class EChartsTimeSeries extends IPSModuleStrict
             'theme'         => $this->ReadPropertyString('EChartsTheme'),
             'chart'         => [
                 'title'      => $this->ReadPropertyString('Title'),
-                'enableZoom' => $this->ReadPropertyBoolean('EnableZoom')
+                'enableZoom' => $this->ReadPropertyBoolean('EnableZoom'),
+                'design'     => $this->ReadTimeSeriesDesign()
             ],
             'range'         => [
                 'key'                 => $this->ReadPropertyString('Range'),
@@ -314,6 +371,13 @@ class EChartsTimeSeries extends IPSModuleStrict
             || $this->ReadPropertyInteger('PointBudget') < 200
             || $this->ReadPropertyInteger('PointBudget') > 8000
             || !EChartsAsset::IsSupportedTheme($this->ReadPropertyString('EChartsTheme'))
+            || !in_array($this->ReadPropertyString('LegendPosition'), self::LEGEND_POSITIONS, true)
+            || $this->ReadPropertyInteger('LineWidthPercent') < 50
+            || $this->ReadPropertyInteger('LineWidthPercent') > 200
+            || $this->ReadPropertyInteger('SymbolSizePercent') < 50
+            || $this->ReadPropertyInteger('SymbolSizePercent') > 200
+            || $this->ReadPropertyInteger('AreaOpacityPercent') < 0
+            || $this->ReadPropertyInteger('AreaOpacityPercent') > 100
         ) {
             return [
                 'Status'  => self::STATUS_CONFIGURATION_INVALID,
@@ -658,6 +722,110 @@ class EChartsTimeSeries extends IPSModuleStrict
             $this->RegisterMessage($variableID, VM_UPDATE);
         }
         $this->WriteAttributeString('RegisteredSourceVariableIDs', json_encode($current, JSON_THROW_ON_ERROR));
+    }
+
+    /** @return array{legendPosition:string,lineWidthPercent:int,smoothLines:bool,showSymbols:bool,symbolSizePercent:int,areaOpacityPercent:int,showGrid:bool,showXAxis:bool,showYAxis:bool} */
+    private function ReadTimeSeriesDesign(): array
+    {
+        return [
+            'legendPosition'    => $this->ReadPropertyString('LegendPosition'),
+            'lineWidthPercent'  => $this->ReadPropertyInteger('LineWidthPercent'),
+            'smoothLines'       => $this->ReadPropertyBoolean('SmoothLines'),
+            'showSymbols'       => $this->ReadPropertyBoolean('ShowSymbols'),
+            'symbolSizePercent' => $this->ReadPropertyInteger('SymbolSizePercent'),
+            'areaOpacityPercent' => $this->ReadPropertyInteger('AreaOpacityPercent'),
+            'showGrid'          => $this->ReadPropertyBoolean('ShowGrid'),
+            'showXAxis'         => $this->ReadPropertyBoolean('ShowXAxis'),
+            'showYAxis'         => $this->ReadPropertyBoolean('ShowYAxis')
+        ];
+    }
+
+    /** @param array<string,mixed> $values @return array<string,mixed> */
+    private function TimeSeriesDesignFromFormValues(array $values): array
+    {
+        $design = $this->ReadTimeSeriesDesign();
+        foreach ([
+            'LegendPosition' => 'legendPosition',
+            'LineWidthPercent' => 'lineWidthPercent',
+            'SmoothLines' => 'smoothLines',
+            'ShowSymbols' => 'showSymbols',
+            'SymbolSizePercent' => 'symbolSizePercent',
+            'AreaOpacityPercent' => 'areaOpacityPercent',
+            'ShowGrid' => 'showGrid',
+            'ShowXAxis' => 'showXAxis',
+            'ShowYAxis' => 'showYAxis'
+        ] as $property => $key) {
+            if (array_key_exists($property, $values)) {
+                $design[$key] = $values[$property];
+            }
+        }
+
+        return $design;
+    }
+
+    /** @return list<array{label:string,color:string,style:string}> */
+    private function PreviewSeries(mixed $formSources = null): array
+    {
+        $sources = $formSources;
+        if ($sources === null) {
+            $sources = $this->ReadPropertyString('Sources');
+        }
+        if (is_string($sources)) {
+            $sources = json_decode($sources, true);
+        }
+        if (!is_array($sources) || !array_is_list($sources)) {
+            return [];
+        }
+
+        $result = [];
+        foreach (array_slice($sources, 0, 4) as $index => $source) {
+            if (!is_array($source)) {
+                continue;
+            }
+            $variableID = $source['VariableID'] ?? 0;
+            $label = trim(is_string($source['Label'] ?? null) ? $source['Label'] : '');
+            if ($label === '' && is_int($variableID) && $variableID > 0 && IPS_VariableExists($variableID)) {
+                $label = IPS_GetName($variableID);
+            }
+            $color = is_string($source['Color'] ?? null) ? $source['Color'] : '';
+            $style = is_string($source['Style'] ?? null) && in_array($source['Style'], self::STYLES, true)
+                ? $source['Style']
+                : 'line';
+            $result[] = [
+                'label' => $label !== '' ? $label : 'Series ' . ($index + 1),
+                'color' => preg_match('/^#[0-9A-F]{6}$/i', $color) === 1 ? strtoupper($color) : '',
+                'style' => $style
+            ];
+        }
+
+        return $result;
+    }
+
+    /** @param list<array<string,mixed>> $items @return list<array<string,mixed>> */
+    private function AttachTimeSeriesPreviewActions(array $items): array
+    {
+        $action = $this->TimeSeriesPreviewFormAction();
+        foreach ($items as &$item) {
+            if (isset($item['name']) && in_array($item['name'], self::DESIGN_FORM_FIELDS, true)) {
+                $item['onChange'] = $action;
+            }
+            if (isset($item['items']) && is_array($item['items'])) {
+                $item['items'] = $this->AttachTimeSeriesPreviewActions($item['items']);
+            }
+        }
+        unset($item);
+
+        return $items;
+    }
+
+    private function TimeSeriesPreviewFormAction(): string
+    {
+        $pairs = array_map(
+            static fn (string $name): string => "'" . $name . "' => $" . $name,
+            self::DESIGN_FORM_FIELDS
+        );
+
+        return 'ECTS_UpdateTimeSeriesPreviewFromForm($id, json_encode([' . implode(', ', $pairs) . ']));';
     }
 
     /** @return list<int> */

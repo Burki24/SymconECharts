@@ -32,24 +32,38 @@
         var series = Array.isArray(model.series) ? model.series : [];
         var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 10;
         var zoom = model.chart && model.chart.enableZoom === true;
+        var design = model.chart && model.chart.design || {};
+        var legendPosition = ['top', 'bottom', 'hidden'].indexOf(design.legendPosition) >= 0
+            ? design.legendPosition : 'top';
+        var showLegend = legendPosition !== 'hidden';
+        var bottomLegend = legendPosition === 'bottom';
+        var lineWidth = 2 * Math.max(50, Math.min(200, Number(design.lineWidthPercent) || 100)) / 100;
+        var symbolSize = 6 * Math.max(50, Math.min(200, Number(design.symbolSizePercent) || 100)) / 100;
+        var areaOpacity = Math.max(0, Math.min(100, Number(design.areaOpacityPercent) || 0)) / 100;
+        if (design.areaOpacityPercent === undefined) { areaOpacity = 0.22; }
+        var titleVisible = Boolean(model.chart && model.chart.title);
+        var gridTop = headerInset + (legendPosition === 'top' ? 64 : (titleVisible ? 48 : 20));
+        var gridBottom = bottomLegend ? (zoom ? 94 : 58) : (zoom ? 64 : 34);
 
         return {
             backgroundColor: colors.background,
             animation: false,
             aria: { enabled: true, decal: { show: false } },
             title: {
-                show: Boolean(model.chart && model.chart.title),
+                show: titleVisible,
                 text: model.chart && model.chart.title || '',
                 left: 'center',
                 top: headerInset,
                 textStyle: { color: colors.text, fontSize: 18 }
             },
             legend: {
-                top: headerInset + (model.chart && model.chart.title ? 34 : 4),
+                show: showLegend,
+                top: legendPosition === 'top' ? headerInset + (titleVisible ? 34 : 4) : null,
+                bottom: bottomLegend ? 6 : null,
                 textStyle: { color: colors.text },
                 data: series.map(function (item) { return item.label; })
             },
-            grid: { left: 58, right: axes.length > 1 ? 58 : 22, top: headerInset + 64, bottom: zoom ? 64 : 34 },
+            grid: { left: 58, right: axes.length > 1 ? 58 : 22, top: gridTop, bottom: gridBottom },
             tooltip: {
                 trigger: 'axis',
                 axisPointer: { type: 'cross' },
@@ -71,23 +85,35 @@
                     })).join('<br>');
                 }
             },
-            dataZoom: zoom ? [{ type: 'inside', xAxisIndex: 0 }, { type: 'slider', xAxisIndex: 0, bottom: 12 }] : [],
+            dataZoom: zoom ? [
+                { type: 'inside', xAxisIndex: 0 },
+                { type: 'slider', xAxisIndex: 0, bottom: bottomLegend ? 38 : 12 }
+            ] : [],
             xAxis: {
                 type: 'time',
                 min: model.range.startTimestamp * 1000,
                 max: model.range.endTimestamp * 1000,
-                axisLine: { lineStyle: { color: colors.border } },
-                axisLabel: { color: colors.muted },
+                axisLine: { show: design.showXAxis !== false, lineStyle: { color: colors.border } },
+                axisTick: { show: design.showXAxis !== false },
+                axisLabel: { show: design.showXAxis !== false, color: colors.muted },
                 splitLine: { show: false }
             },
             yAxis: axes.map(function (axis, index) {
                 return {
                     type: 'value',
-                    name: axis.unit || '',
+                    name: design.showYAxis !== false ? axis.unit || '' : '',
                     position: index === 0 ? 'left' : 'right',
-                    axisLine: { show: true, lineStyle: { color: colors.border } },
-                    axisLabel: { color: colors.muted, formatter: '{value}' + (axis.unit ? ' ' + axis.unit : '') },
-                    splitLine: { lineStyle: { color: colors.track || colors.border, opacity: 0.35 } },
+                    axisLine: { show: design.showYAxis !== false, lineStyle: { color: colors.border } },
+                    axisTick: { show: design.showYAxis !== false },
+                    axisLabel: {
+                        show: design.showYAxis !== false,
+                        color: colors.muted,
+                        formatter: '{value}' + (axis.unit ? ' ' + axis.unit : '')
+                    },
+                    splitLine: {
+                        show: design.showGrid !== false,
+                        lineStyle: { color: colors.track || colors.border, opacity: 0.35 }
+                    },
                     nameTextStyle: { color: colors.muted }
                 };
             }),
@@ -97,17 +123,20 @@
                     name: item.label,
                     type: 'line',
                     yAxisIndex: item.axisIndex,
-                    showSymbol: false,
+                    showSymbol: design.showSymbols === true,
+                    symbolSize: symbolSize,
+                    smooth: design.smoothLines === true,
                     connectNulls: false,
                     sampling: 'lttb',
+                    lineStyle: { width: lineWidth },
                     data: item.points.map(function (point) { return [point[0] * 1000, point[1]]; })
                 };
                 if (item.color) {
-                    result.lineStyle = { color: item.color };
+                    result.lineStyle.color = item.color;
                     result.itemStyle = { color: item.color };
                 }
                 if (item.style === 'area') {
-                    result.areaStyle = { opacity: 0.22 };
+                    result.areaStyle = { opacity: areaOpacity };
                 }
                 return result;
             })

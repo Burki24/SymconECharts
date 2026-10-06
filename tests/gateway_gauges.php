@@ -2851,6 +2851,15 @@ $timeSeries->SetTestProperty('Sources', json_encode([
 $timeSeries->SetTestProperty('Range', '1h');
 $timeSeries->SetTestProperty('DataMode', 'auto');
 $timeSeries->SetTestProperty('PointBudget', 2000);
+$timeSeries->SetTestProperty('LegendPosition', 'bottom');
+$timeSeries->SetTestProperty('LineWidthPercent', 150);
+$timeSeries->SetTestProperty('SmoothLines', true);
+$timeSeries->SetTestProperty('ShowSymbols', true);
+$timeSeries->SetTestProperty('SymbolSizePercent', 125);
+$timeSeries->SetTestProperty('AreaOpacityPercent', 40);
+$timeSeries->SetTestProperty('ShowGrid', false);
+$timeSeries->SetTestProperty('ShowXAxis', false);
+$timeSeries->SetTestProperty('ShowYAxis', true);
 $timeSeries->ApplyChanges();
 $timeSeriesData = json_decode($timeSeries->GetTimeSeriesData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
@@ -2864,8 +2873,63 @@ assertGatewayGauge(
         && $timeSeriesData['range']['aggregationLevel'] === 6
         && count($timeSeriesData['axes']) === 2
         && $timeSeriesData['series'][0]['effectiveReducer'] === 'average'
-        && $timeSeriesData['series'][1]['effectiveReducer'] === 'sum',
+        && $timeSeriesData['series'][1]['effectiveReducer'] === 'sum'
+        && $timeSeriesData['chart']['design'] === [
+            'legendPosition'     => 'bottom',
+            'lineWidthPercent'   => 150,
+            'smoothLines'        => true,
+            'showSymbols'        => true,
+            'symbolSizePercent'  => 125,
+            'areaOpacityPercent' => 40,
+            'showGrid'           => false,
+            'showXAxis'          => false,
+            'showYAxis'          => true
+        ],
     'Time Series must build the accepted two-axis aggregated chart model.'
+);
+$timeSeriesForm = $timeSeries->GetConfigurationForm();
+assertGatewayGauge(
+    str_contains($timeSeriesForm, 'ECTS_UpdateTimeSeriesPreviewFromForm')
+        && str_contains($timeSeriesForm, 'data:image/svg+xml;base64,'),
+    'Time Series form must provide a live SVG tile preview.'
+);
+$timeSeries->UpdateTimeSeriesPreviewFromForm(json_encode([
+    'Title'              => 'Edited preview',
+    'Sources'            => [[
+        'VariableID' => 4711,
+        'Label'      => 'Outdoor temperature',
+        'Color'      => '#E5754F',
+        'Style'      => 'area'
+    ]],
+    'EChartsTheme'       => 'dark',
+    'LegendPosition'     => 'hidden',
+    'LineWidthPercent'   => 80,
+    'SmoothLines'        => false,
+    'ShowSymbols'        => true,
+    'SymbolSizePercent'  => 150,
+    'AreaOpacityPercent' => 55,
+    'ShowGrid'           => true,
+    'ShowXAxis'          => true,
+    'ShowYAxis'          => false
+], JSON_THROW_ON_ERROR));
+$timeSeriesPreviewUpdates = $timeSeries->GetTestFormUpdates();
+$timeSeriesPreviewUpdate = end($timeSeriesPreviewUpdates);
+$timeSeriesPreviewUri = is_array($timeSeriesPreviewUpdate)
+    ? (string) ($timeSeriesPreviewUpdate['Value'] ?? '')
+    : '';
+$timeSeriesPreviewSvg = base64_decode(
+    substr($timeSeriesPreviewUri, strlen('data:image/svg+xml;base64,')),
+    true
+);
+assertGatewayGauge(
+    is_string($timeSeriesPreviewSvg)
+        && str_contains($timeSeriesPreviewSvg, 'Edited preview')
+        && str_contains($timeSeriesPreviewSvg, '#E5754F')
+        && str_contains($timeSeriesPreviewSvg, 'data-legend-position="hidden"')
+        && str_contains($timeSeriesPreviewSvg, 'data-smooth-lines="false"')
+        && str_contains($timeSeriesPreviewSvg, 'data-show-symbols="true"')
+        && str_contains($timeSeriesPreviewSvg, 'data-area-opacity="0.55"'),
+    'Time Series preview must react immediately to unpersisted source and design values.'
 );
 $timeSeriesTile = $timeSeries->GetVisualizationTile();
 assertGatewayGauge(
@@ -2994,6 +3058,25 @@ $invalidAxesTimeSeries->ApplyChanges();
 assertGatewayGauge(
     $invalidAxesTimeSeries->GetTestStatus() === 202,
     'Time Series must reject configurations with more than two effective unit groups.'
+);
+
+$invalidDesignTimeSeries = new EChartsTimeSeries();
+$invalidDesignTimeSeries->Create();
+$invalidDesignTimeSeries->SetTestProperty('Sources', json_encode([[
+    'VariableID'              => 4711,
+    'Label'                   => '',
+    'UseVariablePresentation' => false,
+    'Unit'                    => '°C',
+    'Decimals'                => 1,
+    'Color'                   => '',
+    'Style'                   => 'line',
+    'Reducer'                 => 'auto'
+]], JSON_THROW_ON_ERROR));
+$invalidDesignTimeSeries->SetTestProperty('LegendPosition', 'sideways');
+$invalidDesignTimeSeries->ApplyChanges();
+assertGatewayGauge(
+    $invalidDesignTimeSeries->GetTestStatus() === 202,
+    'Time Series must reject unsupported tile design values.'
 );
 
 echo "Gateway and Gauge module integration verified.\n";

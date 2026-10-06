@@ -71,6 +71,7 @@ $requiredFiles = [
     'tests/run.php',
     'tests/symcon_strict.php',
     'tests/test_update_library_metadata.py',
+    'tests/time_series_layout.js',
     'tests/validate_structure.php',
     '.tools/echarts-runtime/package.json',
     '.tools/echarts-runtime/package-lock.json',
@@ -81,7 +82,8 @@ $requiredFiles = [
     'EChartsGaugeSingle/visualization/index.html',
     'EChartsGaugeSingle/visualization/style.css',
     'EChartsGaugeSingle/visualization/app.js',
-    'EChartsGaugeSingle/GaugePreview.php'
+    'EChartsGaugeSingle/GaugePreview.php',
+    'EChartsTimeSeries/TimeSeriesPreview.php'
 ];
 
 foreach ($requiredFiles as $requiredFile) {

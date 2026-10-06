@@ -88,6 +88,17 @@ foreach ([
     "RegisterPropertyString('DataMode', 'auto')",
     "['realtime', 'raw', 'auto'",
     "RegisterPropertyInteger('PointBudget', 2000)",
+    "RegisterPropertyString('LegendPosition', 'top')",
+    "RegisterPropertyInteger('LineWidthPercent', 100)",
+    "RegisterPropertyBoolean('SmoothLines', false)",
+    "RegisterPropertyBoolean('ShowSymbols', false)",
+    "RegisterPropertyInteger('SymbolSizePercent', 100)",
+    "RegisterPropertyInteger('AreaOpacityPercent', 22)",
+    "RegisterPropertyBoolean('ShowGrid', true)",
+    "RegisterPropertyBoolean('ShowXAxis', true)",
+    "RegisterPropertyBoolean('ShowYAxis', true)",
+    'use Burki24\SymconModuleHelper\SVGPreviewHelper;',
+    'public function UpdateTimeSeriesPreviewFromForm(string $Configuration): void',
     'EChartsAsset::TimeSeriesJavaScript()',
     'EChartsVariablePresentation::Resolve('
 ] as $timeSeriesContract) {

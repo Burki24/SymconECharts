@@ -18,6 +18,9 @@ höchstens zwei Einheitengruppen und rendert eine native Symcon-Kachel.
 - Durchschnitt, Zählersumme, Minimum und Maximum entsprechend dem
   versionierten Archivvertrag;
 - native Kachel mit lokalen, integritätsgeprüften ECharts- und Theme-Dateien;
+- kollabierter Kacheldesigner mit sofortiger SVG-Vorschau für Theme,
+  Legendenposition, Zoom, Linienstärke, Glättung, Datenpunkte,
+  Flächendeckkraft, Raster und Achsensichtbarkeit;
 - Rohwertfortschreibung über `VM_UPDATE`, ohne bei jedem Messwert das Archiv
   erneut zu laden;
 - aggregierte Reihen enden am letzten abgeschlossenen Zeitfenster und werden
@@ -35,10 +38,12 @@ Kachel einen Hinweis auf das wirksame Punktbudget.
 ## Einrichtung
 
 1. Eine bestehende gemeinsame `EChartsGateway`-Instanz als Parent auswählen.
-2. Eine bis acht archivierte Integer- oder Float-Variablen konfigurieren.
+2. Eine bis acht Integer- oder Float-Variablen konfigurieren. Archivmodi
+   benötigen archivierte Quellen; `realtime` funktioniert auch ohne Archiv.
 3. Zeitraum, Datenmodus und Punktbudget wählen.
 4. Optional Beschriftung, Einheit, Nachkommastellen, Farbe, Stil und Reducer
    pro Quelle anpassen.
+5. Optional den Kacheldesigner öffnen und Darstellung sowie Vorschau anpassen.
 
 Mehr als zwei unterschiedliche effektive Einheiten werden bewusst abgelehnt.
 `raw` bleibt immer eine echte Rohwertabfrage; `realtime` ist der ausdrücklich
@@ -50,4 +55,7 @@ Verdichtungsstufe.
 Die erste native Vertikale vom Archivvertrag bis zur Kachel ist implementiert
 und durch lokale Vertrags- und Integrationstests abgesichert. Ein realer
 Symcon-Archiv- und Browsertest sowie die getrennte IPSView-Ausgabe stehen noch
-aus. Die Zielplattform bleibt Symcon 9.0/9.1 mit PHP 8.5.
+aus. Der aktuelle Designer wirkt ausschließlich auf die native Kachel; das
+spätere IPSView-Design verwendet denselben fachlichen Designvertrag, bleibt
+aber unabhängig konfigurierbar. Die Zielplattform bleibt Symcon 9.0/9.1 mit
+PHP 8.5.

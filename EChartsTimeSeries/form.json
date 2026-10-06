@@ -142,27 +142,71 @@
             "caption": "Real-time mode starts with the current value and only records changes while the chart is open. Reloading does not restore earlier real-time points."
         },
         {
-            "type": "RowLayout",
+            "type": "ExpansionPanel",
+            "caption": "Tile designer",
+            "expanded": false,
+            "width": "760px",
             "items": [
                 {
-                    "type": "Select",
-                    "name": "EChartsTheme",
-                    "caption": "ECharts theme",
-                    "width": "250px",
-                    "options": [
-                        {"caption": "Automatic (Symcon design)", "value": "auto"},
-                        {"caption": "Dark", "value": "dark"},
-                        {"caption": "Vintage", "value": "vintage"},
-                        {"caption": "Macarons", "value": "macarons"},
-                        {"caption": "Infographic", "value": "infographic"},
-                        {"caption": "Shine", "value": "shine"},
-                        {"caption": "Roma", "value": "roma"}
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "EChartsTheme",
+                            "caption": "ECharts theme",
+                            "width": "250px",
+                            "options": [
+                                {"caption": "Automatic (Symcon design)", "value": "auto"},
+                                {"caption": "Dark", "value": "dark"},
+                                {"caption": "Vintage", "value": "vintage"},
+                                {"caption": "Macarons", "value": "macarons"},
+                                {"caption": "Infographic", "value": "infographic"},
+                                {"caption": "Shine", "value": "shine"},
+                                {"caption": "Roma", "value": "roma"}
+                            ]
+                        },
+                        {
+                            "type": "Select",
+                            "name": "LegendPosition",
+                            "caption": "Legend position",
+                            "width": "180px",
+                            "options": [
+                                {"caption": "Top", "value": "top"},
+                                {"caption": "Bottom", "value": "bottom"},
+                                {"caption": "Hidden", "value": "hidden"}
+                            ]
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "EnableZoom",
+                            "caption": "Enable zoom"
+                        }
                     ]
                 },
                 {
-                    "type": "CheckBox",
-                    "name": "EnableZoom",
-                    "caption": "Enable zoom"
+                    "type": "RowLayout",
+                    "items": [
+                        {"type": "NumberSpinner", "name": "LineWidthPercent", "caption": "Line width", "minimum": 50, "maximum": 200, "suffix": "%", "width": "160px"},
+                        {"type": "CheckBox", "name": "SmoothLines", "caption": "Smooth lines"},
+                        {"type": "CheckBox", "name": "ShowSymbols", "caption": "Show data points"},
+                        {"type": "NumberSpinner", "name": "SymbolSizePercent", "caption": "Point size", "minimum": 50, "maximum": 200, "suffix": "%", "width": "160px"}
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {"type": "NumberSpinner", "name": "AreaOpacityPercent", "caption": "Area opacity", "minimum": 0, "maximum": 100, "suffix": "%", "width": "160px"},
+                        {"type": "CheckBox", "name": "ShowGrid", "caption": "Show grid"},
+                        {"type": "CheckBox", "name": "ShowXAxis", "caption": "Show time axis"},
+                        {"type": "CheckBox", "name": "ShowYAxis", "caption": "Show value axes"}
+                    ]
+                },
+                {
+                    "type": "Image",
+                    "name": "TimeSeriesPreview",
+                    "image": "",
+                    "center": true,
+                    "width": "100%"
                 }
             ]
         }
