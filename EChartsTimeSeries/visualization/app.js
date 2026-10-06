@@ -66,17 +66,19 @@
         }
     }
 
-    function resolveAreaPattern(design) {
+    function areaPatternKey(design) {
         var source = design && design.areaPatternImage;
-        if (typeof source !== 'string' || source.indexOf('data:image/svg+xml;base64,') !== 0
-            || typeof window.Image !== 'function') {
-            return null;
-        }
+        if (typeof source !== 'string' || source.indexOf('data:image/svg+xml;base64,') !== 0) { return null; }
         var sizePercent = Math.max(25, Math.min(400, Number(design.areaSVGSizePercent) || 100));
-        var key = source + '|' + sizePercent;
+        return source + '|' + sizePercent;
+    }
+
+    function ensureAreaPattern(design) {
+        var key = areaPatternKey(design);
+        if (key === null || typeof window.Image !== 'function') { return true; }
+        var sizePercent = Math.max(25, Math.min(400, Number(design.areaSVGSizePercent) || 100));
         var cached = areaPatternCache[key];
-        if (cached && cached.status === 'ready') { return cached.pattern; }
-        if (cached) { return null; }
+        if (cached) { return cached.status !== 'loading'; }
 
         var image = new window.Image();
         areaPatternCache[key] = { status: 'loading', pattern: null };
@@ -102,10 +104,27 @@
             };
             schedulePatternRender();
         };
-        image.onerror = function () { areaPatternCache[key] = { status: 'failed', pattern: null }; };
-        image.src = source;
+        image.onerror = function () {
+            areaPatternCache[key] = { status: 'failed', pattern: null };
+            schedulePatternRender();
+        };
+        image.src = design.areaPatternImage;
 
-        return null;
+        return false;
+    }
+
+    function areaPatternsReady(model) {
+        var series = model && Array.isArray(model.series) ? model.series : [];
+        return series.every(function (item) {
+            return !item || item.style !== 'area' || !item.design || item.design.areaFillMode !== 'svg'
+                || ensureAreaPattern(item.design);
+        });
+    }
+
+    function resolveAreaPattern(design) {
+        var key = areaPatternKey(design);
+        var cached = key === null ? null : areaPatternCache[key];
+        return cached && cached.status === 'ready' ? cached.pattern : null;
     }
 
     function buildOption(model, theme) {
@@ -320,6 +339,10 @@
         }
         if (!window.echarts || typeof window.echarts.init !== 'function') {
             displayError('Apache ECharts could not be initialized.');
+            return;
+        }
+        if (!areaPatternsReady(state.chart)) {
+            if (!chart) { chartElement.hidden = true; }
             return;
         }
         errorElement.hidden = true;

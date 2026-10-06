@@ -37,8 +37,9 @@ function render(
     const errorElement = { hidden: true, textContent: '' };
     let option;
     let dispatchedAction;
+    let setOptionCalls = 0;
     const chart = {
-        setOption: next => { option = next; },
+        setOption: next => { option = next; setOptionCalls += 1; },
         getOption: () => option,
         dispatchAction: action => { dispatchedAction = action; },
         clear: () => {},
@@ -134,7 +135,8 @@ function render(
     assert.ok(option, 'The time-series chart should be rendered.');
     Object.defineProperties(option, {
         testListeners: { value: listeners },
-        getDispatchedAction: { value: () => dispatchedAction }
+        getDispatchedAction: { value: () => dispatchedAction },
+        getSetOptionCalls: { value: () => setOptionCalls }
     });
     return option;
 }
@@ -277,6 +279,7 @@ assert.equal(svgArea.series[0].areaStyle.opacity, 0.35);
 assert.equal(svgArea.series[0].areaStyle.color.repeat, 'repeat');
 assert.equal(svgArea.series[0].areaStyle.color.image.width, 80);
 assert.equal(svgArea.series[0].areaStyle.color.image.height, 40);
+assert.equal(svgArea.getSetOptionCalls(), 1);
 
 const ipsViewZoom = render(undefined, undefined, 750, undefined, 'dark', {}, 'ipsview');
 assert.equal(ipsViewZoom.dataZoom[0].zoomOnMouseWheel, false);
