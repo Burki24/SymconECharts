@@ -14,7 +14,7 @@ const palette = {
     accent: '#55cbb5', seriesColors: ['#111111', '#222222', '#333333']
 };
 
-function render(design, axes, width = 750, chartSeries) {
+function render(design, axes, width = 750, chartSeries, theme = 'dark', resolvedColors = {}) {
     const chartElement = { hidden: false, clientWidth: width };
     const warningElement = { hidden: true, textContent: '' };
     const errorElement = { hidden: true, textContent: '' };
@@ -31,7 +31,7 @@ function render(design, axes, width = 750, chartSeries) {
             state: {
                 status: 'ready',
                 chart: {
-                    theme: 'dark',
+                    theme,
                     chart: { title: 'Climate', enableZoom: true, design },
                     range: { startTimestamp: 1000, endTimestamp: 2000 },
                     axes: axes || [{ unit: '°C' }, { unit: '%' }],
@@ -49,18 +49,42 @@ function render(design, axes, width = 750, chartSeries) {
                 }
             },
             translations: {},
-            options: { echartsThemes: { dark: palette }, tileHeaderVisible: true }
+            options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: true }
         },
         echarts: { init: () => chart },
+        getComputedStyle: probe => ({
+            color: resolvedColors[probe.variable] || probe.fallback || ''
+        }),
         addEventListener: () => {}
     };
     const document = {
         documentElement: { classList: { contains: () => false } },
+        body: { appendChild: () => {} },
+        createElement: () => ({
+            style: {
+                set color(value) {
+                    const match = /^var\((--[^,]+),\s*(.+)\)$/.exec(value);
+                    this.owner.variable = match ? match[1] : '';
+                    this.owner.fallback = match ? match[2] : value;
+                },
+                get color() { return ''; },
+                display: ''
+            },
+            variable: '',
+            fallback: '',
+            remove: () => {}
+        }),
         getElementById: id => ({
             'echarts-timeseries-chart': chartElement,
             'echarts-timeseries-warning': warningElement,
             'echarts-timeseries-error': errorElement
         })[id]
+    };
+    const originalCreateElement = document.createElement;
+    document.createElement = () => {
+        const probe = originalCreateElement();
+        probe.style.owner = probe;
+        return probe;
     };
 
     vm.runInNewContext(source, { window, document });
@@ -121,6 +145,17 @@ assert.equal(compatible.series[0].showSymbol, false);
 assert.equal(compatible.series[0].areaStyle.opacity, 0.22);
 assert.equal(compatible.xAxis.axisLine.show, true);
 assert.equal(compatible.yAxis[0].axisLine.show, true);
+
+const automaticTheme = render(undefined, undefined, 750, undefined, 'auto', {
+    '--symc-background': '#ffffff',
+    '--symc-text': '#202124',
+    '--symc-muted': '#5f6368',
+    '--symc-border': '#dadce0',
+    '--symc-surface': '#f1f3f4',
+    '--symc-accent': '#55cbb5'
+});
+assert.equal(automaticTheme.backgroundColor, '#ffffff');
+assert.equal(automaticTheme.title.textStyle.color, '#202124');
 
 const positioned = render(undefined, [
     { unit: '°C', position: 'left', positionIndex: 0 },

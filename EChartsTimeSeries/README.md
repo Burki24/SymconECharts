@@ -32,6 +32,11 @@ optional ein eigenständiges IPSView-WebContent-Widget.
 - aggregierte Reihen enden am letzten abgeschlossenen Zeitfenster und werden
   nach der nächsten Intervallgrenze neu geladen.
 
+Das Theme **Automatisch (Symcon-Design)** übernimmt in der nativen Kachel
+Hintergrund, Text- und Oberflächenfarben aus dem aktiven hellen oder dunklen
+Symcon-Design. Fest gewählte ECharts-Themes verwenden weiterhin ihre eigenen
+Farben.
+
 Archivmodi lesen das Symcon-Archiv ausschließlich über die gemeinsame
 `EChartsGateway`-Operation `archive.read`. Der getrennte Echtzeitmodus beginnt
 mit `current.read` und sammelt danach Variablenänderungen nur im geöffneten

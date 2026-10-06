@@ -20,14 +20,42 @@
         };
     }
 
+    function resolveColor(variable, fallback) {
+        var probe = document.createElement('span');
+        probe.style.color = 'var(' + variable + ', ' + fallback + ')';
+        probe.style.display = 'none';
+        document.body.appendChild(probe);
+        var resolved = window.getComputedStyle(probe).color;
+        probe.remove();
+
+        return resolved || fallback;
+    }
+
     function normalizeTheme(theme) {
-        return bootstrap.mode === 'symcon' && theme === 'auto'
-            ? (document.documentElement.classList.contains('dark') ? 'dark' : 'auto')
-            : theme;
+        var palettes = bootstrap.options && bootstrap.options.echartsThemes || {};
+        return Object.prototype.hasOwnProperty.call(palettes, theme) ? theme : 'auto';
+    }
+
+    function colorsFor(theme) {
+        var colors = palette(theme);
+        if (theme !== 'auto') {
+            return colors;
+        }
+
+        return {
+            background: resolveColor('--symc-background', colors.background),
+            text: resolveColor('--symc-text', colors.text),
+            muted: resolveColor('--symc-muted', colors.muted),
+            border: resolveColor('--symc-border', colors.border),
+            track: resolveColor('--symc-surface', colors.track),
+            accent: resolveColor('--symc-accent', colors.accent),
+            surface: resolveColor('--symc-surface', colors.surface || colors.background),
+            seriesColors: colors.seriesColors
+        };
     }
 
     function buildOption(model, theme) {
-        var colors = palette(theme);
+        var colors = colorsFor(theme);
         var axes = Array.isArray(model.axes) ? model.axes : [];
         var series = Array.isArray(model.series) ? model.series : [];
         var seriesPalette = Array.isArray(colors.seriesColors) && colors.seriesColors.length > 0
