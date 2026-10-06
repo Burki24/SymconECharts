@@ -728,15 +728,15 @@ class EChartsTimeSeries extends IPSModuleStrict
     private function ReadTimeSeriesDesign(): array
     {
         return [
-            'legendPosition'    => $this->ReadPropertyString('LegendPosition'),
-            'lineWidthPercent'  => $this->ReadPropertyInteger('LineWidthPercent'),
-            'smoothLines'       => $this->ReadPropertyBoolean('SmoothLines'),
-            'showSymbols'       => $this->ReadPropertyBoolean('ShowSymbols'),
-            'symbolSizePercent' => $this->ReadPropertyInteger('SymbolSizePercent'),
+            'legendPosition'     => $this->ReadPropertyString('LegendPosition'),
+            'lineWidthPercent'   => $this->ReadPropertyInteger('LineWidthPercent'),
+            'smoothLines'        => $this->ReadPropertyBoolean('SmoothLines'),
+            'showSymbols'        => $this->ReadPropertyBoolean('ShowSymbols'),
+            'symbolSizePercent'  => $this->ReadPropertyInteger('SymbolSizePercent'),
             'areaOpacityPercent' => $this->ReadPropertyInteger('AreaOpacityPercent'),
-            'showGrid'          => $this->ReadPropertyBoolean('ShowGrid'),
-            'showXAxis'         => $this->ReadPropertyBoolean('ShowXAxis'),
-            'showYAxis'         => $this->ReadPropertyBoolean('ShowYAxis')
+            'showGrid'           => $this->ReadPropertyBoolean('ShowGrid'),
+            'showXAxis'          => $this->ReadPropertyBoolean('ShowXAxis'),
+            'showYAxis'          => $this->ReadPropertyBoolean('ShowYAxis')
         ];
     }
 
@@ -745,15 +745,15 @@ class EChartsTimeSeries extends IPSModuleStrict
     {
         $design = $this->ReadTimeSeriesDesign();
         foreach ([
-            'LegendPosition' => 'legendPosition',
-            'LineWidthPercent' => 'lineWidthPercent',
-            'SmoothLines' => 'smoothLines',
-            'ShowSymbols' => 'showSymbols',
-            'SymbolSizePercent' => 'symbolSizePercent',
+            'LegendPosition'     => 'legendPosition',
+            'LineWidthPercent'   => 'lineWidthPercent',
+            'SmoothLines'        => 'smoothLines',
+            'ShowSymbols'        => 'showSymbols',
+            'SymbolSizePercent'  => 'symbolSizePercent',
             'AreaOpacityPercent' => 'areaOpacityPercent',
-            'ShowGrid' => 'showGrid',
-            'ShowXAxis' => 'showXAxis',
-            'ShowYAxis' => 'showYAxis'
+            'ShowGrid'           => 'showGrid',
+            'ShowXAxis'          => 'showXAxis',
+            'ShowYAxis'          => 'showYAxis'
         ] as $property => $key) {
             if (array_key_exists($property, $values)) {
                 $design[$key] = $values[$property];

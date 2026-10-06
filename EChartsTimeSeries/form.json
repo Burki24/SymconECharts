@@ -26,7 +26,10 @@
                     "add": 0,
                     "edit": {
                         "type": "SelectVariable",
-                        "validVariableTypes": [1, 2]
+                        "validVariableTypes": [
+                            1,
+                            2
+                        ]
                     }
                 },
                 {
@@ -34,35 +37,47 @@
                     "name": "Label",
                     "width": "auto",
                     "add": "",
-                    "edit": {"type": "ValidationTextBox"}
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
                 },
                 {
                     "caption": "Variable presentation",
                     "name": "UseVariablePresentation",
                     "width": "130px",
                     "add": true,
-                    "edit": {"type": "CheckBox"}
+                    "edit": {
+                        "type": "CheckBox"
+                    }
                 },
                 {
                     "caption": "Unit",
                     "name": "Unit",
                     "width": "90px",
                     "add": "",
-                    "edit": {"type": "ValidationTextBox"}
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
                 },
                 {
                     "caption": "Decimals",
                     "name": "Decimals",
                     "width": "85px",
                     "add": 1,
-                    "edit": {"type": "NumberSpinner", "minimum": 0, "maximum": 6}
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "minimum": 0,
+                        "maximum": 6
+                    }
                 },
                 {
                     "caption": "Color",
                     "name": "Color",
                     "width": "100px",
                     "add": "",
-                    "edit": {"type": "ValidationTextBox"}
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
                 },
                 {
                     "caption": "Style",
@@ -72,8 +87,14 @@
                     "edit": {
                         "type": "Select",
                         "options": [
-                            {"caption": "Line", "value": "line"},
-                            {"caption": "Area", "value": "area"}
+                            {
+                                "caption": "Line",
+                                "value": "line"
+                            },
+                            {
+                                "caption": "Area",
+                                "value": "area"
+                            }
                         ]
                     }
                 },
@@ -85,11 +106,26 @@
                     "edit": {
                         "type": "Select",
                         "options": [
-                            {"caption": "Automatic", "value": "auto"},
-                            {"caption": "Average", "value": "average"},
-                            {"caption": "Sum", "value": "sum"},
-                            {"caption": "Minimum", "value": "minimum"},
-                            {"caption": "Maximum", "value": "maximum"}
+                            {
+                                "caption": "Automatic",
+                                "value": "auto"
+                            },
+                            {
+                                "caption": "Average",
+                                "value": "average"
+                            },
+                            {
+                                "caption": "Sum",
+                                "value": "sum"
+                            },
+                            {
+                                "caption": "Minimum",
+                                "value": "minimum"
+                            },
+                            {
+                                "caption": "Maximum",
+                                "value": "maximum"
+                            }
                         ]
                     }
                 }
@@ -104,11 +140,26 @@
                     "caption": "Time range",
                     "width": "190px",
                     "options": [
-                        {"caption": "1 hour", "value": "1h"},
-                        {"caption": "6 hours", "value": "6h"},
-                        {"caption": "24 hours", "value": "24h"},
-                        {"caption": "7 days", "value": "7d"},
-                        {"caption": "30 days", "value": "30d"}
+                        {
+                            "caption": "1 hour",
+                            "value": "1h"
+                        },
+                        {
+                            "caption": "6 hours",
+                            "value": "6h"
+                        },
+                        {
+                            "caption": "24 hours",
+                            "value": "24h"
+                        },
+                        {
+                            "caption": "7 days",
+                            "value": "7d"
+                        },
+                        {
+                            "caption": "30 days",
+                            "value": "30d"
+                        }
                     ]
                 },
                 {
@@ -117,14 +168,38 @@
                     "caption": "Data mode",
                     "width": "230px",
                     "options": [
-                        {"caption": "Real-time values (no archive required)", "value": "realtime"},
-                        {"caption": "Raw values", "value": "raw"},
-                        {"caption": "Automatic aggregation", "value": "auto"},
-                        {"caption": "1 minute", "value": "minute"},
-                        {"caption": "5 minutes", "value": "five-minutes"},
-                        {"caption": "15 minutes", "value": "fifteen-minutes"},
-                        {"caption": "1 hour", "value": "hour"},
-                        {"caption": "1 day", "value": "day"}
+                        {
+                            "caption": "Real-time values (no archive required)",
+                            "value": "realtime"
+                        },
+                        {
+                            "caption": "Raw values",
+                            "value": "raw"
+                        },
+                        {
+                            "caption": "Automatic aggregation",
+                            "value": "auto"
+                        },
+                        {
+                            "caption": "1 minute",
+                            "value": "minute"
+                        },
+                        {
+                            "caption": "5 minutes",
+                            "value": "five-minutes"
+                        },
+                        {
+                            "caption": "15 minutes",
+                            "value": "fifteen-minutes"
+                        },
+                        {
+                            "caption": "1 hour",
+                            "value": "hour"
+                        },
+                        {
+                            "caption": "1 day",
+                            "value": "day"
+                        }
                     ]
                 },
                 {
@@ -156,13 +231,34 @@
                             "caption": "ECharts theme",
                             "width": "250px",
                             "options": [
-                                {"caption": "Automatic (Symcon design)", "value": "auto"},
-                                {"caption": "Dark", "value": "dark"},
-                                {"caption": "Vintage", "value": "vintage"},
-                                {"caption": "Macarons", "value": "macarons"},
-                                {"caption": "Infographic", "value": "infographic"},
-                                {"caption": "Shine", "value": "shine"},
-                                {"caption": "Roma", "value": "roma"}
+                                {
+                                    "caption": "Automatic (Symcon design)",
+                                    "value": "auto"
+                                },
+                                {
+                                    "caption": "Dark",
+                                    "value": "dark"
+                                },
+                                {
+                                    "caption": "Vintage",
+                                    "value": "vintage"
+                                },
+                                {
+                                    "caption": "Macarons",
+                                    "value": "macarons"
+                                },
+                                {
+                                    "caption": "Infographic",
+                                    "value": "infographic"
+                                },
+                                {
+                                    "caption": "Shine",
+                                    "value": "shine"
+                                },
+                                {
+                                    "caption": "Roma",
+                                    "value": "roma"
+                                }
                             ]
                         },
                         {
@@ -171,9 +267,18 @@
                             "caption": "Legend position",
                             "width": "180px",
                             "options": [
-                                {"caption": "Top", "value": "top"},
-                                {"caption": "Bottom", "value": "bottom"},
-                                {"caption": "Hidden", "value": "hidden"}
+                                {
+                                    "caption": "Top",
+                                    "value": "top"
+                                },
+                                {
+                                    "caption": "Bottom",
+                                    "value": "bottom"
+                                },
+                                {
+                                    "caption": "Hidden",
+                                    "value": "hidden"
+                                }
                             ]
                         },
                         {
@@ -186,19 +291,63 @@
                 {
                     "type": "RowLayout",
                     "items": [
-                        {"type": "NumberSpinner", "name": "LineWidthPercent", "caption": "Line width", "minimum": 50, "maximum": 200, "suffix": "%", "width": "160px"},
-                        {"type": "CheckBox", "name": "SmoothLines", "caption": "Smooth lines"},
-                        {"type": "CheckBox", "name": "ShowSymbols", "caption": "Show data points"},
-                        {"type": "NumberSpinner", "name": "SymbolSizePercent", "caption": "Point size", "minimum": 50, "maximum": 200, "suffix": "%", "width": "160px"}
+                        {
+                            "type": "NumberSpinner",
+                            "name": "LineWidthPercent",
+                            "caption": "Line width",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%",
+                            "width": "160px"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "SmoothLines",
+                            "caption": "Smooth lines"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowSymbols",
+                            "caption": "Show data points"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "SymbolSizePercent",
+                            "caption": "Point size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%",
+                            "width": "160px"
+                        }
                     ]
                 },
                 {
                     "type": "RowLayout",
                     "items": [
-                        {"type": "NumberSpinner", "name": "AreaOpacityPercent", "caption": "Area opacity", "minimum": 0, "maximum": 100, "suffix": "%", "width": "160px"},
-                        {"type": "CheckBox", "name": "ShowGrid", "caption": "Show grid"},
-                        {"type": "CheckBox", "name": "ShowXAxis", "caption": "Show time axis"},
-                        {"type": "CheckBox", "name": "ShowYAxis", "caption": "Show value axes"}
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AreaOpacityPercent",
+                            "caption": "Area opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%",
+                            "width": "160px"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowGrid",
+                            "caption": "Show grid"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowXAxis",
+                            "caption": "Show time axis"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowYAxis",
+                            "caption": "Show value axes"
+                        }
                     ]
                 },
                 {
@@ -219,10 +368,30 @@
         }
     ],
     "status": [
-        {"code": 102, "icon": "active", "caption": "Time series is ready"},
-        {"code": 201, "icon": "error", "caption": "Configure 1 to 8 unique numeric sources"},
-        {"code": 202, "icon": "error", "caption": "Time series configuration is invalid"},
-        {"code": 203, "icon": "error", "caption": "No active EChartsGateway is connected"},
-        {"code": 204, "icon": "error", "caption": "EChartsGateway archive request failed"}
+        {
+            "code": 102,
+            "icon": "active",
+            "caption": "Time series is ready"
+        },
+        {
+            "code": 201,
+            "icon": "error",
+            "caption": "Configure 1 to 8 unique numeric sources"
+        },
+        {
+            "code": 202,
+            "icon": "error",
+            "caption": "Time series configuration is invalid"
+        },
+        {
+            "code": 203,
+            "icon": "error",
+            "caption": "No active EChartsGateway is connected"
+        },
+        {
+            "code": 204,
+            "icon": "error",
+            "caption": "EChartsGateway archive request failed"
+        }
     ]
 }
