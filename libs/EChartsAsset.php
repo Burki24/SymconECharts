@@ -251,6 +251,11 @@ final class EChartsAsset
         return self::THEME_PALETTES;
     }
 
+    public static function ColorToHex(int $color): string
+    {
+        return sprintf('#%06X', max(0, min(0xFFFFFF, $color)));
+    }
+
     /**
      * Verifies the upstream bytes while tolerating a Windows checkout that
      * converted the original LF line endings to CRLF.

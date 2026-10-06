@@ -68,6 +68,9 @@ assertEChartsAsset(str_contains((string) file_get_contents($licensePath), 'Apach
 assertEChartsAsset(str_contains((string) file_get_contents($noticePath), 'Apache ECharts'), 'ECharts NOTICE is missing.');
 
 assertEChartsAsset(EChartsAsset::ThemeIDs() === $expectedThemeIDs, 'The supported ECharts theme catalog changed.');
+assertEChartsAsset(EChartsAsset::ColorToHex(-1) === '#000000', 'Negative ECharts colors must be clamped.');
+assertEChartsAsset(EChartsAsset::ColorToHex(0x6B4423) === '#6B4423', 'ECharts RGB conversion changed.');
+assertEChartsAsset(EChartsAsset::ColorToHex(0xFFFFFF + 1) === '#FFFFFF', 'Large ECharts colors must be clamped.');
 assertEChartsAsset(
     array_keys(EChartsAsset::ThemePalettes()) === $expectedThemeIDs,
     'Every supported ECharts theme must provide a readable renderer palette.'

@@ -15,6 +15,7 @@ final class EChartsTimeSeriesPreview
         string $theme,
         array $design,
         bool $adaptToBackground = false,
+        string $backgroundColor = '',
         int $backgroundOpacityPercent = 35
     ): string {
         $palette = EChartsAsset::ThemePreviewPalette($theme);
@@ -39,6 +40,9 @@ final class EChartsTimeSeriesPreview
         $showYAxis = (bool) ($design['showYAxis'] ?? true);
         $areaOpacity = max(0, min(100, (int) ($design['areaOpacityPercent'] ?? 22))) / 100;
         $backgroundOpacityPercent = max(0, min(100, $backgroundOpacityPercent));
+        $backgroundColor = $adaptToBackground && preg_match('/^#[0-9A-F]{6}$/i', $backgroundColor) === 1
+            ? strtoupper($backgroundColor)
+            : $palette['background'];
         $plotTop = $legendPosition === 'top' ? 92 : 62;
         $plotBottom = $legendPosition === 'bottom' ? 300 : 330;
         $content = '';
@@ -113,7 +117,7 @@ final class EChartsTimeSeriesPreview
             . ' data-area-opacity="' . self::N($areaOpacity) . '"'
             . ' data-axis-color="'
             . SVGPreviewHelper::escape($effectiveColors[0] ?? $palette['border']) . '">'
-            . '<rect width="750" height="390" rx="18" fill="' . SVGPreviewHelper::escape($palette['background']) . '"'
+            . '<rect width="750" height="390" rx="18" fill="' . SVGPreviewHelper::escape($backgroundColor) . '"'
             . ($adaptToBackground ? ' fill-opacity="' . self::N($backgroundOpacityPercent / 100) . '"' : '') . '/>'
             . '<text x="375" y="31" fill="' . SVGPreviewHelper::escape($palette['text'])
             . '" font-size="20" font-weight="600" text-anchor="middle">'

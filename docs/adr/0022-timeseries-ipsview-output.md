@@ -34,10 +34,10 @@ verbleiben im Gerätemodul.
   Achsensichtbarkeit werden dann als eigene typisierte IPSView-Properties
   gespeichert.
 - Unabhängig von der Designvererbung kann IPSView seinen realen Hintergrund
-  durchscheinen lassen. Eine eigene Deckkraft von 0 bis 100 Prozent mischt den
-  Theme-Hintergrund genau einmal auf der äußeren Diagrammfläche ein; die
-  ECharts-Canvas bleibt dabei transparent. Die native Kachel wird nicht
-  verändert.
+  durchscheinen lassen. Die Grundfarbe stammt wahlweise aus dem Theme oder
+  einem eigenen Farbwähler. Eine eigene Deckkraft von 0 bis 100 Prozent mischt
+  diese Farbe genau einmal auf der äußeren Diagrammfläche ein; die ECharts-
+  Canvas bleibt dabei transparent. Die native Kachel wird nicht verändert.
 - Eine Formularaktion kopiert das aktuelle Kacheldesign in die unabhängigen
   IPSView-Properties. Beide Designer bleiben standardmäßig kollabiert und
   besitzen eine sofort aktualisierte SVG-Vorschau.

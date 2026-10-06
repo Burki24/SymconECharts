@@ -63,7 +63,8 @@ Kachel einen Hinweis auf das wirksame Punktbudget.
    Standardmäßig übernimmt sie das Kacheldesign. Für eine abweichende
    Gestaltung das Kacheldesign kopieren und anschließend den unabhängigen
    IPSView-Designer bearbeiten. **An Hintergrundfarbe anpassen** lässt den
-   tatsächlichen IPSView-Hintergrund durchscheinen; die
+   tatsächlichen IPSView-Hintergrund durchscheinen. Die **Hintergrundfarbe**
+   verwendet automatisch die Theme-Farbe oder eine frei gewählte Tönung; die
    **Hintergrunddeckkraft** dosiert den darüberliegenden Theme-Hintergrund von
    0 bis 100 Prozent. Die erzeugte Variable **Zeitreihe für
    IPSView** wird als HTML-Widget in IPSView platziert.

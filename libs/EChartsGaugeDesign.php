@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SymconECharts;
 
+require_once __DIR__ . '/EChartsAsset.php';
 require_once __DIR__ . '/EChartsSvgImage.php';
 require_once __DIR__ . '/EChartsSvgPath.php';
 
@@ -234,7 +235,7 @@ final class EChartsGaugeDesign
 
     public static function ColorToHex(int $color): string
     {
-        return sprintf('#%06X', max(0, min(0xFFFFFF, $color)));
+        return EChartsAsset::ColorToHex($color);
     }
 
     /** @return array{anchorPath: string, anchorViewBox: string} */

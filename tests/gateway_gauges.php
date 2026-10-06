@@ -2906,6 +2906,7 @@ assertGatewayGauge(
         && str_contains($timeSeriesForm, 'ECTS_CopyTileDesignToIPSView')
         && str_contains($timeSeriesForm, 'IPSViewUseTileDesign')
         && str_contains($timeSeriesForm, 'IPSViewAdaptToBackground')
+        && str_contains($timeSeriesForm, 'IPSViewBackgroundColor')
         && str_contains($timeSeriesForm, 'IPSViewBackgroundOpacityPercent')
         && str_contains($timeSeriesForm, 'IPSViewTimeSeriesPreview')
         && str_contains($timeSeriesForm, 'data:image/svg+xml;base64,'),
@@ -2977,6 +2978,7 @@ assertGatewayGauge(
 );
 $timeSeries->SetTestProperty('IPSViewUseTileDesign', false);
 $timeSeries->SetTestProperty('IPSViewAdaptToBackground', true);
+$timeSeries->SetTestProperty('IPSViewBackgroundColor', 0x6B4423);
 $timeSeries->SetTestProperty('IPSViewBackgroundOpacityPercent', 35);
 $timeSeries->SetTestProperty('IPSViewEChartsTheme', 'dark');
 $timeSeries->SetTestProperty('IPSViewLegendPosition', 'hidden');
@@ -3001,6 +3003,7 @@ $timeSeries->UpdateTimeSeriesPreviewFromForm(json_encode([
     'LegendPosition'                  => 'bottom',
     'IPSViewUseTileDesign'            => false,
     'IPSViewAdaptToBackground'        => true,
+    'IPSViewBackgroundColor'          => 0x6B4423,
     'IPSViewBackgroundOpacityPercent' => 35,
     'IPSViewEChartsTheme'             => 'dark',
     'IPSViewLegendPosition'           => 'hidden',
@@ -3028,6 +3031,7 @@ assertGatewayGauge(
         && str_contains($independentPreviewSvg, 'data-legend-position="hidden"')
         && str_contains($independentPreviewSvg, 'data-adapt-to-background="true"')
         && str_contains($independentPreviewSvg, 'data-background-opacity="35"')
+        && str_contains($independentPreviewSvg, 'fill="#6B4423"')
         && str_contains($independentPreviewSvg, 'fill-opacity="0.35"')
         && str_contains($independentPreviewSvg, 'data-area-opacity="0.1"')
         && str_contains($independentPreviewSvg, 'stroke-width="2"'),
@@ -3040,7 +3044,7 @@ assertGatewayGauge(
         && str_contains($independentTimeSeriesIPSView, '"adaptToBackground":true')
         && str_contains($independentTimeSeriesIPSView, 'html, body { background:transparent; }')
         && str_contains($independentTimeSeriesIPSView, '#echarts-timeseries-root { background:color-mix(in srgb, ')
-        && str_contains($independentTimeSeriesIPSView, ' 35%, transparent); }')
+        && str_contains($independentTimeSeriesIPSView, '#6B4423 35%, transparent); }')
         && str_contains($independentTimeSeriesIPSView, '"enableZoom":false')
         && str_contains($independentTimeSeriesIPSView, '"legendPosition":"hidden"')
         && str_contains($independentTimeSeriesIPSView, '"lineWidthPercent":80')
