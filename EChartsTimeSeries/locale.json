@@ -58,6 +58,8 @@
             "IPSView design": "IPSView-Design",
             "Time series for IPSView": "Zeitreihe für IPSView",
             "Creates a standalone WebContent variable for use as an IPSView HTML widget.": "Erstellt eine eigenständige WebContent-Variable zur Verwendung als HTML-Widget in IPSView.",
+            "Adapt to IPSView background": "An Hintergrundfarbe anpassen",
+            "Background opacity": "Hintergrunddeckkraft",
             "Use Tile design": "Kacheldesign verwenden",
             "Inherited mode follows every Tile design change. Disable it for an independent IPSView appearance.": "Im vererbten Modus folgt IPSView jeder Änderung des Kacheldesigns. Für eine unabhängige Darstellung deaktivieren.",
             "Copy Tile design to IPSView and edit independently": "Kacheldesign nach IPSView kopieren und unabhängig bearbeiten",

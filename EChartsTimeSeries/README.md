@@ -62,7 +62,10 @@ Kachel einen Hinweis auf das wirksame Punktbudget.
 6. Optional im Abschnitt **IPSView-Design** die WebContent-Ausgabe aktivieren.
    Standardmäßig übernimmt sie das Kacheldesign. Für eine abweichende
    Gestaltung das Kacheldesign kopieren und anschließend den unabhängigen
-   IPSView-Designer bearbeiten. Die erzeugte Variable **Zeitreihe für
+   IPSView-Designer bearbeiten. **An Hintergrundfarbe anpassen** lässt den
+   tatsächlichen IPSView-Hintergrund durchscheinen; die
+   **Hintergrunddeckkraft** dosiert den darüberliegenden Theme-Hintergrund von
+   0 bis 100 Prozent. Die erzeugte Variable **Zeitreihe für
    IPSView** wird als HTML-Widget in IPSView platziert.
 
 Beim Abschalten bleibt eine bereits angelegte WebContent-Variable erhalten,

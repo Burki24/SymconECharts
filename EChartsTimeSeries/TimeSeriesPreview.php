@@ -9,8 +9,14 @@ use Burki24\SymconModuleHelper\SVGPreviewHelper;
 final class EChartsTimeSeriesPreview
 {
     /** @param list<array{label:string,color:string,style:string}> $series @param array<string,mixed> $design */
-    public static function CreateSvg(array $series, string $title, string $theme, array $design): string
-    {
+    public static function CreateSvg(
+        array $series,
+        string $title,
+        string $theme,
+        array $design,
+        bool $adaptToBackground = false,
+        int $backgroundOpacityPercent = 35
+    ): string {
         $palette = EChartsAsset::ThemePreviewPalette($theme);
         $series = $series !== [] ? array_slice($series, 0, 4) : [
             ['label' => 'Temperature', 'color' => '', 'style' => 'line'],
@@ -32,6 +38,7 @@ final class EChartsTimeSeriesPreview
         $showXAxis = (bool) ($design['showXAxis'] ?? true);
         $showYAxis = (bool) ($design['showYAxis'] ?? true);
         $areaOpacity = max(0, min(100, (int) ($design['areaOpacityPercent'] ?? 22))) / 100;
+        $backgroundOpacityPercent = max(0, min(100, $backgroundOpacityPercent));
         $plotTop = $legendPosition === 'top' ? 92 : 62;
         $plotBottom = $legendPosition === 'bottom' ? 300 : 330;
         $content = '';
@@ -101,10 +108,13 @@ final class EChartsTimeSeriesPreview
             . ' data-legend-position="' . SVGPreviewHelper::escape($legendPosition) . '"'
             . ' data-smooth-lines="' . ($smoothLines ? 'true' : 'false') . '"'
             . ' data-show-symbols="' . ($showSymbols ? 'true' : 'false') . '"'
+            . ' data-adapt-to-background="' . ($adaptToBackground ? 'true' : 'false') . '"'
+            . ' data-background-opacity="' . $backgroundOpacityPercent . '"'
             . ' data-area-opacity="' . self::N($areaOpacity) . '"'
             . ' data-axis-color="'
             . SVGPreviewHelper::escape($effectiveColors[0] ?? $palette['border']) . '">'
-            . '<rect width="750" height="390" rx="18" fill="' . SVGPreviewHelper::escape($palette['background']) . '"/>'
+            . '<rect width="750" height="390" rx="18" fill="' . SVGPreviewHelper::escape($palette['background']) . '"'
+            . ($adaptToBackground ? ' fill-opacity="' . self::N($backgroundOpacityPercent / 100) . '"' : '') . '/>'
             . '<text x="375" y="31" fill="' . SVGPreviewHelper::escape($palette['text'])
             . '" font-size="20" font-weight="600" text-anchor="middle">'
             . SVGPreviewHelper::escape(trim($title) !== '' ? $title : 'Time Series') . '</text>'

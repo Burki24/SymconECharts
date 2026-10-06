@@ -14,7 +14,16 @@ const palette = {
     accent: '#55cbb5', seriesColors: ['#111111', '#222222', '#333333']
 };
 
-function render(design, axes, width = 750, chartSeries, theme = 'dark', resolvedColors = {}, mode = 'symcon') {
+function render(
+    design,
+    axes,
+    width = 750,
+    chartSeries,
+    theme = 'dark',
+    resolvedColors = {},
+    mode = 'symcon',
+    adaptToBackground = false
+) {
     const listeners = {};
     const chartElement = {
         hidden: false,
@@ -58,7 +67,11 @@ function render(design, axes, width = 750, chartSeries, theme = 'dark', resolved
                 }
             },
             translations: {},
-            options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: true }
+            options: {
+                echartsThemes: { auto: palette, dark: palette },
+                tileHeaderVisible: true,
+                adaptToBackground
+            }
         },
         echarts: { init: () => chart },
         getComputedStyle: probe => ({
@@ -222,5 +235,9 @@ assert.equal(zoomAction.type, 'dataZoom');
 assert.equal(zoomAction.dataZoomIndex, 0);
 assert.equal(zoomAction.start, 10);
 assert.equal(zoomAction.end, 90);
+
+const adaptedIPSView = render(undefined, undefined, 750, undefined, 'dark', {}, 'ipsview', true);
+assert.equal(adaptedIPSView.backgroundColor, 'transparent');
+assert.equal(compatible.backgroundColor, '#202020');
 
 process.stdout.write('Time Series tile design layout verified.\n');

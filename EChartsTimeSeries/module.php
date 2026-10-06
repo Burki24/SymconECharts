@@ -70,7 +70,8 @@ class EChartsTimeSeries extends IPSModuleStrict
         'AreaOpacityPercent', 'ShowGrid', 'ShowXAxis', 'ShowYAxis',
         'IPSViewUseTileDesign', 'IPSViewEChartsTheme', 'IPSViewLegendPosition', 'IPSViewEnableZoom',
         'IPSViewLineWidthPercent', 'IPSViewSmoothLines', 'IPSViewShowSymbols', 'IPSViewSymbolSizePercent',
-        'IPSViewAreaOpacityPercent', 'IPSViewShowGrid', 'IPSViewShowXAxis', 'IPSViewShowYAxis'
+        'IPSViewAreaOpacityPercent', 'IPSViewShowGrid', 'IPSViewShowXAxis', 'IPSViewShowYAxis',
+        'IPSViewAdaptToBackground', 'IPSViewBackgroundOpacityPercent'
     ];
     private const DESIGN_PROPERTY_TYPES = [
         'LegendPosition'     => 'string',
@@ -110,6 +111,8 @@ class EChartsTimeSeries extends IPSModuleStrict
         $this->RegisterPropertyBoolean('ShowYAxis', true);
         $this->RegisterIPSViewHTMLPageProperties();
         $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
+        $this->RegisterPropertyBoolean('IPSViewAdaptToBackground', false);
+        $this->RegisterPropertyInteger('IPSViewBackgroundOpacityPercent', 35);
         $this->RegisterPropertyString('IPSViewEChartsTheme', EChartsAsset::THEME_AUTO);
         foreach (self::DESIGN_PROPERTY_TYPES as $name => $type) {
             $default = match ($name) {
@@ -178,7 +181,9 @@ class EChartsTimeSeries extends IPSModuleStrict
                 $this->PreviewSeries(),
                 $this->ReadPropertyString('Title'),
                 $this->EffectiveIPSViewTheme(),
-                $this->EffectiveIPSViewDesign()
+                $this->EffectiveIPSViewDesign(),
+                $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
+                $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent')
             )
         );
 
@@ -216,7 +221,11 @@ class EChartsTimeSeries extends IPSModuleStrict
                     : (string) ($values['IPSViewEChartsTheme'] ?? $this->ReadPropertyString('IPSViewEChartsTheme')),
                 $useTileDesign
                     ? $this->TimeSeriesDesignFromFormValues($values)
-                    : $this->TimeSeriesDesignFromFormValues($values, 'IPSView')
+                    : $this->TimeSeriesDesignFromFormValues($values, 'IPSView'),
+                (bool) ($values['IPSViewAdaptToBackground']
+                    ?? $this->ReadPropertyBoolean('IPSViewAdaptToBackground')),
+                (int) ($values['IPSViewBackgroundOpacityPercent']
+                    ?? $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent'))
             )
         ));
     }
@@ -429,7 +438,8 @@ class EChartsTimeSeries extends IPSModuleStrict
             'options'            => [
                 'echartsVersion'    => EChartsAsset::VERSION,
                 'echartsThemes'     => EChartsAsset::ThemePalettes(),
-                'tileHeaderVisible' => !$hiddenTileTitle
+                'tileHeaderVisible' => !$hiddenTileTitle,
+                'adaptToBackground' => $ipsView && $this->ReadPropertyBoolean('IPSViewAdaptToBackground')
             ],
             'replacements'       => [
                 '{{ECHARTS_SCRIPT}}'       => EChartsAsset::TimeSeriesJavaScript(),
@@ -490,6 +500,8 @@ class EChartsTimeSeries extends IPSModuleStrict
             || $this->ReadPropertyInteger('PointBudget') > 8000
             || !EChartsAsset::IsSupportedTheme($this->ReadPropertyString('EChartsTheme'))
             || !$this->IsValidTimeSeriesDesign()
+            || $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent') < 0
+            || $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent') > 100
         ) {
             return [
                 'Status'  => self::STATUS_CONFIGURATION_INVALID,
@@ -1083,6 +1095,11 @@ class EChartsTimeSeries extends IPSModuleStrict
     private function IPSViewThemeCSS(): string
     {
         $palette = EChartsAsset::ThemePreviewPalette($this->EffectiveIPSViewTheme());
+        $adaptToBackground = $this->ReadPropertyBoolean('IPSViewAdaptToBackground');
+        $background = $adaptToBackground
+            ? 'color-mix(in srgb, ' . $palette['background'] . ' '
+                . $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent') . '%, transparent)'
+            : $palette['background'];
 
         return ':root {'
             . '--symc-background:' . $palette['background'] . ';'
@@ -1091,7 +1108,8 @@ class EChartsTimeSeries extends IPSModuleStrict
             . '--symc-border:' . $palette['border'] . ';'
             . '--symc-accent:' . $palette['accent'] . ';'
             . '--symc-surface:' . $palette['surface'] . ';'
-            . '} html, body { background:' . $palette['background'] . '; }';
+            . '} html, body { background:' . ($adaptToBackground ? 'transparent' : $background) . '; }'
+            . ' #echarts-timeseries-root { background:' . $background . '; }';
     }
 
     /** @param list<array<string,mixed>> $elements @return array<string,mixed> */
@@ -1119,6 +1137,25 @@ class EChartsTimeSeries extends IPSModuleStrict
                 ...$this->IPSViewHTMLPageFormItems(
                     'Creates a standalone WebContent variable for use as an IPSView HTML widget.'
                 ),
+                [
+                    'type'  => 'RowLayout',
+                    'items' => [
+                        [
+                            'type'    => 'CheckBox',
+                            'name'    => 'IPSViewAdaptToBackground',
+                            'caption' => 'Adapt to IPSView background'
+                        ],
+                        [
+                            'type'    => 'NumberSpinner',
+                            'name'    => 'IPSViewBackgroundOpacityPercent',
+                            'caption' => 'Background opacity',
+                            'minimum' => 0,
+                            'maximum' => 100,
+                            'suffix'  => '%',
+                            'width'   => '180px'
+                        ]
+                    ]
+                ],
                 [
                     'type'    => 'CheckBox',
                     'name'    => 'IPSViewUseTileDesign',
