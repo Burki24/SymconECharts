@@ -53,6 +53,12 @@ Folgende Module beinhaltet das SymconECharts Repository:
   Nebeninstrumenten. Für jede der 2 bis 5 Quellen steht dieselbe individuelle
   Design- und SVG-Konfiguration wie beim Tacho zur Verfügung.
 
+- __EChartsTimeSeries__ ([Dokumentation](EChartsTimeSeries))
+  Erste historische Chartfamilie für 1 bis 8 archivierte numerische Quellen.
+  Rohwerte bleiben ausdrücklich wählbar; alternativ stehen automatische oder
+  feste Symcon-Aggregationsstufen, Linien und Flächen, zwei Einheitengruppen,
+  Punktbudget, Legende, Tooltip und Zoom in einer nativen Kachel bereit.
+
 Für eine reguläre Installation genügt eine gemeinsame EChartsGateway-Instanz
 für alle Gauge- und späteren Diagramminstanzen. Beim ersten Diagramm kann ein
 neues Gateway angelegt werden; bei jedem weiteren Diagramm wird das bereits
@@ -84,9 +90,9 @@ bereinigtem SVG-Hintergrund
 für alle Instrumente einer Ausgabe. Tacho und Chronograph sind eigenständige
 Module für jeweils 2 bis 5 Quellen und ergänzen diese Basis um quellbezogene
 Designüberschreibungen einschließlich SVG-Zeiger, SVG-Nabe und SVG-Zifferblatt.
-Der Gateway-Vertrag für Archivdaten ist implementiert; das darauf aufbauende
-Zeitreihen-Gerätemodul sowie weitere klassische Instrumentenpanel-Vorlagen
-sind noch nicht implementiert.
+Der Gateway-Vertrag für Archivdaten und die erste darauf aufbauende native
+Zeitreihen-Kachel sind implementiert. Die getrennte IPSView-Ausgabe und die
+weiterführenden Zeitreihen-Designoptionen folgen auf dieser Basis.
 Alle Gauge-Module besitzen optionale IPSView-WebContent-Ausgaben und können
 ihr Kacheldesign erben oder unabhängig gestaltet werden. Der reale
 IPSView-Laufzeittest bleibt mangels Lizenz eine dokumentierte Testlücke.

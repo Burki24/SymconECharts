@@ -22,6 +22,7 @@ $gaugeSingle = (string) file_get_contents($root . '/EChartsGaugeSingle/module.ph
 $gaugeMulti = (string) file_get_contents($root . '/EChartsGaugeMulti/module.php');
 $gaugeTacho = (string) file_get_contents($root . '/EChartsGaugeTacho/module.php');
 $gaugeChronograph = (string) file_get_contents($root . '/EChartsGaugeChronograph/module.php');
+$timeSeries = (string) file_get_contents($root . '/EChartsTimeSeries/module.php');
 $sharedGatewayGuidance = 'One shared EChartsGateway is sufficient for all ECharts chart instances. '
     . 'When adding further charts, select the existing gateway instead of creating another one.';
 
@@ -30,7 +31,8 @@ foreach ([
     'EChartsGaugeSingle'      => $gaugeSingle,
     'EChartsGaugeMulti'       => $gaugeMulti,
     'EChartsGaugeTacho'       => $gaugeTacho,
-    'EChartsGaugeChronograph' => $gaugeChronograph
+    'EChartsGaugeChronograph' => $gaugeChronograph,
+    'EChartsTimeSeries'       => $timeSeries
 ] as $moduleName => $source) {
     requireStrictContract(
         preg_match('/class\s+' . $moduleName . '\s+extends\s+IPSModuleStrict\b/', $source) === 1,
@@ -75,6 +77,22 @@ foreach ([
     requireStrictContract(
         str_contains($gaugeSingle, $visualizationContract),
         'EChartsGaugeSingle is missing visualization contract: ' . $visualizationContract,
+        $errors
+    );
+}
+
+foreach ([
+    'SetVisualizationType(1)',
+    'public function GetVisualizationTile(): string',
+    'public function GetTimeSeriesData(): string',
+    "RegisterPropertyString('DataMode', 'auto')",
+    "RegisterPropertyInteger('PointBudget', 2000)",
+    'EChartsAsset::TimeSeriesJavaScript()',
+    'EChartsVariablePresentation::Resolve('
+] as $timeSeriesContract) {
+    requireStrictContract(
+        str_contains($timeSeries, $timeSeriesContract),
+        'EChartsTimeSeries is missing contract: ' . $timeSeriesContract,
         $errors
     );
 }

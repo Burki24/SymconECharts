@@ -14,8 +14,8 @@ nicht eine eigene große Dashboard-Seite des Moduls.
 
 ## Aktueller Stand und Zielarchitektur
 
-Die Library besitzt mit Gateway sowie Gauge Single, Gauge Multi, Gauge Tacho
-und Gauge Chronograph eine erste technische Modulstruktur. Alle fünf Module
+Die Library besitzt mit Gateway, Gauge Single, Gauge Multi, Gauge Tacho,
+Gauge Chronograph und Time Series eine technische Modulstruktur. Alle sechs Module
 verwenden `IPSModuleStrict`;
 Gauge-Instanzen können vorhandene Gateways wiederverwenden. Ein versioniertes
 Protokoll liefert geprüfte numerische Momentanwerte an ein minimales
@@ -48,9 +48,10 @@ das Grunddesign einschließlich SVG-Zeiger, SVG-Nabe und SVG-Zifferblatt
 Alle Gauge-Module erzeugen optional
 eine IPSView-WebContent-Variable mit vererbtem oder unabhängigem Design auf
 demselben Renderer. Weitere klassische Multi-Instrumentenpanel-Vorlagen,
-das Zeitreihen-Gerätemodul sowie reale Symcon-Laufzeit- und Browsertests fehlen
-noch. Der Gateway-Vertrag `archive.read` liest bereits normalisierte rohe und
-aggregierte Archivwerte und verwendet einen kurzlebigen begrenzten Cache.
+reale Symcon-Laufzeit- und Browsertests fehlen noch. Das Time-Series-Modul
+nutzt den Gateway-Vertrag `archive.read` für rohe oder aggregierte Werte und
+rendert daraus die erste native Zeitreihen-Kachel. Die getrennte IPSView-
+Ausgabe der neuen Familie steht noch aus.
 Die Testsuite prüft zusätzlich
 zu Struktur und Metadaten die Strict-Verträge, das Protokoll, die
 ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
@@ -64,6 +65,7 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 | Gerät | EChartsGaugeMulti | Ein zusammengesetzter Gauge-Chart mit 2 bis 16 Quellen |
 | Gerät | EChartsGaugeTacho | Tacho-Cockpit mit 2 bis 5 individuell gestaltbaren Instrumenten |
 | Gerät | EChartsGaugeChronograph | Chronograph mit 2 bis 5 individuell gestaltbaren Instrumenten |
+| Gerät | EChartsTimeSeries | Historische Linien und Flächen für 1 bis 8 Quellen und höchstens zwei Einheitengruppen |
 
 Eine eigene I/O-Instanz, ein Konfigurator und Discovery gehören nicht zum
 Anfangsumfang. Datenquellen sind Teil der jeweiligen Gauge-Konfiguration und
@@ -88,12 +90,13 @@ Modul-IDs und Datenfluss-IDs haben unterschiedliche Aufgaben.
 | Modul EChartsGaugeMulti | {E667D9C1-379D-44ED-A313-FF21FEFC355F} |
 | Modul EChartsGaugeTacho | `{9D072BFE-45B4-4442-B1D2-4FC458C3BABD}` |
 | Modul EChartsGaugeChronograph | `{B99C3ADA-9A90-486F-97E3-96C39554D9A6}` |
+| Modul EChartsTimeSeries | `{EF172F3B-50F5-41D1-B18E-6BCDEAECCABA}` |
 | Datenfluss Gauge → Gateway | `{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}` |
 | Datenfluss Gateway → Gauge | `{E4749B72-912B-E3E3-1C57-D19019FFDD84}` |
 
 Die Funktionspräfixe sind `ECGW` für das Gateway, `ECGS` für Gauge Single,
-`ECGM` für Gauge Multi, `ECGT` für Gauge Tacho und `ECGC` für Gauge
-Chronograph. Nach der verbindlichen Präfixkonvention steht `EC` für
+`ECGM` für Gauge Multi, `ECGT` für Gauge Tacho, `ECGC` für Gauge
+Chronograph und `ECTS` für Time Series. Nach der verbindlichen Präfixkonvention steht `EC` für
 ECharts; die letzten zwei Buchstaben bezeichnen Aufgabe oder Modultyp. Die
 Entscheidungen zur Modulstruktur und zu den GUIDs dokumentieren
 [`ADR 0001`](adr/0001-chart-family-modules.md) und
@@ -173,11 +176,11 @@ beschrieben.
 ## Bibliotheken und gemeinsame Helper
 
 ECharts wird ohne projektspezifische Änderungen am Bibliothekskern verwendet.
-Der Gauge-spezifische Browser-Build 6.1.0 ist lokal festgeschrieben, wird aus
+Die diagrammfamilienspezifischen Browser-Builds 6.1.0 sind lokal festgeschrieben, werden aus
 der offiziellen Tree-Shaking-API reproduzierbar erzeugt und mit Prüfsumme,
 Originallizenz sowie NOTICE ausgeliefert. Vor der Einbettung wird er auf
-Integrität geprüft. Seine Auswahl aus ECharts Core, Gauge Chart, Aria, Tooltip
-und Canvas Renderer hält das vollständige HTML-Dokument unter dem
+Integrität geprüft. Die getrennten Gauge- und Time-Series-Einstiegspunkte
+enthalten jeweils nur die benötigten Charts und Komponenten und halten das vollständige HTML-Dokument unter dem
 Symcon-Output-Buffer-Limit. Im Betrieb wird weder `latest` noch eine externe
 CDN-Ressource geladen. Aktualisierungen werden erneut gegen APIs, Lizenz,
 Lieferartefakte, Größe und die vorhandenen Renderer geprüft.
@@ -242,14 +245,17 @@ Der erste Funktionsumfang umfasst ein radiales Messinstrument in
 `EChartsGaugeSingle` und zusammengesetzte Gauges auf Basis des vorhandenen
 Mehrquellenmodells in `EChartsGaugeMulti`. Bei der sichtbaren Umsetzung werden
 mehrere getrennte Gauge-Instanzen, beide Ausgabewege gleichzeitig,
-Größenwechsel sowie abgeschaltete IPSView-Ausgabe getestet. Zeitreihen und
-weitere Chartfamilien sind spätere, getrennt zu entscheidende Ausbaustufen.
+Größenwechsel sowie abgeschaltete IPSView-Ausgabe getestet. Die erste native
+Zeitreihen-Vertikale ist ebenfalls implementiert; weitere Chartfamilien sind
+spätere, getrennt zu entscheidende Ausbaustufen.
 Vor ihrer Umsetzung erfolgt die Wiederverwendungsprüfung nach
 [`ADR 0017`](adr/0017-reuse-before-new-chart-development.md).
 Für die erste Zeitreihenfamilie legt
 [`ADR 0018`](adr/0018-first-time-series-family-and-archive-contract.md) den
 Ausgangsumfang und den implementierten Gateway-Vertrag `archive.read` fest.
-Das Zeitreihen-Gerätemodul und sein Renderer sind noch nicht implementiert.
+Das Gerätemodul setzt davon zunächst Quellen, Roh- und Aggregatmodus,
+Punktbudget, Zwei-Achsen-Modell und native Kachel um. IPSView und reale
+Laufzeitmessungen bleiben als nächste Schritte offen.
 
 ## Dokumentation und Lizenzen
 

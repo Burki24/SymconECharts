@@ -66,6 +66,10 @@ Die erste historische Chartfamilie wird als eigenes Gerätemodul
 Instanz stellt genau ein Zeitreihendiagramm in einer nativen Symcon-Kachel und
 optional in einem eigenen IPSView-WebContent-Widget dar.
 
+Die Modul-GUID ist `{EF172F3B-50F5-41D1-B18E-6BCDEAECCABA}`. Das Modul
+verwendet dieselben versionierten Datenfluss-IDs wie die anderen
+ECharts-Geräte; der neue Präfix `ECTS` ist damit verbindlich vergeben.
+
 Die erste Version umfasst:
 
 - eine bis acht numerische Symcon-Variablen;

@@ -13,6 +13,7 @@ use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsDataProtocol;
 use SymconECharts\EChartsGaugeChronographPreview;
 use SymconECharts\EChartsGaugeDesign;
+use SymconECharts\EChartsVariablePresentation;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
 require_once __DIR__ . '/../libs/helper/DataFlowHelper.php';
@@ -24,6 +25,7 @@ require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsGaugeDesign.php';
+require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 require_once __DIR__ . '/GaugePreview.php';
 
 class EChartsGaugeChronograph extends IPSModuleStrict
@@ -800,69 +802,14 @@ class EChartsGaugeChronograph extends IPSModuleStrict
         int $decimals,
         bool $useVariablePresentation
     ): array {
-        $configuration = [
-            'minimum'  => $minimum,
-            'maximum'  => $maximum,
-            'unit'     => trim($unit),
-            'decimals' => $decimals
-        ];
-        if (!$useVariablePresentation) {
-            return $configuration;
-        }
-
-        try {
-            $presentation = IPS_GetVariablePresentation($variableID);
-            if (!is_array($presentation)) {
-                return $configuration;
-            }
-
-            $profileName = $presentation['PROFILE'] ?? null;
-            if (is_string($profileName) && $profileName !== '') {
-                $profile = IPS_GetVariableProfile($profileName);
-                if (is_array($profile)) {
-                    $configuration = self::ApplyPresentationValues($configuration, [
-                        'MIN'    => $profile['MinValue'] ?? null,
-                        'MAX'    => $profile['MaxValue'] ?? null,
-                        'SUFFIX' => $profile['Suffix'] ?? null,
-                        'DIGITS' => $profile['Digits'] ?? null
-                    ]);
-                }
-            }
-
-            return self::ApplyPresentationValues($configuration, $presentation);
-        } catch (Throwable $exception) {
-            $this->SendDebug('ResolveSourceConfiguration', $exception::class, 0);
-
-            return $configuration;
-        }
-    }
-
-    /**
-     * @param array{minimum: float, maximum: float, unit: string, decimals: int} $configuration
-     * @param array<string, mixed> $presentation
-     * @return array{minimum: float, maximum: float, unit: string, decimals: int}
-     */
-    private static function ApplyPresentationValues(array $configuration, array $presentation): array
-    {
-        $presentationMinimum = $presentation['MIN'] ?? null;
-        $presentationMaximum = $presentation['MAX'] ?? null;
-        if ((is_int($presentationMinimum) || is_float($presentationMinimum))
-            && (is_int($presentationMaximum) || is_float($presentationMaximum))
-            && is_finite((float) $presentationMinimum)
-            && is_finite((float) $presentationMaximum)
-            && (float) $presentationMinimum < (float) $presentationMaximum) {
-            $configuration['minimum'] = (float) $presentationMinimum;
-            $configuration['maximum'] = (float) $presentationMaximum;
-        }
-        if (array_key_exists('SUFFIX', $presentation) && is_string($presentation['SUFFIX'])) {
-            $configuration['unit'] = trim($presentation['SUFFIX']);
-        }
-        $presentationDigits = $presentation['DIGITS'] ?? null;
-        if (is_int($presentationDigits) && $presentationDigits >= 0 && $presentationDigits <= 6) {
-            $configuration['decimals'] = $presentationDigits;
-        }
-
-        return $configuration;
+        return EChartsVariablePresentation::Resolve(
+            $variableID,
+            $minimum,
+            $maximum,
+            $unit,
+            $decimals,
+            $useVariablePresentation
+        );
     }
 
     /**

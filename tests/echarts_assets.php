@@ -15,9 +15,11 @@ function assertEChartsAsset(bool $condition, string $message): void
 
 $root = dirname(__DIR__);
 $runtimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.gauge.min.js';
+$timeSeriesRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.timeseries.min.js';
 $licensePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/LICENSE.txt';
 $noticePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/NOTICE.txt';
 $runtime = (string) file_get_contents($runtimePath);
+$timeSeriesRuntime = (string) file_get_contents($timeSeriesRuntimePath);
 $runtimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/gauge-runtime.js');
 $windowsCheckoutRuntime = str_replace("\n", "\r\n", $runtime);
 $expectedThemeIDs = ['auto', 'dark', 'vintage', 'macarons', 'infographic', 'shine', 'roma'];
@@ -33,6 +35,19 @@ assertEChartsAsset(
     'The Gauge-specific ECharts runtime must remain below 512 KiB.'
 );
 assertEChartsAsset(str_contains($runtime, 'window.echarts'), 'The Gauge runtime must expose the ECharts browser API.');
+assertEChartsAsset(is_file($timeSeriesRuntimePath), 'The pinned Time Series runtime is missing.');
+assertEChartsAsset(
+    hash_file('sha256', $timeSeriesRuntimePath) === EChartsAsset::TIME_SERIES_SHA256,
+    'The pinned Time Series runtime checksum changed.'
+);
+assertEChartsAsset(
+    EChartsAsset::TimeSeriesJavaScript() === $timeSeriesRuntime,
+    'The asset loader changed the Time Series runtime.'
+);
+assertEChartsAsset(
+    strlen($timeSeriesRuntime) < 614400 && str_contains($timeSeriesRuntime, 'window.echarts'),
+    'The Time Series ECharts runtime must expose the browser API and remain below 600 KiB.'
+);
 assertEChartsAsset(
     str_contains($runtimeSource, 'GraphicComponent'),
     'The Gauge runtime must include the native ECharts Graphic Component used by dial plates.'

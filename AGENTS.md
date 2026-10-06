@@ -17,8 +17,9 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   erreichbaren Testebene geprüfte Varianten werden sichtbar als Testlücke
   benannt.
 - Der aktuelle Repository-Stand besitzt eine getestete technische
-  Gauge→Gateway-Datenbasis sowie native HTML-SDK-Ausgaben für Gauge Single,
-  Gauge Multi, Gauge Tacho und Gauge Chronograph. Nicht
+  Gauge→Gateway-Datenbasis, die Archivoperation `archive.read` sowie native
+  HTML-SDK-Ausgaben für Gauge Single, Gauge Multi, Gauge Tacho, Gauge
+  Chronograph und die erste Time-Series-Vertikale. Nicht
   implementierte Funktionen, Store-Freigaben oder nicht real geprüfte
   Laufzeitkompatibilität dürfen nicht als vorhanden dargestellt werden.
 - Native Symcon-Kacheln und einzelne IPSView-HTML-Widgets sind vorgesehene
@@ -32,7 +33,8 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   `EChartsGaugeSingle` für genau eine Quellvariable, `EChartsGaugeMulti` für
   allgemeine Mehrquellenmodelle sowie `EChartsGaugeTacho` und
   `EChartsGaugeChronograph` für individuell gestaltbare Instrumentenpanels
-  aufgeteilt.
+  aufgeteilt. Historische Linien- und Flächendiagramme liegen im eigenen
+  Gerätemodul `EChartsTimeSeries`.
 - Das Gateway stellt ausschließlich familienübergreifende Infrastruktur wie
   Archivzugriff, begrenztes Caching, gemeinsame Ressourcen und gegebenenfalls
   abgesicherte IPSView-Kommunikation bereit. Familienbezogene Properties,
@@ -48,7 +50,8 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
 - Die bestehende Gauge-Modul-GUID gehört nach der Aufteilung zu
   `EChartsGaugeSingle`; `EChartsGaugeMulti` besitzt eine eigene Modul-GUID.
   `EChartsGaugeTacho` und `EChartsGaugeChronograph` besitzen ebenfalls eigene
-  Modul-GUIDs; ihre Festlegung dokumentiert ADR 0016.
+  Modul-GUIDs; ihre Festlegung dokumentiert ADR 0016. `EChartsTimeSeries`
+  besitzt die in ADR 0018 festgelegte eigene Identität.
   Datenfluss-IDs werden von beiden Geräten gemeinsam verwendet. Namen,
   Präfixe und Zuständigkeiten aus [`ADR 0001`](docs/adr/0001-chart-family-modules.md)
   und [`ADR 0003`](docs/adr/0003-single-and-multi-gauge-modules.md) sowie das
@@ -79,6 +82,7 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
 - `ECGM` ist `EChartsGaugeMulti` zugeordnet (`GM` = Gauge Multi).
 - `ECGT` ist `EChartsGaugeTacho` zugeordnet (`GT` = Gauge Tacho).
 - `ECGC` ist `EChartsGaugeChronograph` zugeordnet (`GC` = Gauge Chronograph).
+- `ECTS` ist `EChartsTimeSeries` zugeordnet (`TS` = Time Series).
 - Das zuvor für das unveröffentlichte Gauge-Gerüst verwendete Kürzel `ECGA`
   ist abgelöst und wird nicht für ein anderes Modul wiederverwendet.
 - Neue Kürzel werden vor ihrer Verwendung eindeutig festgelegt und in dieser

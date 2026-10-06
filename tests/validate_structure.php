@@ -25,9 +25,11 @@ $requiredFiles = [
     'libs/EChartsAsset.php',
     'libs/EChartsDataProtocol.php',
     'libs/EChartsGaugeDesign.php',
+    'libs/EChartsVariablePresentation.php',
     'libs/EChartsSvgImage.php',
     'libs/EChartsSvgPath.php',
     'libs/echarts/6.1.0/echarts.gauge.min.js',
+    'libs/echarts/6.1.0/echarts.timeseries.min.js',
     'libs/echarts/6.1.0/themes/dark.js',
     'libs/echarts/6.1.0/themes/vintage.js',
     'libs/echarts/6.1.0/themes/macarons.js',
@@ -74,6 +76,7 @@ $requiredFiles = [
     '.tools/echarts-runtime/README.md',
     '.tools/echarts-runtime/scripts/copy-themes.mjs',
     '.tools/echarts-runtime/src/gauge-runtime.js',
+    '.tools/echarts-runtime/src/timeseries-runtime.js',
     'EChartsGaugeSingle/visualization/index.html',
     'EChartsGaugeSingle/visualization/style.css',
     'EChartsGaugeSingle/visualization/app.js',
@@ -270,7 +273,8 @@ if ($helperSync !== null) {
 }
 
 $expectedModules = [
-    'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti', 'EChartsGaugeSingle', 'EChartsGaugeTacho'
+    'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti', 'EChartsGaugeSingle', 'EChartsGaugeTacho',
+    'EChartsTimeSeries'
 ];
 $discoveredModules = [];
 foreach (glob($root . '/*/module.json') ?: [] as $modulePath) {

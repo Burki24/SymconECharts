@@ -13,6 +13,7 @@ final class EChartsAsset
 {
     public const VERSION = '6.1.0';
     public const SHA256 = '37d8c9774f27fc12e048e269e8ec6a114782529fb85262a6be8c6b887207c07f';
+    public const TIME_SERIES_SHA256 = 'bf44d8bc8285f9a27d4989a74b309c248a2d28a5f7bc62f867c2e3d8b327225c';
     public const THEME_AUTO = 'auto';
     public const THEME_SHA256 = [
         'dark'        => 'ae60e563617cb87514690c1946ee202e78c9f1487820490614b58934ed037458',
@@ -124,6 +125,21 @@ final class EChartsAsset
         }
 
         return self::NormalizeLineEndings($content);
+    }
+
+    public static function TimeSeriesJavaScript(): string
+    {
+        $path = __DIR__ . '/echarts/' . self::VERSION . '/echarts.timeseries.min.js';
+        $content = @file_get_contents($path);
+        if ($content === false || $content === '') {
+            throw new RuntimeException('The bundled Apache ECharts Time Series runtime could not be loaded.');
+        }
+        $canonicalContent = self::NormalizeLineEndings($content);
+        if (!hash_equals(self::TIME_SERIES_SHA256, hash('sha256', $canonicalContent))) {
+            throw new RuntimeException('The bundled Apache ECharts Time Series runtime failed its integrity check.');
+        }
+
+        return $canonicalContent;
     }
 
     /** @return list<string> */

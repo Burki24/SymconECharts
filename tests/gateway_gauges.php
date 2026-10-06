@@ -276,6 +276,9 @@ abstract class IPSModuleStrict
     /** @var list<array{Field:string, Parameter:string, Value:mixed}> */
     private array $formUpdates = [];
 
+    /** @var array<string,int> */
+    private array $timers = [];
+
     private int $status = IS_INACTIVE;
     private bool $parentActive = true;
     private string $summary = '';
@@ -507,6 +510,20 @@ abstract class IPSModuleStrict
         return true;
     }
 
+    protected function RegisterTimer(string $ident, int $interval, string $script): bool
+    {
+        $this->timers[$ident] = $interval;
+
+        return true;
+    }
+
+    protected function SetTimerInterval(string $ident, int $interval): bool
+    {
+        $this->timers[$ident] = $interval;
+
+        return true;
+    }
+
     protected function UnregisterMessage(int $senderID, int $message): bool
     {
         $this->messages = array_values(array_filter(
@@ -608,6 +625,7 @@ require_once dirname(__DIR__) . '/EChartsGaugeSingle/module.php';
 require_once dirname(__DIR__) . '/EChartsGaugeMulti/module.php';
 require_once dirname(__DIR__) . '/EChartsGaugeTacho/module.php';
 require_once dirname(__DIR__) . '/EChartsGaugeChronograph/module.php';
+require_once dirname(__DIR__) . '/EChartsTimeSeries/module.php';
 
 function assertGatewayGauge(bool $condition, string $message): void
 {
@@ -2798,6 +2816,139 @@ $archiveCache = json_decode($gateway->GetTestBuffer('ArchiveReadCache'), true, 5
 assertGatewayGauge(
     is_array($archiveCache) && count($archiveCache) === 32,
     'Gateway archive cache must remain bounded to 32 entries.'
+);
+
+$timeSeries = new EChartsTimeSeries();
+$timeSeries->Create();
+$timeSeries->SetTestProperty('Sources', json_encode([
+    [
+        'VariableID'              => 4711,
+        'Label'                   => 'Temperature',
+        'UseVariablePresentation' => false,
+        'Unit'                    => '°C',
+        'Decimals'                => 1,
+        'Color'                   => '#55CBB5',
+        'Style'                   => 'area',
+        'Reducer'                 => 'auto'
+    ],
+    [
+        'VariableID'              => 4713,
+        'Label'                   => 'Humidity counter',
+        'UseVariablePresentation' => false,
+        'Unit'                    => '%',
+        'Decimals'                => 0,
+        'Color'                   => '',
+        'Style'                   => 'line',
+        'Reducer'                 => 'auto'
+    ]
+], JSON_THROW_ON_ERROR));
+$timeSeries->SetTestProperty('Range', '1h');
+$timeSeries->SetTestProperty('DataMode', 'auto');
+$timeSeries->SetTestProperty('PointBudget', 2000);
+$timeSeries->ApplyChanges();
+$timeSeriesData = json_decode($timeSeries->GetTimeSeriesData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $timeSeries->GetTestStatus() === IS_ACTIVE
+        && $timeSeries->GetTestVisualizationType() === 1
+        && $timeSeries->GetTestReferences() === [4711, 4713],
+    'Time Series must initialize as a native visualization with deterministic source references.'
+);
+assertGatewayGauge(
+    $timeSeriesData['family'] === 'time-series'
+        && $timeSeriesData['range']['aggregationLevel'] === 6
+        && count($timeSeriesData['axes']) === 2
+        && $timeSeriesData['series'][0]['effectiveReducer'] === 'average'
+        && $timeSeriesData['series'][1]['effectiveReducer'] === 'sum',
+    'Time Series must build the accepted two-axis aggregated chart model.'
+);
+$timeSeriesTile = $timeSeries->GetVisualizationTile();
+assertGatewayGauge(
+    str_contains($timeSeriesTile, 'echarts-timeseries-root'),
+    'Time Series native tile must embed its visualization root.'
+);
+assertGatewayGauge(
+    str_contains($timeSeriesTile, 'time-series'),
+    'Time Series native tile must embed its chart model.'
+);
+assertGatewayGauge(
+    strlen($timeSeriesTile) < SYMCON_OUTPUT_BUFFER_LIMIT,
+    'Time Series native tile must remain below the Symcon output limit (actual: '
+        . strlen($timeSeriesTile) . ').'
+);
+
+$rawTimeSeries = new EChartsTimeSeries();
+$rawTimeSeries->Create();
+$rawTimeSeries->SetTestProperty('Sources', json_encode([[
+    'VariableID'              => 4711,
+    'Label'                   => '',
+    'UseVariablePresentation' => false,
+    'Unit'                    => '°C',
+    'Decimals'                => 1,
+    'Color'                   => '',
+    'Style'                   => 'line',
+    'Reducer'                 => 'maximum'
+]], JSON_THROW_ON_ERROR));
+$rawTimeSeries->SetTestProperty('Range', '1h');
+$rawTimeSeries->SetTestProperty('DataMode', 'raw');
+$rawTimeSeries->ApplyChanges();
+$rawTimeSeriesData = json_decode($rawTimeSeries->GetTimeSeriesData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $rawTimeSeriesData['range']['aggregationLevel'] === null
+        && $rawTimeSeriesData['series'][0]['effectiveReducer'] === 'raw'
+        && $rawTimeSeriesData['series'][0]['points'] === [],
+    'Explicit raw mode must preserve logged values without applying a reducer.'
+);
+$rawTimeSeries->MessageSink(1780000500, 4711, VM_UPDATE, []);
+$lastTimeSeriesUpdate = $rawTimeSeries->GetTestVisualizationUpdates();
+$lastTimeSeriesUpdate = json_decode((string) end($lastTimeSeriesUpdate), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $lastTimeSeriesUpdate['messageType'] === 'append'
+        && $lastTimeSeriesUpdate['variableID'] === 4711,
+    'Raw Time Series updates must append one live point instead of reloading the archive.'
+);
+
+$longRangeTimeSeries = new EChartsTimeSeries();
+$longRangeTimeSeries->Create();
+$longRangeTimeSeries->SetTestProperty('Sources', json_encode([[
+    'VariableID'              => 4711,
+    'Label'                   => '',
+    'UseVariablePresentation' => false,
+    'Unit'                    => '°C',
+    'Decimals'                => 1,
+    'Color'                   => '',
+    'Style'                   => 'line',
+    'Reducer'                 => 'auto'
+]], JSON_THROW_ON_ERROR));
+$longRangeTimeSeries->SetTestProperty('Range', '30d');
+$longRangeTimeSeries->SetTestProperty('DataMode', 'auto');
+$longRangeTimeSeries->SetTestProperty('PointBudget', 200);
+$longRangeTimeSeries->ApplyChanges();
+$longRangeData = json_decode($longRangeTimeSeries->GetTimeSeriesData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $longRangeData['range']['aggregationLevel'] === 1,
+    'Automatic aggregation must select the finest level that fits the per-series point budget.'
+);
+
+$invalidAxesTimeSeries = new EChartsTimeSeries();
+$invalidAxesTimeSeries->Create();
+$invalidAxesTimeSeries->SetTestProperty('Sources', json_encode(array_map(
+    static fn (int $variableID, string $unit): array => [
+        'VariableID'              => $variableID,
+        'Label'                   => '',
+        'UseVariablePresentation' => false,
+        'Unit'                    => $unit,
+        'Decimals'                => 1,
+        'Color'                   => '',
+        'Style'                   => 'line',
+        'Reducer'                 => 'auto'
+    ],
+    [4711, 4713, 4714],
+    ['°C', '%', 'hPa']
+), JSON_THROW_ON_ERROR));
+$invalidAxesTimeSeries->ApplyChanges();
+assertGatewayGauge(
+    $invalidAxesTimeSeries->GetTestStatus() === 202,
+    'Time Series must reject configurations with more than two effective unit groups.'
 );
 
 echo "Gateway and Gauge module integration verified.\n";

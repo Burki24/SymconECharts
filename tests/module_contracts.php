@@ -101,6 +101,14 @@ $expectedModules = [
         'parentRequirements' => ['{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}'],
         'childRequirements'  => [],
         'implemented'        => ['{E4749B72-912B-E3E3-1C57-D19019FFDD84}']
+    ],
+    'EChartsTimeSeries' => [
+        'id'                 => '{EF172F3B-50F5-41D1-B18E-6BCDEAECCABA}',
+        'type'               => 3,
+        'prefix'             => 'ECTS',
+        'parentRequirements' => ['{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}'],
+        'childRequirements'  => [],
+        'implemented'        => ['{E4749B72-912B-E3E3-1C57-D19019FFDD84}']
     ]
 ];
 
@@ -159,16 +167,19 @@ foreach ($expectedModules as $moduleName => $expected) {
 }
 
 $gateway = $moduleContracts['EChartsGateway'];
-foreach (['EChartsGaugeSingle', 'EChartsGaugeMulti', 'EChartsGaugeTacho', 'EChartsGaugeChronograph'] as $gaugeModuleName) {
-    $gauge = $moduleContracts[$gaugeModuleName];
+foreach ([
+    'EChartsGaugeSingle', 'EChartsGaugeMulti', 'EChartsGaugeTacho', 'EChartsGaugeChronograph',
+    'EChartsTimeSeries'
+] as $deviceModuleName) {
+    $device = $moduleContracts[$deviceModuleName];
     requireContract(
-        ($gateway['implemented'] ?? null) === ($gauge['parentRequirements'] ?? null),
-        $gaugeModuleName . '-to-gateway data flow is inconsistent.',
+        ($gateway['implemented'] ?? null) === ($device['parentRequirements'] ?? null),
+        $deviceModuleName . '-to-gateway data flow is inconsistent.',
         $errors
     );
     requireContract(
-        ($gateway['childRequirements'] ?? null) === ($gauge['implemented'] ?? null),
-        'Gateway-to-' . $gaugeModuleName . ' data flow is inconsistent.',
+        ($gateway['childRequirements'] ?? null) === ($device['implemented'] ?? null),
+        'Gateway-to-' . $deviceModuleName . ' data flow is inconsistent.',
         $errors
     );
 }

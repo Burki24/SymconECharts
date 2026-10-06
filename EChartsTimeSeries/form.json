@@ -1,0 +1,179 @@
+{
+    "$schema": "https://www.symcon.de/assets/files/validation/formSchema.json",
+    "elements": [
+        {
+            "type": "Label",
+            "caption": "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts."
+        },
+        {
+            "type": "ValidationTextBox",
+            "name": "Title",
+            "caption": "Title"
+        },
+        {
+            "type": "List",
+            "name": "Sources",
+            "caption": "Time series sources",
+            "rowCount": 6,
+            "add": true,
+            "delete": true,
+            "changeOrder": true,
+            "columns": [
+                {
+                    "caption": "Variable",
+                    "name": "VariableID",
+                    "width": "230px",
+                    "add": 0,
+                    "edit": {
+                        "type": "SelectVariable",
+                        "validVariableTypes": [1, 2]
+                    }
+                },
+                {
+                    "caption": "Label",
+                    "name": "Label",
+                    "width": "auto",
+                    "add": "",
+                    "edit": {"type": "ValidationTextBox"}
+                },
+                {
+                    "caption": "Variable presentation",
+                    "name": "UseVariablePresentation",
+                    "width": "130px",
+                    "add": true,
+                    "edit": {"type": "CheckBox"}
+                },
+                {
+                    "caption": "Unit",
+                    "name": "Unit",
+                    "width": "90px",
+                    "add": "",
+                    "edit": {"type": "ValidationTextBox"}
+                },
+                {
+                    "caption": "Decimals",
+                    "name": "Decimals",
+                    "width": "85px",
+                    "add": 1,
+                    "edit": {"type": "NumberSpinner", "minimum": 0, "maximum": 6}
+                },
+                {
+                    "caption": "Color",
+                    "name": "Color",
+                    "width": "100px",
+                    "add": "",
+                    "edit": {"type": "ValidationTextBox"}
+                },
+                {
+                    "caption": "Style",
+                    "name": "Style",
+                    "width": "90px",
+                    "add": "line",
+                    "edit": {
+                        "type": "Select",
+                        "options": [
+                            {"caption": "Line", "value": "line"},
+                            {"caption": "Area", "value": "area"}
+                        ]
+                    }
+                },
+                {
+                    "caption": "Reducer",
+                    "name": "Reducer",
+                    "width": "110px",
+                    "add": "auto",
+                    "edit": {
+                        "type": "Select",
+                        "options": [
+                            {"caption": "Automatic", "value": "auto"},
+                            {"caption": "Average", "value": "average"},
+                            {"caption": "Sum", "value": "sum"},
+                            {"caption": "Minimum", "value": "minimum"},
+                            {"caption": "Maximum", "value": "maximum"}
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "type": "RowLayout",
+            "items": [
+                {
+                    "type": "Select",
+                    "name": "Range",
+                    "caption": "Time range",
+                    "width": "190px",
+                    "options": [
+                        {"caption": "1 hour", "value": "1h"},
+                        {"caption": "6 hours", "value": "6h"},
+                        {"caption": "24 hours", "value": "24h"},
+                        {"caption": "7 days", "value": "7d"},
+                        {"caption": "30 days", "value": "30d"}
+                    ]
+                },
+                {
+                    "type": "Select",
+                    "name": "DataMode",
+                    "caption": "Data mode",
+                    "width": "230px",
+                    "options": [
+                        {"caption": "Raw values", "value": "raw"},
+                        {"caption": "Automatic aggregation", "value": "auto"},
+                        {"caption": "1 minute", "value": "minute"},
+                        {"caption": "5 minutes", "value": "five-minutes"},
+                        {"caption": "15 minutes", "value": "fifteen-minutes"},
+                        {"caption": "1 hour", "value": "hour"},
+                        {"caption": "1 day", "value": "day"}
+                    ]
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "PointBudget",
+                    "caption": "Total point budget",
+                    "minimum": 200,
+                    "maximum": 8000,
+                    "width": "170px"
+                }
+            ]
+        },
+        {
+            "type": "RowLayout",
+            "items": [
+                {
+                    "type": "Select",
+                    "name": "EChartsTheme",
+                    "caption": "ECharts theme",
+                    "width": "250px",
+                    "options": [
+                        {"caption": "Automatic (Symcon design)", "value": "auto"},
+                        {"caption": "Dark", "value": "dark"},
+                        {"caption": "Vintage", "value": "vintage"},
+                        {"caption": "Macarons", "value": "macarons"},
+                        {"caption": "Infographic", "value": "infographic"},
+                        {"caption": "Shine", "value": "shine"},
+                        {"caption": "Roma", "value": "roma"}
+                    ]
+                },
+                {
+                    "type": "CheckBox",
+                    "name": "EnableZoom",
+                    "caption": "Enable zoom"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "type": "Button",
+            "caption": "Read current time series data",
+            "onClick": "echo ECTS_GetTimeSeriesData($id);"
+        }
+    ],
+    "status": [
+        {"code": 102, "icon": "active", "caption": "Time series is ready"},
+        {"code": 201, "icon": "error", "caption": "Configure 1 to 8 unique numeric sources"},
+        {"code": 202, "icon": "error", "caption": "Time series configuration is invalid"},
+        {"code": 203, "icon": "error", "caption": "No active EChartsGateway is connected"},
+        {"code": 204, "icon": "error", "caption": "EChartsGateway archive request failed"}
+    ]
+}
