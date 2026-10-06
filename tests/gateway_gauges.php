@@ -66,6 +66,53 @@ $GLOBALS['symconTestProfiles'] = [
         'Suffix'   => ' m/s'
     ]
 ];
+$GLOBALS['symconTestArchiveInstances'] = [6000];
+$GLOBALS['symconTestArchiveQueryCount'] = 0;
+$GLOBALS['symconTestArchiveVariables'] = [
+    4711 => [
+        'AggregationType' => 0,
+        'LoggedValues'    => [
+            ['TimeStamp' => 1780000300, 'Value' => 43.0, 'Duration' => 100],
+            ['TimeStamp' => 1780000200, 'Value' => 42.0, 'Duration' => 100],
+            ['TimeStamp' => 1780000100, 'Value' => 41.0, 'Duration' => 100]
+        ],
+        'AggregatedValues' => [
+            [
+                'TimeStamp' => 1780000200,
+                'Avg'       => 42.5,
+                'Min'       => 42.0,
+                'MinTime'   => 1780000210,
+                'Max'       => 43.0,
+                'MaxTime'   => 1780000250,
+                'Duration'  => 60
+            ],
+            [
+                'TimeStamp' => 1780000100,
+                'Avg'       => 41.5,
+                'Min'       => 41.0,
+                'MinTime'   => 1780000110,
+                'Max'       => 42.0,
+                'MaxTime'   => 1780000150,
+                'Duration'  => 60
+            ]
+        ]
+    ],
+    4713 => [
+        'AggregationType'  => 1,
+        'LoggedValues'     => [],
+        'AggregatedValues' => [
+            [
+                'TimeStamp' => 1780000100,
+                'Avg'       => 12,
+                'Min'       => 2,
+                'MinTime'   => 1780000110,
+                'Max'       => 7,
+                'MaxTime'   => 1780000150,
+                'Duration'  => 60
+            ]
+        ]
+    ]
+];
 
 function IPS_GetKernelRunlevel(): int
 {
@@ -75,6 +122,83 @@ function IPS_GetKernelRunlevel(): int
 function IPS_VariableExists(int $variableID): bool
 {
     return isset($GLOBALS['symconTestVariables'][$variableID]);
+}
+
+/** @return list<int> */
+function IPS_GetInstanceListByModuleID(string $moduleID): array
+{
+    if ($moduleID !== '{43192F0B-135B-4CE7-A0A7-1475603F3060}') {
+        return [];
+    }
+
+    return $GLOBALS['symconTestArchiveInstances'];
+}
+
+/** @return list<array<string, mixed>> */
+function AC_GetAggregationVariables(int $archiveID, bool $databaseQuery): array
+{
+    if (!in_array($archiveID, $GLOBALS['symconTestArchiveInstances'], true)) {
+        throw new RuntimeException('Unknown test archive.');
+    }
+
+    return array_map(
+        static fn (int $variableID): array => [
+            'VariableID'        => $variableID,
+            'AggregationType'   => $GLOBALS['symconTestArchiveVariables'][$variableID]['AggregationType'],
+            'AggregationActive' => true
+        ],
+        array_keys($GLOBALS['symconTestArchiveVariables'])
+    );
+}
+
+function AC_GetAggregationType(int $archiveID, int $variableID): int
+{
+    if (!in_array($archiveID, $GLOBALS['symconTestArchiveInstances'], true)
+        || !isset($GLOBALS['symconTestArchiveVariables'][$variableID])
+    ) {
+        throw new RuntimeException('Unknown test archive variable.');
+    }
+
+    return $GLOBALS['symconTestArchiveVariables'][$variableID]['AggregationType'];
+}
+
+/** @return list<array<string, int|float>> */
+function AC_GetLoggedValues(
+    int $archiveID,
+    int $variableID,
+    int $startTimestamp,
+    int $endTimestamp,
+    int $limit
+): array {
+    ++$GLOBALS['symconTestArchiveQueryCount'];
+    $values = $GLOBALS['symconTestArchiveVariables'][$variableID]['LoggedValues'] ?? [];
+    $values = array_values(array_filter(
+        $values,
+        static fn (array $value): bool => $value['TimeStamp'] >= $startTimestamp
+            && $value['TimeStamp'] <= $endTimestamp
+    ));
+
+    return array_slice($values, 0, $limit);
+}
+
+/** @return list<array<string, int|float>> */
+function AC_GetAggregatedValues(
+    int $archiveID,
+    int $variableID,
+    int $aggregationLevel,
+    int $startTimestamp,
+    int $endTimestamp,
+    int $limit
+): array {
+    ++$GLOBALS['symconTestArchiveQueryCount'];
+    $values = $GLOBALS['symconTestArchiveVariables'][$variableID]['AggregatedValues'] ?? [];
+    $values = array_values(array_filter(
+        $values,
+        static fn (array $value): bool => $value['TimeStamp'] >= $startTimestamp
+            && $value['TimeStamp'] <= $endTimestamp
+    ));
+
+    return array_slice($values, 0, $limit);
 }
 
 /** @return array<string, int> */
@@ -136,6 +260,9 @@ abstract class IPSModuleStrict
 
     /** @var array<string, mixed> */
     private array $attributes = [];
+
+    /** @var array<string, string> */
+    private array $buffers = [];
 
     /** @var list<int> */
     private array $references = [];
@@ -219,6 +346,11 @@ abstract class IPSModuleStrict
     public function GetTestFormUpdates(): array
     {
         return $this->formUpdates;
+    }
+
+    public function GetTestBuffer(string $name): string
+    {
+        return $this->buffers[$name] ?? '';
     }
 
     protected function RegisterPropertyInteger(string $name, int $default): bool
@@ -353,6 +485,16 @@ abstract class IPSModuleStrict
     protected function ReadAttributeString(string $name): string
     {
         return (string) $this->attributes[$name];
+    }
+
+    protected function GetBuffer(string $name): string
+    {
+        return $this->buffers[$name] ?? '';
+    }
+
+    protected function SetBuffer(string $name, string $value): void
+    {
+        $this->buffers[$name] = $value;
     }
 
     protected function RegisterMessage(int $senderID, int $message): bool
@@ -2525,6 +2667,137 @@ assertGatewayGauge($nonNumericResponse['Success'] === false, 'Gateway must rejec
 assertGatewayGauge(
     ($nonNumericResponse['Error']['Code'] ?? null) === 'VARIABLE_NOT_NUMERIC',
     'Gateway returned the wrong non-numeric-variable error.'
+);
+
+$rawArchiveRequest = json_encode([
+    'DataID'          => '{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}',
+    'ProtocolVersion' => 1,
+    'Operation'       => 'archive.read',
+    'Payload'         => [
+        'VariableID'      => 4711,
+        'StartTimestamp'  => 1780000000,
+        'EndTimestamp'    => 1780000400,
+        'Mode'            => 'raw',
+        'Reducer'         => 'auto',
+        'Limit'           => 2
+    ]
+], JSON_THROW_ON_ERROR);
+$rawArchiveResponse = json_decode($gateway->ForwardData($rawArchiveRequest), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge($rawArchiveResponse['Success'] === true, 'Gateway must return raw archive values.');
+assertGatewayGauge(
+    $rawArchiveResponse['Payload']['Points'] === [
+        [1780000200, 42.0],
+        [1780000300, 43.0]
+    ],
+    'Raw archive values must remain unaggregated and be sorted oldest first.'
+);
+assertGatewayGauge(
+    $rawArchiveResponse['Payload']['EffectiveReducer'] === 'raw'
+        && $rawArchiveResponse['Payload']['Truncated'] === true,
+    'Raw archive responses must expose their effective mode and truncation.'
+);
+$archiveQueryCount = $GLOBALS['symconTestArchiveQueryCount'];
+$cachedRawArchiveResponse = json_decode(
+    $gateway->ForwardData($rawArchiveRequest),
+    true,
+    512,
+    JSON_THROW_ON_ERROR
+);
+assertGatewayGauge(
+    $cachedRawArchiveResponse === $rawArchiveResponse
+        && $GLOBALS['symconTestArchiveQueryCount'] === $archiveQueryCount,
+    'Identical archive requests must use the bounded Gateway cache.'
+);
+
+$minimumArchiveRequest = json_encode([
+    'DataID'          => '{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}',
+    'ProtocolVersion' => 1,
+    'Operation'       => 'archive.read',
+    'Payload'         => [
+        'VariableID'       => 4711,
+        'StartTimestamp'   => 1780000000,
+        'EndTimestamp'     => 1780000400,
+        'Mode'             => 'aggregated',
+        'AggregationLevel' => 6,
+        'Reducer'          => 'minimum',
+        'Limit'            => 2
+    ]
+], JSON_THROW_ON_ERROR);
+$minimumArchiveResponse = json_decode(
+    $gateway->ForwardData($minimumArchiveRequest),
+    true,
+    512,
+    JSON_THROW_ON_ERROR
+);
+assertGatewayGauge(
+    $minimumArchiveResponse['Payload']['Points'] === [
+        [1780000100, 41.0],
+        [1780000200, 42.0]
+    ],
+    'Aggregated minimum values must retain their common bucket timestamps.'
+);
+assertGatewayGauge(
+    $minimumArchiveResponse['Payload']['EffectiveReducer'] === 'minimum'
+        && $minimumArchiveResponse['Payload']['ArchiveAggregationType'] === 'standard',
+    'Standard archive aggregation metadata changed.'
+);
+
+$counterArchiveRequest = json_encode([
+    'DataID'          => '{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}',
+    'ProtocolVersion' => 1,
+    'Operation'       => 'archive.read',
+    'Payload'         => [
+        'VariableID'       => 4713,
+        'StartTimestamp'   => 1780000000,
+        'EndTimestamp'     => 1780000400,
+        'Mode'             => 'aggregated',
+        'AggregationLevel' => 6,
+        'Reducer'          => 'auto',
+        'Limit'            => 2
+    ]
+], JSON_THROW_ON_ERROR);
+$counterArchiveResponse = json_decode(
+    $gateway->ForwardData($counterArchiveRequest),
+    true,
+    512,
+    JSON_THROW_ON_ERROR
+);
+assertGatewayGauge(
+    $counterArchiveResponse['Payload']['Points'] === [[1780000100, 12]]
+        && $counterArchiveResponse['Payload']['EffectiveReducer'] === 'sum'
+        && $counterArchiveResponse['Payload']['ArchiveAggregationType'] === 'counter',
+    'Counter archive auto mode must expose Symcon positive-delta sums.'
+);
+
+$invalidCounterReducerRequest = json_decode($counterArchiveRequest, true, 512, JSON_THROW_ON_ERROR);
+$invalidCounterReducerRequest['Payload']['Reducer'] = 'average';
+$invalidCounterReducerResponse = json_decode(
+    $gateway->ForwardData(json_encode($invalidCounterReducerRequest, JSON_THROW_ON_ERROR)),
+    true,
+    512,
+    JSON_THROW_ON_ERROR
+);
+assertGatewayGauge(
+    $invalidCounterReducerResponse['Success'] === false
+        && ($invalidCounterReducerResponse['Error']['Code'] ?? null) === 'REDUCER_NOT_SUPPORTED',
+    'Gateway must not silently reinterpret an explicit average reducer as a counter sum.'
+);
+
+for ($cacheIndex = 1; $cacheIndex <= 33; ++$cacheIndex) {
+    $boundedCacheRequest = json_decode($rawArchiveRequest, true, 512, JSON_THROW_ON_ERROR);
+    $boundedCacheRequest['Payload']['EndTimestamp'] += $cacheIndex;
+    $boundedCacheResponse = json_decode(
+        $gateway->ForwardData(json_encode($boundedCacheRequest, JSON_THROW_ON_ERROR)),
+        true,
+        512,
+        JSON_THROW_ON_ERROR
+    );
+    assertGatewayGauge($boundedCacheResponse['Success'] === true, 'Bounded cache test query failed.');
+}
+$archiveCache = json_decode($gateway->GetTestBuffer('ArchiveReadCache'), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    is_array($archiveCache) && count($archiveCache) === 32,
+    'Gateway archive cache must remain bounded to 32 entries.'
 );
 
 echo "Gateway and Gauge module integration verified.\n";

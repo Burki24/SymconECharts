@@ -5,8 +5,11 @@ angelegt und soll mehrere Geräteinstanzen verschiedener Chartfamilien mit
 gemeinsamen Diensten versorgen. Eine eigene I/O-Instanz ist nicht vorgesehen.
 
 **Entwicklungsstand:** Technische Datenbasis. Das Gateway verarbeitet den
-versionierten `current.read`-Vertrag für numerische Symcon-Variablen. Archiv-,
-Cache-, Renderer- und HTTP-Dienste sind noch nicht implementiert.
+versionierten `current.read`-Vertrag für numerische Symcon-Variablen sowie
+`archive.read` für rohe und aggregierte Archivwerte. Erfolgreiche identische
+Archivabfragen werden bis zu 15 Sekunden in einem auf 32 Einträge begrenzten
+Speichercache gehalten. Renderer- und HTTP-Dienste sind nicht Bestandteil des
+Gateways.
 
 ### Inhaltsverzeichnis
 
@@ -22,15 +25,18 @@ Cache-, Renderer- und HTTP-Dienste sind noch nicht implementiert.
 
 **Vorhanden:** Moduldefinition als Splitter (`type: 2`) auf Basis von
 `IPSModuleStrict`, festgelegte Datenfluss-IDs für Chartfamilien-Geräte und ein
-versionierter Gateway-Vertrag. `ForwardData()` verarbeitet `current.read`,
-prüft Variablen-ID und numerischen Variablentyp und liefert Wert, Typ und
-Änderungszeitpunkt als strukturierte Antwort. Die Transporthülle nutzt den
+versionierter Gateway-Vertrag. `ForwardData()` verarbeitet `current.read` und
+`archive.read`. Momentanwerte werden mit Typ und Änderungszeitpunkt geliefert.
+Archivabfragen validieren Variable, Zeitraum, Datenmodus, Verdichtungsstufe,
+Reducer und Punktlimit. Rohwerte sowie aggregierte Durchschnitts-, Summen-,
+Minimum- und Maximumwerte werden einheitlich zeitlich aufsteigend ausgegeben;
+gekürzte Antworten sind explizit gekennzeichnet. Die Transporthülle nutzt den
 zentralen `DataFlowHelper`.
 
-**Geplant:** Gemeinsame Daten- und Archivdienste, begrenzte Zwischenspeicherung,
-zentrale technische Vorgaben, Diagnose und die bei IPSView-Nutzung benötigten
-abgesicherten HTTP-Endpunkte. Die reine Kachelnutzung soll ohne aktivierte
-IPSView-Ausgabe und ohne deren WebHook-Zugriff funktionieren.
+**Geplant:** Weitere gemeinsame Datenfunktionen entstehen nur bei belegtem
+Bedarf. Das geplante Zeitreihen-Gerätemodul wird erster Consumer von
+`archive.read`. Die reine Kachelnutzung bleibt unabhängig von einer optionalen
+IPSView-Ausgabe.
 
 ### 2. Voraussetzungen
 
@@ -102,7 +108,9 @@ jeweiligen Geräteinstanz
 ([Gauge Single](../EChartsGaugeSingle), [Gauge Multi](../EChartsGaugeMulti),
 [Gauge Tacho](../EChartsGaugeTacho),
 [Gauge Chronograph](../EChartsGaugeChronograph)).
-Beide Ausgabewege sind noch zu implementieren.
+Beide Ausgabewege sind in den Gauge-Gerätemodulen implementiert. Das geplante
+Zeitreihenmodul erhält eigene Ausgabeadapter auf seinem gemeinsamen
+Zeitreihenmodell.
 
 ### 7. PHP-Befehlsreferenz
 

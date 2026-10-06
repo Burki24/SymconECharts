@@ -48,7 +48,9 @@ das Grunddesign einschließlich SVG-Zeiger, SVG-Nabe und SVG-Zifferblatt
 Alle Gauge-Module erzeugen optional
 eine IPSView-WebContent-Variable mit vererbtem oder unabhängigem Design auf
 demselben Renderer. Weitere klassische Multi-Instrumentenpanel-Vorlagen,
-Archivverarbeitung sowie reale Symcon-Laufzeit- und Browsertests fehlen noch.
+das Zeitreihen-Gerätemodul sowie reale Symcon-Laufzeit- und Browsertests fehlen
+noch. Der Gateway-Vertrag `archive.read` liest bereits normalisierte rohe und
+aggregierte Archivwerte und verwendet einen kurzlebigen begrenzten Cache.
 Die Testsuite prüft zusätzlich
 zu Struktur und Metadaten die Strict-Verträge, das Protokoll, die
 ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
@@ -123,8 +125,8 @@ Die eigenständigen Tacho- und Chronograph-Module dokumentiert
 Die verbindliche Prüfung und Zentralisierung bereits vorhandener
 Chart-Funktionen vor einer Neuentwicklung dokumentiert
 [`ADR 0017`](adr/0017-reuse-before-new-chart-development.md).
-Den vorgeschlagenen Umfang der ersten Zeitreihenfamilie und der dafür
-benötigten Gateway-Archivoperation dokumentiert
+Den Umfang der ersten Zeitreihenfamilie und der dafür benötigten
+Gateway-Archivoperation dokumentiert
 [`ADR 0018`](adr/0018-first-time-series-family-and-archive-contract.md).
 
 ## Daten, Konfiguration und Ausgabe
@@ -136,9 +138,10 @@ Layout-Presets und ECharts-Themes bleiben getrennte Konfigurationsachsen. Die
 Theme-Auswahl gehört zur Diagramminstanz, während die geprüften offiziellen
 Theme-Assets und ihre stabilen IDs repositoryweit gemeinsam genutzt werden.
 
-Das Gateway stellt aktuell den gemeinsamen Zugriff auf numerische Momentanwerte
-bereit. Wiederverwendbare Archivabfragen und begrenzte Caches werden erst für
-einen tatsächlich festgelegten historischen Anwendungsfall ergänzt. Ein
+Das Gateway stellt den gemeinsamen Zugriff auf numerische Momentanwerte sowie
+die für die erste Zeitreihenfamilie festgelegte Operation `archive.read`
+bereit. Sie normalisiert rohe und aggregierte Archivwerte und verwendet einen
+kurzlebigen, auf 32 Einträge begrenzten Cache. Ein
 HTML-Dokument wird nicht bei jeder Messwertänderung neu erzeugt. Datenmenge,
 Aktualisierungsrate und Animationen werden insbesondere für mehrere
 gleichzeitig sichtbare Charts begrenzt und getestet.
@@ -243,10 +246,10 @@ Größenwechsel sowie abgeschaltete IPSView-Ausgabe getestet. Zeitreihen und
 weitere Chartfamilien sind spätere, getrennt zu entscheidende Ausbaustufen.
 Vor ihrer Umsetzung erfolgt die Wiederverwendungsprüfung nach
 [`ADR 0017`](adr/0017-reuse-before-new-chart-development.md).
-Für die erste Zeitreihenfamilie liegt mit
-[`ADR 0018`](adr/0018-first-time-series-family-and-archive-contract.md) ein
-Entscheidungsvorschlag vor; daraus wird vor Annahme noch kein implementierter
-Modul- oder Gateway-Vertrag abgeleitet.
+Für die erste Zeitreihenfamilie legt
+[`ADR 0018`](adr/0018-first-time-series-family-and-archive-contract.md) den
+Ausgangsumfang und den implementierten Gateway-Vertrag `archive.read` fest.
+Das Zeitreihen-Gerätemodul und sein Renderer sind noch nicht implementiert.
 
 ## Dokumentation und Lizenzen
 

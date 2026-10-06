@@ -29,6 +29,22 @@ assertProtocol(
 $decodedRequest = EChartsDataProtocol::DecodeRequest(['DataID' => '{TEST}'] + $request);
 assertProtocol($decodedRequest === $request, 'Request decoding must discard only the transport DataID.');
 
+$archiveRequest = EChartsDataProtocol::CreateRequest(
+    EChartsDataProtocol::OPERATION_ARCHIVE_READ,
+    [
+        'VariableID'     => 4711,
+        'StartTimestamp' => 1780000000,
+        'EndTimestamp'   => 1780000400,
+        'Mode'           => 'raw',
+        'Reducer'        => 'auto',
+        'Limit'          => 1000
+    ]
+);
+assertProtocol(
+    $archiveRequest['Operation'] === 'archive.read',
+    'Archive request operation changed.'
+);
+
 $success = EChartsDataProtocol::EncodeSuccessResponse(
     EChartsDataProtocol::OPERATION_CURRENT_READ,
     ['VariableID' => 4711, 'Value' => 0.0, 'Timestamp' => 1780000000]

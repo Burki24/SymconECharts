@@ -4,8 +4,10 @@ Folgende Module beinhaltet das SymconECharts Repository:
 
 - __EChartsGateway__ ([Dokumentation](EChartsGateway))  
   Gemeinsame Zentrale als Splitter. Sie stellt den Chartfamilien aktuell den
-  validierten Zugriff auf numerische Momentanwerte bereit. Archivabfragen,
-  Zwischenspeicherung und weitere gemeinsame Dienste folgen bei belegtem Bedarf.
+  validierten Zugriff auf numerische Momentanwerte sowie normalisierte rohe
+  und aggregierte Archivwerte bereit. Identische Archivabfragen werden kurz
+  und begrenzt zwischengespeichert. Weitere gemeinsame Dienste folgen bei
+  belegtem Bedarf.
   Das Gateway benötigt keine eigene I/O-Instanz.
 
 - __EChartsGaugeSingle__ ([Dokumentation](EChartsGaugeSingle))
@@ -81,8 +83,10 @@ Skalenunterteilungen, Farbrollen und Zifferblattplatten einschließlich
 bereinigtem SVG-Hintergrund
 für alle Instrumente einer Ausgabe. Tacho und Chronograph sind eigenständige
 Module für jeweils 2 bis 5 Quellen und ergänzen diese Basis um quellbezogene
-Designüberschreibungen einschließlich SVG-Zeiger, SVG-Nabe und SVG-Zifferblatt. Archivverarbeitung
-und weitere klassische Instrumentenpanel-Vorlagen sind noch nicht implementiert.
+Designüberschreibungen einschließlich SVG-Zeiger, SVG-Nabe und SVG-Zifferblatt.
+Der Gateway-Vertrag für Archivdaten ist implementiert; das darauf aufbauende
+Zeitreihen-Gerätemodul sowie weitere klassische Instrumentenpanel-Vorlagen
+sind noch nicht implementiert.
 Alle Gauge-Module besitzen optionale IPSView-WebContent-Ausgaben und können
 ihr Kacheldesign erben oder unabhängig gestaltet werden. Der reale
 IPSView-Laufzeittest bleibt mangels Lizenz eine dokumentierte Testlücke.

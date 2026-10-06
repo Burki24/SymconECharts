@@ -14,6 +14,7 @@ use UnexpectedValueException;
 final class EChartsDataProtocol
 {
     public const VERSION = 1;
+    public const OPERATION_ARCHIVE_READ = 'archive.read';
     public const OPERATION_CURRENT_READ = 'current.read';
 
     private const JSON_FLAGS = JSON_THROW_ON_ERROR

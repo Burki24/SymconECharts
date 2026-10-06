@@ -1,8 +1,8 @@
 # ADR 0018: Erste Zeitreihenfamilie und Archivvertrag festlegen
 
-- Status: Vorgeschlagen
+- Status: Angenommen
 - Datum: 2026-10-06
-- Entscheider: offen
+- Entscheider: Burki24
 - Ergänzt: ADR 0001, ADR 0002, ADR 0005 und ADR 0017
 - Ersetzt durch: –
 
@@ -57,7 +57,7 @@ gehört zunächst zum Projekt. Eine Überführung nach `Symcon_ModuleHelper` wir
 erst geprüft, wenn ein zweites unabhängiges Modul denselben validierten
 Abfragevertrag benötigt.
 
-## Entscheidungsvorschlag
+## Entscheidung
 
 ### Modul und fachlicher Umfang
 
@@ -97,7 +97,7 @@ mindestens:
 - `UseVariablePresentation`: Übernahme kompatibler Darstellungsparameter;
 - `Color`: optionale Serienfarbe;
 - `Style`: `line` oder `area`;
-- `Reducer`: `auto`, `average`, `minimum` oder `maximum`.
+- `Reducer`: `auto`, `average`, `sum`, `minimum` oder `maximum`.
 
 Doppelte Variablen sind nicht zulässig. Die Reihenfolge bestimmt Legende,
 Farbzuordnung und Achsenzuordnung. Einheiten werden nach ihrer effektiven
@@ -106,7 +106,7 @@ Konfigurationsfehler.
 
 ### Zeitraum, Punktbudget und Verdichtung
 
-Jede Instanz besitzt ein Gesamtpunktbudget für alle Datenreihen. Vorgeschlagen
+Jede Instanz besitzt ein Gesamtpunktbudget für alle Datenreihen. Festgelegt
 sind 2.000 Punkte als Standard, ein gültiger Bereich von 200 bis 8.000 Punkten
 und höchstens 2.000 Punkte je Reihe. Das Modul verteilt das Budget
 deterministisch auf die konfigurierten Quellen.
@@ -139,7 +139,9 @@ Bei einem Standardarchivwert bedeutet `auto` den Durchschnitt. Bei einem
 Zähler bedeutet `auto` die von Symcon im Feld `Avg` gelieferte Summe der
 positiven Differenzen. Diese Semantik wird im fachlichen Modell ausdrücklich
 als `average` beziehungsweise `sum` ausgewiesen und nicht allein aus dem
-Feldnamen `Avg` abgeleitet.
+Feldnamen `Avg` abgeleitet. `average` ist für Zähler und `sum` für
+Standardvariablen unzulässig; eine Auswahl wird nicht still in die jeweils
+andere Bedeutung umgedeutet.
 
 ### Gateway-Operation `archive.read`
 
@@ -242,10 +244,10 @@ bei gleichem Zeitstempel ersetzter Punkt an den Browser übertragen, sofern die
 Reihe Rohwerte darstellt. Der Browser entfernt Punkte außerhalb des rollenden
 Zeitfensters. Ein vollständiger Archivabruf bei jeder Wertänderung ist
 ausgeschlossen. Bei aggregierter Darstellung darf ein Momentanwert nicht als
-scheinbarer Durchschnitt oder Zählersumme in die Reihe gemischt werden. Die
-Aktualisierung des laufenden Aggregationsfensters wird deshalb vor der
-Implementierung mit einem Laufzeittest festgelegt und anschließend als
-gesonderte Teilentscheidung in dieses ADR übernommen.
+scheinbarer Durchschnitt oder Zählersumme in die Reihe gemischt werden.
+Aggregierte Reihen enden deshalb am letzten vollständig abgeschlossenen
+Zeitfenster. Nach der jeweils nächsten Intervallgrenze lädt das Gerät das neu
+abgeschlossene Fenster nach.
 
 Zeitstempel bleiben im Transport Unix-Zeitstempel. Ihre Beschriftung erfolgt
 im Browser in der lokalen Zeitzone. Sommerzeitgrenzen verändern keine
@@ -280,7 +282,7 @@ können später auf dem Archivvertrag aufbauen, müssen jedoch weiterhin als
 eigene Chartfamilie oder ausdrücklich kompatible Erweiterung entschieden
 werden.
 
-## Vor Annahme zu bestätigen
+## Bestätigte Ausgangsgrenzen
 
 - Modulname `EChartsTimeSeries` und Präfix `ECTS`;
 - eine bis acht Quellen und höchstens zwei Einheitengruppen;
@@ -288,7 +290,11 @@ werden.
 - die fünf rollenden Zeiträume sowie die Anwenderauswahl zwischen Rohdaten,
   Automatik und festen Aggregationsstufen;
 - Cachegrenzen von 32 Einträgen und 15 Sekunden;
-- Verhalten des noch offenen laufenden Aggregationsfensters.
+- Aggregierte Reihen zeigen ausschließlich abgeschlossene Zeitfenster. Das
+  Gerät setzt das Abfrageende auf die letzte abgeschlossene Intervallgrenze
+  und lädt nach jeder folgenden Grenze das neu abgeschlossene Fenster nach.
+  Dadurch wird kein einzelner Momentanwert als scheinbarer Durchschnitt oder
+  Zählersumme dargestellt.
 
 ## Nachweise und Quellen
 
