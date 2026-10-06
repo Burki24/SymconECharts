@@ -144,7 +144,14 @@
                 }
             },
             dataZoom: zoom ? [
-                { type: 'inside', xAxisIndex: 0 },
+                {
+                    type: 'inside',
+                    xAxisIndex: 0,
+                    start: 0,
+                    end: 100,
+                    zoomOnMouseWheel: bootstrap.mode !== 'ipsview',
+                    moveOnMouseWheel: false
+                },
                 { type: 'slider', xAxisIndex: 0, bottom: bottomLegend ? 38 : 12 }
             ] : [],
             xAxis: {
@@ -239,6 +246,54 @@
         chart.setOption(buildOption(state.chart, theme), true);
     }
 
+    function handleIPSViewWheel(event) {
+        if (bootstrap.mode !== 'ipsview'
+            || !chart
+            || !currentState
+            || currentState.status !== 'ready'
+            || !currentState.chart
+            || !currentState.chart.chart
+            || currentState.chart.chart.enableZoom !== true) {
+            return;
+        }
+
+        var delta = Number(event.deltaY);
+        if (!Number.isFinite(delta) || delta === 0) { return; }
+
+        var option = chart.getOption();
+        var zoom = option && Array.isArray(option.dataZoom) ? option.dataZoom[0] : null;
+        var start = zoom && Number.isFinite(Number(zoom.start)) ? Number(zoom.start) : 0;
+        var end = zoom && Number.isFinite(Number(zoom.end)) ? Number(zoom.end) : 100;
+        var span = Math.max(1, Math.min(100, end - start));
+        var nextSpan = Math.max(1, Math.min(100, span * (delta < 0 ? 0.8 : 1.25)));
+        var bounds = chartElement.getBoundingClientRect();
+        var anchor = bounds.width > 0 ? (Number(event.clientX) - bounds.left) / bounds.width : 0.5;
+        anchor = Math.max(0, Math.min(1, Number.isFinite(anchor) ? anchor : 0.5));
+        var anchorValue = start + span * anchor;
+        var nextStart = anchorValue - nextSpan * anchor;
+        var nextEnd = anchorValue + nextSpan * (1 - anchor);
+
+        if (nextStart < 0) {
+            nextEnd -= nextStart;
+            nextStart = 0;
+        }
+        if (nextEnd > 100) {
+            nextStart -= nextEnd - 100;
+            nextEnd = 100;
+        }
+        nextStart = Math.max(0, nextStart);
+        nextEnd = Math.min(100, nextEnd);
+
+        event.preventDefault();
+        event.stopPropagation();
+        chart.dispatchAction({
+            type: 'dataZoom',
+            dataZoomIndex: 0,
+            start: nextStart,
+            end: nextEnd
+        });
+    }
+
     function appendPoint(message) {
         if (!currentState || currentState.status !== 'ready' || !currentState.chart) { return; }
         var model = currentState.chart;
@@ -281,6 +336,9 @@
         }).observe(chartElement);
     } else {
         window.addEventListener('resize', function () { if (chart) { chart.resize(); } });
+    }
+    if (bootstrap.mode === 'ipsview') {
+        chartElement.addEventListener('wheel', handleIPSViewWheel, { passive: false });
     }
     window.addEventListener('beforeunload', function () { if (chart) { chart.dispose(); } });
     render(currentState);

@@ -14,20 +14,29 @@ const palette = {
     accent: '#55cbb5', seriesColors: ['#111111', '#222222', '#333333']
 };
 
-function render(design, axes, width = 750, chartSeries, theme = 'dark', resolvedColors = {}) {
-    const chartElement = { hidden: false, clientWidth: width };
+function render(design, axes, width = 750, chartSeries, theme = 'dark', resolvedColors = {}, mode = 'symcon') {
+    const listeners = {};
+    const chartElement = {
+        hidden: false,
+        clientWidth: width,
+        addEventListener: (type, listener) => { listeners[type] = listener; },
+        getBoundingClientRect: () => ({ left: 0, width })
+    };
     const warningElement = { hidden: true, textContent: '' };
     const errorElement = { hidden: true, textContent: '' };
     let option;
+    let dispatchedAction;
     const chart = {
         setOption: next => { option = next; },
+        getOption: () => option,
+        dispatchAction: action => { dispatchedAction = action; },
         clear: () => {},
         resize: () => {},
         dispose: () => {}
     };
     const window = {
         SYMC_VISUALIZATION: {
-            mode: 'symcon',
+            mode,
             state: {
                 status: 'ready',
                 chart: {
@@ -89,6 +98,10 @@ function render(design, axes, width = 750, chartSeries, theme = 'dark', resolved
 
     vm.runInNewContext(source, { window, document });
     assert.ok(option, 'The time-series chart should be rendered.');
+    Object.defineProperties(option, {
+        testListeners: { value: listeners },
+        getDispatchedAction: { value: () => dispatchedAction }
+    });
     return option;
 }
 
@@ -190,5 +203,24 @@ const sharedAxis = render(undefined, [{ unit: '°C', position: 'left', positionI
 ]);
 assert.equal(sharedAxis.yAxis[0].axisLine.lineStyle.color, '#AABBCC');
 assert.equal(sharedAxis.series[1].lineStyle.color, '#DDEEFF');
+
+const ipsViewZoom = render(undefined, undefined, 750, undefined, 'dark', {}, 'ipsview');
+assert.equal(ipsViewZoom.dataZoom[0].zoomOnMouseWheel, false);
+assert.equal(typeof ipsViewZoom.testListeners.wheel, 'function');
+let prevented = false;
+let stopped = false;
+ipsViewZoom.testListeners.wheel({
+    deltaY: -100,
+    clientX: 375,
+    preventDefault: () => { prevented = true; },
+    stopPropagation: () => { stopped = true; }
+});
+const zoomAction = ipsViewZoom.getDispatchedAction();
+assert.equal(prevented, true);
+assert.equal(stopped, true);
+assert.equal(zoomAction.type, 'dataZoom');
+assert.equal(zoomAction.dataZoomIndex, 0);
+assert.equal(zoomAction.start, 10);
+assert.equal(zoomAction.end, 90);
 
 process.stdout.write('Time Series tile design layout verified.\n');

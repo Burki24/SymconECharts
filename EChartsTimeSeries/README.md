@@ -22,6 +22,7 @@ optional ein eigenständiges IPSView-WebContent-Widget.
 - Durchschnitt, Zählersumme, Minimum und Maximum entsprechend dem
   versionierten Archivvertrag;
 - native Kachel mit lokalen, integritätsgeprüften ECharts- und Theme-Dateien;
+- Mausrad-Zoom in der nativen Kachel und im IPSView-WebContent-Widget;
 - kollabierter Kacheldesigner mit sofortiger SVG-Vorschau für Theme,
   Legendenposition, Zoom, Linienstärke, Glättung, Datenpunkte,
   Flächendeckkraft, Raster und Achsensichtbarkeit;
