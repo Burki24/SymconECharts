@@ -50,8 +50,8 @@ eine IPSView-WebContent-Variable mit vererbtem oder unabhängigem Design auf
 demselben Renderer. Die gemeinsame ECharts-Hintergrundlogik unter
 `libs/EChartsIPSViewBackground.php` steuert für Gauge und TimeSeries das
 Durchscheinen des IPSView-Hintergrunds sowie optionale Farbe und Deckkraft.
-Weitere klassische Multi-Instrumentenpanel-Vorlagen,
-reale Symcon-Laufzeit- und Browsertests fehlen noch. Das Time-Series-Modul
+Weitere klassische Multi-Instrumentenpanel-Vorlagen fehlen noch. Das
+Time-Series-Modul
 nutzt den Gateway-Vertrag `archive.read` für rohe oder aggregierte Werte und
 rendert daraus die erste native Zeitreihen-Kachel sowie optional eine getrennt
 gestaltbare IPSView-WebContent-Ausgabe.
@@ -310,9 +310,23 @@ lokale ECharts-Runtime dokumentiert
 [`ADR 0026`](adr/0026-timeseries-reference-lines-and-value-ranges.md).
 Das Gerätemodul setzt davon Quellen, Roh-, Aggregat- und Echtzeitmodus,
 Punktbudget, Mehr-Achsen-Modell, native Kachel und die optionale IPSView-
-Ausgabe um. Reale Laufzeitmessungen bleiben als nächster Schritt offen.
-Ein realer IPSView-Laufzeittest ist auf der vorhandenen Testebene mangels
-Lizenz nicht möglich und bleibt ausdrücklich eine Testlücke.
+Ausgabe um.
+
+## Laufzeitnachweise
+
+Am 07.10.2026 wurde die native TimeSeries-Ausgabe auf der erreichbaren
+Symcon-9.1-Testebene ausschließlich lesend geprüft. Eine aktive Instanz mit
+drei Quellen lieferte ein gültiges Echtzeitmodell mit getrennten Achsen für
+Temperatur, Luftfeuchtigkeit und Luftdruck. Konfigurationsformular,
+Funktionsregistrierung und Browser-IFrame waren erreichbar; die zugängliche
+ECharts-Beschreibung bestätigte drei dargestellte Reihen und fortgeschriebene
+Echtzeitpunkte. Seit dem letzten Statistik-Reset lagen keine Kernel-Fehler vor.
+
+Die Prüfung änderte weder Instanzkonfigurationen noch Variablenwerte. Ein
+Laufzeitnachweis unter Symcon 9.0 sowie ein Test der bei dieser Instanz
+deaktivierten IPSView-Ausgabe bleiben ausdrücklich offen. Der im äußeren
+Symcon-WebFront auftretende `MutationObserver`-Fehler lag außerhalb des
+Diagramm-IFrames und wurde nicht dem ECharts-Renderer zugerechnet.
 
 ## Dokumentation und Lizenzen
 
