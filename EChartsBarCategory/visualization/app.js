@@ -88,30 +88,12 @@
             };
         }
 
-        var usesAutomaticSingleCategory = items.length > 0 && items.every(function (item) {
-            return String(item.series || '') === '';
-        });
-        if (usesAutomaticSingleCategory) {
-            return {
-                mode: mode,
-                categories: [''],
-                series: items.map(function (item, index) {
-                    var color = item.color || paletteColors[index % paletteColors.length];
-                    return {
-                        name: String(item.label || ''),
-                        color: color,
-                        items: [{ value: Number(item.value), color: color }]
-                    };
-                })
-            };
-        }
-
-        var categories = uniqueInOrder(items.map(function (item) { return String(item.label || ''); }));
-        var seriesNames = uniqueInOrder(items.map(function (item) { return String(item.series || ''); }));
+        var categories = uniqueInOrder(items.map(function (item) { return String(item.category || ''); }));
+        var seriesNames = uniqueInOrder(items.map(function (item) { return String(item.label || ''); }));
         if (order === 'ascending' || order === 'descending') {
             var totals = Object.create(null);
             categories.forEach(function (category) { totals[category] = 0; });
-            items.forEach(function (item) { totals[String(item.label || '')] += Number(item.value) || 0; });
+            items.forEach(function (item) { totals[String(item.category || '')] += Number(item.value) || 0; });
             categories.sort(function (left, right) {
                 var difference = totals[left] - totals[right];
                 if (difference === 0) { return 0; }
@@ -124,7 +106,7 @@
             series: seriesNames.map(function (seriesName, seriesIndex) {
                 var seriesItems = categories.map(function (category) {
                     return items.find(function (item) {
-                        return String(item.label || '') === category && String(item.series || '') === seriesName;
+                        return String(item.category || '') === category && String(item.label || '') === seriesName;
                     });
                 });
                 var configuredColor = '';

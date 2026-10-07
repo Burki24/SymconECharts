@@ -37,11 +37,14 @@ Bar diagrams are split by their data and configuration contracts:
 `current.read` Gateway operation. It provides vertical and horizontal
 orientation, stable configured or value-based ordering, per-source colors,
 live updates and separate Tile/IPSView designs. Simple bars use one source per
-category. Grouped and stacked bars without explicit series names interpret
-every source as a separate series in one shared category. If series names are
-configured, every source requires one and the sources must form a complete
-category/series matrix; value ordering then uses the category sum. The default
-remains `simple`, so existing configurations stay valid.
+category. In grouped and stacked modes the source label names the data series,
+while an explicit optional category places the source on the category axis.
+Sources without a category share one group. Categories may contain different
+series; only duplicate category/label pairs are invalid. Value ordering uses
+the sum of the values available in each category. The default remains
+`simple`, so existing configurations stay valid. The earlier unpublished
+`Series` source field remains a read-only compatibility fallback for the new
+category field during development.
 Archive access, historical grouping, waterfall arithmetic and polar geometry
 remain outside this contract.
 

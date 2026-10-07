@@ -81,10 +81,10 @@ assert.equal(vertical.series[0].label.position, 'top');
 assert.equal(vertical.yAxis.splitLine.show, false);
 
 const matrix = [
-    { label: 'Kitchen', series: 'Today', value: 18, order: 0, color: '#aa0000' },
-    { label: 'Kitchen', series: 'Yesterday', value: 20, order: 1, color: '#0000aa' },
-    { label: 'Office', series: 'Today', value: 24, order: 2, color: '#aa0000' },
-    { label: 'Office', series: 'Yesterday', value: 22, order: 3, color: '#0000aa' }
+    { label: 'Today', category: 'Kitchen', value: 18, order: 0, color: '#aa0000' },
+    { label: 'Yesterday', category: 'Kitchen', value: 20, order: 1, color: '#0000aa' },
+    { label: 'Today', category: 'Office', value: 24, order: 2, color: '#aa0000' },
+    { label: 'Yesterday', category: 'Office', value: 22, order: 3, color: '#0000aa' }
 ];
 const grouped = render('vertical', 'descending', 'symcon', 'grouped', matrix);
 assert.equal(grouped.legend.show, true);
@@ -104,9 +104,9 @@ assert.equal(stacked.series[0].data[0].label.color, '#f4f5f7');
 assert.equal(stacked.series[1].data[0].label.color, '#f4f5f7');
 
 const automaticStack = render('vertical', 'configured', 'symcon', 'stacked', [
-    { label: 'Room', series: '', value: 91, order: 0, color: '#aa0000' },
-    { label: 'Floor', series: '', value: 82, order: 1, color: '#00aa00' },
-    { label: 'Wall', series: '', value: 73, order: 2, color: '#0000aa' }
+    { label: 'Room', category: '', value: 91, order: 0, color: '#aa0000' },
+    { label: 'Floor', category: '', value: 82, order: 1, color: '#00aa00' },
+    { label: 'Wall', category: '', value: 73, order: 2, color: '#0000aa' }
 ]);
 assert.deepEqual(Array.from(automaticStack.xAxis.data), ['']);
 assert.deepEqual(Array.from(automaticStack.legend.data), ['Room', 'Floor', 'Wall']);
@@ -117,5 +117,15 @@ assert.equal(automaticStack.series[2].data[0].itemStyle.color, '#0000aa');
 assert.equal(automaticStack.series[0].data[0].label.color, '#f4f5f7');
 assert.equal(automaticStack.series[1].data[0].label.color, '#101114');
 assert.equal(automaticStack.series[2].data[0].label.color, '#f4f5f7');
+
+const sparse = render('vertical', 'configured', 'symcon', 'grouped', [
+    { label: 'Today', category: 'Kitchen', value: 18, order: 0, color: '#aa0000' },
+    { label: 'Yesterday', category: 'Kitchen', value: 20, order: 1, color: '#0000aa' },
+    { label: 'Today', category: 'Office', value: 24, order: 2, color: '#aa0000' }
+]);
+assert.deepEqual(Array.from(sparse.xAxis.data), ['Kitchen', 'Office']);
+assert.deepEqual(Array.from(sparse.legend.data), ['Today', 'Yesterday']);
+assert.deepEqual(Array.from(sparse.series[0].data, item => item.value), [18, 24]);
+assert.deepEqual(Array.from(sparse.series[1].data, item => item.value), [20, null]);
 
 console.log('Category Bar renderer layout verified.');

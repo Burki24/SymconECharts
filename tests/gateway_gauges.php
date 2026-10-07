@@ -3996,10 +3996,11 @@ assertGatewayGauge(
     'Category Bar must render independent Tile and IPSView designs below the output limit.'
 );
 assertGatewayGauge(
-    str_contains($barForm, '"name":"Series"')
+    str_contains($barForm, '"name":"Category"')
+        && str_contains($barForm, '"caption":"Category (optional)"')
         && str_contains($barForm, '"name":"BarMode"')
         && str_contains($barForm, '"name":"IPSViewBarMode"'),
-    'Category Bar configuration must expose series names and independent output modes.'
+    'Category Bar configuration must expose categories and independent output modes.'
 );
 $barUpdatesBefore = count($barCategory->GetTestVisualizationUpdates());
 $barCategory->MessageSink(1780000100, 4711, VM_UPDATE, []);
@@ -4046,8 +4047,8 @@ foreach ([
     ];
     $groupedBarSources[] = [
         'VariableID'              => $variableID,
-        'Label'                   => $category,
-        'Series'                  => $series,
+        'Label'                   => $series,
+        'Category'                => $category,
         'UseVariablePresentation' => false,
         'Unit'                    => '°C',
         'Decimals'                => 1,
@@ -4065,7 +4066,8 @@ $groupedBarData = json_decode($groupedBar->GetBarData(), true, 512, JSON_THROW_O
 assertGatewayGauge(
     $groupedBar->GetTestStatus() === IS_ACTIVE
         && $groupedBarData['bar']['mode'] === 'grouped'
-        && $groupedBarData['items'][0]['series'] === 'Today'
+        && $groupedBarData['items'][0]['label'] === 'Today'
+        && $groupedBarData['items'][0]['category'] === 'Kitchen'
         && str_contains($groupedBar->GetVisualizationTile(), '"mode":"grouped"')
         && str_contains($groupedBar->GetIPSViewHTML(), '"mode":"stacked"'),
     'Category Bar must support independent grouped and stacked output modes.'
@@ -4077,7 +4079,8 @@ $automaticStackedBar->SetTestProperty(
     json_encode(array_map(
         static function (array $source): array
         {
-            $source['Series'] = '';
+            $source['Label'] = $source['Category'] . ' ' . $source['Label'];
+            $source['Category'] = '';
 
             return $source;
         },
@@ -4089,7 +4092,24 @@ $automaticStackedBar->ApplyChanges();
 assertGatewayGauge(
     $automaticStackedBar->GetTestStatus() === IS_ACTIVE
         && str_contains($automaticStackedBar->GetVisualizationTile(), '"mode":"stacked"'),
-    'Grouped and stacked Category Bars must accept ordinary source lists without explicit series names.'
+    'Grouped and stacked Category Bars must accept ordinary source lists without explicit categories.'
+);
+$legacyCategorySources = array_slice($groupedBarSources, 0, 2);
+foreach ($legacyCategorySources as &$legacyCategorySource) {
+    $legacyCategorySource['Series'] = $legacyCategorySource['Category'];
+    unset($legacyCategorySource['Category']);
+}
+unset($legacyCategorySource);
+$legacyCategoryBar = new EChartsBarCategory();
+$legacyCategoryBar->Create();
+$legacyCategoryBar->SetTestProperty('Sources', json_encode($legacyCategorySources, JSON_THROW_ON_ERROR));
+$legacyCategoryBar->SetTestProperty('BarMode', 'grouped');
+$legacyCategoryBar->ApplyChanges();
+$legacyCategoryData = json_decode($legacyCategoryBar->GetBarData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $legacyCategoryBar->GetTestStatus() === IS_ACTIVE
+        && $legacyCategoryData['items'][0]['category'] === 'Kitchen',
+    'The unpublished Series source field must remain a compatibility fallback for Category.'
 );
 $incompleteGroupedBar = new EChartsBarCategory();
 $incompleteGroupedBar->Create();
@@ -4100,8 +4120,19 @@ $incompleteGroupedBar->SetTestProperty(
 $incompleteGroupedBar->SetTestProperty('BarMode', 'grouped');
 $incompleteGroupedBar->ApplyChanges();
 assertGatewayGauge(
-    $incompleteGroupedBar->GetTestStatus() === 201,
-    'Grouped and stacked Category Bars must reject an incomplete category and series matrix.'
+    $incompleteGroupedBar->GetTestStatus() === IS_ACTIVE,
+    'Grouped and stacked Category Bars must allow categories with different series.'
+);
+$duplicateGroupedBar = new EChartsBarCategory();
+$duplicateGroupedBar->Create();
+$duplicateSources = array_slice($groupedBarSources, 0, 2);
+$duplicateSources[1]['Label'] = $duplicateSources[0]['Label'];
+$duplicateGroupedBar->SetTestProperty('Sources', json_encode($duplicateSources, JSON_THROW_ON_ERROR));
+$duplicateGroupedBar->SetTestProperty('BarMode', 'grouped');
+$duplicateGroupedBar->ApplyChanges();
+assertGatewayGauge(
+    $duplicateGroupedBar->GetTestStatus() === 201,
+    'Grouped and stacked Category Bars must reject duplicate category and label pairs.'
 );
 foreach ($groupedBarSources as $source) {
     unset($GLOBALS['symconTestVariables'][$source['VariableID']]);

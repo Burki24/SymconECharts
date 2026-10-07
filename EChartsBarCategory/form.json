@@ -42,8 +42,8 @@
                     }
                 },
                 {
-                    "caption": "Series (optional)",
-                    "name": "Series",
+                    "caption": "Category (optional)",
+                    "name": "Category",
                     "width": "160px",
                     "add": "",
                     "edit": {
@@ -94,7 +94,7 @@
         },
         {
             "type": "Label",
-            "caption": "For grouped and stacked bars, leave Series empty to place every source in one shared category. Set Series on every source only for an explicit category/series matrix; every combination must then be configured exactly once."
+            "caption": "For grouped and stacked bars, Label names the data series and Category places the source in a group. Empty categories share one group; categories may contain different data series."
         },
         {
             "type": "ExpansionPanel",
