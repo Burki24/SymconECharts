@@ -4070,6 +4070,27 @@ assertGatewayGauge(
         && str_contains($groupedBar->GetIPSViewHTML(), '"mode":"stacked"'),
     'Category Bar must support independent grouped and stacked output modes.'
 );
+$automaticStackedBar = new EChartsBarCategory();
+$automaticStackedBar->Create();
+$automaticStackedBar->SetTestProperty(
+    'Sources',
+    json_encode(array_map(
+        static function (array $source): array
+        {
+            $source['Series'] = '';
+
+            return $source;
+        },
+        array_slice($groupedBarSources, 0, 3)
+    ), JSON_THROW_ON_ERROR)
+);
+$automaticStackedBar->SetTestProperty('BarMode', 'stacked');
+$automaticStackedBar->ApplyChanges();
+assertGatewayGauge(
+    $automaticStackedBar->GetTestStatus() === IS_ACTIVE
+        && str_contains($automaticStackedBar->GetVisualizationTile(), '"mode":"stacked"'),
+    'Grouped and stacked Category Bars must accept ordinary source lists without explicit series names.'
+);
 $incompleteGroupedBar = new EChartsBarCategory();
 $incompleteGroupedBar->Create();
 $incompleteGroupedBar->SetTestProperty(

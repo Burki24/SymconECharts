@@ -88,6 +88,24 @@
             };
         }
 
+        var usesAutomaticSingleCategory = items.length > 0 && items.every(function (item) {
+            return String(item.series || '') === '';
+        });
+        if (usesAutomaticSingleCategory) {
+            return {
+                mode: mode,
+                categories: [''],
+                series: items.map(function (item, index) {
+                    var color = item.color || paletteColors[index % paletteColors.length];
+                    return {
+                        name: String(item.label || ''),
+                        color: color,
+                        items: [{ value: Number(item.value), color: color }]
+                    };
+                })
+            };
+        }
+
         var categories = uniqueInOrder(items.map(function (item) { return String(item.label || ''); }));
         var seriesNames = uniqueInOrder(items.map(function (item) { return String(item.series || ''); }));
         if (order === 'ascending' || order === 'descending') {
@@ -189,7 +207,8 @@
                 formatter: function (parameters) {
                     var values = Array.isArray(parameters) ? parameters : [parameters];
                     if (values.length === 0) { return ''; }
-                    var lines = [String(values[0].name || '')];
+                    var categoryName = String(values[0].name || '');
+                    var lines = categoryName ? [categoryName] : [];
                     values.forEach(function (parameter) {
                         var prefix = multiSeries ? String(parameter.seriesName || '') + ': ' : '';
                         lines.push(String(parameter.marker || '') + prefix

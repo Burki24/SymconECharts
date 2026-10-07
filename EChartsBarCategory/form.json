@@ -42,7 +42,7 @@
                     }
                 },
                 {
-                    "caption": "Series",
+                    "caption": "Series (optional)",
                     "name": "Series",
                     "width": "160px",
                     "add": "",
@@ -94,7 +94,7 @@
         },
         {
             "type": "Label",
-            "caption": "Grouped and stacked bars use Label as category and Series as data-series name. Every category/series combination must be configured exactly once."
+            "caption": "For grouped and stacked bars, leave Series empty to place every source in one shared category. Set Series on every source only for an explicit category/series matrix; every combination must then be configured exactly once."
         },
         {
             "type": "ExpansionPanel",

@@ -391,15 +391,25 @@ class EChartsBarCategory extends IPSModuleStrict
     /** @param list<array{VariableID:int, Label:string, Series:string, Unit:string, Decimals:int, Color:int}> $sources */
     private function ValidateMultiSeriesSources(array $sources): void
     {
+        $configuredSeriesCount = count(array_filter(
+            $sources,
+            static fn (array $source): bool => $source['Series'] !== ''
+        ));
+        if ($configuredSeriesCount === 0) {
+            return;
+        }
+        if ($configuredSeriesCount !== count($sources)) {
+            throw new InvalidArgumentException(
+                'Grouped and stacked bars require either no series names or a series name for every source.'
+            );
+        }
+
         $categories = [];
         $seriesNames = [];
         $pairs = [];
         foreach ($sources as $source) {
             $category = $source['Label'] !== '' ? $source['Label'] : IPS_GetName($source['VariableID']);
             $series = $source['Series'];
-            if ($series === '') {
-                throw new InvalidArgumentException('Grouped and stacked bars require a series name for every source.');
-            }
             $pair = json_encode([$category, $series], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
             if (isset($pairs[$pair])) {
                 throw new InvalidArgumentException('Every Category Bar category and series pair must be unique.');

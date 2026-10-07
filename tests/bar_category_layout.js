@@ -96,4 +96,16 @@ assert.equal(stacked.series[0].stack, 'total');
 assert.equal(stacked.series[1].stack, 'total');
 assert.equal(stacked.series[0].label.position, 'inside');
 
+const automaticStack = render('vertical', 'configured', 'symcon', 'stacked', [
+    { label: 'Room', series: '', value: 91, order: 0, color: '#aa0000' },
+    { label: 'Floor', series: '', value: 82, order: 1, color: '#00aa00' },
+    { label: 'Wall', series: '', value: 73, order: 2, color: '#0000aa' }
+]);
+assert.deepEqual(Array.from(automaticStack.xAxis.data), ['']);
+assert.deepEqual(Array.from(automaticStack.legend.data), ['Room', 'Floor', 'Wall']);
+assert.equal(automaticStack.series.length, 3);
+assert.equal(automaticStack.series[0].stack, 'total');
+assert.equal(automaticStack.series[0].data[0].value, 91);
+assert.equal(automaticStack.series[2].data[0].itemStyle.color, '#0000aa');
+
 console.log('Category Bar renderer layout verified.');

@@ -5,7 +5,9 @@
 - EChartsBarCategory vergleicht 1 bis 16 aktuelle numerische Werte mit
   gemeinsamer Einheit als einfache, gruppierte oder gestapelte vertikale und
   horizontale Balken und bietet Live-Aktualisierung sowie getrennte Designs
-  für Kachel und IPSView.
+  für Kachel und IPSView. Gruppierte und gestapelte Ansichten funktionieren
+  sowohl direkt mit einer gewöhnlichen Quellenliste als auch mit einer
+  ausdrücklich konfigurierten Kategorie-/Datenreihen-Matrix.
 
 - EChartsTimeSeries unterstützt frei definierbare rollende Zeiträume in
   Minuten, Stunden, Tagen oder Wochen sowie wählbare Beschriftungen der
