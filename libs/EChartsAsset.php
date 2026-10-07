@@ -181,6 +181,20 @@ final class EChartsAsset
         return self::CartesianJavaScript();
     }
 
+    /**
+     * Loads project-owned design utilities shared by ECharts renderers.
+     */
+    public static function DesignJavaScript(): string
+    {
+        $path = __DIR__ . '/echarts-design.js';
+        $content = @file_get_contents($path);
+        if ($content === false || $content === '') {
+            throw new RuntimeException('The shared ECharts design utilities could not be loaded.');
+        }
+
+        return self::NormalizeLineEndings($content);
+    }
+
     /** @return list<string> */
     public static function ThemeIDs(): array
     {

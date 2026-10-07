@@ -146,6 +146,7 @@
 
     function buildOption(model, theme) {
         var colors = colorsFor(theme);
+        var design = window.SYMC_ECHARTS_DESIGN || {};
         var bar = model.bar || {};
         var style = bar.style || {};
         var horizontal = bar.orientation === 'horizontal';
@@ -239,8 +240,12 @@
                         }
                     },
                     data: seriesItem.items.map(function (item) {
+                        var labelColor = stacked && typeof design.readableTextColor === 'function'
+                            ? design.readableTextColor(item.color, colors.text, colors.background)
+                            : colors.text;
                         return {
                             value: item.value,
+                            label: stacked ? { color: labelColor } : undefined,
                             itemStyle: {
                                 color: item.color,
                                 borderRadius: horizontal ? [0, radius, radius, 0] : [radius, radius, 0, 0]

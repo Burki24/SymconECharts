@@ -20,6 +20,8 @@ $licensePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/LICENSE.txt'
 $noticePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/NOTICE.txt';
 $runtime = (string) file_get_contents($runtimePath);
 $cartesianRuntime = (string) file_get_contents($cartesianRuntimePath);
+$designUtilitiesPath = $root . '/libs/echarts-design.js';
+$designUtilities = (string) file_get_contents($designUtilitiesPath);
 $runtimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/gauge-runtime.js');
 $cartesianRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/cartesian-runtime.js');
 $windowsCheckoutRuntime = str_replace("\n", "\r\n", $runtime);
@@ -53,6 +55,12 @@ assertEChartsAsset(
 assertEChartsAsset(
     strlen($cartesianRuntime) < 655360 && str_contains($cartesianRuntime, 'window.echarts'),
     'The Cartesian ECharts runtime must expose the browser API and remain below 640 KiB.'
+);
+assertEChartsAsset(
+    EChartsAsset::DesignJavaScript() === $designUtilities
+        && str_contains($designUtilities, 'readableTextColor')
+        && str_contains($designUtilities, 'relativeLuminance'),
+    'The shared ECharts design utilities must expose deterministic contrast helpers.'
 );
 assertEChartsAsset(
     str_contains($cartesianRuntimeSource, 'LineChart')

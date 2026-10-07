@@ -9,6 +9,10 @@ const source = fs.readFileSync(
     path.join(__dirname, '..', 'EChartsBarCategory', 'visualization', 'app.js'),
     'utf8'
 );
+const designSource = fs.readFileSync(
+    path.join(__dirname, '..', 'libs', 'echarts-design.js'),
+    'utf8'
+);
 
 function render(orientation, sortOrder, outputMode = 'symcon', barMode = 'simple', items) {
     const chartElement = { hidden: false, clientWidth: 800 };
@@ -54,6 +58,7 @@ function render(orientation, sortOrder, outputMode = 'symcon', barMode = 'simple
             'echarts-bar-category-error': errorElement
         })[id]
     };
+    vm.runInNewContext(designSource, { window });
     vm.runInNewContext(source, { window, document });
     assert.ok(option, 'The Category Bar chart should render.');
     return option;
@@ -95,6 +100,8 @@ assert.deepEqual(Array.from(stacked.yAxis.data), ['Kitchen', 'Office']);
 assert.equal(stacked.series[0].stack, 'total');
 assert.equal(stacked.series[1].stack, 'total');
 assert.equal(stacked.series[0].label.position, 'inside');
+assert.equal(stacked.series[0].data[0].label.color, '#f4f5f7');
+assert.equal(stacked.series[1].data[0].label.color, '#f4f5f7');
 
 const automaticStack = render('vertical', 'configured', 'symcon', 'stacked', [
     { label: 'Room', series: '', value: 91, order: 0, color: '#aa0000' },
@@ -107,5 +114,8 @@ assert.equal(automaticStack.series.length, 3);
 assert.equal(automaticStack.series[0].stack, 'total');
 assert.equal(automaticStack.series[0].data[0].value, 91);
 assert.equal(automaticStack.series[2].data[0].itemStyle.color, '#0000aa');
+assert.equal(automaticStack.series[0].data[0].label.color, '#f4f5f7');
+assert.equal(automaticStack.series[1].data[0].label.color, '#101114');
+assert.equal(automaticStack.series[2].data[0].label.color, '#f4f5f7');
 
 console.log('Category Bar renderer layout verified.');

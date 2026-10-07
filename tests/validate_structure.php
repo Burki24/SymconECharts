@@ -32,6 +32,7 @@ $requiredFiles = [
     'libs/EChartsGaugeDesign.php',
     'libs/EChartsTimeSeriesDesign.php',
     'libs/EChartsVariablePresentation.php',
+    'libs/echarts-design.js',
     'libs/EChartsSvgImage.php',
     'libs/EChartsSvgPath.php',
     'libs/echarts/6.1.0/echarts.gauge.min.js',

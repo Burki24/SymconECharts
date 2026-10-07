@@ -13,6 +13,7 @@ the same effective unit so that the shared value axis remains meaningful.
   stacked modes place every source as a separate series in one shared category
 - Configured, ascending or descending value order
 - Per-source color or automatic theme colors
+- Automatic light/dark value-label contrast on stacked bar segments
 - Independent Tile and IPSView design settings
 
 The module reads current values through the connected `EChartsGateway`. It
