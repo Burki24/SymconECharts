@@ -176,7 +176,10 @@
                     "add": 0,
                     "edit": {
                         "type": "SelectVariable",
-                        "validVariableTypes": [1, 2]
+                        "validVariableTypes": [
+                            1,
+                            2
+                        ]
                     }
                 },
                 {
@@ -187,8 +190,14 @@
                     "edit": {
                         "type": "Select",
                         "options": [
-                            { "caption": "Reference line", "value": "line" },
-                            { "caption": "Value range", "value": "area" }
+                            {
+                                "caption": "Reference line",
+                                "value": "line"
+                            },
+                            {
+                                "caption": "Value range",
+                                "value": "area"
+                            }
                         ]
                     }
                 },
@@ -197,21 +206,29 @@
                     "name": "Label",
                     "width": "auto",
                     "add": "",
-                    "edit": { "type": "ValidationTextBox" }
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
                 },
                 {
                     "caption": "Value / minimum",
                     "name": "Value",
                     "width": "105px",
                     "add": 0.0,
-                    "edit": { "type": "NumberSpinner", "digits": 3 }
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "digits": 3
+                    }
                 },
                 {
                     "caption": "Maximum",
                     "name": "Maximum",
                     "width": "90px",
                     "add": 100.0,
-                    "edit": { "type": "NumberSpinner", "digits": 3 }
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "digits": 3
+                    }
                 },
                 {
                     "caption": "Color",

@@ -7,6 +7,25 @@ git submodule update --init --recursive
 php tests/run.php
 ```
 
+Für den vollständigen lokalen Qualitätslauf einschließlich automatischer,
+rein mechanischer PHP- und JSON-Formatkorrekturen wird verwendet:
+
+```text
+php tests/quality.php --fix
+```
+
+Ohne `--fix` arbeitet der Qualitätslauf schreibgeschützt. Beide Modi werten
+jeden Teilprozess einzeln aus, damit ein später erfolgreicher Befehl keinen
+vorherigen Fehlerstatus verdeckt. Vor einer JSON-Korrektur wird die Syntax
+aller versionierten JSON-Dateien separat validiert; ungültiges JSON wird nicht
+automatisch überschrieben. Zusätzlich zur Basissuite laufen PHP-Lint,
+PHP-CS-Fixer, JSON-Style, `git diff --check` und alle Gauge-Layouttests.
+
+Der optionale versionierte Pre-Push-Hook wird einmalig mit
+`git config core.hooksPath .githooks` aktiviert. Wenn sein Qualitätslauf eine
+Formatkorrektur erzeugt, wird der Push gestoppt, bis die Korrektur committet
+wurde.
+
 Die Gauge-Layouttests benötigen zusätzlich Node.js und werden separat mit
 `node tests/gauge_single_layout.js`, `node tests/gauge_multi_layout.js`,
 `node tests/gauge_tacho_layout.js` und `node tests/gauge_chronograph_layout.js`

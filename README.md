@@ -126,7 +126,23 @@ Nach normalen Pushes auf `dev` pflegt ein Workflow Version, Build und Datum in
 `library.json` und legt die Metadaten als getrennten Bot-Commit ab. Tags und
 Releases werden dadurch nicht automatisch erzeugt.
 
-Die Basistests werden lokal mit `php tests/run.php` ausgeführt. Der
+Der empfohlene lokale Qualitätslauf ist:
+
+```text
+php tests/quality.php --fix
+```
+
+Er korrigiert ausschließlich PHP- und JSON-Formatierung, prüft die
+Korrekturen erneut und führt danach Syntax-, Vertrags-, Integrations- und
+Layouttests aus. Fachliche oder syntaktische Fehler bleiben harte Fehler.
+Der reine Prüfmodus `php tests/quality.php` verändert keine Dateien.
+
+Optional aktiviert
+`git config core.hooksPath .githooks` den versionierten Pre-Push-Hook. Er
+führt den Korrektur- und Qualitätslauf vor jedem Push aus und stoppt den Push,
+wenn dabei noch zu committende Formatkorrekturen entstanden sind.
+
+Die Basistests können weiterhin mit `php tests/run.php` ausgeführt werden. Der
 Tests-Workflow prüft dieselbe Suite unter PHP 8.5 und ergänzt PHP-Syntax- sowie
 JSON-Validierung über die gemeinsame `Symcon_ModuleCI`-Basis. Ein eigener
 Style-Workflow führt zusätzlich die offiziellen Symcon-Prüfungen für PHP und

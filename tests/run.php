@@ -22,6 +22,7 @@ $tests = [
 ];
 
 $commands = [
+    ['Verify local quality runner', 'php tests/quality.php --help'],
     ['Test persistent IPSView transport', 'node tests/ipsview_transport.js'],
     ['Test Time Series tile design layout', 'node tests/time_series_layout.js'],
     ['Verify vendored helper integrity', 'python3 tests/helper_integrity.py'],

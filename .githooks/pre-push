@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+
+set -u
+
+before_quality=$(git diff HEAD --binary --no-ext-diff | git hash-object --stdin) || exit 1
+php tests/quality.php --fix || exit $?
+after_quality=$(git diff HEAD --binary --no-ext-diff | git hash-object --stdin) || exit 1
+
+if [ "$before_quality" != "$after_quality" ]; then
+    echo "Quality checks corrected tracked files. Commit the corrections before pushing." >&2
+    exit 1
+fi

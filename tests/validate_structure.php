@@ -70,6 +70,7 @@ $requiredFiles = [
     'tests/gateway_gauges.php',
     'tests/helper_integrity.py',
     'tests/module_contracts.php',
+    'tests/quality.php',
     'tests/svg_path.php',
     'tests/run.php',
     'tests/symcon_strict.php',

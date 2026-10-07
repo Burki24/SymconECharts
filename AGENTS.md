@@ -165,5 +165,9 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   CI-Basis. Abschlussberichte nennen ausgeführte Prüfungen und verbleibende
   Testlücken getrennt; Syntax-, Style- und Strukturprüfungen ersetzen keine
   Laufzeit- oder Browserprüfung.
+- Vor der Übergabe commitbereiter Änderungen ist
+  `php tests/quality.php --fix` auszuführen. Der Befehl korrigiert ausschließlich
+  mechanische PHP- und JSON-Formatierung und prüft danach jeden Style-, Syntax-,
+  Vertrags-, Integrations- und Layoutschritt mit eigenem Fehlerstatus erneut.
 - Bei commitbereiten Änderungen werden Commit-Betreff und Commit-Erläuterung
   immer auf Englisch und in zwei getrennten kopierbaren Textblöcken geliefert.
