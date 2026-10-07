@@ -6,8 +6,7 @@ Symcon-Kacheldarstellung und optional ein separat platzierbares WebContent-
 Widget für IPSView bereit. Datenquelle und fachliche Diagrammkonfiguration
 werden dabei nur einmal gepflegt.
 
-**Entwicklungsstand:** Erste sichtbare native Gauge mit Kacheldesigner.
-Quellvariable und minimale Gauge-Einstellungen sind konfigurierbar; das Modul ruft den
+Quellvariable und Gauge-Einstellungen sind konfigurierbar; das Modul ruft den
 Momentanwert über EChartsGateway ab, erzeugt ein versioniertes Gauge-Datenmodell
 und rendert es mit Apache ECharts 6.1.0 in einer responsiven Symcon-Kachel.
 Wertänderungen werden live an die geöffnete Kachel übertragen. Das
@@ -34,8 +33,7 @@ mit 0 bis 100 Prozent Deckkraft über den tatsächlichen IPSView-Hintergrund leg
 
 ### 1. Funktionsumfang
 
-**Vorhanden:** Moduldefinition als Gerät (`type: 3`) auf Basis von
-`IPSModuleStrict`, wiederverwendbare Verbindung zu EChartsGateway,
+Das Modul bietet eine wiederverwendbare Verbindung zu EChartsGateway,
 Variablenauswahl, Wertebereich, Titel, Einheit und Nachkommastellen. Die
 Quellvariable wird als Symcon-Referenz registriert und auf Wertänderungen
 überwacht. `GetGaugeData()` liest den aktuellen Wert über das versionierte
@@ -147,11 +145,6 @@ Eckenradius und Schatten. Optionale Schatten beziehungsweise Leuchteffekte
 stehen zusätzlich für Zeiger, Fortschritt, Skalenring und Nabe bereit. Alle
 Positionen und Größen bleiben Bestandteil der responsiven Layoutberechnung.
 
-**Geplant:** Zusätzliche Gauge-Single-Presets und ein sicherer Importvertrag für
-eigene Theme-Builder-Dateien.
-Archivdarstellung wird erst mit einem dafür
-festgelegten Chart-Anwendungsfall umgesetzt.
-
 Eine Instanz bildet genau einen unabhängig konfigurierbaren Single-Gauge-Chart
 ab. Zusammengesetzte Gauges mit mehreren Werten gehören zu
 [EChartsGaugeMulti](../EChartsGaugeMulti). Weitere Chartfamilien werden bei
@@ -159,11 +152,8 @@ Bedarf als eigene Gerätemodule ergänzt.
 
 ### 2. Voraussetzungen
 
-Das Entwicklungsziel und die deklarierte Mindestversion sind
-**Symcon 9.0 / PHP 8.5**. Eine Kompatibilität zu älteren Symcon-Versionen wird
-nicht versprochen. Die Modulverträge, HTML-Erzeugung und Live-Zustände werden
-lokal mit Test-Doppeln geprüft; ein visueller Laufzeitnachweis in einer realen
-Symcon-Installation und den verschiedenen Symcon-Clients steht noch aus.
+Erforderlich sind **Symcon 9.0 oder 9.1 und PHP 8.5**. Eine Kompatibilität zu
+älteren Symcon-Versionen wird nicht versprochen.
 
 Erforderlich sind eine Verbindung zu einer aktiven
 [EChartsGateway-Instanz](../EChartsGateway) und eine vorhandene Integer- oder
@@ -178,20 +168,16 @@ Das Gauge-Modul wird gemeinsam mit EChartsGateway über die Library
 **SymconECharts** eingebunden. Es gibt kein separat zu installierendes
 Gerätepaket.
 
-Für Entwicklungsarbeiten im Module Control das Repository hinzufügen und
-`dev` auswählen:
+Die Library wird in der Modulverwaltung über folgende Repository-URL
+installiert:
 
 ```text
 https://github.com/Burki24/SymconECharts
 ```
 
-Die Beschreibung gilt für einen Entwicklungsstand mit erster nativer Gauge,
-nicht für eine bereits produktiv freigegebene Visualisierung. Eine
-Veröffentlichung im Module Store wird nicht vorausgesetzt.
-
 ### 4. Einrichten der Instanzen in Symcon
 
-**Zielmodell:** Eine EChartsGaugeSingle-Instanz je unabhängig konfigurierbarem
+Eine EChartsGaugeSingle-Instanz wird je unabhängig konfigurierbarem
 Gauge-Chart. Mehrere Gauge-Instanzen sollen ein gemeinsames Gateway verwenden
 können. Für die parallele Anzeige desselben Charts als Kachel und in IPSView
 ist keine zweite Gauge-Instanz vorgesehen.
@@ -202,7 +188,7 @@ vorhandene Gateway ausgewählt. Symcon bietet aufgrund des Verbindungstyps
 zusätzlich weiterhin eine Neuanlage an; sie ist für den regulären Betrieb nicht
 notwendig.
 
-**Aktueller Stand:** Über die kompatiblen Parent-Verbindungen kann eine
+Über die kompatiblen Parent-Verbindungen kann eine
 vorhandene EChartsGateway-Instanz ausgewählt und von mehreren Gauges verwendet
 werden. Ohne aktive Verbindung bleibt die Gauge-Instanz in einem eindeutigen
 Fehlerstatus.
@@ -273,7 +259,7 @@ Grundposition; unten bleibt die kompatible Standardposition.
    `Strecken` füllt sie gegebenenfalls mit verändertem Seitenverhältnis.
    Größe, Versatz, Deckkraft und Drehung wirken nur auf das Motiv; die zuvor
    gewählte Farbe oder der Verlauf bleibt darunter erhalten. Als direkt
-   importierbare Testdatei liegt ein transparentes
+    importierbare Beispieldatei liegt ein transparentes
    [Fantasy-Astrolabium](examples/fantasy-astrolabe-background.svg) bei.
 6. Die Formularvorschau reagiert sofort. Erst `Übernehmen` speichert die
    Auswahl und aktualisiert damit die native Kachel dauerhaft.
@@ -293,9 +279,7 @@ HTML-Variable erhalten; ein Löschen muss ausdrücklich bestätigt werden.
 
 #### Profile
 
-Aktuell werden noch keine Profile oder eigenen Variablendarstellungen angelegt.
-Die künftige Ausgabe soll auf den gemeinsamen Variablen- und
-Darstellungs-Helpern aufbauen.
+Das Modul legt keine Profile oder eigenen Variablendarstellungen an.
 
 ### 6. Visualisierung
 
@@ -319,9 +303,6 @@ Die Darstellung verwendet die lokal mitgelieferte und per SHA-256 geprüfte
 Apache-ECharts-Runtime 6.1.0. Die sechs offiziellen Theme-Dateien stammen aus
 derselben festgeschriebenen Abhängigkeit und werden ebenfalls vor der
 Einbettung geprüft. Die Visualisierung lädt im Betrieb keine CDN-Ressource.
-Die aktuelle Implementierung ist technisch gegen Test-Doppel geprüft; die
-visuelle Prüfung in realen Symcon-Clients bleibt offen.
-
 #### Kacheldesigner und Konfigurationsvorschau
 
 Die Vorschau im Kacheldesigner ist ein leichtgewichtiges, eigenständiges SVG
@@ -343,9 +324,7 @@ Kontrast- und identische Achsfarben aus dem gemeinsamen Theme-Katalog.
 Layout-Preset und Theme können frei kombiniert werden.
 
 Der offizielle ECharts Theme Builder erzeugt ausführbare JavaScript-Dateien.
-Eigene Builder-Dateien werden in dieser Stufe noch nicht importiert oder
-ausgeführt; dafür ist vorab ein eigener validierter und ausdrücklich
-bestätigter Importvertrag erforderlich.
+Eigene Builder-Dateien werden nicht importiert oder ausgeführt.
 
 #### IPSView
 
@@ -374,10 +353,6 @@ neu zu laden. Ausgabespezifische Anpassungen wie Hintergrund, Transparenz und
 Schriftgrößen können getrennt eingestellt werden, ohne die andere
 Visualisierung zu verändern.
 
-Mangels IPSView-Lizenz auf der vorhandenen Testinstallation ist die reale
-Einbindung in IPSView nicht laufzeitgeprüft. Getestet sind die erzeugten HTML-
-Modelle, die Designvererbung und die Trennung beider Designs.
-
 ### 7. PHP-Befehlsreferenz
 
 Das festgelegte Funktionspräfix lautet `ECGS`.
@@ -395,5 +370,4 @@ Modell nur die validierten Pfaddaten und die `viewBox`, nicht das hochgeladene
 SVG-Dokument. Außerdem enthält es den numerischen Wert. Dasselbe fachliche Modell wird
 vom nativen Gauge-Single-Renderer verwendet.
 
-Weitere Projektgrundsätze: [Entwicklung](../docs/ENTWICKLUNG.md).  
 Lizenz der eigenen Beiträge: [PolyForm Noncommercial License 1.0.0](../LICENSE).

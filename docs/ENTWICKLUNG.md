@@ -262,6 +262,21 @@ eingerichtet. Änderungen an den Visualisierungen benötigen zusätzlich
 Browserprüfungen in beiden Ausgabewegen. Ein PHP-Lint ersetzt keinen
 Symcon-Laufzeittest und keine Visualisierungsprüfung.
 
+Vor der Übergabe commitbereiter Änderungen wird der vollständige lokale Lauf
+gestartet:
+
+```text
+php tests/quality.php --fix
+```
+
+Er korrigiert ausschließlich mechanische PHP- und JSON-Formatierung, prüft
+anschließend die Korrekturen erneut und führt Syntax-, Vertrags-, Integrations-
+und Layouttests jeweils mit eigenem Fehlerstatus aus. Der reine Prüfmodus
+`php tests/quality.php` verändert keine Dateien. Optional aktiviert
+`git config core.hooksPath .githooks` den versionierten Pre-Push-Hook. Der Hook
+stoppt einen Push, wenn der Qualitätslauf fehlschlägt oder noch nicht
+committete Formatkorrekturen erzeugt.
+
 Die offizielle Symcon-Stylekonfiguration wird als Git-Submodul unter `.style`
 eingebunden. Sie bleibt dadurch auf einen nachvollziehbaren StylePHP-Commit
 festgeschrieben und kann über den normalen Submodulablauf aktualisiert werden.
@@ -296,13 +311,23 @@ lokale ECharts-Runtime dokumentiert
 Das Gerätemodul setzt davon Quellen, Roh-, Aggregat- und Echtzeitmodus,
 Punktbudget, Mehr-Achsen-Modell, native Kachel und die optionale IPSView-
 Ausgabe um. Reale Laufzeitmessungen bleiben als nächster Schritt offen.
+Ein realer IPSView-Laufzeittest ist auf der vorhandenen Testebene mangels
+Lizenz nicht möglich und bleibt ausdrücklich eine Testlücke.
 
 ## Dokumentation und Lizenzen
 
-Die [Haupt-README](../README.md) folgt dem Aufbau der bereitgestellten
-`README1.md`: Modulübersicht mit Kurzbeschreibungen und Links. Die ausführliche
-Nutzungsdokumentation steht in den README-Dateien der Modulordner.
-`README1.md` bleibt als unveränderte Vorlage erhalten.
+Die [Haupt-README](../README.md) und die README-Dateien der Module sind reine
+Benutzerdokumentation. Sie beschreiben Voraussetzungen, Installation,
+Konfiguration, Variablen, Bedienung und öffentliche Funktionen. Interne
+Architektur, Entwicklung, Tests und CI werden in diesem Dokument, den ADRs
+oder den Testdokumenten gepflegt. `README1.md` bleibt als unveränderte
+Ausgangsvorlage erhalten.
+
+Jede sichtbare Änderung wird im selben fachlichen Zusammenhang in der
+[CHANGELOG.md](../CHANGELOG.md) unter `# Unveröffentlicht` eingetragen. Erst
+eine ausdrücklich beauftragte Release-Vorbereitung ordnet diese Einträge einer
+Version und einem Veröffentlichungsdatum zu. Interne Refactorings und reine
+Formatkorrekturen benötigen keinen Changelog-Eintrag.
 
 Geplanter und tatsächlich vorhandener Funktionsumfang werden ausdrücklich
 getrennt. Beispiel-APIs, Store-Veröffentlichungen oder Versionsfreigaben

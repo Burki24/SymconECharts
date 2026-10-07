@@ -9,6 +9,7 @@ $requiredFiles = [
     'AGENTS.md',
     '.gitattributes',
     '.gitignore',
+    'CHANGELOG.md',
     'README.md',
     'README1.md',
     'THIRD_PARTY_NOTICES.md',
@@ -323,9 +324,34 @@ if ($readme === false) {
     $errors[] = 'Cannot read README.md.';
 } else {
     foreach ($expectedModules as $moduleDirectory) {
-        if (!str_contains($readme, '](' . $moduleDirectory . ')')) {
+        if (!str_contains($readme, '](' . $moduleDirectory . '/README.md)')) {
             $errors[] = 'README.md does not link module directory: ' . $moduleDirectory;
         }
+    }
+
+    if (!str_contains($readme, '[CHANGELOG.md](CHANGELOG.md)')) {
+        $errors[] = 'README.md does not link CHANGELOG.md.';
+    }
+}
+
+$userReadmePaths = [$root . '/README.md'];
+foreach ($expectedModules as $moduleDirectory) {
+    $userReadmePaths[] = $root . '/' . $moduleDirectory . '/README.md';
+}
+
+foreach ($userReadmePaths as $userReadmePath) {
+    $userReadme = (string) file_get_contents($userReadmePath);
+    if (preg_match('/^#{1,6}\s+(?:Entwicklung|Entwicklungsstand|Tests?|CI|Debugging|Architektur)\b/mi', $userReadme) === 1) {
+        $errors[] = str_replace($root . '/', '', $userReadmePath)
+            . ' contains an internal-development heading.';
+    }
+}
+
+$changelogPath = $root . '/CHANGELOG.md';
+if (is_file($changelogPath)) {
+    $changelog = (string) file_get_contents($changelogPath);
+    if (!str_starts_with($changelog, '# Unveröffentlicht')) {
+        $errors[] = 'CHANGELOG.md must start with # Unveröffentlicht during development.';
     }
 }
 

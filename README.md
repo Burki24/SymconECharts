@@ -1,8 +1,23 @@
 # SymconECharts
 
-Folgende Module beinhaltet das SymconECharts Repository:
+SymconECharts stellt numerische Symcon-Werte als responsive Apache-ECharts-
+Diagramme in nativen Symcon-Kacheln und optionalen IPSView-HTML-Widgets dar.
+Die Library enthält Gauges für einzelne und mehrere Werte sowie historische
+und live fortgeschriebene Zeitreihen.
 
-- __EChartsGateway__ ([Dokumentation](EChartsGateway))  
+## Voraussetzungen
+
+- IP-Symcon 9.0 oder 9.1 mit PHP 8.5;
+- numerische Integer- oder Float-Variablen als Datenquellen;
+- ein Symcon-Archiv für historische Zeitreihen; der Echtzeitmodus funktioniert
+  auch ohne aktiviertes Archiv;
+- IPSView nur bei Verwendung der optionalen IPSView-Ausgabe.
+
+## Enthaltene Module
+
+Folgende Module sind enthalten:
+
+- __EChartsGateway__ ([Dokumentation](EChartsGateway/README.md))
   Gemeinsame Zentrale als Splitter. Sie stellt den Chartfamilien aktuell den
   validierten Zugriff auf numerische Momentanwerte sowie normalisierte rohe
   und aggregierte Archivwerte bereit. Identische Archivabfragen werden kurz
@@ -10,7 +25,7 @@ Folgende Module beinhaltet das SymconECharts Repository:
   belegtem Bedarf.
   Das Gateway benötigt keine eigene I/O-Instanz.
 
-- __EChartsGaugeSingle__ ([Dokumentation](EChartsGaugeSingle))
+- __EChartsGaugeSingle__ ([Dokumentation](EChartsGaugeSingle/README.md))
   Gerätemodul für ein einzelnes, unabhängig konfigurierbares Gauge-Diagramm
   mit genau einer numerischen Quellvariable. Vier responsive Layout-Presets
   und sieben unabhängig wählbare Theme-Modi werden als native Symcon-Kachel
@@ -34,7 +49,7 @@ Folgende Module beinhaltet das SymconECharts Repository:
   werden. Laufzeitwerte aktualisieren das bestehende Diagramm über den
   gemeinsamen Gateway-Transport, ohne das WebContent-Dokument neu zu laden.
 
-- __EChartsGaugeMulti__ ([Dokumentation](EChartsGaugeMulti))
+- __EChartsGaugeMulti__ ([Dokumentation](EChartsGaugeMulti/README.md))
   Gerätemodul für zusammengesetzte Gauge-Darstellungen mit 2 bis 16
   Datenquellen. Jede Quelle besitzt eine
   eigene Beschriftung, Skala, Einheit und Formatierung. Multi Title,
@@ -44,17 +59,17 @@ Folgende Module beinhaltet das SymconECharts Repository:
   Nachkommastellen können je Quelle optional aus deren Variablendarstellung
   übernommen werden.
 
-- __EChartsGaugeTacho__ ([Dokumentation](EChartsGaugeTacho))
+- __EChartsGaugeTacho__ ([Dokumentation](EChartsGaugeTacho/README.md))
   Responsives Tacho-Cockpit für 2 bis 5 Quellen. Jedes Instrument kann Zeiger,
   Nabe, Skala, Farben und Zifferblatt einschließlich eigener SVG-Assets
   unabhängig vom gemeinsamen Grunddesign überschreiben.
 
-- __EChartsGaugeChronograph__ ([Dokumentation](EChartsGaugeChronograph))
+- __EChartsGaugeChronograph__ ([Dokumentation](EChartsGaugeChronograph/README.md))
   Chronograph mit einem Hauptinstrument und bis zu vier eingebetteten
   Nebeninstrumenten. Für jede der 2 bis 5 Quellen steht dieselbe individuelle
   Design- und SVG-Konfiguration wie beim Tacho zur Verfügung.
 
-- __EChartsTimeSeries__ ([Dokumentation](EChartsTimeSeries))
+- __EChartsTimeSeries__ ([Dokumentation](EChartsTimeSeries/README.md))
   Erste historische Chartfamilie für 1 bis 8 archivierte numerische Quellen.
   Rohwerte bleiben ausdrücklich wählbar; alternativ stehen automatische oder
   feste Symcon-Aggregationsstufen, Linien und Flächen, bis zu acht automatisch
@@ -73,80 +88,28 @@ neues Gateway angelegt werden; bei jedem weiteren Diagramm wird das bereits
 vorhandene Gateway ausgewählt. Die von Symcon weiterhin angebotene Neuanlage
 eines Parents ist für den Normalbetrieb nicht erforderlich.
 
-## Entwicklungsstand
+## Installation
 
-**Erste sichtbare Gauge-Single-Vertikale.** Gateway und die Gauge-Module
-verwenden `IPSModuleStrict`, ein versioniertes Datenprotokoll und eine
-wiederverwendbare Parent-Verbindung. Gauge Single rendert sein validiertes
-Momentanwertmodell mit dem lokal gebündelten Apache ECharts 6.1.0 als native,
-responsive Symcon-Kachel. Der erste Kacheldesigner wählt zwischen Basic,
-Simple, Progress und Speed sowie `auto` und sechs lokal gebündelten offiziellen
-Apache-ECharts-Themes. Dazu kommen validierte Zeigerformen einschließlich
-eines pfadbasierten SVG-Imports, Skalenbögen mit
-22,5-Grad-Positionen, ein konfigurierbares Zifferblatt einschließlich
-abgesichertem SVG-Hintergrund und optionale Farbrollen.
-Simple, `auto` und die jeweiligen
-Presetvorgaben erhalten die bisherige
-Standarddarstellung.
-
-Gauge Multi verwaltet eine geordnete Quellenliste, liefert ein versioniertes
-Multi-Modell und rendert die Quellen als Multi-Title-Zifferblätter, Ringraster,
-konzentrische Ringe oder als Wetterstations-Instrumentenpanel. Eine gemeinsame Designschicht
-konfiguriert Zeiger einschließlich validiertem SVG-Import, Naben,
-Skalenunterteilungen, Farbrollen und Zifferblattplatten einschließlich
-bereinigtem SVG-Hintergrund
-für alle Instrumente einer Ausgabe. Tacho und Chronograph sind eigenständige
-Module für jeweils 2 bis 5 Quellen und ergänzen diese Basis um quellbezogene
-Designüberschreibungen einschließlich SVG-Zeiger, SVG-Nabe und SVG-Zifferblatt.
-Der Gateway-Vertrag für Archivdaten und die darauf aufbauende native
-Zeitreihen-Kachel sowie ihre getrennt gestaltbare IPSView-WebContent-Ausgabe
-sind implementiert. Wertachsen können je Einheitengruppe automatisch, anhand
-der Variablendarstellung oder mit manuellem Minimum und Maximum skaliert
-werden. Referenzlinien und Wertebereiche sind quellenbezogen konfigurierbar
-und folgen dadurch der passenden Wertachse.
-Alle Gauge-Module besitzen optionale IPSView-WebContent-Ausgaben und können
-ihr Kacheldesign erben oder unabhängig gestaltet werden. Wie TimeSeries können
-sie den IPSView-Hintergrund transparent durchscheinen lassen und ihn mit einer
-Theme- oder Benutzerfarbe in einstellbarer Deckkraft tönen. Der reale
-IPSView-Laufzeittest bleibt mangels Lizenz eine dokumentierte Testlücke.
-Gauge- und Time-Series-Ausgaben behalten ihr geöffnetes IPSView-Dokument bei
-Wertänderungen bei und aktualisieren nur den ECharts-Zustand.
-
-Als erste Chartfamilie sind Single- und Multi-Gauges vorgesehen. Eine
-Geräteinstanz soll jeweils einen Chart liefern; eine gemeinsame Dashboard-Seite
-ist nicht vorgesehen. Weitere Chartfamilien erhalten eigene Gerätemodule.
-
-## Entwicklung
-
-Die Entwicklung erfolgt auf `dev`. Geprüfte Stände gelangen später per Pull
-Request nach `main`; `dev` bleibt erhalten. Projektziele, Architektur und
-Entwicklungsgrundsätze stehen in [Entwicklung](docs/ENTWICKLUNG.md).
-
-Nach normalen Pushes auf `dev` pflegt ein Workflow Version, Build und Datum in
-`library.json` und legt die Metadaten als getrennten Bot-Commit ab. Tags und
-Releases werden dadurch nicht automatisch erzeugt.
-
-Der empfohlene lokale Qualitätslauf ist:
+Die Library wird über die Symcon-Modulverwaltung aus folgendem Repository
+installiert:
 
 ```text
-php tests/quality.php --fix
+https://github.com/Burki24/SymconECharts
 ```
 
-Er korrigiert ausschließlich PHP- und JSON-Formatierung, prüft die
-Korrekturen erneut und führt danach Syntax-, Vertrags-, Integrations- und
-Layouttests aus. Fachliche oder syntaktische Fehler bleiben harte Fehler.
-Der reine Prüfmodus `php tests/quality.php` verändert keine Dateien.
+Anschließend wird beim ersten Diagramm eine `EChartsGateway`-Instanz als Parent
+angelegt. Weitere Diagramme verwenden dieselbe Gateway-Instanz.
 
-Optional aktiviert
-`git config core.hooksPath .githooks` den versionierten Pre-Push-Hook. Er
-führt den Korrektur- und Qualitätslauf vor jedem Push aus und stoppt den Push,
-wenn dabei noch zu committende Formatkorrekturen entstanden sind.
+## Konfiguration und Verwendung
 
-Die Basistests können weiterhin mit `php tests/run.php` ausgeführt werden. Der
-Tests-Workflow prüft dieselbe Suite unter PHP 8.5 und ergänzt PHP-Syntax- sowie
-JSON-Validierung über die gemeinsame `Symcon_ModuleCI`-Basis. Ein eigener
-Style-Workflow führt zusätzlich die offiziellen Symcon-Prüfungen für PHP und
-JSON aus.
+Für jedes unabhängig zu konfigurierende Diagramm wird eine Instanz des
+passenden Moduls angelegt. Datenquellen, Wertebereiche, Darstellung und die
+optionale IPSView-Ausgabe werden in dieser Instanz festgelegt. Die ausführliche
+Einrichtung ist in den oben verlinkten Modul-Readmes beschrieben.
+
+## Änderungen
+
+Die Versionshistorie steht in der [CHANGELOG.md](CHANGELOG.md).
 
 ## Lizenz
 

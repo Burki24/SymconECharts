@@ -4,6 +4,20 @@
 einem gemeinsamen Chronographen. Die erste Quelle bildet das Hauptinstrument;
 bis zu vier weitere Quellen erscheinen als eingebettete Hilfszifferblätter.
 
+## Voraussetzungen
+
+- IP-Symcon 9.0 oder 9.1 mit PHP 8.5;
+- eine aktive [EChartsGateway-Instanz](../EChartsGateway/README.md);
+- zwei bis fünf Integer- oder Float-Variablen als Datenquellen;
+- IPSView nur für das optionale WebContent-Widget.
+
+## Installation und Einrichtung
+
+Das Modul wird mit der Library **SymconECharts** installiert. Für jeden
+Chronographen wird eine EChartsGaugeChronograph-Instanz angelegt und mit dem
+gemeinsamen Gateway verbunden. Anschließend werden die Quellen in der
+gewünschten Anzeigereihenfolge hinzugefügt.
+
 ## Konfiguration
 
 Jede Quellenzeile enthält Variable, Beschriftung, Minimum, Maximum, Einheit
@@ -26,8 +40,14 @@ konfiguriert werden. Wertänderungen aktualisieren das bestehende Diagramm über
 den gemeinsamen Gateway-WebSocket, ohne das WebContent-Dokument neu zu laden.
 Der Hintergrund kann transparent an IPSView angepasst und mit einer Theme-
 oder Benutzerfarbe in frei wählbarer Deckkraft getönt werden.
-Ein realer IPSView-Laufzeittest ist mangels Lizenz nicht möglich.
 
+## Variablen
+
+Standardmäßig legt das Modul keine Statusvariablen an. Bei aktivierter
+IPSView-Ausgabe wird die Stringvariable **Gauge für IPSView** mit dem Ident
+`IPSViewGauge` und einer WebContent-Darstellung erzeugt. Beim Abschalten bleibt
+eine bereits angelegte Variable erhalten, bis sie im Formular ausdrücklich
+gelöscht wird.
 ## Funktionen
 
 Das Modulpräfix ist `ECGC`:
@@ -45,3 +65,8 @@ Unter `examples` liegen drei zurückhaltende SVG-Zifferblattmotive für
 Temperatur, Luftfeuchtigkeit und Luftdruck. Sie besitzen einen transparenten
 Grund und sind für die Kombination mit einer eigenen Plattenfarbe oder einem
 Plattenverlauf vorgesehen.
+
+## Lizenz
+
+Lizenz der eigenen Beiträge:
+[PolyForm Noncommercial License 1.0.0](../LICENSE).

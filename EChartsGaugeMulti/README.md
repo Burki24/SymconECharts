@@ -6,7 +6,7 @@ Symcon-Kacheldarstellung und ein separat platzierbares HTML-Widget in IPSView
 bereitstellen können. Datenquellen und Diagrammkonfiguration werden dabei nur
 einmal gepflegt.
 
-**Entwicklungsstand:** Multi-Title-, zwei Ring- und Wetterstations-Vorlage mit optionaler
+Multi-Title-, zwei Ring- und Wetterstations-Vorlage mit optionaler
 IPSView-WebContent-Ausgabe. Eine geordnete Liste aus
 2 bis 16 numerischen Quellvariablen ist konfigurierbar, wird als Referenzen
 registriert und über EChartsGateway gelesen. Das Modul erzeugt daraus ein
@@ -30,18 +30,15 @@ Deckkraft über den tatsächlichen IPSView-Hintergrund legen.
 
 ### 1. Funktionsumfang
 
-**Vorhanden:** Eigene Moduldefinition als Gerät (`type: 3`) auf Basis von
-`IPSModuleStrict`, eigene GUID und eigenes Präfix sowie eine wiederverwendbare
-Verbindung zu EChartsGateway. Jede konfigurierte Quelle besitzt eine eindeutige
+Das Modul besitzt eine wiederverwendbare Verbindung zu EChartsGateway. Jede
+konfigurierte Quelle besitzt eine eindeutige
 numerische Variable, Beschriftung, Minimum, Maximum, Einheit und 0 bis 6
 Nachkommastellen. `GetGaugeData()` liest alle aktuellen Werte über das
 versionierte Gateway-Protokoll und liefert sie in der konfigurierten Reihenfolge.
 
-**Vorhanden:** Multi Title, Ringraster, konzentrische Ringe und Wetterstation als native
+Multi Title, Ringraster, konzentrische Ringe und Wetterstation stehen als native
 Symcon-Kachel und optionales IPSView-Widget mit offiziellen ECharts-Themes,
 Live-Aktualisierung und erster Feinabstimmung.
-
-**Geplant:** Weitere klassische Instrumentenpanel-Vorlagen.
 
 Eine Instanz bildet genau einen zusammengesetzten Gauge-Chart ab. Gauges mit
 genau einer numerischen Quellvariable gehören zu
@@ -49,10 +46,8 @@ genau einer numerischen Quellvariable gehören zu
 
 ### 2. Voraussetzungen
 
-Das Entwicklungsziel und die deklarierte Mindestversion sind
-**Symcon 9.0 / PHP 8.5**. Eine Kompatibilität zu älteren Symcon-Versionen wird
-nicht versprochen. Die Modulverträge werden lokal mit Test-Doppeln geprüft;
-ein Laufzeitnachweis in einer realen Symcon-Installation steht noch aus.
+Erforderlich sind **Symcon 9.0 oder 9.1 und PHP 8.5**. Eine Kompatibilität zu
+älteren Symcon-Versionen wird nicht versprochen.
 
 Erforderlich ist eine Verbindung zu einer aktiven
 [EChartsGateway-Instanz](../EChartsGateway) sowie mindestens zwei vorhandene
@@ -69,19 +64,16 @@ Das Gauge-Modul wird gemeinsam mit EChartsGateway über die Library
 **SymconECharts** eingebunden. Es gibt kein separat zu installierendes
 Gerätepaket.
 
-Für Entwicklungsarbeiten im Module Control das Repository hinzufügen und
-`dev` auswählen:
+Die Library wird in der Modulverwaltung über folgende Repository-URL
+installiert:
 
 ```text
 https://github.com/Burki24/SymconECharts
 ```
 
-Die Beschreibung gilt für den Entwicklungsstand der ersten sichtbaren
-Multi-Kachel. Eine Veröffentlichung im Module Store wird nicht vorausgesetzt.
-
 ### 4. Einrichten der Instanzen in Symcon
 
-**Zielmodell:** Eine EChartsGaugeMulti-Instanz je unabhängig konfigurierbarem
+Eine EChartsGaugeMulti-Instanz wird je unabhängig konfigurierbarem
 zusammengesetztem Gauge-Chart. Mehrere Gauge-Instanzen sollen ein gemeinsames
 Gateway verwenden können. Für die parallele Anzeige desselben Charts als
 Kachel und in IPSView ist keine zweite Gauge-Instanz vorgesehen.
@@ -92,7 +84,7 @@ vorhandene Gateway ausgewählt. Symcon bietet aufgrund des Verbindungstyps
 zusätzlich weiterhin eine Neuanlage an; sie ist für den regulären Betrieb nicht
 notwendig.
 
-**Aktueller Stand:** Über die kompatiblen Parent-Verbindungen kann eine
+Über die kompatiblen Parent-Verbindungen kann eine
 vorhandene EChartsGateway-Instanz ausgewählt und von mehreren Gauges verwendet
 werden. Ohne aktive Verbindung bleibt die Gauge-Instanz in einem eindeutigen
 Fehlerstatus.
@@ -108,7 +100,7 @@ der gewählten Multi-Vorlage.
 
 Das in Version 1.8 kurzzeitig enthaltene Einzelquellen-Gerüst wird nicht
 automatisch übernommen: Eine einzelne Quelle erfüllt den Multi-Vertrag nicht.
-Bereits angelegte Entwicklungsinstanzen müssen ihre Quellenliste neu
+Bereits angelegte Instanzen dieses unveröffentlichten Zwischenstands müssen ihre Quellenliste neu
 konfigurieren.
 
 ### 5. Statusvariablen und Profile
@@ -129,9 +121,7 @@ bestätigte Löschfunktion des gemeinsamen Helpers entfernt.
 
 #### Profile
 
-Aktuell werden noch keine Profile oder eigenen Variablendarstellungen angelegt.
-Die künftige Ausgabe soll auf den gemeinsamen Variablen- und
-Darstellungs-Helpern aufbauen.
+Das Modul legt keine Profile oder eigenen Variablendarstellungen an.
 
 ### 6. Visualisierung
 
@@ -178,9 +168,9 @@ einstellbar. Die Standardwerte `preset` und `theme` erhalten die bisherige
 Darstellung vollständig. Die SVG-Vorschau übernimmt die aktuell bearbeiteten
 Designwerte sofort und wendet sie auf jedes dargestellte Instrument an. Sie
 zeigt bis zu vier Quellen exemplarisch. Bei vielen konzentrischen Ringen oder Wetterstations-Instrumenten ist für lesbare Beschriftungen eine ausreichend große Kachel bzw. ein großes IPSView-Widget erforderlich. Zur Laufzeit werden alle 2 bis 16 konfigurierten Quellen ausgegeben.
-Die gemeinsamen Einstellungen einschließlich der SVG-Assets gelten zunächst für alle Quellen der jeweiligen
-Ausgabe. Abweichende Einstellungen je einzelner Quelle sind noch nicht Teil
-dieses Schritts.
+Die gemeinsamen Einstellungen einschließlich der SVG-Assets gelten für alle
+Quellen der jeweiligen Ausgabe. Ein individuelles Design je Quelle bieten die
+eigenständigen Module Gauge Tacho und Gauge Chronograph.
 
 #### IPSView
 
@@ -191,14 +181,10 @@ Gestaltung kann das Kacheldesign kopiert und der unabhängige IPSView-Designer
 bearbeitet werden. Beide Ausgaben behalten dieselben Quellen, Wertebereiche,
 Einheiten und Live-Daten.
 
-Die HTML-Erzeugung und Aktualisierung bei Quellwertänderungen sind lokal
-getestet. Die tatsächliche Einbindung in IPSView bleibt mangels Lizenz auf der
-verfügbaren Testinstallation ungeprüft.
-
 #### Gemeinsame Darstellung
 
-ECharts-Konfiguration, Datenaufbereitung und Zeichenlogik sollen gemeinsam
-verwendet werden. Ausgabespezifische Anpassungen wie Hintergrund, Transparenz
+ECharts-Konfiguration, Datenaufbereitung und Zeichenlogik werden gemeinsam
+verwendet. Ausgabespezifische Anpassungen wie Hintergrund, Transparenz
 und Schriftgrößen dürfen getrennt eingestellt werden, ohne die andere
 Visualisierung unbeabsichtigt zu verändern.
 
@@ -219,6 +205,5 @@ Gauge-Konfiguration und numerischen Wert. Es ist die technische Grenze für die
 beiden Ausgabeadapter und noch kein gerendertes ECharts-Diagramm.
 `ECGM_GetIPSViewHTML($InstanceID)` liefert die eigenständige HTML-Seite für IPSView.
 
-Weitere Projektgrundsätze: [Entwicklung](../docs/ENTWICKLUNG.md).  
 Lizenz der eigenen Beiträge: [PolyForm Noncommercial License 1.0.0](../LICENSE).
 

@@ -165,6 +165,12 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   CI-Basis. Abschlussberichte nennen ausgeführte Prüfungen und verbleibende
   Testlücken getrennt; Syntax-, Style- und Strukturprüfungen ersetzen keine
   Laufzeit- oder Browserprüfung.
+- Die Haupt-README und alle Modul-READMEs bleiben Benutzerdokumentation.
+  Entwicklung, Tests, CI und interne Architektur werden ausschließlich in
+  `docs`, ADRs oder Testdokumenten beschrieben.
+- Jede für Benutzer sichtbare Änderung wird im selben fachlichen Zusammenhang
+  in `CHANGELOG.md` unter `# Unveröffentlicht` dokumentiert. Reine interne oder
+  mechanische Änderungen erhalten keinen Eintrag.
 - Vor der Übergabe commitbereiter Änderungen ist
   `php tests/quality.php --fix` auszuführen. Der Befehl korrigiert ausschließlich
   mechanische PHP- und JSON-Formatierung und prüft danach jeden Style-, Syntax-,

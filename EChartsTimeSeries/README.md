@@ -5,6 +5,15 @@ ECharts-Zeitreihe. Eine Instanz verarbeitet eine bis acht eindeutige Quellen,
 bis zu acht Einheitengruppen und rendert eine native Symcon-Kachel sowie
 optional ein eigenständiges IPSView-WebContent-Widget.
 
+## Voraussetzungen
+
+- IP-Symcon 9.0 oder 9.1 mit PHP 8.5;
+- eine aktive [EChartsGateway-Instanz](../EChartsGateway/README.md);
+- eine bis acht Integer- oder Float-Variablen;
+- eine Symcon-Archivinstanz für historische Modi; der Echtzeitmodus benötigt
+  kein aktiviertes Logging;
+- IPSView nur für das optionale WebContent-Widget.
+
 ## Aktueller Funktionsumfang
 
 - rollende Zeiträume von 1 Stunde, 6 Stunden, 24 Stunden, 7 Tagen und 30 Tagen;
@@ -104,14 +113,26 @@ werden versetzt dargestellt.
 archivfreie Live-Modus und nur `auto` wählt selbstständig eine
 Verdichtungsstufe.
 
-## Entwicklungsstand und Testgrenzen
+## Variablen
 
-Die Vertikale vom Archivvertrag bis zur nativen Kachel und zur optionalen
-IPSView-Ausgabe ist implementiert und durch lokale Vertrags- und
-Integrationstests abgesichert. Ein realer Symcon-Archiv- und Browsertest sowie
-ein IPSView-Laufzeittest stehen noch aus. Im Echtzeitmodus wird bei einer
-Wertänderung nur der aktuelle Punkt über den persistenten Gateway-Transport
-an das geöffnete Diagramm angehängt. Die fortlaufende, nicht persistierte
-Browserhistorie bleibt damit in der nativen Kachel und in IPSView erhalten,
-solange die jeweilige Darstellung geöffnet ist. Die Zielplattform bleibt
-Symcon 9.0/9.1 mit PHP 8.5.
+Standardmäßig legt das Modul keine Statusvariablen an. Bei aktivierter
+IPSView-Ausgabe wird die Stringvariable **Zeitreihe für IPSView** mit dem Ident
+`IPSViewTimeSeries` und einer WebContent-Darstellung erzeugt. Beim Abschalten
+bleibt eine bereits angelegte Variable erhalten, bis sie im Formular
+ausdrücklich gelöscht wird.
+
+## Öffentliche Funktionen
+
+```php
+$json = ECTS_GetTimeSeriesData($InstanceID);
+$html = ECTS_GetIPSViewHTML($InstanceID);
+```
+
+`ECTS_GetTimeSeriesData()` liefert das aktuelle versionierte Datenmodell als
+JSON. `ECTS_GetIPSViewHTML()` liefert das vollständige eigenständige
+HTML-Dokument für IPSView.
+
+## Lizenz
+
+Lizenz der eigenen Beiträge:
+[PolyForm Noncommercial License 1.0.0](../LICENSE).
