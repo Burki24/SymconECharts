@@ -26,6 +26,8 @@ optional ein eigenständiges IPSView-WebContent-Widget.
 - ausdrücklich wählbare Rohwerte, automatische Verdichtung oder feste
   Verdichtung auf Minute, 5 Minuten, 15 Minuten, Stunde oder Tag;
 - Echtzeitdarstellung nicht archivierter Variablen ab dem Öffnen der Kachel;
+- wahlweise durchgehende Linien, automatische Erkennung zeitlicher Datenlücken
+  je Reihe oder eine feste maximale Unterbrechungsdauer in Minuten;
 - Linien- oder Flächendarstellung je Quelle;
 - optionales Einzeldesign je Quelle für Linienart, Linienstärke, Glättung,
   Punktsymbol und Punktgröße sowie Flächendeckkraft;
@@ -84,6 +86,10 @@ Kachel einen Hinweis auf das wirksame Punktbudget.
    abgeschlossener Zeitraum und benötigt deshalb einen Archivdatenmodus. Die
    Zeitachse kann ECharts automatisch beschriften oder ausdrücklich Uhrzeit,
    Datum beziehungsweise beides anzeigen.
+   Die Datenlückenerkennung ist standardmäßig deaktiviert. **Automatisch**
+   unterbricht eine Linie, wenn ein Abstand größer als das Dreifache des
+   typischen Messabstands dieser Reihe ist. Alternativ lässt sich ein fester
+   Maximalabstand in Minuten für alle Reihen festlegen.
 4. Optional Beschriftung, Einheit, Nachkommastellen, Farbe, Stil, Reducer,
    Achsenseite und Achsenbereich pro Quelle anpassen. Der Bereich bleibt
    standardmäßig automatisch, kann aber aus der Variablendarstellung oder aus

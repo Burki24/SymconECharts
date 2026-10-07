@@ -149,6 +149,40 @@
         };
     }
 
+    function automaticGapThresholdSeconds(points) {
+        if (!Array.isArray(points) || points.length < 3) { return 0; }
+        var intervals = [];
+        for (var index = 1; index < points.length; index += 1) {
+            var interval = Number(points[index][0]) - Number(points[index - 1][0]);
+            if (Number.isFinite(interval) && interval > 0) { intervals.push(interval); }
+        }
+        if (intervals.length < 2) { return 0; }
+        intervals.sort(function (left, right) { return left - right; });
+        var typicalInterval = intervals[Math.floor((intervals.length - 1) / 2)];
+        return typicalInterval * 3;
+    }
+
+    function buildSeriesData(item, range) {
+        var points = Array.isArray(item.points) ? item.points : [];
+        var mode = range && typeof range.gapDetectionMode === 'string'
+            ? range.gapDetectionMode : 'off';
+        var threshold = mode === 'custom'
+            ? Number(range.gapThresholdSeconds) || 0
+            : (mode === 'automatic' ? automaticGapThresholdSeconds(points) : 0);
+        var result = [];
+        points.forEach(function (point, index) {
+            if (threshold > 0 && index > 0) {
+                var previousTimestamp = Number(points[index - 1][0]);
+                var currentTimestamp = Number(point[0]);
+                if (currentTimestamp - previousTimestamp > threshold) {
+                    result.push([Math.round((previousTimestamp + currentTimestamp) / 2) * 1000, null]);
+                }
+            }
+            result.push([point[0] * 1000, point[1]]);
+        });
+        return result;
+    }
+
     function buildOption(model, theme) {
         var colors = colorsFor(theme);
         var axes = Array.isArray(model.axes) ? model.axes : [];
@@ -328,7 +362,7 @@
                         color: seriesColor
                     },
                     itemStyle: { color: seriesColor },
-                    data: item.points.map(function (point) { return [point[0] * 1000, point[1]]; })
+                    data: buildSeriesData(item, model.range)
                 };
                 if (item.style === 'area') {
                     var sourceAreaOpacity = sourceDesign

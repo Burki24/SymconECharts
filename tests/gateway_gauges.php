@@ -3054,6 +3054,8 @@ $timeSeries->SetTestProperty('Annotations', json_encode([
 ], JSON_THROW_ON_ERROR));
 $timeSeries->SetTestProperty('DataMode', 'auto');
 $timeSeries->SetTestProperty('PointBudget', 2000);
+$timeSeries->SetTestProperty('GapDetectionMode', 'custom');
+$timeSeries->SetTestProperty('GapThresholdMinutes', 30);
 $timeSeries->SetTestProperty('TimeAxisLabelFormat', 'date-time');
 $timeSeries->SetTestProperty('LegendPosition', 'bottom');
 $timeSeries->SetTestProperty('LineWidthPercent', 150);
@@ -3077,6 +3079,8 @@ assertGatewayGauge(
     $timeSeriesData['family'] === 'time-series'
         && $timeSeriesData['chart']['timeAxisLabelFormat'] === 'date-time'
         && $timeSeriesData['range']['aggregationLevel'] === 6
+        && $timeSeriesData['range']['gapDetectionMode'] === 'custom'
+        && $timeSeriesData['range']['gapThresholdSeconds'] === 1800
         && count($timeSeriesData['axes']) === 2
         && $timeSeriesData['axes'][0]['position'] === 'left'
         && $timeSeriesData['axes'][0]['positionIndex'] === 0
@@ -3135,6 +3139,8 @@ assertGatewayGauge(
         && str_contains($timeSeriesForm, 'current-week')
         && str_contains($timeSeriesForm, 'current-month')
         && str_contains($timeSeriesForm, 'TimeAxisLabelFormat')
+        && str_contains($timeSeriesForm, 'GapDetectionMode')
+        && str_contains($timeSeriesForm, 'GapThresholdMinutes')
         && str_contains($timeSeriesForm, 'Annotations')
         && str_contains($timeSeriesForm, 'Reference line')
         && str_contains($timeSeriesForm, 'Value range')
@@ -3632,6 +3638,26 @@ $invalidTimeAxisFormat->ApplyChanges();
 assertGatewayGauge(
     $invalidTimeAxisFormat->GetTestStatus() === 202,
     'Unsupported time-axis label formats must not enter the renderer contract.'
+);
+
+$invalidGapDetection = new EChartsTimeSeries();
+$invalidGapDetection->Create();
+$invalidGapDetection->SetTestProperty('Sources', json_encode([[
+    'VariableID'              => 4717,
+    'Label'                   => '',
+    'UseVariablePresentation' => false,
+    'Unit'                    => '°C',
+    'Decimals'                => 1,
+    'Color'                   => '',
+    'Style'                   => 'line',
+    'Reducer'                 => 'auto'
+]], JSON_THROW_ON_ERROR));
+$invalidGapDetection->SetTestProperty('GapDetectionMode', 'custom');
+$invalidGapDetection->SetTestProperty('GapThresholdMinutes', 0);
+$invalidGapDetection->ApplyChanges();
+assertGatewayGauge(
+    $invalidGapDetection->GetTestStatus() === 202,
+    'A custom gap detection interval outside the supported range must be rejected.'
 );
 
 $invalidIPSViewTimeSettings = new EChartsTimeSeries();

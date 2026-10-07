@@ -407,6 +407,36 @@
                 },
                 {
                     "type": "Select",
+                    "name": "GapDetectionMode",
+                    "caption": "Data gaps",
+                    "width": "190px",
+                    "options": [
+                        {
+                            "caption": "Do not interrupt lines",
+                            "value": "off"
+                        },
+                        {
+                            "caption": "Detect automatically",
+                            "value": "automatic"
+                        },
+                        {
+                            "caption": "Custom maximum interval",
+                            "value": "custom"
+                        }
+                    ]
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "GapThresholdMinutes",
+                    "caption": "Maximum interval",
+                    "suffix": " min",
+                    "minimum": 1,
+                    "maximum": 10080,
+                    "width": "150px",
+                    "visible": false
+                },
+                {
+                    "type": "Select",
                     "name": "TimeAxisLabelFormat",
                     "caption": "Time axis labels",
                     "width": "190px",
@@ -434,6 +464,10 @@
         {
             "type": "Label",
             "caption": "Real-time mode starts with the current value and only records changes while the chart is open. Reloading does not restore earlier real-time points."
+        },
+        {
+            "type": "Label",
+            "caption": "Automatic gap detection interrupts a line when an interval exceeds three times the typical interval of that series. A custom interval applies the selected number of minutes to every series."
         },
         {
             "type": "ExpansionPanel",

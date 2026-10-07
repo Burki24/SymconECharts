@@ -16,6 +16,8 @@
 - Die IPSView-Ausgabe aller Diagrammmodule kann ihren Hintergrund transparent
   darstellen und mit einer Theme- oder Benutzerfarbe in einstellbarer
   Deckkraft tönen.
+- EChartsTimeSeries kann Linien bei automatisch erkannten Datenlücken oder
+  nach einem festgelegten maximalen Zeitabstand sichtbar unterbrechen.
 
 ## Fixes
 

@@ -315,6 +315,11 @@ Dieselbe Entscheidung umfasst kalendergebundene Zeiträume für heute, gestern,
 die laufende Woche und den laufenden Monat. Deren Grenzen werden in der
 Symcon-Zeitzone gebildet und bei Zeitumstellungen nicht auf feste
 24-Stunden-Tage reduziert.
+Die additive Datenlückenerkennung aus
+[`ADR 0028`](adr/0028-timeseries-data-gap-detection.md) überführt fehlende
+Messintervalle erst im Browserrenderer in explizite ECharts-Unterbrechungen.
+Das archivierte beziehungsweise live fortgeschriebene Quellmodell bleibt
+dabei unverändert und die Funktion ist für bestehende Instanzen deaktiviert.
 Das Gerätemodul setzt davon Quellen, Roh-, Aggregat- und Echtzeitmodus,
 Punktbudget, Mehr-Achsen-Modell, native Kachel und die optionale IPSView-
 Ausgabe um.

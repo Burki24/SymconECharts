@@ -221,6 +221,60 @@ assert.equal(compatible.xAxis.axisLine.show, true);
 assert.equal(compatible.yAxis[0].axisLine.show, true);
 assert.equal(compatible.xAxis.axisLabel.formatter, undefined);
 
+const gapSeries = [{
+    id: 'temperature', variableID: 4711, label: 'Temperature', axisIndex: 0, decimals: 1,
+    unit: '°C', color: '#E5754F', style: 'line',
+    points: [[1000, 20], [1060, 21], [1120, 22], [2000, 23]]
+}];
+const automaticGaps = render(
+    undefined,
+    [{ unit: '°C' }],
+    750,
+    gapSeries,
+    'dark',
+    {},
+    'symcon',
+    false,
+    false,
+    'auto',
+    { startTimestamp: 1000, endTimestamp: 2000, gapDetectionMode: 'automatic' }
+);
+assert.equal(
+    JSON.stringify(automaticGaps.series[0].data),
+    '[[1000000,20],[1060000,21],[1120000,22],[1560000,null],[2000000,23]]'
+);
+const customGaps = render(
+    undefined,
+    [{ unit: '°C' }],
+    750,
+    gapSeries,
+    'dark',
+    {},
+    'symcon',
+    false,
+    false,
+    'auto',
+    {
+        startTimestamp: 1000, endTimestamp: 2000,
+        gapDetectionMode: 'custom', gapThresholdSeconds: 600
+    }
+);
+assert.equal(customGaps.series[0].data[3][1], null);
+const uninterruptedGaps = render(
+    undefined,
+    [{ unit: '°C' }],
+    750,
+    gapSeries,
+    'dark',
+    {},
+    'symcon',
+    false,
+    false,
+    'auto',
+    { startTimestamp: 1000, endTimestamp: 2000, gapDetectionMode: 'off' }
+);
+assert.equal(uninterruptedGaps.series[0].data.length, 4);
+
 const formattedTimeAxis = render(
     undefined,
     undefined,
@@ -374,6 +428,33 @@ const updatedCalendar = currentCalendar.getLatestOption();
 assert.equal(updatedCalendar.xAxis.min, 1000000);
 assert.equal(updatedCalendar.xAxis.max, 2100000);
 assert.equal(JSON.stringify(updatedCalendar.series[0].data), '[[1100000,20],[2100000,21]]');
+
+const liveGapSeries = [{
+    id: 'live-gap', variableID: 4711, label: 'Live gap', axisIndex: 0, decimals: 1,
+    unit: '°C', color: '#E5754F', style: 'line', points: [[1000, 20]]
+}];
+const liveGap = render(
+    undefined,
+    [{ unit: '°C' }],
+    750,
+    liveGapSeries,
+    'dark',
+    {},
+    'symcon',
+    false,
+    false,
+    'auto',
+    {
+        startTimestamp: 0, endTimestamp: 1000, durationSeconds: 3600,
+        calendarAligned: false, acceptLiveUpdates: true, pointLimitPerSeries: 100,
+        gapDetectionMode: 'custom', gapThresholdSeconds: 300
+    }
+);
+liveGap.handleMessage({ messageType: 'append', variableID: 4711, timestamp: 1600, value: 21 });
+assert.equal(
+    JSON.stringify(liveGap.getLatestOption().series[0].data),
+    '[[1000000,20],[1300000,null],[1600000,21]]'
+);
 
 const completedCalendar = render(
     undefined,

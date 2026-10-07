@@ -68,6 +68,7 @@ class EChartsTimeSeries extends IPSModuleStrict
         'week'   => 604800
     ];
     private const TIME_AXIS_LABEL_FORMATS = ['auto', 'time', 'date', 'date-time'];
+    private const GAP_DETECTION_MODES = ['off', 'automatic', 'custom'];
     private const AGGREGATION_LEVELS = [
         'minute'          => 6,
         'five-minutes'    => 5,
@@ -83,6 +84,7 @@ class EChartsTimeSeries extends IPSModuleStrict
     private const DESIGN_FORM_FIELDS = [
         'Title', 'Sources', 'Annotations', 'Range', 'CustomRangeValue', 'CustomRangeUnit',
         'TimeAxisLabelFormat', 'EChartsTheme', 'LegendPosition', 'EnableZoom',
+        'GapDetectionMode', 'GapThresholdMinutes',
         'LineWidthPercent', 'SmoothLines', 'ShowSymbols', 'SymbolSizePercent',
         'AreaOpacityPercent', 'ShowGrid', 'ShowXAxis', 'ShowYAxis',
         'IPSViewUseTileDesign', 'IPSViewEChartsTheme', 'IPSViewLegendPosition', 'IPSViewEnableZoom',
@@ -121,6 +123,8 @@ class EChartsTimeSeries extends IPSModuleStrict
         $this->RegisterPropertyString('TimeAxisLabelFormat', 'auto');
         $this->RegisterPropertyString('DataMode', 'auto');
         $this->RegisterPropertyInteger('PointBudget', 2000);
+        $this->RegisterPropertyString('GapDetectionMode', 'off');
+        $this->RegisterPropertyInteger('GapThresholdMinutes', 60);
         $this->RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO);
         $this->RegisterPropertyString('LegendPosition', 'top');
         $this->RegisterPropertyBoolean('EnableZoom', true);
@@ -200,6 +204,11 @@ class EChartsTimeSeries extends IPSModuleStrict
                 ['CustomRangeValue', 'CustomRangeUnit'],
                 $customRangeVisible
             );
+            $form['elements'] = $this->SetFormFieldVisibility(
+                $form['elements'],
+                ['GapThresholdMinutes'],
+                $this->ReadPropertyString('GapDetectionMode') === 'custom'
+            );
             $form['elements'] = $this->AttachListDesigners($form['elements']);
             $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
             $form['elements'] = $this->AttachTimeSeriesPreviewActions($form['elements']);
@@ -250,6 +259,9 @@ class EChartsTimeSeries extends IPSModuleStrict
         $customRangeVisible = (string) ($values['Range'] ?? $this->ReadPropertyString('Range')) === 'custom';
         $this->UpdateFormField('CustomRangeValue', 'visible', $customRangeVisible);
         $this->UpdateFormField('CustomRangeUnit', 'visible', $customRangeVisible);
+        $gapDetectionMode = (string) ($values['GapDetectionMode']
+            ?? $this->ReadPropertyString('GapDetectionMode'));
+        $this->UpdateFormField('GapThresholdMinutes', 'visible', $gapDetectionMode === 'custom');
         $useTileTimeSettings = (bool) ($values['IPSViewUseTileTimeSettings']
             ?? $this->ReadPropertyBoolean('IPSViewUseTileTimeSettings'));
         $ipsViewRange = (string) ($values['IPSViewRange'] ?? $this->ReadPropertyString('IPSViewRange'));
@@ -563,7 +575,9 @@ class EChartsTimeSeries extends IPSModuleStrict
                 'dataMode'            => $this->ReadPropertyString('DataMode'),
                 'aggregationLevel'    => $query['AggregationLevel'],
                 'pointBudget'         => $this->ReadPropertyInteger('PointBudget'),
-                'pointLimitPerSeries' => $query['Limit']
+                'pointLimitPerSeries' => $query['Limit'],
+                'gapDetectionMode'    => $this->ReadPropertyString('GapDetectionMode'),
+                'gapThresholdSeconds' => $this->ReadPropertyInteger('GapThresholdMinutes') * 60
             ],
             'axes'          => $axes,
             'series'        => $series,
@@ -663,6 +677,10 @@ class EChartsTimeSeries extends IPSModuleStrict
             )
             || $this->ReadPropertyInteger('PointBudget') < 200
             || $this->ReadPropertyInteger('PointBudget') > 8000
+            || !in_array($this->ReadPropertyString('GapDetectionMode'), self::GAP_DETECTION_MODES, true)
+            || ($this->ReadPropertyString('GapDetectionMode') === 'custom'
+                && ($this->ReadPropertyInteger('GapThresholdMinutes') < 1
+                    || $this->ReadPropertyInteger('GapThresholdMinutes') > 10080))
             || !EChartsAsset::IsSupportedTheme($this->ReadPropertyString('EChartsTheme'))
             || !$this->IsValidTimeSeriesDesign()
             || !EChartsIPSViewBackground::IsValid(

@@ -74,7 +74,8 @@ Folgende Module sind enthalten:
   Rohwerte bleiben ausdrücklich wählbar; alternativ stehen automatische oder
   feste Symcon-Aggregationsstufen, Linien und Flächen, bis zu acht automatisch
   oder explizit links/rechts angeordnete Einheitengruppen, Punktbudget,
-  Tooltip und einen eigenen Kacheldesigner für Legende, Zoom,
+  konfigurierbare Unterbrechungen bei zeitlichen Datenlücken, Tooltip und einen
+  eigenen Kacheldesigner für Legende, Zoom,
   Linien, Flächen, Raster und Achsen in einer nativen Kachel bereit. Ein
   eigener Echtzeitmodus zeichnet auch nicht archivierte Variablen ab dem
   Öffnen der Kachel fort. Optional kann jede Reihe Linie, Datenpunkte und
