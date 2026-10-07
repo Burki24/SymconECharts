@@ -2,8 +2,8 @@
 
 SymconECharts stellt numerische Symcon-Werte als responsive Apache-ECharts-
 Diagramme in nativen Symcon-Kacheln und optionalen IPSView-HTML-Widgets dar.
-Die Library enthält Gauges für einzelne und mehrere Werte sowie historische
-und live fortgeschriebene Zeitreihen.
+Die Library enthält Gauges für einzelne und mehrere Werte, historische und
+live fortgeschriebene Zeitreihen sowie aktuelle Kategorienvergleiche.
 
 ## Voraussetzungen
 
@@ -82,6 +82,12 @@ Folgende Module sind enthalten:
   Flächenfüllung einschließlich Verlauf oder sicher importiertem SVG-Muster
   individuell gestalten. Quellenbezogene Referenzlinien und Wertebereiche
   markieren Grenz-, Ziel- und Komfortwerte in beiden Ausgabewegen.
+
+- __EChartsBarCategory__ ([Dokumentation](EChartsBarCategory/README.md))
+  Vergleicht die aktuellen Werte von 1 bis 16 numerischen Variablen mit einer
+  gemeinsamen Einheit. Vertikale und horizontale Balken, konfigurierbare
+  Reihenfolge, individuelle Farben, Live-Aktualisierung sowie getrennte
+  Kachel- und IPSView-Designs gehören zum ersten Bar-Vertrag.
 
 Für eine reguläre Installation genügt eine gemeinsame EChartsGateway-Instanz
 für alle Gauge- und späteren Diagramminstanzen. Beim ersten Diagramm kann ein

@@ -675,6 +675,7 @@ require_once dirname(__DIR__) . '/EChartsGaugeMulti/module.php';
 require_once dirname(__DIR__) . '/EChartsGaugeTacho/module.php';
 require_once dirname(__DIR__) . '/EChartsGaugeChronograph/module.php';
 require_once dirname(__DIR__) . '/EChartsTimeSeries/module.php';
+require_once dirname(__DIR__) . '/EChartsBarCategory/module.php';
 
 final class TestableEChartsGateway extends EChartsGateway
 {
@@ -3939,6 +3940,88 @@ $invalidAnnotationTimeSeries->ApplyChanges();
 assertGatewayGauge(
     $invalidAnnotationTimeSeries->GetTestStatus() === 202,
     'Time Series must reject a value range whose maximum is not greater than its minimum.'
+);
+
+$barCategory = new EChartsBarCategory();
+$barCategory->Create();
+$barCategory->SetTestProperty('Sources', json_encode([
+    [
+        'VariableID'              => 4711,
+        'Label'                   => 'Living room',
+        'UseVariablePresentation' => false,
+        'Unit'                    => '°C',
+        'Decimals'                => 1,
+        'Color'                   => 0xF0442D
+    ],
+    [
+        'VariableID'              => 4717,
+        'Label'                   => 'Outside',
+        'UseVariablePresentation' => false,
+        'Unit'                    => '°C',
+        'Decimals'                => 1,
+        'Color'                   => -1
+    ]
+], JSON_THROW_ON_ERROR));
+$barCategory->SetTestProperty('Title', 'Temperatures');
+$barCategory->SetTestProperty('Orientation', 'horizontal');
+$barCategory->SetTestProperty('SortOrder', 'descending');
+$barCategory->SetTestProperty('EnableIPSView', true);
+$barCategory->SetTestProperty('IPSViewUseTileDesign', false);
+$barCategory->SetTestProperty('IPSViewOrientation', 'vertical');
+$barCategory->SetTestProperty('IPSViewEChartsTheme', 'dark');
+$barCategory->ApplyChanges();
+$barData = json_decode($barCategory->GetBarData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $barCategory->GetTestStatus() === IS_ACTIVE
+        && $barCategory->GetTestVisualizationType() === 1
+        && $barData['family'] === 'bar'
+        && $barData['variant'] === 'category'
+        && $barData['bar']['orientation'] === 'horizontal'
+        && $barData['bar']['sortOrder'] === 'descending'
+        && $barData['bar']['unit'] === '°C'
+        && $barData['items'][0]['color'] === '#F0442D'
+        && $barData['items'][1]['color'] === '',
+    'Category Bar must expose current same-unit values and its Tile design.'
+);
+$barTile = $barCategory->GetVisualizationTile();
+$barIPSView = $barCategory->GetIPSViewHTML();
+assertGatewayGauge(
+    str_contains($barTile, 'echarts-bar-category-root')
+        && str_contains($barTile, '"orientation":"horizontal"')
+        && str_contains($barIPSView, '"orientation":"vertical"')
+        && str_contains($barIPSView, '"theme":"dark"')
+        && strlen($barTile) < SYMCON_OUTPUT_BUFFER_LIMIT
+        && strlen($barIPSView) < SYMCON_OUTPUT_BUFFER_LIMIT,
+    'Category Bar must render independent Tile and IPSView designs below the output limit.'
+);
+$barUpdatesBefore = count($barCategory->GetTestVisualizationUpdates());
+$barCategory->MessageSink(1780000100, 4711, VM_UPDATE, []);
+assertGatewayGauge(
+    count($barCategory->GetTestVisualizationUpdates()) > $barUpdatesBefore,
+    'Category Bar must publish a new visualization state after a source update.'
+);
+$invalidBarCategory = new EChartsBarCategory();
+$invalidBarCategory->Create();
+$invalidBarCategory->SetTestProperty('Sources', json_encode([
+    [
+        'VariableID'              => 4711,
+        'UseVariablePresentation' => false,
+        'Unit'                    => '°C',
+        'Decimals'                => 1,
+        'Color'                   => -1
+    ],
+    [
+        'VariableID'              => 4713,
+        'UseVariablePresentation' => false,
+        'Unit'                    => '%',
+        'Decimals'                => 0,
+        'Color'                   => -1
+    ]
+], JSON_THROW_ON_ERROR));
+$invalidBarCategory->ApplyChanges();
+assertGatewayGauge(
+    $invalidBarCategory->GetTestStatus() === 201,
+    'Category Bar must reject sources with different effective units.'
 );
 
 echo "Gateway and Gauge module integration verified.\n";

@@ -13,7 +13,8 @@ final class EChartsAsset
 {
     public const VERSION = '6.1.0';
     public const SHA256 = '37d8c9774f27fc12e048e269e8ec6a114782529fb85262a6be8c6b887207c07f';
-    public const TIME_SERIES_SHA256 = '4496c91a9540d1b6e534b3afb515faa034bb6e854c0824527aca3da46cb3091b';
+    public const CARTESIAN_SHA256 = '68499685d1e4eb44c7f52f724783b0bae8e459ed86bd8a1dec4049589a4be987';
+    public const TIME_SERIES_SHA256 = self::CARTESIAN_SHA256;
     public const THEME_AUTO = 'auto';
     public const THEME_SHA256 = [
         'dark'        => 'ae60e563617cb87514690c1946ee202e78c9f1487820490614b58934ed037458',
@@ -160,19 +161,24 @@ final class EChartsAsset
         return self::NormalizeLineEndings($content);
     }
 
-    public static function TimeSeriesJavaScript(): string
+    public static function CartesianJavaScript(): string
     {
-        $path = __DIR__ . '/echarts/' . self::VERSION . '/echarts.timeseries.min.js';
+        $path = __DIR__ . '/echarts/' . self::VERSION . '/echarts.cartesian.min.js';
         $content = @file_get_contents($path);
         if ($content === false || $content === '') {
-            throw new RuntimeException('The bundled Apache ECharts Time Series runtime could not be loaded.');
+            throw new RuntimeException('The bundled Apache ECharts Cartesian runtime could not be loaded.');
         }
         $canonicalContent = self::NormalizeLineEndings($content);
-        if (!hash_equals(self::TIME_SERIES_SHA256, hash('sha256', $canonicalContent))) {
-            throw new RuntimeException('The bundled Apache ECharts Time Series runtime failed its integrity check.');
+        if (!hash_equals(self::CARTESIAN_SHA256, hash('sha256', $canonicalContent))) {
+            throw new RuntimeException('The bundled Apache ECharts Cartesian runtime failed its integrity check.');
         }
 
         return $canonicalContent;
+    }
+
+    public static function TimeSeriesJavaScript(): string
+    {
+        return self::CartesianJavaScript();
     }
 
     /** @return list<string> */

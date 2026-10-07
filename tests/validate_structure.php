@@ -25,6 +25,7 @@ $requiredFiles = [
     'docs/adr/0019-timeseries-realtime-without-archive.md',
     'docs/adr/0023-timeseries-source-design-and-svg-area-patterns.md',
     'docs/adr/0027-timeseries-custom-ranges-and-time-axis-labels.md',
+    'docs/adr/0029-bar-chart-families-and-category-bar.md',
     'library.json',
     'libs/EChartsAsset.php',
     'libs/EChartsDataProtocol.php',
@@ -34,7 +35,7 @@ $requiredFiles = [
     'libs/EChartsSvgImage.php',
     'libs/EChartsSvgPath.php',
     'libs/echarts/6.1.0/echarts.gauge.min.js',
-    'libs/echarts/6.1.0/echarts.timeseries.min.js',
+    'libs/echarts/6.1.0/echarts.cartesian.min.js',
     'libs/echarts/6.1.0/themes/dark.js',
     'libs/echarts/6.1.0/themes/vintage.js',
     'libs/echarts/6.1.0/themes/macarons.js',
@@ -78,18 +79,22 @@ $requiredFiles = [
     'tests/symcon_strict.php',
     'tests/test_update_library_metadata.py',
     'tests/time_series_layout.js',
+    'tests/bar_category_layout.js',
     'tests/validate_structure.php',
     '.tools/echarts-runtime/package.json',
     '.tools/echarts-runtime/package-lock.json',
     '.tools/echarts-runtime/README.md',
     '.tools/echarts-runtime/scripts/copy-themes.mjs',
     '.tools/echarts-runtime/src/gauge-runtime.js',
-    '.tools/echarts-runtime/src/timeseries-runtime.js',
+    '.tools/echarts-runtime/src/cartesian-runtime.js',
     'EChartsGaugeSingle/visualization/index.html',
     'EChartsGaugeSingle/visualization/style.css',
     'EChartsGaugeSingle/visualization/app.js',
     'EChartsGaugeSingle/GaugePreview.php',
-    'EChartsTimeSeries/TimeSeriesPreview.php'
+    'EChartsTimeSeries/TimeSeriesPreview.php',
+    'EChartsBarCategory/visualization/index.html',
+    'EChartsBarCategory/visualization/style.css',
+    'EChartsBarCategory/visualization/app.js'
 ];
 
 foreach ($requiredFiles as $requiredFile) {
@@ -282,8 +287,8 @@ if ($helperSync !== null) {
 }
 
 $expectedModules = [
-    'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti', 'EChartsGaugeSingle', 'EChartsGaugeTacho',
-    'EChartsTimeSeries'
+    'EChartsBarCategory', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
+    'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsTimeSeries'
 ];
 $discoveredModules = [];
 foreach (glob($root . '/*/module.json') ?: [] as $modulePath) {

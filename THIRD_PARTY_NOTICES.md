@@ -25,12 +25,12 @@ Ausgelieferte Dateien:
   Gauge-spezifischer Browser-Build aus ECharts Core, Gauge Chart, Aria,
   Tooltip, Graphic Component und Canvas Renderer; 486.506 Byte; SHA-256
   `37d8c9774f27fc12e048e269e8ec6a114782529fb85262a6be8c6b887207c07f`;
-- `libs/echarts/6.1.0/echarts.timeseries.min.js` – reproduzierbarer,
-  Zeitreihen-spezifischer Browser-Build aus ECharts Core, Line Chart, Grid,
+- `libs/echarts/6.1.0/echarts.cartesian.min.js` – reproduzierbarer,
+  kartesischer Browser-Build aus ECharts Core, Line Chart, Bar Chart, Grid,
   Legende, Titel, Tooltip, Data Zoom, Mark Line, Mark Area, Aria und Canvas
-  Renderer; 598.544 Byte;
+  Renderer; 621.264 Byte;
   SHA-256
-  `4496c91a9540d1b6e534b3afb515faa034bb6e854c0824527aca3da46cb3091b`;
+  `68499685d1e4eb44c7f52f724783b0bae8e459ed86bd8a1dec4049589a4be987`;
 - `libs/echarts/6.1.0/themes/dark.js` – offizielles Theme Dark; 5.981 Byte;
   SHA-256 `ae60e563617cb87514690c1946ee202e78c9f1487820490614b58934ed037458`;
 - `libs/echarts/6.1.0/themes/vintage.js` – offizielles Theme Vintage;

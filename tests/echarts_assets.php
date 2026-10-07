@@ -15,13 +15,13 @@ function assertEChartsAsset(bool $condition, string $message): void
 
 $root = dirname(__DIR__);
 $runtimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.gauge.min.js';
-$timeSeriesRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.timeseries.min.js';
+$cartesianRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.cartesian.min.js';
 $licensePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/LICENSE.txt';
 $noticePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/NOTICE.txt';
 $runtime = (string) file_get_contents($runtimePath);
-$timeSeriesRuntime = (string) file_get_contents($timeSeriesRuntimePath);
+$cartesianRuntime = (string) file_get_contents($cartesianRuntimePath);
 $runtimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/gauge-runtime.js');
-$timeSeriesRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/timeseries-runtime.js');
+$cartesianRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/cartesian-runtime.js');
 $windowsCheckoutRuntime = str_replace("\n", "\r\n", $runtime);
 $expectedThemeIDs = ['auto', 'dark', 'vintage', 'macarons', 'infographic', 'shine', 'roma'];
 
@@ -36,23 +36,30 @@ assertEChartsAsset(
     'The Gauge-specific ECharts runtime must remain below 512 KiB.'
 );
 assertEChartsAsset(str_contains($runtime, 'window.echarts'), 'The Gauge runtime must expose the ECharts browser API.');
-assertEChartsAsset(is_file($timeSeriesRuntimePath), 'The pinned Time Series runtime is missing.');
+assertEChartsAsset(is_file($cartesianRuntimePath), 'The pinned Cartesian runtime is missing.');
 assertEChartsAsset(
-    hash_file('sha256', $timeSeriesRuntimePath) === EChartsAsset::TIME_SERIES_SHA256,
-    'The pinned Time Series runtime checksum changed.'
+    hash_file('sha256', $cartesianRuntimePath) === EChartsAsset::CARTESIAN_SHA256,
+    'The pinned Cartesian runtime checksum changed.'
 );
 assertEChartsAsset(
-    EChartsAsset::TimeSeriesJavaScript() === $timeSeriesRuntime,
-    'The asset loader changed the Time Series runtime.'
+    EChartsAsset::TIME_SERIES_SHA256 === EChartsAsset::CARTESIAN_SHA256,
+    'The Time Series runtime checksum compatibility alias changed.'
 );
 assertEChartsAsset(
-    strlen($timeSeriesRuntime) < 614400 && str_contains($timeSeriesRuntime, 'window.echarts'),
-    'The Time Series ECharts runtime must expose the browser API and remain below 600 KiB.'
+    EChartsAsset::CartesianJavaScript() === $cartesianRuntime
+        && EChartsAsset::TimeSeriesJavaScript() === $cartesianRuntime,
+    'The asset loader changed the Cartesian runtime or its compatibility alias.'
 );
 assertEChartsAsset(
-    str_contains($timeSeriesRuntimeSource, 'MarkLineComponent')
-        && str_contains($timeSeriesRuntimeSource, 'MarkAreaComponent'),
-    'The Time Series runtime must include the native ECharts marker components.'
+    strlen($cartesianRuntime) < 655360 && str_contains($cartesianRuntime, 'window.echarts'),
+    'The Cartesian ECharts runtime must expose the browser API and remain below 640 KiB.'
+);
+assertEChartsAsset(
+    str_contains($cartesianRuntimeSource, 'LineChart')
+        && str_contains($cartesianRuntimeSource, 'BarChart')
+        && str_contains($cartesianRuntimeSource, 'MarkLineComponent')
+        && str_contains($cartesianRuntimeSource, 'MarkAreaComponent'),
+    'The Cartesian runtime must include Line, Bar and native marker components.'
 );
 assertEChartsAsset(
     str_contains($runtimeSource, 'GraphicComponent'),

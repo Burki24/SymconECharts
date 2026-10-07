@@ -7,9 +7,9 @@
         "node": ">=18"
     },
     "scripts": {
-        "build": "npm run build:runtime && npm run build:timeseries && npm run build:themes",
+        "build": "npm run build:runtime && npm run build:cartesian && npm run build:themes",
         "build:runtime": "esbuild src/gauge-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.gauge.min.js",
-        "build:timeseries": "esbuild src/timeseries-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.timeseries.min.js",
+        "build:cartesian": "esbuild src/cartesian-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.cartesian.min.js",
         "build:themes": "node scripts/copy-themes.mjs"
     },
     "dependencies": {

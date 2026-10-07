@@ -23,6 +23,7 @@ $gaugeMulti = (string) file_get_contents($root . '/EChartsGaugeMulti/module.php'
 $gaugeTacho = (string) file_get_contents($root . '/EChartsGaugeTacho/module.php');
 $gaugeChronograph = (string) file_get_contents($root . '/EChartsGaugeChronograph/module.php');
 $timeSeries = (string) file_get_contents($root . '/EChartsTimeSeries/module.php');
+$barCategory = (string) file_get_contents($root . '/EChartsBarCategory/module.php');
 $sharedGatewayGuidance = 'One shared EChartsGateway is sufficient for all ECharts chart instances. '
     . 'When adding further charts, select the existing gateway instead of creating another one.';
 
@@ -32,7 +33,8 @@ foreach ([
     'EChartsGaugeMulti'       => $gaugeMulti,
     'EChartsGaugeTacho'       => $gaugeTacho,
     'EChartsGaugeChronograph' => $gaugeChronograph,
-    'EChartsTimeSeries'       => $timeSeries
+    'EChartsTimeSeries'       => $timeSeries,
+    'EChartsBarCategory'      => $barCategory
 ] as $moduleName => $source) {
     requireStrictContract(
         preg_match('/class\s+' . $moduleName . '\s+extends\s+IPSModuleStrict\b/', $source) === 1,
@@ -111,6 +113,27 @@ foreach ([
     requireStrictContract(
         str_contains($timeSeries, $timeSeriesContract),
         'EChartsTimeSeries is missing contract: ' . $timeSeriesContract,
+        $errors
+    );
+}
+
+foreach ([
+    'SetVisualizationType(1)',
+    'public function GetVisualizationTile(): string',
+    'public function GetIPSViewHTML(): string',
+    'public function GetBarData(): string',
+    'public function GetBarDiagnostic(): string',
+    'public function CopyTileDesignToIPSView(): void',
+    '$this->RegisterDesignProperties();',
+    "RegisterPropertyString(\$prefix . 'Orientation', 'vertical')",
+    "RegisterPropertyString(\$prefix . 'SortOrder', 'configured')",
+    'EChartsAsset::CartesianJavaScript()',
+    'EChartsVariablePresentation::Resolve(',
+    'RegisterMessage($variableID, VM_UPDATE)'
+] as $barCategoryContract) {
+    requireStrictContract(
+        str_contains($barCategory, $barCategoryContract),
+        'EChartsBarCategory is missing contract: ' . $barCategoryContract,
         $errors
     );
 }
