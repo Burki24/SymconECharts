@@ -66,6 +66,18 @@ function render(
                     chart: { title: 'Climate', enableZoom: true, design },
                     range: { startTimestamp: 1000, endTimestamp: 2000 },
                     axes: axes || [{ unit: '°C' }, { unit: '%' }],
+                    annotations: [
+                        {
+                            type: 'line', seriesIndex: 0, label: 'Target', value: 22.5,
+                            color: '#E5754F', lineType: 'dashed', lineWidthPercent: 150,
+                            opacityPercent: 20
+                        },
+                        {
+                            type: 'area', seriesIndex: 1, label: 'Warning', value: 60, maximum: 80,
+                            color: '#123456', lineType: 'solid', lineWidthPercent: 100,
+                            opacityPercent: 25
+                        }
+                    ],
                     series: chartSeries || [
                         {
                             id: 'temperature', label: 'Temperature', axisIndex: 0, decimals: 1,
@@ -158,6 +170,15 @@ assert.equal(custom.series[0].smooth, true);
 assert.equal(custom.series[0].showSymbol, true);
 assert.equal(custom.series[0].symbolSize, 7.5);
 assert.equal(custom.series[0].areaStyle.opacity, 0.4);
+assert.equal(custom.series[0].markLine.symbol, 'none');
+assert.equal(custom.series[0].markLine.data[0].yAxis, 22.5);
+assert.equal(custom.series[0].markLine.data[0].lineStyle.color, '#E5754F');
+assert.equal(custom.series[0].markLine.data[0].lineStyle.type, 'dashed');
+assert.equal(custom.series[0].markLine.data[0].lineStyle.width, 3);
+assert.equal(custom.series[1].markArea.data[0][0].yAxis, 60);
+assert.equal(custom.series[1].markArea.data[0][1].yAxis, 80);
+assert.equal(custom.series[1].markArea.data[0][0].itemStyle.color, '#123456');
+assert.equal(custom.series[1].markArea.data[0][0].itemStyle.opacity, 0.25);
 assert.equal(custom.xAxis.axisLine.show, false);
 assert.equal(custom.xAxis.splitLine.show, false);
 assert.equal(custom.yAxis[0].axisLine.show, true);

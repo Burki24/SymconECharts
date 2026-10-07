@@ -3013,6 +3013,30 @@ $timeSeries->SetTestProperty('Sources', json_encode([
     ]
 ], JSON_THROW_ON_ERROR));
 $timeSeries->SetTestProperty('Range', '1h');
+$timeSeries->SetTestProperty('Annotations', json_encode([
+    [
+        'VariableID'       => 4711,
+        'Type'             => 'line',
+        'Label'            => 'Comfort target',
+        'Value'            => 22.5,
+        'Maximum'          => 0.0,
+        'Color'            => 0xE5754F,
+        'LineType'         => 'dashed',
+        'LineWidthPercent' => 150,
+        'OpacityPercent'   => 20
+    ],
+    [
+        'VariableID'       => 4713,
+        'Type'             => 'area',
+        'Label'            => 'Humidity warning',
+        'Value'            => 60.0,
+        'Maximum'          => 80.0,
+        'Color'            => '#123456',
+        'LineType'         => 'solid',
+        'LineWidthPercent' => 100,
+        'OpacityPercent'   => 25
+    ]
+], JSON_THROW_ON_ERROR));
 $timeSeries->SetTestProperty('DataMode', 'auto');
 $timeSeries->SetTestProperty('PointBudget', 2000);
 $timeSeries->SetTestProperty('LegendPosition', 'bottom');
@@ -3052,6 +3076,23 @@ assertGatewayGauge(
         && $timeSeriesData['series'][1]['effectiveReducer'] === 'sum'
         && $timeSeriesData['series'][1]['color'] === ''
         && $timeSeriesData['series'][1]['design'] === []
+        && $timeSeriesData['annotations'][0] === [
+            'type'             => 'line',
+            'variableID'       => 4711,
+            'seriesIndex'      => 0,
+            'label'            => 'Comfort target',
+            'value'            => 22.5,
+            'color'            => '#E5754F',
+            'lineType'         => 'dashed',
+            'lineWidthPercent' => 150,
+            'opacityPercent'   => 20
+        ]
+        && $timeSeriesData['annotations'][1]['type'] === 'area'
+        && $timeSeriesData['annotations'][1]['seriesIndex'] === 1
+        && $timeSeriesData['annotations'][1]['value'] === 60.0
+        && $timeSeriesData['annotations'][1]['maximum'] === 80.0
+        && $timeSeriesData['annotations'][1]['color'] === '#123456'
+        && $timeSeriesData['annotations'][1]['opacityPercent'] === 25
         && $timeSeriesData['chart']['design'] === [
             'legendPosition'     => 'bottom',
             'lineWidthPercent'   => 150,
@@ -3072,6 +3113,10 @@ assertGatewayGauge(
         && str_contains($timeSeriesForm, 'AxisRangeMode')
         && str_contains($timeSeriesForm, 'AxisMinimum')
         && str_contains($timeSeriesForm, 'AxisMaximum')
+        && str_contains($timeSeriesForm, 'Annotations')
+        && str_contains($timeSeriesForm, 'Reference line')
+        && str_contains($timeSeriesForm, 'Value range')
+        && str_contains($timeSeriesForm, 'ECTS_UpdateTimeSeriesPreviewAnnotationFromForm')
         && str_contains($timeSeriesForm, 'SelectColor')
         && str_contains($timeSeriesForm, 'transparentCaption')
         && str_contains($timeSeriesForm, 'UseIndividualDesign')
@@ -3097,6 +3142,17 @@ $timeSeries->UpdateTimeSeriesPreviewFromForm(json_encode([
         'Label'      => 'Outdoor temperature',
         'Color'      => 0xE5754F,
         'Style'      => 'area'
+    ]],
+    'Annotations'        => [[
+        'VariableID'       => 4711,
+        'Type'             => 'line',
+        'Label'            => 'Preview target',
+        'Value'            => 21.5,
+        'Maximum'          => 0.0,
+        'Color'            => -1,
+        'LineType'         => 'dotted',
+        'LineWidthPercent' => 100,
+        'OpacityPercent'   => 18
     ]],
     'EChartsTheme'       => 'dark',
     'LegendPosition'     => 'hidden',
@@ -3128,7 +3184,9 @@ assertGatewayGauge(
         && str_contains($timeSeriesPreviewSvg, 'data-smooth-lines="false"')
         && str_contains($timeSeriesPreviewSvg, 'data-show-symbols="true"')
         && str_contains($timeSeriesPreviewSvg, 'data-area-opacity="0.55"')
-        && str_contains($timeSeriesPreviewSvg, 'data-axis-color="#E5754F"'),
+        && str_contains($timeSeriesPreviewSvg, 'data-axis-color="#E5754F"')
+        && str_contains($timeSeriesPreviewSvg, 'data-annotation-type="line"')
+        && str_contains($timeSeriesPreviewSvg, 'Preview target'),
     'Time Series Tile and IPSView previews must react immediately to unpersisted source and design values.'
 );
 $timeSeriesTile = $timeSeries->GetVisualizationTile();
@@ -3552,6 +3610,35 @@ $invalidSourceDesignTimeSeries->ApplyChanges();
 assertGatewayGauge(
     $invalidSourceDesignTimeSeries->GetTestStatus() === 202,
     'Time Series must reject unsafe SVG area patterns in an active individual source design.'
+);
+
+$invalidAnnotationTimeSeries = new EChartsTimeSeries();
+$invalidAnnotationTimeSeries->Create();
+$invalidAnnotationTimeSeries->SetTestProperty('Sources', json_encode([[
+    'VariableID'              => 4711,
+    'Label'                   => '',
+    'UseVariablePresentation' => false,
+    'Unit'                    => '°C',
+    'Decimals'                => 1,
+    'Color'                   => '',
+    'Style'                   => 'line',
+    'Reducer'                 => 'auto'
+]], JSON_THROW_ON_ERROR));
+$invalidAnnotationTimeSeries->SetTestProperty('Annotations', json_encode([[
+    'VariableID'       => 4711,
+    'Type'             => 'area',
+    'Label'            => 'Invalid range',
+    'Value'            => 25.0,
+    'Maximum'          => 20.0,
+    'Color'            => -1,
+    'LineType'         => 'solid',
+    'LineWidthPercent' => 100,
+    'OpacityPercent'   => 18
+]], JSON_THROW_ON_ERROR));
+$invalidAnnotationTimeSeries->ApplyChanges();
+assertGatewayGauge(
+    $invalidAnnotationTimeSeries->GetTestStatus() === 202,
+    'Time Series must reject a value range whose maximum is not greater than its minimum.'
 );
 
 echo "Gateway and Gauge module integration verified.\n";

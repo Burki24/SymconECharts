@@ -21,6 +21,7 @@ $noticePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/NOTICE.txt';
 $runtime = (string) file_get_contents($runtimePath);
 $timeSeriesRuntime = (string) file_get_contents($timeSeriesRuntimePath);
 $runtimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/gauge-runtime.js');
+$timeSeriesRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/timeseries-runtime.js');
 $windowsCheckoutRuntime = str_replace("\n", "\r\n", $runtime);
 $expectedThemeIDs = ['auto', 'dark', 'vintage', 'macarons', 'infographic', 'shine', 'roma'];
 
@@ -47,6 +48,11 @@ assertEChartsAsset(
 assertEChartsAsset(
     strlen($timeSeriesRuntime) < 614400 && str_contains($timeSeriesRuntime, 'window.echarts'),
     'The Time Series ECharts runtime must expose the browser API and remain below 600 KiB.'
+);
+assertEChartsAsset(
+    str_contains($timeSeriesRuntimeSource, 'MarkLineComponent')
+        && str_contains($timeSeriesRuntimeSource, 'MarkAreaComponent'),
+    'The Time Series runtime must include the native ECharts marker components.'
 );
 assertEChartsAsset(
     str_contains($runtimeSource, 'GraphicComponent'),

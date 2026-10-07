@@ -64,7 +64,8 @@ Folgende Module beinhaltet das SymconECharts Repository:
   eigener Echtzeitmodus zeichnet auch nicht archivierte Variablen ab dem
   Öffnen der Kachel fort. Optional kann jede Reihe Linie, Datenpunkte und
   Flächenfüllung einschließlich Verlauf oder sicher importiertem SVG-Muster
-  individuell gestalten.
+  individuell gestalten. Quellenbezogene Referenzlinien und Wertebereiche
+  markieren Grenz-, Ziel- und Komfortwerte in beiden Ausgabewegen.
 
 Für eine reguläre Installation genügt eine gemeinsame EChartsGateway-Instanz
 für alle Gauge- und späteren Diagramminstanzen. Beim ersten Diagramm kann ein
@@ -101,7 +102,8 @@ Der Gateway-Vertrag für Archivdaten und die darauf aufbauende native
 Zeitreihen-Kachel sowie ihre getrennt gestaltbare IPSView-WebContent-Ausgabe
 sind implementiert. Wertachsen können je Einheitengruppe automatisch, anhand
 der Variablendarstellung oder mit manuellem Minimum und Maximum skaliert
-werden. Weiterführende Zeitreihen-Designoptionen folgen auf dieser Basis.
+werden. Referenzlinien und Wertebereiche sind quellenbezogen konfigurierbar
+und folgen dadurch der passenden Wertachse.
 Alle Gauge-Module besitzen optionale IPSView-WebContent-Ausgaben und können
 ihr Kacheldesign erben oder unabhängig gestaltet werden. Wie TimeSeries können
 sie den IPSView-Hintergrund transparent durchscheinen lassen und ihn mit einer

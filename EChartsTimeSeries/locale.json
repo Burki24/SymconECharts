@@ -53,6 +53,15 @@
             "Left": "Links",
             "Right": "Rechts",
             "Sources with the same unit share one value axis and must use the same explicitly selected side. Automatic distributes unit axes between left and right.": "Quellen mit derselben Einheit teilen sich eine Wertachse und müssen dieselbe ausdrücklich gewählte Seite verwenden. Automatisch verteilt Einheitenachsen auf links und rechts.",
+            "Reference lines and value ranges": "Referenzlinien und Wertebereiche",
+            "Source": "Quelle",
+            "Marker type": "Markierungstyp",
+            "Reference line": "Referenzlinie",
+            "Value range": "Wertebereich",
+            "Series color": "Reihenfarbe",
+            "Value / minimum": "Wert / Minimum",
+            "Range opacity": "Bereichsdeckkraft",
+            "Reference lines use Value. Value ranges use Value as minimum and Maximum as upper boundary.": "Referenzlinien verwenden Wert. Wertebereiche verwenden Wert als Minimum und Maximum als obere Grenze.",
             "Time range": "Zeitraum",
             "1 hour": "1 Stunde",
             "6 hours": "6 Stunden",
@@ -108,7 +117,11 @@
             "The time series could not be loaded.": "Die Zeitreihe konnte nicht geladen werden.",
             "Sources with the same unit must use the same axis side.": "Quellen mit derselben Einheit müssen dieselbe Achsenseite verwenden.",
             "Sources with the same unit must use the same explicit axis range.": "Quellen mit derselben Einheit müssen denselben expliziten Achsenbereich verwenden.",
-            "The value axis minimum must be smaller than its maximum.": "Das Wertachsenminimum muss kleiner als das Maximum sein."
+            "The value axis minimum must be smaller than its maximum.": "Das Wertachsenminimum muss kleiner als das Maximum sein.",
+            "Time series annotations must contain valid JSON.": "Zeitreihenmarkierungen müssen gültiges JSON enthalten.",
+            "Configure no more than 32 time series annotations.": "Höchstens 32 Zeitreihenmarkierungen konfigurieren.",
+            "Time series annotation settings are invalid.": "Die Einstellungen der Zeitreihenmarkierungen sind ungültig.",
+            "A time series value range requires a minimum smaller than its maximum.": "Ein Zeitreihen-Wertebereich benötigt ein Minimum, das kleiner als sein Maximum ist."
         }
     }
 }

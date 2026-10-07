@@ -22,6 +22,9 @@ optional ein eigenständiges IPSView-WebContent-Widget.
   expliziter Anordnung links beziehungsweise rechts;
 - automatische Wertachsenbereiche sowie wahlweise die Übernahme von Minimum
   und Maximum aus der Variablendarstellung oder eine manuelle Vorgabe;
+- quellenbezogene Referenzlinien und Wertebereiche mit Beschriftung,
+  Reihenfarbe oder eigener Farbe sowie konfigurierbarer Linienart,
+  Linienstärke und Bereichsdeckkraft;
 - farblich gekoppelte Wertachsen: Achsenlinie, Teilstriche, Skalenwerte und
   Einheit übernehmen die Farbe der ersten zugeordneten Datenreihe;
 - gemeinsames Punktbudget von 200 bis 8.000 Punkten, maximal 2.000 je Reihe;
@@ -73,7 +76,12 @@ Kachel einen Hinweis auf das wirksame Punktbudget.
    des Kachel- beziehungsweise IPSView-Designers. SVG-Flächenmuster werden nur
    für den Flächenstil verwendet und vor der Ausgabe sicher validiert.
 5. Optional den Kacheldesigner öffnen und Darstellung sowie Vorschau anpassen.
-6. Optional im Abschnitt **IPSView-Design** die WebContent-Ausgabe aktivieren.
+6. Optional unter **Referenzlinien und Wertebereiche** bis zu 32 Markierungen
+   ergänzen. Jede Markierung ist einer konfigurierten Quelle zugeordnet und
+   verwendet damit deren Wertachse. Eine Referenzlinie benötigt einen Wert;
+   ein Wertebereich ein Minimum und ein größeres Maximum. Ohne eigene Farbe
+   übernimmt die Markierung die Reihenfarbe.
+7. Optional im Abschnitt **IPSView-Design** die WebContent-Ausgabe aktivieren.
    Standardmäßig übernimmt sie das Kacheldesign. Für eine abweichende
    Gestaltung das Kacheldesign kopieren und anschließend den unabhängigen
    IPSView-Designer bearbeiten. **An Hintergrundfarbe anpassen** lässt den

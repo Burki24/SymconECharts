@@ -8,7 +8,11 @@ use Burki24\SymconModuleHelper\SVGPreviewHelper;
 
 final class EChartsTimeSeriesPreview
 {
-    /** @param list<array{label:string,color:string,style:string,design?:array<string,mixed>}> $series @param array<string,mixed> $design */
+    /**
+     * @param list<array{variableID?:int,label:string,color:string,style:string,design?:array<string,mixed>}> $series
+     * @param array<string,mixed> $design
+     * @param list<array<string,mixed>> $annotations
+     */
     public static function CreateSvg(
         array $series,
         string $title,
@@ -16,7 +20,8 @@ final class EChartsTimeSeriesPreview
         array $design,
         bool $adaptToBackground = false,
         string $backgroundColor = '',
-        int $backgroundOpacityPercent = 35
+        int $backgroundOpacityPercent = 35,
+        array $annotations = []
     ): string {
         $palette = EChartsAsset::ThemePreviewPalette($theme);
         $series = $series !== [] ? array_slice($series, 0, 4) : [
@@ -67,6 +72,50 @@ final class EChartsTimeSeriesPreview
                 . self::N($plotBottom) . '" stroke="'
                 . SVGPreviewHelper::escape($effectiveColors[0] ?? $palette['border']) . '"/>';
         }
+
+        $annotationAreas = '';
+        $annotationLines = '';
+        $annotationCount = count($annotations);
+        foreach ($annotations as $annotationIndex => $annotation) {
+            $seriesIndex = (int) ($annotation['seriesIndex'] ?? -1);
+            if ($seriesIndex < 0 || !isset($effectiveColors[$seriesIndex])) {
+                continue;
+            }
+            $color = is_string($annotation['color'] ?? null)
+                && preg_match('/^#[0-9A-F]{6}$/i', $annotation['color']) === 1
+                ? $annotation['color']
+                : $effectiveColors[$seriesIndex];
+            $label = trim(is_string($annotation['label'] ?? null) ? $annotation['label'] : '');
+            $y = $plotTop + ($plotBottom - $plotTop) * ($annotationIndex + 1) / ($annotationCount + 1);
+            if (($annotation['type'] ?? 'line') === 'area') {
+                $opacity = max(0, min(100, (int) ($annotation['opacityPercent'] ?? 18))) / 100;
+                $annotationAreas .= '<rect x="70" y="' . self::N($y - 13) . '" width="610" height="26"'
+                    . ' fill="' . SVGPreviewHelper::escape($color) . '" opacity="' . self::N($opacity) . '"'
+                    . ' data-annotation-type="area"/>';
+                if ($label !== '') {
+                    $annotationAreas .= '<text x="675" y="' . self::N($y - 17) . '" text-anchor="end"'
+                        . ' fill="' . SVGPreviewHelper::escape($color) . '" font-size="11">'
+                        . SVGPreviewHelper::escape($label) . '</text>';
+                }
+                continue;
+            }
+            $lineWidth = 2.0 * max(50, min(200, (int) ($annotation['lineWidthPercent'] ?? 100))) / 100;
+            $dashArray = match ((string) ($annotation['lineType'] ?? 'solid')) {
+                'dashed' => '10 7',
+                'dotted' => '2 6',
+                default  => ''
+            };
+            $annotationLines .= '<line x1="70" y1="' . self::N($y) . '" x2="680" y2="' . self::N($y)
+                . '" stroke="' . SVGPreviewHelper::escape($color) . '" stroke-width="' . self::N($lineWidth) . '"'
+                . ($dashArray !== '' ? ' stroke-dasharray="' . $dashArray . '"' : '')
+                . ' data-annotation-type="line"/>';
+            if ($label !== '') {
+                $annotationLines .= '<text x="675" y="' . self::N($y - 6) . '" text-anchor="end"'
+                    . ' fill="' . SVGPreviewHelper::escape($color) . '" font-size="11">'
+                    . SVGPreviewHelper::escape($label) . '</text>';
+            }
+        }
+        $content .= $annotationAreas;
 
         foreach ($series as $index => $item) {
             $color = $effectiveColors[$index];
@@ -148,6 +197,7 @@ final class EChartsTimeSeriesPreview
                 );
             }
         }
+        $content .= $annotationLines;
 
         if ($legendPosition !== 'hidden') {
             $legendY = $legendPosition === 'bottom' ? 352 : 64;

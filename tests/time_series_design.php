@@ -22,6 +22,7 @@ $defaults = EChartsTimeSeriesDesign::SourceDesignDefaults();
 $columns = EChartsTimeSeriesDesign::SourceDesignColumns();
 $axisColumns = EChartsTimeSeriesDesign::AxisRangeColumns();
 $form = EChartsTimeSeriesDesign::SourceEditorForm();
+$annotationForm = EChartsTimeSeriesDesign::AnnotationEditorForm();
 assertTimeSeriesDesign(
     ($defaults['UseIndividualDesign'] ?? null) === false
         && ($columns[0]['name'] ?? null) === 'UseIndividualDesign'
@@ -30,7 +31,10 @@ assertTimeSeriesDesign(
         && array_column($axisColumns, 'name') === ['AxisRangeMode', 'AxisMinimum', 'AxisMaximum']
         && array_column($axisColumns, 'add') === ['auto', 0.0, 100.0]
         && EChartsTimeSeriesDesign::AXIS_RANGE_MODES === ['auto', 'presentation', 'manual']
+        && EChartsTimeSeriesDesign::ANNOTATION_TYPES === ['line', 'area']
+        && EChartsTimeSeriesDesign::ANNOTATION_LINE_TYPES === ['solid', 'dashed', 'dotted']
         && str_contains(json_encode($form, JSON_THROW_ON_ERROR), 'AxisRangeMode')
+        && str_contains(json_encode($annotationForm, JSON_THROW_ON_ERROR), 'OpacityPercent')
         && array_is_list($form),
     'The Time Series source designer or axis-range contract changed.'
 );
@@ -71,18 +75,45 @@ assertTimeSeriesDesign(
     'The individual Time Series SVG area pattern was not imported safely.'
 );
 $svgPreview = EChartsTimeSeriesPreview::CreateSvg([[
-    'label'  => 'Humidity',
-    'color'  => '#55CBB5',
-    'style'  => 'area',
-    'design' => array_merge($svgStyle, [
+    'variableID' => 4711,
+    'label'      => 'Humidity',
+    'color'      => '#55CBB5',
+    'style'      => 'area',
+    'design'     => array_merge($svgStyle, [
         'lineType'    => 'dashed',
         'pointSymbol' => 'diamond'
     ])
-]], 'SVG pattern', 'dark', []);
+]], 'SVG pattern', 'dark', [], annotations: [
+    [
+        'type'             => 'line',
+        'seriesIndex'      => 0,
+        'label'            => 'Target',
+        'value'            => 22.5,
+        'color'            => '#E5754F',
+        'lineType'         => 'dashed',
+        'lineWidthPercent' => 150,
+        'opacityPercent'   => 20
+    ],
+    [
+        'type'             => 'area',
+        'seriesIndex'      => 0,
+        'label'            => 'Comfort',
+        'value'            => 40.0,
+        'maximum'          => 60.0,
+        'color'            => '#55CBB5',
+        'lineType'         => 'solid',
+        'lineWidthPercent' => 100,
+        'opacityPercent'   => 25
+    ]
+]);
 assertTimeSeriesDesign(
     str_contains($svgPreview, '<pattern id="area-pattern-0"')
         && str_contains($svgPreview, 'data:image/svg+xml;base64,')
         && str_contains($svgPreview, 'stroke-dasharray="10 7"')
+        && str_contains($svgPreview, 'data-annotation-type="line"')
+        && str_contains($svgPreview, 'data-annotation-type="area"')
+        && str_contains($svgPreview, 'Target')
+        && str_contains($svgPreview, 'Comfort')
         && str_contains($svgPreview, '<path d="M 310'),
     'The Time Series preview does not visualize the individual SVG area pattern and line design.'
 );

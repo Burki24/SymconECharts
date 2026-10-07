@@ -47,6 +47,7 @@ class EChartsTimeSeries extends IPSModuleStrict
     private const DATA_ID_FROM_PARENT = '{E4749B72-912B-E3E3-1C57-D19019FFDD84}';
     private const MINIMUM_SOURCE_COUNT = 1;
     private const MAXIMUM_SOURCE_COUNT = 8;
+    private const MAXIMUM_ANNOTATION_COUNT = 32;
     private const IPSVIEW_OUTPUT_IDENT = 'IPSViewTimeSeries';
     private const STATUS_SOURCE_INVALID = 201;
     private const STATUS_CONFIGURATION_INVALID = 202;
@@ -72,7 +73,7 @@ class EChartsTimeSeries extends IPSModuleStrict
     private const AXIS_POSITIONS = ['auto', 'left', 'right'];
     private const LEGEND_POSITIONS = ['top', 'bottom', 'hidden'];
     private const DESIGN_FORM_FIELDS = [
-        'Title', 'Sources', 'EChartsTheme', 'LegendPosition', 'EnableZoom',
+        'Title', 'Sources', 'Annotations', 'EChartsTheme', 'LegendPosition', 'EnableZoom',
         'LineWidthPercent', 'SmoothLines', 'ShowSymbols', 'SymbolSizePercent',
         'AreaOpacityPercent', 'ShowGrid', 'ShowXAxis', 'ShowYAxis',
         'IPSViewUseTileDesign', 'IPSViewEChartsTheme', 'IPSViewLegendPosition', 'IPSViewEnableZoom',
@@ -101,6 +102,7 @@ class EChartsTimeSeries extends IPSModuleStrict
         $this->RegisterMessage(0, IPS_KERNELSTARTED);
         $this->RegisterTimer('ArchiveRefresh', 0, 'ECTS_RefreshArchive($_IPS["TARGET"]);');
         $this->RegisterPropertyString('Sources', '[]');
+        $this->RegisterPropertyString('Annotations', '[]');
         $this->RegisterPropertyString('Title', '');
         $this->RegisterPropertyString('Range', '24h');
         $this->RegisterPropertyString('DataMode', 'auto');
@@ -173,7 +175,7 @@ class EChartsTimeSeries extends IPSModuleStrict
     {
         $form = $this->LoadConfigurationForm();
         if (isset($form['elements']) && is_array($form['elements'])) {
-            $form['elements'] = $this->AttachSourceDesigner($form['elements']);
+            $form['elements'] = $this->AttachListDesigners($form['elements']);
             $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
             $form['elements'] = $this->AttachTimeSeriesPreviewActions($form['elements']);
         }
@@ -184,7 +186,8 @@ class EChartsTimeSeries extends IPSModuleStrict
                 $this->PreviewSeries(),
                 $this->ReadPropertyString('Title'),
                 $this->ReadPropertyString('EChartsTheme'),
-                $this->ReadTimeSeriesDesign()
+                $this->ReadTimeSeriesDesign(),
+                annotations: $this->PreviewAnnotations()
             )
         );
         $form = SVGPreviewHelper::withImage(
@@ -197,7 +200,8 @@ class EChartsTimeSeries extends IPSModuleStrict
                 $this->EffectiveIPSViewDesign(),
                 $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
                 EChartsIPSViewBackground::Color($this->ReadPropertyInteger('IPSViewBackgroundColor')),
-                $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent')
+                $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent'),
+                $this->PreviewAnnotations()
             )
         );
 
@@ -221,7 +225,11 @@ class EChartsTimeSeries extends IPSModuleStrict
                 $this->PreviewSeries($values['Sources'] ?? null),
                 (string) ($values['Title'] ?? $this->ReadPropertyString('Title')),
                 (string) ($values['EChartsTheme'] ?? $this->ReadPropertyString('EChartsTheme')),
-                $this->TimeSeriesDesignFromFormValues($values)
+                $this->TimeSeriesDesignFromFormValues($values),
+                annotations: $this->PreviewAnnotations(
+                    $values['Annotations'] ?? null,
+                    $values['Sources'] ?? null
+                )
             )
         ));
 
@@ -241,7 +249,11 @@ class EChartsTimeSeries extends IPSModuleStrict
                 EChartsIPSViewBackground::Color((int) ($values['IPSViewBackgroundColor']
                     ?? $this->ReadPropertyInteger('IPSViewBackgroundColor'))),
                 (int) ($values['IPSViewBackgroundOpacityPercent']
-                    ?? $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent'))
+                    ?? $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent')),
+                $this->PreviewAnnotations(
+                    $values['Annotations'] ?? null,
+                    $values['Sources'] ?? null
+                )
             )
         ));
     }
@@ -273,6 +285,45 @@ class EChartsTimeSeries extends IPSModuleStrict
             $sources[$matchingIndex] = $row;
         }
         $values['Sources'] = $sources;
+        $this->UpdateTimeSeriesPreviewFromForm(json_encode($values, JSON_THROW_ON_ERROR));
+    }
+
+    /** Refreshes both previews after an annotation-row editor was confirmed. */
+    public function UpdateTimeSeriesPreviewAnnotationFromForm(string $Configuration, string $Action): void
+    {
+        try {
+            $values = json_decode($Configuration, true, 64, JSON_THROW_ON_ERROR);
+        } catch (JsonException) {
+            $values = [];
+        }
+        $row = is_array($values) && is_array($values['Annotations'] ?? null) ? $values['Annotations'] : [];
+        $annotations = json_decode($this->ReadPropertyString('Annotations'), true);
+        $annotations = is_array($annotations) && array_is_list($annotations) ? $annotations : [];
+        $matchingIndexes = [];
+        foreach ($annotations as $index => $annotation) {
+            if (!is_array($annotation)
+                || (int) ($annotation['VariableID'] ?? 0) !== (int) ($row['VariableID'] ?? 0)
+                || (string) ($annotation['Type'] ?? 'line') !== (string) ($row['Type'] ?? 'line')
+            ) {
+                continue;
+            }
+            $matchingIndexes[] = $index;
+            if ((string) ($annotation['Label'] ?? '') === (string) ($row['Label'] ?? '')) {
+                $matchingIndexes = [$index];
+                break;
+            }
+        }
+        $matchingIndex = count($matchingIndexes) === 1 ? $matchingIndexes[0] : null;
+        if ($Action === 'delete' && $matchingIndex !== null) {
+            array_splice($annotations, $matchingIndex, 1);
+        } elseif ($Action === 'add') {
+            $annotations[] = $row;
+        } elseif ($matchingIndex !== null) {
+            $annotations[$matchingIndex] = $row;
+        } else {
+            $annotations[] = $row;
+        }
+        $values['Annotations'] = $annotations;
         $this->UpdateTimeSeriesPreviewFromForm(json_encode($values, JSON_THROW_ON_ERROR));
     }
 
@@ -313,6 +364,7 @@ class EChartsTimeSeries extends IPSModuleStrict
         }
 
         $sources = $this->GetValidatedSources();
+        $annotations = $this->GetValidatedAnnotations($sources);
         $query = $this->ResolveArchiveQuery(count($sources));
         $axisModel = $this->BuildAxisModel($sources);
         $axes = $axisModel['Axes'];
@@ -367,6 +419,7 @@ class EChartsTimeSeries extends IPSModuleStrict
             ],
             'axes'          => $axes,
             'series'        => $series,
+            'annotations'   => $annotations,
             'truncated'     => $truncated
         ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
     }
@@ -529,7 +582,8 @@ class EChartsTimeSeries extends IPSModuleStrict
     private function GetConfigurationError(): ?array
     {
         try {
-            $this->GetValidatedSources();
+            $sources = $this->GetValidatedSources();
+            $this->GetValidatedAnnotations($sources);
         } catch (UnexpectedValueException $exception) {
             return [
                 'Status'  => in_array($exception->getCode(), [201, 202], true)
@@ -766,6 +820,111 @@ class EChartsTimeSeries extends IPSModuleStrict
         }
 
         return ['Axes' => $axes, 'Indexes' => $indexes];
+    }
+
+    /**
+     * @param list<array{VariableID:int}> $sources
+     * @return list<array<string,mixed>>
+     */
+    private function GetValidatedAnnotations(array $sources): array
+    {
+        try {
+            $annotations = json_decode($this->ReadPropertyString('Annotations'), true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $exception) {
+            throw new UnexpectedValueException(
+                'Time series annotations must contain valid JSON.',
+                self::STATUS_CONFIGURATION_INVALID,
+                $exception
+            );
+        }
+
+        return $this->NormalizeAnnotations($annotations, $sources);
+    }
+
+    /**
+     * @param list<array<string,mixed>> $sources
+     * @return list<array<string,mixed>>
+     */
+    private function NormalizeAnnotations(mixed $annotations, array $sources): array
+    {
+        if (!is_array($annotations) || !array_is_list($annotations)
+            || count($annotations) > self::MAXIMUM_ANNOTATION_COUNT
+        ) {
+            throw new UnexpectedValueException(
+                'Configure no more than 32 time series annotations.',
+                self::STATUS_CONFIGURATION_INVALID
+            );
+        }
+
+        $seriesIndexes = [];
+        foreach ($sources as $seriesIndex => $source) {
+            $variableID = $source['VariableID'] ?? null;
+            if (is_int($variableID) && $variableID > 0) {
+                $seriesIndexes[$variableID] = $seriesIndex;
+            }
+        }
+
+        $result = [];
+        foreach ($annotations as $annotation) {
+            if (!is_array($annotation)) {
+                throw new UnexpectedValueException(
+                    'Time series annotation settings are invalid.',
+                    self::STATUS_CONFIGURATION_INVALID
+                );
+            }
+            $variableID = $annotation['VariableID'] ?? null;
+            $type = $annotation['Type'] ?? 'line';
+            $label = $annotation['Label'] ?? '';
+            $value = $annotation['Value'] ?? null;
+            $maximum = $annotation['Maximum'] ?? null;
+            $color = self::NormalizeSourceColor($annotation['Color'] ?? '');
+            $lineType = $annotation['LineType'] ?? 'solid';
+            $lineWidthPercent = $annotation['LineWidthPercent'] ?? 100;
+            $opacityPercent = $annotation['OpacityPercent'] ?? 18;
+            if (!is_int($variableID) || !array_key_exists($variableID, $seriesIndexes)
+                || !is_string($type) || !in_array($type, EChartsTimeSeriesDesign::ANNOTATION_TYPES, true)
+                || !is_string($label) || strlen($label) > 120
+                || (!is_int($value) && !is_float($value)) || !is_finite((float) $value)
+                || $color === null
+                || !is_string($lineType)
+                || !in_array($lineType, EChartsTimeSeriesDesign::ANNOTATION_LINE_TYPES, true)
+                || !is_int($lineWidthPercent) || $lineWidthPercent < 50 || $lineWidthPercent > 200
+                || !is_int($opacityPercent) || $opacityPercent < 0 || $opacityPercent > 100
+            ) {
+                throw new UnexpectedValueException(
+                    'Time series annotation settings are invalid.',
+                    self::STATUS_CONFIGURATION_INVALID
+                );
+            }
+            if ($type === 'area'
+                && ((!is_int($maximum) && !is_float($maximum))
+                    || !is_finite((float) $maximum)
+                    || (float) $value >= (float) $maximum)
+            ) {
+                throw new UnexpectedValueException(
+                    'A time series value range requires a minimum smaller than its maximum.',
+                    self::STATUS_CONFIGURATION_INVALID
+                );
+            }
+
+            $normalized = [
+                'type'             => $type,
+                'variableID'       => $variableID,
+                'seriesIndex'      => $seriesIndexes[$variableID],
+                'label'            => trim($label),
+                'value'            => (float) $value,
+                'color'            => $color,
+                'lineType'         => $lineType,
+                'lineWidthPercent' => $lineWidthPercent,
+                'opacityPercent'   => $opacityPercent
+            ];
+            if ($type === 'area') {
+                $normalized['maximum'] = (float) $maximum;
+            }
+            $result[] = $normalized;
+        }
+
+        return $result;
     }
 
     private function AxisValuesEqual(float $left, float $right): bool
@@ -1095,7 +1254,7 @@ class EChartsTimeSeries extends IPSModuleStrict
         return $design;
     }
 
-    /** @return list<array{label:string,color:string,style:string,design:array<string,mixed>}> */
+    /** @return list<array{variableID:int,label:string,color:string,style:string,design:array<string,mixed>}> */
     private function PreviewSeries(mixed $formSources = null): array
     {
         $sources = $formSources;
@@ -1132,14 +1291,40 @@ class EChartsTimeSeries extends IPSModuleStrict
                 }
             }
             $result[] = [
-                'label'  => $label !== '' ? $label : 'Series ' . ($index + 1),
-                'color'  => $color ?? '',
-                'style'  => $style,
-                'design' => $sourceDesign
+                'variableID' => is_int($variableID) ? $variableID : 0,
+                'label'      => $label !== '' ? $label : 'Series ' . ($index + 1),
+                'color'      => $color ?? '',
+                'style'      => $style,
+                'design'     => $sourceDesign
             ];
         }
 
         return $result;
+    }
+
+    /** @return list<array<string,mixed>> */
+    private function PreviewAnnotations(mixed $formAnnotations = null, mixed $formSources = null): array
+    {
+        $annotations = $formAnnotations ?? $this->ReadPropertyString('Annotations');
+        $sources = $formSources ?? $this->ReadPropertyString('Sources');
+        if (is_string($annotations)) {
+            $annotations = json_decode($annotations, true);
+        }
+        if (is_string($sources)) {
+            $sources = json_decode($sources, true);
+        }
+        if (!is_array($sources) || !array_is_list($sources)) {
+            return [];
+        }
+
+        try {
+            return array_values(array_filter(
+                $this->NormalizeAnnotations($annotations, $sources),
+                static fn (array $annotation): bool => $annotation['seriesIndex'] < 4
+            ));
+        } catch (UnexpectedValueException) {
+            return [];
+        }
     }
 
     private static function NormalizeSourceColor(mixed $color): ?string
@@ -1166,7 +1351,7 @@ class EChartsTimeSeries extends IPSModuleStrict
     }
 
     /** @param list<array<string,mixed>> $items @return list<array<string,mixed>> */
-    private function AttachSourceDesigner(array $items): array
+    private function AttachListDesigners(array $items): array
     {
         foreach ($items as &$item) {
             if (($item['type'] ?? '') === 'List' && ($item['name'] ?? '') === 'Sources') {
@@ -1181,8 +1366,15 @@ class EChartsTimeSeries extends IPSModuleStrict
                 $item['onDelete'] = $this->TimeSeriesPreviewFormAction('delete');
                 continue;
             }
+            if (($item['type'] ?? '') === 'List' && ($item['name'] ?? '') === 'Annotations') {
+                $item['form'] = EChartsTimeSeriesDesign::AnnotationEditorForm();
+                $item['onAdd'] = $this->TimeSeriesPreviewFormAction('add', 'annotation');
+                $item['onEdit'] = $this->TimeSeriesPreviewFormAction('edit', 'annotation');
+                $item['onDelete'] = $this->TimeSeriesPreviewFormAction('delete', 'annotation');
+                continue;
+            }
             if (isset($item['items']) && is_array($item['items'])) {
-                $item['items'] = $this->AttachSourceDesigner($item['items']);
+                $item['items'] = $this->AttachListDesigners($item['items']);
             }
         }
         unset($item);
@@ -1207,7 +1399,7 @@ class EChartsTimeSeries extends IPSModuleStrict
         return $items;
     }
 
-    private function TimeSeriesPreviewFormAction(string $sourceAction = ''): string
+    private function TimeSeriesPreviewFormAction(string $sourceAction = '', string $list = 'source'): string
     {
         $pairs = array_map(
             static fn (string $name): string => "'" . $name . "' => $" . $name,
@@ -1215,7 +1407,11 @@ class EChartsTimeSeries extends IPSModuleStrict
         );
 
         if ($sourceAction !== '') {
-            return 'ECTS_UpdateTimeSeriesPreviewSourceFromForm($id, json_encode([' . implode(', ', $pairs)
+            $function = $list === 'annotation'
+                ? 'ECTS_UpdateTimeSeriesPreviewAnnotationFromForm'
+                : 'ECTS_UpdateTimeSeriesPreviewSourceFromForm';
+
+            return $function . '($id, json_encode([' . implode(', ', $pairs)
                 . ']), ' . var_export($sourceAction, true) . ');';
         }
 

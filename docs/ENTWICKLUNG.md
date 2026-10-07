@@ -63,6 +63,10 @@ Der gleiche quellbezogene Vertrag führt die persistierten Optionen für
 automatische, aus der Variablendarstellung gelesene oder manuell festgelegte
 Wertachsenbereiche. Die Zusammenführung je effektiver Einheit verbleibt als
 fachliche Validierung im Zeitreihenmodul.
+Ein getrenntes `Annotations`-Modell ergänzt bis zu 32 quellengebundene
+Referenzlinien und Wertebereiche. Die wiederverwendbaren Formularverträge
+liegen ebenfalls in `libs/EChartsTimeSeriesDesign.php`; Validierung,
+Normalisierung und Zuordnung zur konkreten Reihe verbleiben im Gerätemodul.
 Die Testsuite prüft zusätzlich
 zu Struktur und Metadaten die Strict-Verträge, das Protokoll, die
 ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
@@ -286,6 +290,9 @@ Der gemeinsame persistente IPSView-Transport ist in
 Das quellenbezogene Einzeldesign einschließlich sicherer SVG-Flächenmuster
 dokumentiert
 [`ADR 0023`](adr/0023-timeseries-source-design-and-svg-area-patterns.md).
+Quellenbezogene Referenzlinien und Wertebereiche sowie die dafür erweiterte
+lokale ECharts-Runtime dokumentiert
+[`ADR 0026`](adr/0026-timeseries-reference-lines-and-value-ranges.md).
 Das Gerätemodul setzt davon Quellen, Roh-, Aggregat- und Echtzeitmodus,
 Punktbudget, Mehr-Achsen-Modell, native Kachel und die optionale IPSView-
 Ausgabe um. Reale Laufzeitmessungen bleiben als nächster Schritt offen.

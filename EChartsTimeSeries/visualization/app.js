@@ -131,6 +131,7 @@
         var colors = colorsFor(theme);
         var axes = Array.isArray(model.axes) ? model.axes : [];
         var series = Array.isArray(model.series) ? model.series : [];
+        var annotations = Array.isArray(model.annotations) ? model.annotations : [];
         var seriesPalette = Array.isArray(colors.seriesColors) && colors.seriesColors.length > 0
             ? colors.seriesColors : [colors.accent || colors.border];
         var seriesColors = series.map(function (item, index) {
@@ -324,6 +325,70 @@
                         var pattern = resolveAreaPattern(sourceDesign);
                         if (pattern) { result.areaStyle.color = pattern; }
                     }
+                }
+                var seriesAnnotations = annotations.filter(function (annotation) {
+                    return annotation && Number(annotation.seriesIndex) === index;
+                });
+                var referenceLines = seriesAnnotations.filter(function (annotation) {
+                    return annotation.type === 'line';
+                });
+                if (referenceLines.length > 0) {
+                    result.markLine = {
+                        silent: true,
+                        symbol: 'none',
+                        animation: false,
+                        data: referenceLines.map(function (annotation) {
+                            var annotationColor = annotation.color || seriesColor;
+                            var label = String(annotation.label || '');
+                            return {
+                                name: label,
+                                yAxis: Number(annotation.value),
+                                lineStyle: {
+                                    color: annotationColor,
+                                    type: String(annotation.lineType || 'solid'),
+                                    width: 2 * Math.max(50, Math.min(200,
+                                        Number(annotation.lineWidthPercent) || 100)) / 100
+                                },
+                                label: {
+                                    show: label !== '',
+                                    formatter: label,
+                                    color: annotationColor,
+                                    position: 'insideEndTop'
+                                }
+                            };
+                        })
+                    };
+                }
+                var valueRanges = seriesAnnotations.filter(function (annotation) {
+                    return annotation.type === 'area';
+                });
+                if (valueRanges.length > 0) {
+                    result.markArea = {
+                        silent: true,
+                        animation: false,
+                        data: valueRanges.map(function (annotation) {
+                            var annotationColor = annotation.color || seriesColor;
+                            var label = String(annotation.label || '');
+                            return [
+                                {
+                                    name: label,
+                                    yAxis: Number(annotation.value),
+                                    itemStyle: {
+                                        color: annotationColor,
+                                        opacity: Math.max(0, Math.min(100,
+                                            Number(annotation.opacityPercent) || 0)) / 100
+                                    },
+                                    label: {
+                                        show: label !== '',
+                                        formatter: label,
+                                        color: annotationColor,
+                                        position: 'insideTopRight'
+                                    }
+                                },
+                                { yAxis: Number(annotation.maximum) }
+                            ];
+                        })
+                    };
                 }
                 return result;
             })

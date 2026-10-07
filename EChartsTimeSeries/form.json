@@ -161,6 +161,96 @@
             "caption": "Sources with the same unit share one value axis and must use the same explicitly selected side. Automatic distributes unit axes between left and right."
         },
         {
+            "type": "List",
+            "name": "Annotations",
+            "caption": "Reference lines and value ranges",
+            "rowCount": 4,
+            "add": true,
+            "delete": true,
+            "changeOrder": true,
+            "columns": [
+                {
+                    "caption": "Source",
+                    "name": "VariableID",
+                    "width": "220px",
+                    "add": 0,
+                    "edit": {
+                        "type": "SelectVariable",
+                        "validVariableTypes": [1, 2]
+                    }
+                },
+                {
+                    "caption": "Marker type",
+                    "name": "Type",
+                    "width": "120px",
+                    "add": "line",
+                    "edit": {
+                        "type": "Select",
+                        "options": [
+                            { "caption": "Reference line", "value": "line" },
+                            { "caption": "Value range", "value": "area" }
+                        ]
+                    }
+                },
+                {
+                    "caption": "Label",
+                    "name": "Label",
+                    "width": "auto",
+                    "add": "",
+                    "edit": { "type": "ValidationTextBox" }
+                },
+                {
+                    "caption": "Value / minimum",
+                    "name": "Value",
+                    "width": "105px",
+                    "add": 0.0,
+                    "edit": { "type": "NumberSpinner", "digits": 3 }
+                },
+                {
+                    "caption": "Maximum",
+                    "name": "Maximum",
+                    "width": "90px",
+                    "add": 100.0,
+                    "edit": { "type": "NumberSpinner", "digits": 3 }
+                },
+                {
+                    "caption": "Color",
+                    "name": "Color",
+                    "width": "90px",
+                    "add": -1,
+                    "edit": {
+                        "type": "SelectColor",
+                        "allowTransparent": true,
+                        "transparentCaption": "Series color"
+                    }
+                },
+                {
+                    "caption": "LineType",
+                    "name": "LineType",
+                    "width": "1px",
+                    "visible": false,
+                    "save": true,
+                    "add": "solid"
+                },
+                {
+                    "caption": "LineWidthPercent",
+                    "name": "LineWidthPercent",
+                    "width": "1px",
+                    "visible": false,
+                    "save": true,
+                    "add": 100
+                },
+                {
+                    "caption": "OpacityPercent",
+                    "name": "OpacityPercent",
+                    "width": "1px",
+                    "visible": false,
+                    "save": true,
+                    "add": 18
+                }
+            ]
+        },
+        {
             "type": "RowLayout",
             "items": [
                 {

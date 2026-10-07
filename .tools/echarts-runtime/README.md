@@ -12,7 +12,7 @@ Der Gauge-Einstieg enthält:
 - Canvas Renderer.
 
 Der Time-Series-Einstieg enthält Line Chart, Grid, Legende, Titel, Tooltip,
-Data Zoom, Aria und Canvas Renderer.
+Data Zoom, Referenzlinien, Wertebereiche, Aria und Canvas Renderer.
 
 Zusätzlich kopiert der Build die sechs im Modul angebotenen offiziellen
 ECharts-Themes unverändert aus derselben festgeschriebenen npm-Abhängigkeit:

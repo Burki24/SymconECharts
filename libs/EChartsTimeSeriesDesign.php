@@ -17,6 +17,8 @@ final class EChartsTimeSeriesDesign
     public const POINT_SYMBOLS = ['none', 'circle', 'rect', 'roundRect', 'triangle', 'diamond', 'pin', 'arrow'];
     public const AREA_FILL_MODES = ['color', 'gradient', 'svg'];
     public const AXIS_RANGE_MODES = ['auto', 'presentation', 'manual'];
+    public const ANNOTATION_TYPES = ['line', 'area'];
+    public const ANNOTATION_LINE_TYPES = ['solid', 'dashed', 'dotted'];
 
     /** @var array<string, int|string|bool> */
     private const SOURCE_DESIGN_DEFAULTS = [
@@ -135,6 +137,32 @@ final class EChartsTimeSeriesDesign
                 ['type' => 'SelectFile', 'name' => 'SeriesAreaSVG', 'caption' => 'Area SVG pattern', 'extensions' => '.svg'],
                 ['type' => 'NumberSpinner', 'name' => 'SeriesAreaSVGSizePercent', 'caption' => 'SVG pattern size', 'minimum' => 25, 'maximum' => 400, 'suffix' => ' %']
             ]]
+        ];
+    }
+
+    /** @return list<array<string, mixed>> */
+    public static function AnnotationEditorForm(): array
+    {
+        return [
+            ['type' => 'SelectVariable', 'name' => 'VariableID', 'caption' => 'Source', 'validVariableTypes' => [1, 2]],
+            ['type' => 'RowLayout', 'items' => [
+                ['type' => 'Select', 'name' => 'Type', 'caption' => 'Marker type', 'options' => [
+                    ['caption' => 'Reference line', 'value' => 'line'],
+                    ['caption' => 'Value range', 'value' => 'area']
+                ]],
+                ['type' => 'ValidationTextBox', 'name' => 'Label', 'caption' => 'Label'],
+                ['type' => 'SelectColor', 'name' => 'Color', 'caption' => 'Color', 'allowTransparent' => true, 'transparentCaption' => 'Series color']
+            ]],
+            ['type' => 'RowLayout', 'items' => [
+                ['type' => 'NumberSpinner', 'name' => 'Value', 'caption' => 'Value / minimum', 'digits' => 3],
+                ['type' => 'NumberSpinner', 'name' => 'Maximum', 'caption' => 'Maximum', 'digits' => 3],
+                ['type' => 'NumberSpinner', 'name' => 'OpacityPercent', 'caption' => 'Range opacity', 'minimum' => 0, 'maximum' => 100, 'suffix' => ' %']
+            ]],
+            ['type' => 'RowLayout', 'items' => [
+                ['type' => 'Select', 'name' => 'LineType', 'caption' => 'Line type', 'options' => self::Options(self::ANNOTATION_LINE_TYPES)],
+                ['type' => 'NumberSpinner', 'name' => 'LineWidthPercent', 'caption' => 'Line width', 'minimum' => 50, 'maximum' => 200, 'suffix' => ' %']
+            ]],
+            ['type' => 'Label', 'caption' => 'Reference lines use Value. Value ranges use Value as minimum and Maximum as upper boundary.']
         ];
     }
 
