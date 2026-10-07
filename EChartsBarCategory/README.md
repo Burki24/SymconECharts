@@ -9,8 +9,8 @@ the same effective unit so that the shared value axis remains meaningful.
 - Native Symcon HTML-SDK tile with live value updates
 - Optional standalone IPSView WebContent output
 - Vertical or horizontal bars
-- Simple, grouped or stacked bars with an explicit optional category per
-  source
+- Simple, grouped or stacked bars with separately editable categories and
+  data-series names per source
 - Configured, ascending or descending value order
 - Per-source color or automatic theme colors
 - Automatic light/dark value-label contrast on stacked bar segments
@@ -20,10 +20,13 @@ The module reads current values through the connected `EChartsGateway`. It
 does not read archive data; historical bar charts belong to a separate chart
 family.
 
-In grouped and stacked modes, `Label` names the data series shown in the
-legend and the optional `Category` places its value on the category axis.
-Sources without a category share one group. Categories may contain different
-data series; a missing combination is left empty instead of invalidating the
-chart. Only duplicate category/label pairs are rejected. In value-based
-ordering, categories are sorted by the sum of their available values.
-Existing configurations remain in the compatible `Simple` mode by default.
+Every source row provides an explicit `Category` and an optional `Series`
+field in both the table and its edit dialog. `Category` labels the category
+axis; `Series` names the legend entry in grouped and stacked modes. An empty
+category uses the variable name in Simple mode and the shared group in grouped
+or stacked mode. An empty series also uses the variable name. Categories may
+contain different data series; a missing combination remains empty instead of
+invalidating the chart. Only duplicate category/series pairs are rejected. In
+value-based ordering, categories are sorted by the sum of their available
+values. Existing configurations remain in the compatible `Simple` mode by
+default.

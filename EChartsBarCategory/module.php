@@ -152,11 +152,12 @@ class EChartsBarCategory extends IPSModuleStrict
         $items = [];
         foreach ($sources as $index => $source) {
             $current = $this->ReadCurrentSource($source['VariableID']);
+            $variableName = IPS_GetName($source['VariableID']);
             $items[] = [
                 'id'         => 'variable-' . $source['VariableID'],
                 'variableID' => $source['VariableID'],
-                'label'      => $source['Label'] !== '' ? $source['Label'] : IPS_GetName($source['VariableID']),
                 'category'   => $source['Category'],
+                'series'     => $source['Series'] !== '' ? $source['Series'] : $variableName,
                 'value'      => $current['Value'],
                 'timestamp'  => $current['Timestamp'],
                 'color'      => $source['Color'] < 0 ? '' : EChartsAsset::ColorToHex($source['Color']),
@@ -323,7 +324,7 @@ class EChartsBarCategory extends IPSModuleStrict
         return null;
     }
 
-    /** @return list<array{VariableID:int, Label:string, Category:string, Unit:string, Decimals:int, Color:int}> */
+    /** @return list<array{VariableID:int, Category:string, Series:string, Unit:string, Decimals:int, Color:int}> */
     private function GetValidatedSources(): array
     {
         try {
@@ -376,13 +377,18 @@ class EChartsBarCategory extends IPSModuleStrict
                 throw new InvalidArgumentException('All Category Bar sources must use the same unit.');
             }
             $variableIDs[] = $variableID;
-            $legacyCategory = $source['Series'] ?? '';
+            $hasExplicitCategory = array_key_exists('Category', $source)
+                && is_string($source['Category']);
+            $legacyLabel = trim(is_string($source['Label'] ?? null) ? $source['Label'] : '');
+            $category = $hasExplicitCategory ? trim($source['Category']) : $legacyLabel;
+            $series = trim(is_string($source['Series'] ?? null) ? $source['Series'] : '');
+            if ($series === '' && $hasExplicitCategory) {
+                $series = $legacyLabel;
+            }
             $validated[] = [
                 'VariableID' => $variableID,
-                'Label'      => trim(is_string($source['Label'] ?? null) ? $source['Label'] : ''),
-                'Category'   => trim(is_string($source['Category'] ?? null)
-                    ? $source['Category']
-                    : (is_string($legacyCategory) ? $legacyCategory : '')),
+                'Category'   => $category,
+                'Series'     => $series,
                 'Unit'       => $presentation['unit'],
                 'Decimals'   => $presentation['decimals'],
                 'Color'      => $color
@@ -392,15 +398,15 @@ class EChartsBarCategory extends IPSModuleStrict
         return $validated;
     }
 
-    /** @param list<array{VariableID:int, Label:string, Category:string, Unit:string, Decimals:int, Color:int}> $sources */
+    /** @param list<array{VariableID:int, Category:string, Series:string, Unit:string, Decimals:int, Color:int}> $sources */
     private function ValidateGroupedSources(array $sources): void
     {
         $pairs = [];
         foreach ($sources as $source) {
-            $label = $source['Label'] !== '' ? $source['Label'] : IPS_GetName($source['VariableID']);
-            $pair = json_encode([$source['Category'], $label], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
+            $series = $source['Series'] !== '' ? $source['Series'] : IPS_GetName($source['VariableID']);
+            $pair = json_encode([$source['Category'], $series], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
             if (isset($pairs[$pair])) {
-                throw new InvalidArgumentException('Every Category Bar category and label pair must be unique.');
+                throw new InvalidArgumentException('Every Category Bar category and series pair must be unique.');
             }
             $pairs[$pair] = true;
         }

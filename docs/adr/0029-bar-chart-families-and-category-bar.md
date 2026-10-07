@@ -36,15 +36,17 @@ Bar diagrams are split by their data and configuration contracts:
 `EChartsBarCategory` reads current values through the existing versioned
 `current.read` Gateway operation. It provides vertical and horizontal
 orientation, stable configured or value-based ordering, per-source colors,
-live updates and separate Tile/IPSView designs. Simple bars use one source per
-category. In grouped and stacked modes the source label names the data series,
-while an explicit optional category places the source on the category axis.
-Sources without a category share one group. Categories may contain different
-series; only duplicate category/label pairs are invalid. Value ordering uses
-the sum of the values available in each category. The default remains
-`simple`, so existing configurations stay valid. The earlier unpublished
-`Series` source field remains a read-only compatibility fallback for the new
-category field during development.
+live updates and separate Tile/IPSView designs. Every source exposes category
+and data-series names as separate editable fields. Simple bars use the category
+as their axis label and fall back to the variable name. Grouped and stacked
+bars use the category for the category axis and the series for the legend;
+empty categories share one group and empty series fall back to the variable
+name. Categories may contain different series; only duplicate category/series
+pairs are invalid. Value ordering uses the sum of the values available in each
+category. The default remains `simple`, so existing configurations stay valid.
+The two earlier unpublished source layouts (`Label`/`Series` and
+`Category`/`Label`) remain readable during development but are not written by
+the new form.
 Archive access, historical grouping, waterfall arithmetic and polar geometry
 remain outside this contract.
 

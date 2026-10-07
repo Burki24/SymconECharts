@@ -37,9 +37,9 @@ function render(orientation, sortOrder, outputMode = 'symcon', barMode = 'simple
                         style: { showValues: true, showGrid: false, roundedBars: true, barWidthPercent: 60 }
                     },
                     items: items || [
-                        { label: 'A', value: 10, order: 0, color: '#ff0000' },
-                        { label: 'B', value: 30, order: 1, color: '' },
-                        { label: 'C', value: 20, order: 2, color: '' }
+                        { category: 'A', series: 'A', value: 10, order: 0, color: '#ff0000' },
+                        { category: 'B', series: 'B', value: 30, order: 1, color: '' },
+                        { category: 'C', series: 'C', value: 20, order: 2, color: '' }
                     ]
                 }
             },
@@ -81,10 +81,10 @@ assert.equal(vertical.series[0].label.position, 'top');
 assert.equal(vertical.yAxis.splitLine.show, false);
 
 const matrix = [
-    { label: 'Today', category: 'Kitchen', value: 18, order: 0, color: '#aa0000' },
-    { label: 'Yesterday', category: 'Kitchen', value: 20, order: 1, color: '#0000aa' },
-    { label: 'Today', category: 'Office', value: 24, order: 2, color: '#aa0000' },
-    { label: 'Yesterday', category: 'Office', value: 22, order: 3, color: '#0000aa' }
+    { category: 'Kitchen', series: 'Today', value: 18, order: 0, color: '#aa0000' },
+    { category: 'Kitchen', series: 'Yesterday', value: 20, order: 1, color: '#0000aa' },
+    { category: 'Office', series: 'Today', value: 24, order: 2, color: '#aa0000' },
+    { category: 'Office', series: 'Yesterday', value: 22, order: 3, color: '#0000aa' }
 ];
 const grouped = render('vertical', 'descending', 'symcon', 'grouped', matrix);
 assert.equal(grouped.legend.show, true);
@@ -104,9 +104,9 @@ assert.equal(stacked.series[0].data[0].label.color, '#f4f5f7');
 assert.equal(stacked.series[1].data[0].label.color, '#f4f5f7');
 
 const automaticStack = render('vertical', 'configured', 'symcon', 'stacked', [
-    { label: 'Room', category: '', value: 91, order: 0, color: '#aa0000' },
-    { label: 'Floor', category: '', value: 82, order: 1, color: '#00aa00' },
-    { label: 'Wall', category: '', value: 73, order: 2, color: '#0000aa' }
+    { category: '', series: 'Room', value: 91, order: 0, color: '#aa0000' },
+    { category: '', series: 'Floor', value: 82, order: 1, color: '#00aa00' },
+    { category: '', series: 'Wall', value: 73, order: 2, color: '#0000aa' }
 ]);
 assert.deepEqual(Array.from(automaticStack.xAxis.data), ['']);
 assert.deepEqual(Array.from(automaticStack.legend.data), ['Room', 'Floor', 'Wall']);
@@ -119,9 +119,9 @@ assert.equal(automaticStack.series[1].data[0].label.color, '#101114');
 assert.equal(automaticStack.series[2].data[0].label.color, '#f4f5f7');
 
 const sparse = render('vertical', 'configured', 'symcon', 'grouped', [
-    { label: 'Today', category: 'Kitchen', value: 18, order: 0, color: '#aa0000' },
-    { label: 'Yesterday', category: 'Kitchen', value: 20, order: 1, color: '#0000aa' },
-    { label: 'Today', category: 'Office', value: 24, order: 2, color: '#aa0000' }
+    { category: 'Kitchen', series: 'Today', value: 18, order: 0, color: '#aa0000' },
+    { category: 'Kitchen', series: 'Yesterday', value: 20, order: 1, color: '#0000aa' },
+    { category: 'Office', series: 'Today', value: 24, order: 2, color: '#aa0000' }
 ]);
 assert.deepEqual(Array.from(sparse.xAxis.data), ['Kitchen', 'Office']);
 assert.deepEqual(Array.from(sparse.legend.data), ['Today', 'Yesterday']);

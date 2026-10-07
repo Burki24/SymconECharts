@@ -7,9 +7,9 @@
   horizontale Balken und bietet Live-Aktualisierung sowie getrennte Designs
   für Kachel und IPSView. Gruppierte und gestapelte Ansichten funktionieren
   sowohl direkt mit einer gewöhnlichen Quellenliste als auch mit einer
-  ausdrücklich pro Quelle wählbaren Kategorie. Die Beschriftung benennt dabei
-  verständlich die Datenreihe; Kategorien dürfen unterschiedlich viele
-  Datenreihen enthalten. Wertbeschriftungen
+  ausdrücklich pro Quelle getrennt bearbeitbaren Kategorien und Datenreihen.
+  Der Zeileneditor benennt beide Felder eindeutig; Kategorien dürfen
+  unterschiedlich viele Datenreihen enthalten. Wertbeschriftungen
   in gestapelten Segmenten wählen abhängig von der Balkenfarbe automatisch
   eine kontrastreiche helle oder dunkle Schriftfarbe.
 

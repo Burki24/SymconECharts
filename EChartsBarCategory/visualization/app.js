@@ -78,7 +78,9 @@
             }
             return {
                 mode: mode,
-                categories: items.map(function (item) { return String(item.label || ''); }),
+                categories: items.map(function (item) {
+                    return String(item.category || item.series || '');
+                }),
                 series: [{
                     name: String(bar.title || ''),
                     items: items.map(function (item, index) {
@@ -89,7 +91,7 @@
         }
 
         var categories = uniqueInOrder(items.map(function (item) { return String(item.category || ''); }));
-        var seriesNames = uniqueInOrder(items.map(function (item) { return String(item.label || ''); }));
+        var seriesNames = uniqueInOrder(items.map(function (item) { return String(item.series || ''); }));
         if (order === 'ascending' || order === 'descending') {
             var totals = Object.create(null);
             categories.forEach(function (category) { totals[category] = 0; });
@@ -106,7 +108,7 @@
             series: seriesNames.map(function (seriesName, seriesIndex) {
                 var seriesItems = categories.map(function (category) {
                     return items.find(function (item) {
-                        return String(item.category || '') === category && String(item.label || '') === seriesName;
+                        return String(item.category || '') === category && String(item.series || '') === seriesName;
                     });
                 });
                 var configuredColor = '';
