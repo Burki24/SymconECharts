@@ -1,4 +1,4 @@
-# ADR 0027: Benutzerdefinierte Zeiträume und Zeitachsenbeschriftung
+# ADR 0027: Rollende und kalendergebundene Zeiträume sowie Zeitachsenbeschriftung
 
 - Status: Angenommen
 - Datum: 2026-10-07
@@ -11,6 +11,9 @@
 Die festen rollenden Zeiträume der TimeSeries decken typische Ansichten ab,
 reichen aber nicht für alle Anlagen und Auswertungen. Anwender benötigen
 beispielsweise drei Stunden, zwei Wochen oder andere fortlaufende Fenster.
+Für Tages-, Wochen- und Monatsauswertungen werden außerdem lokale
+Kalendergrenzen benötigt; ein rollendes 24-Stunden-Fenster ist nicht dasselbe
+wie „Heute“ und bildet Tage mit Zeitumstellung falsch ab.
 Außerdem soll die Zeitachse je nach Einsatzzweck nur Uhrzeiten, nur ein Datum
 oder beides anzeigen können.
 
@@ -27,6 +30,16 @@ zusätzlichen Wert `custom`. In diesem Fall bilden die additiven Properties
 ganzzahlige Werte von 1 bis 1.000 sowie die Einheiten Minute, Stunde, Tag und
 Woche. Das Modul wandelt die Kombination vor der Archivabfrage deterministisch
 in Sekunden um. Bestehende Presets und der Standard `24h` bleiben unverändert.
+
+Zusätzlich sind die Werte `today`, `yesterday`, `current-week` und
+`current-month` zulässig. Ihre Grenzen entstehen mit der konfigurierten
+Symcon-Zeitzone: Heute beginnt um 00:00 Uhr, Gestern umfasst den vollständig
+abgeschlossenen vorherigen Kalendertag, die laufende Woche beginnt am Montag
+und der laufende Monat am ersten Kalendertag. Dadurch können Kalendertage bei
+einer Zeitumstellung 23, 24 oder 25 Stunden umfassen. Aktuelle Rohwerte
+verlängern die laufenden Zeiträume, verschieben deren Anfang aber nicht.
+Gestern nimmt keine Livepunkte an und ist wegen seines abgeschlossenen
+Charakters nicht mit dem archivfreien Echtzeitmodus kombinierbar.
 
 Die additive Property `TimeAxisLabelFormat` ist auf die Werte `auto`, `time`,
 `date` und `date-time` begrenzt. `auto` überlässt ECharts die kontextabhängige
@@ -61,6 +74,10 @@ Ungültige Werte, Einheiten oder Beschriftungsmodi erzeugen den bestehenden
 Konfigurationsfehler 202. Unabhängige IPSView-Zeiteinstellungen werden nur bei
 aktivierter IPSView-Ausgabe validiert. Der Gateway-Vertrag, Archivdaten und
 Variablenkonfiguration werden nicht verändert.
+
+Ein Timer lädt kalendergebundene Ansichten an ihrer nächsten maßgeblichen
+Kalendergrenze neu. Das verhindert, dass eine dauerhaft geöffnete Ansicht nach
+Mitternacht, Wochen- oder Monatswechsel mit veralteten Grenzen weiterläuft.
 
 ## Nachweise
 

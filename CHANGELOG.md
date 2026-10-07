@@ -6,7 +6,8 @@
   Minuten, Stunden, Tagen oder Wochen sowie wählbare Beschriftungen der
   Zeitachse mit Uhrzeit, Datum oder beidem. IPSView kann diese Einstellungen
   von der Kachel übernehmen oder einen eigenen Zeitraum und Achsenmodus
-  verwenden.
+  verwenden. Zusätzlich stehen kalendergebundene Ansichten für heute,
+  gestern, die laufende Woche und den laufenden Monat zur Verfügung.
 - EChartsTimeSeries bietet quellenbezogene Referenzlinien und Wertebereiche
   zur Kennzeichnung von Grenz-, Ziel- und Komfortwerten.
 - Wertachsen von EChartsTimeSeries können automatisch, aus der

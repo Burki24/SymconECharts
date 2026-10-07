@@ -24,7 +24,8 @@ function render(
     mode = 'symcon',
     adaptToBackground = false,
     enableImages = false,
-    timeAxisLabelFormat = 'auto'
+    timeAxisLabelFormat = 'auto',
+    range
 ) {
     const listeners = {};
     const scheduled = [];
@@ -65,7 +66,7 @@ function render(
                 chart: {
                     theme,
                     chart: { title: 'Climate', enableZoom: true, timeAxisLabelFormat, design },
-                    range: { startTimestamp: 1000, endTimestamp: 2000 },
+                    range: range || { startTimestamp: 1000, endTimestamp: 2000 },
                     axes: axes || [{ unit: '°C' }, { unit: '%' }],
                     annotations: [
                         {
@@ -149,7 +150,9 @@ function render(
     Object.defineProperties(option, {
         testListeners: { value: listeners },
         getDispatchedAction: { value: () => dispatchedAction },
-        getSetOptionCalls: { value: () => setOptionCalls }
+        getSetOptionCalls: { value: () => setOptionCalls },
+        handleMessage: { value: window.handleMessage },
+        getLatestOption: { value: () => option }
     });
     return option;
 }
@@ -345,5 +348,51 @@ assert.equal(zoomAction.end, 90);
 const adaptedIPSView = render(undefined, undefined, 750, undefined, 'dark', {}, 'ipsview', true);
 assert.equal(adaptedIPSView.backgroundColor, 'transparent');
 assert.equal(compatible.backgroundColor, '#202020');
+
+const calendarSeries = [{
+    id: 'calendar', variableID: 4711, label: 'Calendar', axisIndex: 0, decimals: 1,
+    unit: '°C', color: '#E5754F', style: 'line', points: [[1100, 20]]
+}];
+const currentCalendar = render(
+    undefined,
+    [{ unit: '°C' }],
+    750,
+    calendarSeries,
+    'dark',
+    {},
+    'symcon',
+    false,
+    false,
+    'auto',
+    {
+        startTimestamp: 1000, endTimestamp: 2000, durationSeconds: 1001,
+        calendarAligned: true, acceptLiveUpdates: true, pointLimitPerSeries: 100
+    }
+);
+currentCalendar.handleMessage({ messageType: 'append', variableID: 4711, timestamp: 2100, value: 21 });
+const updatedCalendar = currentCalendar.getLatestOption();
+assert.equal(updatedCalendar.xAxis.min, 1000000);
+assert.equal(updatedCalendar.xAxis.max, 2100000);
+assert.equal(JSON.stringify(updatedCalendar.series[0].data), '[[1100000,20],[2100000,21]]');
+
+const completedCalendar = render(
+    undefined,
+    [{ unit: '°C' }],
+    750,
+    calendarSeries,
+    'dark',
+    {},
+    'symcon',
+    false,
+    false,
+    'auto',
+    {
+        startTimestamp: 1000, endTimestamp: 2000, durationSeconds: 1001,
+        calendarAligned: true, acceptLiveUpdates: false, pointLimitPerSeries: 100
+    }
+);
+const completedSetOptionCalls = completedCalendar.getSetOptionCalls();
+completedCalendar.handleMessage({ messageType: 'append', variableID: 4711, timestamp: 2100, value: 21 });
+assert.equal(completedCalendar.getSetOptionCalls(), completedSetOptionCalls);
 
 process.stdout.write('Time Series tile design layout verified.\n');

@@ -687,6 +687,21 @@ final class TestableEChartsGateway extends EChartsGateway
     }
 }
 
+final class TestableEChartsTimeSeries extends EChartsTimeSeries
+{
+    private int $currentTimestamp = 1;
+
+    public function SetTestCurrentTimestamp(int $timestamp): void
+    {
+        $this->currentTimestamp = $timestamp;
+    }
+
+    protected function CurrentTimestamp(): int
+    {
+        return $this->currentTimestamp;
+    }
+}
+
 function assertGatewayGauge(bool $condition, string $message): void
 {
     if (!$condition) {
@@ -3117,6 +3132,8 @@ assertGatewayGauge(
         && str_contains($timeSeriesForm, 'AxisMaximum')
         && str_contains($timeSeriesForm, 'CustomRangeValue')
         && str_contains($timeSeriesForm, 'CustomRangeUnit')
+        && str_contains($timeSeriesForm, 'current-week')
+        && str_contains($timeSeriesForm, 'current-month')
         && str_contains($timeSeriesForm, 'TimeAxisLabelFormat')
         && str_contains($timeSeriesForm, 'Annotations')
         && str_contains($timeSeriesForm, 'Reference line')
@@ -3445,6 +3462,137 @@ assertGatewayGauge(
         && $customRangeData['range']['aggregationLevel'] === 1
         && $customRangeData['chart']['timeAxisLabelFormat'] === 'time',
     'A custom rolling range and the selected time-axis label format must reach the shared chart model.'
+);
+
+$previousTimezone = date_default_timezone_get();
+date_default_timezone_set('Europe/Berlin');
+$calendarTimezone = new DateTimeZone('Europe/Berlin');
+$calendarNow = (new DateTimeImmutable('2026-10-07 14:30:00', $calendarTimezone))->getTimestamp();
+$calendarSource = [[
+    'VariableID'              => 4711,
+    'Label'                   => 'Calendar temperature',
+    'UseVariablePresentation' => false,
+    'Unit'                    => '°C',
+    'Decimals'                => 1,
+    'Color'                   => '',
+    'Style'                   => 'line',
+    'Reducer'                 => 'auto'
+]];
+$calendarRanges = [
+    'today' => [
+        'start' => '2026-10-07 00:00:00',
+        'end'   => '2026-10-07 14:30:00',
+        'live'  => true
+    ],
+    'yesterday' => [
+        'start' => '2026-10-06 00:00:00',
+        'end'   => '2026-10-06 23:59:59',
+        'live'  => false
+    ],
+    'current-week' => [
+        'start' => '2026-10-05 00:00:00',
+        'end'   => '2026-10-07 14:30:00',
+        'live'  => true
+    ],
+    'current-month' => [
+        'start' => '2026-10-01 00:00:00',
+        'end'   => '2026-10-07 14:30:00',
+        'live'  => true
+    ]
+];
+foreach ($calendarRanges as $range => $expected) {
+    $calendarTimeSeries = new TestableEChartsTimeSeries();
+    $calendarTimeSeries->Create();
+    $calendarTimeSeries->SetTestCurrentTimestamp($calendarNow);
+    $calendarTimeSeries->SetTestProperty('Sources', json_encode($calendarSource, JSON_THROW_ON_ERROR));
+    $calendarTimeSeries->SetTestProperty('Range', $range);
+    $calendarTimeSeries->SetTestProperty('DataMode', 'raw');
+    $calendarTimeSeries->ApplyChanges();
+    $calendarData = json_decode($calendarTimeSeries->GetTimeSeriesData(), true, 512, JSON_THROW_ON_ERROR);
+    $expectedStart = (new DateTimeImmutable($expected['start'], $calendarTimezone))->getTimestamp();
+    $expectedEnd = (new DateTimeImmutable($expected['end'], $calendarTimezone))->getTimestamp();
+    assertGatewayGauge(
+        $calendarTimeSeries->GetTestStatus() === IS_ACTIVE
+            && $calendarData['range']['key'] === $range
+            && $calendarData['range']['calendarAligned'] === true
+            && $calendarData['range']['acceptLiveUpdates'] === $expected['live']
+            && $calendarData['range']['startTimestamp'] === $expectedStart
+            && $calendarData['range']['endTimestamp'] === $expectedEnd
+            && $calendarData['range']['durationSeconds'] === $expectedEnd - $expectedStart + 1,
+        'Calendar range ' . $range . ' must use local calendar boundaries instead of a rolling duration.'
+    );
+}
+
+$aggregatedCalendarTimeSeries = new TestableEChartsTimeSeries();
+$aggregatedCalendarTimeSeries->Create();
+$aggregatedCalendarTimeSeries->SetTestCurrentTimestamp($calendarNow);
+$aggregatedCalendarTimeSeries->SetTestProperty('Sources', json_encode($calendarSource, JSON_THROW_ON_ERROR));
+$aggregatedCalendarTimeSeries->SetTestProperty('Range', 'yesterday');
+$aggregatedCalendarTimeSeries->SetTestProperty('DataMode', 'hour');
+$aggregatedCalendarTimeSeries->ApplyChanges();
+$aggregatedCalendarData = json_decode(
+    $aggregatedCalendarTimeSeries->GetTimeSeriesData(),
+    true,
+    512,
+    JSON_THROW_ON_ERROR
+);
+assertGatewayGauge(
+    $aggregatedCalendarData['range']['startTimestamp']
+        === (new DateTimeImmutable('2026-10-06 00:00:00', $calendarTimezone))->getTimestamp()
+        && $aggregatedCalendarData['range']['endTimestamp']
+        === (new DateTimeImmutable('2026-10-06 23:59:59', $calendarTimezone))->getTimestamp()
+        && $aggregatedCalendarData['range']['aggregationLevel'] === 0,
+    'Completed calendar periods must retain their complete boundaries when aggregated.'
+);
+
+$independentCalendarTimeSeries = new EChartsTimeSeries();
+$independentCalendarTimeSeries->Create();
+$independentCalendarTimeSeries->SetTestProperty('Sources', json_encode($calendarSource, JSON_THROW_ON_ERROR));
+$independentCalendarTimeSeries->SetTestProperty('Range', 'today');
+$independentCalendarTimeSeries->SetTestProperty('DataMode', 'raw');
+$independentCalendarTimeSeries->SetTestProperty('EnableIPSView', true);
+$independentCalendarTimeSeries->SetTestProperty('IPSViewUseTileTimeSettings', false);
+$independentCalendarTimeSeries->SetTestProperty('IPSViewRange', 'yesterday');
+$independentCalendarTimeSeries->ApplyChanges();
+$independentCalendarTile = json_decode(
+    $independentCalendarTimeSeries->GetTimeSeriesData(),
+    true,
+    512,
+    JSON_THROW_ON_ERROR
+);
+$independentCalendarIPSView = $independentCalendarTimeSeries->GetIPSViewHTML();
+assertGatewayGauge(
+    $independentCalendarTile['range']['key'] === 'today'
+        && str_contains($independentCalendarIPSView, '"key":"yesterday"')
+        && str_contains($independentCalendarIPSView, '"acceptLiveUpdates":false'),
+    'Tile and IPSView must resolve independent calendar ranges through the shared range contract.'
+);
+
+$dstCalendarTimeSeries = new TestableEChartsTimeSeries();
+$dstCalendarTimeSeries->Create();
+$dstCalendarTimeSeries->SetTestCurrentTimestamp(
+    (new DateTimeImmutable('2026-10-26 12:00:00', $calendarTimezone))->getTimestamp()
+);
+$dstCalendarTimeSeries->SetTestProperty('Sources', json_encode($calendarSource, JSON_THROW_ON_ERROR));
+$dstCalendarTimeSeries->SetTestProperty('Range', 'yesterday');
+$dstCalendarTimeSeries->SetTestProperty('DataMode', 'raw');
+$dstCalendarTimeSeries->ApplyChanges();
+$dstCalendarData = json_decode($dstCalendarTimeSeries->GetTimeSeriesData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $dstCalendarData['range']['durationSeconds'] === 90000,
+    'Calendar ranges must respect the 25-hour day when daylight saving time ends.'
+);
+date_default_timezone_set($previousTimezone);
+
+$invalidRealtimeYesterday = new EChartsTimeSeries();
+$invalidRealtimeYesterday->Create();
+$invalidRealtimeYesterday->SetTestProperty('Sources', json_encode($calendarSource, JSON_THROW_ON_ERROR));
+$invalidRealtimeYesterday->SetTestProperty('Range', 'yesterday');
+$invalidRealtimeYesterday->SetTestProperty('DataMode', 'realtime');
+$invalidRealtimeYesterday->ApplyChanges();
+assertGatewayGauge(
+    $invalidRealtimeYesterday->GetTestStatus() === 202,
+    'The completed Yesterday range must reject archive-free real-time mode.'
 );
 
 $invalidCustomRangeTimeSeries = new EChartsTimeSeries();

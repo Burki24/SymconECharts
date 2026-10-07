@@ -297,6 +297,22 @@
                             "value": "30d"
                         },
                         {
+                            "caption": "Today",
+                            "value": "today"
+                        },
+                        {
+                            "caption": "Yesterday",
+                            "value": "yesterday"
+                        },
+                        {
+                            "caption": "This week",
+                            "value": "current-week"
+                        },
+                        {
+                            "caption": "This month",
+                            "value": "current-month"
+                        },
+                        {
                             "caption": "Custom",
                             "value": "custom"
                         }

@@ -18,6 +18,9 @@ optional ein eigenständiges IPSView-WebContent-Widget.
 
 - rollende Zeiträume von 1 Stunde, 6 Stunden, 24 Stunden, 7 Tagen und 30 Tagen
   sowie frei definierbare Fenster in Minuten, Stunden, Tagen oder Wochen;
+- kalendergebundene Ansichten für heute, gestern, die laufende Woche und den
+  laufenden Monat; die Grenzen folgen der Symcon-Zeitzone und berücksichtigen
+  Zeitumstellungen;
 - automatische Zeitachsenbeschriftung oder ausdrückliche Anzeige von Uhrzeit,
   Datum beziehungsweise Datum und Uhrzeit;
 - ausdrücklich wählbare Rohwerte, automatische Verdichtung oder feste
@@ -75,7 +78,10 @@ Kachel einen Hinweis auf das wirksame Punktbudget.
 2. Eine bis acht Integer- oder Float-Variablen konfigurieren. Archivmodi
    benötigen archivierte Quellen; `realtime` funktioniert auch ohne Archiv.
 3. Zeitraum, Beschriftung der Zeitachse, Datenmodus und Punktbudget wählen.
-   Bei **Benutzerdefiniert** werden Zeitraumwert und -einheit verwendet; die
+   Bei **Benutzerdefiniert** werden Zeitraumwert und -einheit verwendet.
+   **Heute**, **Gestern**, **Diese Woche** und **Dieser Monat** verwenden lokale
+   Kalendergrenzen statt eines rollenden Sekundenfensters. **Gestern** ist ein
+   abgeschlossener Zeitraum und benötigt deshalb einen Archivdatenmodus. Die
    Zeitachse kann ECharts automatisch beschriften oder ausdrücklich Uhrzeit,
    Datum beziehungsweise beides anzeigen.
 4. Optional Beschriftung, Einheit, Nachkommastellen, Farbe, Stil, Reducer,

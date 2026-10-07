@@ -60,6 +60,7 @@ class EChartsTimeSeries extends IPSModuleStrict
         '7d'  => 604800,
         '30d' => 2592000
     ];
+    private const CALENDAR_RANGES = ['today', 'yesterday', 'current-week', 'current-month'];
     private const CUSTOM_RANGE_UNITS = [
         'minute' => 60,
         'hour'   => 3600,
@@ -557,6 +558,8 @@ class EChartsTimeSeries extends IPSModuleStrict
                 'durationSeconds'     => $query['DurationSeconds'],
                 'startTimestamp'      => $query['StartTimestamp'],
                 'endTimestamp'        => $query['EndTimestamp'],
+                'calendarAligned'     => $query['CalendarAligned'],
+                'acceptLiveUpdates'   => $query['AcceptLiveUpdates'],
                 'dataMode'            => $this->ReadPropertyString('DataMode'),
                 'aggregationLevel'    => $query['AggregationLevel'],
                 'pointBudget'         => $this->ReadPropertyInteger('PointBudget'),
@@ -694,6 +697,18 @@ class EChartsTimeSeries extends IPSModuleStrict
             ];
         }
 
+        if ($this->ReadPropertyString('DataMode') === 'realtime'
+            && ($this->ReadPropertyString('Range') === 'yesterday'
+                || ($this->IsIPSViewHTMLPageEnabled()
+                    && !$this->ReadPropertyBoolean('IPSViewUseTileTimeSettings')
+                    && $this->ReadPropertyString('IPSViewRange') === 'yesterday'))
+        ) {
+            return [
+                'Status'  => self::STATUS_CONFIGURATION_INVALID,
+                'Message' => 'Yesterday requires an archive data mode.'
+            ];
+        }
+
         return null;
     }
 
@@ -708,7 +723,9 @@ class EChartsTimeSeries extends IPSModuleStrict
                     self::CUSTOM_RANGE_UNITS
                 ));
 
-        return (array_key_exists($range, self::RANGE_SECONDS) || $range === 'custom')
+        return (array_key_exists($range, self::RANGE_SECONDS)
+                || in_array($range, self::CALENDAR_RANGES, true)
+                || $range === 'custom')
             && $customRangeIsValid
             && in_array(
                 $this->ReadPropertyString($prefix . 'TimeAxisLabelFormat'),
@@ -1021,10 +1038,12 @@ class EChartsTimeSeries extends IPSModuleStrict
         return abs($left - $right) <= 1e-9 * max(1.0, abs($left), abs($right));
     }
 
-    /** @return array{DurationSeconds:int,StartTimestamp:int,EndTimestamp:int,Mode:string,AggregationLevel:int|null,Limit:int} */
+    /** @return array{DurationSeconds:int,StartTimestamp:int,EndTimestamp:int,Mode:string,AggregationLevel:int|null,Limit:int,CalendarAligned:bool,AcceptLiveUpdates:bool,Empty:bool} */
     private function ResolveArchiveQuery(int $sourceCount, bool $ipsView = false): array
     {
-        $duration = $this->RangeDurationSeconds($ipsView);
+        $now = $this->CurrentTimestamp();
+        $window = $this->ResolveRangeWindow($ipsView, $now);
+        $duration = $window['DurationSeconds'];
         $mode = $this->ReadPropertyString('DataMode');
         $limit = max(1, min(2000, intdiv($this->ReadPropertyInteger('PointBudget'), $sourceCount)));
         $level = null;
@@ -1041,25 +1060,74 @@ class EChartsTimeSeries extends IPSModuleStrict
             }
         }
 
-        $end = $this->CurrentTimestamp();
+        $end = $window['EndTimestamp'];
         if ($level !== null) {
-            $end = $this->AggregationWindowStart($level, $end) - 1;
+            $completedBoundary = $this->AggregationWindowStart($level, $now);
+            $end = min($window['EndTimestamp'] + 1, $completedBoundary) - 1;
         }
+
+        $start = $window['CalendarAligned']
+            ? $window['StartTimestamp']
+            : $end - $duration + ($level === null ? 0 : 1);
+
+        $empty = $end < $start;
 
         return [
             'DurationSeconds'  => $duration,
-            'StartTimestamp'   => max(1, $end - $duration + ($level === null ? 0 : 1)),
-            'EndTimestamp'     => $end,
+            'StartTimestamp'   => max(1, $start),
+            'EndTimestamp'     => max(1, $empty ? $window['EndTimestamp'] : $end),
             'Mode'             => $mode === 'realtime' ? 'realtime' : ($level === null ? 'raw' : 'aggregated'),
             'AggregationLevel' => $level,
-            'Limit'            => $limit
+            'Limit'            => $limit,
+            'CalendarAligned'  => $window['CalendarAligned'],
+            'AcceptLiveUpdates'=> $window['AcceptLiveUpdates'] && in_array($mode, ['raw', 'realtime'], true),
+            'Empty'            => $empty
+        ];
+    }
+
+    /** @return array{DurationSeconds:int,StartTimestamp:int,EndTimestamp:int,CalendarAligned:bool,AcceptLiveUpdates:bool} */
+    private function ResolveRangeWindow(bool $ipsView, int $now): array
+    {
+        $range = $this->EffectiveRange($ipsView);
+        if (!in_array($range, self::CALENDAR_RANGES, true)) {
+            $duration = $this->RangeDurationSeconds($ipsView);
+
+            return [
+                'DurationSeconds'  => $duration,
+                'StartTimestamp'   => max(1, $now - $duration),
+                'EndTimestamp'     => $now,
+                'CalendarAligned'  => false,
+                'AcceptLiveUpdates'=> true
+            ];
+        }
+
+        $timezone = new DateTimeZone(date_default_timezone_get());
+        $localNow = (new DateTimeImmutable('@' . $now))->setTimezone($timezone);
+        $today = $localNow->setTime(0, 0);
+        $start = match ($range) {
+            'today'         => $today,
+            'yesterday'     => $today->modify('-1 day'),
+            'current-week'  => $today->modify('monday this week'),
+            'current-month' => $today->modify('first day of this month')
+        };
+        $end = $range === 'yesterday'
+            ? $today->getTimestamp() - 1
+            : $now;
+        $startTimestamp = $start->getTimestamp();
+
+        return [
+            'DurationSeconds'  => max(1, $end - $startTimestamp + 1),
+            'StartTimestamp'   => $startTimestamp,
+            'EndTimestamp'     => $end,
+            'CalendarAligned'  => true,
+            'AcceptLiveUpdates'=> $range !== 'yesterday'
         ];
     }
 
     private function RangeDurationSeconds(bool $ipsView = false): int
     {
         $range = $this->EffectiveRange($ipsView);
-        if ($range !== 'custom') {
+        if (array_key_exists($range, self::RANGE_SECONDS)) {
             return self::RANGE_SECONDS[$range];
         }
 
@@ -1069,8 +1137,15 @@ class EChartsTimeSeries extends IPSModuleStrict
 
     private function RangeSummary(): string
     {
-        if ($this->ReadPropertyString('Range') !== 'custom') {
-            return $this->ReadPropertyString('Range');
+        $range = $this->ReadPropertyString('Range');
+        if ($range !== 'custom') {
+            return match ($range) {
+                'today'         => $this->Translate('Today'),
+                'yesterday'     => $this->Translate('Yesterday'),
+                'current-week'  => $this->Translate('This week'),
+                'current-month' => $this->Translate('This month'),
+                default         => $range
+            };
         }
 
         $unit = match ($this->ReadPropertyString('CustomRangeUnit')) {
@@ -1086,6 +1161,17 @@ class EChartsTimeSeries extends IPSModuleStrict
     /** @param array{VariableID:int,Reducer:string} $source @param array<string,mixed> $query @return array<string,mixed> */
     private function ReadArchiveSource(array $source, array $query): array
     {
+        if ($query['Empty']) {
+            return [
+                'ArchiveAggregationType' => 'none',
+                'EffectiveReducer'       => $query['AggregationLevel'] === null
+                    ? 'raw'
+                    : ($source['Reducer'] === 'auto' ? 'average' : $source['Reducer']),
+                'Points'                 => [],
+                'Truncated'              => false
+            ];
+        }
+
         $payload = [
             'VariableID'     => $source['VariableID'],
             'StartTimestamp' => $query['StartTimestamp'],
@@ -1265,35 +1351,67 @@ class EChartsTimeSeries extends IPSModuleStrict
     private function ScheduleArchiveRefresh(): void
     {
         $mode = $this->ReadPropertyString('DataMode');
-        if (in_array($mode, ['raw', 'realtime'], true)
-            || !in_array($mode, ['auto', ...array_keys(self::AGGREGATION_LEVELS)], true)
-        ) {
+        if (!in_array($mode, ['raw', 'realtime', 'auto', ...array_keys(self::AGGREGATION_LEVELS)], true)) {
             $this->SetTimerInterval('ArchiveRefresh', 0);
             return;
         }
         try {
             $sourceCount = max(1, count($this->GetValidatedSources()));
-            $levels = [$this->ResolveArchiveQuery($sourceCount)['AggregationLevel']];
+            $outputs = [false];
             if ($this->IsIPSViewHTMLPageEnabled()
                 && !$this->ReadPropertyBoolean('IPSViewUseTileTimeSettings')
             ) {
-                $levels[] = $this->ResolveArchiveQuery($sourceCount, true)['AggregationLevel'];
+                $outputs[] = true;
+            }
+            $levels = [];
+            $calendarBoundaries = [];
+            $now = $this->CurrentTimestamp();
+            foreach ($outputs as $ipsView) {
+                $levels[] = $this->ResolveArchiveQuery($sourceCount, $ipsView)['AggregationLevel'];
+                $calendarBoundary = $this->NextCalendarRangeBoundary($ipsView, $now);
+                if ($calendarBoundary !== null) {
+                    $calendarBoundaries[] = $calendarBoundary;
+                }
             }
         } catch (Throwable) {
             $this->SetTimerInterval('ArchiveRefresh', 0);
             return;
         }
-        $now = $this->CurrentTimestamp();
-        $nextBoundaries = array_map(
-            fn (int $level): int => $this->NextAggregationWindowStart($level, $now) + 2,
-            array_values(array_unique(array_filter($levels, is_int(...))))
-        );
+        $nextBoundaries = $calendarBoundaries;
+        if (!in_array($mode, ['raw', 'realtime'], true)) {
+            $nextBoundaries = [
+                ...$nextBoundaries,
+                ...array_map(
+                    fn (int $level): int => $this->NextAggregationWindowStart($level, $now) + 2,
+                    array_values(array_unique(array_filter($levels, is_int(...))))
+                )
+            ];
+        }
         if ($nextBoundaries === []) {
             $this->SetTimerInterval('ArchiveRefresh', 0);
             return;
         }
         $nextBoundary = min($nextBoundaries);
         $this->SetTimerInterval('ArchiveRefresh', max(1000, ($nextBoundary - $now) * 1000));
+    }
+
+    private function NextCalendarRangeBoundary(bool $ipsView, int $now): ?int
+    {
+        $range = $this->EffectiveRange($ipsView);
+        if (!in_array($range, self::CALENDAR_RANGES, true)) {
+            return null;
+        }
+
+        $localNow = (new DateTimeImmutable('@' . $now))->setTimezone(
+            new DateTimeZone(date_default_timezone_get())
+        );
+        $today = $localNow->setTime(0, 0);
+
+        return match ($range) {
+            'today', 'yesterday' => $today->modify('+1 day')->getTimestamp() + 2,
+            'current-week'       => $today->modify('monday next week')->getTimestamp() + 2,
+            'current-month'      => $today->modify('first day of next month')->getTimestamp() + 2
+        };
     }
 
     private function AggregationWindowStart(int $level, int $timestamp): int
@@ -1720,6 +1838,10 @@ class EChartsTimeSeries extends IPSModuleStrict
                             ['caption' => '24 hours', 'value' => '24h'],
                             ['caption' => '7 days', 'value' => '7d'],
                             ['caption' => '30 days', 'value' => '30d'],
+                            ['caption' => 'Today', 'value' => 'today'],
+                            ['caption' => 'Yesterday', 'value' => 'yesterday'],
+                            ['caption' => 'This week', 'value' => 'current-week'],
+                            ['caption' => 'This month', 'value' => 'current-month'],
                             ['caption' => 'Custom', 'value' => 'custom']
                         ]
                     ],

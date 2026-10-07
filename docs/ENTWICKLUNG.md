@@ -311,6 +311,10 @@ lokale ECharts-Runtime dokumentiert
 Benutzerdefinierte rollende Zeiträume und wahlweise geerbte oder unabhängige
 Zeiteinstellungen für Kachel und IPSView folgen
 [`ADR 0027`](adr/0027-timeseries-custom-ranges-and-time-axis-labels.md).
+Dieselbe Entscheidung umfasst kalendergebundene Zeiträume für heute, gestern,
+die laufende Woche und den laufenden Monat. Deren Grenzen werden in der
+Symcon-Zeitzone gebildet und bei Zeitumstellungen nicht auf feste
+24-Stunden-Tage reduziert.
 Das Gerätemodul setzt davon Quellen, Roh-, Aggregat- und Echtzeitmodus,
 Punktbudget, Mehr-Achsen-Modell, native Kachel und die optionale IPSView-
 Ausgabe um.
