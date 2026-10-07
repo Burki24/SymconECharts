@@ -308,6 +308,9 @@ dokumentiert
 Quellenbezogene Referenzlinien und Wertebereiche sowie die dafür erweiterte
 lokale ECharts-Runtime dokumentiert
 [`ADR 0026`](adr/0026-timeseries-reference-lines-and-value-ranges.md).
+Benutzerdefinierte rollende Zeiträume und wahlweise geerbte oder unabhängige
+Zeiteinstellungen für Kachel und IPSView folgen
+[`ADR 0027`](adr/0027-timeseries-custom-ranges-and-time-axis-labels.md).
 Das Gerätemodul setzt davon Quellen, Roh-, Aggregat- und Echtzeitmodus,
 Punktbudget, Mehr-Achsen-Modell, native Kachel und die optionale IPSView-
 Ausgabe um.

@@ -24,6 +24,7 @@ $requiredFiles = [
     'docs/adr/0016-dedicated-tacho-and-chronograph-modules.md',
     'docs/adr/0019-timeseries-realtime-without-archive.md',
     'docs/adr/0023-timeseries-source-design-and-svg-area-patterns.md',
+    'docs/adr/0027-timeseries-custom-ranges-and-time-axis-labels.md',
     'library.json',
     'libs/EChartsAsset.php',
     'libs/EChartsDataProtocol.php',

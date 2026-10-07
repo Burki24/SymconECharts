@@ -60,6 +60,13 @@ class EChartsTimeSeries extends IPSModuleStrict
         '7d'  => 604800,
         '30d' => 2592000
     ];
+    private const CUSTOM_RANGE_UNITS = [
+        'minute' => 60,
+        'hour'   => 3600,
+        'day'    => 86400,
+        'week'   => 604800
+    ];
+    private const TIME_AXIS_LABEL_FORMATS = ['auto', 'time', 'date', 'date-time'];
     private const AGGREGATION_LEVELS = [
         'minute'          => 6,
         'five-minutes'    => 5,
@@ -73,12 +80,15 @@ class EChartsTimeSeries extends IPSModuleStrict
     private const AXIS_POSITIONS = ['auto', 'left', 'right'];
     private const LEGEND_POSITIONS = ['top', 'bottom', 'hidden'];
     private const DESIGN_FORM_FIELDS = [
-        'Title', 'Sources', 'Annotations', 'EChartsTheme', 'LegendPosition', 'EnableZoom',
+        'Title', 'Sources', 'Annotations', 'Range', 'CustomRangeValue', 'CustomRangeUnit',
+        'TimeAxisLabelFormat', 'EChartsTheme', 'LegendPosition', 'EnableZoom',
         'LineWidthPercent', 'SmoothLines', 'ShowSymbols', 'SymbolSizePercent',
         'AreaOpacityPercent', 'ShowGrid', 'ShowXAxis', 'ShowYAxis',
         'IPSViewUseTileDesign', 'IPSViewEChartsTheme', 'IPSViewLegendPosition', 'IPSViewEnableZoom',
         'IPSViewLineWidthPercent', 'IPSViewSmoothLines', 'IPSViewShowSymbols', 'IPSViewSymbolSizePercent',
         'IPSViewAreaOpacityPercent', 'IPSViewShowGrid', 'IPSViewShowXAxis', 'IPSViewShowYAxis',
+        'IPSViewUseTileTimeSettings', 'IPSViewRange', 'IPSViewCustomRangeValue', 'IPSViewCustomRangeUnit',
+        'IPSViewTimeAxisLabelFormat',
         'IPSViewAdaptToBackground', 'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent'
     ];
     private const DESIGN_PROPERTY_TYPES = [
@@ -105,6 +115,9 @@ class EChartsTimeSeries extends IPSModuleStrict
         $this->RegisterPropertyString('Annotations', '[]');
         $this->RegisterPropertyString('Title', '');
         $this->RegisterPropertyString('Range', '24h');
+        $this->RegisterPropertyInteger('CustomRangeValue', 7);
+        $this->RegisterPropertyString('CustomRangeUnit', 'day');
+        $this->RegisterPropertyString('TimeAxisLabelFormat', 'auto');
         $this->RegisterPropertyString('DataMode', 'auto');
         $this->RegisterPropertyInteger('PointBudget', 2000);
         $this->RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO);
@@ -121,6 +134,11 @@ class EChartsTimeSeries extends IPSModuleStrict
         $this->RegisterIPSViewHTMLPageProperties();
         $this->RegisterEChartsIPSViewTransport();
         $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
+        $this->RegisterPropertyBoolean('IPSViewUseTileTimeSettings', true);
+        $this->RegisterPropertyString('IPSViewRange', '24h');
+        $this->RegisterPropertyInteger('IPSViewCustomRangeValue', 7);
+        $this->RegisterPropertyString('IPSViewCustomRangeUnit', 'day');
+        $this->RegisterPropertyString('IPSViewTimeAxisLabelFormat', 'auto');
         $this->RegisterPropertyBoolean('IPSViewAdaptToBackground', false);
         $this->RegisterPropertyInteger('IPSViewBackgroundColor', EChartsIPSViewBackground::DEFAULT_COLOR);
         $this->RegisterPropertyInteger(
@@ -175,6 +193,12 @@ class EChartsTimeSeries extends IPSModuleStrict
     {
         $form = $this->LoadConfigurationForm();
         if (isset($form['elements']) && is_array($form['elements'])) {
+            $customRangeVisible = $this->ReadPropertyString('Range') === 'custom';
+            $form['elements'] = $this->SetFormFieldVisibility(
+                $form['elements'],
+                ['CustomRangeValue', 'CustomRangeUnit'],
+                $customRangeVisible
+            );
             $form['elements'] = $this->AttachListDesigners($form['elements']);
             $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
             $form['elements'] = $this->AttachTimeSeriesPreviewActions($form['elements']);
@@ -187,7 +211,8 @@ class EChartsTimeSeries extends IPSModuleStrict
                 $this->ReadPropertyString('Title'),
                 $this->ReadPropertyString('EChartsTheme'),
                 $this->ReadTimeSeriesDesign(),
-                annotations: $this->PreviewAnnotations()
+                annotations: $this->PreviewAnnotations(),
+                timeAxisLabelFormat: $this->ReadPropertyString('TimeAxisLabelFormat')
             )
         );
         $form = SVGPreviewHelper::withImage(
@@ -201,7 +226,8 @@ class EChartsTimeSeries extends IPSModuleStrict
                 $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
                 EChartsIPSViewBackground::Color($this->ReadPropertyInteger('IPSViewBackgroundColor')),
                 $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent'),
-                $this->PreviewAnnotations()
+                $this->PreviewAnnotations(),
+                $this->EffectiveTimeAxisLabelFormat(true)
             )
         );
 
@@ -220,6 +246,26 @@ class EChartsTimeSeries extends IPSModuleStrict
             $values = [];
         }
 
+        $customRangeVisible = (string) ($values['Range'] ?? $this->ReadPropertyString('Range')) === 'custom';
+        $this->UpdateFormField('CustomRangeValue', 'visible', $customRangeVisible);
+        $this->UpdateFormField('CustomRangeUnit', 'visible', $customRangeVisible);
+        $useTileTimeSettings = (bool) ($values['IPSViewUseTileTimeSettings']
+            ?? $this->ReadPropertyBoolean('IPSViewUseTileTimeSettings'));
+        $ipsViewRange = (string) ($values['IPSViewRange'] ?? $this->ReadPropertyString('IPSViewRange'));
+        foreach (['IPSViewRange', 'IPSViewTimeAxisLabelFormat'] as $field) {
+            $this->UpdateFormField($field, 'visible', !$useTileTimeSettings);
+        }
+        $this->UpdateFormField(
+            'IPSViewCustomRangeValue',
+            'visible',
+            !$useTileTimeSettings && $ipsViewRange === 'custom'
+        );
+        $this->UpdateFormField(
+            'IPSViewCustomRangeUnit',
+            'visible',
+            !$useTileTimeSettings && $ipsViewRange === 'custom'
+        );
+
         $this->UpdateFormField('TimeSeriesPreview', 'image', SVGPreviewHelper::dataUri(
             EChartsTimeSeriesPreview::CreateSvg(
                 $this->PreviewSeries($values['Sources'] ?? null),
@@ -229,7 +275,9 @@ class EChartsTimeSeries extends IPSModuleStrict
                 annotations: $this->PreviewAnnotations(
                     $values['Annotations'] ?? null,
                     $values['Sources'] ?? null
-                )
+                ),
+                timeAxisLabelFormat: (string) ($values['TimeAxisLabelFormat']
+                    ?? $this->ReadPropertyString('TimeAxisLabelFormat'))
             )
         ));
 
@@ -253,7 +301,12 @@ class EChartsTimeSeries extends IPSModuleStrict
                 $this->PreviewAnnotations(
                     $values['Annotations'] ?? null,
                     $values['Sources'] ?? null
-                )
+                ),
+                $useTileTimeSettings
+                    ? (string) ($values['TimeAxisLabelFormat']
+                        ?? $this->ReadPropertyString('TimeAxisLabelFormat'))
+                    : (string) ($values['IPSViewTimeAxisLabelFormat']
+                        ?? $this->ReadPropertyString('IPSViewTimeAxisLabelFormat'))
             )
         ));
     }
@@ -353,75 +406,7 @@ class EChartsTimeSeries extends IPSModuleStrict
 
     public function GetTimeSeriesData(): string
     {
-        $error = $this->GetConfigurationError();
-        if ($error !== null) {
-            $this->SetStatus($error['Status']);
-            throw new RuntimeException($error['Message']);
-        }
-        if (!$this->HasActiveParent()) {
-            $this->SetStatus(self::STATUS_PARENT_MISSING);
-            throw new RuntimeException('No active EChartsGateway is connected.');
-        }
-
-        $sources = $this->GetValidatedSources();
-        $annotations = $this->GetValidatedAnnotations($sources);
-        $query = $this->ResolveArchiveQuery(count($sources));
-        $axisModel = $this->BuildAxisModel($sources);
-        $axes = $axisModel['Axes'];
-        $axisIndexes = $axisModel['Indexes'];
-        $series = [];
-        $truncated = false;
-        foreach ($sources as $source) {
-            $archive = $query['Mode'] === 'realtime'
-                ? $this->ReadRealtimeSource($source['VariableID'], $query['EndTimestamp'])
-                : $this->ReadArchiveSource($source, $query);
-            $truncated = $truncated || $archive['Truncated'];
-            $series[] = [
-                'id'                     => 'variable-' . $source['VariableID'],
-                'variableID'             => $source['VariableID'],
-                'label'                  => $source['Label'] !== ''
-                    ? $source['Label']
-                    : IPS_GetName($source['VariableID']),
-                'unit'                   => $source['Unit'],
-                'decimals'               => $source['Decimals'],
-                'color'                  => $source['Color'],
-                'style'                  => $source['Style'],
-                'design'                 => $source['Design'],
-                'axisIndex'              => $axisIndexes[$source['Unit']],
-                'effectiveReducer'       => $archive['EffectiveReducer'],
-                'archiveAggregationType' => $archive['ArchiveAggregationType'],
-                'points'                 => $archive['Points'],
-                'truncated'              => $archive['Truncated']
-            ];
-        }
-
-        $this->WriteAttributeString('LastError', '');
-        $this->SetStatus(IS_ACTIVE);
-
-        return json_encode([
-            'schemaVersion' => 1,
-            'family'        => 'time-series',
-            'theme'         => $this->ReadPropertyString('EChartsTheme'),
-            'chart'         => [
-                'title'      => $this->ReadPropertyString('Title'),
-                'enableZoom' => $this->ReadPropertyBoolean('EnableZoom'),
-                'design'     => $this->ReadTimeSeriesDesign()
-            ],
-            'range'         => [
-                'key'                 => $this->ReadPropertyString('Range'),
-                'durationSeconds'     => $query['DurationSeconds'],
-                'startTimestamp'      => $query['StartTimestamp'],
-                'endTimestamp'        => $query['EndTimestamp'],
-                'dataMode'            => $this->ReadPropertyString('DataMode'),
-                'aggregationLevel'    => $query['AggregationLevel'],
-                'pointBudget'         => $this->ReadPropertyInteger('PointBudget'),
-                'pointLimitPerSeries' => $query['Limit']
-            ],
-            'axes'          => $axes,
-            'series'        => $series,
-            'annotations'   => $annotations,
-            'truncated'     => $truncated
-        ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
+        return $this->GetTimeSeriesDataForOutput(false);
     }
 
     public function GetTimeSeriesDiagnostic(): string
@@ -510,6 +495,80 @@ class EChartsTimeSeries extends IPSModuleStrict
         return time();
     }
 
+    private function GetTimeSeriesDataForOutput(bool $ipsView): string
+    {
+        $error = $this->GetConfigurationError();
+        if ($error !== null) {
+            $this->SetStatus($error['Status']);
+            throw new RuntimeException($error['Message']);
+        }
+        if (!$this->HasActiveParent()) {
+            $this->SetStatus(self::STATUS_PARENT_MISSING);
+            throw new RuntimeException('No active EChartsGateway is connected.');
+        }
+
+        $sources = $this->GetValidatedSources();
+        $annotations = $this->GetValidatedAnnotations($sources);
+        $query = $this->ResolveArchiveQuery(count($sources), $ipsView);
+        $axisModel = $this->BuildAxisModel($sources);
+        $axes = $axisModel['Axes'];
+        $axisIndexes = $axisModel['Indexes'];
+        $series = [];
+        $truncated = false;
+        foreach ($sources as $source) {
+            $archive = $query['Mode'] === 'realtime'
+                ? $this->ReadRealtimeSource($source['VariableID'], $query['EndTimestamp'])
+                : $this->ReadArchiveSource($source, $query);
+            $truncated = $truncated || $archive['Truncated'];
+            $series[] = [
+                'id'                     => 'variable-' . $source['VariableID'],
+                'variableID'             => $source['VariableID'],
+                'label'                  => $source['Label'] !== ''
+                    ? $source['Label']
+                    : IPS_GetName($source['VariableID']),
+                'unit'                   => $source['Unit'],
+                'decimals'               => $source['Decimals'],
+                'color'                  => $source['Color'],
+                'style'                  => $source['Style'],
+                'design'                 => $source['Design'],
+                'axisIndex'              => $axisIndexes[$source['Unit']],
+                'effectiveReducer'       => $archive['EffectiveReducer'],
+                'archiveAggregationType' => $archive['ArchiveAggregationType'],
+                'points'                 => $archive['Points'],
+                'truncated'              => $archive['Truncated']
+            ];
+        }
+
+        $this->WriteAttributeString('LastError', '');
+        $this->SetStatus(IS_ACTIVE);
+
+        return json_encode([
+            'schemaVersion' => 1,
+            'family'        => 'time-series',
+            'theme'         => $this->ReadPropertyString('EChartsTheme'),
+            'chart'         => [
+                'title'               => $this->ReadPropertyString('Title'),
+                'enableZoom'          => $this->ReadPropertyBoolean('EnableZoom'),
+                'timeAxisLabelFormat' => $this->EffectiveTimeAxisLabelFormat($ipsView),
+                'design'              => $this->ReadTimeSeriesDesign()
+            ],
+            'range'         => [
+                'key'                 => $this->EffectiveRange($ipsView),
+                'durationSeconds'     => $query['DurationSeconds'],
+                'startTimestamp'      => $query['StartTimestamp'],
+                'endTimestamp'        => $query['EndTimestamp'],
+                'dataMode'            => $this->ReadPropertyString('DataMode'),
+                'aggregationLevel'    => $query['AggregationLevel'],
+                'pointBudget'         => $this->ReadPropertyInteger('PointBudget'),
+                'pointLimitPerSeries' => $query['Limit']
+            ],
+            'axes'          => $axes,
+            'series'        => $series,
+            'annotations'   => $annotations,
+            'truncated'     => $truncated
+        ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
+    }
+
     private function RenderTimeSeriesHTMLPage(bool $ipsView): string
     {
         $hiddenTileTitle = false;
@@ -572,7 +631,7 @@ class EChartsTimeSeries extends IPSModuleStrict
         }
 
         $sources = $this->GetValidatedSources();
-        $this->SetSummary(count($sources) . ' sources · ' . $this->ReadPropertyString('Range'));
+        $this->SetSummary(count($sources) . ' sources · ' . $this->RangeSummary());
         $this->WriteAttributeString('LastError', '');
         $this->SetStatus(IS_ACTIVE);
         $this->ScheduleArchiveRefresh();
@@ -593,7 +652,7 @@ class EChartsTimeSeries extends IPSModuleStrict
             ];
         }
 
-        if (!array_key_exists($this->ReadPropertyString('Range'), self::RANGE_SECONDS)
+        if (!$this->IsValidTimeSettings()
             || !in_array(
                 $this->ReadPropertyString('DataMode'),
                 ['realtime', 'raw', 'auto', ...array_keys(self::AGGREGATION_LEVELS)],
@@ -625,7 +684,37 @@ class EChartsTimeSeries extends IPSModuleStrict
             }
         }
 
+        if ($this->IsIPSViewHTMLPageEnabled()
+            && !$this->ReadPropertyBoolean('IPSViewUseTileTimeSettings')
+            && !$this->IsValidTimeSettings('IPSView')
+        ) {
+            return [
+                'Status'  => self::STATUS_CONFIGURATION_INVALID,
+                'Message' => 'The IPSView time settings are invalid.'
+            ];
+        }
+
         return null;
+    }
+
+    private function IsValidTimeSettings(string $prefix = ''): bool
+    {
+        $range = $this->ReadPropertyString($prefix . 'Range');
+        $customRangeIsValid = $range !== 'custom'
+            || ($this->ReadPropertyInteger($prefix . 'CustomRangeValue') >= 1
+                && $this->ReadPropertyInteger($prefix . 'CustomRangeValue') <= 1000
+                && array_key_exists(
+                    $this->ReadPropertyString($prefix . 'CustomRangeUnit'),
+                    self::CUSTOM_RANGE_UNITS
+                ));
+
+        return (array_key_exists($range, self::RANGE_SECONDS) || $range === 'custom')
+            && $customRangeIsValid
+            && in_array(
+                $this->ReadPropertyString($prefix . 'TimeAxisLabelFormat'),
+                self::TIME_AXIS_LABEL_FORMATS,
+                true
+            );
     }
 
     /** @return list<array{VariableID:int,Label:string,Unit:string,Decimals:int,Color:string,Style:string,Reducer:string,AxisPosition:string,AxisRange:?array{minimum:float,maximum:float},Design:array<string,mixed>}> */
@@ -933,9 +1022,9 @@ class EChartsTimeSeries extends IPSModuleStrict
     }
 
     /** @return array{DurationSeconds:int,StartTimestamp:int,EndTimestamp:int,Mode:string,AggregationLevel:int|null,Limit:int} */
-    private function ResolveArchiveQuery(int $sourceCount): array
+    private function ResolveArchiveQuery(int $sourceCount, bool $ipsView = false): array
     {
-        $duration = self::RANGE_SECONDS[$this->ReadPropertyString('Range')];
+        $duration = $this->RangeDurationSeconds($ipsView);
         $mode = $this->ReadPropertyString('DataMode');
         $limit = max(1, min(2000, intdiv($this->ReadPropertyInteger('PointBudget'), $sourceCount)));
         $level = null;
@@ -965,6 +1054,33 @@ class EChartsTimeSeries extends IPSModuleStrict
             'AggregationLevel' => $level,
             'Limit'            => $limit
         ];
+    }
+
+    private function RangeDurationSeconds(bool $ipsView = false): int
+    {
+        $range = $this->EffectiveRange($ipsView);
+        if ($range !== 'custom') {
+            return self::RANGE_SECONDS[$range];
+        }
+
+        return $this->EffectiveCustomRangeValue($ipsView)
+            * self::CUSTOM_RANGE_UNITS[$this->EffectiveCustomRangeUnit($ipsView)];
+    }
+
+    private function RangeSummary(): string
+    {
+        if ($this->ReadPropertyString('Range') !== 'custom') {
+            return $this->ReadPropertyString('Range');
+        }
+
+        $unit = match ($this->ReadPropertyString('CustomRangeUnit')) {
+            'minute' => 'min',
+            'hour'   => 'h',
+            'day'    => 'd',
+            'week'   => 'w'
+        };
+
+        return $this->ReadPropertyInteger('CustomRangeValue') . $unit;
     }
 
     /** @param array{VariableID:int,Reducer:string} $source @param array<string,mixed> $query @return array<string,mixed> */
@@ -1094,7 +1210,7 @@ class EChartsTimeSeries extends IPSModuleStrict
             ];
         }
         try {
-            $chart = json_decode($this->GetTimeSeriesData(), true, 512, JSON_THROW_ON_ERROR);
+            $chart = json_decode($this->GetTimeSeriesDataForOutput($ipsView), true, 512, JSON_THROW_ON_ERROR);
             if ($ipsView) {
                 $chart['theme'] = $this->EffectiveIPSViewTheme();
                 $chart['chart']['enableZoom'] = $this->EffectiveIPSViewEnableZoom();
@@ -1156,13 +1272,27 @@ class EChartsTimeSeries extends IPSModuleStrict
             return;
         }
         try {
-            $level = $this->ResolveArchiveQuery(max(1, count($this->GetValidatedSources())))['AggregationLevel'];
+            $sourceCount = max(1, count($this->GetValidatedSources()));
+            $levels = [$this->ResolveArchiveQuery($sourceCount)['AggregationLevel']];
+            if ($this->IsIPSViewHTMLPageEnabled()
+                && !$this->ReadPropertyBoolean('IPSViewUseTileTimeSettings')
+            ) {
+                $levels[] = $this->ResolveArchiveQuery($sourceCount, true)['AggregationLevel'];
+            }
         } catch (Throwable) {
             $this->SetTimerInterval('ArchiveRefresh', 0);
             return;
         }
         $now = $this->CurrentTimestamp();
-        $nextBoundary = $this->NextAggregationWindowStart($level, $now) + 2;
+        $nextBoundaries = array_map(
+            fn (int $level): int => $this->NextAggregationWindowStart($level, $now) + 2,
+            array_values(array_unique(array_filter($levels, is_int(...))))
+        );
+        if ($nextBoundaries === []) {
+            $this->SetTimerInterval('ArchiveRefresh', 0);
+            return;
+        }
+        $nextBoundary = min($nextBoundaries);
         $this->SetTimerInterval('ArchiveRefresh', max(1000, ($nextBoundary - $now) * 1000));
     }
 
@@ -1399,6 +1529,22 @@ class EChartsTimeSeries extends IPSModuleStrict
         return $items;
     }
 
+    /** @param list<array<string,mixed>> $items @param list<string> $names @return list<array<string,mixed>> */
+    private function SetFormFieldVisibility(array $items, array $names, bool $visible): array
+    {
+        foreach ($items as &$item) {
+            if (isset($item['name']) && in_array($item['name'], $names, true)) {
+                $item['visible'] = $visible;
+            }
+            if (isset($item['items']) && is_array($item['items'])) {
+                $item['items'] = $this->SetFormFieldVisibility($item['items'], $names, $visible);
+            }
+        }
+        unset($item);
+
+        return $items;
+    }
+
     private function TimeSeriesPreviewFormAction(string $sourceAction = '', string $list = 'source'): string
     {
         $pairs = array_map(
@@ -1438,6 +1584,34 @@ class EChartsTimeSeries extends IPSModuleStrict
         return $this->ReadPropertyBoolean('IPSViewUseTileDesign')
             ? $this->ReadTimeSeriesDesign()
             : $this->ReadTimeSeriesDesign('IPSView');
+    }
+
+    private function EffectiveRange(bool $ipsView): string
+    {
+        return $ipsView && !$this->ReadPropertyBoolean('IPSViewUseTileTimeSettings')
+            ? $this->ReadPropertyString('IPSViewRange')
+            : $this->ReadPropertyString('Range');
+    }
+
+    private function EffectiveCustomRangeValue(bool $ipsView): int
+    {
+        return $ipsView && !$this->ReadPropertyBoolean('IPSViewUseTileTimeSettings')
+            ? $this->ReadPropertyInteger('IPSViewCustomRangeValue')
+            : $this->ReadPropertyInteger('CustomRangeValue');
+    }
+
+    private function EffectiveCustomRangeUnit(bool $ipsView): string
+    {
+        return $ipsView && !$this->ReadPropertyBoolean('IPSViewUseTileTimeSettings')
+            ? $this->ReadPropertyString('IPSViewCustomRangeUnit')
+            : $this->ReadPropertyString('CustomRangeUnit');
+    }
+
+    private function EffectiveTimeAxisLabelFormat(bool $ipsView): string
+    {
+        return $ipsView && !$this->ReadPropertyBoolean('IPSViewUseTileTimeSettings')
+            ? $this->ReadPropertyString('IPSViewTimeAxisLabelFormat')
+            : $this->ReadPropertyString('TimeAxisLabelFormat');
     }
 
     private function IsValidTimeSeriesDesign(string $prefix = ''): bool
@@ -1490,6 +1664,7 @@ class EChartsTimeSeries extends IPSModuleStrict
                     'Creates a standalone WebContent variable for use as an IPSView HTML widget.'
                 ),
                 EChartsIPSViewBackground::FormRow(),
+                ...$this->IPSViewTimeSettingsFormItems(),
                 [
                     'type'    => 'CheckBox',
                     'name'    => 'IPSViewUseTileDesign',
@@ -1509,6 +1684,80 @@ class EChartsTimeSeries extends IPSModuleStrict
                     'caption'  => 'Independent IPSView designer',
                     'expanded' => false,
                     'items'    => $this->PrefixIPSViewDesignerItems($tileDesigner['items'] ?? [])
+                ]
+            ]
+        ];
+    }
+
+    /** @return list<array<string,mixed>> */
+    private function IPSViewTimeSettingsFormItems(): array
+    {
+        $independent = !$this->ReadPropertyBoolean('IPSViewUseTileTimeSettings');
+        $custom = $independent && $this->ReadPropertyString('IPSViewRange') === 'custom';
+
+        return [
+            [
+                'type'    => 'CheckBox',
+                'name'    => 'IPSViewUseTileTimeSettings',
+                'caption' => 'Use Tile time settings'
+            ],
+            [
+                'type'    => 'Label',
+                'caption' => 'Disable this option to use a separate IPSView time range and time-axis label format.'
+            ],
+            [
+                'type'  => 'RowLayout',
+                'items' => [
+                    [
+                        'type'    => 'Select',
+                        'name'    => 'IPSViewRange',
+                        'caption' => 'IPSView time range',
+                        'width'   => '190px',
+                        'visible' => $independent,
+                        'options' => [
+                            ['caption' => '1 hour', 'value' => '1h'],
+                            ['caption' => '6 hours', 'value' => '6h'],
+                            ['caption' => '24 hours', 'value' => '24h'],
+                            ['caption' => '7 days', 'value' => '7d'],
+                            ['caption' => '30 days', 'value' => '30d'],
+                            ['caption' => 'Custom', 'value' => 'custom']
+                        ]
+                    ],
+                    [
+                        'type'    => 'NumberSpinner',
+                        'name'    => 'IPSViewCustomRangeValue',
+                        'caption' => 'Range value',
+                        'minimum' => 1,
+                        'maximum' => 1000,
+                        'width'   => '130px',
+                        'visible' => $custom
+                    ],
+                    [
+                        'type'    => 'Select',
+                        'name'    => 'IPSViewCustomRangeUnit',
+                        'caption' => 'Range unit',
+                        'width'   => '150px',
+                        'visible' => $custom,
+                        'options' => [
+                            ['caption' => 'Minutes', 'value' => 'minute'],
+                            ['caption' => 'Hours', 'value' => 'hour'],
+                            ['caption' => 'Days', 'value' => 'day'],
+                            ['caption' => 'Weeks', 'value' => 'week']
+                        ]
+                    ],
+                    [
+                        'type'    => 'Select',
+                        'name'    => 'IPSViewTimeAxisLabelFormat',
+                        'caption' => 'Time axis labels',
+                        'width'   => '190px',
+                        'visible' => $independent,
+                        'options' => [
+                            ['caption' => 'Automatic', 'value' => 'auto'],
+                            ['caption' => 'Time', 'value' => 'time'],
+                            ['caption' => 'Date', 'value' => 'date'],
+                            ['caption' => 'Date and time', 'value' => 'date-time']
+                        ]
+                    ]
                 ]
             ]
         ];

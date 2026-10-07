@@ -23,7 +23,8 @@ function render(
     resolvedColors = {},
     mode = 'symcon',
     adaptToBackground = false,
-    enableImages = false
+    enableImages = false,
+    timeAxisLabelFormat = 'auto'
 ) {
     const listeners = {};
     const scheduled = [];
@@ -63,7 +64,7 @@ function render(
                 status: 'ready',
                 chart: {
                     theme,
-                    chart: { title: 'Climate', enableZoom: true, design },
+                    chart: { title: 'Climate', enableZoom: true, timeAxisLabelFormat, design },
                     range: { startTimestamp: 1000, endTimestamp: 2000 },
                     axes: axes || [{ unit: '°C' }, { unit: '%' }],
                     annotations: [
@@ -215,6 +216,22 @@ assert.equal(compatible.series[0].showSymbol, false);
 assert.equal(compatible.series[0].areaStyle.opacity, 0.22);
 assert.equal(compatible.xAxis.axisLine.show, true);
 assert.equal(compatible.yAxis[0].axisLine.show, true);
+assert.equal(compatible.xAxis.axisLabel.formatter, undefined);
+
+const formattedTimeAxis = render(
+    undefined,
+    undefined,
+    750,
+    undefined,
+    'dark',
+    {},
+    'symcon',
+    false,
+    false,
+    'date-time'
+);
+assert.equal(typeof formattedTimeAxis.xAxis.axisLabel.formatter, 'function');
+assert.match(formattedTimeAxis.xAxis.axisLabel.formatter(1780000000000), /\d/);
 
 const automaticTheme = render(undefined, undefined, 750, undefined, 'auto', {
     '--symc-background': '#ffffff',

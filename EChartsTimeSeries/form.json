@@ -295,9 +295,52 @@
                         {
                             "caption": "30 days",
                             "value": "30d"
+                        },
+                        {
+                            "caption": "Custom",
+                            "value": "custom"
                         }
                     ]
                 },
+                {
+                    "type": "NumberSpinner",
+                    "name": "CustomRangeValue",
+                    "caption": "Range value",
+                    "minimum": 1,
+                    "maximum": 1000,
+                    "width": "130px",
+                    "visible": false
+                },
+                {
+                    "type": "Select",
+                    "name": "CustomRangeUnit",
+                    "caption": "Range unit",
+                    "width": "150px",
+                    "visible": false,
+                    "options": [
+                        {
+                            "caption": "Minutes",
+                            "value": "minute"
+                        },
+                        {
+                            "caption": "Hours",
+                            "value": "hour"
+                        },
+                        {
+                            "caption": "Days",
+                            "value": "day"
+                        },
+                        {
+                            "caption": "Weeks",
+                            "value": "week"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "RowLayout",
+            "items": [
                 {
                     "type": "Select",
                     "name": "DataMode",
@@ -345,6 +388,30 @@
                     "minimum": 200,
                     "maximum": 8000,
                     "width": "170px"
+                },
+                {
+                    "type": "Select",
+                    "name": "TimeAxisLabelFormat",
+                    "caption": "Time axis labels",
+                    "width": "190px",
+                    "options": [
+                        {
+                            "caption": "Automatic",
+                            "value": "auto"
+                        },
+                        {
+                            "caption": "Time",
+                            "value": "time"
+                        },
+                        {
+                            "caption": "Date",
+                            "value": "date"
+                        },
+                        {
+                            "caption": "Date and time",
+                            "value": "date-time"
+                        }
+                    ]
                 }
             ]
         },

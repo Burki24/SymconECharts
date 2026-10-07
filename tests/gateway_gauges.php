@@ -3039,6 +3039,7 @@ $timeSeries->SetTestProperty('Annotations', json_encode([
 ], JSON_THROW_ON_ERROR));
 $timeSeries->SetTestProperty('DataMode', 'auto');
 $timeSeries->SetTestProperty('PointBudget', 2000);
+$timeSeries->SetTestProperty('TimeAxisLabelFormat', 'date-time');
 $timeSeries->SetTestProperty('LegendPosition', 'bottom');
 $timeSeries->SetTestProperty('LineWidthPercent', 150);
 $timeSeries->SetTestProperty('SmoothLines', true);
@@ -3059,6 +3060,7 @@ assertGatewayGauge(
 );
 assertGatewayGauge(
     $timeSeriesData['family'] === 'time-series'
+        && $timeSeriesData['chart']['timeAxisLabelFormat'] === 'date-time'
         && $timeSeriesData['range']['aggregationLevel'] === 6
         && count($timeSeriesData['axes']) === 2
         && $timeSeriesData['axes'][0]['position'] === 'left'
@@ -3113,6 +3115,9 @@ assertGatewayGauge(
         && str_contains($timeSeriesForm, 'AxisRangeMode')
         && str_contains($timeSeriesForm, 'AxisMinimum')
         && str_contains($timeSeriesForm, 'AxisMaximum')
+        && str_contains($timeSeriesForm, 'CustomRangeValue')
+        && str_contains($timeSeriesForm, 'CustomRangeUnit')
+        && str_contains($timeSeriesForm, 'TimeAxisLabelFormat')
         && str_contains($timeSeriesForm, 'Annotations')
         && str_contains($timeSeriesForm, 'Reference line')
         && str_contains($timeSeriesForm, 'Value range')
@@ -3128,6 +3133,11 @@ assertGatewayGauge(
         && str_contains($timeSeriesForm, 'ECTS_GetTimeSeriesDiagnostic')
         && str_contains($timeSeriesForm, 'ECTS_CopyTileDesignToIPSView')
         && str_contains($timeSeriesForm, 'IPSViewUseTileDesign')
+        && str_contains($timeSeriesForm, 'IPSViewUseTileTimeSettings')
+        && str_contains($timeSeriesForm, 'IPSViewRange')
+        && str_contains($timeSeriesForm, 'IPSViewCustomRangeValue')
+        && str_contains($timeSeriesForm, 'IPSViewCustomRangeUnit')
+        && str_contains($timeSeriesForm, 'IPSViewTimeAxisLabelFormat')
         && str_contains($timeSeriesForm, 'IPSViewAdaptToBackground')
         && str_contains($timeSeriesForm, 'IPSViewBackgroundColor')
         && str_contains($timeSeriesForm, 'IPSViewBackgroundOpacityPercent')
@@ -3154,16 +3164,17 @@ $timeSeries->UpdateTimeSeriesPreviewFromForm(json_encode([
         'LineWidthPercent' => 100,
         'OpacityPercent'   => 18
     ]],
-    'EChartsTheme'       => 'dark',
-    'LegendPosition'     => 'hidden',
-    'LineWidthPercent'   => 80,
-    'SmoothLines'        => false,
-    'ShowSymbols'        => true,
-    'SymbolSizePercent'  => 150,
-    'AreaOpacityPercent' => 55,
-    'ShowGrid'           => true,
-    'ShowXAxis'          => true,
-    'ShowYAxis'          => false
+    'EChartsTheme'        => 'dark',
+    'LegendPosition'      => 'hidden',
+    'LineWidthPercent'    => 80,
+    'SmoothLines'         => false,
+    'ShowSymbols'         => true,
+    'SymbolSizePercent'   => 150,
+    'AreaOpacityPercent'  => 55,
+    'ShowGrid'            => true,
+    'ShowXAxis'           => true,
+    'ShowYAxis'           => false,
+    'TimeAxisLabelFormat' => 'date'
 ], JSON_THROW_ON_ERROR));
 $timeSeriesPreviewUpdates = $timeSeries->GetTestFormUpdates();
 $timeSeriesPreviewFields = array_column(array_slice($timeSeriesPreviewUpdates, -2), 'Field');
@@ -3183,6 +3194,7 @@ assertGatewayGauge(
         && str_contains($timeSeriesPreviewSvg, 'data-legend-position="hidden"')
         && str_contains($timeSeriesPreviewSvg, 'data-smooth-lines="false"')
         && str_contains($timeSeriesPreviewSvg, 'data-show-symbols="true"')
+        && str_contains($timeSeriesPreviewSvg, 'data-time-axis-label-format="date"')
         && str_contains($timeSeriesPreviewSvg, 'data-area-opacity="0.55"')
         && str_contains($timeSeriesPreviewSvg, 'data-axis-color="#E5754F"')
         && str_contains($timeSeriesPreviewSvg, 'data-annotation-type="line"')
@@ -3207,12 +3219,19 @@ $inheritedTimeSeriesIPSView = $timeSeries->GetIPSViewHTML();
 assertGatewayGauge(
     is_string($timeSeries->GetTestVariableValue('IPSViewTimeSeries'))
         && str_contains((string) $timeSeries->GetTestVariableValue('IPSViewTimeSeries'), '"mode":"ipsview"')
+        && str_contains($inheritedTimeSeriesIPSView, '"key":"1h"')
+        && str_contains($inheritedTimeSeriesIPSView, '"timeAxisLabelFormat":"date-time"')
         && str_contains($inheritedTimeSeriesIPSView, '"legendPosition":"bottom"')
         && str_contains($inheritedTimeSeriesIPSView, '"lineWidthPercent":150')
         && strlen($inheritedTimeSeriesIPSView) < SYMCON_OUTPUT_BUFFER_LIMIT,
     'Time Series must publish an optional IPSView WebContent page that inherits the Tile design.'
 );
 $timeSeries->SetTestProperty('IPSViewUseTileDesign', false);
+$timeSeries->SetTestProperty('IPSViewUseTileTimeSettings', false);
+$timeSeries->SetTestProperty('IPSViewRange', 'custom');
+$timeSeries->SetTestProperty('IPSViewCustomRangeValue', 2);
+$timeSeries->SetTestProperty('IPSViewCustomRangeUnit', 'hour');
+$timeSeries->SetTestProperty('IPSViewTimeAxisLabelFormat', 'time');
 $timeSeries->SetTestProperty('IPSViewAdaptToBackground', true);
 $timeSeries->SetTestProperty('IPSViewBackgroundColor', 0x6B4423);
 $timeSeries->SetTestProperty('IPSViewBackgroundOpacityPercent', 35);
@@ -3238,6 +3257,11 @@ $timeSeries->UpdateTimeSeriesPreviewFromForm(json_encode([
     'EChartsTheme'                    => 'vintage',
     'LegendPosition'                  => 'bottom',
     'IPSViewUseTileDesign'            => false,
+    'IPSViewUseTileTimeSettings'      => false,
+    'IPSViewRange'                    => 'custom',
+    'IPSViewCustomRangeValue'         => 2,
+    'IPSViewCustomRangeUnit'          => 'hour',
+    'IPSViewTimeAxisLabelFormat'      => 'time',
     'IPSViewAdaptToBackground'        => true,
     'IPSViewBackgroundColor'          => 0x6B4423,
     'IPSViewBackgroundOpacityPercent' => 35,
@@ -3265,6 +3289,7 @@ assertGatewayGauge(
     is_string($independentPreviewSvg)
         && str_contains($independentPreviewSvg, 'Independent IPSView preview')
         && str_contains($independentPreviewSvg, 'data-legend-position="hidden"')
+        && str_contains($independentPreviewSvg, 'data-time-axis-label-format="time"')
         && str_contains($independentPreviewSvg, 'data-adapt-to-background="true"')
         && str_contains($independentPreviewSvg, 'data-background-opacity="35"')
         && str_contains($independentPreviewSvg, 'fill="#6B4423"')
@@ -3277,6 +3302,9 @@ $timeSeries->ApplyChanges();
 $independentTimeSeriesIPSView = $timeSeries->GetIPSViewHTML();
 assertGatewayGauge(
     str_contains($independentTimeSeriesIPSView, '"theme":"dark"')
+        && str_contains($independentTimeSeriesIPSView, '"key":"custom"')
+        && str_contains($independentTimeSeriesIPSView, '"durationSeconds":7200')
+        && str_contains($independentTimeSeriesIPSView, '"timeAxisLabelFormat":"time"')
         && str_contains($independentTimeSeriesIPSView, '"adaptToBackground":true')
         && str_contains($independentTimeSeriesIPSView, 'html, body { background:transparent; }')
         && str_contains($independentTimeSeriesIPSView, '#echarts-timeseries-root { background:color-mix(in srgb, ')
@@ -3285,9 +3313,11 @@ assertGatewayGauge(
         && str_contains($independentTimeSeriesIPSView, '"legendPosition":"hidden"')
         && str_contains($independentTimeSeriesIPSView, '"lineWidthPercent":80')
         && str_contains($independentTimeSeriesIPSView, '"showYAxis":false')
+        && str_contains($timeSeries->GetVisualizationTile(), '"key":"1h"')
+        && str_contains($timeSeries->GetVisualizationTile(), '"timeAxisLabelFormat":"date-time"')
         && str_contains($timeSeries->GetVisualizationTile(), '"legendPosition":"bottom"')
         && str_contains($timeSeries->GetVisualizationTile(), '"adaptToBackground":false'),
-    'Time Series must keep independent IPSView theme and design settings separate from the Tile.'
+    'Time Series must keep independent IPSView time, theme and design settings separate from the Tile.'
 );
 
 $rawTimeSeries = new EChartsTimeSeries();
@@ -3380,6 +3410,102 @@ $longRangeData = json_decode($longRangeTimeSeries->GetTimeSeriesData(), true, 51
 assertGatewayGauge(
     $longRangeData['range']['aggregationLevel'] === 1,
     'Automatic aggregation must select the finest level that fits the per-series point budget.'
+);
+
+$customRangeTimeSeries = new EChartsTimeSeries();
+$customRangeTimeSeries->Create();
+$customRangeTimeSeries->SetTestProperty('Sources', json_encode([[
+    'VariableID'              => 4711,
+    'Label'                   => 'Custom range temperature',
+    'UseVariablePresentation' => false,
+    'Unit'                    => '°C',
+    'Decimals'                => 1,
+    'Color'                   => '',
+    'Style'                   => 'line',
+    'Reducer'                 => 'auto'
+]], JSON_THROW_ON_ERROR));
+$customRangeTimeSeries->SetTestProperty('Range', 'custom');
+$customRangeTimeSeries->SetTestProperty('CustomRangeValue', 3);
+$customRangeTimeSeries->SetTestProperty('CustomRangeUnit', 'week');
+$customRangeTimeSeries->SetTestProperty('TimeAxisLabelFormat', 'time');
+$customRangeTimeSeries->SetTestProperty('DataMode', 'auto');
+$customRangeTimeSeries->SetTestProperty('PointBudget', 200);
+$customRangeTimeSeries->ApplyChanges();
+$customRangeData = json_decode(
+    $customRangeTimeSeries->GetTimeSeriesData(),
+    true,
+    512,
+    JSON_THROW_ON_ERROR
+);
+assertGatewayGauge(
+    $customRangeTimeSeries->GetTestStatus() === IS_ACTIVE
+        && $customRangeTimeSeries->GetTestSummary() === '1 sources · 3w'
+        && $customRangeData['range']['key'] === 'custom'
+        && $customRangeData['range']['durationSeconds'] === 1814400
+        && $customRangeData['range']['aggregationLevel'] === 1
+        && $customRangeData['chart']['timeAxisLabelFormat'] === 'time',
+    'A custom rolling range and the selected time-axis label format must reach the shared chart model.'
+);
+
+$invalidCustomRangeTimeSeries = new EChartsTimeSeries();
+$invalidCustomRangeTimeSeries->Create();
+$invalidCustomRangeTimeSeries->SetTestProperty('Sources', json_encode([[
+    'VariableID'              => 4717,
+    'Label'                   => '',
+    'UseVariablePresentation' => false,
+    'Unit'                    => '°C',
+    'Decimals'                => 1,
+    'Color'                   => '',
+    'Style'                   => 'line',
+    'Reducer'                 => 'auto'
+]], JSON_THROW_ON_ERROR));
+$invalidCustomRangeTimeSeries->SetTestProperty('Range', 'custom');
+$invalidCustomRangeTimeSeries->SetTestProperty('CustomRangeValue', 0);
+$invalidCustomRangeTimeSeries->ApplyChanges();
+assertGatewayGauge(
+    $invalidCustomRangeTimeSeries->GetTestStatus() === 202,
+    'An invalid custom rolling range must be rejected as an invalid Time Series configuration.'
+);
+
+$invalidTimeAxisFormat = new EChartsTimeSeries();
+$invalidTimeAxisFormat->Create();
+$invalidTimeAxisFormat->SetTestProperty('Sources', json_encode([[
+    'VariableID'              => 4717,
+    'Label'                   => '',
+    'UseVariablePresentation' => false,
+    'Unit'                    => '°C',
+    'Decimals'                => 1,
+    'Color'                   => '',
+    'Style'                   => 'line',
+    'Reducer'                 => 'auto'
+]], JSON_THROW_ON_ERROR));
+$invalidTimeAxisFormat->SetTestProperty('TimeAxisLabelFormat', 'javascript');
+$invalidTimeAxisFormat->ApplyChanges();
+assertGatewayGauge(
+    $invalidTimeAxisFormat->GetTestStatus() === 202,
+    'Unsupported time-axis label formats must not enter the renderer contract.'
+);
+
+$invalidIPSViewTimeSettings = new EChartsTimeSeries();
+$invalidIPSViewTimeSettings->Create();
+$invalidIPSViewTimeSettings->SetTestProperty('Sources', json_encode([[
+    'VariableID'              => 4717,
+    'Label'                   => '',
+    'UseVariablePresentation' => false,
+    'Unit'                    => '°C',
+    'Decimals'                => 1,
+    'Color'                   => '',
+    'Style'                   => 'line',
+    'Reducer'                 => 'auto'
+]], JSON_THROW_ON_ERROR));
+$invalidIPSViewTimeSettings->SetTestProperty('EnableIPSView', true);
+$invalidIPSViewTimeSettings->SetTestProperty('IPSViewUseTileTimeSettings', false);
+$invalidIPSViewTimeSettings->SetTestProperty('IPSViewRange', 'custom');
+$invalidIPSViewTimeSettings->SetTestProperty('IPSViewCustomRangeValue', 0);
+$invalidIPSViewTimeSettings->ApplyChanges();
+assertGatewayGauge(
+    $invalidIPSViewTimeSettings->GetTestStatus() === 202,
+    'Invalid independent IPSView time settings must invalidate the active Time Series configuration.'
 );
 
 $axisRangeTimeSeries = new EChartsTimeSeries();

@@ -16,7 +16,10 @@ optional ein eigenständiges IPSView-WebContent-Widget.
 
 ## Aktueller Funktionsumfang
 
-- rollende Zeiträume von 1 Stunde, 6 Stunden, 24 Stunden, 7 Tagen und 30 Tagen;
+- rollende Zeiträume von 1 Stunde, 6 Stunden, 24 Stunden, 7 Tagen und 30 Tagen
+  sowie frei definierbare Fenster in Minuten, Stunden, Tagen oder Wochen;
+- automatische Zeitachsenbeschriftung oder ausdrückliche Anzeige von Uhrzeit,
+  Datum beziehungsweise Datum und Uhrzeit;
 - ausdrücklich wählbare Rohwerte, automatische Verdichtung oder feste
   Verdichtung auf Minute, 5 Minuten, 15 Minuten, Stunde oder Tag;
 - Echtzeitdarstellung nicht archivierter Variablen ab dem Öffnen der Kachel;
@@ -45,7 +48,8 @@ optional ein eigenständiges IPSView-WebContent-Widget.
   Legendenposition, Zoom, Linienstärke, Glättung, Datenpunkte,
   Flächendeckkraft, Raster und Achsensichtbarkeit;
 - optionales IPSView-WebContent-Widget mit demselben Datenmodell und wahlweise
-  geerbtem oder vollständig unabhängigem Zeitreihendesign;
+  geerbtem oder vollständig unabhängigem Zeitreihendesign sowie einem
+  wahlweise von der Kachel abweichenden Zeitraum und Zeitachsenformat;
 - Rohwertfortschreibung über `VM_UPDATE`, ohne bei jedem Messwert das Archiv
   erneut zu laden;
 - aggregierte Reihen enden am letzten abgeschlossenen Zeitfenster und werden
@@ -70,7 +74,10 @@ Kachel einen Hinweis auf das wirksame Punktbudget.
 1. Eine bestehende gemeinsame `EChartsGateway`-Instanz als Parent auswählen.
 2. Eine bis acht Integer- oder Float-Variablen konfigurieren. Archivmodi
    benötigen archivierte Quellen; `realtime` funktioniert auch ohne Archiv.
-3. Zeitraum, Datenmodus und Punktbudget wählen.
+3. Zeitraum, Beschriftung der Zeitachse, Datenmodus und Punktbudget wählen.
+   Bei **Benutzerdefiniert** werden Zeitraumwert und -einheit verwendet; die
+   Zeitachse kann ECharts automatisch beschriften oder ausdrücklich Uhrzeit,
+   Datum beziehungsweise beides anzeigen.
 4. Optional Beschriftung, Einheit, Nachkommastellen, Farbe, Stil, Reducer,
    Achsenseite und Achsenbereich pro Quelle anpassen. Der Bereich bleibt
    standardmäßig automatisch, kann aber aus der Variablendarstellung oder aus
@@ -91,9 +98,12 @@ Kachel einen Hinweis auf das wirksame Punktbudget.
    ein Wertebereich ein Minimum und ein größeres Maximum. Ohne eigene Farbe
    übernimmt die Markierung die Reihenfarbe.
 7. Optional im Abschnitt **IPSView-Design** die WebContent-Ausgabe aktivieren.
-   Standardmäßig übernimmt sie das Kacheldesign. Für eine abweichende
-   Gestaltung das Kacheldesign kopieren und anschließend den unabhängigen
-   IPSView-Designer bearbeiten. **An Hintergrundfarbe anpassen** lässt den
+   Standardmäßig übernimmt sie Kacheldesign und Zeiteinstellungen. Wird
+   **Zeiteinstellungen der Kachel verwenden** deaktiviert, erhält IPSView
+   einen eigenen Zeitraum und ein eigenes Format der Zeitachsenbeschriftung.
+   Für eine abweichende Gestaltung das Kacheldesign kopieren und anschließend
+   den unabhängigen IPSView-Designer bearbeiten. **An Hintergrundfarbe
+   anpassen** lässt den
    tatsächlichen IPSView-Hintergrund durchscheinen. Die **Hintergrundfarbe**
    verwendet automatisch die Theme-Farbe oder eine frei gewählte Tönung; die
    **Hintergrunddeckkraft** dosiert den darüberliegenden Theme-Hintergrund von

@@ -21,7 +21,8 @@ final class EChartsTimeSeriesPreview
         bool $adaptToBackground = false,
         string $backgroundColor = '',
         int $backgroundOpacityPercent = 35,
-        array $annotations = []
+        array $annotations = [],
+        string $timeAxisLabelFormat = 'auto'
     ): string {
         $palette = EChartsAsset::ThemePreviewPalette($theme);
         $series = $series !== [] ? array_slice($series, 0, 4) : [
@@ -43,6 +44,9 @@ final class EChartsTimeSeriesPreview
         $showGrid = (bool) ($design['showGrid'] ?? true);
         $showXAxis = (bool) ($design['showXAxis'] ?? true);
         $showYAxis = (bool) ($design['showYAxis'] ?? true);
+        $timeAxisLabelFormat = in_array($timeAxisLabelFormat, ['auto', 'time', 'date', 'date-time'], true)
+            ? $timeAxisLabelFormat
+            : 'auto';
         $areaOpacity = max(0, min(100, (int) ($design['areaOpacityPercent'] ?? 22))) / 100;
         $background = EChartsIPSViewBackground::ResolvedPreviewBackground(
             $palette,
@@ -66,6 +70,13 @@ final class EChartsTimeSeriesPreview
         if ($showXAxis) {
             $content .= '<line x1="70" y1="' . self::N($plotBottom) . '" x2="680" y2="'
                 . self::N($plotBottom) . '" stroke="' . SVGPreviewHelper::escape($palette['border']) . '"/>';
+            foreach (self::TimeAxisLabels($timeAxisLabelFormat) as $index => $label) {
+                $x = 70 + 305 * $index;
+                $content .= '<text x="' . self::N($x) . '" y="' . self::N($plotBottom + 19)
+                    . '" text-anchor="' . ($index === 0 ? 'start' : ($index === 2 ? 'end' : 'middle'))
+                    . '" fill="' . SVGPreviewHelper::escape($palette['muted']) . '" font-size="11">'
+                    . SVGPreviewHelper::escape($label) . '</text>';
+            }
         }
         if ($showYAxis) {
             $content .= '<line x1="70" y1="' . self::N($plotTop) . '" x2="70" y2="'
@@ -219,6 +230,7 @@ final class EChartsTimeSeriesPreview
             . ' data-legend-position="' . SVGPreviewHelper::escape($legendPosition) . '"'
             . ' data-smooth-lines="' . ($smoothLines ? 'true' : 'false') . '"'
             . ' data-show-symbols="' . ($showSymbols ? 'true' : 'false') . '"'
+            . ' data-time-axis-label-format="' . SVGPreviewHelper::escape($timeAxisLabelFormat) . '"'
             . ' data-adapt-to-background="' . ($adaptToBackground ? 'true' : 'false') . '"'
             . ' data-background-opacity="' . $backgroundOpacityPercent . '"'
             . ' data-area-opacity="' . self::N($areaOpacity) . '"'
@@ -231,6 +243,17 @@ final class EChartsTimeSeriesPreview
             . '" font-size="20" font-weight="600" text-anchor="middle">'
             . SVGPreviewHelper::escape(trim($title) !== '' ? $title : 'Time Series') . '</text>'
             . $content . '</svg>';
+    }
+
+    /** @return list<string> */
+    private static function TimeAxisLabels(string $format): array
+    {
+        return match ($format) {
+            'time'      => ['06:00', '12:00', '18:00'],
+            'date'      => ['05.10.26', '06.10.26', '07.10.26'],
+            'date-time' => ['05.10. 06:00', '06.10. 12:00', '07.10. 18:00'],
+            default     => ['-24 h', '-12 h', 'Now']
+        };
     }
 
     private static function Symbol(string $symbol, float $x, float $y, float $radius, string $color): string

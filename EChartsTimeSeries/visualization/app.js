@@ -127,6 +127,28 @@
         return cached && cached.status === 'ready' ? cached.pattern : null;
     }
 
+    function buildTimeAxisFormatter(mode) {
+        var options = {
+            time: { hour: '2-digit', minute: '2-digit' },
+            date: { year: '2-digit', month: '2-digit', day: '2-digit' },
+            'date-time': {
+                year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+            }
+        }[mode];
+        if (!options) { return undefined; }
+
+        var formatter = typeof Intl === 'object' && typeof Intl.DateTimeFormat === 'function'
+            ? new Intl.DateTimeFormat(undefined, options) : null;
+        return function (value) {
+            var date = new Date(Number(value));
+            if (formatter) { return formatter.format(date); }
+            var iso = date.toISOString();
+            if (mode === 'time') { return iso.slice(11, 16); }
+            if (mode === 'date') { return iso.slice(0, 10); }
+            return iso.slice(0, 10) + ' ' + iso.slice(11, 16);
+        };
+    }
+
     function buildOption(model, theme) {
         var colors = colorsFor(theme);
         var axes = Array.isArray(model.axes) ? model.axes : [];
@@ -235,7 +257,11 @@
                 max: model.range.endTimestamp * 1000,
                 axisLine: { show: design.showXAxis !== false, lineStyle: { color: colors.border } },
                 axisTick: { show: design.showXAxis !== false },
-                axisLabel: { show: design.showXAxis !== false, color: colors.muted },
+                axisLabel: {
+                    show: design.showXAxis !== false,
+                    color: colors.muted,
+                    formatter: buildTimeAxisFormatter(model.chart && model.chart.timeAxisLabelFormat)
+                },
                 splitLine: { show: false }
             },
             yAxis: normalizedAxes.map(function (entry, index) {
