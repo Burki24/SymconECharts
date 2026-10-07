@@ -3985,6 +3985,7 @@ assertGatewayGauge(
 );
 $barTile = $barCategory->GetVisualizationTile();
 $barIPSView = $barCategory->GetIPSViewHTML();
+$barForm = $barCategory->GetConfigurationForm();
 assertGatewayGauge(
     str_contains($barTile, 'echarts-bar-category-root')
         && str_contains($barTile, '"orientation":"horizontal"')
@@ -3993,6 +3994,12 @@ assertGatewayGauge(
         && strlen($barTile) < SYMCON_OUTPUT_BUFFER_LIMIT
         && strlen($barIPSView) < SYMCON_OUTPUT_BUFFER_LIMIT,
     'Category Bar must render independent Tile and IPSView designs below the output limit.'
+);
+assertGatewayGauge(
+    str_contains($barForm, '"name":"Series"')
+        && str_contains($barForm, '"name":"BarMode"')
+        && str_contains($barForm, '"name":"IPSViewBarMode"'),
+    'Category Bar configuration must expose series names and independent output modes.'
 );
 $barUpdatesBefore = count($barCategory->GetTestVisualizationUpdates());
 $barCategory->MessageSink(1780000100, 4711, VM_UPDATE, []);
@@ -4023,5 +4030,60 @@ assertGatewayGauge(
     $invalidBarCategory->GetTestStatus() === 201,
     'Category Bar must reject sources with different effective units.'
 );
+
+$groupedBarSources = [];
+foreach ([
+    [4900, 'Kitchen today', 18.0, 'Kitchen', 'Today'],
+    [4901, 'Kitchen yesterday', 20.0, 'Kitchen', 'Yesterday'],
+    [4902, 'Office today', 24.0, 'Office', 'Today'],
+    [4903, 'Office yesterday', 22.0, 'Office', 'Yesterday']
+] as [$variableID, $name, $value, $category, $series]) {
+    $GLOBALS['symconTestVariables'][$variableID] = [
+        'VariableType'    => 2,
+        'VariableUpdated' => 1780000200,
+        'Value'           => $value,
+        'Name'            => $name
+    ];
+    $groupedBarSources[] = [
+        'VariableID'              => $variableID,
+        'Label'                   => $category,
+        'Series'                  => $series,
+        'UseVariablePresentation' => false,
+        'Unit'                    => '°C',
+        'Decimals'                => 1,
+        'Color'                   => $series === 'Today' ? 0xAA0000 : 0x0000AA
+    ];
+}
+$groupedBar = new EChartsBarCategory();
+$groupedBar->Create();
+$groupedBar->SetTestProperty('Sources', json_encode($groupedBarSources, JSON_THROW_ON_ERROR));
+$groupedBar->SetTestProperty('BarMode', 'grouped');
+$groupedBar->SetTestProperty('IPSViewUseTileDesign', false);
+$groupedBar->SetTestProperty('IPSViewBarMode', 'stacked');
+$groupedBar->ApplyChanges();
+$groupedBarData = json_decode($groupedBar->GetBarData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $groupedBar->GetTestStatus() === IS_ACTIVE
+        && $groupedBarData['bar']['mode'] === 'grouped'
+        && $groupedBarData['items'][0]['series'] === 'Today'
+        && str_contains($groupedBar->GetVisualizationTile(), '"mode":"grouped"')
+        && str_contains($groupedBar->GetIPSViewHTML(), '"mode":"stacked"'),
+    'Category Bar must support independent grouped and stacked output modes.'
+);
+$incompleteGroupedBar = new EChartsBarCategory();
+$incompleteGroupedBar->Create();
+$incompleteGroupedBar->SetTestProperty(
+    'Sources',
+    json_encode(array_slice($groupedBarSources, 0, 3), JSON_THROW_ON_ERROR)
+);
+$incompleteGroupedBar->SetTestProperty('BarMode', 'grouped');
+$incompleteGroupedBar->ApplyChanges();
+assertGatewayGauge(
+    $incompleteGroupedBar->GetTestStatus() === 201,
+    'Grouped and stacked Category Bars must reject an incomplete category and series matrix.'
+);
+foreach ($groupedBarSources as $source) {
+    unset($GLOBALS['symconTestVariables'][$source['VariableID']]);
+}
 
 echo "Gateway and Gauge module integration verified.\n";

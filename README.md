@@ -85,9 +85,10 @@ Folgende Module sind enthalten:
 
 - __EChartsBarCategory__ ([Dokumentation](EChartsBarCategory/README.md))
   Vergleicht die aktuellen Werte von 1 bis 16 numerischen Variablen mit einer
-  gemeinsamen Einheit. Vertikale und horizontale Balken, konfigurierbare
-  Reihenfolge, individuelle Farben, Live-Aktualisierung sowie getrennte
-  Kachel- und IPSView-Designs gehören zum ersten Bar-Vertrag.
+  gemeinsamen Einheit. Einfache, gruppierte oder gestapelte vertikale und
+  horizontale Balken, konfigurierbare Reihenfolge, individuelle Farben,
+  Live-Aktualisierung sowie getrennte Kachel- und IPSView-Designs gehören zum
+  Category-Bar-Vertrag.
 
 Für eine reguläre Installation genügt eine gemeinsame EChartsGateway-Instanz
 für alle Gauge- und späteren Diagramminstanzen. Beim ersten Diagramm kann ein

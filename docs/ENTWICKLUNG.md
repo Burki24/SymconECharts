@@ -81,7 +81,7 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 | Gerät | EChartsGaugeTacho | Tacho-Cockpit mit 2 bis 5 individuell gestaltbaren Instrumenten |
 | Gerät | EChartsGaugeChronograph | Chronograph mit 2 bis 5 individuell gestaltbaren Instrumenten |
 | Gerät | EChartsTimeSeries | Historische und live fortgeschriebene Linien und Flächen für 1 bis 8 Quellen, bis zu acht links/rechts angeordnete Einheitengruppen sowie getrenntes Kachel- und IPSView-Design |
-| Gerät | EChartsBarCategory | Aktuelle Kategorienvergleiche für 1 bis 16 Quellen mit gemeinsamer Einheit, vertikal/horizontal und mit getrenntem Kachel- und IPSView-Design |
+| Gerät | EChartsBarCategory | Aktuelle einfache, gruppierte oder gestapelte Kategorienvergleiche für 1 bis 16 Quellen mit gemeinsamer Einheit, vertikal/horizontal und mit getrenntem Kachel- und IPSView-Design |
 
 Eine eigene I/O-Instanz, ein Konfigurator und Discovery gehören nicht zum
 Anfangsumfang. Datenquellen sind Teil der jeweiligen Gauge-Konfiguration und

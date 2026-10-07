@@ -36,9 +36,12 @@ Bar diagrams are split by their data and configuration contracts:
 `EChartsBarCategory` reads current values through the existing versioned
 `current.read` Gateway operation. It provides vertical and horizontal
 orientation, stable configured or value-based ordering, per-source colors,
-live updates and separate Tile/IPSView designs. Archive access, grouping,
-stacking, waterfall arithmetic and polar geometry are outside this first
-contract.
+live updates and separate Tile/IPSView designs. Simple bars use one source per
+category. Grouped and stacked bars add a series name to every source and
+require a complete category/series matrix; value ordering uses the category
+sum. The default remains `simple`, so existing configurations stay valid.
+Archive access, historical grouping, waterfall arithmetic and polar geometry
+remain outside this contract.
 
 Line and bar renderers share one reproducibly built Cartesian ECharts runtime
 containing `LineChart`, `BarChart` and their common Cartesian components. The

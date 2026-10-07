@@ -46,6 +46,7 @@ class EChartsBarCategory extends IPSModuleStrict
     private const STATUS_PARENT_MISSING = 203;
     private const STATUS_GATEWAY_FAILED = 204;
     private const IPSVIEW_OUTPUT_IDENT = 'IPSViewBarCategory';
+    private const MODES = ['simple', 'grouped', 'stacked'];
     private const ORIENTATIONS = ['vertical', 'horizontal'];
     private const SORT_ORDERS = ['configured', 'ascending', 'descending'];
 
@@ -155,6 +156,7 @@ class EChartsBarCategory extends IPSModuleStrict
                 'id'         => 'variable-' . $source['VariableID'],
                 'variableID' => $source['VariableID'],
                 'label'      => $source['Label'] !== '' ? $source['Label'] : IPS_GetName($source['VariableID']),
+                'series'     => $source['Series'],
                 'value'      => $current['Value'],
                 'timestamp'  => $current['Timestamp'],
                 'color'      => $source['Color'] < 0 ? '' : EChartsAsset::ColorToHex($source['Color']),
@@ -172,6 +174,7 @@ class EChartsBarCategory extends IPSModuleStrict
             'theme'         => $this->ReadPropertyString('EChartsTheme'),
             'bar'           => [
                 'title'       => $this->ReadPropertyString('Title'),
+                'mode'        => $this->ReadPropertyString('BarMode'),
                 'orientation' => $this->ReadPropertyString('Orientation'),
                 'sortOrder'   => $this->ReadPropertyString('SortOrder'),
                 'unit'        => $sources[0]['Unit'],
@@ -243,8 +246,8 @@ class EChartsBarCategory extends IPSModuleStrict
             'ipsViewStyle'       => $ipsView ? $this->IPSViewThemeCSS() : '',
             'state'              => $this->BuildVisualizationState($ipsView),
             'translations'       => [
-                'Configure 1 to 16 unique numeric sources with one common unit.' => $this->Translate(
-                    'Configure 1 to 16 unique numeric sources with one common unit.'
+                'Configure valid Category Bar sources.'         => $this->Translate(
+                    'Configure valid Category Bar sources.'
                 ),
                 'Connect an active EChartsGateway.'            => $this->Translate('Connect an active EChartsGateway.'),
                 'The Category Bar values could not be loaded.' => $this->Translate(
@@ -295,7 +298,15 @@ class EChartsBarCategory extends IPSModuleStrict
     private function GetConfigurationError(): ?array
     {
         try {
-            $this->GetValidatedSources();
+            $sources = $this->GetValidatedSources();
+            if ($this->ReadPropertyString('BarMode') !== 'simple') {
+                $this->ValidateMultiSeriesSources($sources);
+            }
+            if (!$this->ReadPropertyBoolean('IPSViewUseTileDesign')
+                && $this->ReadPropertyString('IPSViewBarMode') !== 'simple'
+            ) {
+                $this->ValidateMultiSeriesSources($sources);
+            }
         } catch (Throwable $exception) {
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => $exception->getMessage()];
         }
@@ -311,7 +322,7 @@ class EChartsBarCategory extends IPSModuleStrict
         return null;
     }
 
-    /** @return list<array{VariableID:int, Label:string, Unit:string, Decimals:int, Color:int}> */
+    /** @return list<array{VariableID:int, Label:string, Series:string, Unit:string, Decimals:int, Color:int}> */
     private function GetValidatedSources(): array
     {
         try {
@@ -367,6 +378,7 @@ class EChartsBarCategory extends IPSModuleStrict
             $validated[] = [
                 'VariableID' => $variableID,
                 'Label'      => trim(is_string($source['Label'] ?? null) ? $source['Label'] : ''),
+                'Series'     => trim(is_string($source['Series'] ?? null) ? $source['Series'] : ''),
                 'Unit'       => $presentation['unit'],
                 'Decimals'   => $presentation['decimals'],
                 'Color'      => $color
@@ -374,6 +386,34 @@ class EChartsBarCategory extends IPSModuleStrict
         }
 
         return $validated;
+    }
+
+    /** @param list<array{VariableID:int, Label:string, Series:string, Unit:string, Decimals:int, Color:int}> $sources */
+    private function ValidateMultiSeriesSources(array $sources): void
+    {
+        $categories = [];
+        $seriesNames = [];
+        $pairs = [];
+        foreach ($sources as $source) {
+            $category = $source['Label'] !== '' ? $source['Label'] : IPS_GetName($source['VariableID']);
+            $series = $source['Series'];
+            if ($series === '') {
+                throw new InvalidArgumentException('Grouped and stacked bars require a series name for every source.');
+            }
+            $pair = json_encode([$category, $series], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
+            if (isset($pairs[$pair])) {
+                throw new InvalidArgumentException('Every Category Bar category and series pair must be unique.');
+            }
+            $pairs[$pair] = true;
+            $categories[$category] = true;
+            $seriesNames[$series] = true;
+        }
+        if (count($seriesNames) < 2) {
+            throw new InvalidArgumentException('Grouped and stacked bars require at least two series.');
+        }
+        if (count($pairs) !== count($categories) * count($seriesNames)) {
+            throw new InvalidArgumentException('Grouped and stacked bars require a complete category and series matrix.');
+        }
     }
 
     /** @return array{Value: float, Timestamp: int} */
@@ -473,7 +513,7 @@ class EChartsBarCategory extends IPSModuleStrict
                 'variant'       => 'category',
                 'status'        => 'error',
                 'chart'         => null,
-                'error'         => 'Configure 1 to 16 unique numeric sources with one common unit.'
+                'error'         => 'Configure valid Category Bar sources.'
             ];
         }
         if (!$this->HasActiveParent()) {
@@ -490,6 +530,7 @@ class EChartsBarCategory extends IPSModuleStrict
             $chart = json_decode($this->GetBarData(), true, 512, JSON_THROW_ON_ERROR);
             if ($ipsView && !$this->ReadPropertyBoolean('IPSViewUseTileDesign')) {
                 $chart['theme'] = $this->ReadPropertyString('IPSViewEChartsTheme');
+                $chart['bar']['mode'] = $this->ReadPropertyString('IPSViewBarMode');
                 $chart['bar']['orientation'] = $this->ReadPropertyString('IPSViewOrientation');
                 $chart['bar']['sortOrder'] = $this->ReadPropertyString('IPSViewSortOrder');
                 $chart['bar']['style'] = $this->ReadDesignStyle('IPSView');
@@ -544,6 +585,7 @@ class EChartsBarCategory extends IPSModuleStrict
 
     private function RegisterDesignProperties(string $prefix = ''): void
     {
+        $this->RegisterPropertyString($prefix . 'BarMode', 'simple');
         $this->RegisterPropertyString($prefix . 'Orientation', 'vertical');
         $this->RegisterPropertyString($prefix . 'SortOrder', 'configured');
         $this->RegisterPropertyString($prefix . 'EChartsTheme', EChartsAsset::THEME_AUTO);
@@ -557,6 +599,7 @@ class EChartsBarCategory extends IPSModuleStrict
     private function DesignPropertyNames(): array
     {
         return [
+            'BarMode'         => 'string',
             'Orientation'     => 'string',
             'SortOrder'       => 'string',
             'EChartsTheme'    => 'string',
@@ -569,7 +612,8 @@ class EChartsBarCategory extends IPSModuleStrict
 
     private function IsValidDesign(string $prefix): bool
     {
-        return in_array($this->ReadPropertyString($prefix . 'Orientation'), self::ORIENTATIONS, true)
+        return in_array($this->ReadPropertyString($prefix . 'BarMode'), self::MODES, true)
+            && in_array($this->ReadPropertyString($prefix . 'Orientation'), self::ORIENTATIONS, true)
             && in_array($this->ReadPropertyString($prefix . 'SortOrder'), self::SORT_ORDERS, true)
             && EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme'))
             && $this->ReadPropertyInteger($prefix . 'BarWidthPercent') >= 20

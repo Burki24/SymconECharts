@@ -93,9 +93,11 @@ StylePHP und PHP CS Fixer.
   einschließlich Normalisierung, ungültiger Bereichsgrenzen, SVG-Vorschau und
   ECharts-Optionen geprüft.
 - Für Category Bar prüft der Integrationstest den aktuellen Gateway-Datenweg,
-  die gemeinsame Einheit, getrennte Kachel-/IPSView-Designs und Live-Updates.
-  `bar_category_layout.js` sichert Orientierung, Sortierung, Farben,
-  Balkenbreite, Beschriftung und abgerundete Balken im Renderer ab.
+  die gemeinsame Einheit, vollständige Gruppierungs-/Stapelmatrizen,
+  getrennte Kachel-/IPSView-Designs und Live-Updates.
+  `bar_category_layout.js` sichert Orientierung, Sortierung, einfache,
+  gruppierte und gestapelte Reihen, Farben, Balkenbreite, Beschriftung und
+  abgerundete Balken im Renderer ab.
 - `echarts_assets.php` prüft Version, SHA-256-Integrität, Lizenz und NOTICE der
   lokal gebündelten Apache-ECharts-Runtime und der sechs offiziellen Themes.
   Zusätzlich werden der Gauge-spezifische Browser-Export, das gemeinsame

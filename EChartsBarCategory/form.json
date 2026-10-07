@@ -35,7 +35,16 @@
                 {
                     "caption": "Label",
                     "name": "Label",
-                    "width": "220px",
+                    "width": "180px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "caption": "Series",
+                    "name": "Series",
+                    "width": "160px",
                     "add": "",
                     "edit": {
                         "type": "ValidationTextBox"
@@ -84,6 +93,10 @@
             ]
         },
         {
+            "type": "Label",
+            "caption": "Grouped and stacked bars use Label as category and Series as data-series name. Every category/series combination must be configured exactly once."
+        },
+        {
             "type": "ExpansionPanel",
             "caption": "Tile designer",
             "expanded": false,
@@ -94,9 +107,29 @@
                     "items": [
                         {
                             "type": "Select",
+                            "name": "BarMode",
+                            "caption": "Bar mode",
+                            "width": "165px",
+                            "options": [
+                                {
+                                    "caption": "Simple",
+                                    "value": "simple"
+                                },
+                                {
+                                    "caption": "Grouped",
+                                    "value": "grouped"
+                                },
+                                {
+                                    "caption": "Stacked",
+                                    "value": "stacked"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Select",
                             "name": "Orientation",
                             "caption": "Orientation",
-                            "width": "220px",
+                            "width": "165px",
                             "options": [
                                 {
                                     "caption": "Vertical",
@@ -112,7 +145,7 @@
                             "type": "Select",
                             "name": "SortOrder",
                             "caption": "Order",
-                            "width": "220px",
+                            "width": "165px",
                             "options": [
                                 {
                                     "caption": "Configured order",
@@ -132,7 +165,7 @@
                             "type": "Select",
                             "name": "EChartsTheme",
                             "caption": "ECharts theme",
-                            "width": "220px",
+                            "width": "165px",
                             "options": [
                                 {
                                     "caption": "Automatic (Symcon design)",
@@ -254,9 +287,29 @@
                             "items": [
                                 {
                                     "type": "Select",
+                                    "name": "IPSViewBarMode",
+                                    "caption": "Bar mode",
+                                    "width": "165px",
+                                    "options": [
+                                        {
+                                            "caption": "Simple",
+                                            "value": "simple"
+                                        },
+                                        {
+                                            "caption": "Grouped",
+                                            "value": "grouped"
+                                        },
+                                        {
+                                            "caption": "Stacked",
+                                            "value": "stacked"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Select",
                                     "name": "IPSViewOrientation",
                                     "caption": "Orientation",
-                                    "width": "220px",
+                                    "width": "165px",
                                     "options": [
                                         {
                                             "caption": "Vertical",
@@ -272,7 +325,7 @@
                                     "type": "Select",
                                     "name": "IPSViewSortOrder",
                                     "caption": "Order",
-                                    "width": "220px",
+                                    "width": "165px",
                                     "options": [
                                         {
                                             "caption": "Configured order",
@@ -292,7 +345,7 @@
                                     "type": "Select",
                                     "name": "IPSViewEChartsTheme",
                                     "caption": "ECharts theme",
-                                    "width": "220px",
+                                    "width": "165px",
                                     "options": [
                                         {
                                             "caption": "Automatic (Symcon design)",
@@ -376,7 +429,7 @@
         {
             "code": 201,
             "icon": "error",
-            "caption": "Configure 1 to 16 unique numeric sources with one common unit"
+            "caption": "Configure valid Category Bar sources"
         },
         {
             "code": 202,

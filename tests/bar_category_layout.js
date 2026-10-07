@@ -10,7 +10,7 @@ const source = fs.readFileSync(
     'utf8'
 );
 
-function render(orientation, sortOrder, mode = 'symcon') {
+function render(orientation, sortOrder, outputMode = 'symcon', barMode = 'simple', items) {
     const chartElement = { hidden: false, clientWidth: 800 };
     const errorElement = { hidden: true, textContent: '' };
     let option;
@@ -23,16 +23,16 @@ function render(orientation, sortOrder, mode = 'symcon') {
     };
     const window = {
         SYMC_VISUALIZATION: {
-            mode,
+            mode: outputMode,
             state: {
                 status: 'ready',
                 chart: {
                     theme: 'dark',
                     bar: {
-                        title: 'Temperatures', orientation, sortOrder, unit: '°C', decimals: 1,
+                        title: 'Temperatures', mode: barMode, orientation, sortOrder, unit: '°C', decimals: 1,
                         style: { showValues: true, showGrid: false, roundedBars: true, barWidthPercent: 60 }
                     },
-                    items: [
+                    items: items || [
                         { label: 'A', value: 10, order: 0, color: '#ff0000' },
                         { label: 'B', value: 30, order: 1, color: '' },
                         { label: 'C', value: 20, order: 2, color: '' }
@@ -74,5 +74,26 @@ assert.equal(vertical.yAxis.type, 'value');
 assert.deepEqual(Array.from(vertical.xAxis.data), ['A', 'B', 'C']);
 assert.equal(vertical.series[0].label.position, 'top');
 assert.equal(vertical.yAxis.splitLine.show, false);
+
+const matrix = [
+    { label: 'Kitchen', series: 'Today', value: 18, order: 0, color: '#aa0000' },
+    { label: 'Kitchen', series: 'Yesterday', value: 20, order: 1, color: '#0000aa' },
+    { label: 'Office', series: 'Today', value: 24, order: 2, color: '#aa0000' },
+    { label: 'Office', series: 'Yesterday', value: 22, order: 3, color: '#0000aa' }
+];
+const grouped = render('vertical', 'descending', 'symcon', 'grouped', matrix);
+assert.equal(grouped.legend.show, true);
+assert.deepEqual(Array.from(grouped.xAxis.data), ['Office', 'Kitchen']);
+assert.equal(grouped.series.length, 2);
+assert.equal(grouped.series[0].name, 'Today');
+assert.deepEqual(Array.from(grouped.series[0].data, item => item.value), [24, 18]);
+assert.equal(grouped.series[0].stack, undefined);
+assert.equal(grouped.series[0].barCategoryGap, '40%');
+
+const stacked = render('horizontal', 'configured', 'symcon', 'stacked', matrix);
+assert.deepEqual(Array.from(stacked.yAxis.data), ['Kitchen', 'Office']);
+assert.equal(stacked.series[0].stack, 'total');
+assert.equal(stacked.series[1].stack, 'total');
+assert.equal(stacked.series[0].label.position, 'inside');
 
 console.log('Category Bar renderer layout verified.');

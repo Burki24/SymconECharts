@@ -57,17 +57,73 @@
         return formatted + (unit ? ' ' + unit : '');
     }
 
-    function sortedItems(model) {
+    function uniqueInOrder(values) {
+        return values.filter(function (value, index) { return values.indexOf(value) === index; });
+    }
+
+    function buildChartData(model, colors) {
+        var bar = model.bar || {};
+        var mode = ['grouped', 'stacked'].indexOf(bar.mode) >= 0 ? bar.mode : 'simple';
         var items = Array.isArray(model.items) ? model.items.slice() : [];
-        var order = model.bar && model.bar.sortOrder || 'configured';
+        var order = bar.sortOrder || 'configured';
+        var paletteColors = Array.isArray(colors.seriesColors) && colors.seriesColors.length > 0
+            ? colors.seriesColors : [colors.accent || colors.border];
+        if (mode === 'simple') {
+            if (order === 'ascending' || order === 'descending') {
+                items.sort(function (left, right) {
+                    var difference = Number(left.value) - Number(right.value);
+                    if (difference === 0) { return Number(left.order) - Number(right.order); }
+                    return order === 'ascending' ? difference : -difference;
+                });
+            }
+            return {
+                mode: mode,
+                categories: items.map(function (item) { return String(item.label || ''); }),
+                series: [{
+                    name: String(bar.title || ''),
+                    items: items.map(function (item, index) {
+                        return { value: Number(item.value), color: item.color || paletteColors[index % paletteColors.length] };
+                    })
+                }]
+            };
+        }
+
+        var categories = uniqueInOrder(items.map(function (item) { return String(item.label || ''); }));
+        var seriesNames = uniqueInOrder(items.map(function (item) { return String(item.series || ''); }));
         if (order === 'ascending' || order === 'descending') {
-            items.sort(function (left, right) {
-                var difference = Number(left.value) - Number(right.value);
-                if (difference === 0) { return Number(left.order) - Number(right.order); }
+            var totals = Object.create(null);
+            categories.forEach(function (category) { totals[category] = 0; });
+            items.forEach(function (item) { totals[String(item.label || '')] += Number(item.value) || 0; });
+            categories.sort(function (left, right) {
+                var difference = totals[left] - totals[right];
+                if (difference === 0) { return 0; }
                 return order === 'ascending' ? difference : -difference;
             });
         }
-        return items;
+        return {
+            mode: mode,
+            categories: categories,
+            series: seriesNames.map(function (seriesName, seriesIndex) {
+                var seriesItems = categories.map(function (category) {
+                    return items.find(function (item) {
+                        return String(item.label || '') === category && String(item.series || '') === seriesName;
+                    });
+                });
+                var configuredColor = '';
+                seriesItems.some(function (item) {
+                    if (item && item.color) { configuredColor = item.color; return true; }
+                    return false;
+                });
+                var seriesColor = configuredColor || paletteColors[seriesIndex % paletteColors.length];
+                return {
+                    name: seriesName,
+                    color: seriesColor,
+                    items: seriesItems.map(function (item) {
+                        return { value: item ? Number(item.value) : null, color: item && item.color || seriesColor };
+                    })
+                };
+            })
+        };
     }
 
     function buildOption(model, theme) {
@@ -75,9 +131,9 @@
         var bar = model.bar || {};
         var style = bar.style || {};
         var horizontal = bar.orientation === 'horizontal';
-        var items = sortedItems(model);
-        var paletteColors = Array.isArray(colors.seriesColors) && colors.seriesColors.length > 0
-            ? colors.seriesColors : [colors.accent || colors.border];
+        var chartData = buildChartData(model, colors);
+        var multiSeries = chartData.mode !== 'simple';
+        var stacked = chartData.mode === 'stacked';
         var titleVisible = Boolean(bar.title);
         var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8;
         var axisLabel = { color: colors.text, overflow: 'truncate', width: horizontal ? 180 : 100 };
@@ -92,7 +148,7 @@
         };
         var categoryAxis = {
             type: 'category',
-            data: items.map(function (item) { return String(item.label || ''); }),
+            data: chartData.categories,
             axisLabel: axisLabel,
             axisLine: { lineStyle: { color: colors.border } },
             axisTick: { alignWithLabel: true, lineStyle: { color: colors.border } }
@@ -115,45 +171,66 @@
                 textStyle: { color: colors.text, fontSize: 18 }
             },
             grid: {
-                top: headerInset + (titleVisible ? 56 : 20),
+                top: headerInset + (multiSeries ? (titleVisible ? 82 : 48) : (titleVisible ? 56 : 20)),
                 right: horizontal && style.showValues === true ? 84 : 30,
                 bottom: horizontal ? 28 : 70,
                 left: horizontal ? 28 : 52,
                 containLabel: true
             },
+            legend: {
+                show: multiSeries,
+                top: headerInset + (titleVisible ? 38 : 8),
+                textStyle: { color: colors.text },
+                data: chartData.series.map(function (item) { return item.name; })
+            },
             tooltip: {
                 trigger: 'axis',
                 axisPointer: { type: 'shadow' },
                 formatter: function (parameters) {
-                    var parameter = Array.isArray(parameters) ? parameters[0] : parameters;
-                    return String(parameter.name || '') + '<br>'
-                        + formatValue(parameter.value, decimals, unit);
+                    var values = Array.isArray(parameters) ? parameters : [parameters];
+                    if (values.length === 0) { return ''; }
+                    var lines = [String(values[0].name || '')];
+                    values.forEach(function (parameter) {
+                        var prefix = multiSeries ? String(parameter.seriesName || '') + ': ' : '';
+                        lines.push(String(parameter.marker || '') + prefix
+                            + formatValue(parameter.value, decimals, unit));
+                    });
+                    return lines.join('<br>');
                 }
             },
             xAxis: horizontal ? valueAxis : categoryAxis,
             yAxis: horizontal ? categoryAxis : valueAxis,
-            series: [{
-                name: String(bar.title || ''),
-                type: 'bar',
-                barWidth: Math.max(20, Math.min(100, Number(style.barWidthPercent) || 70)) + '%',
-                label: {
-                    show: style.showValues === true,
-                    position: horizontal ? 'right' : 'top',
-                    color: colors.text,
-                    formatter: function (parameters) {
-                        return formatValue(parameters.value, decimals, unit);
-                    }
-                },
-                data: items.map(function (item, index) {
-                    return {
-                        value: Number(item.value),
-                        itemStyle: {
-                            color: item.color || paletteColors[index % paletteColors.length],
-                            borderRadius: horizontal ? [0, radius, radius, 0] : [radius, radius, 0, 0]
+            series: chartData.series.map(function (seriesItem) {
+                var result = {
+                    name: seriesItem.name,
+                    type: 'bar',
+                    stack: stacked ? 'total' : undefined,
+                    barCategoryGap: multiSeries
+                        ? Math.max(0, 100 - Math.max(20, Math.min(100, Number(style.barWidthPercent) || 70))) + '%'
+                        : undefined,
+                    barWidth: multiSeries ? undefined
+                        : Math.max(20, Math.min(100, Number(style.barWidthPercent) || 70)) + '%',
+                    itemStyle: { color: seriesItem.color },
+                    label: {
+                        show: style.showValues === true,
+                        position: stacked ? 'inside' : (horizontal ? 'right' : 'top'),
+                        color: stacked ? colors.background : colors.text,
+                        formatter: function (parameters) {
+                            return formatValue(parameters.value, decimals, unit);
                         }
-                    };
-                })
-            }]
+                    },
+                    data: seriesItem.items.map(function (item) {
+                        return {
+                            value: item.value,
+                            itemStyle: {
+                                color: item.color,
+                                borderRadius: horizontal ? [0, radius, radius, 0] : [radius, radius, 0, 0]
+                            }
+                        };
+                    })
+                };
+                return result;
+            })
         };
     }
 

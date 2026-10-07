@@ -125,6 +125,7 @@ foreach ([
     'public function GetBarDiagnostic(): string',
     'public function CopyTileDesignToIPSView(): void',
     '$this->RegisterDesignProperties();',
+    "RegisterPropertyString(\$prefix . 'BarMode', 'simple')",
     "RegisterPropertyString(\$prefix . 'Orientation', 'vertical')",
     "RegisterPropertyString(\$prefix . 'SortOrder', 'configured')",
     'EChartsAsset::CartesianJavaScript()',
