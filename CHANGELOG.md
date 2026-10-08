@@ -38,5 +38,8 @@
 
 ## Fixes
 
+- Das Konfigurationsformular von EChartsBarHistory lässt sich wieder öffnen;
+  die Felder für einen benutzerdefinierten Zeitraum werden bei der Auswahl
+  unmittelbar ein- oder ausgeblendet.
 - Laufzeitwerte aktualisieren in IPSView nur noch das bestehende Diagramm,
   ohne das vollständige HTML-Dokument neu zu laden und sichtbar zu flackern.

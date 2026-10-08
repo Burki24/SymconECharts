@@ -3185,6 +3185,36 @@ assertGatewayGauge(
         && str_contains($timeSeriesForm, 'data:image/svg+xml;base64,'),
     'Time Series form must provide axis positioning, diagnostics and separate live Tile/IPSView previews.'
 );
+$timeSeriesFormData = json_decode($timeSeriesForm, true, 512, JSON_THROW_ON_ERROR);
+$timeSeriesRows = array_values(array_filter(
+    $timeSeriesFormData['elements'],
+    static fn (array $element): bool => ($element['type'] ?? '') === 'RowLayout'
+));
+$timeSeriesRangeFields = array_column($timeSeriesRows[0]['items'], null, 'name');
+$timeSeriesGapFields = array_column($timeSeriesRows[1]['items'], null, 'name');
+assertGatewayGauge(
+    ($timeSeriesRangeFields['CustomRangeValue']['visible'] ?? null) === false
+        && ($timeSeriesRangeFields['CustomRangeUnit']['visible'] ?? null) === false
+        && ($timeSeriesGapFields['GapThresholdMinutes']['visible'] ?? null) === true,
+    'Time Series form must use the shared helper for nested range and gap field visibility.'
+);
+$timeSeries->SetTestProperty('Range', 'custom');
+$timeSeries->SetTestProperty('GapDetectionMode', 'off');
+$timeSeriesFormData = json_decode($timeSeries->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+$timeSeriesRows = array_values(array_filter(
+    $timeSeriesFormData['elements'],
+    static fn (array $element): bool => ($element['type'] ?? '') === 'RowLayout'
+));
+$timeSeriesRangeFields = array_column($timeSeriesRows[0]['items'], null, 'name');
+$timeSeriesGapFields = array_column($timeSeriesRows[1]['items'], null, 'name');
+assertGatewayGauge(
+    ($timeSeriesRangeFields['CustomRangeValue']['visible'] ?? null) === true
+        && ($timeSeriesRangeFields['CustomRangeUnit']['visible'] ?? null) === true
+        && ($timeSeriesGapFields['GapThresholdMinutes']['visible'] ?? null) === false,
+    'Time Series form must update nested visibility for custom and fixed settings.'
+);
+$timeSeries->SetTestProperty('Range', '1h');
+$timeSeries->SetTestProperty('GapDetectionMode', 'custom');
 $timeSeries->UpdateTimeSeriesPreviewFromForm(json_encode([
     'Title'              => 'Edited preview',
     'Sources'            => [[
@@ -4239,6 +4269,39 @@ $barHistoryTile->SetTestProperty('Sources', json_encode([[
 $barHistoryTile->SetTestProperty('Range', '1h');
 $barHistoryTile->SetTestProperty('DataMode', 'raw');
 $barHistoryTile->ApplyChanges();
+$barHistoryForm = json_decode($barHistoryTile->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+$barHistoryRangeRows = array_values(array_filter(
+    $barHistoryForm['elements'],
+    static fn (array $element): bool => ($element['type'] ?? '') === 'RowLayout'
+));
+$barHistoryRangeFields = array_column($barHistoryRangeRows[0]['items'], null, 'name');
+assertGatewayGauge(
+    ($barHistoryRangeFields['CustomRangeValue']['visible'] ?? null) === false
+        && ($barHistoryRangeFields['CustomRangeUnit']['visible'] ?? null) === false
+        && str_contains((string) ($barHistoryRangeFields['Range']['onChange'] ?? ''), 'ECBH_UpdateTimeRangeForm'),
+    'Historical Bar configuration form must hide custom range controls for a fixed range.'
+);
+$barHistoryTile->SetTestProperty('Range', 'custom');
+$barHistoryForm = json_decode($barHistoryTile->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+$barHistoryRangeRows = array_values(array_filter(
+    $barHistoryForm['elements'],
+    static fn (array $element): bool => ($element['type'] ?? '') === 'RowLayout'
+));
+$barHistoryRangeFields = array_column($barHistoryRangeRows[0]['items'], null, 'name');
+assertGatewayGauge(
+    ($barHistoryRangeFields['CustomRangeValue']['visible'] ?? null) === true
+        && ($barHistoryRangeFields['CustomRangeUnit']['visible'] ?? null) === true,
+    'Historical Bar configuration form must reveal custom range controls for a custom range.'
+);
+$barHistoryTile->UpdateTimeRangeForm('custom');
+assertGatewayGauge(
+    array_slice($barHistoryTile->GetTestFormUpdates(), -2) === [
+        ['Field' => 'CustomRangeValue', 'Parameter' => 'visible', 'Value' => true],
+        ['Field' => 'CustomRangeUnit', 'Parameter' => 'visible', 'Value' => true]
+    ],
+    'Historical Bar must reveal both custom range controls as soon as the range changes.'
+);
+$barHistoryTile->SetTestProperty('Range', '1h');
 $barHistoryTileHTML = $barHistoryTile->GetVisualizationTile();
 assertGatewayGauge(
     str_contains($barHistoryTileHTML, 'echarts-bar-history-root')

@@ -25,6 +25,7 @@ $gaugeChronograph = (string) file_get_contents($root . '/EChartsGaugeChronograph
 $timeSeries = (string) file_get_contents($root . '/EChartsTimeSeries/module.php');
 $barCategory = (string) file_get_contents($root . '/EChartsBarCategory/module.php');
 $barHistory = (string) file_get_contents($root . '/EChartsBarHistory/module.php');
+$configurationFormHelper = (string) file_get_contents($root . '/libs/helper/ConfigurationFormHelper.php');
 $sharedGatewayGuidance = 'One shared EChartsGateway is sufficient for all ECharts chart instances. '
     . 'When adding further charts, select the existing gateway instead of creating another one.';
 
@@ -48,6 +49,19 @@ foreach ([
     requireStrictContract(
         str_contains($source, 'DataFlowHelper.php') && str_contains($source, 'use DataFlowHelper;'),
         $moduleName . ' must use the shared DataFlowHelper.',
+        $errors
+    );
+}
+
+requireStrictContract(
+    str_contains($configurationFormHelper, 'protected function SetFormFieldVisibility('),
+    'ConfigurationFormHelper must provide shared nested field visibility.',
+    $errors
+);
+foreach (['EChartsTimeSeries' => $timeSeries, 'EChartsBarHistory' => $barHistory] as $moduleName => $source) {
+    requireStrictContract(
+        !str_contains($source, 'function SetFormFieldVisibility('),
+        $moduleName . ' must use the shared ConfigurationFormHelper visibility method.',
         $errors
     );
 }

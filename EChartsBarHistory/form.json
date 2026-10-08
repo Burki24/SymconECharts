@@ -189,6 +189,7 @@
                     "name": "Range",
                     "caption": "Time range",
                     "width": "180px",
+                    "onChange": "ECBH_UpdateTimeRangeForm($id, $Range);",
                     "options": [
                         {
                             "caption": "1 hour",

@@ -1553,22 +1553,6 @@ class EChartsTimeSeries extends IPSModuleStrict
         return $items;
     }
 
-    /** @param list<array<string,mixed>> $items @param list<string> $names @return list<array<string,mixed>> */
-    private function SetFormFieldVisibility(array $items, array $names, bool $visible): array
-    {
-        foreach ($items as &$item) {
-            if (isset($item['name']) && in_array($item['name'], $names, true)) {
-                $item['visible'] = $visible;
-            }
-            if (isset($item['items']) && is_array($item['items'])) {
-                $item['items'] = $this->SetFormFieldVisibility($item['items'], $names, $visible);
-            }
-        }
-        unset($item);
-
-        return $items;
-    }
-
     private function TimeSeriesPreviewFormAction(string $sourceAction = '', string $list = 'source'): string
     {
         $pairs = array_map(

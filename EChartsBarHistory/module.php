@@ -98,6 +98,13 @@ class EChartsBarHistory extends IPSModuleStrict
         return $this->EncodeConfigurationForm($form);
     }
 
+    public function UpdateTimeRangeForm(string $Range): void
+    {
+        $custom = $Range === 'custom';
+        $this->UpdateFormField('CustomRangeValue', 'visible', $custom);
+        $this->UpdateFormField('CustomRangeUnit', 'visible', $custom);
+    }
+
     public function RequestAction(string $Ident, mixed $Value): void
     {
         throw new InvalidArgumentException('Unknown action: ' . $Ident);
