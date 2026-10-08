@@ -11,7 +11,10 @@ variable as bars along a time axis. It is deliberately separate from
 - Raw values, automatic aggregation or an explicitly selected aggregation
 - Fixed, calendar-aligned and custom time ranges
 - Configurable point budget and time-axis labels
-- Theme, value labels, grid, rounded bars and bar width
+- Theme, value labels, grid, bar width, optional gradient fill, opacity and
+  rounded corners
+- Adjustable font sizes and colors for title, axes and value labels, plus grid
+  color
 - Independent IPSView time range, time-axis labels and appearance, or inheritance
   from the tile; optional background color and opacity
 
@@ -24,6 +27,11 @@ The WebContent variable can then be used as an HTML widget. Archive refreshes
 update the open chart through the shared connection without replacing the HTML
 document. Both outputs use the same source and data mode, but may show different
 time ranges.
+The tile and independent IPSView designers offer the same bar and typography
+controls. Selecting a gradient reveals its end-color picker; enabling rounded
+bars reveals the corner-radius setting. Automatic colors follow the selected
+ECharts theme. If the gradient end color is automatic, it fades toward the
+theme background.
 
 The module currently accepts exactly one source. Additional sources are planned
 for this same `EChartsBarHistory` module; no separate Single/Multi module is

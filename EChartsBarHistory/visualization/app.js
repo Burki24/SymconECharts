@@ -82,10 +82,26 @@
         var decimals = Math.max(0, Math.min(6, Number(bar.decimals) || 0));
         var unit = String(bar.unit || '');
         var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8;
-        var radius = style.roundedBars === true ? 6 : 0;
+        var radius = style.roundedBars === true
+            ? (style.barCornerRadius == null ? 6 : Number(style.barCornerRadius)) : 0;
         var paletteColors = Array.isArray(colors.seriesColors) && colors.seriesColors.length > 0
             ? colors.seriesColors : [colors.accent];
         var barColor = series.color || paletteColors[0];
+        var fillColor = style.barFillMode === 'gradient' ? {
+            type: 'linear', x: 0, y: 1, x2: 0, y2: 0,
+            colorStops: [
+                { offset: 0, color: barColor },
+                { offset: 1, color: style.barGradientColor || colors.background }
+            ]
+        } : barColor;
+        var titleColor = style.titleColor || colors.text;
+        var axisColor = style.axisColor || colors.text;
+        var axisLineColor = style.axisColor || colors.border;
+        var valueColor = style.valueColor || colors.text;
+        var gridColor = style.gridColor || colors.border;
+        var titleFontSize = Math.round(18 * (Number(style.titleFontSizePercent) || 100) / 100);
+        var axisFontSize = Math.round(12 * (Number(style.axisFontSizePercent) || 100) / 100);
+        var valueFontSize = Math.round(12 * (Number(style.valueFontSizePercent) || 100) / 100);
 
         return {
             backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
@@ -98,7 +114,7 @@
                 text: String(bar.title || ''),
                 left: 'center',
                 top: headerInset,
-                textStyle: { color: colors.text, fontSize: 18 }
+                textStyle: { color: titleColor, fontSize: titleFontSize }
             },
             grid: {
                 top: headerInset + (bar.title ? 52 : 16),
@@ -121,31 +137,40 @@
             xAxis: {
                 type: 'time',
                 axisLabel: {
-                    color: colors.text,
+                    color: axisColor,
+                    fontSize: axisFontSize,
                     formatter: function (value) { return formatTimestamp(value, bar.timeAxisLabelFormat || 'auto'); }
                 },
-                axisLine: { lineStyle: { color: colors.border } },
-                axisTick: { lineStyle: { color: colors.border } },
+                axisLine: { lineStyle: { color: axisLineColor } },
+                axisTick: { lineStyle: { color: axisLineColor } },
                 splitLine: { show: false }
             },
             yAxis: {
                 type: 'value',
                 name: unit,
-                nameTextStyle: { color: colors.muted },
-                axisLabel: { color: colors.text },
-                axisLine: { show: true, lineStyle: { color: colors.border } },
-                axisTick: { show: true, lineStyle: { color: colors.border } },
-                splitLine: { show: style.showGrid !== false, lineStyle: { color: colors.border, opacity: 0.22 } }
+                nameTextStyle: { color: style.axisColor || colors.muted },
+                axisLabel: { color: axisColor, fontSize: axisFontSize },
+                axisLine: { show: true, lineStyle: { color: axisLineColor } },
+                axisTick: { show: true, lineStyle: { color: axisLineColor } },
+                splitLine: {
+                    show: style.showGrid !== false,
+                    lineStyle: { color: gridColor, opacity: style.gridColor ? 1 : 0.22 }
+                }
             },
             series: [{
                 name: String(series.label || ''),
                 type: 'bar',
                 barMaxWidth: Math.max(8, Math.round(48 * Math.max(20, Math.min(100, Number(style.barWidthPercent) || 70)) / 100)),
-                itemStyle: { color: barColor, borderRadius: [radius, radius, 0, 0] },
+                itemStyle: {
+                    color: fillColor,
+                    opacity: (style.barOpacityPercent == null ? 100 : Number(style.barOpacityPercent)) / 100,
+                    borderRadius: [radius, radius, 0, 0]
+                },
                 label: {
                     show: style.showValues === true,
                     position: 'top',
-                    color: colors.text,
+                    color: valueColor,
+                    fontSize: valueFontSize,
                     formatter: function (parameters) {
                         return Array.isArray(parameters.value)
                             ? formatValue(parameters.value[1], decimals, unit) : '';

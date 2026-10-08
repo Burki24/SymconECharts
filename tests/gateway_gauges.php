@@ -4276,6 +4276,17 @@ $barHistory->SetTestProperty('ShowValues', true);
 $barHistory->SetTestProperty('ShowGrid', false);
 $barHistory->SetTestProperty('RoundedBars', true);
 $barHistory->SetTestProperty('BarWidthPercent', 60);
+$barHistory->SetTestProperty('BarFillMode', 'gradient');
+$barHistory->SetTestProperty('BarGradientColor', 0x55CCAA);
+$barHistory->SetTestProperty('BarOpacityPercent', 65);
+$barHistory->SetTestProperty('BarCornerRadius', 10);
+$barHistory->SetTestProperty('TitleFontSizePercent', 130);
+$barHistory->SetTestProperty('AxisFontSizePercent', 115);
+$barHistory->SetTestProperty('ValueFontSizePercent', 125);
+$barHistory->SetTestProperty('TitleColor', 0xFFEEDD);
+$barHistory->SetTestProperty('AxisColor', 0xDDEEFF);
+$barHistory->SetTestProperty('ValueColor', 0x112233);
+$barHistory->SetTestProperty('GridColor', 0x445566);
 $barHistory->ApplyChanges();
 $barHistoryData = json_decode($barHistory->GetBarHistoryData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
@@ -4295,7 +4306,18 @@ assertGatewayGauge(
         && $barHistoryData['bar']['style']['showValues'] === true
         && $barHistoryData['bar']['style']['showGrid'] === false
         && $barHistoryData['bar']['style']['roundedBars'] === true
-        && $barHistoryData['bar']['style']['barWidthPercent'] === 60,
+        && $barHistoryData['bar']['style']['barWidthPercent'] === 60
+        && $barHistoryData['bar']['style']['barFillMode'] === 'gradient'
+        && $barHistoryData['bar']['style']['barGradientColor'] === '#55CCAA'
+        && $barHistoryData['bar']['style']['barOpacityPercent'] === 65
+        && $barHistoryData['bar']['style']['barCornerRadius'] === 10
+        && $barHistoryData['bar']['style']['titleFontSizePercent'] === 130
+        && $barHistoryData['bar']['style']['axisFontSizePercent'] === 115
+        && $barHistoryData['bar']['style']['valueFontSizePercent'] === 125
+        && $barHistoryData['bar']['style']['titleColor'] === '#FFEEDD'
+        && $barHistoryData['bar']['style']['axisColor'] === '#DDEEFF'
+        && $barHistoryData['bar']['style']['valueColor'] === '#112233'
+        && $barHistoryData['bar']['style']['gridColor'] === '#445566',
     'Historical Bar must preserve archive, presentation and tile-design settings in its chart model.'
 );
 $barHistoryTile = new EChartsBarHistory();
@@ -4366,11 +4388,29 @@ $barHistoryIPSViewPanels = array_values(array_filter(
     $barHistoryForm['elements'],
     static fn (array $element): bool => ($element['caption'] ?? '') === 'IPSView design'
 ));
+$barHistoryTilePanels = array_values(array_filter(
+    $barHistoryForm['elements'],
+    static fn (array $element): bool => ($element['caption'] ?? '') === 'Tile designer'
+));
 assertGatewayGauge(
     count($barHistoryIPSViewPanels) === 1
         && str_contains(json_encode($barHistoryIPSViewPanels[0], JSON_THROW_ON_ERROR), 'IPSViewUseTileTimeSettings')
-        && str_contains(json_encode($barHistoryIPSViewPanels[0], JSON_THROW_ON_ERROR), 'IPSViewBarWidthPercent'),
+        && str_contains(json_encode($barHistoryIPSViewPanels[0], JSON_THROW_ON_ERROR), 'IPSViewBarWidthPercent')
+        && str_contains(json_encode($barHistoryIPSViewPanels[0], JSON_THROW_ON_ERROR), 'IPSViewBarFillMode')
+        && str_contains(json_encode($barHistoryIPSViewPanels[0], JSON_THROW_ON_ERROR), 'IPSViewAxisColor')
+        && str_contains(json_encode($barHistoryIPSViewPanels[0], JSON_THROW_ON_ERROR), 'ECBH_UpdateBarDesignForm')
+        && count($barHistoryTilePanels) === 1
+        && str_contains(json_encode($barHistoryTilePanels[0], JSON_THROW_ON_ERROR), '"name":"BarFillMode"')
+        && str_contains(json_encode($barHistoryTilePanels[0], JSON_THROW_ON_ERROR), '"name":"AxisFontSizePercent"'),
     'Historical Bar form must expose independent IPSView time and design controls.'
+);
+$barHistoryTile->UpdateBarDesignForm(false, true, 'gradient');
+assertGatewayGauge(
+    array_slice($barHistoryTile->GetTestFormUpdates(), -2) === [
+        ['Field' => 'BarGradientColor', 'Parameter' => 'visible', 'Value' => true],
+        ['Field' => 'BarCornerRadius', 'Parameter' => 'visible', 'Value' => true]
+    ],
+    'Historical Bar must show dependent fill and corner controls immediately.'
 );
 $barHistoryRangeRows = array_values(array_filter(
     $barHistoryForm['elements'],
@@ -4416,6 +4456,9 @@ $barHistoryTile->SetTestProperty('IPSViewTimeAxisLabelFormat', 'date');
 $barHistoryTile->SetTestProperty('IPSViewUseTileDesign', false);
 $barHistoryTile->SetTestProperty('IPSViewEChartsTheme', 'dark');
 $barHistoryTile->SetTestProperty('IPSViewBarWidthPercent', 45);
+$barHistoryTile->SetTestProperty('IPSViewBarFillMode', 'gradient');
+$barHistoryTile->SetTestProperty('IPSViewBarGradientColor', 0x55CCAA);
+$barHistoryTile->SetTestProperty('IPSViewAxisColor', 0xAAEECC);
 $barHistoryTile->SetTestProperty('IPSViewAdaptToBackground', true);
 $barHistoryTile->SetTestProperty('IPSViewBackgroundColor', 0x997755);
 $barHistoryTile->SetTestProperty('IPSViewBackgroundOpacityPercent', 50);
@@ -4429,6 +4472,9 @@ assertGatewayGauge(
         && str_contains($independentBarHistoryIPSView, '"timeAxisLabelFormat":"date"')
         && str_contains($independentBarHistoryIPSView, '"theme":"dark"')
         && str_contains($independentBarHistoryIPSView, '"barWidthPercent":45')
+        && str_contains($independentBarHistoryIPSView, '"barFillMode":"gradient"')
+        && str_contains($independentBarHistoryIPSView, '"barGradientColor":"#55CCAA"')
+        && str_contains($independentBarHistoryIPSView, '"axisColor":"#AAEECC"')
         && str_contains($independentBarHistoryIPSView, '"adaptToBackground":true'),
     'Historical Bar IPSView settings must not change the native Tile range or appearance.'
 );
@@ -4477,6 +4523,19 @@ $invalidBarHistory->ApplyChanges();
 assertGatewayGauge(
     $invalidBarHistory->GetTestStatus() === 201,
     'Historical Bar must reject configurations without exactly one numeric source.'
+);
+
+$invalidBarDesign = new EChartsBarHistory();
+$invalidBarDesign->Create();
+$invalidBarDesign->SetTestProperty('Sources', json_encode([[
+    'VariableID' => 4711, 'UseVariablePresentation' => false, 'Unit' => '°C',
+    'Decimals'   => 1, 'Reducer' => 'auto', 'Color' => -1
+]], JSON_THROW_ON_ERROR));
+$invalidBarDesign->SetTestProperty('BarOpacityPercent', 101);
+$invalidBarDesign->ApplyChanges();
+assertGatewayGauge(
+    $invalidBarDesign->GetTestStatus() === 202,
+    'Historical Bar must reject design values outside their supported range.'
 );
 
 echo "Gateway and Gauge module integration verified.\n";

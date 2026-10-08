@@ -48,12 +48,24 @@ class EChartsBarHistory extends IPSModuleStrict
     private const STATUS_GATEWAY_FAILED = 204;
     private const REDUCERS = ['auto', 'average', 'sum', 'minimum', 'maximum'];
     private const TIME_AXIS_LABEL_FORMATS = ['auto', 'time', 'date', 'date-time'];
+    private const BAR_FILL_MODES = ['solid', 'gradient'];
     private const DESIGN_PROPERTY_TYPES = [
-        'EChartsTheme'    => 'string',
-        'ShowValues'      => 'boolean',
-        'ShowGrid'        => 'boolean',
-        'RoundedBars'     => 'boolean',
-        'BarWidthPercent' => 'integer'
+        'EChartsTheme'        => 'string',
+        'ShowValues'          => 'boolean',
+        'ShowGrid'            => 'boolean',
+        'RoundedBars'         => 'boolean',
+        'BarWidthPercent'     => 'integer',
+        'BarFillMode'         => 'string',
+        'BarGradientColor'    => 'integer',
+        'BarOpacityPercent'   => 'integer',
+        'BarCornerRadius'     => 'integer',
+        'TitleFontSizePercent'=> 'integer',
+        'AxisFontSizePercent' => 'integer',
+        'ValueFontSizePercent'=> 'integer',
+        'TitleColor'          => 'integer',
+        'AxisColor'           => 'integer',
+        'ValueColor'          => 'integer',
+        'GridColor'           => 'integer'
     ];
 
     public function Create(): void
@@ -76,6 +88,17 @@ class EChartsBarHistory extends IPSModuleStrict
         $this->RegisterPropertyBoolean('ShowGrid', true);
         $this->RegisterPropertyBoolean('RoundedBars', false);
         $this->RegisterPropertyInteger('BarWidthPercent', 70);
+        $this->RegisterPropertyString('BarFillMode', 'solid');
+        $this->RegisterPropertyInteger('BarGradientColor', -1);
+        $this->RegisterPropertyInteger('BarOpacityPercent', 100);
+        $this->RegisterPropertyInteger('BarCornerRadius', 6);
+        $this->RegisterPropertyInteger('TitleFontSizePercent', 100);
+        $this->RegisterPropertyInteger('AxisFontSizePercent', 100);
+        $this->RegisterPropertyInteger('ValueFontSizePercent', 100);
+        $this->RegisterPropertyInteger('TitleColor', -1);
+        $this->RegisterPropertyInteger('AxisColor', -1);
+        $this->RegisterPropertyInteger('ValueColor', -1);
+        $this->RegisterPropertyInteger('GridColor', -1);
         $this->RegisterIPSViewHTMLPageProperties();
         $this->RegisterEChartsIPSViewTransport();
         $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
@@ -93,9 +116,14 @@ class EChartsBarHistory extends IPSModuleStrict
         foreach (self::DESIGN_PROPERTY_TYPES as $name => $type) {
             $default = match ($name) {
                 'EChartsTheme'              => EChartsAsset::THEME_AUTO,
+                'BarFillMode'               => 'solid',
                 'ShowValues', 'RoundedBars' => false,
                 'ShowGrid'                  => true,
-                default                     => 70
+                'BarWidthPercent'           => 70,
+                'BarOpacityPercent', 'TitleFontSizePercent', 'AxisFontSizePercent',
+                'ValueFontSizePercent'      => 100,
+                'BarCornerRadius'           => 6,
+                default                     => -1
             };
             match ($type) {
                 'string'  => $this->RegisterPropertyString('IPSView' . $name, $default),
@@ -140,6 +168,16 @@ class EChartsBarHistory extends IPSModuleStrict
                 ['CustomRangeValue', 'CustomRangeUnit'],
                 $this->ReadPropertyString('Range') === 'custom'
             );
+            $form['elements'] = $this->SetFormFieldVisibility(
+                $form['elements'],
+                ['BarGradientColor'],
+                $this->ReadPropertyString('BarFillMode') === 'gradient'
+            );
+            $form['elements'] = $this->SetFormFieldVisibility(
+                $form['elements'],
+                ['BarCornerRadius'],
+                $this->ReadPropertyBoolean('RoundedBars')
+            );
             $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
         }
 
@@ -162,6 +200,13 @@ class EChartsBarHistory extends IPSModuleStrict
         foreach (['IPSViewCustomRangeValue', 'IPSViewCustomRangeUnit'] as $field) {
             $this->UpdateFormField($field, 'visible', $independent && $IPSViewRange === 'custom');
         }
+    }
+
+    public function UpdateBarDesignForm(bool $IPSView, bool $RoundedBars, string $BarFillMode): void
+    {
+        $prefix = $IPSView ? 'IPSView' : '';
+        $this->UpdateFormField($prefix . 'BarGradientColor', 'visible', $BarFillMode === 'gradient');
+        $this->UpdateFormField($prefix . 'BarCornerRadius', 'visible', $RoundedBars);
     }
 
     public function RequestAction(string $Ident, mixed $Value): void
@@ -635,9 +680,31 @@ class EChartsBarHistory extends IPSModuleStrict
 
     private function IsValidDesign(string $prefix): bool
     {
-        return EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme'))
-            && $this->ReadPropertyInteger($prefix . 'BarWidthPercent') >= 20
-            && $this->ReadPropertyInteger($prefix . 'BarWidthPercent') <= 100;
+        if (!EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme'))
+            || !in_array($this->ReadPropertyString($prefix . 'BarFillMode'), self::BAR_FILL_MODES, true)) {
+            return false;
+        }
+        foreach ([
+            'BarWidthPercent'      => [20, 100],
+            'BarOpacityPercent'    => [0, 100],
+            'BarCornerRadius'      => [0, 24],
+            'TitleFontSizePercent' => [50, 200],
+            'AxisFontSizePercent'  => [50, 200],
+            'ValueFontSizePercent' => [50, 200]
+        ] as $name => [$minimum, $maximum]) {
+            $value = $this->ReadPropertyInteger($prefix . $name);
+            if ($value < $minimum || $value > $maximum) {
+                return false;
+            }
+        }
+        foreach (['BarGradientColor', 'TitleColor', 'AxisColor', 'ValueColor', 'GridColor'] as $name) {
+            $color = $this->ReadPropertyInteger($prefix . $name);
+            if ($color < -1 || $color > 0xFFFFFF) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private function IsValidTimeSettings(string $prefix): bool
@@ -688,17 +755,35 @@ class EChartsBarHistory extends IPSModuleStrict
             : $this->ReadPropertyString('EChartsTheme');
     }
 
-    /** @return array{showValues:bool, showGrid:bool, roundedBars:bool, barWidthPercent:int} */
+    /** @return array<string, bool|int|string> */
     private function ReadDesignStyle(bool $ipsView): array
     {
         $prefix = $ipsView && !$this->ReadPropertyBoolean('IPSViewUseTileDesign') ? 'IPSView' : '';
 
         return [
-            'showValues'      => $this->ReadPropertyBoolean($prefix . 'ShowValues'),
-            'showGrid'        => $this->ReadPropertyBoolean($prefix . 'ShowGrid'),
-            'roundedBars'     => $this->ReadPropertyBoolean($prefix . 'RoundedBars'),
-            'barWidthPercent' => $this->ReadPropertyInteger($prefix . 'BarWidthPercent')
+            'showValues'          => $this->ReadPropertyBoolean($prefix . 'ShowValues'),
+            'showGrid'            => $this->ReadPropertyBoolean($prefix . 'ShowGrid'),
+            'roundedBars'         => $this->ReadPropertyBoolean($prefix . 'RoundedBars'),
+            'barWidthPercent'     => $this->ReadPropertyInteger($prefix . 'BarWidthPercent'),
+            'barFillMode'         => $this->ReadPropertyString($prefix . 'BarFillMode'),
+            'barGradientColor'    => $this->OptionalDesignColor($prefix . 'BarGradientColor'),
+            'barOpacityPercent'   => $this->ReadPropertyInteger($prefix . 'BarOpacityPercent'),
+            'barCornerRadius'     => $this->ReadPropertyInteger($prefix . 'BarCornerRadius'),
+            'titleFontSizePercent'=> $this->ReadPropertyInteger($prefix . 'TitleFontSizePercent'),
+            'axisFontSizePercent' => $this->ReadPropertyInteger($prefix . 'AxisFontSizePercent'),
+            'valueFontSizePercent'=> $this->ReadPropertyInteger($prefix . 'ValueFontSizePercent'),
+            'titleColor'          => $this->OptionalDesignColor($prefix . 'TitleColor'),
+            'axisColor'           => $this->OptionalDesignColor($prefix . 'AxisColor'),
+            'valueColor'          => $this->OptionalDesignColor($prefix . 'ValueColor'),
+            'gridColor'           => $this->OptionalDesignColor($prefix . 'GridColor')
         ];
+    }
+
+    private function OptionalDesignColor(string $property): string
+    {
+        $color = $this->ReadPropertyInteger($property);
+
+        return $color < 0 ? '' : EChartsAsset::ColorToHex($color);
     }
 
     private function IPSViewThemeCSS(): string
@@ -716,7 +801,7 @@ class EChartsBarHistory extends IPSModuleStrict
     private function BuildIPSViewDesigner(array $elements): array
     {
         $rangeItems = null;
-        $designItems = null;
+        $designRows = null;
         foreach ($elements as $element) {
             if (($element['type'] ?? null) === 'RowLayout'
                 && in_array('Range', array_column($element['items'] ?? [], 'name'), true)) {
@@ -724,10 +809,10 @@ class EChartsBarHistory extends IPSModuleStrict
             }
             if (($element['type'] ?? null) === 'ExpansionPanel'
                 && ($element['caption'] ?? null) === 'Tile designer') {
-                $designItems = $element['items'][0]['items'] ?? null;
+                $designRows = $element['items'] ?? null;
             }
         }
-        if (!is_array($rangeItems) || !is_array($designItems)) {
+        if (!is_array($rangeItems) || !is_array($designRows)) {
             throw new RuntimeException('The Historical Bar form sections are missing.');
         }
 
@@ -748,19 +833,40 @@ class EChartsBarHistory extends IPSModuleStrict
             $ipsViewTimeItems[] = $item;
         }
 
-        $ipsViewDesignItems = [];
-        foreach ($designItems as $item) {
-            $name = $item['name'] ?? null;
-            if ($name === 'TimeAxisLabelFormat') {
-                $item['name'] = 'IPSViewTimeAxisLabelFormat';
-                $item['visible'] = $independentTime;
-                $ipsViewTimeItems[] = $item;
-            } elseif (is_string($name) && array_key_exists($name, self::DESIGN_PROPERTY_TYPES)) {
-                $item['name'] = 'IPSView' . $name;
-                $ipsViewDesignItems[] = $item;
+        $ipsViewDesignRows = [];
+        $designFieldCount = 0;
+        foreach ($designRows as $row) {
+            if (($row['type'] ?? null) !== 'RowLayout' || !is_array($row['items'] ?? null)) {
+                continue;
+            }
+            $items = [];
+            foreach ($row['items'] as $item) {
+                $name = $item['name'] ?? null;
+                if ($name === 'TimeAxisLabelFormat') {
+                    $item['name'] = 'IPSViewTimeAxisLabelFormat';
+                    $item['visible'] = $independentTime;
+                    $ipsViewTimeItems[] = $item;
+                } elseif (is_string($name) && array_key_exists($name, self::DESIGN_PROPERTY_TYPES)) {
+                    $item['name'] = 'IPSView' . $name;
+                    if (in_array($name, ['RoundedBars', 'BarFillMode'], true)) {
+                        $item['onChange'] = 'ECBH_UpdateBarDesignForm($id, true, '
+                            . '$IPSViewRoundedBars, $IPSViewBarFillMode);';
+                    }
+                    if ($name === 'BarGradientColor') {
+                        $item['visible'] = $this->ReadPropertyString('IPSViewBarFillMode') === 'gradient';
+                    }
+                    if ($name === 'BarCornerRadius') {
+                        $item['visible'] = $this->ReadPropertyBoolean('IPSViewRoundedBars');
+                    }
+                    $items[] = $item;
+                    $designFieldCount++;
+                }
+            }
+            if ($items !== []) {
+                $ipsViewDesignRows[] = ['type' => 'RowLayout', 'items' => $items];
             }
         }
-        if (count($ipsViewTimeItems) !== 4 || count($ipsViewDesignItems) !== count(self::DESIGN_PROPERTY_TYPES)) {
+        if (count($ipsViewTimeItems) !== 4 || $designFieldCount !== count(self::DESIGN_PROPERTY_TYPES)) {
             throw new RuntimeException('The Historical Bar designer fields are missing.');
         }
 
@@ -803,7 +909,7 @@ class EChartsBarHistory extends IPSModuleStrict
                     'type'     => 'ExpansionPanel',
                     'caption'  => 'Independent IPSView designer',
                     'expanded' => false,
-                    'items'    => [['type' => 'RowLayout', 'items' => $ipsViewDesignItems]]
+                    'items'    => $ipsViewDesignRows
                 ]
             ]
         ];

@@ -10,6 +10,9 @@
   Eine optionale IPSView-Ausgabe nutzt denselben Datenvertrag und erlaubt
   einen eigenen Zeitraum, ein eigenes Design sowie einstellbare Hintergrundfarbe
   und -deckkraft. Aktualisierungen ersetzen das HTML-Dokument nicht.
+  Für Kachel und IPSView sind nun zusätzlich Balkenfüllung mit optionalem
+  Farbverlauf, Deckkraft und Eckenradius sowie Schriftgrößen und Farben für
+  Titel, Achsen, Werte und Raster einstellbar.
 
 - EChartsBarCategory vergleicht 1 bis 16 aktuelle numerische Werte mit
   gemeinsamer Einheit als einfache, gruppierte oder gestapelte vertikale und

@@ -392,7 +392,8 @@
                         {
                             "type": "CheckBox",
                             "name": "RoundedBars",
-                            "caption": "Rounded bars"
+                            "caption": "Rounded bars",
+                            "onChange": "ECBH_UpdateBarDesignForm($id, false, $RoundedBars, $BarFillMode);"
                         },
                         {
                             "type": "NumberSpinner",
@@ -402,6 +403,124 @@
                             "maximum": 100,
                             "suffix": "%",
                             "width": "140px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "BarFillMode",
+                            "caption": "Bar fill",
+                            "width": "170px",
+                            "onChange": "ECBH_UpdateBarDesignForm($id, false, $RoundedBars, $BarFillMode);",
+                            "options": [
+                                {
+                                    "caption": "Solid color",
+                                    "value": "solid"
+                                },
+                                {
+                                    "caption": "Gradient",
+                                    "value": "gradient"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "BarGradientColor",
+                            "caption": "Gradient end color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic",
+                            "visible": false
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "BarOpacityPercent",
+                            "caption": "Bar opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%",
+                            "width": "130px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "BarCornerRadius",
+                            "caption": "Corner radius",
+                            "minimum": 0,
+                            "maximum": 24,
+                            "visible": false,
+                            "width": "130px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "TitleFontSizePercent",
+                            "caption": "Title size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%",
+                            "width": "130px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AxisFontSizePercent",
+                            "caption": "Axis label size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%",
+                            "width": "130px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ValueFontSizePercent",
+                            "caption": "Value label size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%",
+                            "width": "130px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "TitleColor",
+                            "caption": "Title color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "AxisColor",
+                            "caption": "Axis color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "ValueColor",
+                            "caption": "Value label color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "GridColor",
+                            "caption": "Grid color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic"
                         }
                     ]
                 }

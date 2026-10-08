@@ -79,9 +79,45 @@ assert.equal(ready.option.yAxis.splitLine.show, false);
 assert.equal(ready.option.series[0].type, 'bar');
 assert.equal(ready.option.series[0].barMaxWidth, 29);
 assert.equal(ready.option.series[0].itemStyle.color, '#e5754f');
+assert.equal(ready.option.series[0].itemStyle.opacity, 1);
+assert.equal(ready.option.title.textStyle.fontSize, 18);
 assert.deepEqual(Array.from(ready.option.series[0].itemStyle.borderRadius), [6, 6, 0, 0]);
 assert.deepEqual(Array.from(ready.option.series[0].data[0]), [1780000100000, 21.5]);
 assert.equal(ready.warningElement.hidden, true);
+
+ready.window.handleMessage({
+    status: 'ready',
+    chart: {
+        theme: 'dark',
+        bar: {
+            title: 'Styled history', unit: '°C', decimals: 1,
+            style: {
+                showValues: true, showGrid: true, roundedBars: true,
+                barWidthPercent: 60, barFillMode: 'gradient', barGradientColor: '#55ccaa',
+                barOpacityPercent: 65, barCornerRadius: 10,
+                titleFontSizePercent: 130, axisFontSizePercent: 115,
+                valueFontSizePercent: 125, titleColor: '#ffeedd',
+                axisColor: '#ddeeff', valueColor: '#112233', gridColor: '#445566'
+            }
+        },
+        series: [{ label: 'Temperature', color: '#e5754f', points: [[1780000300, 23.0]] }]
+    }
+});
+assert.equal(ready.option.title.textStyle.color, '#ffeedd');
+assert.equal(ready.option.title.textStyle.fontSize, 23);
+assert.equal(ready.option.xAxis.axisLabel.color, '#ddeeff');
+assert.equal(ready.option.xAxis.axisLabel.fontSize, 14);
+assert.equal(ready.option.xAxis.axisLine.lineStyle.color, '#ddeeff');
+assert.equal(ready.option.yAxis.nameTextStyle.color, '#ddeeff');
+assert.equal(ready.option.yAxis.splitLine.lineStyle.color, '#445566');
+assert.equal(ready.option.yAxis.splitLine.lineStyle.opacity, 1);
+assert.equal(ready.option.series[0].label.color, '#112233');
+assert.equal(ready.option.series[0].label.fontSize, 15);
+assert.equal(ready.option.series[0].itemStyle.opacity, 0.65);
+assert.deepEqual(Array.from(ready.option.series[0].itemStyle.borderRadius), [10, 10, 0, 0]);
+assert.equal(ready.option.series[0].itemStyle.color.type, 'linear');
+assert.equal(ready.option.series[0].itemStyle.color.colorStops[0].color, '#e5754f');
+assert.equal(ready.option.series[0].itemStyle.color.colorStops[1].color, '#55ccaa');
 
 const truncated = render(true);
 assert.equal(truncated.warningElement.hidden, false);
