@@ -202,6 +202,10 @@ class EChartsTimeSeries extends IPSModuleStrict
                 $this->ReadPropertyString('GapDetectionMode') === 'custom'
             );
             $form['elements'] = $this->AttachListDesigners($form['elements']);
+            $form['elements'] = $this->WithIPSViewTimeSettingsByRange(
+                $form['elements'],
+                $this->IPSViewTimeSettingsFormItems()
+            );
             $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
             $form['elements'] = $this->AttachTimeSeriesPreviewActions($form['elements']);
         }
@@ -1675,7 +1679,6 @@ class EChartsTimeSeries extends IPSModuleStrict
                     'Creates a standalone WebContent variable for use as an IPSView HTML widget.'
                 ),
                 EChartsIPSViewBackground::FormRow(),
-                ...$this->IPSViewTimeSettingsFormItems(),
                 [
                     'type'    => 'CheckBox',
                     'name'    => 'IPSViewUseTileDesign',

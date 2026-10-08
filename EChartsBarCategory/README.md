@@ -17,9 +17,10 @@ the same effective unit so that the shared value axis remains meaningful.
 - Independent Tile and IPSView design settings
 
 In **IPSView design**, **Use Tile design** is enabled by default. While it is
-enabled, independent IPSView design fields have no effect and **Copy Tile design
-to IPSView and edit independently** is disabled. Turn off **Use Tile design**
-first; the button becomes available immediately. Clicking it copies the current
+enabled, the inputs in **Independent IPSView designer** are disabled. The
+**Copy Tile design to IPSView and edit independently** button is inside that
+designer and is disabled as well. Turn off **Use Tile design** first; the
+inputs and button become available immediately. Clicking it copies the current
 Tile design once and replaces previously saved independent IPSView design
 values. Subsequent Tile design changes are not copied automatically. Sources
 and live values remain shared. Save changes to the Tile designer before copying.

@@ -129,9 +129,9 @@ assertGaugeDesign(
         && ($ipsViewDesigner['items'][1]['items'][0]['onChange'] ?? null) === $previewAction
         && ($ipsViewDesigner['items'][4]['onClick'] ?? null) === 'ECGT_CopyTileDesignToIPSView($id);'
         && array_column($independentItems, 'name') === [
-            'Sources', 'IPSViewGaugePreset', 'IPSViewPointerShape', 'IPSViewGaugePreview'
+            'IPSViewGaugePreset', 'IPSViewPointerShape', 'IPSViewGaugePreview'
         ],
-    'Shared Gauge IPSView form must preserve nested design fields and callbacks.'
+    'Shared Gauge IPSView form must omit shared sources while preserving design fields and callbacks.'
 );
 try {
     EChartsGaugeDesign::IPSViewDesignerForm([], [], [], '', '');

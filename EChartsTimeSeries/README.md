@@ -113,16 +113,18 @@ Kachel einen Hinweis auf das wirksame Punktbudget.
    Standardmäßig übernimmt sie Kacheldesign und Zeiteinstellungen. Wird
    **Zeiteinstellungen der Kachel verwenden** deaktiviert, erhält IPSView
    einen eigenen Zeitraum und ein eigenes Format der Zeitachsenbeschriftung.
-   Für eine abweichende Gestaltung zuerst **Kacheldesign verwenden**
-   ausschalten. Solange es aktiv ist, wirken unabhängige IPSView-Designfelder
-   nicht und **Kacheldesign nach IPSView kopieren und unabhängig bearbeiten**
-   ist deaktiviert. Nach dem Ausschalten ist der Knopf sofort aktiv. Er
-   kopiert das aktuelle Kacheldesign einmalig und überschreibt bisherige
-   unabhängige IPSView-Designwerte; diese können anschließend separat
+   Diese Zeiteinstellungen stehen bei den allgemeinen Zeitraumoptionen,
+   außerhalb der beiden Designer. Für eine abweichende Gestaltung zuerst
+   **Kacheldesign verwenden** ausschalten. Solange es aktiv ist, sind die
+   Eingaben im **Unabhängigen IPSView-Designer** und der darin liegende Knopf
+   **Kacheldesign nach IPSView
+   kopieren und unabhängig bearbeiten** deaktiviert. Nach dem Ausschalten
+   werden beide sofort aktiv. Der Knopf kopiert das gespeicherte Kacheldesign
+   einmalig und überschreibt bisherige unabhängige IPSView-Designwerte; diese
+   können anschließend separat
    bearbeitet werden. Änderungen am Kacheldesigner vor dem Kopieren speichern.
-   **An Hintergrundfarbe
-   anpassen** lässt den
-   tatsächlichen IPSView-Hintergrund durchscheinen. Die **Hintergrundfarbe**
+   **An Hintergrundfarbe anpassen** lässt den tatsächlichen
+   IPSView-Hintergrund durchscheinen. Die **Hintergrundfarbe**
    verwendet automatisch die Theme-Farbe oder eine frei gewählte Tönung; die
    **Hintergrunddeckkraft** dosiert den darüberliegenden Theme-Hintergrund von
    0 bis 100 Prozent. Die erzeugte Variable **Zeitreihe für

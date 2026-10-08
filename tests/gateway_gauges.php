@@ -4394,7 +4394,8 @@ $barHistoryTilePanels = array_values(array_filter(
 ));
 assertGatewayGauge(
     count($barHistoryIPSViewPanels) === 1
-        && str_contains(json_encode($barHistoryIPSViewPanels[0], JSON_THROW_ON_ERROR), 'IPSViewUseTileTimeSettings')
+        && !str_contains(json_encode($barHistoryIPSViewPanels[0], JSON_THROW_ON_ERROR), 'IPSViewUseTileTimeSettings')
+        && str_contains(json_encode($barHistoryForm['elements'], JSON_THROW_ON_ERROR), 'IPSViewUseTileTimeSettings')
         && str_contains(json_encode($barHistoryIPSViewPanels[0], JSON_THROW_ON_ERROR), 'IPSViewBarWidthPercent')
         && str_contains(json_encode($barHistoryIPSViewPanels[0], JSON_THROW_ON_ERROR), 'IPSViewBarFillMode')
         && str_contains(json_encode($barHistoryIPSViewPanels[0], JSON_THROW_ON_ERROR), 'IPSViewAxisColor')
@@ -4402,7 +4403,7 @@ assertGatewayGauge(
         && count($barHistoryTilePanels) === 1
         && str_contains(json_encode($barHistoryTilePanels[0], JSON_THROW_ON_ERROR), '"name":"BarFillMode"')
         && str_contains(json_encode($barHistoryTilePanels[0], JSON_THROW_ON_ERROR), '"name":"AxisFontSizePercent"'),
-    'Historical Bar form must expose independent IPSView time and design controls.'
+    'Historical Bar form must separate IPSView time settings from design controls.'
 );
 $barHistoryTile->UpdateBarDesignForm(false, true, 'gradient');
 assertGatewayGauge(
@@ -4562,20 +4563,64 @@ foreach ([
             $designItems,
             static fn (array $item): bool => ($item['name'] ?? null) === 'IPSViewUseTileDesign'
         ));
-        $copyButtons = array_values(array_filter(
+        $independentPanels = array_values(array_filter(
             $designItems,
+            static fn (array $item): bool => ($item['caption'] ?? null) === 'Independent IPSView designer'
+        ));
+        assertGatewayGauge(count($independentPanels) === 1, $moduleClass . ' needs one independent designer.');
+        $copyButtons = array_values(array_filter(
+            $independentPanels[0]['items'],
             static fn (array $item): bool => ($item['name'] ?? null) === 'CopyTileDesignToIPSViewButton'
         ));
+        $interactiveFields = [];
+        $visitDesignFields = static function (array $items) use (&$visitDesignFields, &$interactiveFields): void
+        {
+            foreach ($items as $item) {
+                if (in_array($item['type'] ?? '', [
+                    'Button', 'CheckBox', 'HorizontalSlider', 'List', 'NumberSpinner',
+                    'Select', 'SelectColor', 'SelectFile', 'SelectVariable', 'ValidationTextBox'
+                ], true)) {
+                    $interactiveFields[] = $item;
+                }
+                if (($item['type'] ?? null) !== 'List' && is_array($item['items'] ?? null)) {
+                    $visitDesignFields($item['items']);
+                }
+            }
+        };
+        $visitDesignFields($independentPanels[0]['items']);
         assertGatewayGauge(
             count($designSwitches) === 1
                 && count($copyButtons) === 1
+                && ($independentPanels[0]['items'][0]['name'] ?? null) === 'CopyTileDesignToIPSViewButton'
+                && count($interactiveFields) >= 4
+                && count(array_filter(
+                    $interactiveFields,
+                    static fn (array $item): bool => ($item['enabled'] ?? null) !== !$useTileDesign
+                )) === 0
                 && ($copyButtons[0]['enabled'] ?? null) === !$useTileDesign
                 && str_contains(
                     $designSwitches[0]['onChange'] ?? '',
-                    $modulePrefix . '_UpdateIPSViewDesignAvailability($id, $IPSViewUseTileDesign);'
+                    $modulePrefix . '_UpdateIPSViewDesignAvailability($id, $IPSViewUseTileDesign,'
                 ),
-            $moduleClass . ' must keep the copy button in sync with Tile design inheritance.'
+            $moduleClass . ' must disable the entire independent designer while inheriting Tile design.'
         );
+        $designAction = $designSwitches[0]['onChange'];
+        $compiledDesignAction = eval('return static function () {' . $designAction . '};');
+        assertGatewayGauge(is_callable($compiledDesignAction), $moduleClass . ' has an invalid design callback.');
+        foreach ($interactiveFields as $field) {
+            assertGatewayGauge(
+                str_contains($designAction, var_export($field['name'], true)),
+                $moduleClass . ' must update every independent design field when inheritance changes.'
+            );
+        }
+        if (in_array($moduleClass, [
+            EChartsGaugeMulti::class, EChartsGaugeTacho::class, EChartsGaugeChronograph::class
+        ], true)) {
+            assertGatewayGauge(
+                !in_array('Sources', array_column($independentPanels[0]['items'], 'name'), true),
+                $moduleClass . ' must not duplicate the shared Sources list inside the independent designer.'
+            );
+        }
         if ($moduleClass === EChartsGaugeSingle::class) {
             assertGatewayGauge(
                 str_contains($designSwitches[0]['onChange'], 'ECGS_UpdateIPSViewGaugePreviewFromForm('),
@@ -4583,14 +4628,50 @@ foreach ([
             );
         }
     }
-    $designModule->UpdateIPSViewDesignAvailability(true);
-    $designModule->UpdateIPSViewDesignAvailability(false);
+    $designModule->UpdateIPSViewDesignAvailability(true, [
+        'CopyTileDesignToIPSViewButton', 'IPSViewEChartsTheme'
+    ]);
+    $designModule->UpdateIPSViewDesignAvailability(false, [
+        'CopyTileDesignToIPSViewButton', 'IPSViewEChartsTheme'
+    ]);
     assertGatewayGauge(
-        array_slice($designModule->GetTestFormUpdates(), -2) === [
+        array_slice($designModule->GetTestFormUpdates(), -4) === [
             ['Field' => 'CopyTileDesignToIPSViewButton', 'Parameter' => 'enabled', 'Value' => false],
-            ['Field' => 'CopyTileDesignToIPSViewButton', 'Parameter' => 'enabled', 'Value' => true]
+            ['Field' => 'IPSViewEChartsTheme', 'Parameter' => 'enabled', 'Value' => false],
+            ['Field' => 'CopyTileDesignToIPSViewButton', 'Parameter' => 'enabled', 'Value' => true],
+            ['Field' => 'IPSViewEChartsTheme', 'Parameter' => 'enabled', 'Value' => true]
         ],
-        $moduleClass . ' must update the copy button immediately when inheritance changes.'
+        $moduleClass . ' must update the independent designer immediately when inheritance changes.'
+    );
+}
+
+foreach ([EChartsTimeSeries::class, EChartsBarHistory::class] as $timeModuleClass) {
+    $timeModule = new $timeModuleClass();
+    $timeModule->Create();
+    $timeModule->SetTestProperty('IPSViewUseTileTimeSettings', false);
+    $timeForm = json_decode($timeModule->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+    $rangeIndex = null;
+    $timeSwitchIndex = null;
+    foreach ($timeForm['elements'] as $index => $element) {
+        if (($element['type'] ?? null) === 'RowLayout'
+            && in_array('Range', array_column($element['items'] ?? [], 'name'), true)) {
+            $rangeIndex = $index;
+        }
+        if (($element['name'] ?? null) === 'IPSViewUseTileTimeSettings') {
+            $timeSwitchIndex = $index;
+        }
+    }
+    $timeRow = $timeForm['elements'][$timeSwitchIndex + 2]['items'] ?? [];
+    $independentRange = array_values(array_filter(
+        $timeRow,
+        static fn (array $item): bool => ($item['name'] ?? null) === 'IPSViewRange'
+    ));
+    assertGatewayGauge(
+        $rangeIndex !== null && $timeSwitchIndex !== null && $timeSwitchIndex > $rangeIndex
+            && count($independentRange) === 1
+            && ($independentRange[0]['visible'] ?? null) === true
+            && ($independentRange[0]['enabled'] ?? true) === true,
+        $timeModuleClass . ' must place IPSView time settings beside the main time controls.'
     );
 }
 

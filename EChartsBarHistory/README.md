@@ -33,12 +33,14 @@ bars reveals the corner-radius setting. Automatic colors follow the selected
 ECharts theme. If the gradient end color is automatic, it fades toward the
 theme background.
 **Use Tile design** is enabled by default. While it is enabled, independent
-IPSView design fields have no effect and **Copy Tile design to IPSView and edit
-independently** is disabled. Turn off **Use Tile design** first; the button
-becomes available immediately. Clicking it copies the current Tile design once
-and replaces previously saved independent IPSView design values. Later Tile
-design changes no longer propagate. IPSView time settings are controlled
-separately. Save changes to the Tile designer before copying.
+IPSView design inputs are disabled. The **Copy Tile design to IPSView and edit
+independently** button is inside that designer and is disabled too. Turn off
+**Use Tile design** first; the inputs and button become available immediately.
+Clicking it copies the saved Tile design once and replaces previously saved
+independent IPSView design values. Later Tile
+design changes no longer propagate. IPSView time settings are beside the main
+time-range controls, outside the designers, and are controlled separately.
+Save changes to the Tile designer before copying.
 
 The module currently accepts exactly one source. Additional sources are planned
 for this same `EChartsBarHistory` module; no separate Single/Multi module is

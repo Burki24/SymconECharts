@@ -336,11 +336,12 @@ Element eingebunden.
 
 Im Abschnitt **IPSView-Design** ist zunächst **Kacheldesign verwenden** aktiv.
 Damit folgt das Widget jeder späteren Änderung am Kacheldesigner; die
-unabhängigen IPSView-Designfelder wirken dann nicht und der Kopierknopf ist
-deaktiviert. Für eine andere Optik zuerst **Kacheldesign verwenden**
-ausschalten. Danach ist **Kacheldesign nach IPSView kopieren und unabhängig
-bearbeiten** sofort nutzbar: Die Aktion übernimmt das aktuelle Kacheldesign
-einmalig und überschreibt bisherige unabhängige IPSView-Designwerte. Danach stehen
+Eingaben des **Unabhängigen IPSView-Designers** sind dann deaktiviert. Dort
+liegt auch der deaktivierte Kopierknopf. Für eine andere Optik zuerst
+**Kacheldesign verwenden** ausschalten. Danach ist **Kacheldesign nach IPSView
+kopieren und unabhängig bearbeiten** sofort nutzbar: Die Aktion übernimmt das
+gespeicherte Kacheldesign einmalig und überschreibt bisherige unabhängige
+IPSView-Designwerte. Danach stehen
 Preset, Theme, Zeiger, Nabe, Platte, Skala, Farben, SVGs und Feinabstimmung
 unabhängig zur Verfügung. Datenquelle, Titeltext, Wertebereich, Einheit und
 Nachkommastellen bleiben bewusst gemeinsame fachliche Einstellungen.

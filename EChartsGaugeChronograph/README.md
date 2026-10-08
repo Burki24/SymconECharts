@@ -42,11 +42,12 @@ Der Hintergrund kann transparent an IPSView angepasst und mit einer Theme-
 oder Benutzerfarbe in frei wählbarer Deckkraft getönt werden.
 
 Für ein eigenes IPSView-Grunddesign im Abschnitt **IPSView-Design** zuerst
-**Kacheldesign verwenden** ausschalten. Solange die Option aktiv ist, wirken
-unabhängige IPSView-Designfelder nicht; **Kacheldesign nach IPSView kopieren und
-unabhängig bearbeiten** bleibt deaktiviert. Nach dem Ausschalten ist der Knopf
-sofort aktiv. Er kopiert das aktuelle Kacheldesign einmalig und überschreibt
-dabei bisherige unabhängige IPSView-Designwerte. Danach lassen sich Grunddesign
+**Kacheldesign verwenden** ausschalten. Solange die Option aktiv ist, sind die
+Eingaben im **Unabhängigen IPSView-Designer** und der dort liegende Knopf
+**Kacheldesign nach IPSView kopieren und unabhängig bearbeiten** deaktiviert.
+Nach dem Ausschalten werden beide sofort aktiv. Der Knopf kopiert das
+gespeicherte Kacheldesign einmalig und überschreibt dabei bisherige
+unabhängige IPSView-Designwerte. Danach lassen sich Grunddesign
 und individuelle Quellen-Designs für IPSView separat bearbeiten.
 Änderungen am Kacheldesigner vor dem Kopieren speichern.
 

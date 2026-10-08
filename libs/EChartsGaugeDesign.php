@@ -271,7 +271,10 @@ final class EChartsGaugeDesign
             throw new \RuntimeException('The Tile designer form section is missing.');
         }
 
-        $designerItems = self::PrefixIPSViewDesignerItems($tileDesigner['items'] ?? [], $designNames);
+        $designerItems = array_values(array_filter(
+            self::PrefixIPSViewDesignerItems($tileDesigner['items'] ?? [], $designNames),
+            static fn (array $item): bool => ($item['name'] ?? null) !== 'Sources'
+        ));
 
         return [
             'type'     => 'ExpansionPanel',

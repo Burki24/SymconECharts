@@ -181,6 +181,10 @@ class EChartsBarHistory extends IPSModuleStrict
                 ['BarCornerRadius'],
                 $this->ReadPropertyBoolean('RoundedBars')
             );
+            $form['elements'] = $this->WithIPSViewTimeSettingsByRange(
+                $form['elements'],
+                $this->BuildIPSViewTimeSettings($form['elements'])
+            );
             $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
         }
 
@@ -800,8 +804,8 @@ class EChartsBarHistory extends IPSModuleStrict
         );
     }
 
-    /** @param list<array<string, mixed>> $elements @return array<string, mixed> */
-    private function BuildIPSViewDesigner(array $elements): array
+    /** @param list<array<string, mixed>> $elements @return list<array<string, mixed>> */
+    private function BuildIPSViewTimeSettings(array $elements): array
     {
         $rangeItems = null;
         $designRows = null;
@@ -835,6 +839,49 @@ class EChartsBarHistory extends IPSModuleStrict
             }
             $ipsViewTimeItems[] = $item;
         }
+        foreach ($designRows as $row) {
+            foreach ($row['items'] ?? [] as $item) {
+                if (($item['name'] ?? null) !== 'TimeAxisLabelFormat') {
+                    continue;
+                }
+                $item['name'] = 'IPSViewTimeAxisLabelFormat';
+                $item['visible'] = $independentTime;
+                $ipsViewTimeItems[] = $item;
+            }
+        }
+        if (count($ipsViewTimeItems) !== 4) {
+            throw new RuntimeException('The Historical Bar time settings are incomplete.');
+        }
+
+        return [
+            [
+                'type'     => 'CheckBox',
+                'name'     => 'IPSViewUseTileTimeSettings',
+                'caption'  => 'Use Tile time settings',
+                'onChange' => $timeAction
+            ],
+            [
+                'type'    => 'Label',
+                'caption' => 'Disable this option to use a separate IPSView time range and time-axis label format.'
+            ],
+            ['type' => 'RowLayout', 'items' => $ipsViewTimeItems]
+        ];
+    }
+
+    /** @param list<array<string, mixed>> $elements @return array<string, mixed> */
+    private function BuildIPSViewDesigner(array $elements): array
+    {
+        $designRows = null;
+        foreach ($elements as $element) {
+            if (($element['type'] ?? null) === 'ExpansionPanel'
+                && ($element['caption'] ?? null) === 'Tile designer') {
+                $designRows = $element['items'] ?? null;
+                break;
+            }
+        }
+        if (!is_array($designRows)) {
+            throw new RuntimeException('The Historical Bar Tile designer section is missing.');
+        }
 
         $ipsViewDesignRows = [];
         $designFieldCount = 0;
@@ -845,11 +892,7 @@ class EChartsBarHistory extends IPSModuleStrict
             $items = [];
             foreach ($row['items'] as $item) {
                 $name = $item['name'] ?? null;
-                if ($name === 'TimeAxisLabelFormat') {
-                    $item['name'] = 'IPSViewTimeAxisLabelFormat';
-                    $item['visible'] = $independentTime;
-                    $ipsViewTimeItems[] = $item;
-                } elseif (is_string($name) && array_key_exists($name, self::DESIGN_PROPERTY_TYPES)) {
+                if (is_string($name) && array_key_exists($name, self::DESIGN_PROPERTY_TYPES)) {
                     $item['name'] = 'IPSView' . $name;
                     if (in_array($name, ['RoundedBars', 'BarFillMode'], true)) {
                         $item['onChange'] = 'ECBH_UpdateBarDesignForm($id, true, '
@@ -869,7 +912,7 @@ class EChartsBarHistory extends IPSModuleStrict
                 $ipsViewDesignRows[] = ['type' => 'RowLayout', 'items' => $items];
             }
         }
-        if (count($ipsViewTimeItems) !== 4 || $designFieldCount !== count(self::DESIGN_PROPERTY_TYPES)) {
+        if ($designFieldCount !== count(self::DESIGN_PROPERTY_TYPES)) {
             throw new RuntimeException('The Historical Bar designer fields are missing.');
         }
 
@@ -883,17 +926,6 @@ class EChartsBarHistory extends IPSModuleStrict
                     'Creates a standalone WebContent variable for use as an IPSView HTML widget.'
                 ),
                 EChartsIPSViewBackground::FormRow(),
-                [
-                    'type'     => 'CheckBox',
-                    'name'     => 'IPSViewUseTileTimeSettings',
-                    'caption'  => 'Use Tile time settings',
-                    'onChange' => $timeAction
-                ],
-                [
-                    'type'    => 'Label',
-                    'caption' => 'Disable this option to use a separate IPSView time range and time-axis label format.'
-                ],
-                ['type' => 'RowLayout', 'items' => $ipsViewTimeItems],
                 [
                     'type'    => 'CheckBox',
                     'name'    => 'IPSViewUseTileDesign',
