@@ -1466,6 +1466,7 @@ assertGatewayGauge(
 $gaugeData = json_decode($gauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(($gaugeData['schemaVersion'] ?? null) === 1, 'Gauge Single data schema version changed.');
 assertGatewayGauge(($gaugeData['family'] ?? null) === 'gauge', 'Gauge Single data family changed.');
+assertGatewayGauge(($gaugeData['source']['variableID'] ?? null) === 4711, 'Gauge Single must identify its source by variable ID.');
 assertGatewayGauge(($gaugeData['value'] ?? null) === 42.5, 'Gauge Single did not receive the source value.');
 assertGatewayGauge(($gaugeData['source']['timestamp'] ?? null) === 1780000000, 'Gauge Single timestamp changed.');
 assertGatewayGauge(($gaugeData['gauge']['minimum'] ?? null) === -20.0, 'Gauge Single minimum changed.');
@@ -1669,6 +1670,26 @@ assertGatewayGauge(
     'Gauge Multi must fall back to the variable name for an empty label.'
 );
 assertGatewayGauge(($multiData['items'][1]['value'] ?? null) === 58.0, 'Gauge Multi second value changed.');
+
+$duplicateGaugeSources = json_decode($multiSources, true, 512, JSON_THROW_ON_ERROR);
+foreach ($duplicateGaugeSources as &$duplicateGaugeSource) {
+    $duplicateGaugeSource['Label'] = 'Sensor';
+}
+unset($duplicateGaugeSource);
+foreach ([EChartsGaugeMulti::class, EChartsGaugeTacho::class, EChartsGaugeChronograph::class] as $gaugeClass) {
+    $duplicateGauge = new $gaugeClass();
+    $duplicateGauge->Create();
+    $duplicateGauge->SetTestProperty('Sources', json_encode($duplicateGaugeSources, JSON_THROW_ON_ERROR));
+    $duplicateGauge->ApplyChanges();
+    $duplicateGaugeData = json_decode($duplicateGauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
+    assertGatewayGauge(
+        array_column($duplicateGaugeData['items'], 'id') === ['variable-4711', 'variable-4713']
+            && array_column(array_column($duplicateGaugeData['items'], 'gauge'), 'label') === [
+                'Sensor (#4711)', 'Sensor (#4713)'
+            ],
+        $gaugeClass . ' must retain source IDs and distinguish equal labels without object paths.'
+    );
+}
 
 $designedMultiGauge = new EChartsGaugeMulti();
 $designedMultiGauge->Create();
@@ -3464,6 +3485,41 @@ assertGatewayGauge(
     'Raw Time Series updates must append one live point instead of reloading the archive.'
 );
 
+$sameNameTimeSeries = new EChartsTimeSeries();
+$sameNameTimeSeries->Create();
+$sameNameTimeSeries->SetTestProperty('Sources', json_encode([
+    [
+        'VariableID'              => 4711,
+        'Label'                   => 'Temperatur',
+        'UseVariablePresentation' => false,
+        'Unit'                    => '°C',
+        'Decimals'                => 1,
+        'Color'                   => -1,
+        'Style'                   => 'line',
+        'Reducer'                 => 'auto'
+    ],
+    [
+        'VariableID'              => 4717,
+        'Label'                   => 'Temperatur',
+        'UseVariablePresentation' => false,
+        'Unit'                    => '°C',
+        'Decimals'                => 1,
+        'Color'                   => -1,
+        'Style'                   => 'line',
+        'Reducer'                 => 'auto'
+    ]
+], JSON_THROW_ON_ERROR));
+$sameNameTimeSeries->SetTestProperty('DataMode', 'realtime');
+$sameNameTimeSeries->ApplyChanges();
+$sameNameTimeSeriesData = json_decode($sameNameTimeSeries->GetTimeSeriesData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    array_column($sameNameTimeSeriesData['series'], 'id') === ['variable-4711', 'variable-4717']
+        && array_column($sameNameTimeSeriesData['series'], 'label') === [
+            'Temperatur (#4711)', 'Temperatur (#4717)'
+        ],
+    'Time Series must expose unique legend labels for distinct source IDs with equal names.'
+);
+
 $archiveQueriesBeforeRealtime = $GLOBALS['symconTestArchiveQueryCount'];
 $realtimeSeries = new EChartsTimeSeries();
 $realtimeSeries->Create();
@@ -4308,6 +4364,21 @@ assertGatewayGauge(
         && array_column($duplicateGroupedData['items'], 'series') === ['Today (#4900)', 'Today (#4901)'],
     'Grouped and stacked Category Bars must retain equal category/series labels as distinct source IDs.'
 );
+$collidingSeriesSources = array_slice($groupedBarSources, 0, 3);
+$collidingSeriesSources[1]['Series'] = 'Today';
+$collidingSeriesSources[2]['Series'] = 'Today (#4900)';
+$collidingSeriesBar = new EChartsBarCategory();
+$collidingSeriesBar->Create();
+$collidingSeriesBar->SetTestProperty('Sources', json_encode($collidingSeriesSources, JSON_THROW_ON_ERROR));
+$collidingSeriesBar->SetTestProperty('BarMode', 'grouped');
+$collidingSeriesBar->ApplyChanges();
+$collidingSeriesData = json_decode($collidingSeriesBar->GetBarData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    array_column($collidingSeriesData['items'], 'series') === [
+        'Today (#4900) (#4900)', 'Today (#4901)', 'Today (#4900)'
+    ],
+    'Category Bar must not let an explicit group name collide with an ID-suffixed source name.'
+);
 foreach ($groupedBarSources as $source) {
     unset($GLOBALS['symconTestVariables'][$source['VariableID']]);
 }
@@ -4354,6 +4425,8 @@ assertGatewayGauge(
 assertGatewayGauge(
     $barHistoryData['family'] === 'bar'
         && $barHistoryData['variant'] === 'history'
+        && $barHistoryData['series'][0]['id'] === 'variable-4711'
+        && $barHistoryData['series'][0]['variableID'] === 4711
         && $barHistoryData['range']['aggregationLevel'] === 6
         && $barHistoryData['range']['pointLimitPerSeries'] === 1000
         && $barHistoryData['series'][0]['label'] === 'Temperature history'

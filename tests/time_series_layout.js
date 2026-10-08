@@ -162,6 +162,31 @@ const custom = render({
     showSymbols: true, symbolSizePercent: 125, areaOpacityPercent: 40,
     showGrid: false, showXAxis: false, showYAxis: true
 });
+const duplicateNameSeries = render(
+    undefined,
+    [{ unit: '°C' }],
+    750,
+    [
+        {
+            id: 'variable-4711', variableID: 4711, label: 'Temperatur (#4711)', axisIndex: 0,
+            decimals: 1, unit: '°C', color: '', style: 'line', points: [[1000, 20]]
+        },
+        {
+            id: 'variable-4717', variableID: 4717, label: 'Temperatur (#4717)', axisIndex: 0,
+            decimals: 1, unit: '°C', color: '', style: 'line', points: [[1000, 21]]
+        }
+    ],
+    'dark', {}, 'symcon', false, false, 'auto',
+    {
+        startTimestamp: 0, endTimestamp: 1000, durationSeconds: 3600,
+        calendarAligned: false, acceptLiveUpdates: true, pointLimitPerSeries: 100
+    }
+);
+assert.deepEqual(Array.from(duplicateNameSeries.legend.data), ['Temperatur (#4711)', 'Temperatur (#4717)']);
+assert.deepEqual(Array.from(duplicateNameSeries.series, item => item.id), ['variable-4711', 'variable-4717']);
+duplicateNameSeries.handleMessage({ messageType: 'append', variableID: 4717, timestamp: 1100, value: 22 });
+assert.equal(duplicateNameSeries.getLatestOption().series[0].data.length, 1);
+assert.equal(duplicateNameSeries.getLatestOption().series[1].data.length, 2);
 assert.equal(custom.legend.show, true);
 assert.equal(custom.legend.bottom, 6);
 assert.equal(custom.dataZoom[1].bottom, 38);

@@ -16,6 +16,7 @@ use SymconECharts\EChartsGaugeDesign;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
+use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsVariablePresentation;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
@@ -31,6 +32,7 @@ require_once __DIR__ . '/../libs/EChartsGaugeDesign.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
+require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 require_once __DIR__ . '/GaugePreview.php';
 
@@ -378,10 +380,12 @@ class EChartsGaugeChronograph extends IPSModuleStrict
             throw new RuntimeException('No active EChartsGateway is connected.');
         }
 
+        $sources = $this->GetValidatedSources();
+        $labels = EChartsSourceIdentity::LabelsForSources($sources);
         $items = [];
-        foreach ($this->GetValidatedSources() as $source) {
+        foreach ($sources as $source) {
             $current = $this->ReadCurrentSource($source['VariableID']);
-            $label = $source['Label'] !== '' ? $source['Label'] : IPS_GetName($source['VariableID']);
+            $label = $labels[$source['VariableID']];
             $items[] = [
                 'id'     => 'variable-' . $source['VariableID'],
                 'source' => [
@@ -991,12 +995,14 @@ class EChartsGaugeChronograph extends IPSModuleStrict
             ];
         }
 
-        return array_map(static function (array $source) use ($ipsView): array
+        $labels = EChartsSourceIdentity::LabelsForSources($sources);
+
+        return array_map(static function (array $source) use ($ipsView, $labels): array
         {
             $value = GetValue($source['VariableID']);
 
             return [
-                'label'    => $source['Label'] !== '' ? $source['Label'] : IPS_GetName($source['VariableID']),
+                'label'    => $labels[$source['VariableID']],
                 'minimum'  => $source['Minimum'],
                 'maximum'  => $source['Maximum'],
                 'unit'     => $source['Unit'],
@@ -1017,6 +1023,7 @@ class EChartsGaugeChronograph extends IPSModuleStrict
             return $this->PreviewItems($ipsView);
         }
 
+        $labels = EChartsSourceIdentity::LabelsForDraftSources($sources);
         $items = [];
         foreach (array_slice($sources, 0, self::MAXIMUM_SOURCE_COUNT) as $source) {
             if (!is_array($source)) {
@@ -1037,7 +1044,8 @@ class EChartsGaugeChronograph extends IPSModuleStrict
                 }
             }
             $items[] = [
-                'label'    => trim((string) ($source['Label'] ?? '')) ?: ($variableID > 0 ? IPS_GetName($variableID) : 'Gauge'),
+                'label'    => $labels[$variableID]
+                    ?? (trim((string) ($source['Label'] ?? '')) ?: ($variableID > 0 ? IPS_GetName($variableID) : 'Gauge')),
                 'minimum'  => $minimum,
                 'maximum'  => $maximum > $minimum ? $maximum : $minimum + 1.0,
                 'unit'     => (string) ($source['Unit'] ?? ''),

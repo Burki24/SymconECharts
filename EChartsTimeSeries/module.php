@@ -15,6 +15,7 @@ use SymconECharts\EChartsDataProtocol;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
+use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsTimeSeriesDesign;
 use SymconECharts\EChartsTimeSeriesPreview;
 use SymconECharts\EChartsVariablePresentation;
@@ -32,6 +33,7 @@ require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
+require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
 require_once __DIR__ . '/../libs/EChartsTimeSeriesDesign.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 require_once __DIR__ . '/TimeSeriesPreview.php';
@@ -517,6 +519,7 @@ class EChartsTimeSeries extends IPSModuleStrict
         }
 
         $sources = $this->GetValidatedSources();
+        $labels = EChartsSourceIdentity::LabelsForSources($sources);
         $annotations = $this->GetValidatedAnnotations($sources);
         $query = $this->ResolveArchiveQuery(count($sources), $ipsView);
         $axisModel = $this->BuildAxisModel($sources);
@@ -532,9 +535,7 @@ class EChartsTimeSeries extends IPSModuleStrict
             $series[] = [
                 'id'                     => 'variable-' . $source['VariableID'],
                 'variableID'             => $source['VariableID'],
-                'label'                  => $source['Label'] !== ''
-                    ? $source['Label']
-                    : IPS_GetName($source['VariableID']),
+                'label'                  => $labels[$source['VariableID']],
                 'unit'                   => $source['Unit'],
                 'decimals'               => $source['Decimals'],
                 'color'                  => $source['Color'],
@@ -1429,6 +1430,7 @@ class EChartsTimeSeries extends IPSModuleStrict
             return [];
         }
 
+        $labels = EChartsSourceIdentity::LabelsForDraftSources($sources);
         $result = [];
         foreach (array_slice($sources, 0, 4) as $index => $source) {
             if (!is_array($source)) {
@@ -1453,7 +1455,7 @@ class EChartsTimeSeries extends IPSModuleStrict
             }
             $result[] = [
                 'variableID' => is_int($variableID) ? $variableID : 0,
-                'label'      => $label !== '' ? $label : 'Series ' . ($index + 1),
+                'label'      => $labels[$variableID] ?? ($label !== '' ? $label : 'Series ' . ($index + 1)),
                 'color'      => $color ?? '',
                 'style'      => $style,
                 'design'     => $sourceDesign

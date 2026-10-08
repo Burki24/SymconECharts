@@ -2,6 +2,11 @@
 
 ## Neu
 
+- Gauge Multi, Tacho, Chronograph und TimeSeries unterscheiden gleichlautende
+  Quellbeschriftungen anhand der Variablen-ID in ihren Diagrammen und
+  Vorschauen. Die technische Zuordnung aller ECharts-Module bleibt an die ID
+  gebunden; Namen und Objektpfade sind keine Quellenkennungen.
+
 - Category-Bar verwendet die Variablen-ID als technische Quellenidentität.
   Gleich benannte Variablen in derselben Kategorie bleiben getrennt erhalten;
   bei kollidierenden Beschriftungen erscheint die ID zusätzlich in Achse oder

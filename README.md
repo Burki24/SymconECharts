@@ -100,6 +100,12 @@ Folgende Module sind enthalten:
 
 ## Kacheldesign und IPSView-Design
 
+Jede Datenquelle wird technisch ausschließlich über ihre Symcon-Variablen-ID
+zugeordnet. Namen, Objektpfade und frei gewählte Beschriftungen dienen nur der
+Anzeige oder fachlichen Gruppierung. Haben mehrere Quellen dieselbe sichtbare
+Beschriftung, ergänzen die betroffenen Diagramme zur Unterscheidung die
+Variablen-ID, beispielsweise `Temperatur (#4711)`.
+
 Bei allen ECharts-Diagrammen ist unter **IPSView-Design** die Option
 **Kacheldesign verwenden** standardmäßig aktiv. Solange sie aktiv ist, folgt
 die Diagrammgestaltung in IPSView dem Kacheldesigner. Die eigenen Designfelder

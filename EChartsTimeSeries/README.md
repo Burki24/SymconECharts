@@ -14,6 +14,12 @@ optional ein eigenständiges IPSView-WebContent-Widget.
   kein aktiviertes Logging;
 - IPSView nur für das optionale WebContent-Widget.
 
+Jede Reihe bleibt über ihre Variablen-ID eindeutig, auch wenn mehrere
+Variablen denselben Namen oder dieselbe eigene Beschriftung haben. Solche
+gleichlautenden Reihen erhalten in Legende, Tooltip und Vorschau einen
+ID-Zusatz wie `Temperatur (#4711)`; Live-Updates bleiben der richtigen ID
+zugeordnet. Objektpfade werden dafür nicht ausgewertet.
+
 ## Aktueller Funktionsumfang
 
 - rollende Zeiträume von 1 Stunde, 6 Stunden, 24 Stunden, 7 Tagen und 30 Tagen

@@ -13,6 +13,7 @@ use SymconECharts\EChartsDataProtocol;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
+use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsVariablePresentation;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
@@ -26,6 +27,7 @@ require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
+require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 
 class EChartsBarCategory extends IPSModuleStrict
@@ -177,6 +179,22 @@ class EChartsBarCategory extends IPSModuleStrict
                 'order'      => $index
             ];
         }
+        $sourceLabels = [];
+        $groupLabels = [];
+        foreach ($items as $item) {
+            if ($item['seriesKey'] === $item['id']) {
+                $sourceLabels[$item['variableID']] = $item['series'];
+            } else {
+                $groupLabels[$item['seriesKey']] = $item['series'];
+            }
+        }
+        $sourceLabels = EChartsSourceIdentity::UniqueLabels($sourceLabels, array_values($groupLabels));
+        foreach ($items as &$item) {
+            if ($item['seriesKey'] === $item['id']) {
+                $item['series'] = $sourceLabels[$item['variableID']];
+            }
+        }
+        unset($item);
 
         $this->WriteAttributeString('LastError', '');
         $this->SetStatus(IS_ACTIVE);

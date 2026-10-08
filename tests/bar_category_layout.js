@@ -87,6 +87,14 @@ const repeatedSimple = render('vertical', 'configured', 'symcon', 'simple', [
 assert.deepEqual(Array.from(repeatedSimple.xAxis.data), [
     'Temperatur (#4920)', 'Temperatur (#4921)'
 ]);
+const reservedCategoryCollision = render('vertical', 'configured', 'symcon', 'simple', [
+    { id: 'variable-4920', variableID: 4920, category: 'Temperatur', value: 8.5, order: 0 },
+    { id: 'variable-4921', variableID: 4921, category: 'Temperatur', value: 21, order: 1 },
+    { id: 'variable-4922', variableID: 4922, category: 'Temperatur (#4920)', value: 20.5, order: 2 }
+]);
+assert.deepEqual(Array.from(reservedCategoryCollision.xAxis.data), [
+    'Temperatur (#4920) (#4920)', 'Temperatur (#4921)', 'Temperatur (#4920) (#4922)'
+]);
 
 const repeatedGrouped = render('vertical', 'configured', 'symcon', 'grouped', [
     { id: 'variable-4920', seriesKey: 'variable-4920', category: 'Temperatur', series: 'Temperatur (#4920)', value: 8.5, order: 0 },
@@ -96,6 +104,16 @@ assert.equal(repeatedGrouped.series.length, 2);
 assert.deepEqual(Array.from(repeatedGrouped.legend.data), ['Temperatur (#4920)', 'Temperatur (#4921)']);
 assert.deepEqual(Array.from(repeatedGrouped.series, item => item.id), ['variable-4920', 'variable-4921']);
 assert.deepEqual(Array.from(repeatedGrouped.series, item => item.data[0].value), [8.5, 21]);
+
+const reservedLabelCollision = render('vertical', 'configured', 'symcon', 'grouped', [
+    { id: 'variable-4900', variableID: 4900, seriesKey: 'variable-4900', category: 'Kitchen', series: 'Today (#4900) (#4900)', value: 18, order: 0 },
+    { id: 'variable-4901', variableID: 4901, seriesKey: 'variable-4901', category: 'Kitchen', series: 'Today (#4901)', value: 20, order: 1 },
+    { id: 'variable-4902', variableID: 4902, seriesKey: 'series-Today (#4900)', category: 'Office', series: 'Today (#4900)', value: 24, order: 2 }
+]);
+assert.equal(reservedLabelCollision.series.length, 3);
+assert.deepEqual(Array.from(reservedLabelCollision.legend.data), [
+    'Today (#4900) (#4900)', 'Today (#4901)', 'Today (#4900)'
+]);
 
 const repeatedStacked = render('vertical', 'configured', 'symcon', 'stacked', [
     { id: 'variable-4920', seriesKey: 'variable-4920', category: 'Temperatur', series: 'Temperatur (#4920)', value: 8.5, order: 0 },

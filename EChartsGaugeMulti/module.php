@@ -16,6 +16,7 @@ use SymconECharts\EChartsGaugeMultiPreview;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
+use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsVariablePresentation;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
@@ -31,6 +32,7 @@ require_once __DIR__ . '/../libs/EChartsGaugeDesign.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
+require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 require_once __DIR__ . '/GaugePreview.php';
 
@@ -343,10 +345,12 @@ class EChartsGaugeMulti extends IPSModuleStrict
             throw new RuntimeException('No active EChartsGateway is connected.');
         }
 
+        $sources = $this->GetValidatedSources();
+        $labels = EChartsSourceIdentity::LabelsForSources($sources);
         $items = [];
-        foreach ($this->GetValidatedSources() as $source) {
+        foreach ($sources as $source) {
             $current = $this->ReadCurrentSource($source['VariableID']);
-            $label = $source['Label'] !== '' ? $source['Label'] : IPS_GetName($source['VariableID']);
+            $label = $labels[$source['VariableID']];
             $items[] = [
                 'id'     => 'variable-' . $source['VariableID'],
                 'source' => [
@@ -920,12 +924,14 @@ class EChartsGaugeMulti extends IPSModuleStrict
             ];
         }
 
-        return array_map(static function (array $source): array
+        $labels = EChartsSourceIdentity::LabelsForSources($sources);
+
+        return array_map(static function (array $source) use ($labels): array
         {
             $value = GetValue($source['VariableID']);
 
             return [
-                'label'    => $source['Label'] !== '' ? $source['Label'] : IPS_GetName($source['VariableID']),
+                'label'    => $labels[$source['VariableID']],
                 'minimum'  => $source['Minimum'],
                 'maximum'  => $source['Maximum'],
                 'unit'     => $source['Unit'],

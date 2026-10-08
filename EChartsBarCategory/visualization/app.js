@@ -61,6 +61,23 @@
         return values.filter(function (value, index) { return values.indexOf(value) === index; });
     }
 
+    function uniqueCategoryLabels(items) {
+        var labels = items.map(function (item) { return String(item.category || item.series || ''); });
+        for (var pass = 0; pass <= items.length; pass += 1) {
+            var counts = Object.create(null);
+            labels.forEach(function (label) { counts[label] = (counts[label] || 0) + 1; });
+            var collisions = false;
+            labels = labels.map(function (label, index) {
+                if (counts[label] <= 1) { return label; }
+                collisions = true;
+                var id = String(items[index].variableID || items[index].id || '');
+                return label + ' (#' + id.replace(/^variable-/, '') + ')';
+            });
+            if (!collisions) { return labels; }
+        }
+        return labels;
+    }
+
     function buildChartData(model, colors) {
         var bar = model.bar || {};
         var mode = ['grouped', 'stacked'].indexOf(bar.mode) >= 0 ? bar.mode : 'simple';
@@ -76,16 +93,9 @@
                     return order === 'ascending' ? difference : -difference;
                 });
             }
-            var baseLabels = items.map(function (item) { return String(item.category || item.series || ''); });
-            var baseCounts = Object.create(null);
-            baseLabels.forEach(function (label) { baseCounts[label] = (baseCounts[label] || 0) + 1; });
             return {
                 mode: mode,
-                categories: baseLabels.map(function (label, index) {
-                    if (baseCounts[label] === 1) { return label; }
-                    var id = String(items[index].variableID || items[index].id || index + 1);
-                    return label + ' (#' + id.replace(/^variable-/, '') + ')';
-                }),
+                categories: uniqueCategoryLabels(items),
                 series: [{
                     name: String(bar.title || ''),
                     items: items.map(function (item, index) {
