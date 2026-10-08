@@ -24,6 +24,7 @@ $gaugeTacho = (string) file_get_contents($root . '/EChartsGaugeTacho/module.php'
 $gaugeChronograph = (string) file_get_contents($root . '/EChartsGaugeChronograph/module.php');
 $timeSeries = (string) file_get_contents($root . '/EChartsTimeSeries/module.php');
 $barCategory = (string) file_get_contents($root . '/EChartsBarCategory/module.php');
+$barHistory = (string) file_get_contents($root . '/EChartsBarHistory/module.php');
 $sharedGatewayGuidance = 'One shared EChartsGateway is sufficient for all ECharts chart instances. '
     . 'When adding further charts, select the existing gateway instead of creating another one.';
 
@@ -34,7 +35,8 @@ foreach ([
     'EChartsGaugeTacho'       => $gaugeTacho,
     'EChartsGaugeChronograph' => $gaugeChronograph,
     'EChartsTimeSeries'       => $timeSeries,
-    'EChartsBarCategory'      => $barCategory
+    'EChartsBarCategory'      => $barCategory,
+    'EChartsBarHistory'       => $barHistory
 ] as $moduleName => $source) {
     requireStrictContract(
         preg_match('/class\s+' . $moduleName . '\s+extends\s+IPSModuleStrict\b/', $source) === 1,
@@ -135,6 +137,24 @@ foreach ([
     requireStrictContract(
         str_contains($barCategory, $barCategoryContract),
         'EChartsBarCategory is missing contract: ' . $barCategoryContract,
+        $errors
+    );
+}
+
+foreach ([
+    'SetVisualizationType(1)',
+    'public function GetVisualizationTile(): string',
+    'public function GetBarHistoryData(): string',
+    'public function GetBarHistoryDiagnostic(): string',
+    "RegisterPropertyString('DataMode', 'auto')",
+    "RegisterPropertyInteger('PointBudget', 1000)",
+    'EChartsArchiveQuery::Resolve(',
+    'EChartsAsset::CartesianJavaScript()',
+    'EChartsVariablePresentation::Resolve('
+] as $barHistoryContract) {
+    requireStrictContract(
+        str_contains($barHistory, $barHistoryContract),
+        'EChartsBarHistory is missing contract: ' . $barHistoryContract,
         $errors
     );
 }

@@ -26,6 +26,7 @@ $commands = [
     ['Test persistent IPSView transport', 'node tests/ipsview_transport.js'],
     ['Test Time Series tile design layout', 'node tests/time_series_layout.js'],
     ['Test Category Bar layout', 'node tests/bar_category_layout.js'],
+    ['Test Historical Bar layout', 'node tests/bar_history_layout.js'],
     ['Verify vendored helper integrity', 'python3 tests/helper_integrity.py'],
     ['Test library metadata updater', 'python3 tests/test_update_library_metadata.py']
 ];

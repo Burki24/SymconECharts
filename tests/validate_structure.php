@@ -22,6 +22,7 @@ $requiredFiles = [
     'docs/adr/0006-gauge-single-tile-designer.md',
     'docs/adr/0007-echarts-theme-assets-and-selection.md',
     'docs/adr/0016-dedicated-tacho-and-chronograph-modules.md',
+    'docs/adr/0030-first-historical-bar-vertical.md',
     'docs/adr/0019-timeseries-realtime-without-archive.md',
     'docs/adr/0023-timeseries-source-design-and-svg-area-patterns.md',
     'docs/adr/0027-timeseries-custom-ranges-and-time-axis-labels.md',
@@ -31,6 +32,7 @@ $requiredFiles = [
     'libs/EChartsDataProtocol.php',
     'libs/EChartsGaugeDesign.php',
     'libs/EChartsTimeSeriesDesign.php',
+    'libs/EChartsArchiveQuery.php',
     'libs/EChartsVariablePresentation.php',
     'libs/echarts-design.js',
     'libs/EChartsSvgImage.php',
@@ -81,6 +83,7 @@ $requiredFiles = [
     'tests/test_update_library_metadata.py',
     'tests/time_series_layout.js',
     'tests/bar_category_layout.js',
+    'tests/bar_history_layout.js',
     'tests/validate_structure.php',
     '.tools/echarts-runtime/package.json',
     '.tools/echarts-runtime/package-lock.json',
@@ -95,7 +98,10 @@ $requiredFiles = [
     'EChartsTimeSeries/TimeSeriesPreview.php',
     'EChartsBarCategory/visualization/index.html',
     'EChartsBarCategory/visualization/style.css',
-    'EChartsBarCategory/visualization/app.js'
+    'EChartsBarCategory/visualization/app.js',
+    'EChartsBarHistory/visualization/index.html',
+    'EChartsBarHistory/visualization/style.css',
+    'EChartsBarHistory/visualization/app.js'
 ];
 
 foreach ($requiredFiles as $requiredFile) {
@@ -288,7 +294,7 @@ if ($helperSync !== null) {
 }
 
 $expectedModules = [
-    'EChartsBarCategory', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
+    'EChartsBarCategory', 'EChartsBarHistory', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
     'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsTimeSeries'
 ];
 $discoveredModules = [];

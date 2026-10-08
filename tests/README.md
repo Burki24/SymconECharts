@@ -98,6 +98,11 @@ StylePHP und PHP CS Fixer.
   `bar_category_layout.js` sichert Orientierung, Sortierung, einfache,
   gruppierte und gestapelte Reihen, Farben, Balkenbreite, Beschriftung und
   abgerundete Balken im Renderer ab.
+- Für Historical Bar prüft der Integrationstest den Archivdatenweg mit
+  automatischer Verdichtung und ausdrücklich unveränderten Rohwerten sowie
+  die Ein-Quellen-Validierung. `bar_history_layout.js` sichert Zeitachse,
+  Werteformatierung, Raster, Balkenform, Farbe und Kürzungswarnung im nativen
+  Renderer ab.
 - `echarts_assets.php` prüft Version, SHA-256-Integrität, Lizenz und NOTICE der
   lokal gebündelten Apache-ECharts-Runtime und der sechs offiziellen Themes.
   Zusätzlich werden der Gauge-spezifische Browser-Export, das gemeinsame

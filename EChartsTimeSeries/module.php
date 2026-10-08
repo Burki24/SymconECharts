@@ -9,6 +9,7 @@ use Burki24\SymconModuleHelper\ResponsiveVisualizationHelper;
 use Burki24\SymconModuleHelper\SVGPreviewHelper;
 use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
+use SymconECharts\EChartsArchiveQuery;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsDataProtocol;
 use SymconECharts\EChartsIPSViewBackground;
@@ -25,6 +26,7 @@ require_once __DIR__ . '/../libs/helper/SVGPreviewHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
+require_once __DIR__ . '/../libs/EChartsArchiveQuery.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
@@ -53,20 +55,7 @@ class EChartsTimeSeries extends IPSModuleStrict
     private const STATUS_CONFIGURATION_INVALID = 202;
     private const STATUS_PARENT_MISSING = 203;
     private const STATUS_GATEWAY_FAILED = 204;
-    private const RANGE_SECONDS = [
-        '1h'  => 3600,
-        '6h'  => 21600,
-        '24h' => 86400,
-        '7d'  => 604800,
-        '30d' => 2592000
-    ];
     private const CALENDAR_RANGES = ['today', 'yesterday', 'current-week', 'current-month'];
-    private const CUSTOM_RANGE_UNITS = [
-        'minute' => 60,
-        'hour'   => 3600,
-        'day'    => 86400,
-        'week'   => 604800
-    ];
     private const TIME_AXIS_LABEL_FORMATS = ['auto', 'time', 'date', 'date-time'];
     private const GAP_DETECTION_MODES = ['off', 'automatic', 'custom'];
     private const AGGREGATION_LEVELS = [
@@ -733,18 +722,11 @@ class EChartsTimeSeries extends IPSModuleStrict
     private function IsValidTimeSettings(string $prefix = ''): bool
     {
         $range = $this->ReadPropertyString($prefix . 'Range');
-        $customRangeIsValid = $range !== 'custom'
-            || ($this->ReadPropertyInteger($prefix . 'CustomRangeValue') >= 1
-                && $this->ReadPropertyInteger($prefix . 'CustomRangeValue') <= 1000
-                && array_key_exists(
-                    $this->ReadPropertyString($prefix . 'CustomRangeUnit'),
-                    self::CUSTOM_RANGE_UNITS
-                ));
-
-        return (array_key_exists($range, self::RANGE_SECONDS)
-                || in_array($range, self::CALENDAR_RANGES, true)
-                || $range === 'custom')
-            && $customRangeIsValid
+        return EChartsArchiveQuery::IsValidRange(
+            $range,
+            $this->ReadPropertyInteger($prefix . 'CustomRangeValue'),
+            $this->ReadPropertyString($prefix . 'CustomRangeUnit')
+        )
             && in_array(
                 $this->ReadPropertyString($prefix . 'TimeAxisLabelFormat'),
                 self::TIME_AXIS_LABEL_FORMATS,
@@ -1059,98 +1041,16 @@ class EChartsTimeSeries extends IPSModuleStrict
     /** @return array{DurationSeconds:int,StartTimestamp:int,EndTimestamp:int,Mode:string,AggregationLevel:int|null,Limit:int,CalendarAligned:bool,AcceptLiveUpdates:bool,Empty:bool} */
     private function ResolveArchiveQuery(int $sourceCount, bool $ipsView = false): array
     {
-        $now = $this->CurrentTimestamp();
-        $window = $this->ResolveRangeWindow($ipsView, $now);
-        $duration = $window['DurationSeconds'];
-        $mode = $this->ReadPropertyString('DataMode');
-        $limit = max(1, min(2000, intdiv($this->ReadPropertyInteger('PointBudget'), $sourceCount)));
-        $level = null;
-        if (!in_array($mode, ['raw', 'realtime'], true)) {
-            if ($mode === 'auto') {
-                foreach (self::AGGREGATION_SECONDS as $candidate => $seconds) {
-                    $level = $candidate;
-                    if ((int) ceil($duration / $seconds) <= $limit) {
-                        break;
-                    }
-                }
-            } else {
-                $level = self::AGGREGATION_LEVELS[$mode];
-            }
-        }
-
-        $end = $window['EndTimestamp'];
-        if ($level !== null) {
-            $completedBoundary = $this->AggregationWindowStart($level, $now);
-            $end = min($window['EndTimestamp'] + 1, $completedBoundary) - 1;
-        }
-
-        $start = $window['CalendarAligned']
-            ? $window['StartTimestamp']
-            : $end - $duration + ($level === null ? 0 : 1);
-
-        $empty = $end < $start;
-
-        return [
-            'DurationSeconds'  => $duration,
-            'StartTimestamp'   => max(1, $start),
-            'EndTimestamp'     => max(1, $empty ? $window['EndTimestamp'] : $end),
-            'Mode'             => $mode === 'realtime' ? 'realtime' : ($level === null ? 'raw' : 'aggregated'),
-            'AggregationLevel' => $level,
-            'Limit'            => $limit,
-            'CalendarAligned'  => $window['CalendarAligned'],
-            'AcceptLiveUpdates'=> $window['AcceptLiveUpdates'] && in_array($mode, ['raw', 'realtime'], true),
-            'Empty'            => $empty
-        ];
-    }
-
-    /** @return array{DurationSeconds:int,StartTimestamp:int,EndTimestamp:int,CalendarAligned:bool,AcceptLiveUpdates:bool} */
-    private function ResolveRangeWindow(bool $ipsView, int $now): array
-    {
-        $range = $this->EffectiveRange($ipsView);
-        if (!in_array($range, self::CALENDAR_RANGES, true)) {
-            $duration = $this->RangeDurationSeconds($ipsView);
-
-            return [
-                'DurationSeconds'  => $duration,
-                'StartTimestamp'   => max(1, $now - $duration),
-                'EndTimestamp'     => $now,
-                'CalendarAligned'  => false,
-                'AcceptLiveUpdates'=> true
-            ];
-        }
-
-        $timezone = new DateTimeZone(date_default_timezone_get());
-        $localNow = (new DateTimeImmutable('@' . $now))->setTimezone($timezone);
-        $today = $localNow->setTime(0, 0);
-        $start = match ($range) {
-            'today'         => $today,
-            'yesterday'     => $today->modify('-1 day'),
-            'current-week'  => $today->modify('monday this week'),
-            'current-month' => $today->modify('first day of this month')
-        };
-        $end = $range === 'yesterday'
-            ? $today->getTimestamp() - 1
-            : $now;
-        $startTimestamp = $start->getTimestamp();
-
-        return [
-            'DurationSeconds'  => max(1, $end - $startTimestamp + 1),
-            'StartTimestamp'   => $startTimestamp,
-            'EndTimestamp'     => $end,
-            'CalendarAligned'  => true,
-            'AcceptLiveUpdates'=> $range !== 'yesterday'
-        ];
-    }
-
-    private function RangeDurationSeconds(bool $ipsView = false): int
-    {
-        $range = $this->EffectiveRange($ipsView);
-        if (array_key_exists($range, self::RANGE_SECONDS)) {
-            return self::RANGE_SECONDS[$range];
-        }
-
-        return $this->EffectiveCustomRangeValue($ipsView)
-            * self::CUSTOM_RANGE_UNITS[$this->EffectiveCustomRangeUnit($ipsView)];
+        return EChartsArchiveQuery::Resolve(
+            $this->EffectiveRange($ipsView),
+            $this->EffectiveCustomRangeValue($ipsView),
+            $this->EffectiveCustomRangeUnit($ipsView),
+            $this->ReadPropertyString('DataMode'),
+            $this->ReadPropertyInteger('PointBudget'),
+            $sourceCount,
+            $this->CurrentTimestamp(),
+            date_default_timezone_get()
+        );
     }
 
     private function RangeSummary(): string
@@ -1434,19 +1334,7 @@ class EChartsTimeSeries extends IPSModuleStrict
 
     private function AggregationWindowStart(int $level, int $timestamp): int
     {
-        $local = (new DateTimeImmutable('@' . $timestamp))->setTimezone(
-            new DateTimeZone(date_default_timezone_get())
-        );
-        if ($level === 1) {
-            return $local->setTime(0, 0)->getTimestamp();
-        }
-        if ($level === 0) {
-            return $local->setTime((int) $local->format('G'), 0)->getTimestamp();
-        }
-
-        $minutes = intdiv(self::AGGREGATION_SECONDS[$level] ?? 60, 60);
-        $minute = intdiv((int) $local->format('i'), $minutes) * $minutes;
-        return $local->setTime((int) $local->format('G'), $minute)->getTimestamp();
+        return EChartsArchiveQuery::AggregationWindowStart($level, $timestamp, date_default_timezone_get());
     }
 
     private function NextAggregationWindowStart(int $level, int $timestamp): int

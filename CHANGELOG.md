@@ -2,6 +2,12 @@
 
 ## Neu
 
+- EChartsBarHistory stellt rohe, automatisch verdichtete oder ausdrücklich
+  aggregierte Archivwerte einer numerischen Quelle als vertikale Balken auf
+  einer Zeitachse dar. Die erste native Kachel unterstützt feste,
+  kalendergebundene und benutzerdefinierte Zeiträume, Punktbudget,
+  Variablendarstellung, Reduzierer, Farbe und ein kompaktes Kacheldesign.
+
 - EChartsBarCategory vergleicht 1 bis 16 aktuelle numerische Werte mit
   gemeinsamer Einheit als einfache, gruppierte oder gestapelte vertikale und
   horizontale Balken und bietet Live-Aktualisierung sowie getrennte Designs

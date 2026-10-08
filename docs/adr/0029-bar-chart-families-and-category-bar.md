@@ -26,9 +26,9 @@ Bar diagrams are split by their data and configuration contracts:
   values of one to sixteen unique numeric variables with one common effective
   unit. Its module GUID is `{F9A88437-FE9E-4038-ADAF-775623D2DDC1}` and its
   prefix is `ECBC`.
-- Historical/category-over-time bars will use a separate
-  `EChartsBarHistory` device with prefix `ECBH` when that contract is
-  implemented.
+- Historical/category-over-time bars use the separate `EChartsBarHistory`
+  device with prefix `ECBH`; its first implemented contract is specified by
+  ADR 0030.
 - Waterfall and polar bars remain candidates for separate devices with the
   reserved working prefixes `ECBW` and `ECBP`; this ADR does not assign module
   GUIDs or claim those modules are implemented.

@@ -676,6 +676,7 @@ require_once dirname(__DIR__) . '/EChartsGaugeTacho/module.php';
 require_once dirname(__DIR__) . '/EChartsGaugeChronograph/module.php';
 require_once dirname(__DIR__) . '/EChartsTimeSeries/module.php';
 require_once dirname(__DIR__) . '/EChartsBarCategory/module.php';
+require_once dirname(__DIR__) . '/EChartsBarHistory/module.php';
 
 final class TestableEChartsGateway extends EChartsGateway
 {
@@ -689,6 +690,21 @@ final class TestableEChartsGateway extends EChartsGateway
 }
 
 final class TestableEChartsTimeSeries extends EChartsTimeSeries
+{
+    private int $currentTimestamp = 1;
+
+    public function SetTestCurrentTimestamp(int $timestamp): void
+    {
+        $this->currentTimestamp = $timestamp;
+    }
+
+    protected function CurrentTimestamp(): int
+    {
+        return $this->currentTimestamp;
+    }
+}
+
+final class TestableEChartsBarHistory extends EChartsBarHistory
 {
     private int $currentTimestamp = 1;
 
@@ -4166,5 +4182,104 @@ assertGatewayGauge(
 foreach ($groupedBarSources as $source) {
     unset($GLOBALS['symconTestVariables'][$source['VariableID']]);
 }
+
+$barHistory = new TestableEChartsBarHistory();
+$barHistory->Create();
+$barHistory->SetTestCurrentTimestamp(1780000400);
+$barHistory->SetTestProperty('Sources', json_encode([[
+    'VariableID'              => 4711,
+    'Label'                   => 'Temperature history',
+    'UseVariablePresentation' => false,
+    'Unit'                    => '°C',
+    'Decimals'                => 1,
+    'Reducer'                 => 'average',
+    'Color'                   => 0xE5754F
+]], JSON_THROW_ON_ERROR));
+$barHistory->SetTestProperty('Range', '1h');
+$barHistory->SetTestProperty('DataMode', 'auto');
+$barHistory->SetTestProperty('PointBudget', 1000);
+$barHistory->SetTestProperty('TimeAxisLabelFormat', 'date-time');
+$barHistory->SetTestProperty('ShowValues', true);
+$barHistory->SetTestProperty('ShowGrid', false);
+$barHistory->SetTestProperty('RoundedBars', true);
+$barHistory->SetTestProperty('BarWidthPercent', 60);
+$barHistory->ApplyChanges();
+$barHistoryData = json_decode($barHistory->GetBarHistoryData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $barHistory->GetTestStatus() === IS_ACTIVE
+        && $barHistory->GetTestVisualizationType() === 1
+        && $barHistory->GetTestReferences() === [4711],
+    'Historical Bar must initialize as a native visualization with one deterministic source reference.'
+);
+assertGatewayGauge(
+    $barHistoryData['family'] === 'bar'
+        && $barHistoryData['variant'] === 'history'
+        && $barHistoryData['range']['aggregationLevel'] === 6
+        && $barHistoryData['range']['pointLimitPerSeries'] === 1000
+        && $barHistoryData['series'][0]['label'] === 'Temperature history'
+        && $barHistoryData['series'][0]['color'] === '#E5754F'
+        && $barHistoryData['series'][0]['effectiveReducer'] === 'average'
+        && $barHistoryData['bar']['style']['showValues'] === true
+        && $barHistoryData['bar']['style']['showGrid'] === false
+        && $barHistoryData['bar']['style']['roundedBars'] === true
+        && $barHistoryData['bar']['style']['barWidthPercent'] === 60,
+    'Historical Bar must preserve archive, presentation and tile-design settings in its chart model.'
+);
+$barHistoryTile = new EChartsBarHistory();
+$barHistoryTile->Create();
+$barHistoryTile->SetTestProperty('Sources', json_encode([[
+    'VariableID'              => 4711,
+    'Label'                   => 'Temperature history',
+    'UseVariablePresentation' => false,
+    'Unit'                    => '°C',
+    'Decimals'                => 1,
+    'Reducer'                 => 'average',
+    'Color'                   => 0xE5754F
+]], JSON_THROW_ON_ERROR));
+$barHistoryTile->SetTestProperty('Range', '1h');
+$barHistoryTile->SetTestProperty('DataMode', 'raw');
+$barHistoryTile->ApplyChanges();
+$barHistoryTileHTML = $barHistoryTile->GetVisualizationTile();
+assertGatewayGauge(
+    str_contains($barHistoryTileHTML, 'echarts-bar-history-root')
+        && str_contains($barHistoryTileHTML, 'history'),
+    'Historical Bar must render its ready model into the native visualization document.'
+);
+
+$rawBarHistory = new TestableEChartsBarHistory();
+$rawBarHistory->Create();
+$rawBarHistory->SetTestCurrentTimestamp(1780000400);
+$rawBarHistory->SetTestProperty('Sources', json_encode([[
+    'VariableID'              => 4711,
+    'Label'                   => '',
+    'UseVariablePresentation' => false,
+    'Unit'                    => '°C',
+    'Decimals'                => 1,
+    'Reducer'                 => 'auto',
+    'Color'                   => -1
+]], JSON_THROW_ON_ERROR));
+$rawBarHistory->SetTestProperty('Range', '1h');
+$rawBarHistory->SetTestProperty('DataMode', 'raw');
+$rawBarHistory->SetTestProperty('PointBudget', 200);
+$rawBarHistory->ApplyChanges();
+$rawBarHistoryData = json_decode($rawBarHistory->GetBarHistoryData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $rawBarHistoryData['range']['aggregationLevel'] === null
+        && $rawBarHistoryData['range']['dataMode'] === 'raw'
+        && $rawBarHistoryData['series'][0]['effectiveReducer'] === 'raw'
+        && $rawBarHistoryData['series'][0]['points'] === [
+            [1780000100, 41.0], [1780000200, 42.0], [1780000300, 43.0]
+        ],
+    'Historical Bar raw mode must remain raw and preserve normalized archive points.'
+);
+
+$invalidBarHistory = new EChartsBarHistory();
+$invalidBarHistory->Create();
+$invalidBarHistory->SetTestProperty('Sources', '[]');
+$invalidBarHistory->ApplyChanges();
+assertGatewayGauge(
+    $invalidBarHistory->GetTestStatus() === 201,
+    'Historical Bar must reject configurations without exactly one numeric source.'
+);
 
 echo "Gateway and Gauge module integration verified.\n";

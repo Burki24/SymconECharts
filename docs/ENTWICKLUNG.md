@@ -15,7 +15,7 @@ nicht eine eigene große Dashboard-Seite des Moduls.
 ## Aktueller Stand und Zielarchitektur
 
 Die Library besitzt mit Gateway, Gauge Single, Gauge Multi, Gauge Tacho,
-Gauge Chronograph, Time Series und Bar Category eine technische Modulstruktur. Alle sieben Module
+Gauge Chronograph, Time Series, Bar Category und Bar History eine technische Modulstruktur. Alle acht Module
 verwenden `IPSModuleStrict`;
 Gauge-Instanzen können vorhandene Gateways wiederverwenden. Ein versioniertes
 Protokoll liefert geprüfte numerische Momentanwerte an ein minimales
@@ -82,6 +82,7 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 | Gerät | EChartsGaugeChronograph | Chronograph mit 2 bis 5 individuell gestaltbaren Instrumenten |
 | Gerät | EChartsTimeSeries | Historische und live fortgeschriebene Linien und Flächen für 1 bis 8 Quellen, bis zu acht links/rechts angeordnete Einheitengruppen sowie getrenntes Kachel- und IPSView-Design |
 | Gerät | EChartsBarCategory | Aktuelle einfache, gruppierte oder gestapelte Kategorienvergleiche für 1 bis 16 Quellen mit gemeinsamer Einheit, vertikal/horizontal und mit getrenntem Kachel- und IPSView-Design |
+| Gerät | EChartsBarHistory | Historische rohe oder aggregierte Balken einer Archivquelle auf einer Zeitachse in einer nativen Kachel |
 
 Eine eigene I/O-Instanz, ein Konfigurator und Discovery gehören nicht zum
 Anfangsumfang. Datenquellen sind Teil der jeweiligen Gauge-Konfiguration und
@@ -108,12 +109,13 @@ Modul-IDs und Datenfluss-IDs haben unterschiedliche Aufgaben.
 | Modul EChartsGaugeChronograph | `{B99C3ADA-9A90-486F-97E3-96C39554D9A6}` |
 | Modul EChartsTimeSeries | `{EF172F3B-50F5-41D1-B18E-6BCDEAECCABA}` |
 | Modul EChartsBarCategory | `{F9A88437-FE9E-4038-ADAF-775623D2DDC1}` |
+| Modul EChartsBarHistory | `{BCC80B03-2FC9-45CA-B004-2C81D0689F50}` |
 | Datenfluss Gauge → Gateway | `{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}` |
 | Datenfluss Gateway → Gauge | `{E4749B72-912B-E3E3-1C57-D19019FFDD84}` |
 
 Die Funktionspräfixe sind `ECGW` für das Gateway, `ECGS` für Gauge Single,
 `ECGM` für Gauge Multi, `ECGT` für Gauge Tacho, `ECGC` für Gauge
-Chronograph, `ECTS` für Time Series und `ECBC` für Bar Category. Nach der verbindlichen Präfixkonvention steht `EC` für
+Chronograph, `ECTS` für Time Series, `ECBC` für Bar Category und `ECBH` für Bar History. Nach der verbindlichen Präfixkonvention steht `EC` für
 ECharts; die letzten zwei Buchstaben bezeichnen Aufgabe oder Modultyp. Die
 Entscheidungen zur Modulstruktur und zu den GUIDs dokumentieren
 [`ADR 0001`](adr/0001-chart-family-modules.md) und
@@ -152,6 +154,9 @@ Gateway-Archivoperation dokumentiert
 [`ADR 0018`](adr/0018-first-time-series-family-and-archive-contract.md).
 Die Aufteilung der Bar-Familien und den ersten Category-Bar-Vertrag
 dokumentiert [`ADR 0029`](adr/0029-bar-chart-families-and-category-bar.md).
+Die erste vollständige historische Balken-Vertikale und ihre gemeinsame
+Archiv-Abfrageplanung dokumentiert
+[`ADR 0030`](adr/0030-first-historical-bar-vertical.md).
 
 ## Daten, Konfiguration und Ausgabe
 
