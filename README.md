@@ -94,8 +94,9 @@ Folgende Module sind enthalten:
 - __EChartsBarHistory__ ([Dokumentation](EChartsBarHistory/README.md))
   Stellt rohe oder aggregierte Archivwerte einer numerischen Variable als
   vertikale Balken auf einer Zeitachse dar. Zeitraum, Punktbudget,
-  Beschriftung, Reduzierer, Farbe und Kacheldesign sind konfigurierbar; eine
-  Begrenzung von Rohwerten wird sichtbar gemeldet.
+  Beschriftung, Reduzierer, Farbe und Kacheldesign sind konfigurierbar.
+  IPSView kann optional einen eigenen Zeitraum und ein eigenes Design verwenden;
+  eine Begrenzung von Rohwerten wird sichtbar gemeldet.
 
 Für eine reguläre Installation genügt eine gemeinsame EChartsGateway-Instanz
 für alle Gauge- und späteren Diagramminstanzen. Beim ersten Diagramm kann ein

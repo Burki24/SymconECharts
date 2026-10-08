@@ -7,6 +7,9 @@
   einer Zeitachse dar. Die erste native Kachel unterstützt feste,
   kalendergebundene und benutzerdefinierte Zeiträume, Punktbudget,
   Variablendarstellung, Reduzierer, Farbe und ein kompaktes Kacheldesign.
+  Eine optionale IPSView-Ausgabe nutzt denselben Datenvertrag und erlaubt
+  einen eigenen Zeitraum, ein eigenes Design sowie einstellbare Hintergrundfarbe
+  und -deckkraft. Aktualisierungen ersetzen das HTML-Dokument nicht.
 
 - EChartsBarCategory vergleicht 1 bis 16 aktuelle numerische Werte mit
   gemeinsamer Einheit als einfache, gruppierte oder gestapelte vertikale und

@@ -82,7 +82,7 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 | Gerät | EChartsGaugeChronograph | Chronograph mit 2 bis 5 individuell gestaltbaren Instrumenten |
 | Gerät | EChartsTimeSeries | Historische und live fortgeschriebene Linien und Flächen für 1 bis 8 Quellen, bis zu acht links/rechts angeordnete Einheitengruppen sowie getrenntes Kachel- und IPSView-Design |
 | Gerät | EChartsBarCategory | Aktuelle einfache, gruppierte oder gestapelte Kategorienvergleiche für 1 bis 16 Quellen mit gemeinsamer Einheit, vertikal/horizontal und mit getrenntem Kachel- und IPSView-Design |
-| Gerät | EChartsBarHistory | Historische rohe oder aggregierte Balken einer Archivquelle auf einer Zeitachse in einer nativen Kachel |
+| Gerät | EChartsBarHistory | Historische rohe oder aggregierte Balken einer Archivquelle auf einer Zeitachse in einer nativen Kachel und optionalem IPSView-HTML |
 
 Eine eigene I/O-Instanz, ein Konfigurator und Discovery gehören nicht zum
 Anfangsumfang. Datenquellen sind Teil der jeweiligen Gauge-Konfiguration und
@@ -157,6 +157,15 @@ dokumentiert [`ADR 0029`](adr/0029-bar-chart-families-and-category-bar.md).
 Die erste vollständige historische Balken-Vertikale und ihre gemeinsame
 Archiv-Abfrageplanung dokumentiert
 [`ADR 0030`](adr/0030-first-historical-bar-vertical.md).
+Die Entscheidung für den weiteren Ausbau innerhalb desselben Moduls und den
+optionalen IPSView-Ausgabeweg dokumentiert
+[`ADR 0031`](adr/0031-historical-bar-one-module-expansion.md).
+Der weitere Ausbau von EChartsBarHistory erfolgt innerhalb desselben Moduls:
+Die derzeitige Einquellen-Stufe wird zuerst für Kachel und IPSView abgesichert;
+mehrere Quellen werden später über die bestehende Quellenliste ergänzt.
+Ein getrenntes Single-/Multi-Modulpaar ist dafür nicht vorgesehen. Anzahl,
+Gruppierung und Achsenregeln der Mehrquellen-Stufe werden vor ihrer Umsetzung
+als eigener Vertrag entschieden.
 
 ## Daten, Konfiguration und Ausgabe
 

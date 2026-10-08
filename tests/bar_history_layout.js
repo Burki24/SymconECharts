@@ -10,13 +10,15 @@ const source = fs.readFileSync(
     'utf8'
 );
 
-function render(truncated = false) {
+function render(truncated = false, mode = 'symcon', adaptToBackground = false) {
     const chartElement = { hidden: false };
     const warningElement = { hidden: true, textContent: '' };
     const errorElement = { hidden: true, textContent: '' };
     let option;
+    let initCount = 0;
+    let updateCount = 0;
     const chart = {
-        setOption: next => { option = next; }, clear: () => {}, resize: () => {}, dispose: () => {}
+        setOption: next => { option = next; updateCount++; }, clear: () => {}, resize: () => {}, dispose: () => {}
     };
     const palette = {
         background: '#101114', text: '#f4f5f7', muted: '#969aa2', border: '#a5a9b0',
@@ -24,7 +26,7 @@ function render(truncated = false) {
     };
     const window = {
         SYMC_VISUALIZATION: {
-            mode: 'symcon',
+            mode,
             state: {
                 status: 'ready',
                 chart: {
@@ -41,9 +43,12 @@ function render(truncated = false) {
                 }
             },
             translations: {},
-            options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: true }
+            options: {
+                echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: true,
+                adaptToBackground
+            }
         },
-        echarts: { init: () => chart },
+        echarts: { init: () => { initCount++; return chart; } },
         addEventListener: () => {},
         getComputedStyle: () => ({ color: '' })
     };
@@ -57,7 +62,12 @@ function render(truncated = false) {
         })[id]
     };
     vm.runInNewContext(source, { window, document });
-    return { option, warningElement };
+    return {
+        get option() { return option; },
+        get initCount() { return initCount; },
+        get updateCount() { return updateCount; },
+        warningElement, window
+    };
 }
 
 const ready = render();
@@ -76,5 +86,20 @@ assert.equal(ready.warningElement.hidden, true);
 const truncated = render(true);
 assert.equal(truncated.warningElement.hidden, false);
 assert.match(truncated.warningElement.textContent, /truncated/);
+
+const ipsView = render(false, 'ipsview', true);
+assert.equal(ipsView.option.backgroundColor, 'transparent');
+assert.equal(ipsView.initCount, 1);
+ipsView.window.handleMessage({
+    status: 'ready',
+    chart: {
+        theme: 'dark',
+        bar: { unit: '°C', decimals: 1, style: {} },
+        series: [{ label: 'Temperature', points: [[1780000300, 23.0]] }]
+    }
+});
+assert.equal(ipsView.initCount, 1, 'An IPSView update must reuse the existing chart.');
+assert.equal(ipsView.updateCount, 2);
+assert.deepEqual(Array.from(ipsView.option.series[0].data[0]), [1780000300000, 23.0]);
 
 console.log('Historical Bar renderer layout verified.');

@@ -4311,8 +4311,67 @@ $barHistoryTile->SetTestProperty('Sources', json_encode([[
 ]], JSON_THROW_ON_ERROR));
 $barHistoryTile->SetTestProperty('Range', '1h');
 $barHistoryTile->SetTestProperty('DataMode', 'raw');
+$barHistoryTile->SetTestProperty('TimeAxisLabelFormat', 'date-time');
+$barHistoryTile->SetTestProperty('EnableIPSView', true);
 $barHistoryTile->ApplyChanges();
+$barHistoryIPSView = $barHistoryTile->GetIPSViewHTML();
+assertGatewayGauge(
+    $barHistoryTile->GetTestVariableValue('IPSViewBarHistory') === $barHistoryIPSView
+        && $barHistoryIPSView !== '',
+    'Historical Bar must publish a nonempty IPSView WebContent document.'
+);
+assertGatewayGauge(
+    str_contains($barHistoryIPSView, '"mode":"ipsview"')
+        && str_contains($barHistoryIPSView, '"variant":"history"')
+        && str_contains($barHistoryIPSView, '"timeAxisLabelFormat":"date-time"'),
+    'Historical Bar IPSView must embed its chart and inherit the Tile time-axis format.'
+);
+assertGatewayGauge(
+    str_contains($barHistoryIPSView, 'new WebSocket')
+        && strlen($barHistoryIPSView) < SYMCON_OUTPUT_BUFFER_LIMIT,
+    'Historical Bar IPSView must use the persistent transport within the output limit.'
+);
+assertGatewayGauge(
+    preg_match('#/hook/SymconECharts/state/5000/([a-f0-9]{32})#', $barHistoryIPSView, $barTransportMatch) === 1,
+    'Historical Bar IPSView must provide a targeted persistent state channel.'
+);
+$barStateRequest = ['DataID' => '{E4749B72-912B-E3E3-1C57-D19019FFDD84}']
+    + EChartsDataProtocol::CreateRequest(EChartsDataProtocol::OPERATION_IPSVIEW_STATE, [
+        'InstanceID' => 5000,
+        'Channel'    => $barTransportMatch[1]
+    ]);
+$barStateResponse = EChartsDataProtocol::DecodeResponse(
+    $barHistoryTile->ReceiveData(json_encode($barStateRequest, JSON_THROW_ON_ERROR)),
+    EChartsDataProtocol::OPERATION_IPSVIEW_STATE
+);
+assertGatewayGauge(
+    ($barStateResponse['Payload']['State']['status'] ?? null) === 'ready',
+    'Historical Bar must return a fresh state through the shared IPSView transport.'
+);
+$barStateRequest['Payload']['Channel'] = str_repeat('0', 32);
+assertGatewayGauge(
+    $barHistoryTile->ReceiveData(json_encode($barStateRequest, JSON_THROW_ON_ERROR)) === '',
+    'Historical Bar must reject requests from a different IPSView channel.'
+);
+$barIPSViewBeforeRefresh = $barHistoryTile->GetTestVariableValue('IPSViewBarHistory');
+$barSocketUpdateCount = count($GLOBALS['symconTestWebSocketMessages']);
+$barHistoryTile->RefreshArchive();
+assertGatewayGauge(
+    $barHistoryTile->GetTestVariableValue('IPSViewBarHistory') === $barIPSViewBeforeRefresh
+        && count($GLOBALS['symconTestWebSocketMessages']) === $barSocketUpdateCount + 1,
+    'Historical Bar archive refresh must update IPSView state without replacing its HTML document.'
+);
 $barHistoryForm = json_decode($barHistoryTile->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+$barHistoryIPSViewPanels = array_values(array_filter(
+    $barHistoryForm['elements'],
+    static fn (array $element): bool => ($element['caption'] ?? '') === 'IPSView design'
+));
+assertGatewayGauge(
+    count($barHistoryIPSViewPanels) === 1
+        && str_contains(json_encode($barHistoryIPSViewPanels[0], JSON_THROW_ON_ERROR), 'IPSViewUseTileTimeSettings')
+        && str_contains(json_encode($barHistoryIPSViewPanels[0], JSON_THROW_ON_ERROR), 'IPSViewBarWidthPercent'),
+    'Historical Bar form must expose independent IPSView time and design controls.'
+);
 $barHistoryRangeRows = array_values(array_filter(
     $barHistoryForm['elements'],
     static fn (array $element): bool => ($element['type'] ?? '') === 'RowLayout'
@@ -4350,6 +4409,38 @@ assertGatewayGauge(
     str_contains($barHistoryTileHTML, 'echarts-bar-history-root')
         && str_contains($barHistoryTileHTML, 'history'),
     'Historical Bar must render its ready model into the native visualization document.'
+);
+$barHistoryTile->SetTestProperty('IPSViewUseTileTimeSettings', false);
+$barHistoryTile->SetTestProperty('IPSViewRange', 'yesterday');
+$barHistoryTile->SetTestProperty('IPSViewTimeAxisLabelFormat', 'date');
+$barHistoryTile->SetTestProperty('IPSViewUseTileDesign', false);
+$barHistoryTile->SetTestProperty('IPSViewEChartsTheme', 'dark');
+$barHistoryTile->SetTestProperty('IPSViewBarWidthPercent', 45);
+$barHistoryTile->SetTestProperty('IPSViewAdaptToBackground', true);
+$barHistoryTile->SetTestProperty('IPSViewBackgroundColor', 0x997755);
+$barHistoryTile->SetTestProperty('IPSViewBackgroundOpacityPercent', 50);
+$barHistoryTile->ApplyChanges();
+$independentBarHistoryTile = json_decode($barHistoryTile->GetBarHistoryData(), true, 512, JSON_THROW_ON_ERROR);
+$independentBarHistoryIPSView = $barHistoryTile->GetIPSViewHTML();
+assertGatewayGauge(
+    $independentBarHistoryTile['range']['key'] === '1h'
+        && $independentBarHistoryTile['theme'] === 'auto'
+        && str_contains($independentBarHistoryIPSView, '"key":"yesterday"')
+        && str_contains($independentBarHistoryIPSView, '"timeAxisLabelFormat":"date"')
+        && str_contains($independentBarHistoryIPSView, '"theme":"dark"')
+        && str_contains($independentBarHistoryIPSView, '"barWidthPercent":45')
+        && str_contains($independentBarHistoryIPSView, '"adaptToBackground":true'),
+    'Historical Bar IPSView settings must not change the native Tile range or appearance.'
+);
+$barHistoryTile->UpdateIPSViewTimeRangeForm(false, 'custom');
+assertGatewayGauge(
+    array_slice($barHistoryTile->GetTestFormUpdates(), -4) === [
+        ['Field' => 'IPSViewRange', 'Parameter' => 'visible', 'Value' => true],
+        ['Field' => 'IPSViewTimeAxisLabelFormat', 'Parameter' => 'visible', 'Value' => true],
+        ['Field' => 'IPSViewCustomRangeValue', 'Parameter' => 'visible', 'Value' => true],
+        ['Field' => 'IPSViewCustomRangeUnit', 'Parameter' => 'visible', 'Value' => true]
+    ],
+    'Historical Bar form must reveal the independent custom IPSView range immediately.'
 );
 
 $rawBarHistory = new TestableEChartsBarHistory();

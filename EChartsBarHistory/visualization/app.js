@@ -88,7 +88,8 @@
         var barColor = series.color || paletteColors[0];
 
         return {
-            backgroundColor: colors.background,
+            backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
+                ? 'transparent' : colors.background,
             animation: true,
             animationDuration: 350,
             aria: { enabled: true, decal: { show: false } },
