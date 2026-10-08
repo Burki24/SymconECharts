@@ -102,9 +102,10 @@ Folgende Module sind enthalten:
 
 Jede Datenquelle wird technisch ausschließlich über ihre Symcon-Variablen-ID
 zugeordnet. Namen, Objektpfade und frei gewählte Beschriftungen dienen nur der
-Anzeige oder fachlichen Gruppierung. Haben mehrere Quellen dieselbe sichtbare
-Beschriftung, ergänzen die betroffenen Diagramme zur Unterscheidung die
-Variablen-ID, beispielsweise `Temperatur (#4711)`.
+Anzeige oder fachlichen Gruppierung. Ein ausdrücklich konfigurierter Name hat
+Vorrang, sonst gilt der aktuelle Symcon-Name der Variablen. Auch bei gleichen
+Beschriftungen bleiben die Quellen intern über ihre IDs getrennt; IDs werden
+nicht automatisch in Kachel, IPSView oder Vorschau angezeigt.
 
 Bei allen ECharts-Diagrammen ist unter **IPSView-Design** die Option
 **Kacheldesign verwenden** standardmäßig aktiv. Solange sie aktiv ist, folgt

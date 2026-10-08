@@ -62,20 +62,7 @@
     }
 
     function uniqueCategoryLabels(items) {
-        var labels = items.map(function (item) { return String(item.category || item.series || ''); });
-        for (var pass = 0; pass <= items.length; pass += 1) {
-            var counts = Object.create(null);
-            labels.forEach(function (label) { counts[label] = (counts[label] || 0) + 1; });
-            var collisions = false;
-            labels = labels.map(function (label, index) {
-                if (counts[label] <= 1) { return label; }
-                collisions = true;
-                var id = String(items[index].variableID || items[index].id || '');
-                return label + ' (#' + id.replace(/^variable-/, '') + ')';
-            });
-            if (!collisions) { return labels; }
-        }
-        return labels;
+        return items.map(function (item) { return String(item.category || item.series || ''); });
     }
 
     function buildChartData(model, colors) {
@@ -97,6 +84,7 @@
                 mode: mode,
                 categories: uniqueCategoryLabels(items),
                 series: [{
+                    id: 'simple',
                     name: String(bar.title || ''),
                     items: items.map(function (item, index) {
                         return { value: Number(item.value), color: item.color || paletteColors[index % paletteColors.length] };
@@ -185,7 +173,11 @@
                 ? 'transparent' : colors.background,
             animation: true,
             animationDuration: 350,
-            aria: { enabled: true, decal: { show: false } },
+            aria: {
+                enabled: true,
+                description: chartData.series.map(function (item) { return item.name; }).join(', '),
+                decal: { show: false }
+            },
             title: {
                 show: titleVisible,
                 text: String(bar.title || ''),
@@ -204,7 +196,11 @@
                 show: multiSeries,
                 top: headerInset + (titleVisible ? 38 : 8),
                 textStyle: { color: colors.text },
-                data: chartData.series.map(function (item) { return item.name; })
+                data: chartData.series.map(function (item) { return item.id; }),
+                formatter: function (name) {
+                    var source = chartData.series.find(function (item) { return item.id === name; });
+                    return source ? source.name : '';
+                }
             },
             tooltip: {
                 trigger: 'axis',
@@ -215,7 +211,8 @@
                     var categoryName = String(values[0].name || '');
                     var lines = categoryName ? [categoryName] : [];
                     values.forEach(function (parameter) {
-                        var prefix = multiSeries ? String(parameter.seriesName || '') + ': ' : '';
+                        var source = chartData.series[parameter.seriesIndex];
+                        var prefix = multiSeries && source ? source.name + ': ' : '';
                         lines.push(String(parameter.marker || '') + prefix
                             + formatValue(parameter.value, decimals, unit));
                     });
@@ -227,7 +224,7 @@
             series: chartData.series.map(function (seriesItem) {
                 var result = {
                     id: seriesItem.id,
-                    name: seriesItem.name,
+                    name: seriesItem.id,
                     type: 'bar',
                     stack: stacked ? 'total' : undefined,
                     barCategoryGap: multiSeries

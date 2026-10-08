@@ -168,11 +168,11 @@ const duplicateNameSeries = render(
     750,
     [
         {
-            id: 'variable-4711', variableID: 4711, label: 'Temperatur (#4711)', axisIndex: 0,
+            id: 'variable-4711', variableID: 4711, label: 'Temperatur', axisIndex: 0,
             decimals: 1, unit: '°C', color: '', style: 'line', points: [[1000, 20]]
         },
         {
-            id: 'variable-4717', variableID: 4717, label: 'Temperatur (#4717)', axisIndex: 0,
+            id: 'variable-4717', variableID: 4717, label: 'Temperatur', axisIndex: 0,
             decimals: 1, unit: '°C', color: '', style: 'line', points: [[1000, 21]]
         }
     ],
@@ -182,7 +182,15 @@ const duplicateNameSeries = render(
         calendarAligned: false, acceptLiveUpdates: true, pointLimitPerSeries: 100
     }
 );
-assert.deepEqual(Array.from(duplicateNameSeries.legend.data), ['Temperatur (#4711)', 'Temperatur (#4717)']);
+assert.deepEqual(Array.from(duplicateNameSeries.legend.data), ['variable-4711', 'variable-4717']);
+assert.deepEqual(Array.from(duplicateNameSeries.legend.data, duplicateNameSeries.legend.formatter), ['Temperatur', 'Temperatur']);
+assert.deepEqual(Array.from(duplicateNameSeries.series, item => item.name), ['variable-4711', 'variable-4717']);
+const duplicateTooltip = duplicateNameSeries.tooltip.formatter([
+    { seriesIndex: 0, axisValueLabel: '12:00', marker: '', value: [1000, 20] },
+    { seriesIndex: 1, axisValueLabel: '12:00', marker: '', value: [1000, 21] }
+]);
+assert.equal(duplicateTooltip.includes('variable-'), false);
+assert.equal((duplicateTooltip.match(/Temperatur/g) || []).length, 2);
 assert.deepEqual(Array.from(duplicateNameSeries.series, item => item.id), ['variable-4711', 'variable-4717']);
 duplicateNameSeries.handleMessage({ messageType: 'append', variableID: 4717, timestamp: 1100, value: 22 });
 assert.equal(duplicateNameSeries.getLatestOption().series[0].data.length, 1);

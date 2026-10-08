@@ -24,8 +24,8 @@ Jede Quellenzeile enthält Variable, Beschriftung, Minimum, Maximum, Einheit
 und Nachkommastellen. Optional werden Wertebereich, Einheit und Formatierung
 aus der Variablendarstellung übernommen.
 Die Variablen-ID identifiziert das Instrument unabhängig von Name und Pfad.
-Bei gleichen Beschriftungen ergänzt das Modul `(#Variablen-ID)` in Kachel,
-IPSView und Vorschau.
+Gleiche Beschriftungen bleiben in Kachel, IPSView und Vorschau unverändert;
+die IDs bleiben ausschließlich interne Quellenkennungen.
 
 Der Kacheldesigner definiert das gemeinsame Grunddesign. Im Dialog einer
 Quellenzeile kann **Individuelles Gauge-Design** aktiviert werden. Für dieses

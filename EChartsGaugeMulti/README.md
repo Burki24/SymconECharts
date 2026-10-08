@@ -36,8 +36,8 @@ numerische Variable, Beschriftung, Minimum, Maximum, Einheit und 0 bis 6
 Nachkommastellen. `GetGaugeData()` liest alle aktuellen Werte über das
 versionierte Gateway-Protokoll und liefert sie in der konfigurierten Reihenfolge.
 Die Variablen-ID bleibt dabei die technische Identität jedes Instruments.
-Gleichlautende Beschriftungen werden in Kachel, IPSView und Vorschau durch
-`(#Variablen-ID)` unterschieden; ein Objektpfad wird nicht benötigt.
+Gleichlautende Beschriftungen bleiben unverändert sichtbar; die Variablen-IDs
+unterscheiden die Instrumente ausschließlich intern.
 
 Multi Title, Ringraster, konzentrische Ringe und Wetterstation stehen als native
 Symcon-Kachel und optionales IPSView-Widget mit offiziellen ECharts-Themes,

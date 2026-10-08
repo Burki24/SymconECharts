@@ -27,49 +27,19 @@ function assertSourceIdentity(bool $condition, string $message): void
     }
 }
 
-assertSourceIdentity(EChartsSourceIdentity::UniqueLabels([]) === [], 'An empty source list must stay empty.');
-assertSourceIdentity(
-    EChartsSourceIdentity::UniqueLabels([4711 => 'Temperatur']) === [4711 => 'Temperatur'],
-    'A unique source label must remain unchanged.'
-);
-assertSourceIdentity(
-    EChartsSourceIdentity::UniqueLabels([4711 => 'Temperatur', 4717 => 'Temperatur']) === [
-        4711 => 'Temperatur (#4711)',
-        4717 => 'Temperatur (#4717)'
-    ],
-    'Equal source names must be distinguished only by their variable IDs.'
-);
-assertSourceIdentity(
-    EChartsSourceIdentity::UniqueLabels([
-        4711 => 'Temperatur',
-        4717 => 'Temperatur',
-        4718 => 'Temperatur (#4711)'
-    ]) === [
-        4711 => 'Temperatur (#4711) (#4711)',
-        4717 => 'Temperatur (#4717)',
-        4718 => 'Temperatur (#4711) (#4718)'
-    ],
-    'A literal label containing an ID suffix must not hide another source.'
-);
-assertSourceIdentity(
-    EChartsSourceIdentity::UniqueLabels([4711 => 'Temperatur (#4711)'], ['Temperatur (#4711)']) === [
-        4711 => 'Temperatur (#4711) (#4711)'
-    ],
-    'A source-specific label must remain distinct from a shared presentation-group label.'
-);
 assertSourceIdentity(
     EChartsSourceIdentity::LabelsForSources([
         ['VariableID' => 4711, 'Label' => ''],
         ['VariableID' => 4717, 'Label' => '']
-    ]) === [4711 => 'Temperatur (#4711)', 4717 => 'Temperatur (#4717)'],
-    'Equal names inherited from Symcon must be resolved by variable ID.'
+    ]) === [4711 => 'Temperatur', 4717 => 'Temperatur'],
+    'Equal Symcon names must stay visible without exposing internal IDs.'
 );
 assertSourceIdentity(
     EChartsSourceIdentity::LabelsForDraftSources([
         ['VariableID' => 4711, 'Label' => 'Sensor'],
         ['VariableID' => 4717, 'Label' => 'Sensor']
-    ]) === [4711 => 'Sensor (#4711)', 4717 => 'Sensor (#4717)'],
-    'A complete form draft must preview the same ID-based labels as the saved chart.'
+    ]) === [4711 => 'Sensor', 4717 => 'Sensor'],
+    'A complete form draft must keep configured names without exposing IDs.'
 );
 assertSourceIdentity(
     EChartsSourceIdentity::LabelsForDraftSources([
@@ -79,4 +49,4 @@ assertSourceIdentity(
     'An incomplete draft must not invent an index- or path-based source identity.'
 );
 
-echo "Source variable identity and label collision handling verified.\n";
+echo "Source variable identity and display names verified.\n";

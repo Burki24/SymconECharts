@@ -16,9 +16,9 @@ optional ein eigenständiges IPSView-WebContent-Widget.
 
 Jede Reihe bleibt über ihre Variablen-ID eindeutig, auch wenn mehrere
 Variablen denselben Namen oder dieselbe eigene Beschriftung haben. Solche
-gleichlautenden Reihen erhalten in Legende, Tooltip und Vorschau einen
-ID-Zusatz wie `Temperatur (#4711)`; Live-Updates bleiben der richtigen ID
-zugeordnet. Objektpfade werden dafür nicht ausgewertet.
+gleichlautenden Reihen behalten in Legende, Tooltip und Vorschau ihre Namen
+ohne ID-Zusatz; Live-Updates bleiben der richtigen ID zugeordnet.
+Objektpfade werden dafür nicht ausgewertet.
 
 ## Aktueller Funktionsumfang
 

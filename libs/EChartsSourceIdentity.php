@@ -26,7 +26,7 @@ final class EChartsSourceIdentity
                 : IPS_GetName($variableID);
         }
 
-        return self::UniqueLabels($labels);
+        return $labels;
     }
 
     /**
@@ -57,33 +57,4 @@ final class EChartsSourceIdentity
         return self::LabelsForSources($valid);
     }
 
-    /**
-     * @param array<int,string> $labelsByVariableID
-     * @param list<string> $reservedLabels Names of shared presentation groups, not source IDs.
-     * @return array<int,string>
-     */
-    public static function UniqueLabels(array $labelsByVariableID, array $reservedLabels = []): array
-    {
-        if ($labelsByVariableID === []) {
-            return [];
-        }
-
-        $labels = $labelsByVariableID;
-        for ($pass = 0; $pass <= count($labelsByVariableID) + count($reservedLabels); ++$pass) {
-            $counts = array_count_values(array_merge(array_values($labels), $reservedLabels));
-            $collisions = false;
-            foreach ($labels as $variableID => $label) {
-                if ($counts[$label] <= 1) {
-                    continue;
-                }
-                $labels[$variableID] = $label . ' (#' . $variableID . ')';
-                $collisions = true;
-            }
-            if (!$collisions) {
-                return $labels;
-            }
-        }
-
-        throw new InvalidArgumentException('Source labels could not be distinguished by variable ID.');
-    }
 }

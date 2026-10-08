@@ -237,7 +237,11 @@
                 ? 'transparent' : colors.background,
             color: seriesPalette,
             animation: false,
-            aria: { enabled: true, decal: { show: false } },
+            aria: {
+                enabled: true,
+                description: series.map(function (item) { return String(item.label || ''); }).join(', '),
+                decal: { show: false }
+            },
             title: {
                 show: titleVisible,
                 text: model.chart && model.chart.title || '',
@@ -250,7 +254,11 @@
                 top: legendPosition === 'top' ? headerInset + (titleVisible ? 34 : 4) : null,
                 bottom: bottomLegend ? 6 : null,
                 textStyle: { color: colors.text },
-                data: series.map(function (item) { return item.label; })
+                data: series.map(function (item) { return item.id; }),
+                formatter: function (name) {
+                    var source = series.find(function (item) { return item.id === name; });
+                    return source ? String(source.label || '') : '';
+                }
             },
             grid: { left: leftMargin, right: rightMargin, top: gridTop, bottom: gridBottom },
             tooltip: {
@@ -347,7 +355,7 @@
                 var sourceShowSymbol = sourceDesign ? sourceSymbol !== 'none' : design.showSymbols === true;
                 var result = {
                     id: item.id,
-                    name: item.label,
+                    name: item.id,
                     type: 'line',
                     yAxisIndex: item.axisIndex,
                     showSymbol: sourceShowSymbol,

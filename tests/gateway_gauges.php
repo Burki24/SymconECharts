@@ -1685,9 +1685,9 @@ foreach ([EChartsGaugeMulti::class, EChartsGaugeTacho::class, EChartsGaugeChrono
     assertGatewayGauge(
         array_column($duplicateGaugeData['items'], 'id') === ['variable-4711', 'variable-4713']
             && array_column(array_column($duplicateGaugeData['items'], 'gauge'), 'label') === [
-                'Sensor (#4711)', 'Sensor (#4713)'
+                'Sensor', 'Sensor'
             ],
-        $gaugeClass . ' must retain source IDs and distinguish equal labels without object paths.'
+        $gaugeClass . ' must retain source IDs while displaying equal names without ID suffixes.'
     );
 }
 
@@ -3515,9 +3515,9 @@ $sameNameTimeSeriesData = json_decode($sameNameTimeSeries->GetTimeSeriesData(), 
 assertGatewayGauge(
     array_column($sameNameTimeSeriesData['series'], 'id') === ['variable-4711', 'variable-4717']
         && array_column($sameNameTimeSeriesData['series'], 'label') === [
-            'Temperatur (#4711)', 'Temperatur (#4717)'
+            'Temperatur', 'Temperatur'
         ],
-    'Time Series must expose unique legend labels for distinct source IDs with equal names.'
+    'Time Series must retain distinct source IDs without exposing them in equal legend labels.'
 );
 
 $archiveQueriesBeforeRealtime = $GLOBALS['symconTestArchiveQueryCount'];
@@ -4219,7 +4219,7 @@ assertGatewayGauge(
 $sameNameData = json_decode($sameNameBar->GetBarData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
     array_column($sameNameData['items'], 'series') === [
-        'Temperatur (#4920)', 'Temperatur (#4921)', 'Temperatur (#4922)', 'Temperatur (#4923)'
+        'Temperatur', 'Temperatur', 'Temperatur', 'Temperatur'
     ] && array_column($sameNameData['items'], 'id') === [
         'variable-4920', 'variable-4921', 'variable-4922', 'variable-4923'
     ] && array_column($sameNameData['items'], 'seriesKey') === [
@@ -4233,7 +4233,7 @@ assertGatewayGauge(
     $renamedData['items'][0]['id'] === 'variable-4920'
         && $renamedData['items'][0]['variableID'] === 4920
         && $renamedData['items'][0]['series'] === 'Raumtemperatur'
-        && $renamedData['items'][1]['series'] === 'Temperatur (#4921)',
+        && $renamedData['items'][1]['series'] === 'Temperatur',
     'Renaming a variable may change its label but never its technical source identity.'
 );
 foreach ($sameNameSources as $source) {
@@ -4361,7 +4361,7 @@ $duplicateGroupedData = json_decode($duplicateGroupedBar->GetBarData(), true, 51
 assertGatewayGauge(
     $duplicateGroupedBar->GetTestStatus() === IS_ACTIVE
         && array_column($duplicateGroupedData['items'], 'seriesKey') === ['variable-4900', 'variable-4901']
-        && array_column($duplicateGroupedData['items'], 'series') === ['Today (#4900)', 'Today (#4901)'],
+        && array_column($duplicateGroupedData['items'], 'series') === ['Today', 'Today'],
     'Grouped and stacked Category Bars must retain equal category/series labels as distinct source IDs.'
 );
 $collidingSeriesSources = array_slice($groupedBarSources, 0, 3);
@@ -4375,9 +4375,9 @@ $collidingSeriesBar->ApplyChanges();
 $collidingSeriesData = json_decode($collidingSeriesBar->GetBarData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
     array_column($collidingSeriesData['items'], 'series') === [
-        'Today (#4900) (#4900)', 'Today (#4901)', 'Today (#4900)'
+        'Today', 'Today', 'Today (#4900)'
     ],
-    'Category Bar must not let an explicit group name collide with an ID-suffixed source name.'
+    'Category Bar must preserve configured group names without adding source IDs.'
 );
 foreach ($groupedBarSources as $source) {
     unset($GLOBALS['symconTestVariables'][$source['VariableID']]);
