@@ -726,6 +726,24 @@ function assertGatewayGauge(bool $condition, string $message): void
     }
 }
 
+/** @param list<array<string, mixed>> $items @return array<string, mixed>|null */
+function findGaugeFormElement(array $items, string $name): ?array
+{
+    foreach ($items as $item) {
+        if (($item['name'] ?? null) === $name) {
+            return $item;
+        }
+        if (is_array($item['items'] ?? null)) {
+            $found = findGaugeFormElement($item['items'], $name);
+            if ($found !== null) {
+                return $found;
+            }
+        }
+    }
+
+    return null;
+}
+
 $gateway = new EChartsGateway();
 $gateway->Create();
 $gateway->ApplyChanges();
@@ -1884,6 +1902,10 @@ foreach ([
     );
     $dedicatedForm = json_decode($dedicatedGauge->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
     $dedicatedFormJson = json_encode($dedicatedForm, JSON_THROW_ON_ERROR);
+    $dedicatedSources = findGaugeFormElement($dedicatedForm['elements'], 'Sources');
+    $dedicatedPointer = findGaugeFormElement($dedicatedForm['elements'], 'PointerShape');
+    $dedicatedIPSViewPointer = findGaugeFormElement($dedicatedForm['elements'], 'IPSViewPointerShape');
+    $dedicatedPrefix = $dedicatedClass === EChartsGaugeTacho::class ? 'ECGT' : 'ECGC';
     assertGatewayGauge(
         strlen($dedicatedFormJson) < SYMCON_OUTPUT_BUFFER_LIMIT
             &&
@@ -1899,6 +1921,17 @@ foreach ([
             && !str_contains($dedicatedFormJson, '"name":"GaugePreset"')
             && !str_contains($dedicatedFormJson, '"name":"IPSViewGaugePreset"'),
         $dedicatedClass . ' source editor must offer individual pointer and dial SVG configuration.'
+    );
+    assertGatewayGauge(
+        is_array($dedicatedSources)
+            && str_starts_with($dedicatedSources['onAdd'] ?? '', $dedicatedPrefix . '_UpdateGaugePreviewSourceFromForm(')
+            && str_ends_with($dedicatedSources['onDelete'] ?? '', "]), 'delete');")
+            && is_array($dedicatedPointer)
+            && str_starts_with($dedicatedPointer['onChange'] ?? '', $dedicatedPrefix . '_UpdateGaugePreviewFromForm(')
+            && !str_contains($dedicatedPointer['onChange'] ?? '', "'GaugePreset' =>")
+            && is_array($dedicatedIPSViewPointer)
+            && ($dedicatedIPSViewPointer['onChange'] ?? null) === ($dedicatedPointer['onChange'] ?? null),
+        $dedicatedClass . ' must update both previews without referencing a removed preset selector.'
     );
     $editedSource = $individualSources[0];
     $editedSource['PointerShape'] = 'arrow';
@@ -2058,6 +2091,16 @@ assertGatewayGauge(
 );
 $multiForm = json_decode($multiGauge->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
 $multiFormJson = json_encode($multiForm, JSON_THROW_ON_ERROR);
+$multiPreset = findGaugeFormElement($multiForm['elements'], 'GaugePreset');
+$multiIPSViewPointer = findGaugeFormElement($multiForm['elements'], 'IPSViewPointerShape');
+assertGatewayGauge(
+    is_array($multiPreset)
+        && str_starts_with($multiPreset['onChange'] ?? '', 'ECGM_UpdateGaugePreviewFromForm(')
+        && str_contains($multiPreset['onChange'] ?? '', "'GaugePreset' => $" . 'GaugePreset')
+        && is_array($multiIPSViewPointer)
+        && ($multiIPSViewPointer['onChange'] ?? null) === ($multiPreset['onChange'] ?? null),
+    'Gauge Multi must refresh both previews when shared design fields or its preset change.'
+);
 assertGatewayGauge(
     str_contains($multiFormJson, '"caption":"Tile designer","expanded":false')
         && str_contains($multiFormJson, '"name":"GaugePreset"')

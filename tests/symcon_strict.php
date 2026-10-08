@@ -667,8 +667,12 @@ foreach ([
             );
         }
         requireStrictContract(
-            str_contains($gaugeMulti, 'ECGM_UpdateGaugePreviewFromForm'),
-            'EChartsGaugeMulti designer fields must refresh the SVG previews immediately.',
+            str_contains($gauge, 'EChartsGaugeDesign::WithPreviewActions(')
+                && str_contains(
+                    $gauge,
+                    "EChartsGaugeDesign::PreviewFormAction('" . $gaugeContract['prefix'] . "'"
+                ),
+            $gaugeModuleName . ' designer fields must use the shared SVG preview callback.',
             $errors
         );
     }

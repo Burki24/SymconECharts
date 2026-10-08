@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SymconECharts;
 
 require_once __DIR__ . '/EChartsAsset.php';
+require_once __DIR__ . '/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/EChartsSvgImage.php';
 require_once __DIR__ . '/EChartsSvgPath.php';
 
@@ -160,6 +161,166 @@ final class EChartsGaugeDesign
         }
 
         return $form;
+    }
+
+    /** @param list<array<string, mixed>> $items @return list<array<string, mixed>> */
+    public static function WithSourceEditor(array $items, string $onAdd, string $onEdit, string $onDelete): array
+    {
+        foreach ($items as &$item) {
+            if (($item['type'] ?? '') === 'List' && ($item['name'] ?? '') === 'Sources') {
+                $item['form'] = self::SourceEditorForm();
+                $item['columns'] = array_merge(
+                    is_array($item['columns'] ?? null) ? $item['columns'] : [],
+                    self::SourceDesignColumns()
+                );
+                $item['onAdd'] = $onAdd;
+                $item['onEdit'] = $onEdit;
+                $item['onDelete'] = $onDelete;
+                continue;
+            }
+            if (isset($item['items']) && is_array($item['items'])) {
+                $item['items'] = self::WithSourceEditor($item['items'], $onAdd, $onEdit, $onDelete);
+            }
+        }
+        unset($item);
+
+        return $items;
+    }
+
+    /** @param list<array<string, mixed>> $items @return list<array<string, mixed>> */
+    public static function WithoutPresetSelectors(array $items): array
+    {
+        $result = [];
+        foreach ($items as $item) {
+            if (in_array($item['name'] ?? '', ['GaugePreset', 'IPSViewGaugePreset'], true)) {
+                continue;
+            }
+            if (isset($item['items']) && is_array($item['items'])) {
+                $item['items'] = self::WithoutPresetSelectors($item['items']);
+            }
+            $result[] = $item;
+        }
+
+        return $result;
+    }
+
+    /** @param list<string> $baseFields @param list<string> $designFields @return list<string> */
+    public static function PreviewFieldNames(array $baseFields, array $designFields): array
+    {
+        return array_merge(
+            $baseFields,
+            $designFields,
+            array_map(static fn (string $name): string => 'IPSView' . $name, $designFields)
+        );
+    }
+
+    /** @param list<string> $fieldNames */
+    public static function PreviewFormAction(string $prefix, array $fieldNames, string $sourceAction = ''): string
+    {
+        $pairs = array_map(
+            static fn (string $name): string => "'" . $name . "' => $" . $name,
+            $fieldNames
+        );
+
+        if ($sourceAction !== '') {
+            return $prefix . '_UpdateGaugePreviewSourceFromForm($id, json_encode([' . implode(', ', $pairs)
+                . ']), ' . var_export($sourceAction, true) . ');';
+        }
+
+        return $prefix . '_UpdateGaugePreviewFromForm($id, json_encode([' . implode(', ', $pairs) . ']));';
+    }
+
+    /** @param list<array<string, mixed>> $items @param list<string> $fieldNames @return list<array<string, mixed>> */
+    public static function WithPreviewActions(array $items, array $fieldNames, string $action): array
+    {
+        foreach ($items as &$item) {
+            if (isset($item['name']) && in_array($item['name'], $fieldNames, true)) {
+                $item['onChange'] = $action;
+            }
+            if (isset($item['items']) && is_array($item['items'])) {
+                $item['items'] = self::WithPreviewActions($item['items'], $fieldNames, $action);
+            }
+        }
+        unset($item);
+
+        return $items;
+    }
+
+    /**
+     * @param list<array<string, mixed>> $elements
+     * @param list<array<string, mixed>> $htmlPageItems
+     * @param list<string> $designNames
+     * @return array<string, mixed>
+     */
+    public static function IPSViewDesignerForm(
+        array $elements,
+        array $htmlPageItems,
+        array $designNames,
+        string $previewAction,
+        string $copyAction
+    ): array {
+        $tileDesigner = null;
+        foreach ($elements as $element) {
+            if (($element['type'] ?? null) === 'ExpansionPanel'
+                && ($element['caption'] ?? null) === 'Tile designer') {
+                $tileDesigner = $element;
+                break;
+            }
+        }
+        if (!is_array($tileDesigner)) {
+            throw new \RuntimeException('The Tile designer form section is missing.');
+        }
+
+        $designerItems = self::PrefixIPSViewDesignerItems($tileDesigner['items'] ?? [], $designNames);
+
+        return [
+            'type'     => 'ExpansionPanel',
+            'caption'  => 'IPSView design',
+            'expanded' => false,
+            'width'    => '700px',
+            'items'    => [
+                ...$htmlPageItems,
+                EChartsIPSViewBackground::FormRow($previewAction),
+                [
+                    'type'    => 'CheckBox',
+                    'name'    => 'IPSViewUseTileDesign',
+                    'caption' => 'Use Tile design'
+                ],
+                [
+                    'type'    => 'Label',
+                    'caption' => 'Inherited mode follows every Tile design change. Disable it for an independent IPSView appearance.'
+                ],
+                [
+                    'type'    => 'Button',
+                    'caption' => 'Copy Tile design to IPSView and edit independently',
+                    'onClick' => $copyAction
+                ],
+                [
+                    'type'     => 'ExpansionPanel',
+                    'caption'  => 'Independent IPSView designer',
+                    'expanded' => false,
+                    'items'    => $designerItems
+                ]
+            ]
+        ];
+    }
+
+    /** @param list<array<string, mixed>> $items @param list<string> $designNames @return list<array<string, mixed>> */
+    public static function PrefixIPSViewDesignerItems(array $items, array $designNames): array
+    {
+        foreach ($items as &$item) {
+            if (($item['name'] ?? null) === 'GaugePreview') {
+                $item['name'] = 'IPSViewGaugePreview';
+            } elseif (isset($item['name']) && in_array($item['name'], $designNames, true)) {
+                $item['name'] = 'IPSView' . $item['name'];
+            }
+            if (isset($item['items']) && is_array($item['items'])) {
+                $item['items'] = self::PrefixIPSViewDesignerItems($item['items'], $designNames);
+            }
+        }
+        unset($item);
+
+        return $items;
     }
 
     /** @param array<string, mixed> $source @return array<string, mixed> */

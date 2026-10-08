@@ -1172,64 +1172,37 @@ class EChartsGaugeMulti extends IPSModuleStrict
     /** @param list<array<string, mixed>> $items @return list<array<string, mixed>> */
     private function AttachGaugePreviewActions(array $items): array
     {
-        $fieldNames = [
-            'Title', 'GaugePreset', 'EChartsTheme', 'IPSViewUseTileDesign',
-            'IPSViewAdaptToBackground', 'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent',
-            'IPSViewGaugePreset', 'IPSViewEChartsTheme', ...self::DESIGN_SCALE_PROPERTIES,
-            ...array_keys(self::DESIGN_STRING_DEFAULTS), ...array_keys(self::DESIGN_INTEGER_DEFAULTS),
-            ...array_keys(self::DESIGN_ASSET_STRING_DEFAULTS), ...array_keys(self::DESIGN_ASSET_FLOAT_DEFAULTS),
-            ...array_keys(self::DESIGN_ASSET_BOOLEAN_DEFAULTS), ...array_keys(self::DESIGN_ASSET_INTEGER_DEFAULTS)
-        ];
-        foreach ([
-            self::DESIGN_SCALE_PROPERTIES, array_keys(self::DESIGN_STRING_DEFAULTS),
-            array_keys(self::DESIGN_INTEGER_DEFAULTS), array_keys(self::DESIGN_ASSET_STRING_DEFAULTS),
-            array_keys(self::DESIGN_ASSET_FLOAT_DEFAULTS), array_keys(self::DESIGN_ASSET_BOOLEAN_DEFAULTS),
-            array_keys(self::DESIGN_ASSET_INTEGER_DEFAULTS)
-        ] as $names) {
-            foreach ($names as $name) {
-                $fieldNames[] = 'IPSView' . $name;
-            }
-        }
-        $action = $this->GaugePreviewFormAction();
-        foreach ($items as &$item) {
-            if (isset($item['name']) && in_array($item['name'], $fieldNames, true)) {
-                $item['onChange'] = $action;
-            }
-            if (isset($item['items']) && is_array($item['items'])) {
-                $item['items'] = $this->AttachGaugePreviewActions($item['items']);
-            }
-        }
-        unset($item);
-
-        return $items;
+        return EChartsGaugeDesign::WithPreviewActions(
+            $items,
+            $this->GaugePreviewFieldNames(),
+            $this->GaugePreviewFormAction()
+        );
     }
 
     private function GaugePreviewFormAction(): string
     {
-        $fieldNames = [
+        return EChartsGaugeDesign::PreviewFormAction('ECGM', $this->GaugePreviewFieldNames());
+    }
+
+    /** @return list<string> */
+    private function GaugePreviewFieldNames(): array
+    {
+        return EChartsGaugeDesign::PreviewFieldNames([
             'Title', 'GaugePreset', 'EChartsTheme', 'IPSViewUseTileDesign',
             'IPSViewAdaptToBackground', 'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent',
-            'IPSViewGaugePreset', 'IPSViewEChartsTheme', ...self::DESIGN_SCALE_PROPERTIES,
+            'IPSViewGaugePreset', 'IPSViewEChartsTheme'
+        ], $this->GaugeDesignFieldNames());
+    }
+
+    /** @return list<string> */
+    private function GaugeDesignFieldNames(): array
+    {
+        return [
+            ...self::DESIGN_SCALE_PROPERTIES,
             ...array_keys(self::DESIGN_STRING_DEFAULTS), ...array_keys(self::DESIGN_INTEGER_DEFAULTS),
             ...array_keys(self::DESIGN_ASSET_STRING_DEFAULTS), ...array_keys(self::DESIGN_ASSET_FLOAT_DEFAULTS),
             ...array_keys(self::DESIGN_ASSET_BOOLEAN_DEFAULTS), ...array_keys(self::DESIGN_ASSET_INTEGER_DEFAULTS)
         ];
-        foreach ([
-            self::DESIGN_SCALE_PROPERTIES, array_keys(self::DESIGN_STRING_DEFAULTS),
-            array_keys(self::DESIGN_INTEGER_DEFAULTS), array_keys(self::DESIGN_ASSET_STRING_DEFAULTS),
-            array_keys(self::DESIGN_ASSET_FLOAT_DEFAULTS), array_keys(self::DESIGN_ASSET_BOOLEAN_DEFAULTS),
-            array_keys(self::DESIGN_ASSET_INTEGER_DEFAULTS)
-        ] as $names) {
-            foreach ($names as $name) {
-                $fieldNames[] = 'IPSView' . $name;
-            }
-        }
-        $pairs = array_map(
-            static fn (string $name): string => "'" . $name . "' => $" . $name,
-            $fieldNames
-        );
-
-        return 'ECGM_UpdateGaugePreviewFromForm($id, json_encode([' . implode(', ', $pairs) . ']));';
     }
 
     private function IPSViewThemeCSS(): string
@@ -1248,75 +1221,14 @@ class EChartsGaugeMulti extends IPSModuleStrict
     /** @param list<array<string, mixed>> $elements @return array<string, mixed> */
     private function BuildIPSViewDesigner(array $elements): array
     {
-        $tileDesigner = null;
-        foreach ($elements as $element) {
-            if (($element['type'] ?? null) === 'ExpansionPanel'
-                && ($element['caption'] ?? null) === 'Tile designer') {
-                $tileDesigner = $element;
-                break;
-            }
-        }
-        if (!is_array($tileDesigner)) {
-            throw new RuntimeException('The Tile designer form section is missing.');
-        }
-
-        $designerItems = $this->PrefixIPSViewDesignerItems($tileDesigner['items'] ?? []);
-
-        return [
-            'type'     => 'ExpansionPanel',
-            'caption'  => 'IPSView design',
-            'expanded' => false,
-            'width'    => '700px',
-            'items'    => [
-                ...$this->IPSViewHTMLPageFormItems(
-                    'Creates a standalone WebContent variable for use as an IPSView HTML widget.'
-                ),
-                EChartsIPSViewBackground::FormRow($this->GaugePreviewFormAction()),
-                [
-                    'type'    => 'CheckBox',
-                    'name'    => 'IPSViewUseTileDesign',
-                    'caption' => 'Use Tile design'
-                ],
-                [
-                    'type'    => 'Label',
-                    'caption' => 'Inherited mode follows every Tile design change. Disable it for an independent IPSView appearance.'
-                ],
-                [
-                    'type'    => 'Button',
-                    'caption' => 'Copy Tile design to IPSView and edit independently',
-                    'onClick' => 'ECGM_CopyTileDesignToIPSView($id); return "MESSAGE:Tile design copied to IPSView.";'
-                ],
-                [
-                    'type'     => 'ExpansionPanel',
-                    'caption'  => 'Independent IPSView designer',
-                    'expanded' => false,
-                    'items'    => $designerItems
-                ]
-            ]
-        ];
-    }
-
-    /** @param list<array<string, mixed>> $items @return list<array<string, mixed>> */
-    private function PrefixIPSViewDesignerItems(array $items): array
-    {
-        $designNames = [
-            'GaugePreset', 'EChartsTheme', ...self::DESIGN_SCALE_PROPERTIES,
-            ...array_keys(self::DESIGN_STRING_DEFAULTS), ...array_keys(self::DESIGN_INTEGER_DEFAULTS),
-            ...array_keys(self::DESIGN_ASSET_STRING_DEFAULTS), ...array_keys(self::DESIGN_ASSET_FLOAT_DEFAULTS),
-            ...array_keys(self::DESIGN_ASSET_BOOLEAN_DEFAULTS), ...array_keys(self::DESIGN_ASSET_INTEGER_DEFAULTS)
-        ];
-        foreach ($items as &$item) {
-            if (($item['name'] ?? null) === 'GaugePreview') {
-                $item['name'] = 'IPSViewGaugePreview';
-            } elseif (isset($item['name']) && in_array($item['name'], $designNames, true)) {
-                $item['name'] = 'IPSView' . $item['name'];
-            }
-            if (isset($item['items']) && is_array($item['items'])) {
-                $item['items'] = $this->PrefixIPSViewDesignerItems($item['items']);
-            }
-        }
-        unset($item);
-
-        return $items;
+        return EChartsGaugeDesign::IPSViewDesignerForm(
+            $elements,
+            $this->IPSViewHTMLPageFormItems(
+                'Creates a standalone WebContent variable for use as an IPSView HTML widget.'
+            ),
+            ['GaugePreset', 'EChartsTheme', ...$this->GaugeDesignFieldNames()],
+            $this->GaugePreviewFormAction(),
+            'ECGM_CopyTileDesignToIPSView($id); return "MESSAGE:Tile design copied to IPSView.";'
+        );
     }
 }

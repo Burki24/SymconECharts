@@ -68,6 +68,80 @@ assertGaugeDesign(
         && array_is_list($sourceForm),
     'The shared source-row Gauge design form contract changed.'
 );
+$formItems = [
+    ['type' => 'ExpansionPanel', 'caption' => 'Tile designer', 'items' => [
+        ['type' => 'List', 'name' => 'Sources', 'columns' => [['name' => 'VariableID']]],
+        ['type' => 'Select', 'name' => 'GaugePreset'],
+        ['type' => 'Input', 'name' => 'PointerShape'],
+        ['type' => 'Image', 'name' => 'GaugePreview']
+    ]]
+];
+$sourceDesigner = EChartsGaugeDesign::WithSourceEditor($formItems, 'add()', 'edit()', 'delete()');
+$sourceList = $sourceDesigner[0]['items'][0];
+assertGaugeDesign(
+    ($sourceList['columns'][0]['name'] ?? null) === 'VariableID'
+        && count($sourceList['columns']) === count($sourceColumns) + 1
+        && ($sourceList['onAdd'] ?? null) === 'add()'
+        && ($sourceList['onEdit'] ?? null) === 'edit()'
+        && ($sourceList['onDelete'] ?? null) === 'delete()'
+        && ($sourceList['form'] ?? null) === $sourceForm,
+    'The shared nested Gauge source editor changed its columns or callbacks.'
+);
+$withoutPresets = EChartsGaugeDesign::WithoutPresetSelectors($sourceDesigner);
+assertGaugeDesign(
+    array_column($withoutPresets[0]['items'], 'name') === ['Sources', 'PointerShape', 'GaugePreview'],
+    'Fixed Gauge layouts must not expose preset selectors.'
+);
+$previewFields = EChartsGaugeDesign::PreviewFieldNames(
+    ['Sources', 'Title', 'EChartsTheme', 'IPSViewEChartsTheme'],
+    ['PointerShape', 'PlateBackgroundSVG']
+);
+assertGaugeDesign(
+    $previewFields === [
+        'Sources', 'Title', 'EChartsTheme', 'IPSViewEChartsTheme',
+        'PointerShape', 'PlateBackgroundSVG', 'IPSViewPointerShape', 'IPSViewPlateBackgroundSVG'
+    ],
+    'Gauge preview field order or IPSView prefixes changed.'
+);
+$previewAction = EChartsGaugeDesign::PreviewFormAction('ECGT', $previewFields);
+$sourceAction = EChartsGaugeDesign::PreviewFormAction('ECGC', $previewFields, 'edit');
+$previewItems = EChartsGaugeDesign::WithPreviewActions($withoutPresets, $previewFields, $previewAction);
+assertGaugeDesign(
+    str_starts_with($previewAction, 'ECGT_UpdateGaugePreviewFromForm($id, json_encode([')
+        && str_contains($previewAction, "'IPSViewPlateBackgroundSVG' => $" . 'IPSViewPlateBackgroundSVG')
+        && str_starts_with($sourceAction, 'ECGC_UpdateGaugePreviewSourceFromForm($id, json_encode([')
+        && str_ends_with($sourceAction, "]), 'edit');")
+        && ($previewItems[0]['items'][1]['onChange'] ?? null) === $previewAction
+        && !isset($previewItems[0]['items'][2]['onChange']),
+    'Shared Gauge preview actions must preserve prefix, source action, and nested targets.'
+);
+$ipsViewDesigner = EChartsGaugeDesign::IPSViewDesignerForm(
+    $formItems,
+    [['type' => 'CheckBox', 'name' => 'EnableIPSView']],
+    ['GaugePreset', 'PointerShape'],
+    $previewAction,
+    'ECGT_CopyTileDesignToIPSView($id);'
+);
+$independentItems = $ipsViewDesigner['items'][5]['items'];
+assertGaugeDesign(
+    ($ipsViewDesigner['caption'] ?? null) === 'IPSView design'
+        && ($ipsViewDesigner['items'][0]['name'] ?? null) === 'EnableIPSView'
+        && ($ipsViewDesigner['items'][1]['items'][0]['onChange'] ?? null) === $previewAction
+        && ($ipsViewDesigner['items'][4]['onClick'] ?? null) === 'ECGT_CopyTileDesignToIPSView($id);'
+        && array_column($independentItems, 'name') === [
+            'Sources', 'IPSViewGaugePreset', 'IPSViewPointerShape', 'IPSViewGaugePreview'
+        ],
+    'Shared Gauge IPSView form must preserve nested design fields and callbacks.'
+);
+try {
+    EChartsGaugeDesign::IPSViewDesignerForm([], [], [], '', '');
+    throw new RuntimeException('A missing Tile designer section was accepted.');
+} catch (RuntimeException $exception) {
+    assertGaugeDesign(
+        $exception->getMessage() === 'The Tile designer form section is missing.',
+        'The missing Tile designer diagnostic changed.'
+    );
+}
 $sourceStyle = EChartsGaugeDesign::StyleFromSource(array_merge($sourceDefaults, [
     'PointerShape'               => 'custom',
     'CustomPointerSVG'           => '<svg viewBox="10 20 40 80"><path d="M30 20L50 100L10 100Z"/></svg>',
