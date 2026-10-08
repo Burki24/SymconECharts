@@ -2,9 +2,10 @@
 
 ## Neu
 
-- Der unabhängige IPSView-Designer und sein darin platzierter Kopierknopf sind
-  in allen ECharts-Diagrammen deaktiviert, solange IPSView das Kacheldesign
-  übernimmt. Nach dem Ausschalten der Vererbung werden sie sofort aktiv.
+- Die eigenen IPSView-Designfelder und der Kopierknopf stehen in allen
+  ECharts-Diagrammen direkt im Abschnitt IPSView-Design, ohne zusätzliche
+  Aufklappebene. Solange IPSView das Kacheldesign übernimmt, sind sie
+  deaktiviert; nach dem Ausschalten der Vererbung werden sie sofort aktiv.
   Bei TimeSeries und BarHistory liegen die unabhängigen IPSView-Zeiteinstellungen
   nun neben den allgemeinen Zeitraumoptionen statt im Designer. Die gemeinsame
   Formularlogik ist lokal zentralisiert und die Bedienfolge in allen

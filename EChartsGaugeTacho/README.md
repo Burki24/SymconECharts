@@ -45,8 +45,8 @@ oder Benutzerfarbe in frei wählbarer Deckkraft getönt werden.
 
 Für ein eigenes IPSView-Grunddesign im Abschnitt **IPSView-Design** zuerst
 **Kacheldesign verwenden** ausschalten. Solange die Option aktiv ist, sind die
-Eingaben im **Unabhängigen IPSView-Designer** und der dort liegende Knopf
-**Kacheldesign nach IPSView kopieren und unabhängig bearbeiten** deaktiviert.
+eigenen Designfelder und der Knopf **Kacheldesign nach IPSView kopieren und
+unabhängig bearbeiten** direkt im Abschnitt **IPSView-Design** deaktiviert.
 Nach dem Ausschalten werden beide sofort aktiv. Der Knopf kopiert das
 gespeicherte Kacheldesign einmalig und überschreibt dabei bisherige
 unabhängige IPSView-Designwerte. Danach lassen sich Grunddesign

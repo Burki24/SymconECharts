@@ -178,8 +178,9 @@ Im Abschnitt **IPSView-Design** wird die WebContent-Ausgabe aktiviert. Die
 erzeugte Variable wird in IPSView als HTML-Widget platziert; Größe und Position
 bestimmt IPSView. Standardmäßig erbt sie das Kacheldesign. Für eine abweichende
 Gestaltung zuerst **Kacheldesign verwenden** ausschalten. Solange es aktiv ist,
-ist der **Unabhängige IPSView-Designer** mitsamt dem darin liegenden Knopf
-**Kacheldesign nach IPSView kopieren und unabhängig bearbeiten** deaktiviert.
+stehen die eigenen Designfelder und der Knopf **Kacheldesign nach IPSView
+kopieren und unabhängig bearbeiten** direkt im Abschnitt **IPSView-Design**,
+sind aber deaktiviert.
 Nach dem Ausschalten werden die Eingaben und der Knopf sofort aktiv; dieser
 kopiert das gespeicherte Kacheldesign einmalig. Bisherige unabhängige
 IPSView-Designwerte werden dabei überschrieben. Anschließend kann der

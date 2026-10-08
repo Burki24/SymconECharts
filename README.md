@@ -102,10 +102,10 @@ Folgende Module sind enthalten:
 
 Bei allen ECharts-Diagrammen ist unter **IPSView-Design** die Option
 **Kacheldesign verwenden** standardmäßig aktiv. Solange sie aktiv ist, folgt
-die Diagrammgestaltung in IPSView dem Kacheldesigner. Der **Unabhängige
-IPSView-Designer** bleibt sichtbar, seine Eingaben sind aber deaktiviert.
-Der Knopf **Kacheldesign nach IPSView kopieren und unabhängig bearbeiten**
-liegt innerhalb dieses Designers und ist ebenfalls deaktiviert.
+die Diagrammgestaltung in IPSView dem Kacheldesigner. Die eigenen Designfelder
+und der Knopf **Kacheldesign nach IPSView kopieren und unabhängig bearbeiten**
+stehen direkt im Abschnitt **IPSView-Design**, sind dann aber deaktiviert.
+Die HTML-Ausgabe und die IPSView-Hintergrundeinstellungen bleiben bedienbar.
 
 Für ein eigenes IPSView-Design zuerst **Kacheldesign verwenden** ausschalten.
 Danach ist der Kopierknopf sofort aktiv: Er übernimmt das zuletzt gespeicherte

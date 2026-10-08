@@ -4567,11 +4567,20 @@ foreach ([
             $designItems,
             static fn (array $item): bool => ($item['caption'] ?? null) === 'Independent IPSView designer'
         ));
-        assertGatewayGauge(count($independentPanels) === 1, $moduleClass . ' needs one independent designer.');
+        assertGatewayGauge(count($independentPanels) === 0, $moduleClass . ' must show IPSView design fields directly.');
         $copyButtons = array_values(array_filter(
-            $independentPanels[0]['items'],
+            $designItems,
             static fn (array $item): bool => ($item['name'] ?? null) === 'CopyTileDesignToIPSViewButton'
         ));
+        $copyButtonIndex = null;
+        foreach ($designItems as $index => $item) {
+            if (($item['name'] ?? null) === 'CopyTileDesignToIPSViewButton') {
+                $copyButtonIndex = $index;
+                break;
+            }
+        }
+        assertGatewayGauge($copyButtonIndex !== null, $moduleClass . ' must place the copy button directly in IPSView design.');
+        $directDesignItems = array_slice($designItems, $copyButtonIndex);
         $interactiveFields = [];
         $visitDesignFields = static function (array $items) use (&$visitDesignFields, &$interactiveFields): void
         {
@@ -4587,11 +4596,34 @@ foreach ([
                 }
             }
         };
-        $visitDesignFields($independentPanels[0]['items']);
+        $visitDesignFields($directDesignItems);
+        $designFields = $interactiveFields;
+        $interactiveFields = [];
+        $unaffectedFields = [];
+        foreach (array_slice($designItems, 0, $copyButtonIndex) as $item) {
+            $visitDesignFields([$item]);
+        }
+        foreach ($interactiveFields as $field) {
+            if (in_array($field['name'] ?? null, [
+                'IPSViewAdaptToBackground', 'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent',
+                'EnableIPSView', 'IPSViewUseTileDesign'
+            ], true)) {
+                $unaffectedFields[] = $field;
+            }
+        }
+        $interactiveFields = $designFields;
         assertGatewayGauge(
             count($designSwitches) === 1
                 && count($copyButtons) === 1
-                && ($independentPanels[0]['items'][0]['name'] ?? null) === 'CopyTileDesignToIPSViewButton'
+                && count(array_intersect([
+                    'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
+                    'IPSViewBackgroundOpacityPercent', 'EnableIPSView', 'IPSViewUseTileDesign'
+                ], array_column($unaffectedFields, 'name'))) === 5
+                && count(array_filter(
+                    $unaffectedFields,
+                    static fn (array $item): bool => ($item['enabled'] ?? true) === false
+                )) === 0
+                && ($directDesignItems[0]['name'] ?? null) === 'CopyTileDesignToIPSViewButton'
                 && count($interactiveFields) >= 4
                 && count(array_filter(
                     $interactiveFields,
@@ -4602,7 +4634,7 @@ foreach ([
                     $designSwitches[0]['onChange'] ?? '',
                     $modulePrefix . '_UpdateIPSViewDesignAvailability($id, $IPSViewUseTileDesign,'
                 ),
-            $moduleClass . ' must disable the entire independent designer while inheriting Tile design.'
+            $moduleClass . ' must disable direct IPSView design fields while inheriting Tile design.'
         );
         $designAction = $designSwitches[0]['onChange'];
         $compiledDesignAction = eval('return static function () {' . $designAction . '};');
@@ -4617,7 +4649,7 @@ foreach ([
             EChartsGaugeMulti::class, EChartsGaugeTacho::class, EChartsGaugeChronograph::class
         ], true)) {
             assertGatewayGauge(
-                !in_array('Sources', array_column($independentPanels[0]['items'], 'name'), true),
+                !in_array('Sources', array_column($directDesignItems, 'name'), true),
                 $moduleClass . ' must not duplicate the shared Sources list inside the independent designer.'
             );
         }

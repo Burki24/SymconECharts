@@ -91,26 +91,39 @@ trait EChartsIPSViewDesignForm
 
             $copyButton = $element['items'][$buttonIndex];
             $copyButton['name'] = self::IPSVIEW_COPY_BUTTON;
-            array_splice($element['items'], $buttonIndex, 1);
-            if ($buttonIndex < $independentIndex) {
-                $independentIndex--;
-            }
-            array_unshift($element['items'][$independentIndex]['items'], $copyButton);
+            $designerItems = $element['items'][$independentIndex]['items'];
+            array_unshift($designerItems, $copyButton);
 
             $enabled = !$this->ReadPropertyBoolean('IPSViewUseTileDesign');
             $fieldNames = [];
             $unnamedButton = 0;
             $this->SetIndependentDesignerAvailability(
-                $element['items'][$independentIndex]['items'],
+                $designerItems,
                 $enabled,
                 $fieldNames,
                 $unnamedButton
             );
+            $flatItems = [];
+            foreach ($element['items'] as $index => $item) {
+                if ($index === $buttonIndex || $index === $independentIndex) {
+                    continue;
+                }
+                $flatItems[] = $item;
+            }
+            array_push($flatItems, ...$designerItems);
+            $element['items'] = $flatItems;
+
             $action = $modulePrefix . '_UpdateIPSViewDesignAvailability($id, $IPSViewUseTileDesign, '
                 . var_export(array_values(array_unique($fieldNames)), true) . ');';
-            $existingAction = trim((string) ($element['items'][$checkboxIndex]['onChange'] ?? ''));
-            $element['items'][$checkboxIndex]['onChange'] = $action
-                . ($existingAction === '' ? '' : ' ' . $existingAction);
+            foreach ($element['items'] as &$item) {
+                if (($item['name'] ?? null) !== 'IPSViewUseTileDesign') {
+                    continue;
+                }
+                $existingAction = trim((string) ($item['onChange'] ?? ''));
+                $item['onChange'] = $action . ($existingAction === '' ? '' : ' ' . $existingAction);
+                break;
+            }
+            unset($item);
 
             return $form;
         }

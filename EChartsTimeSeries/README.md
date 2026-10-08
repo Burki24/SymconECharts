@@ -116,10 +116,9 @@ Kachel einen Hinweis auf das wirksame Punktbudget.
    Diese Zeiteinstellungen stehen bei den allgemeinen Zeitraumoptionen,
    außerhalb der beiden Designer. Für eine abweichende Gestaltung zuerst
    **Kacheldesign verwenden** ausschalten. Solange es aktiv ist, sind die
-   Eingaben im **Unabhängigen IPSView-Designer** und der darin liegende Knopf
-   **Kacheldesign nach IPSView
-   kopieren und unabhängig bearbeiten** deaktiviert. Nach dem Ausschalten
-   werden beide sofort aktiv. Der Knopf kopiert das gespeicherte Kacheldesign
+   eigenen Designfelder und der Knopf **Kacheldesign nach IPSView kopieren und
+   unabhängig bearbeiten** direkt im Abschnitt **IPSView-Design** deaktiviert.
+   Nach dem Ausschalten werden beide sofort aktiv. Der Knopf kopiert das gespeicherte Kacheldesign
    einmalig und überschreibt bisherige unabhängige IPSView-Designwerte; diese
    können anschließend separat
    bearbeitet werden. Änderungen am Kacheldesigner vor dem Kopieren speichern.
