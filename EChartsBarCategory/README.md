@@ -33,9 +33,14 @@ Every source row provides an explicit `Category` and an optional `Series`
 field in both the table and its edit dialog. `Category` labels the category
 axis; `Series` names the legend entry in grouped and stacked modes. An empty
 category uses the variable name in Simple mode and the shared group in grouped
-or stacked mode. An empty series also uses the variable name. Categories may
-contain different data series; a missing combination remains empty instead of
-invalidating the chart. Only duplicate category/series pairs are rejected. In
+or stacked mode. An empty series uses the variable name. The variable ID is
+always the technical identity of a source; neither names nor object paths are
+used to identify it. If multiple sources have the same category and series
+label, the legend adds the variable ID, for example `Temperature (#4920)`.
+This also applies to explicitly named series. Thus four variables named
+`Temperature` can share the `Temperature` category and still appear as four
+distinct bars. Categories may contain different data series; a missing
+combination remains empty instead of invalidating the chart. In
 value-based ordering, categories are sorted by the sum of their available
 values. Existing configurations remain in the compatible `Simple` mode by
 default.

@@ -76,10 +76,15 @@
                     return order === 'ascending' ? difference : -difference;
                 });
             }
+            var baseLabels = items.map(function (item) { return String(item.category || item.series || ''); });
+            var baseCounts = Object.create(null);
+            baseLabels.forEach(function (label) { baseCounts[label] = (baseCounts[label] || 0) + 1; });
             return {
                 mode: mode,
-                categories: items.map(function (item) {
-                    return String(item.category || item.series || '');
+                categories: baseLabels.map(function (label, index) {
+                    if (baseCounts[label] === 1) { return label; }
+                    var id = String(items[index].variableID || items[index].id || index + 1);
+                    return label + ' (#' + id.replace(/^variable-/, '') + ')';
                 }),
                 series: [{
                     name: String(bar.title || ''),
@@ -91,7 +96,7 @@
         }
 
         var categories = uniqueInOrder(items.map(function (item) { return String(item.category || ''); }));
-        var seriesNames = uniqueInOrder(items.map(function (item) { return String(item.series || ''); }));
+        var seriesKeys = uniqueInOrder(items.map(function (item) { return String(item.seriesKey || item.series || ''); }));
         if (order === 'ascending' || order === 'descending') {
             var totals = Object.create(null);
             categories.forEach(function (category) { totals[category] = 0; });
@@ -105,10 +110,14 @@
         return {
             mode: mode,
             categories: categories,
-            series: seriesNames.map(function (seriesName, seriesIndex) {
+            series: seriesKeys.map(function (seriesKey, seriesIndex) {
+                var firstItem = items.find(function (item) {
+                    return String(item.seriesKey || item.series || '') === seriesKey;
+                });
                 var seriesItems = categories.map(function (category) {
                     return items.find(function (item) {
-                        return String(item.category || '') === category && String(item.series || '') === seriesName;
+                        return String(item.category || '') === category
+                            && String(item.seriesKey || item.series || '') === seriesKey;
                     });
                 });
                 var configuredColor = '';
@@ -118,7 +127,8 @@
                 });
                 var seriesColor = configuredColor || paletteColors[seriesIndex % paletteColors.length];
                 return {
-                    name: seriesName,
+                    id: seriesKey,
+                    name: String(firstItem && firstItem.series || ''),
                     color: seriesColor,
                     items: seriesItems.map(function (item) {
                         return { value: item ? Number(item.value) : null, color: item && item.color || seriesColor };
@@ -206,6 +216,7 @@
             yAxis: horizontal ? categoryAxis : valueAxis,
             series: chartData.series.map(function (seriesItem) {
                 var result = {
+                    id: seriesItem.id,
                     name: seriesItem.name,
                     type: 'bar',
                     stack: stacked ? 'total' : undefined,

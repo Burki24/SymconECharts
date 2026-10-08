@@ -80,6 +80,30 @@ assert.deepEqual(Array.from(vertical.xAxis.data), ['A', 'B', 'C']);
 assert.equal(vertical.series[0].label.position, 'top');
 assert.equal(vertical.yAxis.splitLine.show, false);
 
+const repeatedSimple = render('vertical', 'configured', 'symcon', 'simple', [
+    { id: 'variable-4920', variableID: 4920, category: 'Temperatur', series: 'Temperatur', value: 8.5, order: 0 },
+    { id: 'variable-4921', variableID: 4921, category: 'Temperatur', series: 'Temperatur', value: 21, order: 1 }
+]);
+assert.deepEqual(Array.from(repeatedSimple.xAxis.data), [
+    'Temperatur (#4920)', 'Temperatur (#4921)'
+]);
+
+const repeatedGrouped = render('vertical', 'configured', 'symcon', 'grouped', [
+    { id: 'variable-4920', seriesKey: 'variable-4920', category: 'Temperatur', series: 'Temperatur (#4920)', value: 8.5, order: 0 },
+    { id: 'variable-4921', seriesKey: 'variable-4921', category: 'Temperatur', series: 'Temperatur (#4921)', value: 21, order: 1 }
+]);
+assert.equal(repeatedGrouped.series.length, 2);
+assert.deepEqual(Array.from(repeatedGrouped.legend.data), ['Temperatur (#4920)', 'Temperatur (#4921)']);
+assert.deepEqual(Array.from(repeatedGrouped.series, item => item.id), ['variable-4920', 'variable-4921']);
+assert.deepEqual(Array.from(repeatedGrouped.series, item => item.data[0].value), [8.5, 21]);
+
+const repeatedStacked = render('vertical', 'configured', 'symcon', 'stacked', [
+    { id: 'variable-4920', seriesKey: 'variable-4920', category: 'Temperatur', series: 'Temperatur (#4920)', value: 8.5, order: 0 },
+    { id: 'variable-4921', seriesKey: 'variable-4921', category: 'Temperatur', series: 'Temperatur (#4921)', value: 21, order: 1 }
+]);
+assert.equal(repeatedStacked.series.length, 2);
+assert.deepEqual(Array.from(repeatedStacked.series, item => item.data[0].value), [8.5, 21]);
+
 const matrix = [
     { category: 'Kitchen', series: 'Today', value: 18, order: 0, color: '#aa0000' },
     { category: 'Kitchen', series: 'Yesterday', value: 20, order: 1, color: '#0000aa' },

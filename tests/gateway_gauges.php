@@ -4131,6 +4131,59 @@ assertGatewayGauge(
     'Category Bar must reject sources with different effective units.'
 );
 
+$sameNameSources = [];
+foreach ([
+    [4920, 8.5], [4921, 21.0], [4922, 20.5], [4923, 19.0]
+] as [$variableID, $value]) {
+    $GLOBALS['symconTestVariables'][$variableID] = [
+        'VariableType'    => 2,
+        'VariableUpdated' => 1780000200,
+        'Value'           => $value,
+        'Name'            => 'Temperatur'
+    ];
+    $sameNameSources[] = [
+        'VariableID'              => $variableID,
+        'Category'                => 'Temperatur',
+        'Series'                  => '',
+        'UseVariablePresentation' => false,
+        'Unit'                    => '°C',
+        'Decimals'                => 1,
+        'Color'                   => -1
+    ];
+}
+$sameNameBar = new EChartsBarCategory();
+$sameNameBar->Create();
+$sameNameBar->SetTestProperty('Sources', json_encode($sameNameSources, JSON_THROW_ON_ERROR));
+$sameNameBar->SetTestProperty('BarMode', 'grouped');
+$sameNameBar->ApplyChanges();
+assertGatewayGauge(
+    $sameNameBar->GetTestStatus() === IS_ACTIVE,
+    'Category Bar must accept equal variable names in one category when source IDs differ.'
+);
+$sameNameData = json_decode($sameNameBar->GetBarData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    array_column($sameNameData['items'], 'series') === [
+        'Temperatur (#4920)', 'Temperatur (#4921)', 'Temperatur (#4922)', 'Temperatur (#4923)'
+    ] && array_column($sameNameData['items'], 'id') === [
+        'variable-4920', 'variable-4921', 'variable-4922', 'variable-4923'
+    ] && array_column($sameNameData['items'], 'seriesKey') === [
+        'variable-4920', 'variable-4921', 'variable-4922', 'variable-4923'
+    ],
+    'Category Bar must distinguish identical labels only by variable ID and keep every source.'
+);
+$GLOBALS['symconTestVariables'][4920]['Name'] = 'Raumtemperatur';
+$renamedData = json_decode($sameNameBar->GetBarData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $renamedData['items'][0]['id'] === 'variable-4920'
+        && $renamedData['items'][0]['variableID'] === 4920
+        && $renamedData['items'][0]['series'] === 'Raumtemperatur'
+        && $renamedData['items'][1]['series'] === 'Temperatur (#4921)',
+    'Renaming a variable may change its label but never its technical source identity.'
+);
+foreach ($sameNameSources as $source) {
+    unset($GLOBALS['symconTestVariables'][$source['VariableID']]);
+}
+
 $groupedBarSources = [];
 foreach ([
     [4900, 'Kitchen today', 18.0, 'Kitchen', 'Today'],
@@ -4248,9 +4301,12 @@ $duplicateSources[1]['Series'] = $duplicateSources[0]['Series'];
 $duplicateGroupedBar->SetTestProperty('Sources', json_encode($duplicateSources, JSON_THROW_ON_ERROR));
 $duplicateGroupedBar->SetTestProperty('BarMode', 'grouped');
 $duplicateGroupedBar->ApplyChanges();
+$duplicateGroupedData = json_decode($duplicateGroupedBar->GetBarData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
-    $duplicateGroupedBar->GetTestStatus() === 201,
-    'Grouped and stacked Category Bars must reject duplicate category and series pairs.'
+    $duplicateGroupedBar->GetTestStatus() === IS_ACTIVE
+        && array_column($duplicateGroupedData['items'], 'seriesKey') === ['variable-4900', 'variable-4901']
+        && array_column($duplicateGroupedData['items'], 'series') === ['Today (#4900)', 'Today (#4901)'],
+    'Grouped and stacked Category Bars must retain equal category/series labels as distinct source IDs.'
 );
 foreach ($groupedBarSources as $source) {
     unset($GLOBALS['symconTestVariables'][$source['VariableID']]);

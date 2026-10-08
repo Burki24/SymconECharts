@@ -139,7 +139,7 @@
         },
         {
             "type": "Label",
-            "caption": "Category labels the category axis. Data series names the legend entry in grouped and stacked bars. An empty category uses the variable name in Simple mode and the shared group in Grouped or Stacked mode; an empty data series uses the variable name."
+            "caption": "Category labels the category axis. Data series names the legend entry in grouped and stacked bars. An empty category uses the variable name in Simple mode and the shared group in Grouped or Stacked mode. An empty data series uses the variable name. If category and series labels collide, the variable ID distinguishes the sources automatically; object paths are not used as source IDs."
         },
         {
             "type": "ExpansionPanel",

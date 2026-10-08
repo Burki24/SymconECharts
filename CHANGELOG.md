@@ -2,6 +2,11 @@
 
 ## Neu
 
+- Category-Bar verwendet die Variablen-ID als technische Quellenidentität.
+  Gleich benannte Variablen in derselben Kategorie bleiben getrennt erhalten;
+  bei kollidierenden Beschriftungen erscheint die ID zusätzlich in Achse oder
+  Legende.
+
 - Die eigenen IPSView-Designfelder und der Kopierknopf stehen in allen
   ECharts-Diagrammen direkt im Abschnitt IPSView-Design, ohne zusätzliche
   Aufklappebene. Solange IPSView das Kacheldesign übernimmt, sind sie

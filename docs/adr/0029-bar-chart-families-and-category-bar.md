@@ -41,9 +41,14 @@ and data-series names as separate editable fields. Simple bars use the category
 as their axis label and fall back to the variable name. Grouped and stacked
 bars use the category for the category axis and the series for the legend;
 empty categories share one group and empty series fall back to the variable
-name. Categories may contain different series; only duplicate category/series
-pairs are invalid. Value ordering uses the sum of the values available in each
-category. The default remains `simple`, so existing configurations stay valid.
+name. The source variable ID is always the technical identity. When two sources
+have the same category and series label, their variable IDs are appended to
+the displayed legend labels, including explicitly configured names. Paths and
+parent instance IDs are not used as source keys. Categories may contain
+different series or equal labels from different source IDs; no value is lost
+because of a label collision. Value ordering uses the sum of the values
+available in each category. The default remains `simple`, so existing
+configurations stay valid.
 The two earlier unpublished source layouts (`Label`/`Series` and
 `Category`/`Label`) remain readable during development but are not written by
 the new form.

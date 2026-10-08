@@ -7,7 +7,7 @@
             "Variable": "Variable",
             "Category": "Kategorie",
             "Data series (optional)": "Datenreihe (optional)",
-            "Category labels the category axis. Data series names the legend entry in grouped and stacked bars. An empty category uses the variable name in Simple mode and the shared group in Grouped or Stacked mode; an empty data series uses the variable name.": "Kategorie beschriftet die Kategorieachse. Datenreihe benennt den Legendeneintrag bei gruppierten und gestapelten Balken. Eine leere Kategorie verwendet im Modus Einfach den Variablennamen und in den Modi Gruppiert oder Gestapelt die gemeinsame Gruppe; eine leere Datenreihe verwendet den Variablennamen.",
+            "Category labels the category axis. Data series names the legend entry in grouped and stacked bars. An empty category uses the variable name in Simple mode and the shared group in Grouped or Stacked mode. An empty data series uses the variable name. If category and series labels collide, the variable ID distinguishes the sources automatically; object paths are not used as source IDs.": "Kategorie beschriftet die Kategorieachse. Datenreihe benennt den Legendeneintrag bei gruppierten und gestapelten Balken. Eine leere Kategorie verwendet im Modus Einfach den Variablennamen und in den Modi Gruppiert oder Gestapelt die gemeinsame Gruppe. Eine leere Datenreihe verwendet den Variablennamen. Wenn Kategorie und Datenreihe gleich lauten, unterscheidet die Variablen-ID automatisch die Quellen; Objektpfade dienen nicht als Quellen-ID.",
             "Variable presentation": "Variablendarstellung",
             "Unit": "Einheit",
             "Decimals": "Nachkommastellen",

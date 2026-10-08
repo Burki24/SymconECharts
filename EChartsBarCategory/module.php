@@ -152,15 +152,25 @@ class EChartsBarCategory extends IPSModuleStrict
         }
 
         $sources = $this->GetValidatedSources();
+        $pairCounts = [];
+        foreach ($sources as $source) {
+            $series = $source['Series'] !== '' ? $source['Series'] : IPS_GetName($source['VariableID']);
+            $pair = json_encode([$source['Category'], $series], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
+            $pairCounts[$pair] = ($pairCounts[$pair] ?? 0) + 1;
+        }
         $items = [];
         foreach ($sources as $index => $source) {
             $current = $this->ReadCurrentSource($source['VariableID']);
             $variableName = IPS_GetName($source['VariableID']);
+            $series = $source['Series'] !== '' ? $source['Series'] : $variableName;
+            $pair = json_encode([$source['Category'], $series], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
+            $duplicateLabel = $pairCounts[$pair] > 1;
             $items[] = [
                 'id'         => 'variable-' . $source['VariableID'],
                 'variableID' => $source['VariableID'],
                 'category'   => $source['Category'],
-                'series'     => $source['Series'] !== '' ? $source['Series'] : $variableName,
+                'seriesKey'  => $duplicateLabel ? 'variable-' . $source['VariableID'] : 'series-' . $series,
+                'series'     => $duplicateLabel ? $series . ' (#' . $source['VariableID'] . ')' : $series,
                 'value'      => $current['Value'],
                 'timestamp'  => $current['Timestamp'],
                 'color'      => $source['Color'] < 0 ? '' : EChartsAsset::ColorToHex($source['Color']),
@@ -303,15 +313,7 @@ class EChartsBarCategory extends IPSModuleStrict
     private function GetConfigurationError(): ?array
     {
         try {
-            $sources = $this->GetValidatedSources();
-            if ($this->ReadPropertyString('BarMode') !== 'simple') {
-                $this->ValidateGroupedSources($sources);
-            }
-            if (!$this->ReadPropertyBoolean('IPSViewUseTileDesign')
-                && $this->ReadPropertyString('IPSViewBarMode') !== 'simple'
-            ) {
-                $this->ValidateGroupedSources($sources);
-            }
+            $this->GetValidatedSources();
         } catch (Throwable $exception) {
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => $exception->getMessage()];
         }
@@ -399,20 +401,6 @@ class EChartsBarCategory extends IPSModuleStrict
         }
 
         return $validated;
-    }
-
-    /** @param list<array{VariableID:int, Category:string, Series:string, Unit:string, Decimals:int, Color:int}> $sources */
-    private function ValidateGroupedSources(array $sources): void
-    {
-        $pairs = [];
-        foreach ($sources as $source) {
-            $series = $source['Series'] !== '' ? $source['Series'] : IPS_GetName($source['VariableID']);
-            $pair = json_encode([$source['Category'], $series], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
-            if (isset($pairs[$pair])) {
-                throw new InvalidArgumentException('Every Category Bar category and series pair must be unique.');
-            }
-            $pairs[$pair] = true;
-        }
     }
 
     /** @return array{Value: float, Timestamp: int} */
