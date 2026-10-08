@@ -335,12 +335,16 @@ verfügbare Fläche an. Dazu wird die WebContent-Variable in IPSView als HTML-
 Element eingebunden.
 
 Im Abschnitt **IPSView-Design** ist zunächst **Kacheldesign verwenden** aktiv.
-Damit folgt das Widget jeder späteren Änderung am Kacheldesigner. Für eine
-andere Optik kann diese Vererbung abgeschaltet oder das aktuelle Kacheldesign
-über die Kopieraktion als Ausgangspunkt übernommen werden. Danach stehen
+Damit folgt das Widget jeder späteren Änderung am Kacheldesigner; die
+unabhängigen IPSView-Designfelder wirken dann nicht und der Kopierknopf ist
+deaktiviert. Für eine andere Optik zuerst **Kacheldesign verwenden**
+ausschalten. Danach ist **Kacheldesign nach IPSView kopieren und unabhängig
+bearbeiten** sofort nutzbar: Die Aktion übernimmt das aktuelle Kacheldesign
+einmalig und überschreibt bisherige unabhängige IPSView-Designwerte. Danach stehen
 Preset, Theme, Zeiger, Nabe, Platte, Skala, Farben, SVGs und Feinabstimmung
 unabhängig zur Verfügung. Datenquelle, Titeltext, Wertebereich, Einheit und
 Nachkommastellen bleiben bewusst gemeinsame fachliche Einstellungen.
+Änderungen am Kacheldesigner vor dem Kopieren speichern.
 
 #### Gemeinsame Darstellung
 

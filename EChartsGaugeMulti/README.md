@@ -177,9 +177,14 @@ eigenständigen Module Gauge Tacho und Gauge Chronograph.
 Im Abschnitt **IPSView-Design** wird die WebContent-Ausgabe aktiviert. Die
 erzeugte Variable wird in IPSView als HTML-Widget platziert; Größe und Position
 bestimmt IPSView. Standardmäßig erbt sie das Kacheldesign. Für eine abweichende
-Gestaltung kann das Kacheldesign kopiert und der unabhängige IPSView-Designer
-bearbeitet werden. Beide Ausgaben behalten dieselben Quellen, Wertebereiche,
+Gestaltung zuerst **Kacheldesign verwenden** ausschalten. Solange es aktiv ist,
+wirken unabhängige IPSView-Designfelder nicht und **Kacheldesign nach IPSView
+kopieren und unabhängig bearbeiten** ist deaktiviert. Nach dem Ausschalten
+ist der Knopf sofort aktiv und kopiert das aktuelle Kacheldesign einmalig;
+bisherige unabhängige IPSView-Designwerte werden dabei überschrieben.
+Anschließend kann der IPSView-Designer separat bearbeitet werden. Beide Ausgaben behalten dieselben Quellen, Wertebereiche,
 Einheiten und Live-Daten.
+Änderungen am Kacheldesigner vor dem Kopieren speichern.
 
 #### Gemeinsame Darstellung
 

@@ -12,6 +12,7 @@ use SymconECharts\EChartsArchiveQuery;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsDataProtocol;
 use SymconECharts\EChartsIPSViewBackground;
+use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsVariablePresentation;
 
@@ -25,6 +26,7 @@ require_once __DIR__ . '/../libs/EChartsArchiveQuery.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
+require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 
@@ -33,6 +35,7 @@ class EChartsBarHistory extends IPSModuleStrict
     use ConfigurationFormHelper;
     use DataFlowHelper;
     use IPSViewHTMLPageHelper;
+    use EChartsIPSViewDesignForm;
     use EChartsIPSViewTransport;
     use ResponsiveVisualizationHelper;
     use VisualizationAssetHelper;
@@ -181,7 +184,7 @@ class EChartsBarHistory extends IPSModuleStrict
             $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
         }
 
-        return $this->EncodeConfigurationForm($form);
+        return $this->EncodeConfigurationForm($this->WithIPSViewDesignFormState($form, 'ECBH'));
     }
 
     public function UpdateTimeRangeForm(string $Range): void

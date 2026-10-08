@@ -13,6 +13,7 @@ use SymconECharts\EChartsArchiveQuery;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsDataProtocol;
 use SymconECharts\EChartsIPSViewBackground;
+use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsTimeSeriesDesign;
 use SymconECharts\EChartsTimeSeriesPreview;
@@ -29,6 +30,7 @@ require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsArchiveQuery.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
+require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
 require_once __DIR__ . '/../libs/EChartsTimeSeriesDesign.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
@@ -39,6 +41,7 @@ class EChartsTimeSeries extends IPSModuleStrict
     use ConfigurationFormHelper;
     use DataFlowHelper;
     use IPSViewHTMLPageHelper;
+    use EChartsIPSViewDesignForm;
     use EChartsIPSViewTransport;
     use ResponsiveVisualizationHelper;
     use VisualizationAssetHelper;
@@ -230,7 +233,7 @@ class EChartsTimeSeries extends IPSModuleStrict
             )
         );
 
-        return $this->EncodeConfigurationForm($form);
+        return $this->EncodeConfigurationForm($this->WithIPSViewDesignFormState($form, 'ECTS'));
     }
 
     /** Refreshes the SVG preview from the values currently edited in the configuration form. */

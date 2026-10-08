@@ -98,6 +98,25 @@ Folgende Module sind enthalten:
   IPSView kann optional einen eigenen Zeitraum und ein eigenes Design verwenden;
   eine Begrenzung von Rohwerten wird sichtbar gemeldet.
 
+## Kacheldesign und IPSView-Design
+
+Bei allen ECharts-Diagrammen ist unter **IPSView-Design** die Option
+**Kacheldesign verwenden** standardmäßig aktiv. Solange sie aktiv ist, folgt
+die Diagrammgestaltung in IPSView dem Kacheldesigner; Änderungen an den
+unabhängigen IPSView-Designfeldern haben dann keine Wirkung. Der Knopf
+**Kacheldesign nach IPSView kopieren und unabhängig bearbeiten** ist in diesem
+Zustand deaktiviert.
+
+Für ein eigenes IPSView-Design zuerst **Kacheldesign verwenden** ausschalten.
+Danach ist der Kopierknopf sofort aktiv: Er übernimmt das zuletzt gespeicherte
+Kacheldesign einmalig als Ausgangspunkt und überschreibt dabei die bisherigen
+unabhängigen IPSView-Designwerte. Anschließend können diese Werte separat
+bearbeitet werden; spätere Änderungen am Kacheldesign werden nicht mehr
+automatisch übernommen. Datenquellen bleiben gemeinsam. Eigenständige
+IPSView-Einstellungen wie Hintergrund und – sofern angeboten – Zeitraum
+werden getrennt gesteuert. Änderungen im Kacheldesigner daher vor dem
+Kopieren erst speichern.
+
 Für eine reguläre Installation genügt eine gemeinsame EChartsGateway-Instanz
 für alle Gauge- und späteren Diagramminstanzen. Beim ersten Diagramm kann ein
 neues Gateway angelegt werden; bei jedem weiteren Diagramm wird das bereits

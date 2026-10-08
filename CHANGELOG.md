@@ -2,6 +2,11 @@
 
 ## Neu
 
+- Der Kopierknopf für das IPSView-Design ist in allen ECharts-Diagrammen
+  deaktiviert, solange IPSView das Kacheldesign übernimmt. Nach dem Ausschalten
+  der Vererbung wird er sofort aktiv; die gemeinsame Formularlogik ist lokal
+  zentralisiert und die Bedienfolge in allen Modul-READMEs erläutert.
+
 - EChartsBarHistory stellt rohe, automatisch verdichtete oder ausdrücklich
   aggregierte Archivwerte einer numerischen Quelle als vertikale Balken auf
   einer Zeitachse dar. Die erste native Kachel unterstützt feste,

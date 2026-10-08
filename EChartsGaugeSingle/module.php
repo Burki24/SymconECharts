@@ -14,6 +14,7 @@ use SymconECharts\EChartsDataProtocol;
 use SymconECharts\EChartsGaugeDesign;
 use SymconECharts\EChartsGaugeSinglePreview;
 use SymconECharts\EChartsIPSViewBackground;
+use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsSvgPath;
 use SymconECharts\EChartsVariablePresentation;
@@ -29,6 +30,7 @@ require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsGaugeDesign.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
+require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
 require_once __DIR__ . '/../libs/EChartsSvgPath.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
@@ -39,6 +41,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
     use ConfigurationFormHelper;
     use DataFlowHelper;
     use IPSViewHTMLPageHelper;
+    use EChartsIPSViewDesignForm;
     use EChartsIPSViewTransport;
     use ResponsiveVisualizationHelper;
     use VisualizationAssetHelper;
@@ -373,7 +376,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
             $this->BuildIPSViewGaugePreviewSvg()
         );
 
-        return $this->EncodeConfigurationForm($form);
+        return $this->EncodeConfigurationForm($this->WithIPSViewDesignFormState($form, 'ECGS'));
     }
 
     public function RequestAction(string $Ident, mixed $Value): void

@@ -16,6 +16,14 @@ the same effective unit so that the shared value axis remains meaningful.
 - Automatic light/dark value-label contrast on stacked bar segments
 - Independent Tile and IPSView design settings
 
+In **IPSView design**, **Use Tile design** is enabled by default. While it is
+enabled, independent IPSView design fields have no effect and **Copy Tile design
+to IPSView and edit independently** is disabled. Turn off **Use Tile design**
+first; the button becomes available immediately. Clicking it copies the current
+Tile design once and replaces previously saved independent IPSView design
+values. Subsequent Tile design changes are not copied automatically. Sources
+and live values remain shared. Save changes to the Tile designer before copying.
+
 The module reads current values through the connected `EChartsGateway`. It
 does not read archive data; historical bar charts belong to a separate chart
 family.

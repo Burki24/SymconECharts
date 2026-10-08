@@ -4538,4 +4538,60 @@ assertGatewayGauge(
     'Historical Bar must reject design values outside their supported range.'
 );
 
+foreach ([
+    EChartsGaugeSingle::class       => 'ECGS',
+    EChartsGaugeMulti::class        => 'ECGM',
+    EChartsGaugeTacho::class        => 'ECGT',
+    EChartsGaugeChronograph::class  => 'ECGC',
+    EChartsTimeSeries::class        => 'ECTS',
+    EChartsBarCategory::class       => 'ECBC',
+    EChartsBarHistory::class        => 'ECBH'
+] as $moduleClass => $modulePrefix) {
+    $designModule = new $moduleClass();
+    $designModule->Create();
+    foreach ([true, false] as $useTileDesign) {
+        $designModule->SetTestProperty('IPSViewUseTileDesign', $useTileDesign);
+        $designForm = json_decode($designModule->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+        $designPanels = array_values(array_filter(
+            $designForm['elements'],
+            static fn (array $element): bool => ($element['caption'] ?? null) === 'IPSView design'
+        ));
+        assertGatewayGauge(count($designPanels) === 1, $moduleClass . ' must have one IPSView designer.');
+        $designItems = $designPanels[0]['items'];
+        $designSwitches = array_values(array_filter(
+            $designItems,
+            static fn (array $item): bool => ($item['name'] ?? null) === 'IPSViewUseTileDesign'
+        ));
+        $copyButtons = array_values(array_filter(
+            $designItems,
+            static fn (array $item): bool => ($item['name'] ?? null) === 'CopyTileDesignToIPSViewButton'
+        ));
+        assertGatewayGauge(
+            count($designSwitches) === 1
+                && count($copyButtons) === 1
+                && ($copyButtons[0]['enabled'] ?? null) === !$useTileDesign
+                && str_contains(
+                    $designSwitches[0]['onChange'] ?? '',
+                    $modulePrefix . '_UpdateIPSViewDesignAvailability($id, $IPSViewUseTileDesign);'
+                ),
+            $moduleClass . ' must keep the copy button in sync with Tile design inheritance.'
+        );
+        if ($moduleClass === EChartsGaugeSingle::class) {
+            assertGatewayGauge(
+                str_contains($designSwitches[0]['onChange'], 'ECGS_UpdateIPSViewGaugePreviewFromForm('),
+                'The shared IPSView form state must preserve Gauge Single preview updates.'
+            );
+        }
+    }
+    $designModule->UpdateIPSViewDesignAvailability(true);
+    $designModule->UpdateIPSViewDesignAvailability(false);
+    assertGatewayGauge(
+        array_slice($designModule->GetTestFormUpdates(), -2) === [
+            ['Field' => 'CopyTileDesignToIPSViewButton', 'Parameter' => 'enabled', 'Value' => false],
+            ['Field' => 'CopyTileDesignToIPSViewButton', 'Parameter' => 'enabled', 'Value' => true]
+        ],
+        $moduleClass . ' must update the copy button immediately when inheritance changes.'
+    );
+}
+
 echo "Gateway and Gauge module integration verified.\n";
