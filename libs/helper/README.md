@@ -5,7 +5,7 @@ Die Dateien in diesem Verzeichnis stammen aus dem gemeinsamen Repository
 
 | Datei | Upstream-Version | SHA-256 |
 | --- | --- | --- |
-| `ConfigurationFormHelper.php` | 1.0.0 | `fa87dd4c67f43a3838fe87110387e4c1a1b98685c13403eeb52c189246045678` |
+| `ConfigurationFormHelper.php` | 1.0.1 | `bd45f15a1c2f6e2800eff51eefeb3094f5745a3469434d6a57b98d54f30d363f` |
 | `DataFlowHelper.php` | 1.0.0 | `4c25828b283367692d0db1631d2b7d71ba6012883798bc5ffddb8f2d551d6dfb` |
 | `IPSViewHTMLPageHelper.php` | 1.5.1 | `8c0b58a2df1fd0a2be6d7c5e5bc90815fae03b40e04f65dc0d1c18876700f4f8` |
 | `HelperTranslationHelper.php` | 1.0.0 | `d3deee581eca9f8eb11e9adce060170227a2dc836ee898bd134f93d27604f639` |
