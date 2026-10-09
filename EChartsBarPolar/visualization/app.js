@@ -5,7 +5,10 @@
     var chartElement = document.getElementById('echarts-bar-polar-chart');
     var errorElement = document.getElementById('echarts-bar-polar-error');
     var chart = null;
+    var currentState = bootstrap.state || null;
     var currentTheme = null;
+    var lastWidth = 0;
+    var lastHeight = 0;
 
     function translate(value) {
         return (bootstrap.translations || {})[value] || value;
@@ -70,6 +73,25 @@
             });
         }
         return result;
+    }
+
+    function polarGeometry(polar) {
+        var style = polar.style || {};
+        var width = Math.max(1, chartElement.clientWidth || 1);
+        var height = Math.max(1, chartElement.clientHeight || 1);
+        var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8;
+        var top = headerInset + (polar.title ? 92 : 52);
+        var bottom = style.showCategoryLabels !== false ? 64 : 32;
+        var side = style.showCategoryLabels !== false ? 120 : 52;
+        var outerPercent = Math.max(20, Math.min(95, Number(style.outerRadiusPercent) || 76));
+        var innerPercent = Math.max(0, Math.min(75, Number(style.innerRadiusPercent) || 0));
+        var requestedRadius = Math.min(width, height) * outerPercent / 200;
+        var availableRadius = Math.max(1, Math.min(width / 2 - side, (height - top - bottom) / 2));
+        var outerRadius = Math.min(requestedRadius, availableRadius);
+        return {
+            center: [width / 2, (top + height - bottom) / 2],
+            radius: [outerRadius * innerPercent / outerPercent, outerRadius]
+        };
     }
 
     function buildOption(model, theme) {
@@ -138,13 +160,7 @@
                         + escapeHtml(formatValue(item.value, itemDecimals(item), unit));
                 }
             },
-            polar: {
-                center: ['50%', titleVisible ? '56%' : '52%'],
-                radius: [
-                    Math.max(0, Math.min(75, Number(style.innerRadiusPercent) || 0)) + '%',
-                    Math.max(20, Math.min(95, Number(style.outerRadiusPercent) || 76)) + '%'
-                ]
-            },
+            polar: polarGeometry(polar),
             angleAxis: angleAxis,
             radiusAxis: mode === 'radial' ? valueAxis : categoryAxis,
             series: [{
@@ -188,6 +204,7 @@
     }
 
     function render(state) {
+        currentState = state;
         if (!state || state.status !== 'ready' || !state.chart) {
             displayError(state && state.error);
             return;
@@ -208,6 +225,21 @@
             currentTheme = theme;
         }
         chart.setOption(buildOption(state.chart, theme), true);
+        lastWidth = chartElement.clientWidth;
+        lastHeight = chartElement.clientHeight;
+    }
+
+    function resizeChart() {
+        if (!chart) { return; }
+        chart.resize();
+        var width = chartElement.clientWidth;
+        var height = chartElement.clientHeight;
+        if (width === lastWidth && height === lastHeight) { return; }
+        lastWidth = width;
+        lastHeight = height;
+        if (currentState && currentState.status === 'ready' && currentState.chart) {
+            chart.setOption({ polar: polarGeometry(currentState.chart.polar || {}) });
+        }
     }
 
     window.handleMessage = function (message) {
@@ -216,9 +248,9 @@
     };
 
     if (window.ResizeObserver) {
-        new ResizeObserver(function () { if (chart) { chart.resize(); } }).observe(chartElement);
+        new ResizeObserver(resizeChart).observe(chartElement);
     } else {
-        window.addEventListener('resize', function () { if (chart) { chart.resize(); } });
+        window.addEventListener('resize', resizeChart);
     }
     window.addEventListener('beforeunload', function () { if (chart) { chart.dispose(); } });
     render(bootstrap.state || null);

@@ -11,13 +11,15 @@ const source = fs.readFileSync(
 const designSource = fs.readFileSync(
     path.join(__dirname, '..', 'libs', 'echarts-design.js'), 'utf8'
 );
-const chartElement = { hidden: false };
+const chartElement = { hidden: false, clientWidth: 625, clientHeight: 560 };
 const errorElement = { hidden: true, textContent: '' };
 const options = [];
 let initialized = 0;
+let resizeCallback = null;
+let resized = 0;
 const chart = {
     setOption: next => { options.push(next); },
-    clear: () => {}, resize: () => {}, dispose: () => {}
+    clear: () => {}, resize: () => { resized++; }, dispose: () => {}
 };
 const palette = {
     background: '#111111', text: '#eeeeee', muted: '#aaaaaa', border: '#777777',
@@ -50,6 +52,10 @@ const window = {
         translations: {}
     },
     echarts: { init: () => { initialized++; return chart; } },
+    ResizeObserver: class {
+        constructor(callback) { resizeCallback = callback; }
+        observe() {}
+    },
     addEventListener: () => {}
 };
 const document = {
@@ -58,10 +64,23 @@ const document = {
     body: { appendChild: () => {} }
 };
 vm.runInNewContext(designSource, { window, document, console });
-vm.runInNewContext(source, { window, document, console });
+vm.runInNewContext(source, { window, document, console, ResizeObserver: window.ResizeObserver });
 
 assert.equal(initialized, 1);
+function pixels(value, basis) {
+    return typeof value === 'string' ? parseFloat(value) * basis / 100 : value;
+}
+function assertProtectedGeometry(option, width, height, topClearance) {
+    const centerX = pixels(option.polar.center[0], width);
+    const centerY = pixels(option.polar.center[1], height);
+    const outerRadius = pixels(option.polar.radius[1], Math.min(width, height) / 2);
+    assert.ok(centerY - outerRadius >= topClearance, 'Polar ring must clear the tile heading and scale.');
+    assert.ok(centerY + outerRadius <= height - 64, 'Polar ring must leave room for bottom labels.');
+    assert.ok(centerX - outerRadius >= 120, 'Polar ring must leave room for left labels.');
+    assert.ok(centerX + outerRadius <= width - 120, 'Polar ring must leave room for right labels.');
+}
 const radial = options.at(-1);
+assertProtectedGeometry(radial, 625, 560, 150);
 assert.equal(radial.series[0].coordinateSystem, 'polar');
 assert.equal(radial.angleAxis.type, 'category');
 assert.equal(radial.radiusAxis.type, 'value');
@@ -115,17 +134,34 @@ assert.equal(tangential.series[0].roundCap, true);
 assert.equal(tangential.series[0].label.show, false);
 assert.equal(tangential.series[0].label.rotate, 0);
 assert.equal(tangential.series[0].label.position, 'middle');
-assert.deepEqual(Array.from(tangential.polar.radius), ['20%', '90%']);
+assertProtectedGeometry(tangential, 625, 560, 110);
+assert.ok(tangential.polar.radius[0] > 0 && tangential.polar.radius[0] < tangential.polar.radius[1]);
 assert.equal(tangential.angleAxis.splitLine.show, false);
+
+chartElement.clientWidth = 1000;
+chartElement.clientHeight = 700;
+resizeCallback();
+assert.equal(resized, 1, 'A size change must resize the ECharts instance.');
+assertProtectedGeometry(options.at(-1), 1000, 700, 110);
+assert.ok(options.at(-1).polar.radius[1] > tangential.polar.radius[1], 'The ring must grow with the tile.');
 
 const localECharts = path.join(__dirname, '..', '.tools', 'echarts-runtime', 'node_modules', 'echarts');
 if (fs.existsSync(localECharts)) {
     const echarts = require(localECharts);
     for (const option of [radial, tangential]) {
-        const realChart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 800, height: 500 });
+        const realChart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 625, height: 560 });
         realChart.setOption(option);
         assert.ok(realChart.renderToSVGString().includes('<svg'), 'Both polar modes must render in ECharts.');
         if (option === radial) {
+            const categoryLabels = realChart.getZr().storage.getDisplayList().filter(
+                element => element.type === 'tspan' && ['<Room>', 'Outside'].includes(element.style.text)
+            );
+            assert.equal(categoryLabels.length, 3);
+            for (const element of categoryLabels) {
+                const bounds = element.getBoundingRect();
+                assert.ok(bounds.x >= 8 && bounds.x + bounds.width <= 617, 'Categories must stay inside tile sides.');
+                assert.ok(bounds.y >= 100 && bounds.y + bounds.height <= 548, 'Categories must clear the title and tile bottom.');
+            }
             const valueSectors = realChart.getZr().storage.getDisplayList().filter(
                 element => element.type === 'sector' && element.getTextContent()
             );
