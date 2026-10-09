@@ -195,6 +195,18 @@ final class EChartsAsset
         return self::NormalizeLineEndings($content);
     }
 
+    /** Loads the shared time-axis zoom controls used by Cartesian renderers. */
+    public static function ZoomJavaScript(): string
+    {
+        $path = __DIR__ . '/echarts-zoom.js';
+        $content = @file_get_contents($path);
+        if ($content === false || $content === '') {
+            throw new RuntimeException('The shared ECharts zoom controls could not be loaded.');
+        }
+
+        return self::NormalizeLineEndings($content);
+    }
+
     /** @return list<string> */
     public static function ThemeIDs(): array
     {

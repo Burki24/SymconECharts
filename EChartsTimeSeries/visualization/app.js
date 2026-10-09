@@ -8,6 +8,7 @@
     var chart = null;
     var currentState = bootstrap.state || null;
     var currentTheme = null;
+    var zoomController = window.SymconEChartsZoom;
     var areaPatternCache = Object.create(null);
 
     function translate(text) {
@@ -282,17 +283,7 @@
                     })).join('<br>');
                 }
             },
-            dataZoom: zoom ? [
-                {
-                    type: 'inside',
-                    xAxisIndex: 0,
-                    start: 0,
-                    end: 100,
-                    zoomOnMouseWheel: bootstrap.mode !== 'ipsview',
-                    moveOnMouseWheel: false
-                },
-                { type: 'slider', xAxisIndex: 0, bottom: bottomLegend ? 38 : 12 }
-            ] : [],
+            dataZoom: zoomController.options(zoom, bootstrap.mode, bottomLegend ? 38 : 12),
             xAxis: {
                 type: 'time',
                 min: model.range.startTimestamp * 1000,
@@ -472,6 +463,9 @@
     }
 
     function render(state) {
+        var previousRange = currentState && currentState.chart && currentState.chart.range;
+        var nextRange = state && state.chart && state.chart.range;
+        var savedZoom = zoomController.capture(chart, previousRange, nextRange);
         currentState = state;
         if (!state || state.status !== 'ready' || !state.chart) {
             displayError(state && state.error);
@@ -498,55 +492,7 @@
         }
         warningElement.textContent = translate('The selected raw range was truncated by the point budget.');
         warningElement.hidden = !state.chart.truncated;
-        chart.setOption(buildOption(state.chart, theme), true);
-    }
-
-    function handleIPSViewWheel(event) {
-        if (bootstrap.mode !== 'ipsview'
-            || !chart
-            || !currentState
-            || currentState.status !== 'ready'
-            || !currentState.chart
-            || !currentState.chart.chart
-            || currentState.chart.chart.enableZoom !== true) {
-            return;
-        }
-
-        var delta = Number(event.deltaY);
-        if (!Number.isFinite(delta) || delta === 0) { return; }
-
-        var option = chart.getOption();
-        var zoom = option && Array.isArray(option.dataZoom) ? option.dataZoom[0] : null;
-        var start = zoom && Number.isFinite(Number(zoom.start)) ? Number(zoom.start) : 0;
-        var end = zoom && Number.isFinite(Number(zoom.end)) ? Number(zoom.end) : 100;
-        var span = Math.max(1, Math.min(100, end - start));
-        var nextSpan = Math.max(1, Math.min(100, span * (delta < 0 ? 0.8 : 1.25)));
-        var bounds = chartElement.getBoundingClientRect();
-        var anchor = bounds.width > 0 ? (Number(event.clientX) - bounds.left) / bounds.width : 0.5;
-        anchor = Math.max(0, Math.min(1, Number.isFinite(anchor) ? anchor : 0.5));
-        var anchorValue = start + span * anchor;
-        var nextStart = anchorValue - nextSpan * anchor;
-        var nextEnd = anchorValue + nextSpan * (1 - anchor);
-
-        if (nextStart < 0) {
-            nextEnd -= nextStart;
-            nextStart = 0;
-        }
-        if (nextEnd > 100) {
-            nextStart -= nextEnd - 100;
-            nextEnd = 100;
-        }
-        nextStart = Math.max(0, nextStart);
-        nextEnd = Math.min(100, nextEnd);
-
-        event.preventDefault();
-        event.stopPropagation();
-        chart.dispatchAction({
-            type: 'dataZoom',
-            dataZoomIndex: 0,
-            start: nextStart,
-            end: nextEnd
-        });
+        zoomController.apply(chart, buildOption(state.chart, theme), savedZoom);
     }
 
     function appendPoint(message) {
@@ -591,14 +537,20 @@
             if (!chart) { return; }
             chart.resize();
             if (currentState && currentState.status === 'ready' && currentState.chart) {
-                chart.setOption(buildOption(currentState.chart, currentTheme), true);
+                var range = currentState.chart.range;
+                var savedZoom = zoomController.capture(chart, range, range);
+                zoomController.apply(chart, buildOption(currentState.chart, currentTheme), savedZoom);
             }
         }).observe(chartElement);
     } else {
         window.addEventListener('resize', function () { if (chart) { chart.resize(); } });
     }
     if (bootstrap.mode === 'ipsview') {
-        chartElement.addEventListener('wheel', handleIPSViewWheel, { passive: false });
+        zoomController.attachIPSViewWheel(chartElement, function () { return chart; }, function () {
+            return currentState && currentState.status === 'ready'
+                && currentState.chart && currentState.chart.chart
+                && currentState.chart.chart.enableZoom === true;
+        });
     }
     window.addEventListener('beforeunload', function () { if (chart) { chart.dispose(); } });
     render(currentState);

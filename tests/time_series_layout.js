@@ -9,6 +9,7 @@ const source = fs.readFileSync(
     path.join(__dirname, '..', 'EChartsTimeSeries', 'visualization', 'app.js'),
     'utf8'
 );
+const zoomSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-zoom.js'), 'utf8');
 const palette = {
     background: '#202020', text: '#ffffff', muted: '#aaaaaa', border: '#cccccc', track: '#444444',
     accent: '#55cbb5', seriesColors: ['#111111', '#222222', '#333333']
@@ -144,13 +145,16 @@ function render(
         return probe;
     };
 
-    vm.runInNewContext(source, { window, document });
+    const context = { window, document };
+    vm.runInNewContext(zoomSource, context);
+    vm.runInNewContext(source, context);
     while (scheduled.length > 0) { scheduled.shift()(); }
     assert.ok(option, 'The time-series chart should be rendered.');
     Object.defineProperties(option, {
         testListeners: { value: listeners },
         getDispatchedAction: { value: () => dispatchedAction },
         getSetOptionCalls: { value: () => setOptionCalls },
+        getState: { value: () => window.SYMC_VISUALIZATION.state },
         handleMessage: { value: window.handleMessage },
         getLatestOption: { value: () => option }
     });
@@ -431,6 +435,21 @@ assert.equal(zoomAction.type, 'dataZoom');
 assert.equal(zoomAction.dataZoomIndex, 0);
 assert.equal(zoomAction.start, 10);
 assert.equal(zoomAction.end, 90);
+
+const retainedTimeZoom = render();
+retainedTimeZoom.dataZoom[0].start = 25;
+retainedTimeZoom.dataZoom[0].end = 75;
+const timeState = retainedTimeZoom.getState();
+retainedTimeZoom.handleMessage({
+    status: 'ready',
+    chart: {
+        ...timeState.chart,
+        range: { ...timeState.chart.range, startTimestamp: 1060, endTimestamp: 2060 }
+    }
+});
+assert.equal(retainedTimeZoom.getLatestOption().dataZoom[0].start, 25,
+    'Time Series must retain the zoom window after a data refresh.');
+assert.equal(retainedTimeZoom.getLatestOption().dataZoom[1].end, 75);
 
 const adaptedIPSView = render(undefined, undefined, 750, undefined, 'dark', {}, 'ipsview', true);
 assert.equal(adaptedIPSView.backgroundColor, 'transparent');

@@ -4434,6 +4434,7 @@ assertGatewayGauge(
         && $barHistoryData['series'][0]['effectiveReducer'] === 'average'
         && $barHistoryData['bar']['style']['showValues'] === true
         && $barHistoryData['bar']['style']['showGrid'] === false
+        && $barHistoryData['bar']['style']['enableZoom'] === true
         && $barHistoryData['bar']['style']['roundedBars'] === true
         && $barHistoryData['bar']['style']['barWidthPercent'] === 60
         && $barHistoryData['bar']['style']['barFillMode'] === 'gradient'
@@ -4527,10 +4528,12 @@ assertGatewayGauge(
         && str_contains(json_encode($barHistoryForm['elements'], JSON_THROW_ON_ERROR), 'IPSViewUseTileTimeSettings')
         && str_contains(json_encode($barHistoryIPSViewPanels[0], JSON_THROW_ON_ERROR), 'IPSViewBarWidthPercent')
         && str_contains(json_encode($barHistoryIPSViewPanels[0], JSON_THROW_ON_ERROR), 'IPSViewBarFillMode')
+        && str_contains(json_encode($barHistoryIPSViewPanels[0], JSON_THROW_ON_ERROR), 'IPSViewEnableZoom')
         && str_contains(json_encode($barHistoryIPSViewPanels[0], JSON_THROW_ON_ERROR), 'IPSViewAxisColor')
         && str_contains(json_encode($barHistoryIPSViewPanels[0], JSON_THROW_ON_ERROR), 'ECBH_UpdateBarDesignForm')
         && count($barHistoryTilePanels) === 1
         && str_contains(json_encode($barHistoryTilePanels[0], JSON_THROW_ON_ERROR), '"name":"BarFillMode"')
+        && str_contains(json_encode($barHistoryTilePanels[0], JSON_THROW_ON_ERROR), '"name":"EnableZoom"')
         && str_contains(json_encode($barHistoryTilePanels[0], JSON_THROW_ON_ERROR), '"name":"AxisFontSizePercent"'),
     'Historical Bar form must separate IPSView time settings from design controls.'
 );
@@ -4577,13 +4580,15 @@ $barHistoryTile->SetTestProperty('Range', '1h');
 $barHistoryTileHTML = $barHistoryTile->GetVisualizationTile();
 assertGatewayGauge(
     str_contains($barHistoryTileHTML, 'echarts-bar-history-root')
-        && str_contains($barHistoryTileHTML, 'history'),
+        && str_contains($barHistoryTileHTML, 'history')
+        && strlen($barHistoryTileHTML) < SYMCON_OUTPUT_BUFFER_LIMIT,
     'Historical Bar must render its ready model into the native visualization document.'
 );
 $barHistoryTile->SetTestProperty('IPSViewUseTileTimeSettings', false);
 $barHistoryTile->SetTestProperty('IPSViewRange', 'yesterday');
 $barHistoryTile->SetTestProperty('IPSViewTimeAxisLabelFormat', 'date');
 $barHistoryTile->SetTestProperty('IPSViewUseTileDesign', false);
+$barHistoryTile->SetTestProperty('IPSViewEnableZoom', false);
 $barHistoryTile->SetTestProperty('IPSViewEChartsTheme', 'dark');
 $barHistoryTile->SetTestProperty('IPSViewBarWidthPercent', 45);
 $barHistoryTile->SetTestProperty('IPSViewBarFillMode', 'gradient');
@@ -4598,6 +4603,7 @@ $independentBarHistoryIPSView = $barHistoryTile->GetIPSViewHTML();
 assertGatewayGauge(
     $independentBarHistoryTile['range']['key'] === '1h'
         && $independentBarHistoryTile['theme'] === 'auto'
+        && $independentBarHistoryTile['bar']['style']['enableZoom'] === true
         && str_contains($independentBarHistoryIPSView, '"key":"yesterday"')
         && str_contains($independentBarHistoryIPSView, '"timeAxisLabelFormat":"date"')
         && str_contains($independentBarHistoryIPSView, '"theme":"dark"')
@@ -4605,6 +4611,7 @@ assertGatewayGauge(
         && str_contains($independentBarHistoryIPSView, '"barFillMode":"gradient"')
         && str_contains($independentBarHistoryIPSView, '"barGradientColor":"#55CCAA"')
         && str_contains($independentBarHistoryIPSView, '"axisColor":"#AAEECC"')
+        && str_contains($independentBarHistoryIPSView, '"enableZoom":false')
         && str_contains($independentBarHistoryIPSView, '"adaptToBackground":true'),
     'Historical Bar IPSView settings must not change the native Tile range or appearance.'
 );

@@ -2,6 +2,12 @@
 
 ## Neu
 
+- BarHistory bietet einen abschaltbaren Zeitachsen-Zoom mit Regler und
+  Mausrad in Kachel und IPSView; ein unabhängiges IPSView-Design kann Zoom
+  getrennt steuern. Die ECharts-spezifische Bedienlogik liegt gemeinsam unter
+  `libs` und bewahrt den gewählten Ausschnitt bei normalen Datenaktualisierungen
+  auch in TimeSeries.
+
 - EChartsBarHistory unterstützt nun 1 bis 16 Archivquellen in einer Instanz.
   Balken mit gleichem Zeitpunkt stehen nebeneinander; verschiedene Einheiten
   erhalten eigene, links oder rechts platzierbare Wertachsen. Das Punktbudget

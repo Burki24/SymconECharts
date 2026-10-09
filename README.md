@@ -96,6 +96,7 @@ Folgende Module sind enthalten:
   als vertikale Balken auf einer Zeitachse dar. Mehrere Reihen stehen
   nebeneinander; verschiedene Einheiten erhalten eigene Wertachsen. Zeitraum,
   Punktbudget, Beschriftung, Reduzierer, Farbe und Kacheldesign sind konfigurierbar.
+  Der Zeitraum kann in Kachel und IPSView mit Regler oder Mausrad gezoomt werden.
   IPSView kann optional einen eigenen Zeitraum und ein eigenes Design verwenden;
   eine Begrenzung von Rohwerten wird sichtbar gemeldet.
 

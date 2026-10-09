@@ -22,6 +22,7 @@ $runtime = (string) file_get_contents($runtimePath);
 $cartesianRuntime = (string) file_get_contents($cartesianRuntimePath);
 $designUtilitiesPath = $root . '/libs/echarts-design.js';
 $designUtilities = (string) file_get_contents($designUtilitiesPath);
+$zoomUtilities = (string) file_get_contents($root . '/libs/echarts-zoom.js');
 $runtimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/gauge-runtime.js');
 $cartesianRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/cartesian-runtime.js');
 $windowsCheckoutRuntime = str_replace("\n", "\r\n", $runtime);
@@ -61,6 +62,11 @@ assertEChartsAsset(
         && str_contains($designUtilities, 'readableTextColor')
         && str_contains($designUtilities, 'relativeLuminance'),
     'The shared ECharts design utilities must expose deterministic contrast helpers.'
+);
+assertEChartsAsset(
+    EChartsAsset::ZoomJavaScript() === $zoomUtilities
+        && str_contains($zoomUtilities, 'SymconEChartsZoom'),
+    'The shared ECharts zoom controls must be loaded from the local asset.'
 );
 assertEChartsAsset(
     str_contains($cartesianRuntimeSource, 'LineChart')

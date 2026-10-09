@@ -9,16 +9,26 @@ const source = fs.readFileSync(
     path.join(__dirname, '..', 'EChartsBarHistory', 'visualization', 'app.js'),
     'utf8'
 );
+const zoomSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-zoom.js'), 'utf8');
 
-function render(truncated = false, mode = 'symcon', adaptToBackground = false) {
-    const chartElement = { hidden: false };
+function render(truncated = false, mode = 'symcon', adaptToBackground = false, enableZoom = true) {
+    const listeners = {};
+    const chartElement = {
+        hidden: false,
+        addEventListener: (name, listener) => { listeners[name] = listener; },
+        getBoundingClientRect: () => ({ left: 0, width: 750 })
+    };
     const warningElement = { hidden: true, textContent: '' };
     const errorElement = { hidden: true, textContent: '' };
     let option;
     let initCount = 0;
     let updateCount = 0;
+    let dispatchedAction;
     const chart = {
-        setOption: next => { option = next; updateCount++; }, clear: () => {}, resize: () => {}, dispose: () => {}
+        setOption: next => { option = next; updateCount++; },
+        getOption: () => option,
+        dispatchAction: action => { dispatchedAction = action; },
+        clear: () => {}, resize: () => {}, dispose: () => {}
     };
     const palette = {
         background: '#101114', text: '#f4f5f7', muted: '#969aa2', border: '#a5a9b0',
@@ -33,8 +43,12 @@ function render(truncated = false, mode = 'symcon', adaptToBackground = false) {
                     theme: 'dark',
                     bar: {
                         title: 'History', timeAxisLabelFormat: 'date-time', unit: '°C', decimals: 1,
-                        style: { showValues: true, showGrid: false, roundedBars: true, barWidthPercent: 60 }
+                        style: {
+                            showValues: true, showGrid: false, roundedBars: true,
+                            barWidthPercent: 60, enableZoom
+                        }
                     },
+                    range: { key: '24h', dataMode: 'auto', startTimestamp: 1780000000, endTimestamp: 1780000400 },
                     series: [{
                         label: 'Temperature', color: '#e5754f',
                         points: [[1780000100, 21.5], [1780000200, 22.0]]
@@ -61,18 +75,25 @@ function render(truncated = false, mode = 'symcon', adaptToBackground = false) {
             'echarts-bar-history-error': errorElement
         })[id]
     };
-    vm.runInNewContext(source, { window, document });
+    const context = { window, document };
+    vm.runInNewContext(zoomSource, context);
+    vm.runInNewContext(source, context);
     return {
         get option() { return option; },
         get initCount() { return initCount; },
         get updateCount() { return updateCount; },
-        warningElement, window
+        get dispatchedAction() { return dispatchedAction; },
+        getState: () => window.SYMC_VISUALIZATION.state,
+        listeners, warningElement, window
     };
 }
 
 const ready = render();
 assert.ok(ready.option, 'The Historical Bar chart should render.');
 assert.equal(ready.option.xAxis.type, 'time');
+assert.equal(ready.option.dataZoom.length, 2);
+assert.equal(ready.option.dataZoom[0].zoomOnMouseWheel, true);
+assert.equal(ready.option.xAxis.min, 1780000000000);
 assert.equal(ready.option.yAxis.type, 'value');
 assert.equal(ready.option.yAxis.name, '°C');
 assert.equal(ready.option.yAxis.splitLine.show, false);
@@ -137,6 +158,46 @@ ipsView.window.handleMessage({
 assert.equal(ipsView.initCount, 1, 'An IPSView update must reuse the existing chart.');
 assert.equal(ipsView.updateCount, 2);
 assert.deepEqual(Array.from(ipsView.option.series[0].data[0]), [1780000300000, 23.0]);
+
+const disabledZoom = render(false, 'symcon', false, false);
+assert.equal(disabledZoom.option.dataZoom.length, 0);
+assert.equal(disabledZoom.option.grid.bottom, 58);
+
+const retainedZoom = render();
+retainedZoom.option.dataZoom[0].start = 25;
+retainedZoom.option.dataZoom[0].end = 75;
+const refreshedState = retainedZoom.getState();
+retainedZoom.window.handleMessage({
+    status: 'ready',
+    chart: {
+        ...refreshedState.chart,
+        range: { ...refreshedState.chart.range, startTimestamp: 1780000060, endTimestamp: 1780000460 }
+    }
+});
+assert.equal(retainedZoom.option.dataZoom[0].start, 25,
+    'An archive refresh must keep the selected zoom window.');
+assert.equal(retainedZoom.option.dataZoom[1].end, 75);
+retainedZoom.window.handleMessage({
+    status: 'ready',
+    chart: {
+        ...refreshedState.chart,
+        range: { ...refreshedState.chart.range, key: '7d' }
+    }
+});
+assert.equal(retainedZoom.option.dataZoom[0].start, 0,
+    'A changed configured range must reset the zoom window.');
+
+const ipsViewZoom = render(false, 'ipsview');
+assert.equal(ipsViewZoom.option.dataZoom[0].zoomOnMouseWheel, false);
+let prevented = false;
+ipsViewZoom.listeners.wheel({
+    deltaY: -100, clientX: 375,
+    preventDefault: () => { prevented = true; }, stopPropagation: () => {}
+});
+assert.equal(prevented, true);
+assert.equal(ipsViewZoom.dispatchedAction.type, 'dataZoom');
+assert.equal(ipsViewZoom.dispatchedAction.start, 10);
+assert.equal(ipsViewZoom.dispatchedAction.end, 90);
 
 const multi = render();
 multi.window.handleMessage({

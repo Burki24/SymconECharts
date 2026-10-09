@@ -14,6 +14,7 @@ variables as bars along a time axis. It is deliberately separate from
 - Raw values, automatic aggregation or an explicitly selected aggregation
 - Fixed, calendar-aligned and custom time ranges
 - Configurable point budget and time-axis labels
+- Optional time-axis zoom with a slider and mouse wheel in the tile and IPSView
 - Theme, value labels, grid, bar width, optional gradient fill, opacity and
   rounded corners
 - Adjustable font sizes and colors for title, axes and value labels, plus grid
@@ -26,6 +27,9 @@ all sources. If more raw points exist than the per-source allowance, the
 gateway reports the result as truncated instead of silently replacing raw data
 with aggregates. The sources keep their own timestamps; different timestamps
 are not artificially aligned.
+Zoom changes only the visible part of the already loaded time range; it does
+not fetch additional archive points. The selected zoom remains in place during
+normal archive refreshes and resets when the configured time range changes.
 
 Each numeric variable ID may be configured only once. The variable ID is used
 internally, never as a chart caption. A configured label is displayed when
@@ -40,8 +44,9 @@ The WebContent variable can then be used as an HTML widget. Archive refreshes
 update the open chart through the shared connection without replacing the HTML
 document. Both outputs use the same sources and data mode, but may show different
 time ranges.
-The tile and independent IPSView designers offer the same bar and typography
-controls. Selecting a gradient reveals its end-color picker; enabling rounded
+The tile and independent IPSView designers offer the same bar, zoom and typography
+controls. Zoom is enabled by default and can be switched off independently in
+IPSView after disabling **Use Tile design**. Selecting a gradient reveals its end-color picker; enabling rounded
 bars reveals the corner-radius setting. Automatic colors follow the selected
 ECharts theme. If the gradient end color is automatic, it fades toward the
 theme background.

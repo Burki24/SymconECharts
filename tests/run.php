@@ -25,6 +25,7 @@ $tests = [
 $commands = [
     ['Verify local quality runner', 'php tests/quality.php --help'],
     ['Test persistent IPSView transport', 'node tests/ipsview_transport.js'],
+    ['Test shared ECharts zoom', 'node tests/echarts_zoom.js'],
     ['Test Time Series tile design layout', 'node tests/time_series_layout.js'],
     ['Test Category Bar layout', 'node tests/bar_category_layout.js'],
     ['Test Historical Bar layout', 'node tests/bar_history_layout.js'],

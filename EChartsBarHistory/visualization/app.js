@@ -8,6 +8,7 @@
     var chart = null;
     var currentState = bootstrap.state || null;
     var currentTheme = null;
+    var zoomController = window.SymconEChartsZoom;
 
     function translate(text) {
         return (bootstrap.translations || {})[text] || text;
@@ -88,6 +89,7 @@
         var axes = Array.isArray(model.axes) && model.axes.length > 0
             ? model.axes : [{ unit: String(bar.unit || ''), position: 'left', positionIndex: 0 }];
         var multi = series.length > 1;
+        var zoom = style.enableZoom === true;
         var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8;
         var radius = style.roundedBars === true
             ? (style.barCornerRadius == null ? 6 : Number(style.barCornerRadius)) : 0;
@@ -152,7 +154,7 @@
             grid: {
                 top: headerInset + (multi ? (bar.title ? 78 : 46) : (bar.title ? 52 : 16)),
                 right: rightMargin,
-                bottom: 58,
+                bottom: zoom ? 90 : 58,
                 left: leftMargin,
                 containLabel: true
             },
@@ -172,8 +174,13 @@
                     })).join('<br>');
                 }
             },
+            dataZoom: zoomController.options(zoom, bootstrap.mode, 12),
             xAxis: {
                 type: 'time',
+                min: model.range && Number.isFinite(Number(model.range.startTimestamp))
+                    ? Number(model.range.startTimestamp) * 1000 : null,
+                max: model.range && Number.isFinite(Number(model.range.endTimestamp))
+                    ? Number(model.range.endTimestamp) * 1000 : null,
                 axisLabel: {
                     color: axisColor,
                     fontSize: axisFontSize,
@@ -257,6 +264,9 @@
     }
 
     function render(state) {
+        var previousRange = currentState && currentState.chart && currentState.chart.range;
+        var nextRange = state && state.chart && state.chart.range;
+        var savedZoom = zoomController.capture(chart, previousRange, nextRange);
         currentState = state;
         if (!state || state.status !== 'ready' || !state.chart) {
             displayError(state && state.error);
@@ -279,7 +289,7 @@
             chart = window.echarts.init(chartElement, theme === 'auto' ? null : theme, { renderer: 'canvas' });
             currentTheme = theme;
         }
-        chart.setOption(buildOption(state.chart, theme), true);
+        zoomController.apply(chart, buildOption(state.chart, theme), savedZoom);
     }
 
     window.handleMessage = function (message) {
@@ -290,6 +300,14 @@
         new ResizeObserver(function () { if (chart) { chart.resize(); } }).observe(chartElement);
     } else {
         window.addEventListener('resize', function () { if (chart) { chart.resize(); } });
+    }
+    if (bootstrap.mode === 'ipsview') {
+        zoomController.attachIPSViewWheel(chartElement, function () { return chart; }, function () {
+            return currentState && currentState.status === 'ready'
+                && currentState.chart && currentState.chart.bar
+                && currentState.chart.bar.style
+                && currentState.chart.bar.style.enableZoom === true;
+        });
     }
     window.addEventListener('beforeunload', function () { if (chart) { chart.dispose(); } });
     render(currentState);

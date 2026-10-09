@@ -184,6 +184,14 @@ HTML-Dokument wird nicht bei jeder Messwertänderung neu erzeugt. Datenmenge,
 Aktualisierungsrate und Animationen werden insbesondere für mehrere
 gleichzeitig sichtbare Charts begrenzt und getestet.
 
+Die Zeitachsen-Zoomsteuerung für TimeSeries und BarHistory liegt als
+projektspezifischer Browserbaustein in `libs/echarts-zoom.js`. Sie stellt
+`dataZoom`-Optionen, die IPSView-Mausradbehandlung und die Übernahme des
+gewählten Ausschnitts über gleichartige Datenaktualisierungen bereit. Die
+jeweilige Diagramminstanz entscheidet weiterhin über Aktivierung, Layout und
+ihre eigenen Zeitbereichs- und Design-Properties; der gemeinsame Baustein
+ändert keine Archive oder Symcon-Daten.
+
 Time Series trennt archivfreie Echtzeitwerte gemäß
 [`ADR 0019`](adr/0019-timeseries-realtime-without-archive.md) ausdrücklich von
 Rohwerten. `realtime` beginnt mit `current.read` und sammelt nachfolgende

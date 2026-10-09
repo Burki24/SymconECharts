@@ -414,6 +414,11 @@
                         },
                         {
                             "type": "CheckBox",
+                            "name": "EnableZoom",
+                            "caption": "Enable zoom"
+                        },
+                        {
+                            "type": "CheckBox",
                             "name": "RoundedBars",
                             "caption": "Rounded bars",
                             "onChange": "ECBH_UpdateBarDesignForm($id, false, $RoundedBars, $BarFillMode);"

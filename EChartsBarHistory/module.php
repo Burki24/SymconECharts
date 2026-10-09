@@ -61,6 +61,7 @@ class EChartsBarHistory extends IPSModuleStrict
         'EChartsTheme'        => 'string',
         'ShowValues'          => 'boolean',
         'ShowGrid'            => 'boolean',
+        'EnableZoom'          => 'boolean',
         'RoundedBars'         => 'boolean',
         'BarWidthPercent'     => 'integer',
         'BarFillMode'         => 'string',
@@ -94,6 +95,7 @@ class EChartsBarHistory extends IPSModuleStrict
         $this->RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO);
         $this->RegisterPropertyBoolean('ShowValues', false);
         $this->RegisterPropertyBoolean('ShowGrid', true);
+        $this->RegisterPropertyBoolean('EnableZoom', true);
         $this->RegisterPropertyBoolean('RoundedBars', false);
         $this->RegisterPropertyInteger('BarWidthPercent', 70);
         $this->RegisterPropertyString('BarFillMode', 'solid');
@@ -126,7 +128,7 @@ class EChartsBarHistory extends IPSModuleStrict
                 'EChartsTheme'              => EChartsAsset::THEME_AUTO,
                 'BarFillMode'               => 'solid',
                 'ShowValues', 'RoundedBars' => false,
-                'ShowGrid'                  => true,
+                'ShowGrid', 'EnableZoom'    => true,
                 'BarWidthPercent'           => 70,
                 'BarOpacityPercent', 'TitleFontSizePercent', 'AxisFontSizePercent',
                 'ValueFontSizePercent'      => 100,
@@ -411,6 +413,7 @@ class EChartsBarHistory extends IPSModuleStrict
             'replacements'       => [
                 '{{ECHARTS_SCRIPT}}'           => EChartsAsset::CartesianJavaScript(),
                 '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
+                '{{ECHARTS_ZOOM_SCRIPT}}'      => EChartsAsset::ZoomJavaScript(),
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
         ]);
@@ -803,6 +806,7 @@ class EChartsBarHistory extends IPSModuleStrict
         return [
             'showValues'          => $this->ReadPropertyBoolean($prefix . 'ShowValues'),
             'showGrid'            => $this->ReadPropertyBoolean($prefix . 'ShowGrid'),
+            'enableZoom'          => $this->ReadPropertyBoolean($prefix . 'EnableZoom'),
             'roundedBars'         => $this->ReadPropertyBoolean($prefix . 'RoundedBars'),
             'barWidthPercent'     => $this->ReadPropertyInteger($prefix . 'BarWidthPercent'),
             'barFillMode'         => $this->ReadPropertyString($prefix . 'BarFillMode'),
