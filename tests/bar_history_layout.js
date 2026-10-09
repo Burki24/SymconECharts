@@ -138,4 +138,43 @@ assert.equal(ipsView.initCount, 1, 'An IPSView update must reuse the existing ch
 assert.equal(ipsView.updateCount, 2);
 assert.deepEqual(Array.from(ipsView.option.series[0].data[0]), [1780000300000, 23.0]);
 
+const multi = render();
+multi.window.handleMessage({
+    status: 'ready',
+    chart: {
+        theme: 'dark',
+        bar: { title: 'Several sources', style: { showValues: true } },
+        axes: [
+            { unit: '°C', position: 'left', positionIndex: 0 },
+            { unit: '%', position: 'right', positionIndex: 0 },
+            { unit: 'hPa', position: 'left', positionIndex: 1 }
+        ],
+        series: [
+            { id: 'variable-4711', label: 'Climate', unit: '°C', decimals: 1,
+                axisIndex: 0, points: [[1780000100, 21.5]] },
+            { id: 'variable-4713', label: 'Climate', unit: '%', decimals: 0,
+                axisIndex: 1, points: [[1780000100, 58]] },
+            { id: 'variable-4714', label: 'Pressure', unit: 'hPa', decimals: 2,
+                axisIndex: 2, points: [[1780000100, 1013.25]] }
+        ]
+    }
+});
+assert.equal(multi.option.legend.show, true);
+assert.deepEqual(Array.from(multi.option.legend.data),
+    ['variable-4711', 'variable-4713', 'variable-4714']);
+assert.equal(multi.option.legend.formatter('variable-4713'), 'Climate');
+assert.equal(multi.option.yAxis.length, 3);
+assert.equal(multi.option.yAxis[2].position, 'left');
+assert.ok(multi.option.yAxis[2].offset > 0);
+assert.deepEqual(Array.from(multi.option.series, item => item.yAxisIndex), [0, 1, 2]);
+assert.equal(multi.option.series[0].stack, undefined);
+assert.equal(multi.option.series[1].barGap, '20%');
+assert.ok(multi.option.series[0].barMaxWidth < ready.option.series[0].barMaxWidth);
+const tooltip = multi.option.tooltip.formatter([
+    { seriesIndex: 0, value: [1780000100000, 21.5], marker: '*' },
+    { seriesIndex: 1, value: [1780000100000, 58], marker: '*' }
+]);
+assert.match(tooltip, /21.5 °C/);
+assert.match(tooltip, /58 %/);
+
 console.log('Historical Bar renderer layout verified.');

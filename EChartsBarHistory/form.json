@@ -13,11 +13,11 @@
         {
             "type": "List",
             "name": "Sources",
-            "caption": "Archive source (exactly one)",
-            "rowCount": 1,
+            "caption": "Archive sources (1 to 16)",
+            "rowCount": 6,
             "add": true,
             "delete": true,
-            "changeOrder": false,
+            "changeOrder": true,
             "columns": [
                 {
                     "caption": "Variable",
@@ -97,6 +97,29 @@
                             {
                                 "caption": "Maximum",
                                 "value": "maximum"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "caption": "Axis side",
+                    "name": "AxisPosition",
+                    "width": "110px",
+                    "add": "auto",
+                    "edit": {
+                        "type": "Select",
+                        "options": [
+                            {
+                                "caption": "Automatic",
+                                "value": "auto"
+                            },
+                            {
+                                "caption": "Left",
+                                "value": "left"
+                            },
+                            {
+                                "caption": "Right",
+                                "value": "right"
                             }
                         ]
                     }
@@ -543,7 +566,7 @@
         {
             "code": 201,
             "icon": "error",
-            "caption": "Configure exactly one numeric Historical Bar source"
+            "caption": "Configure 1 to 16 valid Historical Bar sources."
         },
         {
             "code": 202,

@@ -74,26 +74,28 @@
         });
     }
 
+    function escapeHTML(value) {
+        return String(value).replace(/[&<>"']/g, function (character) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character];
+        });
+    }
+
     function buildOption(model, theme) {
         var colors = colorsFor(theme);
         var bar = model.bar || {};
         var style = bar.style || {};
-        var series = Array.isArray(model.series) && model.series[0] || { points: [] };
-        var decimals = Math.max(0, Math.min(6, Number(bar.decimals) || 0));
-        var unit = String(bar.unit || '');
+        var series = Array.isArray(model.series) ? model.series : [];
+        var axes = Array.isArray(model.axes) && model.axes.length > 0
+            ? model.axes : [{ unit: String(bar.unit || ''), position: 'left', positionIndex: 0 }];
+        var multi = series.length > 1;
         var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8;
         var radius = style.roundedBars === true
             ? (style.barCornerRadius == null ? 6 : Number(style.barCornerRadius)) : 0;
         var paletteColors = Array.isArray(colors.seriesColors) && colors.seriesColors.length > 0
             ? colors.seriesColors : [colors.accent];
-        var barColor = series.color || paletteColors[0];
-        var fillColor = style.barFillMode === 'gradient' ? {
-            type: 'linear', x: 0, y: 1, x2: 0, y2: 0,
-            colorStops: [
-                { offset: 0, color: barColor },
-                { offset: 1, color: style.barGradientColor || colors.background }
-            ]
-        } : barColor;
+        var seriesColors = series.map(function (item, index) {
+            return item.color || paletteColors[index % paletteColors.length];
+        });
         var titleColor = style.titleColor || colors.text;
         var axisColor = style.axisColor || colors.text;
         var axisLineColor = style.axisColor || colors.border;
@@ -102,13 +104,32 @@
         var titleFontSize = Math.round(18 * (Number(style.titleFontSizePercent) || 100) / 100);
         var axisFontSize = Math.round(12 * (Number(style.axisFontSizePercent) || 100) / 100);
         var valueFontSize = Math.round(12 * (Number(style.valueFontSizePercent) || 100) / 100);
+        var axisCounts = { left: 0, right: 0 };
+        var normalizedAxes = axes.map(function (axis, index) {
+            var position = axis.position === 'right' ? 'right' : 'left';
+            var positionIndex = Number.isInteger(axis.positionIndex) && axis.positionIndex >= 0
+                ? axis.positionIndex : axisCounts[position];
+            axisCounts[position] = Math.max(axisCounts[position], positionIndex + 1);
+            return { axis: axis, position: position, positionIndex: positionIndex, index: index };
+        });
+        var chartWidth = Math.max(320, Number(chartElement.clientWidth) || 750);
+        var maximumAxisMargin = Math.max(58, Math.min(190, chartWidth * 0.32));
+        var maximumSideCount = Math.max(axisCounts.left, axisCounts.right);
+        var axisOffsetStep = maximumSideCount > 1
+            ? Math.min(54, (maximumAxisMargin - 58) / (maximumSideCount - 1)) : 0;
+        var leftMargin = axisCounts.left > 0 ? 52 + axisOffsetStep * (axisCounts.left - 1) : 28;
+        var rightMargin = axisCounts.right > 0 ? 52 + axisOffsetStep * (axisCounts.right - 1) : 28;
 
         return {
             backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
                 ? 'transparent' : colors.background,
             animation: true,
             animationDuration: 350,
-            aria: { enabled: true, decal: { show: false } },
+            aria: {
+                enabled: true,
+                description: series.map(function (item) { return String(item.label || ''); }).join(', '),
+                decal: { show: false }
+            },
             title: {
                 show: Boolean(bar.title),
                 text: String(bar.title || ''),
@@ -116,22 +137,39 @@
                 top: headerInset,
                 textStyle: { color: titleColor, fontSize: titleFontSize }
             },
+            legend: {
+                show: multi,
+                top: headerInset + (bar.title ? 34 : 4),
+                textStyle: { color: colors.text },
+                data: series.map(function (item, index) { return item.id || 'series-' + index; }),
+                formatter: function (name) {
+                    var item = series.find(function (candidate, index) {
+                        return (candidate.id || 'series-' + index) === name;
+                    });
+                    return item ? String(item.label || '') : '';
+                }
+            },
             grid: {
-                top: headerInset + (bar.title ? 52 : 16),
-                right: 28,
+                top: headerInset + (multi ? (bar.title ? 78 : 46) : (bar.title ? 52 : 16)),
+                right: rightMargin,
                 bottom: 58,
-                left: 52,
+                left: leftMargin,
                 containLabel: true
             },
             tooltip: {
                 trigger: 'axis',
                 axisPointer: { type: 'shadow' },
                 formatter: function (parameters) {
-                    var parameter = Array.isArray(parameters) ? parameters[0] : parameters;
-                    if (!parameter || !Array.isArray(parameter.value)) { return ''; }
-                    return formatTimestamp(parameter.value[0], 'date-time') + '<br>'
-                        + String(parameter.marker || '') + String(series.label || '') + ': '
-                        + formatValue(parameter.value[1], decimals, unit);
+                    var rows = (Array.isArray(parameters) ? parameters : [parameters]).filter(function (item) {
+                        return item && Array.isArray(item.value);
+                    });
+                    if (rows.length === 0) { return ''; }
+                    return [formatTimestamp(rows[0].value[0], 'date-time')].concat(rows.map(function (item) {
+                        var source = series[item.seriesIndex] || {};
+                        var decimals = Math.max(0, Math.min(6, Number(source.decimals ?? bar.decimals) || 0));
+                        return String(item.marker || '') + escapeHTML(source.label || '') + ': '
+                            + escapeHTML(formatValue(item.value[1], decimals, source.unit ?? bar.unit));
+                    })).join('<br>');
                 }
             },
             xAxis: {
@@ -145,41 +183,68 @@
                 axisTick: { lineStyle: { color: axisLineColor } },
                 splitLine: { show: false }
             },
-            yAxis: {
-                type: 'value',
-                name: unit,
-                nameTextStyle: { color: style.axisColor || colors.muted },
-                axisLabel: { color: axisColor, fontSize: axisFontSize },
-                axisLine: { show: true, lineStyle: { color: axisLineColor } },
-                axisTick: { show: true, lineStyle: { color: axisLineColor } },
-                splitLine: {
-                    show: style.showGrid !== false,
-                    lineStyle: { color: gridColor, opacity: style.gridColor ? 1 : 0.22 }
-                }
-            },
-            series: [{
-                name: String(series.label || ''),
-                type: 'bar',
-                barMaxWidth: Math.max(8, Math.round(48 * Math.max(20, Math.min(100, Number(style.barWidthPercent) || 70)) / 100)),
-                itemStyle: {
-                    color: fillColor,
-                    opacity: (style.barOpacityPercent == null ? 100 : Number(style.barOpacityPercent)) / 100,
-                    borderRadius: [radius, radius, 0, 0]
-                },
-                label: {
-                    show: style.showValues === true,
-                    position: 'top',
-                    color: valueColor,
-                    fontSize: valueFontSize,
-                    formatter: function (parameters) {
-                        return Array.isArray(parameters.value)
-                            ? formatValue(parameters.value[1], decimals, unit) : '';
-                    }
-                },
-                data: (series.points || []).map(function (point) {
-                    return [Number(point[0]) * 1000, Number(point[1])];
-                })
-            }]
+            yAxis: (function () {
+                var valueAxes = normalizedAxes.map(function (entry) {
+                    var axis = entry.axis;
+                    var firstSeries = series.findIndex(function (item) { return item.axisIndex === entry.index; });
+                    var color = multi && !style.axisColor && firstSeries >= 0
+                        ? seriesColors[firstSeries] : axisColor;
+                    return {
+                        type: 'value',
+                        name: String(axis.unit || ''),
+                        position: entry.position,
+                        offset: entry.positionIndex * axisOffsetStep,
+                        nameTextStyle: { color: color },
+                        axisLabel: { color: color, fontSize: axisFontSize },
+                        axisLine: { show: true, lineStyle: { color: multi ? color : axisLineColor } },
+                        axisTick: { show: true, lineStyle: { color: multi ? color : axisLineColor } },
+                        splitLine: {
+                            show: entry.index === 0 && style.showGrid !== false,
+                            lineStyle: { color: gridColor, opacity: style.gridColor ? 1 : 0.22 }
+                        }
+                    };
+                });
+                return multi ? valueAxes : valueAxes[0];
+            }()),
+            series: series.map(function (item, index) {
+                var color = seriesColors[index];
+                var fill = style.barFillMode === 'gradient' ? {
+                    type: 'linear', x: 0, y: 1, x2: 0, y2: 0,
+                    colorStops: [
+                        { offset: 0, color: color },
+                        { offset: 1, color: style.barGradientColor || colors.background }
+                    ]
+                } : color;
+                var decimals = Math.max(0, Math.min(6, Number(item.decimals ?? bar.decimals) || 0));
+                return {
+                    id: item.id || 'series-' + index,
+                    name: item.id || 'series-' + index,
+                    type: 'bar',
+                    yAxisIndex: Number.isInteger(item.axisIndex) ? item.axisIndex : 0,
+                    barGap: '20%',
+                    barMaxWidth: multi
+                        ? Math.max(3, Math.round(48 * Math.max(20, Math.min(100, Number(style.barWidthPercent) || 70)) / 100 / series.length))
+                        : Math.max(8, Math.round(48 * Math.max(20, Math.min(100, Number(style.barWidthPercent) || 70)) / 100)),
+                    itemStyle: {
+                        color: fill,
+                        opacity: (style.barOpacityPercent == null ? 100 : Number(style.barOpacityPercent)) / 100,
+                        borderRadius: [radius, radius, 0, 0]
+                    },
+                    label: {
+                        show: style.showValues === true,
+                        position: 'top',
+                        color: valueColor,
+                        fontSize: valueFontSize,
+                        formatter: function (parameters) {
+                            return Array.isArray(parameters.value)
+                                ? formatValue(parameters.value[1], decimals, item.unit ?? bar.unit) : '';
+                        }
+                    },
+                    data: (item.points || []).map(function (point) {
+                        return [Number(point[0]) * 1000, Number(point[1])];
+                    })
+                };
+            })
         };
     }
 

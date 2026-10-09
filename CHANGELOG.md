@@ -2,6 +2,12 @@
 
 ## Neu
 
+- EChartsBarHistory unterstützt nun 1 bis 16 Archivquellen in einer Instanz.
+  Balken mit gleichem Zeitpunkt stehen nebeneinander; verschiedene Einheiten
+  erhalten eigene, links oder rechts platzierbare Wertachsen. Das Punktbudget
+  wird auf die Quellen verteilt. Bestehende Einquellen-Konfigurationen bleiben
+  gültig.
+
 - Alle ECharts-Module verwenden Variablen-IDs ausschließlich für die interne
   Quellenzuordnung. Auch bei gleichen Beschriftungen bleiben in Diagrammen,
   Legenden und Vorschauen die konfigurierten beziehungsweise aktuellen

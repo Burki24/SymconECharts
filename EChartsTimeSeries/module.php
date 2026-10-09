@@ -18,6 +18,7 @@ use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsTimeSeriesDesign;
 use SymconECharts\EChartsTimeSeriesPreview;
+use SymconECharts\EChartsUnitAxes;
 use SymconECharts\EChartsVariablePresentation;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
@@ -35,6 +36,7 @@ require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
 require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
 require_once __DIR__ . '/../libs/EChartsTimeSeriesDesign.php';
+require_once __DIR__ . '/../libs/EChartsUnitAxes.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 require_once __DIR__ . '/TimeSeriesPreview.php';
 
@@ -868,72 +870,15 @@ class EChartsTimeSeries extends IPSModuleStrict
      */
     private function BuildAxisModel(array $sources): array
     {
-        $groups = [];
-        foreach ($sources as $source) {
-            $unit = $source['Unit'];
-            $requestedPosition = $source['AxisPosition'];
-            if (!array_key_exists($unit, $groups)) {
-                $groups[$unit] = ['unit' => $unit, 'position' => 'auto', 'range' => null];
-            }
-            $groupPosition = $groups[$unit]['position'];
-            if ($requestedPosition !== 'auto' && $groupPosition !== 'auto' && $groupPosition !== $requestedPosition) {
-                throw new UnexpectedValueException(
-                    'Sources with the same unit must use the same axis side.',
-                    self::STATUS_CONFIGURATION_INVALID
-                );
-            }
-            if ($requestedPosition !== 'auto') {
-                $groups[$unit]['position'] = $requestedPosition;
-            }
-            $requestedRange = $source['AxisRange'] ?? null;
-            if ($requestedRange !== null) {
-                $groupRange = $groups[$unit]['range'];
-                if ($groupRange !== null
-                    && (!$this->AxisValuesEqual($groupRange['minimum'], $requestedRange['minimum'])
-                        || !$this->AxisValuesEqual($groupRange['maximum'], $requestedRange['maximum']))
-                ) {
-                    throw new UnexpectedValueException(
-                        'Sources with the same unit must use the same explicit axis range.',
-                        self::STATUS_CONFIGURATION_INVALID
-                    );
-                }
-                $groups[$unit]['range'] = $requestedRange;
-            }
+        try {
+            return EChartsUnitAxes::Build($sources);
+        } catch (InvalidArgumentException $exception) {
+            throw new UnexpectedValueException(
+                $exception->getMessage(),
+                self::STATUS_CONFIGURATION_INVALID,
+                $exception
+            );
         }
-
-        $counts = ['left' => 0, 'right' => 0];
-        foreach ($groups as $group) {
-            if ($group['position'] !== 'auto') {
-                ++$counts[$group['position']];
-            }
-        }
-        foreach ($groups as &$group) {
-            if ($group['position'] === 'auto') {
-                $group['position'] = $counts['left'] <= $counts['right'] ? 'left' : 'right';
-                ++$counts[$group['position']];
-            }
-        }
-        unset($group);
-
-        $axes = [];
-        $indexes = [];
-        $positionIndexes = ['left' => 0, 'right' => 0];
-        foreach ($groups as $unit => $group) {
-            $position = $group['position'];
-            $indexes[$unit] = count($axes);
-            $axis = [
-                'unit'          => $group['unit'],
-                'position'      => $position,
-                'positionIndex' => $positionIndexes[$position]++
-            ];
-            if ($group['range'] !== null) {
-                $axis['minimum'] = $group['range']['minimum'];
-                $axis['maximum'] = $group['range']['maximum'];
-            }
-            $axes[] = $axis;
-        }
-
-        return ['Axes' => $axes, 'Indexes' => $indexes];
     }
 
     /**
@@ -1039,11 +984,6 @@ class EChartsTimeSeries extends IPSModuleStrict
         }
 
         return $result;
-    }
-
-    private function AxisValuesEqual(float $left, float $right): bool
-    {
-        return abs($left - $right) <= 1e-9 * max(1.0, abs($left), abs($right));
     }
 
     /** @return array{DurationSeconds:int,StartTimestamp:int,EndTimestamp:int,Mode:string,AggregationLevel:int|null,Limit:int,CalendarAligned:bool,AcceptLiveUpdates:bool,Empty:bool} */

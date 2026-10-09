@@ -36,9 +36,10 @@ The cross-project rule is defined in
   that resolves those names to visible labels. Equal visible labels therefore
   do not merge series or expose variable IDs. Simple Category Bar labels may
   repeat while their values remain separate by position.
-- Gauge Single and Bar History have exactly one source per instance, so no
-  within-chart label collision is possible. Gateway has no chart source list.
-  These modules retain their existing ID-based source contracts unchanged.
+- Gauge Single has exactly one source per instance. Bar History now accepts
+  several sources and resolves their labels through `EChartsSourceIdentity`,
+  while keeping its ID-based technical series keys. Gateway has no chart
+  source list.
 
 ## Compatibility and verification
 

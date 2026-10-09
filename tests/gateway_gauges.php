@@ -4646,13 +4646,106 @@ assertGatewayGauge(
     'Historical Bar raw mode must remain raw and preserve normalized archive points.'
 );
 
+$GLOBALS['symconTestArchiveVariables'][4714] = [
+    'AggregationType'  => 0,
+    'LoggedValues'     => [['TimeStamp' => 1780000100, 'Value' => 1013.25, 'Duration' => 100]],
+    'AggregatedValues' => []
+];
+$multiBarHistory = new TestableEChartsBarHistory();
+$multiBarHistory->Create();
+$multiBarHistory->SetTestCurrentTimestamp(1780000400);
+$multiBarSources = [
+    [
+        'VariableID'              => 4711, 'Label' => 'Climate', 'Unit' => '°C',
+        'UseVariablePresentation' => false, 'Decimals' => 1, 'AxisPosition' => 'left'
+    ],
+    [
+        'VariableID'              => 4713, 'Label' => 'Climate', 'Unit' => '%',
+        'UseVariablePresentation' => false, 'Decimals' => 0, 'AxisPosition' => 'right'
+    ],
+    [
+        'VariableID'              => 4714, 'Label' => '', 'Unit' => 'hPa',
+        'UseVariablePresentation' => false, 'Decimals' => 2
+    ]
+];
+$multiBarHistory->SetTestProperty('Sources', json_encode($multiBarSources, JSON_THROW_ON_ERROR));
+$multiBarHistory->SetTestProperty('Range', '1h');
+$multiBarHistory->SetTestProperty('PointBudget', 1000);
+$multiBarHistory->ApplyChanges();
+$multiBarData = json_decode($multiBarHistory->GetBarHistoryData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $multiBarHistory->GetTestStatus() === IS_ACTIVE
+        && $multiBarHistory->GetTestReferences() === [4711, 4713, 4714]
+        && array_column($multiBarData['series'], 'variableID') === [4711, 4713, 4714]
+        && array_column($multiBarData['series'], 'label') === ['Climate', 'Climate', 'Air pressure']
+        && array_column($multiBarData['series'], 'axisIndex') === [0, 1, 2]
+        && array_column($multiBarData['axes'], 'position') === ['left', 'right', 'left']
+        && $multiBarData['range']['pointLimitPerSeries'] === 333,
+    'Historical Bar must keep source IDs internal, group axes by unit and divide the point budget.'
+);
+$multiBarSources[] = $multiBarSources[0];
+$multiBarHistory->SetTestProperty('Sources', json_encode($multiBarSources, JSON_THROW_ON_ERROR));
+$multiBarHistory->ApplyChanges();
+assertGatewayGauge(
+    $multiBarHistory->GetTestStatus() === 201,
+    'Historical Bar must reject duplicate variable IDs even when labels match.'
+);
+$multiBarSources = array_slice($multiBarSources, 0, 3);
+$multiBarSources[2]['Unit'] = '°C';
+$multiBarSources[2]['AxisPosition'] = 'right';
+$multiBarHistory->SetTestProperty('Sources', json_encode($multiBarSources, JSON_THROW_ON_ERROR));
+$multiBarHistory->ApplyChanges();
+assertGatewayGauge(
+    $multiBarHistory->GetTestStatus() === 201,
+    'Historical Bar must reject conflicting axis sides for the same unit.'
+);
+unset($GLOBALS['symconTestArchiveVariables'][4714]);
+
+$limitBarHistory = new EChartsBarHistory();
+$limitBarHistory->Create();
+$limitBarSources = [];
+for ($index = 0; $index < 16; ++$index) {
+    $variableID = 5100 + $index;
+    $GLOBALS['symconTestVariables'][$variableID] = [
+        'VariableType' => 2, 'VariableUpdated' => 1780000200,
+        'Value'        => 20.0, 'Name' => 'Source ' . $index
+    ];
+    $limitBarSources[] = [
+        'VariableID' => $variableID, 'Label' => '', 'UseVariablePresentation' => false,
+        'Unit'       => '°C', 'Decimals' => 1
+    ];
+}
+$limitBarHistory->SetTestProperty('Sources', json_encode($limitBarSources, JSON_THROW_ON_ERROR));
+$limitBarHistory->ApplyChanges();
+assertGatewayGauge(
+    json_decode($limitBarHistory->GetBarHistoryDiagnostic(), true, 512, JSON_THROW_ON_ERROR)['valid'] === true
+        && count($limitBarHistory->GetTestReferences()) === 16,
+    'Historical Bar must accept 16 distinct numeric source IDs.'
+);
+$GLOBALS['symconTestVariables'][5116] = [
+    'VariableType' => 2, 'VariableUpdated' => 1780000200, 'Value' => 20.0, 'Name' => 'Source 16'
+];
+$limitBarSources[] = [
+    'VariableID' => 5116, 'Label' => '', 'UseVariablePresentation' => false,
+    'Unit'       => '°C', 'Decimals' => 1
+];
+$limitBarHistory->SetTestProperty('Sources', json_encode($limitBarSources, JSON_THROW_ON_ERROR));
+$limitBarHistory->ApplyChanges();
+assertGatewayGauge(
+    $limitBarHistory->GetTestStatus() === 201,
+    'Historical Bar must reject more than 16 sources without truncating the configuration.'
+);
+for ($variableID = 5100; $variableID <= 5116; ++$variableID) {
+    unset($GLOBALS['symconTestVariables'][$variableID]);
+}
+
 $invalidBarHistory = new EChartsBarHistory();
 $invalidBarHistory->Create();
 $invalidBarHistory->SetTestProperty('Sources', '[]');
 $invalidBarHistory->ApplyChanges();
 assertGatewayGauge(
     $invalidBarHistory->GetTestStatus() === 201,
-    'Historical Bar must reject configurations without exactly one numeric source.'
+    'Historical Bar must reject configurations without a numeric source.'
 );
 
 $invalidBarDesign = new EChartsBarHistory();

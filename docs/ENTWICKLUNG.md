@@ -82,7 +82,7 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 | Gerät | EChartsGaugeChronograph | Chronograph mit 2 bis 5 individuell gestaltbaren Instrumenten |
 | Gerät | EChartsTimeSeries | Historische und live fortgeschriebene Linien und Flächen für 1 bis 8 Quellen, bis zu acht links/rechts angeordnete Einheitengruppen sowie getrenntes Kachel- und IPSView-Design |
 | Gerät | EChartsBarCategory | Aktuelle einfache, gruppierte oder gestapelte Kategorienvergleiche für 1 bis 16 Quellen mit gemeinsamer Einheit, vertikal/horizontal und mit getrenntem Kachel- und IPSView-Design |
-| Gerät | EChartsBarHistory | Historische rohe oder aggregierte Balken einer Archivquelle auf einer Zeitachse in einer nativen Kachel und optionalem IPSView-HTML |
+| Gerät | EChartsBarHistory | Historische rohe oder aggregierte Balken von 1 bis 16 Archivquellen auf einer Zeitachse in einer nativen Kachel und optionalem IPSView-HTML |
 
 Eine eigene I/O-Instanz, ein Konfigurator und Discovery gehören nicht zum
 Anfangsumfang. Datenquellen sind Teil der jeweiligen Gauge-Konfiguration und
@@ -161,11 +161,11 @@ Die Entscheidung für den weiteren Ausbau innerhalb desselben Moduls und den
 optionalen IPSView-Ausgabeweg dokumentiert
 [`ADR 0031`](adr/0031-historical-bar-one-module-expansion.md).
 Der weitere Ausbau von EChartsBarHistory erfolgt innerhalb desselben Moduls:
-Die derzeitige Einquellen-Stufe wird zuerst für Kachel und IPSView abgesichert;
-mehrere Quellen werden später über die bestehende Quellenliste ergänzt.
-Ein getrenntes Single-/Multi-Modulpaar ist dafür nicht vorgesehen. Anzahl,
-Gruppierung und Achsenregeln der Mehrquellen-Stufe werden vor ihrer Umsetzung
-als eigener Vertrag entschieden.
+Die Einquellen-Stufe wurde zuerst für Kachel und IPSView abgesichert;
+mehrere Quellen verwenden die bestehende Quellenliste. Ein getrenntes
+Single-/Multi-Modulpaar ist nicht vorgesehen. Die Regeln für bis zu 16
+Quellen, benachbarte Balken und mehrere Einheitenachsen legt
+[`ADR 0033`](adr/0033-historical-bar-multi-source-axes.md) fest.
 
 ## Daten, Konfiguration und Ausgabe
 

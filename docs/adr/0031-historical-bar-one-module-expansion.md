@@ -23,10 +23,9 @@ settings and design or use its own time range, axis-label format and design.
 Archive refreshes update the open IPSView chart via the shared persistent
 transport rather than rewriting the HTML document.
 
-Several sources will later be added to this same module through the existing
-`Sources` list. The precise limit (8 or 16), grouping semantics, axes and
-compatibility rules require a separate explicit design decision and tests
-before implementation; this ADR does not claim multi-source support exists.
+Several sources are added to this same module through the existing `Sources`
+list. Their limit, grouping, axes and compatibility rules are decided in
+[ADR 0033](0033-historical-bar-multi-source-axes.md).
 
 ## Consequences
 

@@ -1,13 +1,16 @@
 # EChartsBarHistory
 
-`EChartsBarHistory` displays archived values of one numeric IP-Symcon
-variable as bars along a time axis. It is deliberately separate from
+`EChartsBarHistory` displays archived values of 1 to 16 numeric IP-Symcon
+variables as bars along a time axis. It is deliberately separate from
 `EChartsBarCategory`, which compares current values as categories.
 
 ## Current feature set
 
 - Native Symcon HTML-SDK tile and optional IPSView WebContent output
-- One archive source with variable presentation, label, color and reducer
+- 1 to 16 archive sources with individual variable presentation, label, color
+  and reducer; bars at the same time are shown side by side
+- A separate value axis per effective unit, automatically balanced left/right
+  or explicitly placed on a side in the source editor
 - Raw values, automatic aggregation or an explicitly selected aggregation
 - Fixed, calendar-aligned and custom time ranges
 - Configurable point budget and time-axis labels
@@ -18,14 +21,24 @@ variable as bars along a time axis. It is deliberately separate from
 - Independent IPSView time range, time-axis labels and appearance, or inheritance
   from the tile; optional background color and opacity
 
-Raw mode remains available to the user. If more raw points exist than the
-configured budget, the gateway reports the result as truncated instead of
-silently replacing raw data with aggregates.
+Raw mode remains available to the user. The total point budget is shared by
+all sources. If more raw points exist than the per-source allowance, the
+gateway reports the result as truncated instead of silently replacing raw data
+with aggregates. The sources keep their own timestamps; different timestamps
+are not artificially aligned.
+
+Each numeric variable ID may be configured only once. The variable ID is used
+internally, never as a chart caption. A configured label is displayed when
+present; otherwise the current Symcon variable name is used, even if two
+sources then have the same visible name. Sources with the same effective unit
+share an axis. Explicitly choosing opposite axis sides for the same unit is
+invalid. The order in the source list controls the series and axis order.
+With many distinct units, a narrow tile may leave little room for the plot.
 
 IPSView is enabled in the **IPSView design** section of the instance form.
 The WebContent variable can then be used as an HTML widget. Archive refreshes
 update the open chart through the shared connection without replacing the HTML
-document. Both outputs use the same source and data mode, but may show different
+document. Both outputs use the same sources and data mode, but may show different
 time ranges.
 The tile and independent IPSView designers offer the same bar and typography
 controls. Selecting a gradient reveals its end-color picker; enabling rounded
@@ -42,7 +55,5 @@ design changes no longer propagate. IPSView time settings are beside the main
 time-range controls, outside the designers, and are controlled separately.
 Save changes to the Tile designer before copying.
 
-The module currently accepts exactly one source. Additional sources are planned
-for this same `EChartsBarHistory` module; no separate Single/Multi module is
-planned. The eventual source limit and multi-series presentation remain to be
-decided before implementation.
+The source limit is initially 16. Reducing it later would require a compatible
+way to handle previously saved instances with more sources.

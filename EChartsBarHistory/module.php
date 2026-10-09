@@ -14,6 +14,8 @@ use SymconECharts\EChartsDataProtocol;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
+use SymconECharts\EChartsSourceIdentity;
+use SymconECharts\EChartsUnitAxes;
 use SymconECharts\EChartsVariablePresentation;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
@@ -28,6 +30,8 @@ require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
+require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
+require_once __DIR__ . '/../libs/EChartsUnitAxes.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 
 class EChartsBarHistory extends IPSModuleStrict
@@ -50,6 +54,7 @@ class EChartsBarHistory extends IPSModuleStrict
     private const STATUS_PARENT_MISSING = 203;
     private const STATUS_GATEWAY_FAILED = 204;
     private const REDUCERS = ['auto', 'average', 'sum', 'minimum', 'maximum'];
+    private const MAXIMUM_SOURCE_COUNT = 16;
     private const TIME_AXIS_LABEL_FORMATS = ['auto', 'time', 'date', 'date-time'];
     private const BAR_FILL_MODES = ['solid', 'gradient'];
     private const DESIGN_PROPERTY_TYPES = [
@@ -305,21 +310,40 @@ class EChartsBarHistory extends IPSModuleStrict
             throw new RuntimeException('No active EChartsGateway is connected.');
         }
 
-        $source = $this->GetValidatedSource();
+        $sources = $this->GetValidatedSources();
+        $axisModel = EChartsUnitAxes::Build($sources);
+        $labels = EChartsSourceIdentity::LabelsForSources($sources);
         $query = EChartsArchiveQuery::Resolve(
             $this->EffectiveRange($ipsView),
             $this->EffectiveCustomRangeValue($ipsView),
             $this->EffectiveCustomRangeUnit($ipsView),
             $this->ReadPropertyString('DataMode'),
             $this->ReadPropertyInteger('PointBudget'),
-            1,
+            count($sources),
             $this->CurrentTimestamp(),
             date_default_timezone_get()
         );
         if ($query['Mode'] === 'realtime') {
             throw new RuntimeException('Historical bars require archive data.');
         }
-        $archive = $this->ReadArchiveSource($source, $query);
+        $series = [];
+        $truncated = false;
+        foreach ($sources as $source) {
+            $archive = $this->ReadArchiveSource($source, $query);
+            $series[] = [
+                'id'                     => 'variable-' . $source['VariableID'],
+                'variableID'             => $source['VariableID'],
+                'label'                  => $labels[$source['VariableID']],
+                'unit'                   => $source['Unit'],
+                'decimals'               => $source['Decimals'],
+                'axisIndex'              => $axisModel['Indexes'][$source['Unit']],
+                'color'                  => $source['Color'],
+                'effectiveReducer'       => $archive['EffectiveReducer'],
+                'archiveAggregationType' => $archive['ArchiveAggregationType'],
+                'points'                 => $archive['Points']
+            ];
+            $truncated = $truncated || $archive['Truncated'];
+        }
         $this->WriteAttributeString('LastError', '');
         $this->SetStatus(IS_ACTIVE);
 
@@ -331,10 +355,11 @@ class EChartsBarHistory extends IPSModuleStrict
             'bar'           => [
                 'title'               => $this->ReadPropertyString('Title'),
                 'timeAxisLabelFormat' => $this->EffectiveTimeAxisLabelFormat($ipsView),
-                'unit'                => $source['Unit'],
-                'decimals'            => $source['Decimals'],
+                'unit'                => $sources[0]['Unit'],
+                'decimals'            => $sources[0]['Decimals'],
                 'style'               => $this->ReadDesignStyle($ipsView)
             ],
+            'axes'          => $axisModel['Axes'],
             'range'         => [
                 'key'                 => $this->EffectiveRange($ipsView),
                 'startTimestamp'      => $query['StartTimestamp'],
@@ -344,16 +369,8 @@ class EChartsBarHistory extends IPSModuleStrict
                 'pointBudget'         => $this->ReadPropertyInteger('PointBudget'),
                 'pointLimitPerSeries' => $query['Limit']
             ],
-            'series'        => [[
-                'id'                     => 'variable-' . $source['VariableID'],
-                'variableID'             => $source['VariableID'],
-                'label'                  => $source['Label'] !== '' ? $source['Label'] : IPS_GetName($source['VariableID']),
-                'color'                  => $source['Color'],
-                'effectiveReducer'       => $archive['EffectiveReducer'],
-                'archiveAggregationType' => $archive['ArchiveAggregationType'],
-                'points'                 => $archive['Points']
-            ]],
-            'truncated'     => $archive['Truncated']
+            'series'        => $series,
+            'truncated'     => $truncated
         ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
     }
 
@@ -373,8 +390,8 @@ class EChartsBarHistory extends IPSModuleStrict
             'ipsViewStyle'       => $ipsView ? $this->IPSViewThemeCSS() : '',
             'state'              => $this->BuildVisualizationState($ipsView),
             'translations'       => [
-                'Configure one valid Historical Bar source.' => $this->Translate(
-                    'Configure one valid Historical Bar source.'
+                'Configure 1 to 16 valid Historical Bar sources.' => $this->Translate(
+                    'Configure 1 to 16 valid Historical Bar sources.'
                 ),
                 'Connect an active EChartsGateway.'              => $this->Translate('Connect an active EChartsGateway.'),
                 'The Historical Bar values could not be loaded.' => $this->Translate(
@@ -428,7 +445,7 @@ class EChartsBarHistory extends IPSModuleStrict
     private function GetConfigurationError(): ?array
     {
         try {
-            $this->GetValidatedSource();
+            $this->GetValidatedSources();
         } catch (Throwable $exception) {
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => $exception->getMessage()];
         }
@@ -463,48 +480,64 @@ class EChartsBarHistory extends IPSModuleStrict
         return null;
     }
 
-    /** @return array{VariableID:int,Label:string,Unit:string,Decimals:int,Color:string,Reducer:string} */
-    private function GetValidatedSource(): array
+    /** @return list<array{VariableID:int,Label:string,Unit:string,Decimals:int,Color:string,Reducer:string,AxisPosition:string}> */
+    private function GetValidatedSources(): array
     {
         try {
             $sources = json_decode($this->ReadPropertyString('Sources'), true, 32, JSON_THROW_ON_ERROR);
         } catch (JsonException $exception) {
             throw new InvalidArgumentException('Historical Bar sources must contain valid JSON.', 0, $exception);
         }
-        if (!is_array($sources) || !array_is_list($sources) || count($sources) !== 1 || !is_array($sources[0])) {
-            throw new InvalidArgumentException('Configure exactly one numeric Historical Bar source.');
+        if (!is_array($sources) || !array_is_list($sources)
+            || count($sources) < 1 || count($sources) > self::MAXIMUM_SOURCE_COUNT) {
+            throw new InvalidArgumentException('Configure between 1 and 16 numeric Historical Bar sources.');
         }
-        $source = $sources[0];
-        $variableID = $source['VariableID'] ?? null;
-        $label = $source['Label'] ?? '';
-        $decimals = $source['Decimals'] ?? 1;
-        $color = $source['Color'] ?? -1;
-        $reducer = $source['Reducer'] ?? 'auto';
-        if (!is_int($variableID) || $variableID <= 0 || !IPS_VariableExists($variableID)
-            || !in_array(IPS_GetVariable($variableID)['VariableType'] ?? null, [1, 2], true)
-            || !is_string($label) || !is_int($decimals) || $decimals < 0 || $decimals > 6
-            || !is_int($color) || $color < -1 || $color > 0xFFFFFF
-            || !is_string($reducer) || !in_array($reducer, self::REDUCERS, true)
-        ) {
-            throw new InvalidArgumentException('The Historical Bar source settings are invalid.');
+        $result = [];
+        $seen = [];
+        foreach ($sources as $source) {
+            if (!is_array($source)) {
+                throw new InvalidArgumentException('The Historical Bar source settings are invalid.');
+            }
+            $variableID = $source['VariableID'] ?? null;
+            $label = $source['Label'] ?? '';
+            $decimals = $source['Decimals'] ?? 1;
+            $color = $source['Color'] ?? -1;
+            $reducer = $source['Reducer'] ?? 'auto';
+            $unit = $source['Unit'] ?? '';
+            $usePresentation = $source['UseVariablePresentation'] ?? true;
+            $axisPosition = $source['AxisPosition'] ?? 'auto';
+            if (!is_int($variableID) || $variableID <= 0 || !IPS_VariableExists($variableID)
+                || isset($seen[$variableID])
+                || !in_array(IPS_GetVariable($variableID)['VariableType'] ?? null, [1, 2], true)
+                || !is_string($label) || !is_string($unit) || !is_bool($usePresentation)
+                || !is_int($decimals) || $decimals < 0 || $decimals > 6
+                || !is_int($color) || $color < -1 || $color > 0xFFFFFF
+                || !is_string($reducer) || !in_array($reducer, self::REDUCERS, true)
+                || !is_string($axisPosition) || !in_array($axisPosition, ['auto', 'left', 'right'], true)) {
+                throw new InvalidArgumentException('Historical Bar sources must be unique numeric variables with valid settings.');
+            }
+            $presentation = EChartsVariablePresentation::Resolve(
+                $variableID,
+                0.0,
+                100.0,
+                $unit,
+                $decimals,
+                $usePresentation
+            );
+            $seen[$variableID] = true;
+            $result[] = [
+                'VariableID'   => $variableID,
+                'Label'        => trim($label),
+                'Unit'         => $presentation['unit'],
+                'Decimals'     => $presentation['decimals'],
+                'Color'        => $color < 0 ? '' : EChartsAsset::ColorToHex($color),
+                'Reducer'      => $reducer,
+                'AxisPosition' => $axisPosition
+            ];
         }
-        $presentation = EChartsVariablePresentation::Resolve(
-            $variableID,
-            0.0,
-            100.0,
-            is_string($source['Unit'] ?? null) ? $source['Unit'] : '',
-            $decimals,
-            (bool) ($source['UseVariablePresentation'] ?? true)
-        );
+        EChartsUnitAxes::Build($result);
 
-        return [
-            'VariableID' => $variableID,
-            'Label'      => trim($label),
-            'Unit'       => $presentation['unit'],
-            'Decimals'   => $presentation['decimals'],
-            'Color'      => $color < 0 ? '' : EChartsAsset::ColorToHex($color),
-            'Reducer'    => $reducer
-        ];
+        return $result;
     }
 
     /** @param array{VariableID:int,Reducer:string} $source @param array<string,mixed> $query @return array<string,mixed> */
@@ -622,7 +655,7 @@ class EChartsBarHistory extends IPSModuleStrict
                 'variant'       => 'history',
                 'status'        => 'error',
                 'chart'         => null,
-                'error'         => 'Configure one valid Historical Bar source.'
+                'error'         => 'Configure 1 to 16 valid Historical Bar sources.'
             ];
         }
         if (!$this->HasActiveParent()) {

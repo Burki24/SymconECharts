@@ -92,9 +92,10 @@ Folgende Module sind enthalten:
   Category-Bar-Vertrag.
 
 - __EChartsBarHistory__ ([Dokumentation](EChartsBarHistory/README.md))
-  Stellt rohe oder aggregierte Archivwerte einer numerischen Variable als
-  vertikale Balken auf einer Zeitachse dar. Zeitraum, Punktbudget,
-  Beschriftung, Reduzierer, Farbe und Kacheldesign sind konfigurierbar.
+  Stellt rohe oder aggregierte Archivwerte von 1 bis 16 numerischen Variablen
+  als vertikale Balken auf einer Zeitachse dar. Mehrere Reihen stehen
+  nebeneinander; verschiedene Einheiten erhalten eigene Wertachsen. Zeitraum,
+  Punktbudget, Beschriftung, Reduzierer, Farbe und Kacheldesign sind konfigurierbar.
   IPSView kann optional einen eigenen Zeitraum und ein eigenes Design verwenden;
   eine Begrenzung von Rohwerten wird sichtbar gemeldet.
 
