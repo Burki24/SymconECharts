@@ -75,22 +75,29 @@
         return result;
     }
 
-    function polarGeometry(polar) {
+    function polarLayout(polar) {
         var style = polar.style || {};
         var width = Math.max(1, chartElement.clientWidth || 1);
         var height = Math.max(1, chartElement.clientHeight || 1);
         var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8;
-        var top = headerInset + (polar.title ? 92 : 52);
-        var bottom = style.showCategoryLabels !== false ? 64 : 32;
-        var side = style.showCategoryLabels !== false ? 120 : 52;
+        var labelWidth = Math.min(90, Math.max(36, Math.round(width * 0.13)));
+        var labelMargin = Math.min(24, Math.max(16, Math.round(width * 0.05)));
+        var top = headerInset + (polar.title ? 50 : 12);
+        var bottom = style.showCategoryLabels !== false ? Math.min(45, height * 0.14) : 24;
+        var side = style.showCategoryLabels !== false ? labelWidth + labelMargin + 8 : 36;
         var outerPercent = Math.max(20, Math.min(95, Number(style.outerRadiusPercent) || 76));
         var innerPercent = Math.max(0, Math.min(75, Number(style.innerRadiusPercent) || 0));
         var requestedRadius = Math.min(width, height) * outerPercent / 200;
         var availableRadius = Math.max(1, Math.min(width / 2 - side, (height - top - bottom) / 2));
         var outerRadius = Math.min(requestedRadius, availableRadius);
         return {
-            center: [width / 2, (top + height - bottom) / 2],
-            radius: [outerRadius * innerPercent / outerPercent, outerRadius]
+            geometry: {
+                center: [width / 2, (top + height - bottom) / 2],
+                radius: [outerRadius * innerPercent / outerPercent, outerRadius]
+            },
+            labelWidth: labelWidth,
+            labelMargin: labelMargin,
+            showValueScale: style.showGrid !== false && (outerRadius >= 110 || style.showValues !== true)
         };
     }
 
@@ -111,6 +118,7 @@
         var swatches = colors.seriesColors || [colors.accent];
         var titleVisible = Boolean(polar.title);
         var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8;
+        var layout = polarLayout(polar);
         var axisStyle = { color: colors.border, opacity: 0.7 };
         var splitStyle = { color: colors.border, opacity: 0.2 };
         var categoryAxis = {
@@ -126,7 +134,7 @@
         };
         var valueAxis = {
             type: 'value',
-            axisLabel: { show: style.showGrid !== false, color: colors.muted },
+            axisLabel: { show: layout.showValueScale, color: colors.muted },
             axisLine: { show: style.showGrid !== false, lineStyle: axisStyle },
             axisTick: { show: style.showGrid !== false, lineStyle: axisStyle },
             splitLine: { show: style.showGrid !== false, lineStyle: splitStyle }
@@ -135,6 +143,8 @@
         var angleAxis = mode === 'radial' ? categoryAxis : valueAxis;
         angleAxis.startAngle = startAngle;
         angleAxis.clockwise = style.clockwise !== false;
+        categoryAxis.axisLabel.width = layout.labelWidth;
+        categoryAxis.axisLabel.margin = layout.labelMargin;
 
         return {
             backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
@@ -160,7 +170,7 @@
                         + escapeHtml(formatValue(item.value, itemDecimals(item), unit));
                 }
             },
-            polar: polarGeometry(polar),
+            polar: layout.geometry,
             angleAxis: angleAxis,
             radiusAxis: mode === 'radial' ? valueAxis : categoryAxis,
             series: [{
@@ -238,7 +248,15 @@
         lastWidth = width;
         lastHeight = height;
         if (currentState && currentState.status === 'ready' && currentState.chart) {
-            chart.setOption({ polar: polarGeometry(currentState.chart.polar || {}) });
+            var polar = currentState.chart.polar || {};
+            var layout = polarLayout(polar);
+            var categoryAxisName = polar.style && polar.style.mode === 'tangential'
+                ? 'radiusAxis' : 'angleAxis';
+            var valueAxisName = categoryAxisName === 'angleAxis' ? 'radiusAxis' : 'angleAxis';
+            var update = { polar: layout.geometry };
+            update[categoryAxisName] = { axisLabel: { width: layout.labelWidth, margin: layout.labelMargin } };
+            update[valueAxisName] = { axisLabel: { show: layout.showValueScale } };
+            chart.setOption(update);
         }
     }
 

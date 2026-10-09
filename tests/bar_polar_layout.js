@@ -74,13 +74,16 @@ function assertProtectedGeometry(option, width, height, topClearance) {
     const centerX = pixels(option.polar.center[0], width);
     const centerY = pixels(option.polar.center[1], height);
     const outerRadius = pixels(option.polar.radius[1], Math.min(width, height) / 2);
+    const categoryAxis = option.angleAxis.type === 'category' ? option.angleAxis : option.radiusAxis;
+    const sideClearance = categoryAxis.axisLabel.width + categoryAxis.axisLabel.margin + 8;
     assert.ok(centerY - outerRadius >= topClearance, 'Polar ring must clear the tile heading and scale.');
-    assert.ok(centerY + outerRadius <= height - 64, 'Polar ring must leave room for bottom labels.');
-    assert.ok(centerX - outerRadius >= 120, 'Polar ring must leave room for left labels.');
-    assert.ok(centerX + outerRadius <= width - 120, 'Polar ring must leave room for right labels.');
+    assert.ok(centerY + outerRadius <= height - Math.min(45, height * 0.14),
+        'Polar ring must leave room for bottom labels.');
+    assert.ok(centerX - outerRadius >= sideClearance, 'Polar ring must leave room for left labels.');
+    assert.ok(centerX + outerRadius <= width - sideClearance, 'Polar ring must leave room for right labels.');
 }
 const radial = options.at(-1);
-assertProtectedGeometry(radial, 625, 560, 150);
+assertProtectedGeometry(radial, 625, 560, 108);
 assert.equal(radial.series[0].coordinateSystem, 'polar');
 assert.equal(radial.angleAxis.type, 'category');
 assert.equal(radial.radiusAxis.type, 'value');
@@ -134,7 +137,7 @@ assert.equal(tangential.series[0].roundCap, true);
 assert.equal(tangential.series[0].label.show, false);
 assert.equal(tangential.series[0].label.rotate, 0);
 assert.equal(tangential.series[0].label.position, 'middle');
-assertProtectedGeometry(tangential, 625, 560, 110);
+assertProtectedGeometry(tangential, 625, 560, 70);
 assert.ok(tangential.polar.radius[0] > 0 && tangential.polar.radius[0] < tangential.polar.radius[1]);
 assert.equal(tangential.angleAxis.splitLine.show, false);
 
@@ -142,12 +145,78 @@ chartElement.clientWidth = 1000;
 chartElement.clientHeight = 700;
 resizeCallback();
 assert.equal(resized, 1, 'A size change must resize the ECharts instance.');
-assertProtectedGeometry(options.at(-1), 1000, 700, 110);
+assertProtectedGeometry({ ...tangential, ...options.at(-1) }, 1000, 700, 70);
 assert.ok(options.at(-1).polar.radius[1] > tangential.polar.radius[1], 'The ring must grow with the tile.');
+
+chartElement.clientWidth = 300;
+chartElement.clientHeight = 300;
+window.handleMessage({
+    status: 'ready', chart: {
+        ...state.chart,
+        polar: { ...state.chart.polar, title: '' }
+    }
+});
+const compact = options.at(-1);
+assertProtectedGeometry(compact, 300, 300, 70);
+assert.ok(compact.polar.radius[1] >= 80,
+    'Compact Symcon tiles must keep a legible Polar diameter instead of collapsing to a tiny ring.');
+assert.ok(compact.angleAxis.axisLabel.width < radial.angleAxis.axisLabel.width,
+    'Compact category labels must use less side clearance.');
+assert.equal(compact.radiusAxis.axisLabel.show, false,
+    'Compact Polar tiles must hide scale numbers that collide with bar values.');
+window.handleMessage({
+    status: 'ready', chart: {
+        ...state.chart,
+        polar: {
+            ...state.chart.polar,
+            title: '',
+            style: { ...state.chart.polar.style, showValues: false }
+        }
+    }
+});
+assert.equal(options.at(-1).radiusAxis.axisLabel.show, true,
+    'Compact Polar tiles without bar values may keep the numeric scale.');
+window.handleMessage({
+    status: 'ready', chart: {
+        ...state.chart,
+        polar: { ...state.chart.polar, title: '' },
+        items: [
+            { id: 'outside', label: 'Außen', value: 9.5, decimals: 1, color: '#586ee0', order: 0 },
+            { id: 'bath', label: 'Bad', value: 22.6, decimals: 1, color: '#bed939', order: 1 },
+            { id: 'office', label: 'Büro', value: 24.5, decimals: 1, color: '#555674', order: 2 }
+        ]
+    }
+});
+const compactUserValues = options.at(-1);
 
 const localECharts = path.join(__dirname, '..', '.tools', 'echarts-runtime', 'node_modules', 'echarts');
 if (fs.existsSync(localECharts)) {
     const echarts = require(localECharts);
+    const compactChart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 300, height: 300 });
+    compactChart.setOption(compact);
+    const compactTexts = compactChart.getZr().storage.getDisplayList()
+        .filter(element => element.type === 'tspan')
+        .map(element => element.style.text);
+    assert.ok(!compactTexts.includes('12'), 'Compact Polar tiles must not render overlapping value-axis ticks.');
+    assert.ok(compactTexts.includes('10 °C'), 'Compact Polar tiles must keep the bar values readable.');
+    compactChart.dispose();
+    const userChart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 300, height: 300 });
+    userChart.setOption(compactUserValues);
+    const valueLabels = userChart.getZr().storage.getDisplayList()
+        .filter(element => element.type === 'tspan' && /°C$/.test(element.style.text))
+        .map(element => {
+            const bounds = element.getBoundingRect().clone();
+            bounds.applyTransform(element.getComputedTransform());
+            return bounds;
+        });
+    assert.equal(valueLabels.length, 3, 'All three values from the compact user scenario must remain visible.');
+    for (let left = 0; left < valueLabels.length; left++) {
+        for (let right = left + 1; right < valueLabels.length; right++) {
+            assert.equal(valueLabels[left].intersect(valueLabels[right]), false,
+                'Compact user values must not overlap one another.');
+        }
+    }
+    userChart.dispose();
     for (const option of [radial, tangential]) {
         const realChart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 625, height: 560 });
         realChart.setOption(option);

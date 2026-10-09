@@ -89,9 +89,11 @@
 
 ## Fixes
 
-- Polar-Bar passt den Kreis an kleine Kacheln und Größenänderungen an. Die
-  Skala überlagert nicht mehr den Kacheltitel; äußere Kategorien bleiben
-  innerhalb des verfügbaren Bereichs.
+- Polar-Bar passt den Kreis an kleine Kacheln und Größenänderungen an, ohne
+  ihn durch starre Abstände auf Miniaturgröße zu verkleinern. Die Skala
+  überlagert nicht mehr den Kacheltitel und ihre Zahlen werden in sehr
+  kompakten Ansichten zugunsten lesbarer Balkenwerte ausgeblendet; äußere
+  Kategorien bleiben innerhalb des verfügbaren Bereichs.
 - Polar-Bar-Werte bleiben auch im unteren Kreisbereich waagerecht lesbar und
   stehen mit automatisch kontrastierender Schrift mittig im Balken statt auf
   dessen Kante; Kategoriebeschriftungen erhalten mehr Abstand zum äußeren Ring.
