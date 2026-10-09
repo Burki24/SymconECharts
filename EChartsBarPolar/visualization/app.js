@@ -95,7 +95,7 @@
             data: labels,
             axisLabel: {
                 show: style.showCategoryLabels !== false, color: colors.text,
-                overflow: 'truncate', width: 90, fontSize: 11
+                overflow: 'truncate', width: 90, fontSize: 11, margin: 24
             },
             axisLine: { show: style.showGrid !== false, lineStyle: axisStyle },
             axisTick: { show: style.showGrid !== false, lineStyle: axisStyle },
@@ -164,6 +164,7 @@
                     show: style.showValues === true,
                     position: mode === 'radial' ? 'outside' : 'end',
                     color: colors.text,
+                    rotate: 0,
                     formatter: function (parameter) {
                         return formatValue(parameter.value, itemDecimals(items[parameter.dataIndex]), unit);
                     }

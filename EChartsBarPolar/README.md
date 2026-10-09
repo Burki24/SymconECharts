@@ -20,6 +20,7 @@ Im **Kacheldesigner** und im unabhängigen **IPSView-Design** stehen zur Verfüg
 - ECharts-Theme und die je Quelle konfigurierte Balkenfarbe.
 
 Die Werteskala bestimmt ECharts automatisch. Negative Werte werden nicht in positive Werte umgerechnet. Bei vielen Quellen oder langen Namen können Beschriftungen in kleinen Kacheln überlappen; Kachelgröße und Anzeigeoptionen lassen sich passend wählen.
+Wertbeschriftungen bleiben waagerecht lesbar; Kategoriebeschriftungen stehen mit Abstand zum äußeren Ring.
 
 Die Kachel aktualisiert sich bei Änderungen einer Quellvariablen. Optional erzeugt das Modul eine eigenständige WebContent-Variable `IPSViewBarPolar` für ein IPSView-HTML-Widget. Deren HTML-Dokument bleibt bei Wertänderungen bestehen; nur der Diagrammzustand wird übertragen. Für IPSView sind Hintergrundfarbe und Deckkraft einstellbar.
 

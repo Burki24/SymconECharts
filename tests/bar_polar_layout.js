@@ -62,10 +62,12 @@ assert.equal(radial.series[0].coordinateSystem, 'polar');
 assert.equal(radial.angleAxis.type, 'category');
 assert.equal(radial.radiusAxis.type, 'value');
 assert.deepEqual(Array.from(radial.angleAxis.data), ['<Room>', '<Room>', 'Outside']);
+assert.ok(radial.angleAxis.axisLabel.margin >= 20, 'Radial category labels need room outside the outer ring.');
 assert.deepEqual(Array.from(radial.series[0].data, item => item.value), [10, 5, -3]);
 assert.equal(radial.series[0].data[0].itemStyle.color, '#ff5500');
 assert.equal(radial.series[0].data[1].itemStyle.color, '#abcdef');
 assert.equal(radial.angleAxis.startAngle, 90);
+assert.equal(radial.series[0].label.rotate, 0, 'Polar value labels must remain horizontally readable.');
 assert.equal(
     radial.series[0].label.formatter({ value: 5, dataIndex: 1 }),
     Number(5).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' °C'
@@ -100,9 +102,11 @@ assert.equal(initialized, 1, 'Live updates must reuse the chart instance.');
 assert.equal(tangential.angleAxis.type, 'value');
 assert.equal(tangential.radiusAxis.type, 'category');
 assert.deepEqual(Array.from(tangential.radiusAxis.data), ['<Room>', '<Room>', 'Outside']);
+assert.ok(tangential.radiusAxis.axisLabel.margin >= 20, 'Concentric category labels need axis spacing.');
 assert.equal(tangential.angleAxis.clockwise, false);
 assert.equal(tangential.series[0].roundCap, true);
 assert.equal(tangential.series[0].label.show, false);
+assert.equal(tangential.series[0].label.rotate, 0);
 assert.deepEqual(Array.from(tangential.polar.radius), ['20%', '90%']);
 assert.equal(tangential.angleAxis.splitLine.show, false);
 
@@ -113,6 +117,16 @@ if (fs.existsSync(localECharts)) {
         const realChart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 800, height: 500 });
         realChart.setOption(option);
         assert.ok(realChart.renderToSVGString().includes('<svg'), 'Both polar modes must render in ECharts.');
+        if (option === radial) {
+            const valueSectors = realChart.getZr().storage.getDisplayList().filter(
+                element => element.type === 'sector' && element.getTextContent()
+            );
+            assert.ok(valueSectors.length >= 3, 'Radial values must render as polar bar labels.');
+            assert.ok(
+                valueSectors.every(element => element.textConfig.rotation === 0),
+                'Rendered polar values must not follow the bar angle.'
+            );
+        }
         realChart.dispose();
     }
 }

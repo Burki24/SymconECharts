@@ -89,6 +89,8 @@
 
 ## Fixes
 
+- Polar-Bar-Werte bleiben auch im unteren Kreisbereich waagerecht lesbar;
+  Kategoriebeschriftungen erhalten mehr Abstand zum äußeren Ring.
 - Das Konfigurationsformular von EChartsBarHistory lässt sich wieder öffnen;
   die Felder für einen benutzerdefinierten Zeitraum werden bei der Auswahl
   unmittelbar ein- oder ausgeblendet.
