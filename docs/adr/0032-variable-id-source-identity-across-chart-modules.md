@@ -40,6 +40,8 @@ The cross-project rule is defined in
   several sources and resolves their labels through `EChartsSourceIdentity`,
   while keeping its ID-based technical series keys. Gateway has no chart
   source list.
+- Waterfall follows the same ID-based source and label resolution for its
+  ordered start and change steps; equal visible step names do not merge values.
 
 ## Compatibility and verification
 
@@ -49,6 +51,6 @@ never gain an automatic ID suffix. Source order continues to control
 presentation layout, not source identity.
 
 Tests cover duplicate names and explicit labels, stable renderer IDs,
-TimeSeries live updates by variable ID, equal visible labels and all eight
-module contracts. Browser and installed-Symcon behavior remain separate
+TimeSeries live updates by variable ID, equal visible labels and the module
+contracts. Browser and installed-Symcon behavior remain separate
 runtime verification steps.

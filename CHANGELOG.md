@@ -2,6 +2,11 @@
 
 ## Neu
 
+- EChartsBarWaterfall zeigt einen aktuellen Startwert, bis zu 15 geordnete
+  positive oder negative Änderungen und eine berechnete Endsumme. Die native
+  Kachel aktualisiert sich bei Variablenänderungen; IPSView kann ein eigenes
+  Design und einen anpassbaren Hintergrund verwenden.
+
 - BarCategory und BarHistory können ihre Balken in Kachel und IPSView mit
   einem wiederholten, sicher geprüften SVG-Muster füllen. Muster und Größe
   sind bei unabhängigem IPSView-Design separat wählbar; bisherige Farben

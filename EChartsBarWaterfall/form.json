@@ -1,0 +1,406 @@
+{
+    "$schema": "https://www.symcon.de/assets/files/validation/formSchema.json",
+    "elements": [
+        {
+            "type": "Label",
+            "caption": "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts."
+        },
+        {
+            "type": "ValidationTextBox",
+            "name": "Title",
+            "caption": "Title"
+        },
+        {
+            "type": "ValidationTextBox",
+            "name": "TotalLabel",
+            "caption": "Final total label"
+        },
+        {
+            "type": "List",
+            "name": "Sources",
+            "caption": "Waterfall sources (first row: start value; following rows: signed changes)",
+            "rowCount": 8,
+            "add": true,
+            "delete": true,
+            "changeOrder": true,
+            "columns": [
+                {
+                    "caption": "Variable",
+                    "name": "VariableID",
+                    "width": "360px",
+                    "add": 0,
+                    "edit": {
+                        "type": "SelectVariable",
+                        "validVariableTypes": [
+                            1,
+                            2
+                        ]
+                    }
+                },
+                {
+                    "caption": "Step label (optional)",
+                    "name": "Label",
+                    "width": "180px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "caption": "Variable presentation",
+                    "name": "UseVariablePresentation",
+                    "width": "150px",
+                    "add": true,
+                    "edit": {
+                        "type": "CheckBox"
+                    }
+                },
+                {
+                    "caption": "Unit",
+                    "name": "Unit",
+                    "width": "90px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "caption": "Decimals",
+                    "name": "Decimals",
+                    "width": "90px",
+                    "add": 1,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "minimum": 0,
+                        "maximum": 6
+                    }
+                }
+            ],
+            "form": [
+                {
+                    "type": "SelectVariable",
+                    "name": "VariableID",
+                    "caption": "Variable",
+                    "validVariableTypes": [
+                        1,
+                        2
+                    ]
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Label",
+                    "caption": "Step label (optional)"
+                },
+                {
+                    "type": "CheckBox",
+                    "name": "UseVariablePresentation",
+                    "caption": "Variable presentation"
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Unit",
+                    "caption": "Unit"
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "Decimals",
+                    "caption": "Decimals",
+                    "minimum": 0,
+                    "maximum": 6
+                }
+            ]
+        },
+        {
+            "type": "Label",
+            "caption": "Use 2 to 16 unique numeric variables with one unit. The first row is the start value. Every later row is added with its sign; the final total is calculated. Empty step labels use the current variable name."
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Tile designer",
+            "expanded": false,
+            "width": "720px",
+            "items": [
+                {
+                    "type": "Select",
+                    "name": "EChartsTheme",
+                    "caption": "ECharts theme",
+                    "options": [
+                        {
+                            "caption": "Automatic (Symcon design)",
+                            "value": "auto"
+                        },
+                        {
+                            "caption": "Dark",
+                            "value": "dark"
+                        },
+                        {
+                            "caption": "Vintage",
+                            "value": "vintage"
+                        },
+                        {
+                            "caption": "Macarons",
+                            "value": "macarons"
+                        },
+                        {
+                            "caption": "Infographic",
+                            "value": "infographic"
+                        },
+                        {
+                            "caption": "Shine",
+                            "value": "shine"
+                        },
+                        {
+                            "caption": "Roma",
+                            "value": "roma"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowValues",
+                            "caption": "Show values"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowGrid",
+                            "caption": "Show grid"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "BarWidthPercent",
+                            "caption": "Bar width",
+                            "minimum": 20,
+                            "maximum": 100,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "StartColor",
+                            "caption": "Start color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "IncreaseColor",
+                            "caption": "Increase color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "DecreaseColor",
+                            "caption": "Decrease color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "TotalColor",
+                            "caption": "Total color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "IPSView design",
+            "expanded": false,
+            "width": "720px",
+            "items": [
+                {
+                    "type": "Label",
+                    "caption": "Configure optional IPSView HTML output."
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "IPSViewAdaptToBackground",
+                            "caption": "Adapt to IPSView background"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "IPSViewBackgroundColor",
+                            "caption": "Background color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "IPSViewBackgroundOpacityPercent",
+                            "caption": "Background opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "CheckBox",
+                    "name": "IPSViewUseTileDesign",
+                    "caption": "Use Tile design"
+                },
+                {
+                    "type": "Button",
+                    "caption": "Copy Tile design to IPSView and edit independently",
+                    "onClick": "ECBW_CopyTileDesignToIPSView($id); return \"MESSAGE:Tile design copied to IPSView.\";"
+                },
+                {
+                    "type": "ExpansionPanel",
+                    "caption": "Independent IPSView designer",
+                    "expanded": false,
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "IPSViewEChartsTheme",
+                            "caption": "ECharts theme",
+                            "options": [
+                                {
+                                    "caption": "Automatic (Symcon design)",
+                                    "value": "auto"
+                                },
+                                {
+                                    "caption": "Dark",
+                                    "value": "dark"
+                                },
+                                {
+                                    "caption": "Vintage",
+                                    "value": "vintage"
+                                },
+                                {
+                                    "caption": "Macarons",
+                                    "value": "macarons"
+                                },
+                                {
+                                    "caption": "Infographic",
+                                    "value": "infographic"
+                                },
+                                {
+                                    "caption": "Shine",
+                                    "value": "shine"
+                                },
+                                {
+                                    "caption": "Roma",
+                                    "value": "roma"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "CheckBox",
+                                    "name": "IPSViewShowValues",
+                                    "caption": "Show values"
+                                },
+                                {
+                                    "type": "CheckBox",
+                                    "name": "IPSViewShowGrid",
+                                    "caption": "Show grid"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "IPSViewBarWidthPercent",
+                                    "caption": "Bar width",
+                                    "minimum": 20,
+                                    "maximum": 100,
+                                    "suffix": "%"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "SelectColor",
+                                    "name": "IPSViewStartColor",
+                                    "caption": "Start color",
+                                    "allowTransparent": true,
+                                    "transparentCaption": "Automatic (theme)"
+                                },
+                                {
+                                    "type": "SelectColor",
+                                    "name": "IPSViewIncreaseColor",
+                                    "caption": "Increase color",
+                                    "allowTransparent": true,
+                                    "transparentCaption": "Automatic (theme)"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "SelectColor",
+                                    "name": "IPSViewDecreaseColor",
+                                    "caption": "Decrease color",
+                                    "allowTransparent": true,
+                                    "transparentCaption": "Automatic (theme)"
+                                },
+                                {
+                                    "type": "SelectColor",
+                                    "name": "IPSViewTotalColor",
+                                    "caption": "Total color",
+                                    "allowTransparent": true,
+                                    "transparentCaption": "Automatic (theme)"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "type": "Button",
+            "caption": "Read current Waterfall data",
+            "onClick": "echo ECBW_GetWaterfallData($id);"
+        }
+    ],
+    "status": [
+        {
+            "code": 102,
+            "icon": "active",
+            "caption": "Waterfall is ready"
+        },
+        {
+            "code": 201,
+            "icon": "error",
+            "caption": "Configure valid Waterfall sources"
+        },
+        {
+            "code": 202,
+            "icon": "error",
+            "caption": "Waterfall design is invalid"
+        },
+        {
+            "code": 203,
+            "icon": "error",
+            "caption": "No active EChartsGateway is connected"
+        },
+        {
+            "code": 204,
+            "icon": "error",
+            "caption": "EChartsGateway request failed"
+        }
+    ]
+}

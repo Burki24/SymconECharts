@@ -3,8 +3,8 @@
 SymconECharts stellt numerische Symcon-Werte als responsive Apache-ECharts-
 Diagramme in nativen Symcon-Kacheln und optionalen IPSView-HTML-Widgets dar.
 Die Library enthält Gauges für einzelne und mehrere Werte, historische und
-live fortgeschriebene Zeitreihen, aktuelle Kategorienvergleiche sowie erste
-historische Balken.
+live fortgeschriebene Zeitreihen, aktuelle Kategorienvergleiche, historische
+Balken sowie ein Waterfall-Diagramm für aktuelle Werte.
 
 ## Voraussetzungen
 
@@ -99,6 +99,11 @@ Folgende Module sind enthalten:
   Der Zeitraum kann in Kachel und IPSView mit Regler oder Mausrad gezoomt werden.
   IPSView kann optional einen eigenen Zeitraum und ein eigenes Design verwenden;
   eine Begrenzung von Rohwerten wird sichtbar gemeldet.
+
+- __EChartsBarWaterfall__ ([Dokumentation](EChartsBarWaterfall/README.md))
+  Zeigt einen aktuellen Startwert und bis zu 15 geordnete Änderungen mit
+  Vorzeichen als Waterfall-Diagramm. Die Endsumme wird berechnet; ein Archiv
+  ist nicht erforderlich. Kachel und IPSView können getrennt gestaltet werden.
 
 ## Kacheldesign und IPSView-Design
 

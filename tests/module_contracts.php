@@ -125,6 +125,14 @@ $expectedModules = [
         'parentRequirements' => ['{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}'],
         'childRequirements'  => [],
         'implemented'        => ['{E4749B72-912B-E3E3-1C57-D19019FFDD84}']
+    ],
+    'EChartsBarWaterfall' => [
+        'id'                 => '{792B12B3-E608-4301-868D-5FE96DDB8864}',
+        'type'               => 3,
+        'prefix'             => 'ECBW',
+        'parentRequirements' => ['{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}'],
+        'childRequirements'  => [],
+        'implemented'        => ['{E4749B72-912B-E3E3-1C57-D19019FFDD84}']
     ]
 ];
 
@@ -185,7 +193,7 @@ foreach ($expectedModules as $moduleName => $expected) {
 $gateway = $moduleContracts['EChartsGateway'];
 foreach ([
     'EChartsGaugeSingle', 'EChartsGaugeMulti', 'EChartsGaugeTacho', 'EChartsGaugeChronograph',
-    'EChartsTimeSeries', 'EChartsBarCategory', 'EChartsBarHistory'
+    'EChartsTimeSeries', 'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarWaterfall'
 ] as $deviceModuleName) {
     $device = $moduleContracts[$deviceModuleName];
     requireContract(

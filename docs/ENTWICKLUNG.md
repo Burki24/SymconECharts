@@ -83,6 +83,7 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 | Gerät | EChartsTimeSeries | Historische und live fortgeschriebene Linien und Flächen für 1 bis 8 Quellen, bis zu acht links/rechts angeordnete Einheitengruppen sowie getrenntes Kachel- und IPSView-Design |
 | Gerät | EChartsBarCategory | Aktuelle einfache, gruppierte oder gestapelte Kategorienvergleiche für 1 bis 16 Quellen mit gemeinsamer Einheit, vertikal/horizontal und mit getrenntem Kachel- und IPSView-Design |
 | Gerät | EChartsBarHistory | Historische rohe oder aggregierte Balken von 1 bis 16 Archivquellen auf einer Zeitachse in einer nativen Kachel und optionalem IPSView-HTML |
+| Gerät | EChartsBarWaterfall | Aktueller Startwert mit 1 bis 15 signierten Änderungen und berechneter Endsumme in Kachel und optionalem IPSView-HTML |
 
 Eine eigene I/O-Instanz, ein Konfigurator und Discovery gehören nicht zum
 Anfangsumfang. Datenquellen sind Teil der jeweiligen Gauge-Konfiguration und
@@ -110,12 +111,13 @@ Modul-IDs und Datenfluss-IDs haben unterschiedliche Aufgaben.
 | Modul EChartsTimeSeries | `{EF172F3B-50F5-41D1-B18E-6BCDEAECCABA}` |
 | Modul EChartsBarCategory | `{F9A88437-FE9E-4038-ADAF-775623D2DDC1}` |
 | Modul EChartsBarHistory | `{BCC80B03-2FC9-45CA-B004-2C81D0689F50}` |
+| Modul EChartsBarWaterfall | `{792B12B3-E608-4301-868D-5FE96DDB8864}` |
 | Datenfluss Gauge → Gateway | `{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}` |
 | Datenfluss Gateway → Gauge | `{E4749B72-912B-E3E3-1C57-D19019FFDD84}` |
 
 Die Funktionspräfixe sind `ECGW` für das Gateway, `ECGS` für Gauge Single,
 `ECGM` für Gauge Multi, `ECGT` für Gauge Tacho, `ECGC` für Gauge
-Chronograph, `ECTS` für Time Series, `ECBC` für Bar Category und `ECBH` für Bar History. Nach der verbindlichen Präfixkonvention steht `EC` für
+Chronograph, `ECTS` für Time Series, `ECBC` für Bar Category, `ECBH` für Bar History und `ECBW` für Bar Waterfall. Nach der verbindlichen Präfixkonvention steht `EC` für
 ECharts; die letzten zwei Buchstaben bezeichnen Aufgabe oder Modultyp. Die
 Entscheidungen zur Modulstruktur und zu den GUIDs dokumentieren
 [`ADR 0001`](adr/0001-chart-family-modules.md) und
@@ -166,6 +168,9 @@ mehrere Quellen verwenden die bestehende Quellenliste. Ein getrenntes
 Single-/Multi-Modulpaar ist nicht vorgesehen. Die Regeln für bis zu 16
 Quellen, benachbarte Balken und mehrere Einheitenachsen legt
 [`ADR 0033`](adr/0033-historical-bar-multi-source-axes.md) fest.
+Der eigene Vertrag für aktuelle Waterfall-Schritte mit Startwert, signierten
+Änderungen und berechneter Endsumme ist in
+[`ADR 0034`](adr/0034-waterfall-bar-current-values.md) festgelegt.
 Die SVG-Balkenmuster von BarCategory und BarHistory verwenden denselben
 begrenzten Import über `libs/EChartsSvgImage.php` wie TimeSeries-Flächen.
 Die Browserdekodierung und wiederholte Pattern-Erzeugung liegt nun für alle

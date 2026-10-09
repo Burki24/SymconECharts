@@ -677,6 +677,7 @@ require_once dirname(__DIR__) . '/EChartsGaugeChronograph/module.php';
 require_once dirname(__DIR__) . '/EChartsTimeSeries/module.php';
 require_once dirname(__DIR__) . '/EChartsBarCategory/module.php';
 require_once dirname(__DIR__) . '/EChartsBarHistory/module.php';
+require_once dirname(__DIR__) . '/EChartsBarWaterfall/module.php';
 
 final class TestableEChartsGateway extends EChartsGateway
 {
@@ -4886,6 +4887,109 @@ assertGatewayGauge(
     'Historical Bar must reject design values outside their supported range.'
 );
 
+$waterfall = new EChartsBarWaterfall();
+$waterfall->Create();
+$waterfall->SetTestProperty('Sources', json_encode([
+    ['VariableID' => 4711, 'Label' => 'Start', 'UseVariablePresentation' => false, 'Unit' => '°C'],
+    ['VariableID' => 4717, 'Label' => 'Loss', 'UseVariablePresentation' => false, 'Unit' => '°C'],
+    ['VariableID' => 4716, 'Label' => '', 'UseVariablePresentation' => false, 'Unit' => '°C']
+], JSON_THROW_ON_ERROR));
+$waterfall->SetTestProperty('Title', 'Balance');
+$waterfall->SetTestProperty('EnableIPSView', true);
+$waterfall->SetTestProperty('IPSViewUseTileDesign', false);
+$waterfall->SetTestProperty('IPSViewEChartsTheme', 'dark');
+$waterfall->SetTestProperty('IPSViewIncreaseColor', 0x123456);
+$originalWaterfallValue = $GLOBALS['symconTestVariables'][4717]['Value'];
+$GLOBALS['symconTestVariables'][4717]['Value'] = -50.0;
+$waterfall->ApplyChanges();
+$waterfallData = json_decode($waterfall->GetWaterfallData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $waterfall->GetTestStatus() === IS_ACTIVE
+        && $waterfall->GetTestReferences() === [4711, 4716, 4717]
+        && $waterfallData['variant'] === 'waterfall'
+        && $waterfallData['bar']['unit'] === '°C'
+        && $waterfallData['steps'][0]['after'] === 42.5
+        && $waterfallData['steps'][1]['before'] === 42.5
+        && $waterfallData['steps'][1]['after'] === -7.5
+        && $waterfallData['steps'][2]['label'] === 'Legacy wind speed'
+        && $waterfallData['steps'][3]['after'] === 4.84,
+    'Waterfall must calculate ordered signed changes by source ID, including a zero crossing.'
+);
+$waterfallTile = $waterfall->GetVisualizationTile();
+$waterfallIPSView = $waterfall->GetIPSViewHTML();
+assertGatewayGauge(
+    str_contains($waterfallTile, 'echarts-bar-waterfall-root')
+        && str_contains($waterfallTile, '"theme":"auto"')
+        && str_contains($waterfallIPSView, '"theme":"dark"')
+        && str_contains($waterfallIPSView, '#123456')
+        && $waterfall->GetTestVariableValue('IPSViewBarWaterfall') !== null,
+    'Waterfall must provide separate Tile and persistent IPSView output.'
+);
+$waterfallForm = json_decode($waterfall->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+$waterfallSourceForm = current(array_filter(
+    $waterfallForm['elements'],
+    static fn (array $element): bool => ($element['name'] ?? '') === 'Sources'
+));
+assertGatewayGauge(
+    ($waterfallSourceForm['changeOrder'] ?? false) === true
+        && in_array('Label', array_column($waterfallSourceForm['columns'], 'name'), true),
+    'Waterfall form must expose ordered sources and editable step labels.'
+);
+$waterfall->MessageSink(0, 4717, VM_UPDATE, []);
+$waterfallUpdates = $waterfall->GetTestVisualizationUpdates();
+$lastWaterfallUpdate = end($waterfallUpdates);
+assertGatewayGauge(
+    is_string($lastWaterfallUpdate) && str_contains($lastWaterfallUpdate, '"variant":"waterfall"'),
+    'Waterfall must update its chart state when a source variable changes.'
+);
+$GLOBALS['symconTestVariables'][4717]['Value'] = $originalWaterfallValue;
+
+$invalidWaterfall = new EChartsBarWaterfall();
+$invalidWaterfall->Create();
+$invalidWaterfall->SetTestProperty('Sources', json_encode([
+    ['VariableID' => 4711, 'Unit' => '°C', 'UseVariablePresentation' => false],
+    ['VariableID' => 4713, 'Unit' => '%', 'UseVariablePresentation' => false]
+], JSON_THROW_ON_ERROR));
+$invalidWaterfall->ApplyChanges();
+assertGatewayGauge($invalidWaterfall->GetTestStatus() === 201, 'Waterfall must reject mixed units.');
+
+$duplicateWaterfall = new EChartsBarWaterfall();
+$duplicateWaterfall->Create();
+$duplicateWaterfall->SetTestProperty('Sources', json_encode([
+    ['VariableID' => 4711],
+    ['VariableID' => 4711]
+], JSON_THROW_ON_ERROR));
+$duplicateWaterfall->ApplyChanges();
+assertGatewayGauge($duplicateWaterfall->GetTestStatus() === 201, 'Waterfall must reject duplicate variable IDs.');
+
+$sameNameWaterfall = new EChartsBarWaterfall();
+$sameNameWaterfall->Create();
+$sameNameWaterfall->SetTestProperty('Sources', json_encode([
+    ['VariableID' => 4711, 'Label' => 'Configured start', 'UseVariablePresentation' => false],
+    ['VariableID' => 4717, 'UseVariablePresentation' => false]
+], JSON_THROW_ON_ERROR));
+$originalWaterfallName = $GLOBALS['symconTestVariables'][4717]['Name'];
+$GLOBALS['symconTestVariables'][4717]['Name'] = $GLOBALS['symconTestVariables'][4711]['Name'];
+$sameNameWaterfall->ApplyChanges();
+$sameNameWaterfallData = json_decode($sameNameWaterfall->GetWaterfallData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $sameNameWaterfallData['steps'][0]['label'] === 'Configured start'
+        && $sameNameWaterfallData['steps'][1]['label'] === 'Living room temperature'
+        && $sameNameWaterfallData['steps'][0]['id'] !== $sameNameWaterfallData['steps'][1]['id'],
+    'Waterfall must keep IDs as source identity while showing configured or current names.'
+);
+$GLOBALS['symconTestVariables'][4717]['Name'] = $originalWaterfallName;
+$sameNameWaterfall->SetTestProperty('Sources', json_encode([
+    ['VariableID' => 4711, 'UseVariablePresentation' => false],
+    ['VariableID' => 4716, 'UseVariablePresentation' => false]
+], JSON_THROW_ON_ERROR));
+$sameNameWaterfall->ApplyChanges();
+$sameNameWaterfall->ApplyChanges();
+assertGatewayGauge(
+    $sameNameWaterfall->GetTestReferences() === [4711, 4716],
+    'Waterfall must remove stale references and keep repeated ApplyChanges idempotent.'
+);
+
 foreach ([
     EChartsGaugeSingle::class       => 'ECGS',
     EChartsGaugeMulti::class        => 'ECGM',
@@ -4893,7 +4997,8 @@ foreach ([
     EChartsGaugeChronograph::class  => 'ECGC',
     EChartsTimeSeries::class        => 'ECTS',
     EChartsBarCategory::class       => 'ECBC',
-    EChartsBarHistory::class        => 'ECBH'
+    EChartsBarHistory::class        => 'ECBH',
+    EChartsBarWaterfall::class      => 'ECBW'
 ] as $moduleClass => $modulePrefix) {
     $designModule = new $moduleClass();
     $designModule->Create();

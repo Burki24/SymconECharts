@@ -102,7 +102,12 @@ $requiredFiles = [
     'EChartsBarCategory/visualization/app.js',
     'EChartsBarHistory/visualization/index.html',
     'EChartsBarHistory/visualization/style.css',
-    'EChartsBarHistory/visualization/app.js'
+    'EChartsBarHistory/visualization/app.js',
+    'EChartsBarWaterfall/visualization/index.html',
+    'EChartsBarWaterfall/visualization/style.css',
+    'EChartsBarWaterfall/visualization/app.js',
+    'tests/bar_waterfall_layout.js',
+    'libs/EChartsCurrentSources.php'
 ];
 
 foreach ($requiredFiles as $requiredFile) {
@@ -295,7 +300,7 @@ if ($helperSync !== null) {
 }
 
 $expectedModules = [
-    'EChartsBarCategory', 'EChartsBarHistory', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
+    'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarWaterfall', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
     'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsTimeSeries'
 ];
 $discoveredModules = [];

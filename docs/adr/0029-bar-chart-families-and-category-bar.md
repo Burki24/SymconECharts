@@ -33,6 +33,9 @@ Bar diagrams are split by their data and configuration contracts:
   reserved working prefixes `ECBW` and `ECBP`; this ADR does not assign module
   GUIDs or claim those modules are implemented.
 
+The Waterfall candidate was subsequently implemented as a separate device by
+ADR 0034. Polar remains a candidate.
+
 `EChartsBarCategory` reads current values through the existing versioned
 `current.read` Gateway operation. It provides vertical and horizontal
 orientation, stable configured or value-based ordering, per-source colors,

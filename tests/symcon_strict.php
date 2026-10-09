@@ -25,6 +25,8 @@ $gaugeChronograph = (string) file_get_contents($root . '/EChartsGaugeChronograph
 $timeSeries = (string) file_get_contents($root . '/EChartsTimeSeries/module.php');
 $barCategory = (string) file_get_contents($root . '/EChartsBarCategory/module.php');
 $barHistory = (string) file_get_contents($root . '/EChartsBarHistory/module.php');
+$barWaterfall = (string) file_get_contents($root . '/EChartsBarWaterfall/module.php');
+$currentSources = (string) file_get_contents($root . '/libs/EChartsCurrentSources.php');
 $configurationFormHelper = (string) file_get_contents($root . '/libs/helper/ConfigurationFormHelper.php');
 $sharedGatewayGuidance = 'One shared EChartsGateway is sufficient for all ECharts chart instances. '
     . 'When adding further charts, select the existing gateway instead of creating another one.';
@@ -37,7 +39,8 @@ foreach ([
     'EChartsGaugeChronograph' => $gaugeChronograph,
     'EChartsTimeSeries'       => $timeSeries,
     'EChartsBarCategory'      => $barCategory,
-    'EChartsBarHistory'       => $barHistory
+    'EChartsBarHistory'       => $barHistory,
+    'EChartsBarWaterfall'     => $barWaterfall
 ] as $moduleName => $source) {
     requireStrictContract(
         preg_match('/class\s+' . $moduleName . '\s+extends\s+IPSModuleStrict\b/', $source) === 1,
@@ -146,11 +149,35 @@ foreach ([
     "RegisterPropertyString(\$prefix . 'SortOrder', 'configured')",
     'EChartsAsset::CartesianJavaScript()',
     'EChartsVariablePresentation::Resolve(',
-    'RegisterMessage($variableID, VM_UPDATE)'
+    'use EChartsCurrentSources;'
 ] as $barCategoryContract) {
     requireStrictContract(
         str_contains($barCategory, $barCategoryContract),
         'EChartsBarCategory is missing contract: ' . $barCategoryContract,
+        $errors
+    );
+}
+
+requireStrictContract(
+    str_contains($currentSources, 'RegisterMessage($variableID, VM_UPDATE)')
+        && str_contains($currentSources, 'EChartsDataProtocol::OPERATION_CURRENT_READ'),
+    'Current-value charts must share ID-based updates and Gateway reads.',
+    $errors
+);
+
+foreach ([
+    'SetVisualizationType(1)',
+    'public function GetVisualizationTile(): string',
+    'public function GetIPSViewHTML(): string',
+    'public function GetWaterfallData(): string',
+    'use EChartsCurrentSources;',
+    'EChartsSourceIdentity::LabelsForSources($sources)',
+    'EChartsAsset::CartesianJavaScript()',
+    'EChartsVariablePresentation::Resolve('
+] as $waterfallContract) {
+    requireStrictContract(
+        str_contains($barWaterfall, $waterfallContract),
+        'EChartsBarWaterfall is missing contract: ' . $waterfallContract,
         $errors
     );
 }

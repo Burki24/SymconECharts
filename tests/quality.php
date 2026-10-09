@@ -75,7 +75,8 @@ foreach ([
     'tests/gauge_multi_layout.js',
     'tests/gauge_tacho_layout.js',
     'tests/gauge_chronograph_layout.js',
-    'tests/bar_history_layout.js'
+    'tests/bar_history_layout.js',
+    'tests/bar_waterfall_layout.js'
 ] as $layoutTest) {
     runQualityCommand('Run ' . basename($layoutTest), ['node', $layoutTest]);
 }

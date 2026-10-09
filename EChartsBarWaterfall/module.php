@@ -13,7 +13,7 @@ use SymconECharts\EChartsCurrentSources;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
-use SymconECharts\EChartsSvgImage;
+use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsVariablePresentation;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
@@ -28,10 +28,10 @@ require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
-require_once __DIR__ . '/../libs/EChartsSvgImage.php';
+require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 
-class EChartsBarCategory extends IPSModuleStrict
+class EChartsBarWaterfall extends IPSModuleStrict
 {
     use ConfigurationFormHelper;
     use DataFlowHelper;
@@ -46,17 +46,11 @@ class EChartsBarCategory extends IPSModuleStrict
     private const GATEWAY_MODULE_ID = '{33C9DF44-6F6D-5916-4AAE-CCB24BD6928D}';
     private const DATA_ID_TO_PARENT = '{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}';
     private const DATA_ID_FROM_PARENT = '{E4749B72-912B-E3E3-1C57-D19019FFDD84}';
-    private const MINIMUM_SOURCE_COUNT = 1;
-    private const MAXIMUM_SOURCE_COUNT = 16;
+    private const IPSVIEW_OUTPUT_IDENT = 'IPSViewBarWaterfall';
     private const STATUS_SOURCE_INVALID = 201;
     private const STATUS_DESIGN_INVALID = 202;
     private const STATUS_PARENT_MISSING = 203;
     private const STATUS_GATEWAY_FAILED = 204;
-    private const IPSVIEW_OUTPUT_IDENT = 'IPSViewBarCategory';
-    private const MODES = ['simple', 'grouped', 'stacked'];
-    private const ORIENTATIONS = ['vertical', 'horizontal'];
-    private const SORT_ORDERS = ['configured', 'ascending', 'descending'];
-    private const BAR_FILL_MODES = ['solid', 'svg'];
 
     public function Create(): void
     {
@@ -66,6 +60,7 @@ class EChartsBarCategory extends IPSModuleStrict
         $this->RegisterMessage(0, IPS_KERNELSTARTED);
         $this->RegisterPropertyString('Sources', '[]');
         $this->RegisterPropertyString('Title', '');
+        $this->RegisterPropertyString('TotalLabel', '');
         $this->RegisterDesignProperties();
         $this->RegisterIPSViewHTMLPageProperties();
         $this->RegisterEChartsIPSViewTransport();
@@ -86,11 +81,7 @@ class EChartsBarCategory extends IPSModuleStrict
         parent::ApplyChanges();
 
         $this->RegisterMessage(0, IPS_KERNELSTARTED);
-        $this->MaintainIPSViewHTMLVariable(
-            self::IPSVIEW_OUTPUT_IDENT,
-            $this->Translate('Category Bar for IPSView'),
-            90
-        );
+        $this->MaintainIPSViewHTMLVariable(self::IPSVIEW_OUTPUT_IDENT, $this->Translate('Waterfall for IPSView'), 90);
         $this->Initialize();
         if (IPS_GetKernelRunlevel() === KR_READY) {
             $this->PublishVisualizationState();
@@ -110,16 +101,6 @@ class EChartsBarCategory extends IPSModuleStrict
     {
         $form = $this->LoadConfigurationForm();
         if (isset($form['elements']) && is_array($form['elements'])) {
-            $form['elements'] = $this->SetFormFieldVisibility(
-                $form['elements'],
-                ['BarSVG', 'BarSVGSizePercent'],
-                $this->ReadPropertyString('BarFillMode') === 'svg'
-            );
-            $form['elements'] = $this->SetFormFieldVisibility(
-                $form['elements'],
-                ['IPSViewBarSVG', 'IPSViewBarSVGSizePercent'],
-                $this->ReadPropertyString('IPSViewBarFillMode') === 'svg'
-            );
             $this->InsertIPSViewHTMLPageFormItems(
                 $form['elements'],
                 'Configure optional IPSView HTML output.',
@@ -127,14 +108,7 @@ class EChartsBarCategory extends IPSModuleStrict
             );
         }
 
-        return $this->EncodeConfigurationForm($this->WithIPSViewDesignFormState($form, 'ECBC'));
-    }
-
-    public function UpdateBarDesignForm(bool $IPSView, string $BarFillMode): void
-    {
-        $prefix = $IPSView ? 'IPSView' : '';
-        $this->UpdateFormField($prefix . 'BarSVG', 'visible', $BarFillMode === 'svg');
-        $this->UpdateFormField($prefix . 'BarSVGSizePercent', 'visible', $BarFillMode === 'svg');
+        return $this->EncodeConfigurationForm($this->WithIPSViewDesignFormState($form, 'ECBW'));
     }
 
     public function RequestAction(string $Ident, mixed $Value): void
@@ -160,7 +134,7 @@ class EChartsBarCategory extends IPSModuleStrict
         IPS_ApplyChanges($this->InstanceID);
     }
 
-    public function GetBarData(): string
+    public function GetWaterfallData(): string
     {
         $configurationError = $this->GetConfigurationError();
         if ($configurationError !== null) {
@@ -174,71 +148,65 @@ class EChartsBarCategory extends IPSModuleStrict
         }
 
         $sources = $this->GetValidatedSources();
-        $pairCounts = [];
-        foreach ($sources as $source) {
-            $series = $source['Series'] !== '' ? $source['Series'] : IPS_GetName($source['VariableID']);
-            $pair = json_encode([$source['Category'], $series], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
-            $pairCounts[$pair] = ($pairCounts[$pair] ?? 0) + 1;
-        }
-        $items = [];
+        $labels = EChartsSourceIdentity::LabelsForSources($sources);
+        $steps = [];
+        $total = 0.0;
         foreach ($sources as $index => $source) {
             $current = $this->ReadCurrentSource($source['VariableID']);
-            $variableName = IPS_GetName($source['VariableID']);
-            $series = $source['Series'] !== '' ? $source['Series'] : $variableName;
-            $pair = json_encode([$source['Category'], $series], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
-            $duplicateLabel = $pairCounts[$pair] > 1;
-            $items[] = [
-                'id'         => 'variable-' . $source['VariableID'],
-                'variableID' => $source['VariableID'],
-                'category'   => $source['Category'],
-                'seriesKey'  => $duplicateLabel ? 'variable-' . $source['VariableID'] : 'series-' . $series,
-                'series'     => $series,
-                'value'      => $current['Value'],
-                'timestamp'  => $current['Timestamp'],
-                'color'      => $source['Color'] < 0 ? '' : EChartsAsset::ColorToHex($source['Color']),
-                'order'      => $index
+            $value = $current['Value'];
+            $before = $total;
+            $total = $index === 0 ? $value : $total + $value;
+            if (!is_finite($total)) {
+                $this->WriteAttributeString('LastError', 'The Waterfall total is not finite.');
+                $this->SetStatus(self::STATUS_GATEWAY_FAILED);
+                throw new RuntimeException('The Waterfall total is not finite.');
+            }
+            $steps[] = [
+                'id'        => 'variable-' . $source['VariableID'],
+                'label'     => $labels[$source['VariableID']],
+                'kind'      => $index === 0 ? 'start' : 'change',
+                'change'    => $value,
+                'before'    => $before,
+                'after'     => $total,
+                'timestamp' => $current['Timestamp']
             ];
         }
+        $steps[] = [
+            'id'     => 'total',
+            'label'  => trim($this->ReadPropertyString('TotalLabel')) !== ''
+                ? trim($this->ReadPropertyString('TotalLabel')) : $this->Translate('Total'),
+            'kind'   => 'total',
+            'change' => $total,
+            'before' => 0.0,
+            'after'  => $total
+        ];
+
         $this->WriteAttributeString('LastError', '');
         $this->SetStatus(IS_ACTIVE);
 
         return json_encode([
             'schemaVersion' => 1,
             'family'        => 'bar',
-            'variant'       => 'category',
+            'variant'       => 'waterfall',
             'theme'         => $this->ReadPropertyString('EChartsTheme'),
             'bar'           => [
-                'title'       => $this->ReadPropertyString('Title'),
-                'mode'        => $this->ReadPropertyString('BarMode'),
-                'orientation' => $this->ReadPropertyString('Orientation'),
-                'sortOrder'   => $this->ReadPropertyString('SortOrder'),
-                'unit'        => $sources[0]['Unit'],
-                'decimals'    => max(array_column($sources, 'Decimals')),
-                'style'       => $this->ReadDesignStyle()
+                'title'    => $this->ReadPropertyString('Title'),
+                'unit'     => $sources[0]['Unit'],
+                'decimals' => max(array_column($sources, 'Decimals')),
+                'style'    => $this->ReadDesignStyle()
             ],
-            'items'         => $items
+            'steps'         => $steps
         ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
-    }
-
-    public function GetBarDiagnostic(): string
-    {
-        $configurationError = $this->GetConfigurationError();
-
-        return json_encode([
-            'valid'       => $configurationError === null,
-            'sourceCount' => count($this->ConfiguredVariableIDs()),
-            'lastError'   => $configurationError['Message'] ?? $this->ReadAttributeString('LastError')
-        ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 
     public function GetVisualizationTile(): string
     {
-        return $this->RenderBarHTMLPage(false);
+        return $this->RenderWaterfallHTMLPage(false);
     }
 
     public function GetIPSViewHTML(): string
     {
-        return $this->RenderBarHTMLPage(true);
+        return $this->RenderWaterfallHTMLPage(true);
     }
 
     public function ReceiveData(string $JSONString): string
@@ -265,7 +233,7 @@ class EChartsBarCategory extends IPSModuleStrict
         }
     }
 
-    private function RenderBarHTMLPage(bool $ipsView): string
+    private function RenderWaterfallHTMLPage(bool $ipsView): string
     {
         $hiddenTileTitle = false;
         if (!$ipsView && function_exists('IPS_GetObject')) {
@@ -274,20 +242,16 @@ class EChartsBarCategory extends IPSModuleStrict
 
         return $this->RenderVisualizationHTMLPage($ipsView, [
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
-            'title'              => 'ECharts Category Bar',
+            'title'              => 'ECharts Waterfall',
             'visualizationTheme' => $this->VisualizationThemeCSS()
                 . "\n\n"
-                . $this->ResponsiveVisualizationCSS('#echarts-bar-category-root', 'echarts-bar-category'),
+                . $this->ResponsiveVisualizationCSS('#echarts-bar-waterfall-root', 'echarts-bar-waterfall'),
             'ipsViewStyle'       => $ipsView ? $this->IPSViewThemeCSS() : '',
             'state'              => $this->BuildVisualizationState($ipsView),
             'translations'       => [
-                'Configure valid Category Bar sources.'         => $this->Translate(
-                    'Configure valid Category Bar sources.'
-                ),
-                'Connect an active EChartsGateway.'            => $this->Translate('Connect an active EChartsGateway.'),
-                'The Category Bar values could not be loaded.' => $this->Translate(
-                    'The Category Bar values could not be loaded.'
-                )
+                'Configure valid Waterfall sources.'        => $this->Translate('Configure valid Waterfall sources.'),
+                'Connect an active EChartsGateway.'         => $this->Translate('Connect an active EChartsGateway.'),
+                'The Waterfall values could not be loaded.' => $this->Translate('The Waterfall values could not be loaded.')
             ],
             'options'            => [
                 'echartsVersion'    => EChartsAsset::VERSION,
@@ -299,8 +263,6 @@ class EChartsBarCategory extends IPSModuleStrict
             'replacements'       => [
                 '{{ECHARTS_SCRIPT}}'           => EChartsAsset::CartesianJavaScript(),
                 '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
-                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript(),
-                '{{ECHARTS_PATTERN_SCRIPT}}'   => EChartsAsset::PatternJavaScript(),
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
         ]);
@@ -331,7 +293,7 @@ class EChartsBarCategory extends IPSModuleStrict
         $this->SetStatus(IS_ACTIVE);
     }
 
-    /** @return array{Status: int, Message: string}|null */
+    /** @return array{Status:int, Message:string}|null */
     private function GetConfigurationError(): ?array
     {
         try {
@@ -346,80 +308,66 @@ class EChartsBarCategory extends IPSModuleStrict
                 $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent')
             )
         ) {
-            return ['Status' => self::STATUS_DESIGN_INVALID, 'Message' => 'The Category Bar design is invalid.'];
+            return ['Status' => self::STATUS_DESIGN_INVALID, 'Message' => 'The Waterfall design is invalid.'];
         }
 
         return null;
     }
 
-    /** @return list<array{VariableID:int, Category:string, Series:string, Unit:string, Decimals:int, Color:int}> */
+    /** @return list<array{VariableID:int, Label:string, Unit:string, Decimals:int}> */
     private function GetValidatedSources(): array
     {
         try {
             $sources = json_decode($this->ReadPropertyString('Sources'), true, 64, JSON_THROW_ON_ERROR);
         } catch (JsonException $exception) {
-            throw new InvalidArgumentException('The Category Bar sources are not valid JSON.', 0, $exception);
+            throw new InvalidArgumentException('The Waterfall sources are not valid JSON.', 0, $exception);
         }
-        if (!is_array($sources) || !array_is_list($sources)
-            || count($sources) < self::MINIMUM_SOURCE_COUNT
-            || count($sources) > self::MAXIMUM_SOURCE_COUNT
-        ) {
-            throw new InvalidArgumentException('Configure 1 to 16 unique numeric sources with one common unit.');
+        if (!is_array($sources) || !array_is_list($sources) || count($sources) < 2 || count($sources) > 16) {
+            throw new InvalidArgumentException('Configure a start and 1 to 15 signed changes.');
         }
-
         $validated = [];
         $variableIDs = [];
         $commonUnit = null;
         foreach ($sources as $source) {
             if (!is_array($source)) {
-                throw new InvalidArgumentException('Every Category Bar source must be an object.');
+                throw new InvalidArgumentException('Every Waterfall source must be an object.');
             }
             $variableID = $source['VariableID'] ?? null;
             if (!is_int($variableID) || $variableID <= 0 || !IPS_VariableExists($variableID)
                 || in_array($variableID, $variableIDs, true)
             ) {
-                throw new InvalidArgumentException('Configure 1 to 16 unique numeric sources with one common unit.');
+                throw new InvalidArgumentException('Waterfall sources must have unique existing variable IDs.');
             }
             $variable = IPS_GetVariable($variableID);
             if (!is_array($variable) || !in_array($variable['VariableType'] ?? null, [1, 2], true)) {
-                throw new InvalidArgumentException('Category Bar sources must be numeric variables.');
+                throw new InvalidArgumentException('Waterfall sources must be numeric variables.');
             }
             $decimals = $source['Decimals'] ?? 1;
-            $color = $source['Color'] ?? -1;
+            $unit = $source['Unit'] ?? '';
+            $label = $source['Label'] ?? '';
             if (!is_int($decimals) || $decimals < 0 || $decimals > 6
-                || !is_int($color) || $color < -1 || $color > 0xFFFFFF
+                || !is_string($unit) || !is_string($label)
             ) {
-                throw new InvalidArgumentException('A Category Bar source contains invalid display settings.');
+                throw new InvalidArgumentException('A Waterfall source contains invalid display settings.');
             }
             $presentation = EChartsVariablePresentation::Resolve(
                 $variableID,
                 0.0,
                 100.0,
-                is_string($source['Unit'] ?? null) ? $source['Unit'] : '',
+                $unit,
                 $decimals,
                 (bool) ($source['UseVariablePresentation'] ?? true)
             );
-            if ($commonUnit === null) {
-                $commonUnit = $presentation['unit'];
-            } elseif ($presentation['unit'] !== $commonUnit) {
-                throw new InvalidArgumentException('All Category Bar sources must use the same unit.');
+            if ($commonUnit !== null && $presentation['unit'] !== $commonUnit) {
+                throw new InvalidArgumentException('All Waterfall sources must use the same unit.');
             }
+            $commonUnit = $presentation['unit'];
             $variableIDs[] = $variableID;
-            $hasExplicitCategory = array_key_exists('Category', $source)
-                && is_string($source['Category']);
-            $legacyLabel = trim(is_string($source['Label'] ?? null) ? $source['Label'] : '');
-            $category = $hasExplicitCategory ? trim($source['Category']) : $legacyLabel;
-            $series = trim(is_string($source['Series'] ?? null) ? $source['Series'] : '');
-            if ($series === '' && $hasExplicitCategory) {
-                $series = $legacyLabel;
-            }
             $validated[] = [
                 'VariableID' => $variableID,
-                'Category'   => $category,
-                'Series'     => $series,
+                'Label'      => trim($label),
                 'Unit'       => $presentation['unit'],
-                'Decimals'   => $presentation['decimals'],
-                'Color'      => $color
+                'Decimals'   => $presentation['decimals']
             ];
         }
 
@@ -431,54 +379,43 @@ class EChartsBarCategory extends IPSModuleStrict
     {
         $configurationError = $this->GetConfigurationError();
         if ($configurationError !== null) {
-            return [
-                'schemaVersion' => 1,
-                'family'        => 'bar',
-                'variant'       => 'category',
-                'status'        => 'error',
-                'chart'         => null,
-                'error'         => 'Configure valid Category Bar sources.'
-            ];
+            return $this->ErrorState('Configure valid Waterfall sources.');
         }
         if (!$this->HasActiveParent()) {
-            return [
-                'schemaVersion' => 1,
-                'family'        => 'bar',
-                'variant'       => 'category',
-                'status'        => 'error',
-                'chart'         => null,
-                'error'         => 'Connect an active EChartsGateway.'
-            ];
+            return $this->ErrorState('Connect an active EChartsGateway.');
         }
         try {
-            $chart = json_decode($this->GetBarData(), true, 512, JSON_THROW_ON_ERROR);
+            $chart = json_decode($this->GetWaterfallData(), true, 512, JSON_THROW_ON_ERROR);
             if ($ipsView && !$this->ReadPropertyBoolean('IPSViewUseTileDesign')) {
                 $chart['theme'] = $this->ReadPropertyString('IPSViewEChartsTheme');
-                $chart['bar']['mode'] = $this->ReadPropertyString('IPSViewBarMode');
-                $chart['bar']['orientation'] = $this->ReadPropertyString('IPSViewOrientation');
-                $chart['bar']['sortOrder'] = $this->ReadPropertyString('IPSViewSortOrder');
                 $chart['bar']['style'] = $this->ReadDesignStyle('IPSView');
             }
         } catch (Throwable $exception) {
             $this->SendDebug('BuildVisualizationState', $exception::class, 0);
 
-            return [
-                'schemaVersion' => 1,
-                'family'        => 'bar',
-                'variant'       => 'category',
-                'status'        => 'error',
-                'chart'         => null,
-                'error'         => 'The Category Bar values could not be loaded.'
-            ];
+            return $this->ErrorState('The Waterfall values could not be loaded.');
         }
 
         return [
             'schemaVersion' => 1,
             'family'        => 'bar',
-            'variant'       => 'category',
+            'variant'       => 'waterfall',
             'status'        => 'ready',
             'chart'         => $chart,
             'error'         => null
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private function ErrorState(string $message): array
+    {
+        return [
+            'schemaVersion' => 1,
+            'family'        => 'bar',
+            'variant'       => 'waterfall',
+            'status'        => 'error',
+            'chart'         => null,
+            'error'         => $message
         ];
     }
 
@@ -509,97 +446,75 @@ class EChartsBarCategory extends IPSModuleStrict
 
     private function RegisterDesignProperties(string $prefix = ''): void
     {
-        $this->RegisterPropertyString($prefix . 'BarMode', 'simple');
-        $this->RegisterPropertyString($prefix . 'Orientation', 'vertical');
-        $this->RegisterPropertyString($prefix . 'SortOrder', 'configured');
         $this->RegisterPropertyString($prefix . 'EChartsTheme', EChartsAsset::THEME_AUTO);
         $this->RegisterPropertyBoolean($prefix . 'ShowValues', true);
         $this->RegisterPropertyBoolean($prefix . 'ShowGrid', true);
-        $this->RegisterPropertyBoolean($prefix . 'RoundedBars', false);
-        $this->RegisterPropertyInteger($prefix . 'BarWidthPercent', 70);
-        $this->RegisterPropertyString($prefix . 'BarFillMode', 'solid');
-        $this->RegisterPropertyString($prefix . 'BarSVG', '');
-        $this->RegisterPropertyInteger($prefix . 'BarSVGSizePercent', 100);
+        $this->RegisterPropertyInteger($prefix . 'BarWidthPercent', 60);
+        $this->RegisterPropertyInteger($prefix . 'StartColor', -1);
+        $this->RegisterPropertyInteger($prefix . 'IncreaseColor', -1);
+        $this->RegisterPropertyInteger($prefix . 'DecreaseColor', -1);
+        $this->RegisterPropertyInteger($prefix . 'TotalColor', -1);
     }
 
     /** @return array<string, string> */
     private function DesignPropertyNames(): array
     {
         return [
-            'BarMode'           => 'string',
-            'Orientation'       => 'string',
-            'SortOrder'         => 'string',
-            'EChartsTheme'      => 'string',
-            'ShowValues'        => 'boolean',
-            'ShowGrid'          => 'boolean',
-            'RoundedBars'       => 'boolean',
-            'BarWidthPercent'   => 'integer',
-            'BarFillMode'       => 'string',
-            'BarSVG'            => 'string',
-            'BarSVGSizePercent' => 'integer'
+            'EChartsTheme'    => 'string',
+            'ShowValues'      => 'boolean',
+            'ShowGrid'        => 'boolean',
+            'BarWidthPercent' => 'integer',
+            'StartColor'      => 'integer',
+            'IncreaseColor'   => 'integer',
+            'DecreaseColor'   => 'integer',
+            'TotalColor'      => 'integer'
         ];
     }
 
     private function IsValidDesign(string $prefix): bool
     {
-        return in_array($this->ReadPropertyString($prefix . 'BarMode'), self::MODES, true)
-            && in_array($this->ReadPropertyString($prefix . 'Orientation'), self::ORIENTATIONS, true)
-            && in_array($this->ReadPropertyString($prefix . 'SortOrder'), self::SORT_ORDERS, true)
-            && EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme'))
-            && $this->ReadPropertyInteger($prefix . 'BarWidthPercent') >= 20
-            && $this->ReadPropertyInteger($prefix . 'BarWidthPercent') <= 100
-            && in_array($this->ReadPropertyString($prefix . 'BarFillMode'), self::BAR_FILL_MODES, true)
-            && $this->ReadPropertyInteger($prefix . 'BarSVGSizePercent') >= 25
-            && $this->ReadPropertyInteger($prefix . 'BarSVGSizePercent') <= 400
-            && $this->IsValidBarSVG($prefix);
-    }
-
-    private function IsValidBarSVG(string $prefix): bool
-    {
-        if ($this->ReadPropertyString($prefix . 'BarFillMode') !== 'svg') {
-            return true;
-        }
-        try {
-            EChartsSvgImage::Import($this->ReadPropertyString($prefix . 'BarSVG'));
-        } catch (InvalidArgumentException) {
+        if (!EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme'))
+            || $this->ReadPropertyInteger($prefix . 'BarWidthPercent') < 20
+            || $this->ReadPropertyInteger($prefix . 'BarWidthPercent') > 100
+        ) {
             return false;
+        }
+        foreach (['StartColor', 'IncreaseColor', 'DecreaseColor', 'TotalColor'] as $name) {
+            $color = $this->ReadPropertyInteger($prefix . $name);
+            if ($color < -1 || $color > 0xFFFFFF) {
+                return false;
+            }
         }
 
         return true;
     }
 
-    /** @return array<string, bool|int|string|float> */
+    /** @return array<string, mixed> */
     private function ReadDesignStyle(string $prefix = ''): array
     {
-        $style = [
-            'showValues'      => $this->ReadPropertyBoolean($prefix . 'ShowValues'),
-            'showGrid'        => $this->ReadPropertyBoolean($prefix . 'ShowGrid'),
-            'roundedBars'     => $this->ReadPropertyBoolean($prefix . 'RoundedBars'),
-            'barWidthPercent' => $this->ReadPropertyInteger($prefix . 'BarWidthPercent'),
-            'barFillMode'     => $this->ReadPropertyString($prefix . 'BarFillMode')
-        ];
-        if ($style['barFillMode'] === 'svg') {
-            $image = EChartsSvgImage::Import($this->ReadPropertyString($prefix . 'BarSVG'));
-            $style['barPatternImage'] = $image['dataUri'];
-            $style['barPatternAspectRatio'] = $image['width'] / $image['height'];
-            $style['barSVGSizePercent'] = $this->ReadPropertyInteger($prefix . 'BarSVGSizePercent');
+        $colors = [];
+        foreach (['StartColor', 'IncreaseColor', 'DecreaseColor', 'TotalColor'] as $name) {
+            $color = $this->ReadPropertyInteger($prefix . $name);
+            $colors[lcfirst($name)] = $color < 0 ? '' : EChartsAsset::ColorToHex($color);
         }
 
-        return $style;
-    }
-
-    private function EffectiveIPSViewTheme(): string
-    {
-        return $this->ReadPropertyBoolean('IPSViewUseTileDesign')
-            ? $this->ReadPropertyString('EChartsTheme')
-            : $this->ReadPropertyString('IPSViewEChartsTheme');
+        return [
+            'showValues'      => $this->ReadPropertyBoolean($prefix . 'ShowValues'),
+            'showGrid'        => $this->ReadPropertyBoolean($prefix . 'ShowGrid'),
+            'barWidthPercent' => $this->ReadPropertyInteger($prefix . 'BarWidthPercent'),
+            'colors'          => $colors
+        ];
     }
 
     private function IPSViewThemeCSS(): string
     {
+        $theme = $this->ReadPropertyBoolean('IPSViewUseTileDesign')
+            ? $this->ReadPropertyString('EChartsTheme')
+            : $this->ReadPropertyString('IPSViewEChartsTheme');
+
         return EChartsIPSViewBackground::ThemeCSS(
-            EChartsAsset::ThemePreviewPalette($this->EffectiveIPSViewTheme()),
-            '#echarts-bar-category-root',
+            EChartsAsset::ThemePreviewPalette($theme),
+            '#echarts-bar-waterfall-root',
             $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
             $this->ReadPropertyInteger('IPSViewBackgroundColor'),
             $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent')
