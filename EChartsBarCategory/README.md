@@ -13,6 +13,8 @@ the same effective unit so that the shared value axis remains meaningful.
   data-series names per source
 - Configured, ascending or descending value order
 - Per-source color or automatic theme colors
+- Optional repeated SVG pattern for all bars, with adjustable pattern size;
+  source colors remain the fallback if the browser cannot load the SVG
 - Automatic light/dark value-label contrast on stacked bar segments
 - Independent Tile and IPSView design settings
 
@@ -28,6 +30,13 @@ and live values remain shared. Save changes to the Tile designer before copying.
 The module reads current values through the connected `EChartsGateway`. It
 does not read archive data; historical bar charts belong to a separate chart
 family.
+
+Select **SVG pattern** under **Bar fill** in the Tile designer to reveal the
+SVG file and pattern-size controls. The selected motif repeats inside the
+normal rectangular bars; it does not change their shape. Only self-contained,
+validated SVG files are accepted. The file may be at most 256 KiB and may not
+contain scripts or external references. An independent IPSView design can use
+a different motif after disabling **Use Tile design**.
 
 Every source row provides an explicit `Category` and an optional `Series`
 field in both the table and its edit dialog. `Category` labels the category

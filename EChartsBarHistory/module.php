@@ -15,6 +15,7 @@ use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsSourceIdentity;
+use SymconECharts\EChartsSvgImage;
 use SymconECharts\EChartsUnitAxes;
 use SymconECharts\EChartsVariablePresentation;
 
@@ -31,6 +32,7 @@ require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
 require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
+require_once __DIR__ . '/../libs/EChartsSvgImage.php';
 require_once __DIR__ . '/../libs/EChartsUnitAxes.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 
@@ -56,7 +58,7 @@ class EChartsBarHistory extends IPSModuleStrict
     private const REDUCERS = ['auto', 'average', 'sum', 'minimum', 'maximum'];
     private const MAXIMUM_SOURCE_COUNT = 16;
     private const TIME_AXIS_LABEL_FORMATS = ['auto', 'time', 'date', 'date-time'];
-    private const BAR_FILL_MODES = ['solid', 'gradient'];
+    private const BAR_FILL_MODES = ['solid', 'gradient', 'svg'];
     private const DESIGN_PROPERTY_TYPES = [
         'EChartsTheme'        => 'string',
         'ShowValues'          => 'boolean',
@@ -66,6 +68,8 @@ class EChartsBarHistory extends IPSModuleStrict
         'BarWidthPercent'     => 'integer',
         'BarFillMode'         => 'string',
         'BarGradientColor'    => 'integer',
+        'BarSVG'              => 'string',
+        'BarSVGSizePercent'   => 'integer',
         'BarOpacityPercent'   => 'integer',
         'BarCornerRadius'     => 'integer',
         'TitleFontSizePercent'=> 'integer',
@@ -100,6 +104,8 @@ class EChartsBarHistory extends IPSModuleStrict
         $this->RegisterPropertyInteger('BarWidthPercent', 70);
         $this->RegisterPropertyString('BarFillMode', 'solid');
         $this->RegisterPropertyInteger('BarGradientColor', -1);
+        $this->RegisterPropertyString('BarSVG', '');
+        $this->RegisterPropertyInteger('BarSVGSizePercent', 100);
         $this->RegisterPropertyInteger('BarOpacityPercent', 100);
         $this->RegisterPropertyInteger('BarCornerRadius', 6);
         $this->RegisterPropertyInteger('TitleFontSizePercent', 100);
@@ -127,6 +133,8 @@ class EChartsBarHistory extends IPSModuleStrict
             $default = match ($name) {
                 'EChartsTheme'              => EChartsAsset::THEME_AUTO,
                 'BarFillMode'               => 'solid',
+                'BarSVG'                    => '',
+                'BarSVGSizePercent'         => 100,
                 'ShowValues', 'RoundedBars' => false,
                 'ShowGrid', 'EnableZoom'    => true,
                 'BarWidthPercent'           => 70,
@@ -185,6 +193,11 @@ class EChartsBarHistory extends IPSModuleStrict
             );
             $form['elements'] = $this->SetFormFieldVisibility(
                 $form['elements'],
+                ['BarSVG', 'BarSVGSizePercent'],
+                $this->ReadPropertyString('BarFillMode') === 'svg'
+            );
+            $form['elements'] = $this->SetFormFieldVisibility(
+                $form['elements'],
                 ['BarCornerRadius'],
                 $this->ReadPropertyBoolean('RoundedBars')
             );
@@ -220,6 +233,8 @@ class EChartsBarHistory extends IPSModuleStrict
     {
         $prefix = $IPSView ? 'IPSView' : '';
         $this->UpdateFormField($prefix . 'BarGradientColor', 'visible', $BarFillMode === 'gradient');
+        $this->UpdateFormField($prefix . 'BarSVG', 'visible', $BarFillMode === 'svg');
+        $this->UpdateFormField($prefix . 'BarSVGSizePercent', 'visible', $BarFillMode === 'svg');
         $this->UpdateFormField($prefix . 'BarCornerRadius', 'visible', $RoundedBars);
     }
 
@@ -414,6 +429,7 @@ class EChartsBarHistory extends IPSModuleStrict
                 '{{ECHARTS_SCRIPT}}'           => EChartsAsset::CartesianJavaScript(),
                 '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
                 '{{ECHARTS_ZOOM_SCRIPT}}'      => EChartsAsset::ZoomJavaScript(),
+                '{{ECHARTS_PATTERN_SCRIPT}}'   => EChartsAsset::PatternJavaScript(),
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
         ]);
@@ -733,7 +749,8 @@ class EChartsBarHistory extends IPSModuleStrict
             'BarCornerRadius'      => [0, 24],
             'TitleFontSizePercent' => [50, 200],
             'AxisFontSizePercent'  => [50, 200],
-            'ValueFontSizePercent' => [50, 200]
+            'ValueFontSizePercent' => [50, 200],
+            'BarSVGSizePercent'    => [25, 400]
         ] as $name => [$minimum, $maximum]) {
             $value = $this->ReadPropertyInteger($prefix . $name);
             if ($value < $minimum || $value > $maximum) {
@@ -743,6 +760,14 @@ class EChartsBarHistory extends IPSModuleStrict
         foreach (['BarGradientColor', 'TitleColor', 'AxisColor', 'ValueColor', 'GridColor'] as $name) {
             $color = $this->ReadPropertyInteger($prefix . $name);
             if ($color < -1 || $color > 0xFFFFFF) {
+                return false;
+            }
+        }
+
+        if ($this->ReadPropertyString($prefix . 'BarFillMode') === 'svg') {
+            try {
+                EChartsSvgImage::Import($this->ReadPropertyString($prefix . 'BarSVG'));
+            } catch (InvalidArgumentException) {
                 return false;
             }
         }
@@ -798,12 +823,12 @@ class EChartsBarHistory extends IPSModuleStrict
             : $this->ReadPropertyString('EChartsTheme');
     }
 
-    /** @return array<string, bool|int|string> */
+    /** @return array<string, bool|int|string|float> */
     private function ReadDesignStyle(bool $ipsView): array
     {
         $prefix = $ipsView && !$this->ReadPropertyBoolean('IPSViewUseTileDesign') ? 'IPSView' : '';
 
-        return [
+        $style = [
             'showValues'          => $this->ReadPropertyBoolean($prefix . 'ShowValues'),
             'showGrid'            => $this->ReadPropertyBoolean($prefix . 'ShowGrid'),
             'enableZoom'          => $this->ReadPropertyBoolean($prefix . 'EnableZoom'),
@@ -821,6 +846,14 @@ class EChartsBarHistory extends IPSModuleStrict
             'valueColor'          => $this->OptionalDesignColor($prefix . 'ValueColor'),
             'gridColor'           => $this->OptionalDesignColor($prefix . 'GridColor')
         ];
+        if ($style['barFillMode'] === 'svg') {
+            $image = EChartsSvgImage::Import($this->ReadPropertyString($prefix . 'BarSVG'));
+            $style['barPatternImage'] = $image['dataUri'];
+            $style['barPatternAspectRatio'] = $image['width'] / $image['height'];
+            $style['barSVGSizePercent'] = $this->ReadPropertyInteger($prefix . 'BarSVGSizePercent');
+        }
+
+        return $style;
     }
 
     private function OptionalDesignColor(string $property): string
@@ -937,6 +970,9 @@ class EChartsBarHistory extends IPSModuleStrict
                     }
                     if ($name === 'BarGradientColor') {
                         $item['visible'] = $this->ReadPropertyString('IPSViewBarFillMode') === 'gradient';
+                    }
+                    if (in_array($name, ['BarSVG', 'BarSVGSizePercent'], true)) {
+                        $item['visible'] = $this->ReadPropertyString('IPSViewBarFillMode') === 'svg';
                     }
                     if ($name === 'BarCornerRadius') {
                         $item['visible'] = $this->ReadPropertyBoolean('IPSViewRoundedBars');

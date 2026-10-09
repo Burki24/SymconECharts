@@ -15,8 +15,8 @@ variables as bars along a time axis. It is deliberately separate from
 - Fixed, calendar-aligned and custom time ranges
 - Configurable point budget and time-axis labels
 - Optional time-axis zoom with a slider and mouse wheel in the tile and IPSView
-- Theme, value labels, grid, bar width, optional gradient fill, opacity and
-  rounded corners
+- Theme, value labels, grid, bar width, optional gradient or repeated SVG
+  pattern fill, opacity and rounded corners
 - Adjustable font sizes and colors for title, axes and value labels, plus grid
   color
 - Independent IPSView time range, time-axis labels and appearance, or inheritance
@@ -50,6 +50,12 @@ IPSView after disabling **Use Tile design**. Selecting a gradient reveals its en
 bars reveals the corner-radius setting. Automatic colors follow the selected
 ECharts theme. If the gradient end color is automatic, it fades toward the
 theme background.
+Selecting **SVG pattern** under **Bar fill** reveals the SVG file and
+pattern-size controls. The motif repeats within the normal bars; it does not
+change their shape. Only self-contained, validated SVG files up to 256 KiB are
+accepted. If a browser cannot load the image, the source color remains visible.
+On dense historical charts, zoom in to make the motif discernible. An
+independent IPSView design may use a different SVG.
 **Use Tile design** is enabled by default. While it is enabled, independent
 IPSView design inputs and the **Copy Tile design to IPSView and edit
 independently** button are shown directly in **IPSView design** but disabled.

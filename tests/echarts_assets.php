@@ -23,6 +23,7 @@ $cartesianRuntime = (string) file_get_contents($cartesianRuntimePath);
 $designUtilitiesPath = $root . '/libs/echarts-design.js';
 $designUtilities = (string) file_get_contents($designUtilitiesPath);
 $zoomUtilities = (string) file_get_contents($root . '/libs/echarts-zoom.js');
+$patternUtilities = (string) file_get_contents($root . '/libs/echarts-pattern.js');
 $runtimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/gauge-runtime.js');
 $cartesianRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/cartesian-runtime.js');
 $windowsCheckoutRuntime = str_replace("\n", "\r\n", $runtime);
@@ -67,6 +68,11 @@ assertEChartsAsset(
     EChartsAsset::ZoomJavaScript() === $zoomUtilities
         && str_contains($zoomUtilities, 'SymconEChartsZoom'),
     'The shared ECharts zoom controls must be loaded from the local asset.'
+);
+assertEChartsAsset(
+    EChartsAsset::PatternJavaScript() === $patternUtilities
+        && str_contains($patternUtilities, 'SymconEChartsPattern'),
+    'The shared ECharts SVG pattern renderer must be loaded from the local asset.'
 );
 assertEChartsAsset(
     str_contains($cartesianRuntimeSource, 'LineChart')

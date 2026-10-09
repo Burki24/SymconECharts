@@ -207,6 +207,18 @@ final class EChartsAsset
         return self::NormalizeLineEndings($content);
     }
 
+    /** Loads the shared, local SVG image-pattern renderer. */
+    public static function PatternJavaScript(): string
+    {
+        $path = __DIR__ . '/echarts-pattern.js';
+        $content = @file_get_contents($path);
+        if ($content === false || $content === '') {
+            throw new RuntimeException('The shared ECharts pattern utilities could not be loaded.');
+        }
+
+        return self::NormalizeLineEndings($content);
+    }
+
     /** @return list<string> */
     public static function ThemeIDs(): array
     {

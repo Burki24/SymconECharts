@@ -2,6 +2,11 @@
 
 ## Neu
 
+- BarCategory und BarHistory können ihre Balken in Kachel und IPSView mit
+  einem wiederholten, sicher geprüften SVG-Muster füllen. Muster und Größe
+  sind bei unabhängigem IPSView-Design separat wählbar; bisherige Farben
+  und Farbverläufe bleiben unverändert.
+
 - BarHistory bietet einen abschaltbaren Zeitachsen-Zoom mit Regler und
   Mausrad in Kachel und IPSView; ein unabhängiges IPSView-Design kann Zoom
   getrennt steuern. Die ECharts-spezifische Bedienlogik liegt gemeinsam unter

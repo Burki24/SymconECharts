@@ -13,6 +13,7 @@ use SymconECharts\EChartsDataProtocol;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
+use SymconECharts\EChartsSvgImage;
 use SymconECharts\EChartsVariablePresentation;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
@@ -26,6 +27,7 @@ require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
+require_once __DIR__ . '/../libs/EChartsSvgImage.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 
 class EChartsBarCategory extends IPSModuleStrict
@@ -52,6 +54,7 @@ class EChartsBarCategory extends IPSModuleStrict
     private const MODES = ['simple', 'grouped', 'stacked'];
     private const ORIENTATIONS = ['vertical', 'horizontal'];
     private const SORT_ORDERS = ['configured', 'ascending', 'descending'];
+    private const BAR_FILL_MODES = ['solid', 'svg'];
 
     public function Create(): void
     {
@@ -105,6 +108,16 @@ class EChartsBarCategory extends IPSModuleStrict
     {
         $form = $this->LoadConfigurationForm();
         if (isset($form['elements']) && is_array($form['elements'])) {
+            $form['elements'] = $this->SetFormFieldVisibility(
+                $form['elements'],
+                ['BarSVG', 'BarSVGSizePercent'],
+                $this->ReadPropertyString('BarFillMode') === 'svg'
+            );
+            $form['elements'] = $this->SetFormFieldVisibility(
+                $form['elements'],
+                ['IPSViewBarSVG', 'IPSViewBarSVGSizePercent'],
+                $this->ReadPropertyString('IPSViewBarFillMode') === 'svg'
+            );
             $this->InsertIPSViewHTMLPageFormItems(
                 $form['elements'],
                 'Configure optional IPSView HTML output.',
@@ -113,6 +126,13 @@ class EChartsBarCategory extends IPSModuleStrict
         }
 
         return $this->EncodeConfigurationForm($this->WithIPSViewDesignFormState($form, 'ECBC'));
+    }
+
+    public function UpdateBarDesignForm(bool $IPSView, string $BarFillMode): void
+    {
+        $prefix = $IPSView ? 'IPSView' : '';
+        $this->UpdateFormField($prefix . 'BarSVG', 'visible', $BarFillMode === 'svg');
+        $this->UpdateFormField($prefix . 'BarSVGSizePercent', 'visible', $BarFillMode === 'svg');
     }
 
     public function RequestAction(string $Ident, mixed $Value): void
@@ -278,6 +298,7 @@ class EChartsBarCategory extends IPSModuleStrict
                 '{{ECHARTS_SCRIPT}}'           => EChartsAsset::CartesianJavaScript(),
                 '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
                 '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript(),
+                '{{ECHARTS_PATTERN_SCRIPT}}'   => EChartsAsset::PatternJavaScript(),
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
         ]);
@@ -316,7 +337,8 @@ class EChartsBarCategory extends IPSModuleStrict
         } catch (Throwable $exception) {
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => $exception->getMessage()];
         }
-        if (!$this->IsValidDesign('') || !$this->IsValidDesign('IPSView')
+        if (!$this->IsValidDesign('')
+            || (!$this->ReadPropertyBoolean('IPSViewUseTileDesign') && !$this->IsValidDesign('IPSView'))
             || !EChartsIPSViewBackground::IsValid(
                 $this->ReadPropertyInteger('IPSViewBackgroundColor'),
                 $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent')
@@ -579,20 +601,26 @@ class EChartsBarCategory extends IPSModuleStrict
         $this->RegisterPropertyBoolean($prefix . 'ShowGrid', true);
         $this->RegisterPropertyBoolean($prefix . 'RoundedBars', false);
         $this->RegisterPropertyInteger($prefix . 'BarWidthPercent', 70);
+        $this->RegisterPropertyString($prefix . 'BarFillMode', 'solid');
+        $this->RegisterPropertyString($prefix . 'BarSVG', '');
+        $this->RegisterPropertyInteger($prefix . 'BarSVGSizePercent', 100);
     }
 
     /** @return array<string, string> */
     private function DesignPropertyNames(): array
     {
         return [
-            'BarMode'         => 'string',
-            'Orientation'     => 'string',
-            'SortOrder'       => 'string',
-            'EChartsTheme'    => 'string',
-            'ShowValues'      => 'boolean',
-            'ShowGrid'        => 'boolean',
-            'RoundedBars'     => 'boolean',
-            'BarWidthPercent' => 'integer'
+            'BarMode'           => 'string',
+            'Orientation'       => 'string',
+            'SortOrder'         => 'string',
+            'EChartsTheme'      => 'string',
+            'ShowValues'        => 'boolean',
+            'ShowGrid'          => 'boolean',
+            'RoundedBars'       => 'boolean',
+            'BarWidthPercent'   => 'integer',
+            'BarFillMode'       => 'string',
+            'BarSVG'            => 'string',
+            'BarSVGSizePercent' => 'integer'
         ];
     }
 
@@ -603,18 +631,45 @@ class EChartsBarCategory extends IPSModuleStrict
             && in_array($this->ReadPropertyString($prefix . 'SortOrder'), self::SORT_ORDERS, true)
             && EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme'))
             && $this->ReadPropertyInteger($prefix . 'BarWidthPercent') >= 20
-            && $this->ReadPropertyInteger($prefix . 'BarWidthPercent') <= 100;
+            && $this->ReadPropertyInteger($prefix . 'BarWidthPercent') <= 100
+            && in_array($this->ReadPropertyString($prefix . 'BarFillMode'), self::BAR_FILL_MODES, true)
+            && $this->ReadPropertyInteger($prefix . 'BarSVGSizePercent') >= 25
+            && $this->ReadPropertyInteger($prefix . 'BarSVGSizePercent') <= 400
+            && $this->IsValidBarSVG($prefix);
     }
 
-    /** @return array{showValues:bool, showGrid:bool, roundedBars:bool, barWidthPercent:int} */
+    private function IsValidBarSVG(string $prefix): bool
+    {
+        if ($this->ReadPropertyString($prefix . 'BarFillMode') !== 'svg') {
+            return true;
+        }
+        try {
+            EChartsSvgImage::Import($this->ReadPropertyString($prefix . 'BarSVG'));
+        } catch (InvalidArgumentException) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /** @return array<string, bool|int|string|float> */
     private function ReadDesignStyle(string $prefix = ''): array
     {
-        return [
+        $style = [
             'showValues'      => $this->ReadPropertyBoolean($prefix . 'ShowValues'),
             'showGrid'        => $this->ReadPropertyBoolean($prefix . 'ShowGrid'),
             'roundedBars'     => $this->ReadPropertyBoolean($prefix . 'RoundedBars'),
-            'barWidthPercent' => $this->ReadPropertyInteger($prefix . 'BarWidthPercent')
+            'barWidthPercent' => $this->ReadPropertyInteger($prefix . 'BarWidthPercent'),
+            'barFillMode'     => $this->ReadPropertyString($prefix . 'BarFillMode')
         ];
+        if ($style['barFillMode'] === 'svg') {
+            $image = EChartsSvgImage::Import($this->ReadPropertyString($prefix . 'BarSVG'));
+            $style['barPatternImage'] = $image['dataUri'];
+            $style['barPatternAspectRatio'] = $image['width'] / $image['height'];
+            $style['barSVGSizePercent'] = $this->ReadPropertyInteger($prefix . 'BarSVGSizePercent');
+        }
+
+        return $style;
     }
 
     private function EffectiveIPSViewTheme(): string

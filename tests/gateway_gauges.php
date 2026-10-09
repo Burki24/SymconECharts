@@ -4154,7 +4154,9 @@ assertGatewayGauge(
             'VariableID', 'Category', 'Series', 'UseVariablePresentation', 'Unit', 'Decimals', 'Color'
         ]
         && str_contains($barForm, '"name":"BarMode"')
-        && str_contains($barForm, '"name":"IPSViewBarMode"'),
+        && str_contains($barForm, '"name":"IPSViewBarMode"')
+        && str_contains($barForm, '"name":"BarFillMode"')
+        && str_contains($barForm, '"name":"IPSViewBarSVG"'),
     'Category Bar configuration must provide an explicit Category and Series row editor.'
 );
 $barUpdatesBefore = count($barCategory->GetTestVisualizationUpdates());
@@ -4163,6 +4165,63 @@ assertGatewayGauge(
     count($barCategory->GetTestVisualizationUpdates()) > $barUpdatesBefore,
     'Category Bar must publish a new visualization state after a source update.'
 );
+$validBarSVG = '<svg viewBox="0 0 40 20"><circle cx="10" cy="10" r="4" fill="#AABBCC"/></svg>';
+$otherBarSVG = '<svg viewBox="0 0 20 20"><rect width="8" height="8" fill="#112233"/></svg>';
+$barCategory->SetTestProperty('BarFillMode', 'svg');
+$barCategory->SetTestProperty('BarSVG', $validBarSVG);
+$barCategory->SetTestProperty('BarSVGSizePercent', 150);
+$barCategory->SetTestProperty('IPSViewBarFillMode', 'svg');
+$barCategory->SetTestProperty('IPSViewBarSVG', $otherBarSVG);
+$barCategory->ApplyChanges();
+$categorySVGForm = json_decode($barCategory->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    (findGaugeFormElement($categorySVGForm['elements'], 'BarSVG')['visible'] ?? null) === true
+        && (findGaugeFormElement($categorySVGForm['elements'], 'IPSViewBarSVG')['visible'] ?? null) === true,
+    'Category Bar form must reveal the saved SVG choices in both designers.'
+);
+$barCategory->UpdateBarDesignForm(false, 'svg');
+assertGatewayGauge(
+    array_slice($barCategory->GetTestFormUpdates(), -2) === [
+        ['Field' => 'BarSVG', 'Parameter' => 'visible', 'Value' => true],
+        ['Field' => 'BarSVGSizePercent', 'Parameter' => 'visible', 'Value' => true]
+    ],
+    'Category Bar must reveal its SVG controls immediately.'
+);
+$categoryPatternData = json_decode($barCategory->GetBarData(), true, 512, JSON_THROW_ON_ERROR);
+$categoryPatternIPSView = $barCategory->GetIPSViewHTML();
+assertGatewayGauge(
+    $barCategory->GetTestStatus() === IS_ACTIVE
+        && $categoryPatternData['bar']['style']['barFillMode'] === 'svg'
+        && $categoryPatternData['bar']['style']['barSVGSizePercent'] === 150
+        && $categoryPatternData['bar']['style']['barPatternAspectRatio'] === 2.0
+        && str_starts_with($categoryPatternData['bar']['style']['barPatternImage'], 'data:image/svg+xml;base64,')
+        && str_contains($categoryPatternIPSView, '"barPatternAspectRatio":1')
+        && str_contains($categoryPatternIPSView, 'SymconEChartsPattern'),
+    'Category Bar must use safe, independent SVG patterns for Tile and IPSView.'
+);
+$barCategory->SetTestProperty('BarSVG', base64_encode($largeBackgroundSvg));
+$barCategory->ApplyChanges();
+$largeBarCategoryTile = $barCategory->GetVisualizationTile();
+assertGatewayGauge(
+    $barCategory->GetTestStatus() === IS_ACTIVE && strlen($largeBarCategoryTile) < SYMCON_OUTPUT_BUFFER_LIMIT,
+    'A near-limit SVG Category Bar pattern must fit the output buffer (actual: '
+        . strlen($largeBarCategoryTile) . ').'
+);
+$maximumBarSVG = '<svg viewBox="0 0 10 10">'
+    . str_repeat('<path d="M0 0 ' . str_repeat('L1 1 ', 10300) . '" fill="#123456"/>', 5)
+    . '</svg>';
+assertGatewayGauge(strlen($maximumBarSVG) < 262144, 'The maximal SVG Bar fixture exceeds the import limit.');
+$barCategory->SetTestProperty('BarSVG', base64_encode($maximumBarSVG));
+$barCategory->ApplyChanges();
+$maximumBarCategoryTile = $barCategory->GetVisualizationTile();
+assertGatewayGauge(
+    $barCategory->GetTestStatus() === IS_ACTIVE && strlen($maximumBarCategoryTile) < SYMCON_OUTPUT_BUFFER_LIMIT,
+    'A maximum-size SVG Category Bar pattern must fit the output buffer (actual: '
+        . strlen($maximumBarCategoryTile) . ').'
+);
+$barCategory->SetTestProperty('BarSVG', '<svg viewBox="0 0 10 10"><script>alert(1)</script></svg>');
+$barCategory->ApplyChanges();
+assertGatewayGauge($barCategory->GetTestStatus() === 202, 'Category Bar must reject unsafe active SVG patterns.');
 $invalidBarCategory = new EChartsBarCategory();
 $invalidBarCategory->Create();
 $invalidBarCategory->SetTestProperty('Sources', json_encode([
@@ -4450,6 +4509,46 @@ assertGatewayGauge(
         && $barHistoryData['bar']['style']['gridColor'] === '#445566',
     'Historical Bar must preserve archive, presentation and tile-design settings in its chart model.'
 );
+$barHistory->SetTestProperty('BarFillMode', 'svg');
+$barHistory->SetTestProperty('BarSVG', $validBarSVG);
+$barHistory->SetTestProperty('BarSVGSizePercent', 175);
+$barHistory->ApplyChanges();
+$historySVGFormInstance = new EChartsBarHistory();
+$historySVGFormInstance->Create();
+$historySVGFormInstance->SetTestProperty('BarFillMode', 'svg');
+$historySVGForm = json_decode($historySVGFormInstance->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    (findGaugeFormElement($historySVGForm['elements'], 'BarSVG')['visible'] ?? null) === true,
+    'Historical Bar form must reveal the saved Tile SVG pattern.'
+);
+$historyPatternData = json_decode($barHistory->GetBarHistoryData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $barHistory->GetTestStatus() === IS_ACTIVE
+        && $historyPatternData['bar']['style']['barFillMode'] === 'svg'
+        && $historyPatternData['bar']['style']['barSVGSizePercent'] === 175
+        && $historyPatternData['bar']['style']['barPatternAspectRatio'] === 2.0
+        && str_starts_with($historyPatternData['bar']['style']['barPatternImage'], 'data:image/svg+xml;base64,'),
+    'Historical Bar must expose a sanitized SVG pattern without changing the archive series.'
+);
+$barHistory->SetTestProperty('BarSVG', base64_encode($largeBackgroundSvg));
+$barHistory->ApplyChanges();
+$largeBarHistoryTile = $barHistory->GetVisualizationTile();
+assertGatewayGauge(
+    $barHistory->GetTestStatus() === IS_ACTIVE && strlen($largeBarHistoryTile) < SYMCON_OUTPUT_BUFFER_LIMIT,
+    'A near-limit SVG Historical Bar pattern must fit the output buffer (actual: '
+        . strlen($largeBarHistoryTile) . ').'
+);
+$barHistory->SetTestProperty('BarSVG', base64_encode($maximumBarSVG));
+$barHistory->ApplyChanges();
+$maximumBarHistoryTile = $barHistory->GetVisualizationTile();
+assertGatewayGauge(
+    $barHistory->GetTestStatus() === IS_ACTIVE && strlen($maximumBarHistoryTile) < SYMCON_OUTPUT_BUFFER_LIMIT,
+    'A maximum-size SVG Historical Bar pattern must fit the output buffer (actual: '
+        . strlen($maximumBarHistoryTile) . ').'
+);
+$barHistory->SetTestProperty('BarSVG', '<svg viewBox="0 0 10 10"><script>alert(1)</script></svg>');
+$barHistory->ApplyChanges();
+assertGatewayGauge($barHistory->GetTestStatus() === 202, 'Historical Bar must reject unsafe active SVG patterns.');
 $barHistoryTile = new EChartsBarHistory();
 $barHistoryTile->Create();
 $barHistoryTile->SetTestProperty('Sources', json_encode([[
@@ -4528,19 +4627,23 @@ assertGatewayGauge(
         && str_contains(json_encode($barHistoryForm['elements'], JSON_THROW_ON_ERROR), 'IPSViewUseTileTimeSettings')
         && str_contains(json_encode($barHistoryIPSViewPanels[0], JSON_THROW_ON_ERROR), 'IPSViewBarWidthPercent')
         && str_contains(json_encode($barHistoryIPSViewPanels[0], JSON_THROW_ON_ERROR), 'IPSViewBarFillMode')
+        && str_contains(json_encode($barHistoryIPSViewPanels[0], JSON_THROW_ON_ERROR), 'IPSViewBarSVG')
         && str_contains(json_encode($barHistoryIPSViewPanels[0], JSON_THROW_ON_ERROR), 'IPSViewEnableZoom')
         && str_contains(json_encode($barHistoryIPSViewPanels[0], JSON_THROW_ON_ERROR), 'IPSViewAxisColor')
         && str_contains(json_encode($barHistoryIPSViewPanels[0], JSON_THROW_ON_ERROR), 'ECBH_UpdateBarDesignForm')
         && count($barHistoryTilePanels) === 1
         && str_contains(json_encode($barHistoryTilePanels[0], JSON_THROW_ON_ERROR), '"name":"BarFillMode"')
+        && str_contains(json_encode($barHistoryTilePanels[0], JSON_THROW_ON_ERROR), '"name":"BarSVG"')
         && str_contains(json_encode($barHistoryTilePanels[0], JSON_THROW_ON_ERROR), '"name":"EnableZoom"')
         && str_contains(json_encode($barHistoryTilePanels[0], JSON_THROW_ON_ERROR), '"name":"AxisFontSizePercent"'),
     'Historical Bar form must separate IPSView time settings from design controls.'
 );
 $barHistoryTile->UpdateBarDesignForm(false, true, 'gradient');
 assertGatewayGauge(
-    array_slice($barHistoryTile->GetTestFormUpdates(), -2) === [
+    array_slice($barHistoryTile->GetTestFormUpdates(), -4) === [
         ['Field' => 'BarGradientColor', 'Parameter' => 'visible', 'Value' => true],
+        ['Field' => 'BarSVG', 'Parameter' => 'visible', 'Value' => false],
+        ['Field' => 'BarSVGSizePercent', 'Parameter' => 'visible', 'Value' => false],
         ['Field' => 'BarCornerRadius', 'Parameter' => 'visible', 'Value' => true]
     ],
     'Historical Bar must show dependent fill and corner controls immediately.'
@@ -4614,6 +4717,21 @@ assertGatewayGauge(
         && str_contains($independentBarHistoryIPSView, '"enableZoom":false')
         && str_contains($independentBarHistoryIPSView, '"adaptToBackground":true'),
     'Historical Bar IPSView settings must not change the native Tile range or appearance.'
+);
+$barHistoryTile->SetTestProperty('IPSViewBarFillMode', 'svg');
+$barHistoryTile->SetTestProperty('IPSViewBarSVG', $otherBarSVG);
+$barHistoryTile->SetTestProperty('IPSViewBarSVGSizePercent', 125);
+$barHistoryTile->ApplyChanges();
+$independentBarHistoryIPSView = $barHistoryTile->GetIPSViewHTML();
+$historyIPSViewSVGForm = json_decode($barHistoryTile->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $barHistoryTile->GetTestStatus() === IS_ACTIVE
+        && (findGaugeFormElement($historyIPSViewSVGForm['elements'], 'IPSViewBarSVG')['visible'] ?? null) === true
+        && str_contains($independentBarHistoryIPSView, '"barFillMode":"svg"')
+        && str_contains($independentBarHistoryIPSView, '"barPatternAspectRatio":1')
+        && str_contains($independentBarHistoryIPSView, '"barSVGSizePercent":125')
+        && !str_contains($barHistoryTile->GetBarHistoryData(), '"barPatternImage"'),
+    'Independent Historical Bar IPSView patterns must not affect the Tile.'
 );
 $barHistoryTile->UpdateIPSViewTimeRangeForm(false, 'custom');
 assertGatewayGauge(

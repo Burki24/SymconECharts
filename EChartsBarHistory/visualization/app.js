@@ -9,6 +9,13 @@
     var currentState = bootstrap.state || null;
     var currentTheme = null;
     var zoomController = window.SymconEChartsZoom;
+    var barPatterns = window.SymconEChartsPattern.create(function () {
+        if (typeof window.requestAnimationFrame === 'function') {
+            window.requestAnimationFrame(function () { render(currentState); });
+        } else if (typeof window.setTimeout === 'function') {
+            window.setTimeout(function () { render(currentState); }, 0);
+        }
+    });
 
     function translate(text) {
         return (bootstrap.translations || {})[text] || text;
@@ -222,6 +229,10 @@
                         { offset: 1, color: style.barGradientColor || colors.background }
                     ]
                 } : color;
+                if (style.barFillMode === 'svg') {
+                    fill = barPatterns.resolve(style.barPatternImage, style.barSVGSizePercent,
+                        style.barPatternAspectRatio) || color;
+                }
                 var decimals = Math.max(0, Math.min(6, Number(item.decimals ?? bar.decimals) || 0));
                 return {
                     id: item.id || 'series-' + index,
@@ -275,6 +286,10 @@
         if (!window.echarts || typeof window.echarts.init !== 'function') {
             displayError('Apache ECharts could not be initialized.');
             return;
+        }
+        var style = state.chart.bar && state.chart.bar.style || {};
+        if (style.barFillMode === 'svg') {
+            barPatterns.ensure(style.barPatternImage, style.barSVGSizePercent, style.barPatternAspectRatio);
         }
         errorElement.hidden = true;
         chartElement.hidden = false;

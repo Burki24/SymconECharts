@@ -10,9 +10,14 @@ const source = fs.readFileSync(
     'utf8'
 );
 const zoomSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-zoom.js'), 'utf8');
+const patternSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-pattern.js'), 'utf8');
 
-function render(truncated = false, mode = 'symcon', adaptToBackground = false, enableZoom = true) {
+function render(truncated = false, mode = 'symcon', adaptToBackground = false, enableZoom = true, enableImages = false) {
     const listeners = {};
+    const images = [];
+    const scheduled = [];
+    function TestImage() { images.push(this); }
+    Object.defineProperty(TestImage.prototype, 'src', { set(value) { this.source = value; } });
     const chartElement = {
         hidden: false,
         addEventListener: (name, listener) => { listeners[name] = listener; },
@@ -63,12 +68,16 @@ function render(truncated = false, mode = 'symcon', adaptToBackground = false, e
             }
         },
         echarts: { init: () => { initCount++; return chart; } },
+        Image: enableImages ? TestImage : undefined,
+        setTimeout: callback => { scheduled.push(callback); },
         addEventListener: () => {},
         getComputedStyle: () => ({ color: '' })
     };
     const document = {
         body: { appendChild: () => {} },
-        createElement: () => ({ style: {}, remove: () => {} }),
+        createElement: tag => tag === 'canvas'
+            ? { width: 0, height: 0, getContext: () => ({ drawImage: () => {} }) }
+            : { style: {}, remove: () => {} },
         getElementById: id => ({
             'echarts-bar-history-chart': chartElement,
             'echarts-bar-history-warning': warningElement,
@@ -77,6 +86,7 @@ function render(truncated = false, mode = 'symcon', adaptToBackground = false, e
     };
     const context = { window, document };
     vm.runInNewContext(zoomSource, context);
+    vm.runInNewContext(patternSource, context);
     vm.runInNewContext(source, context);
     return {
         get option() { return option; },
@@ -84,7 +94,8 @@ function render(truncated = false, mode = 'symcon', adaptToBackground = false, e
         get updateCount() { return updateCount; },
         get dispatchedAction() { return dispatchedAction; },
         getState: () => window.SYMC_VISUALIZATION.state,
-        listeners, warningElement, window
+        listeners, warningElement, window, images,
+        flush: () => { while (scheduled.length > 0) { scheduled.shift()(); } }
     };
 }
 
@@ -139,6 +150,31 @@ assert.deepEqual(Array.from(ready.option.series[0].itemStyle.borderRadius), [10,
 assert.equal(ready.option.series[0].itemStyle.color.type, 'linear');
 assert.equal(ready.option.series[0].itemStyle.color.colorStops[0].color, '#e5754f');
 assert.equal(ready.option.series[0].itemStyle.color.colorStops[1].color, '#55ccaa');
+
+const patterned = render(false, 'symcon', false, true, true);
+patterned.window.handleMessage({
+    status: 'ready',
+    chart: {
+        theme: 'dark',
+        bar: { title: 'Pattern', unit: '°C', decimals: 1, style: {
+            barFillMode: 'svg', barPatternImage: 'data:image/svg+xml;base64,PHN2Zy8+',
+            barPatternAspectRatio: 2, barSVGSizePercent: 125
+        } },
+        series: [{ label: 'Temperature', color: '#e5754f', points: [[1780000300, 23.0]] }]
+    }
+});
+assert.equal(patterned.option.series[0].itemStyle.color, '#e5754f');
+assert.equal(patterned.images.length, 1);
+patterned.images[0].onload();
+patterned.flush();
+assert.equal(patterned.option.series[0].itemStyle.color.repeat, 'repeat');
+assert.equal(patterned.option.series[0].itemStyle.color.image.width, 80);
+assert.equal(patterned.option.series[0].itemStyle.color.image.height, 40);
+patterned.window.handleMessage({
+    status: 'ready', chart: { theme: 'dark', bar: { style: { barFillMode: 'solid' } },
+        series: [{ label: 'Temperature', color: '#e5754f', points: [[1780000300, 23.0]] }] }
+});
+assert.equal(patterned.option.series[0].itemStyle.color, '#e5754f');
 
 const truncated = render(true);
 assert.equal(truncated.warningElement.hidden, false);

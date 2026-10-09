@@ -9,7 +9,7 @@
     var currentState = bootstrap.state || null;
     var currentTheme = null;
     var zoomController = window.SymconEChartsZoom;
-    var areaPatternCache = Object.create(null);
+    var areaPatterns = window.SymconEChartsPattern.create(schedulePatternRender);
 
     function translate(text) {
         return (bootstrap.translations || {})[text] || text;
@@ -67,65 +67,13 @@
         }
     }
 
-    function areaPatternKey(design) {
-        var source = design && design.areaPatternImage;
-        if (typeof source !== 'string' || source.indexOf('data:image/svg+xml;base64,') !== 0) { return null; }
-        var sizePercent = Math.max(25, Math.min(400, Number(design.areaSVGSizePercent) || 100));
-        return source + '|' + sizePercent;
-    }
-
-    function ensureAreaPattern(design) {
-        var key = areaPatternKey(design);
-        if (key === null || typeof window.Image !== 'function') { return true; }
-        var sizePercent = Math.max(25, Math.min(400, Number(design.areaSVGSizePercent) || 100));
-        var cached = areaPatternCache[key];
-        if (cached) { return cached.status !== 'loading'; }
-
-        var image = new window.Image();
-        areaPatternCache[key] = { status: 'loading', pattern: null };
-        image.onload = function () {
-            var patternImage = image;
-            var size = Math.max(8, Math.round(64 * sizePercent / 100));
-            var aspectRatio = Math.max(0.05, Math.min(20, Number(design.areaPatternAspectRatio) || 1));
-            if (typeof document.createElement === 'function') {
-                var canvas = document.createElement('canvas');
-                if (canvas && typeof canvas.getContext === 'function') {
-                    canvas.width = size;
-                    canvas.height = Math.max(8, Math.round(size / aspectRatio));
-                    var context = canvas.getContext('2d');
-                    if (context && typeof context.drawImage === 'function') {
-                        context.drawImage(image, 0, 0, canvas.width, canvas.height);
-                        patternImage = canvas;
-                    }
-                }
-            }
-            areaPatternCache[key] = {
-                status: 'ready',
-                pattern: { image: patternImage, repeat: 'repeat' }
-            };
-            schedulePatternRender();
-        };
-        image.onerror = function () {
-            areaPatternCache[key] = { status: 'failed', pattern: null };
-            schedulePatternRender();
-        };
-        image.src = design.areaPatternImage;
-
-        return false;
-    }
-
     function areaPatternsReady(model) {
         var series = model && Array.isArray(model.series) ? model.series : [];
         return series.every(function (item) {
             return !item || item.style !== 'area' || !item.design || item.design.areaFillMode !== 'svg'
-                || ensureAreaPattern(item.design);
+                || areaPatterns.ensure(item.design.areaPatternImage,
+                    item.design.areaSVGSizePercent, item.design.areaPatternAspectRatio);
         });
-    }
-
-    function resolveAreaPattern(design) {
-        var key = areaPatternKey(design);
-        var cached = key === null ? null : areaPatternCache[key];
-        return cached && cached.status === 'ready' ? cached.pattern : null;
     }
 
     function buildTimeAxisFormatter(mode) {
@@ -381,7 +329,8 @@
                             global: false
                         };
                     } else if (sourceDesign && sourceDesign.areaFillMode === 'svg') {
-                        var pattern = resolveAreaPattern(sourceDesign);
+                        var pattern = areaPatterns.resolve(sourceDesign.areaPatternImage,
+                            sourceDesign.areaSVGSizePercent, sourceDesign.areaPatternAspectRatio);
                         if (pattern) { result.areaStyle.color = pattern; }
                     }
                 }

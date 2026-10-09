@@ -166,6 +166,13 @@ mehrere Quellen verwenden die bestehende Quellenliste. Ein getrenntes
 Single-/Multi-Modulpaar ist nicht vorgesehen. Die Regeln für bis zu 16
 Quellen, benachbarte Balken und mehrere Einheitenachsen legt
 [`ADR 0033`](adr/0033-historical-bar-multi-source-axes.md) fest.
+Die SVG-Balkenmuster von BarCategory und BarHistory verwenden denselben
+begrenzten Import über `libs/EChartsSvgImage.php` wie TimeSeries-Flächen.
+Die Browserdekodierung und wiederholte Pattern-Erzeugung liegt nun für alle
+drei Renderer in `libs/echarts-pattern.js`. Muster verändern nur die Füllung
+normaler Balken, nicht deren Geometrie. Ein Ladefehler fällt auf die bisherige
+Serienfarbe zurück; Kachel- und unabhängiges IPSView-Design besitzen eigene
+Datei- und Größenwerte.
 
 ## Daten, Konfiguration und Ausgabe
 

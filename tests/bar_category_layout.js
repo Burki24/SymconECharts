@@ -13,10 +13,15 @@ const designSource = fs.readFileSync(
     path.join(__dirname, '..', 'libs', 'echarts-design.js'),
     'utf8'
 );
+const patternSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-pattern.js'), 'utf8');
 
-function render(orientation, sortOrder, outputMode = 'symcon', barMode = 'simple', items) {
+function render(orientation, sortOrder, outputMode = 'symcon', barMode = 'simple', items, styleOverrides = {}, enableImages = false) {
     const chartElement = { hidden: false, clientWidth: 800 };
     const errorElement = { hidden: true, textContent: '' };
+    const images = [];
+    const scheduled = [];
+    function TestImage() { images.push(this); }
+    Object.defineProperty(TestImage.prototype, 'src', { set(value) { this.source = value; } });
     let option;
     const chart = {
         setOption: next => { option = next; }, clear: () => {}, resize: () => {}, dispose: () => {}
@@ -34,7 +39,8 @@ function render(orientation, sortOrder, outputMode = 'symcon', barMode = 'simple
                     theme: 'dark',
                     bar: {
                         title: 'Temperatures', mode: barMode, orientation, sortOrder, unit: '°C', decimals: 1,
-                        style: { showValues: true, showGrid: false, roundedBars: true, barWidthPercent: 60 }
+                        style: { showValues: true, showGrid: false, roundedBars: true,
+                            barWidthPercent: 60, ...styleOverrides }
                     },
                     items: items || [
                         { category: 'A', series: 'A', value: 10, order: 0, color: '#ff0000' },
@@ -47,20 +53,30 @@ function render(orientation, sortOrder, outputMode = 'symcon', barMode = 'simple
             options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: true }
         },
         echarts: { init: () => chart },
+        Image: enableImages ? TestImage : undefined,
+        setTimeout: callback => { scheduled.push(callback); },
         addEventListener: () => {},
         getComputedStyle: () => ({ color: '' })
     };
     const document = {
         body: { appendChild: () => {} },
-        createElement: () => ({ style: {}, remove: () => {} }),
+        createElement: tag => tag === 'canvas'
+            ? { width: 0, height: 0, getContext: () => ({ drawImage: () => {} }) }
+            : { style: {}, remove: () => {} },
         getElementById: id => ({
             'echarts-bar-category-chart': chartElement,
             'echarts-bar-category-error': errorElement
         })[id]
     };
     vm.runInNewContext(designSource, { window });
+    vm.runInNewContext(patternSource, { window, document });
     vm.runInNewContext(source, { window, document });
     assert.ok(option, 'The Category Bar chart should render.');
+    Object.defineProperties(option, {
+        testImages: { value: images },
+        getUpdatedOption: { value: () => option },
+        flush: { value: () => { while (scheduled.length > 0) { scheduled.shift()(); } } }
+    });
     return option;
 }
 
@@ -179,5 +195,31 @@ assert.deepEqual(Array.from(sparse.xAxis.data), ['Kitchen', 'Office']);
 assert.deepEqual(Array.from(sparse.legend.data), ['Today', 'Yesterday']);
 assert.deepEqual(Array.from(sparse.series[0].data, item => item.value), [18, 24]);
 assert.deepEqual(Array.from(sparse.series[1].data, item => item.value), [20, null]);
+
+const svgStyle = {
+    barFillMode: 'svg', barPatternImage: 'data:image/svg+xml;base64,PHN2Zy8+',
+    barPatternAspectRatio: 2, barSVGSizePercent: 150
+};
+const patterned = render('vertical', 'configured', 'symcon', 'simple', undefined, svgStyle, true);
+assert.equal(patterned.testImages.length, 1);
+assert.equal(patterned.series[0].data[0].itemStyle.color, '#ff0000',
+    'The source color remains visible until the SVG has loaded.');
+patterned.testImages[0].onload();
+patterned.flush();
+assert.equal(patterned.getUpdatedOption().series[0].data[0].itemStyle.color.repeat, 'repeat');
+assert.equal(patterned.getUpdatedOption().series[0].data[0].itemStyle.color.image.width, 96);
+assert.equal(patterned.getUpdatedOption().series[0].data[0].itemStyle.color.image.height, 48);
+
+const patternedStacked = render('horizontal', 'configured', 'symcon', 'stacked', matrix, svgStyle, true);
+patternedStacked.testImages[0].onload();
+patternedStacked.flush();
+assert.equal(patternedStacked.getUpdatedOption().series[0].data[0].itemStyle.color.repeat, 'repeat');
+assert.equal(patternedStacked.getUpdatedOption().series[1].data[0].itemStyle.color.repeat, 'repeat');
+
+const failedPattern = render('vertical', 'configured', 'symcon', 'simple', undefined, svgStyle, true);
+failedPattern.testImages[0].onerror();
+failedPattern.flush();
+assert.equal(failedPattern.getUpdatedOption().series[0].data[0].itemStyle.color, '#ff0000',
+    'A failed SVG load must retain the original bar color.');
 
 console.log('Category Bar renderer layout verified.');

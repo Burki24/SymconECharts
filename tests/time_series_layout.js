@@ -10,6 +10,7 @@ const source = fs.readFileSync(
     'utf8'
 );
 const zoomSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-zoom.js'), 'utf8');
+const patternSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-pattern.js'), 'utf8');
 const palette = {
     background: '#202020', text: '#ffffff', muted: '#aaaaaa', border: '#cccccc', track: '#444444',
     accent: '#55cbb5', seriesColors: ['#111111', '#222222', '#333333']
@@ -147,6 +148,7 @@ function render(
 
     const context = { window, document };
     vm.runInNewContext(zoomSource, context);
+    vm.runInNewContext(patternSource, context);
     vm.runInNewContext(source, context);
     while (scheduled.length > 0) { scheduled.shift()(); }
     assert.ok(option, 'The time-series chart should be rendered.');

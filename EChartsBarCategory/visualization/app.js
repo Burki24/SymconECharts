@@ -7,6 +7,13 @@
     var chart = null;
     var currentState = bootstrap.state || null;
     var currentTheme = null;
+    var barPatterns = window.SymconEChartsPattern.create(function () {
+        if (typeof window.requestAnimationFrame === 'function') {
+            window.requestAnimationFrame(function () { render(currentState); });
+        } else if (typeof window.setTimeout === 'function') {
+            window.setTimeout(function () { render(currentState); }, 0);
+        }
+    });
 
     function translate(text) {
         return (bootstrap.translations || {})[text] || text;
@@ -141,6 +148,9 @@
         var design = window.SYMC_ECHARTS_DESIGN || {};
         var bar = model.bar || {};
         var style = bar.style || {};
+        var pattern = style.barFillMode === 'svg'
+            ? barPatterns.resolve(style.barPatternImage, style.barSVGSizePercent, style.barPatternAspectRatio)
+            : null;
         var horizontal = bar.orientation === 'horizontal';
         var chartData = buildChartData(model, colors);
         var multiSeries = chartData.mode !== 'simple';
@@ -232,7 +242,7 @@
                         : undefined,
                     barWidth: multiSeries ? undefined
                         : Math.max(20, Math.min(100, Number(style.barWidthPercent) || 70)) + '%',
-                    itemStyle: { color: seriesItem.color },
+                    itemStyle: { color: pattern || seriesItem.color },
                     label: {
                         show: style.showValues === true,
                         position: stacked ? 'inside' : (horizontal ? 'right' : 'top'),
@@ -249,7 +259,7 @@
                             value: item.value,
                             label: stacked ? { color: labelColor } : undefined,
                             itemStyle: {
-                                color: item.color,
+                                color: pattern || item.color,
                                 borderRadius: horizontal ? [0, radius, radius, 0] : [radius, radius, 0, 0]
                             }
                         };
@@ -276,6 +286,10 @@
         if (!window.echarts || typeof window.echarts.init !== 'function') {
             displayError('Apache ECharts could not be initialized.');
             return;
+        }
+        var style = state.chart.bar && state.chart.bar.style || {};
+        if (style.barFillMode === 'svg') {
+            barPatterns.ensure(style.barPatternImage, style.barSVGSizePercent, style.barPatternAspectRatio);
         }
         errorElement.hidden = true;
         chartElement.hidden = false;

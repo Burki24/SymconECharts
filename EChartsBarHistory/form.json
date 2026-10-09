@@ -451,6 +451,10 @@
                                 {
                                     "caption": "Gradient",
                                     "value": "gradient"
+                                },
+                                {
+                                    "caption": "SVG pattern",
+                                    "value": "svg"
                                 }
                             ]
                         },
@@ -479,6 +483,27 @@
                             "maximum": 24,
                             "visible": false,
                             "width": "130px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectFile",
+                            "name": "BarSVG",
+                            "caption": "Bar SVG pattern",
+                            "extensions": ".svg",
+                            "visible": false
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "BarSVGSizePercent",
+                            "caption": "SVG pattern size",
+                            "minimum": 25,
+                            "maximum": 400,
+                            "suffix": "%",
+                            "visible": false
                         }
                     ]
                 },
