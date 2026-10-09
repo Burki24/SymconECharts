@@ -678,6 +678,7 @@ require_once dirname(__DIR__) . '/EChartsTimeSeries/module.php';
 require_once dirname(__DIR__) . '/EChartsBarCategory/module.php';
 require_once dirname(__DIR__) . '/EChartsBarHistory/module.php';
 require_once dirname(__DIR__) . '/EChartsBarWaterfall/module.php';
+require_once dirname(__DIR__) . '/EChartsBarPolar/module.php';
 
 final class TestableEChartsGateway extends EChartsGateway
 {
@@ -4990,6 +4991,122 @@ assertGatewayGauge(
     'Waterfall must remove stale references and keep repeated ApplyChanges idempotent.'
 );
 
+$polar = new EChartsBarPolar();
+$polar->Create();
+$polar->SetTestProperty('Sources', json_encode([
+    ['VariableID' => 4711, 'Label' => 'Living room', 'UseVariablePresentation' => false, 'Unit' => '°C', 'Decimals' => 2, 'Color' => 0x123456],
+    ['VariableID' => 4717, 'Label' => 'Living room', 'UseVariablePresentation' => false, 'Unit' => '°C', 'Decimals' => 0, 'Color' => -1],
+    ['VariableID' => 4716, 'Label' => '', 'UseVariablePresentation' => false, 'Unit' => '°C', 'Color' => -1]
+], JSON_THROW_ON_ERROR));
+$polar->SetTestProperty('Title', 'Current temperatures');
+$polar->SetTestProperty('EnableIPSView', true);
+$polar->SetTestProperty('IPSViewUseTileDesign', false);
+$polar->SetTestProperty('IPSViewPolarMode', 'tangential');
+$polar->SetTestProperty('IPSViewEChartsTheme', 'dark');
+$polar->ApplyChanges();
+$polarData = json_decode($polar->GetPolarData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $polar->GetTestStatus() === IS_ACTIVE
+        && $polar->GetTestReferences() === [4711, 4716, 4717]
+        && $polarData['variant'] === 'polar'
+        && $polarData['polar']['unit'] === '°C'
+        && $polarData['polar']['style']['mode'] === 'radial'
+        && array_column($polarData['items'], 'label') === ['Living room', 'Living room', 'Legacy wind speed']
+        && $polarData['items'][0]['color'] === '#123456'
+        && array_column($polarData['items'], 'decimals') === [2, 0, 1]
+        && $polarData['items'][0]['value'] === (float) $GLOBALS['symconTestVariables'][4711]['Value']
+        && $polarData['items'][0]['id'] !== $polarData['items'][1]['id'],
+    'Polar Bar must keep current values separate by variable ID, even when labels match.'
+);
+$polarTile = $polar->GetVisualizationTile();
+$polarIPSView = $polar->GetIPSViewHTML();
+assertGatewayGauge(
+    str_contains($polarTile, 'echarts-bar-polar-root')
+        && str_contains($polarTile, '"mode":"radial"')
+        && str_contains($polarIPSView, '"mode":"tangential"')
+        && str_contains($polarIPSView, '"theme":"dark"')
+        && $polar->GetTestVariableValue('IPSViewBarPolar') !== null,
+    'Polar Bar must provide separate Tile and persistent IPSView output.'
+);
+$polarForm = json_decode($polar->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+$polarSourceForm = current(array_filter(
+    $polarForm['elements'],
+    static fn (array $element): bool => ($element['name'] ?? '') === 'Sources'
+));
+assertGatewayGauge(
+    ($polarSourceForm['changeOrder'] ?? false) === true
+        && in_array('Color', array_column($polarSourceForm['columns'], 'name'), true),
+    'Polar Bar form must expose ordered sources and individual colors.'
+);
+$polar->MessageSink(0, 4717, VM_UPDATE, []);
+$polarUpdates = $polar->GetTestVisualizationUpdates();
+$lastPolarUpdate = end($polarUpdates);
+assertGatewayGauge(
+    is_string($lastPolarUpdate) && str_contains($lastPolarUpdate, '"variant":"polar"'),
+    'Polar Bar must update its chart state when a source variable changes.'
+);
+$polar->SetTestProperty('Sources', json_encode([
+    ['VariableID' => 4711, 'UseVariablePresentation' => false, 'Unit' => '°C']
+], JSON_THROW_ON_ERROR));
+$polar->ApplyChanges();
+$polar->ApplyChanges();
+assertGatewayGauge(
+    $polar->GetTestReferences() === [4711] && $polar->GetTestStatus() === IS_ACTIVE,
+    'Polar Bar must remove stale references and keep repeated ApplyChanges idempotent.'
+);
+
+$invalidPolarUnits = new EChartsBarPolar();
+$invalidPolarUnits->Create();
+$invalidPolarUnits->SetTestProperty('Sources', json_encode([
+    ['VariableID' => 4711, 'UseVariablePresentation' => false, 'Unit' => '°C'],
+    ['VariableID' => 4713, 'UseVariablePresentation' => false, 'Unit' => '%']
+], JSON_THROW_ON_ERROR));
+$invalidPolarUnits->ApplyChanges();
+assertGatewayGauge($invalidPolarUnits->GetTestStatus() === 201, 'Polar Bar must reject mixed units.');
+
+$invalidPolarDuplicates = new EChartsBarPolar();
+$invalidPolarDuplicates->Create();
+$invalidPolarDuplicates->SetTestProperty('Sources', json_encode([
+    ['VariableID' => 4711], ['VariableID' => 4711]
+], JSON_THROW_ON_ERROR));
+$invalidPolarDuplicates->ApplyChanges();
+assertGatewayGauge($invalidPolarDuplicates->GetTestStatus() === 201, 'Polar Bar must reject duplicate IDs.');
+
+$invalidPolarDesign = new EChartsBarPolar();
+$invalidPolarDesign->Create();
+$invalidPolarDesign->SetTestProperty('Sources', json_encode([['VariableID' => 4711]], JSON_THROW_ON_ERROR));
+$invalidPolarDesign->SetTestProperty('InnerRadiusPercent', 80);
+$invalidPolarDesign->ApplyChanges();
+assertGatewayGauge($invalidPolarDesign->GetTestStatus() === 202, 'Polar Bar must reject overlapping radii.');
+
+$sixteenPolarSources = [];
+for ($index = 0; $index < 16; $index++) {
+    $variableID = 5800 + $index;
+    $GLOBALS['symconTestVariables'][$variableID] = [
+        'VariableType'    => 2,
+        'VariableUpdated' => 1780000100 + $index,
+        'Value'           => (float) $index,
+        'Name'            => 'Polar source ' . $index
+    ];
+    $sixteenPolarSources[] = ['VariableID' => $variableID, 'UseVariablePresentation' => false, 'Unit' => 'W'];
+}
+$maximumPolar = new EChartsBarPolar();
+$maximumPolar->Create();
+$maximumPolar->SetTestProperty('Sources', json_encode($sixteenPolarSources, JSON_THROW_ON_ERROR));
+$maximumPolar->ApplyChanges();
+assertGatewayGauge(
+    $maximumPolar->GetTestStatus() === IS_ACTIVE
+        && count(json_decode($maximumPolar->GetPolarData(), true, 512, JSON_THROW_ON_ERROR)['items']) === 16,
+    'Polar Bar must accept and preserve all 16 distinct sources.'
+);
+$sixteenPolarSources[] = ['VariableID' => 4711, 'UseVariablePresentation' => false, 'Unit' => 'W'];
+$maximumPolar->SetTestProperty('Sources', json_encode($sixteenPolarSources, JSON_THROW_ON_ERROR));
+$maximumPolar->ApplyChanges();
+assertGatewayGauge($maximumPolar->GetTestStatus() === 201, 'Polar Bar must reject more than 16 sources.');
+for ($index = 0; $index < 16; $index++) {
+    unset($GLOBALS['symconTestVariables'][5800 + $index]);
+}
+
 foreach ([
     EChartsGaugeSingle::class       => 'ECGS',
     EChartsGaugeMulti::class        => 'ECGM',
@@ -4998,7 +5115,8 @@ foreach ([
     EChartsTimeSeries::class        => 'ECTS',
     EChartsBarCategory::class       => 'ECBC',
     EChartsBarHistory::class        => 'ECBH',
-    EChartsBarWaterfall::class      => 'ECBW'
+    EChartsBarWaterfall::class      => 'ECBW',
+    EChartsBarPolar::class          => 'ECBP'
 ] as $moduleClass => $modulePrefix) {
     $designModule = new $moduleClass();
     $designModule->Create();

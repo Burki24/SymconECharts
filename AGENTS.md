@@ -38,7 +38,8 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   eigenen Gerätemodul `EChartsBarCategory`; historische Balken liegen im
   eigenen Gerätemodul `EChartsBarHistory`. Waterfall-Balken mit aktuellem
   Startwert, signierten Änderungen und berechneter Endsumme liegen im eigenen
-  Gerätemodul `EChartsBarWaterfall`. Polar-Balken sind kein Modus dieser Instanzen.
+  Gerätemodul `EChartsBarWaterfall`. Polar-Balken für aktuelle Werte liegen im
+  eigenen Gerätemodul `EChartsBarPolar` und sind kein Modus dieser Instanzen.
 - Das Gateway stellt ausschließlich familienübergreifende Infrastruktur wie
   Archivzugriff, begrenztes Caching, gemeinsame Ressourcen und gegebenenfalls
   abgesicherte IPSView-Kommunikation bereit. Familienbezogene Properties,
@@ -90,6 +91,7 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
 - `ECBC` ist `EChartsBarCategory` zugeordnet (`BC` = Bar Category).
 - `ECBH` ist `EChartsBarHistory` zugeordnet (`BH` = Bar History).
 - `ECBW` ist `EChartsBarWaterfall` zugeordnet (`BW` = Bar Waterfall).
+- `ECBP` ist `EChartsBarPolar` zugeordnet (`BP` = Bar Polar).
 - Das zuvor für das unveröffentlichte Gauge-Gerüst verwendete Kürzel `ECGA`
   ist abgelöst und wird nicht für ein anderes Modul wiederverwendet.
 - Neue Kürzel werden vor ihrer Verwendung eindeutig festgelegt und in dieser

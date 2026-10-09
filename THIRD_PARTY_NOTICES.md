@@ -31,6 +31,10 @@ Ausgelieferte Dateien:
   Renderer; 621.264 Byte;
   SHA-256
   `68499685d1e4eb44c7f52f724783b0bae8e459ed86bd8a1dec4049589a4be987`;
+- `libs/echarts/6.1.0/echarts.polar.min.js` – reproduzierbarer,
+  Polar-Browser-Build aus ECharts Core, Bar Chart, Polar Component, Titel,
+  Tooltip, Aria und Canvas Renderer; 514.353 Byte; SHA-256
+  `f31daec4db27dee855d736f2443b15b5642011bc99bbe6f9bc1fdb91da1ef69c`;
 - `libs/echarts/6.1.0/themes/dark.js` – offizielles Theme Dark; 5.981 Byte;
   SHA-256 `ae60e563617cb87514690c1946ee202e78c9f1487820490614b58934ed037458`;
 - `libs/echarts/6.1.0/themes/vintage.js` – offizielles Theme Vintage;

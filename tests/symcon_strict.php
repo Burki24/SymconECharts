@@ -26,6 +26,7 @@ $timeSeries = (string) file_get_contents($root . '/EChartsTimeSeries/module.php'
 $barCategory = (string) file_get_contents($root . '/EChartsBarCategory/module.php');
 $barHistory = (string) file_get_contents($root . '/EChartsBarHistory/module.php');
 $barWaterfall = (string) file_get_contents($root . '/EChartsBarWaterfall/module.php');
+$barPolar = (string) file_get_contents($root . '/EChartsBarPolar/module.php');
 $currentSources = (string) file_get_contents($root . '/libs/EChartsCurrentSources.php');
 $configurationFormHelper = (string) file_get_contents($root . '/libs/helper/ConfigurationFormHelper.php');
 $sharedGatewayGuidance = 'One shared EChartsGateway is sufficient for all ECharts chart instances. '
@@ -40,7 +41,8 @@ foreach ([
     'EChartsTimeSeries'       => $timeSeries,
     'EChartsBarCategory'      => $barCategory,
     'EChartsBarHistory'       => $barHistory,
-    'EChartsBarWaterfall'     => $barWaterfall
+    'EChartsBarWaterfall'     => $barWaterfall,
+    'EChartsBarPolar'         => $barPolar
 ] as $moduleName => $source) {
     requireStrictContract(
         preg_match('/class\s+' . $moduleName . '\s+extends\s+IPSModuleStrict\b/', $source) === 1,
@@ -178,6 +180,23 @@ foreach ([
     requireStrictContract(
         str_contains($barWaterfall, $waterfallContract),
         'EChartsBarWaterfall is missing contract: ' . $waterfallContract,
+        $errors
+    );
+}
+
+foreach ([
+    'SetVisualizationType(1)',
+    'public function GetVisualizationTile(): string',
+    'public function GetIPSViewHTML(): string',
+    'public function GetPolarData(): string',
+    'use EChartsCurrentSources;',
+    'EChartsSourceIdentity::LabelsForSources($sources)',
+    'EChartsAsset::PolarJavaScript()',
+    'EChartsVariablePresentation::Resolve('
+] as $polarContract) {
+    requireStrictContract(
+        str_contains($barPolar, $polarContract),
+        'EChartsBarPolar is missing contract: ' . $polarContract,
         $errors
     );
 }

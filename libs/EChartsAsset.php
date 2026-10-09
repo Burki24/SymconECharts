@@ -7,13 +7,14 @@ namespace SymconECharts;
 use RuntimeException;
 
 /**
- * Loads the pinned, reproducible Gauge runtime and official ECharts themes.
+ * Loads pinned, reproducible ECharts runtimes and official themes.
  */
 final class EChartsAsset
 {
     public const VERSION = '6.1.0';
     public const SHA256 = '37d8c9774f27fc12e048e269e8ec6a114782529fb85262a6be8c6b887207c07f';
     public const CARTESIAN_SHA256 = '68499685d1e4eb44c7f52f724783b0bae8e459ed86bd8a1dec4049589a4be987';
+    public const POLAR_SHA256 = 'f31daec4db27dee855d736f2443b15b5642011bc99bbe6f9bc1fdb91da1ef69c';
     public const TIME_SERIES_SHA256 = self::CARTESIAN_SHA256;
     public const THEME_AUTO = 'auto';
     public const THEME_SHA256 = [
@@ -179,6 +180,22 @@ final class EChartsAsset
     public static function TimeSeriesJavaScript(): string
     {
         return self::CartesianJavaScript();
+    }
+
+    /** Loads the pinned Polar Bar runtime without changing existing chart bundles. */
+    public static function PolarJavaScript(): string
+    {
+        $path = __DIR__ . '/echarts/' . self::VERSION . '/echarts.polar.min.js';
+        $content = @file_get_contents($path);
+        if ($content === false || $content === '') {
+            throw new RuntimeException('The bundled Apache ECharts Polar runtime could not be loaded.');
+        }
+        $canonicalContent = self::NormalizeLineEndings($content);
+        if (!hash_equals(self::POLAR_SHA256, hash('sha256', $canonicalContent))) {
+            throw new RuntimeException('The bundled Apache ECharts Polar runtime failed its integrity check.');
+        }
+
+        return $canonicalContent;
     }
 
     /**

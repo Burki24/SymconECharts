@@ -2,6 +2,10 @@
 
 ## Neu
 
+- EChartsBarPolar vergleicht 1 bis 16 aktuelle Werte mit gemeinsamer Einheit
+  als radiale Balken oder konzentrische Bögen. Kachel und optionales IPSView
+  bieten getrennte Einstellungen für Reihenfolge, Farben und Polar-Geometrie.
+
 - EChartsBarWaterfall zeigt einen aktuellen Startwert, bis zu 15 geordnete
   positive oder negative Änderungen und eine berechnete Endsumme. Die native
   Kachel aktualisiert sich bei Variablenänderungen; IPSView kann ein eigenes

@@ -34,7 +34,7 @@ Bar diagrams are split by their data and configuration contracts:
   GUIDs or claim those modules are implemented.
 
 The Waterfall candidate was subsequently implemented as a separate device by
-ADR 0034. Polar remains a candidate.
+ADR 0034; Polar was subsequently implemented as a separate device by ADR 0035.
 
 `EChartsBarCategory` reads current values through the existing versioned
 `current.read` Gateway operation. It provides vertical and horizontal

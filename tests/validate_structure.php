@@ -27,6 +27,7 @@ $requiredFiles = [
     'docs/adr/0023-timeseries-source-design-and-svg-area-patterns.md',
     'docs/adr/0027-timeseries-custom-ranges-and-time-axis-labels.md',
     'docs/adr/0029-bar-chart-families-and-category-bar.md',
+    'docs/adr/0035-polar-bar-current-values.md',
     'library.json',
     'libs/EChartsAsset.php',
     'libs/EChartsDataProtocol.php',
@@ -40,6 +41,7 @@ $requiredFiles = [
     'libs/EChartsSvgPath.php',
     'libs/echarts/6.1.0/echarts.gauge.min.js',
     'libs/echarts/6.1.0/echarts.cartesian.min.js',
+    'libs/echarts/6.1.0/echarts.polar.min.js',
     'libs/echarts/6.1.0/themes/dark.js',
     'libs/echarts/6.1.0/themes/vintage.js',
     'libs/echarts/6.1.0/themes/macarons.js',
@@ -92,6 +94,7 @@ $requiredFiles = [
     '.tools/echarts-runtime/scripts/copy-themes.mjs',
     '.tools/echarts-runtime/src/gauge-runtime.js',
     '.tools/echarts-runtime/src/cartesian-runtime.js',
+    '.tools/echarts-runtime/src/polar-runtime.js',
     'EChartsGaugeSingle/visualization/index.html',
     'EChartsGaugeSingle/visualization/style.css',
     'EChartsGaugeSingle/visualization/app.js',
@@ -107,6 +110,10 @@ $requiredFiles = [
     'EChartsBarWaterfall/visualization/style.css',
     'EChartsBarWaterfall/visualization/app.js',
     'tests/bar_waterfall_layout.js',
+    'EChartsBarPolar/visualization/index.html',
+    'EChartsBarPolar/visualization/style.css',
+    'EChartsBarPolar/visualization/app.js',
+    'tests/bar_polar_layout.js',
     'libs/EChartsCurrentSources.php'
 ];
 
@@ -300,7 +307,7 @@ if ($helperSync !== null) {
 }
 
 $expectedModules = [
-    'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarWaterfall', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
+    'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarPolar', 'EChartsBarWaterfall', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
     'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsTimeSeries'
 ];
 $discoveredModules = [];
