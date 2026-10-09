@@ -8,6 +8,9 @@ const vm = require('node:vm');
 const source = fs.readFileSync(
     path.join(__dirname, '..', 'EChartsBarPolar', 'visualization', 'app.js'), 'utf8'
 );
+const designSource = fs.readFileSync(
+    path.join(__dirname, '..', 'libs', 'echarts-design.js'), 'utf8'
+);
 const chartElement = { hidden: false };
 const errorElement = { hidden: true, textContent: '' };
 const options = [];
@@ -54,6 +57,7 @@ const document = {
     createElement: () => ({ style: {}, remove: () => {} }),
     body: { appendChild: () => {} }
 };
+vm.runInNewContext(designSource, { window, document, console });
 vm.runInNewContext(source, { window, document, console });
 
 assert.equal(initialized, 1);
@@ -68,6 +72,9 @@ assert.equal(radial.series[0].data[0].itemStyle.color, '#ff5500');
 assert.equal(radial.series[0].data[1].itemStyle.color, '#abcdef');
 assert.equal(radial.angleAxis.startAngle, 90);
 assert.equal(radial.series[0].label.rotate, 0, 'Polar value labels must remain horizontally readable.');
+assert.equal(radial.series[0].label.position, 'middle', 'Value anchors must be centered inside their bars.');
+assert.equal(radial.series[0].data[1].label.color, '#111111', 'Light bars need dark value text.');
+assert.equal(radial.series[0].data[2].label.color, '#eeeeee', 'Dark bars need light value text.');
 assert.equal(
     radial.series[0].label.formatter({ value: 5, dataIndex: 1 }),
     Number(5).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' °C'
@@ -107,6 +114,7 @@ assert.equal(tangential.angleAxis.clockwise, false);
 assert.equal(tangential.series[0].roundCap, true);
 assert.equal(tangential.series[0].label.show, false);
 assert.equal(tangential.series[0].label.rotate, 0);
+assert.equal(tangential.series[0].label.position, 'middle');
 assert.deepEqual(Array.from(tangential.polar.radius), ['20%', '90%']);
 assert.equal(tangential.angleAxis.splitLine.show, false);
 
@@ -126,6 +134,13 @@ if (fs.existsSync(localECharts)) {
                 valueSectors.every(element => element.textConfig.rotation === 0),
                 'Rendered polar values must not follow the bar angle.'
             );
+            assert.ok(
+                valueSectors.every(element => element.textConfig.position === 'middle'),
+                'Rendered polar values must be centered inside their bars.'
+            );
+            const renderedTextColors = valueSectors.map(element => element.getTextContent().style.fill);
+            assert.ok(renderedTextColors.includes('#111111'), 'Light bars must render dark value text.');
+            assert.ok(renderedTextColors.includes('#eeeeee'), 'Dark bars must render light value text.');
         }
         realChart.dispose();
     }

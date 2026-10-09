@@ -5022,7 +5022,9 @@ $polarTile = $polar->GetVisualizationTile();
 $polarIPSView = $polar->GetIPSViewHTML();
 assertGatewayGauge(
     str_contains($polarTile, 'echarts-bar-polar-root')
+        && str_contains($polarTile, 'SYMC_ECHARTS_DESIGN')
         && str_contains($polarTile, '"mode":"radial"')
+        && str_contains($polarIPSView, 'SYMC_ECHARTS_DESIGN')
         && str_contains($polarIPSView, '"mode":"tangential"')
         && str_contains($polarIPSView, '"theme":"dark"')
         && $polar->GetTestVariableValue('IPSViewBarPolar') !== null,

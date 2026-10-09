@@ -74,6 +74,7 @@
 
     function buildOption(model, theme) {
         var colors = colorsFor(theme);
+        var design = window.SYMC_ECHARTS_DESIGN || {};
         var polar = model.polar || {};
         var style = polar.style || {};
         var mode = style.mode === 'tangential' ? 'tangential' : 'radial';
@@ -153,16 +154,22 @@
                 barWidth: Math.max(20, Math.min(100, Number(style.barWidthPercent) || 60)) + '%',
                 roundCap: style.roundCaps === true,
                 data: items.map(function (item, index) {
+                    var itemColor = item.color || swatches[index % swatches.length] || colors.accent;
                     return {
                         id: item.id,
                         name: String(item.label || ''),
                         value: Number(item.value),
-                        itemStyle: { color: item.color || swatches[index % swatches.length] || colors.accent }
+                        itemStyle: { color: itemColor },
+                        label: {
+                            color: typeof design.readableTextColor === 'function'
+                                ? design.readableTextColor(itemColor, colors.text, colors.background)
+                                : colors.text
+                        }
                     };
                 }),
                 label: {
                     show: style.showValues === true,
-                    position: mode === 'radial' ? 'outside' : 'end',
+                    position: 'middle',
                     color: colors.text,
                     rotate: 0,
                     formatter: function (parameter) {
