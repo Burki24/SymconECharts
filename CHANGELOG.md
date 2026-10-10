@@ -4,7 +4,8 @@
 
 - Kurze BarHistory-Kacheln reservieren wieder Platz für Balken und reduzieren
   überlappende Zeit- und Wertachsenbeschriftungen. Die Zoom-Leiste ist in
-  normalen Ansichten flacher und in kompakten Kacheln nochmals schmaler.
+  normalen Ansichten flacher, in kompakten Kacheln nochmals schmaler und mit
+  Abstand zum unteren Kachelrand platziert.
 
 - Unveränderte Größenmeldungen unterbrechen auch bei Gauges, TimeSeries und
   den übrigen Balkendiagrammen keine laufenden Chart-Animationen mehr. Echte

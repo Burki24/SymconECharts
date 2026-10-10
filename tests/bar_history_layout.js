@@ -130,8 +130,10 @@ assert.ok(ready.option, 'The Historical Bar chart should render.');
 assert.equal(ready.option.xAxis.type, 'time');
 assert.equal(ready.option.dataZoom.length, 2);
 assert.equal(ready.option.dataZoom[0].zoomOnMouseWheel, true);
-assert.equal(ready.option.dataZoom[1].height, 18,
-    'The History zoom slider should remain slim in a regular tile.');
+assert.equal(ready.option.dataZoom[1].height, 12,
+    'The History zoom slider should be slim in a regular tile.');
+assert.ok(ready.option.dataZoom[1].bottom >= 20,
+    'The regular zoom slider must clear the lower tile edge.');
 assert.equal(ready.option.xAxis.min, 1780000000000);
 assert.equal(ready.option.yAxis.type, 'value');
 assert.equal(ready.option.yAxis.name, '°C');
@@ -153,8 +155,13 @@ assert.equal(compact.option.xAxis.axisLabel.hideOverlap, true,
     'Dense time labels must not overlap in a narrow tile.');
 assert.ok(compact.option.xAxis.splitNumber <= 3,
     'The time axis must request fewer ticks when horizontal space is limited.');
-assert.ok(compact.option.dataZoom[1].height <= 14,
-    'The compact zoom slider must not consume the plot height.');
+assert.ok(compact.option.dataZoom[1].height <= 8,
+    'The compact zoom slider must not dominate the short tile.');
+assert.ok(compact.option.dataZoom[1].bottom >= 18,
+    'The compact zoom slider must clear the lower tile edge.');
+assert.ok(compact.option.grid.bottom >= compact.option.dataZoom[1].bottom
+    + compact.option.dataZoom[1].height + 14,
+    'The zoom slider must stay below the compact time-axis labels.');
 compact.window.handleMessage({
     status: 'ready',
     chart: {
@@ -312,6 +319,9 @@ assert.equal(retainedZoom.option.dataZoom[0].start, 0,
 
 const ipsViewZoom = render(false, 'ipsview');
 assert.equal(ipsViewZoom.option.dataZoom[0].zoomOnMouseWheel, false);
+const compactIPSViewZoom = render(false, 'ipsview', false, true, false, 433, 213);
+assert.equal(compactIPSViewZoom.option.dataZoom[1].height, 8);
+assert.equal(compactIPSViewZoom.option.dataZoom[1].bottom, 18);
 let prevented = false;
 ipsViewZoom.listeners.wheel({
     deltaY: -100, clientX: 375,
