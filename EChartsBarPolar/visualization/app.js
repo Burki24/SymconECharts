@@ -81,7 +81,7 @@
         return Number.isInteger(size) && size >= 8 && size <= 24 ? size : fallback;
     }
 
-    function polarLayout(polar) {
+    function polarLayout(polar, labels) {
         var style = polar.style || {};
         var width = Math.max(1, chartElement.clientWidth || 1);
         var height = Math.max(1, chartElement.clientHeight || 1);
@@ -89,6 +89,20 @@
         var labelWidth = Math.min(90, Math.max(36, Math.round(width * 0.13)));
         var labelMargin = Math.min(24, Math.max(16, Math.round(width * 0.05)));
         if (style.valueLabelPosition === 'outside') { labelMargin += 14; }
+        if (bootstrap.mode === 'ipsview' && style.showCategoryLabels !== false) {
+            var size = fontSize(style.categoryLabelFontSize, 10);
+            var getTextRect = window.echarts && window.echarts.format
+                && window.echarts.format.getTextRect;
+            var naturalWidth = (labels || []).reduce(function (maximum, label) {
+                var text = String(label || '');
+                var measured = typeof getTextRect === 'function'
+                    ? getTextRect(text, size + 'px sans-serif').width
+                    : Array.from(text).length * size * 0.7;
+                return Math.max(maximum, measured);
+            }, 0);
+            var availableWidth = Math.max(36, Math.min(320, Math.floor(width / 2 - labelMargin - 88)));
+            labelWidth = Math.min(availableWidth, Math.max(labelWidth, Math.ceil(naturalWidth) + 10));
+        }
         var top = headerInset + (polar.title ? 50 : 12);
         var bottom = style.showCategoryLabels !== false ? Math.min(45, height * 0.14) : 24;
         var side = style.showCategoryLabels !== false ? labelWidth + labelMargin + 8
@@ -131,7 +145,7 @@
         var swatches = colors.seriesColors || [colors.accent];
         var titleVisible = Boolean(polar.title);
         var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8;
-        var layout = polarLayout(polar);
+        var layout = polarLayout(polar, labels);
         var categoryFontSize = fontSize(style.categoryLabelFontSize, 10);
         var valueFontSize = fontSize(style.valueLabelFontSize, 10);
         var scaleFontSize = fontSize(style.scaleLabelFontSize, 10);
@@ -408,7 +422,9 @@
         lastHeight = height;
         if (currentState && currentState.status === 'ready' && currentState.chart) {
             var polar = currentState.chart.polar || {};
-            var layout = polarLayout(polar);
+            var labels = Array.isArray(currentState.chart.items)
+                ? currentState.chart.items.map(function (item) { return String(item.label || ''); }) : [];
+            var layout = polarLayout(polar, labels);
             var categoryAxisName = polar.style && polar.style.mode === 'tangential'
                 ? 'radiusAxis' : 'angleAxis';
             var valueAxisName = categoryAxisName === 'angleAxis' ? 'radiusAxis' : 'angleAxis';

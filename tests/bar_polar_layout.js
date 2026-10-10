@@ -668,9 +668,77 @@ assert.ok(simulatedTracks.every(track => Math.abs(track.shape.startAngle + Math.
     && Math.abs(track.shape.endAngle - Math.PI / 2) < 0.001 && track.shape.clockwise),
 'The Polar renderer must align its background sectors even when the full ECharts runtime is unavailable.');
 
+const categoryLabelState = {
+    status: 'ready', chart: {
+        ...state.chart,
+        polar: {
+            ...state.chart.polar,
+            style: { ...state.chart.polar.style, categoryLabelFontSize: 20, sortOrder: 'configured' }
+        },
+        items: [
+            { id: 'outside', label: 'Temperatur Außen', value: 12, order: 0 },
+            { id: 'bath', label: 'Temperatur Bad', value: 23, order: 1 },
+            { id: 'living', label: 'Temperatur Wohnzimmer', value: 22, order: 2 },
+            { id: 'office', label: 'Temperatur Büro', value: 25, order: 3 }
+        ]
+    }
+};
+const previousWidth = chartElement.clientWidth;
+const previousHeight = chartElement.clientHeight;
+chartElement.clientWidth = 1500;
+chartElement.clientHeight = 900;
+window.SYMC_VISUALIZATION.mode = 'ipsview';
+window.handleMessage(categoryLabelState);
+const wideIPSViewCategories = options.at(-1);
+assert.ok(wideIPSViewCategories.angleAxis.axisLabel.width >= 230,
+    'At 20 px, IPSView must reserve enough label width for full category names when space exists.');
+chartElement.clientWidth = 500;
+chartElement.clientHeight = 450;
+resizeCallback();
+assert.ok(options.at(-1).angleAxis.axisLabel.width < wideIPSViewCategories.angleAxis.axisLabel.width,
+    'Resizing IPSView must update the category label width without waiting for new values.');
+window.handleMessage(categoryLabelState);
+const compactIPSViewCategories = options.at(-1);
+assert.ok(compactIPSViewCategories.angleAxis.axisLabel.width
+    < wideIPSViewCategories.angleAxis.axisLabel.width,
+'Narrow IPSView widgets must bound category labels instead of squeezing the Polar chart away.');
+assert.ok(compactIPSViewCategories.polar.radius[1] >= 75,
+    'Narrow IPSView widgets must preserve a readable Polar radius.');
+chartElement.clientWidth = 1500;
+chartElement.clientHeight = 900;
+window.SYMC_VISUALIZATION.mode = 'symcon';
+window.handleMessage(categoryLabelState);
+assert.ok(options.at(-1).angleAxis.axisLabel.width <= 90,
+    'The existing compact Tile label policy must remain unchanged.');
+chartElement.clientWidth = previousWidth;
+chartElement.clientHeight = previousHeight;
+
 const localECharts = path.join(__dirname, '..', '.tools', 'echarts-runtime', 'node_modules', 'echarts');
 if (fs.existsSync(localECharts)) {
     const echarts = require(localECharts);
+    window.echarts.format = echarts.format;
+    chartElement.clientWidth = 1500;
+    chartElement.clientHeight = 900;
+    window.SYMC_VISUALIZATION.mode = 'ipsview';
+    window.handleMessage(categoryLabelState);
+    const measuredIPSViewCategories = options.at(-1);
+    const longestCategoryWidth = Math.max(...categoryLabelState.chart.items.map(item =>
+        echarts.format.getTextRect(item.label, '20px sans-serif').width));
+    assert.ok(measuredIPSViewCategories.angleAxis.axisLabel.width >= longestCategoryWidth + 8,
+        'The bundled ECharts text measurement must determine the IPSView label width.');
+    delete window.echarts.format;
+    chartElement.clientWidth = previousWidth;
+    chartElement.clientHeight = previousHeight;
+    window.SYMC_VISUALIZATION.mode = 'symcon';
+    const wideCategoryChart = echarts.init(null, null,
+        { renderer: 'svg', ssr: true, width: 1500, height: 900 });
+    wideCategoryChart.setOption(measuredIPSViewCategories);
+    const renderedCategoryNames = wideCategoryChart.getZr().storage.getDisplayList()
+        .filter(element => element.type === 'tspan')
+        .map(element => element.style.text);
+    assert.ok(categoryLabelState.chart.items.every(item => renderedCategoryNames.includes(item.label)),
+        'The bundled ECharts runtime must render every 20 px IPSView category name without truncation.');
+    wideCategoryChart.dispose();
     const focusChart = echarts.init(null, null,
         { renderer: 'svg', ssr: true, width: 625, height: 560 });
     focusChart.setOption(focusedRadial);

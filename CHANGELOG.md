@@ -2,6 +2,10 @@
 
 ## Behoben
 
+- Kategoriebeschriftungen im Polar-IPSView nutzen bei ausreichend Platz die
+  verfügbare Breite auch bei größerer Schrift, statt schon nach wenigen
+  Zeichen abgeschnitten zu werden. Schmale Widgets behalten Platz für den Kreis.
+
 - Hintergrundspuren konzentrischer Polar-Bögen bleiben bei einem begrenzten
   Winkelumfang innerhalb des gewählten Teilkreises, auch nach Größenänderungen.
 
