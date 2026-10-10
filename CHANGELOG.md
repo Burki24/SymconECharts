@@ -25,6 +25,10 @@
 
 ## Neu
 
+- Für Polar-Balken lassen sich Start- und Aktualisierungsanimation in Kachel
+  und unabhängigem IPSView-Design getrennt einstellen oder abschalten. Die
+  Systemeinstellung für reduzierte Bewegung hat Vorrang.
+
 - Polar-Balken erhalten optional einen Schatten mit einstellbarer Stärke,
   Farbe und Deckkraft. Kachel und unabhängiges IPSView-Design sind separat
   konfigurierbar; standardmäßig bleibt der Schatten ausgeschaltet.

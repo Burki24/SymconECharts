@@ -288,6 +288,10 @@ TimeSeries-Flächen und -Annotationen sowie Gauge-Hintergrundplatten nutzen
 denselben Baustein. Die jeweiligen Defaults, Properties, Validierungen und
 ECharts-Ziele verbleiben in den Gerätemodulen. Der Baustein wird in Kachel und
 IPSView vor dem jeweiligen Renderer eingebettet.
+Die Abfrage der Betriebssystemvorgabe für reduzierte Bewegung liegt ebenfalls
+in `libs/echarts-design.js`; Gauge Single und Polar Bar verwenden denselben
+Vertrag. Polar Bar legt die Animationszeiten weiterhin als eigene
+Design-Properties fest.
 Die optionale ECharts-Balkenkontur wird dort ebenfalls aus Breite, eigener oder
 Theme-Farbe als `itemStyle` erzeugt. Aktuell nutzt Polar Bar diesen gemeinsamen
 Vertrag; weitere Balkenmodule können ihn ohne Kopie der Rendererlogik nutzen.

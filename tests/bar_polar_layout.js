@@ -87,6 +87,9 @@ function assertProtectedGeometry(option, width, height, topClearance) {
     assert.ok(centerX + outerRadius <= width - sideClearance, 'Polar ring must leave room for right labels.');
 }
 const radial = options.at(-1);
+assert.equal(radial.animation, true);
+assert.equal(radial.animationDuration, 350);
+assert.equal(radial.animationDurationUpdate, 500);
 assertProtectedGeometry(radial, 625, 560, 108);
 assert.equal(radial.radiusAxis.min, undefined, 'Existing Polar Tiles must retain automatic scale by default.');
 assert.equal(radial.series[0].showBackground, false, 'Background tracks must be off by default.');
@@ -129,6 +132,63 @@ assert.equal(
 );
 assert.match(radial.tooltip.formatter({ dataIndex: 0 }), /&lt;Room&gt;/);
 assert.doesNotMatch(radial.tooltip.formatter({ dataIndex: 0 }), /<Room>/);
+
+window.handleMessage({
+    status: 'ready', chart: {
+        ...state.chart,
+        polar: { ...state.chart.polar, style: {
+            ...state.chart.polar.style,
+            animationEnabled: true, animationDuration: 700, animationDurationUpdate: 1200
+        } }
+    }
+});
+const customAnimation = options.at(-1);
+assert.equal(customAnimation.animation, true);
+assert.equal(customAnimation.animationDuration, 700);
+assert.equal(customAnimation.animationDurationUpdate, 1200);
+window.handleMessage({
+    status: 'ready', chart: {
+        ...state.chart,
+        polar: { ...state.chart.polar, style: {
+            ...state.chart.polar.style,
+            animationEnabled: true, animationDuration: 0, animationDurationUpdate: 3000
+        } }
+    }
+});
+const separateAnimation = options.at(-1);
+assert.equal(separateAnimation.animation, true);
+assert.equal(separateAnimation.animationDuration, 0);
+assert.equal(separateAnimation.animationDurationUpdate, 3000);
+window.handleMessage({
+    status: 'ready', chart: {
+        ...state.chart,
+        polar: { ...state.chart.polar, style: {
+            ...state.chart.polar.style, animationEnabled: false,
+            animationDuration: 700, animationDurationUpdate: 1200
+        } }
+    }
+});
+const disabledAnimation = options.at(-1);
+assert.equal(disabledAnimation.animation, false);
+assert.equal(disabledAnimation.animationDuration, 0);
+assert.equal(disabledAnimation.animationDurationUpdate, 0);
+window.matchMedia = query => ({ matches: query === '(prefers-reduced-motion: reduce)' });
+window.SYMC_VISUALIZATION.mode = 'ipsview';
+window.handleMessage({
+    status: 'ready', chart: {
+        ...state.chart,
+        polar: { ...state.chart.polar, style: {
+            ...state.chart.polar.style, animationEnabled: true,
+            animationDuration: 700, animationDurationUpdate: 1200
+        } }
+    }
+});
+const reducedAnimation = options.at(-1);
+assert.equal(reducedAnimation.animation, false);
+assert.equal(reducedAnimation.animationDuration, 0);
+assert.equal(reducedAnimation.animationDurationUpdate, 0);
+window.matchMedia = () => ({ matches: false });
+window.SYMC_VISUALIZATION.mode = 'symcon';
 
 window.handleMessage({
     status: 'ready', chart: {
@@ -777,6 +837,26 @@ if (fs.existsSync(localECharts)) {
     assert.ok(categoryLabelState.chart.items.every(item => renderedCategoryNames.includes(item.label)),
         'The bundled ECharts runtime must render every 20 px IPSView category name without truncation.');
     wideCategoryChart.dispose();
+    const animationChart = echarts.init(null, null,
+        { renderer: 'svg', ssr: true, width: 625, height: 560 });
+    animationChart.setOption(customAnimation, true);
+    const animatedData = () => animationChart.getModel().getSeriesByIndex(0).getData();
+    assert.ok(animatedData().getItemGraphicEl(0).animators.some(animator =>
+        animator.scope === 'enter' && animator._maxTime === 700),
+    'The bundled ECharts runtime must use the configured initial animation duration.');
+    animationChart.setOption({
+        ...customAnimation,
+        series: [{
+            ...customAnimation.series[0],
+            data: customAnimation.series[0].data.map((item, index) => ({
+                ...item, value: index === 0 ? item.value + 1 : item.value
+            }))
+        }]
+    }, true);
+    assert.ok(animatedData().getItemGraphicEl(0).animators.some(animator =>
+        animator.scope === 'update' && animator._maxTime === 1200),
+    'The bundled ECharts runtime must use the configured update animation duration.');
+    animationChart.dispose();
     const focusChart = echarts.init(null, null,
         { renderer: 'svg', ssr: true, width: 625, height: 560 });
     focusChart.setOption(focusedRadial);

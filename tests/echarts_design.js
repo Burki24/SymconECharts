@@ -44,4 +44,11 @@ assert.equal(colorWithAlpha('rgb(10, 20, 30)', 0.45), 'rgba(10,20,30,0.45)',
 assert.equal(colorWithAlpha('rgba(10,20,30,0.5)', 0.35), 'rgba(10,20,30,0.5)',
     'Unsupported color syntax must remain unchanged for existing Gauge designs.');
 
+const prefersReducedMotion = window.SYMC_ECHARTS_DESIGN.prefersReducedMotion;
+assert.equal(prefersReducedMotion(), false, 'Missing media-query support must preserve motion.');
+window.matchMedia = query => ({ matches: query === '(prefers-reduced-motion: reduce)' });
+assert.equal(prefersReducedMotion(), true, 'The shared helper must honor reduced-motion preferences.');
+window.matchMedia = () => ({ matches: false });
+assert.equal(prefersReducedMotion(), false, 'Normal motion preferences must retain chart animations.');
+
 console.log('Shared ECharts design utilities verified.');

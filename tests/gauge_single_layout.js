@@ -12,7 +12,7 @@ const palette = {
     border: '#cccccc', track: '#444444', surface: '#333333', accent: '#55cbb5'
 };
 
-function render(mode, width, height, preset, style = {}) {
+function render(mode, width, height, preset, style = {}, reducedMotion = false) {
     const chartElement = {
         clientWidth: width,
         clientHeight: height,
@@ -34,6 +34,7 @@ function render(mode, width, height, preset, style = {}) {
             options: { echartsThemes: { dark: palette } }
         },
         echarts: { init: () => ({ setOption: next => { option = next; } }) },
+        matchMedia: query => ({ matches: reducedMotion && query === '(prefers-reduced-motion: reduce)' }),
         addEventListener: () => {}
     };
     const document = {
@@ -66,6 +67,9 @@ for (const mode of ['symcon', 'ipsview']) {
 }
 
 const narrow = render('ipsview', 320, 240, 'simple', { plateShape: 'circle' });
+const reducedGauge = render('ipsview', 620, 630, 'simple', { plateShape: 'circle' }, true);
+assert.equal(reducedGauge.animation, false, 'Gauge Single must keep honoring reduced-motion preferences.');
+assert.equal(reducedGauge.animationDuration, 0);
 assert.ok(narrow.series[0].radius > 0);
 assert.ok(narrow.graphic[0].shape.cx - narrow.graphic[0].shape.r >= 0);
 assert.ok(narrow.graphic[0].shape.cy - narrow.graphic[0].shape.r >= 0);

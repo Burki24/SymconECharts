@@ -57,6 +57,11 @@
         return Math.max(0, Math.min(100, percent)) / 100;
     }
 
+    function prefersReducedMotion() {
+        return typeof global.matchMedia === 'function'
+            && global.matchMedia('(prefers-reduced-motion: reduce)').matches === true;
+    }
+
     function colorWithAlpha(color, alpha) {
         var hex = /^#([0-9a-f]{6})$/i.exec(color);
         if (hex) {
@@ -88,6 +93,7 @@
         readableTextColor: readableTextColor,
         relativeLuminance: relativeLuminance,
         opacityFromPercent: opacityFromPercent,
+        prefersReducedMotion: prefersReducedMotion,
         colorWithAlpha: colorWithAlpha,
         barOutlineStyle: barOutlineStyle
     });

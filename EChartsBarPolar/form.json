@@ -396,6 +396,33 @@
                     "type": "RowLayout",
                     "items": [
                         {
+                            "type": "CheckBox",
+                            "name": "AnimationEnabled",
+                            "caption": "Animate bars",
+                            "onChange": "ECBP_UpdateAnimationForm($id, false, $AnimationEnabled);"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDuration",
+                            "caption": "Initial animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDurationUpdate",
+                            "caption": "Update animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
                             "type": "Select",
                             "name": "BarHighlightMode",
                             "caption": "Bar highlight",
@@ -833,6 +860,33 @@
                                     "minimum": 0,
                                     "maximum": 100,
                                     "suffix": "%"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "CheckBox",
+                                    "name": "IPSViewAnimationEnabled",
+                                    "caption": "Animate bars",
+                                    "onChange": "ECBP_UpdateAnimationForm($id, true, $IPSViewAnimationEnabled);"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "IPSViewAnimationDuration",
+                                    "caption": "Initial animation",
+                                    "minimum": 0,
+                                    "maximum": 3000,
+                                    "suffix": "ms"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "IPSViewAnimationDurationUpdate",
+                                    "caption": "Update animation",
+                                    "minimum": 0,
+                                    "maximum": 3000,
+                                    "suffix": "ms"
                                 }
                             ]
                         },

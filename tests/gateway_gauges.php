@@ -5050,6 +5050,9 @@ assertGatewayGauge(
         && $polarData['polar']['style']['barShadowBlur'] === 0
         && $polarData['polar']['style']['barShadowColor'] === ''
         && $polarData['polar']['style']['barShadowOpacityPercent'] === 35
+        && $polarData['polar']['style']['animationEnabled'] === true
+        && $polarData['polar']['style']['animationDuration'] === 350
+        && $polarData['polar']['style']['animationDurationUpdate'] === 500
         && $polarData['polar']['style']['barHighlightMode'] === 'standard'
         && $polarData['polar']['style']['barHighlightColor'] === ''
         && $polarData['polar']['style']['valueLabelPosition'] === 'middle'
@@ -5121,6 +5124,11 @@ $polarShadowRow = current(array_filter(
     static fn (array $item): bool => in_array('BarShadowBlur', array_column($item['items'] ?? [], 'name'), true)
 ));
 $polarShadowFields = array_column($polarShadowRow['items'], null, 'name');
+$polarAnimationRow = current(array_filter(
+    $polarTileDesigner['items'],
+    static fn (array $item): bool => in_array('AnimationEnabled', array_column($item['items'] ?? [], 'name'), true)
+));
+$polarAnimationFields = array_column($polarAnimationRow['items'], null, 'name');
 $polarHighlightRow = current(array_filter(
     $polarTileDesigner['items'],
     static fn (array $item): bool => in_array('BarHighlightMode', array_column($item['items'] ?? [], 'name'), true)
@@ -5158,6 +5166,14 @@ assertGatewayGauge(
     'Polar Tile form must offer a theme-aware optional bar shadow.'
 );
 assertGatewayGauge(
+    ($polarAnimationFields['AnimationDuration']['minimum'] ?? null) === 0
+        && ($polarAnimationFields['AnimationDuration']['maximum'] ?? null) === 3000
+        && ($polarAnimationFields['AnimationDurationUpdate']['minimum'] ?? null) === 0
+        && ($polarAnimationFields['AnimationDurationUpdate']['maximum'] ?? null) === 3000
+        && str_contains((string) ($polarAnimationFields['AnimationEnabled']['onChange'] ?? ''), 'ECBP_UpdateAnimationForm'),
+    'Polar Tile form must configure entry and update animation independently.'
+);
+assertGatewayGauge(
     array_column($polarHighlightFields['BarHighlightMode']['options'], 'value')
         === ['standard', 'outline', 'focus', 'off']
         && ($polarHighlightFields['BarHighlightColor']['visible'] ?? null) === false,
@@ -5193,6 +5209,11 @@ $polarDefaultIPSViewShadowRow = current(array_filter(
     static fn (array $item): bool => in_array('IPSViewBarShadowBlur', array_column($item['items'] ?? [], 'name'), true)
 ));
 $polarDefaultIPSViewShadowFields = array_column($polarDefaultIPSViewShadowRow['items'], null, 'name');
+$polarDefaultIPSViewAnimationRow = current(array_filter(
+    $polarDefaultIPSViewPanel['items'],
+    static fn (array $item): bool => in_array('IPSViewAnimationEnabled', array_column($item['items'] ?? [], 'name'), true)
+));
+$polarDefaultIPSViewAnimationFields = array_column($polarDefaultIPSViewAnimationRow['items'], null, 'name');
 $polarDefaultIPSViewHighlightRow = current(array_filter(
     $polarDefaultIPSViewPanel['items'],
     static fn (array $item): bool => in_array('IPSViewBarHighlightMode', array_column($item['items'] ?? [], 'name'), true)
@@ -5221,6 +5242,12 @@ assertGatewayGauge(
     'Independent Polar IPSView form must expose editable shadow controls.'
 );
 assertGatewayGauge(
+    ($polarDefaultIPSViewAnimationFields['IPSViewAnimationEnabled']['enabled'] ?? null) === true
+        && ($polarDefaultIPSViewAnimationFields['IPSViewAnimationDuration']['visible'] ?? null) !== false
+        && ($polarDefaultIPSViewAnimationFields['IPSViewAnimationDurationUpdate']['visible'] ?? null) !== false,
+    'Independent Polar IPSView form must expose its own animation controls.'
+);
+assertGatewayGauge(
     ($polarDefaultIPSViewHighlightFields['IPSViewBarHighlightMode']['enabled'] ?? null) === true
         && ($polarDefaultIPSViewHighlightFields['IPSViewBarHighlightColor']['visible'] ?? null) === false,
     'Independent IPSView must offer its own highlight mode.'
@@ -5239,6 +5266,8 @@ $polar->SetTestProperty('BarOutlineColor', 0x123456);
 $polar->SetTestProperty('BarShadowBlur', 12);
 $polar->SetTestProperty('BarShadowColor', 0x223344);
 $polar->SetTestProperty('BarShadowOpacityPercent', 60);
+$polar->SetTestProperty('AnimationDuration', 700);
+$polar->SetTestProperty('AnimationDurationUpdate', 1200);
 $polar->SetTestProperty('BarHighlightMode', 'focus');
 $polar->SetTestProperty('BarHighlightColor', 0xCC00AA);
 $polar->SetTestProperty('AngularSpan', 180);
@@ -5264,6 +5293,9 @@ assertGatewayGauge(
         && $polarDesignData['polar']['style']['barShadowBlur'] === 12
         && $polarDesignData['polar']['style']['barShadowColor'] === '#223344'
         && $polarDesignData['polar']['style']['barShadowOpacityPercent'] === 60
+        && $polarDesignData['polar']['style']['animationEnabled'] === true
+        && $polarDesignData['polar']['style']['animationDuration'] === 700
+        && $polarDesignData['polar']['style']['animationDurationUpdate'] === 1200
         && $polarDesignData['polar']['style']['barHighlightMode'] === 'focus'
         && $polarDesignData['polar']['style']['barHighlightColor'] === '#CC00AA'
         && $polarDesignData['polar']['style']['angularSpan'] === 180
@@ -5292,6 +5324,9 @@ $polar->SetTestProperty('IPSViewBarOutlineColor', -1);
 $polar->SetTestProperty('IPSViewBarShadowBlur', 8);
 $polar->SetTestProperty('IPSViewBarShadowColor', -1);
 $polar->SetTestProperty('IPSViewBarShadowOpacityPercent', 35);
+$polar->SetTestProperty('IPSViewAnimationEnabled', false);
+$polar->SetTestProperty('IPSViewAnimationDuration', 150);
+$polar->SetTestProperty('IPSViewAnimationDurationUpdate', 250);
 $polar->SetTestProperty('IPSViewBarHighlightMode', 'outline');
 $polar->SetTestProperty('IPSViewBarHighlightColor', -1);
 $polar->SetTestProperty('IPSViewAngularSpan', 270);
@@ -5318,6 +5353,9 @@ assertGatewayGauge(
         && str_contains($polarIPSViewDesign, '"barShadowBlur":8')
         && str_contains($polarIPSViewDesign, '"barShadowColor":""')
         && str_contains($polarIPSViewDesign, '"barShadowOpacityPercent":35')
+        && str_contains($polarIPSViewDesign, '"animationEnabled":false')
+        && str_contains($polarIPSViewDesign, '"animationDuration":150')
+        && str_contains($polarIPSViewDesign, '"animationDurationUpdate":250')
         && str_contains($polarIPSViewDesign, '"barHighlightMode":"outline"')
         && str_contains($polarIPSViewDesign, '"barHighlightColor":""')
         && str_contains($polarIPSViewDesign, '"angularSpan":270')
@@ -5346,11 +5384,22 @@ $polarIPSViewFillRow = current(array_filter(
     static fn (array $item): bool => in_array('IPSViewBarFillMode', array_column($item['items'] ?? [], 'name'), true)
 ));
 $polarIPSViewFillFields = array_column($polarIPSViewFillRow['items'], null, 'name');
+$polarIPSViewAnimationRow = current(array_filter(
+    $polarIPSViewPanel['items'],
+    static fn (array $item): bool => in_array('IPSViewAnimationEnabled', array_column($item['items'] ?? [], 'name'), true)
+));
+$polarIPSViewAnimationFields = array_column($polarIPSViewAnimationRow['items'], null, 'name');
 $polarIPSViewHighlightRow = current(array_filter(
     $polarIPSViewPanel['items'],
     static fn (array $item): bool => in_array('IPSViewBarHighlightMode', array_column($item['items'] ?? [], 'name'), true)
 ));
 $polarIPSViewHighlightFields = array_column($polarIPSViewHighlightRow['items'], null, 'name');
+assertGatewayGauge(
+    ($polarIPSViewAnimationFields['IPSViewAnimationEnabled']['enabled'] ?? null) === true
+        && ($polarIPSViewAnimationFields['IPSViewAnimationDuration']['visible'] ?? null) === false
+        && ($polarIPSViewAnimationFields['IPSViewAnimationDurationUpdate']['visible'] ?? null) === false,
+    'Disabled independent IPSView animation must hide both timing controls.'
+);
 $polarIPSViewLabelPositionField = current(array_filter(
     $polarIPSViewPanel['items'],
     static fn (array $item): bool => ($item['name'] ?? '') === 'IPSViewValueLabelPosition'
@@ -5423,6 +5472,14 @@ assertGatewayGauge(
     ],
     'Polar IPSView form must update its fixed-scale controls immediately when the mode changes.'
 );
+$polar->UpdateAnimationForm(true, true);
+assertGatewayGauge(
+    array_slice($polar->GetTestFormUpdates(), -2) === [
+        ['Field' => 'IPSViewAnimationDuration', 'Parameter' => 'visible', 'Value' => true],
+        ['Field' => 'IPSViewAnimationDurationUpdate', 'Parameter' => 'visible', 'Value' => true]
+    ],
+    'Polar IPSView animation controls must appear immediately when enabled.'
+);
 $polar->SetTestProperty('IPSViewUseTileDesign', true);
 $polar->SetTestProperty('IPSViewValueAxisMinimum', 100.0);
 $polar->SetTestProperty('IPSViewValueAxisMaximum', 100.0);
@@ -5458,6 +5515,10 @@ $polarInheritedShadowRow = current(array_filter(
     $polarInheritedPanel['items'],
     static fn (array $item): bool => in_array('IPSViewBarShadowBlur', array_column($item['items'] ?? [], 'name'), true)
 ));
+$polarInheritedAnimationRow = current(array_filter(
+    $polarInheritedPanel['items'],
+    static fn (array $item): bool => in_array('IPSViewAnimationEnabled', array_column($item['items'] ?? [], 'name'), true)
+));
 $polarInheritedLabelPositionField = current(array_filter(
     $polarInheritedPanel['items'],
     static fn (array $item): bool => ($item['name'] ?? '') === 'IPSViewValueLabelPosition'
@@ -5482,6 +5543,9 @@ assertGatewayGauge(
         && str_contains($polarInheritedHTML, '"barShadowBlur":12')
         && str_contains($polarInheritedHTML, '"barShadowColor":"#223344"')
         && str_contains($polarInheritedHTML, '"barShadowOpacityPercent":60')
+        && str_contains($polarInheritedHTML, '"animationEnabled":true')
+        && str_contains($polarInheritedHTML, '"animationDuration":700')
+        && str_contains($polarInheritedHTML, '"animationDurationUpdate":1200')
         && str_contains($polarInheritedHTML, '"barHighlightMode":"focus"')
         && str_contains($polarInheritedHTML, '"barHighlightColor":"#CC00AA"')
         && ($polarInheritedScaleFields['IPSViewValueAxisRangeMode']['enabled'] ?? null) === false
@@ -5492,6 +5556,7 @@ assertGatewayGauge(
         && ($polarInheritedOutlineFields['IPSViewBarOutlineWidth']['enabled'] ?? null) === false
         && ($polarInheritedOutlineFields['IPSViewBarOutlineColor']['enabled'] ?? null) === false
         && array_column($polarInheritedShadowRow['items'], 'enabled') === [false, false, false]
+        && array_column($polarInheritedAnimationRow['items'], 'enabled') === [false, false, false]
         && ($polarInheritedHighlightFields['IPSViewBarHighlightMode']['enabled'] ?? null) === false
         && ($polarInheritedHighlightFields['IPSViewBarHighlightColor']['enabled'] ?? null) === false
         && ($polarInheritedLabelPositionField['enabled'] ?? null) === false
@@ -5521,6 +5586,9 @@ assertGatewayGauge(
         && str_contains($polarCopiedHTML, '"barShadowBlur":12')
         && str_contains($polarCopiedHTML, '"barShadowColor":"#223344"')
         && str_contains($polarCopiedHTML, '"barShadowOpacityPercent":60')
+        && str_contains($polarCopiedHTML, '"animationEnabled":true')
+        && str_contains($polarCopiedHTML, '"animationDuration":700')
+        && str_contains($polarCopiedHTML, '"animationDurationUpdate":1200')
         && str_contains($polarCopiedHTML, '"barHighlightMode":"focus"')
         && str_contains($polarCopiedHTML, '"barHighlightColor":"#CC00AA"')
         && str_contains($polarCopiedHTML, '"angularSpan":180')
@@ -5751,6 +5819,23 @@ foreach ([
     assertGatewayGauge($invalidPolarShadow->GetTestStatus() === 202, 'Polar Bar must reject invalid ' . $property . '.');
 }
 
+foreach ([
+    ['AnimationDuration', -1],
+    ['AnimationDuration', 3001],
+    ['AnimationDurationUpdate', -1],
+    ['AnimationDurationUpdate', 3001]
+] as [$property, $value]) {
+    $invalidPolarAnimation = new EChartsBarPolar();
+    $invalidPolarAnimation->Create();
+    $invalidPolarAnimation->SetTestProperty('Sources', json_encode([['VariableID' => 4711]], JSON_THROW_ON_ERROR));
+    $invalidPolarAnimation->SetTestProperty($property, $value);
+    $invalidPolarAnimation->ApplyChanges();
+    assertGatewayGauge(
+        $invalidPolarAnimation->GetTestStatus() === 202,
+        'Polar Bar must reject invalid ' . $property . '.'
+    );
+}
+
 $invalidPolarSpan = new EChartsBarPolar();
 $invalidPolarSpan->Create();
 $invalidPolarSpan->SetTestProperty('Sources', json_encode([['VariableID' => 4711]], JSON_THROW_ON_ERROR));
@@ -5866,6 +5951,17 @@ $invalidPolarIPSViewShadow->ApplyChanges();
 assertGatewayGauge(
     $invalidPolarIPSViewShadow->GetTestStatus() === 202,
     'Polar Bar must reject an invalid independent IPSView shadow.'
+);
+
+$invalidPolarIPSViewAnimation = new EChartsBarPolar();
+$invalidPolarIPSViewAnimation->Create();
+$invalidPolarIPSViewAnimation->SetTestProperty('Sources', json_encode([['VariableID' => 4711]], JSON_THROW_ON_ERROR));
+$invalidPolarIPSViewAnimation->SetTestProperty('IPSViewUseTileDesign', false);
+$invalidPolarIPSViewAnimation->SetTestProperty('IPSViewAnimationDurationUpdate', 3001);
+$invalidPolarIPSViewAnimation->ApplyChanges();
+assertGatewayGauge(
+    $invalidPolarIPSViewAnimation->GetTestStatus() === 202,
+    'Polar Bar must reject invalid independent IPSView animation timing.'
 );
 
 $invalidPolarIPSViewHighlight = new EChartsBarPolar();

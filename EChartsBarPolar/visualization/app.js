@@ -183,6 +183,11 @@
         }
         var trackOpacity = design.opacityFromPercent(style.barBackgroundOpacityPercent, 25);
         var barOpacity = design.opacityFromPercent(style.barOpacityPercent, 100);
+        var animate = style.animationEnabled !== false && !design.prefersReducedMotion();
+        function animationDuration(value, fallback) {
+            var duration = Number(value);
+            return Number.isInteger(duration) && duration >= 0 && duration <= 3000 ? duration : fallback;
+        }
         var normalOutlineWidth = Number(style.barOutlineWidth) || 0;
         var highlightStyle = design.barOutlineStyle(
             Math.max(3, Math.min(10, normalOutlineWidth + 2)),
@@ -217,8 +222,9 @@
         return {
             backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
                 ? 'transparent' : colors.background,
-            animation: true,
-            animationDuration: 350,
+            animation: animate,
+            animationDuration: animate ? animationDuration(style.animationDuration, 350) : 0,
+            animationDurationUpdate: animate ? animationDuration(style.animationDurationUpdate, 500) : 0,
             aria: {
                 enabled: true,
                 description: items.map(function (item) {
