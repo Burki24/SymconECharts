@@ -10,10 +10,11 @@
   als radiale Balken oder konzentrische Bögen. Kachel und optionales IPSView
   bieten getrennte Einstellungen für Reihenfolge, Farben und Polar-Geometrie.
 
-- Der Polar-Kacheldesigner bietet eine feste Werteskala mit Minimum und Maximum
-  sowie optionale Hintergrundspuren mit Theme- oder Benutzerfarbe und eigener
-  Deckkraft. Die bisherige automatische Skala ohne Spuren bleibt Standard;
-  der unabhängige IPSView-Designer erhält diese Felder erst später.
+- Der Polar-Designer bietet in Kachel und IPSView eine feste Werteskala mit
+  Minimum und Maximum sowie optionale Hintergrundspuren mit Theme- oder
+  Benutzerfarbe und eigener Deckkraft. IPSView kann das Kacheldesign übernehmen
+  oder diese Optionen unabhängig einstellen. Die automatische Skala ohne Spuren
+  bleibt Standard.
 
 - EChartsBarWaterfall zeigt einen aktuellen Startwert, bis zu 15 geordnete
   positive oder negative Änderungen und eine berechnete Endsumme. Die native

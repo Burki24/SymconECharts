@@ -528,6 +528,68 @@
                             "type": "RowLayout",
                             "items": [
                                 {
+                                    "type": "Select",
+                                    "name": "IPSViewValueAxisRangeMode",
+                                    "caption": "Value scale",
+                                    "onChange": "ECBP_UpdateIPSViewValueScaleForm($id, $IPSViewValueAxisRangeMode);",
+                                    "options": [
+                                        {
+                                            "caption": "Automatic",
+                                            "value": "auto"
+                                        },
+                                        {
+                                            "caption": "Fixed range",
+                                            "value": "manual"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "IPSViewValueAxisMinimum",
+                                    "caption": "Scale minimum",
+                                    "digits": 3
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "IPSViewValueAxisMaximum",
+                                    "caption": "Scale maximum",
+                                    "digits": 3
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Label",
+                            "caption": "Minimum and maximum apply to a fixed scale. Values outside the range are clipped."
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "CheckBox",
+                                    "name": "IPSViewShowBarBackground",
+                                    "caption": "Show background tracks"
+                                },
+                                {
+                                    "type": "SelectColor",
+                                    "name": "IPSViewBarBackgroundColor",
+                                    "caption": "Track color",
+                                    "allowTransparent": true,
+                                    "transparentCaption": "Automatic (theme)"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "IPSViewBarBackgroundOpacityPercent",
+                                    "caption": "Track opacity",
+                                    "minimum": 0,
+                                    "maximum": 100,
+                                    "suffix": "%"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
                                     "type": "NumberSpinner",
                                     "name": "IPSViewStartAngle",
                                     "caption": "Start angle",

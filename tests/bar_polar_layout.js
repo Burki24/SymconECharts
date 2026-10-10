@@ -178,7 +178,7 @@ const offsetItems = [
     { id: 'bath', label: 'Bad', value: 22.9, decimals: 1, color: '', order: 1 },
     { id: 'office', label: 'Büro', value: 24.3, decimals: 1, color: '', order: 2 }
 ];
-window.handleMessage({
+const offsetState = {
     status: 'ready', chart: {
         ...state.chart,
         polar: {
@@ -190,7 +190,8 @@ window.handleMessage({
         },
         items: offsetItems
     }
-});
+};
+window.handleMessage(offsetState);
 const offsetTangential = options.at(-1);
 assert.equal(offsetTangential.angleAxis.min, 5);
 assert.equal(offsetTangential.angleAxis.max, 100);
@@ -201,6 +202,15 @@ assert.deepEqual(Array.from(offsetTangential.series[0].data, item => item.value)
 assert.equal(offsetTangential.series[0].label.formatter({ value: 12.1, dataIndex: 0 }),
     Number(12.1).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' °C',
     'Concentric value labels must display the original values.');
+window.SYMC_VISUALIZATION.mode = 'ipsview';
+window.handleMessage(offsetState);
+const offsetIPSView = options.at(-1);
+assert.equal(offsetIPSView.angleAxis.startValue, 5,
+    'The IPSView renderer must keep the fixed-scale baseline at its minimum.');
+assert.equal(offsetIPSView.series[0].showBackground, true);
+assert.equal(offsetIPSView.series[0].backgroundStyle.color, '#778899');
+assert.equal(offsetIPSView.series[0].backgroundStyle.opacity, 0.4);
+window.SYMC_VISUALIZATION.mode = 'symcon';
 window.handleMessage({
     status: 'ready', chart: {
         ...state.chart,
