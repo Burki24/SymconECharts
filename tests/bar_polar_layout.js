@@ -90,6 +90,11 @@ const radial = options.at(-1);
 assert.equal(radial.animation, true);
 assert.equal(radial.animationDuration, 350);
 assert.equal(radial.animationDurationUpdate, 500);
+const initialOptionCount = options.length;
+resizeCallback();
+assert.equal(resized, 0, 'The initial ResizeObserver callback must not cancel an unchanged chart animation.');
+assert.equal(options.length, initialOptionCount,
+    'An unchanged chart size must not trigger a redundant option update.');
 assertProtectedGeometry(radial, 625, 560, 108);
 assert.equal(radial.radiusAxis.min, undefined, 'Existing Polar Tiles must retain automatic scale by default.');
 assert.equal(radial.series[0].showBackground, false, 'Background tracks must be off by default.');
@@ -914,6 +919,31 @@ if (fs.existsSync(localECharts)) {
         window: livePolarWindow, document: livePolarDocument, console,
         ResizeObserver: livePolarWindow.ResizeObserver
     });
+    const initialBar = livePolarChart.getModel().getSeriesByIndex(0).getData().getItemGraphicEl(0);
+    assert.ok(initialBar.animators.some(animator =>
+        animator.scope === 'enter' && animator._maxTime === 350),
+    'The bundled ECharts runtime must begin the Polar bar entrance animation.');
+    liveResizeCallback();
+    assert.ok(initialBar.animators.some(animator =>
+        animator.scope === 'enter' && animator._maxTime === 350),
+    'An unchanged ResizeObserver notification must leave the entrance animation running.');
+    livePolarWindow.handleMessage({
+        ...reportedState,
+        chart: {
+            ...reportedState.chart,
+            items: reportedState.chart.items.map((item, index) => ({
+                ...item, value: index === 0 ? item.value + 1 : item.value
+            }))
+        }
+    });
+    const updatedBar = livePolarChart.getModel().getSeriesByIndex(0).getData().getItemGraphicEl(0);
+    assert.ok(updatedBar.animators.some(animator =>
+        animator.scope === 'update' && animator._maxTime === 500),
+    'The bundled ECharts runtime must animate a changed Polar value.');
+    liveResizeCallback();
+    assert.ok(updatedBar.animators.some(animator =>
+        animator.scope === 'update' && animator._maxTime === 500),
+    'An unchanged ResizeObserver notification must leave the update animation running.');
     function liveTracks() {
         return livePolarChart.getZr().storage.getDisplayList().filter(
             element => element.type === 'sector' && element.style.fill === '#E70D0D'

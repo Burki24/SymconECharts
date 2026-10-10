@@ -2,6 +2,9 @@
 
 ## Behoben
 
+- Start- und Aktualisierungsanimationen der Polar-Balken werden in Kachel und
+  IPSView nicht mehr durch Größenmeldungen ohne tatsächliche Größenänderung abgebrochen.
+
 - Kategoriebeschriftungen im Polar-IPSView nutzen bei ausreichend Platz die
   verfügbare Breite auch bei größerer Schrift, statt schon nach wenigen
   Zeichen abgeschnitten zu werden. Schmale Widgets behalten Platz für den Kreis.

@@ -429,10 +429,10 @@
 
     function resizeChart() {
         if (!chart) { return; }
-        chart.resize();
         var width = chartElement.clientWidth;
         var height = chartElement.clientHeight;
         if (width === lastWidth && height === lastHeight) { return; }
+        chart.resize();
         lastWidth = width;
         lastHeight = height;
         if (currentState && currentState.status === 'ready' && currentState.chart) {
