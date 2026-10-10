@@ -243,6 +243,10 @@
                         {
                             "caption": "Inside at end",
                             "value": "insideEnd"
+                        },
+                        {
+                            "caption": "Outside the bar",
+                            "value": "outside"
                         }
                     ]
                 },
@@ -534,6 +538,10 @@
                                 {
                                     "caption": "Inside at end",
                                     "value": "insideEnd"
+                                },
+                                {
+                                    "caption": "Outside the bar",
+                                    "value": "outside"
                                 }
                             ]
                         },

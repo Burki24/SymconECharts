@@ -53,7 +53,7 @@ class EChartsBarPolar extends IPSModuleStrict
     private const STATUS_GATEWAY_FAILED = 204;
     private const POLAR_MODES = ['radial', 'tangential'];
     private const SORT_ORDERS = ['configured', 'ascending', 'descending'];
-    private const VALUE_LABEL_POSITIONS = ['middle', 'insideStart', 'insideEnd'];
+    private const VALUE_LABEL_POSITIONS = ['middle', 'insideStart', 'insideEnd', 'outside'];
     private const VALUE_AXIS_RANGE_MODES = ['auto', 'manual'];
 
     public function Create(): void

@@ -131,6 +131,18 @@ for (const position of ['insideStart', 'insideEnd']) {
         'Alternative inner positions must retain contrast on light bars.');
 }
 
+window.handleMessage({
+    status: 'ready', chart: {
+        ...state.chart,
+        polar: { ...state.chart.polar, style: { ...state.chart.polar.style, valueLabelPosition: 'outside' } }
+    }
+});
+const outsideRadial = options.at(-1);
+assert.equal(outsideRadial.series[0].label.position, 'outside',
+    'Outside value labels must be anchored beyond each radial bar.');
+assert.equal(outsideRadial.series[0].data[1].label.color, palette.text,
+    'Outside labels need the chart text color, not contrast against the bar fill.');
+
 const tangentialState = {
     status: 'ready',
     chart: {
@@ -179,6 +191,34 @@ window.handleMessage({
 const positionedTangential = options.at(-1);
 assert.equal(positionedTangential.series[0].label.position, 'insideEnd');
 assert.equal(positionedTangential.series[0].label.rotate, 0);
+
+window.handleMessage({
+    status: 'ready', chart: {
+        ...tangentialState.chart,
+        polar: {
+            ...tangentialState.chart.polar,
+            style: {
+                ...tangentialState.chart.polar.style,
+                showValues: true, roundCaps: false, valueLabelPosition: 'outside'
+            }
+        }
+    }
+});
+const outsideTangential = options.at(-1);
+assert.equal(outsideTangential.series[0].label.position, 'outside');
+assert.equal(outsideTangential.series[0].data[1].label.color, palette.text);
+
+window.SYMC_VISUALIZATION.mode = 'ipsview';
+window.handleMessage({
+    status: 'ready', chart: {
+        ...state.chart,
+        polar: { ...state.chart.polar, style: { ...state.chart.polar.style, valueLabelPosition: 'outside' } }
+    }
+});
+const outsideIPSView = options.at(-1);
+assert.equal(outsideIPSView.series[0].label.position, 'outside',
+    'IPSView must use the same outside value-label placement.');
+window.SYMC_VISUALIZATION.mode = 'symcon';
 
 const fixedStyle = {
     ...state.chart.polar.style,
@@ -363,6 +403,24 @@ window.handleMessage({
     }
 });
 const compactUserValues = options.at(-1);
+window.handleMessage({
+    status: 'ready', chart: {
+        ...state.chart,
+        polar: {
+            ...state.chart.polar,
+            title: '',
+            style: { ...state.chart.polar.style, valueLabelPosition: 'outside' }
+        },
+        items: [
+            { id: 'outside', label: 'Außen', value: 9.5, decimals: 1, color: '#586ee0', order: 0 },
+            { id: 'bath', label: 'Bad', value: 22.6, decimals: 1, color: '#bed939', order: 1 },
+            { id: 'office', label: 'Büro', value: 24.5, decimals: 1, color: '#555674', order: 2 }
+        ]
+    }
+});
+const compactOutside = options.at(-1);
+assert.ok(compactOutside.polar.radius[1] >= 70,
+    'Outside labels must not collapse a compact Polar chart into a tiny dial.');
 
 const localECharts = path.join(__dirname, '..', '.tools', 'echarts-runtime', 'node_modules', 'echarts');
 if (fs.existsSync(localECharts)) {
@@ -392,6 +450,57 @@ if (fs.existsSync(localECharts)) {
         }
     }
     userChart.dispose();
+    for (const [option, width, height] of [
+        [outsideRadial, 625, 560], [outsideTangential, 625, 560],
+        [outsideIPSView, 625, 560], [compactOutside, 300, 300]
+    ]) {
+        const outsideChart = echarts.init(null, null, { renderer: 'svg', ssr: true, width, height });
+        outsideChart.setOption(option);
+        const sectors = outsideChart.getZr().storage.getDisplayList().filter(
+            element => element.type === 'sector' && element.getTextContent()
+        );
+        assert.equal(sectors.length, 3, 'Outside placement must keep every bar value visible.');
+        const isRadial = option.angleAxis.type === 'category';
+        assert.ok(sectors.every(element => (isRadial ? ['startArc', 'endArc'] : ['startAngle', 'endAngle'])
+            .includes(element.textConfig.position)), 'ECharts must place values beyond the bar ends.');
+        assert.ok(sectors.every(element => element.getTextContent().style.fill === palette.text),
+            'Outside labels must use the chart text color in the rendered SVG.');
+        const texts = outsideChart.getZr().storage.getDisplayList().filter(
+            element => element.type === 'tspan' && / (?:°C|%)$/.test(element.style.text)
+        );
+        assert.equal(texts.length, 3, 'All outside value labels must render.');
+        const valueBounds = [];
+        for (const element of texts) {
+            const bounds = element.getBoundingRect().clone();
+            bounds.applyTransform(element.getComputedTransform());
+            valueBounds.push({ text: element.style.text, bounds });
+            assert.ok(bounds.x >= 0 && bounds.x + bounds.width <= width
+                && bounds.y >= (option === outsideIPSView ? 8 : 58) && bounds.y + bounds.height <= height,
+            'Outside value labels must stay within the usable chart area.');
+        }
+        const categoryBounds = outsideChart.getZr().storage.getDisplayList().filter(
+            element => element.type === 'tspan' && ['<Room>', 'Outside', 'Außen', 'Bad', 'Büro']
+                .includes(element.style.text)
+        ).map(element => {
+            const bounds = element.getBoundingRect().clone();
+            bounds.applyTransform(element.getComputedTransform());
+            return { text: element.style.text, bounds };
+        });
+        for (const value of valueBounds) {
+            for (const category of categoryBounds) {
+                assert.equal(value.bounds.intersect(category.bounds), false,
+                    'Outside value labels must not overlap category labels: '
+                    + value.text + ' / ' + category.text + ' / ' + option.angleAxis.type);
+            }
+        }
+        for (let left = 0; left < valueBounds.length; left++) {
+            for (let right = left + 1; right < valueBounds.length; right++) {
+                assert.equal(valueBounds[left].bounds.intersect(valueBounds[right].bounds), false,
+                    'Outside bar values must not overlap one another in the tested layouts.');
+            }
+        }
+        outsideChart.dispose();
+    }
     for (const option of [radial, tangential, fixedRadial, fixedTangential,
         halfRadial, partialTangential, partialIPSView, ...positionedRadialOptions, positionedTangential]) {
         const realChart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 625, height: 560 });

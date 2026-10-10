@@ -82,9 +82,11 @@
         var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8;
         var labelWidth = Math.min(90, Math.max(36, Math.round(width * 0.13)));
         var labelMargin = Math.min(24, Math.max(16, Math.round(width * 0.05)));
+        if (style.valueLabelPosition === 'outside') { labelMargin += 14; }
         var top = headerInset + (polar.title ? 50 : 12);
         var bottom = style.showCategoryLabels !== false ? Math.min(45, height * 0.14) : 24;
-        var side = style.showCategoryLabels !== false ? labelWidth + labelMargin + 8 : 36;
+        var side = style.showCategoryLabels !== false ? labelWidth + labelMargin + 8
+            : style.valueLabelPosition === 'outside' ? 64 : 36;
         var outerPercent = Math.max(20, Math.min(95, Number(style.outerRadiusPercent) || 76));
         var innerPercent = Math.max(0, Math.min(75, Number(style.innerRadiusPercent) || 0));
         var requestedRadius = Math.min(width, height) * outerPercent / 200;
@@ -107,7 +109,8 @@
         var polar = model.polar || {};
         var style = polar.style || {};
         var mode = style.mode === 'tangential' ? 'tangential' : 'radial';
-        var valueLabelPosition = ['middle', 'insideStart', 'insideEnd'].indexOf(style.valueLabelPosition) >= 0
+        var valueLabelPosition = ['middle', 'insideStart', 'insideEnd', 'outside']
+            .indexOf(style.valueLabelPosition) >= 0
             ? style.valueLabelPosition : 'middle';
         var items = orderedItems(Array.isArray(model.items) ? model.items : [], style.sortOrder);
         var labels = items.map(function (item) { return String(item.label || ''); });
@@ -213,9 +216,10 @@
                         value: Number(item.value),
                         itemStyle: { color: itemColor },
                         label: {
-                            color: typeof design.readableTextColor === 'function'
-                                ? design.readableTextColor(itemColor, colors.text, colors.background)
-                                : colors.text
+                            color: valueLabelPosition === 'outside' ? colors.text
+                                : typeof design.readableTextColor === 'function'
+                                    ? design.readableTextColor(itemColor, colors.text, colors.background)
+                                    : colors.text
                         }
                     };
                 }),

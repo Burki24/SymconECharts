@@ -5087,8 +5087,9 @@ assertGatewayGauge(
 );
 assertGatewayGauge(
     ($polarLabelPositionField['type'] ?? '') === 'Select'
-        && array_column($polarLabelPositionField['options'], 'value') === ['middle', 'insideStart', 'insideEnd'],
-    'Polar Tile designer must offer only the three supported inner value-label positions.'
+        && array_column($polarLabelPositionField['options'], 'value')
+            === ['middle', 'insideStart', 'insideEnd', 'outside'],
+    'Polar Tile designer must offer all supported value-label positions.'
 );
 $polarDefaultIPSViewPanel = current(array_filter(
     $polarForm['elements'],
@@ -5189,7 +5190,7 @@ assertGatewayGauge(
 assertGatewayGauge(
     ($polarIPSViewLabelPositionField['enabled'] ?? null) === true
         && array_column($polarIPSViewLabelPositionField['options'], 'value')
-            === ['middle', 'insideStart', 'insideEnd'],
+            === ['middle', 'insideStart', 'insideEnd', 'outside'],
     'Independent IPSView must allow the same value-label positions as the Tile.'
 );
 $polar->UpdateIPSViewValueScaleForm('auto');
@@ -5302,6 +5303,31 @@ assertGatewayGauge(
     'Polar Bar must remove stale references and keep repeated ApplyChanges idempotent.'
 );
 
+$outsidePolar = new EChartsBarPolar();
+$outsidePolar->Create();
+$outsidePolar->SetTestProperty('Sources', json_encode([['VariableID' => 4711]], JSON_THROW_ON_ERROR));
+$outsidePolar->SetTestProperty('EnableIPSView', true);
+$outsidePolar->SetTestProperty('ValueLabelPosition', 'outside');
+$outsidePolar->ApplyChanges();
+assertGatewayGauge(
+    $outsidePolar->GetTestStatus() === IS_ACTIVE
+        && json_decode($outsidePolar->GetPolarData(), true, 512, JSON_THROW_ON_ERROR)['polar']['style']['valueLabelPosition']
+            === 'outside'
+        && str_contains($outsidePolar->GetIPSViewHTML(), '"valueLabelPosition":"outside"'),
+    'Polar Bar must accept outside labels in the Tile and inherited IPSView design.'
+);
+$outsidePolar->SetTestProperty('ValueLabelPosition', 'middle');
+$outsidePolar->SetTestProperty('IPSViewUseTileDesign', false);
+$outsidePolar->SetTestProperty('IPSViewValueLabelPosition', 'outside');
+$outsidePolar->ApplyChanges();
+assertGatewayGauge(
+    $outsidePolar->GetTestStatus() === IS_ACTIVE
+        && json_decode($outsidePolar->GetPolarData(), true, 512, JSON_THROW_ON_ERROR)['polar']['style']['valueLabelPosition']
+            === 'middle'
+        && str_contains($outsidePolar->GetIPSViewHTML(), '"valueLabelPosition":"outside"'),
+    'Independent IPSView outside labels must not change the Tile position.'
+);
+
 $invalidPolarUnits = new EChartsBarPolar();
 $invalidPolarUnits->Create();
 $invalidPolarUnits->SetTestProperty('Sources', json_encode([
@@ -5359,7 +5385,7 @@ assertGatewayGauge($invalidPolarSpan->GetTestStatus() === 202, 'Polar Bar must r
 $invalidPolarLabelPosition = new EChartsBarPolar();
 $invalidPolarLabelPosition->Create();
 $invalidPolarLabelPosition->SetTestProperty('Sources', json_encode([['VariableID' => 4711]], JSON_THROW_ON_ERROR));
-$invalidPolarLabelPosition->SetTestProperty('ValueLabelPosition', 'outside');
+$invalidPolarLabelPosition->SetTestProperty('ValueLabelPosition', 'off-canvas');
 $invalidPolarLabelPosition->ApplyChanges();
 assertGatewayGauge(
     $invalidPolarLabelPosition->GetTestStatus() === 202,
@@ -5370,7 +5396,7 @@ $invalidPolarIPSViewLabelPosition = new EChartsBarPolar();
 $invalidPolarIPSViewLabelPosition->Create();
 $invalidPolarIPSViewLabelPosition->SetTestProperty('Sources', json_encode([['VariableID' => 4711]], JSON_THROW_ON_ERROR));
 $invalidPolarIPSViewLabelPosition->SetTestProperty('IPSViewUseTileDesign', false);
-$invalidPolarIPSViewLabelPosition->SetTestProperty('IPSViewValueLabelPosition', 'outside');
+$invalidPolarIPSViewLabelPosition->SetTestProperty('IPSViewValueLabelPosition', 'off-canvas');
 $invalidPolarIPSViewLabelPosition->ApplyChanges();
 assertGatewayGauge(
     $invalidPolarIPSViewLabelPosition->GetTestStatus() === 202,

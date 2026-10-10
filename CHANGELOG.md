@@ -10,6 +10,11 @@
 
 ## Neu
 
+- Polar-Wertbeschriftungen können in Kachel und IPSView auch direkt außerhalb
+  des jeweiligen Balkens, aber innerhalb des Diagrammbereichs stehen. Die
+  Außenbeschriftung nutzt die Theme-Textfarbe und erhält zusätzlichen Abstand
+  zu den Kategoriebeschriftungen.
+
 - Polar-Wertbeschriftungen können in Kachel und unabhängigem IPSView-Design
   mittig, innen am Balkenanfang oder innen am Balkenende platziert werden.
   Die bisherige mittige Position bleibt Standard.
