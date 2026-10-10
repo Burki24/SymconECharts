@@ -43,6 +43,9 @@ const window = {
                     title: 'Balance', unit: '°C', decimals: 1,
                     style: {
                         showValues: true, showGrid: true, barWidthPercent: 60,
+                        animationEnabled: true, animationEasing: 'bounceOut',
+                        animationEasingUpdate: 'linear', animationDelay: 120,
+                        animationDelayUpdate: 240,
                         colors: {
                             startColor: '#123456', increaseColor: '#008800',
                             decreaseColor: '#880000', totalColor: '#654321'
@@ -83,6 +86,10 @@ resizeCallback();
 assert.equal(resized, 1, 'A changed Waterfall tile width must resize the chart.');
 assert.deepEqual(Array.from(option.xAxis.data), ['Start', '<drop>', 'Recovery', 'Total']);
 assert.equal(option.series.length, 4);
+assert.equal(option.animationEasing, 'bounceOut');
+assert.equal(option.animationEasingUpdate, 'linear');
+assert.equal(option.animationDelay, 120);
+assert.equal(option.animationDelayUpdate, 240);
 assert.deepEqual(Array.from(option.series[0].data), [0, 0, 0, 0]);
 assert.deepEqual(Array.from(option.series[1].data, item => item.value), [10, 10, 0, 0]);
 assert.deepEqual(Array.from(option.series[2].data), [0, 0, -3, 0]);

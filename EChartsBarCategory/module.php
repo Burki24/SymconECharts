@@ -113,6 +113,7 @@ class EChartsBarCategory extends IPSModuleStrict
     {
         $form = $this->LoadConfigurationForm();
         if (isset($form['elements']) && is_array($form['elements'])) {
+            $form['elements'] = $this->WithAnimationFormControls($form['elements']);
             $form['elements'] = $this->SetFormFieldVisibility(
                 $form['elements'],
                 ['BarSVG', 'BarSVGSizePercent'],
@@ -545,7 +546,11 @@ class EChartsBarCategory extends IPSModuleStrict
             'BarSVGSizePercent'       => 'integer',
             'AnimationEnabled'        => 'boolean',
             'AnimationDuration'       => 'integer',
-            'AnimationDurationUpdate' => 'integer'
+            'AnimationDurationUpdate' => 'integer',
+            'AnimationEasing'         => 'string',
+            'AnimationEasingUpdate'   => 'string',
+            'AnimationDelay'          => 'integer',
+            'AnimationDelayUpdate'    => 'integer'
         ];
     }
 

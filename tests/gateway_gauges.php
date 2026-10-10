@@ -1501,6 +1501,10 @@ assertGatewayGauge(
         'animationEnabled'            => true,
         'animationDuration'           => 500,
         'animationDurationUpdate'     => 500,
+        'animationEasing'             => 'cubicInOut',
+        'animationEasingUpdate'       => 'cubicInOut',
+        'animationDelay'              => 0,
+        'animationDelayUpdate'        => 0,
         'scaleFontSizePercent'        => 150,
         'valueFontSizePercent'        => 125,
         'unitFontSizePercent'         => 75,
@@ -2427,7 +2431,7 @@ $singleGauge->SetTestProperty('SourceVariableID', 4711);
 $singleGauge->ApplyChanges();
 $defaultSingleData = json_decode($singleGauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
-    array_values(array_slice($defaultSingleData['gauge']['style'] ?? [], 3, 9)) === array_fill(0, 9, 100)
+    array_values(array_slice($defaultSingleData['gauge']['style'] ?? [], 7, 9)) === array_fill(0, 9, 100)
         && ($defaultSingleData['gauge']['style']['pointerShape'] ?? null) === 'preset'
         && ($defaultSingleData['gauge']['style']['titlePosition'] ?? null) === 'bottom'
         && ($defaultSingleData['gauge']['style']['arcMode'] ?? null) === 'preset'
@@ -3233,6 +3237,10 @@ assertGatewayGauge(
             'animationEnabled'        => false,
             'animationDuration'       => 350,
             'animationDurationUpdate' => 500,
+            'animationEasing'         => 'cubicInOut',
+            'animationEasingUpdate'   => 'cubicInOut',
+            'animationDelay'          => 0,
+            'animationDelayUpdate'    => 0,
             'legendPosition'          => 'bottom',
             'lineWidthPercent'        => 150,
             'smoothLines'             => true,
@@ -5483,9 +5491,13 @@ assertGatewayGauge(
 );
 $polar->UpdateAnimationForm(true, true);
 assertGatewayGauge(
-    array_slice($polar->GetTestFormUpdates(), -2) === [
+    array_slice($polar->GetTestFormUpdates(), -6) === [
         ['Field' => 'IPSViewAnimationDuration', 'Parameter' => 'visible', 'Value' => true],
-        ['Field' => 'IPSViewAnimationDurationUpdate', 'Parameter' => 'visible', 'Value' => true]
+        ['Field' => 'IPSViewAnimationDurationUpdate', 'Parameter' => 'visible', 'Value' => true],
+        ['Field' => 'IPSViewAnimationEasing', 'Parameter' => 'visible', 'Value' => true],
+        ['Field' => 'IPSViewAnimationEasingUpdate', 'Parameter' => 'visible', 'Value' => true],
+        ['Field' => 'IPSViewAnimationDelay', 'Parameter' => 'visible', 'Value' => true],
+        ['Field' => 'IPSViewAnimationDelayUpdate', 'Parameter' => 'visible', 'Value' => true]
     ],
     'Polar IPSView animation controls must appear immediately when enabled.'
 );
@@ -5832,7 +5844,13 @@ foreach ([
     ['AnimationDuration', -1],
     ['AnimationDuration', 3001],
     ['AnimationDurationUpdate', -1],
-    ['AnimationDurationUpdate', 3001]
+    ['AnimationDurationUpdate', 3001],
+    ['AnimationDelay', -1],
+    ['AnimationDelay', 3001],
+    ['AnimationDelayUpdate', -1],
+    ['AnimationDelayUpdate', 3001],
+    ['AnimationEasing', 'not-supported'],
+    ['AnimationEasingUpdate', 'not-supported']
 ] as [$property, $value]) {
     $invalidPolarAnimation = new EChartsBarPolar();
     $invalidPolarAnimation->Create();
@@ -6194,19 +6212,40 @@ foreach ([
         $toggle = findGaugeFormElement($animationForm['elements'], $prefix . 'AnimationEnabled');
         $initial = findGaugeFormElement($animationForm['elements'], $prefix . 'AnimationDuration');
         $update = findGaugeFormElement($animationForm['elements'], $prefix . 'AnimationDurationUpdate');
+        $initialEasing = findGaugeFormElement($animationForm['elements'], $prefix . 'AnimationEasing');
+        $updateEasing = findGaugeFormElement($animationForm['elements'], $prefix . 'AnimationEasingUpdate');
+        $initialDelay = findGaugeFormElement($animationForm['elements'], $prefix . 'AnimationDelay');
+        $updateDelay = findGaugeFormElement($animationForm['elements'], $prefix . 'AnimationDelayUpdate');
         assertGatewayGauge(
             $toggle !== null && $initial !== null && $update !== null
+                && $initialEasing !== null && $updateEasing !== null
+                && $initialDelay !== null && $updateDelay !== null
                 && str_contains((string) ($toggle['onChange'] ?? ''), '_UpdateAnimationForm(')
                 && ($initial['visible'] ?? true) === ($animationModuleClass !== EChartsTimeSeries::class)
-                && ($update['visible'] ?? true) === ($animationModuleClass !== EChartsTimeSeries::class),
+                && ($update['visible'] ?? true) === ($animationModuleClass !== EChartsTimeSeries::class)
+                && ($initialEasing['visible'] ?? true) === ($animationModuleClass !== EChartsTimeSeries::class)
+                && ($updateEasing['visible'] ?? true) === ($animationModuleClass !== EChartsTimeSeries::class)
+                && ($initialDelay['visible'] ?? true) === ($animationModuleClass !== EChartsTimeSeries::class)
+                && ($updateDelay['visible'] ?? true) === ($animationModuleClass !== EChartsTimeSeries::class)
+                && array_column($initialEasing['options'] ?? [], 'value') === [
+                    'cubicInOut', 'linear', 'quadraticInOut', 'cubicOut',
+                    'sinusoidalInOut', 'bounceOut', 'elasticOut'
+                ]
+                && array_column($updateEasing['options'] ?? [], 'value') === array_column($initialEasing['options'] ?? [], 'value')
+                && ($initialDelay['maximum'] ?? null) === 3000
+                && ($updateDelay['maximum'] ?? null) === 3000,
             $animationModuleClass . ' must expose synchronized animation controls in both designers.'
         );
     }
     $animationModule->UpdateAnimationForm(true, false);
     assertGatewayGauge(
-        array_slice($animationModule->GetTestFormUpdates(), -2) === [
+        array_slice($animationModule->GetTestFormUpdates(), -6) === [
             ['Field' => 'IPSViewAnimationDuration', 'Parameter' => 'visible', 'Value' => false],
-            ['Field' => 'IPSViewAnimationDurationUpdate', 'Parameter' => 'visible', 'Value' => false]
+            ['Field' => 'IPSViewAnimationDurationUpdate', 'Parameter' => 'visible', 'Value' => false],
+            ['Field' => 'IPSViewAnimationEasing', 'Parameter' => 'visible', 'Value' => false],
+            ['Field' => 'IPSViewAnimationEasingUpdate', 'Parameter' => 'visible', 'Value' => false],
+            ['Field' => 'IPSViewAnimationDelay', 'Parameter' => 'visible', 'Value' => false],
+            ['Field' => 'IPSViewAnimationDelayUpdate', 'Parameter' => 'visible', 'Value' => false]
         ],
         $animationModuleClass . ' must update the IPSView animation fields immediately.'
     );

@@ -6,6 +6,10 @@ variables as bars along a time axis. It is deliberately separate from
 
 ## Animation
 
+Initial and update transitions also have separate **easing** and a fixed
+**delay** (0–3000 ms). Both default to cubicInOut without delay. The delay
+applies to the whole chart transition, not to each data point in sequence.
+
 In the Tile and independent IPSView designers, **Animate chart**, **Initial animation**, and **Update animation** control ECharts transitions independently. Durations range from 0 to 3000 ms; 0 ms suppresses that transition. The system's reduced-motion setting always disables animation. IPSView inherits Tile settings while **Use Tile design** is enabled.
 
 ## Current feature set

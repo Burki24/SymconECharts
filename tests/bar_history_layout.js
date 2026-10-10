@@ -131,13 +131,20 @@ ready.window.handleMessage({
                 barOpacityPercent: 65, barCornerRadius: 10,
                 titleFontSizePercent: 130, axisFontSizePercent: 115,
                 valueFontSizePercent: 125, titleColor: '#ffeedd',
-                axisColor: '#ddeeff', valueColor: '#112233', gridColor: '#445566'
+                axisColor: '#ddeeff', valueColor: '#112233', gridColor: '#445566',
+                animationEnabled: true, animationEasing: 'bounceOut',
+                animationEasingUpdate: 'linear', animationDelay: 120,
+                animationDelayUpdate: 240
             }
         },
         series: [{ label: 'Temperature', color: '#e5754f', points: [[1780000300, 23.0]] }]
     }
 });
 assert.equal(ready.option.title.textStyle.color, '#ffeedd');
+assert.equal(ready.option.animationEasing, 'bounceOut');
+assert.equal(ready.option.animationEasingUpdate, 'linear');
+assert.equal(ready.option.animationDelay, 120);
+assert.equal(ready.option.animationDelayUpdate, 240);
 assert.equal(ready.option.title.textStyle.fontSize, 23);
 assert.equal(ready.option.xAxis.axisLabel.color, '#ddeeff');
 assert.equal(ready.option.xAxis.axisLabel.fontSize, 14);

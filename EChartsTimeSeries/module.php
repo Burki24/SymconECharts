@@ -84,11 +84,14 @@ class EChartsTimeSeries extends IPSModuleStrict
         'Title', 'Sources', 'Annotations', 'Range', 'CustomRangeValue', 'CustomRangeUnit',
         'TimeAxisLabelFormat', 'EChartsTheme', 'LegendPosition', 'EnableZoom',
         'AnimationEnabled', 'AnimationDuration', 'AnimationDurationUpdate',
+        'AnimationEasing', 'AnimationEasingUpdate', 'AnimationDelay', 'AnimationDelayUpdate',
         'GapDetectionMode', 'GapThresholdMinutes',
         'LineWidthPercent', 'SmoothLines', 'ShowSymbols', 'SymbolSizePercent',
         'AreaOpacityPercent', 'ShowGrid', 'ShowXAxis', 'ShowYAxis',
         'IPSViewUseTileDesign', 'IPSViewEChartsTheme', 'IPSViewLegendPosition', 'IPSViewEnableZoom',
         'IPSViewAnimationEnabled', 'IPSViewAnimationDuration', 'IPSViewAnimationDurationUpdate',
+        'IPSViewAnimationEasing', 'IPSViewAnimationEasingUpdate',
+        'IPSViewAnimationDelay', 'IPSViewAnimationDelayUpdate',
         'IPSViewLineWidthPercent', 'IPSViewSmoothLines', 'IPSViewShowSymbols', 'IPSViewSymbolSizePercent',
         'IPSViewAreaOpacityPercent', 'IPSViewShowGrid', 'IPSViewShowXAxis', 'IPSViewShowYAxis',
         'IPSViewUseTileTimeSettings', 'IPSViewRange', 'IPSViewCustomRangeValue', 'IPSViewCustomRangeUnit',
@@ -101,6 +104,10 @@ class EChartsTimeSeries extends IPSModuleStrict
         'AnimationEnabled'        => 'boolean',
         'AnimationDuration'       => 'integer',
         'AnimationDurationUpdate' => 'integer',
+        'AnimationEasing'         => 'string',
+        'AnimationEasingUpdate'   => 'string',
+        'AnimationDelay'          => 'integer',
+        'AnimationDelayUpdate'    => 'integer',
         'LineWidthPercent'        => 'integer',
         'SmoothLines'             => 'boolean',
         'ShowSymbols'             => 'boolean',
@@ -158,13 +165,15 @@ class EChartsTimeSeries extends IPSModuleStrict
         $this->RegisterPropertyString('IPSViewEChartsTheme', EChartsAsset::THEME_AUTO);
         foreach (self::DESIGN_PROPERTY_TYPES as $name => $type) {
             $default = match ($name) {
-                'LegendPosition'                                 => 'top',
-                'LineWidthPercent', 'SymbolSizePercent'          => 100,
-                'AreaOpacityPercent'                             => 22,
-                'SmoothLines', 'ShowSymbols', 'AnimationEnabled' => false,
-                'AnimationDuration'                              => 350,
-                'AnimationDurationUpdate'                        => 500,
-                default                                          => true
+                'LegendPosition'                                  => 'top',
+                'LineWidthPercent', 'SymbolSizePercent'           => 100,
+                'AreaOpacityPercent'                              => 22,
+                'SmoothLines', 'ShowSymbols', 'AnimationEnabled'  => false,
+                'AnimationDuration'                               => 350,
+                'AnimationDurationUpdate'                         => 500,
+                'AnimationEasing', 'AnimationEasingUpdate'        => 'cubicInOut',
+                'AnimationDelay', 'AnimationDelayUpdate'          => 0,
+                default                                           => true
             };
             match ($type) {
                 'string'  => $this->RegisterPropertyString('IPSView' . $name, $default),
@@ -205,6 +214,7 @@ class EChartsTimeSeries extends IPSModuleStrict
     {
         $form = $this->LoadConfigurationForm();
         if (isset($form['elements']) && is_array($form['elements'])) {
+            $form['elements'] = $this->WithAnimationFormControls($form['elements']);
             $customRangeVisible = $this->ReadPropertyString('Range') === 'custom';
             $form['elements'] = $this->SetFormFieldVisibility(
                 $form['elements'],
@@ -1366,7 +1376,11 @@ class EChartsTimeSeries extends IPSModuleStrict
             'ShowYAxis'               => 'showYAxis',
             'AnimationEnabled'        => 'animationEnabled',
             'AnimationDuration'       => 'animationDuration',
-            'AnimationDurationUpdate' => 'animationDurationUpdate'
+            'AnimationDurationUpdate' => 'animationDurationUpdate',
+            'AnimationEasing'         => 'animationEasing',
+            'AnimationEasingUpdate'   => 'animationEasingUpdate',
+            'AnimationDelay'          => 'animationDelay',
+            'AnimationDelayUpdate'    => 'animationDelayUpdate'
         ] as $property => $key) {
             if (array_key_exists($prefix . $property, $values)) {
                 $design[$key] = $values[$prefix . $property];

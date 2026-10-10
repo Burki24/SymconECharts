@@ -95,6 +95,8 @@ class EChartsGaugeTacho extends IPSModuleStrict
         'PlateBorderColor'  => 0xA5A9B0
     ];
     private const DESIGN_ASSET_STRING_DEFAULTS = [
+        'AnimationEasing'        => 'cubicInOut',
+        'AnimationEasingUpdate'  => 'cubicInOut',
         'CustomPointerSVG'       => '',
         'CustomPointerPivotMode' => 'svg',
         'CustomAnchorSVG'        => '',
@@ -116,7 +118,9 @@ class EChartsGaugeTacho extends IPSModuleStrict
         'PlateBackgroundOffsetYPercent' => 0,
         'PlateBackgroundOpacityPercent' => 100,
         'AnimationDuration'             => 500,
-        'AnimationDurationUpdate'       => 500
+        'AnimationDurationUpdate'       => 500,
+        'AnimationDelay'                => 0,
+        'AnimationDelayUpdate'          => 0
     ];
 
     public function Create(): void
@@ -211,6 +215,7 @@ class EChartsGaugeTacho extends IPSModuleStrict
     {
         $form = $this->LoadConfigurationForm();
         if (isset($form['elements']) && is_array($form['elements'])) {
+            $form['elements'] = $this->WithAnimationFormControls($form['elements']);
             $form['elements'] = EChartsGaugeDesign::WithSourceEditor(
                 $form['elements'],
                 $this->GaugePreviewFormAction('add'),

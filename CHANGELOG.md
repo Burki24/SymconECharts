@@ -32,6 +32,12 @@
 
 ## Neu
 
+- Alle neun Diagrammmodule bieten für Start und Aktualisierung getrennte
+  Bewegungskurven und feste Verzögerungen (0–3000 ms) im Kachel- und
+  unabhängigen IPSView-Design. Die bestehenden Übergänge bleiben mit
+  cubicInOut und 0 ms Verzögerung unverändert. Reduzierte Bewegung
+  unterdrückt auch Verzögerungen.
+
 - Alle neun Diagrammmodule bieten im Kachel- und unabhängigen IPSView-Design
   einen gemeinsamen Schalter sowie getrennte Zeiten für Start- und
   Aktualisierungsanimation (0–3000 ms). Bestehende Standardwerte bleiben

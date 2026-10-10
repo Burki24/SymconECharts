@@ -223,10 +223,16 @@ assert.equal(failedPattern.getUpdatedOption().series[0].data[0].itemStyle.color,
     'A failed SVG load must retain the original bar color.');
 
 const timedBar = render('vertical', 'configured', 'ipsview', 'simple', undefined, {
-    animationEnabled: true, animationDuration: 800, animationDurationUpdate: 1300
+    animationEnabled: true, animationDuration: 800, animationDurationUpdate: 1300,
+    animationEasing: 'bounceOut', animationEasingUpdate: 'linear',
+    animationDelay: 120, animationDelayUpdate: 240
 });
 assert.equal(timedBar.animationDuration, 800);
 assert.equal(timedBar.animationDurationUpdate, 1300);
+assert.equal(timedBar.animationEasing, 'bounceOut');
+assert.equal(timedBar.animationEasingUpdate, 'linear');
+assert.equal(timedBar.animationDelay, 120);
+assert.equal(timedBar.animationDelayUpdate, 240);
 const stoppedBar = render('vertical', 'configured', 'symcon', 'simple', undefined, {
     animationEnabled: false, animationDuration: 800, animationDurationUpdate: 1300
 });

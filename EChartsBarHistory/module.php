@@ -84,7 +84,11 @@ class EChartsBarHistory extends IPSModuleStrict
         'GridColor'               => 'integer',
         'AnimationEnabled'        => 'boolean',
         'AnimationDuration'       => 'integer',
-        'AnimationDurationUpdate' => 'integer'
+        'AnimationDurationUpdate' => 'integer',
+        'AnimationEasing'         => 'string',
+        'AnimationEasingUpdate'   => 'string',
+        'AnimationDelay'          => 'integer',
+        'AnimationDelayUpdate'    => 'integer'
     ];
 
     public function Create(): void
@@ -138,15 +142,17 @@ class EChartsBarHistory extends IPSModuleStrict
         );
         foreach (self::DESIGN_PROPERTY_TYPES as $name => $type) {
             $default = match ($name) {
-                'EChartsTheme'                               => EChartsAsset::THEME_AUTO,
-                'BarFillMode'                                => 'solid',
-                'BarSVG'                                     => '',
-                'BarSVGSizePercent'                          => 100,
-                'ShowValues', 'RoundedBars'                  => false,
-                'ShowGrid', 'EnableZoom', 'AnimationEnabled' => true,
-                'AnimationDuration'                          => 350,
-                'AnimationDurationUpdate'                    => 500,
-                'BarWidthPercent'                            => 70,
+                'EChartsTheme'                                => EChartsAsset::THEME_AUTO,
+                'BarFillMode'                                 => 'solid',
+                'BarSVG'                                      => '',
+                'BarSVGSizePercent'                           => 100,
+                'ShowValues', 'RoundedBars'                   => false,
+                'ShowGrid', 'EnableZoom', 'AnimationEnabled'  => true,
+                'AnimationDuration'                           => 350,
+                'AnimationDurationUpdate'                     => 500,
+                'AnimationEasing', 'AnimationEasingUpdate'    => 'cubicInOut',
+                'AnimationDelay', 'AnimationDelayUpdate'      => 0,
+                'BarWidthPercent'                             => 70,
                 'BarOpacityPercent', 'TitleFontSizePercent', 'AxisFontSizePercent',
                 'ValueFontSizePercent'      => 100,
                 'BarCornerRadius'           => 6,
@@ -190,6 +196,7 @@ class EChartsBarHistory extends IPSModuleStrict
     {
         $form = $this->LoadConfigurationForm();
         if (isset($form['elements']) && is_array($form['elements'])) {
+            $form['elements'] = $this->WithAnimationFormControls($form['elements']);
             $form['elements'] = $this->SetFormFieldVisibility(
                 $form['elements'],
                 ['CustomRangeValue', 'CustomRangeUnit'],

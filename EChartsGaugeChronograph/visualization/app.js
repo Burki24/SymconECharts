@@ -867,6 +867,10 @@
             animation: animation.animation,
             animationDuration: animation.animationDuration,
             animationDurationUpdate: animation.animationDurationUpdate,
+            animationEasing: animation.animationEasing,
+            animationEasingUpdate: animation.animationEasingUpdate,
+            animationDelay: animation.animationDelay,
+            animationDelayUpdate: animation.animationDelayUpdate,
             aria: { enabled: true, decal: { show: false } },
             title: {
                 show: title !== '',

@@ -104,6 +104,7 @@ class EChartsBarWaterfall extends IPSModuleStrict
     {
         $form = $this->LoadConfigurationForm();
         if (isset($form['elements']) && is_array($form['elements'])) {
+            $form['elements'] = $this->WithAnimationFormControls($form['elements']);
             $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
             $form['elements'] = $this->WithAnimationFormCallbacks($form['elements'], 'ECBW');
             $this->InsertIPSViewHTMLPageFormItems(
@@ -477,7 +478,11 @@ class EChartsBarWaterfall extends IPSModuleStrict
             'TotalColor'              => 'integer',
             'AnimationEnabled'        => 'boolean',
             'AnimationDuration'       => 'integer',
-            'AnimationDurationUpdate' => 'integer'
+            'AnimationDurationUpdate' => 'integer',
+            'AnimationEasing'         => 'string',
+            'AnimationEasingUpdate'   => 'string',
+            'AnimationDelay'          => 'integer',
+            'AnimationDelayUpdate'    => 'integer'
         ];
     }
 

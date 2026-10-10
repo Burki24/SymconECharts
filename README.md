@@ -115,6 +115,11 @@ Folgende Module sind enthalten:
 Alle Diagrammmodule bieten im Kacheldesigner **Animation**, **Startanimation**
 und **Aktualisierungsanimation**. Die beiden Zeiten sind unabhängig von 0 bis
 3000 ms einstellbar; 0 ms unterdrückt die jeweilige Übergangsbewegung.
+Für Start und Aktualisierung stehen jeweils eine Bewegungskurve und eine feste
+Verzögerung (0–3000 ms) zur Wahl. Standardmäßig gilt cubicInOut ohne
+Verzögerung. Die Verzögerung betrifft den ganzen Chart-Übergang, nicht
+aufeinanderfolgende einzelne Datenpunkte. Bei 0 ms Übergangsdauer entfällt
+auch dessen Verzögerung.
 TimeSeries startet aus Rücksicht auf viele historische Datenpunkte ohne
 Animation, die anderen Diagramme behalten ihre bisherige Animation. Das
 unabhängige IPSView-Design kann andere Werte verwenden. Eine

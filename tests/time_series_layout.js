@@ -199,8 +199,15 @@ assert.equal(timeSeriesResize.optionUpdates, 2, 'A changed TimeSeries width must
 const custom = render({
     legendPosition: 'bottom', lineWidthPercent: 150, smoothLines: true,
     showSymbols: true, symbolSizePercent: 125, areaOpacityPercent: 40,
-    showGrid: false, showXAxis: false, showYAxis: true
+    showGrid: false, showXAxis: false, showYAxis: true,
+    animationEnabled: true, animationEasing: 'bounceOut',
+    animationEasingUpdate: 'linear', animationDelay: 120,
+    animationDelayUpdate: 240
 });
+assert.equal(custom.animationEasing, 'bounceOut');
+assert.equal(custom.animationEasingUpdate, 'linear');
+assert.equal(custom.animationDelay, 120);
+assert.equal(custom.animationDelayUpdate, 240);
 const duplicateNameSeries = render(
     undefined,
     [{ unit: '°C' }],

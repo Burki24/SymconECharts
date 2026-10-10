@@ -105,10 +105,16 @@ const reducedGauge = render('ipsview', 620, 630, 'simple', { plateShape: 'circle
 assert.equal(reducedGauge.animation, false, 'Gauge Single must keep honoring reduced-motion preferences.');
 assert.equal(reducedGauge.animationDuration, 0);
 const timedGauge = render('symcon', 620, 630, 'simple', {
-    animationEnabled: true, animationDuration: 750, animationDurationUpdate: 1250
+    animationEnabled: true, animationDuration: 750, animationDurationUpdate: 1250,
+    animationEasing: 'bounceOut', animationEasingUpdate: 'linear',
+    animationDelay: 120, animationDelayUpdate: 240
 });
 assert.equal(timedGauge.animationDuration, 750);
 assert.equal(timedGauge.animationDurationUpdate, 1250);
+assert.equal(timedGauge.animationEasing, 'bounceOut');
+assert.equal(timedGauge.animationEasingUpdate, 'linear');
+assert.equal(timedGauge.animationDelay, 120);
+assert.equal(timedGauge.animationDelayUpdate, 240);
 assert.equal(timedGauge.series[0].detail.valueAnimation, true);
 const stoppedGauge = render('ipsview', 620, 630, 'simple', {
     animationEnabled: false, animationDuration: 750, animationDurationUpdate: 1250

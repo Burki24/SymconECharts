@@ -143,7 +143,9 @@ window.handleMessage({
         ...state.chart,
         polar: { ...state.chart.polar, style: {
             ...state.chart.polar.style,
-            animationEnabled: true, animationDuration: 700, animationDurationUpdate: 1200
+            animationEnabled: true, animationDuration: 700, animationDurationUpdate: 1200,
+            animationEasing: 'bounceOut', animationEasingUpdate: 'linear',
+            animationDelay: 120, animationDelayUpdate: 240
         } }
     }
 });
@@ -151,6 +153,10 @@ const customAnimation = options.at(-1);
 assert.equal(customAnimation.animation, true);
 assert.equal(customAnimation.animationDuration, 700);
 assert.equal(customAnimation.animationDurationUpdate, 1200);
+assert.equal(customAnimation.animationEasing, 'bounceOut');
+assert.equal(customAnimation.animationEasingUpdate, 'linear');
+assert.equal(customAnimation.animationDelay, 120);
+assert.equal(customAnimation.animationDelayUpdate, 240);
 window.handleMessage({
     status: 'ready', chart: {
         ...state.chart,

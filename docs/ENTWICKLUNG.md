@@ -296,8 +296,13 @@ Validierung und Formularreaktionen aller neun Gerätemodule. Defaults und
 ECharts-Ziele verbleiben in den jeweiligen Chartfamilien. Die
 Gauge-`detail.valueAnimation` folgt dem gemeinsamen Animationsschalter;
 TimeSeries bleibt wegen vieler historischer Datenpunkte standardmäßig aus.
-Nicht freigegeben sind vorerst Easing, Verzögerung und Schwellenwert: Sie
-benötigen je Chartfamilie eigene UX- und Performanceprüfungen.
+Easing und feste Verzögerung für Start und Aktualisierung werden ebenfalls
+zentral in libs/echarts-design.js umgesetzt. Die Verzögerung gilt bewusst für
+den ganzen Übergang statt als datenpunktweise Staffelung; dies verhindert bei
+Archivdiagrammen mit vielen Punkten eine kumulativ lange Wartezeit. Bei 0 ms
+Übergangsdauer entfällt auch die jeweilige Verzögerung. Die Formularfelder
+und ihre Auswahlwerte erzeugt der PHP-Baustein zentral. Der
+ECharts-Schwellenwert bleibt unverändert.
 Die optionale ECharts-Balkenkontur wird dort ebenfalls aus Breite, eigener oder
 Theme-Farbe als `itemStyle` erzeugt. Aktuell nutzt Polar Bar diesen gemeinsamen
 Vertrag; weitere Balkenmodule können ihn ohne Kopie der Rendererlogik nutzen.

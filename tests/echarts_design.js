@@ -54,15 +54,27 @@ assert.equal(prefersReducedMotion(), false, 'Normal motion preferences must reta
 const animationOptions = window.SYMC_ECHARTS_DESIGN.animationOptions;
 const animationDefaults = { enabled: true, initialDuration: 350, updateDuration: 500 };
 assert.deepEqual(JSON.parse(JSON.stringify(animationOptions({}, animationDefaults))), {
-    animation: true, animationDuration: 350, animationDurationUpdate: 500
+    animation: true, animationDuration: 350, animationDurationUpdate: 500,
+    animationEasing: 'cubicInOut', animationEasingUpdate: 'cubicInOut',
+    animationDelay: 0, animationDelayUpdate: 0
 });
 assert.deepEqual(JSON.parse(JSON.stringify(animationOptions({
-    animationEnabled: true, animationDuration: 0, animationDurationUpdate: 3000
+    animationEnabled: true, animationDuration: 0, animationDurationUpdate: 3000,
+    animationEasing: 'linear', animationEasingUpdate: 'bounceOut',
+    animationDelay: 400, animationDelayUpdate: 250
 }, animationDefaults))), {
-    animation: true, animationDuration: 0, animationDurationUpdate: 3000
+    animation: true, animationDuration: 0, animationDurationUpdate: 3000,
+    animationEasing: 'linear', animationEasingUpdate: 'bounceOut',
+    animationDelay: 0, animationDelayUpdate: 250
 });
+assert.equal(animationOptions({
+    animationDuration: 350, animationDelay: 400
+}, animationDefaults).animationDelay, 400);
 assert.equal(animationOptions({ animationDuration: 3001 }, animationDefaults).animationDuration, 350);
 assert.equal(animationOptions({ animationEnabled: false }, animationDefaults).animationDurationUpdate, 0);
+assert.equal(animationOptions({ animationEnabled: false, animationDelay: 400 }, animationDefaults).animationDelay, 0);
+assert.equal(animationOptions({ animationEasing: 'not-an-easing' }, animationDefaults).animationEasing, 'cubicInOut');
+assert.equal(animationOptions({ animationDelayUpdate: 3001 }, animationDefaults).animationDelayUpdate, 0);
 assert.equal(animationOptions({}, { enabled: false, initialDuration: 350, updateDuration: 300 }).animation, false);
 window.matchMedia = query => ({ matches: query === '(prefers-reduced-motion: reduce)' });
 assert.equal(animationOptions({}, animationDefaults).animation, false);

@@ -65,6 +65,10 @@
     function animationOptions(style, defaults) {
         var settings = style || {};
         var fallback = defaults || {};
+        var easings = [
+            'linear', 'quadraticInOut', 'cubicInOut', 'cubicOut',
+            'sinusoidalInOut', 'bounceOut', 'elasticOut'
+        ];
         var enabled = settings.animationEnabled == null
             ? fallback.enabled !== false : settings.animationEnabled === true;
         var animate = enabled && !prefersReducedMotion();
@@ -72,12 +76,21 @@
             var number = Number(value);
             return Number.isInteger(number) && number >= 0 && number <= 3000 ? number : defaultValue;
         }
+        function easing(value) {
+            return easings.indexOf(value) >= 0 ? value : 'cubicInOut';
+        }
+        var initialDuration = animate
+            ? duration(settings.animationDuration, fallback.initialDuration) : 0;
+        var updateDuration = animate
+            ? duration(settings.animationDurationUpdate, fallback.updateDuration) : 0;
         return {
             animation: animate,
-            animationDuration: animate
-                ? duration(settings.animationDuration, fallback.initialDuration) : 0,
-            animationDurationUpdate: animate
-                ? duration(settings.animationDurationUpdate, fallback.updateDuration) : 0
+            animationDuration: initialDuration,
+            animationDurationUpdate: updateDuration,
+            animationEasing: easing(settings.animationEasing),
+            animationEasingUpdate: easing(settings.animationEasingUpdate),
+            animationDelay: initialDuration > 0 ? duration(settings.animationDelay, 0) : 0,
+            animationDelayUpdate: updateDuration > 0 ? duration(settings.animationDelayUpdate, 0) : 0
         };
     }
 

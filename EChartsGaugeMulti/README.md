@@ -8,6 +8,11 @@ einmal gepflegt.
 
 ## Animation
 
+Für Start und Aktualisierung lassen sich außerdem die **Bewegungskurve** und
+eine feste **Verzögerung** (0–3000 ms) getrennt wählen. Ohne Änderung gilt
+jeweils cubicInOut ohne Verzögerung. Die Verzögerung betrifft das ganze Diagramm,
+nicht jeden Datenpunkt einzeln.
+
 Im Kachel- und unabhängigen IPSView-Designer steuern **Animation**, **Startanimation** und **Aktualisierungsanimation** die ECharts-Übergänge. Beide Zeiten sind von 0 bis 3000 ms einstellbar; 0 ms unterdrückt den jeweiligen Übergang. Die Systemeinstellung für reduzierte Bewegung schaltet Animationen immer ab. Bei **Kacheldesign verwenden** übernimmt IPSView die Kachelwerte.
 
 Multi-Title-, zwei Ring- und Wetterstations-Vorlage mit optionaler

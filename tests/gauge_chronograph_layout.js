@@ -333,10 +333,16 @@ assert.equal(customRing.graphic.length, 0, 'Plate settings must not replace ring
 assert.equal(customRing.series[0].progress.itemStyle.color, '#223344');
 
 const timedGauge = render('ipsview', 720, 560, 3, 'Climate', 'multi-title', true, {
-    animationEnabled: true, animationDuration: 900, animationDurationUpdate: 1400
+    animationEnabled: true, animationDuration: 900, animationDurationUpdate: 1400,
+    animationEasing: 'bounceOut', animationEasingUpdate: 'linear',
+    animationDelay: 120, animationDelayUpdate: 240
 });
 assert.equal(timedGauge.animationDuration, 900);
 assert.equal(timedGauge.animationDurationUpdate, 1400);
+assert.equal(timedGauge.animationEasing, 'bounceOut');
+assert.equal(timedGauge.animationEasingUpdate, 'linear');
+assert.equal(timedGauge.animationDelay, 120);
+assert.equal(timedGauge.animationDelayUpdate, 240);
 assert.ok(timedGauge.series.every(series => series.detail.valueAnimation === true));
 const stoppedGauge = render('symcon', 720, 560, 3, 'Climate', 'multi-title', true, {
     animationEnabled: false, animationDuration: 900, animationDurationUpdate: 1400

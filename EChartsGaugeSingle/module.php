@@ -139,7 +139,9 @@ class EChartsGaugeSingle extends IPSModuleStrict
         'UnitVisibility'          => 'preset',
         'TitleVisibility'         => 'preset',
         'DetailBoxVisibility'     => 'preset',
-        'DetailColorMode'         => 'theme'
+        'DetailColorMode'         => 'theme',
+        'AnimationEasing'         => 'cubicInOut',
+        'AnimationEasingUpdate'   => 'cubicInOut'
     ];
     private const IPSVIEW_FLOAT_DESIGN_DEFAULTS = [
         'CustomPointerPivotXPercent' => 50.0,
@@ -164,6 +166,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
     private const IPSVIEW_INTEGER_DESIGN_DEFAULTS = [
         'AnimationDuration'              => 500,
         'AnimationDurationUpdate'        => 500,
+        'AnimationDelay'                 => 0,
+        'AnimationDelayUpdate'           => 0,
         'AnchorColor'                    => 0x55CBB5,
         'AnchorBorderColor'              => 0xF4F5F7,
         'PlateGradientMiddleColor'       => 0x45474C,
@@ -351,6 +355,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
     {
         $form = $this->LoadConfigurationForm();
         if (isset($form['elements']) && is_array($form['elements'])) {
+            $form['elements'] = $this->WithAnimationFormControls($form['elements']);
             $form['elements'] = $this->WithGaugePreviewActions(
                 $form['elements'],
                 $this->GaugePreviewAction()
