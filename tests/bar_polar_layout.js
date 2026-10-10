@@ -98,6 +98,9 @@ assert.equal(radial.angleAxis.startAngle, 90);
 assert.equal(radial.angleAxis.endAngle, undefined, 'Existing full-circle Polar charts must keep their default angle extent.');
 assert.equal(radial.angleAxis.axisLine.show, true, 'Full-circle grid outlines must remain visible.');
 assert.equal(radial.series[0].label.rotate, 0, 'Polar value labels must remain horizontally readable.');
+assert.equal(radial.angleAxis.axisLabel.fontSize, 10, 'Category labels must use a compact default font size.');
+assert.equal(radial.radiusAxis.axisLabel.fontSize, 10, 'Scale labels must use a compact default font size.');
+assert.equal(radial.series[0].label.fontSize, 10, 'Value labels must use a compact default font size.');
 assert.equal(radial.series[0].label.position, 'middle', 'Value anchors must be centered inside their bars.');
 assert.equal(radial.series[0].data[1].label.color, '#111111', 'Light bars need dark value text.');
 assert.equal(radial.series[0].data[2].label.color, '#eeeeee', 'Dark bars need light value text.');
@@ -422,9 +425,107 @@ const compactOutside = options.at(-1);
 assert.ok(compactOutside.polar.radius[1] >= 70,
     'Outside labels must not collapse a compact Polar chart into a tiny dial.');
 
+chartElement.clientWidth = 925;
+chartElement.clientHeight = 690;
+window.handleMessage({
+    status: 'ready', chart: {
+        theme: 'dark',
+        polar: {
+            title: '', unit: '°C', decimals: 1,
+            style: {
+                mode: 'tangential', sortOrder: 'ascending', showCategoryLabels: true,
+                showValues: true, valueLabelPosition: 'insideEnd', showGrid: true,
+                barWidthPercent: 60, innerRadiusPercent: 12, outerRadiusPercent: 76,
+                startAngle: 90, angularSpan: 180, clockwise: true, roundCaps: true,
+                valueAxisRangeMode: 'manual', valueAxisMinimum: 5, valueAxisMaximum: 30,
+                showBarBackground: true, barBackgroundColor: '#E70D0D', barBackgroundOpacityPercent: 20
+            }
+        },
+        items: [
+            { id: 'outside', label: 'Außen', value: 12.2, decimals: 1, color: '#586ee0', order: 0 },
+            { id: 'bath', label: 'Bad', value: 22.7, decimals: 1, color: '#bed939', order: 1 },
+            { id: 'office', label: 'Büro', value: 25.1, decimals: 1, color: '#555674', order: 2 }
+        ]
+    }
+});
+const reportedUserLayout = options.at(-1);
+assert.equal(reportedUserLayout.radiusAxis.z, 3,
+    'Concentric category labels must render in front of background tracks and bars.');
+assert.equal(reportedUserLayout.radiusAxis.axisLabel.textBorderColor, palette.background,
+    'Category labels need a theme-matched outline over colored tracks.');
+assert.equal(reportedUserLayout.series[0].label.align, 'center',
+    'Horizontal values inside concentric arcs must be centered on their anchor.');
+
+window.SYMC_VISUALIZATION.mode = 'ipsview';
+window.handleMessage({
+    status: 'ready', chart: {
+        ...state.chart,
+        polar: {
+            ...state.chart.polar,
+            style: {
+                ...state.chart.polar.style,
+                categoryLabelFontSize: 9, valueLabelFontSize: 13, scaleLabelFontSize: 8
+            }
+        }
+    }
+});
+const customIPSViewFonts = options.at(-1);
+assert.equal(customIPSViewFonts.angleAxis.axisLabel.fontSize, 9);
+assert.equal(customIPSViewFonts.radiusAxis.axisLabel.fontSize, 8);
+assert.equal(customIPSViewFonts.series[0].label.fontSize, 13);
+
 const localECharts = path.join(__dirname, '..', '.tools', 'echarts-runtime', 'node_modules', 'echarts');
 if (fs.existsSync(localECharts)) {
     const echarts = require(localECharts);
+    const reportedChart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 925, height: 690 });
+    reportedChart.setOption(reportedUserLayout);
+    const reportedElements = reportedChart.getZr().storage.getDisplayList();
+    const categoryNames = ['Außen', 'Bad', 'Büro'];
+    const reportedBars = reportedElements.map((element, index) => ({ element, index }))
+        .filter(({ element }) => element.type === 'sausage');
+    const reportedCategories = reportedElements.map((element, index) => ({ element, index }))
+        .filter(({ element }) => element.type === 'tspan' && categoryNames.includes(element.style.text));
+    assert.equal(reportedBars.length, 3, 'The reported concentric layout must render every bar.');
+    assert.deepEqual(reportedCategories.map(({ element }) => element.style.text), categoryNames,
+        'Every category, including the previously hidden middle label, must render.');
+    assert.ok(reportedCategories.every(({ index }) => index > reportedBars.at(-1).index),
+        'Category labels must be painted after all bars and background tracks.');
+    const reportedValues = reportedElements.filter(element => element.type === 'tspan'
+        && / °C$/.test(element.style.text));
+    assert.equal(reportedValues.length, 3, 'All three value labels must remain visible.');
+    for (let index = 0; index < reportedValues.length; index++) {
+        const label = reportedValues[index];
+        const bar = reportedBars[index].element;
+        const bounds = label.getBoundingRect().clone();
+        bounds.applyTransform(label.getComputedTransform());
+        assert.equal(label.style.fill, index === 2 ? palette.text : palette.background,
+            'Value-label contrast must follow its own bar color.');
+        for (const [x, y] of [
+            [bounds.x, bounds.y], [bounds.x + bounds.width, bounds.y],
+            [bounds.x, bounds.y + bounds.height], [bounds.x + bounds.width, bounds.y + bounds.height]
+        ]) {
+            const dx = x - bar.shape.cx;
+            const dy = y - bar.shape.cy;
+            const radius = Math.hypot(dx, dy);
+            const angle = Math.atan2(dy, dx);
+            assert.ok(radius >= bar.shape.r0 - 3 && radius <= bar.shape.r + 3
+                && angle >= bar.shape.startAngle - 0.05 && angle <= bar.shape.endAngle + 0.05,
+            'Each value label must stay on its own colored arc: ' + label.style.text);
+        }
+    }
+    reportedChart.dispose();
+    const roundedStartChart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 925, height: 690 });
+    roundedStartChart.setOption({
+        ...reportedUserLayout,
+        series: [{
+            ...reportedUserLayout.series[0],
+            label: { ...reportedUserLayout.series[0].label, position: 'insideStart' }
+        }]
+    });
+    assert.equal(roundedStartChart.getZr().storage.getDisplayList().filter(
+        element => element.type === 'tspan' && / °C$/.test(element.style.text)
+    ).length, 3, 'Rounded inside-start positions must retain every value label.');
+    roundedStartChart.dispose();
     const compactChart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 300, height: 300 });
     compactChart.setOption(compact);
     const compactTexts = compactChart.getZr().storage.getDisplayList()

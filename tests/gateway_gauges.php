@@ -5036,6 +5036,9 @@ assertGatewayGauge(
         && $polarData['polar']['style']['valueAxisRangeMode'] === 'auto'
         && $polarData['polar']['style']['showBarBackground'] === false
         && $polarData['polar']['style']['valueLabelPosition'] === 'middle'
+        && $polarData['polar']['style']['categoryLabelFontSize'] === 10
+        && $polarData['polar']['style']['valueLabelFontSize'] === 10
+        && $polarData['polar']['style']['scaleLabelFontSize'] === 10
         && $polarData['polar']['style']['angularSpan'] === 360
         && array_column($polarData['items'], 'label') === ['Living room', 'Living room', 'Legacy wind speed']
         && $polarData['items'][0]['color'] === '#123456'
@@ -5113,6 +5116,9 @@ $polar->SetTestProperty('BarBackgroundColor', 0x778899);
 $polar->SetTestProperty('BarBackgroundOpacityPercent', 40);
 $polar->SetTestProperty('AngularSpan', 180);
 $polar->SetTestProperty('ValueLabelPosition', 'insideEnd');
+$polar->SetTestProperty('CategoryLabelFontSize', 9);
+$polar->SetTestProperty('ValueLabelFontSize', 11);
+$polar->SetTestProperty('ScaleLabelFontSize', 8);
 $polar->ApplyChanges();
 $polarDesignData = json_decode($polar->GetPolarData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
@@ -5125,8 +5131,12 @@ assertGatewayGauge(
         && $polarDesignData['polar']['style']['barBackgroundOpacityPercent'] === 40
         && $polarDesignData['polar']['style']['angularSpan'] === 180
         && $polarDesignData['polar']['style']['valueLabelPosition'] === 'insideEnd'
+        && $polarDesignData['polar']['style']['categoryLabelFontSize'] === 9
+        && $polarDesignData['polar']['style']['valueLabelFontSize'] === 11
+        && $polarDesignData['polar']['style']['scaleLabelFontSize'] === 8
         && str_contains($polar->GetIPSViewHTML(), '"valueAxisRangeMode":"auto"')
         && str_contains($polar->GetIPSViewHTML(), '"valueLabelPosition":"middle"')
+        && str_contains($polar->GetIPSViewHTML(), '"categoryLabelFontSize":10')
         && str_contains($polar->GetIPSViewHTML(), '"angularSpan":360')
         && str_contains($polar->GetIPSViewHTML(), '"showBarBackground":false'),
     'Polar Bar must expose a fixed value scale and configurable background tracks in Tile data.'
@@ -5139,6 +5149,9 @@ $polar->SetTestProperty('IPSViewBarBackgroundColor', 0x8B5A2B);
 $polar->SetTestProperty('IPSViewBarBackgroundOpacityPercent', 35);
 $polar->SetTestProperty('IPSViewAngularSpan', 270);
 $polar->SetTestProperty('IPSViewValueLabelPosition', 'insideStart');
+$polar->SetTestProperty('IPSViewCategoryLabelFontSize', 12);
+$polar->SetTestProperty('IPSViewValueLabelFontSize', 13);
+$polar->SetTestProperty('IPSViewScaleLabelFontSize', 14);
 $polar->ApplyChanges();
 $polarIPSViewDesign = $polar->GetIPSViewHTML();
 $polarCurrentTileDesign = json_decode($polar->GetPolarData(), true, 512, JSON_THROW_ON_ERROR);
@@ -5152,6 +5165,9 @@ assertGatewayGauge(
         && str_contains($polarIPSViewDesign, '"barBackgroundOpacityPercent":35')
         && str_contains($polarIPSViewDesign, '"angularSpan":270')
         && str_contains($polarIPSViewDesign, '"valueLabelPosition":"insideStart"')
+        && str_contains($polarIPSViewDesign, '"categoryLabelFontSize":12')
+        && str_contains($polarIPSViewDesign, '"valueLabelFontSize":13')
+        && str_contains($polarIPSViewDesign, '"scaleLabelFontSize":14')
         && $polarCurrentTileDesign['polar']['style']['valueAxisMinimum'] === -10.5
         && $polarCurrentTileDesign['polar']['style']['valueLabelPosition'] === 'insideEnd'
         && $polarCurrentTileDesign['polar']['style']['angularSpan'] === 180
@@ -5184,7 +5200,10 @@ assertGatewayGauge(
         && str_contains(json_encode($polarIPSViewPanel, JSON_THROW_ON_ERROR), 'IPSViewBarBackgroundColor')
         && str_contains(json_encode($polarIPSViewPanel, JSON_THROW_ON_ERROR), 'IPSViewBarBackgroundOpacityPercent')
         && str_contains(json_encode($polarIPSViewPanel, JSON_THROW_ON_ERROR), 'IPSViewAngularSpan')
-        && str_contains(json_encode($polarIPSViewPanel, JSON_THROW_ON_ERROR), 'IPSViewValueLabelPosition'),
+        && str_contains(json_encode($polarIPSViewPanel, JSON_THROW_ON_ERROR), 'IPSViewValueLabelPosition')
+        && str_contains(json_encode($polarIPSViewPanel, JSON_THROW_ON_ERROR), 'IPSViewCategoryLabelFontSize')
+        && str_contains(json_encode($polarIPSViewPanel, JSON_THROW_ON_ERROR), 'IPSViewValueLabelFontSize')
+        && str_contains(json_encode($polarIPSViewPanel, JSON_THROW_ON_ERROR), 'IPSViewScaleLabelFontSize'),
     'Independent Polar IPSView design must expose an enabled fixed scale and background-track controls.'
 );
 assertGatewayGauge(
@@ -5192,6 +5211,14 @@ assertGatewayGauge(
         && array_column($polarIPSViewLabelPositionField['options'], 'value')
             === ['middle', 'insideStart', 'insideEnd', 'outside'],
     'Independent IPSView must allow the same value-label positions as the Tile.'
+);
+$polarIPSViewFontRow = current(array_filter(
+    $polarIPSViewPanel['items'],
+    static fn (array $item): bool => in_array('IPSViewCategoryLabelFontSize', array_column($item['items'] ?? [], 'name'), true)
+));
+assertGatewayGauge(
+    array_column($polarIPSViewFontRow['items'], 'enabled') === [true, true, true],
+    'Independent IPSView font-size controls must be enabled.'
 );
 $polar->UpdateIPSViewValueScaleForm('auto');
 assertGatewayGauge(
@@ -5221,15 +5248,23 @@ $polarInheritedLabelPositionField = current(array_filter(
     $polarInheritedPanel['items'],
     static fn (array $item): bool => ($item['name'] ?? '') === 'IPSViewValueLabelPosition'
 ));
+$polarInheritedFontRow = current(array_filter(
+    $polarInheritedPanel['items'],
+    static fn (array $item): bool => in_array('IPSViewCategoryLabelFontSize', array_column($item['items'] ?? [], 'name'), true)
+));
 assertGatewayGauge(
     $polar->GetTestStatus() === IS_ACTIVE
         && str_contains($polarInheritedHTML, '"valueAxisMinimum":-10.5')
         && str_contains($polarInheritedHTML, '"barBackgroundColor":"#778899"')
         && str_contains($polarInheritedHTML, '"angularSpan":180')
         && str_contains($polarInheritedHTML, '"valueLabelPosition":"insideEnd"')
+        && str_contains($polarInheritedHTML, '"categoryLabelFontSize":9')
+        && str_contains($polarInheritedHTML, '"valueLabelFontSize":11')
+        && str_contains($polarInheritedHTML, '"scaleLabelFontSize":8')
         && ($polarInheritedScaleFields['IPSViewValueAxisRangeMode']['enabled'] ?? null) === false
         && ($polarInheritedScaleFields['IPSViewValueAxisMinimum']['enabled'] ?? null) === false
-        && ($polarInheritedLabelPositionField['enabled'] ?? null) === false,
+        && ($polarInheritedLabelPositionField['enabled'] ?? null) === false
+        && array_column($polarInheritedFontRow['items'], 'enabled') === [false, false, false],
     'Inherited Polar IPSView design must follow the Tile scale and tracks while disabling independent controls.'
 );
 $GLOBALS['symconTestCopyTarget'] = $polar;
@@ -5248,7 +5283,10 @@ assertGatewayGauge(
         && str_contains($polarCopiedHTML, '"barBackgroundColor":"#778899"')
         && str_contains($polarCopiedHTML, '"barBackgroundOpacityPercent":40')
         && str_contains($polarCopiedHTML, '"angularSpan":180')
-        && str_contains($polarCopiedHTML, '"valueLabelPosition":"insideEnd"'),
+        && str_contains($polarCopiedHTML, '"valueLabelPosition":"insideEnd"')
+        && str_contains($polarCopiedHTML, '"categoryLabelFontSize":9')
+        && str_contains($polarCopiedHTML, '"valueLabelFontSize":11')
+        && str_contains($polarCopiedHTML, '"scaleLabelFontSize":8'),
     'Copying the Polar Tile design must copy the fixed scale and tracks, including floating-point limits.'
 );
 $polarForm = json_decode($polar->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
@@ -5265,7 +5303,10 @@ assertGatewayGauge(
         && str_contains($polarTileDesignJSON, 'BarBackgroundColor')
         && str_contains($polarTileDesignJSON, 'BarBackgroundOpacityPercent')
         && str_contains($polarTileDesignJSON, 'AngularSpan')
-        && str_contains($polarTileDesignJSON, 'ValueLabelPosition'),
+        && str_contains($polarTileDesignJSON, 'ValueLabelPosition')
+        && str_contains($polarTileDesignJSON, 'CategoryLabelFontSize')
+        && str_contains($polarTileDesignJSON, 'ValueLabelFontSize')
+        && str_contains($polarTileDesignJSON, 'ScaleLabelFontSize'),
     'Polar Bar Tile designer must expose the fixed scale and background-track controls.'
 );
 $polarScaleRow = current(array_filter(
@@ -5390,6 +5431,27 @@ $invalidPolarLabelPosition->ApplyChanges();
 assertGatewayGauge(
     $invalidPolarLabelPosition->GetTestStatus() === 202,
     'Polar Bar must reject an unsupported Tile value-label position.'
+);
+
+$invalidPolarFontSize = new EChartsBarPolar();
+$invalidPolarFontSize->Create();
+$invalidPolarFontSize->SetTestProperty('Sources', json_encode([['VariableID' => 4711]], JSON_THROW_ON_ERROR));
+$invalidPolarFontSize->SetTestProperty('ValueLabelFontSize', 25);
+$invalidPolarFontSize->ApplyChanges();
+assertGatewayGauge(
+    $invalidPolarFontSize->GetTestStatus() === 202,
+    'Polar Bar must reject an unsupported Tile font size.'
+);
+
+$invalidPolarIPSViewFontSize = new EChartsBarPolar();
+$invalidPolarIPSViewFontSize->Create();
+$invalidPolarIPSViewFontSize->SetTestProperty('Sources', json_encode([['VariableID' => 4711]], JSON_THROW_ON_ERROR));
+$invalidPolarIPSViewFontSize->SetTestProperty('IPSViewUseTileDesign', false);
+$invalidPolarIPSViewFontSize->SetTestProperty('IPSViewCategoryLabelFontSize', 7);
+$invalidPolarIPSViewFontSize->ApplyChanges();
+assertGatewayGauge(
+    $invalidPolarIPSViewFontSize->GetTestStatus() === 202,
+    'Polar Bar must reject an unsupported independent IPSView font size.'
 );
 
 $invalidPolarIPSViewLabelPosition = new EChartsBarPolar();

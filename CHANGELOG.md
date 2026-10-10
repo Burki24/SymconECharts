@@ -2,6 +2,10 @@
 
 ## Behoben
 
+- Bei konzentrischen Polar-Bögen bleiben Kategoriebeschriftungen vor den
+  Balken und Hintergrundspuren sichtbar. Werte an abgerundeten Bogenenden
+  rücken in die farbige Fläche, damit die automatische Schriftfarbe dort passt.
+
 - Bei Polar-Teilkreisen folgen Raster und Hintergrundspuren nun demselben
   Winkelbereich und derselben Drehrichtung wie die Balken; der Vollkreisrand
   erscheint außerhalb des gewählten Ausschnitts nicht mehr.
@@ -9,6 +13,9 @@
 - Polar-Balken und konzentrische Bögen beginnen bei einer festen Werteskala am eingestellten Minimum statt am ECharts-Standardwert 0.
 
 ## Neu
+
+- Kategorie-, Wert- und Skalenschriftgröße des Polar-Diagramms sind für
+  Kachel und unabhängiges IPSView-Design getrennt einstellbar.
 
 - Polar-Wertbeschriftungen können in Kachel und IPSView auch direkt außerhalb
   des jeweiligen Balkens, aber innerhalb des Diagrammbereichs stehen. Die

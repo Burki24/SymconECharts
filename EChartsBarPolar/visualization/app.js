@@ -75,6 +75,11 @@
         return result;
     }
 
+    function fontSize(value, fallback) {
+        var size = Number(value);
+        return Number.isInteger(size) && size >= 8 && size <= 24 ? size : fallback;
+    }
+
     function polarLayout(polar) {
         var style = polar.style || {};
         var width = Math.max(1, chartElement.clientWidth || 1);
@@ -124,14 +129,19 @@
         var titleVisible = Boolean(polar.title);
         var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8;
         var layout = polarLayout(polar);
+        var categoryFontSize = fontSize(style.categoryLabelFontSize, 10);
+        var valueFontSize = fontSize(style.valueLabelFontSize, 10);
+        var scaleFontSize = fontSize(style.scaleLabelFontSize, 10);
         var axisStyle = { color: colors.border, opacity: 0.7 };
         var splitStyle = { color: colors.border, opacity: 0.2 };
         var categoryAxis = {
             type: 'category',
             data: labels,
+            z: mode === 'tangential' ? 3 : 0,
             axisLabel: {
                 show: style.showCategoryLabels !== false, color: colors.text,
-                overflow: 'truncate', width: 90, fontSize: 11, margin: 24
+                overflow: 'truncate', width: 90, fontSize: categoryFontSize, margin: 24,
+                textBorderColor: colors.background, textBorderWidth: mode === 'tangential' ? 3 : 0
             },
             axisLine: { show: style.showGrid !== false, lineStyle: axisStyle },
             axisTick: { show: style.showGrid !== false, lineStyle: axisStyle },
@@ -139,7 +149,7 @@
         };
         var valueAxis = {
             type: 'value',
-            axisLabel: { show: layout.showValueScale, color: colors.muted },
+            axisLabel: { show: layout.showValueScale, color: colors.muted, fontSize: scaleFontSize },
             axisLine: { show: style.showGrid !== false, lineStyle: axisStyle },
             axisTick: { show: style.showGrid !== false, lineStyle: axisStyle },
             splitLine: { show: style.showGrid !== false, lineStyle: splitStyle }
@@ -169,6 +179,17 @@
         }
         categoryAxis.axisLabel.width = layout.labelWidth;
         categoryAxis.axisLabel.margin = layout.labelMargin;
+        var barThickness = (layout.geometry.radius[1] - layout.geometry.radius[0])
+            / Math.max(1, items.length) * Math.max(20, Math.min(100, Number(style.barWidthPercent) || 60)) / 100;
+        // ECharts adds half a rounded cap to the label anchor. Keep horizontal text
+        // clear of that cap and inside the colored arc, especially on outer rings.
+        function valueLabelDistance(index) {
+            if (mode !== 'tangential' || style.roundCaps !== true
+                || (valueLabelPosition !== 'insideStart' && valueLabelPosition !== 'insideEnd')) { return 5; }
+            var middleRadius = layout.geometry.radius[0]
+                + (index + 0.5) * (layout.geometry.radius[1] - layout.geometry.radius[0]) / Math.max(1, items.length);
+            return barThickness / 2 + Math.max(30, valueFontSize * 3, middleRadius * 0.16);
+        }
 
         return {
             backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
@@ -216,6 +237,7 @@
                         value: Number(item.value),
                         itemStyle: { color: itemColor },
                         label: {
+                            distance: valueLabelDistance(index),
                             color: valueLabelPosition === 'outside' ? colors.text
                                 : typeof design.readableTextColor === 'function'
                                     ? design.readableTextColor(itemColor, colors.text, colors.background)
@@ -227,6 +249,8 @@
                     show: style.showValues === true,
                     position: valueLabelPosition,
                     color: colors.text,
+                    fontSize: valueFontSize,
+                    align: mode === 'tangential' && valueLabelPosition !== 'outside' ? 'center' : undefined,
                     rotate: 0,
                     formatter: function (parameter) {
                         return formatValue(parameter.value, itemDecimals(items[parameter.dataIndex]), unit);

@@ -255,6 +255,35 @@
                     "items": [
                         {
                             "type": "NumberSpinner",
+                            "name": "CategoryLabelFontSize",
+                            "caption": "Category font size",
+                            "minimum": 8,
+                            "maximum": 24,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ValueLabelFontSize",
+                            "caption": "Value font size",
+                            "minimum": 8,
+                            "maximum": 24,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ScaleLabelFontSize",
+                            "caption": "Scale font size",
+                            "minimum": 8,
+                            "maximum": 24,
+                            "suffix": "px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
                             "name": "BarWidthPercent",
                             "caption": "Bar width",
                             "minimum": 20,
@@ -542,6 +571,35 @@
                                 {
                                     "caption": "Outside the bar",
                                     "value": "outside"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "IPSViewCategoryLabelFontSize",
+                                    "caption": "Category font size",
+                                    "minimum": 8,
+                                    "maximum": 24,
+                                    "suffix": "px"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "IPSViewValueLabelFontSize",
+                                    "caption": "Value font size",
+                                    "minimum": 8,
+                                    "maximum": 24,
+                                    "suffix": "px"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "IPSViewScaleLabelFontSize",
+                                    "caption": "Scale font size",
+                                    "minimum": 8,
+                                    "maximum": 24,
+                                    "suffix": "px"
                                 }
                             ]
                         },
