@@ -157,6 +157,8 @@ window.handleMessage({
 const fixedRadial = options.at(-1);
 assert.equal(fixedRadial.radiusAxis.min, -5);
 assert.equal(fixedRadial.radiusAxis.max, 25);
+assert.equal(fixedRadial.radiusAxis.startValue, -5,
+    'Radial bars must also start at the configured scale minimum.');
 assert.equal(fixedRadial.series[0].showBackground, true);
 assert.equal(fixedRadial.series[0].backgroundStyle.color, '#778899');
 assert.equal(fixedRadial.series[0].backgroundStyle.opacity, 0.4);
@@ -169,7 +171,36 @@ window.handleMessage({
 const fixedTangential = options.at(-1);
 assert.equal(fixedTangential.angleAxis.min, -5);
 assert.equal(fixedTangential.angleAxis.max, 25);
+assert.equal(fixedTangential.angleAxis.startValue, -5);
 assert.equal(fixedTangential.series[0].showBackground, true);
+const offsetItems = [
+    { id: 'outside', label: 'Außen', value: 12.1, decimals: 1, color: '', order: 0 },
+    { id: 'bath', label: 'Bad', value: 22.9, decimals: 1, color: '', order: 1 },
+    { id: 'office', label: 'Büro', value: 24.3, decimals: 1, color: '', order: 2 }
+];
+window.handleMessage({
+    status: 'ready', chart: {
+        ...state.chart,
+        polar: {
+            ...state.chart.polar,
+            style: {
+                ...fixedStyle, mode: 'tangential', sortOrder: 'configured',
+                valueAxisMinimum: 5, valueAxisMaximum: 100
+            }
+        },
+        items: offsetItems
+    }
+});
+const offsetTangential = options.at(-1);
+assert.equal(offsetTangential.angleAxis.min, 5);
+assert.equal(offsetTangential.angleAxis.max, 100);
+assert.equal(offsetTangential.angleAxis.startValue, 5,
+    'Concentric arcs must start at the configured scale minimum instead of zero.');
+assert.deepEqual(Array.from(offsetTangential.series[0].data, item => item.value), [12.1, 22.9, 24.3],
+    'The rendered data and displayed values must retain their real values.');
+assert.equal(offsetTangential.series[0].label.formatter({ value: 12.1, dataIndex: 0 }),
+    Number(12.1).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' °C',
+    'Concentric value labels must display the original values.');
 window.handleMessage({
     status: 'ready', chart: {
         ...state.chart,
@@ -311,6 +342,27 @@ if (fs.existsSync(localECharts)) {
         }
         realChart.dispose();
     }
+    const offsetChart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 625, height: 560 });
+    offsetChart.setOption(offsetTangential);
+    const scaleAxis = offsetChart.getModel().getComponent('angleAxis').axis;
+    const expectedStart = -scaleAxis.dataToCoord(5) * Math.PI / 180;
+    const offsetData = offsetChart.getModel().getSeriesByIndex(0).getData();
+    for (let index = 0; index < offsetData.count(); index++) {
+        const sector = offsetData.getItemLayout(index);
+        assert.ok(Math.abs(sector.startAngle - expectedStart) < 0.000001,
+            'Every concentric arc must start at the 5-unit scale tick.');
+    }
+    offsetChart.dispose();
+    const radialChart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 625, height: 560 });
+    radialChart.setOption(fixedRadial);
+    const radiusAxis = radialChart.getModel().getComponent('radiusAxis').axis;
+    const expectedRadiusStart = radiusAxis.dataToCoord(-5);
+    const radialData = radialChart.getModel().getSeriesByIndex(0).getData();
+    for (let index = 0; index < radialData.count(); index++) {
+        assert.ok(Math.abs(radialData.getItemLayout(index).r0 - expectedRadiusStart) < 0.000001,
+            'Every radial bar must start at its fixed-scale minimum.');
+    }
+    radialChart.dispose();
 }
 
 window.handleMessage({ status: 'error', error: 'Configure valid Polar sources.' });

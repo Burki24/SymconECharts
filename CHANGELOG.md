@@ -1,5 +1,9 @@
 # Unveröffentlicht
 
+## Behoben
+
+- Polar-Balken und konzentrische Bögen beginnen bei einer festen Werteskala am eingestellten Minimum statt am ECharts-Standardwert 0.
+
 ## Neu
 
 - EChartsBarPolar vergleicht 1 bis 16 aktuelle Werte mit gemeinsamer Einheit

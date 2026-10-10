@@ -146,6 +146,7 @@
             && scaleMinimum < scaleMaximum) {
             valueAxis.min = scaleMinimum;
             valueAxis.max = scaleMaximum;
+            valueAxis.startValue = scaleMinimum;
         }
         var trackOpacity = Number(style.barBackgroundOpacityPercent);
         if (!Number.isFinite(trackOpacity)) { trackOpacity = 25; }
