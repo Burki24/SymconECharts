@@ -140,6 +140,7 @@
             z: mode === 'tangential' ? 3 : 0,
             axisLabel: {
                 show: style.showCategoryLabels !== false, color: colors.text,
+                interval: 0, hideOverlap: true,
                 overflow: 'truncate', width: 90, fontSize: categoryFontSize, margin: 24,
                 textBorderColor: colors.background, textBorderWidth: mode === 'tangential' ? 3 : 0
             },

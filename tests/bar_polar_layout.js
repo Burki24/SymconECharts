@@ -91,6 +91,8 @@ assert.equal(radial.angleAxis.type, 'category');
 assert.equal(radial.radiusAxis.type, 'value');
 assert.deepEqual(Array.from(radial.angleAxis.data), ['<Room>', '<Room>', 'Outside']);
 assert.ok(radial.angleAxis.axisLabel.margin >= 20, 'Radial category labels need room outside the outer ring.');
+assert.equal(radial.angleAxis.axisLabel.interval, 0, 'Radial categories must not be skipped by a coarse automatic interval.');
+assert.equal(radial.angleAxis.axisLabel.hideOverlap, true, 'Only actual radial label collisions may hide a category.');
 assert.deepEqual(Array.from(radial.series[0].data, item => item.value), [10, 5, -3]);
 assert.equal(radial.series[0].data[0].itemStyle.color, '#ff5500');
 assert.equal(radial.series[0].data[1].itemStyle.color, '#abcdef');
@@ -169,6 +171,10 @@ assert.equal(tangential.angleAxis.type, 'value');
 assert.equal(tangential.radiusAxis.type, 'category');
 assert.deepEqual(Array.from(tangential.radiusAxis.data), ['<Room>', '<Room>', 'Outside']);
 assert.ok(tangential.radiusAxis.axisLabel.margin >= 20, 'Concentric category labels need axis spacing.');
+assert.equal(tangential.radiusAxis.axisLabel.interval, 0,
+    'Concentric categories must not be skipped by a coarse automatic interval.');
+assert.equal(tangential.radiusAxis.axisLabel.hideOverlap, true,
+    'Only actual concentric label collisions may hide a category.');
 assert.equal(tangential.angleAxis.clockwise, false);
 assert.equal(tangential.angleAxis.endAngle, undefined, 'Existing counterclockwise charts must remain full circles.');
 assert.equal(tangential.series[0].roundCap, true);
@@ -427,7 +433,7 @@ assert.ok(compactOutside.polar.radius[1] >= 70,
 
 chartElement.clientWidth = 925;
 chartElement.clientHeight = 690;
-window.handleMessage({
+const reportedState = {
     status: 'ready', chart: {
         theme: 'dark',
         polar: {
@@ -447,7 +453,8 @@ window.handleMessage({
             { id: 'office', label: 'Büro', value: 25.1, decimals: 1, color: '#555674', order: 2 }
         ]
     }
-});
+};
+window.handleMessage(reportedState);
 const reportedUserLayout = options.at(-1);
 assert.equal(reportedUserLayout.radiusAxis.z, 3,
     'Concentric category labels must render in front of background tracks and bars.');
@@ -455,6 +462,13 @@ assert.equal(reportedUserLayout.radiusAxis.axisLabel.textBorderColor, palette.ba
     'Category labels need a theme-matched outline over colored tracks.');
 assert.equal(reportedUserLayout.series[0].label.align, 'center',
     'Horizontal values inside concentric arcs must be centered on their anchor.');
+
+chartElement.clientWidth = 435;
+chartElement.clientHeight = 324;
+resizeCallback();
+const reportedResizeUpdate = options.at(-1);
+window.handleMessage(reportedState);
+const compactConcentric = options.at(-1);
 
 window.SYMC_VISUALIZATION.mode = 'ipsview';
 window.handleMessage({
@@ -477,6 +491,24 @@ assert.equal(customIPSViewFonts.series[0].label.fontSize, 13);
 const localECharts = path.join(__dirname, '..', '.tools', 'echarts-runtime', 'node_modules', 'echarts');
 if (fs.existsSync(localECharts)) {
     const echarts = require(localECharts);
+    const compactConcentricChart = echarts.init(null, null,
+        { renderer: 'svg', ssr: true, width: 435, height: 324 });
+    compactConcentricChart.setOption(compactConcentric);
+    assert.deepEqual(compactConcentricChart.getZr().storage.getDisplayList()
+        .filter(element => element.type === 'tspan' && ['Außen', 'Bad', 'Büro'].includes(element.style.text))
+        .map(element => element.style.text), ['Außen', 'Bad', 'Büro'],
+    'Resizing the concentric Tile must keep every category label, including Bad.');
+    compactConcentricChart.dispose();
+    const resizedConcentricChart = echarts.init(null, null,
+        { renderer: 'svg', ssr: true, width: 925, height: 690 });
+    resizedConcentricChart.setOption(reportedUserLayout);
+    resizedConcentricChart.resize({ width: 435, height: 324 });
+    resizedConcentricChart.setOption(reportedResizeUpdate);
+    assert.deepEqual(resizedConcentricChart.getZr().storage.getDisplayList()
+        .filter(element => element.type === 'tspan' && ['Außen', 'Bad', 'Büro'].includes(element.style.text))
+        .map(element => element.style.text), ['Außen', 'Bad', 'Büro'],
+    'The existing concentric chart must retain all categories after an actual ECharts resize.');
+    resizedConcentricChart.dispose();
     const reportedChart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 925, height: 690 });
     reportedChart.setOption(reportedUserLayout);
     const reportedElements = reportedChart.getZr().storage.getDisplayList();

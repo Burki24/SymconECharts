@@ -2,6 +2,10 @@
 
 ## Behoben
 
+- Beim Verkleinern einer Polar-Kachel werden Kategoriebeschriftungen nicht
+  mehr durch das automatische Achsenintervall übersprungen, solange sie
+  tatsächlich Platz haben.
+
 - Bei konzentrischen Polar-Bögen bleiben Kategoriebeschriftungen vor den
   Balken und Hintergrundspuren sichtbar. Werte an abgerundeten Bogenenden
   rücken in die farbige Fläche, damit die automatische Schriftfarbe dort passt.
