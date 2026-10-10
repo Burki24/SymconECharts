@@ -2,6 +2,10 @@
 
 ## Behoben
 
+- Bei Polar-Teilkreisen folgen Raster und Hintergrundspuren nun demselben
+  Winkelbereich und derselben Drehrichtung wie die Balken; der Vollkreisrand
+  erscheint außerhalb des gewählten Ausschnitts nicht mehr.
+
 - Polar-Balken und konzentrische Bögen beginnen bei einer festen Werteskala am eingestellten Minimum statt am ECharts-Standardwert 0.
 
 ## Neu

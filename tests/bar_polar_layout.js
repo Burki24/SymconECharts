@@ -96,6 +96,7 @@ assert.equal(radial.series[0].data[0].itemStyle.color, '#ff5500');
 assert.equal(radial.series[0].data[1].itemStyle.color, '#abcdef');
 assert.equal(radial.angleAxis.startAngle, 90);
 assert.equal(radial.angleAxis.endAngle, undefined, 'Existing full-circle Polar charts must keep their default angle extent.');
+assert.equal(radial.angleAxis.axisLine.show, true, 'Full-circle grid outlines must remain visible.');
 assert.equal(radial.series[0].label.rotate, 0, 'Polar value labels must remain horizontally readable.');
 assert.equal(radial.series[0].label.position, 'middle', 'Value anchors must be centered inside their bars.');
 assert.equal(radial.series[0].data[1].label.color, '#111111', 'Light bars need dark value text.');
@@ -222,8 +223,10 @@ window.handleMessage({
     }
 });
 const halfRadial = options.at(-1);
-assert.equal(halfRadial.angleAxis.endAngle, 270,
-    'Clockwise radial bars must occupy only the configured half-circle.');
+assert.equal(halfRadial.angleAxis.endAngle, -90,
+    'Clockwise radial bars must run from the top toward the right-hand half-circle.');
+assert.equal(halfRadial.angleAxis.axisLine.show, false,
+    'A partial grid with an inner radius must not retain the full-circle axis outline.');
 window.handleMessage({
     status: 'ready', chart: {
         ...state.chart,
@@ -234,8 +237,10 @@ window.handleMessage({
     }
 });
 const partialTangential = options.at(-1);
-assert.equal(partialTangential.angleAxis.endAngle, -90,
+assert.equal(partialTangential.angleAxis.endAngle, 450,
     'Counterclockwise concentric arcs must stop at their configured end angle.');
+assert.equal(partialTangential.angleAxis.axisLine.show, false,
+    'Concentric partial grids must not retain the full-circle axis outline.');
 window.SYMC_VISUALIZATION.mode = 'ipsview';
 window.handleMessage({
     status: 'ready', chart: {
@@ -246,9 +251,11 @@ window.handleMessage({
         }
     }
 });
-assert.equal(options.at(-1).angleAxis.endAngle, 120,
+const partialIPSView = options.at(-1);
+assert.equal(partialIPSView.angleAxis.endAngle, -120,
     'The IPSView renderer must also honor partial-circle geometry.');
-window.SYMC_VISUALIZATION.mode = 'symcon';
+assert.equal(partialIPSView.angleAxis.axisLine.show, false,
+    'The IPSView partial grid must follow its own configured angular extent.');
 window.SYMC_VISUALIZATION.mode = 'symcon';
 window.handleMessage({
     status: 'ready', chart: {
@@ -351,15 +358,39 @@ if (fs.existsSync(localECharts)) {
         }
     }
     userChart.dispose();
-    for (const option of [radial, tangential, fixedRadial, fixedTangential, halfRadial, partialTangential]) {
+    for (const option of [radial, tangential, fixedRadial, fixedTangential,
+        halfRadial, partialTangential, partialIPSView]) {
         const realChart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 625, height: 560 });
         realChart.setOption(option);
         assert.ok(realChart.renderToSVGString().includes('<svg'), 'Both polar modes must render in ECharts.');
-        if (option === halfRadial || option === partialTangential) {
+        if (option === radial) {
+            assert.ok(realChart.getZr().storage.getDisplayList().some(element => element.type === 'ring'),
+                'Existing full-circle charts must retain their circular grid outline.');
+        }
+        if (option === halfRadial || option === partialTangential || option === partialIPSView) {
             const axis = realChart.getModel().getComponent('angleAxis').axis;
             assert.deepEqual(Array.from(axis.getExtent()),
-                option === halfRadial ? [90, 270] : [180, -90],
+                option === halfRadial ? [90, -90] : option === partialTangential ? [180, 450] : [0, -120],
                 'ECharts must apply the requested partial angular extent.');
+            const elements = realChart.getZr().storage.getDisplayList();
+            assert.equal(elements.filter(element => element.type === 'ring').length, 0,
+                'Partial polar charts must not render a 360-degree grid ring.');
+            assert.ok(elements.some(element => element.type === 'path' && element.style.fill === null),
+                'Partial polar charts must retain their angular grid arcs.');
+            if (option === halfRadial) {
+                const centerX = option.polar.center[0];
+                const gridArc = elements.find(element => element.type === 'path' && element.style.fill === null);
+                assert.ok(gridArc.getBoundingRect().x >= centerX - 5,
+                    'The radial grid arcs must occupy the same right-hand half as the bars.');
+                const bars = elements.filter(element => element.type === 'sector' && element.getTextContent());
+                assert.ok(bars.every(element => element.getBoundingRect().x >= centerX - 5),
+                    'The radial bars must stay in the configured right-hand half-circle.');
+                const tracks = elements.filter(element => element.type === 'sector'
+                    && element.style.fill === '#778899');
+                assert.equal(tracks.length, 3, 'The partial radial layout must retain its background tracks.');
+                assert.ok(tracks.every(element => element.getBoundingRect().x >= centerX - 5),
+                    'Background tracks must follow the same half-circle as the radial bars.');
+            }
         }
         if (option === fixedRadial || option === fixedTangential) {
             const tracks = realChart.getZr().storage.getDisplayList().filter(

@@ -157,7 +157,10 @@
         angleAxis.startAngle = startAngle;
         angleAxis.clockwise = style.clockwise !== false;
         if (Number.isFinite(angularSpan) && angularSpan >= 30 && angularSpan < 360) {
-            angleAxis.endAngle = startAngle + (angleAxis.clockwise ? angularSpan : -angularSpan);
+            angleAxis.endAngle = startAngle + (angleAxis.clockwise ? -angularSpan : angularSpan);
+            if (layout.geometry.radius[0] > 0) {
+                angleAxis.axisLine.show = false;
+            }
         }
         categoryAxis.axisLabel.width = layout.labelWidth;
         categoryAxis.axisLabel.margin = layout.labelMargin;
