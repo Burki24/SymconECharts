@@ -175,6 +175,12 @@ Der eigene Vertrag für aktuelle Waterfall-Schritte mit Startwert, signierten
 [`ADR 0034`](adr/0034-waterfall-bar-current-values.md) festgelegt.
 Den eigenen Polar-Bar-Vertrag für aktuelle Werte und zwei Polar-Geometrien
 dokumentiert [`ADR 0035`](adr/0035-polar-bar-current-values.md).
+Bei begrenzten konzentrischen Polar-Bögen zeichnet ECharts 6.1.0 die
+eingebauten Balkenhintergründe intern zunächst als Vollkreise. Der Polar-
+Renderer passt die `BarView._backgroundEls` nach `setOption()` und beim
+Resize an die tatsächliche Winkelachse an. Da dies eine interne ECharts-
+Struktur nutzt, ist der zugehörige Render-Test bei jedem Runtime-Update
+erneut auszuführen.
 Die SVG-Balkenmuster von BarCategory und BarHistory verwenden denselben
 begrenzten Import über `libs/EChartsSvgImage.php` wie TimeSeries-Flächen.
 Die Browserdekodierung und wiederholte Pattern-Erzeugung liegt nun für alle

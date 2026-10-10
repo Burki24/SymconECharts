@@ -273,6 +273,29 @@
         };
     }
 
+    function alignPartialBackgroundTracks(style) {
+        if (!chart || !style || style.mode !== 'tangential' || style.showBarBackground !== true
+            || !Number.isFinite(Number(style.angularSpan)) || Number(style.angularSpan) >= 360
+            || typeof chart.getModel !== 'function' || typeof chart.getViewOfSeriesModel !== 'function') { return; }
+
+        var model = chart.getModel();
+        var series = model && model.getSeriesByIndex(0);
+        var angle = model && model.getComponent('angleAxis');
+        var view = series && chart.getViewOfSeriesModel(series);
+        if (!angle || !view || !Array.isArray(view._backgroundEls)) { return; }
+
+        // ECharts 6.1.0 hardcodes a full circle for tangential bar backgrounds.
+        // Keep its own background sectors, but align them to the actual angle axis.
+        var extent = angle.axis.getExtent();
+        var start = -extent[0] * Math.PI / 180;
+        var end = -extent[1] * Math.PI / 180;
+        view._backgroundEls.forEach(function (track) {
+            if (!track) { return; }
+            track.stopAnimation();
+            track.setShape({ startAngle: start, endAngle: end, clockwise: extent[0] >= extent[1] });
+        });
+    }
+
     function displayError(message) {
         if (chart) { chart.clear(); }
         chartElement.hidden = true;
@@ -302,6 +325,7 @@
             currentTheme = theme;
         }
         chart.setOption(buildOption(state.chart, theme), true);
+        alignPartialBackgroundTracks(state.chart.polar && state.chart.polar.style);
         lastWidth = chartElement.clientWidth;
         lastHeight = chartElement.clientHeight;
     }
@@ -324,6 +348,7 @@
             update[categoryAxisName] = { axisLabel: { width: layout.labelWidth, margin: layout.labelMargin } };
             update[valueAxisName] = { axisLabel: { show: layout.showValueScale } };
             chart.setOption(update);
+            alignPartialBackgroundTracks(polar.style);
         }
     }
 

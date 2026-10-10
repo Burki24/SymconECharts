@@ -2,6 +2,9 @@
 
 ## Behoben
 
+- Hintergrundspuren konzentrischer Polar-Bögen bleiben bei einem begrenzten
+  Winkelumfang innerhalb des gewählten Teilkreises, auch nach Größenänderungen.
+
 - Beim Verkleinern einer Polar-Kachel werden Kategoriebeschriftungen nicht
   mehr durch das automatische Achsenintervall übersprungen, solange sie
   tatsächlich Platz haben.

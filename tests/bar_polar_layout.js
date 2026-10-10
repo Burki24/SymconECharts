@@ -517,9 +517,101 @@ assert.equal(customIPSViewFonts.angleAxis.axisLabel.fontSize, 9);
 assert.equal(customIPSViewFonts.radiusAxis.axisLabel.fontSize, 8);
 assert.equal(customIPSViewFonts.series[0].label.fontSize, 13);
 
+const simulatedTracks = Array.from({ length: 3 }, () => ({
+    stopAnimation() {},
+    setShape(shape) { this.shape = shape; }
+}));
+chart.getModel = () => ({
+    getSeriesByIndex: () => ({}),
+    getComponent: () => ({ axis: { getExtent: () => [90, -90] } })
+});
+chart.getViewOfSeriesModel = () => ({ _backgroundEls: simulatedTracks });
+window.handleMessage(reportedState);
+assert.ok(simulatedTracks.every(track => Math.abs(track.shape.startAngle + Math.PI / 2) < 0.001
+    && Math.abs(track.shape.endAngle - Math.PI / 2) < 0.001 && track.shape.clockwise),
+'The Polar renderer must align its background sectors even when the full ECharts runtime is unavailable.');
+
 const localECharts = path.join(__dirname, '..', '.tools', 'echarts-runtime', 'node_modules', 'echarts');
 if (fs.existsSync(localECharts)) {
     const echarts = require(localECharts);
+    const livePolarElement = { hidden: false, clientWidth: 925, clientHeight: 690 };
+    const livePolarError = { hidden: true, textContent: '' };
+    const livePolarChart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 925, height: 690 });
+    let liveResizeCallback = null;
+    const livePolarWindow = {
+        SYMC_VISUALIZATION: {
+            mode: 'symcon', state: reportedState,
+            options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: true },
+            translations: {}
+        },
+        echarts: { init: () => livePolarChart },
+        ResizeObserver: class {
+            constructor(callback) { liveResizeCallback = callback; }
+            observe() {}
+        },
+        addEventListener: () => {}
+    };
+    const livePolarDocument = {
+        getElementById: id => id === 'echarts-bar-polar-chart' ? livePolarElement : livePolarError,
+        createElement: () => ({ style: {}, remove: () => {} }),
+        body: { appendChild: () => {} }
+    };
+    vm.runInNewContext(designSource, { window: livePolarWindow, document: livePolarDocument, console });
+    vm.runInNewContext(source, {
+        window: livePolarWindow, document: livePolarDocument, console,
+        ResizeObserver: livePolarWindow.ResizeObserver
+    });
+    function liveTracks() {
+        return livePolarChart.getZr().storage.getDisplayList().filter(
+            element => element.type === 'sector' && element.style.fill === '#E70D0D'
+        );
+    }
+    const initialTracks = liveTracks();
+    assert.equal(initialTracks.length, 3, 'The reported concentric Tile must retain all three background tracks.');
+    assert.ok(initialTracks.every(element => Math.abs(element.shape.endAngle - element.shape.startAngle)
+        <= Math.PI + 0.001),
+    'The reported 180-degree concentric tracks must stay inside the selected half-circle.');
+    assert.ok(initialTracks.every(element => Math.abs(element.shape.startAngle + Math.PI / 2) < 0.001
+        && Math.abs(element.shape.endAngle - Math.PI / 2) < 0.001),
+    'Concentric tracks must align with the chosen start and end angles.');
+    livePolarWindow.SYMC_VISUALIZATION.mode = 'ipsview';
+    livePolarWindow.handleMessage({
+        ...reportedState,
+        chart: {
+            ...reportedState.chart,
+            polar: {
+                ...reportedState.chart.polar,
+                style: {
+                    ...reportedState.chart.polar.style,
+                    startAngle: 180, angularSpan: 120, clockwise: false
+                }
+            }
+        }
+    });
+    assert.ok(liveTracks().every(element => Math.abs(element.shape.endAngle - element.shape.startAngle)
+        <= 120 * Math.PI / 180 + 0.001 && element.shape.clockwise === false),
+    'Counterclockwise IPSView tracks must follow its independent angular span.');
+    livePolarElement.clientWidth = 435;
+    livePolarElement.clientHeight = 324;
+    livePolarChart.resize({ width: 435, height: 324 });
+    liveResizeCallback();
+    assert.ok(liveTracks().every(element => Math.abs(element.shape.endAngle - element.shape.startAngle)
+        <= 120 * Math.PI / 180 + 0.001),
+    'Resizing must not restore full-circle concentric background tracks.');
+    livePolarWindow.handleMessage({
+        ...reportedState,
+        chart: {
+            ...reportedState.chart,
+            polar: {
+                ...reportedState.chart.polar,
+                style: { ...reportedState.chart.polar.style, angularSpan: 360 }
+            }
+        }
+    });
+    assert.ok(liveTracks().every(element => Math.abs(element.shape.endAngle - element.shape.startAngle)
+        >= 2 * Math.PI - 0.001),
+    'Full-circle concentric tracks must retain their original 360-degree behavior.');
+    livePolarChart.dispose();
     const gradientChart = echarts.init(null, null,
         { renderer: 'svg', ssr: true, width: 625, height: 560 });
     gradientChart.setOption(gradientRadial);
