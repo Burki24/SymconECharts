@@ -28,13 +28,15 @@ function render(
     adaptToBackground = false,
     enableImages = false,
     timeAxisLabelFormat = 'auto',
-    range
+    range,
+    observeResize = false
 ) {
     const listeners = {};
     const scheduled = [];
     const chartElement = {
         hidden: false,
         clientWidth: width,
+        clientHeight: 400,
         addEventListener: (type, listener) => { listeners[type] = listener; },
         getBoundingClientRect: () => ({ left: 0, width })
     };
@@ -43,12 +45,22 @@ function render(
     let option;
     let dispatchedAction;
     let setOptionCalls = 0;
+    let resizeCallback;
+    let resized = 0;
+    let chartWidth = width;
+    let chartHeight = chartElement.clientHeight;
     const chart = {
         setOption: next => { option = next; setOptionCalls += 1; },
+        getWidth: () => chartWidth,
+        getHeight: () => chartHeight,
         getOption: () => option,
         dispatchAction: action => { dispatchedAction = action; },
         clear: () => {},
-        resize: () => {},
+        resize: () => {
+            resized++;
+            chartWidth = chartElement.clientWidth;
+            chartHeight = chartElement.clientHeight;
+        },
         dispose: () => {}
     };
     function TestImage() {
@@ -105,6 +117,10 @@ function render(
             }
         },
         echarts: { init: () => chart },
+        ResizeObserver: observeResize ? class {
+            constructor(callback) { resizeCallback = callback; }
+            observe() {}
+        } : undefined,
         Image: enableImages ? TestImage : undefined,
         getComputedStyle: probe => ({
             color: resolvedColors[probe.variable] || probe.fallback || ''
@@ -147,7 +163,7 @@ function render(
         return probe;
     };
 
-    const context = { window, document };
+    const context = { window, document, ResizeObserver: window.ResizeObserver };
     vm.runInNewContext(designSource, context);
     vm.runInNewContext(zoomSource, context);
     vm.runInNewContext(patternSource, context);
@@ -158,12 +174,27 @@ function render(
         testListeners: { value: listeners },
         getDispatchedAction: { value: () => dispatchedAction },
         getSetOptionCalls: { value: () => setOptionCalls },
+        resizeTest: { value: observeResize ? {
+            notify: () => resizeCallback(),
+            resizeWidth: next => { chartElement.clientWidth = next; resizeCallback(); },
+            get resized() { return resized; },
+            get optionUpdates() { return setOptionCalls; }
+        } : null },
         getState: { value: () => window.SYMC_VISUALIZATION.state },
         handleMessage: { value: window.handleMessage },
         getLatestOption: { value: () => option }
     });
     return option;
 }
+
+const timeSeriesResize = render(undefined, undefined, 750, undefined, 'dark', {},
+    'symcon', false, false, 'auto', undefined, true).resizeTest;
+timeSeriesResize.notify();
+assert.equal(timeSeriesResize.resized, 0, 'An unchanged TimeSeries notification must preserve animation.');
+assert.equal(timeSeriesResize.optionUpdates, 1, 'An unchanged TimeSeries notification must preserve zoom.');
+timeSeriesResize.resizeWidth(620);
+assert.equal(timeSeriesResize.resized, 1, 'A changed TimeSeries width must resize.');
+assert.equal(timeSeriesResize.optionUpdates, 2, 'A changed TimeSeries width must rebuild its layout.');
 
 const custom = render({
     legendPosition: 'bottom', lineWidthPercent: 150, smoothLines: true,

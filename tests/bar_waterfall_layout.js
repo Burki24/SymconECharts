@@ -8,13 +8,25 @@ const vm = require('node:vm');
 const source = fs.readFileSync(
     path.join(__dirname, '..', 'EChartsBarWaterfall', 'visualization', 'app.js'), 'utf8'
 );
-const chartElement = { hidden: false };
+const designSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-design.js'), 'utf8');
+const chartElement = { hidden: false, clientWidth: 800, clientHeight: 400 };
 const errorElement = { hidden: true, textContent: '' };
 let option;
 let initialized = 0;
+let resized = 0;
+let resizeCallback;
+let chartWidth = chartElement.clientWidth;
+let chartHeight = chartElement.clientHeight;
 const chart = {
     setOption: next => { option = next; },
-    clear: () => {}, resize: () => {}, dispose: () => {}
+    getWidth: () => chartWidth, getHeight: () => chartHeight,
+    clear: () => {},
+    resize: () => {
+        resized++;
+        chartWidth = chartElement.clientWidth;
+        chartHeight = chartElement.clientHeight;
+    },
+    dispose: () => {}
 };
 const palette = {
     background: '#111111', text: '#eeeeee', muted: '#aaaaaa', border: '#777777',
@@ -49,6 +61,10 @@ const window = {
         translations: {}
     },
     echarts: { init: () => { initialized++; return chart; } },
+    ResizeObserver: class {
+        constructor(callback) { resizeCallback = callback; }
+        observe() {}
+    },
     addEventListener: () => {}
 };
 const document = {
@@ -56,9 +72,15 @@ const document = {
     createElement: () => ({ style: {}, remove: () => {} }),
     body: { appendChild: () => {} }
 };
-vm.runInNewContext(source, { window, document, console });
+vm.runInNewContext(designSource, { window });
+vm.runInNewContext(source, { window, document, console, ResizeObserver: window.ResizeObserver });
 
 assert.equal(initialized, 1);
+resizeCallback();
+assert.equal(resized, 0, 'An unchanged observer notification must preserve the Waterfall animation.');
+chartElement.clientWidth = 600;
+resizeCallback();
+assert.equal(resized, 1, 'A changed Waterfall tile width must resize the chart.');
 assert.deepEqual(Array.from(option.xAxis.data), ['Start', '<drop>', 'Recovery', 'Total']);
 assert.equal(option.series.length, 4);
 assert.deepEqual(Array.from(option.series[0].data), [0, 0, 0, 0]);

@@ -88,6 +88,14 @@
         return { borderWidth: pixels, borderColor: color || themeBorder };
     }
 
+    function resizeChartIfNeeded(chart, element) {
+        if (!chart || (chart.getWidth() === element.clientWidth && chart.getHeight() === element.clientHeight)) {
+            return false;
+        }
+        chart.resize();
+        return true;
+    }
+
     global.SYMC_ECHARTS_DESIGN = Object.freeze({
         contrastRatio: contrastRatio,
         readableTextColor: readableTextColor,
@@ -95,6 +103,7 @@
         opacityFromPercent: opacityFromPercent,
         prefersReducedMotion: prefersReducedMotion,
         colorWithAlpha: colorWithAlpha,
-        barOutlineStyle: barOutlineStyle
+        barOutlineStyle: barOutlineStyle,
+        resizeChartIfNeeded: resizeChartIfNeeded
     });
 }(window));

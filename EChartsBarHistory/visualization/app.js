@@ -313,7 +313,9 @@
         if (state) { render(state); }
     };
     if (window.ResizeObserver) {
-        new ResizeObserver(function () { if (chart) { chart.resize(); } }).observe(chartElement);
+        new ResizeObserver(function () {
+            echartsDesign.resizeChartIfNeeded(chart, chartElement);
+        }).observe(chartElement);
     } else {
         window.addEventListener('resize', function () { if (chart) { chart.resize(); } });
     }

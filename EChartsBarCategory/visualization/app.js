@@ -7,6 +7,7 @@
     var chart = null;
     var currentState = bootstrap.state || null;
     var currentTheme = null;
+    var echartsDesign = window.SYMC_ECHARTS_DESIGN;
     var barPatterns = window.SymconEChartsPattern.create(function () {
         if (typeof window.requestAnimationFrame === 'function') {
             window.requestAnimationFrame(function () { render(currentState); });
@@ -312,8 +313,7 @@
 
     if (window.ResizeObserver) {
         new ResizeObserver(function () {
-            if (!chart) { return; }
-            chart.resize();
+            if (!echartsDesign.resizeChartIfNeeded(chart, chartElement)) { return; }
             if (currentState && currentState.status === 'ready') {
                 chart.setOption(buildOption(currentState.chart, currentTheme || 'auto'), true);
             }

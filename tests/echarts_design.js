@@ -51,4 +51,48 @@ assert.equal(prefersReducedMotion(), true, 'The shared helper must honor reduced
 window.matchMedia = () => ({ matches: false });
 assert.equal(prefersReducedMotion(), false, 'Normal motion preferences must retain chart animations.');
 
+const resizeChartIfNeeded = window.SYMC_ECHARTS_DESIGN.resizeChartIfNeeded;
+const chartElement = { clientWidth: 640, clientHeight: 360 };
+let chartWidth = 640;
+let chartHeight = 360;
+let resizeCount = 0;
+const chart = {
+    getWidth: () => chartWidth,
+    getHeight: () => chartHeight,
+    resize: () => {
+        resizeCount++;
+        chartWidth = chartElement.clientWidth;
+        chartHeight = chartElement.clientHeight;
+    }
+};
+assert.equal(resizeChartIfNeeded(null, chartElement), false, 'A missing chart cannot be resized.');
+assert.equal(resizeChartIfNeeded(chart, chartElement), false,
+    'The initial observer notification must not interrupt chart animations.');
+chartElement.clientWidth = 500;
+assert.equal(resizeChartIfNeeded(chart, chartElement), true, 'A width change must resize the chart.');
+assert.equal(resizeCount, 1);
+assert.equal(resizeChartIfNeeded(chart, chartElement), false, 'The repeated size must not resize twice.');
+chartElement.clientHeight = 240;
+assert.equal(resizeChartIfNeeded(chart, chartElement), true, 'A height change must resize the chart.');
+assert.equal(resizeCount, 2);
+
+for (const moduleName of [
+    'EChartsGaugeSingle', 'EChartsGaugeMulti', 'EChartsGaugeTacho',
+    'EChartsGaugeChronograph', 'EChartsTimeSeries', 'EChartsBarCategory',
+    'EChartsBarHistory', 'EChartsBarWaterfall'
+]) {
+    const renderer = fs.readFileSync(path.join(__dirname, '..', moduleName, 'visualization', 'app.js'), 'utf8');
+    const observer = renderer.match(/new ResizeObserver\(function \(\) \{([\s\S]*?)\}\)\.observe\(chartElement\)/);
+    assert.ok(observer, `${moduleName} must observe chart element changes.`);
+    assert.match(observer[1], /resizeChartIfNeeded\(chart, chartElement\)/,
+        `${moduleName} must share the unchanged-size guard.`);
+    assert.doesNotMatch(observer[1], /chart\.resize\(/,
+        `${moduleName} must not interrupt animations with a redundant observer resize.`);
+}
+
+const waterfallTemplate = fs.readFileSync(path.join(__dirname, '..', 'EChartsBarWaterfall',
+    'visualization', 'index.html'), 'utf8');
+assert.match(waterfallTemplate, /\{\{ECHARTS_DESIGN_SCRIPT\}\}/,
+    'Waterfall must load the shared resize helper in its browser document.');
+
 console.log('Shared ECharts design utilities verified.');

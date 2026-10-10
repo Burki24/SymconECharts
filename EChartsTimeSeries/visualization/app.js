@@ -479,8 +479,7 @@
 
     if (window.ResizeObserver) {
         new ResizeObserver(function () {
-            if (!chart) { return; }
-            chart.resize();
+            if (!echartsDesign.resizeChartIfNeeded(chart, chartElement)) { return; }
             if (currentState && currentState.status === 'ready' && currentState.chart) {
                 var range = currentState.chart.range;
                 var savedZoom = zoomController.capture(chart, range, range);

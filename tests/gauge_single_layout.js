@@ -12,7 +12,7 @@ const palette = {
     border: '#cccccc', track: '#444444', surface: '#333333', accent: '#55cbb5'
 };
 
-function render(mode, width, height, preset, style = {}, reducedMotion = false) {
+function render(mode, width, height, preset, style = {}, reducedMotion = false, observeResize = false) {
     const chartElement = {
         clientWidth: width,
         clientHeight: height,
@@ -21,6 +21,21 @@ function render(mode, width, height, preset, style = {}, reducedMotion = false) 
     };
     const errorElement = { hidden: true, textContent: '' };
     let option;
+    let resizeCallback;
+    let resized = 0;
+    let optionUpdates = 0;
+    let chartWidth = width;
+    let chartHeight = height;
+    const chart = {
+        setOption: next => { option = next; optionUpdates++; },
+        getWidth: () => chartWidth,
+        getHeight: () => chartHeight,
+        resize: () => {
+            resized++;
+            chartWidth = chartElement.clientWidth;
+            chartHeight = chartElement.clientHeight;
+        }
+    };
     const window = {
         SYMC_VISUALIZATION: {
             mode,
@@ -33,17 +48,29 @@ function render(mode, width, height, preset, style = {}, reducedMotion = false) 
             },
             options: { echartsThemes: { dark: palette } }
         },
-        echarts: { init: () => ({ setOption: next => { option = next; } }) },
+        echarts: { init: () => chart },
+        ResizeObserver: observeResize ? class {
+            constructor(callback) { resizeCallback = callback; }
+            observe() {}
+        } : undefined,
         matchMedia: query => ({ matches: reducedMotion && query === '(prefers-reduced-motion: reduce)' }),
         addEventListener: () => {}
     };
     const document = {
         getElementById: id => id === 'echarts-gauge-chart' ? chartElement : errorElement
     };
-    const context = { window, document };
+    const context = { window, document, ResizeObserver: window.ResizeObserver };
     vm.runInNewContext(designSource, context);
     vm.runInNewContext(source, context);
     assert.ok(option, 'The Gauge Single option must be rendered.');
+    if (observeResize) {
+        Object.defineProperty(option, 'resizeTest', { value: {
+            notify: () => resizeCallback(),
+            resizeWidth: next => { chartElement.clientWidth = next; resizeCallback(); },
+            get resized() { return resized; },
+            get optionUpdates() { return optionUpdates; }
+        } });
+    }
     return option;
 }
 
@@ -67,6 +94,13 @@ for (const mode of ['symcon', 'ipsview']) {
 }
 
 const narrow = render('ipsview', 320, 240, 'simple', { plateShape: 'circle' });
+const resizeGauge = render('symcon', 620, 630, 'simple', {}, false, true).resizeTest;
+resizeGauge.notify();
+assert.equal(resizeGauge.resized, 0, 'An unchanged Gauge notification must not cancel animation.');
+assert.equal(resizeGauge.optionUpdates, 1, 'An unchanged Gauge notification must not rebuild options.');
+resizeGauge.resizeWidth(500);
+assert.equal(resizeGauge.resized, 1, 'A genuine Gauge width change must resize.');
+assert.equal(resizeGauge.optionUpdates, 2, 'A genuine Gauge width change must rebuild its responsive option.');
 const reducedGauge = render('ipsview', 620, 630, 'simple', { plateShape: 'circle' }, true);
 assert.equal(reducedGauge.animation, false, 'Gauge Single must keep honoring reduced-motion preferences.');
 assert.equal(reducedGauge.animationDuration, 0);

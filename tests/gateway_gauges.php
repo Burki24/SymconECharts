@@ -4950,7 +4950,10 @@ $waterfallIPSView = $waterfall->GetIPSViewHTML();
 assertGatewayGauge(
     str_contains($waterfallTile, 'echarts-bar-waterfall-root')
         && str_contains($waterfallTile, '"theme":"auto"')
+        && str_contains($waterfallTile, 'function resizeChartIfNeeded(')
+        && strlen($waterfallTile) < SYMCON_OUTPUT_BUFFER_LIMIT
         && str_contains($waterfallIPSView, '"theme":"dark"')
+        && str_contains($waterfallIPSView, 'function resizeChartIfNeeded(')
         && str_contains($waterfallIPSView, '#123456')
         && $waterfall->GetTestVariableValue('IPSViewBarWaterfall') !== null,
     'Waterfall must provide separate Tile and persistent IPSView output.'

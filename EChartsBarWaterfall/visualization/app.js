@@ -7,6 +7,7 @@
     var chart = null;
     var currentState = bootstrap.state || null;
     var currentTheme = null;
+    var echartsDesign = window.SYMC_ECHARTS_DESIGN;
 
     function translate(value) {
         return (bootstrap.translations || {})[value] || value;
@@ -223,7 +224,9 @@
     };
 
     if (window.ResizeObserver) {
-        new ResizeObserver(function () { if (chart) { chart.resize(); } }).observe(chartElement);
+        new ResizeObserver(function () {
+            echartsDesign.resizeChartIfNeeded(chart, chartElement);
+        }).observe(chartElement);
     } else {
         window.addEventListener('resize', function () { if (chart) { chart.resize(); } });
     }

@@ -924,8 +924,7 @@
 
     if (window.ResizeObserver) {
         new ResizeObserver(function () {
-            if (chart) {
-                chart.resize();
+            if (echartsDesign.resizeChartIfNeeded(chart, chartElement)) {
                 if (currentState && currentState.status === 'ready') {
                     chart.setOption(buildOption(currentState.chart, currentTheme || 'auto'), true);
                 }

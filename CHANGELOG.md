@@ -2,6 +2,10 @@
 
 ## Behoben
 
+- Unveränderte Größenmeldungen unterbrechen auch bei Gauges, TimeSeries und
+  den übrigen Balkendiagrammen keine laufenden Chart-Animationen mehr. Echte
+  Größenänderungen bleiben wirksam.
+
 - Start- und Aktualisierungsanimationen der Polar-Balken werden in Kachel und
   IPSView nicht mehr durch Größenmeldungen ohne tatsächliche Größenänderung abgebrochen.
 
