@@ -18,6 +18,10 @@
 
 ## Neu
 
+- Polar-Balken und konzentrische Bögen können in Kachel und unabhängigem
+  IPSView-Design statt Vollfarbe einen Farbverlauf mit wählbarer Endfarbe
+  verwenden.
+
 - Kategorie-, Wert- und Skalenschriftgröße des Polar-Diagramms sind für
   Kachel und unabhängiges IPSView-Design getrennt einstellbar.
 

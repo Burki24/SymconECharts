@@ -232,17 +232,29 @@
                 },
                 data: items.map(function (item, index) {
                     var itemColor = item.color || swatches[index % swatches.length] || colors.accent;
+                    var gradient = style.barFillMode === 'gradient';
+                    var fill = gradient ? {
+                        type: 'linear', x: 0, y: 1, x2: 0, y2: 0,
+                        colorStops: [
+                            { offset: 0, color: itemColor },
+                            { offset: 1, color: style.barGradientColor || colors.background }
+                        ]
+                    } : itemColor;
+                    var textColor = valueLabelPosition === 'outside' ? colors.text
+                        : typeof design.readableTextColor === 'function'
+                            ? design.readableTextColor(itemColor, colors.text, colors.background)
+                            : colors.text;
                     return {
                         id: item.id,
                         name: String(item.label || ''),
                         value: Number(item.value),
-                        itemStyle: { color: itemColor },
+                        itemStyle: { color: fill },
                         label: {
                             distance: valueLabelDistance(index),
-                            color: valueLabelPosition === 'outside' ? colors.text
-                                : typeof design.readableTextColor === 'function'
-                                    ? design.readableTextColor(itemColor, colors.text, colors.background)
-                                    : colors.text
+                            color: textColor,
+                            textBorderColor: gradient && valueLabelPosition !== 'outside'
+                                ? (textColor === colors.text ? colors.background : colors.text) : undefined,
+                            textBorderWidth: gradient && valueLabelPosition !== 'outside' ? 2 : 0
                         }
                     };
                 }),

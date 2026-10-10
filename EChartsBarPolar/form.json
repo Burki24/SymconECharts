@@ -313,6 +313,34 @@
                     "items": [
                         {
                             "type": "Select",
+                            "name": "BarFillMode",
+                            "caption": "Bar fill",
+                            "onChange": "ECBP_UpdateBarFillForm($id, false, $BarFillMode);",
+                            "options": [
+                                {
+                                    "caption": "Solid color",
+                                    "value": "solid"
+                                },
+                                {
+                                    "caption": "Gradient",
+                                    "value": "gradient"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "BarGradientColor",
+                            "caption": "Gradient end color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
                             "name": "ValueAxisRangeMode",
                             "caption": "Value scale",
                             "onChange": "ECBP_UpdateValueScaleForm($id, $ValueAxisRangeMode);",
@@ -629,6 +657,34 @@
                                     "minimum": 20,
                                     "maximum": 95,
                                     "suffix": "%"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "Select",
+                                    "name": "IPSViewBarFillMode",
+                                    "caption": "Bar fill",
+                                    "onChange": "ECBP_UpdateBarFillForm($id, true, $IPSViewBarFillMode);",
+                                    "options": [
+                                        {
+                                            "caption": "Solid color",
+                                            "value": "solid"
+                                        },
+                                        {
+                                            "caption": "Gradient",
+                                            "value": "gradient"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "SelectColor",
+                                    "name": "IPSViewBarGradientColor",
+                                    "caption": "Gradient end color",
+                                    "allowTransparent": true,
+                                    "transparentCaption": "Automatic (theme)"
                                 }
                             ]
                         },

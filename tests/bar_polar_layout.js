@@ -229,6 +229,35 @@ assert.equal(outsideIPSView.series[0].label.position, 'outside',
     'IPSView must use the same outside value-label placement.');
 window.SYMC_VISUALIZATION.mode = 'symcon';
 
+const gradientStyle = {
+    ...state.chart.polar.style, barFillMode: 'gradient', barGradientColor: '#223344'
+};
+window.handleMessage({
+    status: 'ready', chart: {
+        ...state.chart, polar: { ...state.chart.polar, style: gradientStyle }
+    }
+});
+const gradientRadial = options.at(-1);
+assert.equal(gradientRadial.series[0].data[0].itemStyle.color.type, 'linear');
+assert.equal(gradientRadial.series[0].data[0].itemStyle.color.colorStops[0].color, '#ff5500',
+    'Gradient fill must begin with the configured source color.');
+assert.equal(gradientRadial.series[0].data[0].itemStyle.color.colorStops[1].color, '#223344');
+assert.equal(gradientRadial.series[0].data[0].label.textBorderWidth, 2,
+    'Labels over gradients need a contrasting outline.');
+window.SYMC_VISUALIZATION.mode = 'ipsview';
+window.handleMessage({
+    status: 'ready', chart: {
+        ...tangentialState.chart,
+        polar: { ...tangentialState.chart.polar, style: {
+            ...tangentialState.chart.polar.style, barFillMode: 'gradient', barGradientColor: ''
+        } }
+    }
+});
+const gradientIPSView = options.at(-1);
+assert.equal(gradientIPSView.series[0].data[1].itemStyle.color.colorStops[1].color, palette.background,
+    'Automatic gradient end color in IPSView must follow the selected theme.');
+window.SYMC_VISUALIZATION.mode = 'symcon';
+
 const fixedStyle = {
     ...state.chart.polar.style,
     valueAxisRangeMode: 'manual', valueAxisMinimum: -5, valueAxisMaximum: 25,
@@ -491,6 +520,15 @@ assert.equal(customIPSViewFonts.series[0].label.fontSize, 13);
 const localECharts = path.join(__dirname, '..', '.tools', 'echarts-runtime', 'node_modules', 'echarts');
 if (fs.existsSync(localECharts)) {
     const echarts = require(localECharts);
+    const gradientChart = echarts.init(null, null,
+        { renderer: 'svg', ssr: true, width: 625, height: 560 });
+    gradientChart.setOption(gradientRadial);
+    const gradientSVG = gradientChart.renderToSVGString();
+    assert.match(gradientSVG, /<linearGradient\b/,
+        'The bundled ECharts renderer must draw Polar bars with a linear gradient.');
+    assert.match(gradientSVG, /#223344/i,
+        'The configured gradient end color must reach the rendered Polar chart.');
+    gradientChart.dispose();
     const compactConcentricChart = echarts.init(null, null,
         { renderer: 'svg', ssr: true, width: 435, height: 324 });
     compactConcentricChart.setOption(compactConcentric);

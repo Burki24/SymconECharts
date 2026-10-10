@@ -5035,6 +5035,8 @@ assertGatewayGauge(
         && $polarData['polar']['style']['mode'] === 'radial'
         && $polarData['polar']['style']['valueAxisRangeMode'] === 'auto'
         && $polarData['polar']['style']['showBarBackground'] === false
+        && $polarData['polar']['style']['barFillMode'] === 'solid'
+        && $polarData['polar']['style']['barGradientColor'] === ''
         && $polarData['polar']['style']['valueLabelPosition'] === 'middle'
         && $polarData['polar']['style']['categoryLabelFontSize'] === 10
         && $polarData['polar']['style']['valueLabelFontSize'] === 10
@@ -5078,6 +5080,11 @@ $polarScaleRow = current(array_filter(
     static fn (array $item): bool => in_array('ValueAxisRangeMode', array_column($item['items'] ?? [], 'name'), true)
 ));
 $polarScaleFields = array_column($polarScaleRow['items'], null, 'name');
+$polarFillRow = current(array_filter(
+    $polarTileDesigner['items'],
+    static fn (array $item): bool => in_array('BarFillMode', array_column($item['items'] ?? [], 'name'), true)
+));
+$polarFillFields = array_column($polarFillRow['items'], null, 'name');
 $polarLabelPositionField = current(array_filter(
     $polarTileDesigner['items'],
     static fn (array $item): bool => ($item['name'] ?? '') === 'ValueLabelPosition'
@@ -5087,6 +5094,11 @@ assertGatewayGauge(
         && ($polarScaleFields['ValueAxisMaximum']['visible'] ?? null) === false
         && str_contains((string) ($polarScaleFields['ValueAxisRangeMode']['onChange'] ?? ''), 'ECBP_UpdateValueScaleForm'),
     'Polar Bar Tile form must hide fixed-scale limits until manual mode is selected.'
+);
+assertGatewayGauge(
+    ($polarFillFields['BarGradientColor']['visible'] ?? null) === false
+        && str_contains((string) ($polarFillFields['BarFillMode']['onChange'] ?? ''), 'ECBP_UpdateBarFillForm'),
+    'Polar Tile form must hide the gradient color until gradient fill is selected.'
 );
 assertGatewayGauge(
     ($polarLabelPositionField['type'] ?? '') === 'Select'
@@ -5103,10 +5115,20 @@ $polarDefaultIPSViewScaleRow = current(array_filter(
     static fn (array $item): bool => in_array('IPSViewValueAxisRangeMode', array_column($item['items'] ?? [], 'name'), true)
 ));
 $polarDefaultIPSViewScaleFields = array_column($polarDefaultIPSViewScaleRow['items'], null, 'name');
+$polarDefaultIPSViewFillRow = current(array_filter(
+    $polarDefaultIPSViewPanel['items'],
+    static fn (array $item): bool => in_array('IPSViewBarFillMode', array_column($item['items'] ?? [], 'name'), true)
+));
+$polarDefaultIPSViewFillFields = array_column($polarDefaultIPSViewFillRow['items'], null, 'name');
 assertGatewayGauge(
     ($polarDefaultIPSViewScaleFields['IPSViewValueAxisMinimum']['visible'] ?? null) === false
         && ($polarDefaultIPSViewScaleFields['IPSViewValueAxisMaximum']['visible'] ?? null) === false,
     'Polar IPSView form must hide fixed-scale limits in automatic mode.'
+);
+assertGatewayGauge(
+    ($polarDefaultIPSViewFillFields['IPSViewBarGradientColor']['visible'] ?? null) === false
+        && ($polarDefaultIPSViewFillFields['IPSViewBarFillMode']['enabled'] ?? null) === true,
+    'Independent Polar IPSView form must start with solid fill and editable fill mode.'
 );
 $polar->SetTestProperty('ValueAxisRangeMode', 'manual');
 $polar->SetTestProperty('ValueAxisMinimum', -10.5);
@@ -5114,6 +5136,8 @@ $polar->SetTestProperty('ValueAxisMaximum', 30.25);
 $polar->SetTestProperty('ShowBarBackground', true);
 $polar->SetTestProperty('BarBackgroundColor', 0x778899);
 $polar->SetTestProperty('BarBackgroundOpacityPercent', 40);
+$polar->SetTestProperty('BarFillMode', 'gradient');
+$polar->SetTestProperty('BarGradientColor', 0x55CCAA);
 $polar->SetTestProperty('AngularSpan', 180);
 $polar->SetTestProperty('ValueLabelPosition', 'insideEnd');
 $polar->SetTestProperty('CategoryLabelFontSize', 9);
@@ -5129,6 +5153,8 @@ assertGatewayGauge(
         && $polarDesignData['polar']['style']['showBarBackground'] === true
         && $polarDesignData['polar']['style']['barBackgroundColor'] === '#778899'
         && $polarDesignData['polar']['style']['barBackgroundOpacityPercent'] === 40
+        && $polarDesignData['polar']['style']['barFillMode'] === 'gradient'
+        && $polarDesignData['polar']['style']['barGradientColor'] === '#55CCAA'
         && $polarDesignData['polar']['style']['angularSpan'] === 180
         && $polarDesignData['polar']['style']['valueLabelPosition'] === 'insideEnd'
         && $polarDesignData['polar']['style']['categoryLabelFontSize'] === 9
@@ -5147,6 +5173,8 @@ $polar->SetTestProperty('IPSViewValueAxisMaximum', 100.0);
 $polar->SetTestProperty('IPSViewShowBarBackground', true);
 $polar->SetTestProperty('IPSViewBarBackgroundColor', 0x8B5A2B);
 $polar->SetTestProperty('IPSViewBarBackgroundOpacityPercent', 35);
+$polar->SetTestProperty('IPSViewBarFillMode', 'gradient');
+$polar->SetTestProperty('IPSViewBarGradientColor', 0x223344);
 $polar->SetTestProperty('IPSViewAngularSpan', 270);
 $polar->SetTestProperty('IPSViewValueLabelPosition', 'insideStart');
 $polar->SetTestProperty('IPSViewCategoryLabelFontSize', 12);
@@ -5163,6 +5191,8 @@ assertGatewayGauge(
         && str_contains($polarIPSViewDesign, '"showBarBackground":true')
         && str_contains($polarIPSViewDesign, '"barBackgroundColor":"#8B5A2B"')
         && str_contains($polarIPSViewDesign, '"barBackgroundOpacityPercent":35')
+        && str_contains($polarIPSViewDesign, '"barFillMode":"gradient"')
+        && str_contains($polarIPSViewDesign, '"barGradientColor":"#223344"')
         && str_contains($polarIPSViewDesign, '"angularSpan":270')
         && str_contains($polarIPSViewDesign, '"valueLabelPosition":"insideStart"')
         && str_contains($polarIPSViewDesign, '"categoryLabelFontSize":12')
@@ -5184,6 +5214,11 @@ $polarIPSViewScaleRow = current(array_filter(
     static fn (array $item): bool => in_array('IPSViewValueAxisRangeMode', array_column($item['items'] ?? [], 'name'), true)
 ));
 $polarIPSViewScaleFields = array_column($polarIPSViewScaleRow['items'], null, 'name');
+$polarIPSViewFillRow = current(array_filter(
+    $polarIPSViewPanel['items'],
+    static fn (array $item): bool => in_array('IPSViewBarFillMode', array_column($item['items'] ?? [], 'name'), true)
+));
+$polarIPSViewFillFields = array_column($polarIPSViewFillRow['items'], null, 'name');
 $polarIPSViewLabelPositionField = current(array_filter(
     $polarIPSViewPanel['items'],
     static fn (array $item): bool => ($item['name'] ?? '') === 'IPSViewValueLabelPosition'
@@ -5205,6 +5240,18 @@ assertGatewayGauge(
         && str_contains(json_encode($polarIPSViewPanel, JSON_THROW_ON_ERROR), 'IPSViewValueLabelFontSize')
         && str_contains(json_encode($polarIPSViewPanel, JSON_THROW_ON_ERROR), 'IPSViewScaleLabelFontSize'),
     'Independent Polar IPSView design must expose an enabled fixed scale and background-track controls.'
+);
+assertGatewayGauge(
+    ($polarIPSViewFillFields['IPSViewBarGradientColor']['visible'] ?? null) === true
+        && ($polarIPSViewFillFields['IPSViewBarGradientColor']['enabled'] ?? null) === true,
+    'Independent Polar IPSView designer must reveal an editable gradient color.'
+);
+$polar->UpdateBarFillForm(true, 'solid');
+assertGatewayGauge(
+    array_slice($polar->GetTestFormUpdates(), -1) === [
+        ['Field' => 'IPSViewBarGradientColor', 'Parameter' => 'visible', 'Value' => false]
+    ],
+    'Independent Polar IPSView designer must react immediately to fill-mode changes.'
 );
 assertGatewayGauge(
     ($polarIPSViewLabelPositionField['enabled'] ?? null) === true
@@ -5244,6 +5291,11 @@ $polarInheritedScaleRow = current(array_filter(
     static fn (array $item): bool => in_array('IPSViewValueAxisRangeMode', array_column($item['items'] ?? [], 'name'), true)
 ));
 $polarInheritedScaleFields = array_column($polarInheritedScaleRow['items'], null, 'name');
+$polarInheritedFillRow = current(array_filter(
+    $polarInheritedPanel['items'],
+    static fn (array $item): bool => in_array('IPSViewBarFillMode', array_column($item['items'] ?? [], 'name'), true)
+));
+$polarInheritedFillFields = array_column($polarInheritedFillRow['items'], null, 'name');
 $polarInheritedLabelPositionField = current(array_filter(
     $polarInheritedPanel['items'],
     static fn (array $item): bool => ($item['name'] ?? '') === 'IPSViewValueLabelPosition'
@@ -5261,8 +5313,11 @@ assertGatewayGauge(
         && str_contains($polarInheritedHTML, '"categoryLabelFontSize":9')
         && str_contains($polarInheritedHTML, '"valueLabelFontSize":11')
         && str_contains($polarInheritedHTML, '"scaleLabelFontSize":8')
+        && str_contains($polarInheritedHTML, '"barGradientColor":"#55CCAA"')
         && ($polarInheritedScaleFields['IPSViewValueAxisRangeMode']['enabled'] ?? null) === false
         && ($polarInheritedScaleFields['IPSViewValueAxisMinimum']['enabled'] ?? null) === false
+        && ($polarInheritedFillFields['IPSViewBarFillMode']['enabled'] ?? null) === false
+        && ($polarInheritedFillFields['IPSViewBarGradientColor']['enabled'] ?? null) === false
         && ($polarInheritedLabelPositionField['enabled'] ?? null) === false
         && array_column($polarInheritedFontRow['items'], 'enabled') === [false, false, false],
     'Inherited Polar IPSView design must follow the Tile scale and tracks while disabling independent controls.'
@@ -5282,6 +5337,8 @@ assertGatewayGauge(
         && str_contains($polarCopiedHTML, '"showBarBackground":true')
         && str_contains($polarCopiedHTML, '"barBackgroundColor":"#778899"')
         && str_contains($polarCopiedHTML, '"barBackgroundOpacityPercent":40')
+        && str_contains($polarCopiedHTML, '"barFillMode":"gradient"')
+        && str_contains($polarCopiedHTML, '"barGradientColor":"#55CCAA"')
         && str_contains($polarCopiedHTML, '"angularSpan":180')
         && str_contains($polarCopiedHTML, '"valueLabelPosition":"insideEnd"')
         && str_contains($polarCopiedHTML, '"categoryLabelFontSize":9')
@@ -5308,6 +5365,22 @@ assertGatewayGauge(
         && str_contains($polarTileDesignJSON, 'ValueLabelFontSize')
         && str_contains($polarTileDesignJSON, 'ScaleLabelFontSize'),
     'Polar Bar Tile designer must expose the fixed scale and background-track controls.'
+);
+$polarFillRow = current(array_filter(
+    $polarTileDesigner['items'],
+    static fn (array $item): bool => in_array('BarFillMode', array_column($item['items'] ?? [], 'name'), true)
+));
+$polarFillFields = array_column($polarFillRow['items'], null, 'name');
+assertGatewayGauge(
+    ($polarFillFields['BarGradientColor']['visible'] ?? null) === true,
+    'Polar Tile designer must reveal the end color for gradient fill.'
+);
+$polar->UpdateBarFillForm(false, 'solid');
+assertGatewayGauge(
+    array_slice($polar->GetTestFormUpdates(), -1) === [
+        ['Field' => 'BarGradientColor', 'Parameter' => 'visible', 'Value' => false]
+    ],
+    'Polar Tile designer must react immediately to fill-mode changes.'
 );
 $polarScaleRow = current(array_filter(
     $polarTileDesigner['items'],
@@ -5415,6 +5488,20 @@ $invalidPolarTrack->SetTestProperty('Sources', json_encode([['VariableID' => 471
 $invalidPolarTrack->SetTestProperty('BarBackgroundOpacityPercent', 101);
 $invalidPolarTrack->ApplyChanges();
 assertGatewayGauge($invalidPolarTrack->GetTestStatus() === 202, 'Polar Bar must reject invalid background opacity.');
+
+$invalidPolarFill = new EChartsBarPolar();
+$invalidPolarFill->Create();
+$invalidPolarFill->SetTestProperty('Sources', json_encode([['VariableID' => 4711]], JSON_THROW_ON_ERROR));
+$invalidPolarFill->SetTestProperty('BarFillMode', 'unsupported');
+$invalidPolarFill->ApplyChanges();
+assertGatewayGauge($invalidPolarFill->GetTestStatus() === 202, 'Polar Bar must reject unknown fill modes.');
+
+$invalidPolarGradientColor = new EChartsBarPolar();
+$invalidPolarGradientColor->Create();
+$invalidPolarGradientColor->SetTestProperty('Sources', json_encode([['VariableID' => 4711]], JSON_THROW_ON_ERROR));
+$invalidPolarGradientColor->SetTestProperty('BarGradientColor', 0x1000000);
+$invalidPolarGradientColor->ApplyChanges();
+assertGatewayGauge($invalidPolarGradientColor->GetTestStatus() === 202, 'Polar Bar must reject invalid gradient colors.');
 
 $invalidPolarSpan = new EChartsBarPolar();
 $invalidPolarSpan->Create();
