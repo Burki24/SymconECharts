@@ -273,14 +273,23 @@
                         : typeof design.readableTextColor === 'function'
                             ? design.readableTextColor(itemColor, colors.text, colors.background)
                             : colors.text;
+                    var itemStyle = Object.assign(
+                        { color: fill, opacity: barOpacity },
+                        design.barOutlineStyle(style.barOutlineWidth, style.barOutlineColor, colors.border)
+                    );
+                    var shadowBlur = Number(style.barShadowBlur);
+                    if (Number.isFinite(shadowBlur) && shadowBlur > 0) {
+                        itemStyle.shadowBlur = Math.min(20, shadowBlur);
+                        itemStyle.shadowColor = design.colorWithAlpha(
+                            style.barShadowColor || colors.border,
+                            design.opacityFromPercent(style.barShadowOpacityPercent, 35)
+                        );
+                    }
                     return {
                         id: item.id,
                         name: String(item.label || ''),
                         value: Number(item.value),
-                        itemStyle: Object.assign(
-                            { color: fill, opacity: barOpacity },
-                            design.barOutlineStyle(style.barOutlineWidth, style.barOutlineColor, colors.border)
-                        ),
+                        itemStyle: itemStyle,
                         label: {
                             distance: valueLabelDistance(index),
                             color: textColor,

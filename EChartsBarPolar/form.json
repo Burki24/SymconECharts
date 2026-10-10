@@ -368,6 +368,34 @@
                     "type": "RowLayout",
                     "items": [
                         {
+                            "type": "NumberSpinner",
+                            "name": "BarShadowBlur",
+                            "caption": "Bar shadow (0 = off)",
+                            "minimum": 0,
+                            "maximum": 20,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "BarShadowColor",
+                            "caption": "Shadow color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "BarShadowOpacityPercent",
+                            "caption": "Shadow opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
                             "type": "Select",
                             "name": "BarHighlightMode",
                             "caption": "Bar highlight",
@@ -777,6 +805,34 @@
                                     "caption": "Outline color",
                                     "allowTransparent": true,
                                     "transparentCaption": "Automatic (theme)"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "IPSViewBarShadowBlur",
+                                    "caption": "Bar shadow (0 = off)",
+                                    "minimum": 0,
+                                    "maximum": 20,
+                                    "suffix": "px"
+                                },
+                                {
+                                    "type": "SelectColor",
+                                    "name": "IPSViewBarShadowColor",
+                                    "caption": "Shadow color",
+                                    "allowTransparent": true,
+                                    "transparentCaption": "Automatic (theme)"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "IPSViewBarShadowOpacityPercent",
+                                    "caption": "Shadow opacity",
+                                    "minimum": 0,
+                                    "maximum": 100,
+                                    "suffix": "%"
                                 }
                             ]
                         },

@@ -58,6 +58,10 @@ for (const mode of ['symcon', 'ipsview']) {
         assert.ok(plate.shape.cx + plate.shape.r <= width - 8, `${mode} ${preset} plate must stay inside the right edge.`);
         assert.ok(plate.shape.cy - plate.shape.r >= 8, `${mode} ${preset} plate must stay inside the top edge.`);
         assert.ok(plate.shape.cy + plate.shape.r <= height - 8, `${mode} ${preset} plate must stay inside the bottom edge.`);
+        if (preset === 'speed') {
+            assert.equal(series.pointer.itemStyle.shadowColor, 'rgba(85,203,181,0.45)',
+                'Centralized color transparency must preserve the existing Gauge shadow.');
+        }
     }
 }
 

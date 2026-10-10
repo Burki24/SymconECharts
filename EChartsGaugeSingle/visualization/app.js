@@ -158,24 +158,6 @@
         return unit ? formatted + '{unit| ' + formatRichTextPart(unit) + '}' : formatted;
     }
 
-    function colorWithAlpha(color, alpha) {
-        var hex = /^#([0-9a-f]{6})$/i.exec(color);
-        if (hex) {
-            return 'rgba('
-                + parseInt(hex[1].substring(0, 2), 16) + ','
-                + parseInt(hex[1].substring(2, 4), 16) + ','
-                + parseInt(hex[1].substring(4, 6), 16) + ','
-                + alpha + ')';
-        }
-
-        var rgb = /^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i.exec(color);
-        if (rgb) {
-            return 'rgba(' + rgb[1] + ',' + rgb[2] + ',' + rgb[3] + ',' + alpha + ')';
-        }
-
-        return color;
-    }
-
     function resolveSpeedSplitNumber(minimum, maximum) {
         var range = Math.abs(maximum - minimum);
         var candidates = [12, 10, 8, 6, 5, 4];
@@ -424,7 +406,7 @@
                 series.startAngle = 180;
                 series.endAngle = 0;
                 series.splitNumber = resolveSpeedSplitNumber(minimum, maximum);
-                series.progress.itemStyle.shadowColor = colorWithAlpha(colors.accent, 0.45);
+                series.progress.itemStyle.shadowColor = echartsDesign.colorWithAlpha(colors.accent, 0.45);
                 series.progress.itemStyle.shadowBlur = 10;
                 series.progress.itemStyle.shadowOffsetX = 2;
                 series.progress.itemStyle.shadowOffsetY = 2;
@@ -434,7 +416,7 @@
                 series.pointer.icon = speedPointerIcon;
                 series.pointer.width = layout.pointerWidth;
                 series.pointer.offsetCenter = [0, '5%'];
-                series.pointer.itemStyle.shadowColor = colorWithAlpha(colors.accent, 0.45);
+                series.pointer.itemStyle.shadowColor = echartsDesign.colorWithAlpha(colors.accent, 0.45);
                 series.pointer.itemStyle.shadowBlur = 10;
                 series.pointer.itemStyle.shadowOffsetX = 2;
                 series.pointer.itemStyle.shadowOffsetY = 2;
@@ -847,10 +829,10 @@
             series.detail.borderColor = scale;
         }
         if (series.progress.itemStyle.shadowColor) {
-            series.progress.itemStyle.shadowColor = colorWithAlpha(progress, 0.45);
+            series.progress.itemStyle.shadowColor = echartsDesign.colorWithAlpha(progress, 0.45);
         }
         if (series.pointer.itemStyle.shadowColor) {
-            series.pointer.itemStyle.shadowColor = colorWithAlpha(pointer, 0.45);
+            series.pointer.itemStyle.shadowColor = echartsDesign.colorWithAlpha(pointer, 0.45);
         }
 
         return series;
@@ -918,7 +900,7 @@
             delete series.detail.borderRadius;
         }
 
-        var shadowColor = colorWithAlpha(colors.accent, 0.45);
+        var shadowColor = echartsDesign.colorWithAlpha(colors.accent, 0.45);
         [
             [series.pointer.itemStyle, style.pointerShadow],
             [series.progress.itemStyle, style.progressShadow],

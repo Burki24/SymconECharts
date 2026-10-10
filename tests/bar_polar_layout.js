@@ -104,6 +104,8 @@ assert.equal(radial.series[0].data[0].itemStyle.opacity, 1,
     'Existing Polar charts must keep fully opaque bars by default.');
 assert.equal(radial.series[0].data[0].itemStyle.borderWidth, 0,
     'Existing Polar charts must not gain a visible outline by default.');
+assert.equal(radial.series[0].data[0].itemStyle.shadowBlur, undefined,
+    'Existing Polar bars must remain without a shadow by default.');
 assert.equal(radial.series[0].emphasis, undefined,
     'Existing Polar charts must keep the bundled ECharts hover behavior by default.');
 assert.equal(radial.angleAxis.startAngle, 90);
@@ -142,6 +144,42 @@ assert.equal(outlinedRadial.series[0].data[0].itemStyle.borderWidth, 2);
 assert.equal(outlinedRadial.series[0].data[0].itemStyle.borderColor, '#224466');
 assert.equal(outlinedRadial.series[0].backgroundStyle.borderWidth, undefined,
     'The bar outline must not frame background tracks.');
+
+window.handleMessage({
+    status: 'ready', chart: {
+        ...state.chart,
+        polar: {
+            ...state.chart.polar,
+            style: {
+                ...state.chart.polar.style,
+                barShadowBlur: 12, barShadowColor: '#223344', barShadowOpacityPercent: 60
+            }
+        }
+    }
+});
+const shadowedRadial = options.at(-1);
+assert.equal(shadowedRadial.series[0].data[0].itemStyle.shadowBlur, 12);
+assert.equal(shadowedRadial.series[0].data[0].itemStyle.shadowColor, 'rgba(34,51,68,0.6)');
+assert.equal(shadowedRadial.series[0].backgroundStyle.shadowBlur, undefined,
+    'The bar shadow must not affect the background tracks.');
+window.SYMC_VISUALIZATION.mode = 'ipsview';
+window.handleMessage({
+    status: 'ready', chart: {
+        ...state.chart,
+        polar: {
+            ...state.chart.polar,
+            style: {
+                ...state.chart.polar.style, mode: 'tangential',
+                barShadowBlur: 8, barShadowColor: '', barShadowOpacityPercent: 35
+            }
+        }
+    }
+});
+const shadowedIPSView = options.at(-1);
+assert.equal(shadowedIPSView.series[0].data[0].itemStyle.shadowBlur, 8);
+assert.equal(shadowedIPSView.series[0].data[0].itemStyle.shadowColor, 'rgba(119,119,119,0.35)',
+    'Independent IPSView shadows must use the active theme when no color is set.');
+window.SYMC_VISUALIZATION.mode = 'symcon';
 
 const focusState = {
     status: 'ready', chart: {
@@ -864,6 +902,14 @@ if (fs.existsSync(localECharts)) {
             && element.style.opacity === 0.35),
     'The bundled ECharts renderer must draw a Polar bar with configured opacity.');
     translucentChart.dispose();
+    const shadowChart = echarts.init(null, null,
+        { renderer: 'svg', ssr: true, width: 625, height: 560 });
+    shadowChart.setOption(shadowedRadial);
+    assert.ok(shadowChart.getZr().storage.getDisplayList().some(element =>
+        element.type === 'sector' && element.style.shadowBlur === 12
+            && element.style.shadowColor === 'rgba(34,51,68,0.6)'),
+    'The bundled ECharts renderer must apply shadow only to a Polar bar.');
+    shadowChart.dispose();
     const compactConcentricChart = echarts.init(null, null,
         { renderer: 'svg', ssr: true, width: 435, height: 324 });
     compactConcentricChart.setOption(compactConcentric);

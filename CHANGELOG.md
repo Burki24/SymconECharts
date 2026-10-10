@@ -25,6 +25,10 @@
 
 ## Neu
 
+- Polar-Balken erhalten optional einen Schatten mit einstellbarer Stärke,
+  Farbe und Deckkraft. Kachel und unabhängiges IPSView-Design sind separat
+  konfigurierbar; standardmäßig bleibt der Schatten ausgeschaltet.
+
 - Polar-Balken lassen sich in Kachel und unabhängigem IPSView-Design bei
   Berührung oder Hover hervorheben, wahlweise mit Abdunklung der anderen
   Balken. Der gewählte Balken kann per Antippen fixiert werden; der bisherige

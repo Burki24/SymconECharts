@@ -36,4 +36,12 @@ assert.equal(barOutlineStyle(Infinity, '', '#778899').borderWidth, 0,
 assert.equal(barOutlineStyle(10, '', '#778899').borderWidth, 10,
     'The shared helper must not impose the Polar module’s width limit on future charts.');
 
+const colorWithAlpha = window.SYMC_ECHARTS_DESIGN.colorWithAlpha;
+assert.equal(colorWithAlpha('#223344', 0.35), 'rgba(34,51,68,0.35)',
+    'Bar shadows and Gauge effects must share the same hex color transparency.');
+assert.equal(colorWithAlpha('rgb(10, 20, 30)', 0.45), 'rgba(10,20,30,0.45)',
+    'The shared helper must preserve the existing Gauge RGB behavior.');
+assert.equal(colorWithAlpha('rgba(10,20,30,0.5)', 0.35), 'rgba(10,20,30,0.5)',
+    'Unsupported color syntax must remain unchanged for existing Gauge designs.');
+
 console.log('Shared ECharts design utilities verified.');

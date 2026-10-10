@@ -57,6 +57,24 @@
         return Math.max(0, Math.min(100, percent)) / 100;
     }
 
+    function colorWithAlpha(color, alpha) {
+        var hex = /^#([0-9a-f]{6})$/i.exec(color);
+        if (hex) {
+            return 'rgba('
+                + parseInt(hex[1].substring(0, 2), 16) + ','
+                + parseInt(hex[1].substring(2, 4), 16) + ','
+                + parseInt(hex[1].substring(4, 6), 16) + ','
+                + alpha + ')';
+        }
+
+        var rgb = /^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i.exec(color);
+        if (rgb) {
+            return 'rgba(' + rgb[1] + ',' + rgb[2] + ',' + rgb[3] + ',' + alpha + ')';
+        }
+
+        return color;
+    }
+
     function barOutlineStyle(width, color, themeBorder) {
         var pixels = Number(width);
         if (!Number.isFinite(pixels) || pixels <= 0) {
@@ -70,6 +88,7 @@
         readableTextColor: readableTextColor,
         relativeLuminance: relativeLuminance,
         opacityFromPercent: opacityFromPercent,
+        colorWithAlpha: colorWithAlpha,
         barOutlineStyle: barOutlineStyle
     });
 }(window));
