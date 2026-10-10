@@ -1498,6 +1498,9 @@ assertGatewayGauge(($gaugeData['gauge']['maximum'] ?? null) === 80.0, 'Gauge Sin
 assertGatewayGauge(($gaugeData['gauge']['preset'] ?? null) === 'progress', 'Gauge Single preset changed.');
 assertGatewayGauge(
     ($gaugeData['gauge']['style'] ?? null) === [
+        'animationEnabled'            => true,
+        'animationDuration'           => 500,
+        'animationDurationUpdate'     => 500,
         'scaleFontSizePercent'        => 150,
         'valueFontSizePercent'        => 125,
         'unitFontSizePercent'         => 75,
@@ -2424,7 +2427,7 @@ $singleGauge->SetTestProperty('SourceVariableID', 4711);
 $singleGauge->ApplyChanges();
 $defaultSingleData = json_decode($singleGauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
-    array_values(array_slice($defaultSingleData['gauge']['style'] ?? [], 0, 9)) === array_fill(0, 9, 100)
+    array_values(array_slice($defaultSingleData['gauge']['style'] ?? [], 3, 9)) === array_fill(0, 9, 100)
         && ($defaultSingleData['gauge']['style']['pointerShape'] ?? null) === 'preset'
         && ($defaultSingleData['gauge']['style']['titlePosition'] ?? null) === 'bottom'
         && ($defaultSingleData['gauge']['style']['arcMode'] ?? null) === 'preset'
@@ -3227,15 +3230,18 @@ assertGatewayGauge(
         && $timeSeriesData['annotations'][1]['color'] === '#123456'
         && $timeSeriesData['annotations'][1]['opacityPercent'] === 25
         && $timeSeriesData['chart']['design'] === [
-            'legendPosition'     => 'bottom',
-            'lineWidthPercent'   => 150,
-            'smoothLines'        => true,
-            'showSymbols'        => true,
-            'symbolSizePercent'  => 125,
-            'areaOpacityPercent' => 40,
-            'showGrid'           => false,
-            'showXAxis'          => false,
-            'showYAxis'          => true
+            'animationEnabled'        => false,
+            'animationDuration'       => 350,
+            'animationDurationUpdate' => 500,
+            'legendPosition'          => 'bottom',
+            'lineWidthPercent'        => 150,
+            'smoothLines'             => true,
+            'showSymbols'             => true,
+            'symbolSizePercent'       => 125,
+            'areaOpacityPercent'      => 40,
+            'showGrid'                => false,
+            'showXAxis'               => false,
+            'showYAxis'               => true
         ],
     'Time Series must build the accepted positioned-axis aggregated chart model.'
 );
@@ -6173,6 +6179,36 @@ foreach ([EChartsTimeSeries::class, EChartsBarHistory::class] as $timeModuleClas
             && ($independentRange[0]['visible'] ?? null) === true
             && ($independentRange[0]['enabled'] ?? true) === true,
         $timeModuleClass . ' must place IPSView time settings beside the main time controls.'
+    );
+}
+
+foreach ([
+    EChartsGaugeSingle::class, EChartsGaugeMulti::class, EChartsGaugeTacho::class,
+    EChartsGaugeChronograph::class, EChartsTimeSeries::class, EChartsBarCategory::class,
+    EChartsBarHistory::class, EChartsBarWaterfall::class, EChartsBarPolar::class
+] as $animationModuleClass) {
+    $animationModule = new $animationModuleClass();
+    $animationModule->Create();
+    $animationForm = json_decode($animationModule->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+    foreach (['', 'IPSView'] as $prefix) {
+        $toggle = findGaugeFormElement($animationForm['elements'], $prefix . 'AnimationEnabled');
+        $initial = findGaugeFormElement($animationForm['elements'], $prefix . 'AnimationDuration');
+        $update = findGaugeFormElement($animationForm['elements'], $prefix . 'AnimationDurationUpdate');
+        assertGatewayGauge(
+            $toggle !== null && $initial !== null && $update !== null
+                && str_contains((string) ($toggle['onChange'] ?? ''), '_UpdateAnimationForm(')
+                && ($initial['visible'] ?? true) === ($animationModuleClass !== EChartsTimeSeries::class)
+                && ($update['visible'] ?? true) === ($animationModuleClass !== EChartsTimeSeries::class),
+            $animationModuleClass . ' must expose synchronized animation controls in both designers.'
+        );
+    }
+    $animationModule->UpdateAnimationForm(true, false);
+    assertGatewayGauge(
+        array_slice($animationModule->GetTestFormUpdates(), -2) === [
+            ['Field' => 'IPSViewAnimationDuration', 'Parameter' => 'visible', 'Value' => false],
+            ['Field' => 'IPSViewAnimationDurationUpdate', 'Parameter' => 'visible', 'Value' => false]
+        ],
+        $animationModuleClass . ' must update the IPSView animation fields immediately.'
     );
 }
 

@@ -6,6 +6,10 @@ Symcon-Kacheldarstellung und optional ein separat platzierbares WebContent-
 Widget für IPSView bereit. Datenquelle und fachliche Diagrammkonfiguration
 werden dabei nur einmal gepflegt.
 
+## Animation
+
+Im Kachel- und unabhängigen IPSView-Designer steuern **Animation**, **Startanimation** und **Aktualisierungsanimation** die ECharts-Übergänge. Beide Zeiten sind von 0 bis 3000 ms einstellbar; 0 ms unterdrückt den jeweiligen Übergang. Die Systemeinstellung für reduzierte Bewegung schaltet Animationen immer ab. Bei **Kacheldesign verwenden** übernimmt IPSView die Kachelwerte.
+
 Quellvariable und Gauge-Einstellungen sind konfigurierbar; das Modul ruft den
 Momentanwert über EChartsGateway ab, erzeugt ein versioniertes Gauge-Datenmodell
 und rendert es mit Apache ECharts 6.1.0 in einer responsiven Symcon-Kachel.

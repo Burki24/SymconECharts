@@ -8,6 +8,7 @@ use Burki24\SymconModuleHelper\IPSViewHTMLPageHelper;
 use Burki24\SymconModuleHelper\ResponsiveVisualizationHelper;
 use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
+use SymconECharts\EChartsAnimationDesign;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsCurrentSources;
 use SymconECharts\EChartsIPSViewBackground;
@@ -23,6 +24,7 @@ require_once __DIR__ . '/../libs/helper/ResponsiveVisualizationHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
+require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsCurrentSources.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
@@ -34,6 +36,7 @@ require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 class EChartsBarWaterfall extends IPSModuleStrict
 {
     use ConfigurationFormHelper;
+    use EChartsAnimationDesign;
     use DataFlowHelper;
     use EChartsCurrentSources;
     use IPSViewHTMLPageHelper;
@@ -101,6 +104,8 @@ class EChartsBarWaterfall extends IPSModuleStrict
     {
         $form = $this->LoadConfigurationForm();
         if (isset($form['elements']) && is_array($form['elements'])) {
+            $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
+            $form['elements'] = $this->WithAnimationFormCallbacks($form['elements'], 'ECBW');
             $this->InsertIPSViewHTMLPageFormItems(
                 $form['elements'],
                 'Configure optional IPSView HTML output.',
@@ -455,26 +460,31 @@ class EChartsBarWaterfall extends IPSModuleStrict
         $this->RegisterPropertyInteger($prefix . 'IncreaseColor', -1);
         $this->RegisterPropertyInteger($prefix . 'DecreaseColor', -1);
         $this->RegisterPropertyInteger($prefix . 'TotalColor', -1);
+        $this->RegisterAnimationProperties($prefix, true, 350, 500);
     }
 
     /** @return array<string, string> */
     private function DesignPropertyNames(): array
     {
         return [
-            'EChartsTheme'    => 'string',
-            'ShowValues'      => 'boolean',
-            'ShowGrid'        => 'boolean',
-            'BarWidthPercent' => 'integer',
-            'StartColor'      => 'integer',
-            'IncreaseColor'   => 'integer',
-            'DecreaseColor'   => 'integer',
-            'TotalColor'      => 'integer'
+            'EChartsTheme'            => 'string',
+            'ShowValues'              => 'boolean',
+            'ShowGrid'                => 'boolean',
+            'BarWidthPercent'         => 'integer',
+            'StartColor'              => 'integer',
+            'IncreaseColor'           => 'integer',
+            'DecreaseColor'           => 'integer',
+            'TotalColor'              => 'integer',
+            'AnimationEnabled'        => 'boolean',
+            'AnimationDuration'       => 'integer',
+            'AnimationDurationUpdate' => 'integer'
         ];
     }
 
     private function IsValidDesign(string $prefix): bool
     {
-        if (!EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme'))
+        if (!$this->AnimationIsValid($prefix)
+            || !EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme'))
             || $this->ReadPropertyInteger($prefix . 'BarWidthPercent') < 20
             || $this->ReadPropertyInteger($prefix . 'BarWidthPercent') > 100
         ) {
@@ -500,6 +510,7 @@ class EChartsBarWaterfall extends IPSModuleStrict
         }
 
         return [
+            ...$this->ReadAnimationStyle($prefix),
             'showValues'      => $this->ReadPropertyBoolean($prefix . 'ShowValues'),
             'showGrid'        => $this->ReadPropertyBoolean($prefix . 'ShowGrid'),
             'barWidthPercent' => $this->ReadPropertyInteger($prefix . 'BarWidthPercent'),

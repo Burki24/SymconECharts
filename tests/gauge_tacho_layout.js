@@ -355,4 +355,16 @@ const customRing = render('symcon', 720, 560, 3, '', 'ring-grid', true, customSt
 assert.equal(customRing.graphic.length, 0, 'Plate settings must not replace ring layouts.');
 assert.equal(customRing.series[0].progress.itemStyle.color, '#223344');
 
+const timedGauge = render('ipsview', 720, 560, 3, 'Climate', 'multi-title', true, {
+    animationEnabled: true, animationDuration: 900, animationDurationUpdate: 1400
+});
+assert.equal(timedGauge.animationDuration, 900);
+assert.equal(timedGauge.animationDurationUpdate, 1400);
+assert.ok(timedGauge.series.every(series => series.detail.valueAnimation === true));
+const stoppedGauge = render('symcon', 720, 560, 3, 'Climate', 'multi-title', true, {
+    animationEnabled: false, animationDuration: 900, animationDurationUpdate: 1400
+});
+assert.equal(stoppedGauge.animation, false);
+assert.ok(stoppedGauge.series.every(series => series.detail.valueAnimation === false));
+
 process.stdout.write('Gauge Tacho renderer layouts and individual design verified.\n');

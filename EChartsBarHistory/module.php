@@ -8,6 +8,7 @@ use Burki24\SymconModuleHelper\IPSViewHTMLPageHelper;
 use Burki24\SymconModuleHelper\ResponsiveVisualizationHelper;
 use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
+use SymconECharts\EChartsAnimationDesign;
 use SymconECharts\EChartsArchiveQuery;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsDataProtocol;
@@ -27,6 +28,7 @@ require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsArchiveQuery.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
+require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
@@ -39,6 +41,7 @@ require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 class EChartsBarHistory extends IPSModuleStrict
 {
     use ConfigurationFormHelper;
+    use EChartsAnimationDesign;
     use DataFlowHelper;
     use IPSViewHTMLPageHelper;
     use EChartsIPSViewDesignForm;
@@ -60,25 +63,28 @@ class EChartsBarHistory extends IPSModuleStrict
     private const TIME_AXIS_LABEL_FORMATS = ['auto', 'time', 'date', 'date-time'];
     private const BAR_FILL_MODES = ['solid', 'gradient', 'svg'];
     private const DESIGN_PROPERTY_TYPES = [
-        'EChartsTheme'        => 'string',
-        'ShowValues'          => 'boolean',
-        'ShowGrid'            => 'boolean',
-        'EnableZoom'          => 'boolean',
-        'RoundedBars'         => 'boolean',
-        'BarWidthPercent'     => 'integer',
-        'BarFillMode'         => 'string',
-        'BarGradientColor'    => 'integer',
-        'BarSVG'              => 'string',
-        'BarSVGSizePercent'   => 'integer',
-        'BarOpacityPercent'   => 'integer',
-        'BarCornerRadius'     => 'integer',
-        'TitleFontSizePercent'=> 'integer',
-        'AxisFontSizePercent' => 'integer',
-        'ValueFontSizePercent'=> 'integer',
-        'TitleColor'          => 'integer',
-        'AxisColor'           => 'integer',
-        'ValueColor'          => 'integer',
-        'GridColor'           => 'integer'
+        'EChartsTheme'            => 'string',
+        'ShowValues'              => 'boolean',
+        'ShowGrid'                => 'boolean',
+        'EnableZoom'              => 'boolean',
+        'RoundedBars'             => 'boolean',
+        'BarWidthPercent'         => 'integer',
+        'BarFillMode'             => 'string',
+        'BarGradientColor'        => 'integer',
+        'BarSVG'                  => 'string',
+        'BarSVGSizePercent'       => 'integer',
+        'BarOpacityPercent'       => 'integer',
+        'BarCornerRadius'         => 'integer',
+        'TitleFontSizePercent'    => 'integer',
+        'AxisFontSizePercent'     => 'integer',
+        'ValueFontSizePercent'    => 'integer',
+        'TitleColor'              => 'integer',
+        'AxisColor'               => 'integer',
+        'ValueColor'              => 'integer',
+        'GridColor'               => 'integer',
+        'AnimationEnabled'        => 'boolean',
+        'AnimationDuration'       => 'integer',
+        'AnimationDurationUpdate' => 'integer'
     ];
 
     public function Create(): void
@@ -115,6 +121,7 @@ class EChartsBarHistory extends IPSModuleStrict
         $this->RegisterPropertyInteger('AxisColor', -1);
         $this->RegisterPropertyInteger('ValueColor', -1);
         $this->RegisterPropertyInteger('GridColor', -1);
+        $this->RegisterAnimationProperties('', true, 350, 500);
         $this->RegisterIPSViewHTMLPageProperties();
         $this->RegisterEChartsIPSViewTransport();
         $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
@@ -131,13 +138,15 @@ class EChartsBarHistory extends IPSModuleStrict
         );
         foreach (self::DESIGN_PROPERTY_TYPES as $name => $type) {
             $default = match ($name) {
-                'EChartsTheme'              => EChartsAsset::THEME_AUTO,
-                'BarFillMode'               => 'solid',
-                'BarSVG'                    => '',
-                'BarSVGSizePercent'         => 100,
-                'ShowValues', 'RoundedBars' => false,
-                'ShowGrid', 'EnableZoom'    => true,
-                'BarWidthPercent'           => 70,
+                'EChartsTheme'                               => EChartsAsset::THEME_AUTO,
+                'BarFillMode'                                => 'solid',
+                'BarSVG'                                     => '',
+                'BarSVGSizePercent'                          => 100,
+                'ShowValues', 'RoundedBars'                  => false,
+                'ShowGrid', 'EnableZoom', 'AnimationEnabled' => true,
+                'AnimationDuration'                          => 350,
+                'AnimationDurationUpdate'                    => 500,
+                'BarWidthPercent'                            => 70,
                 'BarOpacityPercent', 'TitleFontSizePercent', 'AxisFontSizePercent',
                 'ValueFontSizePercent'      => 100,
                 'BarCornerRadius'           => 6,
@@ -206,6 +215,8 @@ class EChartsBarHistory extends IPSModuleStrict
                 $this->BuildIPSViewTimeSettings($form['elements'])
             );
             $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
+            $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
+            $form['elements'] = $this->WithAnimationFormCallbacks($form['elements'], 'ECBH');
         }
 
         return $this->EncodeConfigurationForm($this->WithIPSViewDesignFormState($form, 'ECBH'));
@@ -740,7 +751,8 @@ class EChartsBarHistory extends IPSModuleStrict
 
     private function IsValidDesign(string $prefix): bool
     {
-        if (!EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme'))
+        if (!$this->AnimationIsValid($prefix)
+            || !EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme'))
             || !in_array($this->ReadPropertyString($prefix . 'BarFillMode'), self::BAR_FILL_MODES, true)) {
             return false;
         }
@@ -830,6 +842,7 @@ class EChartsBarHistory extends IPSModuleStrict
         $prefix = $ipsView && !$this->ReadPropertyBoolean('IPSViewUseTileDesign') ? 'IPSView' : '';
 
         $style = [
+            ...$this->ReadAnimationStyle($prefix),
             'showValues'          => $this->ReadPropertyBoolean($prefix . 'ShowValues'),
             'showGrid'            => $this->ReadPropertyBoolean($prefix . 'ShowGrid'),
             'enableZoom'          => $this->ReadPropertyBoolean($prefix . 'EnableZoom'),

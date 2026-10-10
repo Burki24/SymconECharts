@@ -4,6 +4,10 @@
 variables as bars along a time axis. It is deliberately separate from
 `EChartsBarCategory`, which compares current values as categories.
 
+## Animation
+
+In the Tile and independent IPSView designers, **Animate chart**, **Initial animation**, and **Update animation** control ECharts transitions independently. Durations range from 0 to 3000 ms; 0 ms suppresses that transition. The system's reduced-motion setting always disables animation. IPSView inherits Tile settings while **Use Tile design** is enabled.
+
 ## Current feature set
 
 - Native Symcon HTML-SDK tile and optional IPSView WebContent output

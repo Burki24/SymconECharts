@@ -51,6 +51,23 @@ assert.equal(prefersReducedMotion(), true, 'The shared helper must honor reduced
 window.matchMedia = () => ({ matches: false });
 assert.equal(prefersReducedMotion(), false, 'Normal motion preferences must retain chart animations.');
 
+const animationOptions = window.SYMC_ECHARTS_DESIGN.animationOptions;
+const animationDefaults = { enabled: true, initialDuration: 350, updateDuration: 500 };
+assert.deepEqual(JSON.parse(JSON.stringify(animationOptions({}, animationDefaults))), {
+    animation: true, animationDuration: 350, animationDurationUpdate: 500
+});
+assert.deepEqual(JSON.parse(JSON.stringify(animationOptions({
+    animationEnabled: true, animationDuration: 0, animationDurationUpdate: 3000
+}, animationDefaults))), {
+    animation: true, animationDuration: 0, animationDurationUpdate: 3000
+});
+assert.equal(animationOptions({ animationDuration: 3001 }, animationDefaults).animationDuration, 350);
+assert.equal(animationOptions({ animationEnabled: false }, animationDefaults).animationDurationUpdate, 0);
+assert.equal(animationOptions({}, { enabled: false, initialDuration: 350, updateDuration: 300 }).animation, false);
+window.matchMedia = query => ({ matches: query === '(prefers-reduced-motion: reduce)' });
+assert.equal(animationOptions({}, animationDefaults).animation, false);
+window.matchMedia = () => ({ matches: false });
+
 const resizeChartIfNeeded = window.SYMC_ECHARTS_DESIGN.resizeChartIfNeeded;
 const chartElement = { clientWidth: 640, clientHeight: 360 };
 let chartWidth = 640;

@@ -222,4 +222,15 @@ failedPattern.flush();
 assert.equal(failedPattern.getUpdatedOption().series[0].data[0].itemStyle.color, '#ff0000',
     'A failed SVG load must retain the original bar color.');
 
+const timedBar = render('vertical', 'configured', 'ipsview', 'simple', undefined, {
+    animationEnabled: true, animationDuration: 800, animationDurationUpdate: 1300
+});
+assert.equal(timedBar.animationDuration, 800);
+assert.equal(timedBar.animationDurationUpdate, 1300);
+const stoppedBar = render('vertical', 'configured', 'symcon', 'simple', undefined, {
+    animationEnabled: false, animationDuration: 800, animationDurationUpdate: 1300
+});
+assert.equal(stoppedBar.animation, false);
+assert.equal(stoppedBar.animationDurationUpdate, 0);
+
 console.log('Category Bar renderer layout verified.');

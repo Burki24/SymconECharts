@@ -32,6 +32,12 @@
 
 ## Neu
 
+- Alle neun Diagrammmodule bieten im Kachel- und unabhängigen IPSView-Design
+  einen gemeinsamen Schalter sowie getrennte Zeiten für Start- und
+  Aktualisierungsanimation (0–3000 ms). Bestehende Standardwerte bleiben
+  erhalten; TimeSeries ist weiterhin standardmäßig ohne Animation.
+  Reduzierte Bewegung im Betriebssystem hat Vorrang.
+
 - Für Polar-Balken lassen sich Start- und Aktualisierungsanimation in Kachel
   und unabhängigem IPSView-Design getrennt einstellen oder abschalten. Die
   Systemeinstellung für reduzierte Bewegung hat Vorrang.

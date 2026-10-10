@@ -479,6 +479,32 @@
                     "type": "RowLayout",
                     "items": [
                         {
+                            "type": "CheckBox",
+                            "name": "AnimationEnabled",
+                            "caption": "Animate time series"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDuration",
+                            "caption": "Initial animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDurationUpdate",
+                            "caption": "Update animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
                             "type": "Select",
                             "name": "EChartsTheme",
                             "caption": "ECharts theme",

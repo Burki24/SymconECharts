@@ -138,8 +138,9 @@
         return {
             backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
                 ? 'transparent' : colors.background,
-            animation: true,
-            animationDuration: 350,
+            ...echartsDesign.animationOptions(style, {
+                enabled: true, initialDuration: 350, updateDuration: 500
+            }),
             aria: { enabled: true, description: steps.map(function (step) { return step.label; }).join(', ') },
             title: {
                 show: titleVisible, text: String(bar.title || ''), left: 'center', top: headerInset,

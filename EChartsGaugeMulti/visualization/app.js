@@ -796,6 +796,7 @@
         var items = Array.isArray(model.items) ? model.items : [];
         var gauge = model.gauge || {};
         var style = gauge.style || {};
+        var animation = echartsDesign.animationOptions(style, { enabled: true, initialDuration: 500, updateDuration: 500 });
         var colors = colorsFor(theme);
         var width = Math.max(chartElement.clientWidth, 240);
         var height = Math.max(chartElement.clientHeight, 180);
@@ -830,13 +831,19 @@
             return applySeriesDesign(gaugeSeries, style, colors);
         });
         graphic = applyPlateDesign(graphic, series, preset, style, colors, width, height, headerInset);
+        series.forEach(function (gaugeSeries) {
+            if (gaugeSeries.detail) {
+                gaugeSeries.detail.valueAnimation = animation.animation;
+            }
+        });
 
         return {
             backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
                 ? 'transparent'
                 : colors.background,
-            animation: !reduceMotion,
-            animationDuration: reduceMotion ? 0 : 500,
+            animation: animation.animation,
+            animationDuration: animation.animationDuration,
+            animationDurationUpdate: animation.animationDurationUpdate,
             aria: { enabled: true, decal: { show: false } },
             title: {
                 show: title !== '',

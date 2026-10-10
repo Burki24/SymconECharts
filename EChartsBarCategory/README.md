@@ -4,6 +4,10 @@
 IP-Symcon variables as a category bar chart. All configured sources must use
 the same effective unit so that the shared value axis remains meaningful.
 
+## Animation
+
+In the Tile and independent IPSView designers, **Animate chart**, **Initial animation**, and **Update animation** control ECharts transitions independently. Durations range from 0 to 3000 ms; 0 ms suppresses that transition. The system's reduced-motion setting always disables animation. IPSView inherits Tile settings while **Use Tile design** is enabled.
+
 ## Output
 
 - Native Symcon HTML-SDK tile with live value updates

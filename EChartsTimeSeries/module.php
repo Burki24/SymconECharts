@@ -9,6 +9,7 @@ use Burki24\SymconModuleHelper\ResponsiveVisualizationHelper;
 use Burki24\SymconModuleHelper\SVGPreviewHelper;
 use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
+use SymconECharts\EChartsAnimationDesign;
 use SymconECharts\EChartsArchiveQuery;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsDataProtocol;
@@ -29,6 +30,7 @@ require_once __DIR__ . '/../libs/helper/SVGPreviewHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
+require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsArchiveQuery.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
@@ -43,6 +45,7 @@ require_once __DIR__ . '/TimeSeriesPreview.php';
 class EChartsTimeSeries extends IPSModuleStrict
 {
     use ConfigurationFormHelper;
+    use EChartsAnimationDesign;
     use DataFlowHelper;
     use IPSViewHTMLPageHelper;
     use EChartsIPSViewDesignForm;
@@ -80,10 +83,12 @@ class EChartsTimeSeries extends IPSModuleStrict
     private const DESIGN_FORM_FIELDS = [
         'Title', 'Sources', 'Annotations', 'Range', 'CustomRangeValue', 'CustomRangeUnit',
         'TimeAxisLabelFormat', 'EChartsTheme', 'LegendPosition', 'EnableZoom',
+        'AnimationEnabled', 'AnimationDuration', 'AnimationDurationUpdate',
         'GapDetectionMode', 'GapThresholdMinutes',
         'LineWidthPercent', 'SmoothLines', 'ShowSymbols', 'SymbolSizePercent',
         'AreaOpacityPercent', 'ShowGrid', 'ShowXAxis', 'ShowYAxis',
         'IPSViewUseTileDesign', 'IPSViewEChartsTheme', 'IPSViewLegendPosition', 'IPSViewEnableZoom',
+        'IPSViewAnimationEnabled', 'IPSViewAnimationDuration', 'IPSViewAnimationDurationUpdate',
         'IPSViewLineWidthPercent', 'IPSViewSmoothLines', 'IPSViewShowSymbols', 'IPSViewSymbolSizePercent',
         'IPSViewAreaOpacityPercent', 'IPSViewShowGrid', 'IPSViewShowXAxis', 'IPSViewShowYAxis',
         'IPSViewUseTileTimeSettings', 'IPSViewRange', 'IPSViewCustomRangeValue', 'IPSViewCustomRangeUnit',
@@ -91,16 +96,19 @@ class EChartsTimeSeries extends IPSModuleStrict
         'IPSViewAdaptToBackground', 'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent'
     ];
     private const DESIGN_PROPERTY_TYPES = [
-        'LegendPosition'     => 'string',
-        'EnableZoom'         => 'boolean',
-        'LineWidthPercent'   => 'integer',
-        'SmoothLines'        => 'boolean',
-        'ShowSymbols'        => 'boolean',
-        'SymbolSizePercent'  => 'integer',
-        'AreaOpacityPercent' => 'integer',
-        'ShowGrid'           => 'boolean',
-        'ShowXAxis'          => 'boolean',
-        'ShowYAxis'          => 'boolean'
+        'LegendPosition'          => 'string',
+        'EnableZoom'              => 'boolean',
+        'AnimationEnabled'        => 'boolean',
+        'AnimationDuration'       => 'integer',
+        'AnimationDurationUpdate' => 'integer',
+        'LineWidthPercent'        => 'integer',
+        'SmoothLines'             => 'boolean',
+        'ShowSymbols'             => 'boolean',
+        'SymbolSizePercent'       => 'integer',
+        'AreaOpacityPercent'      => 'integer',
+        'ShowGrid'                => 'boolean',
+        'ShowXAxis'               => 'boolean',
+        'ShowYAxis'               => 'boolean'
     ];
 
     public function Create(): void
@@ -124,6 +132,7 @@ class EChartsTimeSeries extends IPSModuleStrict
         $this->RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO);
         $this->RegisterPropertyString('LegendPosition', 'top');
         $this->RegisterPropertyBoolean('EnableZoom', true);
+        $this->RegisterAnimationProperties('', false, 350, 500);
         $this->RegisterPropertyInteger('LineWidthPercent', 100);
         $this->RegisterPropertyBoolean('SmoothLines', false);
         $this->RegisterPropertyBoolean('ShowSymbols', false);
@@ -149,11 +158,13 @@ class EChartsTimeSeries extends IPSModuleStrict
         $this->RegisterPropertyString('IPSViewEChartsTheme', EChartsAsset::THEME_AUTO);
         foreach (self::DESIGN_PROPERTY_TYPES as $name => $type) {
             $default = match ($name) {
-                'LegendPosition'                        => 'top',
-                'LineWidthPercent', 'SymbolSizePercent' => 100,
-                'AreaOpacityPercent'                    => 22,
-                'SmoothLines', 'ShowSymbols'            => false,
-                default                                 => true
+                'LegendPosition'                                 => 'top',
+                'LineWidthPercent', 'SymbolSizePercent'          => 100,
+                'AreaOpacityPercent'                             => 22,
+                'SmoothLines', 'ShowSymbols', 'AnimationEnabled' => false,
+                'AnimationDuration'                              => 350,
+                'AnimationDurationUpdate'                        => 500,
+                default                                          => true
             };
             match ($type) {
                 'string'  => $this->RegisterPropertyString('IPSView' . $name, $default),
@@ -212,6 +223,8 @@ class EChartsTimeSeries extends IPSModuleStrict
             );
             $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
             $form['elements'] = $this->AttachTimeSeriesPreviewActions($form['elements']);
+            $form['elements'] = $this->WithAnimationFormCallbacks($form['elements'], 'ECTS');
+            $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
         }
         $form = SVGPreviewHelper::withImage(
             $form,
@@ -1324,6 +1337,7 @@ class EChartsTimeSeries extends IPSModuleStrict
     private function ReadTimeSeriesDesign(string $prefix = ''): array
     {
         return [
+            ...$this->ReadAnimationStyle($prefix),
             'legendPosition'     => $this->ReadPropertyString($prefix . 'LegendPosition'),
             'lineWidthPercent'   => $this->ReadPropertyInteger($prefix . 'LineWidthPercent'),
             'smoothLines'        => $this->ReadPropertyBoolean($prefix . 'SmoothLines'),
@@ -1341,15 +1355,18 @@ class EChartsTimeSeries extends IPSModuleStrict
     {
         $design = $this->ReadTimeSeriesDesign($prefix);
         foreach ([
-            'LegendPosition'     => 'legendPosition',
-            'LineWidthPercent'   => 'lineWidthPercent',
-            'SmoothLines'        => 'smoothLines',
-            'ShowSymbols'        => 'showSymbols',
-            'SymbolSizePercent'  => 'symbolSizePercent',
-            'AreaOpacityPercent' => 'areaOpacityPercent',
-            'ShowGrid'           => 'showGrid',
-            'ShowXAxis'          => 'showXAxis',
-            'ShowYAxis'          => 'showYAxis'
+            'LegendPosition'          => 'legendPosition',
+            'LineWidthPercent'        => 'lineWidthPercent',
+            'SmoothLines'             => 'smoothLines',
+            'ShowSymbols'             => 'showSymbols',
+            'SymbolSizePercent'       => 'symbolSizePercent',
+            'AreaOpacityPercent'      => 'areaOpacityPercent',
+            'ShowGrid'                => 'showGrid',
+            'ShowXAxis'               => 'showXAxis',
+            'ShowYAxis'               => 'showYAxis',
+            'AnimationEnabled'        => 'animationEnabled',
+            'AnimationDuration'       => 'animationDuration',
+            'AnimationDurationUpdate' => 'animationDurationUpdate'
         ] as $property => $key) {
             if (array_key_exists($prefix . $property, $values)) {
                 $design[$key] = $values[$prefix . $property];
@@ -1576,7 +1593,8 @@ class EChartsTimeSeries extends IPSModuleStrict
 
     private function IsValidTimeSeriesDesign(string $prefix = ''): bool
     {
-        return in_array($this->ReadPropertyString($prefix . 'LegendPosition'), self::LEGEND_POSITIONS, true)
+        return $this->AnimationIsValid($prefix)
+            && in_array($this->ReadPropertyString($prefix . 'LegendPosition'), self::LEGEND_POSITIONS, true)
             && $this->ReadPropertyInteger($prefix . 'LineWidthPercent') >= 50
             && $this->ReadPropertyInteger($prefix . 'LineWidthPercent') <= 200
             && $this->ReadPropertyInteger($prefix . 'SymbolSizePercent') >= 50

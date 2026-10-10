@@ -62,6 +62,25 @@
             && global.matchMedia('(prefers-reduced-motion: reduce)').matches === true;
     }
 
+    function animationOptions(style, defaults) {
+        var settings = style || {};
+        var fallback = defaults || {};
+        var enabled = settings.animationEnabled == null
+            ? fallback.enabled !== false : settings.animationEnabled === true;
+        var animate = enabled && !prefersReducedMotion();
+        function duration(value, defaultValue) {
+            var number = Number(value);
+            return Number.isInteger(number) && number >= 0 && number <= 3000 ? number : defaultValue;
+        }
+        return {
+            animation: animate,
+            animationDuration: animate
+                ? duration(settings.animationDuration, fallback.initialDuration) : 0,
+            animationDurationUpdate: animate
+                ? duration(settings.animationDurationUpdate, fallback.updateDuration) : 0
+        };
+    }
+
     function colorWithAlpha(color, alpha) {
         var hex = /^#([0-9a-f]{6})$/i.exec(color);
         if (hex) {
@@ -102,6 +121,7 @@
         relativeLuminance: relativeLuminance,
         opacityFromPercent: opacityFromPercent,
         prefersReducedMotion: prefersReducedMotion,
+        animationOptions: animationOptions,
         colorWithAlpha: colorWithAlpha,
         barOutlineStyle: barOutlineStyle,
         resizeChartIfNeeded: resizeChartIfNeeded

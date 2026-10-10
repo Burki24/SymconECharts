@@ -6,6 +6,10 @@ Symcon-Kacheldarstellung und ein separat platzierbares HTML-Widget in IPSView
 bereitstellen können. Datenquellen und Diagrammkonfiguration werden dabei nur
 einmal gepflegt.
 
+## Animation
+
+Im Kachel- und unabhängigen IPSView-Designer steuern **Animation**, **Startanimation** und **Aktualisierungsanimation** die ECharts-Übergänge. Beide Zeiten sind von 0 bis 3000 ms einstellbar; 0 ms unterdrückt den jeweiligen Übergang. Die Systemeinstellung für reduzierte Bewegung schaltet Animationen immer ab. Bei **Kacheldesign verwenden** übernimmt IPSView die Kachelwerte.
+
 Multi-Title-, zwei Ring- und Wetterstations-Vorlage mit optionaler
 IPSView-WebContent-Ausgabe. Eine geordnete Liste aus
 2 bis 16 numerischen Quellvariablen ist konfigurierbar, wird als Referenzen

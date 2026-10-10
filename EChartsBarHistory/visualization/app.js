@@ -133,8 +133,9 @@
         return {
             backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
                 ? 'transparent' : colors.background,
-            animation: true,
-            animationDuration: 350,
+            ...echartsDesign.animationOptions(style, {
+                enabled: true, initialDuration: 350, updateDuration: 500
+            }),
             aria: {
                 enabled: true,
                 description: series.map(function (item) { return String(item.label || ''); }).join(', '),

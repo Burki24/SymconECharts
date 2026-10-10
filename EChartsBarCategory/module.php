@@ -8,6 +8,7 @@ use Burki24\SymconModuleHelper\IPSViewHTMLPageHelper;
 use Burki24\SymconModuleHelper\ResponsiveVisualizationHelper;
 use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
+use SymconECharts\EChartsAnimationDesign;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsCurrentSources;
 use SymconECharts\EChartsIPSViewBackground;
@@ -23,6 +24,7 @@ require_once __DIR__ . '/../libs/helper/ResponsiveVisualizationHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
+require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsCurrentSources.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
@@ -34,6 +36,7 @@ require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 class EChartsBarCategory extends IPSModuleStrict
 {
     use ConfigurationFormHelper;
+    use EChartsAnimationDesign;
     use DataFlowHelper;
     use EChartsCurrentSources;
     use IPSViewHTMLPageHelper;
@@ -120,6 +123,8 @@ class EChartsBarCategory extends IPSModuleStrict
                 ['IPSViewBarSVG', 'IPSViewBarSVGSizePercent'],
                 $this->ReadPropertyString('IPSViewBarFillMode') === 'svg'
             );
+            $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
+            $form['elements'] = $this->WithAnimationFormCallbacks($form['elements'], 'ECBC');
             $this->InsertIPSViewHTMLPageFormItems(
                 $form['elements'],
                 'Configure optional IPSView HTML output.',
@@ -520,23 +525,27 @@ class EChartsBarCategory extends IPSModuleStrict
         $this->RegisterPropertyString($prefix . 'BarFillMode', 'solid');
         $this->RegisterPropertyString($prefix . 'BarSVG', '');
         $this->RegisterPropertyInteger($prefix . 'BarSVGSizePercent', 100);
+        $this->RegisterAnimationProperties($prefix, true, 350, 500);
     }
 
     /** @return array<string, string> */
     private function DesignPropertyNames(): array
     {
         return [
-            'BarMode'           => 'string',
-            'Orientation'       => 'string',
-            'SortOrder'         => 'string',
-            'EChartsTheme'      => 'string',
-            'ShowValues'        => 'boolean',
-            'ShowGrid'          => 'boolean',
-            'RoundedBars'       => 'boolean',
-            'BarWidthPercent'   => 'integer',
-            'BarFillMode'       => 'string',
-            'BarSVG'            => 'string',
-            'BarSVGSizePercent' => 'integer'
+            'BarMode'                 => 'string',
+            'Orientation'             => 'string',
+            'SortOrder'               => 'string',
+            'EChartsTheme'            => 'string',
+            'ShowValues'              => 'boolean',
+            'ShowGrid'                => 'boolean',
+            'RoundedBars'             => 'boolean',
+            'BarWidthPercent'         => 'integer',
+            'BarFillMode'             => 'string',
+            'BarSVG'                  => 'string',
+            'BarSVGSizePercent'       => 'integer',
+            'AnimationEnabled'        => 'boolean',
+            'AnimationDuration'       => 'integer',
+            'AnimationDurationUpdate' => 'integer'
         ];
     }
 
@@ -551,6 +560,7 @@ class EChartsBarCategory extends IPSModuleStrict
             && in_array($this->ReadPropertyString($prefix . 'BarFillMode'), self::BAR_FILL_MODES, true)
             && $this->ReadPropertyInteger($prefix . 'BarSVGSizePercent') >= 25
             && $this->ReadPropertyInteger($prefix . 'BarSVGSizePercent') <= 400
+            && $this->AnimationIsValid($prefix)
             && $this->IsValidBarSVG($prefix);
     }
 
@@ -572,6 +582,7 @@ class EChartsBarCategory extends IPSModuleStrict
     private function ReadDesignStyle(string $prefix = ''): array
     {
         $style = [
+            ...$this->ReadAnimationStyle($prefix),
             'showValues'      => $this->ReadPropertyBoolean($prefix . 'ShowValues'),
             'showGrid'        => $this->ReadPropertyBoolean($prefix . 'ShowGrid'),
             'roundedBars'     => $this->ReadPropertyBoolean($prefix . 'RoundedBars'),

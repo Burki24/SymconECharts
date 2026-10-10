@@ -6,6 +6,10 @@ vier weitere Quellen werden als gleich große Nebeninstrumente angeordnet. Bei
 vier und fünf Quellen nutzt eine eigene Anordnung den verfügbaren Platz breiter
 Kacheln aus, ohne das Hauptinstrument zu verkleinern.
 
+## Animation
+
+Im Kachel- und unabhängigen IPSView-Designer steuern **Animation**, **Startanimation** und **Aktualisierungsanimation** die ECharts-Übergänge. Beide Zeiten sind von 0 bis 3000 ms einstellbar; 0 ms unterdrückt den jeweiligen Übergang. Die Systemeinstellung für reduzierte Bewegung schaltet Animationen immer ab. Bei **Kacheldesign verwenden** übernimmt IPSView die Kachelwerte.
+
 ## Voraussetzungen
 
 - IP-Symcon 9.0 oder 9.1 mit PHP 8.5;

@@ -104,6 +104,17 @@ assert.equal(resizeGauge.optionUpdates, 2, 'A genuine Gauge width change must re
 const reducedGauge = render('ipsview', 620, 630, 'simple', { plateShape: 'circle' }, true);
 assert.equal(reducedGauge.animation, false, 'Gauge Single must keep honoring reduced-motion preferences.');
 assert.equal(reducedGauge.animationDuration, 0);
+const timedGauge = render('symcon', 620, 630, 'simple', {
+    animationEnabled: true, animationDuration: 750, animationDurationUpdate: 1250
+});
+assert.equal(timedGauge.animationDuration, 750);
+assert.equal(timedGauge.animationDurationUpdate, 1250);
+assert.equal(timedGauge.series[0].detail.valueAnimation, true);
+const stoppedGauge = render('ipsview', 620, 630, 'simple', {
+    animationEnabled: false, animationDuration: 750, animationDurationUpdate: 1250
+});
+assert.equal(stoppedGauge.animation, false);
+assert.equal(stoppedGauge.series[0].detail.valueAnimation, false);
 assert.ok(narrow.series[0].radius > 0);
 assert.ok(narrow.graphic[0].shape.cx - narrow.graphic[0].shape.r >= 0);
 assert.ok(narrow.graphic[0].shape.cy - narrow.graphic[0].shape.r >= 0);

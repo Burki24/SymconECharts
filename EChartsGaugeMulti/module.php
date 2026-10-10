@@ -9,6 +9,7 @@ use Burki24\SymconModuleHelper\ResponsiveVisualizationHelper;
 use Burki24\SymconModuleHelper\SVGPreviewHelper;
 use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
+use SymconECharts\EChartsAnimationDesign;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsDataProtocol;
 use SymconECharts\EChartsGaugeDesign;
@@ -27,6 +28,7 @@ require_once __DIR__ . '/../libs/helper/SVGPreviewHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
+require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsGaugeDesign.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
@@ -39,6 +41,7 @@ require_once __DIR__ . '/GaugePreview.php';
 class EChartsGaugeMulti extends IPSModuleStrict
 {
     use ConfigurationFormHelper;
+    use EChartsAnimationDesign;
     use DataFlowHelper;
     use IPSViewHTMLPageHelper;
     use EChartsIPSViewDesignForm;
@@ -106,13 +109,16 @@ class EChartsGaugeMulti extends IPSModuleStrict
         'PlateBackgroundRotation'    => 0.0
     ];
     private const DESIGN_ASSET_BOOLEAN_DEFAULTS = [
-        'PlateBackgroundEnabled' => false
+        'PlateBackgroundEnabled' => false,
+        'AnimationEnabled'       => true
     ];
     private const DESIGN_ASSET_INTEGER_DEFAULTS = [
         'PlateBackgroundSizePercent'    => 100,
         'PlateBackgroundOffsetXPercent' => 0,
         'PlateBackgroundOffsetYPercent' => 0,
-        'PlateBackgroundOpacityPercent' => 100
+        'PlateBackgroundOpacityPercent' => 100,
+        'AnimationDuration'             => 500,
+        'AnimationDurationUpdate'       => 500
     ];
 
     public function Create(): void
@@ -209,6 +215,8 @@ class EChartsGaugeMulti extends IPSModuleStrict
         if (isset($form['elements']) && is_array($form['elements'])) {
             $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
             $form['elements'] = $this->AttachGaugePreviewActions($form['elements']);
+            $form['elements'] = $this->WithAnimationFormCallbacks($form['elements'], 'ECGM');
+            $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
         }
         $form = SVGPreviewHelper::withImage(
             $form,
@@ -568,6 +576,9 @@ class EChartsGaugeMulti extends IPSModuleStrict
 
     private function ValidateGaugeDesign(string $prefix = ''): ?string
     {
+        if (!$this->AnimationIsValid($prefix)) {
+            return 'Gauge animation durations must be between 0 and 3000 ms.';
+        }
         foreach (self::DESIGN_SCALE_PROPERTIES as $name) {
             $value = $this->ReadPropertyInteger($prefix . $name);
             if ($value < 50 || $value > 150) {
@@ -1052,7 +1063,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
             $style[lcfirst($name)] = str_ends_with($name, 'Color') ? self::ColorToHex($value) : $value;
         }
 
-        return array_merge($style, $this->ResolveGaugeAssetStyle(
+        return array_merge($style, $this->ReadAnimationStyle($prefix), $this->ResolveGaugeAssetStyle(
             $this->ReadPropertyString($prefix . 'PointerShape'),
             $this->ReadPropertyString($prefix . 'CustomPointerSVG'),
             $this->ReadPropertyString($prefix . 'CustomPointerPivotMode'),
@@ -1096,7 +1107,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
             $style[lcfirst($name)] = str_ends_with($name, 'Color') ? self::ColorToHex($value) : $value;
         }
 
-        return array_merge($style, $this->ResolveGaugeAssetStyle(
+        return array_merge($style, $this->AnimationStyleFromFormValues($values, $prefix), $this->ResolveGaugeAssetStyle(
             (string) ($values[$prefix . 'PointerShape'] ?? $this->ReadPropertyString($prefix . 'PointerShape')),
             (string) ($values[$prefix . 'CustomPointerSVG'] ?? $this->ReadPropertyString($prefix . 'CustomPointerSVG')),
             (string) ($values[$prefix . 'CustomPointerPivotMode'] ?? $this->ReadPropertyString($prefix . 'CustomPointerPivotMode')),

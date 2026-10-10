@@ -4,6 +4,10 @@
 Änderungen zu einer Endsumme entwickelt. Das Modul benötigt zwei bis sechzehn
 eindeutige numerische Symcon-Variablen mit derselben effektiven Einheit.
 
+## Animation
+
+Im Kachel- und unabhängigen IPSView-Designer steuern **Animation**, **Startanimation** und **Aktualisierungsanimation** die ECharts-Übergänge. Beide Zeiten sind von 0 bis 3000 ms einstellbar; 0 ms unterdrückt den jeweiligen Übergang. Die Systemeinstellung für reduzierte Bewegung schaltet Animationen immer ab. Bei **Kacheldesign verwenden** übernimmt IPSView die Kachelwerte.
+
 ## Einrichtung
 
 Ein gemeinsames `EChartsGateway` genügt für alle Diagramme. Wählen Sie bei

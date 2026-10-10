@@ -9,6 +9,7 @@ use Burki24\SymconModuleHelper\ResponsiveVisualizationHelper;
 use Burki24\SymconModuleHelper\SVGPreviewHelper;
 use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
+use SymconECharts\EChartsAnimationDesign;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsDataProtocol;
 use SymconECharts\EChartsGaugeDesign;
@@ -27,6 +28,7 @@ require_once __DIR__ . '/../libs/helper/SVGPreviewHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
+require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsGaugeDesign.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
@@ -39,6 +41,7 @@ require_once __DIR__ . '/GaugePreview.php';
 class EChartsGaugeSingle extends IPSModuleStrict
 {
     use ConfigurationFormHelper;
+    use EChartsAnimationDesign;
     use DataFlowHelper;
     use IPSViewHTMLPageHelper;
     use EChartsIPSViewDesignForm;
@@ -155,9 +158,12 @@ class EChartsGaugeSingle extends IPSModuleStrict
         'PointerShadow'              => false,
         'ProgressShadow'             => false,
         'RingShadow'                 => false,
-        'AnchorShadow'               => false
+        'AnchorShadow'               => false,
+        'AnimationEnabled'           => true
     ];
     private const IPSVIEW_INTEGER_DESIGN_DEFAULTS = [
+        'AnimationDuration'              => 500,
+        'AnimationDurationUpdate'        => 500,
         'AnchorColor'                    => 0x55CBB5,
         'AnchorBorderColor'              => 0xF4F5F7,
         'PlateGradientMiddleColor'       => 0x45474C,
@@ -205,6 +211,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
         $this->RegisterPropertyInteger('Decimals', 1);
         $this->RegisterPropertyString('GaugePreset', self::PRESET_SIMPLE);
         $this->RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO);
+        $this->RegisterAnimationProperties('', true, 500, 500);
         $this->RegisterPropertyString('PointerShape', 'preset');
         $this->RegisterPropertyString('CustomPointerSVG', '');
         $this->RegisterPropertyString('CustomPointerPivotMode', 'svg');
@@ -353,6 +360,8 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 $this->GaugePreviewFormAction()
             );
             $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
+            $form['elements'] = $this->WithAnimationFormCallbacks($form['elements'], 'ECGS');
+            $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
         }
         $gaugeConfiguration = $this->ReadEffectiveGaugeConfiguration();
         $form = SVGPreviewHelper::withImage(
@@ -1299,6 +1308,15 @@ class EChartsGaugeSingle extends IPSModuleStrict
      */
     private function GetConfigurationError(): ?array
     {
+        if (!$this->AnimationIsValid()
+            || ($this->IsIPSViewHTMLPageEnabled()
+                && !$this->ReadPropertyBoolean('IPSViewUseTileDesign')
+                && !$this->AnimationIsValid('IPSView'))) {
+            return [
+                'Status'  => self::STATUS_DESIGN_INVALID,
+                'Message' => 'Gauge animation durations must be between 0 and 3000 ms.'
+            ];
+        }
         if (!EChartsIPSViewBackground::IsValid(
             $this->ReadPropertyInteger('IPSViewBackgroundColor'),
             $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent')
@@ -1627,7 +1645,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
     /** @return array<string, mixed> */
     private function ReadGaugeStyle(): array
     {
-        $style = [];
+        $style = $this->ReadAnimationStyle();
         foreach (self::DESIGN_SCALE_PROPERTIES as $fieldName => $propertyName) {
             $style[$fieldName] = $this->ReadPropertyInteger($propertyName);
         }
@@ -1811,7 +1829,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
     /** @param array<string, mixed> $values */
     private function GaugeStyleFromFormValues(array $values, float $minimum, float $maximum): array
     {
-        $style = $this->ReadGaugeStyle();
+        $style = array_merge($this->ReadGaugeStyle(), $this->AnimationStyleFromFormValues($values));
         foreach (self::DESIGN_SCALE_PROPERTIES as $fieldName => $propertyName) {
             $style[$fieldName] = (int) ($values[$propertyName] ?? $style[$fieldName]);
         }

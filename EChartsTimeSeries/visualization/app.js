@@ -185,7 +185,9 @@
             backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
                 ? 'transparent' : colors.background,
             color: seriesPalette,
-            animation: false,
+            ...echartsDesign.animationOptions(design, {
+                enabled: false, initialDuration: 350, updateDuration: 500
+            }),
             aria: {
                 enabled: true,
                 description: series.map(function (item) { return String(item.label || ''); }).join(', '),

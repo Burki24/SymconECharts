@@ -8,6 +8,7 @@ use Burki24\SymconModuleHelper\IPSViewHTMLPageHelper;
 use Burki24\SymconModuleHelper\ResponsiveVisualizationHelper;
 use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
+use SymconECharts\EChartsAnimationDesign;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsCurrentSources;
 use SymconECharts\EChartsIPSViewBackground;
@@ -23,6 +24,7 @@ require_once __DIR__ . '/../libs/helper/ResponsiveVisualizationHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
+require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsCurrentSources.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
@@ -34,6 +36,7 @@ require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 class EChartsBarPolar extends IPSModuleStrict
 {
     use ConfigurationFormHelper;
+    use EChartsAnimationDesign;
     use DataFlowHelper;
     use EChartsCurrentSources;
     use IPSViewHTMLPageHelper;
@@ -136,16 +139,7 @@ class EChartsBarPolar extends IPSModuleStrict
                 ['IPSViewBarHighlightColor'],
                 in_array($this->ReadPropertyString('IPSViewBarHighlightMode'), ['outline', 'focus'], true)
             );
-            $form['elements'] = $this->SetFormFieldVisibility(
-                $form['elements'],
-                ['AnimationDuration', 'AnimationDurationUpdate'],
-                $this->ReadPropertyBoolean('AnimationEnabled')
-            );
-            $form['elements'] = $this->SetFormFieldVisibility(
-                $form['elements'],
-                ['IPSViewAnimationDuration', 'IPSViewAnimationDurationUpdate'],
-                $this->ReadPropertyBoolean('IPSViewAnimationEnabled')
-            );
+            $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
             $this->InsertIPSViewHTMLPageFormItems(
                 $form['elements'],
                 'Configure optional IPSView HTML output.',
@@ -178,13 +172,6 @@ class EChartsBarPolar extends IPSModuleStrict
             'visible',
             in_array($BarHighlightMode, ['outline', 'focus'], true)
         );
-    }
-
-    public function UpdateAnimationForm(bool $IPSView, bool $AnimationEnabled): void
-    {
-        $prefix = $IPSView ? 'IPSView' : '';
-        $this->UpdateFormField($prefix . 'AnimationDuration', 'visible', $AnimationEnabled);
-        $this->UpdateFormField($prefix . 'AnimationDurationUpdate', 'visible', $AnimationEnabled);
     }
 
     public function RequestAction(string $Ident, mixed $Value): void
@@ -535,9 +522,7 @@ class EChartsBarPolar extends IPSModuleStrict
         $this->RegisterPropertyInteger($prefix . 'BarShadowBlur', 0);
         $this->RegisterPropertyInteger($prefix . 'BarShadowColor', -1);
         $this->RegisterPropertyInteger($prefix . 'BarShadowOpacityPercent', 35);
-        $this->RegisterPropertyBoolean($prefix . 'AnimationEnabled', true);
-        $this->RegisterPropertyInteger($prefix . 'AnimationDuration', 350);
-        $this->RegisterPropertyInteger($prefix . 'AnimationDurationUpdate', 500);
+        $this->RegisterAnimationProperties($prefix, true, 350, 500);
         $this->RegisterPropertyString($prefix . 'BarHighlightMode', 'standard');
         $this->RegisterPropertyInteger($prefix . 'BarHighlightColor', -1);
         $this->RegisterPropertyInteger($prefix . 'InnerRadiusPercent', 12);
@@ -626,10 +611,7 @@ class EChartsBarPolar extends IPSModuleStrict
             || $this->ReadPropertyInteger($prefix . 'BarShadowColor') > 0xFFFFFF
             || $this->ReadPropertyInteger($prefix . 'BarShadowOpacityPercent') < 0
             || $this->ReadPropertyInteger($prefix . 'BarShadowOpacityPercent') > 100
-            || $this->ReadPropertyInteger($prefix . 'AnimationDuration') < 0
-            || $this->ReadPropertyInteger($prefix . 'AnimationDuration') > 3000
-            || $this->ReadPropertyInteger($prefix . 'AnimationDurationUpdate') < 0
-            || $this->ReadPropertyInteger($prefix . 'AnimationDurationUpdate') > 3000
+            || !$this->AnimationIsValid($prefix)
             || !in_array($this->ReadPropertyString($prefix . 'BarHighlightMode'), self::BAR_HIGHLIGHT_MODES, true)
             || $this->ReadPropertyInteger($prefix . 'BarHighlightColor') < -1
             || $this->ReadPropertyInteger($prefix . 'BarHighlightColor') > 0xFFFFFF
@@ -690,9 +672,7 @@ class EChartsBarPolar extends IPSModuleStrict
             'barShadowBlur'               => $this->ReadPropertyInteger($prefix . 'BarShadowBlur'),
             'barShadowColor'              => $shadowColor < 0 ? '' : EChartsAsset::ColorToHex($shadowColor),
             'barShadowOpacityPercent'     => $this->ReadPropertyInteger($prefix . 'BarShadowOpacityPercent'),
-            'animationEnabled'            => $this->ReadPropertyBoolean($prefix . 'AnimationEnabled'),
-            'animationDuration'           => $this->ReadPropertyInteger($prefix . 'AnimationDuration'),
-            'animationDurationUpdate'     => $this->ReadPropertyInteger($prefix . 'AnimationDurationUpdate'),
+            ...$this->ReadAnimationStyle($prefix),
             'barHighlightMode'            => $this->ReadPropertyString($prefix . 'BarHighlightMode'),
             'barHighlightColor'           => $highlightColor < 0 ? '' : EChartsAsset::ColorToHex($highlightColor),
             'innerRadiusPercent'          => $this->ReadPropertyInteger($prefix . 'InnerRadiusPercent'),

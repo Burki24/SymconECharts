@@ -121,6 +121,32 @@
             "width": "720px",
             "items": [
                 {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "AnimationEnabled",
+                            "caption": "Animate bars"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDuration",
+                            "caption": "Initial animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDurationUpdate",
+                            "caption": "Update animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        }
+                    ]
+                },
+                {
                     "type": "Select",
                     "name": "EChartsTheme",
                     "caption": "ECharts theme",
@@ -268,6 +294,32 @@
                     "caption": "Independent IPSView designer",
                     "expanded": false,
                     "items": [
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "CheckBox",
+                                    "name": "IPSViewAnimationEnabled",
+                                    "caption": "Animate bars"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "IPSViewAnimationDuration",
+                                    "caption": "Initial animation",
+                                    "minimum": 0,
+                                    "maximum": 3000,
+                                    "suffix": "ms"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "IPSViewAnimationDurationUpdate",
+                                    "caption": "Update animation",
+                                    "minimum": 0,
+                                    "maximum": 3000,
+                                    "suffix": "ms"
+                                }
+                            ]
+                        },
                         {
                             "type": "Select",
                             "name": "IPSViewEChartsTheme",

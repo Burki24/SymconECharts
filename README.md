@@ -112,6 +112,14 @@ Folgende Module sind enthalten:
 
 ## Kacheldesign und IPSView-Design
 
+Alle Diagrammmodule bieten im Kacheldesigner **Animation**, **Startanimation**
+und **Aktualisierungsanimation**. Die beiden Zeiten sind unabhängig von 0 bis
+3000 ms einstellbar; 0 ms unterdrückt die jeweilige Übergangsbewegung.
+TimeSeries startet aus Rücksicht auf viele historische Datenpunkte ohne
+Animation, die anderen Diagramme behalten ihre bisherige Animation. Das
+unabhängige IPSView-Design kann andere Werte verwenden. Eine
+Systemeinstellung für reduzierte Bewegung schaltet Animationen immer ab.
+
 Jede Datenquelle wird technisch ausschließlich über ihre Symcon-Variablen-ID
 zugeordnet. Namen, Objektpfade und frei gewählte Beschriftungen dienen nur der
 Anzeige oder fachlichen Gruppierung. Ein ausdrücklich konfigurierter Name hat

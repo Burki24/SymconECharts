@@ -5,6 +5,10 @@ ECharts-Zeitreihe. Eine Instanz verarbeitet eine bis acht eindeutige Quellen,
 bis zu acht Einheitengruppen und rendert eine native Symcon-Kachel sowie
 optional ein eigenständiges IPSView-WebContent-Widget.
 
+## Animation
+
+Im Kachel- und unabhängigen IPSView-Designer steuern **Animation**, **Startanimation** und **Aktualisierungsanimation** die ECharts-Übergänge. Beide Zeiten sind von 0 bis 3000 ms einstellbar; 0 ms unterdrückt den jeweiligen Übergang. Die Systemeinstellung für reduzierte Bewegung schaltet Animationen immer ab. Bei **Kacheldesign verwenden** übernimmt IPSView die Kachelwerte. Bei Zeitreihen ist Animation wegen der Datenmenge standardmäßig ausgeschaltet.
+
 ## Voraussetzungen
 
 - IP-Symcon 9.0 oder 9.1 mit PHP 8.5;
