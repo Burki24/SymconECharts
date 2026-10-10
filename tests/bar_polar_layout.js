@@ -84,6 +84,8 @@ function assertProtectedGeometry(option, width, height, topClearance) {
 }
 const radial = options.at(-1);
 assertProtectedGeometry(radial, 625, 560, 108);
+assert.equal(radial.radiusAxis.min, undefined, 'Existing Polar Tiles must retain automatic scale by default.');
+assert.equal(radial.series[0].showBackground, false, 'Background tracks must be off by default.');
 assert.equal(radial.series[0].coordinateSystem, 'polar');
 assert.equal(radial.angleAxis.type, 'category');
 assert.equal(radial.radiusAxis.type, 'value');
@@ -141,11 +143,63 @@ assertProtectedGeometry(tangential, 625, 560, 70);
 assert.ok(tangential.polar.radius[0] > 0 && tangential.polar.radius[0] < tangential.polar.radius[1]);
 assert.equal(tangential.angleAxis.splitLine.show, false);
 
+const fixedStyle = {
+    ...state.chart.polar.style,
+    valueAxisRangeMode: 'manual', valueAxisMinimum: -5, valueAxisMaximum: 25,
+    showBarBackground: true, barBackgroundColor: '#778899', barBackgroundOpacityPercent: 40
+};
+window.handleMessage({
+    status: 'ready', chart: {
+        ...state.chart,
+        polar: { ...state.chart.polar, style: fixedStyle }
+    }
+});
+const fixedRadial = options.at(-1);
+assert.equal(fixedRadial.radiusAxis.min, -5);
+assert.equal(fixedRadial.radiusAxis.max, 25);
+assert.equal(fixedRadial.series[0].showBackground, true);
+assert.equal(fixedRadial.series[0].backgroundStyle.color, '#778899');
+assert.equal(fixedRadial.series[0].backgroundStyle.opacity, 0.4);
+window.handleMessage({
+    status: 'ready', chart: {
+        ...state.chart,
+        polar: { ...state.chart.polar, style: { ...fixedStyle, mode: 'tangential' } }
+    }
+});
+const fixedTangential = options.at(-1);
+assert.equal(fixedTangential.angleAxis.min, -5);
+assert.equal(fixedTangential.angleAxis.max, 25);
+assert.equal(fixedTangential.series[0].showBackground, true);
+window.handleMessage({
+    status: 'ready', chart: {
+        ...state.chart,
+        polar: {
+            ...state.chart.polar,
+            style: {
+                ...fixedStyle,
+                valueAxisRangeMode: 'auto',
+                barBackgroundColor: '',
+                barBackgroundOpacityPercent: 0
+            }
+        }
+    }
+});
+const automaticTracks = options.at(-1);
+assert.equal(automaticTracks.radiusAxis.min, undefined, 'Automatic scale must not keep fixed limits.');
+assert.equal(automaticTracks.series[0].backgroundStyle.color, palette.border,
+    'Automatic track color must follow the active theme.');
+assert.equal(automaticTracks.series[0].backgroundStyle.opacity, 0,
+    'Zero track opacity must stay fully transparent.');
+
 chartElement.clientWidth = 1000;
 chartElement.clientHeight = 700;
 resizeCallback();
 assert.equal(resized, 1, 'A size change must resize the ECharts instance.');
-assertProtectedGeometry({ ...tangential, ...options.at(-1) }, 1000, 700, 70);
+assertProtectedGeometry({
+    ...automaticTracks,
+    ...options.at(-1),
+    angleAxis: { ...automaticTracks.angleAxis, ...options.at(-1).angleAxis }
+}, 1000, 700, 70);
 assert.ok(options.at(-1).polar.radius[1] > tangential.polar.radius[1], 'The ring must grow with the tile.');
 
 chartElement.clientWidth = 300;
@@ -217,10 +271,18 @@ if (fs.existsSync(localECharts)) {
         }
     }
     userChart.dispose();
-    for (const option of [radial, tangential]) {
+    for (const option of [radial, tangential, fixedRadial, fixedTangential]) {
         const realChart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 625, height: 560 });
         realChart.setOption(option);
         assert.ok(realChart.renderToSVGString().includes('<svg'), 'Both polar modes must render in ECharts.');
+        if (option === fixedRadial || option === fixedTangential) {
+            const tracks = realChart.getZr().storage.getDisplayList().filter(
+                element => element.type === 'sector' && element.style.fill === '#778899'
+            );
+            assert.equal(tracks.length, 3, 'Each Polar value must have one ECharts background track.');
+            assert.ok(tracks.every(element => element.style.opacity === 0.4),
+                'The configured background-track opacity must reach the rendered Polar sectors.');
+        }
         if (option === radial) {
             const categoryLabels = realChart.getZr().storage.getDisplayList().filter(
                 element => element.type === 'tspan' && ['<Room>', 'Outside'].includes(element.style.text)

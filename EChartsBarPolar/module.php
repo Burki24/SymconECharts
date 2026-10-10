@@ -53,6 +53,7 @@ class EChartsBarPolar extends IPSModuleStrict
     private const STATUS_GATEWAY_FAILED = 204;
     private const POLAR_MODES = ['radial', 'tangential'];
     private const SORT_ORDERS = ['configured', 'ascending', 'descending'];
+    private const VALUE_AXIS_RANGE_MODES = ['auto', 'manual'];
 
     public function Create(): void
     {
@@ -63,6 +64,12 @@ class EChartsBarPolar extends IPSModuleStrict
         $this->RegisterPropertyString('Sources', '[]');
         $this->RegisterPropertyString('Title', '');
         $this->RegisterDesignProperties();
+        $this->RegisterPropertyString('ValueAxisRangeMode', 'auto');
+        $this->RegisterPropertyFloat('ValueAxisMinimum', 0.0);
+        $this->RegisterPropertyFloat('ValueAxisMaximum', 100.0);
+        $this->RegisterPropertyBoolean('ShowBarBackground', false);
+        $this->RegisterPropertyInteger('BarBackgroundColor', -1);
+        $this->RegisterPropertyInteger('BarBackgroundOpacityPercent', 25);
         $this->RegisterIPSViewHTMLPageProperties();
         $this->RegisterEChartsIPSViewTransport();
         $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
@@ -102,6 +109,11 @@ class EChartsBarPolar extends IPSModuleStrict
     {
         $form = $this->LoadConfigurationForm();
         if (isset($form['elements']) && is_array($form['elements'])) {
+            $form['elements'] = $this->SetFormFieldVisibility(
+                $form['elements'],
+                ['ValueAxisMinimum', 'ValueAxisMaximum'],
+                $this->ReadPropertyString('ValueAxisRangeMode') === 'manual'
+            );
             $this->InsertIPSViewHTMLPageFormItems(
                 $form['elements'],
                 'Configure optional IPSView HTML output.',
@@ -110,6 +122,13 @@ class EChartsBarPolar extends IPSModuleStrict
         }
 
         return $this->EncodeConfigurationForm($this->WithIPSViewDesignFormState($form, 'ECBP'));
+    }
+
+    public function UpdateValueScaleForm(string $ValueAxisRangeMode): void
+    {
+        $manual = $ValueAxisRangeMode === 'manual';
+        $this->UpdateFormField('ValueAxisMinimum', 'visible', $manual);
+        $this->UpdateFormField('ValueAxisMaximum', 'visible', $manual);
     }
 
     public function RequestAction(string $Ident, mixed $Value): void
@@ -483,13 +502,27 @@ class EChartsBarPolar extends IPSModuleStrict
             return false;
         }
 
+        if ($prefix === '' && (
+            !in_array($this->ReadPropertyString('ValueAxisRangeMode'), self::VALUE_AXIS_RANGE_MODES, true)
+            || !is_finite($this->ReadPropertyFloat('ValueAxisMinimum'))
+            || !is_finite($this->ReadPropertyFloat('ValueAxisMaximum'))
+            || ($this->ReadPropertyString('ValueAxisRangeMode') === 'manual'
+                && $this->ReadPropertyFloat('ValueAxisMinimum') >= $this->ReadPropertyFloat('ValueAxisMaximum'))
+            || $this->ReadPropertyInteger('BarBackgroundColor') < -1
+            || $this->ReadPropertyInteger('BarBackgroundColor') > 0xFFFFFF
+            || $this->ReadPropertyInteger('BarBackgroundOpacityPercent') < 0
+            || $this->ReadPropertyInteger('BarBackgroundOpacityPercent') > 100
+        )) {
+            return false;
+        }
+
         return true;
     }
 
     /** @return array<string, mixed> */
     private function ReadDesignStyle(string $prefix = ''): array
     {
-        return [
+        $style = [
             'mode'               => $this->ReadPropertyString($prefix . 'PolarMode'),
             'sortOrder'          => $this->ReadPropertyString($prefix . 'SortOrder'),
             'showCategoryLabels' => $this->ReadPropertyBoolean($prefix . 'ShowCategoryLabels'),
@@ -502,6 +535,18 @@ class EChartsBarPolar extends IPSModuleStrict
             'clockwise'          => $this->ReadPropertyBoolean($prefix . 'Clockwise'),
             'roundCaps'          => $this->ReadPropertyBoolean($prefix . 'RoundCaps')
         ];
+
+        if ($prefix === '') {
+            $style['valueAxisRangeMode'] = $this->ReadPropertyString('ValueAxisRangeMode');
+            $style['valueAxisMinimum'] = $this->ReadPropertyFloat('ValueAxisMinimum');
+            $style['valueAxisMaximum'] = $this->ReadPropertyFloat('ValueAxisMaximum');
+            $style['showBarBackground'] = $this->ReadPropertyBoolean('ShowBarBackground');
+            $backgroundColor = $this->ReadPropertyInteger('BarBackgroundColor');
+            $style['barBackgroundColor'] = $backgroundColor < 0 ? '' : EChartsAsset::ColorToHex($backgroundColor);
+            $style['barBackgroundOpacityPercent'] = $this->ReadPropertyInteger('BarBackgroundOpacityPercent');
+        }
+
+        return $style;
     }
 
     private function IPSViewThemeCSS(): string

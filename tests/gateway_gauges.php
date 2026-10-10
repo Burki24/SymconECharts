@@ -5011,6 +5011,8 @@ assertGatewayGauge(
         && $polarData['variant'] === 'polar'
         && $polarData['polar']['unit'] === '°C'
         && $polarData['polar']['style']['mode'] === 'radial'
+        && $polarData['polar']['style']['valueAxisRangeMode'] === 'auto'
+        && $polarData['polar']['style']['showBarBackground'] === false
         && array_column($polarData['items'], 'label') === ['Living room', 'Living room', 'Legacy wind speed']
         && $polarData['items'][0]['color'] === '#123456'
         && array_column($polarData['items'], 'decimals') === [2, 0, 1]
@@ -5039,6 +5041,73 @@ assertGatewayGauge(
     ($polarSourceForm['changeOrder'] ?? false) === true
         && in_array('Color', array_column($polarSourceForm['columns'], 'name'), true),
     'Polar Bar form must expose ordered sources and individual colors.'
+);
+$polarTileDesigner = current(array_filter(
+    $polarForm['elements'],
+    static fn (array $element): bool => ($element['caption'] ?? '') === 'Tile designer'
+));
+$polarScaleRow = current(array_filter(
+    $polarTileDesigner['items'],
+    static fn (array $item): bool => in_array('ValueAxisRangeMode', array_column($item['items'] ?? [], 'name'), true)
+));
+$polarScaleFields = array_column($polarScaleRow['items'], null, 'name');
+assertGatewayGauge(
+    ($polarScaleFields['ValueAxisMinimum']['visible'] ?? null) === false
+        && ($polarScaleFields['ValueAxisMaximum']['visible'] ?? null) === false
+        && str_contains((string) ($polarScaleFields['ValueAxisRangeMode']['onChange'] ?? ''), 'ECBP_UpdateValueScaleForm'),
+    'Polar Bar Tile form must hide fixed-scale limits until manual mode is selected.'
+);
+$polar->SetTestProperty('ValueAxisRangeMode', 'manual');
+$polar->SetTestProperty('ValueAxisMinimum', -10.5);
+$polar->SetTestProperty('ValueAxisMaximum', 30.25);
+$polar->SetTestProperty('ShowBarBackground', true);
+$polar->SetTestProperty('BarBackgroundColor', 0x778899);
+$polar->SetTestProperty('BarBackgroundOpacityPercent', 40);
+$polar->ApplyChanges();
+$polarDesignData = json_decode($polar->GetPolarData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $polar->GetTestStatus() === IS_ACTIVE
+        && $polarDesignData['polar']['style']['valueAxisRangeMode'] === 'manual'
+        && $polarDesignData['polar']['style']['valueAxisMinimum'] === -10.5
+        && $polarDesignData['polar']['style']['valueAxisMaximum'] === 30.25
+        && $polarDesignData['polar']['style']['showBarBackground'] === true
+        && $polarDesignData['polar']['style']['barBackgroundColor'] === '#778899'
+        && $polarDesignData['polar']['style']['barBackgroundOpacityPercent'] === 40
+        && !str_contains($polar->GetIPSViewHTML(), '"showBarBackground"'),
+    'Polar Bar must expose a fixed value scale and configurable background tracks in Tile data.'
+);
+$polarForm = json_decode($polar->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+$polarTileDesigner = current(array_filter(
+    $polarForm['elements'],
+    static fn (array $element): bool => ($element['caption'] ?? '') === 'Tile designer'
+));
+$polarTileDesignJSON = json_encode($polarTileDesigner, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    str_contains($polarTileDesignJSON, 'ValueAxisRangeMode')
+        && str_contains($polarTileDesignJSON, 'ValueAxisMinimum')
+        && str_contains($polarTileDesignJSON, 'ValueAxisMaximum')
+        && str_contains($polarTileDesignJSON, 'ShowBarBackground')
+        && str_contains($polarTileDesignJSON, 'BarBackgroundColor')
+        && str_contains($polarTileDesignJSON, 'BarBackgroundOpacityPercent'),
+    'Polar Bar Tile designer must expose the fixed scale and background-track controls.'
+);
+$polarScaleRow = current(array_filter(
+    $polarTileDesigner['items'],
+    static fn (array $item): bool => in_array('ValueAxisRangeMode', array_column($item['items'] ?? [], 'name'), true)
+));
+$polarScaleFields = array_column($polarScaleRow['items'], null, 'name');
+assertGatewayGauge(
+    ($polarScaleFields['ValueAxisMinimum']['visible'] ?? null) === true
+        && ($polarScaleFields['ValueAxisMaximum']['visible'] ?? null) === true,
+    'Polar Bar Tile form must reveal the fixed-scale limits for manual mode.'
+);
+$polar->UpdateValueScaleForm('auto');
+assertGatewayGauge(
+    array_slice($polar->GetTestFormUpdates(), -2) === [
+        ['Field' => 'ValueAxisMinimum', 'Parameter' => 'visible', 'Value' => false],
+        ['Field' => 'ValueAxisMaximum', 'Parameter' => 'visible', 'Value' => false]
+    ],
+    'Polar Bar Tile form must update both fixed-scale controls immediately when the mode changes.'
 );
 $polar->MessageSink(0, 4717, VM_UPDATE, []);
 $polarUpdates = $polar->GetTestVisualizationUpdates();
@@ -5080,6 +5149,29 @@ $invalidPolarDesign->SetTestProperty('Sources', json_encode([['VariableID' => 47
 $invalidPolarDesign->SetTestProperty('InnerRadiusPercent', 80);
 $invalidPolarDesign->ApplyChanges();
 assertGatewayGauge($invalidPolarDesign->GetTestStatus() === 202, 'Polar Bar must reject overlapping radii.');
+
+$invalidPolarScale = new EChartsBarPolar();
+$invalidPolarScale->Create();
+$invalidPolarScale->SetTestProperty('Sources', json_encode([['VariableID' => 4711]], JSON_THROW_ON_ERROR));
+$invalidPolarScale->SetTestProperty('ValueAxisRangeMode', 'manual');
+$invalidPolarScale->SetTestProperty('ValueAxisMinimum', 25.0);
+$invalidPolarScale->SetTestProperty('ValueAxisMaximum', 25.0);
+$invalidPolarScale->ApplyChanges();
+assertGatewayGauge($invalidPolarScale->GetTestStatus() === 202, 'Polar Bar must reject a non-increasing fixed scale.');
+
+$invalidPolarScaleMode = new EChartsBarPolar();
+$invalidPolarScaleMode->Create();
+$invalidPolarScaleMode->SetTestProperty('Sources', json_encode([['VariableID' => 4711]], JSON_THROW_ON_ERROR));
+$invalidPolarScaleMode->SetTestProperty('ValueAxisRangeMode', 'unknown');
+$invalidPolarScaleMode->ApplyChanges();
+assertGatewayGauge($invalidPolarScaleMode->GetTestStatus() === 202, 'Polar Bar must reject an unknown scale mode.');
+
+$invalidPolarTrack = new EChartsBarPolar();
+$invalidPolarTrack->Create();
+$invalidPolarTrack->SetTestProperty('Sources', json_encode([['VariableID' => 4711]], JSON_THROW_ON_ERROR));
+$invalidPolarTrack->SetTestProperty('BarBackgroundOpacityPercent', 101);
+$invalidPolarTrack->ApplyChanges();
+assertGatewayGauge($invalidPolarTrack->GetTestStatus() === 202, 'Polar Bar must reject invalid background opacity.');
 
 $sixteenPolarSources = [];
 for ($index = 0; $index < 16; $index++) {

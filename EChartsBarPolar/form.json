@@ -257,6 +257,68 @@
                     ]
                 },
                 {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "ValueAxisRangeMode",
+                            "caption": "Value scale",
+                            "onChange": "ECBP_UpdateValueScaleForm($id, $ValueAxisRangeMode);",
+                            "options": [
+                                {
+                                    "caption": "Automatic",
+                                    "value": "auto"
+                                },
+                                {
+                                    "caption": "Fixed range",
+                                    "value": "manual"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ValueAxisMinimum",
+                            "caption": "Scale minimum",
+                            "digits": 3
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ValueAxisMaximum",
+                            "caption": "Scale maximum",
+                            "digits": 3
+                        }
+                    ]
+                },
+                {
+                    "type": "Label",
+                    "caption": "Minimum and maximum apply to a fixed scale. Values outside the range are clipped."
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowBarBackground",
+                            "caption": "Show background tracks"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "BarBackgroundColor",
+                            "caption": "Track color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "BarBackgroundOpacityPercent",
+                            "caption": "Track opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
                     "type": "Label",
                     "caption": "The outer radius must exceed the inner radius by at least 20 percentage points."
                 },

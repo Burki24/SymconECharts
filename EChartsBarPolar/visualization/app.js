@@ -139,6 +139,17 @@
             axisTick: { show: style.showGrid !== false, lineStyle: axisStyle },
             splitLine: { show: style.showGrid !== false, lineStyle: splitStyle }
         };
+        var scaleMinimum = Number(style.valueAxisMinimum);
+        var scaleMaximum = Number(style.valueAxisMaximum);
+        if (style.valueAxisRangeMode === 'manual'
+            && Number.isFinite(scaleMinimum) && Number.isFinite(scaleMaximum)
+            && scaleMinimum < scaleMaximum) {
+            valueAxis.min = scaleMinimum;
+            valueAxis.max = scaleMaximum;
+        }
+        var trackOpacity = Number(style.barBackgroundOpacityPercent);
+        if (!Number.isFinite(trackOpacity)) { trackOpacity = 25; }
+        trackOpacity = Math.max(0, Math.min(100, trackOpacity)) / 100;
         var startAngle = Math.max(0, Math.min(360, Number(style.startAngle) || 0));
         var angleAxis = mode === 'radial' ? categoryAxis : valueAxis;
         angleAxis.startAngle = startAngle;
@@ -179,6 +190,11 @@
                 coordinateSystem: 'polar',
                 barWidth: Math.max(20, Math.min(100, Number(style.barWidthPercent) || 60)) + '%',
                 roundCap: style.roundCaps === true,
+                showBackground: style.showBarBackground === true,
+                backgroundStyle: {
+                    color: style.barBackgroundColor || colors.border,
+                    opacity: trackOpacity
+                },
                 data: items.map(function (item, index) {
                     var itemColor = item.color || swatches[index % swatches.length] || colors.accent;
                     return {
