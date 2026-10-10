@@ -14,11 +14,15 @@ const designSource = fs.readFileSync(
 const chartElement = { hidden: false, clientWidth: 625, clientHeight: 560 };
 const errorElement = { hidden: true, textContent: '' };
 const options = [];
+const handlers = {};
+const actions = [];
 let initialized = 0;
 let resizeCallback = null;
 let resized = 0;
 const chart = {
     setOption: next => { options.push(next); },
+    on: (event, query, handler) => { handlers[event] = handler; },
+    dispatchAction: action => { actions.push(action); },
     clear: () => {}, resize: () => { resized++; }, dispose: () => {}
 };
 const palette = {
@@ -100,6 +104,8 @@ assert.equal(radial.series[0].data[0].itemStyle.opacity, 1,
     'Existing Polar charts must keep fully opaque bars by default.');
 assert.equal(radial.series[0].data[0].itemStyle.borderWidth, 0,
     'Existing Polar charts must not gain a visible outline by default.');
+assert.equal(radial.series[0].emphasis, undefined,
+    'Existing Polar charts must keep the bundled ECharts hover behavior by default.');
 assert.equal(radial.angleAxis.startAngle, 90);
 assert.equal(radial.angleAxis.endAngle, undefined, 'Existing full-circle Polar charts must keep their default angle extent.');
 assert.equal(radial.angleAxis.axisLine.show, true, 'Full-circle grid outlines must remain visible.');
@@ -136,6 +142,78 @@ assert.equal(outlinedRadial.series[0].data[0].itemStyle.borderWidth, 2);
 assert.equal(outlinedRadial.series[0].data[0].itemStyle.borderColor, '#224466');
 assert.equal(outlinedRadial.series[0].backgroundStyle.borderWidth, undefined,
     'The bar outline must not frame background tracks.');
+
+const focusState = {
+    status: 'ready', chart: {
+        ...state.chart,
+        polar: {
+            ...state.chart.polar,
+            style: {
+                ...state.chart.polar.style,
+                barHighlightMode: 'focus', barHighlightColor: '#cc00aa'
+            }
+        }
+    }
+};
+window.handleMessage(focusState);
+const focusedRadial = options.at(-1);
+assert.equal(focusedRadial.series[0].emphasis.focus, 'self');
+assert.equal(focusedRadial.series[0].emphasis.blurScope, 'series');
+assert.equal(focusedRadial.series[0].emphasis.itemStyle.borderColor, '#cc00aa');
+assert.equal(focusedRadial.series[0].emphasis.itemStyle.borderWidth, 3);
+assert.equal(focusedRadial.series[0].emphasis.itemStyle.opacity, 1);
+assert.equal(focusedRadial.series[0].blur.itemStyle.opacity, 0.25);
+assert.equal(focusedRadial.series[0].selectedMode, undefined,
+    'Built-in selection would merge equal display names and must remain disabled.');
+window.SYMC_VISUALIZATION.mode = 'ipsview';
+window.handleMessage(focusState);
+assert.equal(options.at(-1).series[0].emphasis.focus, 'self',
+    'The IPSView renderer must support the same focus behavior with an independent design.');
+window.SYMC_VISUALIZATION.mode = 'symcon';
+assert.equal(typeof handlers.click, 'function');
+handlers.click({ componentType: 'series', seriesIndex: 0, dataIndex: 0 });
+assert.equal(actions.at(-1).type, 'highlight');
+assert.equal(actions.at(-1).dataIndex, 0);
+window.handleMessage({
+    ...focusState,
+    chart: {
+        ...focusState.chart,
+        polar: {
+            ...focusState.chart.polar,
+            style: { ...focusState.chart.polar.style, sortOrder: 'ascending' }
+        }
+    }
+});
+assert.equal(actions.at(-1).type, 'highlight');
+assert.equal(actions.at(-1).dataIndex, 2,
+    'A pinned item must follow its variable ID when value sorting changes.');
+handlers.click({ componentType: 'series', seriesIndex: 0, dataIndex: 2 });
+assert.equal(actions.at(-1).type, 'downplay', 'Tapping the same bar must release its highlight.');
+assert.equal(actions.at(-1).dataIndex, 2);
+window.handleMessage({
+    status: 'ready', chart: {
+        ...state.chart,
+        polar: {
+            ...state.chart.polar,
+            style: { ...state.chart.polar.style, barHighlightMode: 'outline', barHighlightColor: '' }
+        }
+    }
+});
+const highlightedOnly = options.at(-1);
+assert.equal(highlightedOnly.series[0].emphasis.focus, 'none');
+assert.equal(highlightedOnly.series[0].emphasis.itemStyle.borderColor, palette.text,
+    'Automatic highlight color must follow the active theme.');
+assert.equal(highlightedOnly.series[0].blur, undefined);
+window.handleMessage({
+    status: 'ready', chart: {
+        ...state.chart,
+        polar: {
+            ...state.chart.polar,
+            style: { ...state.chart.polar.style, barHighlightMode: 'off' }
+        }
+    }
+});
+assert.equal(options.at(-1).series[0].emphasis.disabled, true);
 const positionedRadialOptions = [];
 for (const position of ['insideStart', 'insideEnd']) {
     window.handleMessage({
@@ -593,6 +671,19 @@ assert.ok(simulatedTracks.every(track => Math.abs(track.shape.startAngle + Math.
 const localECharts = path.join(__dirname, '..', '.tools', 'echarts-runtime', 'node_modules', 'echarts');
 if (fs.existsSync(localECharts)) {
     const echarts = require(localECharts);
+    const focusChart = echarts.init(null, null,
+        { renderer: 'svg', ssr: true, width: 625, height: 560 });
+    focusChart.setOption(focusedRadial);
+    focusChart.dispatchAction({ type: 'highlight', seriesIndex: 0, dataIndex: 0 });
+    const focusData = focusChart.getModel().getSeriesByIndex(0).getData();
+    assert.equal(focusData.getItemGraphicEl(0).hoverState, 2,
+        'The bundled ECharts runtime must highlight the selected bar.');
+    assert.equal(focusData.getItemGraphicEl(1).hoverState, 1,
+        'Focusing a bar must dim other bars, even when their display names match.');
+    focusChart.dispatchAction({ type: 'downplay', seriesIndex: 0, dataIndex: 0 });
+    assert.equal(focusData.getItemGraphicEl(0).hoverState, 0,
+        'Tapping the same bar again must restore its normal state.');
+    focusChart.dispose();
     for (const [option, expectedColor, expectedWidth] of [
         [outlinedRadial, '#224466', 2],
         [outlinedTangential, palette.border, 3]

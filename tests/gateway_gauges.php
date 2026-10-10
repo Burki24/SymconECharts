@@ -5047,6 +5047,8 @@ assertGatewayGauge(
         && $polarData['polar']['style']['barOpacityPercent'] === 100
         && $polarData['polar']['style']['barOutlineWidth'] === 0
         && $polarData['polar']['style']['barOutlineColor'] === ''
+        && $polarData['polar']['style']['barHighlightMode'] === 'standard'
+        && $polarData['polar']['style']['barHighlightColor'] === ''
         && $polarData['polar']['style']['valueLabelPosition'] === 'middle'
         && $polarData['polar']['style']['categoryLabelFontSize'] === 10
         && $polarData['polar']['style']['valueLabelFontSize'] === 10
@@ -5111,6 +5113,11 @@ $polarOutlineRow = current(array_filter(
     static fn (array $item): bool => in_array('BarOutlineWidth', array_column($item['items'] ?? [], 'name'), true)
 ));
 $polarOutlineFields = array_column($polarOutlineRow['items'], null, 'name');
+$polarHighlightRow = current(array_filter(
+    $polarTileDesigner['items'],
+    static fn (array $item): bool => in_array('BarHighlightMode', array_column($item['items'] ?? [], 'name'), true)
+));
+$polarHighlightFields = array_column($polarHighlightRow['items'], null, 'name');
 $polarLabelPositionField = current(array_filter(
     $polarTileDesigner['items'],
     static fn (array $item): bool => ($item['name'] ?? '') === 'ValueLabelPosition'
@@ -5133,6 +5140,12 @@ assertGatewayGauge(
         && ($polarOutlineFields['BarOutlineWidth']['maximum'] ?? null) === 8
         && ($polarOutlineFields['BarOutlineColor']['transparentCaption'] ?? null) === 'Automatic (theme)',
     'Polar Tile form must offer an optional theme-aware bar outline.'
+);
+assertGatewayGauge(
+    array_column($polarHighlightFields['BarHighlightMode']['options'], 'value')
+        === ['standard', 'outline', 'focus', 'off']
+        && ($polarHighlightFields['BarHighlightColor']['visible'] ?? null) === false,
+    'Polar Tile form must offer highlight modes without showing an unused color by default.'
 );
 assertGatewayGauge(
     ($polarLabelPositionField['type'] ?? '') === 'Select'
@@ -5159,6 +5172,11 @@ $polarDefaultIPSViewOutlineRow = current(array_filter(
     static fn (array $item): bool => in_array('IPSViewBarOutlineWidth', array_column($item['items'] ?? [], 'name'), true)
 ));
 $polarDefaultIPSViewOutlineFields = array_column($polarDefaultIPSViewOutlineRow['items'], null, 'name');
+$polarDefaultIPSViewHighlightRow = current(array_filter(
+    $polarDefaultIPSViewPanel['items'],
+    static fn (array $item): bool => in_array('IPSViewBarHighlightMode', array_column($item['items'] ?? [], 'name'), true)
+));
+$polarDefaultIPSViewHighlightFields = array_column($polarDefaultIPSViewHighlightRow['items'], null, 'name');
 assertGatewayGauge(
     ($polarDefaultIPSViewScaleFields['IPSViewValueAxisMinimum']['visible'] ?? null) === false
         && ($polarDefaultIPSViewScaleFields['IPSViewValueAxisMaximum']['visible'] ?? null) === false,
@@ -5175,6 +5193,11 @@ assertGatewayGauge(
         && ($polarDefaultIPSViewOutlineFields['IPSViewBarOutlineColor']['enabled'] ?? null) === true,
     'Independent Polar IPSView form must expose editable outline controls.'
 );
+assertGatewayGauge(
+    ($polarDefaultIPSViewHighlightFields['IPSViewBarHighlightMode']['enabled'] ?? null) === true
+        && ($polarDefaultIPSViewHighlightFields['IPSViewBarHighlightColor']['visible'] ?? null) === false,
+    'Independent IPSView must offer its own highlight mode.'
+);
 $polar->SetTestProperty('ValueAxisRangeMode', 'manual');
 $polar->SetTestProperty('ValueAxisMinimum', -10.5);
 $polar->SetTestProperty('ValueAxisMaximum', 30.25);
@@ -5186,6 +5209,8 @@ $polar->SetTestProperty('BarGradientColor', 0x55CCAA);
 $polar->SetTestProperty('BarOpacityPercent', 65);
 $polar->SetTestProperty('BarOutlineWidth', 2);
 $polar->SetTestProperty('BarOutlineColor', 0x123456);
+$polar->SetTestProperty('BarHighlightMode', 'focus');
+$polar->SetTestProperty('BarHighlightColor', 0xCC00AA);
 $polar->SetTestProperty('AngularSpan', 180);
 $polar->SetTestProperty('ValueLabelPosition', 'insideEnd');
 $polar->SetTestProperty('CategoryLabelFontSize', 9);
@@ -5206,6 +5231,8 @@ assertGatewayGauge(
         && $polarDesignData['polar']['style']['barOpacityPercent'] === 65
         && $polarDesignData['polar']['style']['barOutlineWidth'] === 2
         && $polarDesignData['polar']['style']['barOutlineColor'] === '#123456'
+        && $polarDesignData['polar']['style']['barHighlightMode'] === 'focus'
+        && $polarDesignData['polar']['style']['barHighlightColor'] === '#CC00AA'
         && $polarDesignData['polar']['style']['angularSpan'] === 180
         && $polarDesignData['polar']['style']['valueLabelPosition'] === 'insideEnd'
         && $polarDesignData['polar']['style']['categoryLabelFontSize'] === 9
@@ -5229,6 +5256,8 @@ $polar->SetTestProperty('IPSViewBarGradientColor', 0x223344);
 $polar->SetTestProperty('IPSViewBarOpacityPercent', 35);
 $polar->SetTestProperty('IPSViewBarOutlineWidth', 3);
 $polar->SetTestProperty('IPSViewBarOutlineColor', -1);
+$polar->SetTestProperty('IPSViewBarHighlightMode', 'outline');
+$polar->SetTestProperty('IPSViewBarHighlightColor', -1);
 $polar->SetTestProperty('IPSViewAngularSpan', 270);
 $polar->SetTestProperty('IPSViewValueLabelPosition', 'insideStart');
 $polar->SetTestProperty('IPSViewCategoryLabelFontSize', 12);
@@ -5250,6 +5279,8 @@ assertGatewayGauge(
         && str_contains($polarIPSViewDesign, '"barOpacityPercent":35')
         && str_contains($polarIPSViewDesign, '"barOutlineWidth":3')
         && str_contains($polarIPSViewDesign, '"barOutlineColor":""')
+        && str_contains($polarIPSViewDesign, '"barHighlightMode":"outline"')
+        && str_contains($polarIPSViewDesign, '"barHighlightColor":""')
         && str_contains($polarIPSViewDesign, '"angularSpan":270')
         && str_contains($polarIPSViewDesign, '"valueLabelPosition":"insideStart"')
         && str_contains($polarIPSViewDesign, '"categoryLabelFontSize":12')
@@ -5276,6 +5307,11 @@ $polarIPSViewFillRow = current(array_filter(
     static fn (array $item): bool => in_array('IPSViewBarFillMode', array_column($item['items'] ?? [], 'name'), true)
 ));
 $polarIPSViewFillFields = array_column($polarIPSViewFillRow['items'], null, 'name');
+$polarIPSViewHighlightRow = current(array_filter(
+    $polarIPSViewPanel['items'],
+    static fn (array $item): bool => in_array('IPSViewBarHighlightMode', array_column($item['items'] ?? [], 'name'), true)
+));
+$polarIPSViewHighlightFields = array_column($polarIPSViewHighlightRow['items'], null, 'name');
 $polarIPSViewLabelPositionField = current(array_filter(
     $polarIPSViewPanel['items'],
     static fn (array $item): bool => ($item['name'] ?? '') === 'IPSViewValueLabelPosition'
@@ -5302,6 +5338,22 @@ assertGatewayGauge(
     ($polarIPSViewFillFields['IPSViewBarGradientColor']['visible'] ?? null) === true
         && ($polarIPSViewFillFields['IPSViewBarGradientColor']['enabled'] ?? null) === true,
     'Independent Polar IPSView designer must reveal an editable gradient color.'
+);
+assertGatewayGauge(
+    ($polarIPSViewHighlightFields['IPSViewBarHighlightColor']['visible'] ?? null) === true
+        && ($polarIPSViewHighlightFields['IPSViewBarHighlightColor']['enabled'] ?? null) === true
+        && str_contains(
+            (string) ($polarIPSViewHighlightFields['IPSViewBarHighlightMode']['onChange'] ?? ''),
+            'ECBP_UpdateBarHighlightForm'
+        ),
+    'Independent Polar IPSView designer must reveal and enable its highlight color.'
+);
+$polar->UpdateBarHighlightForm(true, 'standard');
+assertGatewayGauge(
+    array_slice($polar->GetTestFormUpdates(), -1) === [
+        ['Field' => 'IPSViewBarHighlightColor', 'Parameter' => 'visible', 'Value' => false]
+    ],
+    'The IPSView highlight color must disappear immediately in standard mode.'
 );
 $polar->UpdateBarFillForm(true, 'solid');
 assertGatewayGauge(
@@ -5353,6 +5405,11 @@ $polarInheritedFillRow = current(array_filter(
     static fn (array $item): bool => in_array('IPSViewBarFillMode', array_column($item['items'] ?? [], 'name'), true)
 ));
 $polarInheritedFillFields = array_column($polarInheritedFillRow['items'], null, 'name');
+$polarInheritedHighlightRow = current(array_filter(
+    $polarInheritedPanel['items'],
+    static fn (array $item): bool => in_array('IPSViewBarHighlightMode', array_column($item['items'] ?? [], 'name'), true)
+));
+$polarInheritedHighlightFields = array_column($polarInheritedHighlightRow['items'], null, 'name');
 $polarInheritedOutlineRow = current(array_filter(
     $polarInheritedPanel['items'],
     static fn (array $item): bool => in_array('IPSViewBarOutlineWidth', array_column($item['items'] ?? [], 'name'), true)
@@ -5379,6 +5436,8 @@ assertGatewayGauge(
         && str_contains($polarInheritedHTML, '"barOpacityPercent":65')
         && str_contains($polarInheritedHTML, '"barOutlineWidth":2')
         && str_contains($polarInheritedHTML, '"barOutlineColor":"#123456"')
+        && str_contains($polarInheritedHTML, '"barHighlightMode":"focus"')
+        && str_contains($polarInheritedHTML, '"barHighlightColor":"#CC00AA"')
         && ($polarInheritedScaleFields['IPSViewValueAxisRangeMode']['enabled'] ?? null) === false
         && ($polarInheritedScaleFields['IPSViewValueAxisMinimum']['enabled'] ?? null) === false
         && ($polarInheritedFillFields['IPSViewBarFillMode']['enabled'] ?? null) === false
@@ -5386,6 +5445,8 @@ assertGatewayGauge(
         && ($polarInheritedFillFields['IPSViewBarOpacityPercent']['enabled'] ?? null) === false
         && ($polarInheritedOutlineFields['IPSViewBarOutlineWidth']['enabled'] ?? null) === false
         && ($polarInheritedOutlineFields['IPSViewBarOutlineColor']['enabled'] ?? null) === false
+        && ($polarInheritedHighlightFields['IPSViewBarHighlightMode']['enabled'] ?? null) === false
+        && ($polarInheritedHighlightFields['IPSViewBarHighlightColor']['enabled'] ?? null) === false
         && ($polarInheritedLabelPositionField['enabled'] ?? null) === false
         && array_column($polarInheritedFontRow['items'], 'enabled') === [false, false, false],
     'Inherited Polar IPSView design must follow the Tile scale and tracks while disabling independent controls.'
@@ -5410,6 +5471,8 @@ assertGatewayGauge(
         && str_contains($polarCopiedHTML, '"barOpacityPercent":65')
         && str_contains($polarCopiedHTML, '"barOutlineWidth":2')
         && str_contains($polarCopiedHTML, '"barOutlineColor":"#123456"')
+        && str_contains($polarCopiedHTML, '"barHighlightMode":"focus"')
+        && str_contains($polarCopiedHTML, '"barHighlightColor":"#CC00AA"')
         && str_contains($polarCopiedHTML, '"angularSpan":180')
         && str_contains($polarCopiedHTML, '"valueLabelPosition":"insideEnd"')
         && str_contains($polarCopiedHTML, '"categoryLabelFontSize":9')
@@ -5445,6 +5508,22 @@ $polarFillFields = array_column($polarFillRow['items'], null, 'name');
 assertGatewayGauge(
     ($polarFillFields['BarGradientColor']['visible'] ?? null) === true,
     'Polar Tile designer must reveal the end color for gradient fill.'
+);
+$polarHighlightRow = current(array_filter(
+    $polarTileDesigner['items'],
+    static fn (array $item): bool => in_array('BarHighlightMode', array_column($item['items'] ?? [], 'name'), true)
+));
+$polarHighlightFields = array_column($polarHighlightRow['items'], null, 'name');
+assertGatewayGauge(
+    ($polarHighlightFields['BarHighlightColor']['visible'] ?? null) === true,
+    'Polar Tile designer must reveal the chosen highlight color.'
+);
+$polar->UpdateBarHighlightForm(false, 'off');
+assertGatewayGauge(
+    array_slice($polar->GetTestFormUpdates(), -1) === [
+        ['Field' => 'BarHighlightColor', 'Parameter' => 'visible', 'Value' => false]
+    ],
+    'Polar Tile designer must hide the unused highlight color immediately.'
 );
 $polar->UpdateBarFillForm(false, 'solid');
 assertGatewayGauge(
@@ -5581,6 +5660,20 @@ $invalidPolarOpacity->SetTestProperty('BarOpacityPercent', 101);
 $invalidPolarOpacity->ApplyChanges();
 assertGatewayGauge($invalidPolarOpacity->GetTestStatus() === 202, 'Polar Bar must reject invalid bar opacity.');
 
+$invalidPolarHighlight = new EChartsBarPolar();
+$invalidPolarHighlight->Create();
+$invalidPolarHighlight->SetTestProperty('Sources', json_encode([['VariableID' => 4711]], JSON_THROW_ON_ERROR));
+$invalidPolarHighlight->SetTestProperty('BarHighlightMode', 'unknown');
+$invalidPolarHighlight->ApplyChanges();
+assertGatewayGauge($invalidPolarHighlight->GetTestStatus() === 202, 'Polar Bar must reject unknown highlight modes.');
+
+$invalidPolarHighlightColor = new EChartsBarPolar();
+$invalidPolarHighlightColor->Create();
+$invalidPolarHighlightColor->SetTestProperty('Sources', json_encode([['VariableID' => 4711]], JSON_THROW_ON_ERROR));
+$invalidPolarHighlightColor->SetTestProperty('BarHighlightColor', 0x1000000);
+$invalidPolarHighlightColor->ApplyChanges();
+assertGatewayGauge($invalidPolarHighlightColor->GetTestStatus() === 202, 'Polar Bar must reject invalid highlight colors.');
+
 $invalidPolarOutline = new EChartsBarPolar();
 $invalidPolarOutline->Create();
 $invalidPolarOutline->SetTestProperty('Sources', json_encode([['VariableID' => 4711]], JSON_THROW_ON_ERROR));
@@ -5699,6 +5792,17 @@ $invalidPolarIPSViewOutline->ApplyChanges();
 assertGatewayGauge(
     $invalidPolarIPSViewOutline->GetTestStatus() === 202,
     'Polar Bar must reject a negative independent IPSView outline width.'
+);
+
+$invalidPolarIPSViewHighlight = new EChartsBarPolar();
+$invalidPolarIPSViewHighlight->Create();
+$invalidPolarIPSViewHighlight->SetTestProperty('Sources', json_encode([['VariableID' => 4711]], JSON_THROW_ON_ERROR));
+$invalidPolarIPSViewHighlight->SetTestProperty('IPSViewUseTileDesign', false);
+$invalidPolarIPSViewHighlight->SetTestProperty('IPSViewBarHighlightMode', 'unknown');
+$invalidPolarIPSViewHighlight->ApplyChanges();
+assertGatewayGauge(
+    $invalidPolarIPSViewHighlight->GetTestStatus() === 202,
+    'Polar Bar must reject an unsupported independent IPSView highlight mode.'
 );
 
 $sixteenPolarSources = [];

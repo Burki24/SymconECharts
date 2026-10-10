@@ -56,6 +56,7 @@ class EChartsBarPolar extends IPSModuleStrict
     private const VALUE_LABEL_POSITIONS = ['middle', 'insideStart', 'insideEnd', 'outside'];
     private const VALUE_AXIS_RANGE_MODES = ['auto', 'manual'];
     private const BAR_FILL_MODES = ['solid', 'gradient'];
+    private const BAR_HIGHLIGHT_MODES = ['standard', 'outline', 'focus', 'off'];
 
     public function Create(): void
     {
@@ -125,6 +126,16 @@ class EChartsBarPolar extends IPSModuleStrict
                 ['IPSViewBarGradientColor'],
                 $this->ReadPropertyString('IPSViewBarFillMode') === 'gradient'
             );
+            $form['elements'] = $this->SetFormFieldVisibility(
+                $form['elements'],
+                ['BarHighlightColor'],
+                in_array($this->ReadPropertyString('BarHighlightMode'), ['outline', 'focus'], true)
+            );
+            $form['elements'] = $this->SetFormFieldVisibility(
+                $form['elements'],
+                ['IPSViewBarHighlightColor'],
+                in_array($this->ReadPropertyString('IPSViewBarHighlightMode'), ['outline', 'focus'], true)
+            );
             $this->InsertIPSViewHTMLPageFormItems(
                 $form['elements'],
                 'Configure optional IPSView HTML output.',
@@ -148,6 +159,15 @@ class EChartsBarPolar extends IPSModuleStrict
     public function UpdateBarFillForm(bool $IPSView, string $BarFillMode): void
     {
         $this->UpdateFormField(($IPSView ? 'IPSView' : '') . 'BarGradientColor', 'visible', $BarFillMode === 'gradient');
+    }
+
+    public function UpdateBarHighlightForm(bool $IPSView, string $BarHighlightMode): void
+    {
+        $this->UpdateFormField(
+            ($IPSView ? 'IPSView' : '') . 'BarHighlightColor',
+            'visible',
+            in_array($BarHighlightMode, ['outline', 'focus'], true)
+        );
     }
 
     public function RequestAction(string $Ident, mixed $Value): void
@@ -495,6 +515,8 @@ class EChartsBarPolar extends IPSModuleStrict
         $this->RegisterPropertyInteger($prefix . 'BarOpacityPercent', 100);
         $this->RegisterPropertyInteger($prefix . 'BarOutlineWidth', 0);
         $this->RegisterPropertyInteger($prefix . 'BarOutlineColor', -1);
+        $this->RegisterPropertyString($prefix . 'BarHighlightMode', 'standard');
+        $this->RegisterPropertyInteger($prefix . 'BarHighlightColor', -1);
         $this->RegisterPropertyInteger($prefix . 'InnerRadiusPercent', 12);
         $this->RegisterPropertyInteger($prefix . 'OuterRadiusPercent', 76);
         $this->RegisterPropertyInteger($prefix . 'StartAngle', 90);
@@ -529,6 +551,8 @@ class EChartsBarPolar extends IPSModuleStrict
             'BarOpacityPercent'           => 'integer',
             'BarOutlineWidth'             => 'integer',
             'BarOutlineColor'             => 'integer',
+            'BarHighlightMode'            => 'string',
+            'BarHighlightColor'           => 'integer',
             'InnerRadiusPercent'          => 'integer',
             'OuterRadiusPercent'          => 'integer',
             'StartAngle'                  => 'integer',
@@ -567,6 +591,9 @@ class EChartsBarPolar extends IPSModuleStrict
             || $this->ReadPropertyInteger($prefix . 'BarOutlineWidth') > 8
             || $this->ReadPropertyInteger($prefix . 'BarOutlineColor') < -1
             || $this->ReadPropertyInteger($prefix . 'BarOutlineColor') > 0xFFFFFF
+            || !in_array($this->ReadPropertyString($prefix . 'BarHighlightMode'), self::BAR_HIGHLIGHT_MODES, true)
+            || $this->ReadPropertyInteger($prefix . 'BarHighlightColor') < -1
+            || $this->ReadPropertyInteger($prefix . 'BarHighlightColor') > 0xFFFFFF
             || $this->ReadPropertyInteger($prefix . 'InnerRadiusPercent') < 0
             || $this->ReadPropertyInteger($prefix . 'OuterRadiusPercent') > 95
             || $this->ReadPropertyInteger($prefix . 'OuterRadiusPercent')
@@ -603,6 +630,7 @@ class EChartsBarPolar extends IPSModuleStrict
         $backgroundColor = $this->ReadPropertyInteger($prefix . 'BarBackgroundColor');
         $gradientColor = $this->ReadPropertyInteger($prefix . 'BarGradientColor');
         $outlineColor = $this->ReadPropertyInteger($prefix . 'BarOutlineColor');
+        $highlightColor = $this->ReadPropertyInteger($prefix . 'BarHighlightColor');
         $style = [
             'mode'                        => $this->ReadPropertyString($prefix . 'PolarMode'),
             'sortOrder'                   => $this->ReadPropertyString($prefix . 'SortOrder'),
@@ -619,6 +647,8 @@ class EChartsBarPolar extends IPSModuleStrict
             'barOpacityPercent'           => $this->ReadPropertyInteger($prefix . 'BarOpacityPercent'),
             'barOutlineWidth'             => $this->ReadPropertyInteger($prefix . 'BarOutlineWidth'),
             'barOutlineColor'             => $outlineColor < 0 ? '' : EChartsAsset::ColorToHex($outlineColor),
+            'barHighlightMode'            => $this->ReadPropertyString($prefix . 'BarHighlightMode'),
+            'barHighlightColor'           => $highlightColor < 0 ? '' : EChartsAsset::ColorToHex($highlightColor),
             'innerRadiusPercent'          => $this->ReadPropertyInteger($prefix . 'InnerRadiusPercent'),
             'outerRadiusPercent'          => $this->ReadPropertyInteger($prefix . 'OuterRadiusPercent'),
             'startAngle'                  => $this->ReadPropertyInteger($prefix . 'StartAngle'),

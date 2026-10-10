@@ -369,6 +369,42 @@
                     "items": [
                         {
                             "type": "Select",
+                            "name": "BarHighlightMode",
+                            "caption": "Bar highlight",
+                            "onChange": "ECBP_UpdateBarHighlightForm($id, false, $BarHighlightMode);",
+                            "options": [
+                                {
+                                    "caption": "Standard (ECharts)",
+                                    "value": "standard"
+                                },
+                                {
+                                    "caption": "Highlight bar",
+                                    "value": "outline"
+                                },
+                                {
+                                    "caption": "Focus bar and dim others",
+                                    "value": "focus"
+                                },
+                                {
+                                    "caption": "Off",
+                                    "value": "off"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "BarHighlightColor",
+                            "caption": "Highlight color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
                             "name": "ValueAxisRangeMode",
                             "caption": "Value scale",
                             "onChange": "ECBP_UpdateValueScaleForm($id, $ValueAxisRangeMode);",
@@ -739,6 +775,42 @@
                                     "type": "SelectColor",
                                     "name": "IPSViewBarOutlineColor",
                                     "caption": "Outline color",
+                                    "allowTransparent": true,
+                                    "transparentCaption": "Automatic (theme)"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "Select",
+                                    "name": "IPSViewBarHighlightMode",
+                                    "caption": "Bar highlight",
+                                    "onChange": "ECBP_UpdateBarHighlightForm($id, true, $IPSViewBarHighlightMode);",
+                                    "options": [
+                                        {
+                                            "caption": "Standard (ECharts)",
+                                            "value": "standard"
+                                        },
+                                        {
+                                            "caption": "Highlight bar",
+                                            "value": "outline"
+                                        },
+                                        {
+                                            "caption": "Focus bar and dim others",
+                                            "value": "focus"
+                                        },
+                                        {
+                                            "caption": "Off",
+                                            "value": "off"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "SelectColor",
+                                    "name": "IPSViewBarHighlightColor",
+                                    "caption": "Highlight color",
                                     "allowTransparent": true,
                                     "transparentCaption": "Automatic (theme)"
                                 }

@@ -9,6 +9,7 @@
     var currentTheme = null;
     var lastWidth = 0;
     var lastHeight = 0;
+    var pinnedItemId = null;
 
     function translate(value) {
         return (bootstrap.translations || {})[value] || value;
@@ -113,6 +114,8 @@
         var design = window.SYMC_ECHARTS_DESIGN || {};
         var polar = model.polar || {};
         var style = polar.style || {};
+        var highlightMode = ['outline', 'focus', 'off'].indexOf(style.barHighlightMode) >= 0
+            ? style.barHighlightMode : 'standard';
         var mode = style.mode === 'tangential' ? 'tangential' : 'radial';
         var valueLabelPosition = ['middle', 'insideStart', 'insideEnd', 'outside']
             .indexOf(style.valueLabelPosition) >= 0
@@ -166,6 +169,12 @@
         }
         var trackOpacity = design.opacityFromPercent(style.barBackgroundOpacityPercent, 25);
         var barOpacity = design.opacityFromPercent(style.barOpacityPercent, 100);
+        var normalOutlineWidth = Number(style.barOutlineWidth) || 0;
+        var highlightStyle = design.barOutlineStyle(
+            Math.max(3, Math.min(10, normalOutlineWidth + 2)),
+            style.barHighlightColor, colors.text
+        );
+        highlightStyle.opacity = 1;
         var startAngle = Math.max(0, Math.min(360, Number(style.startAngle) || 0));
         var angularSpan = Number(style.angularSpan);
         var angleAxis = mode === 'radial' ? categoryAxis : valueAxis;
@@ -229,6 +238,13 @@
                     color: style.barBackgroundColor || colors.border,
                     opacity: trackOpacity
                 },
+                emphasis: highlightMode === 'off' ? { disabled: true }
+                    : highlightMode === 'standard' ? undefined : {
+                        focus: highlightMode === 'focus' ? 'self' : 'none',
+                        blurScope: 'series',
+                        itemStyle: highlightStyle
+                    },
+                blur: highlightMode === 'focus' ? { itemStyle: { opacity: 0.25 } } : undefined,
                 data: items.map(function (item, index) {
                     var itemColor = item.color || swatches[index % swatches.length] || colors.accent;
                     var gradient = style.barFillMode === 'gradient';
@@ -305,6 +321,54 @@
         errorElement.hidden = false;
     }
 
+    function currentHighlightMode() {
+        var style = currentState && currentState.chart && currentState.chart.polar
+            && currentState.chart.polar.style;
+        return style && style.barHighlightMode;
+    }
+
+    function pinnedDataIndex() {
+        if (pinnedItemId === null || !currentState || !currentState.chart) { return -1; }
+        var polar = currentState.chart.polar || {};
+        var items = orderedItems(Array.isArray(currentState.chart.items) ? currentState.chart.items : [],
+            (polar.style || {}).sortOrder);
+        return items.findIndex(function (item) { return item.id === pinnedItemId; });
+    }
+
+    function togglePinnedBar(parameter) {
+        if (!chart || !parameter || parameter.componentType !== 'series' || parameter.seriesIndex !== 0
+            || !Number.isInteger(parameter.dataIndex)) { return; }
+        var mode = currentHighlightMode();
+        if (mode !== 'outline' && mode !== 'focus') { return; }
+        var polar = currentState.chart.polar || {};
+        var items = orderedItems(Array.isArray(currentState.chart.items) ? currentState.chart.items : [],
+            (polar.style || {}).sortOrder);
+        var item = items[parameter.dataIndex];
+        if (!item || item.id == null) { return; }
+        var previousIndex = pinnedDataIndex();
+        if (previousIndex >= 0) {
+            chart.dispatchAction({ type: 'downplay', seriesIndex: 0, dataIndex: previousIndex });
+        }
+        pinnedItemId = pinnedItemId === item.id ? null : item.id;
+        if (pinnedItemId !== null) {
+            chart.dispatchAction({ type: 'highlight', seriesIndex: 0, dataIndex: parameter.dataIndex });
+        }
+    }
+
+    function restorePinnedBar() {
+        var mode = currentHighlightMode();
+        if (mode !== 'outline' && mode !== 'focus') {
+            pinnedItemId = null;
+            return;
+        }
+        var index = pinnedDataIndex();
+        if (index < 0) {
+            pinnedItemId = null;
+            return;
+        }
+        chart.dispatchAction({ type: 'highlight', seriesIndex: 0, dataIndex: index });
+    }
+
     function render(state) {
         currentState = state;
         if (!state || state.status !== 'ready' || !state.chart) {
@@ -325,8 +389,10 @@
         if (!chart) {
             chart = window.echarts.init(chartElement, theme === 'auto' ? null : theme, { renderer: 'canvas' });
             currentTheme = theme;
+            chart.on('click', { seriesIndex: 0 }, togglePinnedBar);
         }
         chart.setOption(buildOption(state.chart, theme), true);
+        restorePinnedBar();
         alignPartialBackgroundTracks(state.chart.polar && state.chart.polar.style);
         lastWidth = chartElement.clientWidth;
         lastHeight = chartElement.clientHeight;

@@ -21,6 +21,11 @@
 
 ## Neu
 
+- Polar-Balken lassen sich in Kachel und unabhängigem IPSView-Design bei
+  Berührung oder Hover hervorheben, wahlweise mit Abdunklung der anderen
+  Balken. Der gewählte Balken kann per Antippen fixiert werden; der bisherige
+  ECharts-Standard bleibt voreingestellt.
+
 - Polar-Balken und konzentrische Bögen können in Kachel und unabhängigem
   IPSView-Design eine Kontur von 1 bis 8 px mit Theme- oder eigener Farbe
   erhalten. Standardmäßig bleibt sie ausgeschaltet.
