@@ -53,6 +53,7 @@ class EChartsBarPolar extends IPSModuleStrict
     private const STATUS_GATEWAY_FAILED = 204;
     private const POLAR_MODES = ['radial', 'tangential'];
     private const SORT_ORDERS = ['configured', 'ascending', 'descending'];
+    private const VALUE_LABEL_POSITIONS = ['middle', 'insideStart', 'insideEnd'];
     private const VALUE_AXIS_RANGE_MODES = ['auto', 'manual'];
 
     public function Create(): void
@@ -467,6 +468,7 @@ class EChartsBarPolar extends IPSModuleStrict
         $this->RegisterPropertyString($prefix . 'SortOrder', 'configured');
         $this->RegisterPropertyBoolean($prefix . 'ShowCategoryLabels', true);
         $this->RegisterPropertyBoolean($prefix . 'ShowValues', true);
+        $this->RegisterPropertyString($prefix . 'ValueLabelPosition', 'middle');
         $this->RegisterPropertyBoolean($prefix . 'ShowGrid', true);
         $this->RegisterPropertyInteger($prefix . 'BarWidthPercent', 60);
         $this->RegisterPropertyInteger($prefix . 'InnerRadiusPercent', 12);
@@ -492,6 +494,7 @@ class EChartsBarPolar extends IPSModuleStrict
             'SortOrder'                   => 'string',
             'ShowCategoryLabels'          => 'boolean',
             'ShowValues'                  => 'boolean',
+            'ValueLabelPosition'          => 'string',
             'ShowGrid'                    => 'boolean',
             'BarWidthPercent'             => 'integer',
             'InnerRadiusPercent'          => 'integer',
@@ -514,6 +517,7 @@ class EChartsBarPolar extends IPSModuleStrict
         if (!EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme'))
             || !in_array($this->ReadPropertyString($prefix . 'PolarMode'), self::POLAR_MODES, true)
             || !in_array($this->ReadPropertyString($prefix . 'SortOrder'), self::SORT_ORDERS, true)
+            || !in_array($this->ReadPropertyString($prefix . 'ValueLabelPosition'), self::VALUE_LABEL_POSITIONS, true)
             || $this->ReadPropertyInteger($prefix . 'BarWidthPercent') < 20
             || $this->ReadPropertyInteger($prefix . 'BarWidthPercent') > 100
             || $this->ReadPropertyInteger($prefix . 'InnerRadiusPercent') < 0
@@ -555,6 +559,7 @@ class EChartsBarPolar extends IPSModuleStrict
             'sortOrder'                   => $this->ReadPropertyString($prefix . 'SortOrder'),
             'showCategoryLabels'          => $this->ReadPropertyBoolean($prefix . 'ShowCategoryLabels'),
             'showValues'                  => $this->ReadPropertyBoolean($prefix . 'ShowValues'),
+            'valueLabelPosition'          => $this->ReadPropertyString($prefix . 'ValueLabelPosition'),
             'showGrid'                    => $this->ReadPropertyBoolean($prefix . 'ShowGrid'),
             'barWidthPercent'             => $this->ReadPropertyInteger($prefix . 'BarWidthPercent'),
             'innerRadiusPercent'          => $this->ReadPropertyInteger($prefix . 'InnerRadiusPercent'),

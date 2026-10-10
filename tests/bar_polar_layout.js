@@ -113,6 +113,24 @@ assert.equal(
 assert.match(radial.tooltip.formatter({ dataIndex: 0 }), /&lt;Room&gt;/);
 assert.doesNotMatch(radial.tooltip.formatter({ dataIndex: 0 }), /<Room>/);
 
+const positionedRadialOptions = [];
+for (const position of ['insideStart', 'insideEnd']) {
+    window.handleMessage({
+        status: 'ready', chart: {
+            ...state.chart,
+            polar: { ...state.chart.polar, style: { ...state.chart.polar.style, valueLabelPosition: position } }
+        }
+    });
+    const positioned = options.at(-1);
+    positionedRadialOptions.push(positioned);
+    assert.equal(positioned.series[0].label.position, position,
+        'The selected inner value-label position must reach the ECharts renderer.');
+    assert.equal(positioned.series[0].label.rotate, 0,
+        'Alternative inner positions must keep value text horizontal.');
+    assert.equal(positioned.series[0].data[1].label.color, '#111111',
+        'Alternative inner positions must retain contrast on light bars.');
+}
+
 const tangentialState = {
     status: 'ready',
     chart: {
@@ -145,6 +163,22 @@ assert.equal(tangential.series[0].label.position, 'middle');
 assertProtectedGeometry(tangential, 625, 560, 70);
 assert.ok(tangential.polar.radius[0] > 0 && tangential.polar.radius[0] < tangential.polar.radius[1]);
 assert.equal(tangential.angleAxis.splitLine.show, false);
+
+window.handleMessage({
+    status: 'ready', chart: {
+        ...tangentialState.chart,
+        polar: {
+            ...tangentialState.chart.polar,
+            style: {
+                ...tangentialState.chart.polar.style,
+                showValues: true, roundCaps: false, valueLabelPosition: 'insideEnd'
+            }
+        }
+    }
+});
+const positionedTangential = options.at(-1);
+assert.equal(positionedTangential.series[0].label.position, 'insideEnd');
+assert.equal(positionedTangential.series[0].label.rotate, 0);
 
 const fixedStyle = {
     ...state.chart.polar.style,
@@ -359,7 +393,7 @@ if (fs.existsSync(localECharts)) {
     }
     userChart.dispose();
     for (const option of [radial, tangential, fixedRadial, fixedTangential,
-        halfRadial, partialTangential, partialIPSView]) {
+        halfRadial, partialTangential, partialIPSView, ...positionedRadialOptions, positionedTangential]) {
         const realChart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 625, height: 560 });
         realChart.setOption(option);
         assert.ok(realChart.renderToSVGString().includes('<svg'), 'Both polar modes must render in ECharts.');
@@ -425,6 +459,28 @@ if (fs.existsSync(localECharts)) {
             const renderedTextColors = valueSectors.map(element => element.getTextContent().style.fill);
             assert.ok(renderedTextColors.includes('#111111'), 'Light bars must render dark value text.');
             assert.ok(renderedTextColors.includes('#eeeeee'), 'Dark bars must render light value text.');
+        }
+        if (positionedRadialOptions.includes(option) || option === positionedTangential) {
+            const expectedPosition = option.series[0].label.position;
+            const valueSectors = realChart.getZr().storage.getDisplayList().filter(
+                element => element.type === 'sector' && element.getTextContent()
+            );
+            assert.equal(valueSectors.length, 3, 'Alternative label positions must retain all Polar values.');
+            assert.ok(valueSectors.every(element => element.textConfig.position === expectedPosition),
+                'ECharts must retain the selected inner value-label position.');
+            if (option !== positionedTangential) {
+                for (const sector of valueSectors) {
+                    const anchor = sector.calculateTextPosition(null,
+                        { position: expectedPosition, distance: 5 }, sector.getBoundingRect());
+                    const radius = Math.hypot(anchor.x - sector.shape.cx, anchor.y - sector.shape.cy);
+                    const expectedRadius = expectedPosition === 'insideStart'
+                        ? sector.shape.r0 + 5 : sector.shape.r - 5;
+                    assert.ok(Math.abs(radius - expectedRadius) < 0.001,
+                        'ECharts must anchor radial labels at the configured inner bar end.');
+                }
+            }
+            assert.ok(valueSectors.every(element => element.textConfig.rotation === 0),
+                'Alternative positions must keep rendered labels horizontal.');
         }
         realChart.dispose();
     }

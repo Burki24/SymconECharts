@@ -107,6 +107,8 @@
         var polar = model.polar || {};
         var style = polar.style || {};
         var mode = style.mode === 'tangential' ? 'tangential' : 'radial';
+        var valueLabelPosition = ['middle', 'insideStart', 'insideEnd'].indexOf(style.valueLabelPosition) >= 0
+            ? style.valueLabelPosition : 'middle';
         var items = orderedItems(Array.isArray(model.items) ? model.items : [], style.sortOrder);
         var labels = items.map(function (item) { return String(item.label || ''); });
         var defaultDecimals = Math.max(0, Math.min(6, Number(polar.decimals) || 0));
@@ -219,7 +221,7 @@
                 }),
                 label: {
                     show: style.showValues === true,
-                    position: 'middle',
+                    position: valueLabelPosition,
                     color: colors.text,
                     rotate: 0,
                     formatter: function (parameter) {

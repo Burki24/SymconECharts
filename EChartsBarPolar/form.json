@@ -228,6 +228,25 @@
                     ]
                 },
                 {
+                    "type": "Select",
+                    "name": "ValueLabelPosition",
+                    "caption": "Value label position",
+                    "options": [
+                        {
+                            "caption": "Center of bar",
+                            "value": "middle"
+                        },
+                        {
+                            "caption": "Inside at start",
+                            "value": "insideStart"
+                        },
+                        {
+                            "caption": "Inside at end",
+                            "value": "insideEnd"
+                        }
+                    ]
+                },
+                {
                     "type": "RowLayout",
                     "items": [
                         {
@@ -496,6 +515,25 @@
                                     "type": "CheckBox",
                                     "name": "IPSViewShowGrid",
                                     "caption": "Show grid"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Select",
+                            "name": "IPSViewValueLabelPosition",
+                            "caption": "Value label position",
+                            "options": [
+                                {
+                                    "caption": "Center of bar",
+                                    "value": "middle"
+                                },
+                                {
+                                    "caption": "Inside at start",
+                                    "value": "insideStart"
+                                },
+                                {
+                                    "caption": "Inside at end",
+                                    "value": "insideEnd"
                                 }
                             ]
                         },

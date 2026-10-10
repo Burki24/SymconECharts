@@ -10,6 +10,10 @@
 
 ## Neu
 
+- Polar-Wertbeschriftungen können in Kachel und unabhängigem IPSView-Design
+  mittig, innen am Balkenanfang oder innen am Balkenende platziert werden.
+  Die bisherige mittige Position bleibt Standard.
+
 - Polar-Balken können in Kachel und IPSView auf einen frei einstellbaren
   Winkelbereich von 30° bis 360° begrenzt werden. Ein Halbkreis ist damit ebenso
   möglich wie der bisherige Vollkreis; Startwinkel und Drehrichtung bleiben
