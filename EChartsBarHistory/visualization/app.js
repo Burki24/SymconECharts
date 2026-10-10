@@ -2,6 +2,7 @@
     'use strict';
 
     var bootstrap = window.SYMC_VISUALIZATION || {};
+    var echartsDesign = window.SYMC_ECHARTS_DESIGN;
     var chartElement = document.getElementById('echarts-bar-history-chart');
     var warningElement = document.getElementById('echarts-bar-history-warning');
     var errorElement = document.getElementById('echarts-bar-history-error');
@@ -245,7 +246,7 @@
                         : Math.max(8, Math.round(48 * Math.max(20, Math.min(100, Number(style.barWidthPercent) || 70)) / 100)),
                     itemStyle: {
                         color: fill,
-                        opacity: (style.barOpacityPercent == null ? 100 : Number(style.barOpacityPercent)) / 100,
+                        opacity: echartsDesign.opacityFromPercent(style.barOpacityPercent, 100),
                         borderRadius: [radius, radius, 0, 0]
                     },
                     label: {

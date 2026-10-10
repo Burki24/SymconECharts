@@ -333,6 +333,14 @@
                             "caption": "Gradient end color",
                             "allowTransparent": true,
                             "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "BarOpacityPercent",
+                            "caption": "Bar opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%"
                         }
                     ]
                 },
@@ -685,6 +693,14 @@
                                     "caption": "Gradient end color",
                                     "allowTransparent": true,
                                     "transparentCaption": "Automatic (theme)"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "IPSViewBarOpacityPercent",
+                                    "caption": "Bar opacity",
+                                    "minimum": 0,
+                                    "maximum": 100,
+                                    "suffix": "%"
                                 }
                             ]
                         },

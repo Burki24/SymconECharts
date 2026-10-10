@@ -49,9 +49,18 @@
         return contrastRatio(background, first) >= contrastRatio(background, second) ? first : second;
     }
 
+    function opacityFromPercent(value, defaultPercent) {
+        var fallback = defaultPercent == null ? 100 : Number(defaultPercent);
+        if (!Number.isFinite(fallback)) { fallback = 100; }
+        var percent = value == null ? fallback : Number(value);
+        if (!Number.isFinite(percent)) { percent = fallback; }
+        return Math.max(0, Math.min(100, percent)) / 100;
+    }
+
     global.SYMC_ECHARTS_DESIGN = Object.freeze({
         contrastRatio: contrastRatio,
         readableTextColor: readableTextColor,
-        relativeLuminance: relativeLuminance
+        relativeLuminance: relativeLuminance,
+        opacityFromPercent: opacityFromPercent
     });
 }(window));

@@ -71,6 +71,7 @@ echo 'PHP syntax verified (' . count($phpFiles) . " files).\n";
 
 runQualityCommand('Run repository test suite', [PHP_BINARY, 'tests/run.php']);
 foreach ([
+    'tests/echarts_design.js',
     'tests/gauge_single_layout.js',
     'tests/gauge_multi_layout.js',
     'tests/gauge_tacho_layout.js',

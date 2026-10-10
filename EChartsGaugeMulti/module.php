@@ -465,6 +465,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
             'replacements'       => [
                 '{{ECHARTS_SCRIPT}}'           => EChartsAsset::JavaScript(),
                 '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
+                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript(),
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
         ]);

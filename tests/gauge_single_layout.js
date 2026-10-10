@@ -6,6 +6,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 const source = fs.readFileSync(path.join(__dirname, '..', 'EChartsGaugeSingle', 'visualization', 'app.js'), 'utf8');
+const designSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-design.js'), 'utf8');
 const palette = {
     background: '#202020', text: '#ffffff', muted: '#aaaaaa', subtle: '#888888',
     border: '#cccccc', track: '#444444', surface: '#333333', accent: '#55cbb5'
@@ -38,7 +39,9 @@ function render(mode, width, height, preset, style = {}) {
     const document = {
         getElementById: id => id === 'echarts-gauge-chart' ? chartElement : errorElement
     };
-    vm.runInNewContext(source, { window, document });
+    const context = { window, document };
+    vm.runInNewContext(designSource, context);
+    vm.runInNewContext(source, context);
     assert.ok(option, 'The Gauge Single option must be rendered.');
     return option;
 }
@@ -68,5 +71,13 @@ const customized = render('ipsview', 620, 630, 'simple', {
 });
 assert.ok(customized.series[0].radius > narrow.series[0].radius);
 assert.ok(customized.series[0].radius < 300, 'An oversized custom design must not receive extra automatic zoom.');
+
+const background = render('ipsview', 620, 630, 'simple', {
+    plateShape: 'circle', plateBackgroundEnabled: true,
+    plateBackgroundImage: `data:image/svg+xml;base64,${Buffer.from('<svg/>').toString('base64')}`,
+    plateBackgroundAspectRatio: 1, plateBackgroundFit: 'contain', plateBackgroundOpacityPercent: 60
+});
+assert.equal(background.graphic.find(element => element.id === 'gauge-plate-background').children[0].style.opacity,
+    0.6, 'Gauge Single must retain its configured plate opacity in IPSView.');
 
 process.stdout.write('Gauge Single responsive layout verified for tile and IPSView.\n');

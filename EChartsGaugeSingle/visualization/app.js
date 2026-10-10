@@ -2,6 +2,7 @@
     'use strict';
 
     var bootstrap = window.SYMC_VISUALIZATION || {};
+    var echartsDesign = window.SYMC_ECHARTS_DESIGN;
     var translations = bootstrap.translations || {};
     var themePalettes = bootstrap.options && bootstrap.options.echartsThemes
         ? bootstrap.options.echartsThemes
@@ -767,10 +768,7 @@
             + bounds.width * clamp(Number(style.plateBackgroundOffsetXPercent) || 0, -100, 100) / 100;
         var centerY = bounds.y + bounds.height / 2
             + bounds.height * clamp(Number(style.plateBackgroundOffsetYPercent) || 0, -100, 100) / 100;
-        var opacity = clamp(Number(style.plateBackgroundOpacityPercent), 0, 100) / 100;
-        if (!Number.isFinite(opacity)) {
-            opacity = 1;
-        }
+        var opacity = echartsDesign.opacityFromPercent(style.plateBackgroundOpacityPercent, 100);
         var rotation = clamp(Number(style.plateBackgroundRotation) || 0, -180, 180) * Math.PI / 180;
         var clipPath = {
             type: renderCircle ? 'circle' : 'polygon',

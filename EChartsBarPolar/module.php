@@ -492,6 +492,7 @@ class EChartsBarPolar extends IPSModuleStrict
         $this->RegisterPropertyInteger($prefix . 'BarWidthPercent', 60);
         $this->RegisterPropertyString($prefix . 'BarFillMode', 'solid');
         $this->RegisterPropertyInteger($prefix . 'BarGradientColor', -1);
+        $this->RegisterPropertyInteger($prefix . 'BarOpacityPercent', 100);
         $this->RegisterPropertyInteger($prefix . 'InnerRadiusPercent', 12);
         $this->RegisterPropertyInteger($prefix . 'OuterRadiusPercent', 76);
         $this->RegisterPropertyInteger($prefix . 'StartAngle', 90);
@@ -523,6 +524,7 @@ class EChartsBarPolar extends IPSModuleStrict
             'BarWidthPercent'             => 'integer',
             'BarFillMode'                 => 'string',
             'BarGradientColor'            => 'integer',
+            'BarOpacityPercent'           => 'integer',
             'InnerRadiusPercent'          => 'integer',
             'OuterRadiusPercent'          => 'integer',
             'StartAngle'                  => 'integer',
@@ -555,6 +557,8 @@ class EChartsBarPolar extends IPSModuleStrict
             || !in_array($this->ReadPropertyString($prefix . 'BarFillMode'), self::BAR_FILL_MODES, true)
             || $this->ReadPropertyInteger($prefix . 'BarGradientColor') < -1
             || $this->ReadPropertyInteger($prefix . 'BarGradientColor') > 0xFFFFFF
+            || $this->ReadPropertyInteger($prefix . 'BarOpacityPercent') < 0
+            || $this->ReadPropertyInteger($prefix . 'BarOpacityPercent') > 100
             || $this->ReadPropertyInteger($prefix . 'InnerRadiusPercent') < 0
             || $this->ReadPropertyInteger($prefix . 'OuterRadiusPercent') > 95
             || $this->ReadPropertyInteger($prefix . 'OuterRadiusPercent')
@@ -603,6 +607,7 @@ class EChartsBarPolar extends IPSModuleStrict
             'barWidthPercent'             => $this->ReadPropertyInteger($prefix . 'BarWidthPercent'),
             'barFillMode'                 => $this->ReadPropertyString($prefix . 'BarFillMode'),
             'barGradientColor'            => $gradientColor < 0 ? '' : EChartsAsset::ColorToHex($gradientColor),
+            'barOpacityPercent'           => $this->ReadPropertyInteger($prefix . 'BarOpacityPercent'),
             'innerRadiusPercent'          => $this->ReadPropertyInteger($prefix . 'InnerRadiusPercent'),
             'outerRadiusPercent'          => $this->ReadPropertyInteger($prefix . 'OuterRadiusPercent'),
             'startAngle'                  => $this->ReadPropertyInteger($prefix . 'StartAngle'),

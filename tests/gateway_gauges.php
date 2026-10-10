@@ -1934,6 +1934,13 @@ foreach ([
         $dedicatedClass . ' renderer must merge source-specific design settings.'
     );
     assertGatewayGauge(
+        str_contains($dedicatedGauge->GetVisualizationTile(), 'opacityFromPercent')
+            && str_contains($dedicatedGauge->GetIPSViewHTML(), 'opacityFromPercent')
+            && strpos($dedicatedGauge->GetVisualizationTile(), 'function opacityFromPercent(')
+                < strpos($dedicatedGauge->GetVisualizationTile(), 'window.SYMC_ECHARTS_DESIGN'),
+        $dedicatedClass . ' must embed shared design utilities in Tile and IPSView.'
+    );
+    assertGatewayGauge(
         str_contains($dedicatedGauge->GetVisualizationTile(), '"pointerShape":"custom"')
             && str_contains($dedicatedGauge->GetIPSViewHTML(), '"pointerShape":"line"')
             && str_contains($dedicatedGauge->GetIPSViewHTML(), '"plateMode":"hidden"')
@@ -5037,6 +5044,7 @@ assertGatewayGauge(
         && $polarData['polar']['style']['showBarBackground'] === false
         && $polarData['polar']['style']['barFillMode'] === 'solid'
         && $polarData['polar']['style']['barGradientColor'] === ''
+        && $polarData['polar']['style']['barOpacityPercent'] === 100
         && $polarData['polar']['style']['valueLabelPosition'] === 'middle'
         && $polarData['polar']['style']['categoryLabelFontSize'] === 10
         && $polarData['polar']['style']['valueLabelFontSize'] === 10
@@ -5051,6 +5059,15 @@ assertGatewayGauge(
 );
 $polarTile = $polar->GetVisualizationTile();
 $polarIPSView = $polar->GetIPSViewHTML();
+foreach ([$gauge, $multiGauge, $timeSeries, $barHistoryTile, $polar] as $opacityChart) {
+    assertGatewayGauge(
+        str_contains($opacityChart->GetVisualizationTile(), 'function opacityFromPercent(')
+            && str_contains($opacityChart->GetIPSViewHTML(), 'function opacityFromPercent(')
+            && strpos($opacityChart->GetVisualizationTile(), 'function opacityFromPercent(')
+                < strpos($opacityChart->GetVisualizationTile(), 'window.SYMC_ECHARTS_DESIGN'),
+        $opacityChart::class . ' must embed shared design utilities in Tile and IPSView.'
+    );
+}
 assertGatewayGauge(
     str_contains($polarTile, 'echarts-bar-polar-root')
         && str_contains($polarTile, 'SYMC_ECHARTS_DESIGN')
@@ -5097,6 +5114,8 @@ assertGatewayGauge(
 );
 assertGatewayGauge(
     ($polarFillFields['BarGradientColor']['visible'] ?? null) === false
+        && ($polarFillFields['BarOpacityPercent']['minimum'] ?? null) === 0
+        && ($polarFillFields['BarOpacityPercent']['maximum'] ?? null) === 100
         && str_contains((string) ($polarFillFields['BarFillMode']['onChange'] ?? ''), 'ECBP_UpdateBarFillForm'),
     'Polar Tile form must hide the gradient color until gradient fill is selected.'
 );
@@ -5127,6 +5146,7 @@ assertGatewayGauge(
 );
 assertGatewayGauge(
     ($polarDefaultIPSViewFillFields['IPSViewBarGradientColor']['visible'] ?? null) === false
+        && ($polarDefaultIPSViewFillFields['IPSViewBarOpacityPercent']['enabled'] ?? null) === true
         && ($polarDefaultIPSViewFillFields['IPSViewBarFillMode']['enabled'] ?? null) === true,
     'Independent Polar IPSView form must start with solid fill and editable fill mode.'
 );
@@ -5138,6 +5158,7 @@ $polar->SetTestProperty('BarBackgroundColor', 0x778899);
 $polar->SetTestProperty('BarBackgroundOpacityPercent', 40);
 $polar->SetTestProperty('BarFillMode', 'gradient');
 $polar->SetTestProperty('BarGradientColor', 0x55CCAA);
+$polar->SetTestProperty('BarOpacityPercent', 65);
 $polar->SetTestProperty('AngularSpan', 180);
 $polar->SetTestProperty('ValueLabelPosition', 'insideEnd');
 $polar->SetTestProperty('CategoryLabelFontSize', 9);
@@ -5155,6 +5176,7 @@ assertGatewayGauge(
         && $polarDesignData['polar']['style']['barBackgroundOpacityPercent'] === 40
         && $polarDesignData['polar']['style']['barFillMode'] === 'gradient'
         && $polarDesignData['polar']['style']['barGradientColor'] === '#55CCAA'
+        && $polarDesignData['polar']['style']['barOpacityPercent'] === 65
         && $polarDesignData['polar']['style']['angularSpan'] === 180
         && $polarDesignData['polar']['style']['valueLabelPosition'] === 'insideEnd'
         && $polarDesignData['polar']['style']['categoryLabelFontSize'] === 9
@@ -5175,6 +5197,7 @@ $polar->SetTestProperty('IPSViewBarBackgroundColor', 0x8B5A2B);
 $polar->SetTestProperty('IPSViewBarBackgroundOpacityPercent', 35);
 $polar->SetTestProperty('IPSViewBarFillMode', 'gradient');
 $polar->SetTestProperty('IPSViewBarGradientColor', 0x223344);
+$polar->SetTestProperty('IPSViewBarOpacityPercent', 35);
 $polar->SetTestProperty('IPSViewAngularSpan', 270);
 $polar->SetTestProperty('IPSViewValueLabelPosition', 'insideStart');
 $polar->SetTestProperty('IPSViewCategoryLabelFontSize', 12);
@@ -5193,6 +5216,7 @@ assertGatewayGauge(
         && str_contains($polarIPSViewDesign, '"barBackgroundOpacityPercent":35')
         && str_contains($polarIPSViewDesign, '"barFillMode":"gradient"')
         && str_contains($polarIPSViewDesign, '"barGradientColor":"#223344"')
+        && str_contains($polarIPSViewDesign, '"barOpacityPercent":35')
         && str_contains($polarIPSViewDesign, '"angularSpan":270')
         && str_contains($polarIPSViewDesign, '"valueLabelPosition":"insideStart"')
         && str_contains($polarIPSViewDesign, '"categoryLabelFontSize":12')
@@ -5314,10 +5338,12 @@ assertGatewayGauge(
         && str_contains($polarInheritedHTML, '"valueLabelFontSize":11')
         && str_contains($polarInheritedHTML, '"scaleLabelFontSize":8')
         && str_contains($polarInheritedHTML, '"barGradientColor":"#55CCAA"')
+        && str_contains($polarInheritedHTML, '"barOpacityPercent":65')
         && ($polarInheritedScaleFields['IPSViewValueAxisRangeMode']['enabled'] ?? null) === false
         && ($polarInheritedScaleFields['IPSViewValueAxisMinimum']['enabled'] ?? null) === false
         && ($polarInheritedFillFields['IPSViewBarFillMode']['enabled'] ?? null) === false
         && ($polarInheritedFillFields['IPSViewBarGradientColor']['enabled'] ?? null) === false
+        && ($polarInheritedFillFields['IPSViewBarOpacityPercent']['enabled'] ?? null) === false
         && ($polarInheritedLabelPositionField['enabled'] ?? null) === false
         && array_column($polarInheritedFontRow['items'], 'enabled') === [false, false, false],
     'Inherited Polar IPSView design must follow the Tile scale and tracks while disabling independent controls.'
@@ -5339,6 +5365,7 @@ assertGatewayGauge(
         && str_contains($polarCopiedHTML, '"barBackgroundOpacityPercent":40')
         && str_contains($polarCopiedHTML, '"barFillMode":"gradient"')
         && str_contains($polarCopiedHTML, '"barGradientColor":"#55CCAA"')
+        && str_contains($polarCopiedHTML, '"barOpacityPercent":65')
         && str_contains($polarCopiedHTML, '"angularSpan":180')
         && str_contains($polarCopiedHTML, '"valueLabelPosition":"insideEnd"')
         && str_contains($polarCopiedHTML, '"categoryLabelFontSize":9')
@@ -5503,6 +5530,13 @@ $invalidPolarGradientColor->SetTestProperty('BarGradientColor', 0x1000000);
 $invalidPolarGradientColor->ApplyChanges();
 assertGatewayGauge($invalidPolarGradientColor->GetTestStatus() === 202, 'Polar Bar must reject invalid gradient colors.');
 
+$invalidPolarOpacity = new EChartsBarPolar();
+$invalidPolarOpacity->Create();
+$invalidPolarOpacity->SetTestProperty('Sources', json_encode([['VariableID' => 4711]], JSON_THROW_ON_ERROR));
+$invalidPolarOpacity->SetTestProperty('BarOpacityPercent', 101);
+$invalidPolarOpacity->ApplyChanges();
+assertGatewayGauge($invalidPolarOpacity->GetTestStatus() === 202, 'Polar Bar must reject invalid bar opacity.');
+
 $invalidPolarSpan = new EChartsBarPolar();
 $invalidPolarSpan->Create();
 $invalidPolarSpan->SetTestProperty('Sources', json_encode([['VariableID' => 4711]], JSON_THROW_ON_ERROR));
@@ -5585,6 +5619,17 @@ $invalidPolarIPSViewTrack->ApplyChanges();
 assertGatewayGauge(
     $invalidPolarIPSViewTrack->GetTestStatus() === 202,
     'Polar Bar must reject invalid independent IPSView track opacity.'
+);
+
+$invalidPolarIPSViewOpacity = new EChartsBarPolar();
+$invalidPolarIPSViewOpacity->Create();
+$invalidPolarIPSViewOpacity->SetTestProperty('Sources', json_encode([['VariableID' => 4711]], JSON_THROW_ON_ERROR));
+$invalidPolarIPSViewOpacity->SetTestProperty('IPSViewUseTileDesign', false);
+$invalidPolarIPSViewOpacity->SetTestProperty('IPSViewBarOpacityPercent', -1);
+$invalidPolarIPSViewOpacity->ApplyChanges();
+assertGatewayGauge(
+    $invalidPolarIPSViewOpacity->GetTestStatus() === 202,
+    'Polar Bar must reject invalid independent IPSView bar opacity.'
 );
 
 $sixteenPolarSources = [];

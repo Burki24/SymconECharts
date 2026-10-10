@@ -6,6 +6,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 const source = fs.readFileSync(path.join(__dirname, '..', 'EChartsGaugeChronograph', 'visualization', 'app.js'), 'utf8');
+const designSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-design.js'), 'utf8');
 const palette = {
     background: '#202020',
     text: '#ffffff',
@@ -52,7 +53,9 @@ function render(mode, width, height, count, title = '', preset = 'multi-title', 
         getElementById: id => id === 'echarts-gauge-chart' ? chartElement : errorElement
     };
 
-    vm.runInNewContext(source, { window, document });
+    const context = { window, document };
+    vm.runInNewContext(designSource, context);
+    vm.runInNewContext(source, context);
     assert.ok(option, 'The chart should be rendered.');
     return option;
 }

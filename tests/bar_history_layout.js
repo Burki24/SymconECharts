@@ -9,6 +9,7 @@ const source = fs.readFileSync(
     path.join(__dirname, '..', 'EChartsBarHistory', 'visualization', 'app.js'),
     'utf8'
 );
+const designSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-design.js'), 'utf8');
 const zoomSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-zoom.js'), 'utf8');
 const patternSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-pattern.js'), 'utf8');
 
@@ -85,6 +86,7 @@ function render(truncated = false, mode = 'symcon', adaptToBackground = false, e
         })[id]
     };
     const context = { window, document };
+    vm.runInNewContext(designSource, context);
     vm.runInNewContext(zoomSource, context);
     vm.runInNewContext(patternSource, context);
     vm.runInNewContext(source, context);

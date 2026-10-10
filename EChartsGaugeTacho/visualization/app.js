@@ -2,6 +2,7 @@
     'use strict';
 
     var bootstrap = window.SYMC_VISUALIZATION || {};
+    var echartsDesign = window.SYMC_ECHARTS_DESIGN;
     var translations = bootstrap.translations || {};
     var themePalettes = bootstrap.options && bootstrap.options.echartsThemes
         ? bootstrap.options.echartsThemes
@@ -308,10 +309,7 @@
                     * clamp(Number(plateStyle.plateBackgroundOffsetXPercent) || 0, -100, 100) / 100;
                 var centerY = gauge.center[1] + diameter
                     * clamp(Number(plateStyle.plateBackgroundOffsetYPercent) || 0, -100, 100) / 100;
-                var opacity = clamp(Number(plateStyle.plateBackgroundOpacityPercent), 0, 100) / 100;
-                if (!Number.isFinite(opacity)) {
-                    opacity = 1;
-                }
+                var opacity = echartsDesign.opacityFromPercent(plateStyle.plateBackgroundOpacityPercent, 100);
                 retained.push({
                     id: 'custom-plate-background-' + gauge.id,
                     type: 'group',

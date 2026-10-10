@@ -96,6 +96,8 @@ assert.equal(radial.angleAxis.axisLabel.hideOverlap, true, 'Only actual radial l
 assert.deepEqual(Array.from(radial.series[0].data, item => item.value), [10, 5, -3]);
 assert.equal(radial.series[0].data[0].itemStyle.color, '#ff5500');
 assert.equal(radial.series[0].data[1].itemStyle.color, '#abcdef');
+assert.equal(radial.series[0].data[0].itemStyle.opacity, 1,
+    'Existing Polar charts must keep fully opaque bars by default.');
 assert.equal(radial.angleAxis.startAngle, 90);
 assert.equal(radial.angleAxis.endAngle, undefined, 'Existing full-circle Polar charts must keep their default angle extent.');
 assert.equal(radial.angleAxis.axisLine.show, true, 'Full-circle grid outlines must remain visible.');
@@ -256,6 +258,34 @@ window.handleMessage({
 const gradientIPSView = options.at(-1);
 assert.equal(gradientIPSView.series[0].data[1].itemStyle.color.colorStops[1].color, palette.background,
     'Automatic gradient end color in IPSView must follow the selected theme.');
+window.SYMC_VISUALIZATION.mode = 'symcon';
+
+window.handleMessage({
+    status: 'ready', chart: {
+        ...state.chart, polar: { ...state.chart.polar, style: {
+            ...state.chart.polar.style, barOpacityPercent: 35
+        } }
+    }
+});
+const translucentRadial = options.at(-1);
+assert.equal(translucentRadial.series[0].data[0].itemStyle.opacity, 0.35,
+    'The Tile must apply bar opacity only to Polar bars.');
+assert.equal(translucentRadial.series[0].data[0].label.textBorderWidth, 2,
+    'Text inside translucent bars needs a contrast outline.');
+window.SYMC_VISUALIZATION.mode = 'ipsview';
+window.handleMessage({
+    status: 'ready', chart: {
+        ...tangentialState.chart, polar: { ...tangentialState.chart.polar, style: {
+            ...tangentialState.chart.polar.style, barOpacityPercent: 65,
+            barFillMode: 'gradient', barGradientColor: '#223344'
+        } }
+    }
+});
+const translucentIPSView = options.at(-1);
+assert.equal(translucentIPSView.series[0].data[0].itemStyle.opacity, 0.65,
+    'Independent IPSView opacity must also apply to concentric arcs.');
+assert.equal(translucentIPSView.series[0].backgroundStyle.opacity, 0.25,
+    'Bar opacity must not alter the independent background-track opacity.');
 window.SYMC_VISUALIZATION.mode = 'symcon';
 
 const fixedStyle = {
@@ -621,6 +651,14 @@ if (fs.existsSync(localECharts)) {
     assert.match(gradientSVG, /#223344/i,
         'The configured gradient end color must reach the rendered Polar chart.');
     gradientChart.dispose();
+    const translucentChart = echarts.init(null, null,
+        { renderer: 'svg', ssr: true, width: 625, height: 560 });
+    translucentChart.setOption(translucentRadial);
+    assert.ok(translucentChart.getZr().storage.getDisplayList().some(element =>
+        element.type === 'sector' && element.style.fill === '#ff5500'
+            && element.style.opacity === 0.35),
+    'The bundled ECharts renderer must draw a Polar bar with configured opacity.');
+    translucentChart.dispose();
     const compactConcentricChart = echarts.init(null, null,
         { renderer: 'svg', ssr: true, width: 435, height: 324 });
     compactConcentricChart.setOption(compactConcentric);

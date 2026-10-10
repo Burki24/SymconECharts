@@ -38,7 +38,12 @@ Tacho- und Chronograph-Module einschließlich quellbezogener Designwerte und
 SVG-Verarbeitung für ihre maximal fünf Quellen. Der Tacho-Test prüft außerdem,
 dass breite Kacheln mit vier oder fünf Quellen alle Nebeninstrumente gleich
 groß, überlappungsfrei und innerhalb der verfügbaren Fläche anordnen. Die
-PHP-Basissuite benötigt weiterhin kein Node.js.
+Die übrigen PHP-Vertragstests benötigen kein Node.js; der vollständige
+Qualitätslauf führt zusätzlich die Renderer-Tests mit Node.js aus.
+
+`node tests/echarts_design.js` prüft die gemeinsame Deckkraftumrechnung;
+`node tests/time_series_layout.js` prüft unter anderem Flächen und
+Annotationen. Beide laufen auch im vollständigen Qualitätslauf.
 
 `tests/fixtures/tacho-browser.html` und
 `tests/fixtures/chronograph-browser.html` sind manuelle Browser-Fixierungen

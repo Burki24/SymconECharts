@@ -27,6 +27,7 @@
             "Solid color": "Vollfarbe",
             "Gradient": "Farbverlauf",
             "Gradient end color": "Endfarbe des Farbverlaufs",
+            "Bar opacity": "Balkendeckkraft",
             "Value scale": "Werteskala",
             "Automatic": "Automatisch",
             "Fixed range": "Fester Bereich",

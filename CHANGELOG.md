@@ -21,6 +21,10 @@
 
 ## Neu
 
+- Die Deckkraft radialer Polar-Balken und konzentrischer Bögen ist im
+  Kachel- und unabhängigen IPSView-Designer von 0 bis 100 % einstellbar.
+  Hintergrundspuren und Beschriftungen bleiben davon unabhängig.
+
 - Polar-Balken und konzentrische Bögen können in Kachel und unabhängigem
   IPSView-Design statt Vollfarbe einen Farbverlauf mit wählbarer Endfarbe
   verwenden.

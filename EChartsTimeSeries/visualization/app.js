@@ -2,6 +2,7 @@
     'use strict';
 
     var bootstrap = window.SYMC_VISUALIZATION || {};
+    var echartsDesign = window.SYMC_ECHARTS_DESIGN;
     var chartElement = document.getElementById('echarts-timeseries-chart');
     var warningElement = document.getElementById('echarts-timeseries-warning');
     var errorElement = document.getElementById('echarts-timeseries-error');
@@ -155,8 +156,7 @@
         var bottomLegend = legendPosition === 'bottom';
         var lineWidth = 2 * Math.max(50, Math.min(200, Number(design.lineWidthPercent) || 100)) / 100;
         var symbolSize = 6 * Math.max(50, Math.min(200, Number(design.symbolSizePercent) || 100)) / 100;
-        var areaOpacity = Math.max(0, Math.min(100, Number(design.areaOpacityPercent) || 0)) / 100;
-        if (design.areaOpacityPercent === undefined) { areaOpacity = 0.22; }
+        var areaOpacity = echartsDesign.opacityFromPercent(design.areaOpacityPercent, 22);
         var titleVisible = Boolean(model.chart && model.chart.title);
         var gridTop = headerInset + (legendPosition === 'top' ? 64 : (titleVisible ? 48 : 20));
         var gridBottom = bottomLegend ? (zoom ? 94 : 58) : (zoom ? 64 : 34);
@@ -313,11 +313,8 @@
                 };
                 if (item.style === 'area') {
                     var sourceAreaOpacity = sourceDesign
-                        ? Math.max(0, Math.min(100, Number(sourceDesign.areaOpacityPercent) || 0)) / 100
+                        ? echartsDesign.opacityFromPercent(sourceDesign.areaOpacityPercent, 22)
                         : areaOpacity;
-                    if (sourceDesign && sourceDesign.areaOpacityPercent === undefined) {
-                        sourceAreaOpacity = 0.22;
-                    }
                     result.areaStyle = { opacity: sourceAreaOpacity };
                     if (sourceDesign && sourceDesign.areaFillMode === 'gradient') {
                         result.areaStyle.color = {
@@ -383,8 +380,7 @@
                                     yAxis: Number(annotation.value),
                                     itemStyle: {
                                         color: annotationColor,
-                                        opacity: Math.max(0, Math.min(100,
-                                            Number(annotation.opacityPercent) || 0)) / 100
+                                        opacity: echartsDesign.opacityFromPercent(annotation.opacityPercent, 0)
                                     },
                                     label: {
                                         show: label !== '',

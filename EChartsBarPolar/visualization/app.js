@@ -164,9 +164,8 @@
             valueAxis.max = scaleMaximum;
             valueAxis.startValue = scaleMinimum;
         }
-        var trackOpacity = Number(style.barBackgroundOpacityPercent);
-        if (!Number.isFinite(trackOpacity)) { trackOpacity = 25; }
-        trackOpacity = Math.max(0, Math.min(100, trackOpacity)) / 100;
+        var trackOpacity = design.opacityFromPercent(style.barBackgroundOpacityPercent, 25);
+        var barOpacity = design.opacityFromPercent(style.barOpacityPercent, 100);
         var startAngle = Math.max(0, Math.min(360, Number(style.startAngle) || 0));
         var angularSpan = Number(style.angularSpan);
         var angleAxis = mode === 'radial' ? categoryAxis : valueAxis;
@@ -248,13 +247,13 @@
                         id: item.id,
                         name: String(item.label || ''),
                         value: Number(item.value),
-                        itemStyle: { color: fill },
+                        itemStyle: { color: fill, opacity: barOpacity },
                         label: {
                             distance: valueLabelDistance(index),
                             color: textColor,
-                            textBorderColor: gradient && valueLabelPosition !== 'outside'
+                            textBorderColor: (gradient || barOpacity < 1) && valueLabelPosition !== 'outside'
                                 ? (textColor === colors.text ? colors.background : colors.text) : undefined,
-                            textBorderWidth: gradient && valueLabelPosition !== 'outside' ? 2 : 0
+                            textBorderWidth: (gradient || barOpacity < 1) && valueLabelPosition !== 'outside' ? 2 : 0
                         }
                     };
                 }),

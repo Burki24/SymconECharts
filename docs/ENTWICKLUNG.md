@@ -281,6 +281,14 @@ den festgelegten Synchronisierungsweg nach `libs/helper`. Die Abgrenzung und
 die erforderlichen Vertragsprüfungen legt
 [`ADR 0017`](adr/0017-reuse-before-new-chart-development.md) fest.
 
+Der projektspezifische Browserbaustein `libs/echarts-design.js` wandelt
+konfigurierte Deckkraftwerte von 0 bis 100 Prozent für mehrere Chartfamilien
+einheitlich in ECharts-Werte von 0 bis 1 um. History- und Polar-Balken,
+TimeSeries-Flächen und -Annotationen sowie Gauge-Hintergrundplatten nutzen
+denselben Baustein. Die jeweiligen Defaults, Properties, Validierungen und
+ECharts-Ziele verbleiben in den Gerätemodulen. Der Baustein wird in Kachel und
+IPSView vor dem jeweiligen Renderer eingebettet.
+
 Gemeinsame ECharts-Gauge-Designsemantik liegt in
 `libs/EChartsGaugeDesign.php`. Der Baustein vereinheitlicht für Single und
 Multi insbesondere RGB-Farben sowie den validierten Import von SVG-Zeigern
