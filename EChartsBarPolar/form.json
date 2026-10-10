@@ -334,6 +334,14 @@
                             "suffix": "°"
                         },
                         {
+                            "type": "NumberSpinner",
+                            "name": "AngularSpan",
+                            "caption": "Angular span",
+                            "minimum": 30,
+                            "maximum": 360,
+                            "suffix": "°"
+                        },
+                        {
                             "type": "CheckBox",
                             "name": "Clockwise",
                             "caption": "Clockwise"
@@ -594,6 +602,14 @@
                                     "name": "IPSViewStartAngle",
                                     "caption": "Start angle",
                                     "minimum": 0,
+                                    "maximum": 360,
+                                    "suffix": "°"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "IPSViewAngularSpan",
+                                    "caption": "Angular span",
+                                    "minimum": 30,
                                     "maximum": 360,
                                     "suffix": "°"
                                 },

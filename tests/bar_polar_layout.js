@@ -95,6 +95,7 @@ assert.deepEqual(Array.from(radial.series[0].data, item => item.value), [10, 5, 
 assert.equal(radial.series[0].data[0].itemStyle.color, '#ff5500');
 assert.equal(radial.series[0].data[1].itemStyle.color, '#abcdef');
 assert.equal(radial.angleAxis.startAngle, 90);
+assert.equal(radial.angleAxis.endAngle, undefined, 'Existing full-circle Polar charts must keep their default angle extent.');
 assert.equal(radial.series[0].label.rotate, 0, 'Polar value labels must remain horizontally readable.');
 assert.equal(radial.series[0].label.position, 'middle', 'Value anchors must be centered inside their bars.');
 assert.equal(radial.series[0].data[1].label.color, '#111111', 'Light bars need dark value text.');
@@ -135,6 +136,7 @@ assert.equal(tangential.radiusAxis.type, 'category');
 assert.deepEqual(Array.from(tangential.radiusAxis.data), ['<Room>', '<Room>', 'Outside']);
 assert.ok(tangential.radiusAxis.axisLabel.margin >= 20, 'Concentric category labels need axis spacing.');
 assert.equal(tangential.angleAxis.clockwise, false);
+assert.equal(tangential.angleAxis.endAngle, undefined, 'Existing counterclockwise charts must remain full circles.');
 assert.equal(tangential.series[0].roundCap, true);
 assert.equal(tangential.series[0].label.show, false);
 assert.equal(tangential.series[0].label.rotate, 0);
@@ -210,6 +212,43 @@ assert.equal(offsetIPSView.angleAxis.startValue, 5,
 assert.equal(offsetIPSView.series[0].showBackground, true);
 assert.equal(offsetIPSView.series[0].backgroundStyle.color, '#778899');
 assert.equal(offsetIPSView.series[0].backgroundStyle.opacity, 0.4);
+window.handleMessage({
+    status: 'ready', chart: {
+        ...state.chart,
+        polar: {
+            ...state.chart.polar,
+            style: { ...fixedStyle, startAngle: 90, angularSpan: 180 }
+        }
+    }
+});
+const halfRadial = options.at(-1);
+assert.equal(halfRadial.angleAxis.endAngle, 270,
+    'Clockwise radial bars must occupy only the configured half-circle.');
+window.handleMessage({
+    status: 'ready', chart: {
+        ...state.chart,
+        polar: {
+            ...state.chart.polar,
+            style: { ...fixedStyle, mode: 'tangential', startAngle: 180, clockwise: false, angularSpan: 270 }
+        }
+    }
+});
+const partialTangential = options.at(-1);
+assert.equal(partialTangential.angleAxis.endAngle, -90,
+    'Counterclockwise concentric arcs must stop at their configured end angle.');
+window.SYMC_VISUALIZATION.mode = 'ipsview';
+window.handleMessage({
+    status: 'ready', chart: {
+        ...state.chart,
+        polar: {
+            ...state.chart.polar,
+            style: { ...fixedStyle, mode: 'tangential', startAngle: 0, angularSpan: 120 }
+        }
+    }
+});
+assert.equal(options.at(-1).angleAxis.endAngle, 120,
+    'The IPSView renderer must also honor partial-circle geometry.');
+window.SYMC_VISUALIZATION.mode = 'symcon';
 window.SYMC_VISUALIZATION.mode = 'symcon';
 window.handleMessage({
     status: 'ready', chart: {
@@ -312,10 +351,16 @@ if (fs.existsSync(localECharts)) {
         }
     }
     userChart.dispose();
-    for (const option of [radial, tangential, fixedRadial, fixedTangential]) {
+    for (const option of [radial, tangential, fixedRadial, fixedTangential, halfRadial, partialTangential]) {
         const realChart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 625, height: 560 });
         realChart.setOption(option);
         assert.ok(realChart.renderToSVGString().includes('<svg'), 'Both polar modes must render in ECharts.');
+        if (option === halfRadial || option === partialTangential) {
+            const axis = realChart.getModel().getComponent('angleAxis').axis;
+            assert.deepEqual(Array.from(axis.getExtent()),
+                option === halfRadial ? [90, 270] : [180, -90],
+                'ECharts must apply the requested partial angular extent.');
+        }
         if (option === fixedRadial || option === fixedTangential) {
             const tracks = realChart.getZr().storage.getDisplayList().filter(
                 element => element.type === 'sector' && element.style.fill === '#778899'

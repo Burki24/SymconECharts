@@ -55,6 +55,7 @@
             "Outer radius": "Außenradius",
             "The outer radius must exceed the inner radius by at least 20 percentage points.": "Der Außenradius muss mindestens 20 Prozentpunkte größer als der Innenradius sein.",
             "Start angle": "Startwinkel",
+            "Angular span": "Winkelumfang",
             "Clockwise": "Im Uhrzeigersinn",
             "Rounded caps": "Abgerundete Enden",
             "Polar Bar is ready": "Polar Bar ist bereit",

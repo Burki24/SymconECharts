@@ -152,9 +152,13 @@
         if (!Number.isFinite(trackOpacity)) { trackOpacity = 25; }
         trackOpacity = Math.max(0, Math.min(100, trackOpacity)) / 100;
         var startAngle = Math.max(0, Math.min(360, Number(style.startAngle) || 0));
+        var angularSpan = Number(style.angularSpan);
         var angleAxis = mode === 'radial' ? categoryAxis : valueAxis;
         angleAxis.startAngle = startAngle;
         angleAxis.clockwise = style.clockwise !== false;
+        if (Number.isFinite(angularSpan) && angularSpan >= 30 && angularSpan < 360) {
+            angleAxis.endAngle = startAngle + (angleAxis.clockwise ? angularSpan : -angularSpan);
+        }
         categoryAxis.axisLabel.width = layout.labelWidth;
         categoryAxis.axisLabel.margin = layout.labelMargin;
 

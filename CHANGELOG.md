@@ -6,6 +6,11 @@
 
 ## Neu
 
+- Polar-Balken können in Kachel und IPSView auf einen frei einstellbaren
+  Winkelbereich von 30° bis 360° begrenzt werden. Ein Halbkreis ist damit ebenso
+  möglich wie der bisherige Vollkreis; Startwinkel und Drehrichtung bleiben
+  separat einstellbar.
+
 - EChartsBarPolar vergleicht 1 bis 16 aktuelle Werte mit gemeinsamer Einheit
   als radiale Balken oder konzentrische Bögen. Kachel und optionales IPSView
   bieten getrennte Einstellungen für Reihenfolge, Farben und Polar-Geometrie.

@@ -472,6 +472,7 @@ class EChartsBarPolar extends IPSModuleStrict
         $this->RegisterPropertyInteger($prefix . 'InnerRadiusPercent', 12);
         $this->RegisterPropertyInteger($prefix . 'OuterRadiusPercent', 76);
         $this->RegisterPropertyInteger($prefix . 'StartAngle', 90);
+        $this->RegisterPropertyInteger($prefix . 'AngularSpan', 360);
         $this->RegisterPropertyBoolean($prefix . 'Clockwise', true);
         $this->RegisterPropertyBoolean($prefix . 'RoundCaps', false);
         $this->RegisterPropertyString($prefix . 'ValueAxisRangeMode', 'auto');
@@ -496,6 +497,7 @@ class EChartsBarPolar extends IPSModuleStrict
             'InnerRadiusPercent'          => 'integer',
             'OuterRadiusPercent'          => 'integer',
             'StartAngle'                  => 'integer',
+            'AngularSpan'                 => 'integer',
             'Clockwise'                   => 'boolean',
             'RoundCaps'                   => 'boolean',
             'ValueAxisRangeMode'          => 'string',
@@ -520,6 +522,8 @@ class EChartsBarPolar extends IPSModuleStrict
                 - $this->ReadPropertyInteger($prefix . 'InnerRadiusPercent') < 20
             || $this->ReadPropertyInteger($prefix . 'StartAngle') < 0
             || $this->ReadPropertyInteger($prefix . 'StartAngle') > 360
+            || $this->ReadPropertyInteger($prefix . 'AngularSpan') < 30
+            || $this->ReadPropertyInteger($prefix . 'AngularSpan') > 360
         ) {
             return false;
         }
@@ -556,6 +560,7 @@ class EChartsBarPolar extends IPSModuleStrict
             'innerRadiusPercent'          => $this->ReadPropertyInteger($prefix . 'InnerRadiusPercent'),
             'outerRadiusPercent'          => $this->ReadPropertyInteger($prefix . 'OuterRadiusPercent'),
             'startAngle'                  => $this->ReadPropertyInteger($prefix . 'StartAngle'),
+            'angularSpan'                 => $this->ReadPropertyInteger($prefix . 'AngularSpan'),
             'clockwise'                   => $this->ReadPropertyBoolean($prefix . 'Clockwise'),
             'roundCaps'                   => $this->ReadPropertyBoolean($prefix . 'RoundCaps'),
             'valueAxisRangeMode'          => $this->ReadPropertyString($prefix . 'ValueAxisRangeMode'),
