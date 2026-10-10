@@ -13,7 +13,7 @@ const designSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts
 const zoomSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-zoom.js'), 'utf8');
 const patternSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-pattern.js'), 'utf8');
 
-function render(truncated = false, mode = 'symcon', adaptToBackground = false, enableZoom = true, enableImages = false) {
+function render(truncated = false, mode = 'symcon', adaptToBackground = false, enableZoom = true, enableImages = false, width = 750, height = 420) {
     const listeners = {};
     const images = [];
     const scheduled = [];
@@ -21,20 +21,34 @@ function render(truncated = false, mode = 'symcon', adaptToBackground = false, e
     Object.defineProperty(TestImage.prototype, 'src', { set(value) { this.source = value; } });
     const chartElement = {
         hidden: false,
+        clientWidth: width,
+        clientHeight: height,
         addEventListener: (name, listener) => { listeners[name] = listener; },
-        getBoundingClientRect: () => ({ left: 0, width: 750 })
+        getBoundingClientRect: () => ({ left: 0, width })
     };
     const warningElement = { hidden: true, textContent: '' };
     const errorElement = { hidden: true, textContent: '' };
     let option;
     let initCount = 0;
     let updateCount = 0;
+    let resizeCount = 0;
+    let resizeCallback;
+    let chartWidth = width;
+    let chartHeight = height;
     let dispatchedAction;
     const chart = {
         setOption: next => { option = next; updateCount++; },
         getOption: () => option,
+        getWidth: () => chartWidth,
+        getHeight: () => chartHeight,
         dispatchAction: action => { dispatchedAction = action; },
-        clear: () => {}, resize: () => {}, dispose: () => {}
+        clear: () => {},
+        resize: () => {
+            resizeCount++;
+            chartWidth = chartElement.clientWidth;
+            chartHeight = chartElement.clientHeight;
+        },
+        dispose: () => {}
     };
     const palette = {
         background: '#101114', text: '#f4f5f7', muted: '#969aa2', border: '#a5a9b0',
@@ -69,6 +83,10 @@ function render(truncated = false, mode = 'symcon', adaptToBackground = false, e
             }
         },
         echarts: { init: () => { initCount++; return chart; } },
+        ResizeObserver: class {
+            constructor(callback) { resizeCallback = callback; }
+            observe() {}
+        },
         Image: enableImages ? TestImage : undefined,
         setTimeout: callback => { scheduled.push(callback); },
         addEventListener: () => {},
@@ -85,7 +103,7 @@ function render(truncated = false, mode = 'symcon', adaptToBackground = false, e
             'echarts-bar-history-error': errorElement
         })[id]
     };
-    const context = { window, document };
+    const context = { window, document, ResizeObserver: window.ResizeObserver };
     vm.runInNewContext(designSource, context);
     vm.runInNewContext(zoomSource, context);
     vm.runInNewContext(patternSource, context);
@@ -94,9 +112,15 @@ function render(truncated = false, mode = 'symcon', adaptToBackground = false, e
         get option() { return option; },
         get initCount() { return initCount; },
         get updateCount() { return updateCount; },
+        get resizeCount() { return resizeCount; },
         get dispatchedAction() { return dispatchedAction; },
         getState: () => window.SYMC_VISUALIZATION.state,
         listeners, warningElement, window, images,
+        resizeTo: (nextWidth, nextHeight) => {
+            chartElement.clientWidth = nextWidth;
+            chartElement.clientHeight = nextHeight;
+            resizeCallback();
+        },
         flush: () => { while (scheduled.length > 0) { scheduled.shift()(); } }
     };
 }
@@ -106,6 +130,8 @@ assert.ok(ready.option, 'The Historical Bar chart should render.');
 assert.equal(ready.option.xAxis.type, 'time');
 assert.equal(ready.option.dataZoom.length, 2);
 assert.equal(ready.option.dataZoom[0].zoomOnMouseWheel, true);
+assert.equal(ready.option.dataZoom[1].height, 18,
+    'The History zoom slider should remain slim in a regular tile.');
 assert.equal(ready.option.xAxis.min, 1780000000000);
 assert.equal(ready.option.yAxis.type, 'value');
 assert.equal(ready.option.yAxis.name, '°C');
@@ -118,6 +144,58 @@ assert.equal(ready.option.title.textStyle.fontSize, 18);
 assert.deepEqual(Array.from(ready.option.series[0].itemStyle.borderRadius), [6, 6, 0, 0]);
 assert.deepEqual(Array.from(ready.option.series[0].data[0]), [1780000100000, 21.5]);
 assert.equal(ready.warningElement.hidden, true);
+
+const compact = render(false, 'symcon', false, true, false, 433, 213);
+assert.ok(213 - compact.option.grid.top - compact.option.grid.bottom >= 70,
+    'A short BarHistory tile must reserve a readable plotting area (top '
+        + compact.option.grid.top + ', bottom ' + compact.option.grid.bottom + ').');
+assert.equal(compact.option.xAxis.axisLabel.hideOverlap, true,
+    'Dense time labels must not overlap in a narrow tile.');
+assert.ok(compact.option.xAxis.splitNumber <= 3,
+    'The time axis must request fewer ticks when horizontal space is limited.');
+assert.ok(compact.option.dataZoom[1].height <= 14,
+    'The compact zoom slider must not consume the plot height.');
+compact.window.handleMessage({
+    status: 'ready',
+    chart: {
+        ...compact.getState().chart,
+        bar: { ...compact.getState().chart.bar, title: '' },
+        axes: [
+            { unit: '°C', position: 'left', positionIndex: 0 },
+            { unit: '%', position: 'right', positionIndex: 0 }
+        ],
+        series: [
+            { id: 'temperature', label: 'Temperatur', axisIndex: 0, points: [[1780000100, 21.5]] },
+            { id: 'humidity', label: 'Feuchtigkeit', axisIndex: 1, points: [[1780000100, 49]] }
+        ]
+    }
+});
+assert.ok(213 - compact.option.grid.top - compact.option.grid.bottom >= 70,
+    'A short two-axis History tile must keep enough height beneath the legend.');
+assert.equal(compact.option.legend.show, true);
+assert.equal(compact.option.yAxis[0].axisLabel.hideOverlap, true);
+assert.equal(compact.option.yAxis[1].axisLabel.hideOverlap, true);
+const localECharts = path.join(__dirname, '..', '.tools', 'echarts-runtime', 'node_modules', 'echarts');
+if (fs.existsSync(localECharts)) {
+    const echarts = require(localECharts);
+    const actualChart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 433, height: 213 });
+    actualChart.setOption(compact.option);
+    const actualGrid = actualChart.getModel().getComponent('grid').coordinateSystem.getRect();
+    assert.ok(actualGrid.height >= 45,
+        'ECharts must retain a usable plot after reserving axis labels in the short tile.');
+    assert.ok(actualChart.renderToSVGString().includes('<svg'));
+    actualChart.dispose();
+}
+
+const resizedHistory = render();
+resizedHistory.resizeTo(433, 213);
+assert.equal(resizedHistory.resizeCount, 1);
+assert.equal(resizedHistory.updateCount, 2,
+    'A real tile resize must rebuild the responsive History option.');
+assert.ok(213 - resizedHistory.option.grid.top - resizedHistory.option.grid.bottom >= 70);
+resizedHistory.resizeTo(433, 213);
+assert.equal(resizedHistory.updateCount, 2,
+    'An unchanged observer notification must not restart the chart.');
 
 ready.window.handleMessage({
     status: 'ready',

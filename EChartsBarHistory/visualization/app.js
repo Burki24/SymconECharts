@@ -123,12 +123,27 @@
             return { axis: axis, position: position, positionIndex: positionIndex, index: index };
         });
         var chartWidth = Math.max(320, Number(chartElement.clientWidth) || 750);
+        var chartHeight = Math.max(160, Number(chartElement.clientHeight) || 420);
+        var compact = chartHeight < 280;
         var maximumAxisMargin = Math.max(58, Math.min(190, chartWidth * 0.32));
         var maximumSideCount = Math.max(axisCounts.left, axisCounts.right);
         var axisOffsetStep = maximumSideCount > 1
             ? Math.min(54, (maximumAxisMargin - 58) / (maximumSideCount - 1)) : 0;
         var leftMargin = axisCounts.left > 0 ? 52 + axisOffsetStep * (axisCounts.left - 1) : 28;
         var rightMargin = axisCounts.right > 0 ? 52 + axisOffsetStep * (axisCounts.right - 1) : 28;
+        var gridTop = headerInset + (multi ? (bar.title ? (compact ? 39 : 78) : (compact ? 28 : 46))
+            : (bar.title ? (compact ? 32 : 52) : (compact ? 12 : 16)));
+        var gridBottom = zoom ? (compact ? 42 : 70) : (compact ? 32 : 58);
+        var plotWidth = chartWidth - leftMargin - rightMargin;
+        var timeTickCount = Math.max(2, Math.floor(plotWidth / (axisFontSize * 10)));
+        var valueTickCount = Math.max(2, Math.floor((chartHeight - gridTop - gridBottom - 20) / (axisFontSize * 2)));
+        var dataZoom = zoomController.options(zoom, bootstrap.mode, compact ? 4 : 12);
+        if (dataZoom.length > 1) {
+            dataZoom[1].height = compact ? 14 : 18;
+            if (compact) {
+                dataZoom[1].showDetail = false;
+            }
+        }
 
         return {
             backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
@@ -146,12 +161,12 @@
                 text: String(bar.title || ''),
                 left: 'center',
                 top: headerInset,
-                textStyle: { color: titleColor, fontSize: titleFontSize }
+                textStyle: { color: titleColor, fontSize: compact ? Math.min(titleFontSize, 14) : titleFontSize }
             },
             legend: {
                 show: multi,
-                top: headerInset + (bar.title ? 34 : 4),
-                textStyle: { color: colors.text },
+                top: headerInset + (bar.title ? (compact ? 21 : 34) : (compact ? 2 : 4)),
+                textStyle: { color: colors.text, fontSize: compact ? 10 : 12 },
                 data: series.map(function (item, index) { return item.id || 'series-' + index; }),
                 formatter: function (name) {
                     var item = series.find(function (candidate, index) {
@@ -161,9 +176,9 @@
                 }
             },
             grid: {
-                top: headerInset + (multi ? (bar.title ? 78 : 46) : (bar.title ? 52 : 16)),
+                top: gridTop,
                 right: rightMargin,
-                bottom: zoom ? 90 : 58,
+                bottom: gridBottom,
                 left: leftMargin,
                 containLabel: true
             },
@@ -183,9 +198,10 @@
                     })).join('<br>');
                 }
             },
-            dataZoom: zoomController.options(zoom, bootstrap.mode, 12),
+            dataZoom: dataZoom,
             xAxis: {
                 type: 'time',
+                splitNumber: timeTickCount,
                 min: model.range && Number.isFinite(Number(model.range.startTimestamp))
                     ? Number(model.range.startTimestamp) * 1000 : null,
                 max: model.range && Number.isFinite(Number(model.range.endTimestamp))
@@ -193,6 +209,7 @@
                 axisLabel: {
                     color: axisColor,
                     fontSize: axisFontSize,
+                    hideOverlap: true,
                     formatter: function (value) { return formatTimestamp(value, bar.timeAxisLabelFormat || 'auto'); }
                 },
                 axisLine: { lineStyle: { color: axisLineColor } },
@@ -207,11 +224,12 @@
                         ? seriesColors[firstSeries] : axisColor;
                     return {
                         type: 'value',
+                        splitNumber: valueTickCount,
                         name: String(axis.unit || ''),
                         position: entry.position,
                         offset: entry.positionIndex * axisOffsetStep,
                         nameTextStyle: { color: color },
-                        axisLabel: { color: color, fontSize: axisFontSize },
+                        axisLabel: { color: color, fontSize: axisFontSize, hideOverlap: true },
                         axisLine: { show: true, lineStyle: { color: multi ? color : axisLineColor } },
                         axisTick: { show: true, lineStyle: { color: multi ? color : axisLineColor } },
                         splitLine: {
@@ -315,10 +333,16 @@
     };
     if (window.ResizeObserver) {
         new ResizeObserver(function () {
-            echartsDesign.resizeChartIfNeeded(chart, chartElement);
+            if (echartsDesign.resizeChartIfNeeded(chart, chartElement)) {
+                render(currentState);
+            }
         }).observe(chartElement);
     } else {
-        window.addEventListener('resize', function () { if (chart) { chart.resize(); } });
+        window.addEventListener('resize', function () {
+            if (echartsDesign.resizeChartIfNeeded(chart, chartElement)) {
+                render(currentState);
+            }
+        });
     }
     if (bootstrap.mode === 'ipsview') {
         zoomController.attachIPSViewWheel(chartElement, function () { return chart; }, function () {

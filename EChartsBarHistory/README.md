@@ -38,6 +38,9 @@ are not artificially aligned.
 Zoom changes only the visible part of the already loaded time range; it does
 not fetch additional archive points. The selected zoom remains in place during
 normal archive refreshes and resets when the configured time range changes.
+The slider is slim in regular views and slimmer in short tiles. In a short
+tile, the chart also reduces axis ticks and hides overlapping labels to keep
+the bars readable. Enlarging the tile gives the axes more room again.
 
 Each numeric variable ID may be configured only once. The variable ID is used
 internally, never as a chart caption. A configured label is displayed when
