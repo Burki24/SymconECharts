@@ -20,4 +20,20 @@ assert.equal(opacityFromPercent(101, 100), 1, 'Opacity is bounded above.');
 assert.equal(opacityFromPercent('invalid', 25), 0.25, 'Invalid opacity uses the caller default.');
 assert.equal(opacityFromPercent(Infinity, 25), 0.25, 'Non-finite opacity uses the caller default.');
 
-console.log('Shared ECharts design opacity verified.');
+const barOutlineStyle = window.SYMC_ECHARTS_DESIGN.barOutlineStyle;
+assert.equal(barOutlineStyle(0, '#112233', '#778899').borderWidth, 0,
+    'A zero-width outline must leave existing bars unframed.');
+assert.equal(barOutlineStyle(2, '#112233', '#778899').borderColor, '#112233',
+    'A configured outline color must take priority.');
+assert.equal(barOutlineStyle(2, '', '#778899').borderColor, '#778899',
+    'Automatic outline color must follow the active theme.');
+assert.equal(barOutlineStyle(2, '', '#778899').borderWidth, 2,
+    'The configured width must reach ECharts unchanged.');
+assert.equal(barOutlineStyle(-1, '', '#778899').borderWidth, 0,
+    'Negative widths must not create unexpected outlines.');
+assert.equal(barOutlineStyle(Infinity, '', '#778899').borderWidth, 0,
+    'Non-finite widths must not create unexpected outlines.');
+assert.equal(barOutlineStyle(10, '', '#778899').borderWidth, 10,
+    'The shared helper must not impose the Polar module’s width limit on future charts.');
+
+console.log('Shared ECharts design utilities verified.');

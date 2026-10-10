@@ -98,6 +98,8 @@ assert.equal(radial.series[0].data[0].itemStyle.color, '#ff5500');
 assert.equal(radial.series[0].data[1].itemStyle.color, '#abcdef');
 assert.equal(radial.series[0].data[0].itemStyle.opacity, 1,
     'Existing Polar charts must keep fully opaque bars by default.');
+assert.equal(radial.series[0].data[0].itemStyle.borderWidth, 0,
+    'Existing Polar charts must not gain a visible outline by default.');
 assert.equal(radial.angleAxis.startAngle, 90);
 assert.equal(radial.angleAxis.endAngle, undefined, 'Existing full-circle Polar charts must keep their default angle extent.');
 assert.equal(radial.angleAxis.axisLine.show, true, 'Full-circle grid outlines must remain visible.');
@@ -120,6 +122,20 @@ assert.equal(
 assert.match(radial.tooltip.formatter({ dataIndex: 0 }), /&lt;Room&gt;/);
 assert.doesNotMatch(radial.tooltip.formatter({ dataIndex: 0 }), /<Room>/);
 
+window.handleMessage({
+    status: 'ready', chart: {
+        ...state.chart,
+        polar: {
+            ...state.chart.polar,
+            style: { ...state.chart.polar.style, barOutlineWidth: 2, barOutlineColor: '#224466' }
+        }
+    }
+});
+const outlinedRadial = options.at(-1);
+assert.equal(outlinedRadial.series[0].data[0].itemStyle.borderWidth, 2);
+assert.equal(outlinedRadial.series[0].data[0].itemStyle.borderColor, '#224466');
+assert.equal(outlinedRadial.series[0].backgroundStyle.borderWidth, undefined,
+    'The bar outline must not frame background tracks.');
 const positionedRadialOptions = [];
 for (const position of ['insideStart', 'insideEnd']) {
     window.handleMessage({
@@ -168,6 +184,19 @@ const tangentialState = {
 };
 window.handleMessage(tangentialState);
 const tangential = options.at(-1);
+window.handleMessage({
+    status: 'ready', chart: {
+        ...tangentialState.chart,
+        polar: {
+            ...tangentialState.chart.polar,
+            style: { ...tangentialState.chart.polar.style, barOutlineWidth: 3, barOutlineColor: '' }
+        }
+    }
+});
+const outlinedTangential = options.at(-1);
+assert.equal(outlinedTangential.series[0].data[0].itemStyle.borderWidth, 3);
+assert.equal(outlinedTangential.series[0].data[0].itemStyle.borderColor, palette.border,
+    'Automatic outline color must follow the theme on concentric arcs.');
 assert.equal(initialized, 1, 'Live updates must reuse the chart instance.');
 assert.equal(tangential.angleAxis.type, 'value');
 assert.equal(tangential.radiusAxis.type, 'category');
@@ -564,6 +593,23 @@ assert.ok(simulatedTracks.every(track => Math.abs(track.shape.startAngle + Math.
 const localECharts = path.join(__dirname, '..', '.tools', 'echarts-runtime', 'node_modules', 'echarts');
 if (fs.existsSync(localECharts)) {
     const echarts = require(localECharts);
+    for (const [option, expectedColor, expectedWidth] of [
+        [outlinedRadial, '#224466', 2],
+        [outlinedTangential, palette.border, 3]
+    ]) {
+        const outlineChart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 625, height: 560 });
+        outlineChart.setOption(option);
+        outlineChart.renderToSVGString();
+        const outlinedBars = outlineChart.getZr().storage.getDisplayList().filter(
+            element => ['sector', 'sausage'].includes(element.type)
+                && element.style.stroke === expectedColor
+        );
+        assert.equal(outlinedBars.length, 3, 'Both Polar modes must render three outlined bars.');
+        assert.ok(outlinedBars.every(element => element.style.stroke === expectedColor
+            && element.style.lineWidth === expectedWidth),
+        'The bundled ECharts runtime must draw the configured outline on each Polar bar.');
+        outlineChart.dispose();
+    }
     const livePolarElement = { hidden: false, clientWidth: 925, clientHeight: 690 };
     const livePolarError = { hidden: true, textContent: '' };
     const livePolarChart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 925, height: 690 });

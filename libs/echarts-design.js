@@ -57,10 +57,19 @@
         return Math.max(0, Math.min(100, percent)) / 100;
     }
 
+    function barOutlineStyle(width, color, themeBorder) {
+        var pixels = Number(width);
+        if (!Number.isFinite(pixels) || pixels <= 0) {
+            return { borderWidth: 0 };
+        }
+        return { borderWidth: pixels, borderColor: color || themeBorder };
+    }
+
     global.SYMC_ECHARTS_DESIGN = Object.freeze({
         contrastRatio: contrastRatio,
         readableTextColor: readableTextColor,
         relativeLuminance: relativeLuminance,
-        opacityFromPercent: opacityFromPercent
+        opacityFromPercent: opacityFromPercent,
+        barOutlineStyle: barOutlineStyle
     });
 }(window));

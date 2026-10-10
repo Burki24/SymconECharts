@@ -247,7 +247,10 @@
                         id: item.id,
                         name: String(item.label || ''),
                         value: Number(item.value),
-                        itemStyle: { color: fill, opacity: barOpacity },
+                        itemStyle: Object.assign(
+                            { color: fill, opacity: barOpacity },
+                            design.barOutlineStyle(style.barOutlineWidth, style.barOutlineColor, colors.border)
+                        ),
                         label: {
                             distance: valueLabelDistance(index),
                             color: textColor,

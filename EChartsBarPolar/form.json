@@ -348,6 +348,26 @@
                     "type": "RowLayout",
                     "items": [
                         {
+                            "type": "NumberSpinner",
+                            "name": "BarOutlineWidth",
+                            "caption": "Bar outline (0 = off)",
+                            "minimum": 0,
+                            "maximum": 8,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "BarOutlineColor",
+                            "caption": "Outline color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
                             "type": "Select",
                             "name": "ValueAxisRangeMode",
                             "caption": "Value scale",
@@ -701,6 +721,26 @@
                                     "minimum": 0,
                                     "maximum": 100,
                                     "suffix": "%"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "IPSViewBarOutlineWidth",
+                                    "caption": "Bar outline (0 = off)",
+                                    "minimum": 0,
+                                    "maximum": 8,
+                                    "suffix": "px"
+                                },
+                                {
+                                    "type": "SelectColor",
+                                    "name": "IPSViewBarOutlineColor",
+                                    "caption": "Outline color",
+                                    "allowTransparent": true,
+                                    "transparentCaption": "Automatic (theme)"
                                 }
                             ]
                         },

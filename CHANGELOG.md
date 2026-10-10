@@ -21,6 +21,10 @@
 
 ## Neu
 
+- Polar-Balken und konzentrische Bögen können in Kachel und unabhängigem
+  IPSView-Design eine Kontur von 1 bis 8 px mit Theme- oder eigener Farbe
+  erhalten. Standardmäßig bleibt sie ausgeschaltet.
+
 - Die Deckkraft radialer Polar-Balken und konzentrischer Bögen ist im
   Kachel- und unabhängigen IPSView-Designer von 0 bis 100 % einstellbar.
   Hintergrundspuren und Beschriftungen bleiben davon unabhängig.

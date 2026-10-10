@@ -28,6 +28,8 @@
             "Gradient": "Farbverlauf",
             "Gradient end color": "Endfarbe des Farbverlaufs",
             "Bar opacity": "Balkendeckkraft",
+            "Bar outline (0 = off)": "Balkenkontur (0 = aus)",
+            "Outline color": "Konturfarbe",
             "Value scale": "Werteskala",
             "Automatic": "Automatisch",
             "Fixed range": "Fester Bereich",

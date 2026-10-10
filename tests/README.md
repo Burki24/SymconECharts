@@ -41,7 +41,8 @@ groß, überlappungsfrei und innerhalb der verfügbaren Fläche anordnen. Die
 Die übrigen PHP-Vertragstests benötigen kein Node.js; der vollständige
 Qualitätslauf führt zusätzlich die Renderer-Tests mit Node.js aus.
 
-`node tests/echarts_design.js` prüft die gemeinsame Deckkraftumrechnung;
+`node tests/echarts_design.js` prüft die gemeinsame Deckkraftumrechnung und
+die optionale Balkenkontur;
 `node tests/time_series_layout.js` prüft unter anderem Flächen und
 Annotationen. Beide laufen auch im vollständigen Qualitätslauf.
 
