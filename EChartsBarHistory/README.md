@@ -38,6 +38,9 @@ are not artificially aligned.
 Zoom changes only the visible part of the already loaded time range; it does
 not fetch additional archive points. The selected zoom remains in place during
 normal archive refreshes and resets when the configured time range changes.
+If an archive refresh temporarily fails, the last available chart and its
+zoom remain visible. Repeated failures show a warning until data loads again;
+an initial load failure still shows an error instead of an empty chart.
 The slider is slim in regular views, slimmer in short tiles and spaced from
 the lower tile edge. In a short tile, the chart also reduces axis ticks and
 hides overlapping labels to keep the bars readable. Enlarging the tile gives

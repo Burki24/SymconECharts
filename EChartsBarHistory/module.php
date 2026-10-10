@@ -432,6 +432,9 @@ class EChartsBarHistory extends IPSModuleStrict
                 'The Historical Bar values could not be loaded.' => $this->Translate(
                     'The Historical Bar values could not be loaded.'
                 ),
+                'Historical Bar data could not be refreshed. Showing the last available values.' => $this->Translate(
+                    'Historical Bar data could not be refreshed. Showing the last available values.'
+                ),
                 'The selected raw range was truncated by the point budget.' => $this->Translate(
                     'The selected raw range was truncated by the point budget.'
                 )

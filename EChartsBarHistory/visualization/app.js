@@ -9,6 +9,8 @@
     var chart = null;
     var currentState = bootstrap.state || null;
     var currentTheme = null;
+    var archiveRefreshFailures = 0;
+    var archiveLoadError = 'The Historical Bar values could not be loaded.';
     var zoomController = window.SymconEChartsZoom;
     var barPatterns = window.SymconEChartsPattern.create(function () {
         if (typeof window.requestAnimationFrame === 'function') {
@@ -295,6 +297,18 @@
     }
 
     function render(state) {
+        if (state && state.status === 'error' && state.error === archiveLoadError
+            && chart && currentState && currentState.status === 'ready') {
+            archiveRefreshFailures++;
+            if (archiveRefreshFailures > 1) {
+                warningElement.textContent = translate(
+                    'Historical Bar data could not be refreshed. Showing the last available values.'
+                );
+                warningElement.hidden = false;
+            }
+            return;
+        }
+        archiveRefreshFailures = 0;
         var previousRange = currentState && currentState.chart && currentState.chart.range;
         var nextRange = state && state.chart && state.chart.range;
         var savedZoom = zoomController.capture(chart, previousRange, nextRange);

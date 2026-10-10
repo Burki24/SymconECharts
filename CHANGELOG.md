@@ -2,6 +2,10 @@
 
 ## Behoben
 
+- Ein vorübergehend fehlgeschlagenes Archiv-Update lässt BarHistory-Kachel
+  und IPSView nicht mehr verschwinden: Diagramm und Zoom bleiben erhalten.
+  Wiederholte Fehler werden als Hinweis angezeigt, bis neue Daten eintreffen.
+
 - Kurze BarHistory-Kacheln reservieren wieder Platz für Balken und reduzieren
   überlappende Zeit- und Wertachsenbeschriftungen. Die Zoom-Leiste ist in
   normalen Ansichten flacher, in kompakten Kacheln nochmals schmaler und mit

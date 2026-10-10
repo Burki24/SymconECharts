@@ -114,6 +114,7 @@
             "Configure 1 to 16 valid Historical Bar sources.": "1 bis 16 gültige Archivquellen konfigurieren.",
             "Connect an active EChartsGateway.": "Ein aktives EChartsGateway verbinden.",
             "The Historical Bar values could not be loaded.": "Die historischen Balkenwerte konnten nicht geladen werden.",
+            "Historical Bar data could not be refreshed. Showing the last available values.": "Die historischen Balkenwerte konnten nicht aktualisiert werden. Die letzten verfügbaren Werte bleiben sichtbar.",
             "The selected raw range was truncated by the point budget.": "Der gewählte Rohdatenzeitraum wurde durch das Punktbudget gekürzt."
         }
     }

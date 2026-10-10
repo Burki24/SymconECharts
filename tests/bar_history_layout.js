@@ -13,7 +13,7 @@ const designSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts
 const zoomSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-zoom.js'), 'utf8');
 const patternSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-pattern.js'), 'utf8');
 
-function render(truncated = false, mode = 'symcon', adaptToBackground = false, enableZoom = true, enableImages = false, width = 750, height = 420) {
+function render(truncated = false, mode = 'symcon', adaptToBackground = false, enableZoom = true, enableImages = false, width = 750, height = 420, initialState = null) {
     const listeners = {};
     const images = [];
     const scheduled = [];
@@ -32,6 +32,7 @@ function render(truncated = false, mode = 'symcon', adaptToBackground = false, e
     let initCount = 0;
     let updateCount = 0;
     let resizeCount = 0;
+    let clearCount = 0;
     let resizeCallback;
     let chartWidth = width;
     let chartHeight = height;
@@ -42,7 +43,7 @@ function render(truncated = false, mode = 'symcon', adaptToBackground = false, e
         getWidth: () => chartWidth,
         getHeight: () => chartHeight,
         dispatchAction: action => { dispatchedAction = action; },
-        clear: () => {},
+        clear: () => { clearCount++; },
         resize: () => {
             resizeCount++;
             chartWidth = chartElement.clientWidth;
@@ -57,7 +58,7 @@ function render(truncated = false, mode = 'symcon', adaptToBackground = false, e
     const window = {
         SYMC_VISUALIZATION: {
             mode,
-            state: {
+            state: initialState || {
                 status: 'ready',
                 chart: {
                     theme: 'dark',
@@ -113,9 +114,10 @@ function render(truncated = false, mode = 'symcon', adaptToBackground = false, e
         get initCount() { return initCount; },
         get updateCount() { return updateCount; },
         get resizeCount() { return resizeCount; },
+        get clearCount() { return clearCount; },
         get dispatchedAction() { return dispatchedAction; },
         getState: () => window.SYMC_VISUALIZATION.state,
-        listeners, warningElement, window, images,
+        listeners, warningElement, errorElement, chartElement, window, images,
         resizeTo: (nextWidth, nextHeight) => {
             chartElement.clientWidth = nextWidth;
             chartElement.clientHeight = nextHeight;
@@ -298,6 +300,22 @@ retainedZoom.option.dataZoom[0].start = 25;
 retainedZoom.option.dataZoom[0].end = 75;
 const refreshedState = retainedZoom.getState();
 retainedZoom.window.handleMessage({
+    status: 'error', chart: null,
+    error: 'The Historical Bar values could not be loaded.'
+});
+assert.equal(retainedZoom.chartElement.hidden, false,
+    'One failed archive refresh must not remove the last usable chart.');
+assert.equal(retainedZoom.errorElement.hidden, true);
+assert.equal(retainedZoom.warningElement.hidden, true);
+assert.equal(retainedZoom.clearCount, 0);
+retainedZoom.window.handleMessage({
+    status: 'error', chart: null,
+    error: 'The Historical Bar values could not be loaded.'
+});
+assert.equal(retainedZoom.chartElement.hidden, false);
+assert.equal(retainedZoom.warningElement.hidden, false,
+    'Repeated archive failures must be visible without discarding the chart.');
+retainedZoom.window.handleMessage({
     status: 'ready',
     chart: {
         ...refreshedState.chart,
@@ -307,6 +325,8 @@ retainedZoom.window.handleMessage({
 assert.equal(retainedZoom.option.dataZoom[0].start, 25,
     'An archive refresh must keep the selected zoom window.');
 assert.equal(retainedZoom.option.dataZoom[1].end, 75);
+assert.equal(retainedZoom.warningElement.hidden, true,
+    'A successful refresh must clear the temporary archive warning.');
 retainedZoom.window.handleMessage({
     status: 'ready',
     chart: {
@@ -316,6 +336,23 @@ retainedZoom.window.handleMessage({
 });
 assert.equal(retainedZoom.option.dataZoom[0].start, 0,
     'A changed configured range must reset the zoom window.');
+
+const invalidConfiguration = render();
+invalidConfiguration.window.handleMessage({
+    status: 'error', chart: null,
+    error: 'Configure 1 to 16 valid Historical Bar sources.'
+});
+assert.equal(invalidConfiguration.chartElement.hidden, true,
+    'A real configuration error must replace the stale chart.');
+assert.equal(invalidConfiguration.errorElement.hidden, false);
+
+const initialArchiveFailure = render(false, 'symcon', false, true, false, 750, 420, {
+    status: 'error', chart: null,
+    error: 'The Historical Bar values could not be loaded.'
+});
+assert.equal(initialArchiveFailure.chartElement.hidden, true,
+    'An initial archive failure must still show its error.');
+assert.equal(initialArchiveFailure.errorElement.hidden, false);
 
 const ipsViewZoom = render(false, 'ipsview');
 assert.equal(ipsViewZoom.option.dataZoom[0].zoomOnMouseWheel, false);
