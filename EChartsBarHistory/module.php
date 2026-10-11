@@ -394,7 +394,7 @@ class EChartsBarHistory extends IPSModuleStrict
             }
         }
         $barWidth = max(20, min(100, $this->BarPreviewValue($values, 'BarWidthPercent', 'integer', $ipsView)));
-        $opacity = max(10, min(100, $this->BarPreviewValue($values, 'BarOpacityPercent', 'integer', $ipsView))) / 100;
+        $opacity = max(0, min(100, $this->BarPreviewValue($values, 'BarOpacityPercent', 'integer', $ipsView))) / 100;
         $rounded = $this->BarPreviewValue($values, 'RoundedBars', 'boolean', $ipsView)
             ? max(0, min(24, $this->BarPreviewValue($values, 'BarCornerRadius', 'integer', $ipsView)))
             : 0;

@@ -43,6 +43,10 @@ In the Tile and independent IPSView designers, **Animate chart**, **Initial anim
 - Independent IPSView time range, time-axis labels and appearance, or inheritance
   from the tile; optional background color and opacity
 
+The Tile and independent IPSView configuration previews follow the selected
+bar opacity down to 0%, so fully transparent bars disappear there as they do
+in the chart.
+
 Raw mode remains available to the user. The total point budget is shared by
 all sources. If more raw points exist than the per-source allowance, the
 gateway reports the result as truncated instead of silently replacing raw data

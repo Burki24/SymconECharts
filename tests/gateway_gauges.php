@@ -6994,6 +6994,41 @@ try {
 $historyCornerPreview = new EChartsBarHistory();
 $historyCornerPreview->Create();
 $historyCornerPreview->UpdateBarPreviewFromForm(json_encode([
+    'Sources'                        => [['VariableID' => 4711, 'Label' => 'Sensor']],
+    'BarOpacityPercent'              => 0,
+    'IPSViewUseTileDesign'           => false,
+    'IPSViewBarOpacityPercent'       => 5
+], JSON_THROW_ON_ERROR));
+$historyOpacityUpdates = array_slice($historyCornerPreview->GetTestFormUpdates(), -2);
+$historyOpacityTileSvg = base64_decode(substr(
+    $historyOpacityUpdates[0]['Value'],
+    strlen('data:image/svg+xml;base64,')
+), true);
+$historyOpacityIPSViewSvg = base64_decode(substr(
+    $historyOpacityUpdates[1]['Value'],
+    strlen('data:image/svg+xml;base64,')
+), true);
+$historyPreviewBarOpacity = static function (string $svg): ?string
+{
+    $document = new DOMDocument();
+    if (!$document->loadXML($svg, LIBXML_NONET)) {
+        return null;
+    }
+    foreach ($document->getElementsByTagName('rect') as $rect) {
+        if ($rect->hasAttribute('x') && $rect->hasAttribute('y') && $rect->hasAttribute('fill-opacity')) {
+            return $rect->getAttribute('fill-opacity');
+        }
+    }
+
+    return null;
+};
+assertGatewayGauge(
+    is_string($historyOpacityTileSvg) && is_string($historyOpacityIPSViewSvg)
+        && $historyPreviewBarOpacity($historyOpacityTileSvg) === '0'
+        && $historyPreviewBarOpacity($historyOpacityIPSViewSvg) === '0.05',
+    'Historical Bar previews must reflect 0% Tile and 5% independent IPSView bar opacity.'
+);
+$historyCornerPreview->UpdateBarPreviewFromForm(json_encode([
     'Sources'                      => [['VariableID' => 4711, 'Label' => 'Sensor']],
     'RoundedBars'                  => true,
     'BarCornerRadius'              => 0,

@@ -2,6 +2,9 @@
 
 ## Behoben
 
+- Die BarHistory-Formularvorschau zeigt jetzt auch 0–9 % Balkendeckkraft
+  korrekt, getrennt für Kachel und unabhängiges IPSView.
+
 - Die Waterfall-Formularvorschau setzt Werte fallender Balken und negativer
   Endsummen wie die Kachel unter die Säule; bei negativen Wertebereichen bleiben
   Kategorie- und Wertbeschriftungen getrennt.
