@@ -5,8 +5,9 @@ ECharts-Zeitreihe. Eine Instanz verarbeitet eine bis acht eindeutige Quellen,
 bis zu acht Einheitengruppen und rendert eine native Symcon-Kachel sowie
 optional ein eigenständiges IPSView-WebContent-Widget.
 
-Linien und Datenpunkte sowie Flächen und Achsen sind in beiden Designern als
-eigene einklappbare Bereiche angeordnet; die Vorschau folgt darunter.
+Linien und Datenpunkte, Flächen und Achsen sowie Schrift und Farben sind in
+beiden Designern als eigene einklappbare Bereiche angeordnet; die Vorschau
+folgt darunter.
 
 ## Animation
 
@@ -61,7 +62,13 @@ Objektpfade werden dafür nicht ausgewertet.
   Reihenfarbe oder eigener Farbe sowie konfigurierbarer Linienart,
   Linienstärke und Bereichsdeckkraft;
 - farblich gekoppelte Wertachsen: Achsenlinie, Teilstriche, Skalenwerte und
-  Einheit übernehmen die Farbe der ersten zugeordneten Datenreihe;
+  Einheit übernehmen standardmäßig die Farbe der ersten zugeordneten
+  Datenreihe;
+- separat einstellbare Titel-, Legenden-, Achsen- und Rasterfarben sowie
+  Titel-, Legenden- und Achsenschriftgrößen (50 bis 200 Prozent) im Kachel-
+  und unabhängigen IPSView-Designer. **Automatisch** behält Theme-Farben und
+  die farbliche Kopplung der Wertachsen an ihre Datenreihe bei; eine explizite
+  Achsenfarbe gilt für alle Zeit- und Wertachsen;
 - gemeinsames Punktbudget von 200 bis 8.000 Punkten, maximal 2.000 je Reihe;
 - Durchschnitt, Zählersumme, Minimum und Maximum entsprechend dem
   versionierten Archivvertrag;
@@ -70,7 +77,7 @@ Objektpfade werden dafür nicht ausgewertet.
 - der gewählte Zoom-Ausschnitt bleibt bei normalen Datenaktualisierungen erhalten;
 - kollabierter Kacheldesigner mit sofortiger SVG-Vorschau für Theme,
   Legendenposition, Zoom, Linienstärke, Glättung, Datenpunkte,
-  Flächendeckkraft, Raster und Achsensichtbarkeit;
+  Flächendeckkraft, Raster, Achsensichtbarkeit, Schrift und Farben;
 - optionales IPSView-WebContent-Widget mit demselben Datenmodell und wahlweise
   geerbtem oder vollständig unabhängigem Zeitreihendesign sowie einem
   wahlweise von der Kachel abweichenden Zeitraum und Zeitachsenformat;

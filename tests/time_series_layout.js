@@ -200,6 +200,8 @@ const custom = render({
     legendPosition: 'bottom', lineWidthPercent: 150, smoothLines: true,
     showSymbols: true, symbolSizePercent: 125, areaOpacityPercent: 40,
     showGrid: false, showXAxis: false, showYAxis: true,
+    titleFontSizePercent: 150, legendFontSizePercent: 125, axisFontSizePercent: 150,
+    titleColor: '#123456', legendColor: '#234567', axisColor: '#345678', gridColor: '#456789',
     animationEnabled: true, animationEasing: 'bounceOut',
     animationEasingUpdate: 'linear', animationDelay: 120,
     animationDelayUpdate: 240
@@ -242,6 +244,17 @@ duplicateNameSeries.handleMessage({ messageType: 'append', variableID: 4717, tim
 assert.equal(duplicateNameSeries.getLatestOption().series[0].data.length, 1);
 assert.equal(duplicateNameSeries.getLatestOption().series[1].data.length, 2);
 assert.equal(custom.legend.show, true);
+assert.equal(custom.title.textStyle.color, '#123456');
+assert.equal(custom.title.textStyle.fontSize, 27);
+assert.equal(custom.legend.textStyle.color, '#234567');
+assert.equal(custom.legend.textStyle.fontSize, 15);
+assert.equal(custom.xAxis.axisLabel.color, '#345678');
+assert.equal(custom.xAxis.axisLabel.fontSize, 18);
+assert.equal(custom.yAxis[0].axisLabel.color, '#345678');
+assert.equal(custom.yAxis[0].axisLabel.fontSize, 18);
+assert.equal(custom.yAxis[0].nameTextStyle.fontSize, 18);
+assert.ok(custom.grid.left > 58);
+assert.ok(custom.grid.top > 106);
 assert.equal(custom.legend.bottom, 6);
 assert.equal(custom.dataZoom[1].bottom, 38);
 assert.equal(custom.series[0].lineStyle.width, 3);
@@ -265,15 +278,15 @@ assert.equal(custom.series[1].markArea.data[0][0].itemStyle.opacity, 0.25);
 assert.equal(custom.xAxis.axisLine.show, false);
 assert.equal(custom.xAxis.splitLine.show, false);
 assert.equal(custom.yAxis[0].axisLine.show, true);
-assert.equal(custom.yAxis[0].axisLine.lineStyle.color, '#E5754F');
-assert.equal(custom.yAxis[0].axisTick.lineStyle.color, '#E5754F');
-assert.equal(custom.yAxis[0].axisLabel.color, '#E5754F');
-assert.equal(custom.yAxis[0].nameTextStyle.color, '#E5754F');
-assert.equal(custom.yAxis[1].axisLine.lineStyle.color, '#222222');
-assert.equal(custom.yAxis[1].axisTick.lineStyle.color, '#222222');
-assert.equal(custom.yAxis[1].axisLabel.color, '#222222');
-assert.equal(custom.yAxis[1].nameTextStyle.color, '#222222');
+assert.equal(custom.yAxis[0].axisLine.lineStyle.color, '#345678');
+assert.equal(custom.yAxis[0].axisTick.lineStyle.color, '#345678');
+assert.equal(custom.yAxis[0].nameTextStyle.color, '#345678');
+assert.equal(custom.yAxis[1].axisLine.lineStyle.color, '#345678');
+assert.equal(custom.yAxis[1].axisTick.lineStyle.color, '#345678');
+assert.equal(custom.yAxis[1].nameTextStyle.color, '#345678');
 assert.equal(custom.yAxis[0].splitLine.show, false);
+assert.equal(custom.yAxis[0].splitLine.lineStyle.color, '#456789');
+assert.equal(custom.yAxis[0].splitLine.lineStyle.opacity, 1);
 assert.equal(custom.yAxis[0].position, 'left');
 assert.equal(custom.yAxis[1].position, 'right');
 assert.equal(custom.yAxis[0].offset, 0);
@@ -285,6 +298,7 @@ assert.equal(hidden.xAxis.axisLine.show, true);
 assert.equal(hidden.xAxis.splitLine.show, false);
 assert.equal(hidden.yAxis[0].axisLine.show, false);
 assert.equal(hidden.yAxis[0].splitLine.show, true);
+assert.equal(hidden.yAxis[0].splitLine.lineStyle.color, '#444444');
 assert.equal(hidden.yAxis[1].splitLine.show, false);
 assert.equal(hidden.grid.left, 22);
 assert.equal(hidden.grid.right, 22);
@@ -299,6 +313,11 @@ assert.equal(compatible.series[0].areaStyle.opacity, 0.22);
 assert.equal(compatible.xAxis.axisLine.show, true);
 assert.equal(compatible.yAxis[0].axisLine.show, true);
 assert.equal(compatible.xAxis.axisLabel.formatter, undefined);
+assert.equal(compatible.title.textStyle.color, '#ffffff');
+assert.equal(compatible.title.textStyle.fontSize, 18);
+assert.equal(compatible.legend.textStyle.fontSize, undefined);
+assert.equal(compatible.xAxis.axisLabel.fontSize, undefined);
+assert.equal(compatible.yAxis[0].axisLabel.color, '#E5754F');
 
 const gapSeries = [{
     id: 'temperature', variableID: 4711, label: 'Temperature', axisIndex: 0, decimals: 1,

@@ -48,6 +48,11 @@
 
 ## Neu
 
+- TimeSeries bietet in Kachel und unabhängigem IPSView-Designer eigene
+  Schriftgrößen für Titel, Legende und Achsen sowie Farben für Titel, Legende,
+  Achsen und Raster. Automatische Werte erhalten die bisherigen Theme- und
+  Reihenfarben; die Live-Vorschauen berücksichtigen ungespeicherte Änderungen.
+
 - Die Kachel- und IPSView-Designer aller neun Diagrammmodule sind jetzt in
   fachlich benannte, einklappbare Bereiche gegliedert. Die Rubriken sind je
   Chart passend gewählt; bestehende Einstellungen und Vorschauen bleiben

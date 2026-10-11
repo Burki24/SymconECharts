@@ -44,6 +44,13 @@ final class EChartsTimeSeriesPreview
         $showGrid = (bool) ($design['showGrid'] ?? true);
         $showXAxis = (bool) ($design['showXAxis'] ?? true);
         $showYAxis = (bool) ($design['showYAxis'] ?? true);
+        $titleColor = self::DesignColor($design['titleColor'] ?? '', $palette['text']);
+        $legendColor = self::DesignColor($design['legendColor'] ?? '', $palette['text']);
+        $axisColor = self::DesignColor($design['axisColor'] ?? '', '');
+        $gridColor = self::DesignColor($design['gridColor'] ?? '', $palette['track']);
+        $titleFontSize = self::FontSize($design['titleFontSizePercent'] ?? 100, 20);
+        $legendFontSize = self::FontSize($design['legendFontSizePercent'] ?? 100, 13);
+        $axisFontSize = self::FontSize($design['axisFontSizePercent'] ?? 100, 11);
         $timeAxisLabelFormat = in_array($timeAxisLabelFormat, ['auto', 'time', 'date', 'date-time'], true)
             ? $timeAxisLabelFormat
             : 'auto';
@@ -55,7 +62,9 @@ final class EChartsTimeSeriesPreview
             $backgroundOpacityPercent
         );
         $backgroundOpacityPercent = (int) round($background['opacity'] * 100);
-        $plotTop = $legendPosition === 'top' ? 92 : 62;
+        $titleBaseline = max(31, $titleFontSize + 6);
+        $legendTop = max(64, $titleBaseline + $legendFontSize + 6);
+        $plotTop = $legendPosition === 'top' ? max(92, $legendTop + 20) : max(62, $titleBaseline + 16);
         $plotBottom = $legendPosition === 'bottom' ? 300 : 330;
         $content = '';
         $definitions = '';
@@ -64,24 +73,25 @@ final class EChartsTimeSeriesPreview
             for ($index = 0; $index < 5; ++$index) {
                 $y = $plotTop + ($plotBottom - $plotTop) * $index / 4;
                 $content .= '<line x1="70" y1="' . self::N($y) . '" x2="680" y2="' . self::N($y)
-                    . '" stroke="' . SVGPreviewHelper::escape($palette['track']) . '" stroke-width="1"/>';
+                    . '" stroke="' . SVGPreviewHelper::escape($gridColor) . '" stroke-width="1"/>';
             }
         }
         if ($showXAxis) {
             $content .= '<line x1="70" y1="' . self::N($plotBottom) . '" x2="680" y2="'
-                . self::N($plotBottom) . '" stroke="' . SVGPreviewHelper::escape($palette['border']) . '"/>';
+                . self::N($plotBottom) . '" stroke="' . SVGPreviewHelper::escape($axisColor !== '' ? $axisColor : $palette['border']) . '"/>';
             foreach (self::TimeAxisLabels($timeAxisLabelFormat) as $index => $label) {
                 $x = 70 + 305 * $index;
                 $content .= '<text x="' . self::N($x) . '" y="' . self::N($plotBottom + 19)
                     . '" text-anchor="' . ($index === 0 ? 'start' : ($index === 2 ? 'end' : 'middle'))
-                    . '" fill="' . SVGPreviewHelper::escape($palette['muted']) . '" font-size="11">'
+                    . '" fill="' . SVGPreviewHelper::escape($axisColor !== '' ? $axisColor : $palette['muted'])
+                    . '" font-size="' . $axisFontSize . '">'
                     . SVGPreviewHelper::escape($label) . '</text>';
             }
         }
         if ($showYAxis) {
             $content .= '<line x1="70" y1="' . self::N($plotTop) . '" x2="70" y2="'
                 . self::N($plotBottom) . '" stroke="'
-                . SVGPreviewHelper::escape($effectiveColors[0] ?? $palette['border']) . '"/>';
+                . SVGPreviewHelper::escape($axisColor !== '' ? $axisColor : ($effectiveColors[0] ?? $palette['border'])) . '"/>';
         }
 
         $annotationAreas = '';
@@ -211,7 +221,7 @@ final class EChartsTimeSeriesPreview
         $content .= $annotationLines;
 
         if ($legendPosition !== 'hidden') {
-            $legendY = $legendPosition === 'bottom' ? 352 : 64;
+            $legendY = $legendPosition === 'bottom' ? 352 : $legendTop;
             $legendX = 80.0;
             foreach ($series as $index => $item) {
                 $color = $effectiveColors[$index];
@@ -220,9 +230,9 @@ final class EChartsTimeSeriesPreview
                     . '" x2="' . self::N($legendX + 22) . '" y2="' . self::N($legendY)
                     . '" stroke="' . SVGPreviewHelper::escape($color) . '" stroke-width="3"/>';
                 $content .= '<text x="' . self::N($legendX + 29) . '" y="' . self::N($legendY + 5)
-                    . '" fill="' . SVGPreviewHelper::escape($palette['text']) . '" font-size="13">'
+                    . '" fill="' . SVGPreviewHelper::escape($legendColor) . '" font-size="' . $legendFontSize . '">'
                     . SVGPreviewHelper::escape($label) . '</text>';
-                $legendX += min(190.0, 65.0 + strlen($label) * 7.0);
+                $legendX += min(190.0, 65.0 + strlen($label) * 7.0 * $legendFontSize / 13);
             }
         }
 
@@ -235,14 +245,25 @@ final class EChartsTimeSeriesPreview
             . ' data-background-opacity="' . $backgroundOpacityPercent . '"'
             . ' data-area-opacity="' . self::N($areaOpacity) . '"'
             . ' data-axis-color="'
-            . SVGPreviewHelper::escape($effectiveColors[0] ?? $palette['border']) . '">'
+            . SVGPreviewHelper::escape($axisColor !== '' ? $axisColor : ($effectiveColors[0] ?? $palette['border'])) . '">'
             . '<rect width="750" height="390" rx="18" fill="' . SVGPreviewHelper::escape($background['color']) . '"'
             . ($adaptToBackground ? ' fill-opacity="' . self::N($backgroundOpacityPercent / 100) . '"' : '') . '/>'
             . ($definitions !== '' ? '<defs>' . $definitions . '</defs>' : '')
-            . '<text x="375" y="31" fill="' . SVGPreviewHelper::escape($palette['text'])
-            . '" font-size="20" font-weight="600" text-anchor="middle">'
+            . '<text x="375" y="' . $titleBaseline . '" fill="' . SVGPreviewHelper::escape($titleColor)
+            . '" font-size="' . $titleFontSize . '" font-weight="600" text-anchor="middle">'
             . SVGPreviewHelper::escape(trim($title) !== '' ? $title : 'Time Series') . '</text>'
             . $content . '</svg>';
+    }
+
+    private static function DesignColor(mixed $value, string $fallback): string
+    {
+        return is_string($value) && preg_match('/^#[0-9A-F]{6}$/i', $value) === 1 ? $value : $fallback;
+    }
+
+    private static function FontSize(mixed $value, int $base): int
+    {
+        $percent = is_numeric($value) ? (int) $value : 100;
+        return (int) round($base * max(50, min(200, $percent)) / 100);
     }
 
     /** @return list<string> */

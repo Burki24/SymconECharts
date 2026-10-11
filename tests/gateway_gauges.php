@@ -3216,6 +3216,13 @@ $timeSeries->SetTestProperty('AreaOpacityPercent', 40);
 $timeSeries->SetTestProperty('ShowGrid', false);
 $timeSeries->SetTestProperty('ShowXAxis', false);
 $timeSeries->SetTestProperty('ShowYAxis', true);
+$timeSeries->SetTestProperty('TitleFontSizePercent', 125);
+$timeSeries->SetTestProperty('LegendFontSizePercent', 110);
+$timeSeries->SetTestProperty('AxisFontSizePercent', 150);
+$timeSeries->SetTestProperty('TitleColor', 0x123456);
+$timeSeries->SetTestProperty('LegendColor', 0x234567);
+$timeSeries->SetTestProperty('AxisColor', 0x345678);
+$timeSeries->SetTestProperty('GridColor', 0x456789);
 $timeSeries->SetTestProperty('EnableIPSView', true);
 $timeSeries->ApplyChanges();
 $timeSeriesData = json_decode($timeSeries->GetTimeSeriesData(), true, 512, JSON_THROW_ON_ERROR);
@@ -3280,7 +3287,14 @@ assertGatewayGauge(
             'areaOpacityPercent'      => 40,
             'showGrid'                => false,
             'showXAxis'               => false,
-            'showYAxis'               => true
+            'showYAxis'               => true,
+            'titleFontSizePercent'    => 125,
+            'legendFontSizePercent'   => 110,
+            'axisFontSizePercent'     => 150,
+            'titleColor'              => '#123456',
+            'legendColor'             => '#234567',
+            'axisColor'               => '#345678',
+            'gridColor'               => '#456789'
         ],
     'Time Series must build the accepted positioned-axis aggregated chart model.'
 );
@@ -3322,6 +3336,9 @@ assertGatewayGauge(
         && str_contains($timeSeriesForm, 'IPSViewBackgroundColor')
         && str_contains($timeSeriesForm, 'IPSViewBackgroundOpacityPercent')
         && str_contains($timeSeriesForm, 'IPSViewTimeSeriesPreview')
+        && str_contains($timeSeriesForm, 'IPSViewTitleFontSizePercent')
+        && str_contains($timeSeriesForm, 'IPSViewLegendColor')
+        && str_contains($timeSeriesForm, 'Typography and colors')
         && str_contains($timeSeriesForm, 'data:image/svg+xml;base64,'),
     'Time Series form must provide axis positioning, diagnostics and separate live Tile/IPSView previews.'
 );
@@ -3374,17 +3391,24 @@ $timeSeries->UpdateTimeSeriesPreviewFromForm(json_encode([
         'LineWidthPercent' => 100,
         'OpacityPercent'   => 18
     ]],
-    'EChartsTheme'        => 'dark',
-    'LegendPosition'      => 'hidden',
-    'LineWidthPercent'    => 80,
-    'SmoothLines'         => false,
-    'ShowSymbols'         => true,
-    'SymbolSizePercent'   => 150,
-    'AreaOpacityPercent'  => 55,
-    'ShowGrid'            => true,
-    'ShowXAxis'           => true,
-    'ShowYAxis'           => false,
-    'TimeAxisLabelFormat' => 'date'
+    'EChartsTheme'          => 'dark',
+    'LegendPosition'        => 'hidden',
+    'LineWidthPercent'      => 80,
+    'SmoothLines'           => false,
+    'ShowSymbols'           => true,
+    'SymbolSizePercent'     => 150,
+    'AreaOpacityPercent'    => 55,
+    'ShowGrid'              => true,
+    'ShowXAxis'             => true,
+    'ShowYAxis'             => false,
+    'TitleFontSizePercent'  => 150,
+    'LegendFontSizePercent' => 125,
+    'AxisFontSizePercent'   => 175,
+    'TitleColor'            => 0xABCDEF,
+    'LegendColor'           => 0x123456,
+    'AxisColor'             => 0x234567,
+    'GridColor'             => 0x345678,
+    'TimeAxisLabelFormat'   => 'date'
 ], JSON_THROW_ON_ERROR));
 $timeSeriesPreviewUpdates = $timeSeries->GetTestFormUpdates();
 $timeSeriesPreviewFields = array_column(array_slice($timeSeriesPreviewUpdates, -2), 'Field');
@@ -3406,8 +3430,10 @@ assertGatewayGauge(
         && str_contains($timeSeriesPreviewSvg, 'data-show-symbols="true"')
         && str_contains($timeSeriesPreviewSvg, 'data-time-axis-label-format="date"')
         && str_contains($timeSeriesPreviewSvg, 'data-area-opacity="0.55"')
-        && str_contains($timeSeriesPreviewSvg, 'data-axis-color="#E5754F"')
+        && str_contains($timeSeriesPreviewSvg, 'data-axis-color="#234567"')
         && str_contains($timeSeriesPreviewSvg, 'data-annotation-type="line"')
+        && str_contains($timeSeriesPreviewSvg, 'fill="#ABCDEF" font-size="30"')
+        && str_contains($timeSeriesPreviewSvg, 'stroke="#345678"')
         && str_contains($timeSeriesPreviewSvg, 'Preview target'),
     'Time Series Tile and IPSView previews must react immediately to unpersisted source and design values.'
 );
@@ -3433,6 +3459,7 @@ assertGatewayGauge(
         && str_contains($inheritedTimeSeriesIPSView, '"timeAxisLabelFormat":"date-time"')
         && str_contains($inheritedTimeSeriesIPSView, '"legendPosition":"bottom"')
         && str_contains($inheritedTimeSeriesIPSView, '"lineWidthPercent":150')
+        && str_contains($inheritedTimeSeriesIPSView, '"titleColor":"#123456"')
         && strlen($inheritedTimeSeriesIPSView) < SYMCON_OUTPUT_BUFFER_LIMIT,
     'Time Series must publish an optional IPSView WebContent page that inherits the Tile design.'
 );
@@ -3456,6 +3483,13 @@ $timeSeries->SetTestProperty('IPSViewAreaOpacityPercent', 10);
 $timeSeries->SetTestProperty('IPSViewShowGrid', true);
 $timeSeries->SetTestProperty('IPSViewShowXAxis', true);
 $timeSeries->SetTestProperty('IPSViewShowYAxis', false);
+$timeSeries->SetTestProperty('IPSViewTitleFontSizePercent', 80);
+$timeSeries->SetTestProperty('IPSViewLegendFontSizePercent', 90);
+$timeSeries->SetTestProperty('IPSViewAxisFontSizePercent', 110);
+$timeSeries->SetTestProperty('IPSViewTitleColor', 0xABCDEF);
+$timeSeries->SetTestProperty('IPSViewLegendColor', 0xBCDEFA);
+$timeSeries->SetTestProperty('IPSViewAxisColor', 0xCDEFAB);
+$timeSeries->SetTestProperty('IPSViewGridColor', 0xDEFABC);
 $timeSeries->UpdateTimeSeriesPreviewFromForm(json_encode([
     'Title'                     => 'Independent IPSView preview',
     'Sources'                   => [[
@@ -3484,7 +3518,14 @@ $timeSeries->UpdateTimeSeriesPreviewFromForm(json_encode([
     'IPSViewAreaOpacityPercent'       => 10,
     'IPSViewShowGrid'                 => true,
     'IPSViewShowXAxis'                => true,
-    'IPSViewShowYAxis'                => false
+    'IPSViewShowYAxis'                => false,
+    'IPSViewTitleFontSizePercent'     => 80,
+    'IPSViewLegendFontSizePercent'    => 90,
+    'IPSViewAxisFontSizePercent'      => 110,
+    'IPSViewTitleColor'               => 0xABCDEF,
+    'IPSViewLegendColor'              => 0xBCDEFA,
+    'IPSViewAxisColor'                => 0xCDEFAB,
+    'IPSViewGridColor'                => 0xDEFABC
 ], JSON_THROW_ON_ERROR));
 $independentPreviewUpdates = $timeSeries->GetTestFormUpdates();
 $independentPreviewUpdate = end($independentPreviewUpdates);
@@ -3505,7 +3546,8 @@ assertGatewayGauge(
         && str_contains($independentPreviewSvg, 'fill="#6B4423"')
         && str_contains($independentPreviewSvg, 'fill-opacity="0.35"')
         && str_contains($independentPreviewSvg, 'data-area-opacity="0.1"')
-        && str_contains($independentPreviewSvg, 'stroke-width="2"'),
+        && str_contains($independentPreviewSvg, 'stroke-width="2"')
+        && str_contains($independentPreviewSvg, 'fill="#ABCDEF" font-size="16"'),
     'Time Series preview must render unsaved independent IPSView design values.'
 );
 $timeSeries->ApplyChanges();
@@ -3549,7 +3591,12 @@ $rawTimeSeriesData = json_decode($rawTimeSeries->GetTimeSeriesData(), true, 512,
 assertGatewayGauge(
     $rawTimeSeriesData['range']['aggregationLevel'] === null
         && $rawTimeSeriesData['series'][0]['effectiveReducer'] === 'raw'
-        && $rawTimeSeriesData['series'][0]['points'] === [],
+        && $rawTimeSeriesData['series'][0]['points'] === []
+        && $rawTimeSeriesData['chart']['design']['titleFontSizePercent'] === 100
+        && $rawTimeSeriesData['chart']['design']['legendFontSizePercent'] === 100
+        && $rawTimeSeriesData['chart']['design']['axisFontSizePercent'] === 100
+        && $rawTimeSeriesData['chart']['design']['titleColor'] === ''
+        && $rawTimeSeriesData['chart']['design']['axisColor'] === '',
     'Explicit raw mode must preserve logged values without applying a reducer.'
 );
 $rawTimeSeries->MessageSink(1780000500, 4711, VM_UPDATE, []);
@@ -4112,6 +4159,20 @@ assertGatewayGauge(
     $invalidDesignTimeSeries->GetTestStatus() === 202,
     'Time Series must reject unsupported tile design values.'
 );
+$invalidDesignTimeSeries->SetTestProperty('LegendPosition', 'top');
+$invalidDesignTimeSeries->SetTestProperty('TitleFontSizePercent', 201);
+$invalidDesignTimeSeries->ApplyChanges();
+assertGatewayGauge($invalidDesignTimeSeries->GetTestStatus() === 202, 'Time Series must reject oversized title fonts.');
+$invalidDesignTimeSeries->SetTestProperty('TitleFontSizePercent', 100);
+$invalidDesignTimeSeries->SetTestProperty('GridColor', 0x1000000);
+$invalidDesignTimeSeries->ApplyChanges();
+assertGatewayGauge($invalidDesignTimeSeries->GetTestStatus() === 202, 'Time Series must reject invalid grid colors.');
+$invalidDesignTimeSeries->SetTestProperty('GridColor', -1);
+$invalidDesignTimeSeries->SetTestProperty('EnableIPSView', true);
+$invalidDesignTimeSeries->SetTestProperty('IPSViewUseTileDesign', false);
+$invalidDesignTimeSeries->SetTestProperty('IPSViewAxisFontSizePercent', 49);
+$invalidDesignTimeSeries->ApplyChanges();
+assertGatewayGauge($invalidDesignTimeSeries->GetTestStatus() === 202, 'Time Series must validate independent IPSView typography.');
 
 $invalidSourceDesignTimeSeries = new EChartsTimeSeries();
 $invalidSourceDesignTimeSeries->Create();
@@ -6074,7 +6135,7 @@ $expectedDesignerSections = [
     EChartsGaugeMulti::class       => ['Fine tuning', 'Pointer and hub', 'Scale and colors', 'Dial plate'],
     EChartsGaugeTacho::class       => ['Fine tuning', 'Pointer and hub', 'Scale and colors', 'Dial plate'],
     EChartsGaugeChronograph::class => ['Fine tuning', 'Pointer and hub', 'Scale and colors', 'Dial plate'],
-    EChartsTimeSeries::class       => ['Lines and symbols', 'Area and axes'],
+    EChartsTimeSeries::class       => ['Lines and symbols', 'Area and axes', 'Typography and colors'],
     EChartsBarCategory::class      => ['Bar layout and order', 'Labels and geometry', 'Bar fill and pattern'],
     EChartsBarHistory::class       => ['Axes and display', 'Bar fill and pattern', 'Typography and colors'],
     EChartsBarWaterfall::class     => ['Labels and geometry', 'Step colors'],

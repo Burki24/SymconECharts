@@ -90,12 +90,16 @@ class EChartsTimeSeries extends IPSModuleStrict
         'GapDetectionMode', 'GapThresholdMinutes',
         'LineWidthPercent', 'SmoothLines', 'ShowSymbols', 'SymbolSizePercent',
         'AreaOpacityPercent', 'ShowGrid', 'ShowXAxis', 'ShowYAxis',
+        'TitleFontSizePercent', 'LegendFontSizePercent', 'AxisFontSizePercent',
+        'TitleColor', 'LegendColor', 'AxisColor', 'GridColor',
         'IPSViewUseTileDesign', 'IPSViewEChartsTheme', 'IPSViewLegendPosition', 'IPSViewEnableZoom',
         'IPSViewAnimationEnabled', 'IPSViewAnimationDuration', 'IPSViewAnimationDurationUpdate',
         'IPSViewAnimationEasing', 'IPSViewAnimationEasingUpdate',
         'IPSViewAnimationDelay', 'IPSViewAnimationDelayUpdate',
         'IPSViewLineWidthPercent', 'IPSViewSmoothLines', 'IPSViewShowSymbols', 'IPSViewSymbolSizePercent',
         'IPSViewAreaOpacityPercent', 'IPSViewShowGrid', 'IPSViewShowXAxis', 'IPSViewShowYAxis',
+        'IPSViewTitleFontSizePercent', 'IPSViewLegendFontSizePercent', 'IPSViewAxisFontSizePercent',
+        'IPSViewTitleColor', 'IPSViewLegendColor', 'IPSViewAxisColor', 'IPSViewGridColor',
         'IPSViewUseTileTimeSettings', 'IPSViewRange', 'IPSViewCustomRangeValue', 'IPSViewCustomRangeUnit',
         'IPSViewTimeAxisLabelFormat',
         'IPSViewAdaptToBackground', 'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent'
@@ -117,7 +121,14 @@ class EChartsTimeSeries extends IPSModuleStrict
         'AreaOpacityPercent'      => 'integer',
         'ShowGrid'                => 'boolean',
         'ShowXAxis'               => 'boolean',
-        'ShowYAxis'               => 'boolean'
+        'ShowYAxis'               => 'boolean',
+        'TitleFontSizePercent'    => 'integer',
+        'LegendFontSizePercent'   => 'integer',
+        'AxisFontSizePercent'     => 'integer',
+        'TitleColor'              => 'integer',
+        'LegendColor'             => 'integer',
+        'AxisColor'               => 'integer',
+        'GridColor'               => 'integer'
     ];
 
     public function Create(): void
@@ -150,6 +161,12 @@ class EChartsTimeSeries extends IPSModuleStrict
         $this->RegisterPropertyBoolean('ShowGrid', true);
         $this->RegisterPropertyBoolean('ShowXAxis', true);
         $this->RegisterPropertyBoolean('ShowYAxis', true);
+        foreach (['TitleFontSizePercent', 'LegendFontSizePercent', 'AxisFontSizePercent'] as $name) {
+            $this->RegisterPropertyInteger($name, 100);
+        }
+        foreach (['TitleColor', 'LegendColor', 'AxisColor', 'GridColor'] as $name) {
+            $this->RegisterPropertyInteger($name, -1);
+        }
         $this->RegisterIPSViewHTMLPageProperties();
         $this->RegisterEChartsIPSViewTransport();
         $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
@@ -167,15 +184,17 @@ class EChartsTimeSeries extends IPSModuleStrict
         $this->RegisterPropertyString('IPSViewEChartsTheme', EChartsAsset::THEME_AUTO);
         foreach (self::DESIGN_PROPERTY_TYPES as $name => $type) {
             $default = match ($name) {
-                'LegendPosition'                                  => 'top',
-                'LineWidthPercent', 'SymbolSizePercent'           => 100,
-                'AreaOpacityPercent'                              => 22,
-                'SmoothLines', 'ShowSymbols', 'AnimationEnabled'  => false,
-                'AnimationDuration'                               => 350,
-                'AnimationDurationUpdate'                         => 500,
-                'AnimationEasing', 'AnimationEasingUpdate'        => 'cubicInOut',
-                'AnimationDelay', 'AnimationDelayUpdate'          => 0,
-                default                                           => true
+                'LegendPosition'                                                       => 'top',
+                'LineWidthPercent', 'SymbolSizePercent'                                => 100,
+                'TitleFontSizePercent', 'LegendFontSizePercent', 'AxisFontSizePercent' => 100,
+                'TitleColor', 'LegendColor', 'AxisColor', 'GridColor'                  => -1,
+                'AreaOpacityPercent'                                                   => 22,
+                'SmoothLines', 'ShowSymbols', 'AnimationEnabled'                       => false,
+                'AnimationDuration'                                                    => 350,
+                'AnimationDurationUpdate'                                              => 500,
+                'AnimationEasing', 'AnimationEasingUpdate'                             => 'cubicInOut',
+                'AnimationDelay', 'AnimationDelayUpdate'                               => 0,
+                default                                                                => true
             };
             match ($type) {
                 'string'  => $this->RegisterPropertyString('IPSView' . $name, $default),
@@ -269,7 +288,8 @@ class EChartsTimeSeries extends IPSModuleStrict
         $form = $this->WithIPSViewDesignFormState($form, 'ECTS');
         $form = EChartsDesignerSections::Group($form, [
             ['caption' => 'Lines and symbols', 'start' => 'LineWidthPercent'],
-            ['caption' => 'Area and axes', 'start' => 'AreaOpacityPercent']
+            ['caption' => 'Area and axes', 'start' => 'AreaOpacityPercent'],
+            ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
         ]);
 
         return $this->EncodeConfigurationForm($form);
@@ -1351,20 +1371,27 @@ class EChartsTimeSeries extends IPSModuleStrict
         $this->WriteAttributeString('RegisteredSourceVariableIDs', json_encode($current, JSON_THROW_ON_ERROR));
     }
 
-    /** @return array{legendPosition:string,lineWidthPercent:int,smoothLines:bool,showSymbols:bool,symbolSizePercent:int,areaOpacityPercent:int,showGrid:bool,showXAxis:bool,showYAxis:bool} */
+    /** @return array<string,mixed> */
     private function ReadTimeSeriesDesign(string $prefix = ''): array
     {
         return [
             ...$this->ReadAnimationStyle($prefix),
-            'legendPosition'     => $this->ReadPropertyString($prefix . 'LegendPosition'),
-            'lineWidthPercent'   => $this->ReadPropertyInteger($prefix . 'LineWidthPercent'),
-            'smoothLines'        => $this->ReadPropertyBoolean($prefix . 'SmoothLines'),
-            'showSymbols'        => $this->ReadPropertyBoolean($prefix . 'ShowSymbols'),
-            'symbolSizePercent'  => $this->ReadPropertyInteger($prefix . 'SymbolSizePercent'),
-            'areaOpacityPercent' => $this->ReadPropertyInteger($prefix . 'AreaOpacityPercent'),
-            'showGrid'           => $this->ReadPropertyBoolean($prefix . 'ShowGrid'),
-            'showXAxis'          => $this->ReadPropertyBoolean($prefix . 'ShowXAxis'),
-            'showYAxis'          => $this->ReadPropertyBoolean($prefix . 'ShowYAxis')
+            'legendPosition'        => $this->ReadPropertyString($prefix . 'LegendPosition'),
+            'lineWidthPercent'      => $this->ReadPropertyInteger($prefix . 'LineWidthPercent'),
+            'smoothLines'           => $this->ReadPropertyBoolean($prefix . 'SmoothLines'),
+            'showSymbols'           => $this->ReadPropertyBoolean($prefix . 'ShowSymbols'),
+            'symbolSizePercent'     => $this->ReadPropertyInteger($prefix . 'SymbolSizePercent'),
+            'areaOpacityPercent'    => $this->ReadPropertyInteger($prefix . 'AreaOpacityPercent'),
+            'showGrid'              => $this->ReadPropertyBoolean($prefix . 'ShowGrid'),
+            'showXAxis'             => $this->ReadPropertyBoolean($prefix . 'ShowXAxis'),
+            'showYAxis'             => $this->ReadPropertyBoolean($prefix . 'ShowYAxis'),
+            'titleFontSizePercent'  => $this->ReadPropertyInteger($prefix . 'TitleFontSizePercent'),
+            'legendFontSizePercent' => $this->ReadPropertyInteger($prefix . 'LegendFontSizePercent'),
+            'axisFontSizePercent'   => $this->ReadPropertyInteger($prefix . 'AxisFontSizePercent'),
+            'titleColor'            => $this->OptionalDesignColor($prefix . 'TitleColor'),
+            'legendColor'           => $this->OptionalDesignColor($prefix . 'LegendColor'),
+            'axisColor'             => $this->OptionalDesignColor($prefix . 'AxisColor'),
+            'gridColor'             => $this->OptionalDesignColor($prefix . 'GridColor')
         ];
     }
 
@@ -1382,6 +1409,13 @@ class EChartsTimeSeries extends IPSModuleStrict
             'ShowGrid'                => 'showGrid',
             'ShowXAxis'               => 'showXAxis',
             'ShowYAxis'               => 'showYAxis',
+            'TitleFontSizePercent'    => 'titleFontSizePercent',
+            'LegendFontSizePercent'   => 'legendFontSizePercent',
+            'AxisFontSizePercent'     => 'axisFontSizePercent',
+            'TitleColor'              => 'titleColor',
+            'LegendColor'             => 'legendColor',
+            'AxisColor'               => 'axisColor',
+            'GridColor'               => 'gridColor',
             'AnimationEnabled'        => 'animationEnabled',
             'AnimationDuration'       => 'animationDuration',
             'AnimationDurationUpdate' => 'animationDurationUpdate',
@@ -1391,7 +1425,9 @@ class EChartsTimeSeries extends IPSModuleStrict
             'AnimationDelayUpdate'    => 'animationDelayUpdate'
         ] as $property => $key) {
             if (array_key_exists($prefix . $property, $values)) {
-                $design[$key] = $values[$prefix . $property];
+                $design[$key] = str_ends_with($property, 'Color')
+                    ? self::DesignColor((int) $values[$prefix . $property])
+                    : $values[$prefix . $property];
             }
         }
 
@@ -1622,7 +1658,35 @@ class EChartsTimeSeries extends IPSModuleStrict
             && $this->ReadPropertyInteger($prefix . 'SymbolSizePercent') >= 50
             && $this->ReadPropertyInteger($prefix . 'SymbolSizePercent') <= 200
             && $this->ReadPropertyInteger($prefix . 'AreaOpacityPercent') >= 0
-            && $this->ReadPropertyInteger($prefix . 'AreaOpacityPercent') <= 100;
+            && $this->ReadPropertyInteger($prefix . 'AreaOpacityPercent') <= 100
+            && $this->IsValidTimeSeriesTypography($prefix);
+    }
+
+    private function IsValidTimeSeriesTypography(string $prefix): bool
+    {
+        foreach (['TitleFontSizePercent', 'LegendFontSizePercent', 'AxisFontSizePercent'] as $name) {
+            $value = $this->ReadPropertyInteger($prefix . $name);
+            if ($value < 50 || $value > 200) {
+                return false;
+            }
+        }
+        foreach (['TitleColor', 'LegendColor', 'AxisColor', 'GridColor'] as $name) {
+            $value = $this->ReadPropertyInteger($prefix . $name);
+            if ($value < -1 || $value > 0xFFFFFF) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private function OptionalDesignColor(string $name): string
+    {
+        return self::DesignColor($this->ReadPropertyInteger($name));
+    }
+
+    private static function DesignColor(int $value): string
+    {
+        return $value < 0 || $value > 0xFFFFFF ? '' : EChartsAsset::ColorToHex($value);
     }
 
     private function IPSViewThemeCSS(): string

@@ -54,3 +54,14 @@ oder Prozentwerte setzen die Instanz in den vorhandenen Konfigurationsfehler
 Die Designerlogik bleibt familienbezogen im Zeitreihenmodul. Nur die bereits
 belegte, diagrammunabhängige SVG-Daten-URI- und Formularinfrastruktur wird aus
 `Symcon_ModuleHelper` wiederverwendet.
+
+## Additive Erweiterung (2026-10-11)
+
+Beide Ausgabewege erhalten die Konfiguration von Titel-, Legenden- und
+Achsen-Schriftgröße (50–200 Prozent) sowie von Titel-, Legenden-, Achsen- und
+Rasterfarbe. Die Farben besitzen den automatischen Wert `-1`; er erhält die
+bisherige Theme-Farbgebung und die Kopplung der Wertachsen an ihre erste
+zugeordnete Datenreihe. Eine explizite Achsenfarbe überschreibt die
+Zeit- und Wertachsen gemeinsam. Die sieben Properties bleiben je Ausgabeweg
+getrennt und folgen der bestehenden IPSView-Designvererbung. Ihr Default
+ändert weder bestehende Konfigurationen noch die bisherige Darstellung.

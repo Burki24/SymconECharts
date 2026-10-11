@@ -83,7 +83,8 @@ Folgende Module sind enthalten:
   oder explizit links/rechts angeordnete Einheitengruppen, Punktbudget,
   konfigurierbare Unterbrechungen bei zeitlichen Datenlücken, Tooltip und einen
   eigenen Kacheldesigner für Legende, Zoom,
-  Linien, Flächen, Raster und Achsen in einer nativen Kachel bereit. Ein
+  Linien, Flächen, Raster, Achsen, Schriftgrößen und Farben in einer nativen
+  Kachel bereit. Ein
   eigener Echtzeitmodus zeichnet auch nicht archivierte Variablen ab dem
   Öffnen der Kachel fort. Optional kann jede Reihe Linie, Datenpunkte und
   Flächenfüllung einschließlich Verlauf oder sicher importiertem SVG-Muster

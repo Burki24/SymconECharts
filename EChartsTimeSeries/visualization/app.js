@@ -157,8 +157,32 @@
         var lineWidth = 2 * Math.max(50, Math.min(200, Number(design.lineWidthPercent) || 100)) / 100;
         var symbolSize = 6 * Math.max(50, Math.min(200, Number(design.symbolSizePercent) || 100)) / 100;
         var areaOpacity = echartsDesign.opacityFromPercent(design.areaOpacityPercent, 22);
+        function designColor(value, fallback) {
+            return typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value) ? value : fallback;
+        }
+        function fontSize(value, base) {
+            var percent = Number(value);
+            return Math.round(base * (Number.isFinite(percent) && percent >= 50 && percent <= 200 ? percent : 100) / 100);
+        }
+        var titleColor = designColor(design.titleColor, colors.text);
+        var legendColor = designColor(design.legendColor, colors.text);
+        var configuredAxisColor = designColor(design.axisColor, '');
+        var configuredGridColor = designColor(design.gridColor, '');
+        var gridColor = configuredGridColor || colors.track || colors.border;
+        var titleFontSize = fontSize(design.titleFontSizePercent, 18);
+        var legendFontSize = fontSize(design.legendFontSizePercent, 12);
+        var axisFontSize = fontSize(design.axisFontSizePercent, 12);
+        var legendFontOverride = Number(design.legendFontSizePercent) >= 50
+            && Number(design.legendFontSizePercent) <= 200
+            && Number(design.legendFontSizePercent) !== 100;
+        var axisFontOverride = Number(design.axisFontSizePercent) >= 50
+            && Number(design.axisFontSizePercent) <= 200
+            && Number(design.axisFontSizePercent) !== 100;
         var titleVisible = Boolean(model.chart && model.chart.title);
-        var gridTop = headerInset + (legendPosition === 'top' ? 64 : (titleVisible ? 48 : 20));
+        var titleBlock = titleVisible ? Math.max(34, titleFontSize + 16) : 0;
+        var gridTop = headerInset + (legendPosition === 'top'
+            ? (titleVisible ? titleBlock : 34) + Math.max(30, legendFontSize + 18)
+            : (titleVisible ? Math.max(48, titleFontSize + 30) : 20));
         var gridBottom = bottomLegend ? (zoom ? 94 : 58) : (zoom ? 64 : 34);
         var axisCounts = { left: 0, right: 0 };
         var normalizedAxes = axes.map(function (axis, index) {
@@ -170,12 +194,13 @@
             return { axis: axis, position: position, positionIndex: positionIndex };
         });
         var chartWidth = Math.max(320, Number(chartElement.clientWidth) || 750);
-        var maximumAxisMargin = Math.max(58, Math.min(190, chartWidth * 0.32));
+        var baseAxisMargin = Math.round(58 * Math.max(1, axisFontSize / 12));
+        var maximumAxisMargin = Math.max(baseAxisMargin, Math.min(190, chartWidth * 0.32));
         var maximumSideCount = Math.max(axisCounts.left, axisCounts.right);
         var axisOffsetStep = maximumSideCount > 1
-            ? Math.min(54, (maximumAxisMargin - 58) / (maximumSideCount - 1)) : 0;
-        var leftMargin = axisCounts.left > 0 ? 58 + axisOffsetStep * (axisCounts.left - 1) : 22;
-        var rightMargin = axisCounts.right > 0 ? 58 + axisOffsetStep * (axisCounts.right - 1) : 22;
+            ? Math.min(54, (maximumAxisMargin - baseAxisMargin) / (maximumSideCount - 1)) : 0;
+        var leftMargin = axisCounts.left > 0 ? baseAxisMargin + axisOffsetStep * (axisCounts.left - 1) : 22;
+        var rightMargin = axisCounts.right > 0 ? baseAxisMargin + axisOffsetStep * (axisCounts.right - 1) : 22;
         if (design.showYAxis === false) {
             leftMargin = 22;
             rightMargin = 22;
@@ -198,13 +223,13 @@
                 text: model.chart && model.chart.title || '',
                 left: 'center',
                 top: headerInset,
-                textStyle: { color: colors.text, fontSize: 18 }
+                textStyle: { color: titleColor, fontSize: titleFontSize }
             },
             legend: {
                 show: showLegend,
-                top: legendPosition === 'top' ? headerInset + (titleVisible ? 34 : 4) : null,
+                top: legendPosition === 'top' ? headerInset + (titleVisible ? titleBlock : 4) : null,
                 bottom: bottomLegend ? 6 : null,
-                textStyle: { color: colors.text },
+                textStyle: { color: legendColor, ...(legendFontOverride ? { fontSize: legendFontSize } : {}) },
                 data: series.map(function (item) { return item.id; }),
                 formatter: function (name) {
                     var source = series.find(function (item) { return item.id === name; });
@@ -238,18 +263,19 @@
                 type: 'time',
                 min: model.range.startTimestamp * 1000,
                 max: model.range.endTimestamp * 1000,
-                axisLine: { show: design.showXAxis !== false, lineStyle: { color: colors.border } },
+                axisLine: { show: design.showXAxis !== false, lineStyle: { color: configuredAxisColor || colors.border } },
                 axisTick: { show: design.showXAxis !== false },
                 axisLabel: {
                     show: design.showXAxis !== false,
-                    color: colors.muted,
+                    color: configuredAxisColor || colors.muted,
+                    ...(axisFontOverride ? { fontSize: axisFontSize } : {}),
                     formatter: buildTimeAxisFormatter(model.chart && model.chart.timeAxisLabelFormat)
                 },
                 splitLine: { show: false }
             },
             yAxis: normalizedAxes.map(function (entry, index) {
                 var axis = entry.axis;
-                var axisColor = axisColors[index] || colors.border;
+                var axisColor = configuredAxisColor || axisColors[index] || colors.border;
                 var valueAxis = {
                     type: 'value',
                     name: design.showYAxis !== false ? axis.unit || '' : '',
@@ -263,13 +289,14 @@
                     axisLabel: {
                         show: design.showYAxis !== false,
                         color: axisColor,
+                        ...(axisFontOverride ? { fontSize: axisFontSize } : {}),
                         formatter: '{value}' + (axis.unit ? ' ' + axis.unit : '')
                     },
                     splitLine: {
                         show: index === 0 && design.showGrid !== false,
-                        lineStyle: { color: colors.track || colors.border, opacity: 0.35 }
+                        lineStyle: { color: gridColor, opacity: configuredGridColor ? 1 : 0.35 }
                     },
-                    nameTextStyle: { color: axisColor }
+                    nameTextStyle: { color: axisColor, ...(axisFontOverride ? { fontSize: axisFontSize } : {}) }
                 };
                 var minimum = Number(axis.minimum);
                 var maximum = Number(axis.maximum);
