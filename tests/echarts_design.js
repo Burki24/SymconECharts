@@ -10,6 +10,22 @@ const window = {};
 vm.runInNewContext(source, { window });
 
 const opacityFromPercent = window.SYMC_ECHARTS_DESIGN.opacityFromPercent;
+const recoveryChartElement = { hidden: false };
+const recoveryWarningElement = { hidden: true, textContent: '' };
+const retainFailure = window.SYMC_ECHARTS_DESIGN.createTransientFailureRetainer(
+    recoveryChartElement, recoveryWarningElement, text => text, 'Temporary failure'
+);
+const readyState = { status: 'ready', chart: {} };
+assert.equal(retainFailure({ status: 'error', error: 'Temporary failure' }, readyState, {}), true);
+assert.equal(recoveryWarningElement.hidden, true, 'One transient failure must not flash a warning.');
+assert.equal(retainFailure({ status: 'error', error: 'Temporary failure' }, readyState, {}), true);
+assert.equal(recoveryWarningElement.hidden, false, 'Repeated failures must mark retained data as stale.');
+assert.equal(retainFailure(readyState, readyState, {}), false);
+assert.equal(recoveryWarningElement.hidden, false, 'Repainting the same cached state must not clear the warning.');
+assert.equal(retainFailure({ ...readyState }, readyState, {}), false);
+assert.equal(recoveryWarningElement.hidden, true, 'Fresh data must clear the warning.');
+assert.equal(retainFailure({ status: 'error', error: 'Invalid configuration' }, readyState, {}), false,
+    'Configuration failures must not retain a stale chart.');
 const fontSizePercent = window.SYMC_ECHARTS_DESIGN.fontSizePercent;
 assert.equal(fontSizePercent(undefined, 12), 12, 'Missing font size must retain the chart default.');
 assert.equal(fontSizePercent(150, 12), 18, 'Shared percent scaling must use the chart-specific base size.');
@@ -127,5 +143,28 @@ const waterfallTemplate = fs.readFileSync(path.join(__dirname, '..', 'EChartsBar
     'visualization', 'index.html'), 'utf8');
 assert.match(waterfallTemplate, /\{\{ECHARTS_DESIGN_SCRIPT\}\}/,
     'Waterfall must load the shared resize helper in its browser document.');
+
+for (const [moduleName, warningId] of [
+    ['EChartsGaugeSingle', 'echarts-gauge-warning'],
+    ['EChartsGaugeMulti', 'echarts-gauge-warning'],
+    ['EChartsGaugeTacho', 'echarts-gauge-warning'],
+    ['EChartsGaugeChronograph', 'echarts-gauge-warning'],
+    ['EChartsTimeSeries', 'echarts-timeseries-warning'],
+    ['EChartsBarCategory', 'echarts-bar-category-warning'],
+    ['EChartsBarWaterfall', 'echarts-bar-waterfall-warning'],
+    ['EChartsBarPolar', 'echarts-bar-polar-warning']
+]) {
+    const moduleRoot = path.join(__dirname, '..', moduleName);
+    const html = fs.readFileSync(path.join(moduleRoot, 'visualization', 'index.html'), 'utf8');
+    const renderer = fs.readFileSync(path.join(moduleRoot, 'visualization', 'app.js'), 'utf8');
+    const module = fs.readFileSync(path.join(moduleRoot, 'module.php'), 'utf8');
+    assert.ok(html.includes(`id="${warningId}"`), `${moduleName} needs a visible retry notice.`);
+    assert.match(renderer, /createTransientFailureRetainer\(/,
+        `${moduleName} must retain the last chart through a transient read failure.`);
+    assert.match(module, /RegisterTransientRefresh\(/,
+        `${moduleName} must register its read retry timer.`);
+    assert.match(module, /ScheduleTransientRefresh\(/,
+        `${moduleName} must activate retry only after a transient read failure.`);
+}
 
 console.log('Shared ECharts design utilities verified.');

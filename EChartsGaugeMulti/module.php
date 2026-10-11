@@ -19,6 +19,7 @@ use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsSourceIdentity;
+use SymconECharts\EChartsTransientRefresh;
 use SymconECharts\EChartsVariablePresentation;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
@@ -36,6 +37,7 @@ require_once __DIR__ . '/../libs/EChartsGaugeDesign.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
+require_once __DIR__ . '/../libs/EChartsTransientRefresh.php';
 require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 require_once __DIR__ . '/GaugePreview.php';
@@ -48,6 +50,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
     use IPSViewHTMLPageHelper;
     use EChartsIPSViewDesignForm;
     use EChartsIPSViewTransport;
+    use EChartsTransientRefresh;
     use ResponsiveVisualizationHelper;
     use VisualizationAssetHelper;
     use VisualizationThemeHelper;
@@ -130,6 +133,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
     public function Create(): void
     {
         parent::Create();
+        $this->RegisterTransientRefresh('ECGM');
 
         $this->SetVisualizationType(1);
         $this->RegisterMessage(0, IPS_KERNELSTARTED);
@@ -434,6 +438,12 @@ class EChartsGaugeMulti extends IPSModuleStrict
         );
     }
 
+    /** Retries a failed current-value read without resetting the visualization. */
+    public function RetryTransient(): void
+    {
+        $this->PublishVisualizationState();
+    }
+
     /**
      * Revalidates the module after the Symcon kernel becomes ready.
      *
@@ -483,6 +493,9 @@ class EChartsGaugeMulti extends IPSModuleStrict
                 ),
                 'The Multi Gauge values could not be loaded.' => $this->Translate(
                     'The Multi Gauge values could not be loaded.'
+                ),
+                'Data could not be refreshed. Showing the last available values.' => $this->Translate(
+                    'Data could not be refreshed. Showing the last available values.'
                 )
             ],
             'options'            => [
@@ -1066,11 +1079,19 @@ class EChartsGaugeMulti extends IPSModuleStrict
     private function PublishVisualizationState(): void
     {
         try {
+            $state = $this->BuildVisualizationState();
+            $states = [$state];
             $this->UpdateVisualizationValue(json_encode(
-                $this->BuildVisualizationState(),
+                $state,
                 JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION
             ));
-            $this->PushEChartsIPSViewState(fn (): array => $this->BuildVisualizationState(true));
+            $this->PushEChartsIPSViewState(function () use (&$states): array
+            {
+                $state = $this->BuildVisualizationState(true);
+                $states[] = $state;
+                return $state;
+            });
+            $this->ScheduleTransientRefresh($states, 'The Multi Gauge values could not be loaded.');
         } catch (Throwable $exception) {
             $this->SendDebug('PublishVisualizationState', $exception::class, 0);
         }

@@ -19,7 +19,9 @@ const palette = {
 function render(mode, width, height, count, title = '', preset = 'multi-title', tileHeaderVisible = true, style = {}) {
     const chartElement = { clientWidth: width, clientHeight: height, hidden: false };
     const errorElement = { hidden: true, textContent: '' };
+    const warningElement = { hidden: true, textContent: '' };
     let option;
+    let clearCount = 0;
     const window = {
         SYMC_VISUALIZATION: {
             mode,
@@ -44,20 +46,44 @@ function render(mode, width, height, count, title = '', preset = 'multi-title', 
             options: { echartsThemes: { dark: palette }, tileHeaderVisible }
         },
         echarts: {
-            init: () => ({ setOption: next => { option = next; } })
+            init: () => ({ setOption: next => { option = next; }, clear: () => { clearCount++; } })
         },
         addEventListener: () => {}
     };
     const document = {
-        getElementById: id => id === 'echarts-gauge-chart' ? chartElement : errorElement
+        getElementById: id => ({
+            'echarts-gauge-chart': chartElement,
+            'echarts-gauge-warning': warningElement,
+            'echarts-gauge-error': errorElement
+        })[id]
     };
 
     const context = { window, document };
     vm.runInNewContext(designSource, context);
     vm.runInNewContext(source, context);
     assert.ok(option, 'The chart should be rendered.');
+    Object.defineProperties(option, {
+        handleMessage: { value: window.handleMessage },
+        getState: { value: () => window.SYMC_VISUALIZATION.state },
+        getRecoveryView: { value: () => ({ chartElement, warningElement, errorElement, clearCount }) }
+    });
     return option;
 }
+
+const retainedGauge = render('symcon', 600, 400, 3);
+retainedGauge.handleMessage({ status: 'error', chart: null, error: 'The Multi Gauge values could not be loaded.' });
+assert.equal(retainedGauge.getRecoveryView().chartElement.hidden, false,
+    'A transient Gauge read failure must preserve the last rendered gauges.');
+assert.equal(retainedGauge.getRecoveryView().clearCount, 0);
+retainedGauge.handleMessage({ status: 'error', chart: null, error: 'The Multi Gauge values could not be loaded.' });
+assert.equal(retainedGauge.getRecoveryView().warningElement.hidden, false,
+    'Repeated Gauge read failures must identify stale values.');
+retainedGauge.handleMessage({ ...retainedGauge.getState() });
+assert.equal(retainedGauge.getRecoveryView().warningElement.hidden, true,
+    'A successful Gauge refresh must clear the stale-values warning.');
+retainedGauge.handleMessage({ status: 'error', chart: null, error: 'Configure 2 to 16 unique numeric sources.' });
+assert.equal(retainedGauge.getRecoveryView().chartElement.hidden, true,
+    'A source configuration error must not leave the prior gauge chart visible.');
 
 function topOfFirstGauge(option) {
     return option.series[0].center[1] - option.series[0].radius;

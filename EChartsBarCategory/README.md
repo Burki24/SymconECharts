@@ -4,6 +4,13 @@
 IP-Symcon variables as a category bar chart. All configured sources must use
 the same effective unit so that the shared value axis remains meaningful.
 
+## Temporary loading errors
+
+If current values cannot be loaded briefly, the last valid chart remains
+visible in the tile and IPSView. Repeated failures show a notice, and the
+module retries after 60 seconds. With no previously loaded data or an invalid
+configuration, an error is still shown.
+
 Both designers group bar layout, labels and geometry, fill patterns, and typography and colors in
 collapsible sections. The live preview remains below these sections.
 

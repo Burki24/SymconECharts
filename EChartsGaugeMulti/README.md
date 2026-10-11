@@ -6,6 +6,13 @@ Symcon-Kacheldarstellung und ein separat platzierbares HTML-Widget in IPSView
 bereitstellen können. Datenquellen und Diagrammkonfiguration werden dabei nur
 einmal gepflegt.
 
+## Vorübergehende Ladefehler
+
+Können Werte kurzzeitig nicht geladen werden, bleibt die letzte gültige Grafik
+in Kachel und IPSView sichtbar. Bei wiederholtem Fehler erscheint ein Hinweis;
+das Modul versucht nach 60 Sekunden erneut zu laden. Ohne zuvor geladene Daten
+oder bei ungültiger Konfiguration erscheint weiterhin eine Fehlermeldung.
+
 Kachel- und unabhängiger IPSView-Designer ordnen Diagrammtitel, Feinabstimmung,
 Zeiger und Nabe, Skala und Farben sowie Zifferblatt in einklappbaren Bereichen.
 In **Diagrammtitel** lassen sich Größe (50–150 %) und Farbe des äußeren Titels

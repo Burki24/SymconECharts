@@ -442,6 +442,11 @@ abstract class IPSModuleStrict
         return $this->buffers[$name] ?? '';
     }
 
+    public function GetTestTimerInterval(string $ident): ?int
+    {
+        return $this->timers[$ident] ?? null;
+    }
+
     protected function RegisterPropertyInteger(string $name, int $default): bool
     {
         $this->properties[$name] ??= $default;
@@ -781,6 +786,33 @@ function assertGatewayGauge(bool $condition, string $message): void
     }
 }
 
+function assertTransientRetry(IPSModuleStrict $module, string $name): void
+{
+    $responder = IPSModuleStrict::$ParentResponder;
+    try {
+        IPSModuleStrict::$ParentResponder = static fn (string $json): string => '';
+        $module->RetryTransient();
+        $updates = $module->GetTestVisualizationUpdates();
+        $failedState = json_decode((string) end($updates), true, 512, JSON_THROW_ON_ERROR);
+        assertGatewayGauge(
+            ($failedState['status'] ?? null) === 'error'
+                && $module->GetTestTimerInterval('TransientRetry') === 60000,
+            $name . ' must retry a temporary data-read failure after one minute.'
+        );
+    } finally {
+        IPSModuleStrict::$ParentResponder = $responder;
+    }
+
+    $module->RetryTransient();
+    $updates = $module->GetTestVisualizationUpdates();
+    $readyState = json_decode((string) end($updates), true, 512, JSON_THROW_ON_ERROR);
+    assertGatewayGauge(
+        ($readyState['status'] ?? null) === 'ready'
+            && $module->GetTestTimerInterval('TransientRetry') === 0,
+        $name . ' must stop retrying as soon as fresh data is available.'
+    );
+}
+
 /** @param list<array<string, mixed>> $items @return array<string, mixed>|null */
 function findGaugeFormElement(array $items, string $name): ?array
 {
@@ -882,6 +914,7 @@ $gauge->SetTestProperty('DetailBorderColor', 0x708090);
 $gauge->SetTestProperty('PointerShadow', true);
 $gauge->SetTestProperty('EnableIPSView', true);
 $gauge->ApplyChanges();
+assertTransientRetry($gauge, 'Gauge Single');
 
 assertGatewayGauge($gauge->GetTestStatus() === IS_ACTIVE, 'Gauge Single must become active.');
 assertGatewayGauge($gauge->GetTestReferences() === [4711], 'Gauge Single must register its source reference.');
@@ -1700,6 +1733,7 @@ $multiGauge->SetTestProperty('Sources', $multiSources);
 $multiGauge->SetTestProperty('Title', 'Room climate');
 $multiGauge->SetTestProperty('EnableIPSView', true);
 $multiGauge->ApplyChanges();
+assertTransientRetry($multiGauge, 'Gauge Multi');
 
 assertGatewayGauge($multiGauge->GetTestStatus() === IS_ACTIVE, 'Gauge Multi must become active with two valid sources.');
 assertGatewayGauge($multiGauge->GetTestReferences() === [4711, 4713], 'Gauge Multi must register every source reference.');
@@ -1933,6 +1967,7 @@ foreach ([
     $dedicatedGauge->SetTestProperty('IPSViewAnchorShape', 'custom');
     $dedicatedGauge->SetTestProperty('IPSViewCustomAnchorSVG', $multiPointerSvg);
     $dedicatedGauge->ApplyChanges();
+    assertTransientRetry($dedicatedGauge, $dedicatedClass);
     assertGatewayGauge($dedicatedGauge->GetTestStatus() === IS_ACTIVE, $dedicatedClass . ' must accept two sources.');
     $dedicatedData = json_decode($dedicatedGauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
     assertGatewayGauge(
@@ -3652,6 +3687,7 @@ $rawTimeSeries->SetTestProperty('Sources', json_encode([[
 $rawTimeSeries->SetTestProperty('Range', '1h');
 $rawTimeSeries->SetTestProperty('DataMode', 'raw');
 $rawTimeSeries->ApplyChanges();
+assertTransientRetry($rawTimeSeries, 'Time Series');
 $rawTimeSeriesData = json_decode($rawTimeSeries->GetTimeSeriesData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
     $rawTimeSeriesData['range']['aggregationLevel'] === null
@@ -4317,6 +4353,7 @@ $barCategory->SetTestProperty('IPSViewUseTileDesign', false);
 $barCategory->SetTestProperty('IPSViewOrientation', 'vertical');
 $barCategory->SetTestProperty('IPSViewEChartsTheme', 'dark');
 $barCategory->ApplyChanges();
+assertTransientRetry($barCategory, 'Category Bar');
 $barData = json_decode($barCategory->GetBarData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
     $barCategory->GetTestStatus() === IS_ACTIVE
@@ -5103,6 +5140,7 @@ $waterfall->SetTestProperty('IPSViewIncreaseColor', 0x123456);
 $originalWaterfallValue = $GLOBALS['symconTestVariables'][4717]['Value'];
 $GLOBALS['symconTestVariables'][4717]['Value'] = -50.0;
 $waterfall->ApplyChanges();
+assertTransientRetry($waterfall, 'Waterfall Bar');
 $waterfallData = json_decode($waterfall->GetWaterfallData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
     $waterfall->GetTestStatus() === IS_ACTIVE
@@ -5207,6 +5245,7 @@ $polar->SetTestProperty('IPSViewUseTileDesign', false);
 $polar->SetTestProperty('IPSViewPolarMode', 'tangential');
 $polar->SetTestProperty('IPSViewEChartsTheme', 'dark');
 $polar->ApplyChanges();
+assertTransientRetry($polar, 'Polar Bar');
 $polarData = json_decode($polar->GetPolarData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
     $polar->GetTestStatus() === IS_ACTIVE

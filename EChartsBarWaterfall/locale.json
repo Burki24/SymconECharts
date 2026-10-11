@@ -62,7 +62,8 @@
             "Waterfall for IPSView": "Waterfall für IPSView",
             "Configure valid Waterfall sources.": "Gültige Waterfall-Quellen konfigurieren.",
             "Connect an active EChartsGateway.": "Ein aktives EChartsGateway verbinden.",
-            "The Waterfall values could not be loaded.": "Die Waterfall-Werte konnten nicht geladen werden."
+            "The Waterfall values could not be loaded.": "Die Waterfall-Werte konnten nicht geladen werden.",
+            "Data could not be refreshed. Showing the last available values.": "Die Daten konnten nicht aktualisiert werden. Die letzten verfügbaren Werte bleiben sichtbar."
         }
     }
 }

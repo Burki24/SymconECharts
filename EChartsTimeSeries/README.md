@@ -9,6 +9,14 @@ Linien und Datenpunkte, Flächen und Achsen sowie Schrift und Farben sind in
 beiden Designern als eigene einklappbare Bereiche angeordnet; die Vorschau
 folgt darunter.
 
+## Vorübergehende Ladefehler
+
+Kann das Archiv kurzzeitig nicht gelesen werden, bleibt die letzte gültige
+Grafik in Kachel und IPSView sichtbar. Bei wiederholtem Fehler erscheint ein
+Hinweis; das Modul versucht nach 60 Sekunden erneut zu laden. Ohne zuvor
+geladene Daten oder bei ungültiger Konfiguration erscheint weiterhin eine
+Fehlermeldung.
+
 ## Animation
 
 Für Start und Aktualisierung lassen sich außerdem die **Bewegungskurve** und

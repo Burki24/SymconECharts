@@ -9,6 +9,7 @@
         : {};
     var chartElement = document.getElementById('echarts-gauge-chart');
     var errorElement = document.getElementById('echarts-gauge-error');
+    var warningElement = document.getElementById('echarts-gauge-warning');
     var chart = null;
     var currentTheme = null;
     var currentState = bootstrap.state || null;
@@ -100,6 +101,9 @@
     function translate(text) {
         return typeof translations[text] === 'string' ? translations[text] : text;
     }
+    var retainOnTransientError = echartsDesign.createTransientFailureRetainer(
+        chartElement, warningElement, translate, 'The Gauge value could not be loaded.'
+    );
 
     function resolveColor(variable, fallback) {
         var probe = document.createElement('span');
@@ -1078,6 +1082,7 @@
     }
 
     function render(state) {
+        if (retainOnTransientError(state, currentState, chart)) { return; }
         currentState = state;
         if (!state || state.status !== 'ready' || !state.chart) {
             displayError(state && state.error ? state.error : 'The Gauge value could not be loaded.');

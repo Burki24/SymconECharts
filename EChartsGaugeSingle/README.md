@@ -6,6 +6,13 @@ Symcon-Kacheldarstellung und optional ein separat platzierbares WebContent-
 Widget für IPSView bereit. Datenquelle und fachliche Diagrammkonfiguration
 werden dabei nur einmal gepflegt.
 
+## Vorübergehende Ladefehler
+
+Kann ein Wert kurzzeitig nicht geladen werden, bleibt die letzte gültige Grafik
+in Kachel und IPSView sichtbar. Bei wiederholtem Fehler erscheint ein Hinweis;
+das Modul versucht nach 60 Sekunden erneut zu laden. Ohne zuvor geladene Daten
+oder bei ungültiger Konfiguration erscheint weiterhin eine Fehlermeldung.
+
 ## Animation
 
 Für Start und Aktualisierung lassen sich außerdem die **Bewegungskurve** und

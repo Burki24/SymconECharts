@@ -18,6 +18,7 @@ use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsSvgPath;
+use SymconECharts\EChartsTransientRefresh;
 use SymconECharts\EChartsVariablePresentation;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
@@ -34,6 +35,7 @@ require_once __DIR__ . '/../libs/EChartsGaugeDesign.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
+require_once __DIR__ . '/../libs/EChartsTransientRefresh.php';
 require_once __DIR__ . '/../libs/EChartsSvgPath.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 require_once __DIR__ . '/GaugePreview.php';
@@ -46,6 +48,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
     use IPSViewHTMLPageHelper;
     use EChartsIPSViewDesignForm;
     use EChartsIPSViewTransport;
+    use EChartsTransientRefresh;
     use ResponsiveVisualizationHelper;
     use VisualizationAssetHelper;
     use VisualizationThemeHelper;
@@ -202,6 +205,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
     public function Create(): void
     {
         parent::Create();
+        $this->RegisterTransientRefresh('ECGS');
 
         $this->SetVisualizationType(1);
         $this->RegisterMessage(0, IPS_KERNELSTARTED);
@@ -752,6 +756,12 @@ class EChartsGaugeSingle extends IPSModuleStrict
         );
     }
 
+    /** Retries a failed current-value read without resetting the visualization. */
+    public function RetryTransient(): void
+    {
+        $this->PublishVisualizationState();
+    }
+
     /**
      * Revalidates the module after the Symcon kernel becomes ready.
      *
@@ -791,6 +801,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
                 'Configure a valid ECharts theme.',
                 'Connect an active EChartsGateway.',
                 'The Gauge value could not be loaded.',
+                'Data could not be refreshed. Showing the last available values.',
                 'Apache ECharts could not be initialized.'
             ]),
             'options'            => [
@@ -2212,14 +2223,22 @@ class EChartsGaugeSingle extends IPSModuleStrict
     private function PublishVisualizationState(): void
     {
         try {
+            $state = $this->BuildVisualizationState();
+            $states = [$state];
             $this->UpdateVisualizationValue(json_encode(
-                $this->BuildVisualizationState(),
+                $state,
                 JSON_THROW_ON_ERROR
                 | JSON_UNESCAPED_SLASHES
                 | JSON_UNESCAPED_UNICODE
                 | JSON_PRESERVE_ZERO_FRACTION
             ));
-            $this->PushEChartsIPSViewState(fn (): array => $this->BuildVisualizationState(true));
+            $this->PushEChartsIPSViewState(function () use (&$states): array
+            {
+                $state = $this->BuildVisualizationState(true);
+                $states[] = $state;
+                return $state;
+            });
+            $this->ScheduleTransientRefresh($states, 'The Gauge value could not be loaded.');
         } catch (Throwable $exception) {
             $this->SendDebug('PublishVisualizationState', $exception::class, 0);
         }

@@ -46,6 +46,20 @@ body {
     display: none;
 }
 
+.echarts-refresh-warning {
+    position: absolute;
+    inset-inline: 0.75rem;
+    inset-block-end: 0.65rem;
+    z-index: 2;
+    padding: 0.45rem 0.65rem;
+    border-radius: 0.35rem;
+    background: color-mix(in srgb, var(--symc-surface) 88%, transparent);
+    color: var(--symc-text);
+    text-align: center;
+}
+
+.echarts-refresh-warning[hidden] { display: none; }
+
 @container echarts-gauge (max-width: 20rem) {
     .echarts-gauge-root,
     .echarts-gauge-chart {

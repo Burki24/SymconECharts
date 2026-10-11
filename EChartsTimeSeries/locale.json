@@ -165,6 +165,7 @@
             "EChartsGateway archive request failed": "EChartsGateway-Archivabfrage fehlgeschlagen",
             "The selected raw range was truncated by the point budget.": "Der gewählte Rohdatenzeitraum wurde durch das Punktbudget gekürzt.",
             "The time series could not be loaded.": "Die Zeitreihe konnte nicht geladen werden.",
+            "Data could not be refreshed. Showing the last available values.": "Die Daten konnten nicht aktualisiert werden. Die letzten verfügbaren Werte bleiben sichtbar.",
             "Sources with the same unit must use the same axis side.": "Quellen mit derselben Einheit müssen dieselbe Achsenseite verwenden.",
             "Sources with the same unit must use the same explicit axis range.": "Quellen mit derselben Einheit müssen denselben expliziten Achsenbereich verwenden.",
             "The value axis minimum must be smaller than its maximum.": "Das Wertachsenminimum muss kleiner als das Maximum sein.",

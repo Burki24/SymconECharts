@@ -87,6 +87,7 @@
             "Configure valid Polar sources.": "Gültige Polar-Bar-Quellen konfigurieren.",
             "Connect an active EChartsGateway.": "Ein aktives EChartsGateway verbinden.",
             "The Polar values could not be loaded.": "Die Polar-Bar-Werte konnten nicht geladen werden.",
+            "Data could not be refreshed. Showing the last available values.": "Die Daten konnten nicht aktualisiert werden. Die letzten verfügbaren Werte bleiben sichtbar.",
             "Polar sources": "Polar-Quellen",
             "Category label (optional)": "Kategoriebeschriftung (optional)",
             "Color": "Farbe",

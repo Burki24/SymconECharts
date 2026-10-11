@@ -2,6 +2,13 @@
 
 `EChartsBarPolar` stellt aktuelle Zahlenwerte als Polar-Balken dar. Die Kachel zeigt wahlweise radial nach außen gerichtete Balken oder konzentrische Kreisbögen. Das Modul akzeptiert 1 bis 16 eindeutige numerische Symcon-Variablen mit derselben effektiven Einheit. Ein Archiv ist nicht nötig.
 
+## Vorübergehende Ladefehler
+
+Können Werte kurzzeitig nicht geladen werden, bleibt die letzte gültige Grafik
+in Kachel und IPSView sichtbar. Bei wiederholtem Fehler erscheint ein Hinweis;
+das Modul versucht nach 60 Sekunden erneut zu laden. Ohne zuvor geladene Daten
+oder bei ungültiger Konfiguration erscheint weiterhin eine Fehlermeldung.
+
 Kachel- und unabhängiger IPSView-Designer gliedern Anordnung, Beschriftung,
 Geometrie, Balkeneffekte, Skala und Winkel sowie Schrift und Farben in
 einklappbare Bereiche.

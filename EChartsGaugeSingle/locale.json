@@ -265,6 +265,7 @@
             "Configure a valid ECharts theme.": "Ein gültiges ECharts-Theme konfigurieren.",
             "Connect an active EChartsGateway.": "Ein aktives EChartsGateway verbinden.",
             "The Gauge value could not be loaded.": "Der Gauge-Wert konnte nicht geladen werden.",
+            "Data could not be refreshed. Showing the last available values.": "Die Daten konnten nicht aktualisiert werden. Die letzten verfügbaren Werte bleiben sichtbar.",
             "Apache ECharts could not be initialized.": "Apache ECharts konnte nicht initialisiert werden."
         }
     }

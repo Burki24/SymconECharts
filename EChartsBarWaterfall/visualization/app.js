@@ -4,6 +4,7 @@
     var bootstrap = window.SYMC_VISUALIZATION || {};
     var chartElement = document.getElementById('echarts-bar-waterfall-chart');
     var errorElement = document.getElementById('echarts-bar-waterfall-error');
+    var warningElement = document.getElementById('echarts-bar-waterfall-warning');
     var chart = null;
     var currentState = bootstrap.state || null;
     var currentTheme = null;
@@ -12,6 +13,9 @@
     function translate(value) {
         return (bootstrap.translations || {})[value] || value;
     }
+    var retainOnTransientError = echartsDesign.createTransientFailureRetainer(
+        chartElement, warningElement, translate, 'The Waterfall values could not be loaded.'
+    );
 
     function palette(theme) {
         var palettes = bootstrap.options && bootstrap.options.echartsThemes || {};
@@ -208,6 +212,7 @@
     }
 
     function render(state) {
+        if (retainOnTransientError(state, currentState, chart)) { return; }
         currentState = state;
         if (!state || state.status !== 'ready' || !state.chart) {
             displayError(state && state.error);

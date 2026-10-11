@@ -4,6 +4,13 @@
 einem gemeinsamen Chronographen. Die erste Quelle bildet das Hauptinstrument;
 bis zu vier weitere Quellen erscheinen als eingebettete Hilfszifferblätter.
 
+## Vorübergehende Ladefehler
+
+Können Werte kurzzeitig nicht geladen werden, bleibt die letzte gültige Grafik
+in Kachel und IPSView sichtbar. Bei wiederholtem Fehler erscheint ein Hinweis;
+das Modul versucht nach 60 Sekunden erneut zu laden. Ohne zuvor geladene Daten
+oder bei ungültiger Konfiguration erscheint weiterhin eine Fehlermeldung.
+
 Kachel- und unabhängiger IPSView-Designer ordnen Diagrammtitel, Feinabstimmung,
 Zeiger und Nabe, Skala und Farben sowie Zifferblatt in einklappbaren Bereichen.
 In **Diagrammtitel** lassen sich Größe (50–150 %) und Farbe des äußeren Titels

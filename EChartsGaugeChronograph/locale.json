@@ -135,6 +135,7 @@
             "Configure a valid Chronograph Gauge design.": "Ein gültiges Chronograph-Gauge-Design konfigurieren.",
             "Connect an active EChartsGateway.": "Ein aktives EChartsGateway verbinden.",
             "The Chronograph Gauge values could not be loaded.": "Die Chronograph-Gauge-Werte konnten nicht geladen werden.",
+            "Data could not be refreshed. Showing the last available values.": "Die Daten konnten nicht aktualisiert werden. Die letzten verfügbaren Werte bleiben sichtbar.",
             "Individual design": "Individuelles Design",
             "Use individual Gauge design": "Individuelles Gauge-Design verwenden",
             "Use tile design for this Gauge in IPSView": "Kacheldesign für dieses Gauge in IPSView verwenden",

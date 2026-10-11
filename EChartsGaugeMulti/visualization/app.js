@@ -9,6 +9,7 @@
         : {};
     var chartElement = document.getElementById('echarts-gauge-chart');
     var errorElement = document.getElementById('echarts-gauge-error');
+    var warningElement = document.getElementById('echarts-gauge-warning');
     var chart = null;
     var currentState = bootstrap.state || null;
     var currentTheme = null;
@@ -23,6 +24,9 @@
     function translate(text) {
         return typeof translations[text] === 'string' ? translations[text] : text;
     }
+    var retainOnTransientError = echartsDesign.createTransientFailureRetainer(
+        chartElement, warningElement, translate, 'The Multi Gauge values could not be loaded.'
+    );
 
     function parseState(message) {
         if (typeof message === 'string') {
@@ -885,6 +889,7 @@
     }
 
     function render(state) {
+        if (retainOnTransientError(state, currentState, chart)) { return; }
         currentState = state;
         if (!state || state.status !== 'ready' || !state.chart) {
             displayError(state && state.error ? state.error : 'The Multi Gauge values could not be loaded.');

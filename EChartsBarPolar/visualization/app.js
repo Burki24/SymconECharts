@@ -4,16 +4,21 @@
     var bootstrap = window.SYMC_VISUALIZATION || {};
     var chartElement = document.getElementById('echarts-bar-polar-chart');
     var errorElement = document.getElementById('echarts-bar-polar-error');
+    var warningElement = document.getElementById('echarts-bar-polar-warning');
     var chart = null;
     var currentState = bootstrap.state || null;
     var currentTheme = null;
     var lastWidth = 0;
     var lastHeight = 0;
     var pinnedItemId = null;
+    var echartsDesign = window.SYMC_ECHARTS_DESIGN;
 
     function translate(value) {
         return (bootstrap.translations || {})[value] || value;
     }
+    var retainOnTransientError = echartsDesign.createTransientFailureRetainer(
+        chartElement, warningElement, translate, 'The Polar values could not be loaded.'
+    );
 
     function palette(theme) {
         var palettes = bootstrap.options && bootstrap.options.echartsThemes || {};
@@ -405,6 +410,7 @@
     }
 
     function render(state) {
+        if (retainOnTransientError(state, currentState, chart)) { return; }
         currentState = state;
         if (!state || state.status !== 'ready' || !state.chart) {
             displayError(state && state.error);

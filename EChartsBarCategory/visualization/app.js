@@ -4,6 +4,7 @@
     var bootstrap = window.SYMC_VISUALIZATION || {};
     var chartElement = document.getElementById('echarts-bar-category-chart');
     var errorElement = document.getElementById('echarts-bar-category-error');
+    var warningElement = document.getElementById('echarts-bar-category-warning');
     var chart = null;
     var currentState = bootstrap.state || null;
     var currentTheme = null;
@@ -19,6 +20,9 @@
     function translate(text) {
         return (bootstrap.translations || {})[text] || text;
     }
+    var retainOnTransientError = echartsDesign.createTransientFailureRetainer(
+        chartElement, warningElement, translate, 'The Category Bar values could not be loaded.'
+    );
 
     function palette(theme) {
         var palettes = bootstrap.options && bootstrap.options.echartsThemes || {};
@@ -292,6 +296,7 @@
     }
 
     function render(state) {
+        if (retainOnTransientError(state, currentState, chart)) { return; }
         currentState = state;
         if (!state || state.status !== 'ready' || !state.chart) {
             displayError(state && state.error);

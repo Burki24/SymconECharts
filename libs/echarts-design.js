@@ -128,6 +128,25 @@
         return true;
     }
 
+    function createTransientFailureRetainer(chartElement, warningElement, translate, transientError) {
+        var failures = 0;
+        return function (state, previousState, chart) {
+            if (state && state.status === 'error' && state.error === transientError
+                && chart && previousState && previousState.status === 'ready'
+                && chartElement.hidden === false) {
+                failures++;
+                warningElement.textContent = translate('Data could not be refreshed. Showing the last available values.');
+                warningElement.hidden = failures < 2;
+                return true;
+            }
+            if (state !== previousState) {
+                failures = 0;
+                warningElement.hidden = true;
+            }
+            return false;
+        };
+    }
+
     function fontSizePercent(value, base) {
         var percent = Number(value);
         return Math.round(base * (Number.isFinite(percent) && percent >= 50 && percent <= 200 ? percent : 100) / 100);
@@ -143,6 +162,7 @@
         colorWithAlpha: colorWithAlpha,
         barOutlineStyle: barOutlineStyle,
         fontSizePercent: fontSizePercent,
-        resizeChartIfNeeded: resizeChartIfNeeded
+        resizeChartIfNeeded: resizeChartIfNeeded,
+        createTransientFailureRetainer: createTransientFailureRetainer
     });
 }(window));

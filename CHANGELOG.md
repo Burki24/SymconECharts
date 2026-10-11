@@ -2,6 +2,12 @@
 
 ## Behoben
 
+- Vorübergehende Ladefehler lassen auch bei Gauge Single, Multi, Tacho,
+  Chronograph, TimeSeries, BarCategory, BarWaterfall und BarPolar die letzte
+  gültige Kachel- oder IPSView-Grafik stehen. Bei wiederholtem Fehler erscheint
+  ein Hinweis; die Module versuchen nach 60 Sekunden erneut zu laden.
+  Ungültige Konfigurationen bleiben weiterhin als Fehler sichtbar.
+
 - Gauge Multi aktualisiert beide Formularvorschauen jetzt auch bei noch nicht
   gespeicherten Änderungen der Quellenliste (Hinzufügen, Bearbeiten, Löschen und
   Umsortieren). Unvollständige Listen zeigen einen Hinweis statt veralteter Gauges.

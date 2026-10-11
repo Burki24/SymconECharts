@@ -45,6 +45,7 @@ function render(
     let option;
     let dispatchedAction;
     let setOptionCalls = 0;
+    let clearCount = 0;
     let resizeCallback;
     let resized = 0;
     let chartWidth = width;
@@ -55,7 +56,7 @@ function render(
         getHeight: () => chartHeight,
         getOption: () => option,
         dispatchAction: action => { dispatchedAction = action; },
-        clear: () => {},
+        clear: () => { clearCount++; },
         resize: () => {
             resized++;
             chartWidth = chartElement.clientWidth;
@@ -182,7 +183,8 @@ function render(
         } : null },
         getState: { value: () => window.SYMC_VISUALIZATION.state },
         handleMessage: { value: window.handleMessage },
-        getLatestOption: { value: () => option }
+        getLatestOption: { value: () => option },
+        getRecoveryView: { value: () => ({ chartElement, warningElement, errorElement, clearCount }) }
     });
     return option;
 }
@@ -511,6 +513,28 @@ retainedTimeZoom.handleMessage({
 assert.equal(retainedTimeZoom.getLatestOption().dataZoom[0].start, 25,
     'Time Series must retain the zoom window after a data refresh.');
 assert.equal(retainedTimeZoom.getLatestOption().dataZoom[1].end, 75);
+
+const retainedOnArchiveFailure = render();
+const timeReadyState = retainedOnArchiveFailure.getState();
+retainedOnArchiveFailure.handleMessage({
+    status: 'error', chart: null, error: 'The time series could not be loaded.'
+});
+assert.equal(retainedOnArchiveFailure.getRecoveryView().chartElement.hidden, false,
+    'A transient TimeSeries archive error must keep the last valid chart visible.');
+assert.equal(retainedOnArchiveFailure.getRecoveryView().clearCount, 0);
+retainedOnArchiveFailure.handleMessage({
+    status: 'error', chart: null, error: 'The time series could not be loaded.'
+});
+assert.equal(retainedOnArchiveFailure.getRecoveryView().warningElement.hidden, false,
+    'Repeated TimeSeries archive errors must mark the retained values as stale.');
+retainedOnArchiveFailure.handleMessage(timeReadyState);
+assert.equal(retainedOnArchiveFailure.getRecoveryView().warningElement.hidden, true,
+    'A successful TimeSeries refresh must clear the stale-data warning.');
+retainedOnArchiveFailure.handleMessage({
+    status: 'error', chart: null, error: 'Configure 1 to 8 unique numeric sources.'
+});
+assert.equal(retainedOnArchiveFailure.getRecoveryView().chartElement.hidden, true,
+    'A TimeSeries configuration error must not retain an obsolete chart.');
 
 const adaptedIPSView = render(undefined, undefined, 750, undefined, 'dark', {}, 'ipsview', true);
 assert.equal(adaptedIPSView.backgroundColor, 'transparent');

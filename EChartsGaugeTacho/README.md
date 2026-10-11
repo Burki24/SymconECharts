@@ -6,6 +6,13 @@ vier weitere Quellen werden als gleich große Nebeninstrumente angeordnet. Bei
 vier und fünf Quellen nutzt eine eigene Anordnung den verfügbaren Platz breiter
 Kacheln aus, ohne das Hauptinstrument zu verkleinern.
 
+## Vorübergehende Ladefehler
+
+Können Werte kurzzeitig nicht geladen werden, bleibt die letzte gültige Grafik
+in Kachel und IPSView sichtbar. Bei wiederholtem Fehler erscheint ein Hinweis;
+das Modul versucht nach 60 Sekunden erneut zu laden. Ohne zuvor geladene Daten
+oder bei ungültiger Konfiguration erscheint weiterhin eine Fehlermeldung.
+
 Kachel- und unabhängiger IPSView-Designer ordnen Diagrammtitel, Feinabstimmung,
 Zeiger und Nabe, Skala und Farben sowie Zifferblatt in einklappbaren Bereichen.
 In **Diagrammtitel** lassen sich Größe (50–150 %) und Farbe des äußeren Titels

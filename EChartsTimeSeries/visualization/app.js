@@ -15,6 +15,9 @@
     function translate(text) {
         return (bootstrap.translations || {})[text] || text;
     }
+    var retainOnTransientError = echartsDesign.createTransientFailureRetainer(
+        chartElement, warningElement, translate, 'The time series could not be loaded.'
+    );
 
     function palette(theme) {
         var palettes = bootstrap.options && bootstrap.options.echartsThemes || {};
@@ -437,6 +440,7 @@
     }
 
     function render(state) {
+        if (retainOnTransientError(state, currentState, chart)) { return; }
         var previousRange = currentState && currentState.chart && currentState.chart.range;
         var nextRange = state && state.chart && state.chart.range;
         var savedZoom = zoomController.capture(chart, previousRange, nextRange);
