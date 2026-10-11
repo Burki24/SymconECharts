@@ -2,6 +2,13 @@
 
 ## Behoben
 
+- Die Diagramm-Instanzformulare beginnen einheitlich mit Titel und Quellen;
+  Waterfall ordnet die Beschriftung der Endsumme danach ein, Polar zeigt die
+  Animation am Anfang beider Designer. Alle Diagrammmodule erklären die
+  IPSView-Designvererbung direkt am Schalter und verwenden gleiche
+  IPSView-Hilfetexte. Der bislang englische Gauge-Multi-Hinweis ist wieder
+  deutsch übersetzt.
+
 - Ein vorübergehend fehlgeschlagenes Archiv-Update lässt BarHistory-Kachel
   und IPSView nicht mehr verschwinden: Diagramm und Zoom bleiben erhalten.
   Wiederholte Fehler werden als Hinweis angezeigt, bis neue Daten eintreffen.

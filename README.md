@@ -175,6 +175,13 @@ passenden Moduls angelegt. Datenquellen, Wertebereiche, Darstellung und die
 optionale IPSView-Ausgabe werden in dieser Instanz festgelegt. Die ausführliche
 Einrichtung ist in den oben verlinkten Modul-Readmes beschrieben.
 
+Die Diagrammformulare beginnen nach einem Gateway-Hinweis mit Titel und
+Quellen. Danach folgen die fachlichen Daten- und Zeiteinstellungen, der
+Kacheldesigner und das IPSView-Design; Diagnoseaktionen stehen am Ende. Unter
+**IPSView-Design** erklärt der Schalter **Kacheldesign verwenden** die
+Vererbung unmittelbar neben der Einstellung. Diagrammspezifische Felder
+bleiben im jeweiligen Modul unterschiedlich.
+
 ## Änderungen
 
 Die Versionshistorie steht in der [CHANGELOG.md](CHANGELOG.md).

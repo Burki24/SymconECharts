@@ -6251,4 +6251,107 @@ foreach ([
     );
 }
 
+foreach ([
+    EChartsGaugeSingle::class, EChartsGaugeMulti::class, EChartsGaugeTacho::class,
+    EChartsGaugeChronograph::class, EChartsTimeSeries::class, EChartsBarCategory::class,
+    EChartsBarHistory::class, EChartsBarWaterfall::class, EChartsBarPolar::class
+] as $formModuleClass) {
+    $formModule = new $formModuleClass();
+    $formModule->Create();
+    $formData = json_decode($formModule->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+    $persistentFields = array_values(array_filter(
+        $formData['elements'],
+        static fn (array $element): bool => isset($element['name'])
+    ));
+    assertGatewayGauge(
+        ($persistentFields[0]['name'] ?? null) === 'Title',
+        $formModuleClass . ' must put the chart title before source configuration.'
+    );
+    if ($formModuleClass === EChartsBarWaterfall::class) {
+        assertGatewayGauge(
+            array_search('Sources', array_column($persistentFields, 'name'), true)
+                < array_search('TotalLabel', array_column($persistentFields, 'name'), true),
+            'Waterfall must put its source list before the final-total option.'
+        );
+    }
+
+    $tilePanel = current(array_filter(
+        $formData['elements'],
+        static fn (array $element): bool => ($element['caption'] ?? null) === 'Tile designer'
+    ));
+    $firstTileRow = $tilePanel['items'][0]['items'] ?? [];
+    assertGatewayGauge(
+        in_array('AnimationEnabled', array_column($firstTileRow, 'name'), true),
+        $formModuleClass . ' must start the Tile designer with animation controls.'
+    );
+
+    $ipsViewPanel = current(array_filter(
+        $formData['elements'],
+        static fn (array $element): bool => ($element['caption'] ?? null) === 'IPSView design'
+    ));
+    $ipsViewItems = $ipsViewPanel['items'] ?? [];
+    $inheritanceIndex = null;
+    foreach ($ipsViewItems as $index => $item) {
+        if (($item['name'] ?? null) === 'IPSViewUseTileDesign') {
+            $inheritanceIndex = $index;
+            break;
+        }
+    }
+    assertGatewayGauge(
+        $inheritanceIndex !== null
+            && ($ipsViewItems[$inheritanceIndex + 1]['caption'] ?? null)
+                === 'Inherited mode follows every Tile design change. Disable it for an independent IPSView appearance.',
+        $formModuleClass . ' must explain Tile design inheritance next to the switch.'
+    );
+}
+
+$multiLocale = json_decode(file_get_contents(__DIR__ . '/../EChartsGaugeMulti/locale.json'), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    isset($multiLocale['translations']['de'][
+        'Choose independent dials, ring Gauges, concentric rings, or a weather station. Up to 16 sources share the selected design; source order determines placement and every source keeps its own range and unit.'
+    ]),
+    'Gauge Multi must translate its current designer explanation.'
+);
+
+foreach ([
+    'EChartsGaugeSingle', 'EChartsGaugeMulti', 'EChartsGaugeTacho',
+    'EChartsGaugeChronograph', 'EChartsTimeSeries', 'EChartsBarCategory',
+    'EChartsBarHistory', 'EChartsBarWaterfall', 'EChartsBarPolar'
+] as $moduleDirectory) {
+    $locale = json_decode(
+        file_get_contents(__DIR__ . '/../' . $moduleDirectory . '/locale.json'),
+        true,
+        512,
+        JSON_THROW_ON_ERROR
+    );
+    foreach ([
+        'Inherited mode follows every Tile design change. Disable it for an independent IPSView appearance.' => 'Im vererbten Modus folgt IPSView jeder Änderung des Kacheldesigns. Für ein eigenes IPSView-Design deaktivieren.',
+        'Creates a standalone WebContent variable for use as an IPSView HTML widget.'                        => 'Erzeugt eine eigenständige WebContent-Variable als HTML-Widget für IPSView.',
+        'Adapt to IPSView background'                                                                        => 'An IPSView-Hintergrund anpassen'
+    ] as $source => $translation) {
+        assertGatewayGauge(
+            ($locale['translations']['de'][$source] ?? null) === $translation,
+            $moduleDirectory . ' must use the shared German IPSView wording.'
+        );
+    }
+    $gatewayExplanations = array_filter(
+        $locale['translations']['de'],
+        static fn (string $source): bool => str_starts_with($source, 'One shared EChartsGateway is sufficient'),
+        ARRAY_FILTER_USE_KEY
+    );
+    assertGatewayGauge(
+        count($gatewayExplanations) === 1
+            && current($gatewayExplanations) === 'Ein gemeinsames EChartsGateway genügt für alle ECharts-Diagramminstanzen. Bei weiteren Diagrammen das vorhandene Gateway auswählen, anstatt ein neues anzulegen.',
+        $moduleDirectory . ' must explain the shared gateway consistently.'
+    );
+    if (in_array($moduleDirectory, [
+        'EChartsGaugeMulti', 'EChartsGaugeTacho', 'EChartsGaugeChronograph'
+    ], true)) {
+        assertGatewayGauge(
+            ($locale['translations']['de']['Use variable presentation'] ?? null) === 'Variablendarstellung',
+            $moduleDirectory . ' must use the common source-table wording.'
+        );
+    }
+}
+
 echo "Gateway and Gauge module integration verified.\n";

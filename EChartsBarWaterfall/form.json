@@ -11,11 +11,6 @@
             "caption": "Title"
         },
         {
-            "type": "ValidationTextBox",
-            "name": "TotalLabel",
-            "caption": "Final total label"
-        },
-        {
             "type": "List",
             "name": "Sources",
             "caption": "Waterfall sources (first row: start value; following rows: signed changes)",
@@ -113,6 +108,11 @@
         {
             "type": "Label",
             "caption": "Use 2 to 16 unique numeric variables with one unit. The first row is the start value. Every later row is added with its sign; the final total is calculated. Empty step labels use the current variable name."
+        },
+        {
+            "type": "ValidationTextBox",
+            "name": "TotalLabel",
+            "caption": "Final total label"
         },
         {
             "type": "ExpansionPanel",

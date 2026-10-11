@@ -1,7 +1,7 @@
 {
     "translations": {
         "de": {
-            "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts.": "Ein gemeinsames EChartsGateway genügt für alle ECharts-Diagramminstanzen. Für weitere Diagramme das vorhandene Gateway auswählen.",
+            "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts.": "Ein gemeinsames EChartsGateway genügt für alle ECharts-Diagramminstanzen. Bei weiteren Diagrammen das vorhandene Gateway auswählen, anstatt ein neues anzulegen.",
             "Title": "Titel",
             "Variable": "Variable",
             "Variable presentation": "Variablendarstellung",
@@ -63,11 +63,12 @@
             "Track color": "Spurfarbe",
             "Track opacity": "Spurdeckkraft",
             "Configure optional IPSView HTML output.": "Optionale IPSView-HTML-Ausgabe konfigurieren.",
-            "Creates a standalone WebContent variable for use as an IPSView HTML widget.": "Erzeugt eine eigenständige WebContent-Variable zur Verwendung als IPSView-HTML-Widget.",
+            "Creates a standalone WebContent variable for use as an IPSView HTML widget.": "Erzeugt eine eigenständige WebContent-Variable als HTML-Widget für IPSView.",
             "Adapt to IPSView background": "An IPSView-Hintergrund anpassen",
             "Background color": "Hintergrundfarbe",
             "Background opacity": "Hintergrunddeckkraft",
             "Use Tile design": "Kacheldesign verwenden",
+            "Inherited mode follows every Tile design change. Disable it for an independent IPSView appearance.": "Im vererbten Modus folgt IPSView jeder Änderung des Kacheldesigns. Für ein eigenes IPSView-Design deaktivieren.",
             "Copy Tile design to IPSView and edit independently": "Kacheldesign nach IPSView kopieren und unabhängig bearbeiten",
             "Independent IPSView designer": "Unabhängiger IPSView-Designer",
             "Read current Polar data": "Aktuelle Polar-Daten lesen",

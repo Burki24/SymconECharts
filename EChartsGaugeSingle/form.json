@@ -6,6 +6,12 @@
             "caption": "One shared EChartsGateway is sufficient for all ECharts chart instances. When adding further charts, select the existing gateway instead of creating another one."
         },
         {
+            "type": "ValidationTextBox",
+            "name": "Title",
+            "caption": "Title",
+            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
+        },
+        {
             "type": "SelectVariable",
             "name": "SourceVariableID",
             "caption": "Source variable",
@@ -36,12 +42,6 @@
             "name": "Maximum",
             "caption": "Maximum",
             "digits": 3,
-            "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
-        },
-        {
-            "type": "ValidationTextBox",
-            "name": "Title",
-            "caption": "Title",
             "onChange": "ECGS_UpdateGaugePreview($id, $SourceVariableID, $Minimum, $Maximum, $Title, $Unit, $Decimals, $GaugePreset, $EChartsTheme, $ScaleFontSizePercent, $ValueFontSizePercent, $UnitFontSizePercent, $TitleFontSizePercent, $RingWidthPercent, $PointerWidthPercent, $MinorTickLengthPercent, $MajorTickLengthPercent, $PointerShape, $GaugeArcMode, $GaugeStartPosition, $GaugeEndPosition, $GaugeColorMode, $PointerColor, $ProgressColor, $RingColor, $ScaleColor, $ValueColor, $TitleColor, $CustomPointerSVG, $PointerLengthPercent, $CustomPointerPivotMode, $CustomPointerPivotXPercent, $CustomPointerPivotYPercent, $AnchorShape, $CustomAnchorSVG, $AnchorColorMode, $AnchorColor, $AnchorBorderColor, $AnchorSizePercent, $AnchorBorderWidthPercent, $PlateShape, $PlateColorMode, $PlateTransparent, $PlateShadow, $PlateColor, $PlateBorderColor, $PlateSizePercent, $PlateBorderWidthPercent);"
         },
         {

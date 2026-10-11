@@ -89,6 +89,21 @@ trait EChartsIPSViewDesignForm
                 throw new RuntimeException('The IPSView design inheritance controls are incomplete.');
             }
 
+            $inheritanceHelp = 'Inherited mode follows every Tile design change. Disable it for an independent IPSView appearance.';
+            $nextItem = $element['items'][$checkboxIndex + 1] ?? null;
+            if (($nextItem['type'] ?? null) !== 'Label' || ($nextItem['caption'] ?? null) !== $inheritanceHelp) {
+                array_splice($element['items'], $checkboxIndex + 1, 0, [[
+                    'type'    => 'Label',
+                    'caption' => $inheritanceHelp
+                ]]);
+                if ($buttonIndex > $checkboxIndex) {
+                    $buttonIndex++;
+                }
+                if ($independentIndex > $checkboxIndex) {
+                    $independentIndex++;
+                }
+            }
+
             $copyButton = $element['items'][$buttonIndex];
             $copyButton['name'] = self::IPSVIEW_COPY_BUTTON;
             $designerItems = $element['items'][$independentIndex]['items'];

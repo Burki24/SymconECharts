@@ -1,7 +1,7 @@
 {
     "translations": {
         "de": {
-            "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts.": "Ein gemeinsames EChartsGateway genügt für alle ECharts-Diagramminstanzen. Für weitere Diagramme das vorhandene Gateway auswählen.",
+            "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts.": "Ein gemeinsames EChartsGateway genügt für alle ECharts-Diagramminstanzen. Bei weiteren Diagrammen das vorhandene Gateway auswählen, anstatt ein neues anzulegen.",
             "Title": "Titel",
             "Archive sources (1 to 16)": "Archivquellen (1 bis 16)",
             "Variable": "Variable",
@@ -62,7 +62,7 @@
             "Elastic": "Elastisch",
             "IPSView design": "IPSView-Design",
             "Historical Bar for IPSView": "Historische Balken für IPSView",
-            "Creates a standalone WebContent variable for use as an IPSView HTML widget.": "Erstellt eine eigenständige WebContent-Variable zur Verwendung als HTML-Widget in IPSView.",
+            "Creates a standalone WebContent variable for use as an IPSView HTML widget.": "Erzeugt eine eigenständige WebContent-Variable als HTML-Widget für IPSView.",
             "Use Tile time settings": "Zeiteinstellungen der Kachel verwenden",
             "Disable this option to use a separate IPSView time range and time-axis label format.": "Deaktivieren, um für IPSView einen eigenen Zeitraum und ein eigenes Beschriftungsformat der Zeitachse zu verwenden.",
             "IPSView time range": "IPSView-Zeitraum",
@@ -70,7 +70,7 @@
             "Background color": "Hintergrundfarbe",
             "Background opacity": "Hintergrunddeckkraft",
             "Use Tile design": "Kacheldesign verwenden",
-            "Inherited mode follows every Tile design change. Disable it for an independent IPSView appearance.": "Im vererbten Modus folgt IPSView jeder Änderung des Kacheldesigns. Für eine unabhängige Darstellung deaktivieren.",
+            "Inherited mode follows every Tile design change. Disable it for an independent IPSView appearance.": "Im vererbten Modus folgt IPSView jeder Änderung des Kacheldesigns. Für ein eigenes IPSView-Design deaktivieren.",
             "Copy Tile design to IPSView and edit independently": "Kacheldesign nach IPSView kopieren und unabhängig bearbeiten",
             "Tile design copied to IPSView.": "Kacheldesign nach IPSView kopiert.",
             "Independent IPSView designer": "Unabhängiger IPSView-Designer",
