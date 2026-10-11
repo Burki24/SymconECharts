@@ -187,7 +187,8 @@ read-only-Formularverdrahtung, einschließlich zweier `Image`-Felder,
 erhaltener bestehender Änderungsaktionen und der vollständigen ungespeicherten,
 ID-basierten Quellenliste bei Hinzufügen, Bearbeiten, Löschen und Umordnen.
 `libs/EChartsBarPreview.php` teilt ausschließlich Vorschau-Palette,
-SVG-Rahmen und begrenzte Quellenauflösung; Modus, Skala und Diagrammgeometrie
+SVG-Rahmen, begrenzte Quellenauflösung und die schematische Größe wiederholter
+SVG-Muster in Category und History; Modus, Skala und Diagrammgeometrie
 verbleiben in den jeweiligen Bar-Modulen. Der synchronisierte
 `SVGPreviewHelper` wird unverändert wiederverwendet. History nutzt
 gekennzeichnete Beispielverläufe und fragt beim Formularbearbeiten kein

@@ -405,6 +405,9 @@ class EChartsBarHistory extends IPSModuleStrict
             $palette['background']
         );
         if ($fillMode === 'gradient' || $fillMode === 'svg') {
+            $patternSize = $fillMode === 'svg' ? EChartsBarPreview::PatternSize(
+                $this->BarPreviewValue($values, 'BarSVGSizePercent', 'integer', $ipsView)
+            ) : 0.0;
             $svg .= '<defs>';
             foreach ($items as $index => $item) {
                 $color = $item['color'] !== '' ? $item['color'] : $palette['seriesColors'][$index % count($palette['seriesColors'])];
@@ -413,9 +416,13 @@ class EChartsBarHistory extends IPSModuleStrict
                         . '<stop offset="0" stop-color="' . EChartsBarPreview::E($color) . '"/>'
                         . '<stop offset="1" stop-color="' . EChartsBarPreview::E($gradientEnd) . '"/></linearGradient>';
                 } else {
-                    $svg .= '<pattern id="bar-history-preview-' . $index . '" width="7" height="7" patternUnits="userSpaceOnUse">'
-                        . '<rect width="7" height="7" fill="' . EChartsBarPreview::E($color) . '"/>'
-                        . '<path d="M 0 7 L 7 0" stroke="' . EChartsBarPreview::E($palette['text'])
+                    $size = EChartsBarPreview::N($patternSize);
+                    $svg .= '<pattern id="bar-history-preview-' . $index . '" width="' . $size
+                        . '" height="' . $size . '" patternUnits="userSpaceOnUse">'
+                        . '<rect width="' . $size . '" height="' . $size . '" fill="'
+                        . EChartsBarPreview::E($color) . '"/>'
+                        . '<path d="M 0 ' . $size . ' L ' . $size . ' 0" stroke="'
+                        . EChartsBarPreview::E($palette['text'])
                         . '" stroke-opacity="0.45"/></pattern>';
                 }
             }

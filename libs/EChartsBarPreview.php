@@ -118,6 +118,12 @@ final class EChartsBarPreview
         return rtrim(rtrim(sprintf('%.2F', $value), '0'), '.');
     }
 
+    /** Keeps schematic SVG patterns legible while reflecting the configured motif scale. */
+    public static function PatternSize(int $sizePercent): float
+    {
+        return max(4.0, min(14.0, 7.0 * $sizePercent / 100));
+    }
+
     public static function Color(int $configured, string $fallback): string
     {
         return $configured < 0 ? $fallback : EChartsAsset::ColorToHex($configured);

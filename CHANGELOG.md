@@ -2,6 +2,9 @@
 
 ## Behoben
 
+- Die BarHistory-Formularvorschau zeigt Änderungen der SVG-Mustergröße jetzt
+  getrennt für Kachel und unabhängiges IPSView statt eines festen Musterrasters.
+
 - Die BarHistory-Formularvorschau berücksichtigt jetzt den eingestellten
   Eckradius abgerundeter Balken getrennt für Kachel und unabhängiges IPSView.
 

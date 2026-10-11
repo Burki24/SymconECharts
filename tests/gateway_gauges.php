@@ -6976,6 +6976,30 @@ assertGatewayGauge(
     'Historical Bar IPSView preview must inherit the unsaved Tile corner radius.'
 );
 
+$historyCornerPreview->UpdateBarPreviewFromForm(json_encode([
+    'Sources'                      => [['VariableID' => 4711, 'Label' => 'Sensor']],
+    'BarFillMode'                  => 'svg',
+    'BarSVGSizePercent'            => 50,
+    'IPSViewUseTileDesign'         => false,
+    'IPSViewBarFillMode'           => 'svg',
+    'IPSViewBarSVGSizePercent'     => 200
+], JSON_THROW_ON_ERROR));
+$historyPatternUpdates = array_slice($historyCornerPreview->GetTestFormUpdates(), -2);
+$historyPatternTileSvg = base64_decode(substr(
+    $historyPatternUpdates[0]['Value'],
+    strlen('data:image/svg+xml;base64,')
+), true);
+$historyPatternIPSViewSvg = base64_decode(substr(
+    $historyPatternUpdates[1]['Value'],
+    strlen('data:image/svg+xml;base64,')
+), true);
+assertGatewayGauge(
+    is_string($historyPatternTileSvg) && is_string($historyPatternIPSViewSvg)
+        && str_contains($historyPatternTileSvg, 'pattern id="bar-history-preview-0" width="4" height="4"')
+        && str_contains($historyPatternIPSViewSvg, 'pattern id="bar-history-preview-0" width="14" height="14"'),
+    'Historical Bar previews must reflect independent unsaved SVG pattern sizes.'
+);
+
 $categoryPreview = new EChartsBarCategory();
 $categoryPreview->Create();
 $categorySources = [
@@ -7016,6 +7040,29 @@ assertGatewayGauge(
         && $barXs($groupedSvg)[0] !== $barXs($groupedSvg)[1]
         && $barXs($stackedSvg)[0] === $barXs($stackedSvg)[1],
     'Category live preview must distinguish grouped from stacked bar geometry.'
+);
+$categoryPreview->UpdateBarPreviewFromForm(json_encode([
+    'Sources'                  => $categorySources,
+    'BarFillMode'              => 'svg',
+    'BarSVGSizePercent'        => 50,
+    'IPSViewUseTileDesign'     => false,
+    'IPSViewBarFillMode'       => 'svg',
+    'IPSViewBarSVGSizePercent' => 200
+], JSON_THROW_ON_ERROR));
+$categoryPatternUpdates = array_slice($categoryPreview->GetTestFormUpdates(), -2);
+$categoryPatternTileSvg = base64_decode(substr(
+    $categoryPatternUpdates[0]['Value'],
+    strlen('data:image/svg+xml;base64,')
+), true);
+$categoryPatternIPSViewSvg = base64_decode(substr(
+    $categoryPatternUpdates[1]['Value'],
+    strlen('data:image/svg+xml;base64,')
+), true);
+assertGatewayGauge(
+    is_string($categoryPatternTileSvg) && is_string($categoryPatternIPSViewSvg)
+        && str_contains($categoryPatternTileSvg, 'pattern id="bar-category-preview-0" width="4" height="4"')
+        && str_contains($categoryPatternIPSViewSvg, 'pattern id="bar-category-preview-0" width="14" height="14"'),
+    'Category Bar previews must preserve independent SVG pattern sizing.'
 );
 $polarPreview = new EChartsBarPolar();
 $polarPreview->Create();

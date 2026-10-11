@@ -379,7 +379,9 @@ class EChartsBarCategory extends IPSModuleStrict
         $rounded = $this->BarPreviewValue($values, 'RoundedBars', 'boolean', $ipsView) ? 5 : 0;
         $fillMode = $this->BarPreviewValue($values, 'BarFillMode', 'string', $ipsView);
         if ($fillMode === 'svg') {
-            $patternSize = max(4, min(14, 7 * $this->BarPreviewValue($values, 'BarSVGSizePercent', 'integer', $ipsView) / 100));
+            $patternSize = EChartsBarPreview::PatternSize(
+                $this->BarPreviewValue($values, 'BarSVGSizePercent', 'integer', $ipsView)
+            );
             $svg .= '<defs>';
             foreach ($items as $index => $item) {
                 $color = $item['color'] !== '' ? $item['color'] : $palette['seriesColors'][$index % count($palette['seriesColors'])];

@@ -83,7 +83,9 @@ pattern-size controls. The motif repeats within the normal bars; it does not
 change their shape. Only self-contained, validated SVG files up to 256 KiB are
 accepted. If a browser cannot load the image, the source color remains visible.
 On dense historical charts, zoom in to make the motif discernible. An
-independent IPSView design may use a different SVG.
+independent IPSView design may use a different SVG. The configuration previews
+show a schematic pattern whose spacing follows the pattern-size setting;
+the actual SVG motif is shown in the Tile or IPSView widget.
 **Use Tile design** is enabled by default. While it is enabled, independent
 IPSView design inputs and the **Copy Tile design to IPSView and edit
 independently** button are shown directly in **IPSView design** but disabled.
