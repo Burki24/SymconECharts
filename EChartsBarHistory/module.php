@@ -361,6 +361,7 @@ class EChartsBarHistory extends IPSModuleStrict
         $palette = EChartsBarPreview::Palette($theme);
         $data = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values, 'Label', false);
         $items = array_slice($data['items'], 0, 3);
+        $previewLanguage = $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage());
         $svg = EChartsBarPreview::Open(
             $palette,
             (string) ($values['Title'] ?? $this->ReadPropertyString('Title')),
@@ -457,7 +458,12 @@ class EChartsBarHistory extends IPSModuleStrict
                 $labelX = 70 + $bucket * 40 + ($index + 0.5) * 40 / $count;
                 $svg .= '<text x="' . EChartsBarPreview::N($labelX) . '" y="' . EChartsBarPreview::N(258 - $height)
                     . '" text-anchor="middle" fill="' . EChartsBarPreview::E($valueColor)
-                    . '" font-size="' . $valueSize . '">' . EChartsBarPreview::E(EChartsBarPreview::N(5 + $height / 10) . ' ' . $item['unit']) . '</text>';
+                    . '" font-size="' . $valueSize . '">' . EChartsBarPreview::E(EChartsBarPreview::FormatValue(
+                        5 + $height / 10,
+                        $item['decimals'],
+                        $item['unit'],
+                        $previewLanguage
+                    )) . '</text>';
             }
         }
         $svg .= '<text x="70" y="286" fill="' . EChartsBarPreview::E($axisColor)

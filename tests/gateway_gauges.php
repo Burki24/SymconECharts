@@ -6957,6 +6957,32 @@ assertGatewayGauge(
     'Shared Bar preview values must use German decimal and grouping separators when configured.'
 );
 
+$historyFormatPreview = new EChartsBarHistory();
+$historyFormatPreview->Create();
+$historyFormatPreview->UpdateBarPreviewFromForm(json_encode([
+    'Sources' => [[
+        'VariableID'              => 4711,
+        'Label'                   => 'Sensor',
+        'UseVariablePresentation' => false,
+        'Unit'                    => 'kWh',
+        'Decimals'                => 3
+    ]],
+    'ShowValues'            => true,
+    'IPSViewUseTileDesign'  => false,
+    'IPSViewShowValues'     => true
+], JSON_THROW_ON_ERROR));
+foreach (array_slice($historyFormatPreview->GetTestFormUpdates(), -2) as $historyFormatUpdate) {
+    $historyFormatSvg = base64_decode(substr(
+        $historyFormatUpdate['Value'],
+        strlen('data:image/svg+xml;base64,')
+    ), true);
+    assertGatewayGauge(
+        is_string($historyFormatSvg)
+            && preg_match('/<text[^>]*>\d+\.\d{3} kWh<\/text>/', $historyFormatSvg) === 1,
+        'Historical Bar Tile and independent IPSView previews must format example labels with source decimals and unit.'
+    );
+}
+
 $waterfallFormatPreview = new EChartsBarWaterfall();
 $waterfallFormatPreview->Create();
 $originalWaterfallFormatValue = $GLOBALS['symconTestVariables'][4717]['Value'];

@@ -2,6 +2,10 @@
 
 ## Behoben
 
+- Die BarHistory-Formularvorschau formatiert Beispielwert-Beschriftungen jetzt
+  mit der wirksamen Einheit und Nachkommastellen jeder Quelle statt mit einer
+  festen Dezimaldarstellung, getrennt für Kachel und unabhängiges IPSView.
+
 - Die Formularvorschauen von BarCategory, BarPolar und BarWaterfall übernehmen
   jetzt wirksame Einheiten und Nachkommastellen aus der Variablendarstellung;
   Waterfall formatiert damit auch Änderungen und Endsumme wie die Kachel.

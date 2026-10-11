@@ -16,6 +16,8 @@ previews. The historical waveform is always marked as example data: editing
 the form does not trigger an archive query. **Use Tile design** makes the
 IPSView preview follow Tile appearance. Check the real tile and IPSView widget
 for the responsive chart, detailed labels, zoom and SVG bar patterns.
+Example value labels use each source's effective unit and decimal places,
+including the variable presentation when enabled.
 
 ## Animation
 
