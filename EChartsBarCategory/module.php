@@ -322,6 +322,8 @@ class EChartsBarCategory extends IPSModuleStrict
         $palette = EChartsBarPreview::Palette($theme);
         $data = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values, 'Category');
         $items = array_slice($data['items'], 0, 6);
+        $previewDecimals = max(array_column($data['items'], 'decimals'));
+        $previewLanguage = $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage());
         $mode = $this->BarPreviewValue($values, 'BarMode', 'string', $ipsView);
         $orientation = $this->BarPreviewValue($values, 'Orientation', 'string', $ipsView);
         $sort = $this->BarPreviewValue($values, 'SortOrder', 'string', $ipsView);
@@ -477,7 +479,12 @@ class EChartsBarCategory extends IPSModuleStrict
                 if ($showValues) {
                     $svg .= '<text x="' . EChartsBarPreview::N($valueX) . '" y="' . EChartsBarPreview::N($valueY)
                         . '" text-anchor="middle" fill="' . EChartsBarPreview::E($valueColor) . '" font-size="' . $valueSize . '">'
-                        . EChartsBarPreview::E(EChartsBarPreview::N($item['value']) . ' ' . $item['unit']) . '</text>';
+                        . EChartsBarPreview::E(EChartsBarPreview::FormatValue(
+                            $item['value'],
+                            $previewDecimals,
+                            $item['unit'],
+                            $previewLanguage
+                        )) . '</text>';
                 }
                 if ($item['value'] >= 0) {
                     $positiveOffset += $size;

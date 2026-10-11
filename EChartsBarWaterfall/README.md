@@ -23,8 +23,10 @@ werden übernommen. Der erste Wert ist der Startwert, weitere Werte sind
 vorzeichenbehaftete Änderungen; die Endsumme wird berechnet. Wertbeschriftungen
 stehen bei fallenden Balken und negativen Endsummen unter der Säule. Ohne gültige
 Quellen sind Beispieldaten ausdrücklich markiert. Bei aktiviertem
-**Kacheldesign verwenden** folgt die IPSView-Vorschau dem Kacheldesign. Die
-responsive Laufzeitdarstellung prüfen Sie anschließend in Kachel und Widget.
+**Kacheldesign verwenden** folgt die IPSView-Vorschau dem Kacheldesign.
+Wertbeschriftungen verwenden die wirksame gemeinsame Einheit und die höchste
+Nachkommastellenzahl der Quellen. Die responsive Laufzeitdarstellung prüfen
+Sie anschließend in Kachel und Widget.
 
 ## Animation
 

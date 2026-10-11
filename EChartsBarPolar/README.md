@@ -21,7 +21,8 @@ konzentrische Bögen. Sie reagiert auf noch nicht gespeicherte Titel-, Quellen-,
 Theme-, Skalen- und Geometrieänderungen; Kategoriebeschriftungen verwenden
 konfigurierte Namen vor Symcon-Namen, niemals automatisch Variablen-IDs.
 **Kacheldesign verwenden** gilt auch für die IPSView-Vorschau. Ohne gültige
-Quellen sind Beispieldaten markiert. Die Vorschau ist schematisch:
+Quellen sind Beispieldaten markiert. Wertbeschriftungen übernehmen die wirksame
+Einheit und Nachkommastellen der Quellen. Die Vorschau ist schematisch:
 Hover-Hervorhebung, Animation und das responsive Beschriftungslayout prüfen
 Sie an der echten Kachel beziehungsweise im IPSView-Widget.
 

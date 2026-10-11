@@ -6927,6 +6927,66 @@ foreach ([
     );
 }
 
+foreach ([EChartsBarCategory::class, EChartsBarPolar::class] as $presentedBarClass) {
+    $presentedBar = new $presentedBarClass();
+    $presentedBar->Create();
+    $presentedBar->UpdateBarPreviewFromForm(json_encode([
+        'Sources' => [[
+            'VariableID'             => 4715,
+            'Category'               => 'Air pressure',
+            'Label'                  => 'Air pressure',
+            'UseVariablePresentation'=> true,
+            'Unit'                   => 'manual',
+            'Decimals'               => 6
+        ]],
+        'IPSViewUseTileDesign' => false
+    ], JSON_THROW_ON_ERROR));
+    foreach (array_slice($presentedBar->GetTestFormUpdates(), -2) as $presentedBarUpdate) {
+        $presentedBarSvg = base64_decode(substr(
+            $presentedBarUpdate['Value'],
+            strlen('data:image/svg+xml;base64,')
+        ), true);
+        assertGatewayGauge(
+            is_string($presentedBarSvg) && str_contains($presentedBarSvg, '1,013.3 hPa'),
+            $presentedBarClass . ' previews must use effective source presentation for value labels.'
+        );
+    }
+}
+assertGatewayGauge(
+    \SymconECharts\EChartsBarPreview::FormatValue(1234.5, 2, '°C', 'de') === '1.234,50 °C',
+    'Shared Bar preview values must use German decimal and grouping separators when configured.'
+);
+
+$waterfallFormatPreview = new EChartsBarWaterfall();
+$waterfallFormatPreview->Create();
+$originalWaterfallFormatValue = $GLOBALS['symconTestVariables'][4717]['Value'];
+try {
+    $GLOBALS['symconTestVariables'][4717]['Value'] = -50.0;
+    $waterfallFormatPreview->UpdateBarPreviewFromForm(json_encode([
+        'Sources' => [
+            ['VariableID' => 4711, 'Label' => 'Start', 'UseVariablePresentation' => false,
+                'Unit'    => '°C', 'Decimals' => 2],
+            ['VariableID' => 4717, 'Label' => 'Decrease', 'UseVariablePresentation' => false,
+                'Unit'    => '°C', 'Decimals' => 1]
+        ],
+        'IPSViewUseTileDesign' => false
+    ], JSON_THROW_ON_ERROR));
+    foreach (array_slice($waterfallFormatPreview->GetTestFormUpdates(), -2) as $waterfallFormatUpdate) {
+        $waterfallFormatSvg = base64_decode(substr(
+            $waterfallFormatUpdate['Value'],
+            strlen('data:image/svg+xml;base64,')
+        ), true);
+        assertGatewayGauge(
+            is_string($waterfallFormatSvg)
+                && str_contains($waterfallFormatSvg, '-50.00 °C')
+                && str_contains($waterfallFormatSvg, '-7.50 °C'),
+            'Waterfall previews must use the common unit and maximum source decimals for signed and total values.'
+        );
+    }
+} finally {
+    $GLOBALS['symconTestVariables'][4717]['Value'] = $originalWaterfallFormatValue;
+}
+
 $waterfallPreview = new EChartsBarWaterfall();
 $waterfallPreview->Create();
 $waterfallPreviewForm = json_decode($waterfallPreview->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
@@ -6957,9 +7017,9 @@ $waterfallPreviewLabels = static function (string $svg): array
 [$sampleBars, $sampleLabels] = $waterfallPreviewLabels($waterfallPreviewSvg);
 assertGatewayGauge(
     count($sampleBars) === 4
-        && ($sampleLabels['18'] ?? INF) < $sampleBars[0]['top']
-        && ($sampleLabels['-5.5'] ?? -INF) > $sampleBars[1]['bottom']
-        && ($sampleLabels['20.5'] ?? INF) < $sampleBars[3]['top'],
+        && ($sampleLabels['18.0 °C'] ?? INF) < $sampleBars[0]['top']
+        && ($sampleLabels['-5.5 °C'] ?? -INF) > $sampleBars[1]['bottom']
+        && ($sampleLabels['20.5 °C'] ?? INF) < $sampleBars[3]['top'],
     'Waterfall preview must place rising values above and falling values below their bars.'
 );
 $originalWaterfallPreviewValue = $GLOBALS['symconTestVariables'][4717]['Value'];
@@ -6981,7 +7041,7 @@ try {
         [$negativeTotalBars, $negativeTotalLabels] = $waterfallPreviewLabels($negativeTotalSvg);
         assertGatewayGauge(
             count($negativeTotalBars) === 3
-                && ($negativeTotalLabels['-50'] ?? -INF) > $negativeTotalBars[1]['bottom']
+                && ($negativeTotalLabels['-50.0'] ?? -INF) > $negativeTotalBars[1]['bottom']
                 && ($negativeTotalLabels['-7.5'] ?? -INF) > $negativeTotalBars[2]['bottom']
                 && ($negativeTotalLabels['Gesamt'] ?? -INF) > ($negativeTotalLabels['-7.5'] ?? INF) + 20,
             'Waterfall Tile and independent IPSView previews must place negative values without label collisions.'

@@ -330,6 +330,7 @@ class EChartsBarPolar extends IPSModuleStrict
         $palette = EChartsBarPreview::Palette($this->BarPreviewValue($values, 'EChartsTheme', 'string', $ipsView));
         $data = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values);
         $items = array_slice($data['items'], 0, 6);
+        $previewLanguage = $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage());
         $mode = $this->BarPreviewValue($values, 'PolarMode', 'string', $ipsView);
         $sort = $this->BarPreviewValue($values, 'SortOrder', 'string', $ipsView);
         if ($sort === 'ascending' || $sort === 'descending') {
@@ -454,7 +455,12 @@ class EChartsBarPolar extends IPSModuleStrict
             if ($showValues) {
                 $svg .= '<text x="675" y="' . $labelY . '" text-anchor="end" fill="'
                     . EChartsBarPreview::E($outsideValueColor) . '" font-size="' . $valueSize . '">'
-                    . EChartsBarPreview::E(EChartsBarPreview::N($item['value']) . ' ' . $item['unit']) . '</text>';
+                    . EChartsBarPreview::E(EChartsBarPreview::FormatValue(
+                        $item['value'],
+                        $item['decimals'],
+                        $item['unit'],
+                        $previewLanguage
+                    )) . '</text>';
             }
         }
 

@@ -7,6 +7,7 @@ namespace SymconECharts;
 use Burki24\SymconModuleHelper\SVGPreviewHelper;
 
 require_once __DIR__ . '/EChartsSourceIdentity.php';
+require_once __DIR__ . '/EChartsVariablePresentation.php';
 
 /** Shared SVG primitives and bounded source resolution; chart geometry stays with each module. */
 final class EChartsBarPreview
@@ -48,12 +49,25 @@ final class EChartsBarPreview
             if (!is_numeric($value)) {
                 $sample = true;
             }
+            $decimals = $row['Decimals'] ?? 1;
+            if (!is_int($decimals) || $decimals < 0 || $decimals > 6) {
+                $decimals = 1;
+            }
+            $presentation = EChartsVariablePresentation::Resolve(
+                $id,
+                0.0,
+                100.0,
+                is_string($row['Unit'] ?? null) ? $row['Unit'] : '',
+                $decimals,
+                (bool) ($row['UseVariablePresentation'] ?? true)
+            );
             $items[] = [
                 ...$row,
-                'label' => $labels[$id],
-                'value' => is_numeric($value) ? (float) $value : (float) (12 + $index * 6),
-                'color' => self::ConfiguredColor($row['Color'] ?? -1),
-                'unit'  => trim(is_string($row['Unit'] ?? null) ? $row['Unit'] : '')
+                'label'    => $labels[$id],
+                'value'    => is_numeric($value) ? (float) $value : (float) (12 + $index * 6),
+                'color'    => self::ConfiguredColor($row['Color'] ?? -1),
+                'unit'     => $presentation['unit'],
+                'decimals' => $presentation['decimals']
             ];
         }
         if ($items !== []) {
@@ -61,10 +75,18 @@ final class EChartsBarPreview
         }
 
         return ['items' => [
-            ['label' => 'Außen', 'value' => 12.4, 'color' => '', 'unit' => '°C'],
-            ['label' => 'Bad', 'value' => 22.6, 'color' => '', 'unit' => '°C'],
-            ['label' => 'Büro', 'value' => 24.1, 'color' => '', 'unit' => '°C']
+            ['label' => 'Außen', 'value' => 12.4, 'color' => '', 'unit' => '°C', 'decimals' => 1],
+            ['label' => 'Bad', 'value' => 22.6, 'color' => '', 'unit' => '°C', 'decimals' => 1],
+            ['label' => 'Büro', 'value' => 24.1, 'color' => '', 'unit' => '°C', 'decimals' => 1]
         ], 'sample' => true];
+    }
+
+    public static function FormatValue(float $value, int $decimals, string $unit, string $language): string
+    {
+        $decimals = max(0, min(6, $decimals));
+        $german = strtolower($language) === 'de';
+
+        return trim(number_format($value, $decimals, $german ? ',' : '.', $german ? '.' : ',') . ' ' . $unit);
     }
 
     /** @return array<string,mixed> */

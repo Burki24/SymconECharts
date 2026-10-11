@@ -21,8 +21,9 @@ the title, sources, theme, orientation, bar mode, ordering and basic appearance
 update it immediately. Configured category names take precedence over variable
 names; variable IDs are never displayed. With **Use Tile design** enabled,
 the IPSView preview follows the Tile design. Without valid sources, the preview
-is explicitly marked as example data. The preview illustrates the layout;
-an imported SVG motif is shown only as a schematic hatch. The actual chart in
+is explicitly marked as example data. Value labels use the effective unit and
+decimal precision from the sources. The preview illustrates the layout; an
+imported SVG motif is shown only as a schematic hatch. The actual chart in
 the tile or IPSView widget remains the visual reference.
 
 ## Animation

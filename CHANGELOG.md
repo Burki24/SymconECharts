@@ -2,6 +2,10 @@
 
 ## Behoben
 
+- Die Formularvorschauen von BarCategory, BarPolar und BarWaterfall übernehmen
+  jetzt wirksame Einheiten und Nachkommastellen aus der Variablendarstellung;
+  Waterfall formatiert damit auch Änderungen und Endsumme wie die Kachel.
+
 - Die BarHistory-Formularvorschau zeigt jetzt auch 0–9 % Balkendeckkraft
   korrekt, getrennt für Kachel und unabhängiges IPSView.
 

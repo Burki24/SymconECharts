@@ -288,6 +288,9 @@ class EChartsBarWaterfall extends IPSModuleStrict
         $palette = EChartsBarPreview::Palette($this->BarPreviewValue($values, 'EChartsTheme', 'string', $ipsView));
         $data = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values);
         $items = array_slice($data['items'], 0, 5);
+        $previewDecimals = max(array_column($data['items'], 'decimals'));
+        $previewUnit = $data['items'][0]['unit'];
+        $previewLanguage = $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage());
         if ($data['sample']) {
             $items[0]['value'] = 18.0;
             $items[1]['value'] = -5.5;
@@ -353,7 +356,12 @@ class EChartsBarWaterfall extends IPSModuleStrict
                 $svg .= '<text x="' . EChartsBarPreview::N($x + $barWidth / 2) . '" y="'
                     . EChartsBarPreview::N($valueY) . '" text-anchor="middle" fill="'
                     . EChartsBarPreview::E($valueColor) . '" font-size="' . $valueSize . '">'
-                    . EChartsBarPreview::E(EChartsBarPreview::N($item['value'])) . '</text>';
+                    . EChartsBarPreview::E(EChartsBarPreview::FormatValue(
+                        $item['value'],
+                        $previewDecimals,
+                        $previewUnit,
+                        $previewLanguage
+                    )) . '</text>';
             }
         }
         $x = 90 + count($items) * $width;
@@ -376,7 +384,12 @@ class EChartsBarWaterfall extends IPSModuleStrict
             $svg .= '<text x="' . EChartsBarPreview::N($x + $barWidth / 2) . '" y="'
                 . EChartsBarPreview::N($valueY) . '" text-anchor="middle" fill="'
                 . EChartsBarPreview::E($valueColor) . '" font-size="' . $valueSize . '">'
-                . EChartsBarPreview::E(EChartsBarPreview::N($total)) . '</text>';
+                . EChartsBarPreview::E(EChartsBarPreview::FormatValue(
+                    $total,
+                    $previewDecimals,
+                    $previewUnit,
+                    $previewLanguage
+                )) . '</text>';
         }
 
         return $svg . '</svg>';
