@@ -118,6 +118,12 @@ Folgende Module sind enthalten:
 
 ## Kacheldesign und IPSView-Design
 
+In beiden Designern finden Sie die Einstellungen in aufklappbaren,
+chartbezogenen Themenbereichen. Animation und grundlegende Auswahlfelder
+stehen davor; die Live-Vorschau folgt den Bereichen. Bei aktiviertem
+„Kacheldesign verwenden“ sind die unabhängigen IPSView-Einstellungen
+deaktiviert, die Vorschau zeigt aber weiterhin das wirksame Design.
+
 Alle Diagrammmodule bieten im Kacheldesigner **Animation**, **Startanimation**
 und **Aktualisierungsanimation**. Die beiden Zeiten sind unabhängig von 0 bis
 3000 ms einstellbar; 0 ms unterdrückt die jeweilige Übergangsbewegung.

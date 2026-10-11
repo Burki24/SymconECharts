@@ -5,6 +5,9 @@ ECharts-Zeitreihe. Eine Instanz verarbeitet eine bis acht eindeutige Quellen,
 bis zu acht Einheitengruppen und rendert eine native Symcon-Kachel sowie
 optional ein eigenständiges IPSView-WebContent-Widget.
 
+Linien und Datenpunkte sowie Flächen und Achsen sind in beiden Designern als
+eigene einklappbare Bereiche angeordnet; die Vorschau folgt darunter.
+
 ## Animation
 
 Für Start und Aktualisierung lassen sich außerdem die **Bewegungskurve** und

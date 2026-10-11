@@ -13,6 +13,7 @@ use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsBarPreview;
 use SymconECharts\EChartsBarPreviewForm;
 use SymconECharts\EChartsCurrentSources;
+use SymconECharts\EChartsDesignerSections;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
@@ -32,6 +33,7 @@ require_once __DIR__ . '/../libs/EChartsBarPreviewForm.php';
 require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsCurrentSources.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
+require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
@@ -121,6 +123,10 @@ class EChartsBarWaterfall extends IPSModuleStrict
         }
 
         $form = $this->WithIPSViewDesignFormState($form, 'ECBW');
+        $form = EChartsDesignerSections::Group($form, [
+            ['caption' => 'Labels and geometry', 'start' => 'ShowValues'],
+            ['caption' => 'Step colors', 'start' => 'StartColor']
+        ]);
         $fields = array_merge(
             ['Title', 'Sources', 'TotalLabel', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
                 'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent'],

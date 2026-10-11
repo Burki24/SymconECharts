@@ -6,6 +6,9 @@ vier weitere Quellen werden als gleich große Nebeninstrumente angeordnet. Bei
 vier und fünf Quellen nutzt eine eigene Anordnung den verfügbaren Platz breiter
 Kacheln aus, ohne das Hauptinstrument zu verkleinern.
 
+Kachel- und unabhängiger IPSView-Designer ordnen Feinabstimmung, Zeiger und
+Nabe, Skala und Farben sowie Zifferblatt in einklappbaren Bereichen.
+
 ## Animation
 
 Für Start und Aktualisierung lassen sich außerdem die **Bewegungskurve** und

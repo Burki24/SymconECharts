@@ -13,6 +13,7 @@ use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsBarPreview;
 use SymconECharts\EChartsBarPreviewForm;
 use SymconECharts\EChartsCurrentSources;
+use SymconECharts\EChartsDesignerSections;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
@@ -32,6 +33,7 @@ require_once __DIR__ . '/../libs/EChartsBarPreviewForm.php';
 require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsCurrentSources.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
+require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
@@ -140,6 +142,11 @@ class EChartsBarCategory extends IPSModuleStrict
         }
 
         $form = $this->WithIPSViewDesignFormState($form, 'ECBC');
+        $form = EChartsDesignerSections::Group($form, [
+            ['caption' => 'Bar layout and order', 'start' => 'BarMode'],
+            ['caption' => 'Labels and geometry', 'start' => 'ShowValues'],
+            ['caption' => 'Bar fill and pattern', 'start' => 'BarFillMode']
+        ]);
         $fields = array_merge(
             ['Title', 'Sources', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
                 'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent'],

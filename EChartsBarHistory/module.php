@@ -14,6 +14,7 @@ use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsBarPreview;
 use SymconECharts\EChartsBarPreviewForm;
 use SymconECharts\EChartsDataProtocol;
+use SymconECharts\EChartsDesignerSections;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
@@ -35,6 +36,7 @@ require_once __DIR__ . '/../libs/EChartsBarPreview.php';
 require_once __DIR__ . '/../libs/EChartsBarPreviewForm.php';
 require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
+require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
@@ -233,6 +235,11 @@ class EChartsBarHistory extends IPSModuleStrict
         }
 
         $form = $this->WithIPSViewDesignFormState($form, 'ECBH');
+        $form = EChartsDesignerSections::Group($form, [
+            ['caption' => 'Axes and display', 'start' => 'EChartsTheme'],
+            ['caption' => 'Bar fill and pattern', 'start' => 'BarFillMode'],
+            ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
+        ]);
         $fields = array_merge(
             ['Title', 'Sources', 'Range', 'CustomRangeValue', 'CustomRangeUnit', 'TimeAxisLabelFormat',
                 'IPSViewUseTileDesign', 'IPSViewUseTileTimeSettings', 'IPSViewRange',

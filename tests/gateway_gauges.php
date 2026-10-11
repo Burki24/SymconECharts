@@ -13,6 +13,37 @@ const SYMCON_OUTPUT_BUFFER_LIMIT = 1048576;
 const VARIABLETYPE_STRING = 3;
 const VARIABLE_PRESENTATION_WEB_CONTENT = '{6B9CAEEC-5958-C223-30F7-BD36569FC57A}';
 
+/** @param list<array<string, mixed>> $items @return list<array<string, mixed>> */
+function flattenDesignerSections(array $items): array
+{
+    $flat = [];
+    foreach ($items as $item) {
+        if (($item['type'] ?? null) === 'ExpansionPanel') {
+            array_push($flat, ...flattenDesignerSections($item['items'] ?? []));
+        } else {
+            $flat[] = $item;
+        }
+    }
+
+    return $flat;
+}
+
+/** @param list<array<string, mixed>> $items @return list<string> */
+function designerControlNames(array $items): array
+{
+    $names = [];
+    foreach ($items as $item) {
+        if (isset($item['name']) && ($item['type'] ?? null) !== 'Image') {
+            $names[] = $item['name'];
+        }
+        if (($item['type'] ?? null) !== 'List' && is_array($item['items'] ?? null)) {
+            array_push($names, ...designerControlNames($item['items']));
+        }
+    }
+
+    return $names;
+}
+
 $GLOBALS['symconTestVariables'] = [
     4711 => [
         'VariableType'    => 2,
@@ -5121,6 +5152,7 @@ $polarTileDesigner = current(array_filter(
     $polarForm['elements'],
     static fn (array $element): bool => ($element['caption'] ?? '') === 'Tile designer'
 ));
+$polarTileDesigner['items'] = flattenDesignerSections($polarTileDesigner['items']);
 $polarScaleRow = current(array_filter(
     $polarTileDesigner['items'],
     static fn (array $item): bool => in_array('ValueAxisRangeMode', array_column($item['items'] ?? [], 'name'), true)
@@ -5206,6 +5238,7 @@ $polarDefaultIPSViewPanel = current(array_filter(
     $polarForm['elements'],
     static fn (array $element): bool => ($element['caption'] ?? '') === 'IPSView design'
 ));
+$polarDefaultIPSViewPanel['items'] = flattenDesignerSections($polarDefaultIPSViewPanel['items']);
 $polarDefaultIPSViewScaleRow = current(array_filter(
     $polarDefaultIPSViewPanel['items'],
     static fn (array $item): bool => in_array('IPSViewValueAxisRangeMode', array_column($item['items'] ?? [], 'name'), true)
@@ -5391,6 +5424,7 @@ $polarIPSViewPanel = current(array_filter(
     $polarIPSViewForm['elements'],
     static fn (array $element): bool => ($element['caption'] ?? '') === 'IPSView design'
 ));
+$polarIPSViewPanel['items'] = flattenDesignerSections($polarIPSViewPanel['items']);
 $polarIPSViewScaleRow = current(array_filter(
     $polarIPSViewPanel['items'],
     static fn (array $item): bool => in_array('IPSViewValueAxisRangeMode', array_column($item['items'] ?? [], 'name'), true)
@@ -5512,6 +5546,7 @@ $polarInheritedPanel = current(array_filter(
     $polarInheritedForm['elements'],
     static fn (array $element): bool => ($element['caption'] ?? '') === 'IPSView design'
 ));
+$polarInheritedPanel['items'] = flattenDesignerSections($polarInheritedPanel['items']);
 $polarInheritedScaleRow = current(array_filter(
     $polarInheritedPanel['items'],
     static fn (array $item): bool => in_array('IPSViewValueAxisRangeMode', array_column($item['items'] ?? [], 'name'), true)
@@ -5624,6 +5659,7 @@ $polarTileDesigner = current(array_filter(
     $polarForm['elements'],
     static fn (array $element): bool => ($element['caption'] ?? '') === 'Tile designer'
 ));
+$polarTileDesigner['items'] = flattenDesignerSections($polarTileDesigner['items']);
 $polarTileDesignJSON = json_encode($polarTileDesigner, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
     str_contains($polarTileDesignJSON, 'ValueAxisRangeMode')
@@ -6030,6 +6066,23 @@ for ($index = 0; $index < 16; $index++) {
     unset($GLOBALS['symconTestVariables'][5800 + $index]);
 }
 
+$expectedDesignerSections = [
+    EChartsGaugeSingle::class      => [
+        'Geometry and pointer', 'Hub design', 'Dial plate', 'Gauge colors',
+        'Scale and value ranges', 'Position and visibility', 'Value display and effects', 'Fine tuning'
+    ],
+    EChartsGaugeMulti::class       => ['Fine tuning', 'Pointer and hub', 'Scale and colors', 'Dial plate'],
+    EChartsGaugeTacho::class       => ['Fine tuning', 'Pointer and hub', 'Scale and colors', 'Dial plate'],
+    EChartsGaugeChronograph::class => ['Fine tuning', 'Pointer and hub', 'Scale and colors', 'Dial plate'],
+    EChartsTimeSeries::class       => ['Lines and symbols', 'Area and axes'],
+    EChartsBarCategory::class      => ['Bar layout and order', 'Labels and geometry', 'Bar fill and pattern'],
+    EChartsBarHistory::class       => ['Axes and display', 'Bar fill and pattern', 'Typography and colors'],
+    EChartsBarWaterfall::class     => ['Labels and geometry', 'Step colors'],
+    EChartsBarPolar::class         => [
+        'Polar layout and order', 'Labels and visibility', 'Bar geometry',
+        'Bar appearance and effects', 'Scale and angular range'
+    ]
+];
 foreach ([
     EChartsGaugeSingle::class       => 'ECGS',
     EChartsGaugeMulti::class        => 'ECGM',
@@ -6046,6 +6099,57 @@ foreach ([
     foreach ([true, false] as $useTileDesign) {
         $designModule->SetTestProperty('IPSViewUseTileDesign', $useTileDesign);
         $designForm = json_decode($designModule->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+        foreach (['Tile designer', 'IPSView design'] as $designerCaption) {
+            $matchingDesigners = array_values(array_filter(
+                $designForm['elements'],
+                static fn (array $element): bool => ($element['caption'] ?? null) === $designerCaption
+            ));
+            assertGatewayGauge(count($matchingDesigners) === 1, $moduleClass . ' must have one ' . $designerCaption . '.');
+            $sectionPanels = array_values(array_filter(
+                $matchingDesigners[0]['items'],
+                static fn (array $item): bool => ($item['type'] ?? null) === 'ExpansionPanel'
+            ));
+            assertGatewayGauge(
+                array_column($sectionPanels, 'caption') === $expectedDesignerSections[$moduleClass]
+                    && count(array_filter(
+                        $sectionPanels,
+                        static fn (array $item): bool => ($item['expanded'] ?? null) !== false
+                    )) === 0,
+                $moduleClass . ' must use its own collapsed topic sections in ' . $designerCaption . '.'
+            );
+            assertGatewayGauge(
+                ($matchingDesigners[0]['items'][array_key_last($matchingDesigners[0]['items'])]['type'] ?? null)
+                    === 'Image',
+                $moduleClass . ' must keep the ' . $designerCaption . ' preview below its topic sections.'
+            );
+        }
+        $moduleDirectory = $moduleClass;
+        $baseForm = json_decode(
+            (string) file_get_contents(__DIR__ . '/../' . $moduleDirectory . '/form.json'),
+            true,
+            512,
+            JSON_THROW_ON_ERROR
+        );
+        $baseTileDesigner = current(array_filter(
+            $baseForm['elements'],
+            static fn (array $element): bool => ($element['caption'] ?? null) === 'Tile designer'
+        ));
+        $actualTileDesigner = current(array_filter(
+            $designForm['elements'],
+            static fn (array $element): bool => ($element['caption'] ?? null) === 'Tile designer'
+        ));
+        $missingBaseFields = array_diff(
+            designerControlNames($baseTileDesigner['items']),
+            designerControlNames($actualTileDesigner['items'])
+        );
+        if (in_array($moduleClass, [EChartsGaugeTacho::class, EChartsGaugeChronograph::class], true)) {
+            $missingBaseFields = array_diff($missingBaseFields, ['GaugePreset']);
+        }
+        assertGatewayGauge(
+            $missingBaseFields === [],
+            $moduleClass . ' must preserve every Tile designer field while grouping it: '
+                . implode(', ', $missingBaseFields)
+        );
         $designPanels = array_values(array_filter(
             $designForm['elements'],
             static fn (array $element): bool => ($element['caption'] ?? null) === 'IPSView design'

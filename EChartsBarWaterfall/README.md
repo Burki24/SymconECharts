@@ -4,6 +4,9 @@
 Änderungen zu einer Endsumme entwickelt. Das Modul benötigt zwei bis sechzehn
 eindeutige numerische Symcon-Variablen mit derselben effektiven Einheit.
 
+Die beiden Designer fassen Beschriftung und Geometrie sowie die Schrittfarben
+in einklappbaren Bereichen zusammen. Die Live-Vorschau steht darunter.
+
 ## Live-Vorschau
 
 Kachel- und IPSView-Designer zeigen jeweils eine SVG-Vorschau. Noch nicht

@@ -4,6 +4,9 @@
 einem gemeinsamen Chronographen. Die erste Quelle bildet das Hauptinstrument;
 bis zu vier weitere Quellen erscheinen als eingebettete Hilfszifferblätter.
 
+Kachel- und unabhängiger IPSView-Designer ordnen Feinabstimmung, Zeiger und
+Nabe, Skala und Farben sowie Zifferblatt in einklappbaren Bereichen.
+
 ## Animation
 
 Für Start und Aktualisierung lassen sich außerdem die **Bewegungskurve** und

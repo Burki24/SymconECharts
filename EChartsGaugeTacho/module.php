@@ -12,6 +12,7 @@ use Burki24\SymconModuleHelper\VisualizationThemeHelper;
 use SymconECharts\EChartsAnimationDesign;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsDataProtocol;
+use SymconECharts\EChartsDesignerSections;
 use SymconECharts\EChartsGaugeDesign;
 use SymconECharts\EChartsGaugeTachoPreview;
 use SymconECharts\EChartsIPSViewBackground;
@@ -30,6 +31,7 @@ require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
+require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
 require_once __DIR__ . '/../libs/EChartsGaugeDesign.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
@@ -260,7 +262,12 @@ class EChartsGaugeTacho extends IPSModuleStrict
             )
         );
 
-        return $this->EncodeConfigurationForm($this->WithIPSViewDesignFormState($form, 'ECGT'));
+        $form = $this->WithIPSViewDesignFormState($form, 'ECGT');
+        $form = EChartsDesignerSections::Group($form, [
+            ['caption' => 'Fine tuning', 'start' => 'Fine tuning values range from 50% to 150%. 100% restores the preset default.']
+        ]);
+
+        return $this->EncodeConfigurationForm($form);
     }
 
     public function RequestAction(string $Ident, mixed $Value): void

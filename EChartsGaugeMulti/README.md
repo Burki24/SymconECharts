@@ -6,6 +6,9 @@ Symcon-Kacheldarstellung und ein separat platzierbares HTML-Widget in IPSView
 bereitstellen können. Datenquellen und Diagrammkonfiguration werden dabei nur
 einmal gepflegt.
 
+Kachel- und unabhängiger IPSView-Designer ordnen Feinabstimmung, Zeiger und
+Nabe, Skala und Farben sowie Zifferblatt in einklappbaren Bereichen.
+
 ## Animation
 
 Für Start und Aktualisierung lassen sich außerdem die **Bewegungskurve** und

@@ -76,6 +76,10 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   IPSView folgen [`ADR 0036`](docs/adr/0036-consistent-chart-forms-and-live-previews.md).
   Das Gateway ohne Diagramm-Designer ist ausgenommen. Die dort noch offenen
   Vorschauen werden nicht als bereits implementiert dargestellt.
+- Fachlich benannte, standardmäßig eingeklappte Unterbereiche in Kachel- und
+  unabhängigem IPSView-Designer folgen
+  [`ADR 0037`](docs/adr/0037-topic-sections-in-chart-designers.md). Rubriken
+  und Feldzuordnung bleiben je Diagrammfamilie festgelegt.
 - Repositoryweit geteilter projektspezifischer Code liegt direkt unter `libs`;
   `libs/helper` enthält ausschließlich die über `.helper-sync.json`
   abonnierten Kopien aus `Symcon_ModuleHelper`. Tests liegen unter `tests`.

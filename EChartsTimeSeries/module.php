@@ -13,6 +13,7 @@ use SymconECharts\EChartsAnimationDesign;
 use SymconECharts\EChartsArchiveQuery;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsDataProtocol;
+use SymconECharts\EChartsDesignerSections;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
@@ -33,6 +34,7 @@ require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsArchiveQuery.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
+require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
@@ -264,7 +266,13 @@ class EChartsTimeSeries extends IPSModuleStrict
             )
         );
 
-        return $this->EncodeConfigurationForm($this->WithIPSViewDesignFormState($form, 'ECTS'));
+        $form = $this->WithIPSViewDesignFormState($form, 'ECTS');
+        $form = EChartsDesignerSections::Group($form, [
+            ['caption' => 'Lines and symbols', 'start' => 'LineWidthPercent'],
+            ['caption' => 'Area and axes', 'start' => 'AreaOpacityPercent']
+        ]);
+
+        return $this->EncodeConfigurationForm($form);
     }
 
     /** Refreshes the SVG preview from the values currently edited in the configuration form. */

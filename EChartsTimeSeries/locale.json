@@ -102,6 +102,8 @@
             "ECharts theme": "ECharts-Theme",
             "Automatic (Symcon design)": "Automatisch (Symcon-Design)",
             "Tile designer": "Kacheldesigner",
+            "Lines and symbols": "Linien und Datenpunkte",
+            "Area and axes": "Flächen und Achsen",
             "Animate time series": "Zeitreihe animieren",
             "Initial animation": "Startanimation",
             "Update animation": "Aktualisierungsanimation",

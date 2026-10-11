@@ -48,6 +48,11 @@
 
 ## Neu
 
+- Die Kachel- und IPSView-Designer aller neun Diagrammmodule sind jetzt in
+  fachlich benannte, einklappbare Bereiche gegliedert. Die Rubriken sind je
+  Chart passend gewählt; bestehende Einstellungen und Vorschauen bleiben
+  erhalten.
+
 - BarCategory, BarHistory, BarWaterfall und BarPolar besitzen jetzt wie die
   Gauges und TimeSeries eine Live-Vorschau im Kachel- und IPSView-Designer.
   Ungespeicherte Formular- und Quellenänderungen aktualisieren beide Bilder;

@@ -4,6 +4,9 @@
 variables as bars along a time axis. It is deliberately separate from
 `EChartsBarCategory`, which compares current values as categories.
 
+Both designers group axes and display, bar fill and patterns, and typography
+and colors in collapsible sections. The live preview remains below them.
+
 ## Live preview
 
 The Tile and IPSView designers each show an SVG preview. Unsaved changes to

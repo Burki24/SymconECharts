@@ -13,6 +13,7 @@ use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsBarPreview;
 use SymconECharts\EChartsBarPreviewForm;
 use SymconECharts\EChartsCurrentSources;
+use SymconECharts\EChartsDesignerSections;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
@@ -32,6 +33,7 @@ require_once __DIR__ . '/../libs/EChartsBarPreviewForm.php';
 require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsCurrentSources.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
+require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
@@ -155,6 +157,13 @@ class EChartsBarPolar extends IPSModuleStrict
         }
 
         $form = $this->WithIPSViewDesignFormState($form, 'ECBP');
+        $form = EChartsDesignerSections::Group($form, [
+            ['caption' => 'Polar layout and order', 'start' => 'PolarMode'],
+            ['caption' => 'Labels and visibility', 'start' => 'ShowCategoryLabels'],
+            ['caption' => 'Bar geometry', 'start' => 'BarWidthPercent'],
+            ['caption' => 'Bar appearance and effects', 'start' => 'BarFillMode'],
+            ['caption' => 'Scale and angular range', 'start' => 'ValueAxisRangeMode']
+        ]);
         $fields = array_merge(
             ['Title', 'Sources', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
                 'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent'],

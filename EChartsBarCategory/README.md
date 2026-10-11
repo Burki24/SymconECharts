@@ -4,6 +4,9 @@
 IP-Symcon variables as a category bar chart. All configured sources must use
 the same effective unit so that the shared value axis remains meaningful.
 
+Both designers group bar layout, labels and geometry, and fill patterns in
+collapsible sections. The live preview remains below these sections.
+
 ## Live preview
 
 The Tile and IPSView designers each show an SVG preview. Unsaved changes to

@@ -178,6 +178,9 @@ dokumentiert [`ADR 0035`](adr/0035-polar-bar-current-values.md).
 Die gemeinsame Grundreihenfolge der Diagrammformulare, die Live-Vorschau
 für beide Ausgabewege und die Grenze zwischen Modul und `libs` legt
 [`ADR 0036`](adr/0036-consistent-chart-forms-and-live-previews.md) fest.
+Die fachlich unterschiedlichen, aber in beiden Ausgabewegen gleich
+aufgebauten Designer-Unterbereiche legt
+[`ADR 0037`](adr/0037-topic-sections-in-chart-designers.md) fest.
 
 Für die vier Bar-Module bündelt `libs/EChartsBarPreviewForm.php` die
 read-only-Formularverdrahtung, einschließlich zweier `Image`-Felder,
