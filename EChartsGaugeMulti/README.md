@@ -185,7 +185,9 @@ ECharts-Gauge-Design-Helper identisch. Ringstärke,
 Schriftgrößen und geometrische Feinabstimmungen sind zwischen 50 und 150 Prozent
 einstellbar. Die Standardwerte `preset` und `theme` erhalten die bisherige
 Darstellung vollständig. Die SVG-Vorschau übernimmt die aktuell bearbeiteten
-Designwerte sofort und wendet sie auf jedes dargestellte Instrument an. Sie
+Designwerte und bestätigte Änderungen der Quellenliste sofort, auch beim
+Hinzufügen, Entfernen und Umsortieren, ohne die Konfiguration zu speichern. Bei
+einer unvollständigen Quellenliste zeigt sie einen Hinweis statt alter Werte. Sie
 zeigt bis zu vier Quellen exemplarisch. Bei vielen konzentrischen Ringen oder Wetterstations-Instrumenten ist für lesbare Beschriftungen eine ausreichend große Kachel bzw. ein großes IPSView-Widget erforderlich. Zur Laufzeit werden alle 2 bis 16 konfigurierten Quellen ausgegeben.
 Die gemeinsamen Einstellungen einschließlich der SVG-Assets gelten für alle
 Quellen der jeweiligen Ausgabe. Ein individuelles Design je Quelle bieten die

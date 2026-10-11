@@ -295,19 +295,29 @@ final class EChartsGaugeDesign
     }
 
     /** @param list<string> $fieldNames */
-    public static function PreviewFormAction(string $prefix, array $fieldNames, string $sourceAction = ''): string
-    {
+    public static function PreviewFormAction(
+        string $prefix,
+        array $fieldNames,
+        string $sourceAction = '',
+        bool $snapshotSources = false
+    ): string {
         $pairs = array_map(
-            static fn (string $name): string => "'" . $name . "' => $" . $name,
+            static fn (string $name): string => "'" . $name . "' => $"
+                . ($snapshotSources && $name === 'Sources' ? 'gaugePreviewSources' : $name),
             $fieldNames
         );
 
+        $snapshot = $snapshotSources
+            ? '$gaugePreviewSources = []; foreach ($Sources as $gaugePreviewSource) {'
+                . ' $gaugePreviewSources[] = $gaugePreviewSource; } '
+            : '';
+
         if ($sourceAction !== '') {
-            return $prefix . '_UpdateGaugePreviewSourceFromForm($id, json_encode([' . implode(', ', $pairs)
+            return $snapshot . $prefix . '_UpdateGaugePreviewSourceFromForm($id, json_encode([' . implode(', ', $pairs)
                 . ']), ' . var_export($sourceAction, true) . ');';
         }
 
-        return $prefix . '_UpdateGaugePreviewFromForm($id, json_encode([' . implode(', ', $pairs) . ']));';
+        return $snapshot . $prefix . '_UpdateGaugePreviewFromForm($id, json_encode([' . implode(', ', $pairs) . ']));';
     }
 
     /** @param list<array<string, mixed>> $items @param list<string> $fieldNames @return list<array<string, mixed>> */

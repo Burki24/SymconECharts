@@ -17,6 +17,17 @@ final class EChartsGaugeMultiPreview
         array $style = []
     ): string {
         $palette = self::StyledPalette(EChartsAsset::ThemePreviewPalette($theme), $style);
+        if ($items === []) {
+            return self::SvgDocument(
+                $title,
+                $palette,
+                '<text x="360" y="215" text-anchor="middle" font-size="18" fill="'
+                    . SVGPreviewHelper::escape($palette['muted'])
+                    . '">Configure 2 to 16 unique numeric sources.</text>',
+                $preset,
+                $style
+            );
+        }
         if ($preset === 'ring-grid') {
             return self::CreateRingGridSvg($items, $title, $palette, $style);
         }

@@ -2,6 +2,10 @@
 
 ## Behoben
 
+- Gauge Multi aktualisiert beide Formularvorschauen jetzt auch bei noch nicht
+  gespeicherten Änderungen der Quellenliste (Hinzufügen, Bearbeiten, Löschen und
+  Umsortieren). Unvollständige Listen zeigen einen Hinweis statt veralteter Gauges.
+
 - Die Diagramm-Instanzformulare beginnen einheitlich mit Titel und Quellen;
   Waterfall ordnet die Beschriftung der Endsumme danach ein, Polar zeigt die
   Animation am Anfang beider Designer. Alle Diagrammmodule erklären die

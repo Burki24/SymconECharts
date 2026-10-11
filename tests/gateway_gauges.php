@@ -2182,7 +2182,19 @@ assertGatewayGauge(
 $multiForm = json_decode($multiGauge->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
 $multiFormJson = json_encode($multiForm, JSON_THROW_ON_ERROR);
 $multiPreset = findGaugeFormElement($multiForm['elements'], 'GaugePreset');
+$multiSourceList = findGaugeFormElement($multiForm['elements'], 'Sources');
 $multiIPSViewPointer = findGaugeFormElement($multiForm['elements'], 'IPSViewPointerShape');
+assertGatewayGauge(
+    is_array($multiSourceList)
+        && array_reduce(
+            ['onAdd', 'onEdit', 'onDelete', 'onChangeOrder'],
+            static fn (bool $valid, string $event): bool => $valid
+                && str_contains((string) ($multiSourceList[$event] ?? ''), 'ECGM_UpdateGaugePreviewFromForm')
+                && str_contains((string) ($multiSourceList[$event] ?? ''), 'foreach ($Sources'),
+            true
+        ),
+    'Gauge Multi must refresh its previews after every source-list edit, including reordering.'
+);
 assertGatewayGauge(
     is_array($multiPreset)
         && str_starts_with($multiPreset['onChange'] ?? '', 'ECGM_UpdateGaugePreviewFromForm(')
@@ -2292,6 +2304,59 @@ assertGatewayGauge(
         && str_contains($ipsViewPreviewSvg, '#010203')
         && str_contains($ipsViewPreviewSvg, 'fill="#6B4423" fill-opacity="0.35"'),
     'Gauge Multi IPSView preview must render its independently edited design immediately.'
+);
+$draftMultiSources = json_decode($multiSources, true, 512, JSON_THROW_ON_ERROR);
+$draftMultiSources[0]['Label'] = 'Draft temperature';
+$draftMultiSources[1]['Label'] = 'Draft humidity';
+$draftMultiSources[] = [
+    'VariableID' => 4714, 'Label' => 'Draft pressure', 'Minimum' => 900.0,
+    'Maximum'    => 1100.0, 'Unit' => 'hPa', 'Decimals' => 0
+];
+$draftMultiSources = [$draftMultiSources[2], $draftMultiSources[1], $draftMultiSources[0]];
+$multiGauge->UpdateGaugePreviewFromForm(json_encode(['Sources' => $draftMultiSources], JSON_THROW_ON_ERROR));
+$draftPreviewUpdates = array_slice($multiGauge->GetTestFormUpdates(), -2);
+foreach ($draftPreviewUpdates as $draftPreviewUpdate) {
+    $draftSvg = base64_decode(
+        substr((string) ($draftPreviewUpdate['Value'] ?? ''), strlen('data:image/svg+xml;base64,')),
+        true
+    );
+    assertGatewayGauge(
+        is_string($draftSvg)
+            && str_contains($draftSvg, 'Draft pressure')
+            && str_contains($draftSvg, 'Draft humidity')
+            && str_contains($draftSvg, 'Draft temperature')
+            && strpos($draftSvg, 'Draft pressure') < strpos($draftSvg, 'Draft humidity')
+            && strpos($draftSvg, 'Draft humidity') < strpos($draftSvg, 'Draft temperature')
+            && !str_contains($draftSvg, 'Living room humidity'),
+        'Gauge Multi tile and IPSView previews must use the complete unsaved source list in its current order.'
+    );
+}
+assertGatewayGauge(
+    array_column(
+        json_decode($multiGauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR)['items'],
+        'id'
+    ) === ['variable-4711', 'variable-4713'],
+    'Gauge Multi draft preview must not persist the edited source list.'
+);
+$multiGauge->UpdateGaugePreviewFromForm(json_encode(['Sources' => []], JSON_THROW_ON_ERROR));
+$emptyDraftSvg = base64_decode(substr(
+    (string) (array_slice($multiGauge->GetTestFormUpdates(), -2)[0]['Value'] ?? ''),
+    strlen('data:image/svg+xml;base64,')
+), true);
+assertGatewayGauge(
+    is_string($emptyDraftSvg) && str_contains($emptyDraftSvg, 'Configure 2 to 16 unique numeric sources.'),
+    'Gauge Multi must show a placeholder for an incomplete draft rather than stale saved gauges.'
+);
+$multiGauge->UpdateGaugePreviewFromForm(json_encode(['Sources' => array_slice($draftMultiSources, 1)], JSON_THROW_ON_ERROR));
+$deletedDraftSvg = base64_decode(substr(
+    (string) (array_slice($multiGauge->GetTestFormUpdates(), -2)[0]['Value'] ?? ''),
+    strlen('data:image/svg+xml;base64,')
+), true);
+assertGatewayGauge(
+    is_string($deletedDraftSvg)
+        && !str_contains($deletedDraftSvg, 'Draft pressure')
+        && str_contains($deletedDraftSvg, 'Draft humidity'),
+    'Gauge Multi draft preview must remove deleted sources immediately.'
 );
 $ringPreviewSvg = \SymconECharts\EChartsGaugeMultiPreview::CreateSvg(
     [

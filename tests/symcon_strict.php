@@ -714,10 +714,11 @@ foreach ([
         }
         requireStrictContract(
             str_contains($gauge, 'EChartsGaugeDesign::WithPreviewActions(')
-                && str_contains(
-                    $gauge,
-                    "EChartsGaugeDesign::PreviewFormAction('" . $gaugeContract['prefix'] . "'"
-                ),
+                && preg_match(
+                    '/EChartsGaugeDesign::PreviewFormAction\(\s*\x27'
+                        . preg_quote($gaugeContract['prefix'], '/') . '\x27/',
+                    $gauge
+                ) === 1,
             $gaugeModuleName . ' designer fields must use the shared SVG preview callback.',
             $errors
         );

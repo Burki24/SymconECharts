@@ -323,7 +323,9 @@ class EChartsGaugeMulti extends IPSModuleStrict
             $values = [];
         }
 
-        $items = $this->PreviewItems();
+        $items = array_key_exists('Sources', $values)
+            ? $this->PreviewItemsFromForm($values['Sources'])
+            : $this->PreviewItems();
         $title = (string) ($values['Title'] ?? $this->ReadPropertyString('Title'));
         $tileStyle = $this->GaugeStyleFromFormValues($values);
         $this->UpdateFormField('GaugePreview', 'image', SVGPreviewHelper::dataUri(
@@ -706,6 +708,12 @@ class EChartsGaugeMulti extends IPSModuleStrict
             );
         }
 
+        return $this->ValidateSources($sources);
+    }
+
+    /** @return list<array{VariableID:int,Label:string,Minimum:float,Maximum:float,Unit:string,Decimals:int,UseVariablePresentation:bool}> */
+    private function ValidateSources(mixed $sources): array
+    {
         if (!is_array($sources) || !array_is_list($sources)) {
             throw new UnexpectedValueException(
                 'Gauge sources must be a JSON list.',
@@ -962,6 +970,25 @@ class EChartsGaugeMulti extends IPSModuleStrict
             ];
         }
 
+        return $this->PreviewItemsFromValidatedSources($sources);
+    }
+
+    /** @return list<array<string, mixed>> */
+    private function PreviewItemsFromForm(mixed $sources): array
+    {
+        if (is_string($sources)) {
+            $sources = json_decode($sources, true);
+        }
+        try {
+            return $this->PreviewItemsFromValidatedSources($this->ValidateSources($sources));
+        } catch (Throwable) {
+            return [];
+        }
+    }
+
+    /** @param list<array<string, mixed>> $sources @return list<array<string, mixed>> */
+    private function PreviewItemsFromValidatedSources(array $sources): array
+    {
         $labels = EChartsSourceIdentity::LabelsForSources($sources);
 
         return array_map(static function (array $source) use ($labels): array
@@ -1225,23 +1252,39 @@ class EChartsGaugeMulti extends IPSModuleStrict
     /** @param list<array<string, mixed>> $items @return list<array<string, mixed>> */
     private function AttachGaugePreviewActions(array $items): array
     {
-        return EChartsGaugeDesign::WithPreviewActions(
+        $items = EChartsGaugeDesign::WithPreviewActions(
             $items,
             $this->GaugePreviewFieldNames(),
             $this->GaugePreviewFormAction()
         );
+        foreach ($items as &$item) {
+            if (($item['name'] ?? null) !== 'Sources' || ($item['type'] ?? null) !== 'List') {
+                continue;
+            }
+            foreach (['onAdd', 'onEdit', 'onDelete', 'onChangeOrder'] as $event) {
+                $item[$event] = $this->GaugePreviewFormAction(true);
+            }
+        }
+        unset($item);
+
+        return $items;
     }
 
-    private function GaugePreviewFormAction(): string
+    private function GaugePreviewFormAction(bool $snapshotSources = false): string
     {
-        return EChartsGaugeDesign::PreviewFormAction('ECGM', $this->GaugePreviewFieldNames());
+        return EChartsGaugeDesign::PreviewFormAction(
+            'ECGM',
+            $this->GaugePreviewFieldNames(),
+            '',
+            $snapshotSources
+        );
     }
 
     /** @return list<string> */
     private function GaugePreviewFieldNames(): array
     {
         return EChartsGaugeDesign::PreviewFieldNames([
-            'Title', 'GaugePreset', 'EChartsTheme', 'IPSViewUseTileDesign',
+            'Title', 'Sources', 'GaugePreset', 'EChartsTheme', 'IPSViewUseTileDesign',
             'IPSViewAdaptToBackground', 'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent',
             'IPSViewGaugePreset', 'IPSViewEChartsTheme'
         ], $this->GaugeDesignFieldNames());
