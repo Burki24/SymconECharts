@@ -4668,7 +4668,7 @@ $barHistoryTilePanels = array_values(array_filter(
 ));
 assertGatewayGauge(
     count($barHistoryIPSViewPanels) === 1
-        && !str_contains(json_encode($barHistoryIPSViewPanels[0], JSON_THROW_ON_ERROR), 'IPSViewUseTileTimeSettings')
+        && findGaugeFormElement($barHistoryIPSViewPanels[0]['items'], 'IPSViewUseTileTimeSettings') === null
         && str_contains(json_encode($barHistoryForm['elements'], JSON_THROW_ON_ERROR), 'IPSViewUseTileTimeSettings')
         && str_contains(json_encode($barHistoryIPSViewPanels[0], JSON_THROW_ON_ERROR), 'IPSViewBarWidthPercent')
         && str_contains(json_encode($barHistoryIPSViewPanels[0], JSON_THROW_ON_ERROR), 'IPSViewBarFillMode')
@@ -6350,6 +6350,257 @@ foreach ([
         assertGatewayGauge(
             ($locale['translations']['de']['Use variable presentation'] ?? null) === 'Variablendarstellung',
             $moduleDirectory . ' must use the common source-table wording.'
+        );
+    }
+}
+
+foreach ([
+    EChartsBarCategory::class, EChartsBarHistory::class,
+    EChartsBarWaterfall::class, EChartsBarPolar::class
+] as $barPreviewClass) {
+    $barPreviewModule = new $barPreviewClass();
+    $barPreviewModule->Create();
+    $barPreviewForm = json_decode($barPreviewModule->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+    $images = [];
+    $collectImages = static function (array $items) use (&$collectImages, &$images): void
+    {
+        foreach ($items as $item) {
+            if (($item['type'] ?? null) === 'Image') {
+                $images[$item['name'] ?? ''] = $item['image'] ?? '';
+            }
+            if (is_array($item['items'] ?? null)) {
+                $collectImages($item['items']);
+            }
+        }
+    };
+    $collectImages($barPreviewForm['elements']);
+    foreach (['BarPreview', 'IPSViewBarPreview'] as $field) {
+        assertGatewayGauge(
+            str_starts_with((string) ($images[$field] ?? ''), 'data:image/svg+xml;base64,'),
+            $barPreviewClass . ' must initialize the ' . $field . ' image.'
+        );
+        $svg = base64_decode(substr($images[$field], strlen('data:image/svg+xml;base64,')), true);
+        $document = new DOMDocument();
+        assertGatewayGauge(
+            is_string($svg) && $document->loadXML($svg, LIBXML_NONET)
+                && $document->documentElement?->localName === 'svg',
+            $barPreviewClass . ' must emit valid SVG in the ' . $field . ' image.'
+        );
+    }
+    $titleControl = findGaugeFormElement($barPreviewForm['elements'], 'Title');
+    $sourceControl = findGaugeFormElement($barPreviewForm['elements'], 'Sources');
+    $inheritanceControl = findGaugeFormElement($barPreviewForm['elements'], 'IPSViewUseTileDesign');
+    assertGatewayGauge(
+        str_contains((string) ($titleControl['onChange'] ?? ''), 'UpdateBarPreviewFromForm')
+            && str_contains((string) ($sourceControl['onAdd'] ?? ''), 'foreach ($Sources as $barPreviewSource)')
+            && str_contains((string) ($sourceControl['onEdit'] ?? ''), 'UpdateBarPreviewFromForm')
+            && str_contains((string) ($sourceControl['onDelete'] ?? ''), 'UpdateBarPreviewFromForm')
+            && str_contains((string) ($sourceControl['onChangeOrder'] ?? ''), 'UpdateBarPreviewFromForm')
+            && str_contains((string) ($inheritanceControl['onChange'] ?? ''), 'UpdateIPSViewDesignAvailability')
+            && str_contains((string) ($inheritanceControl['onChange'] ?? ''), 'UpdateBarPreviewFromForm'),
+        $barPreviewClass . ' must refresh both previews from draft and source-row actions without losing inheritance callbacks.'
+    );
+    preg_match_all(
+        '/\'([A-Za-z][A-Za-z0-9]*)\' => \$[A-Za-z][A-Za-z0-9]*/',
+        (string) ($titleControl['onChange'] ?? ''),
+        $previewFieldMatches
+    );
+    foreach ($previewFieldMatches[1] as $referencedField) {
+        assertGatewayGauge(
+            findGaugeFormElement($barPreviewForm['elements'], $referencedField) !== null,
+            $barPreviewClass . ' must not reference missing form field ' . $referencedField . ' in preview actions.'
+        );
+    }
+
+    $barPreviewModule->UpdateBarPreviewFromForm(json_encode([
+        'Title'                    => 'Entwurf <A>',
+        'EChartsTheme'             => 'vintage',
+        'IPSViewUseTileDesign'     => false,
+        'IPSViewEChartsTheme'      => 'dark',
+        'IPSViewAdaptToBackground' => true,
+        'IPSViewBackgroundColor'   => 0x123456
+    ], JSON_THROW_ON_ERROR));
+    $updates = array_slice($barPreviewModule->GetTestFormUpdates(), -2);
+    $tileSvg = base64_decode(substr($updates[0]['Value'], strlen('data:image/svg+xml;base64,')), true);
+    $ipsViewSvg = base64_decode(substr($updates[1]['Value'], strlen('data:image/svg+xml;base64,')), true);
+    assertGatewayGauge(
+        $updates[0]['Field'] === 'BarPreview'
+            && $updates[1]['Field'] === 'IPSViewBarPreview'
+            && is_string($tileSvg) && is_string($ipsViewSvg)
+            && str_contains($tileSvg, 'Entwurf &lt;A&gt;')
+            && str_contains($ipsViewSvg, 'Entwurf &lt;A&gt;')
+            && str_contains($tileSvg, '#FEF8EF')
+            && str_contains($ipsViewSvg, '#123456'),
+        $barPreviewClass . ' must apply unsaved title, independent IPSView theme and background to both SVG previews.'
+    );
+    $unchanged = json_decode($barPreviewModule->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+    $storedTileSvg = base64_decode(substr(
+        findGaugeFormElement($unchanged['elements'], 'BarPreview')['image'],
+        strlen('data:image/svg+xml;base64,')
+    ), true);
+    assertGatewayGauge(
+        is_string($storedTileSvg) && !str_contains($storedTileSvg, 'Entwurf &lt;A&gt;'),
+        $barPreviewClass . ' must not persist live-preview draft changes.'
+    );
+
+    $sourceRow = ['VariableID' => 4711, 'Label' => 'Sensor', 'Category' => 'Küche'];
+    $barPreviewModule->UpdateBarPreviewFromForm(json_encode([
+        'Sources' => [$sourceRow]
+    ], JSON_THROW_ON_ERROR));
+    $sourceUpdate = array_slice($barPreviewModule->GetTestFormUpdates(), -2)[0];
+    $sourceSvg = base64_decode(substr($sourceUpdate['Value'], strlen('data:image/svg+xml;base64,')), true);
+    $expectedLabel = $barPreviewClass === EChartsBarCategory::class ? 'Küche' : 'Sensor';
+    assertGatewayGauge(
+        is_string($sourceSvg) && str_contains($sourceSvg, $expectedLabel),
+        $barPreviewClass . ' must show the configured display name after an unsaved source-row addition.'
+    );
+    $secondRow = ['VariableID' => 4717, 'Label' => 'Zweiter Sensor', 'Category' => 'Zweites Zimmer'];
+    $barPreviewModule->UpdateBarPreviewFromForm(json_encode([
+        'Sources' => [$sourceRow, $secondRow]
+    ], JSON_THROW_ON_ERROR));
+    $multipleSvg = base64_decode(substr(
+        array_slice($barPreviewModule->GetTestFormUpdates(), -2)[0]['Value'],
+        strlen('data:image/svg+xml;base64,')
+    ), true);
+    assertGatewayGauge(
+        is_string($multipleSvg)
+            && str_contains($multipleSvg, $expectedLabel)
+            && str_contains(
+                $multipleSvg,
+                $barPreviewClass === EChartsBarCategory::class ? 'Zweites' : 'Zweiter'
+            ),
+        $barPreviewClass . ' must preserve multiple unsaved sources in the preview.'
+    );
+    $editedRow = ['VariableID' => 4711, 'Label' => 'Neuer Sensor', 'Category' => 'Neues Bad'];
+    $barPreviewModule->UpdateBarPreviewFromForm(json_encode([
+        'Sources' => [$editedRow]
+    ], JSON_THROW_ON_ERROR));
+    $editedSvg = base64_decode(substr(
+        array_slice($barPreviewModule->GetTestFormUpdates(), -2)[0]['Value'],
+        strlen('data:image/svg+xml;base64,')
+    ), true);
+    assertGatewayGauge(
+        is_string($editedSvg) && str_contains(
+            $editedSvg,
+            $barPreviewClass === EChartsBarCategory::class ? 'Neues Bad' : 'Neuer Sensor'
+        ),
+        $barPreviewClass . ' must reflect an unsaved source-row edit.'
+    );
+    $barPreviewModule->UpdateBarPreviewFromForm(json_encode([
+        'Sources' => []
+    ], JSON_THROW_ON_ERROR));
+    $deletedSvg = base64_decode(substr(
+        array_slice($barPreviewModule->GetTestFormUpdates(), -2)[0]['Value'],
+        strlen('data:image/svg+xml;base64,')
+    ), true);
+    assertGatewayGauge(
+        is_string($deletedSvg) && str_contains($deletedSvg, 'Example data'),
+        $barPreviewClass . ' must show a labelled sample after deleting the last source in the preview.'
+    );
+    $barPreviewModule->UpdateBarPreviewFromForm(json_encode([
+        'Sources'      => [['VariableID' => -1, 'Label' => '<unsafe>']],
+        'EChartsTheme' => 'unsupported-theme'
+    ], JSON_THROW_ON_ERROR));
+    $invalidSvg = base64_decode(substr(
+        array_slice($barPreviewModule->GetTestFormUpdates(), -2)[0]['Value'],
+        strlen('data:image/svg+xml;base64,')
+    ), true);
+    assertGatewayGauge(
+        is_string($invalidSvg)
+            && str_contains($invalidSvg, 'Example data')
+            && !str_contains($invalidSvg, '<unsafe>'),
+        $barPreviewClass . ' must use a safe sample for invalid draft sources and themes.'
+    );
+}
+
+$categoryPreview = new EChartsBarCategory();
+$categoryPreview->Create();
+$categorySources = [
+    ['VariableID' => 4711, 'Category' => 'Wohnraum', 'Series' => 'Temperatur'],
+    ['VariableID' => 4717, 'Category' => 'Wohnraum', 'Series' => 'Luftfeuchte']
+];
+$categoryPreview->UpdateBarPreviewFromForm(json_encode([
+    'Sources' => $categorySources, 'BarMode' => 'grouped'
+], JSON_THROW_ON_ERROR));
+$groupedSvg = base64_decode(substr(
+    array_slice($categoryPreview->GetTestFormUpdates(), -2)[0]['Value'],
+    strlen('data:image/svg+xml;base64,')
+), true);
+$categoryPreview->UpdateBarPreviewFromForm(json_encode([
+    'Sources' => $categorySources, 'BarMode' => 'stacked'
+], JSON_THROW_ON_ERROR));
+$stackedSvg = base64_decode(substr(
+    array_slice($categoryPreview->GetTestFormUpdates(), -2)[0]['Value'],
+    strlen('data:image/svg+xml;base64,')
+), true);
+$barXs = static function (string $svg): array
+{
+    $document = new DOMDocument();
+    $document->loadXML($svg, LIBXML_NONET);
+    $xs = [];
+    foreach ($document->getElementsByTagName('rect') as $rect) {
+        if (in_array($rect->getAttribute('fill'), ['#5070DD', '#B6D634'], true)
+            && (float) $rect->getAttribute('y') >= 80) {
+            $xs[] = $rect->getAttribute('x');
+        }
+    }
+
+    return $xs;
+};
+assertGatewayGauge(
+    is_string($groupedSvg) && is_string($stackedSvg)
+        && count($barXs($groupedSvg)) === 2 && count($barXs($stackedSvg)) === 2
+        && $barXs($groupedSvg)[0] !== $barXs($groupedSvg)[1]
+        && $barXs($stackedSvg)[0] === $barXs($stackedSvg)[1],
+    'Category live preview must distinguish grouped from stacked bar geometry.'
+);
+$polarPreview = new EChartsBarPolar();
+$polarPreview->Create();
+$polarSources = [
+    ['VariableID' => 4711, 'Label' => 'Außen'],
+    ['VariableID' => 4717, 'Label' => 'Innen']
+];
+$polarPreview->UpdateBarPreviewFromForm(json_encode([
+    'Sources' => $polarSources, 'PolarMode' => 'radial'
+], JSON_THROW_ON_ERROR));
+$radialSvg = base64_decode(substr(
+    array_slice($polarPreview->GetTestFormUpdates(), -2)[0]['Value'],
+    strlen('data:image/svg+xml;base64,')
+), true);
+$polarPreview->UpdateBarPreviewFromForm(json_encode([
+    'Sources' => $polarSources, 'PolarMode' => 'tangential', 'AngularSpan' => 180
+], JSON_THROW_ON_ERROR));
+$tangentialSvg = base64_decode(substr(
+    array_slice($polarPreview->GetTestFormUpdates(), -2)[0]['Value'],
+    strlen('data:image/svg+xml;base64,')
+), true);
+assertGatewayGauge(
+    is_string($radialSvg) && is_string($tangentialSvg)
+        && str_contains($radialSvg, '<path') && str_contains($tangentialSvg, '<path')
+        && $radialSvg !== $tangentialSvg,
+    'Polar live preview must draw different radial and tangential geometry.'
+);
+
+foreach ([
+    EChartsGaugeSingle::class      => ['GaugePreview', 'IPSViewGaugePreview'],
+    EChartsGaugeMulti::class       => ['GaugePreview', 'IPSViewGaugePreview'],
+    EChartsGaugeTacho::class       => ['GaugePreview', 'IPSViewGaugePreview'],
+    EChartsGaugeChronograph::class => ['GaugePreview', 'IPSViewGaugePreview'],
+    EChartsTimeSeries::class       => ['TimeSeriesPreview', 'IPSViewTimeSeriesPreview'],
+    EChartsBarCategory::class      => ['BarPreview', 'IPSViewBarPreview'],
+    EChartsBarHistory::class       => ['BarPreview', 'IPSViewBarPreview'],
+    EChartsBarWaterfall::class     => ['BarPreview', 'IPSViewBarPreview'],
+    EChartsBarPolar::class         => ['BarPreview', 'IPSViewBarPreview']
+] as $chartClass => $previewFields) {
+    $chart = new $chartClass();
+    $chart->Create();
+    $form = json_decode($chart->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+    foreach ($previewFields as $field) {
+        $image = findGaugeFormElement($form['elements'], $field);
+        assertGatewayGauge(
+            ($image['type'] ?? null) === 'Image'
+                && str_starts_with((string) ($image['image'] ?? ''), 'data:image/svg+xml;base64,'),
+            $chartClass . ' must expose an initialized ' . $field . ' preview.'
         );
     }
 }

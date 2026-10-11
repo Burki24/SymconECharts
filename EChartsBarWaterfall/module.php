@@ -10,6 +10,8 @@ use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
 use SymconECharts\EChartsAnimationDesign;
 use SymconECharts\EChartsAsset;
+use SymconECharts\EChartsBarPreview;
+use SymconECharts\EChartsBarPreviewForm;
 use SymconECharts\EChartsCurrentSources;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
@@ -21,9 +23,12 @@ require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
 require_once __DIR__ . '/../libs/helper/DataFlowHelper.php';
 require_once __DIR__ . '/../libs/helper/IPSViewHTMLPageHelper.php';
 require_once __DIR__ . '/../libs/helper/ResponsiveVisualizationHelper.php';
+require_once __DIR__ . '/../libs/helper/SVGPreviewHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
+require_once __DIR__ . '/../libs/EChartsBarPreview.php';
+require_once __DIR__ . '/../libs/EChartsBarPreviewForm.php';
 require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsCurrentSources.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
@@ -37,6 +42,7 @@ class EChartsBarWaterfall extends IPSModuleStrict
 {
     use ConfigurationFormHelper;
     use EChartsAnimationDesign;
+    use EChartsBarPreviewForm;
     use DataFlowHelper;
     use EChartsCurrentSources;
     use IPSViewHTMLPageHelper;
@@ -114,7 +120,15 @@ class EChartsBarWaterfall extends IPSModuleStrict
             );
         }
 
-        return $this->EncodeConfigurationForm($this->WithIPSViewDesignFormState($form, 'ECBW'));
+        $form = $this->WithIPSViewDesignFormState($form, 'ECBW');
+        $fields = array_merge(
+            ['Title', 'Sources', 'TotalLabel', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
+                'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent'],
+            array_keys($this->DesignPropertyNames()),
+            array_map(static fn (string $name): string => 'IPSView' . $name, array_keys($this->DesignPropertyNames()))
+        );
+
+        return $this->EncodeConfigurationForm($this->WithBarPreviewForm($form, 'ECBW', $fields));
     }
 
     public function RequestAction(string $Ident, mixed $Value): void
@@ -237,6 +251,94 @@ class EChartsBarWaterfall extends IPSModuleStrict
         if ($Message === VM_UPDATE && in_array($SenderID, $this->ConfiguredVariableIDs(), true)) {
             $this->PublishVisualizationState();
         }
+    }
+
+    /** @param array<string,mixed> $values */
+    protected function BarPreviewSvg(array $values, bool $ipsView): string
+    {
+        $palette = EChartsBarPreview::Palette($this->BarPreviewValue($values, 'EChartsTheme', 'string', $ipsView));
+        $data = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values);
+        $items = array_slice($data['items'], 0, 5);
+        if ($data['sample']) {
+            $items[0]['value'] = 18.0;
+            $items[1]['value'] = -5.5;
+            $items[2]['value'] = 8.0;
+        }
+        $svg = EChartsBarPreview::Open(
+            $palette,
+            (string) ($values['Title'] ?? $this->ReadPropertyString('Title')),
+            $data['sample'],
+            $ipsView,
+            $values,
+            $this->Translate('Example data'),
+            $this->Translate('Chart preview')
+        );
+        $levels = [0.0];
+        $total = 0.0;
+        foreach ($items as $index => $item) {
+            $total = $index === 0 ? $item['value'] : $total + $item['value'];
+            $levels[] = $total;
+        }
+        $minimum = min(0.0, ...$levels);
+        $maximum = max(1.0, ...$levels);
+        $range = max(1.0, $maximum - $minimum);
+        $y = static fn (float $value): float => 285 - ($value - $minimum) / $range * 205;
+        if ($this->BarPreviewValue($values, 'ShowGrid', 'boolean', $ipsView)) {
+            for ($step = 0; $step <= 4; ++$step) {
+                $lineY = 80 + $step * 51;
+                $svg .= '<line x1="70" y1="' . $lineY . '" x2="680" y2="' . $lineY
+                    . '" stroke="' . EChartsBarPreview::E($palette['track']) . '"/>';
+            }
+        }
+        $svg .= '<line x1="70" y1="' . EChartsBarPreview::N($y(0)) . '" x2="680" y2="'
+            . EChartsBarPreview::N($y(0)) . '" stroke="' . EChartsBarPreview::E($palette['border']) . '"/>';
+        $width = 580 / (count($items) + 1);
+        $barWidth = $width * max(20, min(100, $this->BarPreviewValue($values, 'BarWidthPercent', 'integer', $ipsView))) / 100;
+        $showValues = $this->BarPreviewValue($values, 'ShowValues', 'boolean', $ipsView);
+        foreach ($items as $index => $item) {
+            $from = $index === 0 ? 0.0 : $levels[$index];
+            $to = $levels[$index + 1];
+            $top = min($y($from), $y($to));
+            $height = max(2, abs($y($from) - $y($to)));
+            $colorName = $index === 0 ? 'StartColor' : ($item['value'] >= 0 ? 'IncreaseColor' : 'DecreaseColor');
+            $fallback = $palette['seriesColors'][($index + 1) % count($palette['seriesColors'])];
+            $color = EChartsBarPreview::Color($this->BarPreviewValue($values, $colorName, 'integer', $ipsView), $fallback);
+            $x = 90 + $index * $width;
+            $svg .= '<rect x="' . EChartsBarPreview::N($x) . '" y="' . EChartsBarPreview::N($top)
+                . '" width="' . EChartsBarPreview::N($barWidth) . '" height="' . EChartsBarPreview::N($height)
+                . '" fill="' . EChartsBarPreview::E($color) . '"/>';
+            $svg .= '<text x="' . EChartsBarPreview::N($x + $barWidth / 2) . '" y="309" text-anchor="middle" fill="'
+                . EChartsBarPreview::E($palette['text']) . '" font-size="11">'
+                . EChartsBarPreview::E(mb_strimwidth($item['label'], 0, 13, '…')) . '</text>';
+            if ($showValues) {
+                $svg .= '<text x="' . EChartsBarPreview::N($x + $barWidth / 2) . '" y="'
+                    . EChartsBarPreview::N($top - 5) . '" text-anchor="middle" fill="'
+                    . EChartsBarPreview::E($palette['text']) . '" font-size="11">'
+                    . EChartsBarPreview::E(EChartsBarPreview::N($item['value'])) . '</text>';
+            }
+        }
+        $x = 90 + count($items) * $width;
+        $top = min($y(0), $y($total));
+        $height = max(2, abs($y(0) - $y($total)));
+        $color = EChartsBarPreview::Color(
+            $this->BarPreviewValue($values, 'TotalColor', 'integer', $ipsView),
+            $palette['accent']
+        );
+        $svg .= '<rect x="' . EChartsBarPreview::N($x) . '" y="' . EChartsBarPreview::N($top)
+            . '" width="' . EChartsBarPreview::N($barWidth) . '" height="' . EChartsBarPreview::N($height)
+            . '" fill="' . EChartsBarPreview::E($color) . '"/>';
+        $label = (string) ($values['TotalLabel'] ?? $this->ReadPropertyString('TotalLabel'));
+        $svg .= '<text x="' . EChartsBarPreview::N($x + $barWidth / 2) . '" y="309" text-anchor="middle" fill="'
+            . EChartsBarPreview::E($palette['text']) . '" font-size="11">'
+            . EChartsBarPreview::E($label !== '' ? $label : 'Gesamt') . '</text>';
+        if ($showValues) {
+            $svg .= '<text x="' . EChartsBarPreview::N($x + $barWidth / 2) . '" y="'
+                . EChartsBarPreview::N($top - 5) . '" text-anchor="middle" fill="'
+                . EChartsBarPreview::E($palette['text']) . '" font-size="11">'
+                . EChartsBarPreview::E(EChartsBarPreview::N($total)) . '</text>';
+        }
+
+        return $svg . '</svg>';
     }
 
     private function RenderWaterfallHTMLPage(bool $ipsView): string

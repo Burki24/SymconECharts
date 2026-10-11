@@ -4,6 +4,16 @@
 Änderungen zu einer Endsumme entwickelt. Das Modul benötigt zwei bis sechzehn
 eindeutige numerische Symcon-Variablen mit derselben effektiven Einheit.
 
+## Live-Vorschau
+
+Kachel- und IPSView-Designer zeigen jeweils eine SVG-Vorschau. Noch nicht
+gespeicherte Änderungen an Titel, Quellen, Endsummentext, Theme und Farben
+werden übernommen. Der erste Wert ist der Startwert, weitere Werte sind
+vorzeichenbehaftete Änderungen; die Endsumme wird berechnet. Ohne gültige
+Quellen sind Beispieldaten ausdrücklich markiert. Bei aktiviertem
+**Kacheldesign verwenden** folgt die IPSView-Vorschau dem Kacheldesign. Die
+responsive Laufzeitdarstellung prüfen Sie anschließend in Kachel und Widget.
+
 ## Animation
 
 Für Start und Aktualisierung lassen sich außerdem die **Bewegungskurve** und

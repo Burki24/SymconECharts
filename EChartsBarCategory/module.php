@@ -10,6 +10,8 @@ use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
 use SymconECharts\EChartsAnimationDesign;
 use SymconECharts\EChartsAsset;
+use SymconECharts\EChartsBarPreview;
+use SymconECharts\EChartsBarPreviewForm;
 use SymconECharts\EChartsCurrentSources;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
@@ -21,9 +23,12 @@ require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
 require_once __DIR__ . '/../libs/helper/DataFlowHelper.php';
 require_once __DIR__ . '/../libs/helper/IPSViewHTMLPageHelper.php';
 require_once __DIR__ . '/../libs/helper/ResponsiveVisualizationHelper.php';
+require_once __DIR__ . '/../libs/helper/SVGPreviewHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
+require_once __DIR__ . '/../libs/EChartsBarPreview.php';
+require_once __DIR__ . '/../libs/EChartsBarPreviewForm.php';
 require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsCurrentSources.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
@@ -37,6 +42,7 @@ class EChartsBarCategory extends IPSModuleStrict
 {
     use ConfigurationFormHelper;
     use EChartsAnimationDesign;
+    use EChartsBarPreviewForm;
     use DataFlowHelper;
     use EChartsCurrentSources;
     use IPSViewHTMLPageHelper;
@@ -133,7 +139,15 @@ class EChartsBarCategory extends IPSModuleStrict
             );
         }
 
-        return $this->EncodeConfigurationForm($this->WithIPSViewDesignFormState($form, 'ECBC'));
+        $form = $this->WithIPSViewDesignFormState($form, 'ECBC');
+        $fields = array_merge(
+            ['Title', 'Sources', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
+                'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent'],
+            array_keys($this->DesignPropertyNames()),
+            array_map(static fn (string $name): string => 'IPSView' . $name, array_keys($this->DesignPropertyNames()))
+        );
+
+        return $this->EncodeConfigurationForm($this->WithBarPreviewForm($form, 'ECBC', $fields));
     }
 
     public function UpdateBarDesignForm(bool $IPSView, string $BarFillMode): void
@@ -269,6 +283,171 @@ class EChartsBarCategory extends IPSModuleStrict
         if ($Message === VM_UPDATE && in_array($SenderID, $this->ConfiguredVariableIDs(), true)) {
             $this->PublishVisualizationState();
         }
+    }
+
+    /** @param array<string,mixed> $values */
+    protected function BarPreviewSvg(array $values, bool $ipsView): string
+    {
+        $theme = $this->BarPreviewValue($values, 'EChartsTheme', 'string', $ipsView);
+        $palette = EChartsBarPreview::Palette($theme);
+        $data = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values, 'Category');
+        $items = array_slice($data['items'], 0, 6);
+        $mode = $this->BarPreviewValue($values, 'BarMode', 'string', $ipsView);
+        $orientation = $this->BarPreviewValue($values, 'Orientation', 'string', $ipsView);
+        $sort = $this->BarPreviewValue($values, 'SortOrder', 'string', $ipsView);
+        if ($data['sample'] && $mode !== 'simple') {
+            foreach ($items as &$item) {
+                $item['Series'] = $item['label'];
+                $item['Category'] = $this->Translate('Example category');
+                $item['label'] = $this->Translate('Example category');
+            }
+            unset($item);
+        }
+        if ($mode === 'simple' && ($sort === 'ascending' || $sort === 'descending')) {
+            usort($items, static fn (array $a, array $b): int => $sort === 'ascending'
+                ? $a['value'] <=> $b['value'] : $b['value'] <=> $a['value']);
+        }
+        $svg = EChartsBarPreview::Open(
+            $palette,
+            (string) ($values['Title'] ?? $this->ReadPropertyString('Title')),
+            $data['sample'],
+            $ipsView,
+            $values,
+            $this->Translate('Example data'),
+            $this->Translate('Chart preview')
+        );
+        $svg .= '<text x="696" y="55" text-anchor="end" fill="' . EChartsBarPreview::E($palette['muted'])
+            . '" font-size="12">' . EChartsBarPreview::E(ucfirst($mode)) . '</text>';
+        if ($mode !== 'simple') {
+            foreach ($items as $index => $item) {
+                $color = $item['color'] !== '' ? $item['color'] : $palette['seriesColors'][$index % count($palette['seriesColors'])];
+                $series = trim(is_string($item['Series'] ?? null) ? $item['Series'] : '');
+                if ($series === '') {
+                    $series = isset($item['VariableID']) ? IPS_GetName((int) $item['VariableID']) : $item['label'];
+                }
+                $legendX = 80 + ($index % 3) * 195;
+                $legendY = 58 + intdiv($index, 3) * 18;
+                $svg .= '<rect x="' . $legendX . '" y="' . ($legendY - 9) . '" width="12" height="12" fill="'
+                    . EChartsBarPreview::E($color) . '"/>';
+                $svg .= '<text x="' . ($legendX + 17) . '" y="' . $legendY . '" fill="'
+                    . EChartsBarPreview::E($palette['text']) . '" font-size="11">'
+                    . EChartsBarPreview::E(mb_strimwidth($series, 0, 20, '…')) . '</text>';
+            }
+        }
+        $showGrid = $this->BarPreviewValue($values, 'ShowGrid', 'boolean', $ipsView);
+        $showValues = $this->BarPreviewValue($values, 'ShowValues', 'boolean', $ipsView);
+        $barWidth = max(20, min(100, $this->BarPreviewValue($values, 'BarWidthPercent', 'integer', $ipsView)));
+        $rounded = $this->BarPreviewValue($values, 'RoundedBars', 'boolean', $ipsView) ? 5 : 0;
+        $fillMode = $this->BarPreviewValue($values, 'BarFillMode', 'string', $ipsView);
+        if ($fillMode === 'svg') {
+            $patternSize = max(4, min(14, 7 * $this->BarPreviewValue($values, 'BarSVGSizePercent', 'integer', $ipsView) / 100));
+            $svg .= '<defs>';
+            foreach ($items as $index => $item) {
+                $color = $item['color'] !== '' ? $item['color'] : $palette['seriesColors'][$index % count($palette['seriesColors'])];
+                $svg .= '<pattern id="bar-category-preview-' . $index . '" width="' . EChartsBarPreview::N($patternSize)
+                    . '" height="' . EChartsBarPreview::N($patternSize) . '" patternUnits="userSpaceOnUse">'
+                    . '<rect width="100%" height="100%" fill="' . EChartsBarPreview::E($color) . '"/>'
+                    . '<path d="M 0 ' . EChartsBarPreview::N($patternSize) . ' L ' . EChartsBarPreview::N($patternSize)
+                    . ' 0" stroke="' . EChartsBarPreview::E($palette['text'])
+                    . '" stroke-opacity="0.5"/></pattern>';
+            }
+            $svg .= '</defs><text x="696" y="71" text-anchor="end" fill="'
+                . EChartsBarPreview::E($palette['muted']) . '" font-size="10">'
+                . EChartsBarPreview::E($this->Translate('SVG pattern (schematic)')) . '</text>';
+        }
+        $groups = [];
+        foreach ($items as $index => $item) {
+            $category = trim(is_string($item['Category'] ?? null) ? $item['Category'] : '');
+            $key = $mode === 'simple' ? (string) $index : ($category !== '' ? $category : $this->Translate('Shared group'));
+            $groups[$key][] = ['item' => $item, 'index' => $index];
+        }
+        if ($mode !== 'simple' && ($sort === 'ascending' || $sort === 'descending')) {
+            uasort($groups, static function (array $left, array $right) use ($sort): int
+            {
+                $leftTotal = array_sum(array_map(static fn (array $entry): float => $entry['item']['value'], $left));
+                $rightTotal = array_sum(array_map(static fn (array $entry): float => $entry['item']['value'], $right));
+
+                return $sort === 'ascending' ? $leftTotal <=> $rightTotal : $rightTotal <=> $leftTotal;
+            });
+        }
+        $positiveMax = 1.0;
+        $negativeMax = 0.0;
+        foreach ($groups as $group) {
+            $positive = array_map(static fn (array $entry): float => max(0.0, $entry['item']['value']), $group);
+            $negative = array_map(static fn (array $entry): float => max(0.0, -$entry['item']['value']), $group);
+            $positiveMax = max($positiveMax, $mode === 'stacked' ? array_sum($positive) : max($positive));
+            $negativeMax = max($negativeMax, $mode === 'stacked' ? array_sum($negative) : max($negative));
+        }
+        $range = $positiveMax + $negativeMax;
+        $zero = $orientation === 'horizontal'
+            ? 100 + 568 * $negativeMax / $range
+            : 87 + 208 * $positiveMax / $range;
+        if ($showGrid) {
+            for ($step = 0; $step <= 4; ++$step) {
+                $position = $orientation === 'horizontal' ? 100 + $step * 142 : 295 - $step * 52;
+                $svg .= $orientation === 'horizontal'
+                    ? '<line x1="' . $position . '" y1="75" x2="' . $position . '" y2="295" stroke="' . EChartsBarPreview::E($palette['track']) . '"/>'
+                    : '<line x1="100" y1="' . $position . '" x2="668" y2="' . $position . '" stroke="' . EChartsBarPreview::E($palette['track']) . '"/>';
+            }
+        }
+        $svg .= $orientation === 'horizontal'
+            ? '<line x1="' . EChartsBarPreview::N($zero) . '" y1="75" x2="' . EChartsBarPreview::N($zero)
+                . '" y2="295" stroke="' . EChartsBarPreview::E($palette['border']) . '"/>'
+            : '<line x1="100" y1="' . EChartsBarPreview::N($zero) . '" x2="668" y2="'
+                . EChartsBarPreview::N($zero) . '" stroke="' . EChartsBarPreview::E($palette['border']) . '"/>';
+        $groupCount = count($groups);
+        $groupIndex = 0;
+        foreach ($groups as $key => $group) {
+            $span = ($orientation === 'horizontal' ? 210 : 568) / $groupCount;
+            $label = $mode === 'simple' ? $group[0]['item']['label'] : $key;
+            $center = ($orientation === 'horizontal' ? 79 : 100) + ($groupIndex + 0.5) * $span;
+            $svg .= $orientation === 'horizontal'
+                ? '<text x="92" y="' . EChartsBarPreview::N($center + 4) . '" text-anchor="end" fill="' . EChartsBarPreview::E($palette['text'])
+                    . '" font-size="11">' . EChartsBarPreview::E(mb_strimwidth($label, 0, 13, '…')) . '</text>'
+                : '<text x="' . EChartsBarPreview::N($center) . '" y="315" text-anchor="middle" fill="' . EChartsBarPreview::E($palette['text'])
+                    . '" font-size="11">' . EChartsBarPreview::E(mb_strimwidth($label, 0, 12, '…')) . '</text>';
+            $positiveOffset = 0.0;
+            $negativeOffset = 0.0;
+            foreach ($group as $entryIndex => $entry) {
+                $item = $entry['item'];
+                $color = $item['color'] !== '' ? $item['color'] : $palette['seriesColors'][$entry['index'] % count($palette['seriesColors'])];
+                $fill = $fillMode === 'svg' ? 'url(#bar-category-preview-' . $entry['index'] . ')' : $color;
+                $size = ($orientation === 'horizontal' ? 568 : 208) * abs($item['value']) / $range;
+                $subCount = $mode === 'stacked' ? 1 : count($group);
+                $thickness = max(3, ($span - 12) * $barWidth / 100 / $subCount);
+                $cross = $center - $span * $barWidth / 200 + ($mode === 'stacked' ? 0 : $entryIndex * $thickness);
+                $offset = $mode === 'stacked'
+                    ? ($item['value'] >= 0 ? $positiveOffset : $negativeOffset) : 0;
+                if ($orientation === 'horizontal') {
+                    $x = $item['value'] >= 0 ? $zero + $offset : $zero - $offset - $size;
+                    $svg .= '<rect x="' . EChartsBarPreview::N($x) . '" y="' . EChartsBarPreview::N($cross)
+                        . '" width="' . EChartsBarPreview::N($size) . '" height="' . EChartsBarPreview::N($thickness)
+                        . '" rx="' . $rounded . '" fill="' . EChartsBarPreview::E($fill) . '"/>';
+                    $valueX = $item['value'] >= 0 ? $x + $size + 6 : $x - 6;
+                    $valueY = $cross + $thickness / 2 + 4;
+                } else {
+                    $top = $item['value'] >= 0 ? $zero - $offset - $size : $zero + $offset;
+                    $svg .= '<rect x="' . EChartsBarPreview::N($cross) . '" y="' . EChartsBarPreview::N($top)
+                        . '" width="' . EChartsBarPreview::N($thickness) . '" height="' . EChartsBarPreview::N($size)
+                        . '" rx="' . $rounded . '" fill="' . EChartsBarPreview::E($fill) . '"/>';
+                    $valueX = $cross + $thickness / 2;
+                    $valueY = $item['value'] >= 0 ? $top - 5 : $top + $size + 13;
+                }
+                if ($showValues) {
+                    $svg .= '<text x="' . EChartsBarPreview::N($valueX) . '" y="' . EChartsBarPreview::N($valueY)
+                        . '" text-anchor="middle" fill="' . EChartsBarPreview::E($palette['text']) . '" font-size="11">'
+                        . EChartsBarPreview::E(EChartsBarPreview::N($item['value']) . ' ' . $item['unit']) . '</text>';
+                }
+                if ($item['value'] >= 0) {
+                    $positiveOffset += $size;
+                } else {
+                    $negativeOffset += $size;
+                }
+            }
+            ++$groupIndex;
+        }
+
+        return $svg . '</svg>';
     }
 
     private function RenderBarHTMLPage(bool $ipsView): string

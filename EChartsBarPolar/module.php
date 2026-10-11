@@ -10,6 +10,8 @@ use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
 use SymconECharts\EChartsAnimationDesign;
 use SymconECharts\EChartsAsset;
+use SymconECharts\EChartsBarPreview;
+use SymconECharts\EChartsBarPreviewForm;
 use SymconECharts\EChartsCurrentSources;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
@@ -21,9 +23,12 @@ require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
 require_once __DIR__ . '/../libs/helper/DataFlowHelper.php';
 require_once __DIR__ . '/../libs/helper/IPSViewHTMLPageHelper.php';
 require_once __DIR__ . '/../libs/helper/ResponsiveVisualizationHelper.php';
+require_once __DIR__ . '/../libs/helper/SVGPreviewHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
+require_once __DIR__ . '/../libs/EChartsBarPreview.php';
+require_once __DIR__ . '/../libs/EChartsBarPreviewForm.php';
 require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsCurrentSources.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
@@ -37,6 +42,7 @@ class EChartsBarPolar extends IPSModuleStrict
 {
     use ConfigurationFormHelper;
     use EChartsAnimationDesign;
+    use EChartsBarPreviewForm;
     use DataFlowHelper;
     use EChartsCurrentSources;
     use IPSViewHTMLPageHelper;
@@ -148,7 +154,15 @@ class EChartsBarPolar extends IPSModuleStrict
             );
         }
 
-        return $this->EncodeConfigurationForm($this->WithIPSViewDesignFormState($form, 'ECBP'));
+        $form = $this->WithIPSViewDesignFormState($form, 'ECBP');
+        $fields = array_merge(
+            ['Title', 'Sources', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
+                'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent'],
+            array_keys($this->DesignPropertyNames()),
+            array_map(static fn (string $name): string => 'IPSView' . $name, array_keys($this->DesignPropertyNames()))
+        );
+
+        return $this->EncodeConfigurationForm($this->WithBarPreviewForm($form, 'ECBP', $fields));
     }
 
     public function UpdateValueScaleForm(string $ValueAxisRangeMode): void
@@ -278,6 +292,155 @@ class EChartsBarPolar extends IPSModuleStrict
         if ($Message === VM_UPDATE && in_array($SenderID, $this->ConfiguredVariableIDs(), true)) {
             $this->PublishVisualizationState();
         }
+    }
+
+    /** @param array<string,mixed> $values */
+    protected function BarPreviewSvg(array $values, bool $ipsView): string
+    {
+        $palette = EChartsBarPreview::Palette($this->BarPreviewValue($values, 'EChartsTheme', 'string', $ipsView));
+        $data = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values);
+        $items = array_slice($data['items'], 0, 6);
+        $mode = $this->BarPreviewValue($values, 'PolarMode', 'string', $ipsView);
+        $sort = $this->BarPreviewValue($values, 'SortOrder', 'string', $ipsView);
+        if ($sort === 'ascending' || $sort === 'descending') {
+            usort($items, static fn (array $a, array $b): int => $sort === 'ascending'
+                ? $a['value'] <=> $b['value'] : $b['value'] <=> $a['value']);
+        }
+        $svg = EChartsBarPreview::Open(
+            $palette,
+            (string) ($values['Title'] ?? $this->ReadPropertyString('Title')),
+            $data['sample'],
+            $ipsView,
+            $values,
+            $this->Translate('Example data'),
+            $this->Translate('Chart preview')
+        );
+        $cx = 350;
+        $cy = 190;
+        $inner = 145 * max(0, min(70, $this->BarPreviewValue($values, 'InnerRadiusPercent', 'integer', $ipsView))) / 100;
+        $outer = 145 * max(20, min(100, $this->BarPreviewValue($values, 'OuterRadiusPercent', 'integer', $ipsView))) / 100;
+        $outer = max($inner + 25, $outer);
+        $start = (float) $this->BarPreviewValue($values, 'StartAngle', 'integer', $ipsView);
+        $span = max(30, min(360, $this->BarPreviewValue($values, 'AngularSpan', 'integer', $ipsView)));
+        $direction = $this->BarPreviewValue($values, 'Clockwise', 'boolean', $ipsView) ? 1 : -1;
+        $manual = $this->BarPreviewValue($values, 'ValueAxisRangeMode', 'string', $ipsView) === 'manual';
+        $minimum = $manual ? (float) $this->BarPreviewValue($values, 'ValueAxisMinimum', 'float', $ipsView) : 0.0;
+        $maximum = $manual ? (float) $this->BarPreviewValue($values, 'ValueAxisMaximum', 'float', $ipsView)
+            : max(1.0, ...array_map(static fn (array $item): float => $item['value'], $items));
+        $range = max(1.0, $maximum - $minimum);
+        if ($this->BarPreviewValue($values, 'ShowGrid', 'boolean', $ipsView)) {
+            foreach ([0.25, 0.5, 0.75, 1.0] as $fraction) {
+                $radius = $inner + ($outer - $inner) * $fraction;
+                $svg .= '<circle cx="' . $cx . '" cy="' . $cy . '" r="' . EChartsBarPreview::N($radius)
+                    . '" fill="none" stroke="' . EChartsBarPreview::E($palette['track']) . '"/>';
+            }
+        }
+        $opacity = max(0, min(100, $this->BarPreviewValue($values, 'BarOpacityPercent', 'integer', $ipsView))) / 100;
+        $width = max(20, min(100, $this->BarPreviewValue($values, 'BarWidthPercent', 'integer', $ipsView))) / 100;
+        $showLabels = $this->BarPreviewValue($values, 'ShowCategoryLabels', 'boolean', $ipsView);
+        $showValues = $this->BarPreviewValue($values, 'ShowValues', 'boolean', $ipsView);
+        $labelSize = max(8, min(24, $this->BarPreviewValue($values, 'CategoryLabelFontSize', 'integer', $ipsView)));
+        $valueSize = max(8, min(24, $this->BarPreviewValue($values, 'ValueLabelFontSize', 'integer', $ipsView)));
+        $fillMode = $this->BarPreviewValue($values, 'BarFillMode', 'string', $ipsView);
+        $gradientEnd = EChartsBarPreview::Color(
+            $this->BarPreviewValue($values, 'BarGradientColor', 'integer', $ipsView),
+            $palette['background']
+        );
+        $outlineWidth = max(0, min(8, $this->BarPreviewValue($values, 'BarOutlineWidth', 'integer', $ipsView)));
+        $outlineColor = EChartsBarPreview::Color(
+            $this->BarPreviewValue($values, 'BarOutlineColor', 'integer', $ipsView),
+            $palette['border']
+        );
+        $showBackground = $this->BarPreviewValue($values, 'ShowBarBackground', 'boolean', $ipsView);
+        $backgroundColor = EChartsBarPreview::Color(
+            $this->BarPreviewValue($values, 'BarBackgroundColor', 'integer', $ipsView),
+            $palette['track']
+        );
+        $backgroundOpacity = max(0, min(
+            100,
+            $this->BarPreviewValue($values, 'BarBackgroundOpacityPercent', 'integer', $ipsView)
+        )) / 100;
+        if ($fillMode === 'gradient') {
+            $svg .= '<defs>';
+            foreach ($items as $index => $item) {
+                $color = $item['color'] !== '' ? $item['color'] : $palette['seriesColors'][$index % count($palette['seriesColors'])];
+                $svg .= '<linearGradient id="bar-polar-preview-' . $index . '" x1="0" x2="1" y1="0" y2="1">'
+                    . '<stop offset="0" stop-color="' . EChartsBarPreview::E($color) . '"/>'
+                    . '<stop offset="1" stop-color="' . EChartsBarPreview::E($gradientEnd) . '"/></linearGradient>';
+            }
+            $svg .= '</defs>';
+        }
+        foreach ($items as $index => $item) {
+            $fraction = max(0.0, min(1.0, ($item['value'] - $minimum) / $range));
+            $color = $item['color'] !== '' ? $item['color'] : $palette['seriesColors'][$index % count($palette['seriesColors'])];
+            if ($mode === 'tangential') {
+                $ring = ($outer - $inner) / count($items);
+                $r0 = $inner + $index * $ring + $ring * (1 - $width) / 2;
+                $r1 = $r0 + $ring * $width;
+                $a0 = $start;
+                $a1 = $start + $direction * $span * $fraction;
+                if ($showBackground) {
+                    $svg .= '<path d="' . self::BarPreviewWedge($cx, $cy, $r0, $r1, $a0, $start + $direction * $span)
+                        . '" fill="' . EChartsBarPreview::E($backgroundColor)
+                        . '" fill-opacity="' . EChartsBarPreview::N($backgroundOpacity) . '"/>';
+                }
+            } else {
+                $slot = $span / count($items);
+                $gap = $slot * (1 - $width) / 2;
+                $a0 = $start + $direction * ($index * $slot + $gap);
+                $a1 = $start + $direction * (($index + 1) * $slot - $gap);
+                $r0 = $inner;
+                $r1 = $inner + ($outer - $inner) * $fraction;
+                if ($showBackground) {
+                    $svg .= '<path d="' . self::BarPreviewWedge($cx, $cy, $inner, $outer, $a0, $a1)
+                        . '" fill="' . EChartsBarPreview::E($backgroundColor)
+                        . '" fill-opacity="' . EChartsBarPreview::N($backgroundOpacity) . '"/>';
+                }
+            }
+            if ($fraction > 0) {
+                $fill = $fillMode === 'gradient' ? 'url(#bar-polar-preview-' . $index . ')' : $color;
+                $svg .= '<path d="' . self::BarPreviewWedge($cx, $cy, $r0, $r1, $a0, $a1)
+                    . '" fill="' . EChartsBarPreview::E($fill) . '" fill-opacity="'
+                    . EChartsBarPreview::N($opacity) . '" stroke="' . EChartsBarPreview::E($outlineColor)
+                    . '" stroke-width="' . $outlineWidth . '"/>';
+            }
+            $labelY = 83 + $index * 33;
+            if ($showLabels) {
+                $svg .= '<circle cx="545" cy="' . ($labelY - 4) . '" r="5" fill="' . EChartsBarPreview::E($color) . '"/>';
+                $svg .= '<text x="558" y="' . $labelY . '" fill="' . EChartsBarPreview::E($palette['text'])
+                    . '" font-size="' . $labelSize . '">'
+                    . EChartsBarPreview::E(mb_strimwidth($item['label'], 0, 18, '…')) . '</text>';
+            }
+            if ($showValues) {
+                $svg .= '<text x="675" y="' . $labelY . '" text-anchor="end" fill="'
+                    . EChartsBarPreview::E($palette['muted']) . '" font-size="' . $valueSize . '">'
+                    . EChartsBarPreview::E(EChartsBarPreview::N($item['value']) . ' ' . $item['unit']) . '</text>';
+            }
+        }
+
+        return $svg . '</svg>';
+    }
+
+    private static function BarPreviewWedge(float $cx, float $cy, float $inner, float $outer, float $start, float $end): string
+    {
+        $end = $start + max(-359.99, min(359.99, $end - $start));
+        $point = static fn (float $radius, float $angle): array => [
+            $cx + $radius * sin(deg2rad($angle)),
+            $cy - $radius * cos(deg2rad($angle))
+        ];
+        [$x0, $y0] = $point($outer, $start);
+        [$x1, $y1] = $point($outer, $end);
+        [$x2, $y2] = $point($inner, $end);
+        [$x3, $y3] = $point($inner, $start);
+        $large = abs($end - $start) > 180 ? 1 : 0;
+        $sweep = $end >= $start ? 1 : 0;
+
+        return 'M ' . EChartsBarPreview::N($x0) . ' ' . EChartsBarPreview::N($y0)
+            . ' A ' . EChartsBarPreview::N($outer) . ' ' . EChartsBarPreview::N($outer)
+            . ' 0 ' . $large . ' ' . $sweep . ' ' . EChartsBarPreview::N($x1) . ' ' . EChartsBarPreview::N($y1)
+            . ' L ' . EChartsBarPreview::N($x2) . ' ' . EChartsBarPreview::N($y2)
+            . ' A ' . EChartsBarPreview::N($inner) . ' ' . EChartsBarPreview::N($inner)
+            . ' 0 ' . $large . ' ' . (1 - $sweep) . ' ' . EChartsBarPreview::N($x3) . ' ' . EChartsBarPreview::N($y3) . ' Z';
     }
 
     private function UpdateValueScaleFields(string $prefix, string $rangeMode): void

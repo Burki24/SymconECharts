@@ -178,6 +178,17 @@ dokumentiert [`ADR 0035`](adr/0035-polar-bar-current-values.md).
 Die gemeinsame Grundreihenfolge der Diagrammformulare, die Live-Vorschau
 für beide Ausgabewege und die Grenze zwischen Modul und `libs` legt
 [`ADR 0036`](adr/0036-consistent-chart-forms-and-live-previews.md) fest.
+
+Für die vier Bar-Module bündelt `libs/EChartsBarPreviewForm.php` die
+read-only-Formularverdrahtung, einschließlich zweier `Image`-Felder,
+erhaltener bestehender Änderungsaktionen und der vollständigen ungespeicherten,
+ID-basierten Quellenliste bei Hinzufügen, Bearbeiten, Löschen und Umordnen.
+`libs/EChartsBarPreview.php` teilt ausschließlich Vorschau-Palette,
+SVG-Rahmen und begrenzte Quellenauflösung; Modus, Skala und Diagrammgeometrie
+verbleiben in den jeweiligen Bar-Modulen. Der synchronisierte
+`SVGPreviewHelper` wird unverändert wiederverwendet. History nutzt
+gekennzeichnete Beispielverläufe und fragt beim Formularbearbeiten kein
+Archiv ab. Die SVG-Vorschau ist kein Ersatz für visuelle Laufzeitprüfungen.
 Bei begrenzten konzentrischen Polar-Bögen zeichnet ECharts 6.1.0 die
 eingebauten Balkenhintergründe intern zunächst als Vollkreise. Der Polar-
 Renderer passt die `BarView._backgroundEls` nach `setOption()` und beim

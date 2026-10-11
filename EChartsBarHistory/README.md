@@ -4,6 +4,15 @@
 variables as bars along a time axis. It is deliberately separate from
 `EChartsBarCategory`, which compares current values as categories.
 
+## Live preview
+
+The Tile and IPSView designers each show an SVG preview. Unsaved changes to
+the title, source labels, theme, time range and basic bar design update both
+previews. The historical waveform is always marked as example data: editing
+the form does not trigger an archive query. **Use Tile design** makes the
+IPSView preview follow Tile appearance. Check the real tile and IPSView widget
+for the responsive chart, detailed labels, zoom and SVG bar patterns.
+
 ## Animation
 
 Initial and update transitions also have separate **easing** and a fixed

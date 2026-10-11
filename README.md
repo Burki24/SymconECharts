@@ -6,6 +6,12 @@ Die Library enthält Gauges für einzelne und mehrere Werte, historische und
 live fortgeschriebene Zeitreihen, aktuelle Kategorienvergleiche, historische
 Balken sowie Waterfall- und Polar-Diagramme für aktuelle Werte.
 
+Alle neun Diagrammformulare zeigen eine unmittelbar aktualisierte SVG-Vorschau
+im Kachel- und IPSView-Designer. Sie reagiert auf noch nicht gespeicherte
+Titel-, Quellen- und Designänderungen; die endgültige responsive Darstellung
+prüfen Sie in der Kachel beziehungsweise im IPSView-Widget. Historische
+Vorschauen verwenden gekennzeichnete Beispieldaten statt einer Archivabfrage.
+
 ## Voraussetzungen
 
 - IP-Symcon 9.0 oder 9.1 mit PHP 8.5;

@@ -4,6 +4,17 @@
 IP-Symcon variables as a category bar chart. All configured sources must use
 the same effective unit so that the shared value axis remains meaningful.
 
+## Live preview
+
+The Tile and IPSView designers each show an SVG preview. Unsaved changes to
+the title, sources, theme, orientation, bar mode, ordering and basic appearance
+update it immediately. Configured category names take precedence over variable
+names; variable IDs are never displayed. With **Use Tile design** enabled,
+the IPSView preview follows the Tile design. Without valid sources, the preview
+is explicitly marked as example data. The preview illustrates the layout;
+an imported SVG motif is shown only as a schematic hatch. The actual chart in
+the tile or IPSView widget remains the visual reference.
+
 ## Animation
 
 Initial and update transitions also have separate **easing** and a fixed

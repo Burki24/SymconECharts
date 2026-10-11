@@ -2,6 +2,17 @@
 
 `EChartsBarPolar` stellt aktuelle Zahlenwerte als Polar-Balken dar. Die Kachel zeigt wahlweise radial nach außen gerichtete Balken oder konzentrische Kreisbögen. Das Modul akzeptiert 1 bis 16 eindeutige numerische Symcon-Variablen mit derselben effektiven Einheit. Ein Archiv ist nicht nötig.
 
+## Live-Vorschau
+
+Kachel- und IPSView-Designer zeigen eine SVG-Vorschau für radiale Balken und
+konzentrische Bögen. Sie reagiert auf noch nicht gespeicherte Titel-, Quellen-,
+Theme-, Skalen- und Geometrieänderungen; Kategoriebeschriftungen verwenden
+konfigurierte Namen vor Symcon-Namen, niemals automatisch Variablen-IDs.
+**Kacheldesign verwenden** gilt auch für die IPSView-Vorschau. Ohne gültige
+Quellen sind Beispieldaten markiert. Die Vorschau ist schematisch:
+Hover-Hervorhebung, Animation und das responsive Beschriftungslayout prüfen
+Sie an der echten Kachel beziehungsweise im IPSView-Widget.
+
 ## Einrichtung
 
 Für alle ECharts-Diagramme genügt ein gemeinsames `EChartsGateway`. Wählen Sie bei weiteren Instanzen das vorhandene Gateway.

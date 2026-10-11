@@ -48,6 +48,11 @@
 
 ## Neu
 
+- BarCategory, BarHistory, BarWaterfall und BarPolar besitzen jetzt wie die
+  Gauges und TimeSeries eine Live-Vorschau im Kachel- und IPSView-Designer.
+  Ungespeicherte Formular- und Quellenänderungen aktualisieren beide Bilder;
+  historische Vorschauen kennzeichnen ihre archivfreien Beispieldaten.
+
 - Alle neun Diagrammmodule bieten für Start und Aktualisierung getrennte
   Bewegungskurven und feste Verzögerungen (0–3000 ms) im Kachel- und
   unabhängigen IPSView-Design. Die bestehenden Übergänge bleiben mit
