@@ -331,6 +331,7 @@ class EChartsBarWaterfall extends IPSModuleStrict
         $width = 580 / (count($items) + 1);
         $barWidth = $width * max(20, min(100, $this->BarPreviewValue($values, 'BarWidthPercent', 'integer', $ipsView))) / 100;
         $showValues = $this->BarPreviewValue($values, 'ShowValues', 'boolean', $ipsView);
+        $categoryLabelY = $showValues && $minimum < 0 ? 337 : 309;
         foreach ($items as $index => $item) {
             $from = $index === 0 ? 0.0 : $levels[$index];
             $to = $levels[$index + 1];
@@ -343,12 +344,14 @@ class EChartsBarWaterfall extends IPSModuleStrict
             $svg .= '<rect x="' . EChartsBarPreview::N($x) . '" y="' . EChartsBarPreview::N($top)
                 . '" width="' . EChartsBarPreview::N($barWidth) . '" height="' . EChartsBarPreview::N($height)
                 . '" fill="' . EChartsBarPreview::E($color) . '"/>';
-            $svg .= '<text x="' . EChartsBarPreview::N($x + $barWidth / 2) . '" y="309" text-anchor="middle" fill="'
+            $svg .= '<text x="' . EChartsBarPreview::N($x + $barWidth / 2) . '" y="' . $categoryLabelY
+                . '" text-anchor="middle" fill="'
                 . EChartsBarPreview::E($axisColor) . '" font-size="' . $axisSize . '">'
                 . EChartsBarPreview::E(mb_strimwidth($item['label'], 0, 13, '…')) . '</text>';
             if ($showValues) {
+                $valueY = $item['value'] >= 0 ? $top - 5 : $top + $height + $valueSize + 2;
                 $svg .= '<text x="' . EChartsBarPreview::N($x + $barWidth / 2) . '" y="'
-                    . EChartsBarPreview::N($top - 5) . '" text-anchor="middle" fill="'
+                    . EChartsBarPreview::N($valueY) . '" text-anchor="middle" fill="'
                     . EChartsBarPreview::E($valueColor) . '" font-size="' . $valueSize . '">'
                     . EChartsBarPreview::E(EChartsBarPreview::N($item['value'])) . '</text>';
             }
@@ -364,12 +367,14 @@ class EChartsBarWaterfall extends IPSModuleStrict
             . '" width="' . EChartsBarPreview::N($barWidth) . '" height="' . EChartsBarPreview::N($height)
             . '" fill="' . EChartsBarPreview::E($color) . '"/>';
         $label = (string) ($values['TotalLabel'] ?? $this->ReadPropertyString('TotalLabel'));
-        $svg .= '<text x="' . EChartsBarPreview::N($x + $barWidth / 2) . '" y="309" text-anchor="middle" fill="'
+        $svg .= '<text x="' . EChartsBarPreview::N($x + $barWidth / 2) . '" y="' . $categoryLabelY
+            . '" text-anchor="middle" fill="'
             . EChartsBarPreview::E($axisColor) . '" font-size="' . $axisSize . '">'
             . EChartsBarPreview::E($label !== '' ? $label : 'Gesamt') . '</text>';
         if ($showValues) {
+            $valueY = $total >= 0 ? $top - 5 : $top + $height + $valueSize + 2;
             $svg .= '<text x="' . EChartsBarPreview::N($x + $barWidth / 2) . '" y="'
-                . EChartsBarPreview::N($top - 5) . '" text-anchor="middle" fill="'
+                . EChartsBarPreview::N($valueY) . '" text-anchor="middle" fill="'
                 . EChartsBarPreview::E($valueColor) . '" font-size="' . $valueSize . '">'
                 . EChartsBarPreview::E(EChartsBarPreview::N($total)) . '</text>';
         }

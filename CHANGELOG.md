@@ -2,6 +2,10 @@
 
 ## Behoben
 
+- Die Waterfall-Formularvorschau setzt Werte fallender Balken und negativer
+  Endsummen wie die Kachel unter die Säule; bei negativen Wertebereichen bleiben
+  Kategorie- und Wertbeschriftungen getrennt.
+
 - Die BarHistory-Formularvorschau zeigt Änderungen der SVG-Mustergröße jetzt
   getrennt für Kachel und unabhängiges IPSView statt eines festen Musterrasters.
 

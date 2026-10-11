@@ -6927,6 +6927,70 @@ foreach ([
     );
 }
 
+$waterfallPreview = new EChartsBarWaterfall();
+$waterfallPreview->Create();
+$waterfallPreviewForm = json_decode($waterfallPreview->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+$waterfallPreviewSvg = base64_decode(substr(
+    findGaugeFormElement($waterfallPreviewForm['elements'], 'BarPreview')['image'],
+    strlen('data:image/svg+xml;base64,')
+), true);
+$waterfallPreviewLabels = static function (string $svg): array
+{
+    $document = new DOMDocument();
+    $document->loadXML($svg, LIBXML_NONET);
+    $bars = [];
+    foreach ($document->getElementsByTagName('rect') as $rect) {
+        if ($rect->hasAttribute('x') && $rect->hasAttribute('y') && $rect->hasAttribute('height')) {
+            $bars[] = [
+                'top'    => (float) $rect->getAttribute('y'),
+                'bottom' => (float) $rect->getAttribute('y') + (float) $rect->getAttribute('height')
+            ];
+        }
+    }
+    $labels = [];
+    foreach ($document->getElementsByTagName('text') as $item) {
+        $labels[trim($item->textContent)] = (float) $item->getAttribute('y');
+    }
+
+    return [$bars, $labels];
+};
+[$sampleBars, $sampleLabels] = $waterfallPreviewLabels($waterfallPreviewSvg);
+assertGatewayGauge(
+    count($sampleBars) === 4
+        && ($sampleLabels['18'] ?? INF) < $sampleBars[0]['top']
+        && ($sampleLabels['-5.5'] ?? -INF) > $sampleBars[1]['bottom']
+        && ($sampleLabels['20.5'] ?? INF) < $sampleBars[3]['top'],
+    'Waterfall preview must place rising values above and falling values below their bars.'
+);
+$originalWaterfallPreviewValue = $GLOBALS['symconTestVariables'][4717]['Value'];
+try {
+    $GLOBALS['symconTestVariables'][4717]['Value'] = -50.0;
+    $waterfallPreview->UpdateBarPreviewFromForm(json_encode([
+        'Sources'              => [
+            ['VariableID' => 4711, 'Label' => 'Start'],
+            ['VariableID' => 4717, 'Label' => 'Decrease']
+        ],
+        'IPSViewUseTileDesign' => false,
+        'IPSViewShowValues'    => true
+    ], JSON_THROW_ON_ERROR));
+    foreach (array_slice($waterfallPreview->GetTestFormUpdates(), -2) as $negativeTotalUpdate) {
+        $negativeTotalSvg = base64_decode(substr(
+            $negativeTotalUpdate['Value'],
+            strlen('data:image/svg+xml;base64,')
+        ), true);
+        [$negativeTotalBars, $negativeTotalLabels] = $waterfallPreviewLabels($negativeTotalSvg);
+        assertGatewayGauge(
+            count($negativeTotalBars) === 3
+                && ($negativeTotalLabels['-50'] ?? -INF) > $negativeTotalBars[1]['bottom']
+                && ($negativeTotalLabels['-7.5'] ?? -INF) > $negativeTotalBars[2]['bottom']
+                && ($negativeTotalLabels['Gesamt'] ?? -INF) > ($negativeTotalLabels['-7.5'] ?? INF) + 20,
+            'Waterfall Tile and independent IPSView previews must place negative values without label collisions.'
+        );
+    }
+} finally {
+    $GLOBALS['symconTestVariables'][4717]['Value'] = $originalWaterfallPreviewValue;
+}
+
 $historyCornerPreview = new EChartsBarHistory();
 $historyCornerPreview->Create();
 $historyCornerPreview->UpdateBarPreviewFromForm(json_encode([
