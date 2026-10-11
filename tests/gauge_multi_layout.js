@@ -74,6 +74,13 @@ const titledTile = render('symcon', 416, 1048, 3, 'Climate');
 const titledIPSView = render('ipsview', 416, 1048, 3, 'Climate');
 assert.ok(titledTile.title.top >= 64, 'The chart title must follow the native header.');
 assert.equal(titledIPSView.title.top, 6, 'The IPSView chart title must retain its original position.');
+const styledChartTitle = render('ipsview', 720, 560, 3, 'Climate', 'multi-title', true, {
+    chartTitleFontSizePercent: 150, chartTitleColor: '#123456',
+    titleFontSizePercent: 50, titleColor: '#ABCDEF'
+});
+assert.equal(styledChartTitle.title.textStyle.color, '#123456', 'Chart title color must be independent of instrument labels.');
+assert.equal(styledChartTitle.title.textStyle.fontSize, 36, 'Chart title size must follow the configured percent.');
+assert.equal(titledIPSView.title.textStyle.color, '#ffffff', 'Automatic chart title color must follow the theme.');
 assert.equal(render('symcon', 416, 1048, 3, 'Climate', 'multi-title', false).title.top, 6);
 
 for (const preset of ['multi-title', 'ring-grid', 'ring-concentric', 'weather-station', 'tacho', 'chronograph']) {

@@ -137,6 +137,8 @@ class EChartsGaugeMulti extends IPSModuleStrict
         $this->RegisterPropertyString('Title', '');
         $this->RegisterPropertyString('GaugePreset', self::PRESET_MULTI_TITLE);
         $this->RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO);
+        $this->RegisterPropertyInteger('ChartTitleFontSizePercent', 100);
+        $this->RegisterPropertyInteger('ChartTitleColor', -1);
         foreach (self::DESIGN_SCALE_PROPERTIES as $name) {
             $this->RegisterPropertyInteger($name, 100);
         }
@@ -169,6 +171,8 @@ class EChartsGaugeMulti extends IPSModuleStrict
         );
         $this->RegisterPropertyString('IPSViewGaugePreset', self::PRESET_MULTI_TITLE);
         $this->RegisterPropertyString('IPSViewEChartsTheme', EChartsAsset::THEME_AUTO);
+        $this->RegisterPropertyInteger('IPSViewChartTitleFontSizePercent', 100);
+        $this->RegisterPropertyInteger('IPSViewChartTitleColor', -1);
         foreach (self::DESIGN_SCALE_PROPERTIES as $name) {
             $this->RegisterPropertyInteger('IPSView' . $name, 100);
         }
@@ -220,6 +224,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
         $form = $this->LoadConfigurationForm();
         if (isset($form['elements']) && is_array($form['elements'])) {
             $form['elements'] = $this->WithAnimationFormControls($form['elements']);
+            $form['elements'] = EChartsGaugeDesign::WithChartTitleControls($form['elements']);
             $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
             $form['elements'] = $this->AttachGaugePreviewActions($form['elements']);
             $form['elements'] = $this->WithAnimationFormCallbacks($form['elements'], 'ECGM');
@@ -259,6 +264,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
 
         $form = $this->WithIPSViewDesignFormState($form, 'ECGM');
         $form = EChartsDesignerSections::Group($form, [
+            ['caption' => 'Chart title', 'start' => 'ChartTitleFontSizePercent'],
             ['caption' => 'Fine tuning', 'start' => 'Fine tuning values range from 50% to 150%. 100% restores the preset default.']
         ]);
 
@@ -278,6 +284,8 @@ class EChartsGaugeMulti extends IPSModuleStrict
     {
         IPS_SetProperty($this->InstanceID, 'IPSViewGaugePreset', $this->ReadPropertyString('GaugePreset'));
         IPS_SetProperty($this->InstanceID, 'IPSViewEChartsTheme', $this->ReadPropertyString('EChartsTheme'));
+        IPS_SetProperty($this->InstanceID, 'IPSViewChartTitleFontSizePercent', $this->ReadPropertyInteger('ChartTitleFontSizePercent'));
+        IPS_SetProperty($this->InstanceID, 'IPSViewChartTitleColor', $this->ReadPropertyInteger('ChartTitleColor'));
         foreach (self::DESIGN_SCALE_PROPERTIES as $name) {
             IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyInteger($name));
         }
@@ -588,6 +596,12 @@ class EChartsGaugeMulti extends IPSModuleStrict
 
     private function ValidateGaugeDesign(string $prefix = ''): ?string
     {
+        if (!EChartsGaugeDesign::ChartTitleIsValid(
+            $this->ReadPropertyInteger($prefix . 'ChartTitleFontSizePercent'),
+            $this->ReadPropertyInteger($prefix . 'ChartTitleColor')
+        )) {
+            return 'Gauge chart title color or font size is invalid.';
+        }
         if (!$this->AnimationIsValid($prefix)) {
             return 'Gauge animation durations must be between 0 and 3000 ms.';
         }
@@ -1075,7 +1089,10 @@ class EChartsGaugeMulti extends IPSModuleStrict
             $style[lcfirst($name)] = str_ends_with($name, 'Color') ? self::ColorToHex($value) : $value;
         }
 
-        return array_merge($style, $this->ReadAnimationStyle($prefix), $this->ResolveGaugeAssetStyle(
+        return array_merge($style, EChartsGaugeDesign::ChartTitleStyle(
+            $this->ReadPropertyInteger($prefix . 'ChartTitleFontSizePercent'),
+            $this->ReadPropertyInteger($prefix . 'ChartTitleColor')
+        ), $this->ReadAnimationStyle($prefix), $this->ResolveGaugeAssetStyle(
             $this->ReadPropertyString($prefix . 'PointerShape'),
             $this->ReadPropertyString($prefix . 'CustomPointerSVG'),
             $this->ReadPropertyString($prefix . 'CustomPointerPivotMode'),
@@ -1119,7 +1136,10 @@ class EChartsGaugeMulti extends IPSModuleStrict
             $style[lcfirst($name)] = str_ends_with($name, 'Color') ? self::ColorToHex($value) : $value;
         }
 
-        return array_merge($style, $this->AnimationStyleFromFormValues($values, $prefix), $this->ResolveGaugeAssetStyle(
+        return array_merge($style, EChartsGaugeDesign::ChartTitleStyle(
+            (int) ($values[$prefix . 'ChartTitleFontSizePercent'] ?? $this->ReadPropertyInteger($prefix . 'ChartTitleFontSizePercent')),
+            (int) ($values[$prefix . 'ChartTitleColor'] ?? $this->ReadPropertyInteger($prefix . 'ChartTitleColor'))
+        ), $this->AnimationStyleFromFormValues($values, $prefix), $this->ResolveGaugeAssetStyle(
             (string) ($values[$prefix . 'PointerShape'] ?? $this->ReadPropertyString($prefix . 'PointerShape')),
             (string) ($values[$prefix . 'CustomPointerSVG'] ?? $this->ReadPropertyString($prefix . 'CustomPointerSVG')),
             (string) ($values[$prefix . 'CustomPointerPivotMode'] ?? $this->ReadPropertyString($prefix . 'CustomPointerPivotMode')),
@@ -1231,6 +1251,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
     private function GaugeDesignFieldNames(): array
     {
         return [
+            ...EChartsGaugeDesign::ChartTitleFieldNames(),
             ...self::DESIGN_SCALE_PROPERTIES,
             ...array_keys(self::DESIGN_STRING_DEFAULTS), ...array_keys(self::DESIGN_INTEGER_DEFAULTS),
             ...array_keys(self::DESIGN_ASSET_STRING_DEFAULTS), ...array_keys(self::DESIGN_ASSET_FLOAT_DEFAULTS),

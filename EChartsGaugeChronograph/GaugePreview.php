@@ -420,10 +420,7 @@ final class EChartsGaugeChronographPreview
     private static function SvgDocument(string $title, array $palette, string $content, string $preset, array $style): string
     {
         $background = EChartsIPSViewBackground::PreviewBackground($palette, $style);
-        $titleElement = trim($title) === '' ? '' : '<text x="360" y="28" fill="'
-            . SVGPreviewHelper::escape($palette['text'])
-            . '" font-size="18" font-weight="600" text-anchor="middle">'
-            . SVGPreviewHelper::escape($title) . '</text>';
+        $titleElement = EChartsGaugeDesign::ChartTitlePreviewSvg($title, $palette, $style);
 
         return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 400" role="img" data-preset="'
             . SVGPreviewHelper::escape($preset) . '" data-pointer-shape="'

@@ -336,8 +336,14 @@ Gemeinsame ECharts-Gauge-Designsemantik liegt in
 `libs/EChartsGaugeDesign.php`. Der Baustein vereinheitlicht für Single und
 Multi insbesondere RGB-Farben sowie den validierten Import von SVG-Zeigern
 einschließlich Ankerpunkt und von bereinigten SVG-Zifferblatthintergründen.
-Property-Registrierung, Formulare, Vorlagengeometrie und Renderer bleiben im
-jeweiligen Gerätemodul, weil sie dessen öffentlichen Vertrag bestimmen.
+Für Gauge Multi, Tacho und Chronograph teilt er außerdem Validierung,
+Formularfelder, Stilabbildung und SVG-Vorschau des äußeren Diagrammtitels.
+Die Eigenschaften der einzelnen Instrumenttitel bleiben davon getrennt;
+der Browser nutzt die vorhandene prozentuale Schriftgröße aus
+`libs/echarts-design.js`.
+Property-Registrierung, die fachliche Formularstruktur, Vorlagengeometrie und
+Renderer bleiben im jeweiligen Gerätemodul, weil sie dessen öffentlichen
+Vertrag bestimmen.
 
 Eine gemeinsame Dateiauslieferung bedeutet nicht, dass mehrere getrennte
 Browserflächen eine einzige ECharts-Laufzeit teilen. Ressourcenbedarf und

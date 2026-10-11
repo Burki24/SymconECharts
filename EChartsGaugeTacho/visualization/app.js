@@ -898,7 +898,12 @@
                 text: title,
                 left: 'center',
                 top: headerInset + 6,
-                textStyle: { color: colors.text, fontSize: clamp(height * 0.045, 14, 24) }
+                textStyle: {
+                    color: styleColor(style, 'chartTitleColor', colors.text),
+                    fontSize: echartsDesign.fontSizePercent(
+                        style.chartTitleFontSizePercent, clamp(height * 0.045, 14, 24)
+                    )
+                }
             },
             tooltip: {
                 trigger: 'item',

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace SymconECharts;
 
+use Burki24\SymconModuleHelper\SVGPreviewHelper;
+
+require_once __DIR__ . '/helper/SVGPreviewHelper.php';
 require_once __DIR__ . '/EChartsAsset.php';
 require_once __DIR__ . '/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/EChartsSvgImage.php';
@@ -42,6 +45,83 @@ final class EChartsGaugeDesign
         'PlateBackgroundOffsetYPercent' => 0, 'PlateBackgroundOpacityPercent' => 100,
         'PlateBackgroundRotation'       => 0.0
     ];
+
+    /** @return list<string> */
+    public static function ChartTitleFieldNames(): array
+    {
+        return ['ChartTitleFontSizePercent', 'ChartTitleColor'];
+    }
+
+    public static function ChartTitleIsValid(int $fontSizePercent, int $color): bool
+    {
+        return $fontSizePercent >= 50 && $fontSizePercent <= 150
+            && $color >= -1 && $color <= 0xFFFFFF;
+    }
+
+    /** @return array{chartTitleFontSizePercent: int, chartTitleColor: string} */
+    public static function ChartTitleStyle(int $fontSizePercent, int $color): array
+    {
+        return [
+            'chartTitleFontSizePercent' => $fontSizePercent,
+            'chartTitleColor'           => $color < 0 ? '' : EChartsAsset::ColorToHex($color)
+        ];
+    }
+
+    /** @param list<array<string, mixed>> $elements @return list<array<string, mixed>> */
+    public static function WithChartTitleControls(array $elements): array
+    {
+        foreach ($elements as &$element) {
+            if (($element['type'] ?? null) !== 'ExpansionPanel'
+                || ($element['caption'] ?? null) !== 'Tile designer') {
+                continue;
+            }
+            foreach ($element['items'] as $index => $item) {
+                if (($item['caption'] ?? null) !== 'Fine tuning values range from 50% to 150%. 100% restores the preset default.') {
+                    continue;
+                }
+                array_splice($element['items'], $index, 0, [[
+                    'type'  => 'RowLayout',
+                    'items' => [
+                        [
+                            'type'    => 'NumberSpinner', 'name' => 'ChartTitleFontSizePercent',
+                            'caption' => 'Chart title font size', 'minimum' => 50, 'maximum' => 150,
+                            'suffix'  => '%', 'width' => '260px'
+                        ],
+                        [
+                            'type'               => 'SelectColor', 'name' => 'ChartTitleColor',
+                            'caption'            => 'Chart title color', 'allowTransparent' => true,
+                            'transparentCaption' => 'Automatic (theme)', 'width' => '260px'
+                        ]
+                    ]
+                ]]);
+                unset($element);
+
+                return $elements;
+            }
+            throw new \RuntimeException('The Gauge Tile designer title anchor is missing.');
+        }
+        unset($element);
+
+        throw new \RuntimeException('The Gauge Tile designer is missing.');
+    }
+
+    /** @param array<string, string> $palette @param array<string, mixed> $style */
+    public static function ChartTitlePreviewSvg(string $title, array $palette, array $style): string
+    {
+        if (trim($title) === '') {
+            return '';
+        }
+        $percent = (int) ($style['chartTitleFontSizePercent'] ?? 100);
+        $fontSize = round(18 * max(50, min(150, $percent)) / 100);
+        $color = (string) ($style['chartTitleColor'] ?? '');
+        if (preg_match('/^#[0-9a-f]{6}$/iD', $color) !== 1) {
+            $color = $palette['text'];
+        }
+
+        return '<text x="360" y="28" fill="' . SVGPreviewHelper::escape($color)
+            . '" font-size="' . $fontSize . '" font-weight="600" text-anchor="middle">'
+            . SVGPreviewHelper::escape($title) . '</text>';
+    }
 
     /** @return array<string, int|float|string|bool> */
     public static function SourceDesignDefaults(string $prefix = ''): array

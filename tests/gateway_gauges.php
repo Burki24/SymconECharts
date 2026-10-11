@@ -6194,9 +6194,9 @@ $expectedDesignerSections = [
         'Geometry and pointer', 'Hub design', 'Dial plate', 'Gauge colors',
         'Scale and value ranges', 'Position and visibility', 'Value display and effects', 'Fine tuning'
     ],
-    EChartsGaugeMulti::class       => ['Fine tuning', 'Pointer and hub', 'Scale and colors', 'Dial plate'],
-    EChartsGaugeTacho::class       => ['Fine tuning', 'Pointer and hub', 'Scale and colors', 'Dial plate'],
-    EChartsGaugeChronograph::class => ['Fine tuning', 'Pointer and hub', 'Scale and colors', 'Dial plate'],
+    EChartsGaugeMulti::class       => ['Chart title', 'Fine tuning', 'Pointer and hub', 'Scale and colors', 'Dial plate'],
+    EChartsGaugeTacho::class       => ['Chart title', 'Fine tuning', 'Pointer and hub', 'Scale and colors', 'Dial plate'],
+    EChartsGaugeChronograph::class => ['Chart title', 'Fine tuning', 'Pointer and hub', 'Scale and colors', 'Dial plate'],
     EChartsTimeSeries::class       => ['Lines and symbols', 'Area and axes', 'Typography and colors'],
     EChartsBarCategory::class      => [
         'Bar layout and order', 'Labels and geometry', 'Bar fill and pattern', 'Typography and colors'
@@ -6208,6 +6208,87 @@ $expectedDesignerSections = [
         'Bar appearance and effects', 'Scale and angular range', 'Typography and colors'
     ]
 ];
+foreach ([EChartsGaugeMulti::class, EChartsGaugeTacho::class, EChartsGaugeChronograph::class] as $moduleClass) {
+    $gauge = new $moduleClass();
+    $gauge->Create();
+    $gauge->SetTestProperty('Title', 'Climate');
+    $gauge->SetTestProperty('Sources', $multiSources);
+    $gauge->SetTestProperty('ChartTitleFontSizePercent', 150);
+    $gauge->SetTestProperty('ChartTitleColor', 0x123456);
+    $gauge->SetTestProperty('IPSViewUseTileDesign', false);
+    $gauge->SetTestProperty('IPSViewChartTitleFontSizePercent', 75);
+    $gauge->SetTestProperty('IPSViewChartTitleColor', 0x654321);
+    $form = json_decode($gauge->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+    foreach (['ChartTitleFontSizePercent', 'ChartTitleColor', 'IPSViewChartTitleFontSizePercent', 'IPSViewChartTitleColor'] as $name) {
+        $field = findGaugeFormElement($form['elements'], $name);
+        assertGatewayGauge(is_array($field) && isset($field['onChange']), $moduleClass . ' must live-update ' . $name . '.');
+    }
+    $tileImage = (string) findGaugeFormElement($form['elements'], 'GaugePreview')['image'];
+    $ipsImage = (string) findGaugeFormElement($form['elements'], 'IPSViewGaugePreview')['image'];
+    $tileSvg = base64_decode(substr($tileImage, strlen('data:image/svg+xml;base64,')), true);
+    $ipsSvg = base64_decode(substr($ipsImage, strlen('data:image/svg+xml;base64,')), true);
+    assertGatewayGauge(
+        is_string($tileSvg) && is_string($ipsSvg)
+            && str_contains($tileSvg, 'fill="#123456" font-size="27"')
+            && str_contains($ipsSvg, 'fill="#654321" font-size="14"'),
+        $moduleClass . ' must preview separate Tile and IPSView chart-title typography.'
+    );
+    $tileData = json_decode($gauge->GetGaugeData(), true, 512, JSON_THROW_ON_ERROR);
+    $tileStyle = $tileData['gauge']['style'] ?? [];
+    assertGatewayGauge(
+        ($tileStyle['chartTitleFontSizePercent'] ?? null) === 150
+            && ($tileStyle['chartTitleColor'] ?? null) === '#123456'
+            && ($tileStyle['titleFontSizePercent'] ?? null) === 100,
+        $moduleClass . ' must expose chart-title settings without changing instrument-title settings.'
+    );
+    $ipsViewStyle = (new ReflectionMethod($gauge, 'ReadGaugeStyle'))->invoke($gauge, 'IPSView');
+    assertGatewayGauge(
+        ($ipsViewStyle['chartTitleFontSizePercent'] ?? null) === 75
+            && ($ipsViewStyle['chartTitleColor'] ?? null) === '#654321',
+        $moduleClass . ' must retain independent IPSView chart-title settings.'
+    );
+    $gauge->UpdateGaugePreviewFromForm(json_encode([
+        'Title'                             => 'Changed',
+        'ChartTitleFontSizePercent'         => 120,
+        'ChartTitleColor'                   => 0xABCDEF,
+        'IPSViewUseTileDesign'              => true,
+        'IPSViewChartTitleFontSizePercent'  => 80,
+        'IPSViewChartTitleColor'            => 0x654321
+    ], JSON_THROW_ON_ERROR));
+    $updates = array_slice($gauge->GetTestFormUpdates(), -2);
+    $liveTileSvg = base64_decode(substr((string) $updates[0]['Value'], strlen('data:image/svg+xml;base64,')), true);
+    $liveIPSViewSvg = base64_decode(substr((string) $updates[1]['Value'], strlen('data:image/svg+xml;base64,')), true);
+    assertGatewayGauge(
+        is_string($liveTileSvg) && is_string($liveIPSViewSvg)
+            && str_contains($liveTileSvg, 'fill="#ABCDEF" font-size="22"')
+            && str_contains($liveIPSViewSvg, 'fill="#ABCDEF" font-size="22"'),
+        $moduleClass . ' must preview unsaved chart-title changes and IPSView inheritance.'
+    );
+    $validate = new ReflectionMethod($gauge, 'ValidateGaugeDesign');
+    assertGatewayGauge(
+        $validate->invoke($gauge, '') === null && $validate->invoke($gauge, 'IPSView') === null,
+        $moduleClass . ' must accept valid Tile and IPSView chart-title settings.'
+    );
+    $gauge->SetTestProperty('ChartTitleFontSizePercent', 151);
+    assertGatewayGauge($validate->invoke($gauge, '') !== null, $moduleClass . ' must reject oversized chart titles.');
+    $gauge->SetTestProperty('ChartTitleFontSizePercent', 100);
+    $gauge->SetTestProperty('IPSViewChartTitleColor', 0x1000000);
+    assertGatewayGauge($validate->invoke($gauge, 'IPSView') !== null, $moduleClass . ' must reject invalid IPSView title colors.');
+    $gauge->SetTestProperty('ChartTitleFontSizePercent', 150);
+    $GLOBALS['symconTestCopyTarget'] = $gauge;
+    try {
+        $gauge->CopyTileDesignToIPSView();
+    } finally {
+        unset($GLOBALS['symconTestCopyTarget']);
+    }
+    $copiedStyle = (new ReflectionMethod($gauge, 'ReadGaugeStyle'))->invoke($gauge, 'IPSView');
+    assertGatewayGauge(
+        $gauge->GetTestStatus() === IS_ACTIVE
+            && ($copiedStyle['chartTitleFontSizePercent'] ?? null) === 150
+            && ($copiedStyle['chartTitleColor'] ?? null) === '#123456',
+        $moduleClass . ' must copy the chart-title settings with the Tile design.'
+    );
+}
 foreach ([
     EChartsGaugeSingle::class       => 'ECGS',
     EChartsGaugeMulti::class        => 'ECGM',

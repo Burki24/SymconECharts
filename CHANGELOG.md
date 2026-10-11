@@ -48,6 +48,11 @@
 
 ## Neu
 
+- Gauge Multi, Tacho und Chronograph bieten in Kachel und unabhängigem
+  IPSView-Design eine eigene Rubrik für Farbe und Größe des äußeren
+  Diagrammtitels. Automatische Farbe und 100 % Größe erhalten die bisherige
+  Darstellung; Instrumentbeschriftungen bleiben davon unabhängig.
+
 - BarCategory und BarWaterfall bieten in Kachel und unabhängigem IPSView
   konfigurierbare Schriftgrößen und Farben für Titel, Achsen und Werte;
   Category zusätzlich für die Legende. Rasterfarben sind ebenfalls wählbar.

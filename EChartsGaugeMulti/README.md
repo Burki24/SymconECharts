@@ -6,8 +6,12 @@ Symcon-Kacheldarstellung und ein separat platzierbares HTML-Widget in IPSView
 bereitstellen können. Datenquellen und Diagrammkonfiguration werden dabei nur
 einmal gepflegt.
 
-Kachel- und unabhängiger IPSView-Designer ordnen Feinabstimmung, Zeiger und
-Nabe, Skala und Farben sowie Zifferblatt in einklappbaren Bereichen.
+Kachel- und unabhängiger IPSView-Designer ordnen Diagrammtitel, Feinabstimmung,
+Zeiger und Nabe, Skala und Farben sowie Zifferblatt in einklappbaren Bereichen.
+In **Diagrammtitel** lassen sich Größe (50–150 %) und Farbe des äußeren Titels
+einstellen. **Automatisch (Theme)** erhält die bisherige Titelfarbe. Die
+Beschriftungen der einzelnen Instrumente werden weiterhin separat gestaltet.
+Bei **Kacheldesign verwenden** übernimmt IPSView auch diese Titelwerte.
 
 ## Animation
 

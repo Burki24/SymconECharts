@@ -6,8 +6,12 @@ vier weitere Quellen werden als gleich große Nebeninstrumente angeordnet. Bei
 vier und fünf Quellen nutzt eine eigene Anordnung den verfügbaren Platz breiter
 Kacheln aus, ohne das Hauptinstrument zu verkleinern.
 
-Kachel- und unabhängiger IPSView-Designer ordnen Feinabstimmung, Zeiger und
-Nabe, Skala und Farben sowie Zifferblatt in einklappbaren Bereichen.
+Kachel- und unabhängiger IPSView-Designer ordnen Diagrammtitel, Feinabstimmung,
+Zeiger und Nabe, Skala und Farben sowie Zifferblatt in einklappbaren Bereichen.
+In **Diagrammtitel** lassen sich Größe (50–150 %) und Farbe des äußeren Titels
+einstellen. **Automatisch (Theme)** erhält die bisherige Titelfarbe. Die
+Beschriftungen der einzelnen Instrumente werden weiterhin separat gestaltet.
+Bei **Kacheldesign verwenden** übernimmt IPSView auch diese Titelwerte.
 
 ## Animation
 
