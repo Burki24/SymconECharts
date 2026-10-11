@@ -6927,6 +6927,55 @@ foreach ([
     );
 }
 
+$historyCornerPreview = new EChartsBarHistory();
+$historyCornerPreview->Create();
+$historyCornerPreview->UpdateBarPreviewFromForm(json_encode([
+    'Sources'                      => [['VariableID' => 4711, 'Label' => 'Sensor']],
+    'RoundedBars'                  => true,
+    'BarCornerRadius'              => 0,
+    'IPSViewUseTileDesign'         => false,
+    'IPSViewRoundedBars'           => true,
+    'IPSViewBarCornerRadius'       => 12
+], JSON_THROW_ON_ERROR));
+$historyCornerUpdates = array_slice($historyCornerPreview->GetTestFormUpdates(), -2);
+$historyTileSvg = base64_decode(substr(
+    $historyCornerUpdates[0]['Value'],
+    strlen('data:image/svg+xml;base64,')
+), true);
+$historyIPSViewSvg = base64_decode(substr(
+    $historyCornerUpdates[1]['Value'],
+    strlen('data:image/svg+xml;base64,')
+), true);
+assertGatewayGauge(
+    is_string($historyTileSvg) && is_string($historyIPSViewSvg)
+        && str_contains($historyTileSvg, 'rx="0"')
+        && str_contains($historyIPSViewSvg, 'rx="12"'),
+    'Historical Bar previews must reflect independent unsaved corner radii.'
+);
+$historyCornerPreview->UpdateBarPreviewFromForm(json_encode([
+    'Sources'                => [['VariableID' => 4711, 'Label' => 'Sensor']],
+    'RoundedBars'            => true,
+    'BarCornerRadius'        => 9,
+    'IPSViewUseTileDesign'   => true,
+    'IPSViewRoundedBars'     => true,
+    'IPSViewBarCornerRadius' => 12
+], JSON_THROW_ON_ERROR));
+$historyInheritedUpdates = array_slice($historyCornerPreview->GetTestFormUpdates(), -2);
+$historyInheritedTileSvg = base64_decode(substr(
+    $historyInheritedUpdates[0]['Value'],
+    strlen('data:image/svg+xml;base64,')
+), true);
+$historyInheritedIPSViewSvg = base64_decode(substr(
+    $historyInheritedUpdates[1]['Value'],
+    strlen('data:image/svg+xml;base64,')
+), true);
+assertGatewayGauge(
+    is_string($historyInheritedTileSvg) && is_string($historyInheritedIPSViewSvg)
+        && str_contains($historyInheritedTileSvg, 'rx="9"')
+        && str_contains($historyInheritedIPSViewSvg, 'rx="9"'),
+    'Historical Bar IPSView preview must inherit the unsaved Tile corner radius.'
+);
+
 $categoryPreview = new EChartsBarCategory();
 $categoryPreview->Create();
 $categorySources = [

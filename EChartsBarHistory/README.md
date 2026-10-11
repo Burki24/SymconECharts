@@ -10,7 +10,8 @@ and colors in collapsible sections. The live preview remains below them.
 ## Live preview
 
 The Tile and IPSView designers each show an SVG preview. Unsaved changes to
-the title, source labels, theme, time range and basic bar design update both
+the title, source labels, theme, time range and bar design (including the
+configured corner radius when rounded bars are enabled) update both
 previews. The historical waveform is always marked as example data: editing
 the form does not trigger an archive query. **Use Tile design** makes the
 IPSView preview follow Tile appearance. Check the real tile and IPSView widget

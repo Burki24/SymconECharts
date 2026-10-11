@@ -15,9 +15,9 @@ festen Formularvertrag könnten neue Chartfamilien diese Reihenfolge und
 Beschriftung erneut unterschiedlich umsetzen.
 
 Gauge Single, Gauge Multi, Gauge Tacho, Gauge Chronograph und TimeSeries
-besitzen bereits eine SVG-Vorschau im Kachel- und IPSView-Designer. Category
-Bar, BarHistory, Waterfall Bar und Polar Bar besitzen noch keine
-Formularvorschau. Die vorhandenen Vorschauen bilden Diagramme gezielt nach;
+besaßen beim Beschluss bereits eine SVG-Vorschau im Kachel- und IPSView-Designer.
+Category Bar, BarHistory, Waterfall Bar und Polar Bar besaßen damals noch keine
+Formularvorschau. Die Vorschauen bilden Diagramme gezielt nach;
 sie sind kein pixelidentischer Ersatz für die ECharts-Laufzeitausgabe.
 
 Das allgemeine Konfigurationsformular folgt weiterhin dem zentralen Standard
@@ -87,14 +87,15 @@ gemäß [ADR 0017](0017-reuse-before-new-chart-development.md).
 
 ## Einführung und Prüfung
 
-Der Vertrag ist ein Ziel für alle Diagrammgeräte, keine Behauptung, dass die
-vier Bar-Vorschauen bereits vorhanden sind. Zuerst wird Category Bar als
-erste Bar-Vertikale mit Kachel- und IPSView-Vorschau ergänzt und die
-gemeinsame Vorschauverdrahtung gegen Gauge und TimeSeries geprüft. Danach
-folgen BarHistory, Waterfall Bar und Polar Bar mit ihren jeweils eigenen
-Geometrien. Bestehende Vorschauen werden auf Reaktion auf ungespeicherte
-Listenänderungen, Vererbungswechsel und die Kennzeichnung von Beispieldaten
-überprüft. Das infrastrukturelle Gateway benötigt keine Diagrammvorschau.
+Der Vertrag war beim Beschluss ein Ziel für alle Diagrammgeräte, keine
+Behauptung, dass die vier Bar-Vorschauen damals bereits vorhanden waren.
+Category Bar wurde als erste Bar-Vertikale mit Kachel- und IPSView-Vorschau
+ergänzt und die gemeinsame Vorschauverdrahtung gegen Gauge und TimeSeries
+geprüft. Danach folgten BarHistory, Waterfall Bar und Polar Bar mit ihren
+jeweils eigenen Geometrien. Bestehende Vorschauen werden weiterhin auf die
+Reaktion auf ungespeicherte Listenänderungen, Vererbungswechsel und die
+Kennzeichnung von Beispieldaten überprüft. Das infrastrukturelle Gateway
+benötigt keine Diagrammvorschau.
 
 Für jede Vertikale werden mindestens gültige und leere Quellen, ungespeicherte
 Designänderungen, Tile- und IPSView-Vererbung, fehlerhafte Entwürfe,
@@ -105,11 +106,23 @@ keine korrekte visuelle Laufzeitdarstellung. Veröffentlichte Properties,
 Idents, GUIDs und gespeicherte Formate bleiben durch diese
 Formularentscheidung unverändert.
 
+## Umsetzungsstand
+
+Alle neun Diagrammgeräte besitzen inzwischen eine Kachel- und eine
+IPSView-Formularvorschau. Die vier Bar-Vorschauen nutzen die gemeinsame
+read-only-Verdrahtung in `libs/EChartsBarPreviewForm.php` und die begrenzten
+SVG-Grundfunktionen in `libs/EChartsBarPreview.php`; ihre fachliche Geometrie
+bleibt in den jeweiligen Modulen. Die ursprünglich geplante Reihenfolge ist
+damit abgeschlossen. Die beschriebenen Prüfanforderungen gelten weiterhin
+für Änderungen an Formularen und Vorschauen. Insbesondere ersetzt eine
+erfolgreiche Formular- oder SVG-Prüfung keine visuelle Abnahme der Kachel und
+des IPSView-Widgets nach einem Modulupdate.
+
 ## Folgen
 
 Anwender finden die grundlegenden Einstellungen und die Vorschau in jeder
 Diagrammfamilie an vergleichbarer Stelle. Neue Module übernehmen denselben
 Bedienvertrag, ohne fachlich verschiedene Diagramme in ein generisches
-Formularschema oder einen gemeinsamen Renderer zu zwingen. Die vier fehlenden
-Bar-Vorschauen und gegebenenfalls Lücken bestehender Vorschauen bleiben bis
-zur jeweiligen Implementierung ausdrücklich offen.
+Formularschema oder einen gemeinsamen Renderer zu zwingen. Vorschau und
+echter ECharts-Renderer bleiben getrennte Nachweise; eine SVG-Vorschau
+verspricht keine pixelgleiche Ausgabe.

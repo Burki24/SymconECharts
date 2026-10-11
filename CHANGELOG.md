@@ -2,6 +2,9 @@
 
 ## Behoben
 
+- Die BarHistory-Formularvorschau berücksichtigt jetzt den eingestellten
+  Eckradius abgerundeter Balken getrennt für Kachel und unabhängiges IPSView.
+
 - Vorübergehende Ladefehler lassen auch bei Gauge Single, Multi, Tacho,
   Chronograph, TimeSeries, BarCategory, BarWaterfall und BarPolar die letzte
   gültige Kachel- oder IPSView-Grafik stehen. Bei wiederholtem Fehler erscheint
