@@ -175,6 +175,9 @@ Der eigene Vertrag für aktuelle Waterfall-Schritte mit Startwert, signierten
 [`ADR 0034`](adr/0034-waterfall-bar-current-values.md) festgelegt.
 Den eigenen Polar-Bar-Vertrag für aktuelle Werte und zwei Polar-Geometrien
 dokumentiert [`ADR 0035`](adr/0035-polar-bar-current-values.md).
+Die gemeinsame Grundreihenfolge der Diagrammformulare, die Live-Vorschau
+für beide Ausgabewege und die Grenze zwischen Modul und `libs` legt
+[`ADR 0036`](adr/0036-consistent-chart-forms-and-live-previews.md) fest.
 Bei begrenzten konzentrischen Polar-Bögen zeichnet ECharts 6.1.0 die
 eingebauten Balkenhintergründe intern zunächst als Vollkreise. Der Polar-
 Renderer passt die `BarView._backgroundEls` nach `setOption()` und beim

@@ -71,6 +71,11 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Ausgabeadapter und ECharts-Renderer werden als getrennte Zuständigkeiten
   behandelt. Gemeinsame Abstraktionen entstehen nur für belegte gemeinsame
   Anwendungsfälle.
+- Die gemeinsame Grundreihenfolge der Diagramm-Instanzformulare und eine
+  unmittelbar auf Formularänderungen reagierende Vorschau für Kachel und
+  IPSView folgen [`ADR 0036`](docs/adr/0036-consistent-chart-forms-and-live-previews.md).
+  Das Gateway ohne Diagramm-Designer ist ausgenommen. Die dort noch offenen
+  Vorschauen werden nicht als bereits implementiert dargestellt.
 - Repositoryweit geteilter projektspezifischer Code liegt direkt unter `libs`;
   `libs/helper` enthält ausschließlich die über `.helper-sync.json`
   abonnierten Kopien aus `Symcon_ModuleHelper`. Tests liegen unter `tests`.
