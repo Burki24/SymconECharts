@@ -103,7 +103,10 @@
             var availableWidth = Math.max(36, Math.min(320, Math.floor(width / 2 - labelMargin - 88)));
             labelWidth = Math.min(availableWidth, Math.max(labelWidth, Math.ceil(naturalWidth) + 10));
         }
-        var top = headerInset + (polar.title ? 50 : 12);
+        var typography = window.SYMC_ECHARTS_DESIGN || {};
+        var titleSize = typeof typography.fontSizePercent === 'function'
+            ? typography.fontSizePercent(style.titleFontSizePercent, 18) : 18;
+        var top = headerInset + (polar.title ? 50 + Math.max(0, titleSize - 18) : 12);
         var bottom = style.showCategoryLabels !== false ? Math.min(45, height * 0.14) : 24;
         var side = style.showCategoryLabels !== false ? labelWidth + labelMargin + 8
             : style.valueLabelPosition === 'outside' ? 64 : 36;
@@ -149,14 +152,15 @@
         var categoryFontSize = fontSize(style.categoryLabelFontSize, 10);
         var valueFontSize = fontSize(style.valueLabelFontSize, 10);
         var scaleFontSize = fontSize(style.scaleLabelFontSize, 10);
-        var axisStyle = { color: colors.border, opacity: 0.7 };
-        var splitStyle = { color: colors.border, opacity: 0.2 };
+        var titleFontSize = design.fontSizePercent(style.titleFontSizePercent, 18);
+        var axisStyle = { color: style.gridColor || colors.border, opacity: style.gridColor ? 1 : 0.7 };
+        var splitStyle = { color: style.gridColor || colors.border, opacity: style.gridColor ? 1 : 0.2 };
         var categoryAxis = {
             type: 'category',
             data: labels,
             z: mode === 'tangential' ? 3 : 0,
             axisLabel: {
-                show: style.showCategoryLabels !== false, color: colors.text,
+                show: style.showCategoryLabels !== false, color: style.categoryLabelColor || colors.text,
                 interval: 0, hideOverlap: true,
                 overflow: 'truncate', width: 90, fontSize: categoryFontSize, margin: 24,
                 textBorderColor: colors.background, textBorderWidth: mode === 'tangential' ? 3 : 0
@@ -167,7 +171,7 @@
         };
         var valueAxis = {
             type: 'value',
-            axisLabel: { show: layout.showValueScale, color: colors.muted, fontSize: scaleFontSize },
+            axisLabel: { show: layout.showValueScale, color: style.scaleLabelColor || colors.muted, fontSize: scaleFontSize },
             axisLine: { show: style.showGrid !== false, lineStyle: axisStyle },
             axisTick: { show: style.showGrid !== false, lineStyle: axisStyle },
             splitLine: { show: style.showGrid !== false, lineStyle: splitStyle }
@@ -235,7 +239,7 @@
             },
             title: {
                 show: titleVisible, text: String(polar.title || ''), left: 'center', top: headerInset,
-                textStyle: { color: colors.text, fontSize: 18 }
+                textStyle: { color: style.titleColor || colors.text, fontSize: titleFontSize }
             },
             tooltip: {
                 trigger: 'item',
@@ -277,7 +281,7 @@
                             { offset: 1, color: style.barGradientColor || colors.background }
                         ]
                     } : itemColor;
-                    var textColor = valueLabelPosition === 'outside' ? colors.text
+                    var textColor = valueLabelPosition === 'outside' ? (style.valueColor || colors.text)
                         : typeof design.readableTextColor === 'function'
                             ? design.readableTextColor(itemColor, colors.text, colors.background)
                             : colors.text;
@@ -310,7 +314,7 @@
                 label: {
                     show: style.showValues === true,
                     position: valueLabelPosition,
-                    color: colors.text,
+                    color: style.valueColor || colors.text,
                     fontSize: valueFontSize,
                     align: mode === 'tangential' && valueLabelPosition !== 'outside' ? 'center' : undefined,
                     rotate: 0,

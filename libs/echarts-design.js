@@ -128,6 +128,11 @@
         return true;
     }
 
+    function fontSizePercent(value, base) {
+        var percent = Number(value);
+        return Math.round(base * (Number.isFinite(percent) && percent >= 50 && percent <= 200 ? percent : 100) / 100);
+    }
+
     global.SYMC_ECHARTS_DESIGN = Object.freeze({
         contrastRatio: contrastRatio,
         readableTextColor: readableTextColor,
@@ -137,6 +142,7 @@
         animationOptions: animationOptions,
         colorWithAlpha: colorWithAlpha,
         barOutlineStyle: barOutlineStyle,
+        fontSizePercent: fontSizePercent,
         resizeChartIfNeeded: resizeChartIfNeeded
     });
 }(window));

@@ -3,7 +3,8 @@
 `EChartsBarPolar` stellt aktuelle Zahlenwerte als Polar-Balken dar. Die Kachel zeigt wahlweise radial nach außen gerichtete Balken oder konzentrische Kreisbögen. Das Modul akzeptiert 1 bis 16 eindeutige numerische Symcon-Variablen mit derselben effektiven Einheit. Ein Archiv ist nicht nötig.
 
 Kachel- und unabhängiger IPSView-Designer gliedern Anordnung, Beschriftung,
-Geometrie, Balkeneffekte sowie Skala und Winkel in einklappbare Bereiche.
+Geometrie, Balkeneffekte, Skala und Winkel sowie Schrift und Farben in
+einklappbare Bereiche.
 Die Live-Vorschau folgt darunter.
 
 ## Live-Vorschau
@@ -33,6 +34,9 @@ Im **Kacheldesigner** und im unabhängigen **IPSView-Design** stehen zur Verfüg
 - **Konzentrische Bögen**: Kategorien liegen auf getrennten Kreisbahnen; Werte bestimmen die Bogenlänge.
 - Konfigurierte oder wertsortierte Reihenfolge, Kategorie- und Wertbeschriftungen, Raster, Balkenbreite, Innen- und Außenradius, Startwinkel, Winkelumfang, Drehrichtung und abgerundete Enden.
 - ECharts-Theme, die je Quelle konfigurierte Balkenfarbe und wahlweise Vollfarbe oder Farbverlauf.
+- Titelgröße (50–200 %) sowie Farben für Titel, Kategorien, Werteskala,
+  Raster und Werte außerhalb der Balken. Werte innerhalb farbiger Balken
+  behalten ihre automatische Hell-Dunkel-Kontrastfarbe.
 
 Standardmäßig bestimmt ECharts die Werteskala automatisch. Negative Werte werden nicht in positive Werte umgerechnet. Bei vielen Quellen oder langen Namen können Beschriftungen in kleinen Kacheln überlappen; Kachelgröße und Anzeigeoptionen lassen sich passend wählen.
 Der **Winkelumfang** bestimmt, welchen Teil des Kreises die Balken nutzen: 360° ergibt den bisherigen Vollkreis, 180° einen Halbkreis. Werte von 30° bis 360° sind möglich. **Startwinkel** legt den Anfang fest, **Im Uhrzeigersinn** die Laufrichtung. Balken, Hintergrundspuren und Raster nutzen auch bei konzentrischen Bögen denselben Ausschnitt und bleiben nach Größenänderungen darin. Kachel und unabhängiger IPSView-Designer können unterschiedliche Winkelumfänge verwenden; bei **Kacheldesign verwenden** übernimmt IPSView den Kachelwert.

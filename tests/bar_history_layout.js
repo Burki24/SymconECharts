@@ -216,9 +216,9 @@ ready.window.handleMessage({
                 showValues: true, showGrid: true, roundedBars: true,
                 barWidthPercent: 60, barFillMode: 'gradient', barGradientColor: '#55ccaa',
                 barOpacityPercent: 65, barCornerRadius: 10,
-                titleFontSizePercent: 130, axisFontSizePercent: 115,
+                titleFontSizePercent: 130, legendFontSizePercent: 150, axisFontSizePercent: 115,
                 valueFontSizePercent: 125, titleColor: '#ffeedd',
-                axisColor: '#ddeeff', valueColor: '#112233', gridColor: '#445566',
+                legendColor: '#abcdef', axisColor: '#ddeeff', valueColor: '#112233', gridColor: '#445566',
                 animationEnabled: true, animationEasing: 'bounceOut',
                 animationEasingUpdate: 'linear', animationDelay: 120,
                 animationDelayUpdate: 240
@@ -233,10 +233,13 @@ assert.equal(ready.option.animationEasingUpdate, 'linear');
 assert.equal(ready.option.animationDelay, 120);
 assert.equal(ready.option.animationDelayUpdate, 240);
 assert.equal(ready.option.title.textStyle.fontSize, 23);
+assert.equal(ready.option.legend.textStyle.fontSize, 18);
+assert.equal(ready.option.legend.textStyle.color, '#abcdef');
 assert.equal(ready.option.xAxis.axisLabel.color, '#ddeeff');
 assert.equal(ready.option.xAxis.axisLabel.fontSize, 14);
 assert.equal(ready.option.xAxis.axisLine.lineStyle.color, '#ddeeff');
 assert.equal(ready.option.yAxis.nameTextStyle.color, '#ddeeff');
+assert.equal(ready.option.yAxis.nameTextStyle.fontSize, 14);
 assert.equal(ready.option.yAxis.splitLine.lineStyle.color, '#445566');
 assert.equal(ready.option.yAxis.splitLine.lineStyle.opacity, 1);
 assert.equal(ready.option.series[0].label.color, '#112233');

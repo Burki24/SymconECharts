@@ -192,6 +192,13 @@ verbleiben in den jeweiligen Bar-Modulen. Der synchronisierte
 `SVGPreviewHelper` wird unverändert wiederverwendet. History nutzt
 gekennzeichnete Beispielverläufe und fragt beim Formularbearbeiten kein
 Archiv ab. Die SVG-Vorschau ist kein Ersatz für visuelle Laufzeitprüfungen.
+`libs/EChartsBarTypography.php` bündelt die wiederkehrende Registrierung,
+Validierung, Modellabbildung und Formularverdrahtung optionaler Schrift- und
+Farbfelder für Category, Waterfall und Polar. Die konkrete Feldliste und
+Rubrik bleibt je Diagrammfamilie lokal; History behält seine bereits
+veröffentlichten Schrift-Properties und ergänzt nur die Legende. Der
+Browserbaustein `libs/echarts-design.js` teilt die prozentuale Schriftgröße,
+während die jeweiligen Renderer ihre Theme-Rückfälle und Geometrie bestimmen.
 Bei begrenzten konzentrischen Polar-Bögen zeichnet ECharts 6.1.0 die
 eingebauten Balkenhintergründe intern zunächst als Vollkreise. Der Polar-
 Renderer passt die `BarView._backgroundEls` nach `setOption()` und beim

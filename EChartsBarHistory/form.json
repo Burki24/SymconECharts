@@ -547,6 +547,15 @@
                         },
                         {
                             "type": "NumberSpinner",
+                            "name": "LegendFontSizePercent",
+                            "caption": "Legend size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%",
+                            "width": "130px"
+                        },
+                        {
+                            "type": "NumberSpinner",
                             "name": "AxisFontSizePercent",
                             "caption": "Axis label size",
                             "minimum": 50,
@@ -572,6 +581,13 @@
                             "type": "SelectColor",
                             "name": "TitleColor",
                             "caption": "Title color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "LegendColor",
+                            "caption": "Legend color",
                             "allowTransparent": true,
                             "transparentCaption": "Automatic"
                         },

@@ -158,22 +158,32 @@
         var stacked = chartData.mode === 'stacked';
         var titleVisible = Boolean(bar.title);
         var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8;
-        var axisLabel = { color: colors.text, overflow: 'truncate', width: horizontal ? 180 : 100 };
+        var titleColor = style.titleColor || colors.text;
+        var legendColor = style.legendColor || colors.text;
+        var axisColor = style.axisColor || colors.text;
+        var axisLineColor = style.axisColor || colors.border;
+        var gridColor = style.gridColor || colors.border;
+        var valueColor = style.valueColor || colors.text;
+        var titleSize = echartsDesign.fontSizePercent(style.titleFontSizePercent, 18);
+        var legendSize = echartsDesign.fontSizePercent(style.legendFontSizePercent, 12);
+        var axisSize = echartsDesign.fontSizePercent(style.axisFontSizePercent, 12);
+        var valueSize = echartsDesign.fontSizePercent(style.valueFontSizePercent, 12);
+        var axisLabel = { color: axisColor, fontSize: axisSize, overflow: 'truncate', width: horizontal ? 180 : 100 };
         var valueAxis = {
             type: 'value',
             name: String(bar.unit || ''),
-            nameTextStyle: { color: colors.muted },
-            axisLabel: { color: colors.text },
-            axisLine: { show: true, lineStyle: { color: colors.border } },
-            axisTick: { show: true, lineStyle: { color: colors.border } },
-            splitLine: { show: style.showGrid !== false, lineStyle: { color: colors.border, opacity: 0.22 } }
+            nameTextStyle: { color: style.axisColor || colors.muted, fontSize: axisSize },
+            axisLabel: { color: axisColor, fontSize: axisSize },
+            axisLine: { show: true, lineStyle: { color: axisLineColor } },
+            axisTick: { show: true, lineStyle: { color: axisLineColor } },
+            splitLine: { show: style.showGrid !== false, lineStyle: { color: gridColor, opacity: style.gridColor ? 1 : 0.22 } }
         };
         var categoryAxis = {
             type: 'category',
             data: chartData.categories,
             axisLabel: axisLabel,
-            axisLine: { lineStyle: { color: colors.border } },
-            axisTick: { alignWithLabel: true, lineStyle: { color: colors.border } }
+            axisLine: { lineStyle: { color: axisLineColor } },
+            axisTick: { alignWithLabel: true, lineStyle: { color: axisLineColor } }
         };
         var radius = style.roundedBars === true ? 7 : 0;
         var decimals = Math.max(0, Math.min(6, Number(bar.decimals) || 0));
@@ -195,10 +205,11 @@
                 text: String(bar.title || ''),
                 left: 'center',
                 top: headerInset,
-                textStyle: { color: colors.text, fontSize: 18 }
+                textStyle: { color: titleColor, fontSize: titleSize }
             },
             grid: {
-                top: headerInset + (multiSeries ? (titleVisible ? 82 : 48) : (titleVisible ? 56 : 20)),
+                top: headerInset + (multiSeries ? (titleVisible ? 82 : 48) : (titleVisible ? 56 : 20))
+                    + Math.max(0, titleSize - 18) + (multiSeries ? Math.max(0, legendSize - 12) : 0),
                 right: horizontal && style.showValues === true ? 84 : 30,
                 bottom: horizontal ? 28 : 70,
                 left: horizontal ? 28 : 52,
@@ -206,8 +217,8 @@
             },
             legend: {
                 show: multiSeries,
-                top: headerInset + (titleVisible ? 38 : 8),
-                textStyle: { color: colors.text },
+                top: headerInset + (titleVisible ? 38 + Math.max(0, titleSize - 18) : 8),
+                textStyle: { color: legendColor, fontSize: legendSize },
                 data: chartData.series.map(function (item) { return item.id; }),
                 formatter: function (name) {
                     var source = chartData.series.find(function (item) { return item.id === name; });
@@ -248,15 +259,16 @@
                     label: {
                         show: style.showValues === true,
                         position: stacked ? 'inside' : (horizontal ? 'right' : 'top'),
-                        color: stacked ? colors.background : colors.text,
+                        color: style.valueColor || (stacked ? colors.background : colors.text),
+                        fontSize: valueSize,
                         formatter: function (parameters) {
                             return formatValue(parameters.value, decimals, unit);
                         }
                     },
                     data: seriesItem.items.map(function (item) {
-                        var labelColor = stacked && typeof design.readableTextColor === 'function'
+                        var labelColor = style.valueColor || (stacked && typeof design.readableTextColor === 'function'
                             ? design.readableTextColor(item.color, colors.text, colors.background)
-                            : colors.text;
+                            : valueColor);
                         return {
                             value: item.value,
                             label: stacked ? { color: labelColor } : undefined,

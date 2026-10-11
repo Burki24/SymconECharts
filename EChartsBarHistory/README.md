@@ -37,8 +37,8 @@ In the Tile and independent IPSView designers, **Animate chart**, **Initial anim
 - Optional time-axis zoom with a slider and mouse wheel in the tile and IPSView
 - Theme, value labels, grid, bar width, optional gradient or repeated SVG
   pattern fill, opacity and rounded corners
-- Adjustable font sizes and colors for title, axes and value labels, plus grid
-  color
+- Adjustable font sizes and colors for title, legend, axes and value labels,
+  plus grid color. The axis size also applies to its unit caption.
 - Independent IPSView time range, time-axis labels and appearance, or inheritance
   from the tile; optional background color and opacity
 

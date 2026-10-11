@@ -12,6 +12,7 @@ use SymconECharts\EChartsAnimationDesign;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsBarPreview;
 use SymconECharts\EChartsBarPreviewForm;
+use SymconECharts\EChartsBarTypography;
 use SymconECharts\EChartsCurrentSources;
 use SymconECharts\EChartsDesignerSections;
 use SymconECharts\EChartsIPSViewBackground;
@@ -30,6 +31,7 @@ require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsBarPreview.php';
 require_once __DIR__ . '/../libs/EChartsBarPreviewForm.php';
+require_once __DIR__ . '/../libs/EChartsBarTypography.php';
 require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsCurrentSources.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
@@ -45,6 +47,7 @@ class EChartsBarCategory extends IPSModuleStrict
     use ConfigurationFormHelper;
     use EChartsAnimationDesign;
     use EChartsBarPreviewForm;
+    use EChartsBarTypography;
     use DataFlowHelper;
     use EChartsCurrentSources;
     use IPSViewHTMLPageHelper;
@@ -68,6 +71,14 @@ class EChartsBarCategory extends IPSModuleStrict
     private const ORIENTATIONS = ['vertical', 'horizontal'];
     private const SORT_ORDERS = ['configured', 'ascending', 'descending'];
     private const BAR_FILL_MODES = ['solid', 'svg'];
+    private const TEXT_FONTS = [
+        'TitleFontSizePercent' => 'Title size', 'LegendFontSizePercent' => 'Legend size',
+        'AxisFontSizePercent'  => 'Axis label size', 'ValueFontSizePercent' => 'Value label size'
+    ];
+    private const TEXT_COLORS = [
+        'TitleColor' => 'Title color', 'LegendColor' => 'Legend color',
+        'AxisColor'  => 'Axis color', 'ValueColor' => 'Value label color', 'GridColor' => 'Grid color'
+    ];
 
     public function Create(): void
     {
@@ -141,11 +152,13 @@ class EChartsBarCategory extends IPSModuleStrict
             );
         }
 
+        $form = $this->WithBarTypographyForm($form, self::TEXT_FONTS, self::TEXT_COLORS);
         $form = $this->WithIPSViewDesignFormState($form, 'ECBC');
         $form = EChartsDesignerSections::Group($form, [
             ['caption' => 'Bar layout and order', 'start' => 'BarMode'],
             ['caption' => 'Labels and geometry', 'start' => 'ShowValues'],
-            ['caption' => 'Bar fill and pattern', 'start' => 'BarFillMode']
+            ['caption' => 'Bar fill and pattern', 'start' => 'BarFillMode'],
+            ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
         ]);
         $fields = array_merge(
             ['Title', 'Sources', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
@@ -321,8 +334,17 @@ class EChartsBarCategory extends IPSModuleStrict
             $ipsView,
             $values,
             $this->Translate('Example data'),
-            $this->Translate('Chart preview')
+            $this->Translate('Chart preview'),
+            EChartsBarPreview::Color($this->BarPreviewValue($values, 'TitleColor', 'integer', $ipsView), $palette['text']),
+            $this->BarPreviewValue($values, 'TitleFontSizePercent', 'integer', $ipsView)
         );
+        $legendColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'LegendColor', 'integer', $ipsView), $palette['text']);
+        $axisColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'AxisColor', 'integer', $ipsView), $palette['text']);
+        $valueColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'ValueColor', 'integer', $ipsView), $palette['text']);
+        $gridColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'GridColor', 'integer', $ipsView), $palette['track']);
+        $legendSize = max(6, min(22, (int) round(11 * $this->BarPreviewValue($values, 'LegendFontSizePercent', 'integer', $ipsView) / 100)));
+        $axisSize = max(6, min(22, (int) round(11 * $this->BarPreviewValue($values, 'AxisFontSizePercent', 'integer', $ipsView) / 100)));
+        $valueSize = max(6, min(22, (int) round(11 * $this->BarPreviewValue($values, 'ValueFontSizePercent', 'integer', $ipsView) / 100)));
         $svg .= '<text x="696" y="55" text-anchor="end" fill="' . EChartsBarPreview::E($palette['muted'])
             . '" font-size="12">' . EChartsBarPreview::E(ucfirst($mode)) . '</text>';
         if ($mode !== 'simple') {
@@ -337,7 +359,7 @@ class EChartsBarCategory extends IPSModuleStrict
                 $svg .= '<rect x="' . $legendX . '" y="' . ($legendY - 9) . '" width="12" height="12" fill="'
                     . EChartsBarPreview::E($color) . '"/>';
                 $svg .= '<text x="' . ($legendX + 17) . '" y="' . $legendY . '" fill="'
-                    . EChartsBarPreview::E($palette['text']) . '" font-size="11">'
+                    . EChartsBarPreview::E($legendColor) . '" font-size="' . $legendSize . '">'
                     . EChartsBarPreview::E(mb_strimwidth($series, 0, 20, '…')) . '</text>';
             }
         }
@@ -393,8 +415,8 @@ class EChartsBarCategory extends IPSModuleStrict
             for ($step = 0; $step <= 4; ++$step) {
                 $position = $orientation === 'horizontal' ? 100 + $step * 142 : 295 - $step * 52;
                 $svg .= $orientation === 'horizontal'
-                    ? '<line x1="' . $position . '" y1="75" x2="' . $position . '" y2="295" stroke="' . EChartsBarPreview::E($palette['track']) . '"/>'
-                    : '<line x1="100" y1="' . $position . '" x2="668" y2="' . $position . '" stroke="' . EChartsBarPreview::E($palette['track']) . '"/>';
+                    ? '<line x1="' . $position . '" y1="75" x2="' . $position . '" y2="295" stroke="' . EChartsBarPreview::E($gridColor) . '"/>'
+                    : '<line x1="100" y1="' . $position . '" x2="668" y2="' . $position . '" stroke="' . EChartsBarPreview::E($gridColor) . '"/>';
             }
         }
         $svg .= $orientation === 'horizontal'
@@ -409,10 +431,10 @@ class EChartsBarCategory extends IPSModuleStrict
             $label = $mode === 'simple' ? $group[0]['item']['label'] : $key;
             $center = ($orientation === 'horizontal' ? 79 : 100) + ($groupIndex + 0.5) * $span;
             $svg .= $orientation === 'horizontal'
-                ? '<text x="92" y="' . EChartsBarPreview::N($center + 4) . '" text-anchor="end" fill="' . EChartsBarPreview::E($palette['text'])
-                    . '" font-size="11">' . EChartsBarPreview::E(mb_strimwidth($label, 0, 13, '…')) . '</text>'
-                : '<text x="' . EChartsBarPreview::N($center) . '" y="315" text-anchor="middle" fill="' . EChartsBarPreview::E($palette['text'])
-                    . '" font-size="11">' . EChartsBarPreview::E(mb_strimwidth($label, 0, 12, '…')) . '</text>';
+                ? '<text x="92" y="' . EChartsBarPreview::N($center + 4) . '" text-anchor="end" fill="' . EChartsBarPreview::E($axisColor)
+                    . '" font-size="' . $axisSize . '">' . EChartsBarPreview::E(mb_strimwidth($label, 0, 13, '…')) . '</text>'
+                : '<text x="' . EChartsBarPreview::N($center) . '" y="315" text-anchor="middle" fill="' . EChartsBarPreview::E($axisColor)
+                    . '" font-size="' . $axisSize . '">' . EChartsBarPreview::E(mb_strimwidth($label, 0, 12, '…')) . '</text>';
             $positiveOffset = 0.0;
             $negativeOffset = 0.0;
             foreach ($group as $entryIndex => $entry) {
@@ -442,7 +464,7 @@ class EChartsBarCategory extends IPSModuleStrict
                 }
                 if ($showValues) {
                     $svg .= '<text x="' . EChartsBarPreview::N($valueX) . '" y="' . EChartsBarPreview::N($valueY)
-                        . '" text-anchor="middle" fill="' . EChartsBarPreview::E($palette['text']) . '" font-size="11">'
+                        . '" text-anchor="middle" fill="' . EChartsBarPreview::E($valueColor) . '" font-size="' . $valueSize . '">'
                         . EChartsBarPreview::E(EChartsBarPreview::N($item['value']) . ' ' . $item['unit']) . '</text>';
                 }
                 if ($item['value'] >= 0) {
@@ -712,6 +734,7 @@ class EChartsBarCategory extends IPSModuleStrict
         $this->RegisterPropertyString($prefix . 'BarFillMode', 'solid');
         $this->RegisterPropertyString($prefix . 'BarSVG', '');
         $this->RegisterPropertyInteger($prefix . 'BarSVGSizePercent', 100);
+        $this->RegisterBarTypography(array_keys(self::TEXT_FONTS), array_keys(self::TEXT_COLORS), $prefix);
         $this->RegisterAnimationProperties($prefix, true, 350, 500);
     }
 
@@ -730,6 +753,8 @@ class EChartsBarCategory extends IPSModuleStrict
             'BarFillMode'             => 'string',
             'BarSVG'                  => 'string',
             'BarSVGSizePercent'       => 'integer',
+            ...array_fill_keys(array_keys(self::TEXT_FONTS), 'integer'),
+            ...array_fill_keys(array_keys(self::TEXT_COLORS), 'integer'),
             'AnimationEnabled'        => 'boolean',
             'AnimationDuration'       => 'integer',
             'AnimationDurationUpdate' => 'integer',
@@ -751,6 +776,7 @@ class EChartsBarCategory extends IPSModuleStrict
             && in_array($this->ReadPropertyString($prefix . 'BarFillMode'), self::BAR_FILL_MODES, true)
             && $this->ReadPropertyInteger($prefix . 'BarSVGSizePercent') >= 25
             && $this->ReadPropertyInteger($prefix . 'BarSVGSizePercent') <= 400
+            && $this->BarTypographyIsValid(array_keys(self::TEXT_FONTS), array_keys(self::TEXT_COLORS), $prefix)
             && $this->AnimationIsValid($prefix)
             && $this->IsValidBarSVG($prefix);
     }
@@ -778,7 +804,8 @@ class EChartsBarCategory extends IPSModuleStrict
             'showGrid'        => $this->ReadPropertyBoolean($prefix . 'ShowGrid'),
             'roundedBars'     => $this->ReadPropertyBoolean($prefix . 'RoundedBars'),
             'barWidthPercent' => $this->ReadPropertyInteger($prefix . 'BarWidthPercent'),
-            'barFillMode'     => $this->ReadPropertyString($prefix . 'BarFillMode')
+            'barFillMode'     => $this->ReadPropertyString($prefix . 'BarFillMode'),
+            ...$this->ReadBarTypography(array_keys(self::TEXT_FONTS), array_keys(self::TEXT_COLORS), $prefix)
         ];
         if ($style['barFillMode'] === 'svg') {
             $image = EChartsSvgImage::Import($this->ReadPropertyString($prefix . 'BarSVG'));

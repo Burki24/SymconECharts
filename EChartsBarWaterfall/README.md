@@ -4,8 +4,9 @@
 Änderungen zu einer Endsumme entwickelt. Das Modul benötigt zwei bis sechzehn
 eindeutige numerische Symcon-Variablen mit derselben effektiven Einheit.
 
-Die beiden Designer fassen Beschriftung und Geometrie sowie die Schrittfarben
-in einklappbaren Bereichen zusammen. Die Live-Vorschau steht darunter.
+Die beiden Designer fassen Beschriftung und Geometrie, Schrittfarben sowie
+Schrift und Textfarben in einklappbaren Bereichen zusammen. Die Live-Vorschau
+steht darunter.
 
 ## Live-Vorschau
 
@@ -52,6 +53,8 @@ Die effektive Einheit muss bei allen Quellen gleich sein.
 - optionales eigenständiges WebContent-Widget für IPSView;
 - Kachel- und unabhängiges IPSView-Design mit Theme, Raster, Wertanzeige,
   Balkenbreite und separaten Farben für Start, Zunahme, Abnahme und Endsumme;
+- Titel-, Achsen- und Werteschriftgröße von 50 bis 200 % sowie eigene Farben
+  für Titel, Achsen, Werte und Raster; „Automatisch“ folgt weiterhin dem Theme;
 - einstellbare Hintergrundfarbe und Deckkraft für IPSView.
 
 In **IPSView-Design** ist **Kacheldesign verwenden** zunächst aktiv. Die

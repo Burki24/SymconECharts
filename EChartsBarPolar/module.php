@@ -12,6 +12,7 @@ use SymconECharts\EChartsAnimationDesign;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsBarPreview;
 use SymconECharts\EChartsBarPreviewForm;
+use SymconECharts\EChartsBarTypography;
 use SymconECharts\EChartsCurrentSources;
 use SymconECharts\EChartsDesignerSections;
 use SymconECharts\EChartsIPSViewBackground;
@@ -30,6 +31,7 @@ require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsBarPreview.php';
 require_once __DIR__ . '/../libs/EChartsBarPreviewForm.php';
+require_once __DIR__ . '/../libs/EChartsBarTypography.php';
 require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsCurrentSources.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
@@ -45,6 +47,7 @@ class EChartsBarPolar extends IPSModuleStrict
     use ConfigurationFormHelper;
     use EChartsAnimationDesign;
     use EChartsBarPreviewForm;
+    use EChartsBarTypography;
     use DataFlowHelper;
     use EChartsCurrentSources;
     use IPSViewHTMLPageHelper;
@@ -65,6 +68,12 @@ class EChartsBarPolar extends IPSModuleStrict
     private const POLAR_MODES = ['radial', 'tangential'];
     private const SORT_ORDERS = ['configured', 'ascending', 'descending'];
     private const VALUE_LABEL_POSITIONS = ['middle', 'insideStart', 'insideEnd', 'outside'];
+    private const TEXT_FONTS = ['TitleFontSizePercent' => 'Title size'];
+    private const TEXT_COLORS = [
+        'TitleColor'      => 'Title color', 'CategoryLabelColor' => 'Category color',
+        'ScaleLabelColor' => 'Scale color', 'ValueColor' => 'Outside value color',
+        'GridColor'       => 'Grid color'
+    ];
     private const VALUE_AXIS_RANGE_MODES = ['auto', 'manual'];
     private const BAR_FILL_MODES = ['solid', 'gradient'];
     private const BAR_HIGHLIGHT_MODES = ['standard', 'outline', 'focus', 'off'];
@@ -156,13 +165,15 @@ class EChartsBarPolar extends IPSModuleStrict
             );
         }
 
+        $form = $this->WithBarTypographyForm($form, self::TEXT_FONTS, self::TEXT_COLORS);
         $form = $this->WithIPSViewDesignFormState($form, 'ECBP');
         $form = EChartsDesignerSections::Group($form, [
             ['caption' => 'Polar layout and order', 'start' => 'PolarMode'],
             ['caption' => 'Labels and visibility', 'start' => 'ShowCategoryLabels'],
             ['caption' => 'Bar geometry', 'start' => 'BarWidthPercent'],
             ['caption' => 'Bar appearance and effects', 'start' => 'BarFillMode'],
-            ['caption' => 'Scale and angular range', 'start' => 'ValueAxisRangeMode']
+            ['caption' => 'Scale and angular range', 'start' => 'ValueAxisRangeMode'],
+            ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
         ]);
         $fields = array_merge(
             ['Title', 'Sources', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
@@ -322,8 +333,14 @@ class EChartsBarPolar extends IPSModuleStrict
             $ipsView,
             $values,
             $this->Translate('Example data'),
-            $this->Translate('Chart preview')
+            $this->Translate('Chart preview'),
+            EChartsBarPreview::Color($this->BarPreviewValue($values, 'TitleColor', 'integer', $ipsView), $palette['text']),
+            $this->BarPreviewValue($values, 'TitleFontSizePercent', 'integer', $ipsView)
         );
+        $categoryColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'CategoryLabelColor', 'integer', $ipsView), $palette['text']);
+        $scaleColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'ScaleLabelColor', 'integer', $ipsView), $palette['muted']);
+        $outsideValueColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'ValueColor', 'integer', $ipsView), $palette['muted']);
+        $gridColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'GridColor', 'integer', $ipsView), $palette['track']);
         $cx = 350;
         $cy = 190;
         $inner = 145 * max(0, min(70, $this->BarPreviewValue($values, 'InnerRadiusPercent', 'integer', $ipsView))) / 100;
@@ -338,10 +355,14 @@ class EChartsBarPolar extends IPSModuleStrict
             : max(1.0, ...array_map(static fn (array $item): float => $item['value'], $items));
         $range = max(1.0, $maximum - $minimum);
         if ($this->BarPreviewValue($values, 'ShowGrid', 'boolean', $ipsView)) {
+            $scaleSize = max(8, min(24, $this->BarPreviewValue($values, 'ScaleLabelFontSize', 'integer', $ipsView)));
+            $svg .= '<text x="24" y="69" fill="' . EChartsBarPreview::E($scaleColor) . '" font-size="'
+                . $scaleSize . '">' . EChartsBarPreview::E(EChartsBarPreview::N($minimum) . '–'
+                    . EChartsBarPreview::N($maximum)) . '</text>';
             foreach ([0.25, 0.5, 0.75, 1.0] as $fraction) {
                 $radius = $inner + ($outer - $inner) * $fraction;
                 $svg .= '<circle cx="' . $cx . '" cy="' . $cy . '" r="' . EChartsBarPreview::N($radius)
-                    . '" fill="none" stroke="' . EChartsBarPreview::E($palette['track']) . '"/>';
+                    . '" fill="none" stroke="' . EChartsBarPreview::E($gridColor) . '"/>';
             }
         }
         $opacity = max(0, min(100, $this->BarPreviewValue($values, 'BarOpacityPercent', 'integer', $ipsView))) / 100;
@@ -416,13 +437,13 @@ class EChartsBarPolar extends IPSModuleStrict
             $labelY = 83 + $index * 33;
             if ($showLabels) {
                 $svg .= '<circle cx="545" cy="' . ($labelY - 4) . '" r="5" fill="' . EChartsBarPreview::E($color) . '"/>';
-                $svg .= '<text x="558" y="' . $labelY . '" fill="' . EChartsBarPreview::E($palette['text'])
+                $svg .= '<text x="558" y="' . $labelY . '" fill="' . EChartsBarPreview::E($categoryColor)
                     . '" font-size="' . $labelSize . '">'
                     . EChartsBarPreview::E(mb_strimwidth($item['label'], 0, 18, '…')) . '</text>';
             }
             if ($showValues) {
                 $svg .= '<text x="675" y="' . $labelY . '" text-anchor="end" fill="'
-                    . EChartsBarPreview::E($palette['muted']) . '" font-size="' . $valueSize . '">'
+                    . EChartsBarPreview::E($outsideValueColor) . '" font-size="' . $valueSize . '">'
                     . EChartsBarPreview::E(EChartsBarPreview::N($item['value']) . ' ' . $item['unit']) . '</text>';
             }
         }
@@ -710,6 +731,7 @@ class EChartsBarPolar extends IPSModuleStrict
         $this->RegisterPropertyBoolean($prefix . 'ShowBarBackground', false);
         $this->RegisterPropertyInteger($prefix . 'BarBackgroundColor', -1);
         $this->RegisterPropertyInteger($prefix . 'BarBackgroundOpacityPercent', 25);
+        $this->RegisterBarTypography(array_keys(self::TEXT_FONTS), array_keys(self::TEXT_COLORS), $prefix);
     }
 
     /** @return array<string, string> */
@@ -755,7 +777,9 @@ class EChartsBarPolar extends IPSModuleStrict
             'ValueAxisMaximum'            => 'float',
             'ShowBarBackground'           => 'boolean',
             'BarBackgroundColor'          => 'integer',
-            'BarBackgroundOpacityPercent' => 'integer'
+            'BarBackgroundOpacityPercent' => 'integer',
+            ...array_fill_keys(array_keys(self::TEXT_FONTS), 'integer'),
+            ...array_fill_keys(array_keys(self::TEXT_COLORS), 'integer')
         ];
     }
 
@@ -819,7 +843,7 @@ class EChartsBarPolar extends IPSModuleStrict
             return false;
         }
 
-        return true;
+        return $this->BarTypographyIsValid(array_keys(self::TEXT_FONTS), array_keys(self::TEXT_COLORS), $prefix);
     }
 
     /** @return array<string, mixed> */
@@ -863,7 +887,8 @@ class EChartsBarPolar extends IPSModuleStrict
             'valueAxisMaximum'            => $this->ReadPropertyFloat($prefix . 'ValueAxisMaximum'),
             'showBarBackground'           => $this->ReadPropertyBoolean($prefix . 'ShowBarBackground'),
             'barBackgroundColor'          => $backgroundColor < 0 ? '' : EChartsAsset::ColorToHex($backgroundColor),
-            'barBackgroundOpacityPercent' => $this->ReadPropertyInteger($prefix . 'BarBackgroundOpacityPercent')
+            'barBackgroundOpacityPercent' => $this->ReadPropertyInteger($prefix . 'BarBackgroundOpacityPercent'),
+            ...$this->ReadBarTypography(array_keys(self::TEXT_FONTS), array_keys(self::TEXT_COLORS), $prefix)
         ];
 
         return $style;

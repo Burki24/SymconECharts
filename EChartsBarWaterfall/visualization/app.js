@@ -73,6 +73,14 @@
         var unit = String(bar.unit || '');
         var titleVisible = Boolean(bar.title);
         var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8;
+        var titleColor = style.titleColor || colors.text;
+        var axisColor = style.axisColor || colors.text;
+        var axisLineColor = style.axisColor || colors.border;
+        var valueColor = style.valueColor || colors.text;
+        var gridColor = style.gridColor || colors.border;
+        var titleSize = echartsDesign.fontSizePercent(style.titleFontSizePercent, 18);
+        var axisSize = echartsDesign.fontSizePercent(style.axisFontSizePercent, 12);
+        var valueSize = echartsDesign.fontSizePercent(style.valueFontSizePercent, 12);
         var helpersPositive = [];
         var helpersNegative = [];
         var barsPositive = [];
@@ -103,7 +111,8 @@
                 label: {
                     show: style.showValues === true && labelOnPositive && positiveHeight > 0,
                     position: after >= before ? 'top' : 'bottom',
-                    color: colors.text,
+                    color: valueColor,
+                    fontSize: valueSize,
                     formatter: labelText
                 }
             };
@@ -113,7 +122,8 @@
                 label: {
                     show: style.showValues === true && !labelOnPositive && negativeHeight < 0,
                     position: after >= before ? 'top' : 'bottom',
-                    color: colors.text,
+                    color: valueColor,
+                    fontSize: valueSize,
                     formatter: labelText
                 }
             };
@@ -144,9 +154,10 @@
             aria: { enabled: true, description: steps.map(function (step) { return step.label; }).join(', ') },
             title: {
                 show: titleVisible, text: String(bar.title || ''), left: 'center', top: headerInset,
-                textStyle: { color: colors.text, fontSize: 18 }
+                textStyle: { color: titleColor, fontSize: titleSize }
             },
-            grid: { top: headerInset + (titleVisible ? 55 : 20), right: 24, bottom: 48, left: 52, containLabel: true },
+            grid: { top: headerInset + (titleVisible ? 55 : 20) + Math.max(0, titleSize - 18),
+                right: 24, bottom: 48, left: 52, containLabel: true },
             legend: { show: false },
             tooltip: {
                 trigger: 'axis', axisPointer: { type: 'shadow' },
@@ -168,16 +179,17 @@
             },
             xAxis: {
                 type: 'category', data: steps.map(function (step) { return String(step.label || ''); }),
-                axisLabel: { color: colors.text, overflow: 'truncate', width: 110 },
-                axisLine: { lineStyle: { color: colors.border } },
-                axisTick: { alignWithLabel: true, lineStyle: { color: colors.border } }
+                axisLabel: { color: axisColor, fontSize: axisSize, overflow: 'truncate', width: 110 },
+                axisLine: { lineStyle: { color: axisLineColor } },
+                axisTick: { alignWithLabel: true, lineStyle: { color: axisLineColor } }
             },
             yAxis: {
-                type: 'value', name: unit, nameTextStyle: { color: colors.muted },
-                axisLabel: { color: colors.text },
-                axisLine: { show: true, lineStyle: { color: colors.border } },
-                axisTick: { show: true, lineStyle: { color: colors.border } },
-                splitLine: { show: style.showGrid !== false, lineStyle: { color: colors.border, opacity: 0.22 } }
+                type: 'value', name: unit, nameTextStyle: { color: style.axisColor || colors.muted, fontSize: axisSize },
+                axisLabel: { color: axisColor, fontSize: axisSize },
+                axisLine: { show: true, lineStyle: { color: axisLineColor } },
+                axisTick: { show: true, lineStyle: { color: axisLineColor } },
+                splitLine: { show: style.showGrid !== false,
+                    lineStyle: { color: gridColor, opacity: style.gridColor ? 1 : 0.22 } }
             },
             series: [
                 helper('positive-base', helpersPositive),

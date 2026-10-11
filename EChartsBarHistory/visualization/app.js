@@ -109,11 +109,13 @@
             return item.color || paletteColors[index % paletteColors.length];
         });
         var titleColor = style.titleColor || colors.text;
+        var legendColor = style.legendColor || colors.text;
         var axisColor = style.axisColor || colors.text;
         var axisLineColor = style.axisColor || colors.border;
         var valueColor = style.valueColor || colors.text;
         var gridColor = style.gridColor || colors.border;
         var titleFontSize = Math.round(18 * (Number(style.titleFontSizePercent) || 100) / 100);
+        var legendFontSize = echartsDesign.fontSizePercent(style.legendFontSizePercent, 12);
         var axisFontSize = Math.round(12 * (Number(style.axisFontSizePercent) || 100) / 100);
         var valueFontSize = Math.round(12 * (Number(style.valueFontSizePercent) || 100) / 100);
         var axisCounts = { left: 0, right: 0 };
@@ -127,6 +129,9 @@
         var chartWidth = Math.max(320, Number(chartElement.clientWidth) || 750);
         var chartHeight = Math.max(160, Number(chartElement.clientHeight) || 420);
         var compact = chartHeight < 280;
+        var displayedTitleSize = compact ? Math.min(titleFontSize, 14) : titleFontSize;
+        var displayedLegendSize = compact
+            ? echartsDesign.fontSizePercent(style.legendFontSizePercent, 10) : legendFontSize;
         var maximumAxisMargin = Math.max(58, Math.min(190, chartWidth * 0.32));
         var maximumSideCount = Math.max(axisCounts.left, axisCounts.right);
         var axisOffsetStep = maximumSideCount > 1
@@ -134,7 +139,9 @@
         var leftMargin = axisCounts.left > 0 ? 52 + axisOffsetStep * (axisCounts.left - 1) : 28;
         var rightMargin = axisCounts.right > 0 ? 52 + axisOffsetStep * (axisCounts.right - 1) : 28;
         var gridTop = headerInset + (multi ? (bar.title ? (compact ? 39 : 78) : (compact ? 28 : 46))
-            : (bar.title ? (compact ? 32 : 52) : (compact ? 12 : 16)));
+            : (bar.title ? (compact ? 32 : 52) : (compact ? 12 : 16)))
+            + (bar.title ? Math.max(0, displayedTitleSize - (compact ? 14 : 18)) : 0)
+            + (multi ? Math.max(0, displayedLegendSize - (compact ? 10 : 12)) : 0);
         var gridBottom = zoom ? (compact ? 42 : 70) : (compact ? 32 : 58);
         var plotWidth = chartWidth - leftMargin - rightMargin;
         var timeTickCount = Math.max(2, Math.floor(plotWidth / (axisFontSize * 10)));
@@ -163,12 +170,13 @@
                 text: String(bar.title || ''),
                 left: 'center',
                 top: headerInset,
-                textStyle: { color: titleColor, fontSize: compact ? Math.min(titleFontSize, 14) : titleFontSize }
+                textStyle: { color: titleColor, fontSize: displayedTitleSize }
             },
             legend: {
                 show: multi,
-                top: headerInset + (bar.title ? (compact ? 21 : 34) : (compact ? 2 : 4)),
-                textStyle: { color: colors.text, fontSize: compact ? 10 : 12 },
+                top: headerInset + (bar.title ? (compact ? 21 : 34) : (compact ? 2 : 4))
+                    + (bar.title ? Math.max(0, displayedTitleSize - (compact ? 14 : 18)) : 0),
+                textStyle: { color: legendColor, fontSize: displayedLegendSize },
                 data: series.map(function (item, index) { return item.id || 'series-' + index; }),
                 formatter: function (name) {
                     var item = series.find(function (candidate, index) {
@@ -230,7 +238,7 @@
                         name: String(axis.unit || ''),
                         position: entry.position,
                         offset: entry.positionIndex * axisOffsetStep,
-                        nameTextStyle: { color: color },
+                        nameTextStyle: { color: color, fontSize: axisFontSize },
                         axisLabel: { color: color, fontSize: axisFontSize, hideOverlap: true },
                         axisLine: { show: true, lineStyle: { color: multi ? color : axisLineColor } },
                         axisTick: { show: true, lineStyle: { color: multi ? color : axisLineColor } },

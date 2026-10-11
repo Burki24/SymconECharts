@@ -12,6 +12,7 @@ use SymconECharts\EChartsAnimationDesign;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsBarPreview;
 use SymconECharts\EChartsBarPreviewForm;
+use SymconECharts\EChartsBarTypography;
 use SymconECharts\EChartsCurrentSources;
 use SymconECharts\EChartsDesignerSections;
 use SymconECharts\EChartsIPSViewBackground;
@@ -30,6 +31,7 @@ require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsBarPreview.php';
 require_once __DIR__ . '/../libs/EChartsBarPreviewForm.php';
+require_once __DIR__ . '/../libs/EChartsBarTypography.php';
 require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsCurrentSources.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
@@ -45,6 +47,7 @@ class EChartsBarWaterfall extends IPSModuleStrict
     use ConfigurationFormHelper;
     use EChartsAnimationDesign;
     use EChartsBarPreviewForm;
+    use EChartsBarTypography;
     use DataFlowHelper;
     use EChartsCurrentSources;
     use IPSViewHTMLPageHelper;
@@ -62,6 +65,14 @@ class EChartsBarWaterfall extends IPSModuleStrict
     private const STATUS_DESIGN_INVALID = 202;
     private const STATUS_PARENT_MISSING = 203;
     private const STATUS_GATEWAY_FAILED = 204;
+    private const TEXT_FONTS = [
+        'TitleFontSizePercent' => 'Title size', 'AxisFontSizePercent' => 'Axis label size',
+        'ValueFontSizePercent' => 'Value label size'
+    ];
+    private const TEXT_COLORS = [
+        'TitleColor' => 'Title color', 'AxisColor' => 'Axis color',
+        'ValueColor' => 'Value label color', 'GridColor' => 'Grid color'
+    ];
 
     public function Create(): void
     {
@@ -122,10 +133,12 @@ class EChartsBarWaterfall extends IPSModuleStrict
             );
         }
 
+        $form = $this->WithBarTypographyForm($form, self::TEXT_FONTS, self::TEXT_COLORS);
         $form = $this->WithIPSViewDesignFormState($form, 'ECBW');
         $form = EChartsDesignerSections::Group($form, [
             ['caption' => 'Labels and geometry', 'start' => 'ShowValues'],
-            ['caption' => 'Step colors', 'start' => 'StartColor']
+            ['caption' => 'Step colors', 'start' => 'StartColor'],
+            ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
         ]);
         $fields = array_merge(
             ['Title', 'Sources', 'TotalLabel', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
@@ -277,8 +290,15 @@ class EChartsBarWaterfall extends IPSModuleStrict
             $ipsView,
             $values,
             $this->Translate('Example data'),
-            $this->Translate('Chart preview')
+            $this->Translate('Chart preview'),
+            EChartsBarPreview::Color($this->BarPreviewValue($values, 'TitleColor', 'integer', $ipsView), $palette['text']),
+            $this->BarPreviewValue($values, 'TitleFontSizePercent', 'integer', $ipsView)
         );
+        $axisColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'AxisColor', 'integer', $ipsView), $palette['text']);
+        $valueColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'ValueColor', 'integer', $ipsView), $palette['text']);
+        $gridColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'GridColor', 'integer', $ipsView), $palette['track']);
+        $axisSize = max(6, min(22, (int) round(11 * $this->BarPreviewValue($values, 'AxisFontSizePercent', 'integer', $ipsView) / 100)));
+        $valueSize = max(6, min(22, (int) round(11 * $this->BarPreviewValue($values, 'ValueFontSizePercent', 'integer', $ipsView) / 100)));
         $levels = [0.0];
         $total = 0.0;
         foreach ($items as $index => $item) {
@@ -293,7 +313,7 @@ class EChartsBarWaterfall extends IPSModuleStrict
             for ($step = 0; $step <= 4; ++$step) {
                 $lineY = 80 + $step * 51;
                 $svg .= '<line x1="70" y1="' . $lineY . '" x2="680" y2="' . $lineY
-                    . '" stroke="' . EChartsBarPreview::E($palette['track']) . '"/>';
+                    . '" stroke="' . EChartsBarPreview::E($gridColor) . '"/>';
             }
         }
         $svg .= '<line x1="70" y1="' . EChartsBarPreview::N($y(0)) . '" x2="680" y2="'
@@ -314,12 +334,12 @@ class EChartsBarWaterfall extends IPSModuleStrict
                 . '" width="' . EChartsBarPreview::N($barWidth) . '" height="' . EChartsBarPreview::N($height)
                 . '" fill="' . EChartsBarPreview::E($color) . '"/>';
             $svg .= '<text x="' . EChartsBarPreview::N($x + $barWidth / 2) . '" y="309" text-anchor="middle" fill="'
-                . EChartsBarPreview::E($palette['text']) . '" font-size="11">'
+                . EChartsBarPreview::E($axisColor) . '" font-size="' . $axisSize . '">'
                 . EChartsBarPreview::E(mb_strimwidth($item['label'], 0, 13, '…')) . '</text>';
             if ($showValues) {
                 $svg .= '<text x="' . EChartsBarPreview::N($x + $barWidth / 2) . '" y="'
                     . EChartsBarPreview::N($top - 5) . '" text-anchor="middle" fill="'
-                    . EChartsBarPreview::E($palette['text']) . '" font-size="11">'
+                    . EChartsBarPreview::E($valueColor) . '" font-size="' . $valueSize . '">'
                     . EChartsBarPreview::E(EChartsBarPreview::N($item['value'])) . '</text>';
             }
         }
@@ -335,12 +355,12 @@ class EChartsBarWaterfall extends IPSModuleStrict
             . '" fill="' . EChartsBarPreview::E($color) . '"/>';
         $label = (string) ($values['TotalLabel'] ?? $this->ReadPropertyString('TotalLabel'));
         $svg .= '<text x="' . EChartsBarPreview::N($x + $barWidth / 2) . '" y="309" text-anchor="middle" fill="'
-            . EChartsBarPreview::E($palette['text']) . '" font-size="11">'
+            . EChartsBarPreview::E($axisColor) . '" font-size="' . $axisSize . '">'
             . EChartsBarPreview::E($label !== '' ? $label : 'Gesamt') . '</text>';
         if ($showValues) {
             $svg .= '<text x="' . EChartsBarPreview::N($x + $barWidth / 2) . '" y="'
                 . EChartsBarPreview::N($top - 5) . '" text-anchor="middle" fill="'
-                . EChartsBarPreview::E($palette['text']) . '" font-size="11">'
+                . EChartsBarPreview::E($valueColor) . '" font-size="' . $valueSize . '">'
                 . EChartsBarPreview::E(EChartsBarPreview::N($total)) . '</text>';
         }
 
@@ -569,6 +589,7 @@ class EChartsBarWaterfall extends IPSModuleStrict
         $this->RegisterPropertyInteger($prefix . 'IncreaseColor', -1);
         $this->RegisterPropertyInteger($prefix . 'DecreaseColor', -1);
         $this->RegisterPropertyInteger($prefix . 'TotalColor', -1);
+        $this->RegisterBarTypography(array_keys(self::TEXT_FONTS), array_keys(self::TEXT_COLORS), $prefix);
         $this->RegisterAnimationProperties($prefix, true, 350, 500);
     }
 
@@ -584,6 +605,8 @@ class EChartsBarWaterfall extends IPSModuleStrict
             'IncreaseColor'           => 'integer',
             'DecreaseColor'           => 'integer',
             'TotalColor'              => 'integer',
+            ...array_fill_keys(array_keys(self::TEXT_FONTS), 'integer'),
+            ...array_fill_keys(array_keys(self::TEXT_COLORS), 'integer'),
             'AnimationEnabled'        => 'boolean',
             'AnimationDuration'       => 'integer',
             'AnimationDurationUpdate' => 'integer',
@@ -601,6 +624,9 @@ class EChartsBarWaterfall extends IPSModuleStrict
             || $this->ReadPropertyInteger($prefix . 'BarWidthPercent') < 20
             || $this->ReadPropertyInteger($prefix . 'BarWidthPercent') > 100
         ) {
+            return false;
+        }
+        if (!$this->BarTypographyIsValid(array_keys(self::TEXT_FONTS), array_keys(self::TEXT_COLORS), $prefix)) {
             return false;
         }
         foreach (['StartColor', 'IncreaseColor', 'DecreaseColor', 'TotalColor'] as $name) {
@@ -627,7 +653,8 @@ class EChartsBarWaterfall extends IPSModuleStrict
             'showValues'      => $this->ReadPropertyBoolean($prefix . 'ShowValues'),
             'showGrid'        => $this->ReadPropertyBoolean($prefix . 'ShowGrid'),
             'barWidthPercent' => $this->ReadPropertyInteger($prefix . 'BarWidthPercent'),
-            'colors'          => $colors
+            'colors'          => $colors,
+            ...$this->ReadBarTypography(array_keys(self::TEXT_FONTS), array_keys(self::TEXT_COLORS), $prefix)
         ];
     }
 

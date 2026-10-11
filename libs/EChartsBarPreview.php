@@ -81,7 +81,9 @@ final class EChartsBarPreview
         bool $ipsView,
         array $values,
         string $sampleCaption,
-        string $fallbackTitle
+        string $fallbackTitle,
+        ?string $titleColor = null,
+        int $titleFontSizePercent = 100
     ): string {
         $background = $ipsView
             ? EChartsIPSViewBackground::ResolvedPreviewBackground(
@@ -94,7 +96,9 @@ final class EChartsBarPreview
         $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="720" height="360" viewBox="0 0 720 360" role="img" aria-label="Chart preview">';
         $svg .= '<rect width="720" height="360" fill="' . self::E($background['color'])
             . '" fill-opacity="' . self::N($background['opacity']) . '"/>';
-        $svg .= '<text x="24" y="32" fill="' . self::E($palette['text']) . '" font-size="20">'
+        $titleSize = max(10, min(40, (int) round(20 * $titleFontSizePercent / 100)));
+        $svg .= '<text x="24" y="32" fill="' . self::E($titleColor ?? $palette['text'])
+            . '" font-size="' . $titleSize . '">'
             . self::E($title !== '' ? $title : $fallbackTitle) . '</text>';
         if ($sample) {
             $svg .= '<text x="696" y="32" text-anchor="end" fill="' . self::E($palette['muted'])

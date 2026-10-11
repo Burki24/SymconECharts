@@ -48,6 +48,14 @@
 
 ## Neu
 
+- BarCategory und BarWaterfall bieten in Kachel und unabhängigem IPSView
+  konfigurierbare Schriftgrößen und Farben für Titel, Achsen und Werte;
+  Category zusätzlich für die Legende. Rasterfarben sind ebenfalls wählbar.
+  BarHistory ergänzt Legendenfarbe und -größe sowie die Achseneinheit in der
+  Achsenschriftgröße. BarPolar ergänzt Titelgröße und Text-/Rasterfarben;
+  Werte im Balken behalten den automatischen Kontrast. Automatische Vorgaben
+  erhalten die bisherige Theme-Darstellung.
+
 - TimeSeries bietet in Kachel und unabhängigem IPSView-Designer eigene
   Schriftgrößen für Titel, Legende und Achsen sowie Farben für Titel, Legende,
   Achsen und Raster. Automatische Werte erhalten die bisherigen Theme- und

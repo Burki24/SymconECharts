@@ -6127,6 +6127,68 @@ for ($index = 0; $index < 16; $index++) {
     unset($GLOBALS['symconTestVariables'][5800 + $index]);
 }
 
+$typographyCases = [
+    [EChartsBarCategory::class, 'LegendFontSizePercent', 'LegendColor', ''],
+    [EChartsBarWaterfall::class, 'ValueFontSizePercent', 'ValueColor', ''],
+    [EChartsBarHistory::class, 'LegendFontSizePercent', 'LegendColor', false],
+    [EChartsBarPolar::class, 'TitleFontSizePercent', 'CategoryLabelColor', '']
+];
+foreach ($typographyCases as [$moduleClass, $fontName, $colorName, $styleArgument]) {
+    $module = new $moduleClass();
+    $module->Create();
+    $module->SetTestProperty($fontName, 150);
+    $module->SetTestProperty($colorName, 0x123456);
+    $module->SetTestProperty('IPSView' . $fontName, 175);
+    $module->SetTestProperty('IPSView' . $colorName, 0x654321);
+    $module->SetTestProperty('TitleFontSizePercent', 150);
+    $module->SetTestProperty('TitleColor', 0xA1B2C3);
+    $module->SetTestProperty('IPSViewTitleFontSizePercent', 175);
+    $module->SetTestProperty('IPSViewTitleColor', 0xA2B3C4);
+    $module->SetTestProperty('IPSViewUseTileDesign', false);
+    $form = json_decode($module->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+    assertGatewayGauge(
+        findGaugeFormElement($form['elements'], $fontName) !== null
+            && findGaugeFormElement($form['elements'], $colorName) !== null
+            && (findGaugeFormElement($form['elements'], 'IPSView' . $fontName)['enabled'] ?? null) === true
+            && (findGaugeFormElement($form['elements'], 'IPSView' . $colorName)['enabled'] ?? null) === true,
+        $moduleClass . ' must expose independent Tile and IPSView typography controls.'
+    );
+    $tilePreview = (string) (findGaugeFormElement($form['elements'], 'BarPreview')['image'] ?? '');
+    $ipsViewPreview = (string) (findGaugeFormElement($form['elements'], 'IPSViewBarPreview')['image'] ?? '');
+    assertGatewayGauge(
+        str_contains((string) base64_decode(substr($tilePreview, strlen('data:image/svg+xml;base64,')), true), 'fill="#A1B2C3" font-size="30"')
+            && str_contains((string) base64_decode(substr($ipsViewPreview, strlen('data:image/svg+xml;base64,')), true), 'fill="#A2B3C4" font-size="35"'),
+        $moduleClass . ' must preview the independent title color and size without saving.'
+    );
+    $module->UpdateBarPreviewFromForm(json_encode([
+        'TitleColor'                  => 0x0A0B0C, 'TitleFontSizePercent' => 200,
+        'IPSViewUseTileDesign'        => false, 'IPSViewTitleColor' => 0x0D0E0F,
+        'IPSViewTitleFontSizePercent' => 50
+    ], JSON_THROW_ON_ERROR));
+    $previewUpdates = array_slice($module->GetTestFormUpdates(), -2);
+    assertGatewayGauge(
+        str_contains((string) base64_decode(substr((string) $previewUpdates[0]['Value'], strlen('data:image/svg+xml;base64,')), true), 'fill="#0A0B0C" font-size="40"')
+            && str_contains((string) base64_decode(substr((string) $previewUpdates[1]['Value'], strlen('data:image/svg+xml;base64,')), true), 'fill="#0D0E0F" font-size="10"'),
+        $moduleClass . ' must update both typography previews from unsaved form values.'
+    );
+    $styleMethod = new ReflectionMethod($module, 'ReadDesignStyle');
+    $tileStyle = $styleMethod->invoke($module, $styleArgument);
+    $ipsViewStyle = $styleMethod->invoke($module, $moduleClass === EChartsBarHistory::class ? true : 'IPSView');
+    assertGatewayGauge(
+        $tileStyle[lcfirst($fontName)] === 150
+            && $tileStyle[lcfirst($colorName)] === ($colorName === 'TitleColor' ? '#A1B2C3' : '#123456')
+            && $ipsViewStyle[lcfirst($fontName)] === 175
+            && $ipsViewStyle[lcfirst($colorName)] === ($colorName === 'TitleColor' ? '#A2B3C4' : '#654321'),
+        $moduleClass . ' must keep typography styles separate for Tile and IPSView.'
+    );
+    $validation = new ReflectionMethod($module, 'IsValidDesign');
+    $module->SetTestProperty($fontName, 201);
+    assertGatewayGauge(!$validation->invoke($module, ''), $moduleClass . ' must reject an oversized font.');
+    $module->SetTestProperty($fontName, 150);
+    $module->SetTestProperty('IPSView' . $colorName, 0x1000000);
+    assertGatewayGauge(!$validation->invoke($module, 'IPSView'), $moduleClass . ' must reject an invalid IPSView color.');
+}
+
 $expectedDesignerSections = [
     EChartsGaugeSingle::class      => [
         'Geometry and pointer', 'Hub design', 'Dial plate', 'Gauge colors',
@@ -6136,12 +6198,14 @@ $expectedDesignerSections = [
     EChartsGaugeTacho::class       => ['Fine tuning', 'Pointer and hub', 'Scale and colors', 'Dial plate'],
     EChartsGaugeChronograph::class => ['Fine tuning', 'Pointer and hub', 'Scale and colors', 'Dial plate'],
     EChartsTimeSeries::class       => ['Lines and symbols', 'Area and axes', 'Typography and colors'],
-    EChartsBarCategory::class      => ['Bar layout and order', 'Labels and geometry', 'Bar fill and pattern'],
+    EChartsBarCategory::class      => [
+        'Bar layout and order', 'Labels and geometry', 'Bar fill and pattern', 'Typography and colors'
+    ],
     EChartsBarHistory::class       => ['Axes and display', 'Bar fill and pattern', 'Typography and colors'],
-    EChartsBarWaterfall::class     => ['Labels and geometry', 'Step colors'],
+    EChartsBarWaterfall::class     => ['Labels and geometry', 'Step colors', 'Typography and colors'],
     EChartsBarPolar::class         => [
         'Polar layout and order', 'Labels and visibility', 'Bar geometry',
-        'Bar appearance and effects', 'Scale and angular range'
+        'Bar appearance and effects', 'Scale and angular range', 'Typography and colors'
     ]
 ];
 foreach ([

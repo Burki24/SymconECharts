@@ -84,9 +84,11 @@ class EChartsBarHistory extends IPSModuleStrict
         'BarOpacityPercent'       => 'integer',
         'BarCornerRadius'         => 'integer',
         'TitleFontSizePercent'    => 'integer',
+        'LegendFontSizePercent'   => 'integer',
         'AxisFontSizePercent'     => 'integer',
         'ValueFontSizePercent'    => 'integer',
         'TitleColor'              => 'integer',
+        'LegendColor'             => 'integer',
         'AxisColor'               => 'integer',
         'ValueColor'              => 'integer',
         'GridColor'               => 'integer',
@@ -127,9 +129,11 @@ class EChartsBarHistory extends IPSModuleStrict
         $this->RegisterPropertyInteger('BarOpacityPercent', 100);
         $this->RegisterPropertyInteger('BarCornerRadius', 6);
         $this->RegisterPropertyInteger('TitleFontSizePercent', 100);
+        $this->RegisterPropertyInteger('LegendFontSizePercent', 100);
         $this->RegisterPropertyInteger('AxisFontSizePercent', 100);
         $this->RegisterPropertyInteger('ValueFontSizePercent', 100);
         $this->RegisterPropertyInteger('TitleColor', -1);
+        $this->RegisterPropertyInteger('LegendColor', -1);
         $this->RegisterPropertyInteger('AxisColor', -1);
         $this->RegisterPropertyInteger('ValueColor', -1);
         $this->RegisterPropertyInteger('GridColor', -1);
@@ -161,7 +165,7 @@ class EChartsBarHistory extends IPSModuleStrict
                 'AnimationEasing', 'AnimationEasingUpdate'    => 'cubicInOut',
                 'AnimationDelay', 'AnimationDelayUpdate'      => 0,
                 'BarWidthPercent'                             => 70,
-                'BarOpacityPercent', 'TitleFontSizePercent', 'AxisFontSizePercent',
+                'BarOpacityPercent', 'TitleFontSizePercent', 'LegendFontSizePercent', 'AxisFontSizePercent',
                 'ValueFontSizePercent'      => 100,
                 'BarCornerRadius'           => 6,
                 default                     => -1
@@ -364,8 +368,17 @@ class EChartsBarHistory extends IPSModuleStrict
             $ipsView,
             $values,
             $this->Translate('Example data'),
-            $this->Translate('Chart preview')
+            $this->Translate('Chart preview'),
+            EChartsBarPreview::Color($this->BarPreviewValue($values, 'TitleColor', 'integer', $ipsView), $palette['text']),
+            $this->BarPreviewValue($values, 'TitleFontSizePercent', 'integer', $ipsView)
         );
+        $legendColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'LegendColor', 'integer', $ipsView), $palette['text']);
+        $legendSize = max(6, min(24, (int) round(12 * $this->BarPreviewValue($values, 'LegendFontSizePercent', 'integer', $ipsView) / 100)));
+        $axisColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'AxisColor', 'integer', $ipsView), $palette['muted']);
+        $valueColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'ValueColor', 'integer', $ipsView), $palette['text']);
+        $gridColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'GridColor', 'integer', $ipsView), $palette['track']);
+        $axisSize = max(6, min(24, (int) round(11 * $this->BarPreviewValue($values, 'AxisFontSizePercent', 'integer', $ipsView) / 100)));
+        $valueSize = max(6, min(24, (int) round(10 * $this->BarPreviewValue($values, 'ValueFontSizePercent', 'integer', $ipsView) / 100)));
         $range = $ipsView && !($values['IPSViewUseTileTimeSettings']
             ?? $this->ReadPropertyBoolean('IPSViewUseTileTimeSettings'))
             ? (string) ($values['IPSViewRange'] ?? $this->ReadPropertyString('IPSViewRange'))
@@ -377,7 +390,7 @@ class EChartsBarHistory extends IPSModuleStrict
             for ($i = 0; $i <= 4; ++$i) {
                 $y = 265 - $i * 43;
                 $svg .= '<line x1="65" y1="' . $y . '" x2="680" y2="' . $y
-                    . '" stroke="' . EChartsBarPreview::E($palette['track']) . '"/>';
+                    . '" stroke="' . EChartsBarPreview::E($gridColor) . '"/>';
             }
         }
         $barWidth = max(20, min(100, $this->BarPreviewValue($values, 'BarWidthPercent', 'integer', $ipsView)));
@@ -427,20 +440,21 @@ class EChartsBarHistory extends IPSModuleStrict
             $svg .= '<rect x="' . $x . '" y="60" width="13" height="13" fill="' . EChartsBarPreview::E($color) . '"/>';
             $legend = mb_strimwidth($item['label'], 0, 14, '…')
                 . ($item['unit'] !== '' ? ' (' . $item['unit'] . ')' : '');
-            $svg .= '<text x="' . ($x + 19) . '" y="71" fill="' . EChartsBarPreview::E($palette['text'])
-                . '" font-size="12">' . EChartsBarPreview::E($legend) . '</text>';
+            $svg .= '<text x="' . ($x + 19) . '" y="71" fill="' . EChartsBarPreview::E($legendColor)
+                . '" font-size="' . $legendSize . '">' . EChartsBarPreview::E($legend) . '</text>';
             if ($showValues) {
                 $bucket = 10 + $index;
                 $height = 50 + 65 * (1 + sin(($bucket + $index * 3) / 2.4));
                 $labelX = 70 + $bucket * 40 + ($index + 0.5) * 40 / $count;
                 $svg .= '<text x="' . EChartsBarPreview::N($labelX) . '" y="' . EChartsBarPreview::N(258 - $height)
-                    . '" text-anchor="middle" fill="' . EChartsBarPreview::E($palette['text'])
-                    . '" font-size="10">' . EChartsBarPreview::E(EChartsBarPreview::N(5 + $height / 10) . ' ' . $item['unit']) . '</text>';
+                    . '" text-anchor="middle" fill="' . EChartsBarPreview::E($valueColor)
+                    . '" font-size="' . $valueSize . '">' . EChartsBarPreview::E(EChartsBarPreview::N(5 + $height / 10) . ' ' . $item['unit']) . '</text>';
             }
         }
-        $svg .= '<text x="70" y="286" fill="' . EChartsBarPreview::E($palette['muted'])
-            . '" font-size="11">' . EChartsBarPreview::E($range) . '</text><text x="680" y="286" text-anchor="end" fill="'
-            . EChartsBarPreview::E($palette['muted']) . '" font-size="11">0</text>';
+        $svg .= '<text x="70" y="286" fill="' . EChartsBarPreview::E($axisColor)
+            . '" font-size="' . $axisSize . '">' . EChartsBarPreview::E($range)
+            . '</text><text x="680" y="286" text-anchor="end" fill="'
+            . EChartsBarPreview::E($axisColor) . '" font-size="' . $axisSize . '">0</text>';
         if ($fillMode === 'svg') {
             $svg .= '<text x="696" y="307" text-anchor="end" fill="' . EChartsBarPreview::E($palette['muted'])
                 . '" font-size="10">' . EChartsBarPreview::E($this->Translate('SVG pattern (schematic)')) . '</text>';
@@ -895,20 +909,21 @@ class EChartsBarHistory extends IPSModuleStrict
             return false;
         }
         foreach ([
-            'BarWidthPercent'      => [20, 100],
-            'BarOpacityPercent'    => [0, 100],
-            'BarCornerRadius'      => [0, 24],
-            'TitleFontSizePercent' => [50, 200],
-            'AxisFontSizePercent'  => [50, 200],
-            'ValueFontSizePercent' => [50, 200],
-            'BarSVGSizePercent'    => [25, 400]
+            'BarWidthPercent'       => [20, 100],
+            'BarOpacityPercent'     => [0, 100],
+            'BarCornerRadius'       => [0, 24],
+            'TitleFontSizePercent'  => [50, 200],
+            'LegendFontSizePercent' => [50, 200],
+            'AxisFontSizePercent'   => [50, 200],
+            'ValueFontSizePercent'  => [50, 200],
+            'BarSVGSizePercent'     => [25, 400]
         ] as $name => [$minimum, $maximum]) {
             $value = $this->ReadPropertyInteger($prefix . $name);
             if ($value < $minimum || $value > $maximum) {
                 return false;
             }
         }
-        foreach (['BarGradientColor', 'TitleColor', 'AxisColor', 'ValueColor', 'GridColor'] as $name) {
+        foreach (['BarGradientColor', 'TitleColor', 'LegendColor', 'AxisColor', 'ValueColor', 'GridColor'] as $name) {
             $color = $this->ReadPropertyInteger($prefix . $name);
             if ($color < -1 || $color > 0xFFFFFF) {
                 return false;
@@ -981,22 +996,24 @@ class EChartsBarHistory extends IPSModuleStrict
 
         $style = [
             ...$this->ReadAnimationStyle($prefix),
-            'showValues'          => $this->ReadPropertyBoolean($prefix . 'ShowValues'),
-            'showGrid'            => $this->ReadPropertyBoolean($prefix . 'ShowGrid'),
-            'enableZoom'          => $this->ReadPropertyBoolean($prefix . 'EnableZoom'),
-            'roundedBars'         => $this->ReadPropertyBoolean($prefix . 'RoundedBars'),
-            'barWidthPercent'     => $this->ReadPropertyInteger($prefix . 'BarWidthPercent'),
-            'barFillMode'         => $this->ReadPropertyString($prefix . 'BarFillMode'),
-            'barGradientColor'    => $this->OptionalDesignColor($prefix . 'BarGradientColor'),
-            'barOpacityPercent'   => $this->ReadPropertyInteger($prefix . 'BarOpacityPercent'),
-            'barCornerRadius'     => $this->ReadPropertyInteger($prefix . 'BarCornerRadius'),
-            'titleFontSizePercent'=> $this->ReadPropertyInteger($prefix . 'TitleFontSizePercent'),
-            'axisFontSizePercent' => $this->ReadPropertyInteger($prefix . 'AxisFontSizePercent'),
-            'valueFontSizePercent'=> $this->ReadPropertyInteger($prefix . 'ValueFontSizePercent'),
-            'titleColor'          => $this->OptionalDesignColor($prefix . 'TitleColor'),
-            'axisColor'           => $this->OptionalDesignColor($prefix . 'AxisColor'),
-            'valueColor'          => $this->OptionalDesignColor($prefix . 'ValueColor'),
-            'gridColor'           => $this->OptionalDesignColor($prefix . 'GridColor')
+            'showValues'           => $this->ReadPropertyBoolean($prefix . 'ShowValues'),
+            'showGrid'             => $this->ReadPropertyBoolean($prefix . 'ShowGrid'),
+            'enableZoom'           => $this->ReadPropertyBoolean($prefix . 'EnableZoom'),
+            'roundedBars'          => $this->ReadPropertyBoolean($prefix . 'RoundedBars'),
+            'barWidthPercent'      => $this->ReadPropertyInteger($prefix . 'BarWidthPercent'),
+            'barFillMode'          => $this->ReadPropertyString($prefix . 'BarFillMode'),
+            'barGradientColor'     => $this->OptionalDesignColor($prefix . 'BarGradientColor'),
+            'barOpacityPercent'    => $this->ReadPropertyInteger($prefix . 'BarOpacityPercent'),
+            'barCornerRadius'      => $this->ReadPropertyInteger($prefix . 'BarCornerRadius'),
+            'titleFontSizePercent' => $this->ReadPropertyInteger($prefix . 'TitleFontSizePercent'),
+            'legendFontSizePercent'=> $this->ReadPropertyInteger($prefix . 'LegendFontSizePercent'),
+            'axisFontSizePercent'  => $this->ReadPropertyInteger($prefix . 'AxisFontSizePercent'),
+            'valueFontSizePercent' => $this->ReadPropertyInteger($prefix . 'ValueFontSizePercent'),
+            'titleColor'           => $this->OptionalDesignColor($prefix . 'TitleColor'),
+            'legendColor'          => $this->OptionalDesignColor($prefix . 'LegendColor'),
+            'axisColor'            => $this->OptionalDesignColor($prefix . 'AxisColor'),
+            'valueColor'           => $this->OptionalDesignColor($prefix . 'ValueColor'),
+            'gridColor'            => $this->OptionalDesignColor($prefix . 'GridColor')
         ];
         if ($style['barFillMode'] === 'svg') {
             $image = EChartsSvgImage::Import($this->ReadPropertyString($prefix . 'BarSVG'));

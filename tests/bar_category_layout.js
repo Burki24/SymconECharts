@@ -96,6 +96,24 @@ assert.deepEqual(Array.from(vertical.xAxis.data), ['A', 'B', 'C']);
 assert.equal(vertical.series[0].label.position, 'top');
 assert.equal(vertical.yAxis.splitLine.show, false);
 
+const styled = render('vertical', 'configured', 'symcon', 'grouped', undefined, {
+    showGrid: true, titleFontSizePercent: 150, legendFontSizePercent: 125,
+    axisFontSizePercent: 150, valueFontSizePercent: 125,
+    titleColor: '#123456', legendColor: '#234567', axisColor: '#345678',
+    valueColor: '#456789', gridColor: '#56789a'
+});
+assert.equal(styled.title.textStyle.fontSize, 27);
+assert.equal(styled.title.textStyle.color, '#123456');
+assert.equal(styled.legend.textStyle.fontSize, 15);
+assert.equal(styled.legend.textStyle.color, '#234567');
+assert.equal(styled.xAxis.axisLabel.fontSize, 18);
+assert.equal(styled.yAxis.nameTextStyle.fontSize, 18);
+assert.equal(styled.xAxis.axisLabel.color, '#345678');
+assert.equal(styled.yAxis.splitLine.lineStyle.color, '#56789a');
+assert.equal(styled.series[0].label.fontSize, 15);
+assert.equal(styled.series[0].data[0].label, undefined);
+assert.equal(styled.series[0].label.color, '#456789');
+
 const repeatedSimple = render('vertical', 'configured', 'symcon', 'simple', [
     { id: 'variable-4920', variableID: 4920, category: 'Temperatur', series: 'Temperatur', value: 8.5, order: 0 },
     { id: 'variable-4921', variableID: 4921, category: 'Temperatur', series: 'Temperatur', value: 21, order: 1 }
@@ -170,6 +188,9 @@ assert.equal(stacked.series[1].stack, 'total');
 assert.equal(stacked.series[0].label.position, 'inside');
 assert.equal(stacked.series[0].data[0].label.color, '#f4f5f7');
 assert.equal(stacked.series[1].data[0].label.color, '#f4f5f7');
+const styledStack = render('horizontal', 'configured', 'symcon', 'stacked', matrix, { valueColor: '#123456' });
+assert.equal(styledStack.series[0].data[0].label.color, '#123456',
+    'A configured value color must override automatic stacked contrast.');
 
 const automaticStack = render('vertical', 'configured', 'symcon', 'stacked', [
     { category: '', series: 'Room', value: 91, order: 0, color: '#aa0000' },

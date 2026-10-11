@@ -124,6 +124,8 @@ chartbezogenen Themenbereichen. Animation und grundlegende Auswahlfelder
 stehen davor; die Live-Vorschau folgt den Bereichen. Bei aktiviertem
 „Kacheldesign verwenden“ sind die unabhängigen IPSView-Einstellungen
 deaktiviert, die Vorschau zeigt aber weiterhin das wirksame Design.
+Category, History, Waterfall und Polar bieten eigene Rubriken für Schrift und
+Farben. Automatische Farben folgen weiterhin dem gewählten Theme.
 
 Alle Diagrammmodule bieten im Kacheldesigner **Animation**, **Startanimation**
 und **Aktualisierungsanimation**. Die beiden Zeiten sind unabhängig von 0 bis

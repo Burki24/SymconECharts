@@ -4,7 +4,7 @@
 IP-Symcon variables as a category bar chart. All configured sources must use
 the same effective unit so that the shared value axis remains meaningful.
 
-Both designers group bar layout, labels and geometry, and fill patterns in
+Both designers group bar layout, labels and geometry, fill patterns, and typography and colors in
 collapsible sections. The live preview remains below these sections.
 
 ## Live preview
@@ -38,6 +38,9 @@ In the Tile and independent IPSView designers, **Animate chart**, **Initial anim
 - Optional repeated SVG pattern for all bars, with adjustable pattern size;
   source colors remain the fallback if the browser cannot load the SVG
 - Automatic light/dark value-label contrast on stacked bar segments
+- Separate title, legend, axis and value-label font sizes (50–200%) and colors,
+  plus a grid color. Automatic colors follow the theme; stacked value labels
+  retain automatic contrast unless a value-label color is explicitly set.
 - Independent Tile and IPSView design settings
 
 In **IPSView design**, **Use Tile design** is enabled by default. While it is

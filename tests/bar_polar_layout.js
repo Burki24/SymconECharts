@@ -123,6 +123,35 @@ assert.equal(radial.series[0].label.rotate, 0, 'Polar value labels must remain h
 assert.equal(radial.angleAxis.axisLabel.fontSize, 10, 'Category labels must use a compact default font size.');
 assert.equal(radial.radiusAxis.axisLabel.fontSize, 10, 'Scale labels must use a compact default font size.');
 assert.equal(radial.series[0].label.fontSize, 10, 'Value labels must use a compact default font size.');
+window.handleMessage({
+    status: 'ready', chart: {
+        ...state.chart,
+        polar: {
+            ...state.chart.polar,
+            style: {
+                ...state.chart.polar.style,
+                titleFontSizePercent: 150, titleColor: '#123456',
+                categoryLabelColor: '#234567', scaleLabelColor: '#345678',
+                valueColor: '#456789', gridColor: '#56789a'
+            }
+        }
+    }
+});
+const styledPolar = options.at(-1);
+assert.equal(styledPolar.title.textStyle.fontSize, 27);
+assert.equal(styledPolar.title.textStyle.color, '#123456');
+assert.equal(styledPolar.angleAxis.axisLabel.color, '#234567');
+assert.equal(styledPolar.radiusAxis.axisLabel.color, '#345678');
+assert.equal(styledPolar.angleAxis.splitLine.lineStyle.color, '#56789a');
+assert.equal(styledPolar.series[0].data[1].label.color, '#111111',
+    'An explicit outside color must not override automatic contrast inside a bright bar.');
+window.handleMessage({
+    status: 'ready', chart: {
+        ...state.chart,
+        polar: { ...state.chart.polar, style: { ...state.chart.polar.style, valueLabelPosition: 'outside', valueColor: '#456789' } }
+    }
+});
+assert.equal(options.at(-1).series[0].data[1].label.color, '#456789');
 assert.equal(radial.series[0].label.position, 'middle', 'Value anchors must be centered inside their bars.');
 assert.equal(radial.series[0].data[1].label.color, '#111111', 'Light bars need dark value text.');
 assert.equal(radial.series[0].data[2].label.color, '#eeeeee', 'Dark bars need light value text.');

@@ -101,6 +101,28 @@ assert.equal(option.series[3].data[3].itemStyle.color, '#654321');
 assert.match(option.tooltip.formatter([{ dataIndex: 1 }]), /&lt;drop&gt;/);
 assert.doesNotMatch(option.tooltip.formatter([{ dataIndex: 1 }]), /<drop>/);
 
+window.handleMessage({
+    status: 'ready', chart: {
+        ...window.SYMC_VISUALIZATION.state.chart,
+        bar: {
+            ...window.SYMC_VISUALIZATION.state.chart.bar,
+            style: {
+                ...window.SYMC_VISUALIZATION.state.chart.bar.style,
+                titleFontSizePercent: 150, axisFontSizePercent: 125, valueFontSizePercent: 150,
+                titleColor: '#123456', axisColor: '#234567', valueColor: '#345678', gridColor: '#456789'
+            }
+        }
+    }
+});
+assert.equal(option.title.textStyle.fontSize, 27);
+assert.equal(option.title.textStyle.color, '#123456');
+assert.equal(option.xAxis.axisLabel.fontSize, 15);
+assert.equal(option.yAxis.nameTextStyle.fontSize, 15);
+assert.equal(option.xAxis.axisLabel.color, '#234567');
+assert.equal(option.yAxis.splitLine.lineStyle.color, '#456789');
+assert.equal(option.series[1].data[0].label.fontSize, 18);
+assert.equal(option.series[1].data[0].label.color, '#345678');
+
 const localECharts = path.join(__dirname, '..', '.tools', 'echarts-runtime', 'node_modules', 'echarts');
 if (fs.existsSync(localECharts)) {
     const echarts = require(localECharts);

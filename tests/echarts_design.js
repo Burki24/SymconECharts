@@ -10,6 +10,10 @@ const window = {};
 vm.runInNewContext(source, { window });
 
 const opacityFromPercent = window.SYMC_ECHARTS_DESIGN.opacityFromPercent;
+const fontSizePercent = window.SYMC_ECHARTS_DESIGN.fontSizePercent;
+assert.equal(fontSizePercent(undefined, 12), 12, 'Missing font size must retain the chart default.');
+assert.equal(fontSizePercent(150, 12), 18, 'Shared percent scaling must use the chart-specific base size.');
+assert.equal(fontSizePercent(300, 12), 12, 'Invalid font size must not make a chart unreadable.');
 assert.equal(opacityFromPercent(undefined, 100), 1, 'Missing bar opacity must remain fully opaque.');
 assert.equal(opacityFromPercent(undefined, 22), 0.22, 'Area opacity keeps its own default.');
 assert.equal(opacityFromPercent(0, 100), 0, 'Zero percent must remain transparent.');
