@@ -18,6 +18,7 @@ use SymconECharts\EChartsDesignerSections;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
+use SymconECharts\EChartsLabelDesign;
 use SymconECharts\EChartsPreviewSourceCount;
 use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsTransientRefresh;
@@ -39,6 +40,7 @@ require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsCurrentSources.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
+require_once __DIR__ . '/../libs/EChartsLabelDesign.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
@@ -140,6 +142,12 @@ class EChartsBarWaterfall extends IPSModuleStrict
         }
 
         $form = $this->WithBarTypographyForm($form, self::TEXT_FONTS, self::TEXT_COLORS);
+        EChartsLabelDesign::InsertAfterRowContaining($form['elements'], 'ShowValues', [
+            ['type' => 'RowLayout', 'items' => EChartsLabelDesign::CartesianControls()]
+        ]);
+        EChartsLabelDesign::InsertAfterRowContaining($form['elements'], 'IPSViewShowValues', [
+            ['type' => 'RowLayout', 'items' => EChartsLabelDesign::CartesianControls('IPSView')]
+        ]);
         $form = $this->WithIPSViewDesignFormState($form, 'ECBW');
         $form = EChartsDesignerSections::Group($form, [
             ['caption' => 'Labels and geometry', 'start' => 'ShowValues'],
@@ -336,6 +344,8 @@ class EChartsBarWaterfall extends IPSModuleStrict
         $width = 580 / (count($items) + 1);
         $barWidth = $width * max(20, min(100, $this->BarPreviewValue($values, 'BarWidthPercent', 'integer', $ipsView))) / 100;
         $showValues = $this->BarPreviewValue($values, 'ShowValues', 'boolean', $ipsView);
+        $valueLabelPosition = $this->BarPreviewValue($values, 'ValueLabelPosition', 'string', $ipsView);
+        $valueLabelDistance = $this->BarPreviewValue($values, 'ValueLabelDistance', 'integer', $ipsView);
         $categoryLabelY = $showValues && $minimum < 0 ? 337 : 309;
         foreach ($items as $index => $item) {
             $from = $index === 0 ? 0.0 : $levels[$index];
@@ -355,8 +365,23 @@ class EChartsBarWaterfall extends IPSModuleStrict
                 . EChartsBarPreview::E(mb_strimwidth($item['label'], 0, 13, '…')) . '</text>';
             if ($showValues) {
                 $valueY = $item['value'] >= 0 ? $top - 5 : $top + $height + $valueSize + 2;
-                $svg .= '<text x="' . EChartsBarPreview::N($x + $barWidth / 2) . '" y="'
-                    . EChartsBarPreview::N($valueY) . '" text-anchor="middle" fill="'
+                $valueX = $x + $barWidth / 2;
+                $anchor = 'middle';
+                if ($valueLabelPosition !== 'auto' || $valueLabelDistance !== 5) {
+                    $placement = EChartsLabelDesign::PreviewRect(
+                        $x,
+                        $top,
+                        $barWidth,
+                        $height,
+                        $valueLabelPosition === 'auto' ? ($item['value'] >= 0 ? 'top' : 'bottom') : $valueLabelPosition,
+                        $valueLabelDistance
+                    );
+                    $valueX = $placement['x'];
+                    $valueY = $placement['y'];
+                    $anchor = $placement['anchor'];
+                }
+                $svg .= '<text x="' . EChartsBarPreview::N($valueX) . '" y="'
+                    . EChartsBarPreview::N($valueY) . '" text-anchor="' . $anchor . '" fill="'
                     . EChartsBarPreview::E($valueColor) . '" font-size="' . $valueSize . '">'
                     . EChartsBarPreview::E(EChartsBarPreview::FormatValue(
                         $item['value'],
@@ -383,8 +408,23 @@ class EChartsBarWaterfall extends IPSModuleStrict
             . EChartsBarPreview::E($label !== '' ? $label : 'Gesamt') . '</text>';
         if ($showValues) {
             $valueY = $total >= 0 ? $top - 5 : $top + $height + $valueSize + 2;
-            $svg .= '<text x="' . EChartsBarPreview::N($x + $barWidth / 2) . '" y="'
-                . EChartsBarPreview::N($valueY) . '" text-anchor="middle" fill="'
+            $valueX = $x + $barWidth / 2;
+            $anchor = 'middle';
+            if ($valueLabelPosition !== 'auto' || $valueLabelDistance !== 5) {
+                $placement = EChartsLabelDesign::PreviewRect(
+                    $x,
+                    $top,
+                    $barWidth,
+                    $height,
+                    $valueLabelPosition === 'auto' ? ($total >= 0 ? 'top' : 'bottom') : $valueLabelPosition,
+                    $valueLabelDistance
+                );
+                $valueX = $placement['x'];
+                $valueY = $placement['y'];
+                $anchor = $placement['anchor'];
+            }
+            $svg .= '<text x="' . EChartsBarPreview::N($valueX) . '" y="'
+                . EChartsBarPreview::N($valueY) . '" text-anchor="' . $anchor . '" fill="'
                 . EChartsBarPreview::E($valueColor) . '" font-size="' . $valueSize . '">'
                 . EChartsBarPreview::E(EChartsBarPreview::FormatValue(
                     $total,
@@ -632,6 +672,8 @@ class EChartsBarWaterfall extends IPSModuleStrict
     {
         $this->RegisterPropertyString($prefix . 'EChartsTheme', EChartsAsset::THEME_AUTO);
         $this->RegisterPropertyBoolean($prefix . 'ShowValues', true);
+        $this->RegisterPropertyString($prefix . 'ValueLabelPosition', 'auto');
+        $this->RegisterPropertyInteger($prefix . 'ValueLabelDistance', 5);
         $this->RegisterPropertyBoolean($prefix . 'ShowGrid', true);
         $this->RegisterPropertyInteger($prefix . 'BarWidthPercent', 60);
         $this->RegisterPropertyInteger($prefix . 'StartColor', -1);
@@ -648,6 +690,8 @@ class EChartsBarWaterfall extends IPSModuleStrict
         return [
             'EChartsTheme'            => 'string',
             'ShowValues'              => 'boolean',
+            'ValueLabelPosition'      => 'string',
+            'ValueLabelDistance'      => 'integer',
             'ShowGrid'                => 'boolean',
             'BarWidthPercent'         => 'integer',
             'StartColor'              => 'integer',
@@ -669,6 +713,8 @@ class EChartsBarWaterfall extends IPSModuleStrict
     private function IsValidDesign(string $prefix): bool
     {
         if (!$this->AnimationIsValid($prefix)
+            || !EChartsLabelDesign::IsValidPosition($this->ReadPropertyString($prefix . 'ValueLabelPosition'), EChartsLabelDesign::CARTESIAN_POSITIONS)
+            || !EChartsLabelDesign::IsValidDistance($this->ReadPropertyInteger($prefix . 'ValueLabelDistance'))
             || !EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme'))
             || $this->ReadPropertyInteger($prefix . 'BarWidthPercent') < 20
             || $this->ReadPropertyInteger($prefix . 'BarWidthPercent') > 100
@@ -699,10 +745,12 @@ class EChartsBarWaterfall extends IPSModuleStrict
 
         return [
             ...$this->ReadAnimationStyle($prefix),
-            'showValues'      => $this->ReadPropertyBoolean($prefix . 'ShowValues'),
-            'showGrid'        => $this->ReadPropertyBoolean($prefix . 'ShowGrid'),
-            'barWidthPercent' => $this->ReadPropertyInteger($prefix . 'BarWidthPercent'),
-            'colors'          => $colors,
+            'showValues'         => $this->ReadPropertyBoolean($prefix . 'ShowValues'),
+            'valueLabelPosition' => $this->ReadPropertyString($prefix . 'ValueLabelPosition'),
+            'valueLabelDistance' => $this->ReadPropertyInteger($prefix . 'ValueLabelDistance'),
+            'showGrid'           => $this->ReadPropertyBoolean($prefix . 'ShowGrid'),
+            'barWidthPercent'    => $this->ReadPropertyInteger($prefix . 'BarWidthPercent'),
+            'colors'             => $colors,
             ...$this->ReadBarTypography(array_keys(self::TEXT_FONTS), array_keys(self::TEXT_COLORS), $prefix)
         ];
     }

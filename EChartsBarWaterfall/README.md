@@ -1,5 +1,12 @@
 # EChartsBarWaterfall
 
+## Beschriftungsoptionen
+
+Die automatische Wertposition folgt weiter dem Vorzeichen des Schritts. Alternativ lässt sich die Position oberhalb, unterhalb, links, rechts oder innerhalb des Balkens festlegen. Ein eigener Abstand von 0 bis 100 px ist möglich.
+
+Die Optionen gelten für Kacheln und – bei unabhängigem Design – auch für
+IPSView. Bei geerbtem Design folgt IPSView den Kacheleinstellungen.
+
 `EChartsBarWaterfall` zeigt, wie sich ein aktueller Wert durch mehrere
 Änderungen zu einer Endsumme entwickelt. Das Modul benötigt zwei bis sechzehn
 eindeutige numerische Symcon-Variablen mit derselben effektiven Einheit.

@@ -1,5 +1,12 @@
 # EChartsBarCategory
 
+## Value-label options
+
+Value labels keep their automatic position by default. They can also be placed above, below, left, right or inside a bar, with a 0–100 px gap. Manually placed inside labels use a contrasting text color unless a custom value color is selected.
+
+These options apply to the tile and the independent IPSView design. In
+inherited mode, IPSView follows the tile settings.
+
 `EChartsBarCategory` compares the current values of one to sixteen numeric
 IP-Symcon variables as a category bar chart. All configured sources must use
 the same effective unit so that the shared value axis remains meaningful.

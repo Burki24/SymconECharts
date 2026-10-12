@@ -7,6 +7,7 @@ namespace SymconECharts;
 use Burki24\SymconModuleHelper\SVGPreviewHelper;
 
 require_once __DIR__ . '/../libs/EChartsPreviewSourceCount.php';
+require_once __DIR__ . '/../libs/EChartsLabelDesign.php';
 
 final class EChartsTimeSeriesPreview
 {
@@ -65,6 +66,11 @@ final class EChartsTimeSeriesPreview
         $lineWidth = 2.5 * max(50, min(200, (int) ($design['lineWidthPercent'] ?? 100))) / 100;
         $symbolRadius = 3.5 * max(50, min(200, (int) ($design['symbolSizePercent'] ?? 100))) / 100;
         $showSymbols = (bool) ($design['showSymbols'] ?? false);
+        $showValues = (bool) ($design['showValues'] ?? false);
+        $valueLabelPosition = (string) ($design['valueLabelPosition'] ?? 'top');
+        $valueLabelDistance = (int) ($design['valueLabelDistance'] ?? 5);
+        $valueColor = self::DesignColor($design['valueColor'] ?? '', $palette['text']);
+        $valueFontSize = self::FontSize($design['valueFontSizePercent'] ?? 100, 12);
         $smoothLines = (bool) ($design['smoothLines'] ?? false);
         $showGrid = (bool) ($design['showGrid'] ?? true);
         $showXAxis = (bool) ($design['showXAxis'] ?? true);
@@ -257,6 +263,21 @@ final class EChartsTimeSeriesPreview
                     $sourceSymbolRadius,
                     $color
                 );
+            }
+            if ($showValues) {
+                $unit = trim((string) ($item['unit'] ?? ''));
+                $placement = EChartsLabelDesign::PreviewRect(
+                    310,
+                    185 + $offset / 2,
+                    0,
+                    0,
+                    $valueLabelPosition === 'auto' ? 'top' : $valueLabelPosition,
+                    $valueLabelDistance
+                );
+                $content .= '<text data-preview-value-label="true" x="' . self::N($placement['x'])
+                    . '" y="' . self::N($placement['y']) . '" text-anchor="' . $placement['anchor']
+                    . '" fill="' . SVGPreviewHelper::escape($valueColor) . '" font-size="' . $valueFontSize . '">'
+                    . SVGPreviewHelper::escape('42' . ($unit !== '' ? ' ' . $unit : '')) . '</text>';
             }
         }
         $content .= $annotationLines;

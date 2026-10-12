@@ -1,5 +1,14 @@
 # EChartsGaugeTacho
 
+## Beschriftungsoptionen
+
+Skalenbeschriftungen lassen sich um -100 bis +100 px relativ zur Vorlage verschieben. Titel und Werte können separat horizontal und vertikal um -100 bis +100 % versetzt werden; null bewahrt die bisherige Vorlagengeometrie.
+
+Die Optionen gelten für Kacheln und – bei unabhängigem Design – auch für
+IPSView. Bei geerbtem Design folgt IPSView den Kacheleinstellungen. Im
+Quelleneditor können diese Abstände und Verschiebungen bei aktivem
+individuellem Gauge-Design zusätzlich pro Instrument festgelegt werden.
+
 `EChartsGaugeTacho` rendert zwei bis fünf numerische Symcon-Variablen als
 responsives Tacho-Cockpit. Die erste Quelle bildet das Hauptinstrument; bis zu
 vier weitere Quellen werden als gleich große Nebeninstrumente angeordnet. Bei

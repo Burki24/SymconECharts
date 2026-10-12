@@ -1,5 +1,12 @@
 # EChartsBarHistory
 
+## Value-label options
+
+Value labels are optional. Their default position remains above the bars; alternatively they can appear below, left, right or inside, with a 0–100 px gap.
+
+These options apply to the tile and the independent IPSView design. In
+inherited mode, IPSView follows the tile settings.
+
 `EChartsBarHistory` displays archived values of 1 to 16 numeric IP-Symcon
 variables as bars along a time axis. It is deliberately separate from
 `EChartsBarCategory`, which compares current values as categories.

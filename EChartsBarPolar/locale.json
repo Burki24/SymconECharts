@@ -1,6 +1,9 @@
 {
     "translations": {
         "de": {
+            "At start": "Am Anfang",
+            "At end": "Am Ende",
+            "Value label distance (-1 = automatic)": "Abstand der Wertbeschriftung (-1 = automatisch)",
             "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts.": "Ein gemeinsames EChartsGateway genügt für alle ECharts-Diagramminstanzen. Bei weiteren Diagrammen das vorhandene Gateway auswählen, anstatt ein neues anzulegen.",
             "Title": "Titel",
             "Variable": "Variable",

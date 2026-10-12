@@ -19,6 +19,7 @@ $tests = [
     __DIR__ . '/svg_image.php',
     __DIR__ . '/gauge_design.php',
     __DIR__ . '/time_series_design.php',
+    __DIR__ . '/label_design.php',
     __DIR__ . '/gateway_gauges.php'
 ];
 
@@ -26,6 +27,7 @@ $commands = [
     ['Verify local quality runner', 'php tests/quality.php --help'],
     ['Test persistent IPSView transport', 'node tests/ipsview_transport.js'],
     ['Test shared ECharts zoom', 'node tests/echarts_zoom.js'],
+    ['Test shared ECharts label design', 'node tests/label_design.js'],
     ['Test Time Series tile design layout', 'node tests/time_series_layout.js'],
     ['Test Category Bar layout', 'node tests/bar_category_layout.js'],
     ['Test Historical Bar layout', 'node tests/bar_history_layout.js'],

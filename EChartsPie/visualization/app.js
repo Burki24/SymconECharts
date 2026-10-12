@@ -196,8 +196,9 @@
                     position: style.labelPosition === 'inside' ? 'inside' : 'outside',
                     color: style.labelColor || colors.text,
                     fontSize: labelSize,
-                    alignTo: style.labelPosition === 'inside' ? undefined : 'edge',
-                    edgeDistance: style.labelPosition === 'inside' ? undefined : 8,
+                    alignTo: style.labelPosition === 'inside' ? undefined : (style.outsideLabelAlignment || 'edge'),
+                    edgeDistance: style.labelPosition === 'inside' ? undefined : Number(style.labelEdgeDistance ?? 8),
+                    distanceToLabelLine: Number(style.labelLineGap ?? 5),
                     bleedMargin: 4,
                     width: Math.min(130, Math.max(72, Math.round(layout.width * 0.2))),
                     overflow: 'truncate',
@@ -208,7 +209,11 @@
                         ) + '%' : '');
                     }
                 },
-                labelLine: { show: style.showLabels === true && style.labelPosition !== 'inside' },
+                labelLine: {
+                    show: style.showLabels === true && style.labelPosition !== 'inside',
+                    length: Number(style.leaderLineLength ?? 15),
+                    length2: Number(style.leaderLineLength2 ?? 15)
+                },
                 data: data
             }]
         };

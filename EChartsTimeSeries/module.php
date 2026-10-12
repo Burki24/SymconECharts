@@ -17,6 +17,7 @@ use SymconECharts\EChartsDesignerSections;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
+use SymconECharts\EChartsLabelDesign;
 use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsTimeSeriesDesign;
 use SymconECharts\EChartsTimeSeriesPreview;
@@ -36,6 +37,7 @@ require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsArchiveQuery.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
+require_once __DIR__ . '/../libs/EChartsLabelDesign.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
@@ -92,17 +94,19 @@ class EChartsTimeSeries extends IPSModuleStrict
         'AnimationEasing', 'AnimationEasingUpdate', 'AnimationDelay', 'AnimationDelayUpdate',
         'GapDetectionMode', 'GapThresholdMinutes',
         'LineWidthPercent', 'SmoothLines', 'ShowSymbols', 'SymbolSizePercent',
+        'ShowValues', 'ValueLabelPosition', 'ValueLabelDistance',
         'AreaOpacityPercent', 'ShowGrid', 'ShowXAxis', 'ShowYAxis',
-        'TitleFontSizePercent', 'LegendFontSizePercent', 'AxisFontSizePercent',
-        'TitleColor', 'LegendColor', 'AxisColor', 'GridColor',
+        'TitleFontSizePercent', 'LegendFontSizePercent', 'AxisFontSizePercent', 'ValueFontSizePercent',
+        'TitleColor', 'LegendColor', 'AxisColor', 'GridColor', 'ValueColor',
         'IPSViewUseTileDesign', 'IPSViewEChartsTheme', 'IPSViewLegendPosition', 'IPSViewEnableZoom',
         'IPSViewAnimationEnabled', 'IPSViewAnimationDuration', 'IPSViewAnimationDurationUpdate',
         'IPSViewAnimationEasing', 'IPSViewAnimationEasingUpdate',
         'IPSViewAnimationDelay', 'IPSViewAnimationDelayUpdate',
         'IPSViewLineWidthPercent', 'IPSViewSmoothLines', 'IPSViewShowSymbols', 'IPSViewSymbolSizePercent',
+        'IPSViewShowValues', 'IPSViewValueLabelPosition', 'IPSViewValueLabelDistance',
         'IPSViewAreaOpacityPercent', 'IPSViewShowGrid', 'IPSViewShowXAxis', 'IPSViewShowYAxis',
-        'IPSViewTitleFontSizePercent', 'IPSViewLegendFontSizePercent', 'IPSViewAxisFontSizePercent',
-        'IPSViewTitleColor', 'IPSViewLegendColor', 'IPSViewAxisColor', 'IPSViewGridColor',
+        'IPSViewTitleFontSizePercent', 'IPSViewLegendFontSizePercent', 'IPSViewAxisFontSizePercent', 'IPSViewValueFontSizePercent',
+        'IPSViewTitleColor', 'IPSViewLegendColor', 'IPSViewAxisColor', 'IPSViewGridColor', 'IPSViewValueColor',
         'IPSViewUseTileTimeSettings', 'IPSViewRange', 'IPSViewCustomRangeValue', 'IPSViewCustomRangeUnit',
         'IPSViewTimeAxisLabelFormat',
         'IPSViewAdaptToBackground', 'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent'
@@ -121,6 +125,9 @@ class EChartsTimeSeries extends IPSModuleStrict
         'SmoothLines'             => 'boolean',
         'ShowSymbols'             => 'boolean',
         'SymbolSizePercent'       => 'integer',
+        'ShowValues'              => 'boolean',
+        'ValueLabelPosition'      => 'string',
+        'ValueLabelDistance'      => 'integer',
         'AreaOpacityPercent'      => 'integer',
         'ShowGrid'                => 'boolean',
         'ShowXAxis'               => 'boolean',
@@ -128,10 +135,12 @@ class EChartsTimeSeries extends IPSModuleStrict
         'TitleFontSizePercent'    => 'integer',
         'LegendFontSizePercent'   => 'integer',
         'AxisFontSizePercent'     => 'integer',
+        'ValueFontSizePercent'    => 'integer',
         'TitleColor'              => 'integer',
         'LegendColor'             => 'integer',
         'AxisColor'               => 'integer',
-        'GridColor'               => 'integer'
+        'GridColor'               => 'integer',
+        'ValueColor'              => 'integer'
     ];
 
     public function Create(): void
@@ -161,14 +170,17 @@ class EChartsTimeSeries extends IPSModuleStrict
         $this->RegisterPropertyBoolean('SmoothLines', false);
         $this->RegisterPropertyBoolean('ShowSymbols', false);
         $this->RegisterPropertyInteger('SymbolSizePercent', 100);
+        $this->RegisterPropertyBoolean('ShowValues', false);
+        $this->RegisterPropertyString('ValueLabelPosition', 'top');
+        $this->RegisterPropertyInteger('ValueLabelDistance', 5);
         $this->RegisterPropertyInteger('AreaOpacityPercent', 22);
         $this->RegisterPropertyBoolean('ShowGrid', true);
         $this->RegisterPropertyBoolean('ShowXAxis', true);
         $this->RegisterPropertyBoolean('ShowYAxis', true);
-        foreach (['TitleFontSizePercent', 'LegendFontSizePercent', 'AxisFontSizePercent'] as $name) {
+        foreach (['TitleFontSizePercent', 'LegendFontSizePercent', 'AxisFontSizePercent', 'ValueFontSizePercent'] as $name) {
             $this->RegisterPropertyInteger($name, 100);
         }
-        foreach (['TitleColor', 'LegendColor', 'AxisColor', 'GridColor'] as $name) {
+        foreach (['TitleColor', 'LegendColor', 'AxisColor', 'GridColor', 'ValueColor'] as $name) {
             $this->RegisterPropertyInteger($name, -1);
         }
         $this->RegisterIPSViewHTMLPageProperties();
@@ -188,17 +200,20 @@ class EChartsTimeSeries extends IPSModuleStrict
         $this->RegisterPropertyString('IPSViewEChartsTheme', EChartsAsset::THEME_AUTO);
         foreach (self::DESIGN_PROPERTY_TYPES as $name => $type) {
             $default = match ($name) {
-                'LegendPosition'                                                       => 'top',
-                'LineWidthPercent', 'SymbolSizePercent'                                => 100,
-                'TitleFontSizePercent', 'LegendFontSizePercent', 'AxisFontSizePercent' => 100,
-                'TitleColor', 'LegendColor', 'AxisColor', 'GridColor'                  => -1,
-                'AreaOpacityPercent'                                                   => 22,
-                'SmoothLines', 'ShowSymbols', 'AnimationEnabled'                       => false,
-                'AnimationDuration'                                                    => 350,
-                'AnimationDurationUpdate'                                              => 500,
-                'AnimationEasing', 'AnimationEasingUpdate'                             => 'cubicInOut',
-                'AnimationDelay', 'AnimationDelayUpdate'                               => 0,
-                default                                                                => true
+                'LegendPosition'                                                                               => 'top',
+                'LineWidthPercent', 'SymbolSizePercent'                                                        => 100,
+                'ShowValues'                                                                                   => false,
+                'ValueLabelPosition'                                                                           => 'top',
+                'ValueLabelDistance'                                                                           => 5,
+                'TitleFontSizePercent', 'LegendFontSizePercent', 'AxisFontSizePercent', 'ValueFontSizePercent' => 100,
+                'TitleColor', 'LegendColor', 'AxisColor', 'GridColor', 'ValueColor'                            => -1,
+                'AreaOpacityPercent'                                                                           => 22,
+                'SmoothLines', 'ShowSymbols', 'AnimationEnabled'                                               => false,
+                'AnimationDuration'                                                                            => 350,
+                'AnimationDurationUpdate'                                                                      => 500,
+                'AnimationEasing', 'AnimationEasingUpdate'                                                     => 'cubicInOut',
+                'AnimationDelay', 'AnimationDelayUpdate'                                                       => 0,
+                default                                                                                        => true
             };
             match ($type) {
                 'string'  => $this->RegisterPropertyString('IPSView' . $name, $default),
@@ -240,6 +255,18 @@ class EChartsTimeSeries extends IPSModuleStrict
         $form = $this->LoadConfigurationForm();
         if (isset($form['elements']) && is_array($form['elements'])) {
             $form['elements'] = $this->WithAnimationFormControls($form['elements']);
+            EChartsLabelDesign::InsertAfterRowContaining($form['elements'], 'ShowSymbols', [
+                ['type' => 'RowLayout', 'items' => [
+                    ['type' => 'CheckBox', 'name' => 'ShowValues', 'caption' => 'Show point values'],
+                    ...EChartsLabelDesign::CartesianControls()
+                ]],
+                ['type' => 'RowLayout', 'items' => [
+                    ['type'       => 'NumberSpinner', 'name' => 'ValueFontSizePercent',
+                        'caption' => 'Value font size', 'minimum' => 50, 'maximum' => 200, 'suffix' => '%'],
+                    ['type'                  => 'SelectColor', 'name' => 'ValueColor', 'caption' => 'Value color',
+                        'transparentCaption' => 'Automatic (theme)']
+                ]]
+            ]);
             $customRangeVisible = $this->ReadPropertyString('Range') === 'custom';
             $form['elements'] = $this->SetFormFieldVisibility(
                 $form['elements'],
@@ -1405,6 +1432,9 @@ class EChartsTimeSeries extends IPSModuleStrict
             'smoothLines'           => $this->ReadPropertyBoolean($prefix . 'SmoothLines'),
             'showSymbols'           => $this->ReadPropertyBoolean($prefix . 'ShowSymbols'),
             'symbolSizePercent'     => $this->ReadPropertyInteger($prefix . 'SymbolSizePercent'),
+            'showValues'            => $this->ReadPropertyBoolean($prefix . 'ShowValues'),
+            'valueLabelPosition'    => $this->ReadPropertyString($prefix . 'ValueLabelPosition'),
+            'valueLabelDistance'    => $this->ReadPropertyInteger($prefix . 'ValueLabelDistance'),
             'areaOpacityPercent'    => $this->ReadPropertyInteger($prefix . 'AreaOpacityPercent'),
             'showGrid'              => $this->ReadPropertyBoolean($prefix . 'ShowGrid'),
             'showXAxis'             => $this->ReadPropertyBoolean($prefix . 'ShowXAxis'),
@@ -1412,10 +1442,12 @@ class EChartsTimeSeries extends IPSModuleStrict
             'titleFontSizePercent'  => $this->ReadPropertyInteger($prefix . 'TitleFontSizePercent'),
             'legendFontSizePercent' => $this->ReadPropertyInteger($prefix . 'LegendFontSizePercent'),
             'axisFontSizePercent'   => $this->ReadPropertyInteger($prefix . 'AxisFontSizePercent'),
+            'valueFontSizePercent'  => $this->ReadPropertyInteger($prefix . 'ValueFontSizePercent'),
             'titleColor'            => $this->OptionalDesignColor($prefix . 'TitleColor'),
             'legendColor'           => $this->OptionalDesignColor($prefix . 'LegendColor'),
             'axisColor'             => $this->OptionalDesignColor($prefix . 'AxisColor'),
-            'gridColor'             => $this->OptionalDesignColor($prefix . 'GridColor')
+            'gridColor'             => $this->OptionalDesignColor($prefix . 'GridColor'),
+            'valueColor'            => $this->OptionalDesignColor($prefix . 'ValueColor')
         ];
     }
 
@@ -1429,6 +1461,9 @@ class EChartsTimeSeries extends IPSModuleStrict
             'SmoothLines'             => 'smoothLines',
             'ShowSymbols'             => 'showSymbols',
             'SymbolSizePercent'       => 'symbolSizePercent',
+            'ShowValues'              => 'showValues',
+            'ValueLabelPosition'      => 'valueLabelPosition',
+            'ValueLabelDistance'      => 'valueLabelDistance',
             'AreaOpacityPercent'      => 'areaOpacityPercent',
             'ShowGrid'                => 'showGrid',
             'ShowXAxis'               => 'showXAxis',
@@ -1436,10 +1471,12 @@ class EChartsTimeSeries extends IPSModuleStrict
             'TitleFontSizePercent'    => 'titleFontSizePercent',
             'LegendFontSizePercent'   => 'legendFontSizePercent',
             'AxisFontSizePercent'     => 'axisFontSizePercent',
+            'ValueFontSizePercent'    => 'valueFontSizePercent',
             'TitleColor'              => 'titleColor',
             'LegendColor'             => 'legendColor',
             'AxisColor'               => 'axisColor',
             'GridColor'               => 'gridColor',
+            'ValueColor'              => 'valueColor',
             'AnimationEnabled'        => 'animationEnabled',
             'AnimationDuration'       => 'animationDuration',
             'AnimationDurationUpdate' => 'animationDurationUpdate',
@@ -1696,6 +1733,8 @@ class EChartsTimeSeries extends IPSModuleStrict
             && $this->ReadPropertyInteger($prefix . 'LineWidthPercent') <= 200
             && $this->ReadPropertyInteger($prefix . 'SymbolSizePercent') >= 50
             && $this->ReadPropertyInteger($prefix . 'SymbolSizePercent') <= 200
+            && EChartsLabelDesign::IsValidPosition($this->ReadPropertyString($prefix . 'ValueLabelPosition'), EChartsLabelDesign::CARTESIAN_POSITIONS)
+            && EChartsLabelDesign::IsValidDistance($this->ReadPropertyInteger($prefix . 'ValueLabelDistance'))
             && $this->ReadPropertyInteger($prefix . 'AreaOpacityPercent') >= 0
             && $this->ReadPropertyInteger($prefix . 'AreaOpacityPercent') <= 100
             && $this->IsValidTimeSeriesTypography($prefix);
@@ -1703,13 +1742,13 @@ class EChartsTimeSeries extends IPSModuleStrict
 
     private function IsValidTimeSeriesTypography(string $prefix): bool
     {
-        foreach (['TitleFontSizePercent', 'LegendFontSizePercent', 'AxisFontSizePercent'] as $name) {
+        foreach (['TitleFontSizePercent', 'LegendFontSizePercent', 'AxisFontSizePercent', 'ValueFontSizePercent'] as $name) {
             $value = $this->ReadPropertyInteger($prefix . $name);
             if ($value < 50 || $value > 200) {
                 return false;
             }
         }
-        foreach (['TitleColor', 'LegendColor', 'AxisColor', 'GridColor'] as $name) {
+        foreach (['TitleColor', 'LegendColor', 'AxisColor', 'GridColor', 'ValueColor'] as $name) {
             $value = $this->ReadPropertyInteger($prefix . $name);
             if ($value < -1 || $value > 0xFFFFFF) {
                 return false;

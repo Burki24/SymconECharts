@@ -1,6 +1,14 @@
 {
     "translations": {
         "de": {
+            "Outside label alignment": "Ausrichtung der Außenbeschriftung",
+            "Natural": "Natürlich",
+            "Leader line": "Führungslinie",
+            "Container edge": "Containerrand",
+            "First leader length": "Länge der ersten Führungslinie",
+            "Second leader length": "Länge der zweiten Führungslinie",
+            "Text gap to leader": "Textabstand zur Linie",
+            "Label edge distance": "Abstand zum Rand",
             "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts.": "Ein gemeinsames EChartsGateway genügt für alle ECharts-Diagramminstanzen. Bei weiteren Diagrammen das vorhandene Gateway auswählen, anstatt ein neues anzulegen.",
             "Title": "Titel",
             "Pie sources": "Kreisdiagramm-Quellen",

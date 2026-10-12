@@ -1,6 +1,17 @@
 {
     "translations": {
         "de": {
+            "Value label position": "Position der Wertbeschriftung",
+            "Value label distance": "Abstand der Wertbeschriftung",
+            "Above": "Oberhalb",
+            "Below": "Unterhalb",
+            "Left": "Links",
+            "Right": "Rechts",
+            "Inside center": "Innen mittig",
+            "Inside top": "Innen oben",
+            "Inside bottom": "Innen unten",
+            "Inside left": "Innen links",
+            "Inside right": "Innen rechts",
             "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts.": "Ein gemeinsames EChartsGateway genügt für alle ECharts-Diagramminstanzen. Bei weiteren Diagrammen das vorhandene Gateway auswählen, anstatt ein neues anzulegen.",
             "Title": "Titel",
             "Archive sources (1 to 16)": "Archivquellen (1 bis 16)",
@@ -17,8 +28,6 @@
             "Maximum": "Maximum",
             "Color": "Farbe",
             "Axis side": "Achsenseite",
-            "Left": "Links",
-            "Right": "Rechts",
             "Automatic (theme)": "Automatisch (Theme)",
             "Time range": "Zeitraum",
             "1 hour": "1 Stunde",

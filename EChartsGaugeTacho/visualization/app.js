@@ -876,7 +876,8 @@
                     : buildSeries(item, index, grid, colors, style);
             });
         series = series.map(function (gaugeSeries, index) {
-            return applySeriesDesign(gaugeSeries, Object.assign({}, style, items[index].style || {}), colors);
+            var seriesStyle = Object.assign({}, style, items[index].style || {});
+            return echartsDesign.gaugeLabelOffsets(applySeriesDesign(gaugeSeries, seriesStyle, colors), seriesStyle);
         });
         graphic = applyPlateDesign(graphic, series, preset, style, colors, width, height, headerInset, items);
         series.forEach(function (gaugeSeries) {

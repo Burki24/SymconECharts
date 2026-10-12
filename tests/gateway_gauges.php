@@ -3610,6 +3610,9 @@ assertGatewayGauge(
             'smoothLines'             => true,
             'showSymbols'             => true,
             'symbolSizePercent'       => 125,
+            'showValues'              => false,
+            'valueLabelPosition'      => 'top',
+            'valueLabelDistance'      => 5,
             'areaOpacityPercent'      => 40,
             'showGrid'                => false,
             'showXAxis'               => false,
@@ -3617,10 +3620,12 @@ assertGatewayGauge(
             'titleFontSizePercent'    => 125,
             'legendFontSizePercent'   => 110,
             'axisFontSizePercent'     => 150,
+            'valueFontSizePercent'    => 100,
             'titleColor'              => '#123456',
             'legendColor'             => '#234567',
             'axisColor'               => '#345678',
-            'gridColor'               => '#456789'
+            'gridColor'               => '#456789',
+            'valueColor'              => ''
         ],
     'Time Series must build the accepted positioned-axis aggregated chart model.'
 );
@@ -5689,7 +5694,7 @@ assertGatewayGauge(
 assertGatewayGauge(
     ($polarLabelPositionField['type'] ?? '') === 'Select'
         && array_column($polarLabelPositionField['options'], 'value')
-            === ['middle', 'insideStart', 'insideEnd', 'outside'],
+            === ['middle', 'insideStart', 'insideEnd', 'outside', 'start', 'end'],
     'Polar Tile designer must offer all supported value-label positions.'
 );
 $polarDefaultIPSViewPanel = current(array_filter(
@@ -5962,7 +5967,7 @@ assertGatewayGauge(
 assertGatewayGauge(
     ($polarIPSViewLabelPositionField['enabled'] ?? null) === true
         && array_column($polarIPSViewLabelPositionField['options'], 'value')
-            === ['middle', 'insideStart', 'insideEnd', 'outside'],
+            === ['middle', 'insideStart', 'insideEnd', 'outside', 'start', 'end'],
     'Independent IPSView must allow the same value-label positions as the Tile.'
 );
 $polarIPSViewFontRow = current(array_filter(
@@ -7932,6 +7937,24 @@ foreach ([
             ($image['type'] ?? null) === 'Image'
                 && str_starts_with((string) ($image['image'] ?? ''), 'data:image/svg+xml;base64,'),
             $chartClass . ' must expose an initialized ' . $field . ' preview.'
+        );
+    }
+    $labelFields = match ($chartClass) {
+        EChartsPie::class => ['OutsideLabelAlignment', 'LeaderLineLength', 'LeaderLineLength2',
+            'LabelLineGap', 'LabelEdgeDistance'],
+        EChartsBarCategory::class, EChartsBarHistory::class, EChartsBarWaterfall::class => ['ValueLabelPosition', 'ValueLabelDistance'],
+        EChartsBarPolar::class                                                          => ['ValueLabelPosition', 'ValueLabelDistance'],
+        EChartsTimeSeries::class                                                        => ['ShowValues', 'ValueLabelPosition', 'ValueLabelDistance',
+            'ValueFontSizePercent', 'ValueColor'],
+        EChartsGaugeMulti::class, EChartsGaugeTacho::class, EChartsGaugeChronograph::class => ['ScaleLabelDistanceOffset', 'TitleOffsetXPercent', 'TitleOffsetYPercent',
+            'ValueOffsetXPercent', 'ValueOffsetYPercent'],
+        default => []
+    };
+    foreach ($labelFields as $field) {
+        assertGatewayGauge(
+            findGaugeFormElement($form['elements'], $field) !== null
+                && findGaugeFormElement($form['elements'], 'IPSView' . $field) !== null,
+            $chartClass . ' must offer ' . $field . ' in Tile and IPSView designers.'
         );
     }
 }

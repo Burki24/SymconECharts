@@ -1,5 +1,12 @@
 # EChartsPie
 
+## Beschriftungsoptionen
+
+Außenbeschriftungen lassen sich natürlich, entlang der Führungslinie oder am Containerrand ausrichten. Die beiden Linienlängen, der Textabstand zur Linie und der Randabstand sind getrennt einstellbar. Innenbeschriftungen bleiben davon unberührt; die bisherige Randausrichtung ist der Standard.
+
+Die Optionen gelten für Kacheln und – bei unabhängigem Design – auch für
+IPSView. Bei geerbtem Design folgt IPSView den Kacheleinstellungen.
+
 `EChartsPie` vergleicht Anteile aktueller numerischer Symcon-Werte als Kreis,
 Donut oder Nightingale-Rose. Für alle ECharts-Diagramme genügt ein gemeinsames
 `EChartsGateway`; bei weiteren Instanzen wählen Sie das vorhandene Gateway.

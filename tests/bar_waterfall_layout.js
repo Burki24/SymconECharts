@@ -108,6 +108,7 @@ window.handleMessage({
             ...window.SYMC_VISUALIZATION.state.chart.bar,
             style: {
                 ...window.SYMC_VISUALIZATION.state.chart.bar.style,
+                valueLabelPosition: 'insideTop', valueLabelDistance: 11,
                 titleFontSizePercent: 150, axisFontSizePercent: 125, valueFontSizePercent: 150,
                 titleColor: '#123456', axisColor: '#234567', valueColor: '#345678', gridColor: '#456789'
             }
@@ -122,6 +123,8 @@ assert.equal(option.xAxis.axisLabel.color, '#234567');
 assert.equal(option.yAxis.splitLine.lineStyle.color, '#456789');
 assert.equal(option.series[1].data[0].label.fontSize, 18);
 assert.equal(option.series[1].data[0].label.color, '#345678');
+assert.equal(option.series[1].data[0].label.position, 'insideTop');
+assert.equal(option.series[1].data[0].label.distance, 11);
 
 const localECharts = path.join(__dirname, '..', '.tools', 'echarts-runtime', 'node_modules', 'echarts');
 if (fs.existsSync(localECharts)) {

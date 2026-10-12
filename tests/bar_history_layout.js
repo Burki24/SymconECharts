@@ -218,6 +218,7 @@ ready.window.handleMessage({
                 barOpacityPercent: 65, barCornerRadius: 10,
                 titleFontSizePercent: 130, legendFontSizePercent: 150, axisFontSizePercent: 115,
                 valueFontSizePercent: 125, titleColor: '#ffeedd',
+                valueLabelPosition: 'bottom', valueLabelDistance: 12,
                 legendColor: '#abcdef', axisColor: '#ddeeff', valueColor: '#112233', gridColor: '#445566',
                 animationEnabled: true, animationEasing: 'bounceOut',
                 animationEasingUpdate: 'linear', animationDelay: 120,
@@ -244,6 +245,8 @@ assert.equal(ready.option.yAxis.splitLine.lineStyle.color, '#445566');
 assert.equal(ready.option.yAxis.splitLine.lineStyle.opacity, 1);
 assert.equal(ready.option.series[0].label.color, '#112233');
 assert.equal(ready.option.series[0].label.fontSize, 15);
+assert.equal(ready.option.series[0].label.position, 'bottom');
+assert.equal(ready.option.series[0].label.distance, 12);
 assert.equal(ready.option.series[0].itemStyle.opacity, 0.65);
 assert.deepEqual(Array.from(ready.option.series[0].itemStyle.borderRadius), [10, 10, 0, 0]);
 assert.equal(ready.option.series[0].itemStyle.color.type, 'linear');

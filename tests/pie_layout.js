@@ -81,6 +81,13 @@ assert.ok(wideTile.option.series[0].center[0] + wideTile.option.series[0].radius
     < 1000 - wideTile.option.legend.width,
     'A wide tile must reserve a separate column for the legend.');
 const pie = render(baseStyle, sources);
+const routedLabels = render({ ...baseStyle, outsideLabelAlignment: 'labelLine',
+    leaderLineLength: 24, leaderLineLength2: 16, labelLineGap: 7,
+    labelEdgeDistance: 12 }, sources);
+assert.equal(routedLabels.option.series[0].label.alignTo, 'labelLine');
+assert.equal(routedLabels.option.series[0].label.distanceToLabelLine, 7);
+assert.equal(routedLabels.option.series[0].labelLine.length, 24);
+assert.equal(routedLabels.option.series[0].labelLine.length2, 16);
 assert.ok(pie.option, 'Pie must render current positive values.');
 assert.equal(pie.option.series[0].type, 'pie');
 assert.equal(pie.option.series[0].radius[0], 0);

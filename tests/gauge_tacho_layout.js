@@ -65,6 +65,19 @@ function topOfFirstGauge(option) {
 }
 
 const tallTile = render('symcon', 416, 1048, 3);
+const shiftedLabels = render('symcon', 416, 1048, 3, '', 'multi-title', true, {
+    scaleLabelDistanceOffset: 7, titleOffsetXPercent: 4, titleOffsetYPercent: -3,
+    valueOffsetXPercent: -5, valueOffsetYPercent: 6
+});
+assert.equal(shiftedLabels.series[0].axisLabel.distance, tallTile.series[0].axisLabel.distance + 7);
+assert.equal(parseFloat(shiftedLabels.series[0].title.offsetCenter[0]),
+    parseFloat(tallTile.series[0].title.offsetCenter[0]) + 4);
+assert.equal(parseFloat(shiftedLabels.series[0].title.offsetCenter[1]),
+    parseFloat(tallTile.series[0].title.offsetCenter[1]) - 3);
+assert.equal(parseFloat(shiftedLabels.series[0].detail.offsetCenter[0]),
+    parseFloat(tallTile.series[0].detail.offsetCenter[0]) - 5);
+assert.equal(parseFloat(shiftedLabels.series[0].detail.offsetCenter[1]),
+    parseFloat(tallTile.series[0].detail.offsetCenter[1]) + 6);
 const tallIPSView = render('ipsview', 416, 1048, 3);
 const tallTileWithoutHeader = render('symcon', 416, 1048, 3, '', 'multi-title', false);
 assert.ok(topOfFirstGauge(tallTile) >= 64, 'The native header must remain clear.');
@@ -358,6 +371,18 @@ assert.equal(individualTacho.series[0].anchor.icon, 'path://M50 0L100 50L50 100L
 assert.notEqual(individualTacho.series[1].pointer.itemStyle.color, '#010203');
 assert.ok(!individualTacho.graphic.some(element => element.id === 'tacho-bezel-variable-0'));
 assert.ok(individualTacho.graphic.some(element => element.id === 'tacho-bezel-variable-1'));
+const individualLabels = render('ipsview', 720, 560, 3, 'Cockpit', 'tacho', true,
+    { scaleLabelDistanceOffset: 3, titleOffsetXPercent: 2, valueOffsetYPercent: 4 }, [{
+        scaleLabelDistanceOffset: 9, titleOffsetXPercent: 11, valueOffsetYPercent: -7
+    }]);
+const globalLabels = render('ipsview', 720, 560, 3, 'Cockpit', 'tacho', true,
+    { scaleLabelDistanceOffset: 3, titleOffsetXPercent: 2, valueOffsetYPercent: 4 });
+assert.equal(individualLabels.series[0].axisLabel.distance, globalLabels.series[0].axisLabel.distance + 6);
+assert.equal(parseFloat(individualLabels.series[0].title.offsetCenter[0]),
+    parseFloat(globalLabels.series[0].title.offsetCenter[0]) + 9);
+assert.equal(parseFloat(individualLabels.series[0].detail.offsetCenter[1]),
+    parseFloat(globalLabels.series[0].detail.offsetCenter[1]) - 11);
+assert.equal(individualLabels.series[1].axisLabel.distance, globalLabels.series[1].axisLabel.distance);
 const customRing = render('symcon', 720, 560, 3, '', 'ring-grid', true, customStyle);
 assert.equal(customRing.graphic.length, 0, 'Plate settings must not replace ring layouts.');
 assert.equal(customRing.series[0].progress.itemStyle.color, '#223344');

@@ -18,6 +18,7 @@ use SymconECharts\EChartsDesignerSections;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
+use SymconECharts\EChartsLabelDesign;
 use SymconECharts\EChartsPreviewSourceCount;
 use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsTransientRefresh;
@@ -39,6 +40,7 @@ require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsCurrentSources.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
+require_once __DIR__ . '/../libs/EChartsLabelDesign.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
@@ -72,7 +74,7 @@ class EChartsBarPolar extends IPSModuleStrict
     private const STATUS_GATEWAY_FAILED = 204;
     private const POLAR_MODES = ['radial', 'tangential'];
     private const SORT_ORDERS = ['configured', 'ascending', 'descending'];
-    private const VALUE_LABEL_POSITIONS = ['middle', 'insideStart', 'insideEnd', 'outside'];
+    private const VALUE_LABEL_POSITIONS = EChartsLabelDesign::POLAR_POSITIONS;
     private const TEXT_FONTS = ['TitleFontSizePercent' => 'Title size'];
     private const TEXT_COLORS = [
         'TitleColor'      => 'Title color', 'CategoryLabelColor' => 'Category color',
@@ -131,6 +133,17 @@ class EChartsBarPolar extends IPSModuleStrict
     public function GetConfigurationForm(): string
     {
         $form = $this->LoadConfigurationForm();
+        foreach (['', 'IPSView'] as $prefix) {
+            EChartsLabelDesign::AppendOptions($form['elements'], $prefix . 'ValueLabelPosition', [
+                ['caption' => 'At start', 'value' => 'start'],
+                ['caption' => 'At end', 'value' => 'end']
+            ]);
+            EChartsLabelDesign::InsertAfter($form['elements'], $prefix . 'ValueLabelPosition', [
+                ['type'       => 'NumberSpinner', 'name' => $prefix . 'ValueLabelDistance',
+                    'caption' => 'Value label distance (-1 = automatic)',
+                    'minimum' => -1, 'maximum' => 100, 'suffix' => 'px']
+            ]);
+        }
         if (isset($form['elements']) && is_array($form['elements'])) {
             $form['elements'] = $this->WithAnimationFormControls($form['elements']);
             $form['elements'] = $this->SetFormFieldVisibility(
@@ -786,6 +799,7 @@ class EChartsBarPolar extends IPSModuleStrict
         $this->RegisterPropertyBoolean($prefix . 'ShowCategoryLabels', true);
         $this->RegisterPropertyBoolean($prefix . 'ShowValues', true);
         $this->RegisterPropertyString($prefix . 'ValueLabelPosition', 'middle');
+        $this->RegisterPropertyInteger($prefix . 'ValueLabelDistance', -1);
         $this->RegisterPropertyInteger($prefix . 'CategoryLabelFontSize', 10);
         $this->RegisterPropertyInteger($prefix . 'ValueLabelFontSize', 10);
         $this->RegisterPropertyInteger($prefix . 'ScaleLabelFontSize', 10);
@@ -827,6 +841,7 @@ class EChartsBarPolar extends IPSModuleStrict
             'ShowCategoryLabels'          => 'boolean',
             'ShowValues'                  => 'boolean',
             'ValueLabelPosition'          => 'string',
+            'ValueLabelDistance'          => 'integer',
             'CategoryLabelFontSize'       => 'integer',
             'ValueLabelFontSize'          => 'integer',
             'ScaleLabelFontSize'          => 'integer',
@@ -872,6 +887,7 @@ class EChartsBarPolar extends IPSModuleStrict
             || !in_array($this->ReadPropertyString($prefix . 'PolarMode'), self::POLAR_MODES, true)
             || !in_array($this->ReadPropertyString($prefix . 'SortOrder'), self::SORT_ORDERS, true)
             || !in_array($this->ReadPropertyString($prefix . 'ValueLabelPosition'), self::VALUE_LABEL_POSITIONS, true)
+            || !EChartsLabelDesign::IsValidDistance($this->ReadPropertyInteger($prefix . 'ValueLabelDistance'), true)
             || $this->ReadPropertyInteger($prefix . 'CategoryLabelFontSize') < 8
             || $this->ReadPropertyInteger($prefix . 'CategoryLabelFontSize') > 24
             || $this->ReadPropertyInteger($prefix . 'ValueLabelFontSize') < 8
@@ -943,6 +959,7 @@ class EChartsBarPolar extends IPSModuleStrict
             'showCategoryLabels'          => $this->ReadPropertyBoolean($prefix . 'ShowCategoryLabels'),
             'showValues'                  => $this->ReadPropertyBoolean($prefix . 'ShowValues'),
             'valueLabelPosition'          => $this->ReadPropertyString($prefix . 'ValueLabelPosition'),
+            'valueLabelDistance'          => $this->ReadPropertyInteger($prefix . 'ValueLabelDistance'),
             'categoryLabelFontSize'       => $this->ReadPropertyInteger($prefix . 'CategoryLabelFontSize'),
             'valueLabelFontSize'          => $this->ReadPropertyInteger($prefix . 'ValueLabelFontSize'),
             'scaleLabelFontSize'          => $this->ReadPropertyInteger($prefix . 'ScaleLabelFontSize'),

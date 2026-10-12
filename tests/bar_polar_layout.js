@@ -152,6 +152,16 @@ window.handleMessage({
     }
 });
 assert.equal(options.at(-1).series[0].data[1].label.color, '#456789');
+window.handleMessage({
+    status: 'ready', chart: {
+        ...state.chart,
+        polar: { ...state.chart.polar, style: {
+            ...state.chart.polar.style, valueLabelPosition: 'end', valueLabelDistance: 12
+        } }
+    }
+});
+assert.equal(options.at(-1).series[0].label.position, 'end');
+assert.equal(options.at(-1).series[0].data[1].label.distance, 12);
 assert.equal(radial.series[0].label.position, 'middle', 'Value anchors must be centered inside their bars.');
 assert.equal(radial.series[0].data[1].label.color, '#111111', 'Light bars need dark value text.');
 assert.equal(radial.series[0].data[2].label.color, '#eeeeee', 'Dark bars need light value text.');

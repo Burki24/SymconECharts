@@ -280,7 +280,9 @@
                     },
                     label: {
                         show: style.showValues === true,
-                        position: 'top',
+                        ...echartsDesign.valueLabel(style, 'top',
+                            ['top', 'bottom', 'left', 'right', 'inside', 'insideTop', 'insideBottom',
+                                'insideLeft', 'insideRight'], 5),
                         color: valueColor,
                         fontSize: valueFontSize,
                         formatter: function (parameters) {

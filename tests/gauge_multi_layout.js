@@ -90,6 +90,19 @@ function topOfFirstGauge(option) {
 }
 
 const tallTile = render('symcon', 416, 1048, 3);
+const shiftedLabels = render('symcon', 416, 1048, 3, '', 'multi-title', true, {
+    scaleLabelDistanceOffset: 7, titleOffsetXPercent: 4, titleOffsetYPercent: -3,
+    valueOffsetXPercent: -5, valueOffsetYPercent: 6
+});
+assert.equal(shiftedLabels.series[0].axisLabel.distance, tallTile.series[0].axisLabel.distance + 7);
+assert.equal(parseFloat(shiftedLabels.series[0].title.offsetCenter[0]),
+    parseFloat(tallTile.series[0].title.offsetCenter[0]) + 4);
+assert.equal(parseFloat(shiftedLabels.series[0].title.offsetCenter[1]),
+    parseFloat(tallTile.series[0].title.offsetCenter[1]) - 3);
+assert.equal(parseFloat(shiftedLabels.series[0].detail.offsetCenter[0]),
+    parseFloat(tallTile.series[0].detail.offsetCenter[0]) - 5);
+assert.equal(parseFloat(shiftedLabels.series[0].detail.offsetCenter[1]),
+    parseFloat(tallTile.series[0].detail.offsetCenter[1]) + 6);
 const tallIPSView = render('ipsview', 416, 1048, 3);
 const tallTileWithoutHeader = render('symcon', 416, 1048, 3, '', 'multi-title', false);
 assert.ok(topOfFirstGauge(tallTile) >= 64, 'The native header must remain clear.');

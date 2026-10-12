@@ -1,5 +1,12 @@
 # EChartsGaugeMulti
 
+## Beschriftungsoptionen
+
+Skalenbeschriftungen lassen sich um -100 bis +100 px relativ zur Vorlage verschieben. Titel und Werte können separat horizontal und vertikal um -100 bis +100 % versetzt werden; null bewahrt die bisherige Vorlagengeometrie.
+
+Die Optionen gelten für Kacheln und – bei unabhängigem Design – auch für
+IPSView. Bei geerbtem Design folgt IPSView den Kacheleinstellungen.
+
 Gerätemodul der SymconECharts-Library für einen zusammengesetzten Gauge-Chart
 mit mehreren Werten oder Zeigern. Eine Gauge-Multi-Instanz soll die native
 Symcon-Kacheldarstellung und ein separat platzierbares HTML-Widget in IPSView

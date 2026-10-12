@@ -249,6 +249,11 @@
             xAxis: horizontal ? valueAxis : categoryAxis,
             yAxis: horizontal ? categoryAxis : valueAxis,
             series: chartData.series.map(function (seriesItem) {
+                var valueLabel = echartsDesign.valueLabel(style,
+                    stacked ? 'inside' : (horizontal ? 'right' : 'top'),
+                    ['top', 'bottom', 'left', 'right', 'inside', 'insideTop', 'insideBottom',
+                        'insideLeft', 'insideRight'], 5);
+                var labelIsInside = valueLabel.position.indexOf('inside') === 0;
                 var result = {
                     id: seriesItem.id,
                     name: seriesItem.id,
@@ -262,20 +267,20 @@
                     itemStyle: { color: pattern || seriesItem.color },
                     label: {
                         show: style.showValues === true,
-                        position: stacked ? 'inside' : (horizontal ? 'right' : 'top'),
-                        color: style.valueColor || (stacked ? colors.background : colors.text),
+                        ...valueLabel,
+                        color: style.valueColor || (labelIsInside ? colors.background : colors.text),
                         fontSize: valueSize,
                         formatter: function (parameters) {
                             return formatValue(parameters.value, decimals, unit);
                         }
                     },
                     data: seriesItem.items.map(function (item) {
-                        var labelColor = style.valueColor || (stacked && typeof design.readableTextColor === 'function'
+                        var labelColor = style.valueColor || (labelIsInside && typeof design.readableTextColor === 'function'
                             ? design.readableTextColor(item.color, colors.text, colors.background)
                             : valueColor);
                         return {
                             value: item.value,
-                            label: stacked ? { color: labelColor } : undefined,
+                            label: labelIsInside ? { color: labelColor } : undefined,
                             itemStyle: {
                                 color: pattern || item.color,
                                 borderRadius: horizontal ? [0, radius, radius, 0] : [radius, radius, 0, 0]

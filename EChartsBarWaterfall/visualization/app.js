@@ -114,7 +114,9 @@
                 itemStyle: { color: fill },
                 label: {
                     show: style.showValues === true && labelOnPositive && positiveHeight > 0,
-                    position: after >= before ? 'top' : 'bottom',
+                    ...echartsDesign.valueLabel(style, after >= before ? 'top' : 'bottom',
+                        ['top', 'bottom', 'left', 'right', 'inside', 'insideTop', 'insideBottom',
+                            'insideLeft', 'insideRight'], 5),
                     color: valueColor,
                     fontSize: valueSize,
                     formatter: labelText
@@ -125,7 +127,9 @@
                 itemStyle: { color: fill },
                 label: {
                     show: style.showValues === true && !labelOnPositive && negativeHeight < 0,
-                    position: after >= before ? 'top' : 'bottom',
+                    ...echartsDesign.valueLabel(style, after >= before ? 'top' : 'bottom',
+                        ['top', 'bottom', 'left', 'right', 'inside', 'insideTop', 'insideBottom',
+                            'insideLeft', 'insideRight'], 5),
                     color: valueColor,
                     fontSize: valueSize,
                     formatter: labelText

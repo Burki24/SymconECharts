@@ -191,6 +191,12 @@ assert.equal(stacked.series[1].data[0].label.color, '#f4f5f7');
 const styledStack = render('horizontal', 'configured', 'symcon', 'stacked', matrix, { valueColor: '#123456' });
 assert.equal(styledStack.series[0].data[0].label.color, '#123456',
     'A configured value color must override automatic stacked contrast.');
+const positionedBars = render('vertical', 'configured', 'symcon', 'grouped', matrix,
+    { showValues: true, valueLabelPosition: 'insideTop', valueLabelDistance: 12 });
+assert.equal(positionedBars.series[0].label.position, 'insideTop');
+assert.equal(positionedBars.series[0].label.distance, 12);
+assert.equal(positionedBars.series[0].data[0].label.color, '#f4f5f7',
+    'Manually placed inside labels must preserve readable contrast.');
 
 const automaticStack = render('vertical', 'configured', 'symcon', 'stacked', [
     { category: '', series: 'Room', value: 91, order: 0, color: '#aa0000' },

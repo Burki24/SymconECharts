@@ -18,6 +18,7 @@ use SymconECharts\EChartsGaugeDesign;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
+use SymconECharts\EChartsLabelDesign;
 use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsTransientRefresh;
 use SymconECharts\EChartsVariablePresentation;
@@ -33,6 +34,7 @@ require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
+require_once __DIR__ . '/../libs/EChartsLabelDesign.php';
 require_once __DIR__ . '/../libs/EChartsGaugeDesign.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
@@ -86,18 +88,23 @@ class EChartsGaugeChronograph extends IPSModuleStrict
         'PlateDesignMode' => 'preset'
     ];
     private const DESIGN_INTEGER_DEFAULTS = [
-        'MajorSplitCount'   => 0,
-        'MinorSplitCount'   => 0,
-        'PointerColor'      => 0x55CBB5,
-        'ProgressColor'     => 0x55CBB5,
-        'AnchorColor'       => 0x55CBB5,
-        'AnchorBorderColor' => 0xF4F5F7,
-        'RingColor'         => 0x45474C,
-        'ScaleColor'        => 0xA7A9AE,
-        'ValueColor'        => 0xF4F5F7,
-        'TitleColor'        => 0xA7A9AE,
-        'PlateColor'        => 0x25272B,
-        'PlateBorderColor'  => 0xA5A9B0
+        'ScaleLabelDistanceOffset' => 0,
+        'TitleOffsetXPercent'      => 0,
+        'TitleOffsetYPercent'      => 0,
+        'ValueOffsetXPercent'      => 0,
+        'ValueOffsetYPercent'      => 0,
+        'MajorSplitCount'          => 0,
+        'MinorSplitCount'          => 0,
+        'PointerColor'             => 0x55CBB5,
+        'ProgressColor'            => 0x55CBB5,
+        'AnchorColor'              => 0x55CBB5,
+        'AnchorBorderColor'        => 0xF4F5F7,
+        'RingColor'                => 0x45474C,
+        'ScaleColor'               => 0xA7A9AE,
+        'ValueColor'               => 0xF4F5F7,
+        'TitleColor'               => 0xA7A9AE,
+        'PlateColor'               => 0x25272B,
+        'PlateBorderColor'         => 0xA5A9B0
     ];
     private const DESIGN_ASSET_STRING_DEFAULTS = [
         'AnimationEasing'        => 'cubicInOut',
@@ -227,6 +234,11 @@ class EChartsGaugeChronograph extends IPSModuleStrict
         if (isset($form['elements']) && is_array($form['elements'])) {
             $form['elements'] = $this->WithAnimationFormControls($form['elements']);
             $form['elements'] = EChartsGaugeDesign::WithChartTitleControls($form['elements']);
+            EChartsLabelDesign::InsertAfterRowContaining(
+                $form['elements'],
+                'TitleFontSizePercent',
+                EChartsLabelDesign::GaugeControls()
+            );
             $form['elements'] = EChartsGaugeDesign::WithSourceEditor(
                 $form['elements'],
                 $this->GaugePreviewFormAction('add'),
@@ -685,6 +697,13 @@ class EChartsGaugeChronograph extends IPSModuleStrict
         if (($majorSplitCount !== 0 && ($majorSplitCount < 2 || $majorSplitCount > 24))
             || $minorSplitCount < 0 || $minorSplitCount > 10) {
             return 'Chronograph Gauge scale divisions are invalid.';
+        }
+        foreach (['ScaleLabelDistanceOffset', 'TitleOffsetXPercent', 'TitleOffsetYPercent',
+            'ValueOffsetXPercent', 'ValueOffsetYPercent'] as $name) {
+            $offset = $this->ReadPropertyInteger($prefix . $name);
+            if ($offset < -100 || $offset > 100) {
+                return 'Gauge label offsets must be between -100 and 100.';
+            }
         }
         foreach (array_keys(array_filter(
             self::DESIGN_INTEGER_DEFAULTS,

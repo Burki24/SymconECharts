@@ -139,7 +139,7 @@
         var highlightMode = ['outline', 'focus', 'off'].indexOf(style.barHighlightMode) >= 0
             ? style.barHighlightMode : 'standard';
         var mode = style.mode === 'tangential' ? 'tangential' : 'radial';
-        var valueLabelPosition = ['middle', 'insideStart', 'insideEnd', 'outside']
+        var valueLabelPosition = ['middle', 'insideStart', 'insideEnd', 'outside', 'start', 'end']
             .indexOf(style.valueLabelPosition) >= 0
             ? style.valueLabelPosition : 'middle';
         var items = orderedItems(Array.isArray(model.items) ? model.items : [], style.sortOrder);
@@ -219,6 +219,10 @@
         // ECharts adds half a rounded cap to the label anchor. Keep horizontal text
         // clear of that cap and inside the colored arc, especially on outer rings.
         function valueLabelDistance(index) {
+            if (Number.isFinite(Number(style.valueLabelDistance))
+                && Number(style.valueLabelDistance) >= 0 && Number(style.valueLabelDistance) <= 100) {
+                return Number(style.valueLabelDistance);
+            }
             if (mode !== 'tangential' || style.roundCaps !== true
                 || (valueLabelPosition !== 'insideStart' && valueLabelPosition !== 'insideEnd')) { return 5; }
             var middleRadius = layout.geometry.radius[0]

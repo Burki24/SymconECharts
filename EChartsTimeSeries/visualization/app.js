@@ -341,6 +341,21 @@
                         color: seriesColor
                     },
                     itemStyle: { color: seriesColor },
+                    label: {
+                        show: design.showValues === true,
+                        ...echartsDesign.valueLabel(design, 'top',
+                            ['top', 'bottom', 'left', 'right', 'inside', 'insideTop', 'insideBottom',
+                                'insideLeft', 'insideRight'], 5),
+                        color: design.valueColor || colors.text,
+                        fontSize: echartsDesign.fontSizePercent(design.valueFontSizePercent, 12),
+                        formatter: function (parameters) {
+                            var value = Array.isArray(parameters.value) ? parameters.value[1] : parameters.value;
+                            var decimals = Math.max(0, Math.min(6, Number(item.decimals) || 0));
+                            return Number(value).toLocaleString(undefined, {
+                                minimumFractionDigits: decimals, maximumFractionDigits: decimals
+                            }) + (item.unit ? ' ' + item.unit : '');
+                        }
+                    },
                     data: buildSeriesData(item, model.range)
                 };
                 if (item.style === 'area') {

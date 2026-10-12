@@ -1,5 +1,12 @@
 # EChartsTimeSeries
 
+## Beschriftungsoptionen
+
+Punktwerte können bei Bedarf eingeblendet werden. Position, Abstand, Schriftgröße und Farbe sind unabhängig vom Achsen- und Legendentext einstellbar. Standardmäßig bleiben Punktwerte ausgeblendet; bei dichten Reihen können viele Labels überlappen.
+
+Die Optionen gelten für Kacheln und – bei unabhängigem Design – auch für
+IPSView. Bei geerbtem Design folgt IPSView den Kacheleinstellungen.
+
 Gerätemodul für historische numerische Symcon-Werte als responsive Apache-
 ECharts-Zeitreihe. Eine Instanz verarbeitet eine bis acht eindeutige Quellen,
 bis zu acht Einheitengruppen und rendert eine native Symcon-Kachel sowie

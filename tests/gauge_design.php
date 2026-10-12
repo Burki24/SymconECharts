@@ -60,6 +60,16 @@ assertGaugeDesign(EChartsGaugeDesign::ColorToHex(0xFFFFFF + 1) === '#FFFFFF', 'L
 $sourceDefaults = EChartsGaugeDesign::SourceDesignDefaults();
 $sourceColumns = EChartsGaugeDesign::SourceDesignColumns();
 $sourceForm = EChartsGaugeDesign::SourceEditorForm();
+foreach (['ScaleLabelDistanceOffset', 'TitleOffsetXPercent', 'TitleOffsetYPercent',
+    'ValueOffsetXPercent', 'ValueOffsetYPercent'] as $field) {
+    assertGaugeDesign(array_key_exists($field, $sourceDefaults), 'An individual Gauge label offset is missing.');
+}
+$sourceFormJson = json_encode($sourceForm, JSON_THROW_ON_ERROR);
+assertGaugeDesign(
+    str_contains($sourceFormJson, '"name":"ScaleLabelDistanceOffset"')
+        && str_contains($sourceFormJson, '"name":"IPSViewValueOffsetYPercent"'),
+    'Individual Gauge source editors must expose tile and IPSView label offsets.'
+);
 assertGaugeDesign(
     ($sourceDefaults['UseIndividualDesign'] ?? null) === false
         && count($sourceColumns) === count($sourceDefaults) * 2
@@ -156,8 +166,9 @@ $sourceStyle = EChartsGaugeDesign::StyleFromSource(array_merge($sourceDefaults, 
     'PlateBackgroundFit'         => 'contain'
 ]));
 $ipsViewSourceStyle = EChartsGaugeDesign::StyleFromSource([
-    'IPSViewPointerShape'    => 'line',
-    'IPSViewPlateDesignMode' => 'hidden'
+    'IPSViewPointerShape'        => 'line',
+    'IPSViewPlateDesignMode'     => 'hidden',
+    'IPSViewTitleOffsetXPercent' => 12
 ], 'IPSView');
 assertGaugeDesign(
     ($sourceStyle['pointerPivotX'] ?? null) === 20.0
@@ -166,9 +177,15 @@ assertGaugeDesign(
         && ($sourceStyle['plateMode'] ?? null) === 'custom'
         && ($sourceStyle['plateBackgroundAspectRatio'] ?? null) === 2.0
         && ($ipsViewSourceStyle['pointerShape'] ?? null) === 'line'
-        && ($ipsViewSourceStyle['plateMode'] ?? null) === 'hidden',
+        && ($ipsViewSourceStyle['plateMode'] ?? null) === 'hidden'
+        && ($ipsViewSourceStyle['titleOffsetXPercent'] ?? null) === 12,
     'The shared source-row SVG design could not be materialized.'
 );
+try {
+    EChartsGaugeDesign::StyleFromSource(['ValueOffsetYPercent' => 101]);
+    throw new RuntimeException('An invalid individual Gauge label offset was accepted.');
+} catch (InvalidArgumentException) {
+}
 
 foreach ([
     static fn (): array => EChartsGaugeDesign::ImportPointer('<svg/>', 'invalid'),

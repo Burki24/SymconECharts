@@ -17,6 +17,7 @@ use SymconECharts\EChartsDesignerSections;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
+use SymconECharts\EChartsLabelDesign;
 use SymconECharts\EChartsPreviewSourceCount;
 use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsTransientRefresh;
@@ -36,6 +37,7 @@ require_once __DIR__ . '/../libs/EChartsBarPreviewForm.php';
 require_once __DIR__ . '/../libs/EChartsCurrentSources.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
+require_once __DIR__ . '/../libs/EChartsLabelDesign.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
@@ -113,6 +115,28 @@ class EChartsPie extends IPSModuleStrict
     {
         $form = $this->LoadConfigurationForm();
         $form['elements'] = $this->WithAnimationFormControls($form['elements']);
+        foreach (['', 'IPSView'] as $prefix) {
+            EChartsLabelDesign::InsertAfterRowContaining($form['elements'], $prefix . 'LabelPosition', [
+                ['type' => 'RowLayout', 'items' => [
+                    ['type'       => 'Select', 'name' => $prefix . 'OutsideLabelAlignment',
+                        'caption' => 'Outside label alignment', 'options' => [
+                            ['caption' => 'Natural', 'value' => 'none'],
+                            ['caption' => 'Leader line', 'value' => 'labelLine'],
+                            ['caption' => 'Container edge', 'value' => 'edge']
+                        ]],
+                    ['type'       => 'NumberSpinner', 'name' => $prefix . 'LabelEdgeDistance',
+                        'caption' => 'Label edge distance', 'minimum' => 0, 'maximum' => 100, 'suffix' => 'px']
+                ]],
+                ['type' => 'RowLayout', 'items' => [
+                    ['type'       => 'NumberSpinner', 'name' => $prefix . 'LeaderLineLength',
+                        'caption' => 'First leader length', 'minimum' => 0, 'maximum' => 100, 'suffix' => 'px'],
+                    ['type'       => 'NumberSpinner', 'name' => $prefix . 'LeaderLineLength2',
+                        'caption' => 'Second leader length', 'minimum' => 0, 'maximum' => 100, 'suffix' => 'px'],
+                    ['type'       => 'NumberSpinner', 'name' => $prefix . 'LabelLineGap',
+                        'caption' => 'Text gap to leader', 'minimum' => 0, 'maximum' => 100, 'suffix' => 'px']
+                ]]
+            ]);
+        }
         $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
         $form['elements'] = $this->WithAnimationFormCallbacks($form['elements'], 'ECPI');
         $this->InsertIPSViewHTMLPageFormItems(
@@ -298,6 +322,11 @@ class EChartsPie extends IPSModuleStrict
         $showLabels = $this->BarPreviewValue($values, 'ShowLabels', 'boolean', $ipsView);
         $showPercent = $this->BarPreviewValue($values, 'ShowPercent', 'boolean', $ipsView);
         $labelPosition = $this->BarPreviewValue($values, 'LabelPosition', 'string', $ipsView);
+        $alignment = $this->BarPreviewValue($values, 'OutsideLabelAlignment', 'string', $ipsView);
+        $leader1 = max(0, min(100, $this->BarPreviewValue($values, 'LeaderLineLength', 'integer', $ipsView)));
+        $leader2 = max(0, min(100, $this->BarPreviewValue($values, 'LeaderLineLength2', 'integer', $ipsView)));
+        $lineGap = max(0, min(100, $this->BarPreviewValue($values, 'LabelLineGap', 'integer', $ipsView)));
+        $edgeDistance = max(0, min(100, $this->BarPreviewValue($values, 'LabelEdgeDistance', 'integer', $ipsView)));
         $labelSize = max(7, min(20, (int) round(11 * $this->BarPreviewValue($values, 'LabelFontSizePercent', 'integer', $ipsView) / 100)));
         $labelColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'LabelColor', 'integer', $ipsView), $palette['text']);
         $previewLanguage = $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage());
@@ -319,6 +348,24 @@ class EChartsPie extends IPSModuleStrict
                 $labelRadius = $labelPosition === 'inside' ? ($inner + $radius) / 2 : $radius + 15;
                 $x = 310 + $labelRadius * cos($mid);
                 $y = 190 + $labelRadius * sin($mid);
+                $anchor = 'middle';
+                if ($labelPosition !== 'inside'
+                    && ($alignment !== 'edge' || $leader1 !== 15 || $leader2 !== 15
+                        || $lineGap !== 5 || $edgeDistance !== 8)) {
+                    $side = cos($mid) >= 0 ? 1 : -1;
+                    $x1 = 310 + ($radius + $leader1) * cos($mid);
+                    $y1 = 190 + ($radius + $leader1) * sin($mid);
+                    $x2 = $alignment === 'edge' ? 310 + $side * (150 - $edgeDistance - $lineGap)
+                        : $x1 + $side * $leader2;
+                    $svg .= '<path d="M ' . EChartsBarPreview::N(310 + $radius * cos($mid)) . ' '
+                        . EChartsBarPreview::N(190 + $radius * sin($mid)) . ' L '
+                        . EChartsBarPreview::N($x1) . ' ' . EChartsBarPreview::N($y1) . ' L '
+                        . EChartsBarPreview::N($x2) . ' ' . EChartsBarPreview::N($y1)
+                        . '" fill="none" stroke="' . EChartsBarPreview::E($labelColor) . '"/>';
+                    $x = $x2 + $side * $lineGap;
+                    $y = $y1;
+                    $anchor = $side > 0 ? 'start' : 'end';
+                }
                 $text = mb_strimwidth((string) $item['label'], 0, 14, '…');
                 if ($showPercent) {
                     $text .= ' ' . EChartsBarPreview::FormatValue(
@@ -329,7 +376,7 @@ class EChartsPie extends IPSModuleStrict
                     );
                 }
                 $svg .= '<text x="' . EChartsBarPreview::N($x) . '" y="' . EChartsBarPreview::N($y)
-                    . '" text-anchor="middle" fill="' . EChartsBarPreview::E($labelColor) . '" font-size="'
+                    . '" text-anchor="' . $anchor . '" fill="' . EChartsBarPreview::E($labelColor) . '" font-size="'
                     . $labelSize . '">' . EChartsBarPreview::E($text) . '</text>';
             }
             $start = $end;
@@ -596,6 +643,11 @@ class EChartsPie extends IPSModuleStrict
         $this->RegisterPropertyBoolean($prefix . 'ShowLabels', true);
         $this->RegisterPropertyBoolean($prefix . 'ShowPercent', true);
         $this->RegisterPropertyString($prefix . 'LabelPosition', 'outside');
+        $this->RegisterPropertyString($prefix . 'OutsideLabelAlignment', 'edge');
+        $this->RegisterPropertyInteger($prefix . 'LeaderLineLength', 15);
+        $this->RegisterPropertyInteger($prefix . 'LeaderLineLength2', 15);
+        $this->RegisterPropertyInteger($prefix . 'LabelLineGap', 5);
+        $this->RegisterPropertyInteger($prefix . 'LabelEdgeDistance', 8);
         foreach (['TitleFontSizePercent', 'LegendFontSizePercent', 'LabelFontSizePercent'] as $name) {
             $this->RegisterPropertyInteger($prefix . $name, 100);
         }
@@ -613,6 +665,9 @@ class EChartsPie extends IPSModuleStrict
             'InnerRadiusPercent'      => 'integer', 'OuterRadiusPercent' => 'integer',
             'ShowLegend'              => 'boolean', 'ShowLabels' => 'boolean', 'ShowPercent' => 'boolean',
             'LabelPosition'           => 'string',
+            'OutsideLabelAlignment'   => 'string',
+            'LeaderLineLength'        => 'integer', 'LeaderLineLength2' => 'integer',
+            'LabelLineGap'            => 'integer', 'LabelEdgeDistance' => 'integer',
             'TitleFontSizePercent'    => 'integer', 'LegendFontSizePercent' => 'integer',
             'LabelFontSizePercent'    => 'integer',
             'TitleColor'              => 'integer', 'LegendColor' => 'integer', 'LabelColor' => 'integer',
@@ -628,6 +683,7 @@ class EChartsPie extends IPSModuleStrict
         if (!in_array($this->ReadPropertyString($prefix . 'PieMode'), self::MODES, true)
             || !in_array($this->ReadPropertyString($prefix . 'SortOrder'), self::SORT_ORDERS, true)
             || !in_array($this->ReadPropertyString($prefix . 'LabelPosition'), self::LABEL_POSITIONS, true)
+            || !in_array($this->ReadPropertyString($prefix . 'OutsideLabelAlignment'), ['none', 'labelLine', 'edge'], true)
             || !EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme'))
             || $this->ReadPropertyInteger($prefix . 'InnerRadiusPercent') < 0
             || $this->ReadPropertyInteger($prefix . 'InnerRadiusPercent') > 70
@@ -639,6 +695,11 @@ class EChartsPie extends IPSModuleStrict
         foreach (['TitleFontSizePercent', 'LegendFontSizePercent', 'LabelFontSizePercent'] as $name) {
             $size = $this->ReadPropertyInteger($prefix . $name);
             if ($size < 50 || $size > 200) {
+                return false;
+            }
+        }
+        foreach (['LeaderLineLength', 'LeaderLineLength2', 'LabelLineGap', 'LabelEdgeDistance'] as $name) {
+            if (!EChartsLabelDesign::IsValidDistance($this->ReadPropertyInteger($prefix . $name))) {
                 return false;
             }
         }
@@ -656,14 +717,19 @@ class EChartsPie extends IPSModuleStrict
     {
         $style = [
             ...$this->ReadAnimationStyle($prefix),
-            'mode'               => $this->ReadPropertyString($prefix . 'PieMode'),
-            'sortOrder'          => $this->ReadPropertyString($prefix . 'SortOrder'),
-            'innerRadiusPercent' => $this->ReadPropertyInteger($prefix . 'InnerRadiusPercent'),
-            'outerRadiusPercent' => $this->ReadPropertyInteger($prefix . 'OuterRadiusPercent'),
-            'showLegend'         => $this->ReadPropertyBoolean($prefix . 'ShowLegend'),
-            'showLabels'         => $this->ReadPropertyBoolean($prefix . 'ShowLabels'),
-            'showPercent'        => $this->ReadPropertyBoolean($prefix . 'ShowPercent'),
-            'labelPosition'      => $this->ReadPropertyString($prefix . 'LabelPosition')
+            'mode'                  => $this->ReadPropertyString($prefix . 'PieMode'),
+            'sortOrder'             => $this->ReadPropertyString($prefix . 'SortOrder'),
+            'innerRadiusPercent'    => $this->ReadPropertyInteger($prefix . 'InnerRadiusPercent'),
+            'outerRadiusPercent'    => $this->ReadPropertyInteger($prefix . 'OuterRadiusPercent'),
+            'showLegend'            => $this->ReadPropertyBoolean($prefix . 'ShowLegend'),
+            'showLabels'            => $this->ReadPropertyBoolean($prefix . 'ShowLabels'),
+            'showPercent'           => $this->ReadPropertyBoolean($prefix . 'ShowPercent'),
+            'labelPosition'         => $this->ReadPropertyString($prefix . 'LabelPosition'),
+            'outsideLabelAlignment' => $this->ReadPropertyString($prefix . 'OutsideLabelAlignment'),
+            'leaderLineLength'      => $this->ReadPropertyInteger($prefix . 'LeaderLineLength'),
+            'leaderLineLength2'     => $this->ReadPropertyInteger($prefix . 'LeaderLineLength2'),
+            'labelLineGap'          => $this->ReadPropertyInteger($prefix . 'LabelLineGap'),
+            'labelEdgeDistance'     => $this->ReadPropertyInteger($prefix . 'LabelEdgeDistance')
         ];
         foreach (['TitleFontSizePercent', 'LegendFontSizePercent', 'LabelFontSizePercent'] as $name) {
             $style[lcfirst($name)] = $this->ReadPropertyInteger($prefix . $name);

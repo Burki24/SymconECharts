@@ -208,6 +208,13 @@ const custom = render({
     animationEasingUpdate: 'linear', animationDelay: 120,
     animationDelayUpdate: 240
 });
+const valueLabels = render({ showValues: true, valueLabelPosition: 'bottom',
+    valueLabelDistance: 14, valueFontSizePercent: 150, valueColor: '#123456' });
+assert.equal(valueLabels.series[0].label.show, true);
+assert.equal(valueLabels.series[0].label.position, 'bottom');
+assert.equal(valueLabels.series[0].label.distance, 14);
+assert.equal(valueLabels.series[0].label.fontSize, 18);
+assert.equal(valueLabels.series[0].label.color, '#123456');
 assert.equal(custom.animationEasing, 'bounceOut');
 assert.equal(custom.animationEasingUpdate, 'linear');
 assert.equal(custom.animationDelay, 120);

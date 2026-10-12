@@ -8,6 +8,7 @@ use Burki24\SymconModuleHelper\SVGPreviewHelper;
 
 require_once __DIR__ . '/helper/SVGPreviewHelper.php';
 require_once __DIR__ . '/EChartsAsset.php';
+require_once __DIR__ . '/EChartsLabelDesign.php';
 require_once __DIR__ . '/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/EChartsSvgImage.php';
 require_once __DIR__ . '/EChartsSvgPath.php';
@@ -38,6 +39,8 @@ final class EChartsGaugeDesign
         'ValueColor'                    => 0xF4F5F7, 'TitleColor' => 0xA7A9AE, 'ProgressColor' => 0x55CBB5,
         'RingWidthPercent'              => 100, 'ScaleFontSizePercent' => 100, 'ValueFontSizePercent' => 100,
         'TitleFontSizePercent'          => 100, 'MajorSplitCount' => 0, 'MinorSplitCount' => 0,
+        'ScaleLabelDistanceOffset'      => 0, 'TitleOffsetXPercent' => 0, 'TitleOffsetYPercent' => 0,
+        'ValueOffsetXPercent'           => 0, 'ValueOffsetYPercent' => 0,
         'PlateDesignMode'               => 'preset', 'PlateSizePercent' => 100, 'PlateBorderWidthPercent' => 100,
         'PlateColor'                    => 0x25272B, 'PlateBorderColor' => 0xA5A9B0,
         'PlateBackgroundEnabled'        => false, 'PlateBackgroundSVG' => '', 'PlateBackgroundFit' => 'cover',
@@ -205,6 +208,7 @@ final class EChartsGaugeDesign
             ['type' => 'ExpansionPanel', 'caption' => 'Scale and colors', 'expanded' => false, 'items' => [
                 ['type' => 'Select', 'name' => 'GaugeColorMode', 'caption' => 'Colors', 'options' => self::Options(['theme', 'custom'])],
                 ['type' => 'RowLayout', 'items' => [$percent('RingWidthPercent', 'Ring width'), $percent('ScaleFontSizePercent', 'Scale font'), $percent('ValueFontSizePercent', 'Value font'), $percent('TitleFontSizePercent', 'Title font')]],
+                ...EChartsLabelDesign::GaugeControls(),
                 ['type' => 'RowLayout', 'items' => [
                     ['type' => 'NumberSpinner', 'name' => 'MajorSplitCount', 'caption' => 'Major divisions', 'minimum' => 0, 'maximum' => 24],
                     ['type' => 'NumberSpinner', 'name' => 'MinorSplitCount', 'caption' => 'Minor divisions', 'minimum' => 0, 'maximum' => 10]
@@ -444,6 +448,12 @@ final class EChartsGaugeDesign
         if (!is_int($values['MajorSplitCount']) || $values['MajorSplitCount'] < 0 || $values['MajorSplitCount'] > 24
             || !is_int($values['MinorSplitCount']) || $values['MinorSplitCount'] < 0 || $values['MinorSplitCount'] > 10) {
             throw new \InvalidArgumentException('Individual Gauge scale divisions are invalid.');
+        }
+        foreach (['ScaleLabelDistanceOffset', 'TitleOffsetXPercent', 'TitleOffsetYPercent',
+            'ValueOffsetXPercent', 'ValueOffsetYPercent'] as $name) {
+            if (!is_int($values[$name]) || $values[$name] < -100 || $values[$name] > 100) {
+                throw new \InvalidArgumentException('Individual Gauge label offsets must be between -100 and 100.');
+            }
         }
         $style = [];
         foreach ($values as $name => $value) {

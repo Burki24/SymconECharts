@@ -2,6 +2,14 @@
 
 ## Hinzugefügt
 
+- Pie/Donut/Nightingale, Balken- und TimeSeries-Designer bieten zusätzliche
+  Positionen und Abstände für Wertbeschriftungen; Pie erhält eigene Regler für
+  Außen-Ausrichtung und Führungslinien. Die Gauge-Designer für Multi, Tacho
+  und Chronograph können Skalenabstand sowie Titel- und Wertposition relativ
+  zur Vorlage verschieben. Kachel und unabhängiges IPSView-Design besitzen
+  dieselben Regler. Gemeinsame Verträge liegen in `libs`; bisherige
+  Automatiken bleiben voreingestellt.
+
 - Das neue Modul `EChartsPie` zeigt aktuelle Anteile als Kreis, Donut oder
   Nightingale-Rose in Kachel und IPSView. Beide Designer bieten Live-Vorschauen,
   unabhängige Gestaltung und Animation. Negative Werte und Nullsummen werden

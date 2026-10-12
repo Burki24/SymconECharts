@@ -152,6 +152,41 @@
         return Math.round(base * (Number.isFinite(percent) && percent >= 50 && percent <= 200 ? percent : 100) / 100);
     }
 
+    function valueLabel(style, automaticPosition, allowedPositions, automaticDistance) {
+        var position = String(style.valueLabelPosition || 'auto');
+        return {
+            position: position !== 'auto' && allowedPositions.indexOf(position) >= 0
+                ? position : automaticPosition,
+            distance: Number.isFinite(Number(style.valueLabelDistance))
+                && Number(style.valueLabelDistance) >= 0 && Number(style.valueLabelDistance) <= 100
+                ? Number(style.valueLabelDistance) : automaticDistance
+        };
+    }
+
+    function gaugeLabelOffsets(series, style) {
+        function offset(base, x, y) {
+            var center = Array.isArray(base) ? base : [0, 0];
+            return [
+                Number(x) ? ((parseFloat(center[0]) || 0) + Number(x)) + '%' : center[0],
+                Number(y) ? ((parseFloat(center[1]) || 0) + Number(y)) + '%' : center[1]
+            ];
+        }
+        if (series.type !== 'gauge') { return series; }
+        var scaleOffset = Number(style.scaleLabelDistanceOffset) || 0;
+        if (scaleOffset !== 0 && series.axisLabel && series.axisLabel.show !== false) {
+            series.axisLabel.distance = (Number(series.axisLabel.distance) || 15) + scaleOffset;
+        }
+        if (series.title) {
+            series.title.offsetCenter = offset(series.title.offsetCenter,
+                style.titleOffsetXPercent, style.titleOffsetYPercent);
+        }
+        if (series.detail) {
+            series.detail.offsetCenter = offset(series.detail.offsetCenter,
+                style.valueOffsetXPercent, style.valueOffsetYPercent);
+        }
+        return series;
+    }
+
     global.SYMC_ECHARTS_DESIGN = Object.freeze({
         contrastRatio: contrastRatio,
         readableTextColor: readableTextColor,
@@ -162,6 +197,8 @@
         colorWithAlpha: colorWithAlpha,
         barOutlineStyle: barOutlineStyle,
         fontSizePercent: fontSizePercent,
+        valueLabel: valueLabel,
+        gaugeLabelOffsets: gaugeLabelOffsets,
         resizeChartIfNeeded: resizeChartIfNeeded,
         createTransientFailureRetainer: createTransientFailureRetainer
     });

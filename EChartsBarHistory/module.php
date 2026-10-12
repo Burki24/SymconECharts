@@ -18,6 +18,7 @@ use SymconECharts\EChartsDesignerSections;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
+use SymconECharts\EChartsLabelDesign;
 use SymconECharts\EChartsPreviewSourceCount;
 use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsSvgImage;
@@ -39,6 +40,7 @@ require_once __DIR__ . '/../libs/EChartsPreviewSourceCount.php';
 require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
+require_once __DIR__ . '/../libs/EChartsLabelDesign.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
@@ -75,6 +77,8 @@ class EChartsBarHistory extends IPSModuleStrict
     private const DESIGN_PROPERTY_TYPES = [
         'EChartsTheme'            => 'string',
         'ShowValues'              => 'boolean',
+        'ValueLabelPosition'      => 'string',
+        'ValueLabelDistance'      => 'integer',
         'ShowGrid'                => 'boolean',
         'EnableZoom'              => 'boolean',
         'RoundedBars'             => 'boolean',
@@ -120,6 +124,8 @@ class EChartsBarHistory extends IPSModuleStrict
         $this->RegisterPropertyString('TimeAxisLabelFormat', 'auto');
         $this->RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO);
         $this->RegisterPropertyBoolean('ShowValues', false);
+        $this->RegisterPropertyString('ValueLabelPosition', 'auto');
+        $this->RegisterPropertyInteger('ValueLabelDistance', 5);
         $this->RegisterPropertyBoolean('ShowGrid', true);
         $this->RegisterPropertyBoolean('EnableZoom', true);
         $this->RegisterPropertyBoolean('RoundedBars', false);
@@ -161,6 +167,8 @@ class EChartsBarHistory extends IPSModuleStrict
                 'BarSVG'                                      => '',
                 'BarSVGSizePercent'                           => 100,
                 'ShowValues', 'RoundedBars'                   => false,
+                'ValueLabelPosition'                          => 'auto',
+                'ValueLabelDistance'                          => 5,
                 'ShowGrid', 'EnableZoom', 'AnimationEnabled'  => true,
                 'AnimationDuration'                           => 350,
                 'AnimationDurationUpdate'                     => 500,
@@ -211,6 +219,9 @@ class EChartsBarHistory extends IPSModuleStrict
         $form = $this->LoadConfigurationForm();
         if (isset($form['elements']) && is_array($form['elements'])) {
             $form['elements'] = $this->WithAnimationFormControls($form['elements']);
+            EChartsLabelDesign::InsertAfterRowContaining($form['elements'], 'ShowValues', [
+                ['type' => 'RowLayout', 'items' => EChartsLabelDesign::CartesianControls()]
+            ]);
             $form['elements'] = $this->SetFormFieldVisibility(
                 $form['elements'],
                 ['CustomRangeValue', 'CustomRangeUnit'],
@@ -446,6 +457,8 @@ class EChartsBarHistory extends IPSModuleStrict
             ? max(0, min(24, $this->BarPreviewValue($values, 'BarCornerRadius', 'integer', $ipsView)))
             : 0;
         $showValues = $this->BarPreviewValue($values, 'ShowValues', 'boolean', $ipsView);
+        $valueLabelPosition = $this->BarPreviewValue($values, 'ValueLabelPosition', 'string', $ipsView);
+        $valueLabelDistance = $this->BarPreviewValue($values, 'ValueLabelDistance', 'integer', $ipsView);
         $fillMode = $this->BarPreviewValue($values, 'BarFillMode', 'string', $ipsView);
         $gradientEnd = EChartsBarPreview::Color(
             $this->BarPreviewValue($values, 'BarGradientColor', 'integer', $ipsView),
@@ -502,8 +515,26 @@ class EChartsBarHistory extends IPSModuleStrict
                 $bucket = 10 + $index;
                 $height = 50 + 65 * (1 + sin(($bucket + $index * 3) / 2.4));
                 $labelX = 70 + $bucket * 40 + ($index + 0.5) * 40 / $count;
-                $svg .= '<text x="' . EChartsBarPreview::N($labelX) . '" y="' . EChartsBarPreview::N(258 - $height)
-                    . '" text-anchor="middle" fill="' . EChartsBarPreview::E($valueColor)
+                $labelY = 258 - $height;
+                $anchor = 'middle';
+                if ($valueLabelPosition !== 'auto' || $valueLabelDistance !== 5) {
+                    $slot = 40 / $count;
+                    $width = $slot * $barWidth / 100;
+                    $barX = 70 + $bucket * 40 + $index * $slot + ($slot - $width) / 2;
+                    $placement = EChartsLabelDesign::PreviewRect(
+                        $barX,
+                        265 - $height,
+                        $width,
+                        $height,
+                        $valueLabelPosition === 'auto' ? 'top' : $valueLabelPosition,
+                        $valueLabelDistance
+                    );
+                    $labelX = $placement['x'];
+                    $labelY = $placement['y'];
+                    $anchor = $placement['anchor'];
+                }
+                $svg .= '<text x="' . EChartsBarPreview::N($labelX) . '" y="' . EChartsBarPreview::N($labelY)
+                    . '" text-anchor="' . $anchor . '" fill="' . EChartsBarPreview::E($valueColor)
                     . '" font-size="' . $valueSize . '">' . EChartsBarPreview::E(EChartsBarPreview::FormatValue(
                         5 + $height / 10,
                         $item['decimals'],
@@ -972,6 +1003,8 @@ class EChartsBarHistory extends IPSModuleStrict
     private function IsValidDesign(string $prefix): bool
     {
         if (!$this->AnimationIsValid($prefix)
+            || !EChartsLabelDesign::IsValidPosition($this->ReadPropertyString($prefix . 'ValueLabelPosition'), EChartsLabelDesign::CARTESIAN_POSITIONS)
+            || !EChartsLabelDesign::IsValidDistance($this->ReadPropertyInteger($prefix . 'ValueLabelDistance'))
             || !EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme'))
             || !in_array($this->ReadPropertyString($prefix . 'BarFillMode'), self::BAR_FILL_MODES, true)) {
             return false;
@@ -1065,6 +1098,8 @@ class EChartsBarHistory extends IPSModuleStrict
         $style = [
             ...$this->ReadAnimationStyle($prefix),
             'showValues'           => $this->ReadPropertyBoolean($prefix . 'ShowValues'),
+            'valueLabelPosition'   => $this->ReadPropertyString($prefix . 'ValueLabelPosition'),
+            'valueLabelDistance'   => $this->ReadPropertyInteger($prefix . 'ValueLabelDistance'),
             'showGrid'             => $this->ReadPropertyBoolean($prefix . 'ShowGrid'),
             'enableZoom'           => $this->ReadPropertyBoolean($prefix . 'EnableZoom'),
             'roundedBars'          => $this->ReadPropertyBoolean($prefix . 'RoundedBars'),
