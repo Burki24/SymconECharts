@@ -9,7 +9,7 @@ use Burki24\SymconModuleHelper\SVGPreviewHelper;
 final class EChartsTimeSeriesPreview
 {
     /**
-     * @param list<array{variableID?:int,label:string,color:string,style:string,design?:array<string,mixed>}> $series
+     * @param list<array{variableID?:int,label:string,color:string,style:string,unit?:string,axisPosition?:string,design?:array<string,mixed>}> $series
      * @param array<string,mixed> $design
      * @param list<array<string,mixed>> $annotations
      */
@@ -25,10 +25,32 @@ final class EChartsTimeSeriesPreview
         string $timeAxisLabelFormat = 'auto'
     ): string {
         $palette = EChartsAsset::ThemePreviewPalette($theme);
-        $series = $series !== [] ? array_slice($series, 0, 4) : [
+        $allSeries = $series !== [] ? $series : [
             ['label' => 'Temperature', 'color' => '', 'style' => 'line'],
             ['label' => 'Humidity', 'color' => '', 'style' => 'area']
         ];
+        $axisSources = [];
+        foreach ($allSeries as $item) {
+            $position = $item['axisPosition'] ?? 'auto';
+            $axisSources[] = [
+                'Unit'         => (string) ($item['unit'] ?? ''),
+                'AxisPosition' => in_array($position, ['auto', 'left', 'right'], true) ? $position : 'auto'
+            ];
+        }
+        try {
+            $axisModel = EChartsUnitAxes::Build($axisSources);
+        } catch (\InvalidArgumentException) {
+            foreach ($axisSources as &$axisSource) {
+                $axisSource['AxisPosition'] = 'auto';
+            }
+            unset($axisSource);
+            $axisModel = EChartsUnitAxes::Build($axisSources);
+        }
+        $series = array_slice($allSeries, 0, 4);
+        $visibleUnits = [];
+        foreach ($series as $index => $item) {
+            $visibleUnits[(string) ($item['unit'] ?? '')] ??= $index;
+        }
         $fallbackColors = $palette['seriesColors'];
         $effectiveColors = [];
         foreach ($series as $index => $item) {
@@ -89,9 +111,25 @@ final class EChartsTimeSeriesPreview
             }
         }
         if ($showYAxis) {
-            $content .= '<line x1="70" y1="' . self::N($plotTop) . '" x2="70" y2="'
-                . self::N($plotBottom) . '" stroke="'
-                . SVGPreviewHelper::escape($axisColor !== '' ? $axisColor : ($effectiveColors[0] ?? $palette['border'])) . '"/>';
+            foreach ($axisModel['Axes'] as $axis) {
+                if (!array_key_exists($axis['unit'], $visibleUnits)) {
+                    continue;
+                }
+                $sourceIndex = $visibleUnits[$axis['unit']];
+                $color = $axisColor !== '' ? $axisColor : $effectiveColors[$sourceIndex];
+                $left = $axis['position'] === 'left';
+                $x = $left ? 70 - $axis['positionIndex'] * 12 : 680 + $axis['positionIndex'] * 12;
+                $content .= '<line data-preview-axis="' . $axis['position'] . '" x1="' . $x
+                    . '" y1="' . self::N($plotTop) . '" x2="' . $x . '" y2="'
+                    . self::N($plotBottom) . '" stroke="' . SVGPreviewHelper::escape($color) . '"/>';
+                if ($axis['unit'] !== '') {
+                    $captionX = $left ? 74 + $axis['positionIndex'] * 80 : 676 - $axis['positionIndex'] * 80;
+                    $content .= '<text data-preview-axis-unit="' . $axis['position'] . '" x="' . $captionX
+                        . '" y="' . self::N($plotTop - 7) . '" text-anchor="' . ($left ? 'start' : 'end')
+                        . '" fill="' . SVGPreviewHelper::escape($color) . '" font-size="' . $axisFontSize . '">'
+                        . SVGPreviewHelper::escape(mb_strimwidth($axis['unit'], 0, 8, '…')) . '</text>';
+                }
+            }
         }
 
         $annotationAreas = '';

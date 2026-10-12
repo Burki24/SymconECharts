@@ -8,6 +8,11 @@ optional ein eigenständiges IPSView-WebContent-Widget.
 Linien und Datenpunkte, Flächen und Achsen sowie Schrift und Farben sind in
 beiden Designern als eigene einklappbare Bereiche angeordnet; die Vorschau
 folgt darunter.
+Die schematische Vorschau zeigt bis zu vier Reihen und deren effektive
+Einheitenachsen auf der konfigurierten Seite. Die Achsen übernehmen automatisch
+die Farbe der ersten zugeordneten Reihe oder die ausdrücklich gewählte
+Achsenfarbe. Archivwerte und numerische Skalen bleiben der echten Kachel
+beziehungsweise dem IPSView-Widget vorbehalten.
 
 ## Vorübergehende Ladefehler
 

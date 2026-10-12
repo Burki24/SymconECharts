@@ -1454,7 +1454,7 @@ class EChartsTimeSeries extends IPSModuleStrict
         return $design;
     }
 
-    /** @return list<array{variableID:int,label:string,color:string,style:string,design:array<string,mixed>}> */
+    /** @return list<array{variableID:int,label:string,color:string,style:string,unit:string,axisPosition:string,design:array<string,mixed>}> */
     private function PreviewSeries(mixed $formSources = null): array
     {
         $sources = $formSources;
@@ -1470,7 +1470,7 @@ class EChartsTimeSeries extends IPSModuleStrict
 
         $labels = EChartsSourceIdentity::LabelsForDraftSources($sources);
         $result = [];
-        foreach (array_slice($sources, 0, 4) as $index => $source) {
+        foreach (array_slice($sources, 0, self::MAXIMUM_SOURCE_COUNT) as $index => $source) {
             if (!is_array($source)) {
                 continue;
             }
@@ -1483,6 +1483,19 @@ class EChartsTimeSeries extends IPSModuleStrict
             $style = is_string($source['Style'] ?? null) && in_array($source['Style'], self::STYLES, true)
                 ? $source['Style']
                 : 'line';
+            $unit = is_string($source['Unit'] ?? null) ? $source['Unit'] : '';
+            $presentation = EChartsVariablePresentation::Resolve(
+                is_int($variableID) ? $variableID : 0,
+                0.0,
+                100.0,
+                $unit,
+                1,
+                (bool) ($source['UseVariablePresentation'] ?? true)
+            );
+            $axisPosition = $source['AxisPosition'] ?? 'auto';
+            if (!is_string($axisPosition) || !in_array($axisPosition, self::AXIS_POSITIONS, true)) {
+                $axisPosition = 'auto';
+            }
             $sourceDesign = [];
             if (($source['UseIndividualDesign'] ?? false) === true) {
                 try {
@@ -1492,11 +1505,13 @@ class EChartsTimeSeries extends IPSModuleStrict
                 }
             }
             $result[] = [
-                'variableID' => is_int($variableID) ? $variableID : 0,
-                'label'      => $labels[$variableID] ?? ($label !== '' ? $label : 'Series ' . ($index + 1)),
-                'color'      => $color ?? '',
-                'style'      => $style,
-                'design'     => $sourceDesign
+                'variableID'   => is_int($variableID) ? $variableID : 0,
+                'label'        => $labels[$variableID] ?? ($label !== '' ? $label : 'Series ' . ($index + 1)),
+                'color'        => $color ?? '',
+                'style'        => $style,
+                'unit'         => $presentation['unit'],
+                'axisPosition' => $axisPosition,
+                'design'       => $sourceDesign
             ];
         }
 

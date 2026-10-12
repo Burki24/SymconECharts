@@ -3537,6 +3537,58 @@ assertGatewayGauge(
         && str_contains($timeSeriesPreviewSvg, 'Preview target'),
     'Time Series Tile and IPSView previews must react immediately to unpersisted source and design values.'
 );
+$timeSeriesAxesPreview = new EChartsTimeSeries();
+$timeSeriesAxesPreview->Create();
+$timeSeriesAxesPreview->UpdateTimeSeriesPreviewFromForm(json_encode([
+    'Sources' => [
+        ['VariableID'      => 4711, 'Unit' => '°C', 'UseVariablePresentation' => false,
+            'AxisPosition' => 'right', 'Color' => 0x123456],
+        ['VariableID'      => 4713, 'Unit' => '%', 'UseVariablePresentation' => false,
+            'AxisPosition' => 'left', 'Color' => 0x654321],
+        ['VariableID'      => 4714, 'Unit' => '°C', 'UseVariablePresentation' => false,
+            'AxisPosition' => 'right', 'Color' => 0xABCDEF],
+        ['VariableID'      => 4715, 'Unit' => '', 'UseVariablePresentation' => true,
+            'AxisPosition' => 'auto', 'Color' => 0x2468AC]
+    ],
+    'IPSViewUseTileDesign' => false
+], JSON_THROW_ON_ERROR));
+foreach (array_slice($timeSeriesAxesPreview->GetTestFormUpdates(), -2) as $axisPreviewUpdate) {
+    $axisPreviewSvg = base64_decode(substr(
+        $axisPreviewUpdate['Value'],
+        strlen('data:image/svg+xml;base64,')
+    ), true);
+    assertGatewayGauge(is_string($axisPreviewSvg), 'Time Series multi-axis preview must produce an SVG image.');
+    $axisPreviewDocument = new DOMDocument();
+    assertGatewayGauge(
+        $axisPreviewDocument->loadXML($axisPreviewSvg, LIBXML_NONET),
+        'Time Series multi-axis preview SVG must be valid XML.'
+    );
+    $axes = [];
+    foreach ($axisPreviewDocument->getElementsByTagName('line') as $line) {
+        if ($line->hasAttribute('data-preview-axis')) {
+            $axes[] = [
+                'side'  => $line->getAttribute('data-preview-axis'),
+                'x'     => (float) $line->getAttribute('x1'),
+                'color' => $line->getAttribute('stroke')
+            ];
+        }
+    }
+    $units = [];
+    foreach ($axisPreviewDocument->getElementsByTagName('text') as $label) {
+        if ($label->hasAttribute('data-preview-axis-unit')) {
+            $units[] = $label->textContent;
+        }
+    }
+    assertGatewayGauge(
+        count($axes) === 3
+            && $axes[0]['side'] === 'right' && $axes[0]['color'] === '#123456'
+            && $axes[1]['side'] === 'left' && $axes[1]['color'] === '#654321'
+            && $axes[2]['side'] === 'left' && $axes[2]['color'] === '#2468AC'
+            && $axes[2]['x'] < $axes[1]['x']
+            && $units === ['°C', '%', 'hPa'],
+        'Time Series previews must show one color-coded axis per effective unit on its assigned side.'
+    );
+}
 $timeSeriesTile = $timeSeries->GetVisualizationTile();
 assertGatewayGauge(
     str_contains($timeSeriesTile, 'echarts-timeseries-root'),

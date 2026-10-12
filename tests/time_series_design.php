@@ -8,6 +8,7 @@ use SymconECharts\EChartsTimeSeriesPreview;
 require_once __DIR__ . '/../libs/helper/SVGPreviewHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
+require_once __DIR__ . '/../libs/EChartsUnitAxes.php';
 require_once __DIR__ . '/../libs/EChartsTimeSeriesDesign.php';
 require_once __DIR__ . '/../EChartsTimeSeries/TimeSeriesPreview.php';
 
@@ -116,6 +117,40 @@ assertTimeSeriesDesign(
         && str_contains($svgPreview, 'Comfort')
         && str_contains($svgPreview, '<path d="M 310'),
     'The Time Series preview does not visualize the individual SVG area pattern and line design.'
+);
+$axisSeries = [
+    ['label'   => 'Temperature', 'color' => '#123456', 'style' => 'line',
+        'unit' => '°C', 'axisPosition' => 'left'],
+    ['label'   => 'Humidity', 'color' => '#654321', 'style' => 'line',
+        'unit' => '%', 'axisPosition' => 'right']
+];
+$manualAxisPreview = EChartsTimeSeriesPreview::CreateSvg(
+    $axisSeries,
+    'Manual axes',
+    'dark',
+    ['axisColor' => '#ABCDEF']
+);
+assertTimeSeriesDesign(
+    preg_match_all('/<line data-preview-axis="(?:left|right)"[^>]*stroke="#ABCDEF"\/>/', $manualAxisPreview) === 2,
+    'An explicit Time Series axis color must override both automatic unit colors.'
+);
+$hiddenAxisPreview = EChartsTimeSeriesPreview::CreateSvg(
+    $axisSeries,
+    'Hidden axes',
+    'dark',
+    ['showYAxis' => false]
+);
+assertTimeSeriesDesign(
+    !str_contains($hiddenAxisPreview, 'data-preview-axis='),
+    'The Time Series preview must hide every value axis when the Y axis is disabled.'
+);
+$conflictingAxisPreview = EChartsTimeSeriesPreview::CreateSvg([
+    $axisSeries[0],
+    [...$axisSeries[0], 'label' => 'Other temperature', 'axisPosition' => 'right']
+], 'Invalid draft', 'dark', []);
+assertTimeSeriesDesign(
+    substr_count($conflictingAxisPreview, 'data-preview-axis=') === 1,
+    'Conflicting draft axis sides must leave the Time Series preview available.'
 );
 
 foreach ([
