@@ -5,6 +5,7 @@
             "Title": "Titel",
             "Configure 2 to 16 unique numeric sources. Their order determines their position in the selected Gauge template.": "2 bis 16 eindeutige numerische Quellen konfigurieren. Ihre Reihenfolge bestimmt ihre Position in der gewählten Gauge-Vorlage.",
             "Gauge sources": "Gauge-Quellen",
+            "Preview shows %d of %d sources": "Vorschau zeigt %d von %d Quellen",
             "Variable": "Variable",
             "Label": "Beschriftung",
             "Use variable presentation": "Variablendarstellung",

@@ -14,9 +14,11 @@ final class EChartsGaugeMultiPreview
         string $title,
         string $theme,
         string $preset = 'multi-title',
-        array $style = []
+        array $style = [],
+        string $sourceCountCaption = 'Preview shows %d of %d sources'
     ): string {
         $palette = self::StyledPalette(EChartsAsset::ThemePreviewPalette($theme), $style);
+        $sourceCount = count($items);
         if ($items === []) {
             return self::SvgDocument(
                 $title,
@@ -29,19 +31,49 @@ final class EChartsGaugeMultiPreview
             );
         }
         if ($preset === 'ring-grid') {
-            return self::CreateRingGridSvg($items, $title, $palette, $style);
+            return self::WithSourceCountNotice(
+                self::CreateRingGridSvg($items, $title, $palette, $style),
+                min(4, $sourceCount),
+                $sourceCount,
+                $palette,
+                $sourceCountCaption
+            );
         }
         if ($preset === 'ring-concentric') {
-            return self::CreateConcentricSvg($items, $title, $palette, $style);
+            return self::WithSourceCountNotice(
+                self::CreateConcentricSvg($items, $title, $palette, $style),
+                min(4, $sourceCount),
+                $sourceCount,
+                $palette,
+                $sourceCountCaption
+            );
         }
         if ($preset === 'weather-station') {
-            return self::CreateWeatherStationSvg($items, $title, $palette, $style);
+            return self::WithSourceCountNotice(
+                self::CreateWeatherStationSvg($items, $title, $palette, $style),
+                min(4, $sourceCount),
+                $sourceCount,
+                $palette,
+                $sourceCountCaption
+            );
         }
         if ($preset === 'tacho') {
-            return self::CreateTachoSvg($items, $title, $palette, $style);
+            return self::WithSourceCountNotice(
+                self::CreateTachoSvg($items, $title, $palette, $style),
+                min(3, $sourceCount),
+                $sourceCount,
+                $palette,
+                $sourceCountCaption
+            );
         }
         if ($preset === 'chronograph') {
-            return self::CreateChronographSvg($items, $title, $palette, $style);
+            return self::WithSourceCountNotice(
+                self::CreateChronographSvg($items, $title, $palette, $style),
+                min(6, $sourceCount),
+                $sourceCount,
+                $palette,
+                $sourceCountCaption
+            );
         }
 
         $items = array_slice($items, 0, 4);
@@ -87,7 +119,13 @@ final class EChartsGaugeMultiPreview
                 . SVGPreviewHelper::escape($label) . '</text>';
         }
 
-        return self::SvgDocument($title, $palette, $content, 'multi-title', $style);
+        return self::WithSourceCountNotice(
+            self::SvgDocument($title, $palette, $content, 'multi-title', $style),
+            $count,
+            $sourceCount,
+            $palette,
+            $sourceCountCaption
+        );
     }
 
     /** @param list<array<string, mixed>> $items @param array<string, string> $palette @param array<string, int|string> $style */
@@ -414,6 +452,26 @@ final class EChartsGaugeMultiPreview
             . '<rect width="720" height="400" rx="16" fill="' . SVGPreviewHelper::escape($background['color'])
             . '" fill-opacity="' . self::N($background['opacity']) . '"/>'
             . $titleElement . $content . '</svg>';
+    }
+
+    /** @param array<string, string> $palette */
+    private static function WithSourceCountNotice(
+        string $svg,
+        int $visibleCount,
+        int $sourceCount,
+        array $palette,
+        string $caption
+    ): string {
+        if ($visibleCount >= $sourceCount) {
+            return $svg;
+        }
+
+        $notice = '<text x="700" y="386" text-anchor="end" font-size="12" fill="'
+            . SVGPreviewHelper::escape($palette['muted']) . '" data-preview-sources="'
+            . $visibleCount . '/' . $sourceCount . '">'
+            . SVGPreviewHelper::escape(sprintf($caption, $visibleCount, $sourceCount)) . '</text>';
+
+        return substr($svg, 0, -strlen('</svg>')) . $notice . '</svg>';
     }
 
     private static function RingCircles(

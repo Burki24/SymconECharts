@@ -1709,6 +1709,21 @@ assertGatewayGauge(
     'Gauge Single must inherit range, unit and decimals through a legacy variable profile.'
 );
 
+$emptyMultiGauge = new EChartsGaugeMulti();
+$emptyMultiGauge->Create();
+$emptyMultiForm = json_decode($emptyMultiGauge->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+$emptyMultiPreview = findGaugeFormElement($emptyMultiForm['elements'], 'GaugePreview');
+$emptyMultiSvg = base64_decode(substr(
+    (string) ($emptyMultiPreview['image'] ?? ''),
+    strlen('data:image/svg+xml;base64,')
+), true);
+assertGatewayGauge(
+    is_string($emptyMultiSvg)
+        && str_contains($emptyMultiSvg, 'Configure 2 to 16 unique numeric sources.')
+        && !str_contains($emptyMultiSvg, 'Temperature'),
+    'A new Gauge Multi instance must show a configuration hint instead of unmarked example gauges.'
+);
+
 $multiSources = json_encode([
     [
         'VariableID' => 4711,
@@ -2393,6 +2408,39 @@ assertGatewayGauge(
         && str_contains($deletedDraftSvg, 'Draft humidity'),
     'Gauge Multi draft preview must remove deleted sources immediately.'
 );
+$GLOBALS['symconTestVariables'][4718] = [
+    'VariableType'    => 2,
+    'VariableUpdated' => 1780000007,
+    'Value'           => 37.0,
+    'Name'            => 'Preview-only seventh source'
+];
+$manyDraftSources = [];
+foreach ([4711, 4713, 4714, 4715, 4716, 4717, 4718] as $index => $variableID) {
+    $manyDraftSources[] = [
+        'VariableID' => $variableID,
+        'Label'      => 'Draft source ' . ($index + 1),
+        'Minimum'    => 0.0,
+        'Maximum'    => 2000.0,
+        'Unit'       => '',
+        'Decimals'   => 1
+    ];
+}
+$multiGauge->UpdateGaugePreviewFromForm(json_encode(['Sources' => $manyDraftSources], JSON_THROW_ON_ERROR));
+foreach (array_slice($multiGauge->GetTestFormUpdates(), -2) as $previewUpdate) {
+    $limitedSvg = base64_decode(substr(
+        (string) ($previewUpdate['Value'] ?? ''),
+        strlen('data:image/svg+xml;base64,')
+    ), true);
+    assertGatewayGauge(
+        is_string($limitedSvg)
+            && str_contains($limitedSvg, 'data-preview-sources="4/7"')
+            && str_contains($limitedSvg, 'Preview shows 4 of 7 sources')
+            && str_contains($limitedSvg, 'Draft source 4')
+            && !str_contains($limitedSvg, 'Draft source 5'),
+        'Gauge Multi tile and IPSView previews must disclose when only a bounded subset of draft sources is shown.'
+    );
+}
+unset($GLOBALS['symconTestVariables'][4718]);
 $ringPreviewSvg = \SymconECharts\EChartsGaugeMultiPreview::CreateSvg(
     [
         ['label' => 'A', 'minimum' => 0.0, 'maximum' => 100.0, 'unit' => '%', 'decimals' => 0, 'value' => 25.0],
@@ -2406,6 +2454,39 @@ $ringPreviewSvg = \SymconECharts\EChartsGaugeMultiPreview::CreateSvg(
 assertGatewayGauge(
     substr_count($ringPreviewSvg, '#223344') >= 2 && substr_count($ringPreviewSvg, '#334455') >= 2,
     'Gauge Multi ring preview must apply shared progress and ring colors to every Gauge.'
+);
+$previewLimitItems = array_map(
+    static fn (int $index): array => [
+        'label' => 'Source ' . $index, 'minimum' => 0.0, 'maximum' => 100.0,
+        'unit'  => '%', 'decimals' => 0, 'value' => (float) ($index * 10)
+    ],
+    range(1, 7)
+);
+foreach ([
+    'multi-title'     => 4, 'ring-grid' => 4, 'ring-concentric' => 4,
+    'weather-station' => 4, 'tacho' => 3, 'chronograph' => 6
+] as $preset => $visibleCount) {
+    $limitedPresetSvg = \SymconECharts\EChartsGaugeMultiPreview::CreateSvg(
+        $previewLimitItems,
+        '',
+        'dark',
+        $preset
+    );
+    assertGatewayGauge(
+        str_contains($limitedPresetSvg, 'data-preview-sources="' . $visibleCount . '/7"')
+            && str_contains($limitedPresetSvg, 'Preview shows ' . $visibleCount . ' of 7 sources'),
+        'Gauge Multi ' . $preset . ' preview must disclose its actual source limit.'
+    );
+}
+$completePresetSvg = \SymconECharts\EChartsGaugeMultiPreview::CreateSvg(
+    array_slice($previewLimitItems, 0, 3),
+    '',
+    'dark',
+    'multi-title'
+);
+assertGatewayGauge(
+    !str_contains($completePresetSvg, 'data-preview-sources='),
+    'Gauge Multi preview must not imply omitted sources when all configured gauges are visible.'
 );
 $multiIPSViewBeforeUpdate = $multiGauge->GetTestVariableValue('IPSViewGauge');
 $multiUpdateCount = count($multiGauge->GetTestVisualizationUpdates());

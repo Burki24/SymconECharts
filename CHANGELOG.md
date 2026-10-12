@@ -2,6 +2,12 @@
 
 ## Behoben
 
+- Gauge Multi kennzeichnet in beiden Formularvorschauen jetzt, wie viele der
+  konfigurierten Quellen die jeweilige Vorlage exemplarisch zeigt. Zuvor
+  verschwanden weitere Quellen dort ohne Hinweis, obwohl Kachel und IPSView
+  alle Quellen darstellten. Neue, noch unkonfigurierte Instanzen zeigen statt
+  unmarkierter Beispielinstrumente einen Konfigurationshinweis.
+
 - Die Kachel- und IPSView-Designer aller Diagrammmodule nutzen nun die
   verfügbare Breite der Instanzkonfiguration, statt auf 700–760 px begrenzt
   zu sein.

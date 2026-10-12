@@ -234,22 +234,25 @@ class EChartsGaugeMulti extends IPSModuleStrict
             $form['elements'] = $this->WithAnimationFormCallbacks($form['elements'], 'ECGM');
             $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
         }
+        $previewItems = $this->PreviewItems();
+        $sourceCountCaption = $this->Translate('Preview shows %d of %d sources');
         $form = SVGPreviewHelper::withImage(
             $form,
             'GaugePreview',
             EChartsGaugeMultiPreview::CreateSvg(
-                $this->PreviewItems(),
+                $previewItems,
                 $this->ReadPropertyString('Title'),
                 $this->ReadPropertyString('EChartsTheme'),
                 $this->ReadPropertyString('GaugePreset'),
-                $this->ReadGaugeStyle()
+                $this->ReadGaugeStyle(),
+                $sourceCountCaption
             )
         );
         $form = SVGPreviewHelper::withImage(
             $form,
             'IPSViewGaugePreview',
             EChartsGaugeMultiPreview::CreateSvg(
-                $this->PreviewItems(),
+                $previewItems,
                 $this->ReadPropertyString('Title'),
                 $this->EffectiveIPSViewTheme(),
                 $this->ReadPropertyBoolean('IPSViewUseTileDesign')
@@ -262,7 +265,8 @@ class EChartsGaugeMulti extends IPSModuleStrict
                     $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
                     $this->ReadPropertyInteger('IPSViewBackgroundColor'),
                     $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent')
-                )
+                ),
+                $sourceCountCaption
             )
         );
 
@@ -331,6 +335,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
             ? $this->PreviewItemsFromForm($values['Sources'])
             : $this->PreviewItems();
         $title = (string) ($values['Title'] ?? $this->ReadPropertyString('Title'));
+        $sourceCountCaption = $this->Translate('Preview shows %d of %d sources');
         $tileStyle = $this->GaugeStyleFromFormValues($values);
         $this->UpdateFormField('GaugePreview', 'image', SVGPreviewHelper::dataUri(
             EChartsGaugeMultiPreview::CreateSvg(
@@ -338,7 +343,8 @@ class EChartsGaugeMulti extends IPSModuleStrict
                 $title,
                 (string) ($values['EChartsTheme'] ?? $this->ReadPropertyString('EChartsTheme')),
                 (string) ($values['GaugePreset'] ?? $this->ReadPropertyString('GaugePreset')),
-                $tileStyle
+                $tileStyle,
+                $sourceCountCaption
             )
         ));
 
@@ -361,7 +367,8 @@ class EChartsGaugeMulti extends IPSModuleStrict
                         ?? $this->ReadPropertyInteger('IPSViewBackgroundColor')),
                     (int) ($values['IPSViewBackgroundOpacityPercent']
                         ?? $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent'))
-                )
+                ),
+                $sourceCountCaption
             )
         ));
     }
@@ -975,15 +982,10 @@ class EChartsGaugeMulti extends IPSModuleStrict
     private function PreviewItems(): array
     {
         try {
-            $sources = $this->GetValidatedSources();
+            return $this->PreviewItemsFromValidatedSources($this->GetValidatedSources());
         } catch (Throwable) {
-            return [
-                ['label' => 'Temperature', 'minimum' => 0.0, 'maximum' => 40.0, 'unit' => '°C', 'decimals' => 1, 'value' => 21.5],
-                ['label' => 'Humidity', 'minimum' => 0.0, 'maximum' => 100.0, 'unit' => '%', 'decimals' => 0, 'value' => 54.0]
-            ];
+            return [];
         }
-
-        return $this->PreviewItemsFromValidatedSources($sources);
     }
 
     /** @return list<array<string, mixed>> */
@@ -1016,7 +1018,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
                 'decimals' => $source['Decimals'],
                 'value'    => is_int($value) || is_float($value) ? (float) $value : $source['Minimum']
             ];
-        }, array_slice($sources, 0, 6));
+        }, $sources);
     }
 
     /** @return array<string, mixed> */
