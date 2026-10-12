@@ -18,6 +18,10 @@ IPSView preview follow Tile appearance. Check the real tile and IPSView widget
 for the responsive chart, detailed labels, zoom and SVG bar patterns.
 Example value labels use each source's effective unit and decimal places,
 including the variable presentation when enabled.
+The schematic previews also show a separate value axis for each displayed
+effective unit, on its configured side. With multiple sources, automatic axis
+colors follow the first source of each unit. Numeric axis ticks and archived
+values are shown only in the actual chart.
 
 ## Animation
 

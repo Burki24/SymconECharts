@@ -2,6 +2,10 @@
 
 ## Behoben
 
+- Die BarHistory-Formularvorschauen zeigen bei mehreren Einheiten die
+  zugehörigen Wertachsen auf der konfigurierten Seite und in der wirksamen
+  Achsenfarbe statt einer einzigen neutralen Skizzenachse.
+
 - Die BarHistory-Formularvorschau formatiert Beispielwert-Beschriftungen jetzt
   mit der wirksamen Einheit und Nachkommastellen jeder Quelle statt mit einer
   festen Dezimaldarstellung, getrennt für Kachel und unabhängiges IPSView.

@@ -361,6 +361,28 @@ class EChartsBarHistory extends IPSModuleStrict
         $palette = EChartsBarPreview::Palette($theme);
         $data = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values, 'Label', false);
         $items = array_slice($data['items'], 0, 3);
+        $axisSources = [];
+        foreach ($data['items'] as $item) {
+            $position = $item['AxisPosition'] ?? 'auto';
+            $axisSources[] = [
+                'Unit'         => $item['unit'],
+                'AxisPosition' => is_string($position) && in_array($position, ['auto', 'left', 'right'], true)
+                    ? $position : 'auto'
+            ];
+        }
+        try {
+            $axisModel = EChartsUnitAxes::Build($axisSources);
+        } catch (\InvalidArgumentException) {
+            foreach ($axisSources as &$axisSource) {
+                $axisSource['AxisPosition'] = 'auto';
+            }
+            unset($axisSource);
+            $axisModel = EChartsUnitAxes::Build($axisSources);
+        }
+        $visibleUnits = [];
+        foreach ($items as $index => $item) {
+            $visibleUnits[$item['unit']] ??= $index;
+        }
         $previewLanguage = $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage());
         $svg = EChartsBarPreview::Open(
             $palette,
@@ -392,6 +414,28 @@ class EChartsBarHistory extends IPSModuleStrict
                 $y = 265 - $i * 43;
                 $svg .= '<line x1="65" y1="' . $y . '" x2="680" y2="' . $y
                     . '" stroke="' . EChartsBarPreview::E($gridColor) . '"/>';
+            }
+        }
+        $automaticAxisColor = $this->BarPreviewValue($values, 'AxisColor', 'integer', $ipsView) < 0;
+        foreach ($axisModel['Axes'] as $axis) {
+            if (!array_key_exists($axis['unit'], $visibleUnits)) {
+                continue;
+            }
+            $sourceIndex = $visibleUnits[$axis['unit']];
+            $source = $items[$sourceIndex];
+            $sourceColor = $source['color'] !== ''
+                ? $source['color'] : $palette['seriesColors'][$sourceIndex % count($palette['seriesColors'])];
+            $color = $automaticAxisColor && count($data['items']) > 1 ? $sourceColor : $axisColor;
+            $left = $axis['position'] === 'left';
+            $axisX = $left ? 65 - $axis['positionIndex'] * 12 : 680 + $axis['positionIndex'] * 12;
+            $svg .= '<line data-preview-axis="' . $axis['position'] . '" x1="' . $axisX
+                . '" y1="93" x2="' . $axisX . '" y2="265" stroke="' . EChartsBarPreview::E($color) . '"/>';
+            if ($axis['unit'] !== '') {
+                $captionX = $left ? 68 + $axis['positionIndex'] * 110 : 676 - $axis['positionIndex'] * 110;
+                $svg .= '<text data-preview-axis-unit="' . $axis['position'] . '" x="' . $captionX
+                    . '" y="88" text-anchor="' . ($left ? 'start' : 'end') . '" fill="'
+                    . EChartsBarPreview::E($color) . '" font-size="' . $axisSize . '">'
+                    . EChartsBarPreview::E(mb_strimwidth($axis['unit'], 0, 8, '…')) . '</text>';
             }
         }
         $barWidth = max(20, min(100, $this->BarPreviewValue($values, 'BarWidthPercent', 'integer', $ipsView)));
@@ -468,8 +512,7 @@ class EChartsBarHistory extends IPSModuleStrict
         }
         $svg .= '<text x="70" y="286" fill="' . EChartsBarPreview::E($axisColor)
             . '" font-size="' . $axisSize . '">' . EChartsBarPreview::E($range)
-            . '</text><text x="680" y="286" text-anchor="end" fill="'
-            . EChartsBarPreview::E($axisColor) . '" font-size="' . $axisSize . '">0</text>';
+            . '</text>';
         if ($fillMode === 'svg') {
             $svg .= '<text x="696" y="307" text-anchor="end" fill="' . EChartsBarPreview::E($palette['muted'])
                 . '" font-size="10">' . EChartsBarPreview::E($this->Translate('SVG pattern (schematic)')) . '</text>';

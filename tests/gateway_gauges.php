@@ -6983,6 +6983,83 @@ foreach (array_slice($historyFormatPreview->GetTestFormUpdates(), -2) as $histor
     );
 }
 
+$historyAxesPreview = new EChartsBarHistory();
+$historyAxesPreview->Create();
+$historyAxisSources = [
+    ['VariableID' => 4711, 'Label' => 'Temperature', 'UseVariablePresentation' => false,
+        'Unit'    => '°C', 'AxisPosition' => 'right', 'Color' => 0x123456],
+    ['VariableID' => 4713, 'Label' => 'Humidity', 'UseVariablePresentation' => false,
+        'Unit'    => '%', 'AxisPosition' => 'left', 'Color' => 0x654321],
+    ['VariableID' => 4714, 'Label' => 'Other temperature', 'UseVariablePresentation' => false,
+        'Unit'    => '°C', 'AxisPosition' => 'right', 'Color' => 0xABCDEF]
+];
+$historyAxesPreview->UpdateBarPreviewFromForm(json_encode([
+    'Sources'              => $historyAxisSources,
+    'IPSViewUseTileDesign' => false
+], JSON_THROW_ON_ERROR));
+foreach (array_slice($historyAxesPreview->GetTestFormUpdates(), -2) as $historyAxesUpdate) {
+    $historyAxesSvg = base64_decode(substr(
+        $historyAxesUpdate['Value'],
+        strlen('data:image/svg+xml;base64,')
+    ), true);
+    assertGatewayGauge(is_string($historyAxesSvg), 'Historical Bar preview must produce a valid SVG image.');
+    $historyAxesDocument = new DOMDocument();
+    assertGatewayGauge(
+        $historyAxesDocument->loadXML($historyAxesSvg, LIBXML_NONET),
+        'Historical Bar multi-axis preview SVG must be valid XML.'
+    );
+    $drawnAxes = [];
+    foreach ($historyAxesDocument->getElementsByTagName('line') as $line) {
+        if ($line->hasAttribute('data-preview-axis')) {
+            $drawnAxes[$line->getAttribute('data-preview-axis')] = [
+                'x'     => (float) $line->getAttribute('x1'),
+                'color' => $line->getAttribute('stroke')
+            ];
+        }
+    }
+    $axisCaptions = [];
+    foreach ($historyAxesDocument->getElementsByTagName('text') as $label) {
+        if ($label->hasAttribute('data-preview-axis-unit')) {
+            $axisCaptions[] = $label->textContent;
+        }
+    }
+    assertGatewayGauge(
+        count($drawnAxes) === 2
+            && ($drawnAxes['right']['x'] ?? 0) > 360
+            && ($drawnAxes['right']['color'] ?? '') === '#123456'
+            && ($drawnAxes['left']['x'] ?? 720) < 360
+            && ($drawnAxes['left']['color'] ?? '') === '#654321'
+            && $axisCaptions === ['°C', '%'],
+        'Historical Bar previews must show one color-coded axis per effective unit on its configured side.'
+    );
+}
+$historyAxisSources[2]['Unit'] = 'hPa';
+$historyAxisSources[2]['AxisPosition'] = 'auto';
+$historyAxesPreview->UpdateBarPreviewFromForm(json_encode([
+    'Sources'              => $historyAxisSources,
+    'IPSViewUseTileDesign' => false
+], JSON_THROW_ON_ERROR));
+foreach (array_slice($historyAxesPreview->GetTestFormUpdates(), -2) as $historyAxesUpdate) {
+    $svg = base64_decode(substr($historyAxesUpdate['Value'], strlen('data:image/svg+xml;base64,')), true);
+    assertGatewayGauge(is_string($svg), 'Historical Bar three-unit preview must produce an SVG image.');
+    $document = new DOMDocument();
+    assertGatewayGauge($document->loadXML($svg, LIBXML_NONET), 'Historical Bar three-unit SVG must be valid XML.');
+    $positions = [];
+    foreach ($document->getElementsByTagName('line') as $line) {
+        if ($line->hasAttribute('data-preview-axis')) {
+            $positions[] = [$line->getAttribute('data-preview-axis'), (float) $line->getAttribute('x1')];
+        }
+    }
+    assertGatewayGauge(
+        count($positions) === 3
+            && $positions[0][0] === 'right'
+            && $positions[1][0] === 'left'
+            && $positions[2][0] === 'left'
+            && $positions[2][1] < $positions[1][1],
+        'Historical Bar previews must show additional units as separate offset axes on the assigned side.'
+    );
+}
+
 $waterfallFormatPreview = new EChartsBarWaterfall();
 $waterfallFormatPreview->Create();
 $originalWaterfallFormatValue = $GLOBALS['symconTestVariables'][4717]['Value'];
