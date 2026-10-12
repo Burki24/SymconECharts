@@ -372,8 +372,14 @@ class EChartsBarPolar extends IPSModuleStrict
                     . EChartsBarPreview::N($maximum)) . '</text>';
             foreach ([0.25, 0.5, 0.75, 1.0] as $fraction) {
                 $radius = $inner + ($outer - $inner) * $fraction;
-                $svg .= '<circle cx="' . $cx . '" cy="' . $cy . '" r="' . EChartsBarPreview::N($radius)
-                    . '" fill="none" stroke="' . EChartsBarPreview::E($gridColor) . '"/>';
+                if ($span === 360) {
+                    $svg .= '<circle cx="' . $cx . '" cy="' . $cy . '" r="' . EChartsBarPreview::N($radius)
+                        . '" fill="none" stroke="' . EChartsBarPreview::E($gridColor) . '"/>';
+                } else {
+                    $svg .= '<path data-preview-grid-arc="true" d="'
+                        . self::BarPreviewGridArc($cx, $cy, $radius, $start, $start + $direction * $span)
+                        . '" fill="none" stroke="' . EChartsBarPreview::E($gridColor) . '"/>';
+                }
             }
         }
         $opacity = max(0, min(100, $this->BarPreviewValue($values, 'BarOpacityPercent', 'integer', $ipsView))) / 100;
@@ -470,14 +476,10 @@ class EChartsBarPolar extends IPSModuleStrict
     private static function BarPreviewWedge(float $cx, float $cy, float $inner, float $outer, float $start, float $end): string
     {
         $end = $start + max(-359.99, min(359.99, $end - $start));
-        $point = static fn (float $radius, float $angle): array => [
-            $cx + $radius * sin(deg2rad($angle)),
-            $cy - $radius * cos(deg2rad($angle))
-        ];
-        [$x0, $y0] = $point($outer, $start);
-        [$x1, $y1] = $point($outer, $end);
-        [$x2, $y2] = $point($inner, $end);
-        [$x3, $y3] = $point($inner, $start);
+        [$x0, $y0] = self::BarPreviewPoint($cx, $cy, $outer, $start);
+        [$x1, $y1] = self::BarPreviewPoint($cx, $cy, $outer, $end);
+        [$x2, $y2] = self::BarPreviewPoint($cx, $cy, $inner, $end);
+        [$x3, $y3] = self::BarPreviewPoint($cx, $cy, $inner, $start);
         $large = abs($end - $start) > 180 ? 1 : 0;
         $sweep = $end >= $start ? 1 : 0;
 
@@ -487,6 +489,27 @@ class EChartsBarPolar extends IPSModuleStrict
             . ' L ' . EChartsBarPreview::N($x2) . ' ' . EChartsBarPreview::N($y2)
             . ' A ' . EChartsBarPreview::N($inner) . ' ' . EChartsBarPreview::N($inner)
             . ' 0 ' . $large . ' ' . (1 - $sweep) . ' ' . EChartsBarPreview::N($x3) . ' ' . EChartsBarPreview::N($y3) . ' Z';
+    }
+
+    private static function BarPreviewGridArc(float $cx, float $cy, float $radius, float $start, float $end): string
+    {
+        [$x0, $y0] = self::BarPreviewPoint($cx, $cy, $radius, $start);
+        [$x1, $y1] = self::BarPreviewPoint($cx, $cy, $radius, $end);
+        $large = abs($end - $start) > 180 ? 1 : 0;
+        $sweep = $end >= $start ? 1 : 0;
+
+        return 'M ' . EChartsBarPreview::N($x0) . ' ' . EChartsBarPreview::N($y0)
+            . ' A ' . EChartsBarPreview::N($radius) . ' ' . EChartsBarPreview::N($radius)
+            . ' 0 ' . $large . ' ' . $sweep . ' ' . EChartsBarPreview::N($x1) . ' ' . EChartsBarPreview::N($y1);
+    }
+
+    /** @return array{float,float} */
+    private static function BarPreviewPoint(float $cx, float $cy, float $radius, float $angle): array
+    {
+        return [
+            $cx + $radius * sin(deg2rad($angle)),
+            $cy - $radius * cos(deg2rad($angle))
+        ];
     }
 
     private function UpdateValueScaleFields(string $prefix, string $rangeMode): void

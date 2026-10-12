@@ -23,6 +23,8 @@ konfigurierte Namen vor Symcon-Namen, niemals automatisch Variablen-IDs.
 **Kacheldesign verwenden** gilt auch für die IPSView-Vorschau. Ohne gültige
 Quellen sind Beispieldaten markiert. Wertbeschriftungen übernehmen die wirksame
 Einheit und Nachkommastellen der Quellen. Die Vorschau ist schematisch:
+Ihr Raster folgt dem gewählten Winkelumfang und der Drehrichtung; bei 360°
+bleiben die Rasterlinien vollständige Kreise.
 Hover-Hervorhebung, Animation und das responsive Beschriftungslayout prüfen
 Sie an der echten Kachel beziehungsweise im IPSView-Widget.
 

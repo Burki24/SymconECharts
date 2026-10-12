@@ -7404,6 +7404,59 @@ assertGatewayGauge(
         && $radialSvg !== $tangentialSvg,
     'Polar live preview must draw different radial and tangential geometry.'
 );
+$polarPreview->UpdateBarPreviewFromForm(json_encode([
+    'Sources'               => $polarSources,
+    'ShowGrid'              => true,
+    'AngularSpan'           => 180,
+    'Clockwise'             => true,
+    'IPSViewUseTileDesign'  => false,
+    'IPSViewShowGrid'       => true,
+    'IPSViewAngularSpan'    => 270,
+    'IPSViewClockwise'      => false
+], JSON_THROW_ON_ERROR));
+$polarGridUpdates = array_slice($polarPreview->GetTestFormUpdates(), -2);
+$polarGridGeometry = static function (string $uri): array
+{
+    $svg = base64_decode(substr($uri, strlen('data:image/svg+xml;base64,')), true);
+    assertGatewayGauge(is_string($svg), 'Polar grid preview must produce an SVG image.');
+    $document = new DOMDocument();
+    assertGatewayGauge($document->loadXML($svg, LIBXML_NONET), 'Polar grid preview SVG must be valid XML.');
+    $arcs = [];
+    foreach ($document->getElementsByTagName('path') as $path) {
+        if ($path->hasAttribute('data-preview-grid-arc')) {
+            $arcs[] = $path->getAttribute('d');
+        }
+    }
+    $fullCircles = 0;
+    foreach ($document->getElementsByTagName('circle') as $circle) {
+        if ($circle->getAttribute('fill') === 'none') {
+            ++$fullCircles;
+        }
+    }
+
+    return [$arcs, $fullCircles];
+};
+[$tileGridArcs, $tileFullCircles] = $polarGridGeometry($polarGridUpdates[0]['Value']);
+[$ipsViewGridArcs, $ipsViewFullCircles] = $polarGridGeometry($polarGridUpdates[1]['Value']);
+assertGatewayGauge(
+    count($tileGridArcs) === 4 && $tileFullCircles === 0
+        && preg_match('/ A [\d.]+ [\d.]+ 0 0 1 /', $tileGridArcs[0]) === 1
+        && count($ipsViewGridArcs) === 4 && $ipsViewFullCircles === 0
+        && preg_match('/ A [\d.]+ [\d.]+ 0 1 0 /', $ipsViewGridArcs[0]) === 1,
+    'Polar Tile and independent IPSView preview grids must follow their angular spans and directions.'
+);
+$polarPreview->UpdateBarPreviewFromForm(json_encode([
+    'Sources'      => $polarSources,
+    'ShowGrid'     => true,
+    'AngularSpan'  => 360
+], JSON_THROW_ON_ERROR));
+[$fullSpanGridArcs, $fullSpanCircles] = $polarGridGeometry(
+    array_slice($polarPreview->GetTestFormUpdates(), -2)[0]['Value']
+);
+assertGatewayGauge(
+    $fullSpanGridArcs === [] && $fullSpanCircles === 4,
+    'A 360-degree Polar preview must retain complete circular grid rings.'
+);
 
 foreach ([
     EChartsGaugeSingle::class      => ['GaugePreview', 'IPSViewGaugePreview'],

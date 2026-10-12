@@ -2,6 +2,10 @@
 
 ## Behoben
 
+- Das Raster der Polar-Formularvorschau folgt bei Teilkreisen nun dem
+  eingestellten Winkelumfang und der Drehrichtung, auch bei unabhängigem
+  IPSView-Design; 360° bleiben vollständige Kreise.
+
 - Die TimeSeries-Formularvorschauen zeigen jetzt für unterschiedliche
   effektive Einheiten getrennte Wertachsen mit richtiger Seite und Farbe,
   statt nur einer neutralen Y-Achse ohne Einheiten.
