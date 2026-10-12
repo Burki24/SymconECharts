@@ -1,5 +1,12 @@
 # Unveröffentlicht
 
+## Hinzugefügt
+
+- Das neue Modul `EChartsPie` zeigt aktuelle Anteile als Kreis, Donut oder
+  Nightingale-Rose in Kachel und IPSView. Beide Designer bieten Live-Vorschauen,
+  unabhängige Gestaltung und Animation. Negative Werte und Nullsummen werden
+  verständlich gemeldet; Quellen bleiben auch bei gleichen Namen ID-getrennt.
+
 ## Behoben
 
 - Die deutschen Instanzformulare zeigen in BarCategory, BarHistory,

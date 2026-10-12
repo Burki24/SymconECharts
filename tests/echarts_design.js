@@ -128,7 +128,7 @@ assert.equal(resizeCount, 2);
 for (const moduleName of [
     'EChartsGaugeSingle', 'EChartsGaugeMulti', 'EChartsGaugeTacho',
     'EChartsGaugeChronograph', 'EChartsTimeSeries', 'EChartsBarCategory',
-    'EChartsBarHistory', 'EChartsBarWaterfall'
+    'EChartsBarHistory', 'EChartsBarWaterfall', 'EChartsPie'
 ]) {
     const renderer = fs.readFileSync(path.join(__dirname, '..', moduleName, 'visualization', 'app.js'), 'utf8');
     const observer = renderer.match(/new ResizeObserver\(function \(\) \{([\s\S]*?)\}\)\.observe\(chartElement\)/);
@@ -152,7 +152,8 @@ for (const [moduleName, warningId] of [
     ['EChartsTimeSeries', 'echarts-timeseries-warning'],
     ['EChartsBarCategory', 'echarts-bar-category-warning'],
     ['EChartsBarWaterfall', 'echarts-bar-waterfall-warning'],
-    ['EChartsBarPolar', 'echarts-bar-polar-warning']
+    ['EChartsBarPolar', 'echarts-bar-polar-warning'],
+    ['EChartsPie', 'echarts-pie-warning']
 ]) {
     const moduleRoot = path.join(__dirname, '..', moduleName);
     const html = fs.readFileSync(path.join(moduleRoot, 'visualization', 'index.html'), 'utf8');

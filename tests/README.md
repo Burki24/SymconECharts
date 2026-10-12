@@ -45,6 +45,10 @@ Qualitätslauf führt zusätzlich die Renderer-Tests mit Node.js aus.
 die optionale Balkenkontur;
 `node tests/time_series_layout.js` prüft unter anderem Flächen und
 Annotationen. Beide laufen auch im vollständigen Qualitätslauf.
+`node tests/pie_layout.js` prüft Kreis, Donut und Nightingale-Rose,
+ID-getrennte gleichnamige Quellen, Textsicherheit, Animation und Nullsummen.
+Bei installierter festgeschriebener ECharts-Buildabhängigkeit prüft es die
+Sektorgeometrien zusätzlich gegen die echte ECharts-Engine im SVG-SSR-Modus.
 
 `tests/fixtures/tacho-browser.html` und
 `tests/fixtures/chronograph-browser.html` sind manuelle Browser-Fixierungen

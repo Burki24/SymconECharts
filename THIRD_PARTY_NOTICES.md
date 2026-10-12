@@ -35,6 +35,10 @@ Ausgelieferte Dateien:
   Polar-Browser-Build aus ECharts Core, Bar Chart, Polar Component, Titel,
   Tooltip, Aria und Canvas Renderer; 514.353 Byte; SHA-256
   `f31daec4db27dee855d736f2443b15b5642011bc99bbe6f9bc1fdb91da1ef69c`;
+- `libs/echarts/6.1.0/echarts.pie.min.js` – reproduzierbarer,
+  Pie-Browser-Build aus ECharts Core, Pie Chart, Legende, Titel, Tooltip,
+  Aria und Canvas Renderer; 504.031 Byte; SHA-256
+  `b61d6fb1b4652e2365cb91813ce23cc3e2f5afac06610a47bc0ab9eb706440ea`;
 - `libs/echarts/6.1.0/themes/dark.js` – offizielles Theme Dark; 5.981 Byte;
   SHA-256 `ae60e563617cb87514690c1946ee202e78c9f1487820490614b58934ed037458`;
 - `libs/echarts/6.1.0/themes/vintage.js` – offizielles Theme Vintage;
@@ -59,7 +63,7 @@ Der Build wird lokal ausgeliefert und zur Laufzeit nicht von einem CDN geladen.
 Sein Einstiegspunkt, die exakt festgeschriebenen npm-Abhängigkeiten und der
 Buildbefehl liegen unter `.tools/echarts-runtime`. Die ECharts-Quellen werden
 nicht inhaltlich verändert, sondern über die offizielle Tree-Shaking-API auf
-die von Gauge Single benötigten Bestandteile begrenzt. Die Theme-Dateien werden
+die von den jeweiligen Diagrammfamilien benötigten Bestandteile begrenzt. Die Theme-Dateien werden
 unverändert aus dem Paket übernommen.
 
 Das Preset `speed` adaptiert die charakteristische Konfiguration und den

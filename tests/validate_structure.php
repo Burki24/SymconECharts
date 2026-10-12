@@ -42,6 +42,7 @@ $requiredFiles = [
     'libs/echarts/6.1.0/echarts.gauge.min.js',
     'libs/echarts/6.1.0/echarts.cartesian.min.js',
     'libs/echarts/6.1.0/echarts.polar.min.js',
+    'libs/echarts/6.1.0/echarts.pie.min.js',
     'libs/echarts/6.1.0/themes/dark.js',
     'libs/echarts/6.1.0/themes/vintage.js',
     'libs/echarts/6.1.0/themes/macarons.js',
@@ -113,7 +114,11 @@ $requiredFiles = [
     'EChartsBarPolar/visualization/index.html',
     'EChartsBarPolar/visualization/style.css',
     'EChartsBarPolar/visualization/app.js',
+    'EChartsPie/visualization/index.html',
+    'EChartsPie/visualization/style.css',
+    'EChartsPie/visualization/app.js',
     'tests/bar_polar_layout.js',
+    'tests/pie_layout.js',
     'libs/EChartsCurrentSources.php'
 ];
 
@@ -308,7 +313,7 @@ if ($helperSync !== null) {
 
 $expectedModules = [
     'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarPolar', 'EChartsBarWaterfall', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
-    'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsTimeSeries'
+    'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsPie', 'EChartsTimeSeries'
 ];
 $discoveredModules = [];
 foreach (glob($root . '/*/module.json') ?: [] as $modulePath) {

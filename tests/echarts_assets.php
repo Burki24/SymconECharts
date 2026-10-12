@@ -17,11 +17,13 @@ $root = dirname(__DIR__);
 $runtimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.gauge.min.js';
 $cartesianRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.cartesian.min.js';
 $polarRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.polar.min.js';
+$pieRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.pie.min.js';
 $licensePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/LICENSE.txt';
 $noticePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/NOTICE.txt';
 $runtime = (string) file_get_contents($runtimePath);
 $cartesianRuntime = (string) file_get_contents($cartesianRuntimePath);
 $polarRuntime = (string) file_get_contents($polarRuntimePath);
+$pieRuntime = (string) file_get_contents($pieRuntimePath);
 $designUtilitiesPath = $root . '/libs/echarts-design.js';
 $designUtilities = (string) file_get_contents($designUtilitiesPath);
 $zoomUtilities = (string) file_get_contents($root . '/libs/echarts-zoom.js');
@@ -29,6 +31,7 @@ $patternUtilities = (string) file_get_contents($root . '/libs/echarts-pattern.js
 $runtimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/gauge-runtime.js');
 $cartesianRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/cartesian-runtime.js');
 $polarRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/polar-runtime.js');
+$pieRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/pie-runtime.js');
 $windowsCheckoutRuntime = str_replace("\n", "\r\n", $runtime);
 $expectedThemeIDs = ['auto', 'dark', 'vintage', 'macarons', 'infographic', 'shine', 'roma'];
 
@@ -72,6 +75,14 @@ assertEChartsAsset(
         && str_contains($polarRuntime, 'window.echarts'),
     'The Polar runtime must expose the browser API and remain below 512 KiB.'
 );
+assertEChartsAsset(is_file($pieRuntimePath), 'The pinned Pie runtime is missing.');
+assertEChartsAsset(
+    hash_file('sha256', $pieRuntimePath) === EChartsAsset::PIE_SHA256
+        && EChartsAsset::PieJavaScript() === $pieRuntime
+        && strlen($pieRuntime) < 524288
+        && str_contains($pieRuntime, 'window.echarts'),
+    'The Pie runtime must be pinned, expose the browser API and remain below 512 KiB.'
+);
 assertEChartsAsset(
     EChartsAsset::DesignJavaScript() === $designUtilities
         && str_contains($designUtilities, 'readableTextColor')
@@ -100,6 +111,12 @@ assertEChartsAsset(
         && str_contains($polarRuntimeSource, 'PolarComponent')
         && str_contains($polarRuntimeSource, 'CanvasRenderer'),
     'The Polar runtime must include Bar, Polar and Canvas components.'
+);
+assertEChartsAsset(
+    str_contains($pieRuntimeSource, 'PieChart')
+        && str_contains($pieRuntimeSource, 'LegendComponent')
+        && str_contains($pieRuntimeSource, 'CanvasRenderer'),
+    'The Pie runtime must include Pie, Legend and Canvas components.'
 );
 assertEChartsAsset(
     str_contains($runtimeSource, 'GraphicComponent'),

@@ -4,9 +4,9 @@ SymconECharts stellt numerische Symcon-Werte als responsive Apache-ECharts-
 Diagramme in nativen Symcon-Kacheln und optionalen IPSView-HTML-Widgets dar.
 Die Library enthält Gauges für einzelne und mehrere Werte, historische und
 live fortgeschriebene Zeitreihen, aktuelle Kategorienvergleiche, historische
-Balken sowie Waterfall- und Polar-Diagramme für aktuelle Werte.
+Balken, Waterfall- und Polar-Diagramme sowie Kreisdiagramme für aktuelle Werte.
 
-Alle neun Diagrammformulare zeigen eine unmittelbar aktualisierte SVG-Vorschau
+Alle zehn Diagrammformulare zeigen eine unmittelbar aktualisierte SVG-Vorschau
 im Kachel- und IPSView-Designer. Sie reagiert auf noch nicht gespeicherte
 Titel-, Quellen- und Designänderungen; die endgültige responsive Darstellung
 prüfen Sie in der Kachel beziehungsweise im IPSView-Widget. Historische
@@ -117,6 +117,11 @@ Folgende Module sind enthalten:
   konzentrische Bögen. Reihenfolge, Farben und Polar-Geometrie lassen sich
   für Kachel und IPSView getrennt gestalten.
 
+- __EChartsPie__ ([Dokumentation](EChartsPie/README.md))
+  Zeigt aktuelle Anteile aus 1 bis 16 Quellen als Kreis, Donut oder
+  Nightingale-Rose. Kachel und IPSView besitzen eigene Designer und
+  Live-Vorschauen; negative Werte werden sichtbar abgewiesen.
+
 ## Kacheldesign und IPSView-Design
 
 In beiden Designern finden Sie die Einstellungen in aufklappbaren,
@@ -126,7 +131,7 @@ nutzen die verfügbare Breite der Instanzkonfiguration statt einer festen
 Pixelbreite. Bei aktiviertem „Kacheldesign verwenden“ sind die unabhängigen
 IPSView-Einstellungen deaktiviert, die Vorschau zeigt aber weiterhin das
 wirksame Design.
-Category, History, Waterfall und Polar bieten eigene Rubriken für Schrift und
+Category, History, Waterfall, Polar und Pie bieten eigene Rubriken für Schrift und
 Farben. Automatische Farben folgen weiterhin dem gewählten Theme.
 
 Alle Diagrammmodule bieten im Kacheldesigner **Animation**, **Startanimation**

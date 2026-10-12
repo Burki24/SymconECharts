@@ -743,6 +743,7 @@ require_once dirname(__DIR__) . '/EChartsBarCategory/module.php';
 require_once dirname(__DIR__) . '/EChartsBarHistory/module.php';
 require_once dirname(__DIR__) . '/EChartsBarWaterfall/module.php';
 require_once dirname(__DIR__) . '/EChartsBarPolar/module.php';
+require_once dirname(__DIR__) . '/EChartsPie/module.php';
 
 final class TestableEChartsGateway extends EChartsGateway
 {
@@ -1000,6 +1001,144 @@ assertGatewayGauge(
     'An independent IPSView design must not alter the Tile design.'
 );
 $gauge->SetTestProperty('IPSViewUseTileDesign', true);
+// Current-value Pie models keep duplicate visible names separate by variable ID.
+$pie = new EChartsPie();
+$pie->Create();
+$pie->SetTestProperty('Sources', json_encode([
+    ['VariableID' => 4711, 'Label' => 'Temperatur', 'UseVariablePresentation' => false,
+        'Unit'    => '°C', 'Decimals' => 1, 'Color' => 0x5070DD],
+    ['VariableID' => 4717, 'Label' => 'Temperatur', 'UseVariablePresentation' => false,
+        'Unit'    => '°C', 'Decimals' => 1, 'Color' => -1]
+], JSON_THROW_ON_ERROR));
+$pie->SetTestProperty('Title', 'Anteile');
+$pie->SetTestProperty('IPSViewUseTileDesign', false);
+$pie->SetTestProperty('IPSViewPieMode', 'nightingale');
+$pie->ApplyChanges();
+$pieData = json_decode($pie->GetPieData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $pie->GetTestStatus() === IS_ACTIVE
+        && $pieData['family'] === 'pie'
+        && array_column($pieData['items'], 'id') === ['variable-4711', 'variable-4717']
+        && array_column($pieData['items'], 'name') === ['Temperatur', 'Temperatur']
+        && $pieData['items'][0]['color'] === '#5070DD',
+    'Pie must retain same-name current sources separately by variable ID.'
+);
+$pieTile = $pie->GetVisualizationTile();
+$pieIPSView = $pie->GetIPSViewHTML();
+$pieUpdatesBefore = count($pie->GetTestVisualizationUpdates());
+$pie->MessageSink(1780000300, 4711, VM_UPDATE, []);
+assertGatewayGauge(
+    count($pie->GetTestVisualizationUpdates()) > $pieUpdatesBefore,
+    'Pie must publish fresh values when a configured source variable changes.'
+);
+$pieForm = json_decode($pie->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    str_contains($pieTile, 'echarts-pie-root')
+        && str_contains($pieTile, '"mode":"pie"')
+        && str_contains($pieIPSView, '"mode":"nightingale"')
+        && strlen($pieTile) < SYMCON_OUTPUT_BUFFER_LIMIT
+        && strlen($pieIPSView) < SYMCON_OUTPUT_BUFFER_LIMIT,
+    'Pie must render independent Tile and IPSView designs below the output limit.'
+);
+assertGatewayGauge(
+    findGaugeFormElement($pieForm['elements'], 'BarPreview')['type'] === 'Image'
+        && findGaugeFormElement($pieForm['elements'], 'IPSViewBarPreview')['type'] === 'Image'
+        && findGaugeFormElement($pieForm['elements'], 'IPSViewPieMode')['enabled'] === true
+        && findGaugeFormElement($pieForm['elements'], 'CopyTileDesignToIPSViewButton')['enabled'] === true,
+    'Pie must expose live Tile and independent IPSView preview controls.'
+);
+$pie->UpdateBarPreviewFromForm(json_encode([
+    'Sources' => [
+        ['VariableID' => 4711, 'Label' => 'Raum'],
+        ['VariableID' => 4717, 'Label' => 'Außen']
+    ],
+    'PieMode' => 'donut', 'IPSViewUseTileDesign' => false, 'IPSViewPieMode' => 'nightingale'
+], JSON_THROW_ON_ERROR));
+$pieUpdates = array_slice($pie->GetTestFormUpdates(), -2);
+$tilePreview = base64_decode(substr($pieUpdates[0]['Value'], strlen('data:image/svg+xml;base64,')), true);
+$ipsViewPreview = base64_decode(substr($pieUpdates[1]['Value'], strlen('data:image/svg+xml;base64,')), true);
+assertGatewayGauge(
+    is_string($tilePreview) && str_contains($tilePreview, 'Donut')
+        && str_contains($tilePreview, 'Raum')
+        && is_string($ipsViewPreview) && str_contains($ipsViewPreview, 'Nightingale'),
+    'Pie previews must reflect unsaved source labels and independent layouts.'
+);
+$negativePieValue = $GLOBALS['symconTestVariables'][4717]['Value'];
+$GLOBALS['symconTestVariables'][4717]['Value'] = -1.0;
+assertGatewayGauge(
+    str_contains($pie->GetVisualizationTile(), 'Pie charts require non-negative values.')
+        && $pie->GetTestStatus() === 205,
+    'Pie must visibly reject negative values instead of converting their sign.'
+);
+$GLOBALS['symconTestVariables'][4717]['Value'] = $negativePieValue;
+$zeroPieValue = $GLOBALS['symconTestVariables'][4711]['Value'];
+$GLOBALS['symconTestVariables'][4711]['Value'] = 0.0;
+$GLOBALS['symconTestVariables'][4717]['Value'] = 0.0;
+assertGatewayGauge(
+    str_contains($pie->GetVisualizationTile(), '"value":0'),
+    'Pie must retain zero-valued source data for an explicit empty display.'
+);
+$GLOBALS['symconTestVariables'][4711]['Value'] = $zeroPieValue;
+$GLOBALS['symconTestVariables'][4717]['Value'] = $negativePieValue;
+$originalPieName = $GLOBALS['symconTestVariables'][4717]['Name'];
+$GLOBALS['symconTestVariables'][4717]['Name'] = 'Aktueller Symcon-Name';
+$pie->SetTestProperty('Sources', json_encode([
+    ['VariableID' => 4711, 'Label' => 'Vorgabe', 'UseVariablePresentation' => false, 'Unit' => '°C'],
+    ['VariableID' => 4717, 'Label' => '', 'UseVariablePresentation' => false, 'Unit' => '°C']
+], JSON_THROW_ON_ERROR));
+$pie->ApplyChanges();
+assertGatewayGauge(
+    array_column(json_decode($pie->GetPieData(), true, 512, JSON_THROW_ON_ERROR)['items'], 'name')
+        === ['Vorgabe', 'Aktueller Symcon-Name'],
+    'Pie must prefer an explicit label and otherwise use the current Symcon name.'
+);
+$GLOBALS['symconTestVariables'][4717]['Name'] = $originalPieName;
+$invalidPie = new EChartsPie();
+$invalidPie->Create();
+$invalidPie->SetTestProperty('Sources', json_encode([
+    ['VariableID' => 4711], ['VariableID' => 4711]
+], JSON_THROW_ON_ERROR));
+$invalidPie->ApplyChanges();
+assertGatewayGauge($invalidPie->GetTestStatus() === 201, 'Pie must reject duplicate source variable IDs.');
+$invalidPie->SetTestProperty('Sources', json_encode([
+    ['VariableID' => 4711, 'UseVariablePresentation' => false, 'Unit' => '°C'],
+    ['VariableID' => 4717, 'UseVariablePresentation' => false, 'Unit' => '%']
+], JSON_THROW_ON_ERROR));
+$invalidPie->ApplyChanges();
+assertGatewayGauge($invalidPie->GetTestStatus() === 201, 'Pie must reject sources with unlike units.');
+$invalidPie->SetTestProperty('Sources', json_encode([['VariableID' => 4711]], JSON_THROW_ON_ERROR));
+$invalidPie->SetTestProperty('IPSViewUseTileDesign', false);
+$invalidPie->SetTestProperty('IPSViewInnerRadiusPercent', 90);
+$invalidPie->ApplyChanges();
+assertGatewayGauge($invalidPie->GetTestStatus() === 202, 'Pie must reject invalid independent IPSView geometry.');
+$pieSources = [];
+for ($index = 0; $index < 16; $index++) {
+    $id = 5900 + $index;
+    $GLOBALS['symconTestVariables'][$id] = [
+        'VariableType'    => 2,
+        'VariableUpdated' => 1780000200 + $index,
+        'Value'           => (float) $index,
+        'Name'            => 'Pie source'
+    ];
+    $pieSources[] = ['VariableID' => $id, 'UseVariablePresentation' => false, 'Unit' => 'W'];
+}
+$maximumPie = new EChartsPie();
+$maximumPie->Create();
+$maximumPie->SetTestProperty('Sources', json_encode($pieSources, JSON_THROW_ON_ERROR));
+$maximumPie->ApplyChanges();
+assertGatewayGauge(
+    $maximumPie->GetTestStatus() === IS_ACTIVE
+        && count(json_decode($maximumPie->GetPieData(), true, 512, JSON_THROW_ON_ERROR)['items']) === 16,
+    'Pie must preserve all 16 distinct same-name sources.'
+);
+$pieSources[] = ['VariableID' => 4711, 'UseVariablePresentation' => false, 'Unit' => 'W'];
+$maximumPie->SetTestProperty('Sources', json_encode($pieSources, JSON_THROW_ON_ERROR));
+$maximumPie->ApplyChanges();
+assertGatewayGauge($maximumPie->GetTestStatus() === 201, 'Pie must reject more than 16 sources.');
+for ($index = 0; $index < 16; $index++) {
+    unset($GLOBALS['symconTestVariables'][5900 + $index]);
+}
+
 foreach ([
     'function resolveGaugeLayout(preset, width, height, style, scaleMultiplier)',
     "resolveStyleScale(style, 'scaleFontSizePercent')",
@@ -6389,7 +6528,8 @@ $typographyCases = [
     [EChartsBarCategory::class, 'LegendFontSizePercent', 'LegendColor', ''],
     [EChartsBarWaterfall::class, 'ValueFontSizePercent', 'ValueColor', ''],
     [EChartsBarHistory::class, 'LegendFontSizePercent', 'LegendColor', false],
-    [EChartsBarPolar::class, 'TitleFontSizePercent', 'CategoryLabelColor', '']
+    [EChartsBarPolar::class, 'TitleFontSizePercent', 'CategoryLabelColor', ''],
+    [EChartsPie::class, 'LegendFontSizePercent', 'LegendColor', '']
 ];
 foreach ($typographyCases as [$moduleClass, $fontName, $colorName, $styleArgument]) {
     $module = new $moduleClass();
@@ -6461,6 +6601,7 @@ $expectedDesignerSections = [
     ],
     EChartsBarHistory::class       => ['Axes and display', 'Bar fill and pattern', 'Typography and colors'],
     EChartsBarWaterfall::class     => ['Labels and geometry', 'Step colors', 'Typography and colors'],
+    EChartsPie::class              => ['Geometry and order', 'Labels and visibility', 'Typography and colors'],
     EChartsBarPolar::class         => [
         'Polar layout and order', 'Labels and visibility', 'Bar geometry',
         'Bar appearance and effects', 'Scale and angular range', 'Typography and colors'
@@ -6479,6 +6620,10 @@ $requiredGermanFormTexts = [
     'EChartsBarPolar' => [
         'Typography and colors', 'Title size', 'Title color', 'Category color',
         'Scale color', 'Outside value color', 'Grid color'
+    ],
+    'EChartsPie' => [
+        'Typography and colors', 'Title size', 'Legend size', 'Label size',
+        'Title color', 'Legend color', 'Label color'
     ],
     'EChartsGaugeTacho' => [
         'SVG pivot', 'Hub border', 'Colors', 'Scale font', 'Value font', 'Title font',
@@ -6616,7 +6761,8 @@ foreach ([
     EChartsBarCategory::class       => 'ECBC',
     EChartsBarHistory::class        => 'ECBH',
     EChartsBarWaterfall::class      => 'ECBW',
-    EChartsBarPolar::class          => 'ECBP'
+    EChartsBarPolar::class          => 'ECBP',
+    EChartsPie::class               => 'ECPI'
 ] as $moduleClass => $modulePrefix) {
     $designModule = new $moduleClass();
     $designModule->Create();
@@ -6835,7 +6981,8 @@ foreach ([EChartsTimeSeries::class, EChartsBarHistory::class] as $timeModuleClas
 foreach ([
     EChartsGaugeSingle::class, EChartsGaugeMulti::class, EChartsGaugeTacho::class,
     EChartsGaugeChronograph::class, EChartsTimeSeries::class, EChartsBarCategory::class,
-    EChartsBarHistory::class, EChartsBarWaterfall::class, EChartsBarPolar::class
+    EChartsBarHistory::class, EChartsBarWaterfall::class, EChartsBarPolar::class,
+    EChartsPie::class
 ] as $animationModuleClass) {
     $animationModule = new $animationModuleClass();
     $animationModule->Create();
@@ -6886,7 +7033,8 @@ foreach ([
 foreach ([
     EChartsGaugeSingle::class, EChartsGaugeMulti::class, EChartsGaugeTacho::class,
     EChartsGaugeChronograph::class, EChartsTimeSeries::class, EChartsBarCategory::class,
-    EChartsBarHistory::class, EChartsBarWaterfall::class, EChartsBarPolar::class
+    EChartsBarHistory::class, EChartsBarWaterfall::class, EChartsBarPolar::class,
+    EChartsPie::class
 ] as $formModuleClass) {
     $formModule = new $formModuleClass();
     $formModule->Create();
@@ -6948,7 +7096,7 @@ assertGatewayGauge(
 foreach ([
     'EChartsGaugeSingle', 'EChartsGaugeMulti', 'EChartsGaugeTacho',
     'EChartsGaugeChronograph', 'EChartsTimeSeries', 'EChartsBarCategory',
-    'EChartsBarHistory', 'EChartsBarWaterfall', 'EChartsBarPolar'
+    'EChartsBarHistory', 'EChartsBarWaterfall', 'EChartsBarPolar', 'EChartsPie'
 ] as $moduleDirectory) {
     $locale = json_decode(
         file_get_contents(__DIR__ . '/../' . $moduleDirectory . '/locale.json'),
@@ -7772,7 +7920,8 @@ foreach ([
     EChartsBarCategory::class      => ['BarPreview', 'IPSViewBarPreview'],
     EChartsBarHistory::class       => ['BarPreview', 'IPSViewBarPreview'],
     EChartsBarWaterfall::class     => ['BarPreview', 'IPSViewBarPreview'],
-    EChartsBarPolar::class         => ['BarPreview', 'IPSViewBarPreview']
+    EChartsBarPolar::class         => ['BarPreview', 'IPSViewBarPreview'],
+    EChartsPie::class              => ['BarPreview', 'IPSViewBarPreview']
 ] as $chartClass => $previewFields) {
     $chart = new $chartClass();
     $chart->Create();

@@ -1,0 +1,660 @@
+{
+    "$schema": "https://www.symcon.de/assets/files/validation/formSchema.json",
+    "elements": [
+        {
+            "type": "Label",
+            "caption": "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts."
+        },
+        {
+            "type": "ValidationTextBox",
+            "name": "Title",
+            "caption": "Title"
+        },
+        {
+            "type": "List",
+            "name": "Sources",
+            "caption": "Pie sources",
+            "rowCount": 8,
+            "add": true,
+            "delete": true,
+            "changeOrder": true,
+            "columns": [
+                {
+                    "caption": "Variable",
+                    "name": "VariableID",
+                    "width": "360px",
+                    "add": 0,
+                    "edit": {
+                        "type": "SelectVariable",
+                        "validVariableTypes": [
+                            1,
+                            2
+                        ]
+                    }
+                },
+                {
+                    "caption": "Label (optional)",
+                    "name": "Label",
+                    "width": "180px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "caption": "Variable presentation",
+                    "name": "UseVariablePresentation",
+                    "width": "150px",
+                    "add": true,
+                    "edit": {
+                        "type": "CheckBox"
+                    }
+                },
+                {
+                    "caption": "Unit",
+                    "name": "Unit",
+                    "width": "90px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "caption": "Decimals",
+                    "name": "Decimals",
+                    "width": "90px",
+                    "add": 1,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "minimum": 0,
+                        "maximum": 6
+                    }
+                },
+                {
+                    "caption": "Color",
+                    "name": "Color",
+                    "width": "130px",
+                    "add": -1,
+                    "edit": {
+                        "type": "SelectColor",
+                        "allowTransparent": true,
+                        "transparentCaption": "Automatic (theme)"
+                    }
+                }
+            ],
+            "form": [
+                {
+                    "type": "SelectVariable",
+                    "name": "VariableID",
+                    "caption": "Variable",
+                    "validVariableTypes": [
+                        1,
+                        2
+                    ]
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Label",
+                    "caption": "Label (optional)"
+                },
+                {
+                    "type": "CheckBox",
+                    "name": "UseVariablePresentation",
+                    "caption": "Variable presentation"
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Unit",
+                    "caption": "Unit"
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "Decimals",
+                    "caption": "Decimals",
+                    "minimum": 0,
+                    "maximum": 6
+                },
+                {
+                    "type": "SelectColor",
+                    "name": "Color",
+                    "caption": "Color",
+                    "allowTransparent": true,
+                    "transparentCaption": "Automatic (theme)"
+                }
+            ]
+        },
+        {
+            "type": "Label",
+            "caption": "Use 1 to 16 unique numeric variables with one effective unit. Negative values cannot form Pie sectors. Equal names remain separate sources."
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Tile designer",
+            "expanded": false,
+            "items": [
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "AnimationEnabled",
+                            "caption": "Animate sectors"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDuration",
+                            "caption": "Initial animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDurationUpdate",
+                            "caption": "Update animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "PieMode",
+                            "caption": "Pie layout",
+                            "options": [
+                                {
+                                    "caption": "Pie",
+                                    "value": "pie"
+                                },
+                                {
+                                    "caption": "Donut",
+                                    "value": "donut"
+                                },
+                                {
+                                    "caption": "Nightingale rose",
+                                    "value": "nightingale"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Select",
+                            "name": "SortOrder",
+                            "caption": "Order",
+                            "options": [
+                                {
+                                    "caption": "Configured order",
+                                    "value": "configured"
+                                },
+                                {
+                                    "caption": "Value ascending",
+                                    "value": "ascending"
+                                },
+                                {
+                                    "caption": "Value descending",
+                                    "value": "descending"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Select",
+                            "name": "EChartsTheme",
+                            "caption": "ECharts theme",
+                            "options": [
+                                {
+                                    "caption": "Automatic (Symcon design)",
+                                    "value": "auto"
+                                },
+                                {
+                                    "caption": "Dark",
+                                    "value": "dark"
+                                },
+                                {
+                                    "caption": "Vintage",
+                                    "value": "vintage"
+                                },
+                                {
+                                    "caption": "Macarons",
+                                    "value": "macarons"
+                                },
+                                {
+                                    "caption": "Infographic",
+                                    "value": "infographic"
+                                },
+                                {
+                                    "caption": "Shine",
+                                    "value": "shine"
+                                },
+                                {
+                                    "caption": "Roma",
+                                    "value": "roma"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "InnerRadiusPercent",
+                            "caption": "Inner radius (% of outer)",
+                            "minimum": 0,
+                            "maximum": 70,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "OuterRadiusPercent",
+                            "caption": "Outer radius",
+                            "minimum": 40,
+                            "maximum": 100,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowLegend",
+                            "caption": "Show legend"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowLabels",
+                            "caption": "Show labels"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowPercent",
+                            "caption": "Show percentage"
+                        },
+                        {
+                            "type": "Select",
+                            "name": "LabelPosition",
+                            "caption": "Label position",
+                            "options": [
+                                {
+                                    "caption": "Outside",
+                                    "value": "outside"
+                                },
+                                {
+                                    "caption": "Inside",
+                                    "value": "inside"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "TitleFontSizePercent",
+                            "caption": "Title size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "LegendFontSizePercent",
+                            "caption": "Legend size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "LabelFontSizePercent",
+                            "caption": "Label size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "TitleColor",
+                            "caption": "Title color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "LegendColor",
+                            "caption": "Legend color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "LabelColor",
+                            "caption": "Label color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "IPSView design",
+            "expanded": false,
+            "items": [
+                {
+                    "type": "Label",
+                    "caption": "Configure optional IPSView HTML output."
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "IPSViewAdaptToBackground",
+                            "caption": "Adapt to IPSView background"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "IPSViewBackgroundColor",
+                            "caption": "Background color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "IPSViewBackgroundOpacityPercent",
+                            "caption": "Background opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "CheckBox",
+                    "name": "IPSViewUseTileDesign",
+                    "caption": "Use Tile design"
+                },
+                {
+                    "type": "Button",
+                    "caption": "Copy Tile design to IPSView and edit independently",
+                    "onClick": "ECPI_CopyTileDesignToIPSView($id); return \"MESSAGE:Tile design copied to IPSView.\";"
+                },
+                {
+                    "type": "ExpansionPanel",
+                    "caption": "Independent IPSView designer",
+                    "expanded": false,
+                    "items": [
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "CheckBox",
+                                    "name": "IPSViewAnimationEnabled",
+                                    "caption": "Animate sectors"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "IPSViewAnimationDuration",
+                                    "caption": "Initial animation",
+                                    "minimum": 0,
+                                    "maximum": 3000,
+                                    "suffix": "ms"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "IPSViewAnimationDurationUpdate",
+                                    "caption": "Update animation",
+                                    "minimum": 0,
+                                    "maximum": 3000,
+                                    "suffix": "ms"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "Select",
+                                    "name": "IPSViewPieMode",
+                                    "caption": "Pie layout",
+                                    "options": [
+                                        {
+                                            "caption": "Pie",
+                                            "value": "pie"
+                                        },
+                                        {
+                                            "caption": "Donut",
+                                            "value": "donut"
+                                        },
+                                        {
+                                            "caption": "Nightingale rose",
+                                            "value": "nightingale"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Select",
+                                    "name": "IPSViewSortOrder",
+                                    "caption": "Order",
+                                    "options": [
+                                        {
+                                            "caption": "Configured order",
+                                            "value": "configured"
+                                        },
+                                        {
+                                            "caption": "Value ascending",
+                                            "value": "ascending"
+                                        },
+                                        {
+                                            "caption": "Value descending",
+                                            "value": "descending"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Select",
+                                    "name": "IPSViewEChartsTheme",
+                                    "caption": "ECharts theme",
+                                    "options": [
+                                        {
+                                            "caption": "Automatic (Symcon design)",
+                                            "value": "auto"
+                                        },
+                                        {
+                                            "caption": "Dark",
+                                            "value": "dark"
+                                        },
+                                        {
+                                            "caption": "Vintage",
+                                            "value": "vintage"
+                                        },
+                                        {
+                                            "caption": "Macarons",
+                                            "value": "macarons"
+                                        },
+                                        {
+                                            "caption": "Infographic",
+                                            "value": "infographic"
+                                        },
+                                        {
+                                            "caption": "Shine",
+                                            "value": "shine"
+                                        },
+                                        {
+                                            "caption": "Roma",
+                                            "value": "roma"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "IPSViewInnerRadiusPercent",
+                                    "caption": "Inner radius (% of outer)",
+                                    "minimum": 0,
+                                    "maximum": 70,
+                                    "suffix": "%"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "IPSViewOuterRadiusPercent",
+                                    "caption": "Outer radius",
+                                    "minimum": 40,
+                                    "maximum": 100,
+                                    "suffix": "%"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "CheckBox",
+                                    "name": "IPSViewShowLegend",
+                                    "caption": "Show legend"
+                                },
+                                {
+                                    "type": "CheckBox",
+                                    "name": "IPSViewShowLabels",
+                                    "caption": "Show labels"
+                                },
+                                {
+                                    "type": "CheckBox",
+                                    "name": "IPSViewShowPercent",
+                                    "caption": "Show percentage"
+                                },
+                                {
+                                    "type": "Select",
+                                    "name": "IPSViewLabelPosition",
+                                    "caption": "Label position",
+                                    "options": [
+                                        {
+                                            "caption": "Outside",
+                                            "value": "outside"
+                                        },
+                                        {
+                                            "caption": "Inside",
+                                            "value": "inside"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "IPSViewTitleFontSizePercent",
+                                    "caption": "Title size",
+                                    "minimum": 50,
+                                    "maximum": 200,
+                                    "suffix": "%"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "IPSViewLegendFontSizePercent",
+                                    "caption": "Legend size",
+                                    "minimum": 50,
+                                    "maximum": 200,
+                                    "suffix": "%"
+                                },
+                                {
+                                    "type": "NumberSpinner",
+                                    "name": "IPSViewLabelFontSizePercent",
+                                    "caption": "Label size",
+                                    "minimum": 50,
+                                    "maximum": 200,
+                                    "suffix": "%"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "RowLayout",
+                            "items": [
+                                {
+                                    "type": "SelectColor",
+                                    "name": "IPSViewTitleColor",
+                                    "caption": "Title color",
+                                    "allowTransparent": true,
+                                    "transparentCaption": "Automatic (theme)"
+                                },
+                                {
+                                    "type": "SelectColor",
+                                    "name": "IPSViewLegendColor",
+                                    "caption": "Legend color",
+                                    "allowTransparent": true,
+                                    "transparentCaption": "Automatic (theme)"
+                                },
+                                {
+                                    "type": "SelectColor",
+                                    "name": "IPSViewLabelColor",
+                                    "caption": "Label color",
+                                    "allowTransparent": true,
+                                    "transparentCaption": "Automatic (theme)"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "type": "Button",
+            "caption": "Read current Pie data",
+            "onClick": "echo ECPI_GetPieData($id);"
+        }
+    ],
+    "status": [
+        {
+            "code": 102,
+            "icon": "active",
+            "caption": "Pie is ready"
+        },
+        {
+            "code": 201,
+            "icon": "error",
+            "caption": "Configure valid Pie sources"
+        },
+        {
+            "code": 202,
+            "icon": "error",
+            "caption": "Pie design is invalid"
+        },
+        {
+            "code": 203,
+            "icon": "error",
+            "caption": "No active EChartsGateway is connected"
+        },
+        {
+            "code": 204,
+            "icon": "error",
+            "caption": "EChartsGateway request failed"
+        },
+        {
+            "code": 205,
+            "icon": "error",
+            "caption": "Pie values must not be negative"
+        }
+    ]
+}

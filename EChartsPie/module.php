@@ -1,0 +1,690 @@
+<?php
+
+declare(strict_types=1);
+
+use Burki24\SymconModuleHelper\ConfigurationFormHelper;
+use Burki24\SymconModuleHelper\DataFlowHelper;
+use Burki24\SymconModuleHelper\IPSViewHTMLPageHelper;
+use Burki24\SymconModuleHelper\ResponsiveVisualizationHelper;
+use Burki24\SymconModuleHelper\VisualizationAssetHelper;
+use Burki24\SymconModuleHelper\VisualizationThemeHelper;
+use SymconECharts\EChartsAnimationDesign;
+use SymconECharts\EChartsAsset;
+use SymconECharts\EChartsBarPreview;
+use SymconECharts\EChartsBarPreviewForm;
+use SymconECharts\EChartsCurrentSources;
+use SymconECharts\EChartsDesignerSections;
+use SymconECharts\EChartsIPSViewBackground;
+use SymconECharts\EChartsIPSViewDesignForm;
+use SymconECharts\EChartsIPSViewTransport;
+use SymconECharts\EChartsPreviewSourceCount;
+use SymconECharts\EChartsSourceIdentity;
+use SymconECharts\EChartsTransientRefresh;
+use SymconECharts\EChartsVariablePresentation;
+
+require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
+require_once __DIR__ . '/../libs/helper/DataFlowHelper.php';
+require_once __DIR__ . '/../libs/helper/IPSViewHTMLPageHelper.php';
+require_once __DIR__ . '/../libs/helper/ResponsiveVisualizationHelper.php';
+require_once __DIR__ . '/../libs/helper/SVGPreviewHelper.php';
+require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
+require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
+require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
+require_once __DIR__ . '/../libs/EChartsAsset.php';
+require_once __DIR__ . '/../libs/EChartsBarPreview.php';
+require_once __DIR__ . '/../libs/EChartsBarPreviewForm.php';
+require_once __DIR__ . '/../libs/EChartsCurrentSources.php';
+require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
+require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
+require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
+require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
+require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
+require_once __DIR__ . '/../libs/EChartsPreviewSourceCount.php';
+require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
+require_once __DIR__ . '/../libs/EChartsTransientRefresh.php';
+require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
+
+class EChartsPie extends IPSModuleStrict
+{
+    use ConfigurationFormHelper;
+    use DataFlowHelper;
+    use EChartsAnimationDesign;
+    use EChartsBarPreviewForm;
+    use EChartsCurrentSources;
+    use EChartsIPSViewDesignForm;
+    use EChartsIPSViewTransport;
+    use EChartsTransientRefresh;
+    use IPSViewHTMLPageHelper;
+    use ResponsiveVisualizationHelper;
+    use VisualizationAssetHelper;
+    use VisualizationThemeHelper;
+
+    private const GATEWAY_MODULE_ID = '{33C9DF44-6F6D-5916-4AAE-CCB24BD6928D}';
+    private const DATA_ID_TO_PARENT = '{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}';
+    private const DATA_ID_FROM_PARENT = '{E4749B72-912B-E3E3-1C57-D19019FFDD84}';
+    private const IPSVIEW_OUTPUT_IDENT = 'IPSViewPie';
+    private const STATUS_SOURCE_INVALID = 201;
+    private const STATUS_DESIGN_INVALID = 202;
+    private const STATUS_PARENT_MISSING = 203;
+    private const STATUS_GATEWAY_FAILED = 204;
+    private const STATUS_VALUE_INVALID = 205;
+    private const MODES = ['pie', 'donut', 'nightingale'];
+    private const SORT_ORDERS = ['configured', 'ascending', 'descending'];
+    private const LABEL_POSITIONS = ['inside', 'outside'];
+
+    public function Create(): void
+    {
+        parent::Create();
+        $this->RegisterTransientRefresh('ECPI');
+        $this->SetVisualizationType(1);
+        $this->RegisterMessage(0, IPS_KERNELSTARTED);
+        $this->RegisterPropertyString('Sources', '[]');
+        $this->RegisterPropertyString('Title', '');
+        $this->RegisterDesignProperties();
+        $this->RegisterIPSViewHTMLPageProperties();
+        $this->RegisterEChartsIPSViewTransport();
+        $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
+        $this->RegisterPropertyBoolean('IPSViewAdaptToBackground', false);
+        $this->RegisterPropertyInteger('IPSViewBackgroundColor', EChartsIPSViewBackground::DEFAULT_COLOR);
+        $this->RegisterPropertyInteger('IPSViewBackgroundOpacityPercent', EChartsIPSViewBackground::DEFAULT_OPACITY_PERCENT);
+        $this->RegisterDesignProperties('IPSView');
+        $this->RegisterAttributeString('RegisteredSourceVariableIDs', '[]');
+        $this->RegisterAttributeString('LastError', '');
+    }
+
+    public function ApplyChanges(): void
+    {
+        parent::ApplyChanges();
+        $this->RegisterMessage(0, IPS_KERNELSTARTED);
+        $this->MaintainIPSViewHTMLVariable(self::IPSVIEW_OUTPUT_IDENT, $this->Translate('Pie for IPSView'), 90);
+        $this->Initialize();
+        if (IPS_GetKernelRunlevel() === KR_READY) {
+            $this->PublishVisualizationState();
+            $this->PublishIPSViewHTML();
+        }
+    }
+
+    public function GetCompatibleParents(): string
+    {
+        return json_encode(['type' => 'connect', 'moduleIDs' => [self::GATEWAY_MODULE_ID]], JSON_THROW_ON_ERROR);
+    }
+
+    public function GetConfigurationForm(): string
+    {
+        $form = $this->LoadConfigurationForm();
+        $form['elements'] = $this->WithAnimationFormControls($form['elements']);
+        $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
+        $form['elements'] = $this->WithAnimationFormCallbacks($form['elements'], 'ECPI');
+        $this->InsertIPSViewHTMLPageFormItems(
+            $form['elements'],
+            'Configure optional IPSView HTML output.',
+            'Creates a standalone WebContent variable for use as an IPSView HTML widget.'
+        );
+        $form = $this->WithIPSViewDesignFormState($form, 'ECPI');
+        $form = EChartsDesignerSections::Group($form, [
+            ['caption' => 'Geometry and order', 'start' => 'PieMode'],
+            ['caption' => 'Labels and visibility', 'start' => 'ShowLegend'],
+            ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
+        ]);
+        $fields = array_merge(
+            ['Title', 'Sources', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
+                'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent'],
+            array_keys($this->DesignPropertyNames()),
+            array_map(static fn (string $name): string => 'IPSView' . $name, array_keys($this->DesignPropertyNames()))
+        );
+
+        return $this->EncodeConfigurationForm($this->WithBarPreviewForm($form, 'ECPI', $fields));
+    }
+
+    public function RequestAction(string $Ident, mixed $Value): void
+    {
+        if ($this->HandleIPSViewHTMLPageAction($Ident, $Value)) {
+            return;
+        }
+        throw new InvalidArgumentException('Unknown action: ' . $Ident);
+    }
+
+    public function CopyTileDesignToIPSView(): void
+    {
+        foreach ($this->DesignPropertyNames() as $name => $type) {
+            $value = match ($type) {
+                'string'  => $this->ReadPropertyString($name),
+                'boolean' => $this->ReadPropertyBoolean($name),
+                default   => $this->ReadPropertyInteger($name)
+            };
+            IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
+        }
+        IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
+        IPS_ApplyChanges($this->InstanceID);
+    }
+
+    public function GetPieData(): string
+    {
+        $error = $this->GetConfigurationError();
+        if ($error !== null) {
+            $this->WriteAttributeString('LastError', $error['Message']);
+            $this->SetStatus($error['Status']);
+            throw new RuntimeException($error['Message']);
+        }
+        if (!$this->HasActiveParent()) {
+            $this->SetStatus(self::STATUS_PARENT_MISSING);
+            throw new RuntimeException('No active EChartsGateway is connected.');
+        }
+
+        $sources = $this->GetValidatedSources();
+        $labels = EChartsSourceIdentity::LabelsForSources(array_map(
+            static fn (array $source): array => ['VariableID' => $source['VariableID'], 'Label' => $source['Label']],
+            $sources
+        ));
+        $items = [];
+        foreach ($sources as $index => $source) {
+            $current = $this->ReadCurrentSource($source['VariableID']);
+            if ($current['Value'] < 0) {
+                $this->WriteAttributeString('LastError', 'Pie charts require non-negative values.');
+                $this->SetStatus(self::STATUS_VALUE_INVALID);
+                throw new DomainException('Pie charts require non-negative values.');
+            }
+            $items[] = [
+                'id'        => 'variable-' . $source['VariableID'],
+                'name'      => $labels[$source['VariableID']],
+                'value'     => $current['Value'],
+                'timestamp' => $current['Timestamp'],
+                'unit'      => $source['Unit'],
+                'decimals'  => $source['Decimals'],
+                'color'     => $source['Color'] < 0 ? '' : EChartsAsset::ColorToHex($source['Color']),
+                'order'     => $index
+            ];
+        }
+        $this->WriteAttributeString('LastError', '');
+        $this->SetStatus(IS_ACTIVE);
+
+        return json_encode([
+            'schemaVersion' => 1,
+            'family'        => 'pie',
+            'theme'         => $this->ReadPropertyString('EChartsTheme'),
+            'pie'           => [
+                'title' => $this->ReadPropertyString('Title'),
+                'style' => $this->ReadDesignStyle()
+            ],
+            'items'         => $items
+        ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
+    }
+
+    public function GetPieDiagnostic(): string
+    {
+        $error = $this->GetConfigurationError();
+        return json_encode([
+            'valid'       => $error === null,
+            'sourceCount' => count($this->ConfiguredVariableIDs()),
+            'lastError'   => $error['Message'] ?? $this->ReadAttributeString('LastError')
+        ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    }
+
+    public function GetVisualizationTile(): string
+    {
+        return $this->RenderPieHTMLPage(false);
+    }
+
+    public function GetIPSViewHTML(): string
+    {
+        return $this->RenderPieHTMLPage(true);
+    }
+
+    public function ReceiveData(string $JSONString): string
+    {
+        return $this->HandleEChartsIPSViewRequest(
+            $JSONString,
+            self::DATA_ID_FROM_PARENT,
+            fn (): array => $this->BuildVisualizationState(true)
+        );
+    }
+
+    public function RetryTransient(): void
+    {
+        $this->PublishVisualizationState();
+    }
+
+    /** @param array<int,mixed> $Data */
+    public function MessageSink(int $TimeStamp, int $SenderID, int $Message, array $Data): void
+    {
+        if ($SenderID === 0 && $Message === IPS_KERNELSTARTED) {
+            $this->Initialize();
+            $this->PublishVisualizationState();
+            $this->PublishIPSViewHTML();
+            return;
+        }
+        if ($Message === VM_UPDATE && in_array($SenderID, $this->ConfiguredVariableIDs(), true)) {
+            $this->PublishVisualizationState();
+        }
+    }
+
+    /** @param array<string,mixed> $values */
+    protected function BarPreviewSvg(array $values, bool $ipsView): string
+    {
+        $theme = $this->BarPreviewValue($values, 'EChartsTheme', 'string', $ipsView);
+        $palette = EChartsBarPreview::Palette($theme);
+        $sourceData = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values);
+        $items = $sourceData['items'];
+        $mode = $this->BarPreviewValue($values, 'PieMode', 'string', $ipsView);
+        $sort = $this->BarPreviewValue($values, 'SortOrder', 'string', $ipsView);
+        if ($sort === 'ascending' || $sort === 'descending') {
+            usort($items, static fn (array $a, array $b): int => $sort === 'ascending'
+                ? $a['value'] <=> $b['value'] : $b['value'] <=> $a['value']);
+        }
+        $items = array_slice($items, 0, 6);
+        $svg = EChartsBarPreview::Open(
+            $palette,
+            (string) ($values['Title'] ?? $this->ReadPropertyString('Title')),
+            $sourceData['sample'],
+            $ipsView,
+            $values,
+            $this->Translate('Example data'),
+            $this->Translate('Pie preview'),
+            EChartsBarPreview::Color($this->BarPreviewValue($values, 'TitleColor', 'integer', $ipsView), $palette['text']),
+            $this->BarPreviewValue($values, 'TitleFontSizePercent', 'integer', $ipsView)
+        );
+        $modeCaption = match ($mode) {
+            'donut'       => 'Donut',
+            'nightingale' => 'Nightingale rose',
+            default       => 'Pie'
+        };
+        $svg .= '<text x="696" y="58" text-anchor="end" fill="' . EChartsBarPreview::E($palette['muted'])
+            . '" font-size="12">' . EChartsBarPreview::E($this->Translate($modeCaption)) . '</text>';
+        $hasNegative = count(array_filter($sourceData['items'], static fn (array $item): bool => $item['value'] < 0)) > 0;
+        $positive = $hasNegative ? [] : array_values(array_filter($items, static fn (array $item): bool => $item['value'] > 0));
+        $sum = array_sum(array_column($positive, 'value'));
+        $outer = max(80, min(125, 125 * $this->BarPreviewValue($values, 'OuterRadiusPercent', 'integer', $ipsView) / 100));
+        $inner = $mode === 'pie' ? 0 : $outer * max(0, min(70, $this->BarPreviewValue($values, 'InnerRadiusPercent', 'integer', $ipsView))) / 100;
+        $showLabels = $this->BarPreviewValue($values, 'ShowLabels', 'boolean', $ipsView);
+        $showPercent = $this->BarPreviewValue($values, 'ShowPercent', 'boolean', $ipsView);
+        $labelPosition = $this->BarPreviewValue($values, 'LabelPosition', 'string', $ipsView);
+        $labelSize = max(7, min(20, (int) round(11 * $this->BarPreviewValue($values, 'LabelFontSizePercent', 'integer', $ipsView) / 100)));
+        $labelColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'LabelColor', 'integer', $ipsView), $palette['text']);
+        $previewLanguage = $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage());
+        $legendColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'LegendColor', 'integer', $ipsView), $palette['text']);
+        $legendSize = max(7, min(20, (int) round(11 * $this->BarPreviewValue($values, 'LegendFontSizePercent', 'integer', $ipsView) / 100)));
+        $start = -M_PI / 2;
+        $sectorItems = $mode === 'nightingale' && $sum > 0 ? $items : $positive;
+        foreach ($sectorItems as $index => $item) {
+            $angle = $mode === 'nightingale' ? 2 * M_PI / count($sectorItems) : 2 * M_PI * $item['value'] / $sum;
+            $end = $start + $angle;
+            $radius = $mode === 'nightingale' ? $inner + ($outer - $inner) * $item['value'] / max(array_column($positive, 'value')) : $outer;
+            $color = $item['color'] !== '' ? $item['color'] : $palette['seriesColors'][$index % count($palette['seriesColors'])];
+            if ($radius > $inner) {
+                $svg .= '<path d="' . $this->PreviewSector(310, 190, $inner, $radius, $start, $end)
+                    . '" fill="' . EChartsBarPreview::E($color) . '"/>';
+            }
+            if ($showLabels && $item['value'] > 0) {
+                $mid = $start + $angle / 2;
+                $labelRadius = $labelPosition === 'inside' ? ($inner + $radius) / 2 : $radius + 15;
+                $x = 310 + $labelRadius * cos($mid);
+                $y = 190 + $labelRadius * sin($mid);
+                $text = mb_strimwidth((string) $item['label'], 0, 14, '…');
+                if ($showPercent) {
+                    $text .= ' ' . EChartsBarPreview::FormatValue(
+                        100 * $item['value'] / $sum,
+                        1,
+                        '%',
+                        $previewLanguage
+                    );
+                }
+                $svg .= '<text x="' . EChartsBarPreview::N($x) . '" y="' . EChartsBarPreview::N($y)
+                    . '" text-anchor="middle" fill="' . EChartsBarPreview::E($labelColor) . '" font-size="'
+                    . $labelSize . '">' . EChartsBarPreview::E($text) . '</text>';
+            }
+            $start = $end;
+        }
+        if ($hasNegative) {
+            $svg .= '<text x="310" y="195" text-anchor="middle" fill="' . EChartsBarPreview::E($palette['text'])
+                . '" font-size="14">' . EChartsBarPreview::E($this->Translate('Pie charts require non-negative values.')) . '</text>';
+        } elseif ($sum === 0.0) {
+            $svg .= '<text x="310" y="195" text-anchor="middle" fill="' . EChartsBarPreview::E($palette['muted'])
+                . '" font-size="14">' . EChartsBarPreview::E($this->Translate('No positive values')) . '</text>';
+        }
+        if ($this->BarPreviewValue($values, 'ShowLegend', 'boolean', $ipsView)) {
+            foreach ($items as $index => $item) {
+                $color = $item['color'] !== '' ? $item['color'] : $palette['seriesColors'][$index % count($palette['seriesColors'])];
+                $y = 105 + $index * 30;
+                $svg .= '<rect x="480" y="' . $y . '" width="12" height="12" fill="' . EChartsBarPreview::E($color) . '"/>';
+                $svg .= '<text x="500" y="' . ($y + 11) . '" fill="' . EChartsBarPreview::E($legendColor)
+                    . '" font-size="' . $legendSize . '">' . EChartsBarPreview::E(mb_strimwidth($item['label'], 0, 25, '…')) . '</text>';
+            }
+        }
+
+        return EChartsPreviewSourceCount::Append(
+            $svg . '</svg>',
+            count($items),
+            count($sourceData['items']),
+            $this->Translate('Preview shows %d of %d sources'),
+            $palette['muted'],
+            696,
+            351
+        );
+    }
+
+    private function PreviewSector(float $cx, float $cy, float $inner, float $outer, float $start, float $end): string
+    {
+        $span = min($end - $start, 2 * M_PI - 0.000001);
+        $end = $start + $span;
+        $x1 = $cx + $outer * cos($start);
+        $y1 = $cy + $outer * sin($start);
+        $x2 = $cx + $outer * cos($end);
+        $y2 = $cy + $outer * sin($end);
+        $large = $span > M_PI ? 1 : 0;
+        $path = 'M ' . EChartsBarPreview::N($x1) . ' ' . EChartsBarPreview::N($y1)
+            . ' A ' . EChartsBarPreview::N($outer) . ' ' . EChartsBarPreview::N($outer)
+            . ' 0 ' . $large . ' 1 ' . EChartsBarPreview::N($x2) . ' ' . EChartsBarPreview::N($y2);
+        if ($inner > 0) {
+            $ix2 = $cx + $inner * cos($end);
+            $iy2 = $cy + $inner * sin($end);
+            $ix1 = $cx + $inner * cos($start);
+            $iy1 = $cy + $inner * sin($start);
+            $path .= ' L ' . EChartsBarPreview::N($ix2) . ' ' . EChartsBarPreview::N($iy2)
+                . ' A ' . EChartsBarPreview::N($inner) . ' ' . EChartsBarPreview::N($inner)
+                . ' 0 ' . $large . ' 0 ' . EChartsBarPreview::N($ix1) . ' ' . EChartsBarPreview::N($iy1);
+        } else {
+            $path .= ' L ' . EChartsBarPreview::N($cx) . ' ' . EChartsBarPreview::N($cy);
+        }
+
+        return $path . ' Z';
+    }
+
+    private function RenderPieHTMLPage(bool $ipsView): string
+    {
+        $hiddenTitle = !$ipsView && function_exists('IPS_GetObject')
+            && (bool) (IPS_GetObject($this->InstanceID)['ObjectIsHiddenTitle'] ?? false);
+        return $this->RenderVisualizationHTMLPage($ipsView, [
+            'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
+            'title'              => 'ECharts Pie',
+            'visualizationTheme' => $this->VisualizationThemeCSS() . "\n\n"
+                . $this->ResponsiveVisualizationCSS('#echarts-pie-root', 'echarts-pie'),
+            'ipsViewStyle'       => $ipsView ? $this->IPSViewThemeCSS() : '',
+            'state'              => $this->BuildVisualizationState($ipsView),
+            'translations'       => [
+                'Configure valid Pie sources.'                                    => $this->Translate('Configure valid Pie sources.'),
+                'Connect an active EChartsGateway.'                               => $this->Translate('Connect an active EChartsGateway.'),
+                'The Pie values could not be loaded.'                             => $this->Translate('The Pie values could not be loaded.'),
+                'Pie charts require non-negative values.'                         => $this->Translate('Pie charts require non-negative values.'),
+                'No positive values'                                              => $this->Translate('No positive values'),
+                'Data could not be refreshed. Showing the last available values.' => $this->Translate(
+                    'Data could not be refreshed. Showing the last available values.'
+                )
+            ],
+            'options' => [
+                'echartsVersion'    => EChartsAsset::VERSION,
+                'echartsThemes'     => EChartsAsset::ThemePalettes(),
+                'tileHeaderVisible' => !$hiddenTitle,
+                'adaptToBackground' => $ipsView && $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
+                'ipsViewTransport'  => $ipsView ? $this->EChartsIPSViewTransportOptions() : null
+            ],
+            'replacements' => [
+                '{{ECHARTS_SCRIPT}}'           => EChartsAsset::PieJavaScript(),
+                '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
+                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript(),
+                '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
+            ]
+        ]);
+    }
+
+    private function Initialize(): void
+    {
+        $this->SetStatus(IS_INACTIVE);
+        if (IPS_GetKernelRunlevel() !== KR_READY) {
+            return;
+        }
+        $this->SetSummary('');
+        $this->SynchronizeSourceReferences();
+        $error = $this->GetConfigurationError();
+        if ($error !== null) {
+            $this->WriteAttributeString('LastError', $error['Message']);
+            $this->SetStatus($error['Status']);
+            return;
+        }
+        if (!$this->HasActiveParent()) {
+            $this->WriteAttributeString('LastError', 'No active EChartsGateway is connected.');
+            $this->SetStatus(self::STATUS_PARENT_MISSING);
+            return;
+        }
+        $this->WriteAttributeString('LastError', '');
+        $this->SetStatus(IS_ACTIVE);
+    }
+
+    /** @return array{Status:int,Message:string}|null */
+    private function GetConfigurationError(): ?array
+    {
+        try {
+            $this->GetValidatedSources();
+        } catch (Throwable $exception) {
+            return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => $exception->getMessage()];
+        }
+        if (!$this->IsValidDesign('')
+            || (!$this->ReadPropertyBoolean('IPSViewUseTileDesign') && !$this->IsValidDesign('IPSView'))
+            || !EChartsIPSViewBackground::IsValid(
+                $this->ReadPropertyInteger('IPSViewBackgroundColor'),
+                $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent')
+            )) {
+            return ['Status' => self::STATUS_DESIGN_INVALID, 'Message' => 'The Pie design is invalid.'];
+        }
+        return null;
+    }
+
+    /** @return list<array{VariableID:int,Label:string,Unit:string,Decimals:int,Color:int}> */
+    private function GetValidatedSources(): array
+    {
+        try {
+            $sources = json_decode($this->ReadPropertyString('Sources'), true, 64, JSON_THROW_ON_ERROR);
+        } catch (JsonException $exception) {
+            throw new InvalidArgumentException('The Pie sources are not valid JSON.', 0, $exception);
+        }
+        if (!is_array($sources) || !array_is_list($sources) || count($sources) < 1 || count($sources) > 16) {
+            throw new InvalidArgumentException('Configure 1 to 16 unique numeric Pie sources with one common unit.');
+        }
+        $validated = [];
+        $ids = [];
+        $unit = null;
+        foreach ($sources as $source) {
+            if (!is_array($source)) {
+                throw new InvalidArgumentException('Every Pie source must be an object.');
+            }
+            $id = $source['VariableID'] ?? null;
+            if (!is_int($id) || $id <= 0 || in_array($id, $ids, true) || !IPS_VariableExists($id)
+                || !in_array(IPS_GetVariable($id)['VariableType'] ?? null, [1, 2], true)) {
+                throw new InvalidArgumentException('Pie sources must be unique numeric variables.');
+            }
+            $decimals = $source['Decimals'] ?? 1;
+            $color = $source['Color'] ?? -1;
+            if (!is_int($decimals) || $decimals < 0 || $decimals > 6
+                || !is_int($color) || $color < -1 || $color > 0xFFFFFF) {
+                throw new InvalidArgumentException('A Pie source contains invalid display settings.');
+            }
+            $presentation = EChartsVariablePresentation::Resolve(
+                $id,
+                0.0,
+                100.0,
+                is_string($source['Unit'] ?? null) ? $source['Unit'] : '',
+                $decimals,
+                (bool) ($source['UseVariablePresentation'] ?? true)
+            );
+            if ($unit !== null && $unit !== $presentation['unit']) {
+                throw new InvalidArgumentException('All Pie sources must use the same unit.');
+            }
+            $unit = $presentation['unit'];
+            $ids[] = $id;
+            $validated[] = [
+                'VariableID' => $id,
+                'Label'      => trim(is_string($source['Label'] ?? null) ? $source['Label'] : ''),
+                'Unit'       => $presentation['unit'],
+                'Decimals'   => $presentation['decimals'],
+                'Color'      => $color
+            ];
+        }
+        return $validated;
+    }
+
+    /** @return array<string,mixed> */
+    private function BuildVisualizationState(bool $ipsView = false): array
+    {
+        $error = $this->GetConfigurationError();
+        if ($error !== null) {
+            return $this->ErrorState('Configure valid Pie sources.');
+        }
+        if (!$this->HasActiveParent()) {
+            return $this->ErrorState('Connect an active EChartsGateway.');
+        }
+        try {
+            $chart = json_decode($this->GetPieData(), true, 512, JSON_THROW_ON_ERROR);
+            if ($ipsView && !$this->ReadPropertyBoolean('IPSViewUseTileDesign')) {
+                $chart['theme'] = $this->ReadPropertyString('IPSViewEChartsTheme');
+                $chart['pie']['style'] = $this->ReadDesignStyle('IPSView');
+            }
+        } catch (DomainException) {
+            return $this->ErrorState('Pie charts require non-negative values.');
+        } catch (Throwable $exception) {
+            $this->SendDebug('BuildVisualizationState', $exception::class, 0);
+            return $this->ErrorState('The Pie values could not be loaded.');
+        }
+        return ['schemaVersion' => 1, 'family' => 'pie', 'status' => 'ready', 'chart' => $chart, 'error' => null];
+    }
+
+    /** @return array<string,mixed> */
+    private function ErrorState(string $message): array
+    {
+        return ['schemaVersion' => 1, 'family' => 'pie', 'status' => 'error', 'chart' => null, 'error' => $message];
+    }
+
+    private function PublishVisualizationState(): void
+    {
+        try {
+            $state = $this->BuildVisualizationState();
+            $states = [$state];
+            $this->UpdateVisualizationValue(json_encode(
+                $state,
+                JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+            ));
+            $this->PushEChartsIPSViewState(function () use (&$states): array
+            {
+                $state = $this->BuildVisualizationState(true);
+                $states[] = $state;
+                return $state;
+            });
+            $this->ScheduleTransientRefresh($states, 'The Pie values could not be loaded.');
+        } catch (Throwable $exception) {
+            $this->SendDebug('PublishVisualizationState', $exception::class, 0);
+        }
+    }
+
+    private function PublishIPSViewHTML(): void
+    {
+        if (!$this->IsIPSViewHTMLPageEnabled()) {
+            return;
+        }
+        try {
+            $this->UpdateIPSViewHTMLVariable(self::IPSVIEW_OUTPUT_IDENT, $this->GetIPSViewHTML());
+        } catch (Throwable $exception) {
+            $this->SendDebug('PublishIPSViewHTML', $exception::class, 0);
+        }
+    }
+
+    private function RegisterDesignProperties(string $prefix = ''): void
+    {
+        $this->RegisterPropertyString($prefix . 'PieMode', 'pie');
+        $this->RegisterPropertyString($prefix . 'SortOrder', 'configured');
+        $this->RegisterPropertyString($prefix . 'EChartsTheme', EChartsAsset::THEME_AUTO);
+        $this->RegisterPropertyInteger($prefix . 'InnerRadiusPercent', 35);
+        $this->RegisterPropertyInteger($prefix . 'OuterRadiusPercent', 70);
+        $this->RegisterPropertyBoolean($prefix . 'ShowLegend', true);
+        $this->RegisterPropertyBoolean($prefix . 'ShowLabels', true);
+        $this->RegisterPropertyBoolean($prefix . 'ShowPercent', true);
+        $this->RegisterPropertyString($prefix . 'LabelPosition', 'outside');
+        foreach (['TitleFontSizePercent', 'LegendFontSizePercent', 'LabelFontSizePercent'] as $name) {
+            $this->RegisterPropertyInteger($prefix . $name, 100);
+        }
+        foreach (['TitleColor', 'LegendColor', 'LabelColor'] as $name) {
+            $this->RegisterPropertyInteger($prefix . $name, -1);
+        }
+        $this->RegisterAnimationProperties($prefix, true, 350, 500);
+    }
+
+    /** @return array<string,string> */
+    private function DesignPropertyNames(): array
+    {
+        return [
+            'PieMode'                 => 'string', 'SortOrder' => 'string', 'EChartsTheme' => 'string',
+            'InnerRadiusPercent'      => 'integer', 'OuterRadiusPercent' => 'integer',
+            'ShowLegend'              => 'boolean', 'ShowLabels' => 'boolean', 'ShowPercent' => 'boolean',
+            'LabelPosition'           => 'string',
+            'TitleFontSizePercent'    => 'integer', 'LegendFontSizePercent' => 'integer',
+            'LabelFontSizePercent'    => 'integer',
+            'TitleColor'              => 'integer', 'LegendColor' => 'integer', 'LabelColor' => 'integer',
+            'AnimationEnabled'        => 'boolean', 'AnimationDuration' => 'integer',
+            'AnimationDurationUpdate' => 'integer', 'AnimationEasing' => 'string',
+            'AnimationEasingUpdate'   => 'string', 'AnimationDelay' => 'integer',
+            'AnimationDelayUpdate'    => 'integer'
+        ];
+    }
+
+    private function IsValidDesign(string $prefix): bool
+    {
+        if (!in_array($this->ReadPropertyString($prefix . 'PieMode'), self::MODES, true)
+            || !in_array($this->ReadPropertyString($prefix . 'SortOrder'), self::SORT_ORDERS, true)
+            || !in_array($this->ReadPropertyString($prefix . 'LabelPosition'), self::LABEL_POSITIONS, true)
+            || !EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme'))
+            || $this->ReadPropertyInteger($prefix . 'InnerRadiusPercent') < 0
+            || $this->ReadPropertyInteger($prefix . 'InnerRadiusPercent') > 70
+            || $this->ReadPropertyInteger($prefix . 'OuterRadiusPercent') < 40
+            || $this->ReadPropertyInteger($prefix . 'OuterRadiusPercent') > 100
+            || !$this->AnimationIsValid($prefix)) {
+            return false;
+        }
+        foreach (['TitleFontSizePercent', 'LegendFontSizePercent', 'LabelFontSizePercent'] as $name) {
+            $size = $this->ReadPropertyInteger($prefix . $name);
+            if ($size < 50 || $size > 200) {
+                return false;
+            }
+        }
+        foreach (['TitleColor', 'LegendColor', 'LabelColor'] as $name) {
+            $color = $this->ReadPropertyInteger($prefix . $name);
+            if ($color < -1 || $color > 0xFFFFFF) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** @return array<string,mixed> */
+    private function ReadDesignStyle(string $prefix = ''): array
+    {
+        $style = [
+            ...$this->ReadAnimationStyle($prefix),
+            'mode'               => $this->ReadPropertyString($prefix . 'PieMode'),
+            'sortOrder'          => $this->ReadPropertyString($prefix . 'SortOrder'),
+            'innerRadiusPercent' => $this->ReadPropertyInteger($prefix . 'InnerRadiusPercent'),
+            'outerRadiusPercent' => $this->ReadPropertyInteger($prefix . 'OuterRadiusPercent'),
+            'showLegend'         => $this->ReadPropertyBoolean($prefix . 'ShowLegend'),
+            'showLabels'         => $this->ReadPropertyBoolean($prefix . 'ShowLabels'),
+            'showPercent'        => $this->ReadPropertyBoolean($prefix . 'ShowPercent'),
+            'labelPosition'      => $this->ReadPropertyString($prefix . 'LabelPosition')
+        ];
+        foreach (['TitleFontSizePercent', 'LegendFontSizePercent', 'LabelFontSizePercent'] as $name) {
+            $style[lcfirst($name)] = $this->ReadPropertyInteger($prefix . $name);
+        }
+        foreach (['TitleColor', 'LegendColor', 'LabelColor'] as $name) {
+            $value = $this->ReadPropertyInteger($prefix . $name);
+            $style[lcfirst($name)] = $value < 0 ? '' : EChartsAsset::ColorToHex($value);
+        }
+        return $style;
+    }
+
+    private function IPSViewThemeCSS(): string
+    {
+        $theme = $this->ReadPropertyBoolean('IPSViewUseTileDesign')
+            ? $this->ReadPropertyString('EChartsTheme') : $this->ReadPropertyString('IPSViewEChartsTheme');
+        return EChartsIPSViewBackground::ThemeCSS(
+            EChartsAsset::ThemePreviewPalette($theme),
+            '#echarts-pie-root',
+            $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
+            $this->ReadPropertyInteger('IPSViewBackgroundColor'),
+            $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent')
+        );
+    }
+}

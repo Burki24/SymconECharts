@@ -8,7 +8,7 @@ use Burki24\SymconModuleHelper\SVGPreviewHelper;
 use JsonException;
 use RuntimeException;
 
-/** Shared, read-only configuration-form wiring for the four Bar previews. */
+/** Shared, read-only configuration-form wiring for Bar and Pie previews. */
 trait EChartsBarPreviewForm
 {
     /** Updates only the form images; draft values are never persisted. */
