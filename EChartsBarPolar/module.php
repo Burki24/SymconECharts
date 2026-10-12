@@ -359,7 +359,7 @@ class EChartsBarPolar extends IPSModuleStrict
         $outer = max($inner + 25, $outer);
         $start = (float) $this->BarPreviewValue($values, 'StartAngle', 'integer', $ipsView);
         $span = max(30, min(360, $this->BarPreviewValue($values, 'AngularSpan', 'integer', $ipsView)));
-        $direction = $this->BarPreviewValue($values, 'Clockwise', 'boolean', $ipsView) ? 1 : -1;
+        $direction = $this->BarPreviewValue($values, 'Clockwise', 'boolean', $ipsView) ? -1 : 1;
         $manual = $this->BarPreviewValue($values, 'ValueAxisRangeMode', 'string', $ipsView) === 'manual';
         $minimum = $manual ? (float) $this->BarPreviewValue($values, 'ValueAxisMinimum', 'float', $ipsView) : 0.0;
         $maximum = $manual ? (float) $this->BarPreviewValue($values, 'ValueAxisMaximum', 'float', $ipsView)
@@ -470,7 +470,29 @@ class EChartsBarPolar extends IPSModuleStrict
             }
         }
 
+        $svg .= self::BarPreviewAngleGuide($cx, $cy, $start, $direction, $scaleColor);
+
         return $svg . '</svg>';
+    }
+
+    private static function BarPreviewAngleGuide(float $cx, float $cy, float $start, int $direction, string $color): string
+    {
+        $svg = '';
+        foreach ([0 => '0°/360°', 90 => '90°', 180 => '180°', 270 => '270°'] as $angle => $label) {
+            $absoluteAngle = $start + $direction * $angle;
+            [$tickX0, $tickY0] = self::BarPreviewPoint($cx, $cy, 148, $absoluteAngle);
+            [$tickX1, $tickY1] = self::BarPreviewPoint($cx, $cy, 153, $absoluteAngle);
+            [$labelX, $labelY] = self::BarPreviewPoint($cx, $cy, 159, $absoluteAngle);
+            $svg .= '<path d="M ' . EChartsBarPreview::N($tickX0) . ' ' . EChartsBarPreview::N($tickY0)
+                . ' L ' . EChartsBarPreview::N($tickX1) . ' ' . EChartsBarPreview::N($tickY1)
+                . '" stroke="' . EChartsBarPreview::E($color) . '" stroke-opacity="0.65"/>';
+            $svg .= '<text data-preview-angle="' . $angle . '" x="' . EChartsBarPreview::N($labelX)
+                . '" y="' . EChartsBarPreview::N(max(46, min(348, $labelY + 4)))
+                . '" text-anchor="middle" fill="' . EChartsBarPreview::E($color)
+                . '" font-size="11">' . EChartsBarPreview::E($label) . '</text>';
+        }
+
+        return $svg;
     }
 
     private static function BarPreviewWedge(float $cx, float $cy, float $inner, float $outer, float $start, float $end): string
@@ -481,7 +503,7 @@ class EChartsBarPolar extends IPSModuleStrict
         [$x2, $y2] = self::BarPreviewPoint($cx, $cy, $inner, $end);
         [$x3, $y3] = self::BarPreviewPoint($cx, $cy, $inner, $start);
         $large = abs($end - $start) > 180 ? 1 : 0;
-        $sweep = $end >= $start ? 1 : 0;
+        $sweep = $end <= $start ? 1 : 0;
 
         return 'M ' . EChartsBarPreview::N($x0) . ' ' . EChartsBarPreview::N($y0)
             . ' A ' . EChartsBarPreview::N($outer) . ' ' . EChartsBarPreview::N($outer)
@@ -496,7 +518,7 @@ class EChartsBarPolar extends IPSModuleStrict
         [$x0, $y0] = self::BarPreviewPoint($cx, $cy, $radius, $start);
         [$x1, $y1] = self::BarPreviewPoint($cx, $cy, $radius, $end);
         $large = abs($end - $start) > 180 ? 1 : 0;
-        $sweep = $end >= $start ? 1 : 0;
+        $sweep = $end <= $start ? 1 : 0;
 
         return 'M ' . EChartsBarPreview::N($x0) . ' ' . EChartsBarPreview::N($y0)
             . ' A ' . EChartsBarPreview::N($radius) . ' ' . EChartsBarPreview::N($radius)
@@ -507,8 +529,8 @@ class EChartsBarPolar extends IPSModuleStrict
     private static function BarPreviewPoint(float $cx, float $cy, float $radius, float $angle): array
     {
         return [
-            $cx + $radius * sin(deg2rad($angle)),
-            $cy - $radius * cos(deg2rad($angle))
+            $cx + $radius * cos(deg2rad($angle)),
+            $cy - $radius * sin(deg2rad($angle))
         ];
     }
 

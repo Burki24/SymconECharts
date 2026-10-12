@@ -23,8 +23,12 @@ konfigurierte Namen vor Symcon-Namen, niemals automatisch Variablen-IDs.
 **Kacheldesign verwenden** gilt auch für die IPSView-Vorschau. Ohne gültige
 Quellen sind Beispieldaten markiert. Wertbeschriftungen übernehmen die wirksame
 Einheit und Nachkommastellen der Quellen. Die Vorschau ist schematisch:
-Ihr Raster folgt dem gewählten Winkelumfang und der Drehrichtung; bei 360°
-bleiben die Rasterlinien vollständige Kreise.
+Startwinkel und Drehrichtung entsprechen der Kachel: 0° liegt rechts, 90°
+oben. Das Raster folgt dem gewählten Winkelumfang und der Drehrichtung; bei
+360° bleiben die Rasterlinien vollständige Kreise. Eine zusätzliche
+Orientierungshilfe markiert in der Formularvorschau 0°/360°, 90°, 180° und
+270° ab dem eingestellten Startpunkt in der gewählten Laufrichtung. Diese
+Gradmarken gehören nicht zur Kachel oder zum IPSView-Widget.
 Hover-Hervorhebung, Animation und das responsive Beschriftungslayout prüfen
 Sie an der echten Kachel beziehungsweise im IPSView-Widget.
 
@@ -49,7 +53,7 @@ Im **Kacheldesigner** und im unabhängigen **IPSView-Design** stehen zur Verfüg
   behalten ihre automatische Hell-Dunkel-Kontrastfarbe.
 
 Standardmäßig bestimmt ECharts die Werteskala automatisch. Negative Werte werden nicht in positive Werte umgerechnet. Bei vielen Quellen oder langen Namen können Beschriftungen in kleinen Kacheln überlappen; Kachelgröße und Anzeigeoptionen lassen sich passend wählen.
-Der **Winkelumfang** bestimmt, welchen Teil des Kreises die Balken nutzen: 360° ergibt den bisherigen Vollkreis, 180° einen Halbkreis. Werte von 30° bis 360° sind möglich. **Startwinkel** legt den Anfang fest, **Im Uhrzeigersinn** die Laufrichtung. Balken, Hintergrundspuren und Raster nutzen auch bei konzentrischen Bögen denselben Ausschnitt und bleiben nach Größenänderungen darin. Kachel und unabhängiger IPSView-Designer können unterschiedliche Winkelumfänge verwenden; bei **Kacheldesign verwenden** übernimmt IPSView den Kachelwert.
+Der **Winkelumfang** bestimmt, welchen Teil des Kreises die Balken nutzen: 360° ergibt den bisherigen Vollkreis, 180° einen Halbkreis. Werte von 30° bis 360° sind möglich. **Startwinkel** legt den Anfang fest (0° rechts, 90° oben), **Im Uhrzeigersinn** die Laufrichtung. Balken, Hintergrundspuren und Raster nutzen auch bei konzentrischen Bögen denselben Ausschnitt und bleiben nach Größenänderungen darin. Kachel und unabhängiger IPSView-Designer können unterschiedliche Winkelumfänge verwenden; bei **Kacheldesign verwenden** übernimmt IPSView den Kachelwert.
 Im **Kacheldesigner** und im unabhängigen **IPSView-Designer** kann die Werteskala alternativ als fester Bereich mit Minimum und Maximum eingestellt werden. Das ist besonders für vergleichbare Anzeigen mit dauerhaft gleicher Skala sinnvoll. Werte außerhalb dieses Bereichs werden im Diagramm abgeschnitten; die Quelldaten bleiben unverändert. Optionale **Hintergrundspuren** zeigen hinter jedem Balken den verfügbaren Skalenbereich. Ihre Farbe kann dem Theme folgen oder frei gewählt werden; die Deckkraft ist einstellbar. Ohne Änderung der Einstellungen bleiben automatische Skala und ausgeblendete Spuren erhalten. Mit **Kacheldesign verwenden** übernimmt IPSView Skala und Spuren der Kachel; nach dem Deaktivieren sind sie unabhängig einstellbar oder können mit der Kopierschaltfläche übernommen werden.
 Bei einer festen Skala beginnen Balken und Kreisbögen am eingestellten Minimum; die Beschriftungen zeigen weiterhin die tatsächlichen Quellwerte.
 Bei **Balkenfüllung** ist **Vollfarbe** voreingestellt. **Farbverlauf** verwendet die Farbe der jeweiligen Quelle und eine wählbare Endfarbe; **Automatisch (Theme)** führt zur Hintergrundfarbe des Themes. Der Übergang verläuft linear innerhalb der gezeichneten Form, nicht entlang des Polarwerts. Er ist ein Farbeffekt, kein zusätzlicher Wert oder eine zweite Datenreihe. Werte innerhalb eines Verlaufs erhalten einen Kontrastumriss. Kachel und unabhängiges IPSView-Design können unterschiedliche Füllungen und Endfarben verwenden; **Kacheldesign verwenden** übernimmt auch diese Einstellungen.

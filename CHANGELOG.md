@@ -2,6 +2,15 @@
 
 ## Behoben
 
+- Die Polar-Formularvorschau kennzeichnet den Winkelverlauf nun mit
+  0°/360°, 90°, 180° und 270° ab dem eingestellten Startpunkt. Die Marken
+  folgen der gewählten Laufrichtung in Kachel- und IPSView-Designer.
+
+- Die Polar-Formularvorschau verwendet für Startwinkel und Drehrichtung nun
+  dieselbe Winkelkonvention wie die ECharts-Kachel. Teilkreise und Balken
+  erscheinen dadurch im Kachel- und unabhängigen IPSView-Designer an der
+  richtigen Position.
+
 - Das Raster der Polar-Formularvorschau folgt bei Teilkreisen nun dem
   eingestellten Winkelumfang und der Drehrichtung, auch bei unabhängigem
   IPSView-Design; 360° bleiben vollständige Kreise.

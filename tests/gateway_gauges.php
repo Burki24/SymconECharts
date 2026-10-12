@@ -7422,9 +7422,12 @@ $polarGridGeometry = static function (string $uri): array
     $document = new DOMDocument();
     assertGatewayGauge($document->loadXML($svg, LIBXML_NONET), 'Polar grid preview SVG must be valid XML.');
     $arcs = [];
+    $bars = [];
     foreach ($document->getElementsByTagName('path') as $path) {
         if ($path->hasAttribute('data-preview-grid-arc')) {
             $arcs[] = $path->getAttribute('d');
+        } elseif ($path->hasAttribute('fill-opacity') && $path->hasAttribute('stroke-width')) {
+            $bars[] = $path->getAttribute('d');
         }
     }
     $fullCircles = 0;
@@ -7434,7 +7437,7 @@ $polarGridGeometry = static function (string $uri): array
         }
     }
 
-    return [$arcs, $fullCircles];
+    return [$arcs, $fullCircles, $bars];
 };
 [$tileGridArcs, $tileFullCircles] = $polarGridGeometry($polarGridUpdates[0]['Value']);
 [$ipsViewGridArcs, $ipsViewFullCircles] = $polarGridGeometry($polarGridUpdates[1]['Value']);
@@ -7456,6 +7459,79 @@ $polarPreview->UpdateBarPreviewFromForm(json_encode([
 assertGatewayGauge(
     $fullSpanGridArcs === [] && $fullSpanCircles === 4,
     'A 360-degree Polar preview must retain complete circular grid rings.'
+);
+$polarPreview->UpdateBarPreviewFromForm(json_encode([
+    'Sources'               => $polarSources,
+    'PolarMode'             => 'radial',
+    'ShowGrid'              => true,
+    'StartAngle'            => 0,
+    'AngularSpan'           => 180,
+    'Clockwise'             => false,
+    'IPSViewUseTileDesign'  => false,
+    'IPSViewPolarMode'      => 'tangential',
+    'IPSViewShowGrid'       => true,
+    'IPSViewStartAngle'     => 90,
+    'IPSViewAngularSpan'    => 180,
+    'IPSViewClockwise'      => true
+], JSON_THROW_ON_ERROR));
+$polarAngleUpdates = array_slice($polarPreview->GetTestFormUpdates(), -2);
+[$tileAngleArcs, , $tileAngleBars] = $polarGridGeometry($polarAngleUpdates[0]['Value']);
+[$ipsViewAngleArcs, , $ipsViewAngleBars] = $polarGridGeometry($polarAngleUpdates[1]['Value']);
+$polarPreviewAngleLabels = static function (string $uri): array
+{
+    $svg = base64_decode(substr($uri, strlen('data:image/svg+xml;base64,')), true);
+    assertGatewayGauge(is_string($svg), 'Polar angle guide must produce an SVG image.');
+    $document = new DOMDocument();
+    assertGatewayGauge($document->loadXML($svg, LIBXML_NONET), 'Polar angle guide SVG must be valid XML.');
+    $labels = [];
+    foreach ($document->getElementsByTagName('text') as $element) {
+        if (!$element->hasAttribute('data-preview-angle')) {
+            continue;
+        }
+        $angle = (int) $element->getAttribute('data-preview-angle');
+        $labels[$angle] = [
+            'x'    => (float) $element->getAttribute('x'),
+            'y'    => (float) $element->getAttribute('y'),
+            'text' => $element->textContent
+        ];
+    }
+
+    return $labels;
+};
+$tileAngleLabels = $polarPreviewAngleLabels($polarAngleUpdates[0]['Value']);
+$ipsViewAngleLabels = $polarPreviewAngleLabels($polarAngleUpdates[1]['Value']);
+assertGatewayGauge(
+    count($tileAngleLabels) === 4 && ($tileAngleLabels[0]['text'] ?? '') === '0°/360°'
+        && $tileAngleLabels[0]['x'] > 350 && abs($tileAngleLabels[0]['y'] - 190) < 5
+        && abs($tileAngleLabels[90]['x'] - 350) < 5 && $tileAngleLabels[90]['y'] < 190
+        && $tileAngleLabels[180]['x'] < 350 && abs($tileAngleLabels[180]['y'] - 190) < 5
+        && abs($tileAngleLabels[270]['x'] - 350) < 5 && $tileAngleLabels[270]['y'] > 190,
+    'Counterclockwise Polar preview angle marks must advance from the configured start point.'
+);
+assertGatewayGauge(
+    count($ipsViewAngleLabels) === 4 && ($ipsViewAngleLabels[0]['text'] ?? '') === '0°/360°'
+        && abs($ipsViewAngleLabels[0]['x'] - 350) < 5 && $ipsViewAngleLabels[0]['y'] < 190
+        && $ipsViewAngleLabels[90]['x'] > 350 && abs($ipsViewAngleLabels[90]['y'] - 190) < 5
+        && abs($ipsViewAngleLabels[180]['x'] - 350) < 5 && $ipsViewAngleLabels[180]['y'] > 190
+        && $ipsViewAngleLabels[270]['x'] < 350 && abs($ipsViewAngleLabels[270]['y'] - 190) < 5,
+    'Clockwise independent IPSView preview angle marks must advance in the opposite direction.'
+);
+assertGatewayGauge(
+    preg_match('/^M ([\d.]+) ([\d.]+) A [\d.]+ [\d.]+ 0 0 0 ([\d.]+) ([\d.]+)$/', $tileAngleArcs[0] ?? '', $tileArc) === 1
+        && (float) $tileArc[1] > 350 && abs((float) $tileArc[2] - 190) < 0.02
+        && (float) $tileArc[3] < 350 && abs((float) $tileArc[4] - 190) < 0.02
+        && preg_match('/^M ([\d.]+) ([\d.]+) A /', $tileAngleBars[0] ?? '', $tileBar) === 1
+        && (float) $tileBar[1] > 350 && (float) $tileBar[2] < 190,
+    'A zero-degree counterclockwise Tile preview must occupy the upper half like ECharts.'
+);
+assertGatewayGauge(
+    preg_match('/^M ([\d.]+) ([\d.]+) A [\d.]+ [\d.]+ 0 0 1 ([\d.]+) ([\d.]+)$/', $ipsViewAngleArcs[0] ?? '', $ipsViewArc) === 1
+        && abs((float) $ipsViewArc[1] - 350) < 0.02 && (float) $ipsViewArc[2] < 190
+        && abs((float) $ipsViewArc[3] - 350) < 0.02 && (float) $ipsViewArc[4] > 190
+        && preg_match('/^M ([\d.]+) ([\d.]+) A [\d.]+ [\d.]+ 0 0 1 ([\d.]+) ([\d.]+)/', $ipsViewAngleBars[0] ?? '', $ipsViewBar) === 1
+        && abs((float) $ipsViewBar[1] - 350) < 0.02 && (float) $ipsViewBar[2] < 190
+        && abs((float) $ipsViewBar[3] - 350) < 0.02 && (float) $ipsViewBar[4] > 190,
+    'A ninety-degree clockwise independent IPSView preview must occupy the right half like ECharts.'
 );
 
 foreach ([
