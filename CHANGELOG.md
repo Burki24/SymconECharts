@@ -9,6 +9,10 @@
 
 ## Behoben
 
+- `EChartsPie` passt Kreisgröße und Beschriftungen an die tatsächlich freie
+  Fläche an. In mittelgroßen Kacheln steht die Legende unter dem Diagramm,
+  statt mit Außenbeschriftungen zu kollidieren; der Kachelkopf bleibt frei.
+
 - Die deutschen Instanzformulare zeigen in BarCategory, BarHistory,
   BarWaterfall und BarPolar die Schrift- und Farboptionen nun vollständig
   übersetzt. Auch die individuellen Designs von Gauge Tacho und Gauge

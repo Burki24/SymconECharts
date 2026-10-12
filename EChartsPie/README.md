@@ -27,9 +27,11 @@ sichtbaren Sektor.
 Der Kacheldesigner bietet Kreis, Donut und Nightingale-Rose sowie Sortierung,
 Innenradius in Prozent des Außenradius, Außenradius, Legende, Beschriftungen, Prozentwerte, Schriftgrößen,
 Farben, Theme und Start-/Aktualisierungsanimation. Bei der Nightingale-Rose
-haben die Sektoren gleiche Winkel und linear wertabhängige Radien. In kleinen
-Kacheln wird die Legende zugunsten der Grafik ausgeblendet; Werte und Namen
-bleiben über den Tooltip erreichbar.
+haben die Sektoren gleiche Winkel und linear wertabhängige Radien. Die Legende
+steht in mittelgroßen Kacheln unter dem Diagramm, in breiten Ansichten daneben.
+Kreis und Außenbeschriftungen lassen Platz für Legende und Kachelkopf. In sehr
+kleinen Kacheln wird die Legende zugunsten der Grafik ausgeblendet; Werte und
+Namen bleiben über den Tooltip erreichbar.
 
 Kachel und optionales IPSView-HTML-Widget verwenden dieselben Quellen.
 IPSView übernimmt zunächst das Kacheldesign; bei deaktiviertem

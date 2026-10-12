@@ -13,8 +13,8 @@ const palette = {
     accent: '#55cbb5', seriesColors: ['#111111', '#222222', '#333333']
 };
 
-function render(style, items, width = 800, mode = 'tile') {
-    const chartElement = { hidden: false, clientWidth: width, clientHeight: 400 };
+function render(style, items, width = 800, mode = 'symcon', height = 400) {
+    const chartElement = { hidden: false, clientWidth: width, clientHeight: height };
     const errorElement = { hidden: true, textContent: '' };
     const emptyElement = { hidden: true, textContent: '' };
     const warningElement = { hidden: true, textContent: '' };
@@ -58,10 +58,33 @@ const baseStyle = {
     mode: 'pie', sortOrder: 'configured', innerRadiusPercent: 35, outerRadiusPercent: 90,
     showLegend: true, showLabels: true, showPercent: true, labelPosition: 'outside'
 };
+const crowdedTile = render({ ...baseStyle, outerRadiusPercent: 100 }, [
+    { ...sources[0], name: 'Feuchtigkeit' },
+    { ...sources[1], name: 'Feuchtigkeit' },
+    { ...sources[1], id: 'variable-3', name: 'Feuchtigkeit' },
+    { ...sources[1], id: 'variable-4', name: 'Feuchtigkeit' }
+], 586, 'symcon', 552);
+const crowdedSeries = crowdedTile.option.series[0];
+const crowdedCenter = crowdedSeries.center;
+const crowdedRadius = crowdedSeries.radius[1];
+assert.equal(crowdedTile.option.legend.orient, 'horizontal',
+    'A medium-sized tile should place its legend below the Pie instead of beside the labels.');
+assert.ok(crowdedCenter[1] - crowdedRadius >= 58,
+    'The Pie must leave the visible Symcon tile header unobstructed.');
+assert.ok(crowdedCenter[1] + crowdedRadius <= 552 - 45,
+    'The Pie must not collide with its bottom legend.');
+assert.ok(crowdedCenter[0] - crowdedRadius >= 60 && crowdedCenter[0] + crowdedRadius <= 586 - 60,
+    'Outside labels need room on both sides of the Pie.');
+const wideTile = render({ ...baseStyle, outerRadiusPercent: 100 }, sources, 1000, 'symcon', 560);
+assert.equal(wideTile.option.legend.orient, 'vertical');
+assert.ok(wideTile.option.series[0].center[0] + wideTile.option.series[0].radius[1]
+    < 1000 - wideTile.option.legend.width,
+    'A wide tile must reserve a separate column for the legend.');
 const pie = render(baseStyle, sources);
 assert.ok(pie.option, 'Pie must render current positive values.');
 assert.equal(pie.option.series[0].type, 'pie');
-assert.deepEqual(Array.from(pie.option.series[0].radius), ['0%', '90%']);
+assert.equal(pie.option.series[0].radius[0], 0);
+assert.ok(pie.option.series[0].radius[1] > 0);
 assert.equal(pie.option.series[0].roseType, false);
 assert.equal(pie.option.series[0].stillShowZeroSum, false);
 assert.deepEqual(Array.from(pie.option.series[0].data, item => item.name), ['variable-1', 'variable-2']);
@@ -76,7 +99,7 @@ assert.equal(pie.option.series[0].data[1].itemStyle.color, '#222222');
 
 const donut = render({ ...baseStyle, mode: 'donut', sortOrder: 'descending', labelPosition: 'inside',
     showPercent: false, legendFontSizePercent: 150, labelColor: '#123456' }, sources, 800, 'ipsview');
-assert.deepEqual(Array.from(donut.option.series[0].radius), ['31.5%', '90%']);
+assert.ok(Math.abs(donut.option.series[0].radius[0] - donut.option.series[0].radius[1] * 0.35) < 0.001);
 assert.deepEqual(Array.from(donut.option.series[0].data, item => item.name), ['variable-2', 'variable-1']);
 assert.equal(donut.option.series[0].label.position, 'inside');
 assert.equal(donut.option.series[0].label.color, '#123456');

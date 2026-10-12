@@ -80,6 +80,41 @@
         return items;
     }
 
+    function pieLayout(style, showTitle, showLegend, titleSize) {
+        var width = Math.max(1, chartElement.clientWidth || 1);
+        var height = Math.max(1, chartElement.clientHeight || 1);
+        var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8;
+        var top = headerInset + (showTitle ? titleSize + 18 : 0);
+        var legendAtRight = showLegend && width >= 760 && width >= height * 1.2;
+        var legendWidth = legendAtRight ? Math.min(230, Math.max(170, Math.round(width * 0.24))) : 0;
+        var plotWidth = width - legendWidth - (legendAtRight ? 16 : 0);
+        var bottom = 16 + (showLegend && !legendAtRight ? 36 : 0);
+        var sideInset = style.showLabels === true && style.labelPosition !== 'inside'
+            ? Math.min(100, Math.max(60, Math.round(width * 0.12))) : 16;
+        var centerX = plotWidth / 2;
+        var centerY = (top + height - bottom) / 2;
+        var outerPercent = Math.max(40, Math.min(100, Number(style.outerRadiusPercent) || 70));
+        var requestedRadius = Math.min(width, height) * outerPercent / 200;
+        var availableRadius = Math.max(1, Math.min(
+            centerX - sideInset,
+            plotWidth - centerX - sideInset,
+            (height - top - bottom) / 2
+        ));
+        var outerRadius = Math.max(1, Math.min(requestedRadius, availableRadius));
+        var innerPercent = style.mode === 'pie' ? 0
+            : Math.max(0, Math.min(70, Number(style.innerRadiusPercent) || 0));
+        return {
+            center: [centerX, centerY],
+            radius: [outerRadius * innerPercent / 100, outerRadius],
+            legendAtRight: legendAtRight,
+            legendWidth: legendWidth,
+            plotWidth: plotWidth,
+            top: top,
+            width: width,
+            height: height
+        };
+    }
+
     function buildOption(model, theme) {
         var colors = colorsFor(theme);
         var pie = model.pie || {};
@@ -92,11 +127,7 @@
         var showLegend = style.showLegend === true && !compact;
         var showTitle = Boolean(pie.title) && (bootstrap.mode === 'ipsview'
             || bootstrap.options.tileHeaderVisible === false);
-        var top = (bootstrap.mode === 'tile' && bootstrap.options.tileHeaderVisible !== false ? 54 : 10)
-            + (showTitle ? titleSize + 18 : 0);
-        var outer = Math.max(40, Math.min(100, Number(style.outerRadiusPercent) || 90));
-        var inner = style.mode === 'pie' ? 0
-            : Math.round(outer * Math.max(0, Math.min(70, Number(style.innerRadiusPercent) || 0))) / 100;
+        var layout = pieLayout(style, showTitle, showLegend, titleSize);
         var labelMap = {};
         var itemMap = {};
         var data = items.map(function (item, index) {
@@ -125,12 +156,19 @@
                 return item.name + ': ' + formatValue(item);
             }).join(', ') },
             title: {
-                show: showTitle, text: String(pie.title || ''), left: 'center', top: top - titleSize - 10,
+                show: showTitle, text: String(pie.title || ''), left: layout.plotWidth / 2,
+                textAlign: 'center', top: bootstrap.mode === 'symcon' ? 8 : 4,
                 textStyle: { color: style.titleColor || colors.text, fontSize: titleSize }
             },
             legend: {
-                show: showLegend, type: 'scroll', orient: 'vertical', right: 4, top: top,
-                bottom: 10, width: '25%', data: data.map(function (item) { return item.name; }),
+                show: showLegend, type: 'scroll', orient: layout.legendAtRight ? 'vertical' : 'horizontal',
+                right: layout.legendAtRight ? 8 : undefined,
+                left: layout.legendAtRight ? undefined : 8,
+                top: layout.legendAtRight ? layout.top : undefined,
+                bottom: layout.legendAtRight ? 12 : 6,
+                width: layout.legendAtRight ? layout.legendWidth : layout.width - 16,
+                height: layout.legendAtRight ? Math.max(1, layout.height - layout.top - 24) : 28,
+                data: data.map(function (item) { return item.name; }),
                 textStyle: { color: style.legendColor || colors.text, fontSize: legendSize },
                 formatter: function (key) { return labelMap[key] || ''; }
             },
@@ -147,16 +185,22 @@
             },
             series: [{
                 id: 'pie', type: 'pie', name: String(pie.title || ''),
-                radius: [inner + '%', outer + '%'],
-                center: [showLegend ? '39%' : '50%', top < 55 ? '52%' : '56%'],
+                radius: layout.radius,
+                center: layout.center,
                 roseType: style.mode === 'nightingale' ? 'area' : false,
                 stillShowZeroSum: false,
                 avoidLabelOverlap: true,
+                labelLayout: { hideOverlap: true },
                 label: {
                     show: style.showLabels === true,
                     position: style.labelPosition === 'inside' ? 'inside' : 'outside',
                     color: style.labelColor || colors.text,
                     fontSize: labelSize,
+                    alignTo: style.labelPosition === 'inside' ? undefined : 'edge',
+                    edgeDistance: style.labelPosition === 'inside' ? undefined : 8,
+                    bleedMargin: 4,
+                    width: Math.min(130, Math.max(72, Math.round(layout.width * 0.2))),
+                    overflow: 'truncate',
                     formatter: function (parameter) {
                         var name = labelMap[parameter.name] || '';
                         return name + (style.showPercent === true ? '\n' + Number(parameter.percent).toLocaleString(
