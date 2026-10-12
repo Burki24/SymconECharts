@@ -46,6 +46,14 @@ aufgebautes Instanzformular:
 4. Diagnose- und Bedienaktionen stehen getrennt von den persistierenden
    Eingaben am Ende des Formulars.
 
+Als Ergänzung vom 2026-10-12 gilt für beide Designer der zentrale
+Breitenstandard aus `SymconDevelopment/standards/CONFIGURATION_FORM.md`:
+Die äußeren Kachel- und IPSView-`ExpansionPanel` besitzen keine feste
+Pixelbreite und nutzen den verfügbaren Formularplatz. Vorschau-`Image`-Felder
+skalieren relativ zur Panelbreite. Einzelne Eingaben dürfen für die
+Lesbarkeit weiterhin gezielte Breiten besitzen; daraus entsteht keine feste
+Breite des gesamten Designers.
+
 Eine **Live-Vorschau** reagiert auf noch nicht übernommene Änderungen an
 relevanten Titeln, Quellenlisten, Themes und Designfeldern, auch nach dem
 Bestätigen einer Listenzeile. Sie benötigt weder `ApplyChanges()` noch eine
@@ -100,7 +108,9 @@ benötigt keine Diagrammvorschau.
 Für jede Vertikale werden mindestens gültige und leere Quellen, ungespeicherte
 Designänderungen, Tile- und IPSView-Vererbung, fehlerhafte Entwürfe,
 mehrfache Formularöffnung ohne Seiteneffekt sowie Kachel und IPSView im
-Browser geprüft. Ist eine Ausgabeumgebung nicht erreichbar, wird diese
+Browser geprüft. Die Designerbreite wird außerdem in schmalen und breiten
+Konsolenansichten auf Überlauf und abgeschnittene Bedienelemente geprüft.
+Ist eine Ausgabeumgebung nicht erreichbar, wird diese
 Laufzeitprüfung als Lücke benannt. Struktur- und PHP-Tests allein belegen
 keine korrekte visuelle Laufzeitdarstellung. Veröffentlichte Properties,
 Idents, GUIDs und gespeicherte Formate bleiben durch diese
@@ -113,10 +123,13 @@ IPSView-Formularvorschau. Die vier Bar-Vorschauen nutzen die gemeinsame
 read-only-Verdrahtung in `libs/EChartsBarPreviewForm.php` und die begrenzten
 SVG-Grundfunktionen in `libs/EChartsBarPreview.php`; ihre fachliche Geometrie
 bleibt in den jeweiligen Modulen. Die ursprünglich geplante Reihenfolge ist
-damit abgeschlossen. Die beschriebenen Prüfanforderungen gelten weiterhin
-für Änderungen an Formularen und Vorschauen. Insbesondere ersetzt eine
-erfolgreiche Formular- oder SVG-Prüfung keine visuelle Abnahme der Kachel und
-des IPSView-Widgets nach einem Modulupdate.
+damit abgeschlossen. Seit 2026-10-12 besitzen die äußeren Designer-Panels
+aller neun Diagrammgeräte keine feste Pixelbreite; die dynamische Breite
+wurde in der Symcon-Konsole visuell bestätigt. Die beschriebenen
+Prüfanforderungen gelten weiterhin für Änderungen an Formularen und
+Vorschauen. Insbesondere ersetzt eine erfolgreiche Formular- oder SVG-Prüfung
+keine visuelle Abnahme der Kachel und des IPSView-Widgets nach einem
+Modulupdate.
 
 ## Folgen
 
