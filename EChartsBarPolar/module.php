@@ -18,6 +18,7 @@ use SymconECharts\EChartsDesignerSections;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
+use SymconECharts\EChartsPreviewSourceCount;
 use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsTransientRefresh;
 use SymconECharts\EChartsVariablePresentation;
@@ -32,6 +33,7 @@ require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsBarPreview.php';
 require_once __DIR__ . '/../libs/EChartsBarPreviewForm.php';
+require_once __DIR__ . '/../libs/EChartsPreviewSourceCount.php';
 require_once __DIR__ . '/../libs/EChartsBarTypography.php';
 require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsCurrentSources.php';
@@ -329,7 +331,7 @@ class EChartsBarPolar extends IPSModuleStrict
     {
         $palette = EChartsBarPreview::Palette($this->BarPreviewValue($values, 'EChartsTheme', 'string', $ipsView));
         $data = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values);
-        $items = array_slice($data['items'], 0, 6);
+        $items = $data['items'];
         $previewLanguage = $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage());
         $mode = $this->BarPreviewValue($values, 'PolarMode', 'string', $ipsView);
         $sort = $this->BarPreviewValue($values, 'SortOrder', 'string', $ipsView);
@@ -337,6 +339,7 @@ class EChartsBarPolar extends IPSModuleStrict
             usort($items, static fn (array $a, array $b): int => $sort === 'ascending'
                 ? $a['value'] <=> $b['value'] : $b['value'] <=> $a['value']);
         }
+        $items = array_slice($items, 0, 6);
         $svg = EChartsBarPreview::Open(
             $palette,
             (string) ($values['Title'] ?? $this->ReadPropertyString('Title')),
@@ -472,7 +475,15 @@ class EChartsBarPolar extends IPSModuleStrict
 
         $svg .= self::BarPreviewAngleGuide($cx, $cy, $start, $direction, $scaleColor);
 
-        return $svg . '</svg>';
+        return EChartsPreviewSourceCount::Append(
+            $svg . '</svg>',
+            count($items),
+            count($data['items']),
+            $this->Translate('Preview shows %d of %d sources'),
+            $palette['muted'],
+            696,
+            351
+        );
     }
 
     private static function BarPreviewAngleGuide(float $cx, float $cy, float $start, int $direction, string $color): string

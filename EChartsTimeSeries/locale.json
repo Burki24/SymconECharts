@@ -4,6 +4,7 @@
             "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts.": "Ein gemeinsames EChartsGateway genügt für alle ECharts-Diagramminstanzen. Bei weiteren Diagrammen das vorhandene Gateway auswählen, anstatt ein neues anzulegen.",
             "Title": "Titel",
             "Time series sources": "Zeitreihenquellen",
+            "Preview shows %d of %d sources": "Vorschau zeigt %d von %d Quellen",
             "Variable": "Variable",
             "Label": "Beschriftung",
             "Variable presentation": "Variablendarstellung",

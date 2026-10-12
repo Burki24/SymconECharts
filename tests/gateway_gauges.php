@@ -95,6 +95,12 @@ $GLOBALS['symconTestVariables'] = [
         'VariableUpdated' => 1780000006,
         'Value'           => 23.75,
         'Name'            => 'Unarchived real-time temperature'
+    ],
+    4720 => [
+        'VariableType'    => 2,
+        'VariableUpdated' => 1780000007,
+        'Value'           => 19.5,
+        'Name'            => 'Additional temperature'
     ]
 ];
 $GLOBALS['symconTestProfiles'] = [
@@ -3618,6 +3624,21 @@ assertGatewayGauge(
         && str_contains($timeSeriesPreviewSvg, 'Preview target'),
     'Time Series Tile and IPSView previews must react immediately to unpersisted source and design values.'
 );
+$timeSeries->UpdateTimeSeriesPreviewFromForm(json_encode([
+    'Sources' => array_map(
+        static fn (int $variableID): array => ['VariableID' => $variableID, 'Label' => 'Source ' . $variableID],
+        [4711, 4713, 4714, 4715, 4716]
+    )
+], JSON_THROW_ON_ERROR));
+foreach (array_slice($timeSeries->GetTestFormUpdates(), -2) as $update) {
+    $svg = base64_decode(substr($update['Value'], strlen('data:image/svg+xml;base64,')), true);
+    assertGatewayGauge(
+        is_string($svg)
+            && str_contains($svg, 'data-preview-sources="4/5"')
+            && str_contains($svg, 'Preview shows 4 of 5 sources'),
+        'Time Series must disclose when its Tile or IPSView preview omits configured sources.'
+    );
+}
 $timeSeriesAxesPreview = new EChartsTimeSeries();
 $timeSeriesAxesPreview->Create();
 $timeSeriesAxesPreview->UpdateTimeSeriesPreviewFromForm(json_encode([
@@ -7022,6 +7043,69 @@ foreach ([
             ),
         $barPreviewClass . ' must preserve multiple unsaved sources in the preview.'
     );
+    $previewLimit = match ($barPreviewClass) {
+        EChartsBarHistory::class   => 3,
+        EChartsBarWaterfall::class => 5,
+        default                    => 6
+    };
+    $manyRows = array_map(
+        static fn (int $variableID): array => [
+            'VariableID' => $variableID,
+            'Label'      => 'Source ' . $variableID,
+            'Category'   => 'Category ' . $variableID
+        ],
+        [4711, 4713, 4714, 4715, 4716, 4717, 4720]
+    );
+    $barPreviewModule->UpdateBarPreviewFromForm(json_encode(['Sources' => $manyRows], JSON_THROW_ON_ERROR));
+    foreach (array_slice($barPreviewModule->GetTestFormUpdates(), -2) as $update) {
+        $svg = base64_decode(substr($update['Value'], strlen('data:image/svg+xml;base64,')), true);
+        assertGatewayGauge(
+            is_string($svg)
+                && str_contains($svg, 'data-preview-sources="' . $previewLimit . '/7"')
+                && str_contains($svg, 'Preview shows ' . $previewLimit . ' of 7 sources'),
+            $barPreviewClass . ' must disclose when its Tile or IPSView preview omits configured sources.'
+        );
+    }
+    if (in_array($barPreviewClass, [EChartsBarCategory::class, EChartsBarPolar::class], true)) {
+        $sortedRows = array_map(
+            static fn (int $variableID): array => [
+                'VariableID' => $variableID,
+                'Label'      => 'S' . $variableID,
+                'Category'   => 'C' . $variableID
+            ],
+            [4711, 4713, 4716, 4717, 4720, 4714, 4715]
+        );
+        $barPreviewModule->UpdateBarPreviewFromForm(json_encode([
+            'Sources'   => $sortedRows,
+            'SortOrder' => 'descending'
+        ], JSON_THROW_ON_ERROR));
+        $sortedSvg = base64_decode(substr(
+            array_slice($barPreviewModule->GetTestFormUpdates(), -2)[0]['Value'],
+            strlen('data:image/svg+xml;base64,')
+        ), true);
+        assertGatewayGauge(
+            is_string($sortedSvg) && str_contains(
+                $sortedSvg,
+                $barPreviewClass === EChartsBarCategory::class ? 'C4715' : 'S4715'
+            ),
+            $barPreviewClass . ' must select preview sources after sorting all sources like the Tile renderer.'
+        );
+        if ($barPreviewClass === EChartsBarCategory::class) {
+            $barPreviewModule->UpdateBarPreviewFromForm(json_encode([
+                'Sources'   => $sortedRows,
+                'BarMode'   => 'grouped',
+                'SortOrder' => 'descending'
+            ], JSON_THROW_ON_ERROR));
+            $groupedSvg = base64_decode(substr(
+                array_slice($barPreviewModule->GetTestFormUpdates(), -2)[0]['Value'],
+                strlen('data:image/svg+xml;base64,')
+            ), true);
+            assertGatewayGauge(
+                is_string($groupedSvg) && str_contains($groupedSvg, 'C4715'),
+                'EChartsBarCategory must sort all grouped category totals before limiting the preview.'
+            );
+        }
+    }
     $editedRow = ['VariableID' => 4711, 'Label' => 'Neuer Sensor', 'Category' => 'Neues Bad'];
     $barPreviewModule->UpdateBarPreviewFromForm(json_encode([
         'Sources' => [$editedRow]

@@ -25,6 +25,9 @@ is explicitly marked as example data. Value labels use the effective unit and
 decimal precision from the sources. The preview illustrates the layout; an
 imported SVG motif is shown only as a schematic hatch. The actual chart in
 the tile or IPSView widget remains the visual reference.
+When more than six sources are configured, the preview shows the first six in
+the selected sort order and states the shown and total source counts; the actual
+chart still uses all sources.
 
 ## Animation
 

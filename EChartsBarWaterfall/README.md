@@ -27,6 +27,8 @@ Quellen sind Beispieldaten ausdrücklich markiert. Bei aktiviertem
 Wertbeschriftungen verwenden die wirksame gemeinsame Einheit und die höchste
 Nachkommastellenzahl der Quellen. Die responsive Laufzeitdarstellung prüfen
 Sie anschließend in Kachel und Widget.
+Bei mehr als fünf Quellen zeigt die Vorschau die ersten fünf Schritte und nennt
+die angezeigte sowie die gesamte Quellenzahl; die eigentliche Grafik nutzt alle.
 
 ## Animation
 

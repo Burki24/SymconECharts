@@ -22,6 +22,8 @@ The schematic previews also show a separate value axis for each displayed
 effective unit, on its configured side. With multiple sources, automatic axis
 colors follow the first source of each unit. Numeric axis ticks and archived
 values are shown only in the actual chart.
+With more than three sources, the preview shows the first three and states the
+shown and total counts; the actual chart still uses every configured source.
 
 ## Animation
 

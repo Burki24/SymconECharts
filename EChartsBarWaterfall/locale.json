@@ -19,6 +19,7 @@
             "IPSView live preview": "IPSView-Live-Vorschau",
             "Example data": "Beispieldaten",
             "Chart preview": "Diagrammvorschau",
+            "Preview shows %d of %d sources": "Vorschau zeigt %d von %d Quellen",
             "Animate bars": "Balken animieren",
             "Initial animation": "Startanimation",
             "Update animation": "Aktualisierungsanimation",

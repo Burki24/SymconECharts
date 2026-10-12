@@ -6,6 +6,8 @@ namespace SymconECharts;
 
 use Burki24\SymconModuleHelper\SVGPreviewHelper;
 
+require_once __DIR__ . '/../libs/EChartsPreviewSourceCount.php';
+
 final class EChartsGaugeMultiPreview
 {
     /** @param list<array<string, mixed>> $items @param array<string, int|string> $style */
@@ -462,16 +464,16 @@ final class EChartsGaugeMultiPreview
         array $palette,
         string $caption
     ): string {
-        if ($visibleCount >= $sourceCount) {
-            return $svg;
-        }
-
-        $notice = '<text x="700" y="386" text-anchor="end" font-size="12" fill="'
-            . SVGPreviewHelper::escape($palette['muted']) . '" data-preview-sources="'
-            . $visibleCount . '/' . $sourceCount . '">'
-            . SVGPreviewHelper::escape(sprintf($caption, $visibleCount, $sourceCount)) . '</text>';
-
-        return substr($svg, 0, -strlen('</svg>')) . $notice . '</svg>';
+        return EChartsPreviewSourceCount::Append(
+            $svg,
+            $visibleCount,
+            $sourceCount,
+            $caption,
+            $palette['muted'],
+            700,
+            386,
+            12
+        );
     }
 
     private static function RingCircles(

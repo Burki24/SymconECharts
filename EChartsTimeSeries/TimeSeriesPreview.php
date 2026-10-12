@@ -6,6 +6,8 @@ namespace SymconECharts;
 
 use Burki24\SymconModuleHelper\SVGPreviewHelper;
 
+require_once __DIR__ . '/../libs/EChartsPreviewSourceCount.php';
+
 final class EChartsTimeSeriesPreview
 {
     /**
@@ -22,7 +24,8 @@ final class EChartsTimeSeriesPreview
         string $backgroundColor = '',
         int $backgroundOpacityPercent = 35,
         array $annotations = [],
-        string $timeAxisLabelFormat = 'auto'
+        string $timeAxisLabelFormat = 'auto',
+        string $sourceCountCaption = 'Preview shows %d of %d sources'
     ): string {
         $palette = EChartsAsset::ThemePreviewPalette($theme);
         $allSeries = $series !== [] ? $series : [
@@ -274,7 +277,7 @@ final class EChartsTimeSeriesPreview
             }
         }
 
-        return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 390" role="img"'
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 390" role="img"'
             . ' data-legend-position="' . SVGPreviewHelper::escape($legendPosition) . '"'
             . ' data-smooth-lines="' . ($smoothLines ? 'true' : 'false') . '"'
             . ' data-show-symbols="' . ($showSymbols ? 'true' : 'false') . '"'
@@ -291,6 +294,16 @@ final class EChartsTimeSeriesPreview
             . '" font-size="' . $titleFontSize . '" font-weight="600" text-anchor="middle">'
             . SVGPreviewHelper::escape(trim($title) !== '' ? $title : 'Time Series') . '</text>'
             . $content . '</svg>';
+
+        return EChartsPreviewSourceCount::Append(
+            $svg,
+            count($series),
+            count($allSeries),
+            $sourceCountCaption,
+            $palette['muted'],
+            730,
+            380
+        );
     }
 
     private static function DesignColor(mixed $value, string $fallback): string

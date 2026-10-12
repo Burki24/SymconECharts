@@ -270,7 +270,8 @@ class EChartsTimeSeries extends IPSModuleStrict
                 $this->ReadPropertyString('EChartsTheme'),
                 $this->ReadTimeSeriesDesign(),
                 annotations: $this->PreviewAnnotations(),
-                timeAxisLabelFormat: $this->ReadPropertyString('TimeAxisLabelFormat')
+                timeAxisLabelFormat: $this->ReadPropertyString('TimeAxisLabelFormat'),
+                sourceCountCaption: $this->Translate('Preview shows %d of %d sources')
             )
         );
         $form = SVGPreviewHelper::withImage(
@@ -285,7 +286,8 @@ class EChartsTimeSeries extends IPSModuleStrict
                 EChartsIPSViewBackground::Color($this->ReadPropertyInteger('IPSViewBackgroundColor')),
                 $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent'),
                 $this->PreviewAnnotations(),
-                $this->EffectiveTimeAxisLabelFormat(true)
+                $this->EffectiveTimeAxisLabelFormat(true),
+                $this->Translate('Preview shows %d of %d sources')
             )
         );
 
@@ -345,7 +347,8 @@ class EChartsTimeSeries extends IPSModuleStrict
                     $values['Sources'] ?? null
                 ),
                 timeAxisLabelFormat: (string) ($values['TimeAxisLabelFormat']
-                    ?? $this->ReadPropertyString('TimeAxisLabelFormat'))
+                    ?? $this->ReadPropertyString('TimeAxisLabelFormat')),
+                sourceCountCaption: $this->Translate('Preview shows %d of %d sources')
             )
         ));
 
@@ -374,7 +377,8 @@ class EChartsTimeSeries extends IPSModuleStrict
                     ? (string) ($values['TimeAxisLabelFormat']
                         ?? $this->ReadPropertyString('TimeAxisLabelFormat'))
                     : (string) ($values['IPSViewTimeAxisLabelFormat']
-                        ?? $this->ReadPropertyString('IPSViewTimeAxisLabelFormat'))
+                        ?? $this->ReadPropertyString('IPSViewTimeAxisLabelFormat')),
+                $this->Translate('Preview shows %d of %d sources')
             )
         ));
     }

@@ -18,6 +18,7 @@ use SymconECharts\EChartsDesignerSections;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
+use SymconECharts\EChartsPreviewSourceCount;
 use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsSvgImage;
 use SymconECharts\EChartsUnitAxes;
@@ -34,6 +35,7 @@ require_once __DIR__ . '/../libs/EChartsArchiveQuery.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsBarPreview.php';
 require_once __DIR__ . '/../libs/EChartsBarPreviewForm.php';
+require_once __DIR__ . '/../libs/EChartsPreviewSourceCount.php';
 require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
@@ -524,7 +526,15 @@ class EChartsBarHistory extends IPSModuleStrict
                 . EChartsBarPreview::E($palette['accent']) . '" fill-opacity="0.4"/>';
         }
 
-        return $svg . '</svg>';
+        return EChartsPreviewSourceCount::Append(
+            $svg . '</svg>',
+            count($items),
+            count($data['items']),
+            $this->Translate('Preview shows %d of %d sources'),
+            $palette['muted'],
+            696,
+            351
+        );
     }
 
     protected function CurrentTimestamp(): int

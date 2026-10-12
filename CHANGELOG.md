@@ -2,6 +2,14 @@
 
 ## Behoben
 
+- Begrenzte Formularvorschauen von TimeSeries, BarCategory, BarHistory,
+  BarWaterfall und BarPolar nennen jetzt die Zahl der gezeigten und insgesamt
+  konfigurierten Quellen. Die Kachel und das IPSView-Widget verarbeiten
+  weiterhin alle Quellen; Gauge Multi nutzt für denselben Hinweis nun den
+  gemeinsamen Vorschau-Baustein. BarCategory und BarPolar wählen die
+  Vorschauquellen bei aktiver Sortierung jetzt in derselben Reihenfolge wie
+  die Kachel aus.
+
 - Gauge Multi kennzeichnet in beiden Formularvorschauen jetzt, wie viele der
   konfigurierten Quellen die jeweilige Vorlage exemplarisch zeigt. Zuvor
   verschwanden weitere Quellen dort ohne Hinweis, obwohl Kachel und IPSView

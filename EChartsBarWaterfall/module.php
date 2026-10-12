@@ -18,6 +18,7 @@ use SymconECharts\EChartsDesignerSections;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
+use SymconECharts\EChartsPreviewSourceCount;
 use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsTransientRefresh;
 use SymconECharts\EChartsVariablePresentation;
@@ -32,6 +33,7 @@ require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsBarPreview.php';
 require_once __DIR__ . '/../libs/EChartsBarPreviewForm.php';
+require_once __DIR__ . '/../libs/EChartsPreviewSourceCount.php';
 require_once __DIR__ . '/../libs/EChartsBarTypography.php';
 require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsCurrentSources.php';
@@ -392,7 +394,15 @@ class EChartsBarWaterfall extends IPSModuleStrict
                 )) . '</text>';
         }
 
-        return $svg . '</svg>';
+        return EChartsPreviewSourceCount::Append(
+            $svg . '</svg>',
+            count($items),
+            count($data['items']),
+            $this->Translate('Preview shows %d of %d sources'),
+            $palette['muted'],
+            696,
+            351
+        );
     }
 
     private function RenderWaterfallHTMLPage(bool $ipsView): string

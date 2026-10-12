@@ -18,6 +18,7 @@ use SymconECharts\EChartsDesignerSections;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
+use SymconECharts\EChartsPreviewSourceCount;
 use SymconECharts\EChartsSvgImage;
 use SymconECharts\EChartsTransientRefresh;
 use SymconECharts\EChartsVariablePresentation;
@@ -32,6 +33,7 @@ require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsBarPreview.php';
 require_once __DIR__ . '/../libs/EChartsBarPreviewForm.php';
+require_once __DIR__ . '/../libs/EChartsPreviewSourceCount.php';
 require_once __DIR__ . '/../libs/EChartsBarTypography.php';
 require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsCurrentSources.php';
@@ -321,7 +323,7 @@ class EChartsBarCategory extends IPSModuleStrict
         $theme = $this->BarPreviewValue($values, 'EChartsTheme', 'string', $ipsView);
         $palette = EChartsBarPreview::Palette($theme);
         $data = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values, 'Category');
-        $items = array_slice($data['items'], 0, 6);
+        $items = $data['items'];
         $previewDecimals = max(array_column($data['items'], 'decimals'));
         $previewLanguage = $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage());
         $mode = $this->BarPreviewValue($values, 'BarMode', 'string', $ipsView);
@@ -338,7 +340,21 @@ class EChartsBarCategory extends IPSModuleStrict
         if ($mode === 'simple' && ($sort === 'ascending' || $sort === 'descending')) {
             usort($items, static fn (array $a, array $b): int => $sort === 'ascending'
                 ? $a['value'] <=> $b['value'] : $b['value'] <=> $a['value']);
+        } elseif ($mode !== 'simple' && ($sort === 'ascending' || $sort === 'descending')) {
+            $categoryTotals = [];
+            foreach ($items as $item) {
+                $category = trim((string) ($item['Category'] ?? ''));
+                $categoryTotals[$category] = ($categoryTotals[$category] ?? 0.0) + $item['value'];
+            }
+            usort($items, static function (array $a, array $b) use ($categoryTotals, $sort): int
+            {
+                $left = $categoryTotals[trim((string) ($a['Category'] ?? ''))];
+                $right = $categoryTotals[trim((string) ($b['Category'] ?? ''))];
+
+                return $sort === 'ascending' ? $left <=> $right : $right <=> $left;
+            });
         }
+        $items = array_slice($items, 0, 6);
         $svg = EChartsBarPreview::Open(
             $palette,
             (string) ($values['Title'] ?? $this->ReadPropertyString('Title')),
@@ -495,7 +511,15 @@ class EChartsBarCategory extends IPSModuleStrict
             ++$groupIndex;
         }
 
-        return $svg . '</svg>';
+        return EChartsPreviewSourceCount::Append(
+            $svg . '</svg>',
+            count($items),
+            count($data['items']),
+            $this->Translate('Preview shows %d of %d sources'),
+            $palette['muted'],
+            696,
+            351
+        );
     }
 
     private function RenderBarHTMLPage(bool $ipsView): string

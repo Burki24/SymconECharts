@@ -13,6 +13,8 @@ Einheitenachsen auf der konfigurierten Seite. Die Achsen übernehmen automatisch
 die Farbe der ersten zugeordneten Reihe oder die ausdrücklich gewählte
 Achsenfarbe. Archivwerte und numerische Skalen bleiben der echten Kachel
 beziehungsweise dem IPSView-Widget vorbehalten.
+Bei mehr als vier Quellen nennt die Vorschau die angezeigte und gesamte Anzahl;
+Kachel und Widget nutzen weiterhin alle konfigurierten Reihen.
 
 ## Vorübergehende Ladefehler
 

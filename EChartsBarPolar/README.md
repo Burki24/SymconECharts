@@ -29,6 +29,9 @@ oben. Das Raster folgt dem gewählten Winkelumfang und der Drehrichtung; bei
 Orientierungshilfe markiert in der Formularvorschau 0°/360°, 90°, 180° und
 270° ab dem eingestellten Startpunkt in der gewählten Laufrichtung. Diese
 Gradmarken gehören nicht zur Kachel oder zum IPSView-Widget.
+Bei mehr als sechs Quellen zeigt die Vorschau die ersten sechs gemäß der
+gewählten Sortierung und nennt die angezeigte sowie die gesamte Quellenzahl;
+die eigentliche Grafik nutzt alle.
 Hover-Hervorhebung, Animation und das responsive Beschriftungslayout prüfen
 Sie an der echten Kachel beziehungsweise im IPSView-Widget.
 
