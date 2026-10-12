@@ -6466,7 +6466,7 @@ $expectedDesignerSections = [
         'Bar appearance and effects', 'Scale and angular range', 'Typography and colors'
     ]
 ];
-$requiredGermanFormCaptions = [
+$requiredGermanFormTexts = [
     'EChartsBarCategory' => [
         'Typography and colors', 'Title size', 'Legend size', 'Axis label size', 'Value label size',
         'Title color', 'Legend color', 'Axis color', 'Value label color', 'Grid color'
@@ -6484,16 +6484,18 @@ $requiredGermanFormCaptions = [
         'SVG pivot', 'Hub border', 'Colors', 'Scale font', 'Value font', 'Title font',
         'PointerColor', 'AnchorColor', 'AnchorBorderColor', 'RingColor', 'ScaleColor',
         'ValueColor', 'TitleColor', 'ProgressColor', 'Plate design', 'Plate border',
-        'Fitting', 'Size', 'Offset X', 'Offset Y', 'Opacity', 'Rotation'
+        'Fitting', 'Size', 'Offset X', 'Offset Y', 'Opacity', 'Rotation',
+        'None', 'Svg', 'Theme'
     ],
     'EChartsGaugeChronograph' => [
         'SVG pivot', 'Hub border', 'Colors', 'Scale font', 'Value font', 'Title font',
         'PointerColor', 'AnchorColor', 'AnchorBorderColor', 'RingColor', 'ScaleColor',
         'ValueColor', 'TitleColor', 'ProgressColor', 'Plate design', 'Plate border',
-        'Fitting', 'Size', 'Offset X', 'Offset Y', 'Opacity', 'Rotation'
+        'Fitting', 'Size', 'Offset X', 'Offset Y', 'Opacity', 'Rotation',
+        'None', 'Svg', 'Theme'
     ]
 ];
-foreach ($requiredGermanFormCaptions as $moduleName => $captions) {
+foreach ($requiredGermanFormTexts as $moduleName => $texts) {
     $locale = json_decode(
         (string) file_get_contents(__DIR__ . '/../' . $moduleName . '/locale.json'),
         true,
@@ -6501,10 +6503,10 @@ foreach ($requiredGermanFormCaptions as $moduleName => $captions) {
         JSON_THROW_ON_ERROR
     );
     $translations = $locale['translations']['de'] ?? [];
-    foreach ($captions as $caption) {
+    foreach ($texts as $sourceText) {
         assertGatewayGauge(
-            isset($translations[$caption]) && $translations[$caption] !== $caption,
-            $moduleName . ' must translate the form caption ' . $caption . ' into German.'
+            isset($translations[$sourceText]) && $translations[$sourceText] !== $sourceText,
+            $moduleName . ' must translate the form text ' . $sourceText . ' into German.'
         );
     }
 }

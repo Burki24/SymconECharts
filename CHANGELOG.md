@@ -6,8 +6,9 @@
   BarWaterfall und BarPolar die Schrift- und Farboptionen nun vollständig
   übersetzt. Auch die individuellen Designs von Gauge Tacho und Gauge
   Chronograph enthalten keine englischen Feldnamen oder internen
-  Farbbezeichner mehr. In den Quellenlisten von Gauge Tacho, Gauge
-  Chronograph und TimeSeries erscheint „Individuelles Design“ nun als
+  Farbbezeichner mehr; ihre Auswahlwerte für Nabe, SVG-Ankerpunkt und
+  Theme-Farben sind ebenfalls deutsch. In den Quellenlisten von Gauge Tacho,
+  Gauge Chronograph und TimeSeries erscheint „Individuelles Design“ nun als
   Ankreuzfeld statt als `true`/`false`.
 
 - Begrenzte Formularvorschauen von TimeSeries, BarCategory, BarHistory,
