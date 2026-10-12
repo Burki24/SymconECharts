@@ -151,7 +151,7 @@ final class EChartsGaugeDesign
         );
         foreach ($defaults as $name => $default) {
             $visible = $name === 'UseIndividualDesign';
-            $columns[] = [
+            $column = [
                 'caption' => $visible ? 'Individual design' : $name,
                 'name'    => $name,
                 'width'   => $visible ? '130px' : '1px',
@@ -159,6 +159,10 @@ final class EChartsGaugeDesign
                 'save'    => true,
                 'add'     => $default
             ];
+            if ($visible) {
+                $column['edit'] = ['type' => 'CheckBox'];
+            }
+            $columns[] = $column;
         }
 
         return $columns;

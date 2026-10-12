@@ -6466,6 +6466,64 @@ $expectedDesignerSections = [
         'Bar appearance and effects', 'Scale and angular range', 'Typography and colors'
     ]
 ];
+$requiredGermanFormCaptions = [
+    'EChartsBarCategory' => [
+        'Typography and colors', 'Title size', 'Legend size', 'Axis label size', 'Value label size',
+        'Title color', 'Legend color', 'Axis color', 'Value label color', 'Grid color'
+    ],
+    'EChartsBarHistory'   => ['Legend size', 'Legend color'],
+    'EChartsBarWaterfall' => [
+        'Typography and colors', 'Title size', 'Axis label size', 'Value label size',
+        'Title color', 'Axis color', 'Value label color', 'Grid color'
+    ],
+    'EChartsBarPolar' => [
+        'Typography and colors', 'Title size', 'Title color', 'Category color',
+        'Scale color', 'Outside value color', 'Grid color'
+    ],
+    'EChartsGaugeTacho' => [
+        'SVG pivot', 'Hub border', 'Colors', 'Scale font', 'Value font', 'Title font',
+        'PointerColor', 'AnchorColor', 'AnchorBorderColor', 'RingColor', 'ScaleColor',
+        'ValueColor', 'TitleColor', 'ProgressColor', 'Plate design', 'Plate border',
+        'Fitting', 'Size', 'Offset X', 'Offset Y', 'Opacity', 'Rotation'
+    ],
+    'EChartsGaugeChronograph' => [
+        'SVG pivot', 'Hub border', 'Colors', 'Scale font', 'Value font', 'Title font',
+        'PointerColor', 'AnchorColor', 'AnchorBorderColor', 'RingColor', 'ScaleColor',
+        'ValueColor', 'TitleColor', 'ProgressColor', 'Plate design', 'Plate border',
+        'Fitting', 'Size', 'Offset X', 'Offset Y', 'Opacity', 'Rotation'
+    ]
+];
+foreach ($requiredGermanFormCaptions as $moduleName => $captions) {
+    $locale = json_decode(
+        (string) file_get_contents(__DIR__ . '/../' . $moduleName . '/locale.json'),
+        true,
+        512,
+        JSON_THROW_ON_ERROR
+    );
+    $translations = $locale['translations']['de'] ?? [];
+    foreach ($captions as $caption) {
+        assertGatewayGauge(
+            isset($translations[$caption]) && $translations[$caption] !== $caption,
+            $moduleName . ' must translate the form caption ' . $caption . ' into German.'
+        );
+    }
+}
+foreach ([
+    \SymconECharts\EChartsGaugeDesign::class,
+    \SymconECharts\EChartsTimeSeriesDesign::class
+] as $designClass) {
+    $individualColumn = null;
+    foreach ($designClass::SourceDesignColumns() as $column) {
+        if (($column['name'] ?? null) === 'UseIndividualDesign') {
+            $individualColumn = $column;
+            break;
+        }
+    }
+    assertGatewayGauge(
+        ($individualColumn['edit']['type'] ?? null) === 'CheckBox',
+        $designClass . ' must display the individual-design state as a checkbox in the source list.'
+    );
+}
 foreach ([EChartsGaugeMulti::class, EChartsGaugeTacho::class, EChartsGaugeChronograph::class] as $moduleClass) {
     $gauge = new $moduleClass();
     $gauge->Create();

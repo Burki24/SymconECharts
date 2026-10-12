@@ -47,7 +47,7 @@ final class EChartsTimeSeriesDesign
         $columns = [];
         foreach (self::SOURCE_DESIGN_DEFAULTS as $name => $default) {
             $visible = $name === 'UseIndividualDesign';
-            $columns[] = [
+            $column = [
                 'caption' => $visible ? 'Individual design' : $name,
                 'name'    => $name,
                 'width'   => $visible ? '125px' : '1px',
@@ -55,6 +55,10 @@ final class EChartsTimeSeriesDesign
                 'save'    => true,
                 'add'     => $default
             ];
+            if ($visible) {
+                $column['edit'] = ['type' => 'CheckBox'];
+            }
+            $columns[] = $column;
         }
 
         return $columns;
