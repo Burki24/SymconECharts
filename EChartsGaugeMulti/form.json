@@ -100,7 +100,6 @@
             "type": "ExpansionPanel",
             "caption": "Tile designer",
             "expanded": false,
-            "width": "700px",
             "items": [
                 {
                     "type": "RowLayout",

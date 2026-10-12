@@ -370,7 +370,6 @@ final class EChartsGaugeDesign
             'type'     => 'ExpansionPanel',
             'caption'  => 'IPSView design',
             'expanded' => false,
-            'width'    => '700px',
             'items'    => [
                 ...$htmlPageItems,
                 EChartsIPSViewBackground::FormRow($previewAction),

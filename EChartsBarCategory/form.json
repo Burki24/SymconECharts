@@ -145,7 +145,6 @@
             "type": "ExpansionPanel",
             "caption": "Tile designer",
             "expanded": false,
-            "width": "720px",
             "items": [
                 {
                     "type": "RowLayout",
@@ -342,7 +341,6 @@
             "type": "ExpansionPanel",
             "caption": "IPSView design",
             "expanded": false,
-            "width": "720px",
             "items": [
                 {
                     "type": "Label",

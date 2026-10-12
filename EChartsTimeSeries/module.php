@@ -1757,7 +1757,6 @@ class EChartsTimeSeries extends IPSModuleStrict
             'type'     => 'ExpansionPanel',
             'caption'  => 'IPSView design',
             'expanded' => false,
-            'width'    => '760px',
             'items'    => [
                 ...$this->IPSViewHTMLPageFormItems(
                     'Creates a standalone WebContent variable for use as an IPSView HTML widget.'

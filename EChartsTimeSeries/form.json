@@ -473,7 +473,6 @@
             "type": "ExpansionPanel",
             "caption": "Tile designer",
             "expanded": false,
-            "width": "760px",
             "items": [
                 {
                     "type": "RowLayout",

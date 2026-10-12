@@ -2,6 +2,10 @@
 
 ## Behoben
 
+- Die Kachel- und IPSView-Designer aller Diagrammmodule nutzen nun die
+  verfügbare Breite der Instanzkonfiguration, statt auf 700–760 px begrenzt
+  zu sein.
+
 - Die Polar-Formularvorschau kennzeichnet den Winkelverlauf nun mit
   0°/360°, 90°, 180° und 270° ab dem eingestellten Startpunkt. Die Marken
   folgen der gewählten Laufrichtung in Kachel- und IPSView-Designer.

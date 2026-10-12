@@ -6467,6 +6467,10 @@ foreach ([
                 static fn (array $element): bool => ($element['caption'] ?? null) === $designerCaption
             ));
             assertGatewayGauge(count($matchingDesigners) === 1, $moduleClass . ' must have one ' . $designerCaption . '.');
+            assertGatewayGauge(
+                !isset($matchingDesigners[0]['width']),
+                $moduleClass . ' must let the ' . $designerCaption . ' use the available form width.'
+            );
             $sectionPanels = array_values(array_filter(
                 $matchingDesigners[0]['items'],
                 static fn (array $item): bool => ($item['type'] ?? null) === 'ExpansionPanel'

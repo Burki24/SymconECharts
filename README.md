@@ -121,9 +121,11 @@ Folgende Module sind enthalten:
 
 In beiden Designern finden Sie die Einstellungen in aufklappbaren,
 chartbezogenen Themenbereichen. Animation und grundlegende Auswahlfelder
-stehen davor; die Live-Vorschau folgt den Bereichen. Bei aktiviertem
-„Kacheldesign verwenden“ sind die unabhängigen IPSView-Einstellungen
-deaktiviert, die Vorschau zeigt aber weiterhin das wirksame Design.
+stehen davor; die Live-Vorschau folgt den Bereichen. Die Designer-Panels
+nutzen die verfügbare Breite der Instanzkonfiguration statt einer festen
+Pixelbreite. Bei aktiviertem „Kacheldesign verwenden“ sind die unabhängigen
+IPSView-Einstellungen deaktiviert, die Vorschau zeigt aber weiterhin das
+wirksame Design.
 Category, History, Waterfall und Polar bieten eigene Rubriken für Schrift und
 Farben. Automatische Farben folgen weiterhin dem gewählten Theme.
 
