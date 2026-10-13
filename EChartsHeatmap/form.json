@@ -140,7 +140,7 @@
                             "caption": "Color scale preset",
                             "options": [
                                 {
-                                    "caption": "Custom (two colors)",
+                                    "caption": "Custom (2–5 colors)",
                                     "value": "custom"
                                 },
                                 {
@@ -189,7 +189,7 @@
                 },
                 {
                     "type": "Label",
-                    "caption": "Presets use fixed Celsius classes, not the observed archive range. NOAA covers -50 to +50 °C; other historical bounds are approximated from Schiewe (2023). Tempera uses an application-defined -20 to +40 °C range. The two custom colors apply only to Custom."
+                    "caption": "Presets use fixed Celsius classes, not the observed archive range. NOAA covers -50 to +50 °C; other historical bounds are approximated from Schiewe (2023). Tempera uses an application-defined -20 to +40 °C range. Custom blends 2–5 evenly spaced colors over the observed range."
                 },
                 {
                     "type": "RowLayout",
@@ -200,6 +200,32 @@
                             "caption": "Low value color",
                             "allowTransparent": true,
                             "transparentCaption": "Automatic"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "CustomMiddleColor1",
+                            "caption": "Intermediate color 1",
+                            "allowTransparent": true,
+                            "transparentCaption": "Not used"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "CustomMiddleColor2",
+                            "caption": "Intermediate color 2",
+                            "allowTransparent": true,
+                            "transparentCaption": "Not used"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "CustomMiddleColor3",
+                            "caption": "Intermediate color 3",
+                            "allowTransparent": true,
+                            "transparentCaption": "Not used"
                         },
                         {
                             "type": "SelectColor",
@@ -271,7 +297,7 @@
                             "name": "ValueColor",
                             "caption": "Value label color",
                             "allowTransparent": true,
-                            "transparentCaption": "Automatic"
+                            "transparentCaption": "Automatic contrast"
                         },
                         {
                             "type": "SelectColor",

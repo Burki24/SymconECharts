@@ -73,6 +73,13 @@ assert.equal(barOutlineStyle(10, '', '#778899').borderWidth, 10,
     'The shared helper must not impose the Polar module’s width limit on future charts.');
 
 const colorWithAlpha = window.SYMC_ECHARTS_DESIGN.colorWithAlpha;
+const interpolateColorStops = window.SYMC_ECHARTS_DESIGN.interpolateColorStops;
+assert.equal(interpolateColorStops(['#000000', '#ffffff'], 0.5), '#808080',
+    'Two-stop gradients must preserve their existing midpoint.');
+assert.equal(interpolateColorStops(['#000000', '#ff0000', '#ffffff'], 0.5), '#ff0000',
+    'An intermediate user color must land at its evenly spaced stop.');
+assert.equal(interpolateColorStops(['rgb(0, 0, 0)', '#ffffff'], 1), '#ffffff',
+    'Automatic theme RGB colors must also interpolate.');
 assert.equal(colorWithAlpha('#223344', 0.35), 'rgba(34,51,68,0.35)',
     'Bar shadows and Gauge effects must share the same hex color transparency.');
 assert.equal(colorWithAlpha('rgb(10, 20, 30)', 0.45), 'rgba(10,20,30,0.45)',

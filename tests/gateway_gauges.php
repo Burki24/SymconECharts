@@ -1181,7 +1181,8 @@ $heatmap->ApplyChanges();
 $heatmapData = json_decode($heatmap->GetHeatmapData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
     $heatmapData['heatmap']['style']['colorScalePreset'] === 'custom'
-        && $heatmapData['heatmap']['style']['colorScaleColors'] === [],
+        && $heatmapData['heatmap']['style']['colorScaleColors'] === []
+        && $heatmapData['heatmap']['style']['customMiddleColors'] === [],
     'Existing Heatmap instances must retain their two-color scale by default.'
 );
 assertGatewayGauge(
@@ -1206,6 +1207,16 @@ assertGatewayGauge(
     findGaugeFormElement($heatmapForm['elements'], 'IPSViewColorScalePreset') !== null,
     'An independent IPSView Heatmap design must expose the same palette selection.'
 );
+foreach ([1, 2, 3] as $index) {
+    $tileMiddle = findGaugeFormElement($heatmapForm['elements'], 'CustomMiddleColor' . $index);
+    $ipsViewMiddle = findGaugeFormElement($heatmapForm['elements'], 'IPSViewCustomMiddleColor' . $index);
+    assertGatewayGauge(
+        $tileMiddle !== null && $ipsViewMiddle !== null
+            && str_contains((string) ($tileMiddle['onChange'] ?? ''), 'ECHM_UpdateBarPreviewFromForm')
+            && str_contains((string) ($ipsViewMiddle['onChange'] ?? ''), 'ECHM_UpdateBarPreviewFromForm'),
+        'Both Heatmap designers must preview each optional custom middle color live.'
+    );
+}
 foreach ($heatmapPresetSelect['options'] as $option) {
     $id = $option['value'];
     $colors = \SymconECharts\HeatmapColorScales::Colors($id);
@@ -1273,6 +1284,58 @@ assertGatewayGauge(
         && substr_count($noaaPreview, 'y="330"') === 20,
     'The NOAA preview must show its source-defined range and 20 classes.'
 );
+$heatmapOutput->UpdateBarPreviewFromForm(json_encode([
+    'ColorScalePreset'   => 'custom', 'LowColor' => 0x111111,
+    'CustomMiddleColor1' => 0xEE1111, 'CustomMiddleColor2' => 0x11EE11,
+    'CustomMiddleColor3' => 0x1111EE, 'HighColor' => 0xEEEEEE,
+    'ShowValues'         => true
+], JSON_THROW_ON_ERROR));
+$customPreview = base64_decode(substr(
+    (string) array_slice($heatmapOutput->GetTestFormUpdates(), -2)[0]['Value'],
+    strlen('data:image/svg+xml;base64,')
+), true);
+assertGatewayGauge(
+    is_string($customPreview)
+        && substr_count($customPreview, '<stop offset=') === 5
+        && str_contains($customPreview, '#EE1111')
+        && str_contains($customPreview, '#11EE11')
+        && str_contains($customPreview, '#1111EE')
+        && str_contains($customPreview, 'fill="#111111" font-size="10"'),
+    'The unsaved custom preview must show five stops and dark text on bright cells.'
+);
+$heatmapOutput->UpdateBarPreviewFromForm(json_encode([
+    'ShowValues' => true, 'ValueColor' => 0xAABBCC
+], JSON_THROW_ON_ERROR));
+$manualTextPreview = base64_decode(substr(
+    (string) array_slice($heatmapOutput->GetTestFormUpdates(), -2)[0]['Value'],
+    strlen('data:image/svg+xml;base64,')
+), true);
+assertGatewayGauge(
+    is_string($manualTextPreview) && str_contains($manualTextPreview, 'fill="#AABBCC" font-size="10"'),
+    'An explicitly selected value text color must override the Heatmap preview contrast.'
+);
+$heatmapOutput->UpdateBarPreviewFromForm(json_encode([
+    'IPSViewUseTileDesign' => false, 'IPSViewColorScalePreset' => 'custom',
+    'IPSViewLowColor'      => 0x112233, 'IPSViewCustomMiddleColor2' => 0x445566,
+    'IPSViewHighColor'     => 0x778899
+], JSON_THROW_ON_ERROR));
+$independentPreview = base64_decode(substr(
+    (string) array_slice($heatmapOutput->GetTestFormUpdates(), -1)[0]['Value'],
+    strlen('data:image/svg+xml;base64,')
+), true);
+assertGatewayGauge(
+    is_string($independentPreview)
+        && substr_count($independentPreview, '<stop offset=') === 3
+        && str_contains($independentPreview, '#445566'),
+    'The independent IPSView preview must use its own configured middle colors.'
+);
+$heatmap->SetTestProperty('CustomMiddleColor1', 0xEE1111);
+$heatmap->SetTestProperty('CustomMiddleColor3', 0x1111EE);
+$customData = json_decode($heatmap->GetHeatmapData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $customData['heatmap']['style']['customMiddleColors'] === ['#EE1111', '#1111EE'],
+    'Only configured middle colors must be serialized, in their selected order.'
+);
 $heatmap->SetTestProperty('ColorScalePreset', 'tempera12');
 $presetData = json_decode($heatmap->GetHeatmapData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
@@ -1297,6 +1360,15 @@ assertGatewayGauge(
         && str_contains($heatmapPresetIPSView, 'echarts-heatmap-class-legend'),
     'Both Heatmap output routes must include the compact legend and remain below the output-buffer limit.'
 );
+$heatmap->SetTestProperty('CustomMiddleColor2', 0x1000000);
+$heatmap->ApplyChanges();
+assertGatewayGauge(
+    $heatmap->GetTestStatus() === 202,
+    'Invalid custom palette colors must be rejected before rendering.'
+);
+$heatmap->SetTestProperty('CustomMiddleColor2', -1);
+$heatmap->ApplyChanges();
+assertGatewayGauge($heatmap->GetTestStatus() === IS_ACTIVE, 'Corrected palette colors must recover the Heatmap.');
 $heatmap->SetTestProperty('SourceVariableID', 4712);
 $heatmap->ApplyChanges();
 assertGatewayGauge(

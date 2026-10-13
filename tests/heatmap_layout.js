@@ -80,6 +80,27 @@ assert.equal(wide.option.visualMap.itemWidth, 12);
 assert.deepEqual(Array.from(wide.option.visualMap.text, label => label.replace(',', '.')), ['20.0 °C', '0.0 °C'],
     'The visible color scale must label its high and low values with the source unit.');
 assert.deepEqual(Array.from(wide.option.visualMap.inRange.color), ['#123456', '#fedcba']);
+const userPalette = render({ ...model, cells: [
+    { hour: 0, weekday: 0, value: 0, count: 1 },
+    { hour: 1, weekday: 0, value: 5, count: 1 },
+    { hour: 2, weekday: 0, value: 10, count: 1 },
+    { hour: 3, weekday: 0, value: 15, count: 1 },
+    { hour: 4, weekday: 0, value: 20, count: 1 }
+], heatmap: { ...model.heatmap, style: { ...model.heatmap.style,
+    lowColor: '#111111', highColor: '#eeeeee', customMiddleColors: ['#ee1111', '#11ee11', '#1111ee'] } } });
+assert.deepEqual(Array.from(userPalette.option.visualMap.inRange.color),
+    ['#111111', '#ee1111', '#11ee11', '#1111ee', '#eeeeee'],
+    'The custom gradient must keep up to three intermediate colors in user order.');
+assert.equal(userPalette.option.series[0].data[0].label.color, '#FFFFFF',
+    'Automatic value labels must be light on a dark cell.');
+assert.equal(userPalette.option.series[0].data[4].label.color, '#111111',
+    'Automatic value labels must be dark on a bright cell.');
+const explicitLabel = render({ ...userPalette.window.SYMC_VISUALIZATION.state.chart,
+    heatmap: { ...userPalette.window.SYMC_VISUALIZATION.state.chart.heatmap,
+        style: { ...userPalette.window.SYMC_VISUALIZATION.state.chart.heatmap.style,
+            valueColor: '#AABBCC' } } });
+assert.equal(explicitLabel.option.series[0].data[0].label.color, '#AABBCC',
+    'An explicit value color must override adaptive contrast.');
 const presetColors = ['#123456', '#89abcd', '#fedcba'];
 const presetModel = { ...model, cells: [
     { hour: 0, weekday: 0, value: -10, count: 1 },
@@ -136,8 +157,11 @@ assert.equal(noaa.option.visualMap.pieces[0].lt, -45);
 assert.equal(noaa.option.visualMap.pieces.at(-1).gte, 45);
 assert.equal(noaa.classMinElement.textContent.replace(',', '.'), '-50.0 °C');
 assert.equal(noaa.classMaxElement.textContent.replace(',', '.'), '50.0 °C');
+assert.equal(noaa.option.series[0].data[2].label.color, '#111111',
+    'The yellow NOAA cell in the reported IPSView case needs dark value text.');
 const invalidPreset = render({ ...model, heatmap: { ...model.heatmap,
-    style: { ...model.heatmap.style, colorScaleColors: ['#123456', 'invalid'] } } });
+    style: { ...model.heatmap.style, colorScalePreset: 'sample',
+        colorScaleColors: ['#123456', 'invalid'], customMiddleColors: ['#abcdef'] } } });
 assert.equal(invalidPreset.option.visualMap.type, 'continuous');
 assert.deepEqual(Array.from(invalidPreset.option.visualMap.inRange.color), ['#123456', '#fedcba'],
     'Malformed palette data must fall back to the legacy two-color design.');
@@ -181,6 +205,24 @@ if (fs.existsSync(localECharts)) {
     assert.match(svg, /20[,.]0 °C/, 'The ECharts runtime must render the upper color-scale endpoint.');
     assert.match(svg, /0[,.]0 °C/, 'The ECharts runtime must render the lower color-scale endpoint.');
     actual.dispose();
+    const userChart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 1400, height: 520 });
+    userChart.setOption(userPalette.option);
+    const userData = userChart.getModel().getSeriesByIndex(0).getData();
+    assert.deepEqual([0, 1, 2, 3, 4].map(index => userData.getItemVisual(index, 'style').fill),
+        ['rgba(17,17,17,1)', 'rgba(238,17,17,1)', 'rgba(17,238,17,1)',
+            'rgba(17,17,238,1)', 'rgba(238,238,238,1)'],
+        'The real ECharts runtime must preserve all five selected color stops.');
+    assert.equal(userData.getItemModel(0).get(['label', 'color']), '#FFFFFF');
+    assert.equal(userData.getItemModel(4).get(['label', 'color']), '#111111',
+        'The real ECharts runtime must accept per-cell contrast colors.');
+    const userSvg = userChart.renderToSVGString();
+    assert.match(userSvg, /<svg/,
+        'The real ECharts runtime must render the custom palette with adaptive labels.');
+    assert.match(userSvg, /<text[^>]*fill="#111111"/,
+        'Bright cells must render dark text, not merely retain a configuration value.');
+    assert.match(userSvg, /<text[^>]*fill="#FFFFFF"/,
+        'Dark cells must render light text, not merely retain a configuration value.');
+    userChart.dispose();
     const presetChart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 360, height: 240 });
     presetChart.setOption(preset.option);
     assert.match(presetChart.renderToSVGString(), /<svg/,

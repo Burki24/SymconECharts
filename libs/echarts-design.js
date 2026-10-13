@@ -49,6 +49,20 @@
         return contrastRatio(background, first) >= contrastRatio(background, second) ? first : second;
     }
 
+    function interpolateColorStops(stops, fraction) {
+        if (!Array.isArray(stops) || stops.length < 2) { return null; }
+        var position = Math.max(0, Math.min(1, Number(fraction) || 0)) * (stops.length - 1);
+        var index = Math.min(stops.length - 2, Math.floor(position));
+        var first = parseColor(stops[index]);
+        var second = parseColor(stops[index + 1]);
+        if (!first || !second) { return null; }
+        var weight = position - index;
+        return '#' + first.map(function (channel, offset) {
+            return Math.round(channel + (second[offset] - channel) * weight)
+                .toString(16).padStart(2, '0');
+        }).join('');
+    }
+
     function opacityFromPercent(value, defaultPercent) {
         var fallback = defaultPercent == null ? 100 : Number(defaultPercent);
         if (!Number.isFinite(fallback)) { fallback = 100; }
@@ -213,6 +227,7 @@
     global.SYMC_ECHARTS_DESIGN = Object.freeze({
         contrastRatio: contrastRatio,
         readableTextColor: readableTextColor,
+        interpolateColorStops: interpolateColorStops,
         relativeLuminance: relativeLuminance,
         opacityFromPercent: opacityFromPercent,
         prefersReducedMotion: prefersReducedMotion,

@@ -24,8 +24,12 @@ Quelle:
 
 `EChartsHeatmap` erhält eine optionale Property `ColorScalePreset` für die
 Kachel und `IPSViewColorScalePreset` für den unabhängigen IPSView-Designer.
-`custom` ist der kompatible Standard und verwendet unverändert `LowColor`
-und `HighColor`. Die weiteren stabilen Kennungen sind `tempera12`,
+`custom` ist der kompatible Standard und verwendet weiterhin `LowColor`
+und `HighColor`. Drei optionale, separat für Kachel und IPSView gespeicherte
+Zwischenfarben erweitern diesen kontinuierlichen Verlauf auf höchstens fünf
+gleichmäßig verteilte Farbstützpunkte. Nicht gesetzte Zwischenfarben werden
+übersprungen; ohne sie bleibt der bisherige Zwei-Farben-Verlauf unverändert.
+Die weiteren stabilen Kennungen sind `tempera12`,
 `tempera6`, `noaa2023`, `saws2023`, `dwd2023`, `ts2023`, `faz2023`, `usa2023`,
 `china2023` und `abc2023`.
 
@@ -48,6 +52,9 @@ Klassenfarbe dargestellt. Die kompakte, nicht interaktive Legende zeigt
 alle Klassenfarben und die festen Endwerte in °C, ohne für jede Klasse einen
 eigenen ECharts-Legendeneintrag zu beanspruchen. Es findet keine automatische
 Einheitenumrechnung statt; die Vorlagen setzen Temperaturwerte in °C voraus.
+Bei aktivierten Zellenwerten wählt die automatische Beschriftungsfarbe für
+jede Zelle kontrastreiches Hell oder Dunkel gegen die jeweils berechnete
+Füllfarbe. Die vorhandene explizite `ValueColor` überschreibt diese Automatik.
 
 Die kanonischen Farbreihen liegen modulnah in `HeatmapColorScales.php`, weil
 derzeit nur die Wochentag-Stunden-Heatmap diesen konkreten fachlichen Vertrag
@@ -57,7 +64,10 @@ weitere nutzende Diagrammfamilie begründet eine Verschiebung nach `libs`.
 
 ## Folgen
 
-Instanzen mit `custom` ändern ihr Aussehen nicht. Bereits gewählte Vorlagen
+Bestehende Instanzen mit `custom` ändern ihr Aussehen nicht; die neuen
+Zwischenfarben sind standardmäßig ungesetzt. Die bisherige automatische
+Wertbeschriftungsfarbe wird hingegen zellenweise kontrastabhängig; eine
+gespeicherte manuelle Farbe bleibt erhalten. Bereits gewählte Vorlagen
 wechseln bei einem Modulupdate von an Archivwerte angepassten zu festen
 Celsius-Klassen und zeigen daher gegebenenfalls deutlich andere Farben.
 Ein unbekannter Preset-Wert ist eine ungültige Konfiguration; beschädigte

@@ -95,6 +95,8 @@
         var high = style.highColor || colors.accent;
         var suppliedColors = Array.isArray(style.colorScaleColors)
             ? style.colorScaleColors.filter(function (color) { return /^#[0-9a-f]{6}$/i.test(color); }) : [];
+        var customMiddleColors = Array.isArray(style.customMiddleColors)
+            ? style.customMiddleColors.filter(function (color) { return /^#[0-9a-f]{6}$/i.test(color); }).slice(0, 3) : [];
         var presetRange = style.colorScaleRange || {};
         var presetMinimum = Number(presetRange.min);
         var presetMaximum = Number(presetRange.max);
@@ -103,7 +105,9 @@
             && presetRange.min !== undefined && presetRange.max !== undefined
             && Number.isFinite(presetMinimum) && Number.isFinite(presetMaximum)
             && presetMinimum < presetMaximum;
-        var scaleColors = classScale ? suppliedColors : [low, high];
+        var scaleColors = classScale ? suppliedColors
+            : style.colorScalePreset && style.colorScalePreset !== 'custom'
+                ? [low, high] : [low].concat(customMiddleColors, [high]);
         var decimals = Math.max(0, Math.min(6, Number(heatmap.decimals) || 0));
         var visualMap = {
             type: 'continuous', show: style.showColorScale === true && values.length > 0,
@@ -130,6 +134,15 @@
                     return { gte: lower, lt: upper, color: color };
                 })
             };
+        }
+
+        function cellBackground(value) {
+            if (classScale) {
+                var classIndex = Math.max(0, Math.min(scaleColors.length - 1,
+                    Math.floor((value - presetMinimum) / classWidth)));
+                return scaleColors[classIndex];
+            }
+            return design.interpolateColorStops(scaleColors, (value - minimum) / (maximum - minimum)) || low;
         }
 
         return {
@@ -171,8 +184,10 @@
             visualMap: visualMap,
             series: [{
                 type: 'heatmap', data: cells.map(function (cell) {
-                    return { value: [Number(cell.hour), Number(cell.weekday), Number(cell.value)],
-                        count: Number(cell.count) };
+                    var value = Number(cell.value);
+                    return { value: [Number(cell.hour), Number(cell.weekday), value],
+                        count: Number(cell.count),
+                        label: { color: style.valueColor || design.readableTextColor(cellBackground(value)) } };
                 }),
                 label: { show: showValues, color: style.valueColor || colors.text,
                     fontSize: valueSize, formatter: function (parameters) {

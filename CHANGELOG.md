@@ -2,6 +2,11 @@
 
 ## Behoben
 
+- Die automatische Wertbeschriftungsfarbe der Heatmap passt sich nun je
+  Zelle an helle und dunkle Füllfarben an. Eine manuell gewählte Farbe
+  bleibt unverändert. Achtung: Die bisherige automatische Schriftfarbe kann
+  sich nach dem Modulupdate sichtbar ändern.
+
 - Die Temperatur-Vorlagen der Heatmap färben Zellen jetzt nach festen
   Celsius-Klassen statt den aktuellen Archivwertebereich auf alle Farben
   zu strecken. Die Legende zeigt die festen Vorlagengrenzen. Achtung:
@@ -28,6 +33,11 @@
   zeigt ebenfalls eine breitere Skala.
 
 ## Hinzugefügt
+
+- Die individuelle Heatmap-Farbskala bietet bis zu drei optionale
+  Zwischenfarben und damit zwei bis fünf Farbstützpunkte. Ohne zusätzliche
+  Farben bleibt der bisherige Zwei-Farben-Verlauf bestehen; Kachel und
+  unabhängiges IPSView-Design können getrennte Paletten nutzen.
 
 - Die Heatmap bietet zehn mehrfarbige Temperatur-Vorlagen: Tempera-12/-6
   sowie acht aus Schiewe (2023) näherungsweise rekonstruierte Beispiele vom

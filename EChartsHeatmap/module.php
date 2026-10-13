@@ -72,6 +72,9 @@ class EChartsHeatmap extends IPSModuleStrict
         'EChartsTheme'         => EChartsAsset::THEME_AUTO,
         'ColorScalePreset'     => HeatmapColorScales::CUSTOM,
         'LowColor'             => -1,
+        'CustomMiddleColor1'   => -1,
+        'CustomMiddleColor2'   => -1,
+        'CustomMiddleColor3'   => -1,
         'HighColor'            => -1,
         'ShowColorScale'       => true,
         'ShowValues'           => false,
@@ -259,11 +262,21 @@ class EChartsHeatmap extends IPSModuleStrict
         $scaleColors = HeatmapColorScales::Colors($preset);
         $scaleRange = HeatmapColorScales::Range($preset);
         $classScale = $scaleColors !== [] && $scaleRange !== null;
-        if ($scaleColors === []) {
-            $scaleColors = [$low, $high];
+        if (!$classScale) {
+            $scaleColors = [$low];
+            if ($preset === HeatmapColorScales::CUSTOM) {
+                foreach ([1, 2, 3] as $index) {
+                    $configured = $this->BarPreviewValue($values, 'CustomMiddleColor' . $index, 'integer', $ipsView);
+                    if ($configured >= 0 && $configured <= 0xFFFFFF) {
+                        $scaleColors[] = EChartsAsset::ColorToHex($configured);
+                    }
+                }
+            }
+            $scaleColors[] = $high;
         }
         $titleColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'TitleColor', 'integer', $ipsView), $palette['text']);
         $axisColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'AxisColor', 'integer', $ipsView), $palette['text']);
+        $valueColor = $this->BarPreviewValue($values, 'ValueColor', 'integer', $ipsView);
         $svg = EChartsBarPreview::Open(
             $palette,
             $title,
@@ -299,7 +312,8 @@ class EChartsHeatmap extends IPSModuleStrict
                         ? $scaleRange['min'] + ($scaleRange['max'] - $scaleRange['min']) * $ratio
                         : $ratio * 100;
                     $svg .= '<text x="' . ($x + 12) . '" y="' . ($y + 19)
-                        . '" text-anchor="middle" fill="' . EChartsBarPreview::E($palette['text'])
+                        . '" text-anchor="middle" fill="' . EChartsBarPreview::E($valueColor < 0 || $valueColor > 0xFFFFFF
+                            ? self::ReadableCellTextColor($color) : EChartsAsset::ColorToHex($valueColor))
                         . '" font-size="10">' . round($sample, 1) . '</text>';
                 }
             }
@@ -548,7 +562,8 @@ class EChartsHeatmap extends IPSModuleStrict
             || !HeatmapColorScales::IsSupported($this->ReadPropertyString($prefix . 'ColorScalePreset'))) {
             return false;
         }
-        foreach (['LowColor', 'HighColor', 'TitleColor', 'AxisColor', 'ValueColor', 'GridColor'] as $name) {
+        foreach (['LowColor', 'CustomMiddleColor1', 'CustomMiddleColor2', 'CustomMiddleColor3',
+            'HighColor', 'TitleColor', 'AxisColor', 'ValueColor', 'GridColor'] as $name) {
             $value = $this->ReadPropertyInteger($prefix . $name);
             if ($value < -1 || $value > 0xFFFFFF) {
                 return false;
@@ -654,6 +669,7 @@ class EChartsHeatmap extends IPSModuleStrict
             'colorScalePreset'     => $this->ReadPropertyString($prefix . 'ColorScalePreset'),
             'colorScaleColors'     => HeatmapColorScales::Colors($this->ReadPropertyString($prefix . 'ColorScalePreset')),
             'colorScaleRange'      => HeatmapColorScales::Range($this->ReadPropertyString($prefix . 'ColorScalePreset')),
+            'customMiddleColors'   => $this->CustomMiddleColors($prefix),
             'lowColor'             => $this->OptionalDesignColor($prefix . 'LowColor'),
             'highColor'            => $this->OptionalDesignColor($prefix . 'HighColor'),
             'showColorScale'       => $this->ReadPropertyBoolean($prefix . 'ShowColorScale'),
@@ -672,6 +688,20 @@ class EChartsHeatmap extends IPSModuleStrict
     {
         $color = $this->ReadPropertyInteger($property);
         return $color < 0 ? '' : EChartsAsset::ColorToHex($color);
+    }
+
+    /** @return list<string> */
+    private function CustomMiddleColors(string $prefix): array
+    {
+        $colors = [];
+        foreach ([1, 2, 3] as $index) {
+            $color = $this->OptionalDesignColor($prefix . 'CustomMiddleColor' . $index);
+            if ($color !== '') {
+                $colors[] = $color;
+            }
+        }
+
+        return $colors;
     }
 
     private function IPSViewThemeCSS(): string
@@ -746,5 +776,21 @@ class EChartsHeatmap extends IPSModuleStrict
         $position = max(0.0, min(1.0, $ratio)) * (count($colors) - 1);
         $index = min(count($colors) - 2, (int) floor($position));
         return self::InterpolateColor($colors[$index], $colors[$index + 1], $position - $index);
+    }
+
+    private static function ReadableCellTextColor(string $background): string
+    {
+        $channels = sscanf($background, '#%02x%02x%02x');
+        $linear = array_map(static function (int $channel): float
+        {
+            $normalized = $channel / 255;
+            return $normalized <= 0.04045
+                ? $normalized / 12.92
+                : (($normalized + 0.055) / 1.055) ** 2.4;
+        }, $channels);
+        $luminance = 0.2126 * $linear[0] + 0.7152 * $linear[1] + 0.0722 * $linear[2];
+        $darkLuminance = ((17 / 255 + 0.055) / 1.055) ** 2.4;
+        return 1.05 / ($luminance + 0.05) >= ($luminance + 0.05) / ($darkLuminance + 0.05)
+            ? '#FFFFFF' : '#111111';
     }
 }

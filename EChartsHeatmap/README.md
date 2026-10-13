@@ -23,10 +23,12 @@ Nachkommastellen aus der Variablendarstellung oder den manuellen Angaben.
 ## Design und Ausgabe
 
 Der Kacheldesigner enthält Theme, Farben der Werteskala, sichtbare Farbskala,
-optionale Zellenwerte, Textgrößen und -farben sowie Animation. Die individuelle
-Zwei-Farben-Skala zeigt ihren kleinsten und größten Archivwert mit der
-gewählten Einheit an.
-Neben der bisherigen individuellen Zwei-Farben-Skala stehen Tempera-12 und
+optionale Zellenwerte, Textgrößen und -farben sowie Animation. „Individuell“
+verläuft zwischen Start- und Endfarbe; bis zu drei optionale Zwischenfarben
+ergeben insgesamt zwei bis fünf gleichmäßig verteilte Farbstützpunkte. Ohne
+Zwischenfarben bleibt das bisherige Aussehen erhalten. Die individuelle
+Skala zeigt ihren kleinsten und größten Archivwert mit der gewählten Einheit.
+Neben dieser individuellen Skala stehen Tempera-12 und
 Tempera-6 sowie acht historische Farbreihen aus der Untersuchung von
 [Schiewe (2023)](https://kartdok.staatsbibliothek-berlin.de/servlets/MCRFileNodeServlet/kartdok_derivate_00000704/Schiewe_Farbschemata%20f%C3%BCr%20Temperaturkarten_Was%20liegt%20zwischen%20Blau%20und%20Rot_KN-IP_2023.pdf)
 zur Wahl. Die als NOAA, SAWS, DWD, tagesschau, FAZ, USA Today, China Daily
@@ -43,9 +45,11 @@ außerhalb einer Vorlage erhalten die erste beziehungsweise letzte Klassenfarbe.
 Die kompakte Legende zeigt alle Farbfelder und die festen Endwerte in °C,
 auch wenn die aktuellen Archivwerte nur einen Ausschnitt belegen. Für diese
 Vorlagen müssen die Daten bereits als °C vorliegen; eine Umrechnung erfolgt
-nicht. Die eigenen
-Endfarben greifen nur bei „Individuell“; bestehende Instanzen behalten diese
-Voreinstellung.
+nicht. Die eigenen Farben greifen nur bei „Individuell“; bestehende Instanzen
+behalten diese Voreinstellung. Bei aktivierten Zellenwerten wählt
+„Wertbeschriftungsfarbe: Automatischer Kontrast“ für jede Zelle eine helle oder
+dunkle Schrift passend zu ihrer Füllfarbe. Eine manuell gewählte Schriftfarbe
+hat Vorrang.
 Die Formularvorschau verwendet ausdrücklich Beispieldaten und liest beim
 Bearbeiten kein Archiv. Das Diagramm selbst zeigt leere Felder ohne
 Interpolation.
