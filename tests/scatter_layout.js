@@ -90,6 +90,41 @@ assert.equal(bubble.option.yAxis.scale, true);
 assert.equal(bubble.option.xAxis.min, undefined);
 assert.equal(bubble.option.yAxis.min, undefined);
 assert.equal(bubble.option.series[0].itemStyle.color, '#123456');
+assert.equal(bubble.option.visualMap, undefined, 'Existing charts keep their solid point color.');
+const colorMapped = render({ ...model, scatter: { ...model.scatter, style: {
+    ...model.scatter.style, colorMapEnabled: true, colorMapDimension: 'y',
+    colorMapRangeMode: 'data', colorMapShowLegend: true,
+    colorMapLowColor: '#123456', colorMapHighColor: '#fedcba'
+} } });
+assert.equal(colorMapped.option.visualMap.dimension, 4);
+assert.equal(colorMapped.option.visualMap.min, 50);
+assert.equal(colorMapped.option.visualMap.max, 55);
+assert.equal(colorMapped.option.series[0].data[0].value[4], 50);
+assert.deepEqual(Array.from(colorMapped.option.visualMap.inRange.color), ['#123456', '#fedcba']);
+assert.equal(colorMapped.option.series[0].itemStyle.color, undefined);
+assert.ok(colorMapped.option.grid.top > bubble.option.grid.top,
+    'A visible color scale must reserve its own space above the plot.');
+const manualColors = render({ ...model, scatter: { ...model.scatter, style: {
+    ...model.scatter.style, colorMapEnabled: true, colorMapDimension: 'x',
+    colorMapRangeMode: 'manual', colorMapMinimum: -5, colorMapMaximum: 25
+} } });
+assert.equal(manualColors.option.visualMap.dimension, 4);
+assert.equal(manualColors.option.visualMap.min, -5);
+assert.equal(manualColors.option.visualMap.max, 25);
+assert.equal(manualColors.option.series[0].data[0].value[4], 10);
+const clippedColors = render({ ...model, scatter: { ...model.scatter, style: {
+    ...model.scatter.style, colorMapEnabled: true, colorMapDimension: 'x',
+    colorMapRangeMode: 'manual', colorMapMinimum: 12, colorMapMaximum: 18
+} } });
+assert.deepEqual(Array.from(clippedColors.option.series[0].data, entry => entry.value[4]), [12, 18],
+    'Values outside manual color limits use the nearest endpoint color.');
+const bubbleColors = render({ ...model, scatter: { ...model.scatter, style: {
+    ...model.scatter.style, colorMapEnabled: true, colorMapDimension: 'size'
+} } });
+assert.equal(bubbleColors.option.visualMap.dimension, 4);
+assert.equal(bubbleColors.option.visualMap.min, 1);
+assert.equal(bubbleColors.option.visualMap.max, 3);
+assert.equal(bubbleColors.option.series[0].data[1].value[4], 3);
 assert.equal(bubble.option.dataZoom.length, 4);
 assert.equal(bubble.option.dataZoom[2].xAxisIndex, 0);
 assert.equal(bubble.option.dataZoom[3].yAxisIndex, 0);

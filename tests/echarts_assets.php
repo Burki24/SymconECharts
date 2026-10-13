@@ -16,12 +16,14 @@ function assertEChartsAsset(bool $condition, string $message): void
 $root = dirname(__DIR__);
 $runtimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.gauge.min.js';
 $cartesianRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.cartesian.min.js';
+$scatterRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.scatter.min.js';
 $polarRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.polar.min.js';
 $pieRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.pie.min.js';
 $licensePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/LICENSE.txt';
 $noticePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/NOTICE.txt';
 $runtime = (string) file_get_contents($runtimePath);
 $cartesianRuntime = (string) file_get_contents($cartesianRuntimePath);
+$scatterRuntime = (string) file_get_contents($scatterRuntimePath);
 $polarRuntime = (string) file_get_contents($polarRuntimePath);
 $pieRuntime = (string) file_get_contents($pieRuntimePath);
 $designUtilitiesPath = $root . '/libs/echarts-design.js';
@@ -30,6 +32,7 @@ $zoomUtilities = (string) file_get_contents($root . '/libs/echarts-zoom.js');
 $patternUtilities = (string) file_get_contents($root . '/libs/echarts-pattern.js');
 $runtimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/gauge-runtime.js');
 $cartesianRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/cartesian-runtime.js');
+$scatterRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/scatter-runtime.js');
 $polarRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/polar-runtime.js');
 $pieRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/pie-runtime.js');
 $windowsCheckoutRuntime = str_replace("\n", "\r\n", $runtime);
@@ -63,6 +66,14 @@ assertEChartsAsset(
 assertEChartsAsset(
     strlen($cartesianRuntime) < 655360 && str_contains($cartesianRuntime, 'window.echarts'),
     'The Cartesian ECharts runtime must expose the browser API and remain below 640 KiB.'
+);
+assertEChartsAsset(
+    is_file($scatterRuntimePath)
+        && hash_file('sha256', $scatterRuntimePath) === EChartsAsset::SCATTER_SHA256
+        && EChartsAsset::ScatterJavaScript() === $scatterRuntime
+        && strlen($scatterRuntime) < 786432
+        && str_contains($scatterRuntime, 'window.echarts'),
+    'The Scatter ECharts runtime must be pinned, expose the browser API and remain below 768 KiB.'
 );
 assertEChartsAsset(is_file($polarRuntimePath), 'The pinned Polar runtime is missing.');
 assertEChartsAsset(
@@ -105,6 +116,11 @@ assertEChartsAsset(
         && str_contains($cartesianRuntimeSource, 'MarkLineComponent')
         && str_contains($cartesianRuntimeSource, 'MarkAreaComponent'),
     'The Cartesian runtime must include Line, Bar and native marker components.'
+);
+assertEChartsAsset(
+    str_contains($scatterRuntimeSource, 'VisualMapComponent')
+        && str_contains($scatterRuntimeSource, 'cartesian-runtime.js'),
+    'The Scatter runtime must extend the shared Cartesian source with Visual Map.'
 );
 assertEChartsAsset(
     str_contains($polarRuntimeSource, 'BarChart')

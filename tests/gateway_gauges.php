@@ -7992,6 +7992,30 @@ $scatter->ApplyChanges();
 assertGatewayGauge($scatter->GetTestStatus() === 202, 'Scatter must reject an unknown label content mode.');
 $scatter->SetTestProperty('ValueLabelContent', 'y');
 $scatter->ApplyChanges();
+$scatter->SetTestProperty('ColorMapEnabled', true);
+$scatter->SetTestProperty('ColorMapDimension', 'x');
+$scatter->SetTestProperty('ColorMapRangeMode', 'manual');
+$scatter->SetTestProperty('ColorMapMinimum', -5.5);
+$scatter->SetTestProperty('ColorMapMaximum', 45.5);
+$scatter->ApplyChanges();
+$scatterColorData = json_decode($scatter->GetScatterData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $scatterColorData['scatter']['style']['colorMapEnabled'] === true
+        && $scatterColorData['scatter']['style']['colorMapDimension'] === 'x'
+        && $scatterColorData['scatter']['style']['colorMapMinimum'] === -5.5
+        && $scatterColorData['scatter']['style']['colorMapMaximum'] === 45.5,
+    'Scatter must expose its independent continuous color scale to ECharts.'
+);
+$scatter->SetTestProperty('ColorMapMaximum', -6.0);
+$scatter->ApplyChanges();
+assertGatewayGauge($scatter->GetTestStatus() === 202, 'Scatter must reject reversed manual color bounds.');
+$scatter->SetTestProperty('ColorMapRangeMode', 'data');
+$scatter->SetTestProperty('ColorMapDimension', 'size');
+$scatter->ApplyChanges();
+assertGatewayGauge($scatter->GetTestStatus() === 202, 'Size-based colors require a bubble source.');
+$scatter->SetTestProperty('ColorMapEnabled', false);
+$scatter->SetTestProperty('ColorMapDimension', 'y');
+$scatter->ApplyChanges();
 $scatterOutput = new EChartsScatter();
 $scatterOutput->Create();
 $scatterForm = json_decode($scatterOutput->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
@@ -8020,6 +8044,23 @@ foreach (['EnableZoom', 'IPSViewEnableZoom'] as $field) {
         'Scatter must offer X/Y zoom with live previews in Tile and IPSView.'
     );
 }
+foreach (['ColorMapEnabled', 'IPSViewColorMapEnabled'] as $field) {
+    $control = findGaugeFormElement($scatterForm['elements'], $field);
+    assertGatewayGauge(
+        ($control['type'] ?? null) === 'CheckBox'
+            && str_contains((string) ($control['onChange'] ?? ''), 'UpdateBarPreviewFromForm'),
+        'Scatter must offer value-based colors with live previews in both designers.'
+    );
+}
+foreach (['ColorMapRangeMode', 'IPSViewColorMapRangeMode'] as $field) {
+    $control = findGaugeFormElement($scatterForm['elements'], $field);
+    assertGatewayGauge(
+        ($control['type'] ?? null) === 'Select'
+            && str_contains((string) ($control['onChange'] ?? ''), 'UpdateColorMapRangeForm')
+            && str_contains((string) ($control['onChange'] ?? ''), 'UpdateBarPreviewFromForm'),
+        'Both Scatter color ranges must update their bounds and previews.'
+    );
+}
 foreach (['X', 'Y'] as $axis) {
     $tileMode = findGaugeFormElement($scatterForm['elements'], $axis . 'AxisRangeMode');
     $ipsViewMode = findGaugeFormElement($scatterForm['elements'], 'IPSView' . $axis . 'AxisRangeMode');
@@ -8045,12 +8086,22 @@ assertGatewayGauge(
     ],
     'Scatter must reveal only the selected manual axis bounds while editing the form.'
 );
+$scatterOutput->UpdateColorMapRangeForm(true, 'manual');
+assertGatewayGauge(
+    array_slice($scatterOutput->GetTestFormUpdates(), -2) === [
+        ['Field' => 'IPSViewColorMapMinimum', 'Parameter' => 'visible', 'Value' => true],
+        ['Field' => 'IPSViewColorMapMaximum', 'Parameter' => 'visible', 'Value' => true]
+    ],
+    'Independent IPSView color bounds must be revealed on demand.'
+);
 $scatterOutput->UpdateBarPreviewFromForm(json_encode([
     'Sources' => [
         ['VariableID' => 4711, 'Role' => 'x', 'Label' => 'Outside', 'Unit' => '°C', 'UseVariablePresentation' => false],
         ['VariableID' => 4713, 'Role' => 'y', 'Label' => 'Humidity', 'Unit' => '%', 'UseVariablePresentation' => false]
     ],
     'ShowValues'           => true,
+    'ColorMapEnabled'      => true, 'ColorMapShowLegend' => true,
+    'ColorMapLowColor'     => 0x112233, 'ColorMapHighColor' => 0xDDEEFF,
     'ValueLabelContent'    => 'both',
     'XAxisRangeMode'       => 'manual', 'XAxisMinimum' => 0.0, 'XAxisMaximum' => 20.0,
     'YAxisRangeMode'       => 'manual', 'YAxisMinimum' => 40.0, 'YAxisMaximum' => 100.0,
@@ -8074,7 +8125,9 @@ assertGatewayGauge(
         && str_contains($scatterTileSvg, '°C / ')
         && str_contains($scatterIPSViewSvg, '°C</text>')
         && !str_contains($scatterIPSViewSvg, '°C / ')
-        && str_contains($scatterTileSvg, '%</text>'),
+        && str_contains($scatterTileSvg, '%</text>')
+        && str_contains($scatterTileSvg, 'scatter-preview-color-map')
+        && !str_contains($scatterIPSViewSvg, 'scatter-preview-color-map'),
     'Scatter previews must keep points inside the plot and reflect independent axis and value-label settings.'
 );
 $scatterOutput->SetTestProperty('Sources', json_encode([
@@ -8100,6 +8153,10 @@ assertGatewayGauge(
 $scatterOutput->SetTestProperty('XAxisRangeMode', 'manual');
 $scatterOutput->SetTestProperty('XAxisMinimum', -5.25);
 $scatterOutput->SetTestProperty('XAxisMaximum', 25.75);
+$scatterOutput->SetTestProperty('ColorMapEnabled', true);
+$scatterOutput->SetTestProperty('ColorMapRangeMode', 'manual');
+$scatterOutput->SetTestProperty('ColorMapMinimum', 0.5);
+$scatterOutput->SetTestProperty('ColorMapMaximum', 99.5);
 $GLOBALS['symconTestCopyTarget'] = $scatterOutput;
 try {
     $scatterOutput->CopyTileDesignToIPSView();
@@ -8110,8 +8167,10 @@ assertGatewayGauge(
     str_contains($scatterOutput->GetIPSViewHTML(), '"xAxisRangeMode":"manual"')
         && str_contains($scatterOutput->GetIPSViewHTML(), '"valueLabelContent":"both"')
         && str_contains($scatterOutput->GetIPSViewHTML(), '"xAxisMinimum":-5.25')
-        && str_contains($scatterOutput->GetIPSViewHTML(), '"xAxisMaximum":25.75'),
-    'Scatter must copy floating manual axis bounds to the independent IPSView design.'
+        && str_contains($scatterOutput->GetIPSViewHTML(), '"xAxisMaximum":25.75')
+        && str_contains($scatterOutput->GetIPSViewHTML(), '"colorMapEnabled":true')
+        && str_contains($scatterOutput->GetIPSViewHTML(), '"colorMapMinimum":0.5'),
+    'Scatter must copy floating axis and color bounds to the independent IPSView design.'
 );
 assertGatewayGauge(
     str_contains($scatterOutput->GetVisualizationTile(), 'echarts-scatter-chart')

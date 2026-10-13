@@ -40,6 +40,12 @@ sind alle X-/Y- und optionalen Größenwerte weiterhin erreichbar. Sichtbare
 Punktbeschriftungen zeigen wahlweise den X-Wert, den Y-Wert (Voreinstellung)
 oder beide Werte mit ihren jeweiligen Einheiten. Kachel und unabhängiges
 IPSView-Design können die Auswahl getrennt festlegen.
+Optional können die Punkte anhand von X, Y oder – mit dritter Quelle – der
+Blasengröße eingefärbt werden. Der Farbbereich folgt den Daten oder verwendet
+ein manuelles Minimum und Maximum; niedrige und hohe Farbe sowie eine
+Farblegende sind einstellbar. Ohne diese Option bleibt die bisherige
+einheitliche Punktfarbe erhalten. Kachel und IPSView können die Farbkodierung
+unabhängig konfigurieren; beide Live-Vorschauen zeigen den Verlauf.
 Ein zuschaltbarer X/Y-Zoom stellt für beide Achsen eigene schmale Schieberegler
 mit derselben Reglerstärke wie bei den Zeitdiagrammen bereit. In der Kachel
 lässt sich die Punktwolke zusätzlich mit dem Mausrad

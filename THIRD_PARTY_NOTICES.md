@@ -31,6 +31,10 @@ Ausgelieferte Dateien:
   Renderer; 627.600 Byte;
   SHA-256
   `92954fbddaa6b7c09f25819ab7b4743eb6afd5efa92351f129b14d298d2ab31a`;
+- `libs/echarts/6.1.0/echarts.scatter.min.js` – reproduzierbarer
+  Scatter-Browser-Build mit den kartesischen Komponenten und Visual Map;
+  665.338 Byte; SHA-256
+  `5a344f5bc820ab1ca19487fcc8748068676cbcc234b57ce4990d928987fb4ec5`;
 - `libs/echarts/6.1.0/echarts.polar.min.js` – reproduzierbarer,
   Polar-Browser-Build aus ECharts Core, Bar Chart, Polar Component, Titel,
   Tooltip, Aria und Canvas Renderer; 514.353 Byte; SHA-256

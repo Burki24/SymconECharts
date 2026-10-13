@@ -2,6 +2,11 @@
 
 ## Hinzugefügt
 
+- Scatter/Bubble kann Punkte über die ECharts-Farbskala nach X-, Y- oder
+  Blasengrößenwert einfärben. Farbgrenzen, Endfarben und Legende sind in
+  Kachel und IPSView getrennt einstellbar und in beiden Vorschauen sichtbar;
+  bestehende Instanzen behalten die einheitliche Punktfarbe.
+
 - Scatter/Bubble bietet einen getrennten interaktiven X/Y-Zoom mit schlanken
   Schiebereglern, Mausradsteuerung und Erhalt beider Ausschnitte bei passenden
   Datenaktualisierungen. Die Einstellung steht im Kachel- und im unabhängigen

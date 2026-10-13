@@ -68,6 +68,37 @@
         return base + (large - base) * Math.max(0, Math.min(1, (value - minimum) / (maximum - minimum)));
     }
 
+    function colorMapOptions(style, roles, points, colors, top, compact, hasTitle) {
+        if (style.colorMapEnabled !== true) { return null; }
+        var dimension = { x: 0, y: 1, size: 2 }[style.colorMapDimension];
+        if (dimension === undefined) { dimension = 1; }
+        if (dimension === 2 && !roles.size) { return null; }
+        var pointIndex = dimension + 1;
+        var values = points.map(function (point) { return Number(point[pointIndex]); })
+            .filter(Number.isFinite);
+        var manual = style.colorMapRangeMode === 'manual';
+        var minimum = manual ? Number(style.colorMapMinimum) : Math.min.apply(null, values);
+        var maximum = manual ? Number(style.colorMapMaximum) : Math.max.apply(null, values);
+        if (!Number.isFinite(minimum) || !Number.isFinite(maximum)) { return null; }
+        if (maximum <= minimum) {
+            var padding = Math.max(1, Math.abs(minimum) * 0.01);
+            minimum -= padding;
+            maximum += padding;
+        }
+        var role = [roles.x, roles.y, roles.size][dimension] || { unit: '', decimals: 1 };
+        return {
+            type: 'continuous', seriesIndex: 0, dimension: 4,
+            min: minimum, max: maximum, show: style.colorMapShowLegend === true,
+            calculable: false, orient: 'horizontal', left: 'center',
+            top: top + (hasTitle ? 32 : 4), itemWidth: compact ? 65 : 100, itemHeight: 8,
+            text: [formatValue(maximum, role), formatValue(minimum, role)],
+            textStyle: { color: style.axisColor || colors.muted,
+                fontSize: compact ? 9 : 11 },
+            inRange: { color: [style.colorMapLowColor || colors.seriesColors[0] || colors.accent,
+                style.colorMapHighColor || colors.seriesColors[3] || colors.accent] }
+        };
+    }
+
     function sameZoomContext(previous, next) {
         if (!previous || !next) { return false; }
         var axisKeys = ['xAxisRangeMode', 'xAxisMinimum', 'xAxisMaximum',
@@ -103,6 +134,10 @@
         var axisColor = style.axisColor || colors.muted;
         var gridColor = style.gridColor || colors.track;
         var fontSize = design.fontSizePercent(style.axisFontSizePercent, compact ? 10 : 12);
+        var visualMap = colorMapOptions(style, roles, points, colors, top, compact, hasTitle);
+        var colorDimension = { x: 0, y: 1, size: 2 }[style.colorMapDimension];
+        if (colorDimension === undefined) { colorDimension = 1; }
+        var showColorLegend = visualMap && visualMap.show;
 
         return {
             backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
@@ -115,8 +150,10 @@
                 textStyle: { color: style.titleColor || colors.text,
                     fontSize: design.fontSizePercent(style.titleFontSizePercent, 18) }
             },
+            visualMap: visualMap || undefined,
             grid: { left: compact ? 65 : 86, right: zoomEnabled ? (compact ? 56 : 70) : (compact ? 20 : 38),
-                top: top + (hasTitle ? 48 : 18), bottom: zoomEnabled ? (compact ? 78 : 94) : (compact ? 54 : 70),
+                top: top + (hasTitle ? 48 : 18) + (showColorLegend ? 30 : 0),
+                bottom: zoomEnabled ? (compact ? 78 : 94) : (compact ? 54 : 70),
                 containLabel: true },
             dataZoom: zoom.cartesianOptions(zoomEnabled, bootstrap.mode, compact),
             xAxis: {
@@ -159,7 +196,7 @@
                 symbolSize: function (value) {
                     return sizeRole ? pointSize(Number(value[2]), minimum, maximum, base, large) : base;
                 },
-                itemStyle: { color: pointColor, opacity: 0.8 },
+                itemStyle: visualMap ? { opacity: 0.8 } : { color: pointColor, opacity: 0.8 },
                 labelLayout: { hideOverlap: true },
                 label: {
                     show: style.showValues === true,
@@ -178,8 +215,13 @@
                     }
                 },
                 data: points.map(function (point) {
-                    return { id: 'interval-' + point[0], value: [Number(point[1]), Number(point[2]),
-                        sizeRole ? Number(point[3]) : null, Number(point[0])] };
+                    var value = [Number(point[1]), Number(point[2]),
+                        sizeRole ? Number(point[3]) : null, Number(point[0])];
+                    if (visualMap) {
+                        var rawColorValue = Number(value[colorDimension]);
+                        value.push(Math.max(visualMap.min, Math.min(visualMap.max, rawColorValue)));
+                    }
+                    return { id: 'interval-' + point[0], value: value };
                 })
             }]
         };

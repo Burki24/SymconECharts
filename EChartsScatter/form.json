@@ -544,6 +544,92 @@
                     "type": "RowLayout",
                     "items": [
                         {
+                            "type": "CheckBox",
+                            "name": "ColorMapEnabled",
+                            "caption": "Color points by value"
+                        },
+                        {
+                            "type": "Select",
+                            "name": "ColorMapDimension",
+                            "caption": "Color source",
+                            "options": [
+                                {
+                                    "caption": "X value",
+                                    "value": "x"
+                                },
+                                {
+                                    "caption": "Y value",
+                                    "value": "y"
+                                },
+                                {
+                                    "caption": "Bubble size",
+                                    "value": "size"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ColorMapShowLegend",
+                            "caption": "Show color scale"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "ColorMapRangeMode",
+                            "caption": "Color range",
+                            "onChange": "ECSC_UpdateColorMapRangeForm($id, false, $ColorMapRangeMode);",
+                            "options": [
+                                {
+                                    "caption": "Fit to data",
+                                    "value": "data"
+                                },
+                                {
+                                    "caption": "Manual",
+                                    "value": "manual"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ColorMapMinimum",
+                            "caption": "Color minimum",
+                            "digits": 6
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ColorMapMaximum",
+                            "caption": "Color maximum",
+                            "digits": 6
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "ColorMapLowColor",
+                            "caption": "Low value color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "ColorMapHighColor",
+                            "caption": "High value color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
                             "type": "NumberSpinner",
                             "name": "TitleFontSizePercent",
                             "caption": "Title size",

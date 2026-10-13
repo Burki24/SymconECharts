@@ -81,6 +81,14 @@ class EChartsScatter extends IPSModuleStrict
         'ValueLabelDistance'      => 'integer',
         'PointSize'               => 'integer',
         'BubbleMaxSize'           => 'integer',
+        'ColorMapEnabled'         => 'boolean',
+        'ColorMapDimension'       => 'string',
+        'ColorMapRangeMode'       => 'string',
+        'ColorMapMinimum'         => 'float',
+        'ColorMapMaximum'         => 'float',
+        'ColorMapLowColor'        => 'integer',
+        'ColorMapHighColor'       => 'integer',
+        'ColorMapShowLegend'      => 'boolean',
         'XAxisRangeMode'          => 'string',
         'XAxisMinimum'            => 'float',
         'XAxisMaximum'            => 'float',
@@ -127,6 +135,14 @@ class EChartsScatter extends IPSModuleStrict
         $this->RegisterPropertyInteger('ValueLabelDistance', 5);
         $this->RegisterPropertyInteger('PointSize', 12);
         $this->RegisterPropertyInteger('BubbleMaxSize', 48);
+        $this->RegisterPropertyBoolean('ColorMapEnabled', false);
+        $this->RegisterPropertyString('ColorMapDimension', 'y');
+        $this->RegisterPropertyString('ColorMapRangeMode', 'data');
+        $this->RegisterPropertyFloat('ColorMapMinimum', 0.0);
+        $this->RegisterPropertyFloat('ColorMapMaximum', 100.0);
+        $this->RegisterPropertyInteger('ColorMapLowColor', -1);
+        $this->RegisterPropertyInteger('ColorMapHighColor', -1);
+        $this->RegisterPropertyBoolean('ColorMapShowLegend', false);
         foreach (['X', 'Y'] as $axis) {
             $this->RegisterPropertyString($axis . 'AxisRangeMode', 'data');
             $this->RegisterPropertyFloat($axis . 'AxisMinimum', 0.0);
@@ -151,21 +167,22 @@ class EChartsScatter extends IPSModuleStrict
         $this->RegisterPropertyInteger('IPSViewBackgroundOpacityPercent', EChartsIPSViewBackground::DEFAULT_OPACITY_PERCENT);
         foreach (self::DESIGN_PROPERTY_TYPES as $name => $type) {
             $default = match ($name) {
-                'EChartsTheme'                                                        => EChartsAsset::THEME_AUTO,
-                'ValueLabelPosition'                                                  => 'auto',
-                'ValueLabelContent'                                                   => 'y',
-                'XAxisRangeMode', 'YAxisRangeMode'                                    => 'data',
-                'AnimationEasing', 'AnimationEasingUpdate'                            => 'cubicInOut',
-                'ShowGrid', 'EnableZoom', 'AnimationEnabled'                          => true,
-                'ShowValues'                                                          => false,
-                'PointSize'                                                           => 12, 'BubbleMaxSize' => 48,
-                'ValueLabelDistance'                                                  => 5,
-                'XAxisMinimum', 'YAxisMinimum'                                        => 0.0,
-                'XAxisMaximum', 'YAxisMaximum'                                        => 100.0,
-                'TitleFontSizePercent', 'AxisFontSizePercent', 'ValueFontSizePercent' => 100,
-                'AnimationDuration'                                                   => 350, 'AnimationDurationUpdate' => 500,
-                'AnimationDelay', 'AnimationDelayUpdate'                              => 0,
-                default                                                               => -1
+                'EChartsTheme'                                                         => EChartsAsset::THEME_AUTO,
+                'ValueLabelPosition'                                                   => 'auto',
+                'ValueLabelContent'                                                    => 'y',
+                'XAxisRangeMode', 'YAxisRangeMode', 'ColorMapRangeMode'                => 'data',
+                'ColorMapDimension'                                                    => 'y',
+                'AnimationEasing', 'AnimationEasingUpdate'                             => 'cubicInOut',
+                'ShowGrid', 'EnableZoom', 'AnimationEnabled'                           => true,
+                'ShowValues', 'ColorMapEnabled', 'ColorMapShowLegend'                  => false,
+                'PointSize'                                                            => 12, 'BubbleMaxSize' => 48,
+                'ValueLabelDistance'                                                   => 5,
+                'XAxisMinimum', 'YAxisMinimum', 'ColorMapMinimum'                      => 0.0,
+                'XAxisMaximum', 'YAxisMaximum', 'ColorMapMaximum'                      => 100.0,
+                'TitleFontSizePercent', 'AxisFontSizePercent', 'ValueFontSizePercent'  => 100,
+                'AnimationDuration'                                                    => 350, 'AnimationDurationUpdate' => 500,
+                'AnimationDelay', 'AnimationDelayUpdate'                               => 0,
+                default                                                                => -1
             };
             match ($type) {
                 'string'  => $this->RegisterPropertyString('IPSView' . $name, $default),
@@ -213,6 +230,11 @@ class EChartsScatter extends IPSModuleStrict
                 $this->ReadPropertyString($axis . 'AxisRangeMode') === 'manual'
             );
         }
+        $form['elements'] = $this->SetFormFieldVisibility(
+            $form['elements'],
+            ['ColorMapMinimum', 'ColorMapMaximum'],
+            $this->ReadPropertyString('ColorMapRangeMode') === 'manual'
+        );
         $form['elements'] = $this->WithIPSViewTimeSettingsByRange(
             $form['elements'],
             $this->BuildIPSViewTimeSettings($form['elements'])
@@ -225,12 +247,18 @@ class EChartsScatter extends IPSModuleStrict
                 $this->ReadPropertyString('IPSView' . $axis . 'AxisRangeMode') === 'manual'
             );
         }
+        $form['elements'] = $this->SetFormFieldVisibility(
+            $form['elements'],
+            ['IPSViewColorMapMinimum', 'IPSViewColorMapMaximum'],
+            $this->ReadPropertyString('IPSViewColorMapRangeMode') === 'manual'
+        );
         $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
         $form['elements'] = $this->WithAnimationFormCallbacks($form['elements'], 'ECSC');
         $form = $this->WithIPSViewDesignFormState($form, 'ECSC');
         $form = EChartsDesignerSections::Group($form, [
             ['caption' => 'Points and display', 'start' => 'EChartsTheme'],
             ['caption' => 'Axis ranges', 'start' => 'XAxisRangeMode'],
+            ['caption' => 'Value-based colors', 'start' => 'ColorMapEnabled'],
             ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
         ]);
         $fields = array_merge(
@@ -267,6 +295,14 @@ class EChartsScatter extends IPSModuleStrict
             foreach (['Minimum', 'Maximum'] as $bound) {
                 $this->UpdateFormField($prefix . $axis . 'Axis' . $bound, 'visible', $mode === 'manual');
             }
+        }
+    }
+
+    public function UpdateColorMapRangeForm(bool $IPSView, string $ColorMapRangeMode): void
+    {
+        $prefix = $IPSView ? 'IPSView' : '';
+        foreach (['Minimum', 'Maximum'] as $bound) {
+            $this->UpdateFormField($prefix . 'ColorMap' . $bound, 'visible', $ColorMapRangeMode === 'manual');
         }
     }
 
@@ -364,6 +400,34 @@ class EChartsScatter extends IPSModuleStrict
         $yLabel = ($byRole['y']['label'] ?? 'Y') . (empty($byRole['y']['unit']) ? '' : ' (' . $byRole['y']['unit'] . ')');
         $themeColor = $palette['seriesColors'][0] ?? $palette['accent'];
         $pointColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'PointColor', 'integer', $ipsView), $themeColor);
+        $colorMapEnabled = $this->BarPreviewValue($values, 'ColorMapEnabled', 'boolean', $ipsView);
+        $colorMapDimension = $this->BarPreviewValue($values, 'ColorMapDimension', 'string', $ipsView);
+        $colorMapLow = EChartsBarPreview::Color(
+            $this->BarPreviewValue($values, 'ColorMapLowColor', 'integer', $ipsView),
+            $palette['seriesColors'][0] ?? $palette['accent']
+        );
+        $colorMapHigh = EChartsBarPreview::Color(
+            $this->BarPreviewValue($values, 'ColorMapHighColor', 'integer', $ipsView),
+            $palette['seriesColors'][3] ?? $palette['accent']
+        );
+        $colorMapSamples = [];
+        for ($sampleIndex = 0; $sampleIndex < 13; $sampleIndex++) {
+            $colorMapSamples[] = match ($colorMapDimension) {
+                'x'     => 1.8 + $sampleIndex,
+                'size'  => (float) $sampleIndex,
+                default => 92 - $sampleIndex * 2.7 + sin($sampleIndex * 0.8) * 6
+            };
+        }
+        $colorMapMinimum = min($colorMapSamples);
+        $colorMapMaximum = max($colorMapSamples);
+        if ($this->BarPreviewValue($values, 'ColorMapRangeMode', 'string', $ipsView) === 'manual') {
+            $configuredMinimum = $this->BarPreviewValue($values, 'ColorMapMinimum', 'float', $ipsView);
+            $configuredMaximum = $this->BarPreviewValue($values, 'ColorMapMaximum', 'float', $ipsView);
+            if ($configuredMinimum < $configuredMaximum) {
+                $colorMapMinimum = $configuredMinimum;
+                $colorMapMaximum = $configuredMaximum;
+            }
+        }
         $axisColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'AxisColor', 'integer', $ipsView), $palette['muted']);
         $gridColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'GridColor', 'integer', $ipsView), $palette['track']);
         $titleColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'TitleColor', 'integer', $ipsView), $palette['text']);
@@ -379,6 +443,32 @@ class EChartsScatter extends IPSModuleStrict
             $this->BarPreviewValue($values, 'TitleFontSizePercent', 'integer', $ipsView)
         );
         $svg .= '<style>text{font-family:Arial,sans-serif}</style>';
+        if ($colorMapEnabled && $this->BarPreviewValue($values, 'ColorMapShowLegend', 'boolean', $ipsView)) {
+            $colorMapRole = $byRole[$colorMapDimension] ?? [];
+            $colorMapDecimals = (int) ($colorMapRole['decimals'] ?? 1);
+            $colorMapUnit = (string) ($colorMapRole['unit'] ?? '');
+            $colorMapLanguage = $this->ResolveHelperTranslationLanguage();
+            $svg .= '<defs><linearGradient id="scatter-preview-color-map"><stop offset="0%" stop-color="'
+                . EChartsBarPreview::E($colorMapLow) . '"/><stop offset="100%" stop-color="'
+                . EChartsBarPreview::E($colorMapHigh) . '"/></linearGradient></defs>';
+            $svg .= '<text x="292" y="54" text-anchor="end" font-size="10" fill="'
+                . EChartsBarPreview::E($palette['muted']) . '">'
+                . EChartsBarPreview::E(EChartsBarPreview::FormatValue(
+                    $colorMapMinimum,
+                    $colorMapDecimals,
+                    $colorMapUnit,
+                    $colorMapLanguage
+                )) . '</text>';
+            $svg .= '<rect x="300" y="44" width="120" height="8" fill="url(#scatter-preview-color-map)"/>';
+            $svg .= '<text x="428" y="54" font-size="10" fill="'
+                . EChartsBarPreview::E($palette['muted']) . '">'
+                . EChartsBarPreview::E(EChartsBarPreview::FormatValue(
+                    $colorMapMaximum,
+                    $colorMapDecimals,
+                    $colorMapUnit,
+                    $colorMapLanguage
+                )) . '</text>';
+        }
         $left = 105;
         $right = 670;
         $top = 70;
@@ -447,9 +537,14 @@ class EChartsScatter extends IPSModuleStrict
             $x = $left + ($xValue - $xRange[0]) / ($xRange[1] - $xRange[0]) * ($right - $left);
             $y = $bottom - ($yValue - $yRange[0]) / ($yRange[1] - $yRange[0]) * ($bottom - $top);
             $radius = isset($byRole['size']) ? ($size + ($maxBubble - $size) * $i / 12) / 2 : $size / 2;
+            $sampleColor = $colorMapEnabled ? self::PreviewInterpolatedColor(
+                $colorMapLow,
+                $colorMapHigh,
+                ($colorMapSamples[$i] - $colorMapMinimum) / max(0.000001, $colorMapMaximum - $colorMapMinimum)
+            ) : $pointColor;
             $svg .= '<circle cx="' . EChartsBarPreview::N($x) . '" cy="' . EChartsBarPreview::N($y)
                 . '" r="' . EChartsBarPreview::N($radius) . '" clip-path="url(#scatter-preview-plot)" fill="'
-                . EChartsBarPreview::E($pointColor) . '" fill-opacity="0.8"/>';
+                . EChartsBarPreview::E($sampleColor) . '" fill-opacity="0.8"/>';
             if ($showValues && $i % 4 === 1) {
                 $label = EChartsLabelDesign::PreviewRect(
                     $x - $radius,
@@ -490,6 +585,19 @@ class EChartsScatter extends IPSModuleStrict
             . EChartsBarPreview::E($yLabel) . '</text>';
 
         return $svg . '</svg>';
+    }
+
+    private static function PreviewInterpolatedColor(string $low, string $high, float $fraction): string
+    {
+        $fraction = max(0.0, min(1.0, $fraction));
+        $channels = [];
+        foreach ([1, 3, 5] as $offset) {
+            $start = hexdec(substr($low, $offset, 2));
+            $end = hexdec(substr($high, $offset, 2));
+            $channels[] = (int) round($start + ($end - $start) * $fraction);
+        }
+
+        return sprintf('#%02X%02X%02X', ...$channels);
     }
 
     /** @param array<string,mixed> $values @return array{float,float} */
@@ -601,7 +709,7 @@ class EChartsScatter extends IPSModuleStrict
                 'ipsViewTransport'  => $ipsView ? $this->EChartsIPSViewTransportOptions() : null
             ],
             'replacements' => [
-                '{{ECHARTS_SCRIPT}}'           => EChartsAsset::CartesianJavaScript(),
+                '{{ECHARTS_SCRIPT}}'           => EChartsAsset::ScatterJavaScript(),
                 '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
                 '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript(),
                 '{{ECHARTS_ZOOM_SCRIPT}}'      => EChartsAsset::ZoomJavaScript(),
@@ -639,7 +747,7 @@ class EChartsScatter extends IPSModuleStrict
     private function GetConfigurationError(): ?array
     {
         try {
-            $this->GetValidatedSources();
+            $sources = $this->GetValidatedSources();
         } catch (Throwable $exception) {
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => $exception->getMessage()];
         }
@@ -656,6 +764,16 @@ class EChartsScatter extends IPSModuleStrict
             || $this->ReadPropertyInteger('PointBudget') > 2000
             || !$this->IsValidDesign('')) {
             return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => 'The Scatter settings are invalid.'];
+        }
+        if (($this->ReadPropertyBoolean('ColorMapEnabled')
+            && $this->ReadPropertyString('ColorMapDimension') === 'size')
+            || ($this->IsIPSViewHTMLPageEnabled() && !$this->ReadPropertyBoolean('IPSViewUseTileDesign')
+                && $this->ReadPropertyBoolean('IPSViewColorMapEnabled')
+                && $this->ReadPropertyString('IPSViewColorMapDimension') === 'size')) {
+            if (!isset($sources['size'])) {
+                return ['Status' => self::STATUS_CONFIGURATION_INVALID,
+                    'Message'    => 'A bubble-size source is required for size-based colors.'];
+            }
         }
         if ($this->IsIPSViewHTMLPageEnabled()
             && (!EChartsIPSViewBackground::IsValid(
@@ -872,6 +990,15 @@ class EChartsScatter extends IPSModuleStrict
             || $this->ReadPropertyInteger($prefix . 'BubbleMaxSize') < $this->ReadPropertyInteger($prefix . 'PointSize')) {
             return false;
         }
+        $colorRangeMinimum = $this->ReadPropertyFloat($prefix . 'ColorMapMinimum');
+        $colorRangeMaximum = $this->ReadPropertyFloat($prefix . 'ColorMapMaximum');
+        if (!in_array($this->ReadPropertyString($prefix . 'ColorMapDimension'), self::ROLES, true)
+            || !in_array($this->ReadPropertyString($prefix . 'ColorMapRangeMode'), ['data', 'manual'], true)
+            || !is_finite($colorRangeMinimum) || !is_finite($colorRangeMaximum)
+            || ($this->ReadPropertyString($prefix . 'ColorMapRangeMode') === 'manual'
+                && $colorRangeMinimum >= $colorRangeMaximum)) {
+            return false;
+        }
         foreach (['X', 'Y'] as $axis) {
             $mode = $this->ReadPropertyString($prefix . $axis . 'AxisRangeMode');
             $minimum = $this->ReadPropertyFloat($prefix . $axis . 'AxisMinimum');
@@ -888,7 +1015,8 @@ class EChartsScatter extends IPSModuleStrict
                 return false;
             }
         }
-        foreach (['PointColor', 'TitleColor', 'AxisColor', 'GridColor', 'ValueColor'] as $name) {
+        foreach (['PointColor', 'TitleColor', 'AxisColor', 'GridColor', 'ValueColor',
+            'ColorMapLowColor', 'ColorMapHighColor'] as $name) {
             if ($this->ReadPropertyInteger($prefix . $name) < -1
                 || $this->ReadPropertyInteger($prefix . $name) > 0xFFFFFF) {
                 return false;
@@ -927,11 +1055,15 @@ class EChartsScatter extends IPSModuleStrict
     {
         $prefix = $ipsView && !$this->ReadPropertyBoolean('IPSViewUseTileDesign') ? 'IPSView' : '';
         $style = $this->ReadAnimationStyle($prefix);
-        foreach (['ShowGrid', 'EnableZoom', 'ShowValues'] as $name) {
+        foreach (['ShowGrid', 'EnableZoom', 'ShowValues', 'ColorMapEnabled', 'ColorMapShowLegend'] as $name) {
             $style[lcfirst($name)] = $this->ReadPropertyBoolean($prefix . $name);
         }
         $style['valueLabelPosition'] = $this->ReadPropertyString($prefix . 'ValueLabelPosition');
         $style['valueLabelContent'] = $this->ReadPropertyString($prefix . 'ValueLabelContent');
+        $style['colorMapDimension'] = $this->ReadPropertyString($prefix . 'ColorMapDimension');
+        $style['colorMapRangeMode'] = $this->ReadPropertyString($prefix . 'ColorMapRangeMode');
+        $style['colorMapMinimum'] = $this->ReadPropertyFloat($prefix . 'ColorMapMinimum');
+        $style['colorMapMaximum'] = $this->ReadPropertyFloat($prefix . 'ColorMapMaximum');
         foreach (['X', 'Y'] as $axis) {
             $style[lcfirst($axis) . 'AxisRangeMode'] = $this->ReadPropertyString($prefix . $axis . 'AxisRangeMode');
             foreach (['Minimum', 'Maximum'] as $bound) {
@@ -942,7 +1074,8 @@ class EChartsScatter extends IPSModuleStrict
             'AxisFontSizePercent', 'ValueFontSizePercent'] as $name) {
             $style[lcfirst($name)] = $this->ReadPropertyInteger($prefix . $name);
         }
-        foreach (['PointColor', 'TitleColor', 'AxisColor', 'GridColor', 'ValueColor'] as $name) {
+        foreach (['PointColor', 'TitleColor', 'AxisColor', 'GridColor', 'ValueColor',
+            'ColorMapLowColor', 'ColorMapHighColor'] as $name) {
             $color = $this->ReadPropertyInteger($prefix . $name);
             $style[lcfirst($name)] = $color < 0 ? '' : EChartsAsset::ColorToHex($color);
         }
@@ -1029,6 +1162,8 @@ class EChartsScatter extends IPSModuleStrict
                 if (in_array($name, ['XAxisRangeMode', 'YAxisRangeMode'], true)) {
                     $item['onChange'] = 'ECSC_UpdateAxisRangeForm($id, true, '
                         . '$IPSViewXAxisRangeMode, $IPSViewYAxisRangeMode);';
+                } elseif ($name === 'ColorMapRangeMode') {
+                    $item['onChange'] = 'ECSC_UpdateColorMapRangeForm($id, true, $IPSViewColorMapRangeMode);';
                 }
                 $items[] = $item;
             }
