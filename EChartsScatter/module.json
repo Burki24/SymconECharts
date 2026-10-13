@@ -1,0 +1,16 @@
+{
+    "id": "{9865CDB4-5CA9-4C34-A148-983E0B5F2FA6}",
+    "name": "EChartsScatter",
+    "type": 3,
+    "vendor": "",
+    "aliases": [],
+    "parentRequirements": [
+        "{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}"
+    ],
+    "childRequirements": [],
+    "implemented": [
+        "{E4749B72-912B-E3E3-1C57-D19019FFDD84}"
+    ],
+    "prefix": "ECSC",
+    "url": "https://github.com/Burki24/SymconECharts"
+}

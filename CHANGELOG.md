@@ -2,6 +2,12 @@
 
 ## Hinzugefügt
 
+- `EChartsScatter` zeigt Archivwerte als X/Y-Streudiagramm oder mit optionaler
+  dritter Quelle als Bubble-Diagramm in Kachel und IPSView. Punkte entstehen
+  ausschließlich aus gemeinsamen abgeschlossenen Intervallen; fehlende Werte
+  werden weder interpoliert noch fortgeschrieben. Beide Designer besitzen
+  Live-Vorschau, Farben, Beschriftungen und Animation.
+
 - Pie/Donut/Nightingale, Balken- und TimeSeries-Designer bieten zusätzliche
   Positionen und Abstände für Wertbeschriftungen; Pie erhält eigene Regler für
   Außen-Ausrichtung und Führungslinien. Die Gauge-Designer für Multi, Tacho

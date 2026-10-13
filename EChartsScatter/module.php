@@ -1,0 +1,878 @@
+<?php
+
+declare(strict_types=1);
+
+use Burki24\SymconModuleHelper\ConfigurationFormHelper;
+use Burki24\SymconModuleHelper\DataFlowHelper;
+use Burki24\SymconModuleHelper\IPSViewHTMLPageHelper;
+use Burki24\SymconModuleHelper\ResponsiveVisualizationHelper;
+use Burki24\SymconModuleHelper\VisualizationAssetHelper;
+use Burki24\SymconModuleHelper\VisualizationThemeHelper;
+use SymconECharts\EChartsAnimationDesign;
+use SymconECharts\EChartsArchiveQuery;
+use SymconECharts\EChartsAsset;
+use SymconECharts\EChartsBarPreview;
+use SymconECharts\EChartsBarPreviewForm;
+use SymconECharts\EChartsDataProtocol;
+use SymconECharts\EChartsDesignerSections;
+use SymconECharts\EChartsIPSViewBackground;
+use SymconECharts\EChartsIPSViewDesignForm;
+use SymconECharts\EChartsIPSViewTransport;
+use SymconECharts\EChartsLabelDesign;
+use SymconECharts\EChartsSourceIdentity;
+use SymconECharts\EChartsTransientRefresh;
+use SymconECharts\EChartsVariablePresentation;
+use SymconECharts\ScatterPairing;
+
+require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
+require_once __DIR__ . '/../libs/helper/DataFlowHelper.php';
+require_once __DIR__ . '/../libs/helper/IPSViewHTMLPageHelper.php';
+require_once __DIR__ . '/../libs/helper/ResponsiveVisualizationHelper.php';
+require_once __DIR__ . '/../libs/helper/SVGPreviewHelper.php';
+require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
+require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
+require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
+require_once __DIR__ . '/../libs/EChartsArchiveQuery.php';
+require_once __DIR__ . '/../libs/EChartsAsset.php';
+require_once __DIR__ . '/../libs/EChartsBarPreview.php';
+require_once __DIR__ . '/../libs/EChartsBarPreviewForm.php';
+require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
+require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
+require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
+require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
+require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
+require_once __DIR__ . '/../libs/EChartsLabelDesign.php';
+require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
+require_once __DIR__ . '/../libs/EChartsTransientRefresh.php';
+require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
+require_once __DIR__ . '/ScatterPairing.php';
+
+class EChartsScatter extends IPSModuleStrict
+{
+    use ConfigurationFormHelper;
+    use DataFlowHelper;
+    use EChartsAnimationDesign;
+    use EChartsBarPreviewForm;
+    use EChartsIPSViewDesignForm;
+    use EChartsIPSViewTransport;
+    use EChartsTransientRefresh;
+    use IPSViewHTMLPageHelper;
+    use ResponsiveVisualizationHelper;
+    use VisualizationAssetHelper;
+    use VisualizationThemeHelper;
+
+    private const GATEWAY_MODULE_ID = '{33C9DF44-6F6D-5916-4AAE-CCB24BD6928D}';
+    private const DATA_ID_TO_PARENT = '{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}';
+    private const DATA_ID_FROM_PARENT = '{E4749B72-912B-E3E3-1C57-D19019FFDD84}';
+    private const IPSVIEW_OUTPUT_IDENT = 'IPSViewScatter';
+    private const STATUS_SOURCE_INVALID = 201;
+    private const STATUS_CONFIGURATION_INVALID = 202;
+    private const STATUS_PARENT_MISSING = 203;
+    private const STATUS_GATEWAY_FAILED = 204;
+    private const ROLES = ['x', 'y', 'size'];
+    private const REDUCERS = ['auto', 'average', 'sum', 'minimum', 'maximum'];
+    private const DESIGN_PROPERTY_TYPES = [
+        'EChartsTheme'            => 'string',
+        'ShowGrid'                => 'boolean',
+        'ShowValues'              => 'boolean',
+        'ValueLabelPosition'      => 'string',
+        'ValueLabelDistance'      => 'integer',
+        'PointSize'               => 'integer',
+        'BubbleMaxSize'           => 'integer',
+        'PointColor'              => 'integer',
+        'TitleColor'              => 'integer',
+        'AxisColor'               => 'integer',
+        'GridColor'               => 'integer',
+        'ValueColor'              => 'integer',
+        'TitleFontSizePercent'    => 'integer',
+        'AxisFontSizePercent'     => 'integer',
+        'ValueFontSizePercent'    => 'integer',
+        'AnimationEnabled'        => 'boolean',
+        'AnimationDuration'       => 'integer',
+        'AnimationDurationUpdate' => 'integer',
+        'AnimationEasing'         => 'string',
+        'AnimationEasingUpdate'   => 'string',
+        'AnimationDelay'          => 'integer',
+        'AnimationDelayUpdate'    => 'integer'
+    ];
+
+    public function Create(): void
+    {
+        parent::Create();
+        $this->SetVisualizationType(1);
+        $this->RegisterMessage(0, IPS_KERNELSTARTED);
+        $this->RegisterTimer('ArchiveRefresh', 0, 'ECSC_RefreshArchive($_IPS["TARGET"]);');
+        $this->RegisterTransientRefresh('ECSC');
+        $this->RegisterPropertyString('Sources', '[]');
+        $this->RegisterPropertyString('Title', '');
+        $this->RegisterPropertyString('Range', '24h');
+        $this->RegisterPropertyInteger('CustomRangeValue', 7);
+        $this->RegisterPropertyString('CustomRangeUnit', 'day');
+        $this->RegisterPropertyString('DataMode', 'auto');
+        $this->RegisterPropertyInteger('PointBudget', 1000);
+        $this->RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO);
+        $this->RegisterPropertyBoolean('ShowGrid', true);
+        $this->RegisterPropertyBoolean('ShowValues', false);
+        $this->RegisterPropertyString('ValueLabelPosition', 'auto');
+        $this->RegisterPropertyInteger('ValueLabelDistance', 5);
+        $this->RegisterPropertyInteger('PointSize', 12);
+        $this->RegisterPropertyInteger('BubbleMaxSize', 48);
+        foreach (['PointColor', 'TitleColor', 'AxisColor', 'GridColor', 'ValueColor'] as $name) {
+            $this->RegisterPropertyInteger($name, -1);
+        }
+        foreach (['TitleFontSizePercent', 'AxisFontSizePercent', 'ValueFontSizePercent'] as $name) {
+            $this->RegisterPropertyInteger($name, 100);
+        }
+        $this->RegisterAnimationProperties('', true, 350, 500);
+        $this->RegisterIPSViewHTMLPageProperties();
+        $this->RegisterEChartsIPSViewTransport();
+        $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
+        $this->RegisterPropertyBoolean('IPSViewUseTileTimeSettings', true);
+        $this->RegisterPropertyString('IPSViewRange', '24h');
+        $this->RegisterPropertyInteger('IPSViewCustomRangeValue', 7);
+        $this->RegisterPropertyString('IPSViewCustomRangeUnit', 'day');
+        $this->RegisterPropertyBoolean('IPSViewAdaptToBackground', false);
+        $this->RegisterPropertyInteger('IPSViewBackgroundColor', EChartsIPSViewBackground::DEFAULT_COLOR);
+        $this->RegisterPropertyInteger('IPSViewBackgroundOpacityPercent', EChartsIPSViewBackground::DEFAULT_OPACITY_PERCENT);
+        foreach (self::DESIGN_PROPERTY_TYPES as $name => $type) {
+            $default = match ($name) {
+                'EChartsTheme'                                                        => EChartsAsset::THEME_AUTO,
+                'ValueLabelPosition'                                                  => 'auto',
+                'AnimationEasing', 'AnimationEasingUpdate'                            => 'cubicInOut',
+                'ShowGrid', 'AnimationEnabled'                                        => true,
+                'ShowValues'                                                          => false,
+                'PointSize'                                                           => 12, 'BubbleMaxSize' => 48,
+                'ValueLabelDistance'                                                  => 5,
+                'TitleFontSizePercent', 'AxisFontSizePercent', 'ValueFontSizePercent' => 100,
+                'AnimationDuration'                                                   => 350, 'AnimationDurationUpdate' => 500,
+                'AnimationDelay', 'AnimationDelayUpdate'                              => 0,
+                default                                                               => -1
+            };
+            match ($type) {
+                'string'  => $this->RegisterPropertyString('IPSView' . $name, $default),
+                'boolean' => $this->RegisterPropertyBoolean('IPSView' . $name, $default),
+                default   => $this->RegisterPropertyInteger('IPSView' . $name, $default)
+            };
+        }
+        $this->RegisterAttributeString('RegisteredSourceVariableIDs', '[]');
+        $this->RegisterAttributeString('LastError', '');
+    }
+
+    public function ApplyChanges(): void
+    {
+        parent::ApplyChanges();
+        $this->MaintainIPSViewHTMLVariable(self::IPSVIEW_OUTPUT_IDENT, $this->Translate('Scatter for IPSView'), 90);
+        $this->Initialize();
+        if (IPS_GetKernelRunlevel() === KR_READY) {
+            $this->PublishVisualizationState();
+            $this->PublishIPSViewHTML();
+        }
+    }
+
+    public function GetCompatibleParents(): string
+    {
+        return json_encode(['type' => 'connect', 'moduleIDs' => [self::GATEWAY_MODULE_ID]], JSON_THROW_ON_ERROR);
+    }
+
+    public function GetConfigurationForm(): string
+    {
+        $form = $this->LoadConfigurationForm();
+        $form['elements'] = $this->WithAnimationFormControls($form['elements']);
+        EChartsLabelDesign::InsertAfterRowContaining($form['elements'], 'ShowValues', [
+            ['type' => 'RowLayout', 'items' => EChartsLabelDesign::CartesianControls()]
+        ]);
+        $form['elements'] = $this->SetFormFieldVisibility(
+            $form['elements'],
+            ['CustomRangeValue', 'CustomRangeUnit'],
+            $this->ReadPropertyString('Range') === 'custom'
+        );
+        $form['elements'] = $this->WithIPSViewTimeSettingsByRange(
+            $form['elements'],
+            $this->BuildIPSViewTimeSettings($form['elements'])
+        );
+        $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
+        $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
+        $form['elements'] = $this->WithAnimationFormCallbacks($form['elements'], 'ECSC');
+        $form = $this->WithIPSViewDesignFormState($form, 'ECSC');
+        $form = EChartsDesignerSections::Group($form, [
+            ['caption' => 'Points and display', 'start' => 'EChartsTheme'],
+            ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
+        ]);
+        $fields = array_merge(
+            ['Title', 'Sources', 'Range', 'CustomRangeValue', 'CustomRangeUnit', 'DataMode', 'PointBudget',
+                'IPSViewUseTileDesign', 'IPSViewUseTileTimeSettings', 'IPSViewRange',
+                'IPSViewCustomRangeValue', 'IPSViewCustomRangeUnit',
+                'IPSViewAdaptToBackground', 'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent'],
+            array_keys(self::DESIGN_PROPERTY_TYPES),
+            array_map(static fn (string $name): string => 'IPSView' . $name, array_keys(self::DESIGN_PROPERTY_TYPES))
+        );
+
+        return $this->EncodeConfigurationForm($this->WithBarPreviewForm($form, 'ECSC', $fields));
+    }
+
+    public function UpdateTimeRangeForm(string $Range): void
+    {
+        foreach (['CustomRangeValue', 'CustomRangeUnit'] as $field) {
+            $this->UpdateFormField($field, 'visible', $Range === 'custom');
+        }
+    }
+
+    public function UpdateIPSViewTimeRangeForm(bool $IPSViewUseTileTimeSettings, string $IPSViewRange): void
+    {
+        $this->UpdateFormField('IPSViewRange', 'visible', !$IPSViewUseTileTimeSettings);
+        foreach (['IPSViewCustomRangeValue', 'IPSViewCustomRangeUnit'] as $field) {
+            $this->UpdateFormField($field, 'visible', !$IPSViewUseTileTimeSettings && $IPSViewRange === 'custom');
+        }
+    }
+
+    public function RequestAction(string $Ident, mixed $Value): void
+    {
+        if (!$this->HandleIPSViewHTMLPageAction($Ident, $Value)) {
+            throw new InvalidArgumentException('Unknown action: ' . $Ident);
+        }
+    }
+
+    public function CopyTileDesignToIPSView(): void
+    {
+        foreach (self::DESIGN_PROPERTY_TYPES as $name => $type) {
+            $value = match ($type) {
+                'string'  => $this->ReadPropertyString($name),
+                'boolean' => $this->ReadPropertyBoolean($name),
+                default   => $this->ReadPropertyInteger($name)
+            };
+            IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
+        }
+        IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
+        IPS_ApplyChanges($this->InstanceID);
+    }
+
+    public function GetScatterData(): string
+    {
+        return $this->GetScatterDataForOutput(false);
+    }
+
+    public function GetScatterDiagnostic(): string
+    {
+        $error = $this->GetConfigurationError();
+
+        return json_encode(['valid' => $error === null, 'lastError' => $error['Message']
+            ?? $this->ReadAttributeString('LastError')], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
+    }
+
+    public function GetVisualizationTile(): string
+    {
+        return $this->RenderScatterHTMLPage(false);
+    }
+
+    public function GetIPSViewHTML(): string
+    {
+        return $this->RenderScatterHTMLPage(true);
+    }
+
+    public function ReceiveData(string $JSONString): string
+    {
+        return $this->HandleEChartsIPSViewRequest(
+            $JSONString,
+            self::DATA_ID_FROM_PARENT,
+            fn (): array => $this->BuildVisualizationState(true)
+        );
+    }
+
+    public function RefreshArchive(): void
+    {
+        $this->PublishVisualizationState();
+    }
+
+    public function RetryTransient(): void
+    {
+        $this->PublishVisualizationState();
+    }
+
+    /** @param array<int,mixed> $Data */
+    public function MessageSink(int $TimeStamp, int $SenderID, int $Message, array $Data): void
+    {
+        if ($SenderID === 0 && $Message === IPS_KERNELSTARTED) {
+            $this->Initialize();
+            $this->PublishVisualizationState();
+            $this->PublishIPSViewHTML();
+        }
+    }
+
+    protected function CurrentTimestamp(): int
+    {
+        return time();
+    }
+
+    /** @param array<string,mixed> $values */
+    protected function BarPreviewSvg(array $values, bool $ipsView): string
+    {
+        $palette = EChartsBarPreview::Palette($this->BarPreviewValue($values, 'EChartsTheme', 'string', $ipsView));
+        $sources = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values, 'Label', false);
+        $byRole = [];
+        foreach ($sources['items'] as $source) {
+            if (in_array($source['Role'] ?? null, self::ROLES, true)) {
+                $byRole[$source['Role']] = $source;
+            }
+        }
+        $xLabel = $byRole['x']['label'] ?? 'X';
+        $yLabel = $byRole['y']['label'] ?? 'Y';
+        $themeColor = $palette['seriesColors'][0] ?? $palette['accent'];
+        $pointColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'PointColor', 'integer', $ipsView), $themeColor);
+        $axisColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'AxisColor', 'integer', $ipsView), $palette['muted']);
+        $gridColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'GridColor', 'integer', $ipsView), $palette['track']);
+        $titleColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'TitleColor', 'integer', $ipsView), $palette['text']);
+        $svg = EChartsBarPreview::Open(
+            $palette,
+            (string) ($values['Title'] ?? $this->ReadPropertyString('Title')),
+            true,
+            $ipsView,
+            $values,
+            $this->Translate('Example data'),
+            $this->Translate('Chart preview'),
+            $titleColor,
+            $this->BarPreviewValue($values, 'TitleFontSizePercent', 'integer', $ipsView)
+        );
+        if ($this->BarPreviewValue($values, 'ShowGrid', 'boolean', $ipsView)) {
+            for ($i = 1; $i < 5; $i++) {
+                $svg .= '<path d="M ' . (70 + $i * 120) . ' 70 V 290 M 70 ' . (70 + $i * 44)
+                    . ' H 670" stroke="' . EChartsBarPreview::E($gridColor) . '"/>';
+            }
+        }
+        $svg .= '<path d="M 70 70 V 290 H 670" fill="none" stroke="' . EChartsBarPreview::E($axisColor) . '"/>';
+        $size = max(4, min(60, $this->BarPreviewValue($values, 'PointSize', 'integer', $ipsView)));
+        $maxBubble = max(8, min(100, $this->BarPreviewValue($values, 'BubbleMaxSize', 'integer', $ipsView)));
+        for ($i = 0; $i < 13; $i++) {
+            $x = 95 + $i * 43;
+            $y = 252 - (int) (115 + sin($i * 0.72) * 65 + $i * 3);
+            $radius = isset($byRole['size']) ? ($size + ($maxBubble - $size) * $i / 12) / 2 : $size / 2;
+            $svg .= '<circle cx="' . $x . '" cy="' . $y . '" r="' . EChartsBarPreview::N($radius)
+                . '" fill="' . EChartsBarPreview::E($pointColor) . '" fill-opacity="0.75"/>';
+        }
+        $svg .= '<text x="370" y="326" text-anchor="middle" fill="' . EChartsBarPreview::E($axisColor) . '">'
+            . EChartsBarPreview::E($xLabel) . '</text>';
+        $svg .= '<text x="23" y="180" fill="' . EChartsBarPreview::E($axisColor) . '">'
+            . EChartsBarPreview::E($yLabel) . '</text>';
+
+        return $svg . '</svg>';
+    }
+
+    private function GetScatterDataForOutput(bool $ipsView): string
+    {
+        $error = $this->GetConfigurationError();
+        if ($error !== null) {
+            $this->WriteAttributeString('LastError', $error['Message']);
+            $this->SetStatus($error['Status']);
+            throw new RuntimeException($error['Message']);
+        }
+        if (!$this->HasActiveParent()) {
+            $this->SetStatus(self::STATUS_PARENT_MISSING);
+            throw new RuntimeException('No active EChartsGateway is connected.');
+        }
+        $sources = $this->GetValidatedSources();
+        $query = EChartsArchiveQuery::Resolve(
+            $this->EffectiveRange($ipsView),
+            $this->EffectiveCustomRangeValue($ipsView),
+            $this->EffectiveCustomRangeUnit($ipsView),
+            $this->ReadPropertyString('DataMode'),
+            $this->ReadPropertyInteger('PointBudget'),
+            count($sources),
+            $this->CurrentTimestamp(),
+            date_default_timezone_get()
+        );
+        if ($query['Mode'] !== 'aggregated') {
+            throw new RuntimeException('Scatter pairing requires completed archive intervals.');
+        }
+        $archive = [];
+        $metadata = [];
+        $truncated = false;
+        foreach ($sources as $role => $source) {
+            $response = $this->ReadArchiveSource($source, $query);
+            $archive[$role] = $response['Points'];
+            $metadata[$role] = [
+                'variableID' => $source['VariableID'], 'label' => $source['Label'],
+                'unit'       => $source['Unit'], 'decimals' => $source['Decimals']
+            ];
+            $truncated = $truncated || $response['Truncated'];
+        }
+        $points = ScatterPairing::Pair($archive['x'], $archive['y'], $archive['size'] ?? null);
+        $this->WriteAttributeString('LastError', '');
+        $this->SetStatus(IS_ACTIVE);
+
+        return json_encode([
+            'schemaVersion' => 1,
+            'family'        => 'scatter',
+            'variant'       => isset($sources['size']) ? 'bubble' : 'scatter',
+            'theme'         => $this->EffectiveTheme($ipsView),
+            'scatter'       => ['title' => $this->ReadPropertyString('Title'), 'style' => $this->ReadDesignStyle($ipsView)],
+            'roles'         => $metadata,
+            'range'         => [
+                'key'              => $this->EffectiveRange($ipsView),
+                'startTimestamp'   => $query['StartTimestamp'],
+                'endTimestamp'     => $query['EndTimestamp'],
+                'aggregationLevel' => $query['AggregationLevel'],
+                'pointBudget'      => $this->ReadPropertyInteger('PointBudget')
+            ],
+            'points'    => $points,
+            'truncated' => $truncated
+        ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
+    }
+
+    private function RenderScatterHTMLPage(bool $ipsView): string
+    {
+        $hiddenTileTitle = !$ipsView && function_exists('IPS_GetObject')
+            && (bool) (IPS_GetObject($this->InstanceID)['ObjectIsHiddenTitle'] ?? false);
+
+        return $this->RenderVisualizationHTMLPage($ipsView, [
+            'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
+            'title'              => 'ECharts Scatter',
+            'visualizationTheme' => $this->VisualizationThemeCSS() . "\n\n"
+                . $this->ResponsiveVisualizationCSS('#echarts-scatter-root', 'echarts-scatter'),
+            'ipsViewStyle' => $ipsView ? $this->IPSViewThemeCSS() : '',
+            'state'        => $this->BuildVisualizationState($ipsView),
+            'translations' => [
+                'Configure X and Y archive sources.'                                      => $this->Translate('Configure X and Y archive sources.'),
+                'Connect an active EChartsGateway.'                                       => $this->Translate('Connect an active EChartsGateway.'),
+                'The Scatter values could not be loaded.'                                 => $this->Translate('The Scatter values could not be loaded.'),
+                'Scatter data could not be refreshed. Showing the last available values.' => $this->Translate(
+                    'Scatter data could not be refreshed. Showing the last available values.'
+                ),
+                'No common completed archive intervals.'                => $this->Translate('No common completed archive intervals.'),
+                'The selected range was truncated by the point budget.' => $this->Translate(
+                    'The selected range was truncated by the point budget.'
+                )
+            ],
+            'options' => [
+                'echartsVersion'    => EChartsAsset::VERSION,
+                'echartsThemes'     => EChartsAsset::ThemePalettes(),
+                'tileHeaderVisible' => !$hiddenTileTitle,
+                'adaptToBackground' => $ipsView && $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
+                'ipsViewTransport'  => $ipsView ? $this->EChartsIPSViewTransportOptions() : null
+            ],
+            'replacements' => [
+                '{{ECHARTS_SCRIPT}}'           => EChartsAsset::CartesianJavaScript(),
+                '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
+                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript(),
+                '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
+            ]
+        ]);
+    }
+
+    private function Initialize(): void
+    {
+        $this->SetStatus(IS_INACTIVE);
+        $this->SetTimerInterval('ArchiveRefresh', 0);
+        if (IPS_GetKernelRunlevel() !== KR_READY) {
+            return;
+        }
+        $this->SynchronizeSourceReference();
+        $error = $this->GetConfigurationError();
+        if ($error !== null) {
+            $this->WriteAttributeString('LastError', $error['Message']);
+            $this->SetStatus($error['Status']);
+            return;
+        }
+        if (!$this->HasActiveParent()) {
+            $this->WriteAttributeString('LastError', 'No active EChartsGateway is connected.');
+            $this->SetStatus(self::STATUS_PARENT_MISSING);
+            return;
+        }
+        $this->SetSummary($this->ReadPropertyString('Range'));
+        $this->WriteAttributeString('LastError', '');
+        $this->SetStatus(IS_ACTIVE);
+        $this->SetTimerInterval('ArchiveRefresh', 60000);
+    }
+
+    /** @return array{Status:int,Message:string}|null */
+    private function GetConfigurationError(): ?array
+    {
+        try {
+            $this->GetValidatedSources();
+        } catch (Throwable $exception) {
+            return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => $exception->getMessage()];
+        }
+        if (!EChartsArchiveQuery::IsValidRange(
+            $this->ReadPropertyString('Range'),
+            $this->ReadPropertyInteger('CustomRangeValue'),
+            $this->ReadPropertyString('CustomRangeUnit')
+        ) || !in_array(
+            $this->ReadPropertyString('DataMode'),
+            ['auto', ...array_keys(EChartsArchiveQuery::AGGREGATION_LEVELS)],
+            true
+        )
+            || $this->ReadPropertyInteger('PointBudget') < 200
+            || $this->ReadPropertyInteger('PointBudget') > 2000
+            || !$this->IsValidDesign('')) {
+            return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => 'The Scatter settings are invalid.'];
+        }
+        if ($this->IsIPSViewHTMLPageEnabled()
+            && (!EChartsIPSViewBackground::IsValid(
+                $this->ReadPropertyInteger('IPSViewBackgroundColor'),
+                $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent')
+            )
+                || (!$this->ReadPropertyBoolean('IPSViewUseTileDesign') && !$this->IsValidDesign('IPSView'))
+                || (!$this->ReadPropertyBoolean('IPSViewUseTileTimeSettings')
+                    && !EChartsArchiveQuery::IsValidRange(
+                        $this->ReadPropertyString('IPSViewRange'),
+                        $this->ReadPropertyInteger('IPSViewCustomRangeValue'),
+                        $this->ReadPropertyString('IPSViewCustomRangeUnit')
+                    )))) {
+            return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => 'The IPSView Scatter settings are invalid.'];
+        }
+
+        return null;
+    }
+
+    /** @return array<string,array{VariableID:int,Label:string,Unit:string,Decimals:int,Reducer:string}> */
+    private function GetValidatedSources(): array
+    {
+        try {
+            $raw = json_decode($this->ReadPropertyString('Sources'), true, 32, JSON_THROW_ON_ERROR);
+        } catch (JsonException $exception) {
+            throw new InvalidArgumentException('Scatter sources must contain valid JSON.', 0, $exception);
+        }
+        if (!is_array($raw) || !array_is_list($raw) || count($raw) < 2 || count($raw) > 3) {
+            throw new InvalidArgumentException('Configure one X and one Y source, optionally one size source.');
+        }
+        $byRole = [];
+        $seen = [];
+        foreach ($raw as $source) {
+            if (!is_array($source)) {
+                throw new InvalidArgumentException('Scatter source settings are invalid.');
+            }
+            $variableID = $source['VariableID'] ?? null;
+            $role = $source['Role'] ?? null;
+            $label = $source['Label'] ?? '';
+            $unit = $source['Unit'] ?? '';
+            $decimals = $source['Decimals'] ?? 1;
+            $reducer = $source['Reducer'] ?? 'auto';
+            $usePresentation = $source['UseVariablePresentation'] ?? true;
+            if (!is_int($variableID) || $variableID <= 0 || !IPS_VariableExists($variableID)
+                || isset($seen[$variableID]) || !in_array(IPS_GetVariable($variableID)['VariableType'] ?? null, [1, 2], true)
+                || !is_string($role) || !in_array($role, self::ROLES, true) || isset($byRole[$role])
+                || !is_string($label) || !is_string($unit) || !is_int($decimals)
+                || $decimals < 0 || $decimals > 6 || !is_bool($usePresentation)
+                || !is_string($reducer) || !in_array($reducer, self::REDUCERS, true)) {
+                throw new InvalidArgumentException('Scatter roles need distinct numeric variable IDs and valid settings.');
+            }
+            $presentation = EChartsVariablePresentation::Resolve(
+                $variableID,
+                0.0,
+                100.0,
+                $unit,
+                $decimals,
+                $usePresentation
+            );
+            $byRole[$role] = [
+                'VariableID' => $variableID, 'Label' => trim($label),
+                'Unit'       => $presentation['unit'], 'Decimals' => $presentation['decimals'], 'Reducer' => $reducer
+            ];
+            $seen[$variableID] = true;
+        }
+        if (!isset($byRole['x'], $byRole['y'])) {
+            throw new InvalidArgumentException('Scatter needs exactly one X and one Y source.');
+        }
+        $labels = EChartsSourceIdentity::LabelsForSources(array_values($byRole));
+        foreach ($byRole as &$source) {
+            $source['Label'] = $labels[$source['VariableID']];
+        }
+        unset($source);
+
+        return $byRole;
+    }
+
+    /** @param array{VariableID:int,Reducer:string} $source @param array<string,mixed> $query @return array<string,mixed> */
+    private function ReadArchiveSource(array $source, array $query): array
+    {
+        if ($query['Empty']) {
+            return ['Points' => [], 'Truncated' => false];
+        }
+        $payload = [
+            'VariableID'       => $source['VariableID'],
+            'StartTimestamp'   => $query['StartTimestamp'],
+            'EndTimestamp'     => $query['EndTimestamp'],
+            'Mode'             => 'aggregated',
+            'Reducer'          => $source['Reducer'],
+            'Limit'            => $query['Limit'],
+            'AggregationLevel' => $query['AggregationLevel']
+        ];
+        $operation = EChartsDataProtocol::OPERATION_ARCHIVE_READ;
+        try {
+            $response = EChartsDataProtocol::DecodeResponse(
+                $this->SendDataToParent($this->EncodeDataFlowMessage(
+                    self::DATA_ID_TO_PARENT,
+                    EChartsDataProtocol::CreateRequest($operation, $payload)
+                )),
+                $operation
+            );
+        } catch (Throwable $exception) {
+            $this->SetStatus(self::STATUS_GATEWAY_FAILED);
+            throw new RuntimeException('The gateway returned an invalid Scatter archive response.', 0, $exception);
+        }
+        if (!$response['Success']) {
+            $code = (string) ($response['Error']['Code'] ?? 'GATEWAY_REQUEST_FAILED');
+            $this->WriteAttributeString('LastError', $code);
+            $this->SetStatus(self::STATUS_GATEWAY_FAILED);
+            throw new RuntimeException('The gateway archive request failed: ' . $code);
+        }
+        $archive = $response['Payload'];
+        if (($archive['VariableID'] ?? null) !== $source['VariableID']
+            || !is_array($archive['Points'] ?? null) || !is_bool($archive['Truncated'] ?? null)) {
+            throw new RuntimeException('The gateway returned invalid Scatter archive data.');
+        }
+
+        return $archive;
+    }
+
+    private function SynchronizeSourceReference(): void
+    {
+        $previous = json_decode($this->ReadAttributeString('RegisteredSourceVariableIDs'), true);
+        $previous = is_array($previous) ? array_values(array_filter($previous, is_int(...))) : [];
+        $raw = json_decode($this->ReadPropertyString('Sources'), true);
+        $current = [];
+        foreach (is_array($raw) ? $raw : [] as $source) {
+            $id = is_array($source) ? ($source['VariableID'] ?? null) : null;
+            if (is_int($id) && $id > 0 && !in_array($id, $current, true)) {
+                $current[] = $id;
+            }
+        }
+        foreach (array_diff($previous, $current) as $variableID) {
+            $this->UnregisterReference($variableID);
+        }
+        foreach (array_diff($current, $previous) as $variableID) {
+            if (IPS_VariableExists($variableID)) {
+                $this->RegisterReference($variableID);
+            }
+        }
+        $this->WriteAttributeString('RegisteredSourceVariableIDs', json_encode($current, JSON_THROW_ON_ERROR));
+    }
+
+    /** @return array<string,mixed> */
+    private function BuildVisualizationState(bool $ipsView = false): array
+    {
+        if ($this->GetConfigurationError() !== null) {
+            return ['schemaVersion' => 1, 'family' => 'scatter', 'status' => 'error',
+                'chart'             => null, 'error' => 'Configure X and Y archive sources.'];
+        }
+        if (!$this->HasActiveParent()) {
+            return ['schemaVersion' => 1, 'family' => 'scatter', 'status' => 'error',
+                'chart'             => null, 'error' => 'Connect an active EChartsGateway.'];
+        }
+        try {
+            $chart = json_decode($this->GetScatterDataForOutput($ipsView), true, 512, JSON_THROW_ON_ERROR);
+        } catch (Throwable $exception) {
+            $this->SendDebug('BuildVisualizationState', $exception::class, 0);
+            return ['schemaVersion' => 1, 'family' => 'scatter', 'status' => 'error',
+                'chart'             => null, 'error' => 'The Scatter values could not be loaded.'];
+        }
+
+        return ['schemaVersion' => 1, 'family' => 'scatter', 'status' => 'ready',
+            'chart'             => $chart, 'error' => null];
+    }
+
+    private function PublishVisualizationState(): void
+    {
+        try {
+            $state = $this->BuildVisualizationState();
+            $states = [$state];
+            $this->UpdateVisualizationValue(json_encode(
+                $state,
+                JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+            ));
+            $this->PushEChartsIPSViewState(function () use (&$states): array
+            {
+                $state = $this->BuildVisualizationState(true);
+                $states[] = $state;
+                return $state;
+            });
+            $this->ScheduleTransientRefresh($states, 'The Scatter values could not be loaded.');
+        } catch (Throwable $exception) {
+            $this->SendDebug('PublishVisualizationState', $exception::class, 0);
+        }
+    }
+
+    private function PublishIPSViewHTML(): void
+    {
+        if (!$this->IsIPSViewHTMLPageEnabled()) {
+            return;
+        }
+        try {
+            $this->UpdateIPSViewHTMLVariable(self::IPSVIEW_OUTPUT_IDENT, $this->GetIPSViewHTML());
+        } catch (Throwable $exception) {
+            $this->SendDebug('PublishIPSViewHTML', $exception::class, 0);
+        }
+    }
+
+    private function IsValidDesign(string $prefix): bool
+    {
+        if (!$this->AnimationIsValid($prefix)
+            || !EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme'))
+            || !EChartsLabelDesign::IsValidPosition(
+                $this->ReadPropertyString($prefix . 'ValueLabelPosition'),
+                EChartsLabelDesign::CARTESIAN_POSITIONS
+            )
+            || !EChartsLabelDesign::IsValidDistance($this->ReadPropertyInteger($prefix . 'ValueLabelDistance'))
+            || $this->ReadPropertyInteger($prefix . 'PointSize') < 4
+            || $this->ReadPropertyInteger($prefix . 'PointSize') > 60
+            || $this->ReadPropertyInteger($prefix . 'BubbleMaxSize') < 8
+            || $this->ReadPropertyInteger($prefix . 'BubbleMaxSize') > 100
+            || $this->ReadPropertyInteger($prefix . 'BubbleMaxSize') < $this->ReadPropertyInteger($prefix . 'PointSize')) {
+            return false;
+        }
+        foreach (['TitleFontSizePercent', 'AxisFontSizePercent', 'ValueFontSizePercent'] as $name) {
+            if ($this->ReadPropertyInteger($prefix . $name) < 50
+                || $this->ReadPropertyInteger($prefix . $name) > 150) {
+                return false;
+            }
+        }
+        foreach (['PointColor', 'TitleColor', 'AxisColor', 'GridColor', 'ValueColor'] as $name) {
+            if ($this->ReadPropertyInteger($prefix . $name) < -1
+                || $this->ReadPropertyInteger($prefix . $name) > 0xFFFFFF) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private function EffectiveRange(bool $ipsView): string
+    {
+        return $ipsView && !$this->ReadPropertyBoolean('IPSViewUseTileTimeSettings')
+            ? $this->ReadPropertyString('IPSViewRange') : $this->ReadPropertyString('Range');
+    }
+
+    private function EffectiveCustomRangeValue(bool $ipsView): int
+    {
+        return $ipsView && !$this->ReadPropertyBoolean('IPSViewUseTileTimeSettings')
+            ? $this->ReadPropertyInteger('IPSViewCustomRangeValue') : $this->ReadPropertyInteger('CustomRangeValue');
+    }
+
+    private function EffectiveCustomRangeUnit(bool $ipsView): string
+    {
+        return $ipsView && !$this->ReadPropertyBoolean('IPSViewUseTileTimeSettings')
+            ? $this->ReadPropertyString('IPSViewCustomRangeUnit') : $this->ReadPropertyString('CustomRangeUnit');
+    }
+
+    private function EffectiveTheme(bool $ipsView): string
+    {
+        return $ipsView && !$this->ReadPropertyBoolean('IPSViewUseTileDesign')
+            ? $this->ReadPropertyString('IPSViewEChartsTheme') : $this->ReadPropertyString('EChartsTheme');
+    }
+
+    /** @return array<string,bool|int|string> */
+    private function ReadDesignStyle(bool $ipsView): array
+    {
+        $prefix = $ipsView && !$this->ReadPropertyBoolean('IPSViewUseTileDesign') ? 'IPSView' : '';
+        $style = $this->ReadAnimationStyle($prefix);
+        foreach (['ShowGrid', 'ShowValues'] as $name) {
+            $style[lcfirst($name)] = $this->ReadPropertyBoolean($prefix . $name);
+        }
+        $style['valueLabelPosition'] = $this->ReadPropertyString($prefix . 'ValueLabelPosition');
+        foreach (['ValueLabelDistance', 'PointSize', 'BubbleMaxSize', 'TitleFontSizePercent',
+            'AxisFontSizePercent', 'ValueFontSizePercent'] as $name) {
+            $style[lcfirst($name)] = $this->ReadPropertyInteger($prefix . $name);
+        }
+        foreach (['PointColor', 'TitleColor', 'AxisColor', 'GridColor', 'ValueColor'] as $name) {
+            $color = $this->ReadPropertyInteger($prefix . $name);
+            $style[lcfirst($name)] = $color < 0 ? '' : EChartsAsset::ColorToHex($color);
+        }
+
+        return $style;
+    }
+
+    private function IPSViewThemeCSS(): string
+    {
+        return EChartsIPSViewBackground::ThemeCSS(
+            EChartsAsset::ThemePreviewPalette($this->EffectiveTheme(true)),
+            '#echarts-scatter-root',
+            $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
+            $this->ReadPropertyInteger('IPSViewBackgroundColor'),
+            $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent')
+        );
+    }
+
+    /** @param list<array<string,mixed>> $elements @return list<array<string,mixed>> */
+    private function BuildIPSViewTimeSettings(array $elements): array
+    {
+        $rangeRow = null;
+        foreach ($elements as $element) {
+            if (($element['type'] ?? '') === 'RowLayout'
+                && in_array('Range', array_column($element['items'] ?? [], 'name'), true)) {
+                $rangeRow = $element['items'];
+                break;
+            }
+        }
+        if (!is_array($rangeRow)) {
+            throw new RuntimeException('The Scatter time range form section is missing.');
+        }
+        $independent = !$this->ReadPropertyBoolean('IPSViewUseTileTimeSettings');
+        $timeItems = [];
+        foreach ($rangeRow as $item) {
+            if (!in_array($item['name'] ?? null, ['Range', 'CustomRangeValue', 'CustomRangeUnit'], true)) {
+                continue;
+            }
+            $item['name'] = 'IPSView' . $item['name'];
+            $item['visible'] = $item['name'] === 'IPSViewRange'
+                ? $independent : ($independent && $this->ReadPropertyString('IPSViewRange') === 'custom');
+            unset($item['onChange']);
+            $timeItems[] = $item;
+        }
+        $action = 'ECSC_UpdateIPSViewTimeRangeForm($id, $IPSViewUseTileTimeSettings, $IPSViewRange);';
+        $timeItems[0]['caption'] = 'IPSView time range';
+        $timeItems[0]['onChange'] = $action;
+
+        return [
+            ['type'       => 'CheckBox', 'name' => 'IPSViewUseTileTimeSettings',
+                'caption' => 'Use Tile time settings', 'onChange' => $action],
+            ['type' => 'Label', 'caption' => 'Disable to use an independent IPSView time range.'],
+            ['type' => 'RowLayout', 'items' => $timeItems]
+        ];
+    }
+
+    /** @param list<array<string,mixed>> $elements @return array<string,mixed> */
+    private function BuildIPSViewDesigner(array $elements): array
+    {
+        $designRows = null;
+        foreach ($elements as $element) {
+            if (($element['type'] ?? '') === 'ExpansionPanel'
+                && ($element['caption'] ?? '') === 'Tile designer') {
+                $designRows = $element['items'] ?? null;
+                break;
+            }
+        }
+        if (!is_array($designRows)) {
+            throw new RuntimeException('The Scatter Tile designer section is missing.');
+        }
+        $ipsViewRows = [];
+        foreach ($designRows as $row) {
+            if (($row['type'] ?? '') !== 'RowLayout') {
+                continue;
+            }
+            $items = [];
+            foreach ($row['items'] ?? [] as $item) {
+                $name = $item['name'] ?? null;
+                if (!is_string($name) || !array_key_exists($name, self::DESIGN_PROPERTY_TYPES)) {
+                    continue;
+                }
+                $item['name'] = 'IPSView' . $name;
+                unset($item['onChange']);
+                $items[] = $item;
+            }
+            if ($items !== []) {
+                $ipsViewRows[] = ['type' => 'RowLayout', 'items' => $items];
+            }
+        }
+
+        return ['type' => 'ExpansionPanel', 'caption' => 'IPSView design', 'expanded' => false, 'items' => [
+            ...$this->IPSViewHTMLPageFormItems(
+                'Creates a standalone WebContent variable for use as an IPSView HTML widget.'
+            ),
+            EChartsIPSViewBackground::FormRow(),
+            ['type' => 'CheckBox', 'name' => 'IPSViewUseTileDesign', 'caption' => 'Use Tile design'],
+            ['type' => 'Label', 'caption' => 'Inherited mode follows every Tile design change. Disable it for an independent IPSView appearance.'],
+            ['type'       => 'Button', 'caption' => 'Copy Tile design to IPSView and edit independently',
+                'onClick' => 'ECSC_CopyTileDesignToIPSView($id); return "MESSAGE:Tile design copied to IPSView.";'],
+            ['type'        => 'ExpansionPanel', 'caption' => 'Independent IPSView designer',
+                'expanded' => false, 'items' => $ipsViewRows]
+        ]];
+    }
+}

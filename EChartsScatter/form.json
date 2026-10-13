@@ -1,0 +1,535 @@
+{
+    "$schema": "https://www.symcon.de/assets/files/validation/formSchema.json",
+    "elements": [
+        {
+            "type": "Label",
+            "caption": "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts."
+        },
+        {
+            "type": "ValidationTextBox",
+            "name": "Title",
+            "caption": "Title"
+        },
+        {
+            "type": "List",
+            "name": "Sources",
+            "caption": "Scatter sources (X, Y, optional size)",
+            "rowCount": 3,
+            "add": true,
+            "delete": true,
+            "changeOrder": false,
+            "columns": [
+                {
+                    "caption": "Variable",
+                    "name": "VariableID",
+                    "width": "290px",
+                    "add": 0,
+                    "edit": {
+                        "type": "SelectVariable",
+                        "validVariableTypes": [
+                            1,
+                            2
+                        ]
+                    }
+                },
+                {
+                    "caption": "Role",
+                    "name": "Role",
+                    "width": "90px",
+                    "add": "x",
+                    "edit": {
+                        "type": "Select",
+                        "options": [
+                            {
+                                "caption": "X axis",
+                                "value": "x"
+                            },
+                            {
+                                "caption": "Y axis",
+                                "value": "y"
+                            },
+                            {
+                                "caption": "Bubble size",
+                                "value": "size"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "caption": "Label (optional)",
+                    "name": "Label",
+                    "width": "180px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "caption": "Variable presentation",
+                    "name": "UseVariablePresentation",
+                    "width": "150px",
+                    "add": true,
+                    "edit": {
+                        "type": "CheckBox"
+                    }
+                },
+                {
+                    "caption": "Unit",
+                    "name": "Unit",
+                    "width": "90px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "caption": "Decimals",
+                    "name": "Decimals",
+                    "width": "90px",
+                    "add": 1,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "minimum": 0,
+                        "maximum": 6
+                    }
+                },
+                {
+                    "caption": "Reducer",
+                    "name": "Reducer",
+                    "width": "120px",
+                    "add": "auto",
+                    "edit": {
+                        "type": "Select",
+                        "options": [
+                            {
+                                "caption": "Automatic",
+                                "value": "auto"
+                            },
+                            {
+                                "caption": "Average",
+                                "value": "average"
+                            },
+                            {
+                                "caption": "Sum",
+                                "value": "sum"
+                            },
+                            {
+                                "caption": "Minimum",
+                                "value": "minimum"
+                            },
+                            {
+                                "caption": "Maximum",
+                                "value": "maximum"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "form": [
+                {
+                    "type": "SelectVariable",
+                    "name": "VariableID",
+                    "caption": "Variable",
+                    "validVariableTypes": [
+                        1,
+                        2
+                    ]
+                },
+                {
+                    "type": "Select",
+                    "name": "Role",
+                    "caption": "Role",
+                    "options": [
+                        {
+                            "caption": "X axis",
+                            "value": "x"
+                        },
+                        {
+                            "caption": "Y axis",
+                            "value": "y"
+                        },
+                        {
+                            "caption": "Bubble size",
+                            "value": "size"
+                        }
+                    ]
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Label",
+                    "caption": "Label (optional)"
+                },
+                {
+                    "type": "CheckBox",
+                    "name": "UseVariablePresentation",
+                    "caption": "Variable presentation"
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Unit",
+                    "caption": "Unit"
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "Decimals",
+                    "caption": "Decimals",
+                    "minimum": 0,
+                    "maximum": 6
+                },
+                {
+                    "type": "Select",
+                    "name": "Reducer",
+                    "caption": "Reducer",
+                    "options": [
+                        {
+                            "caption": "Automatic",
+                            "value": "auto"
+                        },
+                        {
+                            "caption": "Average",
+                            "value": "average"
+                        },
+                        {
+                            "caption": "Sum",
+                            "value": "sum"
+                        },
+                        {
+                            "caption": "Minimum",
+                            "value": "minimum"
+                        },
+                        {
+                            "caption": "Maximum",
+                            "value": "maximum"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "Label",
+            "caption": "Only completed archive intervals present for all selected roles become points. Values are never interpolated."
+        },
+        {
+            "type": "RowLayout",
+            "items": [
+                {
+                    "type": "Select",
+                    "name": "Range",
+                    "caption": "Time range",
+                    "onChange": "ECSC_UpdateTimeRangeForm($id, $Range);",
+                    "options": [
+                        {
+                            "caption": "1 hour",
+                            "value": "1h"
+                        },
+                        {
+                            "caption": "6 hours",
+                            "value": "6h"
+                        },
+                        {
+                            "caption": "24 hours",
+                            "value": "24h"
+                        },
+                        {
+                            "caption": "7 days",
+                            "value": "7d"
+                        },
+                        {
+                            "caption": "30 days",
+                            "value": "30d"
+                        },
+                        {
+                            "caption": "Today",
+                            "value": "today"
+                        },
+                        {
+                            "caption": "Yesterday",
+                            "value": "yesterday"
+                        },
+                        {
+                            "caption": "This week",
+                            "value": "current-week"
+                        },
+                        {
+                            "caption": "This month",
+                            "value": "current-month"
+                        },
+                        {
+                            "caption": "Custom",
+                            "value": "custom"
+                        }
+                    ]
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "CustomRangeValue",
+                    "caption": "Range value",
+                    "minimum": 1,
+                    "maximum": 1000
+                },
+                {
+                    "type": "Select",
+                    "name": "CustomRangeUnit",
+                    "caption": "Range unit",
+                    "options": [
+                        {
+                            "caption": "Minutes",
+                            "value": "minute"
+                        },
+                        {
+                            "caption": "Hours",
+                            "value": "hour"
+                        },
+                        {
+                            "caption": "Days",
+                            "value": "day"
+                        },
+                        {
+                            "caption": "Weeks",
+                            "value": "week"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "RowLayout",
+            "items": [
+                {
+                    "type": "Select",
+                    "name": "DataMode",
+                    "caption": "Aggregation",
+                    "options": [
+                        {
+                            "caption": "Automatic",
+                            "value": "auto"
+                        },
+                        {
+                            "caption": "1 minute",
+                            "value": "minute"
+                        },
+                        {
+                            "caption": "5 minutes",
+                            "value": "five-minutes"
+                        },
+                        {
+                            "caption": "15 minutes",
+                            "value": "fifteen-minutes"
+                        },
+                        {
+                            "caption": "1 hour",
+                            "value": "hour"
+                        },
+                        {
+                            "caption": "1 day",
+                            "value": "day"
+                        }
+                    ]
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "PointBudget",
+                    "caption": "Point budget",
+                    "minimum": 200,
+                    "maximum": 2000
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Tile designer",
+            "expanded": false,
+            "items": [
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "AnimationEnabled",
+                            "caption": "Animate points"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDuration",
+                            "caption": "Initial animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDurationUpdate",
+                            "caption": "Update animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "EChartsTheme",
+                            "caption": "ECharts theme",
+                            "options": [
+                                {
+                                    "caption": "Automatic (Symcon design)",
+                                    "value": "auto"
+                                },
+                                {
+                                    "caption": "Dark",
+                                    "value": "dark"
+                                },
+                                {
+                                    "caption": "Vintage",
+                                    "value": "vintage"
+                                },
+                                {
+                                    "caption": "Macarons",
+                                    "value": "macarons"
+                                },
+                                {
+                                    "caption": "Infographic",
+                                    "value": "infographic"
+                                },
+                                {
+                                    "caption": "Shine",
+                                    "value": "shine"
+                                },
+                                {
+                                    "caption": "Roma",
+                                    "value": "roma"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowGrid",
+                            "caption": "Show grid"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowValues",
+                            "caption": "Show point values"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "PointSize",
+                            "caption": "Point size",
+                            "minimum": 4,
+                            "maximum": 60,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "BubbleMaxSize",
+                            "caption": "Maximum bubble size",
+                            "minimum": 8,
+                            "maximum": 100,
+                            "suffix": "px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "TitleFontSizePercent",
+                            "caption": "Title size",
+                            "minimum": 50,
+                            "maximum": 150,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AxisFontSizePercent",
+                            "caption": "Axis font size",
+                            "minimum": 50,
+                            "maximum": 150,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ValueFontSizePercent",
+                            "caption": "Value font size",
+                            "minimum": 50,
+                            "maximum": 150,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "PointColor",
+                            "caption": "Point color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "TitleColor",
+                            "caption": "Title color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "AxisColor",
+                            "caption": "Axis color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "GridColor",
+                            "caption": "Grid color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "ValueColor",
+                            "caption": "Value color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "actions": [],
+    "status": [
+        {
+            "code": 201,
+            "icon": "error",
+            "caption": "Configure distinct X and Y sources."
+        },
+        {
+            "code": 202,
+            "icon": "error",
+            "caption": "Check Scatter settings."
+        },
+        {
+            "code": 203,
+            "icon": "error",
+            "caption": "Connect an active EChartsGateway."
+        },
+        {
+            "code": 204,
+            "icon": "error",
+            "caption": "The gateway archive request failed."
+        }
+    ]
+}

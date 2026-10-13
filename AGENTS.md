@@ -42,6 +42,9 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   eigenen Gerätemodul `EChartsBarPolar` und sind kein Modus dieser Instanzen.
   Kreis-, Donut- und Nightingale-Diagramme für aktuelle Anteile liegen im
   eigenen Gerätemodul `EChartsPie` und sind kein Balkenmodus.
+  Historische X/Y-Vergleiche und optionale Bubble-Größen liegen im eigenen
+  Gerätemodul `EChartsScatter` und werden ohne Interpolation nach gemeinsamen
+  abgeschlossenen Archivintervallen verbunden.
 - Das Gateway stellt ausschließlich familienübergreifende Infrastruktur wie
   Archivzugriff, begrenztes Caching, gemeinsame Ressourcen und gegebenenfalls
   abgesicherte IPSView-Kommunikation bereit. Familienbezogene Properties,
@@ -104,6 +107,7 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
 - `ECBW` ist `EChartsBarWaterfall` zugeordnet (`BW` = Bar Waterfall).
 - `ECBP` ist `EChartsBarPolar` zugeordnet (`BP` = Bar Polar).
 - `ECPI` ist `EChartsPie` zugeordnet (`PI` = Pie).
+- `ECSC` ist `EChartsScatter` zugeordnet (`SC` = Scatter).
 - Das zuvor für das unveröffentlichte Gauge-Gerüst verwendete Kürzel `ECGA`
   ist abgelöst und wird nicht für ein anderes Modul wiederverwendet.
 - Neue Kürzel werden vor ihrer Verwendung eindeutig festgelegt und in dieser

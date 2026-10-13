@@ -1,0 +1,226 @@
+(function () {
+    'use strict';
+
+    var bootstrap = window.SYMC_VISUALIZATION || {};
+    var design = window.SYMC_ECHARTS_DESIGN;
+    var chartElement = document.getElementById('echarts-scatter-chart');
+    var emptyElement = document.getElementById('echarts-scatter-empty');
+    var warningElement = document.getElementById('echarts-scatter-warning');
+    var errorElement = document.getElementById('echarts-scatter-error');
+    var chart = null;
+    var currentState = bootstrap.state || null;
+    var currentTheme = null;
+    var refreshFailures = 0;
+    var loadError = 'The Scatter values could not be loaded.';
+
+    function translate(text) {
+        return (bootstrap.translations || {})[text] || text;
+    }
+
+    function escapeHTML(value) {
+        return String(value).replace(/[&<>"']/g, function (character) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character];
+        });
+    }
+
+    function palette(theme) {
+        var palettes = bootstrap.options && bootstrap.options.echartsThemes || {};
+        return palettes[theme] || palettes.auto || {
+            background: '#151619', text: '#F4F5F7', muted: '#969AA2',
+            border: '#A5A9B0', track: '#34363B', accent: '#55CBB5', seriesColors: ['#55CBB5']
+        };
+    }
+
+    function resolveColor(variable, fallback) {
+        var probe = document.createElement('span');
+        probe.style.color = 'var(' + variable + ', ' + fallback + ')';
+        probe.style.display = 'none';
+        document.body.appendChild(probe);
+        var resolved = window.getComputedStyle(probe).color;
+        probe.remove();
+        return resolved || fallback;
+    }
+
+    function colorsFor(theme) {
+        var colors = palette(theme);
+        if (theme !== 'auto') { return colors; }
+        return {
+            background: resolveColor('--symc-background', colors.background),
+            text: resolveColor('--symc-text', colors.text),
+            muted: resolveColor('--symc-text-muted', colors.muted),
+            border: resolveColor('--symc-border', colors.border),
+            track: colors.track,
+            accent: resolveColor('--symc-accent', colors.accent),
+            seriesColors: colors.seriesColors
+        };
+    }
+
+    function formatValue(value, role) {
+        var decimals = Math.max(0, Math.min(6, Number(role.decimals) || 0));
+        return Number(value).toLocaleString(undefined, {
+            minimumFractionDigits: decimals, maximumFractionDigits: decimals
+        }) + (role.unit ? ' ' + role.unit : '');
+    }
+
+    function pointSize(value, minimum, maximum, base, large) {
+        if (!Number.isFinite(value) || maximum <= minimum) { return base; }
+        return base + (large - base) * Math.max(0, Math.min(1, (value - minimum) / (maximum - minimum)));
+    }
+
+    function buildOption(model, theme) {
+        var colors = colorsFor(theme);
+        var scatter = model.scatter || {};
+        var style = scatter.style || {};
+        var roles = model.roles || {};
+        var xRole = roles.x || { label: 'X', unit: '', decimals: 1 };
+        var yRole = roles.y || { label: 'Y', unit: '', decimals: 1 };
+        var sizeRole = roles.size || null;
+        var points = Array.isArray(model.points) ? model.points : [];
+        var hasTitle = Boolean(scatter.title) && (bootstrap.mode === 'ipsview'
+            || bootstrap.options.tileHeaderVisible === false);
+        var compact = chartElement.clientWidth < 420 || chartElement.clientHeight < 280;
+        var top = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8;
+        var base = Math.max(4, Math.min(60, Number(style.pointSize) || 12));
+        var large = Math.max(base, Math.min(100, Number(style.bubbleMaxSize) || 48));
+        var sizeValues = sizeRole ? points.map(function (point) { return Number(point[3]); }) : [];
+        var minimum = sizeValues.length ? Math.min.apply(null, sizeValues) : 0;
+        var maximum = sizeValues.length ? Math.max.apply(null, sizeValues) : 0;
+        var pointColor = style.pointColor || colors.seriesColors[0] || colors.accent;
+        var axisColor = style.axisColor || colors.muted;
+        var gridColor = style.gridColor || colors.track;
+        var fontSize = design.fontSizePercent(style.axisFontSizePercent, compact ? 10 : 12);
+
+        return {
+            backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
+                ? 'transparent' : colors.background,
+            ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
+            aria: { enabled: true, decal: { show: false }, description: [xRole.label, yRole.label,
+                sizeRole && sizeRole.label].filter(Boolean).join(', ') },
+            title: {
+                show: hasTitle, text: String(scatter.title || ''), left: 'center', top: top,
+                textStyle: { color: style.titleColor || colors.text,
+                    fontSize: design.fontSizePercent(style.titleFontSizePercent, 18) }
+            },
+            grid: { left: compact ? 65 : 86, right: compact ? 20 : 38,
+                top: top + (hasTitle ? 48 : 18), bottom: compact ? 54 : 70, containLabel: true },
+            xAxis: {
+                type: 'value', name: String(xRole.label || 'X') + (xRole.unit ? ' (' + xRole.unit + ')' : ''),
+                nameLocation: 'middle', nameGap: compact ? 25 : 34,
+                nameTextStyle: { color: axisColor, fontSize: fontSize },
+                axisLabel: { color: axisColor, fontSize: fontSize },
+                axisLine: { lineStyle: { color: axisColor } },
+                splitLine: { show: style.showGrid === true, lineStyle: { color: gridColor } }
+            },
+            yAxis: {
+                type: 'value', name: String(yRole.label || 'Y') + (yRole.unit ? ' (' + yRole.unit + ')' : ''),
+                nameLocation: 'middle', nameGap: compact ? 38 : 52,
+                nameTextStyle: { color: axisColor, fontSize: fontSize },
+                axisLabel: { color: axisColor, fontSize: fontSize },
+                axisLine: { lineStyle: { color: axisColor } },
+                splitLine: { show: style.showGrid === true, lineStyle: { color: gridColor } }
+            },
+            tooltip: {
+                trigger: 'item', formatter: function (parameters) {
+                    var value = parameters.value || [];
+                    var date = new Date(Number(value[3]) * 1000).toLocaleString();
+                    var lines = [date, escapeHTML(xRole.label) + ': ' + escapeHTML(formatValue(value[0], xRole)),
+                        escapeHTML(yRole.label) + ': ' + escapeHTML(formatValue(value[1], yRole))];
+                    if (sizeRole) {
+                        lines.push(escapeHTML(sizeRole.label) + ': ' + escapeHTML(formatValue(value[2], sizeRole)));
+                    }
+                    return lines.join('<br>');
+                }
+            },
+            series: [{
+                id: 'scatter', type: 'scatter', name: String(scatter.title || ''),
+                symbol: 'circle',
+                symbolSize: function (value) {
+                    return sizeRole ? pointSize(Number(value[2]), minimum, maximum, base, large) : base;
+                },
+                itemStyle: { color: pointColor, opacity: 0.8 },
+                label: {
+                    show: style.showValues === true,
+                    ...design.valueLabel(style, 'top', ['top', 'bottom', 'left', 'right', 'inside',
+                        'insideTop', 'insideBottom', 'insideLeft', 'insideRight'], 5),
+                    color: style.valueColor || colors.text,
+                    fontSize: design.fontSizePercent(style.valueFontSizePercent, 11),
+                    formatter: function (parameters) {
+                        var value = parameters.value || [];
+                        return formatValue(value[0], xRole) + ' / ' + formatValue(value[1], yRole);
+                    }
+                },
+                data: points.map(function (point) {
+                    return { id: 'interval-' + point[0], value: [Number(point[1]), Number(point[2]),
+                        sizeRole ? Number(point[3]) : null, Number(point[0])] };
+                })
+            }]
+        };
+    }
+
+    function displayError(message) {
+        if (chart) { chart.clear(); }
+        chartElement.hidden = true;
+        emptyElement.hidden = true;
+        warningElement.hidden = true;
+        errorElement.textContent = translate(message || loadError);
+        errorElement.hidden = false;
+    }
+
+    function render(state) {
+        if (state && state.status === 'error' && state.error === loadError
+            && chart && currentState && currentState.status === 'ready') {
+            refreshFailures++;
+            if (refreshFailures > 1) {
+                warningElement.textContent = translate(
+                    'Scatter data could not be refreshed. Showing the last available values.'
+                );
+                warningElement.hidden = false;
+            }
+            return;
+        }
+        refreshFailures = 0;
+        currentState = state;
+        if (!state || state.status !== 'ready' || !state.chart) {
+            displayError(state && state.error);
+            return;
+        }
+        if (!window.echarts || typeof window.echarts.init !== 'function') {
+            displayError('Apache ECharts could not be initialized.');
+            return;
+        }
+        errorElement.hidden = true;
+        var points = Array.isArray(state.chart.points) ? state.chart.points : [];
+        emptyElement.hidden = points.length > 0;
+        emptyElement.textContent = translate('No common completed archive intervals.');
+        var wasHidden = chartElement.hidden;
+        chartElement.hidden = points.length === 0;
+        warningElement.textContent = translate('The selected range was truncated by the point budget.');
+        warningElement.hidden = state.chart.truncated !== true;
+        if (points.length === 0) { return; }
+        var palettes = bootstrap.options && bootstrap.options.echartsThemes || {};
+        var theme = Object.prototype.hasOwnProperty.call(palettes, state.chart.theme) ? state.chart.theme : 'auto';
+        if (chart && currentTheme !== theme) { chart.dispose(); chart = null; }
+        if (!chart) {
+            chart = window.echarts.init(chartElement, theme === 'auto' ? null : theme, { renderer: 'canvas' });
+            currentTheme = theme;
+        }
+        if (wasHidden) { chart.resize(); }
+        chart.setOption(buildOption(state.chart, theme), true);
+    }
+
+    window.handleMessage = function (message) {
+        var state = typeof message === 'string' ? JSON.parse(message) : message;
+        if (state) { render(state); }
+    };
+    if (window.ResizeObserver) {
+        new ResizeObserver(function () {
+            if (design.resizeChartIfNeeded(chart, chartElement)) { render(currentState); }
+        }).observe(chartElement);
+    } else {
+        window.addEventListener('resize', function () {
+            if (design.resizeChartIfNeeded(chart, chartElement)) { render(currentState); }
+        });
+    }
+    window.addEventListener('beforeunload', function () { if (chart) { chart.dispose(); } });
+    render(currentState);
+}());

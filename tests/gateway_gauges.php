@@ -744,6 +744,7 @@ require_once dirname(__DIR__) . '/EChartsBarHistory/module.php';
 require_once dirname(__DIR__) . '/EChartsBarWaterfall/module.php';
 require_once dirname(__DIR__) . '/EChartsBarPolar/module.php';
 require_once dirname(__DIR__) . '/EChartsPie/module.php';
+require_once dirname(__DIR__) . '/EChartsScatter/module.php';
 
 final class TestableEChartsGateway extends EChartsGateway
 {
@@ -772,6 +773,21 @@ final class TestableEChartsTimeSeries extends EChartsTimeSeries
 }
 
 final class TestableEChartsBarHistory extends EChartsBarHistory
+{
+    private int $currentTimestamp = 1;
+
+    public function SetTestCurrentTimestamp(int $timestamp): void
+    {
+        $this->currentTimestamp = $timestamp;
+    }
+
+    protected function CurrentTimestamp(): int
+    {
+        return $this->currentTimestamp;
+    }
+}
+
+final class TestableEChartsScatter extends EChartsScatter
 {
     private int $currentTimestamp = 1;
 
@@ -7916,6 +7932,53 @@ assertGatewayGauge(
     'A ninety-degree clockwise independent IPSView preview must occupy the right half like ECharts.'
 );
 
+$scatter = new TestableEChartsScatter();
+$scatter->Create();
+$scatter->SetTestCurrentTimestamp(1780000400);
+$scatter->SetTestProperty('Range', '1h');
+$scatter->SetTestProperty('Sources', json_encode([
+    ['VariableID' => 4711, 'Role' => 'x', 'Label' => 'Outside', 'UseVariablePresentation' => false,
+        'Unit'    => '°C', 'Decimals' => 1, 'Reducer' => 'average'],
+    ['VariableID' => 4713, 'Role' => 'y', 'Label' => 'Humidity', 'UseVariablePresentation' => false,
+        'Unit'    => '%', 'Decimals' => 0, 'Reducer' => 'sum']
+], JSON_THROW_ON_ERROR));
+$scatter->ApplyChanges();
+$scatterData = json_decode($scatter->GetScatterData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $scatter->GetTestStatus() === IS_ACTIVE
+        && $scatter->GetTestReferences() === [4711, 4713]
+        && $scatterData['family'] === 'scatter'
+        && $scatterData['variant'] === 'scatter'
+        && $scatterData['roles']['x']['label'] === 'Outside'
+        && $scatterData['roles']['y']['label'] === 'Humidity'
+        && count($scatterData['points']) === 1
+        && $scatterData['points'][0][0] === 1780000100
+        && $scatterData['points'][0][1] === 41.5
+        && $scatterData['points'][0][2] === 12.0,
+    'Scatter must join the gateway archive only at the same completed interval without interpolation.'
+);
+$scatterOutput = new EChartsScatter();
+$scatterOutput->Create();
+assertGatewayGauge(
+    str_contains($scatterOutput->GetVisualizationTile(), 'echarts-scatter-chart'),
+    'Scatter must render the native Tile output.'
+);
+assertGatewayGauge(
+    str_contains($scatterOutput->GetIPSViewHTML(), 'echarts-scatter-chart'),
+    'Scatter must render the IPSView output.'
+);
+assertGatewayGauge(
+    strlen($scatterOutput->GetVisualizationTile()) < SYMCON_OUTPUT_BUFFER_LIMIT
+        && strlen($scatterOutput->GetIPSViewHTML()) < SYMCON_OUTPUT_BUFFER_LIMIT,
+    'Scatter Tile and IPSView payloads must stay below the Symcon HTML output limit.'
+);
+assertTransientRetry($scatter, 'Scatter');
+$scatter->SetTestProperty('Sources', json_encode([
+    ['VariableID' => 4711, 'Role' => 'x'], ['VariableID' => 4711, 'Role' => 'y']
+], JSON_THROW_ON_ERROR));
+$scatter->ApplyChanges();
+assertGatewayGauge($scatter->GetTestStatus() === 201, 'Scatter must reject reused variable IDs between roles.');
+
 foreach ([
     EChartsGaugeSingle::class      => ['GaugePreview', 'IPSViewGaugePreview'],
     EChartsGaugeMulti::class       => ['GaugePreview', 'IPSViewGaugePreview'],
@@ -7926,7 +7989,8 @@ foreach ([
     EChartsBarHistory::class       => ['BarPreview', 'IPSViewBarPreview'],
     EChartsBarWaterfall::class     => ['BarPreview', 'IPSViewBarPreview'],
     EChartsBarPolar::class         => ['BarPreview', 'IPSViewBarPreview'],
-    EChartsPie::class              => ['BarPreview', 'IPSViewBarPreview']
+    EChartsPie::class              => ['BarPreview', 'IPSViewBarPreview'],
+    EChartsScatter::class          => ['BarPreview', 'IPSViewBarPreview']
 ] as $chartClass => $previewFields) {
     $chart = new $chartClass();
     $chart->Create();

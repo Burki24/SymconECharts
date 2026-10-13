@@ -86,6 +86,7 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 | Gerät | EChartsBarWaterfall | Aktueller Startwert mit 1 bis 15 signierten Änderungen und berechneter Endsumme in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsBarPolar | Aktuelle Werte aus 1 bis 16 Quellen als radiale Balken oder konzentrische Bögen in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsPie | Aktuelle nichtnegative Anteile aus 1 bis 16 Quellen als Kreis, Donut oder Nightingale-Rose in Kachel und optionalem IPSView-HTML |
+| Gerät | EChartsScatter | Archivierte X/Y-Werte mit optionaler Bubble-Größe, ausschließlich zeitgleiche abgeschlossene Intervalle ohne Interpolation, in Kachel und optionalem IPSView-HTML |
 
 Eine eigene I/O-Instanz, ein Konfigurator und Discovery gehören nicht zum
 Anfangsumfang. Datenquellen sind Teil der jeweiligen Gauge-Konfiguration und
@@ -116,12 +117,13 @@ Modul-IDs und Datenfluss-IDs haben unterschiedliche Aufgaben.
 | Modul EChartsBarWaterfall | `{792B12B3-E608-4301-868D-5FE96DDB8864}` |
 | Modul EChartsBarPolar | `{B22B5AB4-CDA4-416F-9FF1-4126734E078B}` |
 | Modul EChartsPie | `{176F1531-ABC4-4AE5-9DE5-8F3F006C8237}` |
+| Modul EChartsScatter | `{9865CDB4-5CA9-4C34-A148-983E0B5F2FA6}` |
 | Datenfluss Gauge → Gateway | `{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}` |
 | Datenfluss Gateway → Gauge | `{E4749B72-912B-E3E3-1C57-D19019FFDD84}` |
 
 Die Funktionspräfixe sind `ECGW` für das Gateway, `ECGS` für Gauge Single,
 `ECGM` für Gauge Multi, `ECGT` für Gauge Tacho, `ECGC` für Gauge
-Chronograph, `ECTS` für Time Series, `ECBC` für Bar Category, `ECBH` für Bar History, `ECBW` für Bar Waterfall, `ECBP` für Bar Polar und `ECPI` für Pie. Nach der verbindlichen Präfixkonvention steht `EC` für
+Chronograph, `ECTS` für Time Series, `ECBC` für Bar Category, `ECBH` für Bar History, `ECBW` für Bar Waterfall, `ECBP` für Bar Polar, `ECPI` für Pie und `ECSC` für Scatter. Nach der verbindlichen Präfixkonvention steht `EC` für
 ECharts; die letzten zwei Buchstaben bezeichnen Aufgabe oder Modultyp. Die
 Entscheidungen zur Modulstruktur und zu den GUIDs dokumentieren
 [`ADR 0001`](adr/0001-chart-family-modules.md) und
@@ -186,6 +188,9 @@ aufgebauten Designer-Unterbereiche legt
 Die eigene Pie-Familie für aktuelle Anteile und die drei Geometrien
 Kreis, Donut und Nightingale-Rose legt
 [`ADR 0038`](adr/0038-pie-current-values.md) fest.
+Die Verknüpfung historischer X/Y- und optionaler Größenwerte nur über
+identische abgeschlossene Archivintervalle ohne Interpolation legt
+[`ADR 0040`](adr/0040-scatter-archive-interval-pairing.md) fest.
 
 Für die vier Bar-Module bündelt `libs/EChartsBarPreviewForm.php` die
 read-only-Formularverdrahtung, einschließlich zweier `Image`-Felder,

@@ -26,11 +26,11 @@ Ausgelieferte Dateien:
   Tooltip, Graphic Component und Canvas Renderer; 486.506 Byte; SHA-256
   `37d8c9774f27fc12e048e269e8ec6a114782529fb85262a6be8c6b887207c07f`;
 - `libs/echarts/6.1.0/echarts.cartesian.min.js` – reproduzierbarer,
-  kartesischer Browser-Build aus ECharts Core, Line Chart, Bar Chart, Grid,
+  kartesischer Browser-Build aus ECharts Core, Line Chart, Bar Chart, Scatter Chart, Grid,
   Legende, Titel, Tooltip, Data Zoom, Mark Line, Mark Area, Aria und Canvas
-  Renderer; 621.264 Byte;
+  Renderer; 627.600 Byte;
   SHA-256
-  `68499685d1e4eb44c7f52f724783b0bae8e459ed86bd8a1dec4049589a4be987`;
+  `92954fbddaa6b7c09f25819ab7b4743eb6afd5efa92351f129b14d298d2ab31a`;
 - `libs/echarts/6.1.0/echarts.polar.min.js` – reproduzierbarer,
   Polar-Browser-Build aus ECharts Core, Bar Chart, Polar Component, Titel,
   Tooltip, Aria und Canvas Renderer; 514.353 Byte; SHA-256

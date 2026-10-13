@@ -11,7 +11,7 @@ Der Gauge-Einstieg enthält:
 - Aria, Tooltip und Graphic Component;
 - Canvas Renderer.
 
-Der kartesische Einstieg enthält Line Chart, Bar Chart, Grid, Legende, Titel,
+Der kartesische Einstieg enthält Line Chart, Bar Chart, Scatter Chart, Grid, Legende, Titel,
 Tooltip, Data Zoom, Referenzlinien, Wertebereiche, Aria und Canvas Renderer.
 Der separate Polar-Einstieg enthält Bar Chart, Polar Component, Titel, Tooltip,
 Aria und Canvas Renderer. Er verändert den bestehenden kartesischen Build nicht.

@@ -117,8 +117,14 @@ $requiredFiles = [
     'EChartsPie/visualization/index.html',
     'EChartsPie/visualization/style.css',
     'EChartsPie/visualization/app.js',
+    'EChartsScatter/ScatterPairing.php',
+    'EChartsScatter/visualization/index.html',
+    'EChartsScatter/visualization/style.css',
+    'EChartsScatter/visualization/app.js',
     'tests/bar_polar_layout.js',
     'tests/pie_layout.js',
+    'tests/scatter_pairing.php',
+    'tests/scatter_layout.js',
     'libs/EChartsCurrentSources.php'
 ];
 
@@ -313,7 +319,7 @@ if ($helperSync !== null) {
 
 $expectedModules = [
     'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarPolar', 'EChartsBarWaterfall', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
-    'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsPie', 'EChartsTimeSeries'
+    'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsPie', 'EChartsScatter', 'EChartsTimeSeries'
 ];
 $discoveredModules = [];
 foreach (glob($root . '/*/module.json') ?: [] as $modulePath) {
