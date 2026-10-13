@@ -20,6 +20,11 @@
 
 ## Hinzugefügt
 
+- Scatter/Bubble kann Punktbeschriftungen optional an Diagrammgröße und
+  Punktdichte anpassen. Kachel und unabhängiges IPSView-Design besitzen
+  getrennte Schalter; bisherige Instanzen bleiben unverändert. Die Punkte
+  und Tooltips bleiben vollständig erhalten.
+
 - Scatter/Bubble bietet in Kachel und IPSView optional die ECharts-
   Rechteckauswahl. Ausgewählte Punkte werden mit Anzahl und X/Y-Wertebereich
   zusammengefasst; die übrigen Punkte werden abgeblendet. Beide Designer

@@ -7974,6 +7974,18 @@ assertGatewayGauge(
         && $scaledScatter['scatter']['style']['yAxisRangeMode'] === 'zero',
     'Scatter must expose independent validated X/Y axis ranges to the renderer.'
 );
+assertGatewayGauge(
+    $scaledScatter['scatter']['style']['adaptiveValueLabels'] === false,
+    'Adaptive Scatter labels must be disabled by default for existing instances.'
+);
+$scatter->SetTestProperty('AdaptiveValueLabels', true);
+$scatter->ApplyChanges();
+assertGatewayGauge(
+    json_decode($scatter->GetScatterData(), true, 512, JSON_THROW_ON_ERROR)['scatter']['style']['adaptiveValueLabels'] === true,
+    'Scatter must pass the optional adaptive-label setting to its renderer.'
+);
+$scatter->SetTestProperty('AdaptiveValueLabels', false);
+$scatter->ApplyChanges();
 $scatter->SetTestProperty('YAxisRangeMode', 'manual');
 $scatter->SetTestProperty('YAxisMinimum', 100.0);
 $scatter->SetTestProperty('YAxisMaximum', 40.0);
@@ -8034,6 +8046,14 @@ foreach (['ValueLabelContent', 'IPSViewValueLabelContent'] as $field) {
             && array_column($selector['options'], 'value') === ['x', 'y', 'both']
             && str_contains((string) ($selector['onChange'] ?? ''), 'UpdateBarPreviewFromForm'),
         'Scatter must offer X, Y and both label values with live previews in Tile and IPSView.'
+    );
+}
+foreach (['AdaptiveValueLabels', 'IPSViewAdaptiveValueLabels'] as $field) {
+    $control = findGaugeFormElement($scatterForm['elements'], $field);
+    assertGatewayGauge(
+        ($control['type'] ?? null) === 'CheckBox'
+            && str_contains((string) ($control['onChange'] ?? ''), 'UpdateBarPreviewFromForm'),
+        'Scatter must offer optional adaptive labels with live previews in Tile and IPSView.'
     );
 }
 foreach (['EnableZoom', 'IPSViewEnableZoom'] as $field) {
@@ -8145,6 +8165,8 @@ $scatterOutput->SetTestProperty('Sources', json_encode([
 $scatterOutput->SetTestProperty('IPSViewUseTileDesign', false);
 $scatterOutput->SetTestProperty('ValueLabelContent', 'both');
 $scatterOutput->SetTestProperty('IPSViewValueLabelContent', 'x');
+$scatterOutput->SetTestProperty('AdaptiveValueLabels', true);
+$scatterOutput->SetTestProperty('IPSViewAdaptiveValueLabels', false);
 $scatterOutput->SetTestProperty('IPSViewYAxisRangeMode', 'manual');
 $scatterOutput->SetTestProperty('IPSViewYAxisMinimum', 40.5);
 $scatterOutput->SetTestProperty('IPSViewYAxisMaximum', 99.5);
@@ -8154,6 +8176,8 @@ assertGatewayGauge(
         && str_contains($scatterOutput->GetIPSViewHTML(), '"valueLabelContent":"x"')
         && str_contains($scatterOutput->GetIPSViewHTML(), '"yAxisMinimum":40.5')
         && str_contains($scatterOutput->GetVisualizationTile(), '"valueLabelContent":"both"')
+        && str_contains($scatterOutput->GetVisualizationTile(), '"adaptiveValueLabels":true')
+        && str_contains($scatterOutput->GetIPSViewHTML(), '"adaptiveValueLabels":false')
         && str_contains($scatterOutput->GetVisualizationTile(), '"enableZoom":true')
         && str_contains($scatterOutput->GetIPSViewHTML(), '"enableZoom":false')
         && str_contains($scatterOutput->GetVisualizationTile(), '"yAxisRangeMode":"data"'),
@@ -8176,6 +8200,7 @@ try {
 assertGatewayGauge(
     str_contains($scatterOutput->GetIPSViewHTML(), '"xAxisRangeMode":"manual"')
         && str_contains($scatterOutput->GetIPSViewHTML(), '"valueLabelContent":"both"')
+        && str_contains($scatterOutput->GetIPSViewHTML(), '"adaptiveValueLabels":true')
         && str_contains($scatterOutput->GetIPSViewHTML(), '"xAxisMinimum":-5.25')
         && str_contains($scatterOutput->GetIPSViewHTML(), '"xAxisMaximum":25.75')
         && str_contains($scatterOutput->GetIPSViewHTML(), '"colorMapEnabled":true')

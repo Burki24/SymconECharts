@@ -68,6 +68,7 @@
             "Clear selection": "Auswahl aufheben",
             "Selected points": "Ausgewählte Punkte",
             "Show point values": "Punktwerte anzeigen",
+            "Adapt point labels to chart size": "Punktbeschriftungen an Diagrammgröße anpassen",
             "Point size": "Punktgröße",
             "Maximum bubble size": "Maximale Blasengröße",
             "Value-based colors": "Wertabhängige Farben",

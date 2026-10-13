@@ -77,6 +77,7 @@ class EChartsScatter extends IPSModuleStrict
         'EnableZoom'              => 'boolean',
         'EnableBrush'             => 'boolean',
         'ShowValues'              => 'boolean',
+        'AdaptiveValueLabels'     => 'boolean',
         'ValueLabelContent'       => 'string',
         'ValueLabelPosition'      => 'string',
         'ValueLabelDistance'      => 'integer',
@@ -132,6 +133,7 @@ class EChartsScatter extends IPSModuleStrict
         $this->RegisterPropertyBoolean('EnableZoom', true);
         $this->RegisterPropertyBoolean('EnableBrush', false);
         $this->RegisterPropertyBoolean('ShowValues', false);
+        $this->RegisterPropertyBoolean('AdaptiveValueLabels', false);
         $this->RegisterPropertyString('ValueLabelContent', 'y');
         $this->RegisterPropertyString('ValueLabelPosition', 'auto');
         $this->RegisterPropertyInteger('ValueLabelDistance', 5);
@@ -169,22 +171,22 @@ class EChartsScatter extends IPSModuleStrict
         $this->RegisterPropertyInteger('IPSViewBackgroundOpacityPercent', EChartsIPSViewBackground::DEFAULT_OPACITY_PERCENT);
         foreach (self::DESIGN_PROPERTY_TYPES as $name => $type) {
             $default = match ($name) {
-                'EChartsTheme'                                                         => EChartsAsset::THEME_AUTO,
-                'ValueLabelPosition'                                                   => 'auto',
-                'ValueLabelContent'                                                    => 'y',
-                'XAxisRangeMode', 'YAxisRangeMode', 'ColorMapRangeMode'                => 'data',
-                'ColorMapDimension'                                                    => 'y',
-                'AnimationEasing', 'AnimationEasingUpdate'                             => 'cubicInOut',
-                'ShowGrid', 'EnableZoom', 'AnimationEnabled'                           => true,
-                'ShowValues', 'EnableBrush', 'ColorMapEnabled', 'ColorMapShowLegend'   => false,
-                'PointSize'                                                            => 12, 'BubbleMaxSize' => 48,
-                'ValueLabelDistance'                                                   => 5,
-                'XAxisMinimum', 'YAxisMinimum', 'ColorMapMinimum'                      => 0.0,
-                'XAxisMaximum', 'YAxisMaximum', 'ColorMapMaximum'                      => 100.0,
-                'TitleFontSizePercent', 'AxisFontSizePercent', 'ValueFontSizePercent'  => 100,
-                'AnimationDuration'                                                    => 350, 'AnimationDurationUpdate' => 500,
-                'AnimationDelay', 'AnimationDelayUpdate'                               => 0,
-                default                                                                => -1
+                'EChartsTheme'                                                                              => EChartsAsset::THEME_AUTO,
+                'ValueLabelPosition'                                                                        => 'auto',
+                'ValueLabelContent'                                                                         => 'y',
+                'XAxisRangeMode', 'YAxisRangeMode', 'ColorMapRangeMode'                                     => 'data',
+                'ColorMapDimension'                                                                         => 'y',
+                'AnimationEasing', 'AnimationEasingUpdate'                                                  => 'cubicInOut',
+                'ShowGrid', 'EnableZoom', 'AnimationEnabled'                                                => true,
+                'ShowValues', 'AdaptiveValueLabels', 'EnableBrush', 'ColorMapEnabled', 'ColorMapShowLegend' => false,
+                'PointSize'                                                                                 => 12, 'BubbleMaxSize' => 48,
+                'ValueLabelDistance'                                                                        => 5,
+                'XAxisMinimum', 'YAxisMinimum', 'ColorMapMinimum'                                           => 0.0,
+                'XAxisMaximum', 'YAxisMaximum', 'ColorMapMaximum'                                           => 100.0,
+                'TitleFontSizePercent', 'AxisFontSizePercent', 'ValueFontSizePercent'                       => 100,
+                'AnimationDuration'                                                                         => 350, 'AnimationDurationUpdate' => 500,
+                'AnimationDelay', 'AnimationDelayUpdate'                                                    => 0,
+                default                                                                                     => -1
             };
             match ($type) {
                 'string'  => $this->RegisterPropertyString('IPSView' . $name, $default),
@@ -522,6 +524,7 @@ class EChartsScatter extends IPSModuleStrict
         $size = max(4, min(60, $this->BarPreviewValue($values, 'PointSize', 'integer', $ipsView)));
         $maxBubble = max(8, min(100, $this->BarPreviewValue($values, 'BubbleMaxSize', 'integer', $ipsView)));
         $showValues = $this->BarPreviewValue($values, 'ShowValues', 'boolean', $ipsView);
+        $adaptiveLabels = $this->BarPreviewValue($values, 'AdaptiveValueLabels', 'boolean', $ipsView);
         $valueColor = EChartsBarPreview::Color(
             $this->BarPreviewValue($values, 'ValueColor', 'integer', $ipsView),
             $palette['text']
@@ -553,7 +556,7 @@ class EChartsScatter extends IPSModuleStrict
             $svg .= '<circle cx="' . EChartsBarPreview::N($x) . '" cy="' . EChartsBarPreview::N($y)
                 . '" r="' . EChartsBarPreview::N($radius) . '" clip-path="url(#scatter-preview-plot)" fill="'
                 . EChartsBarPreview::E($sampleColor) . '" fill-opacity="0.8"/>';
-            if ($showValues && $i % 4 === 1) {
+            if ($showValues && $i % ($adaptiveLabels ? 6 : 4) === 1) {
                 $label = EChartsLabelDesign::PreviewRect(
                     $x - $radius,
                     $y - $radius,
@@ -1066,7 +1069,8 @@ class EChartsScatter extends IPSModuleStrict
     {
         $prefix = $ipsView && !$this->ReadPropertyBoolean('IPSViewUseTileDesign') ? 'IPSView' : '';
         $style = $this->ReadAnimationStyle($prefix);
-        foreach (['ShowGrid', 'EnableZoom', 'EnableBrush', 'ShowValues', 'ColorMapEnabled', 'ColorMapShowLegend'] as $name) {
+        foreach (['ShowGrid', 'EnableZoom', 'EnableBrush', 'ShowValues', 'AdaptiveValueLabels',
+            'ColorMapEnabled', 'ColorMapShowLegend'] as $name) {
             $style[lcfirst($name)] = $this->ReadPropertyBoolean($prefix . $name);
         }
         $style['valueLabelPosition'] = $this->ReadPropertyString($prefix . 'ValueLabelPosition');

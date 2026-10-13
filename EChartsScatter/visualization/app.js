@@ -113,6 +113,70 @@
                 && previous.range.pointBudget === next.range.pointBudget));
     }
 
+    function pointLabelText(value, content, xRole, yRole) {
+        if (content === 'x') { return formatValue(value[0], xRole); }
+        if (content === 'both') {
+            return formatValue(value[0], xRole) + ' / ' + formatValue(value[1], yRole);
+        }
+        return formatValue(value[1], yRole);
+    }
+
+    function adaptiveLabelVisibility(points, style, xRole, yRole, grid, label, fontSize, pointSize) {
+        var xValues = points.map(function (point) { return Number(point[1]); });
+        var yValues = points.map(function (point) { return Number(point[2]); });
+        var xMinimum = style.xAxisRangeMode === 'manual' ? Number(style.xAxisMinimum)
+            : Math.min.apply(null, xValues);
+        var xMaximum = style.xAxisRangeMode === 'manual' ? Number(style.xAxisMaximum)
+            : Math.max.apply(null, xValues);
+        var yMinimum = style.yAxisRangeMode === 'manual' ? Number(style.yAxisMinimum)
+            : Math.min.apply(null, yValues);
+        var yMaximum = style.yAxisRangeMode === 'manual' ? Number(style.yAxisMaximum)
+            : Math.max.apply(null, yValues);
+        if (style.xAxisRangeMode === 'zero') {
+            xMinimum = Math.min(0, xMinimum); xMaximum = Math.max(0, xMaximum);
+        }
+        if (style.yAxisRangeMode === 'zero') {
+            yMinimum = Math.min(0, yMinimum); yMaximum = Math.max(0, yMaximum);
+        }
+        if (xMinimum === xMaximum) { xMinimum -= 1; xMaximum += 1; }
+        if (yMinimum === yMaximum) { yMinimum -= 1; yMaximum += 1; }
+        var width = Math.max(1, chartElement.clientWidth - grid.left - grid.right);
+        var height = Math.max(1, chartElement.clientHeight - grid.top - grid.bottom);
+        var distance = Math.max(0, Number(label.distance) || 0) + pointSize / 2;
+        var occupied = [];
+        return points.map(function (point) {
+            var xValue = Number(point[1]);
+            var yValue = Number(point[2]);
+            if (xValue < xMinimum || xValue > xMaximum || yValue < yMinimum || yValue > yMaximum) {
+                return false;
+            }
+            var x = grid.left + (xValue - xMinimum) / (xMaximum - xMinimum) * width;
+            var y = grid.top + (yMaximum - yValue) / (yMaximum - yMinimum) * height;
+            var text = pointLabelText([point[1], point[2]], style.valueLabelContent, xRole, yRole);
+            var labelWidth = text.length * fontSize * 0.65 + 8;
+            var labelHeight = fontSize * 1.5 + 4;
+            var left = x - labelWidth / 2;
+            var top = y - distance - labelHeight;
+            if (label.position === 'bottom' || label.position === 'insideBottom') {
+                top = y + distance;
+            } else if (label.position === 'left' || label.position === 'insideLeft') {
+                left = x - distance - labelWidth; top = y - labelHeight / 2;
+            } else if (label.position === 'right' || label.position === 'insideRight') {
+                left = x + distance; top = y - labelHeight / 2;
+            } else if (label.position === 'inside') {
+                top = y - labelHeight / 2;
+            }
+            var rect = { left: left - 4, right: left + labelWidth + 4,
+                top: top - 4, bottom: top + labelHeight + 4 };
+            var overlaps = occupied.some(function (other) {
+                return rect.left < other.right && rect.right > other.left
+                    && rect.top < other.bottom && rect.bottom > other.top;
+            });
+            if (!overlaps) { occupied.push(rect); }
+            return !overlaps;
+        });
+    }
+
     function buildOption(model, theme) {
         var colors = colorsFor(theme);
         var scatter = model.scatter || {};
@@ -146,6 +210,15 @@
         var toolboxTop = top + (hasTitle ? 34 : 0) + (showColorLegend ? 30 : 0);
         var gridTop = top + (hasTitle ? 48 : 18) + (showColorLegend ? 30 : 0);
         if (brushEnabled) { gridTop = Math.max(gridTop, toolboxTop + brushToolSize + 8); }
+        var grid = { left: compact ? 65 : 86,
+            right: zoomEnabled ? (compact ? 56 : 70) : (compact ? 20 : 38),
+            top: gridTop, bottom: zoomEnabled ? (compact ? 78 : 94) : (compact ? 54 : 70),
+            containLabel: true };
+        var valueLabel = design.valueLabel(style, 'top', ['top', 'bottom', 'left', 'right', 'inside',
+            'insideTop', 'insideBottom', 'insideLeft', 'insideRight'], 5);
+        var valueFontSize = design.fontSizePercent(style.valueFontSizePercent, 11);
+        var visibleLabels = style.showValues === true && style.adaptiveValueLabels === true
+            ? adaptiveLabelVisibility(points, style, xRole, yRole, grid, valueLabel, valueFontSize, base) : null;
 
         return {
             backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
@@ -176,10 +249,7 @@
                     color: 'rgba(85, 203, 181, 0.12)' },
                 outOfBrush: { opacity: 0.18 }
             } : undefined,
-            grid: { left: compact ? 65 : 86, right: zoomEnabled ? (compact ? 56 : 70) : (compact ? 20 : 38),
-                top: gridTop,
-                bottom: zoomEnabled ? (compact ? 78 : 94) : (compact ? 54 : 70),
-                containLabel: true },
+            grid: grid,
             dataZoom: zoom.cartesianOptions(zoomEnabled, bootstrap.mode, compact),
             xAxis: {
                 type: 'value', name: String(xRole.label || 'X') + (xRole.unit ? ' (' + xRole.unit + ')' : ''),
@@ -225,28 +295,24 @@
                 labelLayout: { hideOverlap: true },
                 label: {
                     show: style.showValues === true,
-                    ...design.valueLabel(style, 'top', ['top', 'bottom', 'left', 'right', 'inside',
-                        'insideTop', 'insideBottom', 'insideLeft', 'insideRight'], 5),
+                    ...valueLabel,
                     color: style.valueColor || colors.text,
-                    fontSize: design.fontSizePercent(style.valueFontSizePercent, 11),
+                    fontSize: valueFontSize,
                     formatter: function (parameters) {
                         var value = parameters.value || [];
-                        var content = style.valueLabelContent || 'y';
-                        if (content === 'x') { return formatValue(value[0], xRole); }
-                        if (content === 'both') {
-                            return formatValue(value[0], xRole) + ' / ' + formatValue(value[1], yRole);
-                        }
-                        return formatValue(value[1], yRole);
+                        return pointLabelText(value, style.valueLabelContent, xRole, yRole);
                     }
                 },
-                data: points.map(function (point) {
+                data: points.map(function (point, index) {
                     var value = [Number(point[1]), Number(point[2]),
                         sizeRole ? Number(point[3]) : null, Number(point[0])];
                     if (visualMap) {
                         var rawColorValue = Number(value[colorDimension]);
                         value.push(Math.max(visualMap.min, Math.min(visualMap.max, rawColorValue)));
                     }
-                    return { id: 'interval-' + point[0], value: value };
+                    var item = { id: 'interval-' + point[0], value: value };
+                    if (visibleLabels) { item.label = { show: visibleLabels[index] }; }
+                    return item;
                 })
             }]
         };

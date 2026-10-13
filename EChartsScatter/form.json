@@ -423,6 +423,11 @@
                             "type": "CheckBox",
                             "name": "ShowValues",
                             "caption": "Show point values"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "AdaptiveValueLabels",
+                            "caption": "Adapt point labels to chart size"
                         }
                     ]
                 },

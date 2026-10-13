@@ -35,8 +35,12 @@ optionale Wertebeschriftungen, Schriftgrößen, Farben und Animation. X- und
 Y-Achse sind unabhängig skalierbar: **An Daten anpassen** nutzt den sichtbaren
 Wertebereich ohne erzwungenen Nullpunkt, **Null einschließen** zeigt den
 Nullpunkt mit an und **Manuell** setzt Minimum und Maximum selbst. Bei vielen
-Punkten werden sich überlagernde Wertbeschriftungen ausgeblendet; per Tooltip
-sind alle X-/Y- und optionalen Größenwerte weiterhin erreichbar. Sichtbare
+Punkten blendet ECharts sich überlagernde Wertbeschriftungen aus. Zusätzlich
+kann die adaptive Beschriftung eingeschaltet werden: Sie wählt abhängig von
+Diagrammgröße, Schriftgröße und Punktdichte eine lesbare Teilmenge der Labels.
+Sie ist für bestehende Instanzen ausgeschaltet und in Kachel und unabhängigem
+IPSView-Design separat einstellbar. Alle Punkte und ihre X-/Y- sowie optionalen
+Größenwerte bleiben per Tooltip erreichbar. Sichtbare
 Punktbeschriftungen zeigen wahlweise den X-Wert, den Y-Wert (Voreinstellung)
 oder beide Werte mit ihren jeweiligen Einheiten. Kachel und unabhängiges
 IPSView-Design können die Auswahl getrennt festlegen.

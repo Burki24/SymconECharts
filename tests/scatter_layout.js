@@ -103,6 +103,29 @@ const bothLabels = render({ ...model, scatter: { ...model.scatter, style: {
 assert.match(bothLabels.option.series[0].label.formatter({ value: [10, 50, 1, 100] }), /^10[.,]0 °C \/ 50 %$/);
 assert.equal(bubble.option.series[0].labelLayout.hideOverlap, true,
     'Crowded value labels must be suppressed without hiding their points or tooltips.');
+assert.equal(bubble.option.series[0].data[0].label, undefined,
+    'Existing Scatter instances must keep their original point labels when adaptation is disabled.');
+const densePoints = Array.from({ length: 30 }, (_, index) =>
+    [100 + index, 1 + index * 0.45, 94 - index * 1.4, 1]);
+const denseModel = { ...model, points: densePoints, scatter: { ...model.scatter, style: {
+    ...model.scatter.style, adaptiveValueLabels: true, valueLabelContent: 'both'
+} } };
+const compactLabels = render(denseModel, 'ipsview', 400, 240);
+const spaciousLabels = render(denseModel, 'ipsview', 1500, 800);
+const shownLabels = option => option.series[0].data.filter(point => point.label.show).length;
+assert.equal(compactLabels.option.series[0].data.length, densePoints.length,
+    'Adaptive labels must never remove points.');
+assert.ok(shownLabels(compactLabels.option) > 0 && shownLabels(compactLabels.option) < densePoints.length,
+    'A small chart must show representative labels while suppressing crowded ones.');
+assert.ok(shownLabels(spaciousLabels.option) > shownLabels(compactLabels.option),
+    'A larger chart must make room for more point labels.');
+assert.ok(compactLabels.option.tooltip.formatter({ value: [1, 94, 1, 100] }).includes('Außen'),
+    'Hidden point labels must retain their tooltip values.');
+compactLabels.chartElement.clientWidth = 1500;
+compactLabels.chartElement.clientHeight = 800;
+compactLabels.triggerResize();
+assert.equal(shownLabels(compactLabels.currentOption()), shownLabels(spaciousLabels.option),
+    'Resizing an existing widget must recalculate adaptive label density.');
 assert.equal(bubble.option.xAxis.scale, true);
 assert.equal(bubble.option.yAxis.scale, true);
 assert.equal(bubble.option.xAxis.min, undefined);
