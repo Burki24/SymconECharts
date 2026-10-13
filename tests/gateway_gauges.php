@@ -1266,6 +1266,12 @@ assertGatewayGauge(
 $heatmapOutput = new EChartsHeatmap();
 $heatmapOutput->Create();
 $heatmapForm = json_decode($heatmapOutput->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+$heatmapRangeSelect = findGaugeFormElement($heatmapForm['elements'], 'Range');
+assertGatewayGauge(
+    is_array($heatmapRangeSelect)
+        && ($heatmapRangeSelect['options'][1]['caption'] ?? null) === '30-day average',
+    'The thirty-day form option must describe its weekday/hour averaging.'
+);
 $heatmapPresetSelect = findGaugeFormElement($heatmapForm['elements'], 'ColorScalePreset');
 assertGatewayGauge(
     is_array($heatmapPresetSelect) && count($heatmapPresetSelect['options'] ?? []) === 11,
@@ -1321,6 +1327,17 @@ assertGatewayGauge(
         && str_contains($heatmapPreview, '7d')
         && preg_match('/<text x="74" y="82"[^>]*>[^<]+ [0-9]{2}\.[0-9]{2}\.<\/text>/', $heatmapPreview) === 1,
     'The unsaved Heatmap preview must follow title, source and range edits without an archive read.'
+);
+$heatmapOutput->UpdateBarPreviewFromForm(json_encode([
+    'Title' => 'Draft Heatmap', 'SourceVariableID' => 4713, 'Range' => '30d'
+], JSON_THROW_ON_ERROR));
+$thirtyDayPreview = base64_decode(substr(
+    (string) array_slice($heatmapOutput->GetTestFormUpdates(), -2)[0]['Value'],
+    strlen('data:image/svg+xml;base64,')
+), true);
+assertGatewayGauge(
+    is_string($thirtyDayPreview) && str_contains($thirtyDayPreview, '30-day average'),
+    'The thirty-day form preview must explicitly mark its averaged weekday/hour cells.'
 );
 $heatmapOutput->UpdateBarPreviewFromForm(json_encode([
     'ColorScalePreset' => 'tempera6'

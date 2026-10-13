@@ -31,6 +31,18 @@ heatmapAssert(
     'Zero values must remain distinct from missing cells.'
 );
 
+$thirtyDayCells = HeatmapAggregation::ByWeekdayAndHour([
+    [$time('2026-09-14 08:00:00'), 10.0],
+    [$time('2026-09-21 08:00:00'), 20.0],
+    [$time('2026-09-28 08:00:00'), 30.0],
+    [$time('2026-10-05 08:00:00'), 40.0],
+    [$time('2026-10-12 08:00:00'), 50.0]
+], 'Europe/Berlin');
+heatmapAssert(
+    $thirtyDayCells === [['hour' => 8, 'weekday' => 0, 'value' => 30.0, 'count' => 5]],
+    'A thirty-day Monday/hour average must include all five available Mondays, not only the last week.'
+);
+
 $fallback = HeatmapAggregation::ByWeekdayAndHour([
     [1792886400, 10.0], // 2026-10-25 02:00 CEST
     [1792890000, 20.0]  // 2026-10-25 02:00 CET

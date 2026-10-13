@@ -109,8 +109,11 @@ const thirtyDay = render({ ...model, heatmap: { ...model.heatmap, range: '30d', 
     startDate: '2026-09-14', endDate: '2026-10-13', days: [] } }, 600, 400);
 assert.equal(thirtyDay.option.yAxis.data[0], 'Mon',
     'Thirty days must retain the requested Monday–Sunday average rows.');
-assert.match(thirtyDay.periodLabelElement.textContent, /14\.09\.2026 – 13\.10\.2026 \(30 days\)/,
-    'The actual thirty-day interval must remain visible despite the seven-row average.');
+assert.match(thirtyDay.periodLabelElement.textContent, /14\.09\.2026 – 13\.10\.2026 \(30-day average\)/,
+    'The selected interval and its weekday/hour aggregation must both be visible.');
+assert.match(thirtyDay.option.tooltip.formatter({ data: thirtyDay.option.series[0].data[1] }),
+    /Average of 4 hourly intervals/,
+    'A thirty-day cell must identify the averaging behind its displayed value.');
 assert.equal(wide.option.series[0].type, 'heatmap');
 assert.equal(wide.option.series[0].data.length, 2, 'No missing weekday/hour cells may be invented.');
 assert.deepEqual(Array.from(wide.option.series[0].data[0].value), [0, 0, 0],

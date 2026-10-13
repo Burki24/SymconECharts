@@ -32,7 +32,7 @@
                             "value": "7d"
                         },
                         {
-                            "caption": "30 days",
+                            "caption": "30-day average",
                             "value": "30d"
                         }
                     ]
@@ -58,7 +58,7 @@
         },
         {
             "type": "Label",
-            "caption": "Seven days show dated local days through today; thirty days average by local weekday and hour. Missing hours stay empty."
+            "caption": "Seven days show dated local days through today. Thirty days show the average of available archived hourly values for each local weekday and hour in the selected period, not thirty individual days. Missing hours stay empty."
         },
         {
             "type": "ExpansionPanel",

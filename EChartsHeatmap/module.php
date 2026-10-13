@@ -298,8 +298,9 @@ class EChartsHeatmap extends IPSModuleStrict
         $sourceID = (int) ($values['SourceVariableID'] ?? $this->ReadPropertyInteger('SourceVariableID'));
         $sourceName = $sourceID > 0 && IPS_VariableExists($sourceID) ? IPS_GetName($sourceID) : $this->Translate('No source selected');
         $range = (string) ($values['Range'] ?? $this->ReadPropertyString('Range'));
+        $rangeLabel = $range === '30d' ? $this->Translate('30-day average') : $range;
         $svg .= '<text x="54" y="53" fill="' . EChartsBarPreview::E($palette['muted'])
-            . '" font-size="11">' . EChartsBarPreview::E($sourceName . ' · ' . $range) . '</text>';
+            . '" font-size="11">' . EChartsBarPreview::E($sourceName . ' · ' . $rangeLabel) . '</text>';
         $weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
         $datedDays = $range === '7d'
             ? HeatmapWindow::Resolve($range, 0, $this->CurrentTimestamp(), date_default_timezone_get())['Days']
@@ -493,16 +494,18 @@ class EChartsHeatmap extends IPSModuleStrict
                 'No completed archive hours in the selected range.' => $this->Translate(
                     'No completed archive hours in the selected range.'
                 ),
-                'Previous period'                   => $this->Translate('Previous period'),
-                'Next period'                       => $this->Translate('Next period'),
-                'Time range'                        => $this->Translate('Time range'),
-                'Today'                             => $this->Translate('Today'),
-                '7 days'                            => $this->Translate('7 days'),
-                '30 days'                           => $this->Translate('30 days'),
-                'Mon'                               => $this->Translate('Mon'), 'Tue' => $this->Translate('Tue'),
-                'Wed'                               => $this->Translate('Wed'), 'Thu' => $this->Translate('Thu'),
-                'Fri'                               => $this->Translate('Fri'), 'Sat' => $this->Translate('Sat'),
-                'Sun'                               => $this->Translate('Sun')
+                'Previous period'                     => $this->Translate('Previous period'),
+                'Next period'                         => $this->Translate('Next period'),
+                'Time range'                          => $this->Translate('Time range'),
+                'Today'                               => $this->Translate('Today'),
+                '7 days'                              => $this->Translate('7 days'),
+                '30 days'                             => $this->Translate('30 days'),
+                '30-day average'                      => $this->Translate('30-day average'),
+                'Average of {count} hourly intervals' => $this->Translate('Average of {count} hourly intervals'),
+                'Mon'                                 => $this->Translate('Mon'), 'Tue' => $this->Translate('Tue'),
+                'Wed'                                 => $this->Translate('Wed'), 'Thu' => $this->Translate('Thu'),
+                'Fri'                                 => $this->Translate('Fri'), 'Sat' => $this->Translate('Sat'),
+                'Sun'                                 => $this->Translate('Sun')
             ],
             'options' => [
                 'echartsVersion'    => EChartsAsset::VERSION,

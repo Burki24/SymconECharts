@@ -13,17 +13,22 @@ Die Variable wird über ihre ID zugeordnet; ihr Name ist kein technischer
 Schlüssel.
 
 Wählbar sind sieben oder dreißig lokale Kalendertage einschließlich heute.
-Sieben Tage zeigen jeden Tag mit Wochentag und Datum; bei dreißig Tagen werden
-die Werte weiterhin nach Mo–So und Stunde zusammengefasst. Der Datumsbereich
-steht über dem Diagramm. Mit den Pfeilen wechseln Sie um sieben bzw. dreißig
+Sieben Tage zeigen jeden Tag mit Wochentag und Datum. Bei dreißig Tagen
+werden alle verfügbaren Stundenwerte des gewählten 30-Tage-Zeitraums
+berücksichtigt: Jede Zelle zeigt den Durchschnitt für genau ihren Wochentag
+und ihre Stunde, etwa aus den vorhandenen Montagen um 08:00 Uhr. Die sieben
+Mo–So-Zeilen sind also keine Beschränkung auf sieben Tage. Der Datumsbereich
+und die Kennzeichnung „30-Tage-Durchschnitt“ stehen über dem Diagramm.
+Mit den Pfeilen wechseln Sie um sieben bzw. dreißig
 Tage in frühere oder spätere, lückenlos anschließende Zeiträume; „Heute“ führt
 zur aktuellen Ansicht zurück. Der Wechsel gilt für die gerade geöffnete
 Kachel beziehungsweise IPSView-Seite und wird nicht als Instanzeinstellung
 gespeichert. Nach dem erneuten Öffnen erscheint wieder der aktuelle Zeitraum.
 Das Gateway liefert ausschließlich abgeschlossene stündliche Durchschnittswerte.
 Werte derselben lokalen Wochentag-Stunde-Kombination werden bei dreißig Tagen
-erneut arithmetisch gemittelt. Eine
-fehlende Stunde bleibt leer, nicht null. Beim Wechsel von Sommer- auf
+erneut arithmetisch gemittelt; der Tooltip nennt die Anzahl der tatsächlich
+berücksichtigten Stundenintervalle. Eine fehlende Stunde bleibt leer, nicht
+null. Beim Wechsel von Sommer- auf
 Winterzeit gehen beide tatsächlich vorhandenen 02-Uhr-Intervalle in dieselbe
 Zelle ein. Beim umgekehrten Wechsel wird keine 02-Uhr-Zelle erfunden.
 Tooltip und optional sichtbare Zellenwerte verwenden Einheit und

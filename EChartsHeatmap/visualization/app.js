@@ -87,7 +87,7 @@
         todayElement.textContent = translate('Today');
         currentOffset = Math.max(0, Number(heatmap.windowOffset) || 0);
         periodLabelElement.textContent = dateLabel(heatmap.startDate) + ' – ' + dateLabel(heatmap.endDate)
-            + ' (' + translate(heatmap.range === '7d' ? '7 days' : '30 days') + ')';
+            + ' (' + translate(heatmap.range === '7d' ? '7 days' : '30-day average') + ')';
         previousElement.disabled = navigating || currentOffset >= (Number(bootstrap.options.heatmapMaxOffset) || 120);
         nextElement.disabled = navigating || currentOffset === 0;
         todayElement.disabled = navigating || currentOffset === 0;
@@ -201,9 +201,13 @@
                     var dayLabel = datedDays && datedDays[value[1]]
                         ? weekdays[datedDays[value[1]].weekday] + ' ' + dateLabel(datedDays[value[1]].date)
                         : days[value[1]] || '';
+                    var intervalCount = String(data.count || 1);
+                    var intervalInfo = heatmap.range === '30d'
+                        ? translate('Average of {count} hourly intervals').replace('{count}', intervalCount)
+                        : intervalCount + ' ' + translate('Hourly intervals');
                     return escapeHTML(dayLabel) + ', ' + escapeHTML(String(value[0]).padStart(2, '0'))
                         + ':00<br>' + escapeHTML(formatValue(value[2], decimals, heatmap.unit || ''))
-                        + '<br>' + escapeHTML(String(data.count || 1)) + ' ' + escapeHTML(translate('Hourly intervals'));
+                        + '<br>' + escapeHTML(intervalInfo);
                 }
             },
             xAxis: {

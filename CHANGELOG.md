@@ -2,6 +2,11 @@
 
 ## Behoben
 
+- Die 30-Tage-Heatmap kennzeichnet ihren Mo–So/Stunden-Durchschnitt nun im
+  Diagramm, im Tooltip und im Formular ausdrücklich. Sie berücksichtigt
+  weiterhin alle vorhandenen Stundenwerte des gewählten 30-Tage-Zeitraums;
+  Datenaggregation und gespeicherte Einstellungen ändern sich nicht.
+
 - Die Heatmap zählt sieben Tage jetzt als sieben datierte lokale Tage bis heute
   statt als 168 Stunden mit zwei vermischten Randtagen. Achtung: Dadurch
   können bisherige 7-Tage-Zellenwerte nach dem Modulupdate anders aussehen.
