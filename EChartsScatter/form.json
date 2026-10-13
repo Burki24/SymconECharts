@@ -411,6 +411,11 @@
                         },
                         {
                             "type": "CheckBox",
+                            "name": "EnableZoom",
+                            "caption": "Enable X/Y zoom"
+                        },
+                        {
+                            "type": "CheckBox",
                             "name": "ShowValues",
                             "caption": "Show point values"
                         }

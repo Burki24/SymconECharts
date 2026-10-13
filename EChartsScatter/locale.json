@@ -62,6 +62,7 @@
             "ECharts theme": "ECharts-Theme",
             "Automatic (Symcon design)": "Automatisch (Symcon-Design)",
             "Show grid": "Raster anzeigen",
+            "Enable X/Y zoom": "X/Y-Zoom aktivieren",
             "Show point values": "Punktwerte anzeigen",
             "Point size": "Punktgröße",
             "Maximum bubble size": "Maximale Blasengröße",

@@ -2,6 +2,11 @@
 
 ## Hinzugefügt
 
+- Scatter/Bubble bietet einen getrennten interaktiven X/Y-Zoom mit schlanken
+  Schiebereglern, Mausradsteuerung und Erhalt beider Ausschnitte bei passenden
+  Datenaktualisierungen. Die Einstellung steht im Kachel- und im unabhängigen
+  IPSView-Designer mit Live-Vorschau zur Verfügung.
+
 - Scatter/Bubble kann Punktbeschriftungen mit X-Wert, Y-Wert oder beiden Werten
   samt jeweiliger Einheit anzeigen. Die Auswahl ist im Kachel- und im
   unabhängigen IPSView-Designer verfügbar; bestehende Instanzen bleiben bei Y.

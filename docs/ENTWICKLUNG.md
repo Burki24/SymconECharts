@@ -249,6 +249,9 @@ gewählten Ausschnitts über gleichartige Datenaktualisierungen bereit. Die
 jeweilige Diagramminstanz entscheidet weiterhin über Aktivierung, Layout und
 ihre eigenen Zeitbereichs- und Design-Properties; der gemeinsame Baustein
 ändert keine Archive oder Symcon-Daten.
+Scatter nutzt denselben Baustein mit getrennten X/Y-`dataZoom`-Fenstern und
+Schiebereglern. Der ursprüngliche Zeitachsenvertrag bleibt unverändert;
+X/Y-Ausschnitte werden nur bei kompatiblem Zeitraum übernommen.
 
 Time Series trennt archivfreie Echtzeitwerte gemäß
 [`ADR 0019`](adr/0019-timeseries-realtime-without-archive.md) ausdrücklich von

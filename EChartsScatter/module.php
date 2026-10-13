@@ -74,6 +74,7 @@ class EChartsScatter extends IPSModuleStrict
     private const DESIGN_PROPERTY_TYPES = [
         'EChartsTheme'            => 'string',
         'ShowGrid'                => 'boolean',
+        'EnableZoom'              => 'boolean',
         'ShowValues'              => 'boolean',
         'ValueLabelContent'       => 'string',
         'ValueLabelPosition'      => 'string',
@@ -119,6 +120,7 @@ class EChartsScatter extends IPSModuleStrict
         $this->RegisterPropertyInteger('PointBudget', 1000);
         $this->RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO);
         $this->RegisterPropertyBoolean('ShowGrid', true);
+        $this->RegisterPropertyBoolean('EnableZoom', true);
         $this->RegisterPropertyBoolean('ShowValues', false);
         $this->RegisterPropertyString('ValueLabelContent', 'y');
         $this->RegisterPropertyString('ValueLabelPosition', 'auto');
@@ -154,7 +156,7 @@ class EChartsScatter extends IPSModuleStrict
                 'ValueLabelContent'                                                   => 'y',
                 'XAxisRangeMode', 'YAxisRangeMode'                                    => 'data',
                 'AnimationEasing', 'AnimationEasingUpdate'                            => 'cubicInOut',
-                'ShowGrid', 'AnimationEnabled'                                        => true,
+                'ShowGrid', 'EnableZoom', 'AnimationEnabled'                          => true,
                 'ShowValues'                                                          => false,
                 'PointSize'                                                           => 12, 'BubbleMaxSize' => 48,
                 'ValueLabelDistance'                                                  => 5,
@@ -408,6 +410,15 @@ class EChartsScatter extends IPSModuleStrict
         }
         $svg .= '<path d="M ' . $left . ' ' . $top . ' V ' . $bottom . ' H ' . $right
             . '" fill="none" stroke="' . EChartsBarPreview::E($axisColor) . '"/>';
+        if ($this->BarPreviewValue($values, 'EnableZoom', 'boolean', $ipsView)) {
+            $sliderColor = EChartsBarPreview::E($palette['accent']);
+            $svg .= '<path d="M ' . $left . ' 320 H ' . $right . ' M 692 ' . $top . ' V ' . $bottom
+                . '" fill="none" stroke="' . EChartsBarPreview::E($gridColor)
+                . '" stroke-width="7" stroke-linecap="round"/>';
+            $svg .= '<path d="M ' . $left . ' 320 H ' . $right . ' M 692 ' . $top . ' V ' . $bottom
+                . '" fill="none" stroke="' . $sliderColor
+                . '" stroke-width="3" stroke-linecap="round"/>';
+        }
         $svg .= '<defs><clipPath id="scatter-preview-plot"><rect x="' . $left . '" y="' . $top
             . '" width="' . ($right - $left) . '" height="' . ($bottom - $top) . '"/></clipPath></defs>';
         $size = max(4, min(60, $this->BarPreviewValue($values, 'PointSize', 'integer', $ipsView)));
@@ -593,6 +604,7 @@ class EChartsScatter extends IPSModuleStrict
                 '{{ECHARTS_SCRIPT}}'           => EChartsAsset::CartesianJavaScript(),
                 '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
                 '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript(),
+                '{{ECHARTS_ZOOM_SCRIPT}}'      => EChartsAsset::ZoomJavaScript(),
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
         ]);
@@ -915,7 +927,7 @@ class EChartsScatter extends IPSModuleStrict
     {
         $prefix = $ipsView && !$this->ReadPropertyBoolean('IPSViewUseTileDesign') ? 'IPSView' : '';
         $style = $this->ReadAnimationStyle($prefix);
-        foreach (['ShowGrid', 'ShowValues'] as $name) {
+        foreach (['ShowGrid', 'EnableZoom', 'ShowValues'] as $name) {
             $style[lcfirst($name)] = $this->ReadPropertyBoolean($prefix . $name);
         }
         $style['valueLabelPosition'] = $this->ReadPropertyString($prefix . 'ValueLabelPosition');

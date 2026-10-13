@@ -40,6 +40,12 @@ sind alle X-/Y- und optionalen Größenwerte weiterhin erreichbar. Sichtbare
 Punktbeschriftungen zeigen wahlweise den X-Wert, den Y-Wert (Voreinstellung)
 oder beide Werte mit ihren jeweiligen Einheiten. Kachel und unabhängiges
 IPSView-Design können die Auswahl getrennt festlegen.
+Ein zuschaltbarer X/Y-Zoom stellt für beide Achsen eigene schmale Schieberegler
+bereit. In der Kachel lässt sich die Punktwolke zusätzlich mit dem Mausrad
+zoomen; in IPSView wird das Mausrad gesondert verarbeitet. Beide Achsenausschnitte
+bleiben bei einer Aktualisierung desselben Zeitraums erhalten und werden beim
+Wechsel des Zeitraums zurückgesetzt. Der Zoom ist im Kachel- und im
+unabhängigen IPSView-Designer getrennt abschaltbar.
 Die SVG-Live-Vorschau zeigt die Gestaltung schematisch mit Beispieldaten und
 berücksichtigt auch die gewählten Achsenbereiche; sie liest beim Ändern des
 Formulars keine Archivdaten.

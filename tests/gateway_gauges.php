@@ -7950,6 +7950,7 @@ assertGatewayGauge(
         && $scatterData['family'] === 'scatter'
         && $scatterData['variant'] === 'scatter'
         && $scatterData['scatter']['style']['valueLabelContent'] === 'y'
+        && $scatterData['scatter']['style']['enableZoom'] === true
         && $scatterData['scatter']['style']['xAxisRangeMode'] === 'data'
         && $scatterData['scatter']['style']['yAxisRangeMode'] === 'data'
         && $scatterData['roles']['x']['label'] === 'Outside'
@@ -8011,6 +8012,14 @@ foreach (['ValueLabelContent', 'IPSViewValueLabelContent'] as $field) {
         'Scatter must offer X, Y and both label values with live previews in Tile and IPSView.'
     );
 }
+foreach (['EnableZoom', 'IPSViewEnableZoom'] as $field) {
+    $control = findGaugeFormElement($scatterForm['elements'], $field);
+    assertGatewayGauge(
+        ($control['type'] ?? null) === 'CheckBox'
+            && str_contains((string) ($control['onChange'] ?? ''), 'UpdateBarPreviewFromForm'),
+        'Scatter must offer X/Y zoom with live previews in Tile and IPSView.'
+    );
+}
 foreach (['X', 'Y'] as $axis) {
     $tileMode = findGaugeFormElement($scatterForm['elements'], $axis . 'AxisRangeMode');
     $ipsViewMode = findGaugeFormElement($scatterForm['elements'], 'IPSView' . $axis . 'AxisRangeMode');
@@ -8058,6 +8067,8 @@ assertGatewayGauge(
         && $scatterSvgDocument->loadXML($scatterIPSViewSvg, LIBXML_NONET)
         && str_contains($scatterTileSvg, 'rotate(-90 26 178)')
         && str_contains($scatterTileSvg, 'clip-path="url(#scatter-preview-plot)"')
+        && str_contains($scatterTileSvg, 'M 105 320 H 670')
+        && str_contains($scatterIPSViewSvg, 'M 105 320 H 670')
         && str_contains($scatterTileSvg, '>40</text>')
         && str_contains($scatterIPSViewSvg, '>0</text>')
         && str_contains($scatterTileSvg, '°C / ')
@@ -8075,11 +8086,14 @@ $scatterOutput->SetTestProperty('IPSViewValueLabelContent', 'x');
 $scatterOutput->SetTestProperty('IPSViewYAxisRangeMode', 'manual');
 $scatterOutput->SetTestProperty('IPSViewYAxisMinimum', 40.5);
 $scatterOutput->SetTestProperty('IPSViewYAxisMaximum', 99.5);
+$scatterOutput->SetTestProperty('IPSViewEnableZoom', false);
 assertGatewayGauge(
     str_contains($scatterOutput->GetIPSViewHTML(), '"yAxisRangeMode":"manual"')
         && str_contains($scatterOutput->GetIPSViewHTML(), '"valueLabelContent":"x"')
         && str_contains($scatterOutput->GetIPSViewHTML(), '"yAxisMinimum":40.5')
         && str_contains($scatterOutput->GetVisualizationTile(), '"valueLabelContent":"both"')
+        && str_contains($scatterOutput->GetVisualizationTile(), '"enableZoom":true')
+        && str_contains($scatterOutput->GetIPSViewHTML(), '"enableZoom":false')
         && str_contains($scatterOutput->GetVisualizationTile(), '"yAxisRangeMode":"data"'),
     'Scatter must use independent IPSView scale settings without changing the Tile scale.'
 );
@@ -8100,11 +8114,13 @@ assertGatewayGauge(
     'Scatter must copy floating manual axis bounds to the independent IPSView design.'
 );
 assertGatewayGauge(
-    str_contains($scatterOutput->GetVisualizationTile(), 'echarts-scatter-chart'),
+    str_contains($scatterOutput->GetVisualizationTile(), 'echarts-scatter-chart')
+        && str_contains($scatterOutput->GetVisualizationTile(), 'cartesianOptions'),
     'Scatter must render the native Tile output.'
 );
 assertGatewayGauge(
-    str_contains($scatterOutput->GetIPSViewHTML(), 'echarts-scatter-chart'),
+    str_contains($scatterOutput->GetIPSViewHTML(), 'echarts-scatter-chart')
+        && str_contains($scatterOutput->GetIPSViewHTML(), 'attachIPSViewWheelCartesian'),
     'Scatter must render the IPSView output.'
 );
 assertGatewayGauge(

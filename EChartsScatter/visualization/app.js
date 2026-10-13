@@ -3,6 +3,7 @@
 
     var bootstrap = window.SYMC_VISUALIZATION || {};
     var design = window.SYMC_ECHARTS_DESIGN;
+    var zoom = window.SymconEChartsZoom;
     var chartElement = document.getElementById('echarts-scatter-chart');
     var emptyElement = document.getElementById('echarts-scatter-empty');
     var warningElement = document.getElementById('echarts-scatter-warning');
@@ -67,6 +68,18 @@
         return base + (large - base) * Math.max(0, Math.min(1, (value - minimum) / (maximum - minimum)));
     }
 
+    function sameZoomContext(previous, next) {
+        if (!previous || !next) { return false; }
+        var axisKeys = ['xAxisRangeMode', 'xAxisMinimum', 'xAxisMaximum',
+            'yAxisRangeMode', 'yAxisMinimum', 'yAxisMaximum', 'enableZoom'];
+        var previousStyle = previous.scatter && previous.scatter.style || {};
+        var nextStyle = next.scatter && next.scatter.style || {};
+        return axisKeys.every(function (key) { return previousStyle[key] === nextStyle[key]; })
+            && JSON.stringify(previous.roles || {}) === JSON.stringify(next.roles || {})
+            && (!previous.range || !next.range || (previous.range.aggregationLevel === next.range.aggregationLevel
+                && previous.range.pointBudget === next.range.pointBudget));
+    }
+
     function buildOption(model, theme) {
         var colors = colorsFor(theme);
         var scatter = model.scatter || {};
@@ -79,6 +92,7 @@
         var hasTitle = Boolean(scatter.title) && (bootstrap.mode === 'ipsview'
             || bootstrap.options.tileHeaderVisible === false);
         var compact = chartElement.clientWidth < 420 || chartElement.clientHeight < 280;
+        var zoomEnabled = style.enableZoom === true;
         var top = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8;
         var base = Math.max(4, Math.min(60, Number(style.pointSize) || 12));
         var large = Math.max(base, Math.min(100, Number(style.bubbleMaxSize) || 48));
@@ -101,8 +115,10 @@
                 textStyle: { color: style.titleColor || colors.text,
                     fontSize: design.fontSizePercent(style.titleFontSizePercent, 18) }
             },
-            grid: { left: compact ? 65 : 86, right: compact ? 20 : 38,
-                top: top + (hasTitle ? 48 : 18), bottom: compact ? 54 : 70, containLabel: true },
+            grid: { left: compact ? 65 : 86, right: zoomEnabled ? (compact ? 56 : 70) : (compact ? 20 : 38),
+                top: top + (hasTitle ? 48 : 18), bottom: zoomEnabled ? (compact ? 78 : 94) : (compact ? 54 : 70),
+                containLabel: true },
+            dataZoom: zoom.cartesianOptions(zoomEnabled, bootstrap.mode, compact),
             xAxis: {
                 type: 'value', name: String(xRole.label || 'X') + (xRole.unit ? ' (' + xRole.unit + ')' : ''),
                 scale: style.xAxisRangeMode !== 'zero',
@@ -191,6 +207,7 @@
             return;
         }
         refreshFailures = 0;
+        var previousState = currentState;
         currentState = state;
         if (!state || state.status !== 'ready' || !state.chart) {
             displayError(state && state.error);
@@ -211,19 +228,29 @@
         if (points.length === 0) { return; }
         var palettes = bootstrap.options && bootstrap.options.echartsThemes || {};
         var theme = Object.prototype.hasOwnProperty.call(palettes, state.chart.theme) ? state.chart.theme : 'auto';
+        var savedZoom = chart && currentTheme === theme && previousState
+            && sameZoomContext(previousState.chart, state.chart)
+            ? zoom.captureCartesian(chart, previousState.chart && previousState.chart.range, state.chart.range) : null;
         if (chart && currentTheme !== theme) { chart.dispose(); chart = null; }
         if (!chart) {
             chart = window.echarts.init(chartElement, theme === 'auto' ? null : theme, { renderer: 'canvas' });
             currentTheme = theme;
         }
         if (wasHidden) { chart.resize(); }
-        chart.setOption(buildOption(state.chart, theme), true);
+        zoom.applyCartesian(chart, buildOption(state.chart, theme), savedZoom);
     }
 
     window.handleMessage = function (message) {
         var state = typeof message === 'string' ? JSON.parse(message) : message;
         if (state) { render(state); }
     };
+    if (bootstrap.mode === 'ipsview') {
+        zoom.attachIPSViewWheelCartesian(chartElement, function () { return chart; }, function () {
+            var style = currentState && currentState.chart && currentState.chart.scatter
+                && currentState.chart.scatter.style;
+            return style && style.enableZoom === true;
+        });
+    }
     if (window.ResizeObserver) {
         new ResizeObserver(function () {
             if (design.resizeChartIfNeeded(chart, chartElement)) { render(currentState); }
