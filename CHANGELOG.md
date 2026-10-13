@@ -23,6 +23,14 @@
 
 ## Behoben
 
+- Scatter/Bubble nutzt die Diagrammfläche mit datenangepassten X- und
+  Y-Achsen statt beide Skalen unnötig bei null beginnen zu lassen. Beide
+  Achsen können unabhängig null einschließen oder manuell begrenzt werden.
+  Bei dichten Punktwolken werden kollidierende Wertbeschriftungen verborgen;
+  der Tooltip zeigt weiterhin alle Messwerte. Die Formularvorschau platziert
+  Beispielpunkte, Skalen und Y-Achsentitel nun innerhalb einer konsistenten
+  Diagrammgeometrie und reagiert auf die Achsen- und Beschriftungsoptionen.
+
 - `EChartsPie` passt Kreisgröße und Beschriftungen an die tatsächlich freie
   Fläche an. In mittelgroßen Kacheln steht die Legende unter dem Diagramm,
   statt mit Außenbeschriftungen zu kollidieren; der Kachelkopf bleibt frei.

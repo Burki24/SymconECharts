@@ -51,6 +51,8 @@ const model = {
     theme: 'dark', scatter: { title: 'Climate', style: {
         pointSize: 10, bubbleMaxSize: 40, showGrid: true, showValues: true,
         valueLabelPosition: 'right', valueLabelDistance: 8,
+        xAxisRangeMode: 'data', yAxisRangeMode: 'data',
+        xAxisMinimum: 0, xAxisMaximum: 100, yAxisMinimum: 0, yAxisMaximum: 100,
         pointColor: '#123456', axisColor: '#cccccc'
     } },
     roles: {
@@ -67,6 +69,13 @@ assert.equal(bubble.option.series[0].symbolSize([10, 50, 1, 100]), 10);
 assert.equal(bubble.option.series[0].symbolSize([20, 55, 3, 200]), 40);
 assert.equal(bubble.option.series[0].label.position, 'right');
 assert.equal(bubble.option.series[0].label.distance, 8);
+assert.equal(bubble.option.series[0].label.formatter({ value: [10, 50, 1, 100] }), '50 %');
+assert.equal(bubble.option.series[0].labelLayout.hideOverlap, true,
+    'Crowded value labels must be suppressed without hiding their points or tooltips.');
+assert.equal(bubble.option.xAxis.scale, true);
+assert.equal(bubble.option.yAxis.scale, true);
+assert.equal(bubble.option.xAxis.min, undefined);
+assert.equal(bubble.option.yAxis.min, undefined);
 assert.equal(bubble.option.series[0].itemStyle.color, '#123456');
 assert.equal(bubble.option.xAxis.name, 'Außen (°C)');
 assert.equal(bubble.option.yAxis.name, 'Feuchte (%)');
@@ -74,6 +83,14 @@ assert.ok(!bubble.option.title.show, 'Visible Symcon tile headers must not dupli
 assert.ok(bubble.option.tooltip.formatter({ value: [10, 50, 1, 100] }).includes('Wind'));
 const ipsview = render(model, 'ipsview');
 assert.equal(ipsview.option.title.show, true);
+const zeroScale = render({ ...model, scatter: { ...model.scatter, style: {
+    ...model.scatter.style, xAxisRangeMode: 'zero', yAxisRangeMode: 'manual',
+    yAxisMinimum: 40, yAxisMaximum: 100
+} } });
+assert.equal(zeroScale.option.xAxis.scale, false);
+assert.equal(zeroScale.option.yAxis.scale, true);
+assert.equal(zeroScale.option.yAxis.min, 40);
+assert.equal(zeroScale.option.yAxis.max, 100);
 const scatter = render({ ...model, roles: { x: model.roles.x, y: model.roles.y },
     points: [[100, 10, 50]] });
 assert.equal(scatter.option.series[0].symbolSize([10, 50, null, 100]), 10);

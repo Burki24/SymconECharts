@@ -441,6 +441,80 @@
                     "type": "RowLayout",
                     "items": [
                         {
+                            "type": "Select",
+                            "name": "XAxisRangeMode",
+                            "caption": "X axis range",
+                            "onChange": "ECSC_UpdateAxisRangeForm($id, false, $XAxisRangeMode, $YAxisRangeMode);",
+                            "options": [
+                                {
+                                    "caption": "Fit to data",
+                                    "value": "data"
+                                },
+                                {
+                                    "caption": "Include zero",
+                                    "value": "zero"
+                                },
+                                {
+                                    "caption": "Manual",
+                                    "value": "manual"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "XAxisMinimum",
+                            "caption": "X minimum",
+                            "digits": 6
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "XAxisMaximum",
+                            "caption": "X maximum",
+                            "digits": 6
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "YAxisRangeMode",
+                            "caption": "Y axis range",
+                            "onChange": "ECSC_UpdateAxisRangeForm($id, false, $XAxisRangeMode, $YAxisRangeMode);",
+                            "options": [
+                                {
+                                    "caption": "Fit to data",
+                                    "value": "data"
+                                },
+                                {
+                                    "caption": "Include zero",
+                                    "value": "zero"
+                                },
+                                {
+                                    "caption": "Manual",
+                                    "value": "manual"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "YAxisMinimum",
+                            "caption": "Y minimum",
+                            "digits": 6
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "YAxisMaximum",
+                            "caption": "Y maximum",
+                            "digits": 6
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
                             "type": "NumberSpinner",
                             "name": "TitleFontSizePercent",
                             "caption": "Title size",

@@ -105,6 +105,9 @@
                 top: top + (hasTitle ? 48 : 18), bottom: compact ? 54 : 70, containLabel: true },
             xAxis: {
                 type: 'value', name: String(xRole.label || 'X') + (xRole.unit ? ' (' + xRole.unit + ')' : ''),
+                scale: style.xAxisRangeMode !== 'zero',
+                min: style.xAxisRangeMode === 'manual' ? Number(style.xAxisMinimum) : undefined,
+                max: style.xAxisRangeMode === 'manual' ? Number(style.xAxisMaximum) : undefined,
                 nameLocation: 'middle', nameGap: compact ? 25 : 34,
                 nameTextStyle: { color: axisColor, fontSize: fontSize },
                 axisLabel: { color: axisColor, fontSize: fontSize },
@@ -113,6 +116,9 @@
             },
             yAxis: {
                 type: 'value', name: String(yRole.label || 'Y') + (yRole.unit ? ' (' + yRole.unit + ')' : ''),
+                scale: style.yAxisRangeMode !== 'zero',
+                min: style.yAxisRangeMode === 'manual' ? Number(style.yAxisMinimum) : undefined,
+                max: style.yAxisRangeMode === 'manual' ? Number(style.yAxisMaximum) : undefined,
                 nameLocation: 'middle', nameGap: compact ? 38 : 52,
                 nameTextStyle: { color: axisColor, fontSize: fontSize },
                 axisLabel: { color: axisColor, fontSize: fontSize },
@@ -138,6 +144,7 @@
                     return sizeRole ? pointSize(Number(value[2]), minimum, maximum, base, large) : base;
                 },
                 itemStyle: { color: pointColor, opacity: 0.8 },
+                labelLayout: { hideOverlap: true },
                 label: {
                     show: style.showValues === true,
                     ...design.valueLabel(style, 'top', ['top', 'bottom', 'left', 'right', 'inside',
@@ -146,7 +153,7 @@
                     fontSize: design.fontSizePercent(style.valueFontSizePercent, 11),
                     formatter: function (parameters) {
                         var value = parameters.value || [];
-                        return formatValue(value[0], xRole) + ' / ' + formatValue(value[1], yRole);
+                        return formatValue(value[1], yRole);
                     }
                 },
                 data: points.map(function (point) {

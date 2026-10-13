@@ -31,9 +31,16 @@ Intervalle kleiner sein als das Punktbudget.
 ## Design und Ausgabe
 
 Der Kacheldesigner bietet Theme, Raster, Punkt- und maximale Blasengröße,
-optionale Wertebeschriftungen, Schriftgrößen, Farben und Animation.
-Die SVG-Live-Vorschau zeigt die Gestaltung schematisch mit Beispieldaten;
-sie liest beim Ändern des Formulars keine Archivdaten.
+optionale Wertebeschriftungen, Schriftgrößen, Farben und Animation. X- und
+Y-Achse sind unabhängig skalierbar: **An Daten anpassen** nutzt den sichtbaren
+Wertebereich ohne erzwungenen Nullpunkt, **Null einschließen** zeigt den
+Nullpunkt mit an und **Manuell** setzt Minimum und Maximum selbst. Bei vielen
+Punkten werden sich überlagernde Wertbeschriftungen ausgeblendet; per Tooltip
+sind alle X-/Y- und optionalen Größenwerte weiterhin erreichbar. Sichtbare
+Punktbeschriftungen nennen zur besseren Lesbarkeit nur den Y-Wert.
+Die SVG-Live-Vorschau zeigt die Gestaltung schematisch mit Beispieldaten und
+berücksichtigt auch die gewählten Achsenbereiche; sie liest beim Ändern des
+Formulars keine Archivdaten.
 
 Optional erstellt das Modul eine WebContent-Variable `IPSViewScatter` für
 IPSView. Dort kann das Kacheldesign geerbt oder unabhängig gestaltet werden;
