@@ -22,10 +22,15 @@ function render(model, mode = 'symcon', width = 700, height = 410) {
     const errorElement = { hidden: true, textContent: '' };
     let option;
     let resizeCount = 0;
+    let chartWidth = width;
+    let chartHeight = height;
     const listeners = {};
+    const windowListeners = {};
     const chart = {
         setOption: next => { option = next; }, getOption: () => option, clear: () => {},
-        resize: () => { resizeCount++; }, dispose: () => {},
+        resize: () => { resizeCount++; chartWidth = chartElement.clientWidth;
+            chartHeight = chartElement.clientHeight; },
+        getWidth: () => chartWidth, getHeight: () => chartHeight, dispose: () => {},
         on: (name, listener) => { listeners[name] = listener; }
     };
     const window = {
@@ -34,7 +39,8 @@ function render(model, mode = 'symcon', width = 700, height = 410) {
             options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: true }
         },
         echarts: { init: () => chart },
-        addEventListener: () => {}, getComputedStyle: () => ({ color: '' })
+        addEventListener: (name, listener) => { windowListeners[name] = listener; },
+        getComputedStyle: () => ({ color: '' })
     };
     const document = {
         body: { appendChild: () => {} },
@@ -52,6 +58,7 @@ function render(model, mode = 'symcon', width = 700, height = 410) {
     vm.runInNewContext(source, { window, document });
     return { option, window, chartElement, emptyElement, warningElement, selectionElement, errorElement,
         emit: (name, event) => listeners[name](event),
+        triggerResize: () => windowListeners.resize(),
         currentOption: () => option,
         resizeCount: () => resizeCount };
 }
@@ -110,6 +117,29 @@ const selectable = render({ ...model, scatter: { ...model.scatter, style: {
 assert.deepEqual(Array.from(selectable.option.brush.toolbox), ['rect', 'clear']);
 assert.equal(selectable.option.brush.brushMode, 'single');
 assert.equal(selectable.option.toolbox.feature.brush.title.rect, 'Select points');
+const smallTools = render({ ...model, scatter: { ...model.scatter, style: {
+    ...model.scatter.style, enableBrush: true
+} } }, 'ipsview', 400, 240);
+const largeTools = render({ ...model, scatter: { ...model.scatter, style: {
+    ...model.scatter.style, enableBrush: true
+} } }, 'ipsview', 1200, 800);
+assert.ok(smallTools.option.toolbox.itemSize >= 18,
+    'Brush tools must remain legible in a compact widget.');
+assert.ok(largeTools.option.toolbox.itemSize > smallTools.option.toolbox.itemSize,
+    'Brush tools must scale with the available chart area.');
+assert.ok(largeTools.option.toolbox.itemSize <= 28,
+    'Brush tools must not become oversized in a large widget.');
+assert.equal(smallTools.option.toolbox.iconStyle.borderColor, palette.text);
+assert.ok(smallTools.option.toolbox.iconStyle.borderWidth >= 2);
+assert.ok(smallTools.option.grid.top >= smallTools.option.toolbox.top
+    + smallTools.option.toolbox.itemSize + 8,
+    'The plot must leave room below the enlarged brush tools.');
+smallTools.chartElement.clientWidth = 1200;
+smallTools.chartElement.clientHeight = 800;
+smallTools.triggerResize();
+assert.equal(smallTools.currentOption().toolbox.itemSize, largeTools.option.toolbox.itemSize,
+    'Resizing an existing widget must recalculate brush tool size.');
+assert.equal(smallTools.resizeCount(), 1);
 selectable.emit('brushselected', { batch: [{ areas: [{ brushType: 'rect' }],
     selected: [{ seriesIndex: 0, dataIndex: [0, 1] }] }] });
 assert.equal(selectable.selectionElement.hidden, false);

@@ -56,6 +56,7 @@ Wechsel des Zeitraums zurückgesetzt. Der Zoom ist im Kachel- und im
 unabhängigen IPSView-Designer getrennt abschaltbar.
 Optional aktiviert die Bereichsauswahl zwei ECharts-Werkzeuge: Ein Rechteck
 markiert Punkte in der X/Y-Fläche, das zweite hebt die Auswahl auf. Die
+nutzbare Symbolgröße passt sich dabei der Kachel- oder Widgetgröße an. Die
 nicht gewählten Punkte werden abgeblendet. Für die Auswahl erscheinen Anzahl
 sowie der kleinste und größte X- und Y-Wert mit ihren Einheiten. Die Auswahl
 ist nur eine lokale Ansicht und wird bei neuen Daten oder einem Designwechsel

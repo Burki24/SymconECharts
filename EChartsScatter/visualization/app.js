@@ -141,6 +141,11 @@
         var colorDimension = { x: 0, y: 1, size: 2 }[style.colorMapDimension];
         if (colorDimension === undefined) { colorDimension = 1; }
         var showColorLegend = visualMap && visualMap.show;
+        var brushToolSize = Math.max(18, Math.min(28,
+            Math.round(Math.min(chartElement.clientWidth, chartElement.clientHeight) / 20)));
+        var toolboxTop = top + (hasTitle ? 34 : 0) + (showColorLegend ? 30 : 0);
+        var gridTop = top + (hasTitle ? 48 : 18) + (showColorLegend ? 30 : 0);
+        if (brushEnabled) { gridTop = Math.max(gridTop, toolboxTop + brushToolSize + 8); }
 
         return {
             backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
@@ -156,10 +161,10 @@
             visualMap: visualMap || undefined,
             toolbox: brushEnabled ? {
                 show: true, right: zoomEnabled ? (compact ? 56 : 70) : (compact ? 20 : 38),
-                top: top + (hasTitle ? 34 : 0) + (showColorLegend ? 30 : 0),
-                itemSize: compact ? 12 : 15, itemGap: 8,
-                iconStyle: { borderColor: axisColor },
-                emphasis: { iconStyle: { borderColor: colors.accent } },
+                top: toolboxTop, padding: 2,
+                itemSize: brushToolSize, itemGap: 8,
+                iconStyle: { borderColor: colors.text, borderWidth: 2 },
+                emphasis: { iconStyle: { borderColor: colors.accent, borderWidth: 2 } },
                 feature: { brush: { type: ['rect', 'clear'], title: {
                     rect: translate('Select points'), clear: translate('Clear selection')
                 } } }
@@ -172,7 +177,7 @@
                 outOfBrush: { opacity: 0.18 }
             } : undefined,
             grid: { left: compact ? 65 : 86, right: zoomEnabled ? (compact ? 56 : 70) : (compact ? 20 : 38),
-                top: top + (hasTitle ? 48 : 18) + (showColorLegend ? 30 : 0),
+                top: gridTop,
                 bottom: zoomEnabled ? (compact ? 78 : 94) : (compact ? 54 : 70),
                 containLabel: true },
             dataZoom: zoom.cartesianOptions(zoomEnabled, bootstrap.mode, compact),

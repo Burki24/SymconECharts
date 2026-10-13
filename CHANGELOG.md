@@ -2,6 +2,10 @@
 
 ## Behoben
 
+- Die beiden Scatter-Werkzeuge für Rechteckauswahl und Zurücksetzen sind in
+  Kachel und IPSView kontrastreicher und wachsen mit der verfügbaren
+  Diagrammfläche. Die Plotfläche hält dafür ausreichend Abstand frei.
+
 - Alle Diagrammkacheln übernehmen nur noch vollständige Visualisierungszustände
   als Datenaktualisierung. Andere oder unvollständige Nachrichten ersetzen
   die Darstellung nicht mehr durch eine irreführende Ladefehlermeldung.
