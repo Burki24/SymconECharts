@@ -451,7 +451,7 @@ class EChartsScatter extends IPSModuleStrict
             $svg .= '<defs><linearGradient id="scatter-preview-color-map"><stop offset="0%" stop-color="'
                 . EChartsBarPreview::E($colorMapLow) . '"/><stop offset="100%" stop-color="'
                 . EChartsBarPreview::E($colorMapHigh) . '"/></linearGradient></defs>';
-            $svg .= '<text x="292" y="54" text-anchor="end" font-size="10" fill="'
+            $svg .= '<text x="242" y="54" text-anchor="end" font-size="10" fill="'
                 . EChartsBarPreview::E($palette['muted']) . '">'
                 . EChartsBarPreview::E(EChartsBarPreview::FormatValue(
                     $colorMapMinimum,
@@ -459,8 +459,8 @@ class EChartsScatter extends IPSModuleStrict
                     $colorMapUnit,
                     $colorMapLanguage
                 )) . '</text>';
-            $svg .= '<rect x="300" y="44" width="120" height="8" fill="url(#scatter-preview-color-map)"/>';
-            $svg .= '<text x="428" y="54" font-size="10" fill="'
+            $svg .= '<rect x="250" y="44" width="220" height="8" fill="url(#scatter-preview-color-map)"/>';
+            $svg .= '<text x="478" y="54" font-size="10" fill="'
                 . EChartsBarPreview::E($palette['muted']) . '">'
                 . EChartsBarPreview::E(EChartsBarPreview::FormatValue(
                     $colorMapMaximum,

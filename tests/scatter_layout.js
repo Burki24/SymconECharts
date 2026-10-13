@@ -101,6 +101,23 @@ assert.equal(colorMapped.option.visualMap.min, 50);
 assert.equal(colorMapped.option.visualMap.max, 55);
 assert.equal(colorMapped.option.series[0].data[0].value[4], 50);
 assert.deepEqual(Array.from(colorMapped.option.visualMap.inRange.color), ['#123456', '#fedcba']);
+assert.equal(colorMapped.option.visualMap.orient, 'horizontal');
+assert.equal(colorMapped.option.visualMap.itemWidth, 12,
+    'ECharts uses itemWidth for the thickness of a horizontal visual map.');
+assert.ok(colorMapped.option.visualMap.itemHeight >= 200,
+    'The horizontal color scale must be a readable length on a regular Tile.');
+const wideColorMapped = render({ ...model, scatter: { ...model.scatter, style: {
+    ...model.scatter.style, colorMapEnabled: true, colorMapShowLegend: true
+} } }, 'ipsview', 1900, 900);
+assert.ok(wideColorMapped.option.visualMap.itemHeight > colorMapped.option.visualMap.itemHeight,
+    'The color scale must grow in a wide IPSView view without remaining a narrow strip.');
+assert.ok(wideColorMapped.option.visualMap.itemHeight <= 420,
+    'The legend must remain bounded rather than span the whole screen.');
+const compactColorMapped = render({ ...model, scatter: { ...model.scatter, style: {
+    ...model.scatter.style, colorMapEnabled: true, colorMapShowLegend: true
+} } }, 'ipsview', 400, 240);
+assert.equal(compactColorMapped.option.visualMap.itemWidth, 8);
+assert.equal(compactColorMapped.option.visualMap.itemHeight, 160);
 assert.equal(colorMapped.option.series[0].itemStyle.color, undefined);
 assert.ok(colorMapped.option.grid.top > bubble.option.grid.top,
     'A visible color scale must reserve its own space above the plot.');

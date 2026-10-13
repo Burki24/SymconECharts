@@ -8127,6 +8127,7 @@ assertGatewayGauge(
         && !str_contains($scatterIPSViewSvg, '°C / ')
         && str_contains($scatterTileSvg, '%</text>')
         && str_contains($scatterTileSvg, 'scatter-preview-color-map')
+        && str_contains($scatterTileSvg, 'x="250" y="44" width="220" height="8"')
         && !str_contains($scatterIPSViewSvg, 'scatter-preview-color-map'),
     'Scatter previews must keep points inside the plot and reflect independent axis and value-label settings.'
 );

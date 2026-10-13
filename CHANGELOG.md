@@ -1,5 +1,12 @@
 # Unveröffentlicht
 
+## Behoben
+
+- Die Scatter-Farbskala verwendet nun die ECharts-Abmessungen korrekt:
+  eine flache, an die Kachel- oder IPSView-Breite angepasste horizontale
+  Legende statt eines schmalen senkrechten Streifens. Die Formularvorschau
+  zeigt ebenfalls eine breitere Skala.
+
 ## Hinzugefügt
 
 - Scatter/Bubble kann Punkte über die ECharts-Farbskala nach X-, Y- oder
