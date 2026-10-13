@@ -416,6 +416,11 @@
                         },
                         {
                             "type": "CheckBox",
+                            "name": "EnableBrush",
+                            "caption": "Enable area selection"
+                        },
+                        {
+                            "type": "CheckBox",
                             "name": "ShowValues",
                             "caption": "Show point values"
                         }

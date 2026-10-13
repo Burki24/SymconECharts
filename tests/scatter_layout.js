@@ -18,12 +18,15 @@ function render(model, mode = 'symcon', width = 700, height = 410) {
         addEventListener: () => {}, getBoundingClientRect: () => ({ left: 0, top: 0, width, height }) };
     const emptyElement = { hidden: true, textContent: '' };
     const warningElement = { hidden: true, textContent: '' };
+    const selectionElement = { hidden: true, textContent: '', style: { setProperty: () => {} } };
     const errorElement = { hidden: true, textContent: '' };
     let option;
     let resizeCount = 0;
+    const listeners = {};
     const chart = {
         setOption: next => { option = next; }, getOption: () => option, clear: () => {},
-        resize: () => { resizeCount++; }, dispose: () => {}
+        resize: () => { resizeCount++; }, dispose: () => {},
+        on: (name, listener) => { listeners[name] = listener; }
     };
     const window = {
         SYMC_VISUALIZATION: {
@@ -40,13 +43,15 @@ function render(model, mode = 'symcon', width = 700, height = 410) {
             'echarts-scatter-chart': chartElement,
             'echarts-scatter-empty': emptyElement,
             'echarts-scatter-warning': warningElement,
+            'echarts-scatter-selection': selectionElement,
             'echarts-scatter-error': errorElement
         })[id]
     };
     vm.runInNewContext(designSource, { window });
     vm.runInNewContext(zoomSource, { window });
     vm.runInNewContext(source, { window, document });
-    return { option, window, chartElement, emptyElement, warningElement, errorElement,
+    return { option, window, chartElement, emptyElement, warningElement, selectionElement, errorElement,
+        emit: (name, event) => listeners[name](event),
         currentOption: () => option,
         resizeCount: () => resizeCount };
 }
@@ -91,6 +96,25 @@ assert.equal(bubble.option.xAxis.min, undefined);
 assert.equal(bubble.option.yAxis.min, undefined);
 assert.equal(bubble.option.series[0].itemStyle.color, '#123456');
 assert.equal(bubble.option.visualMap, undefined, 'Existing charts keep their solid point color.');
+assert.equal(bubble.option.brush, undefined, 'Existing charts must keep selection disabled.');
+assert.equal(bubble.option.toolbox, undefined);
+const selectable = render({ ...model, scatter: { ...model.scatter, style: {
+    ...model.scatter.style, enableBrush: true
+} } });
+assert.deepEqual(Array.from(selectable.option.brush.toolbox), ['rect', 'clear']);
+assert.equal(selectable.option.brush.brushMode, 'single');
+assert.equal(selectable.option.toolbox.feature.brush.title.rect, 'Select points');
+selectable.emit('brushselected', { batch: [{ areas: [{ brushType: 'rect' }],
+    selected: [{ seriesIndex: 0, dataIndex: [0, 1] }] }] });
+assert.equal(selectable.selectionElement.hidden, false);
+assert.match(selectable.selectionElement.textContent, /Selected points: 2/);
+assert.match(selectable.selectionElement.textContent, /Außen: .*10.*20/);
+selectable.emit('brushselected', { batch: [{ areas: [], selected: [{ dataIndex: [] }] }] });
+assert.equal(selectable.selectionElement.hidden, true, 'Clearing a brush must remove the summary.');
+selectable.emit('brushselected', { batch: [{ areas: [{ brushType: 'rect' }],
+    selected: [{ dataIndex: [1] }] }] });
+selectable.window.handleMessage({ status: 'ready', chart: model });
+assert.equal(selectable.selectionElement.hidden, true, 'A data refresh resets the temporary selection.');
 const colorMapped = render({ ...model, scatter: { ...model.scatter, style: {
     ...model.scatter.style, colorMapEnabled: true, colorMapDimension: 'y',
     colorMapRangeMode: 'data', colorMapShowLegend: true,
@@ -121,6 +145,16 @@ assert.equal(compactColorMapped.option.visualMap.itemHeight, 160);
 assert.equal(colorMapped.option.series[0].itemStyle.color, undefined);
 assert.ok(colorMapped.option.grid.top > bubble.option.grid.top,
     'A visible color scale must reserve its own space above the plot.');
+const selectableColors = render({ ...model, scatter: { ...model.scatter, style: {
+    ...model.scatter.style, enableBrush: true, colorMapEnabled: true, colorMapShowLegend: true
+} } }, 'ipsview');
+const selectableIPSView = render({ ...model, scatter: { ...model.scatter, style: {
+    ...model.scatter.style, enableBrush: true
+} } }, 'ipsview');
+assert.ok(selectableColors.option.toolbox.top > selectableIPSView.option.toolbox.top,
+    'The selection tools must move below a visible color scale.');
+assert.equal(selectableColors.option.visualMap.dimension, 4,
+    'Area selection must coexist with value-based point colors.');
 const manualColors = render({ ...model, scatter: { ...model.scatter, style: {
     ...model.scatter.style, colorMapEnabled: true, colorMapDimension: 'x',
     colorMapRangeMode: 'manual', colorMapMinimum: -5, colorMapMaximum: 25

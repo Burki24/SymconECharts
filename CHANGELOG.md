@@ -9,6 +9,11 @@
 
 ## Hinzugefügt
 
+- Scatter/Bubble bietet in Kachel und IPSView optional die ECharts-
+  Rechteckauswahl. Ausgewählte Punkte werden mit Anzahl und X/Y-Wertebereich
+  zusammengefasst; die übrigen Punkte werden abgeblendet. Beide Designer
+  können die Auswahl unabhängig aktivieren.
+
 - Scatter/Bubble kann Punkte über die ECharts-Farbskala nach X-, Y- oder
   Blasengrößenwert einfärben. Farbgrenzen, Endfarben und Legende sind in
   Kachel und IPSView getrennt einstellbar und in beiden Vorschauen sichtbar;

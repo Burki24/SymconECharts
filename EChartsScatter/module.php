@@ -75,6 +75,7 @@ class EChartsScatter extends IPSModuleStrict
         'EChartsTheme'            => 'string',
         'ShowGrid'                => 'boolean',
         'EnableZoom'              => 'boolean',
+        'EnableBrush'             => 'boolean',
         'ShowValues'              => 'boolean',
         'ValueLabelContent'       => 'string',
         'ValueLabelPosition'      => 'string',
@@ -129,6 +130,7 @@ class EChartsScatter extends IPSModuleStrict
         $this->RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO);
         $this->RegisterPropertyBoolean('ShowGrid', true);
         $this->RegisterPropertyBoolean('EnableZoom', true);
+        $this->RegisterPropertyBoolean('EnableBrush', false);
         $this->RegisterPropertyBoolean('ShowValues', false);
         $this->RegisterPropertyString('ValueLabelContent', 'y');
         $this->RegisterPropertyString('ValueLabelPosition', 'auto');
@@ -174,7 +176,7 @@ class EChartsScatter extends IPSModuleStrict
                 'ColorMapDimension'                                                    => 'y',
                 'AnimationEasing', 'AnimationEasingUpdate'                             => 'cubicInOut',
                 'ShowGrid', 'EnableZoom', 'AnimationEnabled'                           => true,
-                'ShowValues', 'ColorMapEnabled', 'ColorMapShowLegend'                  => false,
+                'ShowValues', 'EnableBrush', 'ColorMapEnabled', 'ColorMapShowLegend'   => false,
                 'PointSize'                                                            => 12, 'BubbleMaxSize' => 48,
                 'ValueLabelDistance'                                                   => 5,
                 'XAxisMinimum', 'YAxisMinimum', 'ColorMapMinimum'                      => 0.0,
@@ -443,6 +445,12 @@ class EChartsScatter extends IPSModuleStrict
             $this->BarPreviewValue($values, 'TitleFontSizePercent', 'integer', $ipsView)
         );
         $svg .= '<style>text{font-family:Arial,sans-serif}</style>';
+        if ($this->BarPreviewValue($values, 'EnableBrush', 'boolean', $ipsView)) {
+            $svg .= '<rect x="640" y="37" width="18" height="14" fill="none" stroke="'
+                . EChartsBarPreview::E($palette['accent']) . '" stroke-width="1.5" stroke-dasharray="3 2"/>';
+            $svg .= '<path d="M 665 39 L 665 49 M 660 44 L 670 44" stroke="'
+                . EChartsBarPreview::E($palette['muted']) . '" stroke-width="1.5"/>';
+        }
         if ($colorMapEnabled && $this->BarPreviewValue($values, 'ColorMapShowLegend', 'boolean', $ipsView)) {
             $colorMapRole = $byRole[$colorMapDimension] ?? [];
             $colorMapDecimals = (int) ($colorMapRole['decimals'] ?? 1);
@@ -690,10 +698,13 @@ class EChartsScatter extends IPSModuleStrict
             'ipsViewStyle' => $ipsView ? $this->IPSViewThemeCSS() : '',
             'state'        => $this->BuildVisualizationState($ipsView),
             'translations' => [
-                'Configure X and Y archive sources.'                                      => $this->Translate('Configure X and Y archive sources.'),
-                'Connect an active EChartsGateway.'                                       => $this->Translate('Connect an active EChartsGateway.'),
-                'The Scatter values could not be loaded.'                                 => $this->Translate('The Scatter values could not be loaded.'),
-                'Scatter data could not be refreshed. Showing the last available values.' => $this->Translate(
+                'Configure X and Y archive sources.'                                         => $this->Translate('Configure X and Y archive sources.'),
+                'Connect an active EChartsGateway.'                                          => $this->Translate('Connect an active EChartsGateway.'),
+                'The Scatter values could not be loaded.'                                    => $this->Translate('The Scatter values could not be loaded.'),
+                'Select points'                                                              => $this->Translate('Select points'),
+                'Clear selection'                                                            => $this->Translate('Clear selection'),
+                'Selected points'                                                            => $this->Translate('Selected points'),
+                'Scatter data could not be refreshed. Showing the last available values.'    => $this->Translate(
                     'Scatter data could not be refreshed. Showing the last available values.'
                 ),
                 'No common completed archive intervals.'                => $this->Translate('No common completed archive intervals.'),
@@ -1055,7 +1066,7 @@ class EChartsScatter extends IPSModuleStrict
     {
         $prefix = $ipsView && !$this->ReadPropertyBoolean('IPSViewUseTileDesign') ? 'IPSView' : '';
         $style = $this->ReadAnimationStyle($prefix);
-        foreach (['ShowGrid', 'EnableZoom', 'ShowValues', 'ColorMapEnabled', 'ColorMapShowLegend'] as $name) {
+        foreach (['ShowGrid', 'EnableZoom', 'EnableBrush', 'ShowValues', 'ColorMapEnabled', 'ColorMapShowLegend'] as $name) {
             $style[lcfirst($name)] = $this->ReadPropertyBoolean($prefix . $name);
         }
         $style['valueLabelPosition'] = $this->ReadPropertyString($prefix . 'ValueLabelPosition');

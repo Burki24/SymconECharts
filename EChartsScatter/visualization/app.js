@@ -7,6 +7,7 @@
     var chartElement = document.getElementById('echarts-scatter-chart');
     var emptyElement = document.getElementById('echarts-scatter-empty');
     var warningElement = document.getElementById('echarts-scatter-warning');
+    var selectionElement = document.getElementById('echarts-scatter-selection');
     var errorElement = document.getElementById('echarts-scatter-error');
     var chart = null;
     var currentState = bootstrap.state || null;
@@ -125,6 +126,7 @@
             || bootstrap.options.tileHeaderVisible === false);
         var compact = chartElement.clientWidth < 420 || chartElement.clientHeight < 280;
         var zoomEnabled = style.enableZoom === true;
+        var brushEnabled = style.enableBrush === true;
         var top = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8;
         var base = Math.max(4, Math.min(60, Number(style.pointSize) || 12));
         var large = Math.max(base, Math.min(100, Number(style.bubbleMaxSize) || 48));
@@ -152,6 +154,23 @@
                     fontSize: design.fontSizePercent(style.titleFontSizePercent, 18) }
             },
             visualMap: visualMap || undefined,
+            toolbox: brushEnabled ? {
+                show: true, right: zoomEnabled ? (compact ? 56 : 70) : (compact ? 20 : 38),
+                top: top + (hasTitle ? 34 : 0) + (showColorLegend ? 30 : 0),
+                itemSize: compact ? 12 : 15, itemGap: 8,
+                iconStyle: { borderColor: axisColor },
+                emphasis: { iconStyle: { borderColor: colors.accent } },
+                feature: { brush: { type: ['rect', 'clear'], title: {
+                    rect: translate('Select points'), clear: translate('Clear selection')
+                } } }
+            } : undefined,
+            brush: brushEnabled ? {
+                toolbox: ['rect', 'clear'], brushMode: 'single', transformable: false,
+                xAxisIndex: 0, yAxisIndex: 0,
+                brushStyle: { borderWidth: 1, borderColor: colors.accent,
+                    color: 'rgba(85, 203, 181, 0.12)' },
+                outOfBrush: { opacity: 0.18 }
+            } : undefined,
             grid: { left: compact ? 65 : 86, right: zoomEnabled ? (compact ? 56 : 70) : (compact ? 20 : 38),
                 top: top + (hasTitle ? 48 : 18) + (showColorLegend ? 30 : 0),
                 bottom: zoomEnabled ? (compact ? 78 : 94) : (compact ? 54 : 70),
@@ -230,11 +249,40 @@
 
     function displayError(message) {
         if (chart) { chart.clear(); }
+        selectionElement.hidden = true;
         chartElement.hidden = true;
         emptyElement.hidden = true;
         warningElement.hidden = true;
         errorElement.textContent = translate(message || loadError);
         errorElement.hidden = false;
+    }
+
+    function updateSelection(event) {
+        var batch = event && event.batch && event.batch[0];
+        var selected = batch && batch.selected && batch.selected[0];
+        var points = currentState && currentState.chart && currentState.chart.points;
+        if (!batch || !Array.isArray(batch.areas) || batch.areas.length === 0
+            || !selected || !Array.isArray(selected.dataIndex) || !Array.isArray(points)) {
+            selectionElement.hidden = true;
+            return;
+        }
+        var matching = selected.dataIndex.map(function (index) { return points[index]; })
+            .filter(function (point) { return Array.isArray(point); });
+        if (matching.length === 0) {
+            selectionElement.hidden = true;
+            return;
+        }
+        var roles = currentState.chart.roles || {};
+        var xRole = roles.x || { label: 'X', unit: '', decimals: 1 };
+        var yRole = roles.y || { label: 'Y', unit: '', decimals: 1 };
+        var xs = matching.map(function (point) { return Number(point[1]); });
+        var ys = matching.map(function (point) { return Number(point[2]); });
+        selectionElement.textContent = translate('Selected points') + ': ' + matching.length + ' · '
+            + xRole.label + ': ' + formatValue(Math.min.apply(null, xs), xRole) + '–'
+            + formatValue(Math.max.apply(null, xs), xRole) + ' · '
+            + yRole.label + ': ' + formatValue(Math.min.apply(null, ys), yRole) + '–'
+            + formatValue(Math.max.apply(null, ys), yRole);
+        selectionElement.hidden = false;
     }
 
     function render(state) {
@@ -262,6 +310,7 @@
         }
         errorElement.hidden = true;
         var points = Array.isArray(state.chart.points) ? state.chart.points : [];
+        selectionElement.hidden = true;
         emptyElement.hidden = points.length > 0;
         emptyElement.textContent = translate('No common completed archive intervals.');
         var wasHidden = chartElement.hidden;
@@ -277,10 +326,14 @@
         if (chart && currentTheme !== theme) { chart.dispose(); chart = null; }
         if (!chart) {
             chart = window.echarts.init(chartElement, theme === 'auto' ? null : theme, { renderer: 'canvas' });
+            chart.on('brushselected', updateSelection);
             currentTheme = theme;
         }
         if (wasHidden) { chart.resize(); }
-        zoom.applyCartesian(chart, buildOption(state.chart, theme), savedZoom);
+        var option = buildOption(state.chart, theme);
+        selectionElement.style.setProperty('--scatter-selection-top', (option.grid.top + 8) + 'px');
+        selectionElement.style.setProperty('--scatter-selection-left', (option.grid.left + 8) + 'px');
+        zoom.applyCartesian(chart, option, savedZoom);
     }
 
     window.handleMessage = function (message) {

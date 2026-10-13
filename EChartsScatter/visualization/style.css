@@ -21,6 +21,7 @@ html, body {
 }
 
 .echarts-scatter-empty,
+.echarts-scatter-selection,
 .echarts-scatter-warning,
 .echarts-scatter-error {
     position: absolute;
@@ -36,4 +37,14 @@ html, body {
 .echarts-scatter-empty,
 .echarts-scatter-error { inset-block-start: 50%; transform: translateY(-50%); color: var(--symc-muted); }
 .echarts-scatter-warning { inset-block-end: 0.65rem; }
+.echarts-scatter-selection {
+    inset-block-start: var(--scatter-selection-top, 6rem);
+    inset-inline-start: var(--scatter-selection-left, 6rem);
+    inset-inline-end: auto;
+    max-inline-size: min(20rem, 55%);
+    text-align: start;
+    font-size: 0.8rem;
+    line-height: 1.35;
+    pointer-events: none;
+}
 [hidden] { display: none !important; }

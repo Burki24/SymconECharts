@@ -35,8 +35,11 @@ Der Gateway bleibt familienübergreifende Infrastruktur. Zeitraumplanung,
 Animation, Beschriftungsregler, Formularvorschau, responsive Ausgabe und
 IPSView-Transport verwenden vorhandene `libs`-Bausteine. Die fachliche
 X/Y/Größen-Verknüpfung bleibt im Scatter-Modul, bis eine zweite Familie
-denselben Vertrag tatsächlich benötigt. Die ECharts-Runtime wird unverändert
-und versioniert mit `ScatterChart` im kartesischen Bundle ausgeliefert.
+denselben Vertrag tatsächlich benötigt. Die unveränderte, versionierte
+ECharts-Runtime erhält für Scatter einen eigenen Browser-Build mit Visual Map,
+Brush und Toolbox. So wachsen die HTML-Ausgaben anderer kartesischer Module
+nicht mit Scatter-spezifischen Komponenten. Die optionale Rechteckauswahl ist
+eine temporäre Browserinteraktion und verändert keine Symcon-Quelldaten.
 
 ## Folgen und Prüfung
 

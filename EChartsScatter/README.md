@@ -54,6 +54,13 @@ zoomen; in IPSView wird das Mausrad gesondert verarbeitet. Beide Achsenausschnit
 bleiben bei einer Aktualisierung desselben Zeitraums erhalten und werden beim
 Wechsel des Zeitraums zurückgesetzt. Der Zoom ist im Kachel- und im
 unabhängigen IPSView-Designer getrennt abschaltbar.
+Optional aktiviert die Bereichsauswahl zwei ECharts-Werkzeuge: Ein Rechteck
+markiert Punkte in der X/Y-Fläche, das zweite hebt die Auswahl auf. Die
+nicht gewählten Punkte werden abgeblendet. Für die Auswahl erscheinen Anzahl
+sowie der kleinste und größte X- und Y-Wert mit ihren Einheiten. Die Auswahl
+ist nur eine lokale Ansicht und wird bei neuen Daten oder einem Designwechsel
+zurückgesetzt; sie ändert keine Symcon-Variablen. Kachel und unabhängiges
+IPSView-Design können das Werkzeug getrennt aktivieren.
 Die SVG-Live-Vorschau zeigt die Gestaltung schematisch mit Beispieldaten und
 berücksichtigt auch die gewählten Achsenbereiche; sie liest beim Ändern des
 Formulars keine Archivdaten.

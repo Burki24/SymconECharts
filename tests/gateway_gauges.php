@@ -8044,6 +8044,14 @@ foreach (['EnableZoom', 'IPSViewEnableZoom'] as $field) {
         'Scatter must offer X/Y zoom with live previews in Tile and IPSView.'
     );
 }
+foreach (['EnableBrush', 'IPSViewEnableBrush'] as $field) {
+    $control = findGaugeFormElement($scatterForm['elements'], $field);
+    assertGatewayGauge(
+        ($control['type'] ?? null) === 'CheckBox'
+            && str_contains((string) ($control['onChange'] ?? ''), 'UpdateBarPreviewFromForm'),
+        'Scatter must offer optional area selection with live previews in Tile and IPSView.'
+    );
+}
 foreach (['ColorMapEnabled', 'IPSViewColorMapEnabled'] as $field) {
     $control = findGaugeFormElement($scatterForm['elements'], $field);
     assertGatewayGauge(
@@ -8158,6 +8166,7 @@ $scatterOutput->SetTestProperty('ColorMapEnabled', true);
 $scatterOutput->SetTestProperty('ColorMapRangeMode', 'manual');
 $scatterOutput->SetTestProperty('ColorMapMinimum', 0.5);
 $scatterOutput->SetTestProperty('ColorMapMaximum', 99.5);
+$scatterOutput->SetTestProperty('EnableBrush', true);
 $GLOBALS['symconTestCopyTarget'] = $scatterOutput;
 try {
     $scatterOutput->CopyTileDesignToIPSView();
@@ -8170,6 +8179,7 @@ assertGatewayGauge(
         && str_contains($scatterOutput->GetIPSViewHTML(), '"xAxisMinimum":-5.25')
         && str_contains($scatterOutput->GetIPSViewHTML(), '"xAxisMaximum":25.75')
         && str_contains($scatterOutput->GetIPSViewHTML(), '"colorMapEnabled":true')
+        && str_contains($scatterOutput->GetIPSViewHTML(), '"enableBrush":true')
         && str_contains($scatterOutput->GetIPSViewHTML(), '"colorMapMinimum":0.5'),
     'Scatter must copy floating axis and color bounds to the independent IPSView design.'
 );

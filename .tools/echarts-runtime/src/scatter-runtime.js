@@ -1,7 +1,7 @@
 import * as echarts from 'echarts/core';
-import {VisualMapComponent} from 'echarts/components';
+import {BrushComponent, ToolboxComponent, VisualMapComponent} from 'echarts/components';
 import './cartesian-runtime.js';
 
-echarts.use([VisualMapComponent]);
+echarts.use([BrushComponent, ToolboxComponent, VisualMapComponent]);
 
 window.echarts = echarts;
