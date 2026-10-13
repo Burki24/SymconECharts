@@ -16,6 +16,15 @@
         ];
     }
 
+    function timeAxisOptions(enabled, mode, sliderBottom, compact) {
+        var result = options(enabled, mode, sliderBottom);
+        if (result.length > 1) {
+            result[1].height = compact ? 8 : 12;
+            if (compact) { result[1].showDetail = false; }
+        }
+        return result;
+    }
+
     function capture(chart, previousRange, nextRange) {
         if (!chart || typeof chart.getOption !== 'function') { return null; }
         if (previousRange || nextRange) {
@@ -172,6 +181,7 @@
 
     window.SymconEChartsZoom = {
         options: options,
+        timeAxisOptions: timeAxisOptions,
         capture: capture,
         apply: apply,
         attachIPSViewWheel: attachIPSViewWheel,

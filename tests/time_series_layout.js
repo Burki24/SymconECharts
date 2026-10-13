@@ -29,14 +29,15 @@ function render(
     enableImages = false,
     timeAxisLabelFormat = 'auto',
     range,
-    observeResize = false
+    observeResize = false,
+    height = 400
 ) {
     const listeners = {};
     const scheduled = [];
     const chartElement = {
         hidden: false,
         clientWidth: width,
-        clientHeight: 400,
+        clientHeight: height,
         addEventListener: (type, listener) => { listeners[type] = listener; },
         getBoundingClientRect: () => ({ left: 0, width })
     };
@@ -266,6 +267,13 @@ assert.ok(custom.grid.left > 58);
 assert.ok(custom.grid.top > 106);
 assert.equal(custom.legend.bottom, 6);
 assert.equal(custom.dataZoom[1].bottom, 38);
+assert.equal(custom.dataZoom[1].height, 12,
+    'The regular TimeSeries zoom slider must match the slim BarHistory control.');
+const compactZoom = render({ legendPosition: 'bottom' }, undefined, 433,
+    undefined, 'dark', {}, 'ipsview', false, false, 'auto', undefined, false, 213);
+assert.equal(compactZoom.dataZoom[1].height, 8,
+    'The compact TimeSeries zoom slider must not dominate the tile.');
+assert.equal(compactZoom.dataZoom[1].showDetail, false);
 assert.equal(custom.series[0].lineStyle.width, 3);
 assert.equal(custom.series[0].lineStyle.color, '#E5754F');
 assert.equal(custom.series[0].itemStyle.color, '#E5754F');

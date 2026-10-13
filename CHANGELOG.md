@@ -32,6 +32,9 @@
 
 ## Behoben
 
+- Die Zoomleiste von TimeSeries ist in Kachel und IPSView nun genauso schlank
+  wie bei BarHistory; auch kurze Ansichten erhalten den kompakten Regler.
+
 - Das Scatter-Instanzformular bezeichnet die Darstellung verständlich als
   „Streudiagramm (optional mit Blasengröße)“; technische Modulnamen bleiben
   unverändert.

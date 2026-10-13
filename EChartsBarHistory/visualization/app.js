@@ -146,13 +146,7 @@
         var plotWidth = chartWidth - leftMargin - rightMargin;
         var timeTickCount = Math.max(2, Math.floor(plotWidth / (axisFontSize * 10)));
         var valueTickCount = Math.max(2, Math.floor((chartHeight - gridTop - gridBottom - 20) / (axisFontSize * 2)));
-        var dataZoom = zoomController.options(zoom, bootstrap.mode, compact ? 18 : 22);
-        if (dataZoom.length > 1) {
-            dataZoom[1].height = compact ? 8 : 12;
-            if (compact) {
-                dataZoom[1].showDetail = false;
-            }
-        }
+        var dataZoom = zoomController.timeAxisOptions(zoom, bootstrap.mode, compact ? 18 : 22, compact);
 
         return {
             backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true

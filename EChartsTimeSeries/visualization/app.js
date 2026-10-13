@@ -152,6 +152,7 @@
         });
         var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 10;
         var zoom = model.chart && model.chart.enableZoom === true;
+        var compact = chartElement.clientHeight < 280;
         var design = model.chart && model.chart.design || {};
         var legendPosition = ['top', 'bottom', 'hidden'].indexOf(design.legendPosition) >= 0
             ? design.legendPosition : 'top';
@@ -261,7 +262,7 @@
                     })).join('<br>');
                 }
             },
-            dataZoom: zoomController.options(zoom, bootstrap.mode, bottomLegend ? 38 : 12),
+            dataZoom: zoomController.timeAxisOptions(zoom, bootstrap.mode, bottomLegend ? 38 : 12, compact),
             xAxis: {
                 type: 'time',
                 min: model.range.startTimestamp * 1000,

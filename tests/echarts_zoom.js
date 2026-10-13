@@ -15,6 +15,9 @@ assert.equal(zoom.options(false, 'symcon', 12).length, 0);
 assert.equal(zoom.options(true, 'symcon', 12)[0].zoomOnMouseWheel, true);
 assert.equal(zoom.options(true, 'ipsview', 38)[0].zoomOnMouseWheel, false);
 assert.equal(zoom.options(true, 'ipsview', 38)[1].bottom, 38);
+assert.equal(zoom.timeAxisOptions(true, 'symcon', 22, false)[1].height, 12);
+assert.equal(zoom.timeAxisOptions(true, 'ipsview', 38, true)[1].height, 8);
+assert.equal(zoom.timeAxisOptions(true, 'ipsview', 38, true)[1].showDetail, false);
 
 let wheelListener;
 let action;

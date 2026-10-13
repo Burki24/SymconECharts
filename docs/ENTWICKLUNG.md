@@ -248,7 +248,8 @@ projektspezifischer Browserbaustein in `libs/echarts-zoom.js`. Sie stellt
 gewählten Ausschnitts über gleichartige Datenaktualisierungen bereit. Die
 jeweilige Diagramminstanz entscheidet weiterhin über Aktivierung, Layout und
 ihre eigenen Zeitbereichs- und Design-Properties; der gemeinsame Baustein
-ändert keine Archive oder Symcon-Daten.
+stellt für beide Zeitdiagramme auch die schmale Reglerhöhe bereit und ändert
+keine Archive oder Symcon-Daten.
 Scatter nutzt denselben Baustein mit getrennten X/Y-`dataZoom`-Fenstern und
 Schiebereglern. Der ursprüngliche Zeitachsenvertrag bleibt unverändert;
 X/Y-Ausschnitte werden nur bei kompatiblem Zeitraum übernommen.
