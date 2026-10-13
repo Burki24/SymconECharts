@@ -9,7 +9,6 @@ use Burki24\SymconModuleHelper\ResponsiveVisualizationHelper;
 use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
 use SymconECharts\EChartsAnimationDesign;
-use SymconECharts\EChartsArchiveQuery;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsBarPreview;
 use SymconECharts\EChartsBarPreviewForm;
@@ -22,6 +21,7 @@ use SymconECharts\EChartsTransientRefresh;
 use SymconECharts\EChartsVariablePresentation;
 use SymconECharts\HeatmapAggregation;
 use SymconECharts\HeatmapColorScales;
+use SymconECharts\HeatmapWindow;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
 require_once __DIR__ . '/../libs/helper/DataFlowHelper.php';
@@ -44,6 +44,7 @@ require_once __DIR__ . '/../libs/EChartsTransientRefresh.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 require_once __DIR__ . '/HeatmapAggregation.php';
 require_once __DIR__ . '/HeatmapColorScales.php';
+require_once __DIR__ . '/HeatmapWindow.php';
 
 class EChartsHeatmap extends IPSModuleStrict
 {
@@ -226,7 +227,11 @@ class EChartsHeatmap extends IPSModuleStrict
         return $this->HandleEChartsIPSViewRequest(
             $JSONString,
             self::DATA_ID_FROM_PARENT,
-            fn (): array => $this->BuildVisualizationState(true)
+            fn (array $payload): array => $this->BuildVisualizationState(
+                ($payload['Output'] ?? 'ipsview') !== 'tile',
+                (int) ($payload['WindowOffset'] ?? 0)
+            ),
+            true
         );
     }
 
@@ -296,22 +301,28 @@ class EChartsHeatmap extends IPSModuleStrict
         $svg .= '<text x="54" y="53" fill="' . EChartsBarPreview::E($palette['muted'])
             . '" font-size="11">' . EChartsBarPreview::E($sourceName . ' · ' . $range) . '</text>';
         $weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        $datedDays = $range === '7d'
+            ? HeatmapWindow::Resolve($range, 0, $this->CurrentTimestamp(), date_default_timezone_get())['Days']
+            : [];
         foreach ($weekdays as $day => $name) {
-            $svg .= '<text x="45" y="' . (82 + $day * 34) . '" text-anchor="end" fill="'
+            $label = $datedDays === [] ? $this->Translate($name)
+                : $this->Translate($weekdays[$datedDays[$day]['weekday']]) . ' '
+                    . substr($datedDays[$day]['date'], 8, 2) . '.' . substr($datedDays[$day]['date'], 5, 2) . '.';
+            $svg .= '<text x="74" y="' . (82 + $day * 34) . '" text-anchor="end" fill="'
                 . EChartsBarPreview::E($axisColor) . '" font-size="12">'
-                . EChartsBarPreview::E($this->Translate($name)) . '</text>';
+                . EChartsBarPreview::E($label) . '</text>';
             for ($hour = 0; $hour < 24; $hour++) {
                 $ratio = (($hour * 11 + $day * 17) % 100) / 100;
                 $color = self::ScaleColor($scaleColors, $ratio, $classScale);
-                $x = 54 + $hour * 26;
+                $x = 82 + $hour * 24;
                 $y = 64 + $day * 34;
-                $svg .= '<rect x="' . $x . '" y="' . $y . '" width="24" height="30" rx="2" fill="'
+                $svg .= '<rect x="' . $x . '" y="' . $y . '" width="22" height="30" rx="2" fill="'
                     . EChartsBarPreview::E($color) . '"/>';
                 if ($showValues && $hour % 3 === 0) {
                     $sample = $classScale
                         ? $scaleRange['min'] + ($scaleRange['max'] - $scaleRange['min']) * $ratio
                         : $ratio * 100;
-                    $svg .= '<text x="' . ($x + 12) . '" y="' . ($y + 19)
+                    $svg .= '<text x="' . ($x + 11) . '" y="' . ($y + 19)
                         . '" text-anchor="middle" fill="' . EChartsBarPreview::E($valueColor < 0 || $valueColor > 0xFFFFFF
                             ? self::ReadableCellTextColor($color) : EChartsAsset::ColorToHex($valueColor))
                         . '" font-size="10">' . round($sample, 1) . '</text>';
@@ -319,7 +330,7 @@ class EChartsHeatmap extends IPSModuleStrict
             }
         }
         foreach ([0, 6, 12, 18, 23] as $hour) {
-            $svg .= '<text x="' . (66 + $hour * 26) . '" y="312" text-anchor="middle" fill="'
+            $svg .= '<text x="' . (93 + $hour * 24) . '" y="312" text-anchor="middle" fill="'
                 . EChartsBarPreview::E($axisColor) . '" font-size="12">' . $hour . '</text>';
         }
         if ($showScale) {
@@ -351,7 +362,7 @@ class EChartsHeatmap extends IPSModuleStrict
         return time();
     }
 
-    private function GetHeatmapDataForOutput(bool $ipsView): string
+    private function GetHeatmapDataForOutput(bool $ipsView, int $windowOffset = 0): string
     {
         $error = $this->GetConfigurationError();
         if ($error !== null) {
@@ -374,16 +385,7 @@ class EChartsHeatmap extends IPSModuleStrict
         );
         $timezone = date_default_timezone_get();
         $range = $this->ReadPropertyString('Range');
-        $query = EChartsArchiveQuery::Resolve(
-            $range,
-            7,
-            'day',
-            'hour',
-            2000,
-            1,
-            $this->CurrentTimestamp(),
-            $timezone
-        );
+        $query = HeatmapWindow::Resolve($range, $windowOffset, $this->CurrentTimestamp(), $timezone);
         $archive = $this->ReadArchive($variableID, $query);
         $cells = HeatmapAggregation::ByWeekdayAndHour($archive['Points'], $timezone);
         $this->WriteAttributeString('LastError', '');
@@ -399,6 +401,10 @@ class EChartsHeatmap extends IPSModuleStrict
                 'decimals'       => $presentation['decimals'],
                 'timezone'       => $timezone,
                 'range'          => $range,
+                'windowOffset'   => $windowOffset,
+                'startDate'      => $query['StartDate'],
+                'endDate'        => $query['EndDate'],
+                'days'           => $range === '7d' ? $query['Days'] : [],
                 'startTimestamp' => $query['StartTimestamp'],
                 'endTimestamp'   => $query['EndTimestamp'],
                 'style'          => $this->ReadDesignStyle($ipsView)
@@ -487,6 +493,12 @@ class EChartsHeatmap extends IPSModuleStrict
                 'No completed archive hours in the selected range.' => $this->Translate(
                     'No completed archive hours in the selected range.'
                 ),
+                'Previous period'                   => $this->Translate('Previous period'),
+                'Next period'                       => $this->Translate('Next period'),
+                'Time range'                        => $this->Translate('Time range'),
+                'Today'                             => $this->Translate('Today'),
+                '7 days'                            => $this->Translate('7 days'),
+                '30 days'                           => $this->Translate('30 days'),
                 'Mon'                               => $this->Translate('Mon'), 'Tue' => $this->Translate('Tue'),
                 'Wed'                               => $this->Translate('Wed'), 'Thu' => $this->Translate('Thu'),
                 'Fri'                               => $this->Translate('Fri'), 'Sat' => $this->Translate('Sat'),
@@ -497,7 +509,9 @@ class EChartsHeatmap extends IPSModuleStrict
                 'echartsThemes'     => EChartsAsset::ThemePalettes(),
                 'tileHeaderVisible' => !$hiddenTileTitle,
                 'adaptToBackground' => $ipsView && $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
-                'ipsViewTransport'  => $ipsView ? $this->EChartsIPSViewTransportOptions() : null
+                'ipsViewTransport'  => $ipsView ? $this->EChartsIPSViewTransportOptions() : null,
+                'heatmapStatePath'  => $this->EChartsIPSViewTransportOptions()['statePath'],
+                'heatmapMaxOffset'  => EChartsDataProtocol::MAX_STATE_WINDOW_OFFSET
             ],
             'replacements' => [
                 '{{ECHARTS_SCRIPT}}'           => EChartsAsset::HeatmapJavaScript(),
@@ -596,7 +610,7 @@ class EChartsHeatmap extends IPSModuleStrict
     }
 
     /** @return array<string,mixed> */
-    private function BuildVisualizationState(bool $ipsView = false): array
+    private function BuildVisualizationState(bool $ipsView = false, int $windowOffset = 0): array
     {
         $error = $this->GetConfigurationError();
         if ($error !== null) {
@@ -608,7 +622,7 @@ class EChartsHeatmap extends IPSModuleStrict
                 'chart'             => null, 'error' => 'Connect an active EChartsGateway.'];
         }
         try {
-            $chart = json_decode($this->GetHeatmapDataForOutput($ipsView), true, 512, JSON_THROW_ON_ERROR);
+            $chart = json_decode($this->GetHeatmapDataForOutput($ipsView, $windowOffset), true, 512, JSON_THROW_ON_ERROR);
         } catch (Throwable $exception) {
             $this->SendDebug('BuildVisualizationState', $exception::class, 0);
             return ['schemaVersion' => 1, 'family' => 'heatmap', 'status' => 'error',

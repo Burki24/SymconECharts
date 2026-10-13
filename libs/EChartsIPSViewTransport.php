@@ -76,12 +76,13 @@ trait EChartsIPSViewTransport
     }
 
     /**
-     * @param Closure(): array<string, mixed> $stateBuilder
+     * @param Closure(array<string,mixed>): array<string, mixed> $stateBuilder
      */
     protected function HandleEChartsIPSViewRequest(
         string $json,
         string $dataID,
-        Closure $stateBuilder
+        Closure $stateBuilder,
+        bool $allowTile = false
     ): string {
         try {
             $message = $this->DecodeDataFlowMessage($json, $dataID);
@@ -91,17 +92,22 @@ trait EChartsIPSViewTransport
             }
 
             $payload = $request['Payload'];
+            $output = $payload['Output'] ?? 'ipsview';
+            $offset = $payload['WindowOffset'] ?? 0;
             if (($payload['InstanceID'] ?? null) !== $this->InstanceID
                 || !is_string($payload['Channel'] ?? null)
                 || !hash_equals($this->EChartsIPSViewChannel(), $payload['Channel'])
-                || !$this->IsIPSViewHTMLPageEnabled()
+                || !in_array($output, ['tile', 'ipsview'], true)
+                || !is_int($offset) || $offset < 0 || $offset > EChartsDataProtocol::MAX_STATE_WINDOW_OFFSET
+                || ($output === 'tile'
+                    ? !$allowTile : !$this->IsIPSViewHTMLPageEnabled())
             ) {
                 return '';
             }
 
             return EChartsDataProtocol::EncodeSuccessResponse(
                 EChartsDataProtocol::OPERATION_IPSVIEW_STATE,
-                ['State' => $stateBuilder()]
+                ['State' => $stateBuilder($payload)]
             );
         } catch (Throwable $exception) {
             $this->SendDebug('ReceiveIPSViewState', $exception::class, 0);

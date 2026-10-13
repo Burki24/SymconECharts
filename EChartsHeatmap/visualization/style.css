@@ -16,6 +16,31 @@ html, body {
     min-block-size: 12rem;
     overflow: hidden;
 }
+.echarts-heatmap-period {
+    position: absolute;
+    z-index: 3;
+    inset-inline: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    block-size: 1.6rem;
+    color: var(--symc-text);
+    font-size: clamp(10px, 2.5vw, 12px);
+    white-space: nowrap;
+}
+.echarts-heatmap-period button {
+    min-inline-size: 1.5rem;
+    block-size: 1.45rem;
+    padding: 0 0.3rem;
+    border: 1px solid var(--symc-border);
+    border-radius: 0.25rem;
+    color: inherit;
+    background: var(--symc-surface);
+    cursor: pointer;
+}
+.echarts-heatmap-period button:disabled { opacity: 0.4; cursor: default; }
+.echarts-heatmap-period-label { overflow: hidden; text-overflow: ellipsis; }
 .echarts-heatmap-warning, .echarts-heatmap-empty, .echarts-heatmap-error {
     position: absolute;
     inset-inline: 0.75rem;

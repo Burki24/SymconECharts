@@ -22,6 +22,7 @@ $tests = [
     __DIR__ . '/label_design.php',
     __DIR__ . '/scatter_pairing.php',
     __DIR__ . '/heatmap_aggregation.php',
+    __DIR__ . '/heatmap_window.php',
     __DIR__ . '/gateway_gauges.php'
 ];
 

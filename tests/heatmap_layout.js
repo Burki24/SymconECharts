@@ -12,7 +12,7 @@ const palette = {
     track: '#34363b', accent: '#55cbb5'
 };
 
-function render(model, width = 800, height = 420, mode = 'symcon') {
+function render(model, width = 800, height = 420, mode = 'symcon', fetchImpl = null) {
     const chartElement = { hidden: false, clientWidth: width, clientHeight: height };
     const warningElement = { hidden: true, textContent: '' };
     const emptyElement = { hidden: true, textContent: '' };
@@ -21,6 +21,15 @@ function render(model, width = 800, height = 420, mode = 'symcon') {
     const classMinElement = { textContent: '' };
     const classSegmentsElement = { innerHTML: '' };
     const classMaxElement = { textContent: '' };
+    const periodElement = { hidden: false, style: {}, setAttribute: () => {} };
+    const periodLabelElement = { textContent: '' };
+    const buttonListeners = {};
+    const previousElement = { disabled: false, setAttribute: () => {},
+        addEventListener: (_, listener) => { buttonListeners.previous = listener; } };
+    const nextElement = { disabled: false, setAttribute: () => {},
+        addEventListener: (_, listener) => { buttonListeners.next = listener; } };
+    const todayElement = { disabled: false, textContent: '',
+        addEventListener: (_, listener) => { buttonListeners.today = listener; } };
     let option;
     let chartWidth = width;
     let chartHeight = height;
@@ -33,9 +42,11 @@ function render(model, width = 800, height = 420, mode = 'symcon') {
     const window = {
         SYMC_VISUALIZATION: {
             mode, state: { status: 'ready', chart: model }, translations: {},
-            options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: true }
+            options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: true,
+                heatmapStatePath: '/hook/SymconECharts/state/5000/0123456789abcdef0123456789abcdef' }
         },
         echarts: { init: () => chart },
+        location: { protocol: 'https:', host: 'symcon.example.test' },
         addEventListener: (name, listener) => { listeners[name] = listener; },
         getComputedStyle: () => ({ color: '' })
     };
@@ -50,13 +61,20 @@ function render(model, width = 800, height = 420, mode = 'symcon') {
             'echarts-heatmap-class-legend': classLegendElement,
             'echarts-heatmap-class-min': classMinElement,
             'echarts-heatmap-class-segments': classSegmentsElement,
-            'echarts-heatmap-class-max': classMaxElement
+            'echarts-heatmap-class-max': classMaxElement,
+            'echarts-heatmap-period': periodElement,
+            'echarts-heatmap-period-label': periodLabelElement,
+            'echarts-heatmap-previous': previousElement,
+            'echarts-heatmap-next': nextElement,
+            'echarts-heatmap-today': todayElement
         })[id]
     };
     vm.runInNewContext(designSource, { window });
-    vm.runInNewContext(source, { window, document });
+    vm.runInNewContext(source, { window, document, fetch: fetchImpl || (() => Promise.reject(new Error('No fetch stub.'))) });
     return { get option() { return option; }, window, chartElement, warningElement, emptyElement, errorElement,
         classLegendElement, classMinElement, classSegmentsElement, classMaxElement,
+        periodElement, periodLabelElement, previousElement, nextElement, todayElement,
+        click: name => buttonListeners[name](),
         resize: () => listeners.resize() };
 }
 
@@ -69,6 +87,30 @@ const model = {
     ], truncated: false
 };
 const wide = render(model, 1400, 520);
+const datedModel = { ...model, heatmap: { ...model.heatmap, range: '7d', windowOffset: 0,
+    startDate: '2026-10-07', endDate: '2026-10-13', days: [
+        { date: '2026-10-07', weekday: 2 }, { date: '2026-10-08', weekday: 3 },
+        { date: '2026-10-09', weekday: 4 }, { date: '2026-10-10', weekday: 5 },
+        { date: '2026-10-11', weekday: 6 }, { date: '2026-10-12', weekday: 0 },
+        { date: '2026-10-13', weekday: 1 }
+    ] }, cells: [
+    { hour: 8, weekday: 2, value: 10, count: 1 },
+    { hour: 8, weekday: 1, value: 20, count: 1 }
+] };
+const dated = render(datedModel, 1400, 520);
+assert.equal(dated.option.yAxis.data[0], 'Wed 07.10.',
+    'The first row of seven days must be the oldest actual local date, not Monday.');
+assert.equal(dated.option.yAxis.data[6], 'Tue 13.10.');
+assert.deepEqual(Array.from(dated.option.series[0].data, item => item.value[1]), [0, 6],
+    'Weekday buckets must map to chronological seven-day rows.');
+assert.match(dated.option.tooltip.formatter({ data: dated.option.series[0].data[1] }), /13\.10\.2026/,
+    'A seven-day tooltip must identify the actual date.');
+const thirtyDay = render({ ...model, heatmap: { ...model.heatmap, range: '30d', windowOffset: 0,
+    startDate: '2026-09-14', endDate: '2026-10-13', days: [] } }, 600, 400);
+assert.equal(thirtyDay.option.yAxis.data[0], 'Mon',
+    'Thirty days must retain the requested Monday–Sunday average rows.');
+assert.match(thirtyDay.periodLabelElement.textContent, /14\.09\.2026 – 13\.10\.2026 \(30 days\)/,
+    'The actual thirty-day interval must remain visible despite the seven-row average.');
 assert.equal(wide.option.series[0].type, 'heatmap');
 assert.equal(wide.option.series[0].data.length, 2, 'No missing weekday/hour cells may be invented.');
 assert.deepEqual(Array.from(wide.option.series[0].data[0].value), [0, 0, 0],
@@ -253,4 +295,49 @@ if (fs.existsSync(localECharts)) {
     outlierChart.dispose();
 }
 
-console.log('Heatmap renderer layout verified.');
+async function verifyNavigation() {
+    const previousModel = { ...datedModel, heatmap: { ...datedModel.heatmap,
+        windowOffset: 1, startDate: '2026-09-30', endDate: '2026-10-06' } };
+    const requests = [];
+    const navigable = render(datedModel, 600, 400, 'symcon', url => {
+        requests.push(url);
+        const chart = url.includes('offset=1') ? previousModel : datedModel;
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ status: 'ready', chart }) });
+    });
+    assert.equal(navigable.nextElement.disabled, true, 'Next must be disabled at the current period.');
+    navigable.click('previous');
+    await new Promise(resolve => setImmediate(resolve));
+    assert.match(requests[0], /offset=1&output=tile$/,
+        'Native tile navigation must request the previous archive period through its scoped hook.');
+    assert.match(navigable.periodLabelElement.textContent, /30\.09\.2026 – 06\.10\.2026/);
+    assert.equal(navigable.nextElement.disabled, false);
+    navigable.window.handleMessage({ status: 'ready', chart: datedModel });
+    assert.match(navigable.periodLabelElement.textContent, /30\.09\.2026/,
+        'A periodic live push must not reset a user-selected historical window.');
+    await new Promise(resolve => setImmediate(resolve));
+    assert.match(requests[1], /offset=1&output=tile$/,
+        'A live push must refresh the selected historical window, not replace it with today.');
+    navigable.click('next');
+    await new Promise(resolve => setImmediate(resolve));
+    assert.match(requests[2], /offset=0&output=tile$/);
+    assert.equal(navigable.nextElement.disabled, true);
+    const ipsView = render(datedModel, 600, 400, 'ipsview', url => {
+        requests.push(url);
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ status: 'ready', chart: previousModel }) });
+    });
+    ipsView.click('previous');
+    await new Promise(resolve => setImmediate(resolve));
+    assert.match(requests[3], /offset=1$/,
+        'IPSView navigation must use the same read-only state endpoint without tile styling.');
+    const failing = render(datedModel, 600, 400, 'symcon', () => Promise.reject(new Error('offline')));
+    const retainedOption = failing.option;
+    failing.click('previous');
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(failing.option, retainedOption,
+        'A failed historical request must retain the last good Heatmap.');
+    assert.equal(failing.warningElement.hidden, false,
+        'A failed historical request must be visible without replacing the chart.');
+}
+
+verifyNavigation().then(() => console.log('Heatmap renderer layout verified.'))
+    .catch(error => { console.error(error); process.exitCode = 1; });

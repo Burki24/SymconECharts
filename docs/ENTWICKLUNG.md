@@ -87,7 +87,7 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 | Gerät | EChartsBarPolar | Aktuelle Werte aus 1 bis 16 Quellen als radiale Balken oder konzentrische Bögen in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsPie | Aktuelle nichtnegative Anteile aus 1 bis 16 Quellen als Kreis, Donut oder Nightingale-Rose in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsScatter | Archivierte X/Y-Werte mit optionaler Bubble-Größe, ausschließlich zeitgleiche abgeschlossene Intervalle ohne Interpolation, in Kachel und optionalem IPSView-HTML |
-| Gerät | EChartsHeatmap | Eine Archivvariable als lokale Wochentag-Stunden-Matrix mit separaten Kachel- und IPSView-Designern |
+| Gerät | EChartsHeatmap | Eine Archivvariable als lokale Tages-/Wochentag-Stunden-Matrix mit separaten Kachel- und IPSView-Designern |
 
 Eine eigene I/O-Instanz, ein Konfigurator und Discovery gehören nicht zum
 Anfangsumfang. Datenquellen sind Teil der jeweiligen Gauge-Konfiguration und
@@ -193,8 +193,9 @@ Kreis, Donut und Nightingale-Rose legt
 Die Verknüpfung historischer X/Y- und optionaler Größenwerte nur über
 identische abgeschlossene Archivintervalle ohne Interpolation legt
 [`ADR 0040`](adr/0040-scatter-archive-interval-pairing.md) fest.
-Die eigene Wochentag-Stunden-Heatmap und die Abgrenzung zum Kalenderlayout
-legt [`ADR 0041`](adr/0041-heatmap-weekday-hour-family.md) fest.
+Die eigene Tages-/Wochentag-Stunden-Heatmap und die Abgrenzung zum Kalenderlayout
+legt [`ADR 0041`](adr/0041-heatmap-weekday-hour-family.md) fest; ihre
+gleitenden Zeitfenster regelt [`ADR 0043`](adr/0043-heatmap-rolling-windows-and-navigation.md).
 
 ## Weitere ECharts-Familien im Plan
 

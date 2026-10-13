@@ -1180,6 +1180,74 @@ $heatmap->SetTestProperty('Unit', '°C');
 $heatmap->ApplyChanges();
 $heatmapData = json_decode($heatmap->GetHeatmapData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
+    $heatmapData['heatmap']['range'] === '30d'
+        && count($heatmapData['heatmap']['days']) === 0
+        && $heatmapData['heatmap']['windowOffset'] === 0,
+    'Existing thirty-day Heatmaps must keep weekday/hour aggregation by default.'
+);
+$heatmap->SetTestProperty('Range', '7d');
+$datedHeatmap = json_decode($heatmap->GetHeatmapData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    count($datedHeatmap['heatmap']['days']) === 7
+        && $datedHeatmap['heatmap']['days'][0]['date'] === $datedHeatmap['heatmap']['startDate']
+        && $datedHeatmap['heatmap']['days'][6]['date'] === $datedHeatmap['heatmap']['endDate'],
+    'Seven-day Heatmaps must expose dated rolling rows from the actual archive window.'
+);
+$heatmapNavigation = new EChartsHeatmap();
+$heatmapNavigation->Create();
+$heatmapNavigation->SetTestProperty('SourceVariableID', 4711);
+$heatmapNavigation->SetTestProperty('Range', '7d');
+$heatmapNavigation->ApplyChanges();
+$navigationCurrent = json_decode($heatmapNavigation->GetHeatmapData(), true, 512, JSON_THROW_ON_ERROR);
+$heatmapTile = $heatmapNavigation->GetVisualizationTile();
+assertGatewayGauge(
+    preg_match('#/hook/SymconECharts/state/5000/([a-f0-9]{32})#', $heatmapTile, $heatmapChannel) === 1,
+    'The Heatmap tile must expose a scoped read-only navigation channel.'
+);
+$heatmapRequest = ['DataID' => '{E4749B72-912B-E3E3-1C57-D19019FFDD84}']
+    + EChartsDataProtocol::CreateRequest(EChartsDataProtocol::OPERATION_IPSVIEW_STATE, [
+        'InstanceID'    => 5000,
+        'Channel'       => $heatmapChannel[1],
+        'WindowOffset'  => 1,
+        'Output'        => 'tile'
+    ]);
+$heatmapResponse = EChartsDataProtocol::DecodeResponse(
+    $heatmapNavigation->ReceiveData(json_encode($heatmapRequest, JSON_THROW_ON_ERROR)),
+    EChartsDataProtocol::OPERATION_IPSVIEW_STATE
+);
+assertGatewayGauge(
+    ($heatmapResponse['Payload']['State']['chart']['heatmap']['windowOffset'] ?? null) === 1
+        && ($heatmapResponse['Payload']['State']['chart']['heatmap']['endTimestamp'] ?? PHP_INT_MAX)
+            < $navigationCurrent['heatmap']['startTimestamp'],
+    'Read-only tile navigation must retrieve the preceding seven-day archive window.'
+);
+$heatmapRequest['Payload']['Channel'] = str_repeat('0', 32);
+assertGatewayGauge(
+    $heatmapNavigation->ReceiveData(json_encode($heatmapRequest, JSON_THROW_ON_ERROR)) === '',
+    'Heatmap navigation must reject an unrelated channel.'
+);
+$heatmapHookGateway = new TestableEChartsGateway();
+$heatmapHookGateway->Create();
+$heatmapHookGateway->ApplyChanges();
+IPSModuleStrict::$ChildResponders = [static fn (string $json): string => $heatmapNavigation->ReceiveData($json)];
+$_SERVER['REQUEST_METHOD'] = 'GET';
+$_SERVER['SCRIPT_NAME'] = '/hook/SymconECharts/state/5000/' . $heatmapChannel[1];
+$_GET['offset'] = '1';
+$_GET['output'] = 'tile';
+$navigatedHookState = json_decode($heatmapHookGateway->ProcessTestHook(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    ($navigatedHookState['chart']['heatmap']['windowOffset'] ?? null) === 1,
+    'The Gateway hook must pass a bounded navigation offset to the Heatmap tile.'
+);
+$_GET['offset'] = '121';
+assertGatewayGauge(
+    $heatmapHookGateway->ProcessTestHook() === '' && http_response_code() === 400,
+    'The Gateway hook must reject excessive archive navigation offsets.'
+);
+IPSModuleStrict::$ChildResponders = [];
+unset($_SERVER['REQUEST_METHOD'], $_SERVER['SCRIPT_NAME'], $_GET['offset'], $_GET['output']);
+$heatmap->SetTestProperty('Range', '30d');
+assertGatewayGauge(
     $heatmapData['heatmap']['style']['colorScalePreset'] === 'custom'
         && $heatmapData['heatmap']['style']['colorScaleColors'] === []
         && $heatmapData['heatmap']['style']['customMiddleColors'] === [],
@@ -1250,7 +1318,8 @@ assertGatewayGauge(
     is_string($heatmapPreview)
         && str_contains($heatmapPreview, 'Draft Heatmap')
         && str_contains($heatmapPreview, 'Living room humidity')
-        && str_contains($heatmapPreview, '7d'),
+        && str_contains($heatmapPreview, '7d')
+        && preg_match('/<text x="74" y="82"[^>]*>[^<]+ [0-9]{2}\.[0-9]{2}\.<\/text>/', $heatmapPreview) === 1,
     'The unsaved Heatmap preview must follow title, source and range edits without an archive read.'
 );
 $heatmapOutput->UpdateBarPreviewFromForm(json_encode([

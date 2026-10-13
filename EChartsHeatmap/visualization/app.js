@@ -11,9 +11,16 @@
     var classMinElement = document.getElementById('echarts-heatmap-class-min');
     var classSegmentsElement = document.getElementById('echarts-heatmap-class-segments');
     var classMaxElement = document.getElementById('echarts-heatmap-class-max');
+    var periodElement = document.getElementById('echarts-heatmap-period');
+    var periodLabelElement = document.getElementById('echarts-heatmap-period-label');
+    var previousElement = document.getElementById('echarts-heatmap-previous');
+    var nextElement = document.getElementById('echarts-heatmap-next');
+    var todayElement = document.getElementById('echarts-heatmap-today');
     var chart = null;
     var theme = null;
     var currentState = bootstrap.state || null;
+    var currentOffset = 0;
+    var navigating = false;
     var loadError = 'The Heatmap values could not be loaded.';
     var retainOnTransientError = design.createTransientFailureRetainer(
         chartElement, warningElement, translate, loadError
@@ -66,6 +73,26 @@
         });
     }
 
+    function dateLabel(date) {
+        return /^\d{4}-\d{2}-\d{2}$/.test(date || '')
+            ? date.slice(8, 10) + '.' + date.slice(5, 7) + '.' + date.slice(0, 4) : '';
+    }
+
+    function updatePeriod(heatmap, headerInset) {
+        periodElement.style.top = headerInset + 'px';
+        periodElement.hidden = !bootstrap.options || !bootstrap.options.heatmapStatePath;
+        periodElement.setAttribute('aria-label', translate('Time range'));
+        previousElement.setAttribute('aria-label', translate('Previous period'));
+        nextElement.setAttribute('aria-label', translate('Next period'));
+        todayElement.textContent = translate('Today');
+        currentOffset = Math.max(0, Number(heatmap.windowOffset) || 0);
+        periodLabelElement.textContent = dateLabel(heatmap.startDate) + ' – ' + dateLabel(heatmap.endDate)
+            + ' (' + translate(heatmap.range === '7d' ? '7 days' : '30 days') + ')';
+        previousElement.disabled = navigating || currentOffset >= (Number(bootstrap.options.heatmapMaxOffset) || 120);
+        nextElement.disabled = navigating || currentOffset === 0;
+        todayElement.disabled = navigating || currentOffset === 0;
+    }
+
     function buildOption(model, themeId) {
         var colors = colorsFor(themeId);
         var heatmap = model.heatmap || {};
@@ -84,13 +111,22 @@
         var titleSize = design.fontSizePercent(style.titleFontSizePercent, compact ? 14 : 18);
         var axisSize = design.fontSizePercent(style.axisFontSizePercent, compact ? 10 : 12);
         var valueSize = design.fontSizePercent(style.valueFontSizePercent, compact ? 9 : 11);
-        var top = headerInset + (heatmap.title ? (compact ? 32 : 42) : 14);
+        var top = headerInset + 26 + (heatmap.title ? (compact ? 32 : 42) : 14);
         var bottom = style.showColorScale === true ? (compact ? 62 : 76) : 34;
         var plotWidth = width - 60;
         var plotHeight = height - top - bottom;
         var showValues = style.showValues === true && plotWidth / 24 >= valueSize * 2.8
             && plotHeight / 7 >= valueSize * 1.5;
-        var days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(translate);
+        var weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(translate);
+        var datedDays = heatmap.range === '7d' && Array.isArray(heatmap.days) && heatmap.days.length === 7
+            ? heatmap.days : null;
+        var days = datedDays ? datedDays.map(function (day) {
+            return weekdays[day.weekday] + ' ' + dateLabel(day.date).slice(0, 6);
+        }) : weekdays;
+        var weekdayRows = {};
+        if (datedDays) {
+            datedDays.forEach(function (day, index) { weekdayRows[day.weekday] = index; });
+        }
         var low = style.lowColor || colors.track || colors.background;
         var high = style.highColor || colors.accent;
         var suppliedColors = Array.isArray(style.colorScaleColors)
@@ -150,18 +186,22 @@
                 ? 'transparent' : colors.background,
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
             aria: { enabled: true, description: String(heatmap.title || translate('Heatmap'))
-                + ': ' + translate('24 hours by seven weekdays.') },
+                + ': ' + dateLabel(heatmap.startDate) + ' – ' + dateLabel(heatmap.endDate) },
             title: {
-                show: Boolean(heatmap.title), text: String(heatmap.title || ''), left: 'center', top: headerInset,
+                show: Boolean(heatmap.title), text: String(heatmap.title || ''), left: 'center', top: headerInset + 26,
                 textStyle: { color: style.titleColor || colors.text, fontSize: titleSize }
             },
-            grid: { left: compact ? 38 : 48, right: compact ? 10 : 18, top: top, bottom: bottom },
+            grid: { left: datedDays ? (compact ? 70 : 88) : (compact ? 38 : 48),
+                right: compact ? 10 : 18, top: top, bottom: bottom },
             tooltip: {
                 trigger: 'item',
                 formatter: function (parameters) {
                     var data = parameters.data || {};
                     var value = data.value || [];
-                    return escapeHTML(days[value[1]] || '') + ', ' + escapeHTML(String(value[0]).padStart(2, '0'))
+                    var dayLabel = datedDays && datedDays[value[1]]
+                        ? weekdays[datedDays[value[1]].weekday] + ' ' + dateLabel(datedDays[value[1]].date)
+                        : days[value[1]] || '';
+                    return escapeHTML(dayLabel) + ', ' + escapeHTML(String(value[0]).padStart(2, '0'))
                         + ':00<br>' + escapeHTML(formatValue(value[2], decimals, heatmap.unit || ''))
                         + '<br>' + escapeHTML(String(data.count || 1)) + ' ' + escapeHTML(translate('Hourly intervals'));
                 }
@@ -185,7 +225,8 @@
             series: [{
                 type: 'heatmap', data: cells.map(function (cell) {
                     var value = Number(cell.value);
-                    return { value: [Number(cell.hour), Number(cell.weekday), value],
+                    var weekday = Number(cell.weekday);
+                    return { value: [Number(cell.hour), datedDays ? weekdayRows[weekday] : weekday, value],
                         count: Number(cell.count),
                         label: { color: style.valueColor || design.readableTextColor(cellBackground(value)) } };
                 }),
@@ -202,6 +243,7 @@
     function displayError(message) {
         if (chart) { chart.clear(); }
         chartElement.hidden = true;
+        periodElement.hidden = true;
         classLegendElement.hidden = true;
         warningElement.hidden = true;
         emptyElement.hidden = true;
@@ -259,14 +301,91 @@
                 { renderer: 'canvas' });
             theme = nextTheme;
         }
+        updatePeriod(state.chart.heatmap || {},
+            bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8);
         var option = buildOption(state.chart, nextTheme);
         chart.setOption(option, true);
         updateClassLegend(option, state.chart);
     }
 
+    function stateURL(offset) {
+        var path = bootstrap.options && bootstrap.options.heatmapStatePath;
+        if (!path || !/^\/hook\/SymconECharts\/state\//.test(path)) { throw new Error('Missing state path.'); }
+        var location = window.location || {};
+        var protocol = location.protocol;
+        var host = location.host;
+        if (protocol !== 'http:' && protocol !== 'https:') {
+            var source = String(location.href || '').startsWith('data:')
+                ? decodeURIComponent(location.href) : ((document.head && document.head.innerHTML) || '');
+            var base = source.match(/<base\s+href=["'](https?:)\/\/([^\/"']+)/i);
+            if (base) {
+                protocol = base[1];
+                host = base[2];
+            } else {
+                protocol = window.top.location.protocol;
+                host = window.top.location.host;
+            }
+        }
+        return protocol + '//' + host + path + '?offset=' + offset
+            + (bootstrap.mode === 'symcon' ? '&output=tile' : '');
+    }
+
+    function navigate(offset) {
+        if (navigating || offset < 0 || offset > (Number(bootstrap.options.heatmapMaxOffset) || 120)
+            || !currentState || !currentState.chart) { return; }
+        navigating = true;
+        updatePeriod(currentState.chart.heatmap || {},
+            bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8);
+        var range = currentState.chart.heatmap.range;
+        try {
+            fetch(stateURL(offset), { method: 'GET', cache: 'no-store', credentials: 'same-origin',
+                headers: { Accept: 'application/json' } })
+                .then(function (response) {
+                    if (!response.ok) { throw new Error('Heatmap state request failed.'); }
+                    return response.json();
+                })
+                .then(function (state) {
+                    if (!state || state.status !== 'ready' || !state.chart
+                        || state.chart.heatmap.range !== range
+                        || state.chart.heatmap.windowOffset !== offset) {
+                        throw new Error('Heatmap state response is invalid.');
+                    }
+                    render(state);
+                })
+                .catch(function () {
+                    warningElement.textContent = translate(loadError);
+                    warningElement.hidden = false;
+                })
+                .finally(function () {
+                    navigating = false;
+                    if (currentState && currentState.chart) {
+                        updatePeriod(currentState.chart.heatmap || {},
+                            bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8);
+                    }
+                });
+        } catch (error) {
+            navigating = false;
+            warningElement.textContent = translate(loadError);
+            warningElement.hidden = false;
+            updatePeriod(currentState.chart.heatmap || {},
+                bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8);
+        }
+    }
+
+    previousElement.addEventListener('click', function () { navigate(currentOffset + 1); });
+    nextElement.addEventListener('click', function () { navigate(currentOffset - 1); });
+    todayElement.addEventListener('click', function () { navigate(0); });
+
     window.handleMessage = function (message) {
         var state = design.parseVisualizationState(message);
-        if (state) { render(state); }
+        if (!state) { return; }
+        if (currentOffset > 0 && state.chart && state.chart.heatmap
+            && state.chart.heatmap.windowOffset === 0 && currentState && currentState.chart
+            && state.chart.heatmap.range === currentState.chart.heatmap.range) {
+            navigate(currentOffset);
+            return;
+        }
+        render(state);
     };
     if (window.ResizeObserver) {
         new ResizeObserver(function () {

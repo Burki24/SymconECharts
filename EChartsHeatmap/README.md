@@ -1,7 +1,8 @@
 # EChartsHeatmap
 
 `EChartsHeatmap` zeigt eine numerische Archivvariable als 7 × 24-Heatmap:
-Wochentage von Montag bis Sonntag und lokale Stunden von 0 bis 23 Uhr. Eine
+lokale Stunden von 0 bis 23 Uhr und je nach Zeitraum konkrete Tage oder
+gemittelte Wochentage. Eine
 gemeinsame `EChartsGateway`-Instanz genügt auch für diese Diagrammfamilie.
 
 ## Voraussetzungen und Daten
@@ -11,9 +12,17 @@ Float-Variable mit aktiviertem Archiv und das verbundene EChartsGateway.
 Die Variable wird über ihre ID zugeordnet; ihr Name ist kein technischer
 Schlüssel.
 
-Wählbar sind die letzten 7 oder 30 Tage. Das Gateway liefert ausschließlich
-abgeschlossene stündliche Durchschnittswerte. Werte derselben lokalen
-Wochentag-Stunde-Kombination werden erneut arithmetisch gemittelt. Eine
+Wählbar sind sieben oder dreißig lokale Kalendertage einschließlich heute.
+Sieben Tage zeigen jeden Tag mit Wochentag und Datum; bei dreißig Tagen werden
+die Werte weiterhin nach Mo–So und Stunde zusammengefasst. Der Datumsbereich
+steht über dem Diagramm. Mit den Pfeilen wechseln Sie um sieben bzw. dreißig
+Tage in frühere oder spätere, lückenlos anschließende Zeiträume; „Heute“ führt
+zur aktuellen Ansicht zurück. Der Wechsel gilt für die gerade geöffnete
+Kachel beziehungsweise IPSView-Seite und wird nicht als Instanzeinstellung
+gespeichert. Nach dem erneuten Öffnen erscheint wieder der aktuelle Zeitraum.
+Das Gateway liefert ausschließlich abgeschlossene stündliche Durchschnittswerte.
+Werte derselben lokalen Wochentag-Stunde-Kombination werden bei dreißig Tagen
+erneut arithmetisch gemittelt. Eine
 fehlende Stunde bleibt leer, nicht null. Beim Wechsel von Sommer- auf
 Winterzeit gehen beide tatsächlich vorhandenen 02-Uhr-Intervalle in dieselbe
 Zelle ein. Beim umgekehrten Wechsel wird keine 02-Uhr-Zelle erfunden.
@@ -53,6 +62,12 @@ hat Vorrang.
 Die Formularvorschau verwendet ausdrücklich Beispieldaten und liest beim
 Bearbeiten kein Archiv. Das Diagramm selbst zeigt leere Felder ohne
 Interpolation.
+
+Bei bestehenden Instanzen kann die 7-Tage-Ansicht nach dem Modulupdate andere
+Zellenwerte zeigen: Bisher wurden 168 Stunden rückwärts ab der aktuellen
+Uhrzeit betrachtet, einschließlich zweier angebrochener Tage. Jetzt zählen
+sieben vollständige lokale Datumszeilen, wobei heute nur bis zur letzten
+abgeschlossenen Stunde reicht. Die 30-Tage-Mittelung bleibt erhalten.
 
 Die native Symcon-Kachel und ein optionales IPSView-WebContent-Widget verwenden
 denselben Archivwert. Das IPSView-Design kann das Kacheldesign erben oder

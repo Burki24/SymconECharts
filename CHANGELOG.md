@@ -2,6 +2,10 @@
 
 ## Behoben
 
+- Die Heatmap zählt sieben Tage jetzt als sieben datierte lokale Tage bis heute
+  statt als 168 Stunden mit zwei vermischten Randtagen. Achtung: Dadurch
+  können bisherige 7-Tage-Zellenwerte nach dem Modulupdate anders aussehen.
+
 - Die automatische Wertbeschriftungsfarbe der Heatmap passt sich nun je
   Zelle an helle und dunkle Füllfarben an. Eine manuell gewählte Farbe
   bleibt unverändert. Achtung: Die bisherige automatische Schriftfarbe kann
@@ -33,6 +37,10 @@
   zeigt ebenfalls eine breitere Skala.
 
 ## Hinzugefügt
+
+- Die Heatmap zeigt den tatsächlichen Datumsbereich und bietet in Kachel und
+  IPSView Zurück/Vor/Heute für lückenlos anschließende 7- oder 30-Tage-Fenster.
+  Die 30-Tage-Ansicht bleibt nach Wochentag und Stunde gemittelt.
 
 - Die individuelle Heatmap-Farbskala bietet bis zu drei optionale
   Zwischenfarben und damit zwei bis fünf Farbstützpunkte. Ohne zusätzliche

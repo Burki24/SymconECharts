@@ -45,7 +45,7 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Historische X/Y-Vergleiche und optionale Bubble-Größen liegen im eigenen
   Gerätemodul `EChartsScatter` und werden ohne Interpolation nach gemeinsamen
   abgeschlossenen Archivintervallen verbunden.
-  Eine archivbasierte Wochentag-Stunden-Heatmap liegt im eigenen Gerätemodul
+  Eine archivbasierte Tages- beziehungsweise Wochentag-Stunden-Heatmap liegt im eigenen Gerätemodul
   `EChartsHeatmap`. Sie ist kein Kalenderdiagramm und kein Scatter-Modus.
 - Das Gateway stellt ausschließlich familienübergreifende Infrastruktur wie
   Archivzugriff, begrenztes Caching, gemeinsame Ressourcen und gegebenenfalls

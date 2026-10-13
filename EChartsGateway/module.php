@@ -90,9 +90,21 @@ class EChartsGateway extends IPSModuleStrict
             return;
         }
 
+        $offset = $_GET['offset'] ?? '0';
+        $output = $_GET['output'] ?? 'ipsview';
+        if (!is_string($offset) || preg_match('/^(0|[1-9][0-9]{0,2})$/D', $offset) !== 1
+            || (int) $offset > EChartsDataProtocol::MAX_STATE_WINDOW_OFFSET
+            || !in_array($output, ['tile', 'ipsview'], true)) {
+            $this->SendHookResponse(400, '');
+
+            return;
+        }
+
         $request = EChartsDataProtocol::CreateRequest(EChartsDataProtocol::OPERATION_IPSVIEW_STATE, [
-            'InstanceID' => (int) $matches[1],
-            'Channel'    => $matches[2]
+            'InstanceID'   => (int) $matches[1],
+            'Channel'      => $matches[2],
+            'WindowOffset' => (int) $offset,
+            'Output'       => $output
         ]);
         $responses = $this->SendDataToChildren($this->EncodeDataFlowMessage(self::DATA_ID_TO_CHILD, $request));
         if (!is_array($responses)) {

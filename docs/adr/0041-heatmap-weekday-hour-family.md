@@ -4,7 +4,7 @@
 - Datum: 2026-10-13
 - Entscheider: Burki24
 - Ergänzt: ADR 0001, ADR 0017, ADR 0018, ADR 0036 und ADR 0037
-- Ersetzt durch: –
+- Zeitfenster und Navigation präzisiert durch: ADR 0043
 
 ## Kontext
 
@@ -22,10 +22,12 @@ Präfix `ECHM` und Modul-GUID `{62F06D1A-873F-4B0E-9F3E-6AA9AA1A8274}`.
 Sie nutzt eine numerische Archivvariable, identifiziert ausschließlich durch
 deren Variablen-ID. Sie ist weder ein Scatter-Modus noch eine Kalenderansicht.
 
-Die X-Achse zeigt lokale Stunden 0–23, die Y-Achse Montag–Sonntag. Das
-Gateway liefert abgeschlossene Stundenaggregate für die letzten 7 oder 30
-Tage. Pro Wochentag/Stunde wird das arithmetische Mittel der vorhandenen
-Stundenwerte gebildet. Für nicht vorhandene Kombinationen entsteht **keine**
+Die X-Achse zeigt lokale Stunden 0–23. Die ursprüngliche Y-Achse und
+Zeitfensterdefinition werden in ADR 0043 für sieben Tage präzisiert: dort
+erscheinen sieben datierte lokale Tage bis heute, während dreißig Tage weiter
+auf Montag–Sonntag gemittelt werden. Pro Wochentag/Stunde wird das
+arithmetische Mittel der vorhandenen Stundenwerte gebildet. Für nicht
+vorhandene Kombinationen entsteht **keine**
 Null oder interpolierte Zelle. Bei der Zeitumstellung im Herbst gehen beide
 tatsächlich vorhandenen lokalen 02-Uhr-Intervalle in dieselbe Zelle ein; die
 im Frühjahr ausgefallene Stunde wird nicht ergänzt. Maßgeblich ist die

@@ -58,7 +58,7 @@
         },
         {
             "type": "Label",
-            "caption": "Completed hourly archive values are averaged by local weekday and hour. Missing hours stay empty."
+            "caption": "Seven days show dated local days through today; thirty days average by local weekday and hour. Missing hours stay empty."
         },
         {
             "type": "ExpansionPanel",
