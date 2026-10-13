@@ -40,7 +40,7 @@
             "USA Today (April 2023 sample)": "USA Today (Beispiel April 2023)",
             "China Daily (April 2023 sample)": "China Daily (Beispiel April 2023)",
             "ABC.net (April 2023 sample)": "ABC.net (Beispiel April 2023)",
-            "Preset colors are approximated from Schiewe (2023). The observed range is divided into equal classes; the two custom colors apply only to Custom.": "Die Farben sind aus Schiewe (2023) näherungsweise rekonstruiert. Der vorhandene Wertebereich wird in gleich breite Klassen geteilt; die beiden individuellen Farben gelten nur für „Individuell“.",
+            "Presets use fixed Celsius classes, not the observed archive range. NOAA covers -50 to +50 °C; other historical bounds are approximated from Schiewe (2023). Tempera uses an application-defined -20 to +40 °C range. The two custom colors apply only to Custom.": "Vorlagen nutzen feste Celsius-Klassen, nicht den vorhandenen Archivwertebereich. NOAA reicht von −50 bis +50 °C; die anderen historischen Grenzen sind aus Schiewe (2023) näherungsweise abgelesen. Tempera nutzt einen anwendungsseitig festgelegten Bereich von −20 bis +40 °C. Die beiden individuellen Farben gelten nur für „Individuell“.",
             "Automatic": "Automatisch",
             "Show color scale": "Farbskala anzeigen",
             "Show cell values": "Zellenwerte anzeigen",

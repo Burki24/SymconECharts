@@ -81,9 +81,14 @@ assert.deepEqual(Array.from(wide.option.visualMap.text, label => label.replace('
     'The visible color scale must label its high and low values with the source unit.');
 assert.deepEqual(Array.from(wide.option.visualMap.inRange.color), ['#123456', '#fedcba']);
 const presetColors = ['#123456', '#89abcd', '#fedcba'];
-const presetModel = { ...model, cells: [...model.cells, { hour: 12, weekday: 3, value: 10, count: 1 }],
+const presetModel = { ...model, cells: [
+    { hour: 0, weekday: 0, value: -10, count: 1 },
+    { hour: 8, weekday: 6, value: 20, count: 4 },
+    { hour: 12, weekday: 3, value: 0, count: 1 }
+],
     heatmap: { ...model.heatmap,
-    style: { ...model.heatmap.style, colorScalePreset: 'sample', colorScaleColors: presetColors } } };
+    style: { ...model.heatmap.style, colorScalePreset: 'sample', colorScaleColors: presetColors,
+        colorScaleRange: { min: -10, max: 20 } } } };
 const preset = render(presetModel, 360, 240, 'ipsview');
 assert.equal(preset.option.visualMap.type, 'piecewise',
     'A sourced palette must assign classes instead of interpolating between color stops.');
@@ -91,10 +96,10 @@ assert.deepEqual(Array.from(preset.option.visualMap.pieces, piece => piece.color
     'All preset classes must reach ECharts in source order in compact IPSView widgets.');
 assert.equal(preset.option.visualMap.show, false,
     'A compact widget must not show one oversized ECharts legend item per class.');
-assert.equal(preset.option.visualMap.pieces[0].gte, 0);
-assert.equal(preset.option.visualMap.pieces.at(-1).lte, 20);
+assert.equal(preset.option.visualMap.pieces[0].lt, 0);
+assert.equal(preset.option.visualMap.pieces.at(-1).gte, 10);
 assert.equal(preset.classLegendElement.hidden, false);
-assert.equal(preset.classMinElement.textContent.replace(',', '.'), '0.0 °C');
+assert.equal(preset.classMinElement.textContent.replace(',', '.'), '-10.0 °C');
 assert.equal(preset.classMaxElement.textContent.replace(',', '.'), '20.0 °C');
 assert.equal((preset.classSegmentsElement.innerHTML.match(/<span /g) || []).length, 3,
     'The compact legend must show every distinct class without a text label for each one.');
@@ -114,8 +119,23 @@ const emptyPreset = render({ ...presetModel, cells: [] });
 assert.equal(emptyPreset.classLegendElement.hidden, true,
     'An empty archive range must not show a meaningless class legend.');
 const constantPreset = render({ ...presetModel, cells: [{ hour: 8, weekday: 1, value: 9.2, count: 1 }] });
-assert.equal(constantPreset.classMaxElement.textContent.replace(',', '.'), '9.2 °C',
-    'A constant range must not expose artificial padding in the class legend.');
+assert.equal(constantPreset.classMaxElement.textContent.replace(',', '.'), '20.0 °C',
+    'A constant archive range must not shift a preset class boundary.');
+const noaaColors = ['#7A8484', '#C2C3C3', '#ECF7FE', '#FBE0ED', '#C198C5', '#6F3A8F', '#223F92',
+    '#008CCE', '#00ADE4', '#9DD7F1', '#009641', '#78B927', '#B0CB01', '#F1E400', '#FDC100',
+    '#F29019', '#E73C2F', '#E11213', '#BD4693', '#F082B2'];
+const noaa = render({ ...presetModel, cells: [
+    { hour: 0, weekday: 0, value: 1.5, count: 1 },
+    { hour: 1, weekday: 0, value: 9, count: 1 },
+    { hour: 2, weekday: 0, value: 22, count: 1 }
+], heatmap: { ...presetModel.heatmap, style: { ...presetModel.heatmap.style,
+    colorScalePreset: 'noaa2023', colorScaleColors: noaaColors,
+    colorScaleRange: { min: -50, max: 50 } } } });
+assert.equal(noaa.option.visualMap.pieces.length, 20);
+assert.equal(noaa.option.visualMap.pieces[0].lt, -45);
+assert.equal(noaa.option.visualMap.pieces.at(-1).gte, 45);
+assert.equal(noaa.classMinElement.textContent.replace(',', '.'), '-50.0 °C');
+assert.equal(noaa.classMaxElement.textContent.replace(',', '.'), '50.0 °C');
 const invalidPreset = render({ ...model, heatmap: { ...model.heatmap,
     style: { ...model.heatmap.style, colorScaleColors: ['#123456', 'invalid'] } } });
 assert.equal(invalidPreset.option.visualMap.type, 'continuous');
@@ -172,6 +192,23 @@ if (fs.existsSync(localECharts)) {
     assert.equal(presetData.getItemVisual(2, 'style').fill, '#89abcd',
         'A middle value must receive the exact middle class color.');
     presetChart.dispose();
+    const noaaChart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 1400, height: 520 });
+    noaaChart.setOption(noaa.option);
+    const noaaData = noaaChart.getModel().getSeriesByIndex(0).getData();
+    assert.deepEqual([0, 1, 2].map(index => noaaData.getItemVisual(index, 'style').fill),
+        ['#009641', '#78B927', '#FDC100'],
+        'NOAA colors must follow fixed 5 °C classes, not the observed 1.5–22 °C range.');
+    noaaChart.dispose();
+    const noaaOutliers = render({ ...noaa.window.SYMC_VISUALIZATION.state.chart, cells: [
+        { hour: 0, weekday: 0, value: -55, count: 1 },
+        { hour: 1, weekday: 0, value: 55, count: 1 }
+    ] });
+    const outlierChart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 1400, height: 520 });
+    outlierChart.setOption(noaaOutliers.option);
+    const outlierData = outlierChart.getModel().getSeriesByIndex(0).getData();
+    assert.deepEqual([0, 1].map(index => outlierData.getItemVisual(index, 'style').fill),
+        ['#7A8484', '#F082B2'], 'Values outside the preset range must retain its end colors.');
+    outlierChart.dispose();
 }
 
 console.log('Heatmap renderer layout verified.');

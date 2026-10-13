@@ -9,9 +9,11 @@ namespace SymconECharts;
  * "Farbschemata für Temperaturkarten" (KN – Info und Praxis 3/2023).
  * These are historical examples, not current or official provider palettes.
  * The paper contains no machine-readable color table; the RGB samples are
- * approximate. Only the color order and class count are reproduced. The
- * Heatmap divides the observed data range into equally sized classes rather
- * than claiming the original temperature bounds.
+ * approximate. Figure 1 locates the sampled palettes on a Celsius axis;
+ * except for NOAA's explicitly stated -50..50 °C span, the bounds below are
+ * rounded readings of that figure, not official provider thresholds.
+ * Figure 5 gives Tempera colors without temperature bounds, so its range is
+ * an application-defined -20..40 °C (5 °C / 10 °C per class).
  *
  * @see https://kartdok.staatsbibliothek-berlin.de/servlets/MCRFileNodeServlet/kartdok_derivate_00000704/Schiewe_Farbschemata%20f%C3%BCr%20Temperaturkarten_Was%20liegt%20zwischen%20Blau%20und%20Rot_KN-IP_2023.pdf
  */
@@ -33,6 +35,20 @@ final class HeatmapColorScales
         'abc2023'   => ['#9D2C87', '#C55C9F', '#EFB7D4', '#CBCCC5', '#5561AA', '#00B1E0', '#7DCBDB', '#009A3E', '#2AA836', '#B8DAB8', '#FCF7C8', '#F2E400', '#FDC95F', '#F9CFCD', '#F29499', '#E83C43', '#E30711', '#B46E32', '#B72F16']
     ];
 
+    /** @var array<string,array{min:int,max:int}> */
+    private const RANGES = [
+        'tempera12' => ['min' => -20, 'max' => 40],
+        'tempera6'  => ['min' => -20, 'max' => 40],
+        'noaa2023'  => ['min' => -50, 'max' => 50],
+        'saws2023'  => ['min' => 25, 'max' => 45],
+        'dwd2023'   => ['min' => -5, 'max' => 25],
+        'ts2023'    => ['min' => -5, 'max' => 25],
+        'faz2023'   => ['min' => -15, 'max' => 40],
+        'usa2023'   => ['min' => -12, 'max' => 43],
+        'china2023' => ['min' => -32, 'max' => 18],
+        'abc2023'   => ['min' => -10, 'max' => 47]
+    ];
+
     public static function IsSupported(string $id): bool
     {
         return $id === self::CUSTOM || isset(self::COLORS[$id]);
@@ -42,5 +58,11 @@ final class HeatmapColorScales
     public static function Colors(string $id): array
     {
         return self::COLORS[$id] ?? [];
+    }
+
+    /** @return array{min:int,max:int}|null */
+    public static function Range(string $id): ?array
+    {
+        return self::RANGES[$id] ?? null;
     }
 }

@@ -95,8 +95,14 @@
         var high = style.highColor || colors.accent;
         var suppliedColors = Array.isArray(style.colorScaleColors)
             ? style.colorScaleColors.filter(function (color) { return /^#[0-9a-f]{6}$/i.test(color); }) : [];
+        var presetRange = style.colorScaleRange || {};
+        var presetMinimum = Number(presetRange.min);
+        var presetMaximum = Number(presetRange.max);
         var classScale = style.colorScalePreset && style.colorScalePreset !== 'custom'
-            && suppliedColors.length >= 2 && suppliedColors.length === style.colorScaleColors.length;
+            && suppliedColors.length >= 2 && suppliedColors.length === style.colorScaleColors.length
+            && presetRange.min !== undefined && presetRange.max !== undefined
+            && Number.isFinite(presetMinimum) && Number.isFinite(presetMaximum)
+            && presetMinimum < presetMaximum;
         var scaleColors = classScale ? suppliedColors : [low, high];
         var decimals = Math.max(0, Math.min(6, Number(heatmap.decimals) || 0));
         var visualMap = {
@@ -111,16 +117,17 @@
             inRange: { color: scaleColors }
         };
         if (classScale) {
-            // Preserve the historical class count, but use the current archive range.
+            // A preset's Celsius class boundaries must not move with the archive range.
+            var classWidth = (presetMaximum - presetMinimum) / scaleColors.length;
             visualMap = {
                 type: 'piecewise', show: false, dimension: 2,
                 textStyle: { color: style.axisColor || colors.text, fontSize: axisSize },
                 pieces: scaleColors.map(function (color, index) {
-                    var lower = minimum + (maximum - minimum) * index / scaleColors.length;
-                    var upper = minimum + (maximum - minimum) * (index + 1) / scaleColors.length;
-                    return index === scaleColors.length - 1
-                        ? { gte: lower, lte: upper, color: color }
-                        : { gte: lower, lt: upper, color: color };
+                    var lower = presetMinimum + classWidth * index;
+                    var upper = presetMinimum + classWidth * (index + 1);
+                    if (index === 0) { return { lt: upper, color: color }; }
+                    if (index === scaleColors.length - 1) { return { gte: lower, color: color }; }
+                    return { gte: lower, lt: upper, color: color };
                 })
             };
         }
@@ -198,10 +205,8 @@
             return;
         }
         var decimals = Math.max(0, Math.min(6, Number(heatmap.decimals) || 0));
-        var minimum = Math.min.apply(null, values);
-        var maximum = Math.max.apply(null, values);
-        classMinElement.textContent = formatValue(minimum, decimals, heatmap.unit || '');
-        classMaxElement.textContent = formatValue(maximum, decimals, heatmap.unit || '');
+        classMinElement.textContent = formatValue(style.colorScaleRange.min, decimals, '°C');
+        classMaxElement.textContent = formatValue(style.colorScaleRange.max, decimals, '°C');
         classSegmentsElement.innerHTML = option.visualMap.pieces.map(function (piece) {
             return '<span style="background-color:' + piece.color + '"></span>';
         }).join('');

@@ -33,14 +33,21 @@ Die RGB-Werte sind näherungsweise aus den Farbfeldern der genannten
 Abbildungen gewonnen. Reihenfolge und Klassenanzahl werden beibehalten.
 Nach einem ersten Laufzeittest wurde die zunächst interpolierende
 `continuous`-Abbildung durch eine diskrete `piecewise`-Abbildung ersetzt:
-Jede Klasse erhält exakt eine Farbe. Der Bereich zwischen beobachtetem
-Minimal- und Maximalwert wird in gleich breite Klassen geteilt. Weder die
-historischen festen Temperaturklassengrenzen noch unveröffentlichte
-Originaldaten der Anbieter werden behauptet. Die kompakte, nicht
-interaktive Legende zeigt alle Klassenfarben sowie die Endwerte mit Einheit,
-ohne für jede Klasse einen eigenen ECharts-Legendeneintrag zu beanspruchen.
-Die Vorlagen sind für Temperaturwerte in °C gedacht; andere Einheiten werden
-nicht automatisch umgerechnet.
+Jede Klasse erhält exakt eine Farbe. Ein weiterer Laufzeittest zeigte, dass
+eine Einteilung über den *beobachteten* Min-/Max-Bereich die historischen
+Temperaturfarben bei jeder Datenänderung semantisch verschiebt (beispielsweise
+1,5 °C in die erste graue NOAA-Klasse). Deshalb erhält jede Vorlage einen
+festen Celsius-Bereich; daraus ergeben sich ihre gleich breiten Klassen.
+NOAA ist mit −50 bis +50 °C und 20 Klassen zu 5 °C im Text ausdrücklich
+belegt. Die Grenzen der sieben anderen historischen Beispiele sind nur
+gerundete Ablesungen aus Abb. 1, keine offiziellen Anbieter-Klassengrenzen.
+Abb. 5 enthält für Tempera keine Temperaturgrenzen; die hier verwendeten
+−20 bis +40 °C sind daher eine dokumentierte Anwendungsvorgabe. Werte
+außerhalb des Bereichs werden mit der ersten beziehungsweise letzten
+Klassenfarbe dargestellt. Die kompakte, nicht interaktive Legende zeigt
+alle Klassenfarben und die festen Endwerte in °C, ohne für jede Klasse einen
+eigenen ECharts-Legendeneintrag zu beanspruchen. Es findet keine automatische
+Einheitenumrechnung statt; die Vorlagen setzen Temperaturwerte in °C voraus.
 
 Die kanonischen Farbreihen liegen modulnah in `HeatmapColorScales.php`, weil
 derzeit nur die Wochentag-Stunden-Heatmap diesen konkreten fachlichen Vertrag
@@ -51,7 +58,8 @@ weitere nutzende Diagrammfamilie begründet eine Verschiebung nach `libs`.
 ## Folgen
 
 Instanzen mit `custom` ändern ihr Aussehen nicht. Bereits gewählte Vorlagen
-wechseln bei einem Modulupdate von interpolierten Farben zu festen Klassen.
+wechseln bei einem Modulupdate von an Archivwerte angepassten zu festen
+Celsius-Klassen und zeigen daher gegebenenfalls deutlich andere Farben.
 Ein unbekannter Preset-Wert ist eine ungültige Konfiguration; beschädigte
 Farbdaten fallen im Renderer auf die individuelle Zwei-Farben-Skala zurück.
 Die Formularvorschau verwendet

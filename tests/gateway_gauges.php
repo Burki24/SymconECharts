@@ -1209,13 +1209,19 @@ assertGatewayGauge(
 foreach ($heatmapPresetSelect['options'] as $option) {
     $id = $option['value'];
     $colors = \SymconECharts\HeatmapColorScales::Colors($id);
+    $scaleRange = \SymconECharts\HeatmapColorScales::Range($id);
     assertGatewayGauge(
         \SymconECharts\HeatmapColorScales::IsSupported($id)
             && ($id === 'custom' || count($colors) >= 2)
-            && count(array_filter($colors, static fn (string $color): bool => preg_match('/^#[0-9A-F]{6}$/', $color) === 1)) === count($colors),
-        'Every published Heatmap preset must have a valid canonical color row.'
+            && count(array_filter($colors, static fn (string $color): bool => preg_match('/^#[0-9A-F]{6}$/', $color) === 1)) === count($colors)
+            && ($id === 'custom' ? $scaleRange === null : is_array($scaleRange) && $scaleRange['min'] < $scaleRange['max']),
+        'Every published Heatmap preset must have valid canonical colors and fixed Celsius class bounds.'
     );
 }
+assertGatewayGauge(
+    \SymconECharts\HeatmapColorScales::Range('noaa2023') === ['min' => -50, 'max' => 50],
+    'The NOAA sample must retain its documented -50 to +50 °C range.'
+);
 $heatmapTitleAction = (string) (findGaugeFormElement($heatmapForm['elements'], 'Title')['onChange'] ?? '');
 assertGatewayGauge(
     str_contains($heatmapTitleAction, 'ECHM_UpdateBarPreviewFromForm')
@@ -1248,15 +1254,38 @@ assertGatewayGauge(
         && str_contains($heatmapPresetPreview, '#333D8D')
         && str_contains($heatmapPresetPreview, '#E7362D')
         && substr_count($heatmapPresetPreview, 'y="330"') === 6
+        && str_contains($heatmapPresetPreview, '-20 °C')
+        && str_contains($heatmapPresetPreview, '40 °C')
         && !str_contains($heatmapPresetPreview, '<linearGradient id="scale">'),
-    'The Heatmap preview must show six distinct classes for an unsaved Tempera-6 preset.'
+    'The Heatmap preview must show six fixed Celsius classes for an unsaved Tempera-6 preset.'
+);
+$heatmapOutput->UpdateBarPreviewFromForm(json_encode([
+    'ColorScalePreset' => 'noaa2023'
+], JSON_THROW_ON_ERROR));
+$noaaPreview = base64_decode(substr(
+    (string) array_slice($heatmapOutput->GetTestFormUpdates(), -2)[0]['Value'],
+    strlen('data:image/svg+xml;base64,')
+), true);
+assertGatewayGauge(
+    is_string($noaaPreview)
+        && str_contains($noaaPreview, '-50 °C')
+        && str_contains($noaaPreview, '50 °C')
+        && substr_count($noaaPreview, 'y="330"') === 20,
+    'The NOAA preview must show its source-defined range and 20 classes.'
 );
 $heatmap->SetTestProperty('ColorScalePreset', 'tempera12');
 $presetData = json_decode($heatmap->GetHeatmapData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
     $presetData['heatmap']['style']['colorScalePreset'] === 'tempera12'
-        && count($presetData['heatmap']['style']['colorScaleColors']) === 12,
-    'The selected palette must be serialized for the Tile and inherited IPSView renderer.'
+        && count($presetData['heatmap']['style']['colorScaleColors']) === 12
+        && $presetData['heatmap']['style']['colorScaleRange'] === ['min' => -20, 'max' => 40],
+    'The selected palette and its fixed temperature range must reach Tile and inherited IPSView.'
+);
+$heatmap->SetTestProperty('ColorScalePreset', 'noaa2023');
+$noaaData = json_decode($heatmap->GetHeatmapData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $noaaData['heatmap']['style']['colorScaleRange'] === ['min' => -50, 'max' => 50],
+    'The NOAA archive values must not redefine the source palette bounds.'
 );
 $heatmapOutput->SetTestProperty('ColorScalePreset', 'tempera12');
 $heatmapPresetTile = $heatmapOutput->GetVisualizationTile();

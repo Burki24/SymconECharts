@@ -257,7 +257,8 @@ class EChartsHeatmap extends IPSModuleStrict
         $high = EChartsBarPreview::Color($this->BarPreviewValue($values, 'HighColor', 'integer', $ipsView), $palette['accent']);
         $preset = $this->BarPreviewValue($values, 'ColorScalePreset', 'string', $ipsView);
         $scaleColors = HeatmapColorScales::Colors($preset);
-        $classScale = $scaleColors !== [];
+        $scaleRange = HeatmapColorScales::Range($preset);
+        $classScale = $scaleColors !== [] && $scaleRange !== null;
         if ($scaleColors === []) {
             $scaleColors = [$low, $high];
         }
@@ -294,9 +295,12 @@ class EChartsHeatmap extends IPSModuleStrict
                 $svg .= '<rect x="' . $x . '" y="' . $y . '" width="24" height="30" rx="2" fill="'
                     . EChartsBarPreview::E($color) . '"/>';
                 if ($showValues && $hour % 3 === 0) {
+                    $sample = $classScale
+                        ? $scaleRange['min'] + ($scaleRange['max'] - $scaleRange['min']) * $ratio
+                        : $ratio * 100;
                     $svg .= '<text x="' . ($x + 12) . '" y="' . ($y + 19)
                         . '" text-anchor="middle" fill="' . EChartsBarPreview::E($palette['text'])
-                        . '" font-size="10">' . (int) round($ratio * 100) . '</text>';
+                        . '" font-size="10">' . round($sample, 1) . '</text>';
                 }
             }
         }
@@ -311,6 +315,10 @@ class EChartsHeatmap extends IPSModuleStrict
                         . '" y="330" width="' . (200 / count($scaleColors))
                         . '" height="8" fill="' . EChartsBarPreview::E($color) . '"/>';
                 }
+                $svg .= '<text x="250" y="338" text-anchor="end" fill="' . EChartsBarPreview::E($axisColor)
+                    . '" font-size="10">' . $scaleRange['min'] . ' °C</text>';
+                $svg .= '<text x="470" y="338" fill="' . EChartsBarPreview::E($axisColor)
+                    . '" font-size="10">' . $scaleRange['max'] . ' °C</text>';
             } else {
                 $svg .= '<defs><linearGradient id="scale">';
                 foreach ($scaleColors as $index => $color) {
@@ -645,6 +653,7 @@ class EChartsHeatmap extends IPSModuleStrict
             ...$this->ReadAnimationStyle($prefix),
             'colorScalePreset'     => $this->ReadPropertyString($prefix . 'ColorScalePreset'),
             'colorScaleColors'     => HeatmapColorScales::Colors($this->ReadPropertyString($prefix . 'ColorScalePreset')),
+            'colorScaleRange'      => HeatmapColorScales::Range($this->ReadPropertyString($prefix . 'ColorScalePreset')),
             'lowColor'             => $this->OptionalDesignColor($prefix . 'LowColor'),
             'highColor'            => $this->OptionalDesignColor($prefix . 'HighColor'),
             'showColorScale'       => $this->ReadPropertyBoolean($prefix . 'ShowColorScale'),

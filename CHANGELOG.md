@@ -2,8 +2,9 @@
 
 ## Behoben
 
-- Die Temperatur-Vorlagen der Heatmap färben Zellen und Legende jetzt in
-  getrennten Farbklassen statt als kontinuierlichen Verlauf. Achtung:
+- Die Temperatur-Vorlagen der Heatmap färben Zellen jetzt nach festen
+  Celsius-Klassen statt den aktuellen Archivwertebereich auf alle Farben
+  zu strecken. Die Legende zeigt die festen Vorlagengrenzen. Achtung:
   Bereits ausgewählte Vorlagen ändern dadurch nach dem Modulupdate ihre
   Darstellung; die individuelle Zwei-Farben-Skala bleibt unverändert.
 
