@@ -135,6 +135,66 @@
                     "type": "RowLayout",
                     "items": [
                         {
+                            "type": "Select",
+                            "name": "ColorScalePreset",
+                            "caption": "Color scale preset",
+                            "options": [
+                                {
+                                    "caption": "Custom (two colors)",
+                                    "value": "custom"
+                                },
+                                {
+                                    "caption": "Tempera-12 (Schiewe 2023)",
+                                    "value": "tempera12"
+                                },
+                                {
+                                    "caption": "Tempera-6 (Schiewe 2023)",
+                                    "value": "tempera6"
+                                },
+                                {
+                                    "caption": "NOAA (April 2023 sample)",
+                                    "value": "noaa2023"
+                                },
+                                {
+                                    "caption": "SAWS (April 2023 sample)",
+                                    "value": "saws2023"
+                                },
+                                {
+                                    "caption": "DWD (April 2023 sample)",
+                                    "value": "dwd2023"
+                                },
+                                {
+                                    "caption": "tagesschau (April 2023 sample)",
+                                    "value": "ts2023"
+                                },
+                                {
+                                    "caption": "FAZ (April 2023 sample)",
+                                    "value": "faz2023"
+                                },
+                                {
+                                    "caption": "USA Today (April 2023 sample)",
+                                    "value": "usa2023"
+                                },
+                                {
+                                    "caption": "China Daily (April 2023 sample)",
+                                    "value": "china2023"
+                                },
+                                {
+                                    "caption": "ABC.net (April 2023 sample)",
+                                    "value": "abc2023"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Label",
+                    "caption": "Presets reproduce colors approximately from Schiewe (2023); values are mapped to the observed range. The two custom colors apply only to Custom."
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
                             "type": "SelectColor",
                             "name": "LowColor",
                             "caption": "Low value color",

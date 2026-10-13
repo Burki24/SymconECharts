@@ -71,6 +71,18 @@ assert.equal(wide.option.visualMap.itemWidth, 12);
 assert.deepEqual(Array.from(wide.option.visualMap.text, label => label.replace(',', '.')), ['20.0 °C', '0.0 °C'],
     'The visible color scale must label its high and low values with the source unit.');
 assert.deepEqual(Array.from(wide.option.visualMap.inRange.color), ['#123456', '#fedcba']);
+const presetColors = ['#123456', '#89abcd', '#fedcba'];
+const presetModel = { ...model, heatmap: { ...model.heatmap,
+    style: { ...model.heatmap.style, colorScalePreset: 'sample', colorScaleColors: presetColors } } };
+const preset = render(presetModel, 360, 240, 'ipsview');
+assert.deepEqual(Array.from(preset.option.visualMap.inRange.color), presetColors,
+    'All preset stops must reach ECharts in source order in compact IPSView widgets.');
+assert.deepEqual(Array.from(preset.option.visualMap.text, label => label.replace(',', '.')),
+    ['20.0 °C', '0.0 °C'], 'A palette must keep the observed endpoint labels.');
+const invalidPreset = render({ ...model, heatmap: { ...model.heatmap,
+    style: { ...model.heatmap.style, colorScaleColors: ['#123456', 'invalid'] } } });
+assert.deepEqual(Array.from(invalidPreset.option.visualMap.inRange.color), ['#123456', '#fedcba'],
+    'Malformed palette data must fall back to the legacy two-color design.');
 assert.equal(wide.option.series[0].label.show, true);
 assert.equal(wide.emptyElement.hidden, true, 'Populated data must not show the empty-state hint.');
 assert.match(wide.option.tooltip.formatter({ data: wide.option.series[0].data[1] }), /4 Hourly intervals/);
@@ -111,6 +123,11 @@ if (fs.existsSync(localECharts)) {
     assert.match(svg, /20[,.]0 °C/, 'The ECharts runtime must render the upper color-scale endpoint.');
     assert.match(svg, /0[,.]0 °C/, 'The ECharts runtime must render the lower color-scale endpoint.');
     actual.dispose();
+    const presetChart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 360, height: 240 });
+    presetChart.setOption(preset.option);
+    assert.match(presetChart.renderToSVGString(), /<svg/,
+        'The real ECharts engine must accept a multi-stop palette in a compact widget.');
+    presetChart.dispose();
 }
 
 console.log('Heatmap renderer layout verified.');

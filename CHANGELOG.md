@@ -23,6 +23,11 @@
 
 ## Hinzugefügt
 
+- Die Heatmap bietet zehn mehrfarbige Temperatur-Vorlagen: Tempera-12/-6
+  sowie acht aus Schiewe (2023) näherungsweise rekonstruierte Beispiele vom
+  April 2023. Kachel, IPSView und Formularvorschau nutzen dieselben Farben;
+  die bisherige Zwei-Farben-Skala bleibt die Voreinstellung.
+
 - `EChartsHeatmap` (`ECHM`) zeigt eine archivbasierte Wochentag-Stunden-Matrix
   mit Farbskala, Tooltip, optionalen Zellenwerten und eigenem Kachel- und
   IPSView-Designer. Fehlende Archivstunden bleiben leer; die Vorschauen

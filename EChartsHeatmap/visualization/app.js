@@ -89,6 +89,11 @@
         var days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(translate);
         var low = style.lowColor || colors.track || colors.background;
         var high = style.highColor || colors.accent;
+        var scaleColors = Array.isArray(style.colorScaleColors)
+            ? style.colorScaleColors.filter(function (color) { return /^#[0-9a-f]{6}$/i.test(color); }) : [];
+        if (scaleColors.length < 2 || scaleColors.length !== (style.colorScaleColors || []).length) {
+            scaleColors = [low, high];
+        }
         var decimals = Math.max(0, Math.min(6, Number(heatmap.decimals) || 0));
 
         return {
@@ -136,7 +141,7 @@
                 itemWidth: compact ? 10 : 12, itemHeight: Math.max(80, Math.min(220, width * 0.32)),
                 textGap: compact ? 5 : 8,
                 textStyle: { color: style.axisColor || colors.text, fontSize: axisSize },
-                inRange: { color: [low, high] }
+                inRange: { color: scaleColors }
             },
             series: [{
                 type: 'heatmap', data: cells.map(function (cell) {

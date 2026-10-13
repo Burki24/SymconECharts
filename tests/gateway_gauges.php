@@ -1180,6 +1180,11 @@ $heatmap->SetTestProperty('Unit', '°C');
 $heatmap->ApplyChanges();
 $heatmapData = json_decode($heatmap->GetHeatmapData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
+    $heatmapData['heatmap']['style']['colorScalePreset'] === 'custom'
+        && $heatmapData['heatmap']['style']['colorScaleColors'] === [],
+    'Existing Heatmap instances must retain their two-color scale by default.'
+);
+assertGatewayGauge(
     $heatmap->GetTestStatus() === IS_ACTIVE
         && $heatmap->GetTestReferences() === [4711]
         && $heatmapData['family'] === 'heatmap'
@@ -1196,6 +1201,25 @@ assertGatewayGauge(
 $heatmapOutput = new EChartsHeatmap();
 $heatmapOutput->Create();
 $heatmapForm = json_decode($heatmapOutput->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+$heatmapPresetSelect = findGaugeFormElement($heatmapForm['elements'], 'ColorScalePreset');
+assertGatewayGauge(
+    is_array($heatmapPresetSelect) && count($heatmapPresetSelect['options'] ?? []) === 11,
+    'The Heatmap designer must expose the custom design and all ten sourced presets.'
+);
+assertGatewayGauge(
+    findGaugeFormElement($heatmapForm['elements'], 'IPSViewColorScalePreset') !== null,
+    'An independent IPSView Heatmap design must expose the same palette selection.'
+);
+foreach ($heatmapPresetSelect['options'] as $option) {
+    $id = $option['value'];
+    $colors = \SymconECharts\HeatmapColorScales::Colors($id);
+    assertGatewayGauge(
+        \SymconECharts\HeatmapColorScales::IsSupported($id)
+            && ($id === 'custom' || count($colors) >= 2)
+            && count(array_filter($colors, static fn (string $color): bool => preg_match('/^#[0-9A-F]{6}$/', $color) === 1)) === count($colors),
+        'Every published Heatmap preset must have a valid canonical color row.'
+    );
+}
 $heatmapTitleAction = (string) (findGaugeFormElement($heatmapForm['elements'], 'Title')['onChange'] ?? '');
 assertGatewayGauge(
     str_contains($heatmapTitleAction, 'ECHM_UpdateBarPreviewFromForm')
@@ -1215,6 +1239,26 @@ assertGatewayGauge(
         && str_contains($heatmapPreview, 'Living room humidity')
         && str_contains($heatmapPreview, '7d'),
     'The unsaved Heatmap preview must follow title, source and range edits without an archive read.'
+);
+$heatmapOutput->UpdateBarPreviewFromForm(json_encode([
+    'ColorScalePreset' => 'tempera6'
+], JSON_THROW_ON_ERROR));
+$heatmapPresetPreview = base64_decode(substr(
+    (string) array_slice($heatmapOutput->GetTestFormUpdates(), -2)[0]['Value'],
+    strlen('data:image/svg+xml;base64,')
+), true);
+assertGatewayGauge(
+    is_string($heatmapPresetPreview)
+        && str_contains($heatmapPresetPreview, '#333D8D')
+        && str_contains($heatmapPresetPreview, '#E7362D'),
+    'The Heatmap preview must react to an unsaved multi-color preset.'
+);
+$heatmap->SetTestProperty('ColorScalePreset', 'tempera12');
+$presetData = json_decode($heatmap->GetHeatmapData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $presetData['heatmap']['style']['colorScalePreset'] === 'tempera12'
+        && count($presetData['heatmap']['style']['colorScaleColors']) === 12,
+    'The selected palette must be serialized for the Tile and inherited IPSView renderer.'
 );
 $heatmap->SetTestProperty('SourceVariableID', 4712);
 $heatmap->ApplyChanges();

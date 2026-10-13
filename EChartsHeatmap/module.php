@@ -21,6 +21,7 @@ use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsTransientRefresh;
 use SymconECharts\EChartsVariablePresentation;
 use SymconECharts\HeatmapAggregation;
+use SymconECharts\HeatmapColorScales;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
 require_once __DIR__ . '/../libs/helper/DataFlowHelper.php';
@@ -42,6 +43,7 @@ require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
 require_once __DIR__ . '/../libs/EChartsTransientRefresh.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 require_once __DIR__ . '/HeatmapAggregation.php';
+require_once __DIR__ . '/HeatmapColorScales.php';
 
 class EChartsHeatmap extends IPSModuleStrict
 {
@@ -68,6 +70,7 @@ class EChartsHeatmap extends IPSModuleStrict
     private const RANGES = ['7d', '30d'];
     private const DESIGN_DEFAULTS = [
         'EChartsTheme'         => EChartsAsset::THEME_AUTO,
+        'ColorScalePreset'     => HeatmapColorScales::CUSTOM,
         'LowColor'             => -1,
         'HighColor'            => -1,
         'ShowColorScale'       => true,
@@ -140,7 +143,7 @@ class EChartsHeatmap extends IPSModuleStrict
         $form['elements'] = $this->WithAnimationFormCallbacks($form['elements'], 'ECHM');
         $form = $this->WithIPSViewDesignFormState($form, 'ECHM');
         $form = EChartsDesignerSections::Group($form, [
-            ['caption' => 'Color scale', 'start' => 'LowColor'],
+            ['caption' => 'Color scale', 'start' => 'ColorScalePreset'],
             ['caption' => 'Labels and typography', 'start' => 'ShowValues']
         ]);
         $fields = [
@@ -252,6 +255,11 @@ class EChartsHeatmap extends IPSModuleStrict
         $title = (string) ($values['Title'] ?? $this->ReadPropertyString('Title'));
         $low = EChartsBarPreview::Color($this->BarPreviewValue($values, 'LowColor', 'integer', $ipsView), $palette['track']);
         $high = EChartsBarPreview::Color($this->BarPreviewValue($values, 'HighColor', 'integer', $ipsView), $palette['accent']);
+        $preset = $this->BarPreviewValue($values, 'ColorScalePreset', 'string', $ipsView);
+        $scaleColors = HeatmapColorScales::Colors($preset);
+        if ($scaleColors === []) {
+            $scaleColors = [$low, $high];
+        }
         $titleColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'TitleColor', 'integer', $ipsView), $palette['text']);
         $axisColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'AxisColor', 'integer', $ipsView), $palette['text']);
         $svg = EChartsBarPreview::Open(
@@ -279,7 +287,7 @@ class EChartsHeatmap extends IPSModuleStrict
                 . EChartsBarPreview::E($this->Translate($name)) . '</text>';
             for ($hour = 0; $hour < 24; $hour++) {
                 $ratio = (($hour * 11 + $day * 17) % 100) / 100;
-                $color = self::InterpolateColor($low, $high, $ratio);
+                $color = self::ScaleColor($scaleColors, $ratio);
                 $x = 54 + $hour * 26;
                 $y = 64 + $day * 34;
                 $svg .= '<rect x="' . $x . '" y="' . $y . '" width="24" height="30" rx="2" fill="'
@@ -296,9 +304,12 @@ class EChartsHeatmap extends IPSModuleStrict
                 . EChartsBarPreview::E($axisColor) . '" font-size="12">' . $hour . '</text>';
         }
         if ($showScale) {
-            $svg .= '<defs><linearGradient id="scale"><stop stop-color="' . EChartsBarPreview::E($low)
-                . '"/><stop offset="1" stop-color="' . EChartsBarPreview::E($high)
-                . '"/></linearGradient></defs><rect x="260" y="330" width="200" height="8" fill="url(#scale)"/>';
+            $svg .= '<defs><linearGradient id="scale">';
+            foreach ($scaleColors as $index => $color) {
+                $svg .= '<stop offset="' . round($index * 100 / (count($scaleColors) - 1), 2)
+                    . '%" stop-color="' . EChartsBarPreview::E($color) . '"/>';
+            }
+            $svg .= '</linearGradient></defs><rect x="260" y="330" width="200" height="8" fill="url(#scale)"/>';
         }
 
         return $svg . '</svg>';
@@ -516,7 +527,8 @@ class EChartsHeatmap extends IPSModuleStrict
     private function IsValidDesign(string $prefix): bool
     {
         if (!$this->AnimationIsValid($prefix)
-            || !EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme'))) {
+            || !EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme'))
+            || !HeatmapColorScales::IsSupported($this->ReadPropertyString($prefix . 'ColorScalePreset'))) {
             return false;
         }
         foreach (['LowColor', 'HighColor', 'TitleColor', 'AxisColor', 'ValueColor', 'GridColor'] as $name) {
@@ -615,13 +627,15 @@ class EChartsHeatmap extends IPSModuleStrict
             : $this->ReadPropertyString('EChartsTheme');
     }
 
-    /** @return array<string,bool|int|string> */
+    /** @return array<string,mixed> */
     private function ReadDesignStyle(bool $ipsView): array
     {
         $prefix = $ipsView && !$this->ReadPropertyBoolean('IPSViewUseTileDesign') ? 'IPSView' : '';
 
         return [
             ...$this->ReadAnimationStyle($prefix),
+            'colorScalePreset'     => $this->ReadPropertyString($prefix . 'ColorScalePreset'),
+            'colorScaleColors'     => HeatmapColorScales::Colors($this->ReadPropertyString($prefix . 'ColorScalePreset')),
             'lowColor'             => $this->OptionalDesignColor($prefix . 'LowColor'),
             'highColor'            => $this->OptionalDesignColor($prefix . 'HighColor'),
             'showColorScale'       => $this->ReadPropertyBoolean($prefix . 'ShowColorScale'),
@@ -703,5 +717,13 @@ class EChartsHeatmap extends IPSModuleStrict
             (int) round($first[1] + ($last[1] - $first[1]) * $ratio),
             (int) round($first[2] + ($last[2] - $first[2]) * $ratio)
         );
+    }
+
+    /** @param list<string> $colors */
+    private static function ScaleColor(array $colors, float $ratio): string
+    {
+        $position = max(0.0, min(1.0, $ratio)) * (count($colors) - 1);
+        $index = min(count($colors) - 2, (int) floor($position));
+        return self::InterpolateColor($colors[$index], $colors[$index + 1], $position - $index);
     }
 }

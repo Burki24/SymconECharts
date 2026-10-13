@@ -25,6 +25,18 @@ Nachkommastellen aus der Variablendarstellung oder den manuellen Angaben.
 Der Kacheldesigner enthält Theme, Farben der Werteskala, sichtbare Farbskala,
 optionale Zellenwerte, Textgrößen und -farben sowie Animation. Die Farbskala
 zeigt ihren kleinsten und größten Archivwert mit der gewählten Einheit an.
+Neben der bisherigen individuellen Zwei-Farben-Skala stehen Tempera-12 und
+Tempera-6 sowie acht historische Farbreihen aus der Untersuchung von
+[Schiewe (2023)](https://kartdok.staatsbibliothek-berlin.de/servlets/MCRFileNodeServlet/kartdok_derivate_00000704/Schiewe_Farbschemata%20f%C3%BCr%20Temperaturkarten_Was%20liegt%20zwischen%20Blau%20und%20Rot_KN-IP_2023.pdf)
+zur Wahl. Die als NOAA, SAWS, DWD, tagesschau, FAZ, USA Today, China Daily
+und ABC.net bezeichneten Beispiele stammen aus Karten vom April 2023. Ihre
+Farbtöne wurden aus den Abbildungen näherungsweise rekonstruiert: Es sind
+**keine aktuellen, offiziell veröffentlichten Anbieterpaletten**. ECharts
+interpoliert zwischen den Farbtönen und verteilt die Skala über den kleinsten
+und größten vorhandenen Archivwert; die ursprünglichen Temperaturklassen
+werden nicht als feste Grenzen übernommen. Für diese Vorlagen sollten
+Temperaturwerte in °C verwendet werden. Die eigenen Endfarben greifen nur
+bei „Individuell“; bestehende Instanzen behalten diese Voreinstellung.
 Die Formularvorschau verwendet ausdrücklich Beispieldaten und liest beim
 Bearbeiten kein Archiv. Das Diagramm selbst zeigt leere Felder ohne
 Interpolation.
