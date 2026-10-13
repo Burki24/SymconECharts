@@ -28,12 +28,28 @@
                     "caption": "Time range",
                     "options": [
                         {
-                            "caption": "7 days",
-                            "value": "7d"
+                            "caption": "1 week",
+                            "value": "1w"
                         },
                         {
-                            "caption": "30-day average",
-                            "value": "30d"
+                            "caption": "1 month",
+                            "value": "1m"
+                        },
+                        {
+                            "caption": "3 months",
+                            "value": "3m"
+                        },
+                        {
+                            "caption": "6 months",
+                            "value": "6m"
+                        },
+                        {
+                            "caption": "12 months",
+                            "value": "12m"
+                        },
+                        {
+                            "caption": "Since January 1",
+                            "value": "ytd"
                         }
                     ]
                 },
@@ -58,7 +74,7 @@
         },
         {
             "type": "Label",
-            "caption": "Seven days show dated local days through today. Thirty days show the average of available archived hourly values for each local weekday and hour in the selected period, not thirty individual days. Missing hours stay empty."
+            "caption": "One week shows seven dated local days through today. Month ranges use the last fully completed calendar months; since January 1 runs through today. All longer ranges average available archived hourly values by local weekday and hour. Missing hours stay empty."
         },
         {
             "type": "ExpansionPanel",

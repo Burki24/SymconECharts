@@ -1180,12 +1180,12 @@ $heatmap->SetTestProperty('Unit', '°C');
 $heatmap->ApplyChanges();
 $heatmapData = json_decode($heatmap->GetHeatmapData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
-    $heatmapData['heatmap']['range'] === '30d'
+    $heatmapData['heatmap']['range'] === '1m'
         && count($heatmapData['heatmap']['days']) === 0
         && $heatmapData['heatmap']['windowOffset'] === 0,
-    'Existing thirty-day Heatmaps must keep weekday/hour aggregation by default.'
+    'New Heatmaps must default to the last complete calendar month.'
 );
-$heatmap->SetTestProperty('Range', '7d');
+$heatmap->SetTestProperty('Range', '1w');
 $datedHeatmap = json_decode($heatmap->GetHeatmapData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
     count($datedHeatmap['heatmap']['days']) === 7
@@ -1196,7 +1196,7 @@ assertGatewayGauge(
 $heatmapNavigation = new EChartsHeatmap();
 $heatmapNavigation->Create();
 $heatmapNavigation->SetTestProperty('SourceVariableID', 4711);
-$heatmapNavigation->SetTestProperty('Range', '7d');
+$heatmapNavigation->SetTestProperty('Range', '1w');
 $heatmapNavigation->ApplyChanges();
 $navigationCurrent = json_decode($heatmapNavigation->GetHeatmapData(), true, 512, JSON_THROW_ON_ERROR);
 $heatmapTile = $heatmapNavigation->GetVisualizationTile();
@@ -1246,7 +1246,8 @@ assertGatewayGauge(
 );
 IPSModuleStrict::$ChildResponders = [];
 unset($_SERVER['REQUEST_METHOD'], $_SERVER['SCRIPT_NAME'], $_GET['offset'], $_GET['output']);
-$heatmap->SetTestProperty('Range', '30d');
+$heatmap->SetTestProperty('Range', '1w');
+$heatmapData = json_decode($heatmap->GetHeatmapData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
     $heatmapData['heatmap']['style']['colorScalePreset'] === 'custom'
         && $heatmapData['heatmap']['style']['colorScaleColors'] === []
@@ -1263,14 +1264,91 @@ assertGatewayGauge(
         && $heatmapData['cells'][0]['count'] === 2,
     'Heatmap must group completed hourly gateway archive values by local weekday and hour.'
 );
+$savedHeatmapArchive = $GLOBALS['symconTestArchiveVariables'][4711]['AggregatedValues'];
+$savedHeatmapTimezone = date_default_timezone_get();
+date_default_timezone_set('Europe/Berlin');
+$heatmapZone = new DateTimeZone('Europe/Berlin');
+$heatmapArchiveTime = static fn (string $date): int => (new DateTimeImmutable($date, $heatmapZone))->getTimestamp();
+$GLOBALS['symconTestArchiveVariables'][4711]['AggregatedValues'] = array_map(
+    static fn (array $point): array => ['TimeStamp' => $heatmapArchiveTime($point[0]),
+        'Avg'                                       => $point[1], 'Min' => $point[1], 'Max' => $point[1]],
+    [['2026-09-28 08:00:00', 30.0], ['2026-03-02 08:00:00', 20.0], ['2025-10-06 08:00:00', 10.0]]
+);
+$longHeatmap = new TestableEChartsHeatmap();
+$longHeatmap->Create();
+$longHeatmap->SetTestCurrentTimestamp($heatmapArchiveTime('2026-10-13 12:34:00'));
+$longHeatmap->SetTestProperty('SourceVariableID', 4711);
+$longHeatmap->SetTestProperty('Range', '12m');
+$queryCountBefore = $GLOBALS['symconTestArchiveQueryCount'];
+$longHeatmapData = json_decode($longHeatmap->GetHeatmapData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $longHeatmapData['heatmap']['startDate'] === '2025-10-01'
+        && $longHeatmapData['heatmap']['endDate'] === '2026-09-30'
+        && $longHeatmapData['cells'] === [[
+            'hour' => 8, 'weekday' => 0, 'value' => 20.0, 'count' => 3
+        ]]
+        && $GLOBALS['symconTestArchiveQueryCount'] - $queryCountBefore >= 6,
+    'The twelve-month Heatmap must combine all archive chunks without losing old or recent hours.'
+);
+$GLOBALS['symconTestArchiveVariables'][4711]['AggregatedValues'] = $savedHeatmapArchive;
+$savedDenseArchive = $GLOBALS['symconTestArchiveVariables'][4713];
+$denseHeatmapPoints = [];
+$denseStart = $heatmapArchiveTime('2025-10-01 00:00:00');
+for ($index = 2000; $index >= 0; $index--) {
+    $denseHeatmapPoints[] = [
+        'TimeStamp' => $denseStart + $index * 3600,
+        'Avg'       => 1.0, 'Min' => 1.0, 'Max' => 1.0
+    ];
+}
+$GLOBALS['symconTestArchiveVariables'][4713] = [
+    'AggregationType' => 0, 'LoggedValues' => [], 'AggregatedValues' => $denseHeatmapPoints
+];
+$denseHeatmap = new TestableEChartsHeatmap();
+$denseHeatmap->Create();
+$denseHeatmap->SetTestCurrentTimestamp($heatmapArchiveTime('2026-10-13 12:34:00'));
+$denseHeatmap->SetTestProperty('SourceVariableID', 4713);
+$denseHeatmap->SetTestProperty('Range', '12m');
+$denseHeatmapData = json_decode($denseHeatmap->GetHeatmapData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    array_sum(array_column($denseHeatmapData['cells'], 'count')) === 2001
+        && $denseHeatmapData['truncated'] === false,
+    'More than 2000 hourly archive values must be fully included through multiple Gateway requests.'
+);
+$savedHeatmapResponder = IPSModuleStrict::$ParentResponder;
+IPSModuleStrict::$ParentResponder = static fn (string $json): string => EChartsDataProtocol::EncodeSuccessResponse(
+    EChartsDataProtocol::OPERATION_ARCHIVE_READ,
+    ['VariableID' => 4713, 'Points' => [], 'Truncated' => true]
+);
+$truncatedHeatmapRejected = false;
+try {
+    $denseHeatmap->GetHeatmapData();
+} catch (RuntimeException) {
+    $truncatedHeatmapRejected = true;
+}
+IPSModuleStrict::$ParentResponder = $savedHeatmapResponder;
+assertGatewayGauge(
+    $truncatedHeatmapRejected && $denseHeatmap->GetTestStatus() === 204,
+    'A truncated archive chunk must fail visibly rather than publish an incomplete long-range average.'
+);
+$GLOBALS['symconTestArchiveVariables'][4713] = $savedDenseArchive;
+date_default_timezone_set($savedHeatmapTimezone);
 $heatmapOutput = new EChartsHeatmap();
 $heatmapOutput->Create();
 $heatmapForm = json_decode($heatmapOutput->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
 $heatmapRangeSelect = findGaugeFormElement($heatmapForm['elements'], 'Range');
 assertGatewayGauge(
     is_array($heatmapRangeSelect)
-        && ($heatmapRangeSelect['options'][1]['caption'] ?? null) === '30-day average',
-    'The thirty-day form option must describe its weekday/hour averaging.'
+        && array_column($heatmapRangeSelect['options'], 'value') === ['1w', '1m', '3m', '6m', '12m', 'ytd'],
+    'The Heatmap form must offer exactly the six requested calendar ranges.'
+);
+$oldRangeHeatmap = new EChartsHeatmap();
+$oldRangeHeatmap->Create();
+$oldRangeHeatmap->SetTestProperty('SourceVariableID', 4711);
+$oldRangeHeatmap->SetTestProperty('Range', '30d');
+$oldRangeHeatmap->ApplyChanges();
+assertGatewayGauge(
+    $oldRangeHeatmap->GetTestStatus() === 202,
+    'A previously saved thirty-day value must require an explicit new calendar-range selection.'
 );
 $heatmapPresetSelect = findGaugeFormElement($heatmapForm['elements'], 'ColorScalePreset');
 assertGatewayGauge(
@@ -1314,7 +1392,7 @@ assertGatewayGauge(
     'A single-source Heatmap preview action must not reference a non-existent Sources list.'
 );
 $heatmapOutput->UpdateBarPreviewFromForm(json_encode([
-    'Title' => 'Draft Heatmap', 'SourceVariableID' => 4713, 'Range' => '7d'
+    'Title' => 'Draft Heatmap', 'SourceVariableID' => 4713, 'Range' => '1w'
 ], JSON_THROW_ON_ERROR));
 $heatmapPreview = base64_decode(substr(
     (string) array_slice($heatmapOutput->GetTestFormUpdates(), -2)[0]['Value'],
@@ -1324,20 +1402,20 @@ assertGatewayGauge(
     is_string($heatmapPreview)
         && str_contains($heatmapPreview, 'Draft Heatmap')
         && str_contains($heatmapPreview, 'Living room humidity')
-        && str_contains($heatmapPreview, '7d')
+        && str_contains($heatmapPreview, '1 week')
         && preg_match('/<text x="74" y="82"[^>]*>[^<]+ [0-9]{2}\.[0-9]{2}\.<\/text>/', $heatmapPreview) === 1,
     'The unsaved Heatmap preview must follow title, source and range edits without an archive read.'
 );
 $heatmapOutput->UpdateBarPreviewFromForm(json_encode([
-    'Title' => 'Draft Heatmap', 'SourceVariableID' => 4713, 'Range' => '30d'
+    'Title' => 'Draft Heatmap', 'SourceVariableID' => 4713, 'Range' => '1m'
 ], JSON_THROW_ON_ERROR));
 $thirtyDayPreview = base64_decode(substr(
     (string) array_slice($heatmapOutput->GetTestFormUpdates(), -2)[0]['Value'],
     strlen('data:image/svg+xml;base64,')
 ), true);
 assertGatewayGauge(
-    is_string($thirtyDayPreview) && str_contains($thirtyDayPreview, '30-day average'),
-    'The thirty-day form preview must explicitly mark its averaged weekday/hour cells.'
+    is_string($thirtyDayPreview) && str_contains($thirtyDayPreview, '1-month average'),
+    'The calendar-month form preview must identify its selected interval.'
 );
 $heatmapOutput->UpdateBarPreviewFromForm(json_encode([
     'ColorScalePreset' => 'tempera6'

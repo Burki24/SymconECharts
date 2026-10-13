@@ -68,7 +68,7 @@ class EChartsHeatmap extends IPSModuleStrict
     private const STATUS_CONFIGURATION_INVALID = 202;
     private const STATUS_PARENT_MISSING = 203;
     private const STATUS_GATEWAY_FAILED = 204;
-    private const RANGES = ['7d', '30d'];
+    private const RANGES = HeatmapWindow::RANGES;
     private const DESIGN_DEFAULTS = [
         'EChartsTheme'         => EChartsAsset::THEME_AUTO,
         'ColorScalePreset'     => HeatmapColorScales::CUSTOM,
@@ -97,7 +97,7 @@ class EChartsHeatmap extends IPSModuleStrict
         $this->RegisterTransientRefresh('ECHM');
         $this->RegisterPropertyInteger('SourceVariableID', 0);
         $this->RegisterPropertyString('Title', '');
-        $this->RegisterPropertyString('Range', '30d');
+        $this->RegisterPropertyString('Range', '1m');
         $this->RegisterPropertyBoolean('UseVariablePresentation', true);
         $this->RegisterPropertyString('Unit', '');
         $this->RegisterPropertyInteger('Decimals', 1);
@@ -298,11 +298,15 @@ class EChartsHeatmap extends IPSModuleStrict
         $sourceID = (int) ($values['SourceVariableID'] ?? $this->ReadPropertyInteger('SourceVariableID'));
         $sourceName = $sourceID > 0 && IPS_VariableExists($sourceID) ? IPS_GetName($sourceID) : $this->Translate('No source selected');
         $range = (string) ($values['Range'] ?? $this->ReadPropertyString('Range'));
-        $rangeLabel = $range === '30d' ? $this->Translate('30-day average') : $range;
+        $rangeLabel = $this->Translate(match ($range) {
+            '1w'    => '1 week', '1m' => '1-month average', '3m' => '3-month average',
+            '6m'    => '6-month average', '12m' => '12-month average', 'ytd' => 'Since January 1 average',
+            default => $range
+        });
         $svg .= '<text x="54" y="53" fill="' . EChartsBarPreview::E($palette['muted'])
             . '" font-size="11">' . EChartsBarPreview::E($sourceName . ' · ' . $rangeLabel) . '</text>';
         $weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-        $datedDays = $range === '7d'
+        $datedDays = $range === '1w'
             ? HeatmapWindow::Resolve($range, 0, $this->CurrentTimestamp(), date_default_timezone_get())['Days']
             : [];
         foreach ($weekdays as $day => $name) {
@@ -386,7 +390,8 @@ class EChartsHeatmap extends IPSModuleStrict
         );
         $timezone = date_default_timezone_get();
         $range = $this->ReadPropertyString('Range');
-        $query = HeatmapWindow::Resolve($range, $windowOffset, $this->CurrentTimestamp(), $timezone);
+        $now = $this->CurrentTimestamp();
+        $query = HeatmapWindow::Resolve($range, $windowOffset, $now, $timezone);
         $archive = $this->ReadArchive($variableID, $query);
         $cells = HeatmapAggregation::ByWeekdayAndHour($archive['Points'], $timezone);
         $this->WriteAttributeString('LastError', '');
@@ -405,7 +410,8 @@ class EChartsHeatmap extends IPSModuleStrict
                 'windowOffset'   => $windowOffset,
                 'startDate'      => $query['StartDate'],
                 'endDate'        => $query['EndDate'],
-                'days'           => $range === '7d' ? $query['Days'] : [],
+                'days'           => $range === '1w' ? $query['Days'] : [],
+                'maxOffset'      => HeatmapWindow::MaximumOffset($range, $now, $timezone),
                 'startTimestamp' => $query['StartTimestamp'],
                 'endTimestamp'   => $query['EndTimestamp'],
                 'style'          => $this->ReadDesignStyle($ipsView)
@@ -421,14 +427,30 @@ class EChartsHeatmap extends IPSModuleStrict
         if ($query['Empty']) {
             return ['Points' => [], 'Truncated' => false];
         }
+        $points = [];
+        foreach (HeatmapWindow::ArchiveChunks($query['StartTimestamp'], $query['EndTimestamp']) as $chunk) {
+            $archive = $this->ReadArchiveChunk($variableID, $chunk, $query['Limit']);
+            if ($archive['Truncated']) {
+                $this->SetStatus(self::STATUS_GATEWAY_FAILED);
+                throw new RuntimeException('The gateway truncated a Heatmap archive interval.');
+            }
+            array_push($points, ...$archive['Points']);
+        }
+
+        return ['Points' => $points, 'Truncated' => false];
+    }
+
+    /** @param array{StartTimestamp:int,EndTimestamp:int} $chunk @return array{Points:list<array{0:int,1:float}>,Truncated:bool} */
+    private function ReadArchiveChunk(int $variableID, array $chunk, int $limit): array
+    {
         $payload = [
             'VariableID'       => $variableID,
-            'StartTimestamp'   => $query['StartTimestamp'],
-            'EndTimestamp'     => $query['EndTimestamp'],
+            'StartTimestamp'   => $chunk['StartTimestamp'],
+            'EndTimestamp'     => $chunk['EndTimestamp'],
             'Mode'             => 'aggregated',
             'AggregationLevel' => 0,
             'Reducer'          => 'average',
-            'Limit'            => $query['Limit']
+            'Limit'            => $limit
         ];
         $operation = EChartsDataProtocol::OPERATION_ARCHIVE_READ;
         try {
@@ -498,9 +520,12 @@ class EChartsHeatmap extends IPSModuleStrict
                 'Next period'                         => $this->Translate('Next period'),
                 'Time range'                          => $this->Translate('Time range'),
                 'Today'                               => $this->Translate('Today'),
-                '7 days'                              => $this->Translate('7 days'),
-                '30 days'                             => $this->Translate('30 days'),
-                '30-day average'                      => $this->Translate('30-day average'),
+                '1 week'                              => $this->Translate('1 week'),
+                '1-month average'                     => $this->Translate('1-month average'),
+                '3-month average'                     => $this->Translate('3-month average'),
+                '6-month average'                     => $this->Translate('6-month average'),
+                '12-month average'                    => $this->Translate('12-month average'),
+                'Since January 1 average'             => $this->Translate('Since January 1 average'),
                 'Average of {count} hourly intervals' => $this->Translate('Average of {count} hourly intervals'),
                 'Mon'                                 => $this->Translate('Mon'), 'Tue' => $this->Translate('Tue'),
                 'Wed'                                 => $this->Translate('Wed'), 'Thu' => $this->Translate('Thu'),

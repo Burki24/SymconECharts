@@ -12,20 +12,26 @@ Float-Variable mit aktiviertem Archiv und das verbundene EChartsGateway.
 Die Variable wird über ihre ID zugeordnet; ihr Name ist kein technischer
 Schlüssel.
 
-Wählbar sind sieben oder dreißig lokale Kalendertage einschließlich heute.
-Sieben Tage zeigen jeden Tag mit Wochentag und Datum. Bei dreißig Tagen
-werden alle verfügbaren Stundenwerte des gewählten 30-Tage-Zeitraums
-berücksichtigt: Jede Zelle zeigt den Durchschnitt für genau ihren Wochentag
-und ihre Stunde, etwa aus den vorhandenen Montagen um 08:00 Uhr. Die sieben
-Mo–So-Zeilen sind also keine Beschränkung auf sieben Tage. Der Datumsbereich
-und die Kennzeichnung „30-Tage-Durchschnitt“ stehen über dem Diagramm.
-Mit den Pfeilen wechseln Sie um sieben bzw. dreißig
-Tage in frühere oder spätere, lückenlos anschließende Zeiträume; „Heute“ führt
-zur aktuellen Ansicht zurück. Der Wechsel gilt für die gerade geöffnete
+Wählbar sind eine Woche, ein, drei, sechs oder zwölf Monate sowie „Seit
+1. Januar“. Eine Woche zeigt sieben datierte lokale Tage bis heute.
+Monatsansichten verwenden ausschließlich die letzten vollständig
+abgeschlossenen Kalendermonate: Am 13. Oktober zeigt „1 Monat“ den September,
+„3 Monate“ zeigen Juli bis September. „Seit 1. Januar“ reicht im laufenden
+Jahr bis heute. Bei diesen längeren Ansichten zeigt jede Mo–So-Zelle den
+Durchschnitt der vorhandenen Stundenwerte ihres Wochentags und ihrer Stunde
+aus dem gesamten angezeigten Zeitraum – etwa der Montage um 08:00 Uhr.
+Der konkrete Datumsbereich und die Mittelwert-Kennzeichnung stehen über
+dem Diagramm.
+
+Mit den Pfeilen wechseln Sie um eine Woche, die gewählte Anzahl vollständiger
+Monate oder ein Jahr zurück beziehungsweise vor. „Seit 1. Januar“ vergleicht
+im Vorjahr denselben Jahresabschnitt; der 29. Februar wird gegebenenfalls auf
+den 28. Februar begrenzt. „Heute“ führt zur aktuellen Ansicht zurück. Der
+Wechsel gilt für die gerade geöffnete
 Kachel beziehungsweise IPSView-Seite und wird nicht als Instanzeinstellung
 gespeichert. Nach dem erneuten Öffnen erscheint wieder der aktuelle Zeitraum.
 Das Gateway liefert ausschließlich abgeschlossene stündliche Durchschnittswerte.
-Werte derselben lokalen Wochentag-Stunde-Kombination werden bei dreißig Tagen
+Werte derselben lokalen Wochentag-Stunde-Kombination werden in längeren Ansichten
 erneut arithmetisch gemittelt; der Tooltip nennt die Anzahl der tatsächlich
 berücksichtigten Stundenintervalle. Eine fehlende Stunde bleibt leer, nicht
 null. Beim Wechsel von Sommer- auf
@@ -68,11 +74,11 @@ Die Formularvorschau verwendet ausdrücklich Beispieldaten und liest beim
 Bearbeiten kein Archiv. Das Diagramm selbst zeigt leere Felder ohne
 Interpolation.
 
-Bei bestehenden Instanzen kann die 7-Tage-Ansicht nach dem Modulupdate andere
-Zellenwerte zeigen: Bisher wurden 168 Stunden rückwärts ab der aktuellen
-Uhrzeit betrachtet, einschließlich zweier angebrochener Tage. Jetzt zählen
-sieben vollständige lokale Datumszeilen, wobei heute nur bis zur letzten
-abgeschlossenen Stunde reicht. Die 30-Tage-Mittelung bleibt erhalten.
+Bestehende Instanzen mit der bisherigen Auswahl `7d` oder `30d` benötigen
+nach dem Modulupdate eine neue Zeitraumwahl im Formular. Die alten Werte
+werden nicht übernommen; bis zur Auswahl meldet die Instanz eine ungültige
+Konfiguration. „1 Monat“ ist nicht gleichbedeutend mit den bisherigen
+gleitenden 30 Tagen. Variablen- und Archivdaten bleiben unverändert.
 
 Die native Symcon-Kachel und ein optionales IPSView-WebContent-Widget verwenden
 denselben Archivwert. Das IPSView-Design kann das Kacheldesign erben oder

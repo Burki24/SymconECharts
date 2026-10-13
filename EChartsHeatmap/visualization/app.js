@@ -78,6 +78,20 @@
             ? date.slice(8, 10) + '.' + date.slice(5, 7) + '.' + date.slice(0, 4) : '';
     }
 
+    function rangeLabel(range) {
+        return translate({
+            '1w': '1 week', '1m': '1-month average', '3m': '3-month average',
+            '6m': '6-month average', '12m': '12-month average',
+            'ytd': 'Since January 1 average'
+        }[range] || range);
+    }
+
+    function maxOffset(heatmap) {
+        var limit = Number(heatmap.maxOffset);
+        return Number.isInteger(limit) && limit >= 0 ? limit
+            : (Number(bootstrap.options.heatmapMaxOffset) || 120);
+    }
+
     function updatePeriod(heatmap, headerInset) {
         periodElement.style.top = headerInset + 'px';
         periodElement.hidden = !bootstrap.options || !bootstrap.options.heatmapStatePath;
@@ -87,8 +101,8 @@
         todayElement.textContent = translate('Today');
         currentOffset = Math.max(0, Number(heatmap.windowOffset) || 0);
         periodLabelElement.textContent = dateLabel(heatmap.startDate) + ' – ' + dateLabel(heatmap.endDate)
-            + ' (' + translate(heatmap.range === '7d' ? '7 days' : '30-day average') + ')';
-        previousElement.disabled = navigating || currentOffset >= (Number(bootstrap.options.heatmapMaxOffset) || 120);
+            + ' (' + rangeLabel(heatmap.range) + ')';
+        previousElement.disabled = navigating || currentOffset >= maxOffset(heatmap);
         nextElement.disabled = navigating || currentOffset === 0;
         todayElement.disabled = navigating || currentOffset === 0;
     }
@@ -118,7 +132,7 @@
         var showValues = style.showValues === true && plotWidth / 24 >= valueSize * 2.8
             && plotHeight / 7 >= valueSize * 1.5;
         var weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(translate);
-        var datedDays = heatmap.range === '7d' && Array.isArray(heatmap.days) && heatmap.days.length === 7
+        var datedDays = heatmap.range === '1w' && Array.isArray(heatmap.days) && heatmap.days.length === 7
             ? heatmap.days : null;
         var days = datedDays ? datedDays.map(function (day) {
             return weekdays[day.weekday] + ' ' + dateLabel(day.date).slice(0, 6);
@@ -202,7 +216,7 @@
                         ? weekdays[datedDays[value[1]].weekday] + ' ' + dateLabel(datedDays[value[1]].date)
                         : days[value[1]] || '';
                     var intervalCount = String(data.count || 1);
-                    var intervalInfo = heatmap.range === '30d'
+                    var intervalInfo = heatmap.range && heatmap.range !== '1w'
                         ? translate('Average of {count} hourly intervals').replace('{count}', intervalCount)
                         : intervalCount + ' ' + translate('Hourly intervals');
                     return escapeHTML(dayLabel) + ', ' + escapeHTML(String(value[0]).padStart(2, '0'))
@@ -335,7 +349,8 @@
     }
 
     function navigate(offset) {
-        if (navigating || offset < 0 || offset > (Number(bootstrap.options.heatmapMaxOffset) || 120)
+        if (navigating || offset < 0 || offset > maxOffset(currentState && currentState.chart
+            ? currentState.chart.heatmap || {} : {})
             || !currentState || !currentState.chart) { return; }
         navigating = true;
         updatePeriod(currentState.chart.heatmap || {},

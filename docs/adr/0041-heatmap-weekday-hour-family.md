@@ -23,9 +23,9 @@ Sie nutzt eine numerische Archivvariable, identifiziert ausschließlich durch
 deren Variablen-ID. Sie ist weder ein Scatter-Modus noch eine Kalenderansicht.
 
 Die X-Achse zeigt lokale Stunden 0–23. Die ursprüngliche Y-Achse und
-Zeitfensterdefinition werden in ADR 0043 für sieben Tage präzisiert: dort
-erscheinen sieben datierte lokale Tage bis heute, während dreißig Tage weiter
-auf Montag–Sonntag gemittelt werden. Pro Wochentag/Stunde wird das
+Zeitfensterdefinition werden in ADR 0043 präzisiert: Eine Woche zeigt sieben
+datierte lokale Tage bis heute, während die dort festgelegten längeren
+Kalenderzeiträume auf Montag–Sonntag gemittelt werden. Pro Wochentag/Stunde wird das
 arithmetische Mittel der vorhandenen Stundenwerte gebildet. Für nicht
 vorhandene Kombinationen entsteht **keine**
 Null oder interpolierte Zelle. Bei der Zeitumstellung im Herbst gehen beide
@@ -57,8 +57,8 @@ Lizenz werden wie bei den anderen Builds dokumentiert.
 Die 7×24-Matrix ist nicht mit einem Kalender-Heatmap-Layout gleichzusetzen.
 Ein späteres Kalenderdiagramm bekommt bei belegtem Datenvertrag eine eigene
 Familienentscheidung. Freie X/Y-Kategorien, mehrere Quellen und alternative
-Reduzierer werden nicht vorab in `ECHM` versprochen. Die ersten beiden
-Zeiträume halten die Archivabfrage unter dem Gateway-Limit von 2000
-Stundenpunkten. Tests für Gruppierung, Lücken und Sommerzeit sind Pflicht;
+Reduzierer werden nicht vorab in `ECHM` versprochen. Längere Zeiträume
+werden innerhalb des Gateway-Limits von 2000 Stundenpunkten in einzelne
+Archivabfragen aufgeteilt. Tests für Gruppierung, Lücken und Sommerzeit sind Pflicht;
 Kachel/IPSView und tatsächliche Archivdaten werden nach Modulupdate live
 geprüft.

@@ -87,7 +87,7 @@ const model = {
     ], truncated: false
 };
 const wide = render(model, 1400, 520);
-const datedModel = { ...model, heatmap: { ...model.heatmap, range: '7d', windowOffset: 0,
+const datedModel = { ...model, heatmap: { ...model.heatmap, range: '1w', windowOffset: 0,
     startDate: '2026-10-07', endDate: '2026-10-13', days: [
         { date: '2026-10-07', weekday: 2 }, { date: '2026-10-08', weekday: 3 },
         { date: '2026-10-09', weekday: 4 }, { date: '2026-10-10', weekday: 5 },
@@ -105,15 +105,25 @@ assert.deepEqual(Array.from(dated.option.series[0].data, item => item.value[1]),
     'Weekday buckets must map to chronological seven-day rows.');
 assert.match(dated.option.tooltip.formatter({ data: dated.option.series[0].data[1] }), /13\.10\.2026/,
     'A seven-day tooltip must identify the actual date.');
-const thirtyDay = render({ ...model, heatmap: { ...model.heatmap, range: '30d', windowOffset: 0,
-    startDate: '2026-09-14', endDate: '2026-10-13', days: [] } }, 600, 400);
-assert.equal(thirtyDay.option.yAxis.data[0], 'Mon',
-    'Thirty days must retain the requested Monday–Sunday average rows.');
-assert.match(thirtyDay.periodLabelElement.textContent, /14\.09\.2026 – 13\.10\.2026 \(30-day average\)/,
-    'The selected interval and its weekday/hour aggregation must both be visible.');
-assert.match(thirtyDay.option.tooltip.formatter({ data: thirtyDay.option.series[0].data[1] }),
+const month = render({ ...model, heatmap: { ...model.heatmap, range: '1m', windowOffset: 0,
+    startDate: '2026-09-01', endDate: '2026-09-30', days: [] } }, 600, 400);
+assert.equal(month.option.yAxis.data[0], 'Mon',
+    'Calendar-month averages must retain seven Monday–Sunday rows.');
+assert.match(month.periodLabelElement.textContent, /01\.09\.2026 – 30\.09\.2026 \(1-month average\)/,
+    'The complete calendar month and its averaging must both be visible.');
+assert.match(month.option.tooltip.formatter({ data: month.option.series[0].data[1] }),
     /Average of 4 hourly intervals/,
-    'A thirty-day cell must identify the averaging behind its displayed value.');
+    'A calendar-month cell must identify the averaging behind its displayed value.');
+for (const [range, label] of [
+    ['3m', '3-month average'], ['6m', '6-month average'],
+    ['12m', '12-month average'], ['ytd', 'Since January 1 average']
+]) {
+    const view = render({ ...model, heatmap: { ...model.heatmap, range, windowOffset: 0,
+        startDate: '2026-01-01', endDate: '2026-10-13', days: [], maxOffset: 0 } }, 600, 400);
+    assert.match(view.periodLabelElement.textContent, new RegExp(label));
+    assert.equal(view.previousElement.disabled, true,
+        'The renderer must honor the range-specific navigation boundary.');
+}
 assert.equal(wide.option.series[0].type, 'heatmap');
 assert.equal(wide.option.series[0].data.length, 2, 'No missing weekday/hour cells may be invented.');
 assert.deepEqual(Array.from(wide.option.series[0].data[0].value), [0, 0, 0],

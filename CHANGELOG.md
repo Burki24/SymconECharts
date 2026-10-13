@@ -43,6 +43,14 @@
 
 ## Hinzugefügt
 
+- Die Heatmap bietet eine Woche, die letzten vollständigen 1/3/6/12
+  Kalendermonate und den Zeitraum seit dem 1. Januar. Für längere Zeiträume
+  werden alle Archivstunden in mehreren begrenzten Abfragen berücksichtigt;
+  die Navigation folgt Wochen, Monatsblöcken beziehungsweise dem gleichen
+  Jahresabschnitt im Vorjahr. Achtung: Bestehende Instanzen mit `7d` oder
+  `30d` müssen nach dem Modulupdate einen neuen Zeitraum auswählen; „1 Monat“
+  entspricht nicht den bisherigen gleitenden 30 Tagen.
+
 - Die Heatmap zeigt den tatsächlichen Datumsbereich und bietet in Kachel und
   IPSView Zurück/Vor/Heute für lückenlos anschließende 7- oder 30-Tage-Fenster.
   Die 30-Tage-Ansicht bleibt nach Wochentag und Stunde gemittelt.
