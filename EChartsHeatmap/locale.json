@@ -40,7 +40,7 @@
             "USA Today (April 2023 sample)": "USA Today (Beispiel April 2023)",
             "China Daily (April 2023 sample)": "China Daily (Beispiel April 2023)",
             "ABC.net (April 2023 sample)": "ABC.net (Beispiel April 2023)",
-            "Presets reproduce colors approximately from Schiewe (2023); values are mapped to the observed range. The two custom colors apply only to Custom.": "Die Vorlagen rekonstruieren die Farben aus Schiewe (2023) näherungsweise und verteilen sie über den vorhandenen Wertebereich. Die beiden individuellen Farben gelten nur für „Individuell“.",
+            "Preset colors are approximated from Schiewe (2023). The observed range is divided into equal classes; the two custom colors apply only to Custom.": "Die Farben sind aus Schiewe (2023) näherungsweise rekonstruiert. Der vorhandene Wertebereich wird in gleich breite Klassen geteilt; die beiden individuellen Farben gelten nur für „Individuell“.",
             "Automatic": "Automatisch",
             "Show color scale": "Farbskala anzeigen",
             "Show cell values": "Zellenwerte anzeigen",

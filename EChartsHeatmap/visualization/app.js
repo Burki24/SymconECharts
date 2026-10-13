@@ -7,6 +7,10 @@
     var warningElement = document.getElementById('echarts-heatmap-warning');
     var emptyElement = document.getElementById('echarts-heatmap-empty');
     var errorElement = document.getElementById('echarts-heatmap-error');
+    var classLegendElement = document.getElementById('echarts-heatmap-class-legend');
+    var classMinElement = document.getElementById('echarts-heatmap-class-min');
+    var classSegmentsElement = document.getElementById('echarts-heatmap-class-segments');
+    var classMaxElement = document.getElementById('echarts-heatmap-class-max');
     var chart = null;
     var theme = null;
     var currentState = bootstrap.state || null;
@@ -89,12 +93,37 @@
         var days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(translate);
         var low = style.lowColor || colors.track || colors.background;
         var high = style.highColor || colors.accent;
-        var scaleColors = Array.isArray(style.colorScaleColors)
+        var suppliedColors = Array.isArray(style.colorScaleColors)
             ? style.colorScaleColors.filter(function (color) { return /^#[0-9a-f]{6}$/i.test(color); }) : [];
-        if (scaleColors.length < 2 || scaleColors.length !== (style.colorScaleColors || []).length) {
-            scaleColors = [low, high];
-        }
+        var classScale = style.colorScalePreset && style.colorScalePreset !== 'custom'
+            && suppliedColors.length >= 2 && suppliedColors.length === style.colorScaleColors.length;
+        var scaleColors = classScale ? suppliedColors : [low, high];
         var decimals = Math.max(0, Math.min(6, Number(heatmap.decimals) || 0));
+        var visualMap = {
+            type: 'continuous', show: style.showColorScale === true && values.length > 0,
+            min: minimum, max: maximum,
+            text: [formatValue(displayedMaximum, decimals, heatmap.unit || ''),
+                formatValue(minimum, decimals, heatmap.unit || '')],
+            dimension: 2, calculable: false, orient: 'horizontal', left: 'center', bottom: compact ? 5 : 12,
+            itemWidth: compact ? 10 : 12, itemHeight: Math.max(80, Math.min(220, width * 0.32)),
+            textGap: compact ? 5 : 8,
+            textStyle: { color: style.axisColor || colors.text, fontSize: axisSize },
+            inRange: { color: scaleColors }
+        };
+        if (classScale) {
+            // Preserve the historical class count, but use the current archive range.
+            visualMap = {
+                type: 'piecewise', show: false, dimension: 2,
+                textStyle: { color: style.axisColor || colors.text, fontSize: axisSize },
+                pieces: scaleColors.map(function (color, index) {
+                    var lower = minimum + (maximum - minimum) * index / scaleColors.length;
+                    var upper = minimum + (maximum - minimum) * (index + 1) / scaleColors.length;
+                    return index === scaleColors.length - 1
+                        ? { gte: lower, lte: upper, color: color }
+                        : { gte: lower, lt: upper, color: color };
+                })
+            };
+        }
 
         return {
             backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
@@ -132,17 +161,7 @@
                 splitArea: { show: true, areaStyle: { color: [colors.background] } },
                 splitLine: { show: true, lineStyle: { color: style.gridColor || colors.border, opacity: 0.25 } }
             },
-            visualMap: {
-                type: 'continuous', show: style.showColorScale === true && values.length > 0,
-                min: minimum, max: maximum,
-                text: [formatValue(displayedMaximum, decimals, heatmap.unit || ''),
-                    formatValue(minimum, decimals, heatmap.unit || '')],
-                dimension: 2, calculable: false, orient: 'horizontal', left: 'center', bottom: compact ? 5 : 12,
-                itemWidth: compact ? 10 : 12, itemHeight: Math.max(80, Math.min(220, width * 0.32)),
-                textGap: compact ? 5 : 8,
-                textStyle: { color: style.axisColor || colors.text, fontSize: axisSize },
-                inRange: { color: scaleColors }
-            },
+            visualMap: visualMap,
             series: [{
                 type: 'heatmap', data: cells.map(function (cell) {
                     return { value: [Number(cell.hour), Number(cell.weekday), Number(cell.value)],
@@ -161,10 +180,37 @@
     function displayError(message) {
         if (chart) { chart.clear(); }
         chartElement.hidden = true;
+        classLegendElement.hidden = true;
         warningElement.hidden = true;
         emptyElement.hidden = true;
         errorElement.textContent = translate(message || loadError);
         errorElement.hidden = false;
+    }
+
+    function updateClassLegend(option, model) {
+        // ECharts' piecewise legend would allocate one label per class in a narrow tile.
+        var heatmap = model.heatmap || {};
+        var style = heatmap.style || {};
+        var values = Array.isArray(model.cells) ? model.cells.map(function (cell) { return Number(cell.value); })
+            .filter(function (value) { return Number.isFinite(value); }) : [];
+        if (option.visualMap.type !== 'piecewise' || style.showColorScale !== true || values.length === 0) {
+            classLegendElement.hidden = true;
+            return;
+        }
+        var decimals = Math.max(0, Math.min(6, Number(heatmap.decimals) || 0));
+        var minimum = Math.min.apply(null, values);
+        var maximum = Math.max.apply(null, values);
+        classMinElement.textContent = formatValue(minimum, decimals, heatmap.unit || '');
+        classMaxElement.textContent = formatValue(maximum, decimals, heatmap.unit || '');
+        classSegmentsElement.innerHTML = option.visualMap.pieces.map(function (piece) {
+            return '<span style="background-color:' + piece.color + '"></span>';
+        }).join('');
+        classLegendElement.style.color = option.visualMap.textStyle.color;
+        classLegendElement.style.fontSize = Math.min(option.visualMap.textStyle.fontSize,
+            Math.max(10, (Number(chartElement.clientWidth) || 240) / 24)) + 'px';
+        classLegendElement.setAttribute('aria-label', classMinElement.textContent + ' – '
+            + classMaxElement.textContent);
+        classLegendElement.hidden = false;
     }
 
     function render(state) {
@@ -193,7 +239,9 @@
                 { renderer: 'canvas' });
             theme = nextTheme;
         }
-        chart.setOption(buildOption(state.chart, nextTheme), true);
+        var option = buildOption(state.chart, nextTheme);
+        chart.setOption(option, true);
+        updateClassLegend(option, state.chart);
     }
 
     window.handleMessage = function (message) {

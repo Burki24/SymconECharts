@@ -26,6 +26,35 @@ html, body {
     color: var(--symc-text);
     text-align: center;
 }
+.echarts-heatmap-class-legend {
+    position: absolute;
+    z-index: 1;
+    inset-inline: 0;
+    inset-block-end: 0.55rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    inline-size: min(100%, 460px);
+    margin-inline: auto;
+    padding-inline: 0.3rem;
+    font-size: clamp(10px, 1.2vw, 12px);
+    white-space: nowrap;
+    pointer-events: none;
+}
+.echarts-heatmap-class-segments {
+    display: flex;
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    max-inline-size: 320px;
+    block-size: 0.75rem;
+    overflow: hidden;
+    border-radius: 0.15rem;
+}
+.echarts-heatmap-class-segments > span {
+    flex: 1 1 0;
+    min-inline-size: 0;
+}
 .echarts-heatmap-warning { inset-block-end: 0.65rem; }
 .echarts-heatmap-empty, .echarts-heatmap-error {
     inset-block-start: 50%;

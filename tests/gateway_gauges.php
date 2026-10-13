@@ -1194,10 +1194,6 @@ assertGatewayGauge(
         && $heatmapData['cells'][0]['count'] === 2,
     'Heatmap must group completed hourly gateway archive values by local weekday and hour.'
 );
-assertGatewayGauge(
-    strlen($heatmap->GetVisualizationTile()) < SYMCON_OUTPUT_BUFFER_LIMIT,
-    'The Heatmap Tile must remain below the Symcon output-buffer limit.'
-);
 $heatmapOutput = new EChartsHeatmap();
 $heatmapOutput->Create();
 $heatmapForm = json_decode($heatmapOutput->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
@@ -1250,8 +1246,10 @@ $heatmapPresetPreview = base64_decode(substr(
 assertGatewayGauge(
     is_string($heatmapPresetPreview)
         && str_contains($heatmapPresetPreview, '#333D8D')
-        && str_contains($heatmapPresetPreview, '#E7362D'),
-    'The Heatmap preview must react to an unsaved multi-color preset.'
+        && str_contains($heatmapPresetPreview, '#E7362D')
+        && substr_count($heatmapPresetPreview, 'y="330"') === 6
+        && !str_contains($heatmapPresetPreview, '<linearGradient id="scale">'),
+    'The Heatmap preview must show six distinct classes for an unsaved Tempera-6 preset.'
 );
 $heatmap->SetTestProperty('ColorScalePreset', 'tempera12');
 $presetData = json_decode($heatmap->GetHeatmapData(), true, 512, JSON_THROW_ON_ERROR);
@@ -1259,6 +1257,16 @@ assertGatewayGauge(
     $presetData['heatmap']['style']['colorScalePreset'] === 'tempera12'
         && count($presetData['heatmap']['style']['colorScaleColors']) === 12,
     'The selected palette must be serialized for the Tile and inherited IPSView renderer.'
+);
+$heatmapOutput->SetTestProperty('ColorScalePreset', 'tempera12');
+$heatmapPresetTile = $heatmapOutput->GetVisualizationTile();
+$heatmapPresetIPSView = $heatmapOutput->GetIPSViewHTML();
+assertGatewayGauge(
+    strlen($heatmapPresetTile) < SYMCON_OUTPUT_BUFFER_LIMIT
+        && strlen($heatmapPresetIPSView) < SYMCON_OUTPUT_BUFFER_LIMIT
+        && str_contains($heatmapPresetTile, 'echarts-heatmap-class-legend')
+        && str_contains($heatmapPresetIPSView, 'echarts-heatmap-class-legend'),
+    'Both Heatmap output routes must include the compact legend and remain below the output-buffer limit.'
 );
 $heatmap->SetTestProperty('SourceVariableID', 4712);
 $heatmap->ApplyChanges();

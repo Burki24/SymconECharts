@@ -17,6 +17,10 @@ function render(model, width = 800, height = 420, mode = 'symcon') {
     const warningElement = { hidden: true, textContent: '' };
     const emptyElement = { hidden: true, textContent: '' };
     const errorElement = { hidden: true, textContent: '' };
+    const classLegendElement = { hidden: true, style: {}, setAttribute: () => {} };
+    const classMinElement = { textContent: '' };
+    const classSegmentsElement = { innerHTML: '' };
+    const classMaxElement = { textContent: '' };
     let option;
     let chartWidth = width;
     let chartHeight = height;
@@ -42,12 +46,17 @@ function render(model, width = 800, height = 420, mode = 'symcon') {
             'echarts-heatmap-chart': chartElement,
             'echarts-heatmap-warning': warningElement,
             'echarts-heatmap-empty': emptyElement,
-            'echarts-heatmap-error': errorElement
+            'echarts-heatmap-error': errorElement,
+            'echarts-heatmap-class-legend': classLegendElement,
+            'echarts-heatmap-class-min': classMinElement,
+            'echarts-heatmap-class-segments': classSegmentsElement,
+            'echarts-heatmap-class-max': classMaxElement
         })[id]
     };
     vm.runInNewContext(designSource, { window });
     vm.runInNewContext(source, { window, document });
     return { get option() { return option; }, window, chartElement, warningElement, emptyElement, errorElement,
+        classLegendElement, classMinElement, classSegmentsElement, classMaxElement,
         resize: () => listeners.resize() };
 }
 
@@ -72,15 +81,44 @@ assert.deepEqual(Array.from(wide.option.visualMap.text, label => label.replace('
     'The visible color scale must label its high and low values with the source unit.');
 assert.deepEqual(Array.from(wide.option.visualMap.inRange.color), ['#123456', '#fedcba']);
 const presetColors = ['#123456', '#89abcd', '#fedcba'];
-const presetModel = { ...model, heatmap: { ...model.heatmap,
+const presetModel = { ...model, cells: [...model.cells, { hour: 12, weekday: 3, value: 10, count: 1 }],
+    heatmap: { ...model.heatmap,
     style: { ...model.heatmap.style, colorScalePreset: 'sample', colorScaleColors: presetColors } } };
 const preset = render(presetModel, 360, 240, 'ipsview');
-assert.deepEqual(Array.from(preset.option.visualMap.inRange.color), presetColors,
-    'All preset stops must reach ECharts in source order in compact IPSView widgets.');
-assert.deepEqual(Array.from(preset.option.visualMap.text, label => label.replace(',', '.')),
-    ['20.0 °C', '0.0 °C'], 'A palette must keep the observed endpoint labels.');
+assert.equal(preset.option.visualMap.type, 'piecewise',
+    'A sourced palette must assign classes instead of interpolating between color stops.');
+assert.deepEqual(Array.from(preset.option.visualMap.pieces, piece => piece.color), presetColors,
+    'All preset classes must reach ECharts in source order in compact IPSView widgets.');
+assert.equal(preset.option.visualMap.show, false,
+    'A compact widget must not show one oversized ECharts legend item per class.');
+assert.equal(preset.option.visualMap.pieces[0].gte, 0);
+assert.equal(preset.option.visualMap.pieces.at(-1).lte, 20);
+assert.equal(preset.classLegendElement.hidden, false);
+assert.equal(preset.classMinElement.textContent.replace(',', '.'), '0.0 °C');
+assert.equal(preset.classMaxElement.textContent.replace(',', '.'), '20.0 °C');
+assert.equal((preset.classSegmentsElement.innerHTML.match(/<span /g) || []).length, 3,
+    'The compact legend must show every distinct class without a text label for each one.');
+const twentyColors = Array.from({ length: 20 }, (_, index) =>
+    '#' + (index * 0x0d0d0d).toString(16).padStart(6, '0'));
+const twentyClassPreset = render({ ...presetModel, heatmap: { ...presetModel.heatmap,
+    style: { ...presetModel.heatmap.style, colorScaleColors: twentyColors } } }, 260, 240, 'symcon');
+assert.equal(twentyClassPreset.option.visualMap.pieces.length, 20);
+assert.equal((twentyClassPreset.classSegmentsElement.innerHTML.match(/<span /g) || []).length, 20,
+    'Even a 20-class preset must use one compact bar, not 20 labeled legend entries.');
+const hiddenPreset = render({ ...presetModel, heatmap: { ...presetModel.heatmap,
+    style: { ...presetModel.heatmap.style, showColorScale: false } } });
+assert.equal(hiddenPreset.option.visualMap.type, 'piecewise');
+assert.equal(hiddenPreset.classLegendElement.hidden, true,
+    'Disabling the legend must not disable classed cell colors.');
+const emptyPreset = render({ ...presetModel, cells: [] });
+assert.equal(emptyPreset.classLegendElement.hidden, true,
+    'An empty archive range must not show a meaningless class legend.');
+const constantPreset = render({ ...presetModel, cells: [{ hour: 8, weekday: 1, value: 9.2, count: 1 }] });
+assert.equal(constantPreset.classMaxElement.textContent.replace(',', '.'), '9.2 °C',
+    'A constant range must not expose artificial padding in the class legend.');
 const invalidPreset = render({ ...model, heatmap: { ...model.heatmap,
     style: { ...model.heatmap.style, colorScaleColors: ['#123456', 'invalid'] } } });
+assert.equal(invalidPreset.option.visualMap.type, 'continuous');
 assert.deepEqual(Array.from(invalidPreset.option.visualMap.inRange.color), ['#123456', '#fedcba'],
     'Malformed palette data must fall back to the legacy two-color design.');
 assert.equal(wide.option.series[0].label.show, true);
@@ -127,6 +165,12 @@ if (fs.existsSync(localECharts)) {
     presetChart.setOption(preset.option);
     assert.match(presetChart.renderToSVGString(), /<svg/,
         'The real ECharts engine must accept a multi-stop palette in a compact widget.');
+    const presetData = presetChart.getModel().getSeriesByIndex(0).getData();
+    assert.equal(presetData.getItemVisual(0, 'style').fill, '#123456');
+    assert.equal(presetData.getItemVisual(1, 'style').fill, '#fedcba',
+        'The actual ECharts engine must color cells by class rather than interpolate.');
+    assert.equal(presetData.getItemVisual(2, 'style').fill, '#89abcd',
+        'A middle value must receive the exact middle class color.');
     presetChart.dispose();
 }
 

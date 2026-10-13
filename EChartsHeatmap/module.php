@@ -257,6 +257,7 @@ class EChartsHeatmap extends IPSModuleStrict
         $high = EChartsBarPreview::Color($this->BarPreviewValue($values, 'HighColor', 'integer', $ipsView), $palette['accent']);
         $preset = $this->BarPreviewValue($values, 'ColorScalePreset', 'string', $ipsView);
         $scaleColors = HeatmapColorScales::Colors($preset);
+        $classScale = $scaleColors !== [];
         if ($scaleColors === []) {
             $scaleColors = [$low, $high];
         }
@@ -287,7 +288,7 @@ class EChartsHeatmap extends IPSModuleStrict
                 . EChartsBarPreview::E($this->Translate($name)) . '</text>';
             for ($hour = 0; $hour < 24; $hour++) {
                 $ratio = (($hour * 11 + $day * 17) % 100) / 100;
-                $color = self::ScaleColor($scaleColors, $ratio);
+                $color = self::ScaleColor($scaleColors, $ratio, $classScale);
                 $x = 54 + $hour * 26;
                 $y = 64 + $day * 34;
                 $svg .= '<rect x="' . $x . '" y="' . $y . '" width="24" height="30" rx="2" fill="'
@@ -304,12 +305,20 @@ class EChartsHeatmap extends IPSModuleStrict
                 . EChartsBarPreview::E($axisColor) . '" font-size="12">' . $hour . '</text>';
         }
         if ($showScale) {
-            $svg .= '<defs><linearGradient id="scale">';
-            foreach ($scaleColors as $index => $color) {
-                $svg .= '<stop offset="' . round($index * 100 / (count($scaleColors) - 1), 2)
-                    . '%" stop-color="' . EChartsBarPreview::E($color) . '"/>';
+            if ($classScale) {
+                foreach ($scaleColors as $index => $color) {
+                    $svg .= '<rect x="' . (260 + $index * 200 / count($scaleColors))
+                        . '" y="330" width="' . (200 / count($scaleColors))
+                        . '" height="8" fill="' . EChartsBarPreview::E($color) . '"/>';
+                }
+            } else {
+                $svg .= '<defs><linearGradient id="scale">';
+                foreach ($scaleColors as $index => $color) {
+                    $svg .= '<stop offset="' . round($index * 100 / (count($scaleColors) - 1), 2)
+                        . '%" stop-color="' . EChartsBarPreview::E($color) . '"/>';
+                }
+                $svg .= '</linearGradient></defs><rect x="260" y="330" width="200" height="8" fill="url(#scale)"/>';
             }
-            $svg .= '</linearGradient></defs><rect x="260" y="330" width="200" height="8" fill="url(#scale)"/>';
         }
 
         return $svg . '</svg>';
@@ -720,8 +729,11 @@ class EChartsHeatmap extends IPSModuleStrict
     }
 
     /** @param list<string> $colors */
-    private static function ScaleColor(array $colors, float $ratio): string
+    private static function ScaleColor(array $colors, float $ratio, bool $classScale): string
     {
+        if ($classScale) {
+            return $colors[min(count($colors) - 1, (int) floor(max(0.0, min(1.0, $ratio)) * count($colors)))];
+        }
         $position = max(0.0, min(1.0, $ratio)) * (count($colors) - 1);
         $index = min(count($colors) - 2, (int) floor($position));
         return self::InterpolateColor($colors[$index], $colors[$index + 1], $position - $index);

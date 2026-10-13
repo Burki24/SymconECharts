@@ -2,6 +2,11 @@
 
 ## Behoben
 
+- Die Temperatur-Vorlagen der Heatmap färben Zellen und Legende jetzt in
+  getrennten Farbklassen statt als kontinuierlichen Verlauf. Achtung:
+  Bereits ausgewählte Vorlagen ändern dadurch nach dem Modulupdate ihre
+  Darstellung; die individuelle Zwei-Farben-Skala bleibt unverändert.
+
 - Die Heatmap-Farbskala zeigt in Kachel und IPSView ihren kleinsten und größten
   Archivwert mit der konfigurierten Einheit an.
 
@@ -25,7 +30,7 @@
 
 - Die Heatmap bietet zehn mehrfarbige Temperatur-Vorlagen: Tempera-12/-6
   sowie acht aus Schiewe (2023) näherungsweise rekonstruierte Beispiele vom
-  April 2023. Kachel, IPSView und Formularvorschau nutzen dieselben Farben;
+  April 2023. Kachel, IPSView und Formularvorschau nutzen dieselben Klassenfarben;
   die bisherige Zwei-Farben-Skala bleibt die Voreinstellung.
 
 - `EChartsHeatmap` (`ECHM`) zeigt eine archivbasierte Wochentag-Stunden-Matrix

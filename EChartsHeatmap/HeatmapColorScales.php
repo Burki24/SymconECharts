@@ -9,8 +9,9 @@ namespace SymconECharts;
  * "Farbschemata für Temperaturkarten" (KN – Info und Praxis 3/2023).
  * These are historical examples, not current or official provider palettes.
  * The paper contains no machine-readable color table; the RGB samples are
- * approximate. Only the color order is reproduced. The Heatmap maps it to
- * the observed data range rather than claiming the original class bounds.
+ * approximate. Only the color order and class count are reproduced. The
+ * Heatmap divides the observed data range into equally sized classes rather
+ * than claiming the original temperature bounds.
  *
  * @see https://kartdok.staatsbibliothek-berlin.de/servlets/MCRFileNodeServlet/kartdok_derivate_00000704/Schiewe_Farbschemata%20f%C3%BCr%20Temperaturkarten_Was%20liegt%20zwischen%20Blau%20und%20Rot_KN-IP_2023.pdf
  */

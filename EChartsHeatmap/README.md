@@ -31,12 +31,15 @@ Tempera-6 sowie acht historische Farbreihen aus der Untersuchung von
 zur Wahl. Die als NOAA, SAWS, DWD, tagesschau, FAZ, USA Today, China Daily
 und ABC.net bezeichneten Beispiele stammen aus Karten vom April 2023. Ihre
 Farbtöne wurden aus den Abbildungen näherungsweise rekonstruiert: Es sind
-**keine aktuellen, offiziell veröffentlichten Anbieterpaletten**. ECharts
-interpoliert zwischen den Farbtönen und verteilt die Skala über den kleinsten
-und größten vorhandenen Archivwert; die ursprünglichen Temperaturklassen
-werden nicht als feste Grenzen übernommen. Für diese Vorlagen sollten
-Temperaturwerte in °C verwendet werden. Die eigenen Endfarben greifen nur
-bei „Individuell“; bestehende Instanzen behalten diese Voreinstellung.
+**keine aktuellen, offiziell veröffentlichten Anbieterpaletten**. Die
+Heatmap unterteilt den Bereich zwischen kleinstem und größtem Archivwert in
+gleich breite Klassen und verwendet je Klasse genau eine Farbe – ohne
+Farbmischung. Die ursprünglichen festen Temperaturgrenzen werden nicht
+übernommen; bei anderen Archivwerten können sich die Klassengrenzen ändern.
+Die kompakte Legende zeigt alle Farbfelder und die aktuellen Endwerte. Für
+diese Vorlagen sollten Temperaturwerte in °C verwendet werden. Die eigenen
+Endfarben greifen nur bei „Individuell“; bestehende Instanzen behalten diese
+Voreinstellung.
 Die Formularvorschau verwendet ausdrücklich Beispieldaten und liest beim
 Bearbeiten kein Archiv. Das Diagramm selbst zeigt leere Felder ohne
 Interpolation.

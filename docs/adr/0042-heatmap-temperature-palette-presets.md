@@ -30,13 +30,17 @@ und `HighColor`. Die weiteren stabilen Kennungen sind `tempera12`,
 `china2023` und `abc2023`.
 
 Die RGB-Werte sind näherungsweise aus den Farbfeldern der genannten
-Abbildungen gewonnen. Die Reihenfolge wird beibehalten, ECharts interpoliert
-jedoch zwischen den Stützfarben. Der gesamte Verlauf wird wie die bisherige
-Farbskala auf den beobachteten Minimal- und Maximalwert gelegt. Weder die
-historischen Temperaturklassengrenzen noch unveröffentlichte Originaldaten
-der Anbieter werden behauptet. Die Skalenendpunkte bleiben mit Einheit
-sichtbar. Die Vorlagen sind für Temperaturwerte in °C gedacht; andere
-Einheiten werden nicht automatisch umgerechnet.
+Abbildungen gewonnen. Reihenfolge und Klassenanzahl werden beibehalten.
+Nach einem ersten Laufzeittest wurde die zunächst interpolierende
+`continuous`-Abbildung durch eine diskrete `piecewise`-Abbildung ersetzt:
+Jede Klasse erhält exakt eine Farbe. Der Bereich zwischen beobachtetem
+Minimal- und Maximalwert wird in gleich breite Klassen geteilt. Weder die
+historischen festen Temperaturklassengrenzen noch unveröffentlichte
+Originaldaten der Anbieter werden behauptet. Die kompakte, nicht
+interaktive Legende zeigt alle Klassenfarben sowie die Endwerte mit Einheit,
+ohne für jede Klasse einen eigenen ECharts-Legendeneintrag zu beanspruchen.
+Die Vorlagen sind für Temperaturwerte in °C gedacht; andere Einheiten werden
+nicht automatisch umgerechnet.
 
 Die kanonischen Farbreihen liegen modulnah in `HeatmapColorScales.php`, weil
 derzeit nur die Wochentag-Stunden-Heatmap diesen konkreten fachlichen Vertrag
@@ -46,8 +50,10 @@ weitere nutzende Diagrammfamilie begründet eine Verschiebung nach `libs`.
 
 ## Folgen
 
-Bestehende Instanzen ändern ihr Aussehen nicht. Ein unbekannter Preset-Wert
-ist eine ungültige Konfiguration; beschädigte Farbdaten fallen im Renderer
-auf die individuelle Zwei-Farben-Skala zurück. Die Formularvorschau verwendet
+Instanzen mit `custom` ändern ihr Aussehen nicht. Bereits gewählte Vorlagen
+wechseln bei einem Modulupdate von interpolierten Farben zu festen Klassen.
+Ein unbekannter Preset-Wert ist eine ungültige Konfiguration; beschädigte
+Farbdaten fallen im Renderer auf die individuelle Zwei-Farben-Skala zurück.
+Die Formularvorschau verwendet
 weiter Beispieldaten. Kachel- und IPSView-Laufzeit werden nach Modulupdate
 gesondert live geprüft.

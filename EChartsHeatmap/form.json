@@ -189,7 +189,7 @@
                 },
                 {
                     "type": "Label",
-                    "caption": "Presets reproduce colors approximately from Schiewe (2023); values are mapped to the observed range. The two custom colors apply only to Custom."
+                    "caption": "Preset colors are approximated from Schiewe (2023). The observed range is divided into equal classes; the two custom colors apply only to Custom."
                 },
                 {
                     "type": "RowLayout",
