@@ -3,11 +3,12 @@
         "de": {
             "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts.": "Ein gemeinsames EChartsGateway genügt für alle ECharts-Diagramminstanzen. Bei weiteren Diagrammen das vorhandene Gateway auswählen.",
             "Title": "Titel",
+            "Use Symcon root (entire object tree)": "Symcon-Wurzel (gesamter Objektbaum) verwenden",
             "Root category or instance": "Wurzelkategorie oder -instanz",
             "Maximum depth": "Maximale Tiefe",
             "Maximum nodes": "Maximale Knotenanzahl",
             "Include hidden objects": "Ausgeblendete Objekte einbeziehen",
-            "Categories, instances and variables below the selected root are read only. Other object types are omitted. The node limit is reported in the chart.": "Kategorien, Instanzen und Variablen unterhalb der gewählten Wurzel werden nur gelesen. Andere Objekttypen entfallen. Das Erreichen der Knotengrenze wird im Diagramm angezeigt.",
+            "Categories, instances and variables below the selected root or the Symcon root are read only. Other object types are omitted. The node limit is reported in the chart.": "Kategorien, Instanzen und Variablen unterhalb der gewählten Wurzel oder der Symcon-Wurzel werden nur gelesen. Andere Objekttypen entfallen. Das Erreichen der Knotengrenze wird im Diagramm angezeigt.",
             "Tile designer": "Kacheldesigner",
             "Animate Tree": "Baum animieren",
             "Initial animation": "Startanimation",

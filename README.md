@@ -138,7 +138,8 @@ Folgende Module sind enthalten:
 
 - __EChartsTree__ ([Dokumentation](EChartsTree/README.md))
   Zeigt die Kategorien, Instanzen und Variablen unter einer gewählten
-  IP-Symcon-Wurzel als begrenzten, interaktiven Baum. Kachel und optionales
+  Kategorie, Instanz oder der obersten Symcon-Ebene als begrenzten,
+  interaktiven Baum. Kachel und optionales
   IPSView-Widget besitzen getrennte Designer und Live-Vorschauen.
 
 ## Kacheldesign und IPSView-Design

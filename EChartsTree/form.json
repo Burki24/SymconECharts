@@ -11,6 +11,12 @@
             "caption": "Title"
         },
         {
+            "type": "CheckBox",
+            "name": "UseSymconRoot",
+            "caption": "Use Symcon root (entire object tree)",
+            "onChange": "ECTR_UpdateTreeRootAvailability($id, $UseSymconRoot);"
+        },
+        {
             "type": "SelectObject",
             "name": "RootObjectID",
             "caption": "Root category or instance"
@@ -41,7 +47,7 @@
         },
         {
             "type": "Label",
-            "caption": "Categories, instances and variables below the selected root are read only. Other object types are omitted. The node limit is reported in the chart."
+            "caption": "Categories, instances and variables below the selected root or the Symcon root are read only. Other object types are omitted. The node limit is reported in the chart."
         },
         {
             "type": "ExpansionPanel",

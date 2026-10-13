@@ -36,6 +36,24 @@ assertTree($tree['root']['children'][0]['children'][0]['children'][1]['id'] === 
 assertTree($tree['root']['children'][0]['children'][0]['children'][0]['displayValue'] === '21,3 °C', 'Formatted value missing.');
 assertTree($tree['count'] === 5 && $tree['truncated'] === false, 'Visible tree count is wrong.');
 
+$symconRoot = TreeHierarchy::Build(
+    0,
+    1,
+    20,
+    false,
+    static fn (int $id): array => $id === 0
+        ? ['ObjectType' => 0, 'ObjectName' => 'Symcon', 'ObjectIsHidden' => false]
+        : $objects[$id],
+    static fn (int $id): array => $id === 0 ? [101] : [],
+    $value
+);
+assertTree(
+    $symconRoot['root']['id'] === 'object-0'
+        && $symconRoot['root']['children'][0]['id'] === 'object-101'
+        && $symconRoot['count'] === 2,
+    'The Symcon root must be represented as a stable top-level Tree node.'
+);
+
 $shallow = TreeHierarchy::Build(100, 1, 20, false, $object, $getChildren, $value);
 assertTree($shallow['count'] === 2 && $shallow['root']['children'][0]['children'] === [], 'Maximum depth was ignored.');
 

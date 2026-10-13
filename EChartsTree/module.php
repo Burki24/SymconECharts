@@ -87,6 +87,7 @@ class EChartsTree extends IPSModuleStrict
         $this->RegisterTimer('TreeRefresh', 0, 'ECTR_RefreshTree($_IPS["TARGET"]);');
         $this->RegisterTransientRefresh('ECTR');
         $this->RegisterPropertyInteger('RootObjectID', 0);
+        $this->RegisterPropertyBoolean('UseSymconRoot', false);
         $this->RegisterPropertyString('Title', '');
         $this->RegisterPropertyInteger('MaxDepth', 3);
         $this->RegisterPropertyInteger('MaxNodes', 80);
@@ -130,6 +131,13 @@ class EChartsTree extends IPSModuleStrict
     public function GetConfigurationForm(): string
     {
         $form = $this->LoadConfigurationForm();
+        foreach ($form['elements'] as &$element) {
+            if (($element['name'] ?? null) === 'RootObjectID') {
+                $element['enabled'] = !$this->ReadPropertyBoolean('UseSymconRoot');
+                break;
+            }
+        }
+        unset($element);
         $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
         $form['elements'] = $this->WithAnimationFormControls($form['elements']);
         $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
@@ -141,7 +149,7 @@ class EChartsTree extends IPSModuleStrict
             ['caption' => 'Node and line colors', 'start' => 'CategoryColor']
         ]);
         $fields = [
-            'Title', 'RootObjectID', 'MaxDepth', 'MaxNodes', 'IncludeHidden',
+            'Title', 'UseSymconRoot', 'RootObjectID', 'MaxDepth', 'MaxNodes', 'IncludeHidden',
             'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
             'IPSViewBackgroundOpacityPercent',
             ...array_keys(self::DESIGN_DEFAULTS),
@@ -162,6 +170,11 @@ class EChartsTree extends IPSModuleStrict
             return;
         }
         throw new InvalidArgumentException('Unknown action: ' . $Ident);
+    }
+
+    public function UpdateTreeRootAvailability(bool $UseSymconRoot): void
+    {
+        $this->UpdateFormField('RootObjectID', 'enabled', !$UseSymconRoot);
     }
 
     public function CopyTileDesignToIPSView(): void
@@ -259,8 +272,9 @@ class EChartsTree extends IPSModuleStrict
             ['name' => 'Haus', 'kind' => 'category'], ['name' => 'Wohnen', 'kind' => 'category'],
             ['name'                                           => 'Sensor', 'kind' => 'instance'], ['name' => 'Temperatur', 'kind' => 'variable', 'displayValue' => '21 °C']
         ];
-        $rootID = (int) ($values['RootObjectID'] ?? $this->ReadPropertyInteger('RootObjectID'));
-        if ($rootID > 0 && IPS_ObjectExists($rootID)) {
+        $useSymconRoot = (bool) ($values['UseSymconRoot'] ?? $this->ReadPropertyBoolean('UseSymconRoot'));
+        $rootID = $useSymconRoot ? 0 : (int) ($values['RootObjectID'] ?? $this->ReadPropertyInteger('RootObjectID'));
+        if ($useSymconRoot || ($rootID > 0 && IPS_ObjectExists($rootID))) {
             try {
                 $tree = $this->ReadHierarchy(
                     $rootID,
@@ -356,7 +370,7 @@ class EChartsTree extends IPSModuleStrict
         }
         try {
             $hierarchy = $this->ReadHierarchy(
-                $this->ReadPropertyInteger('RootObjectID'),
+                $this->ReadPropertyBoolean('UseSymconRoot') ? 0 : $this->ReadPropertyInteger('RootObjectID'),
                 $this->ReadPropertyInteger('MaxDepth'),
                 $this->ReadPropertyInteger('MaxNodes'),
                 $this->ReadPropertyBoolean('IncludeHidden')
@@ -390,7 +404,9 @@ class EChartsTree extends IPSModuleStrict
             $maxDepth,
             $maxNodes,
             $includeHidden,
-            static fn (int $id): array => IPS_GetObject($id),
+            static fn (int $id): array => $id === 0
+                ? ['ObjectType' => 0, 'ObjectName' => 'Symcon', 'ObjectIsHidden' => false]
+                : IPS_GetObject($id),
             static fn (int $id): array => IPS_GetChildrenIDs($id),
             static fn (int $id): string => (string) GetValueFormatted($id)
         );
@@ -462,8 +478,9 @@ class EChartsTree extends IPSModuleStrict
     private function GetConfigurationError(): ?array
     {
         $rootID = $this->ReadPropertyInteger('RootObjectID');
-        if ($rootID < 1 || !IPS_ObjectExists($rootID)
-            || !in_array(IPS_GetObject($rootID)['ObjectType'] ?? null, [0, 1], true)
+        if ((!$this->ReadPropertyBoolean('UseSymconRoot')
+            && ($rootID < 1 || !IPS_ObjectExists($rootID)
+                || !in_array(IPS_GetObject($rootID)['ObjectType'] ?? null, [0, 1], true)))
             || $this->ReadPropertyInteger('MaxDepth') < 1 || $this->ReadPropertyInteger('MaxDepth') > 6
             || $this->ReadPropertyInteger('MaxNodes') < 10 || $this->ReadPropertyInteger('MaxNodes') > 500) {
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => 'Select a valid Tree root and limits.'];

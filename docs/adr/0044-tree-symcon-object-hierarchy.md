@@ -18,9 +18,15 @@ Familien bleiben eigene Roadmap-Einträge.
 
 Ein eigenes Gerätemodul `EChartsTree` nutzt Präfix `ECTR` und die Modul-GUID
 `{2B2C26A3-6F92-48D0-ADE1-5F03D7282EF8}`. Der Anwender wählt eine Kategorie
-oder Instanz anhand ihrer Objekt-ID als Wurzel. Die Auswahl erfasst darunter
-lesend Kategorien, Instanzen und Variablen in der von Symcon gelieferten
-Kinderreihenfolge. Andere Objekttypen, insbesondere Links und Skripte, werden
+oder Instanz anhand ihrer Objekt-ID als Wurzel oder aktiviert ausdrücklich
+`UseSymconRoot` für den gesamten Symcon-Objektbaum. Diese zusätzliche Property
+ist standardmäßig `false`: Eine bisher nicht gewählte `RootObjectID = 0` wird
+dadurch nicht stillschweigend zur gültigen Wurzel. Bei aktivierter Option
+verwendet die Projektion intern die Symcon-Root-ID `0` und eine benannte
+Wurzel „Symcon“; eine zuvor gewählte positive Objekt-ID bleibt gespeichert.
+Die Auswahl erfasst darunter lesend Kategorien, Instanzen und Variablen in
+der von Symcon gelieferten Kinderreihenfolge. Andere Objekttypen,
+insbesondere Links und Skripte, werden
 nicht als Knoten oder alternative Quellen aufgelöst. Ein ausgeblendeter Zweig
 entfällt standardmäßig insgesamt; seine Einbeziehung ist optional. Die
 konfigurierte maximale Tiefe liegt zwischen 1 und 6, die Knotengrenze
@@ -30,7 +36,8 @@ Erreicht die Traversierung die Knotengrenze vor weiteren passenden Objekten,
 wird die Kürzung sichtbar gemeldet. Die Tiefengrenze ist
 hingegen eine bewusst gewählte Ansicht und keine Fehlermeldung.
 
-Die Objekt-ID ist die alleinige technische Identität eines Knotens.
+Die Objekt-ID ist die alleinige technische Identität eines Knotens; die
+synthetisch benannte Symcon-Wurzel verwendet intern `object-0`.
 Variablennamen, Elternnamen und Pfade werden nicht als Schlüssel verwendet;
 gleichnamige Variablen bleiben getrennt. Der aktuelle formatierte Wert ist
 nur Anzeigeinhalt einer Variablen, keine Gewichtung der Baumgeometrie.

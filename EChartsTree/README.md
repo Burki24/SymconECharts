@@ -5,14 +5,20 @@ interaktiven Apache-ECharts-Baum in einer nativen Kachel oder einem optionalen
 IPSView-HTML-Widget. Benötigt werden IP-Symcon 9.0/9.1 und ein verbundenes,
 aktives `EChartsGateway`. Ein Archiv ist nicht erforderlich.
 
-Wählen Sie als Wurzel eine Kategorie oder Instanz. Darunter werden Kategorien,
-Instanzen und Variablen in der Symcon-Reihenfolge aufgenommen; Skripte, Links,
+Wählen Sie als Wurzel eine Kategorie oder Instanz. Für den gesamten Objektbaum
+aktivieren Sie stattdessen „Symcon-Wurzel verwenden“; das Objekt-Auswahlfeld
+wird dann deaktiviert. Eine dort zuvor gewählte Kategorie oder Instanz bleibt
+gespeichert und wird beim Ausschalten der Option wieder verwendet. Ohne diese
+Option und ohne ausgewähltes Objekt bleibt die Instanz unkonfiguriert.
+Unter der aktiven Wurzel werden Kategorien, Instanzen und Variablen in der
+Symcon-Reihenfolge aufgenommen; Skripte, Links,
 Medien und andere Objekttypen bleiben außen vor. Ausgeblendete Objekte und
 deren Zweige erscheinen standardmäßig nicht. „Ausgeblendete Objekte
 einbeziehen“ hebt diesen Filter auf. Maximale Tiefe und Knotenzahl begrenzen
 die Darstellung auf 1–6 Nachkommensebenen beziehungsweise 10–500 Knoten.
-Wenn die Knotengrenze weitere passende Objekte abschneidet, zeigt das Diagramm eine
-Meldung. Beide Ausgabewege verwenden dieselbe Wurzel und dieselben Grenzen.
+Wenn die Knotengrenze weitere passende Objekte abschneidet, zeigt das
+Diagramm eine Meldung. Beide Ausgabewege verwenden dieselbe Wurzel und
+dieselben Grenzen.
 
 Jeder Knoten trägt seinen aktuellen Symcon-Namen. Bei Variablen zeigt der
 Tooltip zusätzlich den formatierten aktuellen Wert; dieser kann optional auch

@@ -1099,6 +1099,75 @@ assertGatewayGauge(
         && findGaugeFormElement($treeForm['elements'], 'IPSViewTreeLayout')['enabled'] === true,
     'Tree must expose live Tile and independent IPSView previews.'
 );
+$GLOBALS['symconTestTreeChildren'][0] = [9000];
+try {
+    $unselectedTree = new EChartsTree();
+    $unselectedTree->Create();
+    $unselectedTree->ApplyChanges();
+    $unselectedForm = json_decode($unselectedTree->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+    assertGatewayGauge(
+        $unselectedTree->GetTestStatus() === 201
+            && findGaugeFormElement($unselectedForm['elements'], 'RootObjectID')['enabled'] === true,
+        'An unselected Tree must remain invalid and offer the object selector.'
+    );
+    $unselectedTree->UpdateBarPreviewFromForm(json_encode([
+        'UseSymconRoot' => true, 'RootObjectID' => 0
+    ], JSON_THROW_ON_ERROR));
+    $rootDraftSvg = base64_decode(substr(
+        (string) array_slice($unselectedTree->GetTestFormUpdates(), -2)[0]['Value'],
+        strlen('data:image/svg+xml;base64,')
+    ), true);
+    assertGatewayGauge(
+        is_string($rootDraftSvg) && str_contains($rootDraftSvg, 'Symcon') && str_contains($rootDraftSvg, 'Home'),
+        'Unsaved Symcon-root selection must use the real hierarchy in the live preview.'
+    );
+
+    $symconTree = new EChartsTree();
+    $symconTree->Create();
+    $symconTree->SetTestProperty('UseSymconRoot', true);
+    $symconTree->ApplyChanges();
+    $symconData = json_decode($symconTree->GetTreeData(), true, 512, JSON_THROW_ON_ERROR);
+    $symconForm = json_decode($symconTree->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+    $rootToggle = findGaugeFormElement($symconForm['elements'], 'UseSymconRoot');
+    assertGatewayGauge(
+        $symconTree->GetTestStatus() === IS_ACTIVE
+            && $symconData['tree']['root']['id'] === 'object-0'
+            && $symconData['tree']['root']['name'] === 'Symcon'
+            && $symconData['tree']['root']['children'][0]['id'] === 'object-9000'
+            && findGaugeFormElement($symconForm['elements'], 'RootObjectID')['enabled'] === false
+            && str_contains((string) ($rootToggle['onChange'] ?? ''), 'ECTR_UpdateTreeRootAvailability')
+            && str_contains((string) ($rootToggle['onChange'] ?? ''), 'ECTR_UpdateBarPreviewFromForm'),
+        'Explicit Symcon-root mode must traverse object zero and disable the unused object selector.'
+    );
+    assertGatewayGauge(
+        str_contains($symconTree->GetVisualizationTile(), '"id":"object-0"')
+            && str_contains($symconTree->GetIPSViewHTML(), '"id":"object-0"'),
+        'Tile and IPSView must render the explicitly selected Symcon root.'
+    );
+    $symconTree->UpdateTreeRootAvailability(true);
+    assertGatewayGauge(
+        array_slice($symconTree->GetTestFormUpdates(), -1)[0] === [
+            'Field' => 'RootObjectID', 'Parameter' => 'enabled', 'Value' => false
+        ],
+        'Symcon-root toggle must immediately update object-selector availability.'
+    );
+    $symconTree->SetTestProperty('RootObjectID', 9000);
+    $symconTree->ApplyChanges();
+    assertGatewayGauge(
+        json_decode($symconTree->GetTreeData(), true, 512, JSON_THROW_ON_ERROR)['tree']['root']['id'] === 'object-0',
+        'Explicit Symcon-root mode must override a previously selected object without deleting it.'
+    );
+    $symconTree->SetTestProperty('UseSymconRoot', false);
+    $symconTree->ApplyChanges();
+    $restoredForm = json_decode($symconTree->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+    assertGatewayGauge(
+        json_decode($symconTree->GetTreeData(), true, 512, JSON_THROW_ON_ERROR)['tree']['root']['id'] === 'object-9000'
+            && findGaugeFormElement($restoredForm['elements'], 'RootObjectID')['enabled'] === true,
+        'Turning off Symcon-root mode must restore the stored object selection.'
+    );
+} finally {
+    unset($GLOBALS['symconTestTreeChildren'][0]);
+}
 $tree->SetTestProperty('MaxNodes', 2);
 $tree->ApplyChanges();
 assertGatewayGauge($tree->GetTestStatus() === 201, 'Tree must reject out-of-contract node limits.');
