@@ -115,6 +115,9 @@ const chart = {
     }
 };
 assert.equal(resizeChartIfNeeded(null, chartElement), false, 'A missing chart cannot be resized.');
+assert.equal(resizeChartIfNeeded({ isDisposed: () => true, getWidth: () => {
+    throw new Error('Disposed chart must not be measured.');
+} }, chartElement), false, 'A disposed chart cannot be resized by a pending observer callback.');
 assert.equal(resizeChartIfNeeded(chart, chartElement), false,
     'The initial observer notification must not interrupt chart animations.');
 chartElement.clientWidth = 500;

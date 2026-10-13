@@ -121,7 +121,8 @@
     }
 
     function resizeChartIfNeeded(chart, element) {
-        if (!chart || (chart.getWidth() === element.clientWidth && chart.getHeight() === element.clientHeight)) {
+        if (!chart || (typeof chart.isDisposed === 'function' && chart.isDisposed())
+            || (chart.getWidth() === element.clientWidth && chart.getHeight() === element.clientHeight)) {
             return false;
         }
         chart.resize();

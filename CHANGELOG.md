@@ -2,6 +2,9 @@
 
 ## Behoben
 
+- Ausstehende Größenänderungen greifen nach dem Verlassen oder Neuaufbau einer
+  Kachel nicht mehr auf bereits freigegebene ECharts-Instanzen zu.
+
 - Die Scatter-Farbskala verwendet nun die ECharts-Abmessungen korrekt:
   eine flache, an die Kachel- oder IPSView-Breite angepasste horizontale
   Legende statt eines schmalen senkrechten Streifens. Die Formularvorschau
