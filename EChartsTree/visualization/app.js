@@ -64,9 +64,17 @@
         var fallback = colors.seriesColors || [colors.accent];
         var kind = node.kind === 'variable' ? 'variable' : (node.kind === 'instance' ? 'instance' : 'category');
         var color = style[kind + 'Color'] || fallback[{ category: 0, instance: 1, variable: 2 }[kind] % fallback.length];
+        var health = ['ok', 'warning', 'critical'].includes(node.health) ? node.health : '';
+        var statusColors = {
+            ok: style.healthyColor || '#2EAD69',
+            warning: style.warningColor || '#F3A43B',
+            critical: style.criticalColor || '#E54F55'
+        };
+        if (health) { color = statusColors[health]; }
         var result = {
             id: String(node.id), name: String(node.name || ''), kind: kind,
             displayValue: String(node.displayValue || ''),
+            health: health,
             itemStyle: { color: color },
             children: (node.children || []).map(function (child) { return coloredNode(child, style, colors); })
         };
@@ -107,7 +115,10 @@
                 formatter: function (parameter) {
                     var data = parameter.data || {};
                     return escapeHTML(data.name || '') + (data.displayValue
-                        ? '<br>' + escapeHTML(data.displayValue) : '');
+                        ? '<br>' + escapeHTML(data.displayValue) : '')
+                        + (data.health ? '<br>' + escapeHTML(translate('Status: ' + ({
+                            ok: 'OK', warning: 'Warning', critical: 'Critical'
+                        }[data.health] || ''))) : '');
                 }
             },
             series: [{

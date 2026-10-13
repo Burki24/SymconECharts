@@ -113,6 +113,12 @@ $GLOBALS['symconTestTreeObjects'] = [
 ];
 $GLOBALS['symconTestTreeChildren'] = [9000 => [9001, 9004], 9001 => [9002, 9003], 9004 => [9005]];
 $GLOBALS['symconTestTreeValues'] = [9002 => '21.3 °C', 9003 => '22.4 °C', 9005 => 'secret'];
+$GLOBALS['symconTestVariables'][9002] = [
+    'VariableType' => 1, 'VariableUpdated' => 1780000008, 'Value' => 1, 'Name' => 'First status'
+];
+$GLOBALS['symconTestVariables'][9003] = [
+    'VariableType' => 1, 'VariableUpdated' => 1780000008, 'Value' => 2, 'Name' => 'Second status'
+];
 $GLOBALS['symconTestProfiles'] = [
     'Test.Wind' => [
         'MinValue' => 0.0,
@@ -1098,6 +1104,63 @@ assertGatewayGauge(
         && findGaugeFormElement($treeForm['elements'], 'IPSViewBarPreview')['type'] === 'Image'
         && findGaugeFormElement($treeForm['elements'], 'IPSViewTreeLayout')['enabled'] === true,
     'Tree must expose live Tile and independent IPSView previews.'
+);
+$tree->SetTestProperty('StatusRules', json_encode([
+    ['VariableID' => 9002, 'Direction' => 'high', 'WarningAt' => 1, 'CriticalAt' => 2],
+    ['VariableID' => 9003, 'Direction' => 'high', 'WarningAt' => 1, 'CriticalAt' => 2]
+], JSON_THROW_ON_ERROR));
+$tree->SetTestProperty('HealthyColor', 0x008800);
+$tree->SetTestProperty('WarningColor', 0xCC9900);
+$tree->SetTestProperty('CriticalColor', 0xCC0000);
+$tree->SetTestProperty('IPSViewCriticalColor', 0xDDAA00);
+$tree->ApplyChanges();
+$healthData = json_decode($tree->GetTreeData(), true, 512, JSON_THROW_ON_ERROR);
+$healthRoot = $healthData['tree']['root'];
+$healthForm = json_decode($tree->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $healthRoot['health'] === 'critical'
+        && $healthRoot['children'][0]['health'] === 'critical'
+        && $healthRoot['children'][0]['children'][0]['health'] === 'warning'
+        && $healthRoot['children'][0]['children'][1]['health'] === 'critical'
+        && $healthData['tree']['style']['criticalColor'] === '#CC0000'
+        && findGaugeFormElement($healthForm['elements'], 'StatusRules')['type'] === 'List'
+        && findGaugeFormElement($healthForm['elements'], 'IPSViewCriticalColor')['enabled'] === true,
+    'Tree must expose explicit status rules, propagate severity and keep separate design colors.'
+);
+assertGatewayGauge(
+    str_contains($tree->GetVisualizationTile(), '"health":"critical"')
+        && str_contains($tree->GetIPSViewHTML(), '"health":"critical"')
+        && str_contains($tree->GetIPSViewHTML(), '"criticalColor":"#DDAA00"'),
+    'Tile and IPSView must share status while applying independent status colors.'
+);
+$tree->UpdateBarPreviewFromForm(json_encode([
+    'StatusRules' => [
+        ['VariableID' => 9002, 'Direction' => 'high', 'WarningAt' => 1, 'CriticalAt' => 1]
+    ],
+    'CriticalColor'        => 0xAABBCC,
+    'IPSViewUseTileDesign' => false,
+    'IPSViewCriticalColor' => 0x0011AA
+], JSON_THROW_ON_ERROR));
+$treePreviewUpdates = array_slice($tree->GetTestFormUpdates(), -2);
+$treeTileSvg = base64_decode(substr($treePreviewUpdates[0]['Value'], strlen('data:image/svg+xml;base64,')), true);
+$treeIPSViewSvg = base64_decode(substr($treePreviewUpdates[1]['Value'], strlen('data:image/svg+xml;base64,')), true);
+assertGatewayGauge(
+    is_string($treeTileSvg) && is_string($treeIPSViewSvg)
+        && str_contains($treeTileSvg, 'fill="#AABBCC"')
+        && str_contains($treeIPSViewSvg, 'fill="#0011AA"'),
+    'Unsaved Tree status rules and independent colors must reach both live previews.'
+);
+$tree->SetTestProperty('StatusRules', '[{"VariableID":9002,"Direction":"high","WarningAt":2,"CriticalAt":1}]');
+$tree->ApplyChanges();
+assertGatewayGauge($tree->GetTestStatus() === 205, 'Tree must reject invalid status thresholds.');
+$tree->SetTestProperty('StatusRules', '[{"VariableID":99999,"Direction":"high","WarningAt":1,"CriticalAt":2}]');
+$tree->ApplyChanges();
+assertGatewayGauge($tree->GetTestStatus() === 205, 'Tree must reject missing status variables.');
+$tree->SetTestProperty('StatusRules', '[]');
+$tree->ApplyChanges();
+assertGatewayGauge(
+    !isset(json_decode($tree->GetTreeData(), true, 512, JSON_THROW_ON_ERROR)['tree']['root']['health']),
+    'Removing all status rules must restore the previous uncolored model.'
 );
 $GLOBALS['symconTestTreeChildren'][0] = [9000];
 try {
@@ -7196,7 +7259,7 @@ $expectedDesignerSections = [
         'Polar layout and order', 'Labels and visibility', 'Bar geometry',
         'Bar appearance and effects', 'Scale and angular range', 'Typography and colors'
     ],
-    EChartsTree::class             => ['Layout and interaction', 'Labels and typography', 'Node and line colors']
+    EChartsTree::class             => ['Layout and interaction', 'Labels and typography', 'Node and line colors', 'Status colors']
 ];
 $requiredGermanFormTexts = [
     'EChartsBarCategory' => [

@@ -89,6 +89,18 @@ assert.ok(radial.option.series[0].label.fontSize > tree.option.series[0].label.f
 const limited = render(baseStyle, root, 800, 'symcon', 400, true);
 assert.equal(limited.warningElement.hidden, false);
 
+const healthRoot = { ...root, health: 'critical', children: [{
+    ...root.children[0], health: 'critical', children: [
+        { ...root.children[0].children[0], health: 'warning' },
+        { ...root.children[0].children[1], health: 'critical' }
+    ]
+}] };
+const health = render({ ...baseStyle, healthyColor: '#008800', warningColor: '#cc9900',
+    criticalColor: '#cc0000' }, healthRoot);
+assert.equal(health.option.series[0].data[0].itemStyle.color, '#cc0000');
+assert.equal(health.option.series[0].data[0].children[0].children[0].itemStyle.color, '#cc9900');
+assert.match(health.option.tooltip.formatter({ data: health.option.series[0].data[0] }), /Status: Critical/);
+
 const hostile = render(baseStyle, { ...root, name: '<img src=x onerror=alert(1)>' });
 const tooltip = hostile.option.tooltip.formatter({ data: { name: '<script>', displayValue: '<b>' } });
 assert.ok(tooltip.includes('&lt;script&gt;'));

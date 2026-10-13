@@ -24,6 +24,7 @@ $tests = [
     __DIR__ . '/heatmap_aggregation.php',
     __DIR__ . '/heatmap_window.php',
     __DIR__ . '/tree_hierarchy.php',
+    __DIR__ . '/tree_health.php',
     __DIR__ . '/gateway_gauges.php'
 ];
 

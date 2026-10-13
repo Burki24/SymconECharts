@@ -51,6 +51,119 @@
         },
         {
             "type": "ExpansionPanel",
+            "caption": "Plant status",
+            "expanded": false,
+            "items": [
+                {
+                    "type": "Label",
+                    "caption": "Only explicitly selected numeric or Boolean variables determine status. Thresholds use raw values; parents inherit the worst status of visible descendants. Equal warning and critical thresholds mark an alarm directly as critical."
+                },
+                {
+                    "type": "List",
+                    "name": "StatusRules",
+                    "caption": "Status variables",
+                    "rowCount": 6,
+                    "add": true,
+                    "delete": true,
+                    "columns": [
+                        {
+                            "caption": "Variable",
+                            "name": "VariableID",
+                            "width": "280px",
+                            "add": 0,
+                            "edit": {
+                                "type": "SelectVariable",
+                                "validVariableTypes": [
+                                    0,
+                                    1,
+                                    2
+                                ]
+                            }
+                        },
+                        {
+                            "caption": "Alarm direction",
+                            "name": "Direction",
+                            "width": "160px",
+                            "add": "high",
+                            "edit": {
+                                "type": "Select",
+                                "options": [
+                                    {
+                                        "caption": "Higher is worse",
+                                        "value": "high"
+                                    },
+                                    {
+                                        "caption": "Lower is worse",
+                                        "value": "low"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "caption": "Warning at",
+                            "name": "WarningAt",
+                            "width": "130px",
+                            "add": 1,
+                            "edit": {
+                                "type": "NumberSpinner",
+                                "digits": 3
+                            }
+                        },
+                        {
+                            "caption": "Critical at",
+                            "name": "CriticalAt",
+                            "width": "130px",
+                            "add": 2,
+                            "edit": {
+                                "type": "NumberSpinner",
+                                "digits": 3
+                            }
+                        }
+                    ],
+                    "form": [
+                        {
+                            "type": "SelectVariable",
+                            "name": "VariableID",
+                            "caption": "Variable",
+                            "validVariableTypes": [
+                                0,
+                                1,
+                                2
+                            ]
+                        },
+                        {
+                            "type": "Select",
+                            "name": "Direction",
+                            "caption": "Alarm direction",
+                            "options": [
+                                {
+                                    "caption": "Higher is worse",
+                                    "value": "high"
+                                },
+                                {
+                                    "caption": "Lower is worse",
+                                    "value": "low"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "WarningAt",
+                            "caption": "Warning at",
+                            "digits": 3
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "CriticalAt",
+                            "caption": "Critical at",
+                            "digits": 3
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
             "caption": "Tile designer",
             "expanded": false,
             "items": [
@@ -285,6 +398,32 @@
                             "transparentCaption": "Automatic (theme)"
                         }
                     ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "HealthyColor",
+                            "caption": "Healthy color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (status)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "WarningColor",
+                            "caption": "Warning color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (status)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "CriticalColor",
+                            "caption": "Critical color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (status)"
+                        }
+                    ]
                 }
             ]
         }
@@ -321,6 +460,11 @@
             "code": 204,
             "icon": "error",
             "caption": "Tree objects could not be read"
+        },
+        {
+            "code": 205,
+            "icon": "error",
+            "caption": "Tree status rules are invalid"
         }
     ]
 }

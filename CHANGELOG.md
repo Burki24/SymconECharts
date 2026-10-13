@@ -43,6 +43,12 @@
 
 ## Hinzugefügt
 
+- `EChartsTree` kann ausdrücklich ausgewählte Bool- und Zahl-Variablen als
+  Anlagenzustand bewerten. Pro Quelle lassen sich Alarmrichtung sowie Warn-
+  und Kritisch-Schwelle festlegen; Eltern zeigen den höchsten Zustand ihrer
+  sichtbaren Nachkommen. Kachel und IPSView können die Zustandsfarben getrennt
+  gestalten. Bestehende Instanzen ohne Zustandsregeln bleiben unverändert.
+
 - `EChartsTree` (`ECTR`) zeigt Kategorien, Instanzen und Variablen unter einer
   gewählten Symcon-Kategorie oder -Instanz als interaktiven Baum. Tiefe,
   Knotenzahl, versteckte Objekte, Layout, Richtung, Linien, Beschriftung,

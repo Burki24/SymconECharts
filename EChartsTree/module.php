@@ -17,6 +17,7 @@ use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsTransientRefresh;
+use SymconECharts\TreeHealth;
 use SymconECharts\TreeHierarchy;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
@@ -37,6 +38,7 @@ require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
 require_once __DIR__ . '/../libs/EChartsTransientRefresh.php';
 require_once __DIR__ . '/TreeHierarchy.php';
+require_once __DIR__ . '/TreeHealth.php';
 
 class EChartsTree extends IPSModuleStrict
 {
@@ -59,6 +61,7 @@ class EChartsTree extends IPSModuleStrict
     private const STATUS_DESIGN_INVALID = 202;
     private const STATUS_PARENT_MISSING = 203;
     private const STATUS_READ_FAILED = 204;
+    private const STATUS_RULES_INVALID = 205;
     private const DESIGN_DEFAULTS = [
         'EChartsTheme'         => EChartsAsset::THEME_AUTO,
         'TreeLayout'           => 'orthogonal',
@@ -76,7 +79,10 @@ class EChartsTree extends IPSModuleStrict
         'CategoryColor'        => -1,
         'InstanceColor'        => -1,
         'VariableColor'        => -1,
-        'EdgeColor'            => -1
+        'EdgeColor'            => -1,
+        'HealthyColor'         => -1,
+        'WarningColor'         => -1,
+        'CriticalColor'        => -1
     ];
 
     public function Create(): void
@@ -92,6 +98,7 @@ class EChartsTree extends IPSModuleStrict
         $this->RegisterPropertyInteger('MaxDepth', 3);
         $this->RegisterPropertyInteger('MaxNodes', 80);
         $this->RegisterPropertyBoolean('IncludeHidden', false);
+        $this->RegisterPropertyString('StatusRules', '[]');
         foreach (['', 'IPSView'] as $prefix) {
             foreach (self::DESIGN_DEFAULTS as $name => $default) {
                 match (gettype($default)) {
@@ -146,10 +153,11 @@ class EChartsTree extends IPSModuleStrict
         $form = EChartsDesignerSections::Group($form, [
             ['caption' => 'Layout and interaction', 'start' => 'TreeLayout'],
             ['caption' => 'Labels and typography', 'start' => 'ShowLabels'],
-            ['caption' => 'Node and line colors', 'start' => 'CategoryColor']
+            ['caption' => 'Node and line colors', 'start' => 'CategoryColor'],
+            ['caption' => 'Status colors', 'start' => 'HealthyColor']
         ]);
         $fields = [
-            'Title', 'UseSymconRoot', 'RootObjectID', 'MaxDepth', 'MaxNodes', 'IncludeHidden',
+            'Title', 'UseSymconRoot', 'RootObjectID', 'MaxDepth', 'MaxNodes', 'IncludeHidden', 'StatusRules',
             'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
             'IPSViewBackgroundOpacityPercent',
             ...array_keys(self::DESIGN_DEFAULTS),
@@ -267,6 +275,11 @@ class EChartsTree extends IPSModuleStrict
             'instance' => EChartsBarPreview::Color($this->BarPreviewValue($values, 'InstanceColor', 'integer', $ipsView), $palette['seriesColors'][1]),
             'variable' => EChartsBarPreview::Color($this->BarPreviewValue($values, 'VariableColor', 'integer', $ipsView), $palette['seriesColors'][2])
         ];
+        $healthColors = [
+            'ok'       => EChartsBarPreview::Color($this->BarPreviewValue($values, 'HealthyColor', 'integer', $ipsView), '#2EAD69'),
+            'warning'  => EChartsBarPreview::Color($this->BarPreviewValue($values, 'WarningColor', 'integer', $ipsView), '#F3A43B'),
+            'critical' => EChartsBarPreview::Color($this->BarPreviewValue($values, 'CriticalColor', 'integer', $ipsView), '#E54F55')
+        ];
         $sample = true;
         $nodes = [
             ['name' => 'Haus', 'kind' => 'category'], ['name' => 'Wohnen', 'kind' => 'category'],
@@ -274,19 +287,30 @@ class EChartsTree extends IPSModuleStrict
         ];
         $useSymconRoot = (bool) ($values['UseSymconRoot'] ?? $this->ReadPropertyBoolean('UseSymconRoot'));
         $rootID = $useSymconRoot ? 0 : (int) ($values['RootObjectID'] ?? $this->ReadPropertyInteger('RootObjectID'));
+        try {
+            $rules = TreeHealth::Parse($values['StatusRules'] ?? $this->ReadPropertyString('StatusRules'));
+        } catch (Throwable) {
+            $rules = [];
+        }
         if ($useSymconRoot || ($rootID > 0 && IPS_ObjectExists($rootID))) {
             try {
                 $tree = $this->ReadHierarchy(
                     $rootID,
                     min(3, (int) ($values['MaxDepth'] ?? $this->ReadPropertyInteger('MaxDepth'))),
                     12,
-                    (bool) ($values['IncludeHidden'] ?? $this->ReadPropertyBoolean('IncludeHidden'))
+                    (bool) ($values['IncludeHidden'] ?? $this->ReadPropertyBoolean('IncludeHidden')),
+                    $rules
                 );
                 $nodes = $this->PreviewNodes($tree['root']);
                 $sample = false;
             } catch (Throwable) {
                 $sample = true;
             }
+        }
+        if ($sample && $rules !== []) {
+            $nodes[0]['health'] = 'critical';
+            $nodes[1]['health'] = 'warning';
+            $nodes[3]['health'] = 'ok';
         }
         $svg = EChartsBarPreview::Open(
             $palette,
@@ -331,8 +355,10 @@ class EChartsTree extends IPSModuleStrict
                 $svg .= '<path d="' . EChartsBarPreview::E($path) . '" fill="none" stroke="' . EChartsBarPreview::E($edgeColor) . '" stroke-width="2"/>';
             }
             $kind = (string) ($node['kind'] ?? 'category');
+            $health = (string) ($node['health'] ?? '');
+            $color = $healthColors[$health] ?? ($colors[$kind] ?? $colors['category']);
             $svg .= '<circle cx="' . EChartsBarPreview::N($x) . '" cy="' . EChartsBarPreview::N($y)
-                . '" r="' . EChartsBarPreview::N($nodeSize / 2) . '" fill="' . EChartsBarPreview::E($colors[$kind] ?? $colors['category']) . '"/>';
+                . '" r="' . EChartsBarPreview::N($nodeSize / 2) . '" fill="' . EChartsBarPreview::E($color) . '"/>';
             if ($showLabels) {
                 $name = mb_strimwidth((string) ($node['name'] ?? ''), 0, 14, '…');
                 if ($showValues && $kind === 'variable') {
@@ -373,7 +399,8 @@ class EChartsTree extends IPSModuleStrict
                 $this->ReadPropertyBoolean('UseSymconRoot') ? 0 : $this->ReadPropertyInteger('RootObjectID'),
                 $this->ReadPropertyInteger('MaxDepth'),
                 $this->ReadPropertyInteger('MaxNodes'),
-                $this->ReadPropertyBoolean('IncludeHidden')
+                $this->ReadPropertyBoolean('IncludeHidden'),
+                TreeHealth::Parse($this->ReadPropertyString('StatusRules'))
             );
         } catch (Throwable $exception) {
             $this->WriteAttributeString('LastError', $exception->getMessage());
@@ -397,9 +424,9 @@ class EChartsTree extends IPSModuleStrict
     }
 
     /** @return array{root:array<string,mixed>,count:int,truncated:bool,variableIDs:list<int>} */
-    private function ReadHierarchy(int $rootID, int $maxDepth, int $maxNodes, bool $includeHidden): array
+    private function ReadHierarchy(int $rootID, int $maxDepth, int $maxNodes, bool $includeHidden, array $rules): array
     {
-        return TreeHierarchy::Build(
+        $hierarchy = TreeHierarchy::Build(
             $rootID,
             $maxDepth,
             $maxNodes,
@@ -410,6 +437,12 @@ class EChartsTree extends IPSModuleStrict
             static fn (int $id): array => IPS_GetChildrenIDs($id),
             static fn (int $id): string => (string) GetValueFormatted($id)
         );
+        $hierarchy['root'] = TreeHealth::Annotate(
+            $hierarchy['root'],
+            $rules,
+            static fn (int $id): mixed => GetValue($id)
+        );
+        return $hierarchy;
     }
 
     private function RenderTreeHTMLPage(bool $ipsView): string
@@ -424,13 +457,17 @@ class EChartsTree extends IPSModuleStrict
             'ipsViewStyle' => $ipsView ? $this->IPSViewThemeCSS() : '',
             'state'        => $this->BuildVisualizationState($ipsView),
             'translations' => [
-                'Select a valid Tree root.'                                       => $this->Translate('Select a valid Tree root.'),
-                'Select a valid Tree root and limits.'                            => $this->Translate('Select a valid Tree root and limits.'),
-                'The Tree design is invalid.'                                     => $this->Translate('The Tree design is invalid.'),
-                'Connect an active EChartsGateway.'                               => $this->Translate('Connect an active EChartsGateway.'),
-                'The Tree could not be loaded.'                                   => $this->Translate('The Tree could not be loaded.'),
-                'Only the first configured nodes are shown.'                      => $this->Translate('Only the first configured nodes are shown.'),
-                'Data could not be refreshed. Showing the last available values.' => $this->Translate(
+                'Select a valid Tree root.'                                         => $this->Translate('Select a valid Tree root.'),
+                'Select a valid Tree root and limits.'                              => $this->Translate('Select a valid Tree root and limits.'),
+                'The Tree design is invalid.'                                       => $this->Translate('The Tree design is invalid.'),
+                'Connect an active EChartsGateway.'                                 => $this->Translate('Connect an active EChartsGateway.'),
+                'The Tree could not be loaded.'                                     => $this->Translate('The Tree could not be loaded.'),
+                'Only the first configured nodes are shown.'                        => $this->Translate('Only the first configured nodes are shown.'),
+                'Status: OK'                                                        => $this->Translate('Status: OK'),
+                'Status: Warning'                                                   => $this->Translate('Status: Warning'),
+                'Status: Critical'                                                  => $this->Translate('Status: Critical'),
+                'The Tree status rules are invalid.'                                => $this->Translate('The Tree status rules are invalid.'),
+                'Data could not be refreshed. Showing the last available values.'   => $this->Translate(
                     'Data could not be refreshed. Showing the last available values.'
                 )
             ],
@@ -485,6 +522,17 @@ class EChartsTree extends IPSModuleStrict
             || $this->ReadPropertyInteger('MaxNodes') < 10 || $this->ReadPropertyInteger('MaxNodes') > 500) {
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => 'Select a valid Tree root and limits.'];
         }
+        try {
+            $rules = TreeHealth::Parse($this->ReadPropertyString('StatusRules'));
+            foreach (array_keys($rules) as $id) {
+                if (!IPS_VariableExists($id)
+                    || !in_array(IPS_GetVariable($id)['VariableType'] ?? null, [0, 1, 2], true)) {
+                    throw new InvalidArgumentException('The Tree status rules are invalid.');
+                }
+            }
+        } catch (Throwable) {
+            return ['Status' => self::STATUS_RULES_INVALID, 'Message' => 'The Tree status rules are invalid.'];
+        }
         if (!$this->IsValidDesign('')
             || (!$this->ReadPropertyBoolean('IPSViewUseTileDesign') && !$this->IsValidDesign('IPSView'))
             || !EChartsIPSViewBackground::IsValid(
@@ -515,7 +563,8 @@ class EChartsTree extends IPSModuleStrict
                 return false;
             }
         }
-        foreach (['TitleColor', 'LabelColor', 'CategoryColor', 'InstanceColor', 'VariableColor', 'EdgeColor'] as $name) {
+        foreach (['TitleColor', 'LabelColor', 'CategoryColor', 'InstanceColor', 'VariableColor', 'EdgeColor',
+            'HealthyColor', 'WarningColor', 'CriticalColor'] as $name) {
             $value = $this->ReadPropertyInteger($prefix . $name);
             if ($value < -1 || $value > 0xFFFFFF) {
                 return false;

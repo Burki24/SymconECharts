@@ -200,7 +200,9 @@ legt [`ADR 0041`](adr/0041-heatmap-weekday-hour-family.md) fest; ihre
 gleitenden Zeitfenster regelt [`ADR 0043`](adr/0043-heatmap-rolling-windows-and-navigation.md).
 
 Die lesende Objekt-Hierarchie und ihre Grenzen legt
-[`ADR 0044`](adr/0044-tree-symcon-object-hierarchy.md) fest.
+[`ADR 0044`](adr/0044-tree-symcon-object-hierarchy.md) fest. Die optionale,
+ausdrücklich konfigurierte Zustandsüberlagerung regelt
+[`ADR 0045`](adr/0045-tree-plant-status.md).
 
 ## Weitere ECharts-Familien im Plan
 
