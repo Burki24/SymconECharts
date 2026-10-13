@@ -190,7 +190,7 @@ for (const [moduleName, warningId] of [
 for (const moduleName of [
     'EChartsGaugeSingle', 'EChartsGaugeMulti', 'EChartsGaugeTacho', 'EChartsGaugeChronograph',
     'EChartsTimeSeries', 'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarWaterfall',
-    'EChartsBarPolar', 'EChartsPie', 'EChartsScatter'
+    'EChartsBarPolar', 'EChartsPie', 'EChartsScatter', 'EChartsHeatmap'
 ]) {
     const renderer = fs.readFileSync(path.join(__dirname, '..', moduleName, 'visualization', 'app.js'), 'utf8');
     assert.match(renderer, /parseVisualizationState\(/,

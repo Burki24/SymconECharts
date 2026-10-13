@@ -15,6 +15,7 @@ final class EChartsAsset
     public const SHA256 = '37d8c9774f27fc12e048e269e8ec6a114782529fb85262a6be8c6b887207c07f';
     public const CARTESIAN_SHA256 = '92954fbddaa6b7c09f25819ab7b4743eb6afd5efa92351f129b14d298d2ab31a';
     public const SCATTER_SHA256 = 'd759229d5b223da5b3badff736a732f978efc30c3e91d8913aa3e90d01b2974a';
+    public const HEATMAP_SHA256 = '2ed5eac005bb669e165d16bbd12003bf8e7f6fb6a95a6d103579bad92b1418bc';
     public const POLAR_SHA256 = 'f31daec4db27dee855d736f2443b15b5642011bc99bbe6f9bc1fdb91da1ef69c';
     public const PIE_SHA256 = 'b61d6fb1b4652e2365cb91813ce23cc3e2f5afac06610a47bc0ab9eb706440ea';
     public const TIME_SERIES_SHA256 = self::CARTESIAN_SHA256;
@@ -195,6 +196,22 @@ final class EChartsAsset
         $canonicalContent = self::NormalizeLineEndings($content);
         if (!hash_equals(self::SCATTER_SHA256, hash('sha256', $canonicalContent))) {
             throw new RuntimeException('The bundled Apache ECharts Scatter runtime failed its integrity check.');
+        }
+
+        return $canonicalContent;
+    }
+
+    /** Loads the pinned Heatmap runtime without enlarging existing chart bundles. */
+    public static function HeatmapJavaScript(): string
+    {
+        $path = __DIR__ . '/echarts/' . self::VERSION . '/echarts.heatmap.min.js';
+        $content = @file_get_contents($path);
+        if ($content === false || $content === '') {
+            throw new RuntimeException('The bundled Apache ECharts Heatmap runtime could not be loaded.');
+        }
+        $canonicalContent = self::NormalizeLineEndings($content);
+        if (!hash_equals(self::HEATMAP_SHA256, hash('sha256', $canonicalContent))) {
+            throw new RuntimeException('The bundled Apache ECharts Heatmap runtime failed its integrity check.');
         }
 
         return $canonicalContent;

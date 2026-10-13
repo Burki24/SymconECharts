@@ -8,7 +8,7 @@ use Burki24\SymconModuleHelper\SVGPreviewHelper;
 use JsonException;
 use RuntimeException;
 
-/** Shared, read-only configuration-form wiring for Bar and Pie previews. */
+/** Shared, read-only configuration-form wiring for chart SVG previews. */
 trait EChartsBarPreviewForm
 {
     /** Updates only the form images; draft values are never persisted. */
@@ -86,14 +86,15 @@ trait EChartsBarPreviewForm
     /** @param list<string> $fields */
     private static function BarPreviewAction(string $prefix, array $fields): string
     {
+        $hasSourceList = in_array('Sources', $fields, true);
         $pairs = array_map(
             static fn (string $name): string => var_export($name, true)
                 . ' => ' . ($name === 'Sources' ? '$barPreviewSources' : '$' . $name),
             $fields
         );
 
-        return '$barPreviewSources = []; foreach ($Sources as $barPreviewSource) {'
-            . ' $barPreviewSources[] = $barPreviewSource; } '
+        return ($hasSourceList ? '$barPreviewSources = []; foreach ($Sources as $barPreviewSource) {'
+            . ' $barPreviewSources[] = $barPreviewSource; } ' : '')
             . $prefix . '_UpdateBarPreviewFromForm($id, json_encode([' . implode(', ', $pairs) . ']));';
     }
 

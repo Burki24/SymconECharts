@@ -49,6 +49,10 @@ Annotationen. Beide laufen auch im vollständigen Qualitätslauf.
 ID-getrennte gleichnamige Quellen, Textsicherheit, Animation und Nullsummen.
 Bei installierter festgeschriebener ECharts-Buildabhängigkeit prüft es die
 Sektorgeometrien zusätzlich gegen die echte ECharts-Engine im SVG-SSR-Modus.
+`php tests/heatmap_aggregation.php` prüft Wochentag-/Stundenbildung,
+fehlende und gemessene Nullwerte sowie beide Sommerzeitwechsel.
+`node tests/heatmap_layout.js` prüft ECharts-Optionen, responsive
+Zellenbeschriftungen und den Erhalt der letzten Grafik bei Lesefehlern.
 
 `tests/fixtures/tacho-browser.html` und
 `tests/fixtures/chronograph-browser.html` sind manuelle Browser-Fixierungen

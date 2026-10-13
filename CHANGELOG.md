@@ -20,6 +20,11 @@
 
 ## Hinzugefügt
 
+- `EChartsHeatmap` (`ECHM`) zeigt eine archivbasierte Wochentag-Stunden-Matrix
+  mit Farbskala, Tooltip, optionalen Zellenwerten und eigenem Kachel- und
+  IPSView-Designer. Fehlende Archivstunden bleiben leer; die Vorschauen
+  verwenden gekennzeichnete Beispieldaten.
+
 - Scatter/Bubble kann Punktbeschriftungen optional an Diagrammgröße und
   Punktdichte anpassen. Kachel und unabhängiges IPSView-Design besitzen
   getrennte Schalter; bisherige Instanzen bleiben unverändert. Die Punkte

@@ -45,6 +45,8 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Historische X/Y-Vergleiche und optionale Bubble-Größen liegen im eigenen
   Gerätemodul `EChartsScatter` und werden ohne Interpolation nach gemeinsamen
   abgeschlossenen Archivintervallen verbunden.
+  Eine archivbasierte Wochentag-Stunden-Heatmap liegt im eigenen Gerätemodul
+  `EChartsHeatmap`. Sie ist kein Kalenderdiagramm und kein Scatter-Modus.
 - Das Gateway stellt ausschließlich familienübergreifende Infrastruktur wie
   Archivzugriff, begrenztes Caching, gemeinsame Ressourcen und gegebenenfalls
   abgesicherte IPSView-Kommunikation bereit. Familienbezogene Properties,
@@ -108,6 +110,7 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
 - `ECBP` ist `EChartsBarPolar` zugeordnet (`BP` = Bar Polar).
 - `ECPI` ist `EChartsPie` zugeordnet (`PI` = Pie).
 - `ECSC` ist `EChartsScatter` zugeordnet (`SC` = Scatter).
+- `ECHM` ist `EChartsHeatmap` zugeordnet (`HM` = Heatmap).
 - Das zuvor für das unveröffentlichte Gauge-Gerüst verwendete Kürzel `ECGA`
   ist abgelöst und wird nicht für ein anderes Modul wiederverwendet.
 - Neue Kürzel werden vor ihrer Verwendung eindeutig festgelegt und in dieser

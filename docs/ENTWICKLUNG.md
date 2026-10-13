@@ -14,8 +14,8 @@ nicht eine eigene große Dashboard-Seite des Moduls.
 
 ## Aktueller Stand und Zielarchitektur
 
-Die Library besitzt mit Gateway, Gauge Single, Gauge Multi, Gauge Tacho,
-Gauge Chronograph, Time Series, Bar Category und Bar History eine technische Modulstruktur. Alle acht Module
+Die Library besitzt mit Gateway und den zwölf Diagrammfamilien eine technische
+Modulstruktur. Alle dreizehn Module
 verwenden `IPSModuleStrict`;
 Gauge-Instanzen können vorhandene Gateways wiederverwenden. Ein versioniertes
 Protokoll liefert geprüfte numerische Momentanwerte an ein minimales
@@ -87,6 +87,7 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 | Gerät | EChartsBarPolar | Aktuelle Werte aus 1 bis 16 Quellen als radiale Balken oder konzentrische Bögen in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsPie | Aktuelle nichtnegative Anteile aus 1 bis 16 Quellen als Kreis, Donut oder Nightingale-Rose in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsScatter | Archivierte X/Y-Werte mit optionaler Bubble-Größe, ausschließlich zeitgleiche abgeschlossene Intervalle ohne Interpolation, in Kachel und optionalem IPSView-HTML |
+| Gerät | EChartsHeatmap | Eine Archivvariable als lokale Wochentag-Stunden-Matrix mit separaten Kachel- und IPSView-Designern |
 
 Eine eigene I/O-Instanz, ein Konfigurator und Discovery gehören nicht zum
 Anfangsumfang. Datenquellen sind Teil der jeweiligen Gauge-Konfiguration und
@@ -118,12 +119,13 @@ Modul-IDs und Datenfluss-IDs haben unterschiedliche Aufgaben.
 | Modul EChartsBarPolar | `{B22B5AB4-CDA4-416F-9FF1-4126734E078B}` |
 | Modul EChartsPie | `{176F1531-ABC4-4AE5-9DE5-8F3F006C8237}` |
 | Modul EChartsScatter | `{9865CDB4-5CA9-4C34-A148-983E0B5F2FA6}` |
+| Modul EChartsHeatmap | `{62F06D1A-873F-4B0E-9F3E-6AA9AA1A8274}` |
 | Datenfluss Gauge → Gateway | `{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}` |
 | Datenfluss Gateway → Gauge | `{E4749B72-912B-E3E3-1C57-D19019FFDD84}` |
 
 Die Funktionspräfixe sind `ECGW` für das Gateway, `ECGS` für Gauge Single,
 `ECGM` für Gauge Multi, `ECGT` für Gauge Tacho, `ECGC` für Gauge
-Chronograph, `ECTS` für Time Series, `ECBC` für Bar Category, `ECBH` für Bar History, `ECBW` für Bar Waterfall, `ECBP` für Bar Polar, `ECPI` für Pie und `ECSC` für Scatter. Nach der verbindlichen Präfixkonvention steht `EC` für
+Chronograph, `ECTS` für Time Series, `ECBC` für Bar Category, `ECBH` für Bar History, `ECBW` für Bar Waterfall, `ECBP` für Bar Polar, `ECPI` für Pie, `ECSC` für Scatter und `ECHM` für Heatmap. Nach der verbindlichen Präfixkonvention steht `EC` für
 ECharts; die letzten zwei Buchstaben bezeichnen Aufgabe oder Modultyp. Die
 Entscheidungen zur Modulstruktur und zu den GUIDs dokumentieren
 [`ADR 0001`](adr/0001-chart-family-modules.md) und
@@ -191,6 +193,20 @@ Kreis, Donut und Nightingale-Rose legt
 Die Verknüpfung historischer X/Y- und optionaler Größenwerte nur über
 identische abgeschlossene Archivintervalle ohne Interpolation legt
 [`ADR 0040`](adr/0040-scatter-archive-interval-pairing.md) fest.
+Die eigene Wochentag-Stunden-Heatmap und die Abgrenzung zum Kalenderlayout
+legt [`ADR 0041`](adr/0041-heatmap-weekday-hour-family.md) fest.
+
+## Weitere ECharts-Familien im Plan
+
+Nach der Heatmap werden **Tree, Graph, Treemap, Sunburst, Parallel und Sankey**
+jeweils mit eigenem Symcon-Datenvertrag geprüft. Daraus können getrennte
+Gerätemodule entstehen; die jeweilige Modulidentität wird erst bei Beginn
+der Vertikale festgelegt. **Calendar** wird als eigenes Koordinaten- und
+Zeitlayout geprüft und nicht in die 7×24-Heatmap hineingezogen. **Dataset**
+ist in ECharts eine familienübergreifende Datenkomponente, keine eigene
+Diagrammfamilie oder Symcon-Geräteinstanz; seine Nutzung wird bei passenden
+Serien auf Datenfluss und Wiederverwendung geprüft. Diese Einträge sind
+Roadmap, keine Behauptung bereits implementierter Module.
 
 Für die vier Bar-Module bündelt `libs/EChartsBarPreviewForm.php` die
 read-only-Formularverdrahtung, einschließlich zweier `Image`-Felder,

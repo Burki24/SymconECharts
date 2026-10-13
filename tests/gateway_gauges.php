@@ -745,6 +745,7 @@ require_once dirname(__DIR__) . '/EChartsBarWaterfall/module.php';
 require_once dirname(__DIR__) . '/EChartsBarPolar/module.php';
 require_once dirname(__DIR__) . '/EChartsPie/module.php';
 require_once dirname(__DIR__) . '/EChartsScatter/module.php';
+require_once dirname(__DIR__) . '/EChartsHeatmap/module.php';
 
 final class TestableEChartsGateway extends EChartsGateway
 {
@@ -788,6 +789,21 @@ final class TestableEChartsBarHistory extends EChartsBarHistory
 }
 
 final class TestableEChartsScatter extends EChartsScatter
+{
+    private int $currentTimestamp = 1;
+
+    public function SetTestCurrentTimestamp(int $timestamp): void
+    {
+        $this->currentTimestamp = $timestamp;
+    }
+
+    protected function CurrentTimestamp(): int
+    {
+        return $this->currentTimestamp;
+    }
+}
+
+final class TestableEChartsHeatmap extends EChartsHeatmap
 {
     private int $currentTimestamp = 1;
 
@@ -1154,6 +1170,58 @@ assertGatewayGauge($maximumPie->GetTestStatus() === 201, 'Pie must reject more t
 for ($index = 0; $index < 16; $index++) {
     unset($GLOBALS['symconTestVariables'][5900 + $index]);
 }
+
+$heatmap = new TestableEChartsHeatmap();
+$heatmap->Create();
+$heatmap->SetTestCurrentTimestamp(1780004000);
+$heatmap->SetTestProperty('SourceVariableID', 4711);
+$heatmap->SetTestProperty('UseVariablePresentation', false);
+$heatmap->SetTestProperty('Unit', '°C');
+$heatmap->ApplyChanges();
+$heatmapData = json_decode($heatmap->GetHeatmapData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $heatmap->GetTestStatus() === IS_ACTIVE
+        && $heatmap->GetTestReferences() === [4711]
+        && $heatmapData['family'] === 'heatmap'
+        && $heatmapData['heatmap']['unit'] === '°C'
+        && count($heatmapData['cells']) === 1
+        && $heatmapData['cells'][0]['value'] === 42.0
+        && $heatmapData['cells'][0]['count'] === 2,
+    'Heatmap must group completed hourly gateway archive values by local weekday and hour.'
+);
+assertGatewayGauge(
+    strlen($heatmap->GetVisualizationTile()) < SYMCON_OUTPUT_BUFFER_LIMIT,
+    'The Heatmap Tile must remain below the Symcon output-buffer limit.'
+);
+$heatmapOutput = new EChartsHeatmap();
+$heatmapOutput->Create();
+$heatmapForm = json_decode($heatmapOutput->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+$heatmapTitleAction = (string) (findGaugeFormElement($heatmapForm['elements'], 'Title')['onChange'] ?? '');
+assertGatewayGauge(
+    str_contains($heatmapTitleAction, 'ECHM_UpdateBarPreviewFromForm')
+        && !str_contains($heatmapTitleAction, '$Sources'),
+    'A single-source Heatmap preview action must not reference a non-existent Sources list.'
+);
+$heatmapOutput->UpdateBarPreviewFromForm(json_encode([
+    'Title' => 'Draft Heatmap', 'SourceVariableID' => 4713, 'Range' => '7d'
+], JSON_THROW_ON_ERROR));
+$heatmapPreview = base64_decode(substr(
+    (string) array_slice($heatmapOutput->GetTestFormUpdates(), -2)[0]['Value'],
+    strlen('data:image/svg+xml;base64,')
+), true);
+assertGatewayGauge(
+    is_string($heatmapPreview)
+        && str_contains($heatmapPreview, 'Draft Heatmap')
+        && str_contains($heatmapPreview, 'Living room humidity')
+        && str_contains($heatmapPreview, '7d'),
+    'The unsaved Heatmap preview must follow title, source and range edits without an archive read.'
+);
+$heatmap->SetTestProperty('SourceVariableID', 4712);
+$heatmap->ApplyChanges();
+assertGatewayGauge(
+    $heatmap->GetTestStatus() === 201,
+    'Heatmap must reject a non-numeric source variable.'
+);
 
 foreach ([
     'function resolveGaugeLayout(preset, width, height, style, scaleMultiplier)',
@@ -8241,7 +8309,8 @@ foreach ([
     EChartsBarWaterfall::class     => ['BarPreview', 'IPSViewBarPreview'],
     EChartsBarPolar::class         => ['BarPreview', 'IPSViewBarPreview'],
     EChartsPie::class              => ['BarPreview', 'IPSViewBarPreview'],
-    EChartsScatter::class          => ['BarPreview', 'IPSViewBarPreview']
+    EChartsScatter::class          => ['BarPreview', 'IPSViewBarPreview'],
+    EChartsHeatmap::class          => ['BarPreview', 'IPSViewBarPreview']
 ] as $chartClass => $previewFields) {
     $chart = new $chartClass();
     $chart->Create();

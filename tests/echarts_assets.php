@@ -17,6 +17,7 @@ $root = dirname(__DIR__);
 $runtimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.gauge.min.js';
 $cartesianRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.cartesian.min.js';
 $scatterRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.scatter.min.js';
+$heatmapRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.heatmap.min.js';
 $polarRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.polar.min.js';
 $pieRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.pie.min.js';
 $licensePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/LICENSE.txt';
@@ -24,6 +25,7 @@ $noticePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/NOTICE.txt';
 $runtime = (string) file_get_contents($runtimePath);
 $cartesianRuntime = (string) file_get_contents($cartesianRuntimePath);
 $scatterRuntime = (string) file_get_contents($scatterRuntimePath);
+$heatmapRuntime = (string) file_get_contents($heatmapRuntimePath);
 $polarRuntime = (string) file_get_contents($polarRuntimePath);
 $pieRuntime = (string) file_get_contents($pieRuntimePath);
 $designUtilitiesPath = $root . '/libs/echarts-design.js';
@@ -33,6 +35,7 @@ $patternUtilities = (string) file_get_contents($root . '/libs/echarts-pattern.js
 $runtimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/gauge-runtime.js');
 $cartesianRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/cartesian-runtime.js');
 $scatterRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/scatter-runtime.js');
+$heatmapRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/heatmap-runtime.js');
 $polarRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/polar-runtime.js');
 $pieRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/pie-runtime.js');
 $windowsCheckoutRuntime = str_replace("\n", "\r\n", $runtime);
@@ -74,6 +77,14 @@ assertEChartsAsset(
         && strlen($scatterRuntime) < 786432
         && str_contains($scatterRuntime, 'window.echarts'),
     'The Scatter ECharts runtime must be pinned, expose the browser API and remain below 768 KiB.'
+);
+assertEChartsAsset(
+    is_file($heatmapRuntimePath)
+        && hash_file('sha256', $heatmapRuntimePath) === EChartsAsset::HEATMAP_SHA256
+        && EChartsAsset::HeatmapJavaScript() === $heatmapRuntime
+        && strlen($heatmapRuntime) < 655360
+        && str_contains($heatmapRuntime, 'window.echarts'),
+    'The Heatmap ECharts runtime must be pinned, expose the browser API and remain below 640 KiB.'
 );
 assertEChartsAsset(is_file($polarRuntimePath), 'The pinned Polar runtime is missing.');
 assertEChartsAsset(
@@ -121,6 +132,12 @@ assertEChartsAsset(
     str_contains($scatterRuntimeSource, 'VisualMapComponent')
         && str_contains($scatterRuntimeSource, 'cartesian-runtime.js'),
     'The Scatter runtime must extend the shared Cartesian source with Visual Map.'
+);
+assertEChartsAsset(
+    str_contains($heatmapRuntimeSource, 'HeatmapChart')
+        && str_contains($heatmapRuntimeSource, 'VisualMapComponent')
+        && str_contains($heatmapRuntimeSource, 'CanvasRenderer'),
+    'The Heatmap runtime must include Heatmap, Visual Map and Canvas components.'
 );
 assertEChartsAsset(
     str_contains($polarRuntimeSource, 'BarChart')

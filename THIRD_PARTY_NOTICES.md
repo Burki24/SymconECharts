@@ -35,6 +35,10 @@ Ausgelieferte Dateien:
   Scatter-Browser-Build mit den kartesischen Komponenten, Visual Map, Brush
   und Toolbox; 709.931 Byte; SHA-256
   `d759229d5b223da5b3badff736a732f978efc30c3e91d8913aa3e90d01b2974a`;
+- `libs/echarts/6.1.0/echarts.heatmap.min.js` – reproduzierbarer
+  Heatmap-Browser-Build aus ECharts Core, Heatmap Chart, Grid, Visual Map,
+  Titel, Tooltip, Aria und Canvas Renderer; 535.630 Byte; SHA-256
+  `2ed5eac005bb669e165d16bbd12003bf8e7f6fb6a95a6d103579bad92b1418bc`;
 - `libs/echarts/6.1.0/echarts.polar.min.js` – reproduzierbarer,
   Polar-Browser-Build aus ECharts Core, Bar Chart, Polar Component, Titel,
   Tooltip, Aria und Canvas Renderer; 514.353 Byte; SHA-256

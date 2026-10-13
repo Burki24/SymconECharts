@@ -5,9 +5,9 @@ Diagramme in nativen Symcon-Kacheln und optionalen IPSView-HTML-Widgets dar.
 Die Library enthält Gauges für einzelne und mehrere Werte, historische und
 live fortgeschriebene Zeitreihen, aktuelle Kategorienvergleiche, historische
 Balken, Waterfall- und Polar-Diagramme, Kreisdiagramme für aktuelle Werte sowie
-historische Streu- und Bubble-Diagramme.
+historische Streu- und Bubble-Diagramme sowie eine Wochentag-Stunden-Heatmap.
 
-Alle elf Diagrammformulare zeigen eine unmittelbar aktualisierte SVG-Vorschau
+Alle zwölf Diagrammformulare zeigen eine unmittelbar aktualisierte SVG-Vorschau
 im Kachel- und IPSView-Designer. Sie reagiert auf noch nicht gespeicherte
 Titel-, Quellen- und Designänderungen; die endgültige responsive Darstellung
 prüfen Sie in der Kachel beziehungsweise im IPSView-Widget. Historische
@@ -128,6 +128,11 @@ Folgende Module sind enthalten:
   dritte Quelle steuert optional die Bubble-Größe. Ein Punkt entsteht nur bei
   exakt gemeinsamem abgeschlossenem Archivintervall, ohne Interpolation.
   Kachel und IPSView besitzen eigene Designer und Live-Vorschauen.
+
+- __EChartsHeatmap__ ([Dokumentation](EChartsHeatmap/README.md))
+  Verdichtet abgeschlossene stündliche Archivwerte einer numerischen Variable
+  nach lokalem Wochentag und Stunde. Kachel und optionales IPSView-Widget
+  besitzen getrennt gestaltbare Heatmaps und Live-Vorschauen.
 
 ## Kacheldesign und IPSView-Design
 

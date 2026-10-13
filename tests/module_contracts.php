@@ -157,6 +157,14 @@ $expectedModules = [
         'parentRequirements' => ['{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}'],
         'childRequirements'  => [],
         'implemented'        => ['{E4749B72-912B-E3E3-1C57-D19019FFDD84}']
+    ],
+    'EChartsHeatmap' => [
+        'id'                 => '{62F06D1A-873F-4B0E-9F3E-6AA9AA1A8274}',
+        'type'               => 3,
+        'prefix'             => 'ECHM',
+        'parentRequirements' => ['{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}'],
+        'childRequirements'  => [],
+        'implemented'        => ['{E4749B72-912B-E3E3-1C57-D19019FFDD84}']
     ]
 ];
 
@@ -218,7 +226,7 @@ $gateway = $moduleContracts['EChartsGateway'];
 foreach ([
     'EChartsGaugeSingle', 'EChartsGaugeMulti', 'EChartsGaugeTacho', 'EChartsGaugeChronograph',
     'EChartsTimeSeries', 'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarWaterfall', 'EChartsBarPolar',
-    'EChartsPie', 'EChartsScatter'
+    'EChartsPie', 'EChartsScatter', 'EChartsHeatmap'
 ] as $deviceModuleName) {
     $device = $moduleContracts[$deviceModuleName];
     requireContract(

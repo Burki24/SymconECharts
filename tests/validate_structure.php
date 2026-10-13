@@ -121,6 +121,15 @@ $requiredFiles = [
     'EChartsScatter/visualization/index.html',
     'EChartsScatter/visualization/style.css',
     'EChartsScatter/visualization/app.js',
+    'EChartsHeatmap/HeatmapAggregation.php',
+    'EChartsHeatmap/visualization/index.html',
+    'EChartsHeatmap/visualization/style.css',
+    'EChartsHeatmap/visualization/app.js',
+    'libs/echarts/6.1.0/echarts.heatmap.min.js',
+    '.tools/echarts-runtime/src/heatmap-runtime.js',
+    'docs/adr/0041-heatmap-weekday-hour-family.md',
+    'tests/heatmap_aggregation.php',
+    'tests/heatmap_layout.js',
     'tests/bar_polar_layout.js',
     'tests/pie_layout.js',
     'tests/scatter_pairing.php',
@@ -319,7 +328,7 @@ if ($helperSync !== null) {
 
 $expectedModules = [
     'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarPolar', 'EChartsBarWaterfall', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
-    'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsPie', 'EChartsScatter', 'EChartsTimeSeries'
+    'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsHeatmap', 'EChartsPie', 'EChartsScatter', 'EChartsTimeSeries'
 ];
 $discoveredModules = [];
 foreach (glob($root . '/*/module.json') ?: [] as $modulePath) {
