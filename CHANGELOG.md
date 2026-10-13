@@ -49,6 +49,9 @@
   Farben und Animation sind einstellbar; Kachel und IPSView besitzen getrennte
   Designer mit Live-Vorschau. Die Objekte und Werte werden nur gelesen.
 
+- Die maximale Knotenzahl von `EChartsTree` lässt sich testweise bis 500 statt
+  bisher 200 einstellen. Der Standardwert von 80 Knoten bleibt unverändert.
+
 - Die Heatmap bietet eine Woche, die letzten vollständigen 1/3/6/12
   Kalendermonate und den Zeitraum seit dem 1. Januar. Für längere Zeiträume
   werden alle Archivstunden in mehreren begrenzten Abfragen berücksichtigt;

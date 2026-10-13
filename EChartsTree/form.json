@@ -30,7 +30,7 @@
                     "name": "MaxNodes",
                     "caption": "Maximum nodes",
                     "minimum": 10,
-                    "maximum": 200
+                    "maximum": 500
                 },
                 {
                     "type": "CheckBox",

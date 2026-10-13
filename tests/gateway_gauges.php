@@ -1107,6 +1107,47 @@ $tree->SetTestProperty('RootObjectID', 9002);
 $tree->ApplyChanges();
 assertGatewayGauge($tree->GetTestStatus() === 201, 'Tree must reject variable roots.');
 
+$GLOBALS['symconTestTreeObjects'][9100] = [
+    'ObjectType' => 0, 'ObjectName' => 'Wide root', 'ObjectIsHidden' => false
+];
+$GLOBALS['symconTestTreeChildren'][9100] = range(9200, 9699);
+foreach ($GLOBALS['symconTestTreeChildren'][9100] as $wideID) {
+    $GLOBALS['symconTestTreeObjects'][$wideID] = [
+        'ObjectType' => 2, 'ObjectName' => str_repeat('N', 120), 'ObjectIsHidden' => false
+    ];
+    $GLOBALS['symconTestTreeValues'][$wideID] = str_repeat('V', 100);
+}
+try {
+    $wideTree = new EChartsTree();
+    $wideTree->Create();
+    $wideTree->SetTestProperty('RootObjectID', 9100);
+    $wideTree->SetTestProperty('MaxNodes', 500);
+    $wideTree->ApplyChanges();
+    $wideTreeData = json_decode($wideTree->GetTreeData(), true, 512, JSON_THROW_ON_ERROR);
+    $wideTreeForm = json_decode($wideTree->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+    assertGatewayGauge(
+        $wideTree->GetTestStatus() === IS_ACTIVE
+            && $wideTreeData['tree']['count'] === 500
+            && $wideTreeData['tree']['truncated'] === true
+            && count($wideTreeData['tree']['root']['children']) === 499
+            && findGaugeFormElement($wideTreeForm['elements'], 'MaxNodes')['maximum'] === 500,
+        'Tree must accept 500 nodes, report truncation and expose the new form limit.'
+    );
+    assertGatewayGauge(
+        strlen($wideTree->GetVisualizationTile()) < SYMCON_OUTPUT_BUFFER_LIMIT
+            && strlen($wideTree->GetIPSViewHTML()) < SYMCON_OUTPUT_BUFFER_LIMIT,
+        'A 500-node Tree must fit the Tile and IPSView output limit with long names and values.'
+    );
+    $wideTree->SetTestProperty('MaxNodes', 501);
+    $wideTree->ApplyChanges();
+    assertGatewayGauge($wideTree->GetTestStatus() === 201, 'Tree must reject a configured limit above 500.');
+} finally {
+    foreach ($GLOBALS['symconTestTreeChildren'][9100] as $wideID) {
+        unset($GLOBALS['symconTestTreeObjects'][$wideID], $GLOBALS['symconTestTreeValues'][$wideID]);
+    }
+    unset($GLOBALS['symconTestTreeChildren'][9100], $GLOBALS['symconTestTreeObjects'][9100]);
+}
+
 // Current-value Pie models keep duplicate visible names separate by variable ID.
 $pie = new EChartsPie();
 $pie->Create();

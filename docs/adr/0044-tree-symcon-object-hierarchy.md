@@ -24,8 +24,10 @@ Kinderreihenfolge. Andere Objekttypen, insbesondere Links und Skripte, werden
 nicht als Knoten oder alternative Quellen aufgelöst. Ein ausgeblendeter Zweig
 entfällt standardmäßig insgesamt; seine Einbeziehung ist optional. Die
 konfigurierte maximale Tiefe liegt zwischen 1 und 6, die Knotengrenze
-zwischen 10 und 200. Erreicht die Traversierung die Knotengrenze vor weiteren
-passenden Objekten, wird die Kürzung sichtbar gemeldet. Die Tiefengrenze ist
+zwischen 10 und 500. Die Obergrenze von 500 wird zunächst im Testbetrieb
+erprobt; sie ist kein zugesicherter Leistungswert für jede Kachelgröße.
+Erreicht die Traversierung die Knotengrenze vor weiteren passenden Objekten,
+wird die Kürzung sichtbar gemeldet. Die Tiefengrenze ist
 hingegen eine bewusst gewählte Ansicht und keine Fehlermeldung.
 
 Die Objekt-ID ist die alleinige technische Identität eines Knotens.

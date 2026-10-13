@@ -465,7 +465,7 @@ class EChartsTree extends IPSModuleStrict
         if ($rootID < 1 || !IPS_ObjectExists($rootID)
             || !in_array(IPS_GetObject($rootID)['ObjectType'] ?? null, [0, 1], true)
             || $this->ReadPropertyInteger('MaxDepth') < 1 || $this->ReadPropertyInteger('MaxDepth') > 6
-            || $this->ReadPropertyInteger('MaxNodes') < 10 || $this->ReadPropertyInteger('MaxNodes') > 200) {
+            || $this->ReadPropertyInteger('MaxNodes') < 10 || $this->ReadPropertyInteger('MaxNodes') > 500) {
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => 'Select a valid Tree root and limits.'];
         }
         if (!$this->IsValidDesign('')

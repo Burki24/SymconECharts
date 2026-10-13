@@ -24,7 +24,7 @@ final class TreeHierarchy
         callable $getChildren,
         callable $getValue
     ): array {
-        if ($rootID < 1 || $maxDepth < 1 || $maxDepth > 6 || $maxNodes < 2 || $maxNodes > 200) {
+        if ($rootID < 1 || $maxDepth < 1 || $maxDepth > 6 || $maxNodes < 2 || $maxNodes > 500) {
             throw new InvalidArgumentException('The Tree selection or limits are invalid.');
         }
         $root = $getObject($rootID);
