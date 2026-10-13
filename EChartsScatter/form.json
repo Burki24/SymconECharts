@@ -420,6 +420,30 @@
                     "type": "RowLayout",
                     "items": [
                         {
+                            "type": "Select",
+                            "name": "ValueLabelContent",
+                            "caption": "Point label values",
+                            "options": [
+                                {
+                                    "caption": "X value",
+                                    "value": "x"
+                                },
+                                {
+                                    "caption": "Y value",
+                                    "value": "y"
+                                },
+                                {
+                                    "caption": "X and Y values",
+                                    "value": "both"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
                             "type": "NumberSpinner",
                             "name": "PointSize",
                             "caption": "Point size",

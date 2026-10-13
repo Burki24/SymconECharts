@@ -7949,6 +7949,7 @@ assertGatewayGauge(
         && $scatter->GetTestReferences() === [4711, 4713]
         && $scatterData['family'] === 'scatter'
         && $scatterData['variant'] === 'scatter'
+        && $scatterData['scatter']['style']['valueLabelContent'] === 'y'
         && $scatterData['scatter']['style']['xAxisRangeMode'] === 'data'
         && $scatterData['scatter']['style']['yAxisRangeMode'] === 'data'
         && $scatterData['roles']['x']['label'] === 'Outside'
@@ -7979,9 +7980,29 @@ $scatter->ApplyChanges();
 assertGatewayGauge($scatter->GetTestStatus() === 202, 'Scatter must reject reversed manual Y bounds.');
 $scatter->SetTestProperty('YAxisRangeMode', 'zero');
 $scatter->ApplyChanges();
+$scatter->SetTestProperty('ValueLabelContent', 'both');
+$scatter->ApplyChanges();
+assertGatewayGauge(
+    json_decode($scatter->GetScatterData(), true, 512, JSON_THROW_ON_ERROR)['scatter']['style']['valueLabelContent'] === 'both',
+    'Scatter must pass the configured label content to its renderer.'
+);
+$scatter->SetTestProperty('ValueLabelContent', 'invalid');
+$scatter->ApplyChanges();
+assertGatewayGauge($scatter->GetTestStatus() === 202, 'Scatter must reject an unknown label content mode.');
+$scatter->SetTestProperty('ValueLabelContent', 'y');
+$scatter->ApplyChanges();
 $scatterOutput = new EChartsScatter();
 $scatterOutput->Create();
 $scatterForm = json_decode($scatterOutput->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+foreach (['ValueLabelContent', 'IPSViewValueLabelContent'] as $field) {
+    $selector = findGaugeFormElement($scatterForm['elements'], $field);
+    assertGatewayGauge(
+        ($selector['type'] ?? null) === 'Select'
+            && array_column($selector['options'], 'value') === ['x', 'y', 'both']
+            && str_contains((string) ($selector['onChange'] ?? ''), 'UpdateBarPreviewFromForm'),
+        'Scatter must offer X, Y and both label values with live previews in Tile and IPSView.'
+    );
+}
 foreach (['X', 'Y'] as $axis) {
     $tileMode = findGaugeFormElement($scatterForm['elements'], $axis . 'AxisRangeMode');
     $ipsViewMode = findGaugeFormElement($scatterForm['elements'], 'IPSView' . $axis . 'AxisRangeMode');
@@ -8013,9 +8034,11 @@ $scatterOutput->UpdateBarPreviewFromForm(json_encode([
         ['VariableID' => 4713, 'Role' => 'y', 'Label' => 'Humidity', 'Unit' => '%', 'UseVariablePresentation' => false]
     ],
     'ShowValues'           => true,
+    'ValueLabelContent'    => 'both',
     'XAxisRangeMode'       => 'manual', 'XAxisMinimum' => 0.0, 'XAxisMaximum' => 20.0,
     'YAxisRangeMode'       => 'manual', 'YAxisMinimum' => 40.0, 'YAxisMaximum' => 100.0,
-    'IPSViewUseTileDesign' => false, 'IPSViewYAxisRangeMode' => 'zero'
+    'IPSViewUseTileDesign' => false, 'IPSViewYAxisRangeMode' => 'zero',
+    'IPSViewShowValues'    => true, 'IPSViewValueLabelContent' => 'x'
 ], JSON_THROW_ON_ERROR));
 $scatterPreviewUpdates = array_slice($scatterOutput->GetTestFormUpdates(), -2);
 $scatterTileSvg = base64_decode(substr($scatterPreviewUpdates[0]['Value'], strlen('data:image/svg+xml;base64,')), true);
@@ -8029,6 +8052,9 @@ assertGatewayGauge(
         && str_contains($scatterTileSvg, 'clip-path="url(#scatter-preview-plot)"')
         && str_contains($scatterTileSvg, '>40</text>')
         && str_contains($scatterIPSViewSvg, '>0</text>')
+        && str_contains($scatterTileSvg, '°C / ')
+        && str_contains($scatterIPSViewSvg, '°C</text>')
+        && !str_contains($scatterIPSViewSvg, '°C / ')
         && str_contains($scatterTileSvg, '%</text>'),
     'Scatter previews must keep points inside the plot and reflect independent axis and value-label settings.'
 );
@@ -8036,12 +8062,16 @@ $scatterOutput->SetTestProperty('Sources', json_encode([
     ['VariableID' => 4711, 'Role' => 'x'], ['VariableID' => 4713, 'Role' => 'y']
 ], JSON_THROW_ON_ERROR));
 $scatterOutput->SetTestProperty('IPSViewUseTileDesign', false);
+$scatterOutput->SetTestProperty('ValueLabelContent', 'both');
+$scatterOutput->SetTestProperty('IPSViewValueLabelContent', 'x');
 $scatterOutput->SetTestProperty('IPSViewYAxisRangeMode', 'manual');
 $scatterOutput->SetTestProperty('IPSViewYAxisMinimum', 40.5);
 $scatterOutput->SetTestProperty('IPSViewYAxisMaximum', 99.5);
 assertGatewayGauge(
     str_contains($scatterOutput->GetIPSViewHTML(), '"yAxisRangeMode":"manual"')
+        && str_contains($scatterOutput->GetIPSViewHTML(), '"valueLabelContent":"x"')
         && str_contains($scatterOutput->GetIPSViewHTML(), '"yAxisMinimum":40.5')
+        && str_contains($scatterOutput->GetVisualizationTile(), '"valueLabelContent":"both"')
         && str_contains($scatterOutput->GetVisualizationTile(), '"yAxisRangeMode":"data"'),
     'Scatter must use independent IPSView scale settings without changing the Tile scale.'
 );
@@ -8056,6 +8086,7 @@ try {
 }
 assertGatewayGauge(
     str_contains($scatterOutput->GetIPSViewHTML(), '"xAxisRangeMode":"manual"')
+        && str_contains($scatterOutput->GetIPSViewHTML(), '"valueLabelContent":"both"')
         && str_contains($scatterOutput->GetIPSViewHTML(), '"xAxisMinimum":-5.25')
         && str_contains($scatterOutput->GetIPSViewHTML(), '"xAxisMaximum":25.75'),
     'Scatter must copy floating manual axis bounds to the independent IPSView design.'

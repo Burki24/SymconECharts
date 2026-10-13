@@ -70,6 +70,14 @@ assert.equal(bubble.option.series[0].symbolSize([20, 55, 3, 200]), 40);
 assert.equal(bubble.option.series[0].label.position, 'right');
 assert.equal(bubble.option.series[0].label.distance, 8);
 assert.equal(bubble.option.series[0].label.formatter({ value: [10, 50, 1, 100] }), '50 %');
+const xLabels = render({ ...model, scatter: { ...model.scatter, style: {
+    ...model.scatter.style, valueLabelContent: 'x'
+} } });
+assert.match(xLabels.option.series[0].label.formatter({ value: [10, 50, 1, 100] }), /^10[.,]0 °C$/);
+const bothLabels = render({ ...model, scatter: { ...model.scatter, style: {
+    ...model.scatter.style, valueLabelContent: 'both'
+} } });
+assert.match(bothLabels.option.series[0].label.formatter({ value: [10, 50, 1, 100] }), /^10[.,]0 °C \/ 50 %$/);
 assert.equal(bubble.option.series[0].labelLayout.hideOverlap, true,
     'Crowded value labels must be suppressed without hiding their points or tooltips.');
 assert.equal(bubble.option.xAxis.scale, true);

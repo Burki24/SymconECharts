@@ -37,7 +37,9 @@ Wertebereich ohne erzwungenen Nullpunkt, **Null einschließen** zeigt den
 Nullpunkt mit an und **Manuell** setzt Minimum und Maximum selbst. Bei vielen
 Punkten werden sich überlagernde Wertbeschriftungen ausgeblendet; per Tooltip
 sind alle X-/Y- und optionalen Größenwerte weiterhin erreichbar. Sichtbare
-Punktbeschriftungen nennen zur besseren Lesbarkeit nur den Y-Wert.
+Punktbeschriftungen zeigen wahlweise den X-Wert, den Y-Wert (Voreinstellung)
+oder beide Werte mit ihren jeweiligen Einheiten. Kachel und unabhängiges
+IPSView-Design können die Auswahl getrennt festlegen.
 Die SVG-Live-Vorschau zeigt die Gestaltung schematisch mit Beispieldaten und
 berücksichtigt auch die gewählten Achsenbereiche; sie liest beim Ändern des
 Formulars keine Archivdaten.

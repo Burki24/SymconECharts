@@ -153,6 +153,11 @@
                     fontSize: design.fontSizePercent(style.valueFontSizePercent, 11),
                     formatter: function (parameters) {
                         var value = parameters.value || [];
+                        var content = style.valueLabelContent || 'y';
+                        if (content === 'x') { return formatValue(value[0], xRole); }
+                        if (content === 'both') {
+                            return formatValue(value[0], xRole) + ' / ' + formatValue(value[1], yRole);
+                        }
                         return formatValue(value[1], yRole);
                     }
                 },

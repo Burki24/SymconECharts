@@ -2,6 +2,10 @@
 
 ## Hinzugefügt
 
+- Scatter/Bubble kann Punktbeschriftungen mit X-Wert, Y-Wert oder beiden Werten
+  samt jeweiliger Einheit anzeigen. Die Auswahl ist im Kachel- und im
+  unabhängigen IPSView-Designer verfügbar; bestehende Instanzen bleiben bei Y.
+
 - `EChartsScatter` zeigt Archivwerte als X/Y-Streudiagramm oder mit optionaler
   dritter Quelle als Bubble-Diagramm in Kachel und IPSView. Punkte entstehen
   ausschließlich aus gemeinsamen abgeschlossenen Intervallen; fehlende Werte

@@ -75,6 +75,7 @@ class EChartsScatter extends IPSModuleStrict
         'EChartsTheme'            => 'string',
         'ShowGrid'                => 'boolean',
         'ShowValues'              => 'boolean',
+        'ValueLabelContent'       => 'string',
         'ValueLabelPosition'      => 'string',
         'ValueLabelDistance'      => 'integer',
         'PointSize'               => 'integer',
@@ -119,6 +120,7 @@ class EChartsScatter extends IPSModuleStrict
         $this->RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO);
         $this->RegisterPropertyBoolean('ShowGrid', true);
         $this->RegisterPropertyBoolean('ShowValues', false);
+        $this->RegisterPropertyString('ValueLabelContent', 'y');
         $this->RegisterPropertyString('ValueLabelPosition', 'auto');
         $this->RegisterPropertyInteger('ValueLabelDistance', 5);
         $this->RegisterPropertyInteger('PointSize', 12);
@@ -149,6 +151,7 @@ class EChartsScatter extends IPSModuleStrict
             $default = match ($name) {
                 'EChartsTheme'                                                        => EChartsAsset::THEME_AUTO,
                 'ValueLabelPosition'                                                  => 'auto',
+                'ValueLabelContent'                                                   => 'y',
                 'XAxisRangeMode', 'YAxisRangeMode'                                    => 'data',
                 'AnimationEasing', 'AnimationEasingUpdate'                            => 'cubicInOut',
                 'ShowGrid', 'AnimationEnabled'                                        => true,
@@ -193,7 +196,7 @@ class EChartsScatter extends IPSModuleStrict
     {
         $form = $this->LoadConfigurationForm();
         $form['elements'] = $this->WithAnimationFormControls($form['elements']);
-        EChartsLabelDesign::InsertAfterRowContaining($form['elements'], 'ShowValues', [
+        EChartsLabelDesign::InsertAfterRowContaining($form['elements'], 'ValueLabelContent', [
             ['type' => 'RowLayout', 'items' => EChartsLabelDesign::CartesianControls()]
         ]);
         $form['elements'] = $this->SetFormFieldVisibility(
@@ -422,6 +425,7 @@ class EChartsScatter extends IPSModuleStrict
         ) / 100)));
         $position = $this->BarPreviewValue($values, 'ValueLabelPosition', 'string', $ipsView);
         $distance = $this->BarPreviewValue($values, 'ValueLabelDistance', 'integer', $ipsView);
+        $content = $this->BarPreviewValue($values, 'ValueLabelContent', 'string', $ipsView);
         for ($i = 0; $i < 13; $i++) {
             $xValue = 1.8 + $i;
             $yValue = 92 - $i * 2.7 + sin($i * 0.8) * 6;
@@ -444,12 +448,23 @@ class EChartsScatter extends IPSModuleStrict
                     $position,
                     $distance
                 );
-                $formatted = EChartsBarPreview::FormatValue(
+                $formattedX = EChartsBarPreview::FormatValue(
+                    $xValue,
+                    (int) ($byRole['x']['decimals'] ?? 0),
+                    (string) ($byRole['x']['unit'] ?? ''),
+                    $this->ResolveHelperTranslationLanguage()
+                );
+                $formattedY = EChartsBarPreview::FormatValue(
                     $yValue,
                     (int) ($byRole['y']['decimals'] ?? 0),
                     (string) ($byRole['y']['unit'] ?? ''),
                     $this->ResolveHelperTranslationLanguage()
                 );
+                $formatted = match ($content) {
+                    'x'     => $formattedX,
+                    'both'  => $formattedX . ' / ' . $formattedY,
+                    default => $formattedY
+                };
                 $svg .= '<text x="' . EChartsBarPreview::N($label['x']) . '" y="'
                     . EChartsBarPreview::N($label['y']) . '" text-anchor="' . $label['anchor']
                     . '" font-size="' . $valueFontSize . '" fill="' . EChartsBarPreview::E($valueColor)
@@ -832,6 +847,7 @@ class EChartsScatter extends IPSModuleStrict
     {
         if (!$this->AnimationIsValid($prefix)
             || !EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme'))
+            || !in_array($this->ReadPropertyString($prefix . 'ValueLabelContent'), ['x', 'y', 'both'], true)
             || !EChartsLabelDesign::IsValidPosition(
                 $this->ReadPropertyString($prefix . 'ValueLabelPosition'),
                 EChartsLabelDesign::CARTESIAN_POSITIONS
@@ -903,6 +919,7 @@ class EChartsScatter extends IPSModuleStrict
             $style[lcfirst($name)] = $this->ReadPropertyBoolean($prefix . $name);
         }
         $style['valueLabelPosition'] = $this->ReadPropertyString($prefix . 'ValueLabelPosition');
+        $style['valueLabelContent'] = $this->ReadPropertyString($prefix . 'ValueLabelContent');
         foreach (['X', 'Y'] as $axis) {
             $style[lcfirst($axis) . 'AxisRangeMode'] = $this->ReadPropertyString($prefix . $axis . 'AxisRangeMode');
             foreach (['Minimum', 'Maximum'] as $bound) {
