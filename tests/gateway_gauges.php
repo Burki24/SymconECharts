@@ -103,6 +103,16 @@ $GLOBALS['symconTestVariables'] = [
         'Name'            => 'Additional temperature'
     ]
 ];
+$GLOBALS['symconTestTreeObjects'] = [
+    9000 => ['ObjectType' => 0, 'ObjectName' => 'Home', 'ObjectIsHidden' => false],
+    9001 => ['ObjectType' => 1, 'ObjectName' => 'Sensor', 'ObjectIsHidden' => false],
+    9002 => ['ObjectType' => 2, 'ObjectName' => 'Temperature', 'ObjectIsHidden' => false],
+    9003 => ['ObjectType' => 2, 'ObjectName' => 'Temperature', 'ObjectIsHidden' => false],
+    9004 => ['ObjectType' => 0, 'ObjectName' => 'Hidden', 'ObjectIsHidden' => true],
+    9005 => ['ObjectType' => 2, 'ObjectName' => 'Private value', 'ObjectIsHidden' => false]
+];
+$GLOBALS['symconTestTreeChildren'] = [9000 => [9001, 9004], 9001 => [9002, 9003], 9004 => [9005]];
+$GLOBALS['symconTestTreeValues'] = [9002 => '21.3 °C', 9003 => '22.4 °C', 9005 => 'secret'];
 $GLOBALS['symconTestProfiles'] = [
     'Test.Wind' => [
         'MinValue' => 0.0,
@@ -321,7 +331,27 @@ function IPS_GetObject(int $objectID): array
         return [];
     }
 
+    if (isset($GLOBALS['symconTestTreeObjects'][$objectID])) {
+        return $GLOBALS['symconTestTreeObjects'][$objectID];
+    }
+
     return ['ObjectIsHiddenTitle' => $GLOBALS['symconTestHiddenTitles'][$objectID] ?? false];
+}
+
+function IPS_ObjectExists(int $objectID): bool
+{
+    return isset($GLOBALS['symconTestTreeObjects'][$objectID]);
+}
+
+/** @return list<int> */
+function IPS_GetChildrenIDs(int $objectID): array
+{
+    return $GLOBALS['symconTestTreeChildren'][$objectID] ?? [];
+}
+
+function GetValueFormatted(int $variableID): string
+{
+    return $GLOBALS['symconTestTreeValues'][$variableID] ?? '';
 }
 
 function GetValue(int $variableID): mixed
@@ -746,6 +776,7 @@ require_once dirname(__DIR__) . '/EChartsBarPolar/module.php';
 require_once dirname(__DIR__) . '/EChartsPie/module.php';
 require_once dirname(__DIR__) . '/EChartsScatter/module.php';
 require_once dirname(__DIR__) . '/EChartsHeatmap/module.php';
+require_once dirname(__DIR__) . '/EChartsTree/module.php';
 
 final class TestableEChartsGateway extends EChartsGateway
 {
@@ -1033,6 +1064,49 @@ assertGatewayGauge(
     'An independent IPSView design must not alter the Tile design.'
 );
 $gauge->SetTestProperty('IPSViewUseTileDesign', true);
+// Tree models project selected Symcon object subtrees without merging equal names.
+$tree = new EChartsTree();
+$tree->Create();
+$tree->SetTestProperty('RootObjectID', 9000);
+$tree->SetTestProperty('Title', 'Home tree');
+$tree->SetTestProperty('IPSViewUseTileDesign', false);
+$tree->SetTestProperty('IPSViewTreeLayout', 'radial');
+$tree->ApplyChanges();
+$treeData = json_decode($tree->GetTreeData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $tree->GetTestStatus() === IS_ACTIVE
+        && $treeData['family'] === 'tree'
+        && $treeData['tree']['root']['children'][0]['children'][0]['id'] === 'object-9002'
+        && $treeData['tree']['root']['children'][0]['children'][1]['id'] === 'object-9003'
+        && $treeData['tree']['count'] === 4
+        && $treeData['tree']['truncated'] === false,
+    'Tree must retain same-name variables by object ID and skip hidden branches.'
+);
+$treeTile = $tree->GetVisualizationTile();
+$treeIPSView = $tree->GetIPSViewHTML();
+$treeForm = json_decode($tree->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    str_contains($treeTile, 'echarts-tree-root')
+        && str_contains($treeTile, '"treeLayout":"orthogonal"')
+        && str_contains($treeIPSView, '"treeLayout":"radial"')
+        && strlen($treeTile) < SYMCON_OUTPUT_BUFFER_LIMIT
+        && strlen($treeIPSView) < SYMCON_OUTPUT_BUFFER_LIMIT,
+    'Tree must render independent Tile and IPSView designs below the output limit.'
+);
+assertGatewayGauge(
+    findGaugeFormElement($treeForm['elements'], 'BarPreview')['type'] === 'Image'
+        && findGaugeFormElement($treeForm['elements'], 'IPSViewBarPreview')['type'] === 'Image'
+        && findGaugeFormElement($treeForm['elements'], 'IPSViewTreeLayout')['enabled'] === true,
+    'Tree must expose live Tile and independent IPSView previews.'
+);
+$tree->SetTestProperty('MaxNodes', 2);
+$tree->ApplyChanges();
+assertGatewayGauge($tree->GetTestStatus() === 201, 'Tree must reject out-of-contract node limits.');
+$tree->SetTestProperty('MaxNodes', 10);
+$tree->SetTestProperty('RootObjectID', 9002);
+$tree->ApplyChanges();
+assertGatewayGauge($tree->GetTestStatus() === 201, 'Tree must reject variable roots.');
+
 // Current-value Pie models keep duplicate visible names separate by variable ID.
 $pie = new EChartsPie();
 $pie->Create();
@@ -7011,7 +7085,8 @@ $expectedDesignerSections = [
     EChartsBarPolar::class         => [
         'Polar layout and order', 'Labels and visibility', 'Bar geometry',
         'Bar appearance and effects', 'Scale and angular range', 'Typography and colors'
-    ]
+    ],
+    EChartsTree::class             => ['Layout and interaction', 'Labels and typography', 'Node and line colors']
 ];
 $requiredGermanFormTexts = [
     'EChartsBarCategory' => [
@@ -7168,7 +7243,8 @@ foreach ([
     EChartsBarHistory::class        => 'ECBH',
     EChartsBarWaterfall::class      => 'ECBW',
     EChartsBarPolar::class          => 'ECBP',
-    EChartsPie::class               => 'ECPI'
+    EChartsPie::class               => 'ECPI',
+    EChartsTree::class              => 'ECTR'
 ] as $moduleClass => $modulePrefix) {
     $designModule = new $moduleClass();
     $designModule->Create();
@@ -8627,7 +8703,8 @@ foreach ([
     EChartsBarPolar::class         => ['BarPreview', 'IPSViewBarPreview'],
     EChartsPie::class              => ['BarPreview', 'IPSViewBarPreview'],
     EChartsScatter::class          => ['BarPreview', 'IPSViewBarPreview'],
-    EChartsHeatmap::class          => ['BarPreview', 'IPSViewBarPreview']
+    EChartsHeatmap::class          => ['BarPreview', 'IPSViewBarPreview'],
+    EChartsTree::class             => ['BarPreview', 'IPSViewBarPreview']
 ] as $chartClass => $previewFields) {
     $chart = new $chartClass();
     $chart->Create();

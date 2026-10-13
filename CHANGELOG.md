@@ -43,6 +43,12 @@
 
 ## Hinzugefügt
 
+- `EChartsTree` (`ECTR`) zeigt Kategorien, Instanzen und Variablen unter einer
+  gewählten Symcon-Kategorie oder -Instanz als interaktiven Baum. Tiefe,
+  Knotenzahl, versteckte Objekte, Layout, Richtung, Linien, Beschriftung,
+  Farben und Animation sind einstellbar; Kachel und IPSView besitzen getrennte
+  Designer mit Live-Vorschau. Die Objekte und Werte werden nur gelesen.
+
 - Die Heatmap bietet eine Woche, die letzten vollständigen 1/3/6/12
   Kalendermonate und den Zeitraum seit dem 1. Januar. Für längere Zeiträume
   werden alle Archivstunden in mehreren begrenzten Abfragen berücksichtigt;

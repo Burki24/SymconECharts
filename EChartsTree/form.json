@@ -1,0 +1,320 @@
+{
+    "$schema": "https://www.symcon.de/assets/files/validation/formSchema.json",
+    "elements": [
+        {
+            "type": "Label",
+            "caption": "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts."
+        },
+        {
+            "type": "ValidationTextBox",
+            "name": "Title",
+            "caption": "Title"
+        },
+        {
+            "type": "SelectObject",
+            "name": "RootObjectID",
+            "caption": "Root category or instance"
+        },
+        {
+            "type": "RowLayout",
+            "items": [
+                {
+                    "type": "NumberSpinner",
+                    "name": "MaxDepth",
+                    "caption": "Maximum depth",
+                    "minimum": 1,
+                    "maximum": 6
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "MaxNodes",
+                    "caption": "Maximum nodes",
+                    "minimum": 10,
+                    "maximum": 200
+                },
+                {
+                    "type": "CheckBox",
+                    "name": "IncludeHidden",
+                    "caption": "Include hidden objects"
+                }
+            ]
+        },
+        {
+            "type": "Label",
+            "caption": "Categories, instances and variables below the selected root are read only. Other object types are omitted. The node limit is reported in the chart."
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Tile designer",
+            "expanded": false,
+            "items": [
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "AnimationEnabled",
+                            "caption": "Animate Tree"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDuration",
+                            "caption": "Initial animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDurationUpdate",
+                            "caption": "Update animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "EChartsTheme",
+                            "caption": "ECharts theme",
+                            "options": [
+                                {
+                                    "caption": "Automatic (Symcon design)",
+                                    "value": "auto"
+                                },
+                                {
+                                    "caption": "Dark",
+                                    "value": "dark"
+                                },
+                                {
+                                    "caption": "Vintage",
+                                    "value": "vintage"
+                                },
+                                {
+                                    "caption": "Macarons",
+                                    "value": "macarons"
+                                },
+                                {
+                                    "caption": "Infographic",
+                                    "value": "infographic"
+                                },
+                                {
+                                    "caption": "Shine",
+                                    "value": "shine"
+                                },
+                                {
+                                    "caption": "Roma",
+                                    "value": "roma"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "TreeLayout",
+                            "caption": "Tree layout",
+                            "options": [
+                                {
+                                    "caption": "Orthogonal",
+                                    "value": "orthogonal"
+                                },
+                                {
+                                    "caption": "Radial",
+                                    "value": "radial"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Select",
+                            "name": "Orientation",
+                            "caption": "Direction",
+                            "options": [
+                                {
+                                    "caption": "Left to right",
+                                    "value": "LR"
+                                },
+                                {
+                                    "caption": "Right to left",
+                                    "value": "RL"
+                                },
+                                {
+                                    "caption": "Top to bottom",
+                                    "value": "TB"
+                                },
+                                {
+                                    "caption": "Bottom to top",
+                                    "value": "BT"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Select",
+                            "name": "EdgeShape",
+                            "caption": "Connection lines",
+                            "options": [
+                                {
+                                    "caption": "Curved",
+                                    "value": "curve"
+                                },
+                                {
+                                    "caption": "Polyline",
+                                    "value": "polyline"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "InitialDepth",
+                            "caption": "Initially expanded levels",
+                            "minimum": 0,
+                            "maximum": 6
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "NodeSize",
+                            "caption": "Node size",
+                            "minimum": 4,
+                            "maximum": 30,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "RoamEnabled",
+                            "caption": "Pan and zoom"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowLabels",
+                            "caption": "Show labels"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowValues",
+                            "caption": "Show variable values"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "TitleFontSizePercent",
+                            "caption": "Title size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "LabelFontSizePercent",
+                            "caption": "Label size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "TitleColor",
+                            "caption": "Title color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "LabelColor",
+                            "caption": "Label color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "CategoryColor",
+                            "caption": "Category color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "InstanceColor",
+                            "caption": "Instance color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "VariableColor",
+                            "caption": "Variable color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "EdgeColor",
+                            "caption": "Line color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "type": "Button",
+            "caption": "Read current Tree data",
+            "onClick": "echo ECTR_GetTreeData($id);"
+        }
+    ],
+    "status": [
+        {
+            "code": 102,
+            "icon": "active",
+            "caption": "Tree is ready"
+        },
+        {
+            "code": 201,
+            "icon": "error",
+            "caption": "Select a valid Tree root and limits"
+        },
+        {
+            "code": 202,
+            "icon": "error",
+            "caption": "Tree design is invalid"
+        },
+        {
+            "code": 203,
+            "icon": "error",
+            "caption": "No active EChartsGateway is connected"
+        },
+        {
+            "code": 204,
+            "icon": "error",
+            "caption": "Tree objects could not be read"
+        }
+    ]
+}

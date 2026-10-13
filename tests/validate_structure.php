@@ -43,6 +43,7 @@ $requiredFiles = [
     'libs/echarts/6.1.0/echarts.cartesian.min.js',
     'libs/echarts/6.1.0/echarts.polar.min.js',
     'libs/echarts/6.1.0/echarts.pie.min.js',
+    'libs/echarts/6.1.0/echarts.tree.min.js',
     'libs/echarts/6.1.0/themes/dark.js',
     'libs/echarts/6.1.0/themes/vintage.js',
     'libs/echarts/6.1.0/themes/macarons.js',
@@ -125,6 +126,14 @@ $requiredFiles = [
     'EChartsHeatmap/visualization/index.html',
     'EChartsHeatmap/visualization/style.css',
     'EChartsHeatmap/visualization/app.js',
+    'EChartsTree/TreeHierarchy.php',
+    'EChartsTree/visualization/index.html',
+    'EChartsTree/visualization/style.css',
+    'EChartsTree/visualization/app.js',
+    '.tools/echarts-runtime/src/tree-runtime.js',
+    'docs/adr/0044-tree-symcon-object-hierarchy.md',
+    'tests/tree_hierarchy.php',
+    'tests/tree_layout.js',
     'libs/echarts/6.1.0/echarts.heatmap.min.js',
     '.tools/echarts-runtime/src/heatmap-runtime.js',
     'docs/adr/0041-heatmap-weekday-hour-family.md',
@@ -328,7 +337,7 @@ if ($helperSync !== null) {
 
 $expectedModules = [
     'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarPolar', 'EChartsBarWaterfall', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
-    'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsHeatmap', 'EChartsPie', 'EChartsScatter', 'EChartsTimeSeries'
+    'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsHeatmap', 'EChartsPie', 'EChartsScatter', 'EChartsTimeSeries', 'EChartsTree'
 ];
 $discoveredModules = [];
 foreach (glob($root . '/*/module.json') ?: [] as $modulePath) {

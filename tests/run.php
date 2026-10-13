@@ -23,6 +23,7 @@ $tests = [
     __DIR__ . '/scatter_pairing.php',
     __DIR__ . '/heatmap_aggregation.php',
     __DIR__ . '/heatmap_window.php',
+    __DIR__ . '/tree_hierarchy.php',
     __DIR__ . '/gateway_gauges.php'
 ];
 
@@ -36,6 +37,7 @@ $commands = [
     ['Test Historical Bar layout', 'node tests/bar_history_layout.js'],
     ['Test Scatter/Bubble layout', 'node tests/scatter_layout.js'],
     ['Test Heatmap layout', 'node tests/heatmap_layout.js'],
+    ['Test Tree layout', 'node tests/tree_layout.js'],
     ['Verify vendored helper integrity', 'python3 tests/helper_integrity.py'],
     ['Test library metadata updater', 'python3 tests/test_update_library_metadata.py']
 ];

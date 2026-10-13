@@ -47,6 +47,10 @@ Ausgelieferte Dateien:
   Pie-Browser-Build aus ECharts Core, Pie Chart, Legende, Titel, Tooltip,
   Aria und Canvas Renderer; 504.031 Byte; SHA-256
   `b61d6fb1b4652e2365cb91813ce23cc3e2f5afac06610a47bc0ab9eb706440ea`;
+- `libs/echarts/6.1.0/echarts.tree.min.js` – reproduzierbarer,
+  Tree-Browser-Build aus ECharts Core, Tree Chart, Titel, Tooltip, Aria und
+  Canvas Renderer; 500.034 Byte; SHA-256
+  `5debc28928d9d9d51e1611252e494585dc5aa196667542698ee68d40bc22bdb4`;
 - `libs/echarts/6.1.0/themes/dark.js` – offizielles Theme Dark; 5.981 Byte;
   SHA-256 `ae60e563617cb87514690c1946ee202e78c9f1487820490614b58934ed037458`;
 - `libs/echarts/6.1.0/themes/vintage.js` – offizielles Theme Vintage;

@@ -21,6 +21,8 @@ Der separate Polar-Einstieg enthält Bar Chart, Polar Component, Titel, Tooltip,
 Aria und Canvas Renderer. Er verändert den bestehenden kartesischen Build nicht.
 Der Pie-Einstieg enthält Pie Chart, Legende, Titel, Tooltip, Aria und Canvas
 Renderer. Auch er verändert die bestehenden Builds nicht.
+Der Tree-Einstieg enthält Tree Chart, Titel, Tooltip, Aria und Canvas Renderer
+als eigenen Build für die Symcon-Objekthierarchie.
 
 Zusätzlich kopiert der Build die sechs im Modul angebotenen offiziellen
 ECharts-Themes unverändert aus derselben festgeschriebenen npm-Abhängigkeit:
@@ -40,7 +42,8 @@ Die Ergebnisse werden als
 `../../libs/echarts/6.1.0/echarts.scatter.min.js`,
 `../../libs/echarts/6.1.0/echarts.heatmap.min.js`,
 `../../libs/echarts/6.1.0/echarts.polar.min.js`,
-`../../libs/echarts/6.1.0/echarts.pie.min.js` sowie unter
+`../../libs/echarts/6.1.0/echarts.pie.min.js` und
+`../../libs/echarts/6.1.0/echarts.tree.min.js` sowie unter
 `../../libs/echarts/6.1.0/themes` geschrieben. Nach einem bewussten Neuaufbau
 müssen Dateigrößen und SHA-256-Werte in `libs/EChartsAsset.php`, den Tests und
 `THIRD_PARTY_NOTICES.md` geprüft und aktualisiert werden. `node_modules` wird
