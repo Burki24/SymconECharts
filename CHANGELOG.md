@@ -2,6 +2,9 @@
 
 ## Behoben
 
+- Die Heatmap-Farbskala zeigt in Kachel und IPSView ihren kleinsten und größten
+  Archivwert mit der konfigurierten Einheit an.
+
 - Die beiden Scatter-Werkzeuge für Rechteckauswahl und Zurücksetzen sind in
   Kachel und IPSView kontrastreicher und wachsen mit der verfügbaren
   Diagrammfläche. Die Plotfläche hält dafür ausreichend Abstand frei.

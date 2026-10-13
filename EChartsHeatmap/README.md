@@ -23,8 +23,9 @@ Nachkommastellen aus der Variablendarstellung oder den manuellen Angaben.
 ## Design und Ausgabe
 
 Der Kacheldesigner enthält Theme, Farben der Werteskala, sichtbare Farbskala,
-optionale Zellenwerte, Textgrößen und -farben sowie Animation. Die
-Formularvorschau verwendet ausdrücklich Beispieldaten und liest beim
+optionale Zellenwerte, Textgrößen und -farben sowie Animation. Die Farbskala
+zeigt ihren kleinsten und größten Archivwert mit der gewählten Einheit an.
+Die Formularvorschau verwendet ausdrücklich Beispieldaten und liest beim
 Bearbeiten kein Archiv. Das Diagramm selbst zeigt leere Felder ohne
 Interpolation.
 

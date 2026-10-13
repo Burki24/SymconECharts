@@ -71,6 +71,7 @@
             .filter(function (value) { return Number.isFinite(value); });
         var minimum = values.length ? Math.min.apply(null, values) : 0;
         var maximum = values.length ? Math.max.apply(null, values) : 1;
+        var displayedMaximum = maximum;
         if (minimum === maximum) { maximum = minimum + 1; }
         var width = Math.max(240, Number(chartElement.clientWidth) || 720);
         var height = Math.max(190, Number(chartElement.clientHeight) || 420);
@@ -129,8 +130,11 @@
             visualMap: {
                 type: 'continuous', show: style.showColorScale === true && values.length > 0,
                 min: minimum, max: maximum,
+                text: [formatValue(displayedMaximum, decimals, heatmap.unit || ''),
+                    formatValue(minimum, decimals, heatmap.unit || '')],
                 dimension: 2, calculable: false, orient: 'horizontal', left: 'center', bottom: compact ? 5 : 12,
                 itemWidth: compact ? 10 : 12, itemHeight: Math.max(80, Math.min(220, width * 0.32)),
+                textGap: compact ? 5 : 8,
                 textStyle: { color: style.axisColor || colors.text, fontSize: axisSize },
                 inRange: { color: [low, high] }
             },

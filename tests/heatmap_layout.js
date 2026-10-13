@@ -68,6 +68,8 @@ assert.equal(wide.option.yAxis.inverse, true, 'Monday must appear at the top.');
 assert.equal(wide.option.xAxis.data.length, 24);
 assert.equal(wide.option.visualMap.orient, 'horizontal');
 assert.equal(wide.option.visualMap.itemWidth, 12);
+assert.deepEqual(Array.from(wide.option.visualMap.text, label => label.replace(',', '.')), ['20.0 °C', '0.0 °C'],
+    'The visible color scale must label its high and low values with the source unit.');
 assert.deepEqual(Array.from(wide.option.visualMap.inRange.color), ['#123456', '#fedcba']);
 assert.equal(wide.option.series[0].label.show, true);
 assert.equal(wide.emptyElement.hidden, true, 'Populated data must not show the empty-state hint.');
@@ -77,6 +79,8 @@ wide.window.handleMessage({ type: 'click' });
 assert.equal(wide.option, beforeClick, 'An unrelated click must not clear the chart.');
 const compact = render(model, 360, 240, 'ipsview');
 assert.equal(compact.option.series[0].data.length, 2);
+assert.deepEqual(Array.from(compact.option.visualMap.text, label => label.replace(',', '.')), ['20.0 °C', '0.0 °C'],
+    'Compact IPSView widgets need the same color-scale endpoints.');
 assert.equal(compact.option.series[0].label.show, false,
     'Cell labels must yield when a compact widget has insufficient space.');
 compact.chartElement.clientWidth = 1400;
@@ -91,6 +95,9 @@ assert.equal(wide.warningElement.hidden, false, 'Repeated failures need a non-de
 const empty = render({ ...model, cells: [] });
 assert.equal(empty.emptyElement.hidden, false, 'An empty archive range needs a visible explanation.');
 assert.equal(empty.option.visualMap.show, false, 'An empty range must not show a meaningless color scale.');
+const constant = render({ ...model, cells: [{ hour: 8, weekday: 1, value: 9.2, count: 1 }] });
+assert.deepEqual(Array.from(constant.option.visualMap.text, label => label.replace(',', '.')), ['9.2 °C', '9.2 °C'],
+    'A single measured value must not display the artificial scale padding as its maximum.');
 
 const localECharts = path.join(__dirname, '..', '.tools', 'echarts-runtime', 'node_modules', 'echarts');
 if (fs.existsSync(localECharts)) {
@@ -99,7 +106,10 @@ if (fs.existsSync(localECharts)) {
     actual.setOption(wide.option);
     assert.equal(actual.getModel().getSeriesByIndex(0).getData().count(), 2,
         'ECharts 6.1.0 must accept the Heatmap option without inventing missing cells.');
-    assert.match(actual.renderToSVGString(), /<svg/, 'The real ECharts engine must render the Heatmap.');
+    const svg = actual.renderToSVGString();
+    assert.match(svg, /<svg/, 'The real ECharts engine must render the Heatmap.');
+    assert.match(svg, /20[,.]0 °C/, 'The ECharts runtime must render the upper color-scale endpoint.');
+    assert.match(svg, /0[,.]0 °C/, 'The ECharts runtime must render the lower color-scale endpoint.');
     actual.dispose();
 }
 
