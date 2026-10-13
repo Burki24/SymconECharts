@@ -7994,6 +7994,14 @@ $scatter->ApplyChanges();
 $scatterOutput = new EChartsScatter();
 $scatterOutput->Create();
 $scatterForm = json_decode($scatterOutput->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+$scatterLocale = json_decode(file_get_contents(__DIR__ . '/../EChartsScatter/locale.json'), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    findGaugeFormElement($scatterForm['elements'], 'Sources')['caption'] === 'Scatter plot (optional bubble size)'
+        && $scatterLocale['translations']['de']['Scatter plot (optional bubble size)'] === 'Streudiagramm (optional mit Blasengröße)'
+        && in_array('Check scatter plot settings.', array_column($scatterForm['status'], 'caption'), true)
+        && $scatterLocale['translations']['de']['Check scatter plot settings.'] === 'Streudiagramm-Einstellungen prüfen.',
+    'Scatter must describe its optional bubble variant plainly in the configuration form.'
+);
 foreach (['ValueLabelContent', 'IPSViewValueLabelContent'] as $field) {
     $selector = findGaugeFormElement($scatterForm['elements'], $field);
     assertGatewayGauge(

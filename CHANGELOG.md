@@ -27,6 +27,10 @@
 
 ## Behoben
 
+- Das Scatter-Instanzformular bezeichnet die Darstellung verständlich als
+  „Streudiagramm (optional mit Blasengröße)“; technische Modulnamen bleiben
+  unverändert.
+
 - Scatter/Bubble nutzt die Diagrammfläche mit datenangepassten X- und
   Y-Achsen statt beide Skalen unnötig bei null beginnen zu lassen. Beide
   Achsen können unabhängig null einschließen oder manuell begrenzt werden.

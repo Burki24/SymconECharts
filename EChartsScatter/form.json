@@ -13,7 +13,7 @@
         {
             "type": "List",
             "name": "Sources",
-            "caption": "Scatter sources (X, Y, optional size)",
+            "caption": "Scatter plot (optional bubble size)",
             "rowCount": 3,
             "add": true,
             "delete": true,
@@ -617,7 +617,7 @@
         {
             "code": 202,
             "icon": "error",
-            "caption": "Check Scatter settings."
+            "caption": "Check scatter plot settings."
         },
         {
             "code": 203,

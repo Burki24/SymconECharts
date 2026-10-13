@@ -7,13 +7,13 @@ ECharts-Instanzen.
 
 ## Quellen und Daten
 
-Im Abschnitt **Scatter-Quellen** genau eine Variable für **X-Achse** und eine
-für **Y-Achse** wählen. **Blasengröße** ist optional. Jede Rolle benötigt eine
-andere Variablen-ID; gleiche angezeigte Namen sind zulässig. Ein ausdrücklich
-konfigurierter Name hat Vorrang, andernfalls erscheint der aktuelle
-Symcon-Name. IDs werden in der Grafik nicht angezeigt. Einheit und
-Nachkommastellen können aus der Variablendarstellung stammen oder je Quelle
-gesetzt werden.
+Im Abschnitt **Streudiagramm (optional mit Blasengröße)** genau eine Variable
+für **X-Achse** und eine für **Y-Achse** wählen. **Blasengröße** ist optional.
+Jede Rolle benötigt eine andere Variablen-ID; gleiche angezeigte Namen sind
+zulässig. Ein ausdrücklich konfigurierter Name hat Vorrang, andernfalls
+erscheint der aktuelle Symcon-Name. IDs werden in der Grafik nicht angezeigt.
+Einheit und Nachkommastellen können aus der Variablendarstellung stammen oder
+je Quelle gesetzt werden.
 
 Das Modul liest ausschließlich abgeschlossene, aggregierte Archivintervalle.
 Ein Punkt entsteht nur, wenn X und Y für **denselben Intervall-Zeitstempel**

@@ -3,7 +3,7 @@
         "de": {
             "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts.": "Ein gemeinsames EChartsGateway genügt für alle ECharts-Diagramminstanzen. Für weitere Diagramme das vorhandene Gateway auswählen.",
             "Title": "Titel",
-            "Scatter sources (X, Y, optional size)": "Scatter-Quellen (X, Y, optionale Größe)",
+            "Scatter plot (optional bubble size)": "Streudiagramm (optional mit Blasengröße)",
             "Variable": "Variable",
             "Role": "Rolle",
             "X axis": "X-Achse",
@@ -115,7 +115,7 @@
             "Scatter for IPSView": "Scatter für IPSView",
             "Creates a standalone WebContent variable for use as an IPSView HTML widget.": "Erzeugt eine eigenständige WebContent-Variable als HTML-Widget für IPSView.",
             "Configure distinct X and Y sources.": "Unterschiedliche Quellen für X und Y konfigurieren.",
-            "Check Scatter settings.": "Scatter-Einstellungen prüfen.",
+            "Check scatter plot settings.": "Streudiagramm-Einstellungen prüfen.",
             "The gateway archive request failed.": "Die Archivabfrage am Gateway ist fehlgeschlagen.",
             "Configure X and Y archive sources.": "Gültige Archivquellen für X und Y konfigurieren.",
             "Connect an active EChartsGateway.": "Ein aktives EChartsGateway verbinden.",
