@@ -518,11 +518,19 @@
     }
 
     window.handleMessage = function (message) {
-        var value = typeof message === 'string' ? JSON.parse(message) : message;
+        var value = message;
+        if (typeof message === 'string') {
+            try {
+                value = JSON.parse(message);
+            } catch (error) {
+                return;
+            }
+        }
         if (value && value.messageType === 'append') {
             appendPoint(value);
-        } else if (value) {
-            render(value);
+        } else {
+            var state = echartsDesign.parseVisualizationState(value);
+            if (state) { render(state); }
         }
     };
 

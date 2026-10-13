@@ -129,6 +129,28 @@
         return true;
     }
 
+    function parseVisualizationState(message) {
+        var state = message;
+        if (typeof message === 'string') {
+            try {
+                state = JSON.parse(message);
+            } catch (error) {
+                return null;
+            }
+        }
+        if (!state || typeof state !== 'object' || Array.isArray(state)
+            || (state.status !== 'ready' && state.status !== 'error')) {
+            return null;
+        }
+        if (state.status === 'ready' && (!state.chart || typeof state.chart !== 'object')) {
+            return null;
+        }
+        if (state.status === 'error' && (typeof state.error !== 'string' || state.error.length === 0)) {
+            return null;
+        }
+        return state;
+    }
+
     function createTransientFailureRetainer(chartElement, warningElement, translate, transientError) {
         var failures = 0;
         return function (state, previousState, chart) {
@@ -201,6 +223,7 @@
         valueLabel: valueLabel,
         gaugeLabelOffsets: gaugeLabelOffsets,
         resizeChartIfNeeded: resizeChartIfNeeded,
+        parseVisualizationState: parseVisualizationState,
         createTransientFailureRetainer: createTransientFailureRetainer
     });
 }(window));

@@ -117,15 +117,7 @@
     }
 
     function parseState(message) {
-        if (typeof message === 'string') {
-            try {
-                return JSON.parse(message);
-            } catch (error) {
-                return null;
-            }
-        }
-
-        return message && typeof message === 'object' ? message : null;
+        return echartsDesign.parseVisualizationState(message);
     }
 
     function displayError(message) {

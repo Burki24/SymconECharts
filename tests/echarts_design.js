@@ -9,6 +9,22 @@ const source = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-desig
 const window = {};
 vm.runInNewContext(source, { window });
 
+const parseVisualizationState = window.SYMC_ECHARTS_DESIGN.parseVisualizationState;
+const validMessage = { schemaVersion: 1, family: 'scatter', status: 'ready', chart: {} };
+assert.deepEqual(parseVisualizationState(validMessage), validMessage,
+    'A complete chart update must reach the renderer.');
+assert.equal(parseVisualizationState(JSON.stringify(validMessage)).status, 'ready',
+    'A JSON chart update must reach the renderer.');
+assert.equal(parseVisualizationState({ schemaVersion: 1, family: 'scatter', status: 'error', error: 'Failure' }).status,
+    'error', 'A real error state must remain visible.');
+assert.equal(parseVisualizationState({ status: 'error', error: 'Invalid configuration' }).status,
+    'error', 'Existing error updates without protocol metadata must remain visible.');
+for (const message of [{}, { type: 'click' }, { status: 'error' }, { schemaVersion: 1, status: 'ready' },
+    { schemaVersion: 1, family: 'scatter', status: 'ready' }, 'not JSON', null]) {
+    assert.equal(parseVisualizationState(message), null,
+        'An unrelated or incomplete browser message must not replace a chart.');
+}
+
 const opacityFromPercent = window.SYMC_ECHARTS_DESIGN.opacityFromPercent;
 const recoveryChartElement = { hidden: false };
 const recoveryWarningElement = { hidden: true, textContent: '' };
@@ -169,6 +185,16 @@ for (const [moduleName, warningId] of [
         `${moduleName} must register its read retry timer.`);
     assert.match(module, /ScheduleTransientRefresh\(/,
         `${moduleName} must activate retry only after a transient read failure.`);
+}
+
+for (const moduleName of [
+    'EChartsGaugeSingle', 'EChartsGaugeMulti', 'EChartsGaugeTacho', 'EChartsGaugeChronograph',
+    'EChartsTimeSeries', 'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarWaterfall',
+    'EChartsBarPolar', 'EChartsPie', 'EChartsScatter'
+]) {
+    const renderer = fs.readFileSync(path.join(__dirname, '..', moduleName, 'visualization', 'app.js'), 'utf8');
+    assert.match(renderer, /parseVisualizationState\(/,
+        `${moduleName} must validate incoming chart states through the shared guard.`);
 }
 
 console.log('Shared ECharts design utilities verified.');

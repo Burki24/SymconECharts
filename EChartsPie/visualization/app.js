@@ -266,7 +266,7 @@
     }
 
     window.handleMessage = function (message) {
-        var state = typeof message === 'string' ? JSON.parse(message) : message;
+        var state = design.parseVisualizationState(message);
         if (state) { render(state); }
     };
 

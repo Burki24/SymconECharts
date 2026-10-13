@@ -2,6 +2,10 @@
 
 ## Behoben
 
+- Alle Diagrammkacheln übernehmen nur noch vollständige Visualisierungszustände
+  als Datenaktualisierung. Andere oder unvollständige Nachrichten ersetzen
+  die Darstellung nicht mehr durch eine irreführende Ladefehlermeldung.
+
 - Ausstehende Größenänderungen greifen nach dem Verlassen oder Neuaufbau einer
   Kachel nicht mehr auf bereits freigegebene ECharts-Instanzen zu.
 

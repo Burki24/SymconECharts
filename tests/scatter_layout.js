@@ -73,6 +73,12 @@ const model = {
     points: [[100, 10, 50, 1], [200, 20, 55, 3]], truncated: false
 };
 const bubble = render(model);
+const visibleBubbleOption = bubble.currentOption();
+bubble.window.handleMessage({ type: 'click' });
+assert.equal(bubble.currentOption(), visibleBubbleOption,
+    'An unrelated browser click message must not replace the Scatter chart.');
+assert.equal(bubble.errorElement.hidden, true,
+    'An unrelated browser click message must not show a data-load error.');
 assert.equal(bubble.option.series[0].type, 'scatter');
 assert.equal(bubble.option.series[0].data.length, 2);
 assert.equal(bubble.option.series[0].symbolSize([10, 50, 1, 100]), 10);
