@@ -13,9 +13,9 @@ const palette = {
     track: '#34363b', accent: '#55cbb5', seriesColors: ['#5588cc']
 };
 
-function render(model, mode = 'symcon') {
-    const chartElement = { hidden: false, clientWidth: 700, clientHeight: 410,
-        addEventListener: () => {}, getBoundingClientRect: () => ({ left: 0, top: 0, width: 700, height: 410 }) };
+function render(model, mode = 'symcon', width = 700, height = 410) {
+    const chartElement = { hidden: false, clientWidth: width, clientHeight: height,
+        addEventListener: () => {}, getBoundingClientRect: () => ({ left: 0, top: 0, width, height }) };
     const emptyElement = { hidden: true, textContent: '' };
     const warningElement = { hidden: true, textContent: '' };
     const errorElement = { hidden: true, textContent: '' };
@@ -94,6 +94,8 @@ assert.equal(bubble.option.dataZoom.length, 4);
 assert.equal(bubble.option.dataZoom[2].xAxisIndex, 0);
 assert.equal(bubble.option.dataZoom[3].yAxisIndex, 0);
 assert.equal(bubble.option.dataZoom[0].zoomOnMouseWheel, true);
+assert.equal(bubble.option.dataZoom[2].height, 12);
+assert.equal(bubble.option.dataZoom[3].width, 12);
 assert.equal(bubble.option.xAxis.name, 'Außen (°C)');
 assert.equal(bubble.option.yAxis.name, 'Feuchte (%)');
 assert.ok(!bubble.option.title.show, 'Visible Symcon tile headers must not duplicate the chart title.');
@@ -101,6 +103,9 @@ assert.ok(bubble.option.tooltip.formatter({ value: [10, 50, 1, 100] }).includes(
 const ipsview = render(model, 'ipsview');
 assert.equal(ipsview.option.title.show, true);
 assert.equal(ipsview.option.dataZoom[1].zoomOnMouseWheel, false);
+const compactBubble = render(model, 'ipsview', 400, 240);
+assert.equal(compactBubble.option.dataZoom[2].height, 8);
+assert.equal(compactBubble.option.dataZoom[3].width, 8);
 for (const entry of bubble.option.dataZoom) {
     entry.start = entry.xAxisIndex === 0 ? 20 : 35;
     entry.end = entry.xAxisIndex === 0 ? 65 : 80;

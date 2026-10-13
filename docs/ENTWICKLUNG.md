@@ -242,16 +242,17 @@ HTML-Dokument wird nicht bei jeder Messwertänderung neu erzeugt. Datenmenge,
 Aktualisierungsrate und Animationen werden insbesondere für mehrere
 gleichzeitig sichtbare Charts begrenzt und getestet.
 
-Die Zeitachsen-Zoomsteuerung für TimeSeries und BarHistory liegt als
+Die Zoomsteuerung für TimeSeries, BarHistory und Scatter liegt als
 projektspezifischer Browserbaustein in `libs/echarts-zoom.js`. Sie stellt
 `dataZoom`-Optionen, die IPSView-Mausradbehandlung und die Übernahme des
 gewählten Ausschnitts über gleichartige Datenaktualisierungen bereit. Die
 jeweilige Diagramminstanz entscheidet weiterhin über Aktivierung, Layout und
 ihre eigenen Zeitbereichs- und Design-Properties; der gemeinsame Baustein
-stellt für beide Zeitdiagramme auch die schmale Reglerhöhe bereit und ändert
+stellt für horizontale und vertikale Regler dieselbe Stärke von 12 px bzw.
+8 px in kompakten Ansichten bereit und ändert
 keine Archive oder Symcon-Daten.
-Scatter nutzt denselben Baustein mit getrennten X/Y-`dataZoom`-Fenstern und
-Schiebereglern. Der ursprüngliche Zeitachsenvertrag bleibt unverändert;
+Scatter nutzt getrennte X/Y-`dataZoom`-Fenster und Schieberegler. Der
+ursprüngliche Zeitachsenvertrag bleibt unverändert;
 X/Y-Ausschnitte werden nur bei kompatiblem Zeitraum übernommen.
 
 Time Series trennt archivfreie Echtzeitwerte gemäß

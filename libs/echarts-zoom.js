@@ -16,10 +16,14 @@
         ];
     }
 
+    function sliderThickness(compact) {
+        return compact ? 8 : 12;
+    }
+
     function timeAxisOptions(enabled, mode, sliderBottom, compact) {
         var result = options(enabled, mode, sliderBottom);
         if (result.length > 1) {
-            result[1].height = compact ? 8 : 12;
+            result[1].height = sliderThickness(compact);
             if (compact) { result[1].showDetail = false; }
         }
         return result;
@@ -76,10 +80,10 @@
             Object.assign({ id: 'x-inside', xAxisIndex: 0 }, inside),
             Object.assign({ id: 'y-inside', yAxisIndex: 0 }, inside),
             { id: 'x-slider', type: 'slider', xAxisIndex: 0, start: 0, end: 100,
-                filterMode: 'none', bottom: compact ? 10 : 14, height: compact ? 7 : 10,
+                filterMode: 'none', bottom: compact ? 10 : 14, height: sliderThickness(compact),
                 showDataShadow: false, showDetail: false, handleSize: 12 },
             { id: 'y-slider', type: 'slider', yAxisIndex: 0, orient: 'vertical', start: 0, end: 100,
-                filterMode: 'none', right: compact ? 8 : 12, width: compact ? 7 : 10,
+                filterMode: 'none', right: compact ? 8 : 12, width: sliderThickness(compact),
                 showDataShadow: false, showDetail: false, handleSize: 12 }
         ];
     }
@@ -181,6 +185,7 @@
 
     window.SymconEChartsZoom = {
         options: options,
+        sliderThickness: sliderThickness,
         timeAxisOptions: timeAxisOptions,
         capture: capture,
         apply: apply,

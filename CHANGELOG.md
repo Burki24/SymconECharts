@@ -32,6 +32,10 @@
 
 ## Behoben
 
+- Die horizontalen und vertikalen Scatter-Zoomregler haben jetzt dieselbe
+  zentral definierte Stärke wie die Zoomleisten von TimeSeries und BarHistory:
+  12 px, in kompakten Ansichten 8 px.
+
 - Die Zoomleiste von TimeSeries ist in Kachel und IPSView nun genauso schlank
   wie bei BarHistory; auch kurze Ansichten erhalten den kompakten Regler.
 
