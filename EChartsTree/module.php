@@ -270,8 +270,10 @@ class EChartsTree extends IPSModuleStrict
         ];
         $sample = true;
         $nodes = [
-            ['name' => 'Haus', 'kind' => 'category'], ['name' => 'Wohnen', 'kind' => 'category'],
-            ['name'                                           => 'Sensor', 'kind' => 'instance'], ['name' => 'Temperatur', 'kind' => 'variable', 'displayValue' => '21 °C']
+            ['name' => 'Haus', 'kind' => 'category'],
+            ['name' => 'Wohnen', 'kind' => 'category'],
+            ['name' => 'Sensor', 'kind' => 'instance'],
+            ['name' => 'Temperatur', 'kind' => 'variable', 'displayValue' => '21 °C']
         ];
         $useSymconRoot = (bool) ($values['UseSymconRoot'] ?? $this->ReadPropertyBoolean('UseSymconRoot'));
         $rootID = $useSymconRoot ? 0 : (int) ($values['RootObjectID'] ?? $this->ReadPropertyInteger('RootObjectID'));
