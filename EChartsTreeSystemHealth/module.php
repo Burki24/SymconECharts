@@ -99,6 +99,7 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
         $this->RegisterPropertyInteger('MaxNodes', 80);
         $this->RegisterPropertyBoolean('IncludeHidden', false);
         $this->RegisterPropertyString('VariableNameFilter', '');
+        $this->RegisterPropertyBoolean('ShowOnlyRuleVariables', false);
         $this->RegisterPropertyString('StatusRules', '[]');
         foreach (['', 'IPSView'] as $prefix) {
             foreach (self::DESIGN_DEFAULTS as $name => $default) {
@@ -158,7 +159,8 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
             ['caption' => 'Status colors', 'start' => 'HealthyColor']
         ]);
         $fields = [
-            'Title', 'UseSymconRoot', 'RootObjectID', 'MaxDepth', 'MaxNodes', 'IncludeHidden', 'VariableNameFilter', 'StatusRules',
+            'Title', 'UseSymconRoot', 'RootObjectID', 'MaxDepth', 'MaxNodes', 'IncludeHidden', 'VariableNameFilter',
+            'ShowOnlyRuleVariables', 'StatusRules',
             'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
             'IPSViewBackgroundOpacityPercent',
             ...array_keys(self::DESIGN_DEFAULTS),
@@ -488,6 +490,7 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
         $useSymconRoot = (bool) ($values['UseSymconRoot'] ?? $this->ReadPropertyBoolean('UseSymconRoot'));
         $rootID = $useSymconRoot ? 0 : (int) ($values['RootObjectID'] ?? $this->ReadPropertyInteger('RootObjectID'));
         $variableNameFilter = trim((string) ($values['VariableNameFilter'] ?? $this->ReadPropertyString('VariableNameFilter')));
+        $showOnlyRuleVariables = (bool) ($values['ShowOnlyRuleVariables'] ?? $this->ReadPropertyBoolean('ShowOnlyRuleVariables'));
         try {
             $rules = TreeHealth::Parse($values['StatusRules'] ?? $this->ReadPropertyString('StatusRules'));
         } catch (Throwable) {
@@ -497,13 +500,14 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
             try {
                 $tree = $this->ReadHierarchy(
                     $rootID,
-                    $variableNameFilter === ''
+                    $variableNameFilter === '' && !$showOnlyRuleVariables
                         ? min(3, (int) ($values['MaxDepth'] ?? $this->ReadPropertyInteger('MaxDepth')))
                         : (int) ($values['MaxDepth'] ?? $this->ReadPropertyInteger('MaxDepth')),
                     12,
                     (bool) ($values['IncludeHidden'] ?? $this->ReadPropertyBoolean('IncludeHidden')),
                     $rules,
-                    $variableNameFilter
+                    $variableNameFilter,
+                    $showOnlyRuleVariables
                 );
                 $nodes = $this->PreviewNodes($tree['root']);
                 $sample = false;
@@ -684,7 +688,8 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
                 $this->ReadPropertyInteger('MaxNodes'),
                 $this->ReadPropertyBoolean('IncludeHidden'),
                 TreeHealth::Parse($this->ReadPropertyString('StatusRules')),
-                $this->ReadPropertyString('VariableNameFilter')
+                $this->ReadPropertyString('VariableNameFilter'),
+                $this->ReadPropertyBoolean('ShowOnlyRuleVariables')
             );
         } catch (Throwable $exception) {
             $this->WriteAttributeString('LastError', $exception->getMessage());
@@ -714,7 +719,8 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
         int $maxNodes,
         bool $includeHidden,
         array $rules,
-        string $variableNameFilter
+        string $variableNameFilter,
+        bool $showOnlyRuleVariables
     ): array {
         $hierarchy = TreeHierarchy::Build(
             $rootID,
@@ -726,7 +732,8 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
                 : IPS_GetObject($id),
             static fn (int $id): array => IPS_GetChildrenIDs($id),
             static fn (int $id): string => (string) GetValueFormatted($id),
-            $variableNameFilter
+            $variableNameFilter,
+            $showOnlyRuleVariables ? array_keys($rules) : null
         );
         $hierarchy['root'] = TreeHealth::Annotate(
             $hierarchy['root'],

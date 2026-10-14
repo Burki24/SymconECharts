@@ -28,12 +28,21 @@ bestimmten Namensbestandteil einschränken, beispielsweise „Batterie“. Die
 Suche unterscheidet nicht zwischen Groß- und Kleinschreibung. Sichtbar bleiben
 die Treffer sowie ihre übergeordneten Kategorien und Instanzen; andere
 Variablen und leere Zweige entfallen. Bei keinem Treffer bleibt nur die
-gewählte Wurzel sichtbar. Ein leeres Feld zeigt den bisherigen vollständigen
-Teilbaum. Der Filter respektiert Tiefe und ausgeblendete Objekte. Die
+gewählte Wurzel sichtbar. Ein leeres Feld verzichtet auf den Namensfilter.
+Der Filter respektiert Tiefe und ausgeblendete Objekte. Die
 Knotengrenze gilt für das gefilterte Ergebnis, nicht für die zuerst
 durchsuchten Objekte. Für sehr große Hierarchien ist der Suchdurchlauf auf
 30 000 Objekte begrenzt; wird er überschritten, wählen Sie eine engere Wurzel
 oder geringere Tiefe.
+
+Mit „Nur Variablen mit Zustandsregel anzeigen“ blendet der Health-Tree
+Variablen ohne konfigurierte Regel und danach leere Zweige aus. Kategorien und
+Instanzen auf dem Weg zu einer Regelvariable bleiben erhalten. Der Schalter ist
+standardmäßig aus; bisherige Instanzen zeigen weiterhin den vollständigen
+Teilbaum. Bei aktivem Schalter und leerer Regelliste bleibt nur die Wurzel
+sichtbar. Der Namensfilter gilt zusätzlich, und die Knotengrenze wird erst auf
+den gefilterten Baum angewendet. Die Einstellung gilt gleichermaßen für
+Kachel und IPSView.
 
 Jeder Knoten trägt seinen aktuellen Symcon-Namen. Bei Variablen zeigt der
 Tooltip zusätzlich den formatierten aktuellen Wert; dieser kann optional auch
@@ -57,8 +66,10 @@ kennzeichnen einen Alarm direkt als kritisch, etwa eine Bool-Variable mit
 und Float-Variablen auf einmal vorbereiten: Namensbestandteil, Typ,
 Alarmrichtung und Schwellen eingeben, **Suchen** wählen, Treffer einzeln
 ab- oder anwählen und **Auswahl hinzufügen** bestätigen. Gesucht wird nur
-im aktuell angezeigten Teilbaum unter Berücksichtigung von Namensfilter,
-Sichtbarkeit, Tiefe und Knotengrenze. Bereits vorhandene Regeln werden
+unter der gewählten Wurzel unter Berücksichtigung von Namensfilter,
+Sichtbarkeit, Tiefe und Knotengrenze. Der Schalter „Nur Variablen mit
+Zustandsregel anzeigen“ schränkt diese Suche nicht ein, damit weitere Regeln
+hinzugefügt werden können. Bereits vorhandene Regeln werden
 nicht doppelt hinzugefügt. Die neuen Regeln erscheinen zur individuellen
 Nachbearbeitung in der normalen Liste; erst **Änderungen übernehmen**
 speichert sie. Wenn die Knotengrenze erreicht wird, kann die Suche weitere

@@ -31,10 +31,23 @@ Funktionspräfixe der Statusformulare werden entsprechend `ECTH_`.
 
 Beide Module lesen ihre Hierarchie mit der gemeinsamen Klasse
 `libs/TreeHierarchy.php` und verwenden denselben Gateway-Datenfluss. Beide
-behalten zunächst den Variablennamenfilter; seine spätere Bedienung und
-Kopplung an die Statussuche wird gesondert entschieden. Familienbezogene
+behalten den Variablennamenfilter. Familienbezogene
 Properties und Renderer bleiben in ihren jeweiligen Modulen. Die
 Visualisierungsmodelle beider Module verwenden weiterhin die Familie `tree`.
+
+## Ergänzung: Anzeige auf Regelvariablen begrenzen
+
+`EChartsTreeSystemHealth` erhält den optionalen Schalter
+`ShowOnlyRuleVariables` mit dem kompatiblen Default `false`. Ist er aktiv,
+bleiben nur Variablen mit einer `StatusRules`-Zuordnung sowie ihre Vorfahren
+sichtbar. Der Variablennamenfilter wird zusätzlich angewendet; Tiefen- und
+Sichtbarkeitsgrenzen gelten weiterhin. Die Knotengrenze bezieht sich auf das
+gefilterte Ergebnis, nicht auf zuvor gelesene, ausgeblendete Knoten. Ohne
+Regeln bleibt lediglich die Wurzel sichtbar. Die Massensuche nach weiteren
+Zustandsvariablen wird durch den Anzeigeschalter nicht beschränkt.
+`EChartsTree` erhält diesen Schalter nicht. Bestehende Health-Instanzen
+behalten ohne Konfigurationsänderung ihre bisherige vollständige Ansicht;
+eine Migration ist nicht erforderlich.
 
 ## Kompatibilität und Prüfung
 

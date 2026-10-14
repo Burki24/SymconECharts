@@ -1095,6 +1095,7 @@ $treeForm = json_decode($tree->GetConfigurationForm(), true, 512, JSON_THROW_ON_
 assertGatewayGauge(
     !array_key_exists('health', $treeData['tree']['root'])
         && findGaugeFormElement($treeForm['elements'], 'StatusRules') === null
+        && findGaugeFormElement($treeForm['elements'], 'ShowOnlyRuleVariables') === null
         && !array_key_exists('healthyColor', $treeData['tree']['style']),
     'Simple Tree must not expose status rules or health colors.'
 );
@@ -1201,6 +1202,65 @@ assertGatewayGauge(
         && findGaugeFormElement($healthForm['elements'], 'StatusRulesDiagnostics')['visible'] === false,
     'Tree rule changes must update validation feedback and both previews without persisting drafts.'
 );
+$ruleOnlyControl = findGaugeFormElement($healthForm['elements'], 'ShowOnlyRuleVariables');
+assertGatewayGauge(
+    $ruleOnlyControl !== null
+        && $ruleOnlyControl['type'] === 'CheckBox'
+        && str_contains((string) ($ruleOnlyControl['onChange'] ?? ''), 'ECTH_UpdateBarPreviewFromForm'),
+    'Health Tree must expose a live-preview rule-only visibility switch.'
+);
+$ruleOnlyRules = json_encode([
+    ['VariableID' => 9002, 'Direction' => 'high', 'WarningAt' => 1, 'CriticalAt' => 2]
+], JSON_THROW_ON_ERROR);
+$tree->SetTestProperty('StatusRules', $ruleOnlyRules);
+$tree->SetTestProperty('ShowOnlyRuleVariables', true);
+$tree->ApplyChanges();
+$ruleOnlyData = json_decode($tree->GetTreeData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $ruleOnlyData['tree']['count'] === 3
+        && $ruleOnlyData['tree']['root']['children'][0]['children'][0]['id'] === 'object-9002'
+        && count($ruleOnlyData['tree']['root']['children'][0]['children']) === 1
+        && str_contains($tree->GetVisualizationTile(), '"id":"object-9002"')
+        && !str_contains($tree->GetVisualizationTile(), '"id":"object-9003"')
+        && str_contains($tree->GetIPSViewHTML(), '"id":"object-9002"')
+        && !str_contains($tree->GetIPSViewHTML(), '"id":"object-9003"'),
+    'Health Tree must hide unruled variables in Tile and IPSView while keeping their ancestors.'
+);
+$tree->SearchStatusRuleCandidates('Temperature', 'numeric', false, 9000, 3, 80, false, '', $ruleOnlyRules);
+$searchRows = json_decode((string) array_slice($tree->GetTestFormUpdates(), -2)[0]['Value'], true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    count($searchRows) === 1 && $searchRows[0]['VariableID'] === 9003,
+    'Rule-only display filtering must not block searching for new status-rule candidates.'
+);
+$tree->UpdateBarPreviewFromForm(json_encode([
+    'ShowOnlyRuleVariables' => true,
+    'StatusRules'           => [
+        ['VariableID' => 9002, 'Direction' => 'high', 'WarningAt' => 1, 'CriticalAt' => 2]
+    ]
+], JSON_THROW_ON_ERROR));
+$ruleOnlyPreviewUpdates = array_slice($tree->GetTestFormUpdates(), -2);
+$ruleOnlyTileSvg = base64_decode(substr($ruleOnlyPreviewUpdates[0]['Value'], strlen('data:image/svg+xml;base64,')), true);
+$ruleOnlyIPSViewSvg = base64_decode(substr($ruleOnlyPreviewUpdates[1]['Value'], strlen('data:image/svg+xml;base64,')), true);
+assertGatewayGauge(
+    is_string($ruleOnlyTileSvg) && substr_count($ruleOnlyTileSvg, '<circle ') === 3
+        && is_string($ruleOnlyIPSViewSvg) && substr_count($ruleOnlyIPSViewSvg, '<circle ') === 3,
+    'Unsaved rule-only filtering must update Tile and IPSView previews.'
+);
+$tree->SetTestProperty('StatusRules', '[]');
+$tree->ApplyChanges();
+$emptyRuleOnlyData = json_decode($tree->GetTreeData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $emptyRuleOnlyData['tree']['count'] === 1
+        && $emptyRuleOnlyData['tree']['root']['children'] === []
+        && !isset($emptyRuleOnlyData['tree']['root']['health']),
+    'Rule-only filtering without status rules must show only the root.'
+);
+$tree->SetTestProperty('ShowOnlyRuleVariables', false);
+$tree->SetTestProperty('StatusRules', json_encode([
+    ['VariableID' => 9002, 'Direction' => 'high', 'WarningAt' => 1, 'CriticalAt' => 2],
+    ['VariableID' => 9003, 'Direction' => 'high', 'WarningAt' => 1, 'CriticalAt' => 2]
+], JSON_THROW_ON_ERROR));
+$tree->ApplyChanges();
 $lowEditor = json_decode($tree->GetStatusRuleEditorForm('low', 40), true, 512, JSON_THROW_ON_ERROR);
 $highEditor = json_decode($tree->GetStatusRuleEditorForm('high', 40), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
@@ -1561,7 +1621,8 @@ assertGatewayGauge($tree->GetTestStatus() === 205, 'Tree must reject missing sta
 $tree->SetTestProperty('StatusRules', '[]');
 $tree->ApplyChanges();
 assertGatewayGauge(
-    !isset(json_decode($tree->GetTreeData(), true, 512, JSON_THROW_ON_ERROR)['tree']['root']['health']),
+    !isset(json_decode($tree->GetTreeData(), true, 512, JSON_THROW_ON_ERROR)['tree']['root']['health'])
+        && json_decode($tree->GetTreeData(), true, 512, JSON_THROW_ON_ERROR)['tree']['count'] === 4,
     'Removing all status rules must restore the previous uncolored model.'
 );
 $tree = new EChartsTree();

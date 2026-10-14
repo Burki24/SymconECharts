@@ -56,7 +56,16 @@
         },
         {
             "type": "Label",
-            "caption": "Only matching variable names and their parent categories or instances are shown. Leave empty to show the full tree."
+            "caption": "Only matching variable names and their parent categories or instances are shown. Leave empty to skip name filtering."
+        },
+        {
+            "type": "CheckBox",
+            "name": "ShowOnlyRuleVariables",
+            "caption": "Show only variables with status rules"
+        },
+        {
+            "type": "Label",
+            "caption": "When enabled, other variables and empty branches are hidden; parent categories and instances remain. The name filter also applies. Without rules, only the root remains."
         },
         {
             "type": "ExpansionPanel",

@@ -2,6 +2,11 @@
 
 ## Hinzugefügt
 
+- `EChartsTreeSystemHealth` kann optional nur Variablen mit Zustandsregel und
+  deren übergeordnete Knoten anzeigen. Der Namensfilter wirkt zusätzlich;
+  Kachel und IPSView verwenden denselben gefilterten Baum. Bestehende
+  Instanzen behalten standardmäßig ihre bisherige Ansicht.
+
 - `EChartsTreeSystemHealth` (`ECTH`) ist ein eigenes Modul für die lesende
   Objekthierarchie mit expliziten Zustandsregeln. `EChartsTree` (`ECTR`) bleibt
   der einfache Baum ohne Statusregeln und Zustandsfarben. Die gelöschte

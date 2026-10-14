@@ -16,6 +16,7 @@ final class TreeHierarchy
      * @param callable(int):array<string,mixed> $getObject
      * @param callable(int):list<int> $getChildren
      * @param callable(int):string $getValue
+     * @param ?list<int> $allowedVariableIDs
      * @return array{root:array<string,mixed>,count:int,truncated:bool,variableIDs:list<int>}
      */
     public static function Build(
@@ -26,7 +27,8 @@ final class TreeHierarchy
         callable $getObject,
         callable $getChildren,
         callable $getValue,
-        string $variableNameFilter = ''
+        string $variableNameFilter = '',
+        ?array $allowedVariableIDs = null
     ): array {
         $variableNameFilter = trim($variableNameFilter);
         if ($rootID < 0 || $maxDepth < 1 || $maxDepth > 6 || $maxNodes < 2 || $maxNodes > 3000
@@ -37,7 +39,7 @@ final class TreeHierarchy
         if (!in_array($root['ObjectType'] ?? null, [0, 1], true)) {
             throw new InvalidArgumentException('Select a category or instance as the Tree root.');
         }
-        if ($variableNameFilter !== '') {
+        if ($variableNameFilter !== '' || $allowedVariableIDs !== null) {
             return self::BuildFiltered(
                 $rootID,
                 $root,
@@ -47,7 +49,8 @@ final class TreeHierarchy
                 $getObject,
                 $getChildren,
                 $getValue,
-                $variableNameFilter
+                $variableNameFilter,
+                $allowedVariableIDs === null ? null : array_fill_keys($allowedVariableIDs, true)
             );
         }
 
@@ -120,6 +123,7 @@ final class TreeHierarchy
      * @param callable(int):array<string,mixed> $getObject
      * @param callable(int):list<int> $getChildren
      * @param callable(int):string $getValue
+     * @param ?array<int,true> $allowedVariableIDs
      * @return array{root:array<string,mixed>,count:int,truncated:bool,variableIDs:list<int>}
      */
     private static function BuildFiltered(
@@ -131,7 +135,8 @@ final class TreeHierarchy
         callable $getObject,
         callable $getChildren,
         callable $getValue,
-        string $variableNameFilter
+        string $variableNameFilter,
+        ?array $allowedVariableIDs
     ): array {
         $seen = [];
         $scanned = 0;
@@ -145,7 +150,8 @@ final class TreeHierarchy
             $includeHidden,
             $getObject,
             $getChildren,
-            $variableNameFilter
+            $variableNameFilter,
+            $allowedVariableIDs
         ): ?array {
             if (isset($seen[$id])) {
                 return null;
@@ -163,7 +169,8 @@ final class TreeHierarchy
             }
             $name = mb_substr((string) ($object['ObjectName'] ?? ''), 0, 120);
             if ($kind === 'variable') {
-                if (mb_stripos($name, $variableNameFilter, 0, 'UTF-8') === false) {
+                if (($variableNameFilter !== '' && mb_stripos($name, $variableNameFilter, 0, 'UTF-8') === false)
+                    || ($allowedVariableIDs !== null && !isset($allowedVariableIDs[$id]))) {
                     return null;
                 }
                 return ['id' => 'object-' . $id, 'name' => $name, 'kind' => $kind, 'children' => []];

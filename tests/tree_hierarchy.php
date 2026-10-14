@@ -97,6 +97,26 @@ $limitedFilter = TreeHierarchy::Build(500, 3, 4, false, $filterObject, $filterGe
 assertTree($limitedFilter['count'] === 4 && $limitedFilter['truncated'] === true, 'Filtered output must obey the visible node limit.');
 $unfilteredWhitespace = TreeHierarchy::Build(500, 3, 20, false, $filterObject, $filterGetChildren, $value, '   ');
 assertTree($unfilteredWhitespace['count'] === 7, 'A blank filter must preserve the unfiltered Tree.');
+$ruleFiltered = TreeHierarchy::Build(500, 3, 20, false, $filterObject, $filterGetChildren, $value, '', [506]);
+assertTree(
+    $ruleFiltered['count'] === 3
+        && $ruleFiltered['variableIDs'] === [506]
+        && $ruleFiltered['root']['children'][0]['id'] === 'object-505'
+        && $ruleFiltered['root']['children'][0]['children'][0]['id'] === 'object-506',
+    'Rule filtering must retain only selected variables and their ancestors.'
+);
+$ruleNoMatch = TreeHierarchy::Build(500, 3, 20, false, $filterObject, $filterGetChildren, $value, '', []);
+assertTree($ruleNoMatch['count'] === 1 && $ruleNoMatch['root']['children'] === [], 'No selected rules must retain only the root.');
+$ruleNameIntersection = TreeHierarchy::Build(500, 3, 20, false, $filterObject, $filterGetChildren, $value, 'Batterie', [504]);
+assertTree($ruleNameIntersection['count'] === 1, 'Name and rule filters must intersect.');
+$ruleNameMatch = TreeHierarchy::Build(500, 3, 20, false, $filterObject, $filterGetChildren, $value, 'Batterie', [503, 504]);
+assertTree($ruleNameMatch['variableIDs'] === [503], 'Matching names without rules or rules without matching names must be hidden.');
+$ruleHidden = TreeHierarchy::Build(500, 3, 20, false, $filterObject, $filterGetChildren, $value, '', [508]);
+assertTree($ruleHidden['count'] === 1, 'Rule filtering must not reveal hidden branches.');
+$ruleHiddenIncluded = TreeHierarchy::Build(500, 3, 20, true, $filterObject, $filterGetChildren, $value, '', [508]);
+assertTree($ruleHiddenIncluded['variableIDs'] === [508], 'Explicitly included hidden branches may contain rule variables.');
+$ruleLimited = TreeHierarchy::Build(500, 3, 4, false, $filterObject, $filterGetChildren, $value, '', [503, 506]);
+assertTree($ruleLimited['count'] === 4 && $ruleLimited['truncated'] === true, 'Rule-filtered output must obey the visible node limit.');
 
 $lateChildren = range(10001, 13000);
 $lateObject = static fn (int $id): array => [
@@ -115,6 +135,18 @@ $lateMatch = TreeHierarchy::Build(
     'Batterie'
 );
 assertTree($lateMatch['count'] === 2 && $lateMatch['root']['children'][0]['id'] === 'object-13000', 'The filter must find matches after the visible node limit.');
+$lateRule = TreeHierarchy::Build(
+    9999,
+    1,
+    10,
+    false,
+    $lateObject,
+    static fn (int $id): array => $id === 9999 ? $lateChildren : [],
+    $value,
+    '',
+    [13000]
+);
+assertTree($lateRule['count'] === 2 && $lateRule['root']['children'][0]['id'] === 'object-13000', 'Rule filtering must find matches after the visible node limit.');
 
 $scanChildren = range(20001, 50000);
 $scanObject = static fn (int $id): array => [
