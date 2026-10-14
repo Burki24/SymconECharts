@@ -8,6 +8,8 @@
             "Maximum depth": "Maximale Tiefe",
             "Maximum nodes": "Maximale Knotenanzahl",
             "Include hidden objects": "Ausgeblendete Objekte einbeziehen",
+            "Variable name contains (optional)": "Variablenname enthält (optional)",
+            "Only matching variable names and their parent categories or instances are shown. Leave empty to show the full tree.": "Nur passende Variablennamen und ihre übergeordneten Kategorien oder Instanzen werden angezeigt. Leer lassen, um den gesamten Baum zu sehen.",
             "Categories, instances and variables below the selected root or the Symcon root are read only. Other object types are omitted. The node limit is reported in the chart.": "Kategorien, Instanzen und Variablen unterhalb der gewählten Wurzel oder der Symcon-Wurzel werden nur gelesen. Andere Objekttypen entfallen. Das Erreichen der Knotengrenze wird im Diagramm angezeigt.",
             "Tile designer": "Kacheldesigner",
             "Animate Tree": "Baum animieren",

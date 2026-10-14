@@ -50,6 +50,15 @@
             "caption": "Categories, instances and variables below the selected root or the Symcon root are read only. Other object types are omitted. The node limit is reported in the chart."
         },
         {
+            "type": "ValidationTextBox",
+            "name": "VariableNameFilter",
+            "caption": "Variable name contains (optional)"
+        },
+        {
+            "type": "Label",
+            "caption": "Only matching variable names and their parent categories or instances are shown. Leave empty to show the full tree."
+        },
+        {
             "type": "ExpansionPanel",
             "caption": "Plant status",
             "expanded": false,

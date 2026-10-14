@@ -20,6 +20,18 @@ Wenn die Knotengrenze weitere passende Objekte abschneidet, zeigt das
 Diagramm eine Meldung. Beide Ausgabewege verwenden dieselbe Wurzel und
 dieselben Grenzen.
 
+Mit „Variablenname enthält“ lässt sich der Baum auf Variablen mit einem
+bestimmten Namensbestandteil einschränken, beispielsweise „Batterie“. Die
+Suche unterscheidet nicht zwischen Groß- und Kleinschreibung. Sichtbar bleiben
+die Treffer sowie ihre übergeordneten Kategorien und Instanzen; andere
+Variablen und leere Zweige entfallen. Bei keinem Treffer bleibt nur die
+gewählte Wurzel sichtbar. Ein leeres Feld zeigt den bisherigen vollständigen
+Teilbaum. Der Filter respektiert Tiefe und ausgeblendete Objekte. Die
+Knotengrenze gilt für das gefilterte Ergebnis, nicht für die zuerst
+durchsuchten Objekte. Für sehr große Hierarchien ist der Suchdurchlauf auf
+30 000 Objekte begrenzt; wird er überschritten, wählen Sie eine engere Wurzel
+oder geringere Tiefe.
+
 Jeder Knoten trägt seinen aktuellen Symcon-Namen. Bei Variablen zeigt der
 Tooltip zusätzlich den formatierten aktuellen Wert; dieser kann optional auch
 an der Beschriftung stehen. Gleiche Variablennamen werden nicht

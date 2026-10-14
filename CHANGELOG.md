@@ -43,6 +43,10 @@
 
 ## Hinzugefügt
 
+- `EChartsTree` kann Variablen über einen Namensbestandteil filtern, etwa
+  „Batterie“. Kategorien und Instanzen auf dem Weg zu passenden Variablen
+  bleiben erhalten. Ohne Filter ändert sich die bestehende Ansicht nicht.
+
 - Die maximale Knotenzahl von `EChartsTree` lässt sich testweise bis 3000 statt
   bisher 500 einstellen. Der Standardwert von 80 Knoten bleibt unverändert;
   die Obergrenze für Statusregeln steigt entsprechend auf 3000.

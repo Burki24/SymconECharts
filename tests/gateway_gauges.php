@@ -1107,6 +1107,54 @@ assertGatewayGauge(
         && findGaugeFormElement($treeForm['elements'], 'IPSViewTreeLayout')['enabled'] === true,
     'Tree must expose live Tile and independent IPSView previews.'
 );
+$GLOBALS['symconTestTreeObjects'][9006] = [
+    'ObjectType' => 2, 'ObjectName' => 'Batteriestand', 'ObjectIsHidden' => false
+];
+$GLOBALS['symconTestTreeChildren'][9001][] = 9006;
+$GLOBALS['symconTestTreeValues'][9006] = '88 %';
+try {
+    $tree->SetTestProperty('VariableNameFilter', 'bAtTeRiE');
+    $tree->ApplyChanges();
+    $filteredTreeData = json_decode($tree->GetTreeData(), true, 512, JSON_THROW_ON_ERROR);
+    $filteredTreeForm = json_decode($tree->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+    $filterControl = findGaugeFormElement($filteredTreeForm['elements'], 'VariableNameFilter');
+    assertGatewayGauge(
+        $tree->GetTestStatus() === IS_ACTIVE
+            && $filteredTreeData['tree']['count'] === 3
+            && $filteredTreeData['tree']['root']['children'][0]['children'][0]['id'] === 'object-9006'
+            && $filteredTreeData['tree']['root']['children'][0]['children'][0]['displayValue'] === '88 %'
+            && $filterControl['type'] === 'ValidationTextBox'
+            && str_contains((string) ($filterControl['onChange'] ?? ''), 'ECTR_UpdateBarPreviewFromForm')
+            && str_contains($tree->GetVisualizationTile(), '"id":"object-9006"')
+            && str_contains($tree->GetIPSViewHTML(), '"id":"object-9006"'),
+        'Tree must filter Tile and IPSView by variable name and update both previews from the form.'
+    );
+    $tree->UpdateBarPreviewFromForm(json_encode(['VariableNameFilter' => 'Temperatur'], JSON_THROW_ON_ERROR));
+    $filterPreviewUpdates = array_slice($tree->GetTestFormUpdates(), -2);
+    $filterTilePreview = base64_decode(substr($filterPreviewUpdates[0]['Value'], strlen('data:image/svg+xml;base64,')), true);
+    $filterIPSViewPreview = base64_decode(substr($filterPreviewUpdates[1]['Value'], strlen('data:image/svg+xml;base64,')), true);
+    assertGatewayGauge(
+        is_string($filterTilePreview) && is_string($filterIPSViewPreview)
+            && str_contains($filterTilePreview, 'Temperatur') && !str_contains($filterTilePreview, 'Batteriestand')
+            && str_contains($filterIPSViewPreview, 'Temperatur') && !str_contains($filterIPSViewPreview, 'Batteriestand'),
+        'Unsaved variable-name filtering must reach both live previews.'
+    );
+    $tree->SetTestProperty('VariableNameFilter', 'Kein Treffer');
+    $tree->ApplyChanges();
+    $emptyFilteredTree = json_decode($tree->GetTreeData(), true, 512, JSON_THROW_ON_ERROR);
+    assertGatewayGauge(
+        $emptyFilteredTree['tree']['count'] === 1 && $emptyFilteredTree['tree']['root']['children'] === [],
+        'A name filter without matches must retain only the root.'
+    );
+    $tree->SetTestProperty('VariableNameFilter', str_repeat('x', 121));
+    $tree->ApplyChanges();
+    assertGatewayGauge($tree->GetTestStatus() === 201, 'Tree must reject an oversized name filter.');
+} finally {
+    $tree->SetTestProperty('VariableNameFilter', '');
+    array_pop($GLOBALS['symconTestTreeChildren'][9001]);
+    unset($GLOBALS['symconTestTreeObjects'][9006], $GLOBALS['symconTestTreeValues'][9006]);
+    $tree->ApplyChanges();
+}
 $tree->SetTestProperty('StatusRules', json_encode([
     ['VariableID' => 9002, 'Direction' => 'high', 'WarningAt' => 1, 'CriticalAt' => 2],
     ['VariableID' => 9003, 'Direction' => 'high', 'WarningAt' => 1, 'CriticalAt' => 2]

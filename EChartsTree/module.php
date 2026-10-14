@@ -98,6 +98,7 @@ class EChartsTree extends IPSModuleStrict
         $this->RegisterPropertyInteger('MaxDepth', 3);
         $this->RegisterPropertyInteger('MaxNodes', 80);
         $this->RegisterPropertyBoolean('IncludeHidden', false);
+        $this->RegisterPropertyString('VariableNameFilter', '');
         $this->RegisterPropertyString('StatusRules', '[]');
         foreach (['', 'IPSView'] as $prefix) {
             foreach (self::DESIGN_DEFAULTS as $name => $default) {
@@ -157,7 +158,7 @@ class EChartsTree extends IPSModuleStrict
             ['caption' => 'Status colors', 'start' => 'HealthyColor']
         ]);
         $fields = [
-            'Title', 'UseSymconRoot', 'RootObjectID', 'MaxDepth', 'MaxNodes', 'IncludeHidden', 'StatusRules',
+            'Title', 'UseSymconRoot', 'RootObjectID', 'MaxDepth', 'MaxNodes', 'IncludeHidden', 'VariableNameFilter', 'StatusRules',
             'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
             'IPSViewBackgroundOpacityPercent',
             ...array_keys(self::DESIGN_DEFAULTS),
@@ -287,6 +288,7 @@ class EChartsTree extends IPSModuleStrict
         ];
         $useSymconRoot = (bool) ($values['UseSymconRoot'] ?? $this->ReadPropertyBoolean('UseSymconRoot'));
         $rootID = $useSymconRoot ? 0 : (int) ($values['RootObjectID'] ?? $this->ReadPropertyInteger('RootObjectID'));
+        $variableNameFilter = trim((string) ($values['VariableNameFilter'] ?? $this->ReadPropertyString('VariableNameFilter')));
         try {
             $rules = TreeHealth::Parse($values['StatusRules'] ?? $this->ReadPropertyString('StatusRules'));
         } catch (Throwable) {
@@ -296,10 +298,13 @@ class EChartsTree extends IPSModuleStrict
             try {
                 $tree = $this->ReadHierarchy(
                     $rootID,
-                    min(3, (int) ($values['MaxDepth'] ?? $this->ReadPropertyInteger('MaxDepth'))),
+                    $variableNameFilter === ''
+                        ? min(3, (int) ($values['MaxDepth'] ?? $this->ReadPropertyInteger('MaxDepth')))
+                        : (int) ($values['MaxDepth'] ?? $this->ReadPropertyInteger('MaxDepth')),
                     12,
                     (bool) ($values['IncludeHidden'] ?? $this->ReadPropertyBoolean('IncludeHidden')),
-                    $rules
+                    $rules,
+                    $variableNameFilter
                 );
                 $nodes = $this->PreviewNodes($tree['root']);
                 $sample = false;
@@ -400,7 +405,8 @@ class EChartsTree extends IPSModuleStrict
                 $this->ReadPropertyInteger('MaxDepth'),
                 $this->ReadPropertyInteger('MaxNodes'),
                 $this->ReadPropertyBoolean('IncludeHidden'),
-                TreeHealth::Parse($this->ReadPropertyString('StatusRules'))
+                TreeHealth::Parse($this->ReadPropertyString('StatusRules')),
+                $this->ReadPropertyString('VariableNameFilter')
             );
         } catch (Throwable $exception) {
             $this->WriteAttributeString('LastError', $exception->getMessage());
@@ -424,8 +430,14 @@ class EChartsTree extends IPSModuleStrict
     }
 
     /** @return array{root:array<string,mixed>,count:int,truncated:bool,variableIDs:list<int>} */
-    private function ReadHierarchy(int $rootID, int $maxDepth, int $maxNodes, bool $includeHidden, array $rules): array
-    {
+    private function ReadHierarchy(
+        int $rootID,
+        int $maxDepth,
+        int $maxNodes,
+        bool $includeHidden,
+        array $rules,
+        string $variableNameFilter
+    ): array {
         $hierarchy = TreeHierarchy::Build(
             $rootID,
             $maxDepth,
@@ -435,7 +447,8 @@ class EChartsTree extends IPSModuleStrict
                 ? ['ObjectType' => 0, 'ObjectName' => 'Symcon', 'ObjectIsHidden' => false]
                 : IPS_GetObject($id),
             static fn (int $id): array => IPS_GetChildrenIDs($id),
-            static fn (int $id): string => (string) GetValueFormatted($id)
+            static fn (int $id): string => (string) GetValueFormatted($id),
+            $variableNameFilter
         );
         $hierarchy['root'] = TreeHealth::Annotate(
             $hierarchy['root'],
@@ -531,7 +544,8 @@ class EChartsTree extends IPSModuleStrict
             && ($rootID < 1 || !IPS_ObjectExists($rootID)
                 || !in_array(IPS_GetObject($rootID)['ObjectType'] ?? null, [0, 1], true)))
             || $this->ReadPropertyInteger('MaxDepth') < 1 || $this->ReadPropertyInteger('MaxDepth') > 6
-            || $this->ReadPropertyInteger('MaxNodes') < 10 || $this->ReadPropertyInteger('MaxNodes') > 3000) {
+            || $this->ReadPropertyInteger('MaxNodes') < 10 || $this->ReadPropertyInteger('MaxNodes') > 3000
+            || mb_strlen(trim($this->ReadPropertyString('VariableNameFilter')), 'UTF-8') > 120) {
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => 'Select a valid Tree root and limits.'];
         }
         try {

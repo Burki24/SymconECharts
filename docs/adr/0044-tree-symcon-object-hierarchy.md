@@ -36,6 +36,17 @@ Erreicht die Traversierung die Knotengrenze vor weiteren passenden Objekten,
 wird die Kürzung sichtbar gemeldet. Die Tiefengrenze ist
 hingegen eine bewusst gewählte Ansicht und keine Fehlermeldung.
 
+Ein optionaler Filter `VariableNameFilter` sucht ohne Beachtung der
+Groß-/Kleinschreibung nach einem Teilstring im sichtbaren Variablennamen.
+Nur passende Variablen und ihre übergeordneten Kategorien oder Instanzen
+werden ausgegeben; die Wurzel bleibt auch ohne Treffer erhalten. Ein leerer
+Filter wahrt den bisherigen Datenvertrag. Tiefe und Sichtbarkeit gelten
+weiterhin. Bei aktivem Filter wird vor der Ausgabegrenze gesucht, damit
+Treffer hinter den ersten 3000 Objekten nicht verloren gehen. Der Suchlauf
+selbst ist auf 30 000 besuchte Objekte begrenzt und meldet bei Überschreitung
+einen Fehler statt stillschweigend unvollständige Treffer auszugeben.
+Die Objekt-ID bleibt die Identität; Namen dienen nur als Auswahlkriterium.
+
 Die Objekt-ID ist die alleinige technische Identität eines Knotens; die
 synthetisch benannte Symcon-Wurzel verwendet intern `object-0`.
 Variablennamen, Elternnamen und Pfade werden nicht als Schlüssel verwendet;
