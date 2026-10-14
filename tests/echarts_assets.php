@@ -21,6 +21,7 @@ $heatmapRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echar
 $polarRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.polar.min.js';
 $pieRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.pie.min.js';
 $treeRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.tree.min.js';
+$graphRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.graph.min.js';
 $licensePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/LICENSE.txt';
 $noticePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/NOTICE.txt';
 $runtime = (string) file_get_contents($runtimePath);
@@ -30,6 +31,7 @@ $heatmapRuntime = (string) file_get_contents($heatmapRuntimePath);
 $polarRuntime = (string) file_get_contents($polarRuntimePath);
 $pieRuntime = (string) file_get_contents($pieRuntimePath);
 $treeRuntime = (string) file_get_contents($treeRuntimePath);
+$graphRuntime = (string) file_get_contents($graphRuntimePath);
 $designUtilitiesPath = $root . '/libs/echarts-design.js';
 $designUtilities = (string) file_get_contents($designUtilitiesPath);
 $zoomUtilities = (string) file_get_contents($root . '/libs/echarts-zoom.js');
@@ -41,6 +43,7 @@ $heatmapRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runt
 $polarRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/polar-runtime.js');
 $pieRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/pie-runtime.js');
 $treeRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/tree-runtime.js');
+$graphRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/graph-runtime.js');
 $windowsCheckoutRuntime = str_replace("\n", "\r\n", $runtime);
 $expectedThemeIDs = ['auto', 'dark', 'vintage', 'macarons', 'infographic', 'shine', 'roma'];
 
@@ -117,6 +120,14 @@ assertEChartsAsset(
     'The Tree runtime must be pinned, expose the browser API and remain below 512 KiB.'
 );
 assertEChartsAsset(
+    is_file($graphRuntimePath)
+        && hash_file('sha256', $graphRuntimePath) === EChartsAsset::GRAPH_SHA256
+        && EChartsAsset::GraphJavaScript() === $graphRuntime
+        && strlen($graphRuntime) < 524288
+        && str_contains($graphRuntime, 'window.echarts'),
+    'The Graph runtime must be pinned, expose the browser API and remain below 512 KiB.'
+);
+assertEChartsAsset(
     EChartsAsset::DesignJavaScript() === $designUtilities
         && str_contains($designUtilities, 'readableTextColor')
         && str_contains($designUtilities, 'relativeLuminance'),
@@ -166,6 +177,11 @@ assertEChartsAsset(
     str_contains($treeRuntimeSource, 'TreeChart')
         && str_contains($treeRuntimeSource, 'CanvasRenderer'),
     'The Tree runtime must include Tree and Canvas components.'
+);
+assertEChartsAsset(
+    str_contains($graphRuntimeSource, 'GraphChart')
+        && str_contains($graphRuntimeSource, 'CanvasRenderer'),
+    'The Graph runtime must include Graph and Canvas components.'
 );
 assertEChartsAsset(
     str_contains($runtimeSource, 'GraphicComponent'),

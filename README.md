@@ -1,14 +1,16 @@
 # SymconECharts
 
-SymconECharts stellt numerische Symcon-Werte als responsive Apache-ECharts-
-Diagramme in nativen Symcon-Kacheln und optionalen IPSView-HTML-Widgets dar.
+SymconECharts stellt Symcon-Werte und ausgewählte Objektbeziehungen als
+responsive Apache-ECharts-Diagramme in nativen Symcon-Kacheln und optionalen
+IPSView-HTML-Widgets dar.
 Die Library enthält Gauges für einzelne und mehrere Werte, historische und
 live fortgeschriebene Zeitreihen, aktuelle Kategorienvergleiche, historische
 Balken, Waterfall- und Polar-Diagramme, Kreisdiagramme für aktuelle Werte sowie
 historische Streu- und Bubble-Diagramme, eine Tages-/Wochentag-Stunden-Heatmap
-und eine lesende IP-Symcon-Objekthierarchie als Tree.
+eine lesende IP-Symcon-Objekthierarchie als Tree sowie einen allgemeinen
+Graphen für ausdrücklich verbundene Symcon-Objekte.
 
-Alle dreizehn Diagrammformulare zeigen eine unmittelbar aktualisierte SVG-Vorschau
+Alle Diagrammformulare zeigen eine unmittelbar aktualisierte SVG-Vorschau
 im Kachel- und IPSView-Designer. Sie reagiert auf noch nicht gespeicherte
 Titel-, Quellen- und Designänderungen; die endgültige responsive Darstellung
 prüfen Sie in der Kachel beziehungsweise im IPSView-Widget. Historische
@@ -17,7 +19,8 @@ Vorschauen verwenden gekennzeichnete Beispieldaten statt einer Archivabfrage.
 ## Voraussetzungen
 
 - IP-Symcon 9.0 oder 9.1 mit PHP 8.5;
-- numerische Integer- oder Float-Variablen als Datenquellen;
+- numerische Integer- oder Float-Variablen für wertbasierte Diagramme;
+  Tree und Graph können auch andere Symcon-Objekte anzeigen;
 - ein Symcon-Archiv für historische Zeitreihen; der Echtzeitmodus funktioniert
   auch ohne aktiviertes Archiv;
 - IPSView nur bei Verwendung der optionalen IPSView-Ausgabe.
@@ -146,6 +149,12 @@ Folgende Module sind enthalten:
   Ergänzt die lesende Objekthierarchie um ausdrücklich gewählte Zustandsvariablen
   mit Warn- und Kritisch-Schwellen. Eltern zeigen den höchsten Zustand ihrer
   sichtbaren Nachkommen; mehrere Variablen lassen sich per Suche übernehmen.
+
+- __EChartsGraph__ ([Dokumentation](EChartsGraph/README.md))
+  Verknüpft 2 bis 80 frei ausgewählte Symcon-Objekte über 1 bis 200
+  ausdrücklich konfigurierte Kanten. Kachel und optionales IPSView-Widget
+  besitzen getrennte Designer und Live-Vorschauen. Zigbee-Netzwerkkarten
+  gehören nicht zu dieser allgemeinen Instanz.
 
 ## Kacheldesign und IPSView-Design
 

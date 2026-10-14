@@ -90,6 +90,7 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 | Gerät | EChartsHeatmap | Eine Archivvariable als lokale Tages-/Wochentag-Stunden-Matrix mit separaten Kachel- und IPSView-Designern |
 | Gerät | EChartsTree | Begrenzte, lesende IP-Symcon-Objekthierarchie unter einer Kategorie oder Instanz in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsTreeSystemHealth | Lesende Objekthierarchie mit expliziten Zustandsregeln, Schwellen und aggregiertem sichtbarem Anlagenzustand |
+| Gerät | EChartsGraph | Frei konfigurierte, ungerichtete Verbindungen zwischen ausgewählten Symcon-Objekten in Kachel und optionalem IPSView-HTML |
 
 Eine eigene I/O-Instanz, ein Konfigurator und Discovery gehören nicht zum
 Anfangsumfang. Datenquellen sind Teil der jeweiligen Gauge-Konfiguration und
@@ -124,12 +125,13 @@ Modul-IDs und Datenfluss-IDs haben unterschiedliche Aufgaben.
 | Modul EChartsHeatmap | `{62F06D1A-873F-4B0E-9F3E-6AA9AA1A8274}` |
 | Modul EChartsTree | `{2B2C26A3-6F92-48D0-ADE1-5F03D7282EF8}` |
 | Modul EChartsTreeSystemHealth | `{DE4A700B-A38A-4441-A73A-C5F1D7DCCBE2}` |
+| Modul EChartsGraph | `{BD3C8351-82EA-4B6B-BD82-1E034B7E68C6}` |
 | Datenfluss Gauge → Gateway | `{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}` |
 | Datenfluss Gateway → Gauge | `{E4749B72-912B-E3E3-1C57-D19019FFDD84}` |
 
 Die Funktionspräfixe sind `ECGW` für das Gateway, `ECGS` für Gauge Single,
 `ECGM` für Gauge Multi, `ECGT` für Gauge Tacho, `ECGC` für Gauge
-Chronograph, `ECTS` für Time Series, `ECBC` für Bar Category, `ECBH` für Bar History, `ECBW` für Bar Waterfall, `ECBP` für Bar Polar, `ECPI` für Pie, `ECSC` für Scatter, `ECHM` für Heatmap, `ECTR` für Tree und `ECTH` für Tree System Health. Nach der verbindlichen Präfixkonvention steht `EC` für
+Chronograph, `ECTS` für Time Series, `ECBC` für Bar Category, `ECBH` für Bar History, `ECBW` für Bar Waterfall, `ECBP` für Bar Polar, `ECPI` für Pie, `ECSC` für Scatter, `ECHM` für Heatmap, `ECTR` für Tree, `ECTH` für Tree System Health und `ECGR` für den allgemeinen Graphen. `ECGZ` ist für den späteren Zigbee2MQTT-Graphen reserviert. Nach der verbindlichen Präfixkonvention steht `EC` für
 ECharts; die letzten zwei Buchstaben bezeichnen Aufgabe oder Modultyp. Die
 Entscheidungen zur Modulstruktur und zu den GUIDs dokumentieren
 [`ADR 0001`](adr/0001-chart-family-modules.md) und
@@ -206,11 +208,14 @@ Die lesende Objekt-Hierarchie und ihre Grenzen legt
 Zustandsbewertung beschreibt [`ADR 0045`](adr/0045-tree-plant-status.md),
 ihre Auslagerung in `EChartsTreeSystemHealth` regelt
 [`ADR 0046`](adr/0046-tree-system-health-module-split.md).
+Den allgemeinen Graphen mit manuell gewählten Kanten und seine Trennung von
+der Zigbee2MQTT-Topologie regelt
+[`ADR 0047`](adr/0047-general-and-zigbee-graph-split.md).
 
 ## Weitere ECharts-Familien im Plan
 
-Nach der Heatmap und der ersten Tree-Vertikale werden **Graph, Treemap,
-Sunburst, Parallel und Sankey**
+Nach der Heatmap, dem Tree und dem allgemeinen Graphen werden **Zigbee2MQTT-Graph,
+Treemap, Sunburst, Parallel und Sankey**
 jeweils mit eigenem Symcon-Datenvertrag geprüft. Daraus können getrennte
 Gerätemodule entstehen; die jeweilige Modulidentität wird erst bei Beginn
 der Vertikale festgelegt. **Calendar** wird als eigenes Koordinaten- und

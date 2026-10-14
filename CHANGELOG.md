@@ -2,6 +2,12 @@
 
 ## Hinzugefügt
 
+- `EChartsGraph` (`ECGR`) zeigt frei ausgewählte Kategorien, Instanzen und
+  Variablen mit ausdrücklich konfigurierten Verbindungen als interaktiven
+  Graphen in Kachel und optionalem IPSView-Widget. Beide Ausgabewege besitzen
+  getrennte Designer und Live-Vorschauen; Zigbee2MQTT-Topologien bleiben
+  einem eigenen künftigen Modul vorbehalten.
+
 - `EChartsTreeSystemHealth` kann optional nur Variablen mit Zustandsregel und
   deren übergeordnete Knoten anzeigen. Der Namensfilter wirkt zusätzlich;
   Kachel und IPSView verwenden denselben gefilterten Baum. Bestehende

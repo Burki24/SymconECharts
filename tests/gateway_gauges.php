@@ -784,6 +784,7 @@ require_once dirname(__DIR__) . '/EChartsScatter/module.php';
 require_once dirname(__DIR__) . '/EChartsHeatmap/module.php';
 require_once dirname(__DIR__) . '/EChartsTree/module.php';
 require_once dirname(__DIR__) . '/EChartsTreeSystemHealth/module.php';
+require_once dirname(__DIR__) . '/EChartsGraph/module.php';
 
 final class TestableEChartsGateway extends EChartsGateway
 {
@@ -7752,7 +7753,8 @@ $expectedDesignerSections = [
         'Bar appearance and effects', 'Scale and angular range', 'Typography and colors'
     ],
     EChartsTree::class             => ['Layout and interaction', 'Labels and typography', 'Node and line colors'],
-    EChartsTreeSystemHealth::class => ['Layout and interaction', 'Labels and typography', 'Node and line colors', 'Status colors']
+    EChartsTreeSystemHealth::class => ['Layout and interaction', 'Labels and typography', 'Node and line colors', 'Status colors'],
+    EChartsGraph::class            => ['Layout and interaction', 'Labels and typography', 'Node and line colors']
 ];
 $requiredGermanFormTexts = [
     'EChartsBarCategory' => [
@@ -7911,7 +7913,8 @@ foreach ([
     EChartsBarPolar::class          => 'ECBP',
     EChartsPie::class               => 'ECPI',
     EChartsTree::class              => 'ECTR',
-    EChartsTreeSystemHealth::class  => 'ECTH'
+    EChartsTreeSystemHealth::class  => 'ECTH',
+    EChartsGraph::class             => 'ECGR'
 ] as $moduleClass => $modulePrefix) {
     $designModule = new $moduleClass();
     $designModule->Create();
@@ -8126,6 +8129,60 @@ foreach ([EChartsTimeSeries::class, EChartsBarHistory::class] as $timeModuleClas
         $timeModuleClass . ' must place IPSView time settings beside the main time controls.'
     );
 }
+
+$graph = new EChartsGraph();
+$graph->Create();
+$graph->ApplyChanges();
+assertGatewayGauge($graph->GetTestStatus() === 201, 'Unconfigured Graph must report invalid nodes and connections.');
+$graphNodes = [
+    ['ObjectID' => 9000, 'Label' => ''],
+    ['ObjectID' => 9002, 'Label' => 'Sensor A'],
+    ['ObjectID' => 9003, 'Label' => '']
+];
+$graphEdges = [
+    ['SourceObjectID' => 9000, 'TargetObjectID' => 9002],
+    ['SourceObjectID' => 9000, 'TargetObjectID' => 9003]
+];
+$graph->SetTestProperty('Nodes', json_encode($graphNodes, JSON_THROW_ON_ERROR));
+$graph->SetTestProperty('Edges', json_encode($graphEdges, JSON_THROW_ON_ERROR));
+$graph->ApplyChanges();
+$graphData = json_decode($graph->GetGraphData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $graph->GetTestStatus() === IS_ACTIVE
+        && $graphData['family'] === 'graph'
+        && $graphData['graph']['nodes'][1]['id'] === 'object-9002'
+        && $graphData['graph']['nodes'][2]['id'] === 'object-9003'
+        && $graphData['graph']['nodes'][1]['displayValue'] === '21.3 °C'
+        && $graphData['graph']['links'][1]['target'] === 'object-9003',
+    'Graph must keep object identities, read formatted values and project explicit edges.'
+);
+assertGatewayGauge(
+    str_contains($graph->GetVisualizationTile(), 'echarts-graph-root')
+        && str_contains($graph->GetIPSViewHTML(), 'echarts-graph-root'),
+    'Graph must provide both native Tile and IPSView HTML.'
+);
+$graphForm = json_decode($graph->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    str_contains((string) findGaugeFormElement($graphForm['elements'], 'Nodes')['onAdd'], 'ECGR_UpdateBarPreviewFromForm')
+        && str_contains((string) findGaugeFormElement($graphForm['elements'], 'Edges')['onEdit'], 'ECGR_UpdateBarPreviewFromForm')
+        && findGaugeFormElement($graphForm['elements'], 'IPSViewGraphLayout')['enabled'] === false,
+    'Unsaved Graph node and edge edits must refresh both form previews.'
+);
+$draftNodes = $graphNodes;
+$draftNodes[1]['Label'] = '<script>Draft</script>';
+$graph->UpdateBarPreviewFromForm(json_encode(['Nodes' => $draftNodes, 'Edges' => $graphEdges], JSON_THROW_ON_ERROR));
+$graphUpdates = array_slice($graph->GetTestFormUpdates(), -2);
+$draftSvg = base64_decode(substr((string) $graphUpdates[0]['Value'], strlen('data:image/svg+xml;base64,')), true);
+assertGatewayGauge(
+    is_string($draftSvg)
+        && str_contains($draftSvg, '&lt;script&gt;Draft')
+        && !str_contains($draftSvg, '<script>')
+        && json_decode($graph->GetGraphData(), true, 512, JSON_THROW_ON_ERROR)['graph']['nodes'][1]['name'] === 'Sensor A',
+    'Graph draft preview must escape labels and leave the saved configuration untouched.'
+);
+$graph->SetTestProperty('Edges', json_encode([['SourceObjectID' => 9002, 'TargetObjectID' => 9002]], JSON_THROW_ON_ERROR));
+$graph->ApplyChanges();
+assertGatewayGauge($graph->GetTestStatus() === 201, 'Graph must reject self connections on ApplyChanges.');
 
 foreach ([
     EChartsGaugeSingle::class, EChartsGaugeMulti::class, EChartsGaugeTacho::class,
@@ -9372,7 +9429,8 @@ foreach ([
     EChartsScatter::class          => ['BarPreview', 'IPSViewBarPreview'],
     EChartsHeatmap::class          => ['BarPreview', 'IPSViewBarPreview'],
     EChartsTree::class             => ['BarPreview', 'IPSViewBarPreview'],
-    EChartsTreeSystemHealth::class => ['BarPreview', 'IPSViewBarPreview']
+    EChartsTreeSystemHealth::class => ['BarPreview', 'IPSViewBarPreview'],
+    EChartsGraph::class            => ['BarPreview', 'IPSViewBarPreview']
 ] as $chartClass => $previewFields) {
     $chart = new $chartClass();
     $chart->Create();

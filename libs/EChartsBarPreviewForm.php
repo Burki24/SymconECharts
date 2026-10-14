@@ -65,12 +65,13 @@ trait EChartsBarPreviewForm
         $action = self::BarPreviewAction($prefix, $fields);
         foreach ($items as &$item) {
             $name = $item['name'] ?? null;
-            if ($name === 'Sources' && ($item['type'] ?? null) === 'List') {
+            if (is_string($name) && in_array($name, $fields, true)
+                && in_array($name, ['Sources', 'Nodes', 'Edges'], true) && ($item['type'] ?? null) === 'List') {
                 foreach (['onAdd', 'onEdit', 'onDelete', 'onChangeOrder'] as $event) {
                     $previous = trim((string) ($item[$event] ?? ''));
                     $item[$event] = $previous === '' ? $action : $previous . ' ' . $action;
                 }
-            } elseif (is_string($name) && in_array($name, $fields, true) && $name !== 'Sources') {
+            } elseif (is_string($name) && in_array($name, $fields, true)) {
                 $previous = trim((string) ($item['onChange'] ?? ''));
                 $item['onChange'] = $previous === '' ? $action : $previous . ' ' . $action;
             }
@@ -86,15 +87,19 @@ trait EChartsBarPreviewForm
     /** @param list<string> $fields */
     private static function BarPreviewAction(string $prefix, array $fields): string
     {
-        $hasSourceList = in_array('Sources', $fields, true);
+        $listFields = array_values(array_filter($fields, static fn (string $name): bool => in_array($name, ['Sources', 'Nodes', 'Edges'], true)));
         $pairs = array_map(
             static fn (string $name): string => var_export($name, true)
-                . ' => ' . ($name === 'Sources' ? '$barPreviewSources' : '$' . $name),
+                . ' => ' . (in_array($name, $listFields, true) ? '$barPreview' . $name : '$' . $name),
             $fields
         );
-
-        return ($hasSourceList ? '$barPreviewSources = []; foreach ($Sources as $barPreviewSource) {'
-            . ' $barPreviewSources[] = $barPreviewSource; } ' : '')
+        $lists = '';
+        foreach ($listFields as $name) {
+            $rowName = $name === 'Sources' ? 'barPreviewSource' : 'barPreviewRow';
+            $lists .= '$barPreview' . $name . ' = []; foreach ($' . $name . ' as $' . $rowName . ') {'
+                . ' $barPreview' . $name . '[] = $' . $rowName . '; } ';
+        }
+        return $lists
             . $prefix . '_UpdateBarPreviewFromForm($id, json_encode([' . implode(', ', $pairs) . ']));';
     }
 

@@ -29,6 +29,7 @@ $barWaterfall = (string) file_get_contents($root . '/EChartsBarWaterfall/module.
 $barPolar = (string) file_get_contents($root . '/EChartsBarPolar/module.php');
 $pie = (string) file_get_contents($root . '/EChartsPie/module.php');
 $heatmap = (string) file_get_contents($root . '/EChartsHeatmap/module.php');
+$graph = (string) file_get_contents($root . '/EChartsGraph/module.php');
 $currentSources = (string) file_get_contents($root . '/libs/EChartsCurrentSources.php');
 $configurationFormHelper = (string) file_get_contents($root . '/libs/helper/ConfigurationFormHelper.php');
 $sharedGatewayGuidance = 'One shared EChartsGateway is sufficient for all ECharts chart instances. '
@@ -46,7 +47,8 @@ foreach ([
     'EChartsBarWaterfall'     => $barWaterfall,
     'EChartsBarPolar'         => $barPolar,
     'EChartsPie'              => $pie,
-    'EChartsHeatmap'          => $heatmap
+    'EChartsHeatmap'          => $heatmap,
+    'EChartsGraph'            => $graph
 ] as $moduleName => $source) {
     requireStrictContract(
         preg_match('/class\s+' . $moduleName . '\s+extends\s+IPSModuleStrict\b/', $source) === 1,

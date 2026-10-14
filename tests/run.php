@@ -25,6 +25,7 @@ $tests = [
     __DIR__ . '/heatmap_window.php',
     __DIR__ . '/tree_hierarchy.php',
     __DIR__ . '/tree_health.php',
+    __DIR__ . '/graph_model.php',
     __DIR__ . '/gateway_gauges.php'
 ];
 
@@ -39,6 +40,7 @@ $commands = [
     ['Test Scatter/Bubble layout', 'node tests/scatter_layout.js'],
     ['Test Heatmap layout', 'node tests/heatmap_layout.js'],
     ['Test Tree layout', 'node tests/tree_layout.js'],
+    ['Test Graph layout', 'node tests/graph_layout.js'],
     ['Verify vendored helper integrity', 'python3 tests/helper_integrity.py'],
     ['Test library metadata updater', 'python3 tests/test_update_library_metadata.py']
 ];

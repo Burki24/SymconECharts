@@ -19,6 +19,7 @@ final class EChartsAsset
     public const POLAR_SHA256 = 'f31daec4db27dee855d736f2443b15b5642011bc99bbe6f9bc1fdb91da1ef69c';
     public const PIE_SHA256 = 'b61d6fb1b4652e2365cb91813ce23cc3e2f5afac06610a47bc0ab9eb706440ea';
     public const TREE_SHA256 = '5debc28928d9d9d51e1611252e494585dc5aa196667542698ee68d40bc22bdb4';
+    public const GRAPH_SHA256 = 'efc66a2fb25056c9c89785b088c459e262e02b98ca9d1669db770d607b70c3df';
     public const TIME_SERIES_SHA256 = self::CARTESIAN_SHA256;
     public const THEME_AUTO = 'auto';
     public const THEME_SHA256 = [
@@ -261,6 +262,22 @@ final class EChartsAsset
         $canonicalContent = self::NormalizeLineEndings($content);
         if (!hash_equals(self::TREE_SHA256, hash('sha256', $canonicalContent))) {
             throw new RuntimeException('The bundled Apache ECharts Tree runtime failed its integrity check.');
+        }
+
+        return $canonicalContent;
+    }
+
+    /** Loads the pinned Graph runtime without enlarging other chart bundles. */
+    public static function GraphJavaScript(): string
+    {
+        $path = __DIR__ . '/echarts/' . self::VERSION . '/echarts.graph.min.js';
+        $content = @file_get_contents($path);
+        if ($content === false || $content === '') {
+            throw new RuntimeException('The bundled Apache ECharts Graph runtime could not be loaded.');
+        }
+        $canonicalContent = self::NormalizeLineEndings($content);
+        if (!hash_equals(self::GRAPH_SHA256, hash('sha256', $canonicalContent))) {
+            throw new RuntimeException('The bundled Apache ECharts Graph runtime failed its integrity check.');
         }
 
         return $canonicalContent;

@@ -7,7 +7,7 @@
         "node": ">=18"
     },
     "scripts": {
-        "build": "npm run build:runtime && npm run build:cartesian && npm run build:scatter && npm run build:heatmap && npm run build:polar && npm run build:pie && npm run build:tree && npm run build:themes",
+        "build": "npm run build:runtime && npm run build:cartesian && npm run build:scatter && npm run build:heatmap && npm run build:polar && npm run build:pie && npm run build:tree && npm run build:graph && npm run build:themes",
         "build:runtime": "esbuild src/gauge-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.gauge.min.js",
         "build:cartesian": "esbuild src/cartesian-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.cartesian.min.js",
         "build:scatter": "esbuild src/scatter-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.scatter.min.js",
@@ -15,6 +15,7 @@
         "build:polar": "esbuild src/polar-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.polar.min.js",
         "build:pie": "esbuild src/pie-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.pie.min.js",
         "build:tree": "esbuild src/tree-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.tree.min.js",
+        "build:graph": "esbuild src/graph-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.graph.min.js",
         "build:themes": "node scripts/copy-themes.mjs"
     },
     "dependencies": {

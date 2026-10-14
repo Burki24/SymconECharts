@@ -134,6 +134,15 @@ $requiredFiles = [
     'EChartsTreeSystemHealth/visualization/index.html',
     'EChartsTreeSystemHealth/visualization/style.css',
     'EChartsTreeSystemHealth/visualization/app.js',
+    'libs/GraphModel.php',
+    'EChartsGraph/visualization/index.html',
+    'EChartsGraph/visualization/style.css',
+    'EChartsGraph/visualization/app.js',
+    '.tools/echarts-runtime/src/graph-runtime.js',
+    'libs/echarts/6.1.0/echarts.graph.min.js',
+    'docs/adr/0047-general-and-zigbee-graph-split.md',
+    'tests/graph_model.php',
+    'tests/graph_layout.js',
     '.tools/echarts-runtime/src/tree-runtime.js',
     'docs/adr/0044-tree-symcon-object-hierarchy.md',
     'docs/adr/0046-tree-system-health-module-split.md',
@@ -342,7 +351,7 @@ if ($helperSync !== null) {
 
 $expectedModules = [
     'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarPolar', 'EChartsBarWaterfall', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
-    'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsHeatmap', 'EChartsPie', 'EChartsScatter', 'EChartsTimeSeries', 'EChartsTree', 'EChartsTreeSystemHealth'
+    'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsGraph', 'EChartsHeatmap', 'EChartsPie', 'EChartsScatter', 'EChartsTimeSeries', 'EChartsTree', 'EChartsTreeSystemHealth'
 ];
 $discoveredModules = [];
 foreach (glob($root . '/*/module.json') ?: [] as $modulePath) {
