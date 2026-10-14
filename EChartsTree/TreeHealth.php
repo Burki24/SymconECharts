@@ -15,41 +15,66 @@ final class TreeHealth
      */
     public static function Parse(mixed $input): array
     {
+        if (self::Issues($input) !== []) {
+            throw new InvalidArgumentException('The Tree status rules are invalid.');
+        }
+        if (is_string($input)) {
+            $input = json_decode($input, true, 64, JSON_THROW_ON_ERROR);
+        }
+        $rules = [];
+        foreach ($input as $row) {
+            $id = $row['VariableID'];
+            $rules[$id] = [
+                'direction' => $row['Direction'],
+                'warning'   => (float) $row['WarningAt'],
+                'critical'  => (float) $row['CriticalAt']
+            ];
+        }
+        return $rules;
+    }
+
+    /** @return list<array{row:int,code:string,id?:int,firstRow?:int}> */
+    public static function Issues(mixed $input): array
+    {
         if (is_string($input)) {
             try {
                 $input = json_decode($input, true, 64, JSON_THROW_ON_ERROR);
             } catch (\JsonException) {
-                throw new InvalidArgumentException('The Tree status rules are invalid.');
+                return [['row' => 0, 'code' => 'invalid']];
             }
         }
-        if (!is_array($input) || !array_is_list($input) || count($input) > 3000) {
-            throw new InvalidArgumentException('The Tree status rules are invalid.');
+        if (!is_array($input) || !array_is_list($input)) {
+            return [['row' => 0, 'code' => 'invalid']];
         }
-        $rules = [];
-        foreach ($input as $row) {
-            if (!is_array($row)) {
-                throw new InvalidArgumentException('The Tree status rules are invalid.');
-            }
-            $id = $row['VariableID'] ?? null;
-            $direction = $row['Direction'] ?? null;
-            $warning = $row['WarningAt'] ?? null;
-            $critical = $row['CriticalAt'] ?? null;
-            if (!is_int($id) || $id < 1 || isset($rules[$id])
-                || !in_array($direction, ['high', 'low'], true)
+        if (count($input) > 3000) {
+            return [['row' => 0, 'code' => 'too_many']];
+        }
+        $issues = [];
+        $firstRows = [];
+        foreach ($input as $index => $row) {
+            $number = $index + 1;
+            $id = is_array($row) ? ($row['VariableID'] ?? null) : null;
+            $direction = is_array($row) ? ($row['Direction'] ?? null) : null;
+            $warning = is_array($row) ? ($row['WarningAt'] ?? null) : null;
+            $critical = is_array($row) ? ($row['CriticalAt'] ?? null) : null;
+            if (!is_int($id) || $id < 1 || !in_array($direction, ['high', 'low'], true)
                 || (!is_int($warning) && !is_float($warning))
                 || (!is_int($critical) && !is_float($critical))
-                || !is_finite((float) $warning) || !is_finite((float) $critical)
-                || ($direction === 'high' && $critical < $warning)
-                || ($direction === 'low' && $critical > $warning)) {
-                throw new InvalidArgumentException('The Tree status rules are invalid.');
+                || !is_finite((float) $warning) || !is_finite((float) $critical)) {
+                $issues[] = ['row' => $number, 'code' => 'invalid'];
+                continue;
             }
-            $rules[$id] = [
-                'direction' => $direction,
-                'warning'   => (float) $warning,
-                'critical'  => (float) $critical
-            ];
+            if (isset($firstRows[$id])) {
+                $issues[] = ['row' => $number, 'code' => 'duplicate', 'id' => $id, 'firstRow' => $firstRows[$id]];
+            } else {
+                $firstRows[$id] = $number;
+            }
+            if (($direction === 'high' && $critical < $warning)
+                || ($direction === 'low' && $critical > $warning)) {
+                $issues[] = ['row' => $number, 'code' => 'threshold', 'id' => $id];
+            }
         }
-        return $rules;
+        return $issues;
     }
 
     /**

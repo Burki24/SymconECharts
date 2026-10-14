@@ -47,6 +47,23 @@ assertTreeHealth($falseAlarm['health'] === 'critical', 'Boolean false must suppo
 $lowWarning = TreeHealth::Annotate($root, $rules, static fn (int $id): float => $id === 11 ? 0 : 20.0);
 assertTreeHealth($lowWarning['health'] === 'warning', 'Low-direction warning threshold must be applied.');
 assertTreeHealth(TreeHealth::Annotate($root, [], $read) === $root, 'No rules must preserve the old Tree model.');
+assertTreeHealth(
+    TreeHealth::Issues($rules) === [['row' => 0, 'code' => 'invalid']],
+    'Parsed rule maps are not valid list input.'
+);
+$problemRows = [
+    ['VariableID' => 11, 'Direction' => 'low', 'WarningAt' => 40, 'CriticalAt' => 30],
+    ['VariableID' => 11, 'Direction' => 'low', 'WarningAt' => 40, 'CriticalAt' => 30],
+    ['VariableID' => 12, 'Direction' => 'high', 'WarningAt' => 40, 'CriticalAt' => 30]
+];
+assertTreeHealth(TreeHealth::Issues($problemRows) === [
+    ['row' => 2, 'code' => 'duplicate', 'id' => 11, 'firstRow' => 1],
+    ['row' => 3, 'code' => 'threshold', 'id' => 12]
+], 'Status-rule diagnostics must identify both invalid rows and the first duplicate.');
+assertTreeHealth(
+    TreeHealth::Issues('not JSON') === [['row' => 0, 'code' => 'invalid']],
+    'Malformed status rules must have a general diagnostic.'
+);
 
 $wideRules = array_map(
     static fn (int $id): array => ['VariableID' => $id, 'Direction' => 'high', 'WarningAt' => 1, 'CriticalAt' => 2],

@@ -50,6 +50,13 @@ muss die kritische Schwelle mindestens so hoch wie die Warnschwelle sein;
 bei „Niedriger ist schlechter“ höchstens so hoch. Gleiche Schwellen
 kennzeichnen einen Alarm direkt als kritisch, etwa eine Bool-Variable mit
 `1/1` für `true` oder `0/0` für `false`.
+Im Bearbeitungsdialog begrenzt die gewählte Alarmrichtung die zulässige
+Kritisch-Schwelle; eine vertauschte Reihenfolge lässt sich dort nicht
+bestätigen. Doppelt gewählte Variablen und bereits gespeicherte fehlerhafte
+Regeln werden im Formular mit Regelnummer, Sensorname und Variablen-ID angezeigt und die
+betroffenen Zeilen farblich markiert. Korrigieren Sie die markierten Zeilen;
+ungültige Regeln werden weiterhin nicht als gültige Instanzkonfiguration
+übernommen.
 
 Nur ausgewählte Zustandsvariablen erhalten Grün (OK), Orange (Warnung) oder
 Rot (kritisch). Kategorien und Instanzen übernehmen den höchsten Zustand

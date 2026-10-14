@@ -24,6 +24,10 @@ Zahlenwert. Bei `high` muss Kritisch ≥ Warnung sein, bei `low` Kritisch ≤
 Warnung. Die kritischere Schwelle wird zuerst geprüft. Gleiche Schwellen
 ermöglichen ein direkt kritisches Bool-Signal. Maximal 3000 Regeln sind
 zulässig, entsprechend der maximalen Knotenzahl.
+Das Formular macht Regelverstöße mit Zeile, Sensorname und Variablen-ID sichtbar; die
+Schwellenreihenfolge wird bereits im Zeilendialog begrenzt. Diese
+Formularprüfung ersetzt die verbindliche Validierung gespeicherter Properties
+in `ApplyChanges()` nicht.
 
 Nur sichtbare und innerhalb von Tiefe und Knotengrenze tatsächlich gelesene
 Variablen wirken auf den Baum. Ein bewerteter Variablenknoten erhält `ok`,

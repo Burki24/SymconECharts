@@ -2,6 +2,11 @@
 
 ## Behoben
 
+- Ungültige Tree-Zustandsregeln nennen im Formular jetzt die betroffenen
+  Regelzeilen sowie Sensorname und Variablen-ID. Doppelte Einträge werden markiert; die
+  Kritisch-Schwelle lässt sich im Bearbeitungsdialog nur in der zur
+  Alarmrichtung passenden Reihenfolge bestätigen.
+
 - Die 30-Tage-Heatmap kennzeichnet ihren Mo–So/Stunden-Durchschnitt nun im
   Diagramm, im Tooltip und im Formular ausdrücklich. Sie berücksichtigt
   weiterhin alle vorhandenen Stundenwerte des gewählten 30-Tage-Zeitraums;

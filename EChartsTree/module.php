@@ -170,7 +170,64 @@ class EChartsTree extends IPSModuleStrict
                 $fields[] = $prefix . $name;
             }
         }
-        return $this->EncodeConfigurationForm($this->WithBarPreviewForm($form, 'ECTR', $fields));
+        return $this->EncodeConfigurationForm($this->WithStatusRuleForm(
+            $this->WithBarPreviewForm($form, 'ECTR', $fields)
+        ));
+    }
+
+    public function GetStatusRuleEditorForm(string $Direction, float $WarningAt): string
+    {
+        $form = $this->LoadConfigurationForm();
+        foreach ($form['elements'] as $panel) {
+            if (($panel['caption'] ?? null) !== 'Plant status') {
+                continue;
+            }
+            foreach ($panel['items'] as $item) {
+                if (($item['name'] ?? null) !== 'StatusRules') {
+                    continue;
+                }
+                $fields = $item['form'];
+                foreach ($fields as &$field) {
+                    if (($field['name'] ?? null) === 'CriticalAt') {
+                        $field[$Direction === 'low' ? 'maximum' : 'minimum'] = $WarningAt;
+                    } elseif (in_array($field['name'] ?? null, ['Direction', 'WarningAt'], true)) {
+                        $field['onChange'] = 'ECTR_UpdateStatusRuleEditor($id, $Direction, $WarningAt);';
+                    }
+                }
+                unset($field);
+                return json_encode($fields, JSON_THROW_ON_ERROR);
+            }
+        }
+        throw new RuntimeException('The Tree status rule editor is missing.');
+    }
+
+    public function UpdateStatusRuleEditor(string $Direction, float $WarningAt): void
+    {
+        if ($Direction === 'low') {
+            $this->UpdateFormField('CriticalAt', 'minimum', -PHP_FLOAT_MAX);
+            $this->UpdateFormField('CriticalAt', 'maximum', $WarningAt);
+        } else {
+            $this->UpdateFormField('CriticalAt', 'maximum', PHP_FLOAT_MAX);
+            $this->UpdateFormField('CriticalAt', 'minimum', $WarningAt);
+        }
+    }
+
+    public function UpdateStatusRulesForm(string $RulesJson): void
+    {
+        try {
+            $rows = json_decode($RulesJson, true, 64, JSON_THROW_ON_ERROR);
+        } catch (JsonException) {
+            $rows = null;
+        }
+        $issues = $this->StatusRuleIssues($rows);
+        if (is_array($rows) && array_is_list($rows)) {
+            $this->UpdateFormField('StatusRules', 'values', json_encode(
+                self::ColoredStatusRuleRows($rows, $issues),
+                JSON_THROW_ON_ERROR
+            ));
+        }
+        $this->UpdateFormField('StatusRulesDiagnostics', 'caption', $this->StatusRuleIssueText($issues));
+        $this->UpdateFormField('StatusRulesDiagnostics', 'visible', $issues !== []);
     }
 
     public function RequestAction(string $Ident, mixed $Value): void
@@ -694,6 +751,139 @@ class EChartsTree extends IPSModuleStrict
             $this->ReadPropertyInteger('IPSViewBackgroundColor'),
             $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent')
         );
+    }
+
+    /** @param array<string,mixed> $form @return array<string,mixed> */
+    private function WithStatusRuleForm(array $form): array
+    {
+        $stored = $this->ReadPropertyString('StatusRules');
+        $rows = json_decode($stored, true);
+        $issues = $this->StatusRuleIssues($stored);
+        foreach ($form['elements'] as &$panel) {
+            if (($panel['caption'] ?? null) !== 'Plant status') {
+                continue;
+            }
+            foreach ($panel['items'] as &$item) {
+                if (($item['name'] ?? null) === 'StatusRules') {
+                    $previewAction = trim((string) ($item['onChange'] ?? ''));
+                    $previewAction = str_replace(
+                        "'StatusRules' => \$StatusRules",
+                        "'StatusRules' => \$statusRuleRows",
+                        $previewAction
+                    );
+                    unset($item['onChange']);
+                    $item['form'] = 'return json_decode(ECTR_GetStatusRuleEditorForm($id, '
+                        . '(string) ($StatusRules["Direction"] ?? "high"), '
+                        . '(float) ($StatusRules["WarningAt"] ?? 1)), true);';
+                    $action = '$statusRuleRows = []; foreach ($StatusRules as $statusRuleRow) {'
+                        . ' $statusRuleRows[] = $statusRuleRow; } '
+                        . 'ECTR_UpdateStatusRulesForm($id, json_encode($statusRuleRows));';
+                    foreach (['onAdd', 'onEdit', 'onDelete', 'onChangeOrder'] as $event) {
+                        $item[$event] = $action . ($previewAction === '' ? '' : ' ' . $previewAction);
+                    }
+                    if (is_array($rows) && array_is_list($rows)) {
+                        $item['values'] = self::ColoredStatusRuleRows($rows, $issues);
+                    }
+                } elseif (($item['name'] ?? null) === 'StatusRulesDiagnostics') {
+                    $item['caption'] = $this->StatusRuleIssueText($issues);
+                    $item['visible'] = $issues !== [];
+                }
+            }
+            unset($item);
+            break;
+        }
+        unset($panel);
+        return $form;
+    }
+
+    /** @return list<array{row:int,code:string,id?:int,firstRow?:int}> */
+    private function StatusRuleIssues(mixed $input): array
+    {
+        $issues = TreeHealth::Issues($input);
+        $rows = is_string($input) ? json_decode($input, true) : $input;
+        if (!is_array($rows) || !array_is_list($rows)) {
+            return $issues;
+        }
+        $checked = [];
+        foreach ($rows as $index => $row) {
+            $id = is_array($row) ? ($row['VariableID'] ?? null) : null;
+            if (!is_int($id) || $id < 1 || isset($checked[$id])) {
+                continue;
+            }
+            $checked[$id] = true;
+            if (!IPS_VariableExists($id)) {
+                $issues[] = ['row' => $index + 1, 'code' => 'missing', 'id' => $id];
+            } elseif (!in_array(IPS_GetVariable($id)['VariableType'] ?? null, [0, 1, 2], true)) {
+                $issues[] = ['row' => $index + 1, 'code' => 'type', 'id' => $id];
+            }
+        }
+        return $issues;
+    }
+
+    /** @param list<array<string,mixed>> $rows
+     *  @param list<array{row:int,code:string,id?:int,firstRow?:int}> $issues
+     *  @return list<array<string,mixed>>
+     */
+    private static function ColoredStatusRuleRows(array $rows, array $issues): array
+    {
+        $invalid = [];
+        foreach ($issues as $issue) {
+            if ($issue['row'] > 0) {
+                $invalid[$issue['row']] = true;
+            }
+            if (isset($issue['firstRow'])) {
+                $invalid[$issue['firstRow']] = true;
+            }
+        }
+        foreach ($rows as $index => &$row) {
+            if (is_array($row)) {
+                $row['rowColor'] = isset($invalid[$index + 1]) ? '#C94B4B' : '';
+            }
+        }
+        unset($row);
+        return $rows;
+    }
+
+    /** @param list<array{row:int,code:string,id?:int,firstRow?:int}> $issues */
+    private function StatusRuleIssueText(array $issues): string
+    {
+        $messages = [];
+        foreach (array_slice($issues, 0, 12) as $issue) {
+            $messages[] = match ($issue['code']) {
+                'duplicate' => sprintf(
+                    $this->Translate('Rule %d: variable %s is already used in rule %d.'),
+                    $issue['row'],
+                    $this->StatusRuleVariableLabel($issue['id']),
+                    $issue['firstRow']
+                ),
+                'threshold' => sprintf($this->Translate(
+                    'Rule %d: variable %s has warning and critical thresholds in the wrong order.'
+                ), $issue['row'], $this->StatusRuleVariableLabel($issue['id'])),
+                'missing' => sprintf(
+                    $this->Translate('Rule %d: variable %d no longer exists.'),
+                    $issue['row'],
+                    $issue['id']
+                ),
+                'type' => sprintf(
+                    $this->Translate('Rule %d: variable %d must be Boolean or numeric.'),
+                    $issue['row'],
+                    $issue['id']
+                ),
+                'too_many' => $this->Translate('At most 3000 status rules are allowed.'),
+                default    => $issue['row'] > 0
+                    ? sprintf($this->Translate('Rule %d is incomplete or invalid.'), $issue['row'])
+                    : $this->Translate('The status rule list is invalid.')
+            };
+        }
+        if (count($issues) > 12) {
+            $messages[] = sprintf($this->Translate('Further status rule errors: %d.'), count($issues) - 12);
+        }
+        return implode('  ', $messages);
+    }
+
+    private function StatusRuleVariableLabel(int $id): string
+    {
+        return IPS_VariableExists($id) ? IPS_GetName($id) . ' (ID ' . $id . ')' : (string) $id;
     }
 
     /** @param list<array<string,mixed>> $elements @return array<string,mixed> */

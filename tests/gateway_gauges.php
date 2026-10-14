@@ -1167,6 +1167,7 @@ $tree->ApplyChanges();
 $healthData = json_decode($tree->GetTreeData(), true, 512, JSON_THROW_ON_ERROR);
 $healthRoot = $healthData['tree']['root'];
 $healthForm = json_decode($tree->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+$healthRulesForm = findGaugeFormElement($healthForm['elements'], 'StatusRules');
 assertGatewayGauge(
     $healthRoot['health'] === 'critical'
         && $healthRoot['children'][0]['health'] === 'critical'
@@ -1176,6 +1177,69 @@ assertGatewayGauge(
         && findGaugeFormElement($healthForm['elements'], 'StatusRules')['type'] === 'List'
         && findGaugeFormElement($healthForm['elements'], 'IPSViewCriticalColor')['enabled'] === true,
     'Tree must expose explicit status rules, propagate severity and keep separate design colors.'
+);
+assertGatewayGauge(
+    str_contains((string) ($healthRulesForm['form'] ?? ''), 'ECTR_GetStatusRuleEditorForm')
+        && str_contains((string) ($healthRulesForm['onAdd'] ?? ''), 'ECTR_UpdateStatusRulesForm')
+        && str_contains((string) ($healthRulesForm['onEdit'] ?? ''), 'ECTR_UpdateStatusRulesForm')
+        && str_contains((string) ($healthRulesForm['onDelete'] ?? ''), 'ECTR_UpdateStatusRulesForm')
+        && str_contains((string) ($healthRulesForm['onAdd'] ?? ''), 'ECTR_UpdateBarPreviewFromForm')
+        && str_contains((string) ($healthRulesForm['onAdd'] ?? ''), "'StatusRules' => \$statusRuleRows")
+        && findGaugeFormElement($healthForm['elements'], 'StatusRulesDiagnostics')['visible'] === false,
+    'Tree rule changes must update validation feedback and both previews without persisting drafts.'
+);
+$lowEditor = json_decode($tree->GetStatusRuleEditorForm('low', 40), true, 512, JSON_THROW_ON_ERROR);
+$highEditor = json_decode($tree->GetStatusRuleEditorForm('high', 40), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    findGaugeFormElement($lowEditor, 'CriticalAt')['maximum'] === 40
+        && !isset(findGaugeFormElement($lowEditor, 'CriticalAt')['minimum'])
+        && findGaugeFormElement($highEditor, 'CriticalAt')['minimum'] === 40
+        && !isset(findGaugeFormElement($highEditor, 'CriticalAt')['maximum'])
+        && str_contains(
+            (string) findGaugeFormElement($lowEditor, 'WarningAt')['onChange'],
+            'ECTR_UpdateStatusRuleEditor'
+        )
+        && str_contains(
+            (string) findGaugeFormElement($lowEditor, 'Direction')['onChange'],
+            'ECTR_UpdateStatusRuleEditor'
+        ),
+    'The Tree rule dialog must reject inverse critical thresholds for both alarm directions.'
+);
+$tree->UpdateStatusRuleEditor('low', 40);
+assertGatewayGauge(
+    array_slice($tree->GetTestFormUpdates(), -2) === [
+        ['Field' => 'CriticalAt', 'Parameter' => 'minimum', 'Value' => -PHP_FLOAT_MAX],
+        ['Field' => 'CriticalAt', 'Parameter' => 'maximum', 'Value' => 40.0]
+    ],
+    'Changing a rule to low alarm direction must update the critical-value bound in the open dialog.'
+);
+$tree->UpdateStatusRuleEditor('high', 40);
+assertGatewayGauge(
+    array_slice($tree->GetTestFormUpdates(), -2) === [
+        ['Field' => 'CriticalAt', 'Parameter' => 'maximum', 'Value' => PHP_FLOAT_MAX],
+        ['Field' => 'CriticalAt', 'Parameter' => 'minimum', 'Value' => 40.0]
+    ],
+    'Changing a rule to high alarm direction must remove the previous low-direction bound.'
+);
+$tree->UpdateStatusRulesForm(json_encode([
+    ['VariableID' => 9002, 'Direction' => 'low', 'WarningAt' => 40, 'CriticalAt' => 30],
+    ['VariableID' => 9002, 'Direction' => 'low', 'WarningAt' => 40, 'CriticalAt' => 30],
+    ['VariableID' => 9003, 'Direction' => 'high', 'WarningAt' => 40, 'CriticalAt' => 30]
+], JSON_THROW_ON_ERROR));
+$ruleFeedback = array_slice($tree->GetTestFormUpdates(), -3);
+$highlightedRows = json_decode((string) $ruleFeedback[0]['Value'], true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $ruleFeedback[0]['Field'] === 'StatusRules'
+        && $ruleFeedback[0]['Parameter'] === 'values'
+        && $highlightedRows[0]['rowColor'] !== ''
+        && $highlightedRows[1]['rowColor'] !== ''
+        && $highlightedRows[2]['rowColor'] !== ''
+        && str_contains((string) $ruleFeedback[1]['Value'], '9002')
+        && str_contains((string) $ruleFeedback[1]['Value'], 'First status')
+        && str_contains((string) $ruleFeedback[1]['Value'], '9003')
+        && $ruleFeedback[2] === ['Field' => 'StatusRulesDiagnostics', 'Parameter' => 'visible', 'Value' => true],
+    'Duplicate variables and reversed thresholds must identify and highlight their draft rows immediately: '
+        . json_encode($ruleFeedback, JSON_THROW_ON_ERROR)
 );
 assertGatewayGauge(
     str_contains($tree->GetVisualizationTile(), '"health":"critical"')
@@ -1203,6 +1267,32 @@ assertGatewayGauge(
 $tree->SetTestProperty('StatusRules', '[{"VariableID":9002,"Direction":"high","WarningAt":2,"CriticalAt":1}]');
 $tree->ApplyChanges();
 assertGatewayGauge($tree->GetTestStatus() === 205, 'Tree must reject invalid status thresholds.');
+$invalidForm = json_decode($tree->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    findGaugeFormElement($invalidForm['elements'], 'StatusRulesDiagnostics')['visible'] === true
+        && str_contains(
+            (string) findGaugeFormElement($invalidForm['elements'], 'StatusRulesDiagnostics')['caption'],
+            'Rule 1'
+        )
+        && findGaugeFormElement($invalidForm['elements'], 'StatusRules')['values'][0]['rowColor'] !== '',
+    'Existing invalid rules must be explained and marked when the configuration form opens.'
+);
+$tree->SetTestProperty('StatusRules', json_encode([
+    ['VariableID' => 9002, 'Direction' => 'low', 'WarningAt' => 40, 'CriticalAt' => 30],
+    ['VariableID' => 9002, 'Direction' => 'low', 'WarningAt' => 40, 'CriticalAt' => 30]
+], JSON_THROW_ON_ERROR));
+$tree->ApplyChanges();
+$duplicateForm = json_decode($tree->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $tree->GetTestStatus() === 205
+        && str_contains(
+            (string) findGaugeFormElement($duplicateForm['elements'], 'StatusRulesDiagnostics')['caption'],
+            'rule 1'
+        )
+        && findGaugeFormElement($duplicateForm['elements'], 'StatusRules')['values'][0]['rowColor'] !== ''
+        && findGaugeFormElement($duplicateForm['elements'], 'StatusRules')['values'][1]['rowColor'] !== '',
+    'Stored duplicate rules must identify and highlight both occurrences.'
+);
 $tree->SetTestProperty('StatusRules', '[{"VariableID":99999,"Direction":"high","WarningAt":1,"CriticalAt":2}]');
 $tree->ApplyChanges();
 assertGatewayGauge($tree->GetTestStatus() === 205, 'Tree must reject missing status variables.');
