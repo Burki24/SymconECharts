@@ -171,7 +171,8 @@ class EChartsTree extends IPSModuleStrict
             }
         }
         return $this->EncodeConfigurationForm($this->WithStatusRuleForm(
-            $this->WithBarPreviewForm($form, 'ECTR', $fields)
+            $this->WithBarPreviewForm($form, 'ECTR', $fields),
+            $fields
         ));
     }
 
@@ -228,6 +229,145 @@ class EChartsTree extends IPSModuleStrict
         }
         $this->UpdateFormField('StatusRulesDiagnostics', 'caption', $this->StatusRuleIssueText($issues));
         $this->UpdateFormField('StatusRulesDiagnostics', 'visible', $issues !== []);
+    }
+
+    public function UpdateImportThresholdBound(string $Direction, float $WarningAt): void
+    {
+        $this->UpdateFormField('ImportCriticalAt', 'minimum', $Direction === 'low' ? -PHP_FLOAT_MAX : $WarningAt);
+        $this->UpdateFormField('ImportCriticalAt', 'maximum', $Direction === 'low' ? $WarningAt : PHP_FLOAT_MAX);
+    }
+
+    public function InvalidateStatusRuleCandidates(): void
+    {
+        $this->UpdateFormField('ImportCandidates', 'values', '[]');
+        $this->UpdateFormField('ImportSearchSummary', 'caption', $this->Translate('Enter a name and click Search.'));
+    }
+
+    public function SearchStatusRuleCandidates(
+        string $Name,
+        string $Type,
+        bool $UseSymconRoot,
+        int $RootObjectID,
+        int $MaxDepth,
+        int $MaxNodes,
+        bool $IncludeHidden,
+        string $VariableNameFilter,
+        string $RulesJson
+    ): void {
+        try {
+            $rules = json_decode($RulesJson, true, 64, JSON_THROW_ON_ERROR);
+            if ($this->StatusRuleIssues($rules) !== []) {
+                throw new InvalidArgumentException('Correct the existing status rules before searching.');
+            }
+            $result = $this->FindStatusRuleCandidates(
+                $Name,
+                $Type,
+                $UseSymconRoot,
+                $RootObjectID,
+                $MaxDepth,
+                $MaxNodes,
+                $IncludeHidden,
+                $VariableNameFilter,
+                $rules
+            );
+            $this->UpdateFormField('ImportCandidates', 'values', json_encode($result['rows'], JSON_THROW_ON_ERROR));
+            $summary = sprintf(
+                $this->Translate('%d matching variables; %d already have a rule.'),
+                count($result['rows']),
+                $result['existing']
+            );
+            if ($result['truncated']) {
+                $summary .= ' ' . $this->Translate('The Tree node limit was reached; increase it to search further.');
+            }
+            $this->UpdateFormField('ImportSearchSummary', 'caption', $summary);
+        } catch (Throwable $exception) {
+            $this->UpdateFormField('ImportCandidates', 'values', '[]');
+            $this->UpdateFormField('ImportSearchSummary', 'caption', $this->Translate($exception->getMessage()));
+        }
+    }
+
+    public function AddStatusRuleCandidates(
+        string $Name,
+        string $Type,
+        string $Direction,
+        float $WarningAt,
+        float $CriticalAt,
+        bool $UseSymconRoot,
+        int $RootObjectID,
+        int $MaxDepth,
+        int $MaxNodes,
+        bool $IncludeHidden,
+        string $VariableNameFilter,
+        string $RulesJson,
+        string $CandidatesJson,
+        string $PreviewValuesJson
+    ): string {
+        try {
+            if (!in_array($Direction, ['high', 'low'], true) || !is_finite($WarningAt) || !is_finite($CriticalAt)
+                || ($Direction === 'high' && $CriticalAt < $WarningAt)
+                || ($Direction === 'low' && $CriticalAt > $WarningAt)) {
+                throw new InvalidArgumentException('Warning and critical thresholds are in the wrong order.');
+            }
+            $rules = json_decode($RulesJson, true, 64, JSON_THROW_ON_ERROR);
+            $candidates = json_decode($CandidatesJson, true, 64, JSON_THROW_ON_ERROR);
+            if ($this->StatusRuleIssues($rules) !== [] || !is_array($candidates) || !array_is_list($candidates)) {
+                throw new InvalidArgumentException('Correct the status rule list and search again.');
+            }
+            $fresh = $this->FindStatusRuleCandidates(
+                $Name,
+                $Type,
+                $UseSymconRoot,
+                $RootObjectID,
+                $MaxDepth,
+                $MaxNodes,
+                $IncludeHidden,
+                $VariableNameFilter,
+                $rules
+            );
+            $allowed = array_fill_keys(array_column($fresh['rows'], 'VariableID'), true);
+            $selected = [];
+            foreach ($candidates as $candidate) {
+                if (!is_array($candidate) || ($candidate['Selected'] ?? false) !== true) {
+                    continue;
+                }
+                $id = $candidate['VariableID'] ?? null;
+                if (!is_int($id) || !isset($allowed[$id])) {
+                    throw new InvalidArgumentException('The selected variables changed; search again.');
+                }
+                $selected[$id] = true;
+            }
+            if ($selected === []) {
+                throw new InvalidArgumentException('Select at least one matching variable.');
+            }
+            if (count($rules) + count($selected) > 3000) {
+                throw new InvalidArgumentException('At most 3000 status rules are allowed.');
+            }
+            foreach ($rules as &$rule) {
+                unset($rule['rowColor']);
+            }
+            unset($rule);
+            foreach (array_keys($selected) as $id) {
+                $rules[] = [
+                    'VariableID' => $id,
+                    'Direction'  => $Direction,
+                    'WarningAt'  => $WarningAt,
+                    'CriticalAt' => $CriticalAt
+                ];
+            }
+            $previewValues = json_decode($PreviewValuesJson, true, 64, JSON_THROW_ON_ERROR);
+            if (!is_array($previewValues)) {
+                throw new InvalidArgumentException('The draft preview settings are invalid.');
+            }
+            $previewValues['StatusRules'] = $rules;
+            $this->UpdateStatusRulesForm(json_encode($rules, JSON_THROW_ON_ERROR));
+            $this->UpdateBarPreviewFromForm(json_encode($previewValues, JSON_THROW_ON_ERROR));
+            return 'MESSAGE:' . sprintf(
+                $this->Translate('%d status rules added. Review them and apply the form to save.'),
+                count($selected)
+            );
+        } catch (Throwable $exception) {
+            return $this->Translate($exception->getMessage());
+        }
     }
 
     public function RequestAction(string $Ident, mixed $Value): void
@@ -432,6 +572,85 @@ class EChartsTree extends IPSModuleStrict
             }
         }
         return $svg . '</svg>';
+    }
+
+    /** @param list<array<string,mixed>> $rules
+     *  @return array{rows:list<array<string,mixed>>,existing:int,truncated:bool}
+     */
+    private function FindStatusRuleCandidates(
+        string $name,
+        string $type,
+        bool $useSymconRoot,
+        int $rootObjectID,
+        int $maxDepth,
+        int $maxNodes,
+        bool $includeHidden,
+        string $variableNameFilter,
+        array $rules
+    ): array {
+        $name = trim($name);
+        if ($name === '' || mb_strlen($name, 'UTF-8') > 120 || !in_array($type, ['numeric', 'int', 'float'], true)) {
+            throw new InvalidArgumentException('Enter a search term of at most 120 characters and a numeric type.');
+        }
+        if (!$useSymconRoot && ($rootObjectID < 1 || !IPS_ObjectExists($rootObjectID)
+            || !in_array(IPS_GetObject($rootObjectID)['ObjectType'] ?? null, [0, 1], true))) {
+            throw new InvalidArgumentException('Select a valid Tree root before searching.');
+        }
+        $hierarchy = TreeHierarchy::Build(
+            $useSymconRoot ? 0 : $rootObjectID,
+            $maxDepth,
+            $maxNodes,
+            $includeHidden,
+            static fn (int $id): array => $id === 0
+                ? ['ObjectType' => 0, 'ObjectName' => 'Symcon', 'ObjectIsHidden' => false]
+                : IPS_GetObject($id),
+            static fn (int $id): array => IPS_GetChildrenIDs($id),
+            static fn (int $id): string => '',
+            $variableNameFilter
+        );
+        $existingIDs = array_fill_keys(array_column($rules, 'VariableID'), true);
+        $typeLabels = [1 => $this->Translate('Integer'), 2 => $this->Translate('Float')];
+        $rows = [];
+        $existing = 0;
+        $walk = static function (array $node, string $parent) use (
+            &$walk,
+            &$rows,
+            &$existing,
+            $name,
+            $type,
+            $existingIDs,
+            $typeLabels
+        ): void {
+            $nodeName = (string) ($node['name'] ?? '');
+            $path = $parent === '' ? $nodeName : $parent . ' > ' . $nodeName;
+            if (($node['kind'] ?? null) === 'variable'
+                && mb_stripos($nodeName, $name, 0, 'UTF-8') !== false) {
+                $id = (int) substr((string) $node['id'], 7);
+                if (IPS_VariableExists($id)) {
+                    $variableType = IPS_GetVariable($id)['VariableType'] ?? null;
+                    if (($type === 'numeric' && in_array($variableType, [1, 2], true))
+                        || ($type === 'int' && $variableType === 1)
+                        || ($type === 'float' && $variableType === 2)) {
+                        if (isset($existingIDs[$id])) {
+                            ++$existing;
+                        } else {
+                            $rows[] = [
+                                'Selected'     => true,
+                                'Name'         => $nodeName,
+                                'Path'         => $path,
+                                'VariableType' => $typeLabels[$variableType],
+                                'VariableID'   => $id
+                            ];
+                        }
+                    }
+                }
+            }
+            foreach ($node['children'] ?? [] as $child) {
+                $walk($child, $path);
+            }
+        };
+        $walk($hierarchy['root'], '');
+        return ['rows' => $rows, 'existing' => $existing, 'truncated' => $hierarchy['truncated']];
     }
 
     /** @param array<string,mixed> $node @return list<array<string,mixed>> */
@@ -753,8 +972,8 @@ class EChartsTree extends IPSModuleStrict
         );
     }
 
-    /** @param array<string,mixed> $form @return array<string,mixed> */
-    private function WithStatusRuleForm(array $form): array
+    /** @param array<string,mixed> $form @param list<string> $fields @return array<string,mixed> */
+    private function WithStatusRuleForm(array $form, array $fields): array
     {
         $stored = $this->ReadPropertyString('StatusRules');
         $rows = json_decode($stored, true);
@@ -764,7 +983,20 @@ class EChartsTree extends IPSModuleStrict
                 continue;
             }
             foreach ($panel['items'] as &$item) {
-                if (($item['name'] ?? null) === 'StatusRules') {
+                if (($item['name'] ?? null) === 'StatusRuleImport') {
+                    $draftPairs = array_map(
+                        static fn (string $field): string => var_export($field, true) . ' => $' . $field,
+                        $fields
+                    );
+                    $button = &$item['popup']['buttons'][0];
+                    $click = (string) $button['onClick'];
+                    if (!str_ends_with($click, ');')) {
+                        throw new RuntimeException('The Tree status import action is invalid.');
+                    }
+                    $button['onClick'] = substr($click, 0, -2)
+                        . ', json_encode([' . implode(', ', $draftPairs) . ']));';
+                    unset($button);
+                } elseif (($item['name'] ?? null) === 'StatusRules') {
                     $previewAction = trim((string) ($item['onChange'] ?? ''));
                     $previewAction = str_replace(
                         "'StatusRules' => \$StatusRules",

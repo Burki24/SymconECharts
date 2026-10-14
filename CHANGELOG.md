@@ -1,5 +1,12 @@
 # Unveröffentlicht
 
+## Hinzugefügt
+
+- `EChartsTree` kann Integer- und Float-Zustandsvariablen im aktuellen
+  Teilbaum per Namensbestandteil suchen, Treffer auswählen und mit gemeinsamen
+  Schwellen in die bestehende Regelliste übernehmen. Vorhandene Regeln bleiben
+  erhalten; gespeichert wird weiterhin erst beim Übernehmen des Formulars.
+
 ## Behoben
 
 - Ungültige Tree-Zustandsregeln nennen im Formular jetzt die betroffenen

@@ -1241,6 +1241,219 @@ assertGatewayGauge(
     'Duplicate variables and reversed thresholds must identify and highlight their draft rows immediately: '
         . json_encode($ruleFeedback, JSON_THROW_ON_ERROR)
 );
+$GLOBALS['symconTestTreeObjects'][9010] = [
+    'ObjectType' => 2, 'ObjectName' => 'Batterie Keller', 'ObjectIsHidden' => false
+];
+$GLOBALS['symconTestTreeObjects'][9011] = [
+    'ObjectType' => 2, 'ObjectName' => 'Batterie Dach', 'ObjectIsHidden' => false
+];
+$GLOBALS['symconTestTreeChildren'][9001][] = 9010;
+$GLOBALS['symconTestTreeChildren'][9001][] = 9011;
+$GLOBALS['symconTestVariables'][9010] = [
+    'VariableType' => 1, 'VariableUpdated' => 1780000008, 'Value' => 50, 'Name' => 'Batterie Keller'
+];
+$GLOBALS['symconTestVariables'][9011] = [
+    'VariableType' => 2, 'VariableUpdated' => 1780000008, 'Value' => 49.5, 'Name' => 'Batterie Dach'
+];
+try {
+    $importForm = json_decode($tree->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+    $importButton = findGaugeFormElement($importForm['elements'], 'StatusRuleImport');
+    $importItems = $importButton['popup']['items'];
+    $searchButton = null;
+    foreach ($importItems as $item) {
+        if (($item['type'] ?? null) === 'Button') {
+            $searchButton = $item;
+        }
+    }
+    $importClick = (string) ($importButton['popup']['buttons'][0]['onClick'] ?? '');
+    $parsedImportClick = eval('return static function () { ' . $importClick . ' };');
+    assertGatewayGauge(
+        ($importButton['type'] ?? '') === 'PopupButton'
+            && !isset($importButton['popup']['pages'])
+            && str_contains((string) ($importButton['onClick'] ?? ''), 'InvalidateStatusRuleCandidates')
+            && is_callable($parsedImportClick)
+            && str_contains((string) ($searchButton['onClick'] ?? ''), 'ECTR_SearchStatusRuleCandidates')
+            && str_contains(
+                (string) ($importButton['popup']['buttons'][0]['onClick'] ?? ''),
+                'ECTR_AddStatusRuleCandidates'
+            )
+            && str_contains(
+                (string) ($importButton['popup']['buttons'][0]['onClick'] ?? ''),
+                "'IPSViewCriticalColor' => \$IPSViewCriticalColor"
+            ),
+        'The Tree bulk importer must use a Symcon 9.0-compatible popup with an explicit search and selection.'
+    );
+    $draftRules = [
+        ['VariableID' => 9002, 'Direction' => 'high', 'WarningAt' => 1, 'CriticalAt' => 2],
+        ['VariableID' => 9010, 'Direction' => 'low', 'WarningAt' => 40, 'CriticalAt' => 30]
+    ];
+    $tree->SearchStatusRuleCandidates(
+        'bAtTeRiE',
+        'numeric',
+        false,
+        9000,
+        3,
+        80,
+        false,
+        '',
+        json_encode($draftRules, JSON_THROW_ON_ERROR)
+    );
+    $candidateUpdates = array_slice($tree->GetTestFormUpdates(), -2);
+    $candidateRows = json_decode((string) $candidateUpdates[0]['Value'], true, 512, JSON_THROW_ON_ERROR);
+    assertGatewayGauge(
+        $candidateUpdates[0]['Field'] === 'ImportCandidates'
+            && count($candidateRows) === 1
+            && $candidateRows[0]['VariableID'] === 9011
+            && $candidateRows[0]['Selected'] === true
+            && str_contains((string) $candidateUpdates[1]['Value'], '1 already'),
+        'Bulk search must match variable names case-insensitively, exclude existing rules and keep IDs distinct.'
+    );
+    $tree->SearchStatusRuleCandidates(
+        'Batterie',
+        'int',
+        false,
+        9000,
+        3,
+        80,
+        false,
+        '',
+        json_encode($draftRules, JSON_THROW_ON_ERROR)
+    );
+    assertGatewayGauge(
+        json_decode(
+            (string) array_slice($tree->GetTestFormUpdates(), -2)[0]['Value'],
+            true,
+            512,
+            JSON_THROW_ON_ERROR
+        ) === [],
+        'Bulk search must honor the Integer/Float type selection.'
+    );
+    $tree->InvalidateStatusRuleCandidates();
+    assertGatewayGauge(
+        array_slice($tree->GetTestFormUpdates(), -2)[0] === [
+            'Field' => 'ImportCandidates', 'Parameter' => 'values', 'Value' => '[]'
+        ],
+        'Reopening or changing the importer search must clear stale selections.'
+    );
+    $forgedRows = $candidateRows;
+    $forgedRows[0]['VariableID'] = 9003;
+    $forgedResult = $tree->AddStatusRuleCandidates(
+        'Batterie',
+        'numeric',
+        'low',
+        40,
+        30,
+        false,
+        9000,
+        3,
+        80,
+        false,
+        '',
+        json_encode($draftRules, JSON_THROW_ON_ERROR),
+        json_encode($forgedRows, JSON_THROW_ON_ERROR),
+        '{}'
+    );
+    assertGatewayGauge(
+        !str_starts_with($forgedResult, 'MESSAGE:'),
+        'Bulk import must revalidate selected IDs and reject forged or stale entries.'
+    );
+    $badOrder = $tree->AddStatusRuleCandidates(
+        'Batterie',
+        'numeric',
+        'low',
+        40,
+        50,
+        false,
+        9000,
+        3,
+        80,
+        false,
+        '',
+        json_encode($draftRules, JSON_THROW_ON_ERROR),
+        json_encode($candidateRows, JSON_THROW_ON_ERROR),
+        '{}'
+    );
+    assertGatewayGauge(
+        !str_starts_with($badOrder, 'MESSAGE:'),
+        'Bulk import must reject reversed thresholds without changing the form.'
+    );
+    $noSelection = $candidateRows;
+    $noSelection[0]['Selected'] = false;
+    $emptyResult = $tree->AddStatusRuleCandidates(
+        'Batterie',
+        'numeric',
+        'low',
+        40,
+        30,
+        false,
+        9000,
+        3,
+        80,
+        false,
+        '',
+        json_encode($draftRules, JSON_THROW_ON_ERROR),
+        json_encode($noSelection, JSON_THROW_ON_ERROR),
+        '{}'
+    );
+    assertGatewayGauge(
+        !str_starts_with($emptyResult, 'MESSAGE:'),
+        'Bulk import must require an explicit selection.'
+    );
+    $addResult = $tree->AddStatusRuleCandidates(
+        'Batterie',
+        'numeric',
+        'low',
+        40,
+        30,
+        false,
+        9000,
+        3,
+        80,
+        false,
+        '',
+        json_encode($draftRules, JSON_THROW_ON_ERROR),
+        json_encode($candidateRows, JSON_THROW_ON_ERROR),
+        json_encode([
+            'WarningColor'         => 0x123456,
+            'IPSViewUseTileDesign' => false,
+            'IPSViewWarningColor'  => 0xABCDEF
+        ], JSON_THROW_ON_ERROR)
+    );
+    $importUpdates = array_slice($tree->GetTestFormUpdates(), -5);
+    $mergedRules = json_decode((string) $importUpdates[0]['Value'], true, 512, JSON_THROW_ON_ERROR);
+    $importTilePreview = base64_decode(substr(
+        (string) $importUpdates[3]['Value'],
+        strlen('data:image/svg+xml;base64,')
+    ), true);
+    $importIPSViewPreview = base64_decode(substr(
+        (string) $importUpdates[4]['Value'],
+        strlen('data:image/svg+xml;base64,')
+    ), true);
+    assertGatewayGauge(
+        str_starts_with($addResult, 'MESSAGE:')
+            && $importUpdates[0]['Field'] === 'StatusRules'
+            && array_column($mergedRules, 'VariableID') === [9002, 9010, 9011]
+            && $mergedRules[2]['Direction'] === 'low'
+            && $mergedRules[2]['WarningAt'] == 40
+            && $mergedRules[2]['CriticalAt'] == 30
+            && $importUpdates[3]['Field'] === 'BarPreview'
+            && $importUpdates[4]['Field'] === 'IPSViewBarPreview'
+            && is_string($importTilePreview) && str_contains($importTilePreview, 'fill="#123456"')
+            && is_string($importIPSViewPreview) && str_contains($importIPSViewPreview, 'fill="#ABCDEF"')
+            && array_column(findGaugeFormElement(json_decode(
+                $tree->GetConfigurationForm(),
+                true,
+                512,
+                JSON_THROW_ON_ERROR
+            )['elements'], 'StatusRules')['values'], 'VariableID') === [9002, 9003],
+        'Bulk import must merge into the draft only, preserve existing rules and refresh both previews.'
+    );
+} finally {
+    array_pop($GLOBALS['symconTestTreeChildren'][9001]);
+    array_pop($GLOBALS['symconTestTreeChildren'][9001]);
+    unset($GLOBALS['symconTestTreeObjects'][9010], $GLOBALS['symconTestTreeObjects'][9011]);
+    unset($GLOBALS['symconTestVariables'][9010], $GLOBALS['symconTestVariables'][9011]);
+}
 assertGatewayGauge(
     str_contains($tree->GetVisualizationTile(), '"health":"critical"')
         && str_contains($tree->GetIPSViewHTML(), '"health":"critical"')

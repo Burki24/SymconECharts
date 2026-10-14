@@ -29,6 +29,18 @@ Schwellenreihenfolge wird bereits im Zeilendialog begrenzt. Diese
 Formularprüfung ersetzt die verbindliche Validierung gespeicherter Properties
 in `ApplyChanges()` nicht.
 
+Eine formulargebundene Massenauswahl sucht Integer- und Float-Variablen per
+Namensbestandteil ausschließlich unter den aktuell sichtbaren Knoten der
+gewählten Wurzel (einschließlich Namensfilter, Sichtbarkeit, Tiefe und
+Knotengrenze). Sie zeigt die Treffer mit Objektpfad und ID, lässt einzelne
+Treffer abwählen und übernimmt gemeinsame Richtung und Schwellen in die
+ungespeicherte `StatusRules`-Liste. Vorhandene IDs werden ausgelassen; die
+Auswahl wird beim Übernehmen erneut gegen den Objektbaum geprüft. Das
+Formular selbst muss anschließend regulär gespeichert werden. Die Suchfelder
+und Treffer sind keine zusätzlichen persistierten Properties; der Vertrag
+von `StatusRules` bleibt unverändert. Für Symcon 9.0 wird ein reguläres
+PopupButton-Formular statt des erst ab 9.1 verfügbaren Wizards verwendet.
+
 Nur sichtbare und innerhalb von Tiefe und Knotengrenze tatsächlich gelesene
 Variablen wirken auf den Baum. Ein bewerteter Variablenknoten erhält `ok`,
 `warning` oder `critical`; Eltern übernehmen jeweils den höchsten Zustand

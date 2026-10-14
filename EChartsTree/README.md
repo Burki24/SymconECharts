@@ -50,6 +50,17 @@ muss die kritische Schwelle mindestens so hoch wie die Warnschwelle sein;
 bei „Niedriger ist schlechter“ höchstens so hoch. Gleiche Schwellen
 kennzeichnen einen Alarm direkt als kritisch, etwa eine Bool-Variable mit
 `1/1` für `true` oder `0/0` für `false`.
+Über **Zustandsvariablen suchen und hinzufügen** lassen sich mehrere Integer-
+und Float-Variablen auf einmal vorbereiten: Namensbestandteil, Typ,
+Alarmrichtung und Schwellen eingeben, **Suchen** wählen, Treffer einzeln
+ab- oder anwählen und **Auswahl hinzufügen** bestätigen. Gesucht wird nur
+im aktuell angezeigten Teilbaum unter Berücksichtigung von Namensfilter,
+Sichtbarkeit, Tiefe und Knotengrenze. Bereits vorhandene Regeln werden
+nicht doppelt hinzugefügt. Die neuen Regeln erscheinen zur individuellen
+Nachbearbeitung in der normalen Liste; erst **Änderungen übernehmen**
+speichert sie. Wenn die Knotengrenze erreicht wird, kann die Suche weitere
+Variablen auslassen; erhöhen Sie dann die Grenze oder schränken Sie die
+Wurzel ein. Bool-Variablen werden weiterhin einzeln eingetragen.
 Im Bearbeitungsdialog begrenzt die gewählte Alarmrichtung die zulässige
 Kritisch-Schwelle; eine vertauschte Reihenfolge lässt sich dort nicht
 bestätigen. Doppelt gewählte Variablen und bereits gespeicherte fehlerhafte

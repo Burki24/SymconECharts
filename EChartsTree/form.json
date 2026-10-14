@@ -68,6 +68,152 @@
                     "caption": "Only explicitly selected numeric or Boolean variables determine status. Thresholds use raw values; parents inherit the worst status of visible descendants. Equal warning and critical thresholds mark an alarm directly as critical."
                 },
                 {
+                    "type": "PopupButton",
+                    "name": "StatusRuleImport",
+                    "caption": "Find and add status variables",
+                    "onClick": "ECTR_InvalidateStatusRuleCandidates($id);",
+                    "popup": {
+                        "caption": "Find status variables",
+                        "width": "85%",
+                        "closeCaption": "Cancel",
+                        "items": [
+                            {
+                                "type": "Label",
+                                "caption": "Searches only visible variables below the current Tree root. Existing rules are preserved; review the selection and save the form after adding."
+                            },
+                            {
+                                "type": "RowLayout",
+                                "items": [
+                                    {
+                                        "type": "ValidationTextBox",
+                                        "name": "ImportName",
+                                        "caption": "Variable name contains",
+                                        "value": "Batterie",
+                                        "onChange": "ECTR_InvalidateStatusRuleCandidates($id);"
+                                    },
+                                    {
+                                        "type": "Select",
+                                        "name": "ImportType",
+                                        "caption": "Variable type",
+                                        "value": "numeric",
+                                        "onChange": "ECTR_InvalidateStatusRuleCandidates($id);",
+                                        "options": [
+                                            {
+                                                "caption": "Integer and Float",
+                                                "value": "numeric"
+                                            },
+                                            {
+                                                "caption": "Integer only",
+                                                "value": "int"
+                                            },
+                                            {
+                                                "caption": "Float only",
+                                                "value": "float"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "RowLayout",
+                                "items": [
+                                    {
+                                        "type": "Select",
+                                        "name": "ImportDirection",
+                                        "caption": "Alarm direction",
+                                        "value": "low",
+                                        "options": [
+                                            {
+                                                "caption": "Higher is worse",
+                                                "value": "high"
+                                            },
+                                            {
+                                                "caption": "Lower is worse",
+                                                "value": "low"
+                                            }
+                                        ],
+                                        "onChange": "ECTR_UpdateImportThresholdBound($id, $ImportDirection, $ImportWarningAt);"
+                                    },
+                                    {
+                                        "type": "NumberSpinner",
+                                        "name": "ImportWarningAt",
+                                        "caption": "Warning at",
+                                        "value": 40,
+                                        "digits": 3,
+                                        "onChange": "ECTR_UpdateImportThresholdBound($id, $ImportDirection, $ImportWarningAt);"
+                                    },
+                                    {
+                                        "type": "NumberSpinner",
+                                        "name": "ImportCriticalAt",
+                                        "caption": "Critical at",
+                                        "value": 30,
+                                        "digits": 3,
+                                        "maximum": 40
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "Button",
+                                "caption": "Search",
+                                "onClick": "ECTR_SearchStatusRuleCandidates($id, $ImportName, $ImportType, $UseSymconRoot, $RootObjectID, $MaxDepth, $MaxNodes, $IncludeHidden, $VariableNameFilter, json_encode($StatusRules));"
+                            },
+                            {
+                                "type": "Label",
+                                "name": "ImportSearchSummary",
+                                "caption": "Enter a name and click Search."
+                            },
+                            {
+                                "type": "List",
+                                "name": "ImportCandidates",
+                                "caption": "Matches (select rows to add)",
+                                "rowCount": 10,
+                                "add": false,
+                                "delete": false,
+                                "values": [],
+                                "columns": [
+                                    {
+                                        "caption": "Add",
+                                        "name": "Selected",
+                                        "width": "65px",
+                                        "edit": {
+                                            "type": "CheckBox"
+                                        }
+                                    },
+                                    {
+                                        "caption": "Variable",
+                                        "name": "Name",
+                                        "width": "200px",
+                                        "save": true
+                                    },
+                                    {
+                                        "caption": "Path",
+                                        "name": "Path",
+                                        "width": "auto",
+                                        "save": true
+                                    },
+                                    {
+                                        "caption": "Type",
+                                        "name": "VariableType",
+                                        "width": "90px",
+                                        "save": true
+                                    },
+                                    {
+                                        "name": "VariableID",
+                                        "visible": false,
+                                        "save": true
+                                    }
+                                ]
+                            }
+                        ],
+                        "buttons": [
+                            {
+                                "caption": "Add selected",
+                                "onClick": "return ECTR_AddStatusRuleCandidates($id, $ImportName, $ImportType, $ImportDirection, $ImportWarningAt, $ImportCriticalAt, $UseSymconRoot, $RootObjectID, $MaxDepth, $MaxNodes, $IncludeHidden, $VariableNameFilter, json_encode($StatusRules), json_encode($ImportCandidates));"
+                            }
+                        ]
+                    }
+                },
+                {
                     "type": "List",
                     "name": "StatusRules",
                     "caption": "Status variables",
