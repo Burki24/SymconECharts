@@ -139,10 +139,13 @@ Folgende Module sind enthalten:
 - __EChartsTree__ ([Dokumentation](EChartsTree/README.md))
   Zeigt die Kategorien, Instanzen und Variablen unter einer gewählten
   Kategorie, Instanz oder der obersten Symcon-Ebene als begrenzten,
-  interaktiven Baum. Optional gewählte Zustandsvariablen färben Knoten nach
-  Warn- und Kritisch-Schwellen; Eltern zeigen den höchsten sichtbaren Zustand.
-  Kachel und optionales
-  IPSView-Widget besitzen getrennte Designer und Live-Vorschauen.
+  interaktiven Baum ohne Zustandsbewertung. Kachel und optionales IPSView-Widget
+  besitzen getrennte Designer und Live-Vorschauen.
+
+- __EChartsTreeSystemHealth__ ([Dokumentation](EChartsTreeSystemHealth/README.md))
+  Ergänzt die lesende Objekthierarchie um ausdrücklich gewählte Zustandsvariablen
+  mit Warn- und Kritisch-Schwellen. Eltern zeigen den höchsten Zustand ihrer
+  sichtbaren Nachkommen; mehrere Variablen lassen sich per Suche übernehmen.
 
 ## Kacheldesign und IPSView-Design
 

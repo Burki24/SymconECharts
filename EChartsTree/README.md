@@ -40,49 +40,8 @@ mit der nächsten Aktualisierung nach 60 Sekunden sichtbar. Die Abfrage liest
 Objekte und Werte ausschließlich; sie verändert die ausgewählte Hierarchie
 nicht.
 
-## Anlagenzustand
-
-Im aufklappbaren Bereich **Anlagenzustand** können Sie einzelne Bool- oder
-Zahl-Variablen als Zustandsquellen auswählen. Jede Zeile legt fest, ob hohe
-oder niedrige Rohwerte schlechter sind, und ab welchem Wert eine Warnung
-beziehungsweise ein kritischer Zustand gilt. Bei „Höher ist schlechter“
-muss die kritische Schwelle mindestens so hoch wie die Warnschwelle sein;
-bei „Niedriger ist schlechter“ höchstens so hoch. Gleiche Schwellen
-kennzeichnen einen Alarm direkt als kritisch, etwa eine Bool-Variable mit
-`1/1` für `true` oder `0/0` für `false`.
-Über **Zustandsvariablen suchen und hinzufügen** lassen sich mehrere Integer-
-und Float-Variablen auf einmal vorbereiten: Namensbestandteil, Typ,
-Alarmrichtung und Schwellen eingeben, **Suchen** wählen, Treffer einzeln
-ab- oder anwählen und **Auswahl hinzufügen** bestätigen. Gesucht wird nur
-im aktuell angezeigten Teilbaum unter Berücksichtigung von Namensfilter,
-Sichtbarkeit, Tiefe und Knotengrenze. Bereits vorhandene Regeln werden
-nicht doppelt hinzugefügt. Die neuen Regeln erscheinen zur individuellen
-Nachbearbeitung in der normalen Liste; erst **Änderungen übernehmen**
-speichert sie. Wenn die Knotengrenze erreicht wird, kann die Suche weitere
-Variablen auslassen; erhöhen Sie dann die Grenze oder schränken Sie die
-Wurzel ein. Bool-Variablen werden weiterhin einzeln eingetragen.
-Im Bearbeitungsdialog begrenzt die gewählte Alarmrichtung die zulässige
-Kritisch-Schwelle; eine vertauschte Reihenfolge lässt sich dort nicht
-bestätigen. Doppelt gewählte Variablen und bereits gespeicherte fehlerhafte
-Regeln werden im Formular mit Regelnummer, Sensorname und Variablen-ID angezeigt und die
-betroffenen Zeilen farblich markiert. Korrigieren Sie die markierten Zeilen;
-ungültige Regeln werden weiterhin nicht als gültige Instanzkonfiguration
-übernommen.
-
-Nur ausgewählte Zustandsvariablen erhalten Grün (OK), Orange (Warnung) oder
-Rot (kritisch). Kategorien und Instanzen übernehmen den höchsten Zustand
-ihrer **sichtbaren** Nachkommen. Andere Variablen bleiben in ihrer normalen
-Typfarbe; sie werden nicht automatisch als Alarm interpretiert. Der Tooltip
-nennt den ermittelten Zustand. Kachel und IPSView verwenden dieselben
-Zustandsregeln, können ihre drei Farben aber separat gestalten. Ohne Regeln
-bleibt die bisherige Baumdarstellung unverändert.
-
-Eine Zustandsvariable muss im angezeigten Teilbaum und innerhalb der gewählten
-Tiefe und Knotengrenze liegen. Ausgeblendete, abgeschnittene und tiefere
-Zweige fließen nicht in den angezeigten Zustand ein. Bei Kürzung erscheint
-weiterhin die vorhandene Meldung; der Wurzelzustand ist dann **kein**
-Gesamtzustand der vollständigen Anlage. Der Baum liest nur und schaltet keine
-Geräte.
+Für eine Bewertung ausgewählter Zustandsvariablen mit Warn- und Kritisch-Schwellen
+verwenden Sie das separate Modul [`EChartsTreeSystemHealth`](../EChartsTreeSystemHealth/README.md).
 
 Der Kacheldesigner bietet orthogonale oder radiale Anordnung. Für orthogonale
 Bäume sind vier Richtungen verfügbar, für die Verbindungslinien Kurven oder

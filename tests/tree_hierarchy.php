@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use SymconECharts\TreeHierarchy;
 
-require_once dirname(__DIR__) . '/EChartsTree/TreeHierarchy.php';
+require_once dirname(__DIR__) . '/libs/TreeHierarchy.php';
 
 function assertTree(bool $condition, string $message): void
 {

@@ -1,9 +1,14 @@
 # ADR 0045: Anlagenzustand als explizite Tree-Überlagerung
 
-- Status: Angenommen
+- Status: Durch ADR 0046 hinsichtlich Modulzuordnung abgelöst
 - Datum: 2026-10-13
 - Entscheider: Burki24
 - Ergänzt: ADR 0044
+
+Die fachlichen Regeln dieser Entscheidung gelten weiter. Die hier genannte
+Zuordnung zu `EChartsTree` wurde vor Veröffentlichung der Funktion durch
+[`ADR 0046`](0046-tree-system-health-module-split.md) ersetzt:
+`StatusRules` und Zustandsfarben gehören zu `EChartsTreeSystemHealth`.
 
 ## Kontext
 

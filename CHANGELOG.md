@@ -2,18 +2,24 @@
 
 ## Hinzugefügt
 
-- `EChartsTree` kann Integer- und Float-Zustandsvariablen im aktuellen
+- `EChartsTreeSystemHealth` (`ECTH`) ist ein eigenes Modul für die lesende
+  Objekthierarchie mit expliziten Zustandsregeln. `EChartsTree` (`ECTR`) bleibt
+  der einfache Baum ohne Statusregeln und Zustandsfarben. Die gelöschte
+  Testinstanz wird nicht migriert; für den Anlagenzustand ist eine neue
+  Health-Instanz anzulegen.
+
+- `EChartsTreeSystemHealth` kann Integer- und Float-Zustandsvariablen im aktuellen
   Teilbaum per Namensbestandteil suchen, Treffer auswählen und mit gemeinsamen
   Schwellen in die bestehende Regelliste übernehmen. Vorhandene Regeln bleiben
   erhalten; gespeichert wird weiterhin erst beim Übernehmen des Formulars.
 
 ## Behoben
 
-- Die Tree-Suche nach Zustandsvariablen verarbeitet auch leere oder noch nicht
+- Die Health-Tree-Suche nach Zustandsvariablen verarbeitet auch leere oder noch nicht
   gespeicherte Regellisten korrekt. Im Suchdialog werden vorhandene Regeln und
   ausgewählte Treffer als Listenzeilen statt als Formularobjekte übergeben.
 
-- Ungültige Tree-Zustandsregeln nennen im Formular jetzt die betroffenen
+- Ungültige Health-Tree-Zustandsregeln nennen im Formular jetzt die betroffenen
   Regelzeilen sowie Sensorname und Variablen-ID. Doppelte Einträge werden markiert; die
   Kritisch-Schwelle lässt sich im Bearbeitungsdialog nur in der zur
   Alarmrichtung passenden Reihenfolge bestätigen.
@@ -63,15 +69,15 @@
   „Batterie“. Kategorien und Instanzen auf dem Weg zu passenden Variablen
   bleiben erhalten. Ohne Filter ändert sich die bestehende Ansicht nicht.
 
-- Die maximale Knotenzahl von `EChartsTree` lässt sich testweise bis 3000 statt
+- Die maximale Knotenzahl beider Tree-Module lässt sich testweise bis 3000 statt
   bisher 500 einstellen. Der Standardwert von 80 Knoten bleibt unverändert;
   die Obergrenze für Statusregeln steigt entsprechend auf 3000.
 
-- `EChartsTree` kann ausdrücklich ausgewählte Bool- und Zahl-Variablen als
+- `EChartsTreeSystemHealth` kann ausdrücklich ausgewählte Bool- und Zahl-Variablen als
   Anlagenzustand bewerten. Pro Quelle lassen sich Alarmrichtung sowie Warn-
   und Kritisch-Schwelle festlegen; Eltern zeigen den höchsten Zustand ihrer
   sichtbaren Nachkommen. Kachel und IPSView können die Zustandsfarben getrennt
-  gestalten. Bestehende Instanzen ohne Zustandsregeln bleiben unverändert.
+  gestalten. Der einfache Tree bleibt ohne Zustandsbewertung.
 
 - `EChartsTree` (`ECTR`) zeigt Kategorien, Instanzen und Variablen unter einer
   gewählten Symcon-Kategorie oder -Instanz als interaktiven Baum. Tiefe,

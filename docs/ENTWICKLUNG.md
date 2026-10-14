@@ -89,6 +89,7 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 | Gerät | EChartsScatter | Archivierte X/Y-Werte mit optionaler Bubble-Größe, ausschließlich zeitgleiche abgeschlossene Intervalle ohne Interpolation, in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsHeatmap | Eine Archivvariable als lokale Tages-/Wochentag-Stunden-Matrix mit separaten Kachel- und IPSView-Designern |
 | Gerät | EChartsTree | Begrenzte, lesende IP-Symcon-Objekthierarchie unter einer Kategorie oder Instanz in Kachel und optionalem IPSView-HTML |
+| Gerät | EChartsTreeSystemHealth | Lesende Objekthierarchie mit expliziten Zustandsregeln, Schwellen und aggregiertem sichtbarem Anlagenzustand |
 
 Eine eigene I/O-Instanz, ein Konfigurator und Discovery gehören nicht zum
 Anfangsumfang. Datenquellen sind Teil der jeweiligen Gauge-Konfiguration und
@@ -122,12 +123,13 @@ Modul-IDs und Datenfluss-IDs haben unterschiedliche Aufgaben.
 | Modul EChartsScatter | `{9865CDB4-5CA9-4C34-A148-983E0B5F2FA6}` |
 | Modul EChartsHeatmap | `{62F06D1A-873F-4B0E-9F3E-6AA9AA1A8274}` |
 | Modul EChartsTree | `{2B2C26A3-6F92-48D0-ADE1-5F03D7282EF8}` |
+| Modul EChartsTreeSystemHealth | `{DE4A700B-A38A-4441-A73A-C5F1D7DCCBE2}` |
 | Datenfluss Gauge → Gateway | `{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}` |
 | Datenfluss Gateway → Gauge | `{E4749B72-912B-E3E3-1C57-D19019FFDD84}` |
 
 Die Funktionspräfixe sind `ECGW` für das Gateway, `ECGS` für Gauge Single,
 `ECGM` für Gauge Multi, `ECGT` für Gauge Tacho, `ECGC` für Gauge
-Chronograph, `ECTS` für Time Series, `ECBC` für Bar Category, `ECBH` für Bar History, `ECBW` für Bar Waterfall, `ECBP` für Bar Polar, `ECPI` für Pie, `ECSC` für Scatter, `ECHM` für Heatmap und `ECTR` für Tree. Nach der verbindlichen Präfixkonvention steht `EC` für
+Chronograph, `ECTS` für Time Series, `ECBC` für Bar Category, `ECBH` für Bar History, `ECBW` für Bar Waterfall, `ECBP` für Bar Polar, `ECPI` für Pie, `ECSC` für Scatter, `ECHM` für Heatmap, `ECTR` für Tree und `ECTH` für Tree System Health. Nach der verbindlichen Präfixkonvention steht `EC` für
 ECharts; die letzten zwei Buchstaben bezeichnen Aufgabe oder Modultyp. Die
 Entscheidungen zur Modulstruktur und zu den GUIDs dokumentieren
 [`ADR 0001`](adr/0001-chart-family-modules.md) und
@@ -200,9 +202,10 @@ legt [`ADR 0041`](adr/0041-heatmap-weekday-hour-family.md) fest; ihre
 gleitenden Zeitfenster regelt [`ADR 0043`](adr/0043-heatmap-rolling-windows-and-navigation.md).
 
 Die lesende Objekt-Hierarchie und ihre Grenzen legt
-[`ADR 0044`](adr/0044-tree-symcon-object-hierarchy.md) fest. Die optionale,
-ausdrücklich konfigurierte Zustandsüberlagerung regelt
-[`ADR 0045`](adr/0045-tree-plant-status.md).
+[`ADR 0044`](adr/0044-tree-symcon-object-hierarchy.md) fest. Die explizite
+Zustandsbewertung beschreibt [`ADR 0045`](adr/0045-tree-plant-status.md),
+ihre Auslagerung in `EChartsTreeSystemHealth` regelt
+[`ADR 0046`](adr/0046-tree-system-health-module-split.md).
 
 ## Weitere ECharts-Familien im Plan
 

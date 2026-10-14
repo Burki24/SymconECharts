@@ -783,6 +783,7 @@ require_once dirname(__DIR__) . '/EChartsPie/module.php';
 require_once dirname(__DIR__) . '/EChartsScatter/module.php';
 require_once dirname(__DIR__) . '/EChartsHeatmap/module.php';
 require_once dirname(__DIR__) . '/EChartsTree/module.php';
+require_once dirname(__DIR__) . '/EChartsTreeSystemHealth/module.php';
 
 final class TestableEChartsGateway extends EChartsGateway
 {
@@ -1092,6 +1093,12 @@ $treeTile = $tree->GetVisualizationTile();
 $treeIPSView = $tree->GetIPSViewHTML();
 $treeForm = json_decode($tree->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
+    !array_key_exists('health', $treeData['tree']['root'])
+        && findGaugeFormElement($treeForm['elements'], 'StatusRules') === null
+        && !array_key_exists('healthyColor', $treeData['tree']['style']),
+    'Simple Tree must not expose status rules or health colors.'
+);
+assertGatewayGauge(
     str_contains($treeTile, 'echarts-tree-root')
         && str_contains($treeTile, '"treeLayout":"orthogonal"')
         && str_contains($treeIPSView, '"treeLayout":"radial"')
@@ -1155,6 +1162,12 @@ try {
     unset($GLOBALS['symconTestTreeObjects'][9006], $GLOBALS['symconTestTreeValues'][9006]);
     $tree->ApplyChanges();
 }
+$tree = new EChartsTreeSystemHealth();
+$tree->Create();
+$tree->SetTestProperty('RootObjectID', 9000);
+$tree->SetTestProperty('Title', 'Home health tree');
+$tree->SetTestProperty('IPSViewUseTileDesign', false);
+$tree->SetTestProperty('IPSViewTreeLayout', 'radial');
 $tree->SetTestProperty('StatusRules', json_encode([
     ['VariableID' => 9002, 'Direction' => 'high', 'WarningAt' => 1, 'CriticalAt' => 2],
     ['VariableID' => 9003, 'Direction' => 'high', 'WarningAt' => 1, 'CriticalAt' => 2]
@@ -1179,11 +1192,11 @@ assertGatewayGauge(
     'Tree must expose explicit status rules, propagate severity and keep separate design colors.'
 );
 assertGatewayGauge(
-    str_contains((string) ($healthRulesForm['form'] ?? ''), 'ECTR_GetStatusRuleEditorForm')
-        && str_contains((string) ($healthRulesForm['onAdd'] ?? ''), 'ECTR_UpdateStatusRulesForm')
-        && str_contains((string) ($healthRulesForm['onEdit'] ?? ''), 'ECTR_UpdateStatusRulesForm')
-        && str_contains((string) ($healthRulesForm['onDelete'] ?? ''), 'ECTR_UpdateStatusRulesForm')
-        && str_contains((string) ($healthRulesForm['onAdd'] ?? ''), 'ECTR_UpdateBarPreviewFromForm')
+    str_contains((string) ($healthRulesForm['form'] ?? ''), 'ECTH_GetStatusRuleEditorForm')
+        && str_contains((string) ($healthRulesForm['onAdd'] ?? ''), 'ECTH_UpdateStatusRulesForm')
+        && str_contains((string) ($healthRulesForm['onEdit'] ?? ''), 'ECTH_UpdateStatusRulesForm')
+        && str_contains((string) ($healthRulesForm['onDelete'] ?? ''), 'ECTH_UpdateStatusRulesForm')
+        && str_contains((string) ($healthRulesForm['onAdd'] ?? ''), 'ECTH_UpdateBarPreviewFromForm')
         && str_contains((string) ($healthRulesForm['onAdd'] ?? ''), "'StatusRules' => \$statusRuleRows")
         && findGaugeFormElement($healthForm['elements'], 'StatusRulesDiagnostics')['visible'] === false,
     'Tree rule changes must update validation feedback and both previews without persisting drafts.'
@@ -1197,11 +1210,11 @@ assertGatewayGauge(
         && !isset(findGaugeFormElement($highEditor, 'CriticalAt')['maximum'])
         && str_contains(
             (string) findGaugeFormElement($lowEditor, 'WarningAt')['onChange'],
-            'ECTR_UpdateStatusRuleEditor'
+            'ECTH_UpdateStatusRuleEditor'
         )
         && str_contains(
             (string) findGaugeFormElement($lowEditor, 'Direction')['onChange'],
-            'ECTR_UpdateStatusRuleEditor'
+            'ECTH_UpdateStatusRuleEditor'
         ),
     'The Tree rule dialog must reject inverse critical thresholds for both alarm directions.'
 );
@@ -1272,10 +1285,10 @@ try {
             && !isset($importButton['popup']['pages'])
             && str_contains((string) ($importButton['onClick'] ?? ''), 'InvalidateStatusRuleCandidates')
             && is_callable($parsedImportClick)
-            && str_contains((string) ($searchButton['onClick'] ?? ''), 'ECTR_SearchStatusRuleCandidates')
+            && str_contains((string) ($searchButton['onClick'] ?? ''), 'ECTH_SearchStatusRuleCandidates')
             && str_contains(
                 (string) ($importButton['popup']['buttons'][0]['onClick'] ?? ''),
-                'ECTR_AddStatusRuleCandidates'
+                'ECTH_AddStatusRuleCandidates'
             )
             && str_contains(
                 (string) ($importButton['popup']['buttons'][0]['onClick'] ?? ''),
@@ -1305,13 +1318,13 @@ try {
     };
     $blankSearchArgs = $captureImportAction(
         (string) ($searchButton['onClick'] ?? ''),
-        'ECTR_SearchStatusRuleCandidates',
+        'ECTH_SearchStatusRuleCandidates',
         ['StatusRules' => new ArrayIterator([])]
     );
     $selectedImportRows = [['VariableID' => 9011, 'Selected' => true]];
     $addArgs = $captureImportAction(
         $importClick,
-        'ECTR_AddStatusRuleCandidates',
+        'ECTH_AddStatusRuleCandidates',
         [
             'StatusRules'      => new ArrayIterator($draftRules),
             'ImportCandidates' => new ArrayIterator($selectedImportRows)
@@ -1551,6 +1564,10 @@ assertGatewayGauge(
     !isset(json_decode($tree->GetTreeData(), true, 512, JSON_THROW_ON_ERROR)['tree']['root']['health']),
     'Removing all status rules must restore the previous uncolored model.'
 );
+$tree = new EChartsTree();
+$tree->Create();
+$tree->SetTestProperty('RootObjectID', 9000);
+$tree->ApplyChanges();
 $GLOBALS['symconTestTreeChildren'][0] = [9000];
 try {
     $unselectedTree = new EChartsTree();
@@ -7673,7 +7690,8 @@ $expectedDesignerSections = [
         'Polar layout and order', 'Labels and visibility', 'Bar geometry',
         'Bar appearance and effects', 'Scale and angular range', 'Typography and colors'
     ],
-    EChartsTree::class             => ['Layout and interaction', 'Labels and typography', 'Node and line colors', 'Status colors']
+    EChartsTree::class             => ['Layout and interaction', 'Labels and typography', 'Node and line colors'],
+    EChartsTreeSystemHealth::class => ['Layout and interaction', 'Labels and typography', 'Node and line colors', 'Status colors']
 ];
 $requiredGermanFormTexts = [
     'EChartsBarCategory' => [
@@ -7831,7 +7849,8 @@ foreach ([
     EChartsBarWaterfall::class      => 'ECBW',
     EChartsBarPolar::class          => 'ECBP',
     EChartsPie::class               => 'ECPI',
-    EChartsTree::class              => 'ECTR'
+    EChartsTree::class              => 'ECTR',
+    EChartsTreeSystemHealth::class  => 'ECTH'
 ] as $moduleClass => $modulePrefix) {
     $designModule = new $moduleClass();
     $designModule->Create();
@@ -9291,7 +9310,8 @@ foreach ([
     EChartsPie::class              => ['BarPreview', 'IPSViewBarPreview'],
     EChartsScatter::class          => ['BarPreview', 'IPSViewBarPreview'],
     EChartsHeatmap::class          => ['BarPreview', 'IPSViewBarPreview'],
-    EChartsTree::class             => ['BarPreview', 'IPSViewBarPreview']
+    EChartsTree::class             => ['BarPreview', 'IPSViewBarPreview'],
+    EChartsTreeSystemHealth::class => ['BarPreview', 'IPSViewBarPreview']
 ] as $chartClass => $previewFields) {
     $chart = new $chartClass();
     $chart->Create();

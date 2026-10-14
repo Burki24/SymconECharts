@@ -7,6 +7,7 @@ const vm = require('node:vm');
 const zlib = require('node:zlib');
 
 const source = fs.readFileSync(path.join(__dirname, '..', 'EChartsTree', 'visualization', 'app.js'), 'utf8');
+const healthSource = fs.readFileSync(path.join(__dirname, '..', 'EChartsTreeSystemHealth', 'visualization', 'app.js'), 'utf8');
 const designSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-design.js'), 'utf8');
 const palette = {
     background: '#101114', text: '#f4f5f7', muted: '#969aa2',
@@ -21,7 +22,8 @@ const root = {
     ]
 };
 
-function render(style, data = root, width = 800, mode = 'symcon', height = 400, truncated = false, compressed = false) {
+function render(style, data = root, width = 800, mode = 'symcon', height = 400, truncated = false,
+    compressed = false, rendererSource = source) {
     const chartElement = { hidden: false, clientWidth: width, clientHeight: height };
     const errorElement = { hidden: true, textContent: '' };
     const warningElement = { hidden: true, textContent: '' };
@@ -69,7 +71,7 @@ function render(style, data = root, width = 800, mode = 'symcon', height = 400, 
         })[id]
     };
     vm.runInNewContext(designSource, { window });
-    vm.runInNewContext(source, { window, document });
+    vm.runInNewContext(rendererSource, { window, document });
     return { get option() { return option; }, warningElement,
         collapseAndRefresh: () => {
             listeners.treeExpandAndCollapse({ dataIndex: 1 });
@@ -113,10 +115,13 @@ const healthRoot = { ...root, health: 'critical', children: [{
     ]
 }] };
 const health = render({ ...baseStyle, healthyColor: '#008800', warningColor: '#cc9900',
-    criticalColor: '#cc0000' }, healthRoot);
+    criticalColor: '#cc0000' }, healthRoot, 800, 'symcon', 400, false, false, healthSource);
 assert.equal(health.option.series[0].data[0].itemStyle.color, '#cc0000');
 assert.equal(health.option.series[0].data[0].children[0].children[0].itemStyle.color, '#cc9900');
 assert.match(health.option.tooltip.formatter({ data: health.option.series[0].data[0] }), /Status: Critical/);
+const plain = render(baseStyle, healthRoot);
+assert.equal(plain.option.series[0].data[0].itemStyle.color, '#111111');
+assert.equal(plain.option.series[0].data[0].health, undefined);
 
 const hostile = render(baseStyle, { ...root, name: '<img src=x onerror=alert(1)>' });
 const tooltip = hostile.option.tooltip.formatter({ data: { name: '<script>', displayValue: '<b>' } });

@@ -126,12 +126,17 @@ $requiredFiles = [
     'EChartsHeatmap/visualization/index.html',
     'EChartsHeatmap/visualization/style.css',
     'EChartsHeatmap/visualization/app.js',
-    'EChartsTree/TreeHierarchy.php',
+    'libs/TreeHierarchy.php',
     'EChartsTree/visualization/index.html',
     'EChartsTree/visualization/style.css',
     'EChartsTree/visualization/app.js',
+    'EChartsTreeSystemHealth/TreeHealth.php',
+    'EChartsTreeSystemHealth/visualization/index.html',
+    'EChartsTreeSystemHealth/visualization/style.css',
+    'EChartsTreeSystemHealth/visualization/app.js',
     '.tools/echarts-runtime/src/tree-runtime.js',
     'docs/adr/0044-tree-symcon-object-hierarchy.md',
+    'docs/adr/0046-tree-system-health-module-split.md',
     'tests/tree_hierarchy.php',
     'tests/tree_layout.js',
     'libs/echarts/6.1.0/echarts.heatmap.min.js',
@@ -337,7 +342,7 @@ if ($helperSync !== null) {
 
 $expectedModules = [
     'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarPolar', 'EChartsBarWaterfall', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
-    'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsHeatmap', 'EChartsPie', 'EChartsScatter', 'EChartsTimeSeries', 'EChartsTree'
+    'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsHeatmap', 'EChartsPie', 'EChartsScatter', 'EChartsTimeSeries', 'EChartsTree', 'EChartsTreeSystemHealth'
 ];
 $discoveredModules = [];
 foreach (glob($root . '/*/module.json') ?: [] as $modulePath) {

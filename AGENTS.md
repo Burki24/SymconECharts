@@ -48,7 +48,9 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Eine archivbasierte Tages- beziehungsweise Wochentag-Stunden-Heatmap liegt im eigenen Gerätemodul
   `EChartsHeatmap`. Sie ist kein Kalenderdiagramm und kein Scatter-Modus.
   Eine begrenzte, lesende IP-Symcon-Objekthierarchie liegt im eigenen
-  Gerätemodul `EChartsTree` und ist kein Graph-Modus.
+  Gerätemodul `EChartsTree` und ist kein Graph-Modus. Die ausdrückliche
+  Zustandsbewertung dieser Hierarchie liegt getrennt in
+  `EChartsTreeSystemHealth`; der einfache Tree enthält keine Zustandsregeln.
 - Das Gateway stellt ausschließlich familienübergreifende Infrastruktur wie
   Archivzugriff, begrenztes Caching, gemeinsame Ressourcen und gegebenenfalls
   abgesicherte IPSView-Kommunikation bereit. Familienbezogene Properties,
@@ -114,6 +116,7 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
 - `ECSC` ist `EChartsScatter` zugeordnet (`SC` = Scatter).
 - `ECHM` ist `EChartsHeatmap` zugeordnet (`HM` = Heatmap).
 - `ECTR` ist `EChartsTree` zugeordnet (`TR` = Tree).
+- `ECTH` ist `EChartsTreeSystemHealth` zugeordnet (`TH` = Tree System Health).
 - Das zuvor für das unveröffentlichte Gauge-Gerüst verwendete Kürzel `ECGA`
   ist abgelöst und wird nicht für ein anderes Modul wiederverwendet.
 - Neue Kürzel werden vor ihrer Verwendung eindeutig festgelegt und in dieser

@@ -61,7 +61,9 @@ unvollständigen Baums.
 Tree nutzt den bestehenden Gateway-Parent, den gemeinsamen HTML-/IPSView-
 Transport, die Theme- und Animationsbausteine, die read-only-Vorschau-
 Verdrahtung und die Designer-Unterbereiche. Die Projektion der Symcon-
-Objektstruktur bleibt familienbezogen in `EChartsTree/TreeHierarchy.php`.
+Objektstruktur bleibt familienbezogen. Seit der Modultrennung gemäß
+[`ADR 0046`](0046-tree-system-health-module-split.md) nutzen beide
+Tree-Module die gemeinsame Projektion in `libs/TreeHierarchy.php`.
 Große Startzustände werden nur innerhalb der Tree-HTML-Seite gzip-komprimiert
 eingebettet und im Browser vor dem ersten Rendern entpackt. Das öffentliche
 Tree-Datenmodell und spätere Aktualisierungen bleiben unverändert. Für diesen

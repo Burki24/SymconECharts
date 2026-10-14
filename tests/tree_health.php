@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use SymconECharts\TreeHealth;
 
-require_once dirname(__DIR__) . '/EChartsTree/TreeHealth.php';
+require_once dirname(__DIR__) . '/EChartsTreeSystemHealth/TreeHealth.php';
 
 function assertTreeHealth(bool $condition, string $message): void
 {
