@@ -1287,6 +1287,42 @@ try {
         ['VariableID' => 9002, 'Direction' => 'high', 'WarningAt' => 1, 'CriticalAt' => 2],
         ['VariableID' => 9010, 'Direction' => 'low', 'WarningAt' => 40, 'CriticalAt' => 30]
     ];
+    $captureImportAction = static function (string $action, string $method, array $overrides): array
+    {
+        preg_match_all('/\$([A-Za-z_][A-Za-z0-9_]*)/', $action, $matches);
+        $values = array_replace(array_fill_keys($matches[1], null), $overrides);
+        $captured = [];
+        $capture = static function (...$args) use (&$captured): string
+        {
+            $captured = $args;
+            return 'MESSAGE:captured';
+        };
+        $action = str_replace($method . '(', '$capture(', $action);
+        $callback = eval('return static function (array $values, callable $capture) {'
+            . ' extract($values); ' . $action . ' };');
+        $callback($values, $capture);
+        return $captured;
+    };
+    $blankSearchArgs = $captureImportAction(
+        (string) ($searchButton['onClick'] ?? ''),
+        'ECTR_SearchStatusRuleCandidates',
+        ['StatusRules' => new ArrayIterator([])]
+    );
+    $selectedImportRows = [['VariableID' => 9011, 'Selected' => true]];
+    $addArgs = $captureImportAction(
+        $importClick,
+        'ECTR_AddStatusRuleCandidates',
+        [
+            'StatusRules'      => new ArrayIterator($draftRules),
+            'ImportCandidates' => new ArrayIterator($selectedImportRows)
+        ]
+    );
+    assertGatewayGauge(
+        ($blankSearchArgs[9] ?? null) === '[]'
+            && json_decode((string) ($addArgs[12] ?? ''), true) === $draftRules
+            && json_decode((string) ($addArgs[13] ?? ''), true) === $selectedImportRows,
+        'Tree popup actions must serialize iterable Symcon List values as row arrays, including empty lists.'
+    );
     $tree->SearchStatusRuleCandidates(
         'bAtTeRiE',
         'numeric',

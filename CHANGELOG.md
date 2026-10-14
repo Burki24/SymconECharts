@@ -9,6 +9,10 @@
 
 ## Behoben
 
+- Die Tree-Suche nach Zustandsvariablen verarbeitet auch leere oder noch nicht
+  gespeicherte Regellisten korrekt. Im Suchdialog werden vorhandene Regeln und
+  ausgewählte Treffer als Listenzeilen statt als Formularobjekte übergeben.
+
 - Ungültige Tree-Zustandsregeln nennen im Formular jetzt die betroffenen
   Regelzeilen sowie Sensorname und Variablen-ID. Doppelte Einträge werden markiert; die
   Kritisch-Schwelle lässt sich im Bearbeitungsdialog nur in der zur

@@ -155,7 +155,7 @@
                             {
                                 "type": "Button",
                                 "caption": "Search",
-                                "onClick": "ECTR_SearchStatusRuleCandidates($id, $ImportName, $ImportType, $UseSymconRoot, $RootObjectID, $MaxDepth, $MaxNodes, $IncludeHidden, $VariableNameFilter, json_encode($StatusRules));"
+                                "onClick": "$statusRuleRows = []; foreach ($StatusRules as $statusRuleRow) { $statusRuleRows[] = $statusRuleRow; } ECTR_SearchStatusRuleCandidates($id, $ImportName, $ImportType, $UseSymconRoot, $RootObjectID, $MaxDepth, $MaxNodes, $IncludeHidden, $VariableNameFilter, json_encode($statusRuleRows));"
                             },
                             {
                                 "type": "Label",
@@ -208,7 +208,7 @@
                         "buttons": [
                             {
                                 "caption": "Add selected",
-                                "onClick": "return ECTR_AddStatusRuleCandidates($id, $ImportName, $ImportType, $ImportDirection, $ImportWarningAt, $ImportCriticalAt, $UseSymconRoot, $RootObjectID, $MaxDepth, $MaxNodes, $IncludeHidden, $VariableNameFilter, json_encode($StatusRules), json_encode($ImportCandidates));"
+                                "onClick": "$statusRuleRows = []; foreach ($StatusRules as $statusRuleRow) { $statusRuleRows[] = $statusRuleRow; } $importCandidateRows = []; foreach ($ImportCandidates as $importCandidateRow) { $importCandidateRows[] = $importCandidateRow; } return ECTR_AddStatusRuleCandidates($id, $ImportName, $ImportType, $ImportDirection, $ImportWarningAt, $ImportCriticalAt, $UseSymconRoot, $RootObjectID, $MaxDepth, $MaxNodes, $IncludeHidden, $VariableNameFilter, json_encode($statusRuleRows), json_encode($importCandidateRows));"
                             }
                         ]
                     }
