@@ -22,7 +22,7 @@ Jede Variable darf nur eine Regel besitzen. Eine Regel enthält Richtung
 (`high` oder `low`) sowie Warn- und Kritisch-Schwelle für den **rohen**
 Zahlenwert. Bei `high` muss Kritisch ≥ Warnung sein, bei `low` Kritisch ≤
 Warnung. Die kritischere Schwelle wird zuerst geprüft. Gleiche Schwellen
-ermöglichen ein direkt kritisches Bool-Signal. Maximal 500 Regeln sind
+ermöglichen ein direkt kritisches Bool-Signal. Maximal 3000 Regeln sind
 zulässig, entsprechend der maximalen Knotenzahl.
 
 Nur sichtbare und innerhalb von Tiefe und Knotengrenze tatsächlich gelesene

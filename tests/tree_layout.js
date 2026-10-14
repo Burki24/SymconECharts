@@ -4,6 +4,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
+const zlib = require('node:zlib');
 
 const source = fs.readFileSync(path.join(__dirname, '..', 'EChartsTree', 'visualization', 'app.js'), 'utf8');
 const designSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-design.js'), 'utf8');
@@ -20,7 +21,7 @@ const root = {
     ]
 };
 
-function render(style, data = root, width = 800, mode = 'symcon', height = 400, truncated = false) {
+function render(style, data = root, width = 800, mode = 'symcon', height = 400, truncated = false, compressed = false) {
     const chartElement = { hidden: false, clientWidth: width, clientHeight: height };
     const errorElement = { hidden: true, textContent: '' };
     const warningElement = { hidden: true, textContent: '' };
@@ -36,12 +37,28 @@ function render(style, data = root, width = 800, mode = 'symcon', height = 400, 
     const model = {
         family: 'tree', theme: 'dark', tree: { title: 'Home tree', style, root: data, count: 4, truncated }
     };
+    const state = { status: 'ready', chart: model };
     const window = {
         SYMC_VISUALIZATION: {
-            mode, state: { status: 'ready', chart: model }, translations: {},
-            options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: true }
+            mode, state: compressed ? null : state, translations: {},
+            options: {
+                echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: true,
+                compressedStateGzipBase64: compressed ? zlib.gzipSync(JSON.stringify(state)).toString('base64') : null
+            }
         },
-        echarts: { init: () => chart }, addEventListener: () => {}, getComputedStyle: () => ({ color: '' })
+        echarts: { init: () => chart }, addEventListener: () => {}, getComputedStyle: () => ({ color: '' }),
+        atob: value => Buffer.from(value, 'base64').toString('binary'),
+        Blob: class {
+            constructor(parts) { this.bytes = parts[0]; }
+            stream() { return { pipeThrough: () => this.bytes }; }
+        },
+        DecompressionStream: class {
+            constructor(format) { assert.equal(format, 'gzip'); }
+        },
+        Response: class {
+            constructor(bytes) { this.bytes = bytes; }
+            text() { return Promise.resolve(zlib.gunzipSync(Buffer.from(this.bytes)).toString('utf8')); }
+        }
     };
     const document = {
         body: { appendChild: () => {} },
@@ -120,4 +137,9 @@ if (fs.existsSync(localECharts)) {
     chart.dispose();
 }
 
-console.log('Tree renderer layout verified.');
+const compressed = render(baseStyle, root, 800, 'symcon', 400, false, true);
+assert.equal(compressed.option, undefined);
+setImmediate(() => {
+    assert.equal(compressed.option.series[0].data[0].children[0].id, 'object-101');
+    console.log('Tree renderer layout verified.');
+});

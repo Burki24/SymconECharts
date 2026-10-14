@@ -1095,6 +1095,8 @@ assertGatewayGauge(
     str_contains($treeTile, 'echarts-tree-root')
         && str_contains($treeTile, '"treeLayout":"orthogonal"')
         && str_contains($treeIPSView, '"treeLayout":"radial"')
+        && str_contains($treeTile, '"compressedStateGzipBase64":null')
+        && str_contains($treeIPSView, '"compressedStateGzipBase64":null')
         && strlen($treeTile) < SYMCON_OUTPUT_BUFFER_LIMIT
         && strlen($treeIPSView) < SYMCON_OUTPUT_BUFFER_LIMIT,
     'Tree must render independent Tile and IPSView designs below the output limit.'
@@ -1242,7 +1244,7 @@ assertGatewayGauge($tree->GetTestStatus() === 201, 'Tree must reject variable ro
 $GLOBALS['symconTestTreeObjects'][9100] = [
     'ObjectType' => 0, 'ObjectName' => 'Wide root', 'ObjectIsHidden' => false
 ];
-$GLOBALS['symconTestTreeChildren'][9100] = range(9200, 9699);
+$GLOBALS['symconTestTreeChildren'][9100] = range(20000, 23000);
 foreach ($GLOBALS['symconTestTreeChildren'][9100] as $wideID) {
     $GLOBALS['symconTestTreeObjects'][$wideID] = [
         'ObjectType' => 2, 'ObjectName' => str_repeat('N', 120), 'ObjectIsHidden' => false
@@ -1253,26 +1255,51 @@ try {
     $wideTree = new EChartsTree();
     $wideTree->Create();
     $wideTree->SetTestProperty('RootObjectID', 9100);
-    $wideTree->SetTestProperty('MaxNodes', 500);
+    $wideTree->SetTestProperty('MaxNodes', 3000);
     $wideTree->ApplyChanges();
     $wideTreeData = json_decode($wideTree->GetTreeData(), true, 512, JSON_THROW_ON_ERROR);
     $wideTreeForm = json_decode($wideTree->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
     assertGatewayGauge(
         $wideTree->GetTestStatus() === IS_ACTIVE
-            && $wideTreeData['tree']['count'] === 500
+            && $wideTreeData['tree']['count'] === 3000
             && $wideTreeData['tree']['truncated'] === true
-            && count($wideTreeData['tree']['root']['children']) === 499
-            && findGaugeFormElement($wideTreeForm['elements'], 'MaxNodes')['maximum'] === 500,
-        'Tree must accept 500 nodes, report truncation and expose the new form limit.'
+            && count($wideTreeData['tree']['root']['children']) === 2999
+            && findGaugeFormElement($wideTreeForm['elements'], 'MaxNodes')['maximum'] === 3000,
+        'Tree must accept 3000 nodes, report truncation and expose the new form limit.'
     );
+    $wideTreeTileHTML = $wideTree->GetVisualizationTile();
+    $wideTreeIPSViewHTML = $wideTree->GetIPSViewHTML();
+    $wideTreeTileBytes = strlen($wideTreeTileHTML);
+    $wideTreeIPSViewBytes = strlen($wideTreeIPSViewHTML);
     assertGatewayGauge(
-        strlen($wideTree->GetVisualizationTile()) < SYMCON_OUTPUT_BUFFER_LIMIT
-            && strlen($wideTree->GetIPSViewHTML()) < SYMCON_OUTPUT_BUFFER_LIMIT,
-        'A 500-node Tree must fit the Tile and IPSView output limit with long names and values.'
+        $wideTreeTileBytes < SYMCON_OUTPUT_BUFFER_LIMIT
+            && $wideTreeIPSViewBytes < SYMCON_OUTPUT_BUFFER_LIMIT,
+        sprintf(
+            'A 3000-node Tree must fit the Tile and IPSView output limit with long names and values (data: %d, Tile: %d, IPSView: %d bytes).',
+            strlen($wideTree->GetTreeData()),
+            $wideTreeTileBytes,
+            $wideTreeIPSViewBytes
+        )
     );
-    $wideTree->SetTestProperty('MaxNodes', 501);
+    foreach ([$wideTreeTileHTML, $wideTreeIPSViewHTML] as $wideTreeHTML) {
+        $bootstrapMatch = [];
+        assertGatewayGauge(
+            preg_match('/window\.SYMC_VISUALIZATION = ([^\r\n]+);<\/script>/', $wideTreeHTML, $bootstrapMatch) === 1,
+            'A 3000-node Tree output must contain a bootstrap payload.'
+        );
+        $bootstrap = json_decode($bootstrapMatch[1], true, 512, JSON_THROW_ON_ERROR);
+        $encodedState = $bootstrap['options']['compressedStateGzipBase64'] ?? null;
+        $gzip = is_string($encodedState) ? base64_decode($encodedState, true) : false;
+        $decodedState = is_string($gzip) ? gzdecode($gzip) : false;
+        assertGatewayGauge(
+            $bootstrap['state'] === null && is_string($decodedState)
+                && json_decode($decodedState, true, 512, JSON_THROW_ON_ERROR)['chart']['tree']['count'] === 3000,
+            'A 3000-node Tree bootstrap must restore the complete chart state.'
+        );
+    }
+    $wideTree->SetTestProperty('MaxNodes', 3001);
     $wideTree->ApplyChanges();
-    assertGatewayGauge($wideTree->GetTestStatus() === 201, 'Tree must reject a configured limit above 500.');
+    assertGatewayGauge($wideTree->GetTestStatus() === 201, 'Tree must reject a configured limit above 3000.');
 } finally {
     foreach ($GLOBALS['symconTestTreeChildren'][9100] as $wideID) {
         unset($GLOBALS['symconTestTreeObjects'][$wideID], $GLOBALS['symconTestTreeValues'][$wideID]);

@@ -48,6 +48,17 @@ $lowWarning = TreeHealth::Annotate($root, $rules, static fn (int $id): float => 
 assertTreeHealth($lowWarning['health'] === 'warning', 'Low-direction warning threshold must be applied.');
 assertTreeHealth(TreeHealth::Annotate($root, [], $read) === $root, 'No rules must preserve the old Tree model.');
 
+$wideRules = array_map(
+    static fn (int $id): array => ['VariableID' => $id, 'Direction' => 'high', 'WarningAt' => 1, 'CriticalAt' => 2],
+    range(1000, 3999)
+);
+assertTreeHealth(count(TreeHealth::Parse($wideRules)) === 3000, 'Tree must accept 3000 status rules.');
+try {
+    TreeHealth::Parse([...$wideRules, ['VariableID' => 4000, 'Direction' => 'high', 'WarningAt' => 1, 'CriticalAt' => 2]]);
+    throw new RuntimeException('Tree must reject a status-rule limit above 3000.');
+} catch (InvalidArgumentException) {
+}
+
 try {
     TreeHealth::Annotate($root, $boolRule, static fn (int $id): string => 'not numeric');
     throw new RuntimeException('A nonnumeric status source was accepted.');

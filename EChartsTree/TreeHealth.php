@@ -22,7 +22,7 @@ final class TreeHealth
                 throw new InvalidArgumentException('The Tree status rules are invalid.');
             }
         }
-        if (!is_array($input) || !array_is_list($input) || count($input) > 500) {
+        if (!is_array($input) || !array_is_list($input) || count($input) > 3000) {
             throw new InvalidArgumentException('The Tree status rules are invalid.');
         }
         $rules = [];

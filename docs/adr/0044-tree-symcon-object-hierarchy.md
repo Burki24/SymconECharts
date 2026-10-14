@@ -30,7 +30,7 @@ insbesondere Links und Skripte, werden
 nicht als Knoten oder alternative Quellen aufgelöst. Ein ausgeblendeter Zweig
 entfällt standardmäßig insgesamt; seine Einbeziehung ist optional. Die
 konfigurierte maximale Tiefe liegt zwischen 1 und 6, die Knotengrenze
-zwischen 10 und 500. Die Obergrenze von 500 wird zunächst im Testbetrieb
+zwischen 10 und 3000. Die Obergrenze von 3000 wird zunächst im Testbetrieb
 erprobt; sie ist kein zugesicherter Leistungswert für jede Kachelgröße.
 Erreicht die Traversierung die Knotengrenze vor weiteren passenden Objekten,
 wird die Kürzung sichtbar gemeldet. Die Tiefengrenze ist
@@ -51,6 +51,11 @@ Tree nutzt den bestehenden Gateway-Parent, den gemeinsamen HTML-/IPSView-
 Transport, die Theme- und Animationsbausteine, die read-only-Vorschau-
 Verdrahtung und die Designer-Unterbereiche. Die Projektion der Symcon-
 Objektstruktur bleibt familienbezogen in `EChartsTree/TreeHierarchy.php`.
+Große Startzustände werden nur innerhalb der Tree-HTML-Seite gzip-komprimiert
+eingebettet und im Browser vor dem ersten Rendern entpackt. Das öffentliche
+Tree-Datenmodell und spätere Aktualisierungen bleiben unverändert. Für diesen
+Startpfad benötigt der Browser `DecompressionStream`; fehlt die API, erscheint
+ein kontrollierter Ladefehler.
 Keine synchronisierten Helper werden verändert. Ein separater lokaler
 ECharts-6.1.0-Build enthält `TreeChart`, Title, Tooltip, Aria und Canvas;
 andere Runtime-Bundles bleiben unverändert. Orthogonale und radiale Layouts,

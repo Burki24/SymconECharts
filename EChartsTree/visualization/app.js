@@ -207,5 +207,24 @@
         window.addEventListener('resize', function () { if (chart) { chart.resize(); } });
     }
     window.addEventListener('beforeunload', function () { if (chart) { chart.dispose(); } });
-    render(currentState);
+    var compressedState = bootstrap.options && bootstrap.options.compressedStateGzipBase64;
+    if (!compressedState) {
+        render(currentState);
+    } else if (typeof window.DecompressionStream !== 'function') {
+        displayError('The Tree could not be loaded.');
+    } else {
+        try {
+            var binary = window.atob(compressedState);
+            var bytes = new Uint8Array(binary.length);
+            for (var index = 0; index < binary.length; index++) { bytes[index] = binary.charCodeAt(index); }
+            var stream = new window.Blob([bytes]).stream().pipeThrough(new window.DecompressionStream('gzip'));
+            new window.Response(stream).text().then(function (json) {
+                if (currentState === null) { render(JSON.parse(json)); }
+            }).catch(function () {
+                if (currentState === null) { displayError('The Tree could not be loaded.'); }
+            });
+        } catch (error) {
+            displayError('The Tree could not be loaded.');
+        }
+    }
 }());

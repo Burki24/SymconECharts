@@ -449,13 +449,24 @@ class EChartsTree extends IPSModuleStrict
     {
         $hiddenTitle = !$ipsView && function_exists('IPS_GetObject')
             && (bool) (IPS_GetObject($this->InstanceID)['ObjectIsHiddenTitle'] ?? false);
+        $state = $this->BuildVisualizationState($ipsView);
+        $compressedState = null;
+        $stateJSON = json_encode($state, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        if (strlen($stateJSON) > 200000) {
+            $gzip = gzencode($stateJSON, 6);
+            if ($gzip === false) {
+                throw new RuntimeException('The Tree startup state could not be compressed.');
+            }
+            $compressedState = base64_encode($gzip);
+            $state = null;
+        }
         return $this->RenderVisualizationHTMLPage($ipsView, [
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'ECharts Tree',
             'visualizationTheme' => $this->VisualizationThemeCSS() . "\n\n"
                 . $this->ResponsiveVisualizationCSS('#echarts-tree-root', 'echarts-tree'),
             'ipsViewStyle' => $ipsView ? $this->IPSViewThemeCSS() : '',
-            'state'        => $this->BuildVisualizationState($ipsView),
+            'state'        => $state,
             'translations' => [
                 'Select a valid Tree root.'                                         => $this->Translate('Select a valid Tree root.'),
                 'Select a valid Tree root and limits.'                              => $this->Translate('Select a valid Tree root and limits.'),
@@ -472,11 +483,12 @@ class EChartsTree extends IPSModuleStrict
                 )
             ],
             'options' => [
-                'echartsVersion'    => EChartsAsset::VERSION,
-                'echartsThemes'     => EChartsAsset::ThemePalettes(),
-                'tileHeaderVisible' => !$hiddenTitle,
-                'adaptToBackground' => $ipsView && $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
-                'ipsViewTransport'  => $ipsView ? $this->EChartsIPSViewTransportOptions() : null
+                'echartsVersion'            => EChartsAsset::VERSION,
+                'echartsThemes'             => EChartsAsset::ThemePalettes(),
+                'tileHeaderVisible'         => !$hiddenTitle,
+                'adaptToBackground'         => $ipsView && $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
+                'ipsViewTransport'          => $ipsView ? $this->EChartsIPSViewTransportOptions() : null,
+                'compressedStateGzipBase64' => $compressedState
             ],
             'replacements' => [
                 '{{ECHARTS_SCRIPT}}'           => EChartsAsset::TreeJavaScript(),
@@ -519,7 +531,7 @@ class EChartsTree extends IPSModuleStrict
             && ($rootID < 1 || !IPS_ObjectExists($rootID)
                 || !in_array(IPS_GetObject($rootID)['ObjectType'] ?? null, [0, 1], true)))
             || $this->ReadPropertyInteger('MaxDepth') < 1 || $this->ReadPropertyInteger('MaxDepth') > 6
-            || $this->ReadPropertyInteger('MaxNodes') < 10 || $this->ReadPropertyInteger('MaxNodes') > 500) {
+            || $this->ReadPropertyInteger('MaxNodes') < 10 || $this->ReadPropertyInteger('MaxNodes') > 3000) {
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => 'Select a valid Tree root and limits.'];
         }
         try {

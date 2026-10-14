@@ -15,7 +15,7 @@ Symcon-Reihenfolge aufgenommen; Skripte, Links,
 Medien und andere Objekttypen bleiben außen vor. Ausgeblendete Objekte und
 deren Zweige erscheinen standardmäßig nicht. „Ausgeblendete Objekte
 einbeziehen“ hebt diesen Filter auf. Maximale Tiefe und Knotenzahl begrenzen
-die Darstellung auf 1–6 Nachkommensebenen beziehungsweise 10–500 Knoten.
+die Darstellung auf 1–6 Nachkommensebenen beziehungsweise 10–3000 Knoten.
 Wenn die Knotengrenze weitere passende Objekte abschneidet, zeigt das
 Diagramm eine Meldung. Beide Ausgabewege verwenden dieselbe Wurzel und
 dieselben Grenzen.

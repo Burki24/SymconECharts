@@ -63,7 +63,7 @@ assertTree($limited['count'] === 3 && $limited['truncated'] === true, 'Node limi
 $visible = TreeHierarchy::Build(100, 2, 20, true, $object, $getChildren, $value);
 assertTree($visible['count'] === 5 && $visible['root']['children'][1]['name'] === 'Intern', 'Hidden branch inclusion failed.');
 
-$wideChildren = range(1001, 1500);
+$wideChildren = range(1001, 4000);
 $wideObject = static fn (int $id): array => [
     'ObjectType'     => $id === 1000 ? 0 : 2,
     'ObjectName'     => 'Tree object ' . $id,
@@ -72,29 +72,29 @@ $wideObject = static fn (int $id): array => [
 $wideTree = TreeHierarchy::Build(
     1000,
     1,
-    500,
+    3000,
     false,
     $wideObject,
     static fn (int $id): array => $id === 1000 ? $wideChildren : [],
     static fn (int $id): string => (string) $id
 );
-assertTree($wideTree['count'] === 500, 'Tree must accept the configured 500-node limit.');
-assertTree($wideTree['truncated'] === true, 'Tree must report the 501st node as truncated.');
-assertTree(count($wideTree['root']['children']) === 499, 'Tree must retain exactly 499 children beside its root.');
+assertTree($wideTree['count'] === 3000, 'Tree must accept the configured 3000-node limit.');
+assertTree($wideTree['truncated'] === true, 'Tree must report the 3001st node as truncated.');
+assertTree(count($wideTree['root']['children']) === 2999, 'Tree must retain exactly 2999 children beside its root.');
 $exactTree = TreeHierarchy::Build(
     1000,
     1,
-    500,
+    3000,
     false,
     $wideObject,
-    static fn (int $id): array => $id === 1000 ? array_slice($wideChildren, 0, 499) : [],
+    static fn (int $id): array => $id === 1000 ? array_slice($wideChildren, 0, 2999) : [],
     static fn (int $id): string => (string) $id
 );
-assertTree($exactTree['count'] === 500 && $exactTree['truncated'] === false, 'Exactly 500 nodes must not be marked truncated.');
+assertTree($exactTree['count'] === 3000 && $exactTree['truncated'] === false, 'Exactly 3000 nodes must not be marked truncated.');
 
 try {
-    TreeHierarchy::Build(1000, 1, 501, false, $wideObject, static fn (int $id): array => [], $value);
-    throw new RuntimeException('Tree must reject a node limit above 500.');
+    TreeHierarchy::Build(1000, 1, 3001, false, $wideObject, static fn (int $id): array => [], $value);
+    throw new RuntimeException('Tree must reject a node limit above 3000.');
 } catch (InvalidArgumentException) {
 }
 

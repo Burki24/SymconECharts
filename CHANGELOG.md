@@ -43,6 +43,10 @@
 
 ## Hinzugefügt
 
+- Die maximale Knotenzahl von `EChartsTree` lässt sich testweise bis 3000 statt
+  bisher 500 einstellen. Der Standardwert von 80 Knoten bleibt unverändert;
+  die Obergrenze für Statusregeln steigt entsprechend auf 3000.
+
 - `EChartsTree` kann ausdrücklich ausgewählte Bool- und Zahl-Variablen als
   Anlagenzustand bewerten. Pro Quelle lassen sich Alarmrichtung sowie Warn-
   und Kritisch-Schwelle festlegen; Eltern zeigen den höchsten Zustand ihrer
