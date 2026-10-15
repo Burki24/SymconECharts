@@ -27,6 +27,7 @@ $tests = [
     __DIR__ . '/tree_health.php',
     __DIR__ . '/graph_model.php',
     __DIR__ . '/zigbee_graph_model.php',
+    __DIR__ . '/zigbee_graph_export_reader.php',
     __DIR__ . '/gateway_gauges.php'
 ];
 

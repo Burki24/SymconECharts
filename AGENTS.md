@@ -52,7 +52,7 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Zustandsbewertung dieser Hierarchie liegt getrennt in
   `EChartsTreeSystemHealth`; der einfache Tree enthält keine Zustandsregeln.
   Frei festgelegte Knoten und Kanten zwischen ausgewählten Symcon-Objekten
-  liegen in `EChartsGraph`. Die zuletzt gespeicherte Zigbee2MQTT-Netzwerktopologie
+  liegen in `EChartsGraph`. Die zuletzt exportierte Zigbee2MQTT-Netzwerktopologie
   liegt im getrennten, nur lesenden Gerätemodul `EChartsGraphZ2M`; es löst keinen
   Netzwerkscan aus und ist kein manueller Kantenmodus des allgemeinen Graphen.
 - Das Gateway stellt ausschließlich familienübergreifende Infrastruktur wie

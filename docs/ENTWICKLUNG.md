@@ -91,7 +91,7 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 | Gerät | EChartsTree | Begrenzte, lesende IP-Symcon-Objekthierarchie unter einer Kategorie oder Instanz in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsTreeSystemHealth | Lesende Objekthierarchie mit expliziten Zustandsregeln, Schwellen und aggregiertem sichtbarem Anlagenzustand |
 | Gerät | EChartsGraph | Frei konfigurierte, ungerichtete Verbindungen zwischen ausgewählten Symcon-Objekten in Kachel und optionalem IPSView-HTML |
-| Gerät | EChartsGraphZ2M | Zuletzt gespeicherte Zigbee2MQTT-Netzwerkkarte mit gerichteten LQI-Verbindungen in Kachel und optionalem IPSView-HTML; ohne Scan-Auslösung |
+| Gerät | EChartsGraphZ2M | Zuletzt exportierte Zigbee2MQTT-Netzwerkkarte mit gerichteten LQI-Verbindungen in Kachel und optionalem IPSView-HTML; ohne Scan-Auslösung |
 
 Eine eigene I/O-Instanz, ein Konfigurator und Discovery gehören nicht zum
 Anfangsumfang. Datenquellen sind Teil der jeweiligen Gauge-Konfiguration und

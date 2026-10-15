@@ -40,8 +40,14 @@ Designer mit Kräfte- oder Kreislayout, Pan/Zoom, Beschriftung und Farben.
 Die Daten werden im normalen Betrieb mindestens alle 60 Sekunden lesend
 erneuert; Graph-Objekte werden nicht verändert.
 
-`EChartsGraphZ2M` liest ausschließlich die zuletzt gespeicherte RAW-Topologie
+`EChartsGraphZ2M` liest ausschließlich die zuletzt exportierte RAW-Topologie
 der gewählten `Zigbee2MQTT Network Map`-Instanz. Es startet keinen Scan.
+Die öffentliche RAW-Rückgabefunktion überschreitet mit großen Netzen das
+Symcon-Ausgabelimit von 1 MiB. Deshalb liest das Modul die neueste, vom
+Zigbee2MQTT-Modul serverseitig erstellte JSON-Exportdatei. Der gemeinsame
+Exportordner ist nur bei genau einer Netzwerkkarteninstanz eindeutig; bei
+mehreren wird die Konfiguration abgewiesen. Nach einem neuen Scan ist ein
+erneuter Export nötig. Unvollständige und übergroße Dateien werden verworfen.
 IEEE-Adressen identifizieren Geräte intern; gleichnamige Geräte bleiben
 getrennt. Gerichtete Links, LQI und Aufnahmezeit bleiben im Z2M-spezifischen
 Datenvertrag und werden nicht in die manuellen Symcon-Objektlisten des
@@ -49,7 +55,7 @@ allgemeinen Graphen gepresst. Doppelte gerichtete Paare werden mit dem
 höchsten LQI zusammengeführt, die Gegenrichtung bleibt erhalten. Standardmäßig
 werden die 300 stärksten Links angezeigt; Mindest-LQI (0–255) und Linkbudget
 (1–2000) sind Instanzeinstellungen. Alle Geräte bleiben als Knoten sichtbar.
-Der gespeicherte Export wird nach fünf Minuten oder ausdrücklich per
+Die Exportdatei wird nach fünf Minuten oder ausdrücklich per
 Aktualisierungsaktion erneut gelesen.
 Gemeinsamer Renderer-Code wird erst bei belegter semantischer Gleichheit
 beider Graph-Module zentralisiert.

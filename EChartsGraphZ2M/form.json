@@ -36,7 +36,7 @@
         },
         {
             "type": "Label",
-            "caption": "Reads only the last saved network map. It never starts a Zigbee scan. Strongest directed links are shown first; duplicate directions are combined."
+            "caption": "Export the Network Map in Zigbee2MQTT first. This graph reads the latest JSON export without starting a scan. After each scan, export again before refreshing this graph."
         },
         {
             "type": "ExpansionPanel",
@@ -217,7 +217,7 @@
     "actions": [
         {
             "type": "Button",
-            "caption": "Refresh saved network map",
+            "caption": "Refresh exported network map",
             "onClick": "ECGZ_RefreshGraph($id);"
         }
     ],
@@ -245,7 +245,7 @@
         {
             "code": 204,
             "icon": "error",
-            "caption": "Saved network map could not be read"
+            "caption": "Exported network map could not be read"
         }
     ]
 }

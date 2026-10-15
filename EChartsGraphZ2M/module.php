@@ -17,6 +17,7 @@ use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsTransientRefresh;
+use SymconECharts\ZigbeeGraphExportReader;
 use SymconECharts\ZigbeeGraphModel;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
@@ -36,6 +37,7 @@ require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
 require_once __DIR__ . '/../libs/EChartsTransientRefresh.php';
+require_once __DIR__ . '/ZigbeeGraphExportReader.php';
 require_once __DIR__ . '/../libs/ZigbeeGraphModel.php';
 
 class EChartsGraphZ2M extends IPSModuleStrict
@@ -295,18 +297,10 @@ class EChartsGraphZ2M extends IPSModuleStrict
     {
         $sourceID = $this->ReadPropertyInteger('NetworkMapInstanceID');
         $instance = IPS_GetInstance($sourceID);
-        if (($instance['ModuleInfo']['ModuleID'] ?? '') !== self::NETWORK_MAP_MODULE_ID
-            || !function_exists('Z2M_ExportNetworkMapRaw')) {
+        if (($instance['ModuleInfo']['ModuleID'] ?? '') !== self::NETWORK_MAP_MODULE_ID) {
             throw new RuntimeException('The selected Zigbee2MQTT Network Map is unavailable.');
         }
-        $raw = Z2M_ExportNetworkMapRaw($sourceID);
-        if (!is_string($raw) || strlen($raw) > 16777216) {
-            throw new RuntimeException('The saved Zigbee network map is too large.');
-        }
-        $topology = json_decode($raw, true, 64, JSON_THROW_ON_ERROR);
-        if (!is_array($topology)) {
-            throw new RuntimeException('The saved Zigbee network map is invalid.');
-        }
+        $topology = ZigbeeGraphExportReader::ReadLatest(IPS_GetKernelDir());
         return ZigbeeGraphModel::Build(
             $topology,
             $this->ReadPropertyInteger('MinimumLQI'),
@@ -359,11 +353,13 @@ class EChartsGraphZ2M extends IPSModuleStrict
             'ipsViewStyle' => $ipsView ? $this->IPSViewThemeCSS() : '',
             'state'        => $this->BuildVisualizationState($ipsView),
             'translations' => [
-                'Select a Zigbee2MQTT Network Map and valid connection filters.'  => $this->Translate('Select a Zigbee2MQTT Network Map and valid connection filters.'),
-                'The Graph design is invalid.'                                    => $this->Translate('The Graph design is invalid.'),
-                'Connect an active EChartsGateway.'                               => $this->Translate('Connect an active EChartsGateway.'),
-                'The Graph could not be loaded.'                                  => $this->Translate('The Graph could not be loaded.'),
-                'Data could not be refreshed. Showing the last available values.' => $this->Translate(
+                'Select a Zigbee2MQTT Network Map and valid connection filters.'   => $this->Translate('Select a Zigbee2MQTT Network Map and valid connection filters.'),
+                'The export cannot be assigned to multiple Network Map instances.' => $this->Translate('The export cannot be assigned to multiple Network Map instances.'),
+                'No exported Zigbee network map is available.'                     => $this->Translate('No exported Zigbee network map is available.'),
+                'The Graph design is invalid.'                                     => $this->Translate('The Graph design is invalid.'),
+                'Connect an active EChartsGateway.'                                => $this->Translate('Connect an active EChartsGateway.'),
+                'The Graph could not be loaded.'                                   => $this->Translate('The Graph could not be loaded.'),
+                'Data could not be refreshed. Showing the last available values.'  => $this->Translate(
                     'Data could not be refreshed. Showing the last available values.'
                 ),
                 'devices'  => $this->Translate('devices'),
@@ -423,6 +419,9 @@ class EChartsGraphZ2M extends IPSModuleStrict
             $instance = IPS_GetInstance($sourceID);
             if (($instance['ModuleInfo']['ModuleID'] ?? '') !== self::NETWORK_MAP_MODULE_ID) {
                 throw new RuntimeException('Wrong source module.');
+            }
+            if (count(IPS_GetInstanceListByModuleID(self::NETWORK_MAP_MODULE_ID)) !== 1) {
+                return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => 'The export cannot be assigned to multiple Network Map instances.'];
             }
         } catch (Throwable) {
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => 'Select a Zigbee2MQTT Network Map and valid connection filters.'];
@@ -504,7 +503,8 @@ class EChartsGraphZ2M extends IPSModuleStrict
             $chart = json_decode($this->GetGraphDataForOutput($ipsView), true, 512, JSON_THROW_ON_ERROR);
         } catch (Throwable $exception) {
             $this->SendDebug('BuildVisualizationState', $exception::class, 0);
-            return $this->ErrorState('The Graph could not be loaded.');
+            return $this->ErrorState($exception->getMessage() === 'No exported Zigbee network map is available.'
+                ? 'No exported Zigbee network map is available.' : 'The Graph could not be loaded.');
         }
         return ['schemaVersion' => 1, 'family' => 'zigbee-graph', 'status' => 'ready', 'chart' => $chart, 'error' => null];
     }

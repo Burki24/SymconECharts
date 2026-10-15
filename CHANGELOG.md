@@ -2,7 +2,7 @@
 
 ## Hinzugefügt
 
-- `EChartsGraphZ2M` (`ECGZ`) visualisiert die zuletzt gespeicherte
+- `EChartsGraphZ2M` (`ECGZ`) visualisiert die zuletzt exportierte
   Zigbee2MQTT-Netzwerkkarte lesend in Kachel und optionalem IPSView-Widget.
   Gerichtete Verbindungen, LQI, Aufnahmezeit, Mindestqualität und ein
   einstellbares Verbindungsbudget bleiben eigenständig gegenüber dem
@@ -31,6 +31,12 @@
   erhalten; gespeichert wird weiterhin erst beim Übernehmen des Formulars.
 
 ## Behoben
+
+- Der Zigbee2MQTT-Graph liest große Netzwerkkarten aus dem serverseitigen
+  JSON-Export statt über die auf 1 MiB begrenzte Modulrückgabe. Achtung: Nach
+  jedem neuen Netzwerkscan müssen die Exportdateien erneut erstellt werden;
+  mehrere Netzwerkkarteninstanzen mit gemeinsamem Exportordner werden nicht
+  unterstützt.
 
 - Die Health-Tree-Suche nach Zustandsvariablen verarbeitet auch leere oder noch nicht
   gespeicherte Regellisten korrekt. Im Suchdialog werden vorhandene Regeln und

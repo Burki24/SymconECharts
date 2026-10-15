@@ -1,15 +1,20 @@
 # EChartsGraphZ2M
 
-`EChartsGraphZ2M` zeigt die zuletzt gespeicherte Zigbee2MQTT-Netzwerkkarte als
+`EChartsGraphZ2M` zeigt die zuletzt exportierte Zigbee2MQTT-Netzwerkkarte als
 interaktiven Apache-ECharts-Graphen. Benötigt werden IP-Symcon 9.0/9.1, ein
 verbundenes `EChartsGateway` und eine Instanz des Moduls
-`Zigbee2MQTT Network Map`, die bereits eine Netzwerkanalyse abgeschlossen hat.
+`Zigbee2MQTT Network Map`, die bereits eine Netzwerkanalyse abgeschlossen und
+die Exportdateien erstellt hat.
 
-Wählen Sie die Netzwerkkarteninstanz im Formular aus. Der Graph liest deren
-gespeicherten RAW-Export; er startet **keinen** Netzwerkscan und verändert
-weder Geräte noch Zigbee2MQTT-Einstellungen. Nach einem neuen Scan können Sie
-die Anzeige über „Gespeicherte Netzwerkkarte aktualisieren“ sofort erneuern.
-Andernfalls wird die Momentaufnahme alle fünf Minuten erneut gelesen.
+Wählen Sie die Netzwerkkarteninstanz im Formular aus und erstellen Sie in
+Zigbee2MQTT über „Exporte“ die Exportdateien. Der Graph liest die neueste
+JSON-Datei aus dem Netzwerkkarten-Exportverzeichnis auf demselben Symcon-Server;
+er startet **keinen** Netzwerkscan und verändert weder Geräte noch
+Zigbee2MQTT-Einstellungen. Nach jedem neuen Scan muss erneut exportiert werden.
+Danach können Sie die Anzeige über „Exportierte Netzwerkkarte aktualisieren“
+sofort erneuern. Andernfalls prüft der Graph alle fünf Minuten, ob ein neuerer
+Export vorliegt. Bei mehreren Netzwerkkarteninstanzen ist der gemeinsame
+Exportordner nicht eindeutig zuordenbar; diese Konfiguration wird abgewiesen.
 
 Die Knoten entsprechen Zigbee-Geräten; ihre IEEE-Adressen dienen intern als
 stabile technische Identität. Gleichnamige Geräte bleiben getrennt. Die
