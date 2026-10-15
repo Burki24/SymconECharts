@@ -19,10 +19,9 @@ lesend mit Knoten, gerichteten Links, LQI und Aufnahmezeit exportieren.
 
 `EChartsGraph` verwendet die Modul-GUID
 `{BD3C8351-82EA-4B6B-BD82-1E034B7E68C6}` und das Präfix `ECGR`.
-`ECGA` bleibt als früheres Gauge-Kürzel gesperrt. Die eigenständige spätere
-Instanz `EChartsGraphZ2M` erhält das reservierte Präfix `ECGZ`; ihre
-Modul-GUID und ihr detaillierter Vertrag werden erst bei ihrer Umsetzung
-festgelegt.
+`ECGA` bleibt als früheres Gauge-Kürzel gesperrt. Die eigenständige Instanz
+`EChartsGraphZ2M` verwendet das Präfix `ECGZ` und die Modul-GUID
+`{A9C67877-1CF7-4E9E-9B17-C9AC2C200483}`.
 
 Der allgemeine Graph speichert zwei Listen: 2–80 Knoten mit Symcon-Objekt-ID
 und optionalem Anzeigenamen sowie 1–200 ungerichtete Kanten zwischen diesen
@@ -41,18 +40,26 @@ Designer mit Kräfte- oder Kreislayout, Pan/Zoom, Beschriftung und Farben.
 Die Daten werden im normalen Betrieb mindestens alle 60 Sekunden lesend
 erneuert; Graph-Objekte werden nicht verändert.
 
-`EChartsGraphZ2M` soll später ausschließlich eine gespeicherte
-Netzwerkkarten-Momentaufnahme lesen. Es startet keinen automatischen Scan.
-Geräteidentität, gerichtete Links, Qualitätswerte und Zeitpunkt der
-Momentaufnahme bleiben im Z2M-spezifischen Datenvertrag und werden nicht in
-die manuellen Symcon-Objektlisten des allgemeinen Graphen gepresst.
+`EChartsGraphZ2M` liest ausschließlich die zuletzt gespeicherte RAW-Topologie
+der gewählten `Zigbee2MQTT Network Map`-Instanz. Es startet keinen Scan.
+IEEE-Adressen identifizieren Geräte intern; gleichnamige Geräte bleiben
+getrennt. Gerichtete Links, LQI und Aufnahmezeit bleiben im Z2M-spezifischen
+Datenvertrag und werden nicht in die manuellen Symcon-Objektlisten des
+allgemeinen Graphen gepresst. Doppelte gerichtete Paare werden mit dem
+höchsten LQI zusammengeführt, die Gegenrichtung bleibt erhalten. Standardmäßig
+werden die 300 stärksten Links angezeigt; Mindest-LQI (0–255) und Linkbudget
+(1–2000) sind Instanzeinstellungen. Alle Geräte bleiben als Knoten sichtbar.
+Der gespeicherte Export wird nach fünf Minuten oder ausdrücklich per
+Aktualisierungsaktion erneut gelesen.
 Gemeinsamer Renderer-Code wird erst bei belegter semantischer Gleichheit
 beider Graph-Module zentralisiert.
 
 ## Nachweise und Grenzen
 
-Tests prüfen Knoten-/Kantenvalidierung, gleichnamige Objekte, Modell,
-Renderer, Formularvererbung und beide HTML-Ausgabewege. Eine tatsächliche
-Symcon-Kachel- und IPSView-Abnahme folgt nach dem Modulupdate und ist durch
-Repositorytests nicht ersetzt. Der Z2M-Graph ist nicht Teil dieser
-Implementierung.
+Tests prüfen Knoten-/Kantenvalidierung, gleichnamige Objekte, das allgemeine
+Graph-Modell sowie die Z2M-Projektion und den Z2M-Renderer. Eine tatsächliche
+Symcon-Kachel- und IPSView-Abnahme des neuen Z2M-Moduls folgt nach einem
+Modulupdate und ist durch Repositorytests nicht ersetzt. Der Scan ohne Routen
+lieferte am 15.10.2026 eine gespeicherte Momentaufnahme mit 98 Geräten und
+1.907 Link-Einträgen; diese installationsbezogenen Rohdaten sind kein
+Repository-Testfixture.

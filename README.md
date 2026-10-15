@@ -7,8 +7,9 @@ Die Library enthält Gauges für einzelne und mehrere Werte, historische und
 live fortgeschriebene Zeitreihen, aktuelle Kategorienvergleiche, historische
 Balken, Waterfall- und Polar-Diagramme, Kreisdiagramme für aktuelle Werte sowie
 historische Streu- und Bubble-Diagramme, eine Tages-/Wochentag-Stunden-Heatmap
-eine lesende IP-Symcon-Objekthierarchie als Tree sowie einen allgemeinen
-Graphen für ausdrücklich verbundene Symcon-Objekte.
+eine lesende IP-Symcon-Objekthierarchie als Tree, einen allgemeinen Graphen
+für ausdrücklich verbundene Symcon-Objekte sowie einen separaten Graphen
+für gespeicherte Zigbee2MQTT-Netzwerkkarten.
 
 Alle Diagrammformulare zeigen eine unmittelbar aktualisierte SVG-Vorschau
 im Kachel- und IPSView-Designer. Sie reagiert auf noch nicht gespeicherte
@@ -155,6 +156,11 @@ Folgende Module sind enthalten:
   ausdrücklich konfigurierte Kanten. Kachel und optionales IPSView-Widget
   besitzen getrennte Designer und Live-Vorschauen. Zigbee-Netzwerkkarten
   gehören nicht zu dieser allgemeinen Instanz.
+
+- __EChartsGraphZ2M__ ([Dokumentation](EChartsGraphZ2M/README.md))
+  Zeigt die zuletzt gespeicherte Zigbee2MQTT-Netzwerkkarte mit gerichteten
+  Verbindungen und LQI. Die Instanz startet keinen Scan; Mindest-LQI und
+  Verbindungsbudget halten auch große Netze übersichtlich.
 
 ## Kacheldesign und IPSView-Design
 

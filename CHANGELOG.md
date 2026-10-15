@@ -2,6 +2,12 @@
 
 ## Hinzugefügt
 
+- `EChartsGraphZ2M` (`ECGZ`) visualisiert die zuletzt gespeicherte
+  Zigbee2MQTT-Netzwerkkarte lesend in Kachel und optionalem IPSView-Widget.
+  Gerichtete Verbindungen, LQI, Aufnahmezeit, Mindestqualität und ein
+  einstellbares Verbindungsbudget bleiben eigenständig gegenüber dem
+  allgemeinen Graphen; ein Scan wird nie automatisch gestartet.
+
 - `EChartsGraph` (`ECGR`) zeigt frei ausgewählte Kategorien, Instanzen und
   Variablen mit ausdrücklich konfigurierten Verbindungen als interaktiven
   Graphen in Kachel und optionalem IPSView-Widget. Beide Ausgabewege besitzen

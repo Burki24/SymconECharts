@@ -26,6 +26,7 @@ $tests = [
     __DIR__ . '/tree_hierarchy.php',
     __DIR__ . '/tree_health.php',
     __DIR__ . '/graph_model.php',
+    __DIR__ . '/zigbee_graph_model.php',
     __DIR__ . '/gateway_gauges.php'
 ];
 
@@ -41,6 +42,7 @@ $commands = [
     ['Test Heatmap layout', 'node tests/heatmap_layout.js'],
     ['Test Tree layout', 'node tests/tree_layout.js'],
     ['Test Graph layout', 'node tests/graph_layout.js'],
+    ['Test Zigbee Graph layout', 'node tests/zigbee_graph_layout.js'],
     ['Verify vendored helper integrity', 'python3 tests/helper_integrity.py'],
     ['Test library metadata updater', 'python3 tests/test_update_library_metadata.py']
 ];

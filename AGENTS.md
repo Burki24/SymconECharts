@@ -52,9 +52,9 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Zustandsbewertung dieser Hierarchie liegt getrennt in
   `EChartsTreeSystemHealth`; der einfache Tree enthält keine Zustandsregeln.
   Frei festgelegte Knoten und Kanten zwischen ausgewählten Symcon-Objekten
-  liegen in `EChartsGraph`. Die Zigbee2MQTT-Netzwerktopologie erhält ein
-  getrenntes Gerätemodul `EChartsGraphZ2M` und wird nicht als manueller
-  Kantenmodus des allgemeinen Graphen umgesetzt.
+  liegen in `EChartsGraph`. Die zuletzt gespeicherte Zigbee2MQTT-Netzwerktopologie
+  liegt im getrennten, nur lesenden Gerätemodul `EChartsGraphZ2M`; es löst keinen
+  Netzwerkscan aus und ist kein manueller Kantenmodus des allgemeinen Graphen.
 - Das Gateway stellt ausschließlich familienübergreifende Infrastruktur wie
   Archivzugriff, begrenztes Caching, gemeinsame Ressourcen und gegebenenfalls
   abgesicherte IPSView-Kommunikation bereit. Familienbezogene Properties,
@@ -122,7 +122,7 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
 - `ECTR` ist `EChartsTree` zugeordnet (`TR` = Tree).
 - `ECTH` ist `EChartsTreeSystemHealth` zugeordnet (`TH` = Tree System Health).
 - `ECGR` ist `EChartsGraph` zugeordnet (`GR` = Graph).
-- `ECGZ` ist für `EChartsGraphZ2M` reserviert (`GZ` = Graph Zigbee2MQTT).
+- `ECGZ` ist `EChartsGraphZ2M` zugeordnet (`GZ` = Graph Zigbee2MQTT).
 - Das zuvor für das unveröffentlichte Gauge-Gerüst verwendete Kürzel `ECGA`
   ist abgelöst und wird nicht für ein anderes Modul wiederverwendet.
 - Neue Kürzel werden vor ihrer Verwendung eindeutig festgelegt und in dieser
