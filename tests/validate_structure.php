@@ -58,6 +58,7 @@ $requiredFiles = [
     'libs/helper/IPSViewHTMLPageHelper.php',
     'libs/helper/ResponsiveVisualizationHelper.php',
     'libs/helper/SVGPreviewHelper.php',
+    'libs/helper/VariableSearchHelper.php',
     'libs/helper/VisualizationAssetHelper.php',
     'libs/helper/VisualizationThemeHelper.php',
     'libs/helper/translations/IPSViewHTMLPageHelper.json',
@@ -342,6 +343,7 @@ if ($helperSync !== null) {
         'IPSViewHTMLPageHelper'          => ['target' => 'libs/helper/IPSViewHTMLPageHelper.php'],
         'ResponsiveVisualizationHelper'  => ['target' => 'libs/helper/ResponsiveVisualizationHelper.php'],
         'SVGPreviewHelper'               => ['target' => 'libs/helper/SVGPreviewHelper.php'],
+        'VariableSearchHelper'           => ['target' => 'libs/helper/VariableSearchHelper.php'],
         'VisualizationAssetHelper'       => ['target' => 'libs/helper/VisualizationAssetHelper.php'],
         'VisualizationThemeHelper'       => ['target' => 'libs/helper/VisualizationThemeHelper.php']
     ]) {

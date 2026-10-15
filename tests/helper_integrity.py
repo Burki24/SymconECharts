@@ -31,6 +31,7 @@ def main() -> None:
         "IPSViewHTMLPageHelper",
         "ResponsiveVisualizationHelper",
         "SVGPreviewHelper",
+        "VariableSearchHelper",
         "VisualizationAssetHelper",
         "VisualizationThemeHelper",
     }

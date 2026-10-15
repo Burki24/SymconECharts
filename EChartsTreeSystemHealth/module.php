@@ -6,6 +6,7 @@ use Burki24\SymconModuleHelper\ConfigurationFormHelper;
 use Burki24\SymconModuleHelper\DataFlowHelper;
 use Burki24\SymconModuleHelper\IPSViewHTMLPageHelper;
 use Burki24\SymconModuleHelper\ResponsiveVisualizationHelper;
+use Burki24\SymconModuleHelper\VariableSearchHelper;
 use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
 use SymconECharts\EChartsAnimationDesign;
@@ -25,6 +26,7 @@ require_once __DIR__ . '/../libs/helper/DataFlowHelper.php';
 require_once __DIR__ . '/../libs/helper/IPSViewHTMLPageHelper.php';
 require_once __DIR__ . '/../libs/helper/ResponsiveVisualizationHelper.php';
 require_once __DIR__ . '/../libs/helper/SVGPreviewHelper.php';
+require_once __DIR__ . '/../libs/helper/VariableSearchHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
@@ -326,18 +328,7 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
                 $VariableNameFilter,
                 $rules
             );
-            $allowed = array_fill_keys(array_column($fresh['rows'], 'VariableID'), true);
-            $selected = [];
-            foreach ($candidates as $candidate) {
-                if (!is_array($candidate) || ($candidate['Selected'] ?? false) !== true) {
-                    continue;
-                }
-                $id = $candidate['VariableID'] ?? null;
-                if (!is_int($id) || !isset($allowed[$id])) {
-                    throw new InvalidArgumentException('The selected variables changed; search again.');
-                }
-                $selected[$id] = true;
-            }
+            $selected = VariableSearchHelper::ResolveSelectedVariableIDs($candidates, $fresh['rows']);
             if ($selected === []) {
                 throw new InvalidArgumentException('Select at least one matching variable.');
             }
@@ -348,7 +339,7 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
                 unset($rule['rowColor']);
             }
             unset($rule);
-            foreach (array_keys($selected) as $id) {
+            foreach ($selected as $id) {
                 $rules[] = [
                     'VariableID' => $id,
                     'Direction'  => $Direction,
@@ -602,61 +593,38 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
             || !in_array(IPS_GetObject($rootObjectID)['ObjectType'] ?? null, [0, 1], true))) {
             throw new InvalidArgumentException('Select a valid Tree root before searching.');
         }
-        $hierarchy = TreeHierarchy::Build(
+        $types = match ($type) {
+            'int'   => [1],
+            'float' => [2],
+            default => [1, 2]
+        };
+        $result = VariableSearchHelper::Search(
             $useSymconRoot ? 0 : $rootObjectID,
+            $name,
+            $types,
+            $includeHidden,
             $maxDepth,
             $maxNodes,
-            $includeHidden,
-            static fn (int $id): array => $id === 0
-                ? ['ObjectType' => 0, 'ObjectName' => 'Symcon', 'ObjectIsHidden' => false]
-                : IPS_GetObject($id),
-            static fn (int $id): array => IPS_GetChildrenIDs($id),
-            static fn (int $id): string => '',
-            $variableNameFilter
+            $maxNodes,
+            array_values(array_filter(
+                array_column($rules, 'VariableID'),
+                static fn (mixed $variableID): bool => is_int($variableID) && $variableID > 0
+            )),
+            [$variableNameFilter]
         );
-        $existingIDs = array_fill_keys(array_column($rules, 'VariableID'), true);
         $typeLabels = [1 => $this->Translate('Integer'), 2 => $this->Translate('Float')];
-        $rows = [];
-        $existing = 0;
-        $walk = static function (array $node, string $parent) use (
-            &$walk,
-            &$rows,
-            &$existing,
-            $name,
-            $type,
-            $existingIDs,
-            $typeLabels
-        ): void {
-            $nodeName = (string) ($node['name'] ?? '');
-            $path = $parent === '' ? $nodeName : $parent . ' > ' . $nodeName;
-            if (($node['kind'] ?? null) === 'variable'
-                && mb_stripos($nodeName, $name, 0, 'UTF-8') !== false) {
-                $id = (int) substr((string) $node['id'], 7);
-                if (IPS_VariableExists($id)) {
-                    $variableType = IPS_GetVariable($id)['VariableType'] ?? null;
-                    if (($type === 'numeric' && in_array($variableType, [1, 2], true))
-                        || ($type === 'int' && $variableType === 1)
-                        || ($type === 'float' && $variableType === 2)) {
-                        if (isset($existingIDs[$id])) {
-                            ++$existing;
-                        } else {
-                            $rows[] = [
-                                'Selected'     => true,
-                                'Name'         => $nodeName,
-                                'Path'         => $path,
-                                'VariableType' => $typeLabels[$variableType],
-                                'VariableID'   => $id
-                            ];
-                        }
-                    }
-                }
-            }
-            foreach ($node['children'] ?? [] as $child) {
-                $walk($child, $path);
-            }
-        };
-        $walk($hierarchy['root'], '');
-        return ['rows' => $rows, 'existing' => $existing, 'truncated' => $hierarchy['truncated']];
+        $rows = array_map(
+            static fn (array $row): array => [
+                'Selected'     => true,
+                'Name'         => $row['Name'],
+                'Path'         => $row['Path'],
+                'VariableType' => $typeLabels[$row['VariableType']],
+                'VariableID'   => $row['VariableID']
+            ],
+            $result['rows']
+        );
+
+        return ['rows' => $rows, 'existing' => $result['excluded'], 'truncated' => $result['truncated']];
     }
 
     /** @param array<string,mixed> $node @return list<array<string,mixed>> */
