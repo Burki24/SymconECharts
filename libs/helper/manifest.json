@@ -65,6 +65,12 @@
             "sha256": "29fe61a7eccafeb8b2beb77fe3f7a4896f43b3eaace9ebe428a4fc8250fd9088",
             "path": "libs/helper/VisualizationThemeHelper.php",
             "source_sha": "8e3df7e07ede7a7e298a6d69f132bc4cb697ab91"
+        },
+        "VariableSearchHelper": {
+            "version": "1.0.0",
+            "sha256": "f7f18b03a320578ecb2ffd816879df2e280e0d96c18cac27320198c73b564f22",
+            "path": "libs/helper/VariableSearchHelper.php",
+            "source_sha": "721c13515f5b80369f36020271efa0788f5c49d6"
         }
     }
 }
