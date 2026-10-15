@@ -27,6 +27,7 @@ const graph = {
 function render(style, width = 1000, network = graph) {
     const chartElement = { hidden: false, clientWidth: width, clientHeight: 400 };
     const metaElement = { hidden: true, textContent: '' };
+    const legendElement = { hidden: true, innerHTML: '' };
     const errorElement = { hidden: true, textContent: '' };
     const warningElement = { hidden: true, textContent: '' };
     let option;
@@ -47,13 +48,14 @@ function render(style, width = 1000, network = graph) {
         getElementById: id => ({
             'echarts-zigbee-graph-chart': chartElement,
             'echarts-zigbee-graph-meta': metaElement,
+            'echarts-zigbee-graph-legend': legendElement,
             'echarts-zigbee-graph-error': errorElement,
             'echarts-zigbee-graph-warning': warningElement
         })[id]
     };
     vm.runInNewContext(designSource, { window });
     vm.runInNewContext(source, { window, document, Date });
-    return { option, metaElement };
+    return { option, metaElement, legendElement };
 }
 
 const style = {
@@ -71,6 +73,13 @@ assert.equal(large.option.series[0].label.position, 'right');
 assert.equal(large.option.series[0].labelLayout.hideOverlap, true);
 assert.equal(large.option.series[0].emphasis.focus, 'adjacency');
 assert.equal(large.option.series[0].emphasis.label.show, true);
+assert.equal(large.option.series[0].data[0].itemStyle.color, '#5070dd');
+assert.equal(large.option.series[0].data[1].itemStyle.color, '#B6D634');
+assert.equal(large.option.series[0].data[2].itemStyle.color, '#FF994D');
+assert.match(large.legendElement.innerHTML, /Coordinator/);
+assert.match(large.legendElement.innerHTML, /Router/);
+assert.match(large.legendElement.innerHTML, /End device/);
+assert.equal(large.legendElement.hidden, false);
 assert.match(large.option.tooltip.formatter({ dataType: 'edge', data: large.option.series[0].links[0] }), /LQI: 240/);
 assert.match(large.option.tooltip.formatter({ dataType: 'edge', data: large.option.series[0].links[0] }), /&lt;Bridge&gt;/);
 assert.match(large.metaElement.textContent, /3 devices · 2\/4 links · snapshot:/);
@@ -88,6 +97,15 @@ const many = render(style, 400, {
 assert.equal(many.option.series[0].label.show, false);
 assert.equal(render({ ...style, showLinkArrows: false }).option.series[0].edgeSymbol[1], 'none');
 assert.equal(render({ ...style, showLabels: false }).option.series[0].emphasis.label.show, false);
+const custom = render({ ...style, nodeColor: '#123456', routerColor: '#234567', endDeviceColor: '#345678' });
+assert.deepEqual(Array.from(custom.option.series[0].data, node => node.itemStyle.color),
+    ['#123456', '#234567', '#345678']);
+assert.match(custom.legendElement.innerHTML, /background-color:#234567/);
+const unknown = render(style, 1000, {
+    ...graph, nodes: [{ id: 'device-x', name: 'Unknown device', kind: 'Unknown' }], links: []
+});
+assert.equal(unknown.option.series[0].data[0].itemStyle.color, '#5070dd');
+assert.match(unknown.legendElement.innerHTML, /Unknown/);
 
 const echarts = require(path.join(__dirname, '..', '.tools', 'echarts-runtime', 'node_modules', 'echarts'));
 const chart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 800, height: 400 });

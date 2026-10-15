@@ -2,6 +2,12 @@
 
 ## Hinzugefügt
 
+- Der Zigbee2MQTT-Graph unterscheidet Koordinator, Router und Endgeräte durch
+  eigene Knotenfarben und eine Legende. Die Farben können für Kachel und
+  unabhängiges IPSView-Design einzeln angepasst werden. Achtung: Eine bisher
+  eingestellte Knotenfarbe gilt nun für den Koordinator und unbekannte Typen;
+  Router und Endgeräte erhalten standardmäßig eigene Theme-Farben.
+
 - Der Zigbee2MQTT-Graph blendet überlappende Gerätenamen im Überblick aus und
   prüft sie beim Zoomen neu. Verbindungslinien sind dezenter; beim Berühren
   eines Geräts werden dessen Nachbarschaft und Name hervorgehoben. Die

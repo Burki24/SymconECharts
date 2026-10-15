@@ -74,6 +74,8 @@ class EChartsGraphZ2M extends IPSModuleStrict
         'TitleColor'               => -1,
         'LabelColor'               => -1,
         'NodeColor'                => -1,
+        'RouterColor'              => -1,
+        'EndDeviceColor'           => -1,
         'EdgeColor'                => -1
     ];
 
@@ -245,7 +247,11 @@ class EChartsGraphZ2M extends IPSModuleStrict
         $title = (string) ($values['Title'] ?? $this->ReadPropertyString('Title'));
         $titleColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'TitleColor', 'integer', $ipsView), $palette['text']);
         $labelColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'LabelColor', 'integer', $ipsView), $palette['text']);
-        $nodeColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'NodeColor', 'integer', $ipsView), $palette['seriesColors'][0]);
+        $nodeColors = [
+            EChartsBarPreview::Color($this->BarPreviewValue($values, 'NodeColor', 'integer', $ipsView), $palette['seriesColors'][0]),
+            EChartsBarPreview::Color($this->BarPreviewValue($values, 'RouterColor', 'integer', $ipsView), $palette['seriesColors'][1]),
+            EChartsBarPreview::Color($this->BarPreviewValue($values, 'EndDeviceColor', 'integer', $ipsView), $palette['seriesColors'][3])
+        ];
         $edgeColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'EdgeColor', 'integer', $ipsView), $palette['muted']);
         $svg = EChartsBarPreview::Open(
             $palette,
@@ -282,7 +288,7 @@ class EChartsGraphZ2M extends IPSModuleStrict
         foreach (['Coordinator', 'Router A', 'Router B', 'Sensor'] as $index => $name) {
             [$x, $y] = $positions[$index];
             $svg .= '<circle cx="' . $x . '" cy="' . $y . '" r="' . EChartsBarPreview::N($nodeSize / 2)
-                . '" fill="' . EChartsBarPreview::E($nodeColor) . '"/>';
+                . '" fill="' . EChartsBarPreview::E($nodeColors[$index === 3 ? 2 : min($index, 1)]) . '"/>';
             if ($this->BarPreviewValue($values, 'ShowLabels', 'boolean', $ipsView)) {
                 $svg .= '<text x="' . ($x + 12) . '" y="' . ($y - 10) . '" fill="'
                     . EChartsBarPreview::E($labelColor) . '" font-size="' . $labelSize . '">'
@@ -362,9 +368,14 @@ class EChartsGraphZ2M extends IPSModuleStrict
                 'Data could not be refreshed. Showing the last available values.'  => $this->Translate(
                     'Data could not be refreshed. Showing the last available values.'
                 ),
-                'devices'  => $this->Translate('devices'),
-                'links'    => $this->Translate('links'),
-                'snapshot' => $this->Translate('snapshot')
+                'devices'     => $this->Translate('devices'),
+                'links'       => $this->Translate('links'),
+                'snapshot'    => $this->Translate('snapshot'),
+                'Coordinator' => $this->Translate('Coordinator'),
+                'Router'      => $this->Translate('Router'),
+                'EndDevice'   => $this->Translate('EndDevice'),
+                'End device'  => $this->Translate('End device'),
+                'Unknown'     => $this->Translate('Unknown')
             ],
             'options' => [
                 'echartsVersion'    => EChartsAsset::VERSION,
@@ -452,7 +463,7 @@ class EChartsGraphZ2M extends IPSModuleStrict
                 return false;
             }
         }
-        foreach (['TitleColor', 'LabelColor', 'NodeColor', 'EdgeColor'] as $name) {
+        foreach (['TitleColor', 'LabelColor', 'NodeColor', 'RouterColor', 'EndDeviceColor', 'EdgeColor'] as $name) {
             $value = $this->ReadPropertyInteger($prefix . $name);
             if ($value < -1 || $value > 0xFFFFFF) {
                 return false;

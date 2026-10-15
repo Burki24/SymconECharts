@@ -41,4 +41,20 @@ html, body {
     font-size: 0.72rem;
     pointer-events: none;
 }
+.echarts-zigbee-graph-legend {
+    position: absolute;
+    inset-inline-end: 0.65rem;
+    inset-block-end: 1.55rem;
+    z-index: 1;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.25rem 0.65rem;
+    max-inline-size: calc(100% - 1.3rem);
+    color: var(--symc-text);
+    font-size: 0.72rem;
+    pointer-events: none;
+}
+.echarts-zigbee-graph-legend-item { display: inline-flex; align-items: center; gap: 0.25rem; white-space: nowrap; }
+.echarts-zigbee-graph-legend-dot { inline-size: 0.65rem; block-size: 0.65rem; border-radius: 50%; }
 [hidden] { display: none !important; }

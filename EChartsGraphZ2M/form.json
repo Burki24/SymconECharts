@@ -198,7 +198,21 @@
                         {
                             "type": "SelectColor",
                             "name": "NodeColor",
-                            "caption": "Node color",
+                            "caption": "Coordinator color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "RouterColor",
+                            "caption": "Router color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "EndDeviceColor",
+                            "caption": "End device color",
                             "allowTransparent": true,
                             "transparentCaption": "Automatic (theme)"
                         },

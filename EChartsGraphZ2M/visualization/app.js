@@ -4,6 +4,7 @@
     var bootstrap = window.SYMC_VISUALIZATION || {};
     var chartElement = document.getElementById('echarts-zigbee-graph-chart');
     var metaElement = document.getElementById('echarts-zigbee-graph-meta');
+    var legendElement = document.getElementById('echarts-zigbee-graph-legend');
     var errorElement = document.getElementById('echarts-zigbee-graph-error');
     var warningElement = document.getElementById('echarts-zigbee-graph-warning');
     var design = window.SYMC_ECHARTS_DESIGN;
@@ -60,6 +61,14 @@
         return Object.prototype.hasOwnProperty.call(palettes, theme) ? theme : 'auto';
     }
 
+    function nodeColors(style, colors) {
+        return {
+            Coordinator: style.nodeColor || colors.seriesColors[0] || colors.accent,
+            Router: style.routerColor || colors.seriesColors[1] || '#B6D634',
+            EndDevice: style.endDeviceColor || colors.seriesColors[3] || '#FF994D'
+        };
+    }
+
     function buildOption(model, theme) {
         var colors = colorsFor(theme);
         var graph = model.graph || {};
@@ -74,11 +83,14 @@
         var top = (bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8)
             + (showTitle ? titleSize + 12 : 0);
         var nodeSize = Math.max(6, Math.min(40, Number(style.nodeSize) || 16));
-        var nodeColor = style.nodeColor || colors.seriesColors[0] || colors.accent;
+        var roleColors = nodeColors(style, colors);
         var nodes = (graph.nodes || []).map(function (node) {
+            var kind = String(node.kind || 'Unknown');
             return {
-                id: String(node.id), name: String(node.name || ''), kind: String(node.kind || ''),
-                networkAddress: node.networkAddress, itemStyle: { color: nodeColor }
+                id: String(node.id), name: String(node.name || ''), kind: kind,
+                networkAddress: node.networkAddress,
+                itemStyle: { color: Object.prototype.hasOwnProperty.call(roleColors, kind)
+                    ? roleColors[kind] : roleColors.Coordinator }
             };
         });
         var names = {};
@@ -107,13 +119,13 @@
                         return escapeHTML(names[data.source] || '') + ' → '
                             + escapeHTML(names[data.target] || '') + '<br>LQI: ' + escapeHTML(data.lqi);
                     }
-                    return escapeHTML(data.name || '') + '<br>' + escapeHTML(data.kind || '');
+                    return escapeHTML(data.name || '') + '<br>' + escapeHTML(translate(data.kind || 'Unknown'));
                 }
             },
             series: [{
                 id: 'graph', type: 'graph', layout: style.graphLayout === 'circular' ? 'circular' : 'force',
                 roam: style.roamEnabled === true, draggable: style.roamEnabled === true,
-                left: '6%', right: '6%', top: top, bottom: 30,
+                left: '6%', right: '6%', top: top, bottom: 42,
                 symbol: 'circle', symbolSize: compact ? Math.max(6, nodeSize * 0.8) : nodeSize,
                 edgeSymbol: style.showLinkArrows === true ? ['none', 'arrow'] : ['none', 'none'],
                 edgeSymbolSize: 6,
@@ -148,6 +160,7 @@
         if (chart) { chart.clear(); }
         chartElement.hidden = true;
         metaElement.hidden = true;
+        legendElement.hidden = true;
         warningElement.hidden = true;
         errorElement.textContent = translate(message || 'The Graph could not be loaded.');
         errorElement.hidden = false;
@@ -174,6 +187,23 @@
             + (graph.links || []).length + '/' + (Number(graph.totalLinks) || 0) + ' '
             + translate('links') + ' · ' + translate('snapshot') + ': ' + captured;
         metaElement.hidden = false;
+        var colors = colorsFor(normalizeTheme(state.chart.theme || 'auto'));
+        var style = graph.style || {};
+        var roleColors = nodeColors(style, colors);
+        var legend = [
+            ['Coordinator', roleColors.Coordinator],
+            ['Router', roleColors.Router],
+            ['End device', roleColors.EndDevice]
+        ];
+        if ((graph.nodes || []).some(function (node) { return !Object.prototype.hasOwnProperty.call(roleColors, node.kind); })) {
+            legend.push(['Unknown', roleColors.Coordinator]);
+        }
+        legendElement.innerHTML = legend.map(function (entry) {
+            return '<span class="echarts-zigbee-graph-legend-item"><span class="echarts-zigbee-graph-legend-dot"'
+                + ' style="background-color:' + escapeHTML(entry[1]) + '"></span>'
+                + escapeHTML(translate(entry[0])) + '</span>';
+        }).join('');
+        legendElement.hidden = false;
         var theme = normalizeTheme(state.chart.theme || 'auto');
         if (chart && currentTheme !== theme) {
             chart.dispose();

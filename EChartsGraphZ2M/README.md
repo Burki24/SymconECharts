@@ -24,6 +24,14 @@ zusammengefasst; die Gegenrichtung bleibt eigenständig. Die Anzeige nennt den
 Zeitpunkt der gespeicherten Momentaufnahme und die Zahl der dargestellten
 gegenüber allen gemeldeten Verbindungen.
 
+Koordinator, Router und Endgeräte erhalten unterschiedliche Knotenfarben.
+Die Zuordnung steht in der Legende; bei unbekanntem Gerätetyp wird die
+Koordinatorfarbe verwendet. Die Farben richten sich standardmäßig nach dem
+gewählten ECharts-Theme und können im Kachel- sowie im unabhängigen
+IPSView-Designer einzeln angepasst werden. Die bisherige Einstellung
+„Knotenfarbe“ heißt jetzt „Koordinatorfarbe“ und behält ihren gespeicherten
+Wert; Router und Endgeräte nutzen zunächst ihre eigenen Theme-Farben.
+
 Mit Mindest-LQI und maximal angezeigten Verbindungen lässt sich ein großes
 Netz übersichtlich halten. Standardmäßig werden die 300 stärksten Verbindungen
 angezeigt; Knoten ohne ausgewählte Verbindung bleiben sichtbar. Der Grenzwert

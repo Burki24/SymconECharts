@@ -35,7 +35,9 @@
             "Label size": "Beschriftungsgröße",
             "Title color": "Titelfarbe",
             "Label color": "Beschriftungsfarbe",
-            "Node color": "Knotenfarbe",
+            "Coordinator color": "Koordinatorfarbe",
+            "Router color": "Routerfarbe",
+            "End device color": "Endgerätefarbe",
             "Connection color": "Verbindungsfarbe",
             "Automatic (theme)": "Automatisch (Theme)",
             "Layout and interaction": "Layout und Bedienung",
@@ -70,7 +72,12 @@
             "Tile design copied to IPSView.": "Kacheldesign nach IPSView kopiert.",
             "devices": "Geräte",
             "links": "Verbindungen",
-            "snapshot": "Momentaufnahme"
+            "snapshot": "Momentaufnahme",
+            "Coordinator": "Koordinator",
+            "Router": "Router",
+            "EndDevice": "Endgerät",
+            "End device": "Endgerät",
+            "Unknown": "Unbekannt"
         }
     }
 }
