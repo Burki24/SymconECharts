@@ -12,6 +12,7 @@ Die Dateien in diesem Verzeichnis stammen aus dem gemeinsamen Repository
 | `VisualizationAssetHelper.php` | 1.0.0 | `1693b2399bcf95d270a6d9a01df6534caad906497bd4ba9489916a951abaffcc` |
 | `ResponsiveVisualizationHelper.php` | 1.0.0 | `0cebd0f08e6416a6d7d4d5fdbb19bf96d457d3e2d51fcf2a1d3e6adf5e967451` |
 | `SVGPreviewHelper.php` | 1.0.0 | `14313a55020df27931e1ffe071fa599a39152493c6305ab2ef5322922981817b` |
+| `VariableSearchHelper.php` | 1.0.0 | `f7f18b03a320578ecb2ffd816879df2e280e0d96c18cac27320198c73b564f22` |
 | `VisualizationThemeHelper.php` | 1.1.0 | `29fe61a7eccafeb8b2beb77fe3f7a4896f43b3eaace9ebe428a4fc8250fd9088` |
 
 Die Kopien werden bewusst mit der Library ausgeliefert; zur Laufzeit besteht keine externe Abhängigkeit.
