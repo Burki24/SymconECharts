@@ -2,6 +2,11 @@
 
 ## Hinzugefügt
 
+- Der Zigbee2MQTT-Graph blendet überlappende Gerätenamen im Überblick aus und
+  prüft sie beim Zoomen neu. Verbindungslinien sind dezenter; beim Berühren
+  eines Geräts werden dessen Nachbarschaft und Name hervorgehoben. Die
+  dargestellten Geräte und Verbindungen bleiben unverändert.
+
 - `EChartsGraphZ2M` (`ECGZ`) visualisiert die zuletzt exportierte
   Zigbee2MQTT-Netzwerkkarte lesend in Kachel und optionalem IPSView-Widget.
   Gerichtete Verbindungen, LQI, Aufnahmezeit, Mindestqualität und ein

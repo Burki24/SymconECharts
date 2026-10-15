@@ -65,7 +65,12 @@ assert.equal(large.option.series[0].type, 'graph');
 assert.equal(large.option.series[0].edgeSymbol[1], 'arrow');
 assert.equal(large.option.series[0].links[0].lqi, 240);
 assert.ok(large.option.series[0].links[0].lineStyle.opacity > large.option.series[0].links[1].lineStyle.opacity);
+assert.ok(large.option.series[0].links[0].lineStyle.opacity < 0.5);
 assert.equal(large.option.series[0].label.show, true);
+assert.equal(large.option.series[0].label.position, 'right');
+assert.equal(large.option.series[0].labelLayout.hideOverlap, true);
+assert.equal(large.option.series[0].emphasis.focus, 'adjacency');
+assert.equal(large.option.series[0].emphasis.label.show, true);
 assert.match(large.option.tooltip.formatter({ dataType: 'edge', data: large.option.series[0].links[0] }), /LQI: 240/);
 assert.match(large.option.tooltip.formatter({ dataType: 'edge', data: large.option.series[0].links[0] }), /&lt;Bridge&gt;/);
 assert.match(large.metaElement.textContent, /3 devices · 2\/4 links · snapshot:/);
@@ -82,6 +87,7 @@ const many = render(style, 400, {
 });
 assert.equal(many.option.series[0].label.show, false);
 assert.equal(render({ ...style, showLinkArrows: false }).option.series[0].edgeSymbol[1], 'none');
+assert.equal(render({ ...style, showLabels: false }).option.series[0].emphasis.label.show, false);
 
 const echarts = require(path.join(__dirname, '..', '.tools', 'echarts-runtime', 'node_modules', 'echarts'));
 const chart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 800, height: 400 });
@@ -89,5 +95,25 @@ chart.setOption(large.option);
 assert.equal(chart.getModel().getSeriesByIndex(0).getData().count(), 3);
 assert.equal(chart.getModel().getSeriesByIndex(0).getEdgeData().count(), 2);
 chart.dispose();
+
+const crowded = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 500, height: 300 });
+crowded.setOption({
+    animation: false,
+    series: [{
+        ...large.option.series[0], layout: 'none', links: [],
+        data: [
+            { id: 'a', name: 'Alpha', x: 500, y: 100 },
+            { id: 'b', name: 'Beta', x: 502, y: 100 },
+            { id: 'c', name: 'Left', x: 0, y: 0 },
+            { id: 'd', name: 'Right', x: 1000, y: 200 }
+        ]
+    }]
+});
+const crowdedSVG = crowded.renderToSVGString();
+assert.equal((crowdedSVG.match(/>Alpha<\/text>/g) || []).length + (crowdedSVG.match(/>Beta<\/text>/g) || []).length, 1);
+crowded.dispatchAction({ type: 'graphRoam', seriesIndex: 0, zoom: 80, originX: 250, originY: 150 });
+const zoomedSVG = crowded.renderToSVGString();
+assert.equal((zoomedSVG.match(/>Alpha<\/text>/g) || []).length + (zoomedSVG.match(/>Beta<\/text>/g) || []).length, 2);
+crowded.dispose();
 
 console.log('Zigbee graph renderer layout verified.');

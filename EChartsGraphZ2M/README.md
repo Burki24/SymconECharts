@@ -29,7 +29,10 @@ Netz übersichtlich halten. Standardmäßig werden die 300 stärksten Verbindung
 angezeigt; Knoten ohne ausgewählte Verbindung bleiben sichtbar. Der Grenzwert
 kann bis 2.000 erhöht werden. Der kleine Kachelmodus blendet Beschriftungen
 bei großen Netzen aus; über den Tooltip sind die Gerätenamen weiterhin
-abrufbar. Kachel und optionales IPSView-HTML-Widget besitzen getrennte
+abrufbar. In größeren Ansichten werden überlappende Knotennamen automatisch
+ausgedünnt und beim Zoomen erneut angeordnet. Berührte Knoten heben ihre
+Verbindungen und Beschriftung hervor; im Überblick treten die Verbindungslinien
+zurück. Kachel und optionales IPSView-HTML-Widget besitzen getrennte
 Designer für Layout, Zoom, Beschriftung, Farben und Animation. IPSView kann
 das Kacheldesign übernehmen oder unabhängig gestaltet werden.
 

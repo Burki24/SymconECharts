@@ -52,9 +52,9 @@ Ausgelieferte Dateien:
   Canvas Renderer; 500.034 Byte; SHA-256
   `5debc28928d9d9d51e1611252e494585dc5aa196667542698ee68d40bc22bdb4`;
 - `libs/echarts/6.1.0/echarts.graph.min.js` – reproduzierbarer,
-  Graph-Browser-Build aus ECharts Core, Graph Chart, Titel, Tooltip, Aria und
-  Canvas Renderer; 520.499 Byte; SHA-256
-  `efc66a2fb25056c9c89785b088c459e262e02b98ca9d1669db770d607b70c3df`;
+  Graph-Browser-Build aus ECharts Core, Graph Chart, Titel, Tooltip, Aria,
+  Label Layout und Canvas Renderer; 532.951 Byte; SHA-256
+  `b1bc4e3bda0e48a359e3d08d55695894b45e3dc186fbec8bdb4d6265fea23f1b`;
 - `libs/echarts/6.1.0/themes/dark.js` – offizielles Theme Dark; 5.981 Byte;
   SHA-256 `ae60e563617cb87514690c1946ee202e78c9f1487820490614b58934ed037458`;
 - `libs/echarts/6.1.0/themes/vintage.js` – offizielles Theme Vintage;

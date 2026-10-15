@@ -123,7 +123,7 @@ assertEChartsAsset(
     is_file($graphRuntimePath)
         && hash_file('sha256', $graphRuntimePath) === EChartsAsset::GRAPH_SHA256
         && EChartsAsset::GraphJavaScript() === $graphRuntime
-        && strlen($graphRuntime) < 524288
+        && strlen($graphRuntime) < 550000
         && str_contains($graphRuntime, 'window.echarts'),
     'The Graph runtime must be pinned, expose the browser API and remain below 512 KiB.'
 );
@@ -180,6 +180,7 @@ assertEChartsAsset(
 );
 assertEChartsAsset(
     str_contains($graphRuntimeSource, 'GraphChart')
+        && str_contains($graphRuntimeSource, 'LabelLayout')
         && str_contains($graphRuntimeSource, 'CanvasRenderer'),
     'The Graph runtime must include Graph and Canvas components.'
 );

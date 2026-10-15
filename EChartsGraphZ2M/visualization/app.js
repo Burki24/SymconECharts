@@ -87,7 +87,7 @@
             var lqi = Math.max(0, Math.min(255, Number(link.lqi) || 0));
             return {
                 source: String(link.source), target: String(link.target), lqi: lqi,
-                lineStyle: { opacity: 0.25 + 0.65 * lqi / 255 }
+                lineStyle: { opacity: 0.1 + 0.35 * lqi / 255 }
             };
         });
         return {
@@ -120,11 +120,13 @@
                 force: { repulsion: Math.max(140, Math.min(1200, 180 + nodes.length * 7)), edgeLength: compact ? 55 : 85 },
                 circular: { rotateLabel: false },
                 data: nodes, links: links,
-                lineStyle: { color: style.edgeColor || colors.muted, width: 1.2, opacity: 0.7 },
+                lineStyle: { color: style.edgeColor || colors.muted, width: 1, opacity: 0.45 },
                 label: {
                     show: style.showLabels !== false && (width >= 800 || nodes.length <= 30),
                     color: style.labelColor || colors.text,
                     fontSize: labelSize,
+                    position: 'right',
+                    distance: 4,
                     width: compact ? 84 : 140,
                     overflow: 'truncate',
                     formatter: function (parameter) {
@@ -132,7 +134,12 @@
                         return String(data.name || '');
                     }
                 },
-                emphasis: { focus: 'adjacency' }
+                labelLayout: { hideOverlap: true },
+                emphasis: {
+                    focus: 'adjacency',
+                    label: { show: style.showLabels !== false },
+                    lineStyle: { opacity: 0.9, width: 2 }
+                }
             }]
         };
     }

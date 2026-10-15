@@ -57,6 +57,10 @@ werden die 300 stärksten Links angezeigt; Mindest-LQI (0–255) und Linkbudget
 (1–2000) sind Instanzeinstellungen. Alle Geräte bleiben als Knoten sichtbar.
 Die Exportdatei wird nach fünf Minuten oder ausdrücklich per
 Aktualisierungsaktion erneut gelesen.
+Der Z2M-Renderer verwendet das lokal mitgelieferte ECharts Label Layout, um
+überlappende Namen auszublenden und sie beim Zoomen neu zu prüfen. Verbindungslinien
+bleiben vollständig erhalten, erscheinen im Überblick aber zurückhaltender;
+beim Hervorheben eines Geräts werden Nachbarschaft und Beschriftung betont.
 Gemeinsamer Renderer-Code wird erst bei belegter semantischer Gleichheit
 beider Graph-Module zentralisiert.
 
