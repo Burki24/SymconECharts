@@ -80,6 +80,10 @@
 
 ## Behoben
 
+- Der Zigbee-Graph hält die Kopfzeile der Symcon-Kachel auch bei großen
+  Force-Layouts und ohne eigenen Diagrammtitel frei. Knoten und Verbindungen
+  werden nur unterhalb des Kachelnamens gezeichnet.
+
 - Diagrammtitel in Kacheln von Parallel, Pie, Scatter/Bubble, Tree,
   Anlagenzustandsbaum, Graph, Zigbee-Graph, Treemap und Sunburst bleiben
   sichtbar und liegen mit ihren Diagramminhalten unter dem Symcon-Kachelkopf.

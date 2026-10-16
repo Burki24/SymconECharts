@@ -2,6 +2,7 @@
     'use strict';
 
     var bootstrap = window.SYMC_VISUALIZATION || {};
+    var rootElement = document.getElementById('echarts-zigbee-graph-root');
     var chartElement = document.getElementById('echarts-zigbee-graph-chart');
     var metaElement = document.getElementById('echarts-zigbee-graph-meta');
     var legendElement = document.getElementById('echarts-zigbee-graph-legend');
@@ -11,6 +12,13 @@
     var chart = null;
     var currentTheme = null;
     var currentState = bootstrap.state || null;
+    var tileHeaderInset = bootstrap.mode === 'symcon'
+        && (!bootstrap.options || bootstrap.options.tileHeaderVisible !== false) ? 58 : 0;
+    var chartBootstrap = tileHeaderInset
+        ? { mode: 'symcon', options: { tileHeaderVisible: false } } : bootstrap;
+
+    chartElement.style.top = tileHeaderInset + 'px';
+    chartElement.style.height = tileHeaderInset ? 'calc(100% - ' + tileHeaderInset + 'px)' : '100%';
 
     function translate(value) {
         return (bootstrap.translations || {})[value] || value;
@@ -96,7 +104,7 @@
         var compact = width < 430 || height < 300;
         var titleSize = design.fontSizePercent(style.titleFontSizePercent, 18);
         var labelSize = design.fontSizePercent(style.labelFontSizePercent, compact ? 10 : 12);
-        var titleLayout = design.chartTitleLayout(bootstrap, graph.title, titleSize);
+        var titleLayout = design.chartTitleLayout(chartBootstrap, graph.title, titleSize);
         var showTitle = titleLayout.show;
         var top = titleLayout.contentTop;
         var nodeSize = Math.max(6, Math.min(40, Number(style.nodeSize) || 16));
@@ -209,6 +217,8 @@
             + translate('links') + ' · ' + translate('snapshot') + ': ' + captured;
         metaElement.hidden = false;
         var colors = colorsFor(normalizeTheme(state.chart.theme || 'auto'));
+        rootElement.style.backgroundColor = bootstrap.mode === 'ipsview'
+            && bootstrap.options.adaptToBackground === true ? 'transparent' : colors.background;
         var style = graph.style || {};
         var roleColors = nodeColors(style, colors);
         var legend = [

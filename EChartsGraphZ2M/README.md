@@ -50,6 +50,8 @@ Verbindungen und Beschriftung hervor; im Überblick treten die Verbindungslinien
 zurück. Kachel und optionales IPSView-HTML-Widget besitzen getrennte
 Designer für Layout, Zoom, Beschriftung, Farben und Animation. IPSView kann
 das Kacheldesign übernehmen oder unabhängig gestaltet werden.
+In der Symcon-Kachel bleibt die Kopfzeile mit Kachelname und
+Vergrößerungsbutton frei; Knoten und Linien werden darunter angezeigt.
 
 Der Graph zeigt eine gespeicherte Momentaufnahme, keine Live-Funkstrecken.
 Die Existenz einer Verbindung beweist nicht, dass sie aktuell als Route genutzt
