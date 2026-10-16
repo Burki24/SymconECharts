@@ -64,6 +64,10 @@
 
 ## Behoben
 
+- Der weiße Streifen über Treemap-Gruppen übernimmt nun den gewählten
+  Diagrammhintergrund oder die ausdrücklich festgelegte Rahmenfarbe. Das gilt
+  für Kachel und IPSView, auch bei transparentem IPSView-Hintergrund.
+
 - Treemap-Gruppenüberschriften stehen nun auf der jeweiligen Gruppenfarbe
   statt auf einem kontrastarmen hellen Feld. Eine manuell gewählte
   Beschriftungsfarbe wirkt jetzt auch auf Gruppen, Untergruppen und Werte;

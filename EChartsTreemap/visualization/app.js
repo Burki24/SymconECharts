@@ -111,9 +111,10 @@
         var titleSize = design.fontSizePercent(style.titleFontSizePercent, 18);
         var labelSize = design.fontSizePercent(style.labelFontSizePercent, 12);
         var textColor = style.labelColor || colors.text;
+        var backgroundColor = bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
+            ? 'transparent' : colors.background;
         return {
-            backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
-                ? 'transparent' : colors.background,
+            backgroundColor: backgroundColor,
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
             aria: { enabled: true, decal: { show: false } },
             title: {
@@ -150,7 +151,7 @@
                     fontSize: labelSize, height: Math.max(18, labelSize + 8), overflow: 'truncate' },
                 levels: [
                     { itemStyle: { gapWidth: style.groupGapWidth ?? 0,
-                        ...(style.frameColor ? { borderColor: style.frameColor } : {}) } },
+                        borderColor: style.frameColor || backgroundColor } },
                     { itemStyle: { borderWidth: style.level1BorderWidth ?? 3,
                         gapWidth: style.level1GapWidth ?? 3,
                         ...(style.frameColor ? { borderColor: style.frameColor } : {}) },

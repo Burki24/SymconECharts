@@ -12,7 +12,7 @@ const palette = {
     seriesColors: ['#5070dd', '#b6d634']
 };
 
-function render(model, width = 1000, mode = 'symcon') {
+function render(model, width = 1000, mode = 'symcon', adaptToBackground = false) {
     const chartElement = { hidden: false, clientWidth: width, clientHeight: 400 };
     const errorElement = { hidden: true, textContent: '' };
     const emptyElement = { hidden: true, textContent: '' };
@@ -24,7 +24,8 @@ function render(model, width = 1000, mode = 'symcon') {
     const window = {
         SYMC_VISUALIZATION: {
             mode, state: { status: 'ready', chart: model }, translations: {},
-            options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: true }
+            options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: true,
+                adaptToBackground }
         },
         echarts: { init: () => chart }, addEventListener: () => {}, getComputedStyle: () => ({ color: '' })
     };
@@ -146,9 +147,23 @@ const nestedFrame = render({ ...nestedModel, treemap: { ...nestedModel.treemap, 
 } } }, 1000, 'ipsview');
 assert.equal(nestedFrame.option.series[0].data[0].children[0].itemStyle.borderColor, '#112233');
 assert.equal(nestedFrame.option.series[0].data[0].children[0].children[0].itemStyle.borderColor, '#112233');
+const transparentIPSView = render(model, 1000, 'ipsview', true);
+assert.equal(transparentIPSView.option.backgroundColor, 'transparent');
+const darkIPSView = render(model, 1000, 'ipsview');
 
 const echarts = require(path.join(__dirname, '..', '.tools', 'echarts-runtime', 'node_modules', 'echarts'));
 const chart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 1000, height: 400 });
+function rootFill(svg) {
+    const root = svg.match(/<path[^>]*ecmeta_data_index="0"[^>]*>/);
+    assert.ok(root, 'The rendered Treemap root must be present');
+    return root[0].match(/fill="([^"]+)"/)[1];
+}
+chart.setOption(result.option);
+assert.equal(rootFill(chart.renderToSVGString()), palette.background);
+chart.setOption(darkIPSView.option, true);
+assert.equal(rootFill(chart.renderToSVGString()), palette.background);
+chart.setOption(transparentIPSView.option, true);
+assert.equal(rootFill(chart.renderToSVGString()), 'none');
 chart.setOption(chosenLabels.option);
 assert.equal(chart.getModel().getSeriesByIndex(0).type, 'series.treemap');
 assert.match(chart.renderToSVGString(), /Room A/);
@@ -156,6 +171,7 @@ chart.setOption(custom.option, true);
 assert.match(chart.renderToSVGString(), /Room A/);
 chart.setOption(framed.option, true);
 assert.match(chart.renderToSVGString(), /Room A/);
+assert.equal(rootFill(chart.renderToSVGString()), '#112233');
 chart.dispose();
 
 const compact = render(model, 400);
