@@ -196,26 +196,6 @@
                     "type": "RowLayout",
                     "items": [
                         {
-                            "type": "Select",
-                            "name": "LinkColorMode",
-                            "caption": "Connection color mode",
-                            "options": [
-                                {
-                                    "caption": "Uniform color",
-                                    "value": "uniform"
-                                },
-                                {
-                                    "caption": "By LQI (red–yellow–green)",
-                                    "value": "lqi"
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "type": "RowLayout",
-                    "items": [
-                        {
                             "type": "SelectColor",
                             "name": "NodeColor",
                             "caption": "Coordinator color",
@@ -235,13 +215,26 @@
                             "caption": "End device color",
                             "allowTransparent": true,
                             "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "LqiLowColor",
+                            "caption": "LQI 0 color"
                         },
                         {
                             "type": "SelectColor",
-                            "name": "EdgeColor",
-                            "caption": "Connection color",
-                            "allowTransparent": true,
-                            "transparentCaption": "Automatic (theme)"
+                            "name": "LqiMidColor",
+                            "caption": "LQI 128 color"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "LqiHighColor",
+                            "caption": "LQI 255 color"
                         }
                     ]
                 }

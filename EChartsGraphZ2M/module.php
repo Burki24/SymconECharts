@@ -69,7 +69,6 @@ class EChartsGraphZ2M extends IPSModuleStrict
         'RoamEnabled'              => true,
         'ShowLabels'               => true,
         'ShowLinkArrows'           => false,
-        'LinkColorMode'            => 'uniform',
         'TitleFontSizePercent'     => 100,
         'LabelFontSizePercent'     => 100,
         'TitleColor'               => -1,
@@ -77,7 +76,9 @@ class EChartsGraphZ2M extends IPSModuleStrict
         'NodeColor'                => -1,
         'RouterColor'              => -1,
         'EndDeviceColor'           => -1,
-        'EdgeColor'                => -1
+        'LqiLowColor'              => 0xD9534F,
+        'LqiMidColor'              => 0xE6B94A,
+        'LqiHighColor'             => 0x37A873
     ];
 
     public function Create(): void
@@ -253,8 +254,11 @@ class EChartsGraphZ2M extends IPSModuleStrict
             EChartsBarPreview::Color($this->BarPreviewValue($values, 'RouterColor', 'integer', $ipsView), $palette['seriesColors'][1]),
             EChartsBarPreview::Color($this->BarPreviewValue($values, 'EndDeviceColor', 'integer', $ipsView), $palette['seriesColors'][3])
         ];
-        $edgeColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'EdgeColor', 'integer', $ipsView), $palette['muted']);
-        $linkColorMode = $this->BarPreviewValue($values, 'LinkColorMode', 'string', $ipsView);
+        $lqiColors = [
+            EChartsBarPreview::Color($this->BarPreviewValue($values, 'LqiLowColor', 'integer', $ipsView), '#D9534F'),
+            EChartsBarPreview::Color($this->BarPreviewValue($values, 'LqiMidColor', 'integer', $ipsView), '#E6B94A'),
+            EChartsBarPreview::Color($this->BarPreviewValue($values, 'LqiHighColor', 'integer', $ipsView), '#37A873')
+        ];
         $svg = EChartsBarPreview::Open(
             $palette,
             $title,
@@ -272,9 +276,7 @@ class EChartsGraphZ2M extends IPSModuleStrict
         $links = [[0, 1], [0, 2], [1, 3], [2, 3]];
         $arrows = $this->BarPreviewValue($values, 'ShowLinkArrows', 'boolean', $ipsView);
         $markerID = $ipsView ? 'ecgz-preview-arrow-ipsview' : 'ecgz-preview-arrow-tile';
-        $lineColors = $linkColorMode === 'lqi'
-            ? ['#D9534F', '#E6B94A', '#37A873', '#E6B94A']
-            : array_fill(0, count($links), $edgeColor);
+        $lineColors = [$lqiColors[0], $lqiColors[1], $lqiColors[2], $lqiColors[1]];
         if ($arrows) {
             $svg .= '<defs>';
             foreach ($lineColors as $index => $lineColor) {
@@ -461,7 +463,6 @@ class EChartsGraphZ2M extends IPSModuleStrict
     {
         if (!EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme'))
             || !in_array($this->ReadPropertyString($prefix . 'GraphLayout'), ['force', 'circular'], true)
-            || !in_array($this->ReadPropertyString($prefix . 'LinkColorMode'), ['uniform', 'lqi'], true)
             || $this->ReadPropertyInteger($prefix . 'NodeSize') < 6
             || $this->ReadPropertyInteger($prefix . 'NodeSize') > 40
             || !$this->AnimationIsValid($prefix)) {
@@ -473,9 +474,10 @@ class EChartsGraphZ2M extends IPSModuleStrict
                 return false;
             }
         }
-        foreach (['TitleColor', 'LabelColor', 'NodeColor', 'RouterColor', 'EndDeviceColor', 'EdgeColor'] as $name) {
+        foreach (['TitleColor', 'LabelColor', 'NodeColor', 'RouterColor', 'EndDeviceColor',
+            'LqiLowColor', 'LqiMidColor', 'LqiHighColor'] as $name) {
             $value = $this->ReadPropertyInteger($prefix . $name);
-            if ($value < -1 || $value > 0xFFFFFF) {
+            if ($value < (str_starts_with($name, 'Lqi') ? 0 : -1) || $value > 0xFFFFFF) {
                 return false;
             }
         }

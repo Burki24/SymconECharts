@@ -32,12 +32,12 @@ IPSView-Designer einzeln angepasst werden. Die bisherige Einstellung
 „Knotenfarbe“ heißt jetzt „Koordinatorfarbe“ und behält ihren gespeicherten
 Wert; Router und Endgeräte nutzen zunächst ihre eigenen Theme-Farben.
 
-Die Verbindungen können wahlweise ihre bisherige einheitliche Farbe behalten
-oder anhand des LQI eingefärbt werden: 0 ist Rot, 128 Gelb und 255 Grün;
-dazwischen verlaufen die Farben stufenlos. Die Legende zeigt diese Skala an.
-Der Modus „Nach LQI“ ist im Kachel- und IPSView-Designer wählbar. Bestehende
-Instanzen bleiben bei der einheitlichen Verbindungsfarbe. Der LQI stammt aus
-dem letzten Export und ist keine Live-Messung.
+Verbindungen werden anhand ihres LQI eingefärbt: standardmäßig Rot bei 0,
+Gelb bei 128 und Grün bei 255; Zwischenwerte erhalten stufenlos berechnete
+Farben. Alle drei Stützfarben lassen sich im Kachel- und unabhängigen
+IPSView-Designer frei wählen. Die Legende zeigt die gewählte Skala. Eine
+zuvor eingestellte einheitliche Verbindungsfarbe wird nicht mehr verwendet.
+Der LQI stammt aus dem letzten Export und ist keine Live-Messung.
 
 Mit Mindest-LQI und maximal angezeigten Verbindungen lässt sich ein großes
 Netz übersichtlich halten. Standardmäßig werden die 300 stärksten Verbindungen

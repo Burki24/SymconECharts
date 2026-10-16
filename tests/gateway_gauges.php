@@ -785,6 +785,7 @@ require_once dirname(__DIR__) . '/EChartsHeatmap/module.php';
 require_once dirname(__DIR__) . '/EChartsTree/module.php';
 require_once dirname(__DIR__) . '/EChartsTreeSystemHealth/module.php';
 require_once dirname(__DIR__) . '/EChartsGraph/module.php';
+require_once dirname(__DIR__) . '/EChartsGraphZ2M/module.php';
 
 final class TestableEChartsGateway extends EChartsGateway
 {
@@ -8167,6 +8168,59 @@ assertGatewayGauge(
         && str_contains((string) findGaugeFormElement($graphForm['elements'], 'Edges')['onEdit'], 'ECGR_UpdateBarPreviewFromForm')
         && findGaugeFormElement($graphForm['elements'], 'IPSViewGraphLayout')['enabled'] === false,
     'Unsaved Graph node and edge edits must refresh both form previews.'
+);
+$zigbeeGraph = new EChartsGraphZ2M();
+$zigbeeGraph->Create();
+$zigbeeForm = json_decode($zigbeeGraph->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+$zigbeeDesigner = null;
+foreach ($zigbeeForm['elements'] as $element) {
+    if (($element['caption'] ?? null) === 'Tile designer') {
+        $zigbeeDesigner = $element;
+        break;
+    }
+}
+$zigbeeColorsSection = null;
+foreach ($zigbeeDesigner['items'] ?? [] as $section) {
+    if (($section['caption'] ?? null) === 'Node and line colors') {
+        $zigbeeColorsSection = $section;
+        break;
+    }
+}
+assertGatewayGauge(
+    $zigbeeColorsSection !== null
+        && findGaugeFormElement($zigbeeColorsSection['items'], 'LqiLowColor') !== null
+        && findGaugeFormElement($zigbeeColorsSection['items'], 'LqiMidColor') !== null
+        && findGaugeFormElement($zigbeeColorsSection['items'], 'LqiHighColor') !== null
+        && findGaugeFormElement($zigbeeForm['elements'], 'IPSViewLqiLowColor') !== null
+        && findGaugeFormElement($zigbeeForm['elements'], 'EdgeColor') === null
+        && findGaugeFormElement($zigbeeForm['elements'], 'LinkColorMode') === null,
+    'Zigbee LQI anchor colors must appear in both designers and in the visible color section.'
+);
+$zigbeeGraph->UpdateBarPreviewFromForm(json_encode([
+    'LqiLowColor'          => 0x102030, 'LqiMidColor' => 0x405060, 'LqiHighColor' => 0x708090,
+    'IPSViewUseTileDesign' => false, 'IPSViewLqiLowColor' => 0xA0B0C0,
+    'IPSViewLqiMidColor'   => 0xB0C0D0, 'IPSViewLqiHighColor' => 0xC0D0E0
+], JSON_THROW_ON_ERROR));
+$zigbeePreviewUpdates = array_slice($zigbeeGraph->GetTestFormUpdates(), -2);
+$zigbeeTilePreview = base64_decode(substr((string) $zigbeePreviewUpdates[0]['Value'], strlen('data:image/svg+xml;base64,')), true);
+$zigbeeIPSViewPreview = base64_decode(substr((string) $zigbeePreviewUpdates[1]['Value'], strlen('data:image/svg+xml;base64,')), true);
+assertGatewayGauge(
+    str_contains((string) $zigbeeTilePreview, 'stroke="#102030"')
+        && str_contains((string) $zigbeeTilePreview, 'stroke="#405060"')
+        && str_contains((string) $zigbeeTilePreview, 'stroke="#708090"')
+        && str_contains((string) $zigbeeIPSViewPreview, 'stroke="#A0B0C0"')
+        && str_contains((string) $zigbeeIPSViewPreview, 'stroke="#B0C0D0"')
+        && str_contains((string) $zigbeeIPSViewPreview, 'stroke="#C0D0E0"'),
+    'Unsaved LQI anchor colors must update Tile and independent IPSView previews.'
+);
+$zigbeeGraph->SetTestProperty('LqiLowColor', 0x102030);
+$zigbeeGraph->SetTestProperty('IPSViewUseTileDesign', false);
+$zigbeeGraph->SetTestProperty('IPSViewLqiLowColor', 0xA0B0C0);
+$zigbeeStyleMethod = new ReflectionMethod($zigbeeGraph, 'ReadDesignStyle');
+assertGatewayGauge(
+    $zigbeeStyleMethod->invoke($zigbeeGraph, false)['lqiLowColor'] === '#102030'
+        && $zigbeeStyleMethod->invoke($zigbeeGraph, true)['lqiLowColor'] === '#A0B0C0',
+    'Saved LQI colors must reach Tile and independent IPSView renderers separately.'
 );
 $draftNodes = $graphNodes;
 $draftNodes[1]['Label'] = '<script>Draft</script>';

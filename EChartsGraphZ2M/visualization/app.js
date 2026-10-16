@@ -69,13 +69,15 @@
         };
     }
 
-    var lqiColors = ['#D9534F', '#E6B94A', '#37A873'];
+    function lqiColors(style) {
+        return [style.lqiLowColor || '#D9534F', style.lqiMidColor || '#E6B94A', style.lqiHighColor || '#37A873'];
+    }
 
-    function lqiColor(lqi) {
+    function lqiColor(lqi, anchors) {
         var segment = lqi <= 128 ? 0 : 1;
         var ratio = segment === 0 ? lqi / 128 : (lqi - 128) / 127;
-        var start = lqiColors[segment];
-        var end = lqiColors[segment + 1];
+        var start = anchors[segment];
+        var end = anchors[segment + 1];
         var result = '#';
         for (var index = 1; index < 7; index += 2) {
             var channel = Math.round(parseInt(start.slice(index, index + 2), 16) * (1 - ratio)
@@ -100,6 +102,7 @@
             + (showTitle ? titleSize + 12 : 0);
         var nodeSize = Math.max(6, Math.min(40, Number(style.nodeSize) || 16));
         var roleColors = nodeColors(style, colors);
+        var anchors = lqiColors(style);
         var nodes = (graph.nodes || []).map(function (node) {
             var kind = String(node.kind || 'Unknown');
             return {
@@ -116,8 +119,8 @@
             return {
                 source: String(link.source), target: String(link.target), lqi: lqi,
                 lineStyle: {
-                    opacity: style.linkColorMode === 'lqi' ? 0.28 + 0.25 * lqi / 255 : 0.1 + 0.35 * lqi / 255,
-                    ...(style.linkColorMode === 'lqi' ? { color: lqiColor(lqi) } : {})
+                    opacity: 0.28 + 0.25 * lqi / 255,
+                    color: lqiColor(lqi, anchors)
                 }
             };
         });
@@ -144,14 +147,14 @@
             series: [{
                 id: 'graph', type: 'graph', layout: style.graphLayout === 'circular' ? 'circular' : 'force',
                 roam: style.roamEnabled === true, draggable: style.roamEnabled === true,
-                left: '6%', right: '6%', top: top, bottom: style.linkColorMode === 'lqi' ? 60 : 42,
+                left: '6%', right: '6%', top: top, bottom: 60,
                 symbol: 'circle', symbolSize: compact ? Math.max(6, nodeSize * 0.8) : nodeSize,
                 edgeSymbol: style.showLinkArrows === true ? ['none', 'arrow'] : ['none', 'none'],
                 edgeSymbolSize: 6,
                 force: { repulsion: Math.max(140, Math.min(1200, 180 + nodes.length * 7)), edgeLength: compact ? 55 : 85 },
                 circular: { rotateLabel: false },
                 data: nodes, links: links,
-                lineStyle: { color: style.edgeColor || colors.muted, width: 1, opacity: 0.45 },
+                lineStyle: { width: 1, opacity: 0.45 },
                 label: {
                     show: style.showLabels !== false && (width >= 800 || nodes.length <= 30),
                     color: style.labelColor || colors.text,
@@ -222,11 +225,9 @@
                 + ' style="background-color:' + escapeHTML(entry[1]) + '"></span>'
                 + escapeHTML(translate(entry[0])) + '</span>';
         }).join('');
-        if (style.linkColorMode === 'lqi') {
-            legendElement.innerHTML += '<span class="echarts-zigbee-graph-legend-item">'
-                + '<span class="echarts-zigbee-graph-legend-scale" style="background:linear-gradient(90deg,'
-                + lqiColors.join(',') + ')"></span>LQI 0–255</span>';
-        }
+        legendElement.innerHTML += '<span class="echarts-zigbee-graph-legend-item">'
+            + '<span class="echarts-zigbee-graph-legend-scale" style="background:linear-gradient(90deg,'
+            + escapeHTML(lqiColors(style).join(',')) + ')"></span>LQI 0–255</span>';
         legendElement.hidden = false;
         var theme = normalizeTheme(state.chart.theme || 'auto');
         if (chart && currentTheme !== theme) {

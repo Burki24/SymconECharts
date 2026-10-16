@@ -67,7 +67,7 @@ assert.equal(large.option.series[0].type, 'graph');
 assert.equal(large.option.series[0].edgeSymbol[1], 'arrow');
 assert.equal(large.option.series[0].links[0].lqi, 240);
 assert.ok(large.option.series[0].links[0].lineStyle.opacity > large.option.series[0].links[1].lineStyle.opacity);
-assert.ok(large.option.series[0].links[0].lineStyle.opacity < 0.5);
+assert.ok(large.option.series[0].links[0].lineStyle.opacity < 0.55);
 assert.equal(large.option.series[0].label.show, true);
 assert.equal(large.option.series[0].label.position, 'right');
 assert.equal(large.option.series[0].labelLayout.hideOverlap, true);
@@ -101,10 +101,6 @@ const custom = render({ ...style, nodeColor: '#123456', routerColor: '#234567', 
 assert.deepEqual(Array.from(custom.option.series[0].data, node => node.itemStyle.color),
     ['#123456', '#234567', '#345678']);
 assert.match(custom.legendElement.innerHTML, /background-color:#234567/);
-const uniform = render({ ...style, edgeColor: '#ABCDEF', linkColorMode: 'uniform' });
-assert.equal(uniform.option.series[0].lineStyle.color, '#ABCDEF');
-assert.equal(uniform.option.series[0].links[0].lineStyle.color, undefined);
-assert.doesNotMatch(uniform.legendElement.innerHTML, /LQI 0/);
 const lqiNetwork = {
     ...graph,
     links: [
@@ -113,12 +109,18 @@ const lqiNetwork = {
         { source: 'device-c', target: 'device-a', lqi: 255 }
     ]
 };
-const lqiColored = render({ ...style, edgeColor: '#ABCDEF', linkColorMode: 'lqi' }, 1000, lqiNetwork);
+const lqiColored = render(style, 1000, lqiNetwork);
 assert.deepEqual(Array.from(lqiColored.option.series[0].links, link => link.lineStyle.color),
     ['#D9534F', '#E6B94A', '#37A873']);
 assert.equal(lqiColored.option.series[0].emphasis.focus, 'adjacency');
 assert.match(lqiColored.legendElement.innerHTML, /LQI 0/);
 assert.match(lqiColored.legendElement.innerHTML, /255/);
+const customLqiColors = render({
+    ...style, lqiLowColor: '#102030', lqiMidColor: '#405060', lqiHighColor: '#708090'
+}, 1000, lqiNetwork);
+assert.deepEqual(Array.from(customLqiColors.option.series[0].links, link => link.lineStyle.color),
+    ['#102030', '#405060', '#708090']);
+assert.match(customLqiColors.legendElement.innerHTML, /#102030,#405060,#708090/);
 const unknown = render(style, 1000, {
     ...graph, nodes: [{ id: 'device-x', name: 'Unknown device', kind: 'Unknown' }], links: []
 });
