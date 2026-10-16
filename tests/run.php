@@ -29,6 +29,7 @@ $tests = [
     __DIR__ . '/graph_model.php',
     __DIR__ . '/zigbee_graph_model.php',
     __DIR__ . '/treemap_model.php',
+    __DIR__ . '/sankey_model.php',
     __DIR__ . '/zigbee_graph_export_reader.php',
     __DIR__ . '/gateway_gauges.php'
 ];
@@ -49,6 +50,7 @@ $commands = [
     ['Test Treemap layout', 'node tests/treemap_layout.js'],
     ['Test Sunburst layout', 'node tests/sunburst_layout.js'],
     ['Test Parallel layout', 'node tests/parallel_layout.js'],
+    ['Test Sankey layout', 'node tests/sankey_layout.js'],
     ['Verify vendored helper integrity', 'python3 tests/helper_integrity.py'],
     ['Test library metadata updater', 'python3 tests/test_update_library_metadata.py']
 ];

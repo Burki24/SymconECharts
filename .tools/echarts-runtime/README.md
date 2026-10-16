@@ -25,6 +25,8 @@ Der Tree-Einstieg enthält Tree Chart, Titel, Tooltip, Aria und Canvas Renderer
 als eigenen Build für die Symcon-Objekthierarchie.
 Der Parallel-Einstieg enthält Parallel Chart und Component, Titel, Tooltip,
 Aria und Canvas Renderer als eigenen Build für Archivintervall-Vergleiche.
+Der Sankey-Einstieg enthält Sankey Chart, Titel, Tooltip, Aria und Canvas
+Renderer als eigenen Build für aktuelle Mengenflüsse.
 
 Zusätzlich kopiert der Build die sechs im Modul angebotenen offiziellen
 ECharts-Themes unverändert aus derselben festgeschriebenen npm-Abhängigkeit:
@@ -46,7 +48,8 @@ Die Ergebnisse werden als
 `../../libs/echarts/6.1.0/echarts.polar.min.js`,
 `../../libs/echarts/6.1.0/echarts.pie.min.js` und
 `../../libs/echarts/6.1.0/echarts.tree.min.js`,
-`../../libs/echarts/6.1.0/echarts.parallel.min.js` sowie unter
+`../../libs/echarts/6.1.0/echarts.parallel.min.js`,
+`../../libs/echarts/6.1.0/echarts.sankey.min.js` sowie unter
 `../../libs/echarts/6.1.0/themes` geschrieben. Nach einem bewussten Neuaufbau
 müssen Dateigrößen und SHA-256-Werte in `libs/EChartsAsset.php`, den Tests und
 `THIRD_PARTY_NOTICES.md` geprüft und aktualisiert werden. `node_modules` wird

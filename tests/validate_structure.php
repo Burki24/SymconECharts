@@ -177,6 +177,16 @@ $requiredFiles = [
     'docs/adr/0050-archive-parallel-chart.md',
     'tests/parallel_pairing.php',
     'tests/parallel_layout.js',
+    'EChartsSankey/SankeyModel.php',
+    'EChartsSankey/SankeyPreview.php',
+    'EChartsSankey/visualization/index.html',
+    'EChartsSankey/visualization/style.css',
+    'EChartsSankey/visualization/app.js',
+    '.tools/echarts-runtime/src/sankey-runtime.js',
+    'libs/echarts/6.1.0/echarts.sankey.min.js',
+    'docs/adr/0051-manual-current-value-sankey.md',
+    'tests/sankey_model.php',
+    'tests/sankey_layout.js',
     '.tools/echarts-runtime/src/tree-runtime.js',
     'docs/adr/0044-tree-symcon-object-hierarchy.md',
     'docs/adr/0046-tree-system-health-module-split.md',
@@ -386,7 +396,7 @@ if ($helperSync !== null) {
 
 $expectedModules = [
     'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarPolar', 'EChartsBarWaterfall', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
-    'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsGraph', 'EChartsGraphZ2M', 'EChartsHeatmap', 'EChartsParallel', 'EChartsPie', 'EChartsScatter', 'EChartsSunburst', 'EChartsTimeSeries', 'EChartsTree', 'EChartsTreeSystemHealth', 'EChartsTreemap'
+    'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsGraph', 'EChartsGraphZ2M', 'EChartsHeatmap', 'EChartsParallel', 'EChartsPie', 'EChartsSankey', 'EChartsScatter', 'EChartsSunburst', 'EChartsTimeSeries', 'EChartsTree', 'EChartsTreeSystemHealth', 'EChartsTreemap'
 ];
 $discoveredModules = [];
 foreach (glob($root . '/*/module.json') ?: [] as $modulePath) {

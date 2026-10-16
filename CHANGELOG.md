@@ -2,6 +2,12 @@
 
 ## Hinzugefügt
 
+- `EChartsSankey` (`ECSA`) zeigt aktuelle Mengenflüsse zwischen manuell
+  angelegten Knoten. Start und Ziel jeder Verbindung werden ausgewählt;
+  eine numerische Symcon-Variable bestimmt die Breite. Kachel und IPSView
+  besitzen getrennte Designer und Vorschauen. Kreise, doppelte Verbindungen
+  und negative Werte werden mit Diagnose abgewiesen.
+
 - Der Parallel-Designer bietet für Kachel und IPSView getrennt Linienarten,
   Transparenz ausgewählter und übriger Linien beim Eingrenzen, Achsenwerte,
   Teilstriche, Achsenbreite, Titelabstand und Animationseinstellungen.

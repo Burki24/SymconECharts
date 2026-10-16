@@ -13,6 +13,7 @@ für exportierte Zigbee2MQTT-Netzwerkkarten sowie Treemap und Sunburst mit
 manuell festgelegten Gruppen und aktuellen numerischen Variablenwerten.
 Parallelkoordinaten verbinden archivierte Variablenwerte je gemeinsamem
 Stunden- oder Tagesintervall.
+Sankey zeigt aktuelle Mengenflüsse zwischen manuell angelegten Knoten.
 
 Alle Diagrammformulare zeigen eine unmittelbar aktualisierte SVG-Vorschau
 im Kachel- und IPSView-Designer. Sie reagiert auf noch nicht gespeicherte
@@ -35,6 +36,11 @@ Diagrammtitel ohne diesen Kachel-Kopfbereich.
 ## Enthaltene Module
 
 Folgende Module sind enthalten:
+
+- __EChartsSankey__ ([Dokumentation](EChartsSankey/README.md))
+  Aktuelle Mengenflüsse zwischen manuellen Knoten und Verbindungen. Die
+  Verbindungsbreite folgt einer numerischen Symcon-Variable. Kachel und
+  IPSView bieten getrennte Designer.
 
 - __EChartsGateway__ ([Dokumentation](EChartsGateway/README.md))
   Gemeinsame Zentrale als Splitter. Sie stellt den Chartfamilien aktuell den

@@ -62,6 +62,9 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Archivierte Werte mehrerer Variablen werden als Parallelkoordinaten nach
   gemeinsamen abgeschlossenen Stunden- oder Tagesintervallen im eigenen
   Gerätemodul `EChartsParallel` dargestellt.
+  Aktuelle Mengenflüsse zwischen manuell angelegten Knoten liegen im eigenen
+  Gerätemodul `EChartsSankey`; Verbindungsbreiten folgen numerischen
+  Quellvariablen, Zyklen und negative Werte sind unzulässig.
 - Das Gateway stellt ausschließlich familienübergreifende Infrastruktur wie
   Archivzugriff, begrenztes Caching, gemeinsame Ressourcen und gegebenenfalls
   abgesicherte IPSView-Kommunikation bereit. Familienbezogene Properties,
@@ -133,6 +136,7 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
 - `ECTM` ist `EChartsTreemap` zugeordnet (`TM` = Treemap).
 - `ECSB` ist `EChartsSunburst` zugeordnet (`SB` = Sunburst).
 - `ECPA` ist `EChartsParallel` zugeordnet (`PA` = Parallel).
+- `ECSA` ist `EChartsSankey` zugeordnet (`SA` = Sankey).
 - Das zuvor für das unveröffentlichte Gauge-Gerüst verwendete Kürzel `ECGA`
   ist abgelöst und wird nicht für ein anderes Modul wiederverwendet.
 - Neue Kürzel werden vor ihrer Verwendung eindeutig festgelegt und in dieser

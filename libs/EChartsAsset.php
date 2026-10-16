@@ -23,6 +23,7 @@ final class EChartsAsset
     public const TREEMAP_SHA256 = 'e9020d97d1f90d3967dbb717485edcafed098f3ee7b2b632b6f01055582a148e';
     public const SUNBURST_SHA256 = '95ef117d648729e87199ab20a815f773cbe660da2f007fd65441add95c1daa43';
     public const PARALLEL_SHA256 = 'ded2b972e4032a840353eabc34809047d70c5bc9e7f700b6a09f617d9bc21295';
+    public const SANKEY_SHA256 = '7de7151e7ff00b3556de74f1716e2950e530e2aa9ac16309202d1669fbd03abb';
     public const TIME_SERIES_SHA256 = self::CARTESIAN_SHA256;
     public const THEME_AUTO = 'auto';
     public const THEME_SHA256 = [
@@ -331,6 +332,21 @@ final class EChartsAsset
             throw new RuntimeException('The bundled Apache ECharts Parallel runtime failed its integrity check.');
         }
 
+        return $canonicalContent;
+    }
+
+    /** Loads the pinned Sankey runtime without enlarging other chart bundles. */
+    public static function SankeyJavaScript(): string
+    {
+        $path = __DIR__ . '/echarts/' . self::VERSION . '/echarts.sankey.min.js';
+        $content = @file_get_contents($path);
+        if ($content === false || $content === '') {
+            throw new RuntimeException('The bundled Apache ECharts Sankey runtime could not be loaded.');
+        }
+        $canonicalContent = self::NormalizeLineEndings($content);
+        if (!hash_equals(self::SANKEY_SHA256, hash('sha256', $canonicalContent))) {
+            throw new RuntimeException('The bundled Apache ECharts Sankey runtime failed its integrity check.');
+        }
         return $canonicalContent;
     }
 

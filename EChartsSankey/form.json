@@ -1,0 +1,449 @@
+{
+    "$schema": "https://www.symcon.de/assets/files/validation/formSchema.json",
+    "elements": [
+        {
+            "type": "Label",
+            "caption": "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts."
+        },
+        {
+            "type": "ValidationTextBox",
+            "name": "Title",
+            "caption": "Title"
+        },
+        {
+            "type": "List",
+            "name": "Nodes",
+            "caption": "Sankey nodes",
+            "rowCount": 6,
+            "add": true,
+            "delete": true,
+            "changeOrder": true,
+            "columns": [
+                {
+                    "name": "Key",
+                    "caption": "Node key",
+                    "width": "220px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "name": "Label",
+                    "caption": "Node label",
+                    "width": "320px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                }
+            ],
+            "form": [
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Key",
+                    "caption": "Node key"
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Label",
+                    "caption": "Node label"
+                }
+            ]
+        },
+        {
+            "type": "Label",
+            "caption": "Create nodes first. Keys start with a letter and contain up to 40 letters, digits, underscores or hyphens. Labels may be repeated."
+        },
+        {
+            "type": "List",
+            "name": "Sources",
+            "caption": "Sankey connections",
+            "rowCount": 6,
+            "add": true,
+            "delete": true,
+            "changeOrder": true,
+            "columns": [
+                {
+                    "name": "Source",
+                    "caption": "From node",
+                    "width": "250px",
+                    "add": "",
+                    "edit": {
+                        "type": "Select",
+                        "options": [
+                            {
+                                "caption": "Select node",
+                                "value": ""
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "Target",
+                    "caption": "To node",
+                    "width": "250px",
+                    "add": "",
+                    "edit": {
+                        "type": "Select",
+                        "options": [
+                            {
+                                "caption": "Select node",
+                                "value": ""
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "VariableID",
+                    "caption": "Flow variable",
+                    "width": "320px",
+                    "add": 0,
+                    "edit": {
+                        "type": "SelectVariable",
+                        "validVariableTypes": [
+                            1,
+                            2
+                        ]
+                    }
+                }
+            ],
+            "form": [
+                {
+                    "type": "Select",
+                    "name": "Source",
+                    "caption": "From node",
+                    "options": [
+                        {
+                            "caption": "Select node",
+                            "value": ""
+                        }
+                    ]
+                },
+                {
+                    "type": "Select",
+                    "name": "Target",
+                    "caption": "To node",
+                    "options": [
+                        {
+                            "caption": "Select node",
+                            "value": ""
+                        }
+                    ]
+                },
+                {
+                    "type": "SelectVariable",
+                    "name": "VariableID",
+                    "caption": "Flow variable",
+                    "validVariableTypes": [
+                        1,
+                        2
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "Label",
+            "caption": "Choose a current numeric variable for each directed connection. All flows must use the same quantity and unit. Cycles and duplicate directed pairs are invalid; zero flows are hidden."
+        },
+        {
+            "type": "ValidationTextBox",
+            "name": "Unit",
+            "caption": "Unit (optional)"
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Tile designer",
+            "expanded": false,
+            "items": [
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "AnimationEnabled",
+                            "caption": "Animate Sankey"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDuration",
+                            "caption": "Initial animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDurationUpdate",
+                            "caption": "Update animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "EChartsTheme",
+                            "caption": "ECharts theme",
+                            "options": [
+                                {
+                                    "caption": "Automatic (Symcon design)",
+                                    "value": "auto"
+                                },
+                                {
+                                    "caption": "Dark",
+                                    "value": "dark"
+                                },
+                                {
+                                    "caption": "Vintage",
+                                    "value": "vintage"
+                                },
+                                {
+                                    "caption": "Macarons",
+                                    "value": "macarons"
+                                },
+                                {
+                                    "caption": "Infographic",
+                                    "value": "infographic"
+                                },
+                                {
+                                    "caption": "Shine",
+                                    "value": "shine"
+                                },
+                                {
+                                    "caption": "Roma",
+                                    "value": "roma"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "Orientation",
+                            "caption": "Orientation",
+                            "options": [
+                                {
+                                    "caption": "Horizontal",
+                                    "value": "horizontal"
+                                },
+                                {
+                                    "caption": "Vertical",
+                                    "value": "vertical"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Select",
+                            "name": "NodeAlign",
+                            "caption": "Node alignment",
+                            "options": [
+                                {
+                                    "caption": "Justified",
+                                    "value": "justify"
+                                },
+                                {
+                                    "caption": "Start",
+                                    "value": "left"
+                                },
+                                {
+                                    "caption": "End",
+                                    "value": "right"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "NodeWidth",
+                            "caption": "Node width",
+                            "minimum": 4,
+                            "maximum": 40,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "NodeGap",
+                            "caption": "Node gap",
+                            "minimum": 0,
+                            "maximum": 40,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "Draggable",
+                            "caption": "Allow node dragging"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowLabels",
+                            "caption": "Show labels"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowValues",
+                            "caption": "Show node values"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowTooltip",
+                            "caption": "Show tooltip"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "TitleFontSizePercent",
+                            "caption": "Title size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "LabelFontSizePercent",
+                            "caption": "Label size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "TitleColor",
+                            "caption": "Title color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "LabelColor",
+                            "caption": "Label color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "NodeColor",
+                            "caption": "Node color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "Select",
+                            "name": "EdgeColorMode",
+                            "caption": "Flow color mode",
+                            "options": [
+                                {
+                                    "caption": "Source node",
+                                    "value": "source"
+                                },
+                                {
+                                    "caption": "Target node",
+                                    "value": "target"
+                                },
+                                {
+                                    "caption": "Source to target gradient",
+                                    "value": "gradient"
+                                },
+                                {
+                                    "caption": "Fixed color",
+                                    "value": "fixed"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "EdgeColor",
+                            "caption": "Fixed flow color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "EdgeOpacityPercent",
+                            "caption": "Flow opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "EdgeCurvenessPercent",
+                            "caption": "Flow curvature",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "actions": [],
+    "status": [
+        {
+            "code": 102,
+            "icon": "active",
+            "caption": "Sankey is ready"
+        },
+        {
+            "code": 201,
+            "icon": "error",
+            "caption": "Sankey nodes or connections are invalid"
+        },
+        {
+            "code": 202,
+            "icon": "error",
+            "caption": "Sankey design is invalid"
+        },
+        {
+            "code": 203,
+            "icon": "error",
+            "caption": "No active EChartsGateway is connected"
+        },
+        {
+            "code": 204,
+            "icon": "error",
+            "caption": "Sankey values could not be loaded"
+        },
+        {
+            "code": 205,
+            "icon": "error",
+            "caption": "Sankey values must be finite and non-negative"
+        }
+    ]
+}

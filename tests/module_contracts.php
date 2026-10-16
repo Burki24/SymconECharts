@@ -198,6 +198,14 @@ $expectedModules = [
         'childRequirements'  => [],
         'implemented'        => ['{E4749B72-912B-E3E3-1C57-D19019FFDD84}']
     ],
+    'EChartsSankey' => [
+        'id'                 => '{D0F77DFF-6B50-4901-A2F0-5A98159E2559}',
+        'type'               => 3,
+        'prefix'             => 'ECSA',
+        'parentRequirements' => ['{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}'],
+        'childRequirements'  => [],
+        'implemented'        => ['{E4749B72-912B-E3E3-1C57-D19019FFDD84}']
+    ],
     'EChartsParallel' => [
         'id'                 => '{2B3B30E7-F7F2-47CF-A8AB-1E27F896A7DD}',
         'type'               => 3,
@@ -266,7 +274,7 @@ $gateway = $moduleContracts['EChartsGateway'];
 foreach ([
     'EChartsGaugeSingle', 'EChartsGaugeMulti', 'EChartsGaugeTacho', 'EChartsGaugeChronograph',
     'EChartsTimeSeries', 'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarWaterfall', 'EChartsBarPolar',
-    'EChartsPie', 'EChartsScatter', 'EChartsHeatmap', 'EChartsGraph', 'EChartsGraphZ2M', 'EChartsTreemap', 'EChartsSunburst', 'EChartsParallel'
+    'EChartsPie', 'EChartsScatter', 'EChartsHeatmap', 'EChartsGraph', 'EChartsGraphZ2M', 'EChartsTreemap', 'EChartsSunburst', 'EChartsParallel', 'EChartsSankey'
 ] as $deviceModuleName) {
     $device = $moduleContracts[$deviceModuleName];
     requireContract(

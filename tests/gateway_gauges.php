@@ -789,6 +789,7 @@ require_once dirname(__DIR__) . '/EChartsGraphZ2M/module.php';
 require_once dirname(__DIR__) . '/EChartsTreemap/module.php';
 require_once dirname(__DIR__) . '/EChartsSunburst/module.php';
 require_once dirname(__DIR__) . '/EChartsParallel/module.php';
+require_once dirname(__DIR__) . '/EChartsSankey/module.php';
 
 final class TestableEChartsGateway extends EChartsGateway
 {
@@ -9962,5 +9963,146 @@ try {
         unset($GLOBALS['symconTestVariables'][86000 + $index]);
     }
 }
+
+$sankey = new EChartsSankey();
+$sankey->Create();
+$sankeyNodes = [['Key' => 'supply', 'Label' => 'Supply'], ['Key' => 'load', 'Label' => 'Load'],
+    ['Key' => 'other', 'Label' => 'Load']];
+$sankeySources = [['Source' => 'supply', 'Target' => 'load', 'VariableID' => 4711],
+    ['Source' => 'supply', 'Target' => 'other', 'VariableID' => 4713]];
+$sankey->SetTestProperty('Nodes', json_encode($sankeyNodes, JSON_THROW_ON_ERROR));
+$sankey->SetTestProperty('Sources', json_encode($sankeySources, JSON_THROW_ON_ERROR));
+$sankey->SetTestProperty('Title', 'Current power');
+$sankey->SetTestProperty('Unit', 'W');
+$sankey->SetTestProperty('IPSViewUseTileDesign', false);
+$sankey->SetTestProperty('IPSViewOrientation', 'vertical');
+$sankey->SetTestProperty('IPSViewEdgeColorMode', 'fixed');
+$sankey->SetTestProperty('IPSViewEdgeColor', 0x123456);
+$sankey->SetTestProperty('EnableIPSView', true);
+$sankey->ApplyChanges();
+$sankeyData = json_decode($sankey->GetSankeyData(), true, 512, JSON_THROW_ON_ERROR);
+$sankeyTile = $sankey->GetVisualizationTile();
+$sankeyIPSView = $sankey->GetIPSViewHTML();
+assertGatewayGauge(
+    $sankey->GetTestStatus() === IS_ACTIVE && $sankey->GetTestReferences() === [4711, 4713]
+        && $sankeyData['family'] === 'sankey' && $sankeyData['sankey']['unit'] === 'W'
+        && $sankeyData['sankey']['positiveCount'] === 2
+        && $sankeyData['sankey']['links'][0]['value'] === (float) GetValue(4711)
+        && $sankeyData['sankey']['data'][1]['label'] === $sankeyData['sankey']['data'][2]['label']
+        && str_contains($sankeyIPSView, '"orientation":"vertical"')
+        && str_contains($sankeyIPSView, '"edgeColor":"#123456"')
+        && str_contains($sankeyTile, '"orientation":"horizontal"')
+        && strlen($sankeyTile) < SYMCON_OUTPUT_BUFFER_LIMIT && strlen($sankeyIPSView) < SYMCON_OUTPUT_BUFFER_LIMIT
+        && is_string($sankey->GetTestVariableValue('IPSViewSankey')) && $sankey->GetTestVariableValue('IPSViewSankey') !== '',
+    'Sankey must publish current edge values, distinct node identities, independent designs and bounded WebContent.'
+);
+$sankeyForm = json_decode($sankey->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+$sankeyConnections = findGaugeFormElement($sankeyForm['elements'], 'Sources');
+assertGatewayGauge(
+    $sankeyConnections['form'][0]['options'][1]['value'] === 'supply'
+        && findGaugeFormElement($sankeyForm['elements'], 'IPSViewOrientation')['enabled'] === true
+        && str_starts_with(findGaugeFormElement($sankeyForm['elements'], 'BarPreview')['image'], 'data:image/svg+xml;base64,')
+        && str_starts_with(findGaugeFormElement($sankeyForm['elements'], 'IPSViewBarPreview')['image'], 'data:image/svg+xml;base64,'),
+    'Sankey forms must offer configured nodes and separate initialized designer previews.'
+);
+$sankey->UpdateNodeOptions(json_encode([...$sankeyNodes, ['Key' => 'draft', 'Label' => 'Unsaved']], JSON_THROW_ON_ERROR));
+$sankeyUpdates = array_slice($sankey->GetTestFormUpdates(), -2);
+assertGatewayGauge(
+    $sankeyUpdates[0]['Parameter'] === 'columns'
+        && json_decode($sankeyUpdates[1]['Value'], true, 512, JSON_THROW_ON_ERROR)[0]['options'][4]['value'] === 'draft',
+    'Sankey connection selectors must include unsaved node changes.'
+);
+$sankeyNodeField = findGaugeFormElement($sankeyForm['elements'], 'Nodes');
+assertGatewayGauge(
+    !isset($sankeyNodeField['onChange']) && str_contains($sankeyNodeField['onEdit'], 'ECSA_UpdateBarPreviewFromForm'),
+    'Sankey must use supported List edit events for its node selectors.'
+);
+$sankey->UpdateBarPreviewFromForm(json_encode(['Nodes' => $sankeyNodes,
+    'Sources'                                          => [$sankeySources[0], $sankeySources[0]]], JSON_THROW_ON_ERROR));
+$sankeyDraftUpdates = $sankey->GetTestFormUpdates();
+$sankeyDraftDiagnostic = array_values(array_filter(
+    $sankeyDraftUpdates,
+    static fn (array $update): bool => $update['Field'] === 'ConfigurationDiagnostics'
+));
+assertGatewayGauge(
+    str_contains($sankeyDraftDiagnostic[0]['Value'], 'Connection 2:')
+        && json_decode($sankey->GetSankeyData(), true, 512, JSON_THROW_ON_ERROR)['sankey']['positiveCount'] === 2,
+    'Draft Sankey errors must identify the row and leave the saved configuration untouched.'
+);
+$GLOBALS['symconTestCopyTarget'] = $sankey;
+try {
+    $sankey->CopyTileDesignToIPSView();
+} finally {
+    unset($GLOBALS['symconTestCopyTarget']);
+}
+assertGatewayGauge(
+    str_contains($sankey->GetIPSViewHTML(), '"orientation":"horizontal"'),
+    'Sankey must copy Tile settings into an independent IPSView design.'
+);
+$sankeyValueBefore = GetValue(4711);
+try {
+    $GLOBALS['symconTestVariables'][4711]['Value'] = -1.0;
+    $sankey->MessageSink(1780000010, 4711, VM_UPDATE, [-1.0, true]);
+    assertGatewayGauge($sankey->GetTestStatus() === 205, 'Sankey must reject negative current flow widths.');
+    $GLOBALS['symconTestVariables'][4711]['Value'] = 25.0;
+    $sankey->MessageSink(1780000011, 4711, VM_UPDATE, [25.0, true]);
+    $sankeyChanged = json_decode($sankey->GetSankeyData(), true, 512, JSON_THROW_ON_ERROR);
+    assertGatewayGauge(
+        $sankey->GetTestStatus() === IS_ACTIVE && $sankeyChanged['sankey']['links'][0]['value'] === 25.0,
+        'Sankey must recover and update its existing chart after a source change.'
+    );
+} finally {
+    $GLOBALS['symconTestVariables'][4711]['Value'] = $sankeyValueBefore;
+}
+assertTransientRetry($sankey, 'Sankey');
+$sankey->SetTestProperty('Sources', json_encode([...$sankeySources,
+    ['Source' => 'load', 'Target' => 'supply', 'VariableID' => 4711]], JSON_THROW_ON_ERROR));
+$sankey->ApplyChanges();
+assertGatewayGauge(
+    $sankey->GetTestStatus() === 201
+        && str_contains($sankey->GetSankeyDiagnostic(), 'cycle'),
+    'Sankey must reject cycles before rendering, including zero-width connections.'
+);
+$sankey->SetTestProperty('Sources', json_encode([$sankeySources[0]], JSON_THROW_ON_ERROR));
+$sankey->ApplyChanges();
+assertGatewayGauge($sankey->GetTestReferences() === [4711], 'Removing a Sankey connection must unregister unused sources.');
+$sankey->SetTestProperty('Sources', json_encode([array_replace($sankeySources[0], ['VariableID' => 4712])], JSON_THROW_ON_ERROR));
+$sankey->ApplyChanges();
+assertGatewayGauge($sankey->GetTestStatus() === 201, 'Sankey must reject nonnumeric source variables.');
+$sankeyLocale = json_decode(file_get_contents(__DIR__ . '/../EChartsSankey/locale.json'), true, 512, JSON_THROW_ON_ERROR)['translations']['de'];
+$sankeyStaticForm = json_decode(file_get_contents(__DIR__ . '/../EChartsSankey/form.json'), true, 512, JSON_THROW_ON_ERROR);
+$sankeyCaptionCheck = static function (array $items) use (&$sankeyCaptionCheck, $sankeyLocale): void
+{
+    foreach ($items as $key => $item) {
+        if (in_array($key, ['caption', 'transparentCaption'], true) && is_string($item)) {
+            assertGatewayGauge(isset($sankeyLocale[$item]), 'Sankey must localize form caption: ' . $item);
+        } elseif (is_array($item)) {
+            $sankeyCaptionCheck($item);
+        }
+    }
+};
+$sankeyCaptionCheck($sankeyStaticForm);
+
+$maximumSankey = new EChartsSankey();
+$maximumSankey->Create();
+$maximumSankeyNodes = [];
+$maximumSankeySources = [];
+for ($index = 0; $index < 100; ++$index) {
+    $maximumSankeyNodes[] = ['Key' => 'node' . $index, 'Label' => str_repeat('N', 80)];
+}
+for ($source = 0; $source < 100 && count($maximumSankeySources) < 200; ++$source) {
+    for ($target = $source + 1; $target < 100 && count($maximumSankeySources) < 200; ++$target) {
+        $maximumSankeySources[] = ['Source' => 'node' . $source, 'Target' => 'node' . $target, 'VariableID' => 4711];
+    }
+}
+$maximumSankey->SetTestProperty('Nodes', json_encode($maximumSankeyNodes, JSON_THROW_ON_ERROR));
+$maximumSankey->SetTestProperty('Sources', json_encode($maximumSankeySources, JSON_THROW_ON_ERROR));
+$maximumSankey->ApplyChanges();
+assertGatewayGauge(
+    $maximumSankey->GetTestStatus() === IS_ACTIVE && $maximumSankey->GetTestReferences() === [4711]
+        && strlen($maximumSankey->GetVisualizationTile()) < SYMCON_OUTPUT_BUFFER_LIMIT
+        && strlen($maximumSankey->GetIPSViewHTML()) < SYMCON_OUTPUT_BUFFER_LIMIT,
+    'Sankey must deduplicate shared source subscriptions and fit the output limit at maximum configuration size.'
+);
 
 echo "Gateway and Gauge module integration verified.\n";

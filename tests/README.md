@@ -1,5 +1,12 @@
 # Tests
 
+Sankey wird durch `php tests/sankey_model.php` und
+`node tests/sankey_layout.js` geprüft. Abgedeckt sind manuelle Knotenschlüssel,
+aktuelle Verbindungsgewichte, Zyklen, Null- und Negativwerte sowie das Layout
+mit der echten ECharts-Engine. Die Gateway-Suite prüft zusätzlich
+Quellenabonnements, Wertänderungen, Formularauswahl und getrennte Ausgabewege.
+Ein Live-Test in Symcon-Kachel und IPSView bleibt erforderlich.
+
 Die lokale Testsuite wird aus dem Repository-Stamm gestartet:
 
 ```text

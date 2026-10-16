@@ -25,6 +25,7 @@ $graphRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts
 $treemapRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.treemap.min.js';
 $sunburstRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.sunburst.min.js';
 $parallelRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.parallel.min.js';
+$sankeyRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.sankey.min.js';
 $licensePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/LICENSE.txt';
 $noticePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/NOTICE.txt';
 $runtime = (string) file_get_contents($runtimePath);
@@ -38,6 +39,7 @@ $graphRuntime = (string) file_get_contents($graphRuntimePath);
 $treemapRuntime = (string) file_get_contents($treemapRuntimePath);
 $sunburstRuntime = (string) file_get_contents($sunburstRuntimePath);
 $parallelRuntime = (string) file_get_contents($parallelRuntimePath);
+$sankeyRuntime = (string) file_get_contents($sankeyRuntimePath);
 $designUtilitiesPath = $root . '/libs/echarts-design.js';
 $designUtilities = (string) file_get_contents($designUtilitiesPath);
 $zoomUtilities = (string) file_get_contents($root . '/libs/echarts-zoom.js');
@@ -53,6 +55,7 @@ $graphRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtim
 $treemapRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/treemap-runtime.js');
 $sunburstRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/sunburst-runtime.js');
 $parallelRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/parallel-runtime.js');
+$sankeyRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/sankey-runtime.js');
 $windowsCheckoutRuntime = str_replace("\n", "\r\n", $runtime);
 $expectedThemeIDs = ['auto', 'dark', 'vintage', 'macarons', 'infographic', 'shine', 'roma'];
 
@@ -162,6 +165,14 @@ assertEChartsAsset(
         && str_contains($parallelRuntime, 'window.echarts')
         && str_contains($parallelRuntimeSource, 'ParallelChart'),
     'The Parallel runtime must be pinned, expose the browser API and remain below 550 KB.'
+);
+assertEChartsAsset(
+    hash_file('sha256', $sankeyRuntimePath) === EChartsAsset::SANKEY_SHA256
+        && EChartsAsset::SankeyJavaScript() === $sankeyRuntime
+        && strlen($sankeyRuntime) < 550000
+        && str_contains($sankeyRuntime, 'window.echarts')
+        && str_contains($sankeyRuntimeSource, 'SankeyChart'),
+    'The Sankey runtime must be pinned, expose the browser API and remain below 550 KB.'
 );
 assertEChartsAsset(
     EChartsAsset::DesignJavaScript() === $designUtilities

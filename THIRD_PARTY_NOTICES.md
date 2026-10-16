@@ -67,6 +67,10 @@ Ausgelieferte Dateien:
   Parallel-Browser-Build aus ECharts Core, Parallel Chart und Component,
   Titel, Tooltip, Aria und Canvas Renderer; 495.113 Byte; SHA-256
   `ded2b972e4032a840353eabc34809047d70c5bc9e7f700b6a09f617d9bc21295`;
+- `libs/echarts/6.1.0/echarts.sankey.min.js` – reproduzierbarer
+  Sankey-Browser-Build aus ECharts Core, Sankey Chart, Titel, Tooltip,
+  Aria und Canvas Renderer; 502.447 Byte; SHA-256
+  `7de7151e7ff00b3556de74f1716e2950e530e2aa9ac16309202d1669fbd03abb`;
 - `libs/echarts/6.1.0/themes/dark.js` – offizielles Theme Dark; 5.981 Byte;
   SHA-256 `ae60e563617cb87514690c1946ee202e78c9f1487820490614b58934ed037458`;
 - `libs/echarts/6.1.0/themes/vintage.js` – offizielles Theme Vintage;
