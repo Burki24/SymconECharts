@@ -2,6 +2,12 @@
 
 ## Hinzugefügt
 
+- Der Boxplot-Designer bietet minimale Boxbreite, Randlinienarten,
+  Schatten mit Farbe und Versatz, abschaltbare Hover-Hervorhebung,
+  feinere Kategorienbeschriftungen und Achsen, Rastergestaltung sowie
+  Fettschrift. Beide Ausgabewege besitzen unabhängige Einstellungen und
+  aktualisierte Beispielvorschauen; bestehende Quellen und Einstellungen bleiben erhalten.
+
 - `EChartsBoxplot` (`ECBX`) vergleicht abgeschlossene Stundenmittelwerte von
   1–10 Standard-Archivvariablen derselben Einheit über 24 Stunden, 7 oder 30 Tage.
   Boxen zeigen R7-Quartile und Median, die Enden Minimum und Maximum.

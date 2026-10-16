@@ -74,8 +74,18 @@
         var top = titleLayout.contentTop + (boxplot.unit ? font + 14 : 10);
         var left = horizontal ? Math.min(width * 0.35, Math.max(60, font * 12)) : Math.min(width * 0.25, Math.max(45, font * 5));
         var bottom = horizontal ? font * 3 + 24 : font * 2 + 22;
+        var rotation = Number(style.axisLabelRotate) || 0;
+        var requestedLabelWidth = Number(style.axisLabelMaxWidth) || 0;
         var slot = (horizontal ? height - top - bottom : width - left - 22) / Math.max(1, items.length);
+        var autoLabelWidth = Math.max(12, horizontal ? left - 15 : slot - 8);
+        var labelWidth = requestedLabelWidth > 0 ? Math.min(requestedLabelWidth, horizontal ? left - 15 : width - 30) : autoLabelWidth;
+        if (rotation) {
+            var sine = Math.abs(Math.sin(rotation * Math.PI / 180));
+            labelWidth = Math.min(labelWidth, Math.max(12, (horizontal ? slot * 0.7 : height * 0.3) / sine));
+            if (!horizontal && style.showAxisLabels !== false) { bottom += labelWidth * sine; }
+        }
         var boxWidth = Math.max(1, Math.min(style.boxWidth == null ? 40 : style.boxWidth, slot * 0.65));
+        var minimumBoxWidth = Math.min(style.minBoxWidth == null ? 1 : style.minBoxWidth, boxWidth);
         var labels = Object.create(null);
         items.forEach(function (item) { labels[item.id] = item.label; });
         function format(value, item) {
@@ -85,20 +95,26 @@
         var category = { type: 'category', data: items.map(function (item) { return item.id; }),
             axisLabel: { show: style.showAxisLabels !== false, color: style.axisColor || colors.text,
                 fontSize: font, interval: 0, hideOverlap: true, overflow: 'truncate',
-                width: Math.max(12, horizontal ? left - 15 : slot - 8),
+                rotate: rotation, fontWeight: style.axisLabelBold === true ? 'bold' : 'normal', width: labelWidth,
                 formatter: function (id) { return labels[id] || ''; } },
-            axisTick: { alignWithLabel: true }, axisLine: { lineStyle: { color: colors.border } } };
+            axisTick: { show: style.showAxisTicks !== false, alignWithLabel: true },
+            axisLine: { lineStyle: { color: colors.border, width: style.axisLineWidth == null ? 1 : style.axisLineWidth } } };
         var value = { type: 'value', scale: true, name: boxplot.unit || '', nameLocation: horizontal ? 'middle' : 'end',
             nameGap: horizontal ? font + 18 : 15,
             nameTextStyle: { color: style.axisColor || colors.text, fontSize: font },
-            axisLabel: { show: style.showAxisLabels !== false, color: style.axisColor || colors.text, fontSize: font, hideOverlap: true },
-            splitLine: { show: style.showGrid !== false, lineStyle: { color: colors.border, opacity: 0.25 } } };
+            splitNumber: style.splitNumber == null ? 5 : style.splitNumber,
+            axisLabel: { show: style.showAxisLabels !== false, color: style.axisColor || colors.text, fontSize: font, hideOverlap: true,
+                fontWeight: style.axisLabelBold === true ? 'bold' : 'normal' },
+            splitLine: { show: style.showGrid !== false, lineStyle: { color: style.gridColor || colors.border,
+                type: style.gridLineType || 'solid', width: style.gridLineWidth == null ? 1 : style.gridLineWidth,
+                opacity: style.gridOpacityPercent == null ? 0.25 : style.gridOpacityPercent / 100 } } };
         return {
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
             backgroundColor: 'transparent', color: colors.seriesColors || [colors.accent],
             textStyle: { color: colors.text, fontFamily: 'Arial, sans-serif' }, aria: { enabled: true },
             title: { show: titleLayout.show, text: boxplot.title || '', top: titleLayout.top, left: 'center',
-                textStyle: { color: style.titleColor || colors.text, fontSize: titleSize, overflow: 'truncate', width: Math.max(1, width - 36) } },
+                textStyle: { color: style.titleColor || colors.text, fontSize: titleSize, fontWeight: style.titleBold === false ? 'normal' : 'bold',
+                    overflow: 'truncate', width: Math.max(1, width - 36) } },
             grid: { top: top, left: left, right: horizontal ? Math.max(30, font * 3) : 22, bottom: bottom, containLabel: false },
             xAxis: horizontal ? value : category, yAxis: horizontal ? category : value,
             tooltip: { show: style.showTooltip !== false, trigger: 'item', confine: true,
@@ -114,10 +130,14 @@
                         + ' – ' + escapeHTML(new Date(item.lastTimestamp * 1000).toLocaleString(bootstrap.language || undefined))
                         + '<br>' + escapeHTML(translate('Completed hourly means · whiskers: minimum and maximum'));
                 } },
-            series: [{ type: 'boxplot', boxWidth: [1, boxWidth],
+            series: [{ type: 'boxplot', boxWidth: [minimumBoxWidth, boxWidth],
                 itemStyle: { borderWidth: style.borderWidth == null ? 2 : style.borderWidth,
+                    borderType: style.borderType || 'solid', shadowBlur: Number(style.shadowBlur) || 0,
+                    shadowColor: style.shadowColor || 'rgba(0,0,0,0.35)',
+                    shadowOffsetX: Number(style.shadowOffsetX) || 0, shadowOffsetY: Number(style.shadowOffsetY) || 0,
                     borderColor: style.borderColor || colors.border, opacity: style.boxOpacityPercent == null ? 0.7 : style.boxOpacityPercent / 100 },
-                emphasis: { focus: 'self' },
+                emphasis: { focus: style.hoverFocus === 'none' ? 'none' : 'self', disabled: style.hoverFocus === 'none' },
+                blur: { itemStyle: { opacity: style.blurOpacityPercent == null ? 0.1 : style.blurOpacityPercent / 100 } },
                 data: items.map(function (item, index) {
                     return { id: item.id, name: item.label, value: item.statistics || [null, null, null, null, null],
                         itemStyle: { color: item.color || (colors.seriesColors || [colors.accent])[index % (colors.seriesColors || [colors.accent]).length] } };

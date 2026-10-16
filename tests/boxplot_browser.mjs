@@ -21,11 +21,20 @@ function state() {
 }
 const variables = ':root{--symc-background:#303236;--symc-text:#f4f5f7;--symc-text-muted:#969aa2;--symc-border:#555860;--symc-surface:#25272b}';
 const translations = JSON.parse(read('EChartsBoxplot/locale.json')).translations.de;
-function page(mode) {
+function page(mode, extended = false) {
     const initialState = state();
     if (mode === 'ipsview') {
         initialState.chart.boxplot.style.orientation = 'horizontal';
         initialState.chart.boxplot.style.axisColor = '#A9DCD2';
+    }
+    if (extended) {
+        Object.assign(initialState.chart.boxplot.style, {
+            minBoxWidth: 20, borderType: 'dashed', borderColor: '#CBD6E8', shadowBlur: 8, shadowColor: '#000000',
+            shadowOffsetX: 3, shadowOffsetY: 3, hoverFocus: 'self', blurOpacityPercent: 10,
+            axisLineWidth: 2, showAxisTicks: false, axisLabelRotate: mode === 'ipsview' ? 0 : 45, axisLabelMaxWidth: 100,
+            titleBold: false, axisLabelBold: true, splitNumber: 8, gridLineType: 'dotted', gridLineWidth: 1,
+            gridOpacityPercent: 50, gridColor: '#85929E'
+        });
     }
     const bootstrap = { mode, state: initialState, options: { tileHeaderVisible: true, echartsThemes: {auto: {background:'#303236',text:'#f4f5f7',muted:'#969aa2',border:'#777b83',accent:'#55CBB5',seriesColors:['#5070dd','#b6d634','#ff994d','#fb628b']}},
         adaptToBackground: false,  }, translations };
@@ -41,7 +50,7 @@ function page(mode) {
 http.createServer((req, res) => {
     const url = new URL(req.url, 'http://127.0.0.1');
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    if (url.pathname === '/chart') { res.end(page(url.searchParams.get('mode') === 'ipsview' ? 'ipsview' : 'symcon')); return; }
+    if (url.pathname === '/chart') { res.end(page(url.searchParams.get('mode') === 'ipsview' ? 'ipsview' : 'symcon', url.searchParams.get('design') === 'extended')); return; }
     res.end('<!doctype html><html lang="de"><head><title>Boxplot – lokale Browserprüfung</title></head><body style="background:#0b0c0e;color:white;font:16px Arial;margin:20px">'
         + '<h1 style="font-size:20px">Boxplot · synthetische Beispieldaten</h1><div style="display:flex;gap:16px;align-items:start;flex-wrap:wrap">'
         + '<section><h2 style="font-size:16px">Kachel · hoch</h2><iframe title="Kachel" src="/chart?mode=symcon" style="border:0;width:400px;height:600px"></iframe></section>'

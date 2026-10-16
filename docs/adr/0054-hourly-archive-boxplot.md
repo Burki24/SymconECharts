@@ -44,9 +44,9 @@ ECharts-Basis; Integrität und Budget werden geprüft. Grundlage:
 [offizielle Boxplot-Serie](https://echarts.apache.org/en/option.html#series-boxplot).
 
 Erforderlich sind reine Statistiktests, Gateway-/Formular-/Budgettests,
-echte ECharts-Geometrie und lokale Browserprüfung. Symcon-/IPSView-Live-Tests
-der neuen Familie erfolgen erst nach Installation durch den Anwender und
-sind noch offen. Bestehende Instanzen bleiben unverändert.
+echte ECharts-Geometrie und lokale Browserprüfung. Die erste Version wurde
+am 16.10.2026 durch den Anwender in Kachel und IPSView positiv live geprüft.
+Bestehende Instanzen bleiben unverändert.
 
 ## Lokale Prüfung vom 16.10.2026
 
@@ -66,4 +66,38 @@ sind noch offen. Bestehende Instanzen bleiben unverändert.
   eigenem Titel sowie unabhängige horizontale IPSView-Darstellung.
 
 Diese Belege ersetzen keine Prüfung in IP-Symcon 9.0/9.1 oder IPSView.
-Der Anwender muss die neue Familie nach Modulupdate noch live bestätigen.
+Der Anwender hat die erste Version inzwischen live bestätigt; neue
+Designer-Ergänzungen benötigen nach Installation eine erneute Bestätigung.
+
+## Designer-Ergänzung vom 16.10.2026
+
+Abgleich mit der offiziellen [Boxplot-Serie](https://echarts.apache.org/en/option.html#series-boxplot),
+den [Item-Styles](https://github.com/apache/echarts-doc/blob/master/en/option/partial/item-style.md),
+[Schatten und Deckkraft](https://github.com/apache/echarts-doc/blob/master/en/option/partial/style-shadow-opacity.md)
+sowie [Emphasis/Blur](https://github.com/apache/echarts-doc/blob/master/en/option/partial/emphasis-common.md).
+Die vorhandene gepinnte 6.1.0-Runtime unterstützt die Ergänzungen unverändert.
+
+| Bereich | Ergänzungen |
+| --- | --- |
+| Boxen | `boxWidth`-Untergrenze, `borderType` |
+| Effekte | `shadowBlur`, `shadowColor`, `shadowOffsetX/Y`, `emphasis.focus/disabled`, `blur.itemStyle.opacity` |
+| Kategorien | `axisTick.show`, Achsenlinienbreite, `axisLabel.rotate/width/fontWeight` |
+| Werteachse | gewünschte `splitNumber`, `splitLine.lineStyle.type/width/color/opacity` |
+| Typografie | `title.textStyle.fontWeight`, Fettschrift für Wertebeschriftungen der Achse |
+
+Alle 19 neuen Properties erhalten unabhängige IPSView-Pendants und werden über
+die vorhandenen Mechanismen für Registrierung, Vererbung, Kopie und ungespeicherte
+Vorschauzustände geführt. Vorhandene Properties, Quellen, Datenfenster, R7-Statistik,
+Min-/Max-Enden und Gateway-Verträge bleiben unverändert. Ungültige Bereiche,
+Enums und minimale Breiten oberhalb der maximalen Breite werden abgewiesen.
+Kleine Ausgaben dürfen Mindestbreiten und gedrehte Kategoriennamen begrenzen.
+Hover-Effekte werden nicht im statischen SVG simuliert; ein Hinweis benennt die Grenze.
+
+Bewusst nicht Bestandteil dieses Designschritts: Tukey-Ausreißer oder zusätzliche
+Scatter-Serien, Markierungen, manuell abschneidende Wertebereiche, frei ausführbare
+Formatter, Muster-/Gradientenimporte und persistente Auswahlaktionen. Das sind
+zusätzliche fachliche oder interaktive Verträge, keine fehlenden Basis-Styles.
+
+Die Erweiterung wird mit Renderer-/ECharts-Geometrie-, Formular-/Validierungs-,
+Vorschau- und Integrationsprüfungen abgesichert. Der erneute Live-Test der
+Designer-Erweiterung in Symcon/IPSView bleibt nach Modulupdate offen.

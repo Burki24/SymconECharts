@@ -89,10 +89,57 @@ assert.equal(tile.chartElement.hidden, false);
 
 // Real pinned ECharts engine: both orientations, sparse categories, one-value boxes and compact sizing.
 const echarts = require(path.join(root, '.tools/echarts-runtime/node_modules/echarts'));
+const decoration = { minBoxWidth: 12, borderType: 'dashed', shadowBlur: 8, shadowColor: '#123456', shadowOffsetX: 3, shadowOffsetY: -2,
+    hoverFocus: 'none', blurOpacityPercent: 15, axisLineWidth: 3, showAxisTicks: false,
+    axisLabelRotate: 45, axisLabelMaxWidth: 100, titleBold: false, axisLabelBold: true,
+    splitNumber: 8, gridLineType: 'dotted', gridLineWidth: 2, gridOpacityPercent: 60, gridColor: '#fedcba' };
+const decorated = render({ ...model, boxplot: { ...model.boxplot, style: { ...model.boxplot.style, ...decoration } } });
+assert.equal(decorated.option.series[0].itemStyle.borderType, 'dashed');
+assert.equal(decorated.option.series[0].itemStyle.shadowBlur, 8);
+assert.equal(decorated.option.series[0].itemStyle.shadowColor, '#123456');
+assert.equal(decorated.option.series[0].itemStyle.shadowOffsetX, 3);
+assert.equal(decorated.option.series[0].itemStyle.shadowOffsetY, -2);
+assert.equal(decorated.option.series[0].boxWidth[0], 12);
+assert.equal(decorated.option.series[0].emphasis.disabled, true);
+assert.equal(decorated.option.series[0].blur.itemStyle.opacity, 0.15);
+assert.equal(decorated.option.xAxis.axisTick.show, false);
+assert.equal(decorated.option.xAxis.axisLine.lineStyle.width, 3);
+assert.equal(decorated.option.xAxis.axisLabel.rotate, 45);
+assert.equal(decorated.option.xAxis.axisLabel.width, 100);
+assert.equal(decorated.option.xAxis.axisLabel.fontWeight, 'bold');
+assert.equal(decorated.option.title.textStyle.fontWeight, 'normal');
+assert.equal(decorated.option.yAxis.splitNumber, 8);
+assert.equal(decorated.option.yAxis.splitLine.lineStyle.type, 'dotted');
+assert.equal(decorated.option.yAxis.splitLine.lineStyle.width, 2);
+assert.equal(decorated.option.yAxis.splitLine.lineStyle.color, '#fedcba');
+assert.equal(decorated.option.yAxis.splitLine.lineStyle.opacity, 0.6);
+const engineDecoration = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 900, height: 500 });
+engineDecoration.setOption(decorated.option);
+const decoratedElement = engineDecoration.getModel().getSeriesByIndex(0).getData().getItemGraphicEl(0);
+assert.equal(decoratedElement.style.lineDash, 'dashed');
+assert.equal(decoratedElement.style.shadowBlur, 8);
+assert.equal(decoratedElement.style.shadowOffsetY, -2);
+assert.equal(decoratedElement.states.blur.style.opacity, 0.15);
+assert.match(engineDecoration.renderToSVGString(), /stroke-dasharray/);
+engineDecoration.dispose();
+const transparent = render({ ...model, boxplot: { ...model.boxplot, style: { ...model.boxplot.style,
+    gridLineWidth: 0, gridOpacityPercent: 0, axisLineWidth: 0, blurOpacityPercent: 0 } } });
+assert.equal(transparent.option.yAxis.splitLine.lineStyle.width, 0);
+assert.equal(transparent.option.yAxis.splitLine.lineStyle.opacity, 0);
+assert.equal(transparent.option.xAxis.axisLine.lineStyle.width, 0);
+assert.equal(transparent.option.series[0].blur.itemStyle.opacity, 0);
+const crowdedModel = { ...model, boxplot: { ...model.boxplot,
+    data: Array.from({ length: 10 }, (_, i) => ({ ...model.boxplot.data[0], id: 'v' + i, label: 'Very long category label ' + i })),
+    style: { ...model.boxplot.style, ...decoration, axisLabelRotate: 90, axisLabelMaxWidth: 300, axisFontSizePercent: 200,
+        minBoxWidth: 80, boxWidth: 80 } } };
+const crowded = render(crowdedModel, 'symcon', true, 350);
+assert.ok(crowded.option.series[0].boxWidth[0] <= crowded.option.series[0].boxWidth[1]);
+assert.ok(crowded.option.series[0].boxWidth[1] <= (350 - crowded.option.grid.left - crowded.option.grid.right) / 10 * 0.65);
+assert.ok(crowded.option.xAxis.axisLabel.width <= 150, 'Rotated labels must fit the reserved bottom band.');
 for (const horizontal of [false, true]) {
     for (const width of [350, 900]) {
         const rendered = render({ ...model, boxplot: { ...model.boxplot, style: { ...model.boxplot.style,
-            orientation: horizontal ? 'horizontal' : 'vertical' } } }, 'symcon', true, width);
+            ...decoration, orientation: horizontal ? 'horizontal' : 'vertical' } } }, 'symcon', true, width);
         const chart = echarts.init(null, null, { renderer: 'svg', ssr: true, width, height: 500 });
         chart.setOption(rendered.option);
         const data = chart.getModel().getSeriesByIndex(0).getData();

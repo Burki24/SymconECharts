@@ -1,6 +1,7 @@
 {
     "translations": {
         "de": {
+            "Hover effects are visible in the chart.": "Hover-Effekte sind im Diagramm sichtbar.",
             "Example data": "Beispieldaten",
             "Boxplot preview": "Boxplot-Vorschau",
             "Hourly samples": "Stundenstichproben",
@@ -86,7 +87,32 @@
             "Background opacity": "Hintergrunddeckkraft",
             "Tile live preview": "Kachel-Live-Vorschau",
             "IPSView live preview": "IPSView-Live-Vorschau",
-            "Data could not be refreshed. Showing the last available values.": "Die Daten konnten nicht aktualisiert werden. Die letzten verfügbaren Werte werden angezeigt."
+            "Data could not be refreshed. Showing the last available values.": "Die Daten konnten nicht aktualisiert werden. Die letzten verfügbaren Werte werden angezeigt.",
+            "Minimum box width": "Minimale Boxbreite",
+            "Border type": "Randlinienart",
+            "Solid": "Durchgezogen",
+            "Dashed": "Gestrichelt",
+            "Dotted": "Gepunktet",
+            "Shadows and highlighting": "Schatten und Hervorhebung",
+            "Shadow blur": "Schattenunschärfe",
+            "Shadow color": "Schattenfarbe",
+            "Shadow offset X": "Schattenversatz X",
+            "Shadow offset Y": "Schattenversatz Y",
+            "Highlight on hover": "Hervorhebung beim Zeigen",
+            "Highlight hovered box": "Berührte Box hervorheben",
+            "No highlighting": "Keine Hervorhebung",
+            "Other boxes opacity": "Deckkraft übriger Boxen",
+            "Show category ticks": "Kategorien-Teilstriche anzeigen",
+            "Category axis width": "Kategorien-Achsenbreite",
+            "Category label rotation": "Drehung der Kategorienbeschriftung",
+            "Category label width (0 = automatic)": "Kategorien-Textbreite (0 = automatisch)",
+            "Value axis subdivisions": "Unterteilungen der Werteachse",
+            "Grid line type": "Rasterlinienart",
+            "Grid line width": "Rasterlinienbreite",
+            "Grid opacity": "Rasterdeckkraft",
+            "Grid color": "Rasterfarbe",
+            "Bold title": "Titel fett",
+            "Bold axis labels": "Achsenbeschriftungen fett"
         }
     }
 }

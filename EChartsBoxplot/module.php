@@ -72,7 +72,11 @@ class EChartsBoxplot extends IPSModuleStrict
     private const DESIGN_DEFAULTS = [
         'EChartsTheme'         => 'auto', 'Orientation' => 'vertical', 'ShowTooltip' => true,
         'ShowGrid'             => true, 'ShowAxisLabels' => true, 'BoxWidth' => 40, 'BorderWidth' => 2, 'BoxOpacityPercent' => 70,
-        'TitleFontSizePercent' => 100, 'AxisFontSizePercent' => 100, 'TitleColor' => -1, 'AxisColor' => -1, 'BorderColor' => -1
+        'TitleFontSizePercent' => 100, 'AxisFontSizePercent' => 100, 'TitleColor' => -1, 'AxisColor' => -1, 'BorderColor' => -1,
+        'MinBoxWidth'          => 1, 'BorderType' => 'solid', 'ShadowBlur' => 0, 'ShadowColor' => -1, 'ShadowOffsetX' => 0, 'ShadowOffsetY' => 0,
+        'HoverFocus'           => 'self', 'BlurOpacityPercent' => 10, 'AxisLineWidth' => 1, 'ShowAxisTicks' => true,
+        'AxisLabelRotate'      => 0, 'AxisLabelMaxWidth' => 0, 'TitleBold' => true, 'AxisLabelBold' => false,
+        'SplitNumber'          => 5, 'GridLineType' => 'solid', 'GridLineWidth' => 1, 'GridOpacityPercent' => 25, 'GridColor' => -1
     ];
 
     public function Create(): void
@@ -132,6 +136,7 @@ class EChartsBoxplot extends IPSModuleStrict
         $form = EChartsDesignerSections::Group($form, [
             ['caption' => 'Animation', 'start' => 'AnimationEnabled'],
             ['caption' => 'Layout and boxes', 'start' => 'Orientation'],
+            ['caption' => 'Shadows and highlighting', 'start' => 'ShadowBlur'],
             ['caption' => 'Axes and grid', 'start' => 'ShowGrid'],
             ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
         ]);
@@ -557,17 +562,24 @@ class EChartsBoxplot extends IPSModuleStrict
     private function IsValidDesign(string $prefix): bool
     {
         if (!EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme')) || !$this->AnimationIsValid($prefix)
-            || !in_array($this->ReadPropertyString($prefix . 'Orientation'), ['vertical', 'horizontal'], true)) {
+            || !in_array($this->ReadPropertyString($prefix . 'Orientation'), ['vertical', 'horizontal'], true)
+            || !in_array($this->ReadPropertyString($prefix . 'BorderType'), ['solid', 'dashed', 'dotted'], true)
+            || !in_array($this->ReadPropertyString($prefix . 'GridLineType'), ['solid', 'dashed', 'dotted'], true)
+            || !in_array($this->ReadPropertyString($prefix . 'HoverFocus'), ['self', 'none'], true)
+            || $this->ReadPropertyInteger($prefix . 'MinBoxWidth') > $this->ReadPropertyInteger($prefix . 'BoxWidth')) {
             return false;
         }
         foreach (['BoxWidth'       => [8, 80], 'BorderWidth' => [0, 8], 'BoxOpacityPercent' => [0, 100],
-            'TitleFontSizePercent' => [50, 200], 'AxisFontSizePercent' => [50, 200]] as $name => [$min, $max]) {
+            'TitleFontSizePercent' => [50, 200], 'AxisFontSizePercent' => [50, 200],
+            'MinBoxWidth'          => [1, 80], 'ShadowBlur' => [0, 20], 'ShadowOffsetX' => [-20, 20], 'ShadowOffsetY' => [-20, 20],
+            'BlurOpacityPercent'   => [0, 100], 'AxisLineWidth' => [0, 5], 'AxisLabelRotate' => [-90, 90],
+            'AxisLabelMaxWidth'    => [0, 300], 'SplitNumber' => [2, 10], 'GridLineWidth' => [0, 5], 'GridOpacityPercent' => [0, 100]] as $name => [$min, $max]) {
             $value = $this->ReadPropertyInteger($prefix . $name);
             if ($value < $min || $value > $max) {
                 return false;
             }
         }
-        foreach (['TitleColor', 'AxisColor', 'BorderColor'] as $name) {
+        foreach (['TitleColor', 'AxisColor', 'BorderColor', 'ShadowColor', 'GridColor'] as $name) {
             $color = $this->ReadPropertyInteger($prefix . $name);
             if ($color < -1 || $color > 0xFFFFFF) {
                 return false;

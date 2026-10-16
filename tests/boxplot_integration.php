@@ -98,12 +98,62 @@ if (class_exists(DOMDocument::class)) {
     assertGatewayGauge($boxplotXML->loadXML($boxplotSVG, LIBXML_NONET) && $boxplotXML->loadXML($boxplotDraftSVG, LIBXML_NONET), 'Boxplot previews must be valid XML.');
 }
 $GLOBALS['symconTestCopyTarget'] = $boxplot;
+// New controls must reach each output and the drafts, without changing source contracts.
+$boxplotSavedProperties = (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($boxplot);
+$boxplotDecorations = ['MinBoxWidth' => 12, 'BorderType' => 'dashed', 'ShadowBlur' => 8, 'ShadowOffsetX' => 3, 'ShadowOffsetY' => -2,
+    'ShadowColor'                    => 0x123456, 'HoverFocus' => 'none', 'BlurOpacityPercent' => 15, 'AxisLineWidth' => 3, 'ShowAxisTicks' => false,
+    'AxisLabelRotate'                => 45, 'AxisLabelMaxWidth' => 100, 'SplitNumber' => 8, 'GridLineType' => 'dotted', 'GridLineWidth' => 2,
+    'GridOpacityPercent'             => 60, 'GridColor' => 0xFEDCBA, 'TitleBold' => false, 'AxisLabelBold' => true];
+foreach ($boxplotDecorations as $name => $value) {
+    $boxplot->SetTestProperty($name, $value);
+    $field = findGaugeFormElement($boxplotForm['elements'], $name);
+    $independent = findGaugeFormElement($boxplotForm['elements'], 'IPSView' . $name);
+    assertGatewayGauge(
+        isset($field['onChange']) && isset($independent['onChange']) && $independent['enabled'] === true,
+        'Every new control must be wired into both designers and live previews: ' . $name
+    );
+}
+$boxplot->ApplyChanges();
+assertGatewayGauge(str_contains($boxplot->GetVisualizationTile(), '"borderType":"dashed"')
+    && str_contains($boxplot->GetIPSViewHTML(), '"borderType":"solid"'), 'New Boxplot design properties must remain independent.');
+$boxplotPropertiesBeforeDraft = (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($boxplot);
+IPSModuleStrict::$ParentResponder = static function (string $json): string
+{ throw new RuntimeException('Designer drafts must never query archives.'); };
+try {
+    $boxplot->UpdateBarPreviewFromForm(json_encode(['IPSViewUseTileDesign' => true, ...$boxplotDecorations], JSON_THROW_ON_ERROR));
+} finally {
+    IPSModuleStrict::$ParentResponder = $boxplotParent;
+}
+$boxplotDecoratedSVG = base64_decode(substr(array_slice($boxplot->GetTestFormUpdates(), -2)[0]['Value'], strlen('data:image/svg+xml;base64,')), true);
+assertGatewayGauge(
+    str_contains($boxplotDecoratedSVG, 'stroke-dasharray="6 4"') && str_contains($boxplotDecoratedSVG, 'stroke-dasharray="2 3"')
+    && str_contains($boxplotDecoratedSVG, 'filter="url(#box-shadow)"') && str_contains($boxplotDecoratedSVG, 'stdDeviation="4"')
+    && str_contains($boxplotDecoratedSVG, 'dx="3" dy="-2"') && str_contains($boxplotDecoratedSVG, '#FEDCBA')
+    && str_contains($boxplotDecoratedSVG, 'rotate(-45 ') && str_contains($boxplotDecoratedSVG, 'font-weight="normal" x="24"')
+    && str_contains($boxplotDecoratedSVG, 'font-weight="bold"')
+    && (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($boxplot) === $boxplotPropertiesBeforeDraft,
+    'Designer previews must show effects, rotation, grid and typography without saving drafts.'
+);
+$boxplotDecoratedDocument = new DOMDocument();
+assertGatewayGauge($boxplotDecoratedDocument->loadXML($boxplotDecoratedSVG, LIBXML_NONET), 'Decorated Boxplot previews must remain valid XML.');
 try {
     $boxplot->CopyTileDesignToIPSView();
 } finally {
     unset($GLOBALS['symconTestCopyTarget']);
 }
 assertGatewayGauge(str_contains($boxplot->GetIPSViewHTML(), '"orientation":"vertical"'), 'Explicit design copy must copy Boxplot settings.');
+assertGatewayGauge(str_contains($boxplot->GetIPSViewHTML(), '"borderType":"dashed"')
+    && str_contains($boxplot->GetIPSViewHTML(), '"shadowBlur":8'), 'Explicit copy must include every new Boxplot design option.');
+foreach ($boxplotSavedProperties as $name => $value) {
+    $boxplot->SetTestProperty($name, $value);
+}
+$boxplot->SetTestProperty('IPSViewUseTileDesign', true);
+$boxplotInheritedForm = json_decode($boxplot->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+foreach (array_keys($boxplotDecorations) as $name) {
+    assertGatewayGauge(findGaugeFormElement($boxplotInheritedForm['elements'], 'IPSView' . $name)['enabled'] === false, 'Inherited Boxplot controls must be disabled: ' . $name);
+}
+$boxplot->SetTestProperty('IPSViewUseTileDesign', false);
+$boxplot->ApplyChanges();
 foreach (['24h', '7d', '30d'] as $range) {
     $boxplot->SetTestProperty('Range', $range);
     $rangeData = json_decode($boxplot->GetBoxplotData(), true, 512, JSON_THROW_ON_ERROR);
@@ -111,7 +161,11 @@ foreach (['24h', '7d', '30d'] as $range) {
 }
 foreach (['', 'IPSView'] as $prefix) {
     foreach (['Orientation' => ['bad', 'vertical'], 'BoxWidth' => [81, 40], 'BorderWidth' => [-1, 2], 'BoxOpacityPercent' => [101, 70],
-        'TitleColor'        => [-2, -1], 'AxisFontSizePercent' => [201, 100]] as $name => [$invalid, $valid]) {
+        'TitleColor'        => [-2, -1], 'AxisFontSizePercent' => [201, 100],
+        'MinBoxWidth'       => [41, 1], 'BorderType' => ['invalid', 'solid'], 'ShadowBlur' => [21, 0], 'ShadowColor' => [-2, -1],
+        'ShadowOffsetX'     => [-21, 0], 'ShadowOffsetY' => [21, 0], 'HoverFocus' => ['series', 'self'], 'BlurOpacityPercent' => [101, 10],
+        'AxisLineWidth'     => [6, 1], 'AxisLabelRotate' => [91, 0], 'AxisLabelMaxWidth' => [301, 0], 'SplitNumber' => [1, 5],
+        'GridLineType'      => ['invalid', 'solid'], 'GridLineWidth' => [-1, 1], 'GridOpacityPercent' => [101, 25], 'GridColor' => [-2, -1]] as $name => [$invalid, $valid]) {
         $boxplot->SetTestProperty($prefix . $name, $invalid);
         $boxplot->ApplyChanges();
         assertGatewayGauge($boxplot->GetTestStatus() === 202, 'Boxplot must reject invalid design ' . $prefix . $name);

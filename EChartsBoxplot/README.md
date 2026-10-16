@@ -45,6 +45,25 @@ Achsenbeschriftung sowie Schriftgrößen und Farben für Titel und Achsen.
 Die maximale Boxbreite wird auf schmalen Flächen automatisch begrenzt.
 Lange Kategorienamen werden bei Platzmangel gekürzt; im Tooltip bleiben sie vollständig.
 
+Der Designer bietet außerdem:
+
+- minimale und maximale Boxbreite sowie durchgezogene, gestrichelte oder
+  gepunktete Konturen für Boxen, Median und Enden;
+- Schatten mit Farbe, Unschärfe und X-/Y-Versatz;
+- abschaltbare Hover-Hervorhebung und die Deckkraft der übrigen Boxen;
+- Kategorien-Teilstriche, Kategorien-Achsenbreite, Drehung und maximale
+  Textbreite der Kategoriennamen (0 = automatisch);
+- gewünschte Unterteilungsanzahl der Werteachse sowie Rasterlinienart,
+  -breite, -farbe und -deckkraft; ECharts bestimmt die tatsächlichen
+  Skalenabstände anhand der Werte;
+- Fettschrift für Titel und Achsenbeschriftungen.
+
+Die minimale Boxbreite darf nicht größer als die maximale sein. Beide Breiten
+und die Textbreite werden bei Platzmangel responsiv begrenzt. Die Vorschau
+zeigt statische Gestaltung mit Beispieldaten; Hover-Effekte sind erst im
+Diagramm sichtbar. Datenfenster und Statistik werden durch diese Optionen
+nicht verändert.
+
 IPSView übernimmt standardmäßig das Kacheldesign. Für ein unabhängiges Design
 die Übernahme ausschalten oder das Kacheldesign ausdrücklich kopieren und
 anschließend separat bearbeiten. Die Datenquellen und der Zeitraum bleiben
