@@ -80,11 +80,9 @@
         return items;
     }
 
-    function pieLayout(style, showTitle, showLegend, titleSize) {
+    function pieLayout(style, showLegend, top) {
         var width = Math.max(1, chartElement.clientWidth || 1);
         var height = Math.max(1, chartElement.clientHeight || 1);
-        var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8;
-        var top = headerInset + (showTitle ? titleSize + 18 : 0);
         var legendAtRight = showLegend && width >= 760 && width >= height * 1.2;
         var legendWidth = legendAtRight ? Math.min(230, Math.max(170, Math.round(width * 0.24))) : 0;
         var plotWidth = width - legendWidth - (legendAtRight ? 16 : 0);
@@ -125,9 +123,9 @@
         var labelSize = design.fontSizePercent(style.labelFontSizePercent, 12);
         var compact = chartElement.clientWidth < 420 || chartElement.clientHeight < 260;
         var showLegend = style.showLegend === true && !compact;
-        var showTitle = Boolean(pie.title) && (bootstrap.mode === 'ipsview'
-            || bootstrap.options.tileHeaderVisible === false);
-        var layout = pieLayout(style, showTitle, showLegend, titleSize);
+        var titleLayout = design.chartTitleLayout(bootstrap, pie.title, titleSize, 18);
+        var showTitle = titleLayout.show;
+        var layout = pieLayout(style, showLegend, titleLayout.contentTop);
         var labelMap = {};
         var itemMap = {};
         var data = items.map(function (item, index) {
@@ -157,7 +155,7 @@
             }).join(', ') },
             title: {
                 show: showTitle, text: String(pie.title || ''), left: layout.plotWidth / 2,
-                textAlign: 'center', top: bootstrap.mode === 'symcon' ? 8 : 4,
+                textAlign: 'center', top: titleLayout.top,
                 textStyle: { color: style.titleColor || colors.text, fontSize: titleSize }
             },
             legend: {

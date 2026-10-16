@@ -106,9 +106,9 @@
         var width = Math.max(1, chartElement.clientWidth || 1);
         var height = Math.max(1, chartElement.clientHeight || 1);
         var compact = width < 420 || height < 260;
-        var showTitle = Boolean(treemap.title) && (bootstrap.mode === 'ipsview'
-            || bootstrap.options.tileHeaderVisible === false);
         var titleSize = design.fontSizePercent(style.titleFontSizePercent, 18);
+        var titleLayout = design.chartTitleLayout(bootstrap, treemap.title, titleSize);
+        var showTitle = titleLayout.show;
         var labelSize = design.fontSizePercent(style.labelFontSizePercent, 12);
         var textColor = style.labelColor || colors.text;
         var backgroundColor = bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
@@ -118,7 +118,7 @@
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
             aria: { enabled: true, decal: { show: false } },
             title: {
-                show: showTitle, text: String(treemap.title || ''), left: 'center', top: 4,
+                show: showTitle, text: String(treemap.title || ''), left: 'center', top: titleLayout.top,
                 textStyle: { color: style.titleColor || colors.text, fontSize: titleSize }
             },
             tooltip: {
@@ -134,8 +134,7 @@
             series: [{
                 id: 'treemap', type: 'treemap', data: nodesFor(treemap.data, colors, style),
                 left: 8, right: 8,
-                top: (bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8)
-                    + (showTitle ? titleSize + 12 : 0),
+                top: titleLayout.contentTop,
                 bottom: style.showBreadcrumb === false ? 8 : 28,
                 roam: style.allowPanZoom !== false,
                 nodeClick: style.clickToZoom === false ? false : 'zoomToNode',

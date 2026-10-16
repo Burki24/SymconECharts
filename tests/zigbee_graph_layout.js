@@ -63,6 +63,9 @@ const style = {
     showLinkArrows: true, titleFontSizePercent: 100, labelFontSizePercent: 100
 };
 const large = render(style);
+assert.equal(large.option.title.show, true);
+assert.ok(large.option.title.top >= 58 && large.option.series[0].top > large.option.title.top + 18,
+    'The Zigbee Graph title and nodes must clear the Symcon tile header.');
 assert.equal(large.option.series[0].type, 'graph');
 assert.equal(large.option.series[0].edgeSymbol[1], 'arrow');
 assert.equal(large.option.series[0].links[0].lqi, 240);

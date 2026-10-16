@@ -95,10 +95,9 @@
         var orient = ['LR', 'RL', 'TB', 'BT'].includes(style.orientation) ? style.orientation : 'LR';
         var titleSize = design.fontSizePercent(style.titleFontSizePercent, 18);
         var labelSize = design.fontSizePercent(style.labelFontSizePercent, compact ? 10 : 12);
-        var showTitle = Boolean(tree.title) && (bootstrap.mode === 'ipsview'
-            || bootstrap.options.tileHeaderVisible === false);
-        var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8;
-        var top = headerInset + (showTitle ? titleSize + 12 : 0);
+        var titleLayout = design.chartTitleLayout(bootstrap, tree.title, titleSize);
+        var showTitle = titleLayout.show;
+        var top = titleLayout.contentTop;
         var nodeSize = Math.max(4, Math.min(30, Number(style.nodeSize) || 10));
         var root = coloredNode(tree.root || {}, style, colors);
         return {
@@ -107,7 +106,7 @@
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
             aria: { enabled: true, decal: { show: false }, description: String(tree.count || 0) + ' Tree nodes' },
             title: {
-                show: showTitle, text: String(tree.title || ''), left: 'center', top: bootstrap.mode === 'symcon' ? 8 : 4,
+                show: showTitle, text: String(tree.title || ''), left: 'center', top: titleLayout.top,
                 textStyle: { color: style.titleColor || colors.text, fontSize: titleSize }
             },
             tooltip: {

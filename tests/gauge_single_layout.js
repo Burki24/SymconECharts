@@ -12,7 +12,8 @@ const palette = {
     border: '#cccccc', track: '#444444', surface: '#333333', accent: '#55cbb5'
 };
 
-function render(mode, width, height, preset, style = {}, reducedMotion = false, observeResize = false) {
+function render(mode, width, height, preset, style = {}, reducedMotion = false, observeResize = false,
+    tileHeaderVisible = true) {
     const chartElement = {
         clientWidth: width,
         clientHeight: height,
@@ -46,7 +47,7 @@ function render(mode, width, height, preset, style = {}, reducedMotion = false, 
                     gauge: { minimum: 0, maximum: 100, title: 'Wind speed', unit: 'm/s', decimals: 1, preset, style }
                 }
             },
-            options: { echartsThemes: { dark: palette } }
+            options: { echartsThemes: { dark: palette }, tileHeaderVisible }
         },
         echarts: { init: () => chart },
         ResizeObserver: observeResize ? class {
@@ -81,10 +82,12 @@ for (const mode of ['symcon', 'ipsview']) {
         const option = render(mode, width, height, preset, { plateShape: 'circle' });
         const series = option.series[0];
         const plate = option.graphic.find(element => element.id === 'gauge-plate');
-        assert.ok(series.radius > (preset === 'speed' ? 225 : 215), `${mode} ${preset} should use more tile space.`);
+        assert.ok(series.radius > (mode === 'symcon' ? 170 : (preset === 'speed' ? 225 : 215)),
+            `${mode} ${preset} should use the space below its tile header.`);
         assert.ok(plate.shape.cx - plate.shape.r >= 8, `${mode} ${preset} plate must stay inside the left edge.`);
         assert.ok(plate.shape.cx + plate.shape.r <= width - 8, `${mode} ${preset} plate must stay inside the right edge.`);
-        assert.ok(plate.shape.cy - plate.shape.r >= 8, `${mode} ${preset} plate must stay inside the top edge.`);
+        assert.ok(plate.shape.cy - plate.shape.r >= (mode === 'symcon' ? 66 : 8),
+            `${mode} ${preset} plate must clear the tile header (top: ${plate.shape.cy - plate.shape.r}).`);
         assert.ok(plate.shape.cy + plate.shape.r <= height - 8, `${mode} ${preset} plate must stay inside the bottom edge.`);
         if (preset === 'speed') {
             assert.equal(series.pointer.itemStyle.shadowColor, 'rgba(85,203,181,0.45)',
@@ -92,6 +95,15 @@ for (const mode of ['symcon', 'ipsview']) {
         }
     }
 }
+
+const topTitle = render('symcon', 620, 630, 'simple', { titlePosition: 'top' });
+assert.ok(topTitle.series[0].center[1] + topTitle.series[0].title.offsetCenter[1]
+    - topTitle.series[0].title.fontSize >= 58,
+    'A top-positioned Gauge Single title must clear the Symcon tile header.');
+const hiddenTileHeader = render('symcon', 620, 630, 'simple', { titlePosition: 'top' }, false, false, false);
+assert.ok(hiddenTileHeader.series[0].center[1] + hiddenTileHeader.series[0].title.offsetCenter[1]
+    < topTitle.series[0].center[1] + topTitle.series[0].title.offsetCenter[1],
+    'Hiding the Symcon tile header must release the space above the Gauge title.');
 
 const narrow = render('ipsview', 320, 240, 'simple', { plateShape: 'circle' });
 const resizeGauge = render('symcon', 620, 630, 'simple', {}, false, true).resizeTest;

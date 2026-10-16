@@ -61,6 +61,10 @@ const model = {
 };
 
 const result = render(model);
+assert.equal(result.option.title.show, true);
+assert.ok(result.option.title.top >= 58
+    && result.option.series[0].top > result.option.title.top + result.option.title.textStyle.fontSize,
+    'The Treemap title and rectangles must clear the Symcon tile header.');
 assert.equal(result.option.series[0].type, 'treemap');
 assert.equal(result.option.series[0].data[0].value, 7);
 assert.equal(result.option.series[0].data[0].children[0].value, 5);

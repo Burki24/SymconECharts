@@ -243,7 +243,9 @@ assert.equal(bubble.option.dataZoom[2].height, 12);
 assert.equal(bubble.option.dataZoom[3].width, 12);
 assert.equal(bubble.option.xAxis.name, 'Außen (°C)');
 assert.equal(bubble.option.yAxis.name, 'Feuchte (%)');
-assert.ok(!bubble.option.title.show, 'Visible Symcon tile headers must not duplicate the chart title.');
+assert.equal(bubble.option.title.show, true);
+assert.ok(bubble.option.title.top >= 58 && bubble.option.grid.top > bubble.option.title.top + 18,
+    'The Scatter title and plot must clear the Symcon tile header.');
 assert.ok(bubble.option.tooltip.formatter({ value: [10, 50, 1, 100] }).includes('Wind'));
 const ipsview = render(model, 'ipsview');
 assert.equal(ipsview.option.title.show, true);

@@ -189,6 +189,19 @@
         return Math.round(base * (Number.isFinite(percent) && percent >= 50 && percent <= 200 ? percent : 100) / 100);
     }
 
+    function chartTitleLayout(bootstrap, title, fontSize, gap) {
+        var tileHeaderVisible = bootstrap.mode === 'symcon'
+            && (!bootstrap.options || bootstrap.options.tileHeaderVisible !== false);
+        var headerInset = tileHeaderVisible ? 58 : 8;
+        var show = Boolean(title);
+        return {
+            show: show,
+            top: tileHeaderVisible ? headerInset : (bootstrap.mode === 'symcon' ? 8 : 4),
+            headerInset: headerInset,
+            contentTop: headerInset + (show ? fontSize + (gap === undefined ? 12 : gap) : 0)
+        };
+    }
+
     function valueLabel(style, automaticPosition, allowedPositions, automaticDistance) {
         var position = String(style.valueLabelPosition || 'auto');
         return {
@@ -235,6 +248,7 @@
         colorWithAlpha: colorWithAlpha,
         barOutlineStyle: barOutlineStyle,
         fontSizePercent: fontSizePercent,
+        chartTitleLayout: chartTitleLayout,
         valueLabel: valueLabel,
         gaugeLabelOffsets: gaugeLabelOffsets,
         resizeChartIfNeeded: resizeChartIfNeeded,

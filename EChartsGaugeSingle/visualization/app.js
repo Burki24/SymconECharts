@@ -187,8 +187,9 @@
             : clamp(Math.round(value * factor), customMinimum, customMaximum);
     }
 
-    function gaugeLayoutFits(layout, style, width, height) {
+    function gaugeLayoutFits(layout, style, width, height, headerInset) {
         var margin = 8;
+        var topMargin = headerInset + margin;
         var plateRadius = style.plateShape === 'circle'
             ? layout.circlePlateRadius * resolveStyleScale(style, 'plateSizePercent')
             : style.plateShape === 'arc'
@@ -205,11 +206,11 @@
             detailY - layout.detailHeight / 2, titleY - layout.titleFontSize);
         var maximumY = Math.max(layout.centerY + verticalRadius,
             detailY + layout.detailHeight / 2, titleY + layout.titleFontSize);
-        if (maximumY - minimumY > height - 2 * margin) {
+        if (maximumY - minimumY > height - topMargin - margin) {
             return false;
         }
-        if (minimumY < margin) {
-            layout.centerY += margin - minimumY;
+        if (minimumY < topMargin) {
+            layout.centerY += topMargin - minimumY;
         } else if (maximumY > height - margin) {
             layout.centerY -= maximumY - (height - margin);
         }
@@ -220,14 +221,15 @@
             && detailX + layout.detailWidth / 2 <= width - margin
             && titleX >= margin
             && titleX <= width - margin
-            && layout.centerY - verticalRadius >= margin
+            && layout.centerY - verticalRadius >= topMargin
             && layout.centerY + verticalRadius <= height - margin;
     }
 
-    function resolveGaugeLayout(preset, width, height, style, scaleMultiplier) {
+    function resolveGaugeLayout(preset, width, height, style, headerInset, scaleMultiplier) {
         var definition = gaugeLayoutDefinitions[preset] || gaugeLayoutDefinitions.simple;
-        var scale = Math.min(width / 440, height / 400) * (scaleMultiplier || 1);
-        var contentOffsetY = (height - 400 * scale) / 2;
+        var contentHeight = Math.max(1, height - headerInset);
+        var scale = Math.min(width / 440, contentHeight / 400) * (scaleMultiplier || 1);
+        var contentOffsetY = headerInset + (contentHeight - 400 * scale) / 2;
         var scaleFontSize = resolveStyleScale(style, 'scaleFontSizePercent');
         var valueFontSize = resolveStyleScale(style, 'valueFontSizePercent');
         var unitFontSize = resolveStyleScale(style, 'unitFontSizePercent');
@@ -321,10 +323,10 @@
         };
 
         if (scaleMultiplier === undefined) {
-            for (var factor = 1.2; factor > 1; factor -= 0.05) {
-                var expanded = resolveGaugeLayout(preset, width, height, style, factor);
-                if (gaugeLayoutFits(expanded, style, width, height)) {
-                    return expanded;
+            for (var factor = 1.2; factor >= 0.5; factor -= 0.05) {
+                var candidate = resolveGaugeLayout(preset, width, height, style, headerInset, factor);
+                if (gaugeLayoutFits(candidate, style, width, height, headerInset)) {
+                    return candidate;
                 }
             }
         }
@@ -947,7 +949,8 @@
         var animation = echartsDesign.animationOptions(style, { enabled: true, initialDuration: 500, updateDuration: 500 });
         var width = Math.max(chartElement.clientWidth, 1);
         var height = Math.max(chartElement.clientHeight, 160);
-        var layout = resolveGaugeLayout(preset, width, height, style);
+        var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 0;
+        var layout = resolveGaugeLayout(preset, width, height, style, headerInset);
         var colors = resolveThemeColors(theme);
 
         chartElement.setAttribute(

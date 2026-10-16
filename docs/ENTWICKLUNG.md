@@ -12,6 +12,13 @@ Ausgabeziele. Eine Chart-Instanz soll beide Ausgabewege gleichzeitig bedienen
 können. Die Anordnung mehrerer Charts übernimmt die jeweilige Visualisierung,
 nicht eine eigene große Dashboard-Seite des Moduls.
 
+Die gemeinsame JavaScript-Designbasis `libs/echarts-design.js` liefert mit
+`chartTitleLayout()` den Abstand für den Symcon-Kachelkopf und den unabhängig
+konfigurierten Diagrammtitel. Ein sichtbarer Kachelname unterdrückt den
+Diagrammtitel nicht; die fachlichen Renderer platzieren ihre Inhalte unterhalb
+beider Titel. Ein ausgeblendeter Kachelkopf gibt seinen Platz frei, während
+IPSView nur den Diagrammtitel benötigt.
+
 ## Aktueller Stand und Zielarchitektur
 
 Die Library besitzt mit Gateway und eigenständigen Diagrammmodulen eine technische

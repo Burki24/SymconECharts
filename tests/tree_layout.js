@@ -82,6 +82,9 @@ function render(style, data = root, width = 800, mode = 'symcon', height = 400, 
 const baseStyle = { treeLayout: 'orthogonal', orientation: 'LR', edgeShape: 'curve',
     initialDepth: 2, roamEnabled: true, showLabels: true, showValues: false, nodeSize: 10 };
 const tree = render(baseStyle);
+assert.equal(tree.option.title.show, true);
+assert.ok(tree.option.title.top >= 58 && tree.option.series[0].top > tree.option.title.top + 18,
+    'The Tree title and nodes must clear the Symcon tile header.');
 assert.equal(tree.option.series[0].type, 'tree');
 assert.equal(tree.option.series[0].layout, 'orthogonal');
 assert.equal(tree.option.series[0].orient, 'LR');
@@ -116,6 +119,9 @@ const healthRoot = { ...root, health: 'critical', children: [{
 }] };
 const health = render({ ...baseStyle, healthyColor: '#008800', warningColor: '#cc9900',
     criticalColor: '#cc0000' }, healthRoot, 800, 'symcon', 400, false, false, healthSource);
+assert.equal(health.option.title.show, true);
+assert.ok(health.option.title.top >= 58 && health.option.series[0].top > health.option.title.top + 18,
+    'The System Health title and nodes must clear the Symcon tile header.');
 assert.equal(health.option.series[0].data[0].itemStyle.color, '#cc0000');
 assert.equal(health.option.series[0].data[0].children[0].children[0].itemStyle.color, '#cc9900');
 assert.match(health.option.tooltip.formatter({ data: health.option.series[0].data[0] }), /Status: Critical/);

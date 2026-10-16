@@ -80,6 +80,11 @@
 
 ## Behoben
 
+- Diagrammtitel in Kacheln von Parallel, Pie, Scatter/Bubble, Tree,
+  Anlagenzustandsbaum, Graph, Zigbee-Graph, Treemap und Sunburst bleiben
+  sichtbar und liegen mit ihren Diagramminhalten unter dem Symcon-Kachelkopf.
+  IPSView behält seinen eigenen Titelbereich.
+
 - Der weiße Streifen über Treemap-Gruppen übernimmt nun den gewählten
   Diagrammhintergrund oder die ausdrücklich festgelegte Rahmenfarbe. Das gilt
   für Kachel und IPSView, auch bei transparentem IPSView-Hintergrund.

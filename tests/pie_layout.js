@@ -81,6 +81,11 @@ assert.ok(wideTile.option.series[0].center[0] + wideTile.option.series[0].radius
     < 1000 - wideTile.option.legend.width,
     'A wide tile must reserve a separate column for the legend.');
 const pie = render(baseStyle, sources);
+assert.equal(pie.option.title.show, true);
+assert.ok(pie.option.title.top >= 58
+    && pie.option.series[0].center[1] - pie.option.series[0].radius[1]
+        > pie.option.title.top + pie.option.title.textStyle.fontSize,
+    'The Pie title and plot must clear the Symcon tile header.');
 const routedLabels = render({ ...baseStyle, outsideLabelAlignment: 'labelLine',
     leaderLineLength: 24, leaderLineLength2: 16, labelLineGap: 7,
     labelEdgeDistance: 12 }, sources);

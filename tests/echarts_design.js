@@ -43,6 +43,21 @@ assert.equal(recoveryWarningElement.hidden, true, 'Fresh data must clear the war
 assert.equal(retainFailure({ status: 'error', error: 'Invalid configuration' }, readyState, {}), false,
     'Configuration failures must not retain a stale chart.');
 const fontSizePercent = window.SYMC_ECHARTS_DESIGN.fontSizePercent;
+const chartTitleLayout = window.SYMC_ECHARTS_DESIGN.chartTitleLayout;
+assert.deepEqual(JSON.parse(JSON.stringify(chartTitleLayout(
+    { mode: 'symcon', options: { tileHeaderVisible: true } }, 'Chart', 18
+))), { show: true, top: 58, headerInset: 58, contentTop: 88 },
+'A visible tile header must leave room for its name, maximize button and chart title.');
+assert.deepEqual(JSON.parse(JSON.stringify(chartTitleLayout(
+    { mode: 'symcon', options: { tileHeaderVisible: false } }, 'Chart', 18
+))), { show: true, top: 8, headerInset: 8, contentTop: 38 },
+'A hidden tile header must release its reserved space without hiding the chart title.');
+assert.deepEqual(JSON.parse(JSON.stringify(chartTitleLayout(
+    { mode: 'ipsview', options: { tileHeaderVisible: true } }, 'Chart', 18
+))), { show: true, top: 4, headerInset: 8, contentTop: 38 },
+'IPSView title placement must remain independent from Symcon tile headers.');
+assert.equal(chartTitleLayout({ mode: 'symcon', options: { tileHeaderVisible: true } }, '', 18).contentTop,
+    58, 'Empty chart titles must not reserve a second title row.');
 assert.equal(fontSizePercent(undefined, 12), 12, 'Missing font size must retain the chart default.');
 assert.equal(fontSizePercent(150, 12), 18, 'Shared percent scaling must use the chart-specific base size.');
 assert.equal(fontSizePercent(300, 12), 12, 'Invalid font size must not make a chart unreadable.');

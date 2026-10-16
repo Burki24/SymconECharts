@@ -186,12 +186,12 @@
         var yRole = roles.y || { label: 'Y', unit: '', decimals: 1 };
         var sizeRole = roles.size || null;
         var points = Array.isArray(model.points) ? model.points : [];
-        var hasTitle = Boolean(scatter.title) && (bootstrap.mode === 'ipsview'
-            || bootstrap.options.tileHeaderVisible === false);
+        var titleSize = design.fontSizePercent(style.titleFontSizePercent, 18);
+        var titleLayout = design.chartTitleLayout(bootstrap, scatter.title, titleSize);
+        var hasTitle = titleLayout.show;
         var compact = chartElement.clientWidth < 420 || chartElement.clientHeight < 280;
         var zoomEnabled = style.enableZoom === true;
         var brushEnabled = style.enableBrush === true;
-        var top = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8;
         var base = Math.max(4, Math.min(60, Number(style.pointSize) || 12));
         var large = Math.max(base, Math.min(100, Number(style.bubbleMaxSize) || 48));
         var sizeValues = sizeRole ? points.map(function (point) { return Number(point[3]); }) : [];
@@ -201,14 +201,14 @@
         var axisColor = style.axisColor || colors.muted;
         var gridColor = style.gridColor || colors.track;
         var fontSize = design.fontSizePercent(style.axisFontSizePercent, compact ? 10 : 12);
-        var visualMap = colorMapOptions(style, roles, points, colors, top, compact, hasTitle);
+        var visualMap = colorMapOptions(style, roles, points, colors, titleLayout.contentTop, compact, hasTitle);
         var colorDimension = { x: 0, y: 1, size: 2 }[style.colorMapDimension];
         if (colorDimension === undefined) { colorDimension = 1; }
         var showColorLegend = visualMap && visualMap.show;
         var brushToolSize = Math.max(18, Math.min(28,
             Math.round(Math.min(chartElement.clientWidth, chartElement.clientHeight) / 20)));
-        var toolboxTop = top + (hasTitle ? 34 : 0) + (showColorLegend ? 30 : 0);
-        var gridTop = top + (hasTitle ? 48 : 18) + (showColorLegend ? 30 : 0);
+        var toolboxTop = titleLayout.contentTop + (hasTitle ? 12 : 0) + (showColorLegend ? 30 : 0);
+        var gridTop = titleLayout.contentTop + (hasTitle ? 26 : 18) + (showColorLegend ? 30 : 0);
         if (brushEnabled) { gridTop = Math.max(gridTop, toolboxTop + brushToolSize + 8); }
         var grid = { left: compact ? 65 : 86,
             right: zoomEnabled ? (compact ? 56 : 70) : (compact ? 20 : 38),
@@ -227,9 +227,8 @@
             aria: { enabled: true, decal: { show: false }, description: [xRole.label, yRole.label,
                 sizeRole && sizeRole.label].filter(Boolean).join(', ') },
             title: {
-                show: hasTitle, text: String(scatter.title || ''), left: 'center', top: top,
-                textStyle: { color: style.titleColor || colors.text,
-                    fontSize: design.fontSizePercent(style.titleFontSizePercent, 18) }
+                show: hasTitle, text: String(scatter.title || ''), left: 'center', top: titleLayout.top,
+                textStyle: { color: style.titleColor || colors.text, fontSize: titleSize }
             },
             visualMap: visualMap || undefined,
             toolbox: brushEnabled ? {

@@ -62,6 +62,11 @@ const model = {
 
 const result = render(model);
 const series = result.option.series[0];
+assert.equal(result.option.title.show, true);
+assert.ok(result.option.title.top >= 58);
+assert.ok(series.center[1] - parseFloat(series.radius[1]) * 2
+    >= result.option.title.top + result.option.title.textStyle.fontSize,
+    'The Sunburst rings must clear the Symcon tile header and chart title.');
 assert.equal(series.type, 'sunburst');
 assert.equal(series.data[0].value, 7);
 assert.equal(series.data[0].children[0].value, 5);
@@ -79,7 +84,9 @@ assert.equal(series.levels[2].label.show, true);
 assert.equal(series.levels[3].label.show, true);
 assert.equal(series.itemStyle.borderRadius, 0);
 assert.equal(result.option.tooltip.show, true);
-assert.deepEqual(Array.from(series.radius), ['0%', '85%']);
+assert.equal(series.radius[0], '0%');
+assert.ok(parseFloat(series.radius[1]) <= 85,
+    'The configured outer radius is a maximum when the title needs vertical room.');
 assert.match(result.option.tooltip.formatter({ name: '<Battery>', value: 5 }), /&lt;Battery&gt;/);
 assert.doesNotMatch(result.option.tooltip.formatter({ name: '<Battery>', value: 5 }), /<Battery>/);
 
@@ -96,7 +103,8 @@ const custom = render({ ...model, sunburst: { ...model.sunburst, style: {
 } } });
 assert.equal(custom.option.series[0].data[0].itemStyle.color, '#112233');
 assert.equal(custom.option.series[0].nodeClick, false);
-assert.deepEqual(Array.from(custom.option.series[0].radius), ['15%', '90%']);
+assert.equal(custom.option.series[0].radius[0], '15%');
+assert.ok(parseFloat(custom.option.series[0].radius[1]) <= 90);
 assert.equal(custom.option.series[0].itemStyle.borderWidth, 4);
 assert.equal(custom.option.series[0].itemStyle.borderColor, '#ffffff');
 assert.equal(custom.option.series[0].label.color, '#123456');

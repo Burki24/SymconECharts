@@ -63,7 +63,10 @@ assert.deepEqual(Array.from(result.option.series[0].data[0].value), [18.5, 42, 1
 assert.equal(result.option.series[0].lineStyle.color, '#123456');
 assert.equal(result.option.series[0].lineStyle.opacity, 0.45);
 assert.equal(result.option.parallel.parallelAxisDefault.nameTextStyle.color, '#abcdef');
-assert.equal(result.option.title.show, false);
+assert.equal(result.option.title.show, true);
+assert.ok(result.option.title.top >= 58, 'The chart title must clear the visible Symcon tile header.');
+assert.ok(result.option.parallel.top > result.option.title.top + result.option.title.textStyle.fontSize,
+    'Parallel axes must start below the chart title.');
 assert.match(result.option.tooltip.formatter({ name: '<Now>', value: [18.5, 42, 100] }), /&lt;Temperature&gt;/);
 assert.doesNotMatch(result.option.tooltip.formatter({ name: '<Now>', value: [18.5, 42, 100] }), /<Temperature>/);
 

@@ -68,10 +68,9 @@
         var compact = width < 430 || height < 300;
         var titleSize = design.fontSizePercent(style.titleFontSizePercent, 18);
         var labelSize = design.fontSizePercent(style.labelFontSizePercent, compact ? 10 : 12);
-        var showTitle = Boolean(graph.title) && (bootstrap.mode === 'ipsview'
-            || bootstrap.options.tileHeaderVisible === false);
-        var top = (bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8)
-            + (showTitle ? titleSize + 12 : 0);
+        var titleLayout = design.chartTitleLayout(bootstrap, graph.title, titleSize);
+        var showTitle = titleLayout.show;
+        var top = titleLayout.contentTop;
         var nodeSize = Math.max(6, Math.min(40, Number(style.nodeSize) || 16));
         var nodeColor = style.nodeColor || colors.seriesColors[0] || colors.accent;
         var nodes = (graph.nodes || []).map(function (node) {
@@ -89,7 +88,7 @@
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
             aria: { enabled: true, decal: { show: false }, description: nodes.length + ' Graph nodes' },
             title: {
-                show: showTitle, text: String(graph.title || ''), left: 'center', top: bootstrap.mode === 'symcon' ? 8 : 4,
+                show: showTitle, text: String(graph.title || ''), left: 'center', top: titleLayout.top,
                 textStyle: { color: style.titleColor || colors.text, fontSize: titleSize }
             },
             tooltip: {

@@ -1034,6 +1034,17 @@ assertGatewayGauge(str_contains($visualizationTile, '"echartsVersion":"6.1.0"'),
 assertGatewayGauge(str_contains($visualizationTile, '"preset":"progress"'), 'Gauge Single tile must receive the selected preset.');
 assertGatewayGauge(str_contains($visualizationTile, '"theme":"vintage"'), 'Gauge Single tile must receive the selected theme.');
 assertGatewayGauge(str_contains($visualizationTile, '"echartsThemes":'), 'Gauge Single tile must receive the shared theme palettes.');
+assertGatewayGauge(
+    str_contains($visualizationTile, '"tileHeaderVisible":true'),
+    'Gauge Single must reserve space below a visible Symcon tile header.'
+);
+$GLOBALS['symconTestHiddenTitles'][$gauge->InstanceID] = true;
+assertGatewayGauge(
+    str_contains($gauge->GetVisualizationTile(), '"tileHeaderVisible":false')
+        && str_contains($gauge->GetIPSViewHTML(), '"tileHeaderVisible":true'),
+    'A hidden Symcon header must release Gauge Single tile space without changing IPSView.'
+);
+unset($GLOBALS['symconTestHiddenTitles'][$gauge->InstanceID]);
 assertGatewayGauge(str_contains($visualizationTile, "registerTheme('vintage'"), 'Gauge Single tile must register official ECharts themes.');
 assertGatewayGauge(
     str_contains(
@@ -2300,7 +2311,7 @@ assertGatewayGauge(
 );
 
 foreach ([
-    'function resolveGaugeLayout(preset, width, height, style, scaleMultiplier)',
+    'function resolveGaugeLayout(preset, width, height, style, headerInset, scaleMultiplier)',
     "resolveStyleScale(style, 'scaleFontSizePercent')",
     "resolveStyleScale(style, 'valueFontSizePercent')",
     "resolveStyleScale(style, 'unitFontSizePercent')",
@@ -2311,7 +2322,7 @@ foreach ([
     "pointerLength: Math.round(parseFloat(definition.pointerLength) * pointerLength * 100) / 100 + '%'",
     "resolveStyleScale(style, 'minorTickLengthPercent')",
     "resolveStyleScale(style, 'majorTickLengthPercent')",
-    'var scale = Math.min(width / 440, height / 400) * (scaleMultiplier || 1);',
+    'var scale = Math.min(width / 440, contentHeight / 400) * (scaleMultiplier || 1);',
     'var height = Math.max(chartElement.clientHeight, 160);',
     'center: [layout.centerX, layout.centerY]',
     'radius: layout.radius',

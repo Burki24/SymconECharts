@@ -19,6 +19,9 @@ im Kachel- und IPSView-Designer. Sie reagiert auf noch nicht gespeicherte
 Titel-, Quellen- und Designänderungen; die endgültige responsive Darstellung
 prüfen Sie in der Kachel beziehungsweise im IPSView-Widget. Historische
 Vorschauen verwenden gekennzeichnete Beispieldaten statt einer Archivabfrage.
+Ein konfigurierter Diagrammtitel bleibt auch in der Kachel sichtbar und steht
+unter dem Symcon-Kachelnamen samt Vergrößerungsbutton. IPSView zeigt den
+Diagrammtitel ohne diesen Kachel-Kopfbereich.
 
 ## Voraussetzungen
 

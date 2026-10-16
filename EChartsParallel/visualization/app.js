@@ -64,8 +64,9 @@
         var width = Math.max(1, chartElement.clientWidth || 1);
         var height = Math.max(1, chartElement.clientHeight || 1);
         var compact = width < 420 || height < 280;
-        var showTitle = Boolean(parallel.title) && (bootstrap.mode === 'ipsview'
-            || bootstrap.options.tileHeaderVisible === false);
+        var titleSize = design.fontSizePercent(style.titleFontSizePercent, 18);
+        var titleLayout = design.chartTitleLayout(bootstrap, parallel.title, titleSize);
+        var showTitle = titleLayout.show;
         var backgroundColor = bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
             ? 'transparent' : colors.background;
         var lineColor = style.lineColor || colors.accent;
@@ -74,9 +75,9 @@
             backgroundColor: backgroundColor,
             aria: { enabled: true, decal: { show: false } },
             title: {
-                show: showTitle, text: String(parallel.title || ''), left: 'center', top: 4,
+                show: showTitle, text: String(parallel.title || ''), left: 'center', top: titleLayout.top,
                 textStyle: { color: style.titleColor || colors.text,
-                    fontSize: design.fontSizePercent(style.titleFontSizePercent, 18) }
+                    fontSize: titleSize }
             },
             tooltip: {
                 show: style.showTooltip !== false,
@@ -93,7 +94,7 @@
             },
             parallel: {
                 left: compact ? 28 : 64, right: compact ? 28 : 64,
-                top: showTitle ? 68 : 48, bottom: 38,
+                top: titleLayout.headerInset + (showTitle ? titleSize + 42 : 40), bottom: 38,
                 parallelAxisDefault: {
                     type: 'value', nameLocation: 'end', nameGap: 20,
                     nameTextStyle: { color: axisColor, fontSize: design.fontSizePercent(style.axisFontSizePercent, compact ? 10 : 12) },

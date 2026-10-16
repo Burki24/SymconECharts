@@ -57,6 +57,9 @@ function render(style, mode = 'symcon', width = 800) {
 }
 
 const force = render(baseStyle);
+assert.equal(force.option.title.show, true);
+assert.ok(force.option.title.top >= 58 && force.option.series[0].top > force.option.title.top + 18,
+    'The Graph title and nodes must clear the Symcon tile header.');
 assert.equal(force.option.series[0].type, 'graph');
 assert.equal(force.option.series[0].layout, 'force');
 assert.equal(force.option.series[0].roam, true);

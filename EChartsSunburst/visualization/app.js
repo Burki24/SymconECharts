@@ -81,9 +81,16 @@
         var width = Math.max(1, chartElement.clientWidth || 1);
         var height = Math.max(1, chartElement.clientHeight || 1);
         var compact = width < 350 || height < 260;
-        var showTitle = Boolean(sunburst.title) && (bootstrap.mode === 'ipsview'
-            || bootstrap.options.tileHeaderVisible === false);
         var titleSize = design.fontSizePercent(style.titleFontSizePercent, 18);
+        var titleLayout = design.chartTitleLayout(bootstrap, sunburst.title, titleSize);
+        var showTitle = titleLayout.show;
+        var contentTop = titleLayout.contentTop;
+        var contentHeight = Math.max(1, height - contentTop - 8);
+        var outerRadius = Math.max(50, Math.min(95, Number(style.outerRadiusPercent) || 85));
+        var fittedOuterRadius = Math.min(outerRadius,
+            contentHeight * 100 / Math.min(width, height));
+        var innerRadius = Math.min(Math.max(0, Math.min(50, Number(style.innerRadiusPercent) || 0)),
+            Math.max(0, fittedOuterRadius - 1));
         var labelSize = design.fontSizePercent(style.labelFontSizePercent, 12);
         var showLabels = style.showLabels !== false && !compact;
         var ringLabels = [
@@ -110,7 +117,7 @@
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
             aria: { enabled: true, decal: { show: false } },
             title: {
-                show: showTitle, text: String(sunburst.title || ''), left: 'center', top: 4,
+                show: showTitle, text: String(sunburst.title || ''), left: 'center', top: titleLayout.top,
                 textStyle: { color: style.titleColor || colors.text, fontSize: titleSize }
             },
             tooltip: {
@@ -126,9 +133,8 @@
             },
             series: [{
                 id: 'sunburst', type: 'sunburst', data: nodesFor(sunburst.data, colors, style),
-                center: ['50%', showTitle ? '55%' : '50%'],
-                radius: [Math.max(0, Math.min(50, Number(style.innerRadiusPercent) || 0)) + '%',
-                    Math.max(50, Math.min(95, Number(style.outerRadiusPercent) || 85)) + '%'],
+                center: ['50%', contentTop + contentHeight / 2],
+                radius: [innerRadius + '%', fittedOuterRadius + '%'],
                 startAngle: Number.isFinite(Number(style.startAngle)) ? Number(style.startAngle) : 90,
                 clockwise: style.clockwise !== false,
                 sort: style.sortMode === 'asc' || style.sortMode === 'desc' ? style.sortMode : null,
