@@ -788,6 +788,7 @@ require_once dirname(__DIR__) . '/EChartsGraph/module.php';
 require_once dirname(__DIR__) . '/EChartsGraphZ2M/module.php';
 require_once dirname(__DIR__) . '/EChartsTreemap/module.php';
 require_once dirname(__DIR__) . '/EChartsSunburst/module.php';
+require_once dirname(__DIR__) . '/EChartsParallel/module.php';
 
 final class TestableEChartsGateway extends EChartsGateway
 {
@@ -831,6 +832,21 @@ final class TestableEChartsBarHistory extends EChartsBarHistory
 }
 
 final class TestableEChartsScatter extends EChartsScatter
+{
+    private int $currentTimestamp = 1;
+
+    public function SetTestCurrentTimestamp(int $timestamp): void
+    {
+        $this->currentTimestamp = $timestamp;
+    }
+
+    protected function CurrentTimestamp(): int
+    {
+        return $this->currentTimestamp;
+    }
+}
+
+final class TestableEChartsParallel extends EChartsParallel
 {
     private int $currentTimestamp = 1;
 
@@ -9484,6 +9500,7 @@ foreach ([
     EChartsPie::class              => ['BarPreview', 'IPSViewBarPreview'],
     EChartsTreemap::class          => ['BarPreview', 'IPSViewBarPreview'],
     EChartsSunburst::class         => ['BarPreview', 'IPSViewBarPreview'],
+    EChartsParallel::class         => ['BarPreview', 'IPSViewBarPreview'],
     EChartsScatter::class          => ['BarPreview', 'IPSViewBarPreview'],
     EChartsHeatmap::class          => ['BarPreview', 'IPSViewBarPreview'],
     EChartsTree::class             => ['BarPreview', 'IPSViewBarPreview'],
@@ -9667,6 +9684,61 @@ try {
         unset($GLOBALS['symconTestVariables'][85000 + $index]);
     }
 }
+
+$parallel = new TestableEChartsParallel();
+$parallel->Create();
+$parallel->SetTestCurrentTimestamp(1780004000);
+$parallel->SetTestProperty('Sources', json_encode([
+    ['VariableID' => 4711, 'Label' => 'Outside'],
+    ['VariableID' => 4713, 'Label' => 'Humidity']
+], JSON_THROW_ON_ERROR));
+$parallel->SetTestProperty('IPSViewUseTileDesign', false);
+$parallel->SetTestProperty('IPSViewLineColor', 0x123456);
+$parallel->ApplyChanges();
+$parallelData = json_decode($parallel->GetParallelData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $parallel->GetTestStatus() === IS_ACTIVE
+        && $parallel->GetTestReferences() === [4711, 4713]
+        && $parallelData['family'] === 'parallel'
+        && $parallelData['parallel']['aggregation'] === 'hour'
+        && $parallelData['parallel']['axes'][0]['label'] === 'Outside'
+        && $parallelData['parallel']['axes'][1]['label'] === 'Humidity'
+        && count($parallelData['parallel']['rows']) === 1
+        && $parallelData['parallel']['rows'][0]['values'] === [41.5, 12.0],
+    'Parallel must join archived values by completed common hourly intervals.'
+);
+$parallelFormModule = new EChartsParallel();
+$parallelFormModule->Create();
+$parallelFormModule->SetTestProperty('Sources', json_encode([
+    ['VariableID' => 4711, 'Label' => 'Outside'],
+    ['VariableID' => 4713, 'Label' => 'Humidity']
+], JSON_THROW_ON_ERROR));
+$parallelFormModule->SetTestProperty('IPSViewUseTileDesign', false);
+$parallelFormModule->SetTestProperty('IPSViewLineColor', 0x123456);
+$parallelFormModule->ApplyChanges();
+$parallelTile = $parallelFormModule->GetVisualizationTile();
+$parallelIPSView = $parallelFormModule->GetIPSViewHTML();
+$parallelForm = json_decode($parallelFormModule->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    str_contains($parallelTile, 'echarts-parallel-root')
+        && str_contains($parallelIPSView, '"lineColor":"#123456"')
+        && strlen($parallelTile) < SYMCON_OUTPUT_BUFFER_LIMIT
+        && strlen($parallelIPSView) < SYMCON_OUTPUT_BUFFER_LIMIT
+        && findGaugeFormElement($parallelForm['elements'], 'Aggregation')['type'] === 'Select'
+        && findGaugeFormElement($parallelForm['elements'], 'IPSViewLineColor')['type'] === 'SelectColor',
+    'Parallel must expose hourly/daily form controls and bounded Tile/IPSView output.'
+);
+$parallel->SetTestProperty('Aggregation', 'day');
+$parallel->ApplyChanges();
+assertGatewayGauge(
+    json_decode($parallel->GetParallelData(), true, 512, JSON_THROW_ON_ERROR)['parallel']['aggregation'] === 'day',
+    'Parallel must support daily archive intervals.'
+);
+$parallel->SetTestProperty('Sources', json_encode([
+    ['VariableID' => 4711], ['VariableID' => 4711]
+], JSON_THROW_ON_ERROR));
+$parallel->ApplyChanges();
+assertGatewayGauge($parallel->GetTestStatus() === 201, 'Parallel must reject duplicate variable IDs.');
 
 $sunburst = new EChartsSunburst();
 $sunburst->Create();

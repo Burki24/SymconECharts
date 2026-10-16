@@ -21,6 +21,7 @@ $tests = [
     __DIR__ . '/time_series_design.php',
     __DIR__ . '/label_design.php',
     __DIR__ . '/scatter_pairing.php',
+    __DIR__ . '/parallel_pairing.php',
     __DIR__ . '/heatmap_aggregation.php',
     __DIR__ . '/heatmap_window.php',
     __DIR__ . '/tree_hierarchy.php',
@@ -47,6 +48,7 @@ $commands = [
     ['Test Zigbee Graph layout', 'node tests/zigbee_graph_layout.js'],
     ['Test Treemap layout', 'node tests/treemap_layout.js'],
     ['Test Sunburst layout', 'node tests/sunburst_layout.js'],
+    ['Test Parallel layout', 'node tests/parallel_layout.js'],
     ['Verify vendored helper integrity', 'python3 tests/helper_integrity.py'],
     ['Test library metadata updater', 'python3 tests/test_update_library_metadata.py']
 ];

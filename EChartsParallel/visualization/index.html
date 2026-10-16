@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="{{HTML_LANGUAGE}}" class="{{HTML_CLASSES}}" style="font-size: {{ROOT_FONT_SIZE}};">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="{{VIEWPORT_CONTENT}}">
+    <title>{{DOCUMENT_TITLE}}</title>
+    <style>
+{{VISUALIZATION_THEME}}
+{{MODULE_STYLE}}
+{{IPSVIEW_STYLE}}
+    </style>
+</head>
+<body>
+    <main id="echarts-parallel-root" class="echarts-parallel-root">
+        <div id="echarts-parallel-chart" class="echarts-parallel-chart" role="img"></div>
+        <div id="echarts-parallel-warning" class="echarts-refresh-warning" role="status" hidden></div>
+        <div id="echarts-parallel-empty" class="echarts-parallel-empty" role="status" hidden></div>
+        <div id="echarts-parallel-error" class="echarts-parallel-error" role="alert" hidden></div>
+    </main>
+    <script>{{ECHARTS_SCRIPT}}</script>
+    <script>{{ECHARTS_THEME_SCRIPT}}</script>
+    <script>{{ECHARTS_DESIGN_SCRIPT}}</script>
+    <script>window.SYMC_VISUALIZATION = {{BOOTSTRAP_JSON}};</script>
+    <script>{{MODULE_SCRIPT}}</script>
+    <script>{{IPSVIEW_TRANSPORT_SCRIPT}}</script>
+</body>
+</html>

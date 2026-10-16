@@ -59,6 +59,9 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Symcon-Variablenwerten liegt im eigenen Gerätemodul `EChartsTreemap`.
   Ein Sunburst mit derselben manuell benannten Hierarchie und aktuellen
   numerischen Variablenwerten liegt getrennt in `EChartsSunburst`.
+  Archivierte Werte mehrerer Variablen werden als Parallelkoordinaten nach
+  gemeinsamen abgeschlossenen Stunden- oder Tagesintervallen im eigenen
+  Gerätemodul `EChartsParallel` dargestellt.
 - Das Gateway stellt ausschließlich familienübergreifende Infrastruktur wie
   Archivzugriff, begrenztes Caching, gemeinsame Ressourcen und gegebenenfalls
   abgesicherte IPSView-Kommunikation bereit. Familienbezogene Properties,
@@ -129,6 +132,7 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
 - `ECGZ` ist `EChartsGraphZ2M` zugeordnet (`GZ` = Graph Zigbee2MQTT).
 - `ECTM` ist `EChartsTreemap` zugeordnet (`TM` = Treemap).
 - `ECSB` ist `EChartsSunburst` zugeordnet (`SB` = Sunburst).
+- `ECPA` ist `EChartsParallel` zugeordnet (`PA` = Parallel).
 - Das zuvor für das unveröffentlichte Gauge-Gerüst verwendete Kürzel `ECGA`
   ist abgelöst und wird nicht für ein anderes Modul wiederverwendet.
 - Neue Kürzel werden vor ihrer Verwendung eindeutig festgelegt und in dieser

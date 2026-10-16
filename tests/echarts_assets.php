@@ -24,6 +24,7 @@ $treeRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.
 $graphRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.graph.min.js';
 $treemapRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.treemap.min.js';
 $sunburstRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.sunburst.min.js';
+$parallelRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.parallel.min.js';
 $licensePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/LICENSE.txt';
 $noticePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/NOTICE.txt';
 $runtime = (string) file_get_contents($runtimePath);
@@ -36,6 +37,7 @@ $treeRuntime = (string) file_get_contents($treeRuntimePath);
 $graphRuntime = (string) file_get_contents($graphRuntimePath);
 $treemapRuntime = (string) file_get_contents($treemapRuntimePath);
 $sunburstRuntime = (string) file_get_contents($sunburstRuntimePath);
+$parallelRuntime = (string) file_get_contents($parallelRuntimePath);
 $designUtilitiesPath = $root . '/libs/echarts-design.js';
 $designUtilities = (string) file_get_contents($designUtilitiesPath);
 $zoomUtilities = (string) file_get_contents($root . '/libs/echarts-zoom.js');
@@ -50,6 +52,7 @@ $treeRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime
 $graphRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/graph-runtime.js');
 $treemapRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/treemap-runtime.js');
 $sunburstRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/sunburst-runtime.js');
+$parallelRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/parallel-runtime.js');
 $windowsCheckoutRuntime = str_replace("\n", "\r\n", $runtime);
 $expectedThemeIDs = ['auto', 'dark', 'vintage', 'macarons', 'infographic', 'shine', 'roma'];
 
@@ -150,6 +153,15 @@ assertEChartsAsset(
         && str_contains($sunburstRuntime, 'window.echarts')
         && str_contains($sunburstRuntimeSource, 'SunburstChart'),
     'The Sunburst runtime must be pinned, expose the browser API and remain below 550 KB.'
+);
+assertEChartsAsset(
+    is_file($parallelRuntimePath)
+        && hash_file('sha256', $parallelRuntimePath) === EChartsAsset::PARALLEL_SHA256
+        && EChartsAsset::ParallelJavaScript() === $parallelRuntime
+        && strlen($parallelRuntime) < 550000
+        && str_contains($parallelRuntime, 'window.echarts')
+        && str_contains($parallelRuntimeSource, 'ParallelChart'),
+    'The Parallel runtime must be pinned, expose the browser API and remain below 550 KB.'
 );
 assertEChartsAsset(
     EChartsAsset::DesignJavaScript() === $designUtilities

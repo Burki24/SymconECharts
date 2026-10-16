@@ -85,7 +85,8 @@ foreach ([
     'tests/graph_layout.js',
     'tests/zigbee_graph_layout.js',
     'tests/treemap_layout.js',
-    'tests/sunburst_layout.js'
+    'tests/sunburst_layout.js',
+    'tests/parallel_layout.js'
 ] as $layoutTest) {
     runQualityCommand('Run ' . basename($layoutTest), ['node', $layoutTest]);
 }

@@ -2,6 +2,11 @@
 
 ## Hinzugefügt
 
+- `EChartsParallel` (`ECPA`) verbindet archivierte Werte von zwei bis zehn
+  Variablen je gemeinsamem abgeschlossenen Stunden- oder Tagesintervall zu
+  Parallelkoordinaten-Linien. Zeitfenster, Linienbudget und getrennte
+  Kachel-/IPSView-Designs sind einstellbar.
+
 - Sunburst-Designer bieten nun Startwinkel, Drehrichtung und Sortierung,
   radiale/tangentiale/waagerechte Beschriftung, Mindestwinkel für Labels,
   Beschriftungsschalter und Schriftgröße je Ring, abgerundete Segmentkanten
