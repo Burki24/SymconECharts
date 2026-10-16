@@ -57,22 +57,41 @@
         });
     }
 
-    function nodesFor(data, colors, labelColor) {
+    function nodesFor(data, colors, style) {
         var seriesColors = colors.seriesColors && colors.seriesColors.length ? colors.seriesColors : [colors.accent];
         return (Array.isArray(data) ? data : []).map(function (group, index) {
-            var color = seriesColors[index % seriesColors.length];
-            var readable = labelColor || design.readableTextColor(color, colors.text, colors.background);
+            var chosen = style.groupColors || {};
+            var color = Object.prototype.hasOwnProperty.call(chosen, group.name) && /^#[0-9a-f]{6}$/i.test(chosen[group.name])
+                ? chosen[group.name] : seriesColors[index % seriesColors.length];
+            var readable = style.labelColor || design.readableTextColor(color, colors.text, colors.background);
+            var groupColor = style.groupLabelColor || readable;
+            var subgroupColor = style.subgroupLabelColor || readable;
+            var valueSize = design.fontSizePercent(style.labelFontSizePercent, 12);
+            var groupSize = design.fontSizePercent(style.groupLabelFontSizePercent || style.labelFontSizePercent, 12);
+            var subgroupSize = design.fontSizePercent(style.subgroupLabelFontSizePercent || style.labelFontSizePercent, 12);
             function colorChildren(children) {
                 return (children || []).map(function (child) {
+                    var isSubgroup = Array.isArray(child.children);
+                    var label = { color: isSubgroup ? subgroupColor : readable,
+                        fontSize: isSubgroup ? subgroupSize : valueSize };
+                    if (!isSubgroup && style.showValues === true) {
+                        label.formatter = function (params) {
+                            return params.name + '\n' + Number(params.value).toLocaleString(undefined,
+                                { maximumFractionDigits: 3 });
+                        };
+                    }
                     return Object.assign({}, child, child.children ? { itemStyle: { borderColor: color } } : {}, {
-                        label: { color: readable }, upperLabel: { color: readable },
-                        children: child.children ? colorChildren(child.children) : undefined
+                        label: label,
+                        upperLabel: { color: subgroupColor, fontSize: subgroupSize },
+                        children: isSubgroup ? colorChildren(child.children) : undefined
                     });
                 });
             }
             return Object.assign({}, group, {
                 itemStyle: { color: color, borderColor: color },
-                label: { color: readable }, upperLabel: { color: readable },
+                label: { color: groupColor, fontSize: groupSize },
+                upperLabel: { color: groupColor, fontSize: groupSize,
+                    height: Math.max(18, groupSize + 8) },
                 children: colorChildren(group.children)
             });
         });
@@ -110,7 +129,7 @@
                 }
             },
             series: [{
-                id: 'treemap', type: 'treemap', data: nodesFor(treemap.data, colors, style.labelColor),
+                id: 'treemap', type: 'treemap', data: nodesFor(treemap.data, colors, style),
                 left: 8, right: 8,
                 top: (bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8)
                     + (showTitle ? titleSize + 12 : 0),

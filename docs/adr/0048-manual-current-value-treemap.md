@@ -36,6 +36,16 @@ Kachel und optionales IPSView nutzen denselben fachlichen Datensatz und
 getrennte Designs. Die Formularvorschau verwendet ausdrücklich markierte
 Beispielgrößen und die noch nicht gespeicherten Gruppennamen.
 
+Ein erster Designausbau erlaubt optional feste Farben je exakt benannter
+Gruppe, getrennte Schriftgrößen und -farben für Gruppen- und
+Untergruppentitel sowie numerische Blattwerte. Nicht zugeordnete Gruppen
+nutzen weiter die Theme-Palette. Die bisherigen Beschriftungseinstellungen
+bleiben die Vererbungsbasis; zusätzliche Größen nutzen 0 als „übernehmen“
+und Farben -1. Die neuen Werte sind additive Design-Properties für Kachel
+und unabhängiges IPSView. Die bestehende Darstellung bleibt ohne aktive
+Neukonfiguration erhalten. Ein Blattwert wird nur bei sichtbaren Labels
+unter dem Namen ausgegeben; Flächenberechnung und Tooltip bleiben unverändert.
+
 ## Grenzen und Prüfung
 
 Die 100-Quellen-Grenze schützt Daten- und Browserbudget. Ein Update liest

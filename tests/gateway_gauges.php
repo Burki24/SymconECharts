@@ -9529,6 +9529,15 @@ $treemap->SetTestProperty('Sources', json_encode([
 $treemap->SetTestProperty('Title', 'Grouped current values');
 $treemap->SetTestProperty('IPSViewUseTileDesign', false);
 $treemap->SetTestProperty('IPSViewShowLabels', false);
+$treemap->SetTestProperty('IPSViewGroupColors', json_encode([
+    ['Group' => 'Garden', 'Color' => 0xFEDCBA]
+], JSON_THROW_ON_ERROR));
+$treemap->SetTestProperty('GroupColors', json_encode([
+    ['Group' => 'House', 'Color' => 0x123456], ['Group' => 'Garden', 'Color' => -1]
+], JSON_THROW_ON_ERROR));
+$treemap->SetTestProperty('ShowValues', true);
+$treemap->SetTestProperty('GroupLabelFontSizePercent', 150);
+$treemap->SetTestProperty('SubgroupLabelColor', 0xABCDEF);
 $treemap->ApplyChanges();
 $treemapData = json_decode($treemap->GetTreemapData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
@@ -9537,7 +9546,11 @@ assertGatewayGauge(
         && count($treemapData['treemap']['data']) === 2
         && $treemapData['treemap']['data'][0]['children'][0]['children'][0]['id'] === 'variable-4711'
         && $treemapData['treemap']['data'][0]['children'][0]['children'][1]['id'] === 'variable-4717'
-        && $treemapData['treemap']['data'][1]['children'][0]['id'] === 'variable-4720',
+        && $treemapData['treemap']['data'][1]['children'][0]['id'] === 'variable-4720'
+        && $treemapData['treemap']['style']['groupColors']['House'] === '#123456'
+        && $treemapData['treemap']['style']['showValues'] === true
+        && $treemapData['treemap']['style']['groupLabelFontSizePercent'] === 150
+        && $treemapData['treemap']['style']['subgroupLabelColor'] === '#ABCDEF',
     'Treemap must group distinct current variables without changing their IDs.'
 );
 $treemapTile = $treemap->GetVisualizationTile();
@@ -9547,10 +9560,15 @@ assertGatewayGauge(
     str_contains($treemapTile, 'echarts-treemap-root')
         && str_contains($treemapTile, '"showLabels":true')
         && str_contains($treemapIPSView, '"showLabels":false')
+        && str_contains($treemapIPSView, '#FEDCBA')
+        && !str_contains($treemapTile, '#FEDCBA')
         && strlen($treemapTile) < SYMCON_OUTPUT_BUFFER_LIMIT
         && strlen($treemapIPSView) < SYMCON_OUTPUT_BUFFER_LIMIT
         && findGaugeFormElement($treemapForm['elements'], 'BarPreview')['type'] === 'Image'
-        && findGaugeFormElement($treemapForm['elements'], 'IPSViewBarPreview')['type'] === 'Image',
+        && findGaugeFormElement($treemapForm['elements'], 'IPSViewBarPreview')['type'] === 'Image'
+        && findGaugeFormElement($treemapForm['elements'], 'GroupColors')['type'] === 'List'
+        && str_contains(findGaugeFormElement($treemapForm['elements'], 'GroupColors')['onAdd'], 'ECTM_UpdateBarPreviewFromForm')
+        && findGaugeFormElement($treemapForm['elements'], 'IPSViewGroupColors')['type'] === 'List',
     'Treemap must render separate Tile and IPSView designs below Symcon output limit.'
 );
 $updatesBefore = count($treemap->GetTestVisualizationUpdates());
@@ -9560,12 +9578,14 @@ assertGatewayGauge(
     'Treemap must publish a fresh state when a selected variable changes.'
 );
 $treemap->UpdateBarPreviewFromForm(json_encode([
-    'Sources' => [['VariableID' => 4711, 'Group' => '<Room>', 'Subgroup' => '', 'Label' => '']]
+    'Sources'     => [['VariableID' => 4711, 'Group' => '<Room>', 'Subgroup' => '', 'Label' => '']],
+    'GroupColors' => [['Group' => '<Room>', 'Color' => 0xBADA55]]
 ], JSON_THROW_ON_ERROR));
 $previewUpdate = array_slice($treemap->GetTestFormUpdates(), -2)[0]['Value'];
 $previewSvg = base64_decode(substr($previewUpdate, strlen('data:image/svg+xml;base64,')), true);
 assertGatewayGauge(
     is_string($previewSvg) && str_contains($previewSvg, '&lt;Room&gt;')
+        && str_contains($previewSvg, '#BADA55')
         && !str_contains($previewSvg, '<Room>'),
     'Treemap draft preview must escape group names.'
 );
@@ -9577,6 +9597,12 @@ assertGatewayGauge(
     'Treemap must reject negative values.'
 );
 $GLOBALS['symconTestVariables'][4717]['Value'] = $originalTreemapValue;
+$treemap->SetTestProperty('GroupColors', json_encode([
+    ['Group' => 'House', 'Color' => 0x123456], ['Group' => 'House', 'Color' => 0x654321]
+], JSON_THROW_ON_ERROR));
+$treemap->ApplyChanges();
+assertGatewayGauge($treemap->GetTestStatus() === 202, 'Treemap must reject duplicate fixed group colors.');
+$treemap->SetTestProperty('GroupColors', '[]');
 $treemap->SetTestProperty('Sources', json_encode([
     ['VariableID' => 4711, 'Group' => 'House'], ['VariableID' => 4711, 'Group' => 'Garden']
 ], JSON_THROW_ON_ERROR));

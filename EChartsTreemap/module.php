@@ -65,12 +65,18 @@ class EChartsTreemap extends IPSModuleStrict
     private const STATUS_GATEWAY_FAILED = 204;
     private const STATUS_VALUE_INVALID = 205;
     private const DESIGN_DEFAULTS = [
-        'EChartsTheme'         => EChartsAsset::THEME_AUTO,
-        'ShowLabels'           => true,
-        'TitleFontSizePercent' => 100,
-        'LabelFontSizePercent' => 100,
-        'TitleColor'           => -1,
-        'LabelColor'           => -1
+        'EChartsTheme'                 => EChartsAsset::THEME_AUTO,
+        'ShowLabels'                   => true,
+        'ShowValues'                   => false,
+        'TitleFontSizePercent'         => 100,
+        'LabelFontSizePercent'         => 100,
+        'GroupLabelFontSizePercent'    => 0,
+        'SubgroupLabelFontSizePercent' => 0,
+        'TitleColor'                   => -1,
+        'LabelColor'                   => -1,
+        'GroupLabelColor'              => -1,
+        'SubgroupLabelColor'           => -1,
+        'GroupColors'                  => '[]'
     ];
 
     public function Create(): void
@@ -248,6 +254,7 @@ class EChartsTreemap extends IPSModuleStrict
         );
         $rows = $values['Sources'] ?? json_decode($this->ReadPropertyString('Sources'), true);
         $groups = [];
+        $samples = [];
         foreach (is_array($rows) ? $rows : [] as $row) {
             if (!is_array($row)) {
                 continue;
@@ -255,6 +262,10 @@ class EChartsTreemap extends IPSModuleStrict
             $group = trim((string) ($row['Group'] ?? ''));
             if ($group !== '') {
                 $groups[$group] = ($groups[$group] ?? 0) + 1;
+                $samples[$group] ??= [
+                    'subgroup' => trim((string) ($row['Subgroup'] ?? '')),
+                    'leaf'     => trim((string) ($row['Label'] ?? '')) ?: 'Value'
+                ];
             }
         }
         if ($groups === []) {
@@ -265,18 +276,44 @@ class EChartsTreemap extends IPSModuleStrict
         $x = 32;
         $widthAvailable = 656;
         $labelColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'LabelColor', 'integer', $ipsView), $palette['text']);
+        $groupLabelColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'GroupLabelColor', 'integer', $ipsView), $labelColor);
+        $groupColorsProperty = $ipsView && !($values['IPSViewUseTileDesign']
+            ?? $this->ReadPropertyBoolean('IPSViewUseTileDesign')) ? 'IPSViewGroupColors' : 'GroupColors';
+        $configuredColors = $this->ParseGroupColors(
+            $values[$groupColorsProperty] ?? $this->ReadPropertyString($groupColorsProperty)
+        ) ?? [];
         $showLabels = $this->BarPreviewValue($values, 'ShowLabels', 'boolean', $ipsView);
-        $labelSize = max(8, min(22, (int) round(13 * $this->BarPreviewValue($values, 'LabelFontSizePercent', 'integer', $ipsView) / 100)));
+        $showValues = $this->BarPreviewValue($values, 'ShowValues', 'boolean', $ipsView);
+        $labelPercent = $this->BarPreviewValue($values, 'GroupLabelFontSizePercent', 'integer', $ipsView)
+            ?: $this->BarPreviewValue($values, 'LabelFontSizePercent', 'integer', $ipsView);
+        $labelSize = max(8, min(22, (int) round(13 * $labelPercent / 100)));
+        $valueSize = max(8, min(22, (int) round(13 * $this->BarPreviewValue($values, 'LabelFontSizePercent', 'integer', $ipsView) / 100)));
+        $subgroupPercent = $this->BarPreviewValue($values, 'SubgroupLabelFontSizePercent', 'integer', $ipsView)
+            ?: $this->BarPreviewValue($values, 'LabelFontSizePercent', 'integer', $ipsView);
+        $subgroupSize = max(8, min(22, (int) round(13 * $subgroupPercent / 100)));
+        $subgroupColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'SubgroupLabelColor', 'integer', $ipsView), $labelColor);
         $position = 0;
         foreach ($groups as $name => $group) {
             $width = $position === count($groups) - 1 ? 688 - $x : $widthAvailable * $group / $total;
-            $color = $palette['seriesColors'][$position % count($palette['seriesColors'])];
+            $color = $configuredColors[$name] ?? $palette['seriesColors'][$position % count($palette['seriesColors'])];
             $svg .= '<rect x="' . EChartsBarPreview::N($x) . '" y="78" width="' . EChartsBarPreview::N($width)
                 . '" height="240" fill="' . EChartsBarPreview::E($color) . '" stroke="' . EChartsBarPreview::E($palette['background']) . '"/>';
             if ($showLabels && $width > 85) {
                 $svg .= '<text x="' . EChartsBarPreview::N($x + 8) . '" y="103" font-size="' . $labelSize
-                    . '" fill="' . EChartsBarPreview::E($labelColor) . '">'
+                    . '" fill="' . EChartsBarPreview::E($groupLabelColor) . '">'
                     . EChartsBarPreview::E(mb_strimwidth((string) $name, 0, max(4, (int) ($width / 9)), '…')) . '</text>';
+                if ($width > 125) {
+                    $sample = $samples[$name] ?? ['subgroup' => '', 'leaf' => 'Value'];
+                    if ($sample['subgroup'] !== '') {
+                        $svg .= '<text x="' . EChartsBarPreview::N($x + 12) . '" y="135" font-size="' . $subgroupSize
+                            . '" fill="' . EChartsBarPreview::E($subgroupColor) . '">'
+                            . EChartsBarPreview::E(mb_strimwidth($sample['subgroup'], 0, max(4, (int) ($width / 9)), '…')) . '</text>';
+                    }
+                    $svg .= '<text x="' . EChartsBarPreview::N($x + 14) . '" y="164" font-size="' . $valueSize
+                        . '" fill="' . EChartsBarPreview::E($labelColor) . '">'
+                        . EChartsBarPreview::E(mb_strimwidth($sample['leaf'], 0, max(4, (int) ($width / 9)), '…'))
+                        . ($showValues ? ' 12.4' : '') . '</text>';
+                }
             }
             $x += $width;
             ++$position;
@@ -452,13 +489,19 @@ class EChartsTreemap extends IPSModuleStrict
                 return false;
             }
         }
-        foreach (['TitleColor', 'LabelColor'] as $name) {
+        foreach (['GroupLabelFontSizePercent', 'SubgroupLabelFontSizePercent'] as $name) {
+            $value = $this->ReadPropertyInteger($prefix . $name);
+            if ($value !== 0 && ($value < 50 || $value > 200)) {
+                return false;
+            }
+        }
+        foreach (['TitleColor', 'LabelColor', 'GroupLabelColor', 'SubgroupLabelColor'] as $name) {
             $value = $this->ReadPropertyInteger($prefix . $name);
             if ($value < -1 || $value > 0xFFFFFF) {
                 return false;
             }
         }
-        return true;
+        return $this->ParseGroupColors($this->ReadPropertyString($prefix . 'GroupColors')) !== null;
     }
 
     /** @return array<string,mixed> */
@@ -468,6 +511,10 @@ class EChartsTreemap extends IPSModuleStrict
         $style = [...$this->ReadAnimationStyle($prefix)];
         foreach (self::DESIGN_DEFAULTS as $name => $default) {
             if ($name === 'EChartsTheme') {
+                continue;
+            }
+            if ($name === 'GroupColors') {
+                $style['groupColors'] = $this->ParseGroupColors($this->ReadPropertyString($prefix . $name)) ?? [];
                 continue;
             }
             $key = lcfirst($name);
@@ -481,6 +528,33 @@ class EChartsTreemap extends IPSModuleStrict
             }
         }
         return $style;
+    }
+
+    /** @return array<string,string>|null */
+    private function ParseGroupColors(mixed $raw): ?array
+    {
+        try {
+            $rows = is_string($raw) ? json_decode($raw, true, 64, JSON_THROW_ON_ERROR) : $raw;
+        } catch (JsonException) {
+            return null;
+        }
+        if (!is_array($rows) || !array_is_list($rows) || count($rows) > 100) {
+            return null;
+        }
+        $colors = [];
+        foreach ($rows as $row) {
+            if (!is_array($row) || !is_string($row['Group'] ?? null) || !is_int($row['Color'] ?? null)) {
+                return null;
+            }
+            $name = trim($row['Group']);
+            $color = $row['Color'];
+            if ($name === '' || mb_strlen($name) > 80 || array_key_exists($name, $colors)
+                || $color < -1 || $color > 0xFFFFFF) {
+                return null;
+            }
+            $colors[$name] = $color < 0 ? '' : EChartsAsset::ColorToHex($color);
+        }
+        return array_filter($colors, static fn (string $color): bool => $color !== '');
     }
 
     private function EffectiveTheme(bool $ipsView): string
@@ -568,6 +642,11 @@ class EChartsTreemap extends IPSModuleStrict
                 continue;
             }
             foreach ($element['items'] as $row) {
+                if (is_string($row['name'] ?? null) && array_key_exists($row['name'], self::DESIGN_DEFAULTS)) {
+                    $row['name'] = 'IPSView' . $row['name'];
+                    $rows[] = $row;
+                    continue;
+                }
                 $items = [];
                 foreach ($row['items'] ?? [] as $item) {
                     if (is_string($item['name'] ?? null) && (array_key_exists($item['name'], self::DESIGN_DEFAULTS)

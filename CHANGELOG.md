@@ -2,6 +2,11 @@
 
 ## Hinzugefügt
 
+- Treemap-Gruppen können eigene feste Farben erhalten. Gruppen- und
+  Untergruppentitel lassen sich unabhängig von den Werte-Beschriftungen
+  gestalten; Blattwerte können optional im Rechteck erscheinen. Kachel und
+  IPSView unterstützen diese Einstellungen getrennt.
+
 - `EChartsTreemap` (`ECTM`) zeigt 1 bis 100 aktuelle numerische Symcon-Werte
   als Flächen in manuell benannten Gruppen und optionalen Untergruppen.
   Kachel und IPSView besitzen getrennte Designer mit Live-Vorschau. Nullwerte

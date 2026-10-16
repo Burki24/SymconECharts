@@ -23,10 +23,20 @@ aktualisiert, ohne archivierte Werte zu benötigen.
 Das Diagramm kann gezoomt werden. Der Kachel- und der IPSView-Designer
 besitzen Themes, eine einstellbare Titel- und Beschriftungsgröße sowie
 Titel- und Beschriftungsfarben und eine gekennzeichnete SVG-Vorschau.
-„Automatisch“ wählt für die Beschriftungen eine zur jeweiligen Gruppenfarbe
-lesbare Farbe; eine selbst gewählte Beschriftungsfarbe gilt für Gruppen,
-Untergruppen und Werte. IPSView übernimmt standardmäßig das Kacheldesign
-und kann anschließend unabhängig gestaltet werden.
+Die bisherigen Beschriftungseinstellungen gelten als Standard für Gruppen,
+Untergruppen und Werte. Gruppentitel und Untergruppentitel können zusätzlich
+eigene Schriftgrößen und Farben erhalten; 0 % beziehungsweise „Wie
+Werte-Beschriftung“ übernimmt die bisherige Einstellung. „Automatisch“ wählt
+eine zur jeweiligen Gruppenfarbe lesbare Farbe. Die numerischen Werte können
+optional in den Blattrechtecken unter dem Namen angezeigt werden; im Tooltip
+sind sie immer verfügbar.
+
+Unter „Feste Gruppenfarben“ können Sie den exakten Gruppennamen aus der
+Quellenliste und eine Farbe eintragen. Nicht zugeordnete Gruppen behalten die
+Theme-Palette. Gleiche Gruppennamen oder ungültige Farben werden abgelehnt;
+ein „Automatisch“-Eintrag verwendet die Theme-Farbe. IPSView übernimmt
+standardmäßig das Kacheldesign und kann anschließend unabhängig gestaltet
+werden, einschließlich eigener Gruppenfarben.
 
 Öffentliche PHP-Funktionen: `ECTM_GetTreemapData($id)` liefert das aktuelle
 hierarchische Datenmodell als JSON. `ECTM_GetTreemapDiagnostic($id)` liefert

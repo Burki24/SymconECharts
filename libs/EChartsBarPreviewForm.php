@@ -66,7 +66,8 @@ trait EChartsBarPreviewForm
         foreach ($items as &$item) {
             $name = $item['name'] ?? null;
             if (is_string($name) && in_array($name, $fields, true)
-                && in_array($name, ['Sources', 'Nodes', 'Edges'], true) && ($item['type'] ?? null) === 'List') {
+                && in_array($name, ['Sources', 'Nodes', 'Edges', 'GroupColors', 'IPSViewGroupColors'], true)
+                && ($item['type'] ?? null) === 'List') {
                 foreach (['onAdd', 'onEdit', 'onDelete', 'onChangeOrder'] as $event) {
                     $previous = trim((string) ($item[$event] ?? ''));
                     $item[$event] = $previous === '' ? $action : $previous . ' ' . $action;
@@ -87,7 +88,11 @@ trait EChartsBarPreviewForm
     /** @param list<string> $fields */
     private static function BarPreviewAction(string $prefix, array $fields): string
     {
-        $listFields = array_values(array_filter($fields, static fn (string $name): bool => in_array($name, ['Sources', 'Nodes', 'Edges'], true)));
+        $listFields = array_values(array_filter($fields, static fn (string $name): bool => in_array(
+            $name,
+            ['Sources', 'Nodes', 'Edges', 'GroupColors', 'IPSViewGroupColors'],
+            true
+        )));
         $pairs = array_map(
             static fn (string $name): string => var_export($name, true)
                 . ' => ' . (in_array($name, $listFields, true) ? '$barPreview' . $name : '$' . $name),

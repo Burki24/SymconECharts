@@ -171,6 +171,11 @@
                             "caption": "Show labels"
                         },
                         {
+                            "type": "CheckBox",
+                            "name": "ShowValues",
+                            "caption": "Show leaf values"
+                        },
+                        {
                             "type": "NumberSpinner",
                             "name": "TitleFontSizePercent",
                             "caption": "Title size",
@@ -181,8 +186,29 @@
                         {
                             "type": "NumberSpinner",
                             "name": "LabelFontSizePercent",
-                            "caption": "Label size",
+                            "caption": "Value label size",
                             "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "GroupLabelFontSizePercent",
+                            "caption": "Group label size (0 = value labels)",
+                            "minimum": 0,
+                            "maximum": 200,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "SubgroupLabelFontSizePercent",
+                            "caption": "Subgroup label size (0 = value labels)",
+                            "minimum": 0,
                             "maximum": 200,
                             "suffix": "%"
                         }
@@ -201,7 +227,71 @@
                         {
                             "type": "SelectColor",
                             "name": "LabelColor",
-                            "caption": "Label color",
+                            "caption": "Value label color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "GroupLabelColor",
+                            "caption": "Group label color",
+                            "allowTransparent": true,
+                            "transparentCaption": "As value labels"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "SubgroupLabelColor",
+                            "caption": "Subgroup label color",
+                            "allowTransparent": true,
+                            "transparentCaption": "As value labels"
+                        }
+                    ]
+                },
+                {
+                    "type": "List",
+                    "name": "GroupColors",
+                    "caption": "Fixed group colors (optional)",
+                    "rowCount": 4,
+                    "add": true,
+                    "delete": true,
+                    "changeOrder": true,
+                    "columns": [
+                        {
+                            "caption": "Group",
+                            "name": "Group",
+                            "width": "240px",
+                            "add": "",
+                            "edit": {
+                                "type": "ValidationTextBox"
+                            }
+                        },
+                        {
+                            "caption": "Color",
+                            "name": "Color",
+                            "width": "180px",
+                            "add": -1,
+                            "edit": {
+                                "type": "SelectColor",
+                                "allowTransparent": true,
+                                "transparentCaption": "Automatic (theme)"
+                            }
+                        }
+                    ],
+                    "form": [
+                        {
+                            "type": "ValidationTextBox",
+                            "name": "Group",
+                            "caption": "Group"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "Color",
+                            "caption": "Color",
                             "allowTransparent": true,
                             "transparentCaption": "Automatic (theme)"
                         }

@@ -85,21 +85,41 @@ assert.equal(chosenLabels.option.series[0].upperLabel.fontSize, 18);
 assert.equal(chosenLabels.option.series[0].data[0].upperLabel.color, '#123456');
 assert.equal(chosenLabels.option.series[0].data[0].children[0].label.color, '#123456');
 
-const nested = render({ ...model, treemap: { ...model.treemap, data: [{
+const custom = render({ ...model, treemap: { ...model.treemap, style: {
+    ...model.treemap.style, showValues: true,
+    groupColors: { 'Room A': '#112233' },
+    groupLabelColor: '#ffffff', subgroupLabelColor: '#000000',
+    groupLabelFontSizePercent: 150, subgroupLabelFontSizePercent: 125
+} } });
+assert.equal(custom.option.series[0].data[0].itemStyle.color, '#112233');
+assert.equal(custom.option.series[0].data[1].itemStyle.color, '#b6d634');
+assert.equal(custom.option.series[0].data[0].upperLabel.color, '#ffffff');
+assert.equal(custom.option.series[0].data[0].upperLabel.fontSize, 18);
+assert.match(custom.option.series[0].data[0].children[0].label.formatter({ name: 'Battery', value: 5 }), /Battery\n5/);
+
+const nestedModel = { ...model, treemap: { ...model.treemap, data: [{
     id: 'group-a', name: 'Room A', value: 5, children: [{
         id: 'subgroup-a', name: 'Lighting', value: 5, children: [
             { id: 'variable-1', name: 'Lamp', value: 5 }
         ]
     }]
-}] } }, 1000, 'ipsview');
+}] } };
+const nested = render(nestedModel, 1000, 'ipsview');
 assert.equal(nested.option.series[0].data[0].children[0].itemStyle.borderColor, '#5070dd');
 assert.equal(nested.option.series[0].data[0].children[0].upperLabel.color,
     nested.option.series[0].data[0].upperLabel.color);
+const nestedCustom = render({ ...nestedModel, treemap: { ...nestedModel.treemap, style: {
+    ...model.treemap.style, subgroupLabelColor: '#123456', subgroupLabelFontSizePercent: 150
+} } }, 1000, 'ipsview');
+assert.equal(nestedCustom.option.series[0].data[0].children[0].upperLabel.color, '#123456');
+assert.equal(nestedCustom.option.series[0].data[0].children[0].upperLabel.fontSize, 18);
 
 const echarts = require(path.join(__dirname, '..', '.tools', 'echarts-runtime', 'node_modules', 'echarts'));
 const chart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 1000, height: 400 });
 chart.setOption(chosenLabels.option);
 assert.equal(chart.getModel().getSeriesByIndex(0).type, 'series.treemap');
+assert.match(chart.renderToSVGString(), /Room A/);
+chart.setOption(custom.option, true);
 assert.match(chart.renderToSVGString(), /Room A/);
 chart.dispose();
 
