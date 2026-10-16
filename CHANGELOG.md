@@ -97,6 +97,14 @@
 
 ## Behoben
 
+- Sankey-Vorschauen zeigen auch größere Konfigurationen vollständig mit
+  aktuellen Variablenwerten statt eines Ersatz-Beispielnetzes. Geschlossene
+  Flussflächen verhindern Überstände an engen Kurven. Fehler- und
+  Nullwertzustände werden ausdrücklich angezeigt. Beschriftungen in Kachel,
+  IPSView und Vorschau passen sich dem verfügbaren Knotenplatz an; schmale
+  Verbraucher verursachen keinen überlappenden Textblock mehr. Gespeicherte
+  Konfigurationen werden dabei nicht verändert.
+
 - Die neuen Linien-, Achsen- und Animationsfelder im Parallel-Designer sind
   auch in der deutschen Symcon-Konsole vollständig übersetzt.
 

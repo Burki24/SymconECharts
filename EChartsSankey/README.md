@@ -57,7 +57,11 @@ Für Knotenbeschriftungen stehen automatische oder feste Positionen, Abstand,
 Fettschrift und eine maximale Breite zur Verfügung. Breite `0` wählt den
 responsiven Standard. Lange Texte lassen sich kürzen oder an Wörtern bzw.
 Zeichen umbrechen. Überlappende Knotenbeschriftungen können ausgeblendet
-werden. Verbindungswerte lassen sich zusätzlich mit eigener Schriftgröße und
+werden. Beschriftungen werden außerdem auf die tatsächlich verfügbare
+Knotenbreite bzw. -höhe begrenzt. Sehr schmale Verbraucher erhalten deshalb
+gegebenenfalls keine dauerhafte Beschriftung; Tooltip und Hervorhebung zeigen
+weiterhin den vollständigen Namen und Wert, sofern eingeschaltet.
+Verbindungswerte lassen sich zusätzlich mit eigener Schriftgröße und
 Farbe anzeigen; sie verwenden ebenfalls die eingetragene Einheit.
 
 Die Hervorhebung beim Berühren eines Knotens oder einer Verbindung kann
@@ -69,11 +73,13 @@ der Flussstufen erhalten.
 
 IPSView übernimmt standardmäßig das Kacheldesign. Alternativ können Sie es
 kopieren und unabhängig bearbeiten. Die Formularvorschauen reagieren auf
-ungespeicherte Einstellungen und verwenden ausdrücklich gekennzeichnete
-Beispielgewichte. Große oder noch ungültige Konfigurationen werden dort durch
-ein kleines Beispiel ersetzt; die vollständigen aktuellen Werte erscheinen
-nach Übernahme in der Kachel und im IPSView-Widget.
-Die Vorschau stellt Schriftumbruch und Überlappung schematisch dar;
+ungespeicherte Einstellungen. Beim Öffnen und Bearbeiten lesen sie die
+aktuellen Quellwerte und zeigen dieselben Knoten und Verbindungen wie der
+Entwurf, bis zu den vollständigen 100 Knoten und 200 Verbindungen. Nullflüsse
+werden wie im Diagramm ausgeblendet. Fehlende, ungültige oder negative Werte
+erscheinen als Hinweis statt als erfundene Beispielwerte. Die Vorschau speichert
+keine Einstellungen und verändert weder Instanzstatus noch Quellvariablen.
+Die SVG-Vorschau stellt Schriftumbruch und Überlappung schematisch dar;
 Layout-Optimierung und interaktive Hervorhebung werden erst im Diagramm
 angewendet. Die tatsächlichen Textmaße bestimmt der Browser.
 

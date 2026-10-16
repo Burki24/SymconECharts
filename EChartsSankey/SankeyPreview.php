@@ -6,7 +6,7 @@ namespace SymconECharts;
 
 use Throwable;
 
-/** Read-only SVG preview with explicit example weights and unsaved node labels. */
+/** Read-only current-value SVG preview of the complete (possibly unsaved) flow configuration. */
 trait SankeyPreview
 {
     private function SankeyPreviewSvg(array $values, bool $ipsView): string
@@ -15,7 +15,7 @@ trait SankeyPreview
         $svg = EChartsBarPreview::Open(
             $palette,
             (string) ($values['Title'] ?? $this->ReadPropertyString('Title')),
-            true,
+            false,
             $ipsView,
             $values,
             $this->Translate('Example data'),
@@ -23,32 +23,29 @@ trait SankeyPreview
             EChartsBarPreview::Color($this->BarPreviewValue($values, 'TitleColor', 'integer', $ipsView), $palette['text']),
             $this->BarPreviewValue($values, 'TitleFontSizePercent', 'integer', $ipsView)
         );
+        $svg = str_replace('<svg xmlns', '<svg font-family="Arial, sans-serif" color="' . EChartsBarPreview::E($palette['text']) . '" xmlns', $svg);
         try {
-            $nodes = $this->DecodeRows($values['Nodes'] ?? $this->ReadPropertyString('Nodes'));
-            $sources = $this->DecodeRows($values['Sources'] ?? $this->ReadPropertyString('Sources'));
-            if (count($nodes) > 12 || count($sources) > 20) {
-                throw new \InvalidArgumentException('Preview budget exceeded.');
+            $configuration = $this->GetValidatedConfiguration($values);
+            $current = [];
+            // Form previews must not call ReadCurrentSource(): transport failures there change instance status.
+            foreach (array_unique(array_column($configuration['sources'], 'VariableID')) as $id) {
+                $current[$id] = ['Value' => GetValue($id), 'Timestamp' => 0];
             }
-            $configuration = SankeyModel::Validate($nodes, $sources);
-        } catch (Throwable) {
-            $configuration = ['nodes' => [
-                ['Key' => 'a', 'Label' => $this->Translate('Source A')],
-                ['Key' => 'b', 'Label' => $this->Translate('Source B')],
-                ['Key' => 'c', 'Label' => $this->Translate('Distribution')],
-                ['Key' => 'd', 'Label' => $this->Translate('Consumer A')],
-                ['Key' => 'e', 'Label' => $this->Translate('Consumer B')]
-            ], 'sources' => [
-                ['Source' => 'a', 'Target' => 'c', 'VariableID' => 1],
-                ['Source' => 'b', 'Target' => 'c', 'VariableID' => 2],
-                ['Source' => 'c', 'Target' => 'd', 'VariableID' => 3],
-                ['Source' => 'c', 'Target' => 'e', 'VariableID' => 4]
-            ]];
+            $model = SankeyModel::Build(
+                $configuration['nodes'],
+                $configuration['sources'],
+                $current,
+                fn (string $text): string => $this->Translate($text)
+            );
+        } catch (Throwable $exception) {
+            return $this->SankeyPreviewStatus($svg, $exception->getMessage());
         }
-        $sampleValues = [];
-        foreach ($configuration['sources'] as $index => $source) {
-            $sampleValues[$source['VariableID']] = ['Value' => (float) (30 + $index * 7), 'Timestamp' => 0];
+        if ($model['links'] === []) {
+            return $this->SankeyPreviewStatus($svg, $this->Translate('No positive flows'));
         }
-        $model = SankeyModel::Build($configuration['nodes'], $configuration['sources'], $sampleValues);
+        // Normalize geometry only: finite extreme values must not produce an infinite SVG scale.
+        $maximumValue = max(array_column($model['data'], 'value'));
+        $minimumValue = min(array_column($model['data'], 'value'));
         $depths = array_fill_keys(array_column($model['data'], 'name'), 0);
         for ($pass = 0; $pass < count($depths); ++$pass) {
             foreach ($model['links'] as $link) {
@@ -86,10 +83,13 @@ trait SankeyPreview
         foreach ($model['data'] as $node) {
             $layers[$depths[$node['name']]][] = $node;
         }
-        $gap = min($gap, $crossSize / max(1, max(array_map('count', $layers)) - 1) * 0.5);
+        $gap = min($gap, $crossSize / max(1, count($model['data']) - 1) * 0.5);
         $scale = INF;
         foreach ($layers as $layer) {
-            $scale = min($scale, max(1, $crossSize - (count($layer) - 1) * $gap) / array_sum(array_column($layer, 'value')));
+            $total = array_sum(array_map(static fn (array $node): float => $node['value'] / $maximumValue, $layer));
+            if ($total > 0) {
+                $scale = min($scale, max(1, $crossSize - (count($layer) - 1) * $gap) / $total);
+            }
         }
         $positions = [];
         $colors = [];
@@ -101,15 +101,17 @@ trait SankeyPreview
             $nodeColors = [];
         }
         foreach ($layers as $depth => $layer) {
-            $cross = ($crossSize - array_sum(array_column($layer, 'value')) * $scale - (count($layer) - 1) * $gap) / 2;
+            $layerExtent = array_sum(array_map(static fn (array $node): float => $node['value'] / $maximumValue * $scale, $layer));
+            $cross = ($crossSize - $layerExtent - (count($layer) - 1) * $gap) / 2;
             foreach ($layer as $node) {
                 $key = $node['name'];
-                $positions[$key] = [$depth * ($mainSize - $nodeWidth) / $maximumDepth, $cross, $node['value'] * $scale];
+                $extent = $node['value'] / $maximumValue * $scale;
+                $positions[$key] = [$depth * ($mainSize - $nodeWidth) / $maximumDepth, $cross, $extent];
                 $colors[$key] = $nodeColors[$key] ?? EChartsBarPreview::Color(
                     $this->BarPreviewValue($values, 'NodeColor', 'integer', $ipsView),
-                    $palette['seriesColors'][count($colors) % count($palette['seriesColors'])]
+                    $this->SankeyPreviewNodeColor($node['value'], $minimumValue, $maximumValue, $palette['seriesColors'])
                 );
-                $cross += $node['value'] * $scale + $gap;
+                $cross += $extent + $gap;
             }
         }
         $offsetIn = $offsetOut = array_fill_keys(array_keys($depths), 0.0);
@@ -124,7 +126,7 @@ trait SankeyPreview
             $target = $link['target'];
             [$main1, $cross1] = $positions[$source];
             [$main2, $cross2] = $positions[$target];
-            $width = $link['value'] * $scale;
+            $width = $link['value'] / $maximumValue * $scale;
             $main1 += $nodeWidth;
             $cross1 += $offsetOut[$source] + $width / 2;
             $cross2 += $offsetIn[$target] + $width / 2;
@@ -133,8 +135,16 @@ trait SankeyPreview
             $delta = ($main2 - $main1) * $curve;
             $coordinates = $vertical ? [$cross1, $main1, $cross1, $main1 + $delta, $cross2, $main2 - $delta, $cross2, $main2]
                 : [$main1, $cross1, $main1 + $delta, $cross1, $main2 - $delta, $cross2, $main2, $cross2];
-            $path = 'M ' . EChartsBarPreview::N($coordinates[0]) . ' ' . EChartsBarPreview::N($coordinates[1]) . ' C '
-                . implode(' ', array_map(static fn (float $number): string => EChartsBarPreview::N($number), array_slice($coordinates, 2)));
+            // Two Bezier boundaries form a ribbon. A thick center stroke overshoots tight bends.
+            $upper = $lower = $coordinates;
+            foreach ($vertical ? [0, 2, 4, 6] : [1, 3, 5, 7] as $axis) {
+                $upper[$axis] -= $width / 2;
+                $lower[$axis] += $width / 2;
+            }
+            $path = 'M ' . EChartsBarPreview::N($upper[0]) . ' ' . EChartsBarPreview::N($upper[1]) . ' C '
+                . implode(' ', array_map(EChartsBarPreview::N(...), array_slice($upper, 2))) . ' L '
+                . EChartsBarPreview::N($lower[6]) . ' ' . EChartsBarPreview::N($lower[7]) . ' C '
+                . implode(' ', array_map(EChartsBarPreview::N(...), [$lower[4], $lower[5], $lower[2], $lower[3], $lower[0], $lower[1]])) . ' Z';
             $color = match ($mode) {
                 'source' => $colors[$source], 'target' => $colors[$target],
                 'fixed'  => EChartsBarPreview::Color($this->BarPreviewValue($values, 'EdgeColor', 'integer', $ipsView), $palette['muted']),
@@ -143,8 +153,8 @@ trait SankeyPreview
             $svg .= '<defs><linearGradient id="flow-' . $index . '" x2="' . ($vertical ? '0%' : '100%') . '" y2="' . ($vertical ? '100%' : '0%')
                 . '"><stop stop-color="' . EChartsBarPreview::E($colors[$source]) . '"/><stop offset="1" stop-color="'
                 . EChartsBarPreview::E($colors[$target]) . '"/></linearGradient></defs>';
-            $svg .= '<path d="' . $path . '" fill="none" stroke="' . EChartsBarPreview::E($color) . '" stroke-width="'
-                . EChartsBarPreview::N($width) . '" stroke-opacity="' . EChartsBarPreview::N($opacity) . '"/>';
+            $svg .= '<path data-source="' . EChartsBarPreview::E($source) . '" data-target="' . EChartsBarPreview::E($target)
+                . '" d="' . $path . '" fill="' . EChartsBarPreview::E($color) . '" fill-opacity="' . EChartsBarPreview::N($opacity) . '"/>';
             if ($this->BarPreviewValue($values, 'ShowEdgeValues', 'boolean', $ipsView)) {
                 $edgeColor = EChartsBarPreview::Color(
                     $this->BarPreviewValue($values, 'EdgeLabelColor', 'integer', $ipsView),
@@ -154,7 +164,7 @@ trait SankeyPreview
                 $edgeLabels .= '<text x="' . EChartsBarPreview::N(($coordinates[0] + $coordinates[6]) / 2)
                     . '" y="' . EChartsBarPreview::N(($coordinates[1] + $coordinates[7]) / 2)
                     . '" text-anchor="middle" font-size="' . EChartsBarPreview::N($edgeSize) . '" fill="'
-                    . EChartsBarPreview::E($edgeColor) . '">' . EChartsBarPreview::E((string) (int) $link['value'] . ($unit !== '' ? ' ' . $unit : '')) . '</text>';
+                    . EChartsBarPreview::E($edgeColor) . '">' . EChartsBarPreview::E($this->SankeyPreviewFormatValue($link['value'], $unit)) . '</text>';
             }
         }
         $svg .= $edgeLabels;
@@ -172,15 +182,16 @@ trait SankeyPreview
         foreach ($model['data'] as $node) {
             [$main, $cross, $extent] = $positions[$node['name']];
             [$x, $y, $width, $height] = $vertical ? [$cross, $main, $extent, $nodeWidth] : [$main, $cross, $nodeWidth, $extent];
-            $svg .= '<rect x="' . EChartsBarPreview::N($x) . '" y="' . EChartsBarPreview::N($y) . '" width="'
+            $svg .= '<rect data-node="' . EChartsBarPreview::E($node['name']) . '" x="' . EChartsBarPreview::N($x) . '" y="' . EChartsBarPreview::N($y) . '" width="'
                 . EChartsBarPreview::N($width) . '" height="' . EChartsBarPreview::N($height) . '" fill="'
                 . EChartsBarPreview::E($colors[$node['name']]) . '" rx="' . $radius . '" opacity="' . EChartsBarPreview::N($nodeOpacity)
                 . '" stroke="' . EChartsBarPreview::E($borderColor) . '" stroke-width="' . $borderWidth . '"'
-                . ($shadow > 0 ? ' filter="url(#node-shadow)"' : '') . '/>';
+                . ($shadow > 0 ? ' filter="url(#node-shadow)"' : '') . '><title>' . EChartsBarPreview::E($node['label'] . ': '
+                    . $this->SankeyPreviewFormatValue($node['value'], $unit)) . '</title></rect>';
             if ($this->BarPreviewValue($values, 'ShowLabels', 'boolean', $ipsView)) {
                 $label = $node['label'];
                 if ($this->BarPreviewValue($values, 'ShowValues', 'boolean', $ipsView)) {
-                    $label .= "\n" . (string) (int) $node['value'] . ($unit !== '' ? ' ' . $unit : '');
+                    $label .= "\n" . $this->SankeyPreviewFormatValue($node['value'], $unit);
                 }
                 $position = $this->BarPreviewValue($values, 'LabelPosition', 'string', $ipsView);
                 if ($position === 'auto') {
@@ -196,11 +207,28 @@ trait SankeyPreview
                     $this->BarPreviewValue($values, 'LabelDistance', 'integer', $ipsView)
                 );
                 $maxWidth = max(0, min(400, $this->BarPreviewValue($values, 'LabelMaxWidth', 'integer', $ipsView))) ?: 150;
+                if ($vertical || $position === 'inside') {
+                    $maxWidth = min($maxWidth, max(0, $width - 4));
+                }
+                if ($maxWidth < $fontSize) {
+                    continue;
+                }
                 $lines = $this->SankeyPreviewLabelLines(
                     $label,
                     max(1, (int) ($maxWidth / ($fontSize * 0.6))),
                     $this->BarPreviewValue($values, 'LabelOverflow', 'string', $ipsView)
                 );
+                if (!$vertical || $position === 'inside') {
+                    $lines = array_slice($lines, 0, max(0, (int) (($height - 2) / ($fontSize * 1.2))));
+                }
+                if ($lines === []) {
+                    continue;
+                }
+                if (in_array($position, ['left', 'right', 'inside'], true)) {
+                    $placement['y'] -= (count($lines) - 1) * $fontSize * 1.2 / 2;
+                } elseif ($position === 'top') {
+                    $placement['y'] -= (count($lines) - 1) * $fontSize * 1.2;
+                }
                 $textWidth = min($maxWidth, max(array_map('mb_strlen', $lines)) * $fontSize * 0.6);
                 $left = $placement['x'] - match ($placement['anchor']) {
                     'end' => $textWidth, 'middle' => $textWidth / 2, default => 0
@@ -226,6 +254,40 @@ trait SankeyPreview
             }
         }
         return $svg . '</g></svg>';
+    }
+
+    private function SankeyPreviewStatus(string $svg, string $message): string
+    {
+        $svg .= '<text x="360" y="170" text-anchor="middle" font-size="12" fill="currentColor">';
+        foreach (array_slice($this->SankeyPreviewLabelLines($message, 85, 'break'), 0, 5) as $index => $line) {
+            $svg .= '<tspan x="360" dy="' . ($index === 0 ? '0' : '1.3em') . '">' . EChartsBarPreview::E($line) . '</tspan>';
+        }
+        return $svg . '</text></svg>';
+    }
+
+    private function SankeyPreviewFormatValue(float $value, string $unit): string
+    {
+        $language = $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage());
+        $number = rtrim(rtrim(EChartsBarPreview::FormatValue($value, 3, '', $language), '0'), '.,');
+        return $number . ($unit !== '' ? ' ' . $unit : '');
+    }
+
+    /** ECharts Sankey maps node values linearly across the theme palette, not by node index. */
+    private function SankeyPreviewNodeColor(float $value, float $minimum, float $maximum, array $colors): string
+    {
+        $normalized = $maximum > $minimum ? ($value - $minimum) / ($maximum - $minimum) : 0.5;
+        $position = max(0, min(1, $normalized)) * (count($colors) - 1);
+        $index = (int) floor($position);
+        $fraction = $position - $index;
+        $start = hexdec(ltrim($colors[$index], '#'));
+        $end = hexdec(ltrim($colors[min($index + 1, count($colors) - 1)], '#'));
+        $color = 0;
+        foreach ([16, 8, 0] as $shift) {
+            $first = ($start >> $shift) & 0xFF;
+            $last = ($end >> $shift) & 0xFF;
+            $color |= (int) round($first + ($last - $first) * $fraction) << $shift;
+        }
+        return EChartsAsset::ColorToHex($color);
     }
 
     /** Schematic wrapping; the renderer measures the actual browser font. */

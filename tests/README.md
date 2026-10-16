@@ -8,6 +8,11 @@ Quellenabonnements, Wertänderungen, Formularauswahl und getrennte Ausgabewege.
 Die Designer-Tests prüfen zusätzlich individuelle Farben nach Knotenschlüssel,
 Rahmen und Rundungen, Beschriftungs- und Hover-Optionen, Grenzen beider Designs,
 Kopieren, Draft-Vorschau und deren unveränderte gespeicherte Konfiguration.
+Regressionsfälle mit einer Quelle und 24 ungleichen Verbrauchern sichern
+vollständige Vorschauen, aktuelle Größenverhältnisse, geschlossene Flussbänder
+innerhalb der Zeichenfläche sowie Fehler-/Nullzustände ohne Konfigurations-
+oder Statusänderung ab. ECharts-Engine-Tests prüfen begrenzte und kollisionsfreie
+Knotenlabels in beiden Ausrichtungen auch ohne aktiviertes `HideOverlappingLabels`.
 Die ursprüngliche Version wurde vom Anwender in Symcon-Kachel und IPSView
 live bestätigt; die ergänzten Designeroptionen sind dort erneut zu prüfen.
 

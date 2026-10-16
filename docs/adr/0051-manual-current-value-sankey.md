@@ -37,14 +37,26 @@ und keine Gesamtsumme über mehrere Flussstufen gebildet.
 Gateway-Protokoll, `EChartsCurrentSources`, Animation, Vorschauverdrahtung,
 Formularrubriken, Theme, Hintergrund und IPSView-Transport werden verwendet.
 Die Sankey-spezifische Validierung und Modellbildung liegen im Modul in
-`SankeyModel.php`, die begrenzte SVG-Beispielvorschau in `SankeyPreview.php`.
+`SankeyModel.php`, die vollständige SVG-Momentanwertvorschau in `SankeyPreview.php`.
 Es entsteht kein universeller Graphmodus und keine lokale Helper-Kopie.
 
 Kachel und IPSView besitzen getrennte Designer. Unsichtbare beziehungsweise
 unabhängige Felder folgen denselben Vererbungsregeln wie die anderen Geräte.
 Knotenauswahlfelder reagieren auf ungespeicherte Knotenänderungen. Die
-Vorschau übernimmt bis zu zwölf Knoten und zwanzig Verbindungen mit
-synthetischen Gewichten; größere oder ungültige Entwürfe nutzen Beispieldaten.
+Vorschau verwendet die vollständige validierte Entwurfsstruktur (bis zu
+100 Knoten/200 Verbindungen) und liest beim Öffnen bzw. Bearbeiten die
+aktuellen Werte einmal je Variablen-ID und Vorschau. Sie verwendet lokal
+`GetValue`, wie bestehende aktuelle SVG-Vorschauen, und nicht die
+statusverändernden Laufzeit-/Gateway-Lesemethoden. Konfiguration, Abonnements,
+Instanzstatus und Quellwerte bleiben unverändert. Fehler und Nullflusszustände
+werden ausdrücklich angezeigt; ein Ersatz durch synthetische Daten entfällt.
+Geometriewerte werden normalisiert, um auch bei sehr kleinen endlichen
+Messwerten eine endliche SVG-Skalierung zu erhalten. Flüsse sind geschlossene
+Bezier-Flächen zwischen Knotenrändern, keine überbreiten Mittelstriche.
+Automatische Knotenfarben interpolieren wie `sankeyVisual` des gepinnten
+ECharts zwischen den Themefarben nach dem Knotenwert; eine bloße
+Listenfarbenfolge wäre hier falsch. Globale und individuelle Farben haben
+weiterhin Vorrang. Beschriftungen und Werte werden XML-escaped ausgegeben.
 
 ## Runtime und Nachweise
 
@@ -92,7 +104,21 @@ Die ergänzten Designeroptionen benötigen nach dem Modulupdate erneut eine
 Live-Prüfung beider Ausgabewege. Schematische SVG-Vorschauen messen Texte
 näherungsweise und simulieren keine Layout-Optimierungsdurchläufe oder
 Hover-Interaktion.
+Der Renderer begrenzt Labelbreite/-höhe mittels `labelLayout` nach dem
+tatsächlich berechneten Knotenrechteck. `LabelMaxWidth` bleibt die Obergrenze,
+`HideOverlappingLabels` steuert weiterhin die zusätzliche Kollisionsprüfung.
+Nicht passende Textzeilen entfallen durch `lineOverflow: truncate`; explizite
+Hover-Beschriftungen und Tooltips bleiben lesbar. Es werden keine Properties
+migriert oder automatisch überschrieben. Die SVG-Vorschau begrenzt Texte
+entsprechend näherungsweise nach Knotenmaßen; die genaue ECharts-Anordnung
+und Textmessung bleiben Aufgabe des Browsers.
 Ein ergänzender lokaler Canvas-Browsertest bestätigt individuelle Farben,
 Rahmen, Rundungen, Schatten, umgebrochene Labels und Verbindungswerte in beiden
 Ausrichtungen sowie `trajectory`-Hervorhebung, Nullflussanzeige und
 Wiederherstellung. Dies ersetzt keine Prüfung innerhalb von Symcon/IPSView.
+Ein weiterer lokaler Browservergleich der korrigierten SVG-Vorschau mit der
+gebündelten Canvas-Runtime verwendet dieselbe 25-Knoten-/24-Flüsse-Teststruktur
+und dieselben Momentanwerte. Er bestätigt beide Ausrichtungen, passende
+Farben/Anteile, fehlende Textüberlappung und volle Tooltip-/Hover-Beschriftung
+eines schmalen Verbrauchers. Pixelgleiche Anordnung wird nicht zugesagt;
+die beschriebene erneute Live-Prüfung bleibt erforderlich.

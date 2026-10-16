@@ -102,7 +102,7 @@ assert.equal(customized.label.distance, 0);
 assert.equal(customized.label.width, 72);
 assert.equal(customized.label.overflow, 'breakAll');
 assert.equal(customized.label.fontWeight, 'bold');
-assert.equal(customized.labelLayout.hideOverlap, true);
+assert.equal(customized.labelLayout({ dataIndex: 1, rect: { width: 24, height: 100 } }).hideOverlap, true);
 assert.equal(customized.edgeLabel.show, true);
 assert.equal(customized.edgeLabel.color, '#876543');
 assert.equal(customized.edgeLabel.fontSize, 18);
@@ -123,6 +123,43 @@ assert.equal(noHover.emphasis.focus, 'none');
 assert.equal(noHover.itemStyle.opacity, 0);
 
 const echarts = require(path.join(root, '.tools/echarts-runtime/node_modules/echarts'));
+// Reproduce one source feeding many unequal consumers, without enabling hideOverlap in saved design.
+const crowdedWeights = [500, 250, 120, 60, 30, 15, ...Array(18).fill(1)];
+const crowdedNodes = [{ name: 'root', label: 'All consumers', value: crowdedWeights.reduce((sum, value) => sum + value, 0) },
+    ...crowdedWeights.map((value, index) => ({ name: 'sink' + index, label: 'Consumer with a long name ' + index, value }))];
+for (const orientation of ['vertical', 'horizontal']) {
+    const crowdedModel = { ...model, sankey: { ...model.sankey, data: crowdedNodes,
+        links: crowdedWeights.map((value, index) => ({ source: 'root', target: 'sink' + index, value })),
+        style: { ...model.sankey.style, orientation, hideOverlappingLabels: false, labelMaxWidth: 0 } } };
+    const before = JSON.stringify(crowdedModel);
+    const option = render(crowdedModel).option;
+    const engine = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 900, height: 500 });
+    engine.setOption(option);
+    const data = engine.getModel().getSeriesByIndex(0).getData();
+    const labelBoxes = [];
+    for (let index = 0; index < data.count(); index++) {
+        const rectangle = data.getItemGraphicEl(index);
+        const label = rectangle.getTextContent();
+        if (orientation === 'vertical') {
+            assert.ok(label.style.width <= Math.max(0, rectangle.shape.width - 4) + 0.01,
+                'Vertical labels must fit their own consumer width instead of overlapping adjacent consumers.');
+        } else {
+            assert.ok(label.style.height <= Math.max(0, rectangle.shape.height - 2) + 0.01,
+                'Horizontal labels must respect the available consumer height.');
+        }
+        const box = label.getBoundingRect().clone();
+        box.applyTransform(label.getComputedTransform());
+        if (!label.ignore && box.width > 0 && box.height > 0) {
+            assert.ok(labelBoxes.every(other => !box.intersect(other)),
+                'The real engine must render crowded source/consumer labels without overlapping.');
+            labelBoxes.push(box);
+        }
+    }
+    assert.ok(labelBoxes.length >= 2, 'Fitting must retain readable labels where space permits, not hide every label.');
+    assert.equal(JSON.stringify(crowdedModel), before, 'Responsive label fitting must not mutate the configured design or model.');
+    assert.match(option.tooltip.formatter({ dataType: 'node', data: option.series[0].data[24] }), /Consumer with a long name 23/);
+    engine.dispose();
+}
 for (const option of [tile.option, independent.option, decorated,
     render({ ...decoratedModel, sankey: { ...decoratedModel.sankey, style: { ...decoratedModel.sankey.style, orientation: 'vertical' } } }).option]) {
     const chart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 900, height: 500 });

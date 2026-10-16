@@ -77,6 +77,12 @@
             Math.max(0, crossSize) / Math.max(1, nodes.length - 1) * 0.5);
         var labels = new Map(nodes.map(function (node) { return [node.name, String(node.label || '')]; }));
         var outgoing = new Set(links.map(function (link) { return link.source; }));
+        var labelSize = design.fontSizePercent(style.labelFontSizePercent, compact ? 10 : 12);
+        var labelWidth = Number(style.labelMaxWidth) || (compact ? 90 : 150);
+        function labelPosition(name) {
+            return style.labelPosition && style.labelPosition !== 'auto' ? style.labelPosition
+                : (vertical ? (outgoing.has(name) ? 'bottom' : 'top') : (outgoing.has(name) ? 'right' : 'left'));
+        }
         function formatValue(value) {
             return Number(value).toLocaleString(undefined, { maximumFractionDigits: 3 })
                 + (flow.unit ? ' ' + String(flow.unit) : '');
@@ -114,24 +120,35 @@
                     var color = Object.prototype.hasOwnProperty.call(nodeColors, node.name) ? nodeColors[node.name] : style.nodeColor;
                     return { name: node.name, displayName: node.label, value: node.value,
                         itemStyle: color ? { color: color } : {},
-                        label: { position: style.labelPosition && style.labelPosition !== 'auto' ? style.labelPosition
-                            : (vertical ? (outgoing.has(node.name) ? 'bottom' : 'top')
-                                : (outgoing.has(node.name) ? 'right' : 'left')) } };
+                        label: { position: labelPosition(node.name) } };
                 }),
                 links: links.map(function (link) {
                     return { source: link.source, target: link.target, value: link.value, timestamp: link.timestamp };
                 }),
                 label: { show: style.showLabels !== false, color: style.labelColor || colors.text,
-                    fontSize: design.fontSizePercent(style.labelFontSizePercent, compact ? 10 : 12),
+                    fontSize: labelSize,
                     fontWeight: style.labelBold === true ? 'bold' : 'normal',
                     distance: style.labelDistance == null ? 5 : Number(style.labelDistance),
-                    overflow: style.labelOverflow || 'truncate', width: Number(style.labelMaxWidth) || (compact ? 90 : 150),
+                    overflow: style.labelOverflow || 'truncate', lineOverflow: 'truncate', width: labelWidth,
                     formatter: function (parameter) {
                         var data = parameter.data || {};
                         return String(data.displayName || '')
                             + (style.showValues === true ? '\n' + formatValue(data.value) : '');
                     } },
-                labelLayout: { hideOverlap: style.hideOverlappingLabels === true },
+                labelLayout: function (parameters) {
+                    var layout = { hideOverlap: style.hideOverlappingLabels === true };
+                    if (parameters.dataType === 'edge' || !parameters.rect) { return layout; }
+                    var position = labelPosition((nodes[parameters.dataIndex] || {}).name);
+                    var inside = position === 'inside';
+                    // Fit text to the actual laid-out rectangle, not an estimate from node count.
+                    if (vertical || inside) {
+                        layout.width = Math.min(labelWidth, Math.max(0, parameters.rect.width - 4));
+                    }
+                    if (!vertical || inside) {
+                        layout.height = Math.max(0, parameters.rect.height - 2);
+                    }
+                    return layout;
+                },
                 edgeLabel: { show: style.showEdgeValues === true,
                     color: style.edgeLabelColor || style.labelColor || colors.text,
                     fontSize: design.fontSizePercent(style.edgeLabelFontSizePercent, compact ? 10 : 12),
@@ -148,7 +165,8 @@
                     curveness: Number(style.edgeCurvenessPercent) / 100 },
                 emphasis: { disabled: style.hoverFocus === 'none',
                     focus: style.hoverFocus === 'none' ? 'none' : (style.hoverFocus || 'adjacency'),
-                    label: { show: style.showLabels !== false }, edgeLabel: { show: style.showEdgeValues === true },
+                    label: { show: style.showLabels !== false, width: Math.max(150, labelWidth), height: labelSize * 6, overflow: 'break' },
+                    edgeLabel: { show: style.showEdgeValues === true },
                     lineStyle: { opacity: style.highlightEdgeOpacityPercent == null ? 0.85 : Number(style.highlightEdgeOpacityPercent) / 100 } },
                 blur: { lineStyle: { opacity: style.blurEdgeOpacityPercent == null ? 0.05 : Number(style.blurEdgeOpacityPercent) / 100 } }
             }]

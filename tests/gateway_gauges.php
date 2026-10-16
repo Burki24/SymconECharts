@@ -10082,6 +10082,83 @@ $sankeyInheritedDiagnostic = array_values(array_filter(
     static fn (array $update): bool => $update['Field'] === 'ConfigurationDiagnostics'
 ));
 assertGatewayGauge(end($sankeyInheritedDiagnostic)['Value'] === 'Sankey configuration is valid.', 'Disabled independent color drafts must not invalidate inherited IPSView design.');
+$sankeySavedProperties = (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($sankey);
+$sankeyDraftNodes = [['Key' => 'previewSource', 'Label' => 'Actual preview source']];
+$sankeyDraftSources = [];
+for ($index = 0; $index < 24; ++$index) {
+    $sankeyDraftNodes[] = ['Key' => 'previewSink' . $index, 'Label' => 'Actual preview consumer ' . $index];
+    $sankeyDraftSources[] = ['Source' => 'previewSource', 'Target' => 'previewSink' . $index, 'VariableID' => $index === 0 ? 4711 : 4713];
+}
+$sankeyReadPreview = static function (array $draft) use ($sankey): array
+{
+    $sankey->UpdateBarPreviewFromForm(json_encode($draft, JSON_THROW_ON_ERROR));
+    return array_map(
+        static fn (array $update): string => base64_decode(substr($update['Value'], strlen('data:image/svg+xml;base64,')), true),
+        array_slice($sankey->GetTestFormUpdates(), -2)
+    );
+};
+$sankeyPreviewValuesBefore = [GetValue(4711), GetValue(4713)];
+try {
+    $GLOBALS['symconTestVariables'][4711]['Value'] = 200.0;
+    $GLOBALS['symconTestVariables'][4713]['Value'] = 50.0;
+    $sankeyDraft = ['Nodes' => $sankeyDraftNodes, 'Sources' => $sankeyDraftSources,
+        'Orientation'       => 'vertical', 'IPSViewUseTileDesign' => false, 'IPSViewOrientation' => 'horizontal'];
+    foreach ($sankeyReadPreview($sankeyDraft) as $output => $svg) {
+        $document = new DOMDocument();
+        assertGatewayGauge($document->loadXML($svg, LIBXML_NONET), 'Current-value Sankey previews must be valid XML.');
+        $xpath = new DOMXPath($document);
+        $xpath->registerNamespace('svg', 'http://www.w3.org/2000/svg');
+        $rectangles = $xpath->query('//svg:rect[@data-node]');
+        $flows = $xpath->query('//svg:path[@data-source]');
+        assertGatewayGauge(
+            $rectangles->length === 25 && $flows->length === 24
+            && str_contains($svg, 'Actual preview consumer 23') && !str_contains($svg, 'Source A'),
+            'Large Sankey previews must retain all actual nodes and connections instead of replacing them with an example.'
+        );
+        $first = $xpath->query('//svg:rect[@data-node="previewSink0"]')->item(0);
+        $second = $xpath->query('//svg:rect[@data-node="previewSink1"]')->item(0);
+        $extent = $output === 0 ? 'width' : 'height';
+        assertGatewayGauge(
+            abs((float) $first->getAttribute($extent) / (float) $second->getAttribute($extent) - 4) < 0.05,
+            'Preview node proportions must reflect current variable values, including reused sources.'
+        );
+        assertGatewayGauge(
+            $first->getAttribute('fill') === '#AECE41',
+            'Automatic preview colors must follow Sankey value interpolation (200 between 50 and 1350), not node index.'
+        );
+        foreach ($flows as $flow) {
+            assertGatewayGauge(
+                str_ends_with($flow->getAttribute('d'), ' Z') && !$flow->hasAttribute('stroke-width'),
+                'Preview flows must be closed ribbons, not thick strokes protruding beyond node endpoints.'
+            );
+            preg_match_all('/-?\d+(?:\.\d+)?/', $flow->getAttribute('d'), $coordinates);
+            foreach ($coordinates[0] as $index => $coordinate) {
+                $limit = $index % 2 === 0 ? 580 : 220;
+                assertGatewayGauge(
+                    (float) $coordinate >= -0.01 && (float) $coordinate <= $limit + 0.01,
+                    'All ribbon boundary control points must remain within the preview plot, even on tight vertical curves.'
+                );
+            }
+        }
+    }
+    $GLOBALS['symconTestVariables'][4711]['Value'] = 0.0;
+    $GLOBALS['symconTestVariables'][4713]['Value'] = 0.0;
+    assertGatewayGauge(str_contains($sankeyReadPreview($sankeyDraft)[0], 'No positive flows'), 'All-zero previews must match the empty runtime state.');
+    $GLOBALS['symconTestVariables'][4711]['Value'] = -1.0;
+    $sankeyInvalidPreview = $sankeyReadPreview($sankeyDraft)[0];
+    assertGatewayGauge(
+        str_contains($sankeyInvalidPreview, 'finite and non-negative') && !str_contains($sankeyInvalidPreview, 'data-source='),
+        'Invalid current values must be reported without inventing example weights.'
+    );
+} finally {
+    $GLOBALS['symconTestVariables'][4711]['Value'] = $sankeyPreviewValuesBefore[0];
+    $GLOBALS['symconTestVariables'][4713]['Value'] = $sankeyPreviewValuesBefore[1];
+}
+assertGatewayGauge(
+    (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($sankey) === $sankeySavedProperties
+    && $sankey->GetTestStatus() === IS_ACTIVE && $sankey->GetTestReferences() === [4711, 4713],
+    'Preview reads, invalid current values and unsaved graph edits must not modify saved configuration, status or subscriptions.'
+);
 $GLOBALS['symconTestCopyTarget'] = $sankey;
 try {
     $sankey->CopyTileDesignToIPSView();
