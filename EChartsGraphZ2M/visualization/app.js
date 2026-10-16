@@ -69,6 +69,22 @@
         };
     }
 
+    var lqiColors = ['#D9534F', '#E6B94A', '#37A873'];
+
+    function lqiColor(lqi) {
+        var segment = lqi <= 128 ? 0 : 1;
+        var ratio = segment === 0 ? lqi / 128 : (lqi - 128) / 127;
+        var start = lqiColors[segment];
+        var end = lqiColors[segment + 1];
+        var result = '#';
+        for (var index = 1; index < 7; index += 2) {
+            var channel = Math.round(parseInt(start.slice(index, index + 2), 16) * (1 - ratio)
+                + parseInt(end.slice(index, index + 2), 16) * ratio);
+            result += channel.toString(16).padStart(2, '0');
+        }
+        return result.toUpperCase();
+    }
+
     function buildOption(model, theme) {
         var colors = colorsFor(theme);
         var graph = model.graph || {};
@@ -99,7 +115,10 @@
             var lqi = Math.max(0, Math.min(255, Number(link.lqi) || 0));
             return {
                 source: String(link.source), target: String(link.target), lqi: lqi,
-                lineStyle: { opacity: 0.1 + 0.35 * lqi / 255 }
+                lineStyle: {
+                    opacity: style.linkColorMode === 'lqi' ? 0.28 + 0.25 * lqi / 255 : 0.1 + 0.35 * lqi / 255,
+                    ...(style.linkColorMode === 'lqi' ? { color: lqiColor(lqi) } : {})
+                }
             };
         });
         return {
@@ -125,7 +144,7 @@
             series: [{
                 id: 'graph', type: 'graph', layout: style.graphLayout === 'circular' ? 'circular' : 'force',
                 roam: style.roamEnabled === true, draggable: style.roamEnabled === true,
-                left: '6%', right: '6%', top: top, bottom: 42,
+                left: '6%', right: '6%', top: top, bottom: style.linkColorMode === 'lqi' ? 60 : 42,
                 symbol: 'circle', symbolSize: compact ? Math.max(6, nodeSize * 0.8) : nodeSize,
                 edgeSymbol: style.showLinkArrows === true ? ['none', 'arrow'] : ['none', 'none'],
                 edgeSymbolSize: 6,
@@ -203,6 +222,11 @@
                 + ' style="background-color:' + escapeHTML(entry[1]) + '"></span>'
                 + escapeHTML(translate(entry[0])) + '</span>';
         }).join('');
+        if (style.linkColorMode === 'lqi') {
+            legendElement.innerHTML += '<span class="echarts-zigbee-graph-legend-item">'
+                + '<span class="echarts-zigbee-graph-legend-scale" style="background:linear-gradient(90deg,'
+                + lqiColors.join(',') + ')"></span>LQI 0–255</span>';
+        }
         legendElement.hidden = false;
         var theme = normalizeTheme(state.chart.theme || 'auto');
         if (chart && currentTheme !== theme) {

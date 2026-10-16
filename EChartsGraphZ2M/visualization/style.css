@@ -57,4 +57,5 @@ html, body {
 }
 .echarts-zigbee-graph-legend-item { display: inline-flex; align-items: center; gap: 0.25rem; white-space: nowrap; }
 .echarts-zigbee-graph-legend-dot { inline-size: 0.65rem; block-size: 0.65rem; border-radius: 50%; }
+.echarts-zigbee-graph-legend-scale { inline-size: 2.4rem; block-size: 0.3rem; border-radius: 0.15rem; }
 [hidden] { display: none !important; }

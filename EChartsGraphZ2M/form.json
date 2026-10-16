@@ -196,6 +196,26 @@
                     "type": "RowLayout",
                     "items": [
                         {
+                            "type": "Select",
+                            "name": "LinkColorMode",
+                            "caption": "Connection color mode",
+                            "options": [
+                                {
+                                    "caption": "Uniform color",
+                                    "value": "uniform"
+                                },
+                                {
+                                    "caption": "By LQI (red–yellow–green)",
+                                    "value": "lqi"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
                             "type": "SelectColor",
                             "name": "NodeColor",
                             "caption": "Coordinator color",

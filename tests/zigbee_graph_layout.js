@@ -101,6 +101,24 @@ const custom = render({ ...style, nodeColor: '#123456', routerColor: '#234567', 
 assert.deepEqual(Array.from(custom.option.series[0].data, node => node.itemStyle.color),
     ['#123456', '#234567', '#345678']);
 assert.match(custom.legendElement.innerHTML, /background-color:#234567/);
+const uniform = render({ ...style, edgeColor: '#ABCDEF', linkColorMode: 'uniform' });
+assert.equal(uniform.option.series[0].lineStyle.color, '#ABCDEF');
+assert.equal(uniform.option.series[0].links[0].lineStyle.color, undefined);
+assert.doesNotMatch(uniform.legendElement.innerHTML, /LQI 0/);
+const lqiNetwork = {
+    ...graph,
+    links: [
+        { source: 'device-a', target: 'device-b', lqi: 0 },
+        { source: 'device-b', target: 'device-c', lqi: 128 },
+        { source: 'device-c', target: 'device-a', lqi: 255 }
+    ]
+};
+const lqiColored = render({ ...style, edgeColor: '#ABCDEF', linkColorMode: 'lqi' }, 1000, lqiNetwork);
+assert.deepEqual(Array.from(lqiColored.option.series[0].links, link => link.lineStyle.color),
+    ['#D9534F', '#E6B94A', '#37A873']);
+assert.equal(lqiColored.option.series[0].emphasis.focus, 'adjacency');
+assert.match(lqiColored.legendElement.innerHTML, /LQI 0/);
+assert.match(lqiColored.legendElement.innerHTML, /255/);
 const unknown = render(style, 1000, {
     ...graph, nodes: [{ id: 'device-x', name: 'Unknown device', kind: 'Unknown' }], links: []
 });
@@ -112,6 +130,9 @@ const chart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 800,
 chart.setOption(large.option);
 assert.equal(chart.getModel().getSeriesByIndex(0).getData().count(), 3);
 assert.equal(chart.getModel().getSeriesByIndex(0).getEdgeData().count(), 2);
+chart.setOption(lqiColored.option, true);
+assert.equal(chart.getModel().getSeriesByIndex(0).getEdgeData().getItemModel(0).get('lineStyle.color'), '#D9534F');
+assert.equal(chart.getModel().getSeriesByIndex(0).getEdgeData().getItemModel(2).get('lineStyle.color'), '#37A873');
 chart.dispose();
 
 const crowded = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 500, height: 300 });

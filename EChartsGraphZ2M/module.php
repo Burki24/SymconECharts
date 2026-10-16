@@ -69,6 +69,7 @@ class EChartsGraphZ2M extends IPSModuleStrict
         'RoamEnabled'              => true,
         'ShowLabels'               => true,
         'ShowLinkArrows'           => false,
+        'LinkColorMode'            => 'uniform',
         'TitleFontSizePercent'     => 100,
         'LabelFontSizePercent'     => 100,
         'TitleColor'               => -1,
@@ -253,6 +254,7 @@ class EChartsGraphZ2M extends IPSModuleStrict
             EChartsBarPreview::Color($this->BarPreviewValue($values, 'EndDeviceColor', 'integer', $ipsView), $palette['seriesColors'][3])
         ];
         $edgeColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'EdgeColor', 'integer', $ipsView), $palette['muted']);
+        $linkColorMode = $this->BarPreviewValue($values, 'LinkColorMode', 'string', $ipsView);
         $svg = EChartsBarPreview::Open(
             $palette,
             $title,
@@ -270,18 +272,25 @@ class EChartsGraphZ2M extends IPSModuleStrict
         $links = [[0, 1], [0, 2], [1, 3], [2, 3]];
         $arrows = $this->BarPreviewValue($values, 'ShowLinkArrows', 'boolean', $ipsView);
         $markerID = $ipsView ? 'ecgz-preview-arrow-ipsview' : 'ecgz-preview-arrow-tile';
+        $lineColors = $linkColorMode === 'lqi'
+            ? ['#D9534F', '#E6B94A', '#37A873', '#E6B94A']
+            : array_fill(0, count($links), $edgeColor);
         if ($arrows) {
-            $svg .= '<defs><marker id="' . $markerID . '" viewBox="0 0 10 10" refX="10" refY="5"'
-                . ' markerWidth="6" markerHeight="6" orient="auto-start-reverse">'
-                . '<path d="M 0 0 L 10 5 L 0 10 z" fill="' . EChartsBarPreview::E($edgeColor) . '"/>'
-                . '</marker></defs>';
+            $svg .= '<defs>';
+            foreach ($lineColors as $index => $lineColor) {
+                $svg .= '<marker id="' . $markerID . '-' . $index . '" viewBox="0 0 10 10" refX="10" refY="5"'
+                    . ' markerWidth="6" markerHeight="6" orient="auto-start-reverse">'
+                    . '<path d="M 0 0 L 10 5 L 0 10 z" fill="' . EChartsBarPreview::E($lineColor) . '"/>'
+                    . '</marker>';
+            }
+            $svg .= '</defs>';
         }
-        foreach ($links as [$from, $to]) {
+        foreach ($links as $index => [$from, $to]) {
             [$x1, $y1] = $positions[$from];
             [$x2, $y2] = $positions[$to];
             $svg .= '<line x1="' . $x1 . '" y1="' . $y1 . '" x2="' . $x2 . '" y2="' . $y2
-                . '" stroke="' . EChartsBarPreview::E($edgeColor) . '" stroke-width="2"'
-                . ($arrows ? ' marker-end="url(#' . $markerID . ')"' : '') . '/>';
+                . '" stroke="' . EChartsBarPreview::E($lineColors[$index]) . '" stroke-width="2"'
+                . ($arrows ? ' marker-end="url(#' . $markerID . '-' . $index . ')"' : '') . '/>';
         }
         $nodeSize = max(6, min(40, $this->BarPreviewValue($values, 'NodeSize', 'integer', $ipsView)));
         $labelSize = max(8, min(20, (int) round(11 * $this->BarPreviewValue($values, 'LabelFontSizePercent', 'integer', $ipsView) / 100)));
@@ -452,6 +461,7 @@ class EChartsGraphZ2M extends IPSModuleStrict
     {
         if (!EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme'))
             || !in_array($this->ReadPropertyString($prefix . 'GraphLayout'), ['force', 'circular'], true)
+            || !in_array($this->ReadPropertyString($prefix . 'LinkColorMode'), ['uniform', 'lqi'], true)
             || $this->ReadPropertyInteger($prefix . 'NodeSize') < 6
             || $this->ReadPropertyInteger($prefix . 'NodeSize') > 40
             || !$this->AnimationIsValid($prefix)) {

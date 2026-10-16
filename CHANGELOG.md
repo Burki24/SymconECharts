@@ -2,6 +2,10 @@
 
 ## Hinzugefügt
 
+- Der Zigbee2MQTT-Graph kann Verbindungslinien optional nach LQI von Rot über
+  Gelb nach Grün einfärben. Die Farbskala erscheint in der Legende und den
+  Live-Vorschauen; bestehende Instanzen behalten die einheitliche Linienfarbe.
+
 - Der Zigbee2MQTT-Graph unterscheidet Koordinator, Router und Endgeräte durch
   eigene Knotenfarben und eine Legende. Die Farben können für Kachel und
   unabhängiges IPSView-Design einzeln angepasst werden. Achtung: Eine bisher
