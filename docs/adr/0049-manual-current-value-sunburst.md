@@ -51,5 +51,5 @@ Die 100-Quellen-Grenze begrenzt Daten- und Renderbudget. Gemischte
 physikalische Einheiten sind technisch zulässig, fachlich aber oft nicht
 vergleichbar. Die lokale Prüfung umfasst Modulvertrag, Datenhierarchie,
 Optionsaufbau, Bundle-Integrität und Symcon-Ausgabelimit. Die visuelle
-Bedienung der Grunddarstellung in realer Kachel und IPSView wurde vom
-Anwender bestätigt. Ein Livetest der ergänzten Designoptionen steht aus.
+Bedienung der Grunddarstellung und der ergänzten Designoptionen in realer
+Kachel und IPSView wurde vom Anwender bestätigt.
