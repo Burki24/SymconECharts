@@ -73,6 +73,7 @@
         var axisColor = style.axisColor || colors.text;
         return {
             backgroundColor: backgroundColor,
+            ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
             aria: { enabled: true, decal: { show: false } },
             title: {
                 show: showTitle, text: String(parallel.title || ''), left: 'center', top: titleLayout.top,
@@ -96,10 +97,14 @@
                 left: compact ? 28 : 64, right: compact ? 28 : 64,
                 top: titleLayout.headerInset + (showTitle ? titleSize + 42 : 40), bottom: 38,
                 parallelAxisDefault: {
-                    type: 'value', nameLocation: 'end', nameGap: 20,
+                    type: 'value', nameLocation: 'end',
+                    nameGap: style.axisNameGap === undefined ? 20 : Number(style.axisNameGap),
                     nameTextStyle: { color: axisColor, fontSize: design.fontSizePercent(style.axisFontSizePercent, compact ? 10 : 12) },
-                    axisLine: { lineStyle: { color: style.axisColor || colors.border } },
-                    axisLabel: { color: axisColor, fontSize: design.fontSizePercent(style.axisFontSizePercent, compact ? 9 : 11) }
+                    axisLine: { lineStyle: { color: style.axisColor || colors.border,
+                        width: Number(style.axisLineWidth) || 1 } },
+                    axisTick: { show: style.showAxisTicks !== false },
+                    axisLabel: { show: style.showAxisLabels !== false, color: axisColor,
+                        fontSize: design.fontSizePercent(style.axisFontSizePercent, compact ? 9 : 11) }
                 }
             },
             parallelAxis: axes.map(function (axis, index) {
@@ -108,8 +113,10 @@
             series: [{
                 id: 'parallel', type: 'parallel',
                 smooth: style.smooth === true,
+                activeOpacity: style.activeLineOpacityPercent === undefined ? 1 : Number(style.activeLineOpacityPercent) / 100,
+                inactiveOpacity: style.inactiveLineOpacityPercent === undefined ? 0.05 : Number(style.inactiveLineOpacityPercent) / 100,
                 lineStyle: { color: lineColor, width: Number(style.lineWidth) || 1.5,
-                    opacity: Number(style.lineOpacityPercent) / 100 || 0.45 },
+                    type: style.lineType || 'solid', opacity: Number(style.lineOpacityPercent) / 100 || 0.45 },
                 emphasis: { lineStyle: { opacity: 1, width: Math.max(2, Number(style.lineWidth) || 1.5) } },
                 data: rows.map(function (row) {
                     return { name: formatTime(row.timestamp, parallel.aggregation), value: row.values };

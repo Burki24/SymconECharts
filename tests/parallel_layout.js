@@ -50,6 +50,9 @@ const model = { family: 'parallel', theme: 'dark', parallel: {
         { timestamp: 1780003700, values: [19.5, 40, 120] }
     ],
     style: { showTooltip: true, smooth: false, lineWidth: 2, lineOpacityPercent: 45,
+        lineType: 'dashed', activeLineOpacityPercent: 90, inactiveLineOpacityPercent: 12,
+        axisLineWidth: 3, showAxisLabels: false, showAxisTicks: false, axisNameGap: 28,
+        animationEnabled: false,
         lineColor: '#123456', axisColor: '#abcdef', axisFontSizePercent: 150,
         titleColor: '#ffffff', titleFontSizePercent: 125 }
 } };
@@ -62,6 +65,14 @@ assert.equal(result.option.parallelAxis[0].name, '<Temperature> (°C)');
 assert.deepEqual(Array.from(result.option.series[0].data[0].value), [18.5, 42, 100]);
 assert.equal(result.option.series[0].lineStyle.color, '#123456');
 assert.equal(result.option.series[0].lineStyle.opacity, 0.45);
+assert.equal(result.option.series[0].lineStyle.type, 'dashed');
+assert.equal(result.option.series[0].activeOpacity, 0.9);
+assert.equal(result.option.series[0].inactiveOpacity, 0.12);
+assert.equal(result.option.parallel.parallelAxisDefault.axisLine.lineStyle.width, 3);
+assert.equal(result.option.parallel.parallelAxisDefault.axisLabel.show, false);
+assert.equal(result.option.parallel.parallelAxisDefault.axisTick.show, false);
+assert.equal(result.option.parallel.parallelAxisDefault.nameGap, 28);
+assert.equal(result.option.animation, false);
 assert.equal(result.option.parallel.parallelAxisDefault.nameTextStyle.color, '#abcdef');
 assert.equal(result.option.title.show, true);
 assert.ok(result.option.title.top >= 58, 'The chart title must clear the visible Symcon tile header.');

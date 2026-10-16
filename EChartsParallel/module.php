@@ -8,6 +8,7 @@ use Burki24\SymconModuleHelper\IPSViewHTMLPageHelper;
 use Burki24\SymconModuleHelper\ResponsiveVisualizationHelper;
 use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
+use SymconECharts\EChartsAnimationDesign;
 use SymconECharts\EChartsArchiveQuery;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsBarPreview;
@@ -30,6 +31,7 @@ require_once __DIR__ . '/../libs/helper/SVGPreviewHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsArchiveQuery.php';
+require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsBarPreview.php';
 require_once __DIR__ . '/../libs/EChartsBarPreviewForm.php';
@@ -47,6 +49,7 @@ class EChartsParallel extends IPSModuleStrict
 {
     use ConfigurationFormHelper;
     use DataFlowHelper;
+    use EChartsAnimationDesign;
     use EChartsBarPreviewForm;
     use EChartsIPSViewDesignForm;
     use EChartsIPSViewTransport;
@@ -67,6 +70,8 @@ class EChartsParallel extends IPSModuleStrict
     private const DESIGN_DEFAULTS = [
         'EChartsTheme'         => 'auto', 'ShowTooltip' => true, 'Smooth' => false,
         'LineWidth'            => 2, 'LineOpacityPercent' => 45, 'LineColor' => -1,
+        'LineType'             => 'solid', 'ActiveLineOpacityPercent' => 100, 'InactiveLineOpacityPercent' => 5,
+        'ShowAxisLabels'       => true, 'ShowAxisTicks' => true, 'AxisLineWidth' => 1, 'AxisNameGap' => 20,
         'TitleFontSizePercent' => 100, 'AxisFontSizePercent' => 100,
         'TitleColor'           => -1, 'AxisColor' => -1
     ];
@@ -91,6 +96,7 @@ class EChartsParallel extends IPSModuleStrict
                     default   => $this->RegisterPropertyString($prefix . $name, $default)
                 };
             }
+            $this->RegisterAnimationProperties($prefix, true, 350, 500);
         }
         $this->RegisterIPSViewHTMLPageProperties();
         $this->RegisterEChartsIPSViewTransport();
@@ -122,15 +128,26 @@ class EChartsParallel extends IPSModuleStrict
     {
         $form = $this->LoadConfigurationForm();
         $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
+        $form['elements'] = $this->WithAnimationFormControls($form['elements']);
+        $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
+        $form['elements'] = $this->WithAnimationFormCallbacks($form['elements'], 'ECPA');
         $form = $this->WithIPSViewDesignFormState($form, 'ECPA');
         $form = EChartsDesignerSections::Group($form, [
+            ['caption' => 'Animation', 'start' => 'AnimationEnabled'],
             ['caption' => 'Lines and display', 'start' => 'ShowTooltip'],
+            ['caption' => 'Axes', 'start' => 'ShowAxisLabels'],
             ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
         ]);
         $fields = ['Title', 'Sources', 'Range', 'Aggregation', 'LineBudget',
             'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
             'IPSViewBackgroundOpacityPercent', ...array_keys(self::DESIGN_DEFAULTS),
             ...array_map(static fn (string $name): string => 'IPSView' . $name, array_keys(self::DESIGN_DEFAULTS))];
+        foreach (['', 'IPSView'] as $prefix) {
+            foreach (['AnimationEnabled', 'AnimationDuration', 'AnimationDurationUpdate', 'AnimationEasing',
+                'AnimationEasingUpdate', 'AnimationDelay', 'AnimationDelayUpdate'] as $name) {
+                $fields[] = $prefix . $name;
+            }
+        }
         return $this->EncodeConfigurationForm($this->WithBarPreviewForm($form, 'ECPA', $fields));
     }
 
@@ -148,6 +165,15 @@ class EChartsParallel extends IPSModuleStrict
                 'boolean' => $this->ReadPropertyBoolean($name),
                 'integer' => $this->ReadPropertyInteger($name),
                 default   => $this->ReadPropertyString($name)
+            };
+            IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
+        }
+        foreach (['AnimationEnabled', 'AnimationDuration', 'AnimationDurationUpdate', 'AnimationEasing',
+            'AnimationEasingUpdate', 'AnimationDelay', 'AnimationDelayUpdate'] as $name) {
+            $value = match ($name) {
+                'AnimationEnabled'                         => $this->ReadPropertyBoolean($name),
+                'AnimationEasing', 'AnimationEasingUpdate' => $this->ReadPropertyString($name),
+                default                                    => $this->ReadPropertyInteger($name)
             };
             IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
         }
@@ -236,10 +262,38 @@ class EChartsParallel extends IPSModuleStrict
         $color = EChartsBarPreview::Color($this->BarPreviewValue($values, 'LineColor', 'integer', $ipsView), $palette['accent']);
         $axisColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'AxisColor', 'integer', $ipsView), $palette['text']);
         $lineWidth = max(1, min(8, $this->BarPreviewValue($values, 'LineWidth', 'integer', $ipsView)));
+        $axisLineWidth = max(1, min(5, $this->BarPreviewValue($values, 'AxisLineWidth', 'integer', $ipsView)));
+        $axisNameGap = max(0, min(60, $this->BarPreviewValue($values, 'AxisNameGap', 'integer', $ipsView)));
+        $axisBottom = 300 - max(0, $axisNameGap - 20) / 2;
+        $axisFontSize = max(6, min(22, (int) round(11 * $this->BarPreviewValue($values, 'AxisFontSizePercent', 'integer', $ipsView) / 100)));
+        $showAxisLabels = $this->BarPreviewValue($values, 'ShowAxisLabels', 'boolean', $ipsView);
+        $showAxisTicks = $this->BarPreviewValue($values, 'ShowAxisTicks', 'boolean', $ipsView);
+        $lineType = $this->BarPreviewValue($values, 'LineType', 'string', $ipsView);
+        $dashArray = match ($lineType) {
+            'dashed' => ' stroke-dasharray="8 4"',
+            'dotted' => ' stroke-dasharray="2 4"',
+            default  => ''
+        };
         for ($axis = 0; $axis < $count; ++$axis) {
             $x = 72 + (int) round($axis * 576 / max(1, $count - 1));
-            $svg .= '<path d="M ' . $x . ' 72 V 300" stroke="' . EChartsBarPreview::E($palette['border']) . '"/>';
-            $svg .= '<text x="' . $x . '" y="322" text-anchor="middle" font-size="11" fill="'
+            $svg .= '<path d="M ' . $x . ' 72 V ' . EChartsBarPreview::N($axisBottom) . '" stroke="'
+                . EChartsBarPreview::E($palette['border']) . '" stroke-width="' . $axisLineWidth . '"/>';
+            if ($showAxisTicks) {
+                foreach ([90, 185, $axisBottom] as $tickY) {
+                    $svg .= '<path d="M ' . ($x - 4) . ' ' . EChartsBarPreview::N($tickY) . ' h 8" stroke="'
+                        . EChartsBarPreview::E($axisColor) . '"/>';
+                }
+            }
+            if ($showAxisLabels && ($axis === 0 || $axis === $count - 1)) {
+                foreach ([[90, '100'], [185, '50'], [$axisBottom, '0']] as [$labelY, $label]) {
+                    $svg .= '<text x="' . ($axis === 0 ? $x + 9 : $x - 9) . '" y="'
+                        . EChartsBarPreview::N($labelY + 4) . '" text-anchor="'
+                        . ($axis === 0 ? 'start' : 'end') . '" font-size="' . $axisFontSize . '" fill="'
+                        . EChartsBarPreview::E($axisColor) . '">' . $label . '</text>';
+                }
+            }
+            $svg .= '<text x="' . $x . '" y="' . EChartsBarPreview::N($axisBottom + $axisNameGap + 2)
+                . '" text-anchor="middle" font-size="' . $axisFontSize . '" fill="'
                 . EChartsBarPreview::E($axisColor) . '">' . EChartsBarPreview::E(mb_strimwidth($sources[$axis]['label'], 0, 16, '…')) . '</text>';
         }
         for ($line = 0; $line < 8; ++$line) {
@@ -249,7 +303,7 @@ class EChartsParallel extends IPSModuleStrict
                     . (105 + (($line * 27 + $axis * 43 + $line * $axis * 11) % 175));
             }
             $svg .= '<polyline points="' . implode(' ', $points) . '" fill="none" stroke="'
-                . EChartsBarPreview::E($color) . '" stroke-width="' . $lineWidth . '" stroke-opacity="'
+                . EChartsBarPreview::E($color) . '" stroke-width="' . $lineWidth . '"' . $dashArray . ' stroke-opacity="'
                 . EChartsBarPreview::N($this->BarPreviewValue($values, 'LineOpacityPercent', 'integer', $ipsView) / 100) . '"/>';
         }
         return $svg . '</svg>';
@@ -547,7 +601,17 @@ class EChartsParallel extends IPSModuleStrict
             || $this->ReadPropertyInteger($prefix . 'LineWidth') < 1
             || $this->ReadPropertyInteger($prefix . 'LineWidth') > 8
             || $this->ReadPropertyInteger($prefix . 'LineOpacityPercent') < 10
-            || $this->ReadPropertyInteger($prefix . 'LineOpacityPercent') > 100) {
+            || $this->ReadPropertyInteger($prefix . 'LineOpacityPercent') > 100
+            || !in_array($this->ReadPropertyString($prefix . 'LineType'), ['solid', 'dashed', 'dotted'], true)
+            || $this->ReadPropertyInteger($prefix . 'ActiveLineOpacityPercent') < 0
+            || $this->ReadPropertyInteger($prefix . 'ActiveLineOpacityPercent') > 100
+            || $this->ReadPropertyInteger($prefix . 'InactiveLineOpacityPercent') < 0
+            || $this->ReadPropertyInteger($prefix . 'InactiveLineOpacityPercent') > 100
+            || $this->ReadPropertyInteger($prefix . 'AxisLineWidth') < 1
+            || $this->ReadPropertyInteger($prefix . 'AxisLineWidth') > 5
+            || $this->ReadPropertyInteger($prefix . 'AxisNameGap') < 0
+            || $this->ReadPropertyInteger($prefix . 'AxisNameGap') > 60
+            || !$this->AnimationIsValid($prefix)) {
             return false;
         }
         foreach (['TitleFontSizePercent', 'AxisFontSizePercent'] as $name) {
@@ -569,7 +633,7 @@ class EChartsParallel extends IPSModuleStrict
     private function ReadDesignStyle(bool $ipsView): array
     {
         $prefix = $ipsView && !$this->ReadPropertyBoolean('IPSViewUseTileDesign') ? 'IPSView' : '';
-        $style = [];
+        $style = [...$this->ReadAnimationStyle($prefix)];
         foreach (self::DESIGN_DEFAULTS as $name => $default) {
             if ($name === 'EChartsTheme') {
                 continue;
@@ -613,7 +677,8 @@ class EChartsParallel extends IPSModuleStrict
             foreach ($element['items'] as $row) {
                 $items = [];
                 foreach ($row['items'] ?? [] as $item) {
-                    if (is_string($item['name'] ?? null) && array_key_exists($item['name'], self::DESIGN_DEFAULTS)) {
+                    if (is_string($item['name'] ?? null) && (array_key_exists($item['name'], self::DESIGN_DEFAULTS)
+                        || str_starts_with($item['name'], 'Animation'))) {
                         $item['name'] = 'IPSView' . $item['name'];
                         $items[] = $item;
                     }

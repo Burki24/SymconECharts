@@ -2,6 +2,10 @@
 
 ## Hinzugefügt
 
+- Der Parallel-Designer bietet für Kachel und IPSView getrennt Linienarten,
+  Transparenz ausgewählter und übriger Linien beim Eingrenzen, Achsenwerte,
+  Teilstriche, Achsenbreite, Titelabstand und Animationseinstellungen.
+
 - `EChartsParallel` (`ECPA`) verbindet archivierte Werte von zwei bis zehn
   Variablen je gemeinsamem abgeschlossenen Stunden- oder Tagesintervall zu
   Parallelkoordinaten-Linien. Zeitfenster, Linienbudget und getrennte

@@ -9726,6 +9726,14 @@ $parallelFormModule->SetTestProperty('Sources', json_encode([
 ], JSON_THROW_ON_ERROR));
 $parallelFormModule->SetTestProperty('IPSViewUseTileDesign', false);
 $parallelFormModule->SetTestProperty('IPSViewLineColor', 0x123456);
+$parallelFormModule->SetTestProperty('LineType', 'dashed');
+$parallelFormModule->SetTestProperty('IPSViewLineType', 'dotted');
+$parallelFormModule->SetTestProperty('IPSViewInactiveLineOpacityPercent', 12);
+$parallelFormModule->SetTestProperty('IPSViewAxisLineWidth', 3);
+$parallelFormModule->SetTestProperty('IPSViewShowAxisLabels', false);
+$parallelFormModule->SetTestProperty('IPSViewShowAxisTicks', false);
+$parallelFormModule->SetTestProperty('IPSViewAxisNameGap', 28);
+$parallelFormModule->SetTestProperty('IPSViewAnimationEnabled', false);
 $parallelFormModule->ApplyChanges();
 $parallelTile = $parallelFormModule->GetVisualizationTile();
 $parallelIPSView = $parallelFormModule->GetIPSViewHTML();
@@ -9739,6 +9747,48 @@ assertGatewayGauge(
         && findGaugeFormElement($parallelForm['elements'], 'IPSViewLineColor')['type'] === 'SelectColor',
     'Parallel must expose hourly/daily form controls and bounded Tile/IPSView output.'
 );
+assertGatewayGauge(
+    str_contains($parallelTile, '"lineType":"dashed"')
+        && str_contains($parallelIPSView, '"lineType":"dotted"')
+        && str_contains($parallelIPSView, '"inactiveLineOpacityPercent":12')
+        && str_contains($parallelIPSView, '"axisLineWidth":3')
+        && str_contains($parallelIPSView, '"showAxisLabels":false')
+        && str_contains($parallelIPSView, '"showAxisTicks":false')
+        && str_contains($parallelIPSView, '"axisNameGap":28')
+        && str_contains($parallelIPSView, '"animationEnabled":false')
+        && findGaugeFormElement($parallelForm['elements'], 'LineType')['type'] === 'Select'
+        && findGaugeFormElement($parallelForm['elements'], 'IPSViewAxisNameGap')['type'] === 'NumberSpinner'
+        && findGaugeFormElement($parallelForm['elements'], 'IPSViewAnimationEnabled')['type'] === 'CheckBox',
+    'Parallel must expose separate Tile and IPSView line, axis and animation designs.'
+);
+$parallelTilePreview = findGaugeFormElement($parallelForm['elements'], 'BarPreview');
+$parallelIPSViewPreview = findGaugeFormElement($parallelForm['elements'], 'IPSViewBarPreview');
+$parallelTilePreviewSVG = base64_decode(substr((string) ($parallelTilePreview['image'] ?? ''), strlen('data:image/svg+xml;base64,')), true);
+$parallelIPSViewPreviewSVG = base64_decode(substr((string) ($parallelIPSViewPreview['image'] ?? ''), strlen('data:image/svg+xml;base64,')), true);
+assertGatewayGauge(
+    is_string($parallelTilePreviewSVG)
+        && str_contains($parallelTilePreviewSVG, 'stroke-dasharray="8 4"')
+        && is_string($parallelIPSViewPreviewSVG)
+        && str_contains($parallelIPSViewPreviewSVG, 'stroke-dasharray="2 4"')
+        && !str_contains($parallelIPSViewPreviewSVG, '>100</text>'),
+    'Parallel previews must reflect separate line types and axis-label visibility.'
+);
+$parallelFormModule->SetTestProperty('AnimationEnabled', false);
+$parallelFormModule->SetTestProperty('AnimationDuration', 700);
+$GLOBALS['symconTestCopyTarget'] = $parallelFormModule;
+try {
+    $parallelFormModule->CopyTileDesignToIPSView();
+} finally {
+    unset($GLOBALS['symconTestCopyTarget']);
+}
+$parallelCopiedIPSView = $parallelFormModule->GetIPSViewHTML();
+assertGatewayGauge(
+    $parallelFormModule->GetTestStatus() === IS_ACTIVE
+        && str_contains($parallelCopiedIPSView, '"lineType":"dashed"')
+        && str_contains($parallelCopiedIPSView, '"animationEnabled":false')
+        && str_contains($parallelCopiedIPSView, '"animationDuration":700'),
+    'Parallel must copy line and animation settings from Tile to IPSView.'
+);
 $parallel->SetTestProperty('Aggregation', 'day');
 $parallel->ApplyChanges();
 assertGatewayGauge(
@@ -9750,6 +9800,9 @@ $parallel->SetTestProperty('Sources', json_encode([
 ], JSON_THROW_ON_ERROR));
 $parallel->ApplyChanges();
 assertGatewayGauge($parallel->GetTestStatus() === 201, 'Parallel must reject duplicate variable IDs.');
+$parallelFormModule->SetTestProperty('AxisNameGap', 61);
+$parallelFormModule->ApplyChanges();
+assertGatewayGauge($parallelFormModule->GetTestStatus() === 202, 'Parallel must reject an out-of-range axis title distance.');
 
 $sunburst = new EChartsSunburst();
 $sunburst->Create();

@@ -20,8 +20,12 @@ auch an fehlenden Archivwerten liegen. Verschiedene Einheiten werden auf
 getrennten Achsen dargestellt und nicht miteinander verrechnet.
 
 Im Kachel- und unabhängigen IPSView-Designer sind Theme, Tooltip, Glättung,
-Linienbreite, -transparenz und -farbe sowie Titel- und Achsenschrift
-einstellbar. Die Formularvorschau verwendet gekennzeichnete Beispieldaten;
+Linienart, -breite, -transparenz und -farbe sowie Titel- und Achsenschrift
+einstellbar. Ausgewählte und übrige Linien können beim Eingrenzen über eine
+Achse unterschiedlich transparent dargestellt werden. Sichtbarkeit der
+Achsenwerte und Teilstriche, Achsenbreite, Abstand der Achsentitel sowie
+Animationsdauer und -verlauf sind ebenfalls einstellbar. Die Formularvorschau
+verwendet gekennzeichnete Beispieldaten;
 die echten Archivdaten erscheinen nach Übernahme in Kachel und IPSView.
 Das Modul benötigt ein aktives EChartsGateway und löst selbst keine
 Archivänderungen aus.

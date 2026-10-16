@@ -118,6 +118,32 @@
                     "type": "RowLayout",
                     "items": [
                         {
+                            "type": "CheckBox",
+                            "name": "AnimationEnabled",
+                            "caption": "Animate Parallel"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDuration",
+                            "caption": "Initial animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDurationUpdate",
+                            "caption": "Update animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
                             "type": "Select",
                             "name": "EChartsTheme",
                             "caption": "ECharts theme",
@@ -189,6 +215,77 @@
                             "caption": "Line color",
                             "allowTransparent": true,
                             "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "LineType",
+                            "caption": "Line type",
+                            "options": [
+                                {
+                                    "caption": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "caption": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "caption": "Dotted",
+                                    "value": "dotted"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ActiveLineOpacityPercent",
+                            "caption": "Selected line opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "InactiveLineOpacityPercent",
+                            "caption": "Other line opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowAxisLabels",
+                            "caption": "Show axis values"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowAxisTicks",
+                            "caption": "Show axis ticks"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AxisLineWidth",
+                            "caption": "Axis width",
+                            "minimum": 1,
+                            "maximum": 5,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AxisNameGap",
+                            "caption": "Axis title distance",
+                            "minimum": 0,
+                            "maximum": 60,
+                            "suffix": "px"
                         }
                     ]
                 },
