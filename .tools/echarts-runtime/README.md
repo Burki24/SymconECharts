@@ -32,6 +32,10 @@ Titel, Tooltip, Aria und Canvas Renderer als getrennten Jahreskalender-Build.
 Er erweitert nicht die bestehende Stunden-Heatmap-Runtime. Ein gezielter Build
 erfolgt mit `npm run build:calendar`.
 
+Der Boxplot-Einstieg enthält Boxplot Chart, Grid, Titel, Tooltip, Aria und
+Canvas Renderer. `npm run build:boxplot` erzeugt ausschließlich
+`../../libs/echarts/6.1.0/echarts.boxplot.min.js`; andere Builds bleiben unverändert.
+
 Zusätzlich kopiert der Build die sechs im Modul angebotenen offiziellen
 ECharts-Themes unverändert aus derselben festgeschriebenen npm-Abhängigkeit:
 Dark, Vintage, Macarons, Infographic, Shine und Roma.

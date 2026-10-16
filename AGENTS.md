@@ -71,6 +71,9 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Aktuelle Vergleichsgruppen auf expliziten normierten Achsen liegen im eigenen
   Gerätemodul `EChartsRadar` gemäß ADR 0053; keine Archive oder automatische
   Qualitätsbewertung. Werte außerhalb des Bereichs werden nur optisch begrenzt.
+  Verteilungen abgeschlossener Stundenmittelwerte von Archivvariablen liegen
+  in `EChartsBoxplot` gemäß ADR 0054; Quartile werden nicht aus Tagesaggregaten
+  approximiert und fehlende Intervalle nicht als Null ergänzt.
 - Das Gateway stellt ausschließlich familienübergreifende Infrastruktur wie
   Archivzugriff, begrenztes Caching, gemeinsame Ressourcen und gegebenenfalls
   abgesicherte IPSView-Kommunikation bereit. Familienbezogene Properties,
@@ -145,6 +148,7 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
 - `ECSA` ist `EChartsSankey` zugeordnet (`SA` = Sankey).
 - `ECCL` ist `EChartsCalendar` zugeordnet (`CL` = Calendar).
 - `ECRA` ist `EChartsRadar` zugeordnet (`RA` = Radar).
+- `ECBX` ist `EChartsBoxplot` zugeordnet (`BX` = Boxplot).
 - Das zuvor für das unveröffentlichte Gauge-Gerüst verwendete Kürzel `ECGA`
   ist abgelöst und wird nicht für ein anderes Modul wiederverwendet.
 - Neue Kürzel werden vor ihrer Verwendung eindeutig festgelegt und in dieser

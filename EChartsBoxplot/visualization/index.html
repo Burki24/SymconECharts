@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="{{HTML_LANGUAGE}}" class="{{HTML_CLASSES}}" style="font-size: {{ROOT_FONT_SIZE}};">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="{{VIEWPORT_CONTENT}}">
+    <title>{{DOCUMENT_TITLE}}</title>
+    <style>
+{{VISUALIZATION_THEME}}
+{{MODULE_STYLE}}
+{{IPSVIEW_STYLE}}
+    </style>
+</head>
+<body>
+    <main id="echarts-boxplot-root" class="echarts-boxplot-root">
+        <div id="echarts-boxplot-chart" class="echarts-boxplot-chart" role="img"></div>
+        <div id="echarts-boxplot-warning" class="echarts-refresh-warning" role="status" hidden></div>
+        <div id="echarts-boxplot-empty" class="echarts-boxplot-empty" role="status" hidden></div>
+        <div id="echarts-boxplot-error" class="echarts-boxplot-error" role="alert" hidden></div>
+    </main>
+    <script>{{ECHARTS_SCRIPT}}</script>
+    <script>{{ECHARTS_THEME_SCRIPT}}</script>
+    <script>{{ECHARTS_DESIGN_SCRIPT}}</script>
+    <script>window.SYMC_VISUALIZATION = {{BOOTSTRAP_JSON}};</script>
+    <script>{{MODULE_SCRIPT}}</script>
+    <script>{{IPSVIEW_TRANSPORT_SCRIPT}}</script>
+</body>
+</html>

@@ -17,6 +17,7 @@ Sankey zeigt aktuelle Mengenflüsse zwischen manuell angelegten Knoten.
 Calendar stellt archivierte Tagesmittelwerte als farbigen Jahreskalender dar.
 Radar vergleicht aktuelle Messwerte manuell angelegter Gruppen auf gemeinsam
 festgelegten Achsen mit eigenen Wertebereichen und Einheiten.
+Boxplot vergleicht die Verteilung abgeschlossener Archiv-Stundenmittelwerte.
 
 Alle Diagrammformulare zeigen eine unmittelbar aktualisierte SVG-Vorschau
 im Kachel- und IPSView-Designer. Sie reagiert auf noch nicht gespeicherte
@@ -39,6 +40,12 @@ Diagrammtitel ohne diesen Kachel-Kopfbereich.
 ## Enthaltene Module
 
 Folgende Module sind enthalten:
+
+- __EChartsBoxplot__ ([Dokumentation](EChartsBoxplot/README.md))
+  Verteilungen aus 1–10 Standard-Archivvariablen derselben Einheit über
+  24 Stunden, 7 oder 30 Tage. Jede Box zeigt Quartile und Median der
+  Stundenmittelwerte; ihre Enden zeigen Minimum und Maximum.
+  Kachel und IPSView besitzen getrennte Designer.
 
 - __EChartsRadar__ ([Dokumentation](EChartsRadar/README.md))
   Aktuelle Vergleichsgruppen auf 3–10 gemeinsamen Achsen. Die Radien zeigen den

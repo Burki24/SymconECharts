@@ -10259,5 +10259,6 @@ assertGatewayGauge(
 
 require __DIR__ . '/calendar_integration.php';
 require __DIR__ . '/radar_integration.php';
+require __DIR__ . '/boxplot_integration.php';
 
 echo "Gateway and Gauge module integration verified.\n";

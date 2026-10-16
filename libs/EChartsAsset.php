@@ -26,6 +26,7 @@ final class EChartsAsset
     public const SANKEY_SHA256 = '02c589e73e13a571727f7320e2b7bc859bc3ea6f46914871831f7a562d0b32dc';
     public const RADAR_SHA256 = '95a007a03e78d1b428424548f3d309bf7c0b24125aca436a91434fc9aef3011e';
     public const CALENDAR_SHA256 = '9879dece9194b401d95d4e8061b43bf83bc3d6c08dacb320406f48de5b8d31a5';
+    public const BOXPLOT_SHA256 = '32eecfd871aa2af4d806ad51f06444c4ec2c3bc0fc010d8d0adf14e5d708449a';
     public const TIME_SERIES_SHA256 = self::CARTESIAN_SHA256;
     public const THEME_AUTO = 'auto';
     public const THEME_SHA256 = [
@@ -348,6 +349,21 @@ final class EChartsAsset
         $canonicalContent = self::NormalizeLineEndings($content);
         if (!hash_equals(self::SANKEY_SHA256, hash('sha256', $canonicalContent))) {
             throw new RuntimeException('The bundled Apache ECharts Sankey runtime failed its integrity check.');
+        }
+        return $canonicalContent;
+    }
+
+    /** Loads the pinned Boxplot runtime without enlarging other chart bundles. */
+    public static function BoxplotJavaScript(): string
+    {
+        $path = __DIR__ . '/echarts/' . self::VERSION . '/echarts.boxplot.min.js';
+        $content = @file_get_contents($path);
+        if ($content === false || $content === '') {
+            throw new RuntimeException('The bundled Apache ECharts Boxplot runtime could not be loaded.');
+        }
+        $canonicalContent = self::NormalizeLineEndings($content);
+        if (!hash_equals(self::BOXPLOT_SHA256, hash('sha256', $canonicalContent))) {
+            throw new RuntimeException('The bundled Apache ECharts Boxplot runtime failed its integrity check.');
         }
         return $canonicalContent;
     }

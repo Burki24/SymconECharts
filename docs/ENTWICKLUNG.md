@@ -105,6 +105,7 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 | Gerät | EChartsSankey | Aktuelle nichtnegative Mengenflüsse zwischen manuellen Knoten und Verbindungen in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsCalendar | Archivierte Tagesmittelwerte einer Standardvariable als Jahreskalender mit lesender Jahresnavigation |
 | Gerät | EChartsRadar | Aktuelle Vergleichsgruppen auf 3–10 ausdrücklich begrenzten Achsen mit eigenen Einheiten |
+| Gerät | EChartsBoxplot | Verteilungen abgeschlossener Stundenmittelwerte aus 1–10 Standard-Archivvariablen derselben Einheit |
 
 Eine eigene I/O-Instanz, ein Konfigurator und Discovery gehören nicht zum
 Anfangsumfang. Datenquellen sind Teil der jeweiligen Gauge-Konfiguration und
@@ -147,6 +148,7 @@ Modul-IDs und Datenfluss-IDs haben unterschiedliche Aufgaben.
 | Modul EChartsSankey | `{D0F77DFF-6B50-4901-A2F0-5A98159E2559}` |
 | Modul EChartsCalendar | `{3F927445-41C7-44F4-8CEB-069581C5F3D1}` |
 | Modul EChartsRadar | `{B596EE88-C7A6-4A9B-891A-DD81BFF08A94}` |
+| Modul EChartsBoxplot | `{B9B5BCD1-BC63-42A6-8132-98CE744DAE1C}` |
 | Datenfluss Gauge → Gateway | `{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}` |
 | Datenfluss Gateway → Gauge | `{E4749B72-912B-E3E3-1C57-D19019FFDD84}` |
 
@@ -247,6 +249,11 @@ werden nicht um Kalender-Modi erweitert. Das Präfix lautet `ECCL`.
 Radar (`ECRA`) vergleicht aktuelle Werte vollständiger manueller Gruppen
 gemäß [ADR 0053](adr/0053-current-value-radar.md). Normierung und begrenzte
 Geometrie bleiben familienlokal; aktuelle Quellen und Transport werden geteilt.
+Boxplot (`ECBX`) vergleicht Verteilungen abgeschlossener Archiv-Stundenmittelwerte
+gemäß [ADR 0054](adr/0054-hourly-archive-boxplot.md). Der gemeinsame Gateway-Vertrag
+bleibt unverändert; R7-Quartile, Min-/Max-Enden, Einheitenvalidierung und
+synthetische Vorschaugeometrie liegen lokal in der Familie. Ein gesonderter
+Runtime-Build enthält nur die benötigten Komponenten.
 
 ## Weitere ECharts-Familien im Plan
 

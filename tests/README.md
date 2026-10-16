@@ -1,5 +1,14 @@
 # Tests
 
+Boxplot wird durch `php tests/boxplot_statistics.php`,
+`php tests/gateway_gauges.php` (einschließlich `boxplot_integration.php`)
+und `node tests/boxplot_layout.js` geprüft: R7-Quartile, endliche Extremwerte,
+abgeschlossene Stunden, Lücken und leere Archive, einzelne Stichproben,
+Einheiten-/Zähler-Abweisung, strikte Gateway-Antworten, unabhängige Designer,
+entkoppelte Beispielvorschauen, Ausgabegrenzen und echte ECharts-Geometrie.
+Die lokale synthetische Browserfixture startet mit `node tests/boxplot_browser.mjs`.
+Sie ersetzt keine Live-Prüfung in Symcon oder IPSView.
+
 Sankey wird durch `php tests/sankey_model.php` und
 `node tests/sankey_layout.js` geprüft. Abgedeckt sind manuelle Knotenschlüssel,
 aktuelle Verbindungsgewichte, Zyklen, Null- und Negativwerte sowie das Layout

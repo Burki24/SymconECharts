@@ -21,6 +21,11 @@ Paket-SHA-1 laut npm: `ae0f68590f5ebbd728d900907c27acde7c5456d1`
 
 Ausgelieferte Dateien:
 
+- `libs/echarts/6.1.0/echarts.boxplot.min.js` – reproduzierbarer
+  Boxplot-Browser-Build aus ECharts Core, Boxplot Chart, Grid, Titel, Tooltip,
+  Aria und Canvas Renderer; 498.327 Byte; SHA-256
+  `32eecfd871aa2af4d806ad51f06444c4ec2c3bc0fc010d8d0adf14e5d708449a`;
+
 - `libs/echarts/6.1.0/echarts.gauge.min.js` – reproduzierbarer,
   Gauge-spezifischer Browser-Build aus ECharts Core, Gauge Chart, Aria,
   Tooltip, Graphic Component und Canvas Renderer; 486.506 Byte; SHA-256

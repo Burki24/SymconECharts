@@ -199,6 +199,17 @@ $requiredFiles = [
     'tests/radar_model.php',
     'tests/radar_integration.php',
     'tests/radar_layout.js',
+    'EChartsBoxplot/BoxplotStatistics.php',
+    'EChartsBoxplot/BoxplotPreview.php',
+    'EChartsBoxplot/visualization/index.html',
+    'EChartsBoxplot/visualization/style.css',
+    'EChartsBoxplot/visualization/app.js',
+    'libs/echarts/6.1.0/echarts.boxplot.min.js',
+    '.tools/echarts-runtime/src/boxplot-runtime.js',
+    'docs/adr/0054-hourly-archive-boxplot.md',
+    'tests/boxplot_statistics.php',
+    'tests/boxplot_integration.php',
+    'tests/boxplot_layout.js',
     'EChartsCalendar/CalendarData.php',
     'EChartsCalendar/CalendarPreview.php',
     'EChartsCalendar/visualization/index.html',
@@ -418,7 +429,7 @@ if ($helperSync !== null) {
 }
 
 $expectedModules = [
-    'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarPolar', 'EChartsBarWaterfall', 'EChartsCalendar', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
+    'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarPolar', 'EChartsBarWaterfall', 'EChartsBoxplot', 'EChartsCalendar', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
     'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsGraph', 'EChartsGraphZ2M', 'EChartsHeatmap', 'EChartsParallel', 'EChartsPie', 'EChartsRadar', 'EChartsSankey', 'EChartsScatter', 'EChartsSunburst', 'EChartsTimeSeries', 'EChartsTree', 'EChartsTreeSystemHealth', 'EChartsTreemap'
 ];
 $discoveredModules = [];

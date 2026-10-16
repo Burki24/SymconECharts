@@ -37,8 +37,9 @@ und [Radar-Koordinaten](https://echarts.apache.org/en/option.html#radar).
 Dataset ist für diese einzelne Vergleichsserie nicht erforderlich.
 
 Die erste Radar-Version wurde am 16.10.2026 durch den Anwender in Kachel und
-IPSView erfolgreich live geprüft. Die nachfolgende Designer-Erweiterung
-benötigt nach Installation einen erneuten Live-Test. Bestehende Instanzen,
+IPSView erfolgreich live geprüft. Auch die nachfolgende Designer-Erweiterung
+wurde am 16.10.2026 durch den Anwender in beiden Ausgabewegen positiv bestätigt.
+Bestehende Instanzen,
 Datenzuordnungen und Wertebereiche bleiben unverändert.
 
 ## Designer-Ergänzung vom 16.10.2026

@@ -2,6 +2,13 @@
 
 ## Hinzugefügt
 
+- `EChartsBoxplot` (`ECBX`) vergleicht abgeschlossene Stundenmittelwerte von
+  1–10 Standard-Archivvariablen derselben Einheit über 24 Stunden, 7 oder 30 Tage.
+  Boxen zeigen R7-Quartile und Median, die Enden Minimum und Maximum.
+  Fehlende Stunden bleiben leer; Stichprobenumfang und erfasste Zeitspanne
+  stehen im Tooltip. Kachel und IPSView bieten getrennte Designer mit
+  Ausrichtung, Farben, Schriftgrößen und synthetischen Beispielvorschauen.
+
 - Der Radar-Designer bietet individuelle Gruppenfarben, Linienarten,
   Flächenschatten, Symbolformen mit Drehung, Rand und Deckkraft,
   Originalwert-Beschriftungen mit abschaltbarem Überlappungsschutz,
