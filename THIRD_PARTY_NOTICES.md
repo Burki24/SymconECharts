@@ -55,6 +55,10 @@ Ausgelieferte Dateien:
   Graph-Browser-Build aus ECharts Core, Graph Chart, Titel, Tooltip, Aria,
   Label Layout und Canvas Renderer; 532.951 Byte; SHA-256
   `b1bc4e3bda0e48a359e3d08d55695894b45e3dc186fbec8bdb4d6265fea23f1b`;
+- `libs/echarts/6.1.0/echarts.treemap.min.js` – reproduzierbarer
+  Treemap-Browser-Build aus ECharts Core, Treemap Chart, Titel, Tooltip,
+  Aria und Canvas Renderer; 507.134 Byte; SHA-256
+  `e9020d97d1f90d3967dbb717485edcafed098f3ee7b2b632b6f01055582a148e`;
 - `libs/echarts/6.1.0/themes/dark.js` – offizielles Theme Dark; 5.981 Byte;
   SHA-256 `ae60e563617cb87514690c1946ee202e78c9f1487820490614b58934ed037458`;
 - `libs/echarts/6.1.0/themes/vintage.js` – offizielles Theme Vintage;

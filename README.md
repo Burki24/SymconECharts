@@ -9,7 +9,8 @@ Balken, Waterfall- und Polar-Diagramme, Kreisdiagramme für aktuelle Werte sowie
 historische Streu- und Bubble-Diagramme, eine Tages-/Wochentag-Stunden-Heatmap
 eine lesende IP-Symcon-Objekthierarchie als Tree, einen allgemeinen Graphen
 für ausdrücklich verbundene Symcon-Objekte sowie einen separaten Graphen
-für exportierte Zigbee2MQTT-Netzwerkkarten.
+  für exportierte Zigbee2MQTT-Netzwerkkarten sowie eine Treemap mit
+  manuell festgelegten Gruppen und aktuellen numerischen Variablenwerten.
 
 Alle Diagrammformulare zeigen eine unmittelbar aktualisierte SVG-Vorschau
 im Kachel- und IPSView-Designer. Sie reagiert auf noch nicht gespeicherte
@@ -161,6 +162,11 @@ Folgende Module sind enthalten:
   Zeigt die zuletzt exportierte Zigbee2MQTT-Netzwerkkarte mit gerichteten
   Verbindungen und LQI. Die Instanz startet keinen Scan; Mindest-LQI und
   Verbindungsbudget halten auch große Netze übersichtlich.
+
+- __EChartsTreemap__ ([Dokumentation](EChartsTreemap/README.md))
+  Ordnet bis zu 100 aktuelle Integer- und Float-Variablen manuell benannten
+  Gruppen und optionalen Untergruppen zu. Die nichtnegativen Werte bestimmen
+  die Rechteckflächen in Kachel und optionalem IPSView-Widget.
 
 ## Kacheldesign und IPSView-Design
 

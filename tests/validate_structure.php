@@ -152,6 +152,15 @@ $requiredFiles = [
     'EChartsGraphZ2M/visualization/app.js',
     'tests/zigbee_graph_model.php',
     'tests/zigbee_graph_layout.js',
+    'libs/TreemapModel.php',
+    'EChartsTreemap/visualization/index.html',
+    'EChartsTreemap/visualization/style.css',
+    'EChartsTreemap/visualization/app.js',
+    '.tools/echarts-runtime/src/treemap-runtime.js',
+    'libs/echarts/6.1.0/echarts.treemap.min.js',
+    'docs/adr/0048-manual-current-value-treemap.md',
+    'tests/treemap_model.php',
+    'tests/treemap_layout.js',
     '.tools/echarts-runtime/src/tree-runtime.js',
     'docs/adr/0044-tree-symcon-object-hierarchy.md',
     'docs/adr/0046-tree-system-health-module-split.md',
@@ -361,7 +370,7 @@ if ($helperSync !== null) {
 
 $expectedModules = [
     'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarPolar', 'EChartsBarWaterfall', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
-    'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsGraph', 'EChartsGraphZ2M', 'EChartsHeatmap', 'EChartsPie', 'EChartsScatter', 'EChartsTimeSeries', 'EChartsTree', 'EChartsTreeSystemHealth'
+    'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsGraph', 'EChartsGraphZ2M', 'EChartsHeatmap', 'EChartsPie', 'EChartsScatter', 'EChartsTimeSeries', 'EChartsTree', 'EChartsTreeSystemHealth', 'EChartsTreemap'
 ];
 $discoveredModules = [];
 foreach (glob($root . '/*/module.json') ?: [] as $modulePath) {

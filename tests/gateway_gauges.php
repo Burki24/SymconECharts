@@ -786,6 +786,7 @@ require_once dirname(__DIR__) . '/EChartsTree/module.php';
 require_once dirname(__DIR__) . '/EChartsTreeSystemHealth/module.php';
 require_once dirname(__DIR__) . '/EChartsGraph/module.php';
 require_once dirname(__DIR__) . '/EChartsGraphZ2M/module.php';
+require_once dirname(__DIR__) . '/EChartsTreemap/module.php';
 
 final class TestableEChartsGateway extends EChartsGateway
 {
@@ -8242,7 +8243,7 @@ foreach ([
     EChartsGaugeSingle::class, EChartsGaugeMulti::class, EChartsGaugeTacho::class,
     EChartsGaugeChronograph::class, EChartsTimeSeries::class, EChartsBarCategory::class,
     EChartsBarHistory::class, EChartsBarWaterfall::class, EChartsBarPolar::class,
-    EChartsPie::class
+    EChartsPie::class, EChartsTreemap::class
 ] as $animationModuleClass) {
     $animationModule = new $animationModuleClass();
     $animationModule->Create();
@@ -9480,6 +9481,7 @@ foreach ([
     EChartsBarWaterfall::class     => ['BarPreview', 'IPSViewBarPreview'],
     EChartsBarPolar::class         => ['BarPreview', 'IPSViewBarPreview'],
     EChartsPie::class              => ['BarPreview', 'IPSViewBarPreview'],
+    EChartsTreemap::class          => ['BarPreview', 'IPSViewBarPreview'],
     EChartsScatter::class          => ['BarPreview', 'IPSViewBarPreview'],
     EChartsHeatmap::class          => ['BarPreview', 'IPSViewBarPreview'],
     EChartsTree::class             => ['BarPreview', 'IPSViewBarPreview'],
@@ -9514,6 +9516,102 @@ foreach ([
                 && findGaugeFormElement($form['elements'], 'IPSView' . $field) !== null,
             $chartClass . ' must offer ' . $field . ' in Tile and IPSView designers.'
         );
+    }
+}
+
+$treemap = new EChartsTreemap();
+$treemap->Create();
+$treemap->SetTestProperty('Sources', json_encode([
+    ['VariableID' => 4711, 'Group' => 'House', 'Subgroup' => 'Climate', 'Label' => 'Room'],
+    ['VariableID' => 4717, 'Group' => 'House', 'Subgroup' => 'Climate', 'Label' => ''],
+    ['VariableID' => 4720, 'Group' => 'Garden', 'Subgroup' => '', 'Label' => 'Outside']
+], JSON_THROW_ON_ERROR));
+$treemap->SetTestProperty('Title', 'Grouped current values');
+$treemap->SetTestProperty('IPSViewUseTileDesign', false);
+$treemap->SetTestProperty('IPSViewShowLabels', false);
+$treemap->ApplyChanges();
+$treemapData = json_decode($treemap->GetTreemapData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $treemap->GetTestStatus() === IS_ACTIVE
+        && $treemapData['family'] === 'treemap'
+        && count($treemapData['treemap']['data']) === 2
+        && $treemapData['treemap']['data'][0]['children'][0]['children'][0]['id'] === 'variable-4711'
+        && $treemapData['treemap']['data'][0]['children'][0]['children'][1]['id'] === 'variable-4717'
+        && $treemapData['treemap']['data'][1]['children'][0]['id'] === 'variable-4720',
+    'Treemap must group distinct current variables without changing their IDs.'
+);
+$treemapTile = $treemap->GetVisualizationTile();
+$treemapIPSView = $treemap->GetIPSViewHTML();
+$treemapForm = json_decode($treemap->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    str_contains($treemapTile, 'echarts-treemap-root')
+        && str_contains($treemapTile, '"showLabels":true')
+        && str_contains($treemapIPSView, '"showLabels":false')
+        && strlen($treemapTile) < SYMCON_OUTPUT_BUFFER_LIMIT
+        && strlen($treemapIPSView) < SYMCON_OUTPUT_BUFFER_LIMIT
+        && findGaugeFormElement($treemapForm['elements'], 'BarPreview')['type'] === 'Image'
+        && findGaugeFormElement($treemapForm['elements'], 'IPSViewBarPreview')['type'] === 'Image',
+    'Treemap must render separate Tile and IPSView designs below Symcon output limit.'
+);
+$updatesBefore = count($treemap->GetTestVisualizationUpdates());
+$treemap->MessageSink(1780000300, 4711, VM_UPDATE, []);
+assertGatewayGauge(
+    count($treemap->GetTestVisualizationUpdates()) > $updatesBefore,
+    'Treemap must publish a fresh state when a selected variable changes.'
+);
+$treemap->UpdateBarPreviewFromForm(json_encode([
+    'Sources' => [['VariableID' => 4711, 'Group' => '<Room>', 'Subgroup' => '', 'Label' => '']]
+], JSON_THROW_ON_ERROR));
+$previewUpdate = array_slice($treemap->GetTestFormUpdates(), -2)[0]['Value'];
+$previewSvg = base64_decode(substr($previewUpdate, strlen('data:image/svg+xml;base64,')), true);
+assertGatewayGauge(
+    is_string($previewSvg) && str_contains($previewSvg, '&lt;Room&gt;')
+        && !str_contains($previewSvg, '<Room>'),
+    'Treemap draft preview must escape group names.'
+);
+$originalTreemapValue = $GLOBALS['symconTestVariables'][4717]['Value'];
+$GLOBALS['symconTestVariables'][4717]['Value'] = -1.0;
+assertGatewayGauge(
+    str_contains($treemap->GetVisualizationTile(), 'Treemap values must be non-negative.')
+        && $treemap->GetTestStatus() === 205,
+    'Treemap must reject negative values.'
+);
+$GLOBALS['symconTestVariables'][4717]['Value'] = $originalTreemapValue;
+$treemap->SetTestProperty('Sources', json_encode([
+    ['VariableID' => 4711, 'Group' => 'House'], ['VariableID' => 4711, 'Group' => 'Garden']
+], JSON_THROW_ON_ERROR));
+$treemap->ApplyChanges();
+assertGatewayGauge($treemap->GetTestStatus() === 201, 'Treemap must reject duplicate variable IDs.');
+$manyTreemapSources = [];
+for ($index = 0; $index < 100; ++$index) {
+    $id = 85000 + $index;
+    $GLOBALS['symconTestVariables'][$id] = [
+        'VariableType' => 2, 'VariableUpdated' => 1780000300,
+        'Value'        => (float) ($index + 1), 'Name' => 'Current value ' . $index
+    ];
+    $manyTreemapSources[] = [
+        'VariableID' => $id, 'Group' => 'Group ' . intdiv($index, 10),
+        'Subgroup'   => 'Subgroup ' . intdiv($index % 10, 5), 'Label' => ''
+    ];
+}
+try {
+    $manyTreemap = new EChartsTreemap();
+    $manyTreemap->Create();
+    $manyTreemap->SetTestProperty('Sources', json_encode($manyTreemapSources, JSON_THROW_ON_ERROR));
+    $manyTreemap->ApplyChanges();
+    assertGatewayGauge(
+        $manyTreemap->GetTestStatus() === IS_ACTIVE
+            && strlen($manyTreemap->GetVisualizationTile()) < SYMCON_OUTPUT_BUFFER_LIMIT
+            && strlen($manyTreemap->GetIPSViewHTML()) < SYMCON_OUTPUT_BUFFER_LIMIT,
+        'The maximum 100-source Treemap must remain below the Symcon output limit.'
+    );
+    $manyTreemapSources[] = ['VariableID' => 4711, 'Group' => 'Extra'];
+    $manyTreemap->SetTestProperty('Sources', json_encode($manyTreemapSources, JSON_THROW_ON_ERROR));
+    $manyTreemap->ApplyChanges();
+    assertGatewayGauge($manyTreemap->GetTestStatus() === 201, 'Treemap must reject more than 100 variables.');
+} finally {
+    for ($index = 0; $index < 100; ++$index) {
+        unset($GLOBALS['symconTestVariables'][85000 + $index]);
     }
 }
 

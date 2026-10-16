@@ -2,6 +2,11 @@
 
 ## Hinzugefügt
 
+- `EChartsTreemap` (`ECTM`) zeigt 1 bis 100 aktuelle numerische Symcon-Werte
+  als Flächen in manuell benannten Gruppen und optionalen Untergruppen.
+  Kachel und IPSView besitzen getrennte Designer mit Live-Vorschau. Nullwerte
+  bleiben unsichtbar; negative Werte werden als Fehler gemeldet.
+
 - Der Zigbee2MQTT-Graph färbt Verbindungslinien nach LQI ein. Die Farben für
   LQI 0, 128 und 255 sind in Kachel und IPSView frei wählbar; Zwischenfarben
   werden berechnet und die Skala erscheint in der Legende. Achtung: Eine
