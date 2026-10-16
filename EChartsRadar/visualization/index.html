@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="{{HTML_LANGUAGE}}" class="{{HTML_CLASSES}}" style="font-size: {{ROOT_FONT_SIZE}};">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="{{VIEWPORT_CONTENT}}">
+    <title>{{DOCUMENT_TITLE}}</title>
+    <style>
+{{VISUALIZATION_THEME}}
+{{MODULE_STYLE}}
+{{IPSVIEW_STYLE}}
+    </style>
+</head>
+<body>
+    <main id="echarts-radar-root" class="echarts-radar-root">
+        <div id="echarts-radar-chart" class="echarts-radar-chart" role="img"></div>
+        <div id="echarts-radar-warning" class="echarts-refresh-warning" role="status" hidden></div>
+        <div id="echarts-radar-empty" class="echarts-radar-empty" role="status" hidden></div>
+        <div id="echarts-radar-error" class="echarts-radar-error" role="alert" hidden></div>
+    </main>
+    <script>{{ECHARTS_SCRIPT}}</script>
+    <script>{{ECHARTS_THEME_SCRIPT}}</script>
+    <script>{{ECHARTS_DESIGN_SCRIPT}}</script>
+    <script>window.SYMC_VISUALIZATION = {{BOOTSTRAP_JSON}};</script>
+    <script>{{MODULE_SCRIPT}}</script>
+    <script>{{IPSVIEW_TRANSPORT_SCRIPT}}</script>
+</body>
+</html>
+
+

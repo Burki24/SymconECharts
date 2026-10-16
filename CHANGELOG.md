@@ -2,6 +2,12 @@
 
 ## Hinzugefügt
 
+- `EChartsRadar` (`ECRA`) vergleicht 1–8 manuelle Gruppen anhand aktueller
+  Variablenwerte auf 3–10 gemeinsamen Achsen. Jede Achse hat einen eigenen
+  Wertebereich, eine Einheit und Nachkommastellen. Kachel und IPSView bieten
+  getrennte Designer und aktuelle Vorschauen. Werte außerhalb des Bereichs
+  werden optisch begrenzt und mit Hinweis angezeigt; Originalwerte bleiben erhalten.
+
 - Der Calendar-Designer bietet unabhängige Monatstrennlinien, Zellrandarten
   und Zelldeckkraft, Hover-Rahmen, Position und Abstand der Kalendernamen,
   Monatsformate, eine zusätzliche gestaltbare Jahreszahl und Fettschrift.

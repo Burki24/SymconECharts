@@ -70,7 +70,8 @@ außerhalb dieses Designerumfangs.
 
 Der Anwender hat die Grundversion einschließlich Teilarchivkorrektur am
 16.10.2026 in Kachel und IPSView live bestätigt. Die zusätzlichen
-Designeroptionen benötigen nach dem Modulupdate eine erneute Live-Prüfung.
+Designeroptionen wurden anschließend ebenfalls vom Anwender in Kachel und
+IPSView erfolgreich live bestätigt (16.10.2026).
 Lokal wurden die ergänzten Stile am selben Tag mit der unveränderten
 gebündelten Canvas-Runtime im Browser geprüft: hohe Standardkachel und
 breites unabhängiges Design mit Jahreszahl, gegenüberliegenden Namen,

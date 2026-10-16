@@ -75,6 +75,10 @@ Ausgelieferte Dateien:
   Calendar-Browser-Build aus ECharts Core, Heatmap Chart, Calendar Component,
   Visual Map, Titel, Tooltip, Aria und Canvas Renderer; 524.343 Byte; SHA-256
   `9879dece9194b401d95d4e8061b43bf83bc3d6c08dacb320406f48de5b8d31a5`;
+- `libs/echarts/6.1.0/echarts.radar.min.js` – reproduzierbarer
+  Radar-Browser-Build aus ECharts Core, Radar Chart und Component, Legende,
+  Titel, Tooltip, Aria und Canvas Renderer; 502.610 Byte; SHA-256
+  `a6bac5fa0b4357219a5c8baff7dce406109d40846a7778e59b00f8c9b1393ae4`;
 - `libs/echarts/6.1.0/themes/dark.js` – offizielles Theme Dark; 5.981 Byte;
   SHA-256 `ae60e563617cb87514690c1946ee202e78c9f1487820490614b58934ed037458`;
 - `libs/echarts/6.1.0/themes/vintage.js` – offizielles Theme Vintage;

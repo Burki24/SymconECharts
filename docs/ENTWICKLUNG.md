@@ -104,6 +104,7 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 | Gerät | EChartsParallel | Gemeinsame abgeschlossene Archivintervalle von 2–10 Variablen als Parallelkoordinaten in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsSankey | Aktuelle nichtnegative Mengenflüsse zwischen manuellen Knoten und Verbindungen in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsCalendar | Archivierte Tagesmittelwerte einer Standardvariable als Jahreskalender mit lesender Jahresnavigation |
+| Gerät | EChartsRadar | Aktuelle Vergleichsgruppen auf 3–10 ausdrücklich begrenzten Achsen mit eigenen Einheiten |
 
 Eine eigene I/O-Instanz, ein Konfigurator und Discovery gehören nicht zum
 Anfangsumfang. Datenquellen sind Teil der jeweiligen Gauge-Konfiguration und
@@ -145,6 +146,7 @@ Modul-IDs und Datenfluss-IDs haben unterschiedliche Aufgaben.
 | Modul EChartsParallel | `{2B3B30E7-F7F2-47CF-A8AB-1E27F896A7DD}` |
 | Modul EChartsSankey | `{D0F77DFF-6B50-4901-A2F0-5A98159E2559}` |
 | Modul EChartsCalendar | `{3F927445-41C7-44F4-8CEB-069581C5F3D1}` |
+| Modul EChartsRadar | `{B596EE88-C7A6-4A9B-891A-DD81BFF08A94}` |
 | Datenfluss Gauge → Gateway | `{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}` |
 | Datenfluss Gateway → Gauge | `{E4749B72-912B-E3E3-1C57-D19019FFDD84}` |
 
@@ -242,6 +244,9 @@ Den Jahreskalender mit Tagesmittelwerten beschreibt
 [`ADR 0052`](adr/0052-calendar-daily-archive-means.md). Er nutzt die vorhandene
 Archivoperation und eigene Familienvalidierung; Gateway und Stunden-Heatmap
 werden nicht um Kalender-Modi erweitert. Das Präfix lautet `ECCL`.
+Radar (`ECRA`) vergleicht aktuelle Werte vollständiger manueller Gruppen
+gemäß [ADR 0053](adr/0053-current-value-radar.md). Normierung und begrenzte
+Geometrie bleiben familienlokal; aktuelle Quellen und Transport werden geteilt.
 
 ## Weitere ECharts-Familien im Plan
 
@@ -251,6 +256,19 @@ ist in ECharts eine familienübergreifende Datenkomponente, keine eigene
 Diagrammfamilie oder Symcon-Geräteinstanz; seine Nutzung wird bei passenden
 Serien auf Datenfluss und Wiederverwendung geprüft. Diese Einträge sind
 Roadmap, keine Behauptung bereits implementierter Module.
+
+### Dataset-Bewertung vom 16.10.2026
+
+Laut [offiziellem Dataset-Handbuch](https://echarts.apache.org/handbook/en/concepts/dataset/)
+können tabellarische Daten über `dataset.source` und `series.encode` mehreren
+Serien zugeordnet werden. Der Bestand verwendet aktuell familienbezogene
+`series.data`: Category hat individuelle Datenpunktstile, TimeSeries eigene
+Zeitpunkte und Datenlücken, Scatter abgeschlossene Punktzuordnungen und
+Parallel genau eine bereits zusammengeführte Tabelle. Ein gemeinsam benötigter
+Transformationsweg ist bisher nicht belegt. Deshalb erfolgt jetzt weder ein
+pauschaler Rendererumbau noch eine Gateway-/Propertymigration oder ein
+Dataset-Modul. Bei einem konkreten Mehrfachnutzen wird die Bewertung mit
+Vergleichstests und gemessenem Auslieferungsbudget wieder aufgenommen.
 
 Für die vier Bar-Module bündelt `libs/EChartsBarPreviewForm.php` die
 read-only-Formularverdrahtung, einschließlich zweier `Image`-Felder,

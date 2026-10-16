@@ -1,0 +1,486 @@
+{
+    "$schema": "https://www.symcon.de/assets/files/validation/formSchema.json",
+    "elements": [
+        {
+            "type": "Label",
+            "caption": "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts."
+        },
+        {
+            "type": "ValidationTextBox",
+            "name": "Title",
+            "caption": "Title"
+        },
+        {
+            "type": "List",
+            "name": "Axes",
+            "caption": "Radar axes",
+            "rowCount": 6,
+            "add": true,
+            "delete": true,
+            "changeOrder": true,
+            "columns": [
+                {
+                    "name": "Key",
+                    "caption": "Axis key",
+                    "width": "180px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "name": "Label",
+                    "caption": "Axis label",
+                    "width": "180px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "name": "Minimum",
+                    "caption": "Minimum",
+                    "width": "180px",
+                    "add": 0,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "digits": 3
+                    }
+                },
+                {
+                    "name": "Maximum",
+                    "caption": "Maximum",
+                    "width": "180px",
+                    "add": 100,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "digits": 3
+                    }
+                },
+                {
+                    "name": "Unit",
+                    "caption": "Unit",
+                    "width": "180px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "name": "Decimals",
+                    "caption": "Decimals",
+                    "width": "180px",
+                    "add": 1,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "minimum": 0,
+                        "maximum": 6
+                    }
+                }
+            ],
+            "form": [
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Key",
+                    "caption": "Axis key"
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Label",
+                    "caption": "Axis label"
+                },
+                {
+                    "type": "NumberSpinner",
+                    "digits": 3,
+                    "name": "Minimum",
+                    "caption": "Minimum"
+                },
+                {
+                    "type": "NumberSpinner",
+                    "digits": 3,
+                    "name": "Maximum",
+                    "caption": "Maximum"
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Unit",
+                    "caption": "Unit"
+                },
+                {
+                    "type": "NumberSpinner",
+                    "minimum": 0,
+                    "maximum": 6,
+                    "name": "Decimals",
+                    "caption": "Decimals"
+                }
+            ]
+        },
+        {
+            "type": "Label",
+            "caption": "Configure 3 to 10 axes with unique keys, explicit ranges and optional units. The radius represents the percentage of each axis range, not a quality score."
+        },
+        {
+            "type": "List",
+            "name": "Sources",
+            "caption": "Comparison values",
+            "rowCount": 6,
+            "add": true,
+            "delete": true,
+            "changeOrder": true,
+            "columns": [
+                {
+                    "name": "Group",
+                    "caption": "Comparison group",
+                    "width": "180px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "name": "Axis",
+                    "caption": "Axis",
+                    "width": "180px",
+                    "add": "",
+                    "edit": {
+                        "type": "Select",
+                        "options": [
+                            {
+                                "caption": "Select axis",
+                                "value": ""
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "VariableID",
+                    "caption": "Current variable",
+                    "width": "180px",
+                    "add": 0,
+                    "edit": {
+                        "type": "SelectVariable",
+                        "validVariableTypes": [
+                            1,
+                            2
+                        ]
+                    }
+                }
+            ],
+            "form": [
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Group",
+                    "caption": "Comparison group"
+                },
+                {
+                    "type": "Select",
+                    "options": [
+                        {
+                            "caption": "Select axis",
+                            "value": ""
+                        }
+                    ],
+                    "name": "Axis",
+                    "caption": "Axis"
+                },
+                {
+                    "type": "SelectVariable",
+                    "validVariableTypes": [
+                        1,
+                        2
+                    ],
+                    "name": "VariableID",
+                    "caption": "Current variable"
+                }
+            ]
+        },
+        {
+            "type": "Label",
+            "caption": "Configure 1 to 8 groups, each with exactly one numeric variable per axis. Values outside an axis range are visually limited; tooltips retain the original values."
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Tile designer",
+            "expanded": false,
+            "items": [
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "AnimationEnabled",
+                            "caption": "Animate Radar"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDuration",
+                            "caption": "Initial animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDurationUpdate",
+                            "caption": "Update animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "EChartsTheme",
+                            "caption": "ECharts theme",
+                            "options": [
+                                {
+                                    "caption": "Automatic (Symcon design)",
+                                    "value": "auto"
+                                },
+                                {
+                                    "caption": "Dark",
+                                    "value": "dark"
+                                },
+                                {
+                                    "caption": "Vintage",
+                                    "value": "vintage"
+                                },
+                                {
+                                    "caption": "Macarons",
+                                    "value": "macarons"
+                                },
+                                {
+                                    "caption": "Infographic",
+                                    "value": "infographic"
+                                },
+                                {
+                                    "caption": "Shine",
+                                    "value": "shine"
+                                },
+                                {
+                                    "caption": "Roma",
+                                    "value": "roma"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "Shape",
+                            "caption": "Radar shape",
+                            "options": [
+                                {
+                                    "caption": "Polygon",
+                                    "value": "polygon"
+                                },
+                                {
+                                    "caption": "Circle",
+                                    "value": "circle"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "StartAngle",
+                            "caption": "Start angle",
+                            "minimum": 0,
+                            "maximum": 360,
+                            "suffix": "°"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "Clockwise",
+                            "caption": "Clockwise"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowLegend",
+                            "caption": "Show legend"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowTooltip",
+                            "caption": "Show tooltip"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowAxisNames",
+                            "caption": "Show axis names"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowAxisValues",
+                            "caption": "Show normalized axis values"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowSplitArea",
+                            "caption": "Show split areas"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "SplitNumber",
+                            "caption": "Grid divisions",
+                            "minimum": 1,
+                            "maximum": 10
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AxisNameGap",
+                            "caption": "Axis name gap",
+                            "minimum": 0,
+                            "maximum": 40,
+                            "suffix": "px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "LineWidth",
+                            "caption": "Line width",
+                            "minimum": 0,
+                            "maximum": 8,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "LineOpacityPercent",
+                            "caption": "Line opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AreaOpacityPercent",
+                            "caption": "Area opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "SymbolSize",
+                            "caption": "Symbol size",
+                            "minimum": 0,
+                            "maximum": 16,
+                            "suffix": "px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "TitleFontSizePercent",
+                            "caption": "Title size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AxisFontSizePercent",
+                            "caption": "Axis label size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "TitleColor",
+                            "caption": "Title color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "AxisColor",
+                            "caption": "Axis label color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "GridColor",
+                            "caption": "Grid color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "actions": [],
+    "status": [
+        {
+            "code": 102,
+            "icon": "active",
+            "caption": "Radar is ready"
+        },
+        {
+            "code": 201,
+            "icon": "error",
+            "caption": "Radar axes or comparison values are invalid"
+        },
+        {
+            "code": 202,
+            "icon": "error",
+            "caption": "Radar design is invalid"
+        },
+        {
+            "code": 203,
+            "icon": "error",
+            "caption": "No active EChartsGateway is connected"
+        },
+        {
+            "code": 204,
+            "icon": "error",
+            "caption": "Radar values could not be loaded"
+        },
+        {
+            "code": 205,
+            "icon": "error",
+            "caption": "Radar values must be finite numbers"
+        }
+    ]
+}
+

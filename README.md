@@ -15,6 +15,8 @@ Parallelkoordinaten verbinden archivierte Variablenwerte je gemeinsamem
 Stunden- oder Tagesintervall.
 Sankey zeigt aktuelle Mengenflüsse zwischen manuell angelegten Knoten.
 Calendar stellt archivierte Tagesmittelwerte als farbigen Jahreskalender dar.
+Radar vergleicht aktuelle Messwerte manuell angelegter Gruppen auf gemeinsam
+festgelegten Achsen mit eigenen Wertebereichen und Einheiten.
 
 Alle Diagrammformulare zeigen eine unmittelbar aktualisierte SVG-Vorschau
 im Kachel- und IPSView-Designer. Sie reagiert auf noch nicht gespeicherte
@@ -37,6 +39,11 @@ Diagrammtitel ohne diesen Kachel-Kopfbereich.
 ## Enthaltene Module
 
 Folgende Module sind enthalten:
+
+- __EChartsRadar__ ([Dokumentation](EChartsRadar/README.md))
+  Aktuelle Vergleichsgruppen auf 3–10 gemeinsamen Achsen. Die Radien zeigen den
+  relativen Stand im jeweiligen Wertebereich; Tooltips enthalten Originalwerte.
+  Kachel und IPSView besitzen getrennte Designer und aktuelle Vorschauen.
 
 - __EChartsCalendar__ ([Dokumentation](EChartsCalendar/README.md))
   Jahreskalender für die Tagesmittelwerte einer numerischen Archivvariable.

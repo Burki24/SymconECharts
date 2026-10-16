@@ -14,6 +14,12 @@ function assertEChartsAsset(bool $condition, string $message): void
 }
 
 $root = dirname(__DIR__);
+$radarRuntime = EChartsAsset::RadarJavaScript();
+assertEChartsAsset(
+    hash_file('sha256', $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.radar.min.js') === EChartsAsset::RADAR_SHA256
+        && strlen($radarRuntime) < 550000 && str_contains($radarRuntime, 'window.echarts'),
+    'The Radar runtime must be pinned and remain below 550 KB.'
+);
 $calendarRuntime = EChartsAsset::CalendarJavaScript();
 assertEChartsAsset(
     hash_file('sha256', $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.calendar.min.js') === EChartsAsset::CALENDAR_SHA256

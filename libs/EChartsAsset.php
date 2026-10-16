@@ -24,6 +24,7 @@ final class EChartsAsset
     public const SUNBURST_SHA256 = '95ef117d648729e87199ab20a815f773cbe660da2f007fd65441add95c1daa43';
     public const PARALLEL_SHA256 = 'ded2b972e4032a840353eabc34809047d70c5bc9e7f700b6a09f617d9bc21295';
     public const SANKEY_SHA256 = '02c589e73e13a571727f7320e2b7bc859bc3ea6f46914871831f7a562d0b32dc';
+    public const RADAR_SHA256 = 'a6bac5fa0b4357219a5c8baff7dce406109d40846a7778e59b00f8c9b1393ae4';
     public const CALENDAR_SHA256 = '9879dece9194b401d95d4e8061b43bf83bc3d6c08dacb320406f48de5b8d31a5';
     public const TIME_SERIES_SHA256 = self::CARTESIAN_SHA256;
     public const THEME_AUTO = 'auto';
@@ -347,6 +348,21 @@ final class EChartsAsset
         $canonicalContent = self::NormalizeLineEndings($content);
         if (!hash_equals(self::SANKEY_SHA256, hash('sha256', $canonicalContent))) {
             throw new RuntimeException('The bundled Apache ECharts Sankey runtime failed its integrity check.');
+        }
+        return $canonicalContent;
+    }
+
+    /** Loads the pinned Radar runtime without enlarging other chart bundles. */
+    public static function RadarJavaScript(): string
+    {
+        $path = __DIR__ . '/echarts/' . self::VERSION . '/echarts.radar.min.js';
+        $content = @file_get_contents($path);
+        if ($content === false || $content === '') {
+            throw new RuntimeException('The bundled Apache ECharts Radar runtime could not be loaded.');
+        }
+        $canonicalContent = self::NormalizeLineEndings($content);
+        if (!hash_equals(self::RADAR_SHA256, hash('sha256', $canonicalContent))) {
+            throw new RuntimeException('The bundled Apache ECharts Radar runtime failed its integrity check.');
         }
         return $canonicalContent;
     }

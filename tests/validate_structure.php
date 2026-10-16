@@ -187,6 +187,17 @@ $requiredFiles = [
     'docs/adr/0051-manual-current-value-sankey.md',
     'tests/sankey_model.php',
     'tests/sankey_layout.js',
+    'EChartsRadar/RadarModel.php',
+    'EChartsRadar/RadarPreview.php',
+    'EChartsRadar/visualization/index.html',
+    'EChartsRadar/visualization/style.css',
+    'EChartsRadar/visualization/app.js',
+    'libs/echarts/6.1.0/echarts.radar.min.js',
+    '.tools/echarts-runtime/src/radar-runtime.js',
+    'docs/adr/0053-current-value-radar.md',
+    'tests/radar_model.php',
+    'tests/radar_integration.php',
+    'tests/radar_layout.js',
     'EChartsCalendar/CalendarData.php',
     'EChartsCalendar/CalendarPreview.php',
     'EChartsCalendar/visualization/index.html',
@@ -407,7 +418,7 @@ if ($helperSync !== null) {
 
 $expectedModules = [
     'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarPolar', 'EChartsBarWaterfall', 'EChartsCalendar', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
-    'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsGraph', 'EChartsGraphZ2M', 'EChartsHeatmap', 'EChartsParallel', 'EChartsPie', 'EChartsSankey', 'EChartsScatter', 'EChartsSunburst', 'EChartsTimeSeries', 'EChartsTree', 'EChartsTreeSystemHealth', 'EChartsTreemap'
+    'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsGraph', 'EChartsGraphZ2M', 'EChartsHeatmap', 'EChartsParallel', 'EChartsPie', 'EChartsRadar', 'EChartsSankey', 'EChartsScatter', 'EChartsSunburst', 'EChartsTimeSeries', 'EChartsTree', 'EChartsTreeSystemHealth', 'EChartsTreemap'
 ];
 $discoveredModules = [];
 foreach (glob($root . '/*/module.json') ?: [] as $modulePath) {
