@@ -2,6 +2,12 @@
 
 ## Hinzugefügt
 
+- Sunburst-Designer bieten nun Startwinkel, Drehrichtung und Sortierung,
+  radiale/tangentiale/waagerechte Beschriftung, Mindestwinkel für Labels,
+  Beschriftungsschalter und Schriftgröße je Ring, abgerundete Segmentkanten
+  sowie einen Tooltip-Schalter. Kachel und IPSView sind getrennt einstellbar;
+  die bisherigen Standarddarstellungen bleiben erhalten.
+
 - `EChartsSunburst` (`ECSB`) zeigt 1 bis 100 aktuelle numerische
   Symcon-Werte in manuell benannten Gruppen und Untergruppen als
   konzentrische Ringe. Kachel und IPSView besitzen getrennte Designs mit

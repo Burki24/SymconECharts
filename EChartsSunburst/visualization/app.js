@@ -85,6 +85,24 @@
             || bootstrap.options.tileHeaderVisible === false);
         var titleSize = design.fontSizePercent(style.titleFontSizePercent, 18);
         var labelSize = design.fontSizePercent(style.labelFontSizePercent, 12);
+        var showLabels = style.showLabels !== false && !compact;
+        var ringLabels = [
+            style.showInnerRingLabels !== false,
+            style.showMiddleRingLabels !== false,
+            style.showOuterRingLabels !== false
+        ];
+        var ringSizes = [
+            style.innerRingLabelFontSizePercent,
+            style.middleRingLabelFontSizePercent,
+            style.outerRingLabelFontSizePercent
+        ];
+        var levels = [{}].concat(ringLabels.map(function (visible, index) {
+            return { label: {
+                show: showLabels && visible,
+                fontSize: Number(ringSizes[index]) > 0
+                    ? design.fontSizePercent(ringSizes[index], 12) : labelSize
+            } };
+        }));
         var backgroundColor = bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
             ? 'transparent' : colors.background;
         return {
@@ -96,6 +114,7 @@
                 textStyle: { color: style.titleColor || colors.text, fontSize: titleSize }
             },
             tooltip: {
+                show: style.showTooltip !== false,
                 trigger: 'item',
                 formatter: function (parameter) {
                     var path = (parameter.treePathInfo || []).map(function (part) { return part.name; })
@@ -110,17 +129,24 @@
                 center: ['50%', showTitle ? '55%' : '50%'],
                 radius: [Math.max(0, Math.min(50, Number(style.innerRadiusPercent) || 0)) + '%',
                     Math.max(50, Math.min(95, Number(style.outerRadiusPercent) || 85)) + '%'],
-                sort: null,
+                startAngle: Number.isFinite(Number(style.startAngle)) ? Number(style.startAngle) : 90,
+                clockwise: style.clockwise !== false,
+                sort: style.sortMode === 'asc' || style.sortMode === 'desc' ? style.sortMode : null,
                 nodeClick: style.clickToRoot === false ? false : 'rootToNode',
                 emphasis: { focus: 'ancestor' },
+                levels: levels,
                 itemStyle: {
                     borderColor: style.borderColor || backgroundColor,
-                    borderWidth: Number(style.borderWidth) >= 0 ? Number(style.borderWidth) : 1
+                    borderWidth: Number(style.borderWidth) >= 0 ? Number(style.borderWidth) : 1,
+                    borderRadius: Number(style.borderRadius) >= 0 ? Number(style.borderRadius) : 0
                 },
                 label: {
-                    show: style.showLabels !== false && !compact,
+                    show: showLabels,
                     color: style.labelColor || colors.text,
                     fontSize: labelSize,
+                    rotate: style.labelRotation === 'horizontal' ? 0
+                        : style.labelRotation === 'tangential' ? 'tangential' : 'radial',
+                    minAngle: Number(style.labelMinAngle) >= 0 ? Number(style.labelMinAngle) : 0,
                     overflow: 'truncate',
                     formatter: function (parameter) {
                         var name = String(parameter.name || '');

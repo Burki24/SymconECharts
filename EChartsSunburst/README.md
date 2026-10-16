@@ -9,7 +9,8 @@ Wählen Sie das vorhandene `EChartsGateway` als Parent. Tragen Sie 1 bis 100
 eindeutige Integer- oder Float-Variablen ein. Jede Zeile benötigt eine
 manuell benannte Gruppe; Untergruppe und abweichende Beschriftung sind
 optional. Gleichnamige Gruppen und Untergruppen werden zusammengefasst.
-Die Konfigurationsreihenfolge bestimmt die Segmentreihenfolge.
+Die Segmente folgen standardmäßig der Konfigurationsreihenfolge. Wahlweise
+können sie nach Wert auf- oder absteigend sortiert werden.
 
 Verwendet wird ausschließlich der aktuelle Rohwert. Negative oder nicht
 endliche Werte werden abgewiesen. Nullwerte sind zulässig, haben aber keinen
@@ -19,8 +20,12 @@ Archivdaten werden nicht benötigt.
 
 Im Kachel- und IPSView-Designer können Sie Theme, feste Gruppenfarben,
 Schriftgrößen und -farben, optionale Zahlen im Segment, Innen- und
-Außenradius sowie Rahmenbreite und -farbe einstellen. Per Klick kann in
-eine Gruppe hineingezoomt werden. IPSView übernimmt standardmäßig das
+Außenradius sowie Rahmenbreite und -farbe einstellen. Beschriftungen können
+radial, tangential oder waagerecht stehen, je Ring ein- und ausgeblendet
+und je Ring in der Größe angepasst werden. Ein Mindestwinkel blendet Labels
+auf sehr kleinen Segmenten aus. Startwinkel (0–360°), Drehrichtung,
+Sortierung, abgerundete Segmentkanten (0–20 px) und Tooltip sind ebenfalls
+einstellbar. Per Klick kann in eine Gruppe hineingezoomt werden. IPSView übernimmt standardmäßig das
 Kacheldesign, kann aber unabhängig gestaltet werden. Die Formularvorschau
 zeigt eine schematische Ringdarstellung mit Beispieldaten.
 

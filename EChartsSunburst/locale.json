@@ -76,7 +76,26 @@
             "Segment border": "Segmentrahmen",
             "Segment border color": "Segmentrahmenfarbe",
             "Automatic (background)": "Automatisch (Hintergrund)",
-            "Drill down on segment click": "Beim Klick auf ein Segment hineinzoomen"
+            "Drill down on segment click": "Beim Klick auf ein Segment hineinzoomen",
+            "Show tooltip": "Tooltip anzeigen",
+            "Label rotation": "Beschriftungsrichtung",
+            "Radial": "Radial",
+            "Tangential": "Tangential",
+            "Horizontal": "Waagerecht",
+            "Hide labels below angle": "Beschriftungen unter Winkel ausblenden",
+            "Inner ring labels": "Inneren Ring beschriften",
+            "Middle ring labels": "Mittleren Ring beschriften",
+            "Outer ring labels": "Äußeren Ring beschriften",
+            "Inner ring label size (0 = general)": "Schriftgröße innerer Ring (0 = allgemein)",
+            "Middle ring label size (0 = general)": "Schriftgröße mittlerer Ring (0 = allgemein)",
+            "Outer ring label size (0 = general)": "Schriftgröße äußerer Ring (0 = allgemein)",
+            "Start angle": "Startwinkel",
+            "Clockwise": "Im Uhrzeigersinn",
+            "Segment order": "Segmentreihenfolge",
+            "Configured order": "Konfigurationsreihenfolge",
+            "Smallest first": "Kleinste zuerst",
+            "Largest first": "Größte zuerst",
+            "Rounded segment corners": "Abgerundete Segmentkanten"
         }
     }
 }

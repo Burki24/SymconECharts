@@ -65,19 +65,32 @@ class EChartsSunburst extends IPSModuleStrict
     private const STATUS_GATEWAY_FAILED = 204;
     private const STATUS_VALUE_INVALID = 205;
     private const DESIGN_DEFAULTS = [
-        'EChartsTheme'         => EChartsAsset::THEME_AUTO,
-        'ShowLabels'           => true,
-        'ShowValues'           => false,
-        'TitleFontSizePercent' => 100,
-        'LabelFontSizePercent' => 100,
-        'TitleColor'           => -1,
-        'LabelColor'           => -1,
-        'GroupColors'          => '[]',
-        'InnerRadiusPercent'   => 0,
-        'OuterRadiusPercent'   => 85,
-        'BorderWidth'          => 1,
-        'BorderColor'          => -1,
-        'ClickToRoot'          => true
+        'EChartsTheme'                   => EChartsAsset::THEME_AUTO,
+        'ShowLabels'                     => true,
+        'ShowValues'                     => false,
+        'ShowTooltip'                    => true,
+        'LabelRotation'                  => 'radial',
+        'LabelMinAngle'                  => 0,
+        'ShowInnerRingLabels'            => true,
+        'ShowMiddleRingLabels'           => true,
+        'ShowOuterRingLabels'            => true,
+        'InnerRingLabelFontSizePercent'  => 0,
+        'MiddleRingLabelFontSizePercent' => 0,
+        'OuterRingLabelFontSizePercent'  => 0,
+        'TitleFontSizePercent'           => 100,
+        'LabelFontSizePercent'           => 100,
+        'TitleColor'                     => -1,
+        'LabelColor'                     => -1,
+        'GroupColors'                    => '[]',
+        'InnerRadiusPercent'             => 0,
+        'OuterRadiusPercent'             => 85,
+        'StartAngle'                     => 90,
+        'Clockwise'                      => true,
+        'SortMode'                       => 'original',
+        'BorderWidth'                    => 1,
+        'BorderRadius'                   => 0,
+        'BorderColor'                    => -1,
+        'ClickToRoot'                    => true
     ];
 
     public function Create(): void
@@ -266,6 +279,12 @@ class EChartsSunburst extends IPSModuleStrict
             $groups = ['Group A' => 3, 'Group B' => 2, 'Group C' => 1];
         }
         $groups = array_slice($groups, 0, 6, true);
+        $sortMode = $this->BarPreviewValue($values, 'SortMode', 'string', $ipsView);
+        if ($sortMode === 'asc') {
+            asort($groups, SORT_NUMERIC);
+        } elseif ($sortMode === 'desc') {
+            arsort($groups, SORT_NUMERIC);
+        }
         $total = array_sum($groups);
         $groupColorsProperty = $ipsView && !($values['IPSViewUseTileDesign']
             ?? $this->ReadPropertyBoolean('IPSViewUseTileDesign')) ? 'IPSViewGroupColors' : 'GroupColors';
@@ -282,6 +301,24 @@ class EChartsSunburst extends IPSModuleStrict
         $cy = 195;
         $offset = 0.0;
         $position = 0;
+        $startAngle = max(0, min(360, $this->BarPreviewValue($values, 'StartAngle', 'integer', $ipsView)));
+        $clockwise = $this->BarPreviewValue($values, 'Clockwise', 'boolean', $ipsView);
+        $showLabels = $this->BarPreviewValue($values, 'ShowLabels', 'boolean', $ipsView);
+        $ringLabels = [
+            $this->BarPreviewValue($values, 'ShowInnerRingLabels', 'boolean', $ipsView),
+            $this->BarPreviewValue($values, 'ShowMiddleRingLabels', 'boolean', $ipsView),
+            $this->BarPreviewValue($values, 'ShowOuterRingLabels', 'boolean', $ipsView)
+        ];
+        $generalSize = $this->BarPreviewValue($values, 'LabelFontSizePercent', 'integer', $ipsView);
+        $ringSizes = [
+            $this->BarPreviewValue($values, 'InnerRingLabelFontSizePercent', 'integer', $ipsView),
+            $this->BarPreviewValue($values, 'MiddleRingLabelFontSizePercent', 'integer', $ipsView),
+            $this->BarPreviewValue($values, 'OuterRingLabelFontSizePercent', 'integer', $ipsView)
+        ];
+        $labelMinAngle = max(0, min(45, $this->BarPreviewValue($values, 'LabelMinAngle', 'integer', $ipsView)));
+        $labelColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'LabelColor', 'integer', $ipsView), $palette['text']);
+        $labelRotation = $this->BarPreviewValue($values, 'LabelRotation', 'string', $ipsView);
+        $previewLabels = '';
         foreach ($groups as $name => $count) {
             $share = 100.0 * $count / $total;
             $color = $configuredColors[$name] ?? $palette['seriesColors'][$position % count($palette['seriesColors'])];
@@ -292,8 +329,27 @@ class EChartsSunburst extends IPSModuleStrict
                     . '" fill="none" stroke="' . EChartsBarPreview::E($color)
                     . '" stroke-width="' . EChartsBarPreview::N(max(1, $ringWidth))
                     . '" pathLength="100" stroke-dasharray="' . EChartsBarPreview::N(max(0, $share - 0.5))
-                    . ' 100" stroke-dashoffset="' . EChartsBarPreview::N(-$offset)
-                    . '" transform="rotate(-90 ' . $cx . ' ' . $cy . ')"/>';
+                    . ' 100" stroke-dashoffset="' . EChartsBarPreview::N($clockwise ? -$offset : $offset + $share)
+                    . '" transform="rotate(-' . $startAngle . ' ' . $cx . ' ' . $cy . ')"/>';
+                if ($showLabels && $ringLabels[$level] && 3.6 * $share >= $labelMinAngle) {
+                    $angle = -$startAngle + ($clockwise ? 1 : -1) * 3.6 * ($offset + $share / 2);
+                    $radians = deg2rad($angle);
+                    $x = $cx + $ringRadius * cos($radians);
+                    $y = $cy + $ringRadius * sin($radians);
+                    $scale = $ringSizes[$level] > 0 ? $ringSizes[$level] : $generalSize;
+                    $size = max(8, min(22, (int) round(10 * $scale / 100)));
+                    $rotation = match ($labelRotation) {
+                        'radial'     => $angle,
+                        'tangential' => $angle + 90,
+                        default      => 0
+                    };
+                    $previewLabels .= '<text x="' . EChartsBarPreview::N($x) . '" y="' . EChartsBarPreview::N($y)
+                        . '" text-anchor="middle" dominant-baseline="middle" font-size="' . $size
+                        . '" fill="' . EChartsBarPreview::E($labelColor) . '" transform="rotate('
+                        . EChartsBarPreview::N($rotation) . ' ' . EChartsBarPreview::N($x) . ' '
+                        . EChartsBarPreview::N($y) . ')">'
+                        . EChartsBarPreview::E(mb_strimwidth($name, 0, 12, '…')) . '</text>';
+                }
             }
             $offset += $share;
             ++$position;
@@ -306,9 +362,9 @@ class EChartsSunburst extends IPSModuleStrict
                     . '" stroke-width="' . $borderWidth . '"/>';
             }
         }
-        if ($this->BarPreviewValue($values, 'ShowLabels', 'boolean', $ipsView)) {
-            $labelColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'LabelColor', 'integer', $ipsView), $palette['text']);
-            $size = max(8, min(22, (int) round(12 * $this->BarPreviewValue($values, 'LabelFontSizePercent', 'integer', $ipsView) / 100)));
+        $svg .= $previewLabels;
+        if ($showLabels && $ringLabels[0]) {
+            $size = max(8, min(22, (int) round(12 * $generalSize / 100)));
             $labels = array_keys($groups);
             $svg .= '<text x="360" y="352" text-anchor="middle" font-size="' . $size
                 . '" fill="' . EChartsBarPreview::E($labelColor) . '">'
@@ -486,6 +542,17 @@ class EChartsSunburst extends IPSModuleStrict
                 return false;
             }
         }
+        foreach (['InnerRingLabelFontSizePercent', 'MiddleRingLabelFontSizePercent',
+            'OuterRingLabelFontSizePercent'] as $name) {
+            $value = $this->ReadPropertyInteger($prefix . $name);
+            if ($value !== 0 && ($value < 50 || $value > 200)) {
+                return false;
+            }
+        }
+        if (!in_array($this->ReadPropertyString($prefix . 'LabelRotation'), ['radial', 'tangential', 'horizontal'], true)
+            || !in_array($this->ReadPropertyString($prefix . 'SortMode'), ['original', 'asc', 'desc'], true)) {
+            return false;
+        }
         foreach (['TitleColor', 'LabelColor', 'BorderColor'] as $name) {
             $value = $this->ReadPropertyInteger($prefix . $name);
             if ($value < -1 || $value > 0xFFFFFF) {
@@ -495,8 +562,12 @@ class EChartsSunburst extends IPSModuleStrict
         $inner = $this->ReadPropertyInteger($prefix . 'InnerRadiusPercent');
         $outer = $this->ReadPropertyInteger($prefix . 'OuterRadiusPercent');
         $border = $this->ReadPropertyInteger($prefix . 'BorderWidth');
+        $radius = $this->ReadPropertyInteger($prefix . 'BorderRadius');
+        $startAngle = $this->ReadPropertyInteger($prefix . 'StartAngle');
+        $labelMinAngle = $this->ReadPropertyInteger($prefix . 'LabelMinAngle');
         if ($inner < 0 || $inner > 50 || $outer < 50 || $outer > 95 || $inner >= $outer
-            || $border < 0 || $border > 12) {
+            || $border < 0 || $border > 12 || $radius < 0 || $radius > 20
+            || $startAngle < 0 || $startAngle > 360 || $labelMinAngle < 0 || $labelMinAngle > 45) {
             return false;
         }
         return $this->ParseGroupColors($this->ReadPropertyString($prefix . 'GroupColors')) !== null;

@@ -176,6 +176,11 @@
                             "caption": "Show values in segments"
                         },
                         {
+                            "type": "CheckBox",
+                            "name": "ShowTooltip",
+                            "caption": "Show tooltip"
+                        },
+                        {
                             "type": "NumberSpinner",
                             "name": "TitleFontSizePercent",
                             "caption": "Title size",
@@ -188,6 +193,87 @@
                             "name": "LabelFontSizePercent",
                             "caption": "Value label size",
                             "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "LabelRotation",
+                            "caption": "Label rotation",
+                            "options": [
+                                {
+                                    "caption": "Radial",
+                                    "value": "radial"
+                                },
+                                {
+                                    "caption": "Tangential",
+                                    "value": "tangential"
+                                },
+                                {
+                                    "caption": "Horizontal",
+                                    "value": "horizontal"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "LabelMinAngle",
+                            "caption": "Hide labels below angle",
+                            "minimum": 0,
+                            "maximum": 45,
+                            "suffix": "°"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowInnerRingLabels",
+                            "caption": "Inner ring labels"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowMiddleRingLabels",
+                            "caption": "Middle ring labels"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowOuterRingLabels",
+                            "caption": "Outer ring labels"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "InnerRingLabelFontSizePercent",
+                            "caption": "Inner ring label size (0 = general)",
+                            "minimum": 0,
+                            "maximum": 200,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "MiddleRingLabelFontSizePercent",
+                            "caption": "Middle ring label size (0 = general)",
+                            "minimum": 0,
+                            "maximum": 200,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "OuterRingLabelFontSizePercent",
+                            "caption": "Outer ring label size (0 = general)",
+                            "minimum": 0,
                             "maximum": 200,
                             "suffix": "%"
                         }
@@ -283,6 +369,43 @@
                     "items": [
                         {
                             "type": "NumberSpinner",
+                            "name": "StartAngle",
+                            "caption": "Start angle",
+                            "minimum": 0,
+                            "maximum": 360,
+                            "suffix": "°"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "Clockwise",
+                            "caption": "Clockwise"
+                        },
+                        {
+                            "type": "Select",
+                            "name": "SortMode",
+                            "caption": "Segment order",
+                            "options": [
+                                {
+                                    "caption": "Configured order",
+                                    "value": "original"
+                                },
+                                {
+                                    "caption": "Smallest first",
+                                    "value": "asc"
+                                },
+                                {
+                                    "caption": "Largest first",
+                                    "value": "desc"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
                             "name": "BorderWidth",
                             "caption": "Segment border",
                             "minimum": 0,
@@ -295,6 +418,14 @@
                             "caption": "Segment border color",
                             "allowTransparent": true,
                             "transparentCaption": "Automatic (background)"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "BorderRadius",
+                            "caption": "Rounded segment corners",
+                            "minimum": 0,
+                            "maximum": 20,
+                            "suffix": "px"
                         }
                     ]
                 },

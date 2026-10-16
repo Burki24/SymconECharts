@@ -9681,6 +9681,10 @@ $sunburst->SetTestProperty('GroupColors', json_encode([['Group' => 'House', 'Col
 $sunburst->SetTestProperty('InnerRadiusPercent', 15);
 $sunburst->SetTestProperty('OuterRadiusPercent', 90);
 $sunburst->SetTestProperty('ClickToRoot', false);
+$sunburst->SetTestProperty('StartAngle', 210);
+$sunburst->SetTestProperty('SortMode', 'desc');
+$sunburst->SetTestProperty('LabelMinAngle', 8);
+$sunburst->SetTestProperty('IPSViewShowMiddleRingLabels', false);
 $sunburst->ApplyChanges();
 $sunburstData = json_decode($sunburst->GetSunburstData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
@@ -9690,6 +9694,9 @@ assertGatewayGauge(
         && $sunburstData['sunburst']['data'][0]['children'][0]['children'][0]['id'] === 'variable-4711'
         && $sunburstData['sunburst']['style']['groupColors']['House'] === '#123456'
         && $sunburstData['sunburst']['style']['innerRadiusPercent'] === 15
+        && $sunburstData['sunburst']['style']['startAngle'] === 210
+        && $sunburstData['sunburst']['style']['sortMode'] === 'desc'
+        && $sunburstData['sunburst']['style']['labelMinAngle'] === 8
         && $sunburstData['sunburst']['style']['clickToRoot'] === false,
     'Sunburst must retain current-value hierarchy and independent design options.'
 );
@@ -9700,9 +9707,13 @@ assertGatewayGauge(
     str_contains($sunburstTile, 'echarts-sunburst-root')
         && str_contains($sunburstTile, '"showLabels":true')
         && str_contains($sunburstIPSView, '"showLabels":false')
+        && str_contains($sunburstIPSView, '"showMiddleRingLabels":false')
         && strlen($sunburstTile) < SYMCON_OUTPUT_BUFFER_LIMIT
         && strlen($sunburstIPSView) < SYMCON_OUTPUT_BUFFER_LIMIT
         && findGaugeFormElement($sunburstForm['elements'], 'InnerRadiusPercent')['type'] === 'NumberSpinner'
+        && findGaugeFormElement($sunburstForm['elements'], 'SortMode')['type'] === 'Select'
+        && findGaugeFormElement($sunburstForm['elements'], 'LabelRotation')['type'] === 'Select'
+        && findGaugeFormElement($sunburstForm['elements'], 'IPSViewShowMiddleRingLabels')['type'] === 'CheckBox'
         && findGaugeFormElement($sunburstForm['elements'], 'IPSViewClickToRoot')['type'] === 'CheckBox',
     'Sunburst must render Tile and IPSView below the Symcon output limit.'
 );
@@ -9723,6 +9734,31 @@ $sunburst->SetTestProperty('InnerRadiusPercent', 55);
 $sunburst->ApplyChanges();
 assertGatewayGauge($sunburst->GetTestStatus() === 202, 'Sunburst must reject invalid ring radii.');
 $sunburst->SetTestProperty('InnerRadiusPercent', 15);
+$sunburst->SetTestProperty('LabelRotation', 'unsupported');
+$sunburst->ApplyChanges();
+assertGatewayGauge($sunburst->GetTestStatus() === 202, 'Sunburst must reject an unsupported label rotation.');
+$sunburst->SetTestProperty('LabelRotation', 'radial');
+$sunburst->SetTestProperty('LabelMinAngle', 46);
+$sunburst->ApplyChanges();
+assertGatewayGauge($sunburst->GetTestStatus() === 202, 'Sunburst must reject an excessive label threshold.');
+$sunburst->SetTestProperty('LabelMinAngle', 8);
+$sunburst->SetTestProperty('SortMode', 'other');
+$sunburst->ApplyChanges();
+assertGatewayGauge($sunburst->GetTestStatus() === 202, 'Sunburst must reject an unsupported sort mode.');
+$sunburst->SetTestProperty('SortMode', 'desc');
+$sunburst->SetTestProperty('InnerRingLabelFontSizePercent', 30);
+$sunburst->ApplyChanges();
+assertGatewayGauge($sunburst->GetTestStatus() === 202, 'Sunburst must reject an invalid ring label size.');
+$sunburst->SetTestProperty('InnerRingLabelFontSizePercent', 0);
+$sunburst->SetTestProperty('StartAngle', 361);
+$sunburst->ApplyChanges();
+assertGatewayGauge($sunburst->GetTestStatus() === 202, 'Sunburst must reject an invalid start angle.');
+$sunburst->SetTestProperty('StartAngle', 210);
+$sunburst->SetTestProperty('BorderRadius', 21);
+$sunburst->ApplyChanges();
+assertGatewayGauge($sunburst->GetTestStatus() === 202, 'Sunburst must reject an invalid segment radius.');
+$sunburst->SetTestProperty('BorderRadius', 0);
+$sunburst->SetTestProperty('InnerRadiusPercent', 15);
 $sunburst->SetTestProperty('Sources', json_encode([
     ['VariableID' => 4711, 'Group' => 'House'], ['VariableID' => 4711, 'Group' => 'Garden']
 ], JSON_THROW_ON_ERROR));
@@ -9740,6 +9776,22 @@ assertGatewayGauge(
         && str_contains($sunburstPreviewSvg, '#BADA55')
         && !str_contains($sunburstPreviewSvg, '<Room>'),
     'Sunburst draft preview must escape group names.'
+);
+$sunburst->UpdateBarPreviewFromForm(json_encode([
+    'Sources'             => [['VariableID' => 4711, 'Group' => '<Room>', 'Subgroup' => '', 'Label' => '']],
+    'StartAngle'          => 210,
+    'Clockwise'           => false,
+    'ShowInnerRingLabels' => false,
+    'ShowMiddleRingLabels'=> false,
+    'ShowOuterRingLabels' => false
+], JSON_THROW_ON_ERROR));
+$sunburstPreviewUpdate = array_slice($sunburst->GetTestFormUpdates(), -2)[0]['Value'];
+$sunburstPreviewSvg = base64_decode(substr($sunburstPreviewUpdate, strlen('data:image/svg+xml;base64,')), true);
+assertGatewayGauge(
+    is_string($sunburstPreviewSvg)
+        && str_contains($sunburstPreviewSvg, 'rotate(-210 360 195)')
+        && !str_contains($sunburstPreviewSvg, '&lt;Room&gt;'),
+    'Sunburst draft preview must reflect direction and ring label controls.'
 );
 $manySunburstSources = [];
 for ($index = 0; $index < 100; ++$index) {

@@ -37,11 +37,19 @@ Segmentrahmen und Klicknavigation. Die Formularvorschau zeigt
 ausdrücklich schematische Beispieldaten. Änderungen an Quellvariablen
 aktualisieren die Ausgabe.
 
+Ergänzend sind Tooltip-Anzeige, Startwinkel, Drehrichtung und optionale
+Sortierung nach Wert sowie radiale, tangentiale oder waagerechte Labels
+konfigurierbar. Der Mindestwinkel für Labels und Sichtbarkeit/Schriftgröße
+je Ring erlauben eine lesbare Darstellung dichter Hierarchien. Ein
+Segment-Eckenradius kann unabhängig von der Rahmenbreite gesetzt werden.
+Alle Optionen gelten für Kachel und unabhängiges IPSView-Design getrennt;
+die bisherigen Darstellungswerte sind Standard.
+
 ## Grenzen und Prüfung
 
 Die 100-Quellen-Grenze begrenzt Daten- und Renderbudget. Gemischte
 physikalische Einheiten sind technisch zulässig, fachlich aber oft nicht
 vergleichbar. Die lokale Prüfung umfasst Modulvertrag, Datenhierarchie,
 Optionsaufbau, Bundle-Integrität und Symcon-Ausgabelimit. Die visuelle
-Bedienung in realer Kachel und IPSView bleibt bis zum Anwender-Livetest
-eine ausgewiesene Testlücke.
+Bedienung der Grunddarstellung in realer Kachel und IPSView wurde vom
+Anwender bestätigt. Ein Livetest der ergänzten Designoptionen steht aus.
