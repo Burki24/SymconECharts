@@ -1,0 +1,16 @@
+{
+    "id": "{3F927445-41C7-44F4-8CEB-069581C5F3D1}",
+    "name": "EChartsCalendar",
+    "type": 3,
+    "vendor": "",
+    "aliases": [],
+    "parentRequirements": [
+        "{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}"
+    ],
+    "childRequirements": [],
+    "implemented": [
+        "{E4749B72-912B-E3E3-1C57-D19019FFDD84}"
+    ],
+    "prefix": "ECCL",
+    "url": "https://github.com/Burki24/SymconECharts"
+}

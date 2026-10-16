@@ -187,6 +187,17 @@ $requiredFiles = [
     'docs/adr/0051-manual-current-value-sankey.md',
     'tests/sankey_model.php',
     'tests/sankey_layout.js',
+    'EChartsCalendar/CalendarData.php',
+    'EChartsCalendar/CalendarPreview.php',
+    'EChartsCalendar/visualization/index.html',
+    'EChartsCalendar/visualization/style.css',
+    'EChartsCalendar/visualization/app.js',
+    '.tools/echarts-runtime/src/calendar-runtime.js',
+    'libs/echarts/6.1.0/echarts.calendar.min.js',
+    'docs/adr/0052-calendar-daily-archive-means.md',
+    'tests/calendar_data.php',
+    'tests/calendar_layout.js',
+    'tests/calendar_integration.php',
     '.tools/echarts-runtime/src/tree-runtime.js',
     'docs/adr/0044-tree-symcon-object-hierarchy.md',
     'docs/adr/0046-tree-system-health-module-split.md',
@@ -395,7 +406,7 @@ if ($helperSync !== null) {
 }
 
 $expectedModules = [
-    'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarPolar', 'EChartsBarWaterfall', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
+    'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarPolar', 'EChartsBarWaterfall', 'EChartsCalendar', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
     'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsGraph', 'EChartsGraphZ2M', 'EChartsHeatmap', 'EChartsParallel', 'EChartsPie', 'EChartsSankey', 'EChartsScatter', 'EChartsSunburst', 'EChartsTimeSeries', 'EChartsTree', 'EChartsTreeSystemHealth', 'EChartsTreemap'
 ];
 $discoveredModules = [];

@@ -27,6 +27,10 @@ Der Parallel-Einstieg enthält Parallel Chart und Component, Titel, Tooltip,
 Aria und Canvas Renderer als eigenen Build für Archivintervall-Vergleiche.
 Der Sankey-Einstieg enthält Sankey Chart, Titel, Tooltip, Aria, Label Layout und Canvas
 Renderer als eigenen Build für aktuelle Mengenflüsse.
+Der Calendar-Einstieg enthält Heatmap Chart, Calendar Component, Visual Map,
+Titel, Tooltip, Aria und Canvas Renderer als getrennten Jahreskalender-Build.
+Er erweitert nicht die bestehende Stunden-Heatmap-Runtime. Ein gezielter Build
+erfolgt mit `npm run build:calendar`.
 
 Zusätzlich kopiert der Build die sechs im Modul angebotenen offiziellen
 ECharts-Themes unverändert aus derselben festgeschriebenen npm-Abhängigkeit:
@@ -49,7 +53,8 @@ Die Ergebnisse werden als
 `../../libs/echarts/6.1.0/echarts.pie.min.js` und
 `../../libs/echarts/6.1.0/echarts.tree.min.js`,
 `../../libs/echarts/6.1.0/echarts.parallel.min.js`,
-`../../libs/echarts/6.1.0/echarts.sankey.min.js` sowie unter
+`../../libs/echarts/6.1.0/echarts.sankey.min.js`,
+`../../libs/echarts/6.1.0/echarts.calendar.min.js` sowie unter
 `../../libs/echarts/6.1.0/themes` geschrieben. Nach einem bewussten Neuaufbau
 müssen Dateigrößen und SHA-256-Werte in `libs/EChartsAsset.php`, den Tests und
 `THIRD_PARTY_NOTICES.md` geprüft und aktualisiert werden. `node_modules` wird

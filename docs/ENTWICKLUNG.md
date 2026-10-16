@@ -103,6 +103,7 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 | Gerät | EChartsSunburst | Manuell gruppierte aktuelle numerische Variablenwerte als Sunburst in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsParallel | Gemeinsame abgeschlossene Archivintervalle von 2–10 Variablen als Parallelkoordinaten in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsSankey | Aktuelle nichtnegative Mengenflüsse zwischen manuellen Knoten und Verbindungen in Kachel und optionalem IPSView-HTML |
+| Gerät | EChartsCalendar | Archivierte Tagesmittelwerte einer Standardvariable als Jahreskalender mit lesender Jahresnavigation |
 
 Eine eigene I/O-Instanz, ein Konfigurator und Discovery gehören nicht zum
 Anfangsumfang. Datenquellen sind Teil der jeweiligen Gauge-Konfiguration und
@@ -143,6 +144,7 @@ Modul-IDs und Datenfluss-IDs haben unterschiedliche Aufgaben.
 | Modul EChartsSunburst | `{A90CEE66-8708-4C2B-A475-1BAEDC74C359}` |
 | Modul EChartsParallel | `{2B3B30E7-F7F2-47CF-A8AB-1E27F896A7DD}` |
 | Modul EChartsSankey | `{D0F77DFF-6B50-4901-A2F0-5A98159E2559}` |
+| Modul EChartsCalendar | `{3F927445-41C7-44F4-8CEB-069581C5F3D1}` |
 | Datenfluss Gauge → Gateway | `{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}` |
 | Datenfluss Gateway → Gauge | `{E4749B72-912B-E3E3-1C57-D19019FFDD84}` |
 
@@ -236,12 +238,15 @@ Die archivbasierte Parallelfamilie beschreibt
 [`ADR 0050`](adr/0050-archive-parallel-chart.md).
 Die aktuelle Sankey-Familie mit manuellen Knoten und Verbindungen beschreibt
 [`ADR 0051`](adr/0051-manual-current-value-sankey.md).
+Den Jahreskalender mit Tagesmittelwerten beschreibt
+[`ADR 0052`](adr/0052-calendar-daily-archive-means.md). Er nutzt die vorhandene
+Archivoperation und eigene Familienvalidierung; Gateway und Stunden-Heatmap
+werden nicht um Kalender-Modi erweitert. Das Präfix lautet `ECCL`.
 
 ## Weitere ECharts-Familien im Plan
 
-Nach Heatmap, Tree, allgemeinem Graphen, Zigbee2MQTT-Graphen, Treemap,
-Sunburst, Parallel und Sankey wird **Calendar** als eigenes Koordinaten- und
-Zeitlayout geprüft und nicht in die 7×24-Heatmap hineingezogen. **Dataset**
+Nach Heatmap, Tree, Graph, Treemap, Sunburst, Parallel, Sankey und Calendar
+steht die Bewertung gemeinsamer Datenverarbeitung an. **Dataset**
 ist in ECharts eine familienübergreifende Datenkomponente, keine eigene
 Diagrammfamilie oder Symcon-Geräteinstanz; seine Nutzung wird bei passenden
 Serien auf Datenfluss und Wiederverwendung geprüft. Diese Einträge sind

@@ -1,0 +1,60 @@
+html, body {
+    inline-size: 100%;
+    block-size: 100%;
+    min-inline-size: 0;
+    margin: 0;
+    overflow: hidden;
+    color: var(--symc-text);
+    background: var(--symc-background);
+}
+* { box-sizing: border-box; }
+.echarts-calendar-root, .echarts-calendar-chart {
+    position: relative;
+    inline-size: 100%;
+    block-size: 100%;
+    min-inline-size: 0;
+    min-block-size: 0;
+    overflow: hidden;
+}
+.echarts-calendar-period {
+    position: absolute;
+    z-index: 3;
+    inset-inline: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    block-size: 1.6rem;
+    color: var(--symc-text);
+    font-size: clamp(10px, 2.5vw, 12px);
+    white-space: nowrap;
+}
+.echarts-calendar-period button {
+    min-inline-size: 1.5rem;
+    block-size: 1.45rem;
+    padding: 0 0.3rem;
+    border: 1px solid var(--symc-border);
+    border-radius: 0.25rem;
+    color: inherit;
+    background: var(--symc-surface);
+    cursor: pointer;
+}
+.echarts-calendar-period button:disabled { opacity: 0.4; cursor: default; }
+.echarts-calendar-period-label { overflow: hidden; text-overflow: ellipsis; }
+.echarts-refresh-warning, .echarts-calendar-empty, .echarts-calendar-error {
+    position: absolute;
+    inset-inline: 0.75rem;
+    z-index: 2;
+    padding: 0.45rem 0.65rem;
+    border-radius: 0.35rem;
+    background: color-mix(in srgb, var(--symc-surface) 88%, transparent);
+    color: var(--symc-text);
+    text-align: center;
+}
+.echarts-refresh-warning { inset-block-end: 0.65rem; }
+.echarts-calendar-empty, .echarts-calendar-error {
+    inset-block-start: 50%;
+    transform: translateY(-50%);
+    color: var(--symc-muted);
+}
+[hidden] { display: none !important; }

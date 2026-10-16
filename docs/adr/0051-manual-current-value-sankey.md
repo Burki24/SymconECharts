@@ -98,10 +98,10 @@ Formularauswahl, unabhängige Designs, Übersetzungen, Ausgabelimit und den
 Optionsaufbau samt Layout in der echten ECharts-Engine. Ein lokaler Browsertest
 mit der gebündelten Canvas-Runtime bestätigt waagerechtes und senkrechtes
 Layout, Nullflussanzeige, Wiederherstellung nach Aktualisierung und den
-freigehaltenen simulierten Kachelkopf. Der Anwender hat die ursprüngliche
-Sankey-Version in Symcon-Kachel und IPSView erfolgreich live geprüft.
-Die ergänzten Designeroptionen benötigen nach dem Modulupdate erneut eine
-Live-Prüfung beider Ausgabewege. Schematische SVG-Vorschauen messen Texte
+freigehaltenen simulierten Kachelkopf. Der Anwender hat am 16.10.2026 auch die
+ergänzten Designeroptionen sowie die korrigierte Vorschau und Beschriftung in
+Symcon-Kachel und IPSView erfolgreich live bestätigt. Die Vorschau und die
+Darstellung passen auf dieser Testinstallation zusammen. Schematische SVG-Vorschauen messen Texte
 näherungsweise und simulieren keine Layout-Optimierungsdurchläufe oder
 Hover-Interaktion.
 Der Renderer begrenzt Labelbreite/-höhe mittels `labelLayout` nach dem
@@ -120,5 +120,6 @@ Ein weiterer lokaler Browservergleich der korrigierten SVG-Vorschau mit der
 gebündelten Canvas-Runtime verwendet dieselbe 25-Knoten-/24-Flüsse-Teststruktur
 und dieselben Momentanwerte. Er bestätigt beide Ausrichtungen, passende
 Farben/Anteile, fehlende Textüberlappung und volle Tooltip-/Hover-Beschriftung
-eines schmalen Verbrauchers. Pixelgleiche Anordnung wird nicht zugesagt;
-die beschriebene erneute Live-Prüfung bleibt erforderlich.
+eines schmalen Verbrauchers. Pixelgleiche Anordnung wird nicht zugesagt.
+Die Anwenderbestätigung ist ein Nachweis für die vorhandene Testinstallation,
+keine allgemeine Freigabe aller Plattform- und Symcon-Versionsvarianten.

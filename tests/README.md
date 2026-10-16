@@ -13,8 +13,10 @@ vollständige Vorschauen, aktuelle Größenverhältnisse, geschlossene Flussbän
 innerhalb der Zeichenfläche sowie Fehler-/Nullzustände ohne Konfigurations-
 oder Statusänderung ab. ECharts-Engine-Tests prüfen begrenzte und kollisionsfreie
 Knotenlabels in beiden Ausrichtungen auch ohne aktiviertes `HideOverlappingLabels`.
-Die ursprüngliche Version wurde vom Anwender in Symcon-Kachel und IPSView
-live bestätigt; die ergänzten Designeroptionen sind dort erneut zu prüfen.
+Der Anwender hat am 16.10.2026 auch die ergänzten Designeroptionen und die
+korrigierte Vorschau/Beschriftung in Symcon-Kachel und IPSView live bestätigt.
+Dieser Nachweis gilt für die vorhandene Testinstallation; andere Plattform-
+und Symcon-Versionsvarianten sind dadurch nicht zusätzlich geprüft.
 
 Die lokale Testsuite wird aus dem Repository-Stamm gestartet:
 
@@ -157,6 +159,23 @@ StylePHP und PHP CS Fixer.
   Visualisierungshelper vollständig übereinstimmen.
 - `test_update_library_metadata.py` prüft Versionsfortschreibung, Build- und
   Datumsableitung sowie den Schutz vor einer Versionsrückstufung.
+
+## Calendar
+
+`calendar_data.php` prüft Jahresgrenzen, Schaltjahre, Zeitumstellungen,
+abgeschlossene Tage und die Ablehnung ungültiger Tagesdaten. Die im
+Gateway-Integrationstest eingebundene `calendar_integration.php` prüft den
+realen Gateway-Datenweg mit Kernel-Doppeln, negative/Nullwerte, Lücken,
+Zählerablehnung, schreibfreie Vorschauen, Designkopie, getrennte Ausgabewege,
+WebContent und das 1-MB-Limit. `calendar_layout.js` prüft Ausrichtung,
+Kopfbereich, Titel, Farben, Labelanpassung, echte ECharts-Geometrie und die
+lesende Jahresnavigation.
+
+Mit `node tests/calendar_browser.mjs` startet eine rein lokale Fixture unter
+`http://127.0.0.1:8796` mit synthetischen Jahresdaten und der ausgelieferten
+Calendar-Runtime. Am 16.10.2026 wurden hohe native und breite IPSView-Layouts,
+dunkler Hintergrund, Titel/Kopfbereich, Farbskala und Jahresnavigation im
+Browser geprüft. Das ersetzt keinen Live-Test in Symcon oder IPSView.
 
 Die Suite belegt die PHP-seitigen Verträge und den Datenweg nur gegen lokale
 Symcon-Test-Doppel. Sie ersetzt keinen Laufzeittest in Symcon und keinen

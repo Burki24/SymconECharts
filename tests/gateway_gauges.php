@@ -10257,4 +10257,6 @@ assertGatewayGauge(
     'Sankey must deduplicate shared source subscriptions and fit the output limit at maximum configuration size.'
 );
 
+require __DIR__ . '/calendar_integration.php';
+
 echo "Gateway and Gauge module integration verified.\n";

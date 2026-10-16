@@ -2,6 +2,12 @@
 
 ## Hinzugefügt
 
+- `EChartsCalendar` (`ECCL`) zeigt archivierte Tagesmittelwerte einer
+  numerischen Standardvariable als Jahreskalender mit lesender
+  Jahresnavigation. Fehlende und laufende Tage bleiben leer; Zähler sind
+  ausgeschlossen. Kachel und IPSView besitzen getrennte Designer für
+  Ausrichtung, Beschriftung, Schriftgrößen, Farben, Zellränder und Animation.
+
 - Sankey-Designer bieten individuelle Knotenfarben, Rahmen, Rundungen,
   Knotendeckkraft und Schatten, Beschriftungsposition und -abstand,
   Zeilenumbruch, Fettschrift und Überlappungsschutz sowie Verbindungswerte.

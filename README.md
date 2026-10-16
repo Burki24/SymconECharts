@@ -14,6 +14,7 @@ manuell festgelegten Gruppen und aktuellen numerischen Variablenwerten.
 Parallelkoordinaten verbinden archivierte Variablenwerte je gemeinsamem
 Stunden- oder Tagesintervall.
 Sankey zeigt aktuelle Mengenflüsse zwischen manuell angelegten Knoten.
+Calendar stellt archivierte Tagesmittelwerte als farbigen Jahreskalender dar.
 
 Alle Diagrammformulare zeigen eine unmittelbar aktualisierte SVG-Vorschau
 im Kachel- und IPSView-Designer. Sie reagiert auf noch nicht gespeicherte
@@ -36,6 +37,11 @@ Diagrammtitel ohne diesen Kachel-Kopfbereich.
 ## Enthaltene Module
 
 Folgende Module sind enthalten:
+
+- __EChartsCalendar__ ([Dokumentation](EChartsCalendar/README.md))
+  Jahreskalender für die Tagesmittelwerte einer numerischen Archivvariable.
+  Fehlende Tage bleiben leer; die Jahresnavigation verändert keine
+  Konfiguration. Kachel und IPSView besitzen getrennte Designer.
 
 - __EChartsSankey__ ([Dokumentation](EChartsSankey/README.md))
   Aktuelle Mengenflüsse zwischen manuellen Knoten und Verbindungen. Die

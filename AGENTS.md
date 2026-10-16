@@ -65,6 +65,9 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Aktuelle Mengenflüsse zwischen manuell angelegten Knoten liegen im eigenen
   Gerätemodul `EChartsSankey`; Verbindungsbreiten folgen numerischen
   Quellvariablen, Zyklen und negative Werte sind unzulässig.
+  Archivierte Tagesmittelwerte einer einzelnen Standardvariable liegen im
+  eigenen Gerätemodul `EChartsCalendar`; Zähler und laufende Tage sind
+  ausgeschlossen. Das Jahreslayout ist kein Modus der Stunden-Heatmap.
 - Das Gateway stellt ausschließlich familienübergreifende Infrastruktur wie
   Archivzugriff, begrenztes Caching, gemeinsame Ressourcen und gegebenenfalls
   abgesicherte IPSView-Kommunikation bereit. Familienbezogene Properties,
@@ -137,6 +140,7 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
 - `ECSB` ist `EChartsSunburst` zugeordnet (`SB` = Sunburst).
 - `ECPA` ist `EChartsParallel` zugeordnet (`PA` = Parallel).
 - `ECSA` ist `EChartsSankey` zugeordnet (`SA` = Sankey).
+- `ECCL` ist `EChartsCalendar` zugeordnet (`CL` = Calendar).
 - Das zuvor für das unveröffentlichte Gauge-Gerüst verwendete Kürzel `ECGA`
   ist abgelöst und wird nicht für ein anderes Modul wiederverwendet.
 - Neue Kürzel werden vor ihrer Verwendung eindeutig festgelegt und in dieser

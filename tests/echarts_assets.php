@@ -14,6 +14,13 @@ function assertEChartsAsset(bool $condition, string $message): void
 }
 
 $root = dirname(__DIR__);
+$calendarRuntime = EChartsAsset::CalendarJavaScript();
+assertEChartsAsset(
+    hash_file('sha256', $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.calendar.min.js') === EChartsAsset::CALENDAR_SHA256
+        && strlen($calendarRuntime) < 550000 && str_contains($calendarRuntime, 'window.echarts')
+        && str_contains((string) file_get_contents($root . '/.tools/echarts-runtime/src/calendar-runtime.js'), 'CalendarComponent'),
+    'The Calendar runtime must be pinned, expose the browser API and remain below 550 KB.'
+);
 $runtimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.gauge.min.js';
 $cartesianRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.cartesian.min.js';
 $scatterRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.scatter.min.js';
