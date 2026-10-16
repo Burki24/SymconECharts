@@ -38,6 +38,7 @@ require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
+require_once __DIR__ . '/../libs/EChartsLabelDesign.php';
 require_once __DIR__ . '/../libs/EChartsTransientRefresh.php';
 require_once __DIR__ . '/SankeyModel.php';
 require_once __DIR__ . '/SankeyPreview.php';
@@ -70,13 +71,21 @@ class EChartsSankey extends IPSModuleStrict
     private const STATUS_GATEWAY_FAILED = 204;
     private const STATUS_VALUE_INVALID = 205;
     private const DESIGN_DEFAULTS = [
-        'EChartsTheme'         => EChartsAsset::THEME_AUTO,
-        'Orientation'          => 'horizontal', 'NodeAlign' => 'justify',
-        'NodeWidth'            => 20, 'NodeGap' => 12, 'Draggable' => true,
-        'ShowTooltip'          => true, 'ShowLabels' => true, 'ShowValues' => false,
-        'EdgeColorMode'        => 'gradient', 'EdgeOpacityPercent' => 35, 'EdgeCurvenessPercent' => 50,
-        'TitleFontSizePercent' => 100, 'LabelFontSizePercent' => 100,
-        'TitleColor'           => -1, 'LabelColor' => -1, 'NodeColor' => -1, 'EdgeColor' => -1
+        'EChartsTheme'                => EChartsAsset::THEME_AUTO,
+        'Orientation'                 => 'horizontal', 'NodeAlign' => 'justify',
+        'NodeWidth'                   => 20, 'NodeGap' => 12, 'Draggable' => true,
+        'LayoutIterations'            => 32, 'HoverFocus' => 'adjacency',
+        'HighlightEdgeOpacityPercent' => 85, 'BlurEdgeOpacityPercent' => 5,
+        'ShowTooltip'                 => true, 'ShowLabels' => true, 'ShowValues' => false,
+        'LabelPosition'               => 'auto', 'LabelDistance' => 5, 'LabelMaxWidth' => 0,
+        'LabelOverflow'               => 'truncate', 'LabelBold' => false, 'HideOverlappingLabels' => false,
+        'ShowEdgeValues'              => false, 'EdgeLabelFontSizePercent' => 100, 'EdgeLabelColor' => -1,
+        'NodeColors'                  => '[]', 'NodeOpacityPercent' => 100,
+        'NodeBorderWidth'             => 0, 'NodeBorderRadius' => 0, 'NodeBorderColor' => -1,
+        'NodeShadowBlur'              => 0, 'NodeShadowColor' => -1,
+        'EdgeColorMode'               => 'gradient', 'EdgeOpacityPercent' => 35, 'EdgeCurvenessPercent' => 50,
+        'TitleFontSizePercent'        => 100, 'LabelFontSizePercent' => 100,
+        'TitleColor'                  => -1, 'LabelColor' => -1, 'NodeColor' => -1, 'EdgeColor' => -1
     ];
 
     public function Create(): void
@@ -136,6 +145,7 @@ class EChartsSankey extends IPSModuleStrict
             }
         }
         unset($element);
+        $form['elements'] = $this->WithNodeColorOptions($form['elements'], $this->NodeOptions(json_decode($this->ReadPropertyString('Nodes'), true)));
         $diagnostic = $this->GetConfigurationError()['Message'] ?? $this->ReadAttributeString('LastError');
         $form['elements'][] = ['type' => 'Label', 'name' => 'ConfigurationDiagnostics',
             'caption'                 => $diagnostic !== '' ? $diagnostic : $this->Translate('Sankey configuration is valid.')];
@@ -147,7 +157,8 @@ class EChartsSankey extends IPSModuleStrict
         $form = EChartsDesignerSections::Group($form, [
             ['caption' => 'Layout and interaction', 'start' => 'Orientation'],
             ['caption' => 'Labels and typography', 'start' => 'ShowLabels'],
-            ['caption' => 'Node and flow colors', 'start' => 'NodeColor']
+            ['caption' => 'Node appearance', 'start' => 'NodeColor'],
+            ['caption' => 'Flow appearance', 'start' => 'EdgeColorMode']
         ]);
         $fields = [
             'Title', 'Nodes', 'Sources', 'Unit', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
@@ -260,6 +271,12 @@ class EChartsSankey extends IPSModuleStrict
                 $this->UpdateNodeOptions(json_encode($values['Nodes'], JSON_THROW_ON_ERROR));
             }
             $this->GetValidatedConfiguration($values);
+            foreach (['NodeColors', 'IPSViewNodeColors'] as $name) {
+                if (array_key_exists($name, $values)
+                    && ($name === 'NodeColors' || !($values['IPSViewUseTileDesign'] ?? $this->ReadPropertyBoolean('IPSViewUseTileDesign')))) {
+                    $this->ParseNodeColors($values[$name]);
+                }
+            }
             $message = $this->Translate('Sankey configuration is valid.');
         } catch (Throwable $exception) {
             $message = $exception instanceof JsonException
@@ -274,6 +291,12 @@ class EChartsSankey extends IPSModuleStrict
     {
         try {
             $nodes = json_decode($JSONNodes, true, 64, JSON_THROW_ON_ERROR);
+            $options = $this->NodeOptions($nodes);
+            foreach (['NodeColors', 'IPSViewNodeColors'] as $name) {
+                $field = $this->WithNodeColorOptions([$this->NodeColorField()], $options)[0];
+                $this->UpdateFormField($name, 'columns', json_encode($field['columns'], JSON_THROW_ON_ERROR));
+                $this->UpdateFormField($name, 'form', json_encode($field['form'], JSON_THROW_ON_ERROR));
+            }
             $field = $this->ConnectionFields($nodes);
             $this->UpdateFormField('Sources', 'columns', json_encode($field['columns'], JSON_THROW_ON_ERROR));
             $this->UpdateFormField('Sources', 'form', json_encode($field['form'], JSON_THROW_ON_ERROR));
@@ -288,7 +311,7 @@ class EChartsSankey extends IPSModuleStrict
         return $this->SankeyPreviewSvg($values, $ipsView);
     }
 
-    private function ConnectionFields(mixed $nodes): array
+    private function NodeOptions(mixed $nodes): array
     {
         $options = [['caption' => $this->Translate('Select node'), 'value' => '']];
         $seen = [];
@@ -303,6 +326,39 @@ class EChartsSankey extends IPSModuleStrict
             $seen[$key] = true;
             $options[] = ['caption' => trim($node['Label']) . ' (' . $key . ')', 'value' => $key];
         }
+        return $options;
+    }
+
+    private function NodeColorField(): array
+    {
+        foreach ($this->LoadConfigurationForm()['elements'] as $element) {
+            foreach ($element['items'] ?? [] as $field) {
+                if (($field['name'] ?? '') === 'NodeColors') {
+                    return $field;
+                }
+            }
+        }
+        throw new RuntimeException('The Sankey node color list is missing.');
+    }
+
+    private function WithNodeColorOptions(array $fields, array $options): array
+    {
+        foreach ($fields as &$field) {
+            if (($field['name'] ?? '') === 'NodeColors') {
+                $field['columns'][0]['edit']['options'] = $options;
+                $field['form'][0]['options'] = $options;
+            }
+            if (isset($field['items'])) {
+                $field['items'] = $this->WithNodeColorOptions($field['items'], $options);
+            }
+        }
+        unset($field);
+        return $fields;
+    }
+
+    private function ConnectionFields(mixed $nodes): array
+    {
+        $options = $this->NodeOptions($nodes);
         foreach ($this->LoadConfigurationForm()['elements'] as $field) {
             if (($field['name'] ?? '') !== 'Sources') {
                 continue;
@@ -433,6 +489,14 @@ class EChartsSankey extends IPSModuleStrict
         } catch (Throwable $exception) {
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => $exception->getMessage()];
         }
+        try {
+            $this->ParseNodeColors($this->ReadPropertyString('NodeColors'));
+            if (!$this->ReadPropertyBoolean('IPSViewUseTileDesign')) {
+                $this->ParseNodeColors($this->ReadPropertyString('IPSViewNodeColors'));
+            }
+        } catch (Throwable $exception) {
+            return ['Status' => self::STATUS_DESIGN_INVALID, 'Message' => $exception->getMessage()];
+        }
         if (!$this->IsValidDesign('')
             || (!$this->ReadPropertyBoolean('IPSViewUseTileDesign') && !$this->IsValidDesign('IPSView'))
             || !EChartsIPSViewBackground::IsValid(
@@ -489,26 +553,52 @@ class EChartsSankey extends IPSModuleStrict
             return false;
         }
         foreach (['Orientation' => ['horizontal', 'vertical'], 'NodeAlign' => ['justify', 'left', 'right'],
+            'LabelPosition'     => ['auto', 'inside', 'left', 'right', 'top', 'bottom'],
+            'LabelOverflow'     => ['truncate', 'break', 'breakAll'], 'HoverFocus' => ['none', 'adjacency', 'trajectory'],
             'EdgeColorMode'     => ['source', 'target', 'gradient', 'fixed']] as $name => $allowed) {
             if (!in_array($this->ReadPropertyString($prefix . $name), $allowed, true)) {
                 return false;
             }
         }
-        foreach (['NodeWidth'      => [4, 40], 'NodeGap' => [0, 40], 'EdgeOpacityPercent' => [0, 100],
-            'EdgeCurvenessPercent' => [0, 100], 'TitleFontSizePercent' => [50, 200],
-            'LabelFontSizePercent' => [50, 200]] as $name => [$minimum, $maximum]) {
+        foreach (['NodeWidth'             => [4, 40], 'NodeGap' => [0, 40], 'EdgeOpacityPercent' => [0, 100],
+            'LayoutIterations'            => [0, 64], 'LabelDistance' => [0, 30], 'LabelMaxWidth' => [0, 400],
+            'NodeBorderWidth'             => [0, 8], 'NodeBorderRadius' => [0, 20], 'NodeOpacityPercent' => [0, 100],
+            'NodeShadowBlur'              => [0, 20], 'EdgeLabelFontSizePercent' => [50, 200],
+            'HighlightEdgeOpacityPercent' => [0, 100], 'BlurEdgeOpacityPercent' => [0, 100],
+            'EdgeCurvenessPercent'        => [0, 100], 'TitleFontSizePercent' => [50, 200],
+            'LabelFontSizePercent'        => [50, 200]] as $name => [$minimum, $maximum]) {
             $value = $this->ReadPropertyInteger($prefix . $name);
             if ($value < $minimum || $value > $maximum) {
                 return false;
             }
         }
-        foreach (['TitleColor', 'LabelColor', 'NodeColor', 'EdgeColor'] as $name) {
+        foreach (['TitleColor', 'LabelColor', 'NodeColor', 'EdgeColor', 'NodeBorderColor', 'NodeShadowColor', 'EdgeLabelColor'] as $name) {
             $value = $this->ReadPropertyInteger($prefix . $name);
             if ($value < -1 || $value > 0xFFFFFF) {
                 return false;
             }
         }
         return true;
+    }
+
+    /** @return array<string,string> Keyed by stable node key, never by its visible label. */
+    private function ParseNodeColors(mixed $raw): array
+    {
+        $rows = $this->DecodeRows($raw);
+        if (count($rows) > 100) {
+            throw new InvalidArgumentException($this->Translate('Use at most 100 unique node colors.'));
+        }
+        $colors = [];
+        foreach ($rows as $index => $row) {
+            $key = is_array($row) ? ($row['Key'] ?? '') : '';
+            $color = is_array($row) ? ($row['Color'] ?? null) : null;
+            if (!is_string($key) || !preg_match('/^[A-Za-z][A-Za-z0-9_-]{0,39}$/D', $key)
+                || array_key_exists($key, $colors) || !is_int($color) || $color < 0 || $color > 0xFFFFFF) {
+                throw new InvalidArgumentException(sprintf($this->Translate('Node color %d: choose a unique node and a color.'), $index + 1));
+            }
+            $colors[$key] = EChartsAsset::ColorToHex($color);
+        }
+        return $colors;
     }
 
     private function ReadDesignStyle(bool $ipsView): array
@@ -520,6 +610,10 @@ class EChartsSankey extends IPSModuleStrict
                 continue;
             }
             $key = lcfirst($name);
+            if ($name === 'NodeColors') {
+                $style[$key] = (object) $this->ParseNodeColors($this->ReadPropertyString($prefix . $name));
+                continue;
+            }
             $style[$key] = match (gettype($default)) {
                 'boolean' => $this->ReadPropertyBoolean($prefix . $name),
                 'integer' => $this->ReadPropertyInteger($prefix . $name),

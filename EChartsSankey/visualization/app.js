@@ -107,31 +107,50 @@
                 top: top, bottom: bottom,
                 nodeAlign: style.nodeAlign || 'justify',
                 nodeWidth: Number(style.nodeWidth) || 20,
-                nodeGap: nodeGap, layoutIterations: 32,
+                nodeGap: nodeGap, layoutIterations: style.layoutIterations == null ? 32 : Number(style.layoutIterations),
                 draggable: style.draggable !== false,
                 data: nodes.map(function (node) {
+                    var nodeColors = style.nodeColors || {};
+                    var color = Object.prototype.hasOwnProperty.call(nodeColors, node.name) ? nodeColors[node.name] : style.nodeColor;
                     return { name: node.name, displayName: node.label, value: node.value,
-                        itemStyle: style.nodeColor ? { color: style.nodeColor } : {},
-                        label: { position: vertical ? (outgoing.has(node.name) ? 'bottom' : 'top')
-                            : (outgoing.has(node.name) ? 'right' : 'left') } };
+                        itemStyle: color ? { color: color } : {},
+                        label: { position: style.labelPosition && style.labelPosition !== 'auto' ? style.labelPosition
+                            : (vertical ? (outgoing.has(node.name) ? 'bottom' : 'top')
+                                : (outgoing.has(node.name) ? 'right' : 'left')) } };
                 }),
                 links: links.map(function (link) {
                     return { source: link.source, target: link.target, value: link.value, timestamp: link.timestamp };
                 }),
                 label: { show: style.showLabels !== false, color: style.labelColor || colors.text,
                     fontSize: design.fontSizePercent(style.labelFontSizePercent, compact ? 10 : 12),
-                    overflow: 'truncate', width: compact ? 90 : 150,
+                    fontWeight: style.labelBold === true ? 'bold' : 'normal',
+                    distance: style.labelDistance == null ? 5 : Number(style.labelDistance),
+                    overflow: style.labelOverflow || 'truncate', width: Number(style.labelMaxWidth) || (compact ? 90 : 150),
                     formatter: function (parameter) {
                         var data = parameter.data || {};
                         return String(data.displayName || '')
                             + (style.showValues === true ? '\n' + formatValue(data.value) : '');
                     } },
+                labelLayout: { hideOverlap: style.hideOverlappingLabels === true },
+                edgeLabel: { show: style.showEdgeValues === true,
+                    color: style.edgeLabelColor || style.labelColor || colors.text,
+                    fontSize: design.fontSizePercent(style.edgeLabelFontSizePercent, compact ? 10 : 12),
+                    formatter: function (parameter) { return formatValue((parameter.data || {}).value); } },
+                itemStyle: { opacity: style.nodeOpacityPercent == null ? 1 : Number(style.nodeOpacityPercent) / 100,
+                    borderWidth: Number(style.nodeBorderWidth) || 0,
+                    borderRadius: Number(style.nodeBorderRadius) || 0,
+                    borderColor: style.nodeBorderColor || colors.border,
+                    shadowBlur: Number(style.nodeShadowBlur) || 0,
+                    shadowColor: style.nodeShadowColor || 'rgba(0,0,0,0.35)' },
                 lineStyle: { color: style.edgeColorMode === 'fixed' ? (style.edgeColor || colors.muted)
                         : (style.edgeColorMode || 'gradient'),
                     opacity: Number(style.edgeOpacityPercent) / 100,
                     curveness: Number(style.edgeCurvenessPercent) / 100 },
-                emphasis: { focus: 'adjacency', lineStyle: { opacity: 0.85 } },
-                blur: { lineStyle: { opacity: 0.05 } }
+                emphasis: { disabled: style.hoverFocus === 'none',
+                    focus: style.hoverFocus === 'none' ? 'none' : (style.hoverFocus || 'adjacency'),
+                    label: { show: style.showLabels !== false }, edgeLabel: { show: style.showEdgeValues === true },
+                    lineStyle: { opacity: style.highlightEdgeOpacityPercent == null ? 0.85 : Number(style.highlightEdgeOpacityPercent) / 100 } },
+                blur: { lineStyle: { opacity: style.blurEdgeOpacityPercent == null ? 0.05 : Number(style.blurEdgeOpacityPercent) / 100 } }
             }]
         };
     }

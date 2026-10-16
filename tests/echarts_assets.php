@@ -171,7 +171,8 @@ assertEChartsAsset(
         && EChartsAsset::SankeyJavaScript() === $sankeyRuntime
         && strlen($sankeyRuntime) < 550000
         && str_contains($sankeyRuntime, 'window.echarts')
-        && str_contains($sankeyRuntimeSource, 'SankeyChart'),
+        && str_contains($sankeyRuntimeSource, 'SankeyChart')
+        && str_contains($sankeyRuntimeSource, 'LabelLayout'),
     'The Sankey runtime must be pinned, expose the browser API and remain below 550 KB.'
 );
 assertEChartsAsset(

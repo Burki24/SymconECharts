@@ -23,7 +23,7 @@ final class EChartsAsset
     public const TREEMAP_SHA256 = 'e9020d97d1f90d3967dbb717485edcafed098f3ee7b2b632b6f01055582a148e';
     public const SUNBURST_SHA256 = '95ef117d648729e87199ab20a815f773cbe660da2f007fd65441add95c1daa43';
     public const PARALLEL_SHA256 = 'ded2b972e4032a840353eabc34809047d70c5bc9e7f700b6a09f617d9bc21295';
-    public const SANKEY_SHA256 = '7de7151e7ff00b3556de74f1716e2950e530e2aa9ac16309202d1669fbd03abb';
+    public const SANKEY_SHA256 = '02c589e73e13a571727f7320e2b7bc859bc3ea6f46914871831f7a562d0b32dc';
     public const TIME_SERIES_SHA256 = self::CARTESIAN_SHA256;
     public const THEME_AUTO = 'auto';
     public const THEME_SHA256 = [

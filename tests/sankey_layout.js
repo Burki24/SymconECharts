@@ -54,6 +54,12 @@ assert.equal(series.lineStyle.color, 'gradient');
 assert.equal(series.lineStyle.opacity, 0.35);
 assert.equal(series.nodeWidth, 24);
 assert.equal(series.emphasis.focus, 'adjacency');
+assert.equal(series.layoutIterations, 32);
+assert.equal(series.data[0].label.position, 'right');
+assert.equal(series.data[1].label.position, 'left');
+assert.equal(series.label.distance, 5);
+assert.equal(series.edgeLabel.show, false);
+assert.equal(series.itemStyle.borderWidth, 0);
 assert.equal(tile.option.animation, false);
 assert.equal(tile.chartElement.style.top, '58px', 'The canvas viewport must protect the Symcon tile header while dragging nodes.');
 assert.ok(series.top > tile.option.title.top + tile.option.title.textStyle.fontSize);
@@ -70,13 +76,55 @@ assert.equal(independent.option.series[0].lineStyle.color, '#123456');
 assert.equal(independent.option.series[0].lineStyle.opacity, 0);
 assert.equal(independent.option.series[0].data[0].itemStyle.color, '#abcdef');
 assert.equal(independent.option.series[0].label.show, false);
+assert.equal(independent.option.series[0].emphasis.label.show, false, 'Hover must not restore deliberately hidden labels.');
 assert.equal(independent.option.tooltip.show, false);
 assert.equal(independent.option.series[0].draggable, false);
 assert.equal(render(model, 'symcon', false).chartElement.style.top, '0px');
 assert.equal(render({ ...model, sankey: { ...model.sankey, links: [] } }).emptyElement.hidden, false);
 
+const decoratedModel = { ...model, sankey: { ...model.sankey, style: { ...model.sankey.style,
+    layoutIterations: 0, labelPosition: 'inside', labelDistance: 0, labelMaxWidth: 72,
+    labelOverflow: 'breakAll', labelBold: true, hideOverlappingLabels: true,
+    showEdgeValues: true, edgeLabelColor: '#876543', edgeLabelFontSizePercent: 150,
+    nodeColor: '#dddddd', nodeColors: { b: '#ff0000', c: '#00ff00' },
+    nodeBorderWidth: 3, nodeBorderColor: '#123456', nodeBorderRadius: 8,
+    nodeOpacityPercent: 60, nodeShadowBlur: 9, nodeShadowColor: '#334455',
+    hoverFocus: 'trajectory', highlightEdgeOpacityPercent: 100, blurEdgeOpacityPercent: 0
+} } };
+const decorated = render(decoratedModel).option;
+const customized = decorated.series[0];
+assert.equal(customized.layoutIterations, 0, 'Zero iterations must preserve list order, not fall back to 32.');
+assert.equal(customized.data[0].itemStyle.color, '#dddddd');
+assert.equal(customized.data[1].itemStyle.color, '#ff0000');
+assert.equal(customized.data[2].itemStyle.color, '#00ff00', 'Duplicate labels must not merge individually colored node identities.');
+assert.equal(customized.data[1].label.position, 'inside');
+assert.equal(customized.label.distance, 0);
+assert.equal(customized.label.width, 72);
+assert.equal(customized.label.overflow, 'breakAll');
+assert.equal(customized.label.fontWeight, 'bold');
+assert.equal(customized.labelLayout.hideOverlap, true);
+assert.equal(customized.edgeLabel.show, true);
+assert.equal(customized.edgeLabel.color, '#876543');
+assert.equal(customized.edgeLabel.fontSize, 18);
+assert.equal(customized.edgeLabel.formatter({ data: customized.links[0] }), '20 W');
+assert.equal(customized.itemStyle.borderWidth, 3);
+assert.equal(customized.itemStyle.borderRadius, 8);
+assert.equal(customized.itemStyle.borderColor, '#123456');
+assert.equal(customized.itemStyle.opacity, 0.6);
+assert.equal(customized.itemStyle.shadowBlur, 9);
+assert.equal(customized.itemStyle.shadowColor, '#334455');
+assert.equal(customized.emphasis.focus, 'trajectory');
+assert.equal(customized.emphasis.lineStyle.opacity, 1);
+assert.equal(customized.blur.lineStyle.opacity, 0);
+const noHover = render({ ...decoratedModel, sankey: { ...decoratedModel.sankey,
+    style: { ...decoratedModel.sankey.style, hoverFocus: 'none', nodeOpacityPercent: 0 } } }).option.series[0];
+assert.equal(noHover.emphasis.disabled, true);
+assert.equal(noHover.emphasis.focus, 'none');
+assert.equal(noHover.itemStyle.opacity, 0);
+
 const echarts = require(path.join(root, '.tools/echarts-runtime/node_modules/echarts'));
-for (const option of [tile.option, independent.option]) {
+for (const option of [tile.option, independent.option, decorated,
+    render({ ...decoratedModel, sankey: { ...decoratedModel.sankey, style: { ...decoratedModel.sankey.style, orientation: 'vertical' } } }).option]) {
     const chart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 900, height: 500 });
     chart.setOption(option);
     const actual = chart.getModel().getSeriesByIndex(0);
@@ -85,6 +133,14 @@ for (const option of [tile.option, independent.option]) {
     const layout = actual.getData().getItemLayout(0);
     assert.ok(Number.isFinite(layout.x) && Number.isFinite(layout.y));
     assert.match(chart.renderToSVGString(), /<path/);
+    if (option.series[0].edgeLabel.show) {
+        const node = actual.getData().getItemGraphicEl(1);
+        assert.equal(node.shape.r, 8, 'The real engine must apply rounded node rectangles.');
+        assert.equal(node.style.stroke, '#123456');
+        assert.equal(node.style.fill, '#ff0000');
+        assert.equal(node.style.opacity, 0.6);
+        assert.match(actual.getGraph().edges[0].getGraphicEl().getTextContent().style.text, /20 W/);
+    }
     chart.dispose();
 }
 console.log('Sankey layout verified.');

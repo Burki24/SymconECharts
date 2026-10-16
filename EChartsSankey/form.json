@@ -291,6 +291,58 @@
                     "type": "RowLayout",
                     "items": [
                         {
+                            "type": "NumberSpinner",
+                            "name": "LayoutIterations",
+                            "caption": "Layout optimization passes (0: list order)",
+                            "minimum": 0,
+                            "maximum": 64
+                        },
+                        {
+                            "type": "Select",
+                            "name": "HoverFocus",
+                            "caption": "Hover highlighting",
+                            "options": [
+                                {
+                                    "caption": "Disabled",
+                                    "value": "none"
+                                },
+                                {
+                                    "caption": "Adjacent connections",
+                                    "value": "adjacency"
+                                },
+                                {
+                                    "caption": "Complete flow paths",
+                                    "value": "trajectory"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "HighlightEdgeOpacityPercent",
+                            "caption": "Highlighted flow opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "BlurEdgeOpacityPercent",
+                            "caption": "Unfocused flow opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
                             "type": "CheckBox",
                             "name": "ShowLabels",
                             "caption": "Show labels"
@@ -351,12 +403,237 @@
                     "type": "RowLayout",
                     "items": [
                         {
+                            "type": "Select",
+                            "name": "LabelPosition",
+                            "caption": "Label position",
+                            "options": [
+                                {
+                                    "caption": "Automatic",
+                                    "value": "auto"
+                                },
+                                {
+                                    "caption": "Inside",
+                                    "value": "inside"
+                                },
+                                {
+                                    "caption": "Left",
+                                    "value": "left"
+                                },
+                                {
+                                    "caption": "Right",
+                                    "value": "right"
+                                },
+                                {
+                                    "caption": "Top",
+                                    "value": "top"
+                                },
+                                {
+                                    "caption": "Bottom",
+                                    "value": "bottom"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "LabelDistance",
+                            "caption": "Label distance",
+                            "minimum": 0,
+                            "maximum": 30,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "LabelBold",
+                            "caption": "Bold labels"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "LabelMaxWidth",
+                            "caption": "Label width (0: automatic)",
+                            "minimum": 0,
+                            "maximum": 400,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "Select",
+                            "name": "LabelOverflow",
+                            "caption": "Long labels",
+                            "options": [
+                                {
+                                    "caption": "Truncate",
+                                    "value": "truncate"
+                                },
+                                {
+                                    "caption": "Wrap at words",
+                                    "value": "break"
+                                },
+                                {
+                                    "caption": "Wrap at characters",
+                                    "value": "breakAll"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "HideOverlappingLabels",
+                            "caption": "Hide overlapping labels"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowEdgeValues",
+                            "caption": "Show flow values"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "EdgeLabelFontSizePercent",
+                            "caption": "Flow label size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "EdgeLabelColor",
+                            "caption": "Flow label color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
                             "type": "SelectColor",
                             "name": "NodeColor",
                             "caption": "Node color",
                             "allowTransparent": true,
                             "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "List",
+                    "name": "NodeColors",
+                    "caption": "Individual node colors",
+                    "rowCount": 4,
+                    "add": true,
+                    "delete": true,
+                    "changeOrder": true,
+                    "columns": [
+                        {
+                            "name": "Key",
+                            "caption": "Node",
+                            "width": "350px",
+                            "add": "",
+                            "edit": {
+                                "type": "Select",
+                                "options": [
+                                    {
+                                        "caption": "Select node",
+                                        "value": ""
+                                    }
+                                ]
+                            }
                         },
+                        {
+                            "name": "Color",
+                            "caption": "Color",
+                            "width": "220px",
+                            "add": 5614517,
+                            "edit": {
+                                "type": "SelectColor"
+                            }
+                        }
+                    ],
+                    "form": [
+                        {
+                            "type": "Select",
+                            "name": "Key",
+                            "caption": "Node",
+                            "options": [
+                                {
+                                    "caption": "Select node",
+                                    "value": ""
+                                }
+                            ]
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "Color",
+                            "caption": "Color"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "NodeOpacityPercent",
+                            "caption": "Node opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "NodeBorderWidth",
+                            "caption": "Node border width",
+                            "minimum": 0,
+                            "maximum": 8,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "NodeBorderRadius",
+                            "caption": "Node corner radius",
+                            "minimum": 0,
+                            "maximum": 20,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "NodeBorderColor",
+                            "caption": "Node border color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "NodeShadowBlur",
+                            "caption": "Node shadow blur",
+                            "minimum": 0,
+                            "maximum": 20,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "NodeShadowColor",
+                            "caption": "Node shadow color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
                         {
                             "type": "Select",
                             "name": "EdgeColorMode",

@@ -93,12 +93,19 @@ trait SankeyPreview
         }
         $positions = [];
         $colors = [];
+        try {
+            $property = $ipsView && !($values['IPSViewUseTileDesign'] ?? $this->ReadPropertyBoolean('IPSViewUseTileDesign'))
+                ? 'IPSViewNodeColors' : 'NodeColors';
+            $nodeColors = $this->ParseNodeColors($values[$property] ?? $this->ReadPropertyString($property));
+        } catch (Throwable) {
+            $nodeColors = [];
+        }
         foreach ($layers as $depth => $layer) {
             $cross = ($crossSize - array_sum(array_column($layer, 'value')) * $scale - (count($layer) - 1) * $gap) / 2;
             foreach ($layer as $node) {
                 $key = $node['name'];
                 $positions[$key] = [$depth * ($mainSize - $nodeWidth) / $maximumDepth, $cross, $node['value'] * $scale];
-                $colors[$key] = EChartsBarPreview::Color(
+                $colors[$key] = $nodeColors[$key] ?? EChartsBarPreview::Color(
                     $this->BarPreviewValue($values, 'NodeColor', 'integer', $ipsView),
                     $palette['seriesColors'][count($colors) % count($palette['seriesColors'])]
                 );
@@ -110,6 +117,8 @@ trait SankeyPreview
         $opacity = max(0, min(100, $this->BarPreviewValue($values, 'EdgeOpacityPercent', 'integer', $ipsView))) / 100;
         $curve = max(0, min(100, $this->BarPreviewValue($values, 'EdgeCurvenessPercent', 'integer', $ipsView))) / 100;
         $svg .= '<g transform="translate(70 85)">';
+        $edgeLabels = '';
+        $unit = trim((string) ($values['Unit'] ?? $this->ReadPropertyString('Unit')));
         foreach ($model['links'] as $index => $link) {
             $source = $link['source'];
             $target = $link['target'];
@@ -136,28 +145,109 @@ trait SankeyPreview
                 . EChartsBarPreview::E($colors[$target]) . '"/></linearGradient></defs>';
             $svg .= '<path d="' . $path . '" fill="none" stroke="' . EChartsBarPreview::E($color) . '" stroke-width="'
                 . EChartsBarPreview::N($width) . '" stroke-opacity="' . EChartsBarPreview::N($opacity) . '"/>';
+            if ($this->BarPreviewValue($values, 'ShowEdgeValues', 'boolean', $ipsView)) {
+                $edgeColor = EChartsBarPreview::Color(
+                    $this->BarPreviewValue($values, 'EdgeLabelColor', 'integer', $ipsView),
+                    EChartsBarPreview::Color($this->BarPreviewValue($values, 'LabelColor', 'integer', $ipsView), $palette['text'])
+                );
+                $edgeSize = max(6, min(24, 12 * $this->BarPreviewValue($values, 'EdgeLabelFontSizePercent', 'integer', $ipsView) / 100));
+                $edgeLabels .= '<text x="' . EChartsBarPreview::N(($coordinates[0] + $coordinates[6]) / 2)
+                    . '" y="' . EChartsBarPreview::N(($coordinates[1] + $coordinates[7]) / 2)
+                    . '" text-anchor="middle" font-size="' . EChartsBarPreview::N($edgeSize) . '" fill="'
+                    . EChartsBarPreview::E($edgeColor) . '">' . EChartsBarPreview::E((string) (int) $link['value'] . ($unit !== '' ? ' ' . $unit : '')) . '</text>';
+            }
         }
+        $svg .= $edgeLabels;
         $labelColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'LabelColor', 'integer', $ipsView), $palette['text']);
         $fontSize = max(6, min(22, (int) round(12 * $this->BarPreviewValue($values, 'LabelFontSizePercent', 'integer', $ipsView) / 100)));
+        $borderColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'NodeBorderColor', 'integer', $ipsView), $palette['border']);
+        $borderWidth = max(0, min(8, $this->BarPreviewValue($values, 'NodeBorderWidth', 'integer', $ipsView)));
+        $radius = max(0, min(20, $this->BarPreviewValue($values, 'NodeBorderRadius', 'integer', $ipsView)));
+        $nodeOpacity = max(0, min(100, $this->BarPreviewValue($values, 'NodeOpacityPercent', 'integer', $ipsView))) / 100;
+        $shadow = max(0, min(20, $this->BarPreviewValue($values, 'NodeShadowBlur', 'integer', $ipsView)));
+        $shadowColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'NodeShadowColor', 'integer', $ipsView), '#000000');
+        $svg .= '<defs><filter id="node-shadow" x="-100%" y="-100%" width="300%" height="300%"><feDropShadow dx="0" dy="0" stdDeviation="'
+            . EChartsBarPreview::N($shadow / 2) . '" flood-color="' . EChartsBarPreview::E($shadowColor) . '" flood-opacity="0.35"/></filter></defs>';
+        $occupied = [];
         foreach ($model['data'] as $node) {
             [$main, $cross, $extent] = $positions[$node['name']];
             [$x, $y, $width, $height] = $vertical ? [$cross, $main, $extent, $nodeWidth] : [$main, $cross, $nodeWidth, $extent];
             $svg .= '<rect x="' . EChartsBarPreview::N($x) . '" y="' . EChartsBarPreview::N($y) . '" width="'
                 . EChartsBarPreview::N($width) . '" height="' . EChartsBarPreview::N($height) . '" fill="'
-                . EChartsBarPreview::E($colors[$node['name']]) . '"/>';
+                . EChartsBarPreview::E($colors[$node['name']]) . '" rx="' . $radius . '" opacity="' . EChartsBarPreview::N($nodeOpacity)
+                . '" stroke="' . EChartsBarPreview::E($borderColor) . '" stroke-width="' . $borderWidth . '"'
+                . ($shadow > 0 ? ' filter="url(#node-shadow)"' : '') . '/>';
             if ($this->BarPreviewValue($values, 'ShowLabels', 'boolean', $ipsView)) {
-                $label = mb_strimwidth($node['label'], 0, 18, '…');
+                $label = $node['label'];
                 if ($this->BarPreviewValue($values, 'ShowValues', 'boolean', $ipsView)) {
-                    $label .= ' ' . (string) (int) $node['value'];
+                    $label .= "\n" . (string) (int) $node['value'] . ($unit !== '' ? ' ' . $unit : '');
                 }
-                $end = $depths[$node['name']] === $maximumDepth;
-                $labelX = $vertical ? $x + $width / 2 : ($end ? $x - 4 : $x + $width + 4);
-                $labelY = $vertical ? ($end ? $y - 6 : $y + $height + $fontSize) : $y + $height / 2 + 4;
-                $svg .= '<text x="' . EChartsBarPreview::N($labelX) . '" y="' . EChartsBarPreview::N($labelY)
-                    . '" text-anchor="' . ($vertical ? 'middle' : ($end ? 'end' : 'start')) . '" font-size="' . $fontSize
-                    . '" fill="' . EChartsBarPreview::E($labelColor) . '">' . EChartsBarPreview::E($label) . '</text>';
+                $position = $this->BarPreviewValue($values, 'LabelPosition', 'string', $ipsView);
+                if ($position === 'auto') {
+                    $end = !in_array($node['name'], array_column($model['links'], 'source'), true);
+                    $position = $vertical ? ($end ? 'top' : 'bottom') : ($end ? 'left' : 'right');
+                }
+                $placement = EChartsLabelDesign::PreviewRect(
+                    $x,
+                    $y,
+                    $width,
+                    $height,
+                    $position,
+                    $this->BarPreviewValue($values, 'LabelDistance', 'integer', $ipsView)
+                );
+                $maxWidth = max(0, min(400, $this->BarPreviewValue($values, 'LabelMaxWidth', 'integer', $ipsView))) ?: 150;
+                $lines = $this->SankeyPreviewLabelLines(
+                    $label,
+                    max(1, (int) ($maxWidth / ($fontSize * 0.6))),
+                    $this->BarPreviewValue($values, 'LabelOverflow', 'string', $ipsView)
+                );
+                $textWidth = min($maxWidth, max(array_map('mb_strlen', $lines)) * $fontSize * 0.6);
+                $left = $placement['x'] - match ($placement['anchor']) {
+                    'end' => $textWidth, 'middle' => $textWidth / 2, default => 0
+                };
+                $box = [$left, $placement['y'] - $fontSize, $left + $textWidth, $placement['y'] + (count($lines) - 1) * $fontSize * 1.2];
+                if ($this->BarPreviewValue($values, 'HideOverlappingLabels', 'boolean', $ipsView)) {
+                    foreach ($occupied as $other) {
+                        if ($box[0] < $other[2] && $box[2] > $other[0] && $box[1] < $other[3] && $box[3] > $other[1]) {
+                            continue 2;
+                        }
+                    }
+                }
+                $occupied[] = $box;
+                $svg .= '<text x="' . EChartsBarPreview::N($placement['x']) . '" y="' . EChartsBarPreview::N($placement['y'])
+                    . '" text-anchor="' . $placement['anchor'] . '" font-size="' . $fontSize
+                    . '" font-weight="' . ($this->BarPreviewValue($values, 'LabelBold', 'boolean', $ipsView) ? 'bold' : 'normal')
+                    . '" fill="' . EChartsBarPreview::E($labelColor) . '">';
+                foreach ($lines as $index => $line) {
+                    $svg .= '<tspan x="' . EChartsBarPreview::N($placement['x']) . '" dy="' . ($index === 0 ? '0' : '1.2em') . '">'
+                        . EChartsBarPreview::E($line) . '</tspan>';
+                }
+                $svg .= '</text>';
             }
         }
         return $svg . '</g></svg>';
+    }
+
+    /** Schematic wrapping; the renderer measures the actual browser font. */
+    private function SankeyPreviewLabelLines(string $text, int $width, string $overflow): array
+    {
+        $lines = [];
+        foreach (explode("\n", $text) as $paragraph) {
+            if ($overflow === 'truncate') {
+                $lines[] = mb_strimwidth($paragraph, 0, $width, '…');
+                continue;
+            }
+            while (mb_strlen($paragraph) > $width) {
+                $length = $width;
+                if ($overflow === 'break') {
+                    $space = mb_strrpos(mb_substr($paragraph, 0, $width + 1), ' ');
+                    $length = $space !== false && $space > 0 ? $space : $width;
+                }
+                $lines[] = mb_substr($paragraph, 0, $length);
+                $paragraph = ltrim(mb_substr($paragraph, $length));
+            }
+            $lines[] = $paragraph;
+        }
+        return $lines;
     }
 }

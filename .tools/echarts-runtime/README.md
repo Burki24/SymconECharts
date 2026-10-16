@@ -25,7 +25,7 @@ Der Tree-Einstieg enthält Tree Chart, Titel, Tooltip, Aria und Canvas Renderer
 als eigenen Build für die Symcon-Objekthierarchie.
 Der Parallel-Einstieg enthält Parallel Chart und Component, Titel, Tooltip,
 Aria und Canvas Renderer als eigenen Build für Archivintervall-Vergleiche.
-Der Sankey-Einstieg enthält Sankey Chart, Titel, Tooltip, Aria und Canvas
+Der Sankey-Einstieg enthält Sankey Chart, Titel, Tooltip, Aria, Label Layout und Canvas
 Renderer als eigenen Build für aktuelle Mengenflüsse.
 
 Zusätzlich kopiert der Build die sechs im Modul angebotenen offiziellen

@@ -5,7 +5,11 @@ Sankey wird durch `php tests/sankey_model.php` und
 aktuelle Verbindungsgewichte, Zyklen, Null- und Negativwerte sowie das Layout
 mit der echten ECharts-Engine. Die Gateway-Suite prüft zusätzlich
 Quellenabonnements, Wertänderungen, Formularauswahl und getrennte Ausgabewege.
-Ein Live-Test in Symcon-Kachel und IPSView bleibt erforderlich.
+Die Designer-Tests prüfen zusätzlich individuelle Farben nach Knotenschlüssel,
+Rahmen und Rundungen, Beschriftungs- und Hover-Optionen, Grenzen beider Designs,
+Kopieren, Draft-Vorschau und deren unveränderte gespeicherte Konfiguration.
+Die ursprüngliche Version wurde vom Anwender in Symcon-Kachel und IPSView
+live bestätigt; die ergänzten Designeroptionen sind dort erneut zu prüfen.
 
 Die lokale Testsuite wird aus dem Repository-Stamm gestartet:
 

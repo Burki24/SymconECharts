@@ -9978,6 +9978,13 @@ $sankey->SetTestProperty('IPSViewUseTileDesign', false);
 $sankey->SetTestProperty('IPSViewOrientation', 'vertical');
 $sankey->SetTestProperty('IPSViewEdgeColorMode', 'fixed');
 $sankey->SetTestProperty('IPSViewEdgeColor', 0x123456);
+$sankeyColors = [['Key' => 'load', 'Color' => 0xFF0000], ['Key' => 'other', 'Color' => 0x00FF00]];
+$sankey->SetTestProperty('NodeColors', json_encode($sankeyColors, JSON_THROW_ON_ERROR));
+$sankey->SetTestProperty('NodeBorderRadius', 8);
+$sankey->SetTestProperty('LabelPosition', 'inside');
+$sankey->SetTestProperty('ShowEdgeValues', true);
+$sankey->SetTestProperty('IPSViewNodeColors', '[{"Key":"load","Color":255}]');
+$sankey->SetTestProperty('IPSViewNodeBorderWidth', 3);
 $sankey->SetTestProperty('EnableIPSView', true);
 $sankey->ApplyChanges();
 $sankeyData = json_decode($sankey->GetSankeyData(), true, 512, JSON_THROW_ON_ERROR);
@@ -9987,19 +9994,29 @@ assertGatewayGauge(
     $sankey->GetTestStatus() === IS_ACTIVE && $sankey->GetTestReferences() === [4711, 4713]
         && $sankeyData['family'] === 'sankey' && $sankeyData['sankey']['unit'] === 'W'
         && $sankeyData['sankey']['positiveCount'] === 2
+        && $sankeyData['sankey']['style']['nodeColors'] === ['load' => '#FF0000', 'other' => '#00FF00']
+        && $sankeyData['sankey']['style']['nodeBorderRadius'] === 8
+        && $sankeyData['sankey']['style']['showEdgeValues'] === true
         && $sankeyData['sankey']['links'][0]['value'] === (float) GetValue(4711)
         && $sankeyData['sankey']['data'][1]['label'] === $sankeyData['sankey']['data'][2]['label']
         && str_contains($sankeyIPSView, '"orientation":"vertical"')
         && str_contains($sankeyIPSView, '"edgeColor":"#123456"')
         && str_contains($sankeyTile, '"orientation":"horizontal"')
+        && str_contains($sankeyIPSView, '"nodeColors":{"load":"#0000FF"}')
+        && str_contains($sankeyIPSView, '"nodeBorderWidth":3')
+        && str_contains($sankeyIPSView, '"nodeBorderRadius":0')
         && strlen($sankeyTile) < SYMCON_OUTPUT_BUFFER_LIMIT && strlen($sankeyIPSView) < SYMCON_OUTPUT_BUFFER_LIMIT
         && is_string($sankey->GetTestVariableValue('IPSViewSankey')) && $sankey->GetTestVariableValue('IPSViewSankey') !== '',
     'Sankey must publish current edge values, distinct node identities, independent designs and bounded WebContent.'
 );
 $sankeyForm = json_decode($sankey->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
 $sankeyConnections = findGaugeFormElement($sankeyForm['elements'], 'Sources');
+$sankeyColorField = findGaugeFormElement($sankeyForm['elements'], 'NodeColors');
 assertGatewayGauge(
     $sankeyConnections['form'][0]['options'][1]['value'] === 'supply'
+        && $sankeyColorField['form'][0]['options'][2]['value'] === 'load'
+        && findGaugeFormElement($sankeyForm['elements'], 'IPSViewNodeColors')['columns'][0]['edit']['options'][3]['value'] === 'other'
+        && !isset($sankeyColorField['onChange']) && str_contains($sankeyColorField['onEdit'], 'foreach ($NodeColors as')
         && findGaugeFormElement($sankeyForm['elements'], 'IPSViewOrientation')['enabled'] === true
         && str_starts_with(findGaugeFormElement($sankeyForm['elements'], 'BarPreview')['image'], 'data:image/svg+xml;base64,')
         && str_starts_with(findGaugeFormElement($sankeyForm['elements'], 'IPSViewBarPreview')['image'], 'data:image/svg+xml;base64,'),
@@ -10011,6 +10028,12 @@ assertGatewayGauge(
     $sankeyUpdates[0]['Parameter'] === 'columns'
         && json_decode($sankeyUpdates[1]['Value'], true, 512, JSON_THROW_ON_ERROR)[0]['options'][4]['value'] === 'draft',
     'Sankey connection selectors must include unsaved node changes.'
+);
+$sankeyColorUpdates = array_slice($sankey->GetTestFormUpdates(), -6, 4);
+assertGatewayGauge(
+    $sankeyColorUpdates[0]['Field'] === 'NodeColors' && $sankeyColorUpdates[2]['Field'] === 'IPSViewNodeColors'
+        && json_decode($sankeyColorUpdates[3]['Value'], true, 512, JSON_THROW_ON_ERROR)[0]['options'][4]['value'] === 'draft',
+    'Both node-color selectors must follow unsaved node changes without persisting them.'
 );
 $sankeyNodeField = findGaugeFormElement($sankeyForm['elements'], 'Nodes');
 assertGatewayGauge(
@@ -10029,6 +10052,36 @@ assertGatewayGauge(
         && json_decode($sankey->GetSankeyData(), true, 512, JSON_THROW_ON_ERROR)['sankey']['positiveCount'] === 2,
     'Draft Sankey errors must identify the row and leave the saved configuration untouched.'
 );
+$sankey->UpdateBarPreviewFromForm(json_encode([
+    'Nodes'                 => $sankeyNodes, 'Sources' => $sankeySources, 'NodeColors' => [['Key' => 'load', 'Color' => 0xABCDEF]],
+    'NodeBorderWidth'       => 3, 'NodeBorderRadius' => 6, 'NodeOpacityPercent' => 70, 'NodeShadowBlur' => 8,
+    'LabelPosition'         => 'inside', 'LabelBold' => true, 'LabelMaxWidth' => 40, 'LabelOverflow' => 'breakAll',
+    'HideOverlappingLabels' => true, 'ShowEdgeValues' => true, 'EdgeLabelColor' => 0x654321
+], JSON_THROW_ON_ERROR));
+$sankeyPreviewUpdate = array_slice($sankey->GetTestFormUpdates(), -2)[0]['Value'];
+$sankeyPreviewSvg = base64_decode(substr($sankeyPreviewUpdate, strlen('data:image/svg+xml;base64,')), true);
+assertGatewayGauge(
+    is_string($sankeyPreviewSvg) && str_contains($sankeyPreviewSvg, '#ABCDEF')
+        && str_contains($sankeyPreviewSvg, 'rx="6" opacity="0.7"')
+        && str_contains($sankeyPreviewSvg, 'stroke-width="3" filter="url(#node-shadow)"')
+        && str_contains($sankeyPreviewSvg, 'font-weight="bold"') && str_contains($sankeyPreviewSvg, '#654321')
+        && json_decode($sankey->GetSankeyData(), true, 512, JSON_THROW_ON_ERROR)['sankey']['style']['nodeColors'] === ['load' => '#FF0000', 'other' => '#00FF00'],
+    'Draft Sankey appearance must reach the SVG preview without changing saved per-node colors.'
+);
+$sankey->UpdateBarPreviewFromForm(json_encode(['Nodes' => $sankeyNodes, 'Sources' => $sankeySources,
+    'NodeColors'                                       => [$sankeyColors[0], $sankeyColors[0]]], JSON_THROW_ON_ERROR));
+$sankeyColorDiagnostic = array_values(array_filter(
+    $sankey->GetTestFormUpdates(),
+    static fn (array $update): bool => $update['Field'] === 'ConfigurationDiagnostics'
+));
+assertGatewayGauge(str_contains(end($sankeyColorDiagnostic)['Value'], 'Node color 2:'), 'Duplicate color rows must report their row in draft diagnostics.');
+$sankey->UpdateBarPreviewFromForm(json_encode(['Nodes' => $sankeyNodes, 'Sources' => $sankeySources,
+    'IPSViewUseTileDesign'                             => true, 'IPSViewNodeColors' => [$sankeyColors[0], $sankeyColors[0]]], JSON_THROW_ON_ERROR));
+$sankeyInheritedDiagnostic = array_values(array_filter(
+    $sankey->GetTestFormUpdates(),
+    static fn (array $update): bool => $update['Field'] === 'ConfigurationDiagnostics'
+));
+assertGatewayGauge(end($sankeyInheritedDiagnostic)['Value'] === 'Sankey configuration is valid.', 'Disabled independent color drafts must not invalidate inherited IPSView design.');
 $GLOBALS['symconTestCopyTarget'] = $sankey;
 try {
     $sankey->CopyTileDesignToIPSView();
@@ -10036,9 +10089,27 @@ try {
     unset($GLOBALS['symconTestCopyTarget']);
 }
 assertGatewayGauge(
-    str_contains($sankey->GetIPSViewHTML(), '"orientation":"horizontal"'),
+    str_contains($sankey->GetIPSViewHTML(), '"orientation":"horizontal"')
+        && str_contains($sankey->GetIPSViewHTML(), '"nodeColors":{"load":"#FF0000","other":"#00FF00"}')
+        && str_contains($sankey->GetIPSViewHTML(), '"labelPosition":"inside"')
+        && str_contains($sankey->GetIPSViewHTML(), '"showEdgeValues":true'),
     'Sankey must copy Tile settings into an independent IPSView design.'
 );
+foreach ([['NodeBorderWidth', 9, 0], ['NodeBorderRadius', 21, 8], ['NodeOpacityPercent', -1, 100],
+    ['NodeShadowBlur', 21, 0], ['LayoutIterations', 65, 32], ['LabelDistance', -1, 5], ['LabelMaxWidth', 401, 0],
+    ['EdgeLabelFontSizePercent', 201, 100], ['HoverFocus', 'invalid', 'adjacency'], ['LabelPosition', 'invalid', 'inside'],
+    ['LabelOverflow', 'invalid', 'truncate'], ['NodeBorderColor', 0x1000000, -1],
+    ['NodeShadowColor', -2, -1], ['EdgeLabelColor', -2, -1], ['HighlightEdgeOpacityPercent', 101, 85],
+    ['BlurEdgeOpacityPercent', -1, 5], ['NodeColors', '[{"Key":"load","Color":-1}]', json_encode($sankeyColors, JSON_THROW_ON_ERROR)]] as [$name, $invalid, $restore]) {
+    foreach (['', 'IPSView'] as $prefix) {
+        $sankey->SetTestProperty($prefix . $name, $invalid);
+        $sankey->ApplyChanges();
+        assertGatewayGauge($sankey->GetTestStatus() === 202, 'Sankey must reject invalid design setting: ' . $prefix . $name);
+        $sankey->SetTestProperty($prefix . $name, $restore);
+        $sankey->ApplyChanges();
+        assertGatewayGauge($sankey->GetTestStatus() === IS_ACTIVE, 'Sankey must recover after correcting design setting: ' . $prefix . $name);
+    }
+}
 $sankeyValueBefore = GetValue(4711);
 try {
     $GLOBALS['symconTestVariables'][4711]['Value'] = -1.0;
@@ -10096,12 +10167,16 @@ for ($source = 0; $source < 100 && count($maximumSankeySources) < 200; ++$source
     }
 }
 $maximumSankey->SetTestProperty('Nodes', json_encode($maximumSankeyNodes, JSON_THROW_ON_ERROR));
+$maximumSankey->SetTestProperty('NodeColors', json_encode(array_map(static fn (array $node): array => [
+    'Key' => $node['Key'], 'Color' => 0x55CBB5
+], $maximumSankeyNodes), JSON_THROW_ON_ERROR));
 $maximumSankey->SetTestProperty('Sources', json_encode($maximumSankeySources, JSON_THROW_ON_ERROR));
 $maximumSankey->ApplyChanges();
 assertGatewayGauge(
     $maximumSankey->GetTestStatus() === IS_ACTIVE && $maximumSankey->GetTestReferences() === [4711]
         && strlen($maximumSankey->GetVisualizationTile()) < SYMCON_OUTPUT_BUFFER_LIMIT
-        && strlen($maximumSankey->GetIPSViewHTML()) < SYMCON_OUTPUT_BUFFER_LIMIT,
+        && strlen($maximumSankey->GetIPSViewHTML()) < SYMCON_OUTPUT_BUFFER_LIMIT
+        && strlen($maximumSankey->GetConfigurationForm()) < SYMCON_OUTPUT_BUFFER_LIMIT,
     'Sankey must deduplicate shared source subscriptions and fit the output limit at maximum configuration size.'
 );
 

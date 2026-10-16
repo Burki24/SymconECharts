@@ -52,7 +52,33 @@ Die offizielle ECharts-Startseite, `llms.txt`, die Sankey-Optionsdokumentation
 und die Lizenz wurden am 16.10.2026 geprüft. Die vorhandene, festgeschriebene
 Apache-ECharts-Version 6.1.0 wird um einen separaten reproduzierbaren Build
 mit Sankey Chart, Titel, Tooltip, Aria und Canvas Renderer ergänzt.
+Für `labelLayout.hideOverlap` wird zusätzlich das offizielle Feature
+`LabelLayout` eingebunden. Die ECharts-Version und der unveränderte Kern
+bleiben erhalten; nur der dedizierte Sankey-Build wird neu erzeugt.
 Herkunft, Lizenz, Größe und SHA-256 stehen in `THIRD_PARTY_NOTICES.md`.
+
+Die Designer exponieren zusätzlich `layoutIterations` (0 bis 64),
+Knotenrahmen/-rundung/-deckkraft/-schatten, Position, Abstand, Breite,
+Umbruch, Fettschrift und Überlappungsschutz der Knotenbeschriftung sowie
+`edgeLabel` mit Wert, Einheit, Schriftgröße und Farbe. `HoverFocus` bildet
+ausgeschaltete Hervorhebung, `adjacency` und `trajectory` ab; hervorgehobene
+und übrige Flüsse erhalten unabhängig konfigurierbare Deckkraft.
+`NodeColors` ist eine begrenzte JSON-Liste von höchstens 100 eindeutigen
+`{Key, Color}`-Zeilen. Farben sind Integer von 0 bis 0xFFFFFF. Unbekannte
+Schlüssel werden ignoriert, doppelte oder ungültige Einträge mit Zeile
+gemeldet. Der Renderer verwendet eine nach Schlüsseln aufgebaute Farbmap;
+individuelle Farbe hat Vorrang vor globaler Farbe und Theme. Sämtliche
+Properties besitzen eine unabhängige `IPSView`-Variante und folgen den
+bestehenden Kopier-/Vererbungsregeln. Neue Standardwerte erhalten die bisherige
+Darstellung; die Hervorhebung blendet bewusst ausgeschaltete Labels nicht ein.
+
+Grundlage sind die offiziellen [Sankey-Optionen](https://echarts.apache.org/en/option.html#series-sankey)
+und die [Quelldokumentation](https://github.com/apache/echarts-doc/blob/master/en/option/series/sankey.md),
+abgeglichen mit dem installierten ECharts-6.1.0-Quellcode. Nicht exponiert
+werden beliebige JavaScript-Formatter, koordinatensystemübergreifende
+Layouts oder zusätzliche Tiefen-/Einzelkanten-Designlisten. Diese benötigen
+eigene Bedien- und Validierungsverträge; der Designer ist keine vollständige
+Spiegelung jeder Low-Level-ECharts-Option.
 
 Lokale Tests prüfen Konfiguration, Zyklen, Grenzen, gleichlautende Namen,
 Null- und Negativwerte, Quellenabonnements, Wertaktualisierungen,
@@ -60,5 +86,13 @@ Formularauswahl, unabhängige Designs, Übersetzungen, Ausgabelimit und den
 Optionsaufbau samt Layout in der echten ECharts-Engine. Ein lokaler Browsertest
 mit der gebündelten Canvas-Runtime bestätigt waagerechtes und senkrechtes
 Layout, Nullflussanzeige, Wiederherstellung nach Aktualisierung und den
-freigehaltenen simulierten Kachelkopf. Ein Live-Test des neuen Moduls in
-Symcon-Kachel und IPSView bleibt erforderlich.
+freigehaltenen simulierten Kachelkopf. Der Anwender hat die ursprüngliche
+Sankey-Version in Symcon-Kachel und IPSView erfolgreich live geprüft.
+Die ergänzten Designeroptionen benötigen nach dem Modulupdate erneut eine
+Live-Prüfung beider Ausgabewege. Schematische SVG-Vorschauen messen Texte
+näherungsweise und simulieren keine Layout-Optimierungsdurchläufe oder
+Hover-Interaktion.
+Ein ergänzender lokaler Canvas-Browsertest bestätigt individuelle Farben,
+Rahmen, Rundungen, Schatten, umgebrochene Labels und Verbindungswerte in beiden
+Ausrichtungen sowie `trajectory`-Hervorhebung, Nullflussanzeige und
+Wiederherstellung. Dies ersetzt keine Prüfung innerhalb von Symcon/IPSView.

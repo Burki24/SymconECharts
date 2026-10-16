@@ -2,6 +2,13 @@
 
 ## Hinzugefügt
 
+- Sankey-Designer bieten individuelle Knotenfarben, Rahmen, Rundungen,
+  Knotendeckkraft und Schatten, Beschriftungsposition und -abstand,
+  Zeilenumbruch, Fettschrift und Überlappungsschutz sowie Verbindungswerte.
+  Layout-Optimierung und Hervorhebung direkter Verbindungen oder vollständiger
+  Flusspfade sind einstellbar. Alle Optionen gelten getrennt für Kachel und
+  IPSView; die bisherigen Standardeinstellungen bleiben erhalten.
+
 - `EChartsSankey` (`ECSA`) zeigt aktuelle Mengenflüsse zwischen manuell
   angelegten Knoten. Start und Ziel jeder Verbindung werden ausgewählt;
   eine numerische Symcon-Variable bestimmt die Breite. Kachel und IPSView

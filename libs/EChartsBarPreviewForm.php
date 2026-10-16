@@ -66,7 +66,7 @@ trait EChartsBarPreviewForm
         foreach ($items as &$item) {
             $name = $item['name'] ?? null;
             if (is_string($name) && in_array($name, $fields, true)
-                && in_array($name, ['Sources', 'Nodes', 'Edges', 'GroupColors', 'IPSViewGroupColors'], true)
+                && in_array($name, ['Sources', 'Nodes', 'Edges', 'GroupColors', 'IPSViewGroupColors', 'NodeColors', 'IPSViewNodeColors'], true)
                 && ($item['type'] ?? null) === 'List') {
                 foreach (['onAdd', 'onEdit', 'onDelete', 'onChangeOrder'] as $event) {
                     $previous = trim((string) ($item[$event] ?? ''));
@@ -90,7 +90,7 @@ trait EChartsBarPreviewForm
     {
         $listFields = array_values(array_filter($fields, static fn (string $name): bool => in_array(
             $name,
-            ['Sources', 'Nodes', 'Edges', 'GroupColors', 'IPSViewGroupColors'],
+            ['Sources', 'Nodes', 'Edges', 'GroupColors', 'IPSViewGroupColors', 'NodeColors', 'IPSViewNodeColors'],
             true
         )));
         $pairs = array_map(
