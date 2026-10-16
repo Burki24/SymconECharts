@@ -20,6 +20,9 @@ berücksichtigt. Der laufende Tag bleibt leer. Fehlende Archivtage bleiben
 ebenfalls leer und werden weder interpoliert noch als Null gewertet. Echte
 Nullwerte und negative Mittelwerte werden dargestellt. Die Farbskala richtet
 sich automatisch nach den vorhandenen Werten des angezeigten Jahres.
+Das Archiv muss kein vollständiges Jahr abdecken. Beginnt die Aufzeichnung
+erst im Tagesverlauf, wird auch der erste verfügbare Tagesmittelwert angezeigt;
+er bezieht sich auf die tatsächlich aufgezeichnete Zeit dieses Tages.
 Ein Tooltip zeigt Datum, Quellname, Tagesmittelwert und Einheit.
 
 Im Designer sind Ausrichtung, Wochenbeginn, Monats- und Wochentagsnamen,

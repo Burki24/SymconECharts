@@ -103,6 +103,11 @@
 
 ## Behoben
 
+- Calendar zeigt auch Teilarchive, deren erster Tagesdatensatz erst im
+  Tagesverlauf beginnt. Eine zu strenge Mitternachtsprüfung hatte in diesem
+  Fall sämtliche Kalenderwerte verworfen. Fehlende Tage bleiben leer;
+  gespeicherte Konfiguration und Archivwerte werden nicht verändert.
+
 - Sankey-Vorschauen zeigen auch größere Konfigurationen vollständig mit
   aktuellen Variablenwerten statt eines Ersatz-Beispielnetzes. Geschlossene
   Flussflächen verhindern Überstände an engen Kurven. Fehler- und

@@ -35,6 +35,7 @@ $GLOBALS['symconTestArchiveVariables'][$calendarID] = ['AggregationType' => 0, '
     ['TimeStamp' => strtotime('2026-10-16'), 'Avg' => 999.0, 'Min' => 1.0, 'Max' => 999.0],
     ['TimeStamp' => strtotime('2026-10-15'), 'Avg' => 0.0, 'Min' => -1.0, 'Max' => 1.0],
     ['TimeStamp' => strtotime('2026-10-13'), 'Avg' => -7.5, 'Min' => -9.0, 'Max' => -4.0],
+    ['TimeStamp' => strtotime('2026-10-10 09:25:10'), 'Avg' => 8.25, 'Min' => 7.0, 'Max' => 11.0],
     ['TimeStamp' => strtotime('2025-12-31'), 'Avg' => 5.0, 'Min' => 2.0, 'Max' => 7.0]
 ]];
 $calendar = new TestableEChartsCalendar();
@@ -49,8 +50,8 @@ $calendarData = json_decode($calendar->GetCalendarData(), true, 512, JSON_THROW_
 assertGatewayGauge(
     $calendar->GetTestStatus() === IS_ACTIVE && $calendar->GetTestReferences() === [$calendarID]
     && $calendarData['family'] === 'calendar' && $calendarData['calendar']['year'] === 2026
-    && $calendarData['calendar']['data'] === [['date' => '2026-10-13', 'value' => -7.5], ['date' => '2026-10-15', 'value' => 0.0]],
-    'Calendar must use completed daily means, preserve negative/zero values and leave archive gaps empty.'
+    && $calendarData['calendar']['data'] === [['date' => '2026-10-10', 'value' => 8.25], ['date' => '2026-10-13', 'value' => -7.5], ['date' => '2026-10-15', 'value' => 0.0]],
+    'Calendar must show a partial-year archive beginning during a day, preserve negative/zero means and leave gaps empty.'
 );
 $calendarQueries = $GLOBALS['symconTestArchiveQueryCount'];
 $calendarParent = IPSModuleStrict::$ParentResponder;

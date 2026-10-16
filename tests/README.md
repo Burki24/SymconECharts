@@ -164,6 +164,8 @@ StylePHP und PHP CS Fixer.
 
 `calendar_data.php` prüft Jahresgrenzen, Schaltjahre, Zeitumstellungen,
 abgeschlossene Tage und die Ablehnung ungültiger Tagesdaten. Die im
+Tagesverlauf beginnende Aufzeichnung wird als gültiges Tagesaggregat
+beibehalten; doppelte lokale Datumswerte bleiben unzulässig. Die im
 Gateway-Integrationstest eingebundene `calendar_integration.php` prüft den
 realen Gateway-Datenweg mit Kernel-Doppeln, negative/Nullwerte, Lücken,
 Zählerablehnung, schreibfreie Vorschauen, Designkopie, getrennte Ausgabewege,

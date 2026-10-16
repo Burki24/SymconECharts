@@ -22,8 +22,12 @@ Ein Tageswert ist der Symcon-Archivmittelwert, kein selbst berechneter
 Mittelwert von Stundenmitteln. Zählerarchive werden durch den Gateway-Vertrag
 abgewiesen; es gibt keinen stillen Wechsel auf Verbrauch oder Summe.
 Fehlende Tage bleiben Lücken, echte Nullen und negative Mittelwerte bleiben
-erhalten. Trunkierung, doppelte, unvollständige oder falsch ausgerichtete
-Tagesdaten werden nicht als vollständiges Kalenderjahr ausgegeben.
+erhalten. Auch ein nur teilweise aufgezeichnetes Jahr wird dargestellt.
+Ein Tagesaggregat darf beim Aufzeichnungsbeginn im Tagesverlauf starten;
+sein Zeitstempel wird dem lokalen Datum zugeordnet, der Mittelwert unverändert
+übernommen. Es wird kein vollständiger 24-Stunden-Messzeitraum vorausgesetzt.
+Trunkierung, doppelte Datumswerte oder formal ungültige Tagesdaten werden
+nicht als gültiges Kalenderjahr ausgegeben.
 Tagesgrenzen und Datumsschlüssel folgen der Symcon-PHP-Zeitzone einschließlich
 Sommerzeit und Schaltjahren. Das Kalenderlayout ist kein 7×24-Heatmap-Modus.
 

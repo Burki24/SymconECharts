@@ -56,7 +56,10 @@ final class CalendarData
             }
             $local = (new DateTimeImmutable('@' . $point[0]))->setTimezone($zone);
             $date = $local->format('Y-m-d');
-            if ($local->format('H:i:s') !== '00:00:00' || isset($dates[$date])) {
+            // A daily aggregate can start at the first observation (e.g. when logging
+            // begins during the day). The query fixes its daily aggregation level;
+            // use the local date, not an assumed midnight alignment.
+            if (isset($dates[$date])) {
                 throw new InvalidArgumentException('Calendar needs one daily archive mean per local date.');
             }
             $dates[$date] = true;

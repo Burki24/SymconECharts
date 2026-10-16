@@ -32,7 +32,14 @@ foreach (['2024-03-30', '2024-03-31', '2024-04-01', '2024-10-27', '2024-10-28'] 
 $cells = CalendarData::Cells($points, $leap);
 checkCalendar(count($cells) === 5 && $cells[0] === ['date' => '2024-03-30', 'value' => 0.0]
     && $cells[2]['date'] === '2024-04-01' && $cells[4]['date'] === '2024-10-28', 'Zero, negative means and DST dates must be preserved without filling gaps.');
-foreach ([[$points[0], $points[0]], [[$points[0][0] + 3600, 12]], [[$points[0][0], INF]], [[1, 12]]] as $invalid) {
+$partialPoints = [
+    [(new DateTimeImmutable('2024-03-30 09:25:10', $zone))->getTimestamp(), -2.5],
+    [(new DateTimeImmutable('2024-04-01 00:00:00', $zone))->getTimestamp(), 0.0]
+];
+checkCalendar(CalendarData::Cells($partialPoints, $leap) === [
+    ['date' => '2024-03-30', 'value' => -2.5], ['date' => '2024-04-01', 'value' => 0.0]
+], 'An archive beginning during the day must retain its daily mean and all later available days.');
+foreach ([[$points[0], $points[0]], [[$points[0][0], 12], [$points[0][0] + 3600, 13]], [[$points[0][0], INF]], [[1, 12]]] as $invalid) {
     try {
         CalendarData::Cells($invalid, $leap);
         throw new RuntimeException('Invalid daily points were accepted.');
