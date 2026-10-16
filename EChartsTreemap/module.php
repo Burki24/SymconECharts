@@ -76,7 +76,17 @@ class EChartsTreemap extends IPSModuleStrict
         'LabelColor'                   => -1,
         'GroupLabelColor'              => -1,
         'SubgroupLabelColor'           => -1,
-        'GroupColors'                  => '[]'
+        'GroupColors'                  => '[]',
+        'Level1BorderWidth'            => 3,
+        'Level1GapWidth'               => 3,
+        'Level2BorderWidth'            => 2,
+        'Level2GapWidth'               => 1,
+        'Level3BorderWidth'            => 1,
+        'GroupGapWidth'                => 0,
+        'FrameColor'                   => -1,
+        'AllowPanZoom'                 => true,
+        'ClickToZoom'                  => true,
+        'ShowBreadcrumb'               => true
     ];
 
     public function Create(): void
@@ -134,7 +144,8 @@ class EChartsTreemap extends IPSModuleStrict
         $form = $this->WithIPSViewDesignFormState($form, 'ECTM');
         $form = EChartsDesignerSections::Group($form, [
             ['caption' => 'Layout and labels', 'start' => 'ShowLabels'],
-            ['caption' => 'Typography and colors', 'start' => 'TitleColor']
+            ['caption' => 'Typography and colors', 'start' => 'TitleColor'],
+            ['caption' => 'Frames and navigation', 'start' => 'GroupGapWidth']
         ]);
         $fields = [
             'Title', 'Sources', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
@@ -292,24 +303,48 @@ class EChartsTreemap extends IPSModuleStrict
             ?: $this->BarPreviewValue($values, 'LabelFontSizePercent', 'integer', $ipsView);
         $subgroupSize = max(8, min(22, (int) round(13 * $subgroupPercent / 100)));
         $subgroupColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'SubgroupLabelColor', 'integer', $ipsView), $labelColor);
+        $frameColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'FrameColor', 'integer', $ipsView), $palette['background']);
+        $level1Border = max(0, min(12, $this->BarPreviewValue($values, 'Level1BorderWidth', 'integer', $ipsView)));
+        $groupGap = max(0, min(12, $this->BarPreviewValue($values, 'GroupGapWidth', 'integer', $ipsView)));
+        $level1Gap = max(0, min(12, $this->BarPreviewValue($values, 'Level1GapWidth', 'integer', $ipsView)));
+        $level2Border = max(0, min(12, $this->BarPreviewValue($values, 'Level2BorderWidth', 'integer', $ipsView)));
+        $level2Gap = max(0, min(12, $this->BarPreviewValue($values, 'Level2GapWidth', 'integer', $ipsView)));
+        $level3Border = max(0, min(12, $this->BarPreviewValue($values, 'Level3BorderWidth', 'integer', $ipsView)));
         $position = 0;
         foreach ($groups as $name => $group) {
             $width = $position === count($groups) - 1 ? 688 - $x : $widthAvailable * $group / $total;
             $color = $configuredColors[$name] ?? $palette['seriesColors'][$position % count($palette['seriesColors'])];
-            $svg .= '<rect x="' . EChartsBarPreview::N($x) . '" y="78" width="' . EChartsBarPreview::N($width)
-                . '" height="240" fill="' . EChartsBarPreview::E($color) . '" stroke="' . EChartsBarPreview::E($palette['background']) . '"/>';
+            $plotX = $x + $groupGap / 2;
+            $plotWidth = max(1.0, $width - $groupGap);
+            $svg .= '<rect x="' . EChartsBarPreview::N($plotX) . '" y="78" width="' . EChartsBarPreview::N($plotWidth)
+                . '" height="240" fill="' . EChartsBarPreview::E($color) . '" stroke="' . EChartsBarPreview::E($frameColor)
+                . '" stroke-width="' . $level1Border . '"/>';
+            if ($width > 125) {
+                $sample = $samples[$name] ?? ['subgroup' => '', 'leaf' => 'Value'];
+                $innerX = $plotX + 10 + $level1Gap / 2;
+                $innerWidth = max(1.0, $plotWidth - 20 - $level1Gap);
+                $svg .= '<rect x="' . EChartsBarPreview::N($innerX) . '" y="116" width="'
+                    . EChartsBarPreview::N($innerWidth) . '" height="98" fill="' . EChartsBarPreview::E($color)
+                    . '" stroke="' . EChartsBarPreview::E($frameColor) . '" stroke-width="' . $level2Border . '"/>';
+                if ($sample['subgroup'] !== '') {
+                    $leafX = $innerX + 8 + $level2Gap / 2;
+                    $svg .= '<rect x="' . EChartsBarPreview::N($leafX) . '" y="145" width="'
+                        . EChartsBarPreview::N(max(1.0, $innerWidth - 16 - $level2Gap))
+                        . '" height="57" fill="' . EChartsBarPreview::E($color)
+                        . '" stroke="' . EChartsBarPreview::E($frameColor) . '" stroke-width="' . $level3Border . '"/>';
+                }
+            }
             if ($showLabels && $width > 85) {
-                $svg .= '<text x="' . EChartsBarPreview::N($x + 8) . '" y="103" font-size="' . $labelSize
+                $svg .= '<text x="' . EChartsBarPreview::N($plotX + 8) . '" y="103" font-size="' . $labelSize
                     . '" fill="' . EChartsBarPreview::E($groupLabelColor) . '">'
                     . EChartsBarPreview::E(mb_strimwidth((string) $name, 0, max(4, (int) ($width / 9)), '…')) . '</text>';
                 if ($width > 125) {
-                    $sample = $samples[$name] ?? ['subgroup' => '', 'leaf' => 'Value'];
                     if ($sample['subgroup'] !== '') {
-                        $svg .= '<text x="' . EChartsBarPreview::N($x + 12) . '" y="135" font-size="' . $subgroupSize
+                        $svg .= '<text x="' . EChartsBarPreview::N($innerX + 4) . '" y="135" font-size="' . $subgroupSize
                             . '" fill="' . EChartsBarPreview::E($subgroupColor) . '">'
                             . EChartsBarPreview::E(mb_strimwidth($sample['subgroup'], 0, max(4, (int) ($width / 9)), '…')) . '</text>';
                     }
-                    $svg .= '<text x="' . EChartsBarPreview::N($x + 14) . '" y="164" font-size="' . $valueSize
+                    $svg .= '<text x="' . EChartsBarPreview::N($innerX + 6) . '" y="164" font-size="' . $valueSize
                         . '" fill="' . EChartsBarPreview::E($labelColor) . '">'
                         . EChartsBarPreview::E(mb_strimwidth($sample['leaf'], 0, max(4, (int) ($width / 9)), '…'))
                         . ($showValues ? ' 12.4' : '') . '</text>';
@@ -317,6 +352,10 @@ class EChartsTreemap extends IPSModuleStrict
             }
             $x += $width;
             ++$position;
+        }
+        if ($this->BarPreviewValue($values, 'ShowBreadcrumb', 'boolean', $ipsView)) {
+            $svg .= '<text x="32" y="341" font-size="11" fill="' . EChartsBarPreview::E($palette['muted'])
+                . '">' . EChartsBarPreview::E($this->Translate('Navigation path')) . '</text>';
         }
         return $svg . '</svg>';
     }
@@ -495,9 +534,16 @@ class EChartsTreemap extends IPSModuleStrict
                 return false;
             }
         }
-        foreach (['TitleColor', 'LabelColor', 'GroupLabelColor', 'SubgroupLabelColor'] as $name) {
+        foreach (['TitleColor', 'LabelColor', 'GroupLabelColor', 'SubgroupLabelColor', 'FrameColor'] as $name) {
             $value = $this->ReadPropertyInteger($prefix . $name);
             if ($value < -1 || $value > 0xFFFFFF) {
+                return false;
+            }
+        }
+        foreach (['GroupGapWidth', 'Level1BorderWidth', 'Level1GapWidth', 'Level2BorderWidth', 'Level2GapWidth',
+            'Level3BorderWidth'] as $name) {
+            $value = $this->ReadPropertyInteger($prefix . $name);
+            if ($value < 0 || $value > 12) {
                 return false;
             }
         }
@@ -642,6 +688,11 @@ class EChartsTreemap extends IPSModuleStrict
                 continue;
             }
             foreach ($element['items'] as $row) {
+                if (($row['type'] ?? null) === 'Label'
+                    && ($row['caption'] ?? null) === 'Level 2 contains subgroups or direct values; level 3 contains values inside subgroups.') {
+                    $rows[] = $row;
+                    continue;
+                }
                 if (is_string($row['name'] ?? null) && array_key_exists($row['name'], self::DESIGN_DEFAULTS)) {
                     $row['name'] = 'IPSView' . $row['name'];
                     $rows[] = $row;

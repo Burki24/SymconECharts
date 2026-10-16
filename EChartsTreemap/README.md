@@ -38,6 +38,19 @@ ein „Automatisch“-Eintrag verwendet die Theme-Farbe. IPSView übernimmt
 standardmäßig das Kacheldesign und kann anschließend unabhängig gestaltet
 werden, einschließlich eigener Gruppenfarben.
 
+Im Abschnitt „Rahmen und Navigation“ lassen sich Rahmenstärken für die drei
+Hierarchieebenen sowie Abstände zwischen Gruppen und innerhalb von Gruppen
+beziehungsweise Untergruppen von 0 bis 12 Pixel festlegen. Ebene 1 enthält
+Gruppen, Ebene 2 Untergruppen oder direkt zugeordnete Werte, Ebene 3 Werte
+innerhalb von Untergruppen. Eine feste Rahmen- und Abstandsfarbe ist optional;
+„Automatisch“ belässt die bisherige Farbgebung. Verschieben/Zoomen,
+Zoom beim Klick auf einen Knoten und der Navigationspfad sind getrennt
+schaltbar. Auf schmalen Ansichten wird der Navigationspfad weiterhin
+automatisch ausgeblendet; bei ausdrücklich deaktiviertem Navigationspfad
+steht seine Fläche dem Diagramm zur Verfügung. Die statische SVG-Vorschau
+zeigt Rahmen und Abstände schematisch; das Navigationsverhalten ist erst im
+Diagramm prüfbar.
+
 Öffentliche PHP-Funktionen: `ECTM_GetTreemapData($id)` liefert das aktuelle
 hierarchische Datenmodell als JSON. `ECTM_GetTreemapDiagnostic($id)` liefert
 Konfigurationsstatus und die letzte Fehlermeldung. `ECTM_GetIPSViewHTML($id)`

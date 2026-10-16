@@ -59,6 +59,7 @@
 
     function nodesFor(data, colors, style) {
         var seriesColors = colors.seriesColors && colors.seriesColors.length ? colors.seriesColors : [colors.accent];
+        var frameColor = style.frameColor || '';
         return (Array.isArray(data) ? data : []).map(function (group, index) {
             var chosen = style.groupColors || {};
             var color = Object.prototype.hasOwnProperty.call(chosen, group.name) && /^#[0-9a-f]{6}$/i.test(chosen[group.name])
@@ -80,7 +81,8 @@
                                 { maximumFractionDigits: 3 });
                         };
                     }
-                    return Object.assign({}, child, child.children ? { itemStyle: { borderColor: color } } : {}, {
+                    return Object.assign({}, child, isSubgroup || frameColor
+                        ? { itemStyle: { borderColor: frameColor || color } } : {}, {
                         label: label,
                         upperLabel: { color: subgroupColor, fontSize: subgroupSize },
                         children: isSubgroup ? colorChildren(child.children) : undefined
@@ -88,7 +90,7 @@
                 });
             }
             return Object.assign({}, group, {
-                itemStyle: { color: color, borderColor: color },
+                itemStyle: { color: color, borderColor: frameColor || color },
                 label: { color: groupColor, fontSize: groupSize },
                 upperLabel: { color: groupColor, fontSize: groupSize,
                     height: Math.max(18, groupSize + 8) },
@@ -133,10 +135,11 @@
                 left: 8, right: 8,
                 top: (bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8)
                     + (showTitle ? titleSize + 12 : 0),
-                bottom: 28,
-                roam: true,
-                nodeClick: 'zoomToNode',
-                breadcrumb: { show: !compact, bottom: 2, itemStyle: { color: colors.muted },
+                bottom: style.showBreadcrumb === false ? 8 : 28,
+                roam: style.allowPanZoom !== false,
+                nodeClick: style.clickToZoom === false ? false : 'zoomToNode',
+                breadcrumb: { show: style.showBreadcrumb !== false && !compact, bottom: 2,
+                    itemStyle: { color: colors.muted },
                     textStyle: { color: colors.text } },
                 label: {
                     show: style.showLabels !== false && !compact,
@@ -146,10 +149,17 @@
                 upperLabel: { show: style.showLabels !== false, color: textColor,
                     fontSize: labelSize, height: Math.max(18, labelSize + 8), overflow: 'truncate' },
                 levels: [
-                    {},
-                    { itemStyle: { borderWidth: 3, gapWidth: 3 }, upperLabel: { show: style.showLabels !== false } },
-                    { itemStyle: { borderWidth: 2, gapWidth: 1 } },
-                    { itemStyle: { borderWidth: 1, gapWidth: 1 } }
+                    { itemStyle: { gapWidth: style.groupGapWidth ?? 0,
+                        ...(style.frameColor ? { borderColor: style.frameColor } : {}) } },
+                    { itemStyle: { borderWidth: style.level1BorderWidth ?? 3,
+                        gapWidth: style.level1GapWidth ?? 3,
+                        ...(style.frameColor ? { borderColor: style.frameColor } : {}) },
+                    upperLabel: { show: style.showLabels !== false } },
+                    { itemStyle: { borderWidth: style.level2BorderWidth ?? 2,
+                        gapWidth: style.level2GapWidth ?? 1,
+                        ...(style.frameColor ? { borderColor: style.frameColor } : {}) } },
+                    { itemStyle: { borderWidth: style.level3BorderWidth ?? 1,
+                        ...(style.frameColor ? { borderColor: style.frameColor } : {}) } }
                 ]
             }]
         };

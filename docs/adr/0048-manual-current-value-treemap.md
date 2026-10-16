@@ -46,6 +46,18 @@ und unabhängiges IPSView. Die bestehende Darstellung bleibt ohne aktive
 Neukonfiguration erhalten. Ein Blattwert wird nur bei sichtbaren Labels
 unter dem Namen ausgegeben; Flächenberechnung und Tooltip bleiben unverändert.
 
+Der folgende Designausbau macht Rahmenbreite für die drei
+ECharts-Hierarchieebenen (Gruppen, Untergruppen beziehungsweise direkte Werte,
+Werte unter Untergruppen) und Abstände zwischen Gruppen sowie zwischen den
+Kindern von Gruppen und Untergruppen separat einstellbar. Ein Abstand unterhalb
+von Blattwerten hätte keine Wirkung und wird nicht angeboten. Die optionale Rahmenfarbe
+überschreibt die geerbte Gruppenfarbe. Verschieben/Zoomen, Klick-Zoom und
+Navigationspfad sind unabhängige Design-Properties für Kachel und IPSView.
+Neue Properties übernehmen als Defaults die vorherigen festen ECharts-Werte
+(Rahmen 3/2/1 Pixel, Abstände 0/3/1 Pixel; interaktive Navigation an,
+automatische Rahmenfarbe).
+Die bestehende Datenhierarchie und das Datenschema bleiben unverändert.
+
 ## Grenzen und Prüfung
 
 Die 100-Quellen-Grenze schützt Daten- und Browserbudget. Ein Update liest
@@ -57,3 +69,6 @@ Validierung, Bundle-Integrität und Browser-Optionsaufbau. Die grundlegende
 Darstellung wurde am 16.10.2026 vom Anwender in Symcon-Kachel und IPSView
 geprüft. Die daraufhin korrigierte Beschriftungsdarstellung benötigt nach
 dem Modulupdate eine erneute visuelle Prüfung in beiden Ausgabewegen.
+Die neuen Rahmen- und Navigationseinstellungen sind lokal durch Formular-,
+Modell- und ECharts-Layouttests geprüft; ihre Bedienbarkeit in der realen
+Kachel und in IPSView erfordert ebenfalls eine Sichtprüfung nach dem Update.

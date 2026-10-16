@@ -70,6 +70,13 @@ assert.equal(result.option.series[0].data[1].upperLabel.color, '#101114');
 assert.equal(result.option.series[0].data[0].itemStyle.borderColor, '#5070dd');
 assert.equal(result.option.series[0].data[1].itemStyle.borderColor, '#b6d634');
 assert.equal(result.option.series[0].nodeClick, 'zoomToNode');
+assert.equal(result.option.series[0].roam, true);
+assert.equal(result.option.series[0].breadcrumb.show, true);
+assert.equal(result.option.series[0].levels[0].itemStyle.gapWidth, 0);
+assert.equal(result.option.series[0].levels[1].itemStyle.borderWidth, 3);
+assert.equal(result.option.series[0].levels[1].itemStyle.gapWidth, 3);
+assert.equal(result.option.series[0].levels[2].itemStyle.borderWidth, 2);
+assert.equal(result.option.series[0].levels[2].itemStyle.gapWidth, 1);
 assert.equal(result.option.series[0].label.show, true);
 assert.match(result.option.tooltip.formatter({ name: '<Battery>', value: 5, treePathInfo: [
     { name: 'Room A' }, { name: '<Battery>' }
@@ -97,6 +104,27 @@ assert.equal(custom.option.series[0].data[0].upperLabel.color, '#ffffff');
 assert.equal(custom.option.series[0].data[0].upperLabel.fontSize, 18);
 assert.match(custom.option.series[0].data[0].children[0].label.formatter({ name: 'Battery', value: 5 }), /Battery\n5/);
 
+const framed = render({ ...model, treemap: { ...model.treemap, style: {
+    ...model.treemap.style, frameColor: '#112233',
+    groupGapWidth: 9, level1BorderWidth: 7, level1GapWidth: 8,
+    level2BorderWidth: 5, level2GapWidth: 6,
+    level3BorderWidth: 2,
+    allowPanZoom: false, clickToZoom: false, showBreadcrumb: false
+} } });
+assert.equal(framed.option.series[0].roam, false);
+assert.equal(framed.option.series[0].nodeClick, false);
+assert.equal(framed.option.series[0].breadcrumb.show, false);
+assert.equal(framed.option.series[0].bottom, 8);
+assert.equal(framed.option.series[0].levels[0].itemStyle.gapWidth, 9);
+assert.equal(framed.option.series[0].levels[1].itemStyle.borderWidth, 7);
+assert.equal(framed.option.series[0].levels[1].itemStyle.gapWidth, 8);
+assert.equal(framed.option.series[0].levels[2].itemStyle.borderWidth, 5);
+assert.equal(framed.option.series[0].levels[2].itemStyle.gapWidth, 6);
+assert.equal(framed.option.series[0].levels[3].itemStyle.borderWidth, 2);
+assert.equal(framed.option.series[0].levels[3].itemStyle.gapWidth, undefined);
+assert.equal(framed.option.series[0].data[0].itemStyle.borderColor, '#112233');
+assert.equal(framed.option.series[0].data[0].children[0].itemStyle.borderColor, '#112233');
+
 const nestedModel = { ...model, treemap: { ...model.treemap, data: [{
     id: 'group-a', name: 'Room A', value: 5, children: [{
         id: 'subgroup-a', name: 'Lighting', value: 5, children: [
@@ -113,6 +141,11 @@ const nestedCustom = render({ ...nestedModel, treemap: { ...nestedModel.treemap,
 } } }, 1000, 'ipsview');
 assert.equal(nestedCustom.option.series[0].data[0].children[0].upperLabel.color, '#123456');
 assert.equal(nestedCustom.option.series[0].data[0].children[0].upperLabel.fontSize, 18);
+const nestedFrame = render({ ...nestedModel, treemap: { ...nestedModel.treemap, style: {
+    ...model.treemap.style, frameColor: '#112233'
+} } }, 1000, 'ipsview');
+assert.equal(nestedFrame.option.series[0].data[0].children[0].itemStyle.borderColor, '#112233');
+assert.equal(nestedFrame.option.series[0].data[0].children[0].children[0].itemStyle.borderColor, '#112233');
 
 const echarts = require(path.join(__dirname, '..', '.tools', 'echarts-runtime', 'node_modules', 'echarts'));
 const chart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 1000, height: 400 });
@@ -120,6 +153,8 @@ chart.setOption(chosenLabels.option);
 assert.equal(chart.getModel().getSeriesByIndex(0).type, 'series.treemap');
 assert.match(chart.renderToSVGString(), /Room A/);
 chart.setOption(custom.option, true);
+assert.match(chart.renderToSVGString(), /Room A/);
+chart.setOption(framed.option, true);
 assert.match(chart.renderToSVGString(), /Room A/);
 chart.dispose();
 

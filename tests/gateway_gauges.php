@@ -9538,6 +9538,13 @@ $treemap->SetTestProperty('GroupColors', json_encode([
 $treemap->SetTestProperty('ShowValues', true);
 $treemap->SetTestProperty('GroupLabelFontSizePercent', 150);
 $treemap->SetTestProperty('SubgroupLabelColor', 0xABCDEF);
+$treemap->SetTestProperty('FrameColor', 0x123456);
+$treemap->SetTestProperty('GroupGapWidth', 8);
+$treemap->SetTestProperty('Level1BorderWidth', 7);
+$treemap->SetTestProperty('Level2GapWidth', 6);
+$treemap->SetTestProperty('AllowPanZoom', false);
+$treemap->SetTestProperty('ShowBreadcrumb', false);
+$treemap->SetTestProperty('IPSViewClickToZoom', false);
 $treemap->ApplyChanges();
 $treemapData = json_decode($treemap->GetTreemapData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
@@ -9550,7 +9557,13 @@ assertGatewayGauge(
         && $treemapData['treemap']['style']['groupColors']['House'] === '#123456'
         && $treemapData['treemap']['style']['showValues'] === true
         && $treemapData['treemap']['style']['groupLabelFontSizePercent'] === 150
-        && $treemapData['treemap']['style']['subgroupLabelColor'] === '#ABCDEF',
+        && $treemapData['treemap']['style']['subgroupLabelColor'] === '#ABCDEF'
+        && $treemapData['treemap']['style']['frameColor'] === '#123456'
+        && $treemapData['treemap']['style']['groupGapWidth'] === 8
+        && $treemapData['treemap']['style']['level1BorderWidth'] === 7
+        && $treemapData['treemap']['style']['level2GapWidth'] === 6
+        && $treemapData['treemap']['style']['allowPanZoom'] === false
+        && $treemapData['treemap']['style']['showBreadcrumb'] === false,
     'Treemap must group distinct current variables without changing their IDs.'
 );
 $treemapTile = $treemap->GetVisualizationTile();
@@ -9561,6 +9574,7 @@ assertGatewayGauge(
         && str_contains($treemapTile, '"showLabels":true')
         && str_contains($treemapIPSView, '"showLabels":false')
         && str_contains($treemapIPSView, '#FEDCBA')
+        && str_contains($treemapIPSView, '"clickToZoom":false')
         && !str_contains($treemapTile, '#FEDCBA')
         && strlen($treemapTile) < SYMCON_OUTPUT_BUFFER_LIMIT
         && strlen($treemapIPSView) < SYMCON_OUTPUT_BUFFER_LIMIT
@@ -9568,7 +9582,12 @@ assertGatewayGauge(
         && findGaugeFormElement($treemapForm['elements'], 'IPSViewBarPreview')['type'] === 'Image'
         && findGaugeFormElement($treemapForm['elements'], 'GroupColors')['type'] === 'List'
         && str_contains(findGaugeFormElement($treemapForm['elements'], 'GroupColors')['onAdd'], 'ECTM_UpdateBarPreviewFromForm')
-        && findGaugeFormElement($treemapForm['elements'], 'IPSViewGroupColors')['type'] === 'List',
+        && findGaugeFormElement($treemapForm['elements'], 'IPSViewGroupColors')['type'] === 'List'
+        && findGaugeFormElement($treemapForm['elements'], 'Level1BorderWidth')['type'] === 'NumberSpinner'
+        && findGaugeFormElement($treemapForm['elements'], 'GroupGapWidth')['type'] === 'NumberSpinner'
+        && findGaugeFormElement($treemapForm['elements'], 'IPSViewLevel1BorderWidth')['type'] === 'NumberSpinner'
+        && findGaugeFormElement($treemapForm['elements'], 'ShowBreadcrumb')['type'] === 'CheckBox'
+        && findGaugeFormElement($treemapForm['elements'], 'IPSViewShowBreadcrumb')['type'] === 'CheckBox',
     'Treemap must render separate Tile and IPSView designs below Symcon output limit.'
 );
 $updatesBefore = count($treemap->GetTestVisualizationUpdates());
@@ -9586,6 +9605,8 @@ $previewSvg = base64_decode(substr($previewUpdate, strlen('data:image/svg+xml;ba
 assertGatewayGauge(
     is_string($previewSvg) && str_contains($previewSvg, '&lt;Room&gt;')
         && str_contains($previewSvg, '#BADA55')
+        && str_contains($previewSvg, 'stroke="#123456" stroke-width="7"')
+        && !str_contains($previewSvg, 'Navigation path')
         && !str_contains($previewSvg, '<Room>'),
     'Treemap draft preview must escape group names.'
 );
@@ -9597,6 +9618,10 @@ assertGatewayGauge(
     'Treemap must reject negative values.'
 );
 $GLOBALS['symconTestVariables'][4717]['Value'] = $originalTreemapValue;
+$treemap->SetTestProperty('Level1BorderWidth', 13);
+$treemap->ApplyChanges();
+assertGatewayGauge($treemap->GetTestStatus() === 202, 'Treemap must reject excessive frame widths.');
+$treemap->SetTestProperty('Level1BorderWidth', 7);
 $treemap->SetTestProperty('GroupColors', json_encode([
     ['Group' => 'House', 'Color' => 0x123456], ['Group' => 'House', 'Color' => 0x654321]
 ], JSON_THROW_ON_ERROR));

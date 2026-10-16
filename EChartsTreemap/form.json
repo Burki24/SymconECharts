@@ -296,6 +296,105 @@
                             "transparentCaption": "Automatic (theme)"
                         }
                     ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "GroupGapWidth",
+                            "caption": "Gap between groups",
+                            "minimum": 0,
+                            "maximum": 12,
+                            "suffix": "px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "Level1BorderWidth",
+                            "caption": "Level 1 frame (groups)",
+                            "minimum": 0,
+                            "maximum": 12,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "Level1GapWidth",
+                            "caption": "Gap inside groups",
+                            "minimum": 0,
+                            "maximum": 12,
+                            "suffix": "px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "Level2BorderWidth",
+                            "caption": "Level 2 frame",
+                            "minimum": 0,
+                            "maximum": 12,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "Level2GapWidth",
+                            "caption": "Gap inside subgroups",
+                            "minimum": 0,
+                            "maximum": 12,
+                            "suffix": "px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "Level3BorderWidth",
+                            "caption": "Level 3 frame",
+                            "minimum": 0,
+                            "maximum": 12,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "FrameColor",
+                            "caption": "Frame and gap color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (ECharts)"
+                        }
+                    ]
+                },
+                {
+                    "type": "Label",
+                    "caption": "Level 2 contains subgroups or direct values; level 3 contains values inside subgroups."
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "AllowPanZoom",
+                            "caption": "Allow pan and zoom"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ClickToZoom",
+                            "caption": "Zoom on node click"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowBreadcrumb",
+                            "caption": "Show navigation path"
+                        }
+                    ]
                 }
             ]
         }

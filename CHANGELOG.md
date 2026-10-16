@@ -2,6 +2,12 @@
 
 ## Hinzugefügt
 
+- Treemap-Rahmen sind je Hierarchieebene einstellbar, Abstände zwischen
+  Gruppen sowie innerhalb von Gruppen und Untergruppen. Auch die gemeinsame
+  Rahmenfarbe, Verschieben/Zoomen, Klick-Zoom und
+  Navigationspfad lassen sich für Kachel und IPSView getrennt schalten.
+  Die bisherigen Werte bleiben als Standard erhalten.
+
 - Treemap-Gruppen können eigene feste Farben erhalten. Gruppen- und
   Untergruppentitel lassen sich unabhängig von den Werte-Beschriftungen
   gestalten; Blattwerte können optional im Rechteck erscheinen. Kachel und
