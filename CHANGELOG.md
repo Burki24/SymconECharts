@@ -84,6 +84,9 @@
 
 ## Behoben
 
+- Die neuen Linien-, Achsen- und Animationsfelder im Parallel-Designer sind
+  auch in der deutschen Symcon-Konsole vollständig übersetzt.
+
 - Der Zigbee-Graph hält die Kopfzeile der Symcon-Kachel auch bei großen
   Force-Layouts und ohne eigenen Diagrammtitel frei. Knoten und Verbindungen
   werden nur unterhalb des Kachelnamens gezeichnet.

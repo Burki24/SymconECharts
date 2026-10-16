@@ -7804,6 +7804,13 @@ $requiredGermanFormTexts = [
         'Typography and colors', 'Title size', 'Legend size', 'Label size',
         'Title color', 'Legend color', 'Label color'
     ],
+    'EChartsParallel' => [
+        'Animate Parallel', 'Initial animation', 'Update animation', 'Initial easing', 'Update easing',
+        'Initial delay', 'Update delay', 'ECharts default (cubicInOut)', 'Gentle (quadraticInOut)',
+        'Ease out (cubicOut)', 'Sine (sinusoidalInOut)', 'Bounce', 'Elastic',
+        'Line type', 'Solid', 'Dashed', 'Dotted', 'Selected line opacity', 'Other line opacity',
+        'Axes', 'Show axis values', 'Show axis ticks', 'Axis width', 'Axis title distance'
+    ],
     'EChartsGaugeTacho' => [
         'SVG pivot', 'Hub border', 'Colors', 'Scale font', 'Value font', 'Title font',
         'PointerColor', 'AnchorColor', 'AnchorBorderColor', 'RingColor', 'ScaleColor',
