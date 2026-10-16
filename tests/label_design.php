@@ -43,4 +43,28 @@ assertLabelDesign(
     'Schematic bar labels must reflect configured distance.'
 );
 
+require_once dirname(__DIR__) . '/libs/EChartsPreviewSymbol.php';
+assertLabelDesign(
+    \SymconECharts\EChartsPreviewSymbol::Symbol('circle', 10, 20, 3, '#123456') === '<circle cx="10" cy="20" r="3" fill="#123456"/>',
+    'Extracted TimeSeries point geometry must preserve the original circle output.'
+);
+assertLabelDesign(
+    \SymconECharts\EChartsPreviewSymbol::Symbol('none', 10, 20, 3, '#123456') === ''
+    && \SymconECharts\EChartsPreviewSymbol::Symbol('diamond', 10, 20, 0, '#123456') === '',
+    'Hidden and zero-size points must not create preview shapes.'
+);
+$styledSymbol = \SymconECharts\EChartsPreviewSymbol::Symbol(
+    'emptyCircle',
+    10,
+    20,
+    3,
+    '#123456',
+    ['rotate' => 30, 'opacityPercent' => 60, 'borderWidth' => 3, 'borderColor' => '#ABCDEF']
+);
+assertLabelDesign(
+    str_contains($styledSymbol, 'rotate(-30 10 20)') && str_contains($styledSymbol, 'opacity="0.6"')
+    && str_contains($styledSymbol, 'fill="#FFFFFF"') && str_contains($styledSymbol, 'stroke-width="3"')
+    && str_contains($styledSymbol, 'stroke="#ABCDEF"'),
+    'Radar point previews must support hollow symbols, rotation, borders and opacity.'
+);
 echo "Shared ECharts label design verified.\n";

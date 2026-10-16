@@ -94,7 +94,67 @@ tile.window.handleMessage({ status: 'error', error: 'Configure valid Radar axes 
 assert.equal(tile.errorElement.hidden, false);
 assert.equal(tile.chartElement.hidden, true, 'Configuration errors must not retain misleading data.');
 const echarts = require(path.join(root, '.tools/echarts-runtime/node_modules/echarts'));
-for (const option of [render(model).option, custom.option]) {
+const decorated = render({ ...model, radar: { ...model.radar, style: { ...model.radar.style,
+    groupColors: { '<Room>': '#ff0000' }, lineType: 'dashed', symbol: 'diamond', symbolRotate: 30,
+    symbolBorderWidth: 2, symbolBorderColor: '#00ff00', symbolOpacityPercent: 60,
+    showValues: true, valueFontSizePercent: 150, valueColor: '#abcdef', valueLabelPosition: 'right', valueLabelDistance: 8,
+    valueLabelBold: true, titleBold: false, axisLabelBold: true, showAxisRange: false,
+    showAxisLines: false, axisLineWidth: 3, axisLineOpacityPercent: 75,
+    showSplitLines: false, splitLineWidth: 2, splitLineType: 'dotted', splitLineOpacityPercent: 80,
+    splitAreaColor1: '#112233', splitAreaColor2: '#445566', splitAreaOpacityPercent: 45,
+    legendPosition: 'top', legendFontSizePercent: 150, legendColor: '#123456', hoverFocus: 'none',
+    areaShadowBlur: 8, areaShadowColor: '#654321'
+} } }).option;
+assert.equal(decorated.series[0].lineStyle.type, 'dashed');
+assert.equal(decorated.series[0].data[0].itemStyle.color, '#ff0000');
+assert.equal(decorated.series[0].data[0].lineStyle.color, '#ff0000');
+assert.equal(decorated.series[0].symbol, 'diamond');
+assert.equal(decorated.series[0].symbolRotate, 30);
+assert.equal(decorated.series[0].itemStyle.borderColor, '#00ff00');
+assert.equal(decorated.series[0].itemStyle.borderWidth, 2);
+assert.equal(decorated.series[0].itemStyle.opacity, 0.6);
+assert.equal(decorated.series[0].label.fontSize, 18);
+assert.equal(decorated.series[0].label.opacity, 1, 'Point opacity must not make independently configured labels unreadable.');
+assert.equal(decorated.series[0].label.position, 'right');
+assert.equal(decorated.series[0].label.distance, 8);
+assert.equal(decorated.series[0].label.fontWeight, 'bold');
+assert.match(decorated.series[0].label.formatter({ data: decorated.series[0].data[0], dimensionIndex: 2 }), /^2[,.]500 ppm$/);
+assert.equal(decorated.series[0].emphasis.disabled, true);
+assert.equal(decorated.series[0].areaStyle.shadowBlur, 8);
+assert.equal(decorated.title.textStyle.fontWeight, 'normal');
+assert.equal(decorated.radar.axisName.fontWeight, 'bold');
+assert.equal(decorated.radar.indicator[0].name, '<Temperature>');
+assert.equal(decorated.radar.axisLine.show, false);
+assert.equal(decorated.radar.axisLine.lineStyle.width, 3);
+assert.equal(decorated.radar.axisLine.lineStyle.opacity, 0.75);
+assert.equal(decorated.radar.splitLine.show, false);
+assert.equal(decorated.radar.splitLine.lineStyle.type, 'dotted');
+assert.equal(decorated.radar.splitLine.lineStyle.width, 2);
+assert.equal(decorated.radar.splitLine.lineStyle.opacity, 0.8);
+assert.equal(decorated.radar.splitArea.areaStyle.color[0], '#112233');
+assert.equal(decorated.radar.splitArea.areaStyle.opacity, 0.45);
+assert.equal(decorated.legend.textStyle.fontSize, 18);
+assert.equal(decorated.legend.textStyle.color, '#123456');
+assert.ok(decorated.legend.top > decorated.title.top);
+for (const hide of [true, false]) {
+    const repeated = { ...model, radar: { ...model.radar, data: [model.radar.data[1], { ...model.radar.data[1], id: 'third', name: 'Same values' }],
+        style: { ...model.radar.style, showValues: true, hideOverlappingValueLabels: hide } } };
+    const option = render(repeated).option;
+    assert.equal(option.series[0].labelLayout.hideOverlap, hide);
+    const engine = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 900, height: 500 });
+    engine.setOption(option);
+    const actual = engine.getModel().getSeriesByIndex(0).getData();
+    let visible = 0;
+    for (let index = 0; index < actual.count(); index++) {
+        actual.getItemGraphicEl(index).childAt(2).eachChild(symbol => {
+            const label = symbol.getTextContent();
+            if (label && !label.ignore) { visible++; }
+        });
+    }
+    assert.equal(visible, hide ? 3 : 6, 'Real Radar labels must honor the overlap switch without losing the data points.');
+    engine.dispose();
+}
+for (const option of [render(model).option, custom.option, decorated]) {
     const chart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 900, height: 500 });
     chart.setOption(option);
     const series = chart.getModel().getSeriesByIndex(0);
@@ -102,6 +162,12 @@ for (const option of [render(model).option, custom.option]) {
     const points = series.getData().getItemLayout(0);
     assert.ok(points.every(point => point.every(Number.isFinite)), 'Real Radar geometry must remain finite.');
     assert.match(chart.renderToSVGString(), /<path/);
+    if (option === decorated) {
+        const symbols = series.getData().getItemGraphicEl(0).childAt(2);
+        assert.match(symbols.childAt(2).getTextContent().style.text, /^2[,.]500 ppm$/);
+        assert.equal(symbols.childAt(0).style.fill, '#ff0000');
+        assert.equal(symbols.childAt(0).style.lineWidth, 2);
+    }
     chart.dispose();
 }
 console.log('Radar layout and real ECharts geometry verified.');

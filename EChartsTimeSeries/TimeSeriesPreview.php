@@ -8,6 +8,7 @@ use Burki24\SymconModuleHelper\SVGPreviewHelper;
 
 require_once __DIR__ . '/../libs/EChartsPreviewSourceCount.php';
 require_once __DIR__ . '/../libs/EChartsLabelDesign.php';
+require_once __DIR__ . '/../libs/EChartsPreviewSymbol.php';
 
 final class EChartsTimeSeriesPreview
 {
@@ -351,29 +352,7 @@ final class EChartsTimeSeriesPreview
 
     private static function Symbol(string $symbol, float $x, float $y, float $radius, string $color): string
     {
-        $fill = SVGPreviewHelper::escape($color);
-        $xValue = self::N($x);
-        $yValue = self::N($y);
-        $radiusValue = self::N($radius);
-
-        return match ($symbol) {
-            'rect', 'roundRect' => '<rect x="' . self::N($x - $radius) . '" y="' . self::N($y - $radius)
-                . '" width="' . self::N($radius * 2) . '" height="' . self::N($radius * 2) . '"'
-                . ($symbol === 'roundRect' ? ' rx="' . self::N($radius * 0.45) . '"' : '') . ' fill="' . $fill . '"/>',
-            'triangle' => '<path d="M ' . $xValue . ' ' . self::N($y - $radius)
-                . ' L ' . self::N($x + $radius) . ' ' . self::N($y + $radius)
-                . ' L ' . self::N($x - $radius) . ' ' . self::N($y + $radius) . ' Z" fill="' . $fill . '"/>',
-            'diamond' => '<path d="M ' . $xValue . ' ' . self::N($y - $radius)
-                . ' L ' . self::N($x + $radius) . ' ' . $yValue
-                . ' L ' . $xValue . ' ' . self::N($y + $radius)
-                . ' L ' . self::N($x - $radius) . ' ' . $yValue . ' Z" fill="' . $fill . '"/>',
-            'pin', 'arrow' => '<path d="M ' . $xValue . ' ' . self::N($y - $radius)
-                . ' L ' . self::N($x + $radius) . ' ' . $yValue
-                . ' L ' . $xValue . ' ' . self::N($y + $radius)
-                . ' L ' . self::N($x - $radius) . ' ' . $yValue . ' Z" fill="' . $fill . '"/>',
-            default => '<circle cx="' . $xValue . '" cy="' . $yValue . '" r="' . $radiusValue
-                . '" fill="' . $fill . '"/>'
-        };
+        return EChartsPreviewSymbol::Symbol($symbol, $x, $y, $radius, $color);
     }
 
     private static function N(float $value): string

@@ -36,9 +36,40 @@ Aria und Canvas. Grundlage: [Radar-Serie](https://echarts.apache.org/en/option.h
 und [Radar-Koordinaten](https://echarts.apache.org/en/option.html#radar).
 Dataset ist für diese einzelne Vergleichsserie nicht erforderlich.
 
-Lokale Modell-, Gateway-, Formular-, Budget- und echte Rendererprüfungen sind
-erforderlich. Symcon-/IPSView-Live-Tests erfolgen nach Installation durch den
-Anwender; sie sind noch nicht bestätigt. Bestehende Instanzen bleiben unverändert.
+Die erste Radar-Version wurde am 16.10.2026 durch den Anwender in Kachel und
+IPSView erfolgreich live geprüft. Die nachfolgende Designer-Erweiterung
+benötigt nach Installation einen erneuten Live-Test. Bestehende Instanzen,
+Datenzuordnungen und Wertebereiche bleiben unverändert.
+
+## Designer-Ergänzung vom 16.10.2026
+
+Abgleich mit der offiziellen [Radar-Serie](https://echarts.apache.org/en/option.html#series-radar)
+und den [Radar-Koordinaten](https://echarts.apache.org/en/option.html#radar):
+Linienarten, Symbolformen, Drehung, Symbolrand und -deckkraft, Originalwert-
+Beschriftungen sowie Flächenschatten werden als begrenzte statische Optionen
+angeboten. Achsenbereiche, Achsen-/Rasterlinien, Rasterflächenfarben,
+Schriftgewicht und Legende sind separat gestaltbar. Hover-Fokus bleibt
+abschaltbar. `GroupColors`/`IPSViewGroupColors` sind begrenzte Listen aus
+`Group` und Integer-`Color` (-1 = Theme); Gruppennamen sind die bereits
+bestehenden expliziten fachlichen Identitäten, keine Variablennamen.
+Pro Design sind maximal acht eindeutige Farbzuordnungen zulässig.
+Nicht verwendete Zuordnungen bleiben für spätere Änderungen erhalten.
+
+Defaultwerte erhalten die erste Darstellung; es gibt keine automatische
+Änderung gespeicherter Properties. Neue Optionen nutzen die vorhandene
+Vorschau-, Animations-, Theme- und IPSView-Verdrahtung. Die SVG-Punktsymbole
+aus TimeSeries werden nach `libs/EChartsPreviewSymbol.php` extrahiert und
+von beiden Familien verwendet; Radar ergänzt begrenzte Rand-/Rotationsstile.
+Rechteckbezogene Textpositionierung nutzt `EChartsLabelDesign::PreviewRect`.
+Die Gruppenfarbvalidierung bleibt wegen des abweichenden Acht-Gruppen-
+Vertrags und hilfreicher Fehlerdiagnosen lokal. Keine Helper-Kopie wird geändert.
+
+Freie JavaScript-Formatter, externe Bild-/Pfadsymbole, beliebige Decal- oder
+Gradientenobjekte und zusätzliche Auswahlzustände werden nicht als ungeprüfte
+Konfigurationsinhalte importiert. Die Radar-Runtime ergänzt ausschließlich das
+offizielle `LabelLayout` der unveränderten ECharts-6.1.0-Basis für den
+abschaltbaren Überlappungsschutz der Punktwerte. Integritätswert und
+Lieferumfang werden aktualisiert; das 550-KB-Runtimebudget bleibt eingehalten.
 
 ## Prüfnachweise vom 16.10.2026
 

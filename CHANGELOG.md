@@ -2,6 +2,13 @@
 
 ## Hinzugefügt
 
+- Der Radar-Designer bietet individuelle Gruppenfarben, Linienarten,
+  Flächenschatten, Symbolformen mit Drehung, Rand und Deckkraft,
+  Originalwert-Beschriftungen mit abschaltbarem Überlappungsschutz,
+  feinere Achsen- und Rastergestaltung sowie
+  Legendenposition, Schriftgröße und Farbe. Beide Ausgabewege besitzen eigene
+  Einstellungen und aktuelle Vorschauen; bestehende Konfigurationen bleiben erhalten.
+
 - `EChartsRadar` (`ECRA`) vergleicht 1–8 manuelle Gruppen anhand aktueller
   Variablenwerte auf 3–10 gemeinsamen Achsen. Jede Achse hat einen eigenen
   Wertebereich, eine Einheit und Nachkommastellen. Kachel und IPSView bieten

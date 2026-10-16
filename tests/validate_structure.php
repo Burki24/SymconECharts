@@ -189,6 +189,7 @@ $requiredFiles = [
     'tests/sankey_layout.js',
     'EChartsRadar/RadarModel.php',
     'EChartsRadar/RadarPreview.php',
+    'libs/EChartsPreviewSymbol.php',
     'EChartsRadar/visualization/index.html',
     'EChartsRadar/visualization/style.css',
     'EChartsRadar/visualization/app.js',

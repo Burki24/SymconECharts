@@ -70,8 +70,11 @@
         var width = chartElement.clientWidth || 1;
         var height = chartElement.clientHeight || 1;
         var legendRows = style.showLegend === false ? 0 : Math.ceil((radar.data || []).length / (compact ? 2 : 4));
-        var bottom = 22 + legendRows * 22 + (radar.clippedCount > 0 ? 26 : 0);
-        var top = titleLayout.contentTop + axisSize * 2 + 20;
+        var legendSize = design.fontSizePercent(style.legendFontSizePercent, 12);
+        var legendTop = style.legendPosition === 'top';
+        var legendSpace = legendRows * (legendSize + 10);
+        var bottom = 22 + (legendTop ? 0 : legendSpace) + (radar.clippedCount > 0 ? 26 : 0);
+        var top = titleLayout.contentTop + axisSize * 2 + 20 + (legendTop ? legendSpace : 0);
         var axisWidth = Math.min(compact ? 90 : 150, Math.max(30, width / 4));
         var nameGap = style.axisNameGap == null ? 15 : style.axisNameGap;
         var radius = Math.max(1, Math.min(width / 2 - axisWidth - nameGap - 12, (height - top - bottom) / 2 - axisSize * 2));
@@ -86,9 +89,10 @@
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
             aria: { enabled: true },
             title: { show: titleLayout.show, text: String(radar.title || ''), left: 'center', top: titleLayout.top,
-                textStyle: { color: style.titleColor || colors.text, fontSize: titleSize } },
-            legend: { show: style.showLegend !== false, type: 'scroll', bottom: radar.clippedCount > 0 ? 32 : 8,
-                left: 12, right: 12, textStyle: { color: style.axisColor || colors.text, width: compact ? 100 : 160,
+                textStyle: { color: style.titleColor || colors.text, fontSize: titleSize, fontWeight: style.titleBold === false ? 'normal' : 'bold' } },
+            legend: { show: style.showLegend !== false, type: 'scroll',
+                ...(legendTop ? { top: titleLayout.contentTop + 4 } : { bottom: radar.clippedCount > 0 ? 32 : 8 }),
+                left: 12, right: 12, textStyle: { color: style.legendColor || style.axisColor || colors.text, fontSize: legendSize, width: compact ? 100 : 160,
                     overflow: 'truncate' }, tooltip: { show: true } },
             tooltip: { show: style.showTooltip !== false, trigger: 'item', confine: true,
                 formatter: function (parameter) {
@@ -102,21 +106,46 @@
                 clockwise: style.clockwise === true, splitNumber: style.splitNumber || 5,
                 axisNameGap: nameGap,
                 axisName: { show: style.showAxisNames !== false, color: style.axisColor || colors.text, fontSize: axisSize,
-                    width: axisWidth, overflow: 'truncate', lineHeight: axisSize * 1.25 },
+                    width: axisWidth, overflow: 'truncate', lineHeight: axisSize * 1.25, fontWeight: style.axisLabelBold === true ? 'bold' : 'normal' },
                 axisLabel: { show: style.showAxisValues === true, formatter: '{value}%', color: style.axisColor || colors.muted },
-                axisLine: { lineStyle: { color: style.gridColor || colors.border, opacity: 0.5 } },
-                splitLine: { lineStyle: { color: style.gridColor || colors.border, opacity: 0.4 } },
-                splitArea: { show: style.showSplitArea !== false, areaStyle: { color: ['rgba(128,128,128,0.03)', 'rgba(128,128,128,0.09)'] } },
+                axisLine: { show: style.showAxisLines !== false, lineStyle: { color: style.gridColor || colors.border,
+                    width: style.axisLineWidth == null ? 1 : style.axisLineWidth,
+                    opacity: style.axisLineOpacityPercent == null ? 0.5 : style.axisLineOpacityPercent / 100 } },
+                splitLine: { show: style.showSplitLines !== false, lineStyle: { color: style.gridColor || colors.border,
+                    width: style.splitLineWidth == null ? 1 : style.splitLineWidth, type: style.splitLineType || 'solid',
+                    opacity: style.splitLineOpacityPercent == null ? 0.4 : style.splitLineOpacityPercent / 100 } },
+                splitArea: { show: style.showSplitArea !== false, areaStyle: {
+                    color: [style.splitAreaColor1 || 'rgba(128,128,128,0.03)', style.splitAreaColor2 || 'rgba(128,128,128,0.09)'],
+                    opacity: style.splitAreaOpacityPercent == null ? 1 : style.splitAreaOpacityPercent / 100 } },
                 indicator: axes.map(function (axis) {
-                    return { name: axis.Label + '\n' + rawValue(axis.Minimum, axis) + ' … ' + rawValue(axis.Maximum, axis), min: 0, max: 100 };
+                    return { name: axis.Label + (style.showAxisRange === false ? '' : '\n' + rawValue(axis.Minimum, axis) + ' … ' + rawValue(axis.Maximum, axis)), min: 0, max: 100 };
                 }) },
-            series: [{ id: 'radar', type: 'radar', symbol: 'circle', symbolSize: style.symbolSize == null ? 4 : style.symbolSize,
+            series: [{ id: 'radar', type: 'radar', symbol: style.symbol || 'circle', symbolSize: style.symbolSize == null ? 4 : style.symbolSize,
+                symbolRotate: Number(style.symbolRotate) || 0,
+                labelLayout: { hideOverlap: style.hideOverlappingValueLabels !== false },
+                itemStyle: { borderWidth: Number(style.symbolBorderWidth) || 0,
+                    ...(style.symbolBorderColor ? { borderColor: style.symbolBorderColor } : {}),
+                    opacity: style.symbolOpacityPercent == null ? 1 : style.symbolOpacityPercent / 100 },
+                label: { show: style.showValues === true, opacity: 1, position: style.valueLabelPosition || 'top',
+                    distance: style.valueLabelDistance == null ? 5 : style.valueLabelDistance,
+                    color: style.valueColor || colors.text, fontSize: design.fontSizePercent(style.valueFontSizePercent, compact ? 10 : 12),
+                    fontWeight: style.valueLabelBold === true ? 'bold' : 'normal',
+                    formatter: function (parameter) {
+                        var index = parameter.dimensionIndex;
+                        return axes[index] ? rawValue((parameter.data.rawValues || [])[index], axes[index]) : '';
+                    } },
                 lineStyle: { width: style.lineWidth == null ? 2 : style.lineWidth,
+                    type: style.lineType || 'solid',
                     opacity: style.lineOpacityPercent == null ? 1 : style.lineOpacityPercent / 100 },
-                areaStyle: { opacity: style.areaOpacityPercent == null ? 0.25 : style.areaOpacityPercent / 100 },
-                emphasis: { focus: 'self' },
+                areaStyle: { opacity: style.areaOpacityPercent == null ? 0.25 : style.areaOpacityPercent / 100,
+                    shadowBlur: Number(style.areaShadowBlur) || 0, shadowColor: style.areaShadowColor || 'rgba(0,0,0,0.35)' },
+                emphasis: { focus: style.hoverFocus === 'none' ? 'none' : 'self', disabled: style.hoverFocus === 'none',
+                    label: { show: style.showValues === true } },
                 data: (radar.data || []).map(function (item) {
-                    return { id: item.id, name: item.name, value: item.percentValues, rawValues: item.values };
+                    var overrides = style.groupColors || {};
+                    var color = Object.prototype.hasOwnProperty.call(overrides, item.name) ? overrides[item.name] : '';
+                    return { id: item.id, name: item.name, value: item.percentValues, rawValues: item.values,
+                        ...(color ? { itemStyle: { color: color }, lineStyle: { color: color }, areaStyle: { color: color } } : {}) };
                 }) }]
         };
     }

@@ -96,6 +96,65 @@ foreach (['', 'IPSView'] as $radarPrefix) {
         assertGatewayGauge($radar->GetTestStatus() === IS_ACTIVE, 'Radar must recover after correcting design: ' . $radarPrefix . $name);
     }
 }
+$radar->SetTestProperty('GroupColors', '[{"Group":"Room <one>","Color":16711680}]');
+$radar->SetTestProperty('IPSViewGroupColors', '[{"Group":"Room <one>","Color":65280}]');
+$radar->SetTestProperty('LineType', 'dashed');
+$radar->SetTestProperty('Symbol', 'diamond');
+$radar->SetTestProperty('SymbolRotate', 30);
+$radar->SetTestProperty('SymbolBorderWidth', 2);
+$radar->SetTestProperty('ShowValues', true);
+$radar->SetTestProperty('ShowAxisRange', false);
+$radar->SetTestProperty('AreaShadowBlur', 8);
+$radar->SetTestProperty('LegendPosition', 'top');
+$radar->ApplyChanges();
+$radarDecorated = json_decode($radar->GetRadarData(), true)['radar'];
+assertGatewayGauge(
+    $radarDecorated['style']['groupColors'] === ['Room <one>' => '#FF0000']
+    && $radarDecorated['style']['lineType'] === 'dashed' && $radarDecorated['style']['showValues'] === true
+    && $radarDecorated['data'][0]['values'] === [-5.0, 0.0, 2500.0]
+    && str_contains($radar->GetIPSViewHTML(), '#00FF00'),
+    'Radar design extensions must preserve raw values and independent group colors.'
+);
+$radarDecoratedForm = json_decode($radar->GetConfigurationForm(), true);
+$radarDecoratedSVG = base64_decode(substr(findGaugeFormElement($radarDecoratedForm['elements'], 'BarPreview')['image'], strlen('data:image/svg+xml;base64,')), true);
+assertGatewayGauge(
+    str_contains($radarDecoratedSVG, '#FF0000') && str_contains($radarDecoratedSVG, 'data-value="2500"')
+    && str_contains($radarDecoratedSVG, 'stroke-dasharray="6 4"') && str_contains($radarDecoratedSVG, 'rotate(-30')
+    && str_contains($radarDecoratedSVG, 'filter="url(#area-shadow-0)"'),
+    'Radar SVG previews must show individual colors, original values, line types, symbol rotation and area shadows.'
+);
+$radarDraftSources = array_map(static fn (array $row): array => [...$row, 'Group' => 'Unsaved group'], $radarSources);
+$radar->UpdateBarPreviewFromForm(json_encode(['Sources' => $radarDraftSources,
+    'GroupColors'                                       => [['Group' => 'Unsaved group', 'Color' => 0xABCDEF]], 'LineType' => 'dotted', 'Symbol' => 'triangle'], JSON_THROW_ON_ERROR));
+$radarColorUpdates = array_values(array_filter($radar->GetTestFormUpdates(), static fn (array $update): bool => $update['Field'] === 'GroupColors' && $update['Parameter'] === 'form'));
+$radarColorDraftSVG = base64_decode(substr(array_slice($radar->GetTestFormUpdates(), -2)[0]['Value'], strlen('data:image/svg+xml;base64,')), true);
+assertGatewayGauge(
+    json_decode(end($radarColorUpdates)['Value'], true)[0]['options'][1]['value'] === 'Unsaved group'
+    && str_contains($radarColorDraftSVG, '#ABCDEF') && str_contains($radarColorDraftSVG, 'stroke-dasharray="2 3"')
+    && json_decode($radar->GetRadarData(), true)['radar']['style']['groupColors'] === ['Room <one>' => '#FF0000'],
+    'Both color selectors and actual SVG design must reflect unsaved groups without persisting draft changes.'
+);
+if (class_exists(DOMDocument::class)) {
+    assertGatewayGauge($radarXML->loadXML($radarDecoratedSVG, LIBXML_NONET) && $radarXML->loadXML($radarColorDraftSVG, LIBXML_NONET), 'Decorated Radar previews must remain valid XML.');
+}
+foreach (['', 'IPSView'] as $radarPrefix) {
+    foreach (['LineType'          => ['invalid', 'dashed'], 'Symbol' => ['path://unsafe', 'diamond'], 'SymbolRotate' => [181, 30],
+        'SymbolBorderWidth'       => [9, 2], 'SymbolOpacityPercent' => [-1, 100], 'AxisLineWidth' => [9, 1],
+        'AxisLineOpacityPercent'  => [101, 50], 'SplitLineWidth' => [-1, 1], 'SplitLineType' => ['invalid', 'solid'],
+        'SplitLineOpacityPercent' => [101, 40], 'SplitAreaColor1' => [-2, -1], 'SplitAreaColor2' => [0x1000000, -1],
+        'SplitAreaOpacityPercent' => [101, 100], 'ValueFontSizePercent' => [49, 100], 'ValueColor' => [-2, -1],
+        'ValueLabelPosition'      => ['invalid', 'top'], 'ValueLabelDistance' => [31, 5], 'LegendFontSizePercent' => [201, 100],
+        'LegendPosition'          => ['left', 'top'], 'LegendColor' => [-2, -1], 'HoverFocus' => ['invalid', 'self'],
+        'AreaShadowBlur'          => [21, 8], 'AreaShadowColor' => [-2, -1],
+        'GroupColors'             => ['[{"Group":"same","Color":1},{"Group":"same","Color":2}]', '[]']] as $name => [$invalid, $valid]) {
+        $radar->SetTestProperty($radarPrefix . $name, $invalid);
+        $radar->ApplyChanges();
+        assertGatewayGauge($radar->GetTestStatus() === 202, 'Radar must reject invalid extension: ' . $radarPrefix . $name);
+        $radar->SetTestProperty($radarPrefix . $name, $valid);
+        $radar->ApplyChanges();
+        assertGatewayGauge($radar->GetTestStatus() === IS_ACTIVE, 'Radar must recover after correcting extension: ' . $radarPrefix . $name);
+    }
+}
 $GLOBALS['symconTestCopyTarget'] = $radar;
 try {
     $radar->SetTestProperty('LineWidth', 6);
@@ -104,6 +163,16 @@ try {
     unset($GLOBALS['symconTestCopyTarget']);
 }
 assertGatewayGauge(str_contains($radar->GetIPSViewHTML(), '"lineWidth":6'), 'Radar copy action must initialize the independent IPSView design.');
+assertGatewayGauge(str_contains($radar->GetIPSViewHTML(), '"symbol":"diamond"')
+    && str_contains($radar->GetIPSViewHTML(), '"showValues":true'), 'Copying Radar design must include the new options.');
+$radarRepeatedSources = [...$radarSources, ...array_map(static fn (array $row): array => [...$row, 'Group' => 'Same values'], $radarSources)];
+foreach ([true, false] as $hide) {
+    $radar->UpdateBarPreviewFromForm(json_encode(['Sources' => $radarRepeatedSources, 'ShowValues' => true,
+        'HideOverlappingValueLabels'                        => $hide, 'GroupColors' => []], JSON_THROW_ON_ERROR));
+    $svg = base64_decode(substr(array_slice($radar->GetTestFormUpdates(), -2)[0]['Value'], strlen('data:image/svg+xml;base64,')), true);
+    assertGatewayGauge(substr_count($svg, 'data-value=') === ($hide ? 3 : 6), 'Radar preview must honor the overlap switch while retaining both groups.');
+    assertGatewayGauge(substr_count($svg, 'data-group=') === 2, 'Suppressing labels must not remove Radar groups.');
+}
 $radarUpdateCount = count($radar->GetTestVisualizationUpdates());
 $GLOBALS['symconTestVariables'][88100]['Value'] = 10.0;
 $radar->MessageSink(time(), 88100, VM_UPDATE, []);
@@ -131,6 +200,7 @@ for ($index = 0; $index < 10; ++$index) {
 }
 $radarMaximum->SetTestProperty('Axes', json_encode($radarMaximumAxes, JSON_THROW_ON_ERROR));
 $radarMaximum->SetTestProperty('Sources', json_encode($radarMaximumSources, JSON_THROW_ON_ERROR));
+$radarMaximum->SetTestProperty('GroupColors', json_encode(array_map(static fn (int $group): array => ['Group' => str_repeat('G', 79) . $group, 'Color' => $group], range(0, 7)), JSON_THROW_ON_ERROR));
 $radarMaximum->ApplyChanges();
 assertGatewayGauge(
     $radarMaximum->GetTestStatus() === IS_ACTIVE && $radarMaximum->GetTestReferences() === [88100]

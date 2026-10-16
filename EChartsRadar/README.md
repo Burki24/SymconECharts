@@ -30,8 +30,29 @@ Kacheldesigner und unabhängiger IPSView-Designer bieten Themes, Vieleck oder
 Kreis, Startwinkel und Drehrichtung, Legende, Tooltip, Achsennamen und
 normierte Prozentbeschriftung, Rasterflächen und -teilungen, Linienbreite,
 Linien- und Flächendeckkraft, Symbolgröße, Schriftgrößen, Farben und Animation.
+Zusätzlich stehen zur Verfügung:
+
+- individuelle Farben je Vergleichsgruppe; die Auswahl folgt auch
+  ungespeicherten Gruppennamen. Nicht mehr verwendete Farbzuordnungen bleiben
+  erhalten, werden aber nicht angezeigt. Automatisch folgt dem Theme;
+- durchgezogene, gestrichelte oder gepunktete Verbindungslinien sowie
+  Flächenschatten mit eigener Farbe und Weichzeichnung;
+- Kreis, leerer Kreis, Quadrat, abgerundetes Quadrat, Dreieck, Raute oder
+  keine Punktsymbole, mit Drehung, Randbreite, Randfarbe und Deckkraft;
+- Originalwerte an sichtbaren Punkten mit Position, Abstand, Schriftgröße,
+  Farbe und Fettschrift. Die Angaben behalten ihre jeweiligen Einheiten,
+  auch wenn die Geometrie außerhalb des Achsenbereichs begrenzt wird;
+- separat sichtbare Achsenbereiche, Achsen- und Rasterlinien mit Breite und
+  Deckkraft, Rasterlinienarten und zwei eigene Rasterflächenfarben;
+- Legende oben oder unten mit eigener Schriftgröße und Farbe; Fettschrift
+  für Titel und Achsennamen sowie abschaltbare Hover-Hervorhebung.
+
 Die aktuellen SVG-Vorschauen reagieren bereits auf ungespeicherte Änderungen.
 Sie sind schematisch; die endgültige Anordnung hängt von der Diagrammgröße ab.
+Wertebeschriftungen sind zunächst ausgeschaltet. Der standardmäßig aktive,
+abschaltbare Überlappungsschutz blendet bei ähnlichen Werten einzelne Texte aus;
+die vollständigen Werte bleiben im Tooltip. Bei Punktsymbol „Keine“ oder Größe 0 erscheinen auch
+keine Punktbeschriftungen; Tooltips bleiben verfügbar.
 
 Ein konfigurierter Diagrammtitel steht in der Kachel unter dem Symcon-Kachelnamen
 und Vergrößerungsbutton. Lange Achsentexte werden platzabhängig gekürzt;

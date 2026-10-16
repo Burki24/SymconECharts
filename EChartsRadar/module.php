@@ -31,6 +31,8 @@ require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsBarPreview.php';
+require_once __DIR__ . '/../libs/EChartsPreviewSymbol.php';
+require_once __DIR__ . '/../libs/EChartsLabelDesign.php';
 require_once __DIR__ . '/../libs/EChartsBarPreviewForm.php';
 require_once __DIR__ . '/../libs/EChartsCurrentSources.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
@@ -75,7 +77,16 @@ class EChartsRadar extends IPSModuleStrict
         'ShowSplitArea'        => true, 'SplitNumber' => 5, 'AxisNameGap' => 15,
         'LineWidth'            => 2, 'LineOpacityPercent' => 100, 'AreaOpacityPercent' => 25, 'SymbolSize' => 4,
         'TitleFontSizePercent' => 100, 'AxisFontSizePercent' => 100,
-        'TitleColor'           => -1, 'AxisColor' => -1, 'GridColor' => -1
+        'TitleColor'           => -1, 'AxisColor' => -1, 'GridColor' => -1,
+        'GroupColors'          => '[]', 'LineType' => 'solid', 'Symbol' => 'circle', 'SymbolRotate' => 0,
+        'SymbolBorderWidth'    => 0, 'SymbolBorderColor' => -1, 'SymbolOpacityPercent' => 100,
+        'ShowAxisRange'        => true, 'ShowAxisLines' => true, 'AxisLineWidth' => 1, 'AxisLineOpacityPercent' => 50,
+        'ShowSplitLines'       => true, 'SplitLineWidth' => 1, 'SplitLineType' => 'solid', 'SplitLineOpacityPercent' => 40,
+        'SplitAreaColor1'      => -1, 'SplitAreaColor2' => -1, 'SplitAreaOpacityPercent' => 100,
+        'ShowValues'           => false, 'ValueFontSizePercent' => 100, 'ValueColor' => -1,
+        'ValueLabelPosition'   => 'top', 'ValueLabelDistance' => 5, 'ValueLabelBold' => false, 'HideOverlappingValueLabels' => true,
+        'TitleBold'            => true, 'AxisLabelBold' => false, 'LegendFontSizePercent' => 100, 'LegendColor' => -1,
+        'LegendPosition'       => 'bottom', 'HoverFocus' => 'self', 'AreaShadowBlur' => 0, 'AreaShadowColor' => -1
     ];
 
     public function Create(): void
@@ -138,13 +149,16 @@ class EChartsRadar extends IPSModuleStrict
         $form['elements'][] = ['type' => 'Label', 'name' => 'ConfigurationDiagnostics',
             'caption'                 => $diagnostic !== '' ? $diagnostic : $this->Translate('Radar configuration is valid.')];
         $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
+        $form['elements'] = $this->WithGroupColorOptions($form['elements'], $this->GroupOptions(json_decode($this->ReadPropertyString('Sources'), true)));
         $form['elements'] = $this->WithAnimationFormControls($form['elements']);
         $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
         $form['elements'] = $this->WithAnimationFormCallbacks($form['elements'], 'ECRA');
         $form = $this->WithIPSViewDesignFormState($form, 'ECRA');
         $form = EChartsDesignerSections::Group($form, [
             ['caption' => 'Layout and interaction', 'start' => 'Shape'],
+            ['caption' => 'Axes and grid', 'start' => 'ShowAxisNames'],
             ['caption' => 'Lines and areas', 'start' => 'LineWidth'],
+            ['caption' => 'Symbols and values', 'start' => 'Symbol'],
             ['caption' => 'Labels and typography', 'start' => 'TitleFontSizePercent']
         ]);
         $fields = [
@@ -258,12 +272,39 @@ class EChartsRadar extends IPSModuleStrict
                 $this->UpdateAxisOptions(json_encode($values['Axes'], JSON_THROW_ON_ERROR));
             }
             $this->GetValidatedConfiguration($values);
+            foreach (['GroupColors', 'IPSViewGroupColors'] as $name) {
+                if (array_key_exists($name, $values) && ($name === 'GroupColors'
+                    || !($values['IPSViewUseTileDesign'] ?? $this->ReadPropertyBoolean('IPSViewUseTileDesign')))) {
+                    $this->ParseGroupColors($values[$name]);
+                }
+            }
             $message = $this->Translate('Radar configuration is valid.');
         } catch (Throwable $exception) {
             $message = $exception instanceof JsonException
                 ? $this->Translate('The Radar configuration is not valid JSON.') : $exception->getMessage();
         }
         $this->UpdateFormField('ConfigurationDiagnostics', 'caption', $message);
+        if (isset($values['Sources']) && is_array($values['Sources'])) {
+            $options = $this->GroupOptions($values['Sources']);
+            foreach (['GroupColors', 'IPSViewGroupColors'] as $name) {
+                $field = $this->WithGroupColorOptions($this->LoadConfigurationForm()['elements'], $options);
+                $find = static function (array $items) use (&$find): ?array
+                {
+                    foreach ($items as $item) {
+                        if (($item['name'] ?? '') === 'GroupColors') {
+                            return $item;
+                        }
+                        if (isset($item['items']) && ($found = $find($item['items'])) !== null) {
+                            return $found;
+                        }
+                    }
+                    return null;
+                };
+                $field = $find($field);
+                $this->UpdateFormField($name, 'columns', json_encode($field['columns'], JSON_THROW_ON_ERROR));
+                $this->UpdateFormField($name, 'form', json_encode($field['form'], JSON_THROW_ON_ERROR));
+            }
+        }
         $this->UpdateSharedBarPreviewFromForm($Configuration);
     }
 
@@ -488,15 +529,34 @@ class EChartsRadar extends IPSModuleStrict
             || !in_array($this->ReadPropertyString($prefix . 'Shape'), ['polygon', 'circle'], true)) {
             return false;
         }
-        foreach (['StartAngle' => [0, 360], 'SplitNumber' => [1, 10], 'AxisNameGap' => [0, 40],
-            'LineWidth'        => [0, 8], 'LineOpacityPercent' => [0, 100], 'AreaOpacityPercent' => [0, 100],
-            'SymbolSize'       => [0, 16], 'TitleFontSizePercent' => [50, 200], 'AxisFontSizePercent' => [50, 200]] as $name => [$minimum, $maximum]) {
+        foreach (['LineType'     => ['solid', 'dashed', 'dotted'], 'SplitLineType' => ['solid', 'dashed', 'dotted'],
+            'Symbol'             => ['circle', 'emptyCircle', 'rect', 'roundRect', 'triangle', 'diamond', 'none'],
+            'ValueLabelPosition' => ['top', 'bottom', 'left', 'right', 'inside'],
+            'LegendPosition'     => ['top', 'bottom'], 'HoverFocus' => ['self', 'none']] as $name => $allowed) {
+            if (!in_array($this->ReadPropertyString($prefix . $name), $allowed, true)) {
+                return false;
+            }
+        }
+        try {
+            $this->ParseGroupColors($this->ReadPropertyString($prefix . 'GroupColors'));
+        } catch (Throwable) {
+            return false;
+        }
+        foreach (['StartAngle'        => [0, 360], 'SplitNumber' => [1, 10], 'AxisNameGap' => [0, 40],
+            'LineWidth'               => [0, 8], 'LineOpacityPercent' => [0, 100], 'AreaOpacityPercent' => [0, 100],
+            'SymbolSize'              => [0, 16], 'TitleFontSizePercent' => [50, 200], 'AxisFontSizePercent' => [50, 200],
+            'SymbolRotate'            => [-180, 180], 'SymbolBorderWidth' => [0, 8], 'SymbolOpacityPercent' => [0, 100],
+            'AxisLineWidth'           => [0, 8], 'AxisLineOpacityPercent' => [0, 100], 'SplitLineWidth' => [0, 8],
+            'SplitLineOpacityPercent' => [0, 100], 'SplitAreaOpacityPercent' => [0, 100],
+            'ValueFontSizePercent'    => [50, 200], 'ValueLabelDistance' => [0, 30],
+            'LegendFontSizePercent'   => [50, 200], 'AreaShadowBlur' => [0, 20]] as $name => [$minimum, $maximum]) {
             $value = $this->ReadPropertyInteger($prefix . $name);
             if ($value < $minimum || $value > $maximum) {
                 return false;
             }
         }
-        foreach (['TitleColor', 'AxisColor', 'GridColor'] as $name) {
+        foreach (['TitleColor', 'AxisColor', 'GridColor', 'SymbolBorderColor', 'SplitAreaColor1', 'SplitAreaColor2',
+            'ValueColor', 'LegendColor', 'AreaShadowColor'] as $name) {
             $value = $this->ReadPropertyInteger($prefix . $name);
             if ($value < -1 || $value > 0xFFFFFF) {
                 return false;
@@ -514,17 +574,77 @@ class EChartsRadar extends IPSModuleStrict
             if ($name === 'EChartsTheme') {
                 continue;
             }
+            if ($name === 'GroupColors') {
+                $style['groupColors'] = (object) $this->ParseGroupColors($this->ReadPropertyString($prefix . $name));
+                continue;
+            }
             $key = lcfirst($name);
             $style[$key] = match (gettype($default)) {
                 'boolean' => $this->ReadPropertyBoolean($prefix . $name),
                 'integer' => $this->ReadPropertyInteger($prefix . $name),
                 default   => $this->ReadPropertyString($prefix . $name)
             };
-            if (str_ends_with($name, 'Color')) {
+            if (str_ends_with($name, 'Color') || in_array($name, ['SplitAreaColor1', 'SplitAreaColor2'], true)) {
                 $style[$key] = $style[$key] < 0 ? '' : EChartsAsset::ColorToHex($style[$key]);
             }
         }
         return $style;
+    }
+
+    /** Local design contract: at most eight unique group names, independent of source validity. */
+    private function ParseGroupColors(mixed $raw): array
+    {
+        $rows = $this->DecodeRows($raw);
+        if (count($rows) > 8) {
+            throw new InvalidArgumentException($this->Translate('Use at most 8 unique group colors.'));
+        }
+        $colors = [];
+        $seen = [];
+        foreach ($rows as $index => $row) {
+            $group = is_array($row) && is_string($row['Group'] ?? null) ? trim($row['Group']) : '';
+            $color = is_array($row) ? ($row['Color'] ?? null) : null;
+            if ($group === '' || mb_strlen($group) > 80 || isset($seen[$group]) || !is_int($color) || $color < -1 || $color > 0xFFFFFF) {
+                throw new InvalidArgumentException(sprintf($this->Translate('Group color %d: select a unique group and a valid color.'), $index + 1));
+            }
+            $seen[$group] = true;
+            if ($color >= 0) {
+                $colors[$group] = EChartsAsset::ColorToHex($color);
+            }
+        }
+        return $colors;
+    }
+
+    private function GroupOptions(mixed $sources): array
+    {
+        $groups = [];
+        foreach (is_array($sources) ? array_slice($sources, 0, 80) : [] as $row) {
+            if (is_array($row) && is_string($row['Group'] ?? null)) {
+                $name = trim($row['Group']);
+                if ($name !== '' && mb_strlen($name) <= 80) {
+                    $groups[$name] = true;
+                }
+            }
+        }
+        $options = [['caption' => $this->Translate('Select group'), 'value' => '']];
+        foreach (array_keys($groups) as $name) {
+            $options[] = ['caption' => (string) $name, 'value' => (string) $name];
+        }
+        return $options;
+    }
+
+    private function WithGroupColorOptions(array $fields, array $options): array
+    {
+        foreach ($fields as &$field) {
+            if (in_array($field['name'] ?? '', ['GroupColors', 'IPSViewGroupColors'], true)) {
+                $field['columns'][0]['edit']['options'] = $options;
+                $field['form'][0]['options'] = $options;
+            }
+            if (isset($field['items'])) {
+                $field['items'] = $this->WithGroupColorOptions($field['items'], $options);
+            }
+        }
+        unset($field);
+        return $fields;
     }
 
     private function EffectiveTheme(bool $ipsView): string

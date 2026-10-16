@@ -31,7 +31,16 @@ const translations = JSON.parse(read('EChartsRadar/locale.json')).translations.d
 function page(mode) {
     const initialState = state();
     if (mode === 'ipsview') {
-        Object.assign(initialState.chart.radar.style = { ...style }, { shape: 'circle', showAxisValues: true });
+        Object.assign(initialState.chart.radar.style = { ...style }, {
+            shape: 'circle', showAxisValues: false, groupColors: { 'Büro': '#55CBB5', 'Küche': '#FF994D', 'Wohnbereich': '#FB628B' },
+            lineType: 'dashed', symbol: 'diamond', symbolSize: 9, symbolRotate: 30,
+            symbolBorderWidth: 1, symbolBorderColor: '#ffffff', symbolOpacityPercent: 90,
+            showValues: true, valueFontSizePercent: 100, valueLabelPosition: 'right', valueLabelDistance: 8,
+            legendPosition: 'top', legendFontSizePercent: 120, legendColor: '#F4F5F7',
+            axisLabelBold: true, splitLineType: 'dotted', splitLineWidth: 2, splitLineOpacityPercent: 70,
+            splitAreaColor1: '#303236', splitAreaColor2: '#46494e', splitAreaOpacityPercent: 40,
+            areaShadowBlur: 8, areaShadowColor: '#000000'
+        });
     }
     const bootstrap = { mode, state: initialState, options: { tileHeaderVisible: true, echartsThemes: {},
         adaptToBackground: false,  }, translations };

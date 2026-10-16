@@ -321,6 +321,41 @@
                     "type": "RowLayout",
                     "items": [
                         {
+                            "type": "Select",
+                            "name": "LegendPosition",
+                            "caption": "Legend position",
+                            "options": [
+                                {
+                                    "value": "top",
+                                    "caption": "Top"
+                                },
+                                {
+                                    "value": "bottom",
+                                    "caption": "Bottom"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Select",
+                            "name": "HoverFocus",
+                            "caption": "Hover highlighting",
+                            "options": [
+                                {
+                                    "value": "self",
+                                    "caption": "Hovered group"
+                                },
+                                {
+                                    "value": "none",
+                                    "caption": "Disabled"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
                             "type": "CheckBox",
                             "name": "ShowAxisNames",
                             "caption": "Show axis names"
@@ -334,6 +369,26 @@
                             "type": "CheckBox",
                             "name": "ShowSplitArea",
                             "caption": "Show split areas"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowAxisRange",
+                            "caption": "Show axis ranges"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowAxisLines",
+                            "caption": "Show axis lines"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowSplitLines",
+                            "caption": "Show grid lines"
                         }
                     ]
                 },
@@ -362,6 +417,94 @@
                     "items": [
                         {
                             "type": "NumberSpinner",
+                            "name": "AxisLineWidth",
+                            "caption": "Axis line width",
+                            "minimum": 0,
+                            "maximum": 8,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AxisLineOpacityPercent",
+                            "caption": "Axis line opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "SplitLineWidth",
+                            "caption": "Grid line width",
+                            "minimum": 0,
+                            "maximum": 8,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "Select",
+                            "name": "SplitLineType",
+                            "caption": "Grid line style",
+                            "options": [
+                                {
+                                    "value": "solid",
+                                    "caption": "Solid"
+                                },
+                                {
+                                    "value": "dashed",
+                                    "caption": "Dashed"
+                                },
+                                {
+                                    "value": "dotted",
+                                    "caption": "Dotted"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "SplitLineOpacityPercent",
+                            "caption": "Grid line opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "SplitAreaColor1",
+                            "caption": "First grid area color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "SplitAreaColor2",
+                            "caption": "Second grid area color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "SplitAreaOpacityPercent",
+                            "caption": "Grid area opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
                             "name": "LineWidth",
                             "caption": "Line width",
                             "minimum": 0,
@@ -382,12 +525,147 @@
                     "type": "RowLayout",
                     "items": [
                         {
+                            "type": "Select",
+                            "name": "LineType",
+                            "caption": "Line style",
+                            "options": [
+                                {
+                                    "value": "solid",
+                                    "caption": "Solid"
+                                },
+                                {
+                                    "value": "dashed",
+                                    "caption": "Dashed"
+                                },
+                                {
+                                    "value": "dotted",
+                                    "caption": "Dotted"
+                                }
+                            ]
+                        },
+                        {
                             "type": "NumberSpinner",
                             "name": "AreaOpacityPercent",
                             "caption": "Area opacity",
                             "minimum": 0,
                             "maximum": 100,
                             "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AreaShadowBlur",
+                            "caption": "Area shadow blur",
+                            "minimum": 0,
+                            "maximum": 20,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "AreaShadowColor",
+                            "caption": "Area shadow color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "List",
+                    "name": "GroupColors",
+                    "caption": "Comparison group colors",
+                    "rowCount": 4,
+                    "add": true,
+                    "delete": true,
+                    "columns": [
+                        {
+                            "name": "Group",
+                            "caption": "Comparison group",
+                            "width": "300px",
+                            "add": "",
+                            "edit": {
+                                "type": "Select",
+                                "options": [
+                                    {
+                                        "caption": "Select group",
+                                        "value": ""
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "name": "Color",
+                            "caption": "Color",
+                            "width": "220px",
+                            "add": -1,
+                            "edit": {
+                                "type": "SelectColor",
+                                "allowTransparent": true,
+                                "transparentCaption": "Automatic (theme)"
+                            }
+                        }
+                    ],
+                    "form": [
+                        {
+                            "type": "Select",
+                            "name": "Group",
+                            "caption": "Comparison group",
+                            "options": [
+                                {
+                                    "value": "",
+                                    "caption": "Select group"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "Color",
+                            "caption": "Color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "Symbol",
+                            "caption": "Point symbol",
+                            "options": [
+                                {
+                                    "value": "circle",
+                                    "caption": "Circle"
+                                },
+                                {
+                                    "value": "emptyCircle",
+                                    "caption": "Hollow circle"
+                                },
+                                {
+                                    "value": "rect",
+                                    "caption": "Square"
+                                },
+                                {
+                                    "value": "roundRect",
+                                    "caption": "Rounded square"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "caption": "Triangle"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "caption": "Diamond"
+                                },
+                                {
+                                    "value": "none",
+                                    "caption": "None"
+                                }
+                            ]
                         },
                         {
                             "type": "NumberSpinner",
@@ -395,6 +673,92 @@
                             "caption": "Symbol size",
                             "minimum": 0,
                             "maximum": 16,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "SymbolRotate",
+                            "caption": "Symbol rotation",
+                            "minimum": -180,
+                            "maximum": 180,
+                            "suffix": "°"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "SymbolBorderWidth",
+                            "caption": "Symbol border width",
+                            "minimum": 0,
+                            "maximum": 8,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "SymbolBorderColor",
+                            "caption": "Symbol border color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "SymbolOpacityPercent",
+                            "caption": "Symbol opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowValues",
+                            "caption": "Show original values"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "HideOverlappingValueLabels",
+                            "caption": "Hide overlapping value labels"
+                        },
+                        {
+                            "type": "Select",
+                            "name": "ValueLabelPosition",
+                            "caption": "Value label position",
+                            "options": [
+                                {
+                                    "value": "top",
+                                    "caption": "Above"
+                                },
+                                {
+                                    "value": "bottom",
+                                    "caption": "Below"
+                                },
+                                {
+                                    "value": "left",
+                                    "caption": "Left"
+                                },
+                                {
+                                    "value": "right",
+                                    "caption": "Right"
+                                },
+                                {
+                                    "value": "inside",
+                                    "caption": "Inside center"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ValueLabelDistance",
+                            "caption": "Value label distance",
+                            "minimum": 0,
+                            "maximum": 30,
                             "suffix": "px"
                         }
                     ]
@@ -424,6 +788,47 @@
                     "type": "RowLayout",
                     "items": [
                         {
+                            "type": "NumberSpinner",
+                            "name": "ValueFontSizePercent",
+                            "caption": "Value label size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "LegendFontSizePercent",
+                            "caption": "Legend label size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "TitleBold",
+                            "caption": "Bold title"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "AxisLabelBold",
+                            "caption": "Bold axis names"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ValueLabelBold",
+                            "caption": "Bold value labels"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
                             "type": "SelectColor",
                             "name": "TitleColor",
                             "caption": "Title color",
@@ -441,6 +846,25 @@
                             "type": "SelectColor",
                             "name": "GridColor",
                             "caption": "Grid color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "ValueColor",
+                            "caption": "Value label color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "LegendColor",
+                            "caption": "Legend label color",
                             "allowTransparent": true,
                             "transparentCaption": "Automatic (theme)"
                         }

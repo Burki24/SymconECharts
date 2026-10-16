@@ -17,7 +17,8 @@ $root = dirname(__DIR__);
 $radarRuntime = EChartsAsset::RadarJavaScript();
 assertEChartsAsset(
     hash_file('sha256', $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.radar.min.js') === EChartsAsset::RADAR_SHA256
-        && strlen($radarRuntime) < 550000 && str_contains($radarRuntime, 'window.echarts'),
+        && strlen($radarRuntime) < 550000 && str_contains($radarRuntime, 'window.echarts')
+        && str_contains((string) file_get_contents($root . '/.tools/echarts-runtime/src/radar-runtime.js'), 'LabelLayout'),
     'The Radar runtime must be pinned and remain below 550 KB.'
 );
 $calendarRuntime = EChartsAsset::CalendarJavaScript();
