@@ -787,6 +787,7 @@ require_once dirname(__DIR__) . '/EChartsTreeSystemHealth/module.php';
 require_once dirname(__DIR__) . '/EChartsGraph/module.php';
 require_once dirname(__DIR__) . '/EChartsGraphZ2M/module.php';
 require_once dirname(__DIR__) . '/EChartsTreemap/module.php';
+require_once dirname(__DIR__) . '/EChartsSunburst/module.php';
 
 final class TestableEChartsGateway extends EChartsGateway
 {
@@ -8243,7 +8244,7 @@ foreach ([
     EChartsGaugeSingle::class, EChartsGaugeMulti::class, EChartsGaugeTacho::class,
     EChartsGaugeChronograph::class, EChartsTimeSeries::class, EChartsBarCategory::class,
     EChartsBarHistory::class, EChartsBarWaterfall::class, EChartsBarPolar::class,
-    EChartsPie::class, EChartsTreemap::class
+    EChartsPie::class, EChartsTreemap::class, EChartsSunburst::class
 ] as $animationModuleClass) {
     $animationModule = new $animationModuleClass();
     $animationModule->Create();
@@ -9482,6 +9483,7 @@ foreach ([
     EChartsBarPolar::class         => ['BarPreview', 'IPSViewBarPreview'],
     EChartsPie::class              => ['BarPreview', 'IPSViewBarPreview'],
     EChartsTreemap::class          => ['BarPreview', 'IPSViewBarPreview'],
+    EChartsSunburst::class         => ['BarPreview', 'IPSViewBarPreview'],
     EChartsScatter::class          => ['BarPreview', 'IPSViewBarPreview'],
     EChartsHeatmap::class          => ['BarPreview', 'IPSViewBarPreview'],
     EChartsTree::class             => ['BarPreview', 'IPSViewBarPreview'],
@@ -9663,6 +9665,106 @@ try {
 } finally {
     for ($index = 0; $index < 100; ++$index) {
         unset($GLOBALS['symconTestVariables'][85000 + $index]);
+    }
+}
+
+$sunburst = new EChartsSunburst();
+$sunburst->Create();
+$sunburst->SetTestProperty('Sources', json_encode([
+    ['VariableID' => 4711, 'Group' => 'House', 'Subgroup' => 'Climate', 'Label' => 'Room'],
+    ['VariableID' => 4717, 'Group' => 'House', 'Subgroup' => 'Climate', 'Label' => ''],
+    ['VariableID' => 4720, 'Group' => 'Garden', 'Subgroup' => '', 'Label' => 'Outside']
+], JSON_THROW_ON_ERROR));
+$sunburst->SetTestProperty('IPSViewUseTileDesign', false);
+$sunburst->SetTestProperty('IPSViewShowLabels', false);
+$sunburst->SetTestProperty('GroupColors', json_encode([['Group' => 'House', 'Color' => 0x123456]], JSON_THROW_ON_ERROR));
+$sunburst->SetTestProperty('InnerRadiusPercent', 15);
+$sunburst->SetTestProperty('OuterRadiusPercent', 90);
+$sunburst->SetTestProperty('ClickToRoot', false);
+$sunburst->ApplyChanges();
+$sunburstData = json_decode($sunburst->GetSunburstData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    $sunburst->GetTestStatus() === IS_ACTIVE
+        && $sunburstData['family'] === 'sunburst'
+        && count($sunburstData['sunburst']['data']) === 2
+        && $sunburstData['sunburst']['data'][0]['children'][0]['children'][0]['id'] === 'variable-4711'
+        && $sunburstData['sunburst']['style']['groupColors']['House'] === '#123456'
+        && $sunburstData['sunburst']['style']['innerRadiusPercent'] === 15
+        && $sunburstData['sunburst']['style']['clickToRoot'] === false,
+    'Sunburst must retain current-value hierarchy and independent design options.'
+);
+$sunburstTile = $sunburst->GetVisualizationTile();
+$sunburstIPSView = $sunburst->GetIPSViewHTML();
+$sunburstForm = json_decode($sunburst->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    str_contains($sunburstTile, 'echarts-sunburst-root')
+        && str_contains($sunburstTile, '"showLabels":true')
+        && str_contains($sunburstIPSView, '"showLabels":false')
+        && strlen($sunburstTile) < SYMCON_OUTPUT_BUFFER_LIMIT
+        && strlen($sunburstIPSView) < SYMCON_OUTPUT_BUFFER_LIMIT
+        && findGaugeFormElement($sunburstForm['elements'], 'InnerRadiusPercent')['type'] === 'NumberSpinner'
+        && findGaugeFormElement($sunburstForm['elements'], 'IPSViewClickToRoot')['type'] === 'CheckBox',
+    'Sunburst must render Tile and IPSView below the Symcon output limit.'
+);
+$sunburstUpdatesBefore = count($sunburst->GetTestVisualizationUpdates());
+$sunburst->MessageSink(1780000300, 4711, VM_UPDATE, []);
+assertGatewayGauge(
+    count($sunburst->GetTestVisualizationUpdates()) > $sunburstUpdatesBefore,
+    'Sunburst must refresh on source updates.'
+);
+$originalSunburstValue = $GLOBALS['symconTestVariables'][4717]['Value'];
+$GLOBALS['symconTestVariables'][4717]['Value'] = -1.0;
+assertGatewayGauge(
+    str_contains($sunburst->GetVisualizationTile(), 'Sunburst values must be non-negative.'),
+    'Sunburst must reject negative values.'
+);
+$GLOBALS['symconTestVariables'][4717]['Value'] = $originalSunburstValue;
+$sunburst->SetTestProperty('InnerRadiusPercent', 55);
+$sunburst->ApplyChanges();
+assertGatewayGauge($sunburst->GetTestStatus() === 202, 'Sunburst must reject invalid ring radii.');
+$sunburst->SetTestProperty('InnerRadiusPercent', 15);
+$sunburst->SetTestProperty('Sources', json_encode([
+    ['VariableID' => 4711, 'Group' => 'House'], ['VariableID' => 4711, 'Group' => 'Garden']
+], JSON_THROW_ON_ERROR));
+$sunburst->ApplyChanges();
+assertGatewayGauge($sunburst->GetTestStatus() === 201, 'Sunburst must reject duplicate variable IDs.');
+$sunburst->UpdateBarPreviewFromForm(json_encode([
+    'Sources'     => [['VariableID' => 4711, 'Group' => '<Room>', 'Subgroup' => '', 'Label' => '']],
+    'GroupColors' => [['Group' => '<Room>', 'Color' => 0xBADA55]]
+], JSON_THROW_ON_ERROR));
+$sunburstPreviewUpdate = array_slice($sunburst->GetTestFormUpdates(), -2)[0]['Value'];
+$sunburstPreviewSvg = base64_decode(substr($sunburstPreviewUpdate, strlen('data:image/svg+xml;base64,')), true);
+assertGatewayGauge(
+    is_string($sunburstPreviewSvg)
+        && str_contains($sunburstPreviewSvg, '&lt;Room&gt;')
+        && str_contains($sunburstPreviewSvg, '#BADA55')
+        && !str_contains($sunburstPreviewSvg, '<Room>'),
+    'Sunburst draft preview must escape group names.'
+);
+$manySunburstSources = [];
+for ($index = 0; $index < 100; ++$index) {
+    $id = 86000 + $index;
+    $GLOBALS['symconTestVariables'][$id] = [
+        'VariableType' => 2, 'VariableUpdated' => 1780000300,
+        'Value'        => (float) ($index + 1), 'Name' => 'Current value ' . $index
+    ];
+    $manySunburstSources[] = [
+        'VariableID' => $id, 'Group' => 'Group ' . intdiv($index, 10),
+        'Subgroup'   => 'Subgroup ' . intdiv($index % 10, 5), 'Label' => ''
+    ];
+}
+try {
+    $sunburst->SetTestProperty('Sources', json_encode($manySunburstSources, JSON_THROW_ON_ERROR));
+    $sunburst->ApplyChanges();
+    assertGatewayGauge(
+        $sunburst->GetTestStatus() === IS_ACTIVE
+            && strlen($sunburst->GetVisualizationTile()) < SYMCON_OUTPUT_BUFFER_LIMIT
+            && strlen($sunburst->GetIPSViewHTML()) < SYMCON_OUTPUT_BUFFER_LIMIT,
+        'The maximum 100-source Sunburst must remain below the Symcon output limit.'
+    );
+} finally {
+    for ($index = 0; $index < 100; ++$index) {
+        unset($GLOBALS['symconTestVariables'][86000 + $index]);
     }
 }
 

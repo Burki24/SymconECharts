@@ -161,6 +161,13 @@ $requiredFiles = [
     'docs/adr/0048-manual-current-value-treemap.md',
     'tests/treemap_model.php',
     'tests/treemap_layout.js',
+    'EChartsSunburst/visualization/index.html',
+    'EChartsSunburst/visualization/style.css',
+    'EChartsSunburst/visualization/app.js',
+    '.tools/echarts-runtime/src/sunburst-runtime.js',
+    'libs/echarts/6.1.0/echarts.sunburst.min.js',
+    'docs/adr/0049-manual-current-value-sunburst.md',
+    'tests/sunburst_layout.js',
     '.tools/echarts-runtime/src/tree-runtime.js',
     'docs/adr/0044-tree-symcon-object-hierarchy.md',
     'docs/adr/0046-tree-system-health-module-split.md',
@@ -370,7 +377,7 @@ if ($helperSync !== null) {
 
 $expectedModules = [
     'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarPolar', 'EChartsBarWaterfall', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
-    'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsGraph', 'EChartsGraphZ2M', 'EChartsHeatmap', 'EChartsPie', 'EChartsScatter', 'EChartsTimeSeries', 'EChartsTree', 'EChartsTreeSystemHealth', 'EChartsTreemap'
+    'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsGraph', 'EChartsGraphZ2M', 'EChartsHeatmap', 'EChartsPie', 'EChartsScatter', 'EChartsSunburst', 'EChartsTimeSeries', 'EChartsTree', 'EChartsTreeSystemHealth', 'EChartsTreemap'
 ];
 $discoveredModules = [];
 foreach (glob($root . '/*/module.json') ?: [] as $modulePath) {

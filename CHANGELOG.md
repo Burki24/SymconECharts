@@ -2,6 +2,11 @@
 
 ## Hinzugefügt
 
+- `EChartsSunburst` (`ECSB`) zeigt 1 bis 100 aktuelle numerische
+  Symcon-Werte in manuell benannten Gruppen und Untergruppen als
+  konzentrische Ringe. Kachel und IPSView besitzen getrennte Designs mit
+  Live-Vorschau, Gruppenfarben, Radien und Klicknavigation.
+
 - Treemap-Rahmen sind je Hierarchieebene einstellbar, Abstände zwischen
   Gruppen sowie innerhalb von Gruppen und Untergruppen. Auch die gemeinsame
   Rahmenfarbe, Verschieben/Zoomen, Klick-Zoom und

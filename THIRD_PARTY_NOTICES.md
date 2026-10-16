@@ -59,6 +59,10 @@ Ausgelieferte Dateien:
   Treemap-Browser-Build aus ECharts Core, Treemap Chart, Titel, Tooltip,
   Aria und Canvas Renderer; 507.134 Byte; SHA-256
   `e9020d97d1f90d3967dbb717485edcafed098f3ee7b2b632b6f01055582a148e`;
+- `libs/echarts/6.1.0/echarts.sunburst.min.js` – reproduzierbarer
+  Sunburst-Browser-Build aus ECharts Core, Sunburst Chart, Titel, Tooltip,
+  Aria und Canvas Renderer; 480.093 Byte; SHA-256
+  `95ef117d648729e87199ab20a815f773cbe660da2f007fd65441add95c1daa43`;
 - `libs/echarts/6.1.0/themes/dark.js` – offizielles Theme Dark; 5.981 Byte;
   SHA-256 `ae60e563617cb87514690c1946ee202e78c9f1487820490614b58934ed037458`;
 - `libs/echarts/6.1.0/themes/vintage.js` – offizielles Theme Vintage;

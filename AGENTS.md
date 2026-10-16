@@ -57,6 +57,8 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Netzwerkscan aus und ist kein manueller Kantenmodus des allgemeinen Graphen.
   Eine Treemap aus manuell gewählten Gruppen und aktuellen numerischen
   Symcon-Variablenwerten liegt im eigenen Gerätemodul `EChartsTreemap`.
+  Ein Sunburst mit derselben manuell benannten Hierarchie und aktuellen
+  numerischen Variablenwerten liegt getrennt in `EChartsSunburst`.
 - Das Gateway stellt ausschließlich familienübergreifende Infrastruktur wie
   Archivzugriff, begrenztes Caching, gemeinsame Ressourcen und gegebenenfalls
   abgesicherte IPSView-Kommunikation bereit. Familienbezogene Properties,
@@ -126,6 +128,7 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
 - `ECGR` ist `EChartsGraph` zugeordnet (`GR` = Graph).
 - `ECGZ` ist `EChartsGraphZ2M` zugeordnet (`GZ` = Graph Zigbee2MQTT).
 - `ECTM` ist `EChartsTreemap` zugeordnet (`TM` = Treemap).
+- `ECSB` ist `EChartsSunburst` zugeordnet (`SB` = Sunburst).
 - Das zuvor für das unveröffentlichte Gauge-Gerüst verwendete Kürzel `ECGA`
   ist abgelöst und wird nicht für ein anderes Modul wiederverwendet.
 - Neue Kürzel werden vor ihrer Verwendung eindeutig festgelegt und in dieser

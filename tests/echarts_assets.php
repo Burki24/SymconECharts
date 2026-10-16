@@ -23,6 +23,7 @@ $pieRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.p
 $treeRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.tree.min.js';
 $graphRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.graph.min.js';
 $treemapRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.treemap.min.js';
+$sunburstRuntimePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.sunburst.min.js';
 $licensePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/LICENSE.txt';
 $noticePath = $root . '/libs/echarts/' . EChartsAsset::VERSION . '/NOTICE.txt';
 $runtime = (string) file_get_contents($runtimePath);
@@ -34,6 +35,7 @@ $pieRuntime = (string) file_get_contents($pieRuntimePath);
 $treeRuntime = (string) file_get_contents($treeRuntimePath);
 $graphRuntime = (string) file_get_contents($graphRuntimePath);
 $treemapRuntime = (string) file_get_contents($treemapRuntimePath);
+$sunburstRuntime = (string) file_get_contents($sunburstRuntimePath);
 $designUtilitiesPath = $root . '/libs/echarts-design.js';
 $designUtilities = (string) file_get_contents($designUtilitiesPath);
 $zoomUtilities = (string) file_get_contents($root . '/libs/echarts-zoom.js');
@@ -47,6 +49,7 @@ $pieRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/
 $treeRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/tree-runtime.js');
 $graphRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/graph-runtime.js');
 $treemapRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/treemap-runtime.js');
+$sunburstRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/sunburst-runtime.js');
 $windowsCheckoutRuntime = str_replace("\n", "\r\n", $runtime);
 $expectedThemeIDs = ['auto', 'dark', 'vintage', 'macarons', 'infographic', 'shine', 'roma'];
 
@@ -138,6 +141,15 @@ assertEChartsAsset(
         && str_contains($treemapRuntime, 'window.echarts')
         && str_contains($treemapRuntimeSource, 'TreemapChart'),
     'The Treemap runtime must be pinned, expose the browser API and remain below 550 KB.'
+);
+assertEChartsAsset(
+    is_file($sunburstRuntimePath)
+        && hash_file('sha256', $sunburstRuntimePath) === EChartsAsset::SUNBURST_SHA256
+        && EChartsAsset::SunburstJavaScript() === $sunburstRuntime
+        && strlen($sunburstRuntime) < 550000
+        && str_contains($sunburstRuntime, 'window.echarts')
+        && str_contains($sunburstRuntimeSource, 'SunburstChart'),
+    'The Sunburst runtime must be pinned, expose the browser API and remain below 550 KB.'
 );
 assertEChartsAsset(
     EChartsAsset::DesignJavaScript() === $designUtilities

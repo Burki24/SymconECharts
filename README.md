@@ -9,8 +9,8 @@ Balken, Waterfall- und Polar-Diagramme, Kreisdiagramme für aktuelle Werte sowie
 historische Streu- und Bubble-Diagramme, eine Tages-/Wochentag-Stunden-Heatmap
 eine lesende IP-Symcon-Objekthierarchie als Tree, einen allgemeinen Graphen
 für ausdrücklich verbundene Symcon-Objekte sowie einen separaten Graphen
-  für exportierte Zigbee2MQTT-Netzwerkkarten sowie eine Treemap mit
-  manuell festgelegten Gruppen und aktuellen numerischen Variablenwerten.
+für exportierte Zigbee2MQTT-Netzwerkkarten sowie Treemap und Sunburst mit
+manuell festgelegten Gruppen und aktuellen numerischen Variablenwerten.
 
 Alle Diagrammformulare zeigen eine unmittelbar aktualisierte SVG-Vorschau
 im Kachel- und IPSView-Designer. Sie reagiert auf noch nicht gespeicherte
@@ -167,6 +167,10 @@ Folgende Module sind enthalten:
   Ordnet bis zu 100 aktuelle Integer- und Float-Variablen manuell benannten
   Gruppen und optionalen Untergruppen zu. Die nichtnegativen Werte bestimmen
   die Rechteckflächen in Kachel und optionalem IPSView-Widget.
+
+- __EChartsSunburst__ ([Dokumentation](EChartsSunburst/README.md))
+  Zeigt dieselbe manuell benannte Hierarchie als konzentrische Ringe. Aktuelle
+  nichtnegative Variablenwerte bestimmen die Winkel der Segmente.
 
 ## Kacheldesign und IPSView-Design
 
