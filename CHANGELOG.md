@@ -53,6 +53,12 @@
 
 ## Behoben
 
+- Treemap-Gruppenüberschriften stehen nun auf der jeweiligen Gruppenfarbe
+  statt auf einem kontrastarmen hellen Feld. Eine manuell gewählte
+  Beschriftungsfarbe wirkt jetzt auch auf Gruppen, Untergruppen und Werte;
+  die automatische Farbe bleibt kontrastabhängig. Achtung: Die bisherigen
+  automatisch gefärbten Überschriften können nach dem Update anders aussehen.
+
 - Der Zigbee2MQTT-Graph liest große Netzwerkkarten aus dem serverseitigen
   JSON-Export statt über die auf 1 MiB begrenzte Modulrückgabe. Achtung: Nach
   jedem neuen Netzwerkscan müssen die Exportdateien erneut erstellt werden;

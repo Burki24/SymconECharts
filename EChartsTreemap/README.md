@@ -21,9 +21,12 @@ Umrechnung zwischen Einheiten statt. Daten werden bei Variablenänderungen
 aktualisiert, ohne archivierte Werte zu benötigen.
 
 Das Diagramm kann gezoomt werden. Der Kachel- und der IPSView-Designer
-besitzen Themes, Beschriftungs- und Farbeinstellungen sowie eine
-gekennzeichnete SVG-Vorschau. IPSView übernimmt standardmäßig das
-Kacheldesign und kann anschließend unabhängig gestaltet werden.
+besitzen Themes, eine einstellbare Titel- und Beschriftungsgröße sowie
+Titel- und Beschriftungsfarben und eine gekennzeichnete SVG-Vorschau.
+„Automatisch“ wählt für die Beschriftungen eine zur jeweiligen Gruppenfarbe
+lesbare Farbe; eine selbst gewählte Beschriftungsfarbe gilt für Gruppen,
+Untergruppen und Werte. IPSView übernimmt standardmäßig das Kacheldesign
+und kann anschließend unabhängig gestaltet werden.
 
 Öffentliche PHP-Funktionen: `ECTM_GetTreemapData($id)` liefert das aktuelle
 hierarchische Datenmodell als JSON. `ECTM_GetTreemapDiagnostic($id)` liefert

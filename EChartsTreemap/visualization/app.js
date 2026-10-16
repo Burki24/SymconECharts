@@ -57,21 +57,21 @@
         });
     }
 
-    function nodesFor(data, colors) {
+    function nodesFor(data, colors, labelColor) {
         var seriesColors = colors.seriesColors && colors.seriesColors.length ? colors.seriesColors : [colors.accent];
         return (Array.isArray(data) ? data : []).map(function (group, index) {
             var color = seriesColors[index % seriesColors.length];
-            var readable = design.readableTextColor(color, colors.text, colors.background);
+            var readable = labelColor || design.readableTextColor(color, colors.text, colors.background);
             function colorChildren(children) {
                 return (children || []).map(function (child) {
-                    return Object.assign({}, child, {
+                    return Object.assign({}, child, child.children ? { itemStyle: { borderColor: color } } : {}, {
                         label: { color: readable }, upperLabel: { color: readable },
                         children: child.children ? colorChildren(child.children) : undefined
                     });
                 });
             }
             return Object.assign({}, group, {
-                itemStyle: { color: color },
+                itemStyle: { color: color, borderColor: color },
                 label: { color: readable }, upperLabel: { color: readable },
                 children: colorChildren(group.children)
             });
@@ -110,7 +110,7 @@
                 }
             },
             series: [{
-                id: 'treemap', type: 'treemap', data: nodesFor(treemap.data, colors),
+                id: 'treemap', type: 'treemap', data: nodesFor(treemap.data, colors, style.labelColor),
                 left: 8, right: 8,
                 top: (bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8)
                     + (showTitle ? titleSize + 12 : 0),

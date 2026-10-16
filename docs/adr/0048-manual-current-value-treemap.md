@@ -43,5 +43,7 @@ derzeit alle konfigurierten Werte neu; häufig ändernde große Quellmengen sind
 auf der Symcon-Testebene hinsichtlich Latenz und Ausgabegröße zu prüfen.
 Automatische Hierarchie, historische Summen und importierte Gewichte sind
 separate künftige Anforderungen. Der lokale Test prüft Gruppierung,
-Validierung, Bundle-Integrität und Browser-Optionsaufbau. Eine Live-Prüfung
-in Symcon-Kachel und IPSView steht noch aus.
+Validierung, Bundle-Integrität und Browser-Optionsaufbau. Die grundlegende
+Darstellung wurde am 16.10.2026 vom Anwender in Symcon-Kachel und IPSView
+geprüft. Die daraufhin korrigierte Beschriftungsdarstellung benötigt nach
+dem Modulupdate eine erneute visuelle Prüfung in beiden Ausgabewegen.
