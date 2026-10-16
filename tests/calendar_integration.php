@@ -45,6 +45,13 @@ $calendar->SetTestProperty('Title', 'Daily temperature');
 $calendar->SetTestProperty('EnableIPSView', true);
 $calendar->SetTestProperty('IPSViewUseTileDesign', false);
 $calendar->SetTestProperty('IPSViewLowColor', 0x123456);
+$calendar->SetTestProperty('IPSViewShowYearLabel', true);
+$calendar->SetTestProperty('IPSViewYearColor', 0x654321);
+$calendar->SetTestProperty('IPSViewMonthLineType', 'dashed');
+$calendar->SetTestProperty('IPSViewMonthLineColor', 0xABCDEF);
+$calendar->SetTestProperty('IPSViewUseFixedColorRange', true);
+$calendar->SetTestProperty('IPSViewColorScaleMinimum', -20.5);
+$calendar->SetTestProperty('IPSViewColorScaleMaximum', 40.5);
 $calendar->ApplyChanges();
 $calendarData = json_decode($calendar->GetCalendarData(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
@@ -75,6 +82,14 @@ assertGatewayGauge(
     && findGaugeFormElement($calendarForm['elements'], 'IPSViewCellBorderColor')['type'] === 'SelectColor',
     'Calendar form previews must not query archives and must expose independent designers.'
 );
+$calendarIndependentSVG = base64_decode(substr(findGaugeFormElement($calendarForm['elements'], 'IPSViewBarPreview')['image'], strlen('data:image/svg+xml;base64,')), true);
+assertGatewayGauge(
+    is_string($calendarIndependentSVG) && str_contains($calendarIndependentSVG, '#654321')
+    && str_contains($calendarIndependentSVG, '#ABCDEF') && str_contains($calendarIndependentSVG, 'stroke-dasharray="6 4"')
+    && str_contains($calendarIndependentSVG, '-20,5') && str_contains($calendarIndependentSVG, '40,5')
+    && findGaugeFormElement($calendarForm['elements'], 'IPSViewMonthLabelPosition')['type'] === 'Select',
+    'Independent Calendar previews must reflect year labels, separators and fixed color ranges.'
+);
 $calendarPreview = base64_decode(substr(findGaugeFormElement($calendarForm['elements'], 'BarPreview')['image'], strlen('data:image/svg+xml;base64,')), true);
 assertGatewayGauge(
     is_string($calendarPreview) && str_contains($calendarPreview, 'Example data')
@@ -97,6 +112,10 @@ assertGatewayGauge(
 assertGatewayGauge(is_string($calendar->GetTestVariableValue('IPSViewCalendar'))
     && $calendar->GetTestVariableValue('IPSViewCalendar') !== '', 'Calendar must publish nonempty IPSView WebContent.');
 $calendar->SetTestProperty('AnimationEnabled', false);
+$calendar->SetTestProperty('UseFixedColorRange', true);
+$calendar->SetTestProperty('ColorScaleMinimum', -10.25);
+$calendar->SetTestProperty('ColorScaleMaximum', 35.75);
+$calendar->SetTestProperty('MonthLabelPosition', 'end');
 $GLOBALS['symconTestCopyTarget'] = $calendar;
 try {
     $calendar->CopyTileDesignToIPSView();
@@ -105,7 +124,10 @@ try {
 }
 assertGatewayGauge(
     str_contains($calendar->GetIPSViewHTML(), '"lowColor":"#5070DD"')
-    && str_contains($calendar->GetIPSViewHTML(), '"animationEnabled":false'),
+    && str_contains($calendar->GetIPSViewHTML(), '"animationEnabled":false')
+    && str_contains($calendar->GetIPSViewHTML(), '"colorScaleMinimum":-10.25')
+    && str_contains($calendar->GetIPSViewHTML(), '"colorScaleMaximum":35.75')
+    && str_contains($calendar->GetIPSViewHTML(), '"monthLabelPosition":"end"'),
     'Calendar must copy tile color and animation settings into its independent IPSView designer.'
 );
 
@@ -127,6 +149,18 @@ assertGatewayGauge(
 );
 
 assertTransientRetry($calendar, 'Calendar');
+foreach (['', 'IPSView'] as $calendarPrefix) {
+    foreach (['MonthLabelMargin' => [41, 8], 'CellOpacityPercent' => [101, 100],
+        'YearLabelPosition'      => ['unknown', 'auto'], 'MonthLineType' => ['unknown', 'solid'],
+        'MonthLabelFormat'       => ['function(){}', 'name'], 'ColorScaleMaximum' => [-100.0, 35.75]] as $setting => [$invalid, $valid]) {
+        $calendar->SetTestProperty($calendarPrefix . $setting, $invalid);
+        $calendar->ApplyChanges();
+        assertGatewayGauge($calendar->GetTestStatus() === 202, 'Calendar must reject invalid design: ' . $calendarPrefix . $setting);
+        $calendar->SetTestProperty($calendarPrefix . $setting, $valid);
+        $calendar->ApplyChanges();
+        assertGatewayGauge($calendar->GetTestStatus() === IS_ACTIVE, 'Calendar must recover after correcting design: ' . $calendarPrefix . $setting);
+    }
+}
 $calendarMalformedParent = IPSModuleStrict::$ParentResponder;
 IPSModuleStrict::$ParentResponder = static fn (string $json): string => EChartsDataProtocol::EncodeSuccessResponse(
     EChartsDataProtocol::OPERATION_ARCHIVE_READ,

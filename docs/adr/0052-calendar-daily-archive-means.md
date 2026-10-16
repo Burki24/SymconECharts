@@ -41,6 +41,41 @@ Tooltip, Aria, VisualMap und Canvas ein; der ECharts-Kern bleibt unverändert.
 
 ## Nachweise und Grenzen
 
+### Ergänzter Designerumfang vom 16.10.2026
+
+Die offizielle Calendar-, Heatmap- und VisualMap-Dokumentation wurde mit der
+lokal gepinnten 6.1.0-Implementierung abgeglichen:
+
+- [Calendar-Optionen](https://echarts.apache.org/en/option.html#calendar):
+  getrennte `splitLine`-Stile, Start-/Endposition und Abstand von Tages- und
+  Monatsnamen, Monatsausrichtung/-format und optionale Jahresbeschriftung.
+- [Heatmap-Optionen](https://echarts.apache.org/en/option.html#series-heatmap):
+  Zellrandart/-deckkraft, Schriftgewicht und deaktivierbare Hervorhebung.
+- [VisualMap-Optionen](https://echarts.apache.org/en/option.html#visualMap-continuous):
+  fester Wertebereich und umgekehrte `inRange.color`-Farbreihenfolge. Letzteres
+  ändert bewusst die Wert-Farb-Zuordnung, nicht nur die Legendenrichtung.
+
+Alle Properties gehören zur Gerätefamilie und gelten unabhängig für Kachel
+und IPSView einschließlich Übernahme, Validierung und SVG-Vorschau. Die
+Voreinstellungen erhalten automatische Farbgrenzen, normale Schrift, volle
+Deckkraft, durchgezogene Ränder und die bisherige Positionierung. Eine
+Jahreszahl ist zunächst ausgeschaltet; ihre Position berücksichtigt die
+bereits belegten Namensränder. Feste Zellgrößen werden nicht angeboten, weil
+sie den responsiven Kalender über den geschützten Darstellungsbereich hinaus
+vergrößern könnten. Geo-only-Optionen wie `pointSize`/`blurSize`, interne
+Ereignis-/Performancefelder und ausführbare Formatter werden nicht angeboten.
+Hover wird in der statischen Vorschau nicht simuliert. Frei gestaltbare
+Schatten, beliebige Rich-Text-Templates und interaktive Farbfilter bleiben
+außerhalb dieses Designerumfangs.
+
+Der Anwender hat die Grundversion einschließlich Teilarchivkorrektur am
+16.10.2026 in Kachel und IPSView live bestätigt. Die zusätzlichen
+Designeroptionen benötigen nach dem Modulupdate eine erneute Live-Prüfung.
+Lokal wurden die ergänzten Stile am selben Tag mit der unveränderten
+gebündelten Canvas-Runtime im Browser geprüft: hohe Standardkachel und
+breites unabhängiges Design mit Jahreszahl, gegenüberliegenden Namen,
+gestrichelten Monatsgrenzen, Zellstilen und umgekehrter fester Farbskala.
+
 Die offiziellen Calendar-Optionen wurden am 16.10.2026 anhand von
 <https://echarts.apache.org/en/llms.txt> und
 <https://echarts.apache.org/en/option.html#calendar> geprüft.
@@ -52,5 +87,5 @@ Tageswerte, Gateway-Aggregation, Jahresnavigation, unabhängige Designs und den
 realen ECharts-Renderer ab. Eine lokale Browserprüfung mit synthetischen
 Schaltjahresdaten und der ausgelieferten Runtime bestätigte am 16.10.2026
 beide Ausrichtungen, dunklen Hintergrund, Kopfbereich, Titel, Farbskala und
-Navigation. Live-Prüfungen in Symcon-Kachel und IPSView sind
-nach Installation durch den Anwender erforderlich; sie sind noch nicht erfolgt.
+Navigation. Die oben genannte Anwenderbestätigung gilt nur für die vorhandene
+Testinstallation, nicht allgemein für alle Symcon- und Clientvarianten.

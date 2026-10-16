@@ -81,7 +81,42 @@ for (const value of [0, -10, 10, Number.MAX_VALUE, -Number.MAX_VALUE]) {
     assert.ok(result.option.visualMap.max > result.option.visualMap.min);
 }
 const echarts = require(path.join(root, '.tools/echarts-runtime/node_modules/echarts'));
-for (const h of [wide, tall, empty]) {
+const decoratedModel = { ...model, calendar: { ...model.calendar, style: { ...model.calendar.style,
+    showMonthSeparators: false, monthLineWidth: 3, monthLineType: 'dashed', monthLineColor: '#abcdef',
+    monthLabelPosition: 'end', weekdayLabelPosition: 'end', monthLabelMargin: 16, weekdayLabelMargin: 12,
+    monthLabelAlign: 'left', monthLabelFormat: 'year-month', showYearLabel: true, yearLabelPosition: 'right',
+    yearLabelMargin: 18, yearFontSizePercent: 150, yearColor: '#ff8800', labelBold: true,
+    cellOpacityPercent: 45, cellBorderType: 'dotted', hoverHighlight: false, hoverBorderColor: '#123456',
+    reverseColorScale: true, useFixedColorRange: true, colorScaleMinimum: -20.5, colorScaleMaximum: 40.5
+} } };
+const decorated = harness(decoratedModel, 'ipsview');
+assert.equal(decorated.option.calendar.splitLine.show, false);
+assert.equal(decorated.option.calendar.splitLine.lineStyle.type, 'dashed');
+assert.equal(decorated.option.calendar.monthLabel.position, 'end');
+assert.equal(decorated.option.calendar.monthLabel.formatter, '{yyyy}-{MM}');
+assert.equal(decorated.option.calendar.dayLabel.margin, 12);
+assert.equal(decorated.option.calendar.yearLabel.show, true);
+assert.equal(decorated.option.calendar.yearLabel.position, 'right');
+assert.equal(decorated.option.calendar.yearLabel.fontSize, 27);
+assert.equal(decorated.option.series[0].itemStyle.opacity, 0.45);
+assert.equal(decorated.option.series[0].itemStyle.borderType, 'dotted');
+assert.equal(decorated.option.series[0].label.fontWeight, 'bold');
+assert.equal(decorated.option.series[0].emphasis.disabled, true);
+assert.equal(decorated.option.visualMap.min, -20.5);
+assert.equal(decorated.option.visualMap.max, 40.5);
+assert.equal(decorated.option.visualMap.inRange.color[0], '#ddeeff');
+const saturated = harness({ ...decoratedModel, calendar: { ...decoratedModel.calendar, data: [
+    { date: '2024-01-01', value: -100 }, { date: '2024-01-02', value: 100 }
+] } }, 'ipsview');
+const saturatedEngine = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 1100, height: 500 });
+saturatedEngine.setOption(saturated.option);
+const saturatedData = saturatedEngine.getModel().getSeriesByIndex(0).getData();
+assert.equal(saturatedData.count(), 2, 'Fixed color limits must not filter archive points.');
+assert.equal(saturatedData.getItemVisual(0, 'style').fill.toLowerCase(), 'rgba(221,238,255,1)');
+assert.equal(saturatedData.getItemVisual(1, 'style').fill.toLowerCase(), 'rgba(17,34,51,1)');
+saturatedEngine.dispose();
+assert.equal(JSON.stringify(decoratedModel.calendar.data), JSON.stringify(model.calendar.data), 'Design must not rewrite archive means.');
+for (const h of [wide, tall, empty, decorated]) {
     const engine = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 1100, height: 500 });
     engine.setOption(h.option);
     assert.match(engine.renderToSVGString(), /<svg/);
@@ -92,6 +127,34 @@ for (const h of [wide, tall, empty]) {
     }
     engine.dispose();
 }
+for (const [width, height] of [[420, 680], [1100, 430]]) {
+    for (const position of ['top', 'bottom', 'left', 'right']) {
+        const h = harness({ ...decoratedModel, calendar: { ...decoratedModel.calendar,
+            style: { ...decoratedModel.calendar.style, yearLabelPosition: position, showMonthSeparators: true } } },
+        'ipsview', width, height);
+        const engine = echarts.init(null, null, { renderer: 'svg', ssr: true, width, height });
+        engine.setOption(h.option);
+        const view = engine.getViewOfComponentModel(engine.getModel().getComponent('calendar'));
+        view.group.traverse(element => {
+            if (element.type !== 'text' || element.ignore) { return; }
+            const box = element.getBoundingRect().clone();
+            box.applyTransform(element.getComputedTransform());
+            assert.ok(box.x >= -1 && box.y >= -1 && box.x + box.width <= width + 1 && box.y + box.height <= height + 1,
+                'Calendar labels must remain inside the viewport: ' + position + ', ' + element.style.text);
+        });
+        engine.dispose();
+    }
+}
+const narrowMonths = harness({ ...decoratedModel, calendar: { ...decoratedModel.calendar,
+    style: { ...decoratedModel.calendar.style, orientation: 'horizontal', axisFontSizePercent: 150 } } }, 'ipsview', 420, 680);
+assert.equal(typeof narrowMonths.option.calendar.monthLabel.formatter, 'function');
+assert.equal(narrowMonths.option.calendar.monthLabel.formatter({ M: 2, MM: '02', yyyy: '2024' }), '',
+    'Crowded month names must be thinned rather than overlap; all daily data remains.');
+const crowded = harness({ ...decoratedModel, calendar: { ...decoratedModel.calendar,
+    style: { ...decoratedModel.calendar.style, orientation: 'vertical', axisFontSizePercent: 200,
+        yearFontSizePercent: 200, monthLabelMargin: 40, weekdayLabelMargin: 40, yearLabelMargin: 60 } } }, 'ipsview', 300, 240);
+assert.ok(crowded.option.calendar.left + crowded.option.calendar.right < 300);
+assert.ok(crowded.option.calendar.top + crowded.option.calendar.bottom < 240);
 async function navigation() {
     wide.elements['echarts-calendar-previous'].click();
     await new Promise(resolve => setImmediate(resolve));

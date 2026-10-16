@@ -33,6 +33,26 @@ Schriftgrößen und Farben. Tagesnummern beziehungsweise Tagesmittelwerte
 erscheinen in den Zellen nur, wenn ausreichend Platz vorhanden ist; im Tooltip
 bleiben die Werte erreichbar. Animation und Tooltip sind abschaltbar.
 
+Monatstrennlinien lassen sich unabhängig von Zellrändern ein-/ausblenden und
+mit eigener Farbe, Breite und Linienart gestalten. Die Zellränder können
+durchgezogen, gestrichelt oder gepunktet erscheinen; auch die Zelldeckkraft
+ist einstellbar. Der Rahmen beim Berühren eines Tages hat eine eigene Farbe,
+die Hervorhebung kann abgeschaltet werden.
+
+Monats- und Wochentagsnamen können am Anfang oder Ende des Kalenders stehen,
+mit eigenem Abstand. Monate erscheinen zentriert oder am Monatsanfang und
+wahlweise als Name, Nummer oder Jahr-Monat. Eine zusätzliche Jahreszahl kann
+oben, unten, links oder rechts angezeigt werden, mit eigener Größe, Farbe und
+Abstand. Kalenderbeschriftungen können fett dargestellt werden.
+Bei zu wenig Platz werden nur einzelne Monats-/Wochentagsnamen beschriftet; die
+Kalendertage und ihre Werte bleiben vollständig erhalten.
+
+Die Farbreihenfolge kann umgekehrt werden. Ein optionaler fester Wertebereich
+mit Minimum und Maximum hält die Farbzuordnung beim Jahreswechsel konstant.
+Werte außerhalb dieses Bereichs verwenden die jeweilige Endfarbe; sie werden
+nicht aus den Daten entfernt. Ohne festen Bereich gilt weiterhin die
+automatische Skala des angezeigten Jahres.
+
 Einheit und Nachkommastellen können aus der Variablendarstellung übernommen
 oder selbst festgelegt werden. IPSView erbt standardmäßig das Kacheldesign;
 alternativ kann es unabhängig gestaltet werden. Die Formularvorschau verwendet

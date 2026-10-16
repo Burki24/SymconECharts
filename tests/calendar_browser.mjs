@@ -29,7 +29,18 @@ function state(offset = 0) {
 const variables = ':root{--symc-background:#303236;--symc-text:#f4f5f7;--symc-text-muted:#969aa2;--symc-border:#555860;--symc-surface:#25272b}';
 const translations = JSON.parse(read('EChartsCalendar/locale.json')).translations.de;
 function page(mode) {
-    const bootstrap = { mode, state: state(), options: { tileHeaderVisible: true, echartsThemes: {},
+    const initialState = state();
+    if (mode === 'ipsview') {
+        Object.assign(initialState.chart.calendar.style = { ...style }, {
+            monthLabelPosition: 'end', weekdayLabelPosition: 'end', monthLabelFormat: 'year-month',
+            monthLabelMargin: 12, weekdayLabelMargin: 12, showYearLabel: true, yearLabelPosition: 'left',
+            yearFontSizePercent: 125, yearLabelMargin: 20, yearColor: '#FF994D', labelBold: true,
+            monthLineColor: '#ffffff', monthLineWidth: 2, monthLineType: 'dashed',
+            cellOpacityPercent: 80, cellBorderType: 'dotted', reverseColorScale: true,
+            useFixedColorRange: true, colorScaleMinimum: -10, colorScaleMaximum: 30
+        });
+    }
+    const bootstrap = { mode, state: initialState, options: { tileHeaderVisible: true, echartsThemes: {},
         adaptToBackground: false, calendarStatePath: '/hook/SymconECharts/state/5000/' + 'a'.repeat(32) }, translations };
     const replacements = { HTML_LANGUAGE: 'de', HTML_CLASSES: '', ROOT_FONT_SIZE: '16px', VIEWPORT_CONTENT: 'width=device-width, initial-scale=1',
         DOCUMENT_TITLE: 'Calendar browser fixture', VISUALIZATION_THEME: variables, MODULE_STYLE: read('EChartsCalendar/visualization/style.css'),

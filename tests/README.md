@@ -172,6 +172,11 @@ Zählerablehnung, schreibfreie Vorschauen, Designkopie, getrennte Ausgabewege,
 WebContent und das 1-MB-Limit. `calendar_layout.js` prüft Ausrichtung,
 Kopfbereich, Titel, Farben, Labelanpassung, echte ECharts-Geometrie und die
 lesende Jahresnavigation.
+Die Designerweiterung sichert feste Farbgrenzen, umgekehrte Farben,
+Monatstrennlinien, Zellstile, Positions-/Formatoptionen und alle vier
+Jahreszahl-Positionen mit dem realen ECharts-Renderer ab. Die Modultests
+prüfen unabhängige Vorschauen, Float-Grenzen beim Kopieren und die
+Validierung beider Designer.
 
 Mit `node tests/calendar_browser.mjs` startet eine rein lokale Fixture unter
 `http://127.0.0.1:8796` mit synthetischen Jahresdaten und der ausgelieferten

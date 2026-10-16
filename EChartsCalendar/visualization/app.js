@@ -55,6 +55,10 @@
         var values = data.map(function (cell) { return cell.value; });
         var min = values.length ? Math.min.apply(null, values) : 0;
         var max = values.length ? Math.max.apply(null, values) : 1;
+        if (style.useFixedColorRange === true) {
+            min = Number(style.colorScaleMinimum);
+            max = Number(style.colorScaleMaximum);
+        }
         // A constant series still has a finite, non-degenerate visual range, including extreme finite means.
         if (min === max) {
             if (min > 0) { min = min / 2; } else if (max < 0) { max = max / 2; } else { max = 1; }
@@ -71,8 +75,67 @@
         var left = style.showWeekdayLabels && !vertical ? axisSize * 3 + 8
             : (style.showMonthLabels && vertical ? axisSize * 3 + 8 : 18);
         var right = 22;
+        var monthPosition = style.monthLabelPosition || 'start';
+        var weekdayPosition = style.weekdayLabelPosition || 'start';
+        var monthMargin = style.monthLabelMargin == null ? 8 : style.monthLabelMargin;
+        var weekdayMargin = style.weekdayLabelMargin == null ? 8 : style.weekdayLabelMargin;
+        var monthFormat = style.monthLabelFormat || 'name';
+        var monthTextWidth = axisSize * (monthFormat === 'year-month' ? 4.8 : 2.2);
+        if (style.showWeekdayLabels) {
+            if (vertical) {
+                if (weekdayPosition === 'end') { top -= axisSize; bottom += axisSize + weekdayMargin + 6; }
+                else { top += Math.max(0, weekdayMargin - 8); }
+            } else if (weekdayPosition === 'end') { left = 18; right += axisSize * 2.2 + weekdayMargin; }
+            else { left += Math.max(0, weekdayMargin - 8); }
+        }
+        if (style.showMonthLabels) {
+            if (vertical) {
+                if (monthPosition === 'end') { left = 18; right += monthTextWidth + monthMargin; }
+                else { left = Math.max(left, monthTextWidth + monthMargin + 8); }
+            } else if (monthPosition === 'end') { bottom += axisSize + monthMargin + 6; }
+            else { top += Math.max(0, monthMargin - 8); }
+        }
+        var yearSize = design.fontSizePercent(style.yearFontSizePercent, 18);
+        var yearPosition = style.yearLabelPosition && style.yearLabelPosition !== 'auto' ? style.yearLabelPosition : (vertical ? 'top' : 'left');
+        var yearMargin = style.yearLabelMargin == null ? 30 : style.yearLabelMargin;
+        if (style.showYearLabel === true) {
+            // The year sits outside the other calendar labels on the chosen side.
+            var occupied = { top: top - title.contentTop, bottom: bottom - (style.showColorScale ? 55 : 16), left: left - 18, right: right - 22 };
+            yearMargin += Math.max(0, occupied[yearPosition]);
+            var yearSpace = yearMargin + yearSize + 4;
+            if (yearPosition === 'top') { top += yearSpace; }
+            else if (yearPosition === 'bottom') { bottom += yearSpace; }
+            else if (yearPosition === 'left') { left += yearSpace; }
+            else { right += yearSpace; }
+        }
+        var scaleColors = [style.lowColor || '#5070DD', style.highColor || '#FB628B'];
+        if (style.reverseColorScale === true) { scaleColors.reverse(); }
+        // Even very large custom text/margins must leave a positive calendar viewport.
+        var horizontalFit = Math.min(1, Math.max(1, width - 28) / Math.max(1, left + right));
+        left *= horizontalFit;
+        right *= horizontalFit;
+        var verticalFit = Math.min(1, Math.max(1, height - title.contentTop - 28)
+            / Math.max(1, top - title.contentTop + bottom));
+        top = title.contentTop + (top - title.contentTop) * verticalFit;
+        bottom *= verticalFit;
         var cellWidth = Math.max(1, width - left - right) / (vertical ? 7 : 54);
         var cellHeight = Math.max(1, height - top - bottom) / (vertical ? 54 : 7);
+        var monthStep = Math.max(1, Math.ceil(axisSize * (vertical ? 1.2 : (monthFormat === 'year-month' ? 7 : 3) * 0.65)
+            / Math.max(1, (vertical ? height - top - bottom : width - left - right) / 12)));
+        var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map(translate);
+        var weekdayStep = Math.max(1, Math.ceil(axisSize * (vertical ? 2 : 1.2)
+            / Math.max(1, (vertical ? width - left - right : height - top - bottom) / 7)));
+        var weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(function (name, index) {
+            return ((index - style.firstWeekday + 7) % 7) % weekdayStep ? '' : translate(name);
+        });
+        var monthFormatter = monthFormat === 'number' ? '{MM}' : (monthFormat === 'year-month' ? '{yyyy}-{MM}' : '{nameMap}');
+        if (monthStep > 1) {
+            monthFormatter = function (p) {
+                if ((Number(p.M) - 1) % monthStep) { return ''; }
+                return monthFormat === 'year-month' ? p.yyyy + '-' + p.MM
+                    : (monthFormat === 'number' ? p.MM : monthNames[Number(p.M) - 1]);
+            };
+        }
         function format(value, unit) {
             return Number(value).toLocaleString(undefined, { minimumFractionDigits: calendar.decimals,
                 maximumFractionDigits: calendar.decimals }) + (unit && calendar.unit ? ' ' + calendar.unit : '');
@@ -95,27 +158,40 @@
             } },
             calendar: { range: String(calendar.year), orient: vertical ? 'vertical' : 'horizontal',
                 left: left, right: right, top: top, bottom: bottom, cellSize: ['auto', 'auto'],
-                yearLabel: { show: false },
+                yearLabel: { show: style.showYearLabel === true, position: yearPosition, margin: yearMargin,
+                    color: style.yearColor || style.axisColor || colors.text, fontSize: yearSize,
+                    fontWeight: style.labelBold ? 'bold' : 'normal' },
                 monthLabel: { show: style.showMonthLabels, color: style.axisColor || colors.text, fontSize: axisSize,
-                    margin: 8, nameMap: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map(translate) },
+                    position: monthPosition, margin: monthMargin, align: style.monthLabelAlign || 'center',
+                    formatter: monthFormatter,
+                    fontWeight: style.labelBold ? 'bold' : 'normal',
+                    nameMap: monthNames },
                 dayLabel: { show: style.showWeekdayLabels, firstDay: style.firstWeekday,
-                    color: style.axisColor || colors.text, fontSize: axisSize, margin: 8,
-                    nameMap: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(translate) },
-                splitLine: { show: true, lineStyle: { color: style.cellBorderColor || colors.border, width: style.cellBorderWidth } },
-                itemStyle: { color: style.emptyCellColor || colors.surface, borderWidth: style.cellBorderWidth, borderColor: border } },
+                    color: style.axisColor || colors.text, fontSize: axisSize, margin: weekdayMargin, position: weekdayPosition,
+                    fontWeight: style.labelBold ? 'bold' : 'normal',
+                    nameMap: weekdays },
+                splitLine: { show: style.showMonthSeparators !== false, lineStyle: {
+                    color: style.monthLineColor || style.cellBorderColor || colors.border,
+                    width: style.monthLineWidth || style.cellBorderWidth, type: style.monthLineType || 'solid' } },
+                itemStyle: { color: style.emptyCellColor || colors.surface, borderWidth: style.cellBorderWidth,
+                    borderType: style.cellBorderType || 'solid', borderColor: border,
+                    opacity: style.cellOpacityPercent == null ? 1 : style.cellOpacityPercent / 100 } },
             visualMap: { show: style.showColorScale === true && data.length > 0, type: 'continuous',
                 min: min, max: max, dimension: 1, seriesIndex: 0, calculable: false, orient: 'horizontal',
                 left: 'center', bottom: 8, itemWidth: 10, itemHeight: Math.max(40, Math.min(180, width - 170)),
                 textStyle: { color: style.axisColor || colors.text, fontSize: axisSize },
                 text: [format(max, true), format(min, true)],
                 formatter: function (value) { return format(value, true); },
-                inRange: { color: [style.lowColor || '#5070DD', style.highColor || '#FB628B'] } },
+                inRange: { color: scaleColors } },
             series: [{ type: 'heatmap', coordinateSystem: 'calendar',
                 data: data.map(function (cell) { return [cell.date, cell.value]; }),
-                itemStyle: { borderWidth: style.cellBorderWidth, borderColor: border },
+                itemStyle: { borderWidth: style.cellBorderWidth, borderColor: border, borderType: style.cellBorderType || 'solid',
+                    opacity: style.cellOpacityPercent == null ? 1 : style.cellOpacityPercent / 100 },
                 label: { show: showValues || showDays, fontSize: valueSize, color: style.valueColor || colors.text,
+                    fontWeight: style.labelBold ? 'bold' : 'normal',
                     formatter: function (p) { return showValues ? format(p.value[1], false) : String(Number(p.value[0].slice(8))); } },
-                emphasis: { itemStyle: { borderWidth: Math.max(1, style.cellBorderWidth), borderColor: colors.text } } }]
+                emphasis: { disabled: style.hoverHighlight === false,
+                    itemStyle: { borderWidth: Math.max(1, style.cellBorderWidth), borderColor: style.hoverBorderColor || colors.text } } }]
         };
     }
     function updatePeriod(calendar) {

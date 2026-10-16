@@ -2,6 +2,12 @@
 
 ## Hinzugefügt
 
+- Der Calendar-Designer bietet unabhängige Monatstrennlinien, Zellrandarten
+  und Zelldeckkraft, Hover-Rahmen, Position und Abstand der Kalendernamen,
+  Monatsformate, eine zusätzliche gestaltbare Jahreszahl und Fettschrift.
+  Farbreihenfolge und feste Farbgrenzen sind getrennt für Kachel und IPSView
+  einstellbar; bestehende Konfigurationen bleiben erhalten.
+
 - `EChartsCalendar` (`ECCL`) zeigt archivierte Tagesmittelwerte einer
   numerischen Standardvariable als Jahreskalender mit lesender
   Jahresnavigation. Fehlende und laufende Tage bleiben leer; Zähler sind

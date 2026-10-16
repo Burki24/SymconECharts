@@ -75,7 +75,15 @@ class EChartsCalendar extends IPSModuleStrict
         'CellBorderWidth'      => 1, 'CellBorderColor' => -1, 'EmptyCellColor' => -1,
         'LowColor'             => 0x5070DD, 'HighColor' => 0xFB628B,
         'TitleFontSizePercent' => 100, 'AxisFontSizePercent' => 100, 'ValueFontSizePercent' => 100,
-        'TitleColor'           => -1, 'AxisColor' => -1, 'ValueColor' => -1
+        'TitleColor'           => -1, 'AxisColor' => -1, 'ValueColor' => -1,
+        'ShowMonthSeparators'  => true, 'MonthLineWidth' => 0, 'MonthLineType' => 'solid', 'MonthLineColor' => -1,
+        'MonthLabelPosition'   => 'start', 'WeekdayLabelPosition' => 'start',
+        'MonthLabelMargin'     => 8, 'WeekdayLabelMargin' => 8, 'MonthLabelAlign' => 'center', 'MonthLabelFormat' => 'name',
+        'ShowYearLabel'        => false, 'YearLabelPosition' => 'auto', 'YearLabelMargin' => 30,
+        'YearFontSizePercent'  => 100, 'YearColor' => -1, 'LabelBold' => false,
+        'CellOpacityPercent'   => 100, 'CellBorderType' => 'solid', 'HoverHighlight' => true, 'HoverBorderColor' => -1,
+        'ReverseColorScale'    => false, 'UseFixedColorRange' => false,
+        'ColorScaleMinimum'    => 0.0, 'ColorScaleMaximum' => 100.0
     ];
 
     public function Create(): void
@@ -96,6 +104,7 @@ class EChartsCalendar extends IPSModuleStrict
                 match (gettype($default)) {
                     'boolean' => $this->RegisterPropertyBoolean($prefix . $name, $default),
                     'integer' => $this->RegisterPropertyInteger($prefix . $name, $default),
+                    'double'  => $this->RegisterPropertyFloat($prefix . $name, $default),
                     default   => $this->RegisterPropertyString($prefix . $name, $default)
                 };
             }
@@ -138,6 +147,7 @@ class EChartsCalendar extends IPSModuleStrict
         $form = EChartsDesignerSections::Group($form, [
             ['caption' => 'Animation', 'start' => 'AnimationEnabled'],
             ['caption' => 'Calendar layout', 'start' => 'Orientation'],
+            ['caption' => 'Month separators', 'start' => 'ShowMonthSeparators'],
             ['caption' => 'Color scale and cells', 'start' => 'LowColor'],
             ['caption' => 'Labels and typography', 'start' => 'ShowDayNumbers']
         ]);
@@ -167,6 +177,7 @@ class EChartsCalendar extends IPSModuleStrict
             $value = match (gettype($default)) {
                 'boolean' => $this->ReadPropertyBoolean($name),
                 'integer' => $this->ReadPropertyInteger($name),
+                'double'  => $this->ReadPropertyFloat($name),
                 default   => $this->ReadPropertyString($name)
             };
             IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
@@ -517,15 +528,33 @@ class EChartsCalendar extends IPSModuleStrict
             return false;
         }
         foreach (['CellBorderWidth' => [0, 4], 'FirstWeekday' => [0, 6], 'TitleFontSizePercent' => [50, 200],
+            'MonthLineWidth'        => [0, 6], 'MonthLabelMargin' => [0, 40], 'WeekdayLabelMargin' => [0, 40],
+            'YearLabelMargin'       => [0, 60], 'YearFontSizePercent' => [50, 200], 'CellOpacityPercent' => [0, 100],
             'AxisFontSizePercent'   => [50, 200], 'ValueFontSizePercent' => [50, 200]] as $name => [$min, $max]) {
             $value = $this->ReadPropertyInteger($prefix . $name);
             if ($value < $min || $value > $max) {
                 return false;
             }
         }
-        foreach (['CellBorderColor', 'EmptyCellColor', 'LowColor', 'HighColor', 'TitleColor', 'AxisColor', 'ValueColor'] as $name) {
+        foreach (['CellBorderColor', 'EmptyCellColor', 'LowColor', 'HighColor', 'TitleColor', 'AxisColor', 'ValueColor',
+            'MonthLineColor', 'YearColor', 'HoverBorderColor'] as $name) {
             $value = $this->ReadPropertyInteger($prefix . $name);
             if ($value < -1 || $value > 0xFFFFFF) {
+                return false;
+            }
+        }
+        foreach (['MonthLineType' => ['solid', 'dashed', 'dotted'], 'CellBorderType' => ['solid', 'dashed', 'dotted'],
+            'MonthLabelPosition'  => ['start', 'end'], 'WeekdayLabelPosition' => ['start', 'end'],
+            'MonthLabelAlign'     => ['left', 'center'], 'MonthLabelFormat' => ['name', 'number', 'year-month'],
+            'YearLabelPosition'   => ['auto', 'top', 'bottom', 'left', 'right']] as $name => $allowed) {
+            if (!in_array($this->ReadPropertyString($prefix . $name), $allowed, true)) {
+                return false;
+            }
+        }
+        if ($this->ReadPropertyBoolean($prefix . 'UseFixedColorRange')) {
+            $min = $this->ReadPropertyFloat($prefix . 'ColorScaleMinimum');
+            $max = $this->ReadPropertyFloat($prefix . 'ColorScaleMaximum');
+            if (!is_finite($min) || !is_finite($max) || $min >= $max || !is_finite($max - $min)) {
                 return false;
             }
         }
@@ -544,6 +573,7 @@ class EChartsCalendar extends IPSModuleStrict
             $value = match (gettype($default)) {
                 'boolean' => $this->ReadPropertyBoolean($prefix . $name),
                 'integer' => $this->ReadPropertyInteger($prefix . $name),
+                'double'  => $this->ReadPropertyFloat($prefix . $name),
                 default   => $this->ReadPropertyString($prefix . $name)
             };
             $style[lcfirst($name)] = str_ends_with($name, 'Color')
