@@ -145,6 +145,15 @@ offiziellen Bundle enthaltenen Komponenten bleiben unter ihren in
 
 ## Weitere Komponenten
 
+PictorialBar verwendet auf Wunsch ausgewählte Pfadformen aus der bereits
+installierten Symcon-Icon-Bibliothek. Diese enthält unter anderem Font Awesome
+Light/Brands und Symcon-spezifische Icons; es gelten deren jeweilige, mit
+Symcon ausgelieferte Lizenzbedingungen. SymconECharts liefert keine Kopie
+dieser Bibliothek, Fonts oder kommerziellen Iconbestände aus. Der lokale
+Adapter liest nur die ausgewählte Form für die eigene Diagrammausgabe.
+Die Test-Fixtures enthalten ausschließlich selbst erstellte synthetische
+Formen, keine übernommenen Icon-Artworks.
+
 Vor Aufnahme weiterer Bibliotheken, Helper, Vorlagen, Bilder oder Schriftarten
 werden deren Herkunft, Lizenz und Weitergabebedingungen geprüft und dokumentiert.
 Vorhandene Copyright- und Lizenzhinweise bleiben erhalten. Fremdcode wird nicht

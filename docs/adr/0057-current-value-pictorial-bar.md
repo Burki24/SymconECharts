@@ -113,6 +113,53 @@ Sortierung und optische Begrenzung. Lokale Browserprüfungen verwenden
 synthetische Daten. Live-Kachel und IPSView bleiben nach dem Modulupdate
 durch den Eigentümer separat abzunehmen.
 
+### Installierte Symcon-Icons vom 17.10.2026
+
+`Symbol=icon` und `SymbolIcon` ergänzen die bestehenden Formen ohne Migration
+oder Änderung der Defaults. Beide Designer registrieren und kopieren den
+Iconnamen als String. Das dokumentierte native Formularfeld `SelectIcon`
+liefert die grafische Auswahl, keine eigene duplizierte Icon-Galerie.
+
+Das öffentliche PHP-SDK liefert dafür keine SVG-Pfaddaten. Der lokale,
+familienbezogene Adapter `PictorialBarIcon` liest deshalb ausschließlich
+`console/icons.js` unter `IPS_GetKernelDirEx()`, ohne JavaScript auszuführen.
+Das ist ausdrücklich ein **interner Ressourcenformat-Adapter**, kein stabiler
+SDK-Vertrag. Nach Symcon-Änderungen oder auf abweichenden Installationen kann
+er eine Anpassung benötigen; fehlende oder inkompatible Ressourcen führen zu
+einem erklärten Konfigurationsfehler, nicht zu erfundenen Ersatzformen.
+Die Standardformen benötigen diese Ressource nicht.
+
+Die Prüfung verwendet die aktuelle lokal installierte Bibliothek (Light,
+Brands und Symcon-Kit). Minifier-Variablennamen werden aus Pack-Registrierungen
+ermittelt, nicht festgeschrieben. Begrenzte JSON-Tupel werden ausgewertet:
+maximal 8 MiB Bibliothek, 128 KiB Datensatz, Verschachtelung 8, 32 Teilpfade,
+16 KiB kombinierter Pfad und Dimensionen 1–16384. Der vorhandene
+`EChartsSvgPath`-Validator prüft die extrahierten Pfade. Ein begrenzter
+Anfragecache hält nur die installierte Ressource und bis zu 32 Ergebnisse.
+URL-, Datei-, CSS- und freie SVG-Eingaben sind nicht zugelassen.
+
+Nur der gewählte Pfad und seine Dimensionen gelangen ins Modell. Die
+komplette Bibliothek, kommerzielle Iconbestände oder Fonts werden weder ins
+Repository kopiert noch mit dem Modul ausgeliefert. ECharts und Gateway
+bleiben unverändert. Zur Laufzeit besteht keine CDN- oder Font-Abhängigkeit.
+
+Wiederholte Icons werden proportional in ihre Glyphenbox eingepasst und
+als begrenzter Compound-Pfad gezeichnet. Einzelformen passen sich wie bisher
+an die Balkengeometrie an. Alle Farbmodi bleiben verfügbar. Maximal 64
+Icon-Wiederholungen und ein konservatives 256-KiB-Pfadbudget begrenzen die
+Zeichenlast; komplexe Icons ergeben weniger, größere Wiederholungen.
+Werte-Clipping, Rohwerte und Labelpositionen bleiben unverändert. Die
+SVG-Vorschau referenziert die einmal eingebettete Form intern mit `use`.
+Inverse Paint-Transformationen halten den Verlauf in Diagrammkoordinaten.
+
+Grundlagen: [SelectIcon](https://www.symcon.de/en/service/documentation/developer-area/sdk-tools/sdk-php/configuration-forms/selecticon/),
+[HTML-SDK](https://www.symcon.de/de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/html-sdk/),
+[Symcon-Icons](https://www.symcon.de/de/service/dokumentation/komponenten/icons/).
+Der interne Adapter wurde lesend an der vorhandenen Windows-Installation
+geprüft; andere Installationslayouts und Symcon-Versionen bleiben Testlücken.
+Die native Iconauswahl und die neue Live-Kachel-/IPSView-Ausgabe bleiben nach
+dem Modulupdate durch den Eigentümer abzunehmen.
+
 ## Grundlagen
 
 Am 17.10.2026 wurden die offiziellen Einstiege

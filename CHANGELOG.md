@@ -2,6 +2,11 @@
 
 ## Neu
 
+- PictorialBar bietet Symcon-Icons als zusätzliche Symbolform mit grafischer
+  nativer Icon-Auswahl in beiden Designern. Wiederholung, Einzelform,
+  Vorschauen und alle Farbmodi einschließlich des skalenbezogenen Verlaufs
+  verwenden die ausgewählte Form. Bestehende Konfigurationen bleiben unverändert.
+
 - PictorialBar bietet zusätzlich einen Farbverlauf innerhalb jedes
   Symbolbalkens. Er ist fest an die frei einstellbaren Farbgrenzen gebunden
   (etwa 0–100 % oder 0–255 LQI), läuft über wiederholte Symbole hinweg und

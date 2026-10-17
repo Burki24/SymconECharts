@@ -178,6 +178,47 @@ for (const symbol of ['rect','roundRect','circle','diamond','triangle']) {
 const hugeGradient=render({...model,pictorialBar:{...model.pictorialBar,style:{...gradientStyle,symbolSize:4,symbolGap:0}}},'ipsview',true,100000);
 assert.ok((hugeGradient.option.series[0].symbol.match(/Z/g)||[]).length<=128,'Compound symbols must remain bounded in very wide views.');
 assert.ok(hugeGradient.option.series[0].symbol.length<60000,'Generated geometry must have a bounded path payload.');
+const fixtureIcons=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/pictorial-icons.json'),'utf8'));
+const iconStyle={...gradientStyle,symbol:'icon',symbolIcon:'cell',symbolPath:fixtureIcons.light.cell[4],symbolWidth:24,symbolHeight:12};
+for(const colorMode of ['category','value','gradient']){
+ for(const orientation of ['horizontal','vertical']){
+  for(const symbolRepeat of [true,false]){
+    const result=render({...model,pictorialBar:{...model.pictorialBar,style:{...iconStyle,colorMode,orientation,symbolRepeat}}},'ipsview',true,620);
+    assert.match(result.option.series[0].symbol,/^path:\/\//);
+    assert.equal(result.option.series[0].symbolRepeat,false);
+    assert.equal(result.option.series[0].symbolClip,symbolRepeat);
+    assert.equal(result.option.series[0].label.formatter({dataIndex:2}),'150 %');
+    const engine=echarts.init(null,null,{renderer:'svg',ssr:true,width:620,height:500});
+    engine.setOption(result.option);
+    const svg=engine.renderToSVGString();
+    assert.ok(!/NaN|Infinity/.test(svg));
+    assert.ok(svg.includes('<path'));
+    const graphics=engine.getModel().getSeriesByIndex(0).getData().getItemGraphicEl(1);
+    const bounds=graphics.getBoundingRect();
+    assert.ok([bounds.x,bounds.y,bounds.width,bounds.height].every(Number.isFinite));
+    if(symbolRepeat){
+        assert.ok((result.option.series[0].symbol.match(/Z/g)||[]).length<=128,'At most 64 copies of a two-path icon.');
+        assert.equal(typeof result.option.series[0].labelLayout,'function');
+    }
+    if(colorMode==='gradient')assert.match(svg,/<linearGradient/);
+    engine.dispose();
+  }
+ }
+}
+// The transformer supports all SVG path commands, relative moveto and exponents.
+const pathContext={};
+vm.runInNewContext(source.slice(source.indexOf('    function iconPath('),source.indexOf('    // One bounded compound')),pathContext);
+assert.equal(pathContext.iconPath('m1 2 3 4h5v6l1e1 -2t3 4q1 2 3 4c1 2 3 4 5 6s1 2 3 4a2 3 45 0 1 5 6z',2,10,20),
+    'm12 24 6 8 h10 v12 l20 -4 t6 8 q2 4 6 8 c2 4 6 8 10 12 s2 4 6 8 a4 6 45 0 1 10 12 z');
+assert.equal(pathContext.iconPath('M1 2H3V4A2 3 45 0 1 5 6Z',2,10,20),'M12 24 H16 V28 A4 6 45 0 1 20 32 Z');
+assert.throws(()=>pathContext.iconPath('M0 0 L1',1,0,0));
+assert.throws(()=>pathContext.iconPath('L0 0',1,0,0));
+const complexPath='M0 0'+('L1 1 '.repeat(2400))+'Z';
+const complexIcon=render({...model,pictorialBar:{...model.pictorialBar,style:{...iconStyle,symbolPath:complexPath,symbolSize:4,symbolGap:0}}},'ipsview',true,100000);
+assert.ok(complexIcon.option.series[0].symbol.length<262144,'Complex icon repeats must respect the compound path budget.');
+const invalidIcon=render({...model,pictorialBar:{...model.pictorialBar,style:{...iconStyle,symbolPath:'M0 0L1'}}});
+assert.equal(invalidIcon.errorElement.hidden,false);
+assert.equal(invalidIcon.errorElement.textContent,'The selected Symcon icon is unavailable or unsupported.');
 for(const symbol of ['rect','roundRect','circle','diamond','triangle']){
  for(const orientation of ['vertical','horizontal']){
   for(const symbolRepeat of [false,true]){

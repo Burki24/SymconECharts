@@ -24,7 +24,7 @@ Obergrenze automatisch; ein positives Maximum begrenzt die Darstellung.
 Darüberliegende Werte bleiben in Beschriftung und Tooltip unverändert,
 der Balken wird nur optisch begrenzt.
 
-Rechteck, abgerundetes Rechteck, Kreis, Raute und Dreieck stehen bereit.
+Rechteck, abgerundetes Rechteck, Kreis, Raute, Dreieck und Symcon-Icons stehen bereit.
 Mit „Symbole wiederholen“ wird die Balkenlänge durch mehrere gleich große
 Symbole gefüllt; ein letztes Symbol kann angeschnitten sein.
 Ein Symbol bedeutet dabei nicht eine bestimmte Anzahl von Einheiten.
@@ -32,6 +32,27 @@ Ohne Wiederholung wird eine einzelne Form an die Balkengeometrie angepasst.
 Symbolgröße und Abstand wirken auf den Wiederholungsmodus.
 In großen Ansichten kann die Größe zur Begrenzung der Zeichenlast steigen.
 Eigene Bilder und SVG-Importe werden nicht unterstützt.
+
+### Symcon-Icons auswählen
+
+Unter **Anordnung und Symbole** die **Symbolform → Symcon-Icon** wählen.
+Im Feld **Symcon-Icon** öffnet sich Symcons grafischer Icon-Auswahldialog.
+Das gewählte Icon gilt für alle Balken dieses Designers. Beispielsweise kann
+ein Batterie-Icon die bisherigen Rechtecke ersetzen. Der unabhängige
+IPSView-Designer besitzt dieselbe Auswahl; bei Designvererbung gilt die Kachelauswahl.
+
+Wiederholte Icons behalten ihre Proportionen. Ohne Wiederholung wird das
+Icon wie die Grundformen an die Balkengeometrie angepasst. Alle drei Farbmodi
+funktionieren auch mit Icons, insbesondere der gemeinsame skalenbezogene
+Farbverlauf. Die Vorschauen reagieren bereits auf die ungespeicherte Auswahl.
+
+Verwendet wird die auf dem Symcon-Server installierte moderne Icon-Bibliothek
+(Light, Brands und Symcon-Icons). Nur die ausgewählte Pfadform wird in die
+Ausgabe übernommen; der Browser benötigt keine zusätzlichen Schriften oder
+Internetverbindung. Fehlende, nicht lesbare oder nicht unterstützte Icons
+werden gemeldet. Alte Skin-Bilder und eigene Uploads sind nicht enthalten.
+Für komplexe Icons kann die Größe automatisch steigen: maximal 64 Wiederholungen,
+bei langen Pfaden entsprechend weniger. Bestehende Formen und Einstellungen bleiben erhalten.
 
 ## Gestaltung und Ausgabe
 

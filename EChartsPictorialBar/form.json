@@ -213,8 +213,18 @@
                                 {
                                     "caption": "Triangle",
                                     "value": "triangle"
+                                },
+                                {
+                                    "caption": "Symcon icon",
+                                    "value": "icon"
                                 }
                             ]
+                        },
+                        {
+                            "type": "SelectIcon",
+                            "name": "SymbolIcon",
+                            "caption": "Symcon icon",
+                            "width": "225px"
                         },
                         {
                             "type": "CheckBox",

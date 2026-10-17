@@ -59,21 +59,56 @@
             seriesColors: colors.seriesColors
         };
     }
-    // Internally generated paths only: one bounded compound shape gives all
+    // Scale a validated path without SVG markup, script evaluation or font loading.
+    // Uniform scaling preserves arcs and the selected icon's aspect ratio.
+    function iconPath(path, scale, tx, ty) {
+        var tokens = path.match(/[a-zA-Z]|[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:[eE][-+]?\d+)?/g) || [];
+        var arities = {M:2,L:2,H:1,V:1,C:6,S:4,Q:4,T:2,A:7,Z:0};
+        var result = '', first = true, index = 0;
+        var n = function(v) { return Math.round(v * 10000) / 10000; };
+        while (index < tokens.length) {
+            var command = tokens[index++], upper = command.toUpperCase(), arity = arities[upper];
+            if (arity == null || (first && upper !== 'M')) { throw new Error('Invalid icon path'); }
+            result += command;
+            if (!arity) { continue; }
+            var groups = 0;
+            while (index < tokens.length && !/^[a-zA-Z]$/.test(tokens[index])) {
+                var args = tokens.slice(index, index + arity).map(Number);
+                if (args.length !== arity || args.some(function(v) { return !Number.isFinite(v); })) { throw new Error('Invalid icon path'); }
+                index += arity;
+                var absolute = command === upper;
+                args = args.map(function(v, i) {
+                    if (upper === 'A' && i >= 2 && i <= 4) { return v; }
+                    var offset = upper === 'H' ? tx : upper === 'V' ? ty : (i % 2 ? ty : tx);
+                    if (upper === 'A') { offset = i === 5 ? tx : i === 6 ? ty : 0; }
+                    return n(v * scale + ((absolute || (first && upper === 'M' && groups === 0)) ? offset : 0));
+                });
+                result += args.join(' ') + ' ';
+                groups++;
+                first = false;
+            }
+            if (!groups) { throw new Error('Invalid icon path'); }
+        }
+        return result;
+    }
+    // One bounded compound shape gives all
     // repeated glyphs the same gradient coordinate system without renderer hooks.
-    function gradientGroupPath(kind, horizontal, major, width, size, crossSize, gap) {
+    function gradientGroupPath(kind, horizontal, major, width, size, crossSize, gap, icon, limit) {
         var n = function(value) { return Math.round(value * 10000) / 10000; };
         var w = horizontal ? major : width, h = horizontal ? width : major;
         var path = 'M0 0L0 0M' + n(w) + ' ' + n(h) + 'L' + n(w) + ' ' + n(h);
         size = Math.min(size, major);
-        var count = Math.max(1, Math.min(128, Math.floor((major + 2 * gap) / (size + 2 * gap))));
+        var count = Math.max(1, Math.min(limit, Math.floor((major + 2 * gap) / (size + 2 * gap))));
         var step = count > 1 ? (major - size) / (count - 1) : 0;
         for (var i = 0; i < count; i++) {
             var x = horizontal ? i * step : (width - crossSize) / 2;
             var y = horizontal ? (width - crossSize) / 2 : major - size - i * step;
             var sw = horizontal ? size : crossSize, sh = horizontal ? crossSize : size;
             var x2 = x + sw, y2 = y + sh, cx = x + sw / 2, cy = y + sh / 2;
-            if (kind === 'circle') {
+            if (kind === 'icon') {
+                var scale = Math.min(sw / icon.symbolWidth, sh / icon.symbolHeight);
+                path += iconPath(icon.symbolPath,scale,x+(sw-icon.symbolWidth*scale)/2,y+(sh-icon.symbolHeight*scale)/2);
+            } else if (kind === 'circle') {
                 path += 'M' + n(x2) + ' ' + n(cy) + 'A' + n(sw/2) + ' ' + n(sh/2) + ' 0 1 0 ' + n(x) + ' ' + n(cy)
                     + 'A' + n(sw/2) + ' ' + n(sh/2) + ' 0 1 0 ' + n(x2) + ' ' + n(cy) + 'Z';
             } else if (kind === 'diamond' || kind === 'triangle') {
@@ -114,10 +149,13 @@
         var cross = Math.max(1,(horizontal ? height-top-bottom : width-left-right)/Math.max(1,items.length));
         var maximum = style.scaleMaximum > 0 ? style.scaleMaximum : Math.max.apply(null,[1].concat(items.map(function(x){return x.value;})));
         var barWidth = Math.max(1,Math.min(style.barWidth || 40,cross*0.65));
-        var size = Math.max(4,style.symbolSize || 12,Math.ceil(major/128));
+        // Complex glyphs use fewer/larger repeats. Keep path construction bounded.
+        var limit = style.symbol === 'icon' ? Math.max(1,Math.min(64,Math.floor(262144/((style.symbolPath || '').length*16+256)))) : 128;
+        var size = Math.max(4,style.symbolSize || 12,Math.ceil(major/limit));
         var crossSize = Math.max(1,Math.min(size,barWidth));
         var repeated = style.symbolRepeat !== false;
         var gradient = style.colorMode === 'gradient';
+        var compound = repeated && (gradient || style.symbol === 'icon');
         var fontFamily = style.fontFamily || 'Arial, sans-serif';
         function rampColor(value) {
             var minimum = style.colorMinimum == null ? 0 : style.colorMinimum;
@@ -187,10 +225,11 @@
             tooltip:{show:style.showTooltip !== false,trigger:'item',confine:true,
                 extraCssText:'max-width:'+Math.max(80,width-24)+'px;white-space:normal;overflow-wrap:anywhere;',
                 formatter:function(p){var item=items[p.dataIndex];return item?escapeHTML(item.label)+'<br>'+escapeHTML(format(item)):'';}},
-            series:[{type:'pictorialBar',symbol:gradient && repeated
-                ? gradientGroupPath(style.symbol || 'rect',horizontal,major,barWidth,size,crossSize,style.symbolGap == null ? 2 : style.symbolGap) : style.symbol || 'rect',
-                symbolRepeat:repeated && !gradient,symbolRepeatDirection:'start',
-                symbolSize:repeated && !gradient?(horizontal?[size,crossSize]:[crossSize,size]):['100%','100%'],
+            series:[{type:'pictorialBar',symbol:compound
+                ? gradientGroupPath(style.symbol || 'rect',horizontal,major,barWidth,size,crossSize,style.symbolGap == null ? 2 : style.symbolGap,style,limit)
+                : style.symbol === 'icon' ? 'path://M0 0L0 0M'+style.symbolWidth+' '+style.symbolHeight+'L'+style.symbolWidth+' '+style.symbolHeight+style.symbolPath : style.symbol || 'rect',
+                symbolRepeat:repeated && !compound,symbolRepeatDirection:'start',
+                symbolSize:repeated && !compound?(horizontal?[size,crossSize]:[crossSize,size]):['100%','100%'],
                 symbolMargin:style.symbolGap == null ? 2 : style.symbolGap,symbolClip:repeated,
                 ...(repeated?{symbolBoundingData:maximum}:{}),symbolPosition:'start',barWidth:barWidth,clip:true,
                 itemStyle:{opacity:style.opacityPercent == null ? 0.9 : style.opacityPercent/100,
@@ -204,7 +243,7 @@
                     distance:style.valueDistance == null ? 5 : style.valueDistance,fontFamily:fontFamily,fontWeight:style.valueBold === true ? 'bold' : 'normal',
                     fontSize:valueFont,overflow:'truncate',width:horizontal?Math.max(8,right-10):Math.max(12,cross*0.95),
                     formatter:function(p){return items[p.dataIndex]?format(items[p.dataIndex]):'';}},
-                labelLayout:gradient && repeated ? gradientLabelLayout : {hideOverlap:style.hideOverlap !== false},
+                labelLayout:compound ? gradientLabelLayout : {hideOverlap:style.hideOverlap !== false},
                 data:items.map(function(x){return {id:x.id,name:x.label,value:Math.min(maximum,x.value),
                     itemStyle:{color:itemColor(x),...(gradient && !style.borderColor ? {borderColor:itemColor(x)} : {})}};})
             }]
@@ -245,7 +284,12 @@
         } else if (wasHidden) {
             chart.resize();
         }
-        chart.setOption(buildOption(model, theme), true);
+        try {
+            chart.setOption(buildOption(model, theme), true);
+        } catch (error) {
+            displayError(model.pictorialBar && model.pictorialBar.style.symbol === 'icon'
+                ? 'The selected Symcon icon is unavailable or unsupported.' : 'The PictorialBar values could not be loaded.');
+        }
 
     }
     window.handleMessage = function (message) {

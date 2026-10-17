@@ -3,6 +3,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {spawnSync} from 'node:child_process';
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const read = p => fs.readFileSync(path.join(root, p), 'utf8');
@@ -15,7 +16,7 @@ function state(){
 }
 const variables = ':root{--symc-background:#303236;--symc-text:#f4f5f7;--symc-text-muted:#969aa2;--symc-border:#555860;--symc-surface:#25272b}';
 const translations = JSON.parse(read('EChartsPictorialBar/locale.json')).translations.de;
-function page(mode, extended = false, light = false, single = false, gradient = false, lqi = false) {
+function page(mode, extended = false, light = false, single = false, gradient = false, lqi = false, icon = false) {
     const initialState = state();
     if (mode === 'ipsview') {
         initialState.chart.pictorialBar.style.orientation = 'horizontal';
@@ -29,6 +30,10 @@ function page(mode, extended = false, light = false, single = false, gradient = 
     if(single){Object.assign(initialState.chart.pictorialBar.style,{symbol:'diamond',symbolRepeat:false});}
     if(gradient){Object.assign(initialState.chart.pictorialBar.style,{colorMode:'gradient',colorMinimum:0,colorMaximum:100,
         lowColor:'#ee6666',middleColor:'#fac858',highColor:'#91cc75'});}
+    if(icon){
+        const cell=JSON.parse(read('tests/fixtures/pictorial-icons.json')).light.cell;
+        Object.assign(initialState.chart.pictorialBar.style,{symbol:'icon',symbolIcon:'cell',symbolPath:cell[4],symbolWidth:cell[0],symbolHeight:cell[1],symbolSize:24});
+    }
     if(lqi){
         initialState.chart.pictorialBar.title='Verbindungsqualität · LQI';
         initialState.chart.pictorialBar.unit='LQI';
@@ -48,10 +53,23 @@ function page(mode, extended = false, light = false, single = false, gradient = 
 }
 http.createServer((req, res) => {
     const url = new URL(req.url, 'http://127.0.0.1');
+    if(url.pathname === '/preview.svg'){
+        const draft={Sources:[],Title:'Icon-Vorschau · synthetische Werte',Symbol:'icon',SymbolIcon:'cell',SymbolSize:24,
+            ColorMode:'gradient',ColorMinimum:0,ColorMaximum:100,ScaleMaximum:100,
+            Orientation:url.searchParams.get('orientation') === 'vertical'?'vertical':'horizontal'};
+        const php='ob_start();require "tests/gateway_gauges.php";ob_end_clean();'
+            +'$pict->UpdateBarPreviewFromForm($argv[1]);$u=array_slice($pict->GetTestFormUpdates(),-2)[0];'
+            +'echo base64_decode(substr($u["Value"],strlen("data:image/svg+xml;base64,")));';
+        const preview=spawnSync('php',['-r',php,JSON.stringify(draft)],{cwd:root,encoding:'utf8',maxBuffer:1048576});
+        res.statusCode=preview.status === 0?200:500;
+        res.setHeader('Content-Type','image/svg+xml; charset=utf-8');
+        res.end(preview.status === 0?preview.stdout:'');
+        return;
+    }
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    if (url.pathname === '/chart') { res.end(page(url.searchParams.get('mode') === 'ipsview' ? 'ipsview' : 'symcon', url.searchParams.get('design') === 'extended', url.searchParams.get('theme') === 'light', url.searchParams.get('symbols') === 'single',url.searchParams.get('color') === 'gradient',url.searchParams.get('range') === 'lqi')); return; }
+    if (url.pathname === '/chart') { res.end(page(url.searchParams.get('mode') === 'ipsview' ? 'ipsview' : 'symcon', url.searchParams.get('design') === 'extended', url.searchParams.get('theme') === 'light', url.searchParams.get('symbols') === 'single',url.searchParams.get('color') === 'gradient',url.searchParams.get('range') === 'lqi',url.searchParams.get('icon') === 'cell')); return; }
     res.end('<!doctype html><html lang="de"><head><title>PictorialBar – lokale Browserprüfung</title></head><body style="background:#0b0c0e;color:white;font:16px Arial;margin:20px">'
         + '<h1 style="font-size:20px">PictorialBar · synthetische Beispieldaten</h1><div style="display:flex;gap:16px;align-items:start;flex-wrap:wrap">'
-        + '<section><h2 style="font-size:16px">Kachel · hoch</h2><iframe title="Kachel" src="/chart?mode=symcon&design=extended&color=gradient" style="border:0;width:400px;height:600px"></iframe></section>'
-        + '<section><h2 style="font-size:16px">IPSView · breit</h2><iframe title="IPSView" src="/chart?mode=ipsview&design=extended&color=gradient" style="border:0;width:790px;height:440px"></iframe></section></div></body></html>');
+        + '<section><h2 style="font-size:16px">Kachel · hoch</h2><iframe title="Kachel" src="/chart?mode=symcon&design=extended&color=gradient&icon=cell" style="border:0;width:400px;height:600px"></iframe></section>'
+        + '<section><h2 style="font-size:16px">IPSView · breit</h2><iframe title="IPSView" src="/chart?mode=ipsview&design=extended&color=gradient&icon=cell" style="border:0;width:790px;height:440px"></iframe></section></div></body></html>');
 }).listen(8801, '127.0.0.1', () => console.log('PictorialBar browser fixture: http://127.0.0.1:8801'));

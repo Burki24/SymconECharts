@@ -21,6 +21,7 @@ use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsTransientRefresh;
 use SymconECharts\EChartsVariablePresentation;
+use SymconECharts\PictorialBarIcon;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
 require_once __DIR__ . '/../libs/helper/DataFlowHelper.php';
@@ -44,6 +45,7 @@ require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 require_once __DIR__ . '/../libs/EChartsCurrentSources.php';
 require_once __DIR__ . '/../libs/EChartsCurrentComparisonSources.php';
 require_once __DIR__ . '/PictorialBarPreview.php';
+require_once __DIR__ . '/PictorialBarIcon.php';
 
 class EChartsPictorialBar extends IPSModuleStrict
 {
@@ -75,6 +77,7 @@ class EChartsPictorialBar extends IPSModuleStrict
         'Orientation'          => 'horizontal',
         'SortOrder'            => 'configured',
         'Symbol'               => 'rect',
+        'SymbolIcon'           => '',
         'SymbolRepeat'         => true,
         'SymbolSize'           => 12,
         'SymbolGap'            => 2,
@@ -289,6 +292,12 @@ class EChartsPictorialBar extends IPSModuleStrict
         return $this->PictorialBarPreviewSvg($values, $ipsView);
     }
 
+    /** @return array{name:string,path:string,width:int,height:int} */
+    protected function ReadSymconIcon(string $name): array
+    {
+        return PictorialBarIcon::Resolve($name);
+    }
+
     private function GetPictorialBarDataForOutput(bool $ipsView): string
     {
         $error = $this->GetConfigurationError();
@@ -339,6 +348,10 @@ class EChartsPictorialBar extends IPSModuleStrict
             'ipsViewStyle' => $ipsView ? $this->IPSViewThemeCSS() : '',
             'state'        => $this->BuildVisualizationState($ipsView),
             'translations' => [
+                'Select a Symcon icon from the icon picker.'                            => $this->Translate('Select a Symcon icon from the icon picker.'),
+                'The installed Symcon icon library could not be read.'                  => $this->Translate('The installed Symcon icon library could not be read.'),
+                'The selected Symcon icon is unavailable or unsupported.'               => $this->Translate('The selected Symcon icon is unavailable or unsupported.'),
+                'The PictorialBar settings are invalid.'                                => $this->Translate('The PictorialBar settings are invalid.'),
                 'Configure valid PictorialBar variables.'                               => $this->Translate('Configure valid PictorialBar variables.'),
                 'Connect an active EChartsGateway.'                                     => $this->Translate('Connect an active EChartsGateway.'),
                 'The PictorialBar values could not be loaded.'                          => $this->Translate('The PictorialBar values could not be loaded.'),
@@ -392,6 +405,15 @@ class EChartsPictorialBar extends IPSModuleStrict
         } catch (Throwable $exception) {
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => $exception->getMessage()];
         }
+        foreach ($this->ReadPropertyBoolean('IPSViewUseTileDesign') ? [''] : ['', 'IPSView'] as $prefix) {
+            if ($this->ReadPropertyString($prefix . 'Symbol') === 'icon') {
+                try {
+                    $this->ReadSymconIcon($this->ReadPropertyString($prefix . 'SymbolIcon'));
+                } catch (Throwable $exception) {
+                    return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => $exception->getMessage()];
+                }
+            }
+        }
         if (mb_strlen($this->ReadPropertyString('Title')) > 200
             || !$this->IsValidDesign('')
             || (!$this->ReadPropertyBoolean('IPSViewUseTileDesign') && !$this->IsValidDesign('IPSView'))
@@ -413,8 +435,8 @@ class EChartsPictorialBar extends IPSModuleStrict
     /** @return array<string,mixed> */
     private function BuildVisualizationState(bool $ipsView = false): array
     {
-        if ($this->GetConfigurationError() !== null) {
-            return $this->ErrorState('Configure valid PictorialBar variables.');
+        if (($error = $this->GetConfigurationError()) !== null) {
+            return $this->ErrorState($error['Status'] === self::STATUS_CONFIGURATION_INVALID ? $error['Message'] : 'Configure valid PictorialBar variables.');
         }
         if (!$this->HasActiveParent()) {
             return $this->ErrorState('Connect an active EChartsGateway.');
@@ -479,7 +501,7 @@ class EChartsPictorialBar extends IPSModuleStrict
             || !in_array($this->ReadPropertyString($prefix . 'GridType'), ['solid', 'dashed', 'dotted'], true)
             || !in_array($this->ReadPropertyString($prefix . 'BorderType'), ['solid', 'dashed', 'dotted'], true)
             || !in_array($this->ReadPropertyString($prefix . 'Focus'), ['none', 'self'], true)
-            || !in_array($this->ReadPropertyString($prefix . 'Symbol'), ['rect', 'roundRect', 'circle', 'diamond', 'triangle'], true)) {
+            || !in_array($this->ReadPropertyString($prefix . 'Symbol'), ['rect', 'roundRect', 'circle', 'diamond', 'triangle', 'icon'], true)) {
             return false;
         }
         foreach (['SymbolSize'     => [4, 40], 'SymbolGap' => [0, 20], 'BarWidth' => [4, 80], 'ScaleMaximum' => [0, 1000000000],
@@ -521,6 +543,12 @@ class EChartsPictorialBar extends IPSModuleStrict
             };
             $style[lcfirst($name)] = str_ends_with($name, 'Color')
                 ? ($value < 0 ? '' : EChartsAsset::ColorToHex($value)) : $value;
+        }
+        if ($style['symbol'] === 'icon') {
+            $icon = $this->ReadSymconIcon($style['symbolIcon']);
+            $style['symbolPath'] = $icon['path'];
+            $style['symbolWidth'] = $icon['width'];
+            $style['symbolHeight'] = $icon['height'];
         }
         return $style;
     }

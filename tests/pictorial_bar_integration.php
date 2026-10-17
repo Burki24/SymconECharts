@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/EChartsPictorialBar/module.php';
 
+function IPS_GetKernelDirEx(): string
+{
+    return __DIR__ . '/fixtures/symcon-icons/';
+}
+
 final class TestableEChartsPictorialBar extends EChartsPictorialBar
 {
     protected function LoadConfigurationForm(): array
@@ -232,6 +237,63 @@ try {
 }
 assertGatewayGauge(str_contains($pict->GetIPSViewHTML(), '"colorMode":"gradient"')
     && strlen($pict->GetIPSViewHTML()) < SYMCON_OUTPUT_BUFFER_LIMIT, 'Copying must preserve the gradient and output budget.');
+$pictIconBefore = (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($pict);
+$pictIconForm = json_decode($pict->GetConfigurationForm(), true);
+foreach (['', 'IPSView'] as $prefix) {
+    $picker = findGaugeFormElement($pictIconForm['elements'], $prefix . 'SymbolIcon');
+    assertGatewayGauge(
+        $picker['type'] === 'SelectIcon' && str_contains($picker['onChange'], 'ECPB_UpdateBarPreviewFromForm'),
+        'Both designers need a native visual icon picker with draft preview.'
+    );
+}
+foreach (['horizontal', 'vertical'] as $orientation) {
+    foreach ([true, false] as $repeat) {
+        foreach (['category', 'value', 'gradient'] as $mode) {
+            $pict->UpdateBarPreviewFromForm(json_encode(['Symbol' => 'icon', 'SymbolIcon' => 'cell', 'SymbolRepeat' => $repeat,
+                'Orientation'                                     => $orientation, 'ColorMode' => $mode], JSON_THROW_ON_ERROR));
+            $iconSvg = base64_decode(substr(array_slice($pict->GetTestFormUpdates(), -2)[0]['Value'], strlen('data:image/svg+xml;base64,')), true);
+            $doc = new DOMDocument();
+            assertGatewayGauge($doc->loadXML($iconSvg, LIBXML_NONET) && str_contains($iconSvg, 'id="symcon-icon-path"')
+                && str_contains($iconSvg, '<use href="#symcon-icon-path"') && !str_contains($iconSvg, 'NaN')
+                && strlen($iconSvg) < 500000, 'Icon drafts must be safe, bounded SVG in all modes.');
+            assertGatewayGauge(
+                $mode !== 'gradient' || str_contains($iconSvg, 'gradientTransform="matrix('),
+                'Icon gradients must undo the local glyph transform instead of restarting.'
+            );
+        }
+    }
+}
+$pict->UpdateBarPreviewFromForm('{"Symbol":"icon","SymbolIcon":"unknown"}');
+$badIconSvg = base64_decode(substr(array_slice($pict->GetTestFormUpdates(), -2)[0]['Value'], strlen('data:image/svg+xml;base64,')), true);
+assertGatewayGauge(
+    str_contains($badIconSvg, 'The selected Symcon icon is unavailable or unsupported.')
+    && !str_contains($badIconSvg, 'id="symcon-icon-path"')
+    && (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($pict) === $pictIconBefore,
+    'Unavailable icon drafts must explain the problem without changing configuration.'
+);
+$pict->SetTestProperty('Symbol', 'icon');
+$pict->SetTestProperty('SymbolIcon', 'cell');
+$pict->SetTestProperty('IPSViewSymbol', 'icon');
+$pict->SetTestProperty('IPSViewSymbolIcon', 'mark');
+$pict->ApplyChanges();
+$iconData = json_decode($pict->GetPictorialBarData(), true)['pictorialBar']['style'];
+assertGatewayGauge($pict->GetTestStatus() === IS_ACTIVE && $iconData['symbolWidth'] === 24 && $iconData['symbolHeight'] === 12
+    && str_contains($iconData['symbolPath'], 'M22 4') && str_contains($pict->GetIPSViewHTML(), '"symbolIcon":"mark"')
+    && strlen($pict->GetVisualizationTile()) < SYMCON_OUTPUT_BUFFER_LIMIT
+    && strlen($pict->GetIPSViewHTML()) < SYMCON_OUTPUT_BUFFER_LIMIT, 'Independent selected paths must reach both outputs within budget.');
+$GLOBALS['symconTestCopyTarget'] = $pict;
+try {
+    $pict->CopyTileDesignToIPSView();
+} finally {
+    unset($GLOBALS['symconTestCopyTarget']);
+}
+assertGatewayGauge(str_contains($pict->GetIPSViewHTML(), '"symbolIcon":"cell"'), 'Design copy must include the selected icon.');
+$pict->SetTestProperty('SymbolIcon', '../unsafe');
+$pict->ApplyChanges();
+assertGatewayGauge($pict->GetTestStatus() === 202, 'Unsafe selected icon must fail as a design error.');
+$pict->SetTestProperty('Symbol', 'rect');
+$pict->ApplyChanges();
+assertGatewayGauge($pict->GetTestStatus() === IS_ACTIVE, 'Unused icon selection must not invalidate standard shapes.');
 $pict->SetTestParentActive(false);
 $pict->ApplyChanges();
 assertGatewayGauge($pict->GetTestStatus() === 203, 'Missing parent must fail cleanly.');
@@ -247,7 +309,7 @@ $pictCheckCaptions = static function (array $items) use (&$pictCheckCaptions, $p
     }
 };
 $pictCheckCaptions(json_decode(file_get_contents(__DIR__ . '/../EChartsPictorialBar/form.json'), true));
-preg_match_all("/(?:Translate|translate)\\(\\s*'([^']+)'/", file_get_contents(__DIR__ . '/../EChartsPictorialBar/module.php')
+preg_match_all("/->Translate\\(\\s*'([^']+)'/", file_get_contents(__DIR__ . '/../EChartsPictorialBar/module.php')
     . file_get_contents(__DIR__ . '/../EChartsPictorialBar/PictorialBarPreview.php'), $pictTexts);
 foreach ($pictTexts[1] as $text) {
     assertGatewayGauge(isset($pictLocale[$text]), 'Missing runtime translation: ' . $text);

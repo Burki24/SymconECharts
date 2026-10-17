@@ -78,7 +78,19 @@ trait PictorialBarPreview
         $cross = ($horizontal ? $bottom - $top : $right - $left) / max(1, count($items));
         $width = min(max(4, $this->BarPreviewValue($values, 'BarWidth', 'integer', $ipsView)), $cross * 0.65);
         $symbol = $this->BarPreviewValue($values, 'Symbol', 'string', $ipsView);
+        $icon = null;
+        if ($symbol === 'icon') {
+            try {
+                $icon = $this->ReadSymconIcon($this->BarPreviewValue($values, 'SymbolIcon', 'string', $ipsView));
+            } catch (Throwable $exception) {
+                return $svg . '<text x="360" y="190" text-anchor="middle" fill="' . $e($palette['text']) . '">'
+                    . $e($this->Translate($exception->getMessage())) . '</text></svg>';
+            }
+            $svg .= '<defs><path id="symcon-icon-path" d="' . $e($icon['path']) . '"/></defs>';
+        }
+        $limit = $icon === null ? 128 : max(1, min(64, (int) floor(262144 / (strlen($icon['path']) * 16 + 256))));
         $size = max(4, min(40, $this->BarPreviewValue($values, 'SymbolSize', 'integer', $ipsView)));
+        $size = max($size, (int) ceil($major / $limit));
         $crossSize = min($size, $width);
         $gap = max(0, min(20, $this->BarPreviewValue($values, 'SymbolGap', 'integer', $ipsView)));
         $repeat = $this->BarPreviewValue($values, 'SymbolRepeat', 'boolean', $ipsView);
@@ -90,8 +102,32 @@ trait PictorialBarPreview
         $dash = match ($this->BarPreviewValue($values, 'BorderType', 'string', $ipsView)) {
             'dashed' => ' stroke-dasharray="6 4"', 'dotted' => ' stroke-dasharray="2 3"', default => ''
         };
-        $shape = static function (string $kind, float $x, float $y, float $w, float $h, string $fill, string $border) use ($n, $e, $strokeWidth, $dash): string
+        $iconIndex = 0;
+        $shape = static function (string $kind, float $x, float $y, float $w, float $h, string $fill, string $border) use ($n, $e, $strokeWidth, $dash, $icon, $repeat, &$iconIndex): string
         {
+            if ($kind === 'icon' && $icon !== null) {
+                $sx = $w / $icon['width'];
+                $sy = $h / $icon['height'];
+                if ($repeat) {
+                    $sx = $sy = min($sx, $sy);
+                }
+                $tx = $x + ($w - $icon['width'] * $sx) / 2;
+                $ty = $y + ($h - $icon['height'] * $sy) / 2;
+                $defs = '';
+                if ($fill === 'url(#scale-gradient)') {
+                    $id = 'icon-gradient-' . ++$iconIndex;
+                    // Undo the glyph transform for paint: a single chart-wide ramp.
+                    $defs = '<defs><linearGradient id="' . $id . '" href="#scale-gradient" gradientTransform="matrix('
+                        . $n(1 / $sx) . ' 0 0 ' . $n(1 / $sy) . ' ' . $n(-$tx / $sx) . ' ' . $n(-$ty / $sy) . ')"/></defs>';
+                    $fill = 'url(#' . $id . ')';
+                    if ($border === 'url(#scale-gradient)') {
+                        $border = $fill;
+                    }
+                }
+                return $defs . '<use href="#symcon-icon-path" transform="translate(' . $n($tx) . ' ' . $n($ty) . ') scale('
+                    . $n($sx) . ' ' . $n($sy) . ')" fill="' . $e($fill) . '" stroke="' . $e($border)
+                    . '" stroke-width="' . $n($strokeWidth) . '" vector-effect="non-scaling-stroke"' . $dash . '/>';
+            }
             $style = ' fill="' . $e($fill) . '" stroke="' . $e($border) . '" stroke-width="' . $n($strokeWidth) . '"' . $dash . '/>';
             return match ($kind) {
                 'circle'   => '<ellipse cx="' . $n($x + $w / 2) . '" cy="' . $n($y + $h / 2) . '" rx="' . $n($w / 2) . '" ry="' . $n($h / 2) . '"' . $style,
@@ -160,10 +196,10 @@ trait PictorialBarPreview
             $border = EChartsBarPreview::Color($this->BarPreviewValue($values, 'BorderColor', 'integer', $ipsView), $color);
             $svg .= '<g data-source="' . $item['order'] . '"' . ($hasShadow ? ' filter="url(#symbol-shadow)"' : '') . ' opacity="' . $n(max(0, min(100, $this->BarPreviewValue($values, 'OpacityPercent', 'integer', $ipsView))) / 100) . '">';
             if ($length > 0) {
-                if ($repeat && $gradient) {
+                if ($repeat && ($gradient || $icon !== null)) {
                     // Draw in chart coordinates so the gradient does not restart
                     // inside each glyph/pattern. Clip the full group at the value.
-                    $count = max(1, min(128, (int) floor(($major + 2 * $gap) / ($size + 2 * $gap))));
+                    $count = max(1, min($limit, (int) floor(($major + 2 * $gap) / ($size + 2 * $gap))));
                     $step = $count > 1 ? ($major - $size) / ($count - 1) : 0;
                     $id = 'gradient-clip-' . $index;
                     $svg .= '<defs><clipPath id="' . $id . '"><rect x="' . $n($x) . '" y="' . $n($y) . '" width="' . $n($w) . '" height="' . $n($h) . '"/></clipPath></defs><g clip-path="url(#' . $id . ')">';

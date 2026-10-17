@@ -1,5 +1,22 @@
 # Tests
 
+Die Symcon-Icon-Erweiterung wird mit `php tests/pictorial_bar_icons.php`
+gegen synthetische Light-/Brands-/Kit-Tupel, Priorität, mehrere Teilpfade,
+ungültige Namen, Nicht-Ausführung von JavaScript und Ressourcenlimits geprüft.
+Der Integrationstest verwendet den unveränderten Produktionsleser gegen eine
+synthetische installierte `console/icons.js`: native Picker beider Designer,
+Entwurfsänderungen ohne Persistenz, unabhängige Pfade, Kopie, Fehlererholung
+und HTML-Ausgabegrenzen bei 16 Quellen. Der echte ECharts-Renderer prüft
+Icons in beiden Ausrichtungen, allen drei Farbmodi und Einzel-/Wiederholung.
+SVG-Pfadtransformationen und die Lastbegrenzung komplexer Formen sind abgedeckt.
+Die Browserfixture ergänzt `?icon=cell`; `/preview.svg` liefert die tatsächliche
+PHP-Vorschau mit rein synthetischen Beispielen (über die lokale Integrationssuite).
+Am 17.10.2026 wurden hohe Kachel, breite IPSView-Ansicht sowie horizontale und
+vertikale SVG-Vorschau lokal visuell geprüft. Ausgewählte Light-/Brands-Pfade
+der installierten Symcon-Bibliothek wurden zusätzlich rein lesend aufgelöst.
+Native Iconauswahl und neue Live-Ausgaben nach Modulupdate sowie andere
+Installationslayouts/Versionen bleiben ausdrücklich Testlücken.
+
 PictorialBar: `pictorial_bar_integration.php` wird in der Gateway-Suite
 ausgeführt und prüft Quellen, Nullwerte, Einheiten, ID-Identität, negative
 Werte, Abonnements, Aktualisierung, Fehlererholung, Vorschauen, Designs und
