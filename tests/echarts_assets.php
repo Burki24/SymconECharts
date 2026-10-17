@@ -20,6 +20,9 @@ assertEChartsAsset(
         && strlen($funnelRuntime) < 550000 && str_contains($funnelRuntime, 'window.echarts'),
     'The Funnel runtime must be pinned and remain below 550 KB.'
 );
+$candlestickRuntime = EChartsAsset::CandlestickJavaScript();
+assertEChartsAsset(hash_file('sha256', $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.candlestick.min.js') === EChartsAsset::CANDLESTICK_SHA256
+    && strlen($candlestickRuntime) < 550000 && str_contains($candlestickRuntime, 'window.echarts'), 'Pinned Candlestick runtime below 550 KB.');
 $boxplotRuntime = EChartsAsset::BoxplotJavaScript();
 assertEChartsAsset(
     hash_file('sha256', $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.boxplot.min.js') === EChartsAsset::BOXPLOT_SHA256

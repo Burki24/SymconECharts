@@ -1,0 +1,535 @@
+{
+    "$schema": "https://www.symcon.de/assets/files/validation/formSchema.json",
+    "elements": [
+        {
+            "type": "Label",
+            "caption": "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts."
+        },
+        {
+            "type": "ValidationTextBox",
+            "name": "Title",
+            "caption": "Title"
+        },
+        {
+            "type": "SelectVariable",
+            "name": "VariableID",
+            "caption": "Archive variable",
+            "validVariableTypes": [
+                1,
+                2
+            ]
+        },
+        {
+            "type": "Label",
+            "caption": "Each candle shows the first and last logged value plus minimum and maximum of a completed interval. Missing intervals stay empty; counters are not supported."
+        },
+        {
+            "type": "RowLayout",
+            "items": [
+                {
+                    "type": "Select",
+                    "name": "Range",
+                    "caption": "Time range",
+                    "options": [
+                        {
+                            "caption": "Last 24 hours",
+                            "value": "24h"
+                        },
+                        {
+                            "caption": "Last 7 days",
+                            "value": "7d"
+                        },
+                        {
+                            "caption": "Last 30 days",
+                            "value": "30d"
+                        }
+                    ]
+                },
+                {
+                    "type": "Select",
+                    "name": "Interval",
+                    "caption": "Interval",
+                    "options": [
+                        {
+                            "caption": "Hours",
+                            "value": "hour"
+                        },
+                        {
+                            "caption": "Days",
+                            "value": "day"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Tile designer",
+            "expanded": false,
+            "items": [
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "AnimationEnabled",
+                            "caption": "Animate Candlestick"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDuration",
+                            "caption": "Initial animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDurationUpdate",
+                            "caption": "Update animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "Orientation",
+                            "caption": "Orientation",
+                            "options": [
+                                {
+                                    "caption": "Vertical",
+                                    "value": "vertical"
+                                },
+                                {
+                                    "caption": "Horizontal",
+                                    "value": "horizontal"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Select",
+                            "name": "EChartsTheme",
+                            "caption": "ECharts theme",
+                            "options": [
+                                {
+                                    "caption": "Automatic (Symcon design)",
+                                    "value": "auto"
+                                },
+                                {
+                                    "caption": "Dark",
+                                    "value": "dark"
+                                },
+                                {
+                                    "caption": "Vintage",
+                                    "value": "vintage"
+                                },
+                                {
+                                    "caption": "Macarons",
+                                    "value": "macarons"
+                                },
+                                {
+                                    "caption": "Infographic",
+                                    "value": "infographic"
+                                },
+                                {
+                                    "caption": "Shine",
+                                    "value": "shine"
+                                },
+                                {
+                                    "caption": "Roma",
+                                    "value": "roma"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowTooltip",
+                            "caption": "Show tooltip"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "RiseColor",
+                            "caption": "Rise color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "FallColor",
+                            "caption": "Fall color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "DojiColor",
+                            "caption": "Doji color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "MinCandleWidth",
+                            "caption": "Minimum candle width",
+                            "minimum": 1,
+                            "maximum": 80,
+                            "suffix": "px",
+                            "width": "200px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "CandleWidth",
+                            "caption": "Maximum candle width",
+                            "minimum": 8,
+                            "maximum": 80,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "CandleOpacityPercent",
+                            "caption": "Candle opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "BorderWidth",
+                            "caption": "Border width",
+                            "minimum": 0,
+                            "maximum": 8,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "BorderColor",
+                            "caption": "Border color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "Select",
+                            "name": "BorderType",
+                            "caption": "Border type",
+                            "width": "225px",
+                            "options": [
+                                {
+                                    "caption": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "caption": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "caption": "Dotted",
+                                    "value": "dotted"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ShadowBlur",
+                            "caption": "Shadow blur",
+                            "minimum": 0,
+                            "maximum": 20,
+                            "suffix": "px",
+                            "width": "200px"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "ShadowColor",
+                            "caption": "Shadow color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)",
+                            "width": "225px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ShadowOffsetX",
+                            "caption": "Shadow offset X",
+                            "minimum": -20,
+                            "maximum": 20,
+                            "suffix": "px",
+                            "width": "200px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ShadowOffsetY",
+                            "caption": "Shadow offset Y",
+                            "minimum": -20,
+                            "maximum": 20,
+                            "suffix": "px",
+                            "width": "200px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "HoverFocus",
+                            "caption": "Highlight on hover",
+                            "width": "225px",
+                            "options": [
+                                {
+                                    "caption": "Highlight hovered candle",
+                                    "value": "self"
+                                },
+                                {
+                                    "caption": "No highlighting",
+                                    "value": "none"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "BlurOpacityPercent",
+                            "caption": "Other candles opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%",
+                            "width": "200px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowGrid",
+                            "caption": "Show grid"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowAxisLabels",
+                            "caption": "Show axis labels"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowAxisTicks",
+                            "caption": "Show category ticks"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AxisLineWidth",
+                            "caption": "Category axis width",
+                            "minimum": 0,
+                            "maximum": 5,
+                            "suffix": "px",
+                            "width": "200px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AxisLabelRotate",
+                            "caption": "Category label rotation",
+                            "minimum": -90,
+                            "maximum": 90,
+                            "suffix": "°",
+                            "width": "200px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AxisLabelMaxWidth",
+                            "caption": "Category label width (0 = automatic)",
+                            "minimum": 0,
+                            "maximum": 300,
+                            "suffix": "px",
+                            "width": "200px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "SplitNumber",
+                            "caption": "Value axis subdivisions",
+                            "minimum": 2,
+                            "maximum": 10,
+                            "suffix": "",
+                            "width": "200px"
+                        },
+                        {
+                            "type": "Select",
+                            "name": "GridLineType",
+                            "caption": "Grid line type",
+                            "width": "225px",
+                            "options": [
+                                {
+                                    "caption": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "caption": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "caption": "Dotted",
+                                    "value": "dotted"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "GridLineWidth",
+                            "caption": "Grid line width",
+                            "minimum": 0,
+                            "maximum": 5,
+                            "suffix": "px",
+                            "width": "200px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "GridOpacityPercent",
+                            "caption": "Grid opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%",
+                            "width": "200px"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "GridColor",
+                            "caption": "Grid color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)",
+                            "width": "225px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "TitleFontSizePercent",
+                            "caption": "Title size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AxisFontSizePercent",
+                            "caption": "Axis label size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "TitleColor",
+                            "caption": "Title color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "AxisColor",
+                            "caption": "Axis color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "TitleBold",
+                            "caption": "Bold title"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "AxisLabelBold",
+                            "caption": "Bold axis labels"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "actions": [],
+    "status": [
+        {
+            "code": 102,
+            "icon": "active",
+            "caption": "Candlestick is ready"
+        },
+        {
+            "code": 201,
+            "icon": "error",
+            "caption": "Candlestick variables are invalid"
+        },
+        {
+            "code": 202,
+            "icon": "error",
+            "caption": "Candlestick settings are invalid"
+        },
+        {
+            "code": 203,
+            "icon": "error",
+            "caption": "No active EChartsGateway is connected"
+        },
+        {
+            "code": 204,
+            "icon": "error",
+            "caption": "Candlestick archive values could not be loaded"
+        }
+    ]
+}

@@ -1,5 +1,12 @@
 # Diagrammfamilienspezifische ECharts-Runtimes erzeugen
 
+Der Candlestick-Einstieg enthält Candlestick Chart, Grid, Titel, Tooltip,
+Aria und Canvas Renderer aus demselben unveränderten ECharts 6.1.0.
+`npm run build:candlestick` erzeugt ausschließlich
+`../../libs/echarts/6.1.0/echarts.candlestick.min.js`.
+Die offiziellen Einstiege Startseite und llms.txt sowie die Candlestick-
+Dokumentation wurden am 17.10.2026 geprüft.
+
 Die native Symcon-Kachel darf das Output-Buffer-Limit von 1.048.576 Byte nicht
 überschreiten. Deshalb verwenden Gauge und kartesische Diagramme nicht den vollständigen
 ECharts-Browser-Build, sondern getrennte Einstiegspunkte der offiziellen

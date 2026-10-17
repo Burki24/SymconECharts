@@ -157,6 +157,8 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Datei sowie im zugehörigen Architekturkontext dokumentiert. Ein bestehendes
   Kürzel wird nicht für eine andere Bestimmung wiederverwendet.
 
+- `ECCA` ist `EChartsCandlestick` zugeordnet (CA = Candlestick Archive); GUID `{A5C60024-BB95-4417-9632-763CBE9C14D7}` gemäß ADR 0056.
+
 ## ECharts und Fremdkomponenten
 
 - Vor der Festlegung oder Aktualisierung einer ECharts-Abhängigkeit sind die

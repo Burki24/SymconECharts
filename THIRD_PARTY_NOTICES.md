@@ -21,6 +21,11 @@ Paket-SHA-1 laut npm: `ae0f68590f5ebbd728d900907c27acde7c5456d1`
 
 Ausgelieferte Dateien:
 
+- `libs/echarts/6.1.0/echarts.candlestick.min.js` – reproduzierbarer
+  Candlestick-Browser-Build aus ECharts Core, Candlestick Chart, Grid, Titel,
+  Tooltip, Aria und Canvas Renderer; 501.568 Byte; SHA-256
+  `99147592d9a85f19c776b0f6bfd49c8becaf872d825fd9dbe9553202384598bd`;
+
 - `libs/echarts/6.1.0/echarts.funnel.min.js` – reproduzierbarer
   Funnel-Browser-Build aus ECharts Core, Funnel Chart, Titel, Tooltip,
   Aria, Label Layout und Canvas Renderer; 487.801 Byte; SHA-256

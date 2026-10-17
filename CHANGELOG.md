@@ -2,6 +2,13 @@
 
 ## Hinzugefügt
 
+- `EChartsCandlestick` (`ECCA`) zeigt den ersten und letzten tatsächlich
+  protokollierten Wert sowie Minimum und Maximum je abgeschlossenem Stunden-
+  oder Tagesintervall einer Standard-Archivvariable. Kachel und IPSView
+  besitzen unabhängige Designer und Beispielvorschauen. Teilarchive bleiben
+  sichtbar, fehlende Intervalle leer; begrenzte Rohdatenabfragen verhindern
+  unvollständige Kerzen bei dichten Archiven.
+
 - Der Funnel-Designer bietet minimale/maximale optische Stufengröße,
   Rahmenlinienarten, Schatten, lokale Schriftarten, Außenbeschriftung auf
   beiden Seiten, Textbreite und abschaltbaren Überlappungsschutz.

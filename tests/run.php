@@ -32,6 +32,7 @@ $tests = [
     __DIR__ . '/sankey_model.php',
     __DIR__ . '/radar_model.php',
     __DIR__ . '/boxplot_statistics.php',
+    __DIR__ . '/candlestick_data.php',
     __DIR__ . '/calendar_data.php',
     __DIR__ . '/zigbee_graph_export_reader.php',
     __DIR__ . '/gateway_gauges.php'
@@ -54,6 +55,7 @@ $commands = [
     ['Test Sunburst layout', 'node tests/sunburst_layout.js'],
     ['Test Parallel layout', 'node tests/parallel_layout.js'],
     ['Test Boxplot layout', 'node tests/boxplot_layout.js'],
+    ['Test Candlestick layout', 'node tests/candlestick_layout.js'],
     ['Test Funnel layout', 'node tests/funnel_layout.js'],
     ['Test Radar layout', 'node tests/radar_layout.js'],
     ['Test Sankey layout', 'node tests/sankey_layout.js'],

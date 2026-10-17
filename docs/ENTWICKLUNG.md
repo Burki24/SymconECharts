@@ -21,6 +21,14 @@ IPSView nur den Diagrammtitel benötigt.
 
 ## Aktueller Stand und Zielarchitektur
 
+Candlestick ergänzt die Archivfamilien um tatsächliche erste/letzte
+Rohmesswerte und Extrema abgeschlossener Intervalle. Identität, Grenzen und
+Wiederverwendung stehen in [ADR 0056](adr/0056-archive-candlestick.md).
+Die Gateway-Operation bleibt unverändert; Aggregatmittelwerte ersetzen keine
+Kerzen-Endpunkte. Die lokale Prüfung umfasst Datenberechnung, Integration,
+beide Designer und echte ECharts-Geometrie. Die installierte Symcon-Kachel
+und IPSView sind nach dem nächsten Modulupdate gesondert abzunehmen.
+
 Die Library besitzt mit Gateway und eigenständigen Diagrammmodulen eine technische
 Modulstruktur. Alle Module
 verwenden `IPSModuleStrict`;

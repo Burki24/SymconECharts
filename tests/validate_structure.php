@@ -208,6 +208,17 @@ $requiredFiles = [
     'docs/adr/0055-current-value-funnel.md',
     'tests/funnel_integration.php',
     'tests/funnel_layout.js',
+    'EChartsCandlestick/CandlestickData.php',
+    'EChartsCandlestick/CandlestickPreview.php',
+    'EChartsCandlestick/visualization/app.js',
+    'EChartsCandlestick/visualization/index.html',
+    'EChartsCandlestick/visualization/style.css',
+    'tests/candlestick_data.php',
+    'tests/candlestick_integration.php',
+    'tests/candlestick_layout.js',
+    'docs/adr/0056-archive-candlestick.md',
+    'libs/echarts/6.1.0/echarts.candlestick.min.js',
+    '.tools/echarts-runtime/src/candlestick-runtime.js',
     'EChartsBoxplot/BoxplotStatistics.php',
     'EChartsBoxplot/BoxplotPreview.php',
     'EChartsBoxplot/visualization/index.html',
@@ -438,7 +449,7 @@ if ($helperSync !== null) {
 }
 
 $expectedModules = [
-    'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarPolar', 'EChartsBarWaterfall', 'EChartsBoxplot', 'EChartsCalendar', 'EChartsFunnel', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
+    'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarPolar', 'EChartsBarWaterfall', 'EChartsBoxplot', 'EChartsCalendar', 'EChartsCandlestick', 'EChartsFunnel', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
     'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsGraph', 'EChartsGraphZ2M', 'EChartsHeatmap', 'EChartsParallel', 'EChartsPie', 'EChartsRadar', 'EChartsSankey', 'EChartsScatter', 'EChartsSunburst', 'EChartsTimeSeries', 'EChartsTree', 'EChartsTreeSystemHealth', 'EChartsTreemap'
 ];
 $discoveredModules = [];

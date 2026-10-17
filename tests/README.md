@@ -1,5 +1,17 @@
 # Tests
 
+Candlestick: `php tests/candlestick_data.php` prüft abgeschlossene Stunden/
+Tage, Sommerzeit, erste/letzte Rohpunkte, Extrema, Lücken, Einzelwerte,
+Trunkierung und Abfragelimits. `candlestick_integration.php` wird im
+Gateway-Suite-Kontext ausgeführt und prüft Quellen, Cache, Designs,
+Vorschauen, Fehler und beide begrenzten HTML-Ausgaben.
+`node tests/candlestick_layout.js` prüft Optionen und echte ECharts-Geometrie
+für beide Ausrichtungen. Die installierte Kachel und das IPSView-Widget
+bleiben nach dem Modulupdate separat zu prüfen.
+Für synthetische lokale Browserdaten kann
+`node tests/candlestick_browser.mjs` gestartet werden (127.0.0.1:8800).
+Es werden keine echten Symcon-Daten gelesen oder geschrieben.
+
 Boxplot wird durch `php tests/boxplot_statistics.php`,
 `php tests/gateway_gauges.php` (einschließlich `boxplot_integration.php`)
 und `node tests/boxplot_layout.js` geprüft: R7-Quartile, endliche Extremwerte,
