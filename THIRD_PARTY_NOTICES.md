@@ -21,6 +21,11 @@ Paket-SHA-1 laut npm: `ae0f68590f5ebbd728d900907c27acde7c5456d1`
 
 Ausgelieferte Dateien:
 
+- `libs/echarts/6.1.0/echarts.state-timeline.min.js` – reproduzierbarer
+  StateTimeline-Browser-Build aus ECharts Core, Custom Chart, Grid, Data Zoom,
+  Titel, Tooltip, Aria und Canvas Renderer; 550.199 Byte; SHA-256
+  `ff7da41ec7d669f7daf7ef2346ee06e4af1b341dcf307a538500184af63c9d39`;
+
 - `libs/echarts/6.1.0/echarts.theme-river.min.js` – reproduzierbarer
   ThemeRiver-Browser-Build aus ECharts Core, ThemeRiver Chart, SingleAxis,
   Legende, Graphic, Titel, Tooltip, Aria und Canvas Renderer; 520.099 Byte; SHA-256

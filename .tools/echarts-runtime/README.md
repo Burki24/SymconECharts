@@ -1,5 +1,13 @@
 # Diagrammfamilienspezifische ECharts-Runtimes erzeugen
 
+Der StateTimeline-Einstieg enthält Custom Chart, Grid, Data Zoom, Titel,
+Tooltip, Aria und Canvas Renderer aus demselben unveränderten ECharts 6.1.0.
+`npm run build:state-timeline` erzeugt ausschließlich
+`../../libs/echarts/6.1.0/echarts.state-timeline.min.js`. Offizielle Startseite,
+llms.txt, Custom-Series-Handbuch, npm-Version und Apache-2.0-Lizenz wurden
+am 17.10.2026 geprüft. Die Anwendungsdarstellung verwendet einen lokalen
+`renderItem` ohne zusätzliche Erweiterung oder Veränderung des ECharts-Kerns.
+
 Der ThemeRiver-Einstieg enthält ThemeRiver Chart, SingleAxis, Legende, Graphic, Titel,
 Tooltip, Aria und Canvas Renderer aus demselben unveränderten ECharts 6.1.0.
 `npm run build:theme-river` erzeugt ausschließlich

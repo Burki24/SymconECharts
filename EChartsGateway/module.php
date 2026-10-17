@@ -60,10 +60,11 @@ class EChartsGateway extends IPSModuleStrict
         }
 
         return match ($operation) {
-            EChartsDataProtocol::OPERATION_CURRENT_READ => $this->ReadCurrentValue($request['Payload']),
-            EChartsDataProtocol::OPERATION_ARCHIVE_READ => $this->ReadArchiveValues($request['Payload']),
-            EChartsDataProtocol::OPERATION_IPSVIEW_PUSH => $this->PushIPSViewMessage($request['Payload']),
-            default                                     => EChartsDataProtocol::EncodeErrorResponse(
+            EChartsDataProtocol::OPERATION_CURRENT_READ        => $this->ReadCurrentValue($request['Payload']),
+            EChartsDataProtocol::OPERATION_ARCHIVE_READ        => $this->ReadArchiveValues($request['Payload']),
+            EChartsDataProtocol::OPERATION_ARCHIVE_STATES_READ => $this->ReadArchiveStates($request['Payload']),
+            EChartsDataProtocol::OPERATION_IPSVIEW_PUSH        => $this->PushIPSViewMessage($request['Payload']),
+            default                                            => EChartsDataProtocol::EncodeErrorResponse(
                 $operation,
                 'UNSUPPORTED_OPERATION',
                 'The gateway operation is not supported.'
@@ -466,6 +467,168 @@ class EChartsGateway extends IPSModuleStrict
         $this->WriteArchiveCache($cacheKey, $responsePayload);
 
         return EChartsDataProtocol::EncodeSuccessResponse($operation, $responsePayload);
+    }
+
+    /** @param array<string, mixed> $payload */
+    private function ReadArchiveStates(array $payload): string
+    {
+        $operation = EChartsDataProtocol::OPERATION_ARCHIVE_STATES_READ;
+        $variableID = $payload['VariableID'] ?? null;
+        if (!is_int($variableID) || $variableID <= 0) {
+            return EChartsDataProtocol::EncodeErrorResponse(
+                $operation,
+                'INVALID_VARIABLE_ID',
+                'A positive integer VariableID is required.'
+            );
+        }
+        if (!IPS_VariableExists($variableID)) {
+            return EChartsDataProtocol::EncodeErrorResponse(
+                $operation,
+                'VARIABLE_NOT_FOUND',
+                'The selected variable does not exist.'
+            );
+        }
+        $variableType = IPS_GetVariable($variableID)['VariableType'] ?? null;
+        if (!in_array($variableType, [0, 1], true)) {
+            return EChartsDataProtocol::EncodeErrorResponse(
+                $operation,
+                'VARIABLE_NOT_DISCRETE',
+                'The selected variable must be Boolean or Integer.'
+            );
+        }
+        $startTimestamp = $payload['StartTimestamp'] ?? null;
+        $endTimestamp = $payload['EndTimestamp'] ?? null;
+        if (!is_int($startTimestamp) || !is_int($endTimestamp)
+            || $startTimestamp <= 0 || $endTimestamp <= $startTimestamp
+        ) {
+            return EChartsDataProtocol::EncodeErrorResponse(
+                $operation,
+                'INVALID_TIME_RANGE',
+                'StartTimestamp and EndTimestamp must define a positive increasing time range.'
+            );
+        }
+        $limit = $payload['Limit'] ?? null;
+        if (!is_int($limit) || $limit <= 0 || $limit > self::ARCHIVE_MAX_LIMIT) {
+            return EChartsDataProtocol::EncodeErrorResponse(
+                $operation,
+                'INVALID_ARCHIVE_LIMIT',
+                'Limit must be between 1 and 2000.'
+            );
+        }
+
+        $cacheKey = hash('sha256', json_encode([
+            'Operation'      => $operation,
+            'VariableID'     => $variableID,
+            'StartTimestamp' => $startTimestamp,
+            'EndTimestamp'   => $endTimestamp,
+            'Limit'          => $limit
+        ], JSON_THROW_ON_ERROR));
+        $cachedPayload = $this->ReadArchiveCache($cacheKey);
+        if ($cachedPayload !== null) {
+            return EChartsDataProtocol::EncodeSuccessResponse($operation, $cachedPayload);
+        }
+        $archiveIDs = IPS_GetInstanceListByModuleID(self::ARCHIVE_CONTROL_MODULE_ID);
+        sort($archiveIDs, SORT_NUMERIC);
+        $archiveID = $archiveIDs[0] ?? null;
+        if (!is_int($archiveID) || $archiveID <= 0) {
+            return EChartsDataProtocol::EncodeErrorResponse(
+                $operation,
+                'ARCHIVE_NOT_FOUND',
+                'No Archive Control instance is available.'
+            );
+        }
+        try {
+            $archived = false;
+            foreach (AC_GetAggregationVariables($archiveID, false) as $candidate) {
+                if (($candidate['VariableID'] ?? null) === $variableID) {
+                    $archived = true;
+                    break;
+                }
+            }
+            // Metadata lists archived variables independently of current logging.
+            if (!$archived) {
+                return EChartsDataProtocol::EncodeErrorResponse(
+                    $operation,
+                    'SOURCE_NOT_ARCHIVED',
+                    'The selected variable has no archive data.'
+                );
+            }
+            if (AC_GetAggregationType($archiveID, $variableID) !== 0) {
+                return EChartsDataProtocol::EncodeErrorResponse(
+                    $operation,
+                    'UNSUPPORTED_ARCHIVE_TYPE',
+                    'State history requires a standard archive, not a counter.'
+                );
+            }
+            $rows = AC_GetLoggedValues($archiveID, $variableID, $startTimestamp, $endTimestamp, $limit + 1);
+            // EndTime zero means "until now", not the instant before timestamp one.
+            $previousRows = $startTimestamp > 1
+                ? AC_GetLoggedValues($archiveID, $variableID, 0, $startTimestamp - 1, 1)
+                : [];
+        } catch (Throwable) {
+            return EChartsDataProtocol::EncodeErrorResponse(
+                $operation,
+                'ARCHIVE_QUERY_FAILED',
+                'The archive query failed.'
+            );
+        }
+        try {
+            if (count($rows) > $limit + 1 || count($previousRows) > 1) {
+                throw new UnexpectedValueException('Archive query exceeded its row budget.');
+            }
+            $points = $this->NormalizeArchiveStateRows($rows, $variableType, $startTimestamp, $endTimestamp);
+            $previousPoints = $this->NormalizeArchiveStateRows($previousRows, $variableType, 1, $startTimestamp - 1);
+        } catch (Throwable) {
+            return EChartsDataProtocol::EncodeErrorResponse(
+                $operation,
+                'INVALID_ARCHIVE_DATA',
+                'The archive returned invalid or conflicting state data.'
+            );
+        }
+        $responsePayload = [
+            'VariableID'             => $variableID,
+            'VariableType'           => $variableType,
+            'ArchiveAggregationType' => 'standard',
+            'StartTimestamp'         => $startTimestamp,
+            'EndTimestamp'           => $endTimestamp,
+            'Points'                 => array_slice($points, -$limit),
+            'PreviousPoint'          => $previousPoints[0] ?? null,
+            'Truncated'              => count($rows) > $limit
+        ];
+        $this->WriteArchiveCache($cacheKey, $responsePayload);
+
+        return EChartsDataProtocol::EncodeSuccessResponse($operation, $responsePayload);
+    }
+
+    /** @param list<array<string, mixed>> $rows @return list<array{int, int}> */
+    private function NormalizeArchiveStateRows(array $rows, int $variableType, int $start, int $end): array
+    {
+        $points = [];
+        foreach ($rows as $row) {
+            $timestamp = $row['TimeStamp'] ?? null;
+            $value = $row['Value'] ?? null;
+            if (!is_int($timestamp) || $timestamp < $start || $timestamp > $end
+                || (!is_int($value) && !is_float($value) && !($variableType === 0 && is_bool($value)))
+                || !is_finite((float) $value)
+                || (is_float($value) && (floor($value) !== $value
+                    || $value < PHP_INT_MIN || $value >= (float) PHP_INT_MAX))
+                || ($variableType === 0 && !in_array($value, [false, true, 0, 1, 0.0, 1.0], true))
+            ) {
+                throw new UnexpectedValueException('Invalid archive state row.');
+            }
+            $normalized = (int) $value;
+            if (isset($points[$timestamp]) && $points[$timestamp] !== $normalized) {
+                throw new UnexpectedValueException('Conflicting archive states at one timestamp.');
+            }
+            $points[$timestamp] = $normalized;
+        }
+        ksort($points, SORT_NUMERIC);
+        $result = [];
+        foreach ($points as $timestamp => $value) {
+            $result[] = [$timestamp, $value];
+        }
+
+        return $result;
     }
 
     /** @return array<string, mixed>|null */

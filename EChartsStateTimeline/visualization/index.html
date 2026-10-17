@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="{{HTML_LANGUAGE}}" class="{{HTML_CLASSES}}" style="font-size: {{ROOT_FONT_SIZE}};">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="{{VIEWPORT_CONTENT}}">
+    <title>{{DOCUMENT_TITLE}}</title>
+    <style>
+{{VISUALIZATION_THEME}}
+{{MODULE_STYLE}}
+{{IPSVIEW_STYLE}}
+    </style>
+</head>
+<body>
+    <main id="echarts-state-timeline-root" class="echarts-state-timeline-root">
+        <div id="echarts-state-timeline-chart" class="echarts-state-timeline-chart" role="img"></div>
+        <div id="echarts-state-timeline-warning" class="echarts-refresh-warning" role="status" hidden></div>
+        <div id="echarts-state-timeline-empty" class="echarts-state-timeline-empty" role="status" hidden></div>
+        <div id="echarts-state-timeline-error" class="echarts-state-timeline-error" role="alert" hidden></div>
+    </main>
+    <script>{{ECHARTS_SCRIPT}}</script>
+    <script>{{ECHARTS_THEME_SCRIPT}}</script>
+    <script>{{ECHARTS_DESIGN_SCRIPT}}</script>
+    <script>{{ECHARTS_ZOOM_SCRIPT}}</script>
+    <script>window.SYMC_VISUALIZATION = {{BOOTSTRAP_JSON}};</script>
+    <script>{{MODULE_SCRIPT}}</script>
+    <script>{{IPSVIEW_TRANSPORT_SCRIPT}}</script>
+</body>
+</html>

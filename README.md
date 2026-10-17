@@ -22,6 +22,8 @@ Funnel vergleicht aktuelle, nichtnegative Stufenwerte derselben Einheit.
 PictorialBar vergleicht aktuelle, nichtnegative Werte als Symbolbalken.
 Candlestick zeigt ersten und letzten protokollierten Wert sowie Minimum
 und Maximum abgeschlossener Archiv-Stunden oder -Tage.
+StateTimeline zeigt archivierte Boolean-/Integer-Zustände als farbige
+Zeitabschnitte mit eigenen Zustandsnamen und ausdrücklich unbekannten Anfängen.
 
 Alle Diagrammformulare zeigen eine unmittelbar aktualisierte SVG-Vorschau
 im Kachel- und IPSView-Designer. Sie reagiert auf noch nicht gespeicherte
@@ -44,6 +46,11 @@ Diagrammtitel ohne diesen Kachel-Kopfbereich.
 ## Enthaltene Module
 
 Folgende Module sind enthalten:
+
+- __EChartsStateTimeline__ ([Dokumentation](EChartsStateTimeline/README.md))
+  Archivierte Boolean-/Integer-Zustände als farbige Zeitabschnitte je Quelle.
+  Eigene Zustandsnamen/-farben, ausdrücklich unbekannte Anfänge und Zoom;
+  getrennte Kachel- und IPSView-Designer ohne Mittelwertbildung.
 
 Die Namen in der Modulauswahl entsprechen den hier aufgeführten Modulnamen
 ohne Leerzeichen, etwa `EChartsPictorialBar`. Namen vorhandener Instanzen

@@ -938,6 +938,27 @@ assertGatewayGauge(
 );
 IPSModuleStrict::$ParentResponder = static fn (string $json): string => $gateway->ForwardData($json);
 
+if (($argv[1] ?? '') === '--state-timeline-preview') {
+    require_once dirname(__DIR__) . '/EChartsStateTimeline/module.php';
+    $GLOBALS['symconTestVariables'][4800] = ['VariableType' => 0, 'VariableUpdated' => 1780000000, 'Value' => false, 'Name' => 'Fenster'];
+    $GLOBALS['symconTestVariables'][4801] = ['VariableType' => 1, 'VariableUpdated' => 1780000000, 'Value' => 0, 'Name' => 'Pumpe'];
+    $timelinePreview = new EChartsStateTimeline();
+    $timelinePreview->Create();
+    $timelinePreview->UpdateBarPreviewFromForm($argv[2] ?? '{}');
+    $previewUpdate = array_slice($timelinePreview->GetTestFormUpdates(), -2)[($argv[3] ?? '') === 'ipsview' ? 1 : 0];
+    echo base64_decode(substr($previewUpdate['Value'], strlen('data:image/svg+xml;base64,')));
+    exit(0);
+}
+
+if (array_slice($argv, 1) === ['--archive-states']) {
+    require __DIR__ . '/archive_states_gateway.php';
+    exit(0);
+}
+if (array_slice($argv, 1) === ['--state-timeline']) {
+    require __DIR__ . '/state_timeline_integration.php';
+    exit(0);
+}
+
 // Reuse the real Gateway and Kernel doubles without retaining every previous family's HTML fixtures.
 if (($argv[1] ?? '') === '--theme-river-preview') {
     require_once dirname(__DIR__) . '/EChartsThemeRiver/module.php';

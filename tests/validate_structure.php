@@ -6,6 +6,18 @@ $root = dirname(__DIR__);
 $errors = [];
 
 $requiredFiles = [
+    'docs/adr/0059-archive-state-timeline.md',
+    'EChartsStateTimeline/StateTimelineData.php',
+    'EChartsStateTimeline/StateTimelinePreview.php',
+    'EChartsStateTimeline/visualization/index.html',
+    'EChartsStateTimeline/visualization/style.css',
+    'EChartsStateTimeline/visualization/app.js',
+    'libs/echarts/6.1.0/echarts.state-timeline.min.js',
+    '.tools/echarts-runtime/src/state-timeline-runtime.js',
+    'tests/archive_states_gateway.php',
+    'tests/state_timeline_data.php',
+    'tests/state_timeline_integration.php',
+    'tests/state_timeline_layout.js',
     'docs/adr/0058-archive-theme-river.md',
     'EChartsThemeRiver/ThemeRiverData.php',
     'EChartsThemeRiver/ThemeRiverPreview.php',
@@ -471,7 +483,7 @@ if ($helperSync !== null) {
 
 $expectedModules = [
     'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarPolar', 'EChartsBarWaterfall', 'EChartsBoxplot', 'EChartsCalendar', 'EChartsCandlestick', 'EChartsFunnel', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
-    'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsGraph', 'EChartsGraphZ2M', 'EChartsHeatmap', 'EChartsParallel', 'EChartsPictorialBar', 'EChartsPie', 'EChartsRadar', 'EChartsSankey', 'EChartsScatter', 'EChartsSunburst', 'EChartsThemeRiver', 'EChartsTimeSeries', 'EChartsTree', 'EChartsTreeSystemHealth', 'EChartsTreemap'
+    'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsGraph', 'EChartsGraphZ2M', 'EChartsHeatmap', 'EChartsParallel', 'EChartsPictorialBar', 'EChartsPie', 'EChartsRadar', 'EChartsSankey', 'EChartsScatter', 'EChartsStateTimeline', 'EChartsSunburst', 'EChartsThemeRiver', 'EChartsTimeSeries', 'EChartsTree', 'EChartsTreeSystemHealth', 'EChartsTreemap'
 ];
 $discoveredModules = [];
 foreach (glob($root . '/*/module.json') ?: [] as $modulePath) {

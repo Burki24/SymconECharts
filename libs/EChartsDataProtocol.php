@@ -15,6 +15,7 @@ final class EChartsDataProtocol
 {
     public const VERSION = 1;
     public const OPERATION_ARCHIVE_READ = 'archive.read';
+    public const OPERATION_ARCHIVE_STATES_READ = 'archive.states.read';
     public const OPERATION_CURRENT_READ = 'current.read';
     public const OPERATION_IPSVIEW_PUSH = 'ipsview.push';
     public const OPERATION_IPSVIEW_STATE = 'ipsview.state';

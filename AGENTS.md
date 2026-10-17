@@ -125,6 +125,11 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
 
 ## Modulpräfixe
 
+- `ECST` ist `EChartsStateTimeline` zugeordnet (`ST` = State Timeline), GUID
+  `{581AD0EF-4E14-4796-902B-08381E299232}` gemäß ADR 0059. Archivierte
+  Boolean-/Integer-Zustandswechsel werden als Zeitabschnitte dargestellt,
+  ohne Aggregation oder Ersetzung durch aktuelle Werte.
+
 - `ECRV` ist `EChartsThemeRiver` zugeordnet (`RV` = River), GUID
   `{6767D036-5E2B-4D33-B7F1-C9F1B4376C04}` gemäß ADR 0058.
   Die eigenständige Archivfamilie verwendet ausschließlich abgeschlossene

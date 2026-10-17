@@ -1,5 +1,33 @@
 # Tests
 
+StateTimeline wird durch `php tests/state_timeline_data.php`,
+`php tests/archive_states_gateway.php` und `php tests/state_timeline_integration.php`
+abgesichert. Der Integrationstest nutzt den echten Gateway mit den vorhandenen
+Kernel-Doubles über einen eigenen Prozessmodus, damit HTML-Fixtures nicht
+alle gleichzeitig im monolithischen Speicher verbleiben. Geprüft werden
+rohe Boolean-/Integer-Zustände, Vorgänger, Epochengrenze, unbekannte Anfänge,
+gleiche Quellnamen, Quellwechsel, halboffene Intervalle, Dubletten, Wertebereiche,
+Zähler-/Float-Ausschluss, fehlender Parent, Fehlererholung, vollständige deutsche
+Formularbeschriftungen einschließlich dynamischer Felder, Entwürfe ohne
+Persistenz/Archivabfrage, getrennte Designer und IPSView-Kopie. Gekürzte und
+zu große Modelle ergeben einen sichtbaren Fehler. Ein adversarieller gültiger
+Zustandsname mit 80 Ampersands sichert die HTML-JSON-Expansion und das
+1-MiB-Ausgabelimit ab; der Test scheiterte vor dieser Größenkorrektur.
+
+`node tests/state_timeline_layout.js` prüft native ECharts-6.1.0-Geometrie,
+exakte Endpunkte, winzige Abschnitte, unbekannte Zustände, Zoom-Clipping,
+Titel-/Fußabstände, doppelte Namen, große Schrift und eindeutige Datumslabels.
+Browserfixture: `node tests/state_timeline_browser.mjs`, nur `127.0.0.1:8804`
+und synthetische Daten. `/` vergleicht schmale Kachel, breites IPSView und eine
+helle Ansicht mit unbekannten Zuständen. `/chart?mode=ipsview&theme=light&font=200&range=30d`
+prüft große Achsenschrift und Tooltips; `/preview.svg` zeigt die echte PHP-
+Formularvorschau, optional mit `?mode=ipsview&independent=yes`.
+Am 17.10.2026 wurden diese Ansichten und beide PHP-Vorschauen lokal visuell
+geprüft; ein direkter Rendereraufruf blieb ohne Konsolenwarnung/-fehler.
+Lokale Browserprüfung und vollständige Qualitätssuite ersetzen keine Live-
+Abnahme des neuen Moduls nach Update in Symcon 9.0/9.1 und IPSView.
+Es wurden keine Live-Konfigurationen oder Archive verändert.
+
 `node tests/ipsview_transport.js` prüft die zentrale Adressauflösung für
 opake `data:`-/`about:`-Einbettungen bei verbotenem Top-Zugriff: Basisadresse,
 Elternadresse, Referrer, Ancestor-Ursprung und bisheriger Top-Rückfall,

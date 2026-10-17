@@ -2,6 +2,12 @@
 
 ## Neu
 
+- EChartsStateTimeline zeigt rohe archivierte Boolean- und Integer-Zustände
+  als farbige Zeitabschnitte je Quelle. Zustandsnamen/-farben, Zeitraum und
+  Zoom sind konfigurierbar; unbekannte Anfänge bleiben ausdrücklich sichtbar.
+  Kachel und IPSView besitzen getrennte Designer mit Vorschauen. Quelldaten
+  und Archive werden nicht verändert.
+
 - ThemeRiver erweitert beide Designer um Bandhöhe, Konturarten, Schatten,
   Hervorhebungsfokus und Restdeckkraft sowie Achsenlinien, Zeitformate und
   Rastergestaltung. Legendenposition/-ausrichtung, Symbolform/-größe und

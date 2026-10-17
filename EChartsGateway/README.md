@@ -9,6 +9,10 @@ rohe und aggregierte Archivwerte. Identische erfolgreiche Archivabfragen
 werden bis zu 15 Sekunden zwischengespeichert. Außerdem stellt das Gateway die
 Live-Verbindung für IPSView-Diagramme bereit.
 
+Für Zustandszeitdiagramme liest es zusätzlich rohe Boolean- und
+Integer-Archivzustände einschließlich eines vorhandenen Vorgängers vor dem
+Zeitfenster. Diese Zustände werden nicht zu Mittelwerten verdichtet.
+
 ### Inhaltsverzeichnis
 
 1. [Funktionsumfang](#1-funktionsumfang)

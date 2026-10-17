@@ -21,6 +21,14 @@ IPSView nur den Diagrammtitel benötigt.
 
 ## Aktueller Stand und Zielarchitektur
 
+StateTimeline (`ECST`) ergänzt diskrete Boolean-/Integer-Roharchive gemäß
+[ADR 0059](adr/0059-archive-state-timeline.md). Das Gateway stellt die additive
+Operation `archive.states.read` mit einem Vorgänger bereit; Intervallbildung
+und Zustandszuordnung bleiben im Gerät. Die Datengrenze von 250000 Bytes
+bezieht sich auf HTML-sicheres JSON, um auch expandierende Sonderzeichen
+innerhalb des Symcon-Ausgabepuffers zu halten. Lokale Tests ersetzen keine
+Live-Abnahme nach Modulupdate in Symcon und IPSView.
+
 ThemeRiver (`ECRV`) ergänzt abgeschlossene Standard-Archivmittelwerte gemäß
 [ADR 0058](adr/0058-archive-theme-river.md). Eigene Intervallaufbereitung und
 Unterbrechung vollständiger Abschnitte verhindern ECharts-Nullauffüllung.

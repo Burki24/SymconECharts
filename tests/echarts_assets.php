@@ -15,6 +15,13 @@ function assertEChartsAsset(bool $condition, string $message): void
 
 $root = dirname(__DIR__);
 assertEChartsAsset(
+    hash_file('sha256', $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.state-timeline.min.js') === EChartsAsset::STATE_TIMELINE_SHA256
+    && strlen(EChartsAsset::StateTimelineJavaScript()) < 575000
+    && str_contains(EChartsAsset::StateTimelineJavaScript(), 'window.echarts')
+    && str_contains((string) file_get_contents($root . '/.tools/echarts-runtime/src/state-timeline-runtime.js'), 'CustomChart'),
+    'StateTimeline must load its own integrity-pinned bounded custom-series runtime.'
+);
+assertEChartsAsset(
     hash_file('sha256', $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.theme-river.min.js') === EChartsAsset::THEME_RIVER_SHA256
     && strlen(EChartsAsset::ThemeRiverJavaScript()) < 550000
     && str_contains(EChartsAsset::ThemeRiverJavaScript(), 'window.echarts'),

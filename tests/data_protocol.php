@@ -45,6 +45,15 @@ assertProtocol(
     'Archive request operation changed.'
 );
 
+$statesRequest = EChartsDataProtocol::CreateRequest(
+    EChartsDataProtocol::OPERATION_ARCHIVE_STATES_READ,
+    ['VariableID' => 4713, 'StartTimestamp' => 1780000000, 'EndTimestamp' => 1780000400, 'Limit' => 100]
+);
+assertProtocol(
+    $statesRequest['ProtocolVersion'] === 1 && $statesRequest['Operation'] === 'archive.states.read',
+    'Discrete archive states must add an operation without changing protocol version one.'
+);
+
 $ipsViewPush = EChartsDataProtocol::CreateRequest(
     EChartsDataProtocol::OPERATION_IPSVIEW_PUSH,
     ['InstanceID' => 5000, 'Channel' => str_repeat('a', 32), 'Message' => ['status' => 'ready']]
