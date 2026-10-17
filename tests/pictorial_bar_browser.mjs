@@ -16,7 +16,12 @@ function state(){
 }
 const variables = ':root{--symc-background:#303236;--symc-text:#f4f5f7;--symc-text-muted:#969aa2;--symc-border:#555860;--symc-surface:#25272b}';
 const translations = JSON.parse(read('EChartsPictorialBar/locale.json')).translations.de;
-function page(mode, extended = false, light = false, single = false, gradient = false, lqi = false, icon = false) {
+const importedSvg=spawnSync('php',['-r',
+    'require "EChartsPictorialBar/PictorialBarSvg.php";echo json_encode(SymconECharts\\PictorialBarSvg::Import(file_get_contents($argv[1])));',
+    'tests/fixtures/pictorial-symbol-custom.svg'],{cwd:root,encoding:'utf8'});
+if(importedSvg.status !== 0)throw new Error('Local SVG fixture import failed.');
+const svgGeometry=JSON.parse(importedSvg.stdout);
+function page(mode, extended = false, light = false, single = false, gradient = false, lqi = false, icon = false, svg = false) {
     const initialState = state();
     if (mode === 'ipsview') {
         initialState.chart.pictorialBar.style.orientation = 'horizontal';
@@ -34,6 +39,8 @@ function page(mode, extended = false, light = false, single = false, gradient = 
         const cell=JSON.parse(read('tests/fixtures/pictorial-icons.json')).light.cell;
         Object.assign(initialState.chart.pictorialBar.style,{symbol:'icon',symbolIcon:'cell',symbolPath:cell[4],symbolWidth:cell[0],symbolHeight:cell[1],symbolSize:24});
     }
+    if(svg){Object.assign(initialState.chart.pictorialBar.style,{symbol:'svg',symbolPath:svgGeometry.path,
+        symbolWidth:svgGeometry.width,symbolHeight:svgGeometry.height,symbolMinimumX:svgGeometry.minimumX,symbolMinimumY:svgGeometry.minimumY,symbolSize:24});}
     if(lqi){
         initialState.chart.pictorialBar.title='Verbindungsqualität · LQI';
         initialState.chart.pictorialBar.unit='LQI';
@@ -57,6 +64,9 @@ http.createServer((req, res) => {
         const draft={Sources:[],Title:'Icon-Vorschau · synthetische Werte',Symbol:'icon',SymbolIcon:'cell',SymbolSize:24,
             ColorMode:'gradient',ColorMinimum:0,ColorMaximum:100,ScaleMaximum:100,
             Orientation:url.searchParams.get('orientation') === 'vertical'?'vertical':'horizontal'};
+        if(url.searchParams.get('shape') === 'svg')Object.assign(draft,{Title:'SVG-Vorschau · eigene Form',Symbol:'svg',
+            CustomSymbolSVG:Buffer.from(read('tests/fixtures/pictorial-symbol-custom.svg')).toString('base64')});
+        if(url.searchParams.get('symbols') === 'single')draft.SymbolRepeat=false;
         const php='ob_start();require "tests/gateway_gauges.php";ob_end_clean();'
             +'$pict->UpdateBarPreviewFromForm($argv[1]);$u=array_slice($pict->GetTestFormUpdates(),-2)[0];'
             +'echo base64_decode(substr($u["Value"],strlen("data:image/svg+xml;base64,")));';
@@ -67,9 +77,9 @@ http.createServer((req, res) => {
         return;
     }
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    if (url.pathname === '/chart') { res.end(page(url.searchParams.get('mode') === 'ipsview' ? 'ipsview' : 'symcon', url.searchParams.get('design') === 'extended', url.searchParams.get('theme') === 'light', url.searchParams.get('symbols') === 'single',url.searchParams.get('color') === 'gradient',url.searchParams.get('range') === 'lqi',url.searchParams.get('icon') === 'cell')); return; }
+    if (url.pathname === '/chart') { res.end(page(url.searchParams.get('mode') === 'ipsview' ? 'ipsview' : 'symcon', url.searchParams.get('design') === 'extended', url.searchParams.get('theme') === 'light', url.searchParams.get('symbols') === 'single',url.searchParams.get('color') === 'gradient',url.searchParams.get('range') === 'lqi',url.searchParams.get('icon') === 'cell',url.searchParams.get('shape') === 'svg')); return; }
     res.end('<!doctype html><html lang="de"><head><title>PictorialBar – lokale Browserprüfung</title></head><body style="background:#0b0c0e;color:white;font:16px Arial;margin:20px">'
         + '<h1 style="font-size:20px">PictorialBar · synthetische Beispieldaten</h1><div style="display:flex;gap:16px;align-items:start;flex-wrap:wrap">'
-        + '<section><h2 style="font-size:16px">Kachel · hoch</h2><iframe title="Kachel" src="/chart?mode=symcon&design=extended&color=gradient&icon=cell" style="border:0;width:400px;height:600px"></iframe></section>'
-        + '<section><h2 style="font-size:16px">IPSView · breit</h2><iframe title="IPSView" src="/chart?mode=ipsview&design=extended&color=gradient&icon=cell" style="border:0;width:790px;height:440px"></iframe></section></div></body></html>');
+        + '<section><h2 style="font-size:16px">Kachel · hoch</h2><iframe title="Kachel" src="/chart?mode=symcon&design=extended&color=gradient&shape=svg" style="border:0;width:400px;height:600px"></iframe></section>'
+        + '<section><h2 style="font-size:16px">IPSView · breit</h2><iframe title="IPSView" src="/chart?mode=ipsview&design=extended&color=gradient&shape=svg" style="border:0;width:790px;height:440px"></iframe></section></div></body></html>');
 }).listen(8801, '127.0.0.1', () => console.log('PictorialBar browser fixture: http://127.0.0.1:8801'));

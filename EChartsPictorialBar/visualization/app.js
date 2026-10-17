@@ -105,9 +105,10 @@
             var y = horizontal ? (width - crossSize) / 2 : major - size - i * step;
             var sw = horizontal ? size : crossSize, sh = horizontal ? crossSize : size;
             var x2 = x + sw, y2 = y + sh, cx = x + sw / 2, cy = y + sh / 2;
-            if (kind === 'icon') {
+            if (kind === 'icon' || kind === 'svg') {
                 var scale = Math.min(sw / icon.symbolWidth, sh / icon.symbolHeight);
-                path += iconPath(icon.symbolPath,scale,x+(sw-icon.symbolWidth*scale)/2,y+(sh-icon.symbolHeight*scale)/2);
+                path += iconPath(icon.symbolPath,scale,x+(sw-icon.symbolWidth*scale)/2-(icon.symbolMinimumX || 0)*scale,
+                    y+(sh-icon.symbolHeight*scale)/2-(icon.symbolMinimumY || 0)*scale);
             } else if (kind === 'circle') {
                 path += 'M' + n(x2) + ' ' + n(cy) + 'A' + n(sw/2) + ' ' + n(sh/2) + ' 0 1 0 ' + n(x) + ' ' + n(cy)
                     + 'A' + n(sw/2) + ' ' + n(sh/2) + ' 0 1 0 ' + n(x2) + ' ' + n(cy) + 'Z';
@@ -150,12 +151,17 @@
         var maximum = style.scaleMaximum > 0 ? style.scaleMaximum : Math.max.apply(null,[1].concat(items.map(function(x){return x.value;})));
         var barWidth = Math.max(1,Math.min(style.barWidth || 40,cross*0.65));
         // Complex glyphs use fewer/larger repeats. Keep path construction bounded.
-        var limit = style.symbol === 'icon' ? Math.max(1,Math.min(64,Math.floor(262144/((style.symbolPath || '').length*16+256)))) : 128;
+        var customShape = style.symbol === 'icon' || style.symbol === 'svg';
+        var limit = customShape ? Math.max(1,Math.min(64,Math.floor(262144/((style.symbolPath || '').length*16+256)))) : 128;
         var size = Math.max(4,style.symbolSize || 12,Math.ceil(major/limit));
         var crossSize = Math.max(1,Math.min(size,barWidth));
         var repeated = style.symbolRepeat !== false;
         var gradient = style.colorMode === 'gradient';
-        var compound = repeated && (gradient || style.symbol === 'icon');
+        var compound = repeated && (gradient || customShape);
+        var minX = style.symbolMinimumX || 0, minY = style.symbolMinimumY || 0;
+        var maxX = minX + style.symbolWidth, maxY = minY + style.symbolHeight;
+        var singleSymbol = customShape ? 'path://M'+minX+' '+minY+'L'+minX+' '+minY+'M'+maxX+' '+maxY+'L'+maxX+' '+maxY+' '+style.symbolPath
+            : style.symbol || 'rect';
         var fontFamily = style.fontFamily || 'Arial, sans-serif';
         function rampColor(value) {
             var minimum = style.colorMinimum == null ? 0 : style.colorMinimum;
@@ -227,7 +233,7 @@
                 formatter:function(p){var item=items[p.dataIndex];return item?escapeHTML(item.label)+'<br>'+escapeHTML(format(item)):'';}},
             series:[{type:'pictorialBar',symbol:compound
                 ? gradientGroupPath(style.symbol || 'rect',horizontal,major,barWidth,size,crossSize,style.symbolGap == null ? 2 : style.symbolGap,style,limit)
-                : style.symbol === 'icon' ? 'path://M0 0L0 0M'+style.symbolWidth+' '+style.symbolHeight+'L'+style.symbolWidth+' '+style.symbolHeight+style.symbolPath : style.symbol || 'rect',
+                : singleSymbol,
                 symbolRepeat:repeated && !compound,symbolRepeatDirection:'start',
                 symbolSize:repeated && !compound?(horizontal?[size,crossSize]:[crossSize,size]):['100%','100%'],
                 symbolMargin:style.symbolGap == null ? 2 : style.symbolGap,symbolClip:repeated,
@@ -287,8 +293,9 @@
         try {
             chart.setOption(buildOption(model, theme), true);
         } catch (error) {
-            displayError(model.pictorialBar && model.pictorialBar.style.symbol === 'icon'
-                ? 'The selected Symcon icon is unavailable or unsupported.' : 'The PictorialBar values could not be loaded.');
+            var symbol = model.pictorialBar && model.pictorialBar.style.symbol;
+            displayError(symbol === 'svg' ? 'The custom SVG shape is invalid or unsupported. Use a path-only SVG with a viewBox.'
+                : symbol === 'icon' ? 'The selected Symcon icon is unavailable or unsupported.' : 'The PictorialBar values could not be loaded.');
         }
 
     }

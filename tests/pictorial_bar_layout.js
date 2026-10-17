@@ -219,6 +219,43 @@ assert.ok(complexIcon.option.series[0].symbol.length<262144,'Complex icon repeat
 const invalidIcon=render({...model,pictorialBar:{...model.pictorialBar,style:{...iconStyle,symbolPath:'M0 0L1'}}});
 assert.equal(invalidIcon.errorElement.hidden,false);
 assert.equal(invalidIcon.errorElement.textContent,'The selected Symcon icon is unavailable or unsupported.');
+const {execFileSync}=require('node:child_process');
+const svgGeometry=JSON.parse(execFileSync('php',['-r',
+    'require "EChartsPictorialBar/PictorialBarSvg.php";echo json_encode(SymconECharts\\PictorialBarSvg::Import(file_get_contents($argv[1])));',
+    'tests/fixtures/pictorial-symbol-custom.svg'],{cwd:root,encoding:'utf8'}));
+const svgStyle={...iconStyle,symbol:'svg',symbolPath:svgGeometry.path,symbolWidth:svgGeometry.width,symbolHeight:svgGeometry.height,
+    symbolMinimumX:svgGeometry.minimumX,symbolMinimumY:svgGeometry.minimumY};
+for(const mode of ['symcon','ipsview']){
+ for(const orientation of ['horizontal','vertical']){
+  for(const symbolRepeat of [true,false]){
+   for(const colorMode of ['category','value','gradient']){
+    const output=render({...model,pictorialBar:{...model.pictorialBar,style:{...svgStyle,orientation,symbolRepeat,colorMode}}},mode,true,620);
+    assert.equal(output.errorElement.hidden,true);
+    assert.match(output.option.series[0].symbol,/^path:\/\//);
+    assert.equal(output.option.series[0].label.formatter({dataIndex:2}),'150 %');
+    if(symbolRepeat){
+        const zeroBased=render({...model,pictorialBar:{...model.pictorialBar,style:{...svgStyle,orientation,symbolRepeat,colorMode,
+            symbolMinimumX:0,symbolMinimumY:0,symbolPath:'M0 2 l16 0 l0 -2 l8 6 l-8 6 l0 -2 l-16 0 z'}}},mode,true,620);
+        assert.equal(output.option.series[0].symbol,zeroBased.option.series[0].symbol,
+            'Translated SVG viewBoxes must produce the same rendered geometry as zero-based equivalents.');
+    }
+    const engine=echarts.init(null,null,{renderer:'svg',ssr:true,width:620,height:500});
+    engine.setOption(output.option);
+    const markup=engine.renderToSVGString();
+    assert.ok(!/NaN|Infinity/.test(markup));
+    assert.ok(markup.includes('<path'));
+    if(colorMode==='gradient')assert.match(markup,/<linearGradient/);
+    const item=engine.getModel().getSeriesByIndex(0).getData().getItemGraphicEl(1);
+    const bounds=item.getBoundingRect();
+    assert.ok([bounds.x,bounds.y,bounds.width,bounds.height].every(Number.isFinite));
+    engine.dispose();
+   }
+  }
+ }
+}
+const badSvgShape=render({...model,pictorialBar:{...model.pictorialBar,style:{...svgStyle,symbolPath:'M0 0L1'}}});
+assert.equal(badSvgShape.errorElement.hidden,false);
+assert.equal(badSvgShape.errorElement.textContent,'The custom SVG shape is invalid or unsupported. Use a path-only SVG with a viewBox.');
 for(const symbol of ['rect','roundRect','circle','diamond','triangle']){
  for(const orientation of ['vertical','horizontal']){
   for(const symbolRepeat of [false,true]){

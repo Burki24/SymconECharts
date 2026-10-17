@@ -22,6 +22,7 @@ use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsTransientRefresh;
 use SymconECharts\EChartsVariablePresentation;
 use SymconECharts\PictorialBarIcon;
+use SymconECharts\PictorialBarSvg;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
 require_once __DIR__ . '/../libs/helper/DataFlowHelper.php';
@@ -46,6 +47,7 @@ require_once __DIR__ . '/../libs/EChartsCurrentSources.php';
 require_once __DIR__ . '/../libs/EChartsCurrentComparisonSources.php';
 require_once __DIR__ . '/PictorialBarPreview.php';
 require_once __DIR__ . '/PictorialBarIcon.php';
+require_once __DIR__ . '/PictorialBarSvg.php';
 
 class EChartsPictorialBar extends IPSModuleStrict
 {
@@ -78,6 +80,7 @@ class EChartsPictorialBar extends IPSModuleStrict
         'SortOrder'            => 'configured',
         'Symbol'               => 'rect',
         'SymbolIcon'           => '',
+        'CustomSymbolSVG'      => '',
         'SymbolRepeat'         => true,
         'SymbolSize'           => 12,
         'SymbolGap'            => 2,
@@ -348,16 +351,17 @@ class EChartsPictorialBar extends IPSModuleStrict
             'ipsViewStyle' => $ipsView ? $this->IPSViewThemeCSS() : '',
             'state'        => $this->BuildVisualizationState($ipsView),
             'translations' => [
-                'Select a Symcon icon from the icon picker.'                            => $this->Translate('Select a Symcon icon from the icon picker.'),
-                'The installed Symcon icon library could not be read.'                  => $this->Translate('The installed Symcon icon library could not be read.'),
-                'The selected Symcon icon is unavailable or unsupported.'               => $this->Translate('The selected Symcon icon is unavailable or unsupported.'),
-                'The PictorialBar settings are invalid.'                                => $this->Translate('The PictorialBar settings are invalid.'),
-                'Configure valid PictorialBar variables.'                               => $this->Translate('Configure valid PictorialBar variables.'),
-                'Connect an active EChartsGateway.'                                     => $this->Translate('Connect an active EChartsGateway.'),
-                'The PictorialBar values could not be loaded.'                          => $this->Translate('The PictorialBar values could not be loaded.'),
-                'PictorialBar requires non-negative values.'                            => $this->Translate('PictorialBar requires non-negative values.'),
-                'All values are zero.'                                                  => $this->Translate('All values are zero.'),
-                'Data could not be refreshed. Showing the last available values.'       => $this->Translate('Data could not be refreshed. Showing the last available values.')
+                'Select a Symcon icon from the icon picker.'                                          => $this->Translate('Select a Symcon icon from the icon picker.'),
+                'The installed Symcon icon library could not be read.'                                => $this->Translate('The installed Symcon icon library could not be read.'),
+                'The selected Symcon icon is unavailable or unsupported.'                             => $this->Translate('The selected Symcon icon is unavailable or unsupported.'),
+                'The PictorialBar settings are invalid.'                                              => $this->Translate('The PictorialBar settings are invalid.'),
+                'The custom SVG shape is invalid or unsupported. Use a path-only SVG with a viewBox.' => $this->Translate('The custom SVG shape is invalid or unsupported. Use a path-only SVG with a viewBox.'),
+                'Configure valid PictorialBar variables.'                                             => $this->Translate('Configure valid PictorialBar variables.'),
+                'Connect an active EChartsGateway.'                                                   => $this->Translate('Connect an active EChartsGateway.'),
+                'The PictorialBar values could not be loaded.'                                        => $this->Translate('The PictorialBar values could not be loaded.'),
+                'PictorialBar requires non-negative values.'                                          => $this->Translate('PictorialBar requires non-negative values.'),
+                'All values are zero.'                                                                => $this->Translate('All values are zero.'),
+                'Data could not be refreshed. Showing the last available values.'                     => $this->Translate('Data could not be refreshed. Showing the last available values.')
             ],
             'options' => [
                 'echartsVersion'    => EChartsAsset::VERSION, 'echartsThemes' => EChartsAsset::ThemePalettes(),
@@ -410,6 +414,13 @@ class EChartsPictorialBar extends IPSModuleStrict
                 try {
                     $this->ReadSymconIcon($this->ReadPropertyString($prefix . 'SymbolIcon'));
                 } catch (Throwable $exception) {
+                    return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => $exception->getMessage()];
+                }
+            }
+            if ($this->ReadPropertyString($prefix . 'Symbol') === 'svg') {
+                try {
+                    PictorialBarSvg::Import($this->ReadPropertyString($prefix . 'CustomSymbolSVG'));
+                } catch (InvalidArgumentException $exception) {
                     return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => $exception->getMessage()];
                 }
             }
@@ -501,7 +512,7 @@ class EChartsPictorialBar extends IPSModuleStrict
             || !in_array($this->ReadPropertyString($prefix . 'GridType'), ['solid', 'dashed', 'dotted'], true)
             || !in_array($this->ReadPropertyString($prefix . 'BorderType'), ['solid', 'dashed', 'dotted'], true)
             || !in_array($this->ReadPropertyString($prefix . 'Focus'), ['none', 'self'], true)
-            || !in_array($this->ReadPropertyString($prefix . 'Symbol'), ['rect', 'roundRect', 'circle', 'diamond', 'triangle', 'icon'], true)) {
+            || !in_array($this->ReadPropertyString($prefix . 'Symbol'), ['rect', 'roundRect', 'circle', 'diamond', 'triangle', 'icon', 'svg'], true)) {
             return false;
         }
         foreach (['SymbolSize'     => [4, 40], 'SymbolGap' => [0, 20], 'BarWidth' => [4, 80], 'ScaleMaximum' => [0, 1000000000],
@@ -532,7 +543,7 @@ class EChartsPictorialBar extends IPSModuleStrict
         $prefix = $ipsView && !$this->ReadPropertyBoolean('IPSViewUseTileDesign') ? 'IPSView' : '';
         $style = [...$this->ReadAnimationStyle($prefix)];
         foreach (self::DESIGN_DEFAULTS as $name => $default) {
-            if ($name === 'EChartsTheme') {
+            if (in_array($name, ['EChartsTheme', 'CustomSymbolSVG'], true)) {
                 continue;
             }
             $value = match (gettype($default)) {
@@ -544,11 +555,16 @@ class EChartsPictorialBar extends IPSModuleStrict
             $style[lcfirst($name)] = str_ends_with($name, 'Color')
                 ? ($value < 0 ? '' : EChartsAsset::ColorToHex($value)) : $value;
         }
-        if ($style['symbol'] === 'icon') {
-            $icon = $this->ReadSymconIcon($style['symbolIcon']);
+        if (in_array($style['symbol'], ['icon', 'svg'], true)) {
+            $icon = $style['symbol'] === 'icon' ? $this->ReadSymconIcon($style['symbolIcon'])
+                : PictorialBarSvg::Import($this->ReadPropertyString($prefix . 'CustomSymbolSVG'));
             $style['symbolPath'] = $icon['path'];
             $style['symbolWidth'] = $icon['width'];
             $style['symbolHeight'] = $icon['height'];
+            if ($style['symbol'] === 'svg') {
+                $style['symbolMinimumX'] = $icon['minimumX'];
+                $style['symbolMinimumY'] = $icon['minimumY'];
+            }
         }
         return $style;
     }
@@ -584,6 +600,8 @@ class EChartsPictorialBar extends IPSModuleStrict
                     if (is_string($item['name'] ?? null) && (array_key_exists($item['name'], self::DESIGN_DEFAULTS)
                         || str_starts_with($item['name'], 'Animation'))) {
                         $item['name'] = 'IPSView' . $item['name'];
+                        $items[] = $item;
+                    } elseif (($item['type'] ?? null) === 'Label') {
                         $items[] = $item;
                     }
                 }

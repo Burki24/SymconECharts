@@ -79,12 +79,17 @@ trait PictorialBarPreview
         $width = min(max(4, $this->BarPreviewValue($values, 'BarWidth', 'integer', $ipsView)), $cross * 0.65);
         $symbol = $this->BarPreviewValue($values, 'Symbol', 'string', $ipsView);
         $icon = null;
-        if ($symbol === 'icon') {
+        if (in_array($symbol, ['icon', 'svg'], true)) {
             try {
-                $icon = $this->ReadSymconIcon($this->BarPreviewValue($values, 'SymbolIcon', 'string', $ipsView));
+                $icon = $symbol === 'icon'
+                    ? $this->ReadSymconIcon($this->BarPreviewValue($values, 'SymbolIcon', 'string', $ipsView))
+                    : PictorialBarSvg::Import($this->BarPreviewValue($values, 'CustomSymbolSVG', 'string', $ipsView));
             } catch (Throwable $exception) {
-                return $svg . '<text x="360" y="190" text-anchor="middle" fill="' . $e($palette['text']) . '">'
-                    . $e($this->Translate($exception->getMessage())) . '</text></svg>';
+                $svg .= '<text x="360" y="180" text-anchor="middle" font-size="12" fill="' . $e($palette['text']) . '">';
+                foreach (explode("\n", wordwrap($this->Translate($exception->getMessage()), 72, "\n")) as $index => $line) {
+                    $svg .= '<tspan x="360" dy="' . ($index === 0 ? '0' : '18') . '">' . $e($line) . '</tspan>';
+                }
+                return $svg . '</text></svg>';
             }
             $svg .= '<defs><path id="symcon-icon-path" d="' . $e($icon['path']) . '"/></defs>';
         }
@@ -103,29 +108,31 @@ trait PictorialBarPreview
             'dashed' => ' stroke-dasharray="6 4"', 'dotted' => ' stroke-dasharray="2 3"', default => ''
         };
         $iconIndex = 0;
-        $shape = static function (string $kind, float $x, float $y, float $w, float $h, string $fill, string $border) use ($n, $e, $strokeWidth, $dash, $icon, $repeat, &$iconIndex): string
+        // Plot coordinates can be rounded; glyph matrices must retain small scales.
+        $matrixNumber = static fn (float $value): string => json_encode($value, JSON_THROW_ON_ERROR);
+        $shape = static function (string $kind, float $x, float $y, float $w, float $h, string $fill, string $border) use ($n, $e, $matrixNumber, $strokeWidth, $dash, $icon, $repeat, &$iconIndex): string
         {
-            if ($kind === 'icon' && $icon !== null) {
+            if ($icon !== null) {
                 $sx = $w / $icon['width'];
                 $sy = $h / $icon['height'];
                 if ($repeat) {
                     $sx = $sy = min($sx, $sy);
                 }
-                $tx = $x + ($w - $icon['width'] * $sx) / 2;
-                $ty = $y + ($h - $icon['height'] * $sy) / 2;
+                $tx = $x + ($w - $icon['width'] * $sx) / 2 - ($icon['minimumX'] ?? 0) * $sx;
+                $ty = $y + ($h - $icon['height'] * $sy) / 2 - ($icon['minimumY'] ?? 0) * $sy;
                 $defs = '';
                 if ($fill === 'url(#scale-gradient)') {
                     $id = 'icon-gradient-' . ++$iconIndex;
                     // Undo the glyph transform for paint: a single chart-wide ramp.
                     $defs = '<defs><linearGradient id="' . $id . '" href="#scale-gradient" gradientTransform="matrix('
-                        . $n(1 / $sx) . ' 0 0 ' . $n(1 / $sy) . ' ' . $n(-$tx / $sx) . ' ' . $n(-$ty / $sy) . ')"/></defs>';
+                        . $matrixNumber(1 / $sx) . ' 0 0 ' . $matrixNumber(1 / $sy) . ' ' . $matrixNumber(-$tx / $sx) . ' ' . $matrixNumber(-$ty / $sy) . ')"/></defs>';
                     $fill = 'url(#' . $id . ')';
                     if ($border === 'url(#scale-gradient)') {
                         $border = $fill;
                     }
                 }
-                return $defs . '<use href="#symcon-icon-path" transform="translate(' . $n($tx) . ' ' . $n($ty) . ') scale('
-                    . $n($sx) . ' ' . $n($sy) . ')" fill="' . $e($fill) . '" stroke="' . $e($border)
+                return $defs . '<use href="#symcon-icon-path" transform="translate(' . $matrixNumber($tx) . ' ' . $matrixNumber($ty) . ') scale('
+                    . $matrixNumber($sx) . ' ' . $matrixNumber($sy) . ')" fill="' . $e($fill) . '" stroke="' . $e($border)
                     . '" stroke-width="' . $n($strokeWidth) . '" vector-effect="non-scaling-stroke"' . $dash . '/>';
             }
             $style = ' fill="' . $e($fill) . '" stroke="' . $e($border) . '" stroke-width="' . $n($strokeWidth) . '"' . $dash . '/>';

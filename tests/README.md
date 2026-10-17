@@ -1,5 +1,22 @@
 # Tests
 
+`pictorial_bar_svg.php` prüft eigene SVG-Formen über den tatsächlichen
+Uploadadapter: Rohdaten/Base64/Data-URL, nichtnullige viewBox, relative und
+mehrteilige Pfade, alle Pfadbefehle, kompakte Arc-Flags, XML-Struktur sowie
+abgewiesene aktive/fehlerhafte Inhalte und Größenlimits. Die Integration
+sichert native Dateifelder beider Designer, Entwürfe ohne Persistenz,
+eigenständige Vorschauen, Kopie/Vererbung, Fehlererholung und den Ausschluss
+der Originaldatei aus dem Transport ab. Große gültige Uploads mit 16 Quellen
+bleiben einschließlich Formular unter 1 MiB. Abgeschlossene Formular-Snapshots
+werden im monolithischen Test freigegeben, statt das Speicherlimit zu erhöhen.
+Der echte Renderer prüft eigene SVGs in beiden Ausgaben, Ausrichtungen,
+Symbolmodi und Farbmodi; verschobene und nullbasierte Geometrien sind gleich.
+Browserfixture: `?shape=svg`, auch für `/preview.svg`; `&symbols=single`
+prüft Einzelformen. Am 17.10.2026 wurden hohe/breite dunkle Ansichten,
+helle Einzelformen sowie horizontale und vertikale PHP-Vorschauen lokal
+visuell geprüft. Neue native Dateiauswahl und Live-Ausgaben nach Modulupdate
+bleiben offen. Es wurden keine Live-Konfigurationen geändert.
+
 `module_contracts.php` sichert für alle Module das Namensschema ohne
 Leerzeichen und eine leere Aliasliste ab. Die fünf früheren Anzeige-Aliase
 von Boxplot, Candlestick, Funnel, PictorialBar und Radar wurden damit zunächst

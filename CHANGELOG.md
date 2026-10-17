@@ -2,6 +2,14 @@
 
 ## Neu
 
+- PictorialBar importiert eigene pfadbasierte SVG-Formen über eine Dateiauswahl
+  in beiden Designern. Kachel, IPSView und Live-Vorschauen unterstützen sie
+  als Einzel- oder Wiederholungsform mit allen Farbmodi einschließlich
+  skalenbezogenem Verlauf. Der begrenzte Import übernimmt nur geprüfte
+  Geometrie und weist unsichere oder nicht unterstützte SVG-Inhalte ab.
+  Die Anleitung erläutert geeignete Größen, Seitenverhältnisse und den
+  Export und enthält eine direkt importierbare Batterie-Beispieldatei.
+
 - Die Modulauswahl zeigt Boxplot, Candlestick, Funnel, PictorialBar und Radar
   wieder unter ihren einheitlichen Namen ohne Leerzeichen, beispielsweise
   `EChartsPictorialBar`. Abweichende Anzeige-Aliase sind entfernt;

@@ -160,6 +160,51 @@ geprüft; andere Installationslayouts und Symcon-Versionen bleiben Testlücken.
 Die native Iconauswahl und die neue Live-Kachel-/IPSView-Ausgabe bleiben nach
 dem Modulupdate durch den Eigentümer abzunehmen.
 
+### Eigene SVG-Pfadformen vom 17.10.2026
+
+`Symbol=svg` und die String-Property `CustomSymbolSVG` ergänzen beide
+Designer ohne Änderung der bestehenden Defaults oder Konfigurationen.
+Das native `SelectFile` speichert den Dateiinhalt gemäß SDK als Base64.
+Entwürfe aktualisieren ausschließlich die Vorschauen. Vererbung und
+Designkopie folgen dem vorhandenen Vertrag; ungenutzte Dateien werden nicht validiert.
+
+Der familienbezogene Adapter `PictorialBarSvg` verwendet `EChartsSvgPath::Import`
+für Uploadformat, Dateigrenzen, erlaubte Elemente und Sicherheitsprüfung.
+Anschließend prüft DOM mit deaktiviertem Netzwerk die XML-Struktur. Es gibt
+weder Dateipfad-/URL-Lesen noch Skriptausführung oder Rückgabe des Original-Markups.
+Die zusätzliche Pfadgrammatikprüfung validiert Argumentgruppen aller
+SVG-Pfadbefehle einschließlich kompakter Arc-Flags. Jeder Teilpfad erhält
+einen absoluten initialen Move, damit unabhängige relative Ursprünge beim
+Zusammenfügen erhalten bleiben. Die gemeinsam verwendeten Validatoren und
+die ECharts-Runtime bleiben unverändert.
+
+Es gelten 128 KiB dekodierte Datei, 192 KiB Uploadhülle, 32 Pfade und
+16 KiB normalisierte Pfaddaten. Absolute Koordinatenbeträge sind auf 10⁶,
+positive viewBox-Dimensionen auf 10⁻⁶ bis 10⁶ begrenzt. Abgewiesene Uploads
+ergeben eine feste lokalisierte Meldung und Konfigurationsstatus 202;
+Details aus fremden Dateien werden nicht in Fehlermeldungen gespiegelt.
+Der Vertrag ist eine gefüllte Nichtnull-Pfadsilhouette, kein vollständiger
+SVG-Bildrenderer. Eingebettete Farben, Konturlinien, CSS und Layoutattribute
+werden nicht übernommen. Inhalte müssen für diesen Vertrag aufbereitet sein.
+
+Nur Pfad und numerische viewBox-Geometrie erreichen das Modell; die neue
+Datei-Property wird ausdrücklich aus dem Transportstil ausgeschlossen.
+Icons und eigene SVGs teilen sich Compound-Pfad, Clipping, alle Farbmodi und
+die Vorschau mit internem `use`. Zusätzliche Ursprungskoordinaten halten die
+Geometrie auch bei nichtnulliger viewBox deckungsgleich. Ressourcenlimit,
+proportionale Wiederholung und gestreckte Einzelform bleiben wie bei Icons.
+
+Nachweise umfassen Uploadformate, XML-/Pfadfehler, abgelehnte aktive Inhalte,
+Größenlimits, unabhängige relative Teilpfade, beide Designer, schreibfreie
+Entwürfe, Kopie/Vererbung, Rohdaten-Ausschluss und das 1-MiB-Ausgabelimit.
+Die echte ECharts-Engine prüft beide Orientierungen, Ausgabearten, Symbolmodi
+und Farbmodi; verschobene Ursprünge werden mit unabhängig nullbasierten
+Geometrien verglichen. Browserprüfungen mit eigener synthetischer SVG-Form
+ergänzen den Nachweis. Native Dateiauswahl, neue Live-Kachel und IPSView
+bleiben nach dem Modulupdate durch den Eigentümer zu prüfen.
+
+Grundlage: [Symcon SelectFile](https://www.symcon.de/en/service/documentation/developer-area/sdk-tools/sdk-php/configuration-forms/selectfile/).
+
 ## Grundlagen
 
 Am 17.10.2026 wurden die offiziellen Einstiege

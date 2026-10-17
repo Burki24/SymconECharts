@@ -24,14 +24,14 @@ Obergrenze automatisch; ein positives Maximum begrenzt die Darstellung.
 Darüberliegende Werte bleiben in Beschriftung und Tooltip unverändert,
 der Balken wird nur optisch begrenzt.
 
-Rechteck, abgerundetes Rechteck, Kreis, Raute, Dreieck und Symcon-Icons stehen bereit.
+Rechteck, abgerundetes Rechteck, Kreis, Raute, Dreieck, Symcon-Icons und eigene SVG-Formen stehen bereit.
 Mit „Symbole wiederholen“ wird die Balkenlänge durch mehrere gleich große
 Symbole gefüllt; ein letztes Symbol kann angeschnitten sein.
 Ein Symbol bedeutet dabei nicht eine bestimmte Anzahl von Einheiten.
 Ohne Wiederholung wird eine einzelne Form an die Balkengeometrie angepasst.
 Symbolgröße und Abstand wirken auf den Wiederholungsmodus.
 In großen Ansichten kann die Größe zur Begrenzung der Zeichenlast steigen.
-Eigene Bilder und SVG-Importe werden nicht unterstützt.
+Rasterbilder und vollständige SVG-Illustrationen werden nicht unterstützt.
 
 ### Symcon-Icons auswählen
 
@@ -50,9 +50,92 @@ Verwendet wird die auf dem Symcon-Server installierte moderne Icon-Bibliothek
 (Light, Brands und Symcon-Icons). Nur die ausgewählte Pfadform wird in die
 Ausgabe übernommen; der Browser benötigt keine zusätzlichen Schriften oder
 Internetverbindung. Fehlende, nicht lesbare oder nicht unterstützte Icons
-werden gemeldet. Alte Skin-Bilder und eigene Uploads sind nicht enthalten.
+werden gemeldet. Alte Skin-Bilder sind nicht enthalten; eigene Formen werden
+über den getrennten SVG-Import ausgewählt.
 Für komplexe Icons kann die Größe automatisch steigen: maximal 64 Wiederholungen,
 bei langen Pfaden entsprechend weniger. Bestehende Formen und Einstellungen bleiben erhalten.
+
+### Eigene SVG-Form importieren
+
+Unter **Anordnung und Symbole → Symbolform → Eigene SVG-Form** wählen
+und im gleichnamigen Dateifeld eine `.svg`-Datei auswählen. Die Vorschau zeigt
+die Form schon vor dem Übernehmen. Der unabhängige IPSView-Designer kann
+eine andere Datei verwenden; „Kacheldesign übernehmen“ kopiert auch die SVG-Auswahl.
+
+Unterstützt werden pfadbasierte SVG-Silhouetten mit einer gültigen `viewBox`
+und 1–32 `path`-Elementen, optional in `g`-Gruppen. Relative Pfadbefehle,
+mehrere Teilpfade und verschobene `viewBox`-Ursprünge sind erlaubt.
+Texte, Kreise, Rechtecke und andere Grundformen im Grafikprogramm zuerst
+in Pfade umwandeln; Transformationen vorher auf die Pfadkoordinaten anwenden.
+Für reine Konturlinien den Strich in eine gefüllte Kontur umwandeln.
+Die Pfadgeometrie soll innerhalb der angegebenen `viewBox` liegen.
+
+Es wird ausschließlich die Form übernommen: Ursprüngliche SVG-Farben,
+Linienstile und andere Gestaltung gehen nicht in die Darstellung ein.
+Verwendet werden gefüllte Silhouetten mit der normalen Nichtnull-Füllregel.
+Farben, Deckkraft, Rahmen und Schatten stellt der Designer bereit. Alle
+drei Farbmodi einschließlich des festen Verlaufs entlang der Skala
+funktionieren wie bei Symcon-Icons. Wiederholte Formen behalten ihre
+Proportionen; einzelne Formen passen sich an die Balkengeometrie an.
+
+#### Geeignete Größe und Vorbereitung
+
+Eine feste ideale Pixelgröße oder DPI-Zahl gibt es bei SVG nicht: Das Modul
+skaliert die Vektorform. Eine größere Zeichenfläche erzeugt deshalb nicht
+automatisch eine schärfere Darstellung. Als übersichtliche Arbeitsvorlage
+eignet sich `viewBox="0 0 100 100"` für ein quadratisches Symbol.
+Für ein breites Motiv ist beispielsweise `viewBox="0 0 100 50"` geeignet,
+für ein hohes Motiv `viewBox="0 0 50 100"`. Die vier Zahlen bedeuten
+linker Ursprung, oberer Ursprung, Breite und Höhe in SVG-Koordinaten.
+Auch andere Größen sind innerhalb der unten genannten Grenzen zulässig.
+
+- Die Zeichenfläche knapp an die Form anpassen. Ein kleiner Rand ist in
+  Ordnung; viel leerer Platz innerhalb der `viewBox` lässt das Symbol kleiner wirken.
+- Einfache, geschlossene und gefüllte Silhouetten mit wenigen Pfadpunkten
+  verwenden. Dünne Linien, kleine Schrift und sehr feine Aussparungen sind
+  in einer Kachel schlecht erkennbar.
+- Zum Einstieg im Designer eine wiederholte Symbolgröße von etwa 20–24 px
+  wählen und die Form anschließend in der kleinsten geplanten Kachel prüfen.
+  Der tatsächlich verfügbare Platz und die Balkenbreite können die Größe begrenzen.
+- Das gewünschte Seitenverhältnis in der Datei anlegen. Die Diagrammausrichtung
+  dreht die Form nicht automatisch; ein stehendes Motiv daher bereits stehend zeichnen.
+- Vor dem Export Texte und Grundformen in Pfade, reine Striche in gefüllte
+  Konturen umwandeln und Transformationen auf die Koordinaten anwenden.
+  Nur die benötigte Pfadform exportieren, ohne Editor-Metadaten, zusätzliche
+  Elemente oder externe Ressourcen. Eine kleine Datei mit wenigen Kilobytes
+  ist ein sinnvoller Ausgangspunkt; die Importgrenzen sind keine Zielgröße.
+
+#### Beispiel: einfache Batterieform
+
+Die mitgelieferte [battery.svg](examples/battery.svg) ist eine direkt
+importierbare, waagerechte Batteriesilhouette mit dem Seitenverhältnis 2:1.
+Im Repository die Datei öffnen und als SVG herunterladen oder den folgenden
+Inhalt als UTF-8-Datei `battery.svg` speichern, nicht als `.svg.txt`:
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="50" viewBox="0 0 100 50">
+  <path d="M0 0H90V15H100V35H90V50H0Z"/>
+</svg>
+```
+
+Das Beispiel besteht aus einem einzigen geschlossenen Pfad. `width` und
+`height` bestimmen nur die Standardanzeige der Datei; für das Modul ist
+die `viewBox` maßgeblich. Die Farbe wird bewusst nicht festgelegt.
+Nach dem Import **Eigene SVG-Form** auswählen und zum Beispiel
+**Farbverlauf entlang der Skala**, Farbminimum **0**, Farbmaximum **100**
+und Skalenmaximum **100** einstellen. Bei wiederholten Symbolen läuft der
+Verlauf über den gesamten Balken, nicht erneut durch jede einzelne Batterie.
+Für ein einziges an den Balken angepasstes Motiv **Symbole wiederholen** ausschalten.
+
+#### Technische Importgrenzen
+
+Skripte, Ereignisbehandler, externe Referenzen, eingebettete Bilder, eigene
+SVG-Verläufe/Filter und nicht unterstützte Elemente werden abgewiesen.
+Grenzen: 128 KiB Dateigröße und 16 KiB normalisierte Pfaddaten;
+Koordinaten und `viewBox`-Ursprung maximal ±1.000.000, Breite und Höhe
+zwischen 0,000001 und 1.000.000. Komplexe Formen können weniger, größere
+Wiederholungen ergeben. Bei einer ungültigen Datei erscheint eine Meldung
+statt einer Ersatzform. Bestehende Quellen und Designs bleiben unverändert.
 
 ## Gestaltung und Ausgabe
 

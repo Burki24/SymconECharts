@@ -18,6 +18,7 @@ $tests = [
     __DIR__ . '/svg_path.php',
     __DIR__ . '/svg_image.php',
     __DIR__ . '/pictorial_bar_icons.php',
+    __DIR__ . '/pictorial_bar_svg.php',
     __DIR__ . '/gauge_design.php',
     __DIR__ . '/time_series_design.php',
     __DIR__ . '/label_design.php',

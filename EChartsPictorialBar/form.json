@@ -217,6 +217,10 @@
                                 {
                                     "caption": "Symcon icon",
                                     "value": "icon"
+                                },
+                                {
+                                    "caption": "Custom SVG shape",
+                                    "value": "svg"
                                 }
                             ]
                         },
@@ -230,6 +234,28 @@
                             "type": "CheckBox",
                             "name": "SymbolRepeat",
                             "caption": "Repeat symbols"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectFile",
+                            "name": "CustomSymbolSVG",
+                            "caption": "Custom SVG shape",
+                            "extensions": ".svg",
+                            "width": "300px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Label",
+                            "width": "100%",
+                            "caption": "Path-only SVG with viewBox; colors come from the designer. Convert text and basic shapes to paths first."
                         }
                     ]
                 },

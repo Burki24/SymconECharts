@@ -239,11 +239,21 @@ assertGatewayGauge(str_contains($pict->GetIPSViewHTML(), '"colorMode":"gradient"
     && strlen($pict->GetIPSViewHTML()) < SYMCON_OUTPUT_BUFFER_LIMIT, 'Copying must preserve the gradient and output budget.');
 $pictIconBefore = (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($pict);
 $pictIconForm = json_decode($pict->GetConfigurationForm(), true);
+assertGatewayGauge(
+    substr_count(json_encode($pictIconForm), 'Path-only SVG with viewBox; colors come from the designer.') === 2,
+    'Both designers must include the SVG preparation guidance.'
+);
 foreach (['', 'IPSView'] as $prefix) {
     $picker = findGaugeFormElement($pictIconForm['elements'], $prefix . 'SymbolIcon');
     assertGatewayGauge(
         $picker['type'] === 'SelectIcon' && str_contains($picker['onChange'], 'ECPB_UpdateBarPreviewFromForm'),
         'Both designers need a native visual icon picker with draft preview.'
+    );
+    $upload = findGaugeFormElement($pictIconForm['elements'], $prefix . 'CustomSymbolSVG');
+    assertGatewayGauge(
+        is_array($upload) && $upload['type'] === 'SelectFile' && $upload['extensions'] === '.svg'
+        && str_contains($upload['onChange'], 'ECPB_UpdateBarPreviewFromForm'),
+        'Both designers need a native SVG upload with draft preview.'
     );
 }
 foreach (['horizontal', 'vertical'] as $orientation) {
@@ -294,6 +304,102 @@ assertGatewayGauge($pict->GetTestStatus() === 202, 'Unsafe selected icon must fa
 $pict->SetTestProperty('Symbol', 'rect');
 $pict->ApplyChanges();
 assertGatewayGauge($pict->GetTestStatus() === IS_ACTIVE, 'Unused icon selection must not invalidate standard shapes.');
+// These large form snapshots have been checked; release them before upload limits.
+unset($pictForm, $pictIconForm);
+$pictSvgUpload = base64_encode(file_get_contents(__DIR__ . '/fixtures/pictorial-symbol-custom.svg'));
+$pictSvgOther = base64_encode('<svg viewBox="2 3 16 16"><path d="M2 3L18 19L2 19Z"/></svg>');
+$pictSvgBefore = (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($pict);
+$pictSvgStatus = $pict->GetTestStatus();
+foreach (['horizontal', 'vertical'] as $orientation) {
+    foreach ([true, false] as $repeat) {
+        foreach (['category', 'value', 'gradient'] as $mode) {
+            $pict->UpdateBarPreviewFromForm(json_encode(['Sources' => [], 'Symbol' => 'svg', 'CustomSymbolSVG' => $pictSvgUpload,
+                'IPSViewSymbol'                                    => 'svg', 'IPSViewCustomSymbolSVG' => $pictSvgOther, 'IPSViewUseTileDesign' => false,
+                'Orientation'                                      => $orientation, 'SymbolRepeat' => $repeat, 'ColorMode' => $mode,
+                'IPSViewOrientation'                               => $orientation, 'IPSViewSymbolRepeat' => $repeat, 'IPSViewColorMode' => $mode], JSON_THROW_ON_ERROR));
+            $updates = array_slice($pict->GetTestFormUpdates(), -2);
+            foreach ($updates as $output => $update) {
+                $svg = base64_decode(substr($update['Value'], strlen('data:image/svg+xml;base64,')), true);
+                $doc = new DOMDocument();
+                assertGatewayGauge($doc->loadXML($svg, LIBXML_NONET) && str_contains($svg, '<use href="#symcon-icon-path"')
+                    && str_contains($svg, $output === 0 ? 'M-12 -4 l16 0' : 'M2 3 L18 19')
+                    && !str_contains($svg, 'upload-only-marker') && !str_contains($svg, '#123456')
+                    && !str_contains($svg, 'NaN'), 'Both SVG drafts must use only their own validated geometry.');
+                assertGatewayGauge(
+                    $mode !== 'gradient' || str_contains($svg, 'gradientTransform="matrix('),
+                    'Uploaded SVGs need the same chart-wide gradient as icons.'
+                );
+            }
+        }
+    }
+}
+$largeViewBoxSvg = '<svg viewBox="0 0 1000000 500000"><path d="M0 0L1000000 0L1000000 500000L0 500000Z"/></svg>';
+$pict->UpdateBarPreviewFromForm(json_encode(['Sources' => [], 'Symbol' => 'svg', 'CustomSymbolSVG' => base64_encode($largeViewBoxSvg)], JSON_THROW_ON_ERROR));
+$largeViewBoxPreview = base64_decode(substr(array_slice($pict->GetTestFormUpdates(), -2)[0]['Value'], strlen('data:image/svg+xml;base64,')), true);
+assertGatewayGauge(
+    str_contains($largeViewBoxPreview, '<use href=') && !str_contains($largeViewBoxPreview, 'scale(0 0)'),
+    'Large valid viewBoxes must not collapse to zero scale in the SVG preview.'
+);
+$pict->UpdateBarPreviewFromForm('{"Symbol":"svg","CustomSymbolSVG":"invalid"}');
+$badSvg = base64_decode(substr(array_slice($pict->GetTestFormUpdates(), -2)[0]['Value'], strlen('data:image/svg+xml;base64,')), true);
+assertGatewayGauge(
+    str_contains($badSvg, 'The custom SVG shape is invalid or unsupported.')
+    && !str_contains($badSvg, '<use href=') && $pict->GetTestStatus() === $pictSvgStatus
+    && (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($pict) === $pictSvgBefore,
+    'SVG draft validation must not persist, change status or substitute another shape.'
+);
+$pict->SetTestProperty('Symbol', 'svg');
+$pict->SetTestProperty('CustomSymbolSVG', $pictSvgUpload);
+$pict->SetTestProperty('IPSViewSymbol', 'svg');
+$pict->SetTestProperty('IPSViewCustomSymbolSVG', $pictSvgOther);
+$pict->ApplyChanges();
+$svgStyle = json_decode($pict->GetPictorialBarData(), true)['pictorialBar']['style'];
+assertGatewayGauge(
+    $pict->GetTestStatus() === IS_ACTIVE && $svgStyle['symbol'] === 'svg'
+    && $svgStyle['symbolMinimumX'] === -12.0 && $svgStyle['symbolMinimumY'] === -6.0
+    && $svgStyle['symbolWidth'] === 24.0 && !isset($svgStyle['customSymbolSVG'])
+    && str_contains($pict->GetIPSViewHTML(), '"symbolMinimumX":2')
+    && !str_contains($pict->GetVisualizationTile(), 'upload-only-marker')
+    && !str_contains($pict->GetVisualizationTile(), $pictSvgUpload),
+    'Only derived SVG geometry may be transported, with independent viewBox origins.'
+);
+$GLOBALS['symconTestCopyTarget'] = $pict;
+try {
+    $pict->CopyTileDesignToIPSView();
+} finally {
+    unset($GLOBALS['symconTestCopyTarget']);
+}
+$copiedSvg = (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($pict);
+assertGatewayGauge($copiedSvg['IPSViewCustomSymbolSVG'] === $pictSvgUpload
+    && str_contains($pict->GetIPSViewHTML(), '"symbolMinimumX":-12'), 'Design copy must retain the uploaded form.');
+$largeSvg = base64_encode('<svg viewBox="0 0 10 10"><!--' . str_repeat('x', 120000)
+    . '--><path d="M0 0' . str_repeat('L1 1 ', 2000) . 'Z"/></svg>');
+foreach (['CustomSymbolSVG', 'IPSViewCustomSymbolSVG'] as $name) {
+    $pict->SetTestProperty($name, $largeSvg);
+}
+$pict->ApplyChanges();
+assertGatewayGauge(
+    $pict->GetTestStatus() === IS_ACTIVE && strlen($pict->GetVisualizationTile()) < SYMCON_OUTPUT_BUFFER_LIMIT
+    && strlen($pict->GetIPSViewHTML()) < SYMCON_OUTPUT_BUFFER_LIMIT
+    && strlen($pict->GetConfigurationForm()) < SYMCON_OUTPUT_BUFFER_LIMIT,
+    'Large bounded uploads with 16 sources must stay below all output limits.'
+);
+$pict->SetTestProperty('CustomSymbolSVG', $pictSvgUpload);
+$pict->SetTestProperty('IPSViewCustomSymbolSVG', 'invalid');
+$pict->SetTestProperty('IPSViewUseTileDesign', true);
+$pict->ApplyChanges();
+assertGatewayGauge(
+    $pict->GetTestStatus() === IS_ACTIVE && str_contains($pict->GetIPSViewHTML(), '"symbolMinimumX":-12'),
+    'Inherited design must ignore unused independent uploads.'
+);
+$pict->SetTestProperty('IPSViewUseTileDesign', false);
+$pict->ApplyChanges();
+assertGatewayGauge($pict->GetTestStatus() === 202, 'An active invalid SVG must fail as a configuration error.');
+$pict->SetTestProperty('IPSViewSymbol', 'rect');
+$pict->SetTestProperty('Symbol', 'rect');
+$pict->SetTestProperty('CustomSymbolSVG', 'invalid');
+$pict->ApplyChanges();
+assertGatewayGauge($pict->GetTestStatus() === IS_ACTIVE, 'Unused SVG uploads must not invalidate standard forms.');
 $pict->SetTestParentActive(false);
 $pict->ApplyChanges();
 assertGatewayGauge($pict->GetTestStatus() === 203, 'Missing parent must fail cleanly.');
