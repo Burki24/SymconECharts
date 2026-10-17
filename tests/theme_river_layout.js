@@ -126,7 +126,51 @@ for (const mode of ['symcon', 'ipsview']) {
 const enormous = render({...model, themeRiver: {...model.themeRiver, rows: [row(0, [1e308, 1e308]), row(1, [0, 1e308])]}});
 assert.ok(enormous.option.series[0].data.every(point => Number.isFinite(point[1])));
 const longRange = render({...model, range: {...model.range, endTimestamp: start + 30 * 86400}});
-assert.ok(longRange.option.singleAxis.axisLabel.formatter(start * 1000).includes('\n'), 'Long hourly ranges must include calendar dates, not ambiguous hours alone.');
+assert.equal(longRange.option.singleAxis.axisLabel.formatter(start * 1000), '16.10.', 'Multi-day windows use a single calendar date without redundant midnight times.');
+assert.match(tile.option.singleAxis.axisLabel.formatter(start * 1000), /^\d{2}:\d{2}$/, 'Short hourly windows retain clock times.');
+for (const hours of [23, 24, 25]) {
+    const daily = render({...model, range: {...model.range, endTimestamp: start + hours * 3600 - 1},
+        themeRiver: {...model.themeRiver, aggregation: 'day'}}).option.singleAxis;
+    assert.equal(daily.axisLabel.formatter(start * 1000), '16.10.');
+    assert.equal(daily.axisLabel.showMinLabel, true, 'One completed day must retain its start date even across DST.');
+    assert.equal(daily.axisLabel.showMaxLabel, false);
+}
+for (const days of [7, 30]) {
+    for (const mode of ['symcon', 'ipsview']) {
+        for (const width of [320, 630, 2048]) {
+            for (const percent of [50, 100, 200]) {
+                for (const showLegend of [true, false]) {
+                    const output = render({...model, range: {...model.range, endTimestamp: start + days * 86400 - 1},
+                        themeRiver: {...model.themeRiver, missingIntervals: 0, style: {...model.themeRiver.style,
+                            axisFontSizePercent: percent, legendFontSizePercent: percent, showLegend}}}, mode, width);
+                    const option = output.option;
+                    assert.equal(option.singleAxis.minInterval, 86400000, 'Date-only labels need at least daily ticks.');
+                    const engine = echarts.init(null, null, {renderer: 'svg', ssr: true, width, height: 500});
+                    engine.setOption(option);
+                    const axisView = engine.getViewOfComponentModel(engine.getModel().getComponent('singleAxis'));
+                    const axisRect = axisView.group.getBoundingRect().clone();
+                    axisRect.applyTransform(axisView.group.getComputedTransform());
+                    if (showLegend) {
+                        const legendView = engine.getViewOfComponentModel(engine.getModel().getComponent('legend'));
+                        const legendRect = legendView.group.getBoundingRect().clone();
+                        legendRect.applyTransform(legendView.group.getComputedTransform());
+                        assert.ok(legendRect.y - axisRect.y - axisRect.height >= 18,
+                            `Axis and legend need breathing room: ${mode}/${width}/${percent}/${days}: ${JSON.stringify({axisRect, legendRect})}.`);
+                        assert.ok(legendRect.y + legendRect.height <= 500, 'Legend stays inside the viewport.');
+                    }
+                    assert.ok(axisRect.y + axisRect.height <= 486, 'Axis labels stay inside the viewport even without a legend.');
+                    assert.equal(option.singleAxis.axisLabel.showMinLabel, false);
+                    assert.equal(option.singleAxis.axisLabel.showMaxLabel, false);
+                    // ECharts adds arbitrary range endpoints; they are hidden to avoid duplicate partial days.
+                    const ticks = engine.getModel().getComponent('singleAxis').axis.scale.getTicks().slice(1, -1);
+                    const dates = ticks.map(tick => option.singleAxis.axisLabel.formatter(tick.value));
+                    assert.equal(new Set(dates).size, dates.length, 'Date-only time ticks must not repeat a calendar date: ' + JSON.stringify(ticks.map((t, i) => [new Date(t.value).toISOString(), dates[i]])));
+                    engine.dispose();
+                }
+            }
+        }
+    }
+}
 const fragmented = render({...model, range: {...model.range, endTimestamp: start + 720 * 3600 - 1}, themeRiver: {...model.themeRiver,
     missingIntervals: 360, rows: Array.from({length: 720}, (_, i) => row(i, i % 2 ? null : [1, 2]))}});
 assert.equal(fragmented.option.series.length, 360);
@@ -134,4 +178,4 @@ const fragmentedEngine = echarts.init(null, null, {renderer: 'svg', ssr: true, w
 fragmentedEngine.setOption(fragmented.option);
 assert.ok(!fragmentedEngine.renderToSVGString().includes('NaN'), 'The maximal fragmented window must remain finite in the real engine.');
 fragmentedEngine.dispose();
-console.log('ThemeRiver options, pointers, gaps, identity, scaling and real ECharts geometry verified.');
+console.log('ThemeRiver options, time labels, footer spacing, pointers, gaps, identity, scaling and real ECharts geometry verified.');

@@ -721,6 +721,10 @@
 
 ## Fixes
 
+- ThemeRiver beschriftet mehrtägige Zeitachsen mit dem Datum ohne wiederholte
+  Mitternachtszeiten. Achse und Legende erhalten auch bei vergrößerten Schriften
+  getrennte Bereiche mit mehr Abstand; die Vorschau berücksichtigt beides.
+
 - Polar-Bar passt den Kreis an kleine Kacheln und Größenänderungen an, ohne
   ihn durch starre Abstände auf Miniaturgröße zu verkleinern. Die Skala
   überlagert nicht mehr den Kacheltitel und ihre Zahlen werden in sehr

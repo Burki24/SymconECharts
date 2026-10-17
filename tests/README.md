@@ -278,16 +278,24 @@ StylePHP und PHP CS Fixer.
   die echte gepinnte ECharts-Engine: Abschnitte ohne Lückenüberbrückung,
   gemeinsame Pixelmaßstäbe, Nullausgaben ohne Division durch Null, sichere
   Tooltip-Zuordnung an der Zeigerposition und Anzeigenamen statt interner IDs.
+  Stunden-/Datumsbeschriftungen und geometrischer Achsen-/Legendenabstand
+  werden bei 320/630/2048 Pixeln und 50/100/200 % Schriftgröße geprüft;
+  Entwurfsänderungen der SVG-Vorschau verändern keine gespeicherte Konfiguration.
 - `node tests/theme_river_browser.mjs` bietet die rein lokale Canvas-Fixture
   unter `http://127.0.0.1:8802`. `/chart?mode=symcon` und
   `/chart?mode=ipsview&theme=light&design=extended` prüfen dunkle Kachel und
   helle IPSView mit acht Quellen; `case=zero`, `case=empty` und `case=dense`
   ergänzen Grenzfälle. `/preview.svg` erzeugt die tatsächliche PHP-Vorschau
   über den vorhandenen Bootstrap mit `--theme-river-preview`.
+  `range=7d` beziehungsweise `range=30d`, `case=complete` und `font=200`
+  ergänzen die Prüfung von Datumsangaben und dem vergrößerten Legendenabstand.
 
 Am 17.10.2026 wurden lokale Kachel-/IPSView-Darstellung, Titelabstände,
 Lücken und Tooltipausblendung sowie die Nullanzeige visuell geprüft.
-Live-Tests in Symcon und IPSView stehen nach dem Modulupdate noch aus.
+Die Grundfunktion wurde anschließend vom Eigentümer in Kachel und IPSView
+bestätigt. Die überarbeitete Zeitachse und der Legendenabstand wurden lokal
+im Canvas-Renderer und in der SVG-Vorschau auch bei 200 % Schrift geprüft;
+ihre erneute Live-Abnahme steht nach dem Modulupdate noch aus.
 
 ## Funnel
 

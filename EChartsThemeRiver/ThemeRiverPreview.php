@@ -27,8 +27,16 @@ trait ThemeRiverPreview
         $n = EChartsBarPreview::N(...);
         $e = EChartsBarPreview::E(...);
         $top = 86;
-        $bottom = 264;
         $legend = $this->BarPreviewValue($values, 'ShowLegend', 'boolean', $ipsView);
+        $axisLabels = $this->BarPreviewValue($values, 'ShowAxisLabels', 'boolean', $ipsView);
+        $axisTicks = $this->BarPreviewValue($values, 'ShowAxisTicks', 'boolean', $ipsView);
+        $axisFont = max(6, min(24, 11 * $this->BarPreviewValue($values, 'AxisFontSizePercent', 'integer', $ipsView) / 100));
+        $legendFont = max(6, min(24, 11 * $this->BarPreviewValue($values, 'LegendFontSizePercent', 'integer', $ipsView) / 100));
+        $legendHeight = max(14, ceil($legendFont * 1.25)) + 10;
+        $legendTop = 360 - 14 - $legendHeight;
+        $axisExtent = $axisLabels ? 12 + ceil($axisFont * 1.25) : ($axisTicks ? 5 : 0);
+        $axisY = ($legend ? $legendTop - 20 : 342) - $axisExtent;
+        $bottom = $axisY - 16;
         $bandOpacity = max(0, min(100, $this->BarPreviewValue($values, 'BandOpacityPercent', 'integer', $ipsView))) / 100;
         $border = EChartsBarPreview::Color($this->BarPreviewValue($values, 'BorderColor', 'integer', $ipsView), $palette['border']);
         $borderWidth = max(0, min(5, $this->BarPreviewValue($values, 'BorderWidth', 'integer', $ipsView)));
@@ -65,26 +73,25 @@ trait ThemeRiverPreview
             }
         }
         $axisColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'AxisColor', 'integer', $ipsView), $palette['text']);
-        $axisFont = max(6, min(24, 11 * $this->BarPreviewValue($values, 'AxisFontSizePercent', 'integer', $ipsView) / 100));
-        $svg .= '<path d="M60 280H680" stroke="' . $e($axisColor) . '"/>';
-        $daily = ($values['Aggregation'] ?? $this->ReadPropertyString('Aggregation')) === 'day';
+        $svg .= '<path d="M60 ' . $n($axisY) . 'H680" stroke="' . $e($axisColor) . '"/>';
+        $dateOnly = ($values['Aggregation'] ?? $this->ReadPropertyString('Aggregation')) === 'day'
+            || ($values['Range'] ?? $this->ReadPropertyString('Range')) !== '24h';
         foreach ([60, 215, 370, 525, 680] as $index => $x) {
-            if ($this->BarPreviewValue($values, 'ShowAxisTicks', 'boolean', $ipsView)) {
-                $svg .= '<path d="M' . $x . ' 280v5" stroke="' . $e($axisColor) . '"/>';
+            if ($axisTicks) {
+                $svg .= '<path d="M' . $x . ' ' . $n($axisY) . 'v5" stroke="' . $e($axisColor) . '"/>';
             }
-            if ($this->BarPreviewValue($values, 'ShowAxisLabels', 'boolean', $ipsView)) {
-                $svg .= '<text x="' . $x . '" y="302" text-anchor="middle" fill="' . $e($axisColor) . '" font-size="' . $n($axisFont) . '">'
-                    . ($daily ? ('0' . ($index + 1) . '.10.') : str_pad((string) ($index * 6), 2, '0', STR_PAD_LEFT) . ':00') . '</text>';
+            if ($axisLabels) {
+                $svg .= '<text data-axis-label="true" x="' . $x . '" y="' . $n($axisY + 12 + $axisFont) . '" text-anchor="middle" fill="' . $e($axisColor) . '" font-size="' . $n($axisFont) . '">'
+                    . ($dateOnly ? ('0' . ($index + 1) . '.10.') : str_pad((string) ($index * 6), 2, '0', STR_PAD_LEFT) . ':00') . '</text>';
             }
         }
         if ($legend) {
-            $legendFont = max(6, min(24, 11 * $this->BarPreviewValue($values, 'LegendFontSizePercent', 'integer', $ipsView) / 100));
             $legendColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'LegendColor', 'integer', $ipsView), $palette['text']);
             foreach ($items as $index => $item) {
                 $x = 24 + $index * 672 / $count;
                 $color = $item['color'] ?: $palette['seriesColors'][$index % count($palette['seriesColors'])];
-                $svg .= '<rect x="' . $n($x) . '" y="326" width="10" height="10" fill="' . $e($color) . '"/>'
-                    . '<text x="' . $n($x + 14) . '" y="336" font-size="' . $n($legendFont) . '" fill="' . $e($legendColor) . '">'
+                $svg .= '<rect x="' . $n($x) . '" y="' . $n($legendTop + ($legendHeight - 10) / 2) . '" width="10" height="10" fill="' . $e($color) . '"/>'
+                    . '<text data-legend-label="true" x="' . $n($x + 14) . '" y="' . $n($legendTop + ($legendHeight + $legendFont) / 2 - 2) . '" font-size="' . $n($legendFont) . '" fill="' . $e($legendColor) . '">'
                     . $e(mb_strimwidth($item['label'], 0, max(3, (int) (672 / $count / ($legendFont * 0.65)) - 3), '…')) . '</text>';
             }
         }

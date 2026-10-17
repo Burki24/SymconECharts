@@ -11,13 +11,13 @@ const translations = JSON.parse(read('EChartsThemeRiver/locale.json')).translati
 const palette = {background: '#303236', text: '#f4f5f7', muted: '#969aa2', border: '#777b83', accent: '#55CBB5',
     seriesColors: ['#5070DD', '#B6D634', '#505372', '#FF994D', '#0CA8DF', '#FFD10A', '#FB628B', '#785DB0']};
 const start = 1792101600;
-function state(testCase, extended) {
-    const count = testCase === 'dense' ? 720 : 24;
+function state(testCase, extended, days, font) {
+    const count = testCase === 'dense' ? 720 : days * 24;
     const sources = ['Büro', 'Bad', 'Küche', 'Wohnbereich', 'Terrasse', 'Keller', 'Server', 'Werkstatt'].slice(0, extended ? 8 : 4)
         .map((label, i) => ({id: 'source-' + i, label, unit: 'W', decimals: 1, color: ''}));
     const rows = Array.from({length: count}, (_, i) => ({startTimestamp: start + i * 3600, endTimestamp: start + (i + 1) * 3600 - 1,
         label: new Date((start + i * 3600) * 1000).toLocaleString('de-DE', {timeZone: 'Europe/Berlin', timeZoneName: 'shortOffset'}),
-        values: testCase === 'empty' || ((testCase === 'dense' ? i % 2 : i >= 9 && i < 12) && testCase !== 'zero') ? null
+        values: testCase === 'empty' || ((testCase === 'dense' ? i % 2 : testCase === 'gaps' && i >= 9 && i < 12) && testCase !== 'zero') ? null
             : sources.map((_, j) => testCase === 'zero' ? 0 : 10 + 25 * (1 + Math.sin(i * .4 + j)))}));
     return {schemaVersion: 1, family: 'themeRiver', status: 'ready', error: null, chart: {
         schemaVersion: 1, family: 'themeRiver', theme: 'auto', range: {startTimestamp: start, endTimestamp: start + count * 3600 - 1, timezone: 'Europe/Berlin'},
@@ -25,12 +25,14 @@ function state(testCase, extended) {
             missingIntervals: rows.filter(r => r.values === null).length,
             style: {showTooltip: true, showLegend: true, showLabels: extended, showAxisLabels: true, showAxisTicks: true,
                 bandOpacityPercent: extended ? 75 : 85, borderWidth: extended ? 1 : 0, borderColor: '',
-                animationEnabled: false, titleFontSizePercent: 100, axisFontSizePercent: 100, legendFontSizePercent: 100, labelFontSizePercent: 100}}}};
+                animationEnabled: false, titleFontSizePercent: 100, axisFontSizePercent: font, legendFontSizePercent: font, labelFontSizePercent: 100}}}};
 }
 function page(url) {
     const mode = url.searchParams.get('mode') === 'ipsview' ? 'ipsview' : 'symcon';
     const light = url.searchParams.get('theme') === 'light';
-    const bootstrap = {mode, language: 'de', state: state(url.searchParams.get('case') || 'gaps', url.searchParams.get('design') === 'extended'),
+    const days = url.searchParams.get('range') === '30d' ? 30 : url.searchParams.get('range') === '7d' ? 7 : 1;
+    const font = url.searchParams.get('font') === '200' ? 200 : 100;
+    const bootstrap = {mode, language: 'de', state: state(url.searchParams.get('case') || 'gaps', url.searchParams.get('design') === 'extended', days, font),
         options: {tileHeaderVisible: url.searchParams.get('header') !== 'hidden', adaptToBackground: false, echartsThemes: {auto: palette}}, translations};
     const variables = light
         ? ':root{--symc-background:#ffffff;--symc-text:#222222;--symc-text-muted:#666666;--symc-border:#cccccc;--symc-surface:#eeeeee}'
@@ -50,7 +52,10 @@ http.createServer((req, res) => {
     const url = new URL(req.url, 'http://127.0.0.1');
     if (url.pathname === '/preview.svg') {
         const preview = spawnSync('php', ['tests/gateway_gauges.php', '--theme-river-preview', JSON.stringify({
-            Title: 'ThemeRiver · Vorschau', ShowLabels: true, BorderWidth: 1, Sources: []
+            Title: 'ThemeRiver · Vorschau', ShowLabels: true, BorderWidth: 1, Sources: [],
+            Range: url.searchParams.get('range') === '24h' ? '24h' : '7d',
+            AxisFontSizePercent: url.searchParams.get('font') === '200' ? 200 : 100,
+            LegendFontSizePercent: url.searchParams.get('font') === '200' ? 200 : 100
         })], {cwd: root, encoding: 'utf8', maxBuffer: 1048576});
         res.statusCode = preview.status === 0 ? 200 : 500;
         res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
@@ -61,7 +66,7 @@ http.createServer((req, res) => {
     if (url.pathname === '/chart') {res.end(page(url)); return;}
     res.end('<!doctype html><html lang="de"><head><title>ThemeRiver – lokale Browserprüfung</title></head><body style="background:#0b0c0e;color:white;font:16px Arial;margin:20px">'
         + '<h1 style="font-size:20px">ThemeRiver · synthetische Beispieldaten</h1><div style="display:flex;gap:16px;align-items:start;flex-wrap:wrap">'
-        + '<section><h2 style="font-size:16px">Kachel · hoch</h2><iframe title="Kachel" src="/chart?mode=symcon" style="border:0;width:400px;height:600px"></iframe></section>'
-        + '<section><h2 style="font-size:16px">IPSView · breit</h2><iframe title="IPSView" src="/chart?mode=ipsview" style="border:0;width:790px;height:440px"></iframe></section>'
+        + '<section><h2 style="font-size:16px">Kachel · sieben Tage</h2><iframe title="Kachel" src="/chart?mode=symcon&range=7d&case=complete" style="border:0;width:400px;height:600px"></iframe></section>'
+        + '<section><h2 style="font-size:16px">IPSView · große Schrift</h2><iframe title="IPSView" src="/chart?mode=ipsview&range=7d&font=200" style="border:0;width:790px;height:440px"></iframe></section>'
         + '<section><h2 style="font-size:16px">PHP-Vorschau</h2><img src="/preview.svg" alt="ThemeRiver PHP SVG" width="720"></section></div></body></html>');
 }).listen(8802, '127.0.0.1', () => console.log('ThemeRiver fixture: http://127.0.0.1:8802'));

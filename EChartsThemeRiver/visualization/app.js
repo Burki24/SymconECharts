@@ -98,10 +98,19 @@
         var titleSize = design.fontSizePercent(style.titleFontSizePercent, compact ? 15 : 18);
         var titleLayout = design.chartTitleLayout(bootstrap, river.title, titleSize);
         var titleBottom = titleLayout.headerInset + (titleLayout.show ? titleSize + 28 : 16);
-        var bottom = (style.showLegend !== false ? 62 : 30) + (river.missingIntervals > 0 ? 36 : 0);
+        var axisFont = design.fontSizePercent(style.axisFontSizePercent, compact ? 10 : 12);
+        var legendFont = design.fontSizePercent(style.legendFontSizePercent, compact ? 10 : 12);
+        var axisLineHeight = Math.ceil(axisFont * 1.25);
+        var legendLineHeight = Math.ceil(legendFont * 1.25);
+        var legendBottom = 10 + (river.missingIntervals > 0 ? 36 : 0);
+        var axisExtent = style.showAxisLabels !== false ? 12 + axisLineHeight : (style.showAxisTicks !== false ? 5 : 0);
+        // Separate footer bands: labels, breathing room, scroll legend, optional archive warning.
+        var bottom = legendBottom + axisExtent + (style.showLegend !== false ? Math.max(14, legendLineHeight) + 10 + 20 : 4);
         var top = Math.min(titleBottom, Math.max(12, height - bottom - 20));
         var actualBottom = Math.max(top + 8, height - bottom);
         var left = compact ? 22 : 46, right = compact ? 22 : 46;
+        var rangeSeconds = model.range.endTimestamp + 1 - model.range.startTimestamp;
+        var dateOnly = river.aggregation === 'day' || rangeSeconds > 172800;
         plotBounds = {left: left, right: width - right, top: top, bottom: actualBottom};
         var colorList = palette(theme).seriesColors || ['#5070DD', '#B6D634', '#FF994D', '#FB628B', '#55CBB5', '#B693E8', '#D0A662', '#6C9EA8'];
         var sourceColors = sources.map(function (source, index) { return source.color || colorList[index % colorList.length]; });
@@ -189,24 +198,24 @@
             title: {show: titleLayout.show, text: String(river.title || ''), left: 'center', top: titleLayout.top,
                 textStyle: {color: style.titleColor || colors.text, fontSize: titleSize}},
             legend: {show: style.showLegend !== false, type: 'scroll', selectedMode: false,
-                left: 12, right: 12, bottom: river.missingIntervals > 0 ? 44 : 10,
+                left: 12, right: 12, bottom: legendBottom, padding: 5, itemHeight: 14,
                 data: sources.map(function (s) { return {name: s.id, itemStyle: {color: sourceColors[sources.indexOf(s)]}}; }),
                 formatter: function (id) { var source = sources.find(function (s) { return s.id === id; }); return source ? source.label : ''; },
-                textStyle: {color: style.legendColor || colors.text, fontSize: design.fontSizePercent(style.legendFontSizePercent, compact ? 10 : 12)},
+                textStyle: {color: style.legendColor || colors.text, fontSize: legendFont, lineHeight: legendLineHeight},
                 pageTextStyle: {color: style.legendColor || colors.text}},
             singleAxis: {type: 'time', orient: 'horizontal', left: left, right: right, top: top, height: actualBottom - top,
                 min: model.range.startTimestamp * 1000, max: (model.range.endTimestamp + 1) * 1000,
+                minInterval: dateOnly ? 86400000 : 3600000,
+                splitNumber: Math.max(2, Math.floor((width - left - right) / Math.max(70, axisFont * 5))),
                 axisLine: {lineStyle: {color: style.axisColor || colors.border}},
                 axisTick: {show: style.showAxisTicks !== false},
                 axisLabel: {show: style.showAxisLabels !== false, hideOverlap: true, color: style.axisColor || colors.text,
-                    fontSize: design.fontSizePercent(style.axisFontSizePercent, compact ? 10 : 12),
+                    fontSize: axisFont, lineHeight: axisLineHeight, margin: 12,
+                    // One completed day still needs its start date, including 23/25-hour DST days.
+                    showMinLabel: dateOnly ? rangeSeconds <= 90000 : undefined, showMaxLabel: dateOnly ? false : undefined,
                     formatter: function (value) {
                         var date = new Date(value);
-                        if (river.aggregation !== 'day' && model.range.endTimestamp - model.range.startTimestamp > 172800) {
-                            return date.toLocaleDateString(bootstrap.language || undefined, {timeZone: model.range.timezone, day: '2-digit', month: '2-digit'})
-                                + '\n' + date.toLocaleTimeString(bootstrap.language || undefined, {timeZone: model.range.timezone, hour: '2-digit', minute: '2-digit'});
-                        }
-                        return date.toLocaleString(bootstrap.language || undefined, river.aggregation === 'day'
+                        return date.toLocaleString(bootstrap.language || undefined, dateOnly
                             ? {timeZone: model.range.timezone, day: '2-digit', month: '2-digit'}
                             : {timeZone: model.range.timezone, hour: '2-digit', minute: '2-digit'});
                     }},

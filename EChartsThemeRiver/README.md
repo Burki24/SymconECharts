@@ -57,6 +57,9 @@ Teilstriche sowie Schriftgrößen und Farben für Titel, Achse, Bänder und Lege
 Bandbeschriftungen sind zunächst aus; die Legende zeigt die Quellen auch bei
 kleinen Flächen. Sie kann geblättert werden, blendet aber keine Quellen aus.
 Animationen einschließlich Dauer und Bewegungskurve sind einstellbar.
+Die Zeitachse zeigt bei kurzen Stundenfenstern Uhrzeiten, bei mehrtägigen
+Zeiträumen und Tageswerten das Datum. Die Beschriftungsdichte passt sich der
+Breite und Schriftgröße an; zur Legende bleibt ein eigener Abstand reserviert.
 
 Die Formularvorschauen verwenden ausdrücklich gekennzeichnete Beispieldaten
 einschließlich einer Lücke. Änderungen werden vor dem Speichern sichtbar,

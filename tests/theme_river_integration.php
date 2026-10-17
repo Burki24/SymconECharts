@@ -83,6 +83,23 @@ assertGatewayGauge(
     && (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($river) === $riverSaved,
     'ThemeRiver drafts must be escaped, synthetic, live and nonmutating in both designers.'
 );
+foreach (['24h', '7d', '30d'] as $previewRange) {
+    $river->UpdateBarPreviewFromForm(json_encode(['Range' => $previewRange, 'ShowLegend' => true,
+        'AxisFontSizePercent'                             => 200, 'LegendFontSizePercent' => 200], JSON_THROW_ON_ERROR));
+    $riverSvg = base64_decode(substr(array_slice($river->GetTestFormUpdates(), -2)[0]['Value'], strlen('data:image/svg+xml;base64,')), true);
+    assertGatewayGauge($riverXML->loadXML($riverSvg, LIBXML_NONET), 'ThemeRiver footer preview must remain valid SVG.');
+    $xpath = new DOMXPath($riverXML);
+    $axisText = $xpath->query('//*[@data-axis-label]')->item(0);
+    $legendText = $xpath->query('//*[@data-legend-label]')->item(0);
+    assertGatewayGauge(
+        $axisText !== null && $legendText !== null
+        && preg_match($previewRange === '24h' ? '/^\d{2}:\d{2}$/' : '/^\d{2}\.\d{2}\.$/', $axisText->textContent) === 1
+        && (float) $legendText->getAttribute('y') - (float) $legendText->getAttribute('font-size')
+            - (float) $axisText->getAttribute('y') >= 20,
+        'Preview axis labels must follow the window and keep large legend text separate.'
+    );
+}
+assertGatewayGauge((new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($river) === $riverSaved, 'Layout previews must never change saved configuration.');
 $GLOBALS['symconTestCopyTarget'] = $river;
 try {
     $river->CopyTileDesignToIPSView();
