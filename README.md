@@ -45,6 +45,10 @@ Diagrammtitel ohne diesen Kachel-Kopfbereich.
 
 Folgende Module sind enthalten:
 
+Die Namen in der Modulauswahl entsprechen den hier aufgeführten Modulnamen
+ohne Leerzeichen, etwa `EChartsPictorialBar`. Namen vorhandener Instanzen
+können unabhängig davon individuell vergeben werden.
+
 - __EChartsPictorialBar__ ([Dokumentation](EChartsPictorialBar/README.md))
   Aktuelle Werte aus 1–16 Variablen derselben Einheit als einzelne oder
   wiederholte Grundformen. Getrennte Designer für Kachel und IPSView.

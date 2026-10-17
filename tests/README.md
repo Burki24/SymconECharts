@@ -1,5 +1,11 @@
 # Tests
 
+`module_contracts.php` sichert für alle Module das Namensschema ohne
+Leerzeichen und eine leere Aliasliste ab. Die fünf früheren Anzeige-Aliase
+von Boxplot, Candlestick, Funnel, PictorialBar und Radar wurden damit zunächst
+als Regression nachgewiesen; nach ihrer Entfernung besteht der Test.
+Instanznamen werden nicht durch Modulcode oder Tests automatisch geändert.
+
 Die Symcon-Icon-Erweiterung wird mit `php tests/pictorial_bar_icons.php`
 gegen synthetische Light-/Brands-/Kit-Tupel, Priorität, mehrere Teilpfade,
 ungültige Namen, Nicht-Ausführung von JavaScript und Ressourcenlimits geprüft.

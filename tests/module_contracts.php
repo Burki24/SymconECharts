@@ -272,6 +272,16 @@ foreach ($expectedModules as $moduleName => $expected) {
     $moduleContracts[$moduleName] = $module;
 
     requireContract(($module['name'] ?? null) === $moduleName, $moduleName . ' changed its name.', $errors);
+    requireContract(
+        preg_match('/^ECharts[A-Za-z0-9]+$/D', $moduleName) === 1,
+        $moduleName . ' must use the canonical module naming scheme without whitespace.',
+        $errors
+    );
+    requireContract(
+        ($module['aliases'] ?? null) === [],
+        $moduleName . ' must display its canonical module name without alternative aliases.',
+        $errors
+    );
     requireContract(($module['id'] ?? null) === $expected['id'], $moduleName . ' changed its GUID.', $errors);
     requireContract(($module['type'] ?? null) === $expected['type'], $moduleName . ' changed its type.', $errors);
     requireContract(

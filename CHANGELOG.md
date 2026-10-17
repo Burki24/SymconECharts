@@ -2,6 +2,11 @@
 
 ## Neu
 
+- Die Modulauswahl zeigt Boxplot, Candlestick, Funnel, PictorialBar und Radar
+  wieder unter ihren einheitlichen Namen ohne Leerzeichen, beispielsweise
+  `EChartsPictorialBar`. Abweichende Anzeige-Aliase sind entfernt;
+  technische Modulidentitäten und Konfigurationen bleiben unverändert.
+
 - PictorialBar bietet Symcon-Icons als zusätzliche Symbolform mit grafischer
   nativer Icon-Auswahl in beiden Designern. Wiederholung, Einzelform,
   Vorschauen und alle Farbmodi einschließlich des skalenbezogenen Verlaufs
