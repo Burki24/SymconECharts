@@ -19,6 +19,7 @@ Radar vergleicht aktuelle Messwerte manuell angelegter Gruppen auf gemeinsam
 festgelegten Achsen mit eigenen Wertebereichen und Einheiten.
 Boxplot vergleicht die Verteilung abgeschlossener Archiv-Stundenmittelwerte.
 Funnel vergleicht aktuelle, nichtnegative Stufenwerte derselben Einheit.
+PictorialBar vergleicht aktuelle, nichtnegative Werte als Symbolbalken.
 Candlestick zeigt ersten und letzten protokollierten Wert sowie Minimum
 und Maximum abgeschlossener Archiv-Stunden oder -Tage.
 
@@ -43,6 +44,10 @@ Diagrammtitel ohne diesen Kachel-Kopfbereich.
 ## Enthaltene Module
 
 Folgende Module sind enthalten:
+
+- __EChartsPictorialBar__ ([Dokumentation](EChartsPictorialBar/README.md))
+  Aktuelle Werte aus 1–16 Variablen derselben Einheit als einzelne oder
+  wiederholte Grundformen. Getrennte Designer für Kachel und IPSView.
 
 - __EChartsCandlestick__ ([Dokumentation](EChartsCandlestick/README.md))
   Eine Standard-Archivvariable als Stunden- oder Tageskerzen über 24 Stunden,

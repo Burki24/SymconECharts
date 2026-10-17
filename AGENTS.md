@@ -122,6 +122,8 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
 
 ## Modulpräfixe
 
+- `ECPB` ist `EChartsPictorialBar` zugeordnet (PB = Pictorial Bar), GUID `{CF6B1F8C-7219-4D59-94EA-19CF7570637F}` gemäß ADR 0057.
+
 - `ECFU` ist `EChartsFunnel` zugeordnet (`FU` = Funnel), siehe ADR 0055.
 
 - Modulpräfixe bestehen aus vier Großbuchstaben. `EC` bezeichnet stets

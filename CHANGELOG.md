@@ -2,6 +2,12 @@
 
 ## Hinzugefügt
 
+- `EChartsPictorialBar` (`ECPB`) zeigt aktuelle, nichtnegative Werte von
+  1–16 Variablen derselben Einheit als Symbolbalken. Grundformen,
+  Wiederholung, Skala, Sortierung, Ausrichtung, Schriftgrößen und Farben
+  sind für Kachel und IPSView unabhängig einstellbar. Live-Vorschauen
+  verwenden aktuelle Werte; bestehende Instanzen und Quellwerte bleiben unverändert.
+
 - Der Candlestick-Designer bietet getrennte Rahmenfarben und hohle Körper
   für steigende/fallende Kerzen, eine feste responsive Kerzenbreite,
   einstellbare Hover-Rahmen/-deckkraft, Zeitachsenrichtung und -linien,

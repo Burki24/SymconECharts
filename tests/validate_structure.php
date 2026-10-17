@@ -199,6 +199,16 @@ $requiredFiles = [
     'tests/radar_model.php',
     'tests/radar_integration.php',
     'tests/radar_layout.js',
+    'libs/EChartsCurrentComparisonSources.php',
+    'EChartsPictorialBar/PictorialBarPreview.php',
+    'EChartsPictorialBar/visualization/index.html',
+    'EChartsPictorialBar/visualization/style.css',
+    'EChartsPictorialBar/visualization/app.js',
+    '.tools/echarts-runtime/src/pictorial-bar-runtime.js',
+    'libs/echarts/6.1.0/echarts.pictorial-bar.min.js',
+    'docs/adr/0057-current-value-pictorial-bar.md',
+    'tests/pictorial_bar_integration.php',
+    'tests/pictorial_bar_layout.js',
     'EChartsFunnel/FunnelPreview.php',
     'EChartsFunnel/visualization/index.html',
     'EChartsFunnel/visualization/style.css',
@@ -450,7 +460,7 @@ if ($helperSync !== null) {
 
 $expectedModules = [
     'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarPolar', 'EChartsBarWaterfall', 'EChartsBoxplot', 'EChartsCalendar', 'EChartsCandlestick', 'EChartsFunnel', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
-    'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsGraph', 'EChartsGraphZ2M', 'EChartsHeatmap', 'EChartsParallel', 'EChartsPie', 'EChartsRadar', 'EChartsSankey', 'EChartsScatter', 'EChartsSunburst', 'EChartsTimeSeries', 'EChartsTree', 'EChartsTreeSystemHealth', 'EChartsTreemap'
+    'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsGraph', 'EChartsGraphZ2M', 'EChartsHeatmap', 'EChartsParallel', 'EChartsPictorialBar', 'EChartsPie', 'EChartsRadar', 'EChartsSankey', 'EChartsScatter', 'EChartsSunburst', 'EChartsTimeSeries', 'EChartsTree', 'EChartsTreeSystemHealth', 'EChartsTreemap'
 ];
 $discoveredModules = [];
 foreach (glob($root . '/*/module.json') ?: [] as $modulePath) {

@@ -1,5 +1,11 @@
 # Diagrammfamilienspezifische ECharts-Runtimes erzeugen
 
+Der PictorialBar-Einstieg enthält PictorialBar Chart, Grid, Titel, Tooltip,
+Aria, LabelLayout und CanvasRenderer. `npm run build:pictorial-bar` erzeugt
+ausschließlich `../../libs/echarts/6.1.0/echarts.pictorial-bar.min.js` aus dem
+unveränderten gepinnten ECharts 6.1.0. Offizielle Einstiege und benötigte
+APIs wurden am 17.10.2026 erneut geprüft; siehe ADR 0057.
+
 Der Candlestick-Einstieg enthält Candlestick Chart, Grid, Titel, Tooltip,
 Aria und Canvas Renderer aus demselben unveränderten ECharts 6.1.0.
 `npm run build:candlestick` erzeugt ausschließlich

@@ -1,5 +1,15 @@
 # Tests
 
+PictorialBar: `pictorial_bar_integration.php` wird in der Gateway-Suite
+ausgeführt und prüft Quellen, Nullwerte, Einheiten, ID-Identität, negative
+Werte, Abonnements, Aktualisierung, Fehlererholung, Vorschauen, Designs und
+beide Ausgaben. `node tests/pictorial_bar_layout.js` prüft Optionen,
+Originalwert-Erhaltung, Clipping und alle fünf Formen mit der echten Engine
+in beiden Ausrichtungen. Die Funnel-Suite sichert den gemeinsam verwendeten
+Quellenvertrag weiter ab. Lokale Browserfixture:
+`node tests/pictorial_bar_browser.mjs` (127.0.0.1:8801), ausschließlich
+synthetische Werte. Live-Kachel und IPSView sind nach Modulupdate separat offen.
+
 Candlestick: `php tests/candlestick_data.php` prüft abgeschlossene Stunden/
 Tage, Sommerzeit, erste/letzte Rohpunkte, Extrema, Lücken, Einzelwerte,
 Trunkierung und Abfragelimits. `candlestick_integration.php` wird im

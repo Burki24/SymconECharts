@@ -14,6 +14,13 @@ function assertEChartsAsset(bool $condition, string $message): void
 }
 
 $root = dirname(__DIR__);
+$pictorialRuntime = EChartsAsset::PictorialBarJavaScript();
+assertEChartsAsset(
+    hash_file('sha256', $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.pictorial-bar.min.js') === EChartsAsset::PICTORIAL_BAR_SHA256
+    && strlen($pictorialRuntime) < 550000 && str_contains($pictorialRuntime, 'window.echarts')
+    && str_contains((string) file_get_contents($root . '/.tools/echarts-runtime/src/pictorial-bar-runtime.js'), 'PictorialBarChart'),
+    'PictorialBar runtime must be pinned and remain below 550 KB.'
+);
 $funnelRuntime = EChartsAsset::FunnelJavaScript();
 assertEChartsAsset(
     hash_file('sha256', $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.funnel.min.js') === EChartsAsset::FUNNEL_SHA256

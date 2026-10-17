@@ -10262,5 +10262,6 @@ require __DIR__ . '/radar_integration.php';
 require __DIR__ . '/boxplot_integration.php';
 require __DIR__ . '/candlestick_integration.php';
 require __DIR__ . '/funnel_integration.php';
+require __DIR__ . '/pictorial_bar_integration.php';
 
 echo "Gateway and Gauge module integration verified.\n";

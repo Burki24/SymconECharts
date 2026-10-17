@@ -12,6 +12,7 @@ use RuntimeException;
 final class EChartsAsset
 {
     public const VERSION = '6.1.0';
+    public const PICTORIAL_BAR_SHA256 = 'aa455b075155c605bb5253642d8f696927b08ad7fa46487a83810eb1d8a03a6f';
     public const CANDLESTICK_SHA256 = '99147592d9a85f19c776b0f6bfd49c8becaf872d825fd9dbe9553202384598bd';
     public const FUNNEL_SHA256 = 'da9750dd18363325d23b1bcd4ea3af7e1011620b80b994ad6c2d5e3ee819314d';
     public const SHA256 = '37d8c9774f27fc12e048e269e8ec6a114782529fb85262a6be8c6b887207c07f';
@@ -381,6 +382,21 @@ final class EChartsAsset
         $canonicalContent = self::NormalizeLineEndings($content);
         if (!hash_equals(self::BOXPLOT_SHA256, hash('sha256', $canonicalContent))) {
             throw new RuntimeException('The bundled Apache ECharts Boxplot runtime failed its integrity check.');
+        }
+        return $canonicalContent;
+    }
+
+    /** Loads the pinned PictorialBar runtime without enlarging other chart bundles. */
+    public static function PictorialBarJavaScript(): string
+    {
+        $path = __DIR__ . '/echarts/' . self::VERSION . '/echarts.pictorial-bar.min.js';
+        $content = @file_get_contents($path);
+        if ($content === false || $content === '') {
+            throw new RuntimeException('The bundled Apache ECharts PictorialBar runtime could not be loaded.');
+        }
+        $canonicalContent = self::NormalizeLineEndings($content);
+        if (!hash_equals(self::PICTORIAL_BAR_SHA256, hash('sha256', $canonicalContent))) {
+            throw new RuntimeException('The bundled Apache ECharts PictorialBar runtime failed its integrity check.');
         }
         return $canonicalContent;
     }

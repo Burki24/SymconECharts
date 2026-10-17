@@ -21,6 +21,11 @@ Paket-SHA-1 laut npm: `ae0f68590f5ebbd728d900907c27acde7c5456d1`
 
 Ausgelieferte Dateien:
 
+- `libs/echarts/6.1.0/echarts.pictorial-bar.min.js` – reproduzierbarer
+  PictorialBar-Browser-Build aus ECharts Core, PictorialBar Chart, Grid,
+  Titel, Tooltip, Aria, LabelLayout und CanvasRenderer; 520.471 Byte; SHA-256
+  `aa455b075155c605bb5253642d8f696927b08ad7fa46487a83810eb1d8a03a6f`;
+
 - `libs/echarts/6.1.0/echarts.candlestick.min.js` – reproduzierbarer
   Candlestick-Browser-Build aus ECharts Core, Candlestick Chart, Grid, Titel,
   Tooltip, Aria und Canvas Renderer; 501.568 Byte; SHA-256

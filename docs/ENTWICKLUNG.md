@@ -21,6 +21,13 @@ IPSView nur den Diagrammtitel benötigt.
 
 ## Aktueller Stand und Zielarchitektur
 
+PictorialBar ergänzt aktuelle Vergleiche als eigene Symbolbalkenfamilie.
+Der Quellenvertrag wurde mit Funnel in
+`libs/EChartsCurrentComparisonSources.php` zentralisiert; Gateway-Zugriff,
+Abonnements und Ausgaben verwenden die vorhandenen Bausteine.
+Identität, Begrenzungen und Prüfplan stehen in
+[ADR 0057](adr/0057-current-value-pictorial-bar.md).
+
 Candlestick ergänzt die Archivfamilien um tatsächliche erste/letzte
 Rohmesswerte und Extrema abgeschlossener Intervalle. Identität, Grenzen und
 Wiederverwendung stehen in [ADR 0056](adr/0056-archive-candlestick.md).
