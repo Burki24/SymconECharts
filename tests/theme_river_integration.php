@@ -46,6 +46,7 @@ $river->SetTestProperty('Range', '24h');
 $river->ApplyChanges();
 $riverData = json_decode($river->GetThemeRiverData(), true, 512, JSON_THROW_ON_ERROR);
 $riverRows = $riverData['themeRiver']['rows'];
+assertGatewayGauge(($riverData['themeRiver']['style']['bandHeightPercent'] ?? null) === 84, 'ThemeRiver must expose the configurable band height with its existing default.');
 assertGatewayGauge(
     $river->GetTestStatus() === IS_ACTIVE && $river->GetTestTimerInterval('ArchiveRefresh') === 60000
     && $river->GetTestReferences() === range(88500, 88507)
@@ -64,6 +65,80 @@ assertGatewayGauge(
 );
 $riverSaved = (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($river);
 $riverParent = IPSModuleStrict::$ParentResponder;
+$riverDesignChanges = [
+    'BandHeightPercent' => 50, 'BorderType' => 'dotted', 'ShadowBlur' => 8, 'ShadowColor' => 0x123456,
+    'ShadowOffsetX'     => 3, 'ShadowOffsetY' => -4, 'EmphasisEnabled' => false, 'EmphasisFocus' => 'none', 'BlurOpacityPercent' => 20,
+    'ShowAxisLine'      => false, 'AxisLineWidth' => 3, 'AxisLineType' => 'dashed', 'AxisLabelMargin' => 22, 'TimeLabelFormat' => 'dateTime',
+    'ShowGrid'          => true, 'GridLineWidth' => 2, 'GridLineType' => 'dotted', 'GridColor' => 0x334455, 'GridOpacityPercent' => 35,
+    'LegendPosition'    => 'top', 'LegendAlignment' => 'center', 'LegendIcon' => 'diamond',
+    'LegendItemWidth'   => 30, 'LegendItemHeight' => 20, 'LegendItemGap' => 16, 'FontFamily' => 'Georgia, serif',
+    'TitleBold'         => false, 'AxisLabelBold' => true, 'LabelBold' => true, 'LegendBold' => true,
+    'TitleItalic'       => true, 'AxisLabelItalic' => true, 'LabelItalic' => true, 'LegendItalic' => true
+];
+foreach (['', 'IPSView'] as $prefix) {
+    foreach ($riverDesignChanges as $name => $value) {
+        $river->SetTestProperty($prefix . $name, $value);
+    }
+}
+$river->ApplyChanges();
+$extendedData = json_decode($river->GetThemeRiverData(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge($extendedData['themeRiver']['rows'] === $riverRows, 'Design changes must not change archive rows.');
+$extendedForm = json_decode($river->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+foreach ($riverDesignChanges as $name => $value) {
+    $encoded = str_ends_with($name, 'Color') ? SymconECharts\EChartsAsset::ColorToHex($value) : $value;
+    assertGatewayGauge($extendedData['themeRiver']['style'][lcfirst($name)] === $encoded, 'Missing ThemeRiver design payload: ' . $name);
+    foreach (['', 'IPSView'] as $prefix) {
+        $control = findGaugeFormElement($extendedForm['elements'], $prefix . $name);
+        assertGatewayGauge($control !== null && ($control['onChange'] ?? '') !== '', 'Design control must have live preview: ' . $prefix . $name);
+    }
+}
+assertGatewayGauge(str_contains($river->GetIPSViewHTML(), '"legendIcon":"diamond"'), 'Independent IPSView design must reach the renderer.');
+$river->UpdateBarPreviewFromForm(json_encode($riverDesignChanges, JSON_THROW_ON_ERROR));
+foreach (array_slice($river->GetTestFormUpdates(), -2) as $update) {
+    $svg = base64_decode(substr($update['Value'], strlen('data:image/svg+xml;base64,')), true);
+    $xml = new DOMDocument();
+    assertGatewayGauge($xml->loadXML($svg, LIBXML_NONET), 'Extended ThemeRiver previews must remain valid SVG.');
+    $xp = new DOMXPath($xml);
+    assertGatewayGauge(
+        str_contains($svg, 'font-family="Georgia, serif"') && str_contains($svg, 'filter="url(#river-shadow)"')
+        && str_contains($svg, 'stroke-dasharray="2 3"') && $xp->query('//*[@data-grid]')->length === 5
+        && $xp->query('//*[@data-axis-line]')->length === 0 && $xp->query('//*[@data-axis-label]/*')->length === 10
+        && (float) $xp->query('//*[@data-legend-label]')->item(0)->getAttribute('y') < 100,
+        'Preview must reflect shadows, font, dashed bands, grid, hidden axis, multiline dates and top legend.'
+    );
+}
+foreach (['BandHeightPercent' => 19, 'BorderType' => 'invalid', 'ShadowBlur' => 21, 'ShadowColor' => -2,
+    'ShadowOffsetX'           => -21, 'ShadowOffsetY' => 21, 'EmphasisFocus' => 'invalid', 'BlurOpacityPercent' => 101,
+    'AxisLineWidth'           => 6, 'AxisLineType' => 'invalid', 'AxisLabelMargin' => 31, 'TimeLabelFormat' => 'invalid',
+    'GridLineWidth'           => -1, 'GridLineType' => 'invalid', 'GridColor' => 0x1000000, 'GridOpacityPercent' => -1,
+    'LegendPosition'          => 'invalid', 'LegendAlignment' => 'invalid', 'LegendIcon' => 'invalid',
+    'LegendItemWidth'         => 41, 'LegendItemHeight' => 31, 'LegendItemGap' => -1, 'FontFamily' => '<script>'] as $name => $bad) {
+    foreach (['', 'IPSView'] as $prefix) {
+        $river->SetTestProperty($prefix . $name, $bad);
+        $river->ApplyChanges();
+        assertGatewayGauge($river->GetTestStatus() === 202, 'Invalid extended design must be rejected: ' . $prefix . $name);
+        $river->SetTestProperty($prefix . $name, $riverDesignChanges[$name]);
+    }
+}
+$GLOBALS['symconTestCopyTarget'] = $river;
+try {
+    $river->CopyTileDesignToIPSView();
+} finally {
+    unset($GLOBALS['symconTestCopyTarget']);
+}
+$copied = (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($river);
+foreach ($riverDesignChanges as $name => $value) {
+    assertGatewayGauge($copied['IPSView' . $name] === $value, 'Design copy must include ' . $name);
+}
+$river->SetTestProperty('IPSViewUseTileDesign', true);
+$inheritedForm = json_decode($river->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+foreach (array_keys($riverDesignChanges) as $name) {
+    assertGatewayGauge(findGaugeFormElement($inheritedForm['elements'], 'IPSView' . $name)['enabled'] === false, 'Inherited new controls must be disabled: ' . $name);
+}
+foreach ($riverSaved as $name => $value) {
+    $river->SetTestProperty($name, $value);
+}
+$river->ApplyChanges();
 IPSModuleStrict::$ParentResponder = static function (string $json): string
 { throw new RuntimeException('Previews must not request archives.'); };
 try {
@@ -227,7 +302,7 @@ $riverCaptionCheck = static function (array $items) use (&$riverCaptionCheck, $r
     }
 };
 $riverCaptionCheck(json_decode(file_get_contents(__DIR__ . '/../EChartsThemeRiver/form.json'), true));
-preg_match_all("/(?:Translate|translate)\\(\\s*'([^']+)'/", file_get_contents(__DIR__ . '/../EChartsThemeRiver/module.php')
+preg_match_all("/(?:->Translate|(?<![\"\\w])translate)\\(\\s*'([^']+)'/", file_get_contents(__DIR__ . '/../EChartsThemeRiver/module.php')
     . file_get_contents(__DIR__ . '/../EChartsThemeRiver/ThemeRiverPreview.php')
     . file_get_contents(__DIR__ . '/../EChartsThemeRiver/visualization/app.js'), $riverTexts);
 foreach ($riverTexts[1] as $text) {

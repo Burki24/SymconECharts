@@ -25,7 +25,13 @@ function state(testCase, extended, days, font) {
             missingIntervals: rows.filter(r => r.values === null).length,
             style: {showTooltip: true, showLegend: true, showLabels: extended, showAxisLabels: true, showAxisTicks: true,
                 bandOpacityPercent: extended ? 75 : 85, borderWidth: extended ? 1 : 0, borderColor: '',
-                animationEnabled: false, titleFontSizePercent: 100, axisFontSizePercent: font, legendFontSizePercent: font, labelFontSizePercent: 100}}}};
+                animationEnabled: false, titleFontSizePercent: 100, axisFontSizePercent: font, legendFontSizePercent: font, labelFontSizePercent: 100,
+                ...(extended ? {bandHeightPercent: 65, borderType: 'dashed', shadowBlur: 8, shadowColor: '#000000',
+                    shadowOffsetX: 3, shadowOffsetY: 3, showGrid: true, gridColor: '#999999', gridOpacityPercent: 30,
+                    gridLineType: 'dotted', gridLineWidth: 1, axisLabelMargin: 20, timeLabelFormat: 'dateTime',
+                    legendPosition: 'top', legendAlignment: 'center', legendIcon: 'diamond', legendItemWidth: 30,
+                    legendItemHeight: 20, legendItemGap: 16, fontFamily: 'Georgia, serif', titleItalic: true,
+                    axisLabelBold: true, labelBold: true, legendItalic: true, emphasisFocus: 'self', blurOpacityPercent: 20} : {})}}}};
 }
 function page(url) {
     const mode = url.searchParams.get('mode') === 'ipsview' ? 'ipsview' : 'symcon';
@@ -34,6 +40,9 @@ function page(url) {
     const font = url.searchParams.get('font') === '200' ? 200 : 100;
     const bootstrap = {mode, language: 'de', state: state(url.searchParams.get('case') || 'gaps', url.searchParams.get('design') === 'extended', days, font),
         options: {tileHeaderVisible: url.searchParams.get('header') !== 'hidden', adaptToBackground: false, echartsThemes: {auto: palette}}, translations};
+    if (['top', 'bottom'].includes(url.searchParams.get('legend'))) {
+        bootstrap.state.chart.themeRiver.style.legendPosition = url.searchParams.get('legend');
+    }
     const variables = light
         ? ':root{--symc-background:#ffffff;--symc-text:#222222;--symc-text-muted:#666666;--symc-border:#cccccc;--symc-surface:#eeeeee}'
         : ':root{--symc-background:#303236;--symc-text:#f4f5f7;--symc-text-muted:#969aa2;--symc-border:#555860;--symc-surface:#25272b}';
@@ -55,7 +64,13 @@ http.createServer((req, res) => {
             Title: 'ThemeRiver · Vorschau', ShowLabels: true, BorderWidth: 1, Sources: [],
             Range: url.searchParams.get('range') === '24h' ? '24h' : '7d',
             AxisFontSizePercent: url.searchParams.get('font') === '200' ? 200 : 100,
-            LegendFontSizePercent: url.searchParams.get('font') === '200' ? 200 : 100
+            LegendFontSizePercent: url.searchParams.get('font') === '200' ? 200 : 100,
+            ...(url.searchParams.get('design') === 'extended' ? {
+                FontFamily: 'Georgia, serif', TitleItalic: true, BandHeightPercent: 65, BorderType: 'dashed',
+                ShadowBlur: 8, ShadowOffsetX: 3, ShadowOffsetY: 3, ShowGrid: true, TimeLabelFormat: 'dateTime',
+                LegendPosition: 'top', LegendAlignment: 'center', LegendIcon: 'diamond', LegendItemWidth: 30,
+                LegendItemHeight: 20, LegendItemGap: 16, AxisLabelBold: true, LabelBold: true, LegendItalic: true
+            } : {})
         })], {cwd: root, encoding: 'utf8', maxBuffer: 1048576});
         res.statusCode = preview.status === 0 ? 200 : 500;
         res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
@@ -66,7 +81,7 @@ http.createServer((req, res) => {
     if (url.pathname === '/chart') {res.end(page(url)); return;}
     res.end('<!doctype html><html lang="de"><head><title>ThemeRiver – lokale Browserprüfung</title></head><body style="background:#0b0c0e;color:white;font:16px Arial;margin:20px">'
         + '<h1 style="font-size:20px">ThemeRiver · synthetische Beispieldaten</h1><div style="display:flex;gap:16px;align-items:start;flex-wrap:wrap">'
-        + '<section><h2 style="font-size:16px">Kachel · sieben Tage</h2><iframe title="Kachel" src="/chart?mode=symcon&range=7d&case=complete" style="border:0;width:400px;height:600px"></iframe></section>'
-        + '<section><h2 style="font-size:16px">IPSView · große Schrift</h2><iframe title="IPSView" src="/chart?mode=ipsview&range=7d&font=200" style="border:0;width:790px;height:440px"></iframe></section>'
-        + '<section><h2 style="font-size:16px">PHP-Vorschau</h2><img src="/preview.svg" alt="ThemeRiver PHP SVG" width="720"></section></div></body></html>');
+        + '<section><h2 style="font-size:16px">Kachel · erweiterte Gestaltung</h2><iframe title="Kachel" src="/chart?mode=symcon&range=7d&case=complete&design=extended" style="border:0;width:400px;height:600px"></iframe></section>'
+        + '<section><h2 style="font-size:16px">IPSView · große Schrift</h2><iframe title="IPSView" src="/chart?mode=ipsview&range=7d&font=200&design=extended&legend=bottom" style="border:0;width:790px;height:440px"></iframe></section>'
+        + '<section><h2 style="font-size:16px">PHP-Vorschau</h2><img src="/preview.svg?design=extended" alt="ThemeRiver PHP SVG" width="720"></section></div></body></html>');
 }).listen(8802, '127.0.0.1', () => console.log('ThemeRiver fixture: http://127.0.0.1:8802'));

@@ -67,6 +67,32 @@ Beide Designer besitzen Theme, Tooltip, Banddeckkraft, Legende, Beschriftung,
 Schriftgrößen/-farben und Animation; IPSView erbt oder gestaltet unabhängig.
 Die SVG-Vorschau verwendet gekennzeichnete synthetische Werte ohne Archivzugriff.
 
+### Erweiterte Gestaltung
+
+Der Abgleich mit der offiziellen [ThemeRiver-Referenz](https://echarts.apache.org/en/option.html#series-themeRiver),
+deren [Quelldokumentation](https://github.com/apache/echarts-doc/blob/master/en/option/series/themeRiver.md),
+SingleAxis und Legende sowie der gepinnten Runtime am 17.10.2026 ergänzt:
+Bandhöhe (boundaryGap mit erhaltenem gemeinsamen Maßstab), Konturarten,
+Schatten, Hover-Deaktivierung/Fokus und relative Restdeckkraft. Achsenlinie,
+Raster, Zeitformat und Textabstand, Legendenposition/-ausrichtung und
+Symbolgeometrie sowie Schriftfamilie/Fett/Kursiv bleiben lokale Designfelder.
+Alle neuen Properties sind additiv und besitzen passende `IPSView`-Gegenstücke;
+keine Migration bestehender Quellen, Farben oder anderer Properties.
+
+Native `focus: series` meint wegen der Lückentrennung einen zusammenhängenden
+Abschnitt, nicht dieselbe Quelle über alle getrennten Abschnitte hinweg.
+Das Formular benennt dies entsprechend. Native Labelposition/-formatierung
+und Labelverbindungslinien werden wegen des beschriebenen Runtimeverhaltens
+nicht als zusätzliche wirksame Optionen behauptet. Glättung 0.4 ist im nativen
+ThemeRiverView fest kodiert; ein `smooth`-Feld wäre wirkungslos. Orientierung,
+Quellensortierung und Auswahlmodi werden nicht als reine Gestaltung eingeführt.
+Frei ausführbare Formatter, URLs oder JavaScript-Importe bleiben ausgeschlossen.
+
+Die Vorschau zeigt statische Effekte, Raster, Symbole und typografische
+Änderungen ohne Archivzugriff. Hover-Zustände bleiben Laufzeitverhalten.
+Obere Legenden erhalten Platz zwischen Titel und Bändern; untere Legenden
+behalten ihren Abstand zu ein- beziehungsweise zweizeiligen Zeitlabels.
+
 ## Nachweise und Grenzen
 
 Geprüft werden Datenfenster einschließlich DST, negative/ungültige Daten,

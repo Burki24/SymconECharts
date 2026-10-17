@@ -2,6 +2,13 @@
 
 ## Neu
 
+- ThemeRiver erweitert beide Designer um Bandhöhe, Konturarten, Schatten,
+  Hervorhebungsfokus und Restdeckkraft sowie Achsenlinien, Zeitformate und
+  Rastergestaltung. Legendenposition/-ausrichtung, Symbolform/-größe und
+  Abstände sind wählbar; Schriftart, Fett- und Kursivschrift ergänzen die
+  Typografie. Vorschauen, Designvererbung und Kopierfunktion berücksichtigen
+  die neuen Einstellungen, ohne Quellen oder Archivwerte zu verändern.
+
 - EChartsThemeRiver zeigt nichtnegative Stunden- oder Tagesmittelwerte aus
   bis zu acht Standard-Archivvariablen derselben Einheit als farbige Bänder.
   Archivlücken unterbrechen die Darstellung, ohne Nullwerte vorzutäuschen.

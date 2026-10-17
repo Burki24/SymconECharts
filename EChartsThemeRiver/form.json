@@ -242,6 +242,116 @@
                     "type": "RowLayout",
                     "items": [
                         {
+                            "type": "NumberSpinner",
+                            "name": "BandHeightPercent",
+                            "caption": "Band height",
+                            "minimum": 20,
+                            "maximum": 100,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "Select",
+                            "name": "BorderType",
+                            "caption": "Band border type",
+                            "options": [
+                                {
+                                    "caption": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "caption": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "caption": "Dotted",
+                                    "value": "dotted"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ShadowBlur",
+                            "caption": "Shadow blur",
+                            "minimum": 0,
+                            "maximum": 20,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "ShadowColor",
+                            "caption": "Shadow color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ShadowOffsetX",
+                            "caption": "Horizontal shadow offset",
+                            "minimum": -20,
+                            "maximum": 20,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ShadowOffsetY",
+                            "caption": "Vertical shadow offset",
+                            "minimum": -20,
+                            "maximum": 20,
+                            "suffix": "px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "EmphasisEnabled",
+                            "caption": "Highlight on hover"
+                        },
+                        {
+                            "type": "Select",
+                            "name": "EmphasisFocus",
+                            "caption": "Hover focus",
+                            "options": [
+                                {
+                                    "caption": "Hovered band",
+                                    "value": "self"
+                                },
+                                {
+                                    "caption": "Hovered section",
+                                    "value": "series"
+                                },
+                                {
+                                    "caption": "No dimming",
+                                    "value": "none"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "BlurOpacityPercent",
+                            "caption": "Other bands opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
                             "type": "CheckBox",
                             "name": "ShowAxisLabels",
                             "caption": "Show time labels"
@@ -250,6 +360,306 @@
                             "type": "CheckBox",
                             "name": "ShowAxisTicks",
                             "caption": "Show axis ticks"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowAxisLine",
+                            "caption": "Show axis line"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AxisLineWidth",
+                            "caption": "Axis line width",
+                            "minimum": 0,
+                            "maximum": 5,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "Select",
+                            "name": "AxisLineType",
+                            "caption": "Axis line type",
+                            "options": [
+                                {
+                                    "caption": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "caption": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "caption": "Dotted",
+                                    "value": "dotted"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "TimeLabelFormat",
+                            "caption": "Time label format",
+                            "options": [
+                                {
+                                    "caption": "Automatic",
+                                    "value": "auto"
+                                },
+                                {
+                                    "caption": "Date",
+                                    "value": "date"
+                                },
+                                {
+                                    "caption": "Date and time",
+                                    "value": "dateTime"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AxisLabelMargin",
+                            "caption": "Time label distance",
+                            "minimum": 0,
+                            "maximum": 30,
+                            "suffix": "px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowGrid",
+                            "caption": "Show grid lines"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "GridLineWidth",
+                            "caption": "Grid line width",
+                            "minimum": 0,
+                            "maximum": 5,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "Select",
+                            "name": "GridLineType",
+                            "caption": "Grid line type",
+                            "options": [
+                                {
+                                    "caption": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "caption": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "caption": "Dotted",
+                                    "value": "dotted"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "GridColor",
+                            "caption": "Grid color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "GridOpacityPercent",
+                            "caption": "Grid opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "LegendPosition",
+                            "caption": "Legend position",
+                            "options": [
+                                {
+                                    "caption": "Bottom",
+                                    "value": "bottom"
+                                },
+                                {
+                                    "caption": "Top",
+                                    "value": "top"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Select",
+                            "name": "LegendAlignment",
+                            "caption": "Legend alignment",
+                            "options": [
+                                {
+                                    "caption": "Left",
+                                    "value": "left"
+                                },
+                                {
+                                    "caption": "Center",
+                                    "value": "center"
+                                },
+                                {
+                                    "caption": "Right",
+                                    "value": "right"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "LegendIcon",
+                            "caption": "Legend symbol",
+                            "options": [
+                                {
+                                    "caption": "Rounded rectangle",
+                                    "value": "roundRect"
+                                },
+                                {
+                                    "caption": "Rectangle",
+                                    "value": "rect"
+                                },
+                                {
+                                    "caption": "Circle",
+                                    "value": "circle"
+                                },
+                                {
+                                    "caption": "Diamond",
+                                    "value": "diamond"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "LegendItemWidth",
+                            "caption": "Legend symbol width",
+                            "minimum": 6,
+                            "maximum": 40,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "LegendItemHeight",
+                            "caption": "Legend symbol height",
+                            "minimum": 6,
+                            "maximum": 30,
+                            "suffix": "px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "LegendItemGap",
+                            "caption": "Legend item distance",
+                            "minimum": 0,
+                            "maximum": 30,
+                            "suffix": "px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "FontFamily",
+                            "caption": "Font family",
+                            "options": [
+                                {
+                                    "caption": "Arial",
+                                    "value": "Arial, sans-serif"
+                                },
+                                {
+                                    "caption": "Verdana",
+                                    "value": "Verdana, sans-serif"
+                                },
+                                {
+                                    "caption": "Georgia",
+                                    "value": "Georgia, serif"
+                                },
+                                {
+                                    "caption": "Monospace",
+                                    "value": "monospace"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "TitleBold",
+                            "caption": "Bold title"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "TitleItalic",
+                            "caption": "Italic title"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "AxisLabelBold",
+                            "caption": "Bold time labels"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "AxisLabelItalic",
+                            "caption": "Italic time labels"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "LabelBold",
+                            "caption": "Bold band labels"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "LabelItalic",
+                            "caption": "Italic band labels"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "LegendBold",
+                            "caption": "Bold legend"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "LegendItalic",
+                            "caption": "Italic legend"
                         }
                     ]
                 },

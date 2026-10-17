@@ -37,6 +37,41 @@ const model = {family: 'themeRiver', theme: 'dark', range: {startTimestamp: star
         style: {showLegend: true, showTooltip: true, showLabels: true, showAxisLabels: true, showAxisTicks: true,
             bandOpacityPercent: 85, borderWidth: 2, borderColor: '#123456', titleFontSizePercent: 100, animationEnabled: false}}};
 const tile = render(model);
+const designed = render({...model, themeRiver: {...model.themeRiver, style: {...model.themeRiver.style,
+    bandHeightPercent: 50, borderType: 'dotted', shadowBlur: 8, shadowColor: '#123456', shadowOffsetX: 3, shadowOffsetY: -4,
+    emphasisEnabled: false, emphasisFocus: 'none', blurOpacityPercent: 20, showAxisLine: false, axisLineWidth: 3,
+    axisLineType: 'dashed', showGrid: true, gridLineWidth: 2, gridLineType: 'dotted', gridColor: '#334455', gridOpacityPercent: 35,
+    axisLabelMargin: 22, timeLabelFormat: 'dateTime', legendPosition: 'top', legendAlignment: 'center',
+    legendIcon: 'diamond', legendItemWidth: 30, legendItemHeight: 20, legendItemGap: 16,
+    fontFamily: 'Georgia, serif', titleBold: false, axisLabelBold: true, labelBold: true, legendBold: true,
+    titleItalic: true, axisLabelItalic: true, labelItalic: true, legendItalic: true}}});
+assert.equal(designed.option.series[0].boundaryGap[0], '25%');
+assert.equal(designed.option.series[0].itemStyle.borderType, 'dotted');
+assert.equal(designed.option.series[0].itemStyle.shadowBlur, 8);
+assert.equal(designed.option.series[0].itemStyle.shadowColor, '#123456');
+assert.equal(designed.option.series[0].itemStyle.shadowOffsetX, 3);
+assert.equal(designed.option.series[0].itemStyle.shadowOffsetY, -4);
+assert.equal(designed.option.series[0].emphasis.disabled, true);
+assert.equal(designed.option.series[0].emphasis.focus, 'none');
+assert.equal(designed.option.series[0].blur.itemStyle.opacity, 0.17);
+assert.equal(designed.option.singleAxis.axisLine.show, false);
+assert.equal(designed.option.singleAxis.axisLine.lineStyle.width, 3);
+assert.equal(designed.option.singleAxis.axisLine.lineStyle.type, 'dashed');
+assert.equal(designed.option.singleAxis.axisLabel.margin, 22);
+assert.match(designed.option.singleAxis.axisLabel.formatter(start * 1000), /16\.10\.\n\d{2}:\d{2}/);
+assert.equal(designed.option.singleAxis.splitLine.show, true);
+assert.equal(designed.option.singleAxis.splitLine.lineStyle.opacity, 0.35);
+assert.equal(designed.option.legend.icon, 'diamond');
+assert.equal(designed.option.legend.itemWidth, 30);
+assert.equal(designed.option.legend.itemHeight, 20);
+assert.equal(designed.option.legend.itemGap, 16);
+assert.equal(designed.option.legend.left, 'center');
+assert.equal(designed.option.title.textStyle.fontWeight, 'normal');
+for (const text of [designed.option.singleAxis.axisLabel, designed.option.legend.textStyle, designed.option.graphic[0].style]) {
+    assert.equal(text.fontFamily, 'Georgia, serif');
+    assert.equal(text.fontWeight, 'bold');
+    assert.equal(text.fontStyle, 'italic');
+}
 assert.equal(tile.option.series.length, 2, 'A gap must split ThemeRiver into independent contiguous sections.');
 assert.equal(tile.option.series[0].type, 'themeRiver');
 assert.equal(tile.option.series[0].itemStyle.opacity, 0.85);
@@ -84,6 +119,54 @@ assert.equal(transparent.option.singleAxis.axisTick.show, false);
 assert.equal(transparent.option.legend.show, false);
 
 const echarts = require(path.join(root, '.tools/echarts-runtime/node_modules/echarts'));
+for (const mode of ['symcon', 'ipsview']) {
+    for (const width of [320, 900]) {
+        for (const legendPosition of ['top', 'bottom']) {
+            for (const legendAlignment of ['left', 'center', 'right']) {
+                for (const timeLabelFormat of ['auto', 'date', 'dateTime']) {
+                    const option = render({...model, themeRiver: {...model.themeRiver, style: {...model.themeRiver.style,
+                        legendPosition, legendAlignment, timeLabelFormat, axisLabelMargin: 30, fontFamily: 'monospace',
+                        axisFontSizePercent: 200, legendFontSizePercent: 200, legendBold: true, axisLabelBold: true,
+                        legendItemWidth: 40, legendItemHeight: 30, legendItemGap: 30, bandHeightPercent: 100, showGrid: true}}}, mode, width).option;
+                    const engine = echarts.init(null, null, {renderer: 'svg', ssr: true, width, height: 500});
+                    engine.setOption(option);
+                    const rect = name => {
+                        const view = engine.getViewOfComponentModel(engine.getModel().getComponent(name));
+                        // The scroll content group includes clipped off-page entries; its background is the visible box.
+                        const target = name === 'legend' ? view.group.children().find(child => child.type === 'rect') : view.group;
+                        const bounds = target.getBoundingRect().clone();
+                        bounds.applyTransform(target.getComputedTransform());
+                        return bounds;
+                    };
+                    const legend = rect('legend'), title = rect('title'), axis = rect('singleAxis');
+                    if (legendPosition === 'top') {
+                        assert.ok(legend.y >= title.y + title.height + 10, 'Top legend must clear the chart title.');
+                        assert.ok(option.singleAxis.top >= legend.y + legend.height + 14, 'Top legend must clear the band plot.');
+                    } else {
+                        assert.ok(legend.y >= axis.y + axis.height + 18, 'Two-line dates must not intrude into the bottom legend.');
+                    }
+                    assert.ok(legend.x >= 0 && legend.x + legend.width <= width + 1, 'Large scroll legend stays inside the viewport: ' + JSON.stringify({mode, width, legendPosition, legendAlignment, timeLabelFormat, legend}));
+                    if (width === 900) {
+                        if (legendAlignment === 'left') {assert.ok(legend.x < 20);}
+                        if (legendAlignment === 'center') {assert.ok(Math.abs(legend.x + legend.width / 2 - width / 2) < 2);}
+                        if (legendAlignment === 'right') {assert.ok(legend.x + legend.width > width - 20);}
+                    }
+                    const svg = engine.renderToSVGString();
+                    assert.ok(!svg.includes('NaN') && !svg.includes('Infinity'));
+                    assert.equal(engine.getModel().getSeries()[0].getData().count(), option.series[0].data.length);
+                    engine.dispose();
+                }
+            }
+        }
+    }
+}
+const styledEngine = echarts.init(null, null, {renderer: 'svg', ssr: true, width: 900, height: 500});
+styledEngine.setOption(designed.option);
+const styledPolygon = styledEngine.getModel().getSeries()[0].getData().getItemGraphicEl(0);
+assert.equal(styledPolygon.style.shadowBlur, 8, 'Shadow options must reach the actual native band geometry.');
+assert.ok(styledPolygon.style.lineDash.length > 0, 'Dotted borders must produce actual dash geometry.');
+assert.equal(styledPolygon.states.blur.style.opacity, 0.17);
+styledEngine.dispose();
 const zeroEngine = echarts.init(null, null, {renderer: 'svg', ssr: true, width: 900, height: 500});
 zeroEngine.setOption(zero.option);
 assert.equal(zeroEngine.getModel().getSeriesByName('variable-1').length, 1);

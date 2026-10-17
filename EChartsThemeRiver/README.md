@@ -61,6 +61,40 @@ Die Zeitachse zeigt bei kurzen Stundenfenstern Uhrzeiten, bei mehrtägigen
 Zeiträumen und Tageswerten das Datum. Die Beschriftungsdichte passt sich der
 Breite und Schriftgröße an; zur Legende bleibt ein eigener Abstand reserviert.
 
+Zusätzlich stehen in beiden Designern folgende Einstellungen zur Verfügung:
+
+- **Bänder und Darstellung:** Bandhöhe 20–100 % (Standard 84 %) relativ zum
+  verfügbaren Diagrammbereich und durchgezogene, gestrichelte oder gepunktete
+  Konturen. Alle Abschnitte behalten weiterhin denselben Wertmaßstab.
+- **Schatten und Hervorhebung:** Schattenunschärfe 0–20 px (Standard 0),
+  Farbe und horizontaler/vertikaler Versatz −20 bis 20 px (Standard 0).
+  Hervorhebung beim Überfahren lässt sich abschalten. Der Fokus kann das
+  überfahrene Band, seinen zusammenhängenden Abschnitt oder keine Abdunkelung
+  betreffen. Die Restdeckkraft anderer Bänder beträgt standardmäßig 10 %
+  ihrer normalen Deckkraft, einstellbar von 0–100 %.
+- **Zeitachse:** Achsenlinie ein-/ausblenden, Breite 0–5 px (Standard 1),
+  Linienart und Beschriftungsabstand 0–30 px (Standard 12). Das Zeitformat
+  ist automatisch oder ausdrücklich Datum beziehungsweise Datum und Uhrzeit.
+  Letzteres erscheint zweizeilig. Optionale Rasterlinien haben eigene Farbe,
+  Linienart, Breite 0–5 px und Deckkraft 0–100 %; standardmäßig sind sie aus,
+  gestrichelt, 1 px breit und 20 % deckend.
+- **Legende:** oben unter dem Titel oder unten (Standard), linksbündig
+  (Standard), mittig oder rechtsbündig. Als Symbol dienen abgerundete Rechtecke
+  (Standard), Rechtecke, Kreise oder Rauten. Symbolbreite 6–40 px (Standard 25),
+  Symbolhöhe 6–30 px (Standard 14) und Eintragsabstand 0–30 px (Standard 10)
+  sind wählbar. Bei Platzmangel bleibt die Legende blätterbar.
+- **Typografie und Farben:** Arial (Standard), Verdana, Georgia oder
+  nichtproportionale Schrift. Titel, Zeitbeschriftungen, Bandbeschriftungen
+  und Legende können jeweils fett oder kursiv sein. Standardmäßig ist nur
+  der Titel fett; Kursivschrift ist aus.
+
+Automatische Schattenfarbe ist teiltransparentes Schwarz; automatische
+Rasterfarbe folgt dem Theme. Neue Einstellungen übernehmen diese bisherigen
+Grundwerte, ohne Quellen, Zeitraum oder bereits gewählte Farben zu verändern.
+Die Bandglättung ist fest; sie ist kein zusätzlicher Messwert oder ein
+einstellbares Interpolationsverfahren. Überfahreinstellungen wirken in der
+laufenden Darstellung, nicht in der schematischen Formularvorschau.
+
 Die Formularvorschauen verwenden ausdrücklich gekennzeichnete Beispieldaten
 einschließlich einer Lücke. Änderungen werden vor dem Speichern sichtbar,
 ohne Archivabfragen auszulösen. Kachel und IPSView passen sich ihrer Größe an;

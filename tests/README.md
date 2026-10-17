@@ -281,6 +281,11 @@ StylePHP und PHP CS Fixer.
   Stunden-/Datumsbeschriftungen und geometrischer Achsen-/Legendenabstand
   werden bei 320/630/2048 Pixeln und 50/100/200 % Schriftgröße geprüft;
   Entwurfsänderungen der SVG-Vorschau verändern keine gespeicherte Konfiguration.
+  Die erweiterten Designer werden einschließlich Property-Validierung,
+  vollständiger Kopie/Vererbung und deutscher Texte geprüft. Native Bandpolygone
+  müssen Schatten, Stricharten und Blur-Deckkraft tatsächlich übernehmen;
+  obere/untere und links/mittig/rechts ausgerichtete Legenden bleiben bei
+  großen Symbolen und zweizeiligen Datum-/Uhrzeitlabels überlappungsfrei.
 - `node tests/theme_river_browser.mjs` bietet die rein lokale Canvas-Fixture
   unter `http://127.0.0.1:8802`. `/chart?mode=symcon` und
   `/chart?mode=ipsview&theme=light&design=extended` prüfen dunkle Kachel und
@@ -289,6 +294,10 @@ StylePHP und PHP CS Fixer.
   über den vorhandenen Bootstrap mit `--theme-river-preview`.
   `range=7d` beziehungsweise `range=30d`, `case=complete` und `font=200`
   ergänzen die Prüfung von Datumsangaben und dem vergrößerten Legendenabstand.
+  `design=extended` zeigt Schatten, gestrichelte Bänder, Raster, Georgia,
+  Rautensymbole und zweizeilige Daten; `legend=bottom` setzt die ansonsten
+  oben gezeigte erweiterte Legende nach unten. `/preview.svg?design=extended`
+  prüft denselben statischen Designumfang der PHP-Vorschau.
 
 Am 17.10.2026 wurden lokale Kachel-/IPSView-Darstellung, Titelabstände,
 Lücken und Tooltipausblendung sowie die Nullanzeige visuell geprüft.
@@ -296,6 +305,11 @@ Die Grundfunktion wurde anschließend vom Eigentümer in Kachel und IPSView
 bestätigt. Die überarbeitete Zeitachse und der Legendenabstand wurden lokal
 im Canvas-Renderer und in der SVG-Vorschau auch bei 200 % Schrift geprüft;
 ihre erneute Live-Abnahme steht nach dem Modulupdate noch aus.
+Die erweiterten Designoptionen wurden zusätzlich im dunklen Kachelformat,
+in breiter IPSView-Ausgabe mit 200 % Schrift, im hellen Design sowie in der
+SVG-Vorschau visuell geprüft. Bandhover mit reduzierter Restdeckkraft wurde
+im Canvas-Renderer bestätigt. Die Live-Abnahme dieser Erweiterung und der
+neuen Formularfelder in Symcon/IPSView bleibt Aufgabe des Eigentümers.
 
 ## Funnel
 

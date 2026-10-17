@@ -38,6 +38,7 @@ require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
+require_once __DIR__ . '/../libs/EChartsPreviewSymbol.php';
 require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
 require_once __DIR__ . '/../libs/EChartsTransientRefresh.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
@@ -73,7 +74,15 @@ class EChartsThemeRiver extends IPSModuleStrict
         'ShowAxisLabels'       => true, 'ShowAxisTicks' => true,
         'TitleFontSizePercent' => 100, 'AxisFontSizePercent' => 100,
         'LabelFontSizePercent' => 100, 'LegendFontSizePercent' => 100,
-        'TitleColor'           => -1, 'AxisColor' => -1, 'LabelColor' => -1, 'LegendColor' => -1
+        'TitleColor'           => -1, 'AxisColor' => -1, 'LabelColor' => -1, 'LegendColor' => -1,
+        'BandHeightPercent'    => 84, 'BorderType' => 'solid', 'ShadowBlur' => 0, 'ShadowColor' => -1,
+        'ShadowOffsetX'        => 0, 'ShadowOffsetY' => 0, 'EmphasisEnabled' => true, 'EmphasisFocus' => 'self', 'BlurOpacityPercent' => 10,
+        'ShowAxisLine'         => true, 'AxisLineWidth' => 1, 'AxisLineType' => 'solid', 'AxisLabelMargin' => 12, 'TimeLabelFormat' => 'auto',
+        'ShowGrid'             => false, 'GridLineWidth' => 1, 'GridLineType' => 'dashed', 'GridColor' => -1, 'GridOpacityPercent' => 20,
+        'LegendPosition'       => 'bottom', 'LegendAlignment' => 'left', 'LegendIcon' => 'roundRect',
+        'LegendItemWidth'      => 25, 'LegendItemHeight' => 14, 'LegendItemGap' => 10, 'FontFamily' => 'Arial, sans-serif',
+        'TitleBold'            => true, 'AxisLabelBold' => false, 'LabelBold' => false, 'LegendBold' => false,
+        'TitleItalic'          => false, 'AxisLabelItalic' => false, 'LabelItalic' => false, 'LegendItalic' => false
     ];
 
     public function Create(): void
@@ -134,8 +143,10 @@ class EChartsThemeRiver extends IPSModuleStrict
         $form = EChartsDesignerSections::Group($form, [
             ['caption' => 'Animation', 'start' => 'AnimationEnabled'],
             ['caption' => 'Bands and display', 'start' => 'ShowTooltip'],
+            ['caption' => 'Shadows and highlighting', 'start' => 'ShadowBlur'],
             ['caption' => 'Time axis', 'start' => 'ShowAxisLabels'],
-            ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
+            ['caption' => 'Legend', 'start' => 'LegendPosition'],
+            ['caption' => 'Typography and colors', 'start' => 'FontFamily']
         ]);
         $fields = ['Title', 'Sources', 'Range', 'Aggregation',
             'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
@@ -565,15 +576,28 @@ class EChartsThemeRiver extends IPSModuleStrict
             || !$this->AnimationIsValid($prefix)) {
             return false;
         }
+        foreach (['BorderType' => ['solid', 'dashed', 'dotted'], 'AxisLineType' => ['solid', 'dashed', 'dotted'],
+            'GridLineType'     => ['solid', 'dashed', 'dotted'], 'EmphasisFocus' => ['self', 'series', 'none'],
+            'TimeLabelFormat'  => ['auto', 'date', 'dateTime'], 'LegendPosition' => ['top', 'bottom'],
+            'LegendAlignment'  => ['left', 'center', 'right'], 'LegendIcon' => ['roundRect', 'rect', 'circle', 'diamond'],
+            'FontFamily'       => ['Arial, sans-serif', 'Verdana, sans-serif', 'Georgia, serif', 'monospace']] as $name => $allowed) {
+            if (!in_array($this->ReadPropertyString($prefix . $name), $allowed, true)) {
+                return false;
+            }
+        }
         foreach (['BandOpacityPercent' => [0, 100], 'BorderWidth' => [0, 5],
             'TitleFontSizePercent'     => [50, 200], 'AxisFontSizePercent' => [50, 200],
-            'LabelFontSizePercent'     => [50, 200], 'LegendFontSizePercent' => [50, 200]] as $name => [$min, $max]) {
+            'LabelFontSizePercent'     => [50, 200], 'LegendFontSizePercent' => [50, 200],
+            'BandHeightPercent'        => [20, 100], 'ShadowBlur' => [0, 20], 'ShadowOffsetX' => [-20, 20], 'ShadowOffsetY' => [-20, 20],
+            'BlurOpacityPercent'       => [0, 100], 'AxisLineWidth' => [0, 5], 'AxisLabelMargin' => [0, 30],
+            'GridLineWidth'            => [0, 5], 'GridOpacityPercent' => [0, 100],
+            'LegendItemWidth'          => [6, 40], 'LegendItemHeight' => [6, 30], 'LegendItemGap' => [0, 30]] as $name => [$min, $max]) {
             $value = $this->ReadPropertyInteger($prefix . $name);
             if ($value < $min || $value > $max) {
                 return false;
             }
         }
-        foreach (['TitleColor', 'AxisColor', 'BorderColor', 'LabelColor', 'LegendColor'] as $name) {
+        foreach (['TitleColor', 'AxisColor', 'BorderColor', 'LabelColor', 'LegendColor', 'ShadowColor', 'GridColor'] as $name) {
             $color = $this->ReadPropertyInteger($prefix . $name);
             if ($color < -1 || $color > 0xFFFFFF) {
                 return false;

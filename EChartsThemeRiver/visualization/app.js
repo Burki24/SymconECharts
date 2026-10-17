@@ -95,6 +95,10 @@
         var width = Math.max(1, chartElement.clientWidth || 1);
         var height = Math.max(1, chartElement.clientHeight || 1);
         var compact = width < 420 || height < 280;
+        var fontFamily = style.fontFamily || 'Arial, sans-serif';
+        var rangeSeconds = model.range.endTimestamp + 1 - model.range.startTimestamp;
+        var dateTime = style.timeLabelFormat === 'dateTime';
+        var dateOnly = style.timeLabelFormat === 'date' || (!dateTime && (river.aggregation === 'day' || rangeSeconds > 172800));
         var titleSize = design.fontSizePercent(style.titleFontSizePercent, compact ? 15 : 18);
         var titleLayout = design.chartTitleLayout(bootstrap, river.title, titleSize);
         var titleBottom = titleLayout.headerInset + (titleLayout.show ? titleSize + 28 : 16);
@@ -102,15 +106,18 @@
         var legendFont = design.fontSizePercent(style.legendFontSizePercent, compact ? 10 : 12);
         var axisLineHeight = Math.ceil(axisFont * 1.25);
         var legendLineHeight = Math.ceil(legendFont * 1.25);
+        var axisMargin = style.axisLabelMargin === undefined ? 12 : Number(style.axisLabelMargin);
+        var legendHeight = Math.max(16, Number(style.legendItemHeight) || 14, legendLineHeight) + 10;
+        var legendAtTop = style.showLegend !== false && style.legendPosition === 'top';
         var legendBottom = 10 + (river.missingIntervals > 0 ? 36 : 0);
-        var axisExtent = style.showAxisLabels !== false ? 12 + axisLineHeight : (style.showAxisTicks !== false ? 5 : 0);
+        var axisExtent = style.showAxisLabels !== false ? axisMargin + axisLineHeight * (dateTime ? 2 : 1) : (style.showAxisTicks !== false ? 5 : 0);
         // Separate footer bands: labels, breathing room, scroll legend, optional archive warning.
-        var bottom = legendBottom + axisExtent + (style.showLegend !== false ? Math.max(14, legendLineHeight) + 10 + 20 : 4);
-        var top = Math.min(titleBottom, Math.max(12, height - bottom - 20));
+        var bottom = legendBottom + axisExtent + (style.showLegend !== false && !legendAtTop ? legendHeight + 20 : 4);
+        var top = Math.min(titleBottom + (legendAtTop ? legendHeight + 16 : 0), Math.max(12, height - bottom - 20));
         var actualBottom = Math.max(top + 8, height - bottom);
         var left = compact ? 22 : 46, right = compact ? 22 : 46;
-        var rangeSeconds = model.range.endTimestamp + 1 - model.range.startTimestamp;
-        var dateOnly = river.aggregation === 'day' || rangeSeconds > 172800;
+        var bandFraction = Number(style.bandHeightPercent === undefined ? 84 : style.bandHeightPercent) / 100;
+        var opacity = Number(style.bandOpacityPercent === undefined ? 85 : style.bandOpacityPercent) / 100;
         plotBounds = {left: left, right: width - right, top: top, bottom: actualBottom};
         var colorList = palette(theme).seriesColors || ['#5070DD', '#B6D634', '#FF994D', '#FB628B', '#55CBB5', '#B693E8', '#D0A662', '#6C9EA8'];
         var sourceColors = sources.map(function (source, index) { return source.color || colorList[index % colorList.length]; });
@@ -137,12 +144,12 @@
             });
             // Native ThemeRiver divides by the local maximum: never hand it an all-zero run.
             if (!(localTotal > 0)) { return; }
-            var padding = 50 * (1 - 0.84 * localTotal / globalTotal);
+            var padding = 50 * (1 - bandFraction * localTotal / globalTotal);
             if (style.showLabels === true && series.length === 0) {
                 // ECharts 6.1 ThemeRiver omits labelFetcher, so its label.formatter cannot replace internal IDs.
                 // Draw bounded source names as public Graphic elements; never change the upstream renderer.
                 var first = segment[0], total = first.values.reduce(function (sum, value) {return sum + value / maximum;}, 0);
-                var scale = 0.84 * (actualBottom - top) / globalTotal;
+                var scale = bandFraction * (actualBottom - top) / globalTotal;
                 var y = top + padding / 100 * (actualBottom - top) + (localTotal - total) / 2 * scale;
                 var labelFont = design.fontSizePercent(style.labelFontSizePercent, compact ? 10 : 12);
                 var duration = model.range.endTimestamp + 1 - model.range.startTimestamp;
@@ -153,7 +160,8 @@
                     if (bandHeight >= labelFont + 4 && labelWidth >= 24) {
                         labels.push({type: 'text', silent: true, z: 20, x: x, y: y + bandHeight / 2,
                             style: {text: source.label, fill: style.labelColor || colors.text, fontSize: labelFont,
-                                fontFamily: 'Arial, sans-serif', verticalAlign: 'middle', width: labelWidth, overflow: 'truncate'}});
+                                fontFamily: fontFamily, fontWeight: style.labelBold ? 'bold' : 'normal', fontStyle: style.labelItalic ? 'italic' : 'normal',
+                                verticalAlign: 'middle', width: labelWidth, overflow: 'truncate'}});
                     }
                     y += bandHeight;
                 });
@@ -173,9 +181,12 @@
                 id: 'river-run-' + index, type: 'themeRiver', singleAxisIndex: 0,
                 color: sourceColors, colorBy: 'data', boundaryGap: [padding + '%', padding + '%'],
                 label: {show: false},
-                emphasis: {focus: 'self', label: {show: false}},
-                itemStyle: {opacity: Number(style.bandOpacityPercent === undefined ? 85 : style.bandOpacityPercent) / 100,
-                    borderWidth: Number(style.borderWidth) || 0, borderColor: style.borderColor || colors.border},
+                emphasis: {disabled: style.emphasisEnabled === false, focus: style.emphasisFocus || 'self', label: {show: false}},
+                blur: {itemStyle: {opacity: opacity * Number(style.blurOpacityPercent === undefined ? 10 : style.blurOpacityPercent) / 100}},
+                itemStyle: {opacity: opacity, borderWidth: Number(style.borderWidth) || 0, borderColor: style.borderColor || colors.border,
+                    borderType: style.borderType || 'solid', shadowBlur: Number(style.shadowBlur) || 0,
+                    shadowColor: style.shadowColor || 'rgba(0,0,0,0.35)', shadowOffsetX: Number(style.shadowOffsetX) || 0,
+                    shadowOffsetY: Number(style.shadowOffsetY) || 0},
                 data: data
             });
         });
@@ -189,6 +200,7 @@
         }
         return {
             backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true ? 'transparent' : colors.background,
+            textStyle: {fontFamily: fontFamily},
             ...design.animationOptions(style, {enabled: true, initialDuration: 350, updateDuration: 500}),
             aria: {enabled: true, label: {description: String(river.title || 'ThemeRiver') + '. '
                 + translate('Completed interval means') + ': ' + sources.map(function (s) { return s.label; }).join(', ')
@@ -196,30 +208,44 @@
             color: sourceColors,
             graphic: labels,
             title: {show: titleLayout.show, text: String(river.title || ''), left: 'center', top: titleLayout.top,
-                textStyle: {color: style.titleColor || colors.text, fontSize: titleSize}},
+                textStyle: {color: style.titleColor || colors.text, fontSize: titleSize, fontFamily: fontFamily,
+                    fontWeight: style.titleBold === false ? 'normal' : 'bold', fontStyle: style.titleItalic ? 'italic' : 'normal'}},
             legend: {show: style.showLegend !== false, type: 'scroll', selectedMode: false,
-                left: 12, right: 12, bottom: legendBottom, padding: 5, itemHeight: 14,
+                left: style.legendAlignment === 'right' ? undefined : style.legendAlignment === 'center' ? 'center' : 12,
+                right: style.legendAlignment === 'center' ? undefined : 12,
+                top: legendAtTop ? titleBottom : undefined, bottom: legendAtTop ? undefined : legendBottom,
+                padding: 5, icon: style.legendIcon || 'roundRect', itemWidth: Number(style.legendItemWidth) || 25,
+                itemHeight: Number(style.legendItemHeight) || 14, itemGap: style.legendItemGap === undefined ? 10 : Number(style.legendItemGap),
                 data: sources.map(function (s) { return {name: s.id, itemStyle: {color: sourceColors[sources.indexOf(s)]}}; }),
                 formatter: function (id) { var source = sources.find(function (s) { return s.id === id; }); return source ? source.label : ''; },
-                textStyle: {color: style.legendColor || colors.text, fontSize: legendFont, lineHeight: legendLineHeight},
-                pageTextStyle: {color: style.legendColor || colors.text}},
+                textStyle: {color: style.legendColor || colors.text, fontSize: legendFont, lineHeight: legendLineHeight, fontFamily: fontFamily,
+                    fontWeight: style.legendBold ? 'bold' : 'normal', fontStyle: style.legendItalic ? 'italic' : 'normal'},
+                pageTextStyle: {color: style.legendColor || colors.text, fontFamily: fontFamily}},
             singleAxis: {type: 'time', orient: 'horizontal', left: left, right: right, top: top, height: actualBottom - top,
                 min: model.range.startTimestamp * 1000, max: (model.range.endTimestamp + 1) * 1000,
-                minInterval: dateOnly ? 86400000 : 3600000,
+                minInterval: dateOnly || river.aggregation === 'day' || rangeSeconds > 172800 ? 86400000 : 3600000,
                 splitNumber: Math.max(2, Math.floor((width - left - right) / Math.max(70, axisFont * 5))),
-                axisLine: {lineStyle: {color: style.axisColor || colors.border}},
+                axisLine: {show: style.showAxisLine !== false, lineStyle: {color: style.axisColor || colors.border,
+                    width: style.axisLineWidth === undefined ? 1 : Number(style.axisLineWidth), type: style.axisLineType || 'solid'}},
                 axisTick: {show: style.showAxisTicks !== false},
                 axisLabel: {show: style.showAxisLabels !== false, hideOverlap: true, color: style.axisColor || colors.text,
-                    fontSize: axisFont, lineHeight: axisLineHeight, margin: 12,
+                    fontSize: axisFont, lineHeight: axisLineHeight, margin: axisMargin, fontFamily: fontFamily,
+                    fontWeight: style.axisLabelBold ? 'bold' : 'normal', fontStyle: style.axisLabelItalic ? 'italic' : 'normal',
                     // One completed day still needs its start date, including 23/25-hour DST days.
                     showMinLabel: dateOnly ? rangeSeconds <= 90000 : undefined, showMaxLabel: dateOnly ? false : undefined,
                     formatter: function (value) {
                         var date = new Date(value);
+                        if (dateTime) {
+                            return date.toLocaleDateString(bootstrap.language || undefined, {timeZone: model.range.timezone, day: '2-digit', month: '2-digit'})
+                                + '\n' + date.toLocaleTimeString(bootstrap.language || undefined, {timeZone: model.range.timezone, hour: '2-digit', minute: '2-digit'});
+                        }
                         return date.toLocaleString(bootstrap.language || undefined, dateOnly
                             ? {timeZone: model.range.timezone, day: '2-digit', month: '2-digit'}
                             : {timeZone: model.range.timezone, hour: '2-digit', minute: '2-digit'});
                     }},
-                splitLine: {show: false}},
+                splitLine: {show: style.showGrid === true, lineStyle: {color: style.gridColor || colors.border,
+                    width: style.gridLineWidth === undefined ? 1 : Number(style.gridLineWidth), type: style.gridLineType || 'dashed',
+                    opacity: Number(style.gridOpacityPercent === undefined ? 20 : style.gridOpacityPercent) / 100}}},
             tooltip: {show: style.showTooltip !== false, trigger: 'item', triggerOn: 'none', confine: true,
                 formatter: function (parameter) {
                     var row = pointerRow || rows[parameter.data && parameter.data[3]];
