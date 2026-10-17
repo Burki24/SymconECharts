@@ -183,6 +183,27 @@
                     "type": "RowLayout",
                     "items": [
                         {
+                            "type": "SelectColor",
+                            "name": "RiseBorderColor",
+                            "caption": "Rise border color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (candle color)",
+                            "width": "225px"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "FallBorderColor",
+                            "caption": "Fall border color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (candle color)",
+                            "width": "225px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
                             "type": "NumberSpinner",
                             "name": "MinCandleWidth",
                             "caption": "Minimum candle width",
@@ -206,6 +227,30 @@
                             "minimum": 0,
                             "maximum": 100,
                             "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "FixedCandleWidth",
+                            "caption": "Fixed candle width (0 = automatic)",
+                            "minimum": 0,
+                            "maximum": 80,
+                            "suffix": "px",
+                            "width": "200px"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "RiseHollow",
+                            "caption": "Hollow rising candles"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "FallHollow",
+                            "caption": "Hollow falling candles"
                         }
                     ]
                 },
@@ -328,6 +373,37 @@
                     "type": "RowLayout",
                     "items": [
                         {
+                            "type": "NumberSpinner",
+                            "name": "HoverBorderWidth",
+                            "caption": "Hover border width",
+                            "minimum": 0,
+                            "maximum": 8,
+                            "suffix": "px",
+                            "width": "200px"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "HoverBorderColor",
+                            "caption": "Hover border color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (candle border)",
+                            "width": "225px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "HoverOpacityPercent",
+                            "caption": "Hover opacity (-1 = unchanged)",
+                            "minimum": -1,
+                            "maximum": 100,
+                            "suffix": "%",
+                            "width": "200px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
                             "type": "CheckBox",
                             "name": "ShowGrid",
                             "caption": "Show grid"
@@ -336,6 +412,21 @@
                             "type": "CheckBox",
                             "name": "ShowAxisLabels",
                             "caption": "Show axis labels"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ReverseTimeAxis",
+                            "caption": "Reverse time axis"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "IncludeZero",
+                            "caption": "Include zero in value axis"
                         }
                     ]
                 },
@@ -353,6 +444,48 @@
                             "caption": "Category axis width",
                             "minimum": 0,
                             "maximum": 5,
+                            "suffix": "px",
+                            "width": "200px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "AxisLineColor",
+                            "caption": "Time axis line color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)",
+                            "width": "225px"
+                        },
+                        {
+                            "type": "Select",
+                            "name": "AxisLineType",
+                            "caption": "Time axis line type",
+                            "width": "200px",
+                            "options": [
+                                {
+                                    "caption": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "caption": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "caption": "Dotted",
+                                    "value": "dotted"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AxisLabelMargin",
+                            "caption": "Axis label distance",
+                            "minimum": 0,
+                            "maximum": 30,
                             "suffix": "px",
                             "width": "200px"
                         }
@@ -464,6 +597,45 @@
                             "minimum": 50,
                             "maximum": 200,
                             "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "FontFamily",
+                            "caption": "Font family",
+                            "width": "225px",
+                            "options": [
+                                {
+                                    "caption": "Arial",
+                                    "value": "Arial, sans-serif"
+                                },
+                                {
+                                    "caption": "Verdana",
+                                    "value": "Verdana, sans-serif"
+                                },
+                                {
+                                    "caption": "Georgia",
+                                    "value": "Georgia, serif"
+                                },
+                                {
+                                    "caption": "Monospace",
+                                    "value": "monospace"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "TitleItalic",
+                            "caption": "Italic title"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "AxisLabelItalic",
+                            "caption": "Italic axis labels"
                         }
                     ]
                 },

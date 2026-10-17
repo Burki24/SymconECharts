@@ -129,6 +129,80 @@ try {
 }
 assertGatewayGauge(str_contains($candle->GetIPSViewHTML(), '"riseColor":"#3FBE95"'), 'Copy design includes candle colors.');
 $candleLocale = json_decode(file_get_contents(__DIR__ . '/../EChartsCandlestick/locale.json'), true)['translations']['de'];
+$candleValuesBeforeDesign = array_column(json_decode($candle->GetCandlestickData(), true)['candlestick']['data'], 'statistics');
+$candleDesign = ['FixedCandleWidth' => 18, 'RiseHollow' => true, 'FallHollow' => true,
+    'RiseBorderColor'               => 0x123456, 'FallBorderColor' => 0x654321, 'HoverBorderWidth' => 5,
+    'HoverBorderColor'              => 0xFEDCBA, 'HoverOpacityPercent' => 95, 'AxisLineColor' => 0xABCDEF,
+    'AxisLineType'                  => 'dashed', 'AxisLabelMargin' => 16, 'ReverseTimeAxis' => true, 'IncludeZero' => true,
+    'FontFamily'                    => 'Georgia, serif', 'TitleItalic' => true, 'AxisLabelItalic' => true];
+foreach (['', 'IPSView'] as $prefix) {
+    foreach ($candleDesign as $name => $value) {
+        $candle->SetTestProperty($prefix . $name, $value);
+    }
+}
+$candle->SetTestProperty('IPSViewRiseBorderColor', 0xABCDEF);
+$candle->ApplyChanges();
+$candleStyle = json_decode($candle->GetCandlestickData(), true)['candlestick']['style'];
+$candleExtendedForm = json_decode($candle->GetConfigurationForm(), true);
+foreach ($candleDesign as $name => $value) {
+    $expected = str_ends_with($name, 'Color') ? sprintf('#%06X', $value) : $value;
+    assertGatewayGauge($candleStyle[lcfirst($name)] === $expected, 'Candlestick designer setting must reach model: ' . $name);
+    foreach (['', 'IPSView'] as $prefix) {
+        assertGatewayGauge(
+            str_contains(findGaugeFormElement($candleExtendedForm['elements'], $prefix . $name)['onChange'], 'ECCA_UpdateBarPreviewFromForm'),
+            'New fields must have live preview callbacks: ' . $prefix . $name
+        );
+    }
+}
+assertGatewayGauge(
+    str_contains($candle->GetIPSViewHTML(), '"riseBorderColor":"#ABCDEF"')
+    && array_column(json_decode($candle->GetCandlestickData(), true)['candlestick']['data'], 'statistics') === $candleValuesBeforeDesign
+    && $candle->GetTestReferences() === [88500] && GetValue(88500) === 999.0,
+    'Independent designs must not modify source references, archive results or current values.'
+);
+$candleSavedDesign = (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($candle);
+$candlePreviewQueries = $GLOBALS['symconTestArchiveQueryCount'];
+$candle->UpdateBarPreviewFromForm(json_encode(['RiseBorderColor' => 0xDECADE, 'RiseHollow' => true,
+    'FixedCandleWidth'                                           => 12, 'FontFamily' => 'monospace', 'TitleItalic' => true, 'AxisLabelItalic' => true], JSON_THROW_ON_ERROR));
+$candleDesignPreview = base64_decode(substr(array_slice($candle->GetTestFormUpdates(), -2)[0]['Value'], strlen('data:image/svg+xml;base64,')), true);
+$candlePreviewDocument = new DOMDocument();
+assertGatewayGauge(
+    $candlePreviewDocument->loadXML($candleDesignPreview, LIBXML_NONET)
+    && str_contains($candleDesignPreview, 'font-family="monospace"') && str_contains($candleDesignPreview, 'font-style="italic"')
+    && str_contains($candleDesignPreview, 'stroke="#DECADE"') && str_contains($candleDesignPreview, 'fill="none"')
+    && $GLOBALS['symconTestArchiveQueryCount'] === $candlePreviewQueries
+    && (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($candle) === $candleSavedDesign,
+    'Draft design must reach escaped synthetic previews without archive requests or persistence.'
+);
+foreach (['', 'IPSView'] as $prefix) {
+    foreach ([['FixedCandleWidth', -1, 18], ['FixedCandleWidth', 41, 18],
+        ['RiseBorderColor', -2, 0x123456], ['FallBorderColor', 0x1000000, 0x654321],
+        ['HoverBorderWidth', 9, 5], ['HoverBorderColor', -2, 0xFEDCBA],
+        ['HoverOpacityPercent', -2, 95], ['HoverOpacityPercent', 101, 95],
+        ['AxisLabelMargin', 31, 16], ['AxisLineColor', -2, 0xABCDEF],
+        ['AxisLineType', 'invalid', 'dashed'], ['FontFamily', 'url(https://example.invalid)', 'Georgia, serif']] as [$name, $invalid, $restore]) {
+        $candle->SetTestProperty($prefix . $name, $invalid);
+        assertGatewayGauge(json_decode($candle->GetCandlestickDiagnostic(), true)['valid'] === false, 'Reject invalid new Candlestick field: ' . $prefix . $name);
+        $candle->SetTestProperty($prefix . $name, $restore);
+        assertGatewayGauge(json_decode($candle->GetCandlestickDiagnostic(), true)['valid'] === true, 'Recover corrected Candlestick field: ' . $prefix . $name);
+    }
+}
+$GLOBALS['symconTestCopyTarget'] = $candle;
+try {
+    $candle->CopyTileDesignToIPSView();
+} finally {
+    unset($GLOBALS['symconTestCopyTarget']);
+}
+assertGatewayGauge(str_contains($candle->GetIPSViewHTML(), '"riseBorderColor":"#123456"')
+    && str_contains($candle->GetIPSViewHTML(), '"fontFamily":"Georgia, serif"'), 'Copy design includes all new fields.');
+$candleCopiedHTML = $candle->GetIPSViewHTML();
+foreach ($candleDesign as $name => $value) {
+    $expected = str_ends_with($name, 'Color') ? sprintf('#%06X', $value) : $value;
+    assertGatewayGauge(
+        str_contains($candleCopiedHTML, trim(json_encode([lcfirst($name) => $expected], JSON_THROW_ON_ERROR), '{}')),
+        'Independent copied IPSView must preserve: ' . $name
+    );
+}
 $candleCheckCaptions = static function (array $items) use (&$candleCheckCaptions, $candleLocale): void
 {
     foreach ($items as $key => $value) {

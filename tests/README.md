@@ -12,6 +12,13 @@ Für synthetische lokale Browserdaten kann
 `node tests/candlestick_browser.mjs` gestartet werden (127.0.0.1:8800).
 Es werden keine echten Symcon-Daten gelesen oder geschrieben.
 
+Die Candlestick-Designprüfung umfasst außerdem alle 16 ergänzten Felder,
+ungespeicherte Vorschauen, beide Ausgaben, Kopieren/Vererbung, Grenzen und
+Schrift-Whitelist. Die echte Engine prüft hohle Kerzen, getrennte Rahmen,
+Hover-Zustände, feste Breite, umgekehrte Zeitachse und Nullpunkteinbindung
+sowie enge Layouts. Browserfixture `?design=extended` verwendet die neuen
+Einstellungen, `?theme=light` ein helles Layout. Die Archivtests bleiben unverändert.
+
 Boxplot wird durch `php tests/boxplot_statistics.php`,
 `php tests/gateway_gauges.php` (einschließlich `boxplot_integration.php`)
 und `node tests/boxplot_layout.js` geprüft: R7-Quartile, endliche Extremwerte,

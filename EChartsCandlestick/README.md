@@ -49,6 +49,25 @@ Schriftgrößen, Textfarben, Fettschrift, Achsenbeschriftung, Drehung und
 Raster lassen sich unabhängig anpassen. Die Live-Vorschauen verwenden
 gekennzeichnete Beispieldaten und verändern weder Einstellungen noch Archivwerte.
 
+Zusätzlich können steigende und fallende Kerzen getrennte Rahmenfarben und
+hohle Körper erhalten. Eine spezielle Rahmenfarbe hat Vorrang vor der
+gemeinsamen Rahmenfarbe. Die Neutralfarbe gilt weiterhin für Kerzen mit
+gleichem Anfangs- und Endwert.
+
+„Feste Kerzenbreite“ legt die Breite innerhalb der eingestellten Minimal- und
+Maximalbreite fest; 0 verwendet die automatische Breite. In kleinen oder
+sehr dichten Diagrammen wird auch eine feste Breite passend verkleinert.
+Hover-Rahmenbreite, -farbe und -deckkraft lassen sich eigens einstellen;
+bei Deckkraft -1 bleibt das normale Verhalten bestehen. Ohne aktivierte
+Hover-Hervorhebung werden diese Hover-Einstellungen nicht angewendet.
+
+Die Zeitachse kann umgekehrt und ihre Linienfarbe/-art angepasst werden.
+Die Werteachse kann den Nullpunkt einschließen, ohne Messwerte zu ändern.
+Abstände der Achsenbeschriftungen, lokale Schriftart sowie Kursivschrift für
+Titel und Achsen sind in beiden Designern getrennt wählbar. Es werden keine
+Schriftdateien aus dem Internet geladen. Interaktive Hover-Effekte werden
+in der echten Kachel beziehungsweise in IPSView geprüft, nicht im statischen SVG.
+
 IPSView erzeugt bei aktivierter Ausgabe eine WebContent-Variable
 „Candlestick für IPSView“. Der Diagrammtitel erscheint in der Kachel
 unterhalb des Kachelnamens und Vergrößerungsbuttons.

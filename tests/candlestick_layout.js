@@ -95,3 +95,72 @@ const crowded=render({...model,candlestick:{...model.candlestick,data:Array.from
 assert.ok(crowded.option.series[0].barMinWidth<=crowded.option.series[0].barMaxWidth);
 assert.equal(crowded.option.xAxis.axisLabel.interval,'auto');
 console.log('Candlestick renderer, sparse data and real ECharts geometry verified.');
+
+const extendedStyle = { ...model.candlestick.style, fixedCandleWidth: 18, riseHollow: true, fallHollow: true,
+    riseBorderColor:'#123456',fallBorderColor:'#654321',hoverBorderWidth:5,hoverBorderColor:'#fedcba',hoverOpacityPercent:95,
+    axisLineColor:'#abcdef',axisLineType:'dashed',axisLabelMargin:16,reverseTimeAxis:true,includeZero:true,
+    fontFamily:'Georgia, serif',titleItalic:true,axisLabelItalic:true };
+const extendedModel={...model,candlestick:{...model.candlestick,style:extendedStyle}};
+const extended=render(extendedModel);
+assert.equal(extended.option.series[0].barWidth,18);
+assert.equal(extended.option.series[0].itemStyle.color,'transparent');
+assert.equal(extended.option.series[0].itemStyle.color0,'transparent');
+assert.equal(extended.option.series[0].itemStyle.borderColor,'#123456');
+assert.equal(extended.option.series[0].itemStyle.borderColor0,'#654321');
+assert.equal(extended.option.series[0].emphasis.itemStyle.borderWidth,5);
+assert.equal(extended.option.series[0].emphasis.itemStyle.borderColor,'#fedcba');
+assert.equal(extended.option.series[0].emphasis.itemStyle.borderColor0,'#fedcba');
+assert.equal(extended.option.series[0].emphasis.itemStyle.borderColorDoji,'#fedcba');
+assert.equal(extended.option.series[0].emphasis.itemStyle.opacity,0.95);
+assert.equal(extended.option.xAxis.inverse,true);
+assert.equal(extended.option.xAxis.axisLine.lineStyle.color,'#abcdef');
+assert.equal(extended.option.xAxis.axisLine.lineStyle.type,'dashed');
+assert.equal(extended.option.xAxis.axisLabel.margin,16);
+assert.equal(extended.option.yAxis.scale,false);
+assert.equal(extended.option.textStyle.fontFamily,'Georgia, serif');
+assert.equal(extended.option.title.textStyle.fontStyle,'italic');
+assert.equal(extended.option.xAxis.axisLabel.fontStyle,'italic');
+assert.equal(extended.option.yAxis.axisLabel.fontStyle,'italic');
+const extendedEngine=echarts.init(null,null,{renderer:'svg',ssr:true,width:900,height:500});
+extendedEngine.setOption(extended.option);
+const extendedData=extendedEngine.getModel().getSeriesByIndex(0).getData();
+assert.equal(extendedData.getLayout('candleWidth'),18);
+assert.equal(extendedData.getItemVisual(0,'style').fill,'transparent');
+assert.equal(extendedData.getItemVisual(1,'style').stroke,'#654321');
+assert.equal(extendedData.getItemGraphicEl(0).states.emphasis.style.lineWidth,5);
+assert.equal(extendedData.getItemGraphicEl(0).states.emphasis.style.opacity,0.95);
+assert.ok(Math.abs(Math.abs(extendedData.getItemLayout(0).ends[1][0]-extendedData.getItemLayout(0).ends[0][0])-18)<=1,
+    'ECharts may snap candle edges by up to one pixel for crisp strokes.');
+assert.ok(extendedData.getItemLayout(0).ends[0][0]>extendedData.getItemLayout(1).ends[0][0]);
+assert.match(extendedEngine.renderToSVGString(),/Georgia/);
+extendedEngine.dispose();
+const unchanged=render(model);
+assert.equal(unchanged.option.series[0].barWidth,undefined);
+assert.equal(unchanged.option.yAxis.scale,true);
+assert.equal(unchanged.option.series[0].emphasis.itemStyle.opacity,undefined);
+for(const includeZero of [false,true]){
+    const positive=render({...model,candlestick:{...model.candlestick,data:[{...model.candlestick.data[0],statistics:[10,12,9,14]}],
+        style:{...model.candlestick.style,includeZero}}});
+    const engine=echarts.init(null,null,{renderer:'svg',ssr:true,width:900,height:500});
+    engine.setOption(positive.option);
+    const extent=engine.getModel().getComponent('yAxis').axis.scale.getExtent();
+    assert.equal(includeZero?extent[0]===0:extent[0]>0,true,'Zero inclusion is a visual scale choice only.');
+    engine.dispose();
+}
+const narrowFixed=render({...extendedModel,candlestick:{...extendedModel.candlestick,
+    data:Array.from({length:720},(_,i)=>({...model.candlestick.data[0],id:''+i}))}},'symcon',true,300);
+assert.ok(narrowFixed.option.series[0].barWidth<=narrowFixed.option.series[0].barMaxWidth,'Fixed width must shrink to keep dense charts responsive.');
+for(const orientation of ['horizontal','vertical']){
+    const rendered=render({...extendedModel,candlestick:{...extendedModel.candlestick,
+        style:{...extendedStyle,orientation,axisFontSizePercent:200,titleFontSizePercent:150,axisLabelMargin:30}}},'symcon',true,300);
+    const engine=echarts.init(null,null,{renderer:'svg',ssr:true,width:300,height:500});
+    engine.setOption(rendered.option);
+    const data=engine.getModel().getSeriesByIndex(0).getData();
+    for(const index of [0,1,2]){
+        assert.ok(data.getItemLayout(index).ends.every(point=>point.every(Number.isFinite)));
+    }
+    assert.equal((orientation==='horizontal'?rendered.option.yAxis:rendered.option.xAxis).inverse,true);
+    assert.ok(engine.renderToSVGString().includes('Georgia'));
+    engine.dispose();
+}
+console.log('Extended Candlestick design verified.');

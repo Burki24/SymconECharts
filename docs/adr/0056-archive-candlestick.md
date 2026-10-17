@@ -51,3 +51,50 @@ tests prüfen Gateway, Formular, Referenzen, beide Ausgabewege und Fehlerfälle.
 Die echte ECharts-Engine prüft die erzeugten Optionen. Lokale Browserprüfung
 ersetzt keine Abnahme der installierten Symcon-Kachel und des IPSView-Widgets;
 diese folgen nach Modulupdate und Instanzanlage durch den Eigentümer.
+
+## Designer-Erweiterung vom 17.10.2026
+
+Der Eigentümer hat die erste Version in Kachel und IPSView bestätigt.
+Die anschließend anhand der offiziellen Dokumentation ergänzten
+Designfelder verändern weder Rohwerte noch Zeitfenster oder Quellidentität.
+
+| Designer | ECharts-Option |
+| --- | --- |
+| Feste Kerzenbreite (0 = automatisch) | series.barWidth, begrenzt durch bisherige min/max und verfügbaren Platz |
+| Getrennte Anstiegs-/Abfallsrahmen | itemStyle.borderColor / borderColor0 |
+| Hohle Anstiegs-/Abfallskörper | itemStyle.color / color0 = transparent; Rahmen unabhängig |
+| Hover-Rahmenbreite, -farbe, -deckkraft | emphasis.itemStyle.borderWidth / borderColor / borderColor0 / borderColorDoji / opacity |
+| Zeitachsenfarbe und -linienart | categoryAxis.axisLine.lineStyle.color / type |
+| Beschriftungsabstand | axisLabel.margin |
+| Zeitachse umkehren | categoryAxis.inverse |
+| Nullpunkt einschließen | valueAxis.scale = false |
+| Lokale Schriftart, Titel-/Achsenkursivschrift | textStyle.fontFamily / fontStyle |
+
+Die 16 neuen Felder haben neutrale Defaults: automatische Breite, gefüllte
+Körper, bestehende Rahmenfarben, unveränderte Hover-Deckkraft, normale
+Zeitreihenfolge, automatische Werteskala, Arial und keine Kursivschrift.
+Hover-Rahmenbreite 2 und Achsenabstand 8 entsprechen dem bisherigen
+ECharts-Verhalten. Bestehende Properties werden weder migriert noch überschrieben.
+Die feste Breite muss zwischen Minimum und Maximum liegen und darf im
+responsiven Renderer weiter schrumpfen. Neue Rahmenfarben haben Vorrang vor
+der gemeinsamen Rahmenfarbe; die Neutralfarbe bleibt separat.
+
+Die vier bereits bei Funnel verwendeten lokalen Schriftfamilien werden
+über denselben begrenzten Wertevertrag angeboten. Gemeinsame Formular-,
+Transport- und Animationsbausteine bleiben unverändert. Es gibt keine
+externen Schriftressourcen, freie CSS- oder JavaScript-Eingaben.
+
+Auswahlzustände, Markierungen, Brush/DataZoom, freie Formatter, andere
+Koordinatensysteme und Large/Progressive sind keine weiteren Designschalter
+dieses Schritts. Sie benötigen bei Bedarf einen eigenen Interaktions-,
+Daten- beziehungsweise Performancevertrag. Die gepinnte Runtime und das
+Gateway werden hier nicht verändert.
+
+Quellen des Abgleichs:
+[Candlestick](https://echarts.apache.org/en/option.html#series-candlestick),
+[Originaldokumentation](https://github.com/apache/echarts-doc/blob/master/en/option/series/candlestick.md),
+[Schriftgestaltung](https://github.com/apache/echarts-doc/blob/master/en/option/partial/text-style.md)
+sowie die unveränderten Achsen-Typverträge der gepinnten ECharts-6.1.0-Abhängigkeit.
+PHP-Integration, echte ECharts-Geometrie und lokale Browserdarstellung werden
+für die Ergänzung erneut geprüft. Der Live-Test der neuen Optionen nach dem
+Modulupdate bleibt separat offen; die Bestätigung der Basisversion ersetzt ihn nicht.

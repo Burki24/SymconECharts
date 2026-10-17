@@ -68,14 +68,19 @@ class EChartsCandlestick extends IPSModuleStrict
     private const STATUS_PARENT_MISSING = 203;
     private const STATUS_GATEWAY_FAILED = 204;
     private const DESIGN_DEFAULTS = [
-        'EChartsTheme'            => 'auto', 'Orientation' => 'vertical', 'ShowTooltip' => true,
-        'ShowGrid'                => true, 'ShowAxisLabels' => true, 'CandleWidth' => 40, 'BorderWidth' => 2, 'CandleOpacityPercent' => 70,
-        'TitleFontSizePercent'    => 100, 'AxisFontSizePercent' => 100, 'TitleColor' => -1, 'AxisColor' => -1, 'BorderColor' => -1,
-        'RiseColor'               => 0x3FBE95, 'FallColor' => 0xE66B6B, 'DojiColor' => -1,
-        'MinCandleWidth'          => 1, 'BorderType' => 'solid', 'ShadowBlur' => 0, 'ShadowColor' => -1, 'ShadowOffsetX' => 0, 'ShadowOffsetY' => 0,
-        'HoverFocus'              => 'self', 'BlurOpacityPercent' => 10, 'AxisLineWidth' => 1, 'ShowAxisTicks' => true,
-        'AxisLabelRotate'         => 0, 'AxisLabelMaxWidth' => 0, 'TitleBold' => true, 'AxisLabelBold' => false,
-        'SplitNumber'             => 5, 'GridLineType' => 'solid', 'GridLineWidth' => 1, 'GridOpacityPercent' => 25, 'GridColor' => -1
+        'EChartsTheme'             => 'auto', 'Orientation' => 'vertical', 'ShowTooltip' => true,
+        'ShowGrid'                 => true, 'ShowAxisLabels' => true, 'CandleWidth' => 40, 'BorderWidth' => 2, 'CandleOpacityPercent' => 70,
+        'TitleFontSizePercent'     => 100, 'AxisFontSizePercent' => 100, 'TitleColor' => -1, 'AxisColor' => -1, 'BorderColor' => -1,
+        'RiseColor'                => 0x3FBE95, 'FallColor' => 0xE66B6B, 'DojiColor' => -1,
+        'MinCandleWidth'           => 1, 'BorderType' => 'solid', 'ShadowBlur' => 0, 'ShadowColor' => -1, 'ShadowOffsetX' => 0, 'ShadowOffsetY' => 0,
+        'HoverFocus'               => 'self', 'BlurOpacityPercent' => 10, 'AxisLineWidth' => 1, 'ShowAxisTicks' => true,
+        'AxisLabelRotate'          => 0, 'AxisLabelMaxWidth' => 0, 'TitleBold' => true, 'AxisLabelBold' => false,
+        'SplitNumber'              => 5, 'GridLineType' => 'solid', 'GridLineWidth' => 1, 'GridOpacityPercent' => 25, 'GridColor' => -1,
+        'FixedCandleWidth'         => 0, 'RiseHollow' => false, 'FallHollow' => false, 'RiseBorderColor' => -1, 'FallBorderColor' => -1,
+        'HoverBorderWidth'         => 2, 'HoverBorderColor' => -1, 'HoverOpacityPercent' => -1,
+        'AxisLineColor'            => -1, 'AxisLineType' => 'solid', 'AxisLabelMargin' => 8,
+        'ReverseTimeAxis'          => false, 'IncludeZero' => false, 'FontFamily' => 'Arial, sans-serif',
+        'TitleItalic'              => false, 'AxisLabelItalic' => false
     ];
 
     public function Create(): void
@@ -509,11 +514,19 @@ class EChartsCandlestick extends IPSModuleStrict
             || !in_array($this->ReadPropertyString($prefix . 'Orientation'), ['vertical', 'horizontal'], true)
             || !in_array($this->ReadPropertyString($prefix . 'BorderType'), ['solid', 'dashed', 'dotted'], true)
             || !in_array($this->ReadPropertyString($prefix . 'GridLineType'), ['solid', 'dashed', 'dotted'], true)
+            || !in_array($this->ReadPropertyString($prefix . 'AxisLineType'), ['solid', 'dashed', 'dotted'], true)
+            || !in_array($this->ReadPropertyString($prefix . 'FontFamily'), ['Arial, sans-serif', 'Verdana, sans-serif', 'Georgia, serif', 'monospace'], true)
             || !in_array($this->ReadPropertyString($prefix . 'HoverFocus'), ['self', 'none'], true)
             || $this->ReadPropertyInteger($prefix . 'MinCandleWidth') > $this->ReadPropertyInteger($prefix . 'CandleWidth')) {
             return false;
         }
+        $fixedWidth = $this->ReadPropertyInteger($prefix . 'FixedCandleWidth');
+        if ($fixedWidth !== 0 && ($fixedWidth < $this->ReadPropertyInteger($prefix . 'MinCandleWidth')
+            || $fixedWidth > $this->ReadPropertyInteger($prefix . 'CandleWidth'))) {
+            return false;
+        }
         foreach (['CandleWidth'       => [8, 80], 'BorderWidth' => [0, 8], 'CandleOpacityPercent' => [0, 100],
+            'FixedCandleWidth'        => [0, 80], 'HoverBorderWidth' => [0, 8], 'HoverOpacityPercent' => [-1, 100], 'AxisLabelMargin' => [0, 30],
             'TitleFontSizePercent'    => [50, 200], 'AxisFontSizePercent' => [50, 200],
             'MinCandleWidth'          => [1, 80], 'ShadowBlur' => [0, 20], 'ShadowOffsetX' => [-20, 20], 'ShadowOffsetY' => [-20, 20],
             'BlurOpacityPercent'      => [0, 100], 'AxisLineWidth' => [0, 5], 'AxisLabelRotate' => [-90, 90],
@@ -523,7 +536,8 @@ class EChartsCandlestick extends IPSModuleStrict
                 return false;
             }
         }
-        foreach (['RiseColor', 'FallColor', 'DojiColor', 'TitleColor', 'AxisColor', 'BorderColor', 'ShadowColor', 'GridColor'] as $name) {
+        foreach (['RiseBorderColor', 'FallBorderColor', 'HoverBorderColor', 'AxisLineColor',
+            'RiseColor', 'FallColor', 'DojiColor', 'TitleColor', 'AxisColor', 'BorderColor', 'ShadowColor', 'GridColor'] as $name) {
             $color = $this->ReadPropertyInteger($prefix . $name);
             if ($color < -1 || $color > 0xFFFFFF) {
                 return false;

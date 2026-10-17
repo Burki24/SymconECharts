@@ -117,7 +117,29 @@
             "No logged values in completed intervals.": "Keine protokollierten Werte in abgeschlossenen Intervallen.",
             "Actual logged samples in completed intervals": "Tatsächlich protokollierte Werte in abgeschlossenen Intervallen",
             "Each candle shows the first and last logged value plus minimum and maximum of a completed interval. Missing intervals stay empty; counters are not supported.": "Jede Kerze zeigt den ersten und letzten protokollierten Wert sowie Minimum und Maximum eines abgeschlossenen Intervalls. Fehlende Intervalle bleiben leer; Zähler werden nicht unterstützt.",
-            "The archive is too dense. Choose a shorter time range.": "Das Archiv ist zu dicht. Bitte einen kürzeren Zeitraum wählen."
+            "The archive is too dense. Choose a shorter time range.": "Das Archiv ist zu dicht. Bitte einen kürzeren Zeitraum wählen.",
+            "Automatic (candle color)": "Automatisch (Kerzenfarbe)",
+            "Automatic (candle border)": "Automatisch (Kerzenrahmen)",
+            "Rise border color": "Rahmenfarbe bei Anstieg",
+            "Fall border color": "Rahmenfarbe bei Abfall",
+            "Fixed candle width (0 = automatic)": "Feste Kerzenbreite (0 = automatisch)",
+            "Hollow rising candles": "Steigende Kerzen hohl",
+            "Hollow falling candles": "Fallende Kerzen hohl",
+            "Hover border width": "Hover-Rahmenbreite",
+            "Hover border color": "Hover-Rahmenfarbe",
+            "Hover opacity (-1 = unchanged)": "Hover-Deckkraft (-1 = unverändert)",
+            "Reverse time axis": "Zeitachse umkehren",
+            "Include zero in value axis": "Nullpunkt in Werteachse einschließen",
+            "Time axis line color": "Linienfarbe der Zeitachse",
+            "Time axis line type": "Linienart der Zeitachse",
+            "Axis label distance": "Abstand der Achsenbeschriftungen",
+            "Font family": "Schriftart",
+            "Arial": "Arial",
+            "Verdana": "Verdana",
+            "Georgia": "Georgia",
+            "Monospace": "Nichtproportional",
+            "Italic title": "Titel kursiv",
+            "Italic axis labels": "Achsenbeschriftungen kursiv"
         }
     }
 }

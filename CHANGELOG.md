@@ -2,6 +2,13 @@
 
 ## Hinzugefügt
 
+- Der Candlestick-Designer bietet getrennte Rahmenfarben und hohle Körper
+  für steigende/fallende Kerzen, eine feste responsive Kerzenbreite,
+  einstellbare Hover-Rahmen/-deckkraft, Zeitachsenrichtung und -linien,
+  optionale Nullpunkteinbindung, Beschriftungsabstände, lokale Schriftarten
+  sowie Kursivschrift. Beide Designer und Vorschauen sind erweitert;
+  bestehende Quellen, Archivberechnung und gespeicherte Einstellungen bleiben erhalten.
+
 - `EChartsCandlestick` (`ECCA`) zeigt den ersten und letzten tatsächlich
   protokollierten Wert sowie Minimum und Maximum je abgeschlossenem Stunden-
   oder Tagesintervall einer Standard-Archivvariable. Kachel und IPSView
