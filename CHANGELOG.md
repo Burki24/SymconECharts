@@ -728,6 +728,12 @@
 
 ## Fixes
 
+- Der gemeinsame IPSView-Transport ermittelt die Serveradresse auch in
+  isolierten `data:`-Einbettungen ohne eigenes Basis-Element. Frischer Zustand
+  und laufende Wertänderungen erreichen dadurch wieder die Diagramme, statt
+  beim gespeicherten WebContent-Startzustand stehenzubleiben. Instanzkonfiguration,
+  Quellen und Archivdaten bleiben unverändert.
+
 - ThemeRiver beschriftet mehrtägige Zeitachsen mit dem Datum ohne wiederholte
   Mitternachtszeiten. Achse und Legende erhalten auch bei vergrößerten Schriften
   getrennte Bereiche mit mehr Abstand; die Vorschau berücksichtigt beides.

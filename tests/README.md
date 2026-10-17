@@ -1,5 +1,26 @@
 # Tests
 
+`node tests/ipsview_transport.js` prüft die zentrale Adressauflösung für
+opake `data:`-/`about:`-Einbettungen bei verbotenem Top-Zugriff: Basisadresse,
+Elternadresse, Referrer, Ancestor-Ursprung und bisheriger Top-Rückfall,
+HTTP/HTTPS, Ports und IPv6. Ungültige, relative oder mit Zugangsdaten
+versehene Adressen werden nicht als Endpunkt verwendet. Frischer Zustand
+vor wartenden Live-Nachrichten, unveränderte Bootstrap-Konfiguration,
+Credential-Policy und Abschalten der Wiederverbindung sind abgesichert.
+Der neue Einbettungsfall scheiterte vor der Korrektur mit `ws:///hook/...`.
+
+Browserfixture: `node tests/ipsview_transport_browser.mjs` bindet ausschließlich
+`127.0.0.1:8803` und verwendet synthetische Werte, die echte ECharts-Runtime
+und den unveränderten Time-Series-Renderer. Das opake Base64-`data:`-Frame
+enthält standardmäßig kein Basis-Element. Ein HTTP-Zustand mit zwei Punkten
+und drei WebSocket-Nachrichten müssen zur sichtbaren Meldung
+`Live-Verbindung: 5 Punkte` und einer Linie mit fünf Punkten führen; die erste
+Nachricht trifft während der Zustandssynchronisierung ein.
+`?encoding=uri`, `?referrer=none` und `?base=yes` prüfen weitere Einbettungen.
+Diese Varianten wurden am 17.10.2026 lokal im Chromium-Browser geprüft.
+Die Live-Abnahme nach Modulupdate in Kachel und IPSView bleibt separat offen;
+Live-Konfigurationen und Archivdaten wurden nicht verändert.
+
 `pictorial_bar_svg.php` prüft eigene SVG-Formen über den tatsächlichen
 Uploadadapter: Rohdaten/Base64/Data-URL, nichtnullige viewBox, relative und
 mehrteilige Pfade, alle Pfadbefehle, kompakte Arc-Flags, XML-Struktur sowie

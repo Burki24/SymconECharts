@@ -48,6 +48,29 @@ Messwertänderungen über einen WebSocket.
   `libs/echarts/ipsview-transport.js`. Chartmodell und Rendering bleiben in
   den Familienmodulen.
 
+### Adressauflösung in eingebetteten Dokumenten
+
+WebContent kann als `data:`-Dokument mit opakem Ursprung eingebettet sein.
+Der Zugriff auf `window.top.location` ist dann trotz fehlendem Sandbox-Attribut
+verboten; aus der eigenen `data:`-Adresse lässt sich kein WebHook-Host bilden.
+
+Der gemeinsame Browsertransport verwendet deshalb den ersten gültigen
+HTTP(S)-Ursprung aus eigener Dokumentadresse, browserseitig aufgelöstem
+`document.baseURI`, zugänglicher Elternadresse, `document.referrer`,
+`location.ancestorOrigins` und zuletzt der zugänglichen obersten Adresse.
+Basis- und Einbettungsmetadaten müssen auf den Symcon-Server verweisen.
+Pfad, Suchparameter und Fragment werden nicht übernommen; nicht absolute,
+opake und mit Zugangsdaten versehene Adressen werden verworfen.
+HTTP-Zustandsabfrage und WebSocket verwenden denselben ermittelten Ursprung,
+bei HTTPS mit WSS. Die bestehende Fetch-Credential-Policy `same-origin`,
+Kanalprüfung und serverseitige CORS-Antwort bleiben unverändert.
+
+Ohne brauchbare Serveradresse bleibt der Bootstrap sichtbar und die begrenzte
+Wiederverbindung aktiv. Es wird weder ein Host geraten noch ein Basis-Element
+eingefügt. Hosts ohne zugängliche Elternadresse, Basisadresse, Referrer und
+Ancestor-Ursprung können keine Live-Verbindung herstellen. Neue Properties,
+Konfigurationsmigrationen oder Änderungen an Quellen sind nicht erforderlich.
+
 ## Folgen
 
 IPSView behält dasselbe Dokument und dasselbe ECharts-Objekt über

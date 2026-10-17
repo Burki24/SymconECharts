@@ -19,8 +19,8 @@
         }
     }
 
-    function loadCurrentState() {
-        return fetch(httpURL(transport.statePath), {
+    function loadCurrentState(origin) {
+        return fetch(httpURL(transport.statePath, origin), {
             method: 'GET',
             cache: 'no-store',
             credentials: 'same-origin',
@@ -38,36 +38,58 @@
             });
     }
 
-    function browserLocation() {
-        const href = window.location.href || '';
-        if (href.startsWith('data:') || href === 'about:blank' || href === 'about:srcdoc') {
-            const source = href.startsWith('data:')
-                ? decodeURIComponent(href)
-                : ((document.head && document.head.innerHTML) || '')
-                    + ((document.body && document.body.innerHTML) || '');
-            const match = source.match(/<base\s+href=["'](https?:)\/\/([^\/"']+)/i);
-            if (match) {
-                return {protocol: match[1], host: match[2]};
+    function httpOrigin(candidate) {
+        if (typeof candidate !== 'string') { return null; }
+        try {
+            const url = new URL(candidate);
+            if ((url.protocol === 'http:' || url.protocol === 'https:') && url.host && !url.username && !url.password) {
+                return {protocol: url.protocol, host: url.host};
             }
-            try {
-                return {protocol: window.top.location.protocol, host: window.top.location.host};
-            } catch (error) {
-                return {protocol: window.location.protocol, host: window.location.host};
-            }
+        } catch (error) {
+            // Missing, opaque and malformed addresses are not transport endpoints.
         }
-
-        return {protocol: window.location.protocol, host: window.location.host};
+        return null;
     }
 
-    function httpURL(path) {
-        const location = browserLocation();
-        return location.protocol + '//' + location.host + path;
+    function readOrigin(reader) {
+        try { return httpOrigin(reader()); } catch (error) { return null; }
     }
 
-    function socketURL(path) {
-        const location = browserLocation();
-        const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-        return protocol + '//' + location.host + path;
+    function locationAddress(target) {
+        const location = target.location;
+        return location.href || location.protocol + '//' + location.host;
+    }
+
+    function browserLocation() {
+        const ownOrigin = readOrigin(function () { return locationAddress(window); });
+        if (ownOrigin) { return ownOrigin; }
+        // data: frames have opaque origins. The parsed DOM base also supports base64 data URLs.
+        const baseOrigin = readOrigin(function () { return document.baseURI; });
+        if (baseOrigin) { return baseOrigin; }
+        const parentOrigin = readOrigin(function () { return locationAddress(window.parent); });
+        if (parentOrigin) { return parentOrigin; }
+        const referrerOrigin = readOrigin(function () { return document.referrer; });
+        if (referrerOrigin) { return referrerOrigin; }
+        // Chromium/WebKit expose ancestor origins even when cross-origin parent access is forbidden.
+        try {
+            const ancestors = window.location.ancestorOrigins || [];
+            for (let index = 0; index < ancestors.length; index += 1) {
+                const origin = httpOrigin(ancestors[index]);
+                if (origin) { return origin; }
+            }
+        } catch (error) {
+            // Referrer-less hosts may still provide the legacy same-origin top window below.
+        }
+        return readOrigin(function () { return locationAddress(window.top); });
+    }
+
+    function httpURL(path, origin) {
+        return origin.protocol + '//' + origin.host + path;
+    }
+
+    function socketURL(path, origin) {
+        const protocol = origin.protocol === 'https:' ? 'wss:' : 'ws:';
+        return protocol + '//' + origin.host + path;
     }
 
     function connect() {
@@ -75,8 +97,13 @@
             return;
         }
 
+        const origin = browserLocation();
+        if (!origin) {
+            scheduleReconnect();
+            return;
+        }
         try {
-            socket = new WebSocket(socketURL(transport.socketPath));
+            socket = new WebSocket(socketURL(transport.socketPath, origin));
         } catch (error) {
             scheduleReconnect();
             return;
@@ -86,7 +113,7 @@
             retryDelay = 1000;
             synchronizing = true;
             queuedMessages = [];
-            loadCurrentState().finally(function () {
+            loadCurrentState(origin).finally(function () {
                 synchronizing = false;
                 queuedMessages.splice(0).forEach(deliver);
             });
