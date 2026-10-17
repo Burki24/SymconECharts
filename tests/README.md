@@ -171,6 +171,15 @@ StylePHP und PHP CS Fixer.
 
 ## Funnel
 
+Die Designer-Erweiterung prüft optische Größenbegrenzung mit unveränderten
+Nullwerten, Rand-/Führungslinien, Schatten, Schriftfamilie, Beschriftungsseite,
+Überlappungsschalter und Hover-/Blur-Einstellungen. Modell und unabhängige
+IPSView-Ausgabe, Kopie, deutsche Formulare, ungültige Bereiche/Enums und
+invertierte Größen werden abgesichert. Neue PHP-SVG-Punkte werden in beiden
+Ausrichtungen und drei Reihenfolgen mit dem echten ECharts-Renderer verglichen.
+Die Browserfixture ergänzt `design=polished` für lokale Stilprüfungen
+mit Linien, Schatten, Außenbeschriftung und Schriftfamilie.
+
 `funnel_integration.php` ist in `gateway_gauges.php` eingebunden und prüft
 aktuelle Werte über den echten Gateway mit Kernel-Doppeln, ID-Identität,
 gleiche Einheiten, Null-/Negativwerte, Quellenentfernung, VM_UPDATE, Fehler-

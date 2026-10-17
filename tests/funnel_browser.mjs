@@ -19,7 +19,7 @@ function state() {
 }
 const variables = ':root{--symc-background:#303236;--symc-text:#f4f5f7;--symc-text-muted:#969aa2;--symc-border:#555860;--symc-surface:#25272b}';
 const translations = JSON.parse(read('EChartsFunnel/locale.json')).translations.de;
-function page(mode, extended = false, light = false) {
+function page(mode, extended = false, light = false, polished = false) {
     const initialState = state();
     if (mode === 'ipsview') {
         Object.assign(initialState.chart.funnel.style,{orientation:'horizontal',labelPosition:'outside',labelColor:light ? '' : '#A9DCD2'});
@@ -28,6 +28,15 @@ function page(mode, extended = false, light = false) {
         initialState.chart.funnel.data = Array.from({length:16},(_,i)=>({id:'variable-'+i,label:'Langer Stufenname '+(i+1),
             unit:'W',decimals:1,color:'',value:160-i*10,order:i}));
         Object.assign(initialState.chart.funnel.style,{labelFontSizePercent:150,gap:30});
+    }
+    if (polished) {
+        Object.assign(initialState.chart.funnel.style, {
+            minSizePercent:20,maxSizePercent:90,borderType:'dashed',borderColor:light?'#555555':'#CBD6E8',
+            shadowBlur:8,shadowColor:'#000000',shadowOffsetX:3,shadowOffsetY:3,
+            hoverFocus:'self',blurOpacityPercent:15,labelMaxWidth:130,labelPosition:'outside',outsideLabelSide:'start',
+            labelLineLength:24,labelLineWidth:2,labelLineType:'dotted',labelLineColor:light?'#555555':'#CBD6E8',
+            labelLineOpacityPercent:70,fontFamily:'Georgia, serif',labelColor:''
+        });
     }
     const bootstrap = { mode, state: initialState, options: { tileHeaderVisible: true, echartsThemes: {auto: {background:'#303236',text:'#f4f5f7',muted:'#969aa2',border:'#777b83',accent:'#55CBB5',seriesColors:['#5070dd','#b6d634','#ff994d','#fb628b']}},
         adaptToBackground: false,  }, translations };
@@ -43,7 +52,7 @@ function page(mode, extended = false, light = false) {
 http.createServer((req, res) => {
     const url = new URL(req.url, 'http://127.0.0.1');
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    if (url.pathname === '/chart') { res.end(page(url.searchParams.get('mode') === 'ipsview' ? 'ipsview' : 'symcon', url.searchParams.get('design') === 'extended', url.searchParams.get('theme') === 'light')); return; }
+    if (url.pathname === '/chart') { res.end(page(url.searchParams.get('mode') === 'ipsview' ? 'ipsview' : 'symcon', url.searchParams.get('design') === 'extended', url.searchParams.get('theme') === 'light', url.searchParams.get('design') === 'polished')); return; }
     res.end('<!doctype html><html lang="de"><head><title>Funnel – lokale Browserprüfung</title></head><body style="background:#0b0c0e;color:white;font:16px Arial;margin:20px">'
         + '<h1 style="font-size:20px">Funnel · synthetische Beispieldaten</h1><div style="display:flex;gap:16px;align-items:start;flex-wrap:wrap">'
         + '<section><h2 style="font-size:16px">Kachel · hoch</h2><iframe title="Kachel" src="/chart?mode=symcon" style="border:0;width:400px;height:600px"></iframe></section>'

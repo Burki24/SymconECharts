@@ -68,3 +68,52 @@ sie werden nicht durch lokale Tests ersetzt.
 Keine realen Instanzen oder Konfigurationen wurden geschrieben. Die
 MCP-SDK-Abfragen sind lesende Entwicklungsnachweise, keine Bestätigung des
 neuen Moduls in einer Symcon-/IPSView-Laufzeit.
+
+## Designer-Ergänzung vom 17.10.2026
+
+Der Anwender bestätigt die erste Version inzwischen in nativer Kachel und
+IPSView. Die neue reale MCP-Kachelvorschau wurde vor dieser Erweiterung mit
+installierter Instanz erfolgreich geprüft; dieser Nachweis gilt nicht
+automatisch für die folgenden neuen Optionen.
+
+Abgleich mit der offiziellen [Funnel-Serie](https://echarts.apache.org/en/option.html#series-funnel),
+den [Item-Styles](https://github.com/apache/echarts-doc/blob/master/en/option/partial/item-style.md),
+[Schatten](https://github.com/apache/echarts-doc/blob/master/en/option/partial/style-shadow-opacity.md)
+und [Linien-Styles](https://github.com/apache/echarts-doc/blob/master/en/option/partial/line-style.md).
+Alle Ergänzungen werden von der vorhandenen unveränderten 6.1.0-Runtime
+unterstützt; kein Runtime-Neubau oder Abhängigkeitswechsel.
+
+| Bereich | Ergänzungen |
+| --- | --- |
+| Größen | `minSize`, `maxSize` als Prozentwerte, Minimum nicht größer als Maximum |
+| Stufen | `borderType`, `shadowBlur/Color/OffsetX/OffsetY` |
+| Text | `fontFamily`, begrenzte Labelbreite, optionales `labelLayout.hideOverlap`, Außenbeschriftung an beiden Rändern |
+| Führung | `labelLine.show/length/lineStyle.width/type/color/opacity` |
+| Hover | `emphasis.focus/disabled`, optional explizite `blur.itemStyle.opacity` |
+
+Alle 19 neuen Properties erhalten unabhängige IPSView-Pendants und werden
+von den vorhandenen Schleifen für Registrierung, Kopie, Vererbung, Vorschau
+und Modellserialisierung erfasst. Quellen, Sortierung, Farben nach ID,
+Einheiten, aktuelle Werte, Transport und Titel-/Kachelkopfbereich bleiben
+unverändert. Defaults entsprechen den bisherigen festen Optionen; -1 bei
+Blur-Deckkraft lässt ECharts seine automatische Abdunklung beibehalten.
+Eine positive optische Mindestgröße bedeutet ausdrücklich, dass auch eine
+Nullquelle eine Breite erhält; Originalwert und Leerzustand bleiben erhalten.
+
+SVG und Renderer verwenden dieselbe Größenabbildung und seitenabhängige
+Platzreservierung. Statische Vorschauen bilden Schatten, Linien und Typografie
+ab; Hover und Animation bleiben ausdrücklich Laufzeitverhalten. Kleine
+Ausgaben dürfen Führungslängen und Textbreiten begrenzen. Versteckte
+Überlappungen dürfen ausgeschaltet werden, Quellen werden nie entfernt.
+
+Nicht enthalten: freie JavaScript-Formatter, Theme-/Gradientenimporte,
+individuelle Stufenhöhen, Auswahlzustände, Dataset-Umbau und manuell
+abschneidende Wertebereiche. Sie ändern Sicherheits-, Interaktions- oder
+Datenverträge und werden nicht als bloße Stildeklarationen ergänzt.
+Eine Beschriftungsdrehung wird nicht angeboten, da der gepinnte Funnel-
+Renderer sie nicht allein durch die allgemeine Text-Property umsetzt.
+
+Nachweise: Gateway-/Formular-/Budgettests, Validierung beider Designer,
+Übernahme/Kopie aller Optionen, schreibfreie ungespeicherte Vorschau,
+echte ECharts-Styles und Polygonpunkte sowie direkter PHP-SVG-Vergleich.
+Der erneute Live-Test nach Installation bleibt für diese Erweiterung offen.

@@ -108,12 +108,65 @@ $funnelCaptionCheck = function (array $items) use (&$funnelCaptionCheck, $funnel
     }
 };
 $funnelCaptionCheck($funnelForm);
+$funnelSavedProperties = (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($funnel);
+$funnelDecorations = ['MinSizePercent' => 20, 'MaxSizePercent' => 85, 'BorderType' => 'dashed',
+    'ShadowBlur'                       => 8, 'ShadowColor' => 0x123456, 'ShadowOffsetX' => 3, 'ShadowOffsetY' => -2,
+    'HoverFocus'                       => 'none', 'BlurOpacityPercent' => 15, 'HideOverlappingLabels' => false,
+    'LabelMaxWidth'                    => 70, 'ShowLabelLines' => true, 'LabelLineLength' => 24, 'LabelLineWidth' => 2,
+    'LabelLineType'                    => 'dotted', 'LabelLineColor' => 0xFEDCBA, 'LabelLineOpacityPercent' => 60,
+    'OutsideLabelSide'                 => 'start', 'FontFamily' => 'Georgia, serif'];
+$funnel->UpdateBarPreviewFromForm(json_encode([...$funnelDecorations, 'Sources' => array_slice($funnelSources, 0, 3),
+    'LabelPosition'                                                             => 'outside'], JSON_THROW_ON_ERROR));
+$funnelDecoratedSVG = base64_decode(substr(array_slice($funnel->GetTestFormUpdates(), -2)[0]['Value'], strlen('data:image/svg+xml;base64,')), true);
+assertGatewayGauge(
+    str_contains($funnelDecoratedSVG, 'stroke-dasharray="6 4"')
+    && str_contains($funnelDecoratedSVG, 'Georgia, serif') && str_contains($funnelDecoratedSVG, 'filter="url(#funnel-shadow)"')
+    && str_contains($funnelDecoratedSVG, '#FEDCBA') && str_contains($funnelDecoratedSVG, 'stroke-opacity="0.6"')
+    && (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($funnel) === $funnelSavedProperties,
+    'New Funnel styles must reach a draft preview without changing saved properties.'
+);
+foreach ($funnelDecorations as $name => $value) {
+    $funnel->SetTestProperty($name, $value);
+}
+$funnel->ApplyChanges();
+$funnelDecoratedData = json_decode($funnel->GetFunnelData(), true, 512, JSON_THROW_ON_ERROR);
+foreach ($funnelDecorations as $name => $value) {
+    $expected = str_ends_with($name, 'Color') ? sprintf('#%06X', $value) : $value;
+    assertGatewayGauge(
+        $funnelDecoratedData['funnel']['style'][lcfirst($name)] === $expected,
+        'New Funnel property must reach the model: ' . $name
+    );
+}
+assertGatewayGauge(
+    str_contains($funnel->GetIPSViewHTML(), '"minSizePercent":0')
+    && str_contains($funnel->GetIPSViewHTML(), '"fontFamily":"Arial, sans-serif"'),
+    'Tile design changes must not leak into an independent IPSView design.'
+);
+$GLOBALS['symconTestCopyTarget'] = $funnel;
+try {
+    $funnel->CopyTileDesignToIPSView();
+} finally {
+    unset($GLOBALS['symconTestCopyTarget']);
+}
+$funnelCopiedProperties = (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($funnel);
+foreach ($funnelDecorations as $name => $value) {
+    assertGatewayGauge($funnelCopiedProperties['IPSView' . $name] === $value, 'Copy action must include: ' . $name);
+}
+foreach ($funnelSavedProperties as $name => $value) {
+    $funnel->SetTestProperty($name, $value);
+}
 foreach (['', 'IPSView'] as $funnelPrefix) {
     foreach (['Orientation'    => ['invalid', 'vertical'], 'SortOrder' => ['invalid', 'configured'],
         'Alignment'            => ['left', 'center'], 'LabelPosition' => ['invalid', 'inside'],
         'Gap'                  => [31, 3], 'BorderWidth' => [-1, 1], 'OpacityPercent' => [101, 90],
         'TitleFontSizePercent' => [49, 100], 'LabelFontSizePercent' => [201, 100],
-        'LabelColor'           => [-2, -1], 'TitleColor' => [0x1000000, -1], 'BorderColor' => [-2, -1]] as $name => [$invalid, $valid]) {
+        'LabelColor'           => [-2, -1], 'TitleColor' => [0x1000000, -1], 'BorderColor' => [-2, -1],
+        'MinSizePercent'       => [101, 0], 'MaxSizePercent' => [0, 100], 'BorderType' => ['invalid', 'solid'],
+        'ShadowBlur'           => [21, 0], 'ShadowColor' => [-2, -1], 'ShadowOffsetX' => [-21, 0], 'ShadowOffsetY' => [21, 0],
+        'HoverFocus'           => ['adjacency', 'self'], 'BlurOpacityPercent' => [-2, -1], 'LabelMaxWidth' => [301, 0],
+        'LabelLineLength'      => [61, 10], 'LabelLineWidth' => [-1, 1], 'LabelLineType' => ['invalid', 'solid'],
+        'LabelLineColor'       => [0x1000000, -1], 'LabelLineOpacityPercent' => [101, 100], 'OutsideLabelSide' => ['center', 'end'],
+        'FontFamily'           => ['url(unsafe)', 'Arial, sans-serif']] as $name => [$invalid, $valid]) {
         $funnel->SetTestProperty($funnelPrefix . $name, $invalid);
         $funnel->ApplyChanges();
         assertGatewayGauge($funnel->GetTestStatus() === 202, 'Funnel must reject invalid design: ' . $funnelPrefix . $name);
@@ -121,6 +174,13 @@ foreach (['', 'IPSView'] as $funnelPrefix) {
         $funnel->ApplyChanges();
         assertGatewayGauge($funnel->GetTestStatus() === IS_ACTIVE, 'Funnel must recover after correcting design.');
     }
+    $funnel->SetTestProperty($funnelPrefix . 'MinSizePercent', 80);
+    $funnel->SetTestProperty($funnelPrefix . 'MaxSizePercent', 70);
+    $funnel->ApplyChanges();
+    assertGatewayGauge($funnel->GetTestStatus() === 202, 'Visual minimum size must not exceed maximum size.');
+    $funnel->SetTestProperty($funnelPrefix . 'MinSizePercent', 0);
+    $funnel->SetTestProperty($funnelPrefix . 'MaxSizePercent', 100);
+    $funnel->ApplyChanges();
 }
 $funnel->SetTestProperty('BorderWidth', 0);
 $funnel->SetTestProperty('OpacityPercent', 0);

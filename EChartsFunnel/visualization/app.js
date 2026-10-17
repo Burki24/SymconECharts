@@ -68,13 +68,20 @@
         var height = chartElement.clientHeight || 1;
         var horizontal = style.orientation === 'horizontal';
         var outside = style.labelPosition === 'outside';
+        var outsideStart = outside && style.outsideLabelSide === 'start';
+        var hideOverlap = style.hideOverlappingLabels !== false;
+        var fontFamily = style.fontFamily || 'Arial, sans-serif';
         var font = design.fontSizePercent(style.labelFontSizePercent, width < 430 ? 11 : 13);
         var titleSize = design.fontSizePercent(style.titleFontSizePercent, 18);
         var titleLayout = design.chartTitleLayout(chartBootstrap, funnel.title, titleSize);
         var top = titleLayout.contentTop + 10;
-        var left = 18;
-        var right = outside && !horizontal ? Math.min(width * 0.42, Math.max(80, font * 13)) : 18;
-        var bottom = outside && horizontal ? Math.min(height * 0.35, font * 3 + 26) : 18;
+        var lineLength = Math.min(style.labelLineLength == null ? 10 : style.labelLineLength, Math.min(width, height) * 0.2);
+        var reserve = horizontal ? Math.min(height * 0.35, font * 3 + 26 + lineLength - 10)
+            : Math.min(width * 0.42, Math.max(80, font * 13) + lineLength - 10);
+        var left = outsideStart && !horizontal ? reserve : 18;
+        var right = outside && !outsideStart && !horizontal ? reserve : 18;
+        var bottom = outside && !outsideStart && horizontal ? reserve : 18;
+        if (outsideStart && horizontal) { top += reserve; }
         top = Math.max(0, Math.min(top, height - 1));
         bottom = Math.min(bottom, Math.max(0, height - top - 1));
         // Clamp design gaps to leave every stage with a nonnegative extent in small tiles.
@@ -99,10 +106,12 @@
                 + (item.unit ? ' ' + item.unit : '');
         }
         var stageExtent = Math.max(1, (extent - gap * (items.length - 1)) / items.length);
+        var minimumSize = style.minSizePercent == null ? 0 : style.minSizePercent;
+        var maximumSize = style.maxSizePercent == null ? 100 : style.maxSizePercent;
         return {
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
             backgroundColor: 'transparent', color: seriesColors,
-            textStyle: { color: colors.text, fontFamily: 'Arial, sans-serif' }, aria: { enabled: true },
+            textStyle: { color: colors.text, fontFamily: fontFamily }, aria: { enabled: true },
             title: { show: titleLayout.show, text: funnel.title || '', top: titleLayout.top, left: 'center',
                 textStyle: { color: style.titleColor || colors.text, fontSize: titleSize, fontWeight: style.titleBold === false ? 'normal' : 'bold',
                     overflow: 'truncate', width: Math.max(1, width - 36) } },
@@ -114,30 +123,38 @@
                     return escapeHTML(item.name) + '<br>' + escapeHTML(format(item));
                 } },
             series: [{ type: 'funnel', orient: horizontal ? 'horizontal' : 'vertical', sort: 'none',
-                min: 0, max: maximum, minSize: '0%', maxSize: '100%', funnelAlign: align,
+                min: 0, max: maximum, minSize: minimumSize + '%', maxSize: maximumSize + '%', funnelAlign: align,
                 left: left, right: right, top: top, bottom: bottom, gap: gap,
-                label: { show: style.showLabels !== false, position: outside ? (horizontal ? 'bottom' : 'right') : 'inside',
-                    fontFamily: 'Arial, sans-serif', fontSize: font,
+                label: { show: style.showLabels !== false, position: outside ? (horizontal ? (outsideStart ? 'top' : 'bottom') : (outsideStart ? 'left' : 'right')) : 'inside',
+                    fontFamily: fontFamily, fontSize: font,
                     fontWeight: style.labelBold === true ? 'bold' : 'normal',
                     color: style.labelColor || (outside ? colors.text : 'inherit'), overflow: 'truncate',
                     formatter: function (parameter) {
                         return parameter.data.name + (style.showValues === false ? '' : '\n' + format(parameter.data));
                     } },
-                labelLine: { show: outside && style.showLabels !== false, length: 10 },
-                labelLayout: { hideOverlap: true },
+                labelLine: { show: outside && style.showLabels !== false && style.showLabelLines !== false, length: lineLength,
+                    lineStyle: { color: style.labelLineColor || undefined, width: style.labelLineWidth == null ? 1 : style.labelLineWidth,
+                        type: style.labelLineType || 'solid', opacity: style.labelLineOpacityPercent == null ? 1 : style.labelLineOpacityPercent / 100 } },
+                labelLayout: { hideOverlap: hideOverlap },
                 itemStyle: { borderWidth: style.borderWidth == null ? 1 : style.borderWidth,
+                    borderType: style.borderType || 'solid', shadowBlur: Number(style.shadowBlur) || 0,
+                    shadowColor: style.shadowColor || 'rgba(0,0,0,0.35)',
+                    shadowOffsetX: Number(style.shadowOffsetX) || 0, shadowOffsetY: Number(style.shadowOffsetY) || 0,
                     borderColor: style.borderColor || colors.background,
                     opacity: style.opacityPercent == null ? 0.9 : style.opacityPercent / 100 },
-                emphasis: { focus: 'self', label: { show: style.showLabels !== false } },
+                emphasis: { focus: style.hoverFocus === 'none' ? 'none' : 'self', disabled: style.hoverFocus === 'none',
+                    label: { show: style.showLabels !== false } },
+                blur: { itemStyle: style.blurOpacityPercent == null || style.blurOpacityPercent < 0 ? {} : { opacity: style.blurOpacityPercent / 100 } },
                 data: ordered.map(function (item, index) {
                     var next = ordered[index + 1];
-                    var meanWidth = (item.value / maximum + (next ? next.value / maximum : 0)) / 2;
-                    var labelWidth = outside ? (horizontal ? stageExtent - 6 : right - 22)
+                    var meanWidth = (minimumSize + (item.value / maximum + (next ? next.value / maximum : 0)) / 2 * (maximumSize - minimumSize)) / 100;
+                    var labelWidth = outside ? (horizontal ? stageExtent - 6 : reserve - lineLength - 12)
                         : horizontal ? stageExtent - 8 : (width - left - right) * meanWidth - 8;
+                    if (style.labelMaxWidth > 0) { labelWidth = Math.min(labelWidth, style.labelMaxWidth); }
                     return { ...item, name: item.label, itemStyle: { color: item.stageColor },
                         label: { width: Math.max(1, labelWidth),
                             color: style.labelColor || (outside ? colors.text : design.readableTextColor(item.stageColor)),
-                            show: style.showLabels !== false && (outside || horizontal || stageExtent >= font * (style.showValues === false ? 1 : 2)) } };
+                            show: style.showLabels !== false && (!hideOverlap || outside || horizontal || stageExtent >= font * (style.showValues === false ? 1 : 2)) } };
                 }) }]
         };
     }

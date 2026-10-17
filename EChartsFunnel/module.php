@@ -69,12 +69,18 @@ class EChartsFunnel extends IPSModuleStrict
     private const STATUS_GATEWAY_FAILED = 204;
     private const STATUS_VALUE_INVALID = 205;
     private const DESIGN_DEFAULTS = [
-        'EChartsTheme'         => 'auto', 'Orientation' => 'vertical', 'SortOrder' => 'configured',
-        'Alignment'            => 'center', 'Gap' => 3, 'ShowTooltip' => true,
-        'ShowLabels'           => true, 'ShowValues' => true, 'LabelPosition' => 'inside',
-        'LabelFontSizePercent' => 100, 'LabelColor' => -1, 'LabelBold' => false,
-        'TitleFontSizePercent' => 100, 'TitleColor' => -1, 'TitleBold' => true,
-        'BorderWidth'          => 1, 'BorderColor' => -1, 'OpacityPercent' => 90
+        'EChartsTheme'          => 'auto', 'Orientation' => 'vertical', 'SortOrder' => 'configured',
+        'Alignment'             => 'center', 'Gap' => 3, 'ShowTooltip' => true,
+        'ShowLabels'            => true, 'ShowValues' => true, 'LabelPosition' => 'inside',
+        'LabelFontSizePercent'  => 100, 'LabelColor' => -1, 'LabelBold' => false,
+        'TitleFontSizePercent'  => 100, 'TitleColor' => -1, 'TitleBold' => true,
+        'BorderWidth'           => 1, 'BorderColor' => -1, 'OpacityPercent' => 90,
+        'MinSizePercent'        => 0, 'MaxSizePercent' => 100, 'BorderType' => 'solid',
+        'ShadowBlur'            => 0, 'ShadowColor' => -1, 'ShadowOffsetX' => 0, 'ShadowOffsetY' => 0,
+        'HoverFocus'            => 'self', 'BlurOpacityPercent' => -1,
+        'HideOverlappingLabels' => true, 'LabelMaxWidth' => 0, 'OutsideLabelSide' => 'end',
+        'ShowLabelLines'        => true, 'LabelLineLength' => 10, 'LabelLineWidth' => 1, 'LabelLineType' => 'solid',
+        'LabelLineColor'        => -1, 'LabelLineOpacityPercent' => 100, 'FontFamily' => 'Arial, sans-serif'
     ];
 
     public function Create(): void
@@ -133,7 +139,10 @@ class EChartsFunnel extends IPSModuleStrict
             ['caption' => 'Animation', 'start' => 'AnimationEnabled'],
             ['caption' => 'Geometry and order', 'start' => 'Orientation'],
             ['caption' => 'Labels and visibility', 'start' => 'ShowLabels'],
-            ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
+            ['caption' => 'Guide lines', 'start' => 'ShowLabelLines'],
+            ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent'],
+            ['caption' => 'Borders and shadows', 'start' => 'BorderWidth'],
+            ['caption' => 'Highlighting', 'start' => 'HoverFocus']
         ]);
         $fields = ['Title', 'Sources',
             'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
@@ -463,17 +472,27 @@ class EChartsFunnel extends IPSModuleStrict
             || !in_array($this->ReadPropertyString($prefix . 'Orientation'), ['vertical', 'horizontal'], true)
             || !in_array($this->ReadPropertyString($prefix . 'SortOrder'), ['configured', 'ascending', 'descending'], true)
             || !in_array($this->ReadPropertyString($prefix . 'Alignment'), ['start', 'center', 'end'], true)
-            || !in_array($this->ReadPropertyString($prefix . 'LabelPosition'), ['inside', 'outside'], true)) {
+            || !in_array($this->ReadPropertyString($prefix . 'LabelPosition'), ['inside', 'outside'], true)
+            || !in_array($this->ReadPropertyString($prefix . 'OutsideLabelSide'), ['start', 'end'], true)
+            || !in_array($this->ReadPropertyString($prefix . 'BorderType'), ['solid', 'dashed', 'dotted'], true)
+            || !in_array($this->ReadPropertyString($prefix . 'LabelLineType'), ['solid', 'dashed', 'dotted'], true)
+            || !in_array($this->ReadPropertyString($prefix . 'HoverFocus'), ['self', 'none'], true)
+            || !in_array($this->ReadPropertyString($prefix . 'FontFamily'), ['Arial, sans-serif', 'Verdana, sans-serif', 'Georgia, serif', 'monospace'], true)
+            || $this->ReadPropertyInteger($prefix . 'MinSizePercent') > $this->ReadPropertyInteger($prefix . 'MaxSizePercent')) {
             return false;
         }
         foreach (['Gap'            => [0, 30], 'BorderWidth' => [0, 8], 'OpacityPercent' => [0, 100],
-            'TitleFontSizePercent' => [50, 200], 'LabelFontSizePercent' => [50, 200]] as $name => [$min, $max]) {
+            'TitleFontSizePercent' => [50, 200], 'LabelFontSizePercent' => [50, 200],
+            'MinSizePercent'       => [0, 100], 'MaxSizePercent' => [1, 100],
+            'ShadowBlur'           => [0, 20], 'ShadowOffsetX' => [-20, 20], 'ShadowOffsetY' => [-20, 20],
+            'BlurOpacityPercent'   => [-1, 100], 'LabelMaxWidth' => [0, 300],
+            'LabelLineLength'      => [0, 60], 'LabelLineWidth' => [0, 5], 'LabelLineOpacityPercent' => [0, 100]] as $name => [$min, $max]) {
             $value = $this->ReadPropertyInteger($prefix . $name);
             if ($value < $min || $value > $max) {
                 return false;
             }
         }
-        foreach (['TitleColor', 'LabelColor', 'BorderColor'] as $name) {
+        foreach (['TitleColor', 'LabelColor', 'BorderColor', 'ShadowColor', 'LabelLineColor'] as $name) {
             $color = $this->ReadPropertyInteger($prefix . $name);
             if ($color < -1 || $color > 0xFFFFFF) {
                 return false;

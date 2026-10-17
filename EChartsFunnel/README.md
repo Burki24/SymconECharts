@@ -29,12 +29,32 @@ Kachel und IPSView bieten Ausrichtung (vertikal/horizontal), Reihenfolge
 (Liste/aufsteigend/absteigend), Querausrichtung, Stufenabstand, Beschriftungen
 innen/außen, Werteanzeige, Schriftgrößen, Textfarben, Fettschrift, Rahmen,
 Deckkraft, Themes, Tooltip und Animation. Standard ist die Listenreihenfolge.
-Die Quellfarbe bleibt beim Sortieren erhalten. Der größte Wert erhält die
+Die Quellfarbe bleibt beim Sortieren erhalten. Der größte Wert erhält standardmäßig die
 volle Breite beziehungsweise bei horizontaler Ausrichtung die volle Höhe.
 Trapeze verbinden benachbarte Stufen; ihre Flächen sind keine Prozentanteile.
 
-Enge Ausgaben begrenzen Abstände und Beschriftungen; überlappende Texte werden
-ausgeblendet. Der Tooltip zeigt weiterhin den vollständigen Namen und Wert.
+Zusätzlich stehen folgende Einstellungen in beiden Designern zur Verfügung:
+
+- **Minimale/maximale optische Größe:** 0–100 % beziehungsweise 1–100 %;
+  die minimale Größe darf die maximale nicht überschreiten. Standard ist
+  0/100. Eine Mindestgröße über null verbreitert auch Nullwerte sichtbar.
+  Dies ist eine optische Untergrenze, kein zusätzlicher Messwert. Tooltip
+  und Datenmodell behalten die Originalwerte; ausschließlich Nullwerte
+  zeigen weiterhin den Leerhinweis.
+- **Rahmen und Schatten:** durchgezogene, gestrichelte oder gepunktete
+  Rahmen; Schattenunschärfe, Farbe und Versatz.
+- **Beschriftungen:** lokale Schriftart Arial, Verdana, Georgia oder
+  nichtproportional; maximale Textbreite (0 = automatisch) und abschaltbarer
+  Überlappungsschutz. Außenbeschriftungen können am Anfangsrand
+  (links/oben) oder Endrand (rechts/unten) stehen.
+- **Führungslinien:** einzeln schaltbar, Länge, Breite, Linienart, Farbe
+  und Deckkraft. Sie gelten nur für Außenbeschriftungen.
+- **Hervorhebung:** berührte Stufe hervorheben oder Hover-Effekt abschalten;
+  Deckkraft der übrigen Stufen, mit -1 für die automatische ECharts-Abdunklung.
+
+Enge Ausgaben begrenzen Abstände und Beschriftungen; standardmäßig werden
+überlappende Texte ausgeblendet. Ohne Überlappungsschutz können sich Texte
+absichtlich überdecken. Der Tooltip zeigt weiterhin den vollständigen Namen und Wert.
 Die statische Vorschau verwendet bei gültigen Quellen deren aktuelle Werte,
 ohne Quellen gekennzeichnete Beispieldaten. Hover und Animation sind dort nicht
 nachgebildet. Die endgültige Anordnung passt sich an die Ausgabegröße an.

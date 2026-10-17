@@ -2,6 +2,13 @@
 
 ## Hinzugefügt
 
+- Der Funnel-Designer bietet minimale/maximale optische Stufengröße,
+  Rahmenlinienarten, Schatten, lokale Schriftarten, Außenbeschriftung auf
+  beiden Seiten, Textbreite und abschaltbaren Überlappungsschutz.
+  Führungslinien sowie Hover-Hervorhebung sind individuell einstellbar.
+  Kachel und IPSView besitzen unabhängige Einstellungen und aktualisierte
+  Vorschauen; vorhandene Quellen und Konfigurationen bleiben erhalten.
+
 - `EChartsFunnel` (`ECFU`) zeigt 1–16 manuell benannte Stufen mit aktuellen,
   nichtnegativen Variablenwerten derselben Einheit. Kachel und IPSView besitzen
   getrennte Designer für Ausrichtung, Reihenfolge, Abstände, Beschriftungen,
