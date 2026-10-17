@@ -21,6 +21,11 @@ Paket-SHA-1 laut npm: `ae0f68590f5ebbd728d900907c27acde7c5456d1`
 
 Ausgelieferte Dateien:
 
+- `libs/echarts/6.1.0/echarts.funnel.min.js` – reproduzierbarer
+  Funnel-Browser-Build aus ECharts Core, Funnel Chart, Titel, Tooltip,
+  Aria, Label Layout und Canvas Renderer; 487.801 Byte; SHA-256
+  `da9750dd18363325d23b1bcd4ea3af7e1011620b80b994ad6c2d5e3ee819314d`;
+
 - `libs/echarts/6.1.0/echarts.boxplot.min.js` – reproduzierbarer
   Boxplot-Browser-Build aus ECharts Core, Boxplot Chart, Grid, Titel, Tooltip,
   Aria und Canvas Renderer; 498.327 Byte; SHA-256

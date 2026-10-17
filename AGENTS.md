@@ -122,6 +122,8 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
 
 ## Modulpräfixe
 
+- `ECFU` ist `EChartsFunnel` zugeordnet (`FU` = Funnel), siehe ADR 0055.
+
 - Modulpräfixe bestehen aus vier Großbuchstaben. `EC` bezeichnet stets
   ECharts; die dritte und vierte Stelle kennzeichnen Aufgabe oder
   Diagrammfamilie.

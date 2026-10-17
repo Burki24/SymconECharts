@@ -36,6 +36,13 @@ Der Boxplot-Einstieg enthält Boxplot Chart, Grid, Titel, Tooltip, Aria und
 Canvas Renderer. `npm run build:boxplot` erzeugt ausschließlich
 `../../libs/echarts/6.1.0/echarts.boxplot.min.js`; andere Builds bleiben unverändert.
 
+Der Funnel-Einstieg enthält Funnel Chart, Titel, Tooltip, Aria, Label Layout
+und Canvas Renderer. `npm run build:funnel` erzeugt ausschließlich
+`../../libs/echarts/6.1.0/echarts.funnel.min.js`. Die unveränderte gepinnte
+ECharts-6.1.0-Basis wurde am 17.10.2026 mit den offiziellen Einstiegen
+[Startseite](https://echarts.apache.org/en/index.html) und
+[LLM-Dokumentation](https://echarts.apache.org/en/llms.txt) abgeglichen.
+
 Zusätzlich kopiert der Build die sechs im Modul angebotenen offiziellen
 ECharts-Themes unverändert aus derselben festgeschriebenen npm-Abhängigkeit:
 Dark, Vintage, Macarons, Infographic, Shine und Roma.

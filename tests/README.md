@@ -169,6 +169,28 @@ StylePHP und PHP CS Fixer.
 - `test_update_library_metadata.py` prüft Versionsfortschreibung, Build- und
   Datumsableitung sowie den Schutz vor einer Versionsrückstufung.
 
+## Funnel
+
+`funnel_integration.php` ist in `gateway_gauges.php` eingebunden und prüft
+aktuelle Werte über den echten Gateway mit Kernel-Doppeln, ID-Identität,
+gleiche Einheiten, Null-/Negativwerte, Quellenentfernung, VM_UPDATE, Fehler-
+wiederholung, unabhängige Designer, Kopie, deutsche Beschriftungen und das
+1.048.576-Byte-Limit bei 16 Quellen. Vorschauen lesen nur begrenzt aktuelle
+Quellen und verändern weder Status noch gespeicherte Konfiguration.
+
+`node tests/funnel_layout.js` prüft beide Ausrichtungen, Querausrichtung,
+stabile Sortierung, Farben, explizite Null-Styles, sichere Tooltips, Leerzustand
+und Transientfehler. Die echte gepinnte ECharts-Engine prüft die Geometrie bei
+100/350/900 Pixel Breite; PHP-Vorschaupolygone werden direkt mit den
+ECharts-Punkten bei gleicher Zeichenfläche verglichen.
+
+`node tests/funnel_browser.mjs` bietet eine ausschließlich lokale synthetische
+Canvas-Fixture unter `http://127.0.0.1:8799`. Hohe Kachel und breite IPSView-
+Darstellung wurden am 17.10.2026 visuell geprüft. `/chart?mode=symcon&design=extended`
+zeigt 16 Stufen mit großen Schriften/Abständen; `/chart?mode=ipsview&theme=light`
+prüft den hellen Hintergrund. Die reale neue MCP-Kachelvorschau und Live-Tests
+in Symcon beziehungsweise IPSView bleiben nach Installation erforderlich.
+
 ## Calendar
 
 `calendar_data.php` prüft Jahresgrenzen, Schaltjahre, Zeitumstellungen,

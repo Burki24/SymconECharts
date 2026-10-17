@@ -12,6 +12,7 @@ use RuntimeException;
 final class EChartsAsset
 {
     public const VERSION = '6.1.0';
+    public const FUNNEL_SHA256 = 'da9750dd18363325d23b1bcd4ea3af7e1011620b80b994ad6c2d5e3ee819314d';
     public const SHA256 = '37d8c9774f27fc12e048e269e8ec6a114782529fb85262a6be8c6b887207c07f';
     public const CARTESIAN_SHA256 = '92954fbddaa6b7c09f25819ab7b4743eb6afd5efa92351f129b14d298d2ab31a';
     public const SCATTER_SHA256 = 'd759229d5b223da5b3badff736a732f978efc30c3e91d8913aa3e90d01b2974a';
@@ -349,6 +350,21 @@ final class EChartsAsset
         $canonicalContent = self::NormalizeLineEndings($content);
         if (!hash_equals(self::SANKEY_SHA256, hash('sha256', $canonicalContent))) {
             throw new RuntimeException('The bundled Apache ECharts Sankey runtime failed its integrity check.');
+        }
+        return $canonicalContent;
+    }
+
+    /** Loads the pinned Funnel runtime without enlarging other chart bundles. */
+    public static function FunnelJavaScript(): string
+    {
+        $path = __DIR__ . '/echarts/' . self::VERSION . '/echarts.funnel.min.js';
+        $content = @file_get_contents($path);
+        if ($content === false || $content === '') {
+            throw new RuntimeException('The bundled Apache ECharts Funnel runtime could not be loaded.');
+        }
+        $canonicalContent = self::NormalizeLineEndings($content);
+        if (!hash_equals(self::FUNNEL_SHA256, hash('sha256', $canonicalContent))) {
+            throw new RuntimeException('The bundled Apache ECharts Funnel runtime failed its integrity check.');
         }
         return $canonicalContent;
     }

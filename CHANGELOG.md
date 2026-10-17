@@ -2,6 +2,11 @@
 
 ## Hinzugefügt
 
+- `EChartsFunnel` (`ECFU`) zeigt 1–16 manuell benannte Stufen mit aktuellen,
+  nichtnegativen Variablenwerten derselben Einheit. Kachel und IPSView besitzen
+  getrennte Designer für Ausrichtung, Reihenfolge, Abstände, Beschriftungen,
+  Farben, Schriftgrößen, Rahmen und Deckkraft sowie aktuelle Vorschauen.
+
 - Der Boxplot-Designer bietet minimale Boxbreite, Randlinienarten,
   Schatten mit Farbe und Versatz, abschaltbare Hover-Hervorhebung,
   feinere Kategorienbeschriftungen und Achsen, Rastergestaltung sowie

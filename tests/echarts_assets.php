@@ -14,6 +14,12 @@ function assertEChartsAsset(bool $condition, string $message): void
 }
 
 $root = dirname(__DIR__);
+$funnelRuntime = EChartsAsset::FunnelJavaScript();
+assertEChartsAsset(
+    hash_file('sha256', $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.funnel.min.js') === EChartsAsset::FUNNEL_SHA256
+        && strlen($funnelRuntime) < 550000 && str_contains($funnelRuntime, 'window.echarts'),
+    'The Funnel runtime must be pinned and remain below 550 KB.'
+);
 $boxplotRuntime = EChartsAsset::BoxplotJavaScript();
 assertEChartsAsset(
     hash_file('sha256', $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.boxplot.min.js') === EChartsAsset::BOXPLOT_SHA256

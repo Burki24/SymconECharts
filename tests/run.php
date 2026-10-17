@@ -54,6 +54,7 @@ $commands = [
     ['Test Sunburst layout', 'node tests/sunburst_layout.js'],
     ['Test Parallel layout', 'node tests/parallel_layout.js'],
     ['Test Boxplot layout', 'node tests/boxplot_layout.js'],
+    ['Test Funnel layout', 'node tests/funnel_layout.js'],
     ['Test Radar layout', 'node tests/radar_layout.js'],
     ['Test Sankey layout', 'node tests/sankey_layout.js'],
     ['Test Calendar layout and navigation', 'node tests/calendar_layout.js'],

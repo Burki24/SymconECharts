@@ -18,6 +18,7 @@ Calendar stellt archivierte Tagesmittelwerte als farbigen Jahreskalender dar.
 Radar vergleicht aktuelle Messwerte manuell angelegter Gruppen auf gemeinsam
 festgelegten Achsen mit eigenen Wertebereichen und Einheiten.
 Boxplot vergleicht die Verteilung abgeschlossener Archiv-Stundenmittelwerte.
+Funnel vergleicht aktuelle, nichtnegative Stufenwerte derselben Einheit.
 
 Alle Diagrammformulare zeigen eine unmittelbar aktualisierte SVG-Vorschau
 im Kachel- und IPSView-Designer. Sie reagiert auf noch nicht gespeicherte
@@ -40,6 +41,10 @@ Diagrammtitel ohne diesen Kachel-Kopfbereich.
 ## Enthaltene Module
 
 Folgende Module sind enthalten:
+
+- __EChartsFunnel__ ([Dokumentation](EChartsFunnel/README.md))
+  Manuell benannte Stufen aus 1–16 aktuellen Variablenwerten derselben Einheit.
+  Listenreihenfolge oder Wertsortierung, getrennte Designer für Kachel und IPSView.
 
 - __EChartsBoxplot__ ([Dokumentation](EChartsBoxplot/README.md))
   Verteilungen aus 1–10 Standard-Archivvariablen derselben Einheit über

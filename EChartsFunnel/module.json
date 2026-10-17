@@ -1,0 +1,18 @@
+{
+    "id": "{491282D5-3E26-4601-AEA7-ABD7404642B2}",
+    "name": "EChartsFunnel",
+    "type": 3,
+    "vendor": "",
+    "aliases": [
+        "ECharts Funnel"
+    ],
+    "parentRequirements": [
+        "{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}"
+    ],
+    "childRequirements": [],
+    "implemented": [
+        "{E4749B72-912B-E3E3-1C57-D19019FFDD84}"
+    ],
+    "prefix": "ECFU",
+    "url": "https://github.com/Burki24/SymconECharts"
+}

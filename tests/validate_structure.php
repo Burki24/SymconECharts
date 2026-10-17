@@ -199,6 +199,15 @@ $requiredFiles = [
     'tests/radar_model.php',
     'tests/radar_integration.php',
     'tests/radar_layout.js',
+    'EChartsFunnel/FunnelPreview.php',
+    'EChartsFunnel/visualization/index.html',
+    'EChartsFunnel/visualization/style.css',
+    'EChartsFunnel/visualization/app.js',
+    'libs/echarts/6.1.0/echarts.funnel.min.js',
+    '.tools/echarts-runtime/src/funnel-runtime.js',
+    'docs/adr/0055-current-value-funnel.md',
+    'tests/funnel_integration.php',
+    'tests/funnel_layout.js',
     'EChartsBoxplot/BoxplotStatistics.php',
     'EChartsBoxplot/BoxplotPreview.php',
     'EChartsBoxplot/visualization/index.html',
@@ -429,7 +438,7 @@ if ($helperSync !== null) {
 }
 
 $expectedModules = [
-    'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarPolar', 'EChartsBarWaterfall', 'EChartsBoxplot', 'EChartsCalendar', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
+    'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarPolar', 'EChartsBarWaterfall', 'EChartsBoxplot', 'EChartsCalendar', 'EChartsFunnel', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
     'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsGraph', 'EChartsGraphZ2M', 'EChartsHeatmap', 'EChartsParallel', 'EChartsPie', 'EChartsRadar', 'EChartsSankey', 'EChartsScatter', 'EChartsSunburst', 'EChartsTimeSeries', 'EChartsTree', 'EChartsTreeSystemHealth', 'EChartsTreemap'
 ];
 $discoveredModules = [];

@@ -7,7 +7,7 @@
         "node": ">=18"
     },
     "scripts": {
-        "build": "npm run build:runtime && npm run build:cartesian && npm run build:scatter && npm run build:heatmap && npm run build:polar && npm run build:pie && npm run build:tree && npm run build:graph && npm run build:treemap && npm run build:sunburst && npm run build:parallel && npm run build:sankey && npm run build:calendar && npm run build:radar && npm run build:boxplot && npm run build:themes",
+        "build": "npm run build:runtime && npm run build:cartesian && npm run build:scatter && npm run build:heatmap && npm run build:polar && npm run build:pie && npm run build:tree && npm run build:graph && npm run build:treemap && npm run build:sunburst && npm run build:parallel && npm run build:sankey && npm run build:calendar && npm run build:radar && npm run build:boxplot && npm run build:funnel && npm run build:themes",
         "build:runtime": "esbuild src/gauge-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.gauge.min.js",
         "build:cartesian": "esbuild src/cartesian-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.cartesian.min.js",
         "build:scatter": "esbuild src/scatter-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.scatter.min.js",
@@ -23,7 +23,8 @@
         "build:themes": "node scripts/copy-themes.mjs",
         "build:calendar": "esbuild src/calendar-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.calendar.min.js",
         "build:radar": "esbuild src/radar-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.radar.min.js",
-        "build:boxplot": "esbuild src/boxplot-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.boxplot.min.js"
+        "build:boxplot": "esbuild src/boxplot-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.boxplot.min.js",
+        "build:funnel": "esbuild src/funnel-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.funnel.min.js"
     },
     "dependencies": {
         "echarts": "6.1.0"
