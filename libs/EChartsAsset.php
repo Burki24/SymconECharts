@@ -12,6 +12,7 @@ use RuntimeException;
 final class EChartsAsset
 {
     public const VERSION = '6.1.0';
+    public const THEME_RIVER_SHA256 = 'd4739d560c4fc4ce0ac1ad3f81334aa7c8e10d7143cb86d89853a6008955d8dc';
     public const PICTORIAL_BAR_SHA256 = 'aa455b075155c605bb5253642d8f696927b08ad7fa46487a83810eb1d8a03a6f';
     public const CANDLESTICK_SHA256 = '99147592d9a85f19c776b0f6bfd49c8becaf872d825fd9dbe9553202384598bd';
     public const FUNNEL_SHA256 = 'da9750dd18363325d23b1bcd4ea3af7e1011620b80b994ad6c2d5e3ee819314d';
@@ -339,6 +340,20 @@ final class EChartsAsset
         }
 
         return $canonicalContent;
+    }
+
+    /** Loads the pinned ThemeRiver runtime without enlarging existing chart bundles. */
+    public static function ThemeRiverJavaScript(): string
+    {
+        $content = @file_get_contents(__DIR__ . '/echarts/' . self::VERSION . '/echarts.theme-river.min.js');
+        if ($content === false || $content === '') {
+            throw new RuntimeException('The bundled Apache ECharts ThemeRiver runtime could not be loaded.');
+        }
+        $canonical = self::NormalizeLineEndings($content);
+        if (!hash_equals(self::THEME_RIVER_SHA256, hash('sha256', $canonical))) {
+            throw new RuntimeException('The bundled Apache ECharts ThemeRiver runtime failed its integrity check.');
+        }
+        return $canonical;
     }
 
     /** Loads the pinned Sankey runtime without enlarging other chart bundles. */

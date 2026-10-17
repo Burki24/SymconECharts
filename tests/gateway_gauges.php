@@ -938,6 +938,21 @@ assertGatewayGauge(
 );
 IPSModuleStrict::$ParentResponder = static fn (string $json): string => $gateway->ForwardData($json);
 
+// Reuse the real Gateway and Kernel doubles without retaining every previous family's HTML fixtures.
+if (($argv[1] ?? '') === '--theme-river-preview') {
+    require_once dirname(__DIR__) . '/EChartsThemeRiver/module.php';
+    $riverPreview = new EChartsThemeRiver();
+    $riverPreview->Create();
+    $riverPreview->UpdateBarPreviewFromForm($argv[2] ?? '{}');
+    $previewUpdate = array_slice($riverPreview->GetTestFormUpdates(), -2)[0];
+    echo base64_decode(substr($previewUpdate['Value'], strlen('data:image/svg+xml;base64,')));
+    exit(0);
+}
+if (array_slice($argv, 1) === ['--theme-river']) {
+    require __DIR__ . '/theme_river_integration.php';
+    exit(0);
+}
+
 $gauge = new EChartsGaugeSingle();
 $gauge->Create();
 $gauge->SetTestProperty('SourceVariableID', 4711);

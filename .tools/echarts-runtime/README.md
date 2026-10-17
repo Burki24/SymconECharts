@@ -1,5 +1,11 @@
 # Diagrammfamilienspezifische ECharts-Runtimes erzeugen
 
+Der ThemeRiver-Einstieg enthält ThemeRiver Chart, SingleAxis, Legende, Graphic, Titel,
+Tooltip, Aria und Canvas Renderer aus demselben unveränderten ECharts 6.1.0.
+`npm run build:theme-river` erzeugt ausschließlich
+`../../libs/echarts/6.1.0/echarts.theme-river.min.js`. Die offiziellen Einstiege,
+API, aktuelle stabile npm-Version und Lizenz wurden am 17.10.2026 erneut geprüft.
+
 Der PictorialBar-Einstieg enthält PictorialBar Chart, Grid, Titel, Tooltip,
 Aria, LabelLayout und CanvasRenderer. `npm run build:pictorial-bar` erzeugt
 ausschließlich `../../libs/echarts/6.1.0/echarts.pictorial-bar.min.js` aus dem

@@ -262,6 +262,33 @@ StylePHP und PHP CS Fixer.
 - `test_update_library_metadata.py` prüft Versionsfortschreibung, Build- und
   Datumsableitung sowie den Schutz vor einer Versionsrückstufung.
 
+## ThemeRiver
+
+- `php tests/theme_river_data.php` prüft abgeschlossene Stunden und lokale
+  Kalendertage einschließlich beider DST-Wechsel, echte Nullwerte, negative/
+  nichtendliche Daten, exakte Zeitstempel und Lücken ohne Nullauffüllung.
+- `php tests/gateway_gauges.php --theme-river` nutzt denselben echten Gateway
+  und dieselben Kernel-Doppel wie die bisherige Integration, läuft aber wegen
+  deren angesammelter HTML-Fixtures in einem eigenen Prozess. Geprüft werden
+  Quellenidentität und gleiche Namen, Einheiten, explizite Mittelwerte,
+  Zählerablehnung, Quellenreferenzen, Vorschauentwürfe ohne Archivzugriff,
+  unabhängige Designer, Kopie/Vererbung, deutsche Texte, Transientfehler und
+  das 1.048.576-Byte-Limit bei acht Quellen und 720 vollständigen Intervallen.
+- `node tests/theme_river_layout.js` prüft den produktiven Optionsaufbau und
+  die echte gepinnte ECharts-Engine: Abschnitte ohne Lückenüberbrückung,
+  gemeinsame Pixelmaßstäbe, Nullausgaben ohne Division durch Null, sichere
+  Tooltip-Zuordnung an der Zeigerposition und Anzeigenamen statt interner IDs.
+- `node tests/theme_river_browser.mjs` bietet die rein lokale Canvas-Fixture
+  unter `http://127.0.0.1:8802`. `/chart?mode=symcon` und
+  `/chart?mode=ipsview&theme=light&design=extended` prüfen dunkle Kachel und
+  helle IPSView mit acht Quellen; `case=zero`, `case=empty` und `case=dense`
+  ergänzen Grenzfälle. `/preview.svg` erzeugt die tatsächliche PHP-Vorschau
+  über den vorhandenen Bootstrap mit `--theme-river-preview`.
+
+Am 17.10.2026 wurden lokale Kachel-/IPSView-Darstellung, Titelabstände,
+Lücken und Tooltipausblendung sowie die Nullanzeige visuell geprüft.
+Live-Tests in Symcon und IPSView stehen nach dem Modulupdate noch aus.
+
 ## Funnel
 
 Die Designer-Erweiterung prüft optische Größenbegrenzung mit unveränderten

@@ -24,6 +24,7 @@ $tests = [
     __DIR__ . '/label_design.php',
     __DIR__ . '/scatter_pairing.php',
     __DIR__ . '/parallel_pairing.php',
+    __DIR__ . '/theme_river_data.php',
     __DIR__ . '/heatmap_aggregation.php',
     __DIR__ . '/heatmap_window.php',
     __DIR__ . '/tree_hierarchy.php',
@@ -41,6 +42,7 @@ $tests = [
 ];
 
 $commands = [
+    ['Test ThemeRiver Gateway and output integration', 'php tests/gateway_gauges.php --theme-river'],
     ['Verify local quality runner', 'php tests/quality.php --help'],
     ['Test persistent IPSView transport', 'node tests/ipsview_transport.js'],
     ['Test shared ECharts zoom', 'node tests/echarts_zoom.js'],
@@ -56,6 +58,7 @@ $commands = [
     ['Test Treemap layout', 'node tests/treemap_layout.js'],
     ['Test Sunburst layout', 'node tests/sunburst_layout.js'],
     ['Test Parallel layout', 'node tests/parallel_layout.js'],
+    ['Test ThemeRiver layout', 'node tests/theme_river_layout.js'],
     ['Test Boxplot layout', 'node tests/boxplot_layout.js'],
     ['Test Candlestick layout', 'node tests/candlestick_layout.js'],
     ['Test Funnel layout', 'node tests/funnel_layout.js'],

@@ -14,6 +14,12 @@ function assertEChartsAsset(bool $condition, string $message): void
 }
 
 $root = dirname(__DIR__);
+assertEChartsAsset(
+    hash_file('sha256', $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.theme-river.min.js') === EChartsAsset::THEME_RIVER_SHA256
+    && strlen(EChartsAsset::ThemeRiverJavaScript()) < 550000
+    && str_contains(EChartsAsset::ThemeRiverJavaScript(), 'window.echarts'),
+    'ThemeRiver must load its own integrity-pinned bounded local runtime.'
+);
 $pictorialRuntime = EChartsAsset::PictorialBarJavaScript();
 assertEChartsAsset(
     hash_file('sha256', $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.pictorial-bar.min.js') === EChartsAsset::PICTORIAL_BAR_SHA256

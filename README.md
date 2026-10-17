@@ -49,6 +49,11 @@ Die Namen in der Modulauswahl entsprechen den hier aufgeführten Modulnamen
 ohne Leerzeichen, etwa `EChartsPictorialBar`. Namen vorhandener Instanzen
 können unabhängig davon individuell vergeben werden.
 
+- __EChartsThemeRiver__ ([Dokumentation](EChartsThemeRiver/README.md))
+  Nichtnegative Stunden- oder Tagesmittelwerte von 1–8 Standard-Archivvariablen
+  derselben Einheit als farbige Bänder. Archivlücken bleiben sichtbar;
+  Kachel und IPSView besitzen getrennte Designer und Vorschauen.
+
 - __EChartsPictorialBar__ ([Dokumentation](EChartsPictorialBar/README.md))
   Aktuelle Werte aus 1–16 Variablen derselben Einheit als einzelne oder
   wiederholte Grundformen. Getrennte Designer für Kachel und IPSView.

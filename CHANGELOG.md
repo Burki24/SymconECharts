@@ -2,6 +2,12 @@
 
 ## Neu
 
+- EChartsThemeRiver zeigt nichtnegative Stunden- oder Tagesmittelwerte aus
+  bis zu acht Standard-Archivvariablen derselben Einheit als farbige Bänder.
+  Archivlücken unterbrechen die Darstellung, ohne Nullwerte vorzutäuschen.
+  Kachel und IPSView bieten getrennte Designer mit Live-Vorschauen,
+  Schrift-/Farbwahl, Legende, Bandkontur und Animation.
+
 - PictorialBar importiert eigene pfadbasierte SVG-Formen über eine Dateiauswahl
   in beiden Designern. Kachel, IPSView und Live-Vorschauen unterstützen sie
   als Einzel- oder Wiederholungsform mit allen Farbmodi einschließlich

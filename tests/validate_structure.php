@@ -6,6 +6,17 @@ $root = dirname(__DIR__);
 $errors = [];
 
 $requiredFiles = [
+    'docs/adr/0058-archive-theme-river.md',
+    'EChartsThemeRiver/ThemeRiverData.php',
+    'EChartsThemeRiver/ThemeRiverPreview.php',
+    'EChartsThemeRiver/visualization/index.html',
+    'EChartsThemeRiver/visualization/style.css',
+    'EChartsThemeRiver/visualization/app.js',
+    'libs/echarts/6.1.0/echarts.theme-river.min.js',
+    '.tools/echarts-runtime/src/theme-river-runtime.js',
+    'tests/theme_river_data.php',
+    'tests/theme_river_integration.php',
+    'tests/theme_river_layout.js',
     'AGENTS.md',
     '.gitattributes',
     '.gitignore',
@@ -460,7 +471,7 @@ if ($helperSync !== null) {
 
 $expectedModules = [
     'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarPolar', 'EChartsBarWaterfall', 'EChartsBoxplot', 'EChartsCalendar', 'EChartsCandlestick', 'EChartsFunnel', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
-    'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsGraph', 'EChartsGraphZ2M', 'EChartsHeatmap', 'EChartsParallel', 'EChartsPictorialBar', 'EChartsPie', 'EChartsRadar', 'EChartsSankey', 'EChartsScatter', 'EChartsSunburst', 'EChartsTimeSeries', 'EChartsTree', 'EChartsTreeSystemHealth', 'EChartsTreemap'
+    'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsGraph', 'EChartsGraphZ2M', 'EChartsHeatmap', 'EChartsParallel', 'EChartsPictorialBar', 'EChartsPie', 'EChartsRadar', 'EChartsSankey', 'EChartsScatter', 'EChartsSunburst', 'EChartsThemeRiver', 'EChartsTimeSeries', 'EChartsTree', 'EChartsTreeSystemHealth', 'EChartsTreemap'
 ];
 $discoveredModules = [];
 foreach (glob($root . '/*/module.json') ?: [] as $modulePath) {

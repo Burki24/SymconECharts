@@ -21,6 +21,13 @@ IPSView nur den Diagrammtitel benötigt.
 
 ## Aktueller Stand und Zielarchitektur
 
+ThemeRiver (`ECRV`) ergänzt abgeschlossene Standard-Archivmittelwerte gemäß
+[ADR 0058](adr/0058-archive-theme-river.md). Eigene Intervallaufbereitung und
+Unterbrechung vollständiger Abschnitte verhindern ECharts-Nullauffüllung.
+Gemeinsame Quellen-, Designer-, Vorschau- und Transportbausteine bleiben
+unverändert. Die Modul-GUID ist `{6767D036-5E2B-4D33-B7F1-C9F1B4376C04}`.
+Live-Abnahmen in Symcon und IPSView sind nach dem Modulupdate erforderlich.
+
 PictorialBar ergänzt aktuelle Vergleiche als eigene Symbolbalkenfamilie.
 Der Quellenvertrag wurde mit Funnel in
 `libs/EChartsCurrentComparisonSources.php` zentralisiert; Gateway-Zugriff,

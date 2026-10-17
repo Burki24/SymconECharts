@@ -74,6 +74,9 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Verteilungen abgeschlossener Stundenmittelwerte von Archivvariablen liegen
   in `EChartsBoxplot` gemäß ADR 0054; Quartile werden nicht aus Tagesaggregaten
   approximiert und fehlende Intervalle nicht als Null ergänzt.
+  Nichtnegative Stunden- oder Tagesmittelwerte gleicher Einheit liegen als
+  Archivbänder im eigenständigen `EChartsThemeRiver` gemäß ADR 0058;
+  fehlende Quellen unterbrechen ein Intervall ohne Nullauffüllung.
 - Das Gateway stellt ausschließlich familienübergreifende Infrastruktur wie
   Archivzugriff, begrenztes Caching, gemeinsame Ressourcen und gegebenenfalls
   abgesicherte IPSView-Kommunikation bereit. Familienbezogene Properties,
@@ -121,6 +124,11 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Helper nicht lokal verändert.
 
 ## Modulpräfixe
+
+- `ECRV` ist `EChartsThemeRiver` zugeordnet (`RV` = River), GUID
+  `{6767D036-5E2B-4D33-B7F1-C9F1B4376C04}` gemäß ADR 0058.
+  Die eigenständige Archivfamilie verwendet ausschließlich abgeschlossene
+  Stunden-/Tagesmittelwerte nichtnegativer Standardvariablen gleicher Einheit.
 
 - Technische Modulnamen und deren Anzeige folgen einheitlich `ECharts` plus
   Familienname ohne Leerzeichen, beispielsweise `EChartsPictorialBar`.
