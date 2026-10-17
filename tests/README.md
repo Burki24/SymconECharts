@@ -21,6 +21,19 @@ neuen Text-/Raster-/Schattenstile, `?symbols=single` einzelne Formen und
 `?theme=light` einen hellen Hintergrund. Diese lokale Prüfung ersetzt keine
 Live-Abnahme der Erweiterung nach Modulupdate.
 
+Der zusätzliche räumliche Verlauf wird für 0–100 %, 0–255 LQI, nichtnullige
+Minima, automatische Zeichenskalen und optisch begrenzte Werte geprüft.
+Alle fünf Formen, Einzel-/Wiederholung und beide Ausrichtungen laufen gegen
+die echte Engine. Dabei werden auch die tatsächlichen Texttransformationen
+am Messwertende statt an den Compound-Pfadgrenzen geprüft. Der intern
+erzeugte Pfad bleibt bei sehr breiten Ansichten auf 128 Teilformen begrenzt.
+SVG-Vorschau, unabhängige Modi, Kopieren und unveränderte Entwurfs-Properties
+sind im Integrationstest abgedeckt. Browserfixture: `?color=gradient`,
+optional `&range=lqi`, `&symbols=single` oder `&theme=light`. Dunkle hohe und
+breite Wiederholungsansichten sowie helle LQI-Einzelformen wurden am
+17.10.2026 lokal visuell geprüft. Die neue Live-Kachel-/IPSView-Abnahme nach
+Modulupdate bleibt offen.
+
 Candlestick: `php tests/candlestick_data.php` prüft abgeschlossene Stunden/
 Tage, Sommerzeit, erste/letzte Rohpunkte, Extrema, Lücken, Einzelwerte,
 Trunkierung und Abfragelimits. `candlestick_integration.php` wird im

@@ -68,12 +68,39 @@ Der neue Modus übersteuert Quellfarben nur bei der Ausgabe. Standard bleibt
 `category`, ohne Migration oder Änderung bestehender Properties. Alle neuen
 Properties werden symmetrisch für beide Designer registriert und kopiert.
 
-Die Färbung betrifft den gesamten Balken. Ein räumlicher Gradient je wiederholtem
-Glyph würde in jedem Symbol neu beginnen und wird nicht als Batterie-Füllverlauf
-angeboten. Freie Bilder/SVG, Texturen, Callback-Code, Marker und zusätzliche
-Koordinatensysteme bleiben außerhalb dieses Vertrags. Ein kontrollierter
-Bildimport oder räumlicher Verlauf über Symbolgruppen benötigt einen eigenen
-nachgewiesenen Renderer-Vertrag. Die Runtime und das Gateway bleiben unverändert.
+Der Modus `value` färbt weiterhin jeden Balken einheitlich. Freie Bilder/SVG,
+Texturen, Callback-Code, Marker und zusätzliche Koordinatensysteme bleiben
+außerhalb dieses Vertrags. Die Runtime und das Gateway bleiben unverändert.
+
+### Skalenbezogener räumlicher Verlauf vom 17.10.2026
+
+Auf ausdrücklichen Anwenderwunsch ergänzt `ColorMode=gradient` einen räumlichen
+Verlauf; `category`, `value`, ihre Defaults und alle gespeicherten Properties
+bleiben unverändert. Minimum und Maximum beziehen sich immer auf den festen
+Farbbereich, nicht auf den aktuellen Balkenendwert oder die aktuelle Verteilung.
+Bei 0–100 % und 16 % wird nur der entsprechende Anfang sichtbar; bei 0–255 LQI
+liegt die mittlere Farbe bei 127,5. Randfarben gelten außerhalb der Grenzen.
+
+Bei wiederholten Symbolen erzeugt der Browser aus den fünf bereits zugelassenen
+Grundformen einen begrenzten zusammengesetzten `path://`-Symbolpfad. Dessen
+unsichtbare Null-Linien fixieren den vollständigen Koordinatenrahmen. Alle
+Teilformen teilen dadurch einen ECharts-Lineargradienten; BoundingData und
+Clipping begrenzen die sichtbare Länge am Originalmesswert beziehungsweise
+Zeichenmaximum. Die vier Wertepositionen werden über den öffentlichen
+`labelLayout`-Callback am tatsächlichen Balkenende ausgerichtet, nicht an den
+vollen Pfadgrenzen. Einzelformen behalten ihre wertabhängige Geometrie und
+erhalten den auf diesen sichtbaren Ausschnitt begrenzten Farbverlauf.
+
+Die Pfade bestehen ausschließlich aus intern erzeugten endlichen Koordinaten
+mit höchstens 128 Teilformen. Benutzereingaben für Pfade, externe Bilder,
+zusätzliche Ressourcen oder Änderungen an ECharts sind dafür nicht erforderlich.
+ECharts-Gradienten verwenden normierte Endpunkte und nur die relevanten
+Farbgrenzen im sichtbaren Bereich, um extreme Gradientkoordinaten zu vermeiden.
+Die PHP-Vorschau zeichnet direkt in einem gemeinsamen SVG-Koordinatensystem
+und clippt wiederholte Formen am aktuellen Wert, statt Verläufe in Patterns
+zu wiederholen. Beide Designer, Vererbung und Kopieren verwenden denselben Modus.
+
+Grundlage ist das offizielle [Symbol-/Pfadformat](https://github.com/apache/echarts-doc/blob/master/en/option/partial/icon.md).
 
 Grundlagen: [offizielle PictorialBar-Dokumentation](https://github.com/apache/echarts-doc/blob/master/en/option/series/pictorialBar.md)
 und [ItemStyle](https://github.com/apache/echarts-doc/blob/master/en/option/partial/item-style.md).

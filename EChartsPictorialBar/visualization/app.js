@@ -59,6 +59,38 @@
             seriesColors: colors.seriesColors
         };
     }
+    // Internally generated paths only: one bounded compound shape gives all
+    // repeated glyphs the same gradient coordinate system without renderer hooks.
+    function gradientGroupPath(kind, horizontal, major, width, size, crossSize, gap) {
+        var n = function(value) { return Math.round(value * 10000) / 10000; };
+        var w = horizontal ? major : width, h = horizontal ? width : major;
+        var path = 'M0 0L0 0M' + n(w) + ' ' + n(h) + 'L' + n(w) + ' ' + n(h);
+        size = Math.min(size, major);
+        var count = Math.max(1, Math.min(128, Math.floor((major + 2 * gap) / (size + 2 * gap))));
+        var step = count > 1 ? (major - size) / (count - 1) : 0;
+        for (var i = 0; i < count; i++) {
+            var x = horizontal ? i * step : (width - crossSize) / 2;
+            var y = horizontal ? (width - crossSize) / 2 : major - size - i * step;
+            var sw = horizontal ? size : crossSize, sh = horizontal ? crossSize : size;
+            var x2 = x + sw, y2 = y + sh, cx = x + sw / 2, cy = y + sh / 2;
+            if (kind === 'circle') {
+                path += 'M' + n(x2) + ' ' + n(cy) + 'A' + n(sw/2) + ' ' + n(sh/2) + ' 0 1 0 ' + n(x) + ' ' + n(cy)
+                    + 'A' + n(sw/2) + ' ' + n(sh/2) + ' 0 1 0 ' + n(x2) + ' ' + n(cy) + 'Z';
+            } else if (kind === 'diamond' || kind === 'triangle') {
+                path += 'M' + n(cx) + ' ' + n(y) + 'L' + n(x2) + ' ' + n(kind === 'diamond' ? cy : y2)
+                    + (kind === 'diamond' ? 'L' + n(cx) + ' ' + n(y2) : '') + 'L' + n(x) + ' ' + n(kind === 'diamond' ? cy : y2) + 'Z';
+            } else if (kind === 'roundRect') {
+                var r = Math.min(sw, sh) / 4;
+                path += 'M' + n(x+r) + ' ' + n(y) + 'L' + n(x2-r) + ' ' + n(y) + 'Q' + n(x2) + ' ' + n(y) + ' ' + n(x2) + ' ' + n(y+r)
+                    + 'L' + n(x2) + ' ' + n(y2-r) + 'Q' + n(x2) + ' ' + n(y2) + ' ' + n(x2-r) + ' ' + n(y2)
+                    + 'L' + n(x+r) + ' ' + n(y2) + 'Q' + n(x) + ' ' + n(y2) + ' ' + n(x) + ' ' + n(y2-r)
+                    + 'L' + n(x) + ' ' + n(y+r) + 'Q' + n(x) + ' ' + n(y) + ' ' + n(x+r) + ' ' + n(y) + 'Z';
+            } else {
+                path += 'M' + n(x) + ' ' + n(y) + 'L' + n(x2) + ' ' + n(y) + 'L' + n(x2) + ' ' + n(y2) + 'L' + n(x) + ' ' + n(y2) + 'Z';
+            }
+        }
+        return 'path://' + path;
+    }
     function buildOption(model, theme) {
         var colors = colorsFor(theme);
         var bar = model.pictorialBar || {};
@@ -85,19 +117,45 @@
         var size = Math.max(4,style.symbolSize || 12,Math.ceil(major/128));
         var crossSize = Math.max(1,Math.min(size,barWidth));
         var repeated = style.symbolRepeat !== false;
+        var gradient = style.colorMode === 'gradient';
         var fontFamily = style.fontFamily || 'Arial, sans-serif';
-        function itemColor(item) {
-            if (style.colorMode !== 'value') {
-                return item.color || (colors.seriesColors || [colors.accent])[item.order % (colors.seriesColors || [colors.accent]).length];
-            }
+        function rampColor(value) {
             var minimum = style.colorMinimum == null ? 0 : style.colorMinimum;
             var maximum = style.colorMaximum == null ? 100 : style.colorMaximum;
-            var ratio = Math.max(0, Math.min(1, (item.value - minimum) / (maximum - minimum || 1)));
+            var ratio = Math.max(0, Math.min(1, (value - minimum) / (maximum - minimum || 1)));
             var stops = [style.lowColor || '#ee6666', style.middleColor || '#fac858', style.highColor || '#91cc75'];
             return design.interpolateColorStops(stops, ratio);
         }
+        function itemColor(item) {
+            if (style.colorMode === 'value') { return rampColor(item.value); }
+            if (!gradient) { return item.color || (colors.seriesColors || [colors.accent])[item.order % (colors.seriesColors || [colors.accent]).length]; }
+            var domain = repeated ? maximum : Math.min(maximum, item.value);
+            if (domain <= 0) { return rampColor(0); }
+            var low = style.colorMinimum == null ? 0 : style.colorMinimum;
+            var high = style.colorMaximum == null ? 100 : style.colorMaximum;
+            var points = [0].concat([low, low + (high-low)/2, high].filter(function(v) { return v > 0 && v < domain; }), [domain]);
+            // Trim the ramp to the visible domain: avoid huge gradient coordinates
+            // for small values, but never renormalize the configured color range.
+            return {type:'linear',x:0,y:horizontal ? 0 : 1,x2:horizontal ? 1 : 0,y2:0,global:false,
+                colorStops:points.map(function(v) { return {offset:v/domain,color:rampColor(v)}; })};
+        }
         var valuePositions = horizontal ? {outside:'right',inside:'inside',insideStart:'insideLeft',insideEnd:'insideRight'}
             : {outside:'top',inside:'inside',insideStart:'insideBottom',insideEnd:'insideTop'};
+        function gradientLabelLayout(params) {
+            var item = items[params.dataIndex];
+            var length = major * (Math.min(maximum, item.value) / maximum);
+            var distance = style.valueDistance == null ? 5 : style.valueDistance;
+            var position = style.valuePosition || 'outside';
+            var along = position === 'inside' ? length/2 : position === 'insideStart' ? distance
+                : position === 'insideEnd' ? length-distance : length+distance;
+            var center = (params.dataIndex + 0.5)*cross;
+            // The compound path spans the full scale for clipping. Anchor labels
+            // at the measured value, not its full-scale invisible bounds.
+            return {x:horizontal ? left+along : left+center,y:horizontal ? top+center : height-bottom-along,
+                align:horizontal ? (position === 'inside' ? 'center' : position === 'insideEnd' ? 'right' : 'left') : 'center',
+                verticalAlign:horizontal || position === 'inside' ? 'middle' : position === 'insideEnd' ? 'top' : 'bottom',
+                hideOverlap:style.hideOverlap !== false};
+        }
         var labels = Object.create(null);
         items.forEach(function(x){labels[x.id]=x.label;});
         function format(item) {
@@ -129,8 +187,10 @@
             tooltip:{show:style.showTooltip !== false,trigger:'item',confine:true,
                 extraCssText:'max-width:'+Math.max(80,width-24)+'px;white-space:normal;overflow-wrap:anywhere;',
                 formatter:function(p){var item=items[p.dataIndex];return item?escapeHTML(item.label)+'<br>'+escapeHTML(format(item)):'';}},
-            series:[{type:'pictorialBar',symbol:style.symbol || 'rect',symbolRepeat:repeated,symbolRepeatDirection:'start',
-                symbolSize:repeated?(horizontal?[size,crossSize]:[crossSize,size]):['100%','100%'],
+            series:[{type:'pictorialBar',symbol:gradient && repeated
+                ? gradientGroupPath(style.symbol || 'rect',horizontal,major,barWidth,size,crossSize,style.symbolGap == null ? 2 : style.symbolGap) : style.symbol || 'rect',
+                symbolRepeat:repeated && !gradient,symbolRepeatDirection:'start',
+                symbolSize:repeated && !gradient?(horizontal?[size,crossSize]:[crossSize,size]):['100%','100%'],
                 symbolMargin:style.symbolGap == null ? 2 : style.symbolGap,symbolClip:repeated,
                 ...(repeated?{symbolBoundingData:maximum}:{}),symbolPosition:'start',barWidth:barWidth,clip:true,
                 itemStyle:{opacity:style.opacityPercent == null ? 0.9 : style.opacityPercent/100,
@@ -144,9 +204,9 @@
                     distance:style.valueDistance == null ? 5 : style.valueDistance,fontFamily:fontFamily,fontWeight:style.valueBold === true ? 'bold' : 'normal',
                     fontSize:valueFont,overflow:'truncate',width:horizontal?Math.max(8,right-10):Math.max(12,cross*0.95),
                     formatter:function(p){return items[p.dataIndex]?format(items[p.dataIndex]):'';}},
-                labelLayout:{hideOverlap:style.hideOverlap !== false},
+                labelLayout:gradient && repeated ? gradientLabelLayout : {hideOverlap:style.hideOverlap !== false},
                 data:items.map(function(x){return {id:x.id,name:x.label,value:Math.min(maximum,x.value),
-                    itemStyle:{color:itemColor(x)}};})
+                    itemStyle:{color:itemColor(x),...(gradient && !style.borderColor ? {borderColor:itemColor(x)} : {})}};})
             }]
         };
     }

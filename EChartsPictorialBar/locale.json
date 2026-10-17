@@ -119,6 +119,7 @@
             "Symbol coloring": "Symbolfärbung",
             "Category colors": "Kategoriefarben",
             "Continuous color by value": "Stufenlos nach Wert",
+            "Gradient along the scale": "Farbverlauf entlang der Skala",
             "Color range minimum": "Farbskala Minimum",
             "Color range maximum": "Farbskala Maximum",
             "Low value color": "Farbe bei niedrigen Werten",

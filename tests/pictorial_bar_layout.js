@@ -119,6 +119,65 @@ const independentRange=render({...model,pictorialBar:{...model.pictorialBar,data
         lowColor:'#ff0000',middleColor:'#ffff00',highColor:'#00ff00'}}});
 assert.equal(independentRange.option.xAxis.max,25);
 assert.equal(independentRange.option.series[0].data[0].itemStyle.color,'#ff8000','Colors must not renormalize to current highest value.');
+const gradientStyle={...model.pictorialBar.style,colorMode:'gradient',colorMinimum:0,colorMaximum:100,
+    lowColor:'#ff0000',middleColor:'#ffff00',highColor:'#00ff00'};
+const gradient=render({...model,pictorialBar:{...model.pictorialBar,style:gradientStyle}});
+assert.equal(gradient.option.series[0].symbolRepeat,false,'One generated compound symbol must carry the gradient across the entire repeated group.');
+assert.match(gradient.option.series[0].symbol,/^path:\/\//);
+assert.equal(gradient.option.series[0].symbolClip,true);
+assert.equal(JSON.stringify(gradient.option.series[0].data[1].itemStyle.color.colorStops),
+    JSON.stringify([{offset:0,color:'#ff0000'},{offset:0.5,color:'#ffff00'},{offset:1,color:'#00ff00'}]));
+const gradientSingle=render({...model,pictorialBar:{...model.pictorialBar,style:{...gradientStyle,symbolRepeat:false}}});
+assert.equal(gradientSingle.option.series[0].symbol,'rect');
+assert.equal(JSON.stringify(gradientSingle.option.series[0].data[1].itemStyle.color.colorStops),
+    JSON.stringify([{offset:0,color:'#ff0000'},{offset:1,color:'#ff8000'}]),'A 25% symbol must not stretch the full red-yellow-green ramp into itself.');
+assert.equal(gradientSingle.option.series[0].data[0].itemStyle.color,'#ff0000');
+const lqi=render({...model,pictorialBar:{...model.pictorialBar,unit:'LQI',data:[40,127.5,255,300,0].map((value,i)=>({id:'l'+i,label:'LQI',value,order:i,unit:'LQI',decimals:1})),
+    style:{...gradientStyle,colorMaximum:255,scaleMaximum:255,symbolRepeat:false}}});
+assert.equal(lqi.option.series[0].data[0].itemStyle.color.colorStops.at(-1).color,'#ff5000');
+assert.equal(lqi.option.series[0].data[1].itemStyle.color.colorStops.at(-1).color,'#ffff00');
+assert.equal(lqi.option.series[0].data[2].itemStyle.color.colorStops.at(-1).color,'#00ff00');
+assert.equal(lqi.option.series[0].label.formatter({dataIndex:3}),'300 LQI');
+const offsetRamp=render({...model,pictorialBar:{...model.pictorialBar,style:{...gradientStyle,colorMinimum:20,colorMaximum:80}}});
+assert.equal(JSON.stringify(offsetRamp.option.series[0].data[1].itemStyle.color.colorStops),JSON.stringify([
+    {offset:0,color:'#ff0000'},{offset:0.2,color:'#ff0000'},{offset:0.5,color:'#ffff00'},{offset:0.8,color:'#00ff00'},{offset:1,color:'#00ff00'}]));
+const autoRamp=render({...model,pictorialBar:{...model.pictorialBar,data:[{...model.pictorialBar.data[1]}],style:{...gradientStyle,scaleMaximum:0}}});
+assert.equal(autoRamp.option.series[0].data[0].itemStyle.color.colorStops.at(-1).color,'#ff8000','Automatic geometry must not rescale the color range.');
+for (const symbol of ['rect','roundRect','circle','diamond','triangle']) {
+ for (const orientation of ['horizontal','vertical']) {
+  for (const symbolRepeat of [false,true]) {
+    const result=render({...model,pictorialBar:{...model.pictorialBar,style:{...gradientStyle,symbol,orientation,symbolRepeat,borderWidth:1}}},'ipsview',true,620);
+    const engine=echarts.init(null,null,{renderer:'svg',ssr:true,width:620,height:500});
+    engine.setOption(result.option);
+    const data=engine.getModel().getSeriesByIndex(0).getData();
+    assert.equal(data.getItemVisual(1,'style').fill.type,'linear');
+    assert.equal(data.getItemVisual(1,'style').fill.y,orientation==='horizontal'?0:1);
+    assert.ok(!engine.renderToSVGString().includes('NaN'));
+    assert.match(engine.renderToSVGString(),/<linearGradient/);
+    assert.equal(result.option.series[0].label.formatter({dataIndex:2}),'150 %');
+    const graphics=data.getItemGraphicEl(1);
+    const bounds=graphics.getBoundingRect();
+    assert.ok([bounds.x,bounds.y,bounds.width,bounds.height].every(Number.isFinite));
+    if(symbolRepeat) {
+        assert.equal((result.option.series[0].symbol.match(/Z/g)||[]).length<=128,true);
+        const layout=result.option.series[0].labelLayout({dataIndex:1});
+        const g=result.option.grid;
+        if(orientation==='horizontal') assert.equal(layout.x,g.left+(620-g.left-g.right)*0.25+5);
+        else assert.equal(layout.y,500-g.bottom-(500-g.top-g.bottom)*0.25-5);
+        const texts=[];
+        graphics.traverse(el=>{const text=el.getTextContent?.();if(text)texts.push(text);});
+        assert.equal(texts.length,1);
+        const transform=texts[0].getComputedTransform();
+        assert.ok(Math.abs(transform[4]-layout.x)<1 && Math.abs(transform[5]-layout.y)<1,
+            'Real-engine labels must follow measured values, not full-scale compound bounds.');
+    }
+    engine.dispose();
+  }
+ }
+}
+const hugeGradient=render({...model,pictorialBar:{...model.pictorialBar,style:{...gradientStyle,symbolSize:4,symbolGap:0}}},'ipsview',true,100000);
+assert.ok((hugeGradient.option.series[0].symbol.match(/Z/g)||[]).length<=128,'Compound symbols must remain bounded in very wide views.');
+assert.ok(hugeGradient.option.series[0].symbol.length<60000,'Generated geometry must have a bounded path payload.');
 for(const symbol of ['rect','roundRect','circle','diamond','triangle']){
  for(const orientation of ['vertical','horizontal']){
   for(const symbolRepeat of [false,true]){

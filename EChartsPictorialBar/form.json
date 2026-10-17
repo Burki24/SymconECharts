@@ -594,6 +594,10 @@
                                 {
                                     "caption": "Continuous color by value",
                                     "value": "value"
+                                },
+                                {
+                                    "caption": "Gradient along the scale",
+                                    "value": "gradient"
                                 }
                             ]
                         }

@@ -113,6 +113,18 @@ trait PictorialBarPreview
         $gridDash = match ($this->BarPreviewValue($values, 'GridType', 'string', $ipsView)) {
             'dashed' => ' stroke-dasharray="6 4"', 'dotted' => ' stroke-dasharray="2 3"', default => ''
         };
+        $gradient = $this->BarPreviewValue($values, 'ColorMode', 'string', $ipsView) === 'gradient';
+        if ($gradient) {
+            $low = $this->BarPreviewValue($values, 'ColorMinimum', 'float', $ipsView);
+            $high = $this->BarPreviewValue($values, 'ColorMaximum', 'float', $ipsView);
+            $points = [0.0, ...array_filter([$low, $low + ($high - $low) / 2, $high], static fn (float $v): bool => $v > 0 && $v < $maximum), $maximum];
+            $svg .= '<defs><linearGradient id="scale-gradient" gradientUnits="userSpaceOnUse" x1="' . $n($left)
+                . '" y1="' . $n($bottom) . '" x2="' . $n($horizontal ? $right : $left) . '" y2="' . $n($horizontal ? $bottom : $top) . '">';
+            foreach ($points as $point) {
+                $svg .= '<stop offset="' . $n($point / $maximum) . '" stop-color="' . $e($this->PictorialBarPreviewColor($values, $ipsView, $point)) . '"/>';
+            }
+            $svg .= '</linearGradient></defs>';
+        }
         for ($tick = 0; $tick <= 4; ++$tick) {
             $ratio = $tick / 4;
             $x = $horizontal ? $left + $major * $ratio : $left;
@@ -141,20 +153,33 @@ trait PictorialBarPreview
             $h = $horizontal ? $width : $length;
             $color = EChartsBarPreview::Color($item['Color'], $palette['seriesColors'][$item['order'] % count($palette['seriesColors'])]);
             if ($this->BarPreviewValue($values, 'ColorMode', 'string', $ipsView) === 'value') {
-                $minimum = $this->BarPreviewValue($values, 'ColorMinimum', 'float', $ipsView);
-                $colorMaximum = $this->BarPreviewValue($values, 'ColorMaximum', 'float', $ipsView);
-                $ratio = $colorMaximum > $minimum ? max(0, min(1, ($item['value'] - $minimum) / ($colorMaximum - $minimum))) : 0;
-                $stops = array_map(fn (string $name): int => max(0, min(0xFFFFFF, $this->BarPreviewValue($values, $name, 'integer', $ipsView))), ['LowColor', 'MiddleColor', 'HighColor']);
-                $a = $stops[$ratio <= 0.5 ? 0 : 1];
-                $b = $stops[$ratio <= 0.5 ? 1 : 2];
-                $t = $ratio <= 0.5 ? 2 * $ratio : 2 * ($ratio - 0.5);
-                $channels = array_map(static fn (int $shift): int => (int) round((($a >> $shift) & 255) + ((($b >> $shift) & 255) - (($a >> $shift) & 255)) * $t), [16, 8, 0]);
-                $color = sprintf('#%02x%02x%02x', ...$channels);
+                $color = $this->PictorialBarPreviewColor($values, $ipsView, $item['value']);
+            } elseif ($gradient) {
+                $color = 'url(#scale-gradient)';
             }
             $border = EChartsBarPreview::Color($this->BarPreviewValue($values, 'BorderColor', 'integer', $ipsView), $color);
             $svg .= '<g data-source="' . $item['order'] . '"' . ($hasShadow ? ' filter="url(#symbol-shadow)"' : '') . ' opacity="' . $n(max(0, min(100, $this->BarPreviewValue($values, 'OpacityPercent', 'integer', $ipsView))) / 100) . '">';
             if ($length > 0) {
-                if ($repeat) {
+                if ($repeat && $gradient) {
+                    // Draw in chart coordinates so the gradient does not restart
+                    // inside each glyph/pattern. Clip the full group at the value.
+                    $count = max(1, min(128, (int) floor(($major + 2 * $gap) / ($size + 2 * $gap))));
+                    $step = $count > 1 ? ($major - $size) / ($count - 1) : 0;
+                    $id = 'gradient-clip-' . $index;
+                    $svg .= '<defs><clipPath id="' . $id . '"><rect x="' . $n($x) . '" y="' . $n($y) . '" width="' . $n($w) . '" height="' . $n($h) . '"/></clipPath></defs><g clip-path="url(#' . $id . ')">';
+                    for ($glyph = 0; $glyph < $count; ++$glyph) {
+                        $svg .= $shape(
+                            $symbol,
+                            $horizontal ? $left + $glyph * $step : $x + ($width - $crossSize) / 2,
+                            $horizontal ? $y + ($width - $crossSize) / 2 : $bottom - $size - $glyph * $step,
+                            $horizontal ? $size : $crossSize,
+                            $horizontal ? $crossSize : $size,
+                            $color,
+                            $border
+                        );
+                    }
+                    $svg .= '</g>';
+                } elseif ($repeat) {
                     $id = 'symbols-' . $index;
                     $svg .= '<defs><pattern id="' . $id . '" patternUnits="userSpaceOnUse" x="' . $n($x) . '" y="' . $n($horizontal ? $y : $bottom - $size)
                         . '" width="' . $n($horizontal ? $size + 2 * $gap : $width) . '" height="' . $n($horizontal ? $width : $size + 2 * $gap) . '">'
@@ -207,5 +232,18 @@ trait PictorialBarPreview
             }
         }
         return $svg . '</svg>';
+    }
+
+    private function PictorialBarPreviewColor(array $values, bool $ipsView, float $value): string
+    {
+        $minimum = $this->BarPreviewValue($values, 'ColorMinimum', 'float', $ipsView);
+        $maximum = $this->BarPreviewValue($values, 'ColorMaximum', 'float', $ipsView);
+        $ratio = $maximum > $minimum ? max(0, min(1, ($value - $minimum) / ($maximum - $minimum))) : 0;
+        $stops = array_map(fn (string $name): int => max(0, min(0xFFFFFF, $this->BarPreviewValue($values, $name, 'integer', $ipsView))), ['LowColor', 'MiddleColor', 'HighColor']);
+        $a = $stops[$ratio <= 0.5 ? 0 : 1];
+        $b = $stops[$ratio <= 0.5 ? 1 : 2];
+        $t = $ratio <= 0.5 ? 2 * $ratio : 2 * ($ratio - 0.5);
+        $channels = array_map(static fn (int $shift): int => (int) round((($a >> $shift) & 255) + ((($b >> $shift) & 255) - (($a >> $shift) & 255)) * $t), [16, 8, 0]);
+        return sprintf('#%02x%02x%02x', ...$channels);
     }
 }

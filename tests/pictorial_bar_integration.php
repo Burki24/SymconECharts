@@ -192,6 +192,46 @@ assertGatewayGauge(
     $renamedPict['label'] === 'Renamed battery' && $renamedPict['id'] === 'variable-88600',
     'Renaming a source must update the fallback label, not its technical identity.'
 );
+$pict->SetTestProperty('Sources', json_encode(array_slice($pictSources, 0, 2), JSON_THROW_ON_ERROR));
+$GLOBALS['symconTestVariables'][88600]['Value'] = 16.0;
+$GLOBALS['symconTestVariables'][88601]['Value'] = 100.0;
+$pict->SetTestProperty('ColorMode', 'gradient');
+$pict->SetTestProperty('ColorMinimum', 0.0);
+$pict->SetTestProperty('ColorMaximum', 100.0);
+$pict->SetTestProperty('IPSViewUseTileDesign', false);
+$pict->SetTestProperty('IPSViewColorMode', 'value');
+$pict->ApplyChanges();
+assertGatewayGauge(json_decode($pict->GetPictorialBarDiagnostic(), true)['valid']
+    && json_decode($pict->GetPictorialBarData(), true)['pictorialBar']['style']['colorMode'] === 'gradient'
+    && str_contains($pict->GetIPSViewHTML(), '"colorMode":"value"'), 'Both coloring modes must coexist in independent designs.');
+$pictGradientBefore = (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($pict);
+foreach (['horizontal', 'vertical'] as $orientation) {
+    foreach ([true, false] as $repeat) {
+        $pict->UpdateBarPreviewFromForm(json_encode(['Orientation' => $orientation, 'SymbolRepeat' => $repeat,
+            'ScaleMaximum'                                         => 255, 'ColorMaximum' => 255.0, 'LowColor' => 0xFF0000, 'MiddleColor' => 0xFFFF00, 'HighColor' => 0x00FF00], JSON_THROW_ON_ERROR));
+        $svgOutputs = array_slice($pict->GetTestFormUpdates(), -2);
+        $tileSvg = base64_decode(substr($svgOutputs[0]['Value'], strlen('data:image/svg+xml;base64,')), true);
+        $ipsSvg = base64_decode(substr($svgOutputs[1]['Value'], strlen('data:image/svg+xml;base64,')), true);
+        $doc = new DOMDocument();
+        assertGatewayGauge($doc->loadXML($tileSvg, LIBXML_NONET) && str_contains($tileSvg, '<linearGradient')
+            && str_contains($tileSvg, 'gradientUnits="userSpaceOnUse"') && str_contains($tileSvg, 'offset="0.5" stop-color="#ffff00"')
+            && str_contains($tileSvg, 'fill="url(#scale-gradient)"') && !str_contains($tileSvg, '<pattern')
+            && !str_contains($ipsSvg, '<linearGradient'), 'Gradient preview must span the scale instead of repeating per glyph, independently of IPSView.');
+        assertGatewayGauge(!$repeat || str_contains($tileSvg, '<clipPath'), 'Repeated groups must clip at the current value.');
+    }
+}
+assertGatewayGauge(
+    (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($pict) === $pictGradientBefore,
+    'Gradient previews must preserve saved properties.'
+);
+$GLOBALS['symconTestCopyTarget'] = $pict;
+try {
+    $pict->CopyTileDesignToIPSView();
+} finally {
+    unset($GLOBALS['symconTestCopyTarget']);
+}
+assertGatewayGauge(str_contains($pict->GetIPSViewHTML(), '"colorMode":"gradient"')
+    && strlen($pict->GetIPSViewHTML()) < SYMCON_OUTPUT_BUFFER_LIMIT, 'Copying must preserve the gradient and output budget.');
 $pict->SetTestParentActive(false);
 $pict->ApplyChanges();
 assertGatewayGauge($pict->GetTestStatus() === 203, 'Missing parent must fail cleanly.');

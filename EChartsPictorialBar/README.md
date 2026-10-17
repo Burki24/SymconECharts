@@ -54,7 +54,7 @@ Die optionale WebContent-Variable „PictorialBar für IPSView“ enthält die
 eigenständige IPSView-Ausgabe. Änderungen an den Designern verändern keine
 Quellwerte oder Archive.
 
-## Farbverlauf nach Wert, beispielsweise für Batterien
+## Wertabhängige Einheitsfarbe
 
 Unter **Wertabhängige Farben** die Symbolfärbung **Stufenlos nach Wert**
 wählen. Das Minimum, die Skalenmitte und das Maximum erhalten jeweils eine
@@ -74,3 +74,25 @@ Quellfarben. Die Auswahl **Kategoriefarben** stellt die bisherigen Quell-
 beziehungsweise Theme-Farben wieder her. Kachel und unabhängiges IPSView-Design
 können verschiedene Farbmodi verwenden. Beim Update werden keine vorhandenen
 Einstellungen oder Quellen zurückgesetzt.
+
+## Farbverlauf innerhalb des Symbolbalkens
+
+Die zusätzliche Symbolfärbung **Farbverlauf entlang der Skala** verteilt die
+drei Farben räumlich über den eingestellten Farbbereich. Der Verlauf läuft
+über den gesamten Balken und beginnt nicht in jedem wiederholten Symbol neu.
+Die vorhandene Auswahl **Stufenlos nach Wert** bleibt erhalten und färbt
+weiterhin jeden Balken einheitlich nach seinem aktuellen Wert.
+
+Für Batterien Minimum **0**, Maximum **100** und die Farben Rot–Gelb–Grün
+wählen. Rot liegt bei 0 %, Gelb bei 50 % und Grün bei 100 %. Ein Balken mit
+16 % zeigt nur den roten bis rötlich-orangen Anfang; ein voller Balken zeigt
+den gesamten Verlauf. Für LQI beispielsweise Minimum **0** und Maximum **255**
+verwenden; Gelb liegt dann bei 127,5. Für eine feste Längenskala das
+Skalenmaximum ebenfalls auf 100 beziehungsweise 255 setzen.
+
+Der Farbbereich bleibt auch bei automatischer Längenskalierung fest. Ein
+kurzer Balken wird deshalb nicht bis Grün umgefärbt. Vor dem Farbminimum
+und oberhalb des Farbmaximums gilt die jeweilige Randfarbe. Der Modus
+funktioniert horizontal und vertikal sowie mit einzelnen und wiederholten
+Symbolen; Nullwerte und optisch begrenzte Originalwerte bleiben erhalten.
+Kachel und unabhängiges IPSView-Design können unterschiedliche Modi nutzen.

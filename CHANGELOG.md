@@ -2,6 +2,13 @@
 
 ## Neu
 
+- PictorialBar bietet zusätzlich einen Farbverlauf innerhalb jedes
+  Symbolbalkens. Er ist fest an die frei einstellbaren Farbgrenzen gebunden
+  (etwa 0–100 % oder 0–255 LQI), läuft über wiederholte Symbole hinweg und
+  zeigt bei kurzen Balken nur den passenden Anfang. Einzelformen, beide
+  Ausrichtungen und Vorschauen sind unterstützt. Die bisherige
+  wertabhängige Einheitsfarbe und gespeicherte Konfigurationen bleiben erhalten.
+
 - Der PictorialBar-Designer bietet eine stufenlose wertabhängige Färbung
   mit drei frei wählbaren Farben und festen Farbgrenzen, beispielsweise
   Rot–Gelb–Grün für Batteriestände. Schriftfamilie, Werteposition/-abstand,

@@ -475,7 +475,7 @@ class EChartsPictorialBar extends IPSModuleStrict
             || !in_array($this->ReadPropertyString($prefix . 'SortOrder'), ['configured', 'ascending', 'descending'], true)
             || !in_array($this->ReadPropertyString($prefix . 'FontFamily'), ['Arial, sans-serif', 'Verdana, sans-serif', 'Georgia, serif', 'monospace'], true)
             || !in_array($this->ReadPropertyString($prefix . 'ValuePosition'), ['outside', 'inside', 'insideStart', 'insideEnd'], true)
-            || !in_array($this->ReadPropertyString($prefix . 'ColorMode'), ['category', 'value'], true)
+            || !in_array($this->ReadPropertyString($prefix . 'ColorMode'), ['category', 'value', 'gradient'], true)
             || !in_array($this->ReadPropertyString($prefix . 'GridType'), ['solid', 'dashed', 'dotted'], true)
             || !in_array($this->ReadPropertyString($prefix . 'BorderType'), ['solid', 'dashed', 'dotted'], true)
             || !in_array($this->ReadPropertyString($prefix . 'Focus'), ['none', 'self'], true)
