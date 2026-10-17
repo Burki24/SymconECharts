@@ -85,6 +85,19 @@
         var size = Math.max(4,style.symbolSize || 12,Math.ceil(major/128));
         var crossSize = Math.max(1,Math.min(size,barWidth));
         var repeated = style.symbolRepeat !== false;
+        var fontFamily = style.fontFamily || 'Arial, sans-serif';
+        function itemColor(item) {
+            if (style.colorMode !== 'value') {
+                return item.color || (colors.seriesColors || [colors.accent])[item.order % (colors.seriesColors || [colors.accent]).length];
+            }
+            var minimum = style.colorMinimum == null ? 0 : style.colorMinimum;
+            var maximum = style.colorMaximum == null ? 100 : style.colorMaximum;
+            var ratio = Math.max(0, Math.min(1, (item.value - minimum) / (maximum - minimum || 1)));
+            var stops = [style.lowColor || '#ee6666', style.middleColor || '#fac858', style.highColor || '#91cc75'];
+            return design.interpolateColorStops(stops, ratio);
+        }
+        var valuePositions = horizontal ? {outside:'right',inside:'inside',insideStart:'insideLeft',insideEnd:'insideRight'}
+            : {outside:'top',inside:'inside',insideStart:'insideBottom',insideEnd:'insideTop'};
         var labels = Object.create(null);
         items.forEach(function(x){labels[x.id]=x.label;});
         function format(item) {
@@ -93,19 +106,23 @@
         }
         var category = {type:'category',data:items.map(function(x){return x.id;}),inverse:horizontal,
             axisLabel:{show:style.showLabels !== false,fontSize:axisFont,color:style.axisColor || colors.text,
+                rotate:style.categoryLabelRotate || 0,fontFamily:fontFamily,
                 width:horizontal ? Math.max(8,left-16) : Math.max(10,(width-left-right)/Math.max(1,items.length)-6),
                 overflow:'truncate',hideOverlap:true,interval:'auto',formatter:function(id){return labels[id] || '';}},
-            axisTick:{show:false},axisLine:{lineStyle:{color:colors.border}}};
+            axisTick:{show:style.showAxisTicks === true},axisLine:{lineStyle:{color:colors.border}}};
         var value = {type:'value',min:0,max:maximum,name:bar.unit || '',nameLocation:horizontal?'middle':'end',
             nameGap:horizontal?axisFont+18:15,nameTextStyle:{fontSize:axisFont,color:style.axisColor || colors.text},
-            axisLabel:{fontSize:axisFont,color:style.axisColor || colors.text,hideOverlap:true},
-            splitLine:{show:style.showGrid !== false,lineStyle:{color:style.gridColor || colors.border,opacity:0.25}}};
+            axisLabel:{show:style.showAxisValues !== false,fontSize:axisFont,fontFamily:fontFamily,color:style.axisColor || colors.text,hideOverlap:true},
+            axisTick:{show:style.showAxisTicks === true},
+            splitLine:{show:style.showGrid !== false,lineStyle:{color:style.gridColor || colors.border,
+                width:style.gridWidth == null ? 1 : style.gridWidth,type:style.gridType || 'solid',
+                opacity:style.gridOpacityPercent == null ? 0.25 : style.gridOpacityPercent/100}}};
         return {
             ...design.animationOptions(style,{enabled:true,initialDuration:350,updateDuration:500}),
-            backgroundColor:'transparent',textStyle:{fontFamily:'Arial, sans-serif',color:colors.text},
+            backgroundColor:'transparent',textStyle:{fontFamily:fontFamily,color:colors.text},
             aria:{enabled:true,label:{description:(bar.title || 'PictorialBar')+'. '+items.map(function(item){return item.label+': '+format(item);}).join('; ')}},
             title:{show:title.show,text:bar.title || '',left:'center',top:title.top,textStyle:{
-                color:style.titleColor || colors.text,fontSize:titleSize,fontWeight:style.titleBold === false?'normal':'bold',
+                color:style.titleColor || colors.text,fontSize:titleSize,fontFamily:fontFamily,fontWeight:style.titleBold === false?'normal':'bold',
                 overflow:'truncate',width:Math.max(1,width-36)}},
             grid:{left:left,right:right,top:top,bottom:bottom,containLabel:false},
             xAxis:horizontal?value:category,yAxis:horizontal?category:value,
@@ -117,14 +134,19 @@
                 symbolMargin:style.symbolGap == null ? 2 : style.symbolGap,symbolClip:repeated,
                 ...(repeated?{symbolBoundingData:maximum}:{}),symbolPosition:'start',barWidth:barWidth,clip:true,
                 itemStyle:{opacity:style.opacityPercent == null ? 0.9 : style.opacityPercent/100,
-                    borderWidth:style.borderWidth || 0,...(style.borderColor?{borderColor:style.borderColor}:{})},
-                emphasis:{focus:'self'},
-                label:{show:style.showValues !== false,position:horizontal?'right':'top',color:style.valueColor || colors.text,
+                    borderWidth:style.borderWidth || 0,borderType:style.borderType || 'solid',
+                    shadowBlur:style.shadowBlur || 0,shadowColor:style.shadowColor || 'rgba(0,0,0,0.35)',
+                    shadowOffsetX:style.shadowOffsetX || 0,shadowOffsetY:style.shadowOffsetY || 0,
+                    ...(style.borderColor?{borderColor:style.borderColor}:{})},
+                emphasis:{disabled:style.emphasisDisabled === true,focus:style.focus || 'self'},
+                blur:{itemStyle:{opacity:style.blurOpacityPercent == null ? 0.1 : style.blurOpacityPercent/100}},
+                label:{show:style.showValues !== false,position:valuePositions[style.valuePosition || 'outside'],color:style.valueColor || colors.text,
+                    distance:style.valueDistance == null ? 5 : style.valueDistance,fontFamily:fontFamily,fontWeight:style.valueBold === true ? 'bold' : 'normal',
                     fontSize:valueFont,overflow:'truncate',width:horizontal?Math.max(8,right-10):Math.max(12,cross*0.95),
                     formatter:function(p){return items[p.dataIndex]?format(items[p.dataIndex]):'';}},
-                labelLayout:{hideOverlap:true},
+                labelLayout:{hideOverlap:style.hideOverlap !== false},
                 data:items.map(function(x){return {id:x.id,name:x.label,value:Math.min(maximum,x.value),
-                    itemStyle:{color:x.color || (colors.seriesColors || [colors.accent])[x.order%(colors.seriesColors || [colors.accent]).length]}};})
+                    itemStyle:{color:itemColor(x)}};})
             }]
         };
     }

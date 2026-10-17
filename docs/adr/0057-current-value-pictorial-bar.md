@@ -52,6 +52,32 @@ keine erfundenen Ersatzwerte. Nur die leere Konfiguration zeigt Beispiele.
 
 ## Prüfung
 
+### Designer-Ergänzung vom 17.10.2026
+
+Die offiziellen PictorialBar-, Label- und ItemStyle-Optionen wurden erneut
+gegen die unverändert gepinnte Engine geprüft. Ergänzt werden lokale
+Schriftfamilien, Werteposition/-abstand/-gewicht, Überlappungsschutz,
+Kategorienrotation, Achsenmarkierungen/-werte, Rasterbreite/-linienart/-deckkraft,
+Rahmenlinienart, Schatten und abschaltbare Hervorhebung mit Fokus/Blur.
+
+Ein familienbezogener Farbmodus interpoliert RGB linear über drei Farben
+bei Minimum, Mitte und Maximum eines expliziten nichtnegativen Float-Bereichs.
+Der Bereich ist unabhängig von der geometrischen Skala. Werte außerhalb
+erhalten Randfarben, Originalwerte und gespeicherte Quellfarben bleiben erhalten.
+Der neue Modus übersteuert Quellfarben nur bei der Ausgabe. Standard bleibt
+`category`, ohne Migration oder Änderung bestehender Properties. Alle neuen
+Properties werden symmetrisch für beide Designer registriert und kopiert.
+
+Die Färbung betrifft den gesamten Balken. Ein räumlicher Gradient je wiederholtem
+Glyph würde in jedem Symbol neu beginnen und wird nicht als Batterie-Füllverlauf
+angeboten. Freie Bilder/SVG, Texturen, Callback-Code, Marker und zusätzliche
+Koordinatensysteme bleiben außerhalb dieses Vertrags. Ein kontrollierter
+Bildimport oder räumlicher Verlauf über Symbolgruppen benötigt einen eigenen
+nachgewiesenen Renderer-Vertrag. Die Runtime und das Gateway bleiben unverändert.
+
+Grundlagen: [offizielle PictorialBar-Dokumentation](https://github.com/apache/echarts-doc/blob/master/en/option/series/pictorialBar.md)
+und [ItemStyle](https://github.com/apache/echarts-doc/blob/master/en/option/partial/item-style.md).
+
 Vertrags- und Gateway-Integration prüfen positive/Null-/negative/ungültige
 Werte, Quellidentität, Einheiten, Abonnements, Aktualisierung, Fehlererholung,
 Designvererbung und Output-Limit. Renderer-Tests verwenden die echte

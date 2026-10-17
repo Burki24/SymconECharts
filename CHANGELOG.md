@@ -1,5 +1,15 @@
 # Unveröffentlicht
 
+## Neu
+
+- Der PictorialBar-Designer bietet eine stufenlose wertabhängige Färbung
+  mit drei frei wählbaren Farben und festen Farbgrenzen, beispielsweise
+  Rot–Gelb–Grün für Batteriestände. Schriftfamilie, Werteposition/-abstand,
+  Fettschrift, Überlappungsschutz, gedrehte Kategorienbeschriftung,
+  Achsenmarkierungen, Rasterlinien, Rahmenlinienarten, Schatten und
+  Hover-Fokus sind in Kachel und IPSView unabhängig einstellbar.
+  Vorschauen zeigen die neuen Stile; bestehende Konfigurationen bleiben erhalten.
+
 ## Hinzugefügt
 
 - `EChartsPictorialBar` (`ECPB`) zeigt aktuelle, nichtnegative Werte von

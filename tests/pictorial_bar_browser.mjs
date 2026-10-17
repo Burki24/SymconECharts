@@ -10,8 +10,8 @@ const style={orientation:'vertical',symbol:'rect',symbolRepeat:true,symbolSize:1
     showGrid:true,showLabels:true,showValues:true,showTooltip:true,animationEnabled:false};
 function state(){
  return {schemaVersion:1,family:'pictorialBar',status:'ready',error:null,chart:{schemaVersion:1,family:'pictorialBar',theme:'auto',
-  pictorialBar:{title:'Batteriestände · aktuelle Werte',unit:'%',data:['Büro','Bad','Wohnbereich','Schlafzimmer','Außen'].map((label,i)=>({
-    id:'v'+i,label,unit:'%',decimals:0,value:[100,75,42,0,120][i],order:i,color:''})),style:{...style}}}};
+  pictorialBar:{title:'Batteriestände · aktuelle Werte',unit:'%',data:['Büro','Bad','Wohnbereich','Schlafzimmer','Außen','Keller'].map((label,i)=>({
+    id:'v'+i,label,unit:'%',decimals:0,value:[100,75,42,12,120,0][i],order:i,color:''})),style:{...style}}}};
 }
 const variables = ':root{--symc-background:#303236;--symc-text:#f4f5f7;--symc-text-muted:#969aa2;--symc-border:#555860;--symc-surface:#25272b}';
 const translations = JSON.parse(read('EChartsPictorialBar/locale.json')).translations.de;
@@ -21,7 +21,11 @@ function page(mode, extended = false, light = false, single = false) {
         initialState.chart.pictorialBar.style.orientation = 'horizontal';
         initialState.chart.pictorialBar.style.axisColor = light ? '#333333' : '#A9DCD2';
     }
-    if(extended){Object.assign(initialState.chart.pictorialBar.style,{symbol:'circle',symbolSize:16,symbolGap:3,borderWidth:1,borderColor:light?'#333333':'#eeeeee'});}
+    if(extended){Object.assign(initialState.chart.pictorialBar.style,{symbol:'circle',symbolSize:16,symbolGap:3,borderWidth:1,borderColor:light?'#333333':'#eeeeee',
+        colorMode:'value',colorMinimum:0,colorMaximum:100,lowColor:'#ee6666',middleColor:'#fac858',highColor:'#91cc75',
+        fontFamily:'Verdana, sans-serif',valueBold:true,valuePosition:'outside',valueDistance:8,
+        gridType:'dotted',gridWidth:1,gridOpacityPercent:40,borderType:'solid',shadowBlur:5,shadowColor:'#000000',
+        shadowOffsetX:2,shadowOffsetY:2,categoryLabelRotate:mode==='ipsview'?0:25});}
     if(single){Object.assign(initialState.chart.pictorialBar.style,{symbol:'diamond',symbolRepeat:false});}
     const bootstrap = { mode, state: initialState, options: { tileHeaderVisible: true, echartsThemes: {auto: {background:'#303236',text:'#f4f5f7',muted:'#969aa2',border:'#777b83',accent:'#55CBB5',seriesColors:['#5070dd','#b6d634','#ff994d','#fb628b']}},
         adaptToBackground: false,  }, translations };

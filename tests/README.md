@@ -10,6 +10,17 @@ Quellenvertrag weiter ab. Lokale Browserfixture:
 `node tests/pictorial_bar_browser.mjs` (127.0.0.1:8801), ausschließlich
 synthetische Werte. Live-Kachel und IPSView sind nach Modulupdate separat offen.
 
+Die PictorialBar-Designerweiterung prüft kontinuierliche RGB-Interpolation an
+den Rand-/Zwischenwerten, unabhängige Farbbereiche, Nachkommastellen,
+Originalwerte oberhalb des Zeichenmaximums, Whitelists und Grenzen beider
+Designer. Neue Optionen, Kopieren/Vererbung, gültiges und schreibfreies SVG
+sowie deutsche Formulare sind abgesichert. Die echte ECharts-Engine prüft
+die vier Wertepositionen in beiden Ausrichtungen und Symbolmodi.
+Die Browserfixture `?design=extended` zeigt die wertabhängigen Farben und
+neuen Text-/Raster-/Schattenstile, `?symbols=single` einzelne Formen und
+`?theme=light` einen hellen Hintergrund. Diese lokale Prüfung ersetzt keine
+Live-Abnahme der Erweiterung nach Modulupdate.
+
 Candlestick: `php tests/candlestick_data.php` prüft abgeschlossene Stunden/
 Tage, Sommerzeit, erste/letzte Rohpunkte, Extrema, Lücken, Einzelwerte,
 Trunkierung und Abfragelimits. `candlestick_integration.php` wird im

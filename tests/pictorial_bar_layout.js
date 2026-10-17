@@ -67,6 +67,58 @@ assert.equal(tile.warningElement.hidden,false);
 tile.window.handleMessage({status:'error',error:'PictorialBar requires non-negative values.'});
 assert.equal(tile.chartElement.hidden,true);
 const echarts=require(path.join(root,'.tools/echarts-runtime/node_modules/echarts'));
+const colored=render({...model,pictorialBar:{...model.pictorialBar,data:[0,25,50,75,100,150].map((value,i)=>({id:'c'+i,label:'Battery',unit:'%',value,order:i,color:'#ffffff'})),
+    style:{...model.pictorialBar.style,colorMode:'value',colorMinimum:0,colorMaximum:100,lowColor:'#ff0000',middleColor:'#ffff00',highColor:'#00ff00',
+        fontFamily:'Georgia, serif',valuePosition:'insideEnd',valueDistance:8,valueBold:true,hideOverlap:false,categoryLabelRotate:25,
+        showAxisValues:false,showAxisTicks:true,gridWidth:2,gridType:'dotted',gridOpacityPercent:60,borderType:'dashed',
+        shadowBlur:8,shadowColor:'#123456',shadowOffsetX:2,shadowOffsetY:3,emphasisDisabled:true,focus:'none',blurOpacityPercent:30}}});
+assert.equal(colored.option.series[0].data.map(x=>x.itemStyle.color).join(','),'#ff0000,#ff8000,#ffff00,#80ff00,#00ff00,#00ff00',
+    'Battery colors interpolate over a fixed range, override source colors and clamp without changing values.');
+assert.equal(colored.option.series[0].data[5].value,100);
+assert.equal(colored.option.series[0].label.formatter({dataIndex:5}),'150 %');
+assert.equal(colored.option.textStyle.fontFamily,'Georgia, serif');
+assert.equal(colored.option.series[0].label.position,'insideRight');
+assert.equal(colored.option.series[0].label.distance,8);
+assert.equal(colored.option.series[0].label.fontWeight,'bold');
+assert.equal(colored.option.series[0].labelLayout.hideOverlap,false);
+assert.equal(colored.option.yAxis.axisLabel.rotate,25);
+assert.equal(colored.option.xAxis.axisLabel.show,false);
+assert.equal(colored.option.yAxis.axisTick.show,true);
+assert.equal(colored.option.xAxis.splitLine.lineStyle.type,'dotted');
+assert.equal(colored.option.xAxis.splitLine.lineStyle.width,2);
+assert.equal(colored.option.xAxis.splitLine.lineStyle.opacity,0.6);
+assert.equal(colored.option.series[0].itemStyle.borderType,'dashed');
+assert.equal(colored.option.series[0].itemStyle.shadowBlur,8);
+assert.equal(colored.option.series[0].emphasis.disabled,true);
+assert.equal(colored.option.series[0].emphasis.focus,'none');
+assert.equal(colored.option.series[0].blur.itemStyle.opacity,0.3);
+for (const orientation of ['horizontal','vertical']) {
+ for (const symbolRepeat of [false,true]) {
+  for (const valuePosition of ['outside','inside','insideStart','insideEnd']) {
+    const extended=render({...model,pictorialBar:{...model.pictorialBar,style:{...model.pictorialBar.style,...{
+        orientation,symbolRepeat,valuePosition,colorMode:'value',colorMinimum:0.5,colorMaximum:100.5,
+        lowColor:'#ff0000',middleColor:'#ffff00',highColor:'#00ff00',fontFamily:'Georgia, serif',
+        valueDistance:8,valueBold:true,gridType:'dashed',borderWidth:1,borderType:'dotted',shadowBlur:5
+    }}}},'ipsview',true,620);
+    const engine=echarts.init(null,null,{renderer:'svg',ssr:true,width:620,height:500});
+    engine.setOption(extended.option);
+    const data=engine.getModel().getSeriesByIndex(0).getData();
+    assert.equal(data.getItemVisual(0,'style').fill,'#ff0000');
+    assert.equal(data.getItemVisual(2,'style').fill,'#00ff00');
+    assert.match(engine.renderToSVGString(),/Georgia/);
+    assert.ok(!engine.renderToSVGString().includes('NaN'));
+    engine.dispose();
+  }
+ }
+}
+const tiny=render({...model,pictorialBar:{...model.pictorialBar,data:[{...model.pictorialBar.data[0],value:1e-14}],
+    style:{...model.pictorialBar.style,colorMode:'value',colorMinimum:0,colorMaximum:1e-14,highColor:'#000000'}}});
+assert.equal(tiny.option.series[0].data[0].itemStyle.color,'#000000','Small finite ranges and explicit black must work.');
+const independentRange=render({...model,pictorialBar:{...model.pictorialBar,data:[{...model.pictorialBar.data[1],value:25}],
+    style:{...model.pictorialBar.style,scaleMaximum:0,colorMode:'value',colorMinimum:0,colorMaximum:100,
+        lowColor:'#ff0000',middleColor:'#ffff00',highColor:'#00ff00'}}});
+assert.equal(independentRange.option.xAxis.max,25);
+assert.equal(independentRange.option.series[0].data[0].itemStyle.color,'#ff8000','Colors must not renormalize to current highest value.');
 for(const symbol of ['rect','roundRect','circle','diamond','triangle']){
  for(const orientation of ['vertical','horizontal']){
   for(const symbolRepeat of [false,true]){

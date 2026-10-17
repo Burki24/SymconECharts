@@ -94,7 +94,32 @@ class EChartsPictorialBar extends IPSModuleStrict
         'TitleBold'            => true,
         'OpacityPercent'       => 90,
         'BorderWidth'          => 0,
-        'BorderColor'          => -1
+        'BorderColor'          => -1,
+        'FontFamily'           => 'Arial, sans-serif',
+        'ValuePosition'        => 'outside',
+        'ValueDistance'        => 5,
+        'ValueBold'            => false,
+        'HideOverlap'          => true,
+        'CategoryLabelRotate'  => 0,
+        'ShowAxisValues'       => true,
+        'ShowAxisTicks'        => false,
+        'GridWidth'            => 1,
+        'GridType'             => 'solid',
+        'GridOpacityPercent'   => 25,
+        'ColorMode'            => 'category',
+        'ColorMinimum'         => 0.0,
+        'ColorMaximum'         => 100.0,
+        'LowColor'             => 0xEE6666,
+        'MiddleColor'          => 0xFAC858,
+        'HighColor'            => 0x91CC75,
+        'BorderType'           => 'solid',
+        'ShadowBlur'           => 0,
+        'ShadowColor'          => -1,
+        'ShadowOffsetX'        => 0,
+        'ShadowOffsetY'        => 0,
+        'EmphasisDisabled'     => false,
+        'Focus'                => 'self',
+        'BlurOpacityPercent'   => 10
     ];
 
     public function Create(): void
@@ -110,6 +135,7 @@ class EChartsPictorialBar extends IPSModuleStrict
                 match (gettype($default)) {
                     'boolean' => $this->RegisterPropertyBoolean($prefix . $name, $default),
                     'integer' => $this->RegisterPropertyInteger($prefix . $name, $default),
+                    'double'  => $this->RegisterPropertyFloat($prefix . $name, $default),
                     default   => $this->RegisterPropertyString($prefix . $name, $default)
                 };
             }
@@ -154,7 +180,11 @@ class EChartsPictorialBar extends IPSModuleStrict
             ['caption' => 'Layout and symbols', 'start' => 'Orientation'],
             ['caption' => 'Axes and values', 'start' => 'ShowGrid'],
             ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent'],
-            ['caption' => 'Borders and opacity', 'start' => 'BorderWidth']
+            ['caption' => 'Borders and opacity', 'start' => 'BorderWidth'],
+            ['caption' => 'Labels and typography', 'start' => 'FontFamily'],
+            ['caption' => 'Axis and grid details', 'start' => 'ShowAxisValues'],
+            ['caption' => 'Value-dependent colors', 'start' => 'ColorMode'],
+            ['caption' => 'Shadows and highlighting', 'start' => 'ShadowBlur']
         ]);
         $fields = ['Title', 'Sources',
             'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
@@ -182,6 +212,7 @@ class EChartsPictorialBar extends IPSModuleStrict
             $value = match (gettype($default)) {
                 'boolean' => $this->ReadPropertyBoolean($name),
                 'integer' => $this->ReadPropertyInteger($name),
+                'double'  => $this->ReadPropertyFloat($name),
                 default   => $this->ReadPropertyString($name)
             };
             IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
@@ -442,24 +473,35 @@ class EChartsPictorialBar extends IPSModuleStrict
         if (!EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme')) || !$this->AnimationIsValid($prefix)
             || !in_array($this->ReadPropertyString($prefix . 'Orientation'), ['vertical', 'horizontal'], true)
             || !in_array($this->ReadPropertyString($prefix . 'SortOrder'), ['configured', 'ascending', 'descending'], true)
+            || !in_array($this->ReadPropertyString($prefix . 'FontFamily'), ['Arial, sans-serif', 'Verdana, sans-serif', 'Georgia, serif', 'monospace'], true)
+            || !in_array($this->ReadPropertyString($prefix . 'ValuePosition'), ['outside', 'inside', 'insideStart', 'insideEnd'], true)
+            || !in_array($this->ReadPropertyString($prefix . 'ColorMode'), ['category', 'value'], true)
+            || !in_array($this->ReadPropertyString($prefix . 'GridType'), ['solid', 'dashed', 'dotted'], true)
+            || !in_array($this->ReadPropertyString($prefix . 'BorderType'), ['solid', 'dashed', 'dotted'], true)
+            || !in_array($this->ReadPropertyString($prefix . 'Focus'), ['none', 'self'], true)
             || !in_array($this->ReadPropertyString($prefix . 'Symbol'), ['rect', 'roundRect', 'circle', 'diamond', 'triangle'], true)) {
             return false;
         }
         foreach (['SymbolSize'     => [4, 40], 'SymbolGap' => [0, 20], 'BarWidth' => [4, 80], 'ScaleMaximum' => [0, 1000000000],
             'TitleFontSizePercent' => [50, 200], 'AxisFontSizePercent' => [50, 200], 'ValueFontSizePercent' => [50, 200],
-            'BorderWidth'          => [0, 5], 'OpacityPercent' => [0, 100]] as $name => [$min, $max]) {
+            'BorderWidth'          => [0, 5], 'OpacityPercent' => [0, 100], 'ValueDistance' => [0, 30],
+            'CategoryLabelRotate'  => [-90, 90], 'GridWidth' => [0, 5], 'GridOpacityPercent' => [0, 100],
+            'ShadowBlur'           => [0, 20], 'ShadowOffsetX' => [-20, 20], 'ShadowOffsetY' => [-20, 20],
+            'BlurOpacityPercent'   => [0, 100]] as $name => [$min, $max]) {
             $value = $this->ReadPropertyInteger($prefix . $name);
             if ($value < $min || $value > $max) {
                 return false;
             }
         }
-        foreach (['TitleColor', 'AxisColor', 'ValueColor', 'GridColor', 'BorderColor'] as $name) {
+        foreach (['TitleColor', 'AxisColor', 'ValueColor', 'GridColor', 'BorderColor', 'ShadowColor', 'LowColor', 'MiddleColor', 'HighColor'] as $name) {
             $color = $this->ReadPropertyInteger($prefix . $name);
-            if ($color < -1 || $color > 0xFFFFFF) {
+            if ($color < (in_array($name, ['LowColor', 'MiddleColor', 'HighColor'], true) ? 0 : -1) || $color > 0xFFFFFF) {
                 return false;
             }
         }
-        return true;
+        $minimum = $this->ReadPropertyFloat($prefix . 'ColorMinimum');
+        $maximum = $this->ReadPropertyFloat($prefix . 'ColorMaximum');
+        return is_finite($minimum) && is_finite($maximum) && $minimum >= 0 && $maximum <= 1.0e12 && $minimum < $maximum;
     }
 
     /** @return array<string,mixed> */
@@ -474,6 +516,7 @@ class EChartsPictorialBar extends IPSModuleStrict
             $value = match (gettype($default)) {
                 'boolean' => $this->ReadPropertyBoolean($prefix . $name),
                 'integer' => $this->ReadPropertyInteger($prefix . $name),
+                'double'  => $this->ReadPropertyFloat($prefix . $name),
                 default   => $this->ReadPropertyString($prefix . $name)
             };
             $style[lcfirst($name)] = str_ends_with($name, 'Color')

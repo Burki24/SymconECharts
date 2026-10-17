@@ -403,6 +403,328 @@
                             "width": "200px"
                         }
                     ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "BorderType",
+                            "caption": "Border style",
+                            "width": "225px",
+                            "options": [
+                                {
+                                    "caption": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "caption": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "caption": "Dotted",
+                                    "value": "dotted"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "FontFamily",
+                            "caption": "Font family",
+                            "width": "225px",
+                            "options": [
+                                {
+                                    "caption": "Arial",
+                                    "value": "Arial, sans-serif"
+                                },
+                                {
+                                    "caption": "Verdana",
+                                    "value": "Verdana, sans-serif"
+                                },
+                                {
+                                    "caption": "Georgia",
+                                    "value": "Georgia, serif"
+                                },
+                                {
+                                    "caption": "Monospace",
+                                    "value": "monospace"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "ValuePosition",
+                            "caption": "Value position",
+                            "width": "225px",
+                            "options": [
+                                {
+                                    "caption": "Outside",
+                                    "value": "outside"
+                                },
+                                {
+                                    "caption": "Inside center",
+                                    "value": "inside"
+                                },
+                                {
+                                    "caption": "Inside start",
+                                    "value": "insideStart"
+                                },
+                                {
+                                    "caption": "Inside end",
+                                    "value": "insideEnd"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ValueDistance",
+                            "caption": "Value label distance",
+                            "minimum": 0,
+                            "maximum": 30,
+                            "suffix": "px",
+                            "width": "200px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ValueBold",
+                            "caption": "Bold values"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "HideOverlap",
+                            "caption": "Hide overlapping values"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "CategoryLabelRotate",
+                            "caption": "Category label rotation",
+                            "minimum": -90,
+                            "maximum": 90,
+                            "suffix": "°",
+                            "width": "200px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowAxisValues",
+                            "caption": "Show axis values"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowAxisTicks",
+                            "caption": "Show axis ticks"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "GridWidth",
+                            "caption": "Grid line width",
+                            "minimum": 0,
+                            "maximum": 5,
+                            "suffix": "px",
+                            "width": "200px"
+                        },
+                        {
+                            "type": "Select",
+                            "name": "GridType",
+                            "caption": "Grid line style",
+                            "width": "225px",
+                            "options": [
+                                {
+                                    "caption": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "caption": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "caption": "Dotted",
+                                    "value": "dotted"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "GridOpacityPercent",
+                            "caption": "Grid opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%",
+                            "width": "200px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "ColorMode",
+                            "caption": "Symbol coloring",
+                            "width": "225px",
+                            "options": [
+                                {
+                                    "caption": "Category colors",
+                                    "value": "category"
+                                },
+                                {
+                                    "caption": "Continuous color by value",
+                                    "value": "value"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ColorMinimum",
+                            "caption": "Color range minimum",
+                            "digits": 6,
+                            "minimum": 0,
+                            "maximum": 1000000000000,
+                            "suffix": "",
+                            "width": "200px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ColorMaximum",
+                            "caption": "Color range maximum",
+                            "digits": 6,
+                            "minimum": 0,
+                            "maximum": 1000000000000,
+                            "suffix": "",
+                            "width": "200px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "LowColor",
+                            "caption": "Low value color",
+                            "allowTransparent": false
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "MiddleColor",
+                            "caption": "Middle value color",
+                            "allowTransparent": false
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "HighColor",
+                            "caption": "High value color",
+                            "allowTransparent": false
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ShadowBlur",
+                            "caption": "Shadow blur",
+                            "minimum": 0,
+                            "maximum": 20,
+                            "suffix": "px",
+                            "width": "200px"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "ShadowColor",
+                            "caption": "Shadow color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ShadowOffsetX",
+                            "caption": "Horizontal shadow offset",
+                            "minimum": -20,
+                            "maximum": 20,
+                            "suffix": "px",
+                            "width": "200px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ShadowOffsetY",
+                            "caption": "Vertical shadow offset",
+                            "minimum": -20,
+                            "maximum": 20,
+                            "suffix": "px",
+                            "width": "200px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "EmphasisDisabled",
+                            "caption": "Disable highlighting"
+                        },
+                        {
+                            "type": "Select",
+                            "name": "Focus",
+                            "caption": "Hover focus",
+                            "width": "225px",
+                            "options": [
+                                {
+                                    "caption": "Hovered category",
+                                    "value": "self"
+                                },
+                                {
+                                    "caption": "None",
+                                    "value": "none"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "BlurOpacityPercent",
+                            "caption": "Unfocused opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%",
+                            "width": "200px"
+                        }
+                    ]
                 }
             ]
         }

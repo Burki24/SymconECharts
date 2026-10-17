@@ -57,12 +57,64 @@ assertGatewayGauge(
 );
 $pictBefore = (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($pict);
 $pictQueries = $GLOBALS['symconTestArchiveQueryCount'];
+$pictExtended = ['ColorMode' => 'value', 'ColorMinimum' => 0.0, 'ColorMaximum' => 100.0,
+    'LowColor'               => 0xFF0000, 'MiddleColor' => 0xFFFF00, 'HighColor' => 0x00FF00,
+    'FontFamily'             => 'Georgia, serif', 'ValuePosition' => 'insideEnd', 'ValueDistance' => 8,
+    'ValueBold'              => true, 'HideOverlap' => false, 'CategoryLabelRotate' => 25,
+    'ShowAxisValues'         => false, 'ShowAxisTicks' => true, 'GridWidth' => 2, 'GridType' => 'dotted',
+    'GridOpacityPercent'     => 60, 'BorderType' => 'dashed', 'ShadowBlur' => 8, 'ShadowColor' => 0x123456,
+    'ShadowOffsetX'          => 2, 'ShadowOffsetY' => 3, 'EmphasisDisabled' => true, 'Focus' => 'none', 'BlurOpacityPercent' => 30];
+foreach ($pictExtended as $name => $value) {
+    assertGatewayGauge(str_contains(findGaugeFormElement($pictForm['elements'], $name)['onChange'], 'ECPB_UpdateBarPreviewFromForm')
+        && findGaugeFormElement($pictForm['elements'], 'IPSView' . $name)['enabled'], 'New controls must update both live previews: ' . $name);
+}
+assertGatewayGauge(findGaugeFormElement($pictForm['elements'], 'ColorMinimum')['digits'] === 6
+    && findGaugeFormElement($pictForm['elements'], 'IPSViewColorMaximum')['digits'] === 6, 'Both color-range controls must accept fractional values.');
+$pictDraft = [...$pictExtended, 'Sources' => array_slice($pictSources, 0, 6), 'BorderWidth' => 1];
+$pictOriginalValues = [];
+foreach ([0, 25, 50, 75, 100, 150] as $i => $value) {
+    $pictOriginalValues[$i] = $GLOBALS['symconTestVariables'][88600 + $i]['Value'];
+    $GLOBALS['symconTestVariables'][88600 + $i]['Value'] = (float) $value;
+}
+foreach (['horizontal', 'vertical'] as $orientation) {
+    $pict->UpdateBarPreviewFromForm(json_encode([...$pictDraft, 'Orientation' => $orientation], JSON_THROW_ON_ERROR));
+    $extendedSvg = base64_decode(substr(array_slice($pict->GetTestFormUpdates(), -2)[0]['Value'], strlen('data:image/svg+xml;base64,')), true);
+    $doc = new DOMDocument();
+    assertGatewayGauge($doc->loadXML($extendedSvg, LIBXML_NONET), 'Extended preview must be valid SVG.');
+    foreach (['#ff8000', '#ffff00', '#80ff00', '#00ff00', 'Georgia, serif', 'stroke-dasharray', 'feDropShadow', 'rotate(-25'] as $token) {
+        assertGatewayGauge(str_contains($extendedSvg, $token), 'Extended preview must show ' . $token);
+    }
+    assertGatewayGauge(str_contains($extendedSvg, '150 %'), 'Preview must retain original values above the drawing maximum.');
+}
+foreach ($pictOriginalValues as $i => $value) {
+    $GLOBALS['symconTestVariables'][88600 + $i]['Value'] = $value;
+}
+assertGatewayGauge(
+    (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($pict) === $pictBefore,
+    'New draft design settings must not persist.'
+);
+foreach ($pictExtended as $name => $value) {
+    $pict->SetTestProperty($name, $value);
+}
+$extendedModel = json_decode($pict->GetPictorialBarData(), true)['pictorialBar'];
+assertGatewayGauge(
+    $extendedModel['style']['colorMode'] === 'value' && $extendedModel['style']['colorMaximum'] === 100.0
+    && $extendedModel['style']['lowColor'] === '#FF0000' && $extendedModel['data'][1]['color'] === '#123456'
+    && str_contains($pict->GetIPSViewHTML(), '"colorMode":"category"'),
+    'Value coloring must be an independent design mode, not overwrite per-source colors or IPSView design.'
+);
+$pictExtendedBefore = (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($pict);
+$pict->ApplyChanges();
+$pict->ApplyChanges();
+assertGatewayGauge((new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($pict) === $pictExtendedBefore
+    && strlen($pict->GetVisualizationTile()) < SYMCON_OUTPUT_BUFFER_LIMIT
+    && strlen($pict->GetIPSViewHTML()) < SYMCON_OUTPUT_BUFFER_LIMIT, 'Repeated ApplyChanges must preserve sources/design and bounded extended outputs.');
 $pict->UpdateBarPreviewFromForm('{"Title":"Draft <title>","Symbol":"circle","SymbolRepeat":false,"ScaleMaximum":100}');
 $pictSvg = base64_decode(substr(array_slice($pict->GetTestFormUpdates(), -2)[0]['Value'], strlen('data:image/svg+xml;base64,')), true);
 $pictDocument = new DOMDocument();
 assertGatewayGauge($pictDocument->loadXML($pictSvg, LIBXML_NONET) && str_contains($pictSvg, '<ellipse')
     && str_contains($pictSvg, 'Draft &lt;title&gt;') && str_contains($pictSvg, 'Battery &lt;same&gt;')
-    && (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($pict) === $pictBefore
+    && (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($pict) === [...$pictBefore, ...$pictExtended]
     && $GLOBALS['symconTestArchiveQueryCount'] === $pictQueries, 'Previews must use escaped current values without persistence or archives.');
 $GLOBALS['symconTestVariables'][88601]['Value'] = 52.0;
 $pict->MessageSink(1780000001, 88601, VM_UPDATE, [52.0, true]);
@@ -94,12 +146,23 @@ $pict->RetryTransient();
 foreach (['', 'IPSView'] as $prefix) {
     foreach ([['Symbol', 'image://https://example.invalid', 'rect'], ['SymbolSize', 3, 12], ['SymbolGap', 21, 2],
         ['BarWidth', 81, 40], ['ScaleMaximum', -1, 0], ['TitleFontSizePercent', 201, 100],
-        ['OpacityPercent', 101, 90], ['AxisColor', -2, -1], ['SortOrder', 'invalid', 'configured']] as [$name,$bad,$restore]) {
+        ['OpacityPercent', 101, 90], ['AxisColor', -2, -1], ['SortOrder', 'invalid', 'configured'],
+        ['FontFamily', 'url(https://example.invalid)', 'Arial, sans-serif'], ['ValuePosition', 'invalid', 'outside'],
+        ['ValueDistance', 31, 5], ['CategoryLabelRotate', 91, 0], ['GridWidth', -1, 1], ['GridType', 'invalid', 'solid'],
+        ['GridOpacityPercent', 101, 25], ['ColorMode', 'invalid', 'category'], ['LowColor', -1, 0xFF0000],
+        ['MiddleColor', 0x1000000, 0xFFFF00], ['HighColor', -2, 0x00FF00], ['BorderType', 'invalid', 'solid'],
+        ['ShadowBlur', 21, 0], ['ShadowColor', -2, -1], ['ShadowOffsetX', -21, 0], ['ShadowOffsetY', 21, 0],
+        ['Focus', 'invalid', 'self'], ['BlurOpacityPercent', 101, 10],
+        ['ColorMinimum', -0.5, 0.0], ['ColorMaximum', INF, 100.0], ['ColorMaximum', NAN, 100.0],
+        ['ColorMinimum', 100.0, 0.0], ['ColorMaximum', 0.0, 100.0], ['ColorMaximum', 1.0e13, 100.0]] as [$name,$bad,$restore]) {
         $pict->SetTestProperty($prefix . $name, $bad);
         assertGatewayGauge(json_decode($pict->GetPictorialBarDiagnostic(), true)['valid'] === false, 'Reject invalid PictorialBar design: ' . $prefix . $name);
         $pict->SetTestProperty($prefix . $name, $restore);
     }
 }
+$pict->SetTestProperty('ColorMinimum', 0.5);
+$pict->SetTestProperty('ColorMaximum', 100.5);
+$pict->SetTestProperty('ColorMode', 'value');
 $GLOBALS['symconTestCopyTarget'] = $pict;
 try {
     $pict->CopyTileDesignToIPSView();
@@ -107,6 +170,12 @@ try {
     unset($GLOBALS['symconTestCopyTarget']);
 }
 assertGatewayGauge(str_contains($pict->GetIPSViewHTML(), '"symbol":"rect"'), 'Copy Tile design includes symbol settings.');
+assertGatewayGauge(str_contains($pict->GetIPSViewHTML(), '"colorMinimum":0.5')
+    && str_contains($pict->GetIPSViewHTML(), '"colorMaximum":100.5')
+    && str_contains($pict->GetIPSViewHTML(), '"colorMode":"value"'), 'Copy must preserve fractional color ranges and coloring mode.');
+$pict->SetTestProperty('IPSViewUseTileDesign', true);
+$pict->SetTestProperty('FontFamily', 'monospace');
+assertGatewayGauge(str_contains($pict->GetIPSViewHTML(), '"fontFamily":"monospace"'), 'Inherited IPSView design must use new tile properties.');
 foreach (['[]', '[{"VariableID":88600},{"VariableID":88600}]', '[{"VariableID":4712}]'] as $invalidSources) {
     $pict->SetTestProperty('Sources', $invalidSources);
     assertGatewayGauge(json_decode($pict->GetPictorialBarDiagnostic(), true)['valid'] === false, 'Reject empty, duplicate or nonnumeric sources.');
