@@ -6,9 +6,13 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 const source = fs.readFileSync(
-    path.join(__dirname, '..', 'EChartsBarCategory', 'visualization', 'app.js'),
+    path.join(__dirname, '..', 'EChartsBarCategory', 'visualization', 'app.min.js'),
     'utf8'
 );
+const esbuild = require('../.tools/echarts-runtime/node_modules/esbuild');
+const editableSource = fs.readFileSync(path.join(__dirname, '..', 'EChartsBarCategory/visualization/app.js'), 'utf8');
+assert.equal(source.replace(/\r\n/g, '\n'), esbuild.transformSync(editableSource, {minifyWhitespace: true, target: 'es2018'}).code,
+    'The shipped Category Bar script must be reproducible and current with its readable source.');
 const gradientStyle = { barFillMode: 'gradient', colorMinimum: 0, colorMaximum: 100,
     lowColor: '#ff0000', middleColor: '#ffff00', highColor: '#00ff00', animationEnabled: false };
 const designSource = fs.readFileSync(
@@ -17,8 +21,8 @@ const designSource = fs.readFileSync(
 );
 const patternSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-pattern.js'), 'utf8');
 
-function render(orientation, sortOrder, outputMode = 'symcon', barMode = 'simple', items, styleOverrides = {}, enableImages = false) {
-    const chartElement = { hidden: false, clientWidth: 800, clientHeight: 500 };
+function render(orientation, sortOrder, outputMode = 'symcon', barMode = 'simple', items, styleOverrides = {}, enableImages = false, dimensions = {}) {
+    const chartElement = { hidden: false, clientWidth: dimensions.width || 800, clientHeight: dimensions.height || 500 };
     const errorElement = { hidden: true, textContent: '' };
     const images = [];
     const scheduled = [];
@@ -26,6 +30,7 @@ function render(orientation, sortOrder, outputMode = 'symcon', barMode = 'simple
     Object.defineProperty(TestImage.prototype, 'src', { set(value) { this.source = value; } });
     let option, nativeChart = null;
     const handlers = {};
+    const windowHandlers = {};
     const chart = {
         setOption: next => { option = next; }, clear: () => {}, resize: () => {}, dispose: () => {},
         on: (event, handler) => { handlers[event] = handler; },
@@ -60,7 +65,7 @@ function render(orientation, sortOrder, outputMode = 'symcon', barMode = 'simple
         echarts: { init: () => chart },
         Image: enableImages ? TestImage : undefined,
         setTimeout: callback => { scheduled.push(callback); },
-        addEventListener: () => {},
+        addEventListener: (name, handler) => { windowHandlers[name] = handler; },
         getComputedStyle: () => ({ color: '' })
     };
     const document = {
@@ -81,6 +86,11 @@ function render(orientation, sortOrder, outputMode = 'symcon', barMode = 'simple
         testImages: { value: images },
         getUpdatedOption: { value: () => option },
         refresh: { value: () => window.handleMessage(window.SYMC_VISUALIZATION.state) },
+        resize: { value: (width, height) => {
+            chartElement.clientWidth = width;
+            chartElement.clientHeight = height;
+            windowHandlers.resize();
+        } },
         useNativeChart: { value: engine => {
             nativeChart = engine;
             if (engine) { Object.entries(handlers).forEach(([event, handler]) => engine.on(event, handler)); }
@@ -464,5 +474,76 @@ selectable.refresh();
 assert.equal(selectable.getUpdatedOption().legend.selected[selectable.series[0].name], false,
     'A gradient update must preserve the legend selection.');
 selectionEngine.dispose();
+
+const densityItems = Array.from({ length: 72 }, (_, index) => ({id: 'density-' + index,
+    category: 'Battery ' + index, series: 'Sensor ' + index % 2, seriesKey: 'sensor-' + index % 2,
+    value: index + 1, order: index}));
+function visibleCategories(option, orientation) {
+    const slider = option.dataZoom.find(entry => entry.id === 'category-scroll');
+    return slider ? slider.endValue - slider.startValue + 1 : (orientation === 'horizontal' ? option.yAxis : option.xAxis).data.length;
+}
+for (const output of ['symcon', 'ipsview']) {
+    for (const orientation of ['horizontal', 'vertical']) {
+        for (const mode of ['simple', 'grouped', 'stacked']) {
+            const items = densityItems.map((item, index) => ({...item,
+                category: mode === 'simple' ? item.category : 'Room ' + Math.floor(index / 2)}));
+            const dimensions = {width: 1800, height: 1200};
+            const thin = render(orientation, 'configured', output, mode, items,
+                {...gradientStyle, barWidthPercent: 20}, false, dimensions);
+            const thick = render(orientation, 'configured', output, mode, items,
+                {...gradientStyle, barWidthPercent: 100}, false, dimensions);
+            assert.ok(visibleCategories(thin, orientation) > visibleCategories(thick, orientation),
+                'Thinner bars must expose more categories in both orientations, outputs and modes.');
+            if (mode !== 'grouped') {
+                assert.ok(visibleCategories(thin, orientation) > 16,
+                    'A tall or wide chart must not retain the arbitrary sixteen-category viewport cap.');
+            }
+            const largeText = render(orientation, 'configured', output, mode, items,
+                {...gradientStyle, barWidthPercent: 20, axisFontSizePercent: 200, valueFontSizePercent: 200}, false, dimensions);
+            assert.ok(visibleCategories(largeText, orientation) < visibleCategories(thin, orientation),
+                'Larger category/value text must protect a larger minimum category span.');
+            const engine = nativeWindow.echarts.init(null, null, {renderer: 'svg', ssr: true, ...dimensions});
+            engine.setOption(thin);
+            const axisName = orientation === 'horizontal' ? 'yAxis' : 'xAxis';
+            const thinBand = engine.getModel().getComponent(axisName).axis.getBandWidth();
+            assert.equal(engine.getModel().getSeriesByIndex(0).getData().count(), visibleCategories(thin, orientation));
+            engine.setOption(thick, true);
+            const thickBand = engine.getModel().getComponent(axisName).axis.getBandWidth();
+            assert.ok(thinBand < thickBand, 'Native category centers, not just painted thickness, must move closer together.');
+            assert.ok(thinBand >= 12 * 1.5, 'Normal-font category rows must not overlap.');
+            engine.dispose();
+        }
+        const smallSet = render(orientation, 'configured', output, 'simple', densityItems.slice(0, 13),
+            {barWidthPercent: 100, showValues: true}, false, {width: 420, height: 340});
+        assert.ok(visibleCategories(smallSet, orientation) < 13 && smallSet.dataZoom.length === 2,
+            'Small charts must navigate even fewer than sixteen categories when text/bars need more room.');
+    }
+}
+
+for (const orientation of ['horizontal', 'vertical']) {
+    const dense = render(orientation, 'configured', 'ipsview', 'simple', densityItems,
+        {...gradientStyle, barWidthPercent: 20}, false, {width: 900, height: 900});
+    const engine = nativeWindow.echarts.init(null, null, {renderer: 'svg', ssr: true, width: 900, height: 900});
+    dense.useNativeChart(engine);
+    engine.setOption(dense);
+    const initialCount = visibleCategories(dense, orientation);
+    engine.dispatchAction({type: 'dataZoom', dataZoomId: 'category-scroll', startValue: 10, endValue: 10 + initialCount - 1});
+    const categoryKeys = orientation === 'horizontal' ? dense.yAxis.data : dense.xAxis.data;
+    const anchorID = categoryKeys[10];
+    dense.resize(450, 400);
+    const resized = dense.getUpdatedOption();
+    assert.ok(visibleCategories(resized, orientation) < initialCount, 'Resize must recompute category density.');
+    const updatedKeys = orientation === 'horizontal' ? resized.yAxis.data : resized.xAxis.data;
+    assert.equal(updatedKeys[resized.dataZoom[0].startValue], anchorID, 'Resize must retain the visible source ID.');
+    engine.resize({width: 450, height: 400});
+    engine.setOption(resized, true);
+    const count = visibleCategories(resized, orientation);
+    engine.dispatchAction({type: 'dataZoom', dataZoomId: 'category-scroll', startValue: 72 - count, endValue: 71});
+    const last = engine.getModel().getSeriesByIndex(0).getData();
+    assert.equal(last.getRawIndex(last.count() - 1), 71, 'Every category remains reachable at the new density.');
+    dense.refresh();
+    assert.equal(dense.getUpdatedOption().dataZoom[0].startValue, 72 - count);
+    engine.dispose();
+}
 
 console.log('Category Bar renderer layout verified.');

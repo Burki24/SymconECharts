@@ -958,6 +958,24 @@ if (array_slice($argv, 1) === ['--calendar-pie']) {
     exit(0);
 }
 
+if (($argv[1] ?? '') === '--bar-category-preview') {
+    $categoryPreview = new EChartsBarCategory();
+    $categoryPreview->Create();
+    $draft = json_decode($argv[2] ?? '{}', true, 64, JSON_THROW_ON_ERROR);
+    $draft['Sources'] = [];
+    for ($index = 0; $index < 72; ++$index) {
+        $id = 88500 + $index;
+        $GLOBALS['symconTestVariables'][$id] = [...$GLOBALS['symconTestVariables'][4711],
+            'Name' => 'Battery ' . ($index + 1), 'Value' => (float) ($index % 101)];
+        $draft['Sources'][] = ['VariableID' => $id, 'Category' => 'Battery ' . ($index + 1),
+            'UseVariablePresentation'       => false, 'Unit' => '%', 'Decimals' => 0];
+    }
+    $categoryPreview->UpdateBarPreviewFromForm(json_encode($draft, JSON_THROW_ON_ERROR));
+    $previewUpdate = array_slice($categoryPreview->GetTestFormUpdates(), -2)[($argv[3] ?? '') === 'ipsview' ? 1 : 0];
+    echo base64_decode(substr($previewUpdate['Value'], strlen('data:image/svg+xml;base64,')));
+    exit(0);
+}
+
 if (($argv[1] ?? '') === '--state-timeline-preview') {
     require_once dirname(__DIR__) . '/EChartsStateTimeline/module.php';
     $GLOBALS['symconTestVariables'][4800] = ['VariableType' => 0, 'VariableUpdated' => 1780000000, 'Value' => false, 'Name' => 'Fenster'];
@@ -8618,6 +8636,7 @@ foreach ([
         $barPreviewClass . ' must preserve multiple unsaved sources in the preview.'
     );
     $previewLimit = match ($barPreviewClass) {
+        EChartsBarCategory::class  => 5,
         EChartsBarHistory::class   => 3,
         EChartsBarWaterfall::class => 5,
         default                    => 6
@@ -8630,7 +8649,10 @@ foreach ([
         ],
         [4711, 4713, 4714, 4715, 4716, 4717, 4720]
     );
-    $barPreviewModule->UpdateBarPreviewFromForm(json_encode(['Sources' => $manyRows], JSON_THROW_ON_ERROR));
+    $barPreviewModule->UpdateBarPreviewFromForm(json_encode(['Sources' => $manyRows,
+        ...($barPreviewClass === EChartsBarCategory::class ? ['Orientation' => 'horizontal',
+            'BarWidthPercent'                                               => 100, 'IPSViewOrientation' => 'horizontal', 'IPSViewBarWidthPercent' => 100] : [])
+    ], JSON_THROW_ON_ERROR));
     foreach (array_slice($barPreviewModule->GetTestFormUpdates(), -2) as $update) {
         $svg = base64_decode(substr($update['Value'], strlen('data:image/svg+xml;base64,')), true);
         assertGatewayGauge(

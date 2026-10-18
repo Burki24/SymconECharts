@@ -1,5 +1,30 @@
 # Tests
 
+## Breitenabhängige Kategorienabstände in BarCategory
+
+`bar_category_layout.js` führt das ausgelieferte `app.min.js` aus und vergleicht
+es mit der reproduzierbaren esbuild-Transformation von `app.js`. Beide
+Ausrichtungen und Ausgaben sowie einfache, gruppierte und gestapelte Balken
+werden bei 20/100 Prozent Breite verglichen. Native ECharts-Geometrie belegt
+engere Kategoriezentren und mehr sichtbare Kategorien (auch mehr als 16),
+Font-Mindestabstände, Navigation bei kleinen Modellen, Resize/Update mit
+Quell-ID-Anker und Erreichbarkeit des letzten Eintrags. Die erste neue
+Dichte-Assertion scheiterte vor der Änderung an der unveränderten Fenstergröße.
+
+`bar_category_large_sources.php` prüft dichteabhängige SVG-Ausschnitte,
+sichtbare Kategorienabstände, Schriftgrenzen, unabhängige IPSView-Breiten und
+unveränderte gespeicherte Entwürfe. Alle SVGs bleiben parsbar; Anzahlhinweise
+stimmen mit dem Ausschnitt überein. Der bestehende Stressfall mit 100 langen
+Quellbezeichnungen, Themes und fast 256 KiB SVG bleibt unter 1 MiB je Ausgabe.
+Der gemeinsame Vorschautest erzwingt für BarCategory nun einen dichten
+horizontalen Grenzfall statt pauschal sechs Vorschauquellen vorauszusetzen.
+
+Die lokale Browserfixture unterstützt `compare=1`, `width=20|100`, `font=200`
+und `/preview.svg?width=20&orientation=vertical`. Am 18.10.2026 wurden synthetische
+72-Quellen-Vergleiche in Kachel-/IPSView-Varianten, beide Ausrichtungen und
+SVG-Vorschauen visuell geprüft, einschließlich der Dichtebegrenzung durch
+große Schrift. Live-Symcon-/IPSView-Tests nach Modulupdate bleiben offen.
+
 ## BarCategory-Verlauf und StateTimeline bis 32 Quellen
 
 `bar_category_gradient.php` ergänzt die Gateway-Integration um optionale

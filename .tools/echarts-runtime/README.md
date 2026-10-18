@@ -1,5 +1,14 @@
 # Diagrammfamilienspezifische ECharts-Runtimes erzeugen
 
+`npm run build:bar-category-app` erzeugt zusätzlich das eigene BarCategory-
+Anwendungsskript `EChartsBarCategory/visualization/app.min.js` aus der lesbaren
+`app.js`. Es wird ausschließlich mit dem bereits festgeschriebenen esbuild
+whitespace-minifiziert (Ziel ES2018), ohne ECharts einzubündeln oder dessen
+Runtime zu verändern. `npm run build` enthält diesen Schritt. Die Layouttests
+vergleichen das ausgelieferte Artefakt exakt mit der erneuten Transformation
+und führen die Tests darauf aus. Die kleinere Anwendung erhält den 1-MiB-
+Ausgabepuffer bei 100 langen Quellenbezeichnungen plus großem SVG-Muster.
+
 Der BarCategory-Einstieg enthält Bar Chart, Grid, Legende, Titel, Tooltip,
 Aria, DataZoom und Canvas Renderer aus dem unveränderten ECharts 6.1.0.
 `npm run build:bar-category` schreibt ausschließlich

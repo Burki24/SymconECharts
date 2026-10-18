@@ -3,6 +3,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {execFileSync} from 'node:child_process';
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
@@ -29,7 +30,10 @@ function page(query) {
         state: {status: 'ready', chart: {theme: 'auto', bar: {
             title: 'Aktuelle Vergleichswerte · ' + count + ' Quellen', mode: barMode, orientation,
             sortOrder: 'configured', unit: '%', decimals: 0,
-            style: {showValues: true, showGrid: true, roundedBars: false, barWidthPercent: 70, animationEnabled: false,
+            style: {showValues: true, showGrid: true, roundedBars: false,
+                barWidthPercent: Math.max(20, Math.min(100, Number(query.get('width')) || 70)),
+                axisFontSizePercent: Math.max(50, Math.min(200, Number(query.get('font')) || 100)),
+                valueFontSizePercent: Math.max(50, Math.min(200, Number(query.get('font')) || 100)), animationEnabled: false,
                 barFillMode: fill, colorMinimum, colorMaximum, lowColor: '#ff0000', middleColor: '#ffff00', highColor: '#00ff00'}
         }, items}}};
     const replacements = {HTML_LANGUAGE: 'de', HTML_CLASSES: '', ROOT_FONT_SIZE: '16px',
@@ -38,7 +42,7 @@ function page(query) {
         MODULE_STYLE: read('EChartsBarCategory/visualization/style.css'), IPSVIEW_STYLE: '',
         ECHARTS_SCRIPT: read('libs/echarts/6.1.0/echarts.bar-category.min.js'), ECHARTS_THEME_SCRIPT: '',
         ECHARTS_DESIGN_SCRIPT: read('libs/echarts-design.js'), ECHARTS_PATTERN_SCRIPT: read('libs/echarts-pattern.js'),
-        BOOTSTRAP_JSON: JSON.stringify(bootstrap), MODULE_SCRIPT: read('EChartsBarCategory/visualization/app.js'),
+        BOOTSTRAP_JSON: JSON.stringify(bootstrap), MODULE_SCRIPT: read('EChartsBarCategory/visualization/app.min.js'),
         IPSVIEW_TRANSPORT_SCRIPT: ''};
     let html = read('EChartsBarCategory/visualization/index.html').replace(/\{\{([A-Z_]+)\}\}/g, (_, key) => replacements[key] ?? '');
     if (mode === 'symcon') {
@@ -48,6 +52,28 @@ function page(query) {
 }
 const port = Number(process.env.PORT || 8802);
 http.createServer((request, response) => {
+    const url = new URL(request.url, 'http://localhost');
+    if (url.pathname === '/preview.svg') {
+        response.writeHead(200, {'Content-Type': 'image/svg+xml; charset=utf-8'});
+        response.end(execFileSync('php', ['tests/gateway_gauges.php', '--bar-category-preview', JSON.stringify({
+            Orientation: url.searchParams.get('orientation') || 'horizontal',
+            BarWidthPercent: Number(url.searchParams.get('width')) || 70,
+            AxisFontSizePercent: Number(url.searchParams.get('font')) || 100,
+            ValueFontSizePercent: Number(url.searchParams.get('font')) || 100,
+            BarFillMode: 'gradient', BarMode: 'simple'
+        })], {cwd: root, windowsHide: true, encoding: 'utf8', maxBuffer: 2097152}));
+        return;
+    }
     response.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'});
-    response.end(page(new URL(request.url, 'http://localhost').searchParams));
+    if (url.searchParams.get('compare') === '1') {
+        url.searchParams.delete('compare');
+        response.end('<!doctype html><html><body style="background:#101114;color:white;font:16px Arial"><div style="display:flex;gap:16px">'
+            + [100, 20].map(width => {
+                url.searchParams.set('width', String(width));
+                return '<section style="width:50%"><h2>Balkenbreite ' + width + ' %</h2><iframe style="border:0;width:100%;height:590px" src="/?'
+                    + url.searchParams.toString() + '"></iframe></section>';
+            }).join('') + '</div></body></html>');
+        return;
+    }
+    response.end(page(url.searchParams));
 }).listen(port, '127.0.0.1', () => console.log('Category Bar browser fixture: http://127.0.0.1:' + port));

@@ -35,12 +35,59 @@ foreach ([72, 100] as $count) {
     foreach (array_slice($largeCategory->GetTestFormUpdates(), -2) as $update) {
         $svg = base64_decode(substr($update['Value'], strlen('data:image/svg+xml;base64,')), true);
         assertGatewayGauge(
-            is_string($svg) && str_contains($svg, 'Battery')
-            && str_contains($svg, 'data-preview-sources="6/' . $count . '"') && !str_contains($svg, 'Example data'),
+            is_string($svg) && str_contains($svg, 'Batte')
+            && preg_match('/data-preview-sources="([1-9][0-9]*)\/' . $count . '"/', $svg, $shown)
+            && (int) $shown[1] < $count && !str_contains($svg, 'Example data'),
             'Large Category Bar previews must show a disclosed subset of actual sources, not example fallback.'
         );
     }
 }
+$previewSpans = [];
+$previewCounts = [];
+foreach (['simple', 'grouped', 'stacked'] as $mode) {
+    foreach (['horizontal', 'vertical'] as $orientation) {
+        foreach ([20, 100] as $width) {
+            $largeCategory->UpdateBarPreviewFromForm(json_encode(['BarMode' => $mode, 'Orientation' => $orientation,
+                'IPSViewUseTileDesign'                                      => false, 'IPSViewBarMode' => $mode, 'IPSViewOrientation' => $orientation,
+                'BarWidthPercent'                                           => $width, 'IPSViewBarWidthPercent' => $width], JSON_THROW_ON_ERROR));
+            foreach (array_slice($largeCategory->GetTestFormUpdates(), -2) as $outputIndex => $update) {
+                $svg = base64_decode(substr($update['Value'], strlen('data:image/svg+xml;base64,')), true);
+                preg_match('/data-preview-sources="(\d+)\/100"/', $svg, $shown);
+                preg_match('/data-preview-category-span="([\d.]+)"/', $svg, $span);
+                assertGatewayGauge(isset($shown[1], $span[1]), 'Density previews must disclose the actual source subset and category span.');
+                $previewSpans[$mode][$orientation][$width][$outputIndex] = (float) $span[1];
+                $previewCounts[$mode][$orientation][$width][$outputIndex] = (int) $shown[1];
+                $xml = new DOMDocument();
+                assertGatewayGauge($xml->loadXML($svg), 'Density previews must remain valid SVG.');
+            }
+        }
+        foreach ([0, 1] as $outputIndex) {
+            assertGatewayGauge(
+                $previewCounts[$mode][$orientation][20][$outputIndex] > $previewCounts[$mode][$orientation][100][$outputIndex],
+                'Thinner bars must disclose more real sources in either preview and orientation.'
+            );
+        }
+    }
+}
+foreach (['horizontal', 'vertical'] as $orientation) {
+    assertGatewayGauge(
+        $previewSpans['simple'][$orientation][20][0] < $previewSpans['simple'][$orientation][100][0],
+        'SVG category centers, not only the painted bar thickness, must move closer together.'
+    );
+}
+$largeCategory->UpdateBarPreviewFromForm('{"Orientation":"horizontal","BarWidthPercent":20,"IPSViewUseTileDesign":false,"IPSViewOrientation":"horizontal","IPSViewBarWidthPercent":100}');
+$independentPreviews = array_map(static fn (array $update): string => base64_decode(substr($update['Value'], strlen('data:image/svg+xml;base64,')), true), array_slice($largeCategory->GetTestFormUpdates(), -2));
+preg_match('/data-preview-sources="(\d+)\/100"/', $independentPreviews[0], $tileCount);
+preg_match('/data-preview-sources="(\d+)\/100"/', $independentPreviews[1], $ipsCount);
+assertGatewayGauge((int) $tileCount[1] > (int) $ipsCount[1], 'Independent preview density must use its own width, not the Tile width.');
+$largeCategory->UpdateBarPreviewFromForm('{"Orientation":"horizontal","BarWidthPercent":20,"AxisFontSizePercent":200,"ValueFontSizePercent":200}');
+$largeTextPreview = base64_decode(substr(array_slice($largeCategory->GetTestFormUpdates(), -2)[0]['Value'], strlen('data:image/svg+xml;base64,')), true);
+preg_match('/data-preview-sources="(\d+)\/100"/', $largeTextPreview, $largeTextCount);
+assertGatewayGauge((int) $largeTextCount[1] < (int) $tileCount[1], 'Preview fonts must limit the density before labels overlap.');
+assertGatewayGauge(
+    json_decode($largeCategory->GetBarData(), true)['bar']['style']['barWidthPercent'] === 70,
+    'Density previews must not persist unsaved width or font settings.'
+);
 assertGatewayGauge($data['items'][99]['value'] === -250.0, 'Category Bar must retain signed offscreen source values.');
 $largeCategory->SetTestProperty('BarFillMode', 'gradient');
 foreach ([$largeCategory->GetVisualizationTile(), $largeCategory->GetIPSViewHTML()] as $output) {
@@ -91,5 +138,6 @@ foreach ($largeCategorySources as $source) {
 foreach (array_diff(array_keys($GLOBALS['symconTestVariables']), $categoryExistingVariables) as $variableID) {
     unset($GLOBALS['symconTestVariables'][$variableID]);
 }
-unset($largeCategory, $largeCategorySources, $largeCategoryStressSources, $largeCategoryPattern, $data, $output, $svg, $update, $sortedCategoryPreview);
+unset($largeCategory, $largeCategorySources, $largeCategoryStressSources, $largeCategoryPattern, $data, $output, $svg, $update, $sortedCategoryPreview,
+    $previewCounts, $previewSpans, $independentPreviews, $largeTextPreview);
 gc_collect_cycles();

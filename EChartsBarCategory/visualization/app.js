@@ -195,23 +195,35 @@
         var valueSize = echartsDesign.fontSizePercent(style.valueFontSizePercent, 12);
         var top = headerInset + (multiSeries ? (titleVisible ? 82 : 48) : (titleVisible ? 56 : 20))
             + Math.max(0, titleSize - 18) + (multiSeries ? Math.max(0, legendSize - 12) : 0);
-        var scroll = chartData.categories.length > 16;
-        var right = (horizontal && style.showValues === true ? 84 : 30) + (scroll && horizontal ? 28 : 0);
-        var bottom = (horizontal ? 28 : 70) + (scroll && !horizontal ? 28 : 0);
+        var barRatio = Math.max(20, Math.min(100, Number(style.barWidthPercent) || 70)) / 100;
+        var right = horizontal && style.showValues === true ? 84 : 30;
+        var bottom = horizontal ? 28 : 70;
         var left = horizontal ? 28 : 52;
-        var crossSpace = horizontal ? (chartElement.clientHeight || 500) - top - bottom
-            : (chartElement.clientWidth || 800) - left - right;
-        var minimumSpan = Math.max(horizontal ? 28 : 56, axisSize * 1.8,
-            style.showValues === true ? valueSize * 1.8 : 0);
-        if (chartData.mode === 'grouped') {
-            minimumSpan = Math.max(minimumSpan, chartData.series.length * 10);
+        var groupSize = chartData.mode === 'grouped' ? chartData.series.length : 1;
+        var valueSpan = valueSize * 1.8;
+        if (!horizontal && style.showValues === true) {
+            valueSpan = (model.items || []).reduce(function (maximum, item) {
+                return item.value === null ? maximum : Math.max(maximum,
+                    Array.from(formatValue(item.value, Math.max(0, Math.min(6, Number(bar.decimals) || 0)), String(bar.unit || ''))).length * valueSize * 0.65);
+            }, valueSpan);
         }
-        var visibleCount = scroll ? Math.max(1, Math.min(16, Math.floor(crossSpace / minimumSpan))) : chartData.categories.length;
+        var minimumSpan = Math.max((horizontal ? 40 : 80) * groupSize * barRatio,
+            axisSize * (horizontal ? 1.5 : 2.4) + 4,
+            style.showValues === true ? valueSpan * groupSize + 4 : 0);
+        // Leave room for value-axis tick text consumed by containLabel.
+        var crossSpace = Math.max(1, horizontal ? (chartElement.clientHeight || 500) - top - bottom - axisSize * 1.5
+            : (chartElement.clientWidth || 800) - left - right - axisSize * 4);
+        var visibleCount = Math.max(1, Math.min(chartData.categories.length, Math.floor(crossSpace / minimumSpan)));
+        var scroll = visibleCount < chartData.categories.length;
+        if (scroll && horizontal) { right += 28; }
+        if (scroll && !horizontal) { bottom += 28; }
+        var categorySpan = Math.min(minimumSpan, crossSpace);
         var anchorIndex = chartData.categoryKeys.indexOf(categoryAnchor);
         var first = Math.max(0, Math.min(chartData.categories.length - visibleCount,
             anchorIndex >= 0 ? anchorIndex : categoryStart));
         var categoryKeys = scroll ? chartData.categoryKeys : chartData.categories;
-        var axisLabel = { color: axisColor, fontSize: axisSize, overflow: 'truncate', width: horizontal ? 180 : 100 };
+        var axisLabel = { color: axisColor, fontSize: axisSize, overflow: 'truncate',
+            width: horizontal ? 180 : Math.max(8, Math.min(100, categorySpan - 8)) };
         if (scroll) {
             axisLabel.interval = 0;
             axisLabel.formatter = function (key) {
@@ -296,6 +308,8 @@
             },
             grid: {
                 top: top, right: right, bottom: bottom, left: left,
+                ...(horizontal ? {height: categorySpan * visibleCount + axisSize * 1.5}
+                    : {width: categorySpan * visibleCount + axisSize * 4}),
                 containLabel: true
             },
             dataZoom: scroll ? [
@@ -347,19 +361,19 @@
                     ['top', 'bottom', 'left', 'right', 'inside', 'insideTop', 'insideBottom',
                         'insideLeft', 'insideRight'], 5);
                 var labelIsInside = valueLabel.position.indexOf('inside') === 0;
+                var groupThickness = categorySpan * barRatio / (groupSize + 0.3 * (groupSize - 1));
+                var valueLabelsFit = chartData.mode !== 'grouped'
+                    || groupThickness >= (horizontal ? valueSize * 1.2 : valueSpan);
                 var result = {
                     id: seriesItem.id,
                     name: seriesItem.id,
                     type: 'bar',
                     stack: stacked ? 'total' : undefined,
-                    barCategoryGap: multiSeries
-                        ? Math.max(0, 100 - Math.max(20, Math.min(100, Number(style.barWidthPercent) || 70))) + '%'
-                        : undefined,
-                    barWidth: multiSeries ? undefined
-                        : Math.max(20, Math.min(100, Number(style.barWidthPercent) || 70)) + '%',
+                    barCategoryGap: multiSeries ? (100 - barRatio * 100) + '%' : undefined,
+                    barWidth: multiSeries ? undefined : barRatio * 100 + '%',
                     itemStyle: { color: pattern || seriesItem.color },
                     label: {
-                        show: style.showValues === true,
+                        show: style.showValues === true && valueLabelsFit,
                         ...valueLabel,
                         color: style.valueColor || (labelIsInside ? colors.background : colors.text),
                         fontSize: valueSize,
@@ -455,7 +469,14 @@
             }
         }).observe(chartElement);
     } else {
-        window.addEventListener('resize', function () { if (chart) { chart.resize(); } });
+        window.addEventListener('resize', function () {
+            if (!chart) { return; }
+            rememberCategoryWindow();
+            chart.resize();
+            if (currentState && currentState.status === 'ready') {
+                chart.setOption(buildOption(currentState.chart, currentTheme || 'auto'), true);
+            }
+        });
     }
     window.addEventListener('beforeunload', function () { if (chart) { chart.dispose(); } });
     render(currentState);

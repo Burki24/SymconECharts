@@ -129,3 +129,37 @@ its behavior. They use a user-space gradient over the signed preview value
 axis. Existing six-source preview disclosure is unchanged. Both native Canvas
 outputs and the PHP preview contract are covered by local verification; live
 Symcon/IPSView acceptance after module update remains with the owner.
+
+## Extension: width-dependent category density (2026-10-18)
+
+The fixed sixteen-category window is replaced by a category-space budget.
+`BarWidthPercent` keeps its existing 20–100 range, type and inheritance/copy
+contract. Thinner bars reduce the target category pitch; axis/value font sizes
+establish a minimum pitch, with additional room for grouped series. Thus the
+density may plateau at the readability minimum. Vertical numeric-label width
+is conservatively estimated from the formatted full-model values. Grouped
+value labels that cannot fit are suppressed rather than drawn on top of each
+other; original values stay available in tooltips.
+
+The initial window uses all categories that fit, bounded by the existing total
+of 100 source assignments. Native DataZoom is enabled whenever needed, even
+for fewer than sixteen categories. The category direction of the grid remains
+compact when all categories fit. Resizing and current-value refreshes retain
+the source/category anchor; signed full-model axis bounds and gradients are
+unchanged. The fallback resize handler now recalculates the viewport as well.
+
+The static SVG preview uses width/font-dependent source selection and category
+pitch with an explicit actual/total source count. Sorting precedes selection;
+no draft properties or source values are persisted. Truncated preview names
+retain their complete escaped text in SVG title elements. Neither the source
+format nor Gateway, theme, ECharts-runtime or synchronized-helper contracts
+change.
+
+The expanded application would otherwise exceed the 1 MiB IPSView buffer in
+the existing 100-long-label/near-256-KiB-SVG regression. Only this module's own
+application script is therefore whitespace-minified with the already pinned
+esbuild, using `npm run build:bar-category-app` in `.tools/echarts-runtime`.
+Readable `app.js` remains authoritative; committed `app.min.js` is served via
+the existing scriptAsset option. The native layout suite verifies exact
+reproducibility and exercises the shipped artifact. No ECharts code, upstream
+artifact, dependency version or import/source limit changes.

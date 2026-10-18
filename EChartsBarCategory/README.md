@@ -14,11 +14,20 @@ the same effective unit so that the shared value axis remains meaningful.
 ## Large category lists
 
 The source limit is **100 variable assignments in total**, including all
-categories and series in grouped or stacked mode. More than sixteen categories
-enable a category slider and mouse-wheel navigation automatically, in either
-orientation and in both Tile and IPSView. The initial window adapts to the
-available chart size and font sizes, showing at most sixteen categories.
-Grouped bars also reserve room for their series. A scrollable legend helps
+categories and series in grouped or stacked mode. A category slider and
+mouse-wheel navigation appear when the categories do not fit the available
+space, in either orientation and in both Tile and IPSView. There is no fixed
+sixteen-category window: its size follows the chart dimensions, **Bar width**
+and the axis/value-label font sizes.
+
+Thinner bars bring category centers closer together and expose more categories.
+Larger fonts protect a minimum distance; once this minimum is reached, reducing
+the width changes the bar thickness without packing the labels more tightly.
+Short lists remain compact instead of stretching across the whole category
+direction. Grouped bars reserve additional room for their series; if their
+value labels cannot fit without overlap, the labels are omitted and the full
+values remain in the tooltip. Vertical category names truncate to their slot.
+A scrollable legend helps
 with many series; navigation changes the visible categories, not the sources.
 
 All configured values remain in the model. Sorting and the shared signed
@@ -70,9 +79,12 @@ is explicitly marked as example data. Value labels use the effective unit and
 decimal precision from the sources. The preview illustrates the layout; an
 imported SVG motif is shown only as a schematic hatch. The actual chart in
 the tile or IPSView widget remains the visual reference.
-When more than six sources are configured, the preview shows the first six in
-the selected sort order and states the shown and total source counts; the actual
-chart still uses all sources.
+The preview uses the same width/font-dependent spacing principle. Its bounded
+source subset adapts to the preview dimensions, orientation and fonts rather
+than always showing six sources. It sorts all sources before selecting the
+subset and states the shown and total counts whenever sources are omitted.
+The actual chart still uses all sources; a static preview is not a navigable
+or pixel-identical replacement for it.
 
 ## Animation
 

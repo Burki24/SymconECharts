@@ -2,6 +2,12 @@
 
 ## Neu
 
+- EChartsBarCategory koppelt die Balkenbreite an den Kategorienabstand:
+  Dünnere Balken rücken enger zusammen und machen mehr Kategorien sichtbar.
+  Die bisherige Grenze von 16 sichtbaren Kategorien entfällt; Schriftgrößen
+  und gruppierte Reihen begrenzen die Dichte. Dies gilt horizontal und vertikal
+  für Kachel, IPSView und die unmittelbar aktualisierte Vorschau.
+
 - EChartsBarCategory bietet einen optionalen Farbverlauf innerhalb der Balken
   mit frei wählbarer Min-/Max-Skala und drei Farben. Er gilt in Kachel, IPSView
   und Vorschau, horizontal oder vertikal sowie bei gruppierten und gestapelten

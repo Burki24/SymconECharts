@@ -369,7 +369,27 @@ class EChartsBarCategory extends IPSModuleStrict
                 return $sort === 'ascending' ? $left <=> $right : $right <=> $left;
             });
         }
-        $items = array_slice($items, 0, 6);
+        $horizontal = $orientation === 'horizontal';
+        $barRatio = max(20, min(100, $this->BarPreviewValue($values, 'BarWidthPercent', 'integer', $ipsView))) / 100;
+        $previewAxisSize = max(6, min(22, (int) round(11 * $this->BarPreviewValue($values, 'AxisFontSizePercent', 'integer', $ipsView) / 100)));
+        $previewValueSize = max(6, min(22, (int) round(11 * $this->BarPreviewValue($values, 'ValueFontSizePercent', 'integer', $ipsView) / 100)));
+        $previewValueSpan = $previewValueSize * 1.8;
+        if (!$horizontal && $this->BarPreviewValue($values, 'ShowValues', 'boolean', $ipsView)) {
+            foreach ($items as $item) {
+                $previewValueSpan = max($previewValueSpan, mb_strlen(EChartsBarPreview::FormatValue(
+                    $item['value'],
+                    $previewDecimals,
+                    $item['unit'],
+                    $previewLanguage
+                )) * $previewValueSize * 0.65);
+            }
+        }
+        $previewSpan = max(
+            ($horizontal ? 40 : 80) * $barRatio,
+            $previewAxisSize * ($horizontal ? 1.5 : 2.4) + 4,
+            $this->BarPreviewValue($values, 'ShowValues', 'boolean', $ipsView) ? $previewValueSpan + 4 : 0
+        );
+        $items = array_slice($items, 0, max(1, (int) floor(($horizontal ? 210 : 568) / $previewSpan)));
         $svg = EChartsBarPreview::Open(
             $palette,
             (string) ($values['Title'] ?? $this->ReadPropertyString('Title')),
@@ -391,7 +411,7 @@ class EChartsBarCategory extends IPSModuleStrict
         $svg .= '<text x="696" y="55" text-anchor="end" fill="' . EChartsBarPreview::E($palette['muted'])
             . '" font-size="12">' . EChartsBarPreview::E(ucfirst($mode)) . '</text>';
         if ($mode !== 'simple') {
-            foreach ($items as $index => $item) {
+            foreach (array_slice($items, 0, 6) as $index => $item) {
                 $color = $item['color'] !== '' ? $item['color'] : $palette['seriesColors'][$index % count($palette['seriesColors'])];
                 $series = trim(is_string($item['Series'] ?? null) ? $item['Series'] : '');
                 if ($series === '') {
@@ -495,16 +515,20 @@ class EChartsBarCategory extends IPSModuleStrict
             : '<line x1="100" y1="' . EChartsBarPreview::N($zero) . '" x2="668" y2="'
                 . EChartsBarPreview::N($zero) . '" stroke="' . EChartsBarPreview::E($palette['border']) . '"/>';
         $groupCount = count($groups);
+        $span = min(
+            ($horizontal ? 210 : 568) / $groupCount,
+            $previewSpan * ($mode === 'grouped' ? max(array_map('count', $groups)) : 1)
+        );
+        $svg .= '<g data-preview-category-span="' . EChartsBarPreview::N($span) . '">';
         $groupIndex = 0;
         foreach ($groups as $key => $group) {
-            $span = ($orientation === 'horizontal' ? 210 : 568) / $groupCount;
             $label = $mode === 'simple' ? $group[0]['item']['label'] : $key;
             $center = ($orientation === 'horizontal' ? 79 : 100) + ($groupIndex + 0.5) * $span;
             $svg .= $orientation === 'horizontal'
                 ? '<text x="92" y="' . EChartsBarPreview::N($center + 4) . '" text-anchor="end" fill="' . EChartsBarPreview::E($axisColor)
-                    . '" font-size="' . $axisSize . '">' . EChartsBarPreview::E(mb_strimwidth($label, 0, 13, '…')) . '</text>'
+                    . '" font-size="' . $axisSize . '"><title>' . EChartsBarPreview::E($label) . '</title>' . EChartsBarPreview::E(mb_strimwidth($label, 0, 13, '…')) . '</text>'
                 : '<text x="' . EChartsBarPreview::N($center) . '" y="315" text-anchor="middle" fill="' . EChartsBarPreview::E($axisColor)
-                    . '" font-size="' . $axisSize . '">' . EChartsBarPreview::E(mb_strimwidth($label, 0, 12, '…')) . '</text>';
+                    . '" font-size="' . $axisSize . '"><title>' . EChartsBarPreview::E($label) . '</title>' . EChartsBarPreview::E(mb_strimwidth($label, 0, max(1, min(12, (int) floor(($span - 8) / ($axisSize * 0.65)))), '…')) . '</text>';
             $positiveOffset = 0.0;
             $negativeOffset = 0.0;
             foreach ($group as $entryIndex => $entry) {
@@ -516,8 +540,8 @@ class EChartsBarCategory extends IPSModuleStrict
                 }
                 $size = ($orientation === 'horizontal' ? 568 : 208) * abs($item['value']) / $range;
                 $subCount = $mode === 'stacked' ? 1 : count($group);
-                $thickness = max(3, ($span - 12) * $barWidth / 100 / $subCount);
-                $cross = $center - $span * $barWidth / 200 + ($mode === 'stacked' ? 0 : $entryIndex * $thickness);
+                $thickness = max(1, $span * $barWidth / 100 / ($subCount + 0.3 * ($subCount - 1)));
+                $cross = $center - $span * $barWidth / 200 + ($mode === 'stacked' ? 0 : $entryIndex * $thickness * 1.3);
                 $offset = $mode === 'stacked'
                     ? ($item['value'] >= 0 ? $positiveOffset : $negativeOffset) : 0;
                 if ($orientation === 'horizontal') {
@@ -547,7 +571,7 @@ class EChartsBarCategory extends IPSModuleStrict
                     $valueY = $placement['y'];
                     $valueAnchor = $placement['anchor'];
                 }
-                if ($showValues) {
+                if ($showValues && ($mode !== 'grouped' || $thickness >= ($horizontal ? $valueSize * 1.2 : $previewValueSpan))) {
                     $textColor = $valueColor;
                     if ($fillMode === 'gradient' && str_starts_with($valueLabelPosition, 'inside')
                         && $this->BarPreviewValue($values, 'ValueColor', 'integer', $ipsView) < 0) {
@@ -573,7 +597,7 @@ class EChartsBarCategory extends IPSModuleStrict
         }
 
         return EChartsPreviewSourceCount::Append(
-            $svg . '</svg>',
+            $svg . '</g></svg>',
             count($items),
             count($data['items']),
             $this->Translate('Preview shows %d of %d sources'),
@@ -591,6 +615,7 @@ class EChartsBarCategory extends IPSModuleStrict
         }
 
         return $this->RenderVisualizationHTMLPage($ipsView, [
+            'scriptAsset'        => 'app.min.js',
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'ECharts Category Bar',
             'visualizationTheme' => $this->VisualizationThemeCSS()
