@@ -19,16 +19,27 @@ trait EChartsIPSViewDesignForm
     /** Immediately follows an unsaved change to the design inheritance switch. */
     public function UpdateIPSViewDesignAvailability(bool $UseTileDesign, array $FieldNames = []): void
     {
-        $seen = [];
-        foreach ($FieldNames === [] ? [self::IPSVIEW_COPY_BUTTON] : $FieldNames as $name) {
-            if (!is_string($name) || preg_match('/^[A-Za-z][A-Za-z0-9]*$/', $name) !== 1) {
-                throw new \InvalidArgumentException('Invalid IPSView design field name.');
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            $seen = [];
+            foreach ($FieldNames === [] ? [self::IPSVIEW_COPY_BUTTON] : $FieldNames as $name) {
+                if (!is_string($name) || preg_match('/^[A-Za-z][A-Za-z0-9]*$/', $name) !== 1) {
+                    throw new \InvalidArgumentException('Invalid IPSView design field name.');
+                }
+                if (isset($seen[$name])) {
+                    continue;
+                }
+                $seen[$name] = true;
+                $this->UpdateFormField($name, 'enabled', !$UseTileDesign);
             }
-            if (isset($seen[$name])) {
-                continue;
-            }
-            $seen[$name] = true;
-            $this->UpdateFormField($name, 'enabled', !$UseTileDesign);
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
     }
 

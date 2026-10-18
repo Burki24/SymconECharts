@@ -28,6 +28,7 @@ def main() -> None:
     expected = {
         "ConfigurationFormHelper",
         "DataFlowHelper",
+        "DebugFlowHelper",
         "IPSViewHTMLPageHelper",
         "ResponsiveVisualizationHelper",
         "SVGPreviewHelper",

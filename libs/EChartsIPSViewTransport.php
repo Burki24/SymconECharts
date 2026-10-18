@@ -46,33 +46,55 @@ trait EChartsIPSViewTransport
     /** @param array<string, mixed> $message */
     protected function PushEChartsIPSViewMessage(array $message): void
     {
-        if (!$this->IsIPSViewHTMLPageEnabled() || !$this->HasActiveParent()) {
-            return;
-        }
-
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
-            $response = $this->SendDataToParent($this->EncodeDataFlowMessage(
-                self::DATA_ID_TO_PARENT,
-                EChartsDataProtocol::CreateRequest(EChartsDataProtocol::OPERATION_IPSVIEW_PUSH, [
-                    'InstanceID' => $this->InstanceID,
-                    'Channel'    => $this->EChartsIPSViewChannel(),
-                    'Message'    => $message
-                ])
-            ));
-            EChartsDataProtocol::DecodeResponse($response, EChartsDataProtocol::OPERATION_IPSVIEW_PUSH);
-        } catch (Throwable $exception) {
-            $this->SendDebug('PushIPSViewMessage', $exception::class, 0);
+            if (!$this->IsIPSViewHTMLPageEnabled() || !$this->HasActiveParent()) {
+                return;
+            }
+
+            try {
+                $response = $this->DebugEChartsSendToParent($this->EncodeDataFlowMessage(
+                    self::DATA_ID_TO_PARENT,
+                    EChartsDataProtocol::CreateRequest(EChartsDataProtocol::OPERATION_IPSVIEW_PUSH, [
+                        'InstanceID' => $this->InstanceID,
+                        'Channel'    => $this->EChartsIPSViewChannel(),
+                        'Message'    => $message
+                    ])
+                ));
+                EChartsDataProtocol::DecodeResponse($response, EChartsDataProtocol::OPERATION_IPSVIEW_PUSH);
+            } catch (Throwable $exception) {
+                $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
+            }
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
     }
 
     /** @param Closure(): array<string, mixed> $stateBuilder */
     protected function PushEChartsIPSViewState(Closure $stateBuilder): void
     {
-        if (!$this->IsIPSViewHTMLPageEnabled()) {
-            return;
-        }
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            if (!$this->IsIPSViewHTMLPageEnabled()) {
+                return;
+            }
 
-        $this->PushEChartsIPSViewMessage($stateBuilder());
+            $this->PushEChartsIPSViewMessage($stateBuilder());
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
+        }
     }
 
     /**
@@ -84,35 +106,46 @@ trait EChartsIPSViewTransport
         Closure $stateBuilder,
         bool $allowTile = false
     ): string {
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
-            $message = $this->DecodeDataFlowMessage($json, $dataID);
-            $request = EChartsDataProtocol::DecodeRequest($message);
-            if ($request['Operation'] !== EChartsDataProtocol::OPERATION_IPSVIEW_STATE) {
-                return '';
+            try {
+                $message = $this->DecodeDataFlowMessage($json, $dataID);
+                $request = EChartsDataProtocol::DecodeRequest($message);
+                if ($request['Operation'] !== EChartsDataProtocol::OPERATION_IPSVIEW_STATE) {
+                    return $debugFlowResult = '';
+                }
+
+                $payload = $request['Payload'];
+                $output = $payload['Output'] ?? 'ipsview';
+                $offset = $payload['WindowOffset'] ?? 0;
+                if (($payload['InstanceID'] ?? null) !== $this->InstanceID
+                    || !is_string($payload['Channel'] ?? null)
+                    || !hash_equals($this->EChartsIPSViewChannel(), $payload['Channel'])
+                    || !in_array($output, ['tile', 'ipsview'], true)
+                    || !is_int($offset) || $offset < 0 || $offset > EChartsDataProtocol::MAX_STATE_WINDOW_OFFSET
+                    || ($output === 'tile'
+                        ? !$allowTile : !$this->IsIPSViewHTMLPageEnabled())
+                ) {
+                    return $debugFlowResult = '';
+                }
+
+                return $debugFlowResult = EChartsDataProtocol::EncodeSuccessResponse(
+                    EChartsDataProtocol::OPERATION_IPSVIEW_STATE,
+                    ['State' => $stateBuilder($payload)]
+                );
+            } catch (Throwable $exception) {
+                $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
+
+                return $debugFlowResult = '';
             }
-
-            $payload = $request['Payload'];
-            $output = $payload['Output'] ?? 'ipsview';
-            $offset = $payload['WindowOffset'] ?? 0;
-            if (($payload['InstanceID'] ?? null) !== $this->InstanceID
-                || !is_string($payload['Channel'] ?? null)
-                || !hash_equals($this->EChartsIPSViewChannel(), $payload['Channel'])
-                || !in_array($output, ['tile', 'ipsview'], true)
-                || !is_int($offset) || $offset < 0 || $offset > EChartsDataProtocol::MAX_STATE_WINDOW_OFFSET
-                || ($output === 'tile'
-                    ? !$allowTile : !$this->IsIPSViewHTMLPageEnabled())
-            ) {
-                return '';
-            }
-
-            return EChartsDataProtocol::EncodeSuccessResponse(
-                EChartsDataProtocol::OPERATION_IPSVIEW_STATE,
-                ['State' => $stateBuilder($payload)]
-            );
-        } catch (Throwable $exception) {
-            $this->SendDebug('ReceiveIPSViewState', $exception::class, 0);
-
-            return '';
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, false);
         }
     }
 

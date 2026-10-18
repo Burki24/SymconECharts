@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/../libs/helper/DebugFlowHelper.php';
+require_once __DIR__ . '/../libs/EChartsDebugFlow.php';
+
 use Burki24\SymconModuleHelper\ConfigurationFormHelper;
 use Burki24\SymconModuleHelper\DataFlowHelper;
 use Burki24\SymconModuleHelper\IPSViewHTMLPageHelper;
@@ -50,6 +53,9 @@ require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 
 class EChartsBarWaterfall extends IPSModuleStrict
 {
+    use \Burki24\SymconModuleHelper\DebugFlowHelper;
+    use \SymconECharts\EChartsDebugFlow;
+
     use ConfigurationFormHelper;
     use EChartsAnimationDesign;
     use EChartsBarPreviewForm;
@@ -83,212 +89,344 @@ class EChartsBarWaterfall extends IPSModuleStrict
 
     public function Create(): void
     {
-        parent::Create();
-        $this->RegisterTransientRefresh('ECBW');
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            parent::Create();
+            $this->RegisterTransientRefresh('ECBW');
 
-        $this->SetVisualizationType(1);
-        $this->RegisterMessage(0, IPS_KERNELSTARTED);
-        $this->RegisterPropertyString('Sources', '[]');
-        $this->RegisterPropertyString('Title', '');
-        $this->RegisterPropertyString('TotalLabel', '');
-        $this->RegisterDesignProperties();
-        $this->RegisterIPSViewHTMLPageProperties();
-        $this->RegisterEChartsIPSViewTransport();
-        $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
-        $this->RegisterPropertyBoolean('IPSViewAdaptToBackground', false);
-        $this->RegisterPropertyInteger('IPSViewBackgroundColor', EChartsIPSViewBackground::DEFAULT_COLOR);
-        $this->RegisterPropertyInteger(
-            'IPSViewBackgroundOpacityPercent',
-            EChartsIPSViewBackground::DEFAULT_OPACITY_PERCENT
-        );
-        $this->RegisterDesignProperties('IPSView');
-        $this->RegisterAttributeString('RegisteredSourceVariableIDs', '[]');
-        $this->RegisterAttributeString('LastError', '');
+            $this->SetVisualizationType(1);
+            $this->RegisterMessage(0, IPS_KERNELSTARTED);
+            $this->RegisterPropertyString('Sources', '[]');
+            $this->RegisterPropertyString('Title', '');
+            $this->RegisterPropertyString('TotalLabel', '');
+            $this->RegisterDesignProperties();
+            $this->RegisterIPSViewHTMLPageProperties();
+            $this->RegisterEChartsIPSViewTransport();
+            $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
+            $this->RegisterPropertyBoolean('IPSViewAdaptToBackground', false);
+            $this->RegisterPropertyInteger('IPSViewBackgroundColor', EChartsIPSViewBackground::DEFAULT_COLOR);
+            $this->RegisterPropertyInteger(
+                'IPSViewBackgroundOpacityPercent',
+                EChartsIPSViewBackground::DEFAULT_OPACITY_PERCENT
+            );
+            $this->RegisterDesignProperties('IPSView');
+            $this->RegisterAttributeString('RegisteredSourceVariableIDs', '[]');
+            $this->RegisterAttributeString('LastError', '');
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
+        }
     }
 
     public function ApplyChanges(): void
     {
-        parent::ApplyChanges();
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            parent::ApplyChanges();
 
-        $this->RegisterMessage(0, IPS_KERNELSTARTED);
-        $this->MaintainIPSViewHTMLVariable(self::IPSVIEW_OUTPUT_IDENT, $this->Translate('Waterfall for IPSView'), 90);
-        $this->Initialize();
-        if (IPS_GetKernelRunlevel() === KR_READY) {
-            $this->PublishVisualizationState();
-            $this->PublishIPSViewHTML();
+            $this->RegisterMessage(0, IPS_KERNELSTARTED);
+            $this->MaintainIPSViewHTMLVariable(self::IPSVIEW_OUTPUT_IDENT, $this->Translate('Waterfall for IPSView'), 90);
+            $this->Initialize();
+            if (IPS_GetKernelRunlevel() === KR_READY) {
+                $this->PublishVisualizationState();
+                $this->PublishIPSViewHTML();
+            }
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
     }
 
     public function GetCompatibleParents(): string
     {
-        return json_encode([
-            'type'      => 'connect',
-            'moduleIDs' => [self::GATEWAY_MODULE_ID]
-        ], JSON_THROW_ON_ERROR);
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            return $debugFlowResult = json_encode([
+                'type'      => 'connect',
+                'moduleIDs' => [self::GATEWAY_MODULE_ID]
+            ], JSON_THROW_ON_ERROR);
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, false);
+        }
     }
 
     public function GetConfigurationForm(): string
     {
-        $form = $this->LoadConfigurationForm();
-        if (isset($form['elements']) && is_array($form['elements'])) {
-            $form['elements'] = $this->WithAnimationFormControls($form['elements']);
-            $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
-            $form['elements'] = $this->WithAnimationFormCallbacks($form['elements'], 'ECBW');
-            $this->InsertIPSViewHTMLPageFormItems(
-                $form['elements'],
-                'Configure optional IPSView HTML output.',
-                'Creates a standalone WebContent variable for use as an IPSView HTML widget.'
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            $form = $this->LoadConfigurationForm();
+            if (isset($form['elements']) && is_array($form['elements'])) {
+                $form['elements'] = $this->WithAnimationFormControls($form['elements']);
+                $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
+                $form['elements'] = $this->WithAnimationFormCallbacks($form['elements'], 'ECBW');
+                $this->InsertIPSViewHTMLPageFormItems(
+                    $form['elements'],
+                    'Configure optional IPSView HTML output.',
+                    'Creates a standalone WebContent variable for use as an IPSView HTML widget.'
+                );
+            }
+
+            $form = $this->WithBarTypographyForm($form, self::TEXT_FONTS, self::TEXT_COLORS);
+            EChartsLabelDesign::InsertAfterRowContaining($form['elements'], 'ShowValues', [
+                ['type' => 'RowLayout', 'items' => EChartsLabelDesign::CartesianControls()]
+            ]);
+            EChartsLabelDesign::InsertAfterRowContaining($form['elements'], 'IPSViewShowValues', [
+                ['type' => 'RowLayout', 'items' => EChartsLabelDesign::CartesianControls('IPSView')]
+            ]);
+            $form = $this->WithIPSViewDesignFormState($form, 'ECBW');
+            $form = EChartsDesignerSections::Group($form, [
+                ['caption' => 'Labels and geometry', 'start' => 'ShowValues'],
+                ['caption' => 'Step colors', 'start' => 'StartColor'],
+                ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
+            ]);
+            $fields = array_merge(
+                ['Title', 'Sources', 'TotalLabel', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
+                    'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent'],
+                array_keys($this->DesignPropertyNames()),
+                array_map(static fn (string $name): string => 'IPSView' . $name, array_keys($this->DesignPropertyNames()))
             );
+
+            return $debugFlowResult = $this->EncodeConfigurationForm($this->WithBarPreviewForm($form, 'ECBW', $fields));
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, false);
         }
-
-        $form = $this->WithBarTypographyForm($form, self::TEXT_FONTS, self::TEXT_COLORS);
-        EChartsLabelDesign::InsertAfterRowContaining($form['elements'], 'ShowValues', [
-            ['type' => 'RowLayout', 'items' => EChartsLabelDesign::CartesianControls()]
-        ]);
-        EChartsLabelDesign::InsertAfterRowContaining($form['elements'], 'IPSViewShowValues', [
-            ['type' => 'RowLayout', 'items' => EChartsLabelDesign::CartesianControls('IPSView')]
-        ]);
-        $form = $this->WithIPSViewDesignFormState($form, 'ECBW');
-        $form = EChartsDesignerSections::Group($form, [
-            ['caption' => 'Labels and geometry', 'start' => 'ShowValues'],
-            ['caption' => 'Step colors', 'start' => 'StartColor'],
-            ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
-        ]);
-        $fields = array_merge(
-            ['Title', 'Sources', 'TotalLabel', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
-                'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent'],
-            array_keys($this->DesignPropertyNames()),
-            array_map(static fn (string $name): string => 'IPSView' . $name, array_keys($this->DesignPropertyNames()))
-        );
-
-        return $this->EncodeConfigurationForm($this->WithBarPreviewForm($form, 'ECBW', $fields));
     }
 
     public function RequestAction(string $Ident, mixed $Value): void
     {
-        if ($this->HandleIPSViewHTMLPageAction($Ident, $Value)) {
-            return;
-        }
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__, ['Aktion' => $Ident]);
+        try {
+            if ($this->HandleIPSViewHTMLPageAction($Ident, $Value)) {
+                return;
+            }
 
-        throw new InvalidArgumentException('Unknown action: ' . $Ident);
+            throw new InvalidArgumentException('Unknown action: ' . $Ident);
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
+        }
     }
 
     public function CopyTileDesignToIPSView(): void
     {
-        foreach ($this->DesignPropertyNames() as $name => $type) {
-            $value = match ($type) {
-                'string'  => $this->ReadPropertyString($name),
-                'boolean' => $this->ReadPropertyBoolean($name),
-                default   => $this->ReadPropertyInteger($name)
-            };
-            IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            foreach ($this->DesignPropertyNames() as $name => $type) {
+                $value = match ($type) {
+                    'string'  => $this->ReadPropertyString($name),
+                    'boolean' => $this->ReadPropertyBoolean($name),
+                    default   => $this->ReadPropertyInteger($name)
+                };
+                IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
+            }
+            IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
+            IPS_ApplyChanges($this->InstanceID);
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
-        IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
-        IPS_ApplyChanges($this->InstanceID);
     }
 
     public function GetWaterfallData(): string
     {
-        $configurationError = $this->GetConfigurationError();
-        if ($configurationError !== null) {
-            $this->WriteAttributeString('LastError', $configurationError['Message']);
-            $this->SetStatus($configurationError['Status']);
-            throw new RuntimeException($configurationError['Message']);
-        }
-        if (!$this->HasActiveParent()) {
-            $this->SetStatus(self::STATUS_PARENT_MISSING);
-            throw new RuntimeException('No active EChartsGateway is connected.');
-        }
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            $configurationError = $this->GetConfigurationError();
+            if ($configurationError !== null) {
+                $this->WriteAttributeString('LastError', $configurationError['Message']);
+                $this->DebugEChartsSetStatus($configurationError['Status']);
+                throw new RuntimeException($configurationError['Message']);
+            }
+            if (!$this->HasActiveParent()) {
+                $this->DebugEChartsSetStatus(self::STATUS_PARENT_MISSING);
+                throw new RuntimeException('No active EChartsGateway is connected.');
+            }
 
-        $sources = $this->GetValidatedSources();
-        $labels = EChartsSourceIdentity::LabelsForSources($sources);
-        $steps = [];
-        $total = 0.0;
-        foreach ($sources as $index => $source) {
-            $current = $this->ReadCurrentSource($source['VariableID']);
-            $value = $current['Value'];
-            $before = $total;
-            $total = $index === 0 ? $value : $total + $value;
-            if (!is_finite($total)) {
-                $this->WriteAttributeString('LastError', 'The Waterfall total is not finite.');
-                $this->SetStatus(self::STATUS_GATEWAY_FAILED);
-                throw new RuntimeException('The Waterfall total is not finite.');
+            $sources = $this->GetValidatedSources();
+            $labels = EChartsSourceIdentity::LabelsForSources($sources);
+            $steps = [];
+            $total = 0.0;
+            foreach ($sources as $index => $source) {
+                $current = $this->ReadCurrentSource($source['VariableID']);
+                $value = $current['Value'];
+                $before = $total;
+                $total = $index === 0 ? $value : $total + $value;
+                if (!is_finite($total)) {
+                    $this->WriteAttributeString('LastError', 'The Waterfall total is not finite.');
+                    $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                    throw new RuntimeException('The Waterfall total is not finite.');
+                }
+                $steps[] = [
+                    'id'        => 'variable-' . $source['VariableID'],
+                    'label'     => $labels[$source['VariableID']],
+                    'kind'      => $index === 0 ? 'start' : 'change',
+                    'change'    => $value,
+                    'before'    => $before,
+                    'after'     => $total,
+                    'timestamp' => $current['Timestamp']
+                ];
             }
             $steps[] = [
-                'id'        => 'variable-' . $source['VariableID'],
-                'label'     => $labels[$source['VariableID']],
-                'kind'      => $index === 0 ? 'start' : 'change',
-                'change'    => $value,
-                'before'    => $before,
-                'after'     => $total,
-                'timestamp' => $current['Timestamp']
+                'id'     => 'total',
+                'label'  => trim($this->ReadPropertyString('TotalLabel')) !== ''
+                    ? trim($this->ReadPropertyString('TotalLabel')) : $this->Translate('Total'),
+                'kind'   => 'total',
+                'change' => $total,
+                'before' => 0.0,
+                'after'  => $total
             ];
+
+            $this->WriteAttributeString('LastError', '');
+            $this->DebugEChartsSetStatus(IS_ACTIVE);
+
+            return $debugFlowResult = json_encode([
+                'schemaVersion' => 1,
+                'family'        => 'bar',
+                'variant'       => 'waterfall',
+                'theme'         => $this->ReadPropertyString('EChartsTheme'),
+                'bar'           => [
+                    'title'    => $this->ReadPropertyString('Title'),
+                    'unit'     => $sources[0]['Unit'],
+                    'decimals' => max(array_column($sources, 'Decimals')),
+                    'style'    => $this->ReadDesignStyle()
+                ],
+                'steps'         => $steps
+            ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, false);
         }
-        $steps[] = [
-            'id'     => 'total',
-            'label'  => trim($this->ReadPropertyString('TotalLabel')) !== ''
-                ? trim($this->ReadPropertyString('TotalLabel')) : $this->Translate('Total'),
-            'kind'   => 'total',
-            'change' => $total,
-            'before' => 0.0,
-            'after'  => $total
-        ];
-
-        $this->WriteAttributeString('LastError', '');
-        $this->SetStatus(IS_ACTIVE);
-
-        return json_encode([
-            'schemaVersion' => 1,
-            'family'        => 'bar',
-            'variant'       => 'waterfall',
-            'theme'         => $this->ReadPropertyString('EChartsTheme'),
-            'bar'           => [
-                'title'    => $this->ReadPropertyString('Title'),
-                'unit'     => $sources[0]['Unit'],
-                'decimals' => max(array_column($sources, 'Decimals')),
-                'style'    => $this->ReadDesignStyle()
-            ],
-            'steps'         => $steps
-        ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
     }
 
     public function GetVisualizationTile(): string
     {
-        return $this->RenderWaterfallHTMLPage(false);
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            return $debugFlowResult = $this->RenderWaterfallHTMLPage(false);
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, false);
+        }
     }
 
     public function GetIPSViewHTML(): string
     {
-        return $this->RenderWaterfallHTMLPage(true);
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            return $debugFlowResult = $this->RenderWaterfallHTMLPage(true);
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, false);
+        }
     }
 
     public function ReceiveData(string $JSONString): string
     {
-        return $this->HandleEChartsIPSViewRequest(
-            $JSONString,
-            self::DATA_ID_FROM_PARENT,
-            fn (): array => $this->BuildVisualizationState(true)
-        );
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            return $debugFlowResult = $this->HandleEChartsIPSViewRequest(
+                $JSONString,
+                self::DATA_ID_FROM_PARENT,
+                fn (): array => $this->BuildVisualizationState(true)
+            );
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, false);
+        }
     }
 
     /** Retries a failed current-value read without resetting the visualization. */
     public function RetryTransient(): void
     {
-        $this->PublishVisualizationState();
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            $this->PublishVisualizationState();
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
+        }
     }
 
     /** @param array<int, mixed> $Data */
     public function MessageSink(int $TimeStamp, int $SenderID, int $Message, array $Data): void
     {
-        if ($SenderID === 0 && $Message === IPS_KERNELSTARTED) {
-            $this->Initialize();
-            $this->PublishVisualizationState();
-            $this->PublishIPSViewHTML();
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__, ['Quelle' => $SenderID, 'Nachricht' => $Message]);
+        try {
+            if ($SenderID === 0 && $Message === IPS_KERNELSTARTED) {
+                $this->Initialize();
+                $this->PublishVisualizationState();
+                $this->PublishIPSViewHTML();
 
-            return;
-        }
-        if ($Message === VM_UPDATE && in_array($SenderID, $this->ConfiguredVariableIDs(), true)) {
-            $this->PublishVisualizationState();
+                return;
+            }
+            if ($Message === VM_UPDATE && in_array($SenderID, $this->ConfiguredVariableIDs(), true)) {
+                $this->PublishVisualizationState();
+            }
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
     }
 
@@ -486,7 +624,7 @@ class EChartsBarWaterfall extends IPSModuleStrict
 
     private function Initialize(): void
     {
-        $this->SetStatus(IS_INACTIVE);
+        $this->DebugEChartsSetStatus(IS_INACTIVE);
         if (IPS_GetKernelRunlevel() !== KR_READY) {
             return;
         }
@@ -495,18 +633,18 @@ class EChartsBarWaterfall extends IPSModuleStrict
         $configurationError = $this->GetConfigurationError();
         if ($configurationError !== null) {
             $this->WriteAttributeString('LastError', $configurationError['Message']);
-            $this->SetStatus($configurationError['Status']);
+            $this->DebugEChartsSetStatus($configurationError['Status']);
 
             return;
         }
         if (!$this->HasActiveParent()) {
             $this->WriteAttributeString('LastError', 'No active EChartsGateway is connected.');
-            $this->SetStatus(self::STATUS_PARENT_MISSING);
+            $this->DebugEChartsSetStatus(self::STATUS_PARENT_MISSING);
 
             return;
         }
         $this->WriteAttributeString('LastError', '');
-        $this->SetStatus(IS_ACTIVE);
+        $this->DebugEChartsSetStatus(IS_ACTIVE);
     }
 
     /** @return array{Status:int, Message:string}|null */
@@ -607,7 +745,7 @@ class EChartsBarWaterfall extends IPSModuleStrict
                 $chart['bar']['style'] = $this->ReadDesignStyle('IPSView');
             }
         } catch (Throwable $exception) {
-            $this->SendDebug('BuildVisualizationState', $exception::class, 0);
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
 
             return $this->ErrorState('The Waterfall values could not be loaded.');
         }
@@ -637,34 +775,58 @@ class EChartsBarWaterfall extends IPSModuleStrict
 
     private function PublishVisualizationState(): void
     {
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
-            $state = $this->BuildVisualizationState();
-            $states = [$state];
-            $this->UpdateVisualizationValue(json_encode(
-                $state,
-                JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
-            ));
-            $this->PushEChartsIPSViewState(function () use (&$states): array
-            {
-                $state = $this->BuildVisualizationState(true);
-                $states[] = $state;
-                return $state;
-            });
-            $this->ScheduleTransientRefresh($states, 'The Waterfall values could not be loaded.');
-        } catch (Throwable $exception) {
-            $this->SendDebug('PublishVisualizationState', $exception::class, 0);
+            try {
+                $state = $this->BuildVisualizationState();
+                $states = [$state];
+                $this->DebugFlowEvent(__FUNCTION__, __LINE__, 'SENDEN', 'Diagrammzustand an die native Kachel übergeben; Darstellung im Browser ist noch nicht bestätigt.');
+                $this->UpdateVisualizationValue(json_encode(
+                    $state,
+                    JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+                ));
+                $this->PushEChartsIPSViewState(function () use (&$states): array
+                {
+                    $state = $this->BuildVisualizationState(true);
+                    $states[] = $state;
+                    return $state;
+                });
+                $this->ScheduleTransientRefresh($states, 'The Waterfall values could not be loaded.');
+            } catch (Throwable $exception) {
+                $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
+            }
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
     }
 
     private function PublishIPSViewHTML(): void
     {
-        if (!$this->IsIPSViewHTMLPageEnabled()) {
-            return;
-        }
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
-            $this->UpdateIPSViewHTMLVariable(self::IPSVIEW_OUTPUT_IDENT, $this->GetIPSViewHTML());
-        } catch (Throwable $exception) {
-            $this->SendDebug('PublishIPSViewHTML', $exception::class, 0);
+            if (!$this->IsIPSViewHTMLPageEnabled()) {
+                return;
+            }
+            try {
+                $this->DebugFlowEvent(__FUNCTION__, __LINE__, 'SENDEN', 'HTML-Ausgabe an die IPSView-Statusvariable übergeben; Dokumentinhalt bleibt geschützt.', ['Ziel' => self::IPSVIEW_OUTPUT_IDENT]);
+                $this->UpdateIPSViewHTMLVariable(self::IPSVIEW_OUTPUT_IDENT, $this->GetIPSViewHTML());
+            } catch (Throwable $exception) {
+                $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
+            }
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
     }
 

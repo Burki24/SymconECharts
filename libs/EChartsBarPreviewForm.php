@@ -14,18 +14,29 @@ trait EChartsBarPreviewForm
     /** Updates only the form images; draft values are never persisted. */
     public function UpdateBarPreviewFromForm(string $Configuration): void
     {
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
-            $values = json_decode($Configuration, true, 64, JSON_THROW_ON_ERROR);
-        } catch (JsonException) {
-            $values = [];
+            try {
+                $values = json_decode($Configuration, true, 64, JSON_THROW_ON_ERROR);
+            } catch (JsonException) {
+                $values = [];
+            }
+            $values = array_replace($this->BarPreviewStoredValues(), is_array($values) ? $values : []);
+            $this->UpdateFormField('BarPreview', 'image', SVGPreviewHelper::dataUri($this->BarPreviewSvg($values, false)));
+            $this->UpdateFormField(
+                'IPSViewBarPreview',
+                'image',
+                SVGPreviewHelper::dataUri($this->BarPreviewSvg($values, true))
+            );
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
-        $values = array_replace($this->BarPreviewStoredValues(), is_array($values) ? $values : []);
-        $this->UpdateFormField('BarPreview', 'image', SVGPreviewHelper::dataUri($this->BarPreviewSvg($values, false)));
-        $this->UpdateFormField(
-            'IPSViewBarPreview',
-            'image',
-            SVGPreviewHelper::dataUri($this->BarPreviewSvg($values, true))
-        );
     }
 
     /** @param array<string,mixed> $values */

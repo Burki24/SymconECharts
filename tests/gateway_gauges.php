@@ -369,6 +369,10 @@ abstract class IPSModuleStrict
 {
     public int $InstanceID = 5000;
 
+    public array $DebugMessages = [];
+    public bool $FailDebug = false;
+    public bool $CaptureDebug = false;
+
     /** @var null|callable(string): string */
     public static $ParentResponder = null;
 
@@ -765,6 +769,12 @@ abstract class IPSModuleStrict
 
     protected function SendDebug(string $message, string $data, int $format): bool
     {
+        if ($this->FailDebug) {
+            throw new RuntimeException('Synthetic debug failure.');
+        }
+        if ($this->CaptureDebug && str_contains($message, ' | ')) {
+            $this->DebugMessages[] = [$message, json_decode($data, true, 512, JSON_THROW_ON_ERROR)];
+        }
         return true;
     }
 }
@@ -10356,3 +10366,5 @@ require __DIR__ . '/funnel_integration.php';
 require __DIR__ . '/pictorial_bar_integration.php';
 
 echo "Gateway and Gauge module integration verified.\n";
+
+require __DIR__ . '/debug_output.php';

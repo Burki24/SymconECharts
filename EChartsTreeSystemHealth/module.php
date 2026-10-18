@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/../libs/helper/DebugFlowHelper.php';
+require_once __DIR__ . '/../libs/EChartsDebugFlow.php';
+
 use Burki24\SymconModuleHelper\ConfigurationFormHelper;
 use Burki24\SymconModuleHelper\DataFlowHelper;
 use Burki24\SymconModuleHelper\IPSViewHTMLPageHelper;
@@ -44,6 +47,9 @@ require_once __DIR__ . '/TreeHealth.php';
 
 class EChartsTreeSystemHealth extends IPSModuleStrict
 {
+    use \Burki24\SymconModuleHelper\DebugFlowHelper;
+    use \SymconECharts\EChartsDebugFlow;
+
     use ConfigurationFormHelper;
     use DataFlowHelper;
     use EChartsAnimationDesign;
@@ -89,162 +95,261 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
 
     public function Create(): void
     {
-        parent::Create();
-        $this->SetVisualizationType(1);
-        $this->RegisterMessage(0, IPS_KERNELSTARTED);
-        $this->RegisterTimer('TreeRefresh', 0, 'ECTH_RefreshTree($_IPS["TARGET"]);');
-        $this->RegisterTransientRefresh('ECTH');
-        $this->RegisterPropertyInteger('RootObjectID', 0);
-        $this->RegisterPropertyBoolean('UseSymconRoot', false);
-        $this->RegisterPropertyString('Title', '');
-        $this->RegisterPropertyInteger('MaxDepth', 3);
-        $this->RegisterPropertyInteger('MaxNodes', 80);
-        $this->RegisterPropertyBoolean('IncludeHidden', false);
-        $this->RegisterPropertyString('VariableNameFilter', '');
-        $this->RegisterPropertyBoolean('ShowOnlyRuleVariables', false);
-        $this->RegisterPropertyString('StatusRules', '[]');
-        foreach (['', 'IPSView'] as $prefix) {
-            foreach (self::DESIGN_DEFAULTS as $name => $default) {
-                match (gettype($default)) {
-                    'boolean' => $this->RegisterPropertyBoolean($prefix . $name, $default),
-                    'integer' => $this->RegisterPropertyInteger($prefix . $name, $default),
-                    default   => $this->RegisterPropertyString($prefix . $name, $default)
-                };
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            parent::Create();
+            $this->SetVisualizationType(1);
+            $this->RegisterMessage(0, IPS_KERNELSTARTED);
+            $this->RegisterTimer('TreeRefresh', 0, 'ECTH_RefreshTree($_IPS["TARGET"]);');
+            $this->RegisterTransientRefresh('ECTH');
+            $this->RegisterPropertyInteger('RootObjectID', 0);
+            $this->RegisterPropertyBoolean('UseSymconRoot', false);
+            $this->RegisterPropertyString('Title', '');
+            $this->RegisterPropertyInteger('MaxDepth', 3);
+            $this->RegisterPropertyInteger('MaxNodes', 80);
+            $this->RegisterPropertyBoolean('IncludeHidden', false);
+            $this->RegisterPropertyString('VariableNameFilter', '');
+            $this->RegisterPropertyBoolean('ShowOnlyRuleVariables', false);
+            $this->RegisterPropertyString('StatusRules', '[]');
+            foreach (['', 'IPSView'] as $prefix) {
+                foreach (self::DESIGN_DEFAULTS as $name => $default) {
+                    match (gettype($default)) {
+                        'boolean' => $this->RegisterPropertyBoolean($prefix . $name, $default),
+                        'integer' => $this->RegisterPropertyInteger($prefix . $name, $default),
+                        default   => $this->RegisterPropertyString($prefix . $name, $default)
+                    };
+                }
+                $this->RegisterAnimationProperties($prefix, true, 350, 500);
             }
-            $this->RegisterAnimationProperties($prefix, true, 350, 500);
+            $this->RegisterIPSViewHTMLPageProperties();
+            $this->RegisterEChartsIPSViewTransport();
+            $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
+            $this->RegisterPropertyBoolean('IPSViewAdaptToBackground', false);
+            $this->RegisterPropertyInteger('IPSViewBackgroundColor', EChartsIPSViewBackground::DEFAULT_COLOR);
+            $this->RegisterPropertyInteger('IPSViewBackgroundOpacityPercent', EChartsIPSViewBackground::DEFAULT_OPACITY_PERCENT);
+            $this->RegisterAttributeString('LastError', '');
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
-        $this->RegisterIPSViewHTMLPageProperties();
-        $this->RegisterEChartsIPSViewTransport();
-        $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
-        $this->RegisterPropertyBoolean('IPSViewAdaptToBackground', false);
-        $this->RegisterPropertyInteger('IPSViewBackgroundColor', EChartsIPSViewBackground::DEFAULT_COLOR);
-        $this->RegisterPropertyInteger('IPSViewBackgroundOpacityPercent', EChartsIPSViewBackground::DEFAULT_OPACITY_PERCENT);
-        $this->RegisterAttributeString('LastError', '');
     }
 
     public function ApplyChanges(): void
     {
-        parent::ApplyChanges();
-        $this->RegisterMessage(0, IPS_KERNELSTARTED);
-        $this->MaintainIPSViewHTMLVariable(self::IPSVIEW_OUTPUT_IDENT, $this->Translate('System Health Tree for IPSView'), 90);
-        $this->Initialize();
-        if (IPS_GetKernelRunlevel() === KR_READY) {
-            $this->PublishVisualizationState();
-            $this->PublishIPSViewHTML();
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            parent::ApplyChanges();
+            $this->RegisterMessage(0, IPS_KERNELSTARTED);
+            $this->MaintainIPSViewHTMLVariable(self::IPSVIEW_OUTPUT_IDENT, $this->Translate('System Health Tree for IPSView'), 90);
+            $this->Initialize();
+            if (IPS_GetKernelRunlevel() === KR_READY) {
+                $this->PublishVisualizationState();
+                $this->PublishIPSViewHTML();
+            }
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
     }
 
     public function GetCompatibleParents(): string
     {
-        return json_encode(['type' => 'connect', 'moduleIDs' => [self::GATEWAY_MODULE_ID]], JSON_THROW_ON_ERROR);
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            return $debugFlowResult = json_encode(['type' => 'connect', 'moduleIDs' => [self::GATEWAY_MODULE_ID]], JSON_THROW_ON_ERROR);
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, false);
+        }
     }
 
     public function GetConfigurationForm(): string
     {
-        $form = $this->LoadConfigurationForm();
-        foreach ($form['elements'] as &$element) {
-            if (($element['name'] ?? null) === 'RootObjectID') {
-                $element['enabled'] = !$this->ReadPropertyBoolean('UseSymconRoot');
-                break;
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            $form = $this->LoadConfigurationForm();
+            foreach ($form['elements'] as &$element) {
+                if (($element['name'] ?? null) === 'RootObjectID') {
+                    $element['enabled'] = !$this->ReadPropertyBoolean('UseSymconRoot');
+                    break;
+                }
             }
-        }
-        unset($element);
-        $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
-        $form['elements'] = $this->WithAnimationFormControls($form['elements']);
-        $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
-        $form['elements'] = $this->WithAnimationFormCallbacks($form['elements'], 'ECTH');
-        $form = $this->WithIPSViewDesignFormState($form, 'ECTH');
-        $form = EChartsDesignerSections::Group($form, [
-            ['caption' => 'Layout and interaction', 'start' => 'TreeLayout'],
-            ['caption' => 'Labels and typography', 'start' => 'ShowLabels'],
-            ['caption' => 'Node and line colors', 'start' => 'CategoryColor'],
-            ['caption' => 'Status colors', 'start' => 'HealthyColor']
-        ]);
-        $fields = [
-            'Title', 'UseSymconRoot', 'RootObjectID', 'MaxDepth', 'MaxNodes', 'IncludeHidden', 'VariableNameFilter',
-            'ShowOnlyRuleVariables', 'StatusRules',
-            'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
-            'IPSViewBackgroundOpacityPercent',
-            ...array_keys(self::DESIGN_DEFAULTS),
-            ...array_map(static fn (string $name): string => 'IPSView' . $name, array_keys(self::DESIGN_DEFAULTS))
-        ];
-        foreach (['', 'IPSView'] as $prefix) {
-            foreach (['AnimationEnabled', 'AnimationDuration', 'AnimationDurationUpdate', 'AnimationEasing',
-                'AnimationEasingUpdate', 'AnimationDelay', 'AnimationDelayUpdate'] as $name) {
-                $fields[] = $prefix . $name;
+            unset($element);
+            $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
+            $form['elements'] = $this->WithAnimationFormControls($form['elements']);
+            $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
+            $form['elements'] = $this->WithAnimationFormCallbacks($form['elements'], 'ECTH');
+            $form = $this->WithIPSViewDesignFormState($form, 'ECTH');
+            $form = EChartsDesignerSections::Group($form, [
+                ['caption' => 'Layout and interaction', 'start' => 'TreeLayout'],
+                ['caption' => 'Labels and typography', 'start' => 'ShowLabels'],
+                ['caption' => 'Node and line colors', 'start' => 'CategoryColor'],
+                ['caption' => 'Status colors', 'start' => 'HealthyColor']
+            ]);
+            $fields = [
+                'Title', 'UseSymconRoot', 'RootObjectID', 'MaxDepth', 'MaxNodes', 'IncludeHidden', 'VariableNameFilter',
+                'ShowOnlyRuleVariables', 'StatusRules',
+                'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
+                'IPSViewBackgroundOpacityPercent',
+                ...array_keys(self::DESIGN_DEFAULTS),
+                ...array_map(static fn (string $name): string => 'IPSView' . $name, array_keys(self::DESIGN_DEFAULTS))
+            ];
+            foreach (['', 'IPSView'] as $prefix) {
+                foreach (['AnimationEnabled', 'AnimationDuration', 'AnimationDurationUpdate', 'AnimationEasing',
+                    'AnimationEasingUpdate', 'AnimationDelay', 'AnimationDelayUpdate'] as $name) {
+                    $fields[] = $prefix . $name;
+                }
             }
+            return $debugFlowResult = $this->EncodeConfigurationForm($this->WithStatusRuleForm(
+                $this->WithBarPreviewForm($form, 'ECTH', $fields),
+                $fields
+            ));
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, false);
         }
-        return $this->EncodeConfigurationForm($this->WithStatusRuleForm(
-            $this->WithBarPreviewForm($form, 'ECTH', $fields),
-            $fields
-        ));
     }
 
     public function GetStatusRuleEditorForm(string $Direction, float $WarningAt): string
     {
-        $form = $this->LoadConfigurationForm();
-        foreach ($form['elements'] as $panel) {
-            if (($panel['caption'] ?? null) !== 'Plant status') {
-                continue;
-            }
-            foreach ($panel['items'] as $item) {
-                if (($item['name'] ?? null) !== 'StatusRules') {
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            $form = $this->LoadConfigurationForm();
+            foreach ($form['elements'] as $panel) {
+                if (($panel['caption'] ?? null) !== 'Plant status') {
                     continue;
                 }
-                $fields = $item['form'];
-                foreach ($fields as &$field) {
-                    if (($field['name'] ?? null) === 'CriticalAt') {
-                        $field[$Direction === 'low' ? 'maximum' : 'minimum'] = $WarningAt;
-                    } elseif (in_array($field['name'] ?? null, ['Direction', 'WarningAt'], true)) {
-                        $field['onChange'] = 'ECTH_UpdateStatusRuleEditor($id, $Direction, $WarningAt);';
+                foreach ($panel['items'] as $item) {
+                    if (($item['name'] ?? null) !== 'StatusRules') {
+                        continue;
                     }
+                    $fields = $item['form'];
+                    foreach ($fields as &$field) {
+                        if (($field['name'] ?? null) === 'CriticalAt') {
+                            $field[$Direction === 'low' ? 'maximum' : 'minimum'] = $WarningAt;
+                        } elseif (in_array($field['name'] ?? null, ['Direction', 'WarningAt'], true)) {
+                            $field['onChange'] = 'ECTH_UpdateStatusRuleEditor($id, $Direction, $WarningAt);';
+                        }
+                    }
+                    unset($field);
+                    return $debugFlowResult = json_encode($fields, JSON_THROW_ON_ERROR);
                 }
-                unset($field);
-                return json_encode($fields, JSON_THROW_ON_ERROR);
             }
+            throw new RuntimeException('The Tree status rule editor is missing.');
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, false);
         }
-        throw new RuntimeException('The Tree status rule editor is missing.');
     }
 
     public function UpdateStatusRuleEditor(string $Direction, float $WarningAt): void
     {
-        if ($Direction === 'low') {
-            $this->UpdateFormField('CriticalAt', 'minimum', -PHP_FLOAT_MAX);
-            $this->UpdateFormField('CriticalAt', 'maximum', $WarningAt);
-        } else {
-            $this->UpdateFormField('CriticalAt', 'maximum', PHP_FLOAT_MAX);
-            $this->UpdateFormField('CriticalAt', 'minimum', $WarningAt);
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            if ($Direction === 'low') {
+                $this->UpdateFormField('CriticalAt', 'minimum', -PHP_FLOAT_MAX);
+                $this->UpdateFormField('CriticalAt', 'maximum', $WarningAt);
+            } else {
+                $this->UpdateFormField('CriticalAt', 'maximum', PHP_FLOAT_MAX);
+                $this->UpdateFormField('CriticalAt', 'minimum', $WarningAt);
+            }
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
     }
 
     public function UpdateStatusRulesForm(string $RulesJson): void
     {
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
-            $rows = json_decode($RulesJson, true, 64, JSON_THROW_ON_ERROR);
-        } catch (JsonException) {
-            $rows = null;
+            try {
+                $rows = json_decode($RulesJson, true, 64, JSON_THROW_ON_ERROR);
+            } catch (JsonException) {
+                $rows = null;
+            }
+            $issues = $this->StatusRuleIssues($rows);
+            if (is_array($rows) && array_is_list($rows)) {
+                $this->UpdateFormField('StatusRules', 'values', json_encode(
+                    self::ColoredStatusRuleRows($rows, $issues),
+                    JSON_THROW_ON_ERROR
+                ));
+            }
+            $this->UpdateFormField('StatusRulesDiagnostics', 'caption', $this->StatusRuleIssueText($issues));
+            $this->UpdateFormField('StatusRulesDiagnostics', 'visible', $issues !== []);
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
-        $issues = $this->StatusRuleIssues($rows);
-        if (is_array($rows) && array_is_list($rows)) {
-            $this->UpdateFormField('StatusRules', 'values', json_encode(
-                self::ColoredStatusRuleRows($rows, $issues),
-                JSON_THROW_ON_ERROR
-            ));
-        }
-        $this->UpdateFormField('StatusRulesDiagnostics', 'caption', $this->StatusRuleIssueText($issues));
-        $this->UpdateFormField('StatusRulesDiagnostics', 'visible', $issues !== []);
     }
 
     public function UpdateImportThresholdBound(string $Direction, float $WarningAt): void
     {
-        $this->UpdateFormField('ImportCriticalAt', 'minimum', $Direction === 'low' ? -PHP_FLOAT_MAX : $WarningAt);
-        $this->UpdateFormField('ImportCriticalAt', 'maximum', $Direction === 'low' ? $WarningAt : PHP_FLOAT_MAX);
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            $this->UpdateFormField('ImportCriticalAt', 'minimum', $Direction === 'low' ? -PHP_FLOAT_MAX : $WarningAt);
+            $this->UpdateFormField('ImportCriticalAt', 'maximum', $Direction === 'low' ? $WarningAt : PHP_FLOAT_MAX);
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
+        }
     }
 
     public function InvalidateStatusRuleCandidates(): void
     {
-        $this->UpdateFormField('ImportCandidates', 'values', '[]');
-        $this->UpdateFormField('ImportSearchSummary', 'caption', $this->Translate('Enter a name and click Search.'));
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            $this->UpdateFormField('ImportCandidates', 'values', '[]');
+            $this->UpdateFormField('ImportSearchSummary', 'caption', $this->Translate('Enter a name and click Search.'));
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
+        }
     }
 
     public function SearchStatusRuleCandidates(
@@ -258,35 +363,46 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
         string $VariableNameFilter,
         string $RulesJson
     ): void {
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
-            $rules = json_decode($RulesJson, true, 64, JSON_THROW_ON_ERROR);
-            if ($this->StatusRuleIssues($rules) !== []) {
-                throw new InvalidArgumentException('Correct the existing status rules before searching.');
+            try {
+                $rules = json_decode($RulesJson, true, 64, JSON_THROW_ON_ERROR);
+                if ($this->StatusRuleIssues($rules) !== []) {
+                    throw new InvalidArgumentException('Correct the existing status rules before searching.');
+                }
+                $result = $this->FindStatusRuleCandidates(
+                    $Name,
+                    $Type,
+                    $UseSymconRoot,
+                    $RootObjectID,
+                    $MaxDepth,
+                    $MaxNodes,
+                    $IncludeHidden,
+                    $VariableNameFilter,
+                    $rules
+                );
+                $this->UpdateFormField('ImportCandidates', 'values', json_encode($result['rows'], JSON_THROW_ON_ERROR));
+                $summary = sprintf(
+                    $this->Translate('%d matching variables; %d already have a rule.'),
+                    count($result['rows']),
+                    $result['existing']
+                );
+                if ($result['truncated']) {
+                    $summary .= ' ' . $this->Translate('The Tree node limit was reached; increase it to search further.');
+                }
+                $this->UpdateFormField('ImportSearchSummary', 'caption', $summary);
+            } catch (Throwable $exception) {
+                $this->UpdateFormField('ImportCandidates', 'values', '[]');
+                $this->UpdateFormField('ImportSearchSummary', 'caption', $this->Translate($exception->getMessage()));
             }
-            $result = $this->FindStatusRuleCandidates(
-                $Name,
-                $Type,
-                $UseSymconRoot,
-                $RootObjectID,
-                $MaxDepth,
-                $MaxNodes,
-                $IncludeHidden,
-                $VariableNameFilter,
-                $rules
-            );
-            $this->UpdateFormField('ImportCandidates', 'values', json_encode($result['rows'], JSON_THROW_ON_ERROR));
-            $summary = sprintf(
-                $this->Translate('%d matching variables; %d already have a rule.'),
-                count($result['rows']),
-                $result['existing']
-            );
-            if ($result['truncated']) {
-                $summary .= ' ' . $this->Translate('The Tree node limit was reached; increase it to search further.');
-            }
-            $this->UpdateFormField('ImportSearchSummary', 'caption', $summary);
-        } catch (Throwable $exception) {
-            $this->UpdateFormField('ImportCandidates', 'values', '[]');
-            $this->UpdateFormField('ImportSearchSummary', 'caption', $this->Translate($exception->getMessage()));
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
     }
 
@@ -306,149 +422,281 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
         string $CandidatesJson,
         string $PreviewValuesJson
     ): string {
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
-            if (!in_array($Direction, ['high', 'low'], true) || !is_finite($WarningAt) || !is_finite($CriticalAt)
-                || ($Direction === 'high' && $CriticalAt < $WarningAt)
-                || ($Direction === 'low' && $CriticalAt > $WarningAt)) {
-                throw new InvalidArgumentException('Warning and critical thresholds are in the wrong order.');
+            try {
+                if (!in_array($Direction, ['high', 'low'], true) || !is_finite($WarningAt) || !is_finite($CriticalAt)
+                    || ($Direction === 'high' && $CriticalAt < $WarningAt)
+                    || ($Direction === 'low' && $CriticalAt > $WarningAt)) {
+                    throw new InvalidArgumentException('Warning and critical thresholds are in the wrong order.');
+                }
+                $rules = json_decode($RulesJson, true, 64, JSON_THROW_ON_ERROR);
+                $candidates = json_decode($CandidatesJson, true, 64, JSON_THROW_ON_ERROR);
+                if ($this->StatusRuleIssues($rules) !== [] || !is_array($candidates) || !array_is_list($candidates)) {
+                    throw new InvalidArgumentException('Correct the status rule list and search again.');
+                }
+                $fresh = $this->FindStatusRuleCandidates(
+                    $Name,
+                    $Type,
+                    $UseSymconRoot,
+                    $RootObjectID,
+                    $MaxDepth,
+                    $MaxNodes,
+                    $IncludeHidden,
+                    $VariableNameFilter,
+                    $rules
+                );
+                $selected = VariableSearchHelper::ResolveSelectedVariableIDs($candidates, $fresh['rows']);
+                if ($selected === []) {
+                    throw new InvalidArgumentException('Select at least one matching variable.');
+                }
+                if (count($rules) + count($selected) > 3000) {
+                    throw new InvalidArgumentException('At most 3000 status rules are allowed.');
+                }
+                foreach ($rules as &$rule) {
+                    unset($rule['rowColor']);
+                }
+                unset($rule);
+                foreach ($selected as $id) {
+                    $rules[] = [
+                        'VariableID' => $id,
+                        'Direction'  => $Direction,
+                        'WarningAt'  => $WarningAt,
+                        'CriticalAt' => $CriticalAt
+                    ];
+                }
+                $previewValues = json_decode($PreviewValuesJson, true, 64, JSON_THROW_ON_ERROR);
+                if (!is_array($previewValues)) {
+                    throw new InvalidArgumentException('The draft preview settings are invalid.');
+                }
+                $previewValues['StatusRules'] = $rules;
+                $this->UpdateStatusRulesForm(json_encode($rules, JSON_THROW_ON_ERROR));
+                $this->UpdateBarPreviewFromForm(json_encode($previewValues, JSON_THROW_ON_ERROR));
+                return $debugFlowResult = 'MESSAGE:' . sprintf(
+                    $this->Translate('%d status rules added. Review them and apply the form to save.'),
+                    count($selected)
+                );
+            } catch (Throwable $exception) {
+                return $debugFlowResult = $this->Translate($exception->getMessage());
             }
-            $rules = json_decode($RulesJson, true, 64, JSON_THROW_ON_ERROR);
-            $candidates = json_decode($CandidatesJson, true, 64, JSON_THROW_ON_ERROR);
-            if ($this->StatusRuleIssues($rules) !== [] || !is_array($candidates) || !array_is_list($candidates)) {
-                throw new InvalidArgumentException('Correct the status rule list and search again.');
-            }
-            $fresh = $this->FindStatusRuleCandidates(
-                $Name,
-                $Type,
-                $UseSymconRoot,
-                $RootObjectID,
-                $MaxDepth,
-                $MaxNodes,
-                $IncludeHidden,
-                $VariableNameFilter,
-                $rules
-            );
-            $selected = VariableSearchHelper::ResolveSelectedVariableIDs($candidates, $fresh['rows']);
-            if ($selected === []) {
-                throw new InvalidArgumentException('Select at least one matching variable.');
-            }
-            if (count($rules) + count($selected) > 3000) {
-                throw new InvalidArgumentException('At most 3000 status rules are allowed.');
-            }
-            foreach ($rules as &$rule) {
-                unset($rule['rowColor']);
-            }
-            unset($rule);
-            foreach ($selected as $id) {
-                $rules[] = [
-                    'VariableID' => $id,
-                    'Direction'  => $Direction,
-                    'WarningAt'  => $WarningAt,
-                    'CriticalAt' => $CriticalAt
-                ];
-            }
-            $previewValues = json_decode($PreviewValuesJson, true, 64, JSON_THROW_ON_ERROR);
-            if (!is_array($previewValues)) {
-                throw new InvalidArgumentException('The draft preview settings are invalid.');
-            }
-            $previewValues['StatusRules'] = $rules;
-            $this->UpdateStatusRulesForm(json_encode($rules, JSON_THROW_ON_ERROR));
-            $this->UpdateBarPreviewFromForm(json_encode($previewValues, JSON_THROW_ON_ERROR));
-            return 'MESSAGE:' . sprintf(
-                $this->Translate('%d status rules added. Review them and apply the form to save.'),
-                count($selected)
-            );
-        } catch (Throwable $exception) {
-            return $this->Translate($exception->getMessage());
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, false);
         }
     }
 
     public function RequestAction(string $Ident, mixed $Value): void
     {
-        if ($this->HandleIPSViewHTMLPageAction($Ident, $Value)) {
-            return;
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__, ['Aktion' => $Ident]);
+        try {
+            if ($this->HandleIPSViewHTMLPageAction($Ident, $Value)) {
+                return;
+            }
+            throw new InvalidArgumentException('Unknown action: ' . $Ident);
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
-        throw new InvalidArgumentException('Unknown action: ' . $Ident);
     }
 
     public function UpdateTreeRootAvailability(bool $UseSymconRoot): void
     {
-        $this->UpdateFormField('RootObjectID', 'enabled', !$UseSymconRoot);
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            $this->UpdateFormField('RootObjectID', 'enabled', !$UseSymconRoot);
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
+        }
     }
 
     public function CopyTileDesignToIPSView(): void
     {
-        foreach (self::DESIGN_DEFAULTS as $name => $default) {
-            $value = match (gettype($default)) {
-                'boolean' => $this->ReadPropertyBoolean($name),
-                'integer' => $this->ReadPropertyInteger($name),
-                default   => $this->ReadPropertyString($name)
-            };
-            IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            foreach (self::DESIGN_DEFAULTS as $name => $default) {
+                $value = match (gettype($default)) {
+                    'boolean' => $this->ReadPropertyBoolean($name),
+                    'integer' => $this->ReadPropertyInteger($name),
+                    default   => $this->ReadPropertyString($name)
+                };
+                IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
+            }
+            foreach (['AnimationEnabled', 'AnimationDuration', 'AnimationDurationUpdate', 'AnimationEasing',
+                'AnimationEasingUpdate', 'AnimationDelay', 'AnimationDelayUpdate'] as $name) {
+                $value = match ($name) {
+                    'AnimationEnabled'                         => $this->ReadPropertyBoolean($name),
+                    'AnimationEasing', 'AnimationEasingUpdate' => $this->ReadPropertyString($name),
+                    default                                    => $this->ReadPropertyInteger($name)
+                };
+                IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
+            }
+            IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
+            IPS_ApplyChanges($this->InstanceID);
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
-        foreach (['AnimationEnabled', 'AnimationDuration', 'AnimationDurationUpdate', 'AnimationEasing',
-            'AnimationEasingUpdate', 'AnimationDelay', 'AnimationDelayUpdate'] as $name) {
-            $value = match ($name) {
-                'AnimationEnabled'                         => $this->ReadPropertyBoolean($name),
-                'AnimationEasing', 'AnimationEasingUpdate' => $this->ReadPropertyString($name),
-                default                                    => $this->ReadPropertyInteger($name)
-            };
-            IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
-        }
-        IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
-        IPS_ApplyChanges($this->InstanceID);
     }
 
     public function GetTreeData(): string
     {
-        return $this->GetTreeDataForOutput(false);
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            return $debugFlowResult = $this->GetTreeDataForOutput(false);
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, false);
+        }
     }
 
     public function GetTreeDiagnostic(): string
     {
-        $error = $this->GetConfigurationError();
-        return json_encode([
-            'valid'     => $error === null,
-            'lastError' => $error['Message'] ?? $this->ReadAttributeString('LastError')
-        ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            $error = $this->GetConfigurationError();
+            return $debugFlowResult = json_encode([
+                'valid'     => $error === null,
+                'lastError' => $error['Message'] ?? $this->ReadAttributeString('LastError')
+            ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, false);
+        }
     }
 
     public function GetVisualizationTile(): string
     {
-        return $this->RenderTreeHTMLPage(false);
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            return $debugFlowResult = $this->RenderTreeHTMLPage(false);
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, false);
+        }
     }
 
     public function GetIPSViewHTML(): string
     {
-        return $this->RenderTreeHTMLPage(true);
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            return $debugFlowResult = $this->RenderTreeHTMLPage(true);
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, false);
+        }
     }
 
     public function ReceiveData(string $JSONString): string
     {
-        return $this->HandleEChartsIPSViewRequest(
-            $JSONString,
-            self::DATA_ID_FROM_PARENT,
-            fn (): array => $this->BuildVisualizationState(true)
-        );
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            return $debugFlowResult = $this->HandleEChartsIPSViewRequest(
+                $JSONString,
+                self::DATA_ID_FROM_PARENT,
+                fn (): array => $this->BuildVisualizationState(true)
+            );
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, false);
+        }
     }
 
     public function RefreshTree(): void
     {
-        $this->PublishVisualizationState();
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            $this->PublishVisualizationState();
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
+        }
     }
 
     public function RetryTransient(): void
     {
-        $this->PublishVisualizationState();
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            $this->PublishVisualizationState();
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
+        }
     }
 
     /** @param array<int,mixed> $Data */
     public function MessageSink(int $TimeStamp, int $SenderID, int $Message, array $Data): void
     {
-        if ($SenderID === 0 && $Message === IPS_KERNELSTARTED) {
-            $this->Initialize();
-            $this->PublishVisualizationState();
-            $this->PublishIPSViewHTML();
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__, ['Quelle' => $SenderID, 'Nachricht' => $Message]);
+        try {
+            if ($SenderID === 0 && $Message === IPS_KERNELSTARTED) {
+                $this->Initialize();
+                $this->PublishVisualizationState();
+                $this->PublishIPSViewHTML();
+            }
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
     }
 
@@ -642,11 +890,11 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
         $error = $this->GetConfigurationError();
         if ($error !== null) {
             $this->WriteAttributeString('LastError', $error['Message']);
-            $this->SetStatus($error['Status']);
+            $this->DebugEChartsSetStatus($error['Status']);
             throw new RuntimeException($error['Message']);
         }
         if (!$this->HasActiveParent()) {
-            $this->SetStatus(self::STATUS_PARENT_MISSING);
+            $this->DebugEChartsSetStatus(self::STATUS_PARENT_MISSING);
             throw new RuntimeException('No active EChartsGateway is connected.');
         }
         try {
@@ -661,11 +909,11 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
             );
         } catch (Throwable $exception) {
             $this->WriteAttributeString('LastError', $exception->getMessage());
-            $this->SetStatus(self::STATUS_READ_FAILED);
+            $this->DebugEChartsSetStatus(self::STATUS_READ_FAILED);
             throw $exception;
         }
         $this->WriteAttributeString('LastError', '');
-        $this->SetStatus(IS_ACTIVE);
+        $this->DebugEChartsSetStatus(IS_ACTIVE);
         return json_encode([
             'schemaVersion' => 1,
             'family'        => 'tree',
@@ -767,7 +1015,7 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
 
     private function Initialize(): void
     {
-        $this->SetStatus(IS_INACTIVE);
+        $this->DebugEChartsSetStatus(IS_INACTIVE);
         $this->SetTimerInterval('TreeRefresh', 0);
         $this->SetTimerInterval('TransientRetry', 0);
         if (IPS_GetKernelRunlevel() !== KR_READY) {
@@ -776,17 +1024,17 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
         $error = $this->GetConfigurationError();
         if ($error !== null) {
             $this->WriteAttributeString('LastError', $error['Message']);
-            $this->SetStatus($error['Status']);
+            $this->DebugEChartsSetStatus($error['Status']);
             return;
         }
         if (!$this->HasActiveParent()) {
             $this->WriteAttributeString('LastError', 'No active EChartsGateway is connected.');
-            $this->SetStatus(self::STATUS_PARENT_MISSING);
+            $this->DebugEChartsSetStatus(self::STATUS_PARENT_MISSING);
             return;
         }
         $this->SetTimerInterval('TreeRefresh', 60000);
         $this->WriteAttributeString('LastError', '');
-        $this->SetStatus(IS_ACTIVE);
+        $this->DebugEChartsSetStatus(IS_ACTIVE);
     }
 
     /** @return array{Status:int,Message:string}|null */
@@ -893,7 +1141,7 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
         try {
             $chart = json_decode($this->GetTreeDataForOutput($ipsView), true, 512, JSON_THROW_ON_ERROR);
         } catch (Throwable $exception) {
-            $this->SendDebug('BuildVisualizationState', $exception::class, 0);
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
             return $this->ErrorState('The Tree could not be loaded.');
         }
         return ['schemaVersion' => 1, 'family' => 'tree', 'status' => 'ready', 'chart' => $chart, 'error' => null];
@@ -907,34 +1155,58 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
 
     private function PublishVisualizationState(): void
     {
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
-            $state = $this->BuildVisualizationState();
-            $states = [$state];
-            $this->UpdateVisualizationValue(json_encode(
-                $state,
-                JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
-            ));
-            $this->PushEChartsIPSViewState(function () use (&$states): array
-            {
-                $state = $this->BuildVisualizationState(true);
-                $states[] = $state;
-                return $state;
-            });
-            $this->ScheduleTransientRefresh($states, 'The Tree could not be loaded.');
-        } catch (Throwable $exception) {
-            $this->SendDebug('PublishVisualizationState', $exception::class, 0);
+            try {
+                $state = $this->BuildVisualizationState();
+                $states = [$state];
+                $this->DebugFlowEvent(__FUNCTION__, __LINE__, 'SENDEN', 'Diagrammzustand an die native Kachel übergeben; Darstellung im Browser ist noch nicht bestätigt.');
+                $this->UpdateVisualizationValue(json_encode(
+                    $state,
+                    JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+                ));
+                $this->PushEChartsIPSViewState(function () use (&$states): array
+                {
+                    $state = $this->BuildVisualizationState(true);
+                    $states[] = $state;
+                    return $state;
+                });
+                $this->ScheduleTransientRefresh($states, 'The Tree could not be loaded.');
+            } catch (Throwable $exception) {
+                $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
+            }
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
     }
 
     private function PublishIPSViewHTML(): void
     {
-        if (!$this->IsIPSViewHTMLPageEnabled()) {
-            return;
-        }
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
-            $this->UpdateIPSViewHTMLVariable(self::IPSVIEW_OUTPUT_IDENT, $this->GetIPSViewHTML());
-        } catch (Throwable $exception) {
-            $this->SendDebug('PublishIPSViewHTML', $exception::class, 0);
+            if (!$this->IsIPSViewHTMLPageEnabled()) {
+                return;
+            }
+            try {
+                $this->DebugFlowEvent(__FUNCTION__, __LINE__, 'SENDEN', 'HTML-Ausgabe an die IPSView-Statusvariable übergeben; Dokumentinhalt bleibt geschützt.', ['Ziel' => self::IPSVIEW_OUTPUT_IDENT]);
+                $this->UpdateIPSViewHTMLVariable(self::IPSVIEW_OUTPUT_IDENT, $this->GetIPSViewHTML());
+            } catch (Throwable $exception) {
+                $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
+            }
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
     }
 

@@ -71,6 +71,21 @@
             "sha256": "f7f18b03a320578ecb2ffd816879df2e280e0d96c18cac27320198c73b564f22",
             "path": "libs/helper/VariableSearchHelper.php",
             "source_sha": "721c13515f5b80369f36020271efa0788f5c49d6"
+        },
+        "DebugFlowHelper": {
+            "version": "1.0.0",
+            "sha256": "7acb9342e958a867d17ce53c96a69a176a4f28886875b64166372f15eddd11d8",
+            "path": "libs/helper/DebugFlowHelper.php",
+            "source_sha": "working-tree",
+            "dependencies": [
+                {
+                    "name": "DebugHelper",
+                    "version": "1.0.2",
+                    "sha256": "3bc98238da59682b149d981e7641f1a1af8103047d05ce520dec0a2abcbe7d2b",
+                    "path": "libs/helper/DebugHelper.php",
+                    "source_sha": "working-tree"
+                }
+            ]
         }
     }
 }

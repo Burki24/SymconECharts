@@ -19,13 +19,24 @@ trait EChartsAnimationDesign
 
     public function UpdateAnimationForm(bool $IPSView, bool $AnimationEnabled): void
     {
-        $prefix = $IPSView ? 'IPSView' : '';
-        foreach ([
-            'AnimationDuration', 'AnimationDurationUpdate',
-            'AnimationEasing', 'AnimationEasingUpdate',
-            'AnimationDelay', 'AnimationDelayUpdate'
-        ] as $name) {
-            $this->UpdateFormField($prefix . $name, 'visible', $AnimationEnabled);
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            $prefix = $IPSView ? 'IPSView' : '';
+            foreach ([
+                'AnimationDuration', 'AnimationDurationUpdate',
+                'AnimationEasing', 'AnimationEasingUpdate',
+                'AnimationDelay', 'AnimationDelayUpdate'
+            ] as $name) {
+                $this->UpdateFormField($prefix . $name, 'visible', $AnimationEnabled);
+            }
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
     }
 

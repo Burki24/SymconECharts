@@ -2,6 +2,8 @@
 
 ## Neu
 
+- Alle 30 Module verwenden einheitliche deutsche Debug-Ausgaben nach dem OpenHomeAlarm-Vorbild: Vorgangskennung, Funktions-/Zeilenbezug, Start und Ende, Werte- und Schnittstellenverarbeitung sowie sichere Fehlerdiagnosen ohne private Diagramminhalte oder Zugriffskanäle.
+
 - EChartsBoxplot unterstützt bis zu 32 Archivquellen mit automatischer
   Kategoriennavigation horizontal und vertikal in Kachel und IPSView.
   Schriftgröße und Boxbreite bestimmen den sichtbaren Ausschnitt; Navigation

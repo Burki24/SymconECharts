@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/../libs/helper/DebugFlowHelper.php';
+require_once __DIR__ . '/../libs/EChartsDebugFlow.php';
+
 use Burki24\SymconModuleHelper\ConfigurationFormHelper;
 use Burki24\SymconModuleHelper\DataFlowHelper;
 use Burki24\SymconModuleHelper\IPSViewHTMLPageHelper;
@@ -46,6 +49,9 @@ require_once __DIR__ . '/GaugePreview.php';
 
 class EChartsGaugeMulti extends IPSModuleStrict
 {
+    use \Burki24\SymconModuleHelper\DebugFlowHelper;
+    use \SymconECharts\EChartsDebugFlow;
+
     use ConfigurationFormHelper;
     use EChartsAnimationDesign;
     use DataFlowHelper;
@@ -139,328 +145,460 @@ class EChartsGaugeMulti extends IPSModuleStrict
 
     public function Create(): void
     {
-        parent::Create();
-        $this->RegisterTransientRefresh('ECGM');
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            parent::Create();
+            $this->RegisterTransientRefresh('ECGM');
 
-        $this->SetVisualizationType(1);
-        $this->RegisterMessage(0, IPS_KERNELSTARTED);
-        $this->RegisterPropertyString('Sources', '[]');
-        $this->RegisterPropertyString('Title', '');
-        $this->RegisterPropertyString('GaugePreset', self::PRESET_MULTI_TITLE);
-        $this->RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO);
-        $this->RegisterPropertyInteger('ChartTitleFontSizePercent', 100);
-        $this->RegisterPropertyInteger('ChartTitleColor', -1);
-        foreach (self::DESIGN_SCALE_PROPERTIES as $name) {
-            $this->RegisterPropertyInteger($name, 100);
+            $this->SetVisualizationType(1);
+            $this->RegisterMessage(0, IPS_KERNELSTARTED);
+            $this->RegisterPropertyString('Sources', '[]');
+            $this->RegisterPropertyString('Title', '');
+            $this->RegisterPropertyString('GaugePreset', self::PRESET_MULTI_TITLE);
+            $this->RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO);
+            $this->RegisterPropertyInteger('ChartTitleFontSizePercent', 100);
+            $this->RegisterPropertyInteger('ChartTitleColor', -1);
+            foreach (self::DESIGN_SCALE_PROPERTIES as $name) {
+                $this->RegisterPropertyInteger($name, 100);
+            }
+            foreach (self::DESIGN_STRING_DEFAULTS as $name => $default) {
+                $this->RegisterPropertyString($name, $default);
+            }
+            foreach (self::DESIGN_INTEGER_DEFAULTS as $name => $default) {
+                $this->RegisterPropertyInteger($name, $default);
+            }
+            foreach (self::DESIGN_ASSET_STRING_DEFAULTS as $name => $default) {
+                $this->RegisterPropertyString($name, $default);
+            }
+            foreach (self::DESIGN_ASSET_FLOAT_DEFAULTS as $name => $default) {
+                $this->RegisterPropertyFloat($name, $default);
+            }
+            foreach (self::DESIGN_ASSET_BOOLEAN_DEFAULTS as $name => $default) {
+                $this->RegisterPropertyBoolean($name, $default);
+            }
+            foreach (self::DESIGN_ASSET_INTEGER_DEFAULTS as $name => $default) {
+                $this->RegisterPropertyInteger($name, $default);
+            }
+            $this->RegisterIPSViewHTMLPageProperties();
+            $this->RegisterEChartsIPSViewTransport();
+            $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
+            $this->RegisterPropertyBoolean('IPSViewAdaptToBackground', false);
+            $this->RegisterPropertyInteger('IPSViewBackgroundColor', EChartsIPSViewBackground::DEFAULT_COLOR);
+            $this->RegisterPropertyInteger(
+                'IPSViewBackgroundOpacityPercent',
+                EChartsIPSViewBackground::DEFAULT_OPACITY_PERCENT
+            );
+            $this->RegisterPropertyString('IPSViewGaugePreset', self::PRESET_MULTI_TITLE);
+            $this->RegisterPropertyString('IPSViewEChartsTheme', EChartsAsset::THEME_AUTO);
+            $this->RegisterPropertyInteger('IPSViewChartTitleFontSizePercent', 100);
+            $this->RegisterPropertyInteger('IPSViewChartTitleColor', -1);
+            foreach (self::DESIGN_SCALE_PROPERTIES as $name) {
+                $this->RegisterPropertyInteger('IPSView' . $name, 100);
+            }
+            foreach (self::DESIGN_STRING_DEFAULTS as $name => $default) {
+                $this->RegisterPropertyString('IPSView' . $name, $default);
+            }
+            foreach (self::DESIGN_INTEGER_DEFAULTS as $name => $default) {
+                $this->RegisterPropertyInteger('IPSView' . $name, $default);
+            }
+            foreach (self::DESIGN_ASSET_STRING_DEFAULTS as $name => $default) {
+                $this->RegisterPropertyString('IPSView' . $name, $default);
+            }
+            foreach (self::DESIGN_ASSET_FLOAT_DEFAULTS as $name => $default) {
+                $this->RegisterPropertyFloat('IPSView' . $name, $default);
+            }
+            foreach (self::DESIGN_ASSET_BOOLEAN_DEFAULTS as $name => $default) {
+                $this->RegisterPropertyBoolean('IPSView' . $name, $default);
+            }
+            foreach (self::DESIGN_ASSET_INTEGER_DEFAULTS as $name => $default) {
+                $this->RegisterPropertyInteger('IPSView' . $name, $default);
+            }
+            $this->RegisterAttributeString('RegisteredSourceVariableIDs', '[]');
+            $this->RegisterAttributeString('LastError', '');
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
-        foreach (self::DESIGN_STRING_DEFAULTS as $name => $default) {
-            $this->RegisterPropertyString($name, $default);
-        }
-        foreach (self::DESIGN_INTEGER_DEFAULTS as $name => $default) {
-            $this->RegisterPropertyInteger($name, $default);
-        }
-        foreach (self::DESIGN_ASSET_STRING_DEFAULTS as $name => $default) {
-            $this->RegisterPropertyString($name, $default);
-        }
-        foreach (self::DESIGN_ASSET_FLOAT_DEFAULTS as $name => $default) {
-            $this->RegisterPropertyFloat($name, $default);
-        }
-        foreach (self::DESIGN_ASSET_BOOLEAN_DEFAULTS as $name => $default) {
-            $this->RegisterPropertyBoolean($name, $default);
-        }
-        foreach (self::DESIGN_ASSET_INTEGER_DEFAULTS as $name => $default) {
-            $this->RegisterPropertyInteger($name, $default);
-        }
-        $this->RegisterIPSViewHTMLPageProperties();
-        $this->RegisterEChartsIPSViewTransport();
-        $this->RegisterPropertyBoolean('IPSViewUseTileDesign', true);
-        $this->RegisterPropertyBoolean('IPSViewAdaptToBackground', false);
-        $this->RegisterPropertyInteger('IPSViewBackgroundColor', EChartsIPSViewBackground::DEFAULT_COLOR);
-        $this->RegisterPropertyInteger(
-            'IPSViewBackgroundOpacityPercent',
-            EChartsIPSViewBackground::DEFAULT_OPACITY_PERCENT
-        );
-        $this->RegisterPropertyString('IPSViewGaugePreset', self::PRESET_MULTI_TITLE);
-        $this->RegisterPropertyString('IPSViewEChartsTheme', EChartsAsset::THEME_AUTO);
-        $this->RegisterPropertyInteger('IPSViewChartTitleFontSizePercent', 100);
-        $this->RegisterPropertyInteger('IPSViewChartTitleColor', -1);
-        foreach (self::DESIGN_SCALE_PROPERTIES as $name) {
-            $this->RegisterPropertyInteger('IPSView' . $name, 100);
-        }
-        foreach (self::DESIGN_STRING_DEFAULTS as $name => $default) {
-            $this->RegisterPropertyString('IPSView' . $name, $default);
-        }
-        foreach (self::DESIGN_INTEGER_DEFAULTS as $name => $default) {
-            $this->RegisterPropertyInteger('IPSView' . $name, $default);
-        }
-        foreach (self::DESIGN_ASSET_STRING_DEFAULTS as $name => $default) {
-            $this->RegisterPropertyString('IPSView' . $name, $default);
-        }
-        foreach (self::DESIGN_ASSET_FLOAT_DEFAULTS as $name => $default) {
-            $this->RegisterPropertyFloat('IPSView' . $name, $default);
-        }
-        foreach (self::DESIGN_ASSET_BOOLEAN_DEFAULTS as $name => $default) {
-            $this->RegisterPropertyBoolean('IPSView' . $name, $default);
-        }
-        foreach (self::DESIGN_ASSET_INTEGER_DEFAULTS as $name => $default) {
-            $this->RegisterPropertyInteger('IPSView' . $name, $default);
-        }
-        $this->RegisterAttributeString('RegisteredSourceVariableIDs', '[]');
-        $this->RegisterAttributeString('LastError', '');
     }
 
     public function ApplyChanges(): void
     {
-        parent::ApplyChanges();
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            parent::ApplyChanges();
 
-        $this->RegisterMessage(0, IPS_KERNELSTARTED);
-        $this->MaintainIPSViewHTMLVariable(self::IPSVIEW_OUTPUT_IDENT, $this->Translate('Gauge for IPSView'), 90);
-        $this->Initialize();
-        if (IPS_GetKernelRunlevel() === KR_READY) {
-            $this->PublishVisualizationState();
-            $this->PublishIPSViewHTML();
+            $this->RegisterMessage(0, IPS_KERNELSTARTED);
+            $this->MaintainIPSViewHTMLVariable(self::IPSVIEW_OUTPUT_IDENT, $this->Translate('Gauge for IPSView'), 90);
+            $this->Initialize();
+            if (IPS_GetKernelRunlevel() === KR_READY) {
+                $this->PublishVisualizationState();
+                $this->PublishIPSViewHTML();
+            }
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
     }
 
     public function GetCompatibleParents(): string
     {
-        return json_encode([
-            'type'      => 'connect',
-            'moduleIDs' => [self::GATEWAY_MODULE_ID]
-        ], JSON_THROW_ON_ERROR);
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            return $debugFlowResult = json_encode([
+                'type'      => 'connect',
+                'moduleIDs' => [self::GATEWAY_MODULE_ID]
+            ], JSON_THROW_ON_ERROR);
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, false);
+        }
     }
 
     public function GetConfigurationForm(): string
     {
-        $form = $this->LoadConfigurationForm();
-        if (isset($form['elements']) && is_array($form['elements'])) {
-            $form['elements'] = $this->WithAnimationFormControls($form['elements']);
-            $form['elements'] = EChartsGaugeDesign::WithChartTitleControls($form['elements']);
-            EChartsLabelDesign::InsertAfterRowContaining(
-                $form['elements'],
-                'TitleFontSizePercent',
-                EChartsLabelDesign::GaugeControls()
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            $form = $this->LoadConfigurationForm();
+            if (isset($form['elements']) && is_array($form['elements'])) {
+                $form['elements'] = $this->WithAnimationFormControls($form['elements']);
+                $form['elements'] = EChartsGaugeDesign::WithChartTitleControls($form['elements']);
+                EChartsLabelDesign::InsertAfterRowContaining(
+                    $form['elements'],
+                    'TitleFontSizePercent',
+                    EChartsLabelDesign::GaugeControls()
+                );
+                $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
+                $form['elements'] = $this->AttachGaugePreviewActions($form['elements']);
+                $form['elements'] = $this->WithAnimationFormCallbacks($form['elements'], 'ECGM');
+                $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
+            }
+            $previewItems = $this->PreviewItems();
+            $sourceCountCaption = $this->Translate('Preview shows %d of %d sources');
+            $form = SVGPreviewHelper::withImage(
+                $form,
+                'GaugePreview',
+                EChartsGaugeMultiPreview::CreateSvg(
+                    $previewItems,
+                    $this->ReadPropertyString('Title'),
+                    $this->ReadPropertyString('EChartsTheme'),
+                    $this->ReadPropertyString('GaugePreset'),
+                    $this->ReadGaugeStyle(),
+                    $sourceCountCaption
+                )
             );
-            $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
-            $form['elements'] = $this->AttachGaugePreviewActions($form['elements']);
-            $form['elements'] = $this->WithAnimationFormCallbacks($form['elements'], 'ECGM');
-            $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
-        }
-        $previewItems = $this->PreviewItems();
-        $sourceCountCaption = $this->Translate('Preview shows %d of %d sources');
-        $form = SVGPreviewHelper::withImage(
-            $form,
-            'GaugePreview',
-            EChartsGaugeMultiPreview::CreateSvg(
-                $previewItems,
-                $this->ReadPropertyString('Title'),
-                $this->ReadPropertyString('EChartsTheme'),
-                $this->ReadPropertyString('GaugePreset'),
-                $this->ReadGaugeStyle(),
-                $sourceCountCaption
-            )
-        );
-        $form = SVGPreviewHelper::withImage(
-            $form,
-            'IPSViewGaugePreview',
-            EChartsGaugeMultiPreview::CreateSvg(
-                $previewItems,
-                $this->ReadPropertyString('Title'),
-                $this->EffectiveIPSViewTheme(),
-                $this->ReadPropertyBoolean('IPSViewUseTileDesign')
-                    ? $this->ReadPropertyString('GaugePreset')
-                    : $this->ReadPropertyString('IPSViewGaugePreset'),
-                EChartsIPSViewBackground::WithPreviewStyle(
+            $form = SVGPreviewHelper::withImage(
+                $form,
+                'IPSViewGaugePreview',
+                EChartsGaugeMultiPreview::CreateSvg(
+                    $previewItems,
+                    $this->ReadPropertyString('Title'),
+                    $this->EffectiveIPSViewTheme(),
                     $this->ReadPropertyBoolean('IPSViewUseTileDesign')
-                        ? $this->ReadGaugeStyle()
-                        : $this->ReadGaugeStyle('IPSView'),
-                    $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
-                    $this->ReadPropertyInteger('IPSViewBackgroundColor'),
-                    $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent')
-                ),
-                $sourceCountCaption
-            )
-        );
+                        ? $this->ReadPropertyString('GaugePreset')
+                        : $this->ReadPropertyString('IPSViewGaugePreset'),
+                    EChartsIPSViewBackground::WithPreviewStyle(
+                        $this->ReadPropertyBoolean('IPSViewUseTileDesign')
+                            ? $this->ReadGaugeStyle()
+                            : $this->ReadGaugeStyle('IPSView'),
+                        $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
+                        $this->ReadPropertyInteger('IPSViewBackgroundColor'),
+                        $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent')
+                    ),
+                    $sourceCountCaption
+                )
+            );
 
-        $form = $this->WithIPSViewDesignFormState($form, 'ECGM');
-        $form = EChartsDesignerSections::Group($form, [
-            ['caption' => 'Chart title', 'start' => 'ChartTitleFontSizePercent'],
-            ['caption' => 'Fine tuning', 'start' => 'Fine tuning values range from 50% to 150%. 100% restores the preset default.']
-        ]);
+            $form = $this->WithIPSViewDesignFormState($form, 'ECGM');
+            $form = EChartsDesignerSections::Group($form, [
+                ['caption' => 'Chart title', 'start' => 'ChartTitleFontSizePercent'],
+                ['caption' => 'Fine tuning', 'start' => 'Fine tuning values range from 50% to 150%. 100% restores the preset default.']
+            ]);
 
-        return $this->EncodeConfigurationForm($form);
+            return $debugFlowResult = $this->EncodeConfigurationForm($form);
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, false);
+        }
     }
 
     public function RequestAction(string $Ident, mixed $Value): void
     {
-        if ($this->HandleIPSViewHTMLPageAction($Ident, $Value)) {
-            return;
-        }
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__, ['Aktion' => $Ident]);
+        try {
+            if ($this->HandleIPSViewHTMLPageAction($Ident, $Value)) {
+                return;
+            }
 
-        throw new InvalidArgumentException('Unknown action: ' . $Ident);
+            throw new InvalidArgumentException('Unknown action: ' . $Ident);
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
+        }
     }
 
     public function CopyTileDesignToIPSView(): void
     {
-        IPS_SetProperty($this->InstanceID, 'IPSViewGaugePreset', $this->ReadPropertyString('GaugePreset'));
-        IPS_SetProperty($this->InstanceID, 'IPSViewEChartsTheme', $this->ReadPropertyString('EChartsTheme'));
-        IPS_SetProperty($this->InstanceID, 'IPSViewChartTitleFontSizePercent', $this->ReadPropertyInteger('ChartTitleFontSizePercent'));
-        IPS_SetProperty($this->InstanceID, 'IPSViewChartTitleColor', $this->ReadPropertyInteger('ChartTitleColor'));
-        foreach (self::DESIGN_SCALE_PROPERTIES as $name) {
-            IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyInteger($name));
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            IPS_SetProperty($this->InstanceID, 'IPSViewGaugePreset', $this->ReadPropertyString('GaugePreset'));
+            IPS_SetProperty($this->InstanceID, 'IPSViewEChartsTheme', $this->ReadPropertyString('EChartsTheme'));
+            IPS_SetProperty($this->InstanceID, 'IPSViewChartTitleFontSizePercent', $this->ReadPropertyInteger('ChartTitleFontSizePercent'));
+            IPS_SetProperty($this->InstanceID, 'IPSViewChartTitleColor', $this->ReadPropertyInteger('ChartTitleColor'));
+            foreach (self::DESIGN_SCALE_PROPERTIES as $name) {
+                IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyInteger($name));
+            }
+            foreach (self::DESIGN_STRING_DEFAULTS as $name => $_default) {
+                IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyString($name));
+            }
+            foreach (self::DESIGN_INTEGER_DEFAULTS as $name => $_default) {
+                IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyInteger($name));
+            }
+            foreach (self::DESIGN_ASSET_STRING_DEFAULTS as $name => $_default) {
+                IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyString($name));
+            }
+            foreach (self::DESIGN_ASSET_FLOAT_DEFAULTS as $name => $_default) {
+                IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyFloat($name));
+            }
+            foreach (self::DESIGN_ASSET_BOOLEAN_DEFAULTS as $name => $_default) {
+                IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyBoolean($name));
+            }
+            foreach (self::DESIGN_ASSET_INTEGER_DEFAULTS as $name => $_default) {
+                IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyInteger($name));
+            }
+            IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
+            IPS_ApplyChanges($this->InstanceID);
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
-        foreach (self::DESIGN_STRING_DEFAULTS as $name => $_default) {
-            IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyString($name));
-        }
-        foreach (self::DESIGN_INTEGER_DEFAULTS as $name => $_default) {
-            IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyInteger($name));
-        }
-        foreach (self::DESIGN_ASSET_STRING_DEFAULTS as $name => $_default) {
-            IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyString($name));
-        }
-        foreach (self::DESIGN_ASSET_FLOAT_DEFAULTS as $name => $_default) {
-            IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyFloat($name));
-        }
-        foreach (self::DESIGN_ASSET_BOOLEAN_DEFAULTS as $name => $_default) {
-            IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyBoolean($name));
-        }
-        foreach (self::DESIGN_ASSET_INTEGER_DEFAULTS as $name => $_default) {
-            IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $this->ReadPropertyInteger($name));
-        }
-        IPS_SetProperty($this->InstanceID, 'IPSViewUseTileDesign', false);
-        IPS_ApplyChanges($this->InstanceID);
     }
 
     /** Refreshes both SVG previews from one snapshot of the currently edited form values. */
     public function UpdateGaugePreviewFromForm(string $Configuration): void
     {
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
-            $values = json_decode($Configuration, true, 64, JSON_THROW_ON_ERROR);
-        } catch (JsonException) {
-            $values = [];
-        }
-        if (!is_array($values)) {
-            $values = [];
-        }
+            try {
+                $values = json_decode($Configuration, true, 64, JSON_THROW_ON_ERROR);
+            } catch (JsonException) {
+                $values = [];
+            }
+            if (!is_array($values)) {
+                $values = [];
+            }
 
-        $items = array_key_exists('Sources', $values)
-            ? $this->PreviewItemsFromForm($values['Sources'])
-            : $this->PreviewItems();
-        $title = (string) ($values['Title'] ?? $this->ReadPropertyString('Title'));
-        $sourceCountCaption = $this->Translate('Preview shows %d of %d sources');
-        $tileStyle = $this->GaugeStyleFromFormValues($values);
-        $this->UpdateFormField('GaugePreview', 'image', SVGPreviewHelper::dataUri(
-            EChartsGaugeMultiPreview::CreateSvg(
-                $items,
-                $title,
-                (string) ($values['EChartsTheme'] ?? $this->ReadPropertyString('EChartsTheme')),
-                (string) ($values['GaugePreset'] ?? $this->ReadPropertyString('GaugePreset')),
-                $tileStyle,
-                $sourceCountCaption
-            )
-        ));
+            $items = array_key_exists('Sources', $values)
+                ? $this->PreviewItemsFromForm($values['Sources'])
+                : $this->PreviewItems();
+            $title = (string) ($values['Title'] ?? $this->ReadPropertyString('Title'));
+            $sourceCountCaption = $this->Translate('Preview shows %d of %d sources');
+            $tileStyle = $this->GaugeStyleFromFormValues($values);
+            $this->UpdateFormField('GaugePreview', 'image', SVGPreviewHelper::dataUri(
+                EChartsGaugeMultiPreview::CreateSvg(
+                    $items,
+                    $title,
+                    (string) ($values['EChartsTheme'] ?? $this->ReadPropertyString('EChartsTheme')),
+                    (string) ($values['GaugePreset'] ?? $this->ReadPropertyString('GaugePreset')),
+                    $tileStyle,
+                    $sourceCountCaption
+                )
+            ));
 
-        $useTileDesign = (bool) ($values['IPSViewUseTileDesign'] ?? true);
-        $this->UpdateFormField('IPSViewGaugePreview', 'image', SVGPreviewHelper::dataUri(
-            EChartsGaugeMultiPreview::CreateSvg(
-                $items,
-                $title,
-                $useTileDesign
-                    ? (string) ($values['EChartsTheme'] ?? $this->ReadPropertyString('EChartsTheme'))
-                    : (string) ($values['IPSViewEChartsTheme'] ?? $this->ReadPropertyString('IPSViewEChartsTheme')),
-                $useTileDesign
-                    ? (string) ($values['GaugePreset'] ?? $this->ReadPropertyString('GaugePreset'))
-                    : (string) ($values['IPSViewGaugePreset'] ?? $this->ReadPropertyString('IPSViewGaugePreset')),
-                EChartsIPSViewBackground::WithPreviewStyle(
-                    $useTileDesign ? $tileStyle : $this->GaugeStyleFromFormValues($values, 'IPSView'),
-                    (bool) ($values['IPSViewAdaptToBackground']
-                        ?? $this->ReadPropertyBoolean('IPSViewAdaptToBackground')),
-                    (int) ($values['IPSViewBackgroundColor']
-                        ?? $this->ReadPropertyInteger('IPSViewBackgroundColor')),
-                    (int) ($values['IPSViewBackgroundOpacityPercent']
-                        ?? $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent'))
-                ),
-                $sourceCountCaption
-            )
-        ));
+            $useTileDesign = (bool) ($values['IPSViewUseTileDesign'] ?? true);
+            $this->UpdateFormField('IPSViewGaugePreview', 'image', SVGPreviewHelper::dataUri(
+                EChartsGaugeMultiPreview::CreateSvg(
+                    $items,
+                    $title,
+                    $useTileDesign
+                        ? (string) ($values['EChartsTheme'] ?? $this->ReadPropertyString('EChartsTheme'))
+                        : (string) ($values['IPSViewEChartsTheme'] ?? $this->ReadPropertyString('IPSViewEChartsTheme')),
+                    $useTileDesign
+                        ? (string) ($values['GaugePreset'] ?? $this->ReadPropertyString('GaugePreset'))
+                        : (string) ($values['IPSViewGaugePreset'] ?? $this->ReadPropertyString('IPSViewGaugePreset')),
+                    EChartsIPSViewBackground::WithPreviewStyle(
+                        $useTileDesign ? $tileStyle : $this->GaugeStyleFromFormValues($values, 'IPSView'),
+                        (bool) ($values['IPSViewAdaptToBackground']
+                            ?? $this->ReadPropertyBoolean('IPSViewAdaptToBackground')),
+                        (int) ($values['IPSViewBackgroundColor']
+                            ?? $this->ReadPropertyInteger('IPSViewBackgroundColor')),
+                        (int) ($values['IPSViewBackgroundOpacityPercent']
+                            ?? $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent'))
+                    ),
+                    $sourceCountCaption
+                )
+            ));
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
+        }
     }
 
     public function GetGaugeData(): string
     {
-        $configurationError = $this->GetConfigurationError();
-        if ($configurationError !== null) {
-            $this->WriteAttributeString('LastError', $configurationError['Message']);
-            $this->SetStatus($configurationError['Status']);
-            throw new RuntimeException($configurationError['Message']);
-        }
-        if (!$this->HasActiveParent()) {
-            $this->SetStatus(self::STATUS_PARENT_MISSING);
-            throw new RuntimeException('No active EChartsGateway is connected.');
-        }
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            $configurationError = $this->GetConfigurationError();
+            if ($configurationError !== null) {
+                $this->WriteAttributeString('LastError', $configurationError['Message']);
+                $this->DebugEChartsSetStatus($configurationError['Status']);
+                throw new RuntimeException($configurationError['Message']);
+            }
+            if (!$this->HasActiveParent()) {
+                $this->DebugEChartsSetStatus(self::STATUS_PARENT_MISSING);
+                throw new RuntimeException('No active EChartsGateway is connected.');
+            }
 
-        $sources = $this->GetValidatedSources();
-        $labels = EChartsSourceIdentity::LabelsForSources($sources);
-        $items = [];
-        foreach ($sources as $source) {
-            $current = $this->ReadCurrentSource($source['VariableID']);
-            $label = $labels[$source['VariableID']];
-            $items[] = [
-                'id'     => 'variable-' . $source['VariableID'],
-                'source' => [
-                    'variableID' => $source['VariableID'],
-                    'timestamp'  => $current['Timestamp']
+            $sources = $this->GetValidatedSources();
+            $labels = EChartsSourceIdentity::LabelsForSources($sources);
+            $items = [];
+            foreach ($sources as $source) {
+                $current = $this->ReadCurrentSource($source['VariableID']);
+                $label = $labels[$source['VariableID']];
+                $items[] = [
+                    'id'     => 'variable-' . $source['VariableID'],
+                    'source' => [
+                        'variableID' => $source['VariableID'],
+                        'timestamp'  => $current['Timestamp']
+                    ],
+                    'gauge'  => [
+                        'label'    => $label,
+                        'minimum'  => $source['Minimum'],
+                        'maximum'  => $source['Maximum'],
+                        'unit'     => $source['Unit'],
+                        'decimals' => $source['Decimals']
+                    ],
+                    'value'  => $current['Value']
+                ];
+            }
+
+            $this->WriteAttributeString('LastError', '');
+            $this->DebugEChartsSetStatus(IS_ACTIVE);
+
+            return $debugFlowResult = json_encode([
+                'schemaVersion' => 1,
+                'family'        => 'gauge',
+                'variant'       => 'multi',
+                'theme'         => $this->ReadPropertyString('EChartsTheme'),
+                'gauge'         => [
+                    'title'  => $this->ReadPropertyString('Title'),
+                    'preset' => $this->ReadPropertyString('GaugePreset'),
+                    'style'  => $this->ReadGaugeStyle()
                 ],
-                'gauge'  => [
-                    'label'    => $label,
-                    'minimum'  => $source['Minimum'],
-                    'maximum'  => $source['Maximum'],
-                    'unit'     => $source['Unit'],
-                    'decimals' => $source['Decimals']
-                ],
-                'value'  => $current['Value']
-            ];
+                'items'         => $items
+            ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, false);
         }
-
-        $this->WriteAttributeString('LastError', '');
-        $this->SetStatus(IS_ACTIVE);
-
-        return json_encode([
-            'schemaVersion' => 1,
-            'family'        => 'gauge',
-            'variant'       => 'multi',
-            'theme'         => $this->ReadPropertyString('EChartsTheme'),
-            'gauge'         => [
-                'title'  => $this->ReadPropertyString('Title'),
-                'preset' => $this->ReadPropertyString('GaugePreset'),
-                'style'  => $this->ReadGaugeStyle()
-            ],
-            'items'         => $items
-        ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
     }
 
     public function GetVisualizationTile(): string
     {
-        return $this->RenderGaugeHTMLPage(false);
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            return $debugFlowResult = $this->RenderGaugeHTMLPage(false);
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, false);
+        }
     }
 
     public function GetIPSViewHTML(): string
     {
-        return $this->RenderGaugeHTMLPage(true);
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            return $debugFlowResult = $this->RenderGaugeHTMLPage(true);
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, false);
+        }
     }
 
     public function ReceiveData(string $JSONString): string
     {
-        return $this->HandleEChartsIPSViewRequest(
-            $JSONString,
-            self::DATA_ID_FROM_PARENT,
-            fn (): array => $this->BuildVisualizationState(true)
-        );
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            return $debugFlowResult = $this->HandleEChartsIPSViewRequest(
+                $JSONString,
+                self::DATA_ID_FROM_PARENT,
+                fn (): array => $this->BuildVisualizationState(true)
+            );
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, false);
+        }
     }
 
     /** Retries a failed current-value read without resetting the visualization. */
     public function RetryTransient(): void
     {
-        $this->PublishVisualizationState();
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            $this->PublishVisualizationState();
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
+        }
     }
 
     /**
@@ -470,16 +608,27 @@ class EChartsGaugeMulti extends IPSModuleStrict
      */
     public function MessageSink(int $TimeStamp, int $SenderID, int $Message, array $Data): void
     {
-        if ($SenderID === 0 && $Message === IPS_KERNELSTARTED) {
-            $this->Initialize();
-            $this->PublishVisualizationState();
-            $this->PublishIPSViewHTML();
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__, ['Quelle' => $SenderID, 'Nachricht' => $Message]);
+        try {
+            if ($SenderID === 0 && $Message === IPS_KERNELSTARTED) {
+                $this->Initialize();
+                $this->PublishVisualizationState();
+                $this->PublishIPSViewHTML();
 
-            return;
-        }
+                return;
+            }
 
-        if ($Message === VM_UPDATE && in_array($SenderID, $this->ConfiguredVariableIDs(), true)) {
-            $this->PublishVisualizationState();
+            if ($Message === VM_UPDATE && in_array($SenderID, $this->ConfiguredVariableIDs(), true)) {
+                $this->PublishVisualizationState();
+            }
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
     }
 
@@ -535,7 +684,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
 
     private function Initialize(): void
     {
-        $this->SetStatus(IS_INACTIVE);
+        $this->DebugEChartsSetStatus(IS_INACTIVE);
         if (IPS_GetKernelRunlevel() !== KR_READY) {
             return;
         }
@@ -546,20 +695,20 @@ class EChartsGaugeMulti extends IPSModuleStrict
         $configurationError = $this->GetConfigurationError();
         if ($configurationError !== null) {
             $this->WriteAttributeString('LastError', $configurationError['Message']);
-            $this->SetStatus($configurationError['Status']);
+            $this->DebugEChartsSetStatus($configurationError['Status']);
             return;
         }
 
         if (!$this->HasActiveParent()) {
             $this->WriteAttributeString('LastError', 'No active EChartsGateway is connected.');
-            $this->SetStatus(self::STATUS_PARENT_MISSING);
+            $this->DebugEChartsSetStatus(self::STATUS_PARENT_MISSING);
             return;
         }
 
         $sources = $this->GetValidatedSources();
         $this->WriteAttributeString('LastError', '');
         $this->SetSummary(count($sources) . ' sources');
-        $this->SetStatus(IS_ACTIVE);
+        $this->DebugEChartsSetStatus(IS_ACTIVE);
     }
 
     /**
@@ -877,47 +1026,58 @@ class EChartsGaugeMulti extends IPSModuleStrict
      */
     private function ReadCurrentSource(int $variableID): array
     {
-        $operation = EChartsDataProtocol::OPERATION_CURRENT_READ;
-        $request = EChartsDataProtocol::CreateRequest($operation, [
-            'VariableID' => $variableID
-        ]);
-
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__, ['Variable' => $variableID]);
         try {
-            $response = EChartsDataProtocol::DecodeResponse(
-                $this->SendDataToParent($this->EncodeDataFlowMessage(self::DATA_ID_TO_PARENT, $request)),
-                $operation
-            );
-        } catch (Throwable $exception) {
-            $this->WriteAttributeString('LastError', 'INVALID_GATEWAY_RESPONSE');
-            $this->SetStatus(self::STATUS_GATEWAY_FAILED);
-            $this->SendDebug('GetGaugeData', $exception::class, 0);
-            throw new RuntimeException('The gateway returned an invalid response.');
-        }
+            $operation = EChartsDataProtocol::OPERATION_CURRENT_READ;
+            $request = EChartsDataProtocol::CreateRequest($operation, [
+                'VariableID' => $variableID
+            ]);
 
-        if (!$response['Success']) {
-            $errorCode = (string) ($response['Error']['Code'] ?? 'GATEWAY_REQUEST_FAILED');
-            $this->WriteAttributeString('LastError', $errorCode);
-            $this->SetStatus(self::STATUS_GATEWAY_FAILED);
-            throw new RuntimeException('The gateway request failed: ' . $errorCode);
-        }
+            try {
+                $response = EChartsDataProtocol::DecodeResponse(
+                    $this->DebugEChartsSendToParent($this->EncodeDataFlowMessage(self::DATA_ID_TO_PARENT, $request)),
+                    $operation
+                );
+            } catch (Throwable $exception) {
+                $this->WriteAttributeString('LastError', 'INVALID_GATEWAY_RESPONSE');
+                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
+                throw new RuntimeException('The gateway returned an invalid response.');
+            }
 
-        $payload = $response['Payload'];
-        $responseVariableID = $payload['VariableID'] ?? null;
-        $value = $payload['Value'] ?? null;
-        $timestamp = $payload['Timestamp'] ?? null;
-        if ($responseVariableID !== $variableID
-            || (!is_int($value) && !is_float($value))
-            || !is_int($timestamp)
-        ) {
-            $this->WriteAttributeString('LastError', 'INVALID_CURRENT_VALUE');
-            $this->SetStatus(self::STATUS_GATEWAY_FAILED);
-            throw new RuntimeException('The gateway returned invalid current-value data.');
-        }
+            if (!$response['Success']) {
+                $errorCode = (string) ($response['Error']['Code'] ?? 'GATEWAY_REQUEST_FAILED');
+                $this->WriteAttributeString('LastError', $errorCode);
+                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                throw new RuntimeException('The gateway request failed: ' . $errorCode);
+            }
 
-        return [
-            'Value'     => (float) $value,
-            'Timestamp' => $timestamp
-        ];
+            $payload = $response['Payload'];
+            $responseVariableID = $payload['VariableID'] ?? null;
+            $value = $payload['Value'] ?? null;
+            $timestamp = $payload['Timestamp'] ?? null;
+            if ($responseVariableID !== $variableID
+                || (!is_int($value) && !is_float($value))
+                || !is_int($timestamp)
+            ) {
+                $this->WriteAttributeString('LastError', 'INVALID_CURRENT_VALUE');
+                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                throw new RuntimeException('The gateway returned invalid current-value data.');
+            }
+
+            return $debugFlowResult = [
+                'Value'     => (float) $value,
+                'Timestamp' => $timestamp
+            ];
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, false);
+        }
     }
 
     private function SynchronizeSourceReferences(): void
@@ -1075,7 +1235,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
                 $chart['gauge']['style'] = $this->ReadGaugeStyle('IPSView');
             }
         } catch (Throwable $exception) {
-            $this->SendDebug('BuildVisualizationState', $exception::class, 0);
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
 
             return [
                 'schemaVersion' => 1,
@@ -1099,35 +1259,59 @@ class EChartsGaugeMulti extends IPSModuleStrict
 
     private function PublishVisualizationState(): void
     {
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
-            $state = $this->BuildVisualizationState();
-            $states = [$state];
-            $this->UpdateVisualizationValue(json_encode(
-                $state,
-                JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION
-            ));
-            $this->PushEChartsIPSViewState(function () use (&$states): array
-            {
-                $state = $this->BuildVisualizationState(true);
-                $states[] = $state;
-                return $state;
-            });
-            $this->ScheduleTransientRefresh($states, 'The Multi Gauge values could not be loaded.');
-        } catch (Throwable $exception) {
-            $this->SendDebug('PublishVisualizationState', $exception::class, 0);
+            try {
+                $state = $this->BuildVisualizationState();
+                $states = [$state];
+                $this->DebugFlowEvent(__FUNCTION__, __LINE__, 'SENDEN', 'Diagrammzustand an die native Kachel übergeben; Darstellung im Browser ist noch nicht bestätigt.');
+                $this->UpdateVisualizationValue(json_encode(
+                    $state,
+                    JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION
+                ));
+                $this->PushEChartsIPSViewState(function () use (&$states): array
+                {
+                    $state = $this->BuildVisualizationState(true);
+                    $states[] = $state;
+                    return $state;
+                });
+                $this->ScheduleTransientRefresh($states, 'The Multi Gauge values could not be loaded.');
+            } catch (Throwable $exception) {
+                $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
+            }
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
     }
 
     private function PublishIPSViewHTML(): void
     {
-        if (!$this->IsIPSViewHTMLPageEnabled()) {
-            return;
-        }
-
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
-            $this->UpdateIPSViewHTMLVariable(self::IPSVIEW_OUTPUT_IDENT, $this->GetIPSViewHTML());
-        } catch (Throwable $exception) {
-            $this->SendDebug('PublishIPSViewHTML', $exception::class, 0);
+            if (!$this->IsIPSViewHTMLPageEnabled()) {
+                return;
+            }
+
+            try {
+                $this->DebugFlowEvent(__FUNCTION__, __LINE__, 'SENDEN', 'HTML-Ausgabe an die IPSView-Statusvariable übergeben; Dokumentinhalt bleibt geschützt.', ['Ziel' => self::IPSVIEW_OUTPUT_IDENT]);
+                $this->UpdateIPSViewHTMLVariable(self::IPSVIEW_OUTPUT_IDENT, $this->GetIPSViewHTML());
+            } catch (Throwable $exception) {
+                $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
+            }
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
     }
 
@@ -1251,7 +1435,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
                     $pointerPivotYPercent
                 );
             } catch (InvalidArgumentException $exception) {
-                $this->SendDebug('ResolveCustomPointerStyle', $exception->getMessage(), 0);
+                $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
                 $style = [
                     'pointerPath'    => '',
                     'pointerViewBox' => '',
@@ -1274,7 +1458,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
                 $plateBackgroundRotation
             ));
         } catch (InvalidArgumentException $exception) {
-            $this->SendDebug('ResolvePlateBackgroundStyle', $exception->getMessage(), 0);
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
 
             return array_merge($style, [
                 'plateBackgroundEnabled'        => true,

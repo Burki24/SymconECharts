@@ -486,7 +486,8 @@ if ($helperSync !== null) {
         'SVGPreviewHelper'               => ['target' => 'libs/helper/SVGPreviewHelper.php'],
         'VariableSearchHelper'           => ['target' => 'libs/helper/VariableSearchHelper.php'],
         'VisualizationAssetHelper'       => ['target' => 'libs/helper/VisualizationAssetHelper.php'],
-        'VisualizationThemeHelper'       => ['target' => 'libs/helper/VisualizationThemeHelper.php']
+        'VisualizationThemeHelper'       => ['target' => 'libs/helper/VisualizationThemeHelper.php'],
+        'DebugFlowHelper'                => ['target' => 'libs/helper/DebugFlowHelper.php']
     ]) {
         $errors[] = '.helper-sync.json does not contain the required visualization helper subscriptions.';
     }
