@@ -70,14 +70,22 @@
         var colors = colorsFor(theme), colorList = colors.seriesColors || [colors.accent];
         var width = Math.max(1, chartElement.clientWidth || 1), height = Math.max(1, chartElement.clientHeight || 1);
         var compact = width < 430;
+        var fontFamilies = {Arial: 'Arial, sans-serif', Verdana: 'Verdana, sans-serif', Georgia: 'Georgia, serif', monospace: 'monospace'};
+        var fontFamily = Object.prototype.hasOwnProperty.call(fontFamilies, style.fontFamily) ? fontFamilies[style.fontFamily] : fontFamilies.Arial;
         var axisFont = design.fontSizePercent(style.axisFontSizePercent, compact ? 11 : 12);
         var labelFont = design.fontSizePercent(style.labelFontSizePercent, compact ? 11 : 12);
         var titleFont = design.fontSizePercent(style.titleFontSizePercent, 18);
         var titleLayout = design.chartTitleLayout(chartBootstrap, timeline.title, titleFont);
         var top = titleLayout.contentTop + 14;
-        var left = Math.min(width * 0.36, Math.max(60, axisFont * 13)), right = compact ? 14 : 24;
+        var left = style.showSourceLabels === false ? (compact ? 14 : 24) : Math.min(width * 0.36, Math.max(60, axisFont * 13));
+        var right = compact ? 14 : 24;
         var sliderBottom = 12;
-        var bottom = Math.ceil(axisFont * 1.3) + 22 + (style.enableZoom !== false ? zoom.sliderThickness(compact) + 24 : 0);
+        var timeFormat = style.timeLabelFormat || 'auto';
+        var dateOnly = timeFormat === 'date' || (timeFormat === 'auto' && model.range.endTimestamp - model.range.startTimestamp > 172800);
+        var axisMargin = style.axisLabelMargin === undefined ? 12 : Number(style.axisLabelMargin);
+        var lineHeight = Math.ceil(axisFont * 1.3);
+        var axisExtent = style.showTimeLabels !== false ? lineHeight * (timeFormat === 'dateTime' ? 2 : 1) + axisMargin : (style.showAxisTicks === true ? 5 : 0);
+        var bottom = axisExtent + 10 + (style.enableZoom !== false ? zoom.sliderThickness(compact) + 24 : 0);
         var plotHeight = Math.max(1, height - top - bottom);
         var values = [];
         rows.forEach(function (row, rowIndex) {
@@ -97,27 +105,37 @@
         });
         return {
             backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options && bootstrap.options.adaptToBackground === true ? 'transparent' : colors.background,
+            textStyle: {fontFamily: fontFamily},
             ...design.animationOptions(style, {enabled: true, initialDuration: 350, updateDuration: 500}),
             aria: {enabled: true, label: {description: String(timeline.title || 'StateTimeline') + '. ' + rows.map(function (row) {return row.label;}).join(', ')}},
             title: {show: titleLayout.show, text: String(timeline.title || ''), left: 'center', top: titleLayout.top,
-                textStyle: {color: style.titleColor || colors.text, fontSize: titleFont, width: Math.max(1, width - 24), overflow: 'truncate'}},
+                textStyle: {color: style.titleColor || colors.text, fontSize: titleFont, fontFamily: fontFamily,
+                    fontWeight: style.titleBold === false ? 'normal' : 'bold', fontStyle: style.titleItalic ? 'italic' : 'normal',
+                    width: Math.max(1, width - 24), overflow: 'truncate'}},
             grid: {left: left, right: right, top: top, height: plotHeight, containLabel: false},
             xAxis: {type: 'time', min: model.range.startTimestamp * 1000, max: model.range.endTimestamp * 1000,
-                minInterval: model.range.endTimestamp - model.range.startTimestamp > 172800 ? 86400000 : 60000,
+                minInterval: dateOnly ? 86400000 : 60000,
                 splitNumber: Math.max(2, Math.floor((width - left - right) / Math.max(70, axisFont * 5))),
-                axisLine: {lineStyle: {color: style.axisColor || colors.border}}, axisTick: {show: false},
-                axisLabel: {color: style.axisColor || colors.text, fontSize: axisFont, margin: 12, hideOverlap: true,
+                axisLine: {show: style.showAxisLine !== false, lineStyle: {color: style.axisColor || colors.border,
+                    width: style.axisLineWidth === undefined ? 1 : Number(style.axisLineWidth), type: style.axisLineType || 'solid'}},
+                axisTick: {show: style.showAxisTicks === true},
+                axisLabel: {show: style.showTimeLabels !== false, color: style.axisColor || colors.text, fontSize: axisFont,
+                    fontFamily: fontFamily, fontWeight: style.axisLabelBold ? 'bold' : 'normal', fontStyle: style.axisLabelItalic ? 'italic' : 'normal',
+                    lineHeight: lineHeight, margin: axisMargin, hideOverlap: true,
                     showMinLabel: false, showMaxLabel: false,
                     formatter: function (value) {
-                        if (model.range.endTimestamp - model.range.startTimestamp > 172800) {
-                            return new Date(value).toLocaleDateString(bootstrap.language || undefined, {timeZone: model.range.timezone, day: '2-digit', month: '2-digit'});
-                        }
+                        var date = new Date(value).toLocaleDateString(bootstrap.language || undefined, {timeZone: model.range.timezone, day: '2-digit', month: '2-digit'});
+                        if (timeFormat === 'dateTime') {return date + '\n' + dateText(value / 1000, model.range.timezone, false);}
+                        if (dateOnly) {return date;}
                         return dateText(value / 1000, model.range.timezone, false);
                     }},
-                splitLine: {show: style.showGrid === true, lineStyle: {color: style.axisColor || colors.border, opacity: 0.2}}},
+                splitLine: {show: style.showGrid === true, lineStyle: {color: style.gridColor || style.axisColor || colors.border,
+                    opacity: Number(style.gridOpacityPercent === undefined ? 20 : style.gridOpacityPercent) / 100,
+                    width: style.gridLineWidth === undefined ? 1 : Number(style.gridLineWidth), type: style.gridLineType || 'solid'}}},
             yAxis: {type: 'category', inverse: true, data: rows.map(function (row) {return row.id;}),
                 axisLine: {show: false}, axisTick: {show: false},
-                axisLabel: {color: style.axisColor || colors.text, fontSize: axisFont, margin: 10,
+                axisLabel: {show: style.showSourceLabels !== false, color: style.axisColor || colors.text, fontSize: axisFont, margin: 10,
+                    fontFamily: fontFamily, fontWeight: style.axisLabelBold ? 'bold' : 'normal', fontStyle: style.axisLabelItalic ? 'italic' : 'normal',
                     width: Math.max(1, left - 18), overflow: 'truncate', hideOverlap: true,
                     formatter: function (id) { var row = rows.find(function (candidate) {return candidate.id === id;}); return row ? row.label : ''; }},
                 splitLine: {show: false}},
@@ -143,14 +161,26 @@
                     if (!rectangle || rectangle.width <= 0 || rectangle.height <= 0) {return;}
                     var item = values[parameters.dataIndex];
                     var fill = item.itemStyle.color;
-                    var result = {type: 'group', children: [{type: 'rect', shape: rectangle, transition: ['shape'],
-                        style: {fill: fill, opacity: Number(style.barOpacityPercent === undefined ? 90 : style.barOpacityPercent) / 100,
-                            stroke: style.borderColor || colors.border, lineWidth: Number(style.borderWidth) || 0}}]};
+                    rectangle.r = Math.min(Number(style.borderRadius) || 0, rectangle.width / 2, rectangle.height / 2);
+                    var opacity = Number(style.barOpacityPercent === undefined ? 90 : style.barOpacityPercent) / 100;
+                    var focus = style.emphasisEnabled !== false && style.emphasisFocus === 'self' ? 'self' : 'none';
+                    var blurOpacity = Number(style.blurOpacityPercent === undefined ? 20 : style.blurOpacityPercent) / 100;
+                    // Native CustomView reads these flags from the root renderItem element, not series.emphasis.
+                    var result = {type: 'group', focus: focus, blurScope: 'series', emphasisDisabled: style.emphasisEnabled === false,
+                        children: [{type: 'rect', shape: rectangle, transition: ['shape'],
+                            style: {fill: fill, opacity: opacity, stroke: style.borderColor || colors.border,
+                                lineWidth: Number(style.borderWidth) || 0, lineDash: style.borderType === 'solid' || !style.borderType ? null : style.borderType},
+                            blur: {style: {opacity: opacity * blurOpacity}}}]};
                     if (style.showLabels !== false && rectangle.width >= labelFont * 3 && rectangle.height >= labelFont + 4) {
-                        result.children.push({type: 'text', silent: true, x: rectangle.x + rectangle.width / 2,
+                        var position = style.labelPosition || 'center';
+                        result.children.push({type: 'text', silent: true,
+                            x: position === 'left' ? rectangle.x + 4 : position === 'right' ? rectangle.x + rectangle.width - 4 : rectangle.x + rectangle.width / 2,
                             y: rectangle.y + rectangle.height / 2, style: {text: String(item.segment.label),
-                                fill: style.labelColor || design.readableTextColor(fill), fontSize: labelFont, fontFamily: 'Arial, sans-serif',
-                                align: 'center', verticalAlign: 'middle', width: Math.max(1, rectangle.width - 8), overflow: 'truncate'}});
+                                fill: style.labelColor || design.readableTextColor(fill), fontSize: labelFont, fontFamily: fontFamily,
+                                fontWeight: style.labelBold ? 'bold' : 'normal', fontStyle: style.labelItalic ? 'italic' : 'normal',
+                                align: position === 'left' ? 'left' : position === 'right' ? 'right' : 'center',
+                                verticalAlign: 'middle', width: Math.max(1, rectangle.width - 8), overflow: 'truncate'},
+                            blur: {style: {opacity: blurOpacity}}});
                     }
                     return result;
                 }}]

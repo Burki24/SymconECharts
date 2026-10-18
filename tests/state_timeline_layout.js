@@ -83,6 +83,97 @@ assert.equal(disabled.option.dataZoom.length, 0);
 assert.equal(disabled.option.tooltip.show, false);
 assert.equal(disabled.option.xAxis.splitLine.show, false);
 assert.equal(disabled.option.title.textStyle.color, '#223344');
+const styled = render({...model, stateTimeline: {...model.stateTimeline, style: {...model.stateTimeline.style,
+    borderType: 'dotted', borderRadius: 20, borderWidth: 2, labelPosition: 'left', fontFamily: 'Georgia',
+    titleBold: false, titleItalic: true, axisLabelBold: true, axisLabelItalic: true, labelBold: true, labelItalic: true,
+    showTimeLabels: true, showSourceLabels: false, showAxisLine: false, showAxisTicks: true,
+    axisLineWidth: 3, axisLineType: 'dashed', axisLabelMargin: 30, timeLabelFormat: 'dateTime',
+    gridColor: '#112233', gridOpacityPercent: 35, gridLineWidth: 2, gridLineType: 'dotted',
+    emphasisEnabled: true, emphasisFocus: 'self', blurOpacityPercent: 20}}});
+assert.equal(styled.option.yAxis.axisLabel.show, false);
+assert.equal(styled.option.xAxis.axisLine.show, false);
+assert.equal(styled.option.xAxis.axisTick.show, true);
+assert.equal(styled.option.xAxis.axisLine.lineStyle.width, 3);
+assert.equal(styled.option.xAxis.axisLine.lineStyle.type, 'dashed');
+assert.equal(styled.option.xAxis.axisLabel.margin, 30);
+assert.match(styled.option.xAxis.axisLabel.formatter(start * 1000), /16\.10\.\n\d{2}:\d{2}/);
+assert.equal(styled.option.xAxis.splitLine.lineStyle.color, '#112233');
+assert.equal(styled.option.xAxis.splitLine.lineStyle.opacity, 0.35);
+assert.equal(styled.option.xAxis.splitLine.lineStyle.width, 2);
+assert.equal(styled.option.xAxis.splitLine.lineStyle.type, 'dotted');
+assert.equal(styled.option.title.textStyle.fontFamily, 'Georgia, serif');
+assert.equal(styled.option.title.textStyle.fontWeight, 'normal');
+assert.equal(styled.option.title.textStyle.fontStyle, 'italic');
+assert.equal(styled.option.xAxis.axisLabel.fontWeight, 'bold');
+assert.equal(styled.option.xAxis.axisLabel.fontStyle, 'italic');
+const hiddenAxes = render({...model, stateTimeline: {...model.stateTimeline, style: {...model.stateTimeline.style,
+    showTimeLabels: false, showSourceLabels: false}}});
+assert.equal(hiddenAxes.option.xAxis.axisLabel.show, false);
+assert.equal(hiddenAxes.option.yAxis.axisLabel.show, false);
+assert.equal(hiddenAxes.option.grid.left, 24, 'Hidden source labels release their left plot margin.');
+for (const [name, family] of [['Arial', 'Arial, sans-serif'], ['Verdana', 'Verdana, sans-serif'], ['Georgia', 'Georgia, serif'], ['monospace', 'monospace'], ['constructor', 'Arial, sans-serif']]) {
+    const output = render({...model, stateTimeline: {...model.stateTimeline, style: {...model.stateTimeline.style, fontFamily: name}}});
+    assert.equal(output.option.textStyle.fontFamily, family, 'Only named font choices map to local CSS stacks.');
+}
+const styledEngine = echarts.init(null, null, {renderer: 'svg', ssr: true, width: 900, height: 442});
+styledEngine.setOption(styled.option);
+const styledData = styledEngine.getModel().getSeries()[0].getData();
+const styledGroup = styledData.getItemGraphicEl(0);
+const styledRect = styledGroup.children()[0], styledText = styledGroup.children()[1];
+assert.equal(styledRect.style.lineDash, 'dotted');
+assert.ok(styledRect.shape.r > 0 && styledRect.shape.r <= styledRect.shape.width / 2 && styledRect.shape.r <= styledRect.shape.height / 2);
+assert.equal(styledText.x, styledRect.shape.x + 4);
+assert.equal(styledText.style.align, 'left');
+assert.equal(styledText.style.fontFamily, 'Georgia, serif');
+assert.equal(styledText.style.fontWeight, 'bold');
+assert.equal(styledText.style.fontStyle, 'italic');
+assert.ok(Math.abs(styledRect.states.blur.style.opacity - 0.18) < 1e-12);
+assert.equal(styledText.states.blur.style.opacity, 0.2);
+const tinyRect = styledData.getItemGraphicEl(1).children()[0];
+assert.equal(tinyRect.shape.r, tinyRect.shape.width / 2, 'Corner rounding cannot enlarge tiny exact intervals.');
+assert.match(styledEngine.renderToSVGString(), /stroke-dasharray=/, 'Native SVG geometry must contain real dotted strokes.');
+styledEngine.getZr().trigger('mouseover', {target: styledRect, topTarget: styledRect, event: {}});
+styledEngine.getZr().animation.update();
+assert.ok(styledRect.currentStates.includes('emphasis'), 'Actual native mouseover must emphasize the hovered interval.');
+assert.notEqual(styledRect.style.fill, '#666666', 'Native emphasis must visibly lift the normal interval fill.');
+const blurredGroup = styledData.getItemGraphicEl(2), blurredRect = blurredGroup.children()[0], blurredText = blurredGroup.children()[1];
+assert.ok(blurredRect.currentStates.includes('blur'));
+assert.ok(blurredText.currentStates.includes('blur'));
+assert.ok(Math.abs(blurredRect.style.opacity - 0.18) < 1e-12, 'Native focus-self applies relative opacity to other interval rectangles.');
+assert.equal(blurredText.style.opacity, 0.2, 'Other interval labels must fade with their rectangle.');
+styledEngine.getZr().trigger('mouseout', {target: styledRect, topTarget: styledRect, event: {}});
+styledEngine.getZr().animation.update();
+assert.equal(blurredRect.currentStates.length, 0);
+assert.equal(blurredRect.style.opacity, 0.9, 'Mouseout restores the configured bar opacity.');
+styledEngine.dispose();
+for (const [enabled, focus] of [[false, 'self'], [true, 'none']]) {
+    const output = render({...model, stateTimeline: {...model.stateTimeline, style: {...model.stateTimeline.style,
+        emphasisEnabled: enabled, emphasisFocus: focus, blurOpacityPercent: 0}}});
+    const engine = echarts.init(null, null, {renderer: 'svg', ssr: true, width: 900, height: 442});
+    engine.setOption(output.option);
+    const data = engine.getModel().getSeries()[0].getData();
+    const target = data.getItemGraphicEl(0).children()[0], other = data.getItemGraphicEl(2).children()[0];
+    engine.getZr().trigger('mouseover', {target, topTarget: target, event: {}});
+    engine.getZr().animation.update();
+    assert.equal(target.currentStates.includes('emphasis'), enabled, 'Disabling emphasis prevents the actual native hover state.');
+    assert.equal(other.currentStates.includes('blur'), false, 'Disabled emphasis and focus-none never fade unrelated intervals.');
+    assert.equal(other.style.opacity, 0.9);
+    engine.dispose();
+}
+for (const position of ['center', 'left', 'right']) {
+    const output = render({...model, stateTimeline: {...model.stateTimeline, style: {...model.stateTimeline.style, labelPosition: position,
+        fontFamily: 'monospace', borderType: 'dashed', borderRadius: 20, borderWidth: 2}}});
+    const engine = echarts.init(null, null, {renderer: 'svg', ssr: true, width: 900, height: 442});
+    engine.setOption(output.option);
+    const [rectangle, text] = engine.getModel().getSeries()[0].getData().getItemGraphicEl(2).children();
+    assert.equal(text.style.align, position);
+    assert.equal(text.style.fontFamily, 'monospace');
+    const expectedX = position === 'left' ? rectangle.shape.x + 4 : position === 'right' ? rectangle.shape.x + rectangle.shape.width - 4 : rectangle.shape.x + rectangle.shape.width / 2;
+    assert.equal(text.x, expectedX);
+    assert.ok(text.getBoundingRect().width <= rectangle.shape.width - 8 + 1e-5, 'Label position must retain inner padding, never bleed into neighboring intervals.');
+    assert.match(engine.renderToSVGString(), /stroke-dasharray=/);
+    engine.dispose();
+}
 
 function geometry(option, width, height, zoomed) {
     const engine = echarts.init(null, null, {renderer: 'svg', ssr: true, width, height});
@@ -117,7 +208,11 @@ function geometry(option, width, height, zoomed) {
     bounds.applyTransform(titleView.group.getComputedTransform());
     assert.ok(grid.y >= bounds.y + bounds.height + 4, 'Plot clears the diagram title.');
     assert.ok(bounds.x >= -1 && bounds.x + bounds.width <= width + 1, 'Even long diagram titles remain inside the viewport.');
-    assert.ok(grid.y + grid.height + option.xAxis.axisLabel.fontSize + 12 <= height - 12, 'Time labels retain footer clearance.');
+    const axisView = engine.getViewOfComponentModel(engine.getModel().getComponent('xAxis'));
+    const axisBounds = axisView.group.getBoundingRect().clone();
+    axisBounds.applyTransform(axisView.group.getComputedTransform());
+    const sliderReserve = option.dataZoom.length ? 12 + option.dataZoom[1].height : 0;
+    assert.ok(axisBounds.y + axisBounds.height <= height - sliderReserve - 4, 'One- and two-line time labels retain footer/zoom clearance.');
     engine.dispose();
     return rectangles;
 }
@@ -148,6 +243,22 @@ const allUnknown = render({...model, stateTimeline: {...model.stateTimeline, row
 assert.equal(geometry(allUnknown.option, 900, 442, false).length, 1, 'A wholly unknown archive remains explicitly visible, not empty or zero-filled.');
 const designedShapes = geometry(disabled.option, 900, 500, false);
 assert.ok(designedShapes.every(item => item.style.opacity === 0 && item.style.lineWidth === 5 && item.style.stroke === '#123456'));
+for (const mode of ['symcon', 'ipsview']) {
+    for (const width of [320, 900]) {
+        for (const format of ['auto', 'time', 'date', 'dateTime']) {
+            for (const percent of [50, 200]) {
+                const output = render({...model, stateTimeline: {...model.stateTimeline, style: {...model.stateTimeline.style,
+                    timeLabelFormat: format, axisFontSizePercent: percent, axisLabelMargin: 30, fontFamily: 'Verdana',
+                    showAxisTicks: true, axisLabelBold: true, axisLabelItalic: true, borderRadius: 20}}}, mode, width);
+                geometry(output.option, width, mode === 'symcon' ? 442 : 500, false);
+                geometry(output.option, width, mode === 'symcon' ? 442 : 500, true);
+            }
+        }
+    }
+}
+const noTimeAxis = render({...model, stateTimeline: {...model.stateTimeline, style: {...model.stateTimeline.style,
+    showTimeLabels: false, showSourceLabels: false, showAxisTicks: false, showAxisLine: false, enableZoom: false}}});
+geometry(noTimeAxis.option, 900, 442, false);
 for (const days of [7, 30]) {
     for (const width of [320, 2048]) {
         const longRange = render({...model, range: {...model.range, endTimestamp: start + days * 86400}, stateTimeline: {...model.stateTimeline,

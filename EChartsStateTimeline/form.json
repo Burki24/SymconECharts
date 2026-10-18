@@ -269,6 +269,235 @@
                     "type": "RowLayout",
                     "items": [
                         {
+                            "type": "Select",
+                            "name": "BorderType",
+                            "caption": "Border line type",
+                            "options": [
+                                {
+                                    "caption": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "caption": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "caption": "Dotted",
+                                    "value": "dotted"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "BorderRadius",
+                            "caption": "Corner radius",
+                            "minimum": 0,
+                            "maximum": 20,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "Select",
+                            "name": "LabelPosition",
+                            "caption": "State label position",
+                            "options": [
+                                {
+                                    "caption": "Left",
+                                    "value": "left"
+                                },
+                                {
+                                    "caption": "Center",
+                                    "value": "center"
+                                },
+                                {
+                                    "caption": "Right",
+                                    "value": "right"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "EmphasisEnabled",
+                            "caption": "Enable highlighting"
+                        },
+                        {
+                            "type": "Select",
+                            "name": "EmphasisFocus",
+                            "caption": "Focus on hover",
+                            "options": [
+                                {
+                                    "caption": "No dimming",
+                                    "value": "none"
+                                },
+                                {
+                                    "caption": "Hovered interval",
+                                    "value": "self"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "BlurOpacityPercent",
+                            "caption": "Dimmed interval opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowTimeLabels",
+                            "caption": "Show time labels"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowSourceLabels",
+                            "caption": "Show source labels"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowAxisLine",
+                            "caption": "Show time axis line"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowAxisTicks",
+                            "caption": "Show time axis ticks"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "TimeLabelFormat",
+                            "caption": "Time label format",
+                            "options": [
+                                {
+                                    "caption": "Automatic",
+                                    "value": "auto"
+                                },
+                                {
+                                    "caption": "Time",
+                                    "value": "time"
+                                },
+                                {
+                                    "caption": "Date",
+                                    "value": "date"
+                                },
+                                {
+                                    "caption": "Date and time",
+                                    "value": "dateTime"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AxisLabelMargin",
+                            "caption": "Time label distance",
+                            "minimum": 0,
+                            "maximum": 30,
+                            "suffix": "px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AxisLineWidth",
+                            "caption": "Axis line width",
+                            "minimum": 0,
+                            "maximum": 5,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "Select",
+                            "name": "AxisLineType",
+                            "caption": "Axis line type",
+                            "options": [
+                                {
+                                    "caption": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "caption": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "caption": "Dotted",
+                                    "value": "dotted"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "GridColor",
+                            "caption": "Grid color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "GridOpacityPercent",
+                            "caption": "Grid opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "GridLineWidth",
+                            "caption": "Grid line width",
+                            "minimum": 0,
+                            "maximum": 5,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "Select",
+                            "name": "GridLineType",
+                            "caption": "Grid line type",
+                            "options": [
+                                {
+                                    "caption": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "caption": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "caption": "Dotted",
+                                    "value": "dotted"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
                             "type": "NumberSpinner",
                             "name": "TitleFontSizePercent",
                             "caption": "Title font size",
@@ -291,6 +520,79 @@
                             "minimum": 50,
                             "maximum": 200,
                             "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "FontFamily",
+                            "caption": "Font family",
+                            "options": [
+                                {
+                                    "caption": "Arial",
+                                    "value": "Arial"
+                                },
+                                {
+                                    "caption": "Verdana",
+                                    "value": "Verdana"
+                                },
+                                {
+                                    "caption": "Georgia",
+                                    "value": "Georgia"
+                                },
+                                {
+                                    "caption": "Monospace",
+                                    "value": "monospace"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "TitleBold",
+                            "caption": "Bold title"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "TitleItalic",
+                            "caption": "Italic title"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "AxisLabelBold",
+                            "caption": "Bold axis labels"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "AxisLabelItalic",
+                            "caption": "Italic axis labels"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "LabelBold",
+                            "caption": "Bold state labels"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "LabelItalic",
+                            "caption": "Italic state labels"
                         }
                     ]
                 },

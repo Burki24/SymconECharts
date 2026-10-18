@@ -28,7 +28,15 @@ function state(url) {
                         {startTimestamp: start + 60000, endTimestamp: start + days * 86400, value: 2, label: '<Störung> & Wartung', color: '#FB628B'}]})),
             style: {enableZoom: true, showTooltip: true, showLabels: true, showGrid: true, animationEnabled: false,
                 rowHeightPercent: 65, barOpacityPercent: 90, borderWidth: 0, unknownColor: '#777B83',
-                titleFontSizePercent: 110, axisFontSizePercent: url.searchParams.get('font') === '200' ? 200 : 100, labelFontSizePercent: 75}}}};
+                titleFontSizePercent: 110, axisFontSizePercent: url.searchParams.get('font') === '200' ? 200 : 100, labelFontSizePercent: 75,
+                ...(url.searchParams.get('design') === 'extended' ? {
+                    borderWidth: 2, borderType: 'dashed', borderRadius: 12, labelPosition: url.searchParams.get('position') === 'right' ? 'right' : 'left',
+                    fontFamily: 'Georgia', titleBold: false, titleItalic: true, axisLabelBold: true,
+                    labelBold: true, labelItalic: true, axisLineWidth: 2, axisLineType: 'dotted', showAxisTicks: true,
+                    axisLabelMargin: 20, timeLabelFormat: 'dateTime', gridColor: '#999999', gridLineType: 'dotted',
+                    gridLineWidth: 2, gridOpacityPercent: 35, emphasisFocus: 'self', blurOpacityPercent: 20,
+                    emphasisEnabled: url.searchParams.get('hover') !== 'disabled'
+                } : {})}}}};
 }
 function page(url) {
     const mode = url.searchParams.get('mode') === 'ipsview' ? 'ipsview' : 'symcon';
@@ -56,6 +64,11 @@ http.createServer((req, res) => {
         const values = {Title: 'Zustandszeitdiagramm · Vorschau', Range: '24h', ShowLabels: true, RowHeightPercent: 80,
             TitleFontSizePercent: 110, AxisFontSizePercent: 100, LabelFontSizePercent: 100,
             IPSViewUseTileDesign: url.searchParams.get('independent') !== 'yes', IPSViewUnknownColor: 0x444466,
+            ...(url.searchParams.get('design') === 'extended' ? {BorderWidth: 2, BorderType: 'dashed', BorderRadius: 12,
+                LabelPosition: 'left', FontFamily: 'Georgia', TitleBold: false, TitleItalic: true, AxisLabelBold: true,
+                LabelBold: true, LabelItalic: true, AxisLineWidth: 2, AxisLineType: 'dotted', ShowAxisTicks: true,
+                AxisLabelMargin: 20, TimeLabelFormat: 'dateTime', GridColor: 0x999999, GridLineType: 'dotted',
+                GridLineWidth: 2, GridOpacityPercent: 35} : {}),
             Sources: [4800,4801].map((id, index) => ({VariableID: id, Label: index === 0 ? 'Fenster <Wohnzimmer>' : 'Pumpe', States: [
                 {Value: 0, Label: index === 0 ? 'Geschlossen' : 'Aus', Color: 0x5070DD},
                 {Value: 1, Label: index === 0 ? 'Offen' : 'Ein', Color: 0xB6D634}]}))};
@@ -70,7 +83,7 @@ http.createServer((req, res) => {
         + '<body style="background:#0b0c0e;color:white;font:16px Arial;margin:20px"><h1 style="font-size:20px">StateTimeline · synthetische Zustandswechsel</h1>'
         + '<div style="display:flex;gap:16px;align-items:start;flex-wrap:wrap">'
         + '<section><h2 style="font-size:16px">Kachel · schmal</h2><iframe title="Kachel" src="/chart?mode=symcon" style="border:0;width:400px;height:500px"></iframe></section>'
-        + '<section><h2 style="font-size:16px">IPSView · breit</h2><iframe title="IPSView" src="/chart?mode=ipsview&range=7d" style="border:0;width:790px;height:440px"></iframe></section>'
+        + '<section><h2 style="font-size:16px">IPSView · erweiterte Gestaltung</h2><iframe title="IPSView" src="/chart?mode=ipsview&range=7d&design=extended" style="border:0;width:790px;height:440px"></iframe></section>'
         + '<section><h2 style="font-size:16px">Ohne Kachelkopf · unbekannte Zustände</h2><iframe title="Unbekannte Zustände" src="/chart?header=hidden&theme=light&case=unknown" style="border:0;width:320px;height:400px"></iframe></section>'
         + '</div></body></html>');
 }).listen(8804, '127.0.0.1', () => console.log('StateTimeline fixture: http://127.0.0.1:8804'));

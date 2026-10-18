@@ -70,7 +70,14 @@ class EChartsStateTimeline extends IPSModuleStrict
         'ShowGrid'             => true, 'RowHeightPercent' => 65, 'BarOpacityPercent' => 90, 'BorderWidth' => 0,
         'TitleFontSizePercent' => 110, 'AxisFontSizePercent' => 75, 'LabelFontSizePercent' => 75,
         'TitleColor'           => -1, 'AxisColor' => -1, 'LabelColor' => -1, 'BorderColor' => -1,
-        'UnknownColor'         => 0x777B83
+        'UnknownColor'         => 0x777B83,
+        'BorderType'           => 'solid', 'BorderRadius' => 0, 'LabelPosition' => 'center',
+        'FontFamily'           => 'Arial', 'TitleBold' => true, 'TitleItalic' => false,
+        'AxisLabelBold'        => false, 'AxisLabelItalic' => false, 'LabelBold' => false, 'LabelItalic' => false,
+        'ShowTimeLabels'       => true, 'ShowSourceLabels' => true, 'ShowAxisLine' => true, 'ShowAxisTicks' => false,
+        'AxisLineWidth'        => 1, 'AxisLineType' => 'solid', 'AxisLabelMargin' => 12, 'TimeLabelFormat' => 'auto',
+        'GridColor'            => -1, 'GridOpacityPercent' => 20, 'GridLineWidth' => 1, 'GridLineType' => 'solid',
+        'EmphasisEnabled'      => true, 'EmphasisFocus' => 'none', 'BlurOpacityPercent' => 20
     ];
 
     public function Create(): void
@@ -130,6 +137,8 @@ class EChartsStateTimeline extends IPSModuleStrict
         $form = EChartsDesignerSections::Group($form, [
             ['caption' => 'Animation', 'start' => 'AnimationEnabled'],
             ['caption' => 'Intervals and display', 'start' => 'EnableZoom'],
+            ['caption' => 'Highlighting', 'start' => 'EmphasisEnabled'],
+            ['caption' => 'Axes and grid', 'start' => 'ShowTimeLabels'],
             ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
         ]);
         $fields = ['Title', 'Sources', 'Range',
@@ -552,13 +561,23 @@ class EChartsStateTimeline extends IPSModuleStrict
         }
         foreach (['RowHeightPercent' => [20, 100], 'BarOpacityPercent' => [0, 100], 'BorderWidth' => [0, 5],
             'TitleFontSizePercent'   => [50, 200], 'AxisFontSizePercent' => [50, 200],
-            'LabelFontSizePercent'   => [50, 200]] as $name => [$min, $max]) {
+            'LabelFontSizePercent'   => [50, 200], 'BorderRadius' => [0, 20], 'AxisLineWidth' => [0, 5],
+            'AxisLabelMargin'        => [0, 30], 'GridOpacityPercent' => [0, 100], 'GridLineWidth' => [0, 5],
+            'BlurOpacityPercent'     => [0, 100]] as $name => [$min, $max]) {
             $value = $this->ReadPropertyInteger($prefix . $name);
             if ($value < $min || $value > $max) {
                 return false;
             }
         }
-        foreach (['TitleColor', 'AxisColor', 'BorderColor', 'LabelColor', 'UnknownColor'] as $name) {
+        foreach (['BorderType' => ['solid', 'dashed', 'dotted'], 'AxisLineType' => ['solid', 'dashed', 'dotted'],
+            'GridLineType'     => ['solid', 'dashed', 'dotted'], 'LabelPosition' => ['left', 'center', 'right'],
+            'FontFamily'       => ['Arial', 'Verdana', 'Georgia', 'monospace'], 'EmphasisFocus' => ['none', 'self'],
+            'TimeLabelFormat'  => ['auto', 'time', 'date', 'dateTime']] as $name => $allowed) {
+            if (!in_array($this->ReadPropertyString($prefix . $name), $allowed, true)) {
+                return false;
+            }
+        }
+        foreach (['TitleColor', 'AxisColor', 'BorderColor', 'LabelColor', 'UnknownColor', 'GridColor'] as $name) {
             $color = $this->ReadPropertyInteger($prefix . $name);
             if ($color < -1 || $color > 0xFFFFFF) {
                 return false;

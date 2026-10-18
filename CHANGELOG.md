@@ -2,6 +2,12 @@
 
 ## Neu
 
+- EChartsStateTimeline ergänzt beide Designer und Vorschauen um Rahmenarten,
+  Eckenrundung, innere Textausrichtung, Schriftarten und Fett-/Kursivschrift.
+  Zeit-/Quellenlabels, Zeitformate, Achsenlinien, Teilstriche und Raster sind
+  gestaltbar; optionaler Abschnittsfokus mit einstellbarer Restdeckkraft
+  verbessert die Hervorhebung. Quellen und Archivintervalle bleiben unverändert.
+
 - EChartsStateTimeline zeigt rohe archivierte Boolean- und Integer-Zustände
   als farbige Zeitabschnitte je Quelle. Zustandsnamen/-farben, Zeitraum und
   Zoom sind konfigurierbar; unbekannte Anfänge bleiben ausdrücklich sichtbar.

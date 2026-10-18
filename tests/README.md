@@ -28,6 +28,24 @@ Lokale Browserprüfung und vollständige Qualitätssuite ersetzen keine Live-
 Abnahme des neuen Moduls nach Update in Symcon 9.0/9.1 und IPSView.
 Es wurden keine Live-Konfigurationen oder Archive verändert.
 
+Die Designer-Erweiterung vom 18.10.2026 sichert alle neuen Felder in beiden
+Formularen, deutsche Übersetzungen, Validierung, unabhängige IPSView-Ausgabe,
+Kopieren und schreibfreie SVG-Entwürfe ab. Geprüft werden Rundung/Kontur,
+Textausrichtung, Schriftfamilie/-stile, Achsen-/Rastergestaltung und Zeitformate.
+Der echte Custom-Renderer wird zusätzlich über native Mouseover/-out-Ereignisse
+auf Hervorhebung, Fokus, relative Restdeckkraft und Wiederherstellung geprüft.
+Geometrieprüfungen begrenzen Rundungen auch bei Ein-Sekunden-Intervallen und
+sichern Fuß-/Zoomabstände bei zweizeiliger Zeitbeschriftung, 200 % Schrift und
+maximalem Labelabstand in beiden Ausgabewegen ab.
+`/chart?design=extended` und `/preview.svg?design=extended` zeigen die neuen
+Stile mit synthetischen Daten. Am 18.10.2026 wurden dunkle Kachel, breite
+IPSView-Ansicht, helles IPSView mit rechtsbündigen Labels, 200 % Achsenschrift
+und die erweiterte PHP-SVG-Vorschau lokal visuell geprüft. Ein frisch direkt
+geöffneter Renderer blieb ohne Konsolenwarnungen/-fehler; die Vergleichsseite
+mit Frames zeigte einen nicht dem Modul zugeordneten MutationObserver-Fehler.
+Die neue Gestaltung und ihre Formularbedienung sind nach Modulupdate noch
+in der echten Symcon-Kachel und IPSView abzunehmen; keine Live-Schreibzugriffe.
+
 `node tests/ipsview_transport.js` prüft die zentrale Adressauflösung für
 opake `data:`-/`about:`-Einbettungen bei verbotenem Top-Zugriff: Basisadresse,
 Elternadresse, Referrer, Ancestor-Ursprung und bisheriger Top-Rückfall,

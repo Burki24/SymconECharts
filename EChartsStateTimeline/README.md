@@ -68,6 +68,30 @@ ist separat einstellbar. Automatische Textfarben innerhalb der Abschnitte
 berücksichtigen den Hintergrundkontrast. Zu schmale Abschnitte lassen ihren
 Text aus; ihre Werte bleiben im Tooltip erreichbar.
 
+Unter **Abschnitte und Darstellung** können Rahmen durchgezogen, gestrichelt
+oder gepunktet erscheinen. Der Eckenradius reicht von 0 bis 20 px und wird bei
+schmalen Abschnitten automatisch begrenzt. Zustandsnamen lassen sich innerhalb
+des Abschnitts links, mittig oder rechts ausrichten. Die Breite steht weiterhin
+exakt für die Dauer; Rundungen verbreitern kurze Abschnitte nicht.
+
+**Achsen und Raster** bietet getrennte Schalter für Zeit- und Quellenbeschriftung,
+Zeitachsenlinie und Teilstriche. Zeitangaben sind automatisch, als Uhrzeit,
+Datum oder zweizeilig als Datum und Uhrzeit wählbar. Linienart/-breite (0–5 px),
+Beschriftungsabstand (0–30 px) sowie Rasterfarbe, -linienart, -breite und
+-deckkraft sind einstellbar. Automatisch erscheinen bei langen Zeiträumen
+Datumsangaben statt wiederholter Mitternachtszeiten.
+
+Die Schriftart ist zwischen Arial, Verdana, Georgia und nichtproportionaler
+Schrift wählbar. Titel, Achsenbeschriftungen und Zustandsnamen unterstützen
+jeweils Fett- und Kursivschrift. Verwendet werden die auf dem Anzeigegerät
+verfügbaren Schriften; es werden keine externen Schriftdateien geladen.
+
+Unter **Hervorhebung** lässt sich die Reaktion beim Überfahren eines Abschnitts
+abschalten oder auf diesen Abschnitt fokussieren. Beim Fokus bestimmt die
+Restdeckkraft (0–100 %, Standard 20 %) die Darstellung der übrigen Abschnitte.
+Ohne Fokus bleiben sie unverändert. Der Tooltip kann unabhängig davon aktiv
+bleiben. Diese Mausinteraktion ist in der statischen Vorschau nicht darstellbar.
+
 Der Diagrammtitel steht in der Kachel unter dem nativen Kachelnamen und
 Vergrößerungsbutton. IPSView reserviert diesen zusätzlichen Kopfbereich nicht.
 Zoom vergrößert den Zeitbereich innerhalb des Diagramms, ohne die Konfiguration

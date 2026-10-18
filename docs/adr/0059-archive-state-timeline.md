@@ -77,3 +77,29 @@ Werteidentität, doppelte Namen, Limit-/Fehlerfälle, Gateway, beide Designer,
 Vorschauentwürfe ohne Persistenz, Transport, Ausgabegrößen und tatsächliche
 ECharts-Geometrie. Lokale Browserprüfungen ersetzen keine Live-Abnahme nach
 Modulupdate in Symcon und IPSView.
+
+## Erweiterte Gestaltung (18.10.2026)
+
+Der Abgleich erfolgt mit der offiziellen
+[Custom-Serien-Dokumentation](https://echarts.apache.org/en/option.html#series-custom),
+den [grafischen Elementen](https://echarts.apache.org/en/option.html#graphic)
+und [Zeitachsen](https://echarts.apache.org/en/option.html#xAxis).
+Die gepinnte ECharts-Runtime bleibt unverändert. Properties und Validierung
+bleiben im Gerät, gemeinsame Vorschau-/Designer-/Animationshelfer werden
+wiederverwendet. Es entstehen keine neuen Gateway-Aufgaben.
+
+Additiv kommen Konturart, begrenzte Rechteckrundung, innere Textausrichtung,
+Schriftfamilie und getrennte Fett-/Kursivstile hinzu. Zeit- und Quellenlabels,
+Achsenlinie und Ticks sind separat schaltbar; Format, Labelabstand,
+Linienart/-breite sowie Rasterfarbe/-deckkraft/-kontur sind einstellbar.
+Custom-Grafiken erhalten die Eigenschaften ausdrücklich in `renderItem`;
+generische Serien-Labels allein würden hier nicht wirken. Hervorhebung und
+optionaler Selbstfokus gelten pro Abschnitt, nicht für die gesamte Custom-Serie.
+Die Restdeckkraft ist nur bei aktivem Fokus relevant.
+
+Alle Felder gelten ebenso für unabhängiges IPSView, Vererbung, Kopieren und
+Entwurfsvorschauen. Statische SVGs bilden die optischen Einstellungen ab,
+nicht Mausinteraktion oder Animation. Bestehende Defaults sowie Quellen,
+Zeitgrenzen, Archivvertrag, Zustandsidentitäten und Farben bleiben erhalten.
+Frei ausführbare Formatter, externe Schriften und eine irreführende gemeinsame
+Zustandslegende für unterschiedliche Quellen sind nicht Teil dieser Erweiterung.

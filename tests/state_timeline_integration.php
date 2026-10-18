@@ -92,6 +92,42 @@ assertGatewayGauge(str_contains($timeline->GetIPSViewHTML(), '"rowHeightPercent"
     && str_contains($timeline->GetIPSViewHTML(), '"unknownColor":"#123456"')
     && str_contains($timeline->GetVisualizationTile(), '"rowHeightPercent":65'), 'IPSView design must be independent.');
 $form = json_decode($timeline->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+$extendedDesign = ['BorderType' => 'dashed', 'BorderRadius' => 12, 'LabelPosition' => 'right',
+    'FontFamily'                => 'Georgia', 'TitleBold' => false, 'TitleItalic' => true, 'AxisLabelBold' => true,
+    'AxisLabelItalic'           => true, 'LabelBold' => true, 'LabelItalic' => true, 'ShowTimeLabels' => false,
+    'ShowSourceLabels'          => false, 'ShowAxisLine' => false, 'ShowAxisTicks' => true, 'AxisLineWidth' => 3,
+    'AxisLineType'              => 'dotted', 'AxisLabelMargin' => 20, 'TimeLabelFormat' => 'dateTime',
+    'GridColor'                 => 0x123ABC, 'GridOpacityPercent' => 45, 'GridLineWidth' => 2, 'GridLineType' => 'dashed',
+    'EmphasisEnabled'           => false, 'EmphasisFocus' => 'self', 'BlurOpacityPercent' => 15];
+foreach ($extendedDesign as $name => $value) {
+    foreach (['', 'IPSView'] as $prefix) {
+        $control = findGaugeFormElement($form['elements'], $prefix . $name);
+        assertGatewayGauge(
+            $control !== null && str_contains($control['onChange'] ?? '', 'ECST_UpdateBarPreviewFromForm'),
+            'Every extended StateTimeline design field needs mirrored live preview controls: ' . $prefix . $name
+        );
+    }
+    $timeline->SetTestProperty($name, $value);
+}
+$extended = json_decode($timeline->GetStateTimelineData(), true, 512, JSON_THROW_ON_ERROR);
+$independentHTML = $timeline->GetIPSViewHTML();
+foreach ($extendedDesign as $name => $value) {
+    assertGatewayGauge(
+        $extended['stateTimeline']['style'][lcfirst($name)] === ($name === 'GridColor' ? '#123ABC' : $value),
+        'Extended StateTimeline design must reach the renderer: ' . $name
+    );
+}
+assertGatewayGauge(
+    str_contains($independentHTML, '"fontFamily":"Arial"')
+    && str_contains($independentHTML, '"borderRadius":0') && str_contains($independentHTML, '"showTimeLabels":true'),
+    'An independent IPSView designer must not inherit the changed tile design.'
+);
+assertGatewayGauge($extended['stateTimeline']['rows'] === $rows, 'Design changes must not change state intervals or mappings.');
+// Restore tile defaults before the existing independent-design and draft checks.
+$defaults = (new ReflectionClass(EChartsStateTimeline::class))->getConstant('DESIGN_DEFAULTS');
+foreach ($extendedDesign as $name => $value) {
+    $timeline->SetTestProperty($name, $defaults[$name]);
+}
 $translations = json_decode((string) file_get_contents(dirname(__DIR__) . '/EChartsStateTimeline/locale.json'), true)['translations']['de'];
 $helperTranslations = json_decode((string) file_get_contents(dirname(__DIR__) . '/libs/helper/translations/IPSViewHTMLPageHelper.json'), true);
 foreach ($helperTranslations['translations'] as $translation) {
@@ -134,10 +170,68 @@ assertGatewayGauge(
 assertGatewayGauge((new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($timeline) === $properties
     && $GLOBALS['symconTestArchiveQueryCount'] === $queryCount, 'Preview must not persist or query archives.');
 
+$previewDesign = [...$extendedDesign, 'ShowTimeLabels' => true, 'ShowSourceLabels' => true,
+    'ShowAxisLine'                                     => true, 'BorderWidth' => 2, 'EnableZoom' => true, 'LabelFontSizePercent' => 50];
+$timeline->UpdateBarPreviewFromForm(json_encode($previewDesign, JSON_THROW_ON_ERROR));
+$styledUpdates = array_slice($timeline->GetTestFormUpdates(), -2);
+$svg = base64_decode(substr($styledUpdates[0]['Value'], strlen('data:image/svg+xml;base64,')), true);
+$xml = new DOMDocument();
+assertGatewayGauge($xml->loadXML($svg, LIBXML_NONET), 'Extended preview must remain valid SVG.');
+$xpath = new DOMXPath($xml);
+$xpath->registerNamespace('s', 'http://www.w3.org/2000/svg');
+assertGatewayGauge(
+    $xml->documentElement->getAttribute('font-family') === 'Georgia'
+    && $xpath->query('//s:text[@x="24" and @font-weight="normal" and @font-style="italic"]')->length === 1
+    && $xpath->query('//s:rect[@data-state-interval and @rx="12" and @stroke-dasharray="8 4"]')->length > 0
+    && $xpath->query('//s:text[@data-state-label and @text-anchor="end" and @font-weight="bold" and @font-style="italic"]')->length > 0
+    && $xpath->query('//s:text[@data-state-label and @clip-path]')->length === $xpath->query('//s:text[@data-state-label]')->length
+    && $xpath->query('//s:path[@data-state-grid and @stroke="#123ABC" and @opacity="0.45" and @stroke-width="2"]')->length === 5
+    && $xpath->query('//s:text[@data-time-label]/s:tspan')->length === 5
+    && $xpath->query('//s:path[@data-time-axis and @stroke-dasharray="3 3"]')->length === 1
+    && $xpath->query('//s:path[@data-time-tick]')->length === 5,
+    'Preview must visibly apply typography, contour, alignment, grid, axis and two-line time format.'
+);
+assertGatewayGauge((new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($timeline) === $properties
+    && $GLOBALS['symconTestArchiveQueryCount'] === $queryCount, 'Extended design drafts must remain read-only.');
+$independentDraft = ['IPSViewUseTileDesign' => false, 'IPSViewFontFamily' => 'Verdana', 'IPSViewBorderRadius' => 5,
+    'IPSViewBorderType'                     => 'dotted', 'IPSViewBorderWidth' => 3, 'IPSViewLabelPosition' => 'left',
+    'IPSViewShowTimeLabels'                 => false, 'IPSViewShowSourceLabels' => false, 'IPSViewLabelFontSizePercent' => 50];
+$timeline->UpdateBarPreviewFromForm(json_encode([...$previewDesign, ...$independentDraft], JSON_THROW_ON_ERROR));
+$independentUpdates = array_slice($timeline->GetTestFormUpdates(), -2);
+$independentSVG = base64_decode(substr($independentUpdates[1]['Value'], strlen('data:image/svg+xml;base64,')), true);
+assertGatewayGauge(
+    str_contains($independentSVG, 'font-family="Verdana"') && str_contains($independentSVG, 'rx="5"')
+    && str_contains($independentSVG, 'stroke-dasharray="3 3"') && str_contains($independentSVG, 'text-anchor="start"')
+    && !str_contains($independentSVG, 'data-time-label') && !str_contains($independentSVG, 'data-source-label'),
+    'Independent IPSView preview must use its own typography, contour, alignment and axis visibility.'
+);
+assertGatewayGauge((new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($timeline) === $properties
+    && $GLOBALS['symconTestArchiveQueryCount'] === $queryCount, 'Independent IPSView drafts must remain read-only.');
+$timeline->UpdateBarPreviewFromForm(json_encode(['ShowTimeLabels' => false, 'ShowSourceLabels' => false,
+    'ShowAxisLine'                                                => false, 'ShowAxisTicks' => false, 'FontFamily' => 'invalid" onload="alert(1)'], JSON_THROW_ON_ERROR));
+$hiddenSVG = base64_decode(substr(array_slice($timeline->GetTestFormUpdates(), -2)[0]['Value'], strlen('data:image/svg+xml;base64,')), true);
+assertGatewayGauge(
+    !str_contains($hiddenSVG, 'data-time-label') && !str_contains($hiddenSVG, 'data-source-label')
+    && !str_contains($hiddenSVG, 'data-time-axis') && !str_contains($hiddenSVG, 'data-time-tick')
+    && str_contains($hiddenSVG, 'font-family="Arial"') && !str_contains($hiddenSVG, 'onload'),
+    'Preview visibility toggles and the font whitelist must work without unsafe SVG attributes.'
+);
+
 $GLOBALS['symconTestCopyTarget'] = $timeline;
 $timeline->SetTestProperty('RowHeightPercent', 47);
+foreach ($extendedDesign as $name => $value) {
+    $timeline->SetTestProperty($name, $value);
+}
 $timeline->CopyTileDesignToIPSView();
 assertGatewayGauge(str_contains($timeline->GetIPSViewHTML(), '"rowHeightPercent":47'), 'Copy action must preserve all effective design fields.');
+$copied = (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($timeline);
+assertGatewayGauge(str_contains($timeline->GetIPSViewHTML(), '"fontFamily":"Georgia"')
+    && str_contains($timeline->GetIPSViewHTML(), '"borderRadius":12'), 'Copied typography and contour must reach independent IPSView.');
+foreach ($extendedDesign as $name => $value) {
+    assertGatewayGauge($copied['IPSView' . $name] === $value, 'Copy must include extended design: ' . $name);
+    $timeline->SetTestProperty($name, $defaults[$name]);
+    $timeline->SetTestProperty('IPSView' . $name, $defaults[$name]);
+}
 unset($GLOBALS['symconTestCopyTarget']);
 
 $parent = IPSModuleStrict::$ParentResponder;
@@ -194,7 +288,11 @@ assertGatewayGauge(
 );
 IPSModuleStrict::$ParentResponder = $parent;
 
-foreach ([['Range', 'invalid'], ['RowHeightPercent', 101], ['UnknownColor', -2], ['AnimationDuration', 99999]] as [$name, $value]) {
+foreach ([['Range', 'invalid'], ['RowHeightPercent', 101], ['UnknownColor', -2], ['AnimationDuration', 99999],
+    ['BorderType', 'invalid'], ['BorderRadius', 21], ['LabelPosition', 'outside'], ['FontFamily', 'unsafe'],
+    ['AxisLineType', 'invalid'], ['AxisLineWidth', 6], ['AxisLabelMargin', 31], ['TimeLabelFormat', 'invalid'],
+    ['GridColor', 0x1000000], ['GridLineType', 'invalid'], ['GridLineWidth', -1], ['GridOpacityPercent', 101],
+    ['EmphasisFocus', 'series'], ['BlurOpacityPercent', -1], ['IPSViewBorderRadius', 21]] as [$name, $value]) {
     $original = $properties[$name];
     $timeline->SetTestProperty($name, $value);
     $timeline->ApplyChanges();
