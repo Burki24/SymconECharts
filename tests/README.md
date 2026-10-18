@@ -1,5 +1,27 @@
 # Tests
 
+## PictorialBar: große Quellenlisten
+
+`php tests/gateway_gauges.php` prüft zusätzlich 72/100/101 Quellen, unveränderte
+IDs/Referenzen/Abonnements, keine Änderung der Funnel-Grenze, beide HTML-Ausgaben
+und Formularvorschauen unter 1 MiB. Auch 100 Quellen mit großem SVG und Verlauf
+werden geprüft; die SVG-Vorschauen kennzeichnen ihren echten Acht-Quellen-
+Ausschnitt statt auf Beispieldaten zurückzufallen.
+
+`node tests/pictorial_bar_layout.js` prüft die vollständigen 72-/100-Quellen-
+Modelle, native DataZoom-Navigation bis zum letzten Eintrag, Originaltexte und
+die Labelgeometrie nach Scrollen. Beide Ausgaben, beide Ausrichtungen sowie
+Standardform, Icon und eigenes SVG mit Verlauf sind enthalten. Der Ausschnitt
+muss bei einem Datenupdate erhalten bleiben. Diese Tests verwenden die echte
+gepinnt installierte ECharts-Engine; der Assettest prüft das ausgelieferte Subset
+mit DataZoom und neuer Prüfsumme.
+
+`node tests/pictorial_bar_browser.mjs` bietet unter `http://127.0.0.1:8801`
+synthetische Beispiele mit 72 Quellen in der Kachel und 100 in IPSView.
+`/chart?mode=ipsview&count=100&color=gradient&shape=svg` öffnet den großen Fall
+direkt. Ein echter Symcon-/IPSView-Live-Test nach Modulupdate bleibt erforderlich;
+die Entwicklungsprüfungen füllen keine Live-Instanz und ändern keine Quellwerte.
+
 ## CalendarPie
 
 `php tests/calendar_pie_data.php` prüft abgeschlossene lokale Monatsfenster,

@@ -38,8 +38,8 @@ Ausgelieferte Dateien:
 
 - `libs/echarts/6.1.0/echarts.pictorial-bar.min.js` – reproduzierbarer
   PictorialBar-Browser-Build aus ECharts Core, PictorialBar Chart, Grid,
-  Titel, Tooltip, Aria, LabelLayout und CanvasRenderer; 520.471 Byte; SHA-256
-  `aa455b075155c605bb5253642d8f696927b08ad7fa46487a83810eb1d8a03a6f`;
+  Titel, Tooltip, Aria, DataZoom, LabelLayout und CanvasRenderer; 556.814 Byte; SHA-256
+  `ce03a142a661d6a32ee931a9e6efcb390c311220f1e53cdeb89a32f1bee9ef5d`;
 
 - `libs/echarts/6.1.0/echarts.candlestick.min.js` – reproduzierbarer
   Candlestick-Browser-Build aus ECharts Core, Candlestick Chart, Grid, Titel,

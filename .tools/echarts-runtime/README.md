@@ -24,10 +24,13 @@ Tooltip, Aria und Canvas Renderer aus demselben unveränderten ECharts 6.1.0.
 API, aktuelle stabile npm-Version und Lizenz wurden am 17.10.2026 erneut geprüft.
 
 Der PictorialBar-Einstieg enthält PictorialBar Chart, Grid, Titel, Tooltip,
-Aria, LabelLayout und CanvasRenderer. `npm run build:pictorial-bar` erzeugt
+Aria, DataZoom, LabelLayout und CanvasRenderer. `npm run build:pictorial-bar` erzeugt
 ausschließlich `../../libs/echarts/6.1.0/echarts.pictorial-bar.min.js` aus dem
 unveränderten gepinnten ECharts 6.1.0. Offizielle Einstiege und benötigte
-APIs wurden am 17.10.2026 erneut geprüft; siehe ADR 0057.
+APIs wurden am 18.10.2026 erneut geprüft; siehe ADR 0057. Die Kategoriennavigation
+verwendet native Slider-/Inside-DataZoom-Komponenten. Startseite und llms.txt
+sowie npm-Metadaten bestätigen weiterhin Version 6.1.0 und Apache-2.0; die
+konkreten Zoom-Optionen wurden zusätzlich am gepinnten Originalpaket geprüft.
 
 Der Candlestick-Einstieg enthält Candlestick Chart, Grid, Titel, Tooltip,
 Aria und Canvas Renderer aus demselben unveränderten ECharts 6.1.0.

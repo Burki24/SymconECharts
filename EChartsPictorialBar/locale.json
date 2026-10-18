@@ -1,6 +1,7 @@
 {
     "translations": {
         "de": {
+            "Preview: first %d of %d categories. Scroll in the chart to see all.": "Vorschau: erste %d von %d Kategorien. Im Diagramm sind alle durch Scrollen erreichbar.",
             "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts.": "Ein gemeinsames EChartsGateway genügt für alle ECharts-Diagramminstanzen. Bei weiteren Diagrammen das vorhandene Gateway auswählen.",
             "Title": "Titel",
             "Variable": "Variable",
@@ -59,7 +60,7 @@
             "Configure valid PictorialBar variables.": "Gültige PictorialBar-Variablen konfigurieren.",
             "PictorialBar requires non-negative values.": "PictorialBar benötigt nichtnegative Werte.",
             "PictorialBar values could not be loaded": "PictorialBar-Werte konnten nicht geladen werden",
-            "Choose 1 to 16 numeric variables with the same unit and non-negative current values. Symbols show proportions, not one unit each.": "1 bis 16 numerische Variablen derselben Einheit mit nichtnegativen aktuellen Werten wählen. Die Symbole zeigen Anteile, nicht jeweils eine Einheit.",
+            "Choose 1 to 100 numeric variables with the same unit and non-negative current values. Symbols show proportions, not one unit each.": "1 bis 100 numerische Variablen derselben Einheit mit nichtnegativen aktuellen Werten wählen. Die Symbole zeigen Anteile, nicht jeweils eine Einheit.",
             "Layout and symbols": "Anordnung und Symbole",
             "Axes and values": "Achsen und Werte",
             "Borders and opacity": "Rahmen und Deckkraft",

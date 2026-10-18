@@ -52,6 +52,35 @@ keine erfundenen Ersatzwerte. Nur die leere Konfiguration zeigt Beispiele.
 
 ## Prüfung
 
+### Erweiterung auf 100 Quellen vom 18.10.2026
+
+PictorialBar erlaubt auf ausdrücklichen Auftrag 1–100 Quellen; die frühere
+Obergrenze 16 ist abgelöst. Der gemeinsame CurrentComparisonSources-Resolver
+erhält einen expliziten Maximalparameter, dessen Default 16 bleibt. Nur
+PictorialBar wählt 100, Funnel wird nicht beiläufig erweitert. Namen, GUID,
+Properties, Quellenidentität, Einheiten-/Vorzeichenvertrag und Archivfreiheit
+bleiben unverändert; eine Migration gespeicherter Quellen ist nicht nötig.
+
+Über 16 Quellen verwendet der Renderer native Slider-/Inside-DataZoom-
+Komponenten auf der Kategorienachse. Der Ausschnitt enthält abhängig von
+Platz und Schrift höchstens 16 Werte. Das vollständige Modell mit bis zu
+100 IDs bleibt erhalten; Skala und Farbbereiche ändern sich beim Scrollen nicht.
+Vor Neuaufbau bei Wertaktualisierung/Resize wird der sichtbare Anfang anhand
+der Quell-ID gesichert. Gradient-/Icon-/SVG-Werttexte werden an der tatsächlichen
+Zeichenzeile statt am vollständigen Rohindex positioniert.
+
+Die SVG-Vorschau validiert/liest alle bis zu 100 Quellen, zeigt bei großen
+Listen aber ausdrücklich die ersten acht mit Gesamtzahlhinweis. Das schützt
+die Formgröße auch bei komplexen Formen und verhindert Ersatz-Beispieldaten.
+Die gepinnte Runtime bleibt ECharts 6.1.0/Apache-2.0; nur das PictorialBar-Subset
+ergänzt DataZoom. Herkunft, Integrität und Größe werden neu dokumentiert und
+geprüft. Output-/SVG-Budgets und Wiederholungslimits bleiben aktiv.
+
+Regressionen prüfen 72/100/101 Quellen, alle Referenzen, beide Ausgaben und
+Vorschauen unter 1 MiB, große SVGs mit Verläufen, unveränderte Funnel-Grenze,
+native Navigation bis zur letzten Kategorie sowie Fenstererhaltung bei Updates.
+Die historische Entscheidung oben beschreibt weiterhin den Ausgangsstand.
+
 ### Designer-Ergänzung vom 17.10.2026
 
 Die offiziellen PictorialBar-, Label- und ItemStyle-Optionen wurden erneut

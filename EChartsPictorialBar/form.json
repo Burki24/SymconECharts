@@ -78,7 +78,7 @@
         },
         {
             "type": "Label",
-            "caption": "Choose 1 to 16 numeric variables with the same unit and non-negative current values. Symbols show proportions, not one unit each."
+            "caption": "Choose 1 to 100 numeric variables with the same unit and non-negative current values. Symbols show proportions, not one unit each."
         },
         {
             "type": "ExpansionPanel",

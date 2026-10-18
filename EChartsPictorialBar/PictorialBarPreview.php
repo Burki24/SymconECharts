@@ -69,6 +69,12 @@ trait PictorialBarPreview
         if ($fixed > 0) {
             $maximum = $fixed;
         }
+        $totalCount = count($items);
+        if ($totalCount > 16) {
+            $items = array_slice($items, 0, 8);
+            $svg .= '<text x="360" y="348" text-anchor="middle" font-size="10" fill="' . $e($palette['muted']) . '">'
+                . $e(sprintf($this->Translate('Preview: first %d of %d categories. Scroll in the chart to see all.'), count($items), $totalCount)) . '</text>';
+        }
         $horizontal = $this->BarPreviewValue($values, 'Orientation', 'string', $ipsView) === 'horizontal';
         $left = $horizontal ? 140 : 65;
         $right = 640;

@@ -21,8 +21,12 @@ const importedSvg=spawnSync('php',['-r',
     'tests/fixtures/pictorial-symbol-custom.svg'],{cwd:root,encoding:'utf8'});
 if(importedSvg.status !== 0)throw new Error('Local SVG fixture import failed.');
 const svgGeometry=JSON.parse(importedSvg.stdout);
-function page(mode, extended = false, light = false, single = false, gradient = false, lqi = false, icon = false, svg = false) {
+function page(mode, extended = false, light = false, single = false, gradient = false, lqi = false, icon = false, svg = false, count = 6) {
     const initialState = state();
+    if(count>6) {
+        initialState.chart.pictorialBar.data=Array.from({length:count},(_,index)=>({id:'v'+index,label:'Batterie '+String(index+1).padStart(3,'0'),
+            unit:'%',decimals:0,value:(index*7)%101,order:index,color:''}));
+    }
     if (mode === 'ipsview') {
         initialState.chart.pictorialBar.style.orientation = 'horizontal';
         initialState.chart.pictorialBar.style.axisColor = light ? '#333333' : '#A9DCD2';
@@ -77,9 +81,9 @@ http.createServer((req, res) => {
         return;
     }
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    if (url.pathname === '/chart') { res.end(page(url.searchParams.get('mode') === 'ipsview' ? 'ipsview' : 'symcon', url.searchParams.get('design') === 'extended', url.searchParams.get('theme') === 'light', url.searchParams.get('symbols') === 'single',url.searchParams.get('color') === 'gradient',url.searchParams.get('range') === 'lqi',url.searchParams.get('icon') === 'cell',url.searchParams.get('shape') === 'svg')); return; }
+    if (url.pathname === '/chart') { res.end(page(url.searchParams.get('mode') === 'ipsview' ? 'ipsview' : 'symcon', url.searchParams.get('design') === 'extended', url.searchParams.get('theme') === 'light', url.searchParams.get('symbols') === 'single',url.searchParams.get('color') === 'gradient',url.searchParams.get('range') === 'lqi',url.searchParams.get('icon') === 'cell',url.searchParams.get('shape') === 'svg', Math.min(100,Math.max(1,Number(url.searchParams.get('count'))||6)))); return; }
     res.end('<!doctype html><html lang="de"><head><title>PictorialBar – lokale Browserprüfung</title></head><body style="background:#0b0c0e;color:white;font:16px Arial;margin:20px">'
         + '<h1 style="font-size:20px">PictorialBar · synthetische Beispieldaten</h1><div style="display:flex;gap:16px;align-items:start;flex-wrap:wrap">'
-        + '<section><h2 style="font-size:16px">Kachel · hoch</h2><iframe title="Kachel" src="/chart?mode=symcon&design=extended&color=gradient&shape=svg" style="border:0;width:400px;height:600px"></iframe></section>'
-        + '<section><h2 style="font-size:16px">IPSView · breit</h2><iframe title="IPSView" src="/chart?mode=ipsview&design=extended&color=gradient&shape=svg" style="border:0;width:790px;height:440px"></iframe></section></div></body></html>');
+        + '<section><h2 style="font-size:16px">Kachel · 72 Quellen</h2><iframe title="Kachel" src="/chart?mode=symcon&design=extended&color=gradient&shape=svg&count=72" style="border:0;width:400px;height:600px"></iframe></section>'
+        + '<section><h2 style="font-size:16px">IPSView · 100 Quellen</h2><iframe title="IPSView" src="/chart?mode=ipsview&design=extended&color=gradient&shape=svg&count=100" style="border:0;width:790px;height:440px"></iframe></section></div></body></html>');
 }).listen(8801, '127.0.0.1', () => console.log('PictorialBar browser fixture: http://127.0.0.1:8801'));

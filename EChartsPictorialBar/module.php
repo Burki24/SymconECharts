@@ -440,7 +440,7 @@ class EChartsPictorialBar extends IPSModuleStrict
     /** @return list<array{VariableID:int,Label:string,Color:int,Unit:string,Decimals:int}> */
     private function GetValidatedSources(?string $draft = null): array
     {
-        return EChartsCurrentComparisonSources::Resolve($draft ?? $this->ReadPropertyString('Sources'), 'PictorialBar');
+        return EChartsCurrentComparisonSources::Resolve($draft ?? $this->ReadPropertyString('Sources'), 'PictorialBar', 100);
     }
 
     /** @return array<string,mixed> */

@@ -6,7 +6,7 @@ Es verwendet das gemeinsame EChartsGateway und benötigt kein Archiv.
 ## Einrichtung
 
 1. Instanz anlegen und das vorhandene EChartsGateway auswählen.
-2. 1–16 numerische Variablen derselben Einheit hinzufügen, etwa
+2. 1–100 numerische Variablen derselben Einheit hinzufügen, etwa
    Batteriestände in Prozent. Beschriftung und Farbe sind optional.
 3. Titel sowie Symbolform, Ausrichtung und Sortierung festlegen.
 4. Optional die IPSView-Ausgabe einschalten und deren Design unabhängig gestalten.
@@ -18,6 +18,21 @@ Gleiche Anzeigenamen sind erlaubt; jede Variable bleibt separat erhalten.
 Änderungen der Quellen aktualisieren die Anzeige automatisch.
 
 ## Skala und Symbole
+
+Bei mehr als 16 Quellen erscheint automatisch eine Kategoriennavigation:
+rechts bei horizontalen Balken, unten bei vertikalen Balken. Der sichtbare
+Ausschnitt passt sich an Platz und Schriftgröße an und enthält höchstens
+16 Kategorien. Alle konfigurierten Werte bleiben enthalten und sind über
+Schieberegler, Mausrad oder Ziehen erreichbar. Der Ausschnitt bleibt bei
+Wertaktualisierungen erhalten; die Quellenkonfiguration wird dadurch nicht
+verändert. Für viele Batteriestände ist die horizontale Darstellung besonders
+gut lesbar. Skala, Farben und Sortierung beziehen sich weiterhin auf alle Quellen,
+nicht nur auf den sichtbaren Ausschnitt.
+
+Bei großen Listen zeigen die statischen Formularvorschauen die ersten acht
+Kategorien nach der gewählten Sortierung. Ein Hinweis nennt die Gesamtzahl;
+dies ist keine Begrenzung der tatsächlichen Darstellung. Ungültige Quellen
+werden auch außerhalb dieses Vorschauausschnitts geprüft.
 
 Die Skala beginnt bei null. Ein Skalenmaximum von 0 wählt die gemeinsame
 Obergrenze automatisch; ein positives Maximum begrenzt die Darstellung.

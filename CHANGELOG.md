@@ -2,6 +2,12 @@
 
 ## Neu
 
+- EChartsPictorialBar unterstützt jetzt bis zu 100 statt 16 Quellen. Große
+  Listen besitzen eine automatische Kategoriennavigation in Kachel und IPSView;
+  alle Werte bleiben erreichbar, auch mit Icons, eigenen SVGs und Farbverlauf.
+  Vorschauen zeigen einen gekennzeichneten Ausschnitt mit Gesamtzahl. Die
+  Quellenobergrenzen anderer Diagrammfamilien bleiben unverändert.
+
 - EChartsCalendarPie kann numerische Quellen optional anhand eigener Min/Max-
   Grenzen normalisieren. Dadurch lassen sich etwa Temperatur und Luftfeuchtigkeit
   gemeinsam vergleichen. Tooltip und Segmentzahlen bewahren die Originalwerte;

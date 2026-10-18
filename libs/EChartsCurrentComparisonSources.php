@@ -10,11 +10,14 @@ use JsonException;
 require_once __DIR__ . '/EChartsSourceIdentity.php';
 require_once __DIR__ . '/EChartsVariablePresentation.php';
 
-/** Shared ID-based 1–16-source contract for current comparisons in one unit. */
+/** ID-based current comparisons with an explicit family-specific source budget. */
 final class EChartsCurrentComparisonSources
 {
-    public static function Resolve(string $json, string $family): array
+    public static function Resolve(string $json, string $family, int $maximumSources = 16): array
     {
+        if ($maximumSources < 1 || $maximumSources > 100) {
+            throw new InvalidArgumentException('Invalid current-comparison source budget.');
+        }
         try {
             if (strlen($json) > 65536) {
                 throw new InvalidArgumentException($family . ' sources are too large.');
@@ -23,8 +26,8 @@ final class EChartsCurrentComparisonSources
         } catch (JsonException $exception) {
             throw new InvalidArgumentException($family . ' sources must contain valid JSON.', 0, $exception);
         }
-        if (!is_array($raw) || !array_is_list($raw) || count($raw) < 1 || count($raw) > 16) {
-            throw new InvalidArgumentException('Configure 1 to 16 unique numeric ' . $family . ' variables.');
+        if (!is_array($raw) || !array_is_list($raw) || count($raw) < 1 || count($raw) > $maximumSources) {
+            throw new InvalidArgumentException('Configure 1 to ' . $maximumSources . ' unique numeric ' . $family . ' variables.');
         }
         $sources = [];
         $units = [];

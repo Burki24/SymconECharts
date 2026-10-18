@@ -16,7 +16,9 @@ function render(model, mode = 'symcon', headerVisible = true, width = 900) {
     const emptyElement = { hidden: true, textContent: '' };
     const warningElement = { hidden: true, textContent: '' };
     let option;
-    const chart = { setOption: next => { option = next; }, clear: () => {}, resize: () => {}, dispose: () => {} };
+    let nativeChart = null;
+    const chart = { setOption: next => { option = next; }, getOption: () => nativeChart ? nativeChart.getOption() : ({...option, xAxis: [option.xAxis], yAxis: [option.yAxis]}),
+        clear: () => {}, resize: () => {}, dispose: () => {} };
     const window = {
         SYMC_VISUALIZATION: { mode, state: { status: 'ready', chart: model }, translations: {},
             options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: headerVisible,
@@ -31,7 +33,7 @@ function render(model, mode = 'symcon', headerVisible = true, width = 900) {
     };
     vm.runInNewContext(designSource, { window });
     vm.runInNewContext(source, { window, document });
-    return { option, chartElement, errorElement, emptyElement, warningElement, window };
+    return { get option() { return option; }, useNativeChart: engine => {nativeChart=engine;}, chartElement, errorElement, emptyElement, warningElement, window };
 }
 
 
@@ -290,3 +292,61 @@ hugeEngine.getModel().getSeriesByIndex(0).getData().getItemGraphicEl(0).traverse
 });
 assert.ok(glyphs>0&&glyphs<=128,'Repeat count must stay bounded even in exceptionally large viewports: '+glyphs);
 hugeEngine.dispose();
+for (const count of [72,100]) {
+ for (const mode of ['symcon','ipsview']) {
+  for (const orientation of ['horizontal','vertical']) {
+   for (const symbol of ['rect','icon','svg']) {
+    const data = Array.from({length:count},(_,index)=>({id:'many-'+index,label:index<2?'Same':'Battery '+(index+1),
+        unit:'%',decimals:0,value:index+1,order:index,color:''}));
+    const many = {...model,pictorialBar:{...model.pictorialBar,data,
+        style:{...model.pictorialBar.style,...(symbol==='icon'?iconStyle:symbol==='svg'?svgStyle:{}),
+            symbol,orientation,colorMode:'gradient',animationEnabled:false}}};
+    const result=render(many,mode,true,620);
+    assert.equal(result.option.series[0].data.length,count);
+    assert.equal(result.option.dataZoom[0].id,'category-scroll');
+    const windowSize=result.option.dataZoom[0].endValue+1;
+    assert.ok(windowSize>=1&&windowSize<=16);
+    const engine=echarts.init(null,null,{renderer:'svg',ssr:true,width:620,height:500});
+    result.useNativeChart(engine);
+    engine.setOption(result.option);
+    const read=()=>engine.getModel().getSeriesByIndex(0).getData();
+    assert.equal(read().count(),windowSize,'Only a readable category window should be drawn, not a truncated data model.');
+    engine.dispatchAction({type:'dataZoom',dataZoomId:'category-scroll',startValue:count-windowSize,endValue:count-1});
+    const tail=read();
+    assert.equal(tail.getRawIndex(tail.count()-1),count-1,'The final configured category must be reachable.');
+    assert.match(result.option.tooltip.formatter({dataIndex:count-1}),new RegExp('Battery '+count+'.*'+count+' %'));
+    assert.equal(result.option.series[0].label.formatter({dataIndex:count-1}),count+' %');
+    const grid=engine.getModel().getComponent('grid').coordinateSystem.getRect();
+    let checkedLabels=0;
+    for(let index=0;index<tail.count();index++) {
+        const el=tail.getItemGraphicEl(index);
+        let text;
+        el?.traverse(child=>{const label=child.getTextContent?.();if(label)text=label;});
+        if(!text||text.ignore)continue;
+        checkedLabels++;
+        const transform=text.getComputedTransform();
+        assert.ok(Number.isFinite(transform[4])&&Number.isFinite(transform[5]));
+        const raw=tail.getRawIndex(index);
+        const fraction=Math.min(100,data[raw].value)/100;
+        if(orientation==='horizontal') {
+            assert.ok(Math.abs(transform[4]-(grid.x+grid.width*fraction+5))<1,
+                'Scrolled gradient labels must use the raw source value, not the filtered inner index.');
+            assert.ok(transform[5]>=grid.y&&transform[5]<=grid.y+grid.height,
+            'Gradient/icon/SVG value labels must stay in their scrolled row rather than use the full raw index.');
+        } else {
+            assert.ok(Math.abs(transform[5]-(grid.y+grid.height*(1-fraction)-5))<1);
+            assert.ok(transform[4]>=grid.x&&transform[4]<=grid.x+grid.width);
+        }
+    }
+    assert.ok(checkedLabels>0,'The scrolled label regression must exercise visible text: '+[count,mode,orientation,symbol].join('/'));
+    assert.doesNotMatch(engine.renderToSVGString(),/NaN|Infinity/);
+    engine.dispose();
+    result.useNativeChart(null);
+    result.option.dataZoom[0].startValue=count-windowSize;
+    result.option.dataZoom[0].endValue=count-1;
+    result.window.handleMessage({status:'ready',chart:many});
+    assert.equal(result.option.dataZoom[0].startValue,count-windowSize,'Value refreshes must preserve the category viewport.');
+   }
+  }
+ }
+}

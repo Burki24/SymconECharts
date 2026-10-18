@@ -11,6 +11,29 @@
     var chart = null;
     var currentState = bootstrap.state || null;
     var currentTheme = null;
+    var categoryAnchor = null;
+    var categoryStart = 0;
+
+    function currentCategoryWindow() {
+        if (!chart || typeof chart.getOption !== 'function') { return null; }
+        var option = chart.getOption();
+        var zoom = (option.dataZoom || []).find(function (entry) { return entry.id === 'category-scroll'; });
+        if (!zoom) { return null; }
+        var axes = zoom.orient === 'vertical' ? option.yAxis : option.xAxis;
+        var ids = axes && axes[0] && axes[0].data || [];
+        var start = Number(zoom.startValue);
+        if (!Number.isFinite(start)) {
+            start = ids.indexOf(zoom.startValue);
+            if (start < 0) { start = (Number(zoom.start) || 0) * Math.max(0, ids.length - 1) / 100; }
+        }
+        return {start:Math.max(0,Math.ceil(start-1e-8)),ids:ids};
+    }
+    function rememberCategoryWindow() {
+        var window = currentCategoryWindow();
+        if (!window) { return; }
+        categoryStart = window.start;
+        categoryAnchor = window.ids[categoryStart] || null;
+    }
 
     var tileHeaderInset = bootstrap.mode === 'symcon'
         && (!bootstrap.options || bootstrap.options.tileHeaderVisible !== false) ? 58 : 0;
@@ -146,8 +169,17 @@
         var left = horizontal && style.showLabels !== false ? Math.min(width * 0.32,axisFont * 11 + 14) : Math.min(width * 0.22,axisFont * 5);
         var right = horizontal && style.showValues !== false ? Math.min(width * 0.28,valueFont * 8 + 14) : 20;
         var bottom = horizontal ? axisFont * 2 + 22 : (style.showLabels !== false ? axisFont * 3 + 20 : 24);
+        var scroll = items.length > 16;
+        if (scroll) {
+            if (horizontal) { right += 28; } else { bottom += 28; }
+        }
+        var visibleCount = scroll ? Math.max(1, Math.min(16, Math.floor(
+            (horizontal ? height - top - bottom : width - left - right) / Math.max(horizontal ? 24 : 44, axisFont * 1.8, valueFont * 1.8)
+        ))) : items.length;
+        var anchorIndex = items.findIndex(function (item) { return item.id === categoryAnchor; });
+        var first = Math.min(Math.max(0, items.length - visibleCount), Math.max(0, anchorIndex >= 0 ? anchorIndex : categoryStart));
         var major = Math.max(1,horizontal ? width-left-right : height-top-bottom);
-        var cross = Math.max(1,(horizontal ? height-top-bottom : width-left-right)/Math.max(1,items.length));
+        var cross = Math.max(1,(horizontal ? height-top-bottom : width-left-right)/Math.max(1,visibleCount));
         var maximum = style.scaleMaximum > 0 ? style.scaleMaximum : Math.max.apply(null,[1].concat(items.map(function(x){return x.value;})));
         var barWidth = Math.max(1,Math.min(style.barWidth || 40,cross*0.65));
         // Complex glyphs use fewer/larger repeats. Keep path construction bounded.
@@ -186,16 +218,22 @@
         var valuePositions = horizontal ? {outside:'right',inside:'inside',insideStart:'insideLeft',insideEnd:'insideRight'}
             : {outside:'top',inside:'inside',insideStart:'insideBottom',insideEnd:'insideTop'};
         function gradientLabelLayout(params) {
-            var item = items[params.dataIndex];
+            // LabelLayout uses the filtered inner index; tooltip/formatter use
+            // raw indices. Resolve the current category window via the public
+            // chart API so a native drag does not need a renderer rebuild.
+            var window = scroll ? currentCategoryWindow() : null;
+            var item = items[(window ? window.start : 0) + params.dataIndex];
+            if (!item) { return {hideOverlap:true}; }
             var length = major * (Math.min(maximum, item.value) / maximum);
             var distance = style.valueDistance == null ? 5 : style.valueDistance;
             var position = style.valuePosition || 'outside';
             var along = position === 'inside' ? length/2 : position === 'insideStart' ? distance
                 : position === 'insideEnd' ? length-distance : length+distance;
-            var center = (params.dataIndex + 0.5)*cross;
+            var center = params.rect ? (horizontal ? params.rect.y + params.rect.height / 2 : params.rect.x + params.rect.width / 2)
+                : (horizontal ? top : left) + (params.dataIndex - first + 0.5) * cross;
             // The compound path spans the full scale for clipping. Anchor labels
             // at the measured value, not its full-scale invisible bounds.
-            return {x:horizontal ? left+along : left+center,y:horizontal ? top+center : height-bottom-along,
+            return {x:horizontal ? left+along : center,y:horizontal ? center : height-bottom-along,
                 align:horizontal ? (position === 'inside' ? 'center' : position === 'insideEnd' ? 'right' : 'left') : 'center',
                 verticalAlign:horizontal || position === 'inside' ? 'middle' : position === 'insideEnd' ? 'top' : 'bottom',
                 hideOverlap:style.hideOverlap !== false};
@@ -209,7 +247,7 @@
         var category = {type:'category',data:items.map(function(x){return x.id;}),inverse:horizontal,
             axisLabel:{show:style.showLabels !== false,fontSize:axisFont,color:style.axisColor || colors.text,
                 rotate:style.categoryLabelRotate || 0,fontFamily:fontFamily,
-                width:horizontal ? Math.max(8,left-16) : Math.max(10,(width-left-right)/Math.max(1,items.length)-6),
+                width:horizontal ? Math.max(8,left-16) : Math.max(10,cross-6),
                 overflow:'truncate',hideOverlap:true,interval:'auto',formatter:function(id){return labels[id] || '';}},
             axisTick:{show:style.showAxisTicks === true},axisLine:{lineStyle:{color:colors.border}}};
         var value = {type:'value',min:0,max:maximum,name:bar.unit || '',nameLocation:horizontal?'middle':'end',
@@ -228,6 +266,15 @@
                 overflow:'truncate',width:Math.max(1,width-36)}},
             grid:{left:left,right:right,top:top,bottom:bottom,containLabel:false},
             xAxis:horizontal?value:category,yAxis:horizontal?category:value,
+            dataZoom:scroll ? [
+                {id:'category-scroll',type:'slider',...(horizontal ? {yAxisIndex:0,orient:'vertical',right:6,width:12,top:top,bottom:bottom}
+                    : {xAxisIndex:0,orient:'horizontal',bottom:4,height:12,left:left,right:right}),
+                    startValue:first,endValue:first+visibleCount-1,filterMode:'filter',zoomLock:true,showDetail:false,
+                    showDataShadow:false,brushSelect:false,borderColor:colors.border,fillerColor:colors.muted},
+                {id:'category-scroll-inside',type:'inside',...(horizontal ? {yAxisIndex:0} : {xAxisIndex:0}),
+                    startValue:first,endValue:first+visibleCount-1,filterMode:'filter',zoomLock:true,
+                    zoomOnMouseWheel:false,moveOnMouseWheel:true,moveOnMouseMove:true}
+            ] : [],
             tooltip:{show:style.showTooltip !== false,trigger:'item',confine:true,
                 extraCssText:'max-width:'+Math.max(80,width-24)+'px;white-space:normal;overflow-wrap:anywhere;',
                 formatter:function(p){var item=items[p.dataIndex];return item?escapeHTML(item.label)+'<br>'+escapeHTML(format(item)):'';}},
@@ -247,7 +294,7 @@
                 blur:{itemStyle:{opacity:style.blurOpacityPercent == null ? 0.1 : style.blurOpacityPercent/100}},
                 label:{show:style.showValues !== false,position:valuePositions[style.valuePosition || 'outside'],color:style.valueColor || colors.text,
                     distance:style.valueDistance == null ? 5 : style.valueDistance,fontFamily:fontFamily,fontWeight:style.valueBold === true ? 'bold' : 'normal',
-                    fontSize:valueFont,overflow:'truncate',width:horizontal?Math.max(8,right-10):Math.max(12,cross*0.95),
+                    fontSize:valueFont,overflow:'truncate',width:horizontal?Math.max(8,right-10-(scroll?28:0)):Math.max(12,cross*0.95),
                     formatter:function(p){return items[p.dataIndex]?format(items[p.dataIndex]):'';}},
                 labelLayout:compound ? gradientLabelLayout : {hideOverlap:style.hideOverlap !== false},
                 data:items.map(function(x){return {id:x.id,name:x.label,value:Math.min(maximum,x.value),
@@ -283,6 +330,7 @@
         rootElement.style.backgroundColor = bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
             ? 'transparent' : colorsFor(normalizeTheme(model.theme || 'auto')).background;
         var theme = normalizeTheme(model.theme || 'auto');
+        rememberCategoryWindow();
         if (chart && currentTheme !== theme) { chart.dispose(); chart = null; }
         if (!chart) {
             chart = window.echarts.init(chartElement, theme === 'auto' ? null : theme, { renderer: 'canvas' });
@@ -307,6 +355,7 @@
         new ResizeObserver(function () {
             if (!design.resizeChartIfNeeded(chart, chartElement)) { return; }
             if (currentState && currentState.status === 'ready') {
+                rememberCategoryWindow();
                 chart.setOption(buildOption(currentState.chart, currentTheme || 'auto'), true);
             }
         }).observe(chartElement);

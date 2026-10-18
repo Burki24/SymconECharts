@@ -400,6 +400,64 @@ $pict->SetTestProperty('Symbol', 'rect');
 $pict->SetTestProperty('CustomSymbolSVG', 'invalid');
 $pict->ApplyChanges();
 assertGatewayGauge($pict->GetTestStatus() === IS_ACTIVE, 'Unused SVG uploads must not invalidate standard forms.');
+$manyPictorialSources = $pictSources;
+for ($index = 16; $index <= 100; ++$index) {
+    $id = 88600 + $index;
+    $GLOBALS['symconTestVariables'][$id] = ['VariableType' => 2, 'VariableUpdated' => 1780000000,
+        'Value'                                            => (float) ($index % 101), 'Name' => 'Sensor <same>', 'Presentation' => ['SUFFIX' => ' %', 'DIGITS' => 0]];
+    $manyPictorialSources[] = ['VariableID' => $id, 'Label' => 'Battery ' . ($index + 1), 'Color' => -1];
+}
+foreach ([72, 100] as $sourceCount) {
+    $pict->SetTestProperty('Sources', json_encode(array_slice($manyPictorialSources, 0, $sourceCount), JSON_THROW_ON_ERROR));
+    $pict->ApplyChanges();
+    assertGatewayGauge($pict->GetTestStatus() === IS_ACTIVE, 'PictorialBar must accept 72 and 100 battery sources.');
+    $largeModel = json_decode($pict->GetPictorialBarData(), true, 512, JSON_THROW_ON_ERROR)['pictorialBar'];
+    assertGatewayGauge(
+        count($largeModel['data']) === $sourceCount && count($pict->GetTestReferences()) === $sourceCount
+        && $largeModel['data'][$sourceCount - 1]['id'] === 'variable-' . (88600 + $sourceCount - 1),
+        'Large PictorialBar source sets must retain all IDs and active references without truncation.'
+    );
+    assertGatewayGauge(
+        strlen($pict->GetVisualizationTile()) < SYMCON_OUTPUT_BUFFER_LIMIT
+        && strlen($pict->GetIPSViewHTML()) < SYMCON_OUTPUT_BUFFER_LIMIT
+        && strlen($pict->GetConfigurationForm()) < SYMCON_OUTPUT_BUFFER_LIMIT,
+        'Both outputs and both previews must remain below the output limit with 100 sources.'
+    );
+}
+$pict->SetTestProperty('Symbol', 'svg');
+$pict->SetTestProperty('CustomSymbolSVG', $largeSvg);
+$pict->SetTestProperty('ColorMode', 'gradient');
+$pict->SetTestProperty('IPSViewSymbol', 'svg');
+$pict->SetTestProperty('IPSViewCustomSymbolSVG', $largeSvg);
+$pict->SetTestProperty('IPSViewColorMode', 'gradient');
+$pict->ApplyChanges();
+assertGatewayGauge(
+    $pict->GetTestStatus() === IS_ACTIVE
+    && strlen($pict->GetVisualizationTile()) < SYMCON_OUTPUT_BUFFER_LIMIT
+    && strlen($pict->GetIPSViewHTML()) < SYMCON_OUTPUT_BUFFER_LIMIT
+    && strlen($pict->GetConfigurationForm()) < SYMCON_OUTPUT_BUFFER_LIMIT,
+    'Large SVG uploads plus 100 gradient sources must stay inside all output budgets.'
+);
+$pict->UpdateBarPreviewFromForm(json_encode(['Sources' => array_slice($manyPictorialSources, 0, 100)], JSON_THROW_ON_ERROR));
+foreach (array_slice($pict->GetTestFormUpdates(), -2) as $update) {
+    $svg = base64_decode(substr($update['Value'], strlen('data:image/svg+xml;base64,')), true);
+    assertGatewayGauge(
+        substr_count($svg, 'data-source=') === 8 && str_contains($svg, 'first 8 of 100 categories')
+        && !str_contains($svg, 'Example data') && !str_contains($svg, 'Preview requires'),
+        'Both large-model previews must show a disclosed real source subset, never replacement example data.'
+    );
+}
+$pict->SetTestProperty('Sources', json_encode($manyPictorialSources, JSON_THROW_ON_ERROR));
+$pict->ApplyChanges();
+assertGatewayGauge($pict->GetTestStatus() === 201, 'A 101st PictorialBar source must fail visibly, not be silently omitted.');
+try {
+    SymconECharts\EChartsCurrentComparisonSources::Resolve(json_encode(array_slice($manyPictorialSources, 0, 17), JSON_THROW_ON_ERROR), 'Funnel');
+    throw new RuntimeException('The PictorialBar extension must not silently raise Funnel limits.');
+} catch (InvalidArgumentException) {
+}
+$pict->SetTestProperty('Sources', json_encode($pictSources, JSON_THROW_ON_ERROR));
+$pict->SetTestProperty('Symbol', 'rect');
+$pict->SetTestProperty('IPSViewSymbol', 'rect');
 $pict->SetTestParentActive(false);
 $pict->ApplyChanges();
 assertGatewayGauge($pict->GetTestStatus() === 203, 'Missing parent must fail cleanly.');
