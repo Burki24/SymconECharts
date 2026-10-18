@@ -16,7 +16,8 @@ Symcon-Ausgaben. Deshalb werden nicht pauschal alle Grenzen auf 100 gesetzt.
 Inzwischen wurden **PictorialBar und BarCategory auf 100 Quellen** erweitert.
 PictorialBar besitzt außerdem eine anpassbare Bezeichnungsspalte. BarCategory
 bietet optional einen festen Min-/Max-Farbverlauf innerhalb der Balken.
-**StateTimeline unterstützt 32 Quellen mit Zeilennavigation**. Die übrigen
+**StateTimeline unterstützt 32 Quellen mit Zeilennavigation**, Boxplot 32
+Quellen mit Kategoriennavigation und gemeinsamem Archivbudget. Die übrigen
 Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
 
 | Reihenfolge | Empfohlener nächster Schritt | Nutzen und Voraussetzung |
@@ -24,7 +25,7 @@ Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
 | Erledigt | PictorialBar: 1–100 Quellen, Kategoriennavigation | Alle 72 Batterievariablen passen in eine Instanz; lesbarer Ausschnitt statt 100 zusammengedrängter Zeilen. |
 | Erledigt | BarCategory: bis 100 Quellenzuordnungen, Kategoriennavigation | Breiten-/fontabhängige Dichte statt festem 16-Kategorien-Fenster; die Obergrenze gilt für sämtliche Zuordnungen zusammen, nicht je Kategorie oder Reihe. |
 | Erledigt | StateTimeline: 32 Quellen mit Zeilennavigation | Fenster, Türen und Verbraucher gemeinsam darstellen; insgesamt höchstens 16000 Rohwerte, bis 2000 je Quelle, weiterhin begrenzte Ausgabe. 100 erst nach Lastprüfung. |
-| 3 | Boxplot: bis 32 Quellen und Kategoriennavigation | Viele Räume/Sensoren vergleichen; gemeinsames Archivabfragebudget statt 32 unbeschränkter Einzelabfragen. |
+| Erledigt | Boxplot: bis 32 Quellen und Kategoriennavigation | ID-stabiler Ausschnitt, vollständige Skala und höchstens 10000 Stundenmittel insgesamt statt 32 unbeschränkter Einzelabfragen. |
 | 4 | Benutzerdefinierte Archivzeiträume | Vorhandenen Zeitfenstervertrag dort wiederverwenden, wo bisher nur 24 h / 7 d / 30 d angeboten werden. |
 | 5 | Calendar/Heatmap: passende Tages-/Stundenkennzahlen | Minimum, Maximum und ausdrücklich definierter Zählerverbrauch statt ausschließlich Mittelwert. |
 | 6 | Explizite Normalisierung für weitere Vergleiche | Bei Pie, BarCategory, BarPolar und PictorialBar optional unterschiedliche Einheiten vergleichbar machen; Originalwerte erhalten. |
@@ -89,7 +90,7 @@ Candlestick-Anfangswert ausgegeben werden.
 | EChartsParallel | 2–10 Achsen; 1–1000 gemeinsame Zeitlinien, Standard 750; 24 h / 7 d / 30 d sowie Stunde/Tag. Standardarchive als Mittel, Zähler als Verbrauch; unterschiedliche Einheiten zulässig, nur gemeinsame Intervalle. | Benutzerdefinierte Zeitfenster und Reduktion/Skala je Achse zuerst. 16–20 Achsen nur mit vergrößerbarer/verschiebbarer Achsenansicht. Mindestens zwei Achsen gehört zur Diagrammform. |
 | EChartsCalendar | Eine numerische Standard-Archivquelle; abgeschlossene Tagesmittel eines Jahres (1971 bis aktuelles Jahr), höchstens 366 Tage. Teilarchive, negative Werte und null funktionieren. | Tagesminimum/-maximum und Zählerverbrauch ergänzen. Monat/Quartal/freies Fenster als Auswahl. Mehrere Tageswerte gehören zu CalendarPie oder ausdrücklich getrennten Kalenderpanels. |
 | EChartsCalendarPie | Je nach Modus 1–5 numerische Quellen oder eine diskrete Zustandsquelle; Tagesmittel, Zählerverbrauch oder Zustandsdauer. Bis 32 Zustände. Optionale Min/Max-Normalisierung samt Originaleinheiten bereits vorhanden; Monatsmodell höchstens 250000 Bytes. | 1–5 ist die ausdrückliche aktuelle Produktentscheidung, keine sofort aufzuhebende Grenze. Optional verfügbare Teilquellen eines Tages anzeigen, aber nur mit deutlichem Unvollständigkeitshinweis; strenger Standard bleibt sinnvoll. |
-| EChartsBoxplot | 1–10 Standard-Archivquellen gleicher Einheit; 24 h / 7 d / 30 d; bis 1000 abgeschlossene Stundenmittel je Quelle. R7-Quartile und Min/Max-Whisker, nicht Rohwertverteilung oder 1,5-IQR-Ausreißermodell. | Hohe Priorität: 32 Quellen plus Navigation und gemeinsames Abfragebudget. Freie Zeiträume. IQR/Ausreißer als ausdrücklich anderer Modus; unterschiedliche Einheiten nur normalisiert oder in getrennten Panels vergleichen. |
+| EChartsBoxplot | Jetzt 1–32 Standard-Archivquellen gleicher Einheit; 24 h / 7 d / 30 d; bis 1000 abgeschlossene Stundenmittel je Quelle, insgesamt 10000. R7-Quartile und Min/Max-Whisker, nicht Rohwertverteilung oder 1,5-IQR-Ausreißermodell. | Umgesetzt: responsive Kategoriennavigation mit vollständiger Skala und ID-stabilem Ausschnitt. Budgetüberschreitung verlangt einen kürzeren Zeitraum ohne Teilstatistik. Freie Zeiträume und IQR/Ausreißer bleiben gesonderte Erweiterungen; unterschiedliche Einheiten nur normalisiert oder in getrennten Panels vergleichen. |
 | EChartsCandlestick | Eine numerische Standard-Archivquelle; Stunde/Tag in 24 h / 7 d / 30 d. Tatsächliche Rohwerte für ersten/letzten Wert und Minimum/Maximum; leere Intervalle bleiben leer. Bis 63 Abfragen/64000 Rohänderungen pro Aktualisierung. | Freie Zeitfenster, weitere feste Intervalle und Zeitzoom. Mehrere benannte Panels später; Rohwert- und Abfragebudgets behalten. Einzelmessungen ergeben flache Kerzen, keine erfundenen Endpunkte. |
 | EChartsThemeRiver | 1–8 nichtnegative Standard-Archivmittel gleicher Einheit; Stunde/Tag, 24 h / 7 d / 30 d; höchstens 720 Intervalle und 1000 geladene Aggregate je Quelle. Fehlende Quelle unterbricht den gemeinsamen Abschnitt. | Zählerverbrauch, freie Zeiträume und anschließend 16–20 Bänder mit Gesamtbudget prüfen. Optional normalisierte relative Gewichte; keine negativen Flussbreiten und keine stillschweigende Nullfüllung von Archivlücken. |
 | EChartsStateTimeline | Jetzt 1–32 Boolean-/Integer-Standardarchive, bis 32 Zustandsdefinitionen je Quelle; 24 h / 7 d / 30 d; bis 2000 Rohwerte je Quelle plus Vorgänger, insgesamt 16000 Rohwerte; Modell höchstens 250000 Bytes. Unbekannte Zustände sichtbar. | Umgesetzt: unabhängige Zeilennavigation ab neun Quellen und Gesamtbudget ohne stille Kürzung. Später nach Lastprüfung bis 100 Quellen; freie Zeiträume. Float-/String-Zustände erst mit ausdrücklichem Gleichheits-/Zuordnungsvertrag. |
@@ -124,7 +125,7 @@ Importform zusammen mit der größten Quellenliste prüfen.
 Vorschauen sind gesondert zu betrachten:
 
 - `libs/EChartsBarPreview.php::Sources()` akzeptiert standardmäßig höchstens
-  16 Quellen, BarCategory verwendet ausdrücklich 100 und StateTimeline 32. Andere Familien bleiben
+  16 Quellen, BarCategory verwendet ausdrücklich 100 und StateTimeline sowie Boxplot 32. Andere Familien bleiben
   unverändert. Bei ungeeigneten Listen kann der Baustein auf Beispieldaten
   zurückfallen. Eine neue Obergrenze nur in `module.php` wäre deshalb
   unvollständig. PictorialBar verwendet einen eigenen, vollständig validierten
@@ -174,3 +175,12 @@ unabhängigen Zeitzoom und das gemeinsame 16000-Rohwerte-Budget ab.
 Live-Konfigurationen, Archivaufzeichnung und Quellwerte wurden bei
 dieser Folgeänderung nicht verändert. Die übrigen vorgeschlagenen
 Erweiterungen anderer Familien sind noch nicht umgesetzt oder lastgeprüft.
+
+Boxplot prüft nun ebenfalls 32/33 Quellen, gleiche Anzeigenamen mit eigener ID,
+leere/negative Quellen, unveränderte R7-Statistik und beide Ausgaben unter 1 MiB.
+32 vollständige Sieben-Tage-Archive passen in das gemeinsame 10000-Punkte-Budget;
+dichte 30-Tage-Archive werden ohne Teilstatistik mit Zeitraumhinweis abgewiesen.
+Native Engine-Tests decken beide Ausrichtungen, Fonts/Boxbreiten, letzte Kategorie,
+Tooltips nach Filterung sowie Ansichtsanker bei Aktualisierung und Resize ab.
+Eine lokale Canvas-Browserprüfung mit synthetischen Daten ergänzt diese Tests;
+die Live-Abnahme der Boxplot-Erweiterung nach Modulupdate bleibt offen.

@@ -18,7 +18,7 @@
             "Label (optional)": "Beschriftung (optional)",
             "Box color (optional)": "Boxfarbe (optional)",
             "Automatic (theme)": "Automatisch (Theme)",
-            "Choose 1 to 10 numeric standard archive variables with the same unit. Each box shows completed hourly means: minimum, Q1, median, Q3 and maximum. Missing hours remain missing; counters are not supported.": "1 bis 10 numerische Standard-Archivvariablen derselben Einheit wählen. Jede Box zeigt abgeschlossene Stundenmittelwerte: Minimum, Q1, Median, Q3 und Maximum. Fehlende Stunden bleiben leer; Zähler werden nicht unterstützt.",
+            "Choose 1 to 32 numeric standard archive variables with the same unit. Each box shows completed hourly means: minimum, Q1, median, Q3 and maximum. Missing hours remain missing; counters are not supported.": "1 bis 32 numerische Standard-Archivvariablen derselben Einheit wählen. Jede Box zeigt abgeschlossene Stundenmittelwerte: Minimum, Q1, Median, Q3 und Maximum. Fehlende Stunden bleiben leer; Zähler werden nicht unterstützt.",
             "Time range": "Zeitraum",
             "Last 24 hours": "Letzte 24 Stunden",
             "Last 7 days": "Letzte 7 Tage",
@@ -112,7 +112,9 @@
             "Grid opacity": "Rasterdeckkraft",
             "Grid color": "Rasterfarbe",
             "Bold title": "Titel fett",
-            "Bold axis labels": "Achsenbeschriftungen fett"
+            "Bold axis labels": "Achsenbeschriftungen fett",
+            "Preview shows %d of %d sources": "Vorschau zeigt %d von %d Quellen",
+            "Too many Boxplot archive samples. Choose a shorter time range.": "Zu viele Boxplot-Archivwerte. Bitte einen kürzeren Zeitraum wählen."
         }
     }
 }

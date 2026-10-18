@@ -175,7 +175,7 @@ foreach (['', 'IPSView'] as $prefix) {
     }
 }
 foreach (['[]', '{}', 'bad', json_encode([$boxplotSources[0], $boxplotSources[0]]), '[{"VariableID":4712}]',
-    '[{"VariableID":88200,"Color":16777216}]', json_encode([...$boxplotSources, ['VariableID' => 4711]])] as $invalid) {
+    '[{"VariableID":88200,"Color":16777216}]'] as $invalid) {
     $boxplot->SetTestProperty('Sources', $invalid);
     $boxplot->ApplyChanges();
     assertGatewayGauge($boxplot->GetTestStatus() === 201, 'Boxplot must reject invalid sources.');
@@ -237,5 +237,6 @@ preg_match_all("/(?:Translate|translate)\\(\\s*'([^']+)'/", file_get_contents(__
 foreach ($boxplotRuntimeTexts[1] as $text) {
     assertGatewayGauge(isset($boxplotLocale[$text]), 'Boxplot must translate visible runtime text: ' . $text);
 }
+require __DIR__ . '/boxplot_large_sources.php';
 date_default_timezone_set($boxplotZone);
 echo "Boxplot integration verified.\n";

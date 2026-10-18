@@ -23,11 +23,13 @@ trait BoxplotPreview
         );
         $svg = str_replace('<svg xmlns', '<svg font-family="Arial, sans-serif" xmlns', $svg);
         $svg = str_replace('<text x="24"', '<text font-weight="' . ($this->BarPreviewValue($values, 'TitleBold', 'boolean', $ipsView) ? 'bold' : 'normal') . '" x="24"', $svg);
-        $items = array_slice(EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values, 'Label', false)['items'], 0, 10);
+        $allItems = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values, 'Label', false, 32)['items'];
         $horizontal = $this->BarPreviewValue($values, 'Orientation', 'string', $ipsView) === 'horizontal';
         $axis = EChartsBarPreview::Color($this->BarPreviewValue($values, 'AxisColor', 'integer', $ipsView), $palette['text']);
         $border = EChartsBarPreview::Color($this->BarPreviewValue($values, 'BorderColor', 'integer', $ipsView), $palette['border']);
         $font = max(6, min(24, 12 * $this->BarPreviewValue($values, 'AxisFontSizePercent', 'integer', $ipsView) / 100));
+        $minimumSpan = max($horizontal ? 22 : 40, $font * ($horizontal ? 1.5 : 2.4) + 4);
+        $items = array_slice($allItems, 0, max(1, min(10, (int) floor(($horizontal ? 220 : 600) / $minimumSpan))));
         $bold = $this->BarPreviewValue($values, 'AxisLabelBold', 'boolean', $ipsView) ? 'bold' : 'normal';
         $n = EChartsBarPreview::N(...);
         $e = EChartsBarPreview::E(...);
@@ -117,7 +119,15 @@ trait BoxplotPreview
             }
         }
         // Hover effects cannot be triggered inside the static SVG; explain that boundary.
-        return $svg . '<text x="24" y="350" font-size="10" fill="' . $e($palette['muted']) . '">'
-            . $e($this->Translate('Hover effects are visible in the chart.')) . '</text></svg>';
+        return EChartsPreviewSourceCount::Append(
+            $svg . '<text x="24" y="350" font-size="10" fill="' . $e($palette['muted']) . '">'
+                . $e($this->Translate('Hover effects are visible in the chart.')) . '</text></svg>',
+            count($items),
+            count($allItems),
+            $this->Translate('Preview shows %d of %d sources'),
+            $palette['muted'],
+            696,
+            333
+        );
     }
 }

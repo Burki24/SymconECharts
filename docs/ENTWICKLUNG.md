@@ -152,7 +152,7 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 | Gerät | EChartsSankey | Aktuelle nichtnegative Mengenflüsse zwischen manuellen Knoten und Verbindungen in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsCalendar | Archivierte Tagesmittelwerte einer Standardvariable als Jahreskalender mit lesender Jahresnavigation |
 | Gerät | EChartsRadar | Aktuelle Vergleichsgruppen auf 3–10 ausdrücklich begrenzten Achsen mit eigenen Einheiten |
-| Gerät | EChartsBoxplot | Verteilungen abgeschlossener Stundenmittelwerte aus 1–10 Standard-Archivvariablen derselben Einheit |
+| Gerät | EChartsBoxplot | Verteilungen abgeschlossener Stundenmittelwerte aus 1–32 Standard-Archivvariablen derselben Einheit mit Kategoriennavigation |
 | Gerät | EChartsFunnel | 1–16 manuell benannte Stufen mit aktuellen nichtnegativen Werten derselben Einheit |
 
 Eine eigene I/O-Instanz, ein Konfigurator und Discovery gehören nicht zum
@@ -302,7 +302,11 @@ Boxplot (`ECBX`) vergleicht Verteilungen abgeschlossener Archiv-Stundenmittelwer
 gemäß [ADR 0054](adr/0054-hourly-archive-boxplot.md). Der gemeinsame Gateway-Vertrag
 bleibt unverändert; R7-Quartile, Min-/Max-Enden, Einheitenvalidierung und
 synthetische Vorschaugeometrie liegen lokal in der Familie. Ein gesonderter
-Runtime-Build enthält nur die benötigten Komponenten.
+Runtime-Build enthält nur die benötigten Komponenten. Die Erweiterung auf
+32 Quellen nutzt native DataZoom-Kategoriennavigation mit ID-stabilem Ausschnitt
+und vollständiger Werteskala. Das gemeinsame Budget von 10000 Stundenmitteln
+ergänzt das bisherige Limit von 1000 je Quelle; überschrittene oder gekürzte
+Antworten führen ausdrücklich zum Fehler statt zu verfälschten Quartilen.
 
 ## Weitere ECharts-Familien im Plan
 

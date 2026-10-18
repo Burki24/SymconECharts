@@ -84,10 +84,11 @@ können unabhängig davon individuell vergeben werden.
   Listenreihenfolge oder Wertsortierung, getrennte Designer für Kachel und IPSView.
 
 - __EChartsBoxplot__ ([Dokumentation](EChartsBoxplot/README.md))
-  Verteilungen aus 1–10 Standard-Archivvariablen derselben Einheit über
+  Verteilungen aus 1–32 Standard-Archivvariablen derselben Einheit über
   24 Stunden, 7 oder 30 Tage. Jede Box zeigt Quartile und Median der
   Stundenmittelwerte; ihre Enden zeigen Minimum und Maximum.
-  Kachel und IPSView besitzen getrennte Designer.
+  Kachel und IPSView besitzen getrennte Designer und eine automatische
+  Kategoriennavigation bei Platzbedarf.
 
 - __EChartsRadar__ ([Dokumentation](EChartsRadar/README.md))
   Aktuelle Vergleichsgruppen auf 3–10 gemeinsamen Achsen. Die Radien zeigen den

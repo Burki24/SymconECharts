@@ -101,3 +101,42 @@ zusätzliche fachliche oder interaktive Verträge, keine fehlenden Basis-Styles.
 Die Erweiterung wird mit Renderer-/ECharts-Geometrie-, Formular-/Validierungs-,
 Vorschau- und Integrationsprüfungen abgesichert. Der erneute Live-Test der
 Designer-Erweiterung in Symcon/IPSView bleibt nach Modulupdate offen.
+
+## Erweiterung auf 32 Quellen vom 18.10.2026
+
+Die bisherige Grenze von zehn wird auf 32 Quellen angehoben. GUID, Präfix,
+persistierte Quellen, Einheitenvertrag und Statistik bleiben unverändert.
+Das bisher maximal mögliche Gesamtvolumen von 10000 Stundenmitteln bleibt
+als ausdrückliches gemeinsames Budget erhalten, höchstens 1000 je Quelle und
+32 sequenzielle Archivaufrufe je Aktualisierung. Jede Anfrage erhält nur das
+noch verfügbare Budget. Eine gekürzte oder übergroße Antwort wird vor der
+Statistik verworfen; die Visualisierung verlangt einen kürzeren Zeitraum.
+32 vollständige Sieben-Tage-Archive passen hinein, dichte 30-Tage-Archive
+gegebenenfalls nicht. Es gibt keine unbemerkte Teilverteilung.
+
+Native Slider-/Inside-DataZoom-Navigation zeigt bei Platzbedarf einen lesbaren
+Ausschnitt in beiden Ausrichtungen und Ausgabearten. Boxbreite und Achsenfont
+bestimmen dessen Größe. Der Ansichtsanker verwendet die Quellen-ID, nicht den
+Anzeigenamen oder die Position. Aktualisierung, Umordnung und Resize erhalten
+ihn soweit die Quelle vorhanden ist. Leere Quellen behalten ihren Platz.
+Die Werteskala umfasst weiterhin sämtliche Statistiken. Tooltips lösen nach
+Filterung ebenfalls über die Quellen-ID auf, nicht über den gefilterten Index.
+
+Die synthetische Vorschau akzeptiert das vollständige 32-Quellen-Modell,
+zeigt abhängig von Ausrichtung und Font höchstens zehn Einträge und nennt
+sichtbare sowie gesamte Anzahl. Sie führt keine Archivabfragen aus.
+
+Der lokale gepinnte ECharts-6.1.0-Build erhält dafür ausschließlich DataZoom
+als weitere Komponente. Offizielle Startseite, llms.txt, stabile npm-Version,
+Apache-2.0-Lizenz und Lieferartefakt wurden erneut geprüft. API-Nutzung wird
+am unveränderten gepinnten Paket abgesichert. Der neue Boxplot-Build hat
+534648 Bytes; SHA-256:
+`038eb0193d14ee23fd322c6ceca283cac531308135814b5cc1786d5b1f0c6470`.
+Andere Runtimes und der Gateway-Vertrag bleiben unverändert.
+
+Regressionen: 32/33 Quellen, doppelte Namen, leere/negative Quellen, R7-Erhalt,
+Budgetabbruch und Erholung, lange HTML-expandierende Namen unter 1 MiB,
+Vorschauen ohne Archivzugriff, vollständige Skala, gefilterte Tooltips und
+ID-stabile Navigation bei Refresh/Umordnung/Resize. Die echte ausgelieferte
+Runtime wird verwendet. Lokale Canvas-Sichtprüfung ergänzt die automatischen
+Tests; die Live-Abnahme in Kachel und IPSView nach Modulupdate bleibt offen.

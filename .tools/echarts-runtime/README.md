@@ -93,9 +93,13 @@ Titel, Tooltip, Aria und Canvas Renderer als getrennten Jahreskalender-Build.
 Er erweitert nicht die bestehende Stunden-Heatmap-Runtime. Ein gezielter Build
 erfolgt mit `npm run build:calendar`.
 
-Der Boxplot-Einstieg enthält Boxplot Chart, Grid, Titel, Tooltip, Aria und
+Der Boxplot-Einstieg enthält Boxplot Chart, Grid, Titel, Tooltip, Aria, DataZoom und
 Canvas Renderer. `npm run build:boxplot` erzeugt ausschließlich
 `../../libs/echarts/6.1.0/echarts.boxplot.min.js`; andere Builds bleiben unverändert.
+Startseite, llms.txt, stabile npm-Version, Lizenz und Lieferartefakt wurden am
+18.10.2026 erneut geprüft: unverändertes ECharts 6.1.0 unter Apache-2.0.
+Native Slider-/Inside-DataZoom-APIs werden am gepinnten Paket getestet;
+Bytezahl und SHA-256 stehen in `THIRD_PARTY_NOTICES.md`.
 
 Der Funnel-Einstieg enthält Funnel Chart, Titel, Tooltip, Aria, Label Layout
 und Canvas Renderer. `npm run build:funnel` erzeugt ausschließlich

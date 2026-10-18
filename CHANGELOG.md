@@ -2,6 +2,14 @@
 
 ## Neu
 
+- EChartsBoxplot unterstützt bis zu 32 Archivquellen mit automatischer
+  Kategoriennavigation horizontal und vertikal in Kachel und IPSView.
+  Schriftgröße und Boxbreite bestimmen den sichtbaren Ausschnitt; Navigation
+  erhält die vollständige Werteskala und bleibt bei Aktualisierungen an der
+  Quelle verankert. Vorschauen kennzeichnen ihre Teilmenge. Ein gemeinsames
+  Budget von 10000 Stundenmitteln verhindert unbeschränkte Archivabfragen;
+  bei Überschreitung wird ein kürzerer Zeitraum verlangt statt Daten zu kürzen.
+
 - EChartsBarCategory koppelt die Balkenbreite an den Kategorienabstand:
   Dünnere Balken rücken enger zusammen und machen mehr Kategorien sichtbar.
   Die bisherige Grenze von 16 sichtbaren Kategorien entfällt; Schriftgrößen

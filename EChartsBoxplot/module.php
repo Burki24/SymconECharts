@@ -19,6 +19,7 @@ use SymconECharts\EChartsDesignerSections;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
+use SymconECharts\EChartsPreviewSourceCount;
 use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsTransientRefresh;
 use SymconECharts\EChartsVariablePresentation;
@@ -40,6 +41,7 @@ require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
+require_once __DIR__ . '/../libs/EChartsPreviewSourceCount.php';
 require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
 require_once __DIR__ . '/../libs/EChartsTransientRefresh.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
@@ -69,6 +71,8 @@ class EChartsBoxplot extends IPSModuleStrict
     private const STATUS_CONFIGURATION_INVALID = 202;
     private const STATUS_PARENT_MISSING = 203;
     private const STATUS_GATEWAY_FAILED = 204;
+    private const MAXIMUM_SOURCE_COUNT = 32;
+    private const MAXIMUM_TOTAL_POINTS = 10000;
     private const DESIGN_DEFAULTS = [
         'EChartsTheme'         => 'auto', 'Orientation' => 'vertical', 'ShowTooltip' => true,
         'ShowGrid'             => true, 'ShowAxisLabels' => true, 'BoxWidth' => 40, 'BorderWidth' => 2, 'BoxOpacityPercent' => 70,
@@ -272,9 +276,15 @@ class EChartsBoxplot extends IPSModuleStrict
             date_default_timezone_get()
         );
         $data = [];
+        $pointCount = 0;
         foreach ($sources as $source) {
             try {
-                $archive = $this->ReadArchiveSource($source, $query);
+                $remaining = self::MAXIMUM_TOTAL_POINTS - $pointCount;
+                if ($remaining < 1) {
+                    $this->FailArchiveBudget();
+                }
+                $archive = $this->ReadArchiveSource($source, $query, min($query['Limit'], $remaining));
+                $pointCount += count($archive['Points']);
                 $summary = BoxplotStatistics::Summarize($archive['Points'], $query['StartTimestamp'], $query['EndTimestamp']);
             } catch (Throwable $exception) {
                 if ($this->ReadAttributeString('LastError') === '') {
@@ -315,6 +325,7 @@ class EChartsBoxplot extends IPSModuleStrict
                 'Configure valid Boxplot archive variables.'                          => $this->Translate('Configure valid Boxplot archive variables.'),
                 'Connect an active EChartsGateway.'                                   => $this->Translate('Connect an active EChartsGateway.'),
                 'The Boxplot values could not be loaded.'                             => $this->Translate('The Boxplot values could not be loaded.'),
+                'Too many Boxplot archive samples. Choose a shorter time range.'      => $this->Translate('Too many Boxplot archive samples. Choose a shorter time range.'),
                 'Boxplot requires standard archive variables, not counters.'          => $this->Translate('Boxplot requires standard archive variables, not counters.'),
                 'Hourly samples'                                                      => $this->Translate('Hourly samples'),
                 'Minimum'                                                             => $this->Translate('Minimum'), 'Q1' => $this->Translate('Q1'), 'Median' => $this->Translate('Median'),
@@ -398,8 +409,8 @@ class EChartsBoxplot extends IPSModuleStrict
         } catch (JsonException $exception) {
             throw new InvalidArgumentException('Boxplot sources must contain valid JSON.', 0, $exception);
         }
-        if (!is_array($raw) || !array_is_list($raw) || count($raw) < 1 || count($raw) > 10) {
-            throw new InvalidArgumentException('Configure 1 to 10 unique numeric Boxplot variables.');
+        if (!is_array($raw) || !array_is_list($raw) || count($raw) < 1 || count($raw) > self::MAXIMUM_SOURCE_COUNT) {
+            throw new InvalidArgumentException('Configure 1 to 32 unique numeric Boxplot variables.');
         }
         $sources = [];
         $units = [];
@@ -434,7 +445,7 @@ class EChartsBoxplot extends IPSModuleStrict
     }
 
     /** @param array{VariableID:int} $source @param array<string,mixed> $query @return array<string,mixed> */
-    private function ReadArchiveSource(array $source, array $query): array
+    private function ReadArchiveSource(array $source, array $query, int $limit): array
     {
         if ($query['Empty']) {
             return ['Points' => [], 'Truncated' => false];
@@ -443,7 +454,7 @@ class EChartsBoxplot extends IPSModuleStrict
         $payload = ['VariableID' => $source['VariableID'],
             'StartTimestamp'     => $query['StartTimestamp'], 'EndTimestamp' => $query['EndTimestamp'],
             'Mode'               => 'aggregated', 'Reducer' => 'average',
-            'Limit'              => $query['Limit'], 'AggregationLevel' => $query['AggregationLevel']];
+            'Limit'              => $limit, 'AggregationLevel' => $query['AggregationLevel']];
         $this->WriteAttributeString('LastError', '');
         try {
             $response = EChartsDataProtocol::DecodeResponse(
@@ -465,6 +476,9 @@ class EChartsBoxplot extends IPSModuleStrict
             throw new RuntimeException('The gateway archive request failed: ' . $code);
         }
         $archive = $response['Payload'];
+        if (($archive['Truncated'] ?? null) === true || (is_array($archive['Points'] ?? null) && count($archive['Points']) > $limit)) {
+            $this->FailArchiveBudget();
+        }
         if (($archive['VariableID'] ?? null) !== $source['VariableID']
             || !is_array($archive['Points'] ?? null) || ($archive['Truncated'] ?? null) !== false
             || ($archive['StartTimestamp'] ?? null) !== $query['StartTimestamp']
@@ -476,6 +490,13 @@ class EChartsBoxplot extends IPSModuleStrict
             throw new RuntimeException('The gateway returned invalid Boxplot archive data.');
         }
         return $archive;
+    }
+
+    private function FailArchiveBudget(): never
+    {
+        $this->WriteAttributeString('LastError', 'ARCHIVE_TRUNCATED');
+        $this->SetStatus(self::STATUS_GATEWAY_FAILED);
+        throw new RuntimeException('Too many Boxplot archive samples. Choose a shorter time range.');
     }
 
     private function SynchronizeSourceReferences(): void
@@ -514,8 +535,11 @@ class EChartsBoxplot extends IPSModuleStrict
             $chart = json_decode($this->GetBoxplotDataForOutput($ipsView), true, 512, JSON_THROW_ON_ERROR);
         } catch (Throwable $exception) {
             $this->SendDebug('BuildVisualizationState', $exception::class, 0);
-            return $this->ErrorState($this->ReadAttributeString('LastError') === 'REDUCER_NOT_SUPPORTED'
-                ? 'Boxplot requires standard archive variables, not counters.' : 'The Boxplot values could not be loaded.');
+            return $this->ErrorState(match ($this->ReadAttributeString('LastError')) {
+                'REDUCER_NOT_SUPPORTED' => 'Boxplot requires standard archive variables, not counters.',
+                'ARCHIVE_TRUNCATED'     => 'Too many Boxplot archive samples. Choose a shorter time range.',
+                default                 => 'The Boxplot values could not be loaded.'
+            });
         }
         return ['schemaVersion' => 1, 'family' => 'boxplot', 'status' => 'ready', 'chart' => $chart, 'error' => null];
     }

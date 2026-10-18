@@ -349,6 +349,19 @@ entkoppelte Beispielvorschauen, Ausgabegrenzen und echte ECharts-Geometrie.
 Die lokale synthetische Browserfixture startet mit `node tests/boxplot_browser.mjs`.
 Sie ersetzt keine Live-Prüfung in Symcon oder IPSView.
 
+`boxplot_large_sources.php` (über die Gateway-Suite) prüft zusätzlich 32/33
+Quellen, doppelte Namen mit eigener ID, leere und negative Quellen, R7-Erhalt,
+beide Ausgaben und große Bezeichnungen unter 1 MiB sowie Vorschauen ohne
+Archivzugriff mit gekennzeichnetem Ausschnitt. Ein gemeinsames 10000-Punkte-
+Budget bricht dichte 32×30-Tage-Modelle ohne Teilstatistik ab; 32 vollständige
+Sieben-Tage-Archive und Erholung nach Budgetfehler werden geprüft.
+Die echte ausgelieferte Boxplot-Runtime wird für Slider-/Inside-Navigation,
+vollständige signierte Skala, Tooltips nach Filterung und ID-stabile Ansichten
+bei Refresh, Umordnung und Resize in beiden Ausrichtungen getestet.
+Die Browserfixture bietet `count=32`, `orientation=horizontal|vertical`,
+`tail=1`, `font=200` und `box=10` für ergänzende Canvas-Sichtprüfungen.
+Die 32-Quellen-Erweiterung benötigt nach Modulupdate noch die Live-Abnahme.
+
 Sankey wird durch `php tests/sankey_model.php` und
 `node tests/sankey_layout.js` geprüft. Abgedeckt sind manuelle Knotenschlüssel,
 aktuelle Verbindungsgewichte, Zyklen, Null- und Negativwerte sowie das Layout

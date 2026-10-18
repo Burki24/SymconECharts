@@ -11,6 +11,8 @@
     var chart = null;
     var currentState = bootstrap.state || null;
     var currentTheme = null;
+    var categoryAnchor = null;
+    var categoryStart = 0;
 
     var tileHeaderInset = bootstrap.mode === 'symcon'
         && (!bootstrap.options || bootstrap.options.tileHeaderVisible !== false) ? 58 : 0;
@@ -59,6 +61,21 @@
             seriesColors: colors.seriesColors
         };
     }
+    function rememberCategoryWindow() {
+        if (!chart || typeof chart.getOption !== 'function') { return; }
+        var option = chart.getOption();
+        var zoom = (option.dataZoom || []).find(function (entry) { return entry.id === 'category-scroll'; });
+        if (!zoom) { return; }
+        var axes = zoom.orient === 'vertical' ? option.yAxis : option.xAxis;
+        var keys = axes && axes[0] && axes[0].data || [];
+        var start = Number(zoom.startValue);
+        if (!Number.isFinite(start)) {
+            start = keys.indexOf(zoom.startValue);
+            if (start < 0) { start = (Number(zoom.start) || 0) * Math.max(0, keys.length - 1) / 100; }
+        }
+        categoryStart = Math.max(0, Math.ceil(start - 1e-8));
+        categoryAnchor = keys[categoryStart] || null;
+    }
     function buildOption(model, theme) {
         var colors = colorsFor(theme);
         var boxplot = model.boxplot || {};
@@ -73,10 +90,15 @@
         var titleLayout = design.chartTitleLayout(chartBootstrap, boxplot.title, titleSize);
         var top = titleLayout.contentTop + (boxplot.unit ? font + 14 : 10);
         var left = horizontal ? Math.min(width * 0.35, Math.max(60, font * 12)) : Math.min(width * 0.25, Math.max(45, font * 5));
+        var right = horizontal ? Math.max(30, font * 3) : 22;
         var bottom = horizontal ? font * 3 + 24 : font * 2 + 22;
         var rotation = Number(style.axisLabelRotate) || 0;
         var requestedLabelWidth = Number(style.axisLabelMaxWidth) || 0;
-        var slot = (horizontal ? height - top - bottom : width - left - 22) / Math.max(1, items.length);
+        var requestedBoxWidth = Number(style.boxWidth == null ? 40 : style.boxWidth);
+        var minimumSpan = Math.max(requestedBoxWidth / 0.65, font * (horizontal ? 1.75 : 3) + (horizontal ? 6 : 12));
+        var crossSpace = Math.max(1, horizontal ? height - top - bottom : width - left - right);
+        var visibleCount = Math.max(1, Math.min(items.length, Math.floor(crossSpace / minimumSpan)));
+        var slot = crossSpace / visibleCount;
         var autoLabelWidth = Math.max(12, horizontal ? left - 15 : slot - 8);
         var labelWidth = requestedLabelWidth > 0 ? Math.min(requestedLabelWidth, horizontal ? left - 15 : width - 30) : autoLabelWidth;
         if (rotation) {
@@ -84,10 +106,24 @@
             labelWidth = Math.min(labelWidth, Math.max(12, (horizontal ? slot * 0.7 : height * 0.3) / sine));
             if (!horizontal && style.showAxisLabels !== false) { bottom += labelWidth * sine; }
         }
-        var boxWidth = Math.max(1, Math.min(style.boxWidth == null ? 40 : style.boxWidth, slot * 0.65));
+        var scroll = visibleCount < items.length;
+        if (scroll && horizontal) { right += 28; }
+        if (scroll && !horizontal) { bottom += 28; }
+        var anchorIndex = items.findIndex(function (item) { return item.id === categoryAnchor; });
+        var first = Math.max(0, Math.min(items.length - visibleCount, anchorIndex >= 0 ? anchorIndex : categoryStart));
+        var boxWidth = Math.max(1, Math.min(requestedBoxWidth, slot * 0.65));
         var minimumBoxWidth = Math.min(style.minBoxWidth == null ? 1 : style.minBoxWidth, boxWidth);
         var labels = Object.create(null);
-        items.forEach(function (item) { labels[item.id] = item.label; });
+        var sources = Object.create(null);
+        var minimum = Infinity, maximum = -Infinity;
+        items.forEach(function (item) {
+            labels[item.id] = item.label;
+            sources[item.id] = item;
+            if (item.statistics) {
+                minimum = Math.min(minimum, item.statistics[0]);
+                maximum = Math.max(maximum, item.statistics[4]);
+            }
+        });
         function format(value, item) {
             return Number(value).toLocaleString(bootstrap.language || undefined, { maximumFractionDigits: item.decimals == null ? 2 : item.decimals })
                 + (item.unit ? ' ' + item.unit : '');
@@ -108,6 +144,11 @@
             splitLine: { show: style.showGrid !== false, lineStyle: { color: style.gridColor || colors.border,
                 type: style.gridLineType || 'solid', width: style.gridLineWidth == null ? 1 : style.gridLineWidth,
                 opacity: style.gridOpacityPercent == null ? 0.25 : style.gridOpacityPercent / 100 } } };
+        if (scroll && Number.isFinite(minimum) && Number.isFinite(maximum)) {
+            var padding = minimum === maximum ? Math.max(1, Math.abs(minimum) * 0.05) : (maximum - minimum) * 0.05;
+            value.min = minimum - padding;
+            value.max = maximum + padding;
+        }
         return {
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
             backgroundColor: 'transparent', color: colors.seriesColors || [colors.accent],
@@ -115,12 +156,23 @@
             title: { show: titleLayout.show, text: boxplot.title || '', top: titleLayout.top, left: 'center',
                 textStyle: { color: style.titleColor || colors.text, fontSize: titleSize, fontWeight: style.titleBold === false ? 'normal' : 'bold',
                     overflow: 'truncate', width: Math.max(1, width - 36) } },
-            grid: { top: top, left: left, right: horizontal ? Math.max(30, font * 3) : 22, bottom: bottom, containLabel: false },
+            grid: { top: top, left: left, right: right, bottom: bottom, containLabel: false },
             xAxis: horizontal ? value : category, yAxis: horizontal ? category : value,
+            dataZoom: scroll ? [
+                { id: 'category-scroll', type: 'slider',
+                    ...(horizontal ? { yAxisIndex: 0, orient: 'vertical', right: 6, width: 12, top: top, bottom: bottom }
+                        : { xAxisIndex: 0, orient: 'horizontal', bottom: 4, height: 12, left: left, right: right }),
+                    startValue: first, endValue: first + visibleCount - 1, filterMode: 'filter', zoomLock: true,
+                    showDetail: false, showDataShadow: false, brushSelect: false },
+                { id: 'category-scroll-inside', type: 'inside',
+                    ...(horizontal ? { yAxisIndex: 0 } : { xAxisIndex: 0 }),
+                    startValue: first, endValue: first + visibleCount - 1, filterMode: 'filter', zoomLock: true,
+                    zoomOnMouseWheel: false, moveOnMouseWheel: true, moveOnMouseMove: true }
+            ] : [],
             tooltip: { show: style.showTooltip !== false, trigger: 'item', confine: true,
                 extraCssText: 'max-width:' + Math.max(120, width - 24) + 'px;white-space:normal;overflow-wrap:anywhere;',
                 formatter: function (parameter) {
-                    var item = items[parameter.dataIndex];
+                    var item = parameter.data && sources[parameter.data.id];
                     if (!item || !item.statistics) { return ''; }
                     var names = ['Minimum', 'Q1', 'Median', 'Q3', 'Maximum'];
                     return escapeHTML(item.label) + '<br>' + item.statistics.map(function (value, index) {
@@ -145,6 +197,7 @@
         };
     }
     function displayError(message) {
+        rememberCategoryWindow();
         if (chart) { chart.clear(); }
         chartElement.hidden = true;
         emptyElement.hidden = true;
@@ -165,6 +218,7 @@
             return;
         }
         if (!(model.boxplot.data || []).some(function (item) { return item.statistics !== null; })) {
+            rememberCategoryWindow();
             if (chart) { chart.clear(); }
             chartElement.hidden = true;
             errorElement.hidden = true;
@@ -181,6 +235,7 @@
         rootElement.style.backgroundColor = bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
             ? 'transparent' : colorsFor(normalizeTheme(model.theme || 'auto')).background;
         var theme = normalizeTheme(model.theme || 'auto');
+        rememberCategoryWindow();
         if (chart && currentTheme !== theme) { chart.dispose(); chart = null; }
         if (!chart) {
             chart = window.echarts.init(chartElement, theme === 'auto' ? null : theme, { renderer: 'canvas' });
@@ -197,13 +252,21 @@
     };
     if (window.ResizeObserver) {
         new ResizeObserver(function () {
+            rememberCategoryWindow();
             if (!design.resizeChartIfNeeded(chart, chartElement)) { return; }
             if (currentState && currentState.status === 'ready') {
                 chart.setOption(buildOption(currentState.chart, currentTheme || 'auto'), true);
             }
         }).observe(chartElement);
     } else {
-        window.addEventListener('resize', function () { if (chart) { chart.resize(); } });
+        window.addEventListener('resize', function () {
+            if (!chart) { return; }
+            rememberCategoryWindow();
+            chart.resize();
+            if (currentState && currentState.status === 'ready') {
+                chart.setOption(buildOption(currentState.chart, currentTheme || 'auto'), true);
+            }
+        });
     }
     window.addEventListener('beforeunload', function () { if (chart) { chart.dispose(); } });
     render(currentState);

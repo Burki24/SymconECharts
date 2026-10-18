@@ -6,7 +6,7 @@ und optional als eigenes IPSView-WebContent-Widget.
 ## Einrichtung
 
 1. Das vorhandene gemeinsame EChartsGateway auswählen.
-2. Unter „Boxplot-Variablen“ 1–10 numerische Standard-Archivvariablen derselben
+2. Unter „Boxplot-Variablen“ 1–32 numerische Standard-Archivvariablen derselben
    Einheit hinzufügen, beispielsweise Raumtemperaturen. Anzeigename und
    Boxfarbe sind optional. Eine Variable darf nur einmal vorkommen;
    unterschiedliche Variablen dürfen denselben Namen haben.
@@ -36,6 +36,12 @@ Box. Sind alle Archive leer, erscheint ein Hinweis. Der Tooltip zeigt die fünf
 Kennzahlen, Stichprobenanzahl sowie ersten und letzten erfassten Zeitpunkt.
 Teilarchive lassen sich damit erkennen; sie sind nicht automatisch vollständig.
 
+Pro Aktualisierung werden höchstens 10000 Stundenmittelwerte insgesamt und
+1000 je Quelle geladen. 32 vollständige Quellen über sieben Tage passen in
+dieses Budget. Bei vielen dicht aufgezeichneten 30-Tage-Archiven kann ein
+kürzerer Zeitraum erforderlich sein; das Diagramm meldet dies ausdrücklich,
+statt Quartile aus abgeschnittenen Daten zu berechnen.
+
 ## Gestaltung und IPSView
 
 Kachel und IPSView besitzen getrennte Designer mit gekennzeichneten synthetischen
@@ -44,6 +50,13 @@ maximale Boxbreite, Randbreite und -farbe, Boxdeckkraft, Raster, Tooltip,
 Achsenbeschriftung sowie Schriftgrößen und Farben für Titel und Achsen.
 Die maximale Boxbreite wird auf schmalen Flächen automatisch begrenzt.
 Lange Kategorienamen werden bei Platzmangel gekürzt; im Tooltip bleiben sie vollständig.
+
+Bei vielen Kategorien erscheint automatisch eine Navigation per Schieberegler
+oder Mausrad. Das gilt horizontal und vertikal. Boxbreite und Schriftgröße
+bestimmen, wie viele Kategorien gleichzeitig lesbar sind. Der Ausschnitt bleibt
+bei Aktualisierungen und Größenänderungen an derselben Quelle verankert.
+Die Werteskala berücksichtigt weiterhin alle Quellen, nicht nur die sichtbaren.
+Leere Archive behalten ihren Kategorieplatz, ohne eine Null-Box zu erzeugen.
 
 Der Designer bietet außerdem:
 
@@ -61,7 +74,9 @@ Der Designer bietet außerdem:
 Die minimale Boxbreite darf nicht größer als die maximale sein. Beide Breiten
 und die Textbreite werden bei Platzmangel responsiv begrenzt. Die Vorschau
 zeigt statische Gestaltung mit Beispieldaten; Hover-Effekte sind erst im
-Diagramm sichtbar. Datenfenster und Statistik werden durch diese Optionen
+Diagramm sichtbar. Die Vorschau zeigt je nach Schriftgröße und Ausrichtung
+höchstens zehn Quellen und kennzeichnet die gezeigte Anzahl gegenüber der
+Gesamtzahl. Datenfenster und Statistik werden durch diese Optionen
 nicht verändert.
 
 IPSView übernimmt standardmäßig das Kacheldesign. Für ein unabhängiges Design
