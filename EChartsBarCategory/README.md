@@ -28,6 +28,27 @@ updates retain the visible category; in Simple mode this follows the source
 ID even if names are equal or a value update changes the sorting order.
 Sources, saved design settings and variable values are not modified by navigation.
 
+## Gradient fill
+
+Select **Gradient along the value axis** under **Bar fill** to color the inside
+of each bar along a fixed scale. Set its **Color range minimum/maximum** and
+the colors for the minimum, midpoint and maximum (default: red, yellow, green).
+For batteries use 0–100; for LQI use 0–255. Fractional and signed limits are
+supported. Values outside the color range keep the nearest endpoint color;
+the actual values and axis scale are not clipped or normalized.
+
+A 16% bar uses only the first 16% of a 0–100 ramp, rather than stretching the
+whole red-to-green range across that short bar. Horizontal gradients run from
+left to right; vertical gradients run from bottom to top. Stacked segments
+continue at their position on the shared value axis, with positive and negative
+stacks treated separately. Hiding a series in the legend recalculates the
+remaining segments' colors. Tooltips retain the original values and units.
+
+The option works in both designers and previews. IPSView inherits it unless
+**Use Tile design** is disabled. Gradient fill replaces per-source fill colors
+only while selected; legend colors still identify each series. **Solid color**
+remains the default, and **SVG pattern** remains a separate fill choice.
+
 ## Temporary loading errors
 
 If current values cannot be loaded briefly, the last valid chart remains

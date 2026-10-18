@@ -102,3 +102,30 @@ LineChart, ScatterChart, MarkLine and MarkArea components provides room for
 1 MiB output buffer. The previous Cartesian subset did not include LabelLayout
 and BarCategory uses no such callbacks, so that unused feature is not added.
 No ECharts core code, dependency version, licenses or SVG-import limits change.
+
+## Extension: fixed-domain gradient fill (2026-10-18)
+
+`BarFillMode` and `IPSViewBarFillMode` add the opt-in `gradient` value. Existing
+`solid` defaults and `svg` imports remain unchanged. Each designer owns float
+`ColorMinimum`/`ColorMaximum` (finite, ordered, within ±1e12) and RGB integer
+`LowColor`/`MiddleColor`/`HighColor` properties. Defaults are 0, 100, red, yellow
+and green. Inheritance, design copying, translations and unsaved SVG previews
+include all five fields; no source-format or Gateway contract changes.
+
+The three-stop ramp is sampled at absolute value-axis positions. Each native
+bar receives a relative linear gradient restricted to its actual segment
+domain, including any interior minimum/midpoint/maximum stops. This avoids
+unbounded gradient coordinates and preserves the same colors for short bars,
+signed stacks, viewport filtering and changed values. Positive and negative
+stack accumulators are separate. Legend selection recalculates stack positions
+and persists through gradient refreshes. Out-of-range colors clamp, not values.
+Per-source fill colors are inactive only in this mode; legends retain series
+identity colors. Automatic inside-label contrast uses the actual midpoint
+color; explicitly configured value colors win.
+
+The bounded SVG previews use the same ramp interpolation via
+`EChartsBarPreview::RampColor`, also reused by PictorialBar without changing
+its behavior. They use a user-space gradient over the signed preview value
+axis. Existing six-source preview disclosure is unchanged. Both native Canvas
+outputs and the PHP preview contract are covered by local verification; live
+Symcon/IPSView acceptance after module update remains with the owner.

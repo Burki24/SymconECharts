@@ -1,5 +1,37 @@
 # Tests
 
+## BarCategory-Verlauf und StateTimeline bis 32 Quellen
+
+`bar_category_gradient.php` ergänzt die Gateway-Integration um optionale
+Verläufe, unveränderte Vollfarben, unabhängige Designs, Fließkomma-Grenzen,
+Kopie/Vererbung, Feldsichtbarkeit, Vorschau-Callbacks, gültige SVG-Vorschauen
+aller Modi/Ausrichtungen und ungültige Bereiche/Farben. Der 16%-Fall verhindert
+einen auf jeden kurzen Balken neu gestreckten Gesamtverlauf. 100 Quellen mit
+Verlauf bleiben in beiden Ausgaben unter 1 MiB. Abgeschlossene BarCategory-
+Fixtures werden vor weiteren Familien freigegeben, statt das PHP-Speicherlimit
+für die gemeinsame Integrationssuite anzuheben.
+
+`bar_category_layout.js` prüft absolute Min-/Max-Farbstopps, LQI, Teilbereiche,
+Null/fehlende und signierte Werte, gestapelte Segmente, Legenden-Auswahl,
+Kontrast und feste Farbskalen bei Navigation/Sortierung/Updates mit 72/100
+Quellen. Das ausgelieferte Subset prüft native Modelle, Geometrie und
+Gradient-Fills. Der separat geladene SVGRenderer ist nicht klassenidentisch
+mit den Path-Klassen des kompilierten Subsets: Seine SVG-Ausgabe allein ist
+kein Bildnachweis. Tatsächliche SVG-Gradienten werden deshalb zusätzlich mit
+der offiziellen vollständigen Runtime geprüft, native Canvas-Ausgaben lokal
+im Browser. `bar_category_browser.mjs` bietet `fill=gradient`, `min`, `max`
+und `signed=1`. Horizontale 100er-Kachel sowie vertikale gestapelte IPSView-
+Ansicht mit 72 synthetischen Quellen wurden am 18.10.2026 visuell geprüft.
+
+Die StateTimeline-Integration prüft 32 gültige/33 abgewiesene Quellen,
+Quell-IDs bei gleichen Namen, unbekannte/teilweise Archive, Ausgabegrößen,
+gekennzeichnete Vorschauausschnitte und das gemeinsame 16000-Rohwerte-Budget.
+`state_timeline_layout.js` prüft den nativen Zeilenfilter bis Quelle 32,
+gleichzeitigen Zeitzoom und Zeilennavigation, ID-Anker bei Aktualisierung,
+Umordnung und Resize. Die Browserfixture `rows=32` wurde in Kachel-/IPSView-
+Varianten bis zur letzten Quelle visuell geprüft. Das ersetzt keine Live-
+Abnahme im tatsächlichen Symcon-/IPSView-Client nach dem Modulupdate.
+
 ## PictorialBar-Spaltenbreite und BarCategory bis 100 Quellen
 
 Die PictorialBar-Integrationsprüfung sichert die neue Spaltenbreite (0 =

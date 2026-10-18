@@ -26,16 +26,18 @@ function render(model, mode = 'symcon', width = 900, height = 500, headerVisible
     const elements = Object.fromEntries(['root', 'chart', 'error', 'empty', 'warning'].map(name => [name,
         {hidden: name !== 'chart' && name !== 'root', style: {}, textContent: '', clientWidth: width, clientHeight: height - inset,
             addEventListener: () => {}}]));
-    let option;
+    let option, nativeEngine = null;
     const actions = [], events = {};
-    const chart = {setOption: next => {option = next;}, getOption: () => option, clear: () => {option = null;}, resize: () => {}, dispose: () => {}, dispatchAction: action => actions.push(action)};
+    const chart = {setOption: next => {option = next; if (nativeEngine) {nativeEngine.setOption(next, true);}},
+        getOption: () => nativeEngine ? nativeEngine.getOption() : option, clear: () => {option = null;},
+        resize: () => {}, dispose: () => {}, dispatchAction: action => actions.push(action)};
     const window = {SYMC_VISUALIZATION: {mode, language: 'de', state: {status: 'ready', chart: model}, translations: {},
         options: {tileHeaderVisible: headerVisible, adaptToBackground: mode === 'ipsview', echartsThemes: {auto: palette, dark: palette}}},
         echarts: {init: () => chart, graphic: echarts.graphic}, addEventListener: (name, fn) => {events[name] = fn;}, getComputedStyle: () => ({color: ''})};
     const document = {body: {appendChild: () => {}}, createElement: () => ({style: {}, remove: () => {}}),
         getElementById: id => elements[id.replace('echarts-state-timeline-', '')]};
     for (const name of ['libs/echarts-design.js', 'libs/echarts-zoom.js', 'EChartsStateTimeline/visualization/app.js']) {vm.runInNewContext(read(name), {window, document});}
-    return {get option() {return option;}, ...elements, window, engine: chart, events, actions};
+    return {get option() {return option;}, useNativeEngine: engine => {nativeEngine = engine;}, ...elements, window, engine: chart, events, actions};
 }
 const before = JSON.stringify(model);
 const tile = render(model);
@@ -275,4 +277,64 @@ for (const days of [7, 30]) {
     }
 }
 assert.equal(JSON.stringify(model), before, 'Native option construction must not mutate archive models.');
+for (const mode of ['symcon', 'ipsview']) {
+    for (const enableZoom of [true, false]) {
+        const largeModel = {...model, stateTimeline: {...model.stateTimeline,
+            rows: Array.from({length: 32}, (_, index) => ({id: 'variable-' + (100 + index), label: 'Same contact',
+                segments: [{startTimestamp: start, endTimestamp: start + 86400, value: index === 31 ? null : index,
+                    label: index === 31 ? 'Unknown last row' : 'State ' + index, color: index === 31 ? '' : '#2288AA'}]})),
+            style: {...model.stateTimeline.style, enableZoom}}};
+        const output = render(largeModel, mode, 630, 500);
+        const rowZoom = output.option.dataZoom.find(entry => entry.id === 'state-row-scroll');
+        assert.ok(rowZoom, 'More than eight rows need a native independent row navigator.');
+        assert.equal(output.option.yAxis.data.length, 32, 'Navigation must keep all ID-distinct rows in the model.');
+        assert.equal(output.option.series[0].data.length, 32);
+        assert.ok(rowZoom.endValue < 8, 'Initial rows remain legible instead of squeezing all 32 into the tile.');
+        const engine = echarts.init(null, null, {renderer: 'svg', ssr: true, width: 630, height: mode === 'symcon' ? 442 : 500});
+        engine.setOption(output.option);
+        output.useNativeEngine(engine);
+        const rowCount = rowZoom.endValue + 1;
+        engine.dispatchAction({type: 'dataZoom', dataZoomId: 'state-row-scroll', startValue: 32 - rowCount, endValue: 31});
+        if (enableZoom) {engine.dispatchAction({type: 'dataZoom', dataZoomId: 'state-time-inside', start: 25, end: 75});}
+        const data = engine.getModel().getSeries()[0].getData();
+        const last = data.getItemGraphicEl(data.count() - 1);
+        assert.ok(last && last.children().some(child => child.type === 'rect'), 'The 32nd row is reachable after real native row scrolling.');
+        assert.equal(data.count(), rowCount, 'Row navigation filters the native series only, never the source model.');
+        assert.equal(last.children()[0].style.fill, '#666666', 'Offscreen unknown intervals retain their real state and color.');
+        const grid = engine.getModel().getComponent('grid').coordinateSystem.getRect();
+        assert.ok(Math.abs(last.children()[0].shape.x - grid.x) < 1e-5
+            && Math.abs(last.children()[0].shape.width - grid.width) < 1e-5,
+            'A whole-window state still fills exactly the visible time interval after independent time and row zoom.');
+        assert.match(output.option.tooltip.formatter({data: output.option.series[0].data[31]}), /Unknown last row/);
+        assert.doesNotMatch(engine.renderToSVGString(), /NaN|Infinity/);
+        const scrolled = engine.getOption().dataZoom.find(entry => entry.id === 'state-row-scroll');
+        assert.equal(scrolled.startValue, 32 - rowCount);
+        output.window.handleMessage({status: 'ready', chart: {...largeModel,
+            range: {...largeModel.range, startTimestamp: start + 60, endTimestamp: start + 86460}}});
+        const refreshed = engine.getOption().dataZoom;
+        assert.equal(refreshed.find(entry => entry.id === 'state-row-scroll').startValue, 32 - rowCount,
+            'Minute refresh must retain the scrolled source ID rather than restart at the first row.');
+        if (enableZoom) {
+            const time = refreshed.find(entry => entry.id === 'state-time-inside');
+            assert.equal(time.start, 25); assert.equal(time.end, 75);
+        }
+        output.chart.clientWidth = 700;
+        output.events.resize();
+        const resized = engine.getOption().dataZoom;
+        assert.equal(resized.find(entry => entry.id === 'state-row-scroll').startValue, 32 - rowCount);
+        if (enableZoom) {assert.equal(resized.find(entry => entry.id === 'state-time-inside').start, 25);}
+        // Source insertion/reordering must preserve the same ID, not the previous ordinal or equal label.
+        const reordered = {...largeModel, stateTimeline: {...largeModel.stateTimeline,
+            rows: [...largeModel.stateTimeline.rows].reverse()}};
+        output.window.handleMessage({status: 'ready', chart: reordered});
+        assert.equal(engine.getOption().dataZoom.find(entry => entry.id === 'state-row-scroll').startValue, rowCount - 1,
+            'Reordering all identical labels must follow the selected source ID to its new row index.');
+        engine.dispatchAction({type: 'dataZoom', dataZoomId: 'state-row-scroll', startValue: 31, endValue: 31});
+        output.chart.clientHeight = 600;
+        output.events.resize();
+        assert.equal(engine.getOption().dataZoom.find(entry => entry.id === 'state-row-scroll').startValue, 31,
+            'A height increase must not move a selected last source back to fill the preceding rows.');
+        engine.dispose();
+    }
+}
 console.log('StateTimeline exact intervals, unknown states, zoom clipping and pinned-engine layouts verified.');

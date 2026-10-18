@@ -11,12 +11,17 @@ function page(query) {
     const barMode = ['grouped', 'stacked'].includes(query.get('bar')) ? query.get('bar') : 'simple';
     const orientation = query.get('orientation') === 'vertical' ? 'vertical' : 'horizontal';
     const count = Math.min(100, Math.max(1, Number(query.get('count')) || 100));
+    const fill = query.get('fill') === 'gradient' ? 'gradient' : 'solid';
+    const signed = query.get('signed') === '1' || fill !== 'gradient';
+    const requestedMinimum = Number(query.get('min') ?? 0), requestedMaximum = Number(query.get('max') ?? 100);
+    const colorMinimum = Number.isFinite(requestedMinimum) ? requestedMinimum : 0;
+    const colorMaximum = Number.isFinite(requestedMaximum) && requestedMaximum > colorMinimum ? requestedMaximum : colorMinimum + 100;
     const items = Array.from({length: count}, (_, index) => ({
         id: 'source-' + index, variableID: 88000 + index,
         category: barMode === 'simple' ? 'Batterie ' + String(index + 1).padStart(3, '0')
             : 'Bereich ' + String(Math.floor(index / 2) + 1).padStart(2, '0'),
         series: index % 2 ? 'Sensor B' : 'Sensor A', seriesKey: 'series-' + index % 2,
-        value: index === count - 1 ? -25 : (index * 7) % 101, order: index
+        value: signed && index === count - 1 ? -25 : (index * 7) % 101, order: index
     }));
     const palette = {background: '#303236', text: '#f4f5f7', muted: '#969aa2', border: '#777b83',
         accent: '#55cbb5', surface: '#25272b', seriesColors: ['#5070dd', '#b6d634', '#ff994d']};
@@ -24,7 +29,8 @@ function page(query) {
         state: {status: 'ready', chart: {theme: 'auto', bar: {
             title: 'Aktuelle Vergleichswerte · ' + count + ' Quellen', mode: barMode, orientation,
             sortOrder: 'configured', unit: '%', decimals: 0,
-            style: {showValues: true, showGrid: true, roundedBars: false, barWidthPercent: 70, animationEnabled: false}
+            style: {showValues: true, showGrid: true, roundedBars: false, barWidthPercent: 70, animationEnabled: false,
+                barFillMode: fill, colorMinimum, colorMaximum, lowColor: '#ff0000', middleColor: '#ffff00', highColor: '#00ff00'}
         }, items}}};
     const replacements = {HTML_LANGUAGE: 'de', HTML_CLASSES: '', ROOT_FONT_SIZE: '16px',
         VIEWPORT_CONTENT: 'width=device-width, initial-scale=1', DOCUMENT_TITLE: 'Category Bar browser fixture',

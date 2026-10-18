@@ -77,7 +77,7 @@ class EChartsBarCategory extends IPSModuleStrict
     private const MODES = ['simple', 'grouped', 'stacked'];
     private const ORIENTATIONS = ['vertical', 'horizontal'];
     private const SORT_ORDERS = ['configured', 'ascending', 'descending'];
-    private const BAR_FILL_MODES = ['solid', 'svg'];
+    private const BAR_FILL_MODES = ['solid', 'svg', 'gradient'];
     private const TEXT_FONTS = [
         'TitleFontSizePercent' => 'Title size', 'LegendFontSizePercent' => 'Legend size',
         'AxisFontSizePercent'  => 'Axis label size', 'ValueFontSizePercent' => 'Value label size'
@@ -167,6 +167,9 @@ class EChartsBarCategory extends IPSModuleStrict
         EChartsLabelDesign::InsertAfterRowContaining($form['elements'], 'IPSViewShowValues', [
             ['type' => 'RowLayout', 'items' => EChartsLabelDesign::CartesianControls('IPSView')]
         ]);
+        foreach (['', 'IPSView'] as $prefix) {
+            EChartsLabelDesign::InsertAfterRowContaining($form['elements'], $prefix . 'BarFillMode', $this->GradientFormRows($prefix));
+        }
         $form = $this->WithIPSViewDesignFormState($form, 'ECBC');
         $form = EChartsDesignerSections::Group($form, [
             ['caption' => 'Bar layout and order', 'start' => 'BarMode'],
@@ -187,6 +190,9 @@ class EChartsBarCategory extends IPSModuleStrict
     public function UpdateBarDesignForm(bool $IPSView, string $BarFillMode): void
     {
         $prefix = $IPSView ? 'IPSView' : '';
+        foreach (['ColorMinimum', 'ColorMaximum', 'LowColor', 'MiddleColor', 'HighColor'] as $name) {
+            $this->UpdateFormField($prefix . $name, 'visible', $BarFillMode === 'gradient');
+        }
         $this->UpdateFormField($prefix . 'BarSVG', 'visible', $BarFillMode === 'svg');
         $this->UpdateFormField($prefix . 'BarSVGSizePercent', 'visible', $BarFillMode === 'svg');
     }
@@ -206,6 +212,7 @@ class EChartsBarCategory extends IPSModuleStrict
             $value = match ($type) {
                 'string'  => $this->ReadPropertyString($name),
                 'boolean' => $this->ReadPropertyBoolean($name),
+                'float'   => $this->ReadPropertyFloat($name),
                 default   => $this->ReadPropertyInteger($name)
             };
             IPS_SetProperty($this->InstanceID, 'IPSView' . $name, $value);
@@ -448,6 +455,29 @@ class EChartsBarCategory extends IPSModuleStrict
             $negativeMax = max($negativeMax, $mode === 'stacked' ? array_sum($negative) : max($negative));
         }
         $range = $positiveMax + $negativeMax;
+        $rampMinimum = $this->BarPreviewValue($values, 'ColorMinimum', 'float', $ipsView);
+        $rampMaximum = $this->BarPreviewValue($values, 'ColorMaximum', 'float', $ipsView);
+        $rampColors = array_map(fn (string $name): int => $this->BarPreviewValue($values, $name, 'integer', $ipsView), ['LowColor', 'MiddleColor', 'HighColor']);
+        $ramp = static fn (float $value): string => EChartsBarPreview::RampColor($value, $rampMinimum, $rampMaximum, $rampColors);
+        if ($fillMode === 'gradient') {
+            $points = [-$negativeMax];
+            foreach ([$rampMinimum, ($rampMinimum + $rampMaximum) / 2, $rampMaximum] as $point) {
+                if (is_finite($point) && $point > -$negativeMax && $point < $positiveMax) {
+                    $points[] = $point;
+                }
+            }
+            $points[] = $positiveMax;
+            sort($points);
+            $svg .= '<defs><linearGradient id="bar-category-value-gradient" gradientUnits="userSpaceOnUse" '
+                . ($orientation === 'horizontal' ? 'x1="100" y1="0" x2="668" y2="0"' : 'x1="0" y1="295" x2="0" y2="87"') . '>';
+            foreach ($points as $point) {
+                $svg .= '<stop offset="' . EChartsBarPreview::N(($point + $negativeMax) / $range) . '" stop-color="' . $ramp($point) . '"/>';
+            }
+            $svg .= '</linearGradient></defs>';
+            if ($mode === 'stacked' && $valueLabelPosition === 'auto') {
+                $valueLabelPosition = 'inside';
+            }
+        }
         $zero = $orientation === 'horizontal'
             ? 100 + 568 * $negativeMax / $range
             : 87 + 208 * $positiveMax / $range;
@@ -481,6 +511,9 @@ class EChartsBarCategory extends IPSModuleStrict
                 $item = $entry['item'];
                 $color = $item['color'] !== '' ? $item['color'] : $palette['seriesColors'][$entry['index'] % count($palette['seriesColors'])];
                 $fill = $fillMode === 'svg' ? 'url(#bar-category-preview-' . $entry['index'] . ')' : $color;
+                if ($fillMode === 'gradient') {
+                    $fill = 'url(#bar-category-value-gradient)';
+                }
                 $size = ($orientation === 'horizontal' ? 568 : 208) * abs($item['value']) / $range;
                 $subCount = $mode === 'stacked' ? 1 : count($group);
                 $thickness = max(3, ($span - 12) * $barWidth / 100 / $subCount);
@@ -515,8 +548,14 @@ class EChartsBarCategory extends IPSModuleStrict
                     $valueAnchor = $placement['anchor'];
                 }
                 if ($showValues) {
+                    $textColor = $valueColor;
+                    if ($fillMode === 'gradient' && str_starts_with($valueLabelPosition, 'inside')
+                        && $this->BarPreviewValue($values, 'ValueColor', 'integer', $ipsView) < 0) {
+                        $midpoint = ($mode === 'stacked' ? ($item['value'] >= 0 ? $positiveOffset : -$negativeOffset) * $range / ($orientation === 'horizontal' ? 568 : 208) : 0) + $item['value'] / 2;
+                        $textColor = $this->GradientPreviewTextColor($ramp($midpoint), $palette['text'], $palette['background']);
+                    }
                     $svg .= '<text x="' . EChartsBarPreview::N($valueX) . '" y="' . EChartsBarPreview::N($valueY)
-                        . '" text-anchor="' . $valueAnchor . '" fill="' . EChartsBarPreview::E($valueColor) . '" font-size="' . $valueSize . '">'
+                        . '" text-anchor="' . $valueAnchor . '" fill="' . EChartsBarPreview::E($textColor) . '" font-size="' . $valueSize . '">'
                         . EChartsBarPreview::E(EChartsBarPreview::FormatValue(
                             $item['value'],
                             $previewDecimals,
@@ -797,6 +836,40 @@ class EChartsBarCategory extends IPSModuleStrict
         }
     }
 
+    private function GradientPreviewTextColor(string $background, string $first, string $second): string
+    {
+        // Match echarts-design.js: choose the theme candidate with the higher WCAG contrast.
+        $luminance = static function (string $hex): float
+        {
+            $channels = array_map(static function (int $offset) use ($hex): float
+            {
+                $value = hexdec(substr($hex, $offset, 2)) / 255;
+                return $value <= 0.04045 ? $value / 12.92 : (($value + 0.055) / 1.055) ** 2.4;
+            }, [1, 3, 5]);
+            return 0.2126 * $channels[0] + 0.7152 * $channels[1] + 0.0722 * $channels[2];
+        };
+        $base = $luminance($background);
+        $contrast = static fn (float $candidate): float => (max($base, $candidate) + 0.05) / (min($base, $candidate) + 0.05);
+        return $contrast($luminance($first)) >= $contrast($luminance($second)) ? $first : $second;
+    }
+
+    /** @return list<array<string,mixed>> */
+    private function GradientFormRows(string $prefix): array
+    {
+        $visible = $this->ReadPropertyString($prefix . 'BarFillMode') === 'gradient';
+        $ranges = [];
+        foreach (['ColorMinimum' => 'Color range minimum', 'ColorMaximum' => 'Color range maximum'] as $name => $caption) {
+            $ranges[] = ['type' => 'NumberSpinner', 'name' => $prefix . $name, 'caption' => $caption,
+                'minimum'       => -1.0e12, 'maximum' => 1.0e12, 'digits' => 6, 'width' => '230px', 'visible' => $visible];
+        }
+        $colors = [];
+        foreach (['LowColor' => 'Low value color', 'MiddleColor' => 'Middle value color', 'HighColor' => 'High value color'] as $name => $caption) {
+            $colors[] = ['type' => 'SelectColor', 'name' => $prefix . $name, 'caption' => $caption,
+                'width'         => '180px', 'visible' => $visible];
+        }
+        return [['type' => 'RowLayout', 'items' => $ranges], ['type' => 'RowLayout', 'items' => $colors]];
+    }
+
     private function RegisterDesignProperties(string $prefix = ''): void
     {
         $this->RegisterPropertyString($prefix . 'BarMode', 'simple');
@@ -812,6 +885,11 @@ class EChartsBarCategory extends IPSModuleStrict
         $this->RegisterPropertyString($prefix . 'BarFillMode', 'solid');
         $this->RegisterPropertyString($prefix . 'BarSVG', '');
         $this->RegisterPropertyInteger($prefix . 'BarSVGSizePercent', 100);
+        $this->RegisterPropertyFloat($prefix . 'ColorMinimum', 0.0);
+        $this->RegisterPropertyFloat($prefix . 'ColorMaximum', 100.0);
+        $this->RegisterPropertyInteger($prefix . 'LowColor', 0xFF0000);
+        $this->RegisterPropertyInteger($prefix . 'MiddleColor', 0xFFFF00);
+        $this->RegisterPropertyInteger($prefix . 'HighColor', 0x00FF00);
         $this->RegisterBarTypography(array_keys(self::TEXT_FONTS), array_keys(self::TEXT_COLORS), $prefix);
         $this->RegisterAnimationProperties($prefix, true, 350, 500);
     }
@@ -833,6 +911,11 @@ class EChartsBarCategory extends IPSModuleStrict
             'BarFillMode'             => 'string',
             'BarSVG'                  => 'string',
             'BarSVGSizePercent'       => 'integer',
+            'ColorMinimum'            => 'float',
+            'ColorMaximum'            => 'float',
+            'LowColor'                => 'integer',
+            'MiddleColor'             => 'integer',
+            'HighColor'               => 'integer',
             ...array_fill_keys(array_keys(self::TEXT_FONTS), 'integer'),
             ...array_fill_keys(array_keys(self::TEXT_COLORS), 'integer'),
             'AnimationEnabled'        => 'boolean',
@@ -847,6 +930,16 @@ class EChartsBarCategory extends IPSModuleStrict
 
     private function IsValidDesign(string $prefix): bool
     {
+        $minimum = $this->ReadPropertyFloat($prefix . 'ColorMinimum');
+        $maximum = $this->ReadPropertyFloat($prefix . 'ColorMaximum');
+        if (!is_finite($minimum) || !is_finite($maximum) || $minimum < -1.0e12 || $maximum > 1.0e12 || $minimum >= $maximum) {
+            return false;
+        }
+        foreach (['LowColor', 'MiddleColor', 'HighColor'] as $name) {
+            if ($this->ReadPropertyInteger($prefix . $name) < 0 || $this->ReadPropertyInteger($prefix . $name) > 0xFFFFFF) {
+                return false;
+            }
+        }
         return in_array($this->ReadPropertyString($prefix . 'BarMode'), self::MODES, true)
             && in_array($this->ReadPropertyString($prefix . 'Orientation'), self::ORIENTATIONS, true)
             && in_array($this->ReadPropertyString($prefix . 'SortOrder'), self::SORT_ORDERS, true)
@@ -889,6 +982,11 @@ class EChartsBarCategory extends IPSModuleStrict
             'roundedBars'        => $this->ReadPropertyBoolean($prefix . 'RoundedBars'),
             'barWidthPercent'    => $this->ReadPropertyInteger($prefix . 'BarWidthPercent'),
             'barFillMode'        => $this->ReadPropertyString($prefix . 'BarFillMode'),
+            'colorMinimum'       => $this->ReadPropertyFloat($prefix . 'ColorMinimum'),
+            'colorMaximum'       => $this->ReadPropertyFloat($prefix . 'ColorMaximum'),
+            'lowColor'           => EChartsAsset::ColorToHex($this->ReadPropertyInteger($prefix . 'LowColor')),
+            'middleColor'        => EChartsAsset::ColorToHex($this->ReadPropertyInteger($prefix . 'MiddleColor')),
+            'highColor'          => EChartsAsset::ColorToHex($this->ReadPropertyInteger($prefix . 'HighColor')),
             ...$this->ReadBarTypography(array_keys(self::TEXT_FONTS), array_keys(self::TEXT_COLORS), $prefix)
         ];
         if ($style['barFillMode'] === 'svg') {

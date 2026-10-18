@@ -290,12 +290,7 @@ trait PictorialBarPreview
     {
         $minimum = $this->BarPreviewValue($values, 'ColorMinimum', 'float', $ipsView);
         $maximum = $this->BarPreviewValue($values, 'ColorMaximum', 'float', $ipsView);
-        $ratio = $maximum > $minimum ? max(0, min(1, ($value - $minimum) / ($maximum - $minimum))) : 0;
         $stops = array_map(fn (string $name): int => max(0, min(0xFFFFFF, $this->BarPreviewValue($values, $name, 'integer', $ipsView))), ['LowColor', 'MiddleColor', 'HighColor']);
-        $a = $stops[$ratio <= 0.5 ? 0 : 1];
-        $b = $stops[$ratio <= 0.5 ? 1 : 2];
-        $t = $ratio <= 0.5 ? 2 * $ratio : 2 * ($ratio - 0.5);
-        $channels = array_map(static fn (int $shift): int => (int) round((($a >> $shift) & 255) + ((($b >> $shift) & 255) - (($a >> $shift) & 255)) * $t), [16, 8, 0]);
-        return sprintf('#%02x%02x%02x', ...$channels);
+        return EChartsBarPreview::RampColor($value, $minimum, $maximum, $stops);
     }
 }

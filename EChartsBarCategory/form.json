@@ -314,6 +314,10 @@
                                 {
                                     "caption": "SVG pattern",
                                     "value": "svg"
+                                },
+                                {
+                                    "caption": "Gradient along the value axis",
+                                    "value": "gradient"
                                 }
                             ]
                         },
@@ -556,6 +560,10 @@
                                         {
                                             "caption": "SVG pattern",
                                             "value": "svg"
+                                        },
+                                        {
+                                            "caption": "Gradient along the value axis",
+                                            "value": "gradient"
                                         }
                                     ]
                                 },

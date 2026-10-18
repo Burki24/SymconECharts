@@ -9,7 +9,7 @@ Das Modul liest nur; es schaltet keine Geräte und verändert keine Archivdaten.
 
 1. Eine Instanz `EChartsStateTimeline` anlegen und mit dem vorhandenen
    `EChartsGateway` verbinden. Ein gemeinsames Gateway genügt für alle Diagramme.
-2. Unter **Zustandsquellen** ein bis acht unterschiedliche Boolean- oder
+2. Unter **Zustandsquellen** ein bis 32 unterschiedliche Boolean- oder
    Integer-Variablen hinzufügen, die in einem Standardarchiv aufgezeichnet werden.
    Float-, String- und Zählerarchive sind nicht unterstützt.
 3. Optional pro Quelle eine Beschriftung festlegen. Ohne eigene Beschriftung
@@ -52,7 +52,9 @@ oder nachträglich gelöschte Messungen nicht zuverlässig als Ausfall erkennen.
 Das Diagramm stellt die aufgezeichneten Zustände dar und ist kein Nachweis
 einer lückenlosen Geräteüberwachung.
 
-Pro Quelle werden höchstens 2000 Rohwerte innerhalb des Fensters gelesen.
+Pro Quelle werden höchstens 2000 Rohwerte innerhalb des Fensters gelesen,
+zusammen höchstens 16000 Rohwerte für alle Quellen. Ein vorhandener Vorgänger
+vor dem Fenster wird je Quelle zusätzlich berücksichtigt.
 Sehr viele Wechsel oder umfangreiche Beschriftungen können zusätzlich die
 gemeinsame Ausgabebegrenzung erreichen. Dann erscheint die Aufforderung,
 einen kürzeren Zeitraum zu wählen. Werte werden nicht stillschweigend
@@ -97,6 +99,14 @@ Vergrößerungsbutton. IPSView reserviert diesen zusätzlichen Kopfbereich nicht
 Zoom vergrößert den Zeitbereich innerhalb des Diagramms, ohne die Konfiguration
 zu ändern. Animation einschließlich Dauer und Bewegungskurve ist einstellbar.
 
+Bei mehr als acht Quellen zeigt das Diagramm einen lesbaren Ausschnitt von
+höchstens acht Zeilen. Mit der senkrechten **Zeilennavigation rechts** sind
+alle Quellen erreichbar. Sie ist unabhängig vom Zeitzoom und bleibt auch bei
+ausgeschaltetem Zeitzoom verfügbar. Aktualisierungen und Größenänderungen
+behalten die ausgewählte erste Quelle und den gewählten Zeitzoom bei, soweit
+die Quelle und der Zeitraum weiterhin vorhanden sind. Alle Quellen bleiben
+Teil des Diagramms; auch unbekannte Zeitabschnitte werden nicht weggelassen.
+
 IPSView erbt zunächst das Kacheldesign. Mit deaktivierter Vererbung kann es
 unabhängig gestaltet werden; der Kopierknopf übernimmt das Kacheldesign als
 Ausgangspunkt. Die gemeinsame Quellen- und Zustandszuordnung bleibt gleich.
@@ -106,6 +116,9 @@ WebContent-Dokument für ein IPSView-HTML-Widget und wird nicht bedient.
 Die Vorschauen reagieren auf ungespeicherte Titel-, Quellen-, Zustands- und
 Designänderungen. Sie verwenden gekennzeichnete Beispieldaten, nicht den
 tatsächlichen Archivverlauf. Das Speichern erfolgt erst beim Übernehmen.
+Bei mehr als acht Quellen kennzeichnet die statische Vorschau ausdrücklich
+die ersten acht von insgesamt bis zu 32 Zeilen. Scrollen und Zeitzoom sind
+nur im eigentlichen Diagramm bedienbar.
 
 ## Öffentliche Funktionen
 

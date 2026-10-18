@@ -9,7 +9,7 @@
     var emptyElement = document.getElementById('echarts-state-timeline-empty');
     var errorElement = document.getElementById('echarts-state-timeline-error');
     var warningElement = document.getElementById('echarts-state-timeline-warning');
-    var chart = null, currentState = null, currentTheme = null;
+    var chart = null, currentState = null, currentTheme = null, rowAnchor = null;
     var tileHeaderInset = bootstrap.mode === 'symcon'
         && (!bootstrap.options || bootstrap.options.tileHeaderVisible !== false) ? 58 : 0;
     var chartBootstrap = tileHeaderInset ? {mode: 'symcon', options: {tileHeaderVisible: false}} : bootstrap;
@@ -65,6 +65,35 @@
         });
         return result.join(' ') || '0 s';
     }
+    function rememberRowWindow() {
+        if (!chart || typeof chart.getOption !== 'function') {return;}
+        var option = chart.getOption() || {}, entries = option.dataZoom || [];
+        var current = entries.find(function (entry) {return entry.id === 'state-row-scroll';});
+        if (!current) {return;}
+        var axes = Array.isArray(option.yAxis) ? option.yAxis : [option.yAxis];
+        var ids = axes[0] && axes[0].data || [];
+        var first = Number(current.startValue);
+        if (!Number.isFinite(first)) {
+            first = ids.indexOf(current.startValue);
+            if (first < 0) {first = (Number(current.start) || 0) * Math.max(0, ids.length - 1) / 100;}
+        }
+        rowAnchor = ids[Math.max(0, Math.ceil(first - 1e-8))] || null;
+    }
+    function captureTimeWindow(previousRange, nextRange) {
+        if (!chart) {return null;}
+        var entries = (chart.getOption() || {}).dataZoom || [];
+        var time = entries.find(function (entry) {return entry.xAxisIndex !== undefined;});
+        return time ? zoom.capture({getOption: function () {return {dataZoom: [time]};}}, previousRange, nextRange) : null;
+    }
+    function applyView(model, theme, savedTime) {
+        var option = buildOption(model, theme);
+        if (savedTime) {
+            option.dataZoom.forEach(function (entry) {
+                if (entry.xAxisIndex !== undefined) {entry.start = savedTime.start; entry.end = savedTime.end;}
+            });
+        }
+        chart.setOption(option, true);
+    }
     function buildOption(model, theme) {
         var timeline = model.stateTimeline || {}, style = timeline.style || {}, rows = timeline.rows || [];
         var colors = colorsFor(theme), colorList = colors.seriesColors || [colors.accent];
@@ -78,7 +107,8 @@
         var titleLayout = design.chartTitleLayout(chartBootstrap, timeline.title, titleFont);
         var top = titleLayout.contentTop + 14;
         var left = style.showSourceLabels === false ? (compact ? 14 : 24) : Math.min(width * 0.36, Math.max(60, axisFont * 13));
-        var right = compact ? 14 : 24;
+        var scrollRows = rows.length > 8;
+        var right = (compact ? 14 : 24) + (scrollRows ? 28 : 0);
         var sliderBottom = 12;
         var timeFormat = style.timeLabelFormat || 'auto';
         var dateOnly = timeFormat === 'date' || (timeFormat === 'auto' && model.range.endTimestamp - model.range.startTimestamp > 172800);
@@ -87,6 +117,9 @@
         var axisExtent = style.showTimeLabels !== false ? lineHeight * (timeFormat === 'dateTime' ? 2 : 1) + axisMargin : (style.showAxisTicks === true ? 5 : 0);
         var bottom = axisExtent + 10 + (style.enableZoom !== false ? zoom.sliderThickness(compact) + 24 : 0);
         var plotHeight = Math.max(1, height - top - bottom);
+        var visibleRows = scrollRows ? Math.max(1, Math.min(8, Math.floor(plotHeight / Math.max(28, axisFont * 1.8, labelFont * 1.8)))) : rows.length;
+        var firstRow = rowAnchor ? rows.findIndex(function (row) {return row.id === rowAnchor;}) : 0;
+        firstRow = Math.max(0, Math.min(firstRow, rows.length - 1));
         var values = [];
         rows.forEach(function (row, rowIndex) {
             (row.segments || []).forEach(function (segment, segmentIndex) {
@@ -99,10 +132,18 @@
         });
         var dataZoom = zoom.timeAxisOptions(style.enableZoom !== false, bootstrap.mode, sliderBottom, compact);
         dataZoom.forEach(function (entry) {
+            entry.id = entry.type === 'inside' ? 'state-time-inside' : 'state-time-slider';
             // Neither endpoint has to lie inside the zoom window for an interval to be visible.
             entry.filterMode = 'none';
             if (entry.type === 'slider') {entry.showDataShadow = false; entry.showDetail = false; entry.left = left; entry.right = right;}
         });
+        if (scrollRows) {
+            dataZoom.push({id: 'state-row-scroll', type: 'slider', yAxisIndex: 0, orient: 'vertical',
+                right: 6, top: top, height: plotHeight, width: 12,
+                startValue: firstRow, endValue: Math.min(rows.length - 1, firstRow + visibleRows - 1),
+                filterMode: 'filter', zoomLock: true, brushSelect: false,
+                showDataShadow: false, showDetail: false});
+        }
         return {
             backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options && bootstrap.options.adaptToBackground === true ? 'transparent' : colors.background,
             textStyle: {fontFamily: fontFamily},
@@ -208,14 +249,15 @@
             emptyElement.textContent = translate('No StateTimeline sources configured.'); emptyElement.hidden = false; return;
         }
         var theme = normalizeTheme(model.theme || 'auto');
-        var savedZoom = chart && previousState && previousState.chart ? zoom.capture(chart, previousState.chart.range, model.range) : null;
+        rememberRowWindow();
+        var savedZoom = previousState && previousState.chart ? captureTimeWindow(previousState.chart.range, model.range) : null;
         var wasHidden = chartElement.hidden;
         chartElement.hidden = false; errorElement.hidden = true; emptyElement.hidden = true; warningElement.hidden = true;
         rootElement.style.backgroundColor = bootstrap.mode === 'ipsview' && bootstrap.options && bootstrap.options.adaptToBackground === true ? 'transparent' : colorsFor(theme).background;
         if (chart && currentTheme !== theme) {chart.dispose(); chart = null;}
         if (!chart) {chart = window.echarts.init(chartElement, theme === 'auto' ? null : theme, {renderer: 'canvas'}); currentTheme = theme;}
         else if (wasHidden) {chart.resize();}
-        zoom.apply(chart, buildOption(model, theme), savedZoom);
+        applyView(model, theme, savedZoom);
     }
     if (bootstrap.mode === 'ipsview') {
         zoom.attachIPSViewWheel(chartElement, function () {return chart;}, function () {
@@ -226,12 +268,15 @@
     if (window.ResizeObserver) {
         new ResizeObserver(function () {
             if (!design.resizeChartIfNeeded(chart, chartElement) || !currentState || currentState.status !== 'ready') {return;}
-            zoom.apply(chart, buildOption(currentState.chart, currentTheme || 'auto'), zoom.capture(chart, null, null));
+            rememberRowWindow();
+            applyView(currentState.chart, currentTheme || 'auto', captureTimeWindow(null, null));
         }).observe(chartElement);
     } else {
         window.addEventListener('resize', function () {
             if (!chart || !currentState || currentState.status !== 'ready') {return;}
-            chart.resize(); zoom.apply(chart, buildOption(currentState.chart, currentTheme || 'auto'), zoom.capture(chart, null, null));
+            rememberRowWindow();
+            var savedTime = captureTimeWindow(null, null);
+            chart.resize(); applyView(currentState.chart, currentTheme || 'auto', savedTime);
         });
     }
     window.addEventListener('beforeunload', function () {if (chart) {chart.dispose();}});

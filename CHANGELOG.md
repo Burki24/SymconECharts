@@ -2,6 +2,16 @@
 
 ## Neu
 
+- EChartsBarCategory bietet einen optionalen Farbverlauf innerhalb der Balken
+  mit frei wählbarer Min-/Max-Skala und drei Farben. Er gilt in Kachel, IPSView
+  und Vorschau, horizontal oder vertikal sowie bei gruppierten und gestapelten
+  Balken. Bestehende Vollfarben und SVG-Muster bleiben unverändert auswählbar.
+
+- EChartsStateTimeline unterstützt bis zu 32 Quellen. Ab neun Quellen sorgt
+  eine unabhängige Zeilennavigation für lesbare Ausschnitte, ohne den Zeitzoom
+  zu verändern. Vorschauen kennzeichnen ihren Ausschnitt; gemeinsame Daten-
+  und Ausgabebudgets verhindern unkontrolliert große Archivabfragen.
+
 - EChartsPictorialBar passt die Bezeichnungsspalte horizontaler Symbolbalken
   automatisch an die Textlänge an. Alternativ ist ihre Breite in Prozent
   einstellbar, unabhängig für Kachel und IPSView einschließlich Vorschau.

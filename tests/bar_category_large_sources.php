@@ -42,6 +42,14 @@ foreach ([72, 100] as $count) {
     }
 }
 assertGatewayGauge($data['items'][99]['value'] === -250.0, 'Category Bar must retain signed offscreen source values.');
+$largeCategory->SetTestProperty('BarFillMode', 'gradient');
+foreach ([$largeCategory->GetVisualizationTile(), $largeCategory->GetIPSViewHTML()] as $output) {
+    assertGatewayGauge(
+        strlen($output) < 1048576 && str_contains($output, '"barFillMode":"gradient"'),
+        'All 100 sources with inherited gradients must fit both output buffers.'
+    );
+}
+$largeCategory->SetTestProperty('BarFillMode', 'solid');
 $largeCategory->UpdateBarPreviewFromForm('{"SortOrder":"ascending"}');
 $sortedCategoryPreview = base64_decode(substr(array_slice($largeCategory->GetTestFormUpdates(), -2)[0]['Value'], strlen('data:image/svg+xml;base64,')), true);
 assertGatewayGauge(

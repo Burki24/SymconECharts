@@ -103,3 +103,25 @@ nicht Mausinteraktion oder Animation. Bestehende Defaults sowie Quellen,
 Zeitgrenzen, Archivvertrag, Zustandsidentitäten und Farben bleiben erhalten.
 Frei ausführbare Formatter, externe Schriften und eine irreführende gemeinsame
 Zustandslegende für unterschiedliche Quellen sind nicht Teil dieser Erweiterung.
+
+## 32 Quellen und unabhängige Zeilennavigation (18.10.2026)
+
+Die Quellenobergrenze steigt additiv von acht auf 32. Variablen-ID,
+Zustandsmodell, unbekannte Anfänge, Properties und bisherige Konfigurationen
+bleiben erhalten. Bei mehr als acht Quellen ergänzt eine native vertikale
+DataZoom-Leiste einen responsiven Ausschnitt von höchstens acht Zeilen.
+Zeitzoom und Zeilenausschnitt werden getrennt erfasst und wiederhergestellt;
+der Zeilenanker folgt der Variablen-ID, nicht Namen oder Arraypositionen.
+Die Zeilenleiste bleibt ohne Zeitzoom verfügbar. Beide Ausgaben verwenden
+denselben Renderer; die statische Vorschau zeigt ausdrücklich die ersten
+acht von insgesamt bis zu 32 Quellen mit synthetischen Zuständen.
+
+Die vorhandene Custom/DataZoom-Runtime genügt; ein neuer Build ist nicht
+erforderlich. Pro Quelle bleiben höchstens 2000 Rohpunkte plus Vorgänger
+zulässig. Der gemeinsame Abfragehaushalt beträgt weiterhin maximal die
+bisherige Acht-Quellen-Kapazität von 16000 Rohpunkten, nun über bis zu 32
+Anfragen verteilt. Ein kleineres verbleibendes Budget wird als begrenztes
+Limit angefragt; volle/gemeldete gekürzte Archive oder ein erschöpfter
+Haushalt führen zu einem sichtbaren Fehler, nicht Sampling. Die Größe
+HTML-sicher kodierter Zeilen wird bereits während des Aufbaus begrenzt;
+der abschließende 250000-Byte-Modellvertrag und der 1-MiB-Seitenpuffer bleiben.

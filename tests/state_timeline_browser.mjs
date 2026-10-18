@@ -12,12 +12,13 @@ const palette = {background: '#303236', text: '#f4f5f7', muted: '#969aa2', borde
 const start = 1792144800;
 function state(url) {
     const days = url.searchParams.get('range') === '7d' ? 7 : url.searchParams.get('range') === '30d' ? 30 : 1;
-    const count = url.searchParams.get('rows') === '12' ? 12 : 4;
+    const count = Math.max(1, Math.min(32, Number(url.searchParams.get('rows')) || 4));
     const names = ['Fenster mit langem Namen · Wohnzimmer', 'Heizkreispumpe', 'Alarmanlage', 'Fenster mit langem Namen · Wohnzimmer'];
     return {status: 'ready', chart: {schemaVersion: 1, family: 'stateTimeline', theme: 'auto',
         range: {key: days + 'd', startTimestamp: start, endTimestamp: start + days * 86400, timezone: 'Europe/Berlin'},
         stateTimeline: {title: 'Archivierte Zustände · Fenster, Pumpe und Alarmanlage',
-            rows: Array.from({length: count}, (_, index) => ({id: 'variable-' + (index + 1), label: names[index % names.length],
+            rows: Array.from({length: count}, (_, index) => ({id: 'variable-' + (index + 1),
+                label: index === 31 ? 'Kontakt 32 · letzte Quelle' : names[index % names.length],
                 segments: url.searchParams.get('case') === 'unknown' ? [
                     {startTimestamp: start, endTimestamp: start + days * 86400, value: null, label: 'Unbekannt', color: ''}]
                     : [
@@ -82,8 +83,8 @@ http.createServer((req, res) => {
     res.end('<!doctype html><html lang="de"><head><title>StateTimeline – lokale Browserprüfung</title></head>'
         + '<body style="background:#0b0c0e;color:white;font:16px Arial;margin:20px"><h1 style="font-size:20px">StateTimeline · synthetische Zustandswechsel</h1>'
         + '<div style="display:flex;gap:16px;align-items:start;flex-wrap:wrap">'
-        + '<section><h2 style="font-size:16px">Kachel · schmal</h2><iframe title="Kachel" src="/chart?mode=symcon" style="border:0;width:400px;height:500px"></iframe></section>'
-        + '<section><h2 style="font-size:16px">IPSView · erweiterte Gestaltung</h2><iframe title="IPSView" src="/chart?mode=ipsview&range=7d&design=extended" style="border:0;width:790px;height:440px"></iframe></section>'
+        + '<section><h2 style="font-size:16px">Kachel · 32 Zustandsquellen</h2><iframe title="Kachel" src="/chart?mode=symcon&rows=32" style="border:0;width:400px;height:500px"></iframe></section>'
+        + '<section><h2 style="font-size:16px">IPSView · 32 Zustandsquellen</h2><iframe title="IPSView" src="/chart?mode=ipsview&rows=32&range=7d&design=extended" style="border:0;width:790px;height:440px"></iframe></section>'
         + '<section><h2 style="font-size:16px">Ohne Kachelkopf · unbekannte Zustände</h2><iframe title="Unbekannte Zustände" src="/chart?header=hidden&theme=light&case=unknown" style="border:0;width:320px;height:400px"></iframe></section>'
         + '</div></body></html>');
 }).listen(8804, '127.0.0.1', () => console.log('StateTimeline fixture: http://127.0.0.1:8804'));

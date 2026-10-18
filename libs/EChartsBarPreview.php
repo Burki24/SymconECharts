@@ -12,6 +12,17 @@ require_once __DIR__ . '/EChartsVariablePresentation.php';
 /** Shared SVG primitives and bounded source resolution; chart geometry stays with each module. */
 final class EChartsBarPreview
 {
+    /** @param list<int> $colors Three RGB colors at minimum, midpoint and maximum. */
+    public static function RampColor(float $value, float $minimum, float $maximum, array $colors): string
+    {
+        $ratio = $maximum > $minimum ? max(0, min(1, ($value - $minimum) / ($maximum - $minimum))) : 0;
+        $a = max(0, min(0xFFFFFF, $colors[$ratio <= 0.5 ? 0 : 1]));
+        $b = max(0, min(0xFFFFFF, $colors[$ratio <= 0.5 ? 1 : 2]));
+        $t = $ratio <= 0.5 ? 2 * $ratio : 2 * ($ratio - 0.5);
+        $channels = array_map(static fn (int $shift): int => (int) round((($a >> $shift) & 255) + ((($b >> $shift) & 255) - (($a >> $shift) & 255)) * $t), [16, 8, 0]);
+        return sprintf('#%02x%02x%02x', ...$channels);
+    }
+
     /** @param array<string,mixed> $values @return array{items:list<array<string,mixed>>,sample:bool} */
     public static function Sources(string $stored, array $values, string $labelField = 'Label', bool $currentValues = true, int $maximumSources = 16): array
     {

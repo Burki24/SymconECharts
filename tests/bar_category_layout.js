@@ -9,6 +9,8 @@ const source = fs.readFileSync(
     path.join(__dirname, '..', 'EChartsBarCategory', 'visualization', 'app.js'),
     'utf8'
 );
+const gradientStyle = { barFillMode: 'gradient', colorMinimum: 0, colorMaximum: 100,
+    lowColor: '#ff0000', middleColor: '#ffff00', highColor: '#00ff00', animationEnabled: false };
 const designSource = fs.readFileSync(
     path.join(__dirname, '..', 'libs', 'echarts-design.js'),
     'utf8'
@@ -23,8 +25,10 @@ function render(orientation, sortOrder, outputMode = 'symcon', barMode = 'simple
     function TestImage() { images.push(this); }
     Object.defineProperty(TestImage.prototype, 'src', { set(value) { this.source = value; } });
     let option, nativeChart = null;
+    const handlers = {};
     const chart = {
         setOption: next => { option = next; }, clear: () => {}, resize: () => {}, dispose: () => {},
+        on: (event, handler) => { handlers[event] = handler; },
         getOption: () => nativeChart ? nativeChart.getOption() : ({ ...option, xAxis: [option.xAxis], yAxis: [option.yAxis] })
     };
     const palette = {
@@ -77,13 +81,23 @@ function render(orientation, sortOrder, outputMode = 'symcon', barMode = 'simple
         testImages: { value: images },
         getUpdatedOption: { value: () => option },
         refresh: { value: () => window.handleMessage(window.SYMC_VISUALIZATION.state) },
-        useNativeChart: { value: engine => { nativeChart = engine; } },
+        useNativeChart: { value: engine => {
+            nativeChart = engine;
+            if (engine) { Object.entries(handlers).forEach(([event, handler]) => engine.on(event, handler)); }
+        } },
         flush: { value: () => { while (scheduled.length > 0) { scheduled.shift()(); } } }
     });
     return option;
 }
 
 const horizontal = render('horizontal', 'descending');
+const gradientBattery = render('horizontal', 'configured', 'symcon', 'simple', [
+    { id: 'battery', category: 'Battery', value: 16, order: 0, color: '#123456' }
+], gradientStyle);
+assert.equal(gradientBattery.series[0].data[0].itemStyle.color.type, 'linear',
+    'Opting into gradient fill must paint inside each bar rather than choose a flat value color.');
+assert.deepEqual(Array.from(gradientBattery.series[0].data[0].itemStyle.color.colorStops, stop => [stop.offset, stop.color]),
+    [[0, '#ff0000'], [1, '#ff5200']], 'A 16% bar ends at 16% of the full configured ramp, not green.');
 assert.equal(horizontal.xAxis.type, 'value');
 assert.equal(horizontal.yAxis.type, 'category');
 assert.deepEqual(Array.from(horizontal.yAxis.data), ['B', 'C', 'A']);
@@ -275,6 +289,72 @@ const nativeWindow = {};
 vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', 'libs/echarts/6.1.0/echarts.bar-category.min.js'), 'utf8'),
     { window: nativeWindow, navigator: { userAgent: 'Node.js' }, console, setTimeout, clearTimeout });
 nativeWindow.echarts.use(require('../.tools/echarts-runtime/node_modules/echarts/renderers').SVGRenderer);
+const fullEcharts = require('../.tools/echarts-runtime/node_modules/echarts');
+
+function stopPairs(fill) {
+    return Array.from(fill.colorStops, stop => [stop.offset, stop.color]);
+}
+for (const orientation of ['horizontal', 'vertical']) {
+    for (const output of ['symcon', 'ipsview']) {
+        const signed = render(orientation, 'configured', output, 'stacked', [
+            { id: 'p1', category: 'A', series: 'One', value: 20, order: 0 },
+            { id: 'p2', category: 'A', series: 'Two', value: 30, order: 1 },
+            { id: 'n1', category: 'A', series: 'Three', value: -20, order: 2 },
+            { id: 'n2', category: 'A', series: 'Four', value: -30, order: 3 },
+            { id: 'zero', category: 'B', series: 'One', value: 0, order: 4 }
+        ], { ...gradientStyle, colorMinimum: -50, colorMaximum: 50 });
+        const fills = signed.series.map(series => series.data[0].itemStyle.color);
+        assert.deepEqual(stopPairs(fills[0]), [[0, '#ffff00'], [1, '#99ff00']]);
+        assert.deepEqual(stopPairs(fills[1]), [[0, '#99ff00'], [1, '#00ff00']],
+            'Positive stack segments must continue the absolute-axis ramp.');
+        assert.deepEqual(stopPairs(fills[2]), [[0, '#ff9900'], [1, '#ffff00']]);
+        assert.deepEqual(stopPairs(fills[3]), [[0, '#ff0000'], [1, '#ff9900']],
+            'Negative stacks must accumulate independently and retain ascending-axis colors.');
+        assert.equal(signed.series[0].data[1].itemStyle.color, '#ffff00', 'Zero values have a finite flat color.');
+        assert.equal(signed.series[1].data[1].value, null, 'Sparse cells stay absent, never zero-filled.');
+        assert.equal(signed.series[0].data[0].label.color, '#101114', 'Inside labels use the segment midpoint contrast.');
+        const engine = nativeWindow.echarts.init(null, null, { renderer: 'svg', ssr: true, width: 800, height: 500 });
+        engine.setOption(signed);
+        const negativeGraphic = engine.getModel().getSeriesByIndex(3).getData().getItemGraphicEl(0);
+        assert.deepEqual(stopPairs(negativeGraphic.style.fill), [[0, '#ff0000'], [1, '#ff9900']]);
+        assert.equal(negativeGraphic.style.fill.x2, orientation === 'horizontal' ? 1 : 0);
+        assert.equal(negativeGraphic.style.fill.y, orientation === 'vertical' ? 1 : 0);
+        const rect = negativeGraphic.getBoundingRect();
+        assert.ok(Number.isFinite(rect.x) && Number.isFinite(rect.y) && rect.width > 0 && rect.height > 0,
+            'The shipped runtime must lay out a nonempty signed gradient segment.');
+        // The compiled bundle owns different Path classes than an externally
+        // loaded SVG painter. Its geometry above is genuine, but SVG markup is
+        // checked with the official complete runtime sharing its own painter.
+        const svgEngine = fullEcharts.init(null, null, { renderer: 'svg', ssr: true, width: 800, height: 500 });
+        svgEngine.setOption(signed);
+        const svg = svgEngine.renderToSVGString();
+        assert.ok(svg.includes('<linearGradient') && svg.includes('stop-color='), 'Official SVG rendering must preserve gradient fills.');
+        assert.equal(/NaN|Infinity/.test(svg), false);
+        svgEngine.dispose();
+        engine.dispose();
+        const override = render(orientation, 'configured', output, 'simple', undefined,
+            { ...gradientStyle, valueLabelPosition: 'inside', valueColor: '#123456' });
+        assert.equal(override.series[0].data[0].label.color, '#123456');
+        const lqi = render(orientation, 'configured', output, 'simple', [
+            { id: 'lqi', category: 'LQI', value: 127.5, order: 0 }
+        ], { ...gradientStyle, colorMaximum: 255 });
+        assert.deepEqual(stopPairs(lqi.series[0].data[0].itemStyle.color), [[0, '#ff0000'], [1, '#ffff00']]);
+        const fractional = render(orientation, 'configured', output, 'simple', [
+            { id: 'fraction', category: 'Fraction', value: 0.3, order: 0 }
+        ], { ...gradientStyle, colorMinimum: 0.1, colorMaximum: 0.5 });
+        const fractionalFill = fractional.series[0].data[0].itemStyle.color;
+        assert.equal(fractionalFill.colorStops.length, 3);
+        assert.ok(Math.abs(fractionalFill.colorStops[1].offset - 1 / 3) < 1e-12);
+        assert.equal(fractionalFill.colorStops[2].color, '#ffff00');
+        const huge = render(orientation, 'configured', output, 'simple', [
+            { id: 'small', category: 'Small', value: 0.00001, order: 0 }
+        ], { ...gradientStyle, colorMinimum: -1e12, colorMaximum: 1e12 });
+        const hugeFill = huge.series[0].data[0].itemStyle.color;
+        assert.equal(hugeFill.global, false);
+        assert.ok(hugeFill.colorStops.every(stop => Number.isFinite(stop.offset) && stop.offset >= 0 && stop.offset <= 1),
+            'Extreme fixed ranges must never create huge gradient coordinates.');
+    }
+}
 
 for (const count of [72, 100]) {
 for (const output of ['symcon', 'ipsview']) {
@@ -286,7 +366,7 @@ for (const output of ['symcon', 'ipsview']) {
                 series: 'Series ' + index % 2, seriesKey: 'series-' + index % 2,
                 value: index === count - 1 ? -250 : index + 1, order: index
             }));
-            const large = render(orientation, 'configured', output, mode, items, { animationEnabled: false });
+            const large = render(orientation, 'configured', output, mode, items, gradientStyle);
             assert.equal(large.dataZoom.length, 2, 'Large category lists need native slider and inside navigation.');
             assert.equal(large.dataZoom[0].id, 'category-scroll');
             assert.ok(large.dataZoom[0].endValue < 16, 'Initial category windows remain readable.');
@@ -311,6 +391,16 @@ for (const output of ['symcon', 'ipsview']) {
             const tail = engine.getModel().getSeriesByIndex(engine.getModel().getSeries().length - 1).getData();
             assert.equal(tail.getRawIndex(tail.count() - 1), categoryCount - 1,
                 'Every source must be reachable at the end of the category window.');
+            const rawFill = currentOption.series[currentOption.series.length - 1].data[categoryCount - 1].itemStyle.color;
+            assert.equal(rawFill.type, 'linear');
+            assert.deepEqual(stopPairs(tail.getItemGraphicEl(tail.count() - 1).style.fill), stopPairs(rawFill),
+                'Native scrolling must retain full-model gradient endpoints instead of using filtered indexes.');
+            tail.each(index => {
+                const rawIndex = tail.getRawIndex(index);
+                const originalFill = currentOption.series[currentOption.series.length - 1].data[rawIndex].itemStyle.color;
+                assert.deepEqual(stopPairs(tail.getItemGraphicEl(index).style.fill), stopPairs(originalFill),
+                    'Every positive and negative tail segment retains its original gradient domain.');
+            });
             const visibleAxis = engine.getModel().getComponent(orientation === 'horizontal' ? 'yAxis' : 'xAxis').axis;
             const expectedLabels = mode === 'simple' ? Array(visibleCount).fill('Battery')
                 : Array.from({ length: visibleCount }, (_, index) => 'Category ' + (categoryCount - visibleCount + index));
@@ -340,7 +430,7 @@ for (const output of ['symcon', 'ipsview']) {
 const reorderingItems = Array.from({ length: 100 }, (_, index) => ({
     id: 'source-' + index, category: 'Duplicate label', value: index, order: index
 }));
-const reordering = render('horizontal', 'descending', 'symcon', 'simple', reorderingItems, { animationEnabled: false });
+const reordering = render('horizontal', 'descending', 'symcon', 'simple', reorderingItems, gradientStyle);
 const reorderingEngine = nativeWindow.echarts.init(null, null, { renderer: 'svg', ssr: true, width: 800, height: 500 });
 reordering.useNativeChart(reorderingEngine);
 reorderingEngine.setOption(reordering);
@@ -352,6 +442,27 @@ const reordered = reordering.getUpdatedOption();
 assert.equal(reordered.yAxis.data[reordered.dataZoom[0].startValue], anchor,
     'Resorting must retain the visible source ID even when every visible category name is identical.');
 assert.equal(reordered.yAxis.axisLabel.formatter(anchor, reordered.dataZoom[0].startValue), 'Duplicate label');
+assert.deepEqual(stopPairs(reordered.series[0].data[0].itemStyle.color),
+    [[0, '#ff0000'], [0.25, '#ffff00'], [0.5, '#00ff00'], [1, '#00ff00']],
+    'Updated and resorted values retain the same fixed ramp; values above its maximum stay green.');
 reorderingEngine.dispose();
+
+const selectable = render('horizontal', 'configured', 'ipsview', 'stacked', [
+    { id: 'first', category: 'Room', series: 'A', seriesKey: 'a', value: 30, order: 0 },
+    { id: 'second', category: 'Room', series: 'B', seriesKey: 'b', value: 40, order: 1 }
+], gradientStyle);
+const selectionEngine = nativeWindow.echarts.init(null, null, { renderer: 'svg', ssr: true, width: 800, height: 500 });
+selectable.useNativeChart(selectionEngine);
+selectionEngine.setOption(selectable);
+selectionEngine.dispatchAction({ type: 'legendToggleSelect', name: selectable.series[0].name });
+const withoutFirst = selectable.getUpdatedOption();
+assert.equal(withoutFirst.legend.selected[selectable.series[0].name], false);
+assert.deepEqual(stopPairs(withoutFirst.series[1].data[0].itemStyle.color), [[0, '#ff0000'], [1, '#ffcc00']],
+    'Hiding a stack series must move the remaining gradient to its visible axis position.');
+selectionEngine.setOption(withoutFirst, true);
+selectable.refresh();
+assert.equal(selectable.getUpdatedOption().legend.selected[selectable.series[0].name], false,
+    'A gradient update must preserve the legend selection.');
+selectionEngine.dispose();
 
 console.log('Category Bar renderer layout verified.');

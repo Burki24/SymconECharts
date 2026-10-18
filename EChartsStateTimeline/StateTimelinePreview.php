@@ -37,7 +37,8 @@ trait StateTimelinePreview
         $number = fn (string $name, int $min, int $max): int => max($min, min($max, $this->BarPreviewValue($values, $name, 'integer', $ipsView)));
         $dash = static fn (string $type, int $width): string => $type === 'dashed' ? ' stroke-dasharray="' . max(1, $width) * 4 . ' ' . max(1, $width) * 2 . '"'
             : ($type === 'dotted' ? ' stroke-dasharray="' . max(1, $width) . ' ' . max(1, $width) . '"' : '');
-        $items = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values, 'Label', false)['items'];
+        $items = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values, 'Label', false, 32)['items'];
+        $totalRows = count($items);
         $items = array_slice($items, 0, 8);
         $raw = $values['Sources'] ?? $this->ReadPropertyString('Sources');
         $raw = is_string($raw) ? json_decode($raw, true) : $raw;
@@ -149,6 +150,10 @@ trait StateTimelinePreview
         }
         if ($this->BarPreviewValue($values, 'EnableZoom', 'boolean', $ipsView)) {
             $svg .= '<rect x="' . $left . '" y="330" width="' . ($right - $left) . '" height="12" fill="' . $e($palette['surface'] ?? $palette['background']) . '" stroke="' . $e($palette['border']) . '"/>';
+        }
+        if ($totalRows > 8) {
+            $svg .= '<text x="360" y="356" text-anchor="middle" font-size="10" fill="' . $e($palette['text']) . '">'
+                . $e(sprintf($this->Translate('Preview: first %d of %d rows. Scroll in the chart to see all.'), 8, $totalRows)) . '</text>';
         }
         return $svg . '</svg>';
     }

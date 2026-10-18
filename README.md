@@ -55,7 +55,8 @@ Folgende Module sind enthalten:
   bleiben erkennbar; Kachel und IPSView besitzen eigene Designer und Vorschauen.
 
 - __EChartsStateTimeline__ ([Dokumentation](EChartsStateTimeline/README.md))
-  Archivierte Boolean-/Integer-Zustände als farbige Zeitabschnitte je Quelle.
+  Archivierte Boolean-/Integer-Zustände von bis zu 32 Quellen als farbige
+  Zeitabschnitte mit Zeilennavigation für große Listen.
   Eigene Zustandsnamen/-farben, ausdrücklich unbekannte Anfänge und Zoom;
   getrennte Kachel- und IPSView-Designer ohne Mittelwertbildung.
 

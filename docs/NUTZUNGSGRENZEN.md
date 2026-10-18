@@ -14,14 +14,16 @@ falsche Summen, erfundene Archivwerte, unlesbare Geometrie oder übergroße
 Symcon-Ausgaben. Deshalb werden nicht pauschal alle Grenzen auf 100 gesetzt.
 
 Inzwischen wurden **PictorialBar und BarCategory auf 100 Quellen** erweitert.
-PictorialBar besitzt außerdem eine anpassbare Bezeichnungsspalte. Die übrigen
+PictorialBar besitzt außerdem eine anpassbare Bezeichnungsspalte. BarCategory
+bietet optional einen festen Min-/Max-Farbverlauf innerhalb der Balken.
+**StateTimeline unterstützt 32 Quellen mit Zeilennavigation**. Die übrigen
 Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
 
 | Reihenfolge | Empfohlener nächster Schritt | Nutzen und Voraussetzung |
 | --- | --- | --- |
 | Erledigt | PictorialBar: 1–100 Quellen, Kategoriennavigation | Alle 72 Batterievariablen passen in eine Instanz; lesbarer Ausschnitt statt 100 zusammengedrängter Zeilen. |
 | Erledigt | BarCategory: bis 100 Quellenzuordnungen, Kategoriennavigation | Größere Gerätevergleiche; die Obergrenze gilt für sämtliche Zuordnungen zusammen, nicht je Kategorie oder Reihe. |
-| 2 | StateTimeline: zunächst 32 Quellen mit Zeilennavigation | Fenster, Türen und Verbraucher gemeinsam darstellen; Gesamtbudget für Zustandswechsel und Ausgabe ergänzen. 100 erst nach Lastprüfung. |
+| Erledigt | StateTimeline: 32 Quellen mit Zeilennavigation | Fenster, Türen und Verbraucher gemeinsam darstellen; insgesamt höchstens 16000 Rohwerte, bis 2000 je Quelle, weiterhin begrenzte Ausgabe. 100 erst nach Lastprüfung. |
 | 3 | Boxplot: bis 32 Quellen und Kategoriennavigation | Viele Räume/Sensoren vergleichen; gemeinsames Archivabfragebudget statt 32 unbeschränkter Einzelabfragen. |
 | 4 | Benutzerdefinierte Archivzeiträume | Vorhandenen Zeitfenstervertrag dort wiederverwenden, wo bisher nur 24 h / 7 d / 30 d angeboten werden. |
 | 5 | Calendar/Heatmap: passende Tages-/Stundenkennzahlen | Minimum, Maximum und ausdrücklich definierter Zählerverbrauch statt ausschließlich Mittelwert. |
@@ -36,8 +38,8 @@ normalisiert und anschließend als unveränderte Mengenbilanz ausgegeben werden.
 ## Aktuelle Werte und Strukturen
 
 Die folgenden Dateiverweise zeigen die maßgeblichen Verträge. Angegebene
-Erweiterungszahlen außerhalb PictorialBar sind Planungsziele, keine implementierten
-oder bereits lastgeprüften Zusagen.
+Erweiterungszahlen außerhalb der ausdrücklich als umgesetzt bezeichneten
+Schritte sind Planungsziele, keine implementierten oder lastgeprüften Zusagen.
 
 | Familie | Aktueller Vertrag | Bewertung und sinnvolle Erweiterung |
 | --- | --- | --- |
@@ -90,7 +92,7 @@ Candlestick-Anfangswert ausgegeben werden.
 | EChartsBoxplot | 1–10 Standard-Archivquellen gleicher Einheit; 24 h / 7 d / 30 d; bis 1000 abgeschlossene Stundenmittel je Quelle. R7-Quartile und Min/Max-Whisker, nicht Rohwertverteilung oder 1,5-IQR-Ausreißermodell. | Hohe Priorität: 32 Quellen plus Navigation und gemeinsames Abfragebudget. Freie Zeiträume. IQR/Ausreißer als ausdrücklich anderer Modus; unterschiedliche Einheiten nur normalisiert oder in getrennten Panels vergleichen. |
 | EChartsCandlestick | Eine numerische Standard-Archivquelle; Stunde/Tag in 24 h / 7 d / 30 d. Tatsächliche Rohwerte für ersten/letzten Wert und Minimum/Maximum; leere Intervalle bleiben leer. Bis 63 Abfragen/64000 Rohänderungen pro Aktualisierung. | Freie Zeitfenster, weitere feste Intervalle und Zeitzoom. Mehrere benannte Panels später; Rohwert- und Abfragebudgets behalten. Einzelmessungen ergeben flache Kerzen, keine erfundenen Endpunkte. |
 | EChartsThemeRiver | 1–8 nichtnegative Standard-Archivmittel gleicher Einheit; Stunde/Tag, 24 h / 7 d / 30 d; höchstens 720 Intervalle und 1000 geladene Aggregate je Quelle. Fehlende Quelle unterbricht den gemeinsamen Abschnitt. | Zählerverbrauch, freie Zeiträume und anschließend 16–20 Bänder mit Gesamtbudget prüfen. Optional normalisierte relative Gewichte; keine negativen Flussbreiten und keine stillschweigende Nullfüllung von Archivlücken. |
-| EChartsStateTimeline | 1–8 Boolean-/Integer-Standardarchive, bis 32 Zustandsdefinitionen je Quelle; 24 h / 7 d / 30 d; bis 2000 Wechsel je Quelle plus Vorgänger; Modell höchstens 250000 Bytes. Unbekannte Zustände sichtbar. | Hohe Priorität: 32, später nach Lastprüfung 100 Quellen mit Zeilennavigation und gemeinsamem Wechselbudget. Freie Zeiträume. Float-/String-Zustände erst mit ausdrücklichem Gleichheits-/Zuordnungsvertrag. |
+| EChartsStateTimeline | Jetzt 1–32 Boolean-/Integer-Standardarchive, bis 32 Zustandsdefinitionen je Quelle; 24 h / 7 d / 30 d; bis 2000 Rohwerte je Quelle plus Vorgänger, insgesamt 16000 Rohwerte; Modell höchstens 250000 Bytes. Unbekannte Zustände sichtbar. | Umgesetzt: unabhängige Zeilennavigation ab neun Quellen und Gesamtbudget ohne stille Kürzung. Später nach Lastprüfung bis 100 Quellen; freie Zeiträume. Float-/String-Zustände erst mit ausdrücklichem Gleichheits-/Zuordnungsvertrag. |
 
 Maßgebliche Implementierungen:
 
@@ -122,7 +124,7 @@ Importform zusammen mit der größten Quellenliste prüfen.
 Vorschauen sind gesondert zu betrachten:
 
 - `libs/EChartsBarPreview.php::Sources()` akzeptiert standardmäßig höchstens
-  16 Quellen, BarCategory verwendet ausdrücklich 100. Andere Familien bleiben
+  16 Quellen, BarCategory verwendet ausdrücklich 100 und StateTimeline 32. Andere Familien bleiben
   unverändert. Bei ungeeigneten Listen kann der Baustein auf Beispieldaten
   zurückfallen. Eine neue Obergrenze nur in `module.php` wäre deshalb
   unvollständig. PictorialBar verwendet einen eigenen, vollständig validierten
@@ -162,8 +164,13 @@ ihre bisherigen Runtimes weiter.
 Eine lokale Browseransicht mit synthetischen 72/100 Quellen wurde zusätzlich
 visuell geprüft; die 100er-Ansicht lässt sich bis zur letzten Kategorie
 verschieben. Der Eigentümer hat PictorialBar mit allen 72 echten Variablen
-anschließend in Kachel und IPSView live bestätigt. Die neue Spaltenbreite und
-BarCategory-Erweiterung sind nach dem nächsten Modulupdate gesondert live
-abzunehmen. Live-Konfigurationen, Archivaufzeichnung und Quellwerte wurden bei
-dieser Folgeänderung nicht verändert. Die vorgeschlagenen
+anschließend in Kachel und IPSView live bestätigt, ebenso inzwischen BarCategory
+mit 72 Variablen. Die nachfolgende Erweiterung um Balkenverläufe und 32
+Timeline-Zeilen wurde lokal mit synthetischen Daten in den beiden Ausgabe-
+Varianten im Browser geprüft, einschließlich Navigation bis zur letzten Zeile.
+Ihre Live-Abnahme nach Modulupdate steht noch aus. Regressionsprüfungen sichern
+die 32/33-Grenze, unbekannte Archive, ID-stabile Zeilen bei Updates/Resize,
+unabhängigen Zeitzoom und das gemeinsame 16000-Rohwerte-Budget ab.
+Live-Konfigurationen, Archivaufzeichnung und Quellwerte wurden bei
+dieser Folgeänderung nicht verändert. Die übrigen vorgeschlagenen
 Erweiterungen anderer Familien sind noch nicht umgesetzt oder lastgeprüft.

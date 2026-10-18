@@ -6208,6 +6208,17 @@ foreach ($groupedBarSources as $source) {
 }
 
 require __DIR__ . '/bar_category_large_sources.php';
+require __DIR__ . '/bar_category_gradient.php';
+
+// These completed fixtures retain inline runtimes and preview/update histories.
+// Release them before the remaining families run under PHP's normal memory limit.
+unset(
+    $barCategory, $invalidBarCategory, $sameNameBar, $groupedBar, $automaticStackedBar,
+    $legacyCategoryBar, $interimCategoryBar, $incompleteGroupedBar, $duplicateGroupedBar,
+    $collidingSeriesBar, $barTile, $barIPSView, $barForm, $categorySVGForm,
+    $categoryPatternIPSView, $largeBarCategoryTile, $maximumBarCategoryTile
+);
+gc_collect_cycles();
 
 $barHistory = new TestableEChartsBarHistory();
 $barHistory->Create();

@@ -25,7 +25,10 @@ Die [systematische Prüfung der Nutzungsgrenzen](NUTZUNGSGRENZEN.md) erfasst
 alle 29 Diagrammfamilien und das Gateway. Sie trennt fachliche Verträge und
 Ressourcenschutz von ausbaubaren Produktgrenzen. PictorialBar und BarCategory
 unterstützen jetzt 100 Quellen mit Kategoriennavigation; PictorialBar besitzt
-zusätzlich eine anpassbare Bezeichnungsspalte. Weitere Erweiterungen sind dort
+zusätzlich eine anpassbare Bezeichnungsspalte. BarCategory ergänzt einen
+optionalen, an einer festen Min-/Max-Skala ausgerichteten Balkenverlauf.
+StateTimeline unterstützt 32 Quellen mit unabhängiger Zeilennavigation und
+einem Gesamtbudget von 16000 Rohwerten. Weitere Erweiterungen sind dort
 priorisiert, aber noch nicht umgesetzt.
 
 CalendarPie (`ECCP`) ergänzt gemäß [ADR 0060](adr/0060-calendar-pie-data-modes.md)
@@ -132,7 +135,7 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 | Gerät | EChartsGaugeTacho | Tacho-Cockpit mit 2 bis 5 individuell gestaltbaren Instrumenten |
 | Gerät | EChartsGaugeChronograph | Chronograph mit 2 bis 5 individuell gestaltbaren Instrumenten |
 | Gerät | EChartsTimeSeries | Historische und live fortgeschriebene Linien und Flächen für 1 bis 8 Quellen, bis zu acht links/rechts angeordnete Einheitengruppen sowie getrenntes Kachel- und IPSView-Design |
-| Gerät | EChartsBarCategory | Aktuelle einfache, gruppierte oder gestapelte Kategorienvergleiche für 1 bis 16 Quellen mit gemeinsamer Einheit, vertikal/horizontal und mit getrenntem Kachel- und IPSView-Design |
+| Gerät | EChartsBarCategory | Aktuelle einfache, gruppierte oder gestapelte Kategorienvergleiche für 1 bis 100 Quellen mit gemeinsamer Einheit, Kategoriennavigation, optionalem Min-/Max-Farbverlauf und getrenntem Kachel- und IPSView-Design |
 | Gerät | EChartsBarHistory | Historische rohe oder aggregierte Balken von 1 bis 16 Archivquellen auf einer Zeitachse in einer nativen Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsBarWaterfall | Aktueller Startwert mit 1 bis 15 signierten Änderungen und berechneter Endsumme in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsBarPolar | Aktuelle Werte aus 1 bis 16 Quellen als radiale Balken oder konzentrische Bögen in Kachel und optionalem IPSView-HTML |

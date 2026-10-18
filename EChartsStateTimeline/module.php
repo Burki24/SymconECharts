@@ -65,6 +65,7 @@ class EChartsStateTimeline extends IPSModuleStrict
     private const STATUS_CONFIGURATION_INVALID = 202;
     private const STATUS_PARENT_MISSING = 203;
     private const STATUS_GATEWAY_FAILED = 204;
+    private const MAXIMUM_TOTAL_POINTS = 16000;
     private const DESIGN_DEFAULTS = [
         'EChartsTheme'         => 'auto', 'EnableZoom' => true, 'ShowTooltip' => true, 'ShowLabels' => true,
         'ShowGrid'             => true, 'RowHeightPercent' => 65, 'BarOpacityPercent' => 90, 'BorderWidth' => 0,
@@ -264,8 +265,15 @@ class EChartsStateTimeline extends IPSModuleStrict
         $sources = $this->GetValidatedSources();
         $query = StateTimelineData::Window($this->ReadPropertyString('Range'), $this->CurrentTimestamp());
         $rows = [];
+        $pointCount = 0;
+        $encodedRowBytes = 0;
         foreach ($sources as $source) {
-            $archive = $this->ReadArchiveSource($source, $query);
+            $remaining = self::MAXIMUM_TOTAL_POINTS - $pointCount;
+            if ($remaining < 1) {
+                $this->FailArchiveBudget();
+            }
+            $archive = $this->ReadArchiveSource($source, $query, min(2000, $remaining));
+            $pointCount += count($archive['Points']);
             try {
                 $segments = StateTimelineData::Segments(
                     $archive['Points'],
@@ -287,7 +295,12 @@ class EChartsStateTimeline extends IPSModuleStrict
                 $segment['color'] = $color < 0 ? '' : EChartsAsset::ColorToHex($color);
             }
             unset($segment);
-            $rows[] = ['id' => 'variable-' . $source['VariableID'], 'label' => $source['Label'], 'segments' => $segments];
+            $row = ['id' => 'variable-' . $source['VariableID'], 'label' => $source['Label'], 'segments' => $segments];
+            $encodedRowBytes += strlen($this->EncodeVisualizationHTMLJSON($row));
+            if ($encodedRowBytes > 250000) {
+                $this->FailArchiveBudget();
+            }
+            $rows[] = $row;
         }
         $this->WriteAttributeString('LastError', '');
         $this->SetStatus(IS_ACTIVE);
@@ -300,9 +313,7 @@ class EChartsStateTimeline extends IPSModuleStrict
                 'timezone'       => date_default_timezone_get()]
         ]);
         if (strlen($encoded) > 250000) {
-            $this->WriteAttributeString('LastError', 'ARCHIVE_TRUNCATED');
-            $this->SetStatus(self::STATUS_GATEWAY_FAILED);
-            throw new RuntimeException('Too many state changes. Choose a shorter time range.');
+            $this->FailArchiveBudget();
         }
         return $encoded;
     }
@@ -393,8 +404,8 @@ class EChartsStateTimeline extends IPSModuleStrict
         } catch (JsonException $exception) {
             throw new InvalidArgumentException('StateTimeline sources must contain valid JSON.', 0, $exception);
         }
-        if (!is_array($raw) || !array_is_list($raw) || count($raw) < 1 || count($raw) > 8) {
-            throw new InvalidArgumentException('Configure 1 to 8 unique Boolean or Integer StateTimeline variables.');
+        if (!is_array($raw) || !array_is_list($raw) || count($raw) < 1 || count($raw) > 32) {
+            throw new InvalidArgumentException('Configure 1 to 32 unique Boolean or Integer StateTimeline variables.');
         }
         $sources = [];
         $seen = [];
@@ -419,11 +430,11 @@ class EChartsStateTimeline extends IPSModuleStrict
     }
 
     /** @param array{VariableID:int} $source @param array<string,mixed> $query @return array<string,mixed> */
-    private function ReadArchiveSource(array $source, array $query): array
+    private function ReadArchiveSource(array $source, array $query, int $limit): array
     {
         $operation = EChartsDataProtocol::OPERATION_ARCHIVE_STATES_READ;
         $payload = ['VariableID' => $source['VariableID'], 'StartTimestamp' => $query['StartTimestamp'],
-            'EndTimestamp'       => $query['EndTimestamp'], 'Limit' => 2000];
+            'EndTimestamp'       => $query['EndTimestamp'], 'Limit' => $limit];
         $this->WriteAttributeString('LastError', '');
         try {
             $response = EChartsDataProtocol::DecodeResponse(
@@ -445,10 +456,8 @@ class EChartsStateTimeline extends IPSModuleStrict
             throw new RuntimeException('The gateway archive request failed: ' . $code);
         }
         $archive = $response['Payload'];
-        if (($archive['Truncated'] ?? null) === true) {
-            $this->WriteAttributeString('LastError', 'ARCHIVE_TRUNCATED');
-            $this->SetStatus(self::STATUS_GATEWAY_FAILED);
-            throw new RuntimeException('Too many state changes. Choose a shorter time range.');
+        if (($archive['Truncated'] ?? null) === true || (is_array($archive['Points'] ?? null) && count($archive['Points']) > $limit)) {
+            $this->FailArchiveBudget();
         }
         if (($archive['VariableID'] ?? null) !== $source['VariableID']
             || !is_array($archive['Points'] ?? null) || ($archive['Truncated'] ?? null) !== false
@@ -463,6 +472,13 @@ class EChartsStateTimeline extends IPSModuleStrict
             throw new RuntimeException('The gateway returned invalid StateTimeline archive data.');
         }
         return $archive;
+    }
+
+    private function FailArchiveBudget(): never
+    {
+        $this->WriteAttributeString('LastError', 'ARCHIVE_TRUNCATED');
+        $this->SetStatus(self::STATUS_GATEWAY_FAILED);
+        throw new RuntimeException('Too many state changes. Choose a shorter time range.');
     }
 
     private function SynchronizeSourceReferences(): void

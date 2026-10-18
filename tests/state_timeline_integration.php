@@ -341,4 +341,71 @@ assertGatewayGauge(
     'HTML-safe escaping of valid state labels must not exceed the output buffer.'
 );
 IPSModuleStrict::$ParentResponder = $parent;
+$largeSources = [];
+for ($index = 0; $index < 33; ++$index) {
+    $id = 89400 + $index;
+    $GLOBALS['symconTestVariables'][$id] = ['VariableType' => 0, 'VariableUpdated' => $end,
+        'Value'                                            => true, 'Name' => 'Equal contact'];
+    $GLOBALS['symconTestArchiveVariables'][$id] = ['AggregationType' => 0,
+        'LoggedValues'                                               => $index === 31 ? [] : [
+            ['TimeStamp' => $start + 500, 'Value' => true],
+            ...($index % 2 === 0 ? [['TimeStamp' => $start - 1, 'Value' => false]] : [])
+        ]];
+    $largeSources[] = ['VariableID' => $id, 'Label' => '', 'States' => $timelineSources[0]['States']];
+}
+$timeline->SetTestProperty('Sources', json_encode(array_slice($largeSources, 0, 32), JSON_THROW_ON_ERROR));
+$timeline->ApplyChanges();
+assertGatewayGauge($timeline->GetTestStatus() === IS_ACTIVE, 'StateTimeline must accept 32 independent state sources.');
+$largeModel = json_decode($timeline->GetStateTimelineData(), true, 512, JSON_THROW_ON_ERROR);
+$largeRows = $largeModel['stateTimeline']['rows'];
+assertGatewayGauge(
+    count($largeRows) === 32 && count(array_unique(array_column($largeRows, 'id'))) === 32
+    && count(array_unique(array_column($largeRows, 'label'))) === 1
+    && $largeRows[1]['segments'][0]['value'] === null && $largeRows[31]['segments'][0]['value'] === null,
+    'All 32 ID-distinct equal-name rows, partial and fully unknown archives must remain in the model.'
+);
+assertGatewayGauge(
+    count($timeline->GetTestReferences()) === 32
+    && strlen($timeline->GetVisualizationTile()) < SYMCON_OUTPUT_BUFFER_LIMIT
+    && strlen($timeline->GetIPSViewHTML()) < SYMCON_OUTPUT_BUFFER_LIMIT
+    && strlen($timeline->GetConfigurationForm()) < SYMCON_OUTPUT_BUFFER_LIMIT,
+    '32 source references, real HTML outputs and both form previews must remain bounded.'
+);
+$timeline->UpdateBarPreviewFromForm(json_encode(['Sources' => array_slice($largeSources, 0, 32),
+    'ShowSourceLabels'                                     => true], JSON_THROW_ON_ERROR));
+foreach (array_slice($timeline->GetTestFormUpdates(), -2) as $update) {
+    $svg = base64_decode(substr($update['Value'], strlen('data:image/svg+xml;base64,')), true);
+    assertGatewayGauge(substr_count($svg, 'data-source-label="true"') === 8
+        && str_contains($svg, 'Preview: first 8 of 32 rows. Scroll in the chart to see all.')
+        && str_contains($svg, 'Equal contact'), 'A large preview must explicitly identify its real-source subset.');
+}
+$timeline->SetTestProperty('Sources', json_encode($largeSources, JSON_THROW_ON_ERROR));
+$timeline->ApplyChanges();
+assertGatewayGauge($timeline->GetTestStatus() === 201, '33 StateTimeline sources must be rejected.');
+// Keep the previous 8-source raw-point allowance, but do not multiply it by four.
+$timeline->SetTestProperty('Sources', json_encode(array_slice($largeSources, 0, 9), JSON_THROW_ON_ERROR));
+$budgetRequests = 0;
+IPSModuleStrict::$ParentResponder = static function (string $request) use ($parent, $start, &$budgetRequests): string
+{
+    $response = json_decode($parent($request), true, 512, JSON_THROW_ON_ERROR);
+    if (($response['Operation'] ?? null) === 'archive.states.read' && ($response['Success'] ?? false)) {
+        ++$budgetRequests;
+        $response['Payload']['Points'] = array_map(static fn (int $index): array => [$start + $index, 1], range(0, 1999));
+        $response['Payload']['PreviousPoint'] = null;
+    }
+    return json_encode($response, JSON_THROW_ON_ERROR);
+};
+$budgetHTML = $timeline->GetVisualizationTile();
+assertGatewayGauge(
+    str_contains($budgetHTML, '"status":"error"')
+    && str_contains($budgetHTML, 'Too many state changes. Choose a shorter time range.') && $budgetRequests === 8,
+    'A shared 16000 raw-point budget must stop before an extra source read, without sampling.'
+);
+$timeline->SetTestProperty('Sources', json_encode(array_slice($largeSources, 0, 8), JSON_THROW_ON_ERROR));
+assertGatewayGauge(
+    count(json_decode($timeline->GetStateTimelineData(), true)['stateTimeline']['rows']) === 8,
+    'The existing eight-source maximum of 2000 raw points each remains accepted when the output fits.'
+);
+IPSModuleStrict::$ParentResponder = $parent;
+
 echo "StateTimeline Gateway, forms, previews and outputs verified.\n";

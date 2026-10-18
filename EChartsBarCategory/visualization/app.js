@@ -10,6 +10,7 @@
     var currentTheme = null;
     var categoryAnchor = null;
     var categoryStart = 0;
+    var gradientLegendSelection = {};
     var echartsDesign = window.SYMC_ECHARTS_DESIGN;
     var barPatterns = window.SymconEChartsPattern.create(function () {
         if (typeof window.requestAnimationFrame === 'function') {
@@ -252,6 +253,28 @@
         var radius = style.roundedBars === true ? 7 : 0;
         var decimals = Math.max(0, Math.min(6, Number(bar.decimals) || 0));
         var unit = String(bar.unit || '');
+        var gradient = style.barFillMode === 'gradient';
+        var colorMinimum = style.colorMinimum == null ? 0 : Number(style.colorMinimum);
+        var colorMaximum = style.colorMaximum == null ? 100 : Number(style.colorMaximum);
+        var rampColors = [style.lowColor || '#ff0000', style.middleColor || '#ffff00', style.highColor || '#00ff00'];
+        function rampColor(value) {
+            return design.interpolateColorStops(rampColors, (value - colorMinimum) / (colorMaximum - colorMinimum));
+        }
+        function segmentColor(start, end) {
+            var low = Math.min(start, end), high = Math.max(start, end);
+            if (low === high) { return rampColor(low); }
+            var points = [low].concat([colorMinimum, colorMinimum + (colorMaximum - colorMinimum) / 2, colorMaximum]
+                .filter(function (value) { return value > low && value < high; }), [high]);
+            // Relative coordinates cover this segment only; the sampled colors
+            // stay anchored to the configured absolute value-axis range.
+            return { type: 'linear', x: 0, y: horizontal ? 0 : 1, x2: horizontal ? 1 : 0, y2: 0,
+                global: false, colorStops: points.map(function (value) {
+                    return { offset: (value - low) / (high - low), color: rampColor(value) };
+                }) };
+        }
+        // Compute signed stack positions before DataZoom filters categories.
+        var positiveStacks = chartData.categories.map(function () { return 0; });
+        var negativeStacks = chartData.categories.map(function () { return 0; });
 
         return {
             backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
@@ -289,6 +312,7 @@
             legend: {
                 show: multiSeries,
                 type: 'scroll',
+                selected: gradient ? gradientLegendSelection : {},
                 top: headerInset + (titleVisible ? 38 + Math.max(0, titleSize - 18) : 8),
                 textStyle: { color: legendColor, fontSize: legendSize },
                 data: chartData.series.map(function (item) { return item.id; }),
@@ -343,16 +367,25 @@
                             return formatValue(parameters.value, decimals, unit);
                         }
                     },
-                    data: seriesItem.items.map(function (item) {
+                    data: seriesItem.items.map(function (item, categoryIndex) {
+                        var start = 0, end = item.value;
+                        if (stacked && item.value !== null && (!gradient || gradientLegendSelection[seriesItem.id] !== false)) {
+                            var accumulators = item.value < 0 ? negativeStacks : positiveStacks;
+                            start = accumulators[categoryIndex];
+                            end = start + item.value;
+                            accumulators[categoryIndex] = end;
+                        }
+                        var fill = gradient && item.value !== null ? segmentColor(start, end) : pattern || item.color;
+                        var contrastColor = gradient && item.value !== null ? rampColor((start + end) / 2) : item.color;
                         var labelColor = style.valueColor || (labelIsInside && typeof design.readableTextColor === 'function'
-                            ? design.readableTextColor(item.color, colors.text, colors.background)
+                            ? design.readableTextColor(contrastColor, colors.text, colors.background)
                             : valueColor);
                         return {
                             id: item.id,
                             value: item.value,
                             label: labelIsInside ? { color: labelColor } : undefined,
                             itemStyle: {
-                                color: pattern || item.color,
+                                color: fill,
                                 borderRadius: horizontal ? [0, radius, radius, 0] : [radius, radius, 0, 0]
                             }
                         };
@@ -396,6 +429,14 @@
         if (!chart) {
             chart = window.echarts.init(chartElement, theme === 'auto' ? null : theme, { renderer: 'canvas' });
             currentTheme = theme;
+            chart.on('legendselectchanged', function (event) {
+                if (!currentState || currentState.status !== 'ready') { return; }
+                var bar = currentState.chart.bar || {};
+                if (!bar.style || bar.style.barFillMode !== 'gradient') { return; }
+                gradientLegendSelection = event.selected || {};
+                rememberCategoryWindow();
+                chart.setOption(buildOption(currentState.chart, currentTheme || 'auto'), true);
+            });
         }
         chart.setOption(buildOption(state.chart, theme), true);
     }
