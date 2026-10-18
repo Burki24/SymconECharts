@@ -13,13 +13,14 @@ einer fachlichen ECharts-Grenze. Andere Beschränkungen verhindern hingegen
 falsche Summen, erfundene Archivwerte, unlesbare Geometrie oder übergroße
 Symcon-Ausgaben. Deshalb werden nicht pauschal alle Grenzen auf 100 gesetzt.
 
-In diesem Änderungsschritt wurde ausschließlich **PictorialBar auf 100 Quellen**
-erweitert. Die übrigen Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
+Inzwischen wurden **PictorialBar und BarCategory auf 100 Quellen** erweitert.
+PictorialBar besitzt außerdem eine anpassbare Bezeichnungsspalte. Die übrigen
+Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
 
 | Reihenfolge | Empfohlener nächster Schritt | Nutzen und Voraussetzung |
 | --- | --- | --- |
 | Erledigt | PictorialBar: 1–100 Quellen, Kategoriennavigation | Alle 72 Batterievariablen passen in eine Instanz; lesbarer Ausschnitt statt 100 zusammengedrängter Zeilen. |
-| 1 | BarCategory: bis 100 Quellenzuordnungen, Kategoriennavigation | Größere Gerätevergleiche; Grenze muss Kategorien × Datenreihen berücksichtigen. |
+| Erledigt | BarCategory: bis 100 Quellenzuordnungen, Kategoriennavigation | Größere Gerätevergleiche; die Obergrenze gilt für sämtliche Zuordnungen zusammen, nicht je Kategorie oder Reihe. |
 | 2 | StateTimeline: zunächst 32 Quellen mit Zeilennavigation | Fenster, Türen und Verbraucher gemeinsam darstellen; Gesamtbudget für Zustandswechsel und Ausgabe ergänzen. 100 erst nach Lastprüfung. |
 | 3 | Boxplot: bis 32 Quellen und Kategoriennavigation | Viele Räume/Sensoren vergleichen; gemeinsames Archivabfragebudget statt 32 unbeschränkter Einzelabfragen. |
 | 4 | Benutzerdefinierte Archivzeiträume | Vorhandenen Zeitfenstervertrag dort wiederverwenden, wo bisher nur 24 h / 7 d / 30 d angeboten werden. |
@@ -44,7 +45,7 @@ oder bereits lastgeprüften Zusagen.
 | EChartsGaugeMulti | 2–16 Quellen, jeweils eigene Skala und Einheit. | 16 ist eine Layoutgrenze. Perspektivisch 32–100 mit Seiten/Raster und Auswahl, nicht 100 konzentrische Ringe auf derselben Kachel. |
 | EChartsGaugeTacho | 2–5 Quellen mit unabhängigen Skalen; festgelegte Instrumentenanordnung. | Fünf ist durch die besondere Geometrie begründet. Neue Anordnungen wären Voraussetzung für mehr; reine Grenzerhöhung nicht empfohlen. |
 | EChartsGaugeChronograph | 2–5 Quellen als Hauptinstrument mit Nebeninstrumenten. | Ebenso Geometrievertrag. Optional ein einzelnes Hauptinstrument erst nach ausdrücklicher Produktentscheidung; kein allgemeiner 100-Quellen-Kandidat. |
-| EChartsBarCategory | 1–16 numerische Quellenzuordnungen; gleiche effektive Einheit; auch vorzeichenbehaftete Werte. Kategorien und Reihen, gruppiert/gestapelt/einfach. | Hohe Priorität: 100 Zuordnungen plus Kategoriennavigation. Optional Min/Max-Normalisierung für relative Vergleiche; unterschiedliche Roh-Einheiten nicht stillschweigend stapeln. |
+| EChartsBarCategory | Jetzt 1–100 numerische Quellenzuordnungen; gleiche effektive Einheit; auch vorzeichenbehaftete Werte. Kategorien und Reihen, gruppiert/gestapelt/einfach. | Umgesetzt: Kategoriennavigation oberhalb 16 Kategorien, vollständige Skala und viewportstabile Updates. Optional Min/Max-Normalisierung für relative Vergleiche weiterhin offen; unterschiedliche Roh-Einheiten nicht stillschweigend stapeln. |
 | EChartsBarWaterfall | Startwert plus 1–15 signierte Änderungen, also 2–16 Quellen; gleiche Einheit; Endsumme berechnet. | Bis 100 Schritte mit Navigation sinnvoll. Zusätzliche Zwischensummen/Neustarts wären fachlich wertvoller als eine alleinige Grenzerhöhung. Gemeinsame additive Einheit beibehalten. |
 | EChartsBarPolar | 1–16 Quellen gleicher Einheit; gemeinsame Skala, auch negative Werte werden nicht einfach in Beträge umgewandelt. | Größere Modelle nur mit Auswahl/Seiten und lesbarer Ring-/Sektorbreite. Optionale Normalisierung eignet sich für relative Vergleiche. Nicht 100 Ringe in eine kleine Kachel zwingen. |
 | EChartsPie | 1–16 nichtnegative Quellen gleicher Einheit; Null wird ausdrücklich behandelt. | Optionale Normalisierung nach CalendarPie-Vorbild. Größere Listen mit scrollbarer Legende und ausdrücklich gewähltem Restsegment/Top-N; keine unsichtbar ausgelassenen Werte. |
@@ -120,10 +121,12 @@ Importform zusammen mit der größten Quellenliste prüfen.
 
 Vorschauen sind gesondert zu betrachten:
 
-- `libs/EChartsBarPreview.php::Sources()` akzeptiert höchstens 16 Quellen und
-  kann bei ungeeigneten Listen auf Beispieldaten zurückfallen. Eine neue
-  Obergrenze nur in `module.php` wäre deshalb unvollständig. PictorialBar
-  verwendet jetzt einen eigenen, vollständig validierten Vorschauausschnitt.
+- `libs/EChartsBarPreview.php::Sources()` akzeptiert standardmäßig höchstens
+  16 Quellen, BarCategory verwendet ausdrücklich 100. Andere Familien bleiben
+  unverändert. Bei ungeeigneten Listen kann der Baustein auf Beispieldaten
+  zurückfallen. Eine neue Obergrenze nur in `module.php` wäre deshalb
+  unvollständig. PictorialBar verwendet einen eigenen, vollständig validierten
+  Vorschauausschnitt.
 - TimeSeries (vier), BarHistory (drei), Parallel (sechs) und mehrere aktuelle
   Vergleiche begrenzen ihre Vorschau separat. Die Mengenhinweise müssen bei
   jeder Erweiterung erhalten und korrekt sein.
@@ -147,9 +150,20 @@ festgeschriebene echte ECharts-Runtime: beide Ausrichtungen/Ausgabearten,
 Rechteck/Icon/SVG, Farbverlauf, Navigation bis zum letzten Eintrag und korrekte
 Werttextposition auch nach Filterung des sichtbaren Ausschnitts.
 
+Die Folgeänderung prüft zusätzlich die automatische/manuelle Bezeichnungsspalte
+und BarCategory mit 72/100/101 Quellen, signierter Gesamtskala, allen drei
+Balkenmodi, nativer Navigation und stabiler Ansicht bei Aktualisierungen.
+Der Puffer-Stresstest kombiniert 100 lange Bezeichnungen mit einem fast
+256-KiB-großen SVG-Muster und eigenen Themes je Ausgabe. BarCategory erhält
+dafür ein eigenes, lokal gebautes Runtime-Subset ohne die für diese Familie
+ungenutzten Line-/Scatter-/Referenzkomponenten. Die übrigen Familien verwenden
+ihre bisherigen Runtimes weiter.
+
 Eine lokale Browseransicht mit synthetischen 72/100 Quellen wurde zusätzlich
 visuell geprüft; die 100er-Ansicht lässt sich bis zur letzten Kategorie
-verschieben. Das ersetzt weder einen Live-Test mit den 72 echten Variablen
-noch einen IPSView-Client-Test. Live-Konfigurationen, Archivaufzeichnung und
-Quellwerte wurden bei dieser Änderung nicht verändert. Die vorgeschlagenen
+verschieben. Der Eigentümer hat PictorialBar mit allen 72 echten Variablen
+anschließend in Kachel und IPSView live bestätigt. Die neue Spaltenbreite und
+BarCategory-Erweiterung sind nach dem nächsten Modulupdate gesondert live
+abzunehmen. Live-Konfigurationen, Archivaufzeichnung und Quellwerte wurden bei
+dieser Folgeänderung nicht verändert. Die vorgeschlagenen
 Erweiterungen anderer Familien sind noch nicht umgesetzt oder lastgeprüft.

@@ -68,7 +68,7 @@ class EChartsBarCategory extends IPSModuleStrict
     private const DATA_ID_TO_PARENT = '{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}';
     private const DATA_ID_FROM_PARENT = '{E4749B72-912B-E3E3-1C57-D19019FFDD84}';
     private const MINIMUM_SOURCE_COUNT = 1;
-    private const MAXIMUM_SOURCE_COUNT = 16;
+    private const MAXIMUM_SOURCE_COUNT = 100;
     private const STATUS_SOURCE_INVALID = 201;
     private const STATUS_DESIGN_INVALID = 202;
     private const STATUS_PARENT_MISSING = 203;
@@ -330,7 +330,7 @@ class EChartsBarCategory extends IPSModuleStrict
     {
         $theme = $this->BarPreviewValue($values, 'EChartsTheme', 'string', $ipsView);
         $palette = EChartsBarPreview::Palette($theme);
-        $data = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values, 'Category');
+        $data = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values, 'Category', true, self::MAXIMUM_SOURCE_COUNT);
         $items = $data['items'];
         $previewDecimals = max(array_column($data['items'], 'decimals'));
         $previewLanguage = $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage());
@@ -579,7 +579,7 @@ class EChartsBarCategory extends IPSModuleStrict
                 'ipsViewTransport'  => $ipsView ? $this->EChartsIPSViewTransportOptions() : null
             ],
             'replacements'       => [
-                '{{ECHARTS_SCRIPT}}'           => EChartsAsset::CartesianJavaScript(),
+                '{{ECHARTS_SCRIPT}}'           => EChartsAsset::BarCategoryJavaScript(),
                 '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
                 '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript(),
                 '{{ECHARTS_PATTERN_SCRIPT}}'   => EChartsAsset::PatternJavaScript(),
@@ -646,7 +646,7 @@ class EChartsBarCategory extends IPSModuleStrict
             || count($sources) < self::MINIMUM_SOURCE_COUNT
             || count($sources) > self::MAXIMUM_SOURCE_COUNT
         ) {
-            throw new InvalidArgumentException('Configure 1 to 16 unique numeric sources with one common unit.');
+            throw new InvalidArgumentException('Configure 1 to 100 unique numeric sources with one common unit.');
         }
 
         $validated = [];
@@ -660,7 +660,7 @@ class EChartsBarCategory extends IPSModuleStrict
             if (!is_int($variableID) || $variableID <= 0 || !IPS_VariableExists($variableID)
                 || in_array($variableID, $variableIDs, true)
             ) {
-                throw new InvalidArgumentException('Configure 1 to 16 unique numeric sources with one common unit.');
+                throw new InvalidArgumentException('Configure 1 to 100 unique numeric sources with one common unit.');
             }
             $variable = IPS_GetVariable($variableID);
             if (!is_array($variable) || !in_array($variable['VariableType'] ?? null, [1, 2], true)) {

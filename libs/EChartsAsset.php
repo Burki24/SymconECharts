@@ -20,6 +20,7 @@ final class EChartsAsset
     public const FUNNEL_SHA256 = 'da9750dd18363325d23b1bcd4ea3af7e1011620b80b994ad6c2d5e3ee819314d';
     public const SHA256 = '37d8c9774f27fc12e048e269e8ec6a114782529fb85262a6be8c6b887207c07f';
     public const CARTESIAN_SHA256 = '92954fbddaa6b7c09f25819ab7b4743eb6afd5efa92351f129b14d298d2ab31a';
+    public const BAR_CATEGORY_SHA256 = '2d0c0742e63d9a044183dc61db8981d57c3d4d2fa1134aa09e2bf0c56411c818';
     public const SCATTER_SHA256 = 'd759229d5b223da5b3badff736a732f978efc30c3e91d8913aa3e90d01b2974a';
     public const HEATMAP_SHA256 = '2ed5eac005bb669e165d16bbd12003bf8e7f6fb6a95a6d103579bad92b1418bc';
     public const POLAR_SHA256 = 'f31daec4db27dee855d736f2443b15b5642011bc99bbe6f9bc1fdb91da1ef69c';
@@ -193,6 +194,21 @@ final class EChartsAsset
         }
 
         return $canonicalContent;
+    }
+
+    /** Loads the current Category Bar subset without enlarging existing Cartesian consumers. */
+    public static function BarCategoryJavaScript(): string
+    {
+        $content = @file_get_contents(__DIR__ . '/echarts/' . self::VERSION . '/echarts.bar-category.min.js');
+        if ($content === false || $content === '') {
+            throw new RuntimeException('The bundled Apache ECharts Category Bar runtime could not be loaded.');
+        }
+        $canonical = self::NormalizeLineEndings($content);
+        if (!hash_equals(self::BAR_CATEGORY_SHA256, hash('sha256', $canonical))) {
+            throw new RuntimeException('The bundled Apache ECharts Category Bar runtime failed its integrity check.');
+        }
+
+        return $canonical;
     }
 
     public static function TimeSeriesJavaScript(): string

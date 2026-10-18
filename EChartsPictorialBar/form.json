@@ -547,6 +547,20 @@
                         },
                         {
                             "type": "NumberSpinner",
+                            "name": "LabelColumnWidthPercent",
+                            "caption": "Label column width (0 = automatic)",
+                            "minimum": 0,
+                            "maximum": 80,
+                            "suffix": "%",
+                            "width": "260px"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
                             "name": "CategoryLabelRotate",
                             "caption": "Category label rotation",
                             "minimum": -90,

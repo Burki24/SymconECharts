@@ -234,6 +234,20 @@ bleiben nach dem Modulupdate durch den Eigentümer zu prüfen.
 
 Grundlage: [Symcon SelectFile](https://www.symcon.de/en/service/documentation/developer-area/sdk-tools/sdk-php/configuration-forms/selectfile/).
 
+## Anpassbare Bezeichnungsspalte vom 18.10.2026
+
+`LabelColumnWidthPercent` und `IPSViewLabelColumnWidthPercent` ergänzen die
+Designer additiv mit Default 0 (automatisch). Im horizontalen Layout wird die
+Spalte anhand aller Bezeichnungen und der effektiven Schrift gemessen, nicht
+anhand des sichtbaren DataZoom-Ausschnitts. Automatisch werden höchstens 60,
+manuell bis 80 Prozent der
+Diagrammbreite möglich. Die verbleibende Wertefläche und deren Text-/Navigations-
+Reserve begrenzen die Spalte in schmalen Ansichten. Vertikale Layouts und
+Quellwerte bleiben unverändert; eine Migration vorhandener Properties ist
+nicht nötig. Unabhängige Ausgabe, Vererbung, Designkopie und SVG-Entwurf
+verwenden denselben Property-Vertrag. Der Browser misst Text mit Canvas,
+die schematische PHP-Vorschau approximiert anhand von Zeichenbreite und Schriftgröße.
+
 ## Grundlagen
 
 Am 17.10.2026 wurden die offiziellen Einstiege

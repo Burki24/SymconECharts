@@ -1,5 +1,36 @@
 # Tests
 
+## PictorialBar-Spaltenbreite und BarCategory bis 100 Quellen
+
+Die PictorialBar-Integrationsprüfung sichert die neue Spaltenbreite (0 =
+automatisch, 1–80 Prozent), unabhängige Ausgaben, Designkopie, Vererbung,
+ungespeicherte Vorschauen und die Ablehnung ungültiger Breiten ab.
+`pictorial_bar_layout.js` prüft den Einfluss langer Namen, manuelle Anteile,
+Platzschutz in schmalen Kacheln und unveränderte vertikale Geometrie.
+Die lokale Browserfixture unterstützt `labels=long`, `column=45` und
+`orientation=horizontal`; native 624×414- sowie breite IPSView-Ansichten wurden
+am 18.10.2026 mit synthetischen 72/100 Quellen visuell geprüft.
+
+`bar_category_large_sources.php` ist Teil von `gateway_gauges.php` und prüft
+72/100 gültige Quellen, 101 abgewiesene Quellen, unveränderte Identitäten und
+Referenzen, signierte Werte, gekennzeichnete echte Vorschauausschnitte und das
+1-MiB-Ausgabelimit. `bar_category_layout.js` lädt das ausgelieferte BarCategory-
+Subset plus ausschließlich den SVGRenderer als Headless-Testadapter. Für
+beide Ausgaben, Ausrichtungen und alle drei Modi werden Navigation bis zur
+letzten Kategorie, Achsentexte, vollständige signierte Skala, Tooltips und
+Fenstererhaltung nach Aktualisierung geprüft. Gleichlautende Kategorien
+verwerfen keine Variablen; Sortierung bewahrt den Anker anhand der Quell-ID.
+Ein zusätzlicher Integrationstest kombiniert 100 lange Bezeichnungen mit
+einem fast 256-KiB-großen SVG-Muster in beiden Designern samt Themes und
+prüft jede Ausgabe gegen das 1-MiB-Limit.
+
+`node tests/bar_category_browser.mjs` stellt synthetische Canvas-Beispiele auf
+`http://127.0.0.1:8802` bereit. Parameter: `count=100`, `bar=simple|grouped|stacked`,
+`orientation=horizontal|vertical`, `mode=symcon|ipsview`.
+Diese lokalen Nachweise ersetzen nicht die Live-Abnahme nach dem Modulupdate
+in den tatsächlichen Symcon- und IPSView-Clients. Live-Einstellungen werden
+von den Entwicklungsprüfungen nicht geändert.
+
 ## PictorialBar: große Quellenlisten
 
 `php tests/gateway_gauges.php` prüft zusätzlich 72/100/101 Quellen, unveränderte

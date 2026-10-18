@@ -23,8 +23,9 @@ IPSView nur den Diagrammtitel benötigt.
 
 Die [systematische Prüfung der Nutzungsgrenzen](NUTZUNGSGRENZEN.md) erfasst
 alle 29 Diagrammfamilien und das Gateway. Sie trennt fachliche Verträge und
-Ressourcenschutz von ausbaubaren Produktgrenzen. PictorialBar unterstützt
-jetzt 100 Quellen mit Kategoriennavigation; weitere Erweiterungen sind dort
+Ressourcenschutz von ausbaubaren Produktgrenzen. PictorialBar und BarCategory
+unterstützen jetzt 100 Quellen mit Kategoriennavigation; PictorialBar besitzt
+zusätzlich eine anpassbare Bezeichnungsspalte. Weitere Erweiterungen sind dort
 priorisiert, aber noch nicht umgesetzt.
 
 CalendarPie (`ECCP`) ergänzt gemäß [ADR 0060](adr/0060-calendar-pie-data-modes.md)

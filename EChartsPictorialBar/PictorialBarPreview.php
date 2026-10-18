@@ -70,13 +70,17 @@ trait PictorialBarPreview
             $maximum = $fixed;
         }
         $totalCount = count($items);
+        $labelCharacters = max(0, ...array_map(static fn (array $item): int => mb_strwidth($item['Label']), $items));
         if ($totalCount > 16) {
             $items = array_slice($items, 0, 8);
             $svg .= '<text x="360" y="348" text-anchor="middle" font-size="10" fill="' . $e($palette['muted']) . '">'
                 . $e(sprintf($this->Translate('Preview: first %d of %d categories. Scroll in the chart to see all.'), count($items), $totalCount)) . '</text>';
         }
         $horizontal = $this->BarPreviewValue($values, 'Orientation', 'string', $ipsView) === 'horizontal';
-        $left = $horizontal ? 140 : 65;
+        $font = max(6, min(24, 12 * $this->BarPreviewValue($values, 'AxisFontSizePercent', 'integer', $ipsView) / 100));
+        $columnPercent = max(0, min(80, $this->BarPreviewValue($values, 'LabelColumnWidthPercent', 'integer', $ipsView)));
+        $labelWidth = $labelCharacters * $font * 0.6 + 20;
+        $left = $horizontal ? min(560, $columnPercent > 0 ? 720 * $columnPercent / 100 : min(432, max(40, $labelWidth))) : 65;
         $right = 640;
         $top = 80;
         $bottom = 300;
@@ -106,7 +110,6 @@ trait PictorialBarPreview
         $gap = max(0, min(20, $this->BarPreviewValue($values, 'SymbolGap', 'integer', $ipsView)));
         $repeat = $this->BarPreviewValue($values, 'SymbolRepeat', 'boolean', $ipsView);
         $strokeWidth = max(0, min(5, $this->BarPreviewValue($values, 'BorderWidth', 'integer', $ipsView)));
-        $font = max(6, min(24, 12 * $this->BarPreviewValue($values, 'AxisFontSizePercent', 'integer', $ipsView) / 100));
         $valueFont = max(6, min(24, 12 * $this->BarPreviewValue($values, 'ValueFontSizePercent', 'integer', $ipsView) / 100));
         $axis = EChartsBarPreview::Color($this->BarPreviewValue($values, 'AxisColor', 'integer', $ipsView), $palette['text']);
         $grid = EChartsBarPreview::Color($this->BarPreviewValue($values, 'GridColor', 'integer', $ipsView), $palette['border']);
@@ -246,7 +249,7 @@ trait PictorialBarPreview
                 $svg .= '<text x="' . $n($horizontal ? $left - 10 : $center) . '" y="' . $n($horizontal ? $center + 4 : $bottom + 20)
                     . '" transform="rotate(' . $n(-$rotation) . ' ' . $n($labelX) . ' ' . $n($labelY) . ')'
                     . '" text-anchor="' . ($horizontal ? 'end' : 'middle') . '" font-size="' . $n($font) . '" fill="' . $e($axis) . '">'
-                    . $e(mb_strimwidth($item['Label'], 0, $horizontal ? 19 : max(3, (int) ($cross / ($font * 0.55))), '…')) . '</text>';
+                    . $e(mb_strimwidth($item['Label'], 0, $horizontal ? max(3, (int) (($left - 20) / ($font * 0.6))) : max(3, (int) ($cross / ($font * 0.55))), '…')) . '</text>';
             }
             if ($this->BarPreviewValue($values, 'ShowValues', 'boolean', $ipsView)) {
                 $position = $this->BarPreviewValue($values, 'ValuePosition', 'string', $ipsView);

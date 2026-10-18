@@ -14,6 +14,17 @@ function assertEChartsAsset(bool $condition, string $message): void
 }
 
 $root = dirname(__DIR__);
+$categoryRuntime = EChartsAsset::BarCategoryJavaScript();
+$categoryRuntimeSource = (string) file_get_contents($root . '/.tools/echarts-runtime/src/bar-category-runtime.js');
+assertEChartsAsset(
+    hash_file('sha256', $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.bar-category.min.js') === EChartsAsset::BAR_CATEGORY_SHA256
+        && strlen($categoryRuntime) < 575000 && str_contains($categoryRuntime, 'window.echarts')
+        && str_contains($categoryRuntimeSource, 'BarChart') && str_contains($categoryRuntimeSource, 'DataZoomComponent')
+        && str_contains($categoryRuntimeSource, 'LegendComponent') && !str_contains($categoryRuntimeSource, 'LineChart')
+        && !str_contains($categoryRuntimeSource, 'ScatterChart') && !str_contains($categoryRuntimeSource, 'MarkAreaComponent')
+        && !str_contains($categoryRuntimeSource, 'MarkLineComponent'),
+    'Category Bar must use its pinned sub-575 KB bar-only runtime with native category navigation.'
+);
 assertEChartsAsset(
     hash_file('sha256', $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.state-timeline.min.js') === EChartsAsset::STATE_TIMELINE_SHA256
     && strlen(EChartsAsset::StateTimelineJavaScript()) < 575000

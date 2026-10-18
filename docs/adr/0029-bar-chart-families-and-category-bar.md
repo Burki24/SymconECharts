@@ -73,3 +73,32 @@ remain in the owning device module.
   they are not added as unrelated modes of `EChartsBarCategory`.
 - The larger shared Cartesian runtime replaces the former Line-only build,
   while the PHP Time Series loader remains a compatibility alias.
+
+## Extension: bounded large source sets (2026-10-18)
+
+The source limit is extended from 16 to 100 unique numeric variable assignments.
+It counts all assignments, not 100 sources per category or series. The effective
+common-unit and signed-value contracts are unchanged. No properties, source
+formats, identities or Gateway operations are changed.
+
+More than 16 categories use native slider and inside DataZoom components.
+The initial window is responsive and bounded by
+16 categories; grouped mode also accounts for the number of series. All values
+stay in the model and determine sorting and signed value-axis bounds before
+viewport filtering. Source-ID category keys preserve duplicate Simple labels
+and the visible source on sorted value updates; explicit grouped category keys
+retain their existing grouping meaning. A scrollable legend supports long
+series lists without changing source identity.
+
+The SVG preview resolves all 100 configured sources before sorting and
+selecting its explicitly disclosed six-source subset. Other users of the
+shared preview resolver retain their existing 16-source default.
+
+BarCategory now uses its own reproducible ECharts 6.1.0 subset with BarChart,
+Grid, Legend, Title, Tooltip, Aria, DataZoom and CanvasRenderer. The shared
+Cartesian runtime remains unchanged for its other consumers. Removing unused
+LineChart, ScatterChart, MarkLine and MarkArea components provides room for
+100 source assignments and near-limit 256 KiB SVG patterns below Symcon's
+1 MiB output buffer. The previous Cartesian subset did not include LabelLayout
+and BarCategory uses no such callbacks, so that unused feature is not added.
+No ECharts core code, dependency version, licenses or SVG-import limits change.

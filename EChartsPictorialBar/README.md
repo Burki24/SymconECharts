@@ -34,6 +34,16 @@ Kategorien nach der gewählten Sortierung. Ein Hinweis nennt die Gesamtzahl;
 dies ist keine Begrenzung der tatsächlichen Darstellung. Ungültige Quellen
 werden auch außerhalb dieses Vorschauausschnitts geprüft.
 
+Unter **Beschriftung und Schrift** lässt sich die **Breite der
+Bezeichnungsspalte** für horizontale Balken einstellen. **0 = automatisch**
+berücksichtigt die längste Bezeichnung, Schriftart und Schriftgröße. Ein Wert
+von **1–80 %** reserviert diesen Anteil der Diagrammbreite für die Spalte.
+Auf schmalen Ansichten wird der Anteil nötigenfalls verkleinert, damit der
+Wertebereich nutzbar bleibt. Zu lange Texte werden weiterhin gekürzt;
+der Tooltip zeigt die vollständige Bezeichnung. Vertikale Balken bleiben von
+dieser Einstellung unberührt. Kachel und unabhängiges IPSView-Design besitzen
+jeweils eine eigene Einstellung; Vererbung, Designkopie und Vorschau beachten sie.
+
 Die Skala beginnt bei null. Ein Skalenmaximum von 0 wählt die gemeinsame
 Obergrenze automatisch; ein positives Maximum begrenzt die Darstellung.
 Darüberliegende Werte bleiben in Beschriftung und Tooltip unverändert,

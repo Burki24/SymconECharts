@@ -69,8 +69,9 @@ können unabhängig davon individuell vergeben werden.
   Kachel und IPSView besitzen getrennte Designer und Vorschauen.
 
 - __EChartsPictorialBar__ ([Dokumentation](EChartsPictorialBar/README.md))
-  Aktuelle Werte aus 1–16 Variablen derselben Einheit als einzelne oder
-  wiederholte Grundformen. Getrennte Designer für Kachel und IPSView.
+  Aktuelle Werte aus 1–100 Variablen derselben Einheit als einzelne oder
+  wiederholte Grundformen, Icons oder eigene SVGs. Kategoriennavigation und
+  anpassbare Bezeichnungsspalte; getrennte Designer für Kachel und IPSView.
 
 - __EChartsCandlestick__ ([Dokumentation](EChartsCandlestick/README.md))
   Eine Standard-Archivvariable als Stunden- oder Tageskerzen über 24 Stunden,
@@ -170,11 +171,11 @@ können unabhängig davon individuell vergeben werden.
   markieren Grenz-, Ziel- und Komfortwerte in beiden Ausgabewegen.
 
 - __EChartsBarCategory__ ([Dokumentation](EChartsBarCategory/README.md))
-  Vergleicht die aktuellen Werte von 1 bis 16 numerischen Variablen mit einer
+  Vergleicht die aktuellen Werte von 1 bis 100 numerischen Variablen mit einer
   gemeinsamen Einheit. Einfache, gruppierte oder gestapelte vertikale und
   horizontale Balken, konfigurierbare Reihenfolge, individuelle Farben,
   Live-Aktualisierung sowie getrennte Kachel- und IPSView-Designs gehören zum
-  Category-Bar-Vertrag.
+  Category-Bar-Vertrag. Große Kategorienlisten besitzen eine Navigation.
 
 - __EChartsBarHistory__ ([Dokumentation](EChartsBarHistory/README.md))
   Stellt rohe oder aggregierte Archivwerte von 1 bis 16 numerischen Variablen

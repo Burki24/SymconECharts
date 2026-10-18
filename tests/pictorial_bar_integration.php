@@ -62,10 +62,37 @@ assertGatewayGauge(
 );
 $pictBefore = (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($pict);
 $pictQueries = $GLOBALS['symconTestArchiveQueryCount'];
+$pictColumnSources = array_slice($pictSources, 0, 2);
+foreach ($pictColumnSources as &$columnSource) {
+    $columnSource['Label'] = 'Area / sensor with a deliberately long description / battery';
+}
+unset($columnSource);
+$pict->UpdateBarPreviewFromForm(json_encode(['Sources' => $pictColumnSources, 'Orientation' => 'horizontal',
+    'IPSViewOrientation'                               => 'horizontal', 'LabelColumnWidthPercent' => 20, 'IPSViewLabelColumnWidthPercent' => 50,
+    'IPSViewUseTileDesign'                             => false], JSON_THROW_ON_ERROR));
+$columnLabels = [];
+foreach (array_slice($pict->GetTestFormUpdates(), -2) as $index => $update) {
+    $columnSvg = base64_decode(substr($update['Value'], strlen('data:image/svg+xml;base64,')), true);
+    $columnDoc = new DOMDocument();
+    assertGatewayGauge($columnDoc->loadXML($columnSvg, LIBXML_NONET), 'Label-column preview must remain valid SVG.');
+    $labels = (new DOMXPath($columnDoc))->query('//*[local-name()="text"][@transform and @text-anchor="end"]');
+    assertGatewayGauge(
+        $labels->length === 2 && (float) $labels->item(0)->getAttribute('x') === ($index === 0 ? 134.0 : 350.0),
+        'Independent preview columns must reflect 20% and 50% of the 720px preview.'
+    );
+    $columnLabels[] = $labels->item(0)->textContent;
+}
+assertGatewayGauge(mb_strlen($columnLabels[1]) > mb_strlen($columnLabels[0]), 'Wider columns must expose more of a long label.');
+$pict->SetTestProperty('LabelColumnWidthPercent', 35);
+$pict->SetTestProperty('IPSViewLabelColumnWidthPercent', 55);
+assertGatewayGauge(json_decode($pict->GetPictorialBarData(), true)['pictorialBar']['style']['labelColumnWidthPercent'] === 35
+    && str_contains($pict->GetIPSViewHTML(), '"labelColumnWidthPercent":55'), 'Each output must carry its own column width.');
+$pict->SetTestProperty('LabelColumnWidthPercent', 0);
+$pict->SetTestProperty('IPSViewLabelColumnWidthPercent', 0);
 $pictExtended = ['ColorMode' => 'value', 'ColorMinimum' => 0.0, 'ColorMaximum' => 100.0,
     'LowColor'               => 0xFF0000, 'MiddleColor' => 0xFFFF00, 'HighColor' => 0x00FF00,
     'FontFamily'             => 'Georgia, serif', 'ValuePosition' => 'insideEnd', 'ValueDistance' => 8,
-    'ValueBold'              => true, 'HideOverlap' => false, 'CategoryLabelRotate' => 25,
+    'ValueBold'              => true, 'HideOverlap' => false, 'CategoryLabelRotate' => 25, 'LabelColumnWidthPercent' => 40,
     'ShowAxisValues'         => false, 'ShowAxisTicks' => true, 'GridWidth' => 2, 'GridType' => 'dotted',
     'GridOpacityPercent'     => 60, 'BorderType' => 'dashed', 'ShadowBlur' => 8, 'ShadowColor' => 0x123456,
     'ShadowOffsetX'          => 2, 'ShadowOffsetY' => 3, 'EmphasisDisabled' => true, 'Focus' => 'none', 'BlurOpacityPercent' => 30];
@@ -153,7 +180,8 @@ foreach (['', 'IPSView'] as $prefix) {
         ['BarWidth', 81, 40], ['ScaleMaximum', -1, 0], ['TitleFontSizePercent', 201, 100],
         ['OpacityPercent', 101, 90], ['AxisColor', -2, -1], ['SortOrder', 'invalid', 'configured'],
         ['FontFamily', 'url(https://example.invalid)', 'Arial, sans-serif'], ['ValuePosition', 'invalid', 'outside'],
-        ['ValueDistance', 31, 5], ['CategoryLabelRotate', 91, 0], ['GridWidth', -1, 1], ['GridType', 'invalid', 'solid'],
+        ['ValueDistance', 31, 5], ['CategoryLabelRotate', 91, 0], ['LabelColumnWidthPercent', -1, 0],
+        ['LabelColumnWidthPercent', 81, 0], ['GridWidth', -1, 1], ['GridType', 'invalid', 'solid'],
         ['GridOpacityPercent', 101, 25], ['ColorMode', 'invalid', 'category'], ['LowColor', -1, 0xFF0000],
         ['MiddleColor', 0x1000000, 0xFFFF00], ['HighColor', -2, 0x00FF00], ['BorderType', 'invalid', 'solid'],
         ['ShadowBlur', 21, 0], ['ShadowColor', -2, -1], ['ShadowOffsetX', -21, 0], ['ShadowOffsetY', 21, 0],
@@ -168,6 +196,7 @@ foreach (['', 'IPSView'] as $prefix) {
 $pict->SetTestProperty('ColorMinimum', 0.5);
 $pict->SetTestProperty('ColorMaximum', 100.5);
 $pict->SetTestProperty('ColorMode', 'value');
+$pict->SetTestProperty('LabelColumnWidthPercent', 45);
 $GLOBALS['symconTestCopyTarget'] = $pict;
 try {
     $pict->CopyTileDesignToIPSView();
@@ -175,6 +204,9 @@ try {
     unset($GLOBALS['symconTestCopyTarget']);
 }
 assertGatewayGauge(str_contains($pict->GetIPSViewHTML(), '"symbol":"rect"'), 'Copy Tile design includes symbol settings.');
+assertGatewayGauge(str_contains($pict->GetIPSViewHTML(), '"labelColumnWidthPercent":45'), 'Design copying must include the label column.');
+$pict->SetTestProperty('LabelColumnWidthPercent', 0);
+$pict->SetTestProperty('IPSViewLabelColumnWidthPercent', 0);
 assertGatewayGauge(str_contains($pict->GetIPSViewHTML(), '"colorMinimum":0.5')
     && str_contains($pict->GetIPSViewHTML(), '"colorMaximum":100.5')
     && str_contains($pict->GetIPSViewHTML(), '"colorMode":"value"'), 'Copy must preserve fractional color ranges and coloring mode.');

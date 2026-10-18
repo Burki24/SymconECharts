@@ -16,15 +16,16 @@ const designSource = fs.readFileSync(
 const patternSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-pattern.js'), 'utf8');
 
 function render(orientation, sortOrder, outputMode = 'symcon', barMode = 'simple', items, styleOverrides = {}, enableImages = false) {
-    const chartElement = { hidden: false, clientWidth: 800 };
+    const chartElement = { hidden: false, clientWidth: 800, clientHeight: 500 };
     const errorElement = { hidden: true, textContent: '' };
     const images = [];
     const scheduled = [];
     function TestImage() { images.push(this); }
     Object.defineProperty(TestImage.prototype, 'src', { set(value) { this.source = value; } });
-    let option;
+    let option, nativeChart = null;
     const chart = {
-        setOption: next => { option = next; }, clear: () => {}, resize: () => {}, dispose: () => {}
+        setOption: next => { option = next; }, clear: () => {}, resize: () => {}, dispose: () => {},
+        getOption: () => nativeChart ? nativeChart.getOption() : ({ ...option, xAxis: [option.xAxis], yAxis: [option.yAxis] })
     };
     const palette = {
         background: '#101114', text: '#f4f5f7', muted: '#969aa2', border: '#a5a9b0',
@@ -75,6 +76,8 @@ function render(orientation, sortOrder, outputMode = 'symcon', barMode = 'simple
     Object.defineProperties(option, {
         testImages: { value: images },
         getUpdatedOption: { value: () => option },
+        refresh: { value: () => window.handleMessage(window.SYMC_VISUALIZATION.state) },
+        useNativeChart: { value: engine => { nativeChart = engine; } },
         flush: { value: () => { while (scheduled.length > 0) { scheduled.shift()(); } } }
     });
     return option;
@@ -265,5 +268,90 @@ const stoppedBar = render('vertical', 'configured', 'symcon', 'simple', undefine
 });
 assert.equal(stoppedBar.animation, false);
 assert.equal(stoppedBar.animationDurationUpdate, 0);
+
+// Exercise the shipped selective runtime: adding SVG only for headless rendering
+// must not supply BarChart, Grid or DataZoom from the full package.
+const nativeWindow = {};
+vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', 'libs/echarts/6.1.0/echarts.bar-category.min.js'), 'utf8'),
+    { window: nativeWindow, navigator: { userAgent: 'Node.js' }, console, setTimeout, clearTimeout });
+nativeWindow.echarts.use(require('../.tools/echarts-runtime/node_modules/echarts/renderers').SVGRenderer);
+
+for (const count of [72, 100]) {
+for (const output of ['symcon', 'ipsview']) {
+    for (const orientation of ['horizontal', 'vertical']) {
+        for (const mode of ['simple', 'grouped', 'stacked']) {
+            const items = Array.from({ length: count }, (_, index) => ({
+                id: 'source-' + index, variableID: 88000 + index,
+                category: mode === 'simple' ? 'Battery' : 'Category ' + Math.floor(index / 2),
+                series: 'Series ' + index % 2, seriesKey: 'series-' + index % 2,
+                value: index === count - 1 ? -250 : index + 1, order: index
+            }));
+            const large = render(orientation, 'configured', output, mode, items, { animationEnabled: false });
+            assert.equal(large.dataZoom.length, 2, 'Large category lists need native slider and inside navigation.');
+            assert.equal(large.dataZoom[0].id, 'category-scroll');
+            assert.ok(large.dataZoom[0].endValue < 16, 'Initial category windows remain readable.');
+            const categoryAxis = orientation === 'horizontal' ? large.yAxis : large.xAxis;
+            const valueAxis = orientation === 'horizontal' ? large.xAxis : large.yAxis;
+            assert.equal(categoryAxis.data.length, mode === 'simple' ? count : count / 2);
+            assert.equal(valueAxis.min, -250, 'Offscreen negative values remain part of the shared value scale.');
+            large.dataZoom[0].startValue = 5;
+            large.refresh();
+            assert.equal(large.getUpdatedOption().dataZoom[0].startValue, 5,
+                'A current-value update must preserve the category viewport.');
+            const engine = nativeWindow.echarts.init(null, null, { renderer: 'svg', ssr: true, width: 800, height: 500 });
+            large.useNativeChart(engine);
+            const currentOption = large.getUpdatedOption();
+            engine.setOption(currentOption);
+            const visibleCount = currentOption.dataZoom[0].endValue - currentOption.dataZoom[0].startValue + 1;
+            assert.equal(engine.getModel().getSeriesByIndex(0).getData().count(), visibleCount,
+                'The actual supplied runtime must filter offscreen categories, not squeeze every bar into the chart.');
+            const categoryCount = categoryAxis.data.length;
+            engine.dispatchAction({ type: 'dataZoom', dataZoomId: 'category-scroll',
+                startValue: categoryCount - visibleCount, endValue: categoryCount - 1 });
+            const tail = engine.getModel().getSeriesByIndex(engine.getModel().getSeries().length - 1).getData();
+            assert.equal(tail.getRawIndex(tail.count() - 1), categoryCount - 1,
+                'Every source must be reachable at the end of the category window.');
+            const visibleAxis = engine.getModel().getComponent(orientation === 'horizontal' ? 'yAxis' : 'xAxis').axis;
+            const expectedLabels = mode === 'simple' ? Array(visibleCount).fill('Battery')
+                : Array.from({ length: visibleCount }, (_, index) => 'Category ' + (categoryCount - visibleCount + index));
+            assert.deepEqual(Array.from(visibleAxis.getViewLabels(), entry => entry.formattedLabel), expectedLabels,
+                'Scrolled native tick texts must resolve actual category keys, not filtered local indexes.');
+            const lastParameter = engine.getModel().getSeriesByIndex(engine.getModel().getSeries().length - 1)
+                .getDataParams(categoryCount - 1 - (categoryCount - visibleCount));
+            const tooltip = large.tooltip.formatter([lastParameter]);
+            assert.ok(tooltip.includes('-250') && !tooltip.includes('source-'),
+                'Scrolled tooltips retain signed source values and visible names without internal IDs.');
+            large.refresh();
+            const updated = large.getUpdatedOption();
+            assert.equal(updated.dataZoom[0].startValue, categoryCount - visibleCount,
+                'Real native scroll state must survive a current-value refresh.');
+            engine.setOption(updated, true);
+            const axis = engine.getModel().getComponent(orientation === 'horizontal' ? 'xAxis' : 'yAxis').axis;
+            assert.equal(axis.scale.getExtent()[0], -250, 'Scrolling must not rescale away offscreen negatives.');
+            assert.equal(/NaN|Infinity/.test(engine.renderToSVGString()), false);
+            large.useNativeChart(null);
+            engine.dispose();
+        }
+    }
+}
+}
+
+
+const reorderingItems = Array.from({ length: 100 }, (_, index) => ({
+    id: 'source-' + index, category: 'Duplicate label', value: index, order: index
+}));
+const reordering = render('horizontal', 'descending', 'symcon', 'simple', reorderingItems, { animationEnabled: false });
+const reorderingEngine = nativeWindow.echarts.init(null, null, { renderer: 'svg', ssr: true, width: 800, height: 500 });
+reordering.useNativeChart(reorderingEngine);
+reorderingEngine.setOption(reordering);
+reorderingEngine.dispatchAction({ type: 'dataZoom', dataZoomId: 'category-scroll', startValue: 10, endValue: 20 });
+const anchor = reordering.yAxis.data[10];
+reorderingItems[0].value = 200;
+reordering.refresh();
+const reordered = reordering.getUpdatedOption();
+assert.equal(reordered.yAxis.data[reordered.dataZoom[0].startValue], anchor,
+    'Resorting must retain the visible source ID even when every visible category name is identical.');
+assert.equal(reordered.yAxis.axisLabel.formatter(anchor, reordered.dataZoom[0].startValue), 'Duplicate label');
+reorderingEngine.dispose();
 
 console.log('Category Bar renderer layout verified.');

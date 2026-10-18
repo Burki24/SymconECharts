@@ -21,6 +21,11 @@ Paket-SHA-1 laut npm: `ae0f68590f5ebbd728d900907c27acde7c5456d1`
 
 Ausgelieferte Dateien:
 
+- `libs/echarts/6.1.0/echarts.bar-category.min.js` – reproduzierbarer
+  BarCategory-Browser-Build aus ECharts Core, Bar Chart, Grid, Legende, Titel,
+  Tooltip, Aria, DataZoom und Canvas Renderer; 570.705 Byte; SHA-256
+  `2d0c0742e63d9a044183dc61db8981d57c3d4d2fa1134aa09e2bf0c56411c818`;
+
 - `libs/echarts/6.1.0/echarts.calendar-pie.min.js` – reproduzierbarer
   CalendarPie-Browser-Build aus ECharts Core, Pie Chart, Scatter Chart,
   Calendar, Legende, Titel, Tooltip, Aria, LabelLayout und Canvas Renderer; 563.136 Byte;

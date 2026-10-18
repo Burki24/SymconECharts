@@ -62,6 +62,27 @@ assert.equal(render(model,'symcon',false).chartElement.style.top,'0px');
 const sorted=render({...model,pictorialBar:{...model.pictorialBar,style:{...model.pictorialBar.style,sortOrder:'descending'}}});
 assert.equal(sorted.option.series[0].data[0].id,'v3');
 assert.equal(sorted.option.series[0].label.formatter({dataIndex:0}),'150 %');
+for(const mode of ['symcon','ipsview']) {
+    const columnModel = {...model,pictorialBar:{...model.pictorialBar,
+        data:model.pictorialBar.data.map(item=>({...item,label:'Area / very long sensor description / battery'})),
+        style:{...model.pictorialBar.style,labelColumnWidthPercent:40}}};
+    const manual=render(columnModel,mode,true,620);
+    assert.equal(manual.option.grid.left,248,'A manual label column must use the requested share of chart width.');
+    const wide=render({...columnModel,pictorialBar:{...columnModel.pictorialBar,
+        style:{...columnModel.pictorialBar.style,labelColumnWidthPercent:80}}},mode,true,1000);
+    assert.equal(wide.option.grid.left,800,'Large charts can explicitly devote up to 80% to long names.');
+    const automatic=render({...columnModel,pictorialBar:{...columnModel.pictorialBar,
+        style:{...columnModel.pictorialBar.style,labelColumnWidthPercent:0}}},mode,true,620);
+    assert.ok(automatic.option.grid.left>render(model,mode,true,620).option.grid.left,
+        'Automatic columns must accommodate the actual label length, not a fixed character count.');
+    const narrow=render({...columnModel,pictorialBar:{...columnModel.pictorialBar,
+        style:{...columnModel.pictorialBar.style,labelColumnWidthPercent:60}}},mode,true,240);
+    assert.ok(240-narrow.option.grid.left-narrow.option.grid.right>=60-1e-6,'Narrow charts must retain a usable value area.');
+    const vertical=render({...columnModel,pictorialBar:{...columnModel.pictorialBar,
+        style:{...columnModel.pictorialBar.style,orientation:'vertical'}}},mode,true,620);
+    assert.equal(vertical.option.grid.left,render({...columnModel,pictorialBar:{...columnModel.pictorialBar,
+        style:{...columnModel.pictorialBar.style,orientation:'vertical',labelColumnWidthPercent:0}}},mode,true,620).option.grid.left);
+}
 assert.ok(tile.option.grid.top>tile.option.title.top+tile.option.title.textStyle.fontSize);
 tile.window.handleMessage({status:'error',error:'The PictorialBar values could not be loaded.'});
 tile.window.handleMessage({status:'error',error:'The PictorialBar values could not be loaded.'});
@@ -280,7 +301,6 @@ const zeros=render({...model,pictorialBar:{...model.pictorialBar,data:[model.pic
 assert.equal(zeros.option.xAxis.max,1);
 assert.equal(zeros.option.series[0].data[0].value,0);
 assert.equal(zeros.option.series[0].label.formatter({dataIndex:0}),'0 %');
-console.log('PictorialBar options, identity, caps, zero values and real ECharts geometry verified.');
 const huge=render({...model,pictorialBar:{...model.pictorialBar,data:[model.pictorialBar.data[2]],
     style:{...model.pictorialBar.style,symbolSize:4,symbolGap:0,scaleMaximum:150}}},'ipsview',true,100000);
 const hugeEngine=echarts.init(null,null,{renderer:'svg',ssr:true,width:100000,height:500});
@@ -350,3 +370,5 @@ for (const count of [72,100]) {
   }
  }
 }
+
+console.log('PictorialBar columns, identity, category navigation, gradients and real ECharts geometry verified.');

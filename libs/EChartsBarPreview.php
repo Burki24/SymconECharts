@@ -13,10 +13,13 @@ require_once __DIR__ . '/EChartsVariablePresentation.php';
 final class EChartsBarPreview
 {
     /** @param array<string,mixed> $values @return array{items:list<array<string,mixed>>,sample:bool} */
-    public static function Sources(string $stored, array $values, string $labelField = 'Label', bool $currentValues = true): array
+    public static function Sources(string $stored, array $values, string $labelField = 'Label', bool $currentValues = true, int $maximumSources = 16): array
     {
         $raw = $values['Sources'] ?? json_decode($stored, true);
-        if (!is_array($raw) || !array_is_list($raw) || count($raw) > 16) {
+        if ($maximumSources < 1 || $maximumSources > 100) {
+            throw new \InvalidArgumentException('Preview source budget must be between 1 and 100.');
+        }
+        if (!is_array($raw) || !array_is_list($raw) || count($raw) > $maximumSources) {
             $raw = [];
         }
         $mapped = [];
@@ -33,7 +36,7 @@ final class EChartsBarPreview
         }
         $items = [];
         $sample = !$currentValues;
-        foreach (array_slice($raw, 0, 16) as $index => $row) {
+        foreach (array_slice($raw, 0, $maximumSources) as $index => $row) {
             if (!is_array($row)) {
                 continue;
             }

@@ -6207,6 +6207,8 @@ foreach ($groupedBarSources as $source) {
     unset($GLOBALS['symconTestVariables'][$source['VariableID']]);
 }
 
+require __DIR__ . '/bar_category_large_sources.php';
+
 $barHistory = new TestableEChartsBarHistory();
 $barHistory->Create();
 $barHistory->SetTestCurrentTimestamp(1780000400);

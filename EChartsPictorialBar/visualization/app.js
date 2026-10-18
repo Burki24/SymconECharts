@@ -166,12 +166,27 @@
         var titleSize = design.fontSizePercent(style.titleFontSizePercent,18);
         var title = design.chartTitleLayout(chartBootstrap,bar.title,titleSize);
         var top = title.contentTop + axisFont + 14;
+        var fontFamily = style.fontFamily || 'Arial, sans-serif';
         var left = horizontal && style.showLabels !== false ? Math.min(width * 0.32,axisFont * 11 + 14) : Math.min(width * 0.22,axisFont * 5);
         var right = horizontal && style.showValues !== false ? Math.min(width * 0.28,valueFont * 8 + 14) : 20;
         var bottom = horizontal ? axisFont * 2 + 22 : (style.showLabels !== false ? axisFont * 3 + 20 : 24);
         var scroll = items.length > 16;
         if (scroll) {
             if (horizontal) { right += 28; } else { bottom += 28; }
+        }
+        if (horizontal && style.showLabels !== false) {
+            var requestedColumn = Number(style.labelColumnWidthPercent) || 0;
+            var canvas = document.createElement('canvas');
+            var context = canvas.getContext && canvas.getContext('2d');
+            if (context) { context.font = axisFont + 'px ' + fontFamily; }
+            var measured = items.reduce(function (maximum, item) {
+                var text = String(item.label || '');
+                return Math.max(maximum, context ? context.measureText(text).width : Array.from(text).length * axisFont * 0.6);
+            }, 0) + 20;
+            // The column scales with the chart, but never consumes the minimum
+            // value area or the reserved value labels/category navigator.
+            var columnLimit = Math.max(1,width - right - Math.min(80,width * 0.25));
+            left = Math.min(columnLimit, requestedColumn > 0 ? width * requestedColumn / 100 : Math.min(width * 0.6,Math.max(40,measured)));
         }
         var visibleCount = scroll ? Math.max(1, Math.min(16, Math.floor(
             (horizontal ? height - top - bottom : width - left - right) / Math.max(horizontal ? 24 : 44, axisFont * 1.8, valueFont * 1.8)
@@ -194,7 +209,6 @@
         var maxX = minX + style.symbolWidth, maxY = minY + style.symbolHeight;
         var singleSymbol = customShape ? 'path://M'+minX+' '+minY+'L'+minX+' '+minY+'M'+maxX+' '+maxY+'L'+maxX+' '+maxY+' '+style.symbolPath
             : style.symbol || 'rect';
-        var fontFamily = style.fontFamily || 'Arial, sans-serif';
         function rampColor(value) {
             var minimum = style.colorMinimum == null ? 0 : style.colorMinimum;
             var maximum = style.colorMaximum == null ? 100 : style.colorMaximum;

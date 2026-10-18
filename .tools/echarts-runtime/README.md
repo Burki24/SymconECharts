@@ -1,5 +1,18 @@
 # Diagrammfamilienspezifische ECharts-Runtimes erzeugen
 
+Der BarCategory-Einstieg enthält Bar Chart, Grid, Legende, Titel, Tooltip,
+Aria, DataZoom und Canvas Renderer aus dem unveränderten ECharts 6.1.0.
+`npm run build:bar-category` schreibt ausschließlich
+`../../libs/echarts/6.1.0/echarts.bar-category.min.js`. Der kleinere Build
+enthält keine Line-/Scatter-Charts oder MarkLine-/MarkArea-Komponenten;
+die bisherige gemeinsame Cartesian-Runtime bleibt unverändert. Der eigene
+Build erhält den Ausgabepuffer für 100 Quellen zusammen mit großen SVG-Mustern.
+Die BarCategory verwendet keine `labelLayout`-Callbacks; deshalb wird wie
+bei ihrer bisherigen Cartesian-Basis kein zusätzliches LabelLayout-Feature
+eingebunden. Startseite, llms.txt, aktuelle stabile npm-Version, Lizenz und
+Lieferartefakt wurden am 18.10.2026 erneut geprüft: `6.1.0`, `Apache-2.0`,
+offizielles npm-Paket. Hash und Bytezahl stehen in `THIRD_PARTY_NOTICES.md`.
+
 Der CalendarPie-Einstieg enthält Pie Chart, Scatter Chart für Tagesnummern
 und Fehlstellenmarker, Calendar, Legende, Titel, Tooltip, Aria, LabelLayout und Canvas
 Renderer aus dem unveränderten gepinnten ECharts 6.1.0. Der gezielte Befehl
@@ -97,6 +110,7 @@ npm run build
 Die Ergebnisse werden als
 `../../libs/echarts/6.1.0/echarts.gauge.min.js`,
 `../../libs/echarts/6.1.0/echarts.cartesian.min.js`,
+`../../libs/echarts/6.1.0/echarts.bar-category.min.js`,
 `../../libs/echarts/6.1.0/echarts.scatter.min.js`,
 `../../libs/echarts/6.1.0/echarts.heatmap.min.js`,
 `../../libs/echarts/6.1.0/echarts.polar.min.js`,

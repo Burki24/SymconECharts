@@ -2,6 +2,18 @@
 
 ## Neu
 
+- EChartsPictorialBar passt die Bezeichnungsspalte horizontaler Symbolbalken
+  automatisch an die Textlänge an. Alternativ ist ihre Breite in Prozent
+  einstellbar, unabhängig für Kachel und IPSView einschließlich Vorschau.
+  Auf schmalen Ansichten bleibt Platz für den Wertebereich erhalten.
+
+- EChartsBarCategory unterstützt bis zu 100 Quellenzuordnungen mit
+  Kategoriennavigation für große Listen in Kachel und IPSView. Einfache,
+  gruppierte und gestapelte Balken behalten alle Werte, ihre Gesamt-Skala
+  und den sichtbaren Ausschnitt bei Aktualisierungen. Vorschauen kennzeichnen
+  weiterhin ihren begrenzten Ausschnitt. Ein eigenes lokales Runtime-Paket
+  hält auch große SVG-Muster zusammen mit 100 Quellen im Ausgabepuffer.
+
 - EChartsPictorialBar unterstützt jetzt bis zu 100 statt 16 Quellen. Große
   Listen besitzen eine automatische Kategoriennavigation in Kachel und IPSView;
   alle Werte bleiben erreichbar, auch mit Icons, eigenen SVGs und Farbverlauf.

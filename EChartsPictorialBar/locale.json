@@ -142,7 +142,8 @@
             "Hover focus": "Fokus beim Überfahren",
             "Hovered category": "Überfahrene Kategorie",
             "None": "Keiner",
-            "Unfocused opacity": "Deckkraft ohne Fokus"
+            "Unfocused opacity": "Deckkraft ohne Fokus",
+            "Label column width (0 = automatic)": "Breite der Bezeichnungsspalte (0 = automatisch)"
         }
     }
 }

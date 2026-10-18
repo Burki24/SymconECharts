@@ -8,6 +8,8 @@
     var chart = null;
     var currentState = bootstrap.state || null;
     var currentTheme = null;
+    var categoryAnchor = null;
+    var categoryStart = 0;
     var echartsDesign = window.SYMC_ECHARTS_DESIGN;
     var barPatterns = window.SymconEChartsPattern.create(function () {
         if (typeof window.requestAnimationFrame === 'function') {
@@ -77,6 +79,22 @@
         return items.map(function (item) { return String(item.category || item.series || ''); });
     }
 
+    function rememberCategoryWindow() {
+        if (!chart || typeof chart.getOption !== 'function') { return; }
+        var option = chart.getOption();
+        var zoom = (option.dataZoom || []).find(function (entry) { return entry.id === 'category-scroll'; });
+        if (!zoom) { return; }
+        var axes = zoom.orient === 'vertical' ? option.yAxis : option.xAxis;
+        var keys = axes && axes[0] && axes[0].data || [];
+        var start = Number(zoom.startValue);
+        if (!Number.isFinite(start)) {
+            start = keys.indexOf(zoom.startValue);
+            if (start < 0) { start = (Number(zoom.start) || 0) * Math.max(0, keys.length - 1) / 100; }
+        }
+        categoryStart = Math.max(0, Math.ceil(start - 1e-8));
+        categoryAnchor = keys[categoryStart] || null;
+    }
+
     function buildChartData(model, colors) {
         var bar = model.bar || {};
         var mode = ['grouped', 'stacked'].indexOf(bar.mode) >= 0 ? bar.mode : 'simple';
@@ -95,11 +113,12 @@
             return {
                 mode: mode,
                 categories: uniqueCategoryLabels(items),
+                categoryKeys: items.map(function (item, index) { return item.id || 'source-' + index; }),
                 series: [{
                     id: 'simple',
                     name: String(bar.title || ''),
                     items: items.map(function (item, index) {
-                        return { value: Number(item.value), color: item.color || paletteColors[index % paletteColors.length] };
+                        return { id: item.id, value: Number(item.value), color: item.color || paletteColors[index % paletteColors.length] };
                     })
                 }]
             };
@@ -120,6 +139,7 @@
         return {
             mode: mode,
             categories: categories,
+            categoryKeys: categories,
             series: seriesKeys.map(function (seriesKey, seriesIndex) {
                 var firstItem = items.find(function (item) {
                     return String(item.seriesKey || item.series || '') === seriesKey;
@@ -141,7 +161,7 @@
                     name: String(firstItem && firstItem.series || ''),
                     color: seriesColor,
                     items: seriesItems.map(function (item) {
-                        return { value: item ? Number(item.value) : null, color: item && item.color || seriesColor };
+                        return { id: item && item.id, value: item ? Number(item.value) : null, color: item && item.color || seriesColor };
                     })
                 };
             })
@@ -172,7 +192,31 @@
         var legendSize = echartsDesign.fontSizePercent(style.legendFontSizePercent, 12);
         var axisSize = echartsDesign.fontSizePercent(style.axisFontSizePercent, 12);
         var valueSize = echartsDesign.fontSizePercent(style.valueFontSizePercent, 12);
+        var top = headerInset + (multiSeries ? (titleVisible ? 82 : 48) : (titleVisible ? 56 : 20))
+            + Math.max(0, titleSize - 18) + (multiSeries ? Math.max(0, legendSize - 12) : 0);
+        var scroll = chartData.categories.length > 16;
+        var right = (horizontal && style.showValues === true ? 84 : 30) + (scroll && horizontal ? 28 : 0);
+        var bottom = (horizontal ? 28 : 70) + (scroll && !horizontal ? 28 : 0);
+        var left = horizontal ? 28 : 52;
+        var crossSpace = horizontal ? (chartElement.clientHeight || 500) - top - bottom
+            : (chartElement.clientWidth || 800) - left - right;
+        var minimumSpan = Math.max(horizontal ? 28 : 56, axisSize * 1.8,
+            style.showValues === true ? valueSize * 1.8 : 0);
+        if (chartData.mode === 'grouped') {
+            minimumSpan = Math.max(minimumSpan, chartData.series.length * 10);
+        }
+        var visibleCount = scroll ? Math.max(1, Math.min(16, Math.floor(crossSpace / minimumSpan))) : chartData.categories.length;
+        var anchorIndex = chartData.categoryKeys.indexOf(categoryAnchor);
+        var first = Math.max(0, Math.min(chartData.categories.length - visibleCount,
+            anchorIndex >= 0 ? anchorIndex : categoryStart));
+        var categoryKeys = scroll ? chartData.categoryKeys : chartData.categories;
         var axisLabel = { color: axisColor, fontSize: axisSize, overflow: 'truncate', width: horizontal ? 180 : 100 };
+        if (scroll) {
+            axisLabel.interval = 0;
+            axisLabel.formatter = function (key) {
+                return chartData.categories[chartData.categoryKeys.indexOf(String(key))] || '';
+            };
+        }
         var valueAxis = {
             type: 'value',
             name: String(bar.unit || ''),
@@ -182,9 +226,25 @@
             axisTick: { show: true, lineStyle: { color: axisLineColor } },
             splitLine: { show: style.showGrid !== false, lineStyle: { color: gridColor, opacity: style.gridColor ? 1 : 0.22 } }
         };
+        // DataZoom filters categories, not the shared comparison scale. Keep offscreen
+        // signed values (and separate positive/negative stack totals) in that scale.
+        if (scroll) {
+            var minimum = 0, maximum = 0;
+            chartData.categories.forEach(function (_, index) {
+                var positive = 0, negative = 0;
+                chartData.series.forEach(function (series) {
+                    var value = Number(series.items[index].value) || 0;
+                    if (stacked) { positive += Math.max(0, value); negative += Math.min(0, value); }
+                    else { minimum = Math.min(minimum, value); maximum = Math.max(maximum, value); }
+                });
+                if (stacked) { minimum = Math.min(minimum, negative); maximum = Math.max(maximum, positive); }
+            });
+            valueAxis.min = minimum;
+            valueAxis.max = maximum === minimum ? minimum + 1 : maximum;
+        }
         var categoryAxis = {
             type: 'category',
-            data: chartData.categories,
+            data: categoryKeys,
             axisLabel: axisLabel,
             axisLine: { lineStyle: { color: axisLineColor } },
             axisTick: { alignWithLabel: true, lineStyle: { color: axisLineColor } }
@@ -212,15 +272,23 @@
                 textStyle: { color: titleColor, fontSize: titleSize }
             },
             grid: {
-                top: headerInset + (multiSeries ? (titleVisible ? 82 : 48) : (titleVisible ? 56 : 20))
-                    + Math.max(0, titleSize - 18) + (multiSeries ? Math.max(0, legendSize - 12) : 0),
-                right: horizontal && style.showValues === true ? 84 : 30,
-                bottom: horizontal ? 28 : 70,
-                left: horizontal ? 28 : 52,
+                top: top, right: right, bottom: bottom, left: left,
                 containLabel: true
             },
+            dataZoom: scroll ? [
+                { id: 'category-scroll', type: 'slider',
+                    ...(horizontal ? { yAxisIndex: 0, orient: 'vertical', right: 6, width: 12, top: top, bottom: bottom }
+                        : { xAxisIndex: 0, orient: 'horizontal', bottom: 4, height: 12, left: left, right: right }),
+                    startValue: first, endValue: first + visibleCount - 1, filterMode: 'filter', zoomLock: true,
+                    showDetail: false, showDataShadow: false, brushSelect: false },
+                { id: 'category-scroll-inside', type: 'inside',
+                    ...(horizontal ? { yAxisIndex: 0 } : { xAxisIndex: 0 }),
+                    startValue: first, endValue: first + visibleCount - 1, filterMode: 'filter', zoomLock: true,
+                    zoomOnMouseWheel: false, moveOnMouseWheel: true, moveOnMouseMove: true }
+            ] : [],
             legend: {
                 show: multiSeries,
+                type: 'scroll',
                 top: headerInset + (titleVisible ? 38 + Math.max(0, titleSize - 18) : 8),
                 textStyle: { color: legendColor, fontSize: legendSize },
                 data: chartData.series.map(function (item) { return item.id; }),
@@ -235,9 +303,10 @@
                 formatter: function (parameters) {
                     var values = Array.isArray(parameters) ? parameters : [parameters];
                     if (values.length === 0) { return ''; }
-                    var categoryName = String(values[0].name || '');
+                    var categoryName = String(scroll ? chartData.categories[values[0].dataIndex] || '' : values[0].name || '');
                     var lines = categoryName ? [categoryName] : [];
                     values.forEach(function (parameter) {
+                        if (parameter.value === null || parameter.value === undefined || parameter.value === '-') { return; }
                         var source = chartData.series[parameter.seriesIndex];
                         var prefix = multiSeries && source ? source.name + ': ' : '';
                         lines.push(String(parameter.marker || '') + prefix
@@ -279,6 +348,7 @@
                             ? design.readableTextColor(item.color, colors.text, colors.background)
                             : valueColor);
                         return {
+                            id: item.id,
                             value: item.value,
                             label: labelIsInside ? { color: labelColor } : undefined,
                             itemStyle: {
@@ -318,6 +388,7 @@
         errorElement.hidden = true;
         chartElement.hidden = false;
         var theme = normalizeTheme(state.chart.theme || 'auto');
+        rememberCategoryWindow();
         if (chart && currentTheme !== theme) {
             chart.dispose();
             chart = null;
@@ -336,6 +407,7 @@
 
     if (window.ResizeObserver) {
         new ResizeObserver(function () {
+            rememberCategoryWindow();
             if (!echartsDesign.resizeChartIfNeeded(chart, chartElement)) { return; }
             if (currentState && currentState.status === 'ready') {
                 chart.setOption(buildOption(currentState.chart, currentTheme || 'auto'), true);

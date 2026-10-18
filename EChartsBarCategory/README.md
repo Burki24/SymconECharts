@@ -7,9 +7,26 @@ Value labels keep their automatic position by default. They can also be placed a
 These options apply to the tile and the independent IPSView design. In
 inherited mode, IPSView follows the tile settings.
 
-`EChartsBarCategory` compares the current values of one to sixteen numeric
+`EChartsBarCategory` compares the current values of one to one hundred numeric
 IP-Symcon variables as a category bar chart. All configured sources must use
 the same effective unit so that the shared value axis remains meaningful.
+
+## Large category lists
+
+The source limit is **100 variable assignments in total**, including all
+categories and series in grouped or stacked mode. More than sixteen categories
+enable a category slider and mouse-wheel navigation automatically, in either
+orientation and in both Tile and IPSView. The initial window adapts to the
+available chart size and font sizes, showing at most sixteen categories.
+Grouped bars also reserve room for their series. A scrollable legend helps
+with many series; navigation changes the visible categories, not the sources.
+
+All configured values remain in the model. Sorting and the shared signed
+value scale use the full data set, including positive and negative stack
+totals, so scrolling does not change the comparison scale. Current-value
+updates retain the visible category; in Simple mode this follows the source
+ID even if names are equal or a value update changes the sorting order.
+Sources, saved design settings and variable values are not modified by navigation.
 
 ## Temporary loading errors
 

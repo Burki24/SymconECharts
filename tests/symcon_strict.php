@@ -157,7 +157,7 @@ foreach ([
     "RegisterPropertyString(\$prefix . 'BarMode', 'simple')",
     "RegisterPropertyString(\$prefix . 'Orientation', 'vertical')",
     "RegisterPropertyString(\$prefix . 'SortOrder', 'configured')",
-    'EChartsAsset::CartesianJavaScript()',
+    'EChartsAsset::BarCategoryJavaScript()',
     'EChartsVariablePresentation::Resolve(',
     'use EChartsCurrentSources;'
 ] as $barCategoryContract) {
