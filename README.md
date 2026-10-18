@@ -47,6 +47,13 @@ Diagrammtitel ohne diesen Kachel-Kopfbereich.
 
 Folgende Module sind enthalten:
 
+- __EChartsCalendarPie__ ([Dokumentation](EChartsCalendarPie/README.md))
+
+  Ein Monatskalender mit Kreisdiagrammen je abgeschlossenem Tag. Wählbar sind
+  Tagesmittelwerte mehrerer Archivvariablen, Tagesverbrauch von Zählern oder
+  Zeitanteile archivierter Zustände. Fehlende Daten und unbekannte Zeiten
+  bleiben erkennbar; Kachel und IPSView besitzen eigene Designer und Vorschauen.
+
 - __EChartsStateTimeline__ ([Dokumentation](EChartsStateTimeline/README.md))
   Archivierte Boolean-/Integer-Zustände als farbige Zeitabschnitte je Quelle.
   Eigene Zustandsnamen/-farben, ausdrücklich unbekannte Anfänge und Zoom;

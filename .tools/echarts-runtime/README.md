@@ -1,5 +1,14 @@
 # Diagrammfamilienspezifische ECharts-Runtimes erzeugen
 
+Der CalendarPie-Einstieg enthält Pie Chart, Scatter Chart für Tagesnummern
+und Fehlstellenmarker, Calendar, Legende, Titel, Tooltip, Aria, LabelLayout und Canvas
+Renderer aus dem unveränderten gepinnten ECharts 6.1.0. Der gezielte Befehl
+`npm run build:calendar-pie` schreibt ausschließlich
+`../../libs/echarts/6.1.0/echarts.calendar-pie.min.js`.
+Offizielle Startseite, llms.txt, das offizielle Beispiel `calendar-pie`,
+npm-Version und Apache-2.0-Lizenz wurden am 18.10.2026 geprüft. Die native
+Pie-Anbindung verwendet `coordinateSystem: 'calendar'` und `center: Datum`.
+
 Der StateTimeline-Einstieg enthält Custom Chart, Grid, Data Zoom, Titel,
 Tooltip, Aria und Canvas Renderer aus demselben unveränderten ECharts 6.1.0.
 `npm run build:state-timeline` erzeugt ausschließlich

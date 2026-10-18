@@ -21,6 +21,13 @@ IPSView nur den Diagrammtitel benötigt.
 
 ## Aktueller Stand und Zielarchitektur
 
+CalendarPie (`ECCP`) ergänzt gemäß [ADR 0060](adr/0060-calendar-pie-data-modes.md)
+einen Monatskalender mit Tages-Kreisdiagrammen und den auswählbaren
+Datengrundlagen Tagesmittelwerte, Zählerverbrauch und Zustandsdauer. Die
+vorhandenen Archivoperationen bleiben unverändert. Die neue Gestaltung und
+alle drei Modi müssen nach Modulupdate in Symcon und IPSView live geprüft
+werden; lokale Nachweise sind in `tests/README.md` dokumentiert.
+
 StateTimeline (`ECST`) ergänzt diskrete Boolean-/Integer-Roharchive gemäß
 [ADR 0059](adr/0059-archive-state-timeline.md). Das Gateway stellt die additive
 Operation `archive.states.read` mit einem Vorgänger bereit; Intervallbildung

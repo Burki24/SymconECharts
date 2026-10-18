@@ -140,6 +140,33 @@ final class EChartsBarPreview
         return rtrim(rtrim(sprintf('%.2F', $value), '0'), '.');
     }
 
+    /** Shared Pie/CalendarPie sector geometry; two arcs keep complete circles visible after rounding. */
+    public static function Sector(float $cx, float $cy, float $inner, float $outer, float $start, float $end, bool $clockwise = true): string
+    {
+        $span = min(abs($end - $start), 2 * M_PI);
+        $direction = $clockwise ? 1 : -1;
+        $end = $start + $direction * $span;
+        $point = static fn (float $radius, float $angle): string => self::N($cx + $radius * cos($angle)) . ' ' . self::N($cy + $radius * sin($angle));
+        $arc = static fn (float $radius, float $angle, int $sweep, int $large): string => ' A ' . self::N($radius) . ' ' . self::N($radius)
+            . ' 0 ' . $large . ' ' . $sweep . ' ' . $point($radius, $angle);
+        $sweep = $clockwise ? 1 : 0;
+        $full = $span >= 2 * M_PI - 0.000001;
+        $path = 'M ' . $point($outer, $start);
+        if ($full) {
+            $path .= $arc($outer, $start + $direction * M_PI, $sweep, 0) . $arc($outer, $end, $sweep, 0);
+        } else {
+            $path .= $arc($outer, $end, $sweep, $span > M_PI ? 1 : 0);
+        }
+        if ($inner > 0) {
+            $path .= ($full ? ' Z M ' : ' L ') . $point($inner, $end);
+            $path .= $full ? $arc($inner, $end - $direction * M_PI, 1 - $sweep, 0) . $arc($inner, $start, 1 - $sweep, 0)
+                : $arc($inner, $start, 1 - $sweep, $span > M_PI ? 1 : 0);
+        } elseif (!$full) {
+            $path .= ' L ' . self::N($cx) . ' ' . self::N($cy);
+        }
+        return $path . ' Z';
+    }
+
     /** Keeps schematic SVG patterns legible while reflecting the configured motif scale. */
     public static function PatternSize(int $sizePercent): float
     {

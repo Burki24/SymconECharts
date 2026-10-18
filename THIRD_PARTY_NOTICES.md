@@ -21,6 +21,11 @@ Paket-SHA-1 laut npm: `ae0f68590f5ebbd728d900907c27acde7c5456d1`
 
 Ausgelieferte Dateien:
 
+- `libs/echarts/6.1.0/echarts.calendar-pie.min.js` – reproduzierbarer
+  CalendarPie-Browser-Build aus ECharts Core, Pie Chart, Scatter Chart,
+  Calendar, Legende, Titel, Tooltip, Aria, LabelLayout und Canvas Renderer; 563.136 Byte;
+  SHA-256 `cfa29cc588f00c30c27f5843923f6993717c48aa1b1b5321b1c82a3814568ab9`;
+
 - `libs/echarts/6.1.0/echarts.state-timeline.min.js` – reproduzierbarer
   StateTimeline-Browser-Build aus ECharts Core, Custom Chart, Grid, Data Zoom,
   Titel, Tooltip, Aria und Canvas Renderer; 550.199 Byte; SHA-256

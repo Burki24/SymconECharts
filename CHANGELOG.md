@@ -2,6 +2,14 @@
 
 ## Neu
 
+- EChartsCalendarPie zeigt Tages-Kreisdiagramme im Monatskalender. Eine Auswahl
+  bietet Tagesmittelwerte, Zähler-Tagesverbrauch oder archivierte Zustandsdauern.
+  Mittelwerte und Verbrauch erlauben frei wählbar eine bis fünf Archivquellen
+  mit je einem Kreisanteil pro Tag; Zustandsdauer verwendet eine Zustandsvariable.
+  Fehlende Quellen, Nulltage und unbekannte Zeitanteile bleiben erkennbar.
+  Monatsnavigation, Kachel und IPSView mit eigenen Designern und Vorschauen
+  sind enthalten; Quellen und Archivaufzeichnung bleiben unverändert.
+
 - EChartsStateTimeline ergänzt beide Designer und Vorschauen um Rahmenarten,
   Eckenrundung, innere Textausrichtung, Schriftarten und Fett-/Kursivschrift.
   Zeit-/Quellenlabels, Zeitformate, Achsenlinien, Teilstriche und Raster sind
@@ -739,6 +747,9 @@
   nach einem festgelegten maximalen Zeitabstand sichtbar unterbrechen.
 
 ## Fixes
+
+- Kreisvorschauen mit nur einem positiven Anteil zeichnen vollständige Kreise
+  und Donuts zuverlässig, ohne Rundungsfehler oder künstliche radiale Naht.
 
 - Der gemeinsame IPSView-Transport ermittelt die Serveradresse auch in
   isolierten `data:`-Einbettungen ohne eigenes Basis-Element. Frischer Zustand

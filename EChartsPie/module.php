@@ -411,29 +411,7 @@ class EChartsPie extends IPSModuleStrict
 
     private function PreviewSector(float $cx, float $cy, float $inner, float $outer, float $start, float $end): string
     {
-        $span = min($end - $start, 2 * M_PI - 0.000001);
-        $end = $start + $span;
-        $x1 = $cx + $outer * cos($start);
-        $y1 = $cy + $outer * sin($start);
-        $x2 = $cx + $outer * cos($end);
-        $y2 = $cy + $outer * sin($end);
-        $large = $span > M_PI ? 1 : 0;
-        $path = 'M ' . EChartsBarPreview::N($x1) . ' ' . EChartsBarPreview::N($y1)
-            . ' A ' . EChartsBarPreview::N($outer) . ' ' . EChartsBarPreview::N($outer)
-            . ' 0 ' . $large . ' 1 ' . EChartsBarPreview::N($x2) . ' ' . EChartsBarPreview::N($y2);
-        if ($inner > 0) {
-            $ix2 = $cx + $inner * cos($end);
-            $iy2 = $cy + $inner * sin($end);
-            $ix1 = $cx + $inner * cos($start);
-            $iy1 = $cy + $inner * sin($start);
-            $path .= ' L ' . EChartsBarPreview::N($ix2) . ' ' . EChartsBarPreview::N($iy2)
-                . ' A ' . EChartsBarPreview::N($inner) . ' ' . EChartsBarPreview::N($inner)
-                . ' 0 ' . $large . ' 0 ' . EChartsBarPreview::N($ix1) . ' ' . EChartsBarPreview::N($iy1);
-        } else {
-            $path .= ' L ' . EChartsBarPreview::N($cx) . ' ' . EChartsBarPreview::N($cy);
-        }
-
-        return $path . ' Z';
+        return EChartsBarPreview::Sector($cx, $cy, $inner, $outer, $start, $end);
     }
 
     private function RenderPieHTMLPage(bool $ipsView): string

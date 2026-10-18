@@ -125,6 +125,11 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
 
 ## Modulpräfixe
 
+- `ECCP` ist `EChartsCalendarPie` zugeordnet (`CP` = Calendar Pie), GUID
+  `{8F3D4E67-A52E-46AB-976E-25EC4F37FB52}` gemäß ADR 0060. Das eigene
+  Monatskalendermodul bietet Tagesmittelwerte, Zähler-Tagesverbrauch und
+  Zustandsdauer als auswählbare Datengrundlagen, nicht als getrennte Module.
+
 - `ECST` ist `EChartsStateTimeline` zugeordnet (`ST` = State Timeline), GUID
   `{581AD0EF-4E14-4796-902B-08381E299232}` gemäß ADR 0059. Archivierte
   Boolean-/Integer-Zustandswechsel werden als Zeitabschnitte dargestellt,

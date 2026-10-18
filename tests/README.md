@@ -1,5 +1,56 @@
 # Tests
 
+## CalendarPie
+
+`php tests/calendar_pie_data.php` prüft abgeschlossene lokale Monatsfenster,
+Schaltjahre, Sommerzeit und Tagesgrenzen auch bei Übergängen um Mitternacht
+(São Paulo und Havanna). Samoas übersprungenes Datum wird ohne doppelte
+Datumsschlüssel ausgelassen. Alle Zustandsdauern einschließlich unbekannter
+Zeit ergeben exakt die reale Monats- beziehungsweise Tageslänge. Numerische
+Mittelwerte/Zählersummen bleiben unverändert; fehlende Quellen, Nulltage,
+negative Werte, Punkt-/Zustandslimits und ungültige Daten sind abgesichert.
+Jede numerische Quellenanzahl von eins bis fünf bleibt vollständig erhalten;
+eine sechste Quelle wird ausdrücklich abgewiesen.
+
+`php tests/calendar_pie_integration.php` verwendet den echten Gateway mit den
+vorhandenen Kernel-Doubles in einem eigenen Prozess. Alle drei Modi prüfen
+Archivart/Reducer, Metadaten, Vorgänger, Quellenidentität, aktive Referenzen,
+unabhängige Designer, Vererbung/Kopie, deutsche Formular- und Renderertexte,
+schreibfreie Entwürfe, Vorschauzustände/-farben, Monatsnavigation, Fehlererholung
+und die komplette HTML-Ausgabe unter 1 MiB. Vollständige Kreise/Donuts nutzen
+die gemeinsame SVG-Sektorgeometrie ohne Rundungsfehler oder künstliche Naht.
+SVG-Intervalle, Konturen, Labelunterdrückung, automatische Unbekannt-Farbe und
+die Zellposition nach einem übersprungenen lokalen Datum werden geprüft.
+Beide numerischen Modi werden zusätzlich mit je einer bis fünf Quellen durch
+Gateway, Kachel-/IPSView-Bootstrap und beide SVG-Vorschauen geprüft. Ein Entwurf
+mit sechs Quellen zeigt einen Hinweis statt einer gekürzten Vorschau.
+
+`node tests/calendar_pie_layout.js` prüft die gepinnte echte ECharts-Engine in
+312 Geometrievarianten: Kachelkopf, Titel, Navigation, Wochentage, Legende,
+Kreis-/Donutgrenzen, große Schriften sowie vollständige Textgrenzen ohne
+Überlappung oder Eintritt in das Donut-Loch. Ein echter Kollisionsfall mit
+acht Kategorien als defensiver Renderer-Stresstest muss Beschriftungen
+unterdrücken, ohne alle Texte zu verlieren. Der reguläre Quellenvertrag bleibt
+eins bis fünf; jede Anzahl wird in beiden numerischen Modi und Ausgaben geprüft.
+ID-basierte Legenden erhalten gleiche sichtbare Namen. Sichere URL-Auflösung
+für opake Frames, veraltete Navigationsantworten und Timer-Nachrichten während
+des Monatswechsels sind ebenfalls abgesichert.
+
+`node tests/calendar_pie_browser.mjs` stellt ausschließlich unter
+`http://127.0.0.1:8805` synthetische Kalenderdaten bereit. `/` vergleicht
+schmale Kachel, breites IPSView und hellen Verbrauch. `/chart?mode=ipsview&data=states&ring=yes`
+zeigt Zustandsdauern als Ringe; `/chart?mode=ipsview&theme=light&data=counter&font=200&values=yes`
+prüft große Schrift und Innenwerte. `/preview.svg?data=states` beziehungsweise
+`data=average` oder `data=counter` erzeugen die echte PHP-Formularvorschau.
+Mit `sources=1` bis `sources=5` lässt sich die Anzahl numerischer Quellen sowohl
+unter `/chart` als auch unter `/preview.svg` variieren.
+Diese Ansichten, dunkle Kachel, helles IPSView, unbekannte Anteile,
+Monatsnavigation und die korrigierten Innenwerte wurden am 18.10.2026 lokal
+visuell geprüft. Ein direkt geöffneter Renderer blieb ohne Konsolenwarnung
+oder -fehler. Die Live-Abnahme aller drei Modi sowie der neuen Formularfelder
+in Symcon 9.0/9.1 und IPSView steht nach Modulupdate noch aus.
+Es wurden keine Live-Konfigurationen, Variablenwerte oder Archive verändert.
+
 StateTimeline wird durch `php tests/state_timeline_data.php`,
 `php tests/archive_states_gateway.php` und `php tests/state_timeline_integration.php`
 abgesichert. Der Integrationstest nutzt den echten Gateway mit den vorhandenen

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="{{HTML_LANGUAGE}}" class="{{HTML_CLASSES}}" style="font-size: {{ROOT_FONT_SIZE}};">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="{{VIEWPORT_CONTENT}}">
+    <title>{{DOCUMENT_TITLE}}</title>
+    <style>
+{{VISUALIZATION_THEME}}
+{{MODULE_STYLE}}
+{{IPSVIEW_STYLE}}
+    </style>
+</head>
+<body>
+    <main id="echarts-calendar-pie-root" class="echarts-calendar-pie-root">
+        <nav id="echarts-calendar-pie-period" class="echarts-calendar-pie-period" hidden>
+            <button id="echarts-calendar-pie-previous" type="button">‹</button>
+            <span id="echarts-calendar-pie-period-label" aria-live="polite"></span>
+            <button id="echarts-calendar-pie-next" type="button">›</button>
+            <button id="echarts-calendar-pie-selected" type="button"></button>
+        </nav>
+        <div id="echarts-calendar-pie-chart" class="echarts-calendar-pie-chart" role="img"></div>
+        <div id="echarts-calendar-pie-warning" class="echarts-refresh-warning" role="status" hidden></div>
+        <div id="echarts-calendar-pie-error" class="echarts-calendar-pie-error" role="alert" hidden></div>
+    </main>
+    <script>{{ECHARTS_SCRIPT}}</script>
+    <script>{{ECHARTS_THEME_SCRIPT}}</script>
+    <script>{{ECHARTS_DESIGN_SCRIPT}}</script>
+    <script>window.SYMC_VISUALIZATION = {{BOOTSTRAP_JSON}};</script>
+    <script>{{MODULE_SCRIPT}}</script>
+    <script>{{IPSVIEW_TRANSPORT_SCRIPT}}</script>
+</body>
+</html>

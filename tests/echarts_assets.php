@@ -57,6 +57,15 @@ assertEChartsAsset(
         && str_contains((string) file_get_contents($root . '/.tools/echarts-runtime/src/radar-runtime.js'), 'LabelLayout'),
     'The Radar runtime must be pinned and remain below 550 KB.'
 );
+$calendarPieRuntime = EChartsAsset::CalendarPieJavaScript();
+assertEChartsAsset(
+    hash_file('sha256', $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.calendar-pie.min.js') === EChartsAsset::CALENDAR_PIE_SHA256
+        && strlen($calendarPieRuntime) < 600000 && str_contains($calendarPieRuntime, 'window.echarts')
+        && str_contains((string) file_get_contents($root . '/.tools/echarts-runtime/src/calendar-pie-runtime.js'), 'CalendarComponent')
+        && str_contains((string) file_get_contents($root . '/.tools/echarts-runtime/src/calendar-pie-runtime.js'), 'PieChart')
+        && str_contains((string) file_get_contents($root . '/.tools/echarts-runtime/src/calendar-pie-runtime.js'), 'LabelLayout'),
+    'CalendarPie must use the pinned native Calendar/Pie runtime below 600 KB.'
+);
 $calendarRuntime = EChartsAsset::CalendarJavaScript();
 assertEChartsAsset(
     hash_file('sha256', $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.calendar.min.js') === EChartsAsset::CALENDAR_SHA256

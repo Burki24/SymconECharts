@@ -1,0 +1,477 @@
+{
+    "$schema": "https://www.symcon.de/assets/files/validation/formSchema.json",
+    "elements": [
+        {
+            "type": "Label",
+            "caption": "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts."
+        },
+        {
+            "type": "ValidationTextBox",
+            "name": "Title",
+            "caption": "Title"
+        },
+        {
+            "type": "Select",
+            "name": "DataMode",
+            "caption": "Data basis",
+            "options": [
+                {
+                    "caption": "Daily means",
+                    "value": "average"
+                },
+                {
+                    "caption": "Daily consumption",
+                    "value": "counter"
+                },
+                {
+                    "caption": "State duration",
+                    "value": "states"
+                }
+            ],
+            "onChange": "ECCP_UpdateDataMode($id, $DataMode);"
+        },
+        {
+            "type": "List",
+            "name": "Sources",
+            "caption": "Numeric archive sources (1–5)",
+            "rowCount": 5,
+            "add": true,
+            "delete": true,
+            "changeOrder": true,
+            "columns": [
+                {
+                    "caption": "Variable",
+                    "name": "VariableID",
+                    "width": "320px",
+                    "add": 0,
+                    "edit": {
+                        "type": "SelectVariable",
+                        "validVariableTypes": [
+                            1,
+                            2
+                        ]
+                    }
+                },
+                {
+                    "caption": "Label (optional)",
+                    "name": "Label",
+                    "width": "220px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "caption": "Color",
+                    "name": "Color",
+                    "width": "150px",
+                    "add": -1,
+                    "edit": {
+                        "type": "SelectColor",
+                        "allowTransparent": true,
+                        "transparentCaption": "Automatic (theme)"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "SelectVariable",
+            "name": "StateVariableID",
+            "caption": "State archive variable",
+            "validVariableTypes": [
+                0,
+                1
+            ],
+            "visible": false
+        },
+        {
+            "type": "List",
+            "name": "States",
+            "caption": "State definitions",
+            "rowCount": 4,
+            "add": true,
+            "delete": true,
+            "columns": [
+                {
+                    "caption": "Value",
+                    "name": "Value",
+                    "width": "120px",
+                    "add": 0,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "digits": 0
+                    }
+                },
+                {
+                    "caption": "State label",
+                    "name": "Label",
+                    "width": "220px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "caption": "State color",
+                    "name": "Color",
+                    "width": "160px",
+                    "add": -1,
+                    "edit": {
+                        "type": "SelectColor",
+                        "allowTransparent": true,
+                        "transparentCaption": "Automatic (theme)"
+                    }
+                }
+            ],
+            "visible": false
+        },
+        {
+            "type": "Label",
+            "caption": "Only completed local days are shown. Missing numeric sources leave an incomplete day; unknown state durations remain explicit."
+        },
+        {
+            "type": "ValidationTextBox",
+            "name": "Month",
+            "caption": "Month (YYYY-MM, empty = current month)"
+        },
+        {
+            "type": "CheckBox",
+            "name": "UseVariablePresentation",
+            "caption": "Use variable presentation"
+        },
+        {
+            "type": "ValidationTextBox",
+            "name": "Unit",
+            "caption": "Unit"
+        },
+        {
+            "type": "NumberSpinner",
+            "name": "Decimals",
+            "caption": "Decimals",
+            "minimum": 0,
+            "maximum": 6
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Tile designer",
+            "expanded": false,
+            "items": [
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "AnimationEnabled",
+                            "caption": "Animate daily pies"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDuration",
+                            "caption": "Initial animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AnimationDurationUpdate",
+                            "caption": "Update animation",
+                            "minimum": 0,
+                            "maximum": 3000,
+                            "suffix": "ms"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "EChartsTheme",
+                            "caption": "ECharts theme",
+                            "options": [
+                                {
+                                    "caption": "Automatic (Symcon design)",
+                                    "value": "auto"
+                                },
+                                {
+                                    "caption": "Dark",
+                                    "value": "dark"
+                                },
+                                {
+                                    "caption": "Vintage",
+                                    "value": "vintage"
+                                },
+                                {
+                                    "caption": "Macarons",
+                                    "value": "macarons"
+                                },
+                                {
+                                    "caption": "Infographic",
+                                    "value": "infographic"
+                                },
+                                {
+                                    "caption": "Shine",
+                                    "value": "shine"
+                                },
+                                {
+                                    "caption": "Roma",
+                                    "value": "roma"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowTooltip",
+                            "caption": "Show tooltip"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowLegend",
+                            "caption": "Show legend"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowDayNumbers",
+                            "caption": "Show day numbers"
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "ShowValues",
+                            "caption": "Show slice values"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "FirstWeekday",
+                            "caption": "First weekday",
+                            "options": [
+                                {
+                                    "caption": "Sun",
+                                    "value": 0
+                                },
+                                {
+                                    "caption": "Mon",
+                                    "value": 1
+                                },
+                                {
+                                    "caption": "Tue",
+                                    "value": 2
+                                },
+                                {
+                                    "caption": "Wed",
+                                    "value": 3
+                                },
+                                {
+                                    "caption": "Thu",
+                                    "value": 4
+                                },
+                                {
+                                    "caption": "Fri",
+                                    "value": 5
+                                },
+                                {
+                                    "caption": "Sat",
+                                    "value": 6
+                                }
+                            ]
+                        },
+                        {
+                            "type": "CheckBox",
+                            "name": "Clockwise",
+                            "caption": "Clockwise"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "PieRadiusPercent",
+                            "caption": "Pie radius",
+                            "minimum": 20,
+                            "maximum": 90,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "InnerRadiusPercent",
+                            "caption": "Inner radius",
+                            "minimum": 0,
+                            "maximum": 80,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "StartAngle",
+                            "caption": "Start angle",
+                            "minimum": 0,
+                            "maximum": 360,
+                            "suffix": "°"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "SliceBorderWidth",
+                            "caption": "Slice border width",
+                            "minimum": 0,
+                            "maximum": 5,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "CellBorderWidth",
+                            "caption": "Cell border width",
+                            "minimum": 0,
+                            "maximum": 4,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "CellOpacityPercent",
+                            "caption": "Cell opacity",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "TitleFontSizePercent",
+                            "caption": "Title font size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "AxisFontSizePercent",
+                            "caption": "Axis font size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "ValueFontSizePercent",
+                            "caption": "Value font size",
+                            "minimum": 50,
+                            "maximum": 200,
+                            "suffix": "%"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "TitleColor",
+                            "caption": "Title color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "AxisColor",
+                            "caption": "Axis color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "ValueColor",
+                            "caption": "Value color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "CellBorderColor",
+                            "caption": "Cell border color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "EmptyCellColor",
+                            "caption": "Empty cell color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        },
+                        {
+                            "type": "SelectColor",
+                            "name": "SliceBorderColor",
+                            "caption": "Slice border color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "SelectColor",
+                            "name": "UnknownColor",
+                            "caption": "Unknown duration color",
+                            "allowTransparent": true,
+                            "transparentCaption": "Automatic (theme)"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "actions": [],
+    "status": [
+        {
+            "code": 102,
+            "icon": "active",
+            "caption": "CalendarPie is ready"
+        },
+        {
+            "code": 201,
+            "icon": "error",
+            "caption": "CalendarPie variables are invalid"
+        },
+        {
+            "code": 202,
+            "icon": "error",
+            "caption": "CalendarPie settings are invalid"
+        },
+        {
+            "code": 203,
+            "icon": "error",
+            "caption": "No active EChartsGateway is connected"
+        },
+        {
+            "code": 204,
+            "icon": "error",
+            "caption": "CalendarPie archive values could not be loaded"
+        }
+    ]
+}

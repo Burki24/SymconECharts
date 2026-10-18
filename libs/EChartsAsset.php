@@ -12,6 +12,7 @@ use RuntimeException;
 final class EChartsAsset
 {
     public const VERSION = '6.1.0';
+    public const CALENDAR_PIE_SHA256 = 'cfa29cc588f00c30c27f5843923f6993717c48aa1b1b5321b1c82a3814568ab9';
     public const STATE_TIMELINE_SHA256 = 'ff7da41ec7d669f7daf7ef2346ee06e4af1b341dcf307a538500184af63c9d39';
     public const THEME_RIVER_SHA256 = 'd4739d560c4fc4ce0ac1ad3f81334aa7c8e10d7143cb86d89853a6008955d8dc';
     public const PICTORIAL_BAR_SHA256 = 'aa455b075155c605bb5253642d8f696927b08ad7fa46487a83810eb1d8a03a6f';
@@ -459,6 +460,20 @@ final class EChartsAsset
             throw new RuntimeException('The bundled Apache ECharts Radar runtime failed its integrity check.');
         }
         return $canonicalContent;
+    }
+
+    /** Loads Calendar with native daily pies without changing existing chart runtimes. */
+    public static function CalendarPieJavaScript(): string
+    {
+        $content = @file_get_contents(__DIR__ . '/echarts/' . self::VERSION . '/echarts.calendar-pie.min.js');
+        if ($content === false || $content === '') {
+            throw new RuntimeException('The bundled Apache ECharts CalendarPie runtime could not be loaded.');
+        }
+        $canonical = self::NormalizeLineEndings($content);
+        if (!hash_equals(self::CALENDAR_PIE_SHA256, hash('sha256', $canonical))) {
+            throw new RuntimeException('The bundled Apache ECharts CalendarPie runtime failed its integrity check.');
+        }
+        return $canonical;
     }
 
     /** Loads the pinned Calendar runtime without enlarging the hourly Heatmap bundle. */

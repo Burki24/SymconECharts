@@ -6,6 +6,17 @@ $root = dirname(__DIR__);
 $errors = [];
 
 $requiredFiles = [
+    'docs/adr/0060-calendar-pie-data-modes.md',
+    'EChartsCalendarPie/CalendarPieData.php',
+    'EChartsCalendarPie/CalendarPiePreview.php',
+    'EChartsCalendarPie/visualization/index.html',
+    'EChartsCalendarPie/visualization/style.css',
+    'EChartsCalendarPie/visualization/app.js',
+    'libs/echarts/6.1.0/echarts.calendar-pie.min.js',
+    '.tools/echarts-runtime/src/calendar-pie-runtime.js',
+    'tests/calendar_pie_data.php',
+    'tests/calendar_pie_integration.php',
+    'tests/calendar_pie_layout.js',
     'docs/adr/0059-archive-state-timeline.md',
     'EChartsStateTimeline/StateTimelineData.php',
     'EChartsStateTimeline/StateTimelinePreview.php',
@@ -482,7 +493,7 @@ if ($helperSync !== null) {
 }
 
 $expectedModules = [
-    'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarPolar', 'EChartsBarWaterfall', 'EChartsBoxplot', 'EChartsCalendar', 'EChartsCandlestick', 'EChartsFunnel', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
+    'EChartsBarCategory', 'EChartsBarHistory', 'EChartsBarPolar', 'EChartsBarWaterfall', 'EChartsBoxplot', 'EChartsCalendar', 'EChartsCalendarPie', 'EChartsCandlestick', 'EChartsFunnel', 'EChartsGateway', 'EChartsGaugeChronograph', 'EChartsGaugeMulti',
     'EChartsGaugeSingle', 'EChartsGaugeTacho', 'EChartsGraph', 'EChartsGraphZ2M', 'EChartsHeatmap', 'EChartsParallel', 'EChartsPictorialBar', 'EChartsPie', 'EChartsRadar', 'EChartsSankey', 'EChartsScatter', 'EChartsStateTimeline', 'EChartsSunburst', 'EChartsThemeRiver', 'EChartsTimeSeries', 'EChartsTree', 'EChartsTreeSystemHealth', 'EChartsTreemap'
 ];
 $discoveredModules = [];

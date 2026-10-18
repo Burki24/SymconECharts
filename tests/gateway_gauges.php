@@ -938,6 +938,26 @@ assertGatewayGauge(
 );
 IPSModuleStrict::$ParentResponder = static fn (string $json): string => $gateway->ForwardData($json);
 
+if (($argv[1] ?? '') === '--calendar-pie-preview') {
+    require_once dirname(__DIR__) . '/EChartsCalendarPie/module.php';
+    $GLOBALS['symconTestVariables'][4800] = ['VariableType' => 2, 'VariableUpdated' => 1780000000, 'Value' => 8.0, 'Name' => 'Quelle A'];
+    $GLOBALS['symconTestVariables'][4801] = ['VariableType' => 2, 'VariableUpdated' => 1780000000, 'Value' => 3.0, 'Name' => 'Quelle B'];
+    $GLOBALS['symconTestVariables'][4802] = ['VariableType' => 0, 'VariableUpdated' => 1780000000, 'Value' => true, 'Name' => 'Status'];
+    foreach ([4803, 4804, 4805] as $id) {
+        $GLOBALS['symconTestVariables'][$id] = ['VariableType' => 2, 'VariableUpdated' => 1780000000, 'Value' => 5.0, 'Name' => 'Quelle ' . $id];
+    }
+    $calendarPiePreview = new EChartsCalendarPie();
+    $calendarPiePreview->Create();
+    $calendarPiePreview->UpdateBarPreviewFromForm($argv[2] ?? '{}');
+    $previewUpdate = array_slice($calendarPiePreview->GetTestFormUpdates(), -2)[($argv[3] ?? '') === 'ipsview' ? 1 : 0];
+    echo base64_decode(substr($previewUpdate['Value'], strlen('data:image/svg+xml;base64,')));
+    exit(0);
+}
+if (array_slice($argv, 1) === ['--calendar-pie']) {
+    require __DIR__ . '/calendar_pie_integration.php';
+    exit(0);
+}
+
 if (($argv[1] ?? '') === '--state-timeline-preview') {
     require_once dirname(__DIR__) . '/EChartsStateTimeline/module.php';
     $GLOBALS['symconTestVariables'][4800] = ['VariableType' => 0, 'VariableUpdated' => 1780000000, 'Value' => false, 'Name' => 'Fenster'];
