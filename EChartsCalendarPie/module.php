@@ -88,6 +88,7 @@ class EChartsCalendarPie extends IPSModuleStrict
         $this->RegisterPropertyString('Sources', '[]');
         $this->RegisterPropertyString('Title', '');
         $this->RegisterPropertyString('DataMode', 'average');
+        $this->RegisterPropertyBoolean('NormalizeValues', false);
         $this->RegisterPropertyString('Month', '');
         $this->RegisterPropertyInteger('StateVariableID', 0);
         $this->RegisterPropertyString('States', '[]');
@@ -144,7 +145,7 @@ class EChartsCalendarPie extends IPSModuleStrict
             ['caption' => 'Calendar and circles', 'start' => 'ShowTooltip'],
             ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
         ]);
-        $fields = ['Title', 'Sources', 'DataMode', 'Month', 'StateVariableID', 'States',
+        $fields = ['Title', 'Sources', 'DataMode', 'NormalizeValues', 'Month', 'StateVariableID', 'States',
             'UseVariablePresentation', 'Unit', 'Decimals',
             'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
             'IPSViewBackgroundOpacityPercent', ...array_keys(self::DESIGN_DEFAULTS),
@@ -248,11 +249,18 @@ class EChartsCalendarPie extends IPSModuleStrict
 
     public function UpdateDataMode(string $Mode): void
     {
-        foreach (['Sources', 'UseVariablePresentation', 'Unit', 'Decimals'] as $name) {
+        foreach (['Sources', 'NormalizeValues', 'NormalizationHint', 'UseVariablePresentation', 'Unit', 'Decimals'] as $name) {
             $this->UpdateFormField($name, 'visible', $Mode !== 'states');
         }
         foreach (['StateVariableID', 'States'] as $name) {
             $this->UpdateFormField($name, 'visible', $Mode === 'states');
+        }
+    }
+
+    public function UpdateNormalizationForm(bool $NormalizeValues): void
+    {
+        foreach (['UseVariablePresentation', 'Unit', 'Decimals'] as $name) {
+            $this->UpdateFormField($name, 'enabled', !$NormalizeValues);
         }
     }
 
@@ -324,13 +332,14 @@ class EChartsCalendarPie extends IPSModuleStrict
                     $points[$source['VariableID']] = $archive['Points'];
                     $categories[] = ['id' => 'variable-' . $source['VariableID'], 'label' => $source['Label'], 'color' => $source['Color']];
                 }
-                $days = CalendarPieData::NumericDays($sources, $points, $window);
+                $days = CalendarPieData::NumericDays($sources, $points, $window, $this->ReadPropertyBoolean('NormalizeValues'));
                 $unit = $sources[0]['Unit'];
                 $decimals = max(array_column($sources, 'Decimals'));
             }
             $encoded = $this->EncodeVisualizationHTMLJSON([
                 'schemaVersion' => 1, 'family' => 'calendarPie', 'theme' => $this->EffectiveTheme($ipsView),
                 'calendarPie'   => ['title' => $this->ReadPropertyString('Title'), 'mode' => $mode,
+                    'normalized'            => $mode !== 'states' && $this->ReadPropertyBoolean('NormalizeValues'),
                     'month'                 => $window['Month'], 'baseMonth' => $window['BaseMonth'], 'windowOffset' => $windowOffset,
                     'maxOffset'             => $window['MaximumOffset'], 'timezone' => $window['Timezone'],
                     'startTimestamp'        => $window['StartTimestamp'], 'endTimestamp' => $window['EndTimestamp'],
@@ -423,7 +432,7 @@ class EChartsCalendarPie extends IPSModuleStrict
                 $this->ReadPropertyInteger('IPSViewBackgroundColor'),
                 $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent')
             )
-            || ($this->ReadPropertyString('DataMode') !== 'states'
+            || ($this->ReadPropertyString('DataMode') !== 'states' && !$this->ReadPropertyBoolean('NormalizeValues')
                 && ($this->ReadPropertyInteger('Decimals') < 0 || $this->ReadPropertyInteger('Decimals') > 6
                     || mb_strlen($this->ReadPropertyString('Unit')) > 24))) {
             return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => 'The CalendarPie settings are invalid.'];
@@ -463,6 +472,7 @@ class EChartsCalendarPie extends IPSModuleStrict
         $sources = [];
         $seen = [];
         $unit = null;
+        $normalize = $this->ReadPropertyBoolean('NormalizeValues');
         foreach ($raw as $entry) {
             $id = is_array($entry) ? ($entry['VariableID'] ?? null) : null;
             $label = is_array($entry) ? ($entry['Label'] ?? '') : null;
@@ -473,21 +483,27 @@ class EChartsCalendarPie extends IPSModuleStrict
                 || !is_int($color) || $color < -1 || $color > 0xFFFFFF) {
                 throw new InvalidArgumentException('CalendarPie sources need distinct numeric variable IDs, valid labels and colors.');
             }
+            if ($normalize) {
+                [$minimum, $maximum] = CalendarPieData::NormalizationRange($entry);
+            }
             $presentation = EChartsVariablePresentation::Resolve(
                 $id,
                 0.0,
                 100.0,
-                $this->ReadPropertyString('Unit'),
-                $this->ReadPropertyInteger('Decimals'),
-                $this->ReadPropertyBoolean('UseVariablePresentation')
+                $normalize ? '' : $this->ReadPropertyString('Unit'),
+                $normalize ? 1 : $this->ReadPropertyInteger('Decimals'),
+                $normalize || $this->ReadPropertyBoolean('UseVariablePresentation')
             );
-            if ($unit !== null && $unit !== $presentation['unit']) {
+            if (!$normalize && $unit !== null && $unit !== $presentation['unit']) {
                 throw new InvalidArgumentException('All CalendarPie sources must use the same unit.');
             }
             $unit = $presentation['unit'];
             $sources[] = ['VariableID' => $id, 'VariableType' => IPS_GetVariable($id)['VariableType'],
                 'Label'                => trim($label), 'Color' => $color < 0 ? '' : EChartsAsset::ColorToHex($color),
                 'Unit'                 => $unit, 'Decimals' => $presentation['decimals']];
+            if ($normalize) {
+                $sources[array_key_last($sources)] += ['Minimum' => $minimum, 'Maximum' => $maximum];
+            }
             $seen[$id] = true;
         }
         $labels = EChartsSourceIdentity::LabelsForSources($sources);
@@ -759,6 +775,7 @@ class EChartsCalendarPie extends IPSModuleStrict
             'Too many state changes for this month.', 'Data could not be refreshed. Showing the last available values.',
             'Apache ECharts could not be initialized.', 'Unknown', 'Previous month', 'Next month', 'Selected month',
             'Daily means', 'Daily consumption', 'State duration', 'No positive values', 'Incomplete data',
+            'Normalized comparison (0–100)', 'Normalized', 'Range', 'Circle share',
             'Missing data', 'Not completed', 'January', 'February', 'March', 'April', 'May', 'June',
             'July', 'August', 'September', 'October', 'November', 'December', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         return array_combine($keys, array_map(fn (string $key): string => $this->Translate($key), $keys));
@@ -767,8 +784,11 @@ class EChartsCalendarPie extends IPSModuleStrict
     private function SetDataModeVisibility(array &$elements, string $mode): void
     {
         foreach ($elements as &$element) {
-            if (in_array($element['name'] ?? null, ['Sources', 'UseVariablePresentation', 'Unit', 'Decimals'], true)) {
+            if (in_array($element['name'] ?? null, ['Sources', 'NormalizeValues', 'NormalizationHint', 'UseVariablePresentation', 'Unit', 'Decimals'], true)) {
                 $element['visible'] = $mode !== 'states';
+                if (in_array($element['name'] ?? null, ['UseVariablePresentation', 'Unit', 'Decimals'], true)) {
+                    $element['enabled'] = !$this->ReadPropertyBoolean('NormalizeValues');
+                }
             } elseif (in_array($element['name'] ?? null, ['StateVariableID', 'States'], true)) {
                 $element['visible'] = $mode === 'states';
             }

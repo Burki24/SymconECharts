@@ -220,9 +220,9 @@ assertGatewayGauge(
 $properties = (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($calendarPie);
 $queries = $GLOBALS['symconTestArchiveQueryCount'];
 $calendarPie->UpdateDataMode('states');
-$visibility = array_slice($calendarPie->GetTestFormUpdates(), -6);
+$visibility = array_slice($calendarPie->GetTestFormUpdates(), -8);
 assertGatewayGauge(
-    count($visibility) === 6 && $visibility[0]['Value'] === false && $visibility[5]['Value'] === true,
+    count($visibility) === 8 && $visibility[0]['Value'] === false && $visibility[7]['Value'] === true,
     'Mode changes must only update active-control visibility.'
 );
 foreach (['average', 'counter', 'states'] as $mode) {
@@ -587,6 +587,109 @@ foreach (['average', 'counter'] as $mode) {
         );
     }
 }
+
+$normalization = new TestableEChartsCalendarPie();
+$normalization->Create();
+$normalizedSources = [];
+foreach ([88731 => ['°C', 1, 20.0, 40], 88732 => ['%', 0, 60.0, 100]] as $id => [$unit, $digits, $value, $maximum]) {
+    $GLOBALS['symconTestVariables'][$id] = ['VariableType' => 2, 'VariableUpdated' => 1792317600, 'Value' => 999999.0,
+        'Name'                                             => 'Equal <source>', 'Presentation' => ['SUFFIX' => ' ' . $unit, 'DIGITS' => $digits, 'MIN' => 999, 'MAX' => 1000]];
+    $GLOBALS['symconTestArchiveVariables'][$id] = ['AggregationType' => 0, 'LoggedValues' => [],
+        'AggregatedValues'                                           => [['TimeStamp' => strtotime('2026-10-15'), 'Avg' => $value, 'Min' => 0.0, 'Max' => 100.0]]];
+    $normalizedSources[] = ['VariableID' => $id, 'Label' => '', 'Color' => -1, 'Minimum' => 0, 'Maximum' => $maximum];
+}
+$normalization->SetTestProperty('Sources', json_encode($normalizedSources, JSON_THROW_ON_ERROR));
+$normalization->ApplyChanges();
+assertGatewayGauge($normalization->GetTestStatus() === 201, 'Mixed units must still be rejected without explicit normalization.');
+$normalization->SetTestProperty('NormalizeValues', true);
+$normalization->SetTestProperty('UseVariablePresentation', false);
+$normalization->SetTestProperty('Unit', str_repeat('inactive global unit', 3));
+$normalization->SetTestProperty('Decimals', 7);
+$normalization->SetTestProperty('EnableIPSView', true);
+$normalization->ApplyChanges();
+$normalizedChart = json_decode($normalization->GetCalendarPieData(), true, 512, JSON_THROW_ON_ERROR)['calendarPie'];
+assertGatewayGauge(
+    $normalization->GetTestStatus() === 102 && $normalizedChart['normalized'] === true
+    && array_column($normalizedChart['days'][14]['slices'], 'value') === [50.0, 60.0]
+    && array_column($normalizedChart['days'][14]['slices'], 'originalValue') === [20.0, 60.0]
+    && array_column($normalizedChart['days'][14]['slices'], 'unit') === ['°C', '%']
+    && array_column($normalizedChart['days'][14]['slices'], 'decimals') === [1, 0]
+    && count(array_unique(array_column($normalizedChart['categories'], 'id'))) === 2,
+    'Normalized mixed-unit archive sources retain original metadata, fixed explicit ranges and separate identities even with equal labels.'
+);
+foreach ([$normalization->GetVisualizationTile(), $normalization->GetIPSViewHTML()] as $html) {
+    assertGatewayGauge(
+        strlen($html) < SYMCON_OUTPUT_BUFFER_LIMIT && str_contains($html, '"normalized":true')
+        && str_contains($html, '"originalValue":20.0') && str_contains($html, '"unit":"%"'),
+        'Both output bootstraps must publish original and normalized values within the output limit.'
+    );
+}
+$normalizationForm = json_decode($normalization->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+assertGatewayGauge(
+    findGaugeFormElement($normalizationForm['elements'], 'NormalizeValues')['visible'] === true
+    && str_contains(findGaugeFormElement($normalizationForm['elements'], 'NormalizeValues')['onChange'], 'ECCP_UpdateNormalizationForm')
+    && str_contains(findGaugeFormElement($normalizationForm['elements'], 'NormalizeValues')['onChange'], 'ECCP_UpdateBarPreviewFromForm')
+    && findGaugeFormElement($normalizationForm['elements'], 'Unit')['enabled'] === false,
+    'Normalization must be an explicit live-preview control and make its inactive global formatting unambiguous.'
+);
+$normalization->UpdateNormalizationForm(false);
+assertGatewayGauge(
+    count(array_filter(array_slice($normalization->GetTestFormUpdates(), -3), static fn (array $update): bool => $update['Value'] === true)) === 3,
+    'Disabling normalization must immediately re-enable all global presentation controls.'
+);
+$savedProperties = (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($normalization);
+$queriesBefore = $GLOBALS['symconTestArchiveQueryCount'];
+$normalization->UpdateBarPreviewFromForm(json_encode(['NormalizeValues' => true, 'Sources' => $normalizedSources], JSON_THROW_ON_ERROR));
+foreach (array_slice($normalization->GetTestFormUpdates(), -2) as $update) {
+    $svg = base64_decode(substr($update['Value'], strlen('data:image/svg+xml;base64,')), true);
+    assertGatewayGauge(
+        str_contains($svg, 'Normalized comparison (0–100)') && str_contains($svg, 'data-weight="25" data-original-value="10"'),
+        'Both SVG previews must use explicit normalization limits and mark their synthetic normalized comparison.'
+    );
+}
+$badRange = $normalizedSources;
+$zeroDraft = array_map(static fn (array $source): array => [...$source, 'Minimum' => 1000, 'Maximum' => 2000], $normalizedSources);
+$normalization->UpdateBarPreviewFromForm(json_encode(['NormalizeValues' => true, 'Sources' => $zeroDraft], JSON_THROW_ON_ERROR));
+foreach (array_slice($normalization->GetTestFormUpdates(), -2) as $update) {
+    $svg = base64_decode(substr($update['Value'], strlen('data:image/svg+xml;base64,')), true);
+    assertGatewayGauge(
+        !str_contains($svg, 'data-calendar-pie') && str_contains($svg, 'data-status="zero"'),
+        'Both previews must mark all-clipped weights as zero instead of drawing equal or invisible complete pies.'
+    );
+}
+$badRange[0]['Maximum'] = 0;
+$normalization->UpdateBarPreviewFromForm(json_encode(['NormalizeValues' => true, 'Sources' => $badRange], JSON_THROW_ON_ERROR));
+foreach (array_slice($normalization->GetTestFormUpdates(), -2) as $update) {
+    $svg = base64_decode(substr($update['Value'], strlen('data:image/svg+xml;base64,')), true);
+    assertGatewayGauge(
+        str_contains($svg, 'minimum below maximum') && !str_contains($svg, 'data-calendar-day'),
+        'An invalid normalization draft must warn instead of drawing misleading circles.'
+    );
+}
+assertGatewayGauge((new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($normalization) === $savedProperties
+    && $queriesBefore === $GLOBALS['symconTestArchiveQueryCount'], 'Normalization previews must not save properties or read live/archive values.');
+$normalization->SetTestProperty('DataMode', 'counter');
+foreach ([88731, 88732] as $id) {
+    $GLOBALS['symconTestArchiveVariables'][$id]['AggregationType'] = 1;
+}
+$normalization->ApplyChanges();
+assertGatewayGauge(
+    $normalization->GetTestStatus() === 102
+    && array_column(json_decode($normalization->GetCalendarPieData(), true)['calendarPie']['days'][14]['slices'], 'value') === [50.0, 60.0],
+    'Counter daily consumption supports the same optional normalization without changing archive semantics.'
+);
+$normalization->SetTestProperty('Sources', json_encode($badRange, JSON_THROW_ON_ERROR));
+$normalization->ApplyChanges();
+assertGatewayGauge($normalization->GetTestStatus() === 201, 'Invalid enabled normalization limits must fail source validation.');
+$normalization->SetTestProperty('DataMode', 'states');
+$normalization->SetTestProperty('StateVariableID', $stateID);
+$normalization->SetTestProperty('States', json_encode($definitions, JSON_THROW_ON_ERROR));
+$normalization->ApplyChanges();
+assertGatewayGauge(
+    $normalization->GetTestStatus() === 102
+    && json_decode($normalization->GetCalendarPieData(), true)['calendarPie']['normalized'] === false,
+    'State durations ignore inactive normalization and numeric source limits without changing their model.'
+);
 
 date_default_timezone_set($savedTimezone);
 echo "CalendarPie modes, Gateway, forms, previews and outputs verified.\n";

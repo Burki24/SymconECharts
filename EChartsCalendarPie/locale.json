@@ -1,6 +1,15 @@
 {
     "translations": {
         "de": {
+            "Normalize numeric sources using their Min/Max": "Numerische Quellen anhand ihres Min/Max normalisieren",
+            "Normalization maps each source range to 0–100 and clips only the circle weights. Original units and precision come from each variable presentation; global formatting applies only without normalization.": "Normalisierung bildet jeden Quellbereich auf 0–100 ab und begrenzt nur die Kreisgewichte. Originaleinheiten und Nachkommastellen stammen aus der jeweiligen Variablendarstellung; die globale Formatierung gilt nur ohne Normalisierung.",
+            "Min (normalization)": "Min (Normalisierung)",
+            "Max (normalization)": "Max (Normalisierung)",
+            "Normalized comparison (0–100)": "Normalisierter Vergleich (0–100)",
+            "Normalized": "Normalisiert",
+            "Range": "Bereich",
+            "Circle share": "Kreisanteil",
+            "Normalization requires finite source limits with minimum below maximum.": "Die Normalisierung benötigt endliche Quellgrenzen mit Min kleiner als Max.",
             "Configure valid CalendarPie archive variables.": "Gültige CalendarPie-Archivvariablen konfigurieren.",
             "The CalendarPie archive data is invalid.": "Die CalendarPie-Archivdaten sind ungültig.",
             "Too many state changes for this month.": "Zu viele Zustandswechsel für diesen Monat.",

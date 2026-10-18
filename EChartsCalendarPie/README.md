@@ -33,8 +33,8 @@ Ohne eigenen Namen folgt die Beschriftung dem aktuellen Variablennamen.
 Gleichnamige Quellen bleiben getrennt erhalten.
 
 Verwendet werden die unveränderten Tagesmittelwerte des Symcon-Archivs,
-nicht neu berechnete Mittelwerte von Stundenmitteln. Alle Quellen müssen
-dieselbe wirksame Einheit besitzen; Einheit und Nachkommastellen können aus
+nicht neu berechnete Mittelwerte von Stundenmitteln. Ohne Normalisierung müssen
+alle Quellen dieselbe wirksame Einheit besitzen; Einheit und Nachkommastellen können aus
 der Variablendarstellung übernommen oder gemeinsam vorgegeben werden.
 Für Anteile sind nur nichtnegative Werte geeignet. Beispielsweise lassen sich
 die durchschnittlichen Leistungen mehrerer Verbraucher vergleichen; daraus
@@ -42,7 +42,7 @@ wird keine Energieverbrauchsmessung abgeleitet.
 
 ### Tagesverbrauch
 
-Hier werden ebenfalls eine bis fünf numerische Quellen derselben Einheit
+Hier werden ebenfalls eine bis fünf numerische Quellen (ohne Normalisierung derselben Einheit)
 gewählt, jedoch ausschließlich mit **Zähleraggregation** im Symcon-Archiv.
 Die Kreisanteile zeigen dessen Tagesverbrauch: die vom Archiv berechnete Summe
 positiver Zählerdifferenzen. Kumulative Zählerstände werden nicht addiert.
@@ -72,6 +72,36 @@ ausgedünnten oder geschätzten Darstellung. Ein Zustandsarchiv kann verlorene
 Zwischenwerte oder deaktivierte Aufzeichnung nicht zuverlässig als Ausfall
 erkennen: Ein bekannter Zustand wird bis zum nächsten protokollierten Wechsel
 fortgeführt.
+
+### Optionale Normalisierung für unterschiedliche Messgrößen
+
+Für **Tagesmittelwerte** und **Tagesverbrauch** kann **Numerische Quellen anhand
+ihres Min/Max normalisieren** aktiviert werden. Dann dürfen die ein bis fünf
+Quellen unterschiedliche Einheiten haben. Je Quelle werden **Min** und **Max**
+festgelegt; ohne Eintrag gelten 0 und 100. Max muss größer als Min sein.
+Die Grenzen gelten für alle angezeigten Tage und Monate, nicht nur für die
+aktuell beobachteten Messwerte.
+
+Das Kreisgewicht ist `100 × (Wert − Min) / (Max − Min)`, begrenzt auf 0–100.
+Beispiel: 20 °C im Bereich 0–40 °C ergeben Gewicht 50; 60 % Feuchte im Bereich
+0–100 % ergeben Gewicht 60. Die Kreisflächen betragen damit rund 45,5 % und
+54,5 %. Das sind relative Vergleichsgewichte, keine Anteile einer gemeinsamen
+physikalischen Gesamtmenge.
+
+Negative Temperaturen sind bei aktiver Normalisierung erlaubt. Werte außerhalb
+der Grenzen werden nur für die Kreisfläche begrenzt. Der Tooltip bewahrt den
+Original-Tageswert mit seiner eigenen Einheit und Nachkommastellenzahl; zusätzlich
+zeigt er normalisiertes Gewicht, Bereich und gegebenenfalls Kreisanteil.
+Auch optionale Segmentzahlen zeigen die Originalwerte, nicht die Gewichte.
+Einheiten und Nachkommastellen werden je Quelle aus der Symcon-Darstellung
+beziehungsweise dem Legacy-Profil gelesen. Ohne solche Angaben gelten keine
+Einheit und eine Nachkommastelle. Die globalen Formatierungsfelder sind während
+der Normalisierung inaktiv; ihre gespeicherten Einstellungen bleiben erhalten.
+
+Fehlende Quellen bleiben fehlend, und ein vollständig auf null begrenzter Tag
+erhält keinen künstlichen Kreis. Ohne Normalisierung bleiben unveränderte,
+nichtnegative Werte derselben Einheit erforderlich. Der Modus **Zustandsdauer**
+ignoriert die Normalisierung und die numerischen Min/Max-Eingaben.
 
 ## Fehlende Daten und Kalendergrenzen
 

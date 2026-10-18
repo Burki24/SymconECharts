@@ -90,16 +90,33 @@
                 {minimumFractionDigits: calendar.decimals, maximumFractionDigits: calendar.decimals})
                 + (includeUnit !== false && calendar.unit ? ' ' + calendar.unit : '');
         }
+        function formattedSlice(slice, includeUnit) {
+            if (!calendar.normalized || calendar.mode === 'states') { return formatted(slice.value, includeUnit); }
+            return Number(slice.originalValue).toLocaleString(bootstrap.language || undefined,
+                {minimumFractionDigits: slice.decimals, maximumFractionDigits: slice.decimals})
+                + (includeUnit !== false && slice.unit ? ' ' + slice.unit : '');
+        }
+        function shortNumber(value) {
+            return Number(value).toLocaleString(bootstrap.language || undefined, {maximumFractionDigits: 6});
+        }
         function tooltip(p) {
             var raw = p.data || {}, day = dayByDate[raw.date || raw.value && raw.value[0]];
             if (!day) { return ''; }
             var result = escapeHTML(day.date) + '<br>' + escapeHTML(translate(modeText[calendar.mode]));
+            if (calendar.normalized && calendar.mode !== 'states') { result += '<br>' + escapeHTML(translate('Normalized comparison (0–100)')); }
             if (statusText[day.status]) { result += '<br>' + escapeHTML(translate(statusText[day.status])); }
             var total = calendar.mode === 'states' ? day.daySeconds : (day.slices || []).reduce(function (sum, slice) { return sum + slice.value; }, 0);
             (day.slices || []).forEach(function (slice) {
                 var percentage = total > 0 && (day.status === 'complete' || calendar.mode === 'states')
                     ? ' (' + (slice.value / total * 100).toLocaleString(bootstrap.language || undefined, {maximumFractionDigits: 1}) + ' %)' : '';
-                result += '<br>' + escapeHTML(label(slice)) + ': ' + escapeHTML(formatted(slice.value) + percentage);
+                result += '<br>' + escapeHTML(label(slice)) + ': ' + escapeHTML(formattedSlice(slice)
+                    + (calendar.normalized && calendar.mode !== 'states' ? '' : percentage));
+                if (calendar.normalized && calendar.mode !== 'states') {
+                    result += '<br>' + escapeHTML(translate('Normalized') + ': ' + shortNumber(slice.value) + ' / 100'
+                        + ' · ' + translate('Range') + ': ' + shortNumber(slice.minimum) + '–' + shortNumber(slice.maximum)
+                        + (slice.unit ? ' ' + slice.unit : '')
+                        + (percentage ? ' · ' + translate('Circle share') + ': ' + percentage.trim().slice(1, -1) : ''));
+                }
             });
             if ((day.missing || []).length) {
                 result += '<br>' + escapeHTML(translate('Missing data')) + ': '
@@ -124,7 +141,7 @@
             var total = positive.reduce(function (sum, slice) { return sum + slice.value; }, 0);
             var previousValue = 0;
             var pieData = positive.map(function (slice) {
-                var text = formatted(slice.value, false);
+                var text = formattedSlice(slice, false);
                 var measurement = window.echarts.format.getTextRect(text, valueSize + 'px sans-serif');
                 var angle = -bound(style.startAngle, 0, 360, 90) / 180 * Math.PI
                     + (style.clockwise === false ? -1 : 1) * (previousValue + slice.value / 2) / total * Math.PI * 2;
@@ -137,7 +154,7 @@
                 var fits = measurement.width <= radius * 0.9
                     && Math.hypot(Math.abs(x) + halfWidth, Math.abs(y) + halfHeight) <= radius - 1
                     && (innerRadius === 0 || Math.hypot(nearestX, nearestY) >= innerRadius + 1);
-                return {name: slice.id, value: slice.value, date: day.date,
+                return {name: slice.id, value: slice.value, date: day.date, labelText: text,
                     label: {show: showValues && fits}, emphasis: {label: {show: false}},
                     itemStyle: {color: colorByID[slice.id] || slice.color || colors.muted}};
             });
@@ -150,7 +167,7 @@
                 labelLayout: {hideOverlap: true}, minShowLabelAngle: 15,
                 labelLine: {show: false}, label: {show: showValues, position: 'inside', fontSize: valueSize,
                     fontFamily: 'sans-serif', align: 'center', verticalAlign: 'middle',
-                    color: style.valueColor || undefined, formatter: function (p) { return formatted(p.value, false); }},
+                    color: style.valueColor || undefined, formatter: function (p) { return p.data.labelText; }},
                 itemStyle: {borderWidth: bound(style.sliceBorderWidth, 0, 5, 1), borderColor: style.sliceBorderColor || colors.surface},
                 data: pieData});
         });
@@ -172,10 +189,13 @@
             data: days.map(function (day) { return {value: [day.date, 0], date: day.date}; })});
         return {backgroundColor: bootstrap.mode === 'ipsview' && options.adaptToBackground ? 'transparent' : colors.background,
             ...design.animationOptions(style, {enabled: true, initialDuration: 350, updateDuration: 500}),
-            aria: {enabled: true, label: {description: calendar.title + ': ' + monthName(calendar.month) + ', ' + translate(modeText[calendar.mode])}},
+            aria: {enabled: true, label: {description: calendar.title + ': ' + monthName(calendar.month) + ', ' + translate(modeText[calendar.mode])
+                + (calendar.normalized && calendar.mode !== 'states' ? ', ' + translate('Normalized comparison (0–100)') : '')}},
             title: {show: title.show, text: calendar.title, left: 'center', top: title.top,
                 textStyle: {color: style.titleColor || colors.text, fontSize: titleSize, width: Math.max(1, width - 24), overflow: 'truncate'}},
-            tooltip: {show: style.showTooltip !== false, confine: true, formatter: tooltip},
+            tooltip: {show: style.showTooltip !== false, confine: true, formatter: tooltip,
+                extraCssText: calendar.normalized && calendar.mode !== 'states'
+                    ? 'max-width:' + Math.max(80, width - 16) + 'px;white-space:normal;overflow-wrap:anywhere;box-sizing:border-box;' : ''},
             legend: {show: style.showLegend !== false, type: 'scroll', bottom: 8, left: 10, right: 10,
                 selectedMode: false, itemWidth: 12, itemHeight: 9, itemGap: 10,
                 textStyle: {color: style.axisColor || colors.text, fontSize: axisSize,

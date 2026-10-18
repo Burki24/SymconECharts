@@ -31,6 +31,17 @@
             "onChange": "ECCP_UpdateDataMode($id, $DataMode);"
         },
         {
+            "type": "CheckBox",
+            "name": "NormalizeValues",
+            "caption": "Normalize numeric sources using their Min/Max",
+            "onChange": "ECCP_UpdateNormalizationForm($id, $NormalizeValues);"
+        },
+        {
+            "type": "Label",
+            "name": "NormalizationHint",
+            "caption": "Normalization maps each source range to 0–100 and clips only the circle weights. Original units and precision come from each variable presentation; global formatting applies only without normalization."
+        },
+        {
             "type": "List",
             "name": "Sources",
             "caption": "Numeric archive sources (1–5)",
@@ -59,6 +70,26 @@
                     "add": "",
                     "edit": {
                         "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "caption": "Min (normalization)",
+                    "name": "Minimum",
+                    "width": "150px",
+                    "add": 0,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "digits": 2
+                    }
+                },
+                {
+                    "caption": "Max (normalization)",
+                    "name": "Maximum",
+                    "width": "150px",
+                    "add": 100,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "digits": 2
                     }
                 },
                 {

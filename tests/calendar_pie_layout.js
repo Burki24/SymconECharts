@@ -226,6 +226,44 @@ geometry(overlapCase, 'ipsview', 900, 500, false, 1, 100, 0);
 assert.ok(visibleValueLabelCount - beforeOverlap > 0 && visibleValueLabelCount - beforeOverlap < 8,
     'Native LabelLayout must actually suppress conflicting labels while retaining readable values.');
 assert.ok(visibleValueLabelCount > 0, 'Geometry checks must exercise actually visible native value text, not only hidden labels.');
+const normalizedModel = {...model, calendarPie: {...model.calendarPie, normalized: true, unit: '',
+    days: [{date: '2024-02-01', status: 'complete', missing: [], daySeconds: 86400, slices: [
+        {id: 'variable-1', label: '<Same>', value: 50, originalValue: 20, unit: '°C', decimals: 1, minimum: 0, maximum: 40, color: ''},
+        {id: 'variable-2', label: '<Same>', value: 60, originalValue: 60, unit: '%', decimals: 0, minimum: 0, maximum: 100, color: ''}]}]}};
+for (const output of ['symcon', 'ipsview']) {
+    for (const mode of ['average', 'counter']) {
+        const normalized = harness({...normalizedModel, calendarPie: {...normalizedModel.calendarPie, mode}}, output);
+        const daily = normalized.option.series.find(series => series.id === 'day-2024-02-01');
+        assert.deepEqual(Array.from(daily.data, slice => slice.value), [50, 60], 'Native pie angles must use normalized weights rather than original numbers.');
+        const tip = normalized.option.tooltip.formatter({data: daily.data[0]});
+        assert.match(tip, /Normalized comparison \(0–100\)/);
+        assert.match(tip, /&lt;Same&gt;: 20,0 °C/);
+        assert.match(tip, /&lt;Same&gt;: 60 %/);
+        assert.match(tip, /Range: 0–40 °C/);
+        assert.match(tip, /Circle share: 45,5 %/);
+        assert.match(tip, /Circle share: 54,5 %/);
+        assert.equal(daily.label.formatter({data: daily.data[0], value: 50}), '20,0', 'Optional inside labels must preserve original numbers too.');
+        geometry({...normalizedModel, calendarPie: {...normalizedModel.calendarPie, mode}}, output, 900, 500, true, 1, 100);
+    }
+}
+const clippedModel = {...normalizedModel, calendarPie: {...normalizedModel.calendarPie, days: [{...normalizedModel.calendarPie.days[0],
+    slices: normalizedModel.calendarPie.days[0].slices.map((slice, index) => ({...slice, value: index ? 100 : 0, originalValue: index ? 150 : -10}))}]}};
+const clipped = harness(clippedModel);
+assert.equal(clipped.option.series.find(series => series.id === 'day-2024-02-01').data.length, 1);
+const clippedTip = clipped.option.tooltip.formatter({data: {date: '2024-02-01'}});
+assert.match(clippedTip, /-10,0 °C/);
+assert.match(clippedTip, /150 %/);
+assert.match(clippedTip, /Normalized: 0 \/ 100/);
+const normalizedZero = harness({...clippedModel, calendarPie: {...clippedModel.calendarPie,
+    days: [{...clippedModel.calendarPie.days[0], status: 'zero', slices: clippedModel.calendarPie.days[0].slices.map(slice => ({...slice, value: 0}))}]}});
+assert.equal(normalizedZero.option.series.filter(series => series.id === 'day-2024-02-01').length, 0);
+assert.match(normalizedZero.option.tooltip.formatter({data: {date: '2024-02-01'}}), /-10,0 °C/);
+const normalizedPartial = harness({...normalizedModel, calendarPie: {...normalizedModel.calendarPie,
+    days: [{...normalizedModel.calendarPie.days[0], status: 'partial', missing: ['variable-2'], slices: [normalizedModel.calendarPie.days[0].slices[0]]}]}});
+assert.doesNotMatch(normalizedPartial.option.tooltip.formatter({data: {date: '2024-02-01'}}), /Circle share/);
+const escapedUnit = harness({...normalizedModel, calendarPie: {...normalizedModel.calendarPie,
+    days: [{...normalizedModel.calendarPie.days[0], slices: [{...normalizedModel.calendarPie.days[0].slices[0], unit: '<img src=x>'}]}]}});
+assert.doesNotMatch(escapedUnit.option.tooltip.formatter({data: {date: '2024-02-01'}}), /<img/);
 for (const count of [1, 2, 3, 4, 5]) {
     const categories = Array.from({length: count}, (_, index) => ({id: 'variable-' + (index + 1), label: 'Source ' + (index + 1), color: ''}));
     for (const numericMode of ['average', 'counter']) {

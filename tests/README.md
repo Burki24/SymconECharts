@@ -11,6 +11,9 @@ Mittelwerte/Zählersummen bleiben unverändert; fehlende Quellen, Nulltage,
 negative Werte, Punkt-/Zustandslimits und ungültige Daten sind abgesichert.
 Jede numerische Quellenanzahl von eins bis fünf bleibt vollständig erhalten;
 eine sechste Quelle wird ausdrücklich abgewiesen.
+Die optionale Normalisierung prüft feste Min/Max-Bereiche, unterschiedliche
+Einheiten, negative Originale, Begrenzung nur der Gewichte, Originalpräzision,
+Null-/Teiltage, inaktive Grenzen und nichtendliche/ungültige Bereiche.
 
 `php tests/calendar_pie_integration.php` verwendet den echten Gateway mit den
 vorhandenen Kernel-Doubles in einem eigenen Prozess. Alle drei Modi prüfen
@@ -24,9 +27,14 @@ die Zellposition nach einem übersprungenen lokalen Datum werden geprüft.
 Beide numerischen Modi werden zusätzlich mit je einer bis fünf Quellen durch
 Gateway, Kachel-/IPSView-Bootstrap und beide SVG-Vorschauen geprüft. Ein Entwurf
 mit sechs Quellen zeigt einen Hinweis statt einer gekürzten Vorschau.
+Gemischte Einheiten bleiben ohne Normalisierung ungültig und werden nach
+explizitem Einschalten in beiden numerischen Modi korrekt publiziert. Native
+Einheiten/Präzision je Quelle, gleichnamige IDs, inaktive globale Formatierung,
+schreibfreie SVG-Entwürfe, Bereichsfehler und unveränderte Zustandsdauern sind
+zusätzlich abgesichert.
 
 `node tests/calendar_pie_layout.js` prüft die gepinnte echte ECharts-Engine in
-312 Geometrievarianten: Kachelkopf, Titel, Navigation, Wochentage, Legende,
+316 Geometrievarianten: Kachelkopf, Titel, Navigation, Wochentage, Legende,
 Kreis-/Donutgrenzen, große Schriften sowie vollständige Textgrenzen ohne
 Überlappung oder Eintritt in das Donut-Loch. Ein echter Kollisionsfall mit
 acht Kategorien als defensiver Renderer-Stresstest muss Beschriftungen
@@ -35,6 +43,10 @@ eins bis fünf; jede Anzahl wird in beiden numerischen Modi und Ausgaben geprüf
 ID-basierte Legenden erhalten gleiche sichtbare Namen. Sichere URL-Auflösung
 für opake Frames, veraltete Navigationsantworten und Timer-Nachrichten während
 des Monatswechsels sind ebenfalls abgesichert.
+Normalisierte Winkel verwenden Gewichte statt Originalzahlen. Tooltip und
+Innenlabels bewahren Originalwerte; Quelleneinheit/-präzision, Bereich,
+Kreisanteil, negative/überhöhte Werte, Nullgewichte, Teiltage und HTML-Escaping
+der Originaleinheiten werden in den Rendereroptionen geprüft.
 
 `node tests/calendar_pie_browser.mjs` stellt ausschließlich unter
 `http://127.0.0.1:8805` synthetische Kalenderdaten bereit. `/` vergleicht
@@ -44,6 +56,13 @@ prüft große Schrift und Innenwerte. `/preview.svg?data=states` beziehungsweise
 `data=average` oder `data=counter` erzeugen die echte PHP-Formularvorschau.
 Mit `sources=1` bis `sources=5` lässt sich die Anzahl numerischer Quellen sowohl
 unter `/chart` als auch unter `/preview.svg` variieren.
+`/chart?normalize=yes&sources=2` zeigt einen normalisierten Temperatur-/Feuchte-
+Vergleich mit Originalwerten im Tooltip. `mode=ipsview` wählt den zweiten
+Ausgabeweg; `normalize=yes` ist auch für `/preview.svg` verfügbar.
+`/normalized` vergleicht eine schmale dunkle Kachel, helles IPSView und die
+PHP-Vorschau. Diese normalisierten Ansichten sowie Originaleinheiten,
+getrennte Kreisanteile und der Tooltip-Zeilenumbruch bei 400 Pixel Breite wurden
+am 18.10.2026 zusätzlich lokal visuell geprüft.
 Diese Ansichten, dunkle Kachel, helles IPSView, unbekannte Anteile,
 Monatsnavigation und die korrigierten Innenwerte wurden am 18.10.2026 lokal
 visuell geprüft. Ein direkt geöffneter Renderer blieb ohne Konsolenwarnung

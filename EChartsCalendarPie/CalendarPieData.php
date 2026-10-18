@@ -59,7 +59,7 @@ final class CalendarPieData
     }
 
     /** Values are already daily archive means or counter-consumption aggregates, never raw counter differences. */
-    public static function NumericDays(array $sources, array $pointsByID, array $window): array
+    public static function NumericDays(array $sources, array $pointsByID, array $window, bool $normalize = false): array
     {
         if (!array_is_list($sources) || count($sources) < 1 || count($sources) > 5) {
             throw new InvalidArgumentException('Configure one to five CalendarPie sources.');
@@ -76,6 +76,13 @@ final class CalendarPieData
                 throw new InvalidArgumentException('CalendarPie sources need distinct variable IDs, labels and valid colors.');
             }
             $identities[$id] = true;
+            if ($normalize) {
+                self::NormalizationRange($source);
+                if (!is_string($source['Unit'] ?? null) || !is_int($source['Decimals'] ?? null)
+                    || $source['Decimals'] < 0 || $source['Decimals'] > 6) {
+                    throw new InvalidArgumentException('Normalized CalendarPie sources need their original unit and precision.');
+                }
+            }
             // CalendarData validates the daily aggregate's actual first observation timestamp,
             // ascending order and unique local dates. Adapt its inclusive upper bound only.
             $inclusive = $window;
@@ -86,7 +93,7 @@ final class CalendarPieData
             }
             $cells = CalendarData::Cells($points, $inclusive);
             foreach ($cells as $cell) {
-                if ($cell['value'] < 0) {
+                if (!$normalize && $cell['value'] < 0) {
                     throw new InvalidArgumentException('CalendarPie slices require nonnegative daily values.');
                 }
                 $values[$id][$cell['date']] = $cell['value'];
@@ -108,10 +115,17 @@ final class CalendarPieData
                         $result['missing'][] = 'variable-' . $id;
                         continue;
                     }
-                    $value = $values[$id][$day['date']];
+                    $original = $values[$id][$day['date']];
+                    $value = $normalize ? self::NormalizedValue($original, $source) : $original;
                     $total += $value;
-                    $result['slices'][] = ['id' => 'variable-' . $id, 'label' => $source['Label'],
+                    $slice = ['id'              => 'variable-' . $id, 'label' => $source['Label'],
                         'value'                 => $value, 'color' => $source['Color']];
+                    if ($normalize) {
+                        [$minimum, $maximum] = self::NormalizationRange($source);
+                        $slice += ['originalValue' => $original, 'unit' => $source['Unit'], 'decimals' => $source['Decimals'],
+                            'minimum'              => $minimum, 'maximum' => $maximum];
+                    }
+                    $result['slices'][] = $slice;
                 }
                 if (!is_finite($total)) {
                     throw new InvalidArgumentException('The CalendarPie daily total is not finite.');
@@ -122,6 +136,28 @@ final class CalendarPieData
             $days[] = $result;
         }
         return $days;
+    }
+
+    /** Explicit ranges never inherit presentation limits or the observed monthly extrema. */
+    public static function NormalizationRange(array $source): array
+    {
+        $minimum = array_key_exists('Minimum', $source) ? $source['Minimum'] : 0;
+        $maximum = array_key_exists('Maximum', $source) ? $source['Maximum'] : 100;
+        if ((!is_int($minimum) && !is_float($minimum)) || (!is_int($maximum) && !is_float($maximum))
+            || !is_finite((float) $minimum) || !is_finite((float) $maximum) || $minimum >= $maximum
+            || !is_finite((float) $maximum - (float) $minimum)) {
+            throw new InvalidArgumentException('Normalization requires finite source limits with minimum below maximum.');
+        }
+        return [(float) $minimum, (float) $maximum];
+    }
+
+    public static function NormalizedValue(float $value, array $source): float
+    {
+        [$minimum, $maximum] = self::NormalizationRange($source);
+        if (!is_finite($value)) {
+            throw new InvalidArgumentException('CalendarPie normalization requires finite values.');
+        }
+        return (max($minimum, min($maximum, $value)) - $minimum) / ($maximum - $minimum) * 100;
     }
 
     /** Known state durations and unknown prefixes share each day's actual 23/24/25-hour denominator. */

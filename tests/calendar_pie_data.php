@@ -138,6 +138,75 @@ calendarPieReject(static fn () => CalendarPieData::NumericDays($sources, [701 =>
     702                                                                       => [[$stamp('2024-02-01'), PHP_FLOAT_MAX]]], $leap), 'Overflowing daily slice totals accepted.');
 calendarPieReject(static fn () => CalendarPieData::NumericDays($sources, [701 => [[$current['EndTimestamp'], 1]]], $current), 'Current-day point accepted.');
 
+$normalizedSources = [
+    ['VariableID' => 701, 'Label' => 'Temperature', 'Color' => '', 'Minimum' => 0, 'Maximum' => 40, 'Unit' => '°C', 'Decimals' => 1],
+    ['VariableID' => 702, 'Label' => 'Humidity', 'Color' => '', 'Minimum' => 0, 'Maximum' => 100, 'Unit' => '%', 'Decimals' => 0]
+];
+$normalized = CalendarPieData::NumericDays(
+    $normalizedSources,
+    [701 => [[$stamp('2024-02-01'), 20]], 702 => [[$stamp('2024-02-01'), 60]]],
+    $leap,
+    true
+);
+calendarPieAssert(
+    array_column($normalized[0]['slices'], 'value') === [50.0, 60.0]
+    && array_column($normalized[0]['slices'], 'originalValue') === [20.0, 60.0]
+    && array_column($normalized[0]['slices'], 'unit') === ['°C', '%']
+    && array_column($normalized[0]['slices'], 'decimals') === [1, 0],
+    'Normalized slices must use source ranges but preserve original daily values and individual units/precision.'
+);
+$bounded = CalendarPieData::NumericDays($normalizedSources, [701 => [[$stamp('2024-02-01'), -10], [$stamp('2024-02-02'), 45]],
+    702                                                          => [[$stamp('2024-02-01'), 150], [$stamp('2024-02-02'), -1]]], $leap, true);
+calendarPieAssert(
+    array_column($bounded[0]['slices'], 'value') === [0.0, 100.0]
+    && array_column($bounded[1]['slices'], 'value') === [100.0, 0.0]
+    && array_column($bounded[0]['slices'], 'originalValue') === [-10.0, 150.0],
+    'Only normalized weights are clipped at the fixed range; original values are never clipped.'
+);
+$negativeRange = $normalizedSources;
+$negativeRange[0]['Minimum'] = -20;
+calendarPieAssert(
+    CalendarPieData::NumericDays(
+        $negativeRange,
+        [701 => [[$stamp('2024-02-01'), -5]], 702 => [[$stamp('2024-02-01'), 0]]],
+        $leap,
+        true
+    )[0]['slices'][0]['value'] === 25.0,
+    'Negative temperature ranges must normalize to their explicit physical interval.'
+);
+$zeroRange = $normalizedSources;
+$zeroRange[0]['Minimum'] = 10;
+calendarPieAssert(
+    CalendarPieData::NumericDays(
+        $zeroRange,
+        [701 => [[$stamp('2024-02-01'), 5]], 702 => [[$stamp('2024-02-01'), 0]]],
+        $leap,
+        true
+    )[0]['status'] === 'zero',
+    'A day with all zero normalized weights cannot create artificial equal slices.'
+);
+$partialNormalized = CalendarPieData::NumericDays($normalizedSources, [701 => [[$stamp('2024-02-01'), -5]]], $leap, true)[0];
+calendarPieAssert($partialNormalized['status'] === 'partial' && $partialNormalized['missing'] === ['variable-702']
+    && $partialNormalized['slices'][0]['originalValue'] === -5.0, 'Normalization must preserve partial days and their available raw values.');
+foreach ([[0, 0], [2, 1], ['0', 100], [null, 100], [false, 100], [NAN, 100], [0, INF], [-PHP_FLOAT_MAX, PHP_FLOAT_MAX]] as [$minimum, $maximum]) {
+    $invalid = $normalizedSources;
+    $invalid[0]['Minimum'] = $minimum;
+    $invalid[0]['Maximum'] = $maximum;
+    calendarPieReject(static fn () => CalendarPieData::NumericDays($invalid, [], $leap, true), 'Invalid normalization range accepted.');
+}
+$inactiveRange = $normalizedSources;
+$inactiveRange[0]['Minimum'] = 'inactive invalid value';
+calendarPieAssert(
+    CalendarPieData::NumericDays($inactiveRange, $points, $leap) === CalendarPieData::NumericDays($normalizedSources, $points, $leap),
+    'Disabled normalization must preserve the original daily model and ignore inactive ranges.'
+);
+for ($count = 1; $count <= 5; $count++) {
+    $selected = array_map(static fn (array $source): array => $source + ['Minimum' => 0, 'Maximum' => 10, 'Unit' => 'x', 'Decimals' => 2], array_slice($flexibleSources, 0, $count));
+    $selectedPoints = array_intersect_key($flexiblePoints, array_flip(array_column($selected, 'VariableID')));
+    calendarPieAssert(array_column(CalendarPieData::NumericDays($selected, $selectedPoints, $leap, true)[0]['slices'], 'value')
+        === array_map(static fn (int $value): float => $value * 10.0, range(1, $count)), 'Every supported source count must normalize independently.');
+}
+
 $definitions = StateTimelineData::Definitions([['Value' => 0, 'Label' => 'Off', 'Color' => 0], ['Value' => 1, 'Label' => 'On', 'Color' => 0x00FF00]], true);
 foreach ([$midnightDST, $havana, $samoa] as $civilWindow) {
     $civilStates = CalendarPieData::StateDays([], [$civilWindow['StartTimestamp'] - 1, 1], true, $definitions, $civilWindow);

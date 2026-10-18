@@ -27,6 +27,7 @@ trait CalendarPiePreview
         );
         $svg = str_replace('<svg xmlns', '<svg font-family="Arial, sans-serif" xmlns', $svg);
         $mode = $values['DataMode'] ?? $this->ReadPropertyString('DataMode');
+        $normalize = $mode !== 'states' && (bool) ($values['NormalizeValues'] ?? $this->ReadPropertyBoolean('NormalizeValues'));
         try {
             $window = CalendarPieData::Resolve(
                 (string) ($values['Month'] ?? $this->ReadPropertyString('Month')),
@@ -63,9 +64,26 @@ trait CalendarPiePreview
                 return $svg . '<text x="360" y="180" text-anchor="middle" font-size="14" fill="' . $e($palette['text']) . '">'
                     . $e($this->Translate('Select one to five numeric archive variables.')) . '</text></svg>';
             }
+            $ranges = [];
+            if ($normalize && is_array($raw)) {
+                try {
+                    foreach ($raw as $entry) {
+                        if (!is_array($entry)) {
+                            throw new \InvalidArgumentException();
+                        }
+                        [$minimum, $maximum] = CalendarPieData::NormalizationRange($entry);
+                        $ranges[(int) ($entry['VariableID'] ?? 0)] = ['Minimum' => $minimum, 'Maximum' => $maximum];
+                    }
+                } catch (\Throwable) {
+                    return $svg . '<text x="360" y="180" text-anchor="middle" font-size="12" fill="' . $e($palette['text']) . '">'
+                        . $e($this->Translate('Normalization requires finite source limits with minimum below maximum.')) . '</text></svg>';
+                }
+            }
             $items = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values, 'Label', false)['items'];
             foreach ($items as $index => $item) {
-                $categories[] = ['label' => $item['label'], 'color' => $item['color'] ?: $palette['seriesColors'][$index % count($palette['seriesColors'])]];
+                $categories[] = ['label' => $item['label'], 'color' => $item['color'] ?: $palette['seriesColors'][$index % count($palette['seriesColors'])],
+                    'range'              => $ranges[$item['VariableID'] ?? 0] ?? ['Minimum' => 0, 'Maximum' => 100],
+                    'sample'             => $item['value'], 'unit' => $item['unit'], 'decimals' => $item['decimals']];
             }
         }
         $axisFont = 12 * $number('AxisFontSizePercent', 50, 200) / 100;
@@ -88,7 +106,7 @@ trait CalendarPiePreview
         }
         $inner = $radius * $number('InnerRadiusPercent', 0, 80) / 100;
         $svg .= '<text x="360" y="58" text-anchor="middle" font-size="' . $n($axisFont) . '" fill="' . $e($axisColor) . '">'
-            . $e($window['Month']) . '</text>';
+            . $e($window['Month'] . ($normalize ? ' · ' . $this->Translate('Normalized comparison (0–100)') : '')) . '</text>';
         $weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         for ($index = 0; $index < 7; ++$index) {
             $svg .= '<text x="' . $n($left + ($index + 0.5) * $cellWidth) . '" y="80" text-anchor="middle" font-size="'
@@ -102,6 +120,17 @@ trait CalendarPiePreview
             $cx = $x + $cellWidth / 2;
             $cy = $y + $cellHeight / 2;
             $status = !$day['completed'] ? 'pending' : ($index % 11 === 5 ? 'missing' : ($index % 13 === 4 ? 'zero' : ($index % 7 === 3 ? 'partial' : 'complete')));
+            $weights = [];
+            $originals = [];
+            if ($normalize && $status === 'complete') {
+                foreach ($categories as $part => $category) {
+                    $originals[$part] = $category['sample'] + ($index % 5) - 2;
+                    $weights[] = CalendarPieData::NormalizedValue($originals[$part], $category['range']);
+                }
+                if (array_sum($weights) === 0.0) {
+                    $status = 'zero';
+                }
+            }
             $svg .= '<rect data-calendar-day="' . $e($day['date']) . '" data-status="' . $status . '" x="' . $n($x) . '" y="' . $n($y)
                 . '" width="' . $n($cellWidth) . '" height="' . $n($cellHeight) . '" fill="' . $e($color('EmptyCellColor', $palette['surface']))
                 . '" fill-opacity="' . $n($number('CellOpacityPercent', 0, 100) / 100) . '" stroke="' . $e($color('CellBorderColor', $palette['border']))
@@ -111,8 +140,10 @@ trait CalendarPiePreview
                     . '" fill="' . $e($axisColor) . '">' . $calendarDay . '</text>';
             }
             if ($status === 'complete' || ($mode === 'states' && $status !== 'pending')) {
-                $weights = [];
                 foreach ($categories as $part => $category) {
+                    if ($normalize) {
+                        continue;
+                    }
                     $unknown = $mode === 'states' && $part === count($categories) - 1;
                     $weights[] = $unknown ? ($status === 'missing' ? 24 : ($status === 'partial' ? 6 : 0))
                         : ($mode === 'states' && $status === 'missing' ? 0 : 1 + ($part + $index) % 5);
@@ -127,7 +158,8 @@ trait CalendarPiePreview
                     }
                     $span = $weights[$part] / $total * 2 * M_PI;
                     $end = $start + ($clockwise ? 1 : -1) * $span;
-                    $svg .= '<path data-calendar-pie="true" d="' . EChartsBarPreview::Sector($cx, $cy, $inner, $radius, $start, $end, $clockwise)
+                    $svg .= '<path data-calendar-pie="true"' . ($normalize ? ' data-weight="' . $n($weights[$part]) . '" data-original-value="' . $n($originals[$part]) . '"' : '')
+                        . ' d="' . EChartsBarPreview::Sector($cx, $cy, $inner, $radius, $start, $end, $clockwise)
                         . '" fill="' . $e($category['color']) . '" stroke="' . $e($color('SliceBorderColor', $palette['surface']))
                         . '" stroke-width="' . $number('SliceBorderWidth', 0, 5) . '"/>';
                     if ($this->BarPreviewValue($values, 'ShowValues', 'boolean', $ipsView) && $radius >= $valueFont * 2.5 && $span >= 0.8) {
@@ -135,7 +167,8 @@ trait CalendarPiePreview
                         $labelRadius = ($radius + $inner) / 2;
                         $lx = $cx + cos($middle) * $labelRadius;
                         $ly = $cy + sin($middle) * $labelRadius;
-                        $text = (string) $weights[$part];
+                        $text = $normalize ? EChartsBarPreview::FormatValue($originals[$part], $category['decimals'], '', $this->ResolveHelperTranslationLanguage())
+                            : (string) $weights[$part];
                         $textWidth = mb_strlen($text) * $valueFont * 0.75;
                         $box = [$lx - $textWidth / 2, $ly - $valueFont * 0.65, $lx + $textWidth / 2, $ly + $valueFont * 0.65];
                         $fits = $textWidth <= $radius * 0.9

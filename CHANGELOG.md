@@ -2,6 +2,12 @@
 
 ## Neu
 
+- EChartsCalendarPie kann numerische Quellen optional anhand eigener Min/Max-
+  Grenzen normalisieren. Dadurch lassen sich etwa Temperatur und Luftfeuchtigkeit
+  gemeinsam vergleichen. Tooltip und Segmentzahlen bewahren die Originalwerte;
+  je Quelle bleiben Einheit und Nachkommastellen erhalten. Kreisgewichte werden
+  auf 0–100 begrenzt; Vorschauen und beide Ausgabewege berücksichtigen die Option.
+
 - EChartsCalendarPie zeigt Tages-Kreisdiagramme im Monatskalender. Eine Auswahl
   bietet Tagesmittelwerte, Zähler-Tagesverbrauch oder archivierte Zustandsdauern.
   Mittelwerte und Verbrauch erlauben frei wählbar eine bis fünf Archivquellen

@@ -12,6 +12,7 @@ const palette = {background: '#303236', text: '#f4f5f7', muted: '#969aa2', borde
 const sourceCount = url => Math.min(5, Math.max(1, Math.trunc(Number(url.searchParams.get('sources'))) || 5));
 function state(url) {
     const mode = ['average', 'counter', 'states'].includes(url.searchParams.get('data')) ? url.searchParams.get('data') : 'average';
+    const normalized = mode !== 'states' && url.searchParams.get('normalize') === 'yes';
     const offset = Math.min(120, Math.max(0, Number(url.searchParams.get('offset')) || 0));
     const date = new Date(Date.UTC(2024, 9 - offset, 1));
     const month = date.toISOString().slice(0, 7);
@@ -20,13 +21,14 @@ function state(url) {
         {id: 'variable-2', label: mode === 'states' ? 'Bereitschaft' : 'Bereich B', color: '#B6D634'},
         {id: 'variable-3', label: 'Aus', color: '#FF994D'}]
         : Array.from({length: sourceCount(url)}, (_, index) => ({id: 'variable-' + (index + 1),
-            label: 'Bereich ' + String.fromCharCode(65 + index), color: palette.seriesColors[index]}));
+            label: normalized ? (index % 2 ? 'Luftfeuchtigkeit' : 'Temperatur') : 'Bereich ' + String.fromCharCode(65 + index), color: palette.seriesColors[index]}));
     if (mode === 'states') {categories.push({id: 'unknown', label: 'Unbekannt', color: '#777B83'});}
     const days = Array.from({length}, (_, index) => {
         const day = month + '-' + String(index + 1).padStart(2, '0');
         const daySeconds = day === '2024-10-27' ? 90000 : 86400;
         const status = ['complete', 'complete', 'complete', 'partial', 'missing', 'zero', 'pending'][index % 7];
-        let values = categories.map((_, i) => 5 + (i * 11 + index * (3 + i * 4)) % 40);
+        let values = categories.map((_, i) => normalized ? (i % 2 ? 60 : (index === 7 ? -5 : 20)) + index % 5
+            : 5 + (i * 11 + index * (3 + i * 4)) % 40);
         let slices = values.map((value, i) => ({...categories[i], value}));
         if (mode === 'states' && status !== 'pending') {
             values = status === 'missing' ? [0, 0, 0, daySeconds]
@@ -35,12 +37,17 @@ function state(url) {
         } else if (status === 'pending' || status === 'missing') {slices = [];}
         else if (status === 'zero') {slices = categories.map(category => ({...category, value: 0}));}
         else if (status === 'partial') {slices = slices.slice(0, -1);}
+        if (normalized) {
+            slices = slices.map((slice, i) => ({...slice, originalValue: slice.value,
+                unit: i % 2 ? '%' : '°C', decimals: i % 2 ? 0 : 1, minimum: 0, maximum: i % 2 ? 100 : 40,
+                value: Math.max(0, Math.min(i % 2 ? 100 : 40, slice.value)) / (i % 2 ? 100 : 40) * 100}));
+        }
         return {date: day, status: mode === 'states' && status === 'zero' ? 'complete' : status, slices,
             missing: status === 'partial' ? [mode === 'states' ? 'unknown' : categories.at(-1).id] : [], daySeconds};
     });
     return {status: 'ready', chart: {schemaVersion: 1, family: 'calendarPie', theme: 'auto', calendarPie: {
         title: mode === 'states' ? 'Betriebszeiten · Tagesanteile' : mode === 'counter' ? 'Tagesverbrauch nach Bereich' : 'Tagesmittelwerte nach Bereich',
-        mode, month, baseMonth: '2024-10', windowOffset: offset, maxOffset: 120, timezone: 'Europe/Berlin',
+        mode, normalized, month, baseMonth: '2024-10', windowOffset: offset, maxOffset: 120, timezone: 'Europe/Berlin',
         unit: mode === 'states' ? 'h' : mode === 'counter' ? 'kWh' : 'W', decimals: mode === 'states' ? 2 : 1,
         categories, days, style: {showTooltip: true, showLegend: true, showDayNumbers: true,
             showValues: url.searchParams.get('values') === 'yes', firstWeekday: 1, pieRadiusPercent: 70,
@@ -55,6 +62,7 @@ function page(url) {
     const bootstrap = {mode, language: 'de', state: state(url), options: {tileHeaderVisible: url.searchParams.get('header') !== 'hidden',
         adaptToBackground: false, echartsThemes: {auto: palette}, calendarPieStatePath: '/hook/SymconECharts/state/5000/' + 'a'.repeat(32)},
         translations: {'Daily means': 'Tagesmittelwerte', 'Daily consumption': 'Tagesverbrauch', 'State duration': 'Zustandsdauer',
+            'Normalized comparison (0–100)': 'Normalisierter Vergleich (0–100)', Normalized: 'Normalisiert', Range: 'Bereich', 'Circle share': 'Kreisanteil',
             'Missing data': 'Fehlende Daten', 'Incomplete data': 'Unvollständige Daten', 'No positive values': 'Keine positiven Werte',
             'Not completed': 'Nicht abgeschlossen', Unknown: 'Unbekannt', 'Previous month': 'Voriger Monat', 'Next month': 'Nächster Monat',
             'Selected month': 'Ausgewählter Monat', October: 'Oktober', September: 'September', August: 'August', July: 'Juli',
@@ -77,15 +85,16 @@ http.createServer((req, res) => {
     if (url.pathname.startsWith('/hook/SymconECharts/state/')) {
         // Keep the selected fixture data model across local navigation.
         const referer = new URL(req.headers.referer || 'http://127.0.0.1');
-        for (const key of ['data', 'sources']) {
+        for (const key of ['data', 'sources', 'normalize']) {
             if (referer.searchParams.has(key)) {url.searchParams.set(key, referer.searchParams.get(key));}
         }
         res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify(state(url))); return;
     }
     if (url.pathname === '/preview.svg') {
         const values = {Title: 'Kalenderanteile · Vorschau', DataMode: url.searchParams.get('data') || 'average',
+            NormalizeValues: url.searchParams.get('normalize') === 'yes',
             Sources: [4800, 4801, 4803, 4804, 4805].slice(0, sourceCount(url))
-                .map((id, i) => ({VariableID: id, Label: 'Bereich ' + String.fromCharCode(65 + i), Color: -1})),
+                .map((id, i) => ({VariableID: id, Label: 'Bereich ' + String.fromCharCode(65 + i), Color: -1, Minimum: 0, Maximum: i % 2 ? 100 : 40})),
             StateVariableID: 4802, States: [{Value: 0, Label: 'Aus', Color: 0xFF994D}, {Value: 1, Label: 'Ein', Color: 0x5070DD}]};
         try {
             res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
@@ -96,6 +105,14 @@ http.createServer((req, res) => {
     }
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     if (url.pathname === '/chart') {res.end(page(url)); return;}
+    if (url.pathname === '/normalized') {
+        res.end('<!doctype html><html lang="de"><head><title>Normalisierte CalendarPie-Prüfung</title></head>'
+            + '<body style="background:#0b0c0e;color:white;font:16px Arial;margin:20px"><h1>Normalisierte Beispieldaten</h1>'
+            + '<div style="display:flex;gap:16px;flex-wrap:wrap">'
+            + '<iframe title="Normalisierte Kachel" src="/chart?normalize=yes&sources=2" style="border:0;width:400px;height:500px"></iframe>'
+            + '<iframe title="Normalisiertes IPSView" src="/chart?normalize=yes&sources=2&mode=ipsview&theme=light&values=yes" style="border:0;width:790px;height:500px"></iframe>'
+            + '</div><img alt="Normalisierte PHP-Vorschau" src="/preview.svg?normalize=yes&sources=2"></body></html>'); return;
+    }
     res.end('<!doctype html><html lang="de"><head><title>CalendarPie · lokale Browserprüfung</title></head>'
         + '<body style="background:#0b0c0e;color:white;font:16px Arial;margin:20px"><h1 style="font-size:20px">CalendarPie · synthetische Archivtage</h1>'
         + '<div style="display:flex;gap:16px;align-items:start;flex-wrap:wrap">'

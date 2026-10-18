@@ -31,7 +31,7 @@ Monatswechsel im Browser verändert nicht die gespeicherte Auswahl.
 
 Numerische Modi verwenden `Sources` mit 1–5 eindeutigen Integer-/Float-IDs,
 optionalen Namen und Farben. Gleiche sichtbare Namen bleiben getrennt.
-Die wirksame Einheit muss gleich sein. `states` verwendet `StateVariableID`
+Ohne Normalisierung muss die wirksame Einheit gleich sein. `states` verwendet `StateVariableID`
 (Boolean oder Integer) und `States` mit eindeutigen Zustandswerten, Namen und
 Farben. Inaktive Eingaben bleiben gespeichert, werden aber nicht abgefragt
 oder als aktive Quellen referenziert. Aktuelle Quellwerte ersetzen nie Archive.
@@ -50,7 +50,7 @@ oder als aktive Quellen referenziert. Aktuelle Quellwerte ersetzen nie Archive.
   Tagesgrenzen geschnitten; die Summe einschließlich unbekannter Zeit entspricht
   exakt der realen Tageslänge. Unzugeordnete Zustände bleiben numerisch sichtbar.
 
-Numerische Kreisanteile müssen endlich und nichtnegativ sein. Fehlende Quellen
+Ohne Normalisierung müssen numerische Kreisanteile endlich und nichtnegativ sein. Fehlende Quellen
 ergeben einen ausdrücklich unvollständigen Tag ohne Kreis; verfügbare Werte
 und fehlende Kategorien bleiben im Modell/Tooltip. Vollständige echte Nulltage
 werden als Nulltage markiert, nie als gleich große Anteile. Laufende und
@@ -64,6 +64,27 @@ Zu viele Rohwechsel, widersprüchliche oder gekürzte Antworten führen zu einem
 sichtbaren Fehler statt Sampling oder angenommener Vollständigkeit.
 
 ## Ausgabe und Nachweise
+
+### Ergänzung: optionale Normalisierung (2026-10-18)
+
+`NormalizeValues` ist standardmäßig `false`; alte `Sources` bleiben unverändert
+gültig. Bei Aktivierung verwenden numerische Quellen zusätzlich `Minimum` und
+`Maximum` (Defaults 0/100). Die endliche Differenz muss positiv sein. Die Grenzen
+werden nicht aus Profilen oder Monatswerten übernommen. Der begrenzte Wert wird
+auf 0–100 abgebildet; auch negative Originalwerte sind dann zulässig.
+Unterschiedliche Einheiten sind ausdrücklich erlaubt. Source-IDs bleiben die
+Identität, unabhängig von Einheit oder Namen.
+
+Im additiv erweiterten Schema-v1 kennzeichnet `normalized` den aktiven Modus.
+`slice.value` bleibt das gezeichnete Gewicht. Nur normalisierte numerische Slices
+ergänzen `originalValue`, `unit`, `decimals`, `minimum` und `maximum`. Die originale
+Einheit/Präzision stammt pro Variable aus dem bestehenden Presentation-Resolver;
+globale Formatierungsfelder sind inaktiv und werden nicht umgeschrieben.
+Tooltip und optionale Innenlabels verwenden die Originalzahlen, Winkel und
+Nulltagbewertung ausschließlich die Gewichte. Unvollständige Tage werden nicht
+renormalisiert. `states` ignoriert die Option vollständig. Beide Vorschauen
+verwenden dieselbe reine Normalisierungsfunktion mit synthetischen Originalen.
+Ungültige aktive Bereiche ergeben einen Hinweis, keine plausible Ersatzgrafik.
 
 Beide Designer besitzen Theme, Typografie/Farben, Kalenderzellen, Kreisradius,
 Donut-Innenradius, Startwinkel, Drehrichtung, Kontur, Labels, Legende und
