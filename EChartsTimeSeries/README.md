@@ -80,6 +80,9 @@ Objektpfade werden dafür nicht ausgewertet.
   expliziter Anordnung links beziehungsweise rechts;
 - automatische Wertachsenbereiche sowie wahlweise die Übernahme von Minimum
   und Maximum aus der Variablendarstellung oder eine manuelle Vorgabe;
+- automatische Wertachsen folgen den dargestellten Daten mit etwas Randabstand,
+  ohne einen Nullpunkt zu erzwingen; auch beim Zeitzoom werden sie neu skaliert.
+  Manuell oder aus der Variablendarstellung festgelegte Grenzen bleiben fest;
 - quellenbezogene Referenzlinien und Wertebereiche mit Beschriftung,
   Reihenfarbe oder eigener Farbe sowie konfigurierbarer Linienart,
   Linienstärke und Bereichsdeckkraft;

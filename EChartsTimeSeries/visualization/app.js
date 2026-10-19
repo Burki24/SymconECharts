@@ -202,7 +202,7 @@
         var maximumAxisMargin = Math.max(baseAxisMargin, Math.min(190, chartWidth * 0.32));
         var maximumSideCount = Math.max(axisCounts.left, axisCounts.right);
         var axisOffsetStep = maximumSideCount > 1
-            ? Math.min(54, (maximumAxisMargin - baseAxisMargin) / (maximumSideCount - 1)) : 0;
+            ? Math.min(90, (maximumAxisMargin - baseAxisMargin) / (maximumSideCount - 1)) : 0;
         var leftMargin = axisCounts.left > 0 ? baseAxisMargin + axisOffsetStep * (axisCounts.left - 1) : 22;
         var rightMargin = axisCounts.right > 0 ? baseAxisMargin + axisOffsetStep * (axisCounts.right - 1) : 22;
         if (design.showYAxis === false) {
@@ -282,6 +282,8 @@
                 var axisColor = configuredAxisColor || axisColors[index] || colors.border;
                 var valueAxis = {
                     type: 'value',
+                    scale: true,
+                    boundaryGap: ['5%', '5%'],
                     name: design.showYAxis !== false ? axis.unit || '' : '',
                     position: entry.position,
                     offset: entry.positionIndex * axisOffsetStep,

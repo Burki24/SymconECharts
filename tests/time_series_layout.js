@@ -431,6 +431,8 @@ assert.deepEqual(
 assert.equal(positioned.yAxis[0].offset, 0);
 assert.equal(positioned.yAxis[0].min, -40);
 assert.equal(positioned.yAxis[0].max, 60);
+assert.equal(positioned.yAxis[1].scale, true);
+assert.deepEqual(Array.from(positioned.yAxis[1].boundaryGap), ['5%', '5%']);
 assert.equal(Object.hasOwn(positioned.yAxis[1], 'min'), false);
 assert.equal(Object.hasOwn(positioned.yAxis[1], 'max'), false);
 assert.equal(positioned.yAxis[1].offset, 0);

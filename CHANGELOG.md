@@ -1,5 +1,12 @@
 # Unveröffentlicht
 
+- EChartsTimeSeries reserviert bei mehreren Wertachsen auf derselben Seite
+  mehr Abstand für längere Skalenbeschriftungen.
+
+- EChartsTimeSeries skaliert automatische Wertachsen anhand der dargestellten
+  Daten mit Randabstand statt einen Nullpunkt zu erzwingen. Explizite
+  Achsengrenzen bleiben unverändert.
+
 ## Neu
 
 - Alle 30 Module verwenden einheitliche deutsche Debug-Ausgaben nach dem OpenHomeAlarm-Vorbild: Vorgangskennung, Funktions-/Zeilenbezug, Start und Ende, Werte- und Schnittstellenverarbeitung sowie sichere Fehlerdiagnosen ohne private Diagramminhalte oder Zugriffskanäle.
