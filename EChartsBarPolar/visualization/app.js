@@ -17,13 +17,13 @@
     var pageItems = [];
     var selectedItems = [];
     var pageWindow = { first: 0, last: 0, visibleCount: 0 };
-    var controlsElement = document.getElementById('echarts-bar-polar-controls');
-    var selectionElement = document.getElementById('echarts-bar-polar-selection');
-    var sourcesElement = document.getElementById('echarts-bar-polar-sources');
-    var pagesElement = document.getElementById('echarts-bar-polar-pages');
-    var previousButton = document.getElementById('echarts-bar-polar-previous');
-    var nextButton = document.getElementById('echarts-bar-polar-next');
-    var sourceSignature = '';
+    var controls = window.SYMC_ECHARTS_SOURCE_CONTROLS.create({
+        prefix: 'echarts-bar-polar', translate: translate,
+        change: function (id, visible) { selection.select(id, visible); render(currentState); },
+        all: function () { selection.selectAll(true); render(currentState); },
+        inverse: function () { selection.invert(); render(currentState); },
+        move: movePage
+    });
     var controlsVisible = false;
     var paletteIndices = Object.create(null);
     var nextPaletteIndex = 0;
@@ -176,51 +176,9 @@
         capacity = !controlsVisible ? all.length : Math.max(1, Math.min(32, capacity));
         pageWindow = navigation.window(selectedItems.map(function (item) { return item.id; }), capacity);
         pageItems = selectedItems.slice(pageWindow.first, pageWindow.last + 1);
-        updateControls(all, enabled, visible);
+        controls.update({ items: all, selected: visible, enabled: enabled, visible: controlsVisible,
+            window: pageWindow, total: selectedItems.length });
         return { all: all, items: pageItems, projected: controlsVisible };
-    }
-
-    function updateControls(all, enabled, selected) {
-        if (!controlsElement) { return; }
-        controlsElement.hidden = !controlsVisible;
-        selectionElement.hidden = !enabled;
-        document.getElementById('echarts-bar-polar-selection-title').textContent = translate('Sources');
-        document.getElementById('echarts-bar-polar-all').textContent = translate('All');
-        document.getElementById('echarts-bar-polar-inverse').textContent = translate('Inverse');
-        previousButton.setAttribute('aria-label', translate('Previous page'));
-        nextButton.setAttribute('aria-label', translate('Next page'));
-        pagesElement.setAttribute('aria-label', translate('Category navigation'));
-        pagesElement.hidden = !controlsVisible;
-        previousButton.disabled = pageWindow.first === 0;
-        nextButton.disabled = pageWindow.last >= selectedItems.length - 1;
-        document.getElementById('echarts-bar-polar-range').textContent = selectedItems.length
-            ? String(pageWindow.first + 1) + '–' + (pageWindow.last + 1) + ' / ' + selectedItems.length
-            : translate('No sources selected');
-        var signature = JSON.stringify(all.map(function (item) { return [item.id, item.label]; }));
-        if (enabled && signature !== sourceSignature) {
-            sourcesElement.textContent = '';
-            all.forEach(function (item) {
-                var label = document.createElement('label');
-                var checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.value = item.id;
-                checkbox.addEventListener('change', function () {
-                    selection.select(item.id, checkbox.checked);
-                    render(currentState);
-                });
-                var text = document.createElement('span');
-                text.textContent = String(item.label || '');
-                label.appendChild(checkbox);
-                label.appendChild(text);
-                sourcesElement.appendChild(label);
-            });
-            sourceSignature = signature;
-        }
-        if (enabled) {
-            sourcesElement.querySelectorAll('input').forEach(function (checkbox) {
-                checkbox.checked = selected[checkbox.value] !== false;
-            });
-        }
     }
 
     function movePage(direction) {
@@ -496,7 +454,7 @@
         chartElement.hidden = true;
         errorElement.textContent = translate(message || 'The Polar values could not be loaded.');
         errorElement.hidden = false;
-        if (controlsElement) { controlsElement.hidden = true; }
+        controls.hide();
     }
 
     function currentHighlightMode() {
@@ -603,19 +561,6 @@
         var state = echartsDesign.parseVisualizationState(message);
         if (state) { render(state); }
     };
-
-    if (controlsElement) {
-        previousButton.addEventListener('click', function () { movePage(-1); });
-        nextButton.addEventListener('click', function () { movePage(1); });
-        document.getElementById('echarts-bar-polar-all').addEventListener('click', function () {
-            selection.selectAll(true);
-            render(currentState);
-        });
-        document.getElementById('echarts-bar-polar-inverse').addEventListener('click', function () {
-            selection.invert();
-            render(currentState);
-        });
-    }
 
     if (window.ResizeObserver) {
         new ResizeObserver(resizeChart).observe(chartElement);

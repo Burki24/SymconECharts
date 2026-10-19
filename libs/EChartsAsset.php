@@ -521,6 +521,25 @@ final class EChartsAsset
         return self::NormalizeLineEndings($content);
     }
 
+    /** Loads the DOM adapter shared by families with source selection and pages. */
+    public static function SourceControlsJavaScript(): string
+    {
+        $content = @file_get_contents(__DIR__ . '/echarts-source-controls.js');
+        if ($content === false || $content === '') {
+            throw new RuntimeException('The shared source controls could not be loaded.');
+        }
+        return self::NormalizeLineEndings($content);
+    }
+
+    public static function SourceControlsCSS(): string
+    {
+        $content = @file_get_contents(__DIR__ . '/echarts-source-controls.css');
+        if ($content === false || $content === '') {
+            throw new RuntimeException('The shared source control style could not be loaded.');
+        }
+        return self::NormalizeLineEndings($content);
+    }
+
     /** Loads category-window state only for chart families which use it. */
     public static function CategoryNavigationJavaScript(): string
     {

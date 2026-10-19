@@ -821,6 +821,7 @@ class EChartsBarPolar extends IPSModuleStrict
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'ECharts Polar',
             'visualizationTheme' => $this->VisualizationThemeCSS()
+                . "\n" . EChartsAsset::SourceControlsCSS()
                 . "\n\n"
                 . $this->ResponsiveVisualizationCSS('#echarts-bar-polar-root', 'echarts-bar-polar'),
             'ipsViewStyle'       => $ipsView ? $this->IPSViewThemeCSS() : '',
@@ -854,7 +855,7 @@ class EChartsBarPolar extends IPSModuleStrict
                 '{{ECHARTS_SCRIPT}}'           => EChartsAsset::PolarJavaScript(),
                 '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
                 '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript() . "\n" . EChartsAsset::SeriesSelectionJavaScript()
-                    . "\n" . EChartsAsset::CategoryNavigationJavaScript(),
+                    . "\n" . EChartsAsset::CategoryNavigationJavaScript() . "\n" . EChartsAsset::SourceControlsJavaScript(),
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
         ];

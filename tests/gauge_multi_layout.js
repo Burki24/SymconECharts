@@ -16,7 +16,7 @@ const palette = {
     accent: '#55cbb5'
 };
 
-function render(mode, width, height, count, title = '', preset = 'multi-title', tileHeaderVisible = true, style = {}) {
+function render(mode, width, height, count, title = '', preset = 'multi-title', tileHeaderVisible = true, style = {}, selection = false) {
     const chartElement = { clientWidth: width, clientHeight: height, hidden: false };
     const errorElement = { hidden: true, textContent: '' };
     const warningElement = { hidden: true, textContent: '' };
@@ -29,7 +29,7 @@ function render(mode, width, height, count, title = '', preset = 'multi-title', 
                 status: 'ready',
                 chart: {
                     theme: 'dark',
-                    gauge: { title, preset, style },
+                    gauge: { title, preset, style, enableSourceSelection: selection },
                     items: Array.from({ length: count }, (_, index) => ({
                         id: `variable-${index}`,
                         gauge: {
@@ -43,28 +43,56 @@ function render(mode, width, height, count, title = '', preset = 'multi-title', 
                     }))
                 }
             },
-            options: { echartsThemes: { dark: palette }, tileHeaderVisible }
+            options: { echartsThemes: { dark: palette, night: { ...palette, background: '#111111' } }, tileHeaderVisible }
         },
         echarts: {
-            init: () => ({ setOption: next => { option = next; }, clear: () => { clearCount++; } })
+            init: () => ({ setOption: next => { option = next; }, clear: () => { clearCount++; },
+                resize: () => {}, dispose: () => {} })
         },
         addEventListener: () => {}
     };
-    const document = {
-        getElementById: id => ({
+    function element(tag) {
+        const node = { tag, style: {}, children: [], hidden: true, listeners: {},
+            addEventListener: (name, callback) => { node.listeners[name] = callback; },
+            appendChild: child => { node.children.push(child); },
+            setAttribute: (name, value) => { node[name] = value; }, remove: () => {},
+            querySelectorAll: tagName => node.children.flatMap(child => [
+                ...(child.tag === tagName ? [child] : []), ...child.querySelectorAll(tagName)
+            ]) };
+        Object.defineProperty(node, 'textContent', { get: () => node.text || '', set: value => {
+            node.text = value; node.children = [];
+        } });
+        return node;
+    }
+    const elements = {
             'echarts-gauge-chart': chartElement,
             'echarts-gauge-warning': warningElement,
             'echarts-gauge-error': errorElement
-        })[id]
+    };
+    for (const id of ['controls', 'selection', 'selection-title', 'sources', 'pages', 'previous', 'next', 'range', 'all', 'inverse']) {
+        elements['echarts-gauge-' + id] = element('div');
+    }
+    const document = {
+        getElementById: id => elements[id], createElement: element,
+        body: { appendChild: () => {} }
     };
 
     const context = { window, document };
     vm.runInNewContext(designSource, context);
+    for (const file of ['echarts-series-selection.js', 'echarts-category-navigation.js', 'echarts-source-controls.js']) {
+        vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', 'libs', file), 'utf8'), context);
+    }
     vm.runInNewContext(source, context);
     assert.ok(option, 'The chart should be rendered.');
     Object.defineProperties(option, {
         handleMessage: { value: window.handleMessage },
         getState: { value: () => window.SYMC_VISUALIZATION.state },
+        getOption: { value: () => option },
+        element: { value: suffix => elements['echarts-gauge-' + suffix] },
+        resize: { value: (width, height) => {
+            chartElement.clientWidth = width; chartElement.clientHeight = height;
+            window.handleMessage(window.SYMC_VISUALIZATION.state);
+        } },
         getRecoveryView: { value: () => ({ chartElement, warningElement, errorElement, clearCount }) }
     });
     return option;
@@ -132,6 +160,9 @@ for (const preset of ['multi-title', 'ring-grid', 'ring-concentric', 'weather-st
 
 const crowdedTile = render('symcon', 320, 192, 16);
 assert.ok(topOfFirstGauge(crowdedTile) >= 64, 'A crowded tile must not overlap the header.');
+const extendedTile = render('symcon', 625, 560, 32, 'Thirty-two instruments');
+assert.ok(extendedTile.series.length <= 16,
+    'Thirty-two instruments must be projected onto readable pages, not a crowded single raster.');
 
 for (const mode of ['symcon', 'ipsview']) {
     const ring = render(mode, 1260, 310, 3, '', 'ring-grid', false);
@@ -374,4 +405,135 @@ const stoppedGauge = render('symcon', 720, 560, 3, 'Climate', 'multi-title', tru
 assert.equal(stoppedGauge.animation, false);
 assert.ok(stoppedGauge.series.every(series => series.detail.valueAnimation === false));
 
-process.stdout.write('Gauge Multi dial, ring, weather-station, tacho and chronograph layouts verified.\n');
+const nativePages = [];
+const presets = ['multi-title', 'ring-grid', 'ring-concentric', 'weather-station'];
+for (const mode of ['symcon', 'ipsview']) {
+    for (const preset of presets) {
+        const many = render(mode, 625, 560, 32, 'Thirty-two instruments', preset, true,
+            { animationEnabled: false }, true);
+        const press = suffix => many.element(suffix).listeners.click();
+        const original = many.getState();
+        const items = original.chart.items;
+        assert.equal(many.element('controls').hidden, false);
+        assert.equal(many.element('sources').querySelectorAll('input').length, 32);
+        const firstPageIds = many.getOption().series.map(series => series.id);
+        assert.ok(firstPageIds.length > 0 && firstPageIds.length <= 16);
+        const colors = new Map(many.getOption().series.map(series => [series.id, series.itemStyle?.color]));
+        const visited = new Set();
+        for (let page = 0; page < 32; page++) {
+            const option = many.getOption();
+            nativePages.push({ option, width: 625, height: 560 });
+            for (const series of option.series) {
+                visited.add(series.id);
+                const item = items.find(item => item.id === series.id);
+                assert.equal(series.min, item.gauge.minimum);
+                assert.equal(series.max, item.gauge.maximum);
+                assert.equal(series.data[0].value, item.value);
+                assert.match(option.tooltip.formatter({ seriesId: series.id, seriesIndex: 0 }),
+                    new RegExp(`${item.gauge.unit}$`), 'Tooltip ID must survive page position changes.');
+                assert.ok(series.center[1] - series.radius >= (mode === 'symcon' ? 64 : 0));
+                assert.ok(series.center[1] + series.radius <= 516, 'Gauge geometry must clear the controls.');
+            }
+            if (many.element('next').disabled) { break; }
+            press('next');
+        }
+        assert.equal(visited.size, 32, `${mode}/${preset} must make all sources reachable.`);
+        while (!many.element('previous').disabled) { press('previous'); }
+        for (const series of many.getOption().series) {
+            assert.equal(series.itemStyle?.color, colors.get(series.id), 'Paging must preserve source colors.');
+        }
+        const smaller = many.getOption().series.length;
+        many.handleMessage({ ...original, chart: { ...original.chart, gauge: { ...original.chart.gauge,
+            style: { animationEnabled: false, scaleFontSizePercent: 150,
+                titleFontSizePercent: 150, valueFontSizePercent: 150 } } } });
+        assert.ok(many.getOption().series.length <= smaller, 'Large fonts must not crowd more gauges into a page.');
+        press('next');
+        const anchor = many.getOption().series[0].id;
+        const refresh = { ...original, chart: { ...original.chart, items: items.map(item => ({ ...item,
+            gauge: { ...item.gauge, label: '<Same> & room', unit: '<u>' }, value: item.gauge.maximum + 50 })) } };
+        many.handleMessage(refresh);
+        assert.ok(many.getOption().series.some(series => series.id === anchor));
+        assert.match(many.getOption().tooltip.formatter({ seriesIndex: 0 }), /&lt;Same&gt; &amp; room/);
+        assert.match(many.getOption().tooltip.formatter({ seriesIndex: 0 }), /&lt;u&gt;/);
+        assert.ok(many.getOption().series.every(series => series.data[0].value > series.max),
+            'Out-of-range source values must remain original model values, with only geometry clamped by ECharts.');
+        const boxes = many.element('sources').querySelectorAll('input');
+        boxes[0].checked = false; boxes[0].listeners.change();
+        many.handleMessage(refresh);
+        assert.equal(many.element('sources').querySelectorAll('input')[0].checked, false);
+        const beforeReorderAnchor = many.getOption().series[0].id;
+        many.handleMessage({ ...refresh, chart: { ...refresh.chart, theme: 'night',
+            items: refresh.chart.items.slice().reverse() } });
+        assert.ok(many.getOption().series.some(series => series.id === beforeReorderAnchor),
+            'Theme replacement and reorder must retain the surviving ID page anchor.');
+        assert.equal(many.element('sources').querySelectorAll('input').find(input => input.value === 'variable-0').checked, false,
+            'Selection must be keyed by ID across reorder and duplicate labels.');
+        const removed = many.getOption().series[0].id;
+        many.handleMessage({ ...refresh, chart: { ...refresh.chart,
+            items: refresh.chart.items.filter(item => item.id !== removed) } });
+        assert.ok(many.getOption().series.length > 0 && !many.getOption().series.some(series => series.id === removed));
+        press('all'); press('inverse');
+        assert.equal(many.getOption().series.length, 0, 'An empty selection must have no invented instruments.');
+        assert.ok(many.getOption().graphic.some(graphic => graphic.style?.text === 'No sources selected'));
+        nativePages.push({ option: many.getOption(), width: 625, height: 560 });
+        assert.equal(many.element('next').disabled, true);
+        assert.equal(many.element('previous').disabled, true);
+        const one = many.element('sources').querySelectorAll('input')[0];
+        one.checked = true; one.listeners.change();
+        assert.equal(many.getOption().series.length, 1, 'A single selected source must work in every preset.');
+        nativePages.push({ option: many.getOption(), width: 625, height: 560 });
+        press('all');
+        many.resize(240, 300);
+        assert.ok(many.getOption().series.length >= 1 && many.getOption().series.length <= 4,
+            'A narrow widget must retain a small reachable page of real sources.');
+        nativePages.push({ option: many.getOption(), width: 240, height: 300 });
+        many.handleMessage(original);
+        assert.ok(many.getOption().series.length <= 4, 'Small size still constrains a refreshed full model.');
+    }
+}
+
+const legacyInitial = render('ipsview', 625, 560, 16);
+legacyInitial.handleMessage({ ...legacyInitial.getState(), chart: { ...legacyInitial.getState().chart,
+    items: legacyInitial.getState().chart.items.map(item => ({ ...item, initiallyVisible: false })) } });
+assert.equal(legacyInitial.getOption().series.length, 16, 'Disabled selection ignores initial visibility.');
+assert.equal(legacyInitial.element('controls').hidden, true, 'Legacy small models must not gain a footer.');
+const initiallyHidden = render('ipsview', 625, 560, 32, '', 'ring-grid', false, {}, true);
+const hiddenState = initiallyHidden.getState();
+initiallyHidden.handleMessage({ ...hiddenState, chart: { ...hiddenState.chart,
+    items: hiddenState.chart.items.map((item, index) => ({ ...item, initiallyVisible: index === 31 })) } });
+assert.equal(initiallyHidden.getOption().series.length, 1);
+assert.equal(initiallyHidden.getOption().series[0].id, 'variable-31');
+const disabledMany = render('ipsview', 625, 560, 32, '', 'weather-station');
+disabledMany.handleMessage({ ...disabledMany.getState(), chart: { ...disabledMany.getState().chart,
+    items: disabledMany.getState().chart.items.map(item => ({ ...item, initiallyVisible: false })) } });
+assert.match(disabledMany.element('range').textContent, /32$/);
+assert.equal(disabledMany.element('selection').hidden, true);
+const customPaged = render('ipsview', 625, 560, 32, '', 'multi-title', false,
+    { ...customSvgStyle, animationEnabled: false }, true);
+assert.ok(customPaged.series.every(series => series.pointer.icon === 'path://M50 0L60 90L50 100L40 90Z'),
+    'Custom SVG pointers must survive the paged renderer.');
+assert.equal(customPaged.graphic.filter(graphic => String(graphic.id).startsWith('custom-plate-background-')).length,
+    customPaged.series.length, 'Every projected source retains its configured SVG plate.');
+nativePages.push({ option: customPaged, width: 625, height: 560 });
+
+// Native geometry uses the shipped Gauge build, not an independent approximation.
+const shipped = {};
+vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts', '6.1.0', 'echarts.gauge.min.js'), 'utf8'),
+    { window: shipped, navigator: { userAgent: 'Node.js' }, console, setTimeout, clearTimeout });
+shipped.echarts.use(require('../.tools/echarts-runtime/node_modules/echarts/renderers').SVGRenderer);
+for (const { option, width, height } of nativePages) {
+    const native = shipped.echarts.init(null, null, { renderer: 'svg', ssr: true, width, height });
+    native.setOption(option, true);
+    assert.equal(native.getModel().getSeries().length, option.series.length);
+    const svg = native.renderToSVGString();
+    assert.match(svg, /<svg/);
+    assert.ok(!svg.includes('NaN'), 'Native Gauge geometry must remain finite.');
+    native.getModel().getSeries().forEach((series, index) => {
+        assert.equal(series.get('min'), option.series[index].min);
+        assert.equal(series.get('max'), option.series[index].max);
+        assert.equal(series.getData().get('value', 0), option.series[index].data[0].value);
+    });
+    native.dispose();
+}
+
+process.stdout.write('Gauge Multi legacy layouts, 32-source views, selection, pages and native geometry verified.\n');

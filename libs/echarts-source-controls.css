@@ -1,0 +1,55 @@
+.echarts-source-controls {
+    position: absolute;
+    inset-inline: 4px;
+    inset-block-end: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    z-index: 4;
+    font: 12px sans-serif;
+    color: var(--symc-text);
+}
+.echarts-source-controls[hidden],
+.echarts-source-controls [hidden] { display: none !important; }
+.echarts-source-controls button,
+.echarts-source-controls summary {
+    min-block-size: 36px;
+    min-inline-size: 36px;
+    max-inline-size: 100%;
+    padding: 8px;
+    border: 1px solid var(--symc-border);
+    border-radius: 4px;
+    color: inherit;
+    background: var(--symc-background);
+    font: inherit;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+}
+.echarts-source-controls button:disabled { opacity: 0.4; cursor: default; }
+.echarts-source-controls nav { display: flex; align-items: center; gap: 4px; min-inline-size: 0; }
+.echarts-source-controls output { min-inline-size: 0; text-align: center; overflow-wrap: anywhere; }
+.echarts-source-controls details { min-inline-size: 0; }
+.echarts-source-picker {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: calc(100% + 4px);
+    padding: 8px;
+    border: 1px solid var(--symc-border);
+    border-radius: 4px;
+    background: var(--symc-background);
+    max-block-size: min(50vh, 20rem);
+    overflow: auto;
+}
+.echarts-source-picker-actions { display: flex; flex-wrap: wrap; gap: 4px; }
+.echarts-source-list label { display: flex; align-items: center; gap: 8px; min-block-size: 36px; }
+.echarts-source-list input { flex: 0 0 auto; inline-size: 20px; block-size: 20px; }
+.echarts-source-list span { min-inline-size: 0; overflow-wrap: anywhere; }
+.echarts-source-controls:not([hidden]) ~ .echarts-refresh-warning { inset-block-end: 52px; }
+@media (max-width: 259px) {
+    .echarts-source-controls:not([hidden]) ~ .echarts-refresh-warning { inset-block-end: 92px; }
+    .echarts-source-controls nav { flex-basis: 100%; justify-content: center; }
+    .echarts-source-controls output { flex: 1; }
+    .echarts-source-controls button { padding-inline: 4px; }
+}

@@ -13,6 +13,23 @@
 <body>
     <main id="echarts-gauge-root" class="echarts-gauge-root">
         <div id="echarts-gauge-chart" class="echarts-gauge-chart" role="img"></div>
+        <div id="echarts-gauge-controls" class="echarts-source-controls" hidden>
+            <details id="echarts-gauge-selection" hidden>
+                <summary id="echarts-gauge-selection-title"></summary>
+                <div class="echarts-source-picker">
+                    <div class="echarts-source-picker-actions">
+                        <button id="echarts-gauge-all" type="button"></button>
+                        <button id="echarts-gauge-inverse" type="button"></button>
+                    </div>
+                    <div id="echarts-gauge-sources" class="echarts-source-list"></div>
+                </div>
+            </details>
+            <nav id="echarts-gauge-pages">
+                <button id="echarts-gauge-previous" type="button">◀</button>
+                <output id="echarts-gauge-range" role="status" aria-live="polite"></output>
+                <button id="echarts-gauge-next" type="button">▶</button>
+            </nav>
+        </div>
         <div id="echarts-gauge-warning" class="echarts-refresh-warning" role="status" hidden></div>
         <div id="echarts-gauge-error" class="echarts-gauge-error" role="status" hidden></div>
     </main>

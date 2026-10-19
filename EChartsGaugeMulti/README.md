@@ -38,12 +38,45 @@ Im Kachel- und unabhängigen IPSView-Designer steuern **Animation**, **Startanim
 
 Multi-Title-, zwei Ring- und Wetterstations-Vorlage mit optionaler
 IPSView-WebContent-Ausgabe. Eine geordnete Liste aus
-2 bis 16 numerischen Quellvariablen ist konfigurierbar, wird als Referenzen
+2 bis 32 numerischen Quellvariablen ist konfigurierbar, wird als Referenzen
 registriert und über EChartsGateway gelesen. Das Modul erzeugt daraus ein
 versioniertes Multi-Datenmodell und rendert jede Quelle mit eigener Skala,
 Einheit und Wertanzeige in einem responsiven Instrumentenraster. Beide
 Ausgaben verwenden dieselben Quellen und denselben Renderer; IPSView kann
 das Kacheldesign erben oder ein eigenes Design verwenden.
+
+### Quellenauswahl und Seiten
+
+**Quellenauswahl aktivieren** ist zunächst ausgeschaltet. Aktiviert bietet
+**Quellen** eine einzeln schaltbare Liste sowie **Alle** und **Umkehren**.
+**Anfangs sichtbar** bestimmt den Startzustand einer Quelle; ohne Angabe ist
+sie sichtbar. Bei ausgeschalteter Auswahl wird dieses Feld ignoriert.
+
+Listen über 16 Quellen erhalten auch ohne Auswahl eine Seitennavigation.
+Bei aktiver Auswahl passt sich die Anzahl der Instrumente je Seite ebenfalls
+an Platz, Vorlage und Schriftgröße an. Vorherige/nächste Seite und eine
+Bereichsanzeige erschließen alle ausgewählten Quellen. Bestehende Listen bis
+16 Quellen behalten bei ausgeschalteter Auswahl ihre bisherige Darstellung.
+
+Jede Quelle behält ihren eigenen Wertebereich, ihre Einheit und Genauigkeit.
+Auswahl und Seiten bilden weder eine gemeinsame Skala noch eine Normalisierung.
+Alle konfigurierten Quellen werden weiter gelesen, validiert und aktualisiert,
+einschließlich ausgeblendeter und anderer Seiten. Originalwerte außerhalb des
+Bereichs bleiben in Wertanzeige und Tooltip erhalten; nur die Geometrie wird
+begrenzt. Die Quellenreihenfolge bestimmt die Position innerhalb jeder Seite.
+Bei der Wetterstation ist die erste Quelle der jeweiligen Seite das Hauptinstrument.
+
+Auswahl, Seitenanker und automatische Quellenfarben bleiben in der geöffneten
+Auswahl-/Seitenansicht an die Quellenidentität gebunden. Beim Aktualisieren,
+Umbenennen, Umsortieren, Größen- oder Themewechsel bleiben vorhandene Quellen
+erhalten; die erste sichtbare Quelle bleibt erhalten, soweit die neue
+Fenstergröße es zulässt. Ein Reload beginnt mit der gespeicherten Anfangsauswahl.
+Eine einzelne ausgewählte Quelle ist als Ansicht zulässig; die Konfiguration
+benötigt weiterhin mindestens zwei Quellen. Eine leere Auswahl zeigt einen Hinweis.
+
+Sehr umfangreiche Beschriftungen oder Designimporte können die zulässige
+Ausgabegröße überschreiten. Dann erscheint ein ausdrücklicher Fehler statt
+einer unvollständigen Darstellung; Beschriftungen oder Importe verkleinern.
 Der IPSView-Designer kann den Dokumenthintergrund transparent schalten und
 eine automatische Theme-Farbe oder eigene Hintergrundfarbe mit einstellbarer
 Deckkraft über den tatsächlichen IPSView-Hintergrund legen.
@@ -123,7 +156,7 @@ werden. Ohne aktive Verbindung bleibt die Gauge-Instanz in einem eindeutigen
 Fehlerstatus.
 
 **Konfigurationsseite:** Neben dem gemeinsamen Titel wird eine geordnete Liste
-aus 2 bis 16 Quellen gepflegt. Jede Variable darf nur einmal vorkommen. Pro
+aus 2 bis 32 Quellen gepflegt. Jede Variable darf nur einmal vorkommen. Pro
 Quelle werden Beschriftung, Minimum, Maximum, Einheit und 0 bis 6
 Nachkommastellen festgelegt. Mit **Variablendarstellung verwenden** können
 Wertebereich, Einheit und Nachkommastellen stattdessen aus der Quellvariable
@@ -158,7 +191,7 @@ Das Modul legt keine Profile oder eigenen Variablendarstellungen an.
 
 ### 6. Visualisierung
 
-**Fünf Multi-Vorlagen und die optionale IPSView-Ausgabe sind implementiert.**
+**Vier Multi-Vorlagen und die optionale IPSView-Ausgabe sind implementiert.**
 
 #### Native Symcon-Kachel
 
@@ -202,10 +235,13 @@ Darstellung vollständig. Die SVG-Vorschau übernimmt die aktuell bearbeiteten
 Designwerte und bestätigte Änderungen der Quellenliste sofort, auch beim
 Hinzufügen, Entfernen und Umsortieren, ohne die Konfiguration zu speichern. Bei
 einer unvollständigen Quellenliste zeigt sie einen Hinweis statt alter Werte.
-Je nach Vorlage stellt sie drei, vier oder sechs Quellen dar. Falls weitere
-Quellen konfiguriert sind, nennt die Vorschau die angezeigte und die gesamte
-Quellenzahl; die Kachel und IPSView-Ausgabe zeigen weiterhin alle 2 bis 16
-Quellen. Bei vielen konzentrischen Ringen oder Wetterstations-Instrumenten ist
+Die Vorschau zeigt höchstens vier anfangs sichtbare Quellen mit ihren eigenen
+Skalen und Originalwerten. Sie berücksichtigt die Anfangsauswahl vor dem
+Ausschnitt, sodass auch eine erst spät konfigurierte Quelle erscheint.
+Sind weitere Quellen konfiguriert, nennt sie die angezeigte und die gesamte
+Quellenzahl. Eine leere Auswahl wird nicht durch Beispieldaten ersetzt.
+Kachel und IPSView erschließen alle bis zu 32 Quellen über Auswahl und Seiten.
+Bei vielen konzentrischen Ringen oder Wetterstations-Instrumenten ist
 für lesbare Beschriftungen eine ausreichend große Kachel beziehungsweise ein
 großes IPSView-Widget erforderlich.
 Die gemeinsamen Einstellungen einschließlich der SVG-Assets gelten für alle

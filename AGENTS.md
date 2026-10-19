@@ -33,7 +33,12 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   `EChartsGaugeSingle` für genau eine Quellvariable, `EChartsGaugeMulti` für
   allgemeine Mehrquellenmodelle sowie `EChartsGaugeTacho` und
   `EChartsGaugeChronograph` für individuell gestaltbare Instrumentenpanels
-  aufgeteilt. Historische Linien- und Flächendiagramme liegen im eigenen
+  aufgeteilt.
+  `EChartsGaugeMulti` erlaubt gemäß ADR 0074 zwei bis 32 Quellen mit optionaler
+  ID-stabiler Quellenauswahl und responsiven Seiten für seine vier Vorlagen.
+  Individuelle Skalen und Einheiten sowie kleine Altlisten bleiben erhalten.
+  Auswahl-/Seiten-DOM und CSS werden mit BarPolar geteilt; Geometrie bleibt lokal.
+  Historische Linien- und Flächendiagramme liegen im eigenen
   Gerätemodul `EChartsTimeSeries`, gemäß ADR 0067 mit bis zu 32 Reihen,
   Reihenauswahl und einem gemeinsamen Punktbudget bis 32000.
   Aktuelle Kategorienvergleiche liegen im

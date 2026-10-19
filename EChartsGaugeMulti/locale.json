@@ -1,6 +1,21 @@
 {
     "translations": {
         "de": {
+            "Enable source selection": "Quellenauswahl aktivieren",
+            "Initially visible": "Anfangs sichtbar",
+            "Selection and pages only change the view. Every source retains its own range, unit and precision.": "Auswahl und Seiten ändern nur die Ansicht. Jede Quelle behält ihren eigenen Wertebereich, ihre Einheit und Genauigkeit.",
+            "Sources": "Quellen",
+            "All": "Alle",
+            "Inverse": "Umkehren",
+            "Previous page": "Vorherige Seite",
+            "Next page": "Nächste Seite",
+            "Category navigation": "Kategoriennavigation",
+            "No sources selected": "Keine Quellen ausgewählt",
+            "Configure 2 to 32 unique numeric sources.": "2 bis 32 eindeutige numerische Quellen konfigurieren.",
+            "Configure between 2 and 32 Gauge sources.": "Zwischen 2 und 32 Gauge-Quellen konfigurieren.",
+            "Configure 2 to 32 unique numeric sources. Their order determines their position in the selected Gauge template.": "2 bis 32 eindeutige numerische Quellen konfigurieren. Ihre Reihenfolge bestimmt ihre Position in der gewählten Gauge-Vorlage.",
+            "Choose independent dials, ring Gauges, concentric rings, or a weather station. Up to 32 sources share the selected design; source order determines placement and every source keeps its own range and unit.": "Einzelne Zifferblätter, Ring-Gauges, konzentrische Ringe oder Wetterstation wählen. Bis zu 32 Quellen verwenden das gewählte Design; die Reihenfolge bestimmt die Platzierung und jede Quelle behält ihren eigenen Wertebereich und ihre Einheit.",
+            "The Multi Gauge model is too large. Reduce source labels or design imports.": "Das Multi-Gauge-Modell ist zu groß. Quellenbeschriftungen oder Design-Importe verkleinern.",
             "Scale label distance offset": "Zusätzlicher Skalenbeschriftungsabstand",
             "Title offset X": "Titelverschiebung X",
             "Title offset Y": "Titelverschiebung Y",

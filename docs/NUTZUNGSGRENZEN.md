@@ -1,6 +1,6 @@
 # Prüfung der Nutzungsgrenzen
 
-Stand: 19.10.2026. Geprüft wurden alle 29 Diagrammfamilien und das Gateway:
+Stand: 20.10.2026. Geprüft wurden alle 29 Diagrammfamilien und das Gateway:
 Quellenvalidierung, Datenaufbereitung, Renderer, Vorschau, Benutzerdokumentation
 und vorhandene Tests. Das leere Altverzeichnis `EChartsGauge` ist kein Modul.
 Diese Bestandsaufnahme ist keine Performancefreigabe für die vorgeschlagenen
@@ -36,6 +36,8 @@ Pie unterstützt 100 Quellen mit optionaler erweiterter Quellenauswahl,
 ID-stabiler Legendenansicht und ausdrücklich getrennten Auswahl-/Gesamtanteilen.
 BarPolar unterstützt 100 Quellen mit optionaler Quellenauswahl und responsiven
 Seiten für beide Polarmodi; die Werteskala berücksichtigt auch versteckte Quellen.
+GaugeMulti unterstützt zwei bis 32 Quellen mit optionaler Quellenauswahl und
+responsiven Instrumentenseiten bei weiterhin individuellen Skalen und Einheiten.
 Die übrigen
 Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
 
@@ -58,6 +60,7 @@ Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
 | Erledigt | Waterfall: 100 Quellen mit Kategoriennavigation | Ein Startwert plus bis zu 99 Änderungen; vollständige Zwischenstände, Werteskala und Endsumme. Gekennzeichnete Vorschau mit echter Gesamtbilanz; gemeinsame Kategorieanker mit BarCategory. |
 | Erledigt | Pie: 100 Quellen mit optionaler Quellenauswahl | Anfangssichtbarkeit, Alle/Umkehren, ID-stabile Auswahl und Legendenposition; getrennte Nenner für sichtbare und vollständige Gewichte, korrekte Ausschnittsvorschau. |
 | Erledigt | BarPolar: 100 Quellen mit Auswahl und Seiten | ID-stabile Quellenauswahl und Seiten für radiale Balken und konzentrische Bögen, schrift-/platzabhängige Kapazität und vollständige Werteskala einschließlich versteckter Quellen. |
+| Erledigt | GaugeMulti: 32 Quellen mit Auswahl und Seiten | Individuelle Skalen/Einheiten, ID-stabile Auswahl und Seiten für alle vier Vorlagen; DOM-Bedienung und CSS mit BarPolar geteilt, keine verkleinerten 32er-Instrumentenraster. |
 | Danach | Weitere Archiv- und Vergleichsreihen | Nur zusammen mit Navigation, Vorschaukennzeichnung und messbaren Ressourcenbudgets. |
 
 Normalisierung ist keine allgemeine Lösung für unterschiedliche Einheiten:
@@ -74,7 +77,7 @@ Schritte sind Planungsziele, keine implementierten oder lastgeprüften Zusagen.
 | Familie | Aktueller Vertrag | Bewertung und sinnvolle Erweiterung |
 | --- | --- | --- |
 | EChartsGaugeSingle | Genau eine numerische Quelle; eigener Wertebereich, Einheit und Präzision; negative Werte zulässig. Bis acht Farbzonen. | Eine Quelle gehört zur Familie und bleibt. Mehr Farbzonen erst bei konkretem Bedarf. Mehrere Instrumente gehören zu GaugeMulti. |
-| EChartsGaugeMulti | 2–16 Quellen, jeweils eigene Skala und Einheit. | 16 ist eine Layoutgrenze. Perspektivisch 32–100 mit Seiten/Raster und Auswahl, nicht 100 konzentrische Ringe auf derselben Kachel. |
+| EChartsGaugeMulti | 2–32 Quellen, jeweils eigene Skala, Einheit und Präzision; Modell höchstens 900000 Bytes, HTML höchstens 1 MiB. | Umgesetzt: optionale ID-stabile Quellenauswahl und responsive Seiten für vier Vorlagen; kleine Altlisten ohne Auswahl behalten ihre Geometrie. Vorhandene SVG-Importbudgets bleiben erhalten. 100 erst nach weiterem konkreten Bedarf und Lastprüfung. |
 | EChartsGaugeTacho | 2–5 Quellen mit unabhängigen Skalen; festgelegte Instrumentenanordnung. | Fünf ist durch die besondere Geometrie begründet. Neue Anordnungen wären Voraussetzung für mehr; reine Grenzerhöhung nicht empfohlen. |
 | EChartsGaugeChronograph | 2–5 Quellen als Hauptinstrument mit Nebeninstrumenten. | Ebenso Geometrievertrag. Optional ein einzelnes Hauptinstrument erst nach ausdrücklicher Produktentscheidung; kein allgemeiner 100-Quellen-Kandidat. |
 | EChartsBarCategory | 1–100 numerische Quellenzuordnungen, gleiche Roh-Einheit oder ausdrücklich normalisierte Vergleiche mit eigenen Min/Max; auch negative Originale. Kategorien und Reihen, gruppiert/gestapelt/einfach. | Umgesetzt: responsive Kategoriennavigation, viewportstabile Updates und optionale Normalisierung. Stapel addieren normierte Einzelwerte, sind aber keine physikalischen Summen oder 100-Prozent-Stapel. |
@@ -178,6 +181,15 @@ größtmögliche Imports und beide Ausgabewege abdecken. Eine Auswahl/Navigation
 darf keine Daten verändern oder unsichtbar aus dem fachlichen Modell entfernen.
 
 ## Nachweise dieses Änderungsschritts und verbleibende Lücken
+
+GaugeMulti prüft 32/33 Quellen, unveränderte Altlisten, gleiche Namen mit
+verschiedenen IDs, eigene Skalen/Einheiten, Darstellungsübernahme und
+vollständige Lesezugriffe/Referenzen/Abonnements einschließlich versteckter
+Updates. Alle vier Vorlagen und unabhängiges IPSView-Design werden geprüft,
+ebenso leere/späte Anfangsauswahl und korrekte Vorschauzahlen/Geometrie.
+Native Layoutprüfungen sichern Seiten, Identitäten und große Designimporte ab.
+900000 Modellbytes und 1 MiB finaler HTML-Puffer besitzen getrennte Fehlertests.
+Die Live-Abnahme nach Modulupdate bleibt beim Eigentümer.
 
 BarPolar prüft 100/101 Quellen, Altlisten, vollständige Lesezugriffe/Abonnements,
 versteckte Aktualisierungen und Fehler, Normalisierung, unabhängige Designer,

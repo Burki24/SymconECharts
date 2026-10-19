@@ -85,8 +85,8 @@ for (const id of ['controls', 'selection', 'selection-title', 'sources', 'pages'
     elements['echarts-bar-polar-' + id] = element('div');
 }
 vm.runInNewContext(designSource, { window, document, console });
-for (const file of ['echarts-series-selection.js', 'echarts-category-navigation.js']) {
-    vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', 'libs', file), 'utf8'), { window });
+for (const file of ['echarts-series-selection.js', 'echarts-category-navigation.js', 'echarts-source-controls.js']) {
+    vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', 'libs', file), 'utf8'), { window, document });
 }
 vm.runInNewContext(source, { window, document, console, ResizeObserver: window.ResizeObserver });
 
@@ -981,8 +981,8 @@ if (fs.existsSync(localECharts)) {
         body: { appendChild: () => {} }
     };
     vm.runInNewContext(designSource, { window: livePolarWindow, document: livePolarDocument, console });
-    for (const file of ['echarts-series-selection.js', 'echarts-category-navigation.js']) {
-        vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', 'libs', file), 'utf8'), { window: livePolarWindow });
+    for (const file of ['echarts-series-selection.js', 'echarts-category-navigation.js', 'echarts-source-controls.js']) {
+        vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', 'libs', file), 'utf8'), { window: livePolarWindow, document: livePolarDocument });
     }
     vm.runInNewContext(source, {
         window: livePolarWindow, document: livePolarDocument, console,

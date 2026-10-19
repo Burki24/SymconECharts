@@ -10,32 +10,59 @@ require_once __DIR__ . '/../libs/EChartsPreviewSourceCount.php';
 
 final class EChartsGaugeMultiPreview
 {
-    /** @param list<array<string, mixed>> $items @param array<string, int|string> $style */
+    /** @param list<array<string,mixed>> $items @param array<string,mixed> $style @param array<string,mixed> $options */
     public static function CreateSvg(
         array $items,
         string $title,
         string $theme,
         string $preset = 'multi-title',
         array $style = [],
-        string $sourceCountCaption = 'Preview shows %d of %d sources'
+        string $sourceCountCaption = 'Preview shows %d of %d sources',
+        array $options = []
+    ): string {
+        $total = count($items);
+        foreach ($items as $index => &$item) {
+            $item['order'] ??= $index;
+        }
+        unset($item);
+        if (($options['enableSourceSelection'] ?? false) === true) {
+            $items = array_values(array_filter($items, static fn (array $item): bool => ($item['initiallyVisible'] ?? true) === true));
+        }
+        $caption = $total > 0
+            ? (string) ($options['emptySelectionCaption'] ?? 'No sources selected')
+            : (string) ($options['invalidSourcesCaption'] ?? 'Configure 2 to 32 unique numeric sources.');
+        $svg = self::CreateSelectedSvg($items, $title, $theme, $preset, $style, $sourceCountCaption, $total, $caption);
+        return preg_replace('/<svg\b/', '<svg data-gauge-source-count="' . $total
+            . '" data-gauge-visible-count="' . count($items) . '"', $svg, 1) ?? $svg;
+    }
+
+    /** @param list<array<string, mixed>> $items @param array<string, int|string> $style */
+    private static function CreateSelectedSvg(
+        array $items,
+        string $title,
+        string $theme,
+        string $preset = 'multi-title',
+        array $style = [],
+        string $sourceCountCaption = 'Preview shows %d of %d sources',
+        int $sourceCount = 0,
+        string $emptyCaption = ''
     ): string {
         $palette = self::StyledPalette(EChartsAsset::ThemePreviewPalette($theme), $style);
-        $sourceCount = count($items);
         if ($items === []) {
-            return self::SvgDocument(
+            return self::WithSourceCountNotice(self::SvgDocument(
                 $title,
                 $palette,
                 '<text x="360" y="215" text-anchor="middle" font-size="18" fill="'
                     . SVGPreviewHelper::escape($palette['muted'])
-                    . '">Configure 2 to 16 unique numeric sources.</text>',
+                    . '">' . SVGPreviewHelper::escape($emptyCaption) . '</text>',
                 $preset,
                 $style
-            );
+            ), 0, $sourceCount, $palette, $sourceCountCaption);
         }
         if ($preset === 'ring-grid') {
             return self::WithSourceCountNotice(
                 self::CreateRingGridSvg($items, $title, $palette, $style),
-                min(4, $sourceCount),
+                min(4, count($items)),
                 $sourceCount,
                 $palette,
                 $sourceCountCaption
@@ -44,7 +71,7 @@ final class EChartsGaugeMultiPreview
         if ($preset === 'ring-concentric') {
             return self::WithSourceCountNotice(
                 self::CreateConcentricSvg($items, $title, $palette, $style),
-                min(4, $sourceCount),
+                min(4, count($items)),
                 $sourceCount,
                 $palette,
                 $sourceCountCaption
@@ -53,7 +80,7 @@ final class EChartsGaugeMultiPreview
         if ($preset === 'weather-station') {
             return self::WithSourceCountNotice(
                 self::CreateWeatherStationSvg($items, $title, $palette, $style),
-                min(4, $sourceCount),
+                min(4, count($items)),
                 $sourceCount,
                 $palette,
                 $sourceCountCaption
@@ -62,7 +89,7 @@ final class EChartsGaugeMultiPreview
         if ($preset === 'tacho') {
             return self::WithSourceCountNotice(
                 self::CreateTachoSvg($items, $title, $palette, $style),
-                min(3, $sourceCount),
+                min(3, count($items)),
                 $sourceCount,
                 $palette,
                 $sourceCountCaption
@@ -71,7 +98,7 @@ final class EChartsGaugeMultiPreview
         if ($preset === 'chronograph') {
             return self::WithSourceCountNotice(
                 self::CreateChronographSvg($items, $title, $palette, $style),
-                min(6, $sourceCount),
+                min(6, count($items)),
                 $sourceCount,
                 $palette,
                 $sourceCountCaption
@@ -87,6 +114,7 @@ final class EChartsGaugeMultiPreview
         $content = '';
 
         foreach ($items as $index => $item) {
+            $content .= self::InstrumentMarker($item);
             $column = $index % $columns;
             $row = intdiv($index, $columns);
             $centerX = $column * $cellWidth + $cellWidth / 2;
@@ -119,6 +147,7 @@ final class EChartsGaugeMultiPreview
                 . '" font-size="' . self::N(max(11.0, $radius * 0.13) * self::Scale($style, 'titleFontSizePercent'))
                 . '" text-anchor="middle">'
                 . SVGPreviewHelper::escape($label) . '</text>';
+            $content .= '</g>';
         }
 
         return self::WithSourceCountNotice(
@@ -142,12 +171,13 @@ final class EChartsGaugeMultiPreview
         $content = '';
 
         foreach ($items as $index => $item) {
+            $content .= self::InstrumentMarker($item);
             $centerX = ($index % $columns) * $cellWidth + $cellWidth / 2;
             $centerY = intdiv($index, $columns) * $cellHeight + $cellHeight * 0.55;
             $radius = min($cellWidth * 0.31, $cellHeight * 0.36);
             $color = ($style['colorMode'] ?? 'theme') === 'custom'
                 ? self::StyleColor($style, 'progressColor', $palette['accent'])
-                : self::RingColor($index, $palette);
+                : self::RingColor((int) ($item['order'] ?? $index), $palette);
             $content .= self::RingCircles(
                 $centerX,
                 $centerY,
@@ -166,6 +196,7 @@ final class EChartsGaugeMultiPreview
                 . '" font-size="' . self::N(18.0 * self::Scale($style, 'valueFontSizePercent'))
                 . '" font-weight="700" text-anchor="middle">'
                 . SVGPreviewHelper::escape(self::FormattedValue($item)) . '</text>';
+            $content .= '</g>';
         }
 
         return self::SvgDocument($title, $palette, $content, 'ring-grid', $style);
@@ -177,10 +208,11 @@ final class EChartsGaugeMultiPreview
         $items = array_slice($items, 0, 4);
         $content = '';
         foreach ($items as $index => $item) {
+            $content .= self::InstrumentMarker($item);
             $radius = 150.0 - $index * 30.0;
             $color = ($style['colorMode'] ?? 'theme') === 'custom'
                 ? self::StyleColor($style, 'progressColor', $palette['accent'])
-                : self::RingColor($index, $palette);
+                : self::RingColor((int) ($item['order'] ?? $index), $palette);
             $content .= self::RingCircles(
                 215.0,
                 210.0,
@@ -201,6 +233,7 @@ final class EChartsGaugeMultiPreview
                 . '" fill="' . SVGPreviewHelper::escape($palette['text'])
                 . '" font-size="' . self::N(17.0 * self::Scale($style, 'valueFontSizePercent')) . '" font-weight="700">'
                 . SVGPreviewHelper::escape(self::FormattedValue($item)) . '</text>';
+            $content .= '</g>';
         }
 
         return self::SvgDocument($title, $palette, $content, 'ring-concentric', $style);
@@ -212,6 +245,7 @@ final class EChartsGaugeMultiPreview
         $items = array_slice($items, 0, 4);
         $count = count($items);
         $positions = match ($count) {
+            1       => [[360.0, 215.0, 140.0]],
             2       => [[215.0, 215.0, 140.0], [540.0, 215.0, 95.0]],
             3       => [[215.0, 215.0, 140.0], [540.0, 125.0, 68.0], [540.0, 295.0, 68.0]],
             default => [[215.0, 215.0, 140.0], [460.0, 125.0, 62.0],
@@ -219,6 +253,7 @@ final class EChartsGaugeMultiPreview
         };
         $content = '';
         foreach ($items as $index => $item) {
+            $content .= self::InstrumentMarker($item);
             [$x, $y, $radius] = $positions[$index];
             $content .= self::InstrumentDialSvg(
                 $item,
@@ -226,9 +261,10 @@ final class EChartsGaugeMultiPreview
                 $y,
                 $radius,
                 $palette,
-                self::RingColor($index, $palette),
+                self::RingColor((int) ($item['order'] ?? $index), $palette),
                 $style
             );
+            $content .= '</g>';
         }
 
         return self::SvgDocument($title, $palette, $content, 'weather-station', $style);
@@ -627,9 +663,24 @@ final class EChartsGaugeMultiPreview
     }
 
     /** @param array<string, string> $palette */
+    /** @param array<string,mixed> $item */
+    private static function InstrumentMarker(array $item): string
+    {
+        return '<g data-gauge-id="' . SVGPreviewHelper::escape((string) ($item['id'] ?? ''))
+            . '" data-gauge-minimum="' . self::N((float) ($item['minimum'] ?? 0))
+            . '" data-gauge-maximum="' . self::N((float) ($item['maximum'] ?? 100))
+            . '" data-gauge-value="' . self::N((float) ($item['value'] ?? 0))
+            . '" data-gauge-ratio="' . self::N(self::ValueRatio($item)) . '">';
+    }
+
     private static function RingColor(int $index, array $palette): string
     {
-        $colors = [$palette['accent'], '#5C83E9', '#DB7393', '#E6A547'];
+        $colors = [
+            $palette['accent'], '#5C83E9', '#DB7393', '#E6A547',
+            '#8F6BD7', '#5BAE79', '#E5754F', '#3EA8C1',
+            '#C482C7', '#86A646', '#D96C68', '#5B92B1',
+            '#B98955', '#7493DD', '#A77DBC', '#64B8A4'
+        ];
 
         return $colors[$index % count($colors)];
     }

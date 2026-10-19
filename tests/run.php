@@ -55,6 +55,7 @@ $tests = [
 ];
 
 $commands = [
+    ['Test 32-source Gauge Multi integration', 'php tests/gateway_gauges.php --gauge-multi-many'],
     ['Test 100-source Polar integration', 'php tests/gateway_gauges.php --polar-many'],
     ['Test 100-source Pie integration', 'php tests/gateway_gauges.php --pie-many'],
     ['Test 100-source Waterfall integration', 'php tests/gateway_gauges.php --waterfall-many'],
@@ -78,6 +79,7 @@ $commands = [
     ['Test Pie sources and selection', 'node tests/pie_layout.js'],
     ['Test shared chart view state', 'node tests/chart_view_state.js'],
     ['Test Polar pages and selection', 'node tests/bar_polar_layout.js'],
+    ['Test Gauge Multi pages and selection', 'node tests/gauge_multi_layout.js'],
     ['Test Historical Bar layout', 'node tests/bar_history_layout.js'],
     ['Test Scatter/Bubble layout', 'node tests/scatter_layout.js'],
     ['Test Heatmap layout', 'node tests/heatmap_layout.js'],

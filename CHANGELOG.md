@@ -9,6 +9,12 @@
 
 ## Neu
 
+- EChartsGaugeMulti unterstützt bis zu 32 Quellen mit optionaler Quellenauswahl,
+  Anfangssichtbarkeit und Alle/Umkehren. Responsive Seiten für die vier Vorlagen
+  erhalten individuelle Wertebereiche, Einheiten und Genauigkeit. Bestehende
+  kleine Listen bleiben ohne aktivierte Auswahl unverändert; die Vorschau
+  berücksichtigt die Anfangsauswahl vor ihrem gekennzeichneten Ausschnitt.
+
 - EChartsBarPolar unterstützt bis zu 100 Quellen mit optionaler Quellenauswahl,
   Anfangssichtbarkeit und Alle/Umkehren. Responsive Seiten für radiale Balken
   und konzentrische Bögen erhalten die vollständige Werteskala einschließlich

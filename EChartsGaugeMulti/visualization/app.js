@@ -13,6 +13,13 @@
     var chart = null;
     var currentState = bootstrap.state || null;
     var currentTheme = null;
+    var sourceSelection = null;
+    var pageNavigation = null;
+    var sourceControls = null;
+    var pageKeys = [];
+    var pageWindow = { first: 0, last: 0, visibleCount: 0 };
+    var palettePositions = Object.create(null);
+    var nextPalettePosition = 0;
     var reduceMotion = window.matchMedia
         && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var pointerIcons = {
@@ -108,6 +115,92 @@
             '#B98955', '#7493DD', '#A77DBC', '#64B8A4'
         ];
         return palette[index % palette.length];
+    }
+
+    function sourceColor(item, index, colors) {
+        return itemColor(Number.isInteger(item.palettePosition) ? item.palettePosition : index, colors);
+    }
+
+    function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, function (character) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character];
+        });
+    }
+
+    function redrawView() {
+        if (currentState && currentState.status === 'ready') { render(currentState); }
+    }
+
+    function ensureViewControls() {
+        if (sourceControls) { return; }
+        sourceSelection = window.SYMC_ECHARTS_SERIES_SELECTION.create();
+        pageNavigation = window.SymconEChartsCategoryNavigation.create();
+        sourceControls = window.SYMC_ECHARTS_SOURCE_CONTROLS.create({
+            prefix: 'echarts-gauge', translate: translate,
+            change: function (id, visible) { sourceSelection.select(id, visible); redrawView(); },
+            all: function () { sourceSelection.selectAll(true); redrawView(); },
+            inverse: function () { sourceSelection.invert(); redrawView(); },
+            move: function (direction) {
+                pageNavigation.rememberWindow(pageKeys, pageWindow.first + direction * pageWindow.visibleCount);
+                redrawView();
+            }
+        });
+    }
+
+    function pageCapacity(count, preset, width, height, headerInset, hasTitle, style) {
+        var fontScale = Math.max(clamp(Number(style.titleFontSizePercent) || 100, 50, 150),
+            clamp(Number(style.valueFontSizePercent) || 100, 50, 150),
+            clamp(Number(style.scaleFontSizePercent) || 100, 50, 150)) / 100;
+        var capacity = 1;
+        for (var candidate = 1; candidate <= Math.min(16, count); candidate += 1) {
+            var readable;
+            if (preset === 'ring-concentric') {
+                var top = headerInset + (hasTitle ? Math.max(32, height * 0.1) : 4);
+                var availableHeight = Math.max(1, height - top);
+                var beside = width >= 560 && width >= availableHeight * 1.15;
+                var outer = Math.min((beside ? width * 0.53 : width) * 0.42,
+                    (beside ? availableHeight : availableHeight * 0.58) * 0.43);
+                var legendHeight = beside ? availableHeight : availableHeight * 0.42 - 6;
+                var legendRows = Math.ceil(candidate / (beside || candidate <= 8 ? 1 : 2));
+                readable = outer / (candidate + 0.5) >= 9 * fontScale
+                    && legendHeight / legendRows >= 21 * fontScale;
+            } else if (preset === 'weather-station') {
+                readable = resolveWeatherLayout(candidate, width, height, headerInset, hasTitle)
+                    .every(function (position) { return position.radius >= 50 * fontScale; });
+            } else {
+                readable = resolveGrid(candidate, width, height, hasTitle, headerInset).radius >= 60 * fontScale;
+            }
+            if (readable) { capacity = candidate; }
+        }
+        return capacity;
+    }
+
+    function projectItems(items, gauge, width, height, headerInset, hasTitle) {
+        var enabled = gauge.enableSourceSelection === true;
+        if (items.length <= 16 && !enabled) {
+            if (sourceControls) { sourceControls.hide(); }
+            return { items: items, height: height };
+        }
+        ensureViewControls();
+        var selected = sourceSelection.reconcile(items);
+        var selectedItems = items.filter(function (item) { return !enabled || selected[item.id] !== false; });
+        pageKeys = selectedItems.map(function (item) { return item.id; });
+        var plotHeight = Math.max(1, height - (enabled && width < 260 ? 84 : 44));
+        var capacity = pageCapacity(selectedItems.length, gauge.preset || 'multi-title', width,
+            plotHeight, headerInset, hasTitle, gauge.style || {});
+        pageWindow = pageNavigation.window(pageKeys, capacity);
+        pageNavigation.rememberWindow(pageKeys, pageWindow.first);
+        sourceControls.update({
+            items: items.map(function (item) { return { id: item.id, label: String((item.gauge || {}).label || '') }; }),
+            selected: selected, enabled: enabled, visible: true, window: pageWindow, total: selectedItems.length
+        });
+        return {
+            items: selectedItems.slice(pageWindow.first, pageWindow.first + pageWindow.visibleCount)
+                .map(function (item) {
+                    return Object.assign({}, item, { palettePosition: palettePositions[item.id] });
+                }),
+            height: plotHeight
+        };
     }
 
     function styleColor(style, name, fallback) {
@@ -418,7 +511,7 @@
         var radius = grid.radius * 0.95;
         var ringScale = clamp(Number(style.ringWidthPercent) || 100, 50, 150) / 100;
         var ringWidth = clamp(radius * 0.13 * ringScale, 2, 24);
-        var color = itemColor(index, colors);
+        var color = sourceColor(item, index, colors);
         series.radius = radius;
         series.startAngle = 90;
         series.endAngle = -270;
@@ -464,7 +557,7 @@
 
         items.forEach(function (item, index) {
             var gauge = item.gauge || {};
-            var color = itemColor(index, colors);
+            var color = sourceColor(item, index, colors);
             var legendX = legendLeft + (index % legendColumns) * columnWidth;
             var legendY = legendTop + Math.floor(index / legendColumns) * rowHeight;
             var valueText = formatValue(Number(item.value), clamp(Number(gauge.decimals) || 0, 0, 6), String(gauge.unit || ''));
@@ -532,6 +625,10 @@
     function resolveWeatherLayout(count, width, height, headerInset, hasTitle) {
         var top = headerInset + (hasTitle ? Math.max(32, height * 0.1) : 4);
         var availableHeight = Math.max(1, height - top);
+        if (count === 1) {
+            return [{ center: [width * 0.5, top + availableHeight * 0.5],
+                radius: Math.max(1, Math.min(width * 0.34, availableHeight * 0.39)) }];
+        }
         var beside = width >= 620 && width >= availableHeight * 1.2;
         var mainWidth = beside ? width * 0.52 : width;
         var mainHeight = beside ? availableHeight : availableHeight * 0.52;
@@ -575,7 +672,7 @@
         var graphic = [];
         items.forEach(function (item, index) {
             var position = positions[index];
-            var color = itemColor(index, colors);
+            var color = sourceColor(item, index, colors);
             var gauge = buildSeries(item, index, null, colors, style, position);
             gauge.itemStyle = { color: color };
             gauge.pointer.itemStyle.color = color;
@@ -750,7 +847,7 @@
                     radius: subRadius
                 };
             var gauge = buildSeries(item, index, null, colors, style, position);
-            var color = itemColor(index, colors);
+            var color = sourceColor(item, index, colors);
             var dialRadius = position.radius;
             var axisWidth = clamp(dialRadius * (index === 0 ? 0.055 : 0.09) * ringScale, 1, 18);
             gauge.z = index === 0 ? 6 : 5;
@@ -799,14 +896,24 @@
         var title = String(gauge.title || '');
         var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 64 : 0;
         var preset = String(gauge.preset || 'multi-title');
+        // The projection changes the view only. Every item keeps its independent range and formatting.
+        var retainedPalettePositions = Object.create(null);
+        items.forEach(function (item) {
+            retainedPalettePositions[item.id] = Object.prototype.hasOwnProperty.call(palettePositions, item.id)
+                ? palettePositions[item.id] : nextPalettePosition++ % 16;
+        });
+        palettePositions = retainedPalettePositions;
+        var projection = projectItems(items, gauge, width, height, headerInset, title !== '');
+        items = projection.items;
+        height = projection.height;
         var grid = preset === 'ring-concentric' || preset === 'weather-station' || preset === 'tacho'
             || preset === 'chronograph'
             ? null
             : resolveGrid(items.length, width, height, title !== '', headerInset);
-        var concentric = preset === 'ring-concentric'
+        var concentric = items.length && preset === 'ring-concentric'
             ? buildConcentricLayout(items, width, height, headerInset, title !== '', colors, style)
             : null;
-        var weather = preset === 'weather-station'
+        var weather = items.length && preset === 'weather-station'
             ? buildWeatherLayout(items, width, height, headerInset, title !== '', colors, style)
             : null;
         var tacho = preset === 'tacho'
@@ -827,6 +934,10 @@
             return echartsDesign.gaugeLabelOffsets(applySeriesDesign(gaugeSeries, style, colors), style);
         });
         graphic = applyPlateDesign(graphic, series, preset, style, colors, width, height, headerInset);
+        if (!items.length) {
+            graphic.push({ id: 'empty-source-selection', type: 'text', left: 'center', top: 'middle',
+                style: { text: translate('No sources selected'), fill: colors.muted, fontSize: 14 }, silent: true });
+        }
         series.forEach(function (gaugeSeries) {
             if (gaugeSeries.detail) {
                 gaugeSeries.detail.valueAnimation = animation.animation;
@@ -860,10 +971,11 @@
             tooltip: {
                 trigger: 'item',
                 formatter: function (parameters) {
-                    var item = items[parameters.seriesIndex] || {};
+                    var item = items.find(function (entry) { return entry.id === parameters.seriesId; })
+                        || items[parameters.seriesIndex] || {};
                     var itemGauge = item.gauge || {};
-                    return String(itemGauge.label || '') + '<br>'
-                        + formatValue(item.value, Number(itemGauge.decimals) || 0, String(itemGauge.unit || ''));
+                    return escapeHtml(itemGauge.label || '') + '<br>'
+                        + escapeHtml(formatValue(item.value, Number(itemGauge.decimals) || 0, String(itemGauge.unit || '')));
                 }
             },
             graphic: graphic,
@@ -872,6 +984,7 @@
     }
 
     function displayError(message) {
+        if (sourceControls) { sourceControls.hide(); }
         if (chart) {
             chart.clear();
         }
@@ -924,6 +1037,9 @@
         window.addEventListener('resize', function () {
             if (chart) {
                 chart.resize();
+                if (currentState && currentState.status === 'ready') {
+                    chart.setOption(buildOption(currentState.chart, currentTheme || 'auto'), true);
+                }
             }
         });
     }

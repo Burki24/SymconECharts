@@ -391,7 +391,7 @@ foreach ([
             'Decimals', 'Maximum', 'Minimum', 'SourceVariableID', 'Title', 'TitlePosition',
             'Unit', 'UseVariablePresentation'
         ]
-        : ['Sources', 'Title'];
+        : ($gaugeModuleName === 'EChartsGaugeMulti' ? ['EnableSourceSelection', 'Sources', 'Title'] : ['Sources', 'Title']);
     sort($expectedFormNames);
     requireStrictContract(
         $formNames === $expectedFormNames,

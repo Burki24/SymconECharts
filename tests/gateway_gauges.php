@@ -1115,6 +1115,10 @@ if (array_slice($argv, 1) === ['--polar-many']) {
     require __DIR__ . '/bar_polar_many.php';
     exit(0);
 }
+if (array_slice($argv, 1) === ['--gauge-multi-many']) {
+    require __DIR__ . '/gauge_multi_many.php';
+    exit(0);
+}
 if (($argv[1] ?? '') === '--pie-preview') {
     $draft = json_decode($argv[2] ?? '{}', true, 512, JSON_THROW_ON_ERROR);
     $draft['EnableSourceSelection'] ??= true;
@@ -3275,7 +3279,7 @@ $emptyMultiSvg = base64_decode(substr(
 ), true);
 assertGatewayGauge(
     is_string($emptyMultiSvg)
-        && str_contains($emptyMultiSvg, 'Configure 2 to 16 unique numeric sources.')
+        && str_contains($emptyMultiSvg, 'Configure 2 to 32 unique numeric sources.')
         && !str_contains($emptyMultiSvg, 'Temperature'),
     'A new Gauge Multi instance must show a configuration hint instead of unmarked example gauges.'
 );
@@ -3441,13 +3445,7 @@ assertGatewayGauge(
     'Gauge Multi runtime must render shared SVG pointer and plate assets.'
 );
 $svgMultiForm = json_decode($svgMultiGauge->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
-$svgMultiPreview = '';
-foreach ($svgMultiForm['elements'][4]['items'] ?? [] as $svgMultiFormItem) {
-    if (($svgMultiFormItem['name'] ?? null) === 'GaugePreview') {
-        $svgMultiPreview = (string) ($svgMultiFormItem['image'] ?? '');
-        break;
-    }
-}
+$svgMultiPreview = (string) (findGaugeFormElement($svgMultiForm['elements'], 'GaugePreview')['image'] ?? '');
 $svgMultiPreviewSource = base64_decode(
     substr($svgMultiPreview, strlen('data:image/svg+xml;base64,')),
     true
@@ -3480,13 +3478,7 @@ foreach (['ring-grid', 'ring-concentric', 'weather-station'] as $ringPreset) {
         'Both output adapters must receive the selected ring preset.'
     );
     $ringForm = json_decode($ringGauge->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
-    $ringPreview = '';
-    foreach ($ringForm['elements'][4]['items'] ?? [] as $ringFormItem) {
-        if (($ringFormItem['name'] ?? null) === 'GaugePreview') {
-            $ringPreview = $ringFormItem['image'] ?? '';
-            break;
-        }
-    }
+    $ringPreview = findGaugeFormElement($ringForm['elements'], 'GaugePreview')['image'] ?? '';
     assertGatewayGauge(
         is_string($ringPreview) && str_starts_with($ringPreview, 'data:image/svg+xml;base64,')
             && str_contains(
@@ -3950,7 +3942,7 @@ $emptyDraftSvg = base64_decode(substr(
     strlen('data:image/svg+xml;base64,')
 ), true);
 assertGatewayGauge(
-    is_string($emptyDraftSvg) && str_contains($emptyDraftSvg, 'Configure 2 to 16 unique numeric sources.'),
+    is_string($emptyDraftSvg) && str_contains($emptyDraftSvg, 'Configure 2 to 32 unique numeric sources.'),
     'Gauge Multi must show a placeholder for an incomplete draft rather than stale saved gauges.'
 );
 $multiGauge->UpdateGaugePreviewFromForm(json_encode(['Sources' => array_slice($draftMultiSources, 1)], JSON_THROW_ON_ERROR));
@@ -8638,7 +8630,7 @@ foreach ([
 $multiLocale = json_decode(file_get_contents(__DIR__ . '/../EChartsGaugeMulti/locale.json'), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
     isset($multiLocale['translations']['de'][
-        'Choose independent dials, ring Gauges, concentric rings, or a weather station. Up to 16 sources share the selected design; source order determines placement and every source keeps its own range and unit.'
+        'Choose independent dials, ring Gauges, concentric rings, or a weather station. Up to 32 sources share the selected design; source order determines placement and every source keeps its own range and unit.'
     ]),
     'Gauge Multi must translate its current designer explanation.'
 );

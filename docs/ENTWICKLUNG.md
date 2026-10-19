@@ -21,6 +21,18 @@ IPSView nur den Diagrammtitel benötigt.
 
 ## Aktueller Stand und Zielarchitektur
 
+GaugeMulti erweitert gemäß [ADR 0074](adr/0074-gauge-multi-source-selection-and-pages.md)
+auf 2–32 Quellen mit optionaler Auswahl und responsiven Seiten für alle vier
+Vorlagen. Das Modell enthält weiterhin alle Quellen und individuelle Skalen;
+`EnableSourceSelection=false` und fehlendes `InitiallyVisible=true` erhalten
+Altlisten. Bis 16 Quellen ohne Auswahl bleibt die alte Geometrie erhalten.
+Die DOM-Adapter und CSS von Auswahl/Seiten sind mit BarPolar zentralisiert;
+beide verwenden unverändert die vorhandenen ID-Auswahl-/Kategorieanker.
+Familiengeometrie und Gauge-Skalen bleiben lokal. Die Vorschau filtert vor
+ihrem Vier-Quellen-Ausschnitt und behält vollständige Quellenzahlen/Farben.
+900000 Modellbytes lassen Platz für die vorhandenen validierten SVG-Importe;
+der abschließende HTML-Guard begrenzt beide Ausgaben weiterhin auf 1 MiB.
+
 BarPolar erweitert gemäß [ADR 0073](adr/0073-polar-source-selection-and-pages.md)
 auf 100 Quellen mit optionaler ID-Auswahl und responsiven Seiten für beide
 Polarmodi. `EnableSourceSelection=false` und fehlendes `InitiallyVisible=true`
@@ -193,7 +205,7 @@ verwenden `IPSModuleStrict`;
 Gauge-Instanzen können vorhandene Gateways wiederverwenden. Ein versioniertes
 Protokoll liefert geprüfte numerische Momentanwerte an ein minimales
 Gauge-Datenmodell. Gauge Multi besitzt eine geordnete und validierte Liste aus
-2 bis 16 Quellen. Gauge Single rendert sein Modell mit der lokal gebündelten
+2 bis 32 Quellen. Gauge Single rendert sein Modell mit der lokal gebündelten
 Apache-ECharts-Runtime 6.1.0 als responsive native HTML-SDK-Kachel und sendet
 Wertänderungen ohne einen vollständigen Neuaufbau der Seite an den Browser.
 Das Gauge-Single-Formular besitzt außerdem einen ersten Kacheldesigner. Er
@@ -212,7 +224,8 @@ konfigurierbare Skalenunterteilungen und -abstände, beide Drehrichtungen,
 responsive Positionsversätze, elementweise Sichtbarkeit sowie einen
 gestaltbaren Wertekasten und optionale Schatteneffekte. Gauge Multi besitzt
 mit Multi Title, Ringraster, konzentrischen Ringen und einer Wetterstations-
-Vorlage responsive native Kacheln für 2 bis 16 Quellen. Seine gemeinsame
+Vorlage responsive native Kacheln für 2 bis 32 Quellen mit optionaler Auswahl
+und Seiten. Seine gemeinsame
 Designschicht steuert Zeiger, Naben, Skalenunterteilungen, Farbrollen und
 Zifferblattplatten für alle Instrumente einer Ausgabe. Tacho und Chronograph
 sind eigenständige Module für 2 bis 5 Quellen. Dort können einzelne Quellen
@@ -250,7 +263,7 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 | Library | SymconECharts | Gemeinsames installierbares Paket |
 | Splitter | EChartsGateway | Gemeinsame Dienste für mehrere Chart-Instanzen |
 | Gerät | EChartsGaugeSingle | Ein Gauge-Chart mit genau einer Quellvariable und zwei Ausgabewegen |
-| Gerät | EChartsGaugeMulti | Ein zusammengesetzter Gauge-Chart mit 2 bis 16 Quellen |
+| Gerät | EChartsGaugeMulti | Zwei bis 32 individuell skalierte Quellen mit optionaler Quellenauswahl und responsiven Instrumentenseiten |
 | Gerät | EChartsGaugeTacho | Tacho-Cockpit mit 2 bis 5 individuell gestaltbaren Instrumenten |
 | Gerät | EChartsGaugeChronograph | Chronograph mit 2 bis 5 individuell gestaltbaren Instrumenten |
 | Gerät | EChartsTimeSeries | Historische und live fortgeschriebene Linien und Flächen für 1 bis 32 Quellen, Reihenauswahl, bis zu acht links/rechts angeordnete Einheitengruppen sowie getrenntes Kachel- und IPSView-Design |

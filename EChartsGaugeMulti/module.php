@@ -68,7 +68,9 @@ class EChartsGaugeMulti extends IPSModuleStrict
     private const DATA_ID_FROM_PARENT = '{E4749B72-912B-E3E3-1C57-D19019FFDD84}';
 
     private const MINIMUM_SOURCE_COUNT = 2;
-    private const MAXIMUM_SOURCE_COUNT = 16;
+    private const MAXIMUM_SOURCE_COUNT = 32;
+    private const MAXIMUM_MODEL_BYTES = 900000;
+    private const MODEL_TOO_LARGE_MESSAGE = 'The Multi Gauge model is too large. Reduce source labels or design imports.';
 
     private const STATUS_SOURCE_INVALID = 201;
     private const STATUS_RANGE_INVALID = 202;
@@ -155,6 +157,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
             $this->SetVisualizationType(1);
             $this->RegisterMessage(0, IPS_KERNELSTARTED);
             $this->RegisterPropertyString('Sources', '[]');
+            $this->RegisterPropertyBoolean('EnableSourceSelection', false);
             $this->RegisterPropertyString('Title', '');
             $this->RegisterPropertyString('GaugePreset', self::PRESET_MULTI_TITLE);
             $this->RegisterPropertyString('EChartsTheme', EChartsAsset::THEME_AUTO);
@@ -300,7 +303,8 @@ class EChartsGaugeMulti extends IPSModuleStrict
                     $this->ReadPropertyString('EChartsTheme'),
                     $this->ReadPropertyString('GaugePreset'),
                     $this->ReadGaugeStyle(),
-                    $sourceCountCaption
+                    $sourceCountCaption,
+                    $this->PreviewOptions()
                 )
             );
             $form = SVGPreviewHelper::withImage(
@@ -321,7 +325,8 @@ class EChartsGaugeMulti extends IPSModuleStrict
                         $this->ReadPropertyInteger('IPSViewBackgroundColor'),
                         $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent')
                     ),
-                    $sourceCountCaption
+                    $sourceCountCaption,
+                    $this->PreviewOptions()
                 )
             );
 
@@ -432,7 +437,8 @@ class EChartsGaugeMulti extends IPSModuleStrict
                     (string) ($values['EChartsTheme'] ?? $this->ReadPropertyString('EChartsTheme')),
                     (string) ($values['GaugePreset'] ?? $this->ReadPropertyString('GaugePreset')),
                     $tileStyle,
-                    $sourceCountCaption
+                    $sourceCountCaption,
+                    $this->PreviewOptions($values)
                 )
             ));
 
@@ -456,7 +462,8 @@ class EChartsGaugeMulti extends IPSModuleStrict
                         (int) ($values['IPSViewBackgroundOpacityPercent']
                             ?? $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent'))
                     ),
-                    $sourceCountCaption
+                    $sourceCountCaption,
+                    $this->PreviewOptions($values)
                 )
             ));
         } catch (\Throwable $debugFlowException) {
@@ -492,8 +499,9 @@ class EChartsGaugeMulti extends IPSModuleStrict
                 $current = $this->ReadCurrentSource($source['VariableID']);
                 $label = $labels[$source['VariableID']];
                 $items[] = [
-                    'id'     => 'variable-' . $source['VariableID'],
-                    'source' => [
+                    'id'               => 'variable-' . $source['VariableID'],
+                    'initiallyVisible' => $source['InitiallyVisible'],
+                    'source'           => [
                         'variableID' => $source['VariableID'],
                         'timestamp'  => $current['Timestamp']
                     ],
@@ -511,18 +519,25 @@ class EChartsGaugeMulti extends IPSModuleStrict
             $this->WriteAttributeString('LastError', '');
             $this->DebugEChartsSetStatus(IS_ACTIVE);
 
-            return $debugFlowResult = json_encode([
+            $json = json_encode([
                 'schemaVersion' => 1,
                 'family'        => 'gauge',
                 'variant'       => 'multi',
                 'theme'         => $this->ReadPropertyString('EChartsTheme'),
                 'gauge'         => [
-                    'title'  => $this->ReadPropertyString('Title'),
-                    'preset' => $this->ReadPropertyString('GaugePreset'),
-                    'style'  => $this->ReadGaugeStyle()
+                    'enableSourceSelection' => $this->ReadPropertyBoolean('EnableSourceSelection'),
+                    'title'                 => $this->ReadPropertyString('Title'),
+                    'preset'                => $this->ReadPropertyString('GaugePreset'),
+                    'style'                 => $this->ReadGaugeStyle()
                 ],
                 'items'         => $items
             ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
+            if (strlen($json) > self::MAXIMUM_MODEL_BYTES) {
+                $this->WriteAttributeString('LastError', 'MODEL_TOO_LARGE');
+                $this->DebugEChartsSetStatus(self::STATUS_DESIGN_INVALID);
+                throw new RuntimeException(self::MODEL_TOO_LARGE_MESSAGE);
+            }
+            return $debugFlowResult = $json;
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
             $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
@@ -639,17 +654,27 @@ class EChartsGaugeMulti extends IPSModuleStrict
             $hiddenTileTitle = (bool) (IPS_GetObject($this->InstanceID)['ObjectIsHiddenTitle'] ?? false);
         }
 
-        return $this->RenderVisualizationHTMLPage($ipsView, [
+        $configuration = [
             'language'           => $this->NormalizeHelperTranslationLanguage(
                 $this->ResolveHelperTranslationLanguage()
             ),
             'title'              => 'ECharts Gauge Multi',
             'visualizationTheme' => $this->VisualizationThemeCSS()
+                . "\n" . EChartsAsset::SourceControlsCSS()
                 . "\n\n"
                 . $this->ResponsiveVisualizationCSS('#echarts-gauge-root', 'echarts-gauge'),
             'ipsViewStyle'       => $ipsView ? $this->IPSViewThemeCSS() : '',
             'state'              => $this->BuildVisualizationState($ipsView),
             'translations'       => [
+                'Sources'                                   => $this->Translate('Sources'),
+                'All'                                       => $this->Translate('All'),
+                'Inverse'                                   => $this->Translate('Inverse'),
+                'Previous page'                             => $this->Translate('Previous page'),
+                'Next page'                                 => $this->Translate('Next page'),
+                'Category navigation'                       => $this->Translate('Category navigation'),
+                'No sources selected'                       => $this->Translate('No sources selected'),
+                self::MODEL_TOO_LARGE_MESSAGE               => $this->Translate(self::MODEL_TOO_LARGE_MESSAGE),
+                'Configure 2 to 32 unique numeric sources.' => $this->Translate('Configure 2 to 32 unique numeric sources.'),
                 'Configure 2 to 16 unique numeric sources.' => $this->Translate(
                     'Configure 2 to 16 unique numeric sources.'
                 ),
@@ -676,10 +701,22 @@ class EChartsGaugeMulti extends IPSModuleStrict
             'replacements'       => [
                 '{{ECHARTS_SCRIPT}}'           => EChartsAsset::JavaScript(),
                 '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
-                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript(),
+                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript() . "\n" . EChartsAsset::SeriesSelectionJavaScript()
+                    . "\n" . EChartsAsset::CategoryNavigationJavaScript() . "\n" . EChartsAsset::SourceControlsJavaScript(),
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
-        ]);
+        ];
+        $html = $this->RenderVisualizationHTMLPage($ipsView, $configuration);
+        if (strlen($html) > 1048576) {
+            $this->WriteAttributeString('LastError', 'MODEL_TOO_LARGE');
+            $this->DebugEChartsSetStatus(self::STATUS_DESIGN_INVALID);
+            $configuration['state'] = [
+                'schemaVersion' => 1, 'family' => 'gauge', 'variant' => 'multi',
+                'status'        => 'error', 'chart' => null, 'error' => self::MODEL_TOO_LARGE_MESSAGE
+            ];
+            return $this->RenderVisualizationHTMLPage($ipsView, $configuration);
+        }
+        return $html;
     }
 
     private function Initialize(): void
@@ -912,7 +949,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
         $sourceCount = count($sources);
         if ($sourceCount < self::MINIMUM_SOURCE_COUNT || $sourceCount > self::MAXIMUM_SOURCE_COUNT) {
             throw new UnexpectedValueException(
-                'Configure between 2 and 16 Gauge sources.',
+                'Configure between 2 and 32 Gauge sources.',
                 self::STATUS_SOURCE_INVALID
             );
         }
@@ -935,6 +972,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
             $unit = $source['Unit'] ?? '';
             $decimals = $source['Decimals'] ?? null;
             $useVariablePresentation = $source['UseVariablePresentation'] ?? false;
+            $initiallyVisible = $source['InitiallyVisible'] ?? true;
 
             if (!is_int($variableID) || $variableID <= 0 || !IPS_VariableExists($variableID)) {
                 throw new UnexpectedValueException(
@@ -956,7 +994,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
                     self::STATUS_SOURCE_INVALID
                 );
             }
-            if (!is_string($label) || !is_string($unit) || !is_bool($useVariablePresentation)) {
+            if (!is_string($label) || !is_string($unit) || !is_bool($useVariablePresentation) || !is_bool($initiallyVisible)) {
                 throw new UnexpectedValueException(
                     'Gauge source ' . $sourceNumber . ' contains invalid text fields.',
                     self::STATUS_SOURCE_INVALID
@@ -964,6 +1002,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
             }
             if ((!is_int($minimum) && !is_float($minimum))
                 || (!is_int($maximum) && !is_float($maximum))
+                || !is_finite((float) $minimum) || !is_finite((float) $maximum)
                 || $minimum >= $maximum
             ) {
                 throw new UnexpectedValueException(
@@ -995,7 +1034,8 @@ class EChartsGaugeMulti extends IPSModuleStrict
                 'Maximum'                  => $effectiveConfiguration['maximum'],
                 'Unit'                     => $effectiveConfiguration['unit'],
                 'Decimals'                 => $effectiveConfiguration['decimals'],
-                'UseVariablePresentation'  => $useVariablePresentation
+                'UseVariablePresentation'  => $useVariablePresentation,
+                'InitiallyVisible'         => $initiallyVisible
             ];
         }
 
@@ -1185,19 +1225,35 @@ class EChartsGaugeMulti extends IPSModuleStrict
     {
         $labels = EChartsSourceIdentity::LabelsForSources($sources);
 
-        return array_map(static function (array $source) use ($labels): array
+        return array_map(static function (array $source, int $order) use ($labels): array
         {
             $value = GetValue($source['VariableID']);
+            if (is_float($value) && !is_finite($value)) {
+                throw new UnexpectedValueException('Gauge preview values must be finite.');
+            }
 
             return [
-                'label'    => $labels[$source['VariableID']],
-                'minimum'  => $source['Minimum'],
-                'maximum'  => $source['Maximum'],
-                'unit'     => $source['Unit'],
-                'decimals' => $source['Decimals'],
-                'value'    => is_int($value) || is_float($value) ? (float) $value : $source['Minimum']
+                'id'               => 'variable-' . $source['VariableID'],
+                'initiallyVisible' => $source['InitiallyVisible'],
+                'order'            => $order,
+                'label'            => $labels[$source['VariableID']],
+                'minimum'          => $source['Minimum'],
+                'maximum'          => $source['Maximum'],
+                'unit'             => $source['Unit'],
+                'decimals'         => $source['Decimals'],
+                'value'            => is_int($value) || is_float($value) ? (float) $value : $source['Minimum']
             ];
-        }, $sources);
+        }, $sources, array_keys($sources));
+    }
+
+    /** @param array<string,mixed> $values @return array<string,mixed> */
+    private function PreviewOptions(array $values = []): array
+    {
+        return [
+            'enableSourceSelection' => (bool) ($values['EnableSourceSelection'] ?? $this->ReadPropertyBoolean('EnableSourceSelection')),
+            'emptySelectionCaption' => $this->Translate('No sources selected'),
+            'invalidSourcesCaption' => $this->Translate('Configure 2 to 32 unique numeric sources.')
+        ];
     }
 
     /** @return array<string, mixed> */
@@ -1213,7 +1269,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
                 'chart'         => null,
                 'error'         => $configurationError['Status'] === self::STATUS_DESIGN_INVALID
                     ? 'Configure a valid Multi Gauge design.'
-                    : 'Configure 2 to 16 unique numeric sources.'
+                    : 'Configure 2 to 32 unique numeric sources.'
             ];
         }
         if (!$this->HasActiveParent()) {
@@ -1243,7 +1299,8 @@ class EChartsGaugeMulti extends IPSModuleStrict
                 'variant'       => 'multi',
                 'status'        => 'error',
                 'chart'         => null,
-                'error'         => 'The Multi Gauge values could not be loaded.'
+                'error'         => $this->ReadAttributeString('LastError') === 'MODEL_TOO_LARGE'
+                    ? self::MODEL_TOO_LARGE_MESSAGE : 'The Multi Gauge values could not be loaded.'
             ];
         }
 
@@ -1510,7 +1567,7 @@ class EChartsGaugeMulti extends IPSModuleStrict
     private function GaugePreviewFieldNames(): array
     {
         return EChartsGaugeDesign::PreviewFieldNames([
-            'Title', 'Sources', 'GaugePreset', 'EChartsTheme', 'IPSViewUseTileDesign',
+            'Title', 'Sources', 'EnableSourceSelection', 'GaugePreset', 'EChartsTheme', 'IPSViewUseTileDesign',
             'IPSViewAdaptToBackground', 'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent',
             'IPSViewGaugePreset', 'IPSViewEChartsTheme'
         ], $this->GaugeDesignFieldNames());

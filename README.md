@@ -13,6 +13,8 @@ für exportierte Zigbee2MQTT-Netzwerkkarten sowie Treemap und Sunburst mit
 manuell festgelegten Gruppen und aktuellen numerischen Variablenwerten.
 Treemap und Sunburst erlauben optionale Gruppenpfade mit bis zu acht Ebenen
 einschließlich Quellvariable; bestehende Gruppe-/Untergruppe-Zuordnungen bleiben nutzbar.
+GaugeMulti unterstützt bis zu 32 Quellen mit optionaler Quellenauswahl und
+responsiven Seiten; individuelle Wertebereiche und Einheiten bleiben erhalten.
 Tree und TreeSystemHealth unterstützen bis zu zwölf Nachkommensebenen des
 Symcon-Objektbaums; bestehende Tiefen- und Knoteneinstellungen bleiben erhalten.
 Parallelkoordinaten verbinden archivierte Variablenwerte je gemeinsamem
@@ -163,7 +165,7 @@ können unabhängig davon individuell vergeben werden.
   gemeinsamen Gateway-Transport, ohne das WebContent-Dokument neu zu laden.
 
 - __EChartsGaugeMulti__ ([Dokumentation](EChartsGaugeMulti/README.md))
-  Gerätemodul für zusammengesetzte Gauge-Darstellungen mit 2 bis 16
+  Gerätemodul für zusammengesetzte Gauge-Darstellungen mit 2 bis 32
   Datenquellen. Jede Quelle besitzt eine
   eigene Beschriftung, Skala, Einheit und Formatierung. Multi Title,
   Ringraster, konzentrische Ringe und ein Wetterstations-Instrumentenpanel

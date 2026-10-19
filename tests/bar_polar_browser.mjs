@@ -32,10 +32,10 @@ function page(query) {
     const replacements = {HTML_LANGUAGE: 'de', HTML_CLASSES: '', ROOT_FONT_SIZE: '16px',
         VIEWPORT_CONTENT: 'width=device-width, initial-scale=1', DOCUMENT_TITLE: 'Polar browser fixture',
         VISUALIZATION_THEME: ':root{--symc-background:#303236;--symc-text:#f4f5f7;--symc-text-muted:#969aa2;--symc-muted:#969aa2;--symc-border:#777b83;--symc-surface:#25272b}',
-        MODULE_STYLE: read('EChartsBarPolar/visualization/style.css'), IPSVIEW_STYLE: '',
+        MODULE_STYLE: read('libs/echarts-source-controls.css') + '\n' + read('EChartsBarPolar/visualization/style.css'), IPSVIEW_STYLE: '',
         ECHARTS_SCRIPT: read('libs/echarts/6.1.0/echarts.polar.min.js'), ECHARTS_THEME_SCRIPT: '',
         ECHARTS_DESIGN_SCRIPT: read('libs/echarts-design.js') + '\n' + read('libs/echarts-series-selection.js')
-            + '\n' + read('libs/echarts-category-navigation.js'),
+            + '\n' + read('libs/echarts-category-navigation.js') + '\n' + read('libs/echarts-source-controls.js'),
         BOOTSTRAP_JSON: JSON.stringify(bootstrap), MODULE_SCRIPT: read('EChartsBarPolar/visualization/app.js'),
         IPSVIEW_TRANSPORT_SCRIPT: ''};
     let html = read('EChartsBarPolar/visualization/index.html').replace(/\{\{([A-Z_]+)\}\}/g, (_, key) => replacements[key] ?? '');

@@ -1,5 +1,49 @@
 # Tests
 
+## GaugeMulti: 32 Quellen, Auswahl und Instrumentenseiten
+
+`php tests/gateway_gauges.php --gauge-multi-many` prüft den realen Modul-/Gateway-
+Pfad mit synthetischen Kernelgrenzen: 32/33 Quellen, Minimum zwei, individuelle
+signed Skalen/Einheiten/Präzision, Darstellungsübernahme, gleiche sichtbare Namen,
+Referenzen/Abonnements und vollständige Aktualisierung auch versteckter Quellen.
+Altlisten und Designproperties bleiben nach wiederholtem Apply unverändert.
+Alle vier Vorlagen und unabhängige IPSView-Designs werden abgeglichen.
+Der anfängliche Test schlug ausdrücklich an der alten 16er-Grenze fehl.
+
+Vorschautests prüfen einen spät allein sichtbaren 32. Eintrag mit seiner eigenen
+Skala und tatsächlicher Halbkreisgeometrie. Farben folgen derselben vollständigen
+16er-Palette wie im Renderer. Anfangsauswahl wird vor dem Vierer-Sample angewandt;
+der zunächst rote Zählertest verhindert die falsche Angabe 4/32 bei nur einem
+gezeichneten Instrument. Leerzustand, ignorierte Anfangsvorgaben bei deaktivierter
+Auswahl und schreib-/gateway-/archivfreie Drafts sind abgedeckt. Eine gültige
+230-KiB-SVG-Platte bleibt nutzbar. 900000 Modellbytes und finale 1-MiB-HTML-Grenze
+werden getrennt mit begrenzten Fehlerausgaben geprüft. Diese Fälle laufen isoliert
+über `tests/run.php`, ohne den großen Monolith-Speicher weiter zu erhöhen.
+
+`node tests/gauge_multi_layout.js` prüft Altgeometrie, Auswahl/Seiten für alle vier
+Vorlagen und beide Ausgaben, sämtliche 32 erreichbaren Quellen, individuelle
+Originalskalen und Werte, leere/einzelne Auswahl sowie Reorder/Resize/Theme/Removal.
+Native Fälle verwenden die ausgelieferte Gauge-Runtime; nur der Headless-
+Testadapter ergänzt einen SVGRenderer. Custom-Zeiger und SVG-Platten bleiben
+geprüft. `bar_polar_layout.js` und `--polar-many` sichern die Extraktion der
+gemeinsamen DOM-/CSS-Bedienung ohne Veränderung des Polar-Modells ab.
+
+`node tests/gauge_multi_browser.mjs` bietet synthetische Canvas-Daten auf Port
+8808; die Galerie kombiniert vier Vorlagen und beide Ausgabewege.
+`/?narrow=1` zeigt 240-px-Frames und einen Ladefehlerknopf. Am 20.10.2026 wurden
+Raster, Ringraster, konzentrische Ringe mit 150 % und Wetterstation visuell
+geprüft: Alle/Umkehren, leere Auswahl und Wiederherstellung sowie Seite 17–32
+mit Originaleinheiten. Die schmale Warnüberlagerung wurde vor Korrektur
+reproduziert und durch einen gemeinsamen 92-px-Abstand über der zweizeiligen
+Bedienleiste behoben. Der erste vollständige Lauf fand zudem einen veralteten
+Formularindex im alten SVG-Test; die Prüfung adressiert nun den stabilen Feldnamen.
+Live-Abnahme nach Modulupdate bleibt separat, keine Live-Konfiguration geändert.
+
+Separater Bestandsbefund: Dem bereits zuvor ausgelieferten Gauge-Subset fehlt
+der TitleComponent; konfigurierte äußere Diagrammtitel werden nicht gezeichnet.
+Ein lokaler nativer Modellcheck bestätigt `getComponent('title')` als fehlend.
+Diese Runtime-Korrektur ist nicht Bestandteil des Quellen-/Seitenausbaus.
+
 ## Pie: 100 Quellen, Auswahl und vollständige Anteilsgrundlagen
 
 `php tests/pie_data.php` prüft reine Prozentrechnung einschließlich echter
