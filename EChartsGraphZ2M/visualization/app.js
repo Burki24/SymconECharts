@@ -9,16 +9,11 @@
     var errorElement = document.getElementById('echarts-zigbee-graph-error');
     var warningElement = document.getElementById('echarts-zigbee-graph-warning');
     var design = window.SYMC_ECHARTS_DESIGN;
+    var graphSupport = window.SYMC_ECHARTS_GRAPH;
     var chart = null;
     var currentTheme = null;
     var currentState = bootstrap.state || null;
-    var tileHeaderInset = bootstrap.mode === 'symcon'
-        && (!bootstrap.options || bootstrap.options.tileHeaderVisible !== false) ? 58 : 0;
-    var chartBootstrap = tileHeaderInset
-        ? { mode: 'symcon', options: { tileHeaderVisible: false } } : bootstrap;
-
-    chartElement.style.top = tileHeaderInset + 'px';
-    chartElement.style.height = tileHeaderInset ? 'calc(100% - ' + tileHeaderInset + 'px)' : '100%';
+    var chartBootstrap = graphSupport.chartFrame(bootstrap, chartElement);
 
     function translate(value) {
         return (bootstrap.translations || {})[value] || value;
@@ -99,14 +94,13 @@
         var colors = colorsFor(theme);
         var graph = model.graph || {};
         var style = graph.style || {};
+        var titleSize = design.fontSizePercent(style.titleFontSizePercent, 18);
+        graphSupport.chartTitle(bootstrap, chartBootstrap, chartElement, rootElement,
+            graph.title, titleSize, style.titleColor || colors.text, design);
         var width = Math.max(1, chartElement.clientWidth || 1);
         var height = Math.max(1, chartElement.clientHeight || 1);
         var compact = width < 430 || height < 300;
-        var titleSize = design.fontSizePercent(style.titleFontSizePercent, 18);
         var labelSize = design.fontSizePercent(style.labelFontSizePercent, compact ? 10 : 12);
-        var titleLayout = design.chartTitleLayout(chartBootstrap, graph.title, titleSize);
-        var showTitle = titleLayout.show;
-        var top = titleLayout.contentTop;
         var nodeSize = Math.max(6, Math.min(40, Number(style.nodeSize) || 16));
         var roleColors = nodeColors(style, colors);
         var anchors = lqiColors(style);
@@ -137,11 +131,11 @@
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
             aria: { enabled: true, decal: { show: false }, description: nodes.length + ' Zigbee devices' },
             title: {
-                show: showTitle, text: String(graph.title || ''), left: 'center', top: titleLayout.top,
+                show: false, text: String(graph.title || ''), left: 'center', top: 0,
                 textStyle: { color: style.titleColor || colors.text, fontSize: titleSize }
             },
             tooltip: {
-                trigger: 'item',
+                ...graphSupport.tooltipOptions(),
                 formatter: function (parameter) {
                     var data = parameter.data || {};
                     if (parameter.dataType === 'edge') {
@@ -154,7 +148,7 @@
             series: [{
                 id: 'graph', type: 'graph', layout: style.graphLayout === 'circular' ? 'circular' : 'force',
                 roam: style.roamEnabled === true, draggable: style.roamEnabled === true,
-                left: '6%', right: '6%', top: top, bottom: 60,
+                left: '6%', right: '6%', top: 12, bottom: 60,
                 symbol: 'circle', symbolSize: compact ? Math.max(6, nodeSize * 0.8) : nodeSize,
                 edgeSymbol: style.showLinkArrows === true ? ['none', 'arrow'] : ['none', 'none'],
                 edgeSymbolSize: 6,
@@ -163,13 +157,9 @@
                 data: nodes, links: links,
                 lineStyle: { width: 1, opacity: 0.45 },
                 label: {
+                    ...graphSupport.labelOptions(style, width, height, labelSize),
                     show: style.showLabels !== false && (width >= 800 || nodes.length <= 30),
                     color: style.labelColor || colors.text,
-                    fontSize: labelSize,
-                    position: 'right',
-                    distance: 4,
-                    width: compact ? 84 : 140,
-                    overflow: 'truncate',
                     formatter: function (parameter) {
                         var data = parameter.data || {};
                         return String(data.name || '');
@@ -239,6 +229,7 @@
             + escapeHTML(lqiColors(style).join(',')) + ')"></span>LQI 0–255</span>';
         legendElement.hidden = false;
         var theme = normalizeTheme(state.chart.theme || 'auto');
+        var option = buildOption(state.chart, theme);
         if (chart && currentTheme !== theme) {
             chart.dispose();
             chart = null;
@@ -247,23 +238,27 @@
             chart = window.echarts.init(chartElement, theme === 'auto' ? null : theme, { renderer: 'canvas' });
             currentTheme = theme;
         }
-        chart.setOption(buildOption(state.chart, theme), true);
+        graphSupport.updateChart(chart, option);
     }
 
     window.handleMessage = function (message) {
         var state = design.parseVisualizationState(message);
-        if (state) { render(state); }
+        if (state) { if (cancelStartup) { cancelStartup(); } render(state); }
     };
     if (window.ResizeObserver) {
         new ResizeObserver(function () {
             if (!design.resizeChartIfNeeded(chart, chartElement)) { return; }
             if (currentState && currentState.status === 'ready') {
-                chart.setOption(buildOption(currentState.chart, currentTheme || 'auto'), true);
+                graphSupport.updateChart(chart, buildOption(currentState.chart, currentTheme || 'auto'));
             }
         }).observe(chartElement);
     } else {
         window.addEventListener('resize', function () { if (chart) { chart.resize(); } });
     }
-    window.addEventListener('beforeunload', function () { if (chart) { chart.dispose(); } });
-    render(currentState);
+    window.addEventListener('beforeunload', function () {
+        if (cancelStartup) { cancelStartup(); }
+        if (chart) { chart.dispose(); }
+    });
+    var cancelStartup = graphSupport.startup(bootstrap, render,
+        function () { displayError('The Graph could not be loaded.'); });
 }());

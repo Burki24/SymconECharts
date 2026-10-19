@@ -963,6 +963,12 @@ assertGatewayGauge(
 );
 IPSModuleStrict::$ParentResponder = static fn (string $json): string => $gateway->ForwardData($json);
 
+if (array_slice($argv, 1) === ['--graph-large']) {
+    require __DIR__ . '/graph_large.php';
+    echo "Large Graph integration verified.\n";
+    exit(0);
+}
+
 if (array_slice($argv, 1) === ['--tree-depth']) {
     require __DIR__ . '/tree_depth.php';
     echo "Twelve-level Tree integration verified.\n";

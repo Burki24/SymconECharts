@@ -8,6 +8,7 @@ const vm = require('node:vm');
 const source = fs.readFileSync(path.join(__dirname, '..', 'EChartsGraphZ2M', 'visualization', 'app.js'), 'utf8');
 const stylesheet = fs.readFileSync(path.join(__dirname, '..', 'EChartsGraphZ2M', 'visualization', 'style.css'), 'utf8');
 const designSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-design.js'), 'utf8');
+const graphSupportSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-graph.js'), 'utf8');
 const palette = {
     background: '#101114', text: '#f4f5f7', muted: '#969aa2',
     accent: '#55cbb5', seriesColors: ['#5070dd']
@@ -26,7 +27,7 @@ const graph = {
 };
 
 function render(style, width = 1000, network = graph, mode = 'symcon', tileHeaderVisible = true) {
-    const rootElement = { style: {} };
+    const rootElement = { style: {}, appendChild: () => {} };
     const chartElement = { hidden: false, clientWidth: width, clientHeight: 400, style: {} };
     const metaElement = { hidden: true, textContent: '' };
     const legendElement = { hidden: true, innerHTML: '' };
@@ -46,7 +47,7 @@ function render(style, width = 1000, network = graph, mode = 'symcon', tileHeade
     };
     const document = {
         body: { appendChild: () => {} },
-        createElement: () => ({ style: {}, remove: () => {} }),
+        createElement: () => ({ style: {}, remove: () => {}, setAttribute: () => {} }),
         getElementById: id => ({
             'echarts-zigbee-graph-root': rootElement,
             'echarts-zigbee-graph-chart': chartElement,
@@ -57,6 +58,7 @@ function render(style, width = 1000, network = graph, mode = 'symcon', tileHeade
         })[id]
     };
     vm.runInNewContext(designSource, { window });
+    vm.runInNewContext(graphSupportSource, { window, document });
     vm.runInNewContext(source, { window, document, Date });
     return { option, rootElement, chartElement, metaElement, legendElement };
 }
@@ -68,25 +70,28 @@ const style = {
 const large = render(style);
 assert.match(stylesheet, /\.echarts-zigbee-graph-root, \.echarts-zigbee-graph-chart\s*\{[^}]*overflow: hidden;/s,
     'The Zigbee Graph canvas must clip force-layout nodes outside its own viewport.');
-assert.equal(large.chartElement.style.top, '58px',
-    'The Zigbee Graph canvas must start below the visible Symcon tile header.');
-assert.equal(large.chartElement.style.height, 'calc(100% - 58px)',
+assert.ok(parseInt(large.chartElement.style.top) > 58,
+    'The Zigbee Graph canvas must start below both the Symcon tile header and chart title.');
+assert.equal(large.chartElement.style.height, 'calc(100% - ' + large.chartElement.style.top + ')',
     'The shifted canvas must end at the tile bottom rather than overflow it.');
 assert.equal(large.rootElement.style.backgroundColor, large.option.backgroundColor,
     'The space behind the Symcon tile header must match the chart background.');
-assert.equal(large.option.title.show, true);
-assert.ok(58 + large.option.title.top >= 66 && large.option.series[0].top > large.option.title.top + 18,
+assert.equal(large.option.title.show, false);
+assert.equal(large.rootElement.__symcGraphTitle.hidden, false);
+assert.ok(parseInt(large.rootElement.__symcGraphTitle.style.top) >= 66
+    && parseInt(large.chartElement.style.top) > parseInt(large.rootElement.__symcGraphTitle.style.top) + 18,
     'The Zigbee Graph title and nodes must clear the Symcon tile header.');
 const hiddenHeader = render(style, 1000, graph, 'symcon', false);
-assert.equal(hiddenHeader.chartElement.style.top, '0px');
-assert.equal(hiddenHeader.chartElement.style.height, '100%');
+assert.ok(parseInt(hiddenHeader.chartElement.style.top) < 58);
+assert.equal(hiddenHeader.chartElement.style.height, 'calc(100% - ' + hiddenHeader.chartElement.style.top + ')');
 const untitled = render(style, 1000, { ...graph, title: '' });
 assert.equal(untitled.option.title.show, false);
-assert.equal(untitled.chartElement.style.top, '58px',
+assert.equal(untitled.rootElement.__symcGraphTitle.hidden, true);
+assert.ok(parseInt(untitled.chartElement.style.top) >= 58,
     'An empty diagram title must not let force-layout nodes overlap the Symcon tile name.');
 const ipsView = render(style, 1000, graph, 'ipsview');
-assert.equal(ipsView.chartElement.style.top, '0px');
-assert.equal(ipsView.chartElement.style.height, '100%');
+assert.ok(parseInt(ipsView.chartElement.style.top) < 58);
+assert.equal(ipsView.chartElement.style.height, 'calc(100% - ' + ipsView.chartElement.style.top + ')');
 assert.equal(large.option.series[0].type, 'graph');
 assert.equal(large.option.series[0].edgeSymbol[1], 'arrow');
 assert.equal(large.option.series[0].links[0].lqi, 240);

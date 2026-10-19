@@ -38,6 +38,7 @@ $tests = [
     __DIR__ . '/tree_preview.php',
     __DIR__ . '/tree_health.php',
     __DIR__ . '/graph_model.php',
+    __DIR__ . '/graph_output.php',
     __DIR__ . '/zigbee_graph_model.php',
     __DIR__ . '/treemap_model.php',
     __DIR__ . '/hierarchy_sources.php',
@@ -51,6 +52,7 @@ $tests = [
 ];
 
 $commands = [
+    ['Test 300-node Graph integration', 'php tests/gateway_gauges.php --graph-large'],
     ['Test twelve-level Tree integration', 'php tests/gateway_gauges.php --tree-depth'],
     ['Test twelve-level Tree System Health integration', 'php tests/gateway_gauges.php --tree-health-depth'],
     ['Test deep Treemap hierarchies', 'php tests/gateway_gauges.php --treemap-hierarchy'],

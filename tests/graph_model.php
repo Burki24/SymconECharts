@@ -56,4 +56,34 @@ try {
     assertGraph($exception->getMessage() === 'Read failed', 'A read failure must remain distinct from invalid configuration.');
 }
 
-echo "Graph model verified.\n";
+$largeNodes = [];
+$largeEdges = [];
+for ($index = 0; $index < 300; ++$index) {
+    $largeNodes[] = ['ObjectID' => 1000 + $index, 'Label' => 'Same name'];
+}
+for ($from = 0; count($largeEdges) < 1000; ++$from) {
+    for ($to = $from + 1; $to < 300 && count($largeEdges) < 1000; ++$to) {
+        $largeEdges[] = ['SourceObjectID' => 1000 + $from, 'TargetObjectID' => 1000 + $to];
+    }
+}
+$start = hrtime(true);
+$large = GraphModel::Build(
+    $largeNodes,
+    $largeEdges,
+    static fn (int $id): array => ['ObjectType' => 2, 'ObjectName' => 'Same name'],
+    static fn (int $id): string => '50 %'
+);
+assertGraph(count($large['nodes']) === 300 && count($large['links']) === 1000, 'All 300 nodes and 1000 edges must survive.');
+assertGraph(count(array_unique(array_column($large['nodes'], 'id'))) === 300, 'Equal names must not merge nodes.');
+foreach ([
+    [[...$largeNodes, ['ObjectID' => 1300]], $largeEdges],
+    [$largeNodes, [...$largeEdges, ['SourceObjectID' => 1004, 'TargetObjectID' => 1005]]],
+    [$largeNodes, [...array_slice($largeEdges, 0, 999), ['SourceObjectID' => 1001, 'TargetObjectID' => 1000]]]
+] as [$badNodes, $badEdges]) {
+    try {
+        GraphModel::ValidateRows($badNodes, $badEdges);
+        throw new RuntimeException('Over-budget or reversed duplicate Graph accepted.');
+    } catch (InvalidArgumentException) {
+    }
+}
+printf("Graph model verified (300/1000 projection %.2f ms).\n", (hrtime(true) - $start) / 1e6);

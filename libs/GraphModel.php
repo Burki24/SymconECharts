@@ -9,11 +9,17 @@ use InvalidArgumentException;
 /** Projects explicitly chosen Symcon objects and undirected connections. */
 final class GraphModel
 {
+    public const MAXIMUM_NODES = 300;
+    public const MAXIMUM_EDGES = 1000;
+    public const PREVIEW_NODES = 40;
+    public const PREVIEW_EDGES = 80;
+
     /** @param list<array<string,mixed>> $nodeRows @param list<array<string,mixed>> $edgeRows */
     public static function ValidateRows(array $nodeRows, array $edgeRows): void
     {
-        if (count($nodeRows) < 2 || count($nodeRows) > 80 || count($edgeRows) < 1 || count($edgeRows) > 200) {
-            throw new InvalidArgumentException('Graph requires 2–80 nodes and 1–200 connections.');
+        if (count($nodeRows) < 2 || count($nodeRows) > self::MAXIMUM_NODES
+            || count($edgeRows) < 1 || count($edgeRows) > self::MAXIMUM_EDGES) {
+            throw new InvalidArgumentException('Graph requires 2–300 nodes and 1–1000 connections.');
         }
         $known = [];
         foreach ($nodeRows as $row) {

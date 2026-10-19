@@ -94,7 +94,7 @@
         },
         {
             "type": "Label",
-            "caption": "Select 2–80 categories, instances or variables and connect them with 1–200 undirected edges. Both endpoints must be selected nodes. Duplicate and self connections are invalid."
+            "caption": "Select 2–300 categories, instances or variables and connect them with 1–1000 undirected edges. Both endpoints must be selected nodes. Duplicate and self connections are invalid."
         },
         {
             "type": "ExpansionPanel",

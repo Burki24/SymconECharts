@@ -16,6 +16,7 @@ use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsBarPreview;
 use SymconECharts\EChartsBarPreviewForm;
 use SymconECharts\EChartsDesignerSections;
+use SymconECharts\EChartsGraphOutput;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
@@ -40,6 +41,7 @@ require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
 require_once __DIR__ . '/../libs/EChartsTransientRefresh.php';
 require_once __DIR__ . '/../libs/GraphModel.php';
+require_once __DIR__ . '/../libs/EChartsGraphOutput.php';
 
 class EChartsGraph extends IPSModuleStrict
 {
@@ -414,14 +416,30 @@ class EChartsGraph extends IPSModuleStrict
             ['source' => 'sample-2', 'target' => 'sample-4']
         ];
         $sample = true;
+        $previewSummary = '';
         try {
             $nodeRows = $this->DecodeRows($values['Nodes'] ?? $this->ReadPropertyString('Nodes'));
             $edgeRows = $this->DecodeRows($values['Edges'] ?? $this->ReadPropertyString('Edges'));
             $model = $this->ReadGraph($nodeRows, $edgeRows);
-            if (count($model['nodes']) <= 12) {
-                $nodes = $model['nodes'];
-                $links = $model['links'];
-                $sample = false;
+            $nodes = array_slice($model['nodes'], 0, GraphModel::PREVIEW_NODES);
+            $known = array_fill_keys(array_column($nodes, 'id'), true);
+            $links = array_slice(
+                array_values(array_filter(
+                    $model['links'],
+                    static fn (array $edge): bool => isset($known[$edge['source']], $known[$edge['target']])
+                )),
+                0,
+                GraphModel::PREVIEW_EDGES
+            );
+            $sample = false;
+            if (count($nodes) < count($model['nodes']) || count($links) < count($model['links'])) {
+                $previewSummary = sprintf(
+                    $this->Translate('Preview excerpt: %d/%d nodes, %d/%d connections.'),
+                    count($nodes),
+                    count($model['nodes']),
+                    count($links),
+                    count($model['links'])
+                );
             }
         } catch (Throwable) {
             // Invalid drafts are shown with an explicitly marked example.
@@ -447,6 +465,12 @@ class EChartsGraph extends IPSModuleStrict
             $angle = 2 * M_PI * $index / count($nodes) - M_PI / 2;
             $radius = $layout === 'circular' ? 122 : (92 + ($index % 3) * 18);
             $positions[(string) $node['id']] = [360 + cos($angle) * $radius * 1.55, 185 + sin($angle) * $radius];
+            if (count($nodes) > 12 && $layout !== 'circular') {
+                $columns = (int) ceil(sqrt(count($nodes) * 2));
+                $rows = (int) ceil(count($nodes) / $columns);
+                $positions[(string) $node['id']] = [55 + ($index % $columns) * 600 / max(1, $columns - 1),
+                    80 + intdiv($index, $columns) * 210 / max(1, $rows - 1)];
+            }
         }
         foreach ($links as $link) {
             [$x1, $y1] = $positions[$link['source']];
@@ -455,11 +479,13 @@ class EChartsGraph extends IPSModuleStrict
                 . '" x2="' . EChartsBarPreview::N($x2) . '" y2="' . EChartsBarPreview::N($y2)
                 . '" stroke="' . EChartsBarPreview::E($edgeColor) . '" stroke-width="2"/>';
         }
-        foreach ($nodes as $node) {
+        $svg .= '<g data-preview-nodes="' . count($nodes) . '" data-preview-edges="' . count($links) . '">';
+        foreach ($nodes as $index => $node) {
             [$x, $y] = $positions[(string) $node['id']];
             $svg .= '<circle cx="' . EChartsBarPreview::N($x) . '" cy="' . EChartsBarPreview::N($y)
-                . '" r="' . EChartsBarPreview::N($nodeSize / 2) . '" fill="' . EChartsBarPreview::E($nodeColor) . '"/>';
-            if ($showLabels) {
+                . '" r="' . EChartsBarPreview::N($nodeSize / 2) . '" fill="' . EChartsBarPreview::E($nodeColor)
+                . '" data-node="' . EChartsBarPreview::E((string) $node['id']) . '"/>';
+            if ($showLabels && (count($nodes) <= 12 || $index % max(1, (int) ceil(count($nodes) / 12)) === 0)) {
                 $label = mb_strimwidth((string) $node['name'], 0, 16, '…');
                 if ($showValues && $node['kind'] === 'variable' && $node['displayValue'] !== '') {
                     $label .= ' ' . mb_strimwidth((string) $node['displayValue'], 0, 10, '…');
@@ -468,6 +494,11 @@ class EChartsGraph extends IPSModuleStrict
                     . '" fill="' . EChartsBarPreview::E($labelColor) . '" font-size="' . $labelSize . '">'
                     . EChartsBarPreview::E($label) . '</text>';
             }
+        }
+        $svg .= '</g>';
+        if ($previewSummary !== '') {
+            $svg .= '<text x="24" y="348" font-size="11" fill="' . EChartsBarPreview::E($palette['muted']) . '">'
+                . EChartsBarPreview::E($previewSummary) . '</text>';
         }
         return $svg . '</svg>';
     }
@@ -536,13 +567,14 @@ class EChartsGraph extends IPSModuleStrict
     {
         $hiddenTitle = !$ipsView && function_exists('IPS_GetObject')
             && (bool) (IPS_GetObject($this->InstanceID)['ObjectIsHiddenTitle'] ?? false);
+        $startup = EChartsGraphOutput::Startup($this->BuildVisualizationState($ipsView));
         return $this->RenderVisualizationHTMLPage($ipsView, [
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'ECharts Graph',
             'visualizationTheme' => $this->VisualizationThemeCSS() . "\n\n"
                 . $this->ResponsiveVisualizationCSS('#echarts-graph-root', 'echarts-graph'),
             'ipsViewStyle' => $ipsView ? $this->IPSViewThemeCSS() : '',
-            'state'        => $this->BuildVisualizationState($ipsView),
+            'state'        => $startup['state'],
             'translations' => [
                 'Configure at least two valid Graph nodes and one connection.'    => $this->Translate('Configure at least two valid Graph nodes and one connection.'),
                 'The Graph design is invalid.'                                    => $this->Translate('The Graph design is invalid.'),
@@ -553,16 +585,17 @@ class EChartsGraph extends IPSModuleStrict
                 )
             ],
             'options' => [
-                'echartsVersion'    => EChartsAsset::VERSION,
-                'echartsThemes'     => EChartsAsset::ThemePalettes(),
-                'tileHeaderVisible' => !$hiddenTitle,
-                'adaptToBackground' => $ipsView && $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
-                'ipsViewTransport'  => $ipsView ? $this->EChartsIPSViewTransportOptions() : null
+                'echartsVersion'            => EChartsAsset::VERSION,
+                'echartsThemes'             => EChartsAsset::ThemePalettes(),
+                'tileHeaderVisible'         => !$hiddenTitle,
+                'adaptToBackground'         => $ipsView && $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
+                'ipsViewTransport'          => $ipsView ? $this->EChartsIPSViewTransportOptions() : null,
+                'compressedStateGzipBase64' => $startup['compressedStateGzipBase64']
             ],
             'replacements' => [
                 '{{ECHARTS_SCRIPT}}'           => EChartsAsset::GraphJavaScript(),
                 '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
-                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript(),
+                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript() . "\n" . EChartsAsset::GraphSupportJavaScript(),
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
         ]);

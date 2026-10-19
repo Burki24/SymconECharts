@@ -21,7 +21,8 @@ Quellen mit Kategoriennavigation und gemeinsamem Archivbudget. Calendar und
 Heatmap bieten vier Archivkennzahlen. Pie, BarCategory, BarPolar und
 PictorialBar erlauben jetzt optionale Min/Max-Normalisierung. Treemap und
 Sunburst unterstützen flexible Hierarchien mit bis zu acht Ebenen. Tree und
-TreeSystemHealth erlauben zwölf Nachkommensebenen. Die übrigen
+TreeSystemHealth erlauben zwölf Nachkommensebenen. EChartsGraph unterstützt
+300 Knoten und 1000 Verbindungen mit gemeinsamer Graph-Ansichtsverwaltung. Die übrigen
 Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
 
 | Reihenfolge | Empfohlener nächster Schritt | Nutzen und Voraussetzung |
@@ -35,7 +36,8 @@ Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
 | Erledigt | Explizite Normalisierung für weitere Vergleiche | Pie, BarCategory, BarPolar und PictorialBar vergleichen optional Quellen anhand eigener Min/Max auf 0–100; Originalwerte und Einheiten bleiben erhalten. |
 | Erledigt | Treemap/Sunburst: flexible Hierarchien bis acht Ebenen | Gemeinsames Modell, höchstens sieben Gruppen plus Variablenblatt, native Navigation, vollständige Strukturvorschau und begrenzte Modellgröße. |
 | Erledigt | Tree/TreeSystemHealth: zwölf Nachkommensebenen | Unveränderte Defaults und Knoten-/Suchbudgets, gemeinsame Vorschaugeometrie und native Ansichtserhaltung; ausdrücklicher Health-Bewertungsumfang. |
-| Danach | Größere Graphen und weitere Reihen | Nur zusammen mit Navigation, Vorschaukennzeichnung und messbaren Ressourcenbudgets. |
+| Erledigt | Graph: 300 Knoten und 1000 Verbindungen | ID-stabile Pan-/Zoom-Ansicht, weiterverwendete Kräftepositionen, begrenzter echter Vorschauausschnitt und Ausgabeprüfungen. Z2M-Budgets bleiben getrennt. |
+| Danach | Weitere Archiv- und Vergleichsreihen | Nur zusammen mit Navigation, Vorschaukennzeichnung und messbaren Ressourcenbudgets. |
 
 Normalisierung ist keine allgemeine Lösung für unterschiedliche Einheiten:
 Sie kann relative Vergleiche sinnvoll machen, ersetzt aber keine physikalische
@@ -62,7 +64,7 @@ Schritte sind Planungsziele, keine implementierten oder lastgeprüften Zusagen.
 | EChartsPictorialBar | 1–100 nichtnegative Quellen gleicher Roh-Einheit oder optional normalisierte Quellen mit eigenen Min/Max und Originaleinheiten. Wertfarbe, interner Verlauf, Icons und eigene SVGs. | Umgesetzt: Normalisierung und responsive Kategoriennavigation ohne Datenverlust; Vorschau kennzeichnet ihren Acht-Quellen-Ausschnitt. Mehrfachauswahl nach Objektzweig/Filter weiterhin offen. |
 | EChartsTree | Objektwurzel Ebene 0, Kategorien/Instanzen/Variablen; 1–12 Nachkommensebenen; 10–3000 Knoten, Standard 80; gefiltertes Suchbudget 30000 Objekte. Startzustände ab 200000 Bytes werden komprimiert, nicht abgelehnt. | Umgesetzt: tiefere Zweige, getrennte Anfangstiefe, ID-stabile Aufklapp-/Pan-/Zoom-Ansicht und gemeinsame begrenzte Strukturvorschau. Links/Medien/Skripte bleiben ausgeschlossen. |
 | EChartsTreeSystemHealth | Dieselben Hierarchiegrenzen; bis 3000 ausdrückliche Boolean-/Zahlenregeln; Vorfahrenbewertung nur anhand des berücksichtigten Baums. | Umgesetzt: zwölf Nachkommensebenen und sichtbarer lokaler Bewertungsumfang einschließlich nicht enthaltener Regelvariablen. Keine zusätzliche Vollsuche oder Zustandsaussage außerhalb der ausgewählten Hierarchie. |
-| EChartsGraph | 2–80 Objektknoten, 1–200 ungerichtete Kanten; keine Selbstkanten oder doppelten ungeordneten Paare. Isolierte Knoten sind im ansonsten verbundenen Modell erlaubt. | 300 Knoten/1000 Kanten nach Force-/Layoutprofiling prüfen. Gerichtete oder gewichtete Beziehungen benötigen einen ausdrücklich erweiterten Vertrag, nicht nur neue Höchstzahlen. |
+| EChartsGraph | 2–300 Objektknoten, 1–1000 ungerichtete Kanten; keine Selbstkanten oder doppelten ungeordneten Paare. Isolierte Knoten und mehrere getrennte Komponenten sind erlaubt. | Umgesetzt: größere Modelle, gemeinsam mit Z2M erhaltene Pan-/Zoom-Ansicht und Kräfte-Ausgangspositionen sowie begrenzter echter Vorschauausschnitt. Gerichtete oder gewichtete Beziehungen bleiben ein gesonderter Vertrag. |
 | EChartsGraphZ2M | Nur gespeicherter Export, kein Scan; bis 500 Rohknoten/10000 Rohkanten. Sichtbare Verbindungen 1–2000, Standard 300; LQI 0–255; Export höchstens 16 MiB. | Schutzgrenzen zunächst behalten. Schwache Verbindungen gezielt auswählbar machen, statt nur die stärksten zu zeigen. Mehrdeutige Exportproduzenten nicht automatisch zusammenwerfen und keinen Scan versteckt auslösen. |
 | EChartsTreemap | 1–100 nichtnegative Blätter, bis acht Ebenen einschließlich Blatt, höchstens 800 Knoten und 200000 HTML-sicher serialisierte Modellbytes. Optionale Gruppenpfade; alte Gruppe/Untergruppe bleibt unverändert gültig. Null besitzt keine Fläche; Anzeigeeinheit ist global. | Umgesetzt: rekursives gemeinsames Modell, native Navigation und gekennzeichnete vollständige Strukturvorschau. Optionale normalisierte Gewichte und Originalformat je Blatt bleiben offen. Fehlende Einheitenprüfung ist keine saubere Mehr-Einheiten-Unterstützung. |
 | EChartsSunburst | Dasselbe rekursive 1–100-Blatt-Modell und dieselben Tiefen-/Knoten-/Bytebudgets wie Treemap. Die ersten drei Ringdesigns bleiben erhalten; tiefere Ringe übernehmen das äußere Design. | Umgesetzt: native Navigation mit stabilem geöffnetem Zweig bei Aktualisierung und Resize. Originaleinheiten und optionale Gewichte bleiben gesonderte Erweiterungen. |
@@ -139,7 +141,9 @@ Vorschauen sind gesondert zu betrachten:
 - TimeSeries (vier), BarHistory (drei), Parallel (sechs) und mehrere aktuelle
   Vergleiche begrenzen ihre Vorschau separat. Die Mengenhinweise müssen bei
   jeder Erweiterung erhalten und korrekt sein.
-- Graph verwendet bei großen Modellen ein Beispiel. Tree/Health zeigen eine
+- Graph zeigt bei großen gültigen Entwürfen höchstens 40 echte Knoten und
+  80 enthaltene Kanten mit ausdrücklichen Gesamtzahlen; nur ungültige Entwürfe
+  verwenden ein Beispiel. Tree/Health zeigen eine
   gekennzeichnete Strukturvorschau mit höchstens 80 Knoten und konfigurierter
   Anfangstiefe; echte Eltern-Kind-Beziehungen bleiben erhalten. Treemap/Sunburst zeigen inzwischen
   die vollständige konfigurierte Struktur mit gekennzeichneten Beispielgewichten.

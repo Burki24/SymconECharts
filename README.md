@@ -34,6 +34,9 @@ Candlestick zeigt ersten und letzten protokollierten Wert sowie Minimum
 und Maximum abgeschlossener Archiv-Stunden oder -Tage.
 StateTimeline zeigt archivierte Boolean-/Integer-Zustände als farbige
 Zeitabschnitte mit eigenen Zustandsnamen und ausdrücklich unbekannten Anfängen.
+Graph verbindet bis zu 300 manuell ausgewählte Symcon-Objekte mit bis zu
+1.000 ungerichteten Kanten. Große Graphen lassen sich zoomen und verschieben;
+die Ansicht bleibt bei Datenaktualisierungen erhalten.
 
 Boxplot, Parallel, Candlestick, ThemeRiver und StateTimeline bieten neben
 ihren festen Zeiträumen auch rollierende Zeitspannen mit 1–1000 Minuten,

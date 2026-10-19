@@ -1,5 +1,36 @@
 # Tests
 
+## Größere manuelle Graphen
+
+`php tests/graph_model.php` prüft 300 Knoten/1000 Kanten, N+1, gleiche Namen
+mit eigenen IDs und die unveränderten Schutzregeln. `php tests/gateway_gauges.php
+--graph-large` prüft über echte Module mit synthetischen Kernelgrenzen wiederholtes
+Apply, unveränderte gespeicherte Listen, beide unabhängigen Designer, begrenzte
+und sicher maskierte Vorschauausschnitte sowie komplette HTML-Ausgaben unter
+1 MiB. Der Stressfall kombiniert 100 HTML-sensible Zeichen je Name und 300 je
+formatiertem Wert. `graph_output.php` sichert die HTML-sichere Kompressionsschwelle
+ab; die Modulprüfung entpackt beide Dokumente und vergleicht alle Knoten/Kanten
+und unveränderten vollständigen Werte. Kleine Zustände bleiben direkt eingebettet.
+`zigbee_graph_model.php` sichert die getrennten Z2M-Roh-/Link-/LQI-Budgets ab.
+
+`node tests/graph_layout.js` und `node tests/zigbee_graph_layout.js` prüfen
+die Renderer und gemeinsame Ansichtsverwaltung: Kräfte-/Kreislayout,
+Kachel-/IPSView-Ausgabe, ID-stabile Aktualisierung, Resize, entfernte Knoten,
+Layoutwechsel, sichere Tooltips und dichte Beschriftungen. Die Runtime bleibt
+lokal festgeschrieben. `node tests/graph_browser.mjs` stellt synthetische
+300/1000-Canvas-Ansichten auf `127.0.0.1:8814` bereit. Die echte Abnahme in
+Symcon und IPSView nach Modulupdate ist dadurch nicht ersetzt.
+
+Am 19.10.2026 wurden beide Layouts des manuellen Graphen lokal mit komprimiertem
+Startzustand als 400-px-Kachel und 720-px-IPSView-Variante visuell geprüft.
+Pan/Zoom blieb nach Werteaktualisierungen erhalten. GraphZ2M wurde mit
+synthetischen Rollen und LQI-Farben gegengeprüft. Zunächst rote Regressionen
+sichern das 1-MiB-Problem längerer Werte und den zusätzlichen Z2M-Fußbereich ab.
+Die tatsächliche ausgelieferte Canvas-Runtime wird zusätzlich mit einem
+Zeichenkontext-Doppel geprüft; das volle Entwicklungspaket kann fehlende
+Bundle-Komponenten dadurch nicht verdecken. Die vollständigen Originaltexte
+bleiben nach Entpacken im sicheren Tooltip.
+
 ## Zwölf Nachkommensebenen für Tree und SystemHealth
 
 `php tests/tree_hierarchy.php` prüft zwölf Nachkommensebenen ab Wurzel 0,

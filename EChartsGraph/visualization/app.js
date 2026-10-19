@@ -2,13 +2,16 @@
     'use strict';
 
     var bootstrap = window.SYMC_VISUALIZATION || {};
+    var rootElement = document.getElementById('echarts-graph-root');
     var chartElement = document.getElementById('echarts-graph-chart');
     var errorElement = document.getElementById('echarts-graph-error');
     var warningElement = document.getElementById('echarts-graph-warning');
     var design = window.SYMC_ECHARTS_DESIGN;
+    var graphSupport = window.SYMC_ECHARTS_GRAPH;
     var chart = null;
     var currentTheme = null;
     var currentState = bootstrap.state || null;
+    var chartBootstrap = graphSupport.chartFrame(bootstrap, chartElement);
 
     function translate(value) {
         return (bootstrap.translations || {})[value] || value;
@@ -63,14 +66,13 @@
         var colors = colorsFor(theme);
         var graph = model.graph || {};
         var style = graph.style || {};
+        var titleSize = design.fontSizePercent(style.titleFontSizePercent, 18);
+        graphSupport.chartTitle(bootstrap, chartBootstrap, chartElement, rootElement,
+            graph.title, titleSize, style.titleColor || colors.text, design);
         var width = Math.max(1, chartElement.clientWidth || 1);
         var height = Math.max(1, chartElement.clientHeight || 1);
         var compact = width < 430 || height < 300;
-        var titleSize = design.fontSizePercent(style.titleFontSizePercent, 18);
         var labelSize = design.fontSizePercent(style.labelFontSizePercent, compact ? 10 : 12);
-        var titleLayout = design.chartTitleLayout(bootstrap, graph.title, titleSize);
-        var showTitle = titleLayout.show;
-        var top = titleLayout.contentTop;
         var nodeSize = Math.max(6, Math.min(40, Number(style.nodeSize) || 16));
         var nodeColor = style.nodeColor || colors.seriesColors[0] || colors.accent;
         var nodes = (graph.nodes || []).map(function (node) {
@@ -88,11 +90,11 @@
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
             aria: { enabled: true, decal: { show: false }, description: nodes.length + ' Graph nodes' },
             title: {
-                show: showTitle, text: String(graph.title || ''), left: 'center', top: titleLayout.top,
+                show: false, text: String(graph.title || ''), left: 'center', top: 0,
                 textStyle: { color: style.titleColor || colors.text, fontSize: titleSize }
             },
             tooltip: {
-                trigger: 'item',
+                ...graphSupport.tooltipOptions(),
                 formatter: function (parameter) {
                     var data = parameter.data || {};
                     if (parameter.dataType === 'edge') { return ''; }
@@ -103,25 +105,25 @@
             series: [{
                 id: 'graph', type: 'graph', layout: style.graphLayout === 'circular' ? 'circular' : 'force',
                 roam: style.roamEnabled === true, draggable: style.roamEnabled === true,
-                left: '6%', right: '6%', top: top, bottom: 20,
+                left: '6%', right: '6%', top: 12, bottom: 20,
                 symbol: 'circle', symbolSize: compact ? Math.max(6, nodeSize * 0.8) : nodeSize,
                 force: { repulsion: Math.max(80, Math.min(600, 160 + nodes.length * 4)), edgeLength: compact ? 65 : 100 },
                 circular: { rotateLabel: false },
                 data: nodes, links: links,
-                lineStyle: { color: style.edgeColor || colors.muted, width: 1.5, opacity: 0.8 },
+                lineStyle: { color: style.edgeColor || colors.muted, width: 1.5,
+                    opacity: nodes.length > 80 ? 0.25 : 0.8 },
                 label: {
-                    show: style.showLabels !== false,
+                    ...graphSupport.labelOptions(style, width, height, labelSize),
                     color: style.labelColor || colors.text,
-                    fontSize: labelSize,
-                    width: compact ? 84 : 140,
-                    overflow: 'truncate',
                     formatter: function (parameter) {
                         var data = parameter.data || {};
                         return String(data.name || '') + (style.showValues === true && data.kind === 'variable'
                             && data.displayValue ? '\n' + data.displayValue : '');
                     }
                 },
-                emphasis: { focus: 'adjacency' }
+                labelLayout: { hideOverlap: true },
+                emphasis: { focus: 'adjacency', label: { show: style.showLabels !== false },
+                    lineStyle: { opacity: 1, width: 2 } }
             }]
         };
     }
@@ -149,6 +151,10 @@
         chartElement.hidden = false;
         warningElement.hidden = true;
         var theme = normalizeTheme(state.chart.theme || 'auto');
+        var option = buildOption(state.chart, theme);
+        var colors = colorsFor(theme);
+        rootElement.style.backgroundColor = bootstrap.mode === 'ipsview'
+            && bootstrap.options.adaptToBackground === true ? 'transparent' : colors.background;
         if (chart && currentTheme !== theme) {
             chart.dispose();
             chart = null;
@@ -157,23 +163,27 @@
             chart = window.echarts.init(chartElement, theme === 'auto' ? null : theme, { renderer: 'canvas' });
             currentTheme = theme;
         }
-        chart.setOption(buildOption(state.chart, theme), true);
+        graphSupport.updateChart(chart, option);
     }
 
     window.handleMessage = function (message) {
         var state = design.parseVisualizationState(message);
-        if (state) { render(state); }
+        if (state) { if (cancelStartup) { cancelStartup(); } render(state); }
     };
     if (window.ResizeObserver) {
         new ResizeObserver(function () {
             if (!design.resizeChartIfNeeded(chart, chartElement)) { return; }
             if (currentState && currentState.status === 'ready') {
-                chart.setOption(buildOption(currentState.chart, currentTheme || 'auto'), true);
+                graphSupport.updateChart(chart, buildOption(currentState.chart, currentTheme || 'auto'));
             }
         }).observe(chartElement);
     } else {
         window.addEventListener('resize', function () { if (chart) { chart.resize(); } });
     }
-    window.addEventListener('beforeunload', function () { if (chart) { chart.dispose(); } });
-    render(currentState);
+    window.addEventListener('beforeunload', function () {
+        if (cancelStartup) { cancelStartup(); }
+        if (chart) { chart.dispose(); }
+    });
+    var cancelStartup = graphSupport.startup(bootstrap, render,
+        function () { displayError('The Graph could not be loaded.'); });
 }());

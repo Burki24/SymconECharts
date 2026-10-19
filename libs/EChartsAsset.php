@@ -531,6 +531,16 @@ final class EChartsAsset
         return self::NormalizeLineEndings($content);
     }
 
+    /** Loads graph view state and label handling without growing unrelated chart documents. */
+    public static function GraphSupportJavaScript(): string
+    {
+        $content = @file_get_contents(__DIR__ . '/echarts-graph.js');
+        if ($content === false || $content === '') {
+            throw new RuntimeException('The shared Graph utilities could not be loaded.');
+        }
+        return self::NormalizeLineEndings($content);
+    }
+
     /** Loads the shared time-axis zoom controls used by Cartesian renderers. */
     public static function ZoomJavaScript(): string
     {

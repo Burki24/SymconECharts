@@ -9,6 +9,14 @@
 
 ## Neu
 
+- EChartsGraph unterstützt bis zu 300 Knoten und 1.000 ungerichtete
+  Verbindungen. Große Vorschauen zeigen einen gekennzeichneten echten
+  Ausschnitt. Graph und GraphZ2M erhalten Zoom und Verschiebung bei Updates
+  und Größenänderungen; das Kräfte-Layout verwendet erhaltene Knotenpositionen
+  weiter. Kachelkopf und Diagrammtitel bleiben frei; große Startzustände werden
+  verlustfrei komprimiert. Bestehende Konfigurationen und die eigenen
+  Z2M-Grenzen bleiben erhalten.
+
 - Tree und TreeSystemHealth unterstützen bis zu zwölf Nachkommensebenen bei
   unveränderten Standardwerten und Schutzgrenzen. Die gemeinsame Vorschau
   berücksichtigt echte Eltern-Kind-Verbindungen und Anfangstiefe; geöffnete

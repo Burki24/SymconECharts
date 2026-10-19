@@ -21,6 +21,16 @@ IPSView nur den Diagrammtitel benötigt.
 
 ## Aktueller Stand und Zielarchitektur
 
+EChartsGraph unterstützt gemäß [ADR 0066](adr/0066-larger-manual-graphs.md)
+300 Knoten und 1000 ungerichtete Kanten. Die bestehenden Quellen-/Kantenregeln
+bleiben in GraphModel, Z2M-Projektion und Exportbudgets bleiben getrennt.
+`echarts-graph.js` zentralisiert ausschließlich native Ansichtserhaltung,
+Tooltip- und Beschriftungsgrundlagen sowie den geschützten Kachelkopf.
+Das Script wird nur in den beiden Graph-Familien eingebettet.
+`EChartsGraphOutput` verpackt große HTML-sichere Startzustände verlustfrei
+komprimiert; die gemeinsame JavaScript-Startlogik verwirft veraltete
+Entpackergebnisse nach neueren Live-Nachrichten. Kleine Zustände bleiben direkt.
+
 Tree und danach TreeSystemHealth unterstützen gemäß
 [ADR 0065](adr/0065-twelve-level-object-trees.md) zwölf Nachkommensebenen.
 Gemeinsam sind die begrenzte Objektprojektion in `TreeHierarchy`, rekursive

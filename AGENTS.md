@@ -64,6 +64,9 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   liegen in `EChartsGraph`. Die zuletzt exportierte Zigbee2MQTT-Netzwerktopologie
   liegt im getrennten, nur lesenden Gerätemodul `EChartsGraphZ2M`; es löst keinen
   Netzwerkscan aus und ist kein manueller Kantenmodus des allgemeinen Graphen.
+  Der allgemeine Graph erlaubt gemäß ADR 0066 300 Knoten und 1000 ungerichtete
+  Kanten. Gemeinsame flüchtige Ansichtsverwaltung und Beschriftungsgrundlagen
+  liegen unter `libs`; Z2M-Export, LQI, Identitäten und Budgets bleiben getrennt.
   Eine Treemap aus manuell gewählten Gruppen und aktuellen numerischen
   Symcon-Variablenwerten liegt im eigenen Gerätemodul `EChartsTreemap`.
   Ein Sunburst mit derselben manuell benannten Hierarchie und aktuellen

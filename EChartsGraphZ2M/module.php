@@ -16,6 +16,7 @@ use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsBarPreview;
 use SymconECharts\EChartsBarPreviewForm;
 use SymconECharts\EChartsDesignerSections;
+use SymconECharts\EChartsGraphOutput;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
@@ -32,6 +33,7 @@ require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
 require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
+require_once __DIR__ . '/../libs/EChartsGraphOutput.php';
 require_once __DIR__ . '/../libs/EChartsBarPreview.php';
 require_once __DIR__ . '/../libs/EChartsBarPreviewForm.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
@@ -520,6 +522,7 @@ class EChartsGraphZ2M extends IPSModuleStrict
 
     private function RenderGraphHTMLPage(bool $ipsView): string
     {
+        $startup = EChartsGraphOutput::Startup($this->BuildVisualizationState($ipsView));
         $hiddenTitle = !$ipsView && function_exists('IPS_GetObject')
             && (bool) (IPS_GetObject($this->InstanceID)['ObjectIsHiddenTitle'] ?? false);
         return $this->RenderVisualizationHTMLPage($ipsView, [
@@ -528,7 +531,7 @@ class EChartsGraphZ2M extends IPSModuleStrict
             'visualizationTheme' => $this->VisualizationThemeCSS() . "\n\n"
                 . $this->ResponsiveVisualizationCSS('#echarts-zigbee-graph-root', 'echarts-zigbee-graph'),
             'ipsViewStyle' => $ipsView ? $this->IPSViewThemeCSS() : '',
-            'state'        => $this->BuildVisualizationState($ipsView),
+            'state'        => $startup['state'],
             'translations' => [
                 'Select a Zigbee2MQTT Network Map and valid connection filters.'   => $this->Translate('Select a Zigbee2MQTT Network Map and valid connection filters.'),
                 'The export cannot be assigned to multiple Network Map instances.' => $this->Translate('The export cannot be assigned to multiple Network Map instances.'),
@@ -549,16 +552,17 @@ class EChartsGraphZ2M extends IPSModuleStrict
                 'Unknown'     => $this->Translate('Unknown')
             ],
             'options' => [
-                'echartsVersion'    => EChartsAsset::VERSION,
-                'echartsThemes'     => EChartsAsset::ThemePalettes(),
-                'tileHeaderVisible' => !$hiddenTitle,
-                'adaptToBackground' => $ipsView && $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
-                'ipsViewTransport'  => $ipsView ? $this->EChartsIPSViewTransportOptions() : null
+                'echartsVersion'            => EChartsAsset::VERSION,
+                'echartsThemes'             => EChartsAsset::ThemePalettes(),
+                'tileHeaderVisible'         => !$hiddenTitle,
+                'adaptToBackground'         => $ipsView && $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
+                'ipsViewTransport'          => $ipsView ? $this->EChartsIPSViewTransportOptions() : null,
+                'compressedStateGzipBase64' => $startup['compressedStateGzipBase64']
             ],
             'replacements' => [
                 '{{ECHARTS_SCRIPT}}'           => EChartsAsset::GraphJavaScript(),
                 '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
-                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript(),
+                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript() . "\n" . EChartsAsset::GraphSupportJavaScript(),
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
         ]);
