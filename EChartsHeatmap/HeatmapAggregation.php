@@ -19,8 +19,11 @@ final class HeatmapAggregation
      * @param list<array{0:int,1:int|float}> $points
      * @return list<array{hour:int,weekday:int,value:float,count:int}>
      */
-    public static function ByWeekdayAndHour(array $points, string $timezone): array
+    public static function ByWeekdayAndHour(array $points, string $timezone, string $metric = 'average'): array
     {
+        if (!in_array($metric, ['average', 'minimum', 'maximum', 'consumption'], true)) {
+            throw new InvalidArgumentException('Invalid Heatmap metric.');
+        }
         if (!array_is_list($points)) {
             throw new InvalidArgumentException('Archive points must be a list.');
         }
@@ -36,7 +39,7 @@ final class HeatmapAggregation
             if (!is_array($point) || !array_is_list($point) || count($point) !== 2
                 || !is_int($point[0]) || $point[0] <= $previousTimestamp
                 || (!is_int($point[1]) && !is_float($point[1]))
-                || !is_finite((float) $point[1])) {
+                || !is_finite((float) $point[1]) || ($metric === 'consumption' && $point[1] < 0)) {
                 throw new InvalidArgumentException('Invalid or unordered heatmap archive point.');
             }
             $previousTimestamp = $point[0];
@@ -45,9 +48,14 @@ final class HeatmapAggregation
             $hour = (int) $local->format('G');
             $index = $weekday * 24 + $hour;
             if (!isset($buckets[$index])) {
-                $buckets[$index] = ['sum' => 0.0, 'count' => 0];
+                $buckets[$index] = ['sum' => 0.0, 'minimum' => (float) $point[1],
+                    'maximum'             => (float) $point[1], 'count' => 0];
             }
-            $buckets[$index]['sum'] += (float) $point[1];
+            if ($metric === 'average' || $metric === 'consumption') {
+                $buckets[$index]['sum'] += (float) $point[1];
+            }
+            $buckets[$index]['minimum'] = min($buckets[$index]['minimum'], (float) $point[1]);
+            $buckets[$index]['maximum'] = max($buckets[$index]['maximum'], (float) $point[1]);
             if (!is_finite($buckets[$index]['sum'])) {
                 throw new InvalidArgumentException('Heatmap archive values exceed the finite range.');
             }
@@ -60,7 +68,10 @@ final class HeatmapAggregation
             $cells[] = [
                 'hour'    => $index % 24,
                 'weekday' => intdiv($index, 24),
-                'value'   => $bucket['sum'] / $bucket['count'],
+                'value'   => match ($metric) {
+                    'minimum'     => $bucket['minimum'], 'maximum' => $bucket['maximum'],
+                    'consumption' => $bucket['sum'], default => $bucket['sum'] / $bucket['count']
+                },
                 'count'   => $bucket['count']
             ];
         }

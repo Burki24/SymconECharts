@@ -150,7 +150,7 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 | Gerät | EChartsSunburst | Manuell gruppierte aktuelle numerische Variablenwerte als Sunburst in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsParallel | Gemeinsame abgeschlossene Archivintervalle von 2–10 Variablen als Parallelkoordinaten in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsSankey | Aktuelle nichtnegative Mengenflüsse zwischen manuellen Knoten und Verbindungen in Kachel und optionalem IPSView-HTML |
-| Gerät | EChartsCalendar | Archivierte Tagesmittelwerte einer Standardvariable als Jahreskalender mit lesender Jahresnavigation |
+| Gerät | EChartsCalendar | Tagesmittel/-minimum/-maximum einer Standardvariable oder Tagesverbrauch eines Zählers als Jahreskalender mit lesender Jahresnavigation |
 | Gerät | EChartsRadar | Aktuelle Vergleichsgruppen auf 3–10 ausdrücklich begrenzten Achsen mit eigenen Einheiten |
 | Gerät | EChartsBoxplot | Verteilungen abgeschlossener Stundenmittelwerte aus 1–32 Standard-Archivvariablen derselben Einheit mit Kategoriennavigation |
 | Gerät | EChartsFunnel | 1–16 manuell benannte Stufen mit aktuellen nichtnegativen Werten derselben Einheit |
@@ -274,6 +274,10 @@ identische abgeschlossene Archivintervalle ohne Interpolation legt
 Die eigene Tages-/Wochentag-Stunden-Heatmap und die Abgrenzung zum Kalenderlayout
 legt [`ADR 0041`](adr/0041-heatmap-weekday-hour-family.md) fest; ihre
 gleitenden Zeitfenster regelt [`ADR 0043`](adr/0043-heatmap-rolling-windows-and-navigation.md).
+Die Erweiterung um Mittelwert, Minimum, Maximum und ausdrücklichen Zählerverbrauch
+für Heatmap und Calendar regelt [ADR 0062](adr/0062-calendar-and-heatmap-archive-metrics.md).
+Die vorhandenen Gateway-Reducer bleiben unverändert; Kennzahlenauswahl,
+Archivtypprüfung und zweite Wochentag-/Stundenreduktion sind familienlokal.
 
 Die lesende Objekt-Hierarchie und ihre Grenzen legt
 [`ADR 0044`](adr/0044-tree-symcon-object-hierarchy.md) fest. Die explizite

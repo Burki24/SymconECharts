@@ -184,6 +184,7 @@ assertGatewayGauge(
     $calendar->GetTestStatus() === 204 && str_contains($calendar->GetVisualizationTile(), 'not a counter'),
     'Calendar must reject counter variables rather than render consumption as daily means.'
 );
+require __DIR__ . '/calendar_metrics.php';
 $calendar->SetTestProperty('SourceVariableID', 0);
 $calendar->ApplyChanges();
 assertGatewayGauge(

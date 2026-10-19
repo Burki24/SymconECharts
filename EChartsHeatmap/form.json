@@ -20,6 +20,29 @@
             ]
         },
         {
+            "type": "Select",
+            "name": "Metric",
+            "caption": "Metric",
+            "options": [
+                {
+                    "caption": "Average of hourly means",
+                    "value": "average"
+                },
+                {
+                    "caption": "Minimum of hourly minima",
+                    "value": "minimum"
+                },
+                {
+                    "caption": "Maximum of hourly maxima",
+                    "value": "maximum"
+                },
+                {
+                    "caption": "Sum of hourly consumption",
+                    "value": "consumption"
+                }
+            ]
+        },
+        {
             "type": "RowLayout",
             "items": [
                 {
@@ -74,7 +97,7 @@
         },
         {
             "type": "Label",
-            "caption": "One week shows seven dated local days through today. Month ranges use the last fully completed calendar months; since January 1 runs through today. All longer ranges average available archived hourly values by local weekday and hour. Missing hours stay empty."
+            "caption": "Completed hours are grouped by local weekday and hour. Average, minimum and maximum require a standard archive; consumption requires a counter archive. Longer periods combine hourly means, minima, maxima or consumption totals according to the selected metric. Missing hours stay empty."
         },
         {
             "type": "ExpansionPanel",

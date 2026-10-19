@@ -2036,6 +2036,8 @@ for ($index = 0; $index < 16; $index++) {
     unset($GLOBALS['symconTestVariables'][5900 + $index]);
 }
 
+require __DIR__ . '/heatmap_metrics.php';
+
 $heatmap = new TestableEChartsHeatmap();
 $heatmap->Create();
 $heatmap->SetTestCurrentTimestamp(1780004000);
@@ -2279,7 +2281,8 @@ $thirtyDayPreview = base64_decode(substr(
     strlen('data:image/svg+xml;base64,')
 ), true);
 assertGatewayGauge(
-    is_string($thirtyDayPreview) && str_contains($thirtyDayPreview, '1-month average'),
+    is_string($thirtyDayPreview) && str_contains($thirtyDayPreview, '1 month')
+        && str_contains($thirtyDayPreview, 'Average of hourly means'),
     'The calendar-month form preview must identify its selected interval.'
 );
 $heatmapOutput->UpdateBarPreviewFromForm(json_encode([

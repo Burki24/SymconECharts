@@ -1,13 +1,25 @@
 # EChartsCalendar
 
-Das Modul zeigt die Tagesmittelwerte einer archivierten Symcon-Variable als
+Das Modul zeigt wählbare Tageskennzahlen einer archivierten Symcon-Variable als
 farbigen Jahreskalender. Jedes Feld steht für einen Kalendertag. Es kann als
 native Symcon-Kachel und optional als eigenständiges IPSView-HTML-Widget
 verwendet werden.
 
 Wählen Sie eine Integer- oder Float-Variable mit aktivierter Aufzeichnung im
-Symcon-Archiv und Standardaggregation. Zählervariablen werden nicht unterstützt:
-Verbrauchssummen sind keine Tagesmittelwerte. Ein aktives EChartsGateway wird
+Symcon-Archiv und die passende **Kennzahl**:
+
+- **Tagesmittelwert** (Voreinstellung): Symcons Tagesmittelwert einer Standardvariable.
+- **Tagesminimum** oder **Tagesmaximum**: kleinster beziehungsweise größter
+  archivierter Messwert des Tages, nicht das Minimum oder Maximum von Stundenmitteln.
+- **Tagesverbrauch**: Symcons Verbrauchssumme eines Zählerarchivs. Sie stammt
+  aus den positiven Zähleränderungen des Tages, nicht aus dem absoluten Zählerstand
+  oder einer selbst berechneten Differenz von Tagesendwerten. Zählerrücksetzungen
+  folgen der Symcon-Archivberechnung; sie werden nicht als negativer Verbrauch dargestellt.
+
+Mittelwert, Minimum und Maximum benötigen Standardaggregation, Verbrauch benötigt
+Zähleraggregation. Eine unpassende Auswahl wird gemeldet, nicht automatisch umgestellt.
+Das Modul verändert weder Archivierung noch Aggregation der Quelle.
+Ein aktives EChartsGateway wird
 benötigt; für weitere Diagramme genügt das bereits vorhandene Gateway.
 
 `Jahr = 0` zeigt immer das aktuelle Jahr. Alternativ lässt sich ein Jahr von
@@ -18,18 +30,20 @@ Jahr zurück. Die Navigation verändert die gespeicherte Konfiguration nicht.
 Es werden ausschließlich abgeschlossene Kalendertage in der Symcon-Zeitzone
 berücksichtigt. Der laufende Tag bleibt leer. Fehlende Archivtage bleiben
 ebenfalls leer und werden weder interpoliert noch als Null gewertet. Echte
-Nullwerte und negative Mittelwerte werden dargestellt. Die Farbskala richtet
+Nullwerte sowie negative Standard-Messwerte werden dargestellt; Verbrauchswerte
+müssen nichtnegativ sein. Die Farbskala richtet
 sich automatisch nach den vorhandenen Werten des angezeigten Jahres.
 Das Archiv muss kein vollständiges Jahr abdecken. Beginnt die Aufzeichnung
-erst im Tagesverlauf, wird auch der erste verfügbare Tagesmittelwert angezeigt;
+erst im Tagesverlauf, wird auch der erste verfügbare Tageswert angezeigt;
 er bezieht sich auf die tatsächlich aufgezeichnete Zeit dieses Tages.
-Ein Tooltip zeigt Datum, Quellname, Tagesmittelwert und Einheit.
+Ein Tooltip zeigt Datum, Quellname, ausgewählte Kennzahl und Einheit. Die
+Voreinstellung erhält bestehende Kalender als Tagesmittelwert-Darstellung.
 
 Im Designer sind Ausrichtung, Wochenbeginn, Monats- und Wochentagsnamen,
 Farbskala, Farben für niedrige/hohe Werte und leere Tage sowie Zellränder
 einstellbar. Die automatische Ausrichtung passt den Kalender an das
 Seitenverhältnis an. Titel, Achsen und Zellbeschriftung besitzen eigene
-Schriftgrößen und Farben. Tagesnummern beziehungsweise Tagesmittelwerte
+Schriftgrößen und Farben. Tagesnummern beziehungsweise Tageswerte
 erscheinen in den Zellen nur, wenn ausreichend Platz vorhanden ist; im Tooltip
 bleiben die Werte erreichbar. Animation und Tooltip sind abschaltbar.
 

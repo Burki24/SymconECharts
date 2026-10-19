@@ -20,6 +20,29 @@
             ]
         },
         {
+            "type": "Select",
+            "name": "Metric",
+            "caption": "Metric",
+            "options": [
+                {
+                    "caption": "Daily mean",
+                    "value": "average"
+                },
+                {
+                    "caption": "Daily minimum",
+                    "value": "minimum"
+                },
+                {
+                    "caption": "Daily maximum",
+                    "value": "maximum"
+                },
+                {
+                    "caption": "Daily consumption",
+                    "value": "consumption"
+                }
+            ]
+        },
+        {
             "type": "RowLayout",
             "items": [
                 {
@@ -33,7 +56,7 @@
         },
         {
             "type": "Label",
-            "caption": "Each cell shows the archive daily mean of a completed calendar day. Missing days remain empty. Counter variables are not supported."
+            "caption": "Completed calendar days only. Mean, minimum and maximum require a standard archive; consumption requires a counter archive. Missing days remain empty."
         },
         {
             "type": "RowLayout",
@@ -382,7 +405,7 @@
                         {
                             "type": "CheckBox",
                             "name": "ShowValues",
-                            "caption": "Show daily means"
+                            "caption": "Show daily values"
                         }
                     ]
                 },

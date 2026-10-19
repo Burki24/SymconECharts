@@ -9,6 +9,13 @@
 
 ## Neu
 
+- Calendar und Heatmap bieten wählbare Archivkennzahlen: Mittelwert,
+  Minimum und Maximum für Standardarchive oder ausdrücklich Zählerverbrauch
+  für Zählerarchive. Längere Heatmap-Zeiträume verwenden je Wochentag/Stunde
+  die passende Mittelung, Extremwertbildung oder Verbrauchssumme. Tooltips,
+  Beschriftungen und Vorschauen nennen die gewählte Kennzahl. Bestehende
+  Instanzen bleiben standardmäßig bei Mittelwerten; fehlende Intervalle bleiben leer.
+
 - Boxplot, Parallel, Candlestick, ThemeRiver und StateTimeline bieten
   benutzerdefinierte rollierende Archivzeiträume mit 1–1000 Minuten, Stunden,
   Tagen oder Wochen. Kachel und IPSView verwenden dasselbe Zeitfenster;

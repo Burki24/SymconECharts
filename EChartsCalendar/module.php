@@ -105,6 +105,7 @@ class EChartsCalendar extends IPSModuleStrict
             $this->RegisterTransientRefresh('ECCL');
             $this->RegisterPropertyInteger('SourceVariableID', 0);
             $this->RegisterPropertyInteger('Year', 0);
+            $this->RegisterPropertyString('Metric', 'average');
             $this->RegisterPropertyBoolean('UseVariablePresentation', true);
             $this->RegisterPropertyString('Unit', '');
             $this->RegisterPropertyInteger('Decimals', 1);
@@ -194,7 +195,7 @@ class EChartsCalendar extends IPSModuleStrict
                 ['caption' => 'Color scale and cells', 'start' => 'LowColor'],
                 ['caption' => 'Labels and typography', 'start' => 'ShowDayNumbers']
             ]);
-            $fields = ['Title', 'SourceVariableID', 'Year', 'UseVariablePresentation', 'Unit', 'Decimals',
+            $fields = ['Title', 'SourceVariableID', 'Year', 'Metric', 'UseVariablePresentation', 'Unit', 'Decimals',
                 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
                 'IPSViewBackgroundOpacityPercent', ...array_keys(self::DESIGN_DEFAULTS),
                 ...array_map(static fn (string $name): string => 'IPSView' . $name, array_keys(self::DESIGN_DEFAULTS))];
@@ -442,7 +443,7 @@ class EChartsCalendar extends IPSModuleStrict
         );
         $archive = $this->ReadArchiveSource(['VariableID' => $id], $window);
         try {
-            $cells = CalendarData::Cells($archive['Points'], $window);
+            $cells = CalendarData::Cells($archive['Points'], $window, $this->ReadPropertyString('Metric'));
         } catch (Throwable $exception) {
             $this->WriteAttributeString('LastError', $exception->getMessage());
             $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
@@ -462,6 +463,7 @@ class EChartsCalendar extends IPSModuleStrict
         return json_encode(['schemaVersion' => 1, 'family' => 'calendar', 'theme' => $this->EffectiveTheme($ipsView),
             'calendar'                      => ['title' => $this->ReadPropertyString('Title'), 'sourceLabel' => $labels[$id],
                 'unit'                                  => $presentation['unit'], 'decimals' => $presentation['decimals'],
+                'metric'                                => $this->ReadPropertyString('Metric'),
                 'timezone'                              => $window['Timezone'], 'year' => $window['Year'], 'baseYear' => $window['BaseYear'],
                 'windowOffset'                          => $windowOffset, 'maxOffset' => $window['MaximumOffset'],
                 'startTimestamp'                        => $window['StartTimestamp'], 'endTimestamp' => $window['EndTimestamp'],
@@ -485,6 +487,12 @@ class EChartsCalendar extends IPSModuleStrict
                 'Connect an active EChartsGateway.'                                       => $this->Translate('Connect an active EChartsGateway.'),
                 'The Calendar values could not be loaded.'                                => $this->Translate('The Calendar values could not be loaded.'),
                 'No completed daily means in this year.'                                  => $this->Translate('No completed daily means in this year.'),
+                'No completed daily minima in this year.'                                 => $this->Translate('No completed daily minima in this year.'),
+                'No completed daily maxima in this year.'                                 => $this->Translate('No completed daily maxima in this year.'),
+                'No completed daily consumption in this year.'                            => $this->Translate('No completed daily consumption in this year.'),
+                'Daily minimum'                                                           => $this->Translate('Daily minimum'), 'Daily maximum' => $this->Translate('Daily maximum'),
+                'Daily consumption'                                                       => $this->Translate('Daily consumption'),
+                'Calendar consumption requires a counter archive variable.'               => $this->Translate('Calendar consumption requires a counter archive variable.'),
                 'Previous year'                                                           => $this->Translate('Previous year'), 'Next year' => $this->Translate('Next year'),
                 'Selected year'                                                           => $this->Translate('Selected year'), 'Daily mean' => $this->Translate('Daily mean'),
                 'Calendar requires a standard archive variable, not a counter.'           => $this->Translate('Calendar requires a standard archive variable, not a counter.'),
@@ -551,7 +559,8 @@ class EChartsCalendar extends IPSModuleStrict
         } catch (Throwable) {
             return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => $this->Translate('Choose the current year (0) or a year from 1971 through this year.')];
         }
-        if ($this->ReadPropertyInteger('Decimals') < 0 || $this->ReadPropertyInteger('Decimals') > 6
+        if (!in_array($this->ReadPropertyString('Metric'), ['average', 'minimum', 'maximum', 'consumption'], true)
+            || $this->ReadPropertyInteger('Decimals') < 0 || $this->ReadPropertyInteger('Decimals') > 6
             || mb_strlen($this->ReadPropertyString('Unit')) > 24 || !$this->IsValidDesign('')
             || (!$this->ReadPropertyBoolean('IPSViewUseTileDesign') && !$this->IsValidDesign('IPSView'))
             || !EChartsIPSViewBackground::IsValid(
@@ -575,9 +584,11 @@ class EChartsCalendar extends IPSModuleStrict
             }
             $operation = EChartsDataProtocol::OPERATION_ARCHIVE_READ;
             $this->WriteAttributeString('LastError', '');
+            $consumption = $this->ReadPropertyString('Metric') === 'consumption';
+            $reducer = $consumption ? 'sum' : $this->ReadPropertyString('Metric');
             $payload = ['VariableID' => $source['VariableID'],
                 'StartTimestamp'     => $query['StartTimestamp'], 'EndTimestamp' => $query['EndTimestamp'],
-                'Mode'               => 'aggregated', 'Reducer' => 'average',
+                'Mode'               => 'aggregated', 'Reducer' => $reducer,
                 'Limit'              => 366, 'AggregationLevel' => 1];
             try {
                 $response = EChartsDataProtocol::DecodeResponse(
@@ -598,11 +609,19 @@ class EChartsCalendar extends IPSModuleStrict
                 throw new RuntimeException('The gateway archive request failed: ' . $code);
             }
             $archive = $response['Payload'];
+            if (in_array($archive['ArchiveAggregationType'] ?? null, ['standard', 'counter'], true)
+                && $archive['ArchiveAggregationType'] !== ($consumption ? 'counter' : 'standard')) {
+                $this->WriteAttributeString('LastError', 'ARCHIVE_TYPE_MISMATCH');
+                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                throw new RuntimeException('The Calendar metric does not match the archive aggregation type.');
+            }
             if (($archive['VariableID'] ?? null) !== $source['VariableID']
+                || !in_array($archive['VariableType'] ?? null, [1, 2], true)
                 || !is_array($archive['Points'] ?? null) || ($archive['Truncated'] ?? null) !== false
                 || ($archive['StartTimestamp'] ?? null) !== $query['StartTimestamp']
                 || ($archive['EndTimestamp'] ?? null) !== $query['EndTimestamp']
-                || ($archive['EffectiveReducer'] ?? null) !== 'average' || ($archive['ArchiveAggregationType'] ?? null) !== 'standard') {
+                || ($archive['EffectiveReducer'] ?? null) !== $reducer
+                || ($archive['ArchiveAggregationType'] ?? null) !== ($consumption ? 'counter' : 'standard')) {
                 $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
                 throw new RuntimeException('The gateway returned invalid Calendar archive data.');
             }
@@ -646,8 +665,11 @@ class EChartsCalendar extends IPSModuleStrict
             $chart = json_decode($this->GetCalendarDataForOutput($ipsView, $windowOffset), true, 512, JSON_THROW_ON_ERROR);
         } catch (Throwable $exception) {
             $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
-            return $this->ErrorState($this->ReadAttributeString('LastError') === 'REDUCER_NOT_SUPPORTED'
-                ? 'Calendar requires a standard archive variable, not a counter.' : 'The Calendar values could not be loaded.');
+            $mismatch = in_array($this->ReadAttributeString('LastError'), ['REDUCER_NOT_SUPPORTED', 'ARCHIVE_TYPE_MISMATCH'], true);
+            return $this->ErrorState($mismatch
+                ? ($this->ReadPropertyString('Metric') === 'consumption'
+                    ? 'Calendar consumption requires a counter archive variable.'
+                    : 'Calendar requires a standard archive variable, not a counter.') : 'The Calendar values could not be loaded.');
         }
         return ['schemaVersion' => 1, 'family' => 'calendar', 'status' => 'ready', 'chart' => $chart, 'error' => null];
     }

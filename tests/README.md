@@ -1,5 +1,39 @@
 # Tests
 
+## Calendar- und Heatmap-Kennzahlen
+
+`calendar_metrics.php` und `heatmap_metrics.php` ergänzen die Gateway-Suite um
+die explizite Kennzahlenauswahl: unterschiedliche `Avg`/`Min`/`Max`, Zähler-
+`Avg` als Verbrauchssumme statt Zählerstand, gültige Nullen, negative
+Standardwerte und abgewiesene negative Verbräuche. Standard-/Zählerrollen,
+Reducer, Antwortmetadaten, Trunkierung, Navigation und Fehlererholung werden
+über die realen Modul-/Gatewaypfade mit synthetischen Kernel-Doppeln geprüft.
+Beide HTML-Ausgaben bleiben begrenzt; Entwürfe und Vorschauen persistieren
+nichts und fragen kein Archiv ab.
+
+`calendar_data.php` und `heatmap_aggregation.php` prüfen zusätzlich die
+Kennzahlenreduktion. Bei der Heatmap bleiben Mittelwert, Minimum, Maximum
+und Verbrauchssumme auch über mehrere gleiche Wochentag-Stunden erhalten;
+beide realen Herbststunden zählen, fehlende Stunden werden nicht erzeugt.
+`calendar_layout.js` und `heatmap_layout.js` prüfen Kennzahlentexte, Tooltips,
+ARIA, alte Modelle ohne Kennzahl sowie verspätete Navigationsantworten nach
+Kennzahlenwechsel. Die Runtimes und der Gatewayvertrag bleiben unverändert.
+
+Die lokalen Browserfixtures `calendar_browser.mjs` (Port 8796) und
+`heatmap_browser.mjs` (Port 8802) verwenden ausschließlich synthetische Daten.
+`/chart?mode=symcon|ipsview&metric=average|minimum|maximum|consumption` wählt
+Ausgabe und Kennzahl; Navigation behält die Kennzahl bei. Die neuen
+Formularfelder und Kennzahlen benötigen nach Modulupdate noch eine echte
+Symcon-/IPSView-Abnahme; Live-Einstellungen werden nicht geändert.
+
+Am 19.10.2026 wurden Calendar-Tagesminima und -verbrauch sowie Heatmap-
+Stundenmaxima und -verbrauch lokal im Canvas-Renderer visuell geprüft.
+Jahres- und Zeitraumwechsel bewahrten die Kennzahl; die Heatmap wurde auch
+als schmale Kachel neben breitem IPSView geprüft. Direkte Rendereraufrufe
+blieben ohne Konsolenwarnung/-fehler. Die Heatmap-Vergleichsseite mit Frames
+zeigte einmal einen nicht dem Modul zugeordneten MutationObserver-Fehler;
+beide eingebetteten Diagramme und ihre Navigation funktionierten dennoch.
+
 ## Benutzerdefinierte Archivzeiträume
 
 `php tests/archive_windows.php` prüft die neue vollständige Intervallplanung:

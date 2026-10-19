@@ -75,6 +75,22 @@ const empty = harness({ ...model, calendar: { ...model.calendar, data: [] } });
 assert.equal(empty.elements['echarts-calendar-empty'].hidden, false);
 assert.equal(empty.option.visualMap.show, false);
 assert.equal(empty.option.calendar.range, '2024', 'An empty archive still shows the annual calendar, not zero-filled fake days.');
+for (const mode of ['symcon', 'ipsview']) {
+    for (const [metric, label, emptyText] of [
+        ['average', 'Tagesmittelwert', 'No completed daily means in this year.'],
+        ['minimum', 'Daily minimum', 'No completed daily minima in this year.'],
+        ['maximum', 'Daily maximum', 'No completed daily maxima in this year.'],
+        ['consumption', 'Daily consumption', 'No completed daily consumption in this year.']
+    ]) {
+        const result = harness({ ...model, calendar: { ...model.calendar, metric, unit: '<kWh&>' } }, mode);
+        assert.ok(result.option.aria.description.endsWith(label));
+        const tooltip = result.option.tooltip.formatter({ value: ['2024-02-29', 0] });
+        assert.ok(tooltip.includes(label + ': '));
+        assert.match(tooltip, /0[.,]0 &lt;kWh&amp;&gt;/);
+        assert.ok(tooltip.includes('&lt;Outside&gt;'));
+        assert.equal(result.elements['echarts-calendar-empty'].textContent, emptyText);
+    }
+}
 for (const value of [0, -10, 10, Number.MAX_VALUE, -Number.MAX_VALUE]) {
     const result = harness({ ...model, calendar: { ...model.calendar, data: [{ date: '2024-01-01', value }] } });
     assert.ok(Number.isFinite(result.option.visualMap.min) && Number.isFinite(result.option.visualMap.max));
@@ -168,6 +184,13 @@ async function navigation() {
     await new Promise(resolve => setImmediate(resolve));
     assert.equal(wide.option.calendar.range, '2024');
     assert.equal(wide.elements['echarts-calendar-next'].disabled, true);
+    const changing = harness({ ...model, calendar: { ...model.calendar, metric: 'maximum' } });
+    changing.elements['echarts-calendar-previous'].click();
+    changing.window.handleMessage({ schemaVersion: 1, family: 'calendar', status: 'ready',
+        chart: { ...model, calendar: { ...model.calendar, metric: 'consumption' } } });
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(changing.option.calendar.range, '2024', 'An in-flight previous-metric response must not replace a changed metric.');
+    assert.ok(changing.option.aria.description.endsWith('Daily consumption'));
     const before = wide.clears;
     wide.window.handleMessage({ schemaVersion: 1, family: 'calendar', status: 'error', chart: null,
         error: 'The Calendar values could not be loaded.' });

@@ -2,7 +2,7 @@
 
 `EChartsHeatmap` zeigt eine numerische Archivvariable als 7 × 24-Heatmap:
 lokale Stunden von 0 bis 23 Uhr und je nach Zeitraum konkrete Tage oder
-gemittelte Wochentage. Eine
+zusammengefasste Wochentage. Eine
 gemeinsame `EChartsGateway`-Instanz genügt auch für diese Diagrammfamilie.
 
 ## Voraussetzungen und Daten
@@ -17,11 +17,29 @@ Wählbar sind eine Woche, ein, drei, sechs oder zwölf Monate sowie „Seit
 Monatsansichten verwenden ausschließlich die letzten vollständig
 abgeschlossenen Kalendermonate: Am 13. Oktober zeigt „1 Monat“ den September,
 „3 Monate“ zeigen Juli bis September. „Seit 1. Januar“ reicht im laufenden
-Jahr bis heute. Bei diesen längeren Ansichten zeigt jede Mo–So-Zelle den
-Durchschnitt der vorhandenen Stundenwerte ihres Wochentags und ihrer Stunde
+Jahr bis heute. Bei diesen längeren Ansichten zeigt jede Mo–So-Zelle die
+gewählte Kennzahl der vorhandenen Stundenwerte ihres Wochentags und ihrer Stunde
 aus dem gesamten angezeigten Zeitraum – etwa der Montage um 08:00 Uhr.
-Der konkrete Datumsbereich und die Mittelwert-Kennzeichnung stehen über
+Der konkrete Datumsbereich und die Kennzahl stehen über
 dem Diagramm.
+
+„Kennzahl“ bietet vier ausdrücklich wählbare Datengrundlagen:
+
+- **Durchschnitt der Stundenmittelwerte** (Voreinstellung): arithmetischer
+  Durchschnitt der vorhandenen abgeschlossenen Stundenmittelwerte.
+- **Minimum der Stundenminima**: kleinster tatsächlich archivierter
+  Stunden-Minimalwert der betreffenden Wochentag-/Stundenkombination.
+- **Maximum der Stundenmaxima**: größter entsprechender Stunden-Maximalwert.
+- **Summe der Stundenverbräuche**: Summe der archivierten Stundenverbräuche
+  eines Zählers, beispielsweise in kWh. In längeren Ansichten ist dies der
+  Gesamtverbrauch aller vorhandenen passenden Stunden, kein Durchschnitt.
+
+Durchschnitt, Minimum und Maximum benötigen ein numerisches **Standardarchiv**;
+Verbrauch benötigt ein **Zählerarchiv**. Das Modul ändert keine Archivierung
+oder Aggregationsart und wechselt nicht automatisch zu einer anderen Kennzahl.
+Negative und Nullwerte sind bei Standardkennzahlen zulässig. Ein gemessener
+Nullverbrauch bleibt ebenfalls erhalten; negative Verbräuche werden als
+fehlerhafte Archivdaten abgewiesen. Bestehende Instanzen bleiben bei Durchschnitt.
 
 Mit den Pfeilen wechseln Sie um eine Woche, die gewählte Anzahl vollständiger
 Monate oder ein Jahr zurück beziehungsweise vor. „Seit 1. Januar“ vergleicht
@@ -30,9 +48,9 @@ den 28. Februar begrenzt. „Heute“ führt zur aktuellen Ansicht zurück. Der
 Wechsel gilt für die gerade geöffnete
 Kachel beziehungsweise IPSView-Seite und wird nicht als Instanzeinstellung
 gespeichert. Nach dem erneuten Öffnen erscheint wieder der aktuelle Zeitraum.
-Das Gateway liefert ausschließlich abgeschlossene stündliche Durchschnittswerte.
-Werte derselben lokalen Wochentag-Stunde-Kombination werden in längeren Ansichten
-erneut arithmetisch gemittelt; der Tooltip nennt die Anzahl der tatsächlich
+Das Gateway liefert ausschließlich abgeschlossene stündliche Archivkennzahlen.
+Werte derselben lokalen Wochentag-Stunde-Kombination werden gemäß der gewählten
+Kennzahl zusammengefasst; der Tooltip nennt Kennzahl, Zeitraum und die Anzahl der tatsächlich
 berücksichtigten Stundenintervalle. Eine fehlende Stunde bleibt leer, nicht
 null. Beim Wechsel von Sommer- auf
 Winterzeit gehen beide tatsächlich vorhandenen 02-Uhr-Intervalle in dieselbe
@@ -65,7 +83,8 @@ außerhalb einer Vorlage erhalten die erste beziehungsweise letzte Klassenfarbe.
 Die kompakte Legende zeigt alle Farbfelder und die festen Endwerte in °C,
 auch wenn die aktuellen Archivwerte nur einen Ausschnitt belegen. Für diese
 Vorlagen müssen die Daten bereits als °C vorliegen; eine Umrechnung erfolgt
-nicht. Die eigenen Farben greifen nur bei „Individuell“; bestehende Instanzen
+nicht. Für Verbrauch ist ausschließlich „Individuell“ zulässig; die festen
+Celsius-Klassen wären dafür fachlich falsch. Die eigenen Farben greifen nur bei „Individuell“; bestehende Instanzen
 behalten diese Voreinstellung. Bei aktivierten Zellenwerten wählt
 „Wertbeschriftungsfarbe: Automatischer Kontrast“ für jede Zelle eine helle oder
 dunkle Schrift passend zu ihrer Füllfarbe. Eine manuell gewählte Schriftfarbe

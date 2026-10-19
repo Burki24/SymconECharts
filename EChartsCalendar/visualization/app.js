@@ -24,6 +24,13 @@
     period.style.top = header + 'px';
     var loadError = 'The Calendar values could not be loaded.';
     function translate(text) { return (bootstrap.translations || {})[text] || text; }
+    function metricLabel(metric) {
+        return translate({ minimum: 'Daily minimum', maximum: 'Daily maximum', consumption: 'Daily consumption' }[metric] || 'Daily mean');
+    }
+    function emptyLabel(metric) {
+        return translate({ minimum: 'No completed daily minima in this year.', maximum: 'No completed daily maxima in this year.',
+            consumption: 'No completed daily consumption in this year.' }[metric] || 'No completed daily means in this year.');
+    }
     var retain = design.createTransientFailureRetainer(chartElement, warning, translate, loadError);
     function escapeHTML(value) {
         return String(value).replace(/[&<>"']/g, function (c) {
@@ -148,13 +155,13 @@
         return {
             backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground ? 'transparent' : colors.background,
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
-            aria: { enabled: true, description: calendar.sourceLabel + ': ' + calendar.year + ', ' + translate('Daily mean') },
+            aria: { enabled: true, description: calendar.sourceLabel + ': ' + calendar.year + ', ' + metricLabel(calendar.metric) },
             title: { show: title.show, text: calendar.title, left: 'center', top: title.top,
                 textStyle: { color: style.titleColor || colors.text, fontSize: titleSize } },
             tooltip: { show: style.showTooltip !== false, formatter: function (p) {
                 var value = p.value || [];
                 return escapeHTML(calendar.sourceLabel) + '<br>' + escapeHTML(value[0]) + '<br>'
-                    + escapeHTML(translate('Daily mean')) + ': ' + escapeHTML(format(value[1], true));
+                    + escapeHTML(metricLabel(calendar.metric)) + ': ' + escapeHTML(format(value[1], true));
             } },
             calendar: { range: String(calendar.year), orient: vertical ? 'vertical' : 'horizontal',
                 left: left, right: right, top: top, bottom: bottom, cellSize: ['auto', 'auto'],
@@ -223,7 +230,7 @@
         chartElement.hidden = false;
         error.hidden = true;
         warning.hidden = true;
-        empty.textContent = translate('No completed daily means in this year.');
+        empty.textContent = emptyLabel(state.chart.calendar.metric);
         empty.hidden = state.chart.calendar.data.length > 0;
         root.style.backgroundColor = bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground
             ? 'transparent' : colorsFor(nextTheme).background;
@@ -264,11 +271,13 @@
             return response.json();
         }).then(function (state) {
             if (!state || state.status !== 'ready' || !state.chart || state.chart.family !== 'calendar'
-                || state.chart.calendar.baseYear !== calendar.baseYear || state.chart.calendar.windowOffset !== offset) {
+                || state.chart.calendar.baseYear !== calendar.baseYear || state.chart.calendar.windowOffset !== offset
+                || (state.chart.calendar.metric || 'average') !== (calendar.metric || 'average')) {
                 throw new Error('Invalid Calendar response.');
             }
             // A configuration update may have arrived while the request was in flight.
-            if (currentState.chart.calendar.baseYear === calendar.baseYear) { render(state); }
+            if (currentState.chart.calendar.baseYear === calendar.baseYear
+                && (currentState.chart.calendar.metric || 'average') === (calendar.metric || 'average')) { render(state); }
         }).catch(function () {
             warning.textContent = translate(loadError);
             warning.hidden = false;
@@ -285,7 +294,8 @@
         if (!state) { return; }
         var calendar = state.chart && state.chart.calendar;
         if (currentOffset > 0 && calendar && calendar.windowOffset === 0 && currentState && currentState.chart
-            && currentState.chart.calendar.baseYear === calendar.baseYear) { navigate(currentOffset); return; }
+            && currentState.chart.calendar.baseYear === calendar.baseYear
+            && (currentState.chart.calendar.metric || 'average') === (calendar.metric || 'average')) { navigate(currentOffset); return; }
         render(state);
     };
     function resize() {

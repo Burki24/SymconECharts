@@ -108,6 +108,7 @@ class EChartsHeatmap extends IPSModuleStrict
             $this->RegisterPropertyInteger('SourceVariableID', 0);
             $this->RegisterPropertyString('Title', '');
             $this->RegisterPropertyString('Range', '1m');
+            $this->RegisterPropertyString('Metric', 'average');
             $this->RegisterPropertyBoolean('UseVariablePresentation', true);
             $this->RegisterPropertyString('Unit', '');
             $this->RegisterPropertyInteger('Decimals', 1);
@@ -194,7 +195,7 @@ class EChartsHeatmap extends IPSModuleStrict
                 ['caption' => 'Labels and typography', 'start' => 'ShowValues']
             ]);
             $fields = [
-                'Title', 'SourceVariableID', 'Range', 'UseVariablePresentation', 'Unit', 'Decimals',
+                'Title', 'SourceVariableID', 'Range', 'Metric', 'UseVariablePresentation', 'Unit', 'Decimals',
                 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
                 'IPSViewBackgroundOpacityPercent',
                 ...array_keys(self::DESIGN_DEFAULTS),
@@ -459,12 +460,14 @@ class EChartsHeatmap extends IPSModuleStrict
         $sourceName = $sourceID > 0 && IPS_VariableExists($sourceID) ? IPS_GetName($sourceID) : $this->Translate('No source selected');
         $range = (string) ($values['Range'] ?? $this->ReadPropertyString('Range'));
         $rangeLabel = $this->Translate(match ($range) {
-            '1w'    => '1 week', '1m' => '1-month average', '3m' => '3-month average',
-            '6m'    => '6-month average', '12m' => '12-month average', 'ytd' => 'Since January 1 average',
+            '1w'    => '1 week', '1m' => '1 month', '3m' => '3 months',
+            '6m'    => '6 months', '12m' => '12 months', 'ytd' => 'Since January 1',
             default => $range
         });
+        $metric = (string) ($values['Metric'] ?? $this->ReadPropertyString('Metric'));
+        $metricLabel = $this->Translate(self::MetricLabel($metric));
         $svg .= '<text x="54" y="53" fill="' . EChartsBarPreview::E($palette['muted'])
-            . '" font-size="11">' . EChartsBarPreview::E($sourceName . ' · ' . $rangeLabel) . '</text>';
+            . '" font-size="11">' . EChartsBarPreview::E($sourceName . ' · ' . $rangeLabel . ' · ' . $metricLabel) . '</text>';
         $weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
         $datedDays = $range === '1w'
             ? HeatmapWindow::Resolve($range, 0, $this->CurrentTimestamp(), date_default_timezone_get())['Days']
@@ -553,7 +556,12 @@ class EChartsHeatmap extends IPSModuleStrict
         $now = $this->CurrentTimestamp();
         $query = HeatmapWindow::Resolve($range, $windowOffset, $now, $timezone);
         $archive = $this->ReadArchive($variableID, $query);
-        $cells = HeatmapAggregation::ByWeekdayAndHour($archive['Points'], $timezone);
+        try {
+            $cells = HeatmapAggregation::ByWeekdayAndHour($archive['Points'], $timezone, $this->ReadPropertyString('Metric'));
+        } catch (Throwable $exception) {
+            $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+            throw new RuntimeException('The gateway returned invalid Heatmap values.', 0, $exception);
+        }
         $this->WriteAttributeString('LastError', '');
         $this->DebugEChartsSetStatus(IS_ACTIVE);
 
@@ -567,6 +575,7 @@ class EChartsHeatmap extends IPSModuleStrict
                 'decimals'       => $presentation['decimals'],
                 'timezone'       => $timezone,
                 'range'          => $range,
+                'metric'         => $this->ReadPropertyString('Metric'),
                 'windowOffset'   => $windowOffset,
                 'startDate'      => $query['StartDate'],
                 'endDate'        => $query['EndDate'],
@@ -624,7 +633,7 @@ class EChartsHeatmap extends IPSModuleStrict
                 'EndTimestamp'     => $chunk['EndTimestamp'],
                 'Mode'             => 'aggregated',
                 'AggregationLevel' => 0,
-                'Reducer'          => 'average',
+                'Reducer'          => $this->ReadPropertyString('Metric') === 'consumption' ? 'sum' : $this->ReadPropertyString('Metric'),
                 'Limit'            => $limit
             ];
             $operation = EChartsDataProtocol::OPERATION_ARCHIVE_READ;
@@ -648,21 +657,33 @@ class EChartsHeatmap extends IPSModuleStrict
             }
             $archive = $response['Payload'];
             if (($archive['VariableID'] ?? null) !== $variableID
-                || !is_array($archive['Points'] ?? null) || !is_bool($archive['Truncated'] ?? null)) {
+                || ($archive['VariableType'] ?? null) !== IPS_GetVariable($variableID)['VariableType']
+                || ($archive['StartTimestamp'] ?? null) !== $chunk['StartTimestamp']
+                || ($archive['EndTimestamp'] ?? null) !== $chunk['EndTimestamp']
+                || ($archive['EffectiveReducer'] ?? null) !== $payload['Reducer']
+                || ($archive['ArchiveAggregationType'] ?? null) !== ($this->ReadPropertyString('Metric') === 'consumption' ? 'counter' : 'standard')
+                || !is_array($archive['Points'] ?? null) || !array_is_list($archive['Points'])
+                || count($archive['Points']) > $limit || ($archive['Truncated'] ?? null) !== false) {
                 throw new RuntimeException('The gateway returned invalid Heatmap data.');
             }
             $points = [];
+            $previousTimestamp = 0;
             foreach ($archive['Points'] as $point) {
                 if (!is_array($point) || !array_is_list($point) || count($point) !== 2
-                    || !is_int($point[0]) || (!is_int($point[1]) && !is_float($point[1]))) {
+                    || !is_int($point[0]) || $point[0] <= $previousTimestamp
+                    || $point[0] < $chunk['StartTimestamp'] || $point[0] > $chunk['EndTimestamp']
+                    || (!is_int($point[1]) && !is_float($point[1])) || !is_finite((float) $point[1])
+                    || ($payload['Reducer'] === 'sum' && $point[1] < 0)) {
                     throw new RuntimeException('The gateway returned invalid Heatmap points.');
                 }
+                $previousTimestamp = $point[0];
                 $points[] = [$point[0], (float) $point[1]];
             }
 
             return $debugFlowResult = ['Points' => $points, 'Truncated' => $archive['Truncated']];
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
+            $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
             $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
             throw $debugFlowException;
         } finally {
@@ -691,11 +712,23 @@ class EChartsHeatmap extends IPSModuleStrict
                 'Data could not be refreshed. Showing the last available values.' => $this->Translate(
                     'Data could not be refreshed. Showing the last available values.'
                 ),
-                'The selected range was truncated.'                 => $this->Translate('The selected range was truncated.'),
-                'Heatmap'                                           => $this->Translate('Heatmap'),
-                '24 hours by seven weekdays.'                       => $this->Translate('24 hours by seven weekdays.'),
-                'Hourly intervals'                                  => $this->Translate('Hourly intervals'),
-                'No completed archive hours in the selected range.' => $this->Translate(
+                'The selected range was truncated.'                   => $this->Translate('The selected range was truncated.'),
+                'Heatmap'                                             => $this->Translate('Heatmap'),
+                '24 hours by seven weekdays.'                         => $this->Translate('24 hours by seven weekdays.'),
+                'Hourly intervals'                                    => $this->Translate('Hourly intervals'),
+                'Average of hourly means'                             => $this->Translate('Average of hourly means'),
+                'Minimum of hourly minima'                            => $this->Translate('Minimum of hourly minima'),
+                'Maximum of hourly maxima'                            => $this->Translate('Maximum of hourly maxima'),
+                'Sum of hourly consumption'                           => $this->Translate('Sum of hourly consumption'),
+                'Minimum of {count} hourly intervals'                 => $this->Translate('Minimum of {count} hourly intervals'),
+                'Maximum of {count} hourly intervals'                 => $this->Translate('Maximum of {count} hourly intervals'),
+                'Consumption total of {count} hourly intervals'       => $this->Translate('Consumption total of {count} hourly intervals'),
+                '1 month'                                             => $this->Translate('1 month'),
+                '3 months'                                            => $this->Translate('3 months'),
+                '6 months'                                            => $this->Translate('6 months'),
+                '12 months'                                           => $this->Translate('12 months'),
+                'Since January 1'                                     => $this->Translate('Since January 1'),
+                'No completed archive hours in the selected range.'   => $this->Translate(
                     'No completed archive hours in the selected range.'
                 ),
                 'Previous period'                     => $this->Translate('Previous period'),
@@ -766,6 +799,7 @@ class EChartsHeatmap extends IPSModuleStrict
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => 'Configure a numeric archive variable.'];
         }
         if (!in_array($this->ReadPropertyString('Range'), self::RANGES, true)
+            || !in_array($this->ReadPropertyString('Metric'), ['average', 'minimum', 'maximum', 'consumption'], true)
             || $this->ReadPropertyInteger('Decimals') < 0 || $this->ReadPropertyInteger('Decimals') > 6
             || !$this->IsValidDesign('')
             || ($this->IsIPSViewHTMLPageEnabled()
@@ -783,7 +817,9 @@ class EChartsHeatmap extends IPSModuleStrict
     {
         if (!$this->AnimationIsValid($prefix)
             || !EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme'))
-            || !HeatmapColorScales::IsSupported($this->ReadPropertyString($prefix . 'ColorScalePreset'))) {
+            || !HeatmapColorScales::IsSupported($this->ReadPropertyString($prefix . 'ColorScalePreset'))
+            || ($this->ReadPropertyString('Metric') === 'consumption'
+                && $this->ReadPropertyString($prefix . 'ColorScalePreset') !== HeatmapColorScales::CUSTOM)) {
             return false;
         }
         foreach (['LowColor', 'CustomMiddleColor1', 'CustomMiddleColor2', 'CustomMiddleColor3',
@@ -905,6 +941,14 @@ class EChartsHeatmap extends IPSModuleStrict
         return $ipsView && !$this->ReadPropertyBoolean('IPSViewUseTileDesign')
             ? $this->ReadPropertyString('IPSViewEChartsTheme')
             : $this->ReadPropertyString('EChartsTheme');
+    }
+
+    private static function MetricLabel(string $metric): string
+    {
+        return match ($metric) {
+            'minimum'     => 'Minimum of hourly minima', 'maximum' => 'Maximum of hourly maxima',
+            'consumption' => 'Sum of hourly consumption', default => 'Average of hourly means'
+        };
     }
 
     /** @return array<string,mixed> */

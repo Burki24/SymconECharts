@@ -58,6 +58,30 @@ $spring = HeatmapAggregation::ByWeekdayAndHour([
 ], 'Europe/Berlin');
 heatmapAssert(array_column($spring, 'hour') === [1, 3], 'The missing DST hour must stay empty.');
 
+foreach (['minimum' => 10.0, 'maximum' => 20.0, 'consumption' => 30.0] as $metric => $expected) {
+    $reduced = HeatmapAggregation::ByWeekdayAndHour([[1792886400, 10], [1792890000, 20]], 'Europe/Berlin', $metric);
+    heatmapAssert(
+        $reduced === [['hour' => 2, 'weekday' => 6, 'value' => $expected, 'count' => 2]],
+        'Each metric must combine both real repeated local hours according to its own reducer.'
+    );
+}
+heatmapAssert(
+    HeatmapAggregation::ByWeekdayAndHour([[1, -2], [2, 0]], 'UTC', 'minimum')[0]['value'] === -2.0,
+    'Standard minima must preserve signed values and measured zero.'
+);
+foreach (['consumption', 'unsupported'] as $metric) {
+    try {
+        HeatmapAggregation::ByWeekdayAndHour([[1, -1]], 'UTC', $metric);
+        throw new RuntimeException('Invalid metrics and negative consumption must fail.');
+    } catch (InvalidArgumentException) {
+    }
+}
+try {
+    HeatmapAggregation::ByWeekdayAndHour([[1, PHP_FLOAT_MAX], [2, PHP_FLOAT_MAX]], 'UTC', 'consumption');
+    throw new RuntimeException('Consumption overflow must fail.');
+} catch (InvalidArgumentException) {
+}
+
 foreach ([[[1, INF]], [[1, PHP_FLOAT_MAX], [2, PHP_FLOAT_MAX]], [[1, 2], [1, 3]], [[2, 2], [1, 3]]] as $invalid) {
     try {
         HeatmapAggregation::ByWeekdayAndHour($invalid, 'UTC');

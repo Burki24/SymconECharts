@@ -78,7 +78,18 @@
             ? date.slice(8, 10) + '.' + date.slice(5, 7) + '.' + date.slice(0, 4) : '';
     }
 
-    function rangeLabel(range) {
+    function metricOf(heatmap) { return heatmap.metric || 'average'; }
+
+    function metricLabel(metric) {
+        return translate({ average: 'Average of hourly means', minimum: 'Minimum of hourly minima',
+            maximum: 'Maximum of hourly maxima', consumption: 'Sum of hourly consumption' }[metric] || metric);
+    }
+
+    function rangeLabel(range, metric) {
+        if (metric !== 'average') {
+            return translate({ '1w': '1 week', '1m': '1 month', '3m': '3 months',
+                '6m': '6 months', '12m': '12 months', 'ytd': 'Since January 1' }[range] || range);
+        }
         return translate({
             '1w': '1 week', '1m': '1-month average', '3m': '3-month average',
             '6m': '6-month average', '12m': '12-month average',
@@ -101,7 +112,7 @@
         todayElement.textContent = translate('Today');
         currentOffset = Math.max(0, Number(heatmap.windowOffset) || 0);
         periodLabelElement.textContent = dateLabel(heatmap.startDate) + ' – ' + dateLabel(heatmap.endDate)
-            + ' (' + rangeLabel(heatmap.range) + ')';
+            + ' (' + rangeLabel(heatmap.range, metricOf(heatmap)) + ') · ' + metricLabel(metricOf(heatmap));
         previousElement.disabled = navigating || currentOffset >= maxOffset(heatmap);
         nextElement.disabled = navigating || currentOffset === 0;
         todayElement.disabled = navigating || currentOffset === 0;
@@ -200,7 +211,8 @@
                 ? 'transparent' : colors.background,
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
             aria: { enabled: true, description: String(heatmap.title || translate('Heatmap'))
-                + ': ' + dateLabel(heatmap.startDate) + ' – ' + dateLabel(heatmap.endDate) },
+                + ': ' + dateLabel(heatmap.startDate) + ' – ' + dateLabel(heatmap.endDate)
+                + ', ' + metricLabel(metricOf(heatmap)) },
             title: {
                 show: Boolean(heatmap.title), text: String(heatmap.title || ''), left: 'center', top: headerInset + 26,
                 textStyle: { color: style.titleColor || colors.text, fontSize: titleSize }
@@ -216,12 +228,15 @@
                         ? weekdays[datedDays[value[1]].weekday] + ' ' + dateLabel(datedDays[value[1]].date)
                         : days[value[1]] || '';
                     var intervalCount = String(data.count || 1);
-                    var intervalInfo = heatmap.range && heatmap.range !== '1w'
-                        ? translate('Average of {count} hourly intervals').replace('{count}', intervalCount)
-                        : intervalCount + ' ' + translate('Hourly intervals');
+                    var intervalInfo = translate({ average: 'Average of {count} hourly intervals',
+                        minimum: 'Minimum of {count} hourly intervals', maximum: 'Maximum of {count} hourly intervals',
+                        consumption: 'Consumption total of {count} hourly intervals' }[metricOf(heatmap)]
+                        || 'Average of {count} hourly intervals').replace('{count}', intervalCount);
                     return escapeHTML(dayLabel) + ', ' + escapeHTML(String(value[0]).padStart(2, '0'))
                         + ':00<br>' + escapeHTML(formatValue(value[2], decimals, heatmap.unit || ''))
-                        + '<br>' + escapeHTML(intervalInfo);
+                        + '<br>' + escapeHTML(metricLabel(metricOf(heatmap)))
+                        + '<br>' + escapeHTML(intervalInfo)
+                        + '<br>' + escapeHTML(dateLabel(heatmap.startDate) + ' – ' + dateLabel(heatmap.endDate));
                 }
             },
             xAxis: {
@@ -356,6 +371,7 @@
         updatePeriod(currentState.chart.heatmap || {},
             bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8);
         var range = currentState.chart.heatmap.range;
+        var metric = metricOf(currentState.chart.heatmap);
         try {
             fetch(stateURL(offset), { method: 'GET', cache: 'no-store', credentials: 'same-origin',
                 headers: { Accept: 'application/json' } })
@@ -366,6 +382,8 @@
                 .then(function (state) {
                     if (!state || state.status !== 'ready' || !state.chart
                         || state.chart.heatmap.range !== range
+                        || metricOf(state.chart.heatmap) !== metric
+                        || !currentState || !currentState.chart || metricOf(currentState.chart.heatmap) !== metric
                         || state.chart.heatmap.windowOffset !== offset) {
                         throw new Error('Heatmap state response is invalid.');
                     }
@@ -400,7 +418,8 @@
         if (!state) { return; }
         if (currentOffset > 0 && state.chart && state.chart.heatmap
             && state.chart.heatmap.windowOffset === 0 && currentState && currentState.chart
-            && state.chart.heatmap.range === currentState.chart.heatmap.range) {
+            && state.chart.heatmap.range === currentState.chart.heatmap.range
+            && metricOf(state.chart.heatmap) === metricOf(currentState.chart.heatmap)) {
             navigate(currentOffset);
             return;
         }

@@ -65,9 +65,12 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Aktuelle Mengenflüsse zwischen manuell angelegten Knoten liegen im eigenen
   Gerätemodul `EChartsSankey`; Verbindungsbreiten folgen numerischen
   Quellvariablen, Zyklen und negative Werte sind unzulässig.
-  Archivierte Tagesmittelwerte einer einzelnen Standardvariable liegen im
-  eigenen Gerätemodul `EChartsCalendar`; Zähler und laufende Tage sind
-  ausgeschlossen. Das Jahreslayout ist kein Modus der Stunden-Heatmap.
+  Archivierte Tageskennzahlen einer einzelnen numerischen Variable liegen im
+  eigenen Gerätemodul `EChartsCalendar`; Mittelwert, Minimum und Maximum
+  erfordern Standardarchive, der ausdrücklich gewählte Zählerverbrauch ein
+  Zählerarchiv gemäß ADR 0062. Laufende Tage bleiben ausgeschlossen.
+  Das Jahreslayout ist kein Modus der Stunden-Heatmap. Auch deren stündliche
+  Kennzahlen und Wochentag-/Stundenreduktion folgen ADR 0062.
   Aktuelle Vergleichsgruppen auf expliziten normierten Achsen liegen im eigenen
   Gerätemodul `EChartsRadar` gemäß ADR 0053; keine Archive oder automatische
   Qualitätsbewertung. Werte außerhalb des Bereichs werden nur optisch begrenzt.

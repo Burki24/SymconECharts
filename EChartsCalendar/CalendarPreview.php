@@ -12,18 +12,23 @@ trait CalendarPreview
         $get = fn (string $name, string $type = 'integer'): mixed => $this->BarPreviewValue($values, $name, $type, $ipsView);
         $palette = EChartsBarPreview::Palette($get('EChartsTheme', 'string'));
         $color = fn (string $name, string $fallback): string => EChartsBarPreview::Color($get($name), $fallback);
+        $metricLabel = match ((string) ($values['Metric'] ?? $this->ReadPropertyString('Metric'))) {
+            'minimum' => 'Daily minimum', 'maximum' => 'Daily maximum', 'consumption' => 'Daily consumption',
+            default   => 'Daily mean'
+        };
         $svg = EChartsBarPreview::Open(
             $palette,
             (string) ($values['Title'] ?? $this->ReadPropertyString('Title')),
             true,
             $ipsView,
             $values,
-            $this->Translate('Example data'),
+            $this->Translate('Example data') . ' · ' . $this->Translate($metricLabel),
             $this->Translate('Calendar preview'),
             $color('TitleColor', $palette['text']),
             $get('TitleFontSizePercent')
         );
         $svg = str_replace('<svg xmlns', '<svg font-family="Arial, sans-serif" xmlns', $svg);
+        $svg .= '<desc>' . EChartsBarPreview::E($this->Translate($metricLabel)) . '</desc>';
         $year = (int) ($values['Year'] ?? $this->ReadPropertyInteger('Year'));
         try {
             $window = CalendarData::Resolve($year, 0, $this->CurrentTimestamp(), date_default_timezone_get());

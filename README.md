@@ -14,7 +14,9 @@ manuell festgelegten Gruppen und aktuellen numerischen Variablenwerten.
 Parallelkoordinaten verbinden archivierte Variablenwerte je gemeinsamem
 Stunden- oder Tagesintervall.
 Sankey zeigt aktuelle Mengenflüsse zwischen manuell angelegten Knoten.
-Calendar stellt archivierte Tagesmittelwerte als farbigen Jahreskalender dar.
+Calendar stellt archivierte Tageskennzahlen als farbigen Jahreskalender dar.
+Calendar und Heatmap bieten Mittelwert, Minimum und Maximum für Standardarchive
+oder ausdrücklich ausgewählten Zählerverbrauch für Zählerarchive.
 Radar vergleicht aktuelle Messwerte manuell angelegter Gruppen auf gemeinsam
 festgelegten Achsen mit eigenen Wertebereichen und Einheiten.
 Boxplot vergleicht die Verteilung abgeschlossener Archiv-Stundenmittelwerte.
@@ -101,7 +103,8 @@ können unabhängig davon individuell vergeben werden.
   Kachel und IPSView besitzen getrennte Designer und aktuelle Vorschauen.
 
 - __EChartsCalendar__ ([Dokumentation](EChartsCalendar/README.md))
-  Jahreskalender für die Tagesmittelwerte einer numerischen Archivvariable.
+  Jahreskalender für Tagesmittelwerte, -minima, -maxima oder Zählerverbrauch
+  einer numerischen Archivvariable.
   Fehlende Tage bleiben leer; die Jahresnavigation verändert keine
   Konfiguration. Kachel und IPSView besitzen getrennte Designer.
 
@@ -216,7 +219,8 @@ können unabhängig davon individuell vergeben werden.
 
 - __EChartsHeatmap__ ([Dokumentation](EChartsHeatmap/README.md))
   Zeigt abgeschlossene stündliche Archivwerte einer numerischen Variable als
-  sieben datierte Tage oder über längere Kalenderzeiträume gemittelte Wochentage.
+  sieben datierte Tage oder über längere Kalenderzeiträume zusammengefasste
+  Wochentage. Wählbar sind Mittelwert, Minimum, Maximum und Zählerverbrauch.
   Kachel und optionales IPSView-Widget besitzen Zeitraum-Navigation,
   getrennte Designer und Live-Vorschauen.
 

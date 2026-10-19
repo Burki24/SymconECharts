@@ -8,7 +8,7 @@ use DateTimeImmutable;
 use DateTimeZone;
 use InvalidArgumentException;
 
-/** Local calendar days; means come directly from completed Symcon daily archive aggregates. */
+/** Local calendar days; values come directly from completed Symcon daily archive aggregates. */
 final class CalendarData
 {
     public static function Resolve(int $configuredYear, int $offset, int $now, string $timezone): array
@@ -38,9 +38,10 @@ final class CalendarData
     }
 
     /** No interpolation, zero filling or re-averaging of daily values. */
-    public static function Cells(array $points, array $window): array
+    public static function Cells(array $points, array $window, string $metric = 'average'): array
     {
-        if (!array_is_list($points) || count($points) > 366) {
+        if (!in_array($metric, ['average', 'minimum', 'maximum', 'consumption'], true)
+            || !array_is_list($points) || count($points) > 366) {
             throw new InvalidArgumentException('Invalid Calendar archive points.');
         }
         $zone = new DateTimeZone($window['Timezone']);
@@ -51,7 +52,8 @@ final class CalendarData
             if (!is_array($point) || !array_is_list($point) || count($point) !== 2
                 || !is_int($point[0]) || $point[0] <= $previous
                 || $point[0] < $window['StartTimestamp'] || $point[0] > $window['EndTimestamp']
-                || (!is_int($point[1]) && !is_float($point[1])) || !is_finite((float) $point[1])) {
+                || (!is_int($point[1]) && !is_float($point[1])) || !is_finite((float) $point[1])
+                || ($metric === 'consumption' && $point[1] < 0)) {
                 throw new InvalidArgumentException('Invalid Calendar archive points.');
             }
             $local = (new DateTimeImmutable('@' . $point[0]))->setTimezone($zone);
@@ -60,7 +62,7 @@ final class CalendarData
             // begins during the day). The query fixes its daily aggregation level;
             // use the local date, not an assumed midnight alignment.
             if (isset($dates[$date])) {
-                throw new InvalidArgumentException('Calendar needs one daily archive mean per local date.');
+                throw new InvalidArgumentException('Calendar needs one daily archive value per local date.');
             }
             $dates[$date] = true;
             $previous = $point[0];

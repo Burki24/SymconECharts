@@ -114,6 +114,24 @@ assert.match(month.periodLabelElement.textContent, /01\.09\.2026 – 30\.09\.202
 assert.match(month.option.tooltip.formatter({ data: month.option.series[0].data[1] }),
     /Average of 4 hourly intervals/,
     'A calendar-month cell must identify the averaging behind its displayed value.');
+for (const [metric, label, countLabel] of [
+    ['minimum', 'Minimum of hourly minima', 'Minimum of 4 hourly intervals'],
+    ['maximum', 'Maximum of hourly maxima', 'Maximum of 4 hourly intervals'],
+    ['consumption', 'Sum of hourly consumption', 'Consumption total of 4 hourly intervals']
+]) {
+    for (const mode of ['symcon', 'ipsview']) {
+        const view = render({ ...model, heatmap: { ...month.window.SYMC_VISUALIZATION.state.chart.heatmap,
+            metric, unit: '<kWh&>' } }, 600, 400, mode);
+        assert.match(view.periodLabelElement.textContent, /\(1 month\)/);
+        assert.ok(!view.periodLabelElement.textContent.includes('average'));
+        assert.ok(view.periodLabelElement.textContent.includes(label));
+        assert.ok(view.option.aria.description.includes(label));
+        const tooltip = view.option.tooltip.formatter({ data: view.option.series[0].data[1] });
+        assert.ok(tooltip.includes(countLabel));
+        assert.match(tooltip, /01\.09\.2026 – 30\.09\.2026/);
+        assert.ok(tooltip.includes('&lt;kWh&amp;&gt;') && !tooltip.includes('<kWh&>'));
+    }
+}
 for (const [range, label] of [
     ['3m', '3-month average'], ['6m', '6-month average'],
     ['12m', '12-month average'], ['ytd', 'Since January 1 average']
@@ -222,7 +240,7 @@ assert.deepEqual(Array.from(invalidPreset.option.visualMap.inRange.color), ['#12
     'Malformed palette data must fall back to the legacy two-color design.');
 assert.equal(wide.option.series[0].label.show, true);
 assert.equal(wide.emptyElement.hidden, true, 'Populated data must not show the empty-state hint.');
-assert.match(wide.option.tooltip.formatter({ data: wide.option.series[0].data[1] }), /4 Hourly intervals/);
+assert.match(wide.option.tooltip.formatter({ data: wide.option.series[0].data[1] }), /Average of 4 hourly intervals/);
 const beforeClick = wide.option;
 wide.window.handleMessage({ type: 'click' });
 assert.equal(wide.option, beforeClick, 'An unrelated click must not clear the chart.');
@@ -350,6 +368,15 @@ async function verifyNavigation() {
         'A failed historical request must retain the last good Heatmap.');
     assert.equal(failing.warningElement.hidden, false,
         'A failed historical request must be visible without replacing the chart.');
+    let resolveOld;
+    const changing = render(datedModel, 600, 400, 'symcon', () => new Promise(resolve => { resolveOld = resolve; }));
+    changing.click('previous');
+    changing.window.handleMessage({ status: 'ready', chart: { ...datedModel,
+        heatmap: { ...datedModel.heatmap, metric: 'maximum' } } });
+    resolveOld({ ok: true, json: () => Promise.resolve({ status: 'ready', chart: previousModel }) });
+    await new Promise(resolve => setImmediate(resolve));
+    assert.ok(changing.periodLabelElement.textContent.includes('Maximum of hourly maxima'),
+        'A delayed average navigation response must not overwrite a newly selected maximum metric.');
 }
 
 verifyNavigation().then(() => console.log('Heatmap renderer layout verified.'))

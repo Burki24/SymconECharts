@@ -53,4 +53,13 @@ foreach ([-1, 9999] as $offset) {
     } catch (InvalidArgumentException) {
     }
 }
+try {
+    CalendarData::Cells($partialPoints, $leap, 'consumption');
+    throw new RuntimeException('Negative daily consumption was accepted.');
+} catch (InvalidArgumentException) {
+}
+checkCalendar(
+    CalendarData::Cells([[$points[0][0], 0.0]], $leap, 'consumption')[0]['value'] === 0.0,
+    'A genuine zero consumption day must remain present.'
+);
 echo "Calendar day windows and archive points verified.\n";
