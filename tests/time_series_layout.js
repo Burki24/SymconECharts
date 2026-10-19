@@ -14,6 +14,7 @@ const designSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts
 const zoomSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-zoom.js'), 'utf8');
 const patternSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-pattern.js'), 'utf8');
 const startupSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-startup.js'), 'utf8');
+const selectionSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-series-selection.js'), 'utf8');
 const palette = {
     background: '#202020', text: '#ffffff', muted: '#aaaaaa', border: '#cccccc', track: '#444444',
     accent: '#55cbb5', seriesColors: ['#111111', '#222222', '#333333']
@@ -198,6 +199,7 @@ function render(
     vm.runInNewContext(zoomSource, context);
     vm.runInNewContext(patternSource, context);
     vm.runInNewContext(startupSource, context);
+    vm.runInNewContext(selectionSource, context);
     vm.runInNewContext(source, context);
     while (scheduled.length > 0) { scheduled.shift()(); }
     if (!deferredStartup) { assert.ok(option, 'The time-series chart should be rendered.'); }

@@ -1,5 +1,41 @@
 # Tests
 
+## BarHistory: 32 Reihen mit gemeinsamer Reihenauswahl
+
+`php tests/gateway_gauges.php --bar-history-many` prüft echte Gateway-
+Operationen mit synthetischen Kernel-Archiven: 32/33 Quellen, 200/32000/32001
+Budget, Default 1000 und bestehende 16er-Listen ohne Konfigurationsänderung,
+16/17 Einheitengruppen, versteckte Quellen mit unverändertem Budgetanteil,
+Rohzeitstempel/Lücken, Aggregationsmodi und Reducer. Beide komprimierten
+HTML-Startzustände werden exakt entpackt und mit dem vollständigen Modell
+verglichen. Gleichnamige Quellen bleiben getrennt. Große gültige SVGs,
+900000-Byte-Modellfehler und finaler HTML-Guard werden separat geprüft.
+Die Vorschauprüfungen umfassen 0/32 und spät sichtbare Quellen mit erhaltenen
+Farben, kompakten sichtbaren Achsen und gekennzeichnetem Ausschnitt.
+
+Messung am 19.10.2026: Modell mit 32000 Punkten 588488 Bytes, Kachel 891877
+Bytes, IPSView 895164 Bytes. Ein fast 256 KiB großes SVG mit 32 langen Namen
+und kleinerem Punktbudget ergibt 714789/718076 Bytes HTML und 321397 Bytes
+Formular. Ein großes Muster plus maximales Punktbudget kann das Modellbudget
+überschreiten; dies ist ausdrücklich kein versprochenes Kombinationsmaximum.
+Das Gesamttest-Speicherlimit bleibt 128 MiB. Abgeschlossene historische
+Testobjekte und HTML-/Formular-Snapshots werden vor den nachfolgenden Familien
+freigegeben; die Lastprüfung läuft separat mit demselben Limit.
+
+`node tests/bar_history_layout.js` und `node tests/time_series_layout.js`
+prüfen den gemeinsam extrahierten Auswahlbaustein mit der echten gepinnten
+ECharts-Runtime: 32×1000 Punkte, Auswahl/Alle/Umkehren/keine Reihe,
+gleiche Namen und ID-Identität, Legendenanker, Update/Reorder/Removal/Resize,
+Zeitzoom, sichtbare Achsen und Balkenbreiten sowie Start-Dekomprimierung mit
+neueren Vollzuständen und Unload. Die vollständigen Daten bleiben erhalten.
+
+`node tests/bar_history_browser.mjs` bietet eine synthetische lokale
+Canvas-Fixture auf Port 8817. Am 19.10.2026 wurden schmale Kachel und breite
+IPSView-Ausgabe mit 32 Reihen/32000 Punkten visuell geprüft. Native
+Legendenwahl und Zeitzoom blieben nach Refresh und Umsortierung erhalten.
+Die Live-Abnahme dieser Erweiterung nach Modulupdate steht noch aus;
+Symcon-Konfigurationen und Archive wurden nicht verändert.
+
 ## Größere manuelle Graphen
 
 `php tests/graph_model.php` prüft 300 Knoten/1000 Kanten, N+1, gleiche Namen

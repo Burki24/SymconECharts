@@ -13,12 +13,21 @@
         {
             "type": "List",
             "name": "Sources",
-            "caption": "Archive sources (1 to 16)",
+            "caption": "Archive sources (1 to 32)",
             "rowCount": 6,
             "add": true,
             "delete": true,
             "changeOrder": true,
             "columns": [
+                {
+                    "caption": "Initially visible",
+                    "name": "InitiallyVisible",
+                    "width": "120px",
+                    "add": true,
+                    "edit": {
+                        "type": "CheckBox"
+                    }
+                },
                 {
                     "caption": "Variable",
                     "name": "VariableID",
@@ -138,6 +147,11 @@
             ],
             "form": [
                 {
+                    "type": "CheckBox",
+                    "name": "InitiallyVisible",
+                    "caption": "Initially visible"
+                },
+                {
                     "type": "SelectVariable",
                     "name": "VariableID",
                     "caption": "Variable",
@@ -203,6 +217,10 @@
                     "transparentCaption": "Automatic (theme)"
                 }
             ]
+        },
+        {
+            "type": "Label",
+            "caption": "The total point budget is shared by all configured sources, including initially hidden rows. Up to 16 effective unit groups are supported."
         },
         {
             "type": "RowLayout",
@@ -329,7 +347,7 @@
                     "name": "PointBudget",
                     "caption": "Point budget",
                     "minimum": 200,
-                    "maximum": 2000,
+                    "maximum": 32000,
                     "width": "160px"
                 }
             ]
@@ -638,7 +656,7 @@
         {
             "code": 201,
             "icon": "error",
-            "caption": "Configure 1 to 16 valid Historical Bar sources."
+            "caption": "Configure 1 to 32 valid Historical Bar sources."
         },
         {
             "code": 202,

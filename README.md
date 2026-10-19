@@ -201,13 +201,16 @@ können unabhängig davon individuell vergeben werden.
   Category-Bar-Vertrag. Große Kategorienlisten besitzen eine Navigation.
 
 - __EChartsBarHistory__ ([Dokumentation](EChartsBarHistory/README.md))
-  Stellt rohe oder aggregierte Archivwerte von 1 bis 16 numerischen Variablen
+  Stellt rohe oder aggregierte Archivwerte von 1 bis 32 numerischen Variablen
   als vertikale Balken auf einer Zeitachse dar. Mehrere Reihen stehen
   nebeneinander; verschiedene Einheiten erhalten eigene Wertachsen. Zeitraum,
   Punktbudget, Beschriftung, Reduzierer, Farbe und Kacheldesign sind konfigurierbar.
   Der Zeitraum kann in Kachel und IPSView mit Regler oder Mausrad gezoomt werden.
   IPSView kann optional einen eigenen Zeitraum und ein eigenes Design verwenden;
   eine Begrenzung von Rohwerten wird sichtbar gemeldet.
+  Die scrollbare Legende erlaubt Reihenauswahl und Anfangssichtbarkeit.
+  Das Gesamtpunktbudget reicht bis 32.000 (Standard weiterhin 1.000,
+  höchstens 2.000 je Quelle); ausgeblendete Reihen behalten ihren Budgetanteil.
 
 - __EChartsBarWaterfall__ ([Dokumentation](EChartsBarWaterfall/README.md))
   Zeigt einen aktuellen Startwert und bis zu 15 geordnete Änderungen mit

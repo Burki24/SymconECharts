@@ -9,6 +9,14 @@
 
 ## Neu
 
+- EChartsBarHistory unterstützt bis zu 32 Quellen und 32.000 Gesamtpunkte
+  bei unverändertem Standardbudget von 1.000. Scrollbare Reihenauswahl mit
+  Alle/Umkehren und Anfangssichtbarkeit erhält Auswahl und Zeitzoom bei
+  Aktualisierungen. Ausgeblendete Reihen behalten ihren Budgetanteil;
+  vorhandene Konfigurationen und bis zu 16 Einheitengruppen bleiben nutzbar.
+  Große Startzustände werden verlustfrei komprimiert, übergroße Ausgaben
+  ausdrücklich gemeldet und Vorschauausschnitte gekennzeichnet.
+
 - EChartsTimeSeries unterstützt bis zu 32 Reihen und ein einstellbares
   Gesamtpunktbudget bis 32.000 bei unverändertem Standard von 2.000 Punkten.
   Die scrollbare Legende bietet Einzel-, Gesamt- und Umkehrauswahl; jede Quelle

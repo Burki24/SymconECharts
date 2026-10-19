@@ -929,7 +929,8 @@ class EChartsTimeSeries extends IPSModuleStrict
             'replacements'       => [
                 '{{ECHARTS_SCRIPT}}'           => EChartsAsset::TimeSeriesJavaScript(),
                 '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
-                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript() . "\n" . EChartsAsset::StartupJavaScript(),
+                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript() . "\n" . EChartsAsset::StartupJavaScript()
+                    . "\n" . EChartsAsset::SeriesSelectionJavaScript(),
                 '{{ECHARTS_ZOOM_SCRIPT}}'      => EChartsAsset::ZoomJavaScript(),
                 '{{ECHARTS_PATTERN_SCRIPT}}'   => EChartsAsset::PatternJavaScript(),
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''

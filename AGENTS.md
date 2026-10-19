@@ -38,7 +38,10 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Reihenauswahl und einem gemeinsamen Punktbudget bis 32000.
   Aktuelle Kategorienvergleiche liegen im
   eigenen Gerätemodul `EChartsBarCategory`; historische Balken liegen im
-  eigenen Gerätemodul `EChartsBarHistory`. Waterfall-Balken mit aktuellem
+  eigenen Gerätemodul `EChartsBarHistory`, gemäß ADR 0068 mit bis zu 32 Quellen,
+  16 Einheitengruppen und bis zu 32000 Gesamtpunkten. Die ID-stabile flüchtige
+  Reihenauswahl wird mit TimeSeries geteilt; Fachmodelle bleiben getrennt.
+  Waterfall-Balken mit aktuellem
   Startwert, signierten Änderungen und berechneter Endsumme liegen im eigenen
   Gerätemodul `EChartsBarWaterfall`. Polar-Balken für aktuelle Werte liegen im
   eigenen Gerätemodul `EChartsBarPolar` und sind kein Modus dieser Instanzen.

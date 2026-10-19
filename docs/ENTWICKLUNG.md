@@ -21,6 +21,20 @@ IPSView nur den Diagrammtitel benötigt.
 
 ## Aktueller Stand und Zielarchitektur
 
+EChartsBarHistory erweitert gemäß
+[ADR 0068](adr/0068-historical-bar-series-selection.md) auf 32 Quellen und
+200–32000 Gesamtpunkte, behält aber Default 1000, 2000 je Abfrage/Reihe und
+bis zu 16 effektive Einheitengruppen. Archivzeitstempel werden nicht
+ausgerichtet oder ergänzt. Die gemeinsame ID-stabile Auswahllogik von
+TimeSeries und BarHistory liegt in `echarts-series-selection.js`, eingebettet
+über `EChartsAsset::SeriesSelectionJavaScript()`. Native Auswahl und
+Legendenanker bleiben flüchtig; Zeitzoom nutzt weiter `echarts-zoom.js`.
+BarHistory verwendet außerdem den vorhandenen `EChartsStartupState` und
+`echarts-startup.js`, mit Modellgrenze 900000 Bytes und finalem 1-MiB-HTML-Guard.
+Die Vorschau zeichnet höchstens drei anfangs sichtbare Quellen mit ursprünglichen
+Farbindizes, ohne Archive zu lesen. Familiengeometrie und Einheitengrenzen
+werden nicht in den Auswahlbaustein verschoben.
+
 EChartsTimeSeries unterstützt gemäß
 [ADR 0067](adr/0067-timeseries-more-series-and-selection.md) 32 Quellen und
 200–32000 Gesamtpunkte bei unverändertem Default 2000 und höchstens 2000 je
@@ -41,7 +55,7 @@ Das Script wird nur in den beiden Graph-Familien eingebettet.
 `EChartsStartupState` und `echarts-startup.js` verpacken große HTML-sichere
 Startzustände oberhalb von 200000 Bytes verlustfrei komprimiert und entpacken
 sie abbrechbar. TimeSeries und die Graph-Familien verwenden diese gemeinsame
-Logik; `EChartsGraphOutput` bleibt kompatibler Adapter. Kleine Zustände bleiben
+Logik, ebenso BarHistory; `EChartsGraphOutput` bleibt kompatibler Adapter. Kleine Zustände bleiben
 direkt. Neuere Vollzustände und Unload verwerfen veraltete Entpackergebnisse;
 TimeSeries sammelt währenddessen höchstens 32000 Append-Punkte und spielt sie
 nach dem Start gebündelt ein. Numeric-Typen einschließlich Float-Null bleiben
@@ -186,7 +200,7 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 | Gerät | EChartsGaugeChronograph | Chronograph mit 2 bis 5 individuell gestaltbaren Instrumenten |
 | Gerät | EChartsTimeSeries | Historische und live fortgeschriebene Linien und Flächen für 1 bis 32 Quellen, Reihenauswahl, bis zu acht links/rechts angeordnete Einheitengruppen sowie getrenntes Kachel- und IPSView-Design |
 | Gerät | EChartsBarCategory | Aktuelle einfache, gruppierte oder gestapelte Kategorienvergleiche für 1 bis 100 Quellen mit gemeinsamer Einheit, Kategoriennavigation, optionalem Min-/Max-Farbverlauf und getrenntem Kachel- und IPSView-Design |
-| Gerät | EChartsBarHistory | Historische rohe oder aggregierte Balken von 1 bis 16 Archivquellen auf einer Zeitachse in einer nativen Kachel und optionalem IPSView-HTML |
+| Gerät | EChartsBarHistory | Historische rohe oder aggregierte Balken von 1 bis 32 Archivquellen, bis 16 Einheitengruppen und Reihenauswahl in nativer Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsBarWaterfall | Aktueller Startwert mit 1 bis 15 signierten Änderungen und berechneter Endsumme in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsBarPolar | Aktuelle Werte aus 1 bis 16 Quellen als radiale Balken oder konzentrische Bögen in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsPie | Aktuelle nichtnegative Anteile aus 1 bis 16 Quellen als Kreis, Donut oder Nightingale-Rose in Kachel und optionalem IPSView-HTML |

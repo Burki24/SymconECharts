@@ -11,10 +11,7 @@
     var currentTheme = null;
     var zoomController = window.SymconEChartsZoom;
     var areaPatterns = window.SymconEChartsPattern.create(schedulePatternRender);
-    var selectedSeries = Object.create(null);
-    var initialSelection = Object.create(null);
-    var legendAnchor = null;
-    var previousSeriesIDs = [];
+    var seriesSelection = window.SYMC_ECHARTS_SERIES_SELECTION.create();
     var startupPending = Boolean(bootstrap.options && bootstrap.options.compressedStateGzipBase64);
     var pendingAppends = [];
     // Startup queues share the maximum accepted model point budget, not an unbounded history.
@@ -24,37 +21,6 @@
         return String(value == null ? '' : value).replace(/[&<>"']/g, function (character) {
             return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character];
         });
-    }
-
-    function captureSelection() {
-        if (!chart || typeof chart.getOption !== 'function') { return; }
-        var option = chart.getOption();
-        var legend = option && (Array.isArray(option.legend) ? option.legend[0] : option.legend);
-        if (!legend) { return; }
-        previousSeriesIDs.forEach(function (id) {
-            if (legend.selected && typeof legend.selected[id] === 'boolean') {
-                selectedSeries[id] = legend.selected[id];
-            }
-        });
-        var pageIndex = Number(legend.scrollDataIndex);
-        if (Number.isInteger(pageIndex) && pageIndex >= 0 && pageIndex < previousSeriesIDs.length) {
-            legendAnchor = previousSeriesIDs[pageIndex];
-        }
-    }
-
-    function reconcileSelection(series) {
-        var nextSelected = Object.create(null);
-        var nextInitial = Object.create(null);
-        series.forEach(function (item) {
-            var initiallyVisible = item.initiallyVisible !== false;
-            nextInitial[item.id] = initiallyVisible;
-            nextSelected[item.id] = Object.prototype.hasOwnProperty.call(selectedSeries, item.id)
-                && initialSelection[item.id] === initiallyVisible
-                ? selectedSeries[item.id] : initiallyVisible;
-        });
-        selectedSeries = nextSelected;
-        initialSelection = nextInitial;
-        previousSeriesIDs = series.map(function (item) { return item.id; });
     }
 
     function translate(text) {
@@ -185,7 +151,7 @@
         var colors = colorsFor(theme);
         var axes = Array.isArray(model.axes) ? model.axes : [];
         var series = Array.isArray(model.series) ? model.series : [];
-        reconcileSelection(series);
+        var selectedSeries = seriesSelection.reconcile(series);
         var activeAxes = axes.map(function (_, index) {
             return series.some(function (item) { return item.axisIndex === index && selectedSeries[item.id]; });
         });
@@ -286,7 +252,7 @@
                 left: 12,
                 right: 12,
                 selected: Object.assign({}, selectedSeries),
-                scrollDataIndex: Math.max(0, previousSeriesIDs.indexOf(legendAnchor)),
+                scrollDataIndex: seriesSelection.scrollDataIndex(),
                 selector: series.length > 1 ? [
                     { type: 'all', title: translate('All') },
                     { type: 'inverse', title: translate('Invert') }
@@ -538,7 +504,7 @@
         var previousRange = currentState && currentState.chart && currentState.chart.range;
         var nextRange = state && state.chart && state.chart.range;
         var savedZoom = zoomController.capture(chart, previousRange, nextRange);
-        captureSelection();
+        seriesSelection.capture(chart);
         currentState = state;
         if (!state || state.status !== 'ready' || !state.chart) {
             displayError(state && state.error);
@@ -634,7 +600,7 @@
             if (currentState && currentState.status === 'ready' && currentState.chart) {
                 var range = currentState.chart.range;
                 var savedZoom = zoomController.capture(chart, range, range);
-                captureSelection();
+                seriesSelection.capture(chart);
                 zoomController.apply(chart, buildOption(currentState.chart, currentTheme), savedZoom);
             }
         }).observe(chartElement);

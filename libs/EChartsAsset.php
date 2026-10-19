@@ -541,6 +541,16 @@ final class EChartsAsset
         return self::StartupJavaScript() . "\n" . self::NormalizeLineEndings($content);
     }
 
+    /** Loads ID-stable selection and legend navigation shared by historical charts. */
+    public static function SeriesSelectionJavaScript(): string
+    {
+        $content = @file_get_contents(__DIR__ . '/echarts-series-selection.js');
+        if ($content === false || $content === '') {
+            throw new RuntimeException('The shared series selection utilities could not be loaded.');
+        }
+        return self::NormalizeLineEndings($content);
+    }
+
     /** Loads lossless startup decoding for families with compressed initial states. */
     public static function StartupJavaScript(): string
     {

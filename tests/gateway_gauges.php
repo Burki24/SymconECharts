@@ -855,6 +855,16 @@ final class TestableEChartsBarHistory extends EChartsBarHistory
     {
         return $this->currentTimestamp;
     }
+
+    protected function LoadConfigurationForm(): array
+    {
+        return json_decode(file_get_contents(dirname(__DIR__) . '/EChartsBarHistory/form.json'), true, 512, JSON_THROW_ON_ERROR);
+    }
+
+    protected function VisualizationAsset(string $filename): string
+    {
+        return (string) file_get_contents(dirname(__DIR__) . '/EChartsBarHistory/visualization/' . $filename);
+    }
 }
 
 final class TestableEChartsScatter extends EChartsScatter
@@ -972,6 +982,12 @@ assertGatewayGauge(
     'The Gateway must own the shared SymconECharts WebHook.'
 );
 IPSModuleStrict::$ParentResponder = static fn (string $json): string => $gateway->ForwardData($json);
+
+if (array_slice($argv, 1) === ['--bar-history-many']) {
+    require __DIR__ . '/bar_history_many.php';
+    echo "BarHistory 32-source integration verified.\n";
+    exit(0);
+}
 
 if (array_slice($argv, 1) === ['--time-series-many']) {
     require __DIR__ . '/time_series_many.php';
@@ -6728,22 +6744,10 @@ $limitBarHistory->ApplyChanges();
 assertGatewayGauge(
     json_decode($limitBarHistory->GetBarHistoryDiagnostic(), true, 512, JSON_THROW_ON_ERROR)['valid'] === true
         && count($limitBarHistory->GetTestReferences()) === 16,
-    'Historical Bar must accept 16 distinct numeric source IDs.'
+    'Historical Bar must continue accepting legacy 16-source lists.'
 );
-$GLOBALS['symconTestVariables'][5116] = [
-    'VariableType' => 2, 'VariableUpdated' => 1780000200, 'Value' => 20.0, 'Name' => 'Source 16'
-];
-$limitBarSources[] = [
-    'VariableID' => 5116, 'Label' => '', 'UseVariablePresentation' => false,
-    'Unit'       => '°C', 'Decimals' => 1
-];
-$limitBarHistory->SetTestProperty('Sources', json_encode($limitBarSources, JSON_THROW_ON_ERROR));
-$limitBarHistory->ApplyChanges();
-assertGatewayGauge(
-    $limitBarHistory->GetTestStatus() === 201,
-    'Historical Bar must reject more than 16 sources without truncating the configuration.'
-);
-for ($variableID = 5100; $variableID <= 5116; ++$variableID) {
+// 32/33-source stress coverage runs in the isolated --bar-history-many integration.
+for ($variableID = 5100; $variableID < 5116; ++$variableID) {
     unset($GLOBALS['symconTestVariables'][$variableID]);
 }
 
@@ -6768,6 +6772,15 @@ assertGatewayGauge(
     $invalidBarDesign->GetTestStatus() === 202,
     'Historical Bar must reject design values outside their supported range.'
 );
+
+// Historical Bar assertions above are complete. Retain only the tile used by
+// the later cross-family opacity checks, not old inline HTML/form snapshots.
+unset(
+    $barHistory, $rawBarHistory, $multiBarHistory, $limitBarHistory, $invalidBarHistory,
+    $invalidBarDesign, $historySVGFormInstance, $barHistoryForm, $historySVGForm,
+    $barHistoryIPSView, $barHistoryTileHTML, $barIPSViewBeforeRefresh, $independentBarHistoryIPSView
+);
+gc_collect_cycles();
 
 $waterfall = new EChartsBarWaterfall();
 $waterfall->Create();

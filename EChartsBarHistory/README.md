@@ -7,7 +7,7 @@ Value labels are optional. Their default position remains above the bars; altern
 These options apply to the tile and the independent IPSView design. In
 inherited mode, IPSView follows the tile settings.
 
-`EChartsBarHistory` displays archived values of 1 to 16 numeric IP-Symcon
+`EChartsBarHistory` displays archived values of 1 to 32 numeric IP-Symcon
 variables as bars along a time axis. It is deliberately separate from
 `EChartsBarCategory`, which compares current values as categories.
 
@@ -29,8 +29,10 @@ The schematic previews also show a separate value axis for each displayed
 effective unit, on its configured side. With multiple sources, automatic axis
 colors follow the first source of each unit. Numeric axis ticks and archived
 values are shown only in the actual chart.
-With more than three sources, the preview shows the first three and states the
-shown and total counts; the actual chart still uses every configured source.
+The preview shows up to three initially visible sources and states the shown
+and total counts when they differ. If all sources start hidden, no example
+bars are drawn. Colors remain associated with the original source order;
+the actual chart still loads every configured source.
 
 ## Animation
 
@@ -43,13 +45,16 @@ In the Tile and independent IPSView designers, **Animate chart**, **Initial anim
 ## Current feature set
 
 - Native Symcon HTML-SDK tile and optional IPSView WebContent output
-- 1 to 16 archive sources with individual variable presentation, label, color
+- 1 to 32 archive sources with individual variable presentation, label, color
   and reducer; bars at the same time are shown side by side
 - A separate value axis per effective unit, automatically balanced left/right
   or explicitly placed on a side in the source editor
 - Raw values, automatic aggregation or an explicitly selected aggregation
 - Fixed, calendar-aligned and custom time ranges
-- Configurable point budget and time-axis labels
+- Total point budget from 200 to 32,000 (unchanged default: 1,000), at most
+  2,000 points per source, and configurable time-axis labels
+- Scrollable legend with individual selection, **All**, **Invert** and
+  **Initially visible** per source
 - Optional time-axis zoom with a slider and mouse wheel in the tile and IPSView
 - Theme, value labels, grid, bar width, optional gradient or repeated SVG
   pattern fill, opacity and rounded corners
@@ -84,7 +89,40 @@ present; otherwise the current Symcon variable name is used, even if two
 sources then have the same visible name. Sources with the same effective unit
 share an axis. Explicitly choosing opposite axis sides for the same unit is
 invalid. The order in the source list controls the series and axis order.
-With many distinct units, a narrow tile may leave little room for the plot.
+Up to 16 effective unit groups remain supported. With many distinct units,
+a narrow tile may leave little room for the plot; hiding rows also hides
+unused axes and compacts the remaining axis offsets.
+
+## Many sources and series selection
+
+Existing source lists remain valid without changes. Missing **Initially visible**
+settings mean visible. With multiple rows, the legend scrolls when space is
+limited; click an entry to toggle that source. **All** selects every source,
+**Invert** reverses the selection. To hide all sources, choose **All** followed
+by **Invert**. An initially hidden single source also has a legend so it can
+be selected. A normally visible single source keeps its existing legend-free
+layout. Full names and units remain available in legend tooltips.
+
+Selection, legend position and time zoom survive refreshes, source reordering
+and resizing using variable IDs, even when display names are identical.
+Reloading restores the configured initial selection. These temporary choices
+are not written to the instance. Bar widths account for the number of visible
+rows; time zoom provides more space for dense archives without changing values
+or loading additional points.
+
+The point budget is divided across **all configured sources**, including hidden
+ones, rounded down and capped at 2,000 per row. Hiding a source does not stop
+its archive reads or reassign its allowance. With 32 sources, the default
+budget of 1,000 permits at most 31 points per row; 32,000 permits 1,000.
+Higher budgets increase resource use and do not guarantee continuous archive
+coverage. Actual timestamps, empty intervals and reducers remain unchanged.
+
+The serialized model is limited to 900,000 bytes and the complete HTML output
+to 1 MiB. Complex SVGs, long names or high-precision numbers may reach this
+limit before the point budget. A clear error asks for a smaller budget or
+simpler pattern; values are not silently rounded or removed to make it fit.
+Large startup states use lossless gzip compression and require browser
+support for `DecompressionStream`.
 
 IPSView is enabled in the **IPSView design** section of the instance form.
 The WebContent variable can then be used as an HTML widget. Archive refreshes
@@ -115,5 +153,5 @@ design changes no longer propagate. IPSView time settings are beside the main
 time-range controls, outside the designers, and are controlled separately.
 Save changes to the Tile designer before copying.
 
-The source limit is initially 16. Reducing it later would require a compatible
-way to handle previously saved instances with more sources.
+The source limit is 32. Saved one- to sixteen-source configurations and their
+point budgets are not rewritten by the update.

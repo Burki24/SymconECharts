@@ -24,6 +24,7 @@ use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsLabelDesign;
 use SymconECharts\EChartsPreviewSourceCount;
 use SymconECharts\EChartsSourceIdentity;
+use SymconECharts\EChartsStartupState;
 use SymconECharts\EChartsSvgImage;
 use SymconECharts\EChartsUnitAxes;
 use SymconECharts\EChartsVariablePresentation;
@@ -48,6 +49,7 @@ require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
 require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
+require_once __DIR__ . '/../libs/EChartsStartupState.php';
 require_once __DIR__ . '/../libs/EChartsSvgImage.php';
 require_once __DIR__ . '/../libs/EChartsUnitAxes.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
@@ -77,7 +79,10 @@ class EChartsBarHistory extends IPSModuleStrict
     private const STATUS_PARENT_MISSING = 203;
     private const STATUS_GATEWAY_FAILED = 204;
     private const REDUCERS = ['auto', 'average', 'sum', 'minimum', 'maximum'];
-    private const MAXIMUM_SOURCE_COUNT = 16;
+    private const MAXIMUM_SOURCE_COUNT = 32;
+    private const MAXIMUM_POINT_BUDGET = 32000;
+    private const MAXIMUM_MODEL_BYTES = 900000;
+    private const MODEL_TOO_LARGE_MESSAGE = 'The Historical Bar model is too large. Reduce the point budget or simplify the SVG pattern.';
     private const TIME_AXIS_LABEL_FORMATS = ['auto', 'time', 'date', 'date-time'];
     private const BAR_FILL_MODES = ['solid', 'gradient', 'svg'];
     private const DESIGN_PROPERTY_TYPES = [
@@ -554,8 +559,15 @@ class EChartsBarHistory extends IPSModuleStrict
     {
         $theme = $this->BarPreviewValue($values, 'EChartsTheme', 'string', $ipsView);
         $palette = EChartsBarPreview::Palette($theme);
-        $data = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values, 'Label', false);
-        $items = array_slice($data['items'], 0, 3);
+        $data = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values, 'Label', false, self::MAXIMUM_SOURCE_COUNT);
+        foreach ($data['items'] as $index => &$item) {
+            $item['previewPaletteIndex'] = $index;
+        }
+        unset($item);
+        $items = array_slice(array_values(array_filter(
+            $data['items'],
+            static fn (array $item): bool => ($item['InitiallyVisible'] ?? true) !== false
+        )), 0, 3);
         $axisSources = [];
         foreach ($data['items'] as $item) {
             $position = $item['AxisPosition'] ?? 'auto';
@@ -612,6 +624,7 @@ class EChartsBarHistory extends IPSModuleStrict
             }
         }
         $automaticAxisColor = $this->BarPreviewValue($values, 'AxisColor', 'integer', $ipsView) < 0;
+        $visibleAxisCounts = ['left' => 0, 'right' => 0];
         foreach ($axisModel['Axes'] as $axis) {
             if (!array_key_exists($axis['unit'], $visibleUnits)) {
                 continue;
@@ -619,14 +632,15 @@ class EChartsBarHistory extends IPSModuleStrict
             $sourceIndex = $visibleUnits[$axis['unit']];
             $source = $items[$sourceIndex];
             $sourceColor = $source['color'] !== ''
-                ? $source['color'] : $palette['seriesColors'][$sourceIndex % count($palette['seriesColors'])];
+                ? $source['color'] : $palette['seriesColors'][$source['previewPaletteIndex'] % count($palette['seriesColors'])];
             $color = $automaticAxisColor && count($data['items']) > 1 ? $sourceColor : $axisColor;
             $left = $axis['position'] === 'left';
-            $axisX = $left ? 65 - $axis['positionIndex'] * 12 : 680 + $axis['positionIndex'] * 12;
+            $positionIndex = $visibleAxisCounts[$axis['position']]++;
+            $axisX = $left ? 65 - $positionIndex * 12 : 680 + $positionIndex * 12;
             $svg .= '<line data-preview-axis="' . $axis['position'] . '" x1="' . $axisX
                 . '" y1="93" x2="' . $axisX . '" y2="265" stroke="' . EChartsBarPreview::E($color) . '"/>';
             if ($axis['unit'] !== '') {
-                $captionX = $left ? 68 + $axis['positionIndex'] * 110 : 676 - $axis['positionIndex'] * 110;
+                $captionX = $left ? 68 + $positionIndex * 110 : 676 - $positionIndex * 110;
                 $svg .= '<text data-preview-axis-unit="' . $axis['position'] . '" x="' . $captionX
                     . '" y="88" text-anchor="' . ($left ? 'start' : 'end') . '" fill="'
                     . EChartsBarPreview::E($color) . '" font-size="' . $axisSize . '">'
@@ -652,7 +666,7 @@ class EChartsBarHistory extends IPSModuleStrict
             ) : 0.0;
             $svg .= '<defs>';
             foreach ($items as $index => $item) {
-                $color = $item['color'] !== '' ? $item['color'] : $palette['seriesColors'][$index % count($palette['seriesColors'])];
+                $color = $item['color'] !== '' ? $item['color'] : $palette['seriesColors'][$item['previewPaletteIndex'] % count($palette['seriesColors'])];
                 if ($fillMode === 'gradient') {
                     $svg .= '<linearGradient id="bar-history-preview-' . $index . '" x1="0" x2="0" y1="1" y2="0">'
                         . '<stop offset="0" stop-color="' . EChartsBarPreview::E($color) . '"/>'
@@ -673,7 +687,7 @@ class EChartsBarHistory extends IPSModuleStrict
         $count = count($items);
         for ($bucket = 0; $bucket < 15; ++$bucket) {
             foreach ($items as $index => $item) {
-                $color = $item['color'] !== '' ? $item['color'] : $palette['seriesColors'][$index % count($palette['seriesColors'])];
+                $color = $item['color'] !== '' ? $item['color'] : $palette['seriesColors'][$item['previewPaletteIndex'] % count($palette['seriesColors'])];
                 $height = 50 + 65 * (1 + sin(($bucket + $index * 3) / 2.4));
                 $slot = 600 / 15 / $count;
                 $width = $slot * $barWidth / 100;
@@ -686,7 +700,7 @@ class EChartsBarHistory extends IPSModuleStrict
             }
         }
         foreach ($items as $index => $item) {
-            $color = $item['color'] !== '' ? $item['color'] : $palette['seriesColors'][$index % count($palette['seriesColors'])];
+            $color = $item['color'] !== '' ? $item['color'] : $palette['seriesColors'][$item['previewPaletteIndex'] % count($palette['seriesColors'])];
             $x = 75 + $index * 200;
             $svg .= '<rect x="' . $x . '" y="60" width="13" height="13" fill="' . EChartsBarPreview::E($color) . '"/>';
             $legend = mb_strimwidth($item['label'], 0, 14, '…')
@@ -792,6 +806,7 @@ class EChartsBarHistory extends IPSModuleStrict
                 'id'                     => 'variable-' . $source['VariableID'],
                 'variableID'             => $source['VariableID'],
                 'label'                  => $labels[$source['VariableID']],
+                'initiallyVisible'       => $source['InitiallyVisible'],
                 'unit'                   => $source['Unit'],
                 'decimals'               => $source['Decimals'],
                 'axisIndex'              => $axisModel['Indexes'][$source['Unit']],
@@ -805,7 +820,7 @@ class EChartsBarHistory extends IPSModuleStrict
         $this->WriteAttributeString('LastError', '');
         $this->DebugEChartsSetStatus(IS_ACTIVE);
 
-        return json_encode([
+        $json = json_encode([
             'schemaVersion' => 1,
             'family'        => 'bar',
             'variant'       => 'history',
@@ -830,6 +845,12 @@ class EChartsBarHistory extends IPSModuleStrict
             'series'        => $series,
             'truncated'     => $truncated
         ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
+        if (strlen($json) > self::MAXIMUM_MODEL_BYTES) {
+            $this->WriteAttributeString('LastError', self::MODEL_TOO_LARGE_MESSAGE);
+            $this->DebugEChartsSetStatus(self::STATUS_CONFIGURATION_INVALID);
+            throw new RuntimeException(self::MODEL_TOO_LARGE_MESSAGE);
+        }
+        return $json;
     }
 
     private function RenderBarHistoryHTMLPage(bool $ipsView): string
@@ -839,18 +860,22 @@ class EChartsBarHistory extends IPSModuleStrict
             $hiddenTileTitle = (bool) (IPS_GetObject($this->InstanceID)['ObjectIsHiddenTitle'] ?? false);
         }
 
-        return $this->RenderVisualizationHTMLPage($ipsView, [
+        $startup = EChartsStartupState::Startup($this->BuildVisualizationState($ipsView));
+        $configuration = [
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'ECharts Historical Bar',
             'visualizationTheme' => $this->VisualizationThemeCSS()
                 . "\n\n"
                 . $this->ResponsiveVisualizationCSS('#echarts-bar-history-root', 'echarts-bar-history'),
             'ipsViewStyle'       => $ipsView ? $this->IPSViewThemeCSS() : '',
-            'state'              => $this->BuildVisualizationState($ipsView),
+            'state'              => $startup['state'],
             'translations'       => [
-                'Configure 1 to 16 valid Historical Bar sources.' => $this->Translate(
-                    'Configure 1 to 16 valid Historical Bar sources.'
+                'Configure 1 to 32 valid Historical Bar sources.' => $this->Translate(
+                    'Configure 1 to 32 valid Historical Bar sources.'
                 ),
+                'All'                                            => $this->Translate('All'),
+                'Invert'                                         => $this->Translate('Invert'),
+                self::MODEL_TOO_LARGE_MESSAGE                    => $this->Translate(self::MODEL_TOO_LARGE_MESSAGE),
                 'Connect an active EChartsGateway.'              => $this->Translate('Connect an active EChartsGateway.'),
                 'The Historical Bar values could not be loaded.' => $this->Translate(
                     'The Historical Bar values could not be loaded.'
@@ -863,21 +888,33 @@ class EChartsBarHistory extends IPSModuleStrict
                 )
             ],
             'options'            => [
-                'echartsVersion'    => EChartsAsset::VERSION,
-                'echartsThemes'     => EChartsAsset::ThemePalettes(),
-                'tileHeaderVisible' => !$hiddenTileTitle,
-                'adaptToBackground' => $ipsView && $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
-                'ipsViewTransport'  => $ipsView ? $this->EChartsIPSViewTransportOptions() : null
+                'echartsVersion'            => EChartsAsset::VERSION,
+                'echartsThemes'             => EChartsAsset::ThemePalettes(),
+                'tileHeaderVisible'         => !$hiddenTileTitle,
+                'adaptToBackground'         => $ipsView && $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
+                'ipsViewTransport'          => $ipsView ? $this->EChartsIPSViewTransportOptions() : null,
+                'compressedStateGzipBase64' => $startup['compressedStateGzipBase64']
             ],
             'replacements'       => [
                 '{{ECHARTS_SCRIPT}}'           => EChartsAsset::CartesianJavaScript(),
                 '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
-                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript(),
+                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript() . "\n" . EChartsAsset::StartupJavaScript()
+                    . "\n" . EChartsAsset::SeriesSelectionJavaScript(),
                 '{{ECHARTS_ZOOM_SCRIPT}}'      => EChartsAsset::ZoomJavaScript(),
                 '{{ECHARTS_PATTERN_SCRIPT}}'   => EChartsAsset::PatternJavaScript(),
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
-        ]);
+        ];
+        $html = $this->RenderVisualizationHTMLPage($ipsView, $configuration);
+        if (strlen($html) > 1048576) {
+            $this->WriteAttributeString('LastError', self::MODEL_TOO_LARGE_MESSAGE);
+            $this->DebugEChartsSetStatus(self::STATUS_CONFIGURATION_INVALID);
+            $configuration['state'] = ['schemaVersion' => 1, 'family' => 'bar', 'variant' => 'history',
+                'status'                               => 'error', 'chart' => null, 'error' => self::MODEL_TOO_LARGE_MESSAGE];
+            $configuration['options']['compressedStateGzipBase64'] = null;
+            return $this->RenderVisualizationHTMLPage($ipsView, $configuration);
+        }
+        return $html;
     }
 
     private function Initialize(): void
@@ -917,7 +954,7 @@ class EChartsBarHistory extends IPSModuleStrict
         if (!$this->IsValidTimeSettings('')
             || !in_array($mode, ['raw', 'auto', ...array_keys(EChartsArchiveQuery::AGGREGATION_LEVELS)], true)
             || $this->ReadPropertyInteger('PointBudget') < 200
-            || $this->ReadPropertyInteger('PointBudget') > 2000
+            || $this->ReadPropertyInteger('PointBudget') > self::MAXIMUM_POINT_BUDGET
             || !$this->IsValidDesign('')
         ) {
             return [
@@ -954,7 +991,7 @@ class EChartsBarHistory extends IPSModuleStrict
         }
         if (!is_array($sources) || !array_is_list($sources)
             || count($sources) < 1 || count($sources) > self::MAXIMUM_SOURCE_COUNT) {
-            throw new InvalidArgumentException('Configure between 1 and 16 numeric Historical Bar sources.');
+            throw new InvalidArgumentException('Configure between 1 and 32 numeric Historical Bar sources.');
         }
         $result = [];
         $seen = [];
@@ -970,10 +1007,11 @@ class EChartsBarHistory extends IPSModuleStrict
             $unit = $source['Unit'] ?? '';
             $usePresentation = $source['UseVariablePresentation'] ?? true;
             $axisPosition = $source['AxisPosition'] ?? 'auto';
+            $initiallyVisible = $source['InitiallyVisible'] ?? true;
             if (!is_int($variableID) || $variableID <= 0 || !IPS_VariableExists($variableID)
                 || isset($seen[$variableID])
                 || !in_array(IPS_GetVariable($variableID)['VariableType'] ?? null, [1, 2], true)
-                || !is_string($label) || !is_string($unit) || !is_bool($usePresentation)
+                || !is_string($label) || !is_string($unit) || !is_bool($usePresentation) || !is_bool($initiallyVisible)
                 || !is_int($decimals) || $decimals < 0 || $decimals > 6
                 || !is_int($color) || $color < -1 || $color > 0xFFFFFF
                 || !is_string($reducer) || !in_array($reducer, self::REDUCERS, true)
@@ -990,16 +1028,19 @@ class EChartsBarHistory extends IPSModuleStrict
             );
             $seen[$variableID] = true;
             $result[] = [
-                'VariableID'   => $variableID,
-                'Label'        => trim($label),
-                'Unit'         => $presentation['unit'],
-                'Decimals'     => $presentation['decimals'],
-                'Color'        => $color < 0 ? '' : EChartsAsset::ColorToHex($color),
-                'Reducer'      => $reducer,
-                'AxisPosition' => $axisPosition
+                'VariableID'       => $variableID,
+                'InitiallyVisible' => $initiallyVisible,
+                'Label'            => trim($label),
+                'Unit'             => $presentation['unit'],
+                'Decimals'         => $presentation['decimals'],
+                'Color'            => $color < 0 ? '' : EChartsAsset::ColorToHex($color),
+                'Reducer'          => $reducer,
+                'AxisPosition'     => $axisPosition
             ];
         }
-        EChartsUnitAxes::Build($result);
+        if (count(EChartsUnitAxes::Build($result)['Axes']) > 16) {
+            throw new InvalidArgumentException('Configure no more than 16 Historical Bar unit groups.');
+        }
 
         return $result;
     }
@@ -1057,6 +1098,7 @@ class EChartsBarHistory extends IPSModuleStrict
                 || !is_string($archive['ArchiveAggregationType'] ?? null)
                 || !is_string($archive['EffectiveReducer'] ?? null)
                 || !is_array($archive['Points'] ?? null)
+                || count($archive['Points']) > $query['Limit']
                 || !is_bool($archive['Truncated'] ?? null)
             ) {
                 throw new RuntimeException('The gateway returned invalid Historical Bar data.');
@@ -1130,7 +1172,7 @@ class EChartsBarHistory extends IPSModuleStrict
                 'variant'       => 'history',
                 'status'        => 'error',
                 'chart'         => null,
-                'error'         => 'Configure 1 to 16 valid Historical Bar sources.'
+                'error'         => 'Configure 1 to 32 valid Historical Bar sources.'
             ];
         }
         if (!$this->HasActiveParent()) {
@@ -1153,7 +1195,8 @@ class EChartsBarHistory extends IPSModuleStrict
                 'variant'       => 'history',
                 'status'        => 'error',
                 'chart'         => null,
-                'error'         => 'The Historical Bar values could not be loaded.'
+                'error'         => $exception->getMessage() === self::MODEL_TOO_LARGE_MESSAGE
+                    ? self::MODEL_TOO_LARGE_MESSAGE : 'The Historical Bar values could not be loaded.'
             ];
         }
 

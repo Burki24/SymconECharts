@@ -12,6 +12,7 @@
     var archiveRefreshFailures = 0;
     var archiveLoadError = 'The Historical Bar values could not be loaded.';
     var zoomController = window.SymconEChartsZoom;
+    var seriesSelection = window.SYMC_ECHARTS_SERIES_SELECTION.create();
     var barPatterns = window.SymconEChartsPattern.create(function () {
         if (typeof window.requestAnimationFrame === 'function') {
             window.requestAnimationFrame(function () { render(currentState); });
@@ -95,10 +96,20 @@
         var colors = colorsFor(theme);
         var bar = model.bar || {};
         var style = bar.style || {};
-        var series = Array.isArray(model.series) ? model.series : [];
+        var series = (Array.isArray(model.series) ? model.series : []).map(function (item, index) {
+            return Object.assign({}, item, { id: item.id || 'series-' + index,
+                axisIndex: Number.isInteger(item.axisIndex) ? item.axisIndex : 0 });
+        });
+        var selected = seriesSelection.reconcile(series);
         var axes = Array.isArray(model.axes) && model.axes.length > 0
             ? model.axes : [{ unit: String(bar.unit || ''), position: 'left', positionIndex: 0 }];
         var multi = series.length > 1;
+        var showLegend = multi || series.some(function (item) { return item.initiallyVisible === false; });
+        var visibleCount = series.filter(function (item) { return selected[item.id]; }).length;
+        var activeAxes = axes.map(function (_, index) {
+            return series.some(function (item) { return item.axisIndex === index && selected[item.id]; });
+        });
+        var firstActiveAxis = activeAxes.indexOf(true);
         var zoom = style.enableZoom === true;
         var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8;
         var radius = style.roundedBars === true
@@ -121,9 +132,8 @@
         var axisCounts = { left: 0, right: 0 };
         var normalizedAxes = axes.map(function (axis, index) {
             var position = axis.position === 'right' ? 'right' : 'left';
-            var positionIndex = Number.isInteger(axis.positionIndex) && axis.positionIndex >= 0
-                ? axis.positionIndex : axisCounts[position];
-            axisCounts[position] = Math.max(axisCounts[position], positionIndex + 1);
+            var positionIndex = axisCounts[position];
+            if (activeAxes[index]) { axisCounts[position] += 1; }
             return { axis: axis, position: position, positionIndex: positionIndex, index: index };
         });
         var chartWidth = Math.max(320, Number(chartElement.clientWidth) || 750);
@@ -138,10 +148,10 @@
             ? Math.min(54, (maximumAxisMargin - 58) / (maximumSideCount - 1)) : 0;
         var leftMargin = axisCounts.left > 0 ? 52 + axisOffsetStep * (axisCounts.left - 1) : 28;
         var rightMargin = axisCounts.right > 0 ? 52 + axisOffsetStep * (axisCounts.right - 1) : 28;
-        var gridTop = headerInset + (multi ? (bar.title ? (compact ? 39 : 78) : (compact ? 28 : 46))
+        var gridTop = headerInset + (showLegend ? (bar.title ? (compact ? 39 : 78) : (compact ? 28 : 46))
             : (bar.title ? (compact ? 32 : 52) : (compact ? 12 : 16)))
             + (bar.title ? Math.max(0, displayedTitleSize - (compact ? 14 : 18)) : 0)
-            + (multi ? Math.max(0, displayedLegendSize - (compact ? 10 : 12)) : 0);
+            + (showLegend ? Math.max(0, displayedLegendSize - (compact ? 10 : 12)) : 0);
         var gridBottom = zoom ? (compact ? 42 : 70) : (compact ? 32 : 58);
         var plotWidth = chartWidth - leftMargin - rightMargin;
         var timeTickCount = Math.max(2, Math.floor(plotWidth / (axisFontSize * 10)));
@@ -167,10 +177,26 @@
                 textStyle: { color: titleColor, fontSize: displayedTitleSize }
             },
             legend: {
-                show: multi,
+                show: showLegend,
+                type: 'scroll', left: 12, right: 12,
+                selected: Object.assign({}, selected),
+                scrollDataIndex: seriesSelection.scrollDataIndex(),
+                selector: multi ? [
+                    { type: 'all', title: translate('All') },
+                    { type: 'inverse', title: translate('Invert') }
+                ] : [],
+                selectorLabel: { color: legendColor, fontSize: displayedLegendSize },
+                pageTextStyle: { color: legendColor },
+                pageIconColor: legendColor,
+                pageIconInactiveColor: colors.muted,
+                tooltip: { show: true, confine: true, formatter: function (parameters) {
+                    var item = series.find(function (entry) { return entry.id === parameters.name; });
+                    return item ? escapeHTML(item.label) + (item.unit ? ' (' + escapeHTML(item.unit) + ')' : '') : '';
+                } },
                 top: headerInset + (bar.title ? (compact ? 21 : 34) : (compact ? 2 : 4))
                     + (bar.title ? Math.max(0, displayedTitleSize - (compact ? 14 : 18)) : 0),
-                textStyle: { color: legendColor, fontSize: displayedLegendSize },
+                textStyle: { color: legendColor, fontSize: displayedLegendSize,
+                    width: Math.max(40, Math.min(220, chartWidth * 0.32)), overflow: 'truncate' },
                 data: series.map(function (item, index) { return item.id || 'series-' + index; }),
                 formatter: function (name) {
                     var item = series.find(function (candidate, index) {
@@ -188,6 +214,8 @@
             },
             tooltip: {
                 trigger: 'axis',
+                confine: true,
+                extraCssText: 'max-width:calc(100vw - 24px);max-height:70vh;overflow:auto;white-space:normal;overflow-wrap:anywhere;',
                 axisPointer: { type: 'shadow' },
                 formatter: function (parameters) {
                     var rows = (Array.isArray(parameters) ? parameters : [parameters]).filter(function (item) {
@@ -195,7 +223,8 @@
                     });
                     if (rows.length === 0) { return ''; }
                     return [formatTimestamp(rows[0].value[0], 'date-time')].concat(rows.map(function (item) {
-                        var source = series[item.seriesIndex] || {};
+                        var source = series.find(function (entry) { return entry.id === item.seriesId; })
+                            || series[item.seriesIndex] || {};
                         var decimals = Math.max(0, Math.min(6, Number(source.decimals ?? bar.decimals) || 0));
                         return String(item.marker || '') + escapeHTML(source.label || '') + ': '
                             + escapeHTML(formatValue(item.value[1], decimals, source.unit ?? bar.unit));
@@ -223,10 +252,13 @@
             yAxis: (function () {
                 var valueAxes = normalizedAxes.map(function (entry) {
                     var axis = entry.axis;
-                    var firstSeries = series.findIndex(function (item) { return item.axisIndex === entry.index; });
+                    var firstSeries = series.findIndex(function (item) {
+                        return item.axisIndex === entry.index && selected[item.id];
+                    });
                     var color = multi && !style.axisColor && firstSeries >= 0
                         ? seriesColors[firstSeries] : axisColor;
                     return {
+                        show: activeAxes[entry.index],
                         type: 'value',
                         splitNumber: valueTickCount,
                         name: String(axis.unit || ''),
@@ -237,7 +269,7 @@
                         axisLine: { show: true, lineStyle: { color: multi ? color : axisLineColor } },
                         axisTick: { show: true, lineStyle: { color: multi ? color : axisLineColor } },
                         splitLine: {
-                            show: entry.index === 0 && style.showGrid !== false,
+                            show: entry.index === firstActiveAxis && style.showGrid !== false,
                             lineStyle: { color: gridColor, opacity: style.gridColor ? 1 : 0.22 }
                         }
                     };
@@ -264,8 +296,8 @@
                     type: 'bar',
                     yAxisIndex: Number.isInteger(item.axisIndex) ? item.axisIndex : 0,
                     barGap: '20%',
-                    barMaxWidth: multi
-                        ? Math.max(3, Math.round(48 * Math.max(20, Math.min(100, Number(style.barWidthPercent) || 70)) / 100 / series.length))
+                    barMaxWidth: visibleCount > 1
+                        ? Math.max(0.5, Math.round(480 * Math.max(20, Math.min(100, Number(style.barWidthPercent) || 70)) / 100 / visibleCount) / 10)
                         : Math.max(8, Math.round(48 * Math.max(20, Math.min(100, Number(style.barWidthPercent) || 70)) / 100)),
                     itemStyle: {
                         color: fill,
@@ -316,6 +348,7 @@
         var previousRange = currentState && currentState.chart && currentState.chart.range;
         var nextRange = state && state.chart && state.chart.range;
         var savedZoom = zoomController.capture(chart, previousRange, nextRange);
+        seriesSelection.capture(chart);
         currentState = state;
         if (!state || state.status !== 'ready' || !state.chart) {
             displayError(state && state.error);
@@ -341,13 +374,21 @@
         if (!chart) {
             chart = window.echarts.init(chartElement, theme === 'auto' ? null : theme, { renderer: 'canvas' });
             currentTheme = theme;
+            if (typeof chart.on === 'function') {
+                ['legendselectchanged', 'legendselectall', 'legendinverseselect'].forEach(function (eventName) {
+                    chart.on(eventName, function () { if (currentState) { render(currentState); } });
+                });
+            }
         }
         zoomController.apply(chart, buildOption(state.chart, theme), savedZoom);
     }
 
     window.handleMessage = function (message) {
         var state = echartsDesign.parseVisualizationState(message);
-        if (state) { render(state); }
+        if (state) {
+            if (cancelStartup) { cancelStartup(); }
+            render(state);
+        }
     };
     if (window.ResizeObserver) {
         new ResizeObserver(function () {
@@ -370,6 +411,11 @@
                 && currentState.chart.bar.style.enableZoom === true;
         });
     }
-    window.addEventListener('beforeunload', function () { if (chart) { chart.dispose(); } });
-    render(currentState);
+    window.addEventListener('beforeunload', function () {
+        if (cancelStartup) { cancelStartup(); }
+        if (chart) { chart.dispose(); }
+    });
+    var cancelStartup = window.SYMC_ECHARTS_STARTUP(bootstrap, render, function () {
+        displayError(archiveLoadError);
+    });
 }());
