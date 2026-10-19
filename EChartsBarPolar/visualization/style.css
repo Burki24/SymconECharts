@@ -48,3 +48,61 @@ body {
 
 [hidden] { display: none !important; }
 
+.echarts-bar-polar-controls {
+    position: absolute;
+    inset-inline: 4px;
+    inset-block-end: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    z-index: 4;
+    font: 12px sans-serif;
+    color: var(--symc-text);
+}
+
+.echarts-bar-polar-controls button,
+.echarts-bar-polar-controls summary {
+    min-block-size: 36px;
+    min-inline-size: 36px;
+    max-inline-size: 100%;
+    padding: 8px;
+    border: 1px solid var(--symc-border);
+    border-radius: 4px;
+    color: inherit;
+    background: var(--symc-background);
+    font: inherit;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+}
+
+.echarts-bar-polar-controls button:disabled { opacity: 0.4; cursor: default; }
+.echarts-bar-polar-controls nav { display: flex; align-items: center; gap: 4px; min-inline-size: 0; }
+.echarts-bar-polar-controls output { min-inline-size: 0; text-align: center; overflow-wrap: anywhere; }
+.echarts-bar-polar-controls details { min-inline-size: 0; }
+.echarts-bar-polar-picker {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: calc(100% + 4px);
+    padding: 8px;
+    border: 1px solid var(--symc-border);
+    border-radius: 4px;
+    background: var(--symc-background);
+    max-block-size: min(50vh, 20rem);
+    overflow: auto;
+}
+.echarts-bar-polar-picker-actions { display: flex; flex-wrap: wrap; gap: 4px; }
+.echarts-bar-polar-sources label { display: flex; align-items: center; gap: 8px; min-block-size: 36px; }
+.echarts-bar-polar-sources input { flex: 0 0 auto; inline-size: 20px; block-size: 20px; }
+.echarts-bar-polar-sources span { min-inline-size: 0; overflow-wrap: anywhere; }
+.echarts-bar-polar-root:has(.echarts-bar-polar-controls:not([hidden])) .echarts-refresh-warning {
+    inset-block-end: 3.25rem;
+}
+
+@media (max-width: 259px) {
+    .echarts-bar-polar-controls nav { flex-basis: 100%; justify-content: center; }
+    .echarts-bar-polar-controls output { flex: 1; }
+    .echarts-bar-polar-controls button { padding-inline: 4px; }
+}
+

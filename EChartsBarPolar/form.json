@@ -20,6 +20,15 @@
             "caption": "Normalization maps each source range to 0–100. Mixed units and negative originals are allowed. Original values and units remain in the tooltip."
         },
         {
+            "type": "CheckBox",
+            "name": "EnableSourceSelection",
+            "caption": "Enable source selection"
+        },
+        {
+            "type": "Label",
+            "caption": "Selection and pages only change the view. All configured sources continue to determine the complete value scale."
+        },
+        {
             "type": "List",
             "name": "Sources",
             "caption": "Polar sources",
@@ -28,6 +37,15 @@
             "delete": true,
             "changeOrder": true,
             "columns": [
+                {
+                    "caption": "Initially visible",
+                    "name": "InitiallyVisible",
+                    "width": "120px",
+                    "add": true,
+                    "edit": {
+                        "type": "CheckBox"
+                    }
+                },
                 {
                     "caption": "Min (normalization)",
                     "name": "Minimum",
@@ -113,6 +131,11 @@
             ],
             "form": [
                 {
+                    "type": "CheckBox",
+                    "name": "InitiallyVisible",
+                    "caption": "Initially visible"
+                },
+                {
                     "type": "NumberSpinner",
                     "name": "Minimum",
                     "caption": "Min (normalization)",
@@ -166,7 +189,7 @@
         },
         {
             "type": "Label",
-            "caption": "Use 1 to 16 unique numeric variables. A common unit is required only without normalization. Each variable keeps its own identity even when labels match. Radial spokes and concentric arcs are available in both designers."
+            "caption": "Use 1 to 100 unique numeric variables. A common unit is required only without normalization. Each variable keeps its own identity even when labels match. Radial spokes and concentric arcs are available in both designers."
         },
         {
             "type": "ExpansionPanel",

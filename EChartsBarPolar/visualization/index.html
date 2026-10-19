@@ -13,6 +13,23 @@
 <body>
     <main id="echarts-bar-polar-root" class="echarts-bar-polar-root">
         <div id="echarts-bar-polar-chart" class="echarts-bar-polar-chart" role="img"></div>
+        <div id="echarts-bar-polar-controls" class="echarts-bar-polar-controls" hidden>
+            <details id="echarts-bar-polar-selection" hidden>
+                <summary id="echarts-bar-polar-selection-title"></summary>
+                <div class="echarts-bar-polar-picker">
+                    <div class="echarts-bar-polar-picker-actions">
+                        <button id="echarts-bar-polar-all" type="button"></button>
+                        <button id="echarts-bar-polar-inverse" type="button"></button>
+                    </div>
+                    <div id="echarts-bar-polar-sources" class="echarts-bar-polar-sources"></div>
+                </div>
+            </details>
+            <nav id="echarts-bar-polar-pages" hidden>
+                <button id="echarts-bar-polar-previous" type="button">‹</button>
+                <output id="echarts-bar-polar-range" role="status" aria-live="polite"></output>
+                <button id="echarts-bar-polar-next" type="button">›</button>
+            </nav>
+        </div>
         <div id="echarts-bar-polar-warning" class="echarts-refresh-warning" role="status" hidden></div>
         <div id="echarts-bar-polar-error" class="echarts-bar-polar-error" role="alert" hidden></div>
     </main>

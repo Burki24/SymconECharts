@@ -7,7 +7,38 @@ Zusätzlich zu Mitte, innen am Anfang/Ende und außerhalb stehen die ECharts-Pos
 Die Optionen gelten für Kacheln und – bei unabhängigem Design – auch für
 IPSView. Bei geerbtem Design folgt IPSView den Kacheleinstellungen.
 
-`EChartsBarPolar` stellt aktuelle Zahlenwerte als Polar-Balken dar. Die Kachel zeigt wahlweise radial nach außen gerichtete Balken oder konzentrische Kreisbögen. Das Modul akzeptiert 1 bis 16 eindeutige numerische Symcon-Variablen mit derselben effektiven Einheit oder mit ausdrücklich aktivierter Min/Max-Normalisierung. Ein Archiv ist nicht nötig.
+`EChartsBarPolar` stellt aktuelle Zahlenwerte als Polar-Balken dar. Die Kachel zeigt wahlweise radial nach außen gerichtete Balken oder konzentrische Kreisbögen. Das Modul akzeptiert 1 bis 100 eindeutige numerische Symcon-Variablen mit derselben effektiven Einheit oder mit ausdrücklich aktivierter Min/Max-Normalisierung. Ein Archiv ist nicht nötig.
+
+## Quellenauswahl und Seiten
+
+**Quellenauswahl aktivieren** ist zunächst ausgeschaltet. Aktiviert erscheint
+in Kachel und IPSView die Schaltfläche **Quellen** mit einzeln schaltbaren
+Quellen sowie **Alle** und **Umkehren**. **Anfangs sichtbar** legt je Quelle
+den Startzustand fest; ohne Angabe ist sie sichtbar. Bei ausgeschalteter Auswahl
+wird dieses Feld ignoriert.
+
+Große Listen werden auf lesbare Seiten verteilt. Vorherige/nächste Seite und
+eine Bereichsanzeige erschließen alle ausgewählten Quellen; die Seitenlänge
+passt sich Platz, Polar-Anordnung und Schriftgröße an. Auch ohne Quellenauswahl
+erhalten Listen über 16 Quellen eine Seitennavigation. Bestehende Listen bis
+16 Quellen bleiben bei ausgeschalteter Auswahl ohne zusätzliche Bedienelemente.
+
+Auswahl und Seiten ändern nur die Ansicht: Alle konfigurierten Quellen werden
+weiterhin gelesen, aktualisiert und validiert. Die automatische Werteskala
+berücksichtigt immer das vollständige Modell einschließlich ausgeblendeter
+und anderer Seiten sowie den Nullpunkt. Eine feste Skala bleibt unverändert;
+bei Normalisierung gilt weiter 0–100. Es gibt keine Teilsummen oder Restgruppen.
+Originalwerte und Einheiten bleiben im Tooltip erhalten.
+
+In Ansichten mit Auswahl oder Seiten bleiben Auswahl und automatische Farben
+während einer geöffneten Ansicht anhand der Quellenidentität erhalten, auch
+bei Aktualisierung, Sortierung, Themewechsel oder Größenänderung. Die erste
+sichtbare Quelle bleibt erhalten, soweit die neue Fenstergröße es zulässt.
+Kleine Altlisten ohne Auswahl behalten ihre bisherige Farbzuordnung.
+Ein neues Laden startet mit der
+gespeicherten Anfangssichtbarkeit. Entfernte Quellen verschwinden aus der Auswahl.
+Überlange Quellenmetadaten werden mit einer ausdrücklichen Fehlermeldung
+abgewiesen statt still gekürzt; dann Beschriftungen oder Einheiten kürzen.
 
 ## Optionaler Min/Max-Vergleich
 
@@ -58,9 +89,13 @@ oben. Das Raster folgt dem gewählten Winkelumfang und der Drehrichtung; bei
 Orientierungshilfe markiert in der Formularvorschau 0°/360°, 90°, 180° und
 270° ab dem eingestellten Startpunkt in der gewählten Laufrichtung. Diese
 Gradmarken gehören nicht zur Kachel oder zum IPSView-Widget.
-Bei mehr als sechs Quellen zeigt die Vorschau die ersten sechs gemäß der
-gewählten Sortierung und nennt die angezeigte sowie die gesamte Quellenzahl;
-die eigentliche Grafik nutzt alle.
+Die Vorschau zeigt höchstens sechs anfangs sichtbare Quellen gemäß der
+gewählten Sortierung und nennt die angezeigte sowie die gesamte Quellenzahl.
+Die vollständige Werteskala wird vor diesem Ausschnitt und unabhängig von der
+Anfangsauswahl ermittelt. Auch eine einzelne spät konfigurierte Quelle behält
+ihre Farbe und denselben Maßstab. Eine leere Anfangsauswahl wird als solche
+angezeigt, nicht durch Beispieldaten ersetzt. Die eigentliche Grafik erschließt
+alle Quellen über Auswahl und Seiten.
 Hover-Hervorhebung, Animation und das responsive Beschriftungslayout prüfen
 Sie an der echten Kachel beziehungsweise im IPSView-Widget.
 
@@ -84,7 +119,7 @@ Im **Kacheldesigner** und im unabhängigen **IPSView-Design** stehen zur Verfüg
   Raster und Werte außerhalb der Balken. Werte innerhalb farbiger Balken
   behalten ihre automatische Hell-Dunkel-Kontrastfarbe.
 
-Standardmäßig bestimmt ECharts die Werteskala automatisch. Negative Werte werden nicht in positive Werte umgerechnet. Bei vielen Quellen oder langen Namen können Beschriftungen in kleinen Kacheln überlappen; Kachelgröße und Anzeigeoptionen lassen sich passend wählen.
+Standardmäßig wird die Werteskala automatisch bestimmt. Bei Auswahl und Seiten bleibt der Maßstab anhand aller Quellen festgelegt; kleine bestehende Listen ohne Auswahl behalten die automatische ECharts-Skala. Negative Werte werden nicht in positive Werte umgerechnet. Bei langen Namen können Beschriftungen in kleinen Kacheln weiterhin überlappen; Kachelgröße und Anzeigeoptionen lassen sich passend wählen.
 Der **Winkelumfang** bestimmt, welchen Teil des Kreises die Balken nutzen: 360° ergibt den bisherigen Vollkreis, 180° einen Halbkreis. Werte von 30° bis 360° sind möglich. **Startwinkel** legt den Anfang fest (0° rechts, 90° oben), **Im Uhrzeigersinn** die Laufrichtung. Balken, Hintergrundspuren und Raster nutzen auch bei konzentrischen Bögen denselben Ausschnitt und bleiben nach Größenänderungen darin. Kachel und unabhängiger IPSView-Designer können unterschiedliche Winkelumfänge verwenden; bei **Kacheldesign verwenden** übernimmt IPSView den Kachelwert.
 Im **Kacheldesigner** und im unabhängigen **IPSView-Designer** kann die Werteskala alternativ als fester Bereich mit Minimum und Maximum eingestellt werden. Das ist besonders für vergleichbare Anzeigen mit dauerhaft gleicher Skala sinnvoll. Werte außerhalb dieses Bereichs werden im Diagramm abgeschnitten; die Quelldaten bleiben unverändert. Optionale **Hintergrundspuren** zeigen hinter jedem Balken den verfügbaren Skalenbereich. Ihre Farbe kann dem Theme folgen oder frei gewählt werden; die Deckkraft ist einstellbar. Ohne Änderung der Einstellungen bleiben automatische Skala und ausgeblendete Spuren erhalten. Mit **Kacheldesign verwenden** übernimmt IPSView Skala und Spuren der Kachel; nach dem Deaktivieren sind sie unabhängig einstellbar oder können mit der Kopierschaltfläche übernommen werden.
 Bei einer festen Skala beginnen Balken und Kreisbögen am eingestellten Minimum; die Beschriftungen zeigen weiterhin die tatsächlichen Quellwerte.

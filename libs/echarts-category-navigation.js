@@ -4,8 +4,14 @@
     global.SymconEChartsCategoryNavigation = { create: function () {
         var anchor = null, start = 0;
         function reset() { anchor = null; start = 0; }
+        function rememberWindow(keys, index) {
+            if (!keys.length) { reset(); return; }
+            start = Math.max(0, Math.min(keys.length - 1, Math.ceil((Number(index) || 0) - 1e-8)));
+            anchor = keys[start] || null;
+        }
         return {
             reset: reset,
+            rememberWindow: rememberWindow,
             remember: function (chart) {
                 if (!chart || typeof chart.getOption !== 'function') { return; }
                 var option = chart.getOption() || {};
@@ -19,8 +25,7 @@
                     index = keys.indexOf(zoom.startValue);
                     if (index < 0) { index = (Number(zoom.start) || 0) * Math.max(0, keys.length - 1) / 100; }
                 }
-                start = Math.max(0, Math.ceil(index - 1e-8));
-                anchor = keys[start] || null;
+                rememberWindow(keys, index);
             },
             window: function (keys, count) {
                 if (!keys.length) { reset(); return { first: 0, last: 0, visibleCount: 0 }; }

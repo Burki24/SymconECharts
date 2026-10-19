@@ -27,6 +27,7 @@ use SymconECharts\EChartsPreviewSourceCount;
 use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsTransientRefresh;
 use SymconECharts\EChartsVariablePresentation;
+use SymconECharts\PolarData;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
 require_once __DIR__ . '/../libs/helper/DataFlowHelper.php';
@@ -52,6 +53,7 @@ require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
 require_once __DIR__ . '/../libs/EChartsTransientRefresh.php';
 require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
+require_once __DIR__ . '/PolarData.php';
 
 class EChartsBarPolar extends IPSModuleStrict
 {
@@ -71,6 +73,8 @@ class EChartsBarPolar extends IPSModuleStrict
     use ResponsiveVisualizationHelper;
     use VisualizationAssetHelper;
     use VisualizationThemeHelper;
+    private const MAXIMUM_MODEL_BYTES = 200000;
+    private const MODEL_TOO_LARGE_MESSAGE = 'The Polar model is too large. Reduce source labels or units.';
 
     private const GATEWAY_MODULE_ID = '{33C9DF44-6F6D-5916-4AAE-CCB24BD6928D}';
     private const DATA_ID_TO_PARENT = '{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}';
@@ -105,6 +109,7 @@ class EChartsBarPolar extends IPSModuleStrict
             $this->SetVisualizationType(1);
             $this->RegisterMessage(0, IPS_KERNELSTARTED);
             $this->RegisterPropertyString('Sources', '[]');
+            $this->RegisterPropertyBoolean('EnableSourceSelection', false);
             $this->RegisterPropertyBoolean('NormalizeValues', false);
             $this->RegisterPropertyString('Title', '');
             $this->RegisterDesignProperties();
@@ -241,7 +246,7 @@ class EChartsBarPolar extends IPSModuleStrict
                 ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
             ]);
             $fields = array_merge(
-                ['Title', 'Sources', 'NormalizeValues', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
+                ['Title', 'Sources', 'NormalizeValues', 'EnableSourceSelection', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
                     'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent'],
                 array_keys($this->DesignPropertyNames()),
                 array_map(static fn (string $name): string => 'IPSView' . $name, array_keys($this->DesignPropertyNames()))
@@ -394,9 +399,10 @@ class EChartsBarPolar extends IPSModuleStrict
             foreach ($sources as $index => $source) {
                 $current = $this->ReadCurrentSource($source['VariableID']);
                 $items[] = [
-                    'id'        => 'variable-' . $source['VariableID'],
-                    'label'     => $labels[$source['VariableID']],
-                    'value'     => $this->ReadPropertyBoolean('NormalizeValues')
+                    'id'               => 'variable-' . $source['VariableID'],
+                    'initiallyVisible' => $source['InitiallyVisible'],
+                    'label'            => $labels[$source['VariableID']],
+                    'value'            => $this->ReadPropertyBoolean('NormalizeValues')
                         ? EChartsNormalization::Value($current['Value'], $source) : $current['Value'],
                     ...($this->ReadPropertyBoolean('NormalizeValues')
                         ? EChartsNormalization::Metadata($current['Value'], $source) : []),
@@ -411,20 +417,27 @@ class EChartsBarPolar extends IPSModuleStrict
             $this->WriteAttributeString('LastError', '');
             $this->DebugEChartsSetStatus(IS_ACTIVE);
 
-            return $debugFlowResult = json_encode([
+            $json = json_encode([
                 'schemaVersion' => 1,
                 'family'        => 'bar',
                 'variant'       => 'polar',
                 'theme'         => $this->ReadPropertyString('EChartsTheme'),
                 'polar'         => [
-                    'normalized' => $this->ReadPropertyBoolean('NormalizeValues'),
-                    'title'      => $this->ReadPropertyString('Title'),
-                    'unit'       => $this->ReadPropertyBoolean('NormalizeValues') ? '%' : $sources[0]['Unit'],
-                    'decimals'   => max(array_column($sources, 'Decimals')),
-                    'style'      => $this->ReadDesignStyle()
+                    'enableSourceSelection' => $this->ReadPropertyBoolean('EnableSourceSelection'),
+                    'normalized'            => $this->ReadPropertyBoolean('NormalizeValues'),
+                    'title'                 => $this->ReadPropertyString('Title'),
+                    'unit'                  => $this->ReadPropertyBoolean('NormalizeValues') ? '%' : $sources[0]['Unit'],
+                    'decimals'              => max(array_column($sources, 'Decimals')),
+                    'style'                 => $this->ReadDesignStyle()
                 ],
                 'items'         => $items
             ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
+            if (strlen($json) > self::MAXIMUM_MODEL_BYTES) {
+                $this->WriteAttributeString('LastError', 'MODEL_TOO_LARGE');
+                $this->DebugEChartsSetStatus(self::STATUS_DESIGN_INVALID);
+                throw new RuntimeException(self::MODEL_TOO_LARGE_MESSAGE);
+            }
+            return $debugFlowResult = $json;
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
             $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
@@ -533,8 +546,12 @@ class EChartsBarPolar extends IPSModuleStrict
     protected function BarPreviewSvg(array $values, bool $ipsView): string
     {
         $palette = EChartsBarPreview::Palette($this->BarPreviewValue($values, 'EChartsTheme', 'string', $ipsView));
-        $data = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values);
+        $data = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values, 'Label', true, PolarData::MAXIMUM_SOURCE_COUNT);
         $items = $data['items'];
+        foreach ($items as $index => &$item) {
+            $item['order'] = $index;
+        }
+        unset($item);
         $normalized = (bool) ($values['NormalizeValues'] ?? $this->ReadPropertyBoolean('NormalizeValues'));
         if ($normalized) {
             foreach ($items as &$item) {
@@ -547,6 +564,16 @@ class EChartsBarPolar extends IPSModuleStrict
             }
             unset($item);
         }
+        try {
+            [$autoMinimum, $autoMaximum] = PolarData::Bounds(array_column($items, 'value'));
+        } catch (InvalidArgumentException) {
+            return EChartsBarPreview::Open($palette, $this->Translate('The Polar values could not be loaded.'), false, $ipsView, $values, '', '') . '</svg>';
+        }
+        $sourceSelection = (bool) ($values['EnableSourceSelection'] ?? $this->ReadPropertyBoolean('EnableSourceSelection'));
+        if ($sourceSelection) {
+            $items = array_values(array_filter($items, static fn (array $item): bool => ($item['InitiallyVisible'] ?? true) === true));
+        }
+        $visibleCount = count($items);
         $previewLanguage = $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage());
         $mode = $this->BarPreviewValue($values, 'PolarMode', 'string', $ipsView);
         $sort = $this->BarPreviewValue($values, 'SortOrder', 'string', $ipsView);
@@ -583,10 +610,20 @@ class EChartsBarPolar extends IPSModuleStrict
         $span = max(30, min(360, $this->BarPreviewValue($values, 'AngularSpan', 'integer', $ipsView)));
         $direction = $this->BarPreviewValue($values, 'Clockwise', 'boolean', $ipsView) ? -1 : 1;
         $manual = !$normalized && $this->BarPreviewValue($values, 'ValueAxisRangeMode', 'string', $ipsView) === 'manual';
-        $minimum = $manual ? (float) $this->BarPreviewValue($values, 'ValueAxisMinimum', 'float', $ipsView) : 0.0;
+        $minimum = $manual ? (float) $this->BarPreviewValue($values, 'ValueAxisMinimum', 'float', $ipsView) : ($normalized ? 0.0 : $autoMinimum);
         $maximum = $manual ? (float) $this->BarPreviewValue($values, 'ValueAxisMaximum', 'float', $ipsView)
-            : ($normalized ? 100.0 : max(1.0, ...array_map(static fn (array $item): float => $item['value'], $items)));
-        $range = max(1.0, $maximum - $minimum);
+            : ($normalized ? 100.0 : $autoMaximum);
+        if (!is_finite($minimum) || !is_finite($maximum) || $minimum >= $maximum) {
+            return $svg . '</svg>';
+        }
+        $svg = preg_replace('/<svg\b/', '<svg data-polar-min="' . EChartsBarPreview::N($minimum)
+            . '" data-polar-max="' . EChartsBarPreview::N($maximum)
+            . '" data-polar-source-count="' . count($data['items']) . '" data-polar-visible-count="' . $visibleCount . '"', $svg, 1) ?? $svg;
+        $zeroFraction = $manual ? 0.0 : PolarData::Fraction(0.0, $minimum, $maximum);
+        if ($items === []) {
+            $svg .= '<text x="350" y="190" text-anchor="middle" fill="' . EChartsBarPreview::E($categoryColor)
+                . '" font-size="14">' . EChartsBarPreview::E($this->Translate('No sources selected')) . '</text>';
+        }
         if ($this->BarPreviewValue($values, 'ShowGrid', 'boolean', $ipsView)) {
             $scaleSize = max(8, min(24, $this->BarPreviewValue($values, 'ScaleLabelFontSize', 'integer', $ipsView)));
             $svg .= '<text x="24" y="69" fill="' . EChartsBarPreview::E($scaleColor) . '" font-size="'
@@ -632,7 +669,7 @@ class EChartsBarPolar extends IPSModuleStrict
         if ($fillMode === 'gradient') {
             $svg .= '<defs>';
             foreach ($items as $index => $item) {
-                $color = $item['color'] !== '' ? $item['color'] : $palette['seriesColors'][$index % count($palette['seriesColors'])];
+                $color = $item['color'] !== '' ? $item['color'] : $palette['seriesColors'][$item['order'] % count($palette['seriesColors'])];
                 $svg .= '<linearGradient id="bar-polar-preview-' . $index . '" x1="0" x2="1" y1="0" y2="1">'
                     . '<stop offset="0" stop-color="' . EChartsBarPreview::E($color) . '"/>'
                     . '<stop offset="1" stop-color="' . EChartsBarPreview::E($gradientEnd) . '"/></linearGradient>';
@@ -640,16 +677,16 @@ class EChartsBarPolar extends IPSModuleStrict
             $svg .= '</defs>';
         }
         foreach ($items as $index => $item) {
-            $fraction = max(0.0, min(1.0, ($item['value'] - $minimum) / $range));
-            $color = $item['color'] !== '' ? $item['color'] : $palette['seriesColors'][$index % count($palette['seriesColors'])];
+            $fraction = PolarData::Fraction($item['value'], $minimum, $maximum);
+            $color = $item['color'] !== '' ? $item['color'] : $palette['seriesColors'][$item['order'] % count($palette['seriesColors'])];
             if ($mode === 'tangential') {
                 $ring = ($outer - $inner) / count($items);
                 $r0 = $inner + $index * $ring + $ring * (1 - $width) / 2;
                 $r1 = $r0 + $ring * $width;
-                $a0 = $start;
+                $a0 = $start + $direction * $span * $zeroFraction;
                 $a1 = $start + $direction * $span * $fraction;
                 if ($showBackground) {
-                    $svg .= '<path d="' . self::BarPreviewWedge($cx, $cy, $r0, $r1, $a0, $start + $direction * $span)
+                    $svg .= '<path d="' . self::BarPreviewWedge($cx, $cy, $r0, $r1, $start, $start + $direction * $span)
                         . '" fill="' . EChartsBarPreview::E($backgroundColor)
                         . '" fill-opacity="' . EChartsBarPreview::N($backgroundOpacity) . '"/>';
                 }
@@ -658,17 +695,19 @@ class EChartsBarPolar extends IPSModuleStrict
                 $gap = $slot * (1 - $width) / 2;
                 $a0 = $start + $direction * ($index * $slot + $gap);
                 $a1 = $start + $direction * (($index + 1) * $slot - $gap);
-                $r0 = $inner;
+                $r0 = $inner + ($outer - $inner) * $zeroFraction;
                 $r1 = $inner + ($outer - $inner) * $fraction;
+                [$r0, $r1] = [min($r0, $r1), max($r0, $r1)];
                 if ($showBackground) {
                     $svg .= '<path d="' . self::BarPreviewWedge($cx, $cy, $inner, $outer, $a0, $a1)
                         . '" fill="' . EChartsBarPreview::E($backgroundColor)
                         . '" fill-opacity="' . EChartsBarPreview::N($backgroundOpacity) . '"/>';
                 }
             }
-            if ($fraction > 0) {
+            if (abs($fraction - $zeroFraction) > 0) {
                 $fill = $fillMode === 'gradient' ? 'url(#bar-polar-preview-' . $index . ')' : $color;
-                $svg .= '<path d="' . self::BarPreviewWedge($cx, $cy, $r0, $r1, $a0, $a1)
+                $svg .= '<path data-polar-id="variable-' . (int) ($item['VariableID'] ?? 0)
+                    . '" data-polar-fraction="' . sprintf('%.8F', $fraction) . '" d="' . self::BarPreviewWedge($cx, $cy, $r0, $r1, $a0, $a1)
                     . '" fill="' . EChartsBarPreview::E($fill) . '" fill-opacity="'
                     . EChartsBarPreview::N($opacity) . '" stroke="' . EChartsBarPreview::E($outlineColor)
                     . '" stroke-width="' . $outlineWidth . '"/>';
@@ -778,7 +817,7 @@ class EChartsBarPolar extends IPSModuleStrict
             $hiddenTileTitle = (bool) (IPS_GetObject($this->InstanceID)['ObjectIsHiddenTitle'] ?? false);
         }
 
-        return $this->RenderVisualizationHTMLPage($ipsView, [
+        $configuration = [
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'ECharts Polar',
             'visualizationTheme' => $this->VisualizationThemeCSS()
@@ -787,6 +826,14 @@ class EChartsBarPolar extends IPSModuleStrict
             'ipsViewStyle'       => $ipsView ? $this->IPSViewThemeCSS() : '',
             'state'              => $this->BuildVisualizationState($ipsView),
             'translations'       => [
+                'Sources'                                                         => $this->Translate('Sources'),
+                'All'                                                             => $this->Translate('All'),
+                'Inverse'                                                         => $this->Translate('Inverse'),
+                'Previous page'                                                   => $this->Translate('Previous page'),
+                'Next page'                                                       => $this->Translate('Next page'),
+                'Category navigation'                                             => $this->Translate('Category navigation'),
+                'No sources selected'                                             => $this->Translate('No sources selected'),
+                self::MODEL_TOO_LARGE_MESSAGE                                     => $this->Translate(self::MODEL_TOO_LARGE_MESSAGE),
                 'Normalized'                                                      => $this->Translate('Normalized'),
                 'Range'                                                           => $this->Translate('Range'),
                 'Configure valid Polar sources.'                                  => $this->Translate('Configure valid Polar sources.'),
@@ -806,10 +853,19 @@ class EChartsBarPolar extends IPSModuleStrict
             'replacements'       => [
                 '{{ECHARTS_SCRIPT}}'           => EChartsAsset::PolarJavaScript(),
                 '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
-                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript(),
+                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript() . "\n" . EChartsAsset::SeriesSelectionJavaScript()
+                    . "\n" . EChartsAsset::CategoryNavigationJavaScript(),
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
-        ]);
+        ];
+        $html = $this->RenderVisualizationHTMLPage($ipsView, $configuration);
+        if (strlen($html) > 1048576) {
+            $this->WriteAttributeString('LastError', 'MODEL_TOO_LARGE');
+            $this->DebugEChartsSetStatus(self::STATUS_DESIGN_INVALID);
+            $configuration['state'] = $this->ErrorState(self::MODEL_TOO_LARGE_MESSAGE);
+            return $this->RenderVisualizationHTMLPage($ipsView, $configuration);
+        }
+        return $html;
     }
 
     private function Initialize(): void
@@ -866,8 +922,8 @@ class EChartsBarPolar extends IPSModuleStrict
         } catch (JsonException $exception) {
             throw new InvalidArgumentException('The Polar sources are not valid JSON.', 0, $exception);
         }
-        if (!is_array($sources) || !array_is_list($sources) || count($sources) < 1 || count($sources) > 16) {
-            throw new InvalidArgumentException('Configure 1 to 16 numeric Polar sources.');
+        if (!is_array($sources) || !array_is_list($sources) || count($sources) < 1 || count($sources) > PolarData::MAXIMUM_SOURCE_COUNT) {
+            throw new InvalidArgumentException('Configure 1 to 100 numeric Polar sources.');
         }
         $validated = [];
         $variableIDs = [];
@@ -890,8 +946,10 @@ class EChartsBarPolar extends IPSModuleStrict
             $unit = $source['Unit'] ?? '';
             $label = $source['Label'] ?? '';
             $color = $source['Color'] ?? -1;
+            $initiallyVisible = $source['InitiallyVisible'] ?? true;
             if (!is_int($decimals) || $decimals < 0 || $decimals > 6
                 || !is_string($unit) || !is_string($label)
+                || !is_bool($initiallyVisible)
                 || !is_int($color) || $color < -1 || $color > 0xFFFFFF
             ) {
                 throw new InvalidArgumentException('A Polar source contains invalid display settings.');
@@ -912,11 +970,12 @@ class EChartsBarPolar extends IPSModuleStrict
             $validated[] = [
                 ...($this->ReadPropertyBoolean('NormalizeValues')
                     ? array_combine(['Minimum', 'Maximum'], EChartsNormalization::Range($source)) : []),
-                'VariableID' => $variableID,
-                'Label'      => trim($label),
-                'Unit'       => $presentation['unit'],
-                'Decimals'   => $presentation['decimals'],
-                'Color'      => $color
+                'VariableID'       => $variableID,
+                'Label'            => trim($label),
+                'Unit'             => $presentation['unit'],
+                'Decimals'         => $presentation['decimals'],
+                'Color'            => $color,
+                'InitiallyVisible' => $initiallyVisible
             ];
         }
 
@@ -942,7 +1001,8 @@ class EChartsBarPolar extends IPSModuleStrict
         } catch (Throwable $exception) {
             $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
 
-            return $this->ErrorState('The Polar values could not be loaded.');
+            return $this->ErrorState($this->ReadAttributeString('LastError') === 'MODEL_TOO_LARGE'
+                ? self::MODEL_TOO_LARGE_MESSAGE : 'The Polar values could not be loaded.');
         }
 
         return [

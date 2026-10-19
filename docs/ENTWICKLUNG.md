@@ -21,6 +21,18 @@ IPSView nur den Diagrammtitel benötigt.
 
 ## Aktueller Stand und Zielarchitektur
 
+BarPolar erweitert gemäß [ADR 0073](adr/0073-polar-source-selection-and-pages.md)
+auf 100 Quellen mit optionaler ID-Auswahl und responsiven Seiten für beide
+Polarmodi. `EnableSourceSelection=false` und fehlendes `InitiallyVisible=true`
+erhalten Altlisten; bis 16 Quellen ohne Auswahl bleibt die alte Geometrie.
+Die gemeinsame Reihenwahl unterstützt jetzt auch direkte Checkbox-Aktionen,
+der Kategorieanker direkte Seitenfenster. Nur diese Zustandslogik wird geteilt,
+nicht Familiengeometrie oder Werteskala. Alle Quellen bleiben im Modell,
+Lesezugriff und VM-Abonnement. Die vollständige nullinklusive automatische Skala
+bleibt bei Auswahl/Seiten fest, manuelle Bereiche und Normalisierung unverändert.
+Der maximal sechsteilige SVG-Ausschnitt berechnet seine Skala vor Auswahl und
+Sampling. Modell- und HTML-Guards bleiben bei 200000 Bytes beziehungsweise 1 MiB.
+
 Pie erweitert gemäß [ADR 0072](adr/0072-pie-source-selection.md) auf 100 Quellen.
 `EnableSourceSelection` ist standardmäßig aus; `InitiallyVisible` fehlt in
 Altlisten und bedeutet sichtbar. Die erweiterte Auswahl nutzt denselben
@@ -37,7 +49,8 @@ Endsumme. `WaterfallData::Totals` zentralisiert die endliche geordnete Addition
 für Modell und vollständige Vorschau. Ausschnitte verändern keine Zwischenstände
 oder Gesamtbilanz. `echarts-category-navigation.js` teilt ausschließlich flüchtige
 ID-Anker und Fensterbegrenzung mit BarCategory; Familiengeometrie und Bilanz bleiben
-lokal. Die Einbettung erfolgt nur bei diesen beiden Familien über `EChartsAsset`.
+lokal. BarPolar verwendet denselben Kategorieanker für direkte Seitenfenster;
+die Einbettung erfolgt bedarfsbezogen über `EChartsAsset`.
 Das Modell ist auf 200000 JSON-Bytes begrenzt, das vollständige HTML auf 1 MiB.
 
 ThemeRiver ergänzt gemäß [ADR 0070](adr/0070-theme-river-counter-consumption.md)
@@ -244,7 +257,7 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 | Gerät | EChartsBarCategory | Aktuelle einfache, gruppierte oder gestapelte Kategorienvergleiche für 1 bis 100 Quellen mit gemeinsamer Einheit, Kategoriennavigation, optionalem Min-/Max-Farbverlauf und getrenntem Kachel- und IPSView-Design |
 | Gerät | EChartsBarHistory | Historische rohe oder aggregierte Balken von 1 bis 32 Archivquellen, bis 16 Einheitengruppen und Reihenauswahl in nativer Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsBarWaterfall | Aktueller Startwert mit 1 bis 99 signierten Änderungen, berechneter Gesamtbilanz und ID-stabiler Kategoriennavigation in Kachel und optionalem IPSView-HTML |
-| Gerät | EChartsBarPolar | Aktuelle Werte aus 1 bis 16 Quellen als radiale Balken oder konzentrische Bögen in Kachel und optionalem IPSView-HTML |
+| Gerät | EChartsBarPolar | Aktuelle Werte aus 1 bis 100 Quellen als radiale Balken oder konzentrische Bögen mit optionaler Quellenauswahl, Seiten und vollständiger Werteskala in Kachel und IPSView |
 | Gerät | EChartsPie | Aktuelle Anteile aus 1 bis 100 Quellen als Kreis, Donut oder Nightingale-Rose mit optionaler ID-stabiler Quellenauswahl und getrennten Auswahl-/Gesamtanteilen |
 | Gerät | EChartsScatter | Archivierte X/Y-Werte mit optionaler Bubble-Größe, ausschließlich zeitgleiche abgeschlossene Intervalle ohne Interpolation, in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsHeatmap | Eine Archivvariable als lokale Tages-/Wochentag-Stunden-Matrix mit separaten Kachel- und IPSView-Designern |

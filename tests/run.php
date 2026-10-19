@@ -34,6 +34,7 @@ $tests = [
     __DIR__ . '/theme_river_data.php',
     __DIR__ . '/waterfall_data.php',
     __DIR__ . '/pie_data.php',
+    __DIR__ . '/polar_data.php',
     __DIR__ . '/heatmap_aggregation.php',
     __DIR__ . '/heatmap_window.php',
     __DIR__ . '/tree_hierarchy.php',
@@ -54,6 +55,7 @@ $tests = [
 ];
 
 $commands = [
+    ['Test 100-source Polar integration', 'php tests/gateway_gauges.php --polar-many'],
     ['Test 100-source Pie integration', 'php tests/gateway_gauges.php --pie-many'],
     ['Test 100-source Waterfall integration', 'php tests/gateway_gauges.php --waterfall-many'],
     ['Test ThemeRiver counter consumption', 'php tests/gateway_gauges.php --theme-river-consumption'],
@@ -74,6 +76,8 @@ $commands = [
     ['Test Time Series tile design layout', 'node tests/time_series_layout.js'],
     ['Test Category Bar layout', 'node tests/bar_category_layout.js'],
     ['Test Pie sources and selection', 'node tests/pie_layout.js'],
+    ['Test shared chart view state', 'node tests/chart_view_state.js'],
+    ['Test Polar pages and selection', 'node tests/bar_polar_layout.js'],
     ['Test Historical Bar layout', 'node tests/bar_history_layout.js'],
     ['Test Scatter/Bubble layout', 'node tests/scatter_layout.js'],
     ['Test Heatmap layout', 'node tests/heatmap_layout.js'],

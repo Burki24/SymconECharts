@@ -318,6 +318,37 @@ Nach Modulupdate bleiben die neue Formularbedienung und die neuen Vergleiche
 in tatsächlichen Symcon-/IPSView-Clients separat abzunehmen. Bei diesen
 Entwicklungsprüfungen werden keine Live-Einstellungen oder Variablenwerte geändert.
 
+## BarPolar: 100 Quellen, Auswahl und Seiten
+
+`php tests/polar_data.php` prüft Obergrenze, signed vollständige Skalen,
+Gesamt-Null, ungültige Werte und overflow-sichere Vorschauprojektion.
+`php tests/gateway_gauges.php --polar-many` läuft isoliert mit realem Gateway
+und synthetischen Kernel-Grenzen: 100/101 Quellen, Altlisten, vollständige
+Referenzen/Abonnements und Lesezugriffe, versteckte Updates und Fehler,
+unabhängige IPSView-Skalen, Originalmetadaten, Normalisierung und echte Nullen.
+Der zunächst rote Cap-Test schlug ausdrücklich an der alten Grenze fehl.
+Drafts bleiben schreib-/gateway-/archivfrei; SVG-Ausschnitte behalten versteckte
+späte Extrema, IDs und vollständige Palettenpositionen. Die JSON- und finalen
+HTML-Guards werden separat überschritten und auf begrenzte Fehler geprüft.
+
+`node tests/chart_view_state.js` charakterisiert direkte und native Auswahl
+sowie Kategorieanker der beiden geteilten Bausteine. `bar_polar_layout.js`
+prüft die ausgelieferte native Polar-Runtime, alle 100 erreichbaren Quellen,
+leere Auswahl und Wiederherstellung, beide Modi/Ausgaben, ID-Tooltips/Farben,
+Fixierung, Theme/Sort/Refresh/Resize/Entfernung sowie ganze versteckte Extrema.
+Die neuen nativen Layoutfälle verwenden einen zusätzlichen SVGRenderer nur als
+Headless-Testoberfläche; das ausgelieferte Canvas-Bundle wird nicht verändert.
+Alle neuen Tests laufen über `tests/run.php` und den vollständigen Qualitätslauf.
+
+`node tests/bar_polar_browser.mjs` bietet auf `127.0.0.1:8807` ausschließlich
+synthetische Canvas-Beispiele. Die Galerie kombiniert beide Modi und Ausgaben;
+`/chart?mode=symcon|ipsview&shape=radial|tangential&font=24` öffnet eine Ansicht.
+Am 19.10.2026 wurden radiale Kachel-/IPSView-Ansichten sowie konzentrische Bögen
+mit 24 px, Quellen-Popup, Alle/Umkehren, leere Auswahl, Wiederherstellung und
+Seitenwechsel lokal visuell geprüft. Die letzte radiale Seite erschloss Quelle
+100; versteckte Extrema blieben im Maßstab. Keine Live-Konfiguration geändert.
+Live-Abnahme nach Modulupdate in Kachel und IPSView bleibt beim Eigentümer.
+
 ## Calendar- und Heatmap-Kennzahlen
 
 `calendar_metrics.php` und `heatmap_metrics.php` ergänzen die Gateway-Suite um

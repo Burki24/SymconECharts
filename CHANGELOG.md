@@ -9,6 +9,12 @@
 
 ## Neu
 
+- EChartsBarPolar unterstützt bis zu 100 Quellen mit optionaler Quellenauswahl,
+  Anfangssichtbarkeit und Alle/Umkehren. Responsive Seiten für radiale Balken
+  und konzentrische Bögen erhalten die vollständige Werteskala einschließlich
+  ausgeblendeter Quellen. Die Vorschau verwendet denselben vollständigen
+  Maßstab; bestehende Quellen und Designs bleiben unverändert nutzbar.
+
 - EChartsPie unterstützt bis zu 100 Quellen. Die optionale erweiterte
   Quellenauswahl bietet Anfangssichtbarkeit sowie Alle/Umkehren und erhält
   Auswahl und Legendenposition bei Aktualisierungen. Tooltips unterscheiden

@@ -40,6 +40,13 @@
         return {
             capture: capture,
             reconcile: reconcile,
+            select: function (id, visible) {
+                if (ids.indexOf(id) >= 0 && typeof visible === 'boolean') { selected[id] = visible; }
+            },
+            selectAll: function (visible) {
+                if (typeof visible === 'boolean') { ids.forEach(function (id) { selected[id] = visible; }); }
+            },
+            invert: function () { ids.forEach(function (id) { selected[id] = selected[id] === false; }); },
             scrollDataIndex: function () { return Math.max(0, ids.indexOf(anchor)); }
         };
     }

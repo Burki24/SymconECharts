@@ -63,11 +63,31 @@ const window = {
     addEventListener: () => {}
 };
 const document = {
-    getElementById: id => id === 'echarts-bar-polar-chart' ? chartElement : errorElement,
-    createElement: () => ({ style: {}, remove: () => {} }),
+    getElementById: id => elements[id] || errorElement,
+    createElement: tag => element(tag),
     body: { appendChild: () => {} }
 };
+function element(tag) {
+    const node = { tag, style: {}, children: [], hidden: false, listeners: {},
+        addEventListener: (name, callback) => { node.listeners[name] = callback; },
+        appendChild: child => { node.children.push(child); },
+        setAttribute: (name, value) => { node[name] = value; }, remove: () => {},
+        querySelectorAll: tagName => node.children.flatMap(child => [
+            ...(child.tag === tagName ? [child] : []), ...child.querySelectorAll(tagName)
+        ]) };
+    Object.defineProperty(node, 'textContent', { get: () => node.text || '', set: value => {
+        node.text = value; node.children = [];
+    } });
+    return node;
+}
+const elements = { 'echarts-bar-polar-chart': chartElement, 'echarts-bar-polar-error': errorElement };
+for (const id of ['controls', 'selection', 'selection-title', 'sources', 'pages', 'previous', 'next', 'range', 'all', 'inverse']) {
+    elements['echarts-bar-polar-' + id] = element('div');
+}
 vm.runInNewContext(designSource, { window, document, console });
+for (const file of ['echarts-series-selection.js', 'echarts-category-navigation.js']) {
+    vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', 'libs', file), 'utf8'), { window });
+}
 vm.runInNewContext(source, { window, document, console, ResizeObserver: window.ResizeObserver });
 
 assert.equal(initialized, 1);
@@ -955,11 +975,15 @@ if (fs.existsSync(localECharts)) {
         addEventListener: () => {}
     };
     const livePolarDocument = {
-        getElementById: id => id === 'echarts-bar-polar-chart' ? livePolarElement : livePolarError,
+        getElementById: id => id === 'echarts-bar-polar-chart' ? livePolarElement
+            : ['echarts-bar-polar-error', 'echarts-bar-polar-warning'].includes(id) ? livePolarError : null,
         createElement: () => ({ style: {}, remove: () => {} }),
         body: { appendChild: () => {} }
     };
     vm.runInNewContext(designSource, { window: livePolarWindow, document: livePolarDocument, console });
+    for (const file of ['echarts-series-selection.js', 'echarts-category-navigation.js']) {
+        vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', 'libs', file), 'utf8'), { window: livePolarWindow });
+    }
     vm.runInNewContext(source, {
         window: livePolarWindow, document: livePolarDocument, console,
         ResizeObserver: livePolarWindow.ResizeObserver
@@ -1350,6 +1374,177 @@ for (const outputMode of ['symcon', 'ipsview']) {
         assert.match(normalizedOption.tooltip.formatter({ dataIndex: 0 }), /Range/);
         assert.match(normalizedOption.series[0].label.formatter({ dataIndex: 0, value: 50 }), /-10/);
         assert.match(normalizedOption.aria.description, /Normalized/);
+    }
+}
+
+const manyItems = Array.from({ length: 100 }, (_, index) => ({
+    id: 'many-' + index, label: 'Source ' + index, value: index === 99 ? 1500 : index,
+    order: index, initiallyVisible: index !== 99
+}));
+window.handleMessage({ status: 'ready', chart: { ...state.chart, polar: {
+    ...state.chart.polar, enableSourceSelection: true, style: { ...state.chart.polar.style, sortOrder: 'configured' }
+}, items: manyItems } });
+assert.ok(options.at(-1).series[0].data.length < 100,
+    'A hundred Polar sources must be projected onto readable pages rather than squeezed into one circle.');
+assert.equal(options.at(-1).radiusAxis.max, 1500,
+    'A hidden late extreme must remain in the full-model Polar scale.');
+const control = name => elements['echarts-bar-polar-' + name];
+const press = name => control(name).listeners.click();
+assert.equal(control('controls').hidden, false);
+assert.equal(control('selection').hidden, false);
+assert.equal(control('sources').querySelectorAll('input').length, 100,
+    'Every source needs an accessible checkbox, not a dummy ECharts series.');
+assert.equal(control('sources').querySelectorAll('input').at(-1).checked, false);
+const firstPage = options.at(-1).series[0].data.map(item => item.id);
+const firstColor = options.at(-1).series[0].data[0].itemStyle.color;
+press('next');
+const secondPage = options.at(-1).series[0].data.map(item => item.id);
+assert.ok(!secondPage.some(id => firstPage.includes(id)), 'Normal pages must advance without repeating their window.');
+const secondAnchor = secondPage[0];
+window.handleMessage({ status: 'ready', chart: { ...state.chart, polar: {
+    ...state.chart.polar, enableSourceSelection: true, style: { ...state.chart.polar.style, sortOrder: 'configured' }
+}, items: manyItems.map(item => ({ ...item, label: 'Renamed ' + item.order, value: item.value + 1 })) } });
+assert.equal(options.at(-1).series[0].data[0].id, secondAnchor,
+    'Refresh and duplicate/renamed labels must retain the source-ID page anchor.');
+assert.equal(options.at(-1).radiusAxis.max, 1501, 'Off-page hidden updates must change the shared scale.');
+press('previous');
+assert.equal(options.at(-1).series[0].data[0].itemStyle.color, firstColor,
+    'Source colors must not change on a page switch.');
+press('all');
+assert.ok(control('sources').querySelectorAll('input').every(input => input.checked));
+press('inverse');
+assert.equal(options.at(-1).series.length, 1, 'An empty selection must not create placeholder series.');
+assert.equal(options.at(-1).series[0].data.length, 0);
+assert.equal(options.at(-1).radiusAxis.max, 1501, 'Empty selection must still preserve the complete value scale.');
+assert.equal(control('range').textContent, 'No sources selected');
+assert.equal(control('previous').disabled, true);
+assert.equal(control('next').disabled, true);
+press('all');
+const visited = new Set();
+for (let page = 0; page < 100; page++) {
+    const option = options.at(-1);
+    assert.equal(option.series.length, 1, 'Page projection must remain linear, with one actual bar series.');
+    for (let index = 0; index < option.series[0].data.length; index++) {
+        const datum = option.series[0].data[index];
+        visited.add(datum.id);
+        assert.match(option.tooltip.formatter({ dataIndex: 0, data: datum }), new RegExp('Renamed ' + datum.id.split('-')[1] + '<br>'),
+            'Tooltip lookup must prefer the actual datum ID, not a stale filtered position.');
+    }
+    if (control('next').disabled) { break; }
+    press('next');
+}
+assert.equal(visited.size, 100);
+assert.ok(visited.has('many-33') && visited.has('many-99'), 'Middle and last sources must remain reachable.');
+const lastAnchor = options.at(-1).series[0].data[0].id;
+chartElement.clientWidth += 30;
+resizeCallback();
+assert.ok(options.at(-1).series[0].data.some(item => item.id === lastAnchor),
+    'A resized last page must preserve its anchored source when the window clamps at the end.');
+const beforeThemeAnchor = options.at(-1).series[0].data[0].id;
+window.SYMC_VISUALIZATION.options.echartsThemes.night = palette;
+const reorderingState = { status: 'ready', chart: { ...state.chart, theme: 'night', polar: {
+    ...state.chart.polar, enableSourceSelection: true, style: { ...state.chart.polar.style, sortOrder: 'configured' }
+}, items: manyItems.slice().reverse().map((item, index) => ({ ...item, order: index, initiallyVisible: true })) } };
+window.handleMessage(reorderingState);
+assert.ok(options.at(-1).series[0].data.some(item => item.id === beforeThemeAnchor),
+    'Theme replacement and source reorder must retain the ID anchor, clamped only at the end.');
+const removedId = options.at(-1).series[0].data[0].id;
+window.handleMessage({ ...reorderingState, chart: { ...reorderingState.chart,
+    items: reorderingState.chart.items.filter(item => item.id !== removedId) } });
+assert.ok(!options.at(-1).series[0].data.some(item => item.id === removedId));
+assert.ok(options.at(-1).series[0].data.length > 0,
+    'Removing an anchored source must recover a bounded neighboring window, not an empty page.');
+
+// Disabled selection must ignore saved per-source initial visibility, including legacy data.
+window.handleMessage({ status: 'ready', chart: { ...state.chart, polar: {
+    ...state.chart.polar, enableSourceSelection: false,
+    style: { ...state.chart.polar.style, sortOrder: 'configured' }
+}, items: manyItems.map(item => ({ ...item, initiallyVisible: false })) } });
+assert.match(control('range').textContent, /100$/);
+assert.equal(control('selection').hidden, true);
+
+const nativeManyOptions = [];
+for (const outputMode of ['symcon', 'ipsview']) {
+    window.SYMC_VISUALIZATION.mode = outputMode;
+    for (const polarMode of ['radial', 'tangential']) {
+        for (const size of [8, 16, 24]) {
+            chartElement.clientWidth = 625;
+            chartElement.clientHeight = 560;
+            const sources = manyItems.map((item, index) => ({ ...item, label: index < 2 ? '<Same>' : item.label,
+                value: index === 98 ? -700 : item.value, initiallyVisible: index < 98 }));
+            const manyState = { status: 'ready', chart: { ...state.chart, polar: {
+                ...state.chart.polar, enableSourceSelection: true, style: { ...state.chart.polar.style,
+                    mode: polarMode, categoryLabelFontSize: size, valueLabelFontSize: size,
+                    barHighlightMode: 'outline', sortOrder: 'configured', animationEnabled: false }
+            }, items: sources } };
+            window.handleMessage(manyState);
+            const option = options.at(-1);
+            const axis = polarMode === 'radial' ? option.radiusAxis : option.angleAxis;
+            assert.equal(axis.min, -700);
+            assert.equal(axis.max, 1500);
+            assert.ok(option.series[0].data.length >= 1 && option.series[0].data.length < 100);
+            const selectedCheckboxes = control('sources').querySelectorAll('input');
+            selectedCheckboxes[33].checked = false;
+            selectedCheckboxes[33].listeners.change();
+            window.handleMessage(manyState);
+            assert.equal(control('sources').querySelectorAll('input')[33].checked, false,
+                'User choices must survive data refresh independently from labels and current pages.');
+            nativeManyOptions.push({ option: options.at(-1), width: 625, height: 560 });
+            // Keep a pinned source while it is temporarily off-page, then restore it.
+            while (!control('previous').disabled) { press('previous'); }
+            const pinnedId = options.at(-1).series[0].data[0].id;
+            handlers.click({ componentType: 'series', seriesIndex: 0, dataIndex: 0 });
+            press('next');
+            const beforeRestore = actions.length;
+            press('previous');
+            const restoredIndex = options.at(-1).series[0].data.findIndex(item => item.id === pinnedId);
+            assert.ok(actions.slice(beforeRestore).some(action => action.type === 'highlight'
+                && action.dataIndex === restoredIndex), 'Pinned highlight must return with its source page.');
+            handlers.click({ componentType: 'series', seriesIndex: 0, dataIndex: restoredIndex });
+            const manual = { ...manyState, chart: { ...manyState.chart, polar: {
+                ...manyState.chart.polar, style: { ...manyState.chart.polar.style,
+                    valueAxisRangeMode: 'manual', valueAxisMinimum: -100, valueAxisMaximum: 200 }
+            } } };
+            window.handleMessage(manual);
+            assert.equal((polarMode === 'radial' ? options.at(-1).radiusAxis : options.at(-1).angleAxis).min, -100);
+            assert.equal((polarMode === 'radial' ? options.at(-1).radiusAxis : options.at(-1).angleAxis).max, 200);
+            const normalizedMany = { ...manyState, chart: { ...manyState.chart,
+                polar: { ...manyState.chart.polar, normalized: true, unit: '%' },
+                items: sources.map((item, index) => ({ ...item, value: index, originalValue: -20 + index,
+                    unit: '°C', minimum: -20, maximum: 80, decimals: 1 })) } };
+            window.handleMessage(normalizedMany);
+            const normalizedOption = options.at(-1);
+            const normalizedAxis = polarMode === 'radial' ? normalizedOption.radiusAxis : normalizedOption.angleAxis;
+            assert.equal(normalizedAxis.min, 0);
+            assert.equal(normalizedAxis.max, 100);
+            assert.match(normalizedOption.tooltip.formatter({ dataIndex: 0 }), /°C/);
+            assert.match(normalizedOption.tooltip.formatter({ dataIndex: 0 }), /Range/);
+            chartElement.clientWidth = 100;
+            chartElement.clientHeight = 300;
+            resizeCallback();
+            assert.ok(options.at(-1).series[0].data.length >= 1, 'A narrow widget must retain a reachable real source.');
+            nativeManyOptions.push({ option: options.at(-1), width: 100, height: 300 });
+        }
+    }
+}
+{
+    const shipped = {};
+    vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts', '6.1.0', 'echarts.polar.min.js'), 'utf8'),
+        { window: shipped, navigator: { userAgent: 'Node.js' }, console, setTimeout, clearTimeout });
+    shipped.echarts.use(require('../.tools/echarts-runtime/node_modules/echarts/renderers').SVGRenderer);
+    const echarts = shipped.echarts;
+    for (const { option, width, height } of nativeManyOptions) {
+        const native = echarts.init(null, null, { renderer: 'svg', ssr: true, width, height });
+        native.setOption(option, true);
+        const data = native.getModel().getSeriesByIndex(0).getData();
+        assert.equal(data.count(), option.series[0].data.length, 'The shipped runtime must draw exactly the projected page.');
+        assert.ok(native.renderToSVGString().includes('<svg'));
+        for (let index = 0; index < data.count(); index++) {
+            const geometry = data.getItemLayout(index);
+            assert.ok(['cx', 'cy', 'r', 'r0', 'startAngle', 'endAngle'].every(key => Number.isFinite(geometry[key])),
+                'Native page geometry must remain finite at every tested size and font.');
+        }
+        native.dispose();
     }
 }
 

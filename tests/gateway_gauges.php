@@ -1111,6 +1111,10 @@ if (array_slice($argv, 1) === ['--pie-many']) {
     require __DIR__ . '/pie_many.php';
     exit(0);
 }
+if (array_slice($argv, 1) === ['--polar-many']) {
+    require __DIR__ . '/bar_polar_many.php';
+    exit(0);
+}
 if (($argv[1] ?? '') === '--pie-preview') {
     $draft = json_decode($argv[2] ?? '{}', true, 512, JSON_THROW_ON_ERROR);
     $draft['EnableSourceSelection'] ??= true;
@@ -7941,7 +7945,11 @@ assertGatewayGauge(
 $sixteenPolarSources[] = ['VariableID' => 4711, 'UseVariablePresentation' => false, 'Unit' => 'W'];
 $maximumPolar->SetTestProperty('Sources', json_encode($sixteenPolarSources, JSON_THROW_ON_ERROR));
 $maximumPolar->ApplyChanges();
-assertGatewayGauge($maximumPolar->GetTestStatus() === 201, 'Polar Bar must reject more than 16 sources.');
+assertGatewayGauge(
+    $maximumPolar->GetTestStatus() === IS_ACTIVE
+    && count(json_decode($maximumPolar->GetPolarData(), true, 512, JSON_THROW_ON_ERROR)['items']) === 17,
+    'Polar Bar must accept the seventeenth distinct source after extending its former limit.'
+);
 for ($index = 0; $index < 16; $index++) {
     unset($GLOBALS['symconTestVariables'][5800 + $index]);
 }

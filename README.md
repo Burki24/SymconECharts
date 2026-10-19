@@ -225,9 +225,10 @@ können unabhängig davon individuell vergeben werden.
   Bilanz und Werteskala. Kachel und IPSView können getrennt gestaltet werden.
 
 - __EChartsBarPolar__ ([Dokumentation](EChartsBarPolar/README.md))
-  Vergleicht 1 bis 16 aktuelle numerische Werte als radiale Balken oder
-  konzentrische Bögen. Reihenfolge, Farben und Polar-Geometrie lassen sich
-  für Kachel und IPSView getrennt gestalten.
+  Vergleicht 1 bis 100 aktuelle numerische Werte als radiale Balken oder
+  konzentrische Bögen. Optionale Quellenauswahl und responsive Seiten erhalten
+  die vollständige Werteskala. Reihenfolge, Farben und Polar-Geometrie lassen
+  sich für Kachel und IPSView getrennt gestalten.
 
 - __EChartsPie__ ([Dokumentation](EChartsPie/README.md))
   Zeigt aktuelle Anteile aus 1 bis 100 Quellen als Kreis, Donut oder

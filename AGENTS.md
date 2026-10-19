@@ -45,6 +45,10 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Startwert, signierten Änderungen und berechneter Endsumme liegen im eigenen
   Gerätemodul `EChartsBarWaterfall`. Polar-Balken für aktuelle Werte liegen im
   eigenen Gerätemodul `EChartsBarPolar` und sind kein Modus dieser Instanzen.
+  BarPolar erlaubt gemäß ADR 0073 bis zu 100 Quellen mit optionaler
+  ID-stabiler Quellenauswahl und responsiver Seitennavigation. Das vollständige
+  Modell bestimmt weiterhin die Werteskala; Auswahl und Seiten sind reine
+  Ansichten. Gemeinsame Auswahl- und Kategorieankerlogik liegt unter `libs`.
   Waterfall erlaubt gemäß ADR 0071 bis zu 100 Quellen einschließlich Startwert,
   zusätzlich die berechnete Endsumme. Kategoriennavigation ändert niemals die
   vollständige Bilanz oder Skala; gemeinsamer flüchtiger Kategorieanker mit

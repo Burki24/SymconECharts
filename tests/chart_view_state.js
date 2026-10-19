@@ -1,0 +1,34 @@
+'use strict';
+const fs = require('fs');
+const path = require('path');
+const vm = require('vm');
+const assert = require('assert/strict');
+const context = vm.createContext({window: {}});
+for (const file of ['echarts-series-selection.js', 'echarts-category-navigation.js']) {
+    vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'libs', file), 'utf8'), context);
+}
+const selection = context.window.SYMC_ECHARTS_SERIES_SELECTION.create();
+const rows = [{id: 'a'}, {id: 'b', initiallyVisible: false}, {id: 'c'}];
+assert.equal(selection.reconcile(rows).b, false);
+selection.select('b', true);
+assert.equal(selection.reconcile(rows).b, true, 'Manual UI and native legends must share ID-based transient state.');
+selection.selectAll(false);
+assert.deepEqual(Object.values(selection.reconcile(rows)), [false, false, false]);
+selection.invert();
+assert.deepEqual(Object.values(selection.reconcile(rows)), [true, true, true]);
+selection.select('unknown', true);
+assert.equal(Object.keys(selection.reconcile(rows)).length, 3);
+selection.select('b', false);
+assert.equal(selection.reconcile([rows[2], rows[1], rows[0]]).b, false);
+assert.equal(selection.reconcile([{id: 'b', initiallyVisible: true}]).b, true, 'A changed initial setting takes effect per ID.');
+selection.capture({getOption: () => ({legend: [{selected: {b: false}, scrollDataIndex: 0}]})});
+assert.equal(selection.reconcile([{id: 'b'}]).b, false, 'Existing native legend capture stays compatible.');
+const navigation = context.window.SymconEChartsCategoryNavigation.create();
+navigation.rememberWindow(['a', 'b', 'c', 'd'], 1);
+assert.equal(navigation.window(['x', 'b', 'd', 'a', 'c'], 2).first, 1);
+assert.equal(navigation.window(['x', 'd', 'a'], 2).first, 1, 'Removed anchors clamp the remembered offset.');
+navigation.window([], 2);
+assert.equal(navigation.window(['a', 'b', 'c'], 1).first, 0);
+navigation.remember({getOption: () => ({xAxis: [{data: ['a', 'b', 'c']}], dataZoom: [{id: 'category-scroll', startValue: 1}]})});
+assert.equal(navigation.window(['x', 'c', 'b', 'a'], 1).first, 2, 'Existing chart zoom capture preserves the same anchor.');
+console.log('Shared native/manual source selection and category window state verified.');

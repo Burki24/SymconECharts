@@ -1,6 +1,19 @@
 {
     "translations": {
         "de": {
+            "Enable source selection": "Quellenauswahl aktivieren",
+            "Initially visible": "Anfangs sichtbar",
+            "Selection and pages only change the view. All configured sources continue to determine the complete value scale.": "Auswahl und Seiten ändern nur die Ansicht. Alle konfigurierten Quellen bestimmen weiterhin die vollständige Werteskala.",
+            "Use 1 to 100 unique numeric variables. A common unit is required only without normalization. Each variable keeps its own identity even when labels match. Radial spokes and concentric arcs are available in both designers.": "1 bis 100 eindeutige numerische Variablen verwenden. Eine gemeinsame Einheit ist nur ohne Normalisierung erforderlich. Jede Variable bleibt auch bei gleichem Namen eigenständig. Radiale Balken und konzentrische Bögen stehen in beiden Designern zur Verfügung.",
+            "Configure 1 to 100 numeric Polar sources.": "1 bis 100 numerische Polar-Quellen konfigurieren.",
+            "The Polar model is too large. Reduce source labels or units.": "Das Polar-Modell ist zu groß. Quellenbeschriftungen oder Einheiten kürzen.",
+            "Sources": "Quellen",
+            "All": "Alle",
+            "Inverse": "Umkehren",
+            "Previous page": "Vorherige Seite",
+            "Next page": "Nächste Seite",
+            "Category navigation": "Kategoriennavigation",
+            "No sources selected": "Keine Quellen ausgewählt",
             "Use 1 to 16 unique numeric variables. A common unit is required only without normalization. Each variable keeps its own identity even when labels match. Radial spokes and concentric arcs are available in both designers.": "1 bis 16 eindeutige numerische Variablen verwenden. Eine gemeinsame Einheit ist nur ohne Normalisierung erforderlich. Jede Variable bleibt auch bei gleichem Namen eigenständig. Radiale Balken und konzentrische Bögen stehen in beiden Designern zur Verfügung.",
             "Normalize values using source Min/Max": "Werte anhand Quellen-Min/Max normalisieren",
             "Normalization maps each source range to 0–100. Mixed units and negative originals are allowed. Original values and units remain in the tooltip.": "Die Normalisierung bildet jeden Quellenbereich auf 0–100 ab. Unterschiedliche Einheiten und negative Originalwerte sind erlaubt. Originalwerte und Einheiten bleiben im Tooltip erhalten.",
