@@ -1,6 +1,22 @@
 {
     "translations": {
         "de": {
+            "Enable extended source selection": "Erweiterte Quellenauswahl aktivieren",
+            "Extended selection adds All/Inverse and initial source visibility. Percentages refer to the visible selection; tooltips also show the share of all configured sources. Hidden sources are still read.": "Die erweiterte Auswahl ergänzt Alle/Umkehren und die anfängliche Quellensichtbarkeit. Prozentanteile beziehen sich auf die sichtbare Auswahl; der Tooltip nennt zusätzlich den Anteil aller konfigurierten Quellen. Versteckte Quellen werden weiterhin gelesen.",
+            "Initially visible": "Anfangs sichtbar",
+            "Initially visible: %d of %d sources": "Anfangs sichtbar: %d von %d Quellen",
+            "All": "Alle",
+            "Invert": "Umkehren",
+            "Share of visible selection": "Anteil der sichtbaren Auswahl",
+            "Share of full model": "Anteil aller Quellen",
+            "Share of selected normalized weights": "Anteil der ausgewählten normalisierten Gewichte",
+            "Share of all normalized weights": "Anteil aller normalisierten Gewichte",
+            "No sources selected": "Keine Quellen ausgewählt",
+            "No sources selected.": "Keine Quellen ausgewählt.",
+            "No positive values in the selected sources.": "Keine positiven Werte in den ausgewählten Quellen.",
+            "The Pie model is too large. Reduce source labels or units.": "Das Kreisdiagrammmodell ist zu groß. Beschriftungen oder Einheiten kürzen.",
+            "Configure 1 to 100 unique numeric Pie sources with one common unit.": "1 bis 100 eindeutige numerische Kreisdiagramm-Quellen mit einer gemeinsamen Einheit konfigurieren.",
+            "Use 1 to 100 unique numeric variables. Without normalization use one effective unit and nonnegative values. Equal names remain separate sources.": "1 bis 100 eindeutige numerische Variablen verwenden. Ohne Normalisierung sind eine gemeinsame Einheit und nichtnegative Werte erforderlich. Gleiche Namen bleiben getrennte Quellen.",
             "Use 1 to 16 unique numeric variables. Without normalization use one effective unit and nonnegative values. Equal names remain separate sources.": "1 bis 16 eindeutige numerische Variablen verwenden. Ohne Normalisierung sind eine gemeinsame Einheit und nichtnegative Werte erforderlich. Gleiche Namen bleiben getrennte Quellen.",
             "Normalize values using source Min/Max": "Werte anhand Quellen-Min/Max normalisieren",
             "Normalization maps each source range to 0–100. Mixed units and negative originals are allowed. Original values and units remain in the tooltip.": "Die Normalisierung bildet jeden Quellenbereich auf 0–100 ab. Unterschiedliche Einheiten und negative Originalwerte sind erlaubt. Originalwerte und Einheiten bleiben im Tooltip erhalten.",

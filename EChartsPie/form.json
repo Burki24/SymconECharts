@@ -16,6 +16,15 @@
             "caption": "Normalize values using source Min/Max"
         },
         {
+            "type": "CheckBox",
+            "name": "EnableSourceSelection",
+            "caption": "Enable extended source selection"
+        },
+        {
+            "type": "Label",
+            "caption": "Extended selection adds All/Inverse and initial source visibility. Percentages refer to the visible selection; tooltips also show the share of all configured sources. Hidden sources are still read."
+        },
+        {
             "type": "Label",
             "caption": "Normalization maps each source range to 0–100. Mixed units and negative originals are allowed. Original values and units remain in the tooltip."
         },
@@ -28,6 +37,15 @@
             "delete": true,
             "changeOrder": true,
             "columns": [
+                {
+                    "caption": "Initially visible",
+                    "name": "InitiallyVisible",
+                    "width": "130px",
+                    "add": true,
+                    "edit": {
+                        "type": "CheckBox"
+                    }
+                },
                 {
                     "caption": "Min (normalization)",
                     "name": "Minimum",
@@ -113,6 +131,11 @@
             ],
             "form": [
                 {
+                    "type": "CheckBox",
+                    "name": "InitiallyVisible",
+                    "caption": "Initially visible"
+                },
+                {
                     "type": "NumberSpinner",
                     "name": "Minimum",
                     "caption": "Min (normalization)",
@@ -166,7 +189,7 @@
         },
         {
             "type": "Label",
-            "caption": "Use 1 to 16 unique numeric variables. Without normalization use one effective unit and nonnegative values. Equal names remain separate sources."
+            "caption": "Use 1 to 100 unique numeric variables. Without normalization use one effective unit and nonnegative values. Equal names remain separate sources."
         },
         {
             "type": "ExpansionPanel",

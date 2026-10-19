@@ -32,6 +32,8 @@ Zusätzlich ist Zählerverbrauch je abgeschlossenem Intervall ausdrücklich wäh
 der bisherige Standardarchiv-Mittelwert bleibt Default.
 Waterfall unterstützt jetzt 100 Quellen mit Kategoriennavigation und vollständiger
 Bilanz/Skala unabhängig vom sichtbaren Ausschnitt.
+Pie unterstützt 100 Quellen mit optionaler erweiterter Quellenauswahl,
+ID-stabiler Legendenansicht und ausdrücklich getrennten Auswahl-/Gesamtanteilen.
 Die übrigen
 Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
 
@@ -52,6 +54,7 @@ Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
 | Erledigt | ThemeRiver: 16 Quellen mit optionaler Bandauswahl | 16000 Aggregate Ladebudget, höchstens 1000 je Quelle und weiterhin 720 Intervalle; versteckte Quellen bleiben in der gemeinsamen Lückenprüfung. |
 | Erledigt | ThemeRiver: auswählbarer Zählerverbrauch | Symcon-Zähleraggregate je Stunde/Tag statt Zählerstand; gleiche Einheiten, unveränderte Lücken-/Auswahl-/Budgetregeln und Mittelwert als Default. |
 | Erledigt | Waterfall: 100 Quellen mit Kategoriennavigation | Ein Startwert plus bis zu 99 Änderungen; vollständige Zwischenstände, Werteskala und Endsumme. Gekennzeichnete Vorschau mit echter Gesamtbilanz; gemeinsame Kategorieanker mit BarCategory. |
+| Erledigt | Pie: 100 Quellen mit optionaler Quellenauswahl | Anfangssichtbarkeit, Alle/Umkehren, ID-stabile Auswahl und Legendenposition; getrennte Nenner für sichtbare und vollständige Gewichte, korrekte Ausschnittsvorschau. |
 | Danach | Weitere Archiv- und Vergleichsreihen | Nur zusammen mit Navigation, Vorschaukennzeichnung und messbaren Ressourcenbudgets. |
 
 Normalisierung ist keine allgemeine Lösung für unterschiedliche Einheiten:
@@ -74,7 +77,7 @@ Schritte sind Planungsziele, keine implementierten oder lastgeprüften Zusagen.
 | EChartsBarCategory | 1–100 numerische Quellenzuordnungen, gleiche Roh-Einheit oder ausdrücklich normalisierte Vergleiche mit eigenen Min/Max; auch negative Originale. Kategorien und Reihen, gruppiert/gestapelt/einfach. | Umgesetzt: responsive Kategoriennavigation, viewportstabile Updates und optionale Normalisierung. Stapel addieren normierte Einzelwerte, sind aber keine physikalischen Summen oder 100-Prozent-Stapel. |
 | EChartsBarWaterfall | Startwert plus 1–99 signierte Änderungen, also 2–100 Quellen; gleiche Einheit; Endsumme zusätzlich berechnet. Modell höchstens 200000 Bytes, HTML höchstens 1 MiB. | Umgesetzt: responsive Kategoriennavigation, ID-stabiler Ausschnitt und unveränderte vollständige Bilanz/Skala. Vorschau zeichnet höchstens fünf Quellen, zeigt aber die echte Gesamtbilanz. Explizite Zwischensummen/Neustarts bleiben eine eigene fachliche Erweiterung. |
 | EChartsBarPolar | 1–16 Quellen gleicher Roh-Einheit oder ausdrücklich aktivierte Normalisierung je Quelle auf 0–100; negative Originalwerte bleiben erhalten. | Normalisierung umgesetzt. Größere Modelle nur mit Auswahl/Seiten und lesbarer Ring-/Sektorbreite, nicht 100 Ringe in einer kleinen Kachel. |
-| EChartsPie | 1–16 nichtnegative Quellen gleicher Roh-Einheit oder optional normalisierte Gewichte mit beliebigen Originaleinheiten und eigenen Min/Max. Nullgewichte bleiben ausdrücklich leer. | Normalisierung nach CalendarPie-Vorbild umgesetzt. Größere Listen mit scrollbarer Legende und ausdrücklich gewähltem Restsegment/Top-N weiterhin offen; keine unsichtbar ausgelassenen Werte. |
+| EChartsPie | 1–100 nichtnegative Quellen gleicher Roh-Einheit oder optional normalisierte Gewichte mit beliebigen Originaleinheiten und eigenen Min/Max. Modell höchstens 200000 Bytes, HTML höchstens 1 MiB. | Umgesetzt: optionale erweiterte Quellenauswahl mit Anfangssichtbarkeit, Alle/Umkehren und ID-stabiler Legendenposition. Alle Quellen bleiben im Modell; Auswahl- und Gesamtanteil werden getrennt benannt. Keine automatische Restgruppe; eine Ausschnittsvorschau berechnet ihre Gewichte nicht neu. |
 | EChartsFunnel | 1–16 nichtnegative numerische Quellen gleicher Einheit. Null gültig; manuelle oder wertbezogene Reihenfolge, keine erzwungene Abnahme zwischen Stufen. | 16 ist eine Darstellungsgrenze. 32, später 100 nur mit Navigation und Beschriftungsprüfung. Negative Trichterbreiten sind keine sinnvolle Aufhebung. Der gemeinsame Resolver behält hier die Grenze 16. |
 | EChartsPictorialBar | 1–100 nichtnegative Quellen gleicher Roh-Einheit oder optional normalisierte Quellen mit eigenen Min/Max und Originaleinheiten. Wertfarbe, interner Verlauf, Icons und eigene SVGs. | Umgesetzt: Normalisierung und responsive Kategoriennavigation ohne Datenverlust; Vorschau kennzeichnet ihren Acht-Quellen-Ausschnitt. Mehrfachauswahl nach Objektzweig/Filter weiterhin offen. |
 | EChartsTree | Objektwurzel Ebene 0, Kategorien/Instanzen/Variablen; 1–12 Nachkommensebenen; 10–3000 Knoten, Standard 80; gefiltertes Suchbudget 30000 Objekte. Startzustände ab 200000 Bytes werden komprimiert, nicht abgelehnt. | Umgesetzt: tiefere Zweige, getrennte Anfangstiefe, ID-stabile Aufklapp-/Pan-/Zoom-Ansicht und gemeinsame begrenzte Strukturvorschau. Links/Medien/Skripte bleiben ausgeschlossen. |
@@ -148,7 +151,7 @@ Importform zusammen mit der größten Quellenliste prüfen.
 Vorschauen sind gesondert zu betrachten:
 
 - `libs/EChartsBarPreview.php::Sources()` akzeptiert standardmäßig höchstens
-  16 Quellen, BarCategory und Waterfall verwenden ausdrücklich 100,
+  16 Quellen, BarCategory, Waterfall und Pie verwenden ausdrücklich 100,
   StateTimeline sowie Boxplot 32. Andere Familien bleiben
   unverändert. Bei ungeeigneten Listen kann der Baustein auf Beispieldaten
   zurückfallen. Eine neue Obergrenze nur in `module.php` wäre deshalb
@@ -172,6 +175,15 @@ größtmögliche Imports und beide Ausgabewege abdecken. Eine Auswahl/Navigation
 darf keine Daten verändern oder unsichtbar aus dem fachlichen Modell entfernen.
 
 ## Nachweise dieses Änderungsschritts und verbleibende Lücken
+
+Pie prüft 100/101 Quellen, vollständige Lesezugriffe und VM-Abonnements,
+versteckte Updates/Fehler, Altlisten, Einheiten und Normalisierung. Auswahl-
+und Gesamtanteile werden mit unabhängigen Bezugsgrößen einschließlich großer
+und subnormaler Zahlen geprüft. Vorschauen behalten den Nenner des gesamten
+Anfangskollektivs. Native Tests sichern ID-Auswahl, Legendennavigation,
+responsive Textbegrenzung und breite Legendenspalten bei 100/200 % Schrift ab.
+Modell- und abschließender HTML-Guard werden separat geprüft. Lokale Canvas-
+Prüfungen beider Ausgabewege sind positiv; Live-Abnahme nach Update steht aus.
 
 Waterfall prüft 100/101 Quellen, 101 modellierte Schritte, späte Aktualisierungen,
 Referenzen/Abonnements, Altlisten, Originaleinheiten und signed Kumulierung.

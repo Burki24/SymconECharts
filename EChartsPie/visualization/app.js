@@ -10,6 +10,8 @@
     var chart = null;
     var currentTheme = null;
     var currentState = bootstrap.state || null;
+    var sourceSelection = window.SYMC_ECHARTS_SERIES_SELECTION.create();
+    var selectionEnabled = null;
 
     function translate(value) {
         return (bootstrap.translations || {})[value] || value;
@@ -80,17 +82,21 @@
         return items;
     }
 
-    function pieLayout(style, showLegend, top) {
+    function pieLayout(style, showLegend, top, legendSize, selectable) {
         var width = Math.max(1, chartElement.clientWidth || 1);
         var height = Math.max(1, chartElement.clientHeight || 1);
         var legendAtRight = showLegend && width >= 760 && width >= height * 1.2;
-        var legendWidth = legendAtRight ? Math.min(230, Math.max(170, Math.round(width * 0.24))) : 0;
+        var legendWidth = legendAtRight ? Math.min(width * 0.4, Math.max(
+            Math.min(230, Math.max(170, Math.round(width * 0.24))),
+            selectable ? legendSize * 12 + 24 : 0
+        )) : 0;
         var plotWidth = width - legendWidth - (legendAtRight ? 16 : 0);
-        var bottom = 16 + (showLegend && !legendAtRight ? 36 : 0);
+        var legendHeight = Math.max(28, Math.ceil(legendSize * 1.5) + 10) + (selectable ? Math.ceil(legendSize * 1.5) + 8 : 0);
+        var bottom = 16 + (showLegend && !legendAtRight ? legendHeight + 8 : 0);
         var sideInset = style.showLabels === true && style.labelPosition !== 'inside'
             ? Math.min(100, Math.max(60, Math.round(width * 0.12))) : 16;
         var centerX = plotWidth / 2;
-        var centerY = (top + height - bottom) / 2;
+        var centerY = Math.max(1, Math.min(height - 1, (top + height - bottom) / 2));
         var outerPercent = Math.max(40, Math.min(100, Number(style.outerRadiusPercent) || 70));
         var requestedRadius = Math.min(width, height) * outerPercent / 200;
         var availableRadius = Math.max(1, Math.min(
@@ -106,6 +112,7 @@
             radius: [outerRadius * innerPercent / 100, outerRadius],
             legendAtRight: legendAtRight,
             legendWidth: legendWidth,
+            legendHeight: legendHeight,
             plotWidth: plotWidth,
             top: top,
             width: width,
@@ -118,35 +125,88 @@
         var pie = model.pie || {};
         var style = pie.style || {};
         var items = sortedItems(model);
+        var selectable = pie.enableSourceSelection === true;
+        if (selectionEnabled !== selectable) {
+            sourceSelection = window.SYMC_ECHARTS_SERIES_SELECTION.create();
+            selectionEnabled = selectable;
+        }
+        var selected = sourceSelection.reconcile(items.map(function (item) {
+            return selectable ? item : Object.assign({}, item, {initiallyVisible: true});
+        }));
+        // Ratios use scaled denominators: a finite set of finite weights may overflow when summed directly.
+        var maximum = items.reduce(function (value, item) { return Math.max(value, Number(item.value)); }, 0);
+        var visibleMaximum = items.reduce(function (value, item) {
+            return selected[item.id] !== false ? Math.max(value, Number(item.value)) : value;
+        }, 0);
+        var fullWeight = 0, visibleWeight = 0, visibleCount = 0;
+        items.forEach(function (item) {
+            var weight = maximum > 0 ? Number(item.value) / maximum : 0;
+            fullWeight += weight;
+            if (selected[item.id] !== false) {
+                visibleWeight += visibleMaximum > 0 ? Number(item.value) / visibleMaximum : 0;
+                visibleCount += 1;
+            }
+        });
+        // Native angle multiplication also needs a finite reciprocal for subnormal weights.
+        var scaleValues = visibleMaximum > 0 && (visibleMaximum > Number.MAX_VALUE / Math.max(1, visibleWeight)
+            || !Number.isFinite(Math.PI * 2 / visibleMaximum));
+        function percent(item, weight, scale) {
+            return scale > 0 && weight > 0 ? (Number(item.value) / scale) / weight * 100 : 0;
+        }
+        function formatPercent(value, decimals) {
+            return Number(value).toLocaleString(undefined, {minimumFractionDigits: decimals || 0, maximumFractionDigits: 1}) + '%';
+        }
         var titleSize = design.fontSizePercent(style.titleFontSizePercent, 18);
         var legendSize = design.fontSizePercent(style.legendFontSizePercent, 12);
         var labelSize = design.fontSizePercent(style.labelFontSizePercent, 12);
         var compact = chartElement.clientWidth < 420 || chartElement.clientHeight < 260;
-        var showLegend = style.showLegend === true && !compact;
+        var showLegend = selectable || style.showLegend === true && !compact;
         var titleLayout = design.chartTitleLayout(bootstrap, pie.title, titleSize, 18);
         if (pie.normalized === true) { titleLayout.contentTop += 20; }
         var showTitle = titleLayout.show;
-        var layout = pieLayout(style, showLegend, titleLayout.contentTop);
+        var layout = pieLayout(style, showLegend, titleLayout.contentTop, legendSize, selectable);
+        var positiveIds = items.filter(function (item) {
+            return selected[item.id] !== false && Number(item.value) > 0;
+        }).map(function (item) { return String(item.id); });
+        // The shipped lean runtime has no global LabelLayout component. Bound labels explicitly,
+        // sampling around the visible circle instead of drawing one dense contiguous block.
+        var labelLines = style.showPercent === true ? 2 : 1;
+        var labelCapacity = Math.max(0, Math.min(24,
+            Math.floor(layout.radius[1] * 2 / (labelSize * labelLines * 1.3 + 8)) * 2));
+        var limitedLabels = positiveIds.length > labelCapacity;
+        var labeledIds = Object.create(null);
+        if (limitedLabels) {
+            for (var labelIndex = 0; labelIndex < labelCapacity; labelIndex += 1) {
+                labeledIds[positiveIds[Math.floor(labelIndex * positiveIds.length / labelCapacity)]] = true;
+            }
+        }
         var labelMap = {};
         var itemMap = {};
-        var data = items.map(function (item, index) {
+        var data = items.map(function (item) {
             var key = String(item.id);
             labelMap[key] = String(item.name || '');
             itemMap[key] = item;
             var paletteColors = colors.seriesColors && colors.seriesColors.length
                 ? colors.seriesColors : [colors.accent];
+            var order = Math.max(0, Math.floor(Number(item.order) || 0));
+            var color = item.color || paletteColors[order % paletteColors.length];
+            var itemLabel = style.labelPosition === 'inside' && !style.labelColor ? {
+                color: design.readableTextColor(color, colors.text, colors.background)
+            } : undefined;
+            var hideLabel = limitedLabels && !labeledIds[key];
+            if (hideLabel) { itemLabel = Object.assign({}, itemLabel, {show: false}); }
             return {
                 id: key,
                 name: key,
-                value: Number(item.value),
-                itemStyle: { color: item.color || paletteColors[index % paletteColors.length] },
-                label: style.labelPosition === 'inside' && !style.labelColor ? {
-                    color: design.readableTextColor(
-                        item.color || paletteColors[index % paletteColors.length], colors.text, colors.background
-                    )
-                } : undefined
+                value: scaleValues ? Math.min(Number.MAX_VALUE, Number(item.value) / visibleMaximum) : Number(item.value),
+                itemStyle: { color: color },
+                label: itemLabel,
+                labelLine: hideLabel ? {show: false} : undefined
             };
         });
+        emptyElement.textContent = translate(visibleCount === 0 ? 'No sources selected.'
+            : visibleWeight === 0 && fullWeight > 0 ? 'No positive values in the selected sources.' : 'No positive values');
+        emptyElement.hidden = visibleWeight > 0;
         return {
             backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
                 ? 'transparent' : colors.background,
@@ -163,20 +223,23 @@
             },
             legend: {
                 show: showLegend, type: 'scroll', orient: layout.legendAtRight ? 'vertical' : 'horizontal',
-                right: layout.legendAtRight ? 8 : undefined,
-                left: layout.legendAtRight ? undefined : 8,
+                selectedMode: true, selected: Object.assign({}, selected),
+                scrollDataIndex: sourceSelection.scrollDataIndex(),
+                selector: selectable ? [{type: 'all', title: translate('All')}, {type: 'inverse', title: translate('Invert')}] : [],
+                selectorPosition: 'start', selectorLabel: {color: style.legendColor || colors.text, fontSize: legendSize},
+                left: layout.legendAtRight ? layout.width - layout.legendWidth - 8 : 8,
                 top: layout.legendAtRight ? layout.top : undefined,
                 bottom: layout.legendAtRight ? 12 : 6,
                 width: layout.legendAtRight ? layout.legendWidth : layout.width - 16,
-                height: layout.legendAtRight ? Math.max(1, layout.height - layout.top - 24) : 28,
+                height: layout.legendAtRight ? Math.max(1, layout.height - layout.top - 24) : layout.legendHeight,
                 data: data.map(function (item) { return item.name; }),
                 textStyle: { color: style.legendColor || colors.text, fontSize: legendSize },
                 formatter: function (key) { return labelMap[key] || ''; }
             },
             tooltip: {
-                confine: pie.normalized === true,
-                extraCssText: pie.normalized === true ? 'max-width:' + Math.max(80, chartElement.clientWidth - 24)
-                    + 'px;white-space:normal;overflow-wrap:anywhere;box-sizing:border-box;' : '',
+                confine: true,
+                extraCssText: 'max-width:' + Math.max(80, chartElement.clientWidth - 24)
+                    + 'px;white-space:normal;overflow-wrap:anywhere;box-sizing:border-box;',
                 trigger: 'item',
                 formatter: function (parameter) {
                     var item = itemMap[parameter.name];
@@ -187,18 +250,23 @@
                                 + ' / 100<br>' + escapeHTML(translate('Range')) + ': '
                                 + escapeHTML(formatValue({ ...item, value: item.minimum, originalValue: item.minimum })) + ' – '
                                 + escapeHTML(formatValue({ ...item, value: item.maximum, originalValue: item.maximum }))
-                                + '<br>' + escapeHTML(translate('Share of normalized weights')) + ': '
-                            : ' (') + Number(parameter.percent).toLocaleString(undefined, {
-                            maximumFractionDigits: 1
-                        }) + (pie.normalized === true ? '%' : '%)');
+                            : '')
+                        + '<br>' + escapeHTML(translate(pie.normalized === true
+                            ? 'Share of selected normalized weights' : 'Share of visible selection')) + ': '
+                        + escapeHTML(formatPercent(percent(item, visibleWeight, visibleMaximum)))
+                        + '<br>' + escapeHTML(translate(pie.normalized === true
+                            ? 'Share of all normalized weights' : 'Share of full model')) + ': '
+                        + escapeHTML(formatPercent(percent(item, fullWeight, maximum)));
                 }
             },
             series: [{
                 id: 'pie', type: 'pie', name: String(pie.title || ''),
+                left: 0, right: layout.width - layout.plotWidth,
                 radius: layout.radius,
                 center: layout.center,
                 roseType: style.mode === 'nightingale' ? 'area' : false,
                 stillShowZeroSum: false,
+                showEmptyCircle: false,
                 avoidLabelOverlap: true,
                 labelLayout: { hideOverlap: true },
                 label: {
@@ -214,9 +282,9 @@
                     overflow: 'truncate',
                     formatter: function (parameter) {
                         var name = labelMap[parameter.name] || '';
-                        return name + (style.showPercent === true ? '\n' + Number(parameter.percent).toLocaleString(
-                            undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }
-                        ) + '%' + (pie.normalized === true ? ' ' + translate('Share of normalized weights') : '') : '');
+                        var item = itemMap[parameter.name];
+                        return name + (style.showPercent === true && item ? '\n' + formatPercent(percent(item, visibleWeight, visibleMaximum), 1)
+                            + (pie.normalized === true ? ' ' + translate('Share of normalized weights') : '') : '');
                     }
                 },
                 labelLine: {
@@ -239,6 +307,7 @@
 
     function render(state) {
         if (retainOnTransientError(state, currentState, chart)) { return; }
+        sourceSelection.capture(chart);
         currentState = state;
         if (!state || state.status !== 'ready' || !state.chart) {
             displayError(state && state.error);
@@ -246,15 +315,6 @@
         }
         if (!window.echarts || typeof window.echarts.init !== 'function') {
             displayError('Apache ECharts could not be initialized.');
-            return;
-        }
-        var items = state.chart.items || [];
-        if (!items.some(function (item) { return Number(item.value) > 0; })) {
-            if (chart) { chart.clear(); }
-            chartElement.hidden = true;
-            errorElement.hidden = true;
-            emptyElement.textContent = translate('No positive values');
-            emptyElement.hidden = false;
             return;
         }
         emptyElement.hidden = true;
@@ -269,6 +329,11 @@
         if (!chart) {
             chart = window.echarts.init(chartElement, theme === 'auto' ? null : theme, { renderer: 'canvas' });
             currentTheme = theme;
+            if (typeof chart.on === 'function') {
+                ['legendselectchanged', 'legendselectall', 'legendinverseselect'].forEach(function (eventName) {
+                    chart.on(eventName, function () { if (currentState) { render(currentState); } });
+                });
+            }
         } else if (wasHidden) {
             chart.resize();
         }
@@ -280,15 +345,22 @@
         if (state) { render(state); }
     };
 
+    function redrawAfterResize() {
+        if (currentState && currentState.status === 'ready') {
+            sourceSelection.capture(chart);
+            chart.setOption(buildOption(currentState.chart, currentTheme || 'auto'), true);
+        }
+    }
     if (window.ResizeObserver) {
         new ResizeObserver(function () {
             if (!design.resizeChartIfNeeded(chart, chartElement)) { return; }
-            if (currentState && currentState.status === 'ready') {
-                chart.setOption(buildOption(currentState.chart, currentTheme || 'auto'), true);
-            }
+            redrawAfterResize();
         }).observe(chartElement);
     } else {
-        window.addEventListener('resize', function () { if (chart) { chart.resize(); } });
+        window.addEventListener('resize', function () {
+            if (!design.resizeChartIfNeeded(chart, chartElement)) { return; }
+            redrawAfterResize();
+        });
     }
     window.addEventListener('beforeunload', function () { if (chart) { chart.dispose(); } });
     render(currentState);

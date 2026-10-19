@@ -9,6 +9,12 @@
 
 ## Neu
 
+- EChartsPie unterstützt bis zu 100 Quellen. Die optionale erweiterte
+  Quellenauswahl bietet Anfangssichtbarkeit sowie Alle/Umkehren und erhält
+  Auswahl und Legendenposition bei Aktualisierungen. Tooltips unterscheiden
+  Auswahl- und Gesamtanteil; Vorschauausschnitte behalten die vollständige
+  Anteilsgrundlage. Bestehende Konfigurationen bleiben nutzbar.
+
 - EChartsBarWaterfall unterstützt bis zu 100 Quellen: einen Startwert und
   bis zu 99 Änderungen mit Vorzeichen. Die responsive Kategoriennavigation
   erhält alle Zwischenstände, die vollständige Endsumme und Werteskala.

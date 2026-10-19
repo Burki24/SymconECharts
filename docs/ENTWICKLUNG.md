@@ -21,6 +21,16 @@ IPSView nur den Diagrammtitel benötigt.
 
 ## Aktueller Stand und Zielarchitektur
 
+Pie erweitert gemäß [ADR 0072](adr/0072-pie-source-selection.md) auf 100 Quellen.
+`EnableSourceSelection` ist standardmäßig aus; `InitiallyVisible` fehlt in
+Altlisten und bedeutet sichtbar. Die erweiterte Auswahl nutzt denselben
+ID-/Legendenanker-Baustein wie TimeSeries, BarHistory und ThemeRiver. Fachliche
+Gewichte, Originale, Abonnements und Validierung bleiben vollständig.
+Auswahl- und Gesamtanteil haben getrennte overflow-sichere Nenner. Der
+Vorschauausschnitt mit höchstens sechs Quellen wird erst nach dieser Berechnung
+gebildet; Winkel und Nightingale-Maßstab ändern dadurch ihre Bezugsmenge nicht.
+Modell- und finale HTML-Guards liegen bei 200000 Bytes beziehungsweise 1 MiB.
+
 BarWaterfall erweitert gemäß [ADR 0071](adr/0071-waterfall-category-navigation.md)
 auf 2–100 Quellen und 101 modellierte Schritte einschließlich berechneter
 Endsumme. `WaterfallData::Totals` zentralisiert die endliche geordnete Addition
@@ -235,7 +245,7 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 | Gerät | EChartsBarHistory | Historische rohe oder aggregierte Balken von 1 bis 32 Archivquellen, bis 16 Einheitengruppen und Reihenauswahl in nativer Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsBarWaterfall | Aktueller Startwert mit 1 bis 99 signierten Änderungen, berechneter Gesamtbilanz und ID-stabiler Kategoriennavigation in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsBarPolar | Aktuelle Werte aus 1 bis 16 Quellen als radiale Balken oder konzentrische Bögen in Kachel und optionalem IPSView-HTML |
-| Gerät | EChartsPie | Aktuelle nichtnegative Anteile aus 1 bis 16 Quellen als Kreis, Donut oder Nightingale-Rose in Kachel und optionalem IPSView-HTML |
+| Gerät | EChartsPie | Aktuelle Anteile aus 1 bis 100 Quellen als Kreis, Donut oder Nightingale-Rose mit optionaler ID-stabiler Quellenauswahl und getrennten Auswahl-/Gesamtanteilen |
 | Gerät | EChartsScatter | Archivierte X/Y-Werte mit optionaler Bubble-Größe, ausschließlich zeitgleiche abgeschlossene Intervalle ohne Interpolation, in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsHeatmap | Eine Archivvariable als lokale Tages-/Wochentag-Stunden-Matrix mit separaten Kachel- und IPSView-Designern |
 | Gerät | EChartsTree | Begrenzte, lesende IP-Symcon-Objekthierarchie unter einer Kategorie oder Instanz in Kachel und optionalem IPSView-HTML |

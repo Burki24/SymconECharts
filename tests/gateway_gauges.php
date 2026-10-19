@@ -1107,6 +1107,30 @@ if (($argv[1] ?? '') === '--theme-river-preview') {
     echo base64_decode(substr($previewUpdate['Value'], strlen('data:image/svg+xml;base64,')));
     exit(0);
 }
+if (array_slice($argv, 1) === ['--pie-many']) {
+    require __DIR__ . '/pie_many.php';
+    exit(0);
+}
+if (($argv[1] ?? '') === '--pie-preview') {
+    $draft = json_decode($argv[2] ?? '{}', true, 512, JSON_THROW_ON_ERROR);
+    $draft['EnableSourceSelection'] ??= true;
+    if (!isset($draft['Sources'])) {
+        $draft['Sources'] = [];
+        for ($index = 0; $index < 100; ++$index) {
+            $id = 99000 + $index;
+            $GLOBALS['symconTestVariables'][$id] = ['VariableType' => 2, 'Value' => 1.0,
+                'Name'                                             => 'Quelle ' . str_pad((string) ($index + 1), 3, '0', STR_PAD_LEFT)];
+            $draft['Sources'][] = ['VariableID' => $id, 'InitiallyVisible' => $index < 10,
+                'Label'                         => '', 'UseVariablePresentation' => false, 'Unit' => 'W', 'Decimals' => 0];
+        }
+    }
+    $preview = new EChartsPie();
+    $preview->Create();
+    $preview->UpdateBarPreviewFromForm(json_encode($draft, JSON_THROW_ON_ERROR));
+    $previewUpdate = array_slice($preview->GetTestFormUpdates(), -2)[0];
+    echo base64_decode(substr($previewUpdate['Value'], strlen('data:image/svg+xml;base64,')));
+    exit(0);
+}
 if (array_slice($argv, 1) === ['--waterfall-many']) {
     require __DIR__ . '/bar_waterfall_many.php';
     exit(0);
@@ -2145,7 +2169,7 @@ assertGatewayGauge(
 $pieSources[] = ['VariableID' => 4711, 'UseVariablePresentation' => false, 'Unit' => 'W'];
 $maximumPie->SetTestProperty('Sources', json_encode($pieSources, JSON_THROW_ON_ERROR));
 $maximumPie->ApplyChanges();
-assertGatewayGauge($maximumPie->GetTestStatus() === 201, 'Pie must reject more than 16 sources.');
+assertGatewayGauge($maximumPie->GetTestStatus() === IS_ACTIVE, 'Pie must accept seventeen sources after the source limit extension.');
 for ($index = 0; $index < 16; $index++) {
     unset($GLOBALS['symconTestVariables'][5900 + $index]);
 }

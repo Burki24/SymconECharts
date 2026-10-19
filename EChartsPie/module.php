@@ -26,6 +26,7 @@ use SymconECharts\EChartsPreviewSourceCount;
 use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsTransientRefresh;
 use SymconECharts\EChartsVariablePresentation;
+use SymconECharts\PieData;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
 require_once __DIR__ . '/../libs/helper/DataFlowHelper.php';
@@ -50,6 +51,7 @@ require_once __DIR__ . '/../libs/EChartsPreviewSourceCount.php';
 require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
 require_once __DIR__ . '/../libs/EChartsTransientRefresh.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
+require_once __DIR__ . '/PieData.php';
 
 class EChartsPie extends IPSModuleStrict
 {
@@ -73,6 +75,8 @@ class EChartsPie extends IPSModuleStrict
     private const DATA_ID_TO_PARENT = '{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}';
     private const DATA_ID_FROM_PARENT = '{E4749B72-912B-E3E3-1C57-D19019FFDD84}';
     private const IPSVIEW_OUTPUT_IDENT = 'IPSViewPie';
+    private const MAXIMUM_MODEL_BYTES = 200000;
+    private const MODEL_TOO_LARGE_MESSAGE = 'The Pie model is too large. Reduce source labels or units.';
     private const STATUS_SOURCE_INVALID = 201;
     private const STATUS_DESIGN_INVALID = 202;
     private const STATUS_PARENT_MISSING = 203;
@@ -94,6 +98,7 @@ class EChartsPie extends IPSModuleStrict
             $this->RegisterMessage(0, IPS_KERNELSTARTED);
             $this->RegisterPropertyString('Sources', '[]');
             $this->RegisterPropertyBoolean('NormalizeValues', false);
+            $this->RegisterPropertyBoolean('EnableSourceSelection', false);
             $this->RegisterPropertyString('Title', '');
             $this->RegisterDesignProperties();
             $this->RegisterIPSViewHTMLPageProperties();
@@ -197,7 +202,7 @@ class EChartsPie extends IPSModuleStrict
                 ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
             ]);
             $fields = array_merge(
-                ['Title', 'Sources', 'NormalizeValues', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
+                ['Title', 'Sources', 'NormalizeValues', 'EnableSourceSelection', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
                     'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent'],
                 array_keys($this->DesignPropertyNames()),
                 array_map(static fn (string $name): string => 'IPSView' . $name, array_keys($this->DesignPropertyNames()))
@@ -288,9 +293,10 @@ class EChartsPie extends IPSModuleStrict
                     throw new DomainException('Pie charts require non-negative values.');
                 }
                 $items[] = [
-                    'id'        => 'variable-' . $source['VariableID'],
-                    'name'      => $labels[$source['VariableID']],
-                    'value'     => $this->ReadPropertyBoolean('NormalizeValues')
+                    'id'               => 'variable-' . $source['VariableID'],
+                    'initiallyVisible' => $source['InitiallyVisible'],
+                    'name'             => $labels[$source['VariableID']],
+                    'value'            => $this->ReadPropertyBoolean('NormalizeValues')
                         ? EChartsNormalization::Value($current['Value'], $source) : $current['Value'],
                     ...($this->ReadPropertyBoolean('NormalizeValues')
                         ? EChartsNormalization::Metadata($current['Value'], $source) : []),
@@ -304,17 +310,24 @@ class EChartsPie extends IPSModuleStrict
             $this->WriteAttributeString('LastError', '');
             $this->DebugEChartsSetStatus(IS_ACTIVE);
 
-            return $debugFlowResult = json_encode([
+            $json = json_encode([
                 'schemaVersion' => 1,
                 'family'        => 'pie',
                 'theme'         => $this->ReadPropertyString('EChartsTheme'),
                 'pie'           => [
-                    'normalized' => $this->ReadPropertyBoolean('NormalizeValues'),
-                    'title'      => $this->ReadPropertyString('Title'),
-                    'style'      => $this->ReadDesignStyle()
+                    'enableSourceSelection' => $this->ReadPropertyBoolean('EnableSourceSelection'),
+                    'normalized'            => $this->ReadPropertyBoolean('NormalizeValues'),
+                    'title'                 => $this->ReadPropertyString('Title'),
+                    'style'                 => $this->ReadDesignStyle()
                 ],
                 'items'         => $items
             ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
+            if (strlen($json) > self::MAXIMUM_MODEL_BYTES) {
+                $this->WriteAttributeString('LastError', 'MODEL_TOO_LARGE');
+                $this->DebugEChartsSetStatus(self::STATUS_DESIGN_INVALID);
+                throw new RuntimeException(self::MODEL_TOO_LARGE_MESSAGE);
+            }
+            return $debugFlowResult = $json;
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
             $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
@@ -443,7 +456,7 @@ class EChartsPie extends IPSModuleStrict
     {
         $theme = $this->BarPreviewValue($values, 'EChartsTheme', 'string', $ipsView);
         $palette = EChartsBarPreview::Palette($theme);
-        $sourceData = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values);
+        $sourceData = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values, 'Label', true, PieData::MAXIMUM_SOURCE_COUNT);
         $items = $sourceData['items'];
         $normalized = (bool) ($values['NormalizeValues'] ?? $this->ReadPropertyBoolean('NormalizeValues'));
         if ($normalized) {
@@ -457,6 +470,22 @@ class EChartsPie extends IPSModuleStrict
             unset($item);
             $sourceData['items'] = $items;
         }
+        $selectionEnabled = (bool) ($values['EnableSourceSelection'] ?? $this->ReadPropertyBoolean('EnableSourceSelection'));
+        $hasNegative = count(array_filter($items, static fn (array $item): bool => !is_finite($item['value']) || $item['value'] < 0)) > 0;
+        $allShares = $hasNegative ? array_fill(0, count($items), 0.0) : PieData::Shares(array_column($items, 'value'));
+        foreach ($items as $index => &$item) {
+            $item['order'] = $index;
+            $item['allShare'] = $allShares[$index];
+        }
+        unset($item);
+        $items = array_values(array_filter($items, static fn (array $item): bool => !$selectionEnabled || ($item['InitiallyVisible'] ?? true) !== false));
+        $selectedCount = count($items);
+        $selectionShares = $hasNegative ? array_fill(0, $selectedCount, 0.0) : PieData::Shares(array_column($items, 'value'));
+        foreach ($items as $index => &$item) {
+            $item['share'] = $selectionShares[$index];
+        }
+        unset($item);
+        $maximum = $items === [] ? 0.0 : max(array_column($items, 'value'));
         $mode = $this->BarPreviewValue($values, 'PieMode', 'string', $ipsView);
         $sort = $this->BarPreviewValue($values, 'SortOrder', 'string', $ipsView);
         if ($sort === 'ascending' || $sort === 'descending') {
@@ -475,6 +504,8 @@ class EChartsPie extends IPSModuleStrict
             EChartsBarPreview::Color($this->BarPreviewValue($values, 'TitleColor', 'integer', $ipsView), $palette['text']),
             $this->BarPreviewValue($values, 'TitleFontSizePercent', 'integer', $ipsView)
         );
+        $svg = str_replace('<svg xmlns', '<svg data-pie-visible-count="' . $selectedCount
+            . '" data-pie-source-count="' . count($sourceData['items']) . '" xmlns', $svg);
         $modeCaption = match ($mode) {
             'donut'       => 'Donut',
             'nightingale' => 'Nightingale rose',
@@ -482,9 +513,8 @@ class EChartsPie extends IPSModuleStrict
         };
         $svg .= '<text x="696" y="58" text-anchor="end" fill="' . EChartsBarPreview::E($palette['muted'])
             . '" font-size="12">' . EChartsBarPreview::E($this->Translate($modeCaption)) . '</text>';
-        $hasNegative = count(array_filter($sourceData['items'], static fn (array $item): bool => $item['value'] < 0)) > 0;
         $positive = $hasNegative ? [] : array_values(array_filter($items, static fn (array $item): bool => $item['value'] > 0));
-        $sum = array_sum(array_column($positive, 'value'));
+        $sum = $hasNegative ? 0.0 : array_sum($selectionShares);
         $outer = max(80, min(125, 125 * $this->BarPreviewValue($values, 'OuterRadiusPercent', 'integer', $ipsView) / 100));
         $inner = $mode === 'pie' ? 0 : $outer * max(0, min(70, $this->BarPreviewValue($values, 'InnerRadiusPercent', 'integer', $ipsView))) / 100;
         $showLabels = $this->BarPreviewValue($values, 'ShowLabels', 'boolean', $ipsView);
@@ -502,17 +532,24 @@ class EChartsPie extends IPSModuleStrict
             $svg .= '<text x="24" y="350" font-size="11" fill="' . EChartsBarPreview::E($palette['muted']) . '">'
                 . EChartsBarPreview::E($this->Translate('Share of normalized weights')) . '</text>';
         }
+        if ($selectionEnabled) {
+            $svg .= '<text x="24" y="325" font-size="11" fill="' . EChartsBarPreview::E($palette['muted']) . '">'
+                . EChartsBarPreview::E(sprintf($this->Translate('Initially visible: %d of %d sources'), $selectedCount, count($sourceData['items']))) . '</text>';
+        }
         $legendColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'LegendColor', 'integer', $ipsView), $palette['text']);
         $legendSize = max(7, min(20, (int) round(11 * $this->BarPreviewValue($values, 'LegendFontSizePercent', 'integer', $ipsView) / 100)));
         $start = -M_PI / 2;
         $sectorItems = $mode === 'nightingale' && $sum > 0 ? $items : $positive;
         foreach ($sectorItems as $index => $item) {
-            $angle = $mode === 'nightingale' ? 2 * M_PI / count($sectorItems) : 2 * M_PI * $item['value'] / $sum;
+            $angle = $mode === 'nightingale' ? 2 * M_PI / $selectedCount : 2 * M_PI * $item['share'] / 100;
             $end = $start + $angle;
-            $radius = $mode === 'nightingale' ? $inner + ($outer - $inner) * $item['value'] / max(array_column($positive, 'value')) : $outer;
-            $color = $item['color'] !== '' ? $item['color'] : $palette['seriesColors'][$index % count($palette['seriesColors'])];
+            $radius = $mode === 'nightingale' ? $inner + ($outer - $inner) * ($item['value'] / $maximum) : $outer;
+            $color = $item['color'] !== '' ? $item['color'] : $palette['seriesColors'][$item['order'] % count($palette['seriesColors'])];
             if ($radius > $inner) {
-                $svg .= '<path d="' . $this->PreviewSector(310, 190, $inner, $radius, $start, $end)
+                $svg .= '<path data-pie-id="' . EChartsBarPreview::E(isset($item['VariableID']) ? 'variable-' . $item['VariableID'] : 'sample-' . $item['order'])
+                    . '" data-pie-share="' . json_encode($item['share'], JSON_THROW_ON_ERROR | JSON_PRESERVE_ZERO_FRACTION)
+                    . '" data-pie-all-share="' . json_encode($item['allShare'], JSON_THROW_ON_ERROR | JSON_PRESERVE_ZERO_FRACTION)
+                    . '" d="' . $this->PreviewSector(310, 190, $inner, $radius, $start, $end)
                     . '" fill="' . EChartsBarPreview::E($color) . '"/>';
             }
             if ($showLabels && $item['value'] > 0) {
@@ -520,7 +557,7 @@ class EChartsPie extends IPSModuleStrict
                 $labelRadius = $labelPosition === 'inside' ? ($inner + $radius) / 2 : $radius + 15;
                 $x = 310 + $labelRadius * cos($mid);
                 $y = 190 + $labelRadius * sin($mid);
-                $anchor = 'middle';
+                $anchor = $labelPosition === 'inside' ? 'middle' : (cos($mid) >= 0 ? 'start' : 'end');
                 if ($labelPosition !== 'inside'
                     && ($alignment !== 'edge' || $leader1 !== 15 || $leader2 !== 15
                         || $lineGap !== 5 || $edgeDistance !== 8)) {
@@ -541,7 +578,7 @@ class EChartsPie extends IPSModuleStrict
                 $text = mb_strimwidth((string) $item['label'], 0, 14, '…');
                 if ($showPercent) {
                     $text .= ' ' . EChartsBarPreview::FormatValue(
-                        100 * $item['value'] / $sum,
+                        $item['share'],
                         1,
                         '%',
                         $previewLanguage
@@ -556,13 +593,16 @@ class EChartsPie extends IPSModuleStrict
         if ($hasNegative) {
             $svg .= '<text x="310" y="195" text-anchor="middle" fill="' . EChartsBarPreview::E($palette['text'])
                 . '" font-size="14">' . EChartsBarPreview::E($this->Translate('Pie charts require non-negative values.')) . '</text>';
+        } elseif ($selectedCount === 0) {
+            $svg .= '<text x="310" y="195" text-anchor="middle" fill="' . EChartsBarPreview::E($palette['muted'])
+                . '" font-size="14">' . EChartsBarPreview::E($this->Translate('No sources selected')) . '</text>';
         } elseif ($sum === 0.0) {
             $svg .= '<text x="310" y="195" text-anchor="middle" fill="' . EChartsBarPreview::E($palette['muted'])
                 . '" font-size="14">' . EChartsBarPreview::E($this->Translate('No positive values')) . '</text>';
         }
         if ($this->BarPreviewValue($values, 'ShowLegend', 'boolean', $ipsView)) {
             foreach ($items as $index => $item) {
-                $color = $item['color'] !== '' ? $item['color'] : $palette['seriesColors'][$index % count($palette['seriesColors'])];
+                $color = $item['color'] !== '' ? $item['color'] : $palette['seriesColors'][$item['order'] % count($palette['seriesColors'])];
                 $y = 105 + $index * 30;
                 $svg .= '<rect x="480" y="' . $y . '" width="12" height="12" fill="' . EChartsBarPreview::E($color) . '"/>';
                 $svg .= '<text x="500" y="' . ($y + 11) . '" fill="' . EChartsBarPreview::E($legendColor)
@@ -590,7 +630,7 @@ class EChartsPie extends IPSModuleStrict
     {
         $hiddenTitle = !$ipsView && function_exists('IPS_GetObject')
             && (bool) (IPS_GetObject($this->InstanceID)['ObjectIsHiddenTitle'] ?? false);
-        return $this->RenderVisualizationHTMLPage($ipsView, [
+        $configuration = [
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'ECharts Pie',
             'visualizationTheme' => $this->VisualizationThemeCSS() . "\n\n"
@@ -598,6 +638,15 @@ class EChartsPie extends IPSModuleStrict
             'ipsViewStyle'       => $ipsView ? $this->IPSViewThemeCSS() : '',
             'state'              => $this->BuildVisualizationState($ipsView),
             'translations'       => [
+                self::MODEL_TOO_LARGE_MESSAGE                                     => $this->Translate(self::MODEL_TOO_LARGE_MESSAGE),
+                'All'                                                             => $this->Translate('All'),
+                'Invert'                                                          => $this->Translate('Invert'),
+                'Share of visible selection'                                      => $this->Translate('Share of visible selection'),
+                'Share of full model'                                             => $this->Translate('Share of full model'),
+                'Share of selected normalized weights'                            => $this->Translate('Share of selected normalized weights'),
+                'Share of all normalized weights'                                 => $this->Translate('Share of all normalized weights'),
+                'No sources selected.'                                            => $this->Translate('No sources selected.'),
+                'No positive values in the selected sources.'                     => $this->Translate('No positive values in the selected sources.'),
                 'Normalized'                                                      => $this->Translate('Normalized'),
                 'Range'                                                           => $this->Translate('Range'),
                 'Share of normalized weights'                                     => $this->Translate('Share of normalized weights'),
@@ -620,10 +669,18 @@ class EChartsPie extends IPSModuleStrict
             'replacements' => [
                 '{{ECHARTS_SCRIPT}}'           => EChartsAsset::PieJavaScript(),
                 '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
-                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript(),
+                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript() . "\n" . EChartsAsset::SeriesSelectionJavaScript(),
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
-        ]);
+        ];
+        $html = $this->RenderVisualizationHTMLPage($ipsView, $configuration);
+        if (strlen($html) > 1048576) {
+            $this->WriteAttributeString('LastError', 'MODEL_TOO_LARGE');
+            $this->DebugEChartsSetStatus(self::STATUS_DESIGN_INVALID);
+            $configuration['state'] = $this->ErrorState(self::MODEL_TOO_LARGE_MESSAGE);
+            return $this->RenderVisualizationHTMLPage($ipsView, $configuration);
+        }
+        return $html;
     }
 
     private function Initialize(): void
@@ -676,8 +733,8 @@ class EChartsPie extends IPSModuleStrict
         } catch (JsonException $exception) {
             throw new InvalidArgumentException('The Pie sources are not valid JSON.', 0, $exception);
         }
-        if (!is_array($sources) || !array_is_list($sources) || count($sources) < 1 || count($sources) > 16) {
-            throw new InvalidArgumentException('Configure 1 to 16 unique numeric Pie sources with one common unit.');
+        if (!is_array($sources) || !array_is_list($sources) || count($sources) < 1 || count($sources) > PieData::MAXIMUM_SOURCE_COUNT) {
+            throw new InvalidArgumentException('Configure 1 to 100 unique numeric Pie sources with one common unit.');
         }
         $validated = [];
         $ids = [];
@@ -693,7 +750,9 @@ class EChartsPie extends IPSModuleStrict
             }
             $decimals = $source['Decimals'] ?? 1;
             $color = $source['Color'] ?? -1;
+            $initiallyVisible = $source['InitiallyVisible'] ?? true;
             if (!is_int($decimals) || $decimals < 0 || $decimals > 6
+                || !is_bool($initiallyVisible)
                 || !is_int($color) || $color < -1 || $color > 0xFFFFFF) {
                 throw new InvalidArgumentException('A Pie source contains invalid display settings.');
             }
@@ -713,11 +772,12 @@ class EChartsPie extends IPSModuleStrict
             $validated[] = [
                 ...($this->ReadPropertyBoolean('NormalizeValues')
                     ? array_combine(['Minimum', 'Maximum'], EChartsNormalization::Range($source)) : []),
-                'VariableID' => $id,
-                'Label'      => trim(is_string($source['Label'] ?? null) ? $source['Label'] : ''),
-                'Unit'       => $presentation['unit'],
-                'Decimals'   => $presentation['decimals'],
-                'Color'      => $color
+                'VariableID'       => $id,
+                'Label'            => trim(is_string($source['Label'] ?? null) ? $source['Label'] : ''),
+                'Unit'             => $presentation['unit'],
+                'Decimals'         => $presentation['decimals'],
+                'Color'            => $color,
+                'InitiallyVisible' => $initiallyVisible
             ];
         }
         return $validated;
@@ -743,7 +803,8 @@ class EChartsPie extends IPSModuleStrict
             return $this->ErrorState('Pie charts require non-negative values.');
         } catch (Throwable $exception) {
             $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
-            return $this->ErrorState('The Pie values could not be loaded.');
+            return $this->ErrorState($this->ReadAttributeString('LastError') === 'MODEL_TOO_LARGE'
+                ? self::MODEL_TOO_LARGE_MESSAGE : 'The Pie values could not be loaded.');
         }
         return ['schemaVersion' => 1, 'family' => 'pie', 'status' => 'ready', 'chart' => $chart, 'error' => null];
     }

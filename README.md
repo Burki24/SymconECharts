@@ -30,6 +30,9 @@ Pie, BarCategory, BarPolar und PictorialBar können Quellen optional anhand
 eigener Min/Max-Grenzen auf 0–100 normalisieren. So sind relative Vergleiche
 unterschiedlicher Messgrößen möglich; Originalwerte und Einheiten bleiben
 im Tooltip erhalten. Ohne diese Auswahl gelten die bisherigen Rohwertvergleiche.
+Pie unterstützt bis zu 100 Quellen. Eine optionale erweiterte Quellenauswahl
+bietet Anfangssichtbarkeit, Alle/Umkehren und eine bei Aktualisierung erhaltene
+Auswahl. Tooltips unterscheiden Auswahlanteil und Anteil aller Quellen.
 Candlestick zeigt ersten und letzten protokollierten Wert sowie Minimum
 und Maximum abgeschlossener Archiv-Stunden oder -Tage.
 StateTimeline zeigt archivierte Boolean-/Integer-Zustände als farbige
@@ -227,9 +230,9 @@ können unabhängig davon individuell vergeben werden.
   für Kachel und IPSView getrennt gestalten.
 
 - __EChartsPie__ ([Dokumentation](EChartsPie/README.md))
-  Zeigt aktuelle Anteile aus 1 bis 16 Quellen als Kreis, Donut oder
-  Nightingale-Rose. Kachel und IPSView besitzen eigene Designer und
-  Live-Vorschauen; negative Werte werden sichtbar abgewiesen.
+  Zeigt aktuelle Anteile aus 1 bis 100 Quellen als Kreis, Donut oder
+  Nightingale-Rose mit optionaler erweiterter Quellenauswahl. Kachel und IPSView besitzen eigene Designer und
+  Live-Vorschauen; ohne Normalisierung werden negative Werte sichtbar abgewiesen.
 
 - __EChartsScatter__ ([Dokumentation](EChartsScatter/README.md))
   Verknüpft X und Y aus zwei Archivvariablen zu einem Streudiagramm; eine

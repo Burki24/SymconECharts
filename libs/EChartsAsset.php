@@ -551,7 +551,7 @@ final class EChartsAsset
         return self::StartupJavaScript() . "\n" . self::NormalizeLineEndings($content);
     }
 
-    /** Loads ID-stable selection and legend navigation shared by historical charts. */
+    /** Loads ID-stable selection and legend navigation shared by chart families. */
     public static function SeriesSelectionJavaScript(): string
     {
         $content = @file_get_contents(__DIR__ . '/echarts-series-selection.js');

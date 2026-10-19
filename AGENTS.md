@@ -51,6 +51,10 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   BarCategory liegt in `libs/echarts-category-navigation.js`.
   Kreis-, Donut- und Nightingale-Diagramme für aktuelle Anteile liegen im
   eigenen Gerätemodul `EChartsPie` und sind kein Balkenmodus.
+  Pie erlaubt gemäß ADR 0072 bis zu 100 Quellen mit optionaler erweiterter
+  Quellenauswahl. Auswahl- und Gesamtanteil bleiben ausdrücklich getrennt;
+  versteckte Quellen werden weiterhin gelesen und validiert. Die ID-stabile
+  flüchtige Auswahl nutzt `libs/echarts-series-selection.js`.
   Pie, BarCategory, BarPolar und PictorialBar erlauben gemäß ADR 0063 eine
   ausdrücklich aktivierte Min/Max-Normalisierung je Quelle auf 0–100.
   Originalwerte, Einheiten und Quellenidentitäten bleiben erhalten;

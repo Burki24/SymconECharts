@@ -1,5 +1,43 @@
 # Tests
 
+## Pie: 100 Quellen, Auswahl und vollständige Anteilsgrundlagen
+
+`php tests/pie_data.php` prüft reine Prozentrechnung einschließlich echter
+Nullen, 100/101 Quellen, ungültiger Werte, subnormaler und sehr großer Gewichte.
+`php tests/gateway_gauges.php --pie-many` prüft den tatsächlichen Gateway mit
+synthetischen Kernel-Variablen: alle 100 Lesezugriffe, Referenzen und VM-Abonnements,
+Altlisten ohne Umschreiben, Quellenauswahl und Anfangsvorgaben, versteckte
+Updates/Fehler, gleiche Namen, Einheiten/Normalisierung und Originalmetadaten.
+Beide vollständigen Ausgabe-Modelle, realistische UTF-8-Metadaten sowie
+Modell- und tatsächlicher finaler HTML-Guard werden separat abgesichert.
+
+Die Vorschau zeichnet höchstens sechs Quellen, doch Nenner und geometrische
+Bezugsgrößen stammen aus der vollständigen Anfangsauswahl. Bei 100 gleichen
+Gewichten sind das je Quelle 1 %; mit zehn anfangs sichtbaren Quellen 10 %
+Auswahlanteil und 1 % Gesamtanteil. Auch nur die letzte ausgewählte Quelle,
+keine Auswahl und ignorierte Anfangsvorgaben im ausgeschalteten Modus werden
+geprüft. Entwürfe lesen keine Gatewaywerte und verändern keine Properties.
+
+`node tests/pie_layout.js` nutzt zusätzlich die ausgelieferte Pie-Runtime:
+beide Ausgabe-/Resize-Wege, 100 Sektoren, Sortierung, doppelte Namen, originale
+Tooltipwerte, Auswahl-/Gesamtanteile, Legendenanker, Aktualisierung, Entfernen,
+Themewechsel, Alle/Umkehren und Wiederherstellung nach leerer Auswahl/Nullen.
+Große Summen sowie winzige sichtbare Werte neben riesigen versteckten Werten
+werden mit endlicher nativer Sektorgeometrie geprüft. Eine Regression verhindert
+den grauen ECharts-Platzhalterkreis bei leerer Auswahl.
+
+`node tests/pie_browser.mjs` startet eine lokale synthetische Canvas-Fixture
+auf Port 8806 mit beiden Ausgabewegen und echter PHP-Vorschau. Am 19.10.2026
+wurden beide Donut-Ausgabewege mit 100 Quellen, zehn ausgewählten Quellen,
+Auswahl-/Gesamttooltip, Alle/Umkehren, leerer Auswahl und Wiederherstellung
+über die nativen Auswahlknöpfe geprüft. Die PHP-Vorschau behält 10 % je
+gezeichneter Quelle trotz Ausschnitt. Eine breite normalisierte Nightingale-
+Ansicht mit 200 % Schrift bestätigt die Trennung von Außenbeschriftung und
+Legendenspalte einschließlich vollständig sichtbarer Auswahlknöpfe.
+Die Live-Abnahme
+nach Modulupdate in Symcon/IPSView bleibt erforderlich; Live-Konfigurationen
+und Werte werden bei dieser Erweiterung nicht verändert.
+
 ## Waterfall: 100 Quellen und vollständige Bilanz
 
 `php tests/waterfall_data.php` sichert die gemeinsame geordnete Addition für
