@@ -9,11 +9,12 @@ use JsonException;
 
 require_once __DIR__ . '/EChartsSourceIdentity.php';
 require_once __DIR__ . '/EChartsVariablePresentation.php';
+require_once __DIR__ . '/EChartsNormalization.php';
 
 /** ID-based current comparisons with an explicit family-specific source budget. */
 final class EChartsCurrentComparisonSources
 {
-    public static function Resolve(string $json, string $family, int $maximumSources = 16): array
+    public static function Resolve(string $json, string $family, int $maximumSources = 16, bool $normalize = false): array
     {
         if ($maximumSources < 1 || $maximumSources > 100) {
             throw new InvalidArgumentException('Invalid current-comparison source budget.');
@@ -47,10 +48,14 @@ final class EChartsCurrentComparisonSources
             $presentation = EChartsVariablePresentation::Resolve($id, 0.0, 100.0, '', 2, true);
             $sources[] = ['VariableID' => $id, 'Label' => trim($label),
                 'Color'                => $color, 'Unit' => $presentation['unit'], 'Decimals' => $presentation['decimals']];
+            if ($normalize) {
+                [$minimum, $maximum] = EChartsNormalization::Range($entry);
+                $sources[array_key_last($sources)] += ['Minimum' => $minimum, 'Maximum' => $maximum];
+            }
             $units[$presentation['unit']] = true;
             $seen[$id] = true;
         }
-        if (count($units) > 1) {
+        if (!$normalize && count($units) > 1) {
             throw new InvalidArgumentException($family . ' variables must use the same unit.');
         }
         $labels = EChartsSourceIdentity::LabelsForSources($sources);

@@ -42,6 +42,11 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   eigenen Gerätemodul `EChartsBarPolar` und sind kein Modus dieser Instanzen.
   Kreis-, Donut- und Nightingale-Diagramme für aktuelle Anteile liegen im
   eigenen Gerätemodul `EChartsPie` und sind kein Balkenmodus.
+  Pie, BarCategory, BarPolar und PictorialBar erlauben gemäß ADR 0063 eine
+  ausdrücklich aktivierte Min/Max-Normalisierung je Quelle auf 0–100.
+  Originalwerte, Einheiten und Quellenidentitäten bleiben erhalten;
+  unterschiedliche Einheiten sind nur im normalisierten Modus zulässig.
+  Ohne Aktivierung gelten unverändert die Rohwertverträge der Familien.
   Historische X/Y-Vergleiche und optionale Bubble-Größen liegen im eigenen
   Gerätemodul `EChartsScatter` und werden ohne Interpolation nach gemeinsamen
   abgeschlossenen Archivintervallen verbunden.

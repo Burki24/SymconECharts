@@ -56,7 +56,7 @@
 
     function formatValue(item) {
         var decimals = Math.max(0, Math.min(6, Number(item.decimals) || 0));
-        return Number(item.value).toLocaleString(undefined, {
+        return Number(item.originalValue ?? item.value).toLocaleString(undefined, {
             minimumFractionDigits: decimals, maximumFractionDigits: decimals
         }) + (item.unit ? ' ' + item.unit : '');
     }
@@ -124,6 +124,7 @@
         var compact = chartElement.clientWidth < 420 || chartElement.clientHeight < 260;
         var showLegend = style.showLegend === true && !compact;
         var titleLayout = design.chartTitleLayout(bootstrap, pie.title, titleSize, 18);
+        if (pie.normalized === true) { titleLayout.contentTop += 20; }
         var showTitle = titleLayout.show;
         var layout = pieLayout(style, showLegend, titleLayout.contentTop);
         var labelMap = {};
@@ -152,11 +153,13 @@
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
             aria: { enabled: true, decal: { show: false }, description: items.map(function (item) {
                 return item.name + ': ' + formatValue(item);
-            }).join(', ') },
+            }).join(', ') + (pie.normalized === true ? '; ' + translate('Share of normalized weights') : '') },
             title: {
-                show: showTitle, text: String(pie.title || ''), left: layout.plotWidth / 2,
+                show: showTitle || pie.normalized === true, text: String(pie.title || ''), left: layout.plotWidth / 2,
                 textAlign: 'center', top: titleLayout.top,
-                textStyle: { color: style.titleColor || colors.text, fontSize: titleSize }
+                textStyle: { color: style.titleColor || colors.text, fontSize: titleSize },
+                subtext: pie.normalized === true ? translate('Share of normalized weights') : '',
+                subtextStyle: { color: colors.muted, fontSize: 11 }
             },
             legend: {
                 show: showLegend, type: 'scroll', orient: layout.legendAtRight ? 'vertical' : 'horizontal',
@@ -171,14 +174,23 @@
                 formatter: function (key) { return labelMap[key] || ''; }
             },
             tooltip: {
+                confine: pie.normalized === true,
+                extraCssText: pie.normalized === true ? 'max-width:' + Math.max(80, chartElement.clientWidth - 24)
+                    + 'px;white-space:normal;overflow-wrap:anywhere;box-sizing:border-box;' : '',
                 trigger: 'item',
                 formatter: function (parameter) {
                     var item = itemMap[parameter.name];
                     if (!item) { return ''; }
                     return String(parameter.marker || '') + escapeHTML(labelMap[parameter.name]) + ': '
-                        + escapeHTML(formatValue(item)) + ' (' + Number(parameter.percent).toLocaleString(undefined, {
+                        + escapeHTML(formatValue(item)) + (pie.normalized === true
+                            ? '<br>' + escapeHTML(translate('Normalized')) + ': ' + escapeHTML(Number(item.value).toLocaleString(undefined, { maximumFractionDigits: 2 }))
+                                + ' / 100<br>' + escapeHTML(translate('Range')) + ': '
+                                + escapeHTML(formatValue({ ...item, value: item.minimum, originalValue: item.minimum })) + ' – '
+                                + escapeHTML(formatValue({ ...item, value: item.maximum, originalValue: item.maximum }))
+                                + '<br>' + escapeHTML(translate('Share of normalized weights')) + ': '
+                            : ' (') + Number(parameter.percent).toLocaleString(undefined, {
                             maximumFractionDigits: 1
-                        }) + '%)';
+                        }) + (pie.normalized === true ? '%' : '%)');
                 }
             },
             series: [{
@@ -204,7 +216,7 @@
                         var name = labelMap[parameter.name] || '';
                         return name + (style.showPercent === true ? '\n' + Number(parameter.percent).toLocaleString(
                             undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }
-                        ) + '%' : '');
+                        ) + '%' + (pie.normalized === true ? ' ' + translate('Share of normalized weights') : '') : '');
                     }
                 },
                 labelLine: {

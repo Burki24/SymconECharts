@@ -7,7 +7,7 @@
         "node": ">=18"
     },
     "scripts": {
-        "build:bar-category-app": "esbuild ../../EChartsBarCategory/visualization/app.js --minify-whitespace --target=es2018 --outfile=../../EChartsBarCategory/visualization/app.min.js",
+        "build:bar-category-app": "esbuild ../../EChartsBarCategory/visualization/app.js --minify --target=es2018 --outfile=../../EChartsBarCategory/visualization/app.min.js",
         "build": "npm run build:bar-category-app && npm run build:runtime && npm run build:cartesian && npm run build:bar-category && npm run build:scatter && npm run build:heatmap && npm run build:polar && npm run build:pie && npm run build:tree && npm run build:graph && npm run build:treemap && npm run build:sunburst && npm run build:parallel && npm run build:sankey && npm run build:calendar && npm run build:radar && npm run build:boxplot && npm run build:funnel && npm run build:candlestick && npm run build:pictorial-bar && npm run build:theme-river && npm run build:state-timeline && npm run build:calendar-pie && npm run build:themes",
         "build:runtime": "esbuild src/gauge-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.gauge.min.js",
         "build:cartesian": "esbuild src/cartesian-runtime.js --bundle --minify --format=iife --target=es2018 --legal-comments=inline --outfile=../../libs/echarts/6.1.0/echarts.cartesian.min.js",

@@ -1,6 +1,15 @@
 {
     "translations": {
         "de": {
+            "Normalize values using source Min/Max": "Werte anhand Quellen-Min/Max normalisieren",
+            "Minimum (normalization)": "Minimum (Normalisierung)",
+            "Maximum (normalization)": "Maximum (Normalisierung)",
+            "Optional normalization compares each source against its own Min/Max on a 0–100 scale. Different units and negative original values are allowed. Tooltips and value labels retain the originals; colors use the normalized scale.": "Die optionale Normalisierung vergleicht jede Quelle anhand eigener Min/Max auf einer Skala von 0–100. Unterschiedliche Einheiten und negative Originalwerte sind erlaubt. Tooltips und Wertebeschriftungen behalten die Originale; Farben verwenden die normalisierte Skala.",
+            "Normalized": "Normalisiert",
+            "Source range": "Quellbereich",
+            "Normalized (0–100)": "Normalisiert (0–100)",
+            "Normalized preview (0–100); labels show original values.": "Normalisierte Vorschau (0–100); Beschriftungen zeigen Originalwerte.",
+            "Preview requires valid numeric values and source Min/Max.": "Die Vorschau benötigt gültige numerische Werte und Quellen-Min/Max.",
             "Preview: first %d of %d categories. Scroll in the chart to see all.": "Vorschau: erste %d von %d Kategorien. Im Diagramm sind alle durch Scrollen erreichbar.",
             "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts.": "Ein gemeinsames EChartsGateway genügt für alle ECharts-Diagramminstanzen. Bei weiteren Diagrammen das vorhandene Gateway auswählen.",
             "Title": "Titel",

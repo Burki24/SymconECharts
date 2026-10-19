@@ -56,6 +56,17 @@ function page(mode, extended = false, light = false, single = false, gradient = 
         Object.assign(initialState.chart.pictorialBar.style,{colorMaximum:255,scaleMaximum:255});
         initialState.chart.pictorialBar.data.forEach((item,i)=>Object.assign(item,{value:[255,200,127.5,40,300,0][i],unit:'LQI',decimals:1}));
     }
+    if(layout.normalize){
+        Object.assign(initialState.chart.pictorialBar,{normalized:true,unit:'',title:'Normierter Vergleich · Originalwerte im Tooltip',data:[
+            {id:'temperature',label:'Temperatur',unit:'°C',decimals:1,value:50,originalValue:-5,minimum:-20,maximum:10,order:0,color:''},
+            {id:'humidity',label:'Luftfeuchtigkeit',unit:'%',decimals:0,value:75,originalValue:75,minimum:0,maximum:100,order:1,color:''},
+            {id:'signal',label:'Signalqualität',unit:'LQI',decimals:0,value:25.098,originalValue:64,minimum:0,maximum:255,order:2,color:''},
+            {id:'maximum',label:'Oberhalb Maximum',unit:'%',decimals:0,value:100,originalValue:150,minimum:0,maximum:100,order:3,color:''},
+            {id:'minimum',label:'Unterhalb Minimum',unit:'°C',decimals:1,value:0,originalValue:-50,minimum:-20,maximum:10,order:4,color:''}
+        ]});
+        // A stale saved physical scale must not distort normalized geometry.
+        initialState.chart.pictorialBar.style.scaleMaximum=255;
+    }
     const bootstrap = { mode, state: initialState, options: { tileHeaderVisible: true, echartsThemes: {auto: {background:'#303236',text:'#f4f5f7',muted:'#969aa2',border:'#777b83',accent:'#55CBB5',seriesColors:['#5070dd','#b6d634','#ff994d','#fb628b']}},
         adaptToBackground: false,  }, translations };
     const replacements = { HTML_LANGUAGE: 'de', HTML_CLASSES: '', ROOT_FONT_SIZE: '16px', VIEWPORT_CONTENT: 'width=device-width, initial-scale=1',
@@ -76,6 +87,7 @@ http.createServer((req, res) => {
         if(url.searchParams.get('shape') === 'svg')Object.assign(draft,{Title:'SVG-Vorschau · eigene Form',Symbol:'svg',
             CustomSymbolSVG:Buffer.from(read('tests/fixtures/pictorial-symbol-custom.svg')).toString('base64')});
         if(url.searchParams.get('symbols') === 'single')draft.SymbolRepeat=false;
+        if(url.searchParams.get('normalize') === 'yes')draft.NormalizeValues=true;
         const php='ob_start();require "tests/gateway_gauges.php";ob_end_clean();'
             +'$pict->UpdateBarPreviewFromForm($argv[1]);$u=array_slice($pict->GetTestFormUpdates(),-2)[0];'
             +'echo base64_decode(substr($u["Value"],strlen("data:image/svg+xml;base64,")));';
@@ -88,6 +100,7 @@ http.createServer((req, res) => {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     if (url.pathname === '/chart') { res.end(page(url.searchParams.get('mode') === 'ipsview' ? 'ipsview' : 'symcon', url.searchParams.get('design') === 'extended', url.searchParams.get('theme') === 'light', url.searchParams.get('symbols') === 'single',url.searchParams.get('color') === 'gradient',url.searchParams.get('range') === 'lqi',url.searchParams.get('icon') === 'cell',url.searchParams.get('shape') === 'svg', Math.min(100,Math.max(1,Number(url.searchParams.get('count'))||6)),
         {column:Math.min(80,Math.max(0,Number(url.searchParams.get('column'))||0)),longLabels:url.searchParams.get('labels')==='long',
+            normalize:url.searchParams.get('normalize')==='yes',
             orientation:['horizontal','vertical'].includes(url.searchParams.get('orientation'))?url.searchParams.get('orientation'):null})); return; }
     res.end('<!doctype html><html lang="de"><head><title>PictorialBar – lokale Browserprüfung</title></head><body style="background:#0b0c0e;color:white;font:16px Arial;margin:20px">'
         + '<h1 style="font-size:20px">PictorialBar · synthetische Beispieldaten</h1><div style="display:flex;gap:16px;align-items:start;flex-wrap:wrap">'

@@ -15,6 +15,7 @@ trait PictorialBarPreview
         $palette = EChartsBarPreview::Palette($this->BarPreviewValue($values, 'EChartsTheme', 'string', $ipsView));
         $raw = $values['Sources'] ?? json_decode($this->ReadPropertyString('Sources'), true);
         $sample = $raw === [];
+        $normalized = (bool) ($values['NormalizeValues'] ?? $this->ReadPropertyBoolean('NormalizeValues'));
         $invalid = false;
         $items = [];
         try {
@@ -24,13 +25,14 @@ trait PictorialBarPreview
                         'Color'         => -1, 'Unit' => '', 'Decimals' => 0, 'order' => $index];
                 }
             } else {
-                $sources = $this->GetValidatedSources(json_encode($raw, JSON_THROW_ON_ERROR));
+                $sources = $this->GetValidatedSources(json_encode($raw, JSON_THROW_ON_ERROR), $normalized);
                 foreach ($sources as $index => $source) {
                     $value = GetValue($source['VariableID']);
-                    if ((!is_int($value) && !is_float($value)) || !is_finite((float) $value) || $value < 0) {
+                    if ((!is_int($value) && !is_float($value)) || !is_finite((float) $value) || (!$normalized && $value < 0)) {
                         throw new DomainException('Invalid preview value.');
                     }
-                    $items[] = [...$source, 'value' => (float) $value, 'order' => $index];
+                    $items[] = [...$source, 'value' => $normalized ? EChartsNormalization::Value((float) $value, $source) : (float) $value,
+                        'originalValue'             => (float) $value, 'order' => $index];
                 }
             }
         } catch (Throwable) {
@@ -58,7 +60,12 @@ trait PictorialBarPreview
         $svg = str_replace('<svg xmlns', '<svg font-family="' . $e($family) . '" xmlns', $svg);
         if ($invalid) {
             return $svg . '<text x="360" y="190" text-anchor="middle" fill="' . $e($palette['text']) . '">'
-                . $e($this->Translate('Preview requires valid non-negative values.')) . '</text></svg>';
+                . $e($normalized ? $this->Translate('Preview requires valid numeric values and source Min/Max.')
+                    : $this->Translate('Preview requires valid non-negative values.')) . '</text></svg>';
+        }
+        if ($normalized) {
+            $svg .= '<text x="360" y="64" text-anchor="middle" font-size="10" fill="' . $e($palette['muted']) . '">'
+                . $e($this->Translate('Normalized preview (0–100); labels show original values.')) . '</text>';
         }
         $sort = $this->BarPreviewValue($values, 'SortOrder', 'string', $ipsView);
         if (in_array($sort, ['ascending', 'descending'], true)) {
@@ -66,7 +73,9 @@ trait PictorialBarPreview
         }
         $maximum = max(1.0, ...array_column($items, 'value'));
         $fixed = $this->BarPreviewValue($values, 'ScaleMaximum', 'integer', $ipsView);
-        if ($fixed > 0) {
+        if ($normalized) {
+            $maximum = 100;
+        } elseif ($fixed > 0) {
             $maximum = $fixed;
         }
         $totalCount = count($items);
@@ -257,7 +266,7 @@ trait PictorialBarPreview
                 $along = match ($position) {
                     'insideStart' => $distance, 'insideEnd' => $length - $distance, 'inside' => $length / 2, default => $length + $distance
                 };
-                $text = EChartsBarPreview::FormatValue($item['value'], $item['Decimals'], $item['Unit'], $this->ResolveHelperTranslationLanguage());
+                $text = EChartsBarPreview::FormatValue($normalized ? ($item['originalValue'] ?? $item['value']) : $item['value'], $item['Decimals'], $item['Unit'], $this->ResolveHelperTranslationLanguage());
                 $textWidth = mb_strlen($text) * $valueFont * 0.6;
                 $textX = $horizontal ? $left + $along : $center;
                 $textY = $horizontal ? $center + 4 : $bottom - $along;

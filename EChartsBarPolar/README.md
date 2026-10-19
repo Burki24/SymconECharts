@@ -7,7 +7,29 @@ Zusätzlich zu Mitte, innen am Anfang/Ende und außerhalb stehen die ECharts-Pos
 Die Optionen gelten für Kacheln und – bei unabhängigem Design – auch für
 IPSView. Bei geerbtem Design folgt IPSView den Kacheleinstellungen.
 
-`EChartsBarPolar` stellt aktuelle Zahlenwerte als Polar-Balken dar. Die Kachel zeigt wahlweise radial nach außen gerichtete Balken oder konzentrische Kreisbögen. Das Modul akzeptiert 1 bis 16 eindeutige numerische Symcon-Variablen mit derselben effektiven Einheit. Ein Archiv ist nicht nötig.
+`EChartsBarPolar` stellt aktuelle Zahlenwerte als Polar-Balken dar. Die Kachel zeigt wahlweise radial nach außen gerichtete Balken oder konzentrische Kreisbögen. Das Modul akzeptiert 1 bis 16 eindeutige numerische Symcon-Variablen mit derselben effektiven Einheit oder mit ausdrücklich aktivierter Min/Max-Normalisierung. Ein Archiv ist nicht nötig.
+
+## Optionaler Min/Max-Vergleich
+
+**Werte anhand Quellen-Min/Max normalisieren** ist zunächst ausgeschaltet.
+Aktiviert bildet es jede Quelle mit ihren eigenen Feldern **Min
+(Normalisierung)** und **Max (Normalisierung)** auf 0–100 ab:
+`100 × (Wert − Min) / (Max − Min)`. Vorgabe ist 0–100, Min muss
+kleiner als Max sein. So lassen sich beispielsweise Temperatur
+(−20 bis 40 °C), Luftfeuchtigkeit (0 bis 100 %) und Signalqualität
+(0 bis 255 LQI) gemeinsam vergleichen.
+
+Radiale Länge, Bogenlänge und Sortierung folgen dem normalisierten Wert.
+Die Grafik verwendet dann eine feste Skala 0–100 und kennzeichnet den
+normalisierten Vergleich. Gespeicherte manuelle Skalen werden nicht geändert
+und gelten wieder, sobald die Normalisierung ausgeschaltet wird.
+Nur die gezeichnete Länge wird auf 0–100 begrenzt: Wertbeschriftungen und
+Tooltip behalten den Originalwert samt je Quelle gewählter Einheit und
+Genauigkeit. Der Tooltip nennt zusätzlich Normalwert und Min/Max-Bereich.
+Negative Originalwerte sind bei aktivierter Normalisierung zulässig.
+Kachel, IPSView und Live-Vorschauen verwenden dasselbe Quellenmodell.
+Ist die Funktion ausgeschaltet, werden die zusätzlichen Min/Max-Felder
+ignoriert und die bisherige Darstellung bleibt erhalten.
 
 ## Vorübergehende Ladefehler
 
@@ -48,7 +70,7 @@ Für alle ECharts-Diagramme genügt ein gemeinsames `EChartsGateway`. Wählen Si
 
 Unter **Polar-Quellen** wählen Sie die Variablen. Jede Zeile ist ein eigenständiger Wert, nicht die Änderung eines vorherigen Werts. Die Listenreihenfolge lässt sich verschieben. Eine optionale Kategoriebeschriftung hat Vorrang; ist sie leer, erscheint der aktuelle Symcon-Name. Gleichlautende Beschriftungen sind erlaubt und führen nicht zum Verlust eines Werts. Variablen-IDs dienen nur der internen Zuordnung und werden nicht automatisch angezeigt.
 
-Einheit und Nachkommastellen können aus der Variablendarstellung übernommen oder je Quelle gesetzt werden. Alle Quellen müssen dieselbe effektive Einheit verwenden. Eine Quellenfarbe kann individuell gewählt werden; **Automatisch (Theme)** verwendet die Farbpalette des gewählten Themes.
+Einheit und Nachkommastellen können aus der Variablendarstellung übernommen oder je Quelle gesetzt werden. Ohne Normalisierung müssen alle Quellen dieselbe effektive Einheit verwenden. Eine Quellenfarbe kann individuell gewählt werden; **Automatisch (Theme)** verwendet die Farbpalette des gewählten Themes.
 
 ## Darstellung
 

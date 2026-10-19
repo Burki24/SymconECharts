@@ -195,7 +195,7 @@
         var first = Math.min(Math.max(0, items.length - visibleCount), Math.max(0, anchorIndex >= 0 ? anchorIndex : categoryStart));
         var major = Math.max(1,horizontal ? width-left-right : height-top-bottom);
         var cross = Math.max(1,(horizontal ? height-top-bottom : width-left-right)/Math.max(1,visibleCount));
-        var maximum = style.scaleMaximum > 0 ? style.scaleMaximum : Math.max.apply(null,[1].concat(items.map(function(x){return x.value;})));
+        var maximum = bar.normalized === true ? 100 : style.scaleMaximum > 0 ? style.scaleMaximum : Math.max.apply(null,[1].concat(items.map(function(x){return x.value;})));
         var barWidth = Math.max(1,Math.min(style.barWidth || 40,cross*0.65));
         // Complex glyphs use fewer/larger repeats. Keep path construction bounded.
         var customShape = style.symbol === 'icon' || style.symbol === 'svg';
@@ -255,8 +255,14 @@
         var labels = Object.create(null);
         items.forEach(function(x){labels[x.id]=x.label;});
         function format(item) {
-            return Number(item.value).toLocaleString(bootstrap.language || undefined,{maximumFractionDigits:item.decimals == null ? 2 : item.decimals})
+            return Number(bar.normalized === true ? item.originalValue : item.value).toLocaleString(bootstrap.language || undefined,{maximumFractionDigits:item.decimals == null ? 2 : item.decimals})
                 + (item.unit ? ' '+item.unit : '');
+        }
+        function normalizationText(item) {
+            if (bar.normalized !== true) { return ''; }
+            function number(value) { return Number(value).toLocaleString(bootstrap.language || undefined,{maximumFractionDigits:2}); }
+            return translate('Normalized')+': '+number(item.value)+' / 100; '+translate('Source range')+': '
+                +number(item.minimum)+' – '+number(item.maximum)+(item.unit ? ' '+item.unit : '');
         }
         var category = {type:'category',data:items.map(function(x){return x.id;}),inverse:horizontal,
             axisLabel:{show:style.showLabels !== false,fontSize:axisFont,color:style.axisColor || colors.text,
@@ -264,7 +270,7 @@
                 width:horizontal ? Math.max(8,left-16) : Math.max(10,cross-6),
                 overflow:'truncate',hideOverlap:true,interval:'auto',formatter:function(id){return labels[id] || '';}},
             axisTick:{show:style.showAxisTicks === true},axisLine:{lineStyle:{color:colors.border}}};
-        var value = {type:'value',min:0,max:maximum,name:bar.unit || '',nameLocation:horizontal?'middle':'end',
+        var value = {type:'value',min:0,max:maximum,name:bar.normalized === true ? translate('Normalized (0–100)') : bar.unit || '',nameLocation:horizontal?'middle':'end',
             nameGap:horizontal?axisFont+18:15,nameTextStyle:{fontSize:axisFont,color:style.axisColor || colors.text},
             axisLabel:{show:style.showAxisValues !== false,fontSize:axisFont,fontFamily:fontFamily,color:style.axisColor || colors.text,hideOverlap:true},
             axisTick:{show:style.showAxisTicks === true},
@@ -274,7 +280,7 @@
         return {
             ...design.animationOptions(style,{enabled:true,initialDuration:350,updateDuration:500}),
             backgroundColor:'transparent',textStyle:{fontFamily:fontFamily,color:colors.text},
-            aria:{enabled:true,label:{description:(bar.title || 'PictorialBar')+'. '+items.map(function(item){return item.label+': '+format(item);}).join('; ')}},
+            aria:{enabled:true,label:{description:(bar.title || 'PictorialBar')+'. '+items.map(function(item){return item.label+': '+format(item)+(bar.normalized === true ? '; '+normalizationText(item) : '');}).join('; ')}},
             title:{show:title.show,text:bar.title || '',left:'center',top:title.top,textStyle:{
                 color:style.titleColor || colors.text,fontSize:titleSize,fontFamily:fontFamily,fontWeight:style.titleBold === false?'normal':'bold',
                 overflow:'truncate',width:Math.max(1,width-36)}},
@@ -291,7 +297,8 @@
             ] : [],
             tooltip:{show:style.showTooltip !== false,trigger:'item',confine:true,
                 extraCssText:'max-width:'+Math.max(80,width-24)+'px;white-space:normal;overflow-wrap:anywhere;',
-                formatter:function(p){var item=items[p.dataIndex];return item?escapeHTML(item.label)+'<br>'+escapeHTML(format(item)):'';}},
+                formatter:function(p){var item=items[p.dataIndex];return item?escapeHTML(item.label)+'<br>'+escapeHTML(format(item))
+                    +(bar.normalized === true ? '<br>'+escapeHTML(normalizationText(item)) : ''):'';}},
             series:[{type:'pictorialBar',symbol:compound
                 ? gradientGroupPath(style.symbol || 'rect',horizontal,major,barWidth,size,crossSize,style.symbolGap == null ? 2 : style.symbolGap,style,limit)
                 : singleSymbol,

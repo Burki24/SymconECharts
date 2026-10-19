@@ -21,6 +21,7 @@ use SymconECharts\EChartsDesignerSections;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
+use SymconECharts\EChartsNormalization;
 use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsTransientRefresh;
 use SymconECharts\EChartsVariablePresentation;
@@ -146,6 +147,7 @@ class EChartsPictorialBar extends IPSModuleStrict
             $this->RegisterMessage(0, IPS_KERNELSTARTED);
             $this->RegisterTransientRefresh('ECPB');
             $this->RegisterPropertyString('Sources', '[]');
+            $this->RegisterPropertyBoolean('NormalizeValues', false);
             $this->RegisterPropertyString('Title', '');
             foreach (['', 'IPSView'] as $prefix) {
                 foreach (self::DESIGN_DEFAULTS as $name => $default) {
@@ -236,7 +238,7 @@ class EChartsPictorialBar extends IPSModuleStrict
                 ['caption' => 'Value-dependent colors', 'start' => 'ColorMode'],
                 ['caption' => 'Shadows and highlighting', 'start' => 'ShadowBlur']
             ]);
-            $fields = ['Title', 'Sources',
+            $fields = ['Title', 'Sources', 'NormalizeValues',
                 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
                 'IPSViewBackgroundOpacityPercent', ...array_keys(self::DESIGN_DEFAULTS),
                 ...array_map(static fn (string $name): string => 'IPSView' . $name, array_keys(self::DESIGN_DEFAULTS))];
@@ -464,26 +466,30 @@ class EChartsPictorialBar extends IPSModuleStrict
             throw new RuntimeException('No active EChartsGateway is connected.');
         }
         $sources = $this->GetValidatedSources();
+        $normalized = $this->ReadPropertyBoolean('NormalizeValues');
         // A new transport failure must not inherit a previous domain error.
         $this->WriteAttributeString('LastError', '');
         $data = [];
         foreach ($sources as $index => $source) {
             $current = $this->ReadCurrentSource($source['VariableID']);
-            if ($current['Value'] < 0) {
+            if (!$normalized && $current['Value'] < 0) {
                 $this->WriteAttributeString('LastError', 'PictorialBar requires non-negative values.');
                 $this->DebugEChartsSetStatus(self::STATUS_VALUE_INVALID);
                 throw new DomainException('PictorialBar requires non-negative values.');
             }
             $data[] = ['id' => 'variable-' . $source['VariableID'], 'variableID' => $source['VariableID'],
                 'label'     => $source['Label'], 'unit' => $source['Unit'], 'decimals' => $source['Decimals'],
-                'value'     => $current['Value'], 'timestamp' => $current['Timestamp'], 'order' => $index,
-                'color'     => $source['Color'] < 0 ? '' : EChartsAsset::ColorToHex($source['Color'])];
+                'value'     => $normalized ? EChartsNormalization::Value($current['Value'], $source) : $current['Value'],
+                'timestamp' => $current['Timestamp'], 'order' => $index,
+                'color'     => $source['Color'] < 0 ? '' : EChartsAsset::ColorToHex($source['Color']),
+                ...($normalized ? EChartsNormalization::Metadata($current['Value'], $source) : [])];
         }
         $this->WriteAttributeString('LastError', '');
         $this->DebugEChartsSetStatus(IS_ACTIVE);
         return json_encode(
             ['schemaVersion'       => 1, 'family' => 'pictorialBar', 'theme' => $this->EffectiveTheme($ipsView),
-                'pictorialBar'     => ['title' => $this->ReadPropertyString('Title'), 'unit' => $sources[0]['Unit'],
+                'pictorialBar'     => ['title' => $this->ReadPropertyString('Title'), 'unit' => $normalized ? '' : $sources[0]['Unit'],
+                    'normalized'               => $normalized,
                     'data'                     => $data, 'style' => $this->ReadDesignStyle($ipsView)]],
             JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION
         );
@@ -511,6 +517,9 @@ class EChartsPictorialBar extends IPSModuleStrict
                 'The PictorialBar values could not be loaded.'                                        => $this->Translate('The PictorialBar values could not be loaded.'),
                 'PictorialBar requires non-negative values.'                                          => $this->Translate('PictorialBar requires non-negative values.'),
                 'All values are zero.'                                                                => $this->Translate('All values are zero.'),
+                'Normalized'                                                                          => $this->Translate('Normalized'),
+                'Source range'                                                                        => $this->Translate('Source range'),
+                'Normalized (0–100)'                                                                  => $this->Translate('Normalized (0–100)'),
                 'Data could not be refreshed. Showing the last available values.'                     => $this->Translate('Data could not be refreshed. Showing the last available values.')
             ],
             'options' => [
@@ -587,10 +596,15 @@ class EChartsPictorialBar extends IPSModuleStrict
         return null;
     }
 
-    /** @return list<array{VariableID:int,Label:string,Color:int,Unit:string,Decimals:int}> */
-    private function GetValidatedSources(?string $draft = null): array
+    /** @return list<array{VariableID:int,Label:string,Color:int,Unit:string,Decimals:int,Minimum?:float,Maximum?:float}> */
+    private function GetValidatedSources(?string $draft = null, ?bool $normalize = null): array
     {
-        return EChartsCurrentComparisonSources::Resolve($draft ?? $this->ReadPropertyString('Sources'), 'PictorialBar', 100);
+        return EChartsCurrentComparisonSources::Resolve(
+            $draft ?? $this->ReadPropertyString('Sources'),
+            'PictorialBar',
+            100,
+            $normalize ?? $this->ReadPropertyBoolean('NormalizeValues')
+        );
     }
 
     /** @return array<string,mixed> */

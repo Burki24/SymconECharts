@@ -13,7 +13,7 @@ const palette = {
     accent: '#55cbb5', seriesColors: ['#111111', '#222222', '#333333']
 };
 
-function render(style, items, width = 800, mode = 'symcon', height = 400) {
+function render(style, items, width = 800, mode = 'symcon', height = 400, normalized = false) {
     const chartElement = { hidden: false, clientWidth: width, clientHeight: height };
     const errorElement = { hidden: true, textContent: '' };
     const emptyElement = { hidden: true, textContent: '' };
@@ -23,7 +23,7 @@ function render(style, items, width = 800, mode = 'symcon', height = 400) {
         setOption: next => { option = next; }, clear: () => {}, resize: () => {}, dispose: () => {}
     };
     const model = {
-        family: 'pie', theme: 'dark', pie: { title: 'Shares', style }, items
+        family: 'pie', theme: 'dark', pie: { title: 'Shares', style, normalized }, items
     };
     const window = {
         SYMC_VISUALIZATION: {
@@ -58,6 +58,31 @@ const baseStyle = {
     mode: 'pie', sortOrder: 'configured', innerRadiusPercent: 35, outerRadiusPercent: 90,
     showLegend: true, showLabels: true, showPercent: true, labelPosition: 'outside'
 };
+const normalizedPie = render(baseStyle, [
+    { ...sources[0], value: 50, originalValue: -10, minimum: -20, maximum: 0 },
+    { ...sources[1], value: 75, originalValue: 75, minimum: 0, maximum: 100, unit: '%' }
+], 800, 'symcon', 400, true);
+const normalizedTooltip = normalizedPie.option.tooltip.formatter({ name: 'variable-1', dataIndex: 0, percent: 40 });
+assert.match(normalizedTooltip, /-10/);
+assert.match(normalizedTooltip, /°C/);
+assert.match(normalizedTooltip, /Normalized/);
+assert.match(normalizedTooltip, /normalized weights/);
+assert.match(normalizedTooltip, /Range/);
+const narrowNormalizedPie = render(baseStyle, sources.map(item => ({ ...item,
+    originalValue: item.value, minimum: -20, maximum: 40 })), 320, 'symcon', 400, true);
+assert.equal(narrowNormalizedPie.option.tooltip.confine, true,
+    'Long normalization tooltips must stay inside a narrow embedded tile.');
+assert.match(narrowNormalizedPie.option.tooltip.extraCssText, /max-width:296px.*overflow-wrap:anywhere/);
+for (const outputMode of ['symcon', 'ipsview']) {
+    const result = render({ ...baseStyle, showPercent: false }, [
+        { ...sources[0], value: 100, originalValue: 140, minimum: 0, maximum: 100, unit: 'LQI' }
+    ], 800, outputMode, 400, true);
+    assert.equal(result.option.series[0].data[0].value, 100);
+    assert.match(result.option.tooltip.formatter({ name: 'variable-1', percent: 100 }), /140/);
+    assert.match(result.option.tooltip.formatter({ name: 'variable-1', percent: 100 }), /LQI/);
+    assert.match(result.option.title.subtext, /normalized weights/);
+    assert.match(result.option.aria.description, /normalized weights/);
+}
 const crowdedTile = render({ ...baseStyle, outerRadiusPercent: 100 }, [
     { ...sources[0], name: 'Feuchtigkeit' },
     { ...sources[1], name: 'Feuchtigkeit' },

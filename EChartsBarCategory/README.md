@@ -8,8 +8,41 @@ These options apply to the tile and the independent IPSView design. In
 inherited mode, IPSView follows the tile settings.
 
 `EChartsBarCategory` compares the current values of one to one hundred numeric
-IP-Symcon variables as a category bar chart. All configured sources must use
-the same effective unit so that the shared value axis remains meaningful.
+IP-Symcon variables as a category bar chart. Without normalization, all
+configured sources must use the same effective unit so that the shared value
+axis remains meaningful.
+
+## Optional Min/Max normalization
+
+Enable **Normalize numeric sources using their Min/Max** to compare different
+units, for example temperature, humidity and LQI. Set **Min (normalization)**
+and **Max (normalization)** separately in each source row. They default to
+0 and 100, must be finite and have Min below Max. These explicit bounds do
+not come from the variable presentation. They are ignored while normalization
+is disabled, which remains the default.
+
+The displayed length is `(value - Min) / (Max - Min) × 100`, limited to 0–100.
+Values below or above the range retain their original values but draw at
+0 or 100. Negative original values are allowed with suitable bounds. Value
+labels and tooltips keep each source's original value, unit and precision;
+the tooltip additionally shows its normalized position and original range.
+Native variable presentation or manually configured formatting is still
+selected per source. The comparison axis is explicitly labeled **Normalized
+0–100 per source** rather than using any original unit.
+
+Sorting compares normalized values. Grouped bars retain separate source
+positions. Stacked bars add their individual normalized values and can exceed
+100; this is **not** a 100-percent share calculation. Categories, source IDs,
+navigation and original values remain unchanged. Gradient colors follow the
+normalized value-axis positions while this mode is active; a 0–100 gradient
+range is suitable for simple or grouped bars. Saved gradient/style settings
+are not changed automatically.
+Normalized grouped/stacked segments hide value labels when their zero or tiny
+length cannot accommodate readable text. Their original values remain in the
+tooltip; larger segments keep their labels.
+
+The option applies to Tile, IPSView and both live previews, including unsaved
+changes. Disable it to return to the original same-unit signed comparison.
 
 ## Large category lists
 

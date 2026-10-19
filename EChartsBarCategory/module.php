@@ -22,6 +22,7 @@ use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsLabelDesign;
+use SymconECharts\EChartsNormalization;
 use SymconECharts\EChartsPreviewSourceCount;
 use SymconECharts\EChartsSvgImage;
 use SymconECharts\EChartsTransientRefresh;
@@ -44,6 +45,7 @@ require_once __DIR__ . '/../libs/EChartsCurrentSources.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
 require_once __DIR__ . '/../libs/EChartsLabelDesign.php';
+require_once __DIR__ . '/../libs/EChartsNormalization.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
@@ -105,6 +107,7 @@ class EChartsBarCategory extends IPSModuleStrict
             $this->SetVisualizationType(1);
             $this->RegisterMessage(0, IPS_KERNELSTARTED);
             $this->RegisterPropertyString('Sources', '[]');
+            $this->RegisterPropertyBoolean('NormalizeValues', false);
             $this->RegisterPropertyString('Title', '');
             $this->RegisterDesignProperties();
             $this->RegisterIPSViewHTMLPageProperties();
@@ -221,7 +224,7 @@ class EChartsBarCategory extends IPSModuleStrict
                 ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
             ]);
             $fields = array_merge(
-                ['Title', 'Sources', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
+                ['Title', 'Sources', 'NormalizeValues', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
                     'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent'],
                 array_keys($this->DesignPropertyNames()),
                 array_map(static fn (string $name): string => 'IPSView' . $name, array_keys($this->DesignPropertyNames()))
@@ -322,6 +325,7 @@ class EChartsBarCategory extends IPSModuleStrict
             }
 
             $sources = $this->GetValidatedSources();
+            $normalized = $this->ReadPropertyBoolean('NormalizeValues');
             $pairCounts = [];
             foreach ($sources as $source) {
                 $series = $source['Series'] !== '' ? $source['Series'] : IPS_GetName($source['VariableID']);
@@ -341,7 +345,11 @@ class EChartsBarCategory extends IPSModuleStrict
                     'category'   => $source['Category'],
                     'seriesKey'  => $duplicateLabel ? 'variable-' . $source['VariableID'] : 'series-' . $series,
                     'series'     => $series,
-                    'value'      => $current['Value'],
+                    'value'      => $normalized ? EChartsNormalization::Value((float) $current['Value'], $source) : $current['Value'],
+                    ...($normalized ? [
+                        ...EChartsNormalization::Metadata((float) $current['Value'], $source),
+                        'unit' => $source['Unit'], 'decimals' => $source['Decimals']
+                    ] : []),
                     'timestamp'  => $current['Timestamp'],
                     'color'      => $source['Color'] < 0 ? '' : EChartsAsset::ColorToHex($source['Color']),
                     'order'      => $index
@@ -360,7 +368,8 @@ class EChartsBarCategory extends IPSModuleStrict
                     'mode'        => $this->ReadPropertyString('BarMode'),
                     'orientation' => $this->ReadPropertyString('Orientation'),
                     'sortOrder'   => $this->ReadPropertyString('SortOrder'),
-                    'unit'        => $sources[0]['Unit'],
+                    'unit'        => $normalized ? '' : $sources[0]['Unit'],
+                    'normalized'  => $normalized,
                     'decimals'    => max(array_column($sources, 'Decimals')),
                     'style'       => $this->ReadDesignStyle()
                 ],
@@ -499,6 +508,26 @@ class EChartsBarCategory extends IPSModuleStrict
         $palette = EChartsBarPreview::Palette($theme);
         $data = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values, 'Category', true, self::MAXIMUM_SOURCE_COUNT);
         $items = $data['items'];
+        $normalized = (bool) ($values['NormalizeValues'] ?? $this->ReadPropertyBoolean('NormalizeValues'));
+        if ($normalized) {
+            foreach ($items as &$item) {
+                try {
+                    $item = [...$item, ...EChartsNormalization::Metadata((float) $item['value'], $item)];
+                    $item['value'] = EChartsNormalization::Value((float) $item['value'], $item);
+                } catch (InvalidArgumentException) {
+                    return EChartsBarPreview::Open(
+                        $palette,
+                        $this->Translate('Invalid normalization range.'),
+                        false,
+                        $ipsView,
+                        $values,
+                        $this->Translate('Example data'),
+                        $this->Translate('Chart preview')
+                    ) . '</svg>';
+                }
+            }
+            unset($item);
+        }
         $previewDecimals = max(array_column($data['items'], 'decimals'));
         $previewLanguage = $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage());
         $mode = $this->BarPreviewValue($values, 'BarMode', 'string', $ipsView);
@@ -537,8 +566,8 @@ class EChartsBarCategory extends IPSModuleStrict
         if (!$horizontal && $this->BarPreviewValue($values, 'ShowValues', 'boolean', $ipsView)) {
             foreach ($items as $item) {
                 $previewValueSpan = max($previewValueSpan, mb_strlen(EChartsBarPreview::FormatValue(
-                    $item['value'],
-                    $previewDecimals,
+                    $item['originalValue'] ?? $item['value'],
+                    $normalized ? $item['decimals'] : $previewDecimals,
                     $item['unit'],
                     $previewLanguage
                 )) * $previewValueSize * 0.65);
@@ -570,6 +599,10 @@ class EChartsBarCategory extends IPSModuleStrict
         $valueSize = max(6, min(22, (int) round(11 * $this->BarPreviewValue($values, 'ValueFontSizePercent', 'integer', $ipsView) / 100)));
         $svg .= '<text x="696" y="55" text-anchor="end" fill="' . EChartsBarPreview::E($palette['muted'])
             . '" font-size="12">' . EChartsBarPreview::E(ucfirst($mode)) . '</text>';
+        if ($normalized) {
+            $svg .= '<text x="24" y="55" fill="' . EChartsBarPreview::E($palette['muted']) . '" font-size="11">'
+                . EChartsBarPreview::E($this->Translate('Normalized 0–100 per source')) . '</text>';
+        }
         if ($mode !== 'simple') {
             foreach (array_slice($items, 0, 6) as $index => $item) {
                 $color = $item['color'] !== '' ? $item['color'] : $palette['seriesColors'][$index % count($palette['seriesColors'])];
@@ -626,7 +659,7 @@ class EChartsBarCategory extends IPSModuleStrict
                 return $sort === 'ascending' ? $leftTotal <=> $rightTotal : $rightTotal <=> $leftTotal;
             });
         }
-        $positiveMax = 1.0;
+        $positiveMax = $normalized ? 100.0 : 1.0;
         $negativeMax = 0.0;
         foreach ($groups as $group) {
             $positive = array_map(static fn (array $entry): float => max(0.0, $entry['item']['value']), $group);
@@ -741,8 +774,8 @@ class EChartsBarCategory extends IPSModuleStrict
                     $svg .= '<text x="' . EChartsBarPreview::N($valueX) . '" y="' . EChartsBarPreview::N($valueY)
                         . '" text-anchor="' . $valueAnchor . '" fill="' . EChartsBarPreview::E($textColor) . '" font-size="' . $valueSize . '">'
                         . EChartsBarPreview::E(EChartsBarPreview::FormatValue(
-                            $item['value'],
-                            $previewDecimals,
+                            $item['originalValue'] ?? $item['value'],
+                            $normalized ? $item['decimals'] : $previewDecimals,
                             $item['unit'],
                             $previewLanguage
                         )) . '</text>';
@@ -793,7 +826,10 @@ class EChartsBarCategory extends IPSModuleStrict
                 ),
                 'Data could not be refreshed. Showing the last available values.' => $this->Translate(
                     'Data could not be refreshed. Showing the last available values.'
-                )
+                ),
+                'Normalized 0–100 per source' => $this->Translate('Normalized 0–100 per source'),
+                'Normalized'                  => $this->Translate('Normalized'),
+                'Range'                       => $this->Translate('Range')
             ],
             'options'            => [
                 'echartsVersion'    => EChartsAsset::VERSION,
@@ -876,6 +912,7 @@ class EChartsBarCategory extends IPSModuleStrict
         $validated = [];
         $variableIDs = [];
         $commonUnit = null;
+        $normalized = $this->ReadPropertyBoolean('NormalizeValues');
         foreach ($sources as $source) {
             if (!is_array($source)) {
                 throw new InvalidArgumentException('Every Category Bar source must be an object.');
@@ -907,7 +944,7 @@ class EChartsBarCategory extends IPSModuleStrict
             );
             if ($commonUnit === null) {
                 $commonUnit = $presentation['unit'];
-            } elseif ($presentation['unit'] !== $commonUnit) {
+            } elseif (!$normalized && $presentation['unit'] !== $commonUnit) {
                 throw new InvalidArgumentException('All Category Bar sources must use the same unit.');
             }
             $variableIDs[] = $variableID;
@@ -925,7 +962,8 @@ class EChartsBarCategory extends IPSModuleStrict
                 'Series'     => $series,
                 'Unit'       => $presentation['unit'],
                 'Decimals'   => $presentation['decimals'],
-                'Color'      => $color
+                'Color'      => $color,
+                ...($normalized ? array_combine(['Minimum', 'Maximum'], EChartsNormalization::Range($source)) : [])
             ];
         }
 

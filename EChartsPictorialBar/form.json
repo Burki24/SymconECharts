@@ -11,6 +11,11 @@
             "caption": "Title"
         },
         {
+            "type": "CheckBox",
+            "name": "NormalizeValues",
+            "caption": "Normalize values using source Min/Max"
+        },
+        {
             "type": "List",
             "name": "Sources",
             "caption": "PictorialBar variables",
@@ -42,6 +47,26 @@
                     }
                 },
                 {
+                    "caption": "Minimum (normalization)",
+                    "name": "Minimum",
+                    "width": "150px",
+                    "add": 0,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "digits": 6
+                    }
+                },
+                {
+                    "caption": "Maximum (normalization)",
+                    "name": "Maximum",
+                    "width": "150px",
+                    "add": 100,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "digits": 6
+                    }
+                },
+                {
                     "caption": "Category color (optional)",
                     "name": "Color",
                     "width": "160px",
@@ -68,6 +93,18 @@
                     "caption": "Label (optional)"
                 },
                 {
+                    "type": "NumberSpinner",
+                    "name": "Minimum",
+                    "caption": "Minimum (normalization)",
+                    "digits": 6
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "Maximum",
+                    "caption": "Maximum (normalization)",
+                    "digits": 6
+                },
+                {
                     "type": "SelectColor",
                     "name": "Color",
                     "caption": "Category color (optional)",
@@ -79,6 +116,10 @@
         {
             "type": "Label",
             "caption": "Choose 1 to 100 numeric variables with the same unit and non-negative current values. Symbols show proportions, not one unit each."
+        },
+        {
+            "type": "Label",
+            "caption": "Optional normalization compares each source against its own Min/Max on a 0–100 scale. Different units and negative original values are allowed. Tooltips and value labels retain the originals; colors use the normalized scale."
         },
         {
             "type": "ExpansionPanel",

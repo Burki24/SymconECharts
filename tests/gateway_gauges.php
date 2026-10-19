@@ -958,6 +958,19 @@ assertGatewayGauge(
 );
 IPSModuleStrict::$ParentResponder = static fn (string $json): string => $gateway->ForwardData($json);
 
+if (array_slice($argv, 1) === ['--current-normalization']) {
+    require __DIR__ . '/pie_polar_normalization.php';
+    require __DIR__ . '/bar_category_normalization.php';
+    require __DIR__ . '/pictorial_bar_integration.php';
+    echo "Normalized current comparison families verified.\n";
+    exit(0);
+}
+
+if (array_slice($argv, 1) === ['--bar-category-normalization']) {
+    require __DIR__ . '/bar_category_normalization.php';
+    exit(0);
+}
+
 if (($argv[1] ?? '') === '--calendar-pie-preview') {
     require_once dirname(__DIR__) . '/EChartsCalendarPie/module.php';
     $GLOBALS['symconTestVariables'][4800] = ['VariableType' => 2, 'VariableUpdated' => 1780000000, 'Value' => 8.0, 'Name' => 'Quelle A'];
@@ -5954,10 +5967,10 @@ assertGatewayGauge(
 assertGatewayGauge(
     is_array($barSourcesForm)
         && array_column($barSourcesForm['columns'], 'name') === [
-            'VariableID', 'Category', 'Series', 'UseVariablePresentation', 'Unit', 'Decimals', 'Color'
+            'VariableID', 'Category', 'Series', 'UseVariablePresentation', 'Unit', 'Decimals', 'Minimum', 'Maximum', 'Color'
         ]
         && array_column($barSourcesForm['form'], 'name') === [
-            'VariableID', 'Category', 'Series', 'UseVariablePresentation', 'Unit', 'Decimals', 'Color'
+            'VariableID', 'Category', 'Series', 'UseVariablePresentation', 'Unit', 'Decimals', 'Minimum', 'Maximum', 'Color'
         ]
         && str_contains($barForm, '"name":"BarMode"')
         && str_contains($barForm, '"name":"IPSViewBarMode"')

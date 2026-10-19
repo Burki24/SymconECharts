@@ -1323,6 +1323,36 @@ if (fs.existsSync(localECharts)) {
     radialChart.dispose();
 }
 
+for (const outputMode of ['symcon', 'ipsview']) {
+    window.SYMC_VISUALIZATION.mode = outputMode;
+    for (const polarMode of ['radial', 'tangential']) {
+        window.handleMessage({ status: 'ready', chart: {
+            ...state.chart,
+            polar: { ...state.chart.polar, normalized: true, unit: '%', style: {
+                ...state.chart.polar.style, mode: polarMode, sortOrder: 'configured',
+                valueAxisRangeMode: 'manual', valueAxisMinimum: -500, valueAxisMaximum: 500
+            } },
+            items: [
+                { id: 'a', label: 'Temperature', value: 50, originalValue: -10, minimum: -20, maximum: 0, unit: '°C', decimals: 1 },
+                { id: 'b', label: 'Humidity', value: 80, originalValue: 80, minimum: 0, maximum: 100, unit: '%', decimals: 0 }
+            ]
+        } });
+        const normalizedOption = options.at(-1);
+        const normalizedAxis = polarMode === 'radial' ? normalizedOption.radiusAxis : normalizedOption.angleAxis;
+        assert.equal(normalizedAxis.min, 0);
+        assert.equal(normalizedAxis.max, 100);
+        assert.equal(normalizedOption.tooltip.confine, true,
+            'Normalization tooltip originals and ranges must remain inside the widget.');
+        assert.match(normalizedOption.tooltip.extraCssText, /overflow-wrap:anywhere/);
+        assert.match(normalizedOption.tooltip.formatter({ dataIndex: 0 }), /-10/);
+        assert.match(normalizedOption.tooltip.formatter({ dataIndex: 0 }), /°C/);
+        assert.match(normalizedOption.tooltip.formatter({ dataIndex: 1 }), /%/);
+        assert.match(normalizedOption.tooltip.formatter({ dataIndex: 0 }), /Range/);
+        assert.match(normalizedOption.series[0].label.formatter({ dataIndex: 0, value: 50 }), /-10/);
+        assert.match(normalizedOption.aria.description, /Normalized/);
+    }
+}
+
 window.handleMessage({ status: 'error', error: 'Configure valid Polar sources.' });
 assert.equal(chartElement.hidden, true);
 assert.equal(errorElement.hidden, false);

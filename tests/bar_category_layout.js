@@ -11,7 +11,7 @@ const source = fs.readFileSync(
 );
 const esbuild = require('../.tools/echarts-runtime/node_modules/esbuild');
 const editableSource = fs.readFileSync(path.join(__dirname, '..', 'EChartsBarCategory/visualization/app.js'), 'utf8');
-assert.equal(source.replace(/\r\n/g, '\n'), esbuild.transformSync(editableSource, {minifyWhitespace: true, target: 'es2018'}).code,
+assert.equal(source.replace(/\r\n/g, '\n'), esbuild.transformSync(editableSource, {minify: true, target: 'es2018'}).code,
     'The shipped Category Bar script must be reproducible and current with its readable source.');
 const gradientStyle = { barFillMode: 'gradient', colorMinimum: 0, colorMaximum: 100,
     lowColor: '#ff0000', middleColor: '#ffff00', highColor: '#00ff00', animationEnabled: false };
@@ -21,7 +21,7 @@ const designSource = fs.readFileSync(
 );
 const patternSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-pattern.js'), 'utf8');
 
-function render(orientation, sortOrder, outputMode = 'symcon', barMode = 'simple', items, styleOverrides = {}, enableImages = false, dimensions = {}) {
+function render(orientation, sortOrder, outputMode = 'symcon', barMode = 'simple', items, styleOverrides = {}, enableImages = false, dimensions = {}, barOverrides = {}) {
     const chartElement = { hidden: false, clientWidth: dimensions.width || 800, clientHeight: dimensions.height || 500 };
     const errorElement = { hidden: true, textContent: '' };
     const images = [];
@@ -50,7 +50,7 @@ function render(orientation, sortOrder, outputMode = 'symcon', barMode = 'simple
                     bar: {
                         title: 'Temperatures', mode: barMode, orientation, sortOrder, unit: '°C', decimals: 1,
                         style: { showValues: true, showGrid: false, roundedBars: true,
-                            barWidthPercent: 60, ...styleOverrides }
+                            barWidthPercent: 60, ...styleOverrides }, ...barOverrides
                     },
                     items: items || [
                         { category: 'A', series: 'A', value: 10, order: 0, color: '#ff0000' },
@@ -101,6 +101,41 @@ function render(orientation, sortOrder, outputMode = 'symcon', barMode = 'simple
 }
 
 const horizontal = render('horizontal', 'descending');
+const normalizedSources = [
+    { id: 'temperature', category: '<Temperature>', value: 50, originalValue: -5, minimum: -10, maximum: 0, unit: '°C', decimals: 1, order: 0 },
+    { id: 'humidity', category: 'Humidity', value: 75, originalValue: 75, minimum: 0, maximum: 100, unit: '%', decimals: 0, order: 1 }
+];
+const normalized = render('horizontal', 'configured', 'symcon', 'simple', normalizedSources, {}, false, {}, {normalized: true});
+assert.equal(normalized.xAxis.min, 0, 'Normalized category geometry must start at zero.');
+assert.equal(normalized.xAxis.max, 100, 'Normalized simple bars must retain the common 0–100 scale.');
+assert.equal(normalized.tooltip.confine, true, 'Originals and source ranges must fit the embedded comparison tooltip.');
+assert.match(normalized.tooltip.extraCssText, /overflow-wrap:anywhere/);
+assert.ok(normalized.xAxis.name.includes('0–100'), 'The axis must explicitly identify normalized values, not °C.');
+const localeDecimal = value => value.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
+assert.equal(normalized.series[0].label.formatter({value: 50, data: normalized.series[0].data[0]}), localeDecimal(-5) + ' °C');
+const normalizedTooltip = normalized.tooltip.formatter([{name: '<Temperature>', value: 50, dataIndex: 0, seriesIndex: 0,
+    data: normalized.series[0].data[0]}]);
+assert.ok(normalizedTooltip.includes(localeDecimal(-5) + ' °C') && normalizedTooltip.includes(localeDecimal(50)) && normalizedTooltip.includes(localeDecimal(-10)),
+    'Normalized tooltips retain original signed values and their own units plus normalized position and source range.');
+assert.ok(!normalizedTooltip.includes('<Temperature>') && normalizedTooltip.includes('&lt;Temperature&gt;'),
+    'Tooltip source labels must be HTML escaped.');
+for (const mode of ['grouped', 'stacked']) {
+    for (const output of ['symcon', 'ipsview']) {
+        for (const orientation of ['horizontal', 'vertical']) {
+            const tinySources = [0, 1, 80].map((value, index) => ({id: 'tiny-' + index,
+                category: 'Shared category', series: 'Source ' + index, seriesKey: 'source-' + index,
+                value, originalValue: index === 0 ? -10 : value, minimum: index === 0 ? -10 : 0,
+                maximum: 100, unit: index === 0 ? '°C' : '%', decimals: 1, order: index}));
+            const tiny = render(orientation, 'configured', output, mode, tinySources, {}, false, {}, {normalized: true});
+            assert.equal(tiny.series[0].data[0].label && tiny.series[0].data[0].label.show, false, 'Normalized zero segments must not pile labels at the origin.');
+            assert.equal(tiny.series[1].data[0].label && tiny.series[1].data[0].label.show, false, 'Tiny normalized grouped/stacked segments must suppress labels that cannot fit.');
+            assert.notEqual(tiny.series[2].data[0].label && tiny.series[2].data[0].label.show, false,
+                'Readable normalized segments must retain their original-value labels.');
+            const tooltip = tiny.tooltip.formatter([{name: 'Shared category', value: 0, dataIndex: 0, seriesIndex: 0, data: tiny.series[0].data[0]}]);
+            assert.ok(tooltip.includes(localeDecimal(-10) + ' °C'), 'Suppressed labels must keep their original values in the tooltip.');
+        }
+    }
+}
 const gradientBattery = render('horizontal', 'configured', 'symcon', 'simple', [
     { id: 'battery', category: 'Battery', value: 16, order: 0, color: '#123456' }
 ], gradientStyle);
@@ -544,6 +579,43 @@ for (const orientation of ['horizontal', 'vertical']) {
     dense.refresh();
     assert.equal(dense.getUpdatedOption().dataZoom[0].startValue, 72 - count);
     engine.dispose();
+}
+
+for (const output of ['symcon', 'ipsview']) {
+    for (const orientation of ['horizontal', 'vertical']) {
+        for (const mode of ['simple', 'grouped', 'stacked']) {
+            const items = Array.from({length: 100}, (_, index) => ({
+                id: 'normalize-' + index, category: mode === 'simple' ? 'Source ' + index : 'Group ' + Math.floor(index / 2),
+                series: 'Sensor ' + index % 2, seriesKey: 'series-' + index % 2,
+                value: 75, originalValue: index % 2 ? 75 : -2.5,
+                unit: index % 2 ? '%' : '°C', decimals: index % 2 ? 0 : 1,
+                minimum: index % 2 ? 0 : -10, maximum: index % 2 ? 100 : 0, order: index
+            }));
+            const normalizedLarge = render(orientation, 'configured', output, mode, items,
+                {...gradientStyle, barWidthPercent: 20}, false, {width: 800, height: 500}, {normalized: true});
+            const valueAxis = orientation === 'horizontal' ? normalizedLarge.xAxis : normalizedLarge.yAxis;
+            assert.equal(valueAxis.min, 0);
+            assert.equal(valueAxis.max, mode === 'stacked' ? 150 : 100,
+                'Every source maps to 0–100; stacked totals can exceed 100 and must not be clipped.');
+            assert.ok(normalizedLarge.aria.description.includes('0–100'));
+            assert.equal(normalizedLarge.series.reduce((count, series) => count + series.data.filter(item => item.value !== null).length, 0), 100,
+                'Normalized navigation must keep all 100 variable assignments.');
+            const first = normalizedLarge.series[0].data[0];
+            assert.equal(first.originalValue, -2.5);
+            assert.equal(first.unit, '°C');
+            assert.equal(normalizedLarge.series[0].label.formatter({data: first, value: 75}), localeDecimal(-2.5) + ' °C');
+            const engine = nativeWindow.echarts.init(null, null, {renderer: 'svg', ssr: true, width: 800, height: 500});
+            engine.setOption(normalizedLarge);
+            const categories = orientation === 'horizontal' ? normalizedLarge.yAxis.data : normalizedLarge.xAxis.data;
+            const visible = visibleCategories(normalizedLarge, orientation);
+            engine.dispatchAction({type: 'dataZoom', dataZoomId: 'category-scroll',
+                startValue: categories.length - visible, endValue: categories.length - 1});
+            const lastSeriesData = engine.getModel().getSeriesByIndex(normalizedLarge.series.length - 1).getData();
+            assert.equal(lastSeriesData.getRawIndex(lastSeriesData.count() - 1), categories.length - 1,
+                'The last normalized category remains reachable in both output/orientation adapters.');
+            engine.dispose();
+        }
+    }
 }
 
 console.log('Category Bar renderer layout verified.');

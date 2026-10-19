@@ -45,6 +45,33 @@ const model={family:'pictorialBar',theme:'dark',pictorialBar:{title:'Current bat
     {id:'v3',label:'High',unit:'%',decimals:0,value:150,order:2,color:''}
 ],style:{orientation:'horizontal',symbol:'rect',symbolRepeat:true,symbolSize:12,symbolGap:2,barWidth:40,scaleMaximum:100,animationEnabled:false}}};
 const tile=render(model);
+const normalizedModel={...model,pictorialBar:{...model.pictorialBar,normalized:true,unit:'',data:[
+    {id:'temperature',label:'Temperature',unit:'°C',decimals:1,value:50,originalValue:-5,minimum:-20,maximum:10,order:0,color:''},
+    {id:'humidity',label:'Humidity',unit:'%',decimals:0,value:75,originalValue:75,minimum:0,maximum:100,order:1,color:''}
+],style:{...model.pictorialBar.style,scaleMaximum:255}}};
+for(const mode of ['symcon','ipsview']) {
+    const normalized=render(normalizedModel,mode);
+    assert.equal(normalized.option.xAxis.max,100,'Normalization must ignore the saved physical scale maximum.');
+    assert.equal(normalized.option.series[0].label.formatter({dataIndex:0}),'-5 °C','Labels retain original signed source values.');
+    assert.match(normalized.option.tooltip.formatter({dataIndex:0}),/-5 °C.*50.*-20.*10/s,'Tooltip must expose original values, normalized geometry and source range.');
+    assert.match(normalized.option.aria.label.description,/-5 °C/);
+    for(const orientation of ['horizontal','vertical']) {
+        for(const symbolRepeat of [true,false]) {
+            for(const colorMode of ['category','value','gradient']) {
+                const normDesign={...normalizedModel,pictorialBar:{...normalizedModel.pictorialBar,style:{...normalizedModel.pictorialBar.style,
+                    orientation,symbolRepeat,colorMode,colorMinimum:0,colorMaximum:100,lowColor:'#ff0000',middleColor:'#ffff00',highColor:'#00ff00'}}};
+                const configured=render(normDesign,mode);
+                const valueAxis=orientation === 'horizontal'?configured.option.xAxis:configured.option.yAxis;
+                assert.equal(valueAxis.max,100);
+                assert.equal(configured.option.series[0].data[0].value,50);
+                assert.equal(configured.option.series[0].data[1].value,75);
+                assert.equal(configured.option.series[0].label.formatter({dataIndex:0}),'-5 °C');
+                if(colorMode==='value')assert.equal(configured.option.series[0].data[0].itemStyle.color,'#ffff00');
+                if(colorMode==='gradient')assert.equal(configured.option.series[0].data[0].itemStyle.color.colorStops[1].color,'#ffff00');
+            }
+        }
+    }
+}
 assert.equal(tile.chartElement.style.top,'58px');
 assert.equal(tile.option.series[0].type,'pictorialBar');
 assert.equal(tile.option.series[0].symbolClip,true);
@@ -248,6 +275,25 @@ const svgGeometry=JSON.parse(execFileSync('php',['-r',
     'tests/fixtures/pictorial-symbol-custom.svg'],{cwd:root,encoding:'utf8'}));
 const svgStyle={...iconStyle,symbol:'svg',symbolPath:svgGeometry.path,symbolWidth:svgGeometry.width,symbolHeight:svgGeometry.height,
     symbolMinimumX:svgGeometry.minimumX,symbolMinimumY:svgGeometry.minimumY};
+for(const mode of ['symcon','ipsview']) {
+ for(const shape of [model.pictorialBar.style,iconStyle,svgStyle]) {
+  for(const orientation of ['horizontal','vertical']) {
+   for(const symbolRepeat of [true,false]) {
+    const result=render({...normalizedModel,pictorialBar:{...normalizedModel.pictorialBar,
+        style:{...shape,scaleMaximum:255,colorMode:'gradient',orientation,symbolRepeat}}},mode,true,620);
+    const engine=echarts.init(null,null,{renderer:'svg',ssr:true,width:620,height:500});
+    engine.setOption(result.option);
+    const axis=engine.getModel().getComponent(orientation==='horizontal'?'xAxis':'yAxis');
+    assert.equal(axis.axis.scale.getExtent()[1],100,'The real engine must use normalized geometry for all symbol types.');
+    const markup=engine.renderToSVGString();
+    assert.ok(!/NaN|Infinity/.test(markup));
+    assert.match(markup,/<linearGradient/);
+    assert.match(result.option.tooltip.formatter({dataIndex:0}),/-5 °C/);
+    engine.dispose();
+   }
+  }
+ }
+}
 for(const mode of ['symcon','ipsview']){
  for(const orientation of ['horizontal','vertical']){
   for(const symbolRepeat of [true,false]){

@@ -22,6 +22,7 @@ use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsLabelDesign;
+use SymconECharts\EChartsNormalization;
 use SymconECharts\EChartsPreviewSourceCount;
 use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsTransientRefresh;
@@ -41,6 +42,7 @@ require_once __DIR__ . '/../libs/EChartsPreviewSourceCount.php';
 require_once __DIR__ . '/../libs/EChartsBarTypography.php';
 require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsCurrentSources.php';
+require_once __DIR__ . '/../libs/EChartsNormalization.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
 require_once __DIR__ . '/../libs/EChartsLabelDesign.php';
@@ -103,6 +105,7 @@ class EChartsBarPolar extends IPSModuleStrict
             $this->SetVisualizationType(1);
             $this->RegisterMessage(0, IPS_KERNELSTARTED);
             $this->RegisterPropertyString('Sources', '[]');
+            $this->RegisterPropertyBoolean('NormalizeValues', false);
             $this->RegisterPropertyString('Title', '');
             $this->RegisterDesignProperties();
             $this->RegisterIPSViewHTMLPageProperties();
@@ -238,7 +241,7 @@ class EChartsBarPolar extends IPSModuleStrict
                 ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
             ]);
             $fields = array_merge(
-                ['Title', 'Sources', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
+                ['Title', 'Sources', 'NormalizeValues', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
                     'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent'],
                 array_keys($this->DesignPropertyNames()),
                 array_map(static fn (string $name): string => 'IPSView' . $name, array_keys($this->DesignPropertyNames()))
@@ -393,7 +396,11 @@ class EChartsBarPolar extends IPSModuleStrict
                 $items[] = [
                     'id'        => 'variable-' . $source['VariableID'],
                     'label'     => $labels[$source['VariableID']],
-                    'value'     => $current['Value'],
+                    'value'     => $this->ReadPropertyBoolean('NormalizeValues')
+                        ? EChartsNormalization::Value($current['Value'], $source) : $current['Value'],
+                    ...($this->ReadPropertyBoolean('NormalizeValues')
+                        ? EChartsNormalization::Metadata($current['Value'], $source) : []),
+                    'unit'      => $source['Unit'],
                     'decimals'  => $source['Decimals'],
                     'color'     => $source['Color'] < 0 ? '' : EChartsAsset::ColorToHex($source['Color']),
                     'order'     => $index,
@@ -410,10 +417,11 @@ class EChartsBarPolar extends IPSModuleStrict
                 'variant'       => 'polar',
                 'theme'         => $this->ReadPropertyString('EChartsTheme'),
                 'polar'         => [
-                    'title'    => $this->ReadPropertyString('Title'),
-                    'unit'     => $sources[0]['Unit'],
-                    'decimals' => max(array_column($sources, 'Decimals')),
-                    'style'    => $this->ReadDesignStyle()
+                    'normalized' => $this->ReadPropertyBoolean('NormalizeValues'),
+                    'title'      => $this->ReadPropertyString('Title'),
+                    'unit'       => $this->ReadPropertyBoolean('NormalizeValues') ? '%' : $sources[0]['Unit'],
+                    'decimals'   => max(array_column($sources, 'Decimals')),
+                    'style'      => $this->ReadDesignStyle()
                 ],
                 'items'         => $items
             ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
@@ -527,6 +535,18 @@ class EChartsBarPolar extends IPSModuleStrict
         $palette = EChartsBarPreview::Palette($this->BarPreviewValue($values, 'EChartsTheme', 'string', $ipsView));
         $data = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values);
         $items = $data['items'];
+        $normalized = (bool) ($values['NormalizeValues'] ?? $this->ReadPropertyBoolean('NormalizeValues'));
+        if ($normalized) {
+            foreach ($items as &$item) {
+                try {
+                    $item['originalValue'] = $item['value'];
+                    $item['value'] = EChartsNormalization::Value($item['value'], $item);
+                } catch (InvalidArgumentException) {
+                    return EChartsBarPreview::Open($palette, $this->Translate('Normalization requires finite Min < Max for every source.'), false, $ipsView, $values, '', '') . '</svg>';
+                }
+            }
+            unset($item);
+        }
         $previewLanguage = $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage());
         $mode = $this->BarPreviewValue($values, 'PolarMode', 'string', $ipsView);
         $sort = $this->BarPreviewValue($values, 'SortOrder', 'string', $ipsView);
@@ -547,6 +567,10 @@ class EChartsBarPolar extends IPSModuleStrict
             $this->BarPreviewValue($values, 'TitleFontSizePercent', 'integer', $ipsView)
         );
         $categoryColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'CategoryLabelColor', 'integer', $ipsView), $palette['text']);
+        if ($normalized) {
+            $svg .= '<text x="24" y="350" font-size="11" fill="' . EChartsBarPreview::E($palette['muted']) . '">'
+                . EChartsBarPreview::E($this->Translate('Normalized comparison (0–100)')) . '</text>';
+        }
         $scaleColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'ScaleLabelColor', 'integer', $ipsView), $palette['muted']);
         $outsideValueColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'ValueColor', 'integer', $ipsView), $palette['muted']);
         $gridColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'GridColor', 'integer', $ipsView), $palette['track']);
@@ -558,10 +582,10 @@ class EChartsBarPolar extends IPSModuleStrict
         $start = (float) $this->BarPreviewValue($values, 'StartAngle', 'integer', $ipsView);
         $span = max(30, min(360, $this->BarPreviewValue($values, 'AngularSpan', 'integer', $ipsView)));
         $direction = $this->BarPreviewValue($values, 'Clockwise', 'boolean', $ipsView) ? -1 : 1;
-        $manual = $this->BarPreviewValue($values, 'ValueAxisRangeMode', 'string', $ipsView) === 'manual';
+        $manual = !$normalized && $this->BarPreviewValue($values, 'ValueAxisRangeMode', 'string', $ipsView) === 'manual';
         $minimum = $manual ? (float) $this->BarPreviewValue($values, 'ValueAxisMinimum', 'float', $ipsView) : 0.0;
         $maximum = $manual ? (float) $this->BarPreviewValue($values, 'ValueAxisMaximum', 'float', $ipsView)
-            : max(1.0, ...array_map(static fn (array $item): float => $item['value'], $items));
+            : ($normalized ? 100.0 : max(1.0, ...array_map(static fn (array $item): float => $item['value'], $items)));
         $range = max(1.0, $maximum - $minimum);
         if ($this->BarPreviewValue($values, 'ShowGrid', 'boolean', $ipsView)) {
             $scaleSize = max(8, min(24, $this->BarPreviewValue($values, 'ScaleLabelFontSize', 'integer', $ipsView)));
@@ -660,7 +684,7 @@ class EChartsBarPolar extends IPSModuleStrict
                 $svg .= '<text x="675" y="' . $labelY . '" text-anchor="end" fill="'
                     . EChartsBarPreview::E($outsideValueColor) . '" font-size="' . $valueSize . '">'
                     . EChartsBarPreview::E(EChartsBarPreview::FormatValue(
-                        $item['value'],
+                        $normalized ? $item['originalValue'] : $item['value'],
                         $item['decimals'],
                         $item['unit'],
                         $previewLanguage
@@ -763,6 +787,8 @@ class EChartsBarPolar extends IPSModuleStrict
             'ipsViewStyle'       => $ipsView ? $this->IPSViewThemeCSS() : '',
             'state'              => $this->BuildVisualizationState($ipsView),
             'translations'       => [
+                'Normalized'                                                      => $this->Translate('Normalized'),
+                'Range'                                                           => $this->Translate('Range'),
                 'Configure valid Polar sources.'                                  => $this->Translate('Configure valid Polar sources.'),
                 'Connect an active EChartsGateway.'                               => $this->Translate('Connect an active EChartsGateway.'),
                 'The Polar values could not be loaded.'                           => $this->Translate('The Polar values could not be loaded.'),
@@ -878,12 +904,14 @@ class EChartsBarPolar extends IPSModuleStrict
                 $decimals,
                 (bool) ($source['UseVariablePresentation'] ?? true)
             );
-            if ($commonUnit !== null && $presentation['unit'] !== $commonUnit) {
+            if (!$this->ReadPropertyBoolean('NormalizeValues') && $commonUnit !== null && $presentation['unit'] !== $commonUnit) {
                 throw new InvalidArgumentException('All Polar sources must use the same unit.');
             }
             $commonUnit = $presentation['unit'];
             $variableIDs[] = $variableID;
             $validated[] = [
+                ...($this->ReadPropertyBoolean('NormalizeValues')
+                    ? array_combine(['Minimum', 'Maximum'], EChartsNormalization::Range($source)) : []),
                 'VariableID' => $variableID,
                 'Label'      => trim($label),
                 'Unit'       => $presentation['unit'],

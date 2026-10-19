@@ -11,6 +11,15 @@
             "caption": "Title"
         },
         {
+            "type": "CheckBox",
+            "name": "NormalizeValues",
+            "caption": "Normalize numeric sources using their Min/Max"
+        },
+        {
+            "type": "Label",
+            "caption": "Normalization maps each source range to 0–100 and clips only the bar geometry. Original values and units remain available. Stacked bars add the normalized values; they are not percentage shares."
+        },
+        {
             "type": "List",
             "name": "Sources",
             "caption": "Category sources",
@@ -80,6 +89,26 @@
                     }
                 },
                 {
+                    "caption": "Min (normalization)",
+                    "name": "Minimum",
+                    "width": "150px",
+                    "add": 0,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "digits": 6
+                    }
+                },
+                {
+                    "caption": "Max (normalization)",
+                    "name": "Maximum",
+                    "width": "150px",
+                    "add": 100,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "digits": 6
+                    }
+                },
+                {
                     "caption": "Color",
                     "name": "Color",
                     "width": "110px",
@@ -127,6 +156,18 @@
                     "caption": "Decimals",
                     "minimum": 0,
                     "maximum": 6
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "Minimum",
+                    "caption": "Min (normalization)",
+                    "digits": 6
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "Maximum",
+                    "caption": "Max (normalization)",
+                    "digits": 6
                 },
                 {
                     "type": "SelectColor",

@@ -20,6 +20,7 @@ $tests = [
     __DIR__ . '/state_timeline_data.php',
     __DIR__ . '/state_timeline_integration.php',
     __DIR__ . '/source_identity.php',
+    __DIR__ . '/normalization.php',
     __DIR__ . '/echarts_assets.php',
     __DIR__ . '/svg_path.php',
     __DIR__ . '/svg_image.php',
@@ -48,6 +49,7 @@ $tests = [
 ];
 
 $commands = [
+    ['Test normalized current comparisons', 'php tests/gateway_gauges.php --current-normalization'],
     ['Test ThemeRiver Gateway and output integration', 'php tests/gateway_gauges.php --theme-river'],
     ['Verify local quality runner', 'php tests/quality.php --help'],
     ['Test persistent IPSView transport', 'node tests/ipsview_transport.js'],

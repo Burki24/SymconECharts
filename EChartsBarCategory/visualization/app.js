@@ -72,6 +72,18 @@
         return formatted + (unit ? ' ' + unit : '');
     }
 
+    function escapeHTML(value) {
+        return String(value).replace(/[&<>"']/g, function (character) {
+            return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[character];
+        });
+    }
+
+    function originalText(item, bar) {
+        return bar.normalized === true && Number.isFinite(item.originalValue)
+            ? formatValue(item.originalValue, Math.max(0, Math.min(6, Number(item.decimals) || 0)), String(item.unit || ''))
+            : formatValue(item.value, Math.max(0, Math.min(6, Number(bar.decimals) || 0)), String(bar.unit || ''));
+    }
+
     function uniqueInOrder(values) {
         return values.filter(function (value, index) { return values.indexOf(value) === index; });
     }
@@ -119,7 +131,7 @@
                     id: 'simple',
                     name: String(bar.title || ''),
                     items: items.map(function (item, index) {
-                        return { id: item.id, value: Number(item.value), color: item.color || paletteColors[index % paletteColors.length] };
+                        return { ...item, value: Number(item.value), color: item.color || paletteColors[index % paletteColors.length] };
                     })
                 }]
             };
@@ -162,7 +174,7 @@
                     name: String(firstItem && firstItem.series || ''),
                     color: seriesColor,
                     items: seriesItems.map(function (item) {
-                        return { id: item && item.id, value: item ? Number(item.value) : null, color: item && item.color || seriesColor };
+                        return { ...item, id: item && item.id, value: item ? Number(item.value) : null, color: item && item.color || seriesColor };
                     })
                 };
             })
@@ -197,14 +209,14 @@
             + Math.max(0, titleSize - 18) + (multiSeries ? Math.max(0, legendSize - 12) : 0);
         var barRatio = Math.max(20, Math.min(100, Number(style.barWidthPercent) || 70)) / 100;
         var right = horizontal && style.showValues === true ? 84 : 30;
-        var bottom = horizontal ? 28 : 70;
-        var left = horizontal ? 28 : 52;
+        var bottom = horizontal ? (bar.normalized === true ? 54 : 28) : 70;
+        var left = horizontal ? 28 : (bar.normalized === true ? 76 : 52);
         var groupSize = chartData.mode === 'grouped' ? chartData.series.length : 1;
         var valueSpan = valueSize * 1.8;
         if (!horizontal && style.showValues === true) {
             valueSpan = (model.items || []).reduce(function (maximum, item) {
                 return item.value === null ? maximum : Math.max(maximum,
-                    Array.from(formatValue(item.value, Math.max(0, Math.min(6, Number(bar.decimals) || 0)), String(bar.unit || ''))).length * valueSize * 0.65);
+                    Array.from(originalText(item, bar)).length * valueSize * 0.65);
             }, valueSpan);
         }
         var minimumSpan = Math.max((horizontal ? 40 : 80) * groupSize * barRatio,
@@ -232,7 +244,8 @@
         }
         var valueAxis = {
             type: 'value',
-            name: String(bar.unit || ''),
+            name: bar.normalized === true ? translate('Normalized 0–100 per source') : String(bar.unit || ''),
+            ...(bar.normalized === true ? {nameLocation: 'middle', nameGap: horizontal ? 32 : 40} : {}),
             nameTextStyle: { color: style.axisColor || colors.muted, fontSize: axisSize },
             axisLabel: { color: axisColor, fontSize: axisSize },
             axisLine: { show: true, lineStyle: { color: axisLineColor } },
@@ -255,6 +268,12 @@
             valueAxis.min = minimum;
             valueAxis.max = maximum === minimum ? minimum + 1 : maximum;
         }
+        if (bar.normalized === true) {
+            valueAxis.min = 0;
+            valueAxis.max = stacked ? Math.max(100, ...chartData.categories.map(function (_, index) {
+                return chartData.series.reduce(function (sum, entry) { return sum + (Number(entry.items[index].value) || 0); }, 0);
+            })) : 100;
+        }
         var categoryAxis = {
             type: 'category',
             data: categoryKeys,
@@ -263,8 +282,6 @@
             axisTick: { alignWithLabel: true, lineStyle: { color: axisLineColor } }
         };
         var radius = style.roundedBars === true ? 7 : 0;
-        var decimals = Math.max(0, Math.min(6, Number(bar.decimals) || 0));
-        var unit = String(bar.unit || '');
         var gradient = style.barFillMode === 'gradient';
         var colorMinimum = style.colorMinimum == null ? 0 : Number(style.colorMinimum);
         var colorMaximum = style.colorMaximum == null ? 100 : Number(style.colorMaximum);
@@ -287,6 +304,9 @@
         // Compute signed stack positions before DataZoom filters categories.
         var positiveStacks = chartData.categories.map(function () { return 0; });
         var negativeStacks = chartData.categories.map(function () { return 0; });
+        var valueAxisPixels = Math.max(1, horizontal
+            ? (chartElement.clientWidth || 800) - left - right - 190
+            : (chartElement.clientHeight || 500) - top - bottom - axisSize * 1.5);
 
         return {
             backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
@@ -296,7 +316,8 @@
             }),
             aria: {
                 enabled: true,
-                description: chartData.series.map(function (item) { return item.name; }).join(', '),
+                description: (bar.normalized === true ? translate('Normalized 0–100 per source') + '. ' : '')
+                    + chartData.series.map(function (item) { return item.name; }).join(', '),
                 decal: { show: false }
             },
             title: {
@@ -336,19 +357,28 @@
                 }
             },
             tooltip: {
+                confine: bar.normalized === true,
+                extraCssText: bar.normalized === true ? 'max-width:' + Math.max(80, chartElement.clientWidth - 24)
+                    + 'px;white-space:normal;overflow-wrap:anywhere;box-sizing:border-box;' : '',
                 trigger: 'axis',
                 axisPointer: { type: 'shadow' },
                 formatter: function (parameters) {
                     var values = Array.isArray(parameters) ? parameters : [parameters];
                     if (values.length === 0) { return ''; }
                     var categoryName = String(scroll ? chartData.categories[values[0].dataIndex] || '' : values[0].name || '');
-                    var lines = categoryName ? [categoryName] : [];
+                    var lines = categoryName ? [escapeHTML(categoryName)] : [];
                     values.forEach(function (parameter) {
                         if (parameter.value === null || parameter.value === undefined || parameter.value === '-') { return; }
                         var source = chartData.series[parameter.seriesIndex];
                         var prefix = multiSeries && source ? source.name + ': ' : '';
-                        lines.push(String(parameter.marker || '') + prefix
-                            + formatValue(parameter.value, decimals, unit));
+                        var item = parameter.data || source && source.items[parameter.dataIndex] || {value: parameter.value};
+                        lines.push(String(parameter.marker || '') + escapeHTML(prefix + originalText(item, bar)));
+                        if (bar.normalized === true && Number.isFinite(item.originalValue)) {
+                            lines.push(escapeHTML(translate('Normalized') + ': ' + formatValue(item.value, 1, '') + ' / 100'
+                                + ' · ' + translate('Range') + ': '
+                                + formatValue(item.minimum, item.decimals || 0, item.unit || '') + ' … '
+                                + formatValue(item.maximum, item.decimals || 0, item.unit || '')));
+                        }
                     });
                     return lines.join('<br>');
                 }
@@ -378,7 +408,7 @@
                         color: style.valueColor || (labelIsInside ? colors.background : colors.text),
                         fontSize: valueSize,
                         formatter: function (parameters) {
-                            return formatValue(parameters.value, decimals, unit);
+                            return originalText(parameters.data || {value: parameters.value}, bar);
                         }
                     },
                     data: seriesItem.items.map(function (item, categoryIndex) {
@@ -394,10 +424,22 @@
                         var labelColor = style.valueColor || (labelIsInside && typeof design.readableTextColor === 'function'
                             ? design.readableTextColor(contrastColor, colors.text, colors.background)
                             : valueColor);
+                        // Zero/tiny normalized segments otherwise put multiple originals
+                        // at the same origin. Keep every value in the tooltip instead.
+                        var itemLabel = labelIsInside ? { color: labelColor } : undefined;
+                        if (bar.normalized === true && multiSeries) {
+                            var labelLength = horizontal ? Array.from(originalText(item, bar)).length * valueSize * 0.65 + 6
+                                : valueSize * 1.4;
+                            if (!(item.value > 0) || item.value / valueAxis.max * valueAxisPixels < labelLength) {
+                                itemLabel = {show: false};
+                            }
+                        }
                         return {
                             id: item.id,
                             value: item.value,
-                            label: labelIsInside ? { color: labelColor } : undefined,
+                            ...(bar.normalized === true ? {originalValue: item.originalValue, minimum: item.minimum,
+                                maximum: item.maximum, unit: item.unit, decimals: item.decimals} : {}),
+                            label: itemLabel,
                             itemStyle: {
                                 color: fill,
                                 borderRadius: horizontal ? [0, radius, radius, 0] : [radius, radius, 0, 0]

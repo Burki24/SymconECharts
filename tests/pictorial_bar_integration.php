@@ -510,4 +510,6 @@ preg_match_all("/->Translate\\(\\s*'([^']+)'/", file_get_contents(__DIR__ . '/..
 foreach ($pictTexts[1] as $text) {
     assertGatewayGauge(isset($pictLocale[$text]), 'Missing runtime translation: ' . $text);
 }
+require __DIR__ . '/pictorial_bar_normalization.php';
+
 echo "PictorialBar integration verified.\n";

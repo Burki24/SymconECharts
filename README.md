@@ -22,6 +22,10 @@ festgelegten Achsen mit eigenen Wertebereichen und Einheiten.
 Boxplot vergleicht die Verteilung abgeschlossener Archiv-Stundenmittelwerte.
 Funnel vergleicht aktuelle, nichtnegative Stufenwerte derselben Einheit.
 PictorialBar vergleicht aktuelle, nichtnegative Werte als Symbolbalken.
+Pie, BarCategory, BarPolar und PictorialBar können Quellen optional anhand
+eigener Min/Max-Grenzen auf 0–100 normalisieren. So sind relative Vergleiche
+unterschiedlicher Messgrößen möglich; Originalwerte und Einheiten bleiben
+im Tooltip erhalten. Ohne diese Auswahl gelten die bisherigen Rohwertvergleiche.
 Candlestick zeigt ersten und letzten protokollierten Wert sowie Minimum
 und Maximum abgeschlossener Archiv-Stunden oder -Tage.
 StateTimeline zeigt archivierte Boolean-/Integer-Zustände als farbige

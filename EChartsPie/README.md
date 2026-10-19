@@ -19,7 +19,7 @@ Variablen-ID dient ausschließlich der internen Zuordnung. Ein ausdrücklich
 konfigurierter Anzeigename hat Vorrang, sonst erscheint der aktuelle
 Symcon-Name. Gleiche sichtbare Namen bleiben getrennte Sektoren; IDs werden
 in der Grafik nicht angezeigt. Alle Quellen müssen dieselbe wirksame Einheit
-verwenden. Einheit und Nachkommastellen können aus der Variablendarstellung
+verwenden, solange die optionale Normalisierung ausgeschaltet ist. Einheit und Nachkommastellen können aus der Variablendarstellung
 übernommen oder je Quelle gesetzt werden; jede Quelle kann eine eigene Farbe
 erhalten.
 
@@ -28,6 +28,27 @@ in positive Werte umgerechnet: Das Diagramm zeigt dann einen Fehler. Bei einer
 Summe von null zeigt es „Keine positiven Werte“ statt gleich großer
 Scheibensegmente. Nullwerte bleiben als Quellen erhalten, besitzen aber keinen
 sichtbaren Sektor.
+
+### Optionaler Min/Max-Vergleich
+
+**Werte anhand Quellen-Min/Max normalisieren** ist zunächst ausgeschaltet.
+Aktiviert bildet es jede Quelle anhand ihrer eigenen Felder **Min
+(Normalisierung)** und **Max (Normalisierung)** auf 0–100 ab:
+`100 × (Wert − Min) / (Max − Min)`. Die Vorgabe ist 0–100; Min muss
+kleiner als Max sein. Unterschiedliche Einheiten und negative Originalwerte
+sind dann erlaubt, beispielsweise Temperatur mit −20 bis 40 °C und
+Luftfeuchtigkeit mit 0 bis 100 %.
+
+Nur das Sektorgewicht wird auf 0–100 begrenzt. Tooltip und zugängliche
+Beschreibung behalten den Originalwert mit seiner je Quelle gewählten
+Einheit und Genauigkeit. Der Tooltip nennt zusätzlich normalisierten Wert,
+Bereich und **Anteil der normalisierten Gewichte**. Dieser Anteil ist kein
+physikalischer Mengenanteil und kein Temperatur- oder Feuchtigkeitsprozent.
+Sortierung und Nightingale-Radien folgen den normalisierten Gewichten.
+Der Hinweis bleibt auch im Diagramm und in beiden Live-Vorschauen sichtbar.
+Kachel und IPSView verwenden dieselbe Normalisierung; eigene Designwerte
+und Quelldaten werden nicht verändert. Ohne Normalisierung werden die
+Min/Max-Felder ignoriert und es gilt das bisherige Anteilsmodell.
 
 ## Design und Ausgabe
 

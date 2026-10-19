@@ -1,5 +1,50 @@
 # Tests
 
+## Normalisierte aktuelle Vergleiche
+
+`php tests/normalization.php` prüft die reine Projektion auf 0–100 anhand
+expliziter Quellbereiche, Begrenzung nur der Geometrie, negative und echte
+Nullwerte, große/kleine Float-Bereiche und ungültige nichtendliche oder nicht
+darstellbare Grenzen. Der gemeinsame Quellenresolver lässt gemischte Einheiten
+nur nach ausdrücklicher Aktivierung zu; Funnel und inaktive Altmodelle bleiben
+unverändert. Die erste Prüfung war vor Einführung des Vertrags rot.
+
+`php tests/gateway_gauges.php --current-normalization` führt die neuen
+Integrationsfälle für Pie, BarPolar, BarCategory und PictorialBar mit echtem
+Gateway und synthetischen Kernel-Doppeln aus. Die Gesamtsuite ruft diesen
+eigenen Prozess auf, statt alle HTML-Fixtures gleichzeitig im monolithischen
+Speicher zu behalten. Originalzahlen, Einheiten/Präzision, Bereiche, beide Ausgaben,
+schreibfreie Entwürfe, Aktivierung/Deaktivierung und Konfigurationsfehler
+werden geprüft. Die bestehenden Quellen-, SVG- und Ausgabebudgets bleiben aktiv.
+Die vier vorhandenen Layoutsuiten prüfen normalisierte Geometrie getrennt
+von Originalwertbeschriftungen und HTML-sicheren Tooltips.
+
+BarCategory kombiniert zusätzlich 100 normalisierte Quellen mit langen Namen
+und einem fast maximalen SVG-Muster und prüft beide Ausgaben unter 1 MiB.
+Der vorhandene modulbezogene esbuild-Schritt minifiziert nun vollständig;
+der Layouttest sichert die exakte Reproduzierbarkeit des ausgelieferten Appscripts.
+Quellen-/SVG-Limits und das PHP-Speicherlimit werden dafür nicht erhöht.
+
+`node tests/current_normalization_browser.mjs` bietet rein lokale Pie-/Polar-
+Ansichten auf `127.0.0.1:8810`. Die bestehenden Browserfixtures von BarCategory
+und PictorialBar unterstützen `normalize=yes`; PictorialBar kombiniert dies
+mit `color=gradient&shape=svg` oder `shape=icon`. Gemischte °C-/Prozent-/LQI-
+Originalwerte bleiben in Tooltip und Beschriftung erhalten.
+
+Am 19.10.2026 wurden normalisierte Pie-/Polar-Ansichten sowie PictorialBar
+mit eigenem SVG und Farbverlauf lokal visuell geprüft. BarCategory wurde mit
+normalisierten Stapeln und gemischten Einheiten geprüft. Ein dabei sichtbar
+abgeschnittener langer Tooltip ist durch Begrenzung auf das Widget und
+Textumbruch korrigiert und als zunächst roter Layoutfall abgesichert.
+Normalisierte Null-/Kleinstsegmente gruppierter/gestapelter Balken unterdrücken
+unlesbare Labels; ihre Originale bleiben im Tooltip. Direkter PictorialBar-
+Aufruf blieb ohne Konsolenwarnung/-fehler; Frame-Vergleichsseiten können den
+bereits bekannten, nicht dem Modul zugeordneten MutationObserver-Fehler zeigen.
+
+Nach Modulupdate bleiben die neue Formularbedienung und die neuen Vergleiche
+in tatsächlichen Symcon-/IPSView-Clients separat abzunehmen. Bei diesen
+Entwicklungsprüfungen werden keine Live-Einstellungen oder Variablenwerte geändert.
+
 ## Calendar- und Heatmap-Kennzahlen
 
 `calendar_metrics.php` und `heatmap_metrics.php` ergänzen die Gateway-Suite um

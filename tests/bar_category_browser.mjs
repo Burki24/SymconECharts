@@ -14,6 +14,7 @@ function page(query) {
     const count = Math.min(100, Math.max(1, Number(query.get('count')) || 100));
     const fill = query.get('fill') === 'gradient' ? 'gradient' : 'solid';
     const signed = query.get('signed') === '1' || fill !== 'gradient';
+    const normalized = query.get('normalize') === 'yes';
     const requestedMinimum = Number(query.get('min') ?? 0), requestedMaximum = Number(query.get('max') ?? 100);
     const colorMinimum = Number.isFinite(requestedMinimum) ? requestedMinimum : 0;
     const colorMaximum = Number.isFinite(requestedMaximum) && requestedMaximum > colorMinimum ? requestedMaximum : colorMinimum + 100;
@@ -24,12 +25,25 @@ function page(query) {
         series: index % 2 ? 'Sensor B' : 'Sensor A', seriesKey: 'series-' + index % 2,
         value: signed && index === count - 1 ? -25 : (index * 7) % 101, order: index
     }));
+    if (normalized) {
+        items.forEach((item, index) => {
+            const temperature = index % 2 === 0;
+            item.originalValue = temperature ? -10 + index % 41 : index % 101;
+            item.minimum = temperature ? -10 : 0;
+            item.maximum = temperature ? 30 : 100;
+            item.unit = temperature ? '°C' : '%';
+            item.decimals = temperature ? 1 : 0;
+            item.value = Math.max(0, Math.min(100, (item.originalValue - item.minimum) / (item.maximum - item.minimum) * 100));
+            item.category = barMode === 'simple' ? (temperature ? 'Temperatur ' : 'Luftfeuchte ') + (index + 1) : item.category;
+        });
+    }
     const palette = {background: '#303236', text: '#f4f5f7', muted: '#969aa2', border: '#777b83',
         accent: '#55cbb5', surface: '#25272b', seriesColors: ['#5070dd', '#b6d634', '#ff994d']};
-    const bootstrap = {mode, options: {tileHeaderVisible: true, echartsThemes: {auto: palette}}, translations: {},
+    const bootstrap = {mode, options: {tileHeaderVisible: true, echartsThemes: {auto: palette}},
+        translations: JSON.parse(read('EChartsBarCategory/locale.json')).translations.de,
         state: {status: 'ready', chart: {theme: 'auto', bar: {
             title: 'Aktuelle Vergleichswerte · ' + count + ' Quellen', mode: barMode, orientation,
-            sortOrder: 'configured', unit: '%', decimals: 0,
+            sortOrder: 'configured', unit: normalized ? '' : '%', decimals: 0, normalized,
             style: {showValues: true, showGrid: true, roundedBars: false,
                 barWidthPercent: Math.max(20, Math.min(100, Number(query.get('width')) || 70)),
                 axisFontSizePercent: Math.max(50, Math.min(200, Number(query.get('font')) || 100)),
@@ -60,7 +74,7 @@ http.createServer((request, response) => {
             BarWidthPercent: Number(url.searchParams.get('width')) || 70,
             AxisFontSizePercent: Number(url.searchParams.get('font')) || 100,
             ValueFontSizePercent: Number(url.searchParams.get('font')) || 100,
-            BarFillMode: 'gradient', BarMode: 'simple'
+            BarFillMode: 'gradient', BarMode: 'simple', NormalizeValues: url.searchParams.get('normalize') === 'yes'
         })], {cwd: root, windowsHide: true, encoding: 'utf8', maxBuffer: 2097152}));
         return;
     }

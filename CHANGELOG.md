@@ -9,6 +9,13 @@
 
 ## Neu
 
+- Pie, BarCategory, BarPolar und PictorialBar bieten eine optionale
+  Min/Max-Normalisierung je Quelle auf 0–100. Damit lassen sich ausdrücklich
+  auch unterschiedliche Einheiten vergleichen. Originalwerte samt Einheit
+  bleiben in Beschriftung und Tooltip erhalten; der Tooltip ergänzt den
+  normalisierten Wert und Bereich. Kachel, IPSView und Vorschau beachten
+  die Option. Ohne Aktivierung bleibt das bisherige Verhalten unverändert.
+
 - Calendar und Heatmap bieten wählbare Archivkennzahlen: Mittelwert,
   Minimum und Maximum für Standardarchive oder ausdrücklich Zählerverbrauch
   für Zählerarchive. Längere Heatmap-Zeiträume verwenden je Wochentag/Stunde

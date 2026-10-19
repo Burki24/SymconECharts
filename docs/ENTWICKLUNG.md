@@ -31,6 +31,13 @@ StateTimeline unterstützt 32 Quellen mit unabhängiger Zeilennavigation und
 einem Gesamtbudget von 16000 Rohwerten. Weitere Erweiterungen sind dort
 priorisiert, aber noch nicht umgesetzt.
 
+Die optionale Normalisierung aktueller Vergleiche ist für Pie, BarCategory,
+BarPolar und PictorialBar gemäß
+[ADR 0063](adr/0063-normalized-current-comparisons.md) umgesetzt. Die reine
+Min/Max-Projektion liegt unter `libs`; Quellenvalidierung, Formular und
+Geometrie bleiben in den Familien. Originalmetadaten und ID-Identität bleiben
+erhalten; Gateway, Runtime und Mengenflussfamilien werden nicht verändert.
+
 CalendarPie (`ECCP`) ergänzt gemäß [ADR 0060](adr/0060-calendar-pie-data-modes.md)
 einen Monatskalender mit Tages-Kreisdiagrammen und den auswählbaren
 Datengrundlagen Tagesmittelwerte, Zählerverbrauch und Zustandsdauer. Die

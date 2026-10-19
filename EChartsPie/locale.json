@@ -1,6 +1,18 @@
 {
     "translations": {
         "de": {
+            "Use 1 to 16 unique numeric variables. Without normalization use one effective unit and nonnegative values. Equal names remain separate sources.": "1 bis 16 eindeutige numerische Variablen verwenden. Ohne Normalisierung sind eine gemeinsame Einheit und nichtnegative Werte erforderlich. Gleiche Namen bleiben getrennte Quellen.",
+            "Normalize values using source Min/Max": "Werte anhand Quellen-Min/Max normalisieren",
+            "Normalization maps each source range to 0–100. Mixed units and negative originals are allowed. Original values and units remain in the tooltip.": "Die Normalisierung bildet jeden Quellenbereich auf 0–100 ab. Unterschiedliche Einheiten und negative Originalwerte sind erlaubt. Originalwerte und Einheiten bleiben im Tooltip erhalten.",
+            "Min (normalization)": "Min (Normalisierung)",
+            "Max (normalization)": "Max (Normalisierung)",
+            "Normalized": "Normalisiert",
+            "Normalization requires finite source limits with minimum below maximum.": "Die Normalisierung benötigt endliche Quellengrenzen mit Minimum kleiner Maximum.",
+            "Normalization requires finite source values.": "Die Normalisierung benötigt endliche Quellenwerte.",
+            "Range": "Bereich",
+            "Share of normalized weights": "Anteil der normalisierten Gewichte",
+            "Normalized comparison (0–100)": "Normalisierter Vergleich (0–100)",
+            "Normalization requires finite Min < Max for every source.": "Die Normalisierung benötigt endliche Werte Min < Max für jede Quelle.",
             "Outside label alignment": "Ausrichtung der Außenbeschriftung",
             "Natural": "Natürlich",
             "Leader line": "Führungslinie",

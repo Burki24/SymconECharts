@@ -21,6 +21,7 @@ use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsLabelDesign;
+use SymconECharts\EChartsNormalization;
 use SymconECharts\EChartsPreviewSourceCount;
 use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsTransientRefresh;
@@ -38,6 +39,7 @@ require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsBarPreview.php';
 require_once __DIR__ . '/../libs/EChartsBarPreviewForm.php';
 require_once __DIR__ . '/../libs/EChartsCurrentSources.php';
+require_once __DIR__ . '/../libs/EChartsNormalization.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
 require_once __DIR__ . '/../libs/EChartsLabelDesign.php';
@@ -91,6 +93,7 @@ class EChartsPie extends IPSModuleStrict
             $this->SetVisualizationType(1);
             $this->RegisterMessage(0, IPS_KERNELSTARTED);
             $this->RegisterPropertyString('Sources', '[]');
+            $this->RegisterPropertyBoolean('NormalizeValues', false);
             $this->RegisterPropertyString('Title', '');
             $this->RegisterDesignProperties();
             $this->RegisterIPSViewHTMLPageProperties();
@@ -194,7 +197,7 @@ class EChartsPie extends IPSModuleStrict
                 ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
             ]);
             $fields = array_merge(
-                ['Title', 'Sources', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
+                ['Title', 'Sources', 'NormalizeValues', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
                     'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent'],
                 array_keys($this->DesignPropertyNames()),
                 array_map(static fn (string $name): string => 'IPSView' . $name, array_keys($this->DesignPropertyNames()))
@@ -279,7 +282,7 @@ class EChartsPie extends IPSModuleStrict
             $items = [];
             foreach ($sources as $index => $source) {
                 $current = $this->ReadCurrentSource($source['VariableID']);
-                if ($current['Value'] < 0) {
+                if (!$this->ReadPropertyBoolean('NormalizeValues') && $current['Value'] < 0) {
                     $this->WriteAttributeString('LastError', 'Pie charts require non-negative values.');
                     $this->DebugEChartsSetStatus(self::STATUS_VALUE_INVALID);
                     throw new DomainException('Pie charts require non-negative values.');
@@ -287,7 +290,10 @@ class EChartsPie extends IPSModuleStrict
                 $items[] = [
                     'id'        => 'variable-' . $source['VariableID'],
                     'name'      => $labels[$source['VariableID']],
-                    'value'     => $current['Value'],
+                    'value'     => $this->ReadPropertyBoolean('NormalizeValues')
+                        ? EChartsNormalization::Value($current['Value'], $source) : $current['Value'],
+                    ...($this->ReadPropertyBoolean('NormalizeValues')
+                        ? EChartsNormalization::Metadata($current['Value'], $source) : []),
                     'timestamp' => $current['Timestamp'],
                     'unit'      => $source['Unit'],
                     'decimals'  => $source['Decimals'],
@@ -303,8 +309,9 @@ class EChartsPie extends IPSModuleStrict
                 'family'        => 'pie',
                 'theme'         => $this->ReadPropertyString('EChartsTheme'),
                 'pie'           => [
-                    'title' => $this->ReadPropertyString('Title'),
-                    'style' => $this->ReadDesignStyle()
+                    'normalized' => $this->ReadPropertyBoolean('NormalizeValues'),
+                    'title'      => $this->ReadPropertyString('Title'),
+                    'style'      => $this->ReadDesignStyle()
                 ],
                 'items'         => $items
             ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
@@ -438,6 +445,18 @@ class EChartsPie extends IPSModuleStrict
         $palette = EChartsBarPreview::Palette($theme);
         $sourceData = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values);
         $items = $sourceData['items'];
+        $normalized = (bool) ($values['NormalizeValues'] ?? $this->ReadPropertyBoolean('NormalizeValues'));
+        if ($normalized) {
+            foreach ($items as &$item) {
+                try {
+                    $item['value'] = EChartsNormalization::Value($item['value'], $item);
+                } catch (InvalidArgumentException) {
+                    return EChartsBarPreview::Open($palette, $this->Translate('Normalization requires finite Min < Max for every source.'), false, $ipsView, $values, '', '') . '</svg>';
+                }
+            }
+            unset($item);
+            $sourceData['items'] = $items;
+        }
         $mode = $this->BarPreviewValue($values, 'PieMode', 'string', $ipsView);
         $sort = $this->BarPreviewValue($values, 'SortOrder', 'string', $ipsView);
         if ($sort === 'ascending' || $sort === 'descending') {
@@ -479,6 +498,10 @@ class EChartsPie extends IPSModuleStrict
         $labelSize = max(7, min(20, (int) round(11 * $this->BarPreviewValue($values, 'LabelFontSizePercent', 'integer', $ipsView) / 100)));
         $labelColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'LabelColor', 'integer', $ipsView), $palette['text']);
         $previewLanguage = $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage());
+        if ($normalized) {
+            $svg .= '<text x="24" y="350" font-size="11" fill="' . EChartsBarPreview::E($palette['muted']) . '">'
+                . EChartsBarPreview::E($this->Translate('Share of normalized weights')) . '</text>';
+        }
         $legendColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'LegendColor', 'integer', $ipsView), $palette['text']);
         $legendSize = max(7, min(20, (int) round(11 * $this->BarPreviewValue($values, 'LegendFontSizePercent', 'integer', $ipsView) / 100)));
         $start = -M_PI / 2;
@@ -575,6 +598,9 @@ class EChartsPie extends IPSModuleStrict
             'ipsViewStyle'       => $ipsView ? $this->IPSViewThemeCSS() : '',
             'state'              => $this->BuildVisualizationState($ipsView),
             'translations'       => [
+                'Normalized'                                                      => $this->Translate('Normalized'),
+                'Range'                                                           => $this->Translate('Range'),
+                'Share of normalized weights'                                     => $this->Translate('Share of normalized weights'),
                 'Configure valid Pie sources.'                                    => $this->Translate('Configure valid Pie sources.'),
                 'Connect an active EChartsGateway.'                               => $this->Translate('Connect an active EChartsGateway.'),
                 'The Pie values could not be loaded.'                             => $this->Translate('The Pie values could not be loaded.'),
@@ -679,12 +705,14 @@ class EChartsPie extends IPSModuleStrict
                 $decimals,
                 (bool) ($source['UseVariablePresentation'] ?? true)
             );
-            if ($unit !== null && $unit !== $presentation['unit']) {
+            if (!$this->ReadPropertyBoolean('NormalizeValues') && $unit !== null && $unit !== $presentation['unit']) {
                 throw new InvalidArgumentException('All Pie sources must use the same unit.');
             }
             $unit = $presentation['unit'];
             $ids[] = $id;
             $validated[] = [
+                ...($this->ReadPropertyBoolean('NormalizeValues')
+                    ? array_combine(['Minimum', 'Maximum'], EChartsNormalization::Range($source)) : []),
                 'VariableID' => $id,
                 'Label'      => trim(is_string($source['Label'] ?? null) ? $source['Label'] : ''),
                 'Unit'       => $presentation['unit'],

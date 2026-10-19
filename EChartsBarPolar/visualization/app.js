@@ -146,6 +146,9 @@
         var labels = items.map(function (item) { return String(item.label || ''); });
         var defaultDecimals = Math.max(0, Math.min(6, Number(polar.decimals) || 0));
         var unit = String(polar.unit || '');
+        var normalized = polar.normalized === true;
+        function originalValue(item) { return normalized ? item.originalValue : item.value; }
+        function originalUnit(item) { return normalized ? String(item.unit || '') : unit; }
         function itemDecimals(item) {
             return item && Number.isInteger(item.decimals)
                 ? Math.max(0, Math.min(6, item.decimals)) : defaultDecimals;
@@ -183,7 +186,13 @@
         };
         var scaleMinimum = Number(style.valueAxisMinimum);
         var scaleMaximum = Number(style.valueAxisMaximum);
-        if (style.valueAxisRangeMode === 'manual'
+        if (normalized) {
+            valueAxis.min = 0;
+            valueAxis.max = 100;
+            valueAxis.startValue = 0;
+            valueAxis.name = translate('Normalized') + ' (0–100)';
+            valueAxis.axisLabel.formatter = '{value}%';
+        } else if (style.valueAxisRangeMode === 'manual'
             && Number.isFinite(scaleMinimum) && Number.isFinite(scaleMaximum)
             && scaleMinimum < scaleMaximum) {
             valueAxis.min = scaleMinimum;
@@ -243,20 +252,29 @@
             aria: {
                 enabled: true,
                 description: items.map(function (item) {
-                    return item.label + ': ' + formatValue(item.value, itemDecimals(item), unit);
-                }).join(', ')
+                    return item.label + ': ' + formatValue(originalValue(item), itemDecimals(item), originalUnit(item));
+                }).join(', ') + (normalized ? '; ' + translate('Normalized') + ' (0–100)' : '')
             },
             title: {
-                show: titleVisible, text: String(polar.title || ''), left: 'center', top: headerInset,
-                textStyle: { color: style.titleColor || colors.text, fontSize: titleFontSize }
+                show: titleVisible || normalized, text: String(polar.title || ''), left: 'center', top: headerInset,
+                textStyle: { color: style.titleColor || colors.text, fontSize: titleFontSize },
+                subtext: normalized ? translate('Normalized') + ' (0–100)' : '',
+                subtextStyle: { color: colors.muted, fontSize: 11 }
             },
             tooltip: {
+                confine: normalized,
+                extraCssText: normalized ? 'max-width:' + Math.max(80, chartElement.clientWidth - 24)
+                    + 'px;white-space:normal;overflow-wrap:anywhere;box-sizing:border-box;' : '',
                 trigger: 'item',
                 formatter: function (parameter) {
                     var item = items[parameter.dataIndex];
                     if (!item) { return ''; }
                     return escapeHtml(item.label) + '<br>'
-                        + escapeHtml(formatValue(item.value, itemDecimals(item), unit));
+                        + escapeHtml(formatValue(originalValue(item), itemDecimals(item), originalUnit(item)))
+                        + (normalized ? '<br>' + escapeHtml(translate('Normalized')) + ': '
+                            + escapeHtml(formatValue(item.value, 2, '%')) + '<br>' + escapeHtml(translate('Range')) + ': '
+                            + escapeHtml(formatValue(item.minimum, itemDecimals(item), originalUnit(item))) + ' – '
+                            + escapeHtml(formatValue(item.maximum, itemDecimals(item), originalUnit(item))) : '');
                 }
             },
             polar: layout.geometry,
@@ -328,7 +346,8 @@
                     align: mode === 'tangential' && valueLabelPosition !== 'outside' ? 'center' : undefined,
                     rotate: 0,
                     formatter: function (parameter) {
-                        return formatValue(parameter.value, itemDecimals(items[parameter.dataIndex]), unit);
+                        var item = items[parameter.dataIndex];
+                        return formatValue(originalValue(item), itemDecimals(item), originalUnit(item));
                     }
                 }
             }]

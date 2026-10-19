@@ -11,6 +11,15 @@
             "caption": "Title"
         },
         {
+            "type": "CheckBox",
+            "name": "NormalizeValues",
+            "caption": "Normalize values using source Min/Max"
+        },
+        {
+            "type": "Label",
+            "caption": "Normalization maps each source range to 0–100. Mixed units and negative originals are allowed. Original values and units remain in the tooltip."
+        },
+        {
             "type": "List",
             "name": "Sources",
             "caption": "Polar sources",
@@ -19,6 +28,26 @@
             "delete": true,
             "changeOrder": true,
             "columns": [
+                {
+                    "caption": "Min (normalization)",
+                    "name": "Minimum",
+                    "width": "130px",
+                    "add": 0,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "digits": 6
+                    }
+                },
+                {
+                    "caption": "Max (normalization)",
+                    "name": "Maximum",
+                    "width": "130px",
+                    "add": 100,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "digits": 6
+                    }
+                },
                 {
                     "caption": "Variable",
                     "name": "VariableID",
@@ -84,6 +113,18 @@
             ],
             "form": [
                 {
+                    "type": "NumberSpinner",
+                    "name": "Minimum",
+                    "caption": "Min (normalization)",
+                    "digits": 6
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "Maximum",
+                    "caption": "Max (normalization)",
+                    "digits": 6
+                },
+                {
                     "type": "SelectVariable",
                     "name": "VariableID",
                     "caption": "Variable",
@@ -125,7 +166,7 @@
         },
         {
             "type": "Label",
-            "caption": "Use 1 to 16 unique numeric variables with one unit. Each variable keeps its own identity even when labels match. Radial spokes and concentric arcs are available in both designers."
+            "caption": "Use 1 to 16 unique numeric variables. A common unit is required only without normalization. Each variable keeps its own identity even when labels match. Radial spokes and concentric arcs are available in both designers."
         },
         {
             "type": "ExpansionPanel",

@@ -8,6 +8,7 @@ Es verwendet das gemeinsame EChartsGateway und benötigt kein Archiv.
 1. Instanz anlegen und das vorhandene EChartsGateway auswählen.
 2. 1–100 numerische Variablen derselben Einheit hinzufügen, etwa
    Batteriestände in Prozent. Beschriftung und Farbe sind optional.
+   Unterschiedliche Einheiten lassen sich mit der optionalen Min/Max-Normalisierung vergleichen.
 3. Titel sowie Symbolform, Ausrichtung und Sortierung festlegen.
 4. Optional die IPSView-Ausgabe einschalten und deren Design unabhängig gestalten.
 
@@ -16,6 +17,33 @@ gültig und bleibt als Kategorie mit Wert erhalten, zeichnet aber keinen
 Symbolbalken. Negative Werte und ungeeignete Quellen werden sichtbar gemeldet.
 Gleiche Anzeigenamen sind erlaubt; jede Variable bleibt separat erhalten.
 Änderungen der Quellen aktualisieren die Anzeige automatisch.
+
+## Optionale Min/Max-Normalisierung
+
+**Werte anhand Quellen-Min/Max normalisieren** erlaubt Quellen mit
+unterschiedlichen Einheiten und auch negativen Originalwerten. Jede Quelle
+besitzt ein eigenes **Minimum (Normalisierung)** und **Maximum (Normalisierung)**
+(bei fehlenden Angaben 0 und 100). Es muss ein endlicher, aufsteigender
+Bereich sein. Aus `100 × (Wert − Minimum) / (Maximum − Minimum)` entsteht
+eine dimensionslose Vergleichsskala von 0–100. Werte außerhalb des Bereichs
+werden nur für die Balkengeometrie auf 0 beziehungsweise 100 begrenzt.
+
+Beispielsweise ergeben −5 °C im Bereich −20 bis 10 °C einen Balkenwert von
+50; 75 % im Bereich 0 bis 100 % ergeben 75. Das ist keine gemeinsame
+physikalische Einheit oder automatische Bewertung. Tooltip und
+Wertebeschriftungen behalten Originalwert und Einheit; der Tooltip nennt
+zusätzlich den normalisierten Wert und den gewählten Quellbereich.
+
+Die Einstellung gilt gemeinsam für Kachel, IPSView und beide Vorschauen.
+Sortierung, wertabhängige Farben und Farbverläufe verwenden dann die
+normalisierte Skala. Für Rot–Gelb–Grün von 0 bis 100 die Farbgrenzen
+entsprechend auf 0 und 100 setzen. Das gespeicherte Skalenmaximum wird
+während der Normalisierung ignoriert, aber nicht verändert. Symcon-Icons,
+eigene SVG-Formen sowie einzelne und wiederholte Symbole bleiben nutzbar.
+
+Standardmäßig ist die Normalisierung aus. In diesem Fall werden die
+Quellen-Min/Max ignoriert und das bisherige Verhalten einschließlich
+gemeinsamer Einheit, nichtnegativer Werte und eigener Skala bleibt erhalten.
 
 ## Skala und Symbole
 
