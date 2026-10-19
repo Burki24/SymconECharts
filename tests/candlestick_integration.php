@@ -219,6 +219,7 @@ preg_match_all("/(?:Translate|translate)\\(\\s*'([^']+)'/", file_get_contents(__
 foreach ($candleRuntimeTexts[1] as $text) {
     assertGatewayGauge(isset($candleLocale[$text]), 'Missing Candlestick runtime translation: ' . $text);
 }
+(require __DIR__ . '/archive_custom_interval_integration.php')($candle, 'Candlestick', 'Interval');
 $candle->SetTestParentActive(false);
 $candle->ApplyChanges();
 assertGatewayGauge($candle->GetTestStatus() === 203 && $candle->GetTestTimerInterval('ArchiveRefresh') === 0, 'No gateway disables archive refresh.');

@@ -43,4 +43,15 @@ $repeated = ThemeRiverData::Window('24h', 'hour', strtotime('2026-10-25T02:30:00
 assertRiver($repeated['EndTimestamp'] === strtotime('2026-10-25T02:00:00+01:00') - 1, 'Repeated hour must retain the actual UTC offset.');
 assertRiver(count(ThemeRiverData::Window('30d', 'hour', strtotime('2026-10-26T12:00:00+01:00'), 'Europe/Berlin')['Intervals']) === 720, 'Maximum hourly window must remain bounded.');
 assertRiver(count(ThemeRiverData::Window('30d', 'day', strtotime('2026-10-26T12:00:00+01:00'), 'Europe/Berlin')['Intervals']) === 30, 'Daily windows count local days.');
+$custom = ThemeRiverData::Window('custom', 'hour', strtotime('2026-10-17T12:34:56+02:00'), 'Europe/Berlin', 2, 'hour');
+assertRiver(count($custom['Intervals']) === 2 && $custom['StartTimestamp'] === strtotime('2026-10-17T10:00:00+02:00'), 'Custom durations resolve completed hourly means.');
+$empty = ThemeRiverData::Window('custom', 'day', strtotime('2026-10-17T12:34:56+02:00'), 'Europe/Berlin', 1, 'minute');
+assertRiver($empty['Empty'] && ThemeRiverData::Join([[], []], $empty['Intervals']) === ['rows' => [], 'missingIntervals' => 0], 'Empty custom windows must not invent values or gaps.');
+assertRiver(count(ThemeRiverData::Window('custom', 'day', strtotime('2026-10-17T12:34:56+02:00'), 'Europe/Berlin', 720, 'day')['Intervals']) === 720, 'Custom daily durations may exceed the former 30-day preset.');
+try {
+    ThemeRiverData::Window('custom', 'hour', strtotime('2026-10-17T12:34:56+02:00'), 'Europe/Berlin', 721, 'hour');
+    throw new LogicException('Excessive river interval count accepted.');
+} catch (InvalidArgumentException $exception) {
+    assertRiver(str_contains($exception->getMessage(), 'shorter range or a longer interval'), 'Interval limits must explain the available choices.');
+}
 echo "ThemeRiver data verified.\n";

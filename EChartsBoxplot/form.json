@@ -87,6 +87,7 @@
                     "type": "Select",
                     "name": "Range",
                     "caption": "Time range",
+                    "onChange": "ECBX_UpdateTimeRangeForm($id, $Range);",
                     "options": [
                         {
                             "caption": "Last 24 hours",
@@ -99,6 +100,44 @@
                         {
                             "caption": "Last 30 days",
                             "value": "30d"
+                        },
+                        {
+                            "caption": "Custom",
+                            "value": "custom"
+                        }
+                    ]
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "CustomRangeValue",
+                    "caption": "Range value",
+                    "minimum": 1,
+                    "maximum": 1000,
+                    "width": "140px",
+                    "visible": false
+                },
+                {
+                    "type": "Select",
+                    "name": "CustomRangeUnit",
+                    "caption": "Range unit",
+                    "width": "140px",
+                    "visible": false,
+                    "options": [
+                        {
+                            "caption": "Minutes",
+                            "value": "minute"
+                        },
+                        {
+                            "caption": "Hours",
+                            "value": "hour"
+                        },
+                        {
+                            "caption": "Days",
+                            "value": "day"
+                        },
+                        {
+                            "caption": "Weeks",
+                            "value": "week"
                         }
                     ]
                 }

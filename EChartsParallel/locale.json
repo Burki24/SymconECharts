@@ -72,7 +72,14 @@
             "The selected range was truncated by the line budget.": "Der gewählte Zeitraum wurde durch die maximale Linienzahl gekürzt.",
             "Data could not be refreshed. Showing the last available values.": "Die Daten konnten nicht aktualisiert werden. Die letzten verfügbaren Werte werden angezeigt.",
             "Example data": "Beispieldaten",
-            "Parallel preview": "Parallel-Vorschau"
+            "Parallel preview": "Parallel-Vorschau",
+            "Custom": "Benutzerdefiniert",
+            "Range value": "Zeitraumwert",
+            "Range unit": "Zeitraumeinheit",
+            "Minutes": "Minuten",
+            "Hours": "Stunden",
+            "Days": "Tage",
+            "Weeks": "Wochen"
         }
     }
 }

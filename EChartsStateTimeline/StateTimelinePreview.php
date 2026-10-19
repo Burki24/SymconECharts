@@ -124,6 +124,17 @@ trait StateTimelinePreview
             }
         }
         $range = $values['Range'] ?? $this->ReadPropertyString('Range');
+        try {
+            $window = StateTimelineData::Window(
+                (string) $range,
+                $this->CurrentTimestamp(),
+                (int) ($values['CustomRangeValue'] ?? $this->ReadPropertyInteger('CustomRangeValue')),
+                (string) ($values['CustomRangeUnit'] ?? $this->ReadPropertyString('CustomRangeUnit'))
+            );
+        } catch (\Throwable) {
+            $window = StateTimelineData::Window('7d', $this->CurrentTimestamp());
+        }
+        $duration = $window['EndTimestamp'] - $window['StartTimestamp'];
         $axisWidth = $number('AxisLineWidth', 0, 5);
         $axisAttributes = ' stroke="' . $e($color('AxisColor', $palette['border'])) . '" stroke-width="' . $axisWidth . '"'
             . $dash($this->BarPreviewValue($values, 'AxisLineType', 'string', $ipsView), $axisWidth);
@@ -138,11 +149,11 @@ trait StateTimelinePreview
             if (!$this->BarPreviewValue($values, 'ShowTimeLabels', 'boolean', $ipsView)) {
                 continue;
             }
-            $elapsedHours = $index * ($range === '30d' ? 180 : ($range === '7d' ? 42 : 6));
-            $date = sprintf('%02d.10.', 1 + intdiv($elapsedHours, 24));
+            $exampleTimestamp = 1790812800 + (int) round($duration * $index / 4);
+            $date = gmdate('d.m.', $exampleTimestamp);
             $time = $range === '24h' && $timeFormat !== 'dateTime' && $index === 4
-                ? '24:00' : sprintf('%02d:00', $elapsedHours % 24);
-            $label = $timeFormat === 'time' || ($timeFormat === 'auto' && $range === '24h') ? $time : $date;
+                ? '24:00' : gmdate('H:i', $exampleTimestamp);
+            $label = $timeFormat === 'time' || ($timeFormat === 'auto' && $duration <= 172800) ? $time : $date;
             $anchor = $index === 0 ? 'start' : ($index === 4 ? 'end' : 'middle');
             $svg .= '<text data-time-label="true"' . $textStyle('AxisLabel') . ' x="' . $n($x) . '" y="' . $n($bottom + $margin + $axisFont)
                 . '" text-anchor="' . $anchor . '" font-size="' . $n($axisFont) . '" fill="' . $e($axisColor) . '">' . $e($label)

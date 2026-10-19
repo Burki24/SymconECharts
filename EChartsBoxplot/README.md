@@ -10,7 +10,8 @@ und optional als eigenes IPSView-WebContent-Widget.
    Einheit hinzufügen, beispielsweise Raumtemperaturen. Anzeigename und
    Boxfarbe sind optional. Eine Variable darf nur einmal vorkommen;
    unterschiedliche Variablen dürfen denselben Namen haben.
-3. Den Zeitraum wählen: letzte 24 Stunden, 7 Tage oder 30 Tage.
+3. Den Zeitraum wählen: letzte 24 Stunden, 7 Tage oder 30 Tage. Alternativ
+   „Benutzerdefiniert“ wählen und 1–1000 Minuten, Stunden, Tage oder Wochen angeben.
 4. Optional Titel und Design einstellen und Änderungen übernehmen.
 
 Einheit und Nachkommastellen stammen aus der Variablendarstellung beziehungsweise
@@ -22,6 +23,14 @@ Jede Box gehört einer Variable. Ihre Stichproben sind die gleich gewichteten,
 abgeschlossenen **Stundenmittelwerte** des Archivs im gewählten Zeitraum,
 nicht die einzelnen Rohwert-Ereignisse. Die laufende Stunde bleibt unberücksichtigt.
 Die Darstellung wird minütlich aktualisiert.
+
+Benutzerdefinierte Zeiträume sind rollende Zeitfenster bis zum Ende der letzten
+abgeschlossenen Stunde, keine frei gewählten Anfangs-/Enddaten. Auch bei einer
+Angabe in Minuten bleiben die Stichproben Stundenmittelwerte. Beispielsweise
+reichen 90 Minuten bei letzter abgeschlossener Stunde um 12:00 Uhr von 10:30 bis
+11:59:59 Uhr; verwendet wird darin nur der Stundenwert ab 11:00 Uhr. Sehr kurze
+Zeiträume können deshalb ohne Stichproben bleiben. Ein Tag entspricht 24 Stunden,
+eine Woche sieben solchen Tagen, auch bei einer Zeitumstellung.
 
 Die Box reicht vom ersten zum dritten Quartil; die Linie darin ist der Median.
 Die beiden Enden zeigen Minimum und Maximum der Stundenmittelwerte. Quartile
@@ -41,6 +50,8 @@ Pro Aktualisierung werden höchstens 10000 Stundenmittelwerte insgesamt und
 dieses Budget. Bei vielen dicht aufgezeichneten 30-Tage-Archiven kann ein
 kürzerer Zeitraum erforderlich sein; das Diagramm meldet dies ausdrücklich,
 statt Quartile aus abgeschnittenen Daten zu berechnen.
+Dieselbe Begrenzung gilt auch bei benutzerdefinierten langen Zeiträumen;
+eine größere Zeiteinheit erhöht das Archivbudget nicht.
 
 ## Gestaltung und IPSView
 

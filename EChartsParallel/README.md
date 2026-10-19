@@ -9,6 +9,10 @@ Wählen Sie zwei bis zehn verschiedene Integer- oder Float-Variablen, die im
 Archiv aufgezeichnet werden. Ihre Reihenfolge bestimmt die Achsenfolge; der
 Achsentitel kann pro Variable überschrieben werden. Wählen Sie einen Zeitraum
 von 24 Stunden, sieben oder 30 Tagen sowie Stunden- oder Tagesintervalle.
+Alternativ ist **Benutzerdefiniert** mit einer Anzahl von 1–1000 Minuten,
+Stunden, Tagen oder Wochen verfügbar. Das ist ein rollierendes Zeitfenster,
+kein festes historisches Von-/Bis-Datum. Ein Tag entspricht dabei 24 Stunden,
+eine Woche sieben solchen Tagen. Kachel und IPSView verwenden denselben Zeitraum.
 Standardwerte werden als Intervallmittelwerte, Zähler als Intervallsummen
 abgerufen. Nur Intervalle mit Werten auf *allen* Achsen werden gezeichnet;
 fehlende Werte werden nicht interpoliert. Das aktuelle, noch nicht

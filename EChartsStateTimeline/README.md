@@ -20,7 +20,9 @@ Das Modul liest nur; es schaltet keine Geräte und verändert keine Archivdaten.
    Beispielsweise kann ein Kontakt `0 = Geschlossen` und `1 = Offen` verwenden,
    eine andere Quelle unabhängig davon `0 = Aus` und `1 = Ein`.
 5. Titel und Zeitraum wählen. Standardmäßig werden die letzten sieben Tage
-   angezeigt; alternativ stehen 24 Stunden oder 30 Tage zur Verfügung.
+   angezeigt; alternativ stehen 24 Stunden, 30 Tage oder **Benutzerdefiniert**
+   zur Verfügung. Für eigene Zeiträume sind 1–1000 Minuten, Stunden, Tage oder
+   Wochen wählbar, beispielsweise 90 Minuten oder zwei Wochen.
 
 Nicht zugeordnete Zustände bleiben als Zahlen sichtbar. Automatische Farben
 folgen dem gewählten Theme. Zustandsnamen und -farben werden nicht automatisch
@@ -41,8 +43,9 @@ ausgeschaltet zu erscheinen. Bekannte Teile eines unvollständigen Archivs
 bleiben sichtbar. Ein Punkt genau am Fensterende erzeugt keinen weiteren
 Abschnitt ohne Dauer.
 
-Die Zeiträume umfassen verstrichene Stunden beziehungsweise Tage bis zum
-Abfragezeitpunkt; die Beschriftung verwendet die Symcon-Zeitzone.
+Die Zeiträume umfassen verstrichene Zeit bis zum aktuellen Abfragezeitpunkt;
+ein Tag entspricht 24 Stunden, eine Woche sieben Tagen, auch bei einer
+Zeitumstellung. Die Beschriftung verwendet die Symcon-Zeitzone.
 Aktualisiert wird minütlich. Der Tooltip nennt Quelle, Zustand, Wert, Beginn,
 Ende und Dauer des angezeigten Abschnitts. Am Fensterrand abgeschnittene
 Abschnitte zeigen entsprechend nur die Dauer innerhalb des Fensters.
@@ -116,6 +119,10 @@ WebContent-Dokument für ein IPSView-HTML-Widget und wird nicht bedient.
 Die Vorschauen reagieren auf ungespeicherte Titel-, Quellen-, Zustands- und
 Designänderungen. Sie verwenden gekennzeichnete Beispieldaten, nicht den
 tatsächlichen Archivverlauf. Das Speichern erfolgt erst beim Übernehmen.
+Auch eigene Zeiträume ändern die Zeitachse der Vorschauen bereits vor dem
+Speichern, ohne auf das Archiv zuzugreifen. Die Rohwert- und Ausgabegrenzen
+gelten unabhängig von der gewählten Dauer unverändert; bei sehr vielen
+Zustandswechseln muss der Zeitraum verkürzt werden.
 Bei mehr als acht Quellen kennzeichnet die statische Vorschau ausdrücklich
 die ersten acht von insgesamt bis zu 32 Zeilen. Scrollen und Zeitzoom sind
 nur im eigentlichen Diagramm bedienbar.

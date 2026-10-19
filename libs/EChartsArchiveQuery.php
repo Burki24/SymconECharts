@@ -105,6 +105,59 @@ final class EChartsArchiveQuery
                     && array_key_exists($customRangeUnit, self::CUSTOM_RANGE_UNITS)));
     }
 
+    /** Whole intervals for families which cannot summarize a partial leading interval. */
+    public static function CompletedIntervals(
+        string $range,
+        int $customRangeValue,
+        string $customRangeUnit,
+        string $interval,
+        int $now,
+        string $timezone,
+        int $maximumIntervals = 720
+    ): array {
+        if (!in_array($range, ['24h', '7d', '30d', 'custom'], true)
+            || !self::IsValidRange($range, $customRangeValue, $customRangeUnit)
+            || !in_array($interval, ['hour', 'day'], true) || $now < 1 || $maximumIntervals < 1 || $maximumIntervals > 1000) {
+            throw new InvalidArgumentException('The archive interval settings are invalid.');
+        }
+        $zone = new DateTimeZone($timezone);
+        $local = (new DateTimeImmutable('@' . $now))->setTimezone($zone);
+        // Elapsed subtraction preserves the actual offset of a repeated autumn hour.
+        $end = $interval === 'day' ? $local->setTime(0, 0)
+            : $local->setTimestamp($now - (int) $local->format('i') * 60 - (int) $local->format('s'));
+        if ($range !== 'custom' && $interval === 'day') {
+            // Existing daily presets count calendar days, including 23-/25-hour days.
+            $days = intdiv(self::RANGE_SECONDS[$range], 86400);
+            $cursor = $end->modify('-' . $days . ' days');
+        } else {
+            $duration = $range === 'custom' ? $customRangeValue * self::CUSTOM_RANGE_UNITS[$customRangeUnit]
+                : self::RANGE_SECONDS[$range];
+            $earliest = max(1, $end->getTimestamp() - $duration);
+            if ($interval === 'hour') {
+                $wholeHours = intdiv($end->getTimestamp() - $earliest, 3600);
+                $cursor = $end->setTimestamp($end->getTimestamp() - $wholeHours * 3600);
+            } else {
+                $cursor = (new DateTimeImmutable('@' . $earliest))->setTimezone($zone);
+                $midnight = $cursor->setTime(0, 0);
+                $cursor = $midnight->getTimestamp() < $earliest ? $midnight->modify('+1 day') : $midnight;
+            }
+        }
+        $start = $cursor->getTimestamp();
+        $intervals = [];
+        while ($cursor < $end) {
+            if (count($intervals) >= $maximumIntervals) {
+                throw new InvalidArgumentException('Too many archive intervals. Choose a shorter range or a longer interval.');
+            }
+            $next = $interval === 'day' ? $cursor->modify('+1 day') : $cursor->setTimestamp($cursor->getTimestamp() + 3600);
+            $intervals[] = ['startTimestamp' => $cursor->getTimestamp(), 'endTimestamp' => $next->getTimestamp() - 1,
+                'label'                      => $cursor->format($interval === 'day' ? 'Y-m-d' : 'Y-m-d H:i P')];
+            $cursor = $next;
+        }
+        return ['StartTimestamp' => $intervals === [] ? $end->getTimestamp() - 1 : $start,
+            'EndTimestamp'       => $end->getTimestamp() - 1, 'Intervals' => $intervals,
+            'AggregationLevel'   => $interval === 'day' ? 1 : 0, 'Limit' => 1000, 'Empty' => $intervals === []];
+    }
+
     public static function AggregationWindowStart(int $level, int $timestamp, string $timezone): int
     {
         $local = (new DateTimeImmutable('@' . $timestamp))->setTimezone(new DateTimeZone($timezone));

@@ -24,9 +24,22 @@ Gut-/Schlechtbewertung der Messwerte.
 Es werden ausschließlich abgeschlossene Intervalle angezeigt. Zur Auswahl
 stehen 24 Stunden, 7 oder 30 Tage. Im Stundenmodus sind das 24, 168 oder 720
 reale Stunden; im Tagesmodus 1, 7 oder 30 lokale Kalendertage.
+Zusätzlich lässt sich eine **benutzerdefinierte Dauer** von 1–1000 Minuten,
+Stunden, Tagen oder Wochen wählen. Sie endet an der letzten abgeschlossenen
+Intervallgrenze. Nur ganze Stunden beziehungsweise lokale Tage innerhalb
+dieser verstrichenen Dauer werden berücksichtigt; ein kurzer Zeitraum kann
+deshalb leer sein. Höchstens 720 Intervalle sind erlaubt. Bei Überschreitung
+bitte die Dauer verkürzen oder Tagesintervalle wählen.
 Die Zeitzone der Symcon-Installation gilt, einschließlich Sommerzeit.
 Stundenbeschriftungen enthalten den UTC-Offset, damit doppelte Stunden beim
 Herbstwechsel unterscheidbar bleiben.
+
+Bei benutzerdefinierten Angaben entspricht ein Tag 24 verstrichenen Stunden,
+eine Woche sieben solchen Tagen. Die festen Tages-Vorgaben zählen dagegen
+weiterhin lokale Kalendertage. Deshalb kann eine benutzerdefinierte Dauer von
+einem Tag im Tagesmodus beim Herbstwechsel keinen vollständigen 25-Stunden-Tag
+enthalten. Ein leerer Zeitraum löst keine Archivabfrage aus. Kachel und IPSView
+verwenden dieselbe Zeitkonfiguration; Designänderungen verändern sie nicht.
 
 Die Werte sind keine Stunden-/Tagesmittelwerte und keine geschätzten Werte
 an den Intervallgrenzen. Symcon protokolliert Änderungen: Ein konstanter Wert

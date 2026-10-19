@@ -32,6 +32,20 @@ umfassen einen, sieben oder 30 abgeschlossene lokale Kalendertage. Das laufende
 Intervall bleibt ausgeschlossen. Tagesgrenzen berücksichtigen die
 Symcon-Zeitzone und Zeitumstellungen. Der automatische Abruf erfolgt minütlich.
 
+Alternativ ist eine **benutzerdefinierte Dauer** von 1–1000 Minuten, Stunden,
+Tagen oder Wochen möglich. Sie endet an der letzten abgeschlossenen
+Intervallgrenze und enthält nur ganze Stunden beziehungsweise lokale Tage
+innerhalb dieser verstrichenen Dauer, höchstens 720 Intervalle pro Quelle.
+Bei Überschreitung bitte den Zeitraum verkürzen oder Tagesintervalle wählen.
+Sehr kurze Zeiträume können leer sein; dann werden keine Archivwerte gelesen
+und keine Ersatzwerte erzeugt.
+
+Eine benutzerdefinierte Tagesangabe bedeutet 24 verstrichene Stunden, eine
+Woche sieben solche Tage. Feste Tages-Vorgaben zählen dagegen weiterhin lokale
+Kalendertage. Beim Herbstwechsel passt deshalb kein vollständiger
+25-Stunden-Tag in eine benutzerdefinierte Dauer von einem Tag.
+Die Zeitkonfiguration gilt gemeinsam für Kachel und IPSView.
+
 Nur **nichtnegative, endliche Mittelwerte** sind zulässig. Echte Nullwerte
 bleiben gültig; negative Mittelwerte führen zu einer sichtbaren Fehlermeldung.
 Die Darstellung ist weder eine Prozentnormierung noch eine Qualitätsbewertung.

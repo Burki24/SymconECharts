@@ -4,50 +4,23 @@ declare(strict_types=1);
 
 namespace SymconECharts;
 
-use DateTimeImmutable;
-use DateTimeZone;
 use InvalidArgumentException;
+
+require_once __DIR__ . '/../libs/EChartsArchiveQuery.php';
 
 /** Completed local archive intervals and strict, nonnegative common means. */
 final class ThemeRiverData
 {
-    public static function Window(string $range, string $interval, int $now, string $timezone): array
+    public static function Window(string $range, string $interval, int $now, string $timezone, int $customRangeValue = 7, string $customRangeUnit = 'day'): array
     {
-        $days = match ($range) {
-            '24h'   => 1, '7d' => 7, '30d' => 30,
-            default => throw new InvalidArgumentException('Invalid ThemeRiver range.')
-        };
-        if ($now < 1) {
-            throw new InvalidArgumentException('Invalid ThemeRiver timestamp.');
-        }
-        $zone = new DateTimeZone($timezone);
-        $local = (new DateTimeImmutable('@' . $now))->setTimezone($zone);
-        if ($interval === 'day') {
-            $end = $local->setTime(0, 0);
-            $cursor = $end->modify('-' . $days . ' days');
-        } elseif ($interval === 'hour') {
-            $end = $local->setTimestamp($now - (int) $local->format('i') * 60 - (int) $local->format('s'));
-            $cursor = $end->setTimestamp($end->getTimestamp() - $days * 86400);
-        } else {
-            throw new InvalidArgumentException('Invalid ThemeRiver interval.');
-        }
-        $start = $cursor->getTimestamp();
-        $slots = [];
-        while ($cursor < $end) {
-            $next = $interval === 'day' ? $cursor->modify('+1 day') : $cursor->setTimestamp($cursor->getTimestamp() + 3600);
-            $slots[] = ['startTimestamp' => $cursor->getTimestamp(), 'endTimestamp' => $next->getTimestamp() - 1,
-                'label'                  => $cursor->format($interval === 'day' ? 'Y-m-d' : 'Y-m-d H:i P')];
-            $cursor = $next;
-        }
-        return ['StartTimestamp' => $start, 'EndTimestamp' => $end->getTimestamp() - 1,
-            'Intervals'          => $slots, 'AggregationLevel' => $interval === 'day' ? 1 : 0, 'Limit' => 1000, 'Empty' => false];
+        return EChartsArchiveQuery::CompletedIntervals($range, $customRangeValue, $customRangeUnit, $interval, $now, $timezone);
     }
 
     /** A missing value on any source makes the whole interval unavailable, never zero. */
     public static function Join(array $series, array $intervals): array
     {
         if (!array_is_list($series) || count($series) < 1 || count($series) > 8
-            || !array_is_list($intervals) || count($intervals) < 1 || count($intervals) > 720) {
+            || !array_is_list($intervals) || count($intervals) > 720) {
             throw new InvalidArgumentException('Invalid ThemeRiver data size.');
         }
         $allowed = array_fill_keys(array_column($intervals, 'startTimestamp'), true);

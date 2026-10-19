@@ -342,6 +342,9 @@ assertGatewayGauge(
 );
 IPSModuleStrict::$ParentResponder = $parent;
 $largeSources = [];
+$timeline->SetTestProperty('Range', 'custom');
+$timeline->SetTestProperty('CustomRangeValue', 24);
+$timeline->SetTestProperty('CustomRangeUnit', 'hour');
 for ($index = 0; $index < 33; ++$index) {
     $id = 89400 + $index;
     $GLOBALS['symconTestVariables'][$id] = ['VariableType' => 0, 'VariableUpdated' => $end,
@@ -407,5 +410,117 @@ assertGatewayGauge(
     'The existing eight-source maximum of 2000 raw points each remains accepted when the output fits.'
 );
 IPSModuleStrict::$ParentResponder = $parent;
+
+// Custom windows share the exact raw archive and predecessor contract of presets.
+(static function () use ($parent, $end): void
+{
+    $id = 89980;
+    $GLOBALS['symconTestVariables'][$id] = ['VariableType' => 0, 'VariableUpdated' => $end,
+        'Value'                                            => false, 'Name' => 'Synthetic custom contact'];
+    $GLOBALS['symconTestArchiveVariables'][$id] = ['AggregationType' => 0, 'LoggedValues' => [
+        ['TimeStamp' => $end, 'Value' => false],
+        ['TimeStamp' => $end - 1800, 'Value' => false],
+        ['TimeStamp' => $end - 5401, 'Value' => true]
+    ]];
+    $custom = new TestableEChartsStateTimeline();
+    $custom->Create();
+    $custom->SetTestProperty('Sources', json_encode([['VariableID' => $id, 'States' => []]], JSON_THROW_ON_ERROR));
+    $custom->SetTestProperty('Range', 'custom');
+    $custom->SetTestProperty('CustomRangeValue', 90);
+    $custom->SetTestProperty('CustomRangeUnit', 'minute');
+    $custom->ApplyChanges();
+    $requests = [];
+    IPSModuleStrict::$ParentResponder = static function (string $request) use ($parent, &$requests): string
+    {
+        $decoded = json_decode($request, true, 512, JSON_THROW_ON_ERROR);
+        if (($decoded['Operation'] ?? null) === 'archive.states.read') {
+            $requests[] = $decoded['Payload'];
+        }
+        return $parent($request);
+    };
+    try {
+        $model = json_decode($custom->GetStateTimelineData(), true, 512, JSON_THROW_ON_ERROR);
+        assertGatewayGauge(
+            $custom->GetTestStatus() === IS_ACTIVE && count($requests) === 1
+            && $requests[0] === ['VariableID' => $id, 'StartTimestamp' => $end - 5400, 'EndTimestamp' => $end, 'Limit' => 2000],
+            'A custom 90-minute raw request must end now with the existing source budget and no aggregation.'
+        );
+        $segments = $model['stateTimeline']['rows'][0]['segments'];
+        assertGatewayGauge(
+            count($segments) === 2 && $segments[0]['value'] === 1
+            && $segments[0]['startTimestamp'] === $end - 5400 && $segments[0]['endTimestamp'] === $end - 1800
+            && $segments[1]['value'] === 0 && $segments[1]['endTimestamp'] === $end,
+            'Custom windows must preserve predecessors and exclude zero-width changes at the right boundary.'
+        );
+        $rangeJSON = '"range":' . json_encode($model['range'], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES);
+        assertGatewayGauge(str_contains($custom->GetVisualizationTile(), $rangeJSON)
+            && str_contains($custom->GetIPSViewHTML(), $rangeJSON), 'Both outputs must share the configured custom period.');
+        $form = json_decode($custom->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+        foreach (['CustomRangeValue', 'CustomRangeUnit'] as $name) {
+            $control = findGaugeFormElement($form['elements'], $name);
+            assertGatewayGauge($control['visible'] === true
+                && str_contains($control['onChange'], 'ECST_UpdateBarPreviewFromForm'), 'Custom controls need saved visibility and draft preview wiring.');
+        }
+        $rangeControl = findGaugeFormElement($form['elements'], 'Range');
+        assertGatewayGauge(
+            str_contains($rangeControl['onChange'], 'ECST_UpdateTimeRangeForm')
+            && str_contains($rangeControl['onChange'], '$CustomRangeValue') && str_contains($rangeControl['onChange'], '$CustomRangeUnit'),
+            'Range changes must update visibility and send both custom draft fields to previews.'
+        );
+        $properties = (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($custom);
+        $queryCount = count($requests);
+        $custom->UpdateTimeRangeForm('7d');
+        assertGatewayGauge(
+            array_column(array_slice($custom->GetTestFormUpdates(), -2), 'Value') === [false, false],
+            'Unsaved preset selection must hide custom controls without persistence.'
+        );
+        $custom->UpdateTimeRangeForm('custom');
+        assertGatewayGauge(
+            array_column(array_slice($custom->GetTestFormUpdates(), -2), 'Value') === [true, true],
+            'Unsaved custom selection must reveal both controls.'
+        );
+        $custom->UpdateBarPreviewFromForm(json_encode(['Range' => 'custom', 'CustomRangeValue' => 90,
+            'CustomRangeUnit'                                  => 'minute', 'TimeLabelFormat' => 'time'], JSON_THROW_ON_ERROR));
+        foreach (array_slice($custom->GetTestFormUpdates(), -2) as $update) {
+            $svg = base64_decode(substr($update['Value'], strlen('data:image/svg+xml;base64,')), true);
+            assertGatewayGauge(
+                str_contains($svg, '>01:30</text>') && str_contains($svg, 'Example data'),
+                'Both synthetic previews must show a 90-minute draft time axis.'
+            );
+        }
+        assertGatewayGauge((new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($custom) === $properties
+            && count($requests) === $queryCount, 'Visibility and preview drafts must not persist configuration or read archives.');
+        foreach ([['CustomRangeValue', 0], ['CustomRangeValue', 1001], ['CustomRangeUnit', 'month']] as [$name, $value]) {
+            $custom->SetTestProperty($name, $value);
+            $custom->ApplyChanges();
+            assertGatewayGauge(
+                $custom->GetTestStatus() === 202 && $custom->GetTestTimerInterval('ArchiveRefresh') === 0,
+                'Invalid active custom periods must stop archive refresh.'
+            );
+            $custom->SetTestProperty($name, $properties[$name]);
+        }
+        $custom->SetTestProperty('CustomRangeValue', 2);
+        $custom->SetTestProperty('CustomRangeUnit', 'week');
+        $custom->ApplyChanges();
+        assertGatewayGauge(
+            json_decode($custom->GetStateTimelineData(), true)['range']['startTimestamp'] === $end - 1209600,
+            'Custom weeks must be exact elapsed weeks, not aligned calendar weeks.'
+        );
+        $custom->SetTestProperty('Range', '7d');
+        $custom->SetTestProperty('CustomRangeValue', 0);
+        $custom->SetTestProperty('CustomRangeUnit', 'invalid');
+        $custom->ApplyChanges();
+        assertGatewayGauge($custom->GetTestStatus() === IS_ACTIVE, 'Inactive custom values must not invalidate preset configurations.');
+        $form = json_decode($custom->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+        assertGatewayGauge(
+            findGaugeFormElement($form['elements'], 'CustomRangeValue')['visible'] === false
+            && findGaugeFormElement($form['elements'], 'CustomRangeUnit')['visible'] === false,
+            'Saved preset forms must hide both custom controls.'
+        );
+    } finally {
+        IPSModuleStrict::$ParentResponder = $parent;
+        unset($GLOBALS['symconTestVariables'][$id], $GLOBALS['symconTestArchiveVariables'][$id]);
+    }
+})();
 
 echo "StateTimeline Gateway, forms, previews and outputs verified.\n";

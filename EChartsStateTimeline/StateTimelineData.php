@@ -6,6 +6,8 @@ namespace SymconECharts;
 
 use InvalidArgumentException;
 
+require_once __DIR__ . '/../libs/EChartsArchiveQuery.php';
+
 /** Pure half-open intervals from validated discrete archive samples. */
 final class StateTimelineData
 {
@@ -32,13 +34,13 @@ final class StateTimelineData
     }
 
     /** @return array{StartTimestamp:int,EndTimestamp:int} */
-    public static function Window(string $range, int $now): array
+    public static function Window(string $range, int $now, int $customValue = 7, string $customUnit = 'day'): array
     {
-        $seconds = ['24h' => 86400, '7d' => 604800, '30d' => 2592000][$range] ?? null;
-        if ($seconds === null || $now <= 1) {
+        if (!in_array($range, ['24h', '7d', '30d', 'custom'], true) || $now <= 1) {
             throw new InvalidArgumentException('The StateTimeline time range is invalid.');
         }
-        return ['StartTimestamp' => max(1, $now - $seconds), 'EndTimestamp' => $now];
+        $query = EChartsArchiveQuery::Resolve($range, $customValue, $customUnit, 'raw', 1, 1, $now, date_default_timezone_get());
+        return ['StartTimestamp' => $query['StartTimestamp'], 'EndTimestamp' => $query['EndTimestamp']];
     }
 
     /**

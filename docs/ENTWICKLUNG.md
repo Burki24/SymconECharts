@@ -308,6 +308,13 @@ und vollständiger Werteskala. Das gemeinsame Budget von 10000 Stundenmitteln
 ergänzt das bisherige Limit von 1000 je Quelle; überschrittene oder gekürzte
 Antworten führen ausdrücklich zum Fehler statt zu verfälschten Quartilen.
 
+Benutzerdefinierte rollierende Zeiträume für Boxplot, Parallel, Candlestick,
+ThemeRiver und StateTimeline folgen [ADR 0061](adr/0061-custom-archive-durations.md).
+Die Properties ergänzen vorhandene Zeitfenster kompatibel; `EChartsArchiveQuery`
+bleibt die zentrale Planungsbasis. Sein neuer begrenzter Whole-Interval-Pfad
+ersetzt ausschließlich die doppelte Candlestick-/ThemeRiver-Fensterplanung.
+Der bisherige Querypfad anderer Familien und ihre Budgets bleiben unverändert.
+
 ## Weitere ECharts-Familien im Plan
 
 Funnel (`ECFU`) ist gemäß [ADR 0055](adr/0055-current-value-funnel.md)

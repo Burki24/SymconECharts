@@ -1,5 +1,27 @@
 # Tests
 
+## Benutzerdefinierte Archivzeiträume
+
+`php tests/archive_windows.php` prüft die neue vollständige Intervallplanung:
+90 Minuten, leere Minutenfenster, lokale Tage, Sommer-/Winterzeit, eindeutige
+Herbststunden, unveränderte Tagesvorgaben sowie 720/721 und sehr große Dauern.
+Der Test läuft auch über `tests/run.php` und den vollständigen Qualitätslauf.
+
+`parallel_custom_ranges.php` und `boxplot_custom_ranges.php` laufen über die
+Gateway-Suite; `archive_custom_interval_integration.php` über Candlestick und
+die getrennte ThemeRiver-Integration. StateTimeline erweitert seine vorhandenen
+Daten-/Integrationstests. Geprüft werden echte Modul-/Gatewaypfade mit
+Kernel-Doppeln, gemeinsame Zeitbereiche beider HTML-Ausgaben, abgeschlossene
+Aggregate bzw. rohe Zustandsvorgänger, Cacheidentität, Grenzwerte, unveränderte
+Budgets und Statistiken. Formulare prüfen Custom-Auswahl, Grenzen/Einheiten,
+anfängliche und unmittelbare Sichtbarkeit sowie archiv- und schreibfreie Drafts.
+Die erste neue Prüfung jedes Familienpfads schlug vor der Implementierung
+wegen fehlender Custom-Unterstützung fehl.
+
+Die ECharts-Runtimes und Renderer bleiben unverändert; vorhandene Layouttests
+werden erneut ausgeführt. Ein realer Symcon-Formulartest und die Live-Abnahme
+der neuen Zeitbereiche in Kachel/IPSView nach Modulupdate bleiben offen.
+
 ## Breitenabhängige Kategorienabstände in BarCategory
 
 `bar_category_layout.js` führt das ausgelieferte `app.min.js` aus und vergleicht

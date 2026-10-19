@@ -103,6 +103,8 @@ class EChartsBoxplot extends IPSModuleStrict
             $this->RegisterPropertyString('Sources', '[]');
             $this->RegisterPropertyString('Title', '');
             $this->RegisterPropertyString('Range', '7d');
+            $this->RegisterPropertyInteger('CustomRangeValue', 7);
+            $this->RegisterPropertyString('CustomRangeUnit', 'day');
             foreach (['', 'IPSView'] as $prefix) {
                 foreach (self::DESIGN_DEFAULTS as $name => $default) {
                     match (gettype($default)) {
@@ -175,6 +177,11 @@ class EChartsBoxplot extends IPSModuleStrict
         $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
             $form = $this->LoadConfigurationForm();
+            $form['elements'] = $this->SetFormFieldVisibility(
+                $form['elements'],
+                ['CustomRangeValue', 'CustomRangeUnit'],
+                $this->ReadPropertyString('Range') === 'custom'
+            );
             $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
             $form['elements'] = $this->WithAnimationFormControls($form['elements']);
             $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
@@ -187,7 +194,7 @@ class EChartsBoxplot extends IPSModuleStrict
                 ['caption' => 'Axes and grid', 'start' => 'ShowGrid'],
                 ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
             ]);
-            $fields = ['Title', 'Sources', 'Range',
+            $fields = ['Title', 'Sources', 'Range', 'CustomRangeValue', 'CustomRangeUnit',
                 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
                 'IPSViewBackgroundOpacityPercent', ...array_keys(self::DESIGN_DEFAULTS),
                 ...array_map(static fn (string $name): string => 'IPSView' . $name, array_keys(self::DESIGN_DEFAULTS))];
@@ -204,6 +211,24 @@ class EChartsBoxplot extends IPSModuleStrict
             throw $debugFlowException;
         } finally {
             $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, false);
+        }
+    }
+
+    public function UpdateTimeRangeForm(string $Range): void
+    {
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            $custom = $Range === 'custom';
+            $this->UpdateFormField('CustomRangeValue', 'visible', $custom);
+            $this->UpdateFormField('CustomRangeUnit', 'visible', $custom);
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
     }
 
@@ -427,8 +452,8 @@ class EChartsBoxplot extends IPSModuleStrict
         $sources = $this->GetValidatedSources();
         $query = EChartsArchiveQuery::Resolve(
             $this->ReadPropertyString('Range'),
-            7,
-            'day',
+            $this->ReadPropertyInteger('CustomRangeValue'),
+            $this->ReadPropertyString('CustomRangeUnit'),
             'hour',
             1000 * count($sources),
             count($sources),
@@ -545,7 +570,12 @@ class EChartsBoxplot extends IPSModuleStrict
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => $exception->getMessage()];
         }
         if (mb_strlen($this->ReadPropertyString('Title')) > 200
-            || !in_array($this->ReadPropertyString('Range'), ['24h', '7d', '30d'], true)
+            || !in_array($this->ReadPropertyString('Range'), ['24h', '7d', '30d', 'custom'], true)
+            || !EChartsArchiveQuery::IsValidRange(
+                $this->ReadPropertyString('Range'),
+                $this->ReadPropertyInteger('CustomRangeValue'),
+                $this->ReadPropertyString('CustomRangeUnit')
+            )
             || !$this->IsValidDesign('')
             || (!$this->ReadPropertyBoolean('IPSViewUseTileDesign') && !$this->IsValidDesign('IPSView'))
             || !EChartsIPSViewBackground::IsValid(

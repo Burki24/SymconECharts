@@ -25,6 +25,11 @@ und Maximum abgeschlossener Archiv-Stunden oder -Tage.
 StateTimeline zeigt archivierte Boolean-/Integer-Zustände als farbige
 Zeitabschnitte mit eigenen Zustandsnamen und ausdrücklich unbekannten Anfängen.
 
+Boxplot, Parallel, Candlestick, ThemeRiver und StateTimeline bieten neben
+ihren festen Zeiträumen auch rollierende Zeitspannen mit 1–1000 Minuten,
+Stunden, Tagen oder Wochen. Die jeweiligen Archiv- und Intervallgrenzen bleiben
+wirksam; Einzelheiten stehen in den Modulbeschreibungen.
+
 Alle Diagrammformulare zeigen eine unmittelbar aktualisierte SVG-Vorschau
 im Kachel- und IPSView-Designer. Sie reagiert auf noch nicht gespeicherte
 Titel-, Quellen- und Designänderungen; die endgültige responsive Darstellung

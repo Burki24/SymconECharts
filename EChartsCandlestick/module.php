@@ -104,6 +104,8 @@ class EChartsCandlestick extends IPSModuleStrict
             $this->RegisterPropertyString('Interval', 'day');
             $this->RegisterPropertyString('Title', '');
             $this->RegisterPropertyString('Range', '7d');
+            $this->RegisterPropertyInteger('CustomRangeValue', 7);
+            $this->RegisterPropertyString('CustomRangeUnit', 'day');
             foreach (['', 'IPSView'] as $prefix) {
                 foreach (self::DESIGN_DEFAULTS as $name => $default) {
                     match (gettype($default)) {
@@ -177,6 +179,11 @@ class EChartsCandlestick extends IPSModuleStrict
         $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
             $form = $this->LoadConfigurationForm();
+            $form['elements'] = $this->SetFormFieldVisibility(
+                $form['elements'],
+                ['CustomRangeValue', 'CustomRangeUnit'],
+                $this->ReadPropertyString('Range') === 'custom'
+            );
             $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
             $form['elements'] = $this->WithAnimationFormControls($form['elements']);
             $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
@@ -189,7 +196,7 @@ class EChartsCandlestick extends IPSModuleStrict
                 ['caption' => 'Axes and grid', 'start' => 'ShowGrid'],
                 ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
             ]);
-            $fields = ['Title', 'VariableID', 'Range', 'Interval',
+            $fields = ['Title', 'VariableID', 'Range', 'CustomRangeValue', 'CustomRangeUnit', 'Interval',
                 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
                 'IPSViewBackgroundOpacityPercent', ...array_keys(self::DESIGN_DEFAULTS),
                 ...array_map(static fn (string $name): string => 'IPSView' . $name, array_keys(self::DESIGN_DEFAULTS))];
@@ -206,6 +213,24 @@ class EChartsCandlestick extends IPSModuleStrict
             throw $debugFlowException;
         } finally {
             $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, false);
+        }
+    }
+
+    public function UpdateTimeRangeForm(string $Range): void
+    {
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            $custom = $Range === 'custom';
+            $this->UpdateFormField('CustomRangeValue', 'visible', $custom);
+            $this->UpdateFormField('CustomRangeUnit', 'visible', $custom);
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
     }
 
@@ -431,7 +456,9 @@ class EChartsCandlestick extends IPSModuleStrict
             $this->ReadPropertyString('Range'),
             $this->ReadPropertyString('Interval'),
             $this->CurrentTimestamp(),
-            date_default_timezone_get()
+            date_default_timezone_get(),
+            $this->ReadPropertyInteger('CustomRangeValue'),
+            $this->ReadPropertyString('CustomRangeUnit')
         );
         $key = $sources[0]['VariableID'] . ':' . $query['StartTimestamp'] . ':' . $query['EndTimestamp'] . ':' . $this->ReadPropertyString('Interval');
         $cache = json_decode($this->GetBuffer('CandlestickCache') ?: '{}', true);
@@ -439,7 +466,7 @@ class EChartsCandlestick extends IPSModuleStrict
             if (($cache['key'] ?? null) === $key && ($cache['expires'] ?? 0) > $this->CurrentTimestamp()) {
                 $data = $cache['data'];
             } else {
-                $points = CandlestickData::Read(
+                $points = $query['Empty'] ? [] : CandlestickData::Read(
                     $sources[0]['VariableID'],
                     $query['StartTimestamp'],
                     $query['EndTimestamp'],
@@ -484,6 +511,8 @@ class EChartsCandlestick extends IPSModuleStrict
             'ipsViewStyle' => $ipsView ? $this->IPSViewThemeCSS() : '',
             'state'        => $this->BuildVisualizationState($ipsView),
             'translations' => [
+                'Too many archive intervals. Choose a shorter range or a longer interval.'  => $this->Translate('Too many archive intervals. Choose a shorter range or a longer interval.'),
+                'The archive interval settings are invalid.'                                => $this->Translate('The archive interval settings are invalid.'),
                 'Configure valid Candlestick archive variables.'                            => $this->Translate('Configure valid Candlestick archive variables.'),
                 'Connect an active EChartsGateway.'                                         => $this->Translate('Connect an active EChartsGateway.'),
                 'The Candlestick values could not be loaded.'                               => $this->Translate('The Candlestick values could not be loaded.'),
@@ -547,7 +576,7 @@ class EChartsCandlestick extends IPSModuleStrict
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => $exception->getMessage()];
         }
         if (mb_strlen($this->ReadPropertyString('Title')) > 200
-            || !in_array($this->ReadPropertyString('Range'), ['24h', '7d', '30d'], true)
+            || !in_array($this->ReadPropertyString('Range'), ['24h', '7d', '30d', 'custom'], true)
             || !in_array($this->ReadPropertyString('Interval'), ['hour', 'day'], true)
             || !$this->IsValidDesign('')
             || (!$this->ReadPropertyBoolean('IPSViewUseTileDesign') && !$this->IsValidDesign('IPSView'))
@@ -556,6 +585,18 @@ class EChartsCandlestick extends IPSModuleStrict
                 $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent')
             )) {
             return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => 'The Candlestick settings are invalid.'];
+        }
+        try {
+            CandlestickData::Window(
+                $this->ReadPropertyString('Range'),
+                $this->ReadPropertyString('Interval'),
+                $this->CurrentTimestamp(),
+                date_default_timezone_get(),
+                $this->ReadPropertyInteger('CustomRangeValue'),
+                $this->ReadPropertyString('CustomRangeUnit')
+            );
+        } catch (InvalidArgumentException $exception) {
+            return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => $exception->getMessage()];
         }
         return null;
     }
@@ -621,8 +662,11 @@ class EChartsCandlestick extends IPSModuleStrict
     /** @return array<string,mixed> */
     private function BuildVisualizationState(bool $ipsView = false): array
     {
-        if ($this->GetConfigurationError() !== null) {
-            return $this->ErrorState('Configure valid Candlestick archive variables.');
+        $configurationError = $this->GetConfigurationError();
+        if ($configurationError !== null) {
+            return $this->ErrorState(in_array($configurationError['Message'], [
+                'Too many archive intervals. Choose a shorter range or a longer interval.', 'The archive interval settings are invalid.'
+            ], true) ? $configurationError['Message'] : 'Configure valid Candlestick archive variables.');
         }
         if (!$this->HasActiveParent()) {
             return $this->ErrorState('Connect an active EChartsGateway.');

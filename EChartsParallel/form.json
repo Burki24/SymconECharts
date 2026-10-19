@@ -70,6 +70,7 @@
                     "type": "Select",
                     "name": "Range",
                     "caption": "Time range",
+                    "onChange": "ECPA_UpdateTimeRangeForm($id, $Range);",
                     "options": [
                         {
                             "caption": "Last 24 hours",
@@ -82,6 +83,10 @@
                         {
                             "caption": "Last 30 days",
                             "value": "30d"
+                        },
+                        {
+                            "caption": "Custom",
+                            "value": "custom"
                         }
                     ]
                 },
@@ -106,6 +111,45 @@
                     "caption": "Maximum lines",
                     "minimum": 1,
                     "maximum": 1000
+                }
+            ]
+        },
+        {
+            "type": "RowLayout",
+            "items": [
+                {
+                    "type": "NumberSpinner",
+                    "name": "CustomRangeValue",
+                    "caption": "Range value",
+                    "width": "140px",
+                    "minimum": 1,
+                    "maximum": 1000,
+                    "visible": false
+                },
+                {
+                    "type": "Select",
+                    "name": "CustomRangeUnit",
+                    "caption": "Range unit",
+                    "width": "140px",
+                    "visible": false,
+                    "options": [
+                        {
+                            "caption": "Minutes",
+                            "value": "minute"
+                        },
+                        {
+                            "caption": "Hours",
+                            "value": "hour"
+                        },
+                        {
+                            "caption": "Days",
+                            "value": "day"
+                        },
+                        {
+                            "caption": "Weeks",
+                            "value": "week"
+                        }
+                    ]
                 }
             ]
         },

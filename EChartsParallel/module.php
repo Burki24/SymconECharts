@@ -96,6 +96,8 @@ class EChartsParallel extends IPSModuleStrict
             $this->RegisterPropertyString('Sources', '[]');
             $this->RegisterPropertyString('Title', '');
             $this->RegisterPropertyString('Range', '24h');
+            $this->RegisterPropertyInteger('CustomRangeValue', 7);
+            $this->RegisterPropertyString('CustomRangeUnit', 'day');
             $this->RegisterPropertyString('Aggregation', 'hour');
             $this->RegisterPropertyInteger('LineBudget', 750);
             foreach (['', 'IPSView'] as $prefix) {
@@ -170,6 +172,11 @@ class EChartsParallel extends IPSModuleStrict
         $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
             $form = $this->LoadConfigurationForm();
+            $form['elements'] = $this->SetFormFieldVisibility(
+                $form['elements'],
+                ['CustomRangeValue', 'CustomRangeUnit'],
+                $this->ReadPropertyString('Range') === 'custom'
+            );
             $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
             $form['elements'] = $this->WithAnimationFormControls($form['elements']);
             $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
@@ -181,7 +188,7 @@ class EChartsParallel extends IPSModuleStrict
                 ['caption' => 'Axes', 'start' => 'ShowAxisLabels'],
                 ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
             ]);
-            $fields = ['Title', 'Sources', 'Range', 'Aggregation', 'LineBudget',
+            $fields = ['Title', 'Sources', 'Range', 'CustomRangeValue', 'CustomRangeUnit', 'Aggregation', 'LineBudget',
                 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
                 'IPSViewBackgroundOpacityPercent', ...array_keys(self::DESIGN_DEFAULTS),
                 ...array_map(static fn (string $name): string => 'IPSView' . $name, array_keys(self::DESIGN_DEFAULTS))];
@@ -198,6 +205,23 @@ class EChartsParallel extends IPSModuleStrict
             throw $debugFlowException;
         } finally {
             $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, false);
+        }
+    }
+
+    public function UpdateTimeRangeForm(string $Range): void
+    {
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            $this->UpdateFormField('CustomRangeValue', 'visible', $Range === 'custom');
+            $this->UpdateFormField('CustomRangeUnit', 'visible', $Range === 'custom');
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
     }
 
@@ -485,8 +509,8 @@ class EChartsParallel extends IPSModuleStrict
         $budget = $this->ReadPropertyInteger('LineBudget');
         $query = EChartsArchiveQuery::Resolve(
             $this->ReadPropertyString('Range'),
-            7,
-            'day',
+            $this->ReadPropertyInteger('CustomRangeValue'),
+            $this->ReadPropertyString('CustomRangeUnit'),
             $this->ReadPropertyString('Aggregation'),
             $budget * count($sources),
             count($sources),
@@ -589,7 +613,12 @@ class EChartsParallel extends IPSModuleStrict
         } catch (Throwable $exception) {
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => $exception->getMessage()];
         }
-        if (!in_array($this->ReadPropertyString('Range'), ['24h', '7d', '30d'], true)
+        if (!in_array($this->ReadPropertyString('Range'), ['24h', '7d', '30d', 'custom'], true)
+            || !EChartsArchiveQuery::IsValidRange(
+                $this->ReadPropertyString('Range'),
+                $this->ReadPropertyInteger('CustomRangeValue'),
+                $this->ReadPropertyString('CustomRangeUnit')
+            )
             || !in_array($this->ReadPropertyString('Aggregation'), ['hour', 'day'], true)
             || $this->ReadPropertyInteger('LineBudget') < 1 || $this->ReadPropertyInteger('LineBudget') > 1000
             || !$this->IsValidDesign('')

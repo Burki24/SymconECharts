@@ -105,6 +105,8 @@ class EChartsThemeRiver extends IPSModuleStrict
             $this->RegisterPropertyString('Sources', '[]');
             $this->RegisterPropertyString('Title', '');
             $this->RegisterPropertyString('Range', '7d');
+            $this->RegisterPropertyInteger('CustomRangeValue', 7);
+            $this->RegisterPropertyString('CustomRangeUnit', 'day');
             $this->RegisterPropertyString('Aggregation', 'hour');
             foreach (['', 'IPSView'] as $prefix) {
                 foreach (self::DESIGN_DEFAULTS as $name => $default) {
@@ -178,6 +180,11 @@ class EChartsThemeRiver extends IPSModuleStrict
         $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
             $form = $this->LoadConfigurationForm();
+            $form['elements'] = $this->SetFormFieldVisibility(
+                $form['elements'],
+                ['CustomRangeValue', 'CustomRangeUnit'],
+                $this->ReadPropertyString('Range') === 'custom'
+            );
             $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
             $form['elements'] = $this->WithAnimationFormControls($form['elements']);
             $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
@@ -191,7 +198,7 @@ class EChartsThemeRiver extends IPSModuleStrict
                 ['caption' => 'Legend', 'start' => 'LegendPosition'],
                 ['caption' => 'Typography and colors', 'start' => 'FontFamily']
             ]);
-            $fields = ['Title', 'Sources', 'Range', 'Aggregation',
+            $fields = ['Title', 'Sources', 'Range', 'CustomRangeValue', 'CustomRangeUnit', 'Aggregation',
                 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
                 'IPSViewBackgroundOpacityPercent', ...array_keys(self::DESIGN_DEFAULTS),
                 ...array_map(static fn (string $name): string => 'IPSView' . $name, array_keys(self::DESIGN_DEFAULTS))];
@@ -208,6 +215,24 @@ class EChartsThemeRiver extends IPSModuleStrict
             throw $debugFlowException;
         } finally {
             $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, false);
+        }
+    }
+
+    public function UpdateTimeRangeForm(string $Range): void
+    {
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            $custom = $Range === 'custom';
+            $this->UpdateFormField('CustomRangeValue', 'visible', $custom);
+            $this->UpdateFormField('CustomRangeUnit', 'visible', $custom);
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
     }
 
@@ -433,7 +458,9 @@ class EChartsThemeRiver extends IPSModuleStrict
             $this->ReadPropertyString('Range'),
             $this->ReadPropertyString('Aggregation'),
             $this->CurrentTimestamp(),
-            date_default_timezone_get()
+            date_default_timezone_get(),
+            $this->ReadPropertyInteger('CustomRangeValue'),
+            $this->ReadPropertyString('CustomRangeUnit')
         );
         $series = [];
         $descriptors = [];
@@ -475,6 +502,8 @@ class EChartsThemeRiver extends IPSModuleStrict
             'ipsViewStyle' => $ipsView ? $this->IPSViewThemeCSS() : '',
             'state'        => $this->BuildVisualizationState($ipsView),
             'translations' => [
+                'Too many archive intervals. Choose a shorter range or a longer interval.'                          => $this->Translate('Too many archive intervals. Choose a shorter range or a longer interval.'),
+                'The archive interval settings are invalid.'                                                        => $this->Translate('The archive interval settings are invalid.'),
                 'Configure valid ThemeRiver archive variables.'                                                     => $this->Translate('Configure valid ThemeRiver archive variables.'),
                 'Connect an active EChartsGateway.'                                                                 => $this->Translate('Connect an active EChartsGateway.'),
                 'The ThemeRiver values could not be loaded.'                                                        => $this->Translate('The ThemeRiver values could not be loaded.'),
@@ -536,7 +565,7 @@ class EChartsThemeRiver extends IPSModuleStrict
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => $exception->getMessage()];
         }
         if (mb_strlen($this->ReadPropertyString('Title')) > 200
-            || !in_array($this->ReadPropertyString('Range'), ['24h', '7d', '30d'], true)
+            || !in_array($this->ReadPropertyString('Range'), ['24h', '7d', '30d', 'custom'], true)
             || !in_array($this->ReadPropertyString('Aggregation'), ['hour', 'day'], true)
             || !$this->IsValidDesign('')
             || (!$this->ReadPropertyBoolean('IPSViewUseTileDesign') && !$this->IsValidDesign('IPSView'))
@@ -545,6 +574,18 @@ class EChartsThemeRiver extends IPSModuleStrict
                 $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent')
             )) {
             return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => 'The ThemeRiver settings are invalid.'];
+        }
+        try {
+            ThemeRiverData::Window(
+                $this->ReadPropertyString('Range'),
+                $this->ReadPropertyString('Aggregation'),
+                $this->CurrentTimestamp(),
+                date_default_timezone_get(),
+                $this->ReadPropertyInteger('CustomRangeValue'),
+                $this->ReadPropertyString('CustomRangeUnit')
+            );
+        } catch (InvalidArgumentException $exception) {
+            return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => $exception->getMessage()];
         }
         return null;
     }
@@ -683,7 +724,9 @@ class EChartsThemeRiver extends IPSModuleStrict
         if ($configurationError !== null) {
             $this->WriteAttributeString('LastError', $configurationError['Message']);
             $this->DebugEChartsSetStatus($configurationError['Status']);
-            return $this->ErrorState('Configure valid ThemeRiver archive variables.');
+            return $this->ErrorState(in_array($configurationError['Message'], [
+                'Too many archive intervals. Choose a shorter range or a longer interval.', 'The archive interval settings are invalid.'
+            ], true) ? $configurationError['Message'] : 'Configure valid ThemeRiver archive variables.');
         }
         if (!$this->HasActiveParent()) {
             $this->DebugEChartsSetStatus(self::STATUS_PARENT_MISSING);

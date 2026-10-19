@@ -4,41 +4,17 @@ declare(strict_types=1);
 
 namespace SymconECharts;
 
-use DateTimeImmutable;
-use DateTimeZone;
 use InvalidArgumentException;
 use RuntimeException;
+
+require_once __DIR__ . '/../libs/EChartsArchiveQuery.php';
 
 /** Family-local, bounded raw archive reading and OCLH calculation. */
 final class CandlestickData
 {
-    public static function Window(string $range, string $interval, int $now, string $timezone): array
+    public static function Window(string $range, string $interval, int $now, string $timezone, int $customRangeValue = 7, string $customRangeUnit = 'day'): array
     {
-        $days = match ($range) {
-            '24h'   => 1, '7d' => 7, '30d' => 30,
-            default => throw new InvalidArgumentException('Invalid Candlestick range.')
-        };
-        $zone = new DateTimeZone($timezone);
-        $local = (new DateTimeImmutable('@' . $now))->setTimezone($zone);
-        if ($interval === 'day') {
-            $end = $local->setTime(0, 0);
-            $cursor = $end->modify('-' . $days . ' days');
-        } elseif ($interval === 'hour') {
-            // Subtract elapsed minutes to retain the actual offset in a repeated hour.
-            $end = (new DateTimeImmutable('@' . ($now - (int) $local->format('i') * 60 - (int) $local->format('s'))))->setTimezone($zone);
-            $cursor = $end->setTimestamp($end->getTimestamp() - $days * 86400);
-        } else {
-            throw new InvalidArgumentException('Invalid Candlestick interval.');
-        }
-        $start = $cursor->getTimestamp();
-        $intervals = [];
-        while ($cursor < $end) {
-            $next = $interval === 'day' ? $cursor->modify('+1 day') : $cursor->setTimestamp($cursor->getTimestamp() + 3600);
-            $intervals[] = ['startTimestamp' => $cursor->getTimestamp(), 'endTimestamp' => $next->getTimestamp() - 1,
-                'label'                      => $cursor->format($interval === 'day' ? 'Y-m-d' : 'Y-m-d H:i P')];
-            $cursor = $next;
-        }
-        return ['StartTimestamp' => $start, 'EndTimestamp' => $end->getTimestamp() - 1, 'Intervals' => $intervals];
+        return EChartsArchiveQuery::CompletedIntervals($range, $customRangeValue, $customRangeUnit, $interval, $now, $timezone);
     }
 
     /** Discard truncated fragments; bisect disjoint inclusive windows instead. */

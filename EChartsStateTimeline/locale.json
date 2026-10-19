@@ -1,6 +1,13 @@
 {
     "translations": {
         "de": {
+            "Custom": "Benutzerdefiniert",
+            "Range value": "Zeitraumwert",
+            "Range unit": "Zeitraumeinheit",
+            "Minutes": "Minuten",
+            "Hours": "Stunden",
+            "Days": "Tage",
+            "Weeks": "Wochen",
             "Inherited mode follows every Tile design change. Disable it for an independent IPSView appearance.": "Im vererbten Modus folgt IPSView jeder Änderung des Kacheldesigns. Für eine unabhängige Gestaltung die Vererbung deaktivieren.",
             "Intervals and display": "Abschnitte und Darstellung",
             "Update easing": "Aktualisierungs-Bewegungskurve",

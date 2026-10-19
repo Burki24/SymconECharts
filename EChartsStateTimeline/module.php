@@ -12,6 +12,7 @@ use Burki24\SymconModuleHelper\ResponsiveVisualizationHelper;
 use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
 use SymconECharts\EChartsAnimationDesign;
+use SymconECharts\EChartsArchiveQuery;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsBarPreview;
 use SymconECharts\EChartsBarPreviewForm;
@@ -101,6 +102,8 @@ class EChartsStateTimeline extends IPSModuleStrict
             $this->RegisterPropertyString('Sources', '[]');
             $this->RegisterPropertyString('Title', '');
             $this->RegisterPropertyString('Range', '7d');
+            $this->RegisterPropertyInteger('CustomRangeValue', 7);
+            $this->RegisterPropertyString('CustomRangeUnit', 'day');
             foreach (['', 'IPSView'] as $prefix) {
                 foreach (self::DESIGN_DEFAULTS as $name => $default) {
                     match (gettype($default)) {
@@ -173,6 +176,11 @@ class EChartsStateTimeline extends IPSModuleStrict
         $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
             $form = $this->LoadConfigurationForm();
+            $form['elements'] = $this->SetFormFieldVisibility(
+                $form['elements'],
+                ['CustomRangeValue', 'CustomRangeUnit'],
+                $this->ReadPropertyString('Range') === 'custom'
+            );
             $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
             $form['elements'] = $this->WithAnimationFormControls($form['elements']);
             $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
@@ -185,7 +193,7 @@ class EChartsStateTimeline extends IPSModuleStrict
                 ['caption' => 'Axes and grid', 'start' => 'ShowTimeLabels'],
                 ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
             ]);
-            $fields = ['Title', 'Sources', 'Range',
+            $fields = ['Title', 'Sources', 'Range', 'CustomRangeValue', 'CustomRangeUnit',
                 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
                 'IPSViewBackgroundOpacityPercent', ...array_keys(self::DESIGN_DEFAULTS),
                 ...array_map(static fn (string $name): string => 'IPSView' . $name, array_keys(self::DESIGN_DEFAULTS))];
@@ -213,6 +221,24 @@ class EChartsStateTimeline extends IPSModuleStrict
         try {
             if (!$this->HandleIPSViewHTMLPageAction($Ident, $Value)) {
                 throw new InvalidArgumentException('Unknown action: ' . $Ident);
+            }
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
+        }
+    }
+
+    public function UpdateTimeRangeForm(string $Range): void
+    {
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            foreach (['CustomRangeValue', 'CustomRangeUnit'] as $name) {
+                $this->UpdateFormField($name, 'visible', $Range === 'custom');
             }
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
@@ -423,7 +449,12 @@ class EChartsStateTimeline extends IPSModuleStrict
             throw new RuntimeException('No active EChartsGateway is connected.');
         }
         $sources = $this->GetValidatedSources();
-        $query = StateTimelineData::Window($this->ReadPropertyString('Range'), $this->CurrentTimestamp());
+        $query = StateTimelineData::Window(
+            $this->ReadPropertyString('Range'),
+            $this->CurrentTimestamp(),
+            $this->ReadPropertyInteger('CustomRangeValue'),
+            $this->ReadPropertyString('CustomRangeUnit')
+        );
         $rows = [];
         $pointCount = 0;
         $encodedRowBytes = 0;
@@ -540,7 +571,12 @@ class EChartsStateTimeline extends IPSModuleStrict
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => $exception->getMessage()];
         }
         if (mb_strlen($this->ReadPropertyString('Title')) > 200
-            || !in_array($this->ReadPropertyString('Range'), ['24h', '7d', '30d'], true)
+            || !in_array($this->ReadPropertyString('Range'), ['24h', '7d', '30d', 'custom'], true)
+            || !EChartsArchiveQuery::IsValidRange(
+                $this->ReadPropertyString('Range'),
+                $this->ReadPropertyInteger('CustomRangeValue'),
+                $this->ReadPropertyString('CustomRangeUnit')
+            )
             || !$this->IsValidDesign('')
             || (!$this->ReadPropertyBoolean('IPSViewUseTileDesign') && !$this->IsValidDesign('IPSView'))
             || !EChartsIPSViewBackground::IsValid(

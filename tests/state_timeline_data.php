@@ -60,6 +60,23 @@ foreach (['24h' => 86400, '7d' => 604800, '30d' => 2592000] as $range => $second
         'Ranges are exact elapsed durations including DST.'
     );
 }
+$now = (new DateTimeImmutable('2026-10-25 12:00:00', new DateTimeZone('Europe/Berlin')))->getTimestamp();
+foreach ([[90, 'minute', 5400], [2, 'week', 1209600], [1000, 'day', 86400000]] as [$value, $unit, $seconds]) {
+    timelineAssert(StateTimelineData::Window('custom', $now, $value, $unit) === [
+        'StartTimestamp' => $now - $seconds, 'EndTimestamp' => $now
+    ], 'Custom state windows must use exact elapsed durations up to the current second, including DST.');
+}
+foreach ([[0, 'day'], [1001, 'minute'], [7, 'month']] as [$value, $unit]) {
+    try {
+        StateTimelineData::Window('custom', $now, $value, $unit);
+        throw new RuntimeException('Invalid custom state window was accepted.');
+    } catch (InvalidArgumentException) {
+    }
+}
+timelineAssert(
+    StateTimelineData::Window('7d', $now, 0, 'invalid')['StartTimestamp'] === $now - 604800,
+    'Inactive custom settings must not invalidate a saved preset.'
+);
 foreach ([[[100, 2]], [[100, -1]]] as $points) {
     try {
         StateTimelineData::Segments($points, null, 100, 200, true);

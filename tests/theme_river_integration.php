@@ -287,6 +287,7 @@ assertGatewayGauge($river->GetTestStatus() === IS_ACTIVE, 'Unused independent dr
 $river->SetTestProperty('Sources', json_encode([$riverSources[0]], JSON_THROW_ON_ERROR));
 $river->ApplyChanges();
 assertGatewayGauge($river->GetTestReferences() === [88500], 'Removed ThemeRiver sources must unregister references.');
+(require __DIR__ . '/archive_custom_interval_integration.php')($river, 'ThemeRiver', 'Aggregation');
 $river->SetTestParentActive(false);
 $river->ApplyChanges();
 assertGatewayGauge($river->GetTestStatus() === 203 && $river->GetTestTimerInterval('ArchiveRefresh') === 0, 'Missing parent disables archive refresh.');

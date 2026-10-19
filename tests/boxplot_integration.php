@@ -237,6 +237,7 @@ preg_match_all("/(?:Translate|translate)\\(\\s*'([^']+)'/", file_get_contents(__
 foreach ($boxplotRuntimeTexts[1] as $text) {
     assertGatewayGauge(isset($boxplotLocale[$text]), 'Boxplot must translate visible runtime text: ' . $text);
 }
+require __DIR__ . '/boxplot_custom_ranges.php';
 require __DIR__ . '/boxplot_large_sources.php';
 date_default_timezone_set($boxplotZone);
 echo "Boxplot integration verified.\n";

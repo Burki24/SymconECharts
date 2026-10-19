@@ -9,6 +9,13 @@
 
 ## Neu
 
+- Boxplot, Parallel, Candlestick, ThemeRiver und StateTimeline bieten
+  benutzerdefinierte rollierende Archivzeiträume mit 1–1000 Minuten, Stunden,
+  Tagen oder Wochen. Kachel und IPSView verwenden dasselbe Zeitfenster;
+  bisherige Voreinstellungen und Datenbudgets bleiben erhalten. Zu kurze
+  Zeiträume ohne vollständige Aggregate bleiben leer; zu große Intervalllisten
+  werden vor dem Archivzugriff mit einem verständlichen Hinweis abgewiesen.
+
 - Alle 30 Module verwenden einheitliche deutsche Debug-Ausgaben nach dem OpenHomeAlarm-Vorbild: Vorgangskennung, Funktions-/Zeilenbezug, Start und Ende, Werte- und Schnittstellenverarbeitung sowie sichere Fehlerdiagnosen ohne private Diagramminhalte oder Zugriffskanäle.
 
 - EChartsBoxplot unterstützt bis zu 32 Archivquellen mit automatischer

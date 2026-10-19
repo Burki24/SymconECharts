@@ -26,6 +26,17 @@ foreach (['2026-03-30' => 23, '2026-10-26' => 25] as $date => $hours) {
 $fall = CandlestickData::Window('24h', 'hour', strtotime('2026-10-25 12:00 Europe/Berlin'), 'Europe/Berlin');
 $labels = array_column($fall['Intervals'], 'label');
 candleAssert(count(array_unique($labels)) === 24, 'Repeated local hour has distinct offset.');
+$custom = CandlestickData::Window('custom', 'hour', strtotime('2026-10-17 12:34:00 Europe/Berlin'), 'Europe/Berlin', 90, 'minute');
+candleAssert(count($custom['Intervals']) === 1 && $custom['StartTimestamp'] === strtotime('2026-10-17 11:00:00 Europe/Berlin'), 'Custom durations include only whole completed intervals.');
+$empty = CandlestickData::Window('custom', 'day', strtotime('2026-10-17 12:34:00 Europe/Berlin'), 'Europe/Berlin', 1, 'minute');
+candleAssert($empty['Empty'] && CandlestickData::Summarize([], $empty) === [], 'Short custom durations do not invent a complete day.');
+candleAssert(count(CandlestickData::Window('custom', 'day', strtotime('2026-10-17 12:34 Europe/Berlin'), 'Europe/Berlin', 720, 'day')['Intervals']) === 720, 'Custom daily durations may exceed the former 30-day preset.');
+try {
+    CandlestickData::Window('custom', 'hour', strtotime('2026-10-17 12:34 Europe/Berlin'), 'Europe/Berlin', 721, 'hour');
+    throw new LogicException('Excessive candle interval count accepted.');
+} catch (InvalidArgumentException $exception) {
+    candleAssert(str_contains($exception->getMessage(), 'shorter range or a longer interval'), 'Interval limits must explain the available choices.');
+}
 $calls = 0;
 $points = CandlestickData::Read(1, 100, 10099, static function (array $request) use (&$calls): array
 {
