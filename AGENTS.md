@@ -104,6 +104,9 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Gemäß ADR 0069 sind bis zu 16 Quellen mit optionaler Bandauswahl und einem
   gemeinsamen Ladebudget von 16000 Aggregaten zulässig. Auch versteckte
   Quellen bleiben in Ladebudget und vollständiger Lückenprüfung enthalten.
+  ADR 0070 ergänzt ausdrücklich wählbaren Zählerverbrauch je abgeschlossenem
+  Stunden-/Tagesintervall über den bestehenden Gateway-Reducer `sum`.
+  Der Standard `average` bleibt unverändert; Archivtypen werden nicht gemischt.
 - Das Gateway stellt ausschließlich familienübergreifende Infrastruktur wie
   Archivzugriff, begrenztes Caching, gemeinsame Ressourcen und gegebenenfalls
   abgesicherte IPSView-Kommunikation bereit. Familienbezogene Properties,
@@ -164,8 +167,9 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
 
 - `ECRV` ist `EChartsThemeRiver` zugeordnet (`RV` = River), GUID
   `{6767D036-5E2B-4D33-B7F1-C9F1B4376C04}` gemäß ADR 0058.
-  Die eigenständige Archivfamilie verwendet ausschließlich abgeschlossene
-  Stunden-/Tagesmittelwerte nichtnegativer Standardvariablen gleicher Einheit.
+  Die eigenständige Archivfamilie verwendet abgeschlossene Stunden-/Tagesmittelwerte
+  nichtnegativer Standardvariablen oder ausdrücklich ausgewählten Zählerverbrauch
+  gemäß ADR 0070. Die Quellen müssen dieselbe Einheit und passenden Archivtyp besitzen.
 
 - Technische Modulnamen und deren Anzeige folgen einheitlich `ECharts` plus
   Familienname ohne Leerzeichen, beispielsweise `EChartsPictorialBar`.

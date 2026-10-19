@@ -67,6 +67,14 @@ const model = {family: 'themeRiver', theme: 'dark', range: {startTimestamp: star
         style: {showLegend: true, showTooltip: true, showLabels: true, showAxisLabels: true, showAxisTicks: true,
             bandOpacityPercent: 85, borderWidth: 2, borderColor: '#123456', titleFontSizePercent: 100, animationEnabled: false}}};
 const tile = render(model);
+const consumptionModel = {...model, themeRiver: {...model.themeRiver, metric: 'consumption', title: 'Interval energy', unit: 'kWh',
+    sources: model.themeRiver.sources.map(source => ({...source, unit: 'kWh', decimals: 3})),
+    rows: [row(0, [0.125, 0.375]), row(1, [0.25, 0.5]), row(2, null), row(3, [0.1, 0.2]), row(4, [0, 0])]}};
+const consumption = render(consumptionModel);
+assert.match(consumption.option.aria.label.description, /Completed interval consumption/,
+    'Counter consumption must never be described as an interval mean.');
+assert.doesNotMatch(consumption.option.aria.label.description, /mean/i);
+assert.match(tile.option.aria.label.description, /Completed interval means/, 'A legacy model without metric retains average semantics.');
 const designed = render({...model, themeRiver: {...model.themeRiver, style: {...model.themeRiver.style,
     bandHeightPercent: 50, borderType: 'dotted', shadowBlur: 8, shadowColor: '#123456', shadowOffsetX: 3, shadowOffsetY: -4,
     emphasisEnabled: false, emphasisFocus: 'none', blurOpacityPercent: 20, showAxisLine: false, axisLineWidth: 3,
@@ -369,6 +377,37 @@ const zeroSelected = render({...model, themeRiver: {...model.themeRiver, enableB
     rows: [row(0, [0, 100])], sources: model.themeRiver.sources.map((s, i) => ({...s, initiallyVisible: i === 0}))}});
 assert.equal(zeroSelected.empty.textContent, 'All selected interval means are zero.');
 assert.equal(zeroSelected.empty.hidden, false);
+for (const mode of ['symcon', 'ipsview']) {
+    const engine = echarts.init(null, null, {renderer: 'svg', ssr: true, width: 420, height: 500});
+    const input = {...consumptionModel, themeRiver: {...consumptionModel.themeRiver, enableBandSelection: true,
+        sources: consumptionModel.themeRiver.sources.map((source, index) => ({...source, initiallyVisible: index === 0}))}};
+    const snapshot = JSON.stringify(input);
+    const output = render(input, mode, 420, 500, true, () => engine);
+    assert.match(output.option.aria.label.description, /Completed interval consumption/);
+    assert.equal(output.option.series.filter(series => series.data.length).length, 2,
+        'A hidden counter source cannot heal the shared consumption gap.');
+    const tooltip = output.option.tooltip.formatter({data: output.option.series[0].data[0]});
+    assert.match(tooltip, /&lt;Same&gt;: 0,125 kWh/);
+    assert.match(tooltip, /&lt;Same&gt;: 0,375 kWh/, 'Hidden sources retain unmodified original counter consumption in the tooltip.');
+    assert.doesNotMatch(tooltip, /mean|average|Mittelwert|variable-/i);
+    assert.equal(output.option.tooltip.formatter({data: [0, 0, '', 2]}), '');
+    assertNativeFinite(engine);
+    engine.dispatchAction({type: 'legendAllSelect'});
+    engine.dispatchAction({type: 'legendInverseSelect'});
+    assert.equal(output.empty.textContent, 'No bands selected.');
+    engine.dispatchAction({type: 'legendToggleSelect', name: input.themeRiver.sources[0].id});
+    const selectedZeroConsumption = {...input, themeRiver: {...input.themeRiver, rows: [row(0, [0, 0.375])]}};
+    output.window.handleMessage({status: 'ready', chart: selectedZeroConsumption});
+    assert.equal(output.empty.hidden, false);
+    assert.equal(output.empty.textContent, 'Consumption is zero in all selected bands.');
+    const allZeroConsumption = {...input, themeRiver: {...input.themeRiver, rows: [row(0, [0, 0])]}};
+    output.window.handleMessage({status: 'ready', chart: allZeroConsumption});
+    assert.equal(output.empty.hidden, false);
+    assert.equal(output.empty.textContent, 'Consumption is zero in all completed intervals.');
+    assertNativeFinite(engine);
+    assert.equal(JSON.stringify(input), snapshot, 'Consumption rendering never rewrites source values, units, gaps or selection defaults.');
+    engine.dispose();
+}
 assert.equal(JSON.stringify(sixteen), originalSixteen, 'Selection cannot mutate any full original model values or gaps.');
 const manyGaps = render({...sixteen, themeRiver: {...sixteen.themeRiver,
     missingIntervals: 360, rows: sixteen.themeRiver.rows.map((r, i) => ({...r,

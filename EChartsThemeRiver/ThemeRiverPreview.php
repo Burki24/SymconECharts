@@ -9,6 +9,8 @@ trait ThemeRiverPreview
 {
     private function ThemeRiverPreviewSvg(array $values, bool $ipsView): string
     {
+        $metric = (string) ($values['Metric'] ?? $this->ReadPropertyString('Metric'));
+        ThemeRiverData::ArchiveContract($metric);
         $palette = EChartsBarPreview::Palette($this->BarPreviewValue($values, 'EChartsTheme', 'string', $ipsView));
         $svg = EChartsBarPreview::Open(
             $palette,
@@ -16,12 +18,12 @@ trait ThemeRiverPreview
             true,
             $ipsView,
             $values,
-            $this->Translate('Example data'),
+            $this->Translate($metric === 'consumption' ? 'Example data: consumption' : 'Example data'),
             $this->Translate('ThemeRiver preview'),
             EChartsBarPreview::Color($this->BarPreviewValue($values, 'TitleColor', 'integer', $ipsView), $palette['text']),
             $this->BarPreviewValue($values, 'TitleFontSizePercent', 'integer', $ipsView)
         );
-        $svg = str_replace('<svg xmlns', '<svg font-family="' . EChartsBarPreview::E($this->BarPreviewValue($values, 'FontFamily', 'string', $ipsView)) . '" xmlns', $svg);
+        $svg = str_replace('<svg xmlns', '<svg data-metric="' . $metric . '" font-family="' . EChartsBarPreview::E($this->BarPreviewValue($values, 'FontFamily', 'string', $ipsView)) . '" xmlns', $svg);
         $textStyle = fn (string $prefix): string => ' font-weight="' . ($this->BarPreviewValue($values, $prefix . 'Bold', 'boolean', $ipsView) ? 'bold' : 'normal')
             . '" font-style="' . ($this->BarPreviewValue($values, $prefix . 'Italic', 'boolean', $ipsView) ? 'italic' : 'normal') . '"';
         $svg = str_replace('<text x="24"', '<text' . $textStyle('Title') . ' x="24"', $svg);

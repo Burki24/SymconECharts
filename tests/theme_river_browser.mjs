@@ -12,19 +12,22 @@ const translations = JSON.parse(read('EChartsThemeRiver/locale.json')).translati
 const palette = {background: '#303236', text: '#f4f5f7', muted: '#969aa2', border: '#777b83', accent: '#55CBB5',
     seriesColors: ['#5070DD', '#B6D634', '#505372', '#FF994D', '#0CA8DF', '#FFD10A', '#FB628B', '#785DB0']};
 const start = 1792101600;
-function state(testCase, extended, days, font, selection = false, sourceCount = null) {
+function state(testCase, extended, days, font, selection = false, sourceCount = null, metric = 'average') {
     const count = testCase === 'dense' ? 720 : days * 24;
+    const consumption = metric === 'consumption';
+    const unit = consumption ? 'kWh' : 'W';
     const sources = ['Gleicher Name', 'Gleicher Name', 'Küche', 'Wohnbereich', 'Terrasse', 'Keller', 'Server', 'Werkstatt',
         'Heizung', 'Lüftung', 'Ladegerät', 'Flur', 'Dachgeschoss', 'Garage', 'Nebengebäude', 'Synthetischer Bereich mit langem Namen']
         .slice(0, sourceCount || (extended ? 8 : 4))
-        .map((label, i) => ({id: 'source-' + i, label, unit: 'W', decimals: 1, color: '', initiallyVisible: i < 8}));
+        .map((label, i) => ({id: 'source-' + i, label, unit, decimals: consumption ? 3 : 1, color: '', initiallyVisible: i < 8}));
     const rows = Array.from({length: count}, (_, i) => ({startTimestamp: start + i * 3600, endTimestamp: start + (i + 1) * 3600 - 1,
         label: new Date((start + i * 3600) * 1000).toLocaleString('de-DE', {timeZone: 'Europe/Berlin', timeZoneName: 'shortOffset'}),
         values: testCase === 'empty' || ((testCase === 'dense' ? i % 2 : testCase === 'gaps' && i >= 9 && i < 12) && testCase !== 'zero') ? null
-            : sources.map((_, j) => testCase === 'zero' ? 0 : 10 + 25 * (1 + Math.sin(i * .4 + j)))}));
+            : sources.map((_, j) => testCase === 'zero' ? 0 : (10 + 25 * (1 + Math.sin(i * .4 + j))) / (consumption ? 1000 : 1))}));
     return {schemaVersion: 1, family: 'themeRiver', status: 'ready', error: null, chart: {
         schemaVersion: 1, family: 'themeRiver', theme: 'auto', range: {startTimestamp: start, endTimestamp: start + count * 3600 - 1, timezone: 'Europe/Berlin'},
-        themeRiver: {title: 'Verbraucher · archivierte Leistung (W)', unit: 'W', aggregation: 'hour', sources, rows, enableBandSelection: selection,
+        themeRiver: {title: consumption ? 'Verbraucher · Intervallverbrauch (kWh)' : 'Verbraucher · archivierte Leistung (W)',
+            metric, unit, aggregation: 'hour', sources, rows, enableBandSelection: selection,
             missingIntervals: rows.filter(r => r.values === null).length,
             style: {showTooltip: true, showLegend: true, showLabels: extended, showAxisLabels: true, showAxisTicks: true,
                 bandOpacityPercent: extended ? 75 : 85, borderWidth: extended ? 1 : 0, borderColor: '',
@@ -43,7 +46,8 @@ function page(url) {
     const font = url.searchParams.get('font') === '200' ? 200 : 100;
     const selection = url.searchParams.get('selection') === 'on';
     const sourceCount = url.searchParams.get('count') === '16' ? 16 : null;
-    const bootstrap = {mode, language: 'de', state: state(url.searchParams.get('case') || 'gaps', url.searchParams.get('design') === 'extended', days, font, selection, sourceCount),
+    const metric = url.searchParams.get('metric') === 'consumption' ? 'consumption' : 'average';
+    const bootstrap = {mode, language: 'de', state: state(url.searchParams.get('case') || 'gaps', url.searchParams.get('design') === 'extended', days, font, selection, sourceCount, metric),
         options: {tileHeaderVisible: url.searchParams.get('header') !== 'hidden', adaptToBackground: false, echartsThemes: {auto: palette}}, translations};
     if (['top', 'bottom'].includes(url.searchParams.get('legend'))) {
         bootstrap.state.chart.themeRiver.style.legendPosition = url.searchParams.get('legend');
@@ -89,6 +93,7 @@ http.createServer((req, res) => {
     if (url.pathname === '/preview.svg') {
         const preview = spawnSync('php', ['tests/gateway_gauges.php', '--theme-river-preview', JSON.stringify({
             Title: 'ThemeRiver · Vorschau', ShowLabels: true, BorderWidth: 1, Sources: [],
+            Metric: url.searchParams.get('metric') === 'consumption' ? 'consumption' : 'average',
             Range: url.searchParams.get('range') === '24h' ? '24h' : '7d',
             AxisFontSizePercent: url.searchParams.get('font') === '200' ? 200 : 100,
             LegendFontSizePercent: url.searchParams.get('font') === '200' ? 200 : 100,
@@ -106,9 +111,10 @@ http.createServer((req, res) => {
     }
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     if (url.pathname === '/chart') {res.end(page(url)); return;}
+    const metric = url.searchParams.get('metric') === 'consumption' ? 'consumption' : 'average';
     res.end('<!doctype html><html lang="de"><head><title>ThemeRiver – lokale Browserprüfung</title></head><body style="background:#0b0c0e;color:white;font:16px Arial;margin:20px">'
         + '<h1 style="font-size:20px">ThemeRiver · synthetische Beispieldaten</h1><div style="display:flex;gap:16px;align-items:start;flex-wrap:wrap">'
-        + '<section><h2 style="font-size:16px">Kachel · 16 Quellen / 720 Intervalle</h2><iframe title="Kachel" src="/chart?mode=symcon&range=30d&selection=on&count=16" style="border:0;width:400px;height:600px"></iframe></section>'
-        + '<section><h2 style="font-size:16px">IPSView · 16 Quellen / 720 Intervalle</h2><iframe title="IPSView" src="/chart?mode=ipsview&range=30d&selection=on&count=16" style="border:0;width:790px;height:600px"></iframe></section>'
-        + '<section><h2 style="font-size:16px">PHP-Vorschau</h2><img src="/preview.svg?design=extended" alt="ThemeRiver PHP SVG" width="720"></section></div></body></html>');
+        + '<section><h2 style="font-size:16px">Kachel · 16 Quellen / 720 Intervalle</h2><iframe title="Kachel" src="/chart?mode=symcon&range=30d&selection=on&count=16&metric=' + metric + '" style="border:0;width:400px;height:600px"></iframe></section>'
+        + '<section><h2 style="font-size:16px">IPSView · 16 Quellen / 720 Intervalle</h2><iframe title="IPSView" src="/chart?mode=ipsview&range=30d&selection=on&count=16&metric=' + metric + '" style="border:0;width:790px;height:600px"></iframe></section>'
+        + '<section><h2 style="font-size:16px">PHP-Vorschau</h2><img src="/preview.svg?design=extended&metric=' + metric + '" alt="ThemeRiver PHP SVG" width="720"></section></div></body></html>');
 }).listen(8802, '127.0.0.1', () => console.log('ThemeRiver fixture: http://127.0.0.1:8802'));

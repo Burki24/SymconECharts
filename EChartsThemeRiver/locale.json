@@ -1,6 +1,17 @@
 {
     "translations": {
         "de": {
+            "Data basis": "Datengrundlage",
+            "Interval mean (standard archive)": "Intervallmittelwert (Standardarchiv)",
+            "Counter consumption per interval": "Zählerverbrauch je Intervall",
+            "Choose 1 to 16 archive variables of the same unit. Means require standard archives; consumption requires counter archives. Only nonnegative completed interval values are supported. Intervals missing on any source remain blank.": "1 bis 16 Archivvariablen derselben Einheit wählen. Mittelwerte benötigen Standardarchive, Verbrauch benötigt Zählerarchive. Nur nichtnegative Werte abgeschlossener Intervalle werden unterstützt. Fehlt eine Quelle, bleibt das gesamte Intervall leer.",
+            "ThemeRiver consumption requires counter archive variables.": "ThemeRiver-Verbrauch benötigt Zähler-Archivvariablen.",
+            "The ThemeRiver metric is invalid.": "Die ThemeRiver-Datengrundlage ist ungültig.",
+            "The ThemeRiver archive values are invalid. Only nonnegative, finite interval consumption is supported.": "Die ThemeRiver-Archivwerte sind ungültig. Unterstützt werden nur nichtnegative, endliche Intervallverbräuche.",
+            "Consumption is zero in all completed intervals.": "Der Verbrauch ist in allen abgeschlossenen Intervallen 0.",
+            "Consumption is zero in all selected bands.": "Der Verbrauch ist in allen ausgewählten Bändern 0.",
+            "Completed interval consumption": "Verbrauch abgeschlossener Intervalle",
+            "Example data: consumption": "Beispieldaten: Verbrauch",
             "Initially visible": "Anfangs sichtbar",
             "Enable band selection": "Bandauswahl aktivieren",
             "All": "Alle",

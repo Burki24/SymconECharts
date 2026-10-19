@@ -1,5 +1,32 @@
 # Tests
 
+## ThemeRiver: Zählerverbrauch als Datengrundlage
+
+`php tests/gateway_gauges.php --theme-river-consumption` prüft den wirklichen
+Gateway-Pfad mit 16 synthetischen Zählerarchiven: `Metric=consumption` fordert
+`sum` an und erhält die originalen `Avg`-Verbrauchssummen. Absichtlich abweichende
+Roh-/Momentanwerte und ein Rohwert-Reset fließen nicht in die Rechnung ein.
+Bis 16×720 Intervalle, gleiche Namen, versteckte Quellen, Nullwerte und strenge
+gemeinsame Lücken bleiben erhalten. Fehler bei Archivtyp, Reducer, negativen
+Werten, gekürzten/übergroßen Antworten sowie Wiederanlauf sind abgedeckt.
+Der alte `average`-Default verändert keine Quellen oder Designs.
+
+Die Tests vergleichen beide Ausgaben verlustfrei und prüfen den abgeschlossenen
+25-Stunden-DST-Tag, den Ausschluss des laufenden Tages und ein leeres Custom-Fenster
+ohne Archivzugriff. Ungespeicherte Metric-Entwürfe aktualisieren beide
+gekennzeichneten SVG-Vorschauen ohne Archivabfrage oder Property-Schreibzugriff.
+`tests/theme_river_data.php` prüft zusätzlich die zentrale Metric-Zuordnung
+einschließlich ungültiger Werte. Native Tests in `tests/theme_river_layout.js`
+prüfen beide Ausgabearten, Verbrauchs-Aria/Nullhinweise, Auswahl und originale
+kWh-Tooltips samt Dezimalstellen; Modelle ohne Metric behalten die alte Semantik.
+Die lokale Browser-Fixture unterstützt `?metric=consumption`. Am 19.10.2026
+wurden beide Canvas-Ausgaben mit 16 Quellen/720 Intervallen visuell geprüft:
+Verbrauchstitel/Aria, originale kWh-Tooltips, Auswahl mit erhaltenem ID-Anker
+nach Umsortierung, vollständiges Ausblenden/Wiederherstellen und die gekennzeichnete
+PHP-Vorschau. Es traten keine Überlappungen mit Kachelkopf oder Fußbereich auf.
+Live-Konfigurationen/Archive bleiben unverändert; die Abnahme nach Modulupdate
+in Symcon und IPSView bleibt dem Eigentümer vorbehalten.
+
 ## ThemeRiver: 16 Quellen und optionale Bandauswahl
 
 `php tests/theme_river_data.php` prüft 16/17 Reihen und den zentralen
@@ -10,11 +37,11 @@ deaktivierter Default, boolesche Anfangssichtbarkeit und IDs trotz gleicher
 Namen. Versteckte Quellen bleiben in Referenzen, Abfragen, Ladezähler und
 vollständigem gemeinsamen Join. Eine Lücke der versteckten Quelle bleibt
 `null`; echte Nullwerte werden nicht als fehlend behandelt. Negative Werte,
-Zählerarchive und übergroße Antworten werden ohne Teilmodell abgewiesen.
+Zählerarchive im Mittelwertmodus und übergroße Antworten werden ohne Teilmodell abgewiesen.
 
 Die Prüfung entpackt beide großen Startzustände und vergleicht alle Quellen,
-Zeilen und Originalwerte exakt. Gemessen am 19.10.2026: Modell 352320 Bytes,
-Kachel 607527 Bytes und IPSView 610814 Bytes. Getrennte Regressionen prüfen
+Zeilen und Originalwerte exakt. Gemessen am 19.10.2026 einschließlich Metric-Feld:
+Modell 352339 Bytes, Kachel 608584 Bytes und IPSView 611871 Bytes. Getrennte Regressionen prüfen
 900000-Byte-Modellgrenze und finalen HTML-Guard, klare Fehler und Wiederanlauf.
 Das Test-Speicherlimit bleibt 128 MiB. Vorschauen decken 4/16, 0/16, spät
 sichtbare Originalfarben und deaktivierte Auswahl mit 8/16 ab; Entwürfe lösen

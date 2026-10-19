@@ -9,6 +9,11 @@
 
 ## Neu
 
+- EChartsThemeRiver bietet Zählerverbrauch je abgeschlossenem Stunden- oder
+  Tagesintervall als zusätzliche Datengrundlage. Der bisherige Mittelwert
+  bleibt Standard. Verbrauch nutzt Symcons Zähleraggregate; Originaleinheiten,
+  Bandauswahl, gemeinsame Archivlücken und Ladegrenzen bleiben erhalten.
+
 - EChartsThemeRiver unterstützt bis zu 16 Quellen und ein gemeinsames
   Ladebudget von 16.000 Aggregaten. Die optionale, standardmäßig deaktivierte
   Bandauswahl bietet Anfangssichtbarkeit, Alle/Umkehren und erhaltene Auswahl

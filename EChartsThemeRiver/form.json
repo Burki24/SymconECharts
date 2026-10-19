@@ -11,6 +11,21 @@
             "caption": "Title"
         },
         {
+            "type": "Select",
+            "name": "Metric",
+            "caption": "Data basis",
+            "options": [
+                {
+                    "caption": "Interval mean (standard archive)",
+                    "value": "average"
+                },
+                {
+                    "caption": "Counter consumption per interval",
+                    "value": "consumption"
+                }
+            ]
+        },
+        {
             "type": "List",
             "name": "Sources",
             "caption": "ThemeRiver sources",
@@ -92,7 +107,7 @@
         },
         {
             "type": "Label",
-            "caption": "Choose 1 to 16 standard archive variables of the same unit. Only nonnegative completed interval means are supported. Intervals missing on any source remain blank."
+            "caption": "Choose 1 to 16 archive variables of the same unit. Means require standard archives; consumption requires counter archives. Only nonnegative completed interval values are supported. Intervals missing on any source remain blank."
         },
         {
             "type": "CheckBox",

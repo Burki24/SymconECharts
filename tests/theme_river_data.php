@@ -13,6 +13,16 @@ function assertRiver(bool $condition, string $message): void
     }
 }
 
+assertRiver(ThemeRiverData::ArchiveContract('average') === ['reducer' => 'average', 'archiveType' => 'standard'], 'Existing means must explicitly require standard archives.');
+assertRiver(ThemeRiverData::ArchiveContract('consumption') === ['reducer' => 'sum', 'archiveType' => 'counter'], 'Consumption must use the shared Gateway counter reducer, not raw differences.');
+foreach (['', 'auto', 'sum', 'minimum', 'counter'] as $invalidMetric) {
+    try {
+        ThemeRiverData::ArchiveContract($invalidMetric);
+        throw new LogicException('Unknown river metric accepted.');
+    } catch (InvalidArgumentException) {
+    }
+}
+
 $window = ThemeRiverData::Window('24h', 'hour', strtotime('2026-10-17T12:34:56+02:00'), 'Europe/Berlin');
 assertRiver(count($window['Intervals']) === 24 && $window['EndTimestamp'] === strtotime('2026-10-17T12:00:00+02:00') - 1, 'Only completed hours belong to the window.');
 $slots = $window['Intervals'];

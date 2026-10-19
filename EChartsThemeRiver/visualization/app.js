@@ -231,7 +231,8 @@
             textStyle: {fontFamily: fontFamily},
             ...design.animationOptions(style, {enabled: true, initialDuration: 350, updateDuration: 500}),
             aria: {enabled: true, label: {description: String(river.title || 'ThemeRiver') + '. '
-                + translate('Completed interval means') + ': ' + sources.map(function (s) { return s.label; }).join(', ')
+                + translate(river.metric === 'consumption' ? 'Completed interval consumption' : 'Completed interval means')
+                + ': ' + sources.map(function (s) { return s.label; }).join(', ')
                 + '. ' + String(rows.length - (river.missingIntervals || 0)) + '/' + rows.length}},
             color: sourceColors,
             graphic: labels,
@@ -341,8 +342,12 @@
         var positiveOriginal = themeRiver.rows.some(function (row) {
             return Array.isArray(row.values) && row.values.some(function (value) { return value > 0; });
         });
+        var zeroMessage = themeRiver.metric === 'consumption'
+            ? 'Consumption is zero in all completed intervals.' : 'All completed interval means are zero.';
+        var selectedZeroMessage = themeRiver.metric === 'consumption'
+            ? 'Consumption is zero in all selected bands.' : 'All selected interval means are zero.';
         emptyElement.textContent = translate(!anySelected ? 'No bands selected.' :
-            themeRiver.enableBandSelection === true && positiveOriginal ? 'All selected interval means are zero.' : 'All completed interval means are zero.');
+            themeRiver.enableBandSelection === true && positiveOriginal ? selectedZeroMessage : zeroMessage);
         emptyElement.hidden = hasBands;
     }
     window.handleMessage = function (message) {

@@ -21,6 +21,15 @@ IPSView nur den Diagrammtitel benötigt.
 
 ## Aktueller Stand und Zielarchitektur
 
+ThemeRiver ergänzt gemäß [ADR 0070](adr/0070-theme-river-counter-consumption.md)
+die globale Property `Metric`: `average` bleibt Default, `consumption` fordert
+explizit `sum` und Zählerarchive. `ThemeRiverData::ArchiveContract` besitzt
+die familienbezogene Zuordnung; Gateway, Cache und dessen zentrale Übernahme
+der Symcon-`Avg`-Zähleraggregate bleiben unverändert. Keine eigenen Rohwertdifferenzen,
+Resetkorrekturen oder Leistungsintegration. Derselbe Join, Auswahl-, Zeitfenster-
+und Budgetpfad gilt für beide Datengrundlagen; Renderer/Vorschau benennen Verbrauch
+ausdrücklich und behandeln fehlende alte Modellfelder weiterhin als Mittelwert.
+
 ThemeRiver erweitert gemäß [ADR 0069](adr/0069-theme-river-band-selection.md)
 auf 16 Quellen. `EnableBandSelection` ist standardmäßig aus; das optionale
 Quellenfeld `InitiallyVisible` wirkt nur bei Aktivierung. Die flüchtige

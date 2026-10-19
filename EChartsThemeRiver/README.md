@@ -1,18 +1,20 @@
 # EChartsThemeRiver
 
 Zeigt mehrere archivierte Messreihen als farbige Bänder auf einer Zeitachse.
-Die Bandbreite entspricht dem jeweiligen Stunden- oder Tagesmittelwert.
-Geeignet ist das zum Beispiel für die Leistungsaufnahme mehrerer Verbraucher
-in Watt. Es werden keine Energieverbräuche aus Leistungswerten berechnet.
+Die Bandbreite entspricht wahlweise dem Stunden-/Tagesmittelwert oder dem
+Zählerverbrauch des jeweiligen Intervalls. Geeignet ist das beispielsweise
+für mittlere Leistungsaufnahmen in Watt oder Energieverbräuche aus kWh-Zählern.
+Es werden keine Energieverbräuche aus Leistungswerten berechnet.
 
 ## Voraussetzungen und Einrichtung
 
 1. Eine Instanz `EChartsThemeRiver` anlegen und mit dem vorhandenen
    `EChartsGateway` verbinden.
-2. Unter **ThemeRiver-Quellen** ein bis 16 unterschiedliche Integer- oder
-   Float-Variablen hinzufügen, die im Archiv als Standardvariablen aufgezeichnet
-   werden. Alle Quellen müssen dieselbe Einheit haben. Zählerarchive werden
-   nicht unterstützt.
+2. Unter **Datengrundlage** den bisherigen **Intervallmittelwert
+   (Standardarchiv)** oder **Zählerverbrauch je Intervall** wählen. Unter
+   **ThemeRiver-Quellen** ein bis 16 unterschiedliche Integer-/Float-Variablen
+   hinzufügen: Mittelwerte erfordern Standardarchive, Verbrauch erfordert
+   Zählerarchive. Alle Quellen müssen dieselbe Einheit haben.
 3. Optional pro Quelle eine eigene Beschriftung und Farbe festlegen.
    Ohne Beschriftung gilt der aktuelle Variablenname; gleiche Namen sind
    zulässig. Automatische Farben folgen dem gewählten Theme.
@@ -27,7 +29,20 @@ einem kompatiblen Profil. Die Einheit muss fachlich vergleichbar sein:
 Watt, Prozent und andere Größen dürfen nicht miteinander vermischt werden.
 Aktuelle Variablenwerte ersetzen keine Archivdaten.
 
-## Zeitraum, Mittelwerte und Lücken
+## Datengrundlage, Zeitraum und Lücken
+
+**Intervallmittelwert** ist der Standard und bleibt für bestehende Instanzen
+unverändert. **Zählerverbrauch je Intervall** nutzt den von Symcon berechneten
+Verbrauch abgeschlossener Stunden oder Tage. Das ist die Summe positiver
+Zähleränderungen des Intervalls, nicht der absolute Zählerstand oder eine
+eigene Differenz aus erstem und letztem Archivwert. Zählerrücksetzungen
+behandelt Symcon; das Modul erfindet keine eigene Resetkorrektur.
+
+Die Datengrundlage gilt gemeinsam für alle Quellen und für Kachel und IPSView.
+Standardarchive und Zählerarchive werden nicht gemischt oder automatisch
+umgedeutet. Ein falscher Archivtyp führt zu einer Fehlermeldung. Für
+Leistungswerte in Watt weiterhin den Mittelwert wählen; zum Energieverbrauch
+in kWh eine tatsächlich als Zähler archivierte Energievariable verwenden.
 
 Wählbar sind 24 Stunden, sieben oder 30 Tage mit Stunden- oder Tagesintervallen.
 Stundenfenster umfassen 24, 168 oder 720 abgeschlossene Stunden; Tagesfenster
@@ -49,8 +64,8 @@ Kalendertage. Beim Herbstwechsel passt deshalb kein vollständiger
 25-Stunden-Tag in eine benutzerdefinierte Dauer von einem Tag.
 Die Zeitkonfiguration gilt gemeinsam für Kachel und IPSView.
 
-Nur **nichtnegative, endliche Mittelwerte** sind zulässig. Echte Nullwerte
-bleiben gültig; negative Mittelwerte führen zu einer sichtbaren Fehlermeldung.
+Nur **nichtnegative, endliche Intervallwerte** sind zulässig. Echte Nullwerte
+bleiben gültig; negative Mittelwerte oder Verbräuche führen zu einer sichtbaren Fehlermeldung.
 Die Darstellung ist weder eine Prozentnormierung noch eine Qualitätsbewertung.
 
 Ein Intervall wird nur dargestellt, wenn **alle konfigurierten Quellen** dafür
@@ -61,9 +76,9 @@ Abschnitte bleiben sichtbar. Fehlende Werte werden weder mit Null aufgefüllt
 noch durch Verbindung über die Lücke verdeckt.
 
 Alle Abschnitte verwenden denselben Maßstab. Die glatte Bandform verbindet
-vorhandene Mittelwerte grafisch, erzeugt aber keine zusätzlichen Messungen.
+vorhandene Intervallwerte grafisch, erzeugt aber keine zusätzlichen Messungen.
 Der Tooltip nennt das tatsächliche Intervall mit Zeitzonenoffset und die
-Originalmittelwerte aller Quellen. Bestehen alle vorhandenen Mittelwerte aus
+Originalwerte samt Einheit aller Quellen. Bestehen alle vorhandenen Intervallwerte aus
 Null, bleiben Zeitachse, Legende und ein erläuternder Hinweis sichtbar.
 
 Das gemeinsame Ladebudget beträgt höchstens **16.000 Aggregate pro
@@ -151,7 +166,8 @@ einstellbares Interpolationsverfahren. Überfahreinstellungen wirken in der
 laufenden Darstellung, nicht in der schematischen Formularvorschau.
 
 Die Formularvorschauen verwenden ausdrücklich gekennzeichnete Beispieldaten
-einschließlich einer Lücke. Änderungen werden vor dem Speichern sichtbar,
+einschließlich einer Lücke. Die Verbrauchsauswahl ist als solche gekennzeichnet.
+Änderungen werden vor dem Speichern sichtbar,
 ohne Archivabfragen auszulösen. Kachel und IPSView passen sich ihrer Größe an;
 der Diagrammtitel steht in der Kachel unter dem Symcon-Kachelkopf.
 Die Vorschau zeichnet höchstens acht anfangs sichtbare Bänder und nennt bei

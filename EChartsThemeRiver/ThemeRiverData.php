@@ -8,12 +8,22 @@ use InvalidArgumentException;
 
 require_once __DIR__ . '/../libs/EChartsArchiveQuery.php';
 
-/** Completed local archive intervals and strict, nonnegative common means. */
+/** Completed local archive intervals and strict, nonnegative common values. */
 final class ThemeRiverData
 {
     public const MAXIMUM_SOURCE_COUNT = 16;
     public const MAXIMUM_AGGREGATES_PER_SOURCE = 1000;
     public const MAXIMUM_LOADED_AGGREGATES = 16000;
+
+    /** @return array{reducer:string,archiveType:string} */
+    public static function ArchiveContract(string $metric): array
+    {
+        return match ($metric) {
+            'average'     => ['reducer' => 'average', 'archiveType' => 'standard'],
+            'consumption' => ['reducer' => 'sum', 'archiveType' => 'counter'],
+            default       => throw new InvalidArgumentException('The ThemeRiver metric is invalid.')
+        };
+    }
 
     /** Count received aggregates before joining or discarding any missing intervals. */
     public static function CountLoadedAggregates(int $loaded, int $next): int
@@ -49,7 +59,7 @@ final class ThemeRiverData
                 if (!is_array($point) || !array_is_list($point) || count($point) !== 2
                     || !is_int($point[0]) || $point[0] <= $previous || !isset($allowed[$point[0]])
                     || (!is_int($point[1]) && !is_float($point[1])) || !is_finite((float) $point[1]) || $point[1] < 0) {
-                    throw new InvalidArgumentException('ThemeRiver archive means must be nonnegative, finite and strictly ordered at exact completed interval starts.');
+                    throw new InvalidArgumentException('ThemeRiver archive values must be nonnegative, finite and strictly ordered at exact completed interval starts.');
                 }
                 $index[$point[0]] = (float) $point[1];
                 $previous = $point[0];

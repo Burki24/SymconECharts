@@ -110,6 +110,7 @@ class EChartsThemeRiver extends IPSModuleStrict
             $this->RegisterTimer('ArchiveRefresh', 0, 'ECRV_RefreshArchive($_IPS["TARGET"]);');
             $this->RegisterTransientRefresh('ECRV');
             $this->RegisterPropertyString('Sources', '[]');
+            $this->RegisterPropertyString('Metric', 'average');
             $this->RegisterPropertyBoolean('EnableBandSelection', false);
             $this->RegisterPropertyString('Title', '');
             $this->RegisterPropertyString('Range', '7d');
@@ -206,7 +207,7 @@ class EChartsThemeRiver extends IPSModuleStrict
                 ['caption' => 'Legend', 'start' => 'LegendPosition'],
                 ['caption' => 'Typography and colors', 'start' => 'FontFamily']
             ]);
-            $fields = ['Title', 'Sources', 'EnableBandSelection', 'Range', 'CustomRangeValue', 'CustomRangeUnit', 'Aggregation',
+            $fields = ['Title', 'Sources', 'Metric', 'EnableBandSelection', 'Range', 'CustomRangeValue', 'CustomRangeUnit', 'Aggregation',
                 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
                 'IPSViewBackgroundOpacityPercent', ...array_keys(self::DESIGN_DEFAULTS),
                 ...array_map(static fn (string $name): string => 'IPSView' . $name, array_keys(self::DESIGN_DEFAULTS))];
@@ -500,6 +501,7 @@ class EChartsThemeRiver extends IPSModuleStrict
         $json = json_encode([
             'schemaVersion' => 1, 'family' => 'themeRiver', 'theme' => $this->EffectiveTheme($ipsView),
             'themeRiver'    => ['title' => $this->ReadPropertyString('Title'), 'unit' => $sources[0]['Unit'],
+                'metric'                => $this->ReadPropertyString('Metric'),
                 'enableBandSelection'   => $this->ReadPropertyBoolean('EnableBandSelection'),
                 'aggregation'           => $this->ReadPropertyString('Aggregation'), 'sources' => $descriptors,
                 ...$data, 'style'       => $this->ReadDesignStyle($ipsView)],
@@ -530,25 +532,31 @@ class EChartsThemeRiver extends IPSModuleStrict
             'ipsViewStyle' => $ipsView ? $this->IPSViewThemeCSS() : '',
             'state'        => $startup['state'],
             'translations' => [
-                'All'                                                                                               => $this->Translate('All'),
-                'Invert'                                                                                            => $this->Translate('Invert'),
-                'No bands selected.'                                                                                => $this->Translate('No bands selected.'),
-                'All selected interval means are zero.'                                                             => $this->Translate('All selected interval means are zero.'),
-                self::MODEL_TOO_LARGE_MESSAGE                                                                       => $this->Translate(self::MODEL_TOO_LARGE_MESSAGE),
-                self::LOAD_BUDGET_MESSAGE                                                                           => $this->Translate(self::LOAD_BUDGET_MESSAGE),
-                'Too many archive intervals. Choose a shorter range or a longer interval.'                          => $this->Translate('Too many archive intervals. Choose a shorter range or a longer interval.'),
-                'The archive interval settings are invalid.'                                                        => $this->Translate('The archive interval settings are invalid.'),
-                'Configure valid ThemeRiver archive variables.'                                                     => $this->Translate('Configure valid ThemeRiver archive variables.'),
-                'Connect an active EChartsGateway.'                                                                 => $this->Translate('Connect an active EChartsGateway.'),
-                'The ThemeRiver values could not be loaded.'                                                        => $this->Translate('The ThemeRiver values could not be loaded.'),
-                'The ThemeRiver archive values are invalid. Only nonnegative, finite interval means are supported.' => $this->Translate('The ThemeRiver archive values are invalid. Only nonnegative, finite interval means are supported.'),
-                'ThemeRiver requires standard archive variables, not counters.'                                     => $this->Translate('ThemeRiver requires standard archive variables, not counters.'),
-                'No common completed archive intervals.'                                                            => $this->Translate('No common completed archive intervals.'),
-                'Intervals with missing archive values are left blank.'                                             => $this->Translate('Intervals with missing archive values are left blank.'),
-                'All completed interval means are zero.'                                                            => $this->Translate('All completed interval means are zero.'),
-                'Data could not be refreshed. Showing the last available values.'                                   => $this->Translate('Data could not be refreshed. Showing the last available values.'),
-                'Apache ECharts could not be initialized.'                                                          => $this->Translate('Apache ECharts could not be initialized.'),
-                'Completed interval means'                                                                          => $this->Translate('Completed interval means'),
+                'All'                                                                                                    => $this->Translate('All'),
+                'Invert'                                                                                                 => $this->Translate('Invert'),
+                'No bands selected.'                                                                                     => $this->Translate('No bands selected.'),
+                'All selected interval means are zero.'                                                                  => $this->Translate('All selected interval means are zero.'),
+                'Consumption is zero in all completed intervals.'                                                        => $this->Translate('Consumption is zero in all completed intervals.'),
+                'Consumption is zero in all selected bands.'                                                             => $this->Translate('Consumption is zero in all selected bands.'),
+                'Completed interval consumption'                                                                         => $this->Translate('Completed interval consumption'),
+                'ThemeRiver consumption requires counter archive variables.'                                             => $this->Translate('ThemeRiver consumption requires counter archive variables.'),
+                'The ThemeRiver metric is invalid.'                                                                      => $this->Translate('The ThemeRiver metric is invalid.'),
+                'The ThemeRiver archive values are invalid. Only nonnegative, finite interval consumption is supported.' => $this->Translate('The ThemeRiver archive values are invalid. Only nonnegative, finite interval consumption is supported.'),
+                self::MODEL_TOO_LARGE_MESSAGE                                                                            => $this->Translate(self::MODEL_TOO_LARGE_MESSAGE),
+                self::LOAD_BUDGET_MESSAGE                                                                                => $this->Translate(self::LOAD_BUDGET_MESSAGE),
+                'Too many archive intervals. Choose a shorter range or a longer interval.'                               => $this->Translate('Too many archive intervals. Choose a shorter range or a longer interval.'),
+                'The archive interval settings are invalid.'                                                             => $this->Translate('The archive interval settings are invalid.'),
+                'Configure valid ThemeRiver archive variables.'                                                          => $this->Translate('Configure valid ThemeRiver archive variables.'),
+                'Connect an active EChartsGateway.'                                                                      => $this->Translate('Connect an active EChartsGateway.'),
+                'The ThemeRiver values could not be loaded.'                                                             => $this->Translate('The ThemeRiver values could not be loaded.'),
+                'The ThemeRiver archive values are invalid. Only nonnegative, finite interval means are supported.'      => $this->Translate('The ThemeRiver archive values are invalid. Only nonnegative, finite interval means are supported.'),
+                'ThemeRiver requires standard archive variables, not counters.'                                          => $this->Translate('ThemeRiver requires standard archive variables, not counters.'),
+                'No common completed archive intervals.'                                                                 => $this->Translate('No common completed archive intervals.'),
+                'Intervals with missing archive values are left blank.'                                                  => $this->Translate('Intervals with missing archive values are left blank.'),
+                'All completed interval means are zero.'                                                                 => $this->Translate('All completed interval means are zero.'),
+                'Data could not be refreshed. Showing the last available values.'                                        => $this->Translate('Data could not be refreshed. Showing the last available values.'),
+                'Apache ECharts could not be initialized.'                                                               => $this->Translate('Apache ECharts could not be initialized.'),
+                'Completed interval means'                                                                               => $this->Translate('Completed interval means'),
             ],
             'options' => [
                 'echartsVersion'            => EChartsAsset::VERSION, 'echartsThemes' => EChartsAsset::ThemePalettes(),
@@ -604,6 +612,11 @@ class EChartsThemeRiver extends IPSModuleStrict
     /** @return array{Status:int,Message:string}|null */
     private function GetConfigurationError(): ?array
     {
+        try {
+            ThemeRiverData::ArchiveContract($this->ReadPropertyString('Metric'));
+        } catch (InvalidArgumentException $exception) {
+            return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => $exception->getMessage()];
+        }
         try {
             $this->GetValidatedSources();
         } catch (Throwable $exception) {
@@ -695,9 +708,10 @@ class EChartsThemeRiver extends IPSModuleStrict
                 return $debugFlowResult = ['Points' => [], 'Truncated' => false];
             }
             $operation = EChartsDataProtocol::OPERATION_ARCHIVE_READ;
+            $contract = ThemeRiverData::ArchiveContract($this->ReadPropertyString('Metric'));
             $payload = ['VariableID' => $source['VariableID'],
                 'StartTimestamp'     => $query['StartTimestamp'], 'EndTimestamp' => $query['EndTimestamp'],
-                'Mode'               => 'aggregated', 'Reducer' => 'average',
+                'Mode'               => 'aggregated', 'Reducer' => $contract['reducer'],
                 'Limit'              => $query['Limit'], 'AggregationLevel' => $query['AggregationLevel']];
             $this->WriteAttributeString('LastError', '');
             try {
@@ -720,6 +734,12 @@ class EChartsThemeRiver extends IPSModuleStrict
                 throw new RuntimeException('The gateway archive request failed: ' . $code);
             }
             $archive = $response['Payload'];
+            if (in_array($archive['ArchiveAggregationType'] ?? null, ['standard', 'counter'], true)
+                && $archive['ArchiveAggregationType'] !== $contract['archiveType']) {
+                $this->WriteAttributeString('LastError', 'ARCHIVE_TYPE_MISMATCH');
+                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                throw new RuntimeException($this->ArchiveTypeError());
+            }
             if (is_array($archive['Points'] ?? null) && count($archive['Points']) > $query['Limit']) {
                 $this->WriteAttributeString('LastError', 'ARCHIVE_BUDGET_EXCEEDED');
                 $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
@@ -730,8 +750,8 @@ class EChartsThemeRiver extends IPSModuleStrict
                 || ($archive['StartTimestamp'] ?? null) !== $query['StartTimestamp']
                 || ($archive['EndTimestamp'] ?? null) !== $query['EndTimestamp']
                 || !in_array($archive['VariableType'] ?? null, [1, 2], true)
-                || ($archive['EffectiveReducer'] ?? null) !== 'average'
-                || ($archive['ArchiveAggregationType'] ?? null) !== 'standard') {
+                || ($archive['EffectiveReducer'] ?? null) !== $contract['reducer']
+                || ($archive['ArchiveAggregationType'] ?? null) !== $contract['archiveType']) {
                 $this->WriteAttributeString('LastError', 'INVALID_ARCHIVE_DATA');
                 $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
                 throw new RuntimeException('The gateway returned invalid ThemeRiver archive data.');
@@ -769,6 +789,13 @@ class EChartsThemeRiver extends IPSModuleStrict
         $this->WriteAttributeString('RegisteredSourceVariableIDs', json_encode($current, JSON_THROW_ON_ERROR));
     }
 
+    private function ArchiveTypeError(): string
+    {
+        return $this->ReadPropertyString('Metric') === 'consumption'
+            ? 'ThemeRiver consumption requires counter archive variables.'
+            : 'ThemeRiver requires standard archive variables, not counters.';
+    }
+
     /** @return array<string,mixed> */
     private function BuildVisualizationState(bool $ipsView = false): array
     {
@@ -777,7 +804,8 @@ class EChartsThemeRiver extends IPSModuleStrict
             $this->WriteAttributeString('LastError', $configurationError['Message']);
             $this->DebugEChartsSetStatus($configurationError['Status']);
             return $this->ErrorState(in_array($configurationError['Message'], [
-                'Too many archive intervals. Choose a shorter range or a longer interval.', 'The archive interval settings are invalid.'
+                'Too many archive intervals. Choose a shorter range or a longer interval.', 'The archive interval settings are invalid.',
+                'The ThemeRiver metric is invalid.'
             ], true) ? $configurationError['Message'] : 'Configure valid ThemeRiver archive variables.');
         }
         if (!$this->HasActiveParent()) {
@@ -789,10 +817,12 @@ class EChartsThemeRiver extends IPSModuleStrict
         } catch (Throwable $exception) {
             $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
             return $this->ErrorState(match ($this->ReadAttributeString('LastError')) {
-                'MODEL_TOO_LARGE'         => self::MODEL_TOO_LARGE_MESSAGE,
-                'ARCHIVE_BUDGET_EXCEEDED' => self::LOAD_BUDGET_MESSAGE,
-                'REDUCER_NOT_SUPPORTED'   => 'ThemeRiver requires standard archive variables, not counters.',
-                'INVALID_ARCHIVE_DATA'    => 'The ThemeRiver archive values are invalid. Only nonnegative, finite interval means are supported.',
+                'MODEL_TOO_LARGE'                                => self::MODEL_TOO_LARGE_MESSAGE,
+                'ARCHIVE_BUDGET_EXCEEDED'                        => self::LOAD_BUDGET_MESSAGE,
+                'REDUCER_NOT_SUPPORTED', 'ARCHIVE_TYPE_MISMATCH' => $this->ArchiveTypeError(),
+                'INVALID_ARCHIVE_DATA'                           => $this->ReadPropertyString('Metric') === 'consumption'
+                    ? 'The ThemeRiver archive values are invalid. Only nonnegative, finite interval consumption is supported.'
+                    : 'The ThemeRiver archive values are invalid. Only nonnegative, finite interval means are supported.',
                 default                   => 'The ThemeRiver values could not be loaded.'
             });
         }
