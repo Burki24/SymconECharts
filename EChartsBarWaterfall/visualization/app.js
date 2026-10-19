@@ -9,6 +9,7 @@
     var currentState = bootstrap.state || null;
     var currentTheme = null;
     var echartsDesign = window.SYMC_ECHARTS_DESIGN;
+    var categoryNavigation = window.SymconEChartsCategoryNavigation.create();
 
     function translate(value) {
         return (bootstrap.translations || {})[value] || value;
@@ -85,14 +86,35 @@
         var titleSize = echartsDesign.fontSizePercent(style.titleFontSizePercent, 18);
         var axisSize = echartsDesign.fontSizePercent(style.axisFontSizePercent, 12);
         var valueSize = echartsDesign.fontSizePercent(style.valueFontSizePercent, 12);
+        var labelDistance = Math.max(0, Math.min(100, Number(style.valueLabelDistance === undefined ? 5 : style.valueLabelDistance) || 0));
+        var categoryLabelMargin = style.showValues === true ? valueSize + labelDistance + 6 : 8;
+        var top = headerInset + (titleVisible ? 55 : 20) + Math.max(0, titleSize - 18);
+        var barWidth = Math.max(20, Math.min(100, Number(style.barWidthPercent) || 60));
+        var valueSpan = steps.reduce(function (span, step) {
+            return Math.max(span, Array.from(formatValue(step.kind === 'change' ? step.change : step.after, decimals, unit)).length * valueSize * 0.65);
+        }, valueSize * 2);
+        var minimumSpan = Math.max(80 * barWidth / 100, axisSize * 2.4 + 4,
+            style.showValues === true ? valueSpan + 4 : 0);
+        var availableWidth = Math.max(1, (chartElement.clientWidth || 800) - 76 - axisSize * 4);
+        var visibleCount = Math.max(1, Math.min(steps.length, Math.floor(availableWidth / minimumSpan)));
+        var scroll = steps.length > visibleCount;
+        var keys = steps.map(function (step, index) { return String(step.id || 'step-' + index); });
+        var viewport = categoryNavigation.window(keys, scroll ? visibleCount : steps.length);
+        var first = viewport.first;
+        var stepsByID = Object.create(null);
+        steps.forEach(function (step, index) { stepsByID[keys[index]] = step; });
+        var bottom = 48 + (scroll ? 28 : 0);
+        var minimum = 0, maximum = 0;
         var helpersPositive = [];
         var helpersNegative = [];
         var barsPositive = [];
         var barsNegative = [];
 
-        steps.forEach(function (step) {
+        steps.forEach(function (step, index) {
             var before = Number(step.before);
             var after = Number(step.after);
+            minimum = Math.min(minimum, before, after);
+            maximum = Math.max(maximum, before, after);
             var low = Math.min(before, after);
             var high = Math.max(before, after);
             var positiveBase = Math.max(0, low);
@@ -110,6 +132,7 @@
             var labelOnPositive = after > 0 || (after === 0 && negativeHeight === 0);
             var labelText = formatValue(step.kind === 'change' ? step.change : after, decimals, unit);
             var data = {
+                id: keys[index],
                 value: positiveHeight,
                 itemStyle: { color: fill },
                 label: {
@@ -123,6 +146,7 @@
                 }
             };
             var negativeData = {
+                id: keys[index],
                 value: negativeHeight,
                 itemStyle: { color: fill },
                 label: {
@@ -141,7 +165,7 @@
             barsNegative.push(negativeData);
         });
 
-        var width = Math.max(20, Math.min(100, Number(style.barWidthPercent) || 60)) + '%';
+        var width = barWidth + '%';
         function helper(id, data) {
             return {
                 id: id, type: 'bar', stack: 'waterfall', silent: true, barWidth: width,
@@ -164,15 +188,26 @@
                 show: titleVisible, text: String(bar.title || ''), left: 'center', top: headerInset,
                 textStyle: { color: titleColor, fontSize: titleSize }
             },
-            grid: { top: headerInset + (titleVisible ? 55 : 20) + Math.max(0, titleSize - 18),
-                right: 24, bottom: 48, left: 52, containLabel: true },
+            grid: { top: top, right: 24, bottom: bottom, left: 52,
+                ...(scroll ? { width: Math.min(minimumSpan, availableWidth) * visibleCount + axisSize * 4 } : {}),
+                containLabel: true },
+            dataZoom: scroll ? [
+                { id: 'category-scroll', type: 'slider', xAxisIndex: 0, orient: 'horizontal',
+                    bottom: 4, height: 12, left: 52, right: 24,
+                    startValue: first, endValue: viewport.last, filterMode: 'filter', zoomLock: true,
+                    showDetail: false, showDataShadow: false, brushSelect: false },
+                { id: 'category-scroll-inside', type: 'inside', xAxisIndex: 0,
+                    startValue: first, endValue: viewport.last, filterMode: 'filter', zoomLock: true,
+                    zoomOnMouseWheel: false, moveOnMouseWheel: true, moveOnMouseMove: true }
+            ] : [],
             legend: { show: false },
             tooltip: {
                 trigger: 'axis', axisPointer: { type: 'shadow' },
                 formatter: function (parameters) {
                     var values = Array.isArray(parameters) ? parameters : [parameters];
+                    var indexed = values.find(function (parameter) { return parameter.data && parameter.data.id; });
                     var index = values.length ? values[0].dataIndex : -1;
-                    var step = steps[index];
+                    var step = indexed ? stepsByID[indexed.data.id] : steps[index];
                     if (!step) { return ''; }
                     var lines = [escapeHtml(step.label)];
                     if (step.kind === 'change') {
@@ -186,13 +221,18 @@
                 }
             },
             xAxis: {
-                type: 'category', data: steps.map(function (step) { return String(step.label || ''); }),
-                axisLabel: { color: axisColor, fontSize: axisSize, overflow: 'truncate', width: 110 },
+                type: 'category', data: scroll ? keys : steps.map(function (step) { return String(step.label || ''); }),
+                axisLabel: { color: axisColor, fontSize: axisSize, margin: categoryLabelMargin, overflow: 'truncate',
+                    width: scroll ? Math.max(8, Math.min(110, minimumSpan - 8, availableWidth - 8)) : 110,
+                    ...(scroll ? { interval: 0, formatter: function (key) {
+                        return stepsByID[key] ? String(stepsByID[key].label || '') : '';
+                    } } : {}) },
                 axisLine: { lineStyle: { color: axisLineColor } },
                 axisTick: { alignWithLabel: true, lineStyle: { color: axisLineColor } }
             },
             yAxis: {
                 type: 'value', name: unit, nameTextStyle: { color: style.axisColor || colors.muted, fontSize: axisSize },
+                ...(scroll ? { min: minimum, max: maximum === minimum ? minimum + 1 : maximum } : {}),
                 axisLabel: { color: axisColor, fontSize: axisSize },
                 axisLine: { show: true, lineStyle: { color: axisLineColor } },
                 axisTick: { show: true, lineStyle: { color: axisLineColor } },
@@ -229,6 +269,7 @@
         errorElement.hidden = true;
         chartElement.hidden = false;
         var theme = normalizeTheme(state.chart.theme || 'auto');
+        categoryNavigation.remember(chart);
         if (chart && currentTheme !== theme) {
             chart.dispose();
             chart = null;
@@ -247,10 +288,21 @@
 
     if (window.ResizeObserver) {
         new ResizeObserver(function () {
-            echartsDesign.resizeChartIfNeeded(chart, chartElement);
+            categoryNavigation.remember(chart);
+            if (!echartsDesign.resizeChartIfNeeded(chart, chartElement)) { return; }
+            if (currentState && currentState.status === 'ready') {
+                chart.setOption(buildOption(currentState.chart, currentTheme || 'auto'), true);
+            }
         }).observe(chartElement);
     } else {
-        window.addEventListener('resize', function () { if (chart) { chart.resize(); } });
+        window.addEventListener('resize', function () {
+            if (!chart) { return; }
+            categoryNavigation.remember(chart);
+            chart.resize();
+            if (currentState && currentState.status === 'ready') {
+                chart.setOption(buildOption(currentState.chart, currentTheme || 'auto'), true);
+            }
+        });
     }
     window.addEventListener('beforeunload', function () { if (chart) { chart.dispose(); } });
     render(currentState);

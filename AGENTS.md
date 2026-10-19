@@ -45,6 +45,10 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Startwert, signierten Änderungen und berechneter Endsumme liegen im eigenen
   Gerätemodul `EChartsBarWaterfall`. Polar-Balken für aktuelle Werte liegen im
   eigenen Gerätemodul `EChartsBarPolar` und sind kein Modus dieser Instanzen.
+  Waterfall erlaubt gemäß ADR 0071 bis zu 100 Quellen einschließlich Startwert,
+  zusätzlich die berechnete Endsumme. Kategoriennavigation ändert niemals die
+  vollständige Bilanz oder Skala; gemeinsamer flüchtiger Kategorieanker mit
+  BarCategory liegt in `libs/echarts-category-navigation.js`.
   Kreis-, Donut- und Nightingale-Diagramme für aktuelle Anteile liegen im
   eigenen Gerätemodul `EChartsPie` und sind kein Balkenmodus.
   Pie, BarCategory, BarPolar und PictorialBar erlauben gemäß ADR 0063 eine

@@ -8,8 +8,7 @@
     var chart = null;
     var currentState = bootstrap.state || null;
     var currentTheme = null;
-    var categoryAnchor = null;
-    var categoryStart = 0;
+    var categoryNavigation = window.SymconEChartsCategoryNavigation.create();
     var gradientLegendSelection = {};
     var echartsDesign = window.SYMC_ECHARTS_DESIGN;
     var barPatterns = window.SymconEChartsPattern.create(function () {
@@ -93,19 +92,7 @@
     }
 
     function rememberCategoryWindow() {
-        if (!chart || typeof chart.getOption !== 'function') { return; }
-        var option = chart.getOption();
-        var zoom = (option.dataZoom || []).find(function (entry) { return entry.id === 'category-scroll'; });
-        if (!zoom) { return; }
-        var axes = zoom.orient === 'vertical' ? option.yAxis : option.xAxis;
-        var keys = axes && axes[0] && axes[0].data || [];
-        var start = Number(zoom.startValue);
-        if (!Number.isFinite(start)) {
-            start = keys.indexOf(zoom.startValue);
-            if (start < 0) { start = (Number(zoom.start) || 0) * Math.max(0, keys.length - 1) / 100; }
-        }
-        categoryStart = Math.max(0, Math.ceil(start - 1e-8));
-        categoryAnchor = keys[categoryStart] || null;
+        categoryNavigation.remember(chart);
     }
 
     function buildChartData(model, colors) {
@@ -230,9 +217,7 @@
         if (scroll && horizontal) { right += 28; }
         if (scroll && !horizontal) { bottom += 28; }
         var categorySpan = Math.min(minimumSpan, crossSpace);
-        var anchorIndex = chartData.categoryKeys.indexOf(categoryAnchor);
-        var first = Math.max(0, Math.min(chartData.categories.length - visibleCount,
-            anchorIndex >= 0 ? anchorIndex : categoryStart));
+        var first = categoryNavigation.window(chartData.categoryKeys, visibleCount).first;
         var categoryKeys = scroll ? chartData.categoryKeys : chartData.categories;
         var axisLabel = { color: axisColor, fontSize: axisSize, overflow: 'truncate',
             width: horizontal ? 180 : Math.max(8, Math.min(100, categorySpan - 8)) };

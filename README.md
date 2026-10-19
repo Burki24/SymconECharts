@@ -216,9 +216,10 @@ können unabhängig davon individuell vergeben werden.
   höchstens 2.000 je Quelle); ausgeblendete Reihen behalten ihren Budgetanteil.
 
 - __EChartsBarWaterfall__ ([Dokumentation](EChartsBarWaterfall/README.md))
-  Zeigt einen aktuellen Startwert und bis zu 15 geordnete Änderungen mit
+  Zeigt einen aktuellen Startwert und bis zu 99 geordnete Änderungen mit
   Vorzeichen als Waterfall-Diagramm. Die Endsumme wird berechnet; ein Archiv
-  ist nicht erforderlich. Kachel und IPSView können getrennt gestaltet werden.
+  ist nicht erforderlich. Responsive Kategoriennavigation erhält die vollständige
+  Bilanz und Werteskala. Kachel und IPSView können getrennt gestaltet werden.
 
 - __EChartsBarPolar__ ([Dokumentation](EChartsBarPolar/README.md))
   Vergleicht 1 bis 16 aktuelle numerische Werte als radiale Balken oder

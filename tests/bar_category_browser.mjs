@@ -55,7 +55,7 @@ function page(query) {
         VISUALIZATION_THEME: ':root{--symc-background:#303236;--symc-text:#f4f5f7;--symc-text-muted:#969aa2;--symc-border:#777b83;--symc-surface:#25272b}',
         MODULE_STYLE: read('EChartsBarCategory/visualization/style.css'), IPSVIEW_STYLE: '',
         ECHARTS_SCRIPT: read('libs/echarts/6.1.0/echarts.bar-category.min.js'), ECHARTS_THEME_SCRIPT: '',
-        ECHARTS_DESIGN_SCRIPT: read('libs/echarts-design.js'), ECHARTS_PATTERN_SCRIPT: read('libs/echarts-pattern.js'),
+        ECHARTS_DESIGN_SCRIPT: read('libs/echarts-design.js') + '\n' + read('libs/echarts-category-navigation.js'), ECHARTS_PATTERN_SCRIPT: read('libs/echarts-pattern.js'),
         BOOTSTRAP_JSON: JSON.stringify(bootstrap), MODULE_SCRIPT: read('EChartsBarCategory/visualization/app.min.js'),
         IPSVIEW_TRANSPORT_SCRIPT: ''};
     let html = read('EChartsBarCategory/visualization/index.html').replace(/\{\{([A-Z_]+)\}\}/g, (_, key) => replacements[key] ?? '');

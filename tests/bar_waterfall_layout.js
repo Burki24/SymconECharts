@@ -9,6 +9,7 @@ const source = fs.readFileSync(
     path.join(__dirname, '..', 'EChartsBarWaterfall', 'visualization', 'app.js'), 'utf8'
 );
 const designSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-design.js'), 'utf8');
+const navigationSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-category-navigation.js'), 'utf8');
 const chartElement = { hidden: false, clientWidth: 800, clientHeight: 400 };
 const errorElement = { hidden: true, textContent: '' };
 let option;
@@ -19,6 +20,7 @@ let chartWidth = chartElement.clientWidth;
 let chartHeight = chartElement.clientHeight;
 const chart = {
     setOption: next => { option = next; },
+    getOption: () => ({ ...option, xAxis: [option.xAxis], yAxis: [option.yAxis] }),
     getWidth: () => chartWidth, getHeight: () => chartHeight,
     clear: () => {},
     resize: () => {
@@ -76,6 +78,7 @@ const document = {
     body: { appendChild: () => {} }
 };
 vm.runInNewContext(designSource, { window });
+vm.runInNewContext(navigationSource, { window });
 vm.runInNewContext(source, { window, document, console, ResizeObserver: window.ResizeObserver });
 
 assert.equal(initialized, 1);
@@ -86,6 +89,8 @@ resizeCallback();
 assert.equal(resized, 1, 'A changed Waterfall tile width must resize the chart.');
 assert.deepEqual(Array.from(option.xAxis.data), ['Start', '<drop>', 'Recovery', 'Total']);
 assert.equal(option.series.length, 4);
+assert.ok(option.xAxis.axisLabel.margin >= option.series[3].data[1].label.fontSize + option.series[3].data[1].label.distance,
+    'Category names must leave space for negative value labels below the bottom of the plot.');
 assert.equal(option.animationEasing, 'bounceOut');
 assert.equal(option.animationEasingUpdate, 'linear');
 assert.equal(option.animationDelay, 120);
@@ -138,6 +143,142 @@ if (fs.existsSync(localECharts)) {
     assert.ok(realChart.renderToSVGString().includes('<svg'));
     realChart.dispose();
 }
+
+const largeSteps = Array.from({ length: 100 }, (_, index) => ({
+    id: 'source-' + index, label: 'Repeated name', kind: index ? 'change' : 'start',
+    change: index === 0 ? 50 : 1, before: index === 0 ? 0 : 49 + index, after: 50 + index
+}));
+largeSteps.push({ id: 'total', label: 'Total', kind: 'total', change: 149, before: 0, after: 149 });
+window.handleMessage({ status: 'ready', chart: { ...window.SYMC_VISUALIZATION.state.chart, steps: largeSteps } });
+assert.equal(option.dataZoom && option.dataZoom.length, 2,
+    'Waterfall must navigate large step lists rather than squeeze all 101 categories into one chart.');
+
+function waterfallHarness(mode, steps, style = {}, observer = true, width = 800) {
+    const element = { clientWidth: width, clientHeight: 500, hidden: false };
+    const handlers = {};
+    let nextOption, nativeChart, observed, actualWidth = width, actualHeight = 500;
+    let state = { status: 'ready', chart: { theme: 'dark', steps,
+        bar: {title: 'Balance', unit: '', decimals: 0, style: {animationEnabled: false, showValues: true, ...style}} } };
+    const adapter = { setOption: value => { nextOption = value; if (nativeChart) { nativeChart.setOption(value, true); } },
+        getOption: () => nativeChart ? nativeChart.getOption() : {...nextOption, xAxis: [nextOption.xAxis], yAxis: [nextOption.yAxis]},
+        getWidth: () => actualWidth, getHeight: () => actualHeight,
+        resize: () => { actualWidth = element.clientWidth; actualHeight = element.clientHeight; },
+        clear() {}, dispose() {} };
+    const host = {SYMC_VISUALIZATION: {mode, state, options: {echartsThemes: {auto: palette, dark: palette, light: palette}}},
+        echarts: {init: () => adapter}, addEventListener: (name, callback) => { handlers[name] = callback; }};
+    if (observer) { host.ResizeObserver = class {constructor(callback) {observed = callback;} observe() {}}; }
+    const dom = {getElementById: id => id === 'echarts-bar-waterfall-chart' ? element : {hidden: true},
+        createElement: () => ({style: {}, remove() {}}), body: {appendChild() {}}};
+    vm.runInNewContext(designSource, {window: host});
+    vm.runInNewContext(navigationSource, {window: host});
+    vm.runInNewContext(source, {window: host, document: dom, ResizeObserver: host.ResizeObserver});
+    return {get option() {return nextOption;}, useNative: engine => {nativeChart = engine;},
+        update: (newSteps = state.chart.steps, patch = {}, theme = state.chart.theme) => {
+            state = {status: 'ready', chart: {...state.chart, theme, steps: newSteps,
+                bar: {...state.chart.bar, style: {...state.chart.bar.style, ...patch}}}};
+            host.handleMessage(state);
+        },
+        resize: (newWidth, newHeight = 500) => {
+            element.clientWidth = newWidth; element.clientHeight = newHeight;
+            (observed || handlers.resize)();
+        }};
+}
+
+function balanceSteps(count = 100) {
+    let total = 0;
+    const steps = Array.from({length: count}, (_, index) => {
+        const change = index === 0 ? 50 : index === 1 ? 950 : index === 2 ? -2000 : index === 3 ? 1000 : index % 2 ? -2 : 3;
+        const before = total;
+        total += change;
+        return {id: 'source-' + index, label: index === 99 ? 'Last change' : 'Same label',
+            kind: index ? 'change' : 'start', change, before, after: total};
+    });
+    steps.push({id: 'total', label: 'Full total', kind: 'total', change: total, before: 0, after: total});
+    return steps;
+}
+const shipped = {};
+vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', 'libs/echarts/6.1.0/echarts.cartesian.min.js'), 'utf8'),
+    {window: shipped, navigator: {userAgent: 'Node.js'}, console, setTimeout, clearTimeout});
+shipped.echarts.use(require('../.tools/echarts-runtime/node_modules/echarts/renderers').SVGRenderer);
+for (const mode of ['symcon', 'ipsview']) {
+    for (const observer of [true, false]) {
+        const steps = balanceSteps();
+        const harness = waterfallHarness(mode, steps, {}, observer);
+        assert.equal(harness.option.xAxis.data.length, 101);
+        assert.deepEqual([harness.option.yAxis.min, harness.option.yAxis.max], [-1000, 1000],
+            'The visible window must retain offscreen cumulative extrema.');
+        const engine = shipped.echarts.init(null, null, {renderer: 'svg', ssr: true, width: 800, height: 500});
+        harness.useNative(engine);
+        engine.setOption(harness.option);
+        const count = engine.getModel().getSeriesByIndex(1).getData().count();
+        assert.ok(count > 0 && count < 101, 'The pinned renderer must actually filter categories.');
+        const crossing = engine.getModel().getSeriesByIndex(3).getData().getItemLayout(2);
+        assert.ok(crossing.height > 0, 'The initial crossing must retain its true negative segment.');
+        engine.dispatchAction({type: 'dataZoom', dataZoomId: 'category-scroll', startValue: 101 - count, endValue: 100});
+        const data = engine.getModel().getSeriesByIndex(1).getData();
+        const last = data.count() - 1;
+        assert.equal(data.getRawIndex(last), 100);
+        const parameter = engine.getModel().getSeriesByIndex(1).getDataParams(last);
+        assert.equal(parameter.data.id, 'total');
+        assert.equal(harness.option.tooltip.formatter([parameter]), 'Full total<br>48');
+        assert.equal(parameter.data.value, 48, 'The final bar must contain all 99 changes, including hidden ones.');
+        const lastChange = engine.getModel().getSeriesByIndex(1).getDataParams(last - 1);
+        assert.match(harness.option.tooltip.formatter([lastChange]), /Last change<br>-2<br>50 → 48/);
+        const axis = engine.getModel().getComponent('xAxis').axis;
+        assert.deepEqual(Array.from(axis.getViewLabels(), item => item.formattedLabel).slice(-2), ['Last change', 'Full total']);
+        const anchorID = steps[101 - count].id;
+        harness.update();
+        assert.equal(harness.option.xAxis.data[harness.option.dataZoom[0].startValue], anchorID);
+        const reordered = steps.slice();
+        reordered.splice(5, 0, reordered.splice(101 - count, 1)[0]);
+        harness.update(reordered);
+        assert.equal(harness.option.xAxis.data[harness.option.dataZoom[0].startValue], anchorID,
+            'Changing source order must retain the anchored variable ID despite equal labels.');
+        harness.resize(420);
+        assert.equal(harness.option.xAxis.data[harness.option.dataZoom[0].startValue], anchorID);
+        assert.ok(harness.option.dataZoom[0].endValue - harness.option.dataZoom[0].startValue + 1 < count,
+            'Observer and fallback resize must both recompute a readable window.');
+        harness.update(reordered, {axisFontSizePercent: 200, valueFontSizePercent: 200}, 'light');
+        assert.equal(harness.option.xAxis.data[harness.option.dataZoom[0].startValue], anchorID,
+            'Theme and font changes must not discard the stable source anchor.');
+        const removed = reordered.filter(step => step.id !== anchorID);
+        harness.update(removed);
+        assert.ok(harness.option.dataZoom[0].startValue >= 0 && harness.option.dataZoom[0].endValue < removed.length);
+        harness.update([]);
+        harness.update(steps);
+        assert.equal(harness.option.dataZoom[0].startValue, 0, 'An emptied model must reset stale viewport state.');
+        harness.useNative(null);
+        engine.dispose();
+    }
+}
+const thin = waterfallHarness('symcon', balanceSteps(), {barWidthPercent: 20, showValues: false}, true, 1800);
+const thick = waterfallHarness('symcon', balanceSteps(), {barWidthPercent: 100, showValues: false}, true, 1800);
+assert.ok(thin.option.dataZoom[0].endValue > thick.option.dataZoom[0].endValue,
+    'Thin bars may expose more steps, while wider bars reserve enough physical space.');
+assert.ok(thin.option.dataZoom[0].endValue > 16, 'Large charts must not retain an arbitrary sixteen-step viewport cap.');
+const largerText = waterfallHarness('ipsview', balanceSteps(),
+    {barWidthPercent: 20, showValues: false, axisFontSizePercent: 200}, true, 1800);
+assert.ok(largerText.option.dataZoom[0].endValue < thin.option.dataZoom[0].endValue,
+    'Larger fonts reserve more horizontal room per step.');
+const densityEngine = shipped.echarts.init(null, null, {renderer: 'svg', ssr: true, width: 1800, height: 500});
+densityEngine.setOption(thin.option);
+const thinWidth = densityEngine.getModel().getSeriesByIndex(1).getData().getItemLayout(0).width;
+densityEngine.setOption(thick.option, true);
+const thickWidth = densityEngine.getModel().getSeriesByIndex(1).getData().getItemLayout(0).width;
+assert.ok(thickWidth > thinWidth * 2, 'The bar-width choice changes real pinned-engine geometry, not only window counts.');
+densityEngine.dispose();
+
+const navigationHost = {};
+vm.runInNewContext(navigationSource, {window: navigationHost});
+const navigation = navigationHost.SymconEChartsCategoryNavigation.create();
+navigation.remember({getOption: () => ({dataZoom: [{id: 'category-scroll', orient: 'vertical', startValue: 'last'}],
+    yAxis: [{data: ['first', 'middle', 'last']} ]})});
+assert.equal(navigation.window(['last', 'middle', 'first'], 1).first, 0, 'Shared navigation follows category keys, not names or old indexes.');
+navigation.remember({getOption: () => ({dataZoom: [{id: 'category-scroll', start: 50}], xAxis: [{data: ['a', 'b', 'c']}]})});
+assert.equal(navigation.window(['a', 'b', 'c'], 1).first, 1, 'Percentage-only native zoom state has a deterministic fallback.');
+navigation.window([], 0);
+assert.equal(navigation.window(['a', 'b', 'c'], 1).first, 0);
+navigation.remember({getOption: () => undefined});
 
 window.handleMessage({ status: 'error', error: 'Configure valid Waterfall sources.' });
 assert.equal(chartElement.hidden, true);

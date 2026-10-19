@@ -32,6 +32,7 @@ $tests = [
     __DIR__ . '/scatter_pairing.php',
     __DIR__ . '/parallel_pairing.php',
     __DIR__ . '/theme_river_data.php',
+    __DIR__ . '/waterfall_data.php',
     __DIR__ . '/heatmap_aggregation.php',
     __DIR__ . '/heatmap_window.php',
     __DIR__ . '/tree_hierarchy.php',
@@ -52,6 +53,7 @@ $tests = [
 ];
 
 $commands = [
+    ['Test 100-source Waterfall integration', 'php tests/gateway_gauges.php --waterfall-many'],
     ['Test ThemeRiver counter consumption', 'php tests/gateway_gauges.php --theme-river-consumption'],
     ['Test 16-source ThemeRiver integration', 'php tests/gateway_gauges.php --theme-river-many'],
     ['Test 32-source Historical Bar integration', 'php tests/gateway_gauges.php --bar-history-many'],

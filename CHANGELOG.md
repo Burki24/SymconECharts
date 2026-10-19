@@ -9,6 +9,12 @@
 
 ## Neu
 
+- EChartsBarWaterfall unterstützt bis zu 100 Quellen: einen Startwert und
+  bis zu 99 Änderungen mit Vorzeichen. Die responsive Kategoriennavigation
+  erhält alle Zwischenstände, die vollständige Endsumme und Werteskala.
+  Vorschauausschnitte zeigen die echte Gesamtbilanz statt einer Teilbilanz;
+  bestehende Quellen und Designeinstellungen bleiben unverändert nutzbar.
+
 - EChartsThemeRiver bietet Zählerverbrauch je abgeschlossenem Stunden- oder
   Tagesintervall als zusätzliche Datengrundlage. Der bisherige Mittelwert
   bleibt Standard. Verbrauch nutzt Symcons Zähleraggregate; Originaleinheiten,

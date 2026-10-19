@@ -30,6 +30,8 @@ ThemeRiver unterstützt 16 Quellen mit optionaler Bandauswahl und einem
 gemeinsamen Ladebudget von 16000 Aggregaten bei unveränderten Lückenregeln.
 Zusätzlich ist Zählerverbrauch je abgeschlossenem Intervall ausdrücklich wählbar;
 der bisherige Standardarchiv-Mittelwert bleibt Default.
+Waterfall unterstützt jetzt 100 Quellen mit Kategoriennavigation und vollständiger
+Bilanz/Skala unabhängig vom sichtbaren Ausschnitt.
 Die übrigen
 Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
 
@@ -49,6 +51,7 @@ Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
 | Erledigt | BarHistory: 32 Reihen mit Reihenauswahl | Gemeinsame Auswahl-/Startlogik, tatsächliche Archivzeitstempel, bis 16 Einheitengruppen und 32000 Gesamtpunkte; Default 1000 bleibt erhalten. |
 | Erledigt | ThemeRiver: 16 Quellen mit optionaler Bandauswahl | 16000 Aggregate Ladebudget, höchstens 1000 je Quelle und weiterhin 720 Intervalle; versteckte Quellen bleiben in der gemeinsamen Lückenprüfung. |
 | Erledigt | ThemeRiver: auswählbarer Zählerverbrauch | Symcon-Zähleraggregate je Stunde/Tag statt Zählerstand; gleiche Einheiten, unveränderte Lücken-/Auswahl-/Budgetregeln und Mittelwert als Default. |
+| Erledigt | Waterfall: 100 Quellen mit Kategoriennavigation | Ein Startwert plus bis zu 99 Änderungen; vollständige Zwischenstände, Werteskala und Endsumme. Gekennzeichnete Vorschau mit echter Gesamtbilanz; gemeinsame Kategorieanker mit BarCategory. |
 | Danach | Weitere Archiv- und Vergleichsreihen | Nur zusammen mit Navigation, Vorschaukennzeichnung und messbaren Ressourcenbudgets. |
 
 Normalisierung ist keine allgemeine Lösung für unterschiedliche Einheiten:
@@ -69,7 +72,7 @@ Schritte sind Planungsziele, keine implementierten oder lastgeprüften Zusagen.
 | EChartsGaugeTacho | 2–5 Quellen mit unabhängigen Skalen; festgelegte Instrumentenanordnung. | Fünf ist durch die besondere Geometrie begründet. Neue Anordnungen wären Voraussetzung für mehr; reine Grenzerhöhung nicht empfohlen. |
 | EChartsGaugeChronograph | 2–5 Quellen als Hauptinstrument mit Nebeninstrumenten. | Ebenso Geometrievertrag. Optional ein einzelnes Hauptinstrument erst nach ausdrücklicher Produktentscheidung; kein allgemeiner 100-Quellen-Kandidat. |
 | EChartsBarCategory | 1–100 numerische Quellenzuordnungen, gleiche Roh-Einheit oder ausdrücklich normalisierte Vergleiche mit eigenen Min/Max; auch negative Originale. Kategorien und Reihen, gruppiert/gestapelt/einfach. | Umgesetzt: responsive Kategoriennavigation, viewportstabile Updates und optionale Normalisierung. Stapel addieren normierte Einzelwerte, sind aber keine physikalischen Summen oder 100-Prozent-Stapel. |
-| EChartsBarWaterfall | Startwert plus 1–15 signierte Änderungen, also 2–16 Quellen; gleiche Einheit; Endsumme berechnet. | Bis 100 Schritte mit Navigation sinnvoll. Zusätzliche Zwischensummen/Neustarts wären fachlich wertvoller als eine alleinige Grenzerhöhung. Gemeinsame additive Einheit beibehalten. |
+| EChartsBarWaterfall | Startwert plus 1–99 signierte Änderungen, also 2–100 Quellen; gleiche Einheit; Endsumme zusätzlich berechnet. Modell höchstens 200000 Bytes, HTML höchstens 1 MiB. | Umgesetzt: responsive Kategoriennavigation, ID-stabiler Ausschnitt und unveränderte vollständige Bilanz/Skala. Vorschau zeichnet höchstens fünf Quellen, zeigt aber die echte Gesamtbilanz. Explizite Zwischensummen/Neustarts bleiben eine eigene fachliche Erweiterung. |
 | EChartsBarPolar | 1–16 Quellen gleicher Roh-Einheit oder ausdrücklich aktivierte Normalisierung je Quelle auf 0–100; negative Originalwerte bleiben erhalten. | Normalisierung umgesetzt. Größere Modelle nur mit Auswahl/Seiten und lesbarer Ring-/Sektorbreite, nicht 100 Ringe in einer kleinen Kachel. |
 | EChartsPie | 1–16 nichtnegative Quellen gleicher Roh-Einheit oder optional normalisierte Gewichte mit beliebigen Originaleinheiten und eigenen Min/Max. Nullgewichte bleiben ausdrücklich leer. | Normalisierung nach CalendarPie-Vorbild umgesetzt. Größere Listen mit scrollbarer Legende und ausdrücklich gewähltem Restsegment/Top-N weiterhin offen; keine unsichtbar ausgelassenen Werte. |
 | EChartsFunnel | 1–16 nichtnegative numerische Quellen gleicher Einheit. Null gültig; manuelle oder wertbezogene Reihenfolge, keine erzwungene Abnahme zwischen Stufen. | 16 ist eine Darstellungsgrenze. 32, später 100 nur mit Navigation und Beschriftungsprüfung. Negative Trichterbreiten sind keine sinnvolle Aufhebung. Der gemeinsame Resolver behält hier die Grenze 16. |
@@ -145,7 +148,8 @@ Importform zusammen mit der größten Quellenliste prüfen.
 Vorschauen sind gesondert zu betrachten:
 
 - `libs/EChartsBarPreview.php::Sources()` akzeptiert standardmäßig höchstens
-  16 Quellen, BarCategory verwendet ausdrücklich 100 und StateTimeline sowie Boxplot 32. Andere Familien bleiben
+  16 Quellen, BarCategory und Waterfall verwenden ausdrücklich 100,
+  StateTimeline sowie Boxplot 32. Andere Familien bleiben
   unverändert. Bei ungeeigneten Listen kann der Baustein auf Beispieldaten
   zurückfallen. Eine neue Obergrenze nur in `module.php` wäre deshalb
   unvollständig. PictorialBar verwendet einen eigenen, vollständig validierten
@@ -168,6 +172,15 @@ größtmögliche Imports und beide Ausgabewege abdecken. Eine Auswahl/Navigation
 darf keine Daten verändern oder unsichtbar aus dem fachlichen Modell entfernen.
 
 ## Nachweise dieses Änderungsschritts und verbleibende Lücken
+
+Waterfall prüft 100/101 Quellen, 101 modellierte Schritte, späte Aktualisierungen,
+Referenzen/Abonnements, Altlisten, Originaleinheiten und signed Kumulierung.
+Die Vorschau prüft eine echte Gesamtbilanz trotz abweichender Präfixsumme und
+ausgelassener Extrema. Native Tests sichern beide Ausgabewege, globale Skala,
+ID-Tooltips und Navigation bei Reorder/Resize. Modell- und tatsächlicher finaler
+HTML-Guard werden mit übergroßen Metadaten geprüft. BarCategory bleibt auch mit
+gemeinsamer Navigation unter 1 MiB im maximalen Normalisierungstest.
+Die Live-Abnahme nach Modulupdate bleibt offen; keine Live-Konfiguration geändert.
 
 ThemeRiver prüft 16×720 Originalwerte, 16/17 Quellen und das gemeinsame
 16000-Ladebudget einschließlich ausgeblendeter Quellen. Native Tests

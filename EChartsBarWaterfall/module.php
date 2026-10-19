@@ -26,6 +26,7 @@ use SymconECharts\EChartsPreviewSourceCount;
 use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsTransientRefresh;
 use SymconECharts\EChartsVariablePresentation;
+use SymconECharts\WaterfallData;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
 require_once __DIR__ . '/../libs/helper/DataFlowHelper.php';
@@ -50,6 +51,7 @@ require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
 require_once __DIR__ . '/../libs/EChartsTransientRefresh.php';
 require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
+require_once __DIR__ . '/WaterfallData.php';
 
 class EChartsBarWaterfall extends IPSModuleStrict
 {
@@ -74,6 +76,8 @@ class EChartsBarWaterfall extends IPSModuleStrict
     private const DATA_ID_TO_PARENT = '{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}';
     private const DATA_ID_FROM_PARENT = '{E4749B72-912B-E3E3-1C57-D19019FFDD84}';
     private const IPSVIEW_OUTPUT_IDENT = 'IPSViewBarWaterfall';
+    private const MAXIMUM_MODEL_BYTES = 200000;
+    private const MODEL_TOO_LARGE_MESSAGE = 'The Waterfall model is too large. Reduce source labels or units.';
     private const STATUS_SOURCE_INVALID = 201;
     private const STATUS_DESIGN_INVALID = 202;
     private const STATUS_PARENT_MISSING = 203;
@@ -279,27 +283,27 @@ class EChartsBarWaterfall extends IPSModuleStrict
             $sources = $this->GetValidatedSources();
             $labels = EChartsSourceIdentity::LabelsForSources($sources);
             $steps = [];
-            $total = 0.0;
+            $currents = array_map(fn (array $source): array => $this->ReadCurrentSource($source['VariableID']), $sources);
+            try {
+                $totals = WaterfallData::Totals(array_column($currents, 'Value'));
+            } catch (Throwable $exception) {
+                $this->WriteAttributeString('LastError', $exception->getMessage());
+                $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                throw $exception;
+            }
             foreach ($sources as $index => $source) {
-                $current = $this->ReadCurrentSource($source['VariableID']);
-                $value = $current['Value'];
-                $before = $total;
-                $total = $index === 0 ? $value : $total + $value;
-                if (!is_finite($total)) {
-                    $this->WriteAttributeString('LastError', 'The Waterfall total is not finite.');
-                    $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
-                    throw new RuntimeException('The Waterfall total is not finite.');
-                }
+                $current = $currents[$index];
                 $steps[] = [
                     'id'        => 'variable-' . $source['VariableID'],
                     'label'     => $labels[$source['VariableID']],
                     'kind'      => $index === 0 ? 'start' : 'change',
-                    'change'    => $value,
-                    'before'    => $before,
-                    'after'     => $total,
+                    'change'    => $current['Value'],
+                    'before'    => $index === 0 ? 0.0 : $totals[$index - 1],
+                    'after'     => $totals[$index],
                     'timestamp' => $current['Timestamp']
                 ];
             }
+            $total = $totals[count($totals) - 1];
             $steps[] = [
                 'id'     => 'total',
                 'label'  => trim($this->ReadPropertyString('TotalLabel')) !== ''
@@ -313,7 +317,7 @@ class EChartsBarWaterfall extends IPSModuleStrict
             $this->WriteAttributeString('LastError', '');
             $this->DebugEChartsSetStatus(IS_ACTIVE);
 
-            return $debugFlowResult = json_encode([
+            $json = json_encode([
                 'schemaVersion' => 1,
                 'family'        => 'bar',
                 'variant'       => 'waterfall',
@@ -326,6 +330,12 @@ class EChartsBarWaterfall extends IPSModuleStrict
                 ],
                 'steps'         => $steps
             ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
+            if (strlen($json) > self::MAXIMUM_MODEL_BYTES) {
+                $this->WriteAttributeString('LastError', 'MODEL_TOO_LARGE');
+                $this->DebugEChartsSetStatus(self::STATUS_DESIGN_INVALID);
+                throw new RuntimeException(self::MODEL_TOO_LARGE_MESSAGE);
+            }
+            return $debugFlowResult = $json;
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
             $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
@@ -434,16 +444,22 @@ class EChartsBarWaterfall extends IPSModuleStrict
     protected function BarPreviewSvg(array $values, bool $ipsView): string
     {
         $palette = EChartsBarPreview::Palette($this->BarPreviewValue($values, 'EChartsTheme', 'string', $ipsView));
-        $data = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values);
-        $items = array_slice($data['items'], 0, 5);
+        $data = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values, 'Label', true, WaterfallData::MAXIMUM_SOURCE_COUNT);
         $previewDecimals = max(array_column($data['items'], 'decimals'));
         $previewUnit = $data['items'][0]['unit'];
         $previewLanguage = $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage());
         if ($data['sample']) {
-            $items[0]['value'] = 18.0;
-            $items[1]['value'] = -5.5;
-            $items[2]['value'] = 8.0;
+            $data['items'][0]['value'] = 18.0;
+            $data['items'][1]['value'] = -5.5;
+            $data['items'][2]['value'] = 8.0;
         }
+        $items = array_slice($data['items'], 0, 5);
+        $totals = WaterfallData::Totals(array_column($data['items'], 'value'));
+        $levels = [0.0, ...$totals];
+        $total = $totals[count($totals) - 1];
+        $minimum = min(0.0, ...$levels);
+        $maximum = max(1.0, ...$levels);
+        $omitted = count($items) < count($data['items']);
         $svg = EChartsBarPreview::Open(
             $palette,
             (string) ($values['Title'] ?? $this->ReadPropertyString('Title')),
@@ -456,20 +472,18 @@ class EChartsBarWaterfall extends IPSModuleStrict
             $this->BarPreviewValue($values, 'TitleFontSizePercent', 'integer', $ipsView)
         );
         $axisColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'AxisColor', 'integer', $ipsView), $palette['text']);
+        $svg = str_replace('<svg xmlns', '<svg data-waterfall-total="' . json_encode($total, JSON_THROW_ON_ERROR | JSON_PRESERVE_ZERO_FRACTION)
+            . '" data-waterfall-min="' . json_encode($minimum, JSON_THROW_ON_ERROR | JSON_PRESERVE_ZERO_FRACTION)
+            . '" data-waterfall-max="' . json_encode($maximum, JSON_THROW_ON_ERROR | JSON_PRESERVE_ZERO_FRACTION) . '" xmlns', $svg);
         $valueColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'ValueColor', 'integer', $ipsView), $palette['text']);
         $gridColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'GridColor', 'integer', $ipsView), $palette['track']);
         $axisSize = max(6, min(22, (int) round(11 * $this->BarPreviewValue($values, 'AxisFontSizePercent', 'integer', $ipsView) / 100)));
         $valueSize = max(6, min(22, (int) round(11 * $this->BarPreviewValue($values, 'ValueFontSizePercent', 'integer', $ipsView) / 100)));
-        $levels = [0.0];
-        $total = 0.0;
-        foreach ($items as $index => $item) {
-            $total = $index === 0 ? $item['value'] : $total + $item['value'];
-            $levels[] = $total;
-        }
-        $minimum = min(0.0, ...$levels);
-        $maximum = max(1.0, ...$levels);
-        $range = max(1.0, $maximum - $minimum);
-        $y = static fn (float $value): float => 285 - ($value - $minimum) / $range * 205;
+        // Normalize coordinates, not values: a finite signed range can exceed PHP_FLOAT_MAX.
+        $magnitude = max(1.0, abs($minimum), abs($maximum));
+        $normalizedMinimum = $minimum / $magnitude;
+        $normalizedRange = max(1.0 / $magnitude, $maximum / $magnitude - $normalizedMinimum);
+        $y = static fn (float $value): float => 285 - ($value / $magnitude - $normalizedMinimum) / $normalizedRange * 205;
         if ($this->BarPreviewValue($values, 'ShowGrid', 'boolean', $ipsView)) {
             for ($step = 0; $step <= 4; ++$step) {
                 $lineY = 80 + $step * 51;
@@ -479,7 +493,7 @@ class EChartsBarWaterfall extends IPSModuleStrict
         }
         $svg .= '<line x1="70" y1="' . EChartsBarPreview::N($y(0)) . '" x2="680" y2="'
             . EChartsBarPreview::N($y(0)) . '" stroke="' . EChartsBarPreview::E($palette['border']) . '"/>';
-        $width = 580 / (count($items) + 1);
+        $width = 580 / (count($items) + 1 + ($omitted ? 1 : 0));
         $barWidth = $width * max(20, min(100, $this->BarPreviewValue($values, 'BarWidthPercent', 'integer', $ipsView))) / 100;
         $showValues = $this->BarPreviewValue($values, 'ShowValues', 'boolean', $ipsView);
         $valueLabelPosition = $this->BarPreviewValue($values, 'ValueLabelPosition', 'string', $ipsView);
@@ -529,7 +543,12 @@ class EChartsBarWaterfall extends IPSModuleStrict
                     )) . '</text>';
             }
         }
-        $x = 90 + count($items) * $width;
+        if ($omitted) {
+            $svg .= '<text data-omitted-steps="true" x="' . EChartsBarPreview::N(90 + count($items) * $width + $barWidth / 2)
+                . '" y="' . $categoryLabelY . '" text-anchor="middle" fill="' . EChartsBarPreview::E($axisColor)
+                . '" font-size="' . $axisSize . '">…</text>';
+        }
+        $x = 90 + (count($items) + ($omitted ? 1 : 0)) * $width;
         $top = min($y(0), $y($total));
         $height = max(2, abs($y(0) - $y($total)));
         $color = EChartsBarPreview::Color(
@@ -590,7 +609,7 @@ class EChartsBarWaterfall extends IPSModuleStrict
             $hiddenTileTitle = (bool) (IPS_GetObject($this->InstanceID)['ObjectIsHiddenTitle'] ?? false);
         }
 
-        return $this->RenderVisualizationHTMLPage($ipsView, [
+        $configuration = [
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'ECharts Waterfall',
             'visualizationTheme' => $this->VisualizationThemeCSS()
@@ -599,6 +618,7 @@ class EChartsBarWaterfall extends IPSModuleStrict
             'ipsViewStyle'       => $ipsView ? $this->IPSViewThemeCSS() : '',
             'state'              => $this->BuildVisualizationState($ipsView),
             'translations'       => [
+                self::MODEL_TOO_LARGE_MESSAGE                                     => $this->Translate(self::MODEL_TOO_LARGE_MESSAGE),
                 'Configure valid Waterfall sources.'                              => $this->Translate('Configure valid Waterfall sources.'),
                 'Connect an active EChartsGateway.'                               => $this->Translate('Connect an active EChartsGateway.'),
                 'The Waterfall values could not be loaded.'                       => $this->Translate('The Waterfall values could not be loaded.'),
@@ -616,10 +636,18 @@ class EChartsBarWaterfall extends IPSModuleStrict
             'replacements'       => [
                 '{{ECHARTS_SCRIPT}}'           => EChartsAsset::CartesianJavaScript(),
                 '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
-                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript(),
+                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript() . "\n" . EChartsAsset::CategoryNavigationJavaScript(),
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
-        ]);
+        ];
+        $html = $this->RenderVisualizationHTMLPage($ipsView, $configuration);
+        if (strlen($html) > 1048576) {
+            $this->WriteAttributeString('LastError', 'MODEL_TOO_LARGE');
+            $this->DebugEChartsSetStatus(self::STATUS_DESIGN_INVALID);
+            $configuration['state'] = $this->ErrorState(self::MODEL_TOO_LARGE_MESSAGE);
+            return $this->RenderVisualizationHTMLPage($ipsView, $configuration);
+        }
+        return $html;
     }
 
     private function Initialize(): void
@@ -676,8 +704,8 @@ class EChartsBarWaterfall extends IPSModuleStrict
         } catch (JsonException $exception) {
             throw new InvalidArgumentException('The Waterfall sources are not valid JSON.', 0, $exception);
         }
-        if (!is_array($sources) || !array_is_list($sources) || count($sources) < 2 || count($sources) > 16) {
-            throw new InvalidArgumentException('Configure a start and 1 to 15 signed changes.');
+        if (!is_array($sources) || !array_is_list($sources) || count($sources) < 2 || count($sources) > WaterfallData::MAXIMUM_SOURCE_COUNT) {
+            throw new InvalidArgumentException('Configure a start and 1 to 99 signed changes.');
         }
         $validated = [];
         $variableIDs = [];
@@ -747,7 +775,8 @@ class EChartsBarWaterfall extends IPSModuleStrict
         } catch (Throwable $exception) {
             $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
 
-            return $this->ErrorState('The Waterfall values could not be loaded.');
+            return $this->ErrorState($this->ReadAttributeString('LastError') === 'MODEL_TOO_LARGE'
+                ? self::MODEL_TOO_LARGE_MESSAGE : 'The Waterfall values could not be loaded.');
         }
 
         return [

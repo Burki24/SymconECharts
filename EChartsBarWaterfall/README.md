@@ -8,8 +8,34 @@ Die Optionen gelten für Kacheln und – bei unabhängigem Design – auch für
 IPSView. Bei geerbtem Design folgt IPSView den Kacheleinstellungen.
 
 `EChartsBarWaterfall` zeigt, wie sich ein aktueller Wert durch mehrere
-Änderungen zu einer Endsumme entwickelt. Das Modul benötigt zwei bis sechzehn
+Änderungen zu einer Endsumme entwickelt. Das Modul benötigt zwei bis 100
 eindeutige numerische Symcon-Variablen mit derselben effektiven Einheit.
+Die erste Quelle ist der Startwert; bis zu 99 weitere Quellen sind Änderungen.
+Die berechnete Endsumme ist keine zusätzliche Quellvariable.
+
+## Große Bilanzen und Kategoriennavigation
+
+Bei Platzmangel zeigt das Diagramm einen verschiebbaren Ausschnitt mit einer
+horizontalen Kategoriennavigation. Sichtbare Kategorien passen sich an die
+Kachel-/Widgetbreite, Balkenbreite, Schriftgröße und Wertbeschriftung an.
+Schmalere Balken können mehr Schritte sichtbar machen, solange Beschriftungen
+lesbar bleiben. Der Ausschnitt lässt sich am Regler und innerhalb des
+Diagrammbereichs verschieben.
+
+Navigation ändert nur die Ansicht: Sämtliche Quellen werden weiter gelesen.
+Jeder Zwischenstand, die Werteskala und die Endsumme berücksichtigen die
+gesamte geordnete Quellenliste, auch außerhalb des Ausschnitts. Die Endsumme
+steht als letzte Kategorie zur Verfügung. Tooltips nennen den Originalschritt
+mit Änderung sowie Stand davor und danach. Gleichnamige Schritte bleiben
+getrennt; der sichtbare Bereich folgt bei Aktualisierung und Umsortierung
+seinen Quell-IDs. Bei Größenänderung wird der Ausschnitt passend begrenzt.
+
+Bestehende Quellenlisten und Designeinstellungen bleiben nutzbar. Es gibt
+keine automatische Sortierung, Normalisierung oder neue Zwischensummenlogik.
+Sehr große Beschriftungen oder Einheiten können die Ausgabegrenze erreichen:
+Das Modell ist auf 200.000 JSON-Bytes und das HTML-Dokument auf 1 MiB begrenzt.
+Dann erscheint eine Fehlermeldung mit der Bitte, Beschriftungen oder Einheiten
+zu verkürzen; die Bilanz wird nicht stillschweigend abgeschnitten.
 
 ## Vorübergehende Ladefehler
 
@@ -34,8 +60,11 @@ Quellen sind Beispieldaten ausdrücklich markiert. Bei aktiviertem
 Wertbeschriftungen verwenden die wirksame gemeinsame Einheit und die höchste
 Nachkommastellenzahl der Quellen. Die responsive Laufzeitdarstellung prüfen
 Sie anschließend in Kachel und Widget.
-Bei mehr als fünf Quellen zeigt die Vorschau die ersten fünf Schritte und nennt
-die angezeigte sowie die gesamte Quellenzahl; die eigentliche Grafik nutzt alle.
+Bei mehr als fünf Quellen zeigt die Vorschau die ersten fünf Quellen, ein
+Auslassungszeichen und die aus **allen Quellen** berechnete Endsumme. Sie nennt
+die angezeigte und gesamte Quellenzahl. Auch die Vorschau-Werteskala berücksichtigt
+alle Zwischenstände, nicht nur den Ausschnitt. Die eigentliche Grafik nutzt alle
+Quellen; in der Vorschau ausgelassene Änderungen werden nicht als Null behandelt.
 
 ## Animation
 

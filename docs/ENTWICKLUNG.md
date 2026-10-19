@@ -21,6 +21,15 @@ IPSView nur den Diagrammtitel benötigt.
 
 ## Aktueller Stand und Zielarchitektur
 
+BarWaterfall erweitert gemäß [ADR 0071](adr/0071-waterfall-category-navigation.md)
+auf 2–100 Quellen und 101 modellierte Schritte einschließlich berechneter
+Endsumme. `WaterfallData::Totals` zentralisiert die endliche geordnete Addition
+für Modell und vollständige Vorschau. Ausschnitte verändern keine Zwischenstände
+oder Gesamtbilanz. `echarts-category-navigation.js` teilt ausschließlich flüchtige
+ID-Anker und Fensterbegrenzung mit BarCategory; Familiengeometrie und Bilanz bleiben
+lokal. Die Einbettung erfolgt nur bei diesen beiden Familien über `EChartsAsset`.
+Das Modell ist auf 200000 JSON-Bytes begrenzt, das vollständige HTML auf 1 MiB.
+
 ThemeRiver ergänzt gemäß [ADR 0070](adr/0070-theme-river-counter-consumption.md)
 die globale Property `Metric`: `average` bleibt Default, `consumption` fordert
 explizit `sum` und Zählerarchive. `ThemeRiverData::ArchiveContract` besitzt
@@ -224,7 +233,7 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 | Gerät | EChartsTimeSeries | Historische und live fortgeschriebene Linien und Flächen für 1 bis 32 Quellen, Reihenauswahl, bis zu acht links/rechts angeordnete Einheitengruppen sowie getrenntes Kachel- und IPSView-Design |
 | Gerät | EChartsBarCategory | Aktuelle einfache, gruppierte oder gestapelte Kategorienvergleiche für 1 bis 100 Quellen mit gemeinsamer Einheit, Kategoriennavigation, optionalem Min-/Max-Farbverlauf und getrenntem Kachel- und IPSView-Design |
 | Gerät | EChartsBarHistory | Historische rohe oder aggregierte Balken von 1 bis 32 Archivquellen, bis 16 Einheitengruppen und Reihenauswahl in nativer Kachel und optionalem IPSView-HTML |
-| Gerät | EChartsBarWaterfall | Aktueller Startwert mit 1 bis 15 signierten Änderungen und berechneter Endsumme in Kachel und optionalem IPSView-HTML |
+| Gerät | EChartsBarWaterfall | Aktueller Startwert mit 1 bis 99 signierten Änderungen, berechneter Gesamtbilanz und ID-stabiler Kategoriennavigation in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsBarPolar | Aktuelle Werte aus 1 bis 16 Quellen als radiale Balken oder konzentrische Bögen in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsPie | Aktuelle nichtnegative Anteile aus 1 bis 16 Quellen als Kreis, Donut oder Nightingale-Rose in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsScatter | Archivierte X/Y-Werte mit optionaler Bubble-Größe, ausschließlich zeitgleiche abgeschlossene Intervalle ohne Interpolation, in Kachel und optionalem IPSView-HTML |

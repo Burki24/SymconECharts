@@ -20,6 +20,7 @@ const designSource = fs.readFileSync(
     'utf8'
 );
 const patternSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-pattern.js'), 'utf8');
+const navigationSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-category-navigation.js'), 'utf8');
 
 function render(orientation, sortOrder, outputMode = 'symcon', barMode = 'simple', items, styleOverrides = {}, enableImages = false, dimensions = {}, barOverrides = {}) {
     const chartElement = { hidden: false, clientWidth: dimensions.width || 800, clientHeight: dimensions.height || 500 };
@@ -80,6 +81,7 @@ function render(orientation, sortOrder, outputMode = 'symcon', barMode = 'simple
     };
     vm.runInNewContext(designSource, { window });
     vm.runInNewContext(patternSource, { window, document });
+    vm.runInNewContext(navigationSource, { window });
     vm.runInNewContext(source, { window, document });
     assert.ok(option, 'The Category Bar chart should render.');
     Object.defineProperties(option, {

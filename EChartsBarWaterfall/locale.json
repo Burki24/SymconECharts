@@ -1,6 +1,9 @@
 {
     "translations": {
         "de": {
+            "Use 2 to 100 unique numeric variables with one unit: one start value and up to 99 signed changes. The final total uses all sources; category navigation changes only the visible window. Empty step labels use the current variable name.": "2 bis 100 eindeutige numerische Variablen einer Einheit verwenden: ein Startwert und bis zu 99 Änderungen mit Vorzeichen. Die Endsumme berücksichtigt alle Quellen; die Kategoriennavigation ändert nur den sichtbaren Ausschnitt. Bei leerer Schrittbeschriftung erscheint der aktuelle Variablenname.",
+            "Configure a start and 1 to 99 signed changes.": "Einen Startwert und 1 bis 99 Änderungen mit Vorzeichen konfigurieren.",
+            "The Waterfall model is too large. Reduce source labels or units.": "Das Waterfall-Modell ist zu groß. Bitte Quellbeschriftungen oder Einheiten verkürzen.",
             "Value label position": "Position der Wertbeschriftung",
             "Value label distance": "Abstand der Wertbeschriftung",
             "Automatic": "Automatisch",

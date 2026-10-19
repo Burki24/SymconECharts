@@ -107,7 +107,7 @@
         },
         {
             "type": "Label",
-            "caption": "Use 2 to 16 unique numeric variables with one unit. The first row is the start value. Every later row is added with its sign; the final total is calculated. Empty step labels use the current variable name."
+            "caption": "Use 2 to 100 unique numeric variables with one unit: one start value and up to 99 signed changes. The final total uses all sources; category navigation changes only the visible window. Empty step labels use the current variable name."
         },
         {
             "type": "ValidationTextBox",

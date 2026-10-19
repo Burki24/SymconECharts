@@ -386,4 +386,13 @@ assertEChartsAsset(
     'The theme loader must reject content changes beyond line-ending normalization.'
 );
 
+assertEChartsAsset(
+    str_contains(EChartsAsset::CategoryNavigationJavaScript(), 'SymconEChartsCategoryNavigation'),
+    'The project-owned category navigation must be loadable for both consumers.'
+);
+assertEChartsAsset(
+    !str_contains(EChartsAsset::CategoryNavigationJavaScript(), "\r"),
+    'The shared category navigation loader must normalize line endings.'
+);
+
 echo 'Pinned Apache ECharts ' . EChartsAsset::VERSION . " assets verified.\n";

@@ -1107,6 +1107,32 @@ if (($argv[1] ?? '') === '--theme-river-preview') {
     echo base64_decode(substr($previewUpdate['Value'], strlen('data:image/svg+xml;base64,')));
     exit(0);
 }
+if (array_slice($argv, 1) === ['--waterfall-many']) {
+    require __DIR__ . '/bar_waterfall_many.php';
+    exit(0);
+}
+if (($argv[1] ?? '') === '--waterfall-preview') {
+    $draft = json_decode($argv[2] ?? '{}', true, 512, JSON_THROW_ON_ERROR);
+    if (!isset($draft['Sources'])) {
+        $draft['Sources'] = [];
+        for ($index = 0; $index < 100; ++$index) {
+            $id = 99000 + $index;
+            $value = match ($index) {
+                0       => 50.0, 1 => 950.0, 2 => -2000.0, 3 => 1000.0,
+                default => $index % 2 ? -2.0 : 3.0
+            };
+            $GLOBALS['symconTestVariables'][$id] = ['VariableType' => 2, 'Value' => $value,
+                'Name'                                             => $index === 0 ? 'Start' : 'Änderung ' . str_pad((string) $index, 2, '0', STR_PAD_LEFT)];
+            $draft['Sources'][] = ['VariableID' => $id, 'Label' => '', 'UseVariablePresentation' => false, 'Unit' => '', 'Decimals' => 0];
+        }
+    }
+    $waterfallPreview = new EChartsBarWaterfall();
+    $waterfallPreview->Create();
+    $waterfallPreview->UpdateBarPreviewFromForm(json_encode($draft, JSON_THROW_ON_ERROR));
+    $previewUpdate = array_slice($waterfallPreview->GetTestFormUpdates(), -2)[0];
+    echo base64_decode(substr($previewUpdate['Value'], strlen('data:image/svg+xml;base64,')));
+    exit(0);
+}
 if (array_slice($argv, 1) === ['--theme-river-consumption']) {
     require __DIR__ . '/theme_river_consumption.php';
     exit(0);

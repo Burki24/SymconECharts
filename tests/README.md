@@ -1,5 +1,44 @@
 # Tests
 
+## Waterfall: 100 Quellen und vollständige Bilanz
+
+`php tests/waterfall_data.php` sichert die gemeinsame geordnete Addition für
+Modell und Vorschau: Vorzeichenwechsel, negative Starts, echte Nullen, 100/101
+Werte und nichtendliche Einzel-/kumulierte Werte.
+`php tests/gateway_gauges.php --waterfall-many` verwendet den tatsächlichen
+Gateway mit synthetischen Kernel-Variablen: 100 aktuelle Lesezugriffe, 100
+Referenzen/VM-Abonnements und 101 vollständige Schritte samt berechneter Endsumme.
+Geprüft sind Alt-Konfigurationen ohne Umschreiben, gleiche Namen, Einheiten,
+späte Updates, Entfernen von Quellen, Fehler und Wiederanlauf. Die Vorschau
+zeigt 5/100, Auslassungszeichen, vollständige Endsumme und Extrema inklusive
+eines ausgelassenen Ausschlags sowie Präzision einer späten Quelle. Entwürfe
+lesen keine Gatewaywerte und verändern keine Properties.
+
+Beide Ausgaben werden verlustfrei mit dem vollständigen Modell verglichen.
+UTF-8-/HTML-Metadaten, Modellgrenze 200000 Bytes und tatsächlicher finaler
+1-MiB-HTML-Guard sind getestet; zu große gültige Metadaten erzeugen ein klares
+Fehlerdokument statt verkürzter Summen. Die neue fokussierte Suite läuft separat,
+damit die große gemeinsame Gateway-Fixture ihr Speicherlimit beibehält.
+
+`node tests/bar_waterfall_layout.js` nutzt die gepinnte native Cartesian-Runtime:
+beide Ausgabearten, 101 Kategorien, Offscreen-Extrema, letzte Endsumme/ID-Tooltips,
+Zero-Crossings, responsive Dichte, Schrift-/Balkenbreiten, Reorder/Removal/Empty,
+Themewechsel und beide Resize-Wege. `node tests/bar_category_layout.js` prüft
+die gemeinsame ID-Anker-/Fensterlogik ohne Änderungen der Kategoriengeometrie.
+Das generierte Category-App-Artefakt wird mit dem bestehenden dokumentierten
+Minify-Befehl reproduziert. `--current-normalization` prüft zusätzlich die
+knappe Ausgabegrenze großer Category-Modelle samt SVG-Muster.
+
+Die lokale synthetische Browser-Fixture `node tests/bar_waterfall_browser.mjs`
+nutzt Port 8805, zeigt beide Ausgabewege und die echte PHP-Vorschau. Am
+19.10.2026 wurden beide Ausgabewege mit 100 Quellen, Navigation bis zur
+vollständigen Endsumme, erhaltener Skala und erhaltener Position nach erneuter
+Zustandsübertragung visuell geprüft. Die PHP-Vorschau zeigt dieselbe Endsumme
+bei ausdrücklich gekürzter Darstellung. Ein zusätzlicher Regressionstest
+sichert den Abstand negativer Wertbeschriftungen zu den Kategoriennamen ab.
+Die erneute Live-Abnahme nach Modulupdate in Symcon/IPSView bleibt beim Eigentümer;
+Live-Konfigurationen und Variablenwerte werden nicht verändert.
+
 ## ThemeRiver: Zählerverbrauch als Datengrundlage
 
 `php tests/gateway_gauges.php --theme-river-consumption` prüft den wirklichen

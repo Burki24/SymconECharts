@@ -521,6 +521,16 @@ final class EChartsAsset
         return self::NormalizeLineEndings($content);
     }
 
+    /** Loads category-window state only for chart families which use it. */
+    public static function CategoryNavigationJavaScript(): string
+    {
+        $content = @file_get_contents(__DIR__ . '/echarts-category-navigation.js');
+        if ($content === false || $content === '') {
+            throw new RuntimeException('The shared category navigation utilities could not be loaded.');
+        }
+        return self::NormalizeLineEndings($content);
+    }
+
     /** Loads tree-specific view state without growing unrelated chart documents. */
     public static function TreeSupportJavaScript(): string
     {
