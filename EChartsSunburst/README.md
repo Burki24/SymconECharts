@@ -12,6 +12,17 @@ optional. Gleichnamige Gruppen und Untergruppen werden zusammengefasst.
 Die Segmente folgen standardmäßig der Konfigurationsreihenfolge. Wahlweise
 können sie nach Wert auf- oder absteigend sortiert werden.
 
+Für tiefere Strukturen tragen Sie einen optionalen „Gruppenpfad“ ein, etwa
+`Haus / Obergeschoss / Büro / Strom`. Bis zu sieben Gruppen plus das
+Variablenblatt ergeben maximal acht Ebenen. Ein ausgefüllter Gruppenpfad
+ersetzt Gruppe und Untergruppe nur für diesen Eintrag. Ohne Gruppenpfad
+bleiben vorhandene Einträge unverändert nutzbar; `/` in bisherigen Gruppen-
+und Untergruppennamen bleibt wörtlich erhalten. In einem Gruppenpfad steht
+`\/` für einen echten Schrägstrich und `\\` für einen Rückstrich. Leere
+Pfadbestandteile sind unzulässig. Gruppennamen dürfen bis zu 80 Zeichen,
+Blattbeschriftungen bis zu 120 Zeichen enthalten. Maximal 100 Variablen und
+800 Knoten sind zulässig; ein zu großes Datenmodell wird sichtbar abgelehnt.
+
 Verwendet wird ausschließlich der aktuelle Rohwert. Negative oder nicht
 endliche Werte werden abgewiesen. Nullwerte sind zulässig, haben aber keinen
 sichtbaren Winkel; bei ausschließlich Nullwerten erscheint ein Hinweis.
@@ -28,6 +39,18 @@ Sortierung, abgerundete Segmentkanten (0–20 px) und Tooltip sind ebenfalls
 einstellbar. Per Klick kann in eine Gruppe hineingezoomt werden. IPSView übernimmt standardmäßig das
 Kacheldesign, kann aber unabhängig gestaltet werden. Die Formularvorschau
 zeigt eine schematische Ringdarstellung mit Beispieldaten.
+
+Bei tieferen Hierarchien gelten die Einstellungen des äußeren Rings ab
+Ebene 3 für alle weiteren Ringe. Die vollständige Hierarchie wird in der
+Vorschau mit Beispielgewichten dargestellt, ohne aktuelle Werte zu lesen.
+Sehr schmale Segmente bleiben dort unbeschriftet. Im Diagramm zeigt der
+Tooltip den vollständigen Pfad und den Wert. Bei mehr als drei Ebenen werden
+Beschriftungen passend zum verfügbaren Segmentraum gekürzt oder ausgeblendet;
+beim Hineinzoomen wird der neue Platz berücksichtigt. Ein Klick in die Mitte führt
+aus einer vergrößerten Gruppenansicht zur übergeordneten Gruppe zurück.
+Die gewählte Gruppenansicht bleibt bei Werteaktualisierung und
+Größenänderung erhalten, solange diese Gruppe noch vorhanden ist und die
+Klicknavigation aktiviert bleibt.
 
 Öffentliche PHP-Funktionen: `ECSB_GetSunburstData($id)` liefert das
 aktuelle hierarchische Datenmodell als JSON.

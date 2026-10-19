@@ -39,6 +39,7 @@ $tests = [
     __DIR__ . '/graph_model.php',
     __DIR__ . '/zigbee_graph_model.php',
     __DIR__ . '/treemap_model.php',
+    __DIR__ . '/hierarchy_sources.php',
     __DIR__ . '/sankey_model.php',
     __DIR__ . '/radar_model.php',
     __DIR__ . '/boxplot_statistics.php',
@@ -49,6 +50,8 @@ $tests = [
 ];
 
 $commands = [
+    ['Test deep Treemap hierarchies', 'php tests/gateway_gauges.php --treemap-hierarchy'],
+    ['Test deep Sunburst hierarchies', 'php tests/gateway_gauges.php --sunburst-hierarchy'],
     ['Test normalized current comparisons', 'php tests/gateway_gauges.php --current-normalization'],
     ['Test ThemeRiver Gateway and output integration', 'php tests/gateway_gauges.php --theme-river'],
     ['Verify local quality runner', 'php tests/quality.php --help'],

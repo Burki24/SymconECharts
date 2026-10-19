@@ -17,6 +17,7 @@ use SymconECharts\EChartsBarPreview;
 use SymconECharts\EChartsBarPreviewForm;
 use SymconECharts\EChartsCurrentSources;
 use SymconECharts\EChartsDesignerSections;
+use SymconECharts\EChartsHierarchySources;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
@@ -37,6 +38,7 @@ require_once __DIR__ . '/../libs/EChartsBarPreviewForm.php';
 require_once __DIR__ . '/../libs/EChartsCurrentSources.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
+require_once __DIR__ . '/../libs/EChartsHierarchySources.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
@@ -417,29 +419,26 @@ class EChartsSunburst extends IPSModuleStrict
             $this->BarPreviewValue($values, 'TitleFontSizePercent', 'integer', $ipsView)
         );
         $rows = $values['Sources'] ?? json_decode($this->ReadPropertyString('Sources'), true);
-        $groups = [];
-        foreach (is_array($rows) ? $rows : [] as $row) {
-            if (is_array($row) && trim((string) ($row['Group'] ?? '')) !== '') {
-                $group = trim((string) $row['Group']);
-                $groups[$group] = ($groups[$group] ?? 0) + 1;
-            }
+        try {
+            $model = EChartsHierarchySources::Preview($rows, 'Sunburst');
+        } catch (InvalidArgumentException) {
+            return $svg . '<text x="32" y="100" fill="' . EChartsBarPreview::E($palette['text']) . '">'
+                . EChartsBarPreview::E($this->Translate('Configure a valid hierarchy path with up to seven groups.')) . '</text></svg>';
         }
-        if ($groups === []) {
-            $groups = ['Group A' => 3, 'Group B' => 2, 'Group C' => 1];
-        }
-        $groups = array_slice($groups, 0, 6, true);
+        $svg = str_replace('role="img"', 'role="img" data-preview-sources="' . $model['sourceCount']
+            . '" data-preview-depth="' . $model['depth'] . '"', $svg);
         $sortMode = $this->BarPreviewValue($values, 'SortMode', 'string', $ipsView);
-        if ($sortMode === 'asc') {
-            asort($groups, SORT_NUMERIC);
-        } elseif ($sortMode === 'desc') {
-            arsort($groups, SORT_NUMERIC);
-        }
-        $total = array_sum($groups);
+        $total = $model['total'];
         $groupColorsProperty = $ipsView && !($values['IPSViewUseTileDesign']
             ?? $this->ReadPropertyBoolean('IPSViewUseTileDesign')) ? 'IPSViewGroupColors' : 'GroupColors';
         $configuredColors = $this->ParseGroupColors(
             $values[$groupColorsProperty] ?? $this->ReadPropertyString($groupColorsProperty)
         ) ?? [];
+        $rootColors = [];
+        foreach ($model['data'] as $index => $group) {
+            $rootColors[$group['id']] = $configuredColors[$group['name']]
+                ?? $palette['seriesColors'][$index % count($palette['seriesColors'])];
+        }
         $border = EChartsBarPreview::Color($this->BarPreviewValue($values, 'BorderColor', 'integer', $ipsView), $palette['background']);
         $borderWidth = max(0, min(12, $this->BarPreviewValue($values, 'BorderWidth', 'integer', $ipsView)));
         $inner = max(0, min(50, $this->BarPreviewValue($values, 'InnerRadiusPercent', 'integer', $ipsView)));
@@ -448,8 +447,6 @@ class EChartsSunburst extends IPSModuleStrict
         $hole = $inner * 1.2;
         $cx = 360;
         $cy = 195;
-        $offset = 0.0;
-        $position = 0;
         $startAngle = max(0, min(360, $this->BarPreviewValue($values, 'StartAngle', 'integer', $ipsView)));
         $clockwise = $this->BarPreviewValue($values, 'Clockwise', 'boolean', $ipsView);
         $showLabels = $this->BarPreviewValue($values, 'ShowLabels', 'boolean', $ipsView);
@@ -467,20 +464,50 @@ class EChartsSunburst extends IPSModuleStrict
         $labelMinAngle = max(0, min(45, $this->BarPreviewValue($values, 'LabelMinAngle', 'integer', $ipsView)));
         $labelColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'LabelColor', 'integer', $ipsView), $palette['text']);
         $labelRotation = $this->BarPreviewValue($values, 'LabelRotation', 'string', $ipsView);
-        $previewLabels = '';
-        foreach ($groups as $name => $count) {
-            $share = 100.0 * $count / $total;
-            $color = $configuredColors[$name] ?? $palette['seriesColors'][$position % count($palette['seriesColors'])];
-            foreach ([0, 1, 2] as $level) {
-                $ringRadius = $hole + ($radius - $hole) * ($level + 0.5) / 3;
-                $ringWidth = ($radius - $hole) / 3 - $borderWidth;
-                $svg .= '<circle cx="' . $cx . '" cy="' . $cy . '" r="' . EChartsBarPreview::N($ringRadius)
+        $showValues = $this->BarPreviewValue($values, 'ShowValues', 'boolean', $ipsView);
+        $depthCount = $model['depth'];
+        $draw = function (array $nodes, int $depth, float $offset, string $parentColor = '') use (
+            &$draw,
+            &$svg,
+            $rootColors,
+            $sortMode,
+            $total,
+            $depthCount,
+            $hole,
+            $radius,
+            $borderWidth,
+            $border,
+            $cx,
+            $cy,
+            $clockwise,
+            $startAngle,
+            $showLabels,
+            $showValues,
+            $ringLabels,
+            $ringSizes,
+            $generalSize,
+            $labelMinAngle,
+            $labelColor,
+            $labelRotation
+        ): void {
+            if ($sortMode === 'asc' || $sortMode === 'desc') {
+                usort($nodes, static fn (array $left, array $right): int => $sortMode === 'asc'
+                    ? $left['value'] <=> $right['value'] : $right['value'] <=> $left['value']);
+            }
+            foreach ($nodes as $node) {
+                $share = 100.0 * $node['value'] / $total;
+                $color = $depth === 1 ? $rootColors[$node['id']] : $parentColor;
+                $level = min(2, $depth - 1);
+                $ringRadius = $hole + ($radius - $hole) * ($depth - 0.5) / $depthCount;
+                $ringWidth = ($radius - $hole) / $depthCount - $borderWidth;
+                $svg .= '<circle data-node="' . EChartsBarPreview::E($node['id']) . '" data-depth="' . $depth
+                    . '" cx="' . $cx . '" cy="' . $cy . '" r="' . EChartsBarPreview::N($ringRadius)
                     . '" fill="none" stroke="' . EChartsBarPreview::E($color)
                     . '" stroke-width="' . EChartsBarPreview::N(max(1, $ringWidth))
-                    . '" pathLength="100" stroke-dasharray="' . EChartsBarPreview::N(max(0, $share - 0.5))
+                    . '" pathLength="100" stroke-dasharray="' . EChartsBarPreview::N(max(0, $share - 0.25))
                     . ' 100" stroke-dashoffset="' . EChartsBarPreview::N($clockwise ? -$offset : $offset + $share)
                     . '" transform="rotate(-' . $startAngle . ' ' . $cx . ' ' . $cy . ')"/>';
-                if ($showLabels && $ringLabels[$level] && 3.6 * $share >= $labelMinAngle) {
+                if ($showLabels && $ringLabels[$level] && 3.6 * $share >= $labelMinAngle && $share >= 3 && $ringWidth >= 8) {
                     $angle = -$startAngle + ($clockwise ? 1 : -1) * 3.6 * ($offset + $share / 2);
                     $radians = deg2rad($angle);
                     $x = $cx + $ringRadius * cos($radians);
@@ -492,34 +519,31 @@ class EChartsSunburst extends IPSModuleStrict
                         'tangential' => $angle + 90,
                         default      => 0
                     };
-                    $previewLabels .= '<text x="' . EChartsBarPreview::N($x) . '" y="' . EChartsBarPreview::N($y)
+                    $text = $node['name'] . ($showValues && !isset($node['children']) ? ' ' . $node['value'] : '');
+                    $svg .= '<text x="' . EChartsBarPreview::N($x) . '" y="' . EChartsBarPreview::N($y)
                         . '" text-anchor="middle" dominant-baseline="middle" font-size="' . $size
                         . '" fill="' . EChartsBarPreview::E($labelColor) . '" transform="rotate('
                         . EChartsBarPreview::N($rotation) . ' ' . EChartsBarPreview::N($x) . ' '
                         . EChartsBarPreview::N($y) . ')">'
-                        . EChartsBarPreview::E(mb_strimwidth($name, 0, 12, '…')) . '</text>';
+                        . EChartsBarPreview::E(mb_strimwidth($text, 0, 12, '…')) . '</text>';
                 }
+                if (isset($node['children'])) {
+                    $draw($node['children'], $depth + 1, $offset, $color);
+                }
+                $offset += $share;
             }
-            $offset += $share;
-            ++$position;
-        }
+        };
+        $draw($model['data'], 1, 0.0);
         if ($borderWidth > 0) {
-            foreach ([1, 2] as $level) {
+            for ($level = 1; $level < $depthCount; ++$level) {
                 $svg .= '<circle cx="' . $cx . '" cy="' . $cy . '" r="'
-                    . EChartsBarPreview::N($hole + ($radius - $hole) * $level / 3)
+                    . EChartsBarPreview::N($hole + ($radius - $hole) * $level / $depthCount)
                     . '" fill="none" stroke="' . EChartsBarPreview::E($border)
                     . '" stroke-width="' . $borderWidth . '"/>';
             }
         }
-        $svg .= $previewLabels;
-        if ($showLabels && $ringLabels[0]) {
-            $size = max(8, min(22, (int) round(12 * $generalSize / 100)));
-            $labels = array_keys($groups);
-            $svg .= '<text x="360" y="352" text-anchor="middle" font-size="' . $size
-                . '" fill="' . EChartsBarPreview::E($labelColor) . '">'
-                . EChartsBarPreview::E(implode(' · ', array_map(static fn (string $name): string => mb_strimwidth($name, 0, 14, '…'), $labels)))
-                . '</text>';
-        }
+        $svg .= '<text x="32" y="352" font-size="10" fill="' . EChartsBarPreview::E($palette['muted']) . '">'
+            . EChartsBarPreview::E($this->Translate('Schematic hierarchy; zoom in the chart to inspect small nodes.')) . '</text>';
         return $svg . '</svg>';
     }
 
@@ -640,43 +664,10 @@ class EChartsSunburst extends IPSModuleStrict
         return null;
     }
 
-    /** @return list<array{VariableID:int,Group:string,Subgroup:string,Label:string}> */
+    /** @return list<array{VariableID:int,Group:string,Subgroup:string,Label:string,Path:list<string>}> */
     private function GetValidatedSources(): array
     {
-        try {
-            $sources = json_decode($this->ReadPropertyString('Sources'), true, 64, JSON_THROW_ON_ERROR);
-        } catch (JsonException $exception) {
-            throw new InvalidArgumentException('The Sunburst variables are not valid JSON.', 0, $exception);
-        }
-        if (!is_array($sources) || !array_is_list($sources) || count($sources) < 1 || count($sources) > 100) {
-            throw new InvalidArgumentException('Configure 1 to 100 unique numeric Sunburst variables.');
-        }
-        $result = [];
-        $seen = [];
-        foreach ($sources as $source) {
-            if (!is_array($source)) {
-                throw new InvalidArgumentException('Every Sunburst entry must be an object.');
-            }
-            $id = $source['VariableID'] ?? null;
-            $group = $source['Group'] ?? null;
-            $subgroup = $source['Subgroup'] ?? '';
-            $label = $source['Label'] ?? '';
-            if (!is_int($id) || $id <= 0 || isset($seen[$id]) || !IPS_VariableExists($id)
-                || !in_array(IPS_GetVariable($id)['VariableType'] ?? null, [1, 2], true)) {
-                throw new InvalidArgumentException('Sunburst variables must be unique numeric variables.');
-            }
-            if (!is_string($group) || !is_string($subgroup) || !is_string($label)
-                || trim($group) === '' || mb_strlen(trim($group)) > 80
-                || mb_strlen(trim($subgroup)) > 80 || mb_strlen(trim($label)) > 120) {
-                throw new InvalidArgumentException('Sunburst group, subgroup or label is invalid.');
-            }
-            $seen[$id] = true;
-            $result[] = [
-                'VariableID' => $id, 'Group' => trim($group),
-                'Subgroup'   => trim($subgroup), 'Label' => trim($label)
-            ];
-        }
-        return $result;
+        return EChartsHierarchySources::Resolve($this->ReadPropertyString('Sources'), 'Sunburst');
     }
 
     private function IsValidDesign(string $prefix): bool
@@ -885,7 +876,7 @@ class EChartsSunburst extends IPSModuleStrict
             }
             foreach ($element['items'] as $row) {
                 if (($row['type'] ?? null) === 'Label'
-                    && ($row['caption'] ?? null) === 'Level 2 contains subgroups or direct values; level 3 contains values inside subgroups.') {
+                    && ($row['caption'] ?? null) === 'The first three rings retain their design settings. Deeper rings use the outer ring settings.') {
                     $rows[] = $row;
                     continue;
                 }

@@ -237,7 +237,36 @@
         return series;
     }
 
+    // Keep the native hierarchy view root on refresh/resize without persisting navigation.
+    function updateHierarchyChart(chart, option, actionName, enabled) {
+        var series = option.series && option.series[0];
+        var rootId = null;
+        if (enabled && series && typeof chart.getModel === 'function') {
+            var model = chart.getModel();
+            var current = model && model.getSeriesByIndex(0);
+            var root = current && current.id === series.id && typeof current.getViewRoot === 'function'
+                ? current.getViewRoot() : null;
+            rootId = root && typeof root.getId === 'function' ? root.getId() : null;
+        }
+        chart.setOption(option, true);
+        function groupPath(nodes, path) {
+            for (var node of nodes || []) {
+                if (!Array.isArray(node.children)) { continue; }
+                var next = path.concat(node.id);
+                var found = node.id === rootId ? next : groupPath(node.children, next);
+                if (found) { return found; }
+            }
+        }
+        var path = rootId && series && groupPath(series.data, []);
+        if (path && typeof chart.dispatchAction === 'function') {
+            (actionName === 'treemapRootToNode' ? path : [rootId]).forEach(function (id) {
+                chart.dispatchAction({type: actionName, seriesId: series.id, targetNodeId: id});
+            });
+        }
+    }
+
     global.SYMC_ECHARTS_DESIGN = Object.freeze({
+        updateHierarchyChart: updateHierarchyChart,
         contrastRatio: contrastRatio,
         readableTextColor: readableTextColor,
         interpolateColorStops: interpolateColorStops,

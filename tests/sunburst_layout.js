@@ -7,27 +7,32 @@ const vm = require('node:vm');
 
 const source = fs.readFileSync(path.join(__dirname, '..', 'EChartsSunburst', 'visualization', 'app.js'), 'utf8');
 const designSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-design.js'), 'utf8');
+const echarts = require(path.join(__dirname, '..', '.tools', 'echarts-runtime', 'node_modules', 'echarts'));
 const palette = {
     background: '#101114', text: '#f4f5f7', muted: '#969aa2', accent: '#55cbb5',
     seriesColors: ['#5070dd', '#b6d634']
 };
 
-function render(model, width = 1000, mode = 'symcon', adaptToBackground = false) {
+function render(model, width = 1000, mode = 'symcon', adaptToBackground = false, nativeChart = null) {
     const chartElement = { hidden: false, clientWidth: width, clientHeight: 400 };
     const errorElement = { hidden: true, textContent: '' };
     const emptyElement = { hidden: true, textContent: '' };
     const warningElement = { hidden: true, textContent: '' };
     let option;
-    const chart = {
+    const chart = nativeChart || {
         setOption: next => { option = next; }, clear: () => {}, resize: () => {}, dispose: () => {}
     };
+    if (nativeChart) {
+        const setNativeOption = chart.setOption.bind(chart);
+        chart.setOption = (next, ...rest) => { option = next; setNativeOption(next, ...rest); };
+    }
     const window = {
         SYMC_VISUALIZATION: {
             mode, state: { status: 'ready', chart: model }, translations: {},
             options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: true,
                 adaptToBackground }
         },
-        echarts: { init: () => chart }, addEventListener: () => {}, getComputedStyle: () => ({ color: '' })
+        echarts: { init: () => chart, format: echarts.format }, addEventListener: () => {}, getComputedStyle: () => ({ color: '' })
     };
     const document = {
         body: { appendChild: () => {} },
@@ -138,7 +143,25 @@ const zeros = render({ ...model, sunburst: { ...model.sunburst, positiveCount: 0
 assert.equal(zeros.option, undefined);
 assert.equal(zeros.emptyElement.hidden, false);
 
-const echarts = require(path.join(__dirname, '..', '.tools', 'echarts-runtime', 'node_modules', 'echarts'));
+let deepNode = { id: 'variable-8', name: '<Value>', value: 5 };
+for (let depth = 7; depth >= 1; depth--) {
+    deepNode = { id: 'deep-' + depth, name: 'Level ' + depth, value: 5, children: [deepNode] };
+}
+const deepModel = { ...model, sunburst: { ...model.sunburst, depth: 8, data: [deepNode], style: {
+    ...model.sunburst.style, outerRingLabelFontSizePercent: 150
+} } };
+for (const mode of ['symcon', 'ipsview']) {
+    const deep = render(deepModel, 1000, mode);
+    assert.equal(deep.option.series[0].levels.length, 9,
+        'Sunburst must style eight user levels and its invisible root.');
+    for (let depth = 3; depth <= 8; depth++) {
+        assert.equal(deep.option.series[0].levels[depth].label.fontSize, 18,
+            'Deeper rings must retain the existing outer-ring design controls.');
+    }
+    assert.equal(deep.option.tooltip.confine, true);
+    assert.match(deep.option.tooltip.extraCssText, /overflow-wrap/);
+}
+
 const chart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 1000, height: 400 });
 chart.setOption(result.option);
 assert.equal(chart.getModel().getSeriesByIndex(0).type, 'series.sunburst');
@@ -146,6 +169,60 @@ assert.match(chart.renderToSVGString(), /Room A/);
 chart.setOption(custom.option, true);
 assert.doesNotMatch(chart.renderToSVGString(), /Room A/);
 assert.match(chart.renderToSVGString(), /&lt;Battery&gt;/);
+const deepOption = render(deepModel, 1000, 'ipsview').option;
+chart.setOption({ ...deepOption, animation: false }, true);
+chart.dispatchAction({ type: 'sunburstRootToNode', seriesId: 'sunburst', targetNodeId: 'deep-5' });
+assert.equal(chart.getModel().getSeriesByIndex(0).getViewRoot().getId(), 'deep-5');
+const designWindow = {};
+vm.runInNewContext(designSource, { window: designWindow });
+chart.resize({ width: 800, height: 500 });
+designWindow.SYMC_ECHARTS_DESIGN.updateHierarchyChart(chart,
+    { ...deepOption, animation: false }, 'sunburstRootToNode', true);
+assert.equal(chart.getModel().getSeriesByIndex(0).getViewRoot().getId(), 'deep-5',
+    'The pinned engine must preserve the drilled group after refresh and resize.');
+chart.dispatchAction({ type: 'sunburstRootToNode', seriesId: 'sunburst', targetNodeId: 'deep-4' });
+assert.equal(chart.getModel().getSeriesByIndex(0).getViewRoot().getId(), 'deep-4',
+    'Native roll-up must navigate back to a parent.');
+designWindow.SYMC_ECHARTS_DESIGN.updateHierarchyChart(chart, result.option, 'sunburstRootToNode', true);
+assert.notEqual(chart.getModel().getSeriesByIndex(0).getViewRoot().getId(), 'deep-4',
+    'Removing a group must reset navigation rather than restoring stale nodes.');
 chart.dispose();
+
+const deepLabelsChart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 520, height: 400 });
+render(deepModel, 520, 'symcon', false, deepLabelsChart);
+function assertDeepRadialLabelsFit() {
+    const seriesModel = deepLabelsChart.getModel().getSeriesByIndex(0);
+    seriesModel.getData().tree.root.eachNode(node => {
+        const piece = seriesModel.getData().getItemGraphicEl(node.dataIndex);
+        const label = piece && piece.getTextContent();
+        const layout = node.getLayout();
+        if (!label || label.ignore || !layout || node.depth === 0) { return; }
+        assert.ok(label.getBoundingRect().width <= layout.r - layout.r0 - 3,
+            'Deep radial labels must fit their native ring thickness rather than overlap adjacent rings.');
+    });
+}
+assertDeepRadialLabelsFit();
+deepLabelsChart.dispatchAction({ type: 'sunburstRootToNode', seriesId: 'sunburst', targetNodeId: 'deep-5' });
+assertDeepRadialLabelsFit();
+deepLabelsChart.dispose();
+for (const rotation of ['tangential', 'horizontal']) {
+    const rotatedChart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 520, height: 400 });
+    render({ ...deepModel, sunburst: { ...deepModel.sunburst, style: {
+        ...deepModel.sunburst.style, showValues: true, labelRotation: rotation
+    } } }, 520, 'symcon', false, rotatedChart);
+    const seriesModel = rotatedChart.getModel().getSeriesByIndex(0);
+    seriesModel.getData().tree.root.eachNode(node => {
+        const piece = seriesModel.getData().getItemGraphicEl(node.dataIndex);
+        const label = piece && piece.getTextContent();
+        const layout = node.getLayout();
+        if (!label || label.ignore || !layout || node.depth === 0 || !label.style.text.trim()) { return; }
+        const rect = label.getBoundingRect();
+        const delta = rotation === 'tangential' ? Math.PI / 2 : (layout.startAngle + layout.endAngle) / 2;
+        const radialExtent = rect.width * Math.abs(Math.cos(delta)) + rect.height * Math.abs(Math.sin(delta));
+        assert.ok(radialExtent <= layout.r - layout.r0 - 3,
+            'Deep tangential and horizontal labels must also stay inside their native ring thickness.');
+    });
+    rotatedChart.dispose();
+}
 
 console.log('Sunburst layout verified.');

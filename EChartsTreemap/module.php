@@ -17,6 +17,7 @@ use SymconECharts\EChartsBarPreview;
 use SymconECharts\EChartsBarPreviewForm;
 use SymconECharts\EChartsCurrentSources;
 use SymconECharts\EChartsDesignerSections;
+use SymconECharts\EChartsHierarchySources;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
@@ -37,6 +38,7 @@ require_once __DIR__ . '/../libs/EChartsBarPreviewForm.php';
 require_once __DIR__ . '/../libs/EChartsCurrentSources.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
+require_once __DIR__ . '/../libs/EChartsHierarchySources.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
@@ -413,28 +415,14 @@ class EChartsTreemap extends IPSModuleStrict
             $this->BarPreviewValue($values, 'TitleFontSizePercent', 'integer', $ipsView)
         );
         $rows = $values['Sources'] ?? json_decode($this->ReadPropertyString('Sources'), true);
-        $groups = [];
-        $samples = [];
-        foreach (is_array($rows) ? $rows : [] as $row) {
-            if (!is_array($row)) {
-                continue;
-            }
-            $group = trim((string) ($row['Group'] ?? ''));
-            if ($group !== '') {
-                $groups[$group] = ($groups[$group] ?? 0) + 1;
-                $samples[$group] ??= [
-                    'subgroup' => trim((string) ($row['Subgroup'] ?? '')),
-                    'leaf'     => trim((string) ($row['Label'] ?? '')) ?: 'Value'
-                ];
-            }
+        try {
+            $model = EChartsHierarchySources::Preview($rows, 'Treemap');
+        } catch (InvalidArgumentException) {
+            return $svg . '<text x="32" y="100" fill="' . EChartsBarPreview::E($palette['text']) . '">'
+                . EChartsBarPreview::E($this->Translate('Configure a valid hierarchy path with up to seven groups.')) . '</text></svg>';
         }
-        if ($groups === []) {
-            $groups = ['Group A' => 3, 'Group B' => 2, 'Group C' => 1];
-        }
-        $groups = array_slice($groups, 0, 6, true);
-        $total = array_sum($groups);
-        $x = 32;
-        $widthAvailable = 656;
+        $svg = str_replace('role="img"', 'role="img" data-preview-sources="' . $model['sourceCount']
+            . '" data-preview-depth="' . $model['depth'] . '"', $svg);
         $labelColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'LabelColor', 'integer', $ipsView), $palette['text']);
         $groupLabelColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'GroupLabelColor', 'integer', $ipsView), $labelColor);
         $groupColorsProperty = $ipsView && !($values['IPSViewUseTileDesign']
@@ -459,49 +447,74 @@ class EChartsTreemap extends IPSModuleStrict
         $level2Border = max(0, min(12, $this->BarPreviewValue($values, 'Level2BorderWidth', 'integer', $ipsView)));
         $level2Gap = max(0, min(12, $this->BarPreviewValue($values, 'Level2GapWidth', 'integer', $ipsView)));
         $level3Border = max(0, min(12, $this->BarPreviewValue($values, 'Level3BorderWidth', 'integer', $ipsView)));
-        $position = 0;
-        foreach ($groups as $name => $group) {
-            $width = $position === count($groups) - 1 ? 688 - $x : $widthAvailable * $group / $total;
-            $color = $configuredColors[$name] ?? $palette['seriesColors'][$position % count($palette['seriesColors'])];
-            $plotX = $x + $groupGap / 2;
-            $plotWidth = max(1.0, $width - $groupGap);
-            $svg .= '<rect x="' . EChartsBarPreview::N($plotX) . '" y="78" width="' . EChartsBarPreview::N($plotWidth)
-                . '" height="240" fill="' . EChartsBarPreview::E($color) . '" stroke="' . EChartsBarPreview::E($frameColor)
-                . '" stroke-width="' . $level1Border . '"/>';
-            if ($width > 125) {
-                $sample = $samples[$name] ?? ['subgroup' => '', 'leaf' => 'Value'];
-                $innerX = $plotX + 10 + $level1Gap / 2;
-                $innerWidth = max(1.0, $plotWidth - 20 - $level1Gap);
-                $svg .= '<rect x="' . EChartsBarPreview::N($innerX) . '" y="116" width="'
-                    . EChartsBarPreview::N($innerWidth) . '" height="98" fill="' . EChartsBarPreview::E($color)
-                    . '" stroke="' . EChartsBarPreview::E($frameColor) . '" stroke-width="' . $level2Border . '"/>';
-                if ($sample['subgroup'] !== '') {
-                    $leafX = $innerX + 8 + $level2Gap / 2;
-                    $svg .= '<rect x="' . EChartsBarPreview::N($leafX) . '" y="145" width="'
-                        . EChartsBarPreview::N(max(1.0, $innerWidth - 16 - $level2Gap))
-                        . '" height="57" fill="' . EChartsBarPreview::E($color)
-                        . '" stroke="' . EChartsBarPreview::E($frameColor) . '" stroke-width="' . $level3Border . '"/>';
+        $draw = function (array $nodes, float $x, float $y, float $width, float $height, int $depth, string $color = '') use (
+            &$draw,
+            &$svg,
+            $palette,
+            $configuredColors,
+            $showLabels,
+            $showValues,
+            $labelColor,
+            $groupLabelColor,
+            $subgroupColor,
+            $labelSize,
+            $subgroupSize,
+            $valueSize,
+            $frameColor,
+            $level1Border,
+            $level2Border,
+            $level3Border,
+            $groupGap,
+            $level1Gap,
+            $level2Gap
+        ): void {
+            $total = array_sum(array_column($nodes, 'value'));
+            $position = 0.0;
+            foreach ($nodes as $index => $node) {
+                $isGroup = isset($node['children']);
+                $fill = $depth === 1 ? ($configuredColors[$node['name']]
+                    ?? $palette['seriesColors'][$index % count($palette['seriesColors'])]) : $color;
+                $horizontal = $depth % 2 === 1;
+                $size = ($horizontal ? $width : $height) * ($total > 0 ? $node['value'] / $total : 0);
+                $gap = $depth === 1 ? $groupGap : ($depth === 2 ? $level1Gap : $level2Gap);
+                $nodeX = $x + ($horizontal ? $position : 0) + $gap / 2;
+                $nodeY = $y + ($horizontal ? 0 : $position) + $gap / 2;
+                $nodeWidth = max(0, ($horizontal ? $size : $width) - $gap);
+                $nodeHeight = max(0, ($horizontal ? $height : $size) - $gap);
+                $border = $depth === 1 ? $level1Border : ($depth === 2 ? $level2Border : $level3Border);
+                $svg .= '<rect data-node="' . EChartsBarPreview::E($node['id']) . '" data-depth="' . $depth
+                    . '" x="' . EChartsBarPreview::N($nodeX) . '" y="' . EChartsBarPreview::N($nodeY)
+                    . '" width="' . EChartsBarPreview::N($nodeWidth) . '" height="' . EChartsBarPreview::N($nodeHeight)
+                    . '" fill="' . EChartsBarPreview::E($fill) . '" stroke="' . EChartsBarPreview::E($frameColor)
+                    . '" stroke-width="' . $border . '"><title>' . EChartsBarPreview::E($node['name']) . '</title></rect>';
+                $font = $isGroup ? ($depth === 1 ? $labelSize : $subgroupSize) : $valueSize;
+                $textColor = $isGroup ? ($depth === 1 ? $groupLabelColor : $subgroupColor) : $labelColor;
+                $header = $isGroup ? min($nodeHeight, $font + 5) : 0;
+                if ($showLabels && $nodeWidth >= 30 && $nodeHeight >= $font + 3) {
+                    $text = $node['name'] . (!$isGroup && $showValues ? ' ' . $node['value'] : '');
+                    $svg .= '<text x="' . EChartsBarPreview::N($nodeX + 3) . '" y="'
+                        . EChartsBarPreview::N($nodeY + $font + 1) . '" font-size="' . $font . '" fill="'
+                        . EChartsBarPreview::E($textColor) . '">'
+                        . EChartsBarPreview::E(mb_strimwidth($text, 0, max(1, (int) (($nodeWidth - 6) / ($font * 0.6))), '…')) . '</text>';
                 }
-            }
-            if ($showLabels && $width > 85) {
-                $svg .= '<text x="' . EChartsBarPreview::N($plotX + 8) . '" y="103" font-size="' . $labelSize
-                    . '" fill="' . EChartsBarPreview::E($groupLabelColor) . '">'
-                    . EChartsBarPreview::E(mb_strimwidth((string) $name, 0, max(4, (int) ($width / 9)), '…')) . '</text>';
-                if ($width > 125) {
-                    if ($sample['subgroup'] !== '') {
-                        $svg .= '<text x="' . EChartsBarPreview::N($innerX + 4) . '" y="135" font-size="' . $subgroupSize
-                            . '" fill="' . EChartsBarPreview::E($subgroupColor) . '">'
-                            . EChartsBarPreview::E(mb_strimwidth($sample['subgroup'], 0, max(4, (int) ($width / 9)), '…')) . '</text>';
-                    }
-                    $svg .= '<text x="' . EChartsBarPreview::N($innerX + 6) . '" y="164" font-size="' . $valueSize
-                        . '" fill="' . EChartsBarPreview::E($labelColor) . '">'
-                        . EChartsBarPreview::E(mb_strimwidth($sample['leaf'], 0, max(4, (int) ($width / 9)), '…'))
-                        . ($showValues ? ' 12.4' : '') . '</text>';
+                if ($isGroup) {
+                    $inset = min($border + 1, $nodeWidth / 2, max(0, ($nodeHeight - $header) / 2));
+                    $draw(
+                        $node['children'],
+                        $nodeX + $inset,
+                        $nodeY + $header + $inset,
+                        max(0, $nodeWidth - 2 * $inset),
+                        max(0, $nodeHeight - $header - 2 * $inset),
+                        $depth + 1,
+                        $fill
+                    );
                 }
+                $position += $size;
             }
-            $x += $width;
-            ++$position;
-        }
+        };
+        $draw($model['data'], 32, 78, 656, 240, 1);
+        $svg .= '<text x="32" y="58" font-size="10" fill="' . EChartsBarPreview::E($palette['muted']) . '">'
+            . EChartsBarPreview::E($this->Translate('Schematic hierarchy; zoom in the chart to inspect small nodes.')) . '</text>';
         if ($this->BarPreviewValue($values, 'ShowBreadcrumb', 'boolean', $ipsView)) {
             $svg .= '<text x="32" y="341" font-size="11" fill="' . EChartsBarPreview::E($palette['muted'])
                 . '">' . EChartsBarPreview::E($this->Translate('Navigation path')) . '</text>';
@@ -626,43 +639,10 @@ class EChartsTreemap extends IPSModuleStrict
         return null;
     }
 
-    /** @return list<array{VariableID:int,Group:string,Subgroup:string,Label:string}> */
+    /** @return list<array<string,mixed>> */
     private function GetValidatedSources(): array
     {
-        try {
-            $sources = json_decode($this->ReadPropertyString('Sources'), true, 64, JSON_THROW_ON_ERROR);
-        } catch (JsonException $exception) {
-            throw new InvalidArgumentException('The Treemap variables are not valid JSON.', 0, $exception);
-        }
-        if (!is_array($sources) || !array_is_list($sources) || count($sources) < 1 || count($sources) > 100) {
-            throw new InvalidArgumentException('Configure 1 to 100 unique numeric Treemap variables.');
-        }
-        $result = [];
-        $seen = [];
-        foreach ($sources as $source) {
-            if (!is_array($source)) {
-                throw new InvalidArgumentException('Every Treemap entry must be an object.');
-            }
-            $id = $source['VariableID'] ?? null;
-            $group = $source['Group'] ?? null;
-            $subgroup = $source['Subgroup'] ?? '';
-            $label = $source['Label'] ?? '';
-            if (!is_int($id) || $id <= 0 || isset($seen[$id]) || !IPS_VariableExists($id)
-                || !in_array(IPS_GetVariable($id)['VariableType'] ?? null, [1, 2], true)) {
-                throw new InvalidArgumentException('Treemap variables must be unique numeric variables.');
-            }
-            if (!is_string($group) || !is_string($subgroup) || !is_string($label)
-                || trim($group) === '' || mb_strlen(trim($group)) > 80
-                || mb_strlen(trim($subgroup)) > 80 || mb_strlen(trim($label)) > 120) {
-                throw new InvalidArgumentException('Treemap group, subgroup or label is invalid.');
-            }
-            $seen[$id] = true;
-            $result[] = [
-                'VariableID' => $id, 'Group' => trim($group),
-                'Subgroup'   => trim($subgroup), 'Label' => trim($label)
-            ];
-        }
-        return $result;
+        return EChartsHierarchySources::Resolve($this->ReadPropertyString('Sources'), 'Treemap');
     }
 
     private function IsValidDesign(string $prefix): bool

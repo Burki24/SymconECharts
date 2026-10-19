@@ -84,7 +84,8 @@
                     return Object.assign({}, child, isSubgroup || frameColor
                         ? { itemStyle: { borderColor: frameColor || color } } : {}, {
                         label: label,
-                        upperLabel: { color: subgroupColor, fontSize: subgroupSize },
+                        upperLabel: { show: isSubgroup && style.showLabels !== false,
+                            color: subgroupColor, fontSize: subgroupSize, height: Math.max(18, subgroupSize + 8) },
                         children: isSubgroup ? colorChildren(child.children) : undefined
                     });
                 });
@@ -92,7 +93,7 @@
             return Object.assign({}, group, {
                 itemStyle: { color: color, borderColor: frameColor || color },
                 label: { color: groupColor, fontSize: groupSize },
-                upperLabel: { color: groupColor, fontSize: groupSize,
+                upperLabel: { show: style.showLabels !== false, color: groupColor, fontSize: groupSize,
                     height: Math.max(18, groupSize + 8) },
                 children: colorChildren(group.children)
             });
@@ -122,7 +123,8 @@
                 textStyle: { color: style.titleColor || colors.text, fontSize: titleSize }
             },
             tooltip: {
-                trigger: 'item',
+                trigger: 'item', confine: true,
+                extraCssText: 'max-width:min(520px,80vw);white-space:normal;overflow-wrap:anywhere',
                 formatter: function (parameter) {
                     var path = (parameter.treePathInfo || []).map(function (part) { return part.name; })
                         .filter(Boolean).join(' / ');
@@ -138,7 +140,8 @@
                 bottom: style.showBreadcrumb === false ? 8 : 28,
                 roam: style.allowPanZoom !== false,
                 nodeClick: style.clickToZoom === false ? false : 'zoomToNode',
-                breadcrumb: { show: style.showBreadcrumb !== false && !compact, bottom: 2,
+                ...(Number(treemap.depth) > 3 && style.clickToZoom !== false ? { leafDepth: 3 } : {}),
+                breadcrumb: { show: style.showBreadcrumb !== false && (!compact || Number(treemap.depth) > 3), bottom: 2,
                     itemStyle: { color: colors.muted },
                     textStyle: { color: colors.text } },
                 label: {
@@ -158,8 +161,11 @@
                     { itemStyle: { borderWidth: style.level2BorderWidth ?? 2,
                         gapWidth: style.level2GapWidth ?? 1,
                         ...(style.frameColor ? { borderColor: style.frameColor } : {}) } },
-                    { itemStyle: { borderWidth: style.level3BorderWidth ?? 1,
-                        ...(style.frameColor ? { borderColor: style.frameColor } : {}) } }
+                    ...Array.from({ length: Math.max(1, Math.min(8, Number(treemap.depth) || 3) - 2) }, function () {
+                        return { itemStyle: { borderWidth: style.level3BorderWidth ?? 1,
+                            ...(style.frameColor ? { borderColor: style.frameColor } : {}) },
+                        upperLabel: { show: style.showLabels !== false } };
+                    })
                 ]
             }]
         };
@@ -204,7 +210,12 @@
         } else if (wasHidden) {
             chart.resize();
         }
-        chart.setOption(buildOption(state.chart, theme), true);
+        updateChart(state.chart, theme);
+    }
+
+    function updateChart(model, theme) {
+        design.updateHierarchyChart(chart, buildOption(model, theme), 'treemapRootToNode',
+            (model.treemap && model.treemap.style || {}).clickToZoom !== false);
     }
 
     window.handleMessage = function (message) {
@@ -215,7 +226,7 @@
         new ResizeObserver(function () {
             if (!design.resizeChartIfNeeded(chart, chartElement)) { return; }
             if (currentState && currentState.status === 'ready') {
-                chart.setOption(buildOption(currentState.chart, currentTheme || 'auto'), true);
+                updateChart(currentState.chart, currentTheme || 'auto');
             }
         }).observe(chartElement);
     } else {

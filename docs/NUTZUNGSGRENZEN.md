@@ -19,7 +19,8 @@ bietet optional einen festen Min-/Max-Farbverlauf innerhalb der Balken.
 **StateTimeline unterstützt 32 Quellen mit Zeilennavigation**, Boxplot 32
 Quellen mit Kategoriennavigation und gemeinsamem Archivbudget. Calendar und
 Heatmap bieten vier Archivkennzahlen. Pie, BarCategory, BarPolar und
-PictorialBar erlauben jetzt optionale Min/Max-Normalisierung. Die übrigen
+PictorialBar erlauben jetzt optionale Min/Max-Normalisierung. Treemap und
+Sunburst unterstützen flexible Hierarchien mit bis zu acht Ebenen. Die übrigen
 Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
 
 | Reihenfolge | Empfohlener nächster Schritt | Nutzen und Voraussetzung |
@@ -31,7 +32,8 @@ Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
 | Erledigt | Benutzerdefinierte Archivzeiträume | Boxplot, Parallel, Candlestick, ThemeRiver und StateTimeline bieten 1–1000 Minuten/Stunden/Tage/Wochen bei unveränderten Datenbudgets. |
 | Erledigt | Calendar/Heatmap: passende Tages-/Stundenkennzahlen | Mittelwert, Minimum, Maximum für Standardarchive und ausdrücklicher Zählerverbrauch; Heatmap reduziert je Wochentag/Stunde passend statt alle Kennzahlen erneut zu mitteln. |
 | Erledigt | Explizite Normalisierung für weitere Vergleiche | Pie, BarCategory, BarPolar und PictorialBar vergleichen optional Quellen anhand eigener Min/Max auf 0–100; Originalwerte und Einheiten bleiben erhalten. |
-| Danach | Tiefere Hierarchien, größere Graphen, weitere Reihen | Nur zusammen mit Navigation, Vorschaukennzeichnung und messbaren Ressourcenbudgets. |
+| Erledigt | Treemap/Sunburst: flexible Hierarchien bis acht Ebenen | Gemeinsames Modell, höchstens sieben Gruppen plus Variablenblatt, native Navigation, vollständige Strukturvorschau und begrenzte Modellgröße. |
+| Danach | Tiefere Objektbäume, größere Graphen, weitere Reihen | Nur zusammen mit Navigation, Vorschaukennzeichnung und messbaren Ressourcenbudgets. |
 
 Normalisierung ist keine allgemeine Lösung für unterschiedliche Einheiten:
 Sie kann relative Vergleiche sinnvoll machen, ersetzt aber keine physikalische
@@ -60,8 +62,8 @@ Schritte sind Planungsziele, keine implementierten oder lastgeprüften Zusagen.
 | EChartsTreeSystemHealth | Gleiche Hierarchiegrenzen; bis 3000 ausdrückliche Boolean-/Zahlenregeln; Vorfahrenbewertung nur anhand des berücksichtigten Baums. | Wie Tree: tiefere begrenzte Zweige. Regeln, ausgeschlossene Zweige und unvollständige Sicht müssen erkennbar bleiben; keine vermeintliche Gesamtgesundheit aus einer abgeschnittenen Teilmenge. |
 | EChartsGraph | 2–80 Objektknoten, 1–200 ungerichtete Kanten; keine Selbstkanten oder doppelten ungeordneten Paare. Isolierte Knoten sind im ansonsten verbundenen Modell erlaubt. | 300 Knoten/1000 Kanten nach Force-/Layoutprofiling prüfen. Gerichtete oder gewichtete Beziehungen benötigen einen ausdrücklich erweiterten Vertrag, nicht nur neue Höchstzahlen. |
 | EChartsGraphZ2M | Nur gespeicherter Export, kein Scan; bis 500 Rohknoten/10000 Rohkanten. Sichtbare Verbindungen 1–2000, Standard 300; LQI 0–255; Export höchstens 16 MiB. | Schutzgrenzen zunächst behalten. Schwache Verbindungen gezielt auswählbar machen, statt nur die stärksten zu zeigen. Mehrdeutige Exportproduzenten nicht automatisch zusammenwerfen und keinen Scan versteckt auslösen. |
-| EChartsTreemap | 1–100 nichtnegative Blätter; feste Ebenen Gruppe/Untergruppe/Eintrag. Null besitzt keine Fläche. Eine gemeinsame Einheit wird nicht erzwungen; Anzeigeeinheit ist global. | Rekursive Hierarchie mit explizitem Tiefen-/Knotenbudget. Optional normalisierte Gewichte und Originalformat je Blatt. Fehlende Einheitenprüfung ist keine bereits vorhandene saubere Mehr-Einheiten-Unterstützung. |
-| EChartsSunburst | Gleiches 1–100-Blatt-Modell mit Gruppe/Untergruppe/Eintrag. | Rekursive Hierarchie sinnvoll; navigierbare Ebenen statt beliebig vieler unlesbarer Ringe. Originaleinheiten und optionale Gewichte ebenso ausdrücklich modellieren. |
+| EChartsTreemap | 1–100 nichtnegative Blätter, bis acht Ebenen einschließlich Blatt, höchstens 800 Knoten und 200000 HTML-sicher serialisierte Modellbytes. Optionale Gruppenpfade; alte Gruppe/Untergruppe bleibt unverändert gültig. Null besitzt keine Fläche; Anzeigeeinheit ist global. | Umgesetzt: rekursives gemeinsames Modell, native Navigation und gekennzeichnete vollständige Strukturvorschau. Optionale normalisierte Gewichte und Originalformat je Blatt bleiben offen. Fehlende Einheitenprüfung ist keine saubere Mehr-Einheiten-Unterstützung. |
+| EChartsSunburst | Dasselbe rekursive 1–100-Blatt-Modell und dieselben Tiefen-/Knoten-/Bytebudgets wie Treemap. Die ersten drei Ringdesigns bleiben erhalten; tiefere Ringe übernehmen das äußere Design. | Umgesetzt: native Navigation mit stabilem geöffnetem Zweig bei Aktualisierung und Resize. Originaleinheiten und optionale Gewichte bleiben gesonderte Erweiterungen. |
 | EChartsSankey | 2–100 Knoten, 1–200 gerichtete nichtnegative Flüsse; azyklisch, keine Selbstkanten/doppelten gerichteten Paare. Gleiche Variable an mehreren Kanten möglich. Gleiche Einheit dokumentiert, derzeit nicht je Quelle validiert. | Zunächst Einheitenmodell/Validierung sauber machen. Optional negative Werte durch ausdrücklich gewählte Kantenumkehr behandeln, danach erneut Zyklen prüfen. Rest-/Bilanzknoten können helfen. DAG und nichtnegative Breiten sind keine unnötigen Beschränkungen. |
 | EChartsRadar | 3–10 Achsen, 1–8 vollständige Vergleichsgruppen; je Achse eigener Min/Max-Bereich, Einheit und Präzision. Unterschiedliche Einheiten bereits sinnvoll skaliert. | Mindestens drei Achsen sind geometrisch erforderlich. 12–16 Achsen/16 Gruppen erst mit Filter-/Layoutkonzept. Unvollständige Gruppen optional auslassen und kennzeichnen, fehlende Werte nicht als null erfinden. Inverse Achsen wären eine gesondert beschriftete Erweiterung. |
 
@@ -72,7 +74,7 @@ Maßgebliche Implementierungen:
 - Hierarchien: `libs/TreeHierarchy.php`, `EChartsTreeSystemHealth/TreeHealth.php`.
 - Graphen: `libs/GraphModel.php`, `libs/ZigbeeGraphModel.php`,
   `EChartsGraphZ2M/ZigbeeGraphExportReader.php`.
-- Flächen/Flüsse/Achsen: `libs/TreemapModel.php`, `EChartsSankey/SankeyModel.php`,
+- Flächen/Flüsse/Achsen: `libs/EChartsHierarchySources.php`, `libs/TreemapModel.php`, `EChartsSankey/SankeyModel.php`,
   `EChartsRadar/RadarModel.php`.
 - Geometrie und Navigation: die jeweiligen `visualization/app.js`.
 
@@ -136,8 +138,9 @@ Vorschauen sind gesondert zu betrachten:
   Vergleiche begrenzen ihre Vorschau separat. Die Mengenhinweise müssen bei
   jeder Erweiterung erhalten und korrekt sein.
 - Graph verwendet bei großen Modellen ein Beispiel; Tree/Health reduzieren
-  Tiefe/Verzweigung, Treemap/Sunburst Gruppen. Diese Vereinfachungen sollten
-  künftig noch klarer als Struktur-/Designvorschau erkennbar sein.
+  Tiefe/Verzweigung. Diese Vereinfachungen sollten künftig noch klarer als
+  Struktur-/Designvorschau erkennbar sein. Treemap/Sunburst zeigen inzwischen
+  die vollständige konfigurierte Struktur mit gekennzeichneten Beispielgewichten.
 - Waterfall darf in einer Teilvorschau keine aus der Teilmenge berechnete
   Endsumme als die tatsächliche Gesamtbilanz erscheinen lassen.
 

@@ -151,6 +151,32 @@ const nestedFrame = render({ ...nestedModel, treemap: { ...nestedModel.treemap, 
 } } }, 1000, 'ipsview');
 assert.equal(nestedFrame.option.series[0].data[0].children[0].itemStyle.borderColor, '#112233');
 assert.equal(nestedFrame.option.series[0].data[0].children[0].children[0].itemStyle.borderColor, '#112233');
+let deepestNode = { id: 'variable-8', name: '<Value>', value: 5 };
+for (let depth = 7; depth >= 1; depth--) {
+    deepestNode = { id: 'deep-' + depth, name: 'Level ' + depth, value: 5, children: [deepestNode] };
+}
+const deepModel = { ...model, treemap: { ...model.treemap, depth: 8, data: [deepestNode] } };
+for (const mode of ['symcon', 'ipsview']) {
+    const deep = render(deepModel, 1000, mode);
+    assert.equal(deep.option.series[0].levels.length, 9,
+        'Treemap must style all eight hierarchy levels plus its invisible root.');
+    assert.equal(deep.option.series[0].leafDepth, 3,
+        'Deep hierarchies must use native drill-down instead of squeezing eight headers into one view.');
+    for (let depth = 3; depth <= 8; depth++) {
+        assert.equal(deep.option.series[0].levels[depth].itemStyle.borderWidth, 1);
+    }
+    let node = deep.option.series[0].data[0];
+    for (let depth = 1; depth <= 7; depth++) {
+        assert.equal(node.upperLabel.show, true, 'Deep groups require upper labels.');
+        node = node.children[0];
+    }
+    assert.equal(node.id, 'variable-8');
+    assert.equal(deep.option.tooltip.confine, true);
+    assert.match(deep.option.tooltip.extraCssText, /overflow-wrap/);
+    assert.match(deep.option.tooltip.formatter({ name: '<Value>', value: 5,
+        treePathInfo: Array.from({ length: 7 }, (_, i) => ({ name: 'Level ' + (i + 1) })).concat({ name: '<Value>' })
+    }), /Level 7 \/ &lt;Value&gt;/);
+}
 const transparentIPSView = render(model, 1000, 'ipsview', true);
 assert.equal(transparentIPSView.option.backgroundColor, 'transparent');
 const darkIPSView = render(model, 1000, 'ipsview');
@@ -176,11 +202,58 @@ assert.match(chart.renderToSVGString(), /Room A/);
 chart.setOption(framed.option, true);
 assert.match(chart.renderToSVGString(), /Room A/);
 assert.equal(rootFill(chart.renderToSVGString()), '#112233');
+const deepOption = render(deepModel, 1000, 'ipsview').option;
+chart.setOption({ ...deepOption, animation: false }, true);
+chart.dispatchAction({ type: 'treemapRootToNode', seriesId: 'treemap', targetNodeId: 'deep-3' });
+chart.dispatchAction({ type: 'treemapRootToNode', seriesId: 'treemap', targetNodeId: 'deep-5' });
+assert.equal(chart.getModel().getSeriesByIndex(0).getViewRoot().getId(), 'deep-5');
+const designWindow = {};
+vm.runInNewContext(designSource, { window: designWindow });
+designWindow.SYMC_ECHARTS_DESIGN.updateHierarchyChart(chart,
+    { ...deepOption, animation: false }, 'treemapRootToNode', true);
+assert.equal(chart.getModel().getSeriesByIndex(0).getViewRoot().getId(), 'deep-5',
+    'The pinned ECharts engine must retain a native drilled group when its values refresh.');
+assert.match(chart.renderToSVGString(), /Level 6/,
+    'A retained deep Treemap view must still render its nested groups, not just a breadcrumb.');
+chart.dispatchAction({ type: 'treemapRootToNode', seriesId: 'treemap', targetNodeId: 'deep-7' });
+designWindow.SYMC_ECHARTS_DESIGN.updateHierarchyChart(chart,
+    { ...deepOption, animation: false }, 'treemapRootToNode', true);
+assert.equal(chart.getModel().getSeriesByIndex(0).getViewRoot().getId(), 'deep-7');
+assert.match(chart.renderToSVGString(), /&lt;Value&gt;/,
+    'Refreshing the seventh-level group must still render the eighth-level variable leaf.');
+chart.dispatchAction({ type: 'treemapRootToNode', seriesId: 'treemap', targetNodeId: 'deep-2' });
+assert.equal(chart.getModel().getSeriesByIndex(0).getViewRoot().getId(), 'deep-2',
+    'The native breadcrumb action must navigate back to an ancestor.');
+designWindow.SYMC_ECHARTS_DESIGN.updateHierarchyChart(chart, result.option, 'treemapRootToNode', true);
+assert.notEqual(chart.getModel().getSeriesByIndex(0).getViewRoot().getId(), 'deep-2',
+    'A removed group must reset navigation rather than restoring a stale ID.');
 chart.dispose();
 
 const compact = render(model, 400);
 assert.equal(compact.option.series[0].label.show, false);
 assert.equal(compact.option.series[0].breadcrumb.show, false);
+const compactDeep = render(deepModel, 400);
+assert.equal(compactDeep.option.series[0].breadcrumb.show, true,
+    'Deep compact Treemaps must keep native back navigation after drilling into a group.');
+const compactDeepNoBreadcrumb = render({ ...deepModel, treemap: { ...deepModel.treemap,
+    style: { ...deepModel.treemap.style, showBreadcrumb: false } } }, 400);
+assert.equal(compactDeepNoBreadcrumb.option.series[0].breadcrumb.show, false,
+    'An explicit breadcrumb opt-out must remain respected even in a deep compact Treemap.');
+const compactChart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 400, height: 400 });
+compactChart.setOption({ ...compactDeep.option, animation: false }, true);
+compactChart.dispatchAction({ type: 'treemapRootToNode', seriesId: 'treemap', targetNodeId: 'deep-3' });
+compactChart.dispatchAction({ type: 'treemapRootToNode', seriesId: 'treemap', targetNodeId: 'deep-5' });
+assert.equal(compactChart.getModel().getSeriesByIndex(0).getViewRoot().getId(), 'deep-5');
+assert.match(compactChart.renderToSVGString(), /Level 2/,
+    'The compact native breadcrumb must render an ancestor after a deep drill.');
+designWindow.SYMC_ECHARTS_DESIGN.updateHierarchyChart(compactChart,
+    { ...compactDeep.option, animation: false }, 'treemapRootToNode', true);
+assert.match(compactChart.renderToSVGString(), /Level 6/,
+    'Refreshing a deep compact view must keep its actual nested rectangles and labels.');
+compactChart.dispatchAction({ type: 'treemapRootToNode', seriesId: 'treemap', targetNodeId: 'deep-2' });
+assert.equal(compactChart.getModel().getSeriesByIndex(0).getViewRoot().getId(), 'deep-2',
+    'Compact deep Treemaps must support the native ancestor/back action.');
+compactChart.dispose();
 const zeros = render({ ...model, treemap: { ...model.treemap, positiveCount: 0 } });
 assert.equal(zeros.option, undefined);
 assert.equal(zeros.emptyElement.hidden, false);

@@ -64,6 +64,10 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Symcon-Variablenwerten liegt im eigenen Gerätemodul `EChartsTreemap`.
   Ein Sunburst mit derselben manuell benannten Hierarchie und aktuellen
   numerischen Variablenwerten liegt getrennt in `EChartsSunburst`.
+  Beide verwenden gemäß ADR 0064 denselben manuellen Hierarchievertrag mit
+  optionalen Gruppenpfaden, höchstens acht Ebenen einschließlich Blatt,
+  100 Quellen und 800 Knoten. Alte Group-/Subgroup-Quellen bleiben unverändert
+  verwendbar; gemeinsame Quellenprüfung und Modellbildung liegen unter `libs`.
   Archivierte Werte mehrerer Variablen werden als Parallelkoordinaten nach
   gemeinsamen abgeschlossenen Stunden- oder Tagesintervallen im eigenen
   Gerätemodul `EChartsParallel` dargestellt.

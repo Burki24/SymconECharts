@@ -103,9 +103,10 @@
             style.middleRingLabelFontSizePercent,
             style.outerRingLabelFontSizePercent
         ];
-        var levels = [{}].concat(ringLabels.map(function (visible, index) {
+        var levels = [{}].concat(Array.from({ length: Math.max(3, Math.min(8, Number(sunburst.depth) || 3)) }, function (_, depth) {
+            var index = Math.min(2, depth);
             return { label: {
-                show: showLabels && visible,
+                show: showLabels && ringLabels[index],
                 fontSize: Number(ringSizes[index]) > 0
                     ? design.fontSizePercent(ringSizes[index], 12) : labelSize
             } };
@@ -122,7 +123,8 @@
             },
             tooltip: {
                 show: style.showTooltip !== false,
-                trigger: 'item',
+                trigger: 'item', confine: true,
+                extraCssText: 'max-width:min(520px,80vw);white-space:normal;overflow-wrap:anywhere',
                 formatter: function (parameter) {
                     var path = (parameter.treePathInfo || []).map(function (part) { return part.name; })
                         .filter(Boolean).join(' / ');
@@ -156,11 +158,34 @@
                     overflow: 'truncate',
                     formatter: function (parameter) {
                         var name = String(parameter.name || '');
-                        if (style.showValues !== true || parameter.data && Array.isArray(parameter.data.children)) {
-                            return name;
+                        var text = name;
+                        if (style.showValues === true && !(parameter.data && Array.isArray(parameter.data.children))) {
+                            text += '\n' + Number(parameter.value).toLocaleString(undefined, { maximumFractionDigits: 3 });
                         }
-                        return name + '\n' + Number(parameter.value).toLocaleString(undefined,
-                            { maximumFractionDigits: 3 });
+                        // Sunburst's bundle has no LabelLayout feature. Bound deep labels using
+                        // the native node geometry, which also changes after a root-to-node action.
+                        if ((Number(sunburst.depth) || 3) <= 3 || !chart || typeof chart.getModel !== 'function') { return text; }
+                        var series = chart.getModel().getSeriesByIndex(0);
+                        var node = series && series.getData().tree.getNodeByDataIndex(parameter.dataIndex);
+                        var layout = node && node.getLayout();
+                        if (!layout || !window.echarts.format) { return text; }
+                        var font = node.getModel().getModel('label').getFont();
+                        var textHeight = window.echarts.format.getTextRect(text, font).height;
+                        var angle = Math.abs(layout.endAngle - layout.startAngle);
+                        var radialRoom = Math.max(0, layout.r - layout.r0 - 4);
+                        var tangentRoom = Math.max(0, (layout.r + layout.r0)
+                            * Math.sin(Math.min(Math.PI, angle) / 2) - 4);
+                        var delta = style.labelRotation === 'horizontal' ? (layout.startAngle + layout.endAngle) / 2
+                            : style.labelRotation === 'tangential' ? Math.PI / 2 : 0;
+                        var radialFactor = Math.abs(Math.cos(delta));
+                        var tangentFactor = Math.abs(Math.sin(delta));
+                        if (textHeight * tangentFactor > radialRoom || textHeight * radialFactor > tangentRoom) { return ' '; }
+                        var maxWidth = Math.min(
+                            radialFactor > 0.0001 ? (radialRoom - textHeight * tangentFactor) / radialFactor : Infinity,
+                            tangentFactor > 0.0001 ? (tangentRoom - textHeight * radialFactor) / tangentFactor : Infinity
+                        );
+                        // An empty string would make Sunburst restore the unabridged node name.
+                        return window.echarts.format.truncateText(text, Math.max(0, maxWidth), font, '…') || ' ';
                     }
                 }
             }]
@@ -206,7 +231,8 @@
         } else if (wasHidden) {
             chart.resize();
         }
-        chart.setOption(buildOption(state.chart, theme), true);
+        design.updateHierarchyChart(chart, buildOption(state.chart, theme), 'sunburstRootToNode',
+            (state.chart.sunburst.style || {}).clickToRoot !== false);
     }
 
     window.handleMessage = function (message) {
@@ -217,7 +243,8 @@
         new ResizeObserver(function () {
             if (!design.resizeChartIfNeeded(chart, chartElement)) { return; }
             if (currentState && currentState.status === 'ready') {
-                chart.setOption(buildOption(currentState.chart, currentTheme || 'auto'), true);
+                design.updateHierarchyChart(chart, buildOption(currentState.chart, currentTheme || 'auto'),
+                    'sunburstRootToNode', (currentState.chart.sunburst.style || {}).clickToRoot !== false);
             }
         }).observe(chartElement);
     } else {

@@ -21,6 +21,15 @@ IPSView nur den Diagrammtitel benötigt.
 
 ## Aktueller Stand und Zielarchitektur
 
+Treemap und anschließend Sunburst nutzen gemäß
+[ADR 0064](adr/0064-flexible-manual-hierarchies.md) einen gemeinsamen rekursiven
+Hierarchievertrag. Zentralisiert sind Quellen-/Pfadvalidierung und synthetische
+Vorschaudaten in `EChartsHierarchySources`, Modellbau/Budgets in `TreemapModel`
+sowie native Wurzelwiederherstellung in `echarts-design.js`. Familienbezogene
+Geometrie, Ebenendesign und SVG-Zeichnung bleiben getrennt. Acht Ebenen zählen
+das Blatt, aber nicht die künstliche Wurzel; alte Konfigurationen werden nicht
+umgeschrieben.
+
 Die [systematische Prüfung der Nutzungsgrenzen](NUTZUNGSGRENZEN.md) erfasst
 alle 29 Diagrammfamilien und das Gateway. Sie trennt fachliche Verträge und
 Ressourcenschutz von ausbaubaren Produktgrenzen. PictorialBar und BarCategory

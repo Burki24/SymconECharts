@@ -11,6 +11,8 @@ eine lesende IP-Symcon-Objekthierarchie als Tree, einen allgemeinen Graphen
 für ausdrücklich verbundene Symcon-Objekte sowie einen separaten Graphen
 für exportierte Zigbee2MQTT-Netzwerkkarten sowie Treemap und Sunburst mit
 manuell festgelegten Gruppen und aktuellen numerischen Variablenwerten.
+Treemap und Sunburst erlauben optionale Gruppenpfade mit bis zu acht Ebenen
+einschließlich Quellvariable; bestehende Gruppe-/Untergruppe-Zuordnungen bleiben nutzbar.
 Parallelkoordinaten verbinden archivierte Variablenwerte je gemeinsamem
 Stunden- oder Tagesintervall.
 Sankey zeigt aktuelle Mengenflüsse zwischen manuell angelegten Knoten.

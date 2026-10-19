@@ -20,6 +20,15 @@
             "changeOrder": true,
             "columns": [
                 {
+                    "caption": "Group path (optional)",
+                    "name": "GroupPath",
+                    "width": "280px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
                     "caption": "Group",
                     "name": "Group",
                     "width": "200px",
@@ -61,6 +70,15 @@
                 }
             ],
             "form": [
+                {
+                    "type": "ValidationTextBox",
+                    "name": "GroupPath",
+                    "caption": "Group path (optional)"
+                },
+                {
+                    "type": "Label",
+                    "caption": "Optional group path: House / Floor / Room. Up to seven groups plus the variable. A nonempty path replaces Group and Subgroup; escape a literal slash with \\/ and a backslash with \\\\."
+                },
                 {
                     "type": "ValidationTextBox",
                     "name": "Group",

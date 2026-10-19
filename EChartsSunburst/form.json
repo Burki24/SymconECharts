@@ -38,6 +38,15 @@
                     }
                 },
                 {
+                    "caption": "Group path (optional)",
+                    "name": "GroupPath",
+                    "width": "300px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
                     "caption": "Variable",
                     "name": "VariableID",
                     "width": "300px",
@@ -72,6 +81,11 @@
                     "caption": "Subgroup (optional)"
                 },
                 {
+                    "type": "ValidationTextBox",
+                    "name": "GroupPath",
+                    "caption": "Group path (optional)"
+                },
+                {
                     "type": "SelectVariable",
                     "name": "VariableID",
                     "caption": "Variable",
@@ -89,7 +103,7 @@
         },
         {
             "type": "Label",
-            "caption": "Use 1 to 100 unique numeric variables. Ring segments use their current non-negative values; zero values have no visible segment. Groups and optional subgroups are defined here."
+            "caption": "Use 1 to 100 unique numeric variables. An optional group path replaces Group and Subgroup: up to seven groups separated by / plus the variable leaf. Escape literal / as \\/ and backslash as \\\\."
         },
         {
             "type": "ExpansionPanel",
@@ -249,6 +263,10 @@
                             "caption": "Outer ring labels"
                         }
                     ]
+                },
+                {
+                    "type": "Label",
+                    "caption": "The first three rings retain their design settings. Deeper rings use the outer ring settings."
                 },
                 {
                     "type": "RowLayout",

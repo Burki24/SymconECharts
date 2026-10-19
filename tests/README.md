@@ -1,5 +1,35 @@
 # Tests
 
+## Flexible Treemap- und Sunburst-Hierarchien
+
+`php tests/treemap_model.php` und `php tests/hierarchy_sources.php` prüfen
+das gemeinsame rekursive Modell und die Quellenvalidierung: acht Ebenen
+einschließlich Blatt, stabile alte IDs, wörtliche alte Schrägstriche,
+explizite Pfad-Escapes, Reihenfolge/Summen, ungültige Pfade und Bytebudgets.
+Vorschauwerte sind synthetisch; weder aktuelle Werte noch Archive werden gelesen.
+
+`php tests/gateway_gauges.php --treemap-hierarchy` und
+`php tests/gateway_gauges.php --sunburst-hierarchy` prüfen die jeweiligen
+Modul-/Gatewaypfade, unveränderte gespeicherte Altquellen, beide unabhängigen
+Designer sowie vollständige SVG-Vorschauen. Stressfälle mit 100 Quellen,
+800 Knoten und langen Namen bleiben innerhalb der bestehenden Ausgabepuffer.
+Die beiden Layoutsuiten verwenden die festgeschriebene echte ECharts-Runtime:
+tiefe Navigation, Rückweg, Aktualisierung/Resize und entfernte Gruppen.
+Treemap hält bei tiefer Hierarchie den Navigationspfad auch kompakt sichtbar.
+
+`node tests/hierarchy_browser.mjs` stellt auf `127.0.0.1:8804` rein synthetische
+Vergleiche bereit; `/?family=treemap|sunburst` wählt die Familie. Nach Modulupdate
+bleibt die tatsächliche Symcon-/IPSView-Abnahme separat erforderlich.
+
+Am 19.10.2026 wurden beide Familien lokal mit nativer Canvas-Ausgabe als
+400-px-Kachel und 650-px-IPSView-Variante visuell geprüft: tiefe Gruppen öffnen,
+Werte aktualisieren und zurücknavigieren. Ein dabei entdeckter leerer Treemap-
+Ausschnitt nach Wiederherstellung einer tiefen Gruppe ist durch den Aufbau des
+Vorfahrenpfads korrigiert und mit einer zunächst roten echten Runtime-Regression
+abgesichert. Tiefe Sunburst-Beschriftungen werden anhand der tatsächlichen
+Ringgeometrie und Schrift gekürzt statt über benachbarte Ringe zu laufen;
+vollständige Namen bleiben im Tooltip. Die echten Installationen wurden nicht geändert.
+
 ## Normalisierte aktuelle Vergleiche
 
 `php tests/normalization.php` prüft die reine Projektion auf 0–100 anhand

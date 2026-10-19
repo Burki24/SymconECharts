@@ -958,6 +958,18 @@ assertGatewayGauge(
 );
 IPSModuleStrict::$ParentResponder = static fn (string $json): string => $gateway->ForwardData($json);
 
+if (array_slice($argv, 1) === ['--treemap-hierarchy']) {
+    require __DIR__ . '/treemap_hierarchy.php';
+    echo "Treemap deep hierarchy integration verified.\n";
+    exit(0);
+}
+
+if (array_slice($argv, 1) === ['--sunburst-hierarchy']) {
+    require __DIR__ . '/sunburst_hierarchy.php';
+    echo "Sunburst deep hierarchy integration verified.\n";
+    exit(0);
+}
+
 if (array_slice($argv, 1) === ['--current-normalization']) {
     require __DIR__ . '/pie_polar_normalization.php';
     require __DIR__ . '/bar_category_normalization.php';

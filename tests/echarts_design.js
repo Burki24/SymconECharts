@@ -9,6 +9,30 @@ const source = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-desig
 const window = {};
 vm.runInNewContext(source, { window });
 
+const updateHierarchyChart = window.SYMC_ECHARTS_DESIGN.updateHierarchyChart;
+assert.equal(typeof updateHierarchyChart, 'function', 'Both hierarchy renderers need one shared stable-root update contract.');
+for (const [seriesId, actionName] of [['treemap', 'treemapRootToNode'], ['sunburst', 'sunburstRootToNode']]) {
+    const calls = [];
+    const hierarchyChart = {
+        getModel: () => ({getSeriesByIndex: () => ({id: seriesId, getViewRoot: () => ({getId: () => 'deep-group'})})}),
+        setOption: (option, replace) => calls.push(['set', replace]),
+        dispatchAction: action => calls.push(['restore', action.seriesId, action.type, action.targetNodeId])
+    };
+    const option = {series: [{id: seriesId, data: [{id: 'root-group', children: [
+        {id: 'deep-group', children: [{id: 'variable-1', value: 1}]}]}]}]};
+    updateHierarchyChart(hierarchyChart, option, actionName, true);
+    assert.deepEqual(calls, [['set', true],
+        ...(seriesId === 'treemap' ? [['restore', seriesId, actionName, 'root-group']] : []),
+        ['restore', seriesId, actionName, 'deep-group']],
+    'Treemap must rebuild ancestor view children before restoring a leaf-depth-pruned group.');
+    calls.length = 0;
+    updateHierarchyChart(hierarchyChart, {...option, series: [{id: seriesId, data: [{id: 'variable-1', value: 1}]}]}, actionName, true);
+    assert.deepEqual(calls, [['set', true]], 'Removed groups must return to the new full tree.');
+    calls.length = 0;
+    updateHierarchyChart(hierarchyChart, option, actionName, false);
+    assert.deepEqual(calls, [['set', true]], 'Disabling navigation must not restore a previous root.');
+}
+
 const parseVisualizationState = window.SYMC_ECHARTS_DESIGN.parseVisualizationState;
 const validMessage = { schemaVersion: 1, family: 'scatter', status: 'ready', chart: {} };
 assert.deepEqual(parseVisualizationState(validMessage), validMessage,

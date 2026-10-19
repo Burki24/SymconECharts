@@ -12,6 +12,18 @@ zusammengeführt; die Variablen-ID bleibt die technische Identität eines
 Rechtecks. Die Reihenfolge der Einträge bestimmt die Grundreihenfolge der
 Gruppen und Werte.
 
+Für tiefere Hierarchien verwenden Sie stattdessen den optionalen
+„Gruppenpfad“, beispielsweise `Haus / Obergeschoss / Büro / Strom`.
+Bis zu sieben Gruppen und das Blatt mit dem Variablenwert ergeben maximal
+acht Ebenen. Ein ausgefüllter Gruppenpfad ersetzt für diesen Eintrag die
+Felder Gruppe und Untergruppe. Bleibt er leer, werden diese bisherigen Felder
+unverändert verwendet; vorhandene Namen mit `/` werden nicht aufgeteilt.
+Innerhalb eines Pfadbestandteils schreiben Sie `\/` für einen echten
+Schrägstrich und `\\` für einen Rückstrich. Leere Pfadbestandteile sind
+unzulässig. Jeder Gruppenname darf bis zu 80 Zeichen, die Blattbeschriftung
+bis zu 120 Zeichen enthalten. Insgesamt gelten maximal 100 Variablen und
+800 Knoten; ein zu großes Datenmodell wird sichtbar abgelehnt.
+
 Die Fläche verwendet ausschließlich den aktuellen Rohwert der Variable.
 Negative Werte sind für Flächen nicht zulässig und führen zu einem Fehler.
 Nullwerte sind zulässig, haben aber keine sichtbare Fläche. Wenn alle Werte
@@ -45,11 +57,24 @@ Gruppen, Ebene 2 Untergruppen oder direkt zugeordnete Werte, Ebene 3 Werte
 innerhalb von Untergruppen. Eine feste Rahmen- und Abstandsfarbe ist optional;
 „Automatisch“ belässt die bisherige Farbgebung. Verschieben/Zoomen,
 Zoom beim Klick auf einen Knoten und der Navigationspfad sind getrennt
-schaltbar. Auf schmalen Ansichten wird der Navigationspfad weiterhin
-automatisch ausgeblendet; bei ausdrücklich deaktiviertem Navigationspfad
+schaltbar. Auf schmalen Ansichten wird der Navigationspfad bei bis zu drei
+Ebenen automatisch ausgeblendet. Tiefere Hierarchien behalten ihn als
+Rücknavigation; bei ausdrücklich deaktiviertem Navigationspfad
 steht seine Fläche dem Diagramm zur Verfügung. Die statische SVG-Vorschau
 zeigt Rahmen und Abstände schematisch; das Navigationsverhalten ist erst im
 Diagramm prüfbar.
+
+Bei tieferen Hierarchien gelten Rahmen und Abstände der dritten Ebene auch
+für alle weiteren Ebenen; die Untergruppen-Typografie gilt für verschachtelte
+Gruppen ab Ebene 2. Die Vorschau zeigt die vollständige Hierarchie mit
+Beispielgewichten schematisch, ohne aktuelle Variablenwerte zu lesen.
+Sehr kleine Flächen erhalten aus Platzgründen keine sichtbare Beschriftung.
+Im Diagramm bleiben der vollständige Pfad und der Wert im Tooltip erreichbar.
+Navigationspfad und Hineinzoomen funktionieren auch in tiefen Strukturen;
+bei mehr als drei Ebenen zeigt die klickbare Ansicht zunächst drei Ebenen
+und erschließt weitere Gruppen durch Hineinklicken.
+Die gewählte Gruppenansicht bleibt bei Werteaktualisierungen erhalten,
+solange diese Gruppe noch vorhanden ist.
 
 Öffentliche PHP-Funktionen: `ECTM_GetTreemapData($id)` liefert das aktuelle
 hierarchische Datenmodell als JSON. `ECTM_GetTreemapDiagnostic($id)` liefert

@@ -9,6 +9,13 @@
 
 ## Neu
 
+- Treemap und Sunburst unterstützen flexible manuelle Gruppenpfade mit bis
+  zu acht Ebenen einschließlich Variablen-Blatt. Bestehende Gruppe-/Untergruppe-
+  Quellen bleiben unverändert verwendbar. Tiefe Strukturen verwenden denselben
+  zentral validierten Hierarchieaufbau; Vorschauen berücksichtigen die Pfade,
+  und die geöffnete Gruppe bleibt bei Aktualisierung erhalten. Die Grenze
+  bleibt 100 Quellen mit ausdrücklichen Knoten- und Größenbudgets.
+
 - Pie, BarCategory, BarPolar und PictorialBar bieten eine optionale
   Min/Max-Normalisierung je Quelle auf 0–100. Damit lassen sich ausdrücklich
   auch unterschiedliche Einheiten vergleichen. Originalwerte samt Einheit
