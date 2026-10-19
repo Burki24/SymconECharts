@@ -521,6 +521,16 @@ final class EChartsAsset
         return self::NormalizeLineEndings($content);
     }
 
+    /** Loads tree-specific view state without growing unrelated chart documents. */
+    public static function TreeSupportJavaScript(): string
+    {
+        $content = @file_get_contents(__DIR__ . '/echarts-tree.js');
+        if ($content === false || $content === '') {
+            throw new RuntimeException('The shared Tree utilities could not be loaded.');
+        }
+        return self::NormalizeLineEndings($content);
+    }
+
     /** Loads the shared time-axis zoom controls used by Cartesian renderers. */
     public static function ZoomJavaScript(): string
     {

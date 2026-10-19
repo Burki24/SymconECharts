@@ -21,6 +21,14 @@ IPSView nur den Diagrammtitel benötigt.
 
 ## Aktueller Stand und Zielarchitektur
 
+Tree und danach TreeSystemHealth unterstützen gemäß
+[ADR 0065](adr/0065-twelve-level-object-trees.md) zwölf Nachkommensebenen.
+Gemeinsam sind die begrenzte Objektprojektion in `TreeHierarchy`, rekursive
+Vorschauzeichnung in `EChartsTreePreview` und flüchtige native Ansichtsverwaltung
+in `echarts-tree.js`. Dieses Script wird nur in den Tree-Ausgaben geladen.
+Health-Regeln und deren Rohwertbewertung bleiben familienbezogen. Die bisherige
+200000-Byte-Schwelle betrifft Startkompression, nicht eine harte Modellablehnung.
+
 Treemap und anschließend Sunburst nutzen gemäß
 [ADR 0064](adr/0064-flexible-manual-hierarchies.md) einen gemeinsamen rekursiven
 Hierarchievertrag. Zentralisiert sind Quellen-/Pfadvalidierung und synthetische

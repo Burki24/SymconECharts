@@ -140,6 +140,9 @@
             "Data could not be refreshed. Showing the last available values.": "Die Daten konnten nicht aktualisiert werden. Die zuletzt verfügbaren Werte bleiben sichtbar.",
             "Example structure": "Beispielstruktur",
             "Tree preview": "Baumvorschau",
+            "Schematic tree; limited preview.": "Schematischer Baum; begrenzte Vorschau.",
+            "Status applies only to the selected subtree.": "Der Zustand gilt nur für den ausgewählten Teilbaum.",
+            "Some configured status rules are outside the displayed tree.": "Einige konfigurierte Zustandsregeln liegen außerhalb des angezeigten Baums.",
             "Mon": "Mo",
             "Tile design copied to IPSView.": "Kacheldesign nach IPSView kopiert."
         }

@@ -13,6 +13,8 @@ für exportierte Zigbee2MQTT-Netzwerkkarten sowie Treemap und Sunburst mit
 manuell festgelegten Gruppen und aktuellen numerischen Variablenwerten.
 Treemap und Sunburst erlauben optionale Gruppenpfade mit bis zu acht Ebenen
 einschließlich Quellvariable; bestehende Gruppe-/Untergruppe-Zuordnungen bleiben nutzbar.
+Tree und TreeSystemHealth unterstützen bis zu zwölf Nachkommensebenen des
+Symcon-Objektbaums; bestehende Tiefen- und Knoteneinstellungen bleiben erhalten.
 Parallelkoordinaten verbinden archivierte Variablenwerte je gemeinsamem
 Stunden- oder Tagesintervall.
 Sankey zeigt aktuelle Mengenflüsse zwischen manuell angelegten Knoten.

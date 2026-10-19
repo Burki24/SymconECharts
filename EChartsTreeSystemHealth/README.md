@@ -18,7 +18,9 @@ Symcon-Reihenfolge aufgenommen; Skripte, Links,
 Medien und andere Objekttypen bleiben außen vor. Ausgeblendete Objekte und
 deren Zweige erscheinen standardmäßig nicht. „Ausgeblendete Objekte
 einbeziehen“ hebt diesen Filter auf. Maximale Tiefe und Knotenzahl begrenzen
-die Darstellung auf 1–6 Nachkommensebenen beziehungsweise 10–3000 Knoten.
+die Darstellung auf 1–12 Nachkommensebenen beziehungsweise 10–3000 Knoten.
+Die gewählte Wurzel zählt als Ebene null; die bisherigen Standardwerte von
+drei Nachkommensebenen und 80 Knoten bleiben unverändert.
 Wenn die Knotengrenze weitere passende Objekte abschneidet, zeigt das
 Diagramm eine Meldung. Beide Ausgabewege verwenden dieselbe Wurzel und
 dieselben Grenzen.
@@ -97,6 +99,10 @@ Zweige fließen nicht in den angezeigten Zustand ein. Bei Kürzung erscheint
 weiterhin die vorhandene Meldung; der Wurzelzustand ist dann **kein**
 Gesamtzustand der vollständigen Anlage. Der Baum liest nur und schaltet keine
 Geräte.
+Bei konfigurierten Zustandsregeln nennt die Ansicht ausdrücklich diesen
+Teilbaumbezug. Liegen Regeln wegen Tiefe, Sichtbarkeit, Filter, Wurzel oder
+Knotengrenze außerhalb der dargestellten Hierarchie, erscheint ein zusätzlicher
+Hinweis. Ihre Werte werden nicht für den angezeigten Zustand nachgelesen.
 
 Der Kacheldesigner bietet orthogonale oder radiale Anordnung. Für orthogonale
 Bäume sind vier Richtungen verfügbar, für die Verbindungslinien Kurven oder
@@ -107,6 +113,14 @@ Der unabhängige IPSView-Designer besitzt dieselben Optionen; standardmäßig
 übernimmt er das Kacheldesign. Beide Designer zeigen eine unmittelbar auf
 Formularänderungen reagierende schematische Vorschau. Ohne gültige Wurzel
 verwendet diese ausdrücklich eine Beispielstruktur.
+Die Anfangstiefe kann unabhängig bis zwölf Ebenen eingestellt werden; null
+zeigt zunächst nur die Wurzel. Die Vorschau berücksichtigt echte
+Eltern-/Kindbeziehungen und bis zu 80 Knoten sowie die Anfangstiefe.
+Geschlossene Gruppen sind markiert. Lange Beschriftungen werden in Vorschau
+und Laufzeitansicht begrenzt; der Tooltip zeigt den vollständigen Knotennamen.
+Geöffnete Zweige und die verschobene beziehungsweise gezoomte Ansicht bleiben
+bei regelmäßigen Aktualisierungen und Größenänderungen erhalten. Ein Wechsel
+von Wurzel, Layout oder Anfangstiefe beginnt die entsprechende Ansicht neu.
 
 Für IPSView aktivieren Sie die optionale WebContent-Ausgabe und platzieren die
 erzeugte Variable in einem HTML-Widget. Das WebContent-Dokument wird bei

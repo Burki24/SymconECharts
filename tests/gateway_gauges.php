@@ -426,6 +426,11 @@ abstract class IPSModuleStrict
         $this->properties[$name] = $value;
     }
 
+    public function GetTestProperties(): array
+    {
+        return $this->properties;
+    }
+
     public function SetTestParentActive(bool $active): void
     {
         $this->parentActive = $active;
@@ -957,6 +962,18 @@ assertGatewayGauge(
     'The Gateway must own the shared SymconECharts WebHook.'
 );
 IPSModuleStrict::$ParentResponder = static fn (string $json): string => $gateway->ForwardData($json);
+
+if (array_slice($argv, 1) === ['--tree-depth']) {
+    require __DIR__ . '/tree_depth.php';
+    echo "Twelve-level Tree integration verified.\n";
+    exit(0);
+}
+
+if (array_slice($argv, 1) === ['--tree-health-depth']) {
+    require __DIR__ . '/tree_health_depth.php';
+    echo "Twelve-level Tree System Health integration verified.\n";
+    exit(0);
+}
 
 if (array_slice($argv, 1) === ['--treemap-hierarchy']) {
     require __DIR__ . '/treemap_hierarchy.php';

@@ -20,7 +20,8 @@ bietet optional einen festen Min-/Max-Farbverlauf innerhalb der Balken.
 Quellen mit Kategoriennavigation und gemeinsamem Archivbudget. Calendar und
 Heatmap bieten vier Archivkennzahlen. Pie, BarCategory, BarPolar und
 PictorialBar erlauben jetzt optionale Min/Max-Normalisierung. Treemap und
-Sunburst unterstützen flexible Hierarchien mit bis zu acht Ebenen. Die übrigen
+Sunburst unterstützen flexible Hierarchien mit bis zu acht Ebenen. Tree und
+TreeSystemHealth erlauben zwölf Nachkommensebenen. Die übrigen
 Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
 
 | Reihenfolge | Empfohlener nächster Schritt | Nutzen und Voraussetzung |
@@ -33,7 +34,8 @@ Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
 | Erledigt | Calendar/Heatmap: passende Tages-/Stundenkennzahlen | Mittelwert, Minimum, Maximum für Standardarchive und ausdrücklicher Zählerverbrauch; Heatmap reduziert je Wochentag/Stunde passend statt alle Kennzahlen erneut zu mitteln. |
 | Erledigt | Explizite Normalisierung für weitere Vergleiche | Pie, BarCategory, BarPolar und PictorialBar vergleichen optional Quellen anhand eigener Min/Max auf 0–100; Originalwerte und Einheiten bleiben erhalten. |
 | Erledigt | Treemap/Sunburst: flexible Hierarchien bis acht Ebenen | Gemeinsames Modell, höchstens sieben Gruppen plus Variablenblatt, native Navigation, vollständige Strukturvorschau und begrenzte Modellgröße. |
-| Danach | Tiefere Objektbäume, größere Graphen, weitere Reihen | Nur zusammen mit Navigation, Vorschaukennzeichnung und messbaren Ressourcenbudgets. |
+| Erledigt | Tree/TreeSystemHealth: zwölf Nachkommensebenen | Unveränderte Defaults und Knoten-/Suchbudgets, gemeinsame Vorschaugeometrie und native Ansichtserhaltung; ausdrücklicher Health-Bewertungsumfang. |
+| Danach | Größere Graphen und weitere Reihen | Nur zusammen mit Navigation, Vorschaukennzeichnung und messbaren Ressourcenbudgets. |
 
 Normalisierung ist keine allgemeine Lösung für unterschiedliche Einheiten:
 Sie kann relative Vergleiche sinnvoll machen, ersetzt aber keine physikalische
@@ -58,8 +60,8 @@ Schritte sind Planungsziele, keine implementierten oder lastgeprüften Zusagen.
 | EChartsPie | 1–16 nichtnegative Quellen gleicher Roh-Einheit oder optional normalisierte Gewichte mit beliebigen Originaleinheiten und eigenen Min/Max. Nullgewichte bleiben ausdrücklich leer. | Normalisierung nach CalendarPie-Vorbild umgesetzt. Größere Listen mit scrollbarer Legende und ausdrücklich gewähltem Restsegment/Top-N weiterhin offen; keine unsichtbar ausgelassenen Werte. |
 | EChartsFunnel | 1–16 nichtnegative numerische Quellen gleicher Einheit. Null gültig; manuelle oder wertbezogene Reihenfolge, keine erzwungene Abnahme zwischen Stufen. | 16 ist eine Darstellungsgrenze. 32, später 100 nur mit Navigation und Beschriftungsprüfung. Negative Trichterbreiten sind keine sinnvolle Aufhebung. Der gemeinsame Resolver behält hier die Grenze 16. |
 | EChartsPictorialBar | 1–100 nichtnegative Quellen gleicher Roh-Einheit oder optional normalisierte Quellen mit eigenen Min/Max und Originaleinheiten. Wertfarbe, interner Verlauf, Icons und eigene SVGs. | Umgesetzt: Normalisierung und responsive Kategoriennavigation ohne Datenverlust; Vorschau kennzeichnet ihren Acht-Quellen-Ausschnitt. Mehrfachauswahl nach Objektzweig/Filter weiterhin offen. |
-| EChartsTree | Objektwurzel, Kategorien/Instanzen/Variablen; Tiefe 1–6; 10–3000 sichtbare Knoten, Standard 80; Suchbudget 30000 Objekte und Modellbudget 200000 Bytes. | Tiefe sechs ist für reale Anlagen teilweise eng. 12–20 Ebenen bei unveränderten Knoten-/Such-/Bytebudgets prüfen. Links/Medien/Skripte nur mit expliziter Bedeutung und Zyklusbehandlung ergänzen. |
-| EChartsTreeSystemHealth | Gleiche Hierarchiegrenzen; bis 3000 ausdrückliche Boolean-/Zahlenregeln; Vorfahrenbewertung nur anhand des berücksichtigten Baums. | Wie Tree: tiefere begrenzte Zweige. Regeln, ausgeschlossene Zweige und unvollständige Sicht müssen erkennbar bleiben; keine vermeintliche Gesamtgesundheit aus einer abgeschnittenen Teilmenge. |
+| EChartsTree | Objektwurzel Ebene 0, Kategorien/Instanzen/Variablen; 1–12 Nachkommensebenen; 10–3000 Knoten, Standard 80; gefiltertes Suchbudget 30000 Objekte. Startzustände ab 200000 Bytes werden komprimiert, nicht abgelehnt. | Umgesetzt: tiefere Zweige, getrennte Anfangstiefe, ID-stabile Aufklapp-/Pan-/Zoom-Ansicht und gemeinsame begrenzte Strukturvorschau. Links/Medien/Skripte bleiben ausgeschlossen. |
+| EChartsTreeSystemHealth | Dieselben Hierarchiegrenzen; bis 3000 ausdrückliche Boolean-/Zahlenregeln; Vorfahrenbewertung nur anhand des berücksichtigten Baums. | Umgesetzt: zwölf Nachkommensebenen und sichtbarer lokaler Bewertungsumfang einschließlich nicht enthaltener Regelvariablen. Keine zusätzliche Vollsuche oder Zustandsaussage außerhalb der ausgewählten Hierarchie. |
 | EChartsGraph | 2–80 Objektknoten, 1–200 ungerichtete Kanten; keine Selbstkanten oder doppelten ungeordneten Paare. Isolierte Knoten sind im ansonsten verbundenen Modell erlaubt. | 300 Knoten/1000 Kanten nach Force-/Layoutprofiling prüfen. Gerichtete oder gewichtete Beziehungen benötigen einen ausdrücklich erweiterten Vertrag, nicht nur neue Höchstzahlen. |
 | EChartsGraphZ2M | Nur gespeicherter Export, kein Scan; bis 500 Rohknoten/10000 Rohkanten. Sichtbare Verbindungen 1–2000, Standard 300; LQI 0–255; Export höchstens 16 MiB. | Schutzgrenzen zunächst behalten. Schwache Verbindungen gezielt auswählbar machen, statt nur die stärksten zu zeigen. Mehrdeutige Exportproduzenten nicht automatisch zusammenwerfen und keinen Scan versteckt auslösen. |
 | EChartsTreemap | 1–100 nichtnegative Blätter, bis acht Ebenen einschließlich Blatt, höchstens 800 Knoten und 200000 HTML-sicher serialisierte Modellbytes. Optionale Gruppenpfade; alte Gruppe/Untergruppe bleibt unverändert gültig. Null besitzt keine Fläche; Anzeigeeinheit ist global. | Umgesetzt: rekursives gemeinsames Modell, native Navigation und gekennzeichnete vollständige Strukturvorschau. Optionale normalisierte Gewichte und Originalformat je Blatt bleiben offen. Fehlende Einheitenprüfung ist keine saubere Mehr-Einheiten-Unterstützung. |
@@ -137,9 +139,9 @@ Vorschauen sind gesondert zu betrachten:
 - TimeSeries (vier), BarHistory (drei), Parallel (sechs) und mehrere aktuelle
   Vergleiche begrenzen ihre Vorschau separat. Die Mengenhinweise müssen bei
   jeder Erweiterung erhalten und korrekt sein.
-- Graph verwendet bei großen Modellen ein Beispiel; Tree/Health reduzieren
-  Tiefe/Verzweigung. Diese Vereinfachungen sollten künftig noch klarer als
-  Struktur-/Designvorschau erkennbar sein. Treemap/Sunburst zeigen inzwischen
+- Graph verwendet bei großen Modellen ein Beispiel. Tree/Health zeigen eine
+  gekennzeichnete Strukturvorschau mit höchstens 80 Knoten und konfigurierter
+  Anfangstiefe; echte Eltern-Kind-Beziehungen bleiben erhalten. Treemap/Sunburst zeigen inzwischen
   die vollständige konfigurierte Struktur mit gekennzeichneten Beispielgewichten.
 - Waterfall darf in einer Teilvorschau keine aus der Teilmenge berechnete
   Endsumme als die tatsächliche Gesamtbilanz erscheinen lassen.

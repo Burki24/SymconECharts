@@ -15,7 +15,9 @@ Symcon-Reihenfolge aufgenommen; Skripte, Links,
 Medien und andere Objekttypen bleiben außen vor. Ausgeblendete Objekte und
 deren Zweige erscheinen standardmäßig nicht. „Ausgeblendete Objekte
 einbeziehen“ hebt diesen Filter auf. Maximale Tiefe und Knotenzahl begrenzen
-die Darstellung auf 1–6 Nachkommensebenen beziehungsweise 10–3000 Knoten.
+die Darstellung auf 1–12 Nachkommensebenen beziehungsweise 10–3000 Knoten.
+Die gewählte Wurzel zählt als Ebene 0. Bestehende Instanzen behalten ihre
+gespeicherten Grenzen; der Standard bleibt drei Nachkommensebenen und 80 Knoten.
 Wenn die Knotengrenze weitere passende Objekte abschneidet, zeigt das
 Diagramm eine Meldung. Beide Ausgabewege verwenden dieselbe Wurzel und
 dieselben Grenzen.
@@ -48,10 +50,18 @@ Bäume sind vier Richtungen verfügbar, für die Verbindungslinien Kurven oder
 Polylinien. Anfangs geöffnete Ebenen, Verschieben/Zoomen, Knotengröße,
 Beschriftung, Farben, Theme und Animation lassen sich einstellen. Knoten
 können in der Laufzeitansicht per Klick auf- und zugeklappt werden.
+Anfänglich geöffnete Ebenen (0–12) sind unabhängig von der maximal geladenen
+Tiefe: Eingeklappte Zweige können später geöffnet werden, ohne die Auswahl
+zu verändern. Geöffnete Zweige und Pan/Zoom bleiben bei Aktualisierung und
+Größenänderung erhalten; eine neue Wurzel, Anordnung oder Anfangstiefe setzt
+die Ansicht zurück. Lange Namen bleiben vollständig im Tooltip erreichbar.
 Der unabhängige IPSView-Designer besitzt dieselben Optionen; standardmäßig
 übernimmt er das Kacheldesign. Beide Designer zeigen eine unmittelbar auf
 Formularänderungen reagierende schematische Vorschau. Ohne gültige Wurzel
 verwendet diese ausdrücklich eine Beispielstruktur.
+Die Vorschau zeigt echte Eltern-Kind-Verbindungen mit höchstens 80 Knoten
+und berücksichtigt die anfänglich geöffneten Ebenen. Sie ist eine begrenzte
+Struktur-/Designvorschau, keine vollständige Zustands- oder Objektübersicht.
 
 Für IPSView aktivieren Sie die optionale WebContent-Ausgabe und platzieren die
 erzeugte Variable in einem HTML-Widget. Das WebContent-Dokument wird bei

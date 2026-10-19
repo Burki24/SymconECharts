@@ -9,6 +9,13 @@
 
 ## Neu
 
+- Tree und TreeSystemHealth unterstützen bis zu zwölf Nachkommensebenen bei
+  unveränderten Standardwerten und Schutzgrenzen. Die gemeinsame Vorschau
+  berücksichtigt echte Eltern-Kind-Verbindungen und Anfangstiefe; geöffnete
+  Zweige und Pan/Zoom bleiben bei Aktualisierung und Größenänderung erhalten.
+  Health kennzeichnet den begrenzten Bewertungsumfang und nicht enthaltene
+  Regelvariablen, ohne ausgeschlossene Quellen zusätzlich zu lesen.
+
 - Treemap und Sunburst unterstützen flexible manuelle Gruppenpfade mit bis
   zu acht Ebenen einschließlich Variablen-Blatt. Bestehende Gruppe-/Untergruppe-
   Quellen bleiben unverändert verwendbar. Tiefe Strukturen verwenden denselben

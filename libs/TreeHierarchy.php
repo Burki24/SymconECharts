@@ -10,6 +10,9 @@ use RuntimeException;
 /** Read-only, bounded projection of Symcon objects into ECharts Tree nodes. */
 final class TreeHierarchy
 {
+    public const MAXIMUM_DEPTH = 12;
+    public const MAXIMUM_NODES = 3000;
+    public const STARTUP_COMPRESSION_BYTES = 200000;
     private const FILTER_SCAN_LIMIT = 30000;
 
     /**
@@ -31,7 +34,7 @@ final class TreeHierarchy
         ?array $allowedVariableIDs = null
     ): array {
         $variableNameFilter = trim($variableNameFilter);
-        if ($rootID < 0 || $maxDepth < 1 || $maxDepth > 6 || $maxNodes < 2 || $maxNodes > 3000
+        if ($rootID < 0 || $maxDepth < 1 || $maxDepth > self::MAXIMUM_DEPTH || $maxNodes < 2 || $maxNodes > self::MAXIMUM_NODES
             || mb_strlen($variableNameFilter, 'UTF-8') > 120) {
             throw new InvalidArgumentException('The Tree selection or limits are invalid.');
         }

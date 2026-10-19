@@ -6,6 +6,8 @@
             "Use Symcon root (entire object tree)": "Symcon-Wurzel (gesamter Objektbaum) verwenden",
             "Root category or instance": "Wurzelkategorie oder -instanz",
             "Maximum depth": "Maximale Tiefe",
+            "The root is level 0. Select up to twelve descendant levels; initial expansion is configured separately.": "Die Wurzel ist Ebene 0. Bis zu zwölf Nachkommensebenen sind wählbar; die anfänglich geöffneten Ebenen werden getrennt eingestellt.",
+            "Schematic tree; limited preview.": "Schematischer Baum; begrenzte Vorschau.",
             "Maximum nodes": "Maximale Knotenanzahl",
             "Include hidden objects": "Ausgeblendete Objekte einbeziehen",
             "Variable name contains (optional)": "Variablenname enthält (optional)",

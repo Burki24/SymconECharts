@@ -29,7 +29,7 @@
                     "name": "MaxDepth",
                     "caption": "Maximum depth",
                     "minimum": 1,
-                    "maximum": 6
+                    "maximum": 12
                 },
                 {
                     "type": "NumberSpinner",
@@ -44,6 +44,10 @@
                     "caption": "Include hidden objects"
                 }
             ]
+        },
+        {
+            "type": "Label",
+            "caption": "The root is level 0. Select up to twelve descendant levels; initial expansion is configured separately."
         },
         {
             "type": "Label",
@@ -195,7 +199,7 @@
                             "name": "InitialDepth",
                             "caption": "Initially expanded levels",
                             "minimum": 0,
-                            "maximum": 6
+                            "maximum": 12
                         },
                         {
                             "type": "NumberSpinner",

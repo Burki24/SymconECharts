@@ -1,5 +1,41 @@
 # Tests
 
+## Zwölf Nachkommensebenen für Tree und SystemHealth
+
+`php tests/tree_hierarchy.php` prüft zwölf Nachkommensebenen ab Wurzel 0,
+gleiche Namen mit eigenen IDs, Filter, zwölf/dreizehn sowie unveränderte
+Knoten- und Suchbudgets. `php tests/tree_preview.php` prüft die gemeinsame
+SVG-Geometrie: echte Eltern-Kind-Kanten, Anfangstiefe, alle fünf Anordnungen,
+80-Knoten-Grenze, sichere Texte und normale/Zustandsfarben. Mit `--svg LR`
+beziehungsweise RL/TB/BT/radial liefert dieser Test zusätzlich eine synthetische
+tiefe Vorschau zur lokalen Sichtprüfung.
+
+`php tests/gateway_gauges.php --tree-depth` und `--tree-health-depth` verwenden
+die realen Modulpfade mit synthetischen Kernelgrenzen. Defaults, Properties und
+StatusRules bleiben bei wiederholtem Apply beziehungsweise Vorschau-Drafts
+unverändert. Ebene zwölf, Ablehnung von dreizehn, unabhängige Designer,
+Namens-/Regelfilter, ausgeblendete und tiefere Quellen sowie Statussuche werden
+geprüft. Fehlende Regelquellen sind absichtlich nicht numerisch: Ein unerlaubtes
+Lesen für die Bewertung würde den Test fehlschlagen lassen. Kompressions-
+und Ausgabetests sichern 3000 Knoten ab; 200000 Bytes bleiben eine Schwelle
+für Startkompression und werden nicht zu einer neuen Ablehnungsgrenze.
+
+Die erweiterte `tree_layout.js` verwendet echte native Tree-Aktionen für beide
+Renderer, fünf Anordnungen und Ausgabearten. Aufklappen, Pan/Zoom, Aktualisierung,
+Resize, neue Wurzel/Anfangstiefe und entfernte Objekt-IDs werden überprüft.
+Die zusätzliche gemeinsame Tree-JavaScriptdatei wird nur in diesen Familien
+geladen. Die Live-Abnahme nach Modulupdate in Symcon und IPSView bleibt separat.
+
+`node tests/tree_browser.mjs` bietet auf `127.0.0.1:8812` synthetische Canvas-
+Ansichten und SVG-Vorschauen. Am 19.10.2026 wurden Tree horizontal/vertikal
+und Health horizontal/radial als 400-px-Kachel und 720-px-IPSView-Variante
+visuell geprüft. Aufklappen, Pan/Zoom und Werteaktualisierung behielten ihre
+Ansicht; der Health-Bewertungsumfang blieb sichtbar. Dabei entdeckte
+Überschneidungen tiefer Radialbeschriftungen mit dem Hinweis und vertikaler
+Beschriftungen mit dem Titel sind durch zusätzliche Layoutabstände korrigiert
+und mit zunächst roten echten Textgeometrie-Regressionen abgesichert.
+Keine Live-Konfiguration oder Quellwerte wurden geändert.
+
 ## Flexible Treemap- und Sunburst-Hierarchien
 
 `php tests/treemap_model.php` und `php tests/hierarchy_sources.php` prüfen

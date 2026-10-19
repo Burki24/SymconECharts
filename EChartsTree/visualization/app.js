@@ -6,10 +6,10 @@
     var errorElement = document.getElementById('echarts-tree-error');
     var warningElement = document.getElementById('echarts-tree-warning');
     var design = window.SYMC_ECHARTS_DESIGN;
+    var treeSupport = window.SYMC_ECHARTS_TREE;
     var chart = null;
     var currentTheme = null;
     var currentState = bootstrap.state || null;
-    var collapsedNodes = Object.create(null);
 
     function translate(value) {
         return (bootstrap.translations || {})[value] || value;
@@ -70,9 +70,6 @@
             itemStyle: { color: color },
             children: (node.children || []).map(function (child) { return coloredNode(child, style, colors); })
         };
-        if (Object.prototype.hasOwnProperty.call(collapsedNodes, result.id)) {
-            result.collapsed = collapsedNodes[result.id];
-        }
         return result;
     }
 
@@ -90,8 +87,21 @@
         var titleLayout = design.chartTitleLayout(bootstrap, tree.title, titleSize);
         var showTitle = titleLayout.show;
         var top = titleLayout.contentTop;
+        var bottom = 18;
         var nodeSize = Math.max(4, Math.min(30, Number(style.nodeSize) || 10));
         var root = coloredNode(tree.root || {}, style, colors);
+        var initialDepth = Math.max(0, Math.min(Number(bootstrap.options.treeMaxDepth) || 12,
+            Number(style.initialDepth) || 0));
+        var labels = treeSupport.labelLayout(root, width, Math.max(1, height - top - 18), radial,
+            orient, compact, nodeSize, initialDepth, labelSize, style.showValues === true, chart);
+        var outerPadding = labels.outerPadding;
+        top += outerPadding + labels.topPadding;
+        bottom += outerPadding;
+        if (outerPadding || labels.topPadding) {
+            labels = treeSupport.labelLayout(root, Math.max(1, width - 2 * outerPadding),
+                Math.max(1, height - top - bottom), radial, orient, compact, nodeSize,
+                initialDepth, labelSize, style.showValues === true, chart);
+        }
         return {
             backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
                 ? 'transparent' : colors.background,
@@ -102,7 +112,8 @@
                 textStyle: { color: style.titleColor || colors.text, fontSize: titleSize }
             },
             tooltip: {
-                trigger: 'item',
+                trigger: 'item', confine: true,
+                extraCssText: 'max-width:280px;white-space:normal;overflow-wrap:anywhere',
                 formatter: function (parameter) {
                     var data = parameter.data || {};
                     return escapeHTML(data.name || '') + (data.displayValue
@@ -113,10 +124,10 @@
                 id: 'tree', type: 'tree', layout: radial ? 'radial' : 'orthogonal',
                 orient: orient, edgeShape: style.edgeShape === 'polyline' ? 'polyline' : 'curve',
                 roam: style.roamEnabled === true, expandAndCollapse: true,
-                initialTreeDepth: Math.max(0, Math.min(6, Number(style.initialDepth) || 0)),
-                left: radial ? '9%' : (orient === 'RL' ? '22%' : '5%'),
-                right: radial ? '9%' : (orient === 'LR' ? '23%' : '5%'),
-                top: top, bottom: 18,
+                initialTreeDepth: initialDepth,
+                left: radial ? (outerPadding ? width * 0.09 + outerPadding : '9%') : (orient === 'RL' ? '22%' : '5%'),
+                right: radial ? (outerPadding ? width * 0.09 + outerPadding : '9%') : (orient === 'LR' ? '23%' : '5%'),
+                top: top, bottom: bottom,
                 symbol: 'circle', symbolSize: compact ? Math.max(4, nodeSize * 0.8) : nodeSize,
                 lineStyle: { color: style.edgeColor || colors.muted, width: 1.5 },
                 label: {
@@ -124,10 +135,11 @@
                     position: radial ? 'outside' : (orient === 'RL' ? 'left' : (orient === 'LR' ? 'right' : 'top')),
                     color: style.labelColor || colors.text,
                     fontSize: labelSize,
-                    width: compact ? 88 : 150,
+                    width: labels.width,
                     overflow: 'truncate',
                     formatter: function (parameter) {
                         var data = parameter.data || {};
+                        if (!labels.show(data, parameter.collapsed)) { return ''; }
                         return String(data.name || '') + (style.showValues === true && data.kind === 'variable'
                             && data.displayValue ? '\n' + data.displayValue : '');
                     }
@@ -169,15 +181,11 @@
         if (!chart) {
             chart = window.echarts.init(chartElement, theme === 'auto' ? null : theme, { renderer: 'canvas' });
             currentTheme = theme;
-            chart.on('treeExpandAndCollapse', function (event) {
-                var series = chart && chart.getModel().getSeriesByIndex(0);
-                var node = series && series.getDataParams(event.dataIndex);
-                if (node && node.data && node.data.id) {
-                    collapsedNodes[String(node.data.id)] = node.collapsed === true;
-                }
+            chart.on('treeExpandAndCollapse', function () {
+                treeSupport.updateChart(chart, buildOption(currentState.chart, currentTheme || 'auto'));
             });
         }
-        chart.setOption(buildOption(state.chart, theme), true);
+        treeSupport.updateChart(chart, buildOption(state.chart, theme));
     }
 
     window.handleMessage = function (message) {
@@ -188,7 +196,7 @@
         new ResizeObserver(function () {
             if (!design.resizeChartIfNeeded(chart, chartElement)) { return; }
             if (currentState && currentState.status === 'ready') {
-                chart.setOption(buildOption(currentState.chart, currentTheme || 'auto'), true);
+                treeSupport.updateChart(chart, buildOption(currentState.chart, currentTheme || 'auto'));
             }
         }).observe(chartElement);
     } else {

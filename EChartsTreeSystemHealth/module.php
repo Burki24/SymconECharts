@@ -21,6 +21,7 @@ use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsTransientRefresh;
+use SymconECharts\EChartsTreePreview;
 use SymconECharts\TreeHealth;
 use SymconECharts\TreeHierarchy;
 
@@ -42,6 +43,7 @@ require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
 require_once __DIR__ . '/../libs/EChartsTransientRefresh.php';
+require_once __DIR__ . '/../libs/EChartsTreePreview.php';
 require_once __DIR__ . '/../libs/TreeHierarchy.php';
 require_once __DIR__ . '/TreeHealth.php';
 
@@ -720,12 +722,13 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
             'critical' => EChartsBarPreview::Color($this->BarPreviewValue($values, 'CriticalColor', 'integer', $ipsView), '#E54F55')
         ];
         $sample = true;
-        $nodes = [
-            ['name' => 'Haus', 'kind' => 'category'],
-            ['name' => 'Wohnen', 'kind' => 'category'],
-            ['name' => 'Sensor', 'kind' => 'instance'],
-            ['name' => 'Temperatur', 'kind' => 'variable', 'displayValue' => '21 °C']
-        ];
+        $previewRoot = ['id' => 'sample-root', 'name' => 'Haus', 'kind' => 'category', 'children' => [
+            ['id' => 'sample-room', 'name' => 'Wohnen', 'kind' => 'category', 'children' => [
+                ['id' => 'sample-sensor', 'name' => 'Sensor', 'kind' => 'instance', 'children' => [
+                    ['id' => 'sample-value', 'name' => 'Temperatur', 'kind' => 'variable', 'displayValue' => '21 °C', 'children' => []]
+                ]]
+            ]]
+        ]];
         $useSymconRoot = (bool) ($values['UseSymconRoot'] ?? $this->ReadPropertyBoolean('UseSymconRoot'));
         $rootID = $useSymconRoot ? 0 : (int) ($values['RootObjectID'] ?? $this->ReadPropertyInteger('RootObjectID'));
         $variableNameFilter = trim((string) ($values['VariableNameFilter'] ?? $this->ReadPropertyString('VariableNameFilter')));
@@ -739,25 +742,23 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
             try {
                 $tree = $this->ReadHierarchy(
                     $rootID,
-                    $variableNameFilter === '' && !$showOnlyRuleVariables
-                        ? min(3, (int) ($values['MaxDepth'] ?? $this->ReadPropertyInteger('MaxDepth')))
-                        : (int) ($values['MaxDepth'] ?? $this->ReadPropertyInteger('MaxDepth')),
-                    12,
+                    (int) ($values['MaxDepth'] ?? $this->ReadPropertyInteger('MaxDepth')),
+                    min(80, max(2, (int) ($values['MaxNodes'] ?? $this->ReadPropertyInteger('MaxNodes')))),
                     (bool) ($values['IncludeHidden'] ?? $this->ReadPropertyBoolean('IncludeHidden')),
                     $rules,
                     $variableNameFilter,
                     $showOnlyRuleVariables
                 );
-                $nodes = $this->PreviewNodes($tree['root']);
+                $previewRoot = $tree['root'];
                 $sample = false;
             } catch (Throwable) {
                 $sample = true;
             }
         }
         if ($sample && $rules !== []) {
-            $nodes[0]['health'] = 'critical';
-            $nodes[1]['health'] = 'warning';
-            $nodes[3]['health'] = 'ok';
+            $previewRoot['health'] = 'critical';
+            $previewRoot['children'][0]['health'] = 'warning';
+            $previewRoot['children'][0]['children'][0]['children'][0]['health'] = 'ok';
         }
         $svg = EChartsBarPreview::Open(
             $palette,
@@ -770,53 +771,17 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
             $titleColor,
             $this->BarPreviewValue($values, 'TitleFontSizePercent', 'integer', $ipsView)
         );
-        $layout = $this->BarPreviewValue($values, 'TreeLayout', 'string', $ipsView);
-        $orientation = $this->BarPreviewValue($values, 'Orientation', 'string', $ipsView);
-        $edgeShape = $this->BarPreviewValue($values, 'EdgeShape', 'string', $ipsView);
-        $nodeSize = max(4, min(22, $this->BarPreviewValue($values, 'NodeSize', 'integer', $ipsView)));
-        $labelSize = max(8, min(20, (int) round(11 * $this->BarPreviewValue($values, 'LabelFontSizePercent', 'integer', $ipsView) / 100)));
-        $showLabels = $this->BarPreviewValue($values, 'ShowLabels', 'boolean', $ipsView);
-        $showValues = $this->BarPreviewValue($values, 'ShowValues', 'boolean', $ipsView);
-        $positions = $layout === 'radial'
-            ? [[360, 190], [225, 115], [510, 120], [390, 285]]
-            : [[100, 185], [265, 100], [435, 170], [600, 255]];
-        if ($layout !== 'radial') {
-            $positions = array_map(static function (array $point) use ($orientation): array
-            {
-                return match ($orientation) {
-                    'RL'    => [720 - $point[0], $point[1]],
-                    'TB'    => [60 + $point[1] * 1.55, 35 + $point[0] * 0.43],
-                    'BT'    => [60 + $point[1] * 1.55, 325 - $point[0] * 0.43],
-                    default => $point
-                };
-            }, $positions);
-        }
-        $nodes = array_slice($nodes, 0, 4);
-        foreach ($nodes as $index => $node) {
-            [$x, $y] = $positions[$index];
-            if ($index > 0) {
-                [$px, $py] = $positions[$index - 1];
-                $path = $edgeShape === 'polyline'
-                    ? 'M ' . $px . ' ' . $py . ' L ' . (($px + $x) / 2) . ' ' . $py . ' L ' . (($px + $x) / 2) . ' ' . $y . ' L ' . $x . ' ' . $y
-                    : 'M ' . $px . ' ' . $py . ' Q ' . (($px + $x) / 2) . ' ' . (($py + $y) / 2 - 35) . ' ' . $x . ' ' . $y;
-                $svg .= '<path d="' . EChartsBarPreview::E($path) . '" fill="none" stroke="' . EChartsBarPreview::E($edgeColor) . '" stroke-width="2"/>';
-            }
-            $kind = (string) ($node['kind'] ?? 'category');
-            $health = (string) ($node['health'] ?? '');
-            $color = $healthColors[$health] ?? ($colors[$kind] ?? $colors['category']);
-            $svg .= '<circle cx="' . EChartsBarPreview::N($x) . '" cy="' . EChartsBarPreview::N($y)
-                . '" r="' . EChartsBarPreview::N($nodeSize / 2) . '" fill="' . EChartsBarPreview::E($color) . '"/>';
-            if ($showLabels) {
-                $name = mb_strimwidth((string) ($node['name'] ?? ''), 0, 14, '…');
-                if ($showValues && $kind === 'variable') {
-                    $name .= ' ' . mb_strimwidth((string) ($node['displayValue'] ?? ''), 0, 12, '…');
-                }
-                $svg .= '<text x="' . EChartsBarPreview::N($x + 9) . '" y="' . EChartsBarPreview::N($y - 10)
-                    . '" fill="' . EChartsBarPreview::E($labelColor) . '" font-size="' . $labelSize . '">'
-                    . EChartsBarPreview::E($name) . '</text>';
-            }
-        }
-        return $svg . '</svg>';
+        return EChartsTreePreview::Draw($svg, $previewRoot, [
+            'treeLayout'           => $this->BarPreviewValue($values, 'TreeLayout', 'string', $ipsView),
+            'orientation'          => $this->BarPreviewValue($values, 'Orientation', 'string', $ipsView),
+            'edgeShape'            => $this->BarPreviewValue($values, 'EdgeShape', 'string', $ipsView),
+            'nodeSize'             => $this->BarPreviewValue($values, 'NodeSize', 'integer', $ipsView),
+            'labelFontSizePercent' => $this->BarPreviewValue($values, 'LabelFontSizePercent', 'integer', $ipsView),
+            'initialDepth'         => $this->BarPreviewValue($values, 'InitialDepth', 'integer', $ipsView),
+            'showLabels'           => $this->BarPreviewValue($values, 'ShowLabels', 'boolean', $ipsView),
+            'showValues'           => $this->BarPreviewValue($values, 'ShowValues', 'boolean', $ipsView),
+            'labelColor'           => $labelColor, 'edgeColor' => $edgeColor
+        ], array_merge($colors, $healthColors), $this->Translate('Schematic tree; limited preview.'));
     }
 
     /** @param list<array<string,mixed>> $rules
@@ -875,16 +840,6 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
         return ['rows' => $rows, 'existing' => $result['excluded'], 'truncated' => $result['truncated']];
     }
 
-    /** @param array<string,mixed> $node @return list<array<string,mixed>> */
-    private function PreviewNodes(array $node): array
-    {
-        $nodes = [$node];
-        foreach ($node['children'] ?? [] as $child) {
-            array_push($nodes, ...$this->PreviewNodes($child));
-        }
-        return $nodes;
-    }
-
     private function GetTreeDataForOutput(bool $ipsView): string
     {
         $error = $this->GetConfigurationError();
@@ -919,16 +874,17 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
             'family'        => 'tree',
             'theme'         => $this->EffectiveTheme($ipsView),
             'tree'          => [
-                'title'     => $this->ReadPropertyString('Title'),
-                'style'     => $this->ReadDesignStyle($ipsView),
-                'root'      => $hierarchy['root'],
-                'count'     => $hierarchy['count'],
-                'truncated' => $hierarchy['truncated']
+                'title'       => $this->ReadPropertyString('Title'),
+                'style'       => $this->ReadDesignStyle($ipsView),
+                'root'        => $hierarchy['root'],
+                'count'       => $hierarchy['count'],
+                'truncated'   => $hierarchy['truncated'],
+                'healthScope' => $hierarchy['healthScope']
             ]
         ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 
-    /** @return array{root:array<string,mixed>,count:int,truncated:bool,variableIDs:list<int>} */
+    /** @return array{root:array<string,mixed>,count:int,truncated:bool,variableIDs:list<int>,healthScope:array{ruleCount:int,evaluatedRuleCount:int}} */
     private function ReadHierarchy(
         int $rootID,
         int $maxDepth,
@@ -956,6 +912,10 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
             $rules,
             static fn (int $id): mixed => GetValue($id)
         );
+        $hierarchy['healthScope'] = [
+            'ruleCount'          => count($rules),
+            'evaluatedRuleCount' => count(array_intersect(array_keys($rules), $hierarchy['variableIDs']))
+        ];
         return $hierarchy;
     }
 
@@ -966,7 +926,7 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
         $state = $this->BuildVisualizationState($ipsView);
         $compressedState = null;
         $stateJSON = json_encode($state, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        if (strlen($stateJSON) > 200000) {
+        if (strlen($stateJSON) > TreeHierarchy::STARTUP_COMPRESSION_BYTES) {
             $gzip = gzencode($stateJSON, 6);
             if ($gzip === false) {
                 throw new RuntimeException('The Tree startup state could not be compressed.');
@@ -988,6 +948,8 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
                 'Connect an active EChartsGateway.'                                 => $this->Translate('Connect an active EChartsGateway.'),
                 'The Tree could not be loaded.'                                     => $this->Translate('The Tree could not be loaded.'),
                 'Only the first configured nodes are shown.'                        => $this->Translate('Only the first configured nodes are shown.'),
+                'Status applies only to the selected subtree.'                      => $this->Translate('Status applies only to the selected subtree.'),
+                'Some configured status rules are outside the displayed tree.'      => $this->Translate('Some configured status rules are outside the displayed tree.'),
                 'Status: OK'                                                        => $this->Translate('Status: OK'),
                 'Status: Warning'                                                   => $this->Translate('Status: Warning'),
                 'Status: Critical'                                                  => $this->Translate('Status: Critical'),
@@ -1002,12 +964,13 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
                 'tileHeaderVisible'         => !$hiddenTitle,
                 'adaptToBackground'         => $ipsView && $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
                 'ipsViewTransport'          => $ipsView ? $this->EChartsIPSViewTransportOptions() : null,
-                'compressedStateGzipBase64' => $compressedState
+                'compressedStateGzipBase64' => $compressedState,
+                'treeMaxDepth'              => TreeHierarchy::MAXIMUM_DEPTH
             ],
             'replacements' => [
                 '{{ECHARTS_SCRIPT}}'           => EChartsAsset::TreeJavaScript(),
                 '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
-                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript(),
+                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript() . "\n" . EChartsAsset::TreeSupportJavaScript(),
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
         ]);
@@ -1044,8 +1007,8 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
         if ((!$this->ReadPropertyBoolean('UseSymconRoot')
             && ($rootID < 1 || !IPS_ObjectExists($rootID)
                 || !in_array(IPS_GetObject($rootID)['ObjectType'] ?? null, [0, 1], true)))
-            || $this->ReadPropertyInteger('MaxDepth') < 1 || $this->ReadPropertyInteger('MaxDepth') > 6
-            || $this->ReadPropertyInteger('MaxNodes') < 10 || $this->ReadPropertyInteger('MaxNodes') > 3000
+            || $this->ReadPropertyInteger('MaxDepth') < 1 || $this->ReadPropertyInteger('MaxDepth') > TreeHierarchy::MAXIMUM_DEPTH
+            || $this->ReadPropertyInteger('MaxNodes') < 10 || $this->ReadPropertyInteger('MaxNodes') > TreeHierarchy::MAXIMUM_NODES
             || mb_strlen(trim($this->ReadPropertyString('VariableNameFilter')), 'UTF-8') > 120) {
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => 'Select a valid Tree root and limits.'];
         }
@@ -1078,7 +1041,7 @@ class EChartsTreeSystemHealth extends IPSModuleStrict
             || !in_array($this->ReadPropertyString($prefix . 'Orientation'), ['LR', 'RL', 'TB', 'BT'], true)
             || !in_array($this->ReadPropertyString($prefix . 'EdgeShape'), ['curve', 'polyline'], true)
             || $this->ReadPropertyInteger($prefix . 'InitialDepth') < 0
-            || $this->ReadPropertyInteger($prefix . 'InitialDepth') > 6
+            || $this->ReadPropertyInteger($prefix . 'InitialDepth') > TreeHierarchy::MAXIMUM_DEPTH
             || $this->ReadPropertyInteger($prefix . 'NodeSize') < 4
             || $this->ReadPropertyInteger($prefix . 'NodeSize') > 30
             || !$this->AnimationIsValid($prefix)) {

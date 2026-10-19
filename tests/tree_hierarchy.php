@@ -211,4 +211,36 @@ try {
 } catch (InvalidArgumentException) {
 }
 
+$deepObjects = $deepChildren = [];
+for ($level = 0; $level <= 13; ++$level) {
+    $deepObjects[6000 + $level] = ['ObjectType' => $level === 12 || $level === 13 ? 2 : 0,
+        'ObjectName'                            => $level >= 12 ? 'Battery' : 'Level ' . $level, 'ObjectIsHidden' => false];
+    if ($level < 11) {
+        $deepChildren[6000 + $level] = [6001 + $level];
+    }
+}
+$deepChildren[6011] = [6012, 6013];
+$deepObject = static fn (int $id): array => $deepObjects[$id];
+$deepGetChildren = static fn (int $id): array => $deepChildren[$id] ?? [];
+foreach (['', 'battery'] as $filter) {
+    $deepTree = TreeHierarchy::Build(6000, 12, 80, false, $deepObject, $deepGetChildren, $value, $filter);
+    assertTree(
+        $deepTree['count'] === 14 && $deepTree['variableIDs'] === [6012, 6013],
+        'Twelve descendant levels must retain distinct same-name variables and all ancestors.'
+    );
+    $node = $deepTree['root'];
+    for ($level = 0; $level < 12; ++$level) {
+        assertTree($node['id'] === 'object-' . (6000 + $level), 'Deep object identities changed.');
+        $node = $node['children'][0];
+    }
+    assertTree($node['id'] === 'object-6012', 'The twelfth descendant level was not retained.');
+}
+$deepLimited = TreeHierarchy::Build(6000, 12, 10, false, $deepObject, $deepGetChildren, $value);
+assertTree($deepLimited['count'] === 10 && $deepLimited['truncated'], 'Deep trees must retain the node budget.');
+try {
+    TreeHierarchy::Build(6000, 13, 80, false, $deepObject, $deepGetChildren, $value);
+    throw new LogicException('Thirteen descendant levels must remain invalid.');
+} catch (InvalidArgumentException) {
+}
+
 echo "Tree hierarchy verified.\n";

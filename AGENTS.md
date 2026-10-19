@@ -56,6 +56,10 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Gerätemodul `EChartsTree` und ist kein Graph-Modus. Die ausdrückliche
   Zustandsbewertung dieser Hierarchie liegt getrennt in
   `EChartsTreeSystemHealth`; der einfache Tree enthält keine Zustandsregeln.
+  Beide erlauben gemäß ADR 0065 zwölf Nachkommensebenen ab Wurzel 0 bei
+  unveränderten Defaults sowie Knoten-/Suchbudgets. Projektion, SVG-Geometrie
+  und flüchtige Ansichtsverwaltung liegen zentral unter `libs`; Zustandsregeln
+  und deren Bewertung verbleiben ausschließlich bei TreeSystemHealth.
   Frei festgelegte Knoten und Kanten zwischen ausgewählten Symcon-Objekten
   liegen in `EChartsGraph`. Die zuletzt exportierte Zigbee2MQTT-Netzwerktopologie
   liegt im getrennten, nur lesenden Gerätemodul `EChartsGraphZ2M`; es löst keinen

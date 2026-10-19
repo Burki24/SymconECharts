@@ -35,6 +35,7 @@ $tests = [
     __DIR__ . '/heatmap_aggregation.php',
     __DIR__ . '/heatmap_window.php',
     __DIR__ . '/tree_hierarchy.php',
+    __DIR__ . '/tree_preview.php',
     __DIR__ . '/tree_health.php',
     __DIR__ . '/graph_model.php',
     __DIR__ . '/zigbee_graph_model.php',
@@ -50,6 +51,8 @@ $tests = [
 ];
 
 $commands = [
+    ['Test twelve-level Tree integration', 'php tests/gateway_gauges.php --tree-depth'],
+    ['Test twelve-level Tree System Health integration', 'php tests/gateway_gauges.php --tree-health-depth'],
     ['Test deep Treemap hierarchies', 'php tests/gateway_gauges.php --treemap-hierarchy'],
     ['Test deep Sunburst hierarchies', 'php tests/gateway_gauges.php --sunburst-hierarchy'],
     ['Test normalized current comparisons', 'php tests/gateway_gauges.php --current-normalization'],

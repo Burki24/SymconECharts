@@ -29,7 +29,7 @@
                     "name": "MaxDepth",
                     "caption": "Maximum depth",
                     "minimum": 1,
-                    "maximum": 6
+                    "maximum": 12
                 },
                 {
                     "type": "NumberSpinner",
@@ -469,7 +469,7 @@
                             "name": "InitialDepth",
                             "caption": "Initially expanded levels",
                             "minimum": 0,
-                            "maximum": 6
+                            "maximum": 12
                         },
                         {
                             "type": "NumberSpinner",
