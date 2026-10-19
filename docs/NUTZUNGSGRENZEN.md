@@ -22,7 +22,9 @@ Heatmap bieten vier Archivkennzahlen. Pie, BarCategory, BarPolar und
 PictorialBar erlauben jetzt optionale Min/Max-Normalisierung. Treemap und
 Sunburst unterstützen flexible Hierarchien mit bis zu acht Ebenen. Tree und
 TreeSystemHealth erlauben zwölf Nachkommensebenen. EChartsGraph unterstützt
-300 Knoten und 1000 Verbindungen mit gemeinsamer Graph-Ansichtsverwaltung. Die übrigen
+300 Knoten und 1000 Verbindungen mit gemeinsamer Graph-Ansichtsverwaltung.
+TimeSeries bietet 32 Reihen mit Reihenauswahl und bis zu 32000 Gesamtpunkten.
+Die übrigen
 Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
 
 | Reihenfolge | Empfohlener nächster Schritt | Nutzen und Voraussetzung |
@@ -37,6 +39,7 @@ Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
 | Erledigt | Treemap/Sunburst: flexible Hierarchien bis acht Ebenen | Gemeinsames Modell, höchstens sieben Gruppen plus Variablenblatt, native Navigation, vollständige Strukturvorschau und begrenzte Modellgröße. |
 | Erledigt | Tree/TreeSystemHealth: zwölf Nachkommensebenen | Unveränderte Defaults und Knoten-/Suchbudgets, gemeinsame Vorschaugeometrie und native Ansichtserhaltung; ausdrücklicher Health-Bewertungsumfang. |
 | Erledigt | Graph: 300 Knoten und 1000 Verbindungen | ID-stabile Pan-/Zoom-Ansicht, weiterverwendete Kräftepositionen, begrenzter echter Vorschauausschnitt und Ausgabeprüfungen. Z2M-Budgets bleiben getrennt. |
+| Erledigt | TimeSeries: 32 Reihen mit Reihenauswahl | Scrollbare Legende, anfangs sichtbare Reihen, ID-stabile Auswahl/Zoom und höchstens 32000 Gesamtpunkte bei weiterhin höchstens 2000 je Reihe. |
 | Danach | Weitere Archiv- und Vergleichsreihen | Nur zusammen mit Navigation, Vorschaukennzeichnung und messbaren Ressourcenbudgets. |
 
 Normalisierung ist keine allgemeine Lösung für unterschiedliche Einheiten:
@@ -91,7 +94,7 @@ Candlestick-Anfangswert ausgegeben werden.
 
 | Familie | Aktueller Vertrag | Bewertung und sinnvolle Erweiterung |
 | --- | --- | --- |
-| EChartsTimeSeries | 1–8 Integer-/Float-Quellen; insgesamt 200–8000 Punkte, höchstens 2000 je Quelle; bis 32 Annotationen. Roh-/Realtime-/Auto- und feste Aggregationen; unterschiedliche Einheiten und benutzerdefinierte Zeitfenster bereits möglich. | 16–32 Reihen bei unverändertem Gesamtpunktbudget und Reihenfilter prüfen. Keine falsche neue Einheitenbeschränkung einführen; 32 unabhängige Achsen sind keine gute Standardansicht. |
+| EChartsTimeSeries | 1–32 Integer-/Float-Quellen; insgesamt 200–32000 Punkte (Default 2000), höchstens 2000 je Quelle; bis acht effektive Einheitengruppen und 32 Annotationen. Modell höchstens 900000 JSON-Bytes, HTML höchstens 1 MiB. Roh-/Realtime-/Auto- und feste Aggregationen bleiben erhalten. | Umgesetzt: scrollbare Reihenauswahl mit Anfangssichtbarkeit und ID-stabiler Ansicht. Versteckte Reihen bleiben im vollständigen Modell, Archivbudget und Live-Abonnement. Kompression ist verlustfrei; das Bytebudget kann vor dem Punktbudget greifen. |
 | EChartsBarHistory | 1–16 Quellen, insgesamt 200–2000 Punkte; Roh-/Auto-/feste Aggregationen mit verschiedenen Reduktionen. Unterschiedliche Einheiten bereits möglich. | Bis 32 mit Dichte-/Auswahlkonzept. 100 Quellen bei 2000 Gesamtpunkten wären nur etwa 20 Punkte je Quelle und nicht automatisch hilfreicher. Zeitstempel nicht künstlich aufeinander schieben. |
 | EChartsScatter | X und Y, optional eine Größenquelle: genau 2–3 Rollen, keine allgemeine Quellenliste. Gemeinsame abgeschlossene Archivintervalle ohne Interpolation; unterschiedliche Einheiten erlaubt. Insgesamt 200–2000 Punkte über die Rollen verteilt. | Drei ist keine willkürliche Vergleichsobergrenze. Mehrere benannte X/Y-Gruppen benötigen ein Gruppenmodell. Optional feste Min/Max-Grenzen für Bubble-Größen statt allein beobachteter Extrema. |
 | EChartsHeatmap | Eine numerische Quelle; Wochentag × Stunde, feste Zeitfenster von einer Woche bis zwölf Monate/Jahresbeginn. Abgeschlossene Stundenaggregate mit Mittelwert, Minimum, Maximum oder Zählerverbrauch; passende Reduktion je Wochentag/Stunde. | Kennzahlen umgesetzt: Mittel der Stundenmittel, Minimum der Minima, Maximum der Maxima oder Summe der Stundenverbräuche. Benutzerdefinierte Zeiträume/Vergleichspanels bleiben offen. Die einzelne Quelle ist für diesen Feldinhalt schlüssig, nicht einfach 100 Quellen in dieselbe Zelle mischen. |
@@ -156,6 +159,16 @@ größtmögliche Imports und beide Ausgabewege abdecken. Eine Auswahl/Navigation
 darf keine Daten verändern oder unsichtbar aus dem fachlichen Modell entfernen.
 
 ## Nachweise dieses Änderungsschritts und verbleibende Lücken
+
+TimeSeries prüft 32 Reihen mit 32000 Archivpunkten gegen den echten Gateway
+mit Kernel-Doppeln. Modell (590044 Bytes), Kachel (897755 Bytes) und IPSView
+(901043 Bytes) passen im gemessenen Szenario in die festgelegten Budgets.
+Byteguards weisen komplexere übergroße Modelle explizit zurück. Native
+Engine-Tests und eine lokale Canvas-Prüfung belegen ID-stabile Auswahl,
+Legendenanker und Zeitzoom bei Aktualisierung/Umsortierung in beiden
+Ausgabewegen. Große SVG-Muster und versteckte Quellen sind separat geprüft.
+Die neue Live-Abnahme nach Modulupdate bleibt offen; vorhandene
+Konfigurationen und Archive wurden nicht verändert.
 
 PictorialBar hat Regressionen für 72/100 gültige Quellen und 101 abgewiesene
 Quellen, unveränderte Funnel-Grenze, beide Ausgaben unter 1 MiB sowie große

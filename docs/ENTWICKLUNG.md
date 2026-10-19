@@ -21,15 +21,31 @@ IPSView nur den Diagrammtitel benötigt.
 
 ## Aktueller Stand und Zielarchitektur
 
+EChartsTimeSeries unterstützt gemäß
+[ADR 0067](adr/0067-timeseries-more-series-and-selection.md) 32 Quellen und
+200–32000 Gesamtpunkte bei unverändertem Default 2000 und höchstens 2000 je
+Gateway-Anfrage/Reihe. Acht effektive Einheitengruppen bleiben die Grenze.
+ID-stabile Reihenauswahl ist flüchtiger Rendererzustand, keine serverseitige
+Quellenfilterung. Versteckte Reihen bleiben abonniert und im Archivbudget.
+Das Modell ist auf 900000 JSON-Bytes begrenzt; ein zusätzlicher HTML-Guard
+liefert bei Überschreitung von 1 MiB ein begrenztes Fehlerdokument.
+Vorschauen zeichnen vier anfangs sichtbare Reihen, kennzeichnen die Gesamtzahl
+und vereinfachen zu große SVG-Muster ausschließlich mit sichtbarem Hinweis.
+
 EChartsGraph unterstützt gemäß [ADR 0066](adr/0066-larger-manual-graphs.md)
 300 Knoten und 1000 ungerichtete Kanten. Die bestehenden Quellen-/Kantenregeln
 bleiben in GraphModel, Z2M-Projektion und Exportbudgets bleiben getrennt.
 `echarts-graph.js` zentralisiert ausschließlich native Ansichtserhaltung,
 Tooltip- und Beschriftungsgrundlagen sowie den geschützten Kachelkopf.
 Das Script wird nur in den beiden Graph-Familien eingebettet.
-`EChartsGraphOutput` verpackt große HTML-sichere Startzustände verlustfrei
-komprimiert; die gemeinsame JavaScript-Startlogik verwirft veraltete
-Entpackergebnisse nach neueren Live-Nachrichten. Kleine Zustände bleiben direkt.
+`EChartsStartupState` und `echarts-startup.js` verpacken große HTML-sichere
+Startzustände oberhalb von 200000 Bytes verlustfrei komprimiert und entpacken
+sie abbrechbar. TimeSeries und die Graph-Familien verwenden diese gemeinsame
+Logik; `EChartsGraphOutput` bleibt kompatibler Adapter. Kleine Zustände bleiben
+direkt. Neuere Vollzustände und Unload verwerfen veraltete Entpackergebnisse;
+TimeSeries sammelt währenddessen höchstens 32000 Append-Punkte und spielt sie
+nach dem Start gebündelt ein. Numeric-Typen einschließlich Float-Null bleiben
+bei der JSON-Serialisierung erhalten.
 
 Tree und danach TreeSystemHealth unterstützen gemäß
 [ADR 0065](adr/0065-twelve-level-object-trees.md) zwölf Nachkommensebenen.
@@ -168,7 +184,7 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 | Gerät | EChartsGaugeMulti | Ein zusammengesetzter Gauge-Chart mit 2 bis 16 Quellen |
 | Gerät | EChartsGaugeTacho | Tacho-Cockpit mit 2 bis 5 individuell gestaltbaren Instrumenten |
 | Gerät | EChartsGaugeChronograph | Chronograph mit 2 bis 5 individuell gestaltbaren Instrumenten |
-| Gerät | EChartsTimeSeries | Historische und live fortgeschriebene Linien und Flächen für 1 bis 8 Quellen, bis zu acht links/rechts angeordnete Einheitengruppen sowie getrenntes Kachel- und IPSView-Design |
+| Gerät | EChartsTimeSeries | Historische und live fortgeschriebene Linien und Flächen für 1 bis 32 Quellen, Reihenauswahl, bis zu acht links/rechts angeordnete Einheitengruppen sowie getrenntes Kachel- und IPSView-Design |
 | Gerät | EChartsBarCategory | Aktuelle einfache, gruppierte oder gestapelte Kategorienvergleiche für 1 bis 100 Quellen mit gemeinsamer Einheit, Kategoriennavigation, optionalem Min-/Max-Farbverlauf und getrenntem Kachel- und IPSView-Design |
 | Gerät | EChartsBarHistory | Historische rohe oder aggregierte Balken von 1 bis 16 Archivquellen auf einer Zeitachse in einer nativen Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsBarWaterfall | Aktueller Startwert mit 1 bis 15 signierten Änderungen und berechneter Endsumme in Kachel und optionalem IPSView-HTML |

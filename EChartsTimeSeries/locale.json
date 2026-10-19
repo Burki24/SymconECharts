@@ -1,6 +1,15 @@
 {
     "translations": {
         "de": {
+            "Initially visible": "Anfangs sichtbar",
+            "Configure 1–32 unique numeric sources. The total point budget is shared by all sources, including initially hidden rows.": "1–32 eindeutige numerische Quellen konfigurieren. Das Gesamtpunktbudget wird auf alle Quellen verteilt, auch anfangs ausgeblendete Reihen.",
+            "Large SVG patterns are simplified in the preview.": "Große SVG-Muster werden in der Vorschau vereinfacht dargestellt.",
+            "All": "Alle",
+            "Invert": "Umkehren",
+            "The time series model is too large. Reduce the point budget or simplify source patterns.": "Das Zeitreihenmodell ist zu groß. Punktbudget reduzieren oder Quellenmuster vereinfachen.",
+            "Configure 1 to 32 unique numeric sources.": "1 bis 32 eindeutige numerische Quellen konfigurieren.",
+            "Configure between 1 and 32 time series sources.": "Zwischen 1 und 32 Zeitreihenquellen konfigurieren.",
+            "Configure no more than 8 time series unit groups.": "Höchstens 8 Zeitreihen-Einheitengruppen konfigurieren.",
             "Value font size": "Schriftgröße der Werte",
             "Value color": "Wertfarbe",
             "Value label position": "Position der Wertbeschriftung",

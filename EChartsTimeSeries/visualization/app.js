@@ -11,6 +11,51 @@
     var currentTheme = null;
     var zoomController = window.SymconEChartsZoom;
     var areaPatterns = window.SymconEChartsPattern.create(schedulePatternRender);
+    var selectedSeries = Object.create(null);
+    var initialSelection = Object.create(null);
+    var legendAnchor = null;
+    var previousSeriesIDs = [];
+    var startupPending = Boolean(bootstrap.options && bootstrap.options.compressedStateGzipBase64);
+    var pendingAppends = [];
+    // Startup queues share the maximum accepted model point budget, not an unbounded history.
+    var maximumPendingAppends = 32000;
+
+    function escapeHTML(value) {
+        return String(value == null ? '' : value).replace(/[&<>"']/g, function (character) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character];
+        });
+    }
+
+    function captureSelection() {
+        if (!chart || typeof chart.getOption !== 'function') { return; }
+        var option = chart.getOption();
+        var legend = option && (Array.isArray(option.legend) ? option.legend[0] : option.legend);
+        if (!legend) { return; }
+        previousSeriesIDs.forEach(function (id) {
+            if (legend.selected && typeof legend.selected[id] === 'boolean') {
+                selectedSeries[id] = legend.selected[id];
+            }
+        });
+        var pageIndex = Number(legend.scrollDataIndex);
+        if (Number.isInteger(pageIndex) && pageIndex >= 0 && pageIndex < previousSeriesIDs.length) {
+            legendAnchor = previousSeriesIDs[pageIndex];
+        }
+    }
+
+    function reconcileSelection(series) {
+        var nextSelected = Object.create(null);
+        var nextInitial = Object.create(null);
+        series.forEach(function (item) {
+            var initiallyVisible = item.initiallyVisible !== false;
+            nextInitial[item.id] = initiallyVisible;
+            nextSelected[item.id] = Object.prototype.hasOwnProperty.call(selectedSeries, item.id)
+                && initialSelection[item.id] === initiallyVisible
+                ? selectedSeries[item.id] : initiallyVisible;
+        });
+        selectedSeries = nextSelected;
+        initialSelection = nextInitial;
+        previousSeriesIDs = series.map(function (item) { return item.id; });
+    }
 
     function translate(text) {
         return (bootstrap.translations || {})[text] || text;
@@ -140,6 +185,11 @@
         var colors = colorsFor(theme);
         var axes = Array.isArray(model.axes) ? model.axes : [];
         var series = Array.isArray(model.series) ? model.series : [];
+        reconcileSelection(series);
+        var activeAxes = axes.map(function (_, index) {
+            return series.some(function (item) { return item.axisIndex === index && selectedSeries[item.id]; });
+        });
+        var firstActiveAxis = activeAxes.indexOf(true);
         var annotations = Array.isArray(model.annotations) ? model.annotations : [];
         var seriesPalette = Array.isArray(colors.seriesColors) && colors.seriesColors.length > 0
             ? colors.seriesColors : [colors.accent || colors.border];
@@ -147,7 +197,9 @@
             return item.color || seriesPalette[index % seriesPalette.length];
         });
         var axisColors = axes.map(function (axis, axisIndex) {
-            var seriesIndex = series.findIndex(function (item) { return item.axisIndex === axisIndex; });
+            var seriesIndex = series.findIndex(function (item) {
+                return item.axisIndex === axisIndex && selectedSeries[item.id];
+            });
             return seriesIndex >= 0 ? seriesColors[seriesIndex] : colors.border;
         });
         var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 10;
@@ -192,9 +244,8 @@
         var normalizedAxes = axes.map(function (axis, index) {
             var position = axis.position === 'left' || axis.position === 'right'
                 ? axis.position : (index === 0 ? 'left' : 'right');
-            var positionIndex = Number.isInteger(axis.positionIndex) && axis.positionIndex >= 0
-                ? axis.positionIndex : axisCounts[position];
-            axisCounts[position] = Math.max(axisCounts[position], positionIndex + 1);
+            var positionIndex = axisCounts[position];
+            if (activeAxes[index]) { axisCounts[position] += 1; }
             return { axis: axis, position: position, positionIndex: positionIndex };
         });
         var chartWidth = Math.max(320, Number(chartElement.clientWidth) || 750);
@@ -231,9 +282,29 @@
             },
             legend: {
                 show: showLegend,
+                type: 'scroll',
+                left: 12,
+                right: 12,
+                selected: Object.assign({}, selectedSeries),
+                scrollDataIndex: Math.max(0, previousSeriesIDs.indexOf(legendAnchor)),
+                selector: series.length > 1 ? [
+                    { type: 'all', title: translate('All') },
+                    { type: 'inverse', title: translate('Invert') }
+                ] : [],
+                selectorLabel: { color: legendColor, fontSize: legendFontSize },
+                pageTextStyle: { color: legendColor },
+                pageIconColor: legendColor,
+                pageIconInactiveColor: colors.muted,
+                tooltip: { show: true, confine: true, formatter: function (parameters) {
+                    var item = series.find(function (entry) { return entry.id === parameters.name; });
+                    return item ? escapeHTML(item.label) + (item.unit ? ' (' + escapeHTML(item.unit) + ')' : '') : '';
+                } },
                 top: legendPosition === 'top' ? headerInset + (titleVisible ? titleBlock : 4) : null,
                 bottom: bottomLegend ? 6 : null,
-                textStyle: { color: legendColor, ...(legendFontOverride ? { fontSize: legendFontSize } : {}) },
+                textStyle: {
+                    color: legendColor, width: Math.max(40, Math.min(220, chartWidth * 0.32)),
+                    overflow: 'truncate', ...(legendFontOverride ? { fontSize: legendFontSize } : {})
+                },
                 data: series.map(function (item) { return item.id; }),
                 formatter: function (name) {
                     var source = series.find(function (item) { return item.id === name; });
@@ -243,12 +314,15 @@
             grid: { left: leftMargin, right: rightMargin, top: gridTop, bottom: gridBottom },
             tooltip: {
                 trigger: 'axis',
+                confine: true,
+                extraCssText: 'max-width:calc(100vw - 24px);max-height:70vh;overflow:auto;white-space:normal;overflow-wrap:anywhere;',
                 axisPointer: { type: 'cross' },
                 formatter: function (parameters) {
                     if (!Array.isArray(parameters) || parameters.length === 0) { return ''; }
-                    var heading = parameters[0].axisValueLabel || '';
+                    var heading = escapeHTML(parameters[0].axisValueLabel || '');
                     return [heading].concat(parameters.map(function (parameter) {
-                        var item = series[parameter.seriesIndex] || {};
+                        var item = series.find(function (entry) { return entry.id === parameter.seriesId; })
+                            || series[parameter.seriesIndex] || {};
                         var value = Array.isArray(parameter.value) ? Number(parameter.value[1]) : Number(parameter.value);
                         var decimals = Math.max(0, Math.min(6, Number(item.decimals) || 0));
                         var formatted = Number.isFinite(value)
@@ -257,8 +331,8 @@
                                 maximumFractionDigits: decimals
                             })
                             : '–';
-                        return parameter.marker + String(item.label || parameter.seriesName || '') + ': '
-                            + formatted + (item.unit ? ' ' + item.unit : '');
+                        return (parameter.marker || '') + escapeHTML(item.label || parameter.seriesName || '') + ': '
+                            + escapeHTML(formatted) + (item.unit ? ' ' + escapeHTML(item.unit) : '');
                     })).join('<br>');
                 }
             },
@@ -280,26 +354,28 @@
             yAxis: normalizedAxes.map(function (entry, index) {
                 var axis = entry.axis;
                 var axisColor = configuredAxisColor || axisColors[index] || colors.border;
+                var showAxis = design.showYAxis !== false && activeAxes[index];
                 var valueAxis = {
+                    show: activeAxes[index],
                     type: 'value',
                     scale: true,
                     boundaryGap: ['5%', '5%'],
-                    name: design.showYAxis !== false ? axis.unit || '' : '',
+                    name: showAxis ? axis.unit || '' : '',
                     position: entry.position,
                     offset: entry.positionIndex * axisOffsetStep,
-                    axisLine: { show: design.showYAxis !== false, lineStyle: { color: axisColor } },
+                    axisLine: { show: showAxis, lineStyle: { color: axisColor } },
                     axisTick: {
-                        show: design.showYAxis !== false,
+                        show: showAxis,
                         lineStyle: { color: axisColor }
                     },
                     axisLabel: {
-                        show: design.showYAxis !== false,
+                        show: showAxis,
                         color: axisColor,
                         ...(axisFontOverride ? { fontSize: axisFontSize } : {}),
                         formatter: '{value}' + (axis.unit ? ' ' + axis.unit : '')
                     },
                     splitLine: {
-                        show: index === 0 && design.showGrid !== false,
+                        show: index === firstActiveAxis && design.showGrid !== false,
                         lineStyle: { color: gridColor, opacity: configuredGridColor ? 1 : 0.35 }
                     },
                     nameTextStyle: { color: axisColor, ...(axisFontOverride ? { fontSize: axisFontSize } : {}) }
@@ -462,6 +538,7 @@
         var previousRange = currentState && currentState.chart && currentState.chart.range;
         var nextRange = state && state.chart && state.chart.range;
         var savedZoom = zoomController.capture(chart, previousRange, nextRange);
+        captureSelection();
         currentState = state;
         if (!state || state.status !== 'ready' || !state.chart) {
             displayError(state && state.error);
@@ -485,13 +562,18 @@
         if (!chart) {
             chart = window.echarts.init(chartElement, theme === 'auto' ? null : theme, { renderer: 'canvas' });
             currentTheme = theme;
+            if (typeof chart.on === 'function') {
+                ['legendselectchanged', 'legendselectall', 'legendinverseselect'].forEach(function (eventName) {
+                    chart.on(eventName, function () { if (currentState) { render(currentState); } });
+                });
+            }
         }
         warningElement.textContent = translate('The selected raw range was truncated by the point budget.');
         warningElement.hidden = !state.chart.truncated;
         zoomController.apply(chart, buildOption(state.chart, theme), savedZoom);
     }
 
-    function appendPoint(message) {
+    function appendPoint(message, updateView) {
         if (!currentState || currentState.status !== 'ready' || !currentState.chart) { return; }
         var model = currentState.chart;
         if (model.range.acceptLiveUpdates === false) { return; }
@@ -516,7 +598,7 @@
             model.range.startTimestamp = cutoff;
         }
         model.range.endTimestamp = message.timestamp;
-        render(currentState);
+        if (updateView !== false) { render(currentState); }
     }
 
     window.handleMessage = function (message) {
@@ -529,10 +611,20 @@
             }
         }
         if (value && value.messageType === 'append') {
+            if (startupPending) {
+                pendingAppends.push(value);
+                if (pendingAppends.length > maximumPendingAppends) { pendingAppends.shift(); }
+                return;
+            }
             appendPoint(value);
         } else {
             var state = echartsDesign.parseVisualizationState(value);
-            if (state) { render(state); }
+            if (state) {
+                if (cancelStartup) { cancelStartup(); }
+                startupPending = false;
+                pendingAppends = [];
+                render(state);
+            }
         }
     };
 
@@ -542,6 +634,7 @@
             if (currentState && currentState.status === 'ready' && currentState.chart) {
                 var range = currentState.chart.range;
                 var savedZoom = zoomController.capture(chart, range, range);
+                captureSelection();
                 zoomController.apply(chart, buildOption(currentState.chart, currentTheme), savedZoom);
             }
         }).observe(chartElement);
@@ -555,6 +648,23 @@
                 && currentState.chart.chart.enableZoom === true;
         });
     }
-    window.addEventListener('beforeunload', function () { if (chart) { chart.dispose(); } });
-    render(currentState);
+    window.addEventListener('beforeunload', function () {
+        if (cancelStartup) { cancelStartup(); }
+        startupPending = false;
+        pendingAppends = [];
+        if (chart) { chart.dispose(); }
+    });
+    var cancelStartup = window.SYMC_ECHARTS_STARTUP(bootstrap, function (state) {
+        startupPending = false;
+        render(state);
+        if (pendingAppends.length > 0) {
+            pendingAppends.forEach(function (message) { appendPoint(message, false); });
+            pendingAppends = [];
+            render(currentState);
+        }
+    }, function () {
+        startupPending = false;
+        pendingAppends = [];
+        displayError('The time series could not be loaded.');
+    });
 }());

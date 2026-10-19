@@ -4,6 +4,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
+const zlib = require('node:zlib');
 
 const source = fs.readFileSync(
     path.join(__dirname, '..', 'EChartsTimeSeries', 'visualization', 'app.js'),
@@ -12,6 +13,7 @@ const source = fs.readFileSync(
 const designSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-design.js'), 'utf8');
 const zoomSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-zoom.js'), 'utf8');
 const patternSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-pattern.js'), 'utf8');
+const startupSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-startup.js'), 'utf8');
 const palette = {
     background: '#202020', text: '#ffffff', muted: '#aaaaaa', border: '#cccccc', track: '#444444',
     accent: '#55cbb5', seriesColors: ['#111111', '#222222', '#333333']
@@ -30,9 +32,12 @@ function render(
     timeAxisLabelFormat = 'auto',
     range,
     observeResize = false,
-    height = 400
+    height = 400,
+    actualChart = null,
+    deferredStartup = false
 ) {
     const listeners = {};
+    const chartListeners = {};
     const scheduled = [];
     const chartElement = {
         hidden: false,
@@ -51,7 +56,10 @@ function render(
     let resized = 0;
     let chartWidth = width;
     let chartHeight = chartElement.clientHeight;
-    const chart = {
+    let resolveStartup;
+    let startupJSON;
+    const windowListeners = {};
+    const chart = actualChart || {
         setOption: next => { option = next; setOptionCalls += 1; },
         getWidth: () => chartWidth,
         getHeight: () => chartHeight,
@@ -65,6 +73,14 @@ function render(
         },
         dispose: () => {}
     };
+    const nativeSetOption = actualChart && actualChart.setOption.bind(actualChart);
+    if (nativeSetOption) {
+        chart.setOption = (next, ...args) => { option = next; setOptionCalls++; nativeSetOption(next, ...args); };
+        const nativeResize = chart.resize.bind(chart);
+        chart.resize = () => { resized++; nativeResize({ width: chartElement.clientWidth, height: chartElement.clientHeight }); };
+    } else {
+        chart.on = (event, callback) => { chartListeners[event] = callback; };
+    }
     function TestImage() {
         this.onload = null;
         this.onerror = null;
@@ -128,8 +144,20 @@ function render(
             color: resolvedColors[probe.variable] || probe.fallback || ''
         }),
         setTimeout: callback => { scheduled.push(callback); },
-        addEventListener: () => {}
+        addEventListener: (event, callback) => { windowListeners[event] = callback; }
     };
+    if (deferredStartup) {
+        startupJSON = JSON.stringify(window.SYMC_VISUALIZATION.state);
+        window.SYMC_VISUALIZATION.options.compressedStateGzipBase64 = zlib.gzipSync(startupJSON).toString('base64');
+        window.SYMC_VISUALIZATION.state = null;
+        window.atob = value => Buffer.from(value, 'base64').toString('binary');
+        window.Blob = class { constructor(parts) { this.bytes = parts[0]; }
+            stream() { return { pipeThrough: () => this.bytes }; } };
+        window.DecompressionStream = class { constructor(format) { assert.equal(format, 'gzip'); } };
+        window.Response = class { constructor(bytes) {
+            startupJSON = zlib.gunzipSync(Buffer.from(bytes)).toString('utf8');
+        } text() { return new Promise(resolve => { resolveStartup = resolve; }); } };
+    }
     const document = {
         documentElement: { classList: { contains: () => false } },
         body: { appendChild: () => {} },
@@ -169,11 +197,18 @@ function render(
     vm.runInNewContext(designSource, context);
     vm.runInNewContext(zoomSource, context);
     vm.runInNewContext(patternSource, context);
+    vm.runInNewContext(startupSource, context);
     vm.runInNewContext(source, context);
     while (scheduled.length > 0) { scheduled.shift()(); }
-    assert.ok(option, 'The time-series chart should be rendered.');
-    Object.defineProperties(option, {
+    if (!deferredStartup) { assert.ok(option, 'The time-series chart should be rendered.'); }
+    const result = option || {};
+    Object.defineProperties(result, {
         testListeners: { value: listeners },
+        chartListeners: { value: chartListeners },
+        testChart: { value: chart },
+        finishStartup: { value: async () => { resolveStartup(startupJSON); await Promise.resolve(); await Promise.resolve(); } },
+        unload: { value: () => windowListeners.beforeunload() },
+        startupState: { value: () => JSON.parse(startupJSON) },
         getDispatchedAction: { value: () => dispatchedAction },
         getSetOptionCalls: { value: () => setOptionCalls },
         resizeTest: { value: observeResize ? {
@@ -187,7 +222,7 @@ function render(
         getLatestOption: { value: () => option },
         getRecoveryView: { value: () => ({ chartElement, warningElement, errorElement, clearCount }) }
     });
-    return option;
+    return result;
 }
 
 const timeSeriesResize = render(undefined, undefined, 750, undefined, 'dark', {},
@@ -423,7 +458,10 @@ const positioned = render(undefined, [
     { unit: 'm/s', position: 'right', positionIndex: 1 },
     { unit: 'W/m²', position: 'left', positionIndex: 2 },
     { unit: 'mm', position: 'right', positionIndex: 2 }
-], 600);
+], 600, Array.from({ length: 6 }, (_, index) => ({
+    id: 'axis-source-' + index, axisIndex: index, label: 'Axis ' + index,
+    unit: '', points: [[1000, index]], style: 'line'
+})));
 assert.deepEqual(
     Array.from(positioned.yAxis, axis => axis.position),
     ['left', 'right', 'left', 'right', 'left', 'right']
@@ -630,4 +668,125 @@ const completedSetOptionCalls = completedCalendar.getSetOptionCalls();
 completedCalendar.handleMessage({ messageType: 'append', variableID: 4711, timestamp: 2100, value: 21 });
 assert.equal(completedCalendar.getSetOptionCalls(), completedSetOptionCalls);
 
-process.stdout.write('Time Series tile design layout verified.\n');
+const manySources = Array.from({ length: 32 }, (_, index) => ({
+    id: 'variable-' + (10000 + index), variableID: 10000 + index,
+    label: index < 2 ? 'Same label' : 'Synthetic sensor ' + (index + 1),
+    axisIndex: index % 2, decimals: 1, unit: index % 2 ? '%' : '°C',
+    initiallyVisible: index < 8, style: 'line', points: [[1000, index], [2000, index + 1]]
+}));
+const largeSelection = render(undefined, [{ unit: '°C' }, { unit: '%' }], 400, manySources);
+assert.equal(largeSelection.legend.type, 'scroll', 'Many rows need bounded native legend navigation.');
+assert.equal(largeSelection.legend.selected['variable-10000'], true);
+assert.equal(largeSelection.legend.selected['variable-10008'], false,
+    'Initially hidden rows must retain all their points but start unselected.');
+assert.equal(largeSelection.series.length, 32);
+assert.equal(largeSelection.series[8].data.length, 2);
+assert.ok(largeSelection.legend.selector.length > 0);
+
+const escapedTooltip = render(undefined, [{ unit: '°C' }], 750, [{
+    id: 'variable-10000', label: '<img src=x onerror=alert(1)>', axisIndex: 0,
+    unit: '<unit>', decimals: 1, style: 'line', points: [[1000, 20]]
+}]).tooltip.formatter([{ seriesIndex: 0, axisValueLabel: '<time>', marker: '', value: [1000000, 20] }]);
+assert.equal(escapedTooltip.includes('<img'), false);
+assert.ok(escapedTooltip.includes('&lt;unit&gt;'));
+
+largeSelection.legend.selected['variable-10000'] = false;
+largeSelection.legend.scrollDataIndex = 10;
+largeSelection.dataZoom[0].start = 20;
+largeSelection.dataZoom[0].end = 70;
+const largeState = largeSelection.getState();
+largeSelection.handleMessage({ status: 'ready', chart: { ...largeState.chart,
+    series: [...manySources].reverse() } });
+let largeUpdated = largeSelection.getLatestOption();
+assert.equal(largeUpdated.legend.selected['variable-10000'], false,
+    'Independent selection of equally named source IDs must survive refresh/reorder.');
+assert.equal(largeUpdated.legend.selected['variable-10001'], true);
+assert.equal(largeUpdated.legend.scrollDataIndex, 21, 'Legend navigation must track its source ID on reorder.');
+assert.equal(largeUpdated.dataZoom[0].start, 20);
+largeSelection.handleMessage({ status: 'ready', chart: { ...largeState.chart,
+    series: manySources.map(item => item.id === 'variable-10000' ? { ...item, initiallyVisible: false } : item) } });
+largeSelection.handleMessage({ status: 'ready', chart: { ...largeState.chart,
+    series: manySources.map(item => item.id === 'variable-10000' ? { ...item, initiallyVisible: true } : item) } });
+assert.equal(largeSelection.getLatestOption().legend.selected['variable-10000'], true,
+    'An explicit changed initial visibility must apply only to its own source.');
+
+const echarts = require(path.join(__dirname, '..', '.tools', 'echarts-runtime', 'node_modules', 'echarts'));
+for (const mode of ['symcon', 'ipsview']) {
+    const native = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 420, height: 520 });
+    const stressSources = manySources.map(item => ({ ...item,
+        points: Array.from({ length: 1000 }, (_, index) => [1000 + index, Number((20 + Math.sin(index)).toFixed(2))])
+    }));
+    const test = render({ legendPosition: 'bottom' }, [{ unit: '°C' }, { unit: '%' }],
+        420, stressSources, 'dark', {}, mode, false, false, 'auto',
+        { key: 'day', startTimestamp: 1000, endTimestamp: 2000 }, true, 520, native);
+    function option() { return native.getOption(); }
+    assert.equal(option().series.length, 32);
+    assert.equal(option().series.reduce((sum, item) => sum + item.data.length, 0), 32000,
+        'The native engine must retain the complete increased point budget, including hidden rows.');
+    assert.equal(option().legend[0].type, 'scroll');
+    native.dispatchAction({ type: 'legendUnSelect', name: 'variable-10000' });
+    native.dispatchAction({ type: 'legendScroll', scrollDataIndex: 12 });
+    native.dispatchAction({ type: 'dataZoom', dataZoomIndex: 0, start: 20, end: 80 });
+    const state = test.getState();
+    test.handleMessage({ status: 'ready', chart: { ...state.chart,
+        series: [...stressSources].reverse().filter(item => item.id !== 'variable-10002') } });
+    assert.equal(option().legend[0].selected['variable-10000'], false);
+    assert.equal(option().legend[0].selected['variable-10001'], true);
+    assert.equal(option().legend[0].scrollDataIndex, 19);
+    assert.equal(option().dataZoom[0].start, 20);
+    test.resizeTest.resizeWidth(600);
+    assert.equal(option().legend[0].selected['variable-10000'], false);
+    assert.equal(option().dataZoom[0].start, 20);
+    native.dispatchAction({ type: 'legendAllSelect' });
+    assert.ok(Object.values(option().legend[0].selected).every(Boolean));
+    native.dispatchAction({ type: 'legendInverseSelect' });
+    assert.ok(Object.values(option().legend[0].selected).every(value => value === false));
+    assert.ok(option().yAxis.every(axis => axis.show === false), 'All-unselected native view must hide unused axes.');
+    assert.equal(option().series.length, 31, 'Selection must not remove stored source data.');
+    assert.ok(option().series.every(item => item.data.length === 1000));
+    native.dispatchAction({ type: 'legendToggleSelect', name: 'variable-10001' });
+    assert.equal(option().yAxis[0].show, false);
+    assert.equal(option().yAxis[1].show, true);
+    assert.equal(option().yAxis[1].splitLine.show, true);
+    assert.equal(option().dataZoom[0].start, 20);
+    assert.match(native.renderToSVGString(), /<svg/);
+    assert.doesNotMatch(native.renderToSVGString(), /NaN/);
+    native.dispose();
+}
+
+async function verifyCompressedStartup() {
+    function compressed() { return render(undefined, [{ unit: '°C' }], 400, [{
+        id: 'variable-10000', variableID: 10000, label: 'Synthetic', axisIndex: 0,
+        style: 'line', points: [[1000, 20]]
+    }], 'dark', {}, 'symcon', false, false, 'auto', {
+        key: 'hour', startTimestamp: 0, endTimestamp: 1000, durationSeconds: 3600,
+        acceptLiveUpdates: true, pointLimitPerSeries: 2
+    }, false, 520, null, true); }
+    const delayed = compressed();
+    delayed.handleMessage({ messageType: 'append', variableID: 10000, timestamp: 1100, value: 21 });
+    await delayed.finishStartup();
+    assert.equal(JSON.stringify(delayed.getLatestOption().series[0].data), '[[1000000,20],[1100000,21]]',
+        'Live points received during decompression must apply after the initial archive state.');
+    const superseded = compressed();
+    const newer = superseded.startupState();
+    newer.chart.series[0].points = [[1200, 25]];
+    superseded.handleMessage(newer);
+    await superseded.finishStartup();
+    assert.equal(JSON.stringify(superseded.getLatestOption().series[0].data), '[[1200000,25]]',
+        'An older decompressed state must not overwrite a newer complete live state.');
+    const unloaded = compressed();
+    unloaded.unload();
+    await unloaded.finishStartup();
+    assert.equal(unloaded.getSetOptionCalls(), 0, 'A cancelled document must not initialize after decompression.');
+    const bounded = compressed();
+    for (let index = 0; index < 32005; index++) {
+        bounded.handleMessage({ messageType: 'append', variableID: 10000, timestamp: 1100 + index, value: index });
+    }
+    await bounded.finishStartup();
+    assert.equal(bounded.getLatestOption().series[0].data.length, 2);
+    assert.equal(bounded.getLatestOption().series[0].data[1][1], 32004);
+    assert.equal(bounded.getSetOptionCalls(), 2,
+        'Queued live points must be folded once, not trigger thousands of expensive chart renders.');
+}
+verifyCompressedStartup().then(() => process.stdout.write('Time Series tile design layout verified.\n'))
+    .catch(error => { console.error(error); process.exitCode = 1; });

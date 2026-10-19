@@ -20,6 +20,15 @@
             "changeOrder": true,
             "columns": [
                 {
+                    "caption": "Initially visible",
+                    "name": "InitiallyVisible",
+                    "width": "120px",
+                    "add": true,
+                    "edit": {
+                        "type": "CheckBox"
+                    }
+                },
+                {
                     "caption": "Variable",
                     "name": "VariableID",
                     "width": "230px",
@@ -155,6 +164,10 @@
                     }
                 }
             ]
+        },
+        {
+            "type": "Label",
+            "caption": "Configure 1–32 unique numeric sources. The total point budget is shared by all sources, including initially hidden rows."
         },
         {
             "type": "Label",
@@ -402,7 +415,7 @@
                     "name": "PointBudget",
                     "caption": "Total point budget",
                     "minimum": 200,
-                    "maximum": 8000,
+                    "maximum": 32000,
                     "width": "170px"
                 },
                 {

@@ -8,7 +8,8 @@ const vm = require('node:vm');
 const source = fs.readFileSync(path.join(__dirname, '..', 'EChartsGraphZ2M', 'visualization', 'app.js'), 'utf8');
 const stylesheet = fs.readFileSync(path.join(__dirname, '..', 'EChartsGraphZ2M', 'visualization', 'style.css'), 'utf8');
 const designSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-design.js'), 'utf8');
-const graphSupportSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-graph.js'), 'utf8');
+const graphSupportSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-startup.js'), 'utf8') + '\n'
+    + fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-graph.js'), 'utf8');
 const palette = {
     background: '#101114', text: '#f4f5f7', muted: '#969aa2',
     accent: '#55cbb5', seriesColors: ['#5070dd']

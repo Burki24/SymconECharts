@@ -52,6 +52,7 @@ $tests = [
 ];
 
 $commands = [
+    ['Test 32-source TimeSeries integration', 'php tests/gateway_gauges.php --time-series-many'],
     ['Test 300-node Graph integration', 'php tests/gateway_gauges.php --graph-large'],
     ['Test twelve-level Tree integration', 'php tests/gateway_gauges.php --tree-depth'],
     ['Test twelve-level Tree System Health integration', 'php tests/gateway_gauges.php --tree-health-depth'],

@@ -14,6 +14,13 @@ function assertArchiveWindow(bool $condition, string $message): void
 }
 
 $zone = 'Europe/Berlin';
+foreach ([1, 8, 16, 32] as $sourceCount) {
+    $expanded = EChartsArchiveQuery::Resolve('24h', 1, 'day', 'raw', 32000, $sourceCount, 1792404000, 'Europe/Berlin');
+    assertArchiveWindow(
+        $expanded['Limit'] <= 2000 && $expanded['Limit'] * $sourceCount <= 32000,
+        'Expanded Time Series totals must never raise the per-request Gateway limit.'
+    );
+}
 $now = strtotime('2026-10-19T12:34:56+02:00');
 $hour = EChartsArchiveQuery::CompletedIntervals('custom', 90, 'minute', 'hour', $now, $zone);
 assertArchiveWindow(

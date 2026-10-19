@@ -39,7 +39,8 @@ function page(mode, layout, zigbee) {
         VISUALIZATION_THEME: ':root{--symc-background:#303236;--symc-text:#f4f5f7;--symc-text-muted:#969aa2}',
         MODULE_STYLE: read(module + '/visualization/style.css'), IPSVIEW_STYLE: '',
         ECHARTS_SCRIPT: read('libs/echarts/6.1.0/echarts.graph.min.js'), ECHARTS_THEME_SCRIPT: '',
-        ECHARTS_DESIGN_SCRIPT: read('libs/echarts-design.js') + '\n' + read('libs/echarts-graph.js'),
+        ECHARTS_DESIGN_SCRIPT: read('libs/echarts-design.js') + '\n' + read('libs/echarts-startup.js')
+            + '\n' + read('libs/echarts-graph.js'),
         BOOTSTRAP_JSON: JSON.stringify(bootstrap), MODULE_SCRIPT: read(module + '/visualization/app.js'),
         IPSVIEW_TRANSPORT_SCRIPT: '' };
     let html = read(module + '/visualization/index.html').replace(/\{\{([A-Z_]+)\}\}/g, (_, key) => replacements[key] ?? '');

@@ -8,20 +8,22 @@ Die Optionen gelten für Kacheln und – bei unabhängigem Design – auch für
 IPSView. Bei geerbtem Design folgt IPSView den Kacheleinstellungen.
 
 Gerätemodul für historische numerische Symcon-Werte als responsive Apache-
-ECharts-Zeitreihe. Eine Instanz verarbeitet eine bis acht eindeutige Quellen,
+ECharts-Zeitreihe. Eine Instanz verarbeitet eine bis 32 eindeutige Quellen,
 bis zu acht Einheitengruppen und rendert eine native Symcon-Kachel sowie
 optional ein eigenständiges IPSView-WebContent-Widget.
 
 Linien und Datenpunkte, Flächen und Achsen sowie Schrift und Farben sind in
 beiden Designern als eigene einklappbare Bereiche angeordnet; die Vorschau
 folgt darunter.
-Die schematische Vorschau zeigt bis zu vier Reihen und deren effektive
+Die schematische Vorschau zeigt bis zu vier anfänglich sichtbare Reihen und deren effektive
 Einheitenachsen auf der konfigurierten Seite. Die Achsen übernehmen automatisch
 die Farbe der ersten zugeordneten Reihe oder die ausdrücklich gewählte
 Achsenfarbe. Archivwerte und numerische Skalen bleiben der echten Kachel
 beziehungsweise dem IPSView-Widget vorbehalten.
 Bei mehr als vier Quellen nennt die Vorschau die angezeigte und gesamte Anzahl;
-Kachel und Widget nutzen weiterhin alle konfigurierten Reihen.
+Kachel und Widget nutzen weiterhin alle konfigurierten Reihen. Große SVG-Muster
+werden nur in der Vorschau mit sichtbarem Hinweis durch einfache Farbflächen
+ersetzt; das Live-Diagramm verwendet das vollständige Original.
 
 ## Vorübergehende Ladefehler
 
@@ -44,7 +46,7 @@ Im Kachel- und unabhängigen IPSView-Designer steuern **Animation**, **Startanim
 
 - IP-Symcon 9.0 oder 9.1 mit PHP 8.5;
 - eine aktive [EChartsGateway-Instanz](../EChartsGateway/README.md);
-- eine bis acht Integer- oder Float-Variablen;
+- eine bis 32 Integer- oder Float-Variablen;
 - eine Symcon-Archivinstanz für historische Modi; der Echtzeitmodus benötigt
   kein aktiviertes Logging;
 - IPSView nur für das optionale WebContent-Widget.
@@ -94,7 +96,10 @@ Objektpfade werden dafür nicht ausgewertet.
   und unabhängigen IPSView-Designer. **Automatisch** behält Theme-Farben und
   die farbliche Kopplung der Wertachsen an ihre Datenreihe bei; eine explizite
   Achsenfarbe gilt für alle Zeit- und Wertachsen;
-- gemeinsames Punktbudget von 200 bis 8.000 Punkten, maximal 2.000 je Reihe;
+- gemeinsames Punktbudget von 200 bis 32.000 Punkten (Standard weiterhin
+  2.000), maximal 2.000 je Reihe;
+- scrollbare Legende mit einzelner Reihenauswahl sowie **Alle** und
+  **Umkehren**; je Quelle ist **Anfangs sichtbar** einstellbar;
 - Durchschnitt, Zählersumme, Minimum und Maximum entsprechend dem
   versionierten Archivvertrag;
 - native Kachel mit lokalen, integritätsgeprüften ECharts- und Theme-Dateien;
@@ -129,7 +134,7 @@ Kachel einen Hinweis auf das wirksame Punktbudget.
 ## Einrichtung
 
 1. Eine bestehende gemeinsame `EChartsGateway`-Instanz als Parent auswählen.
-2. Eine bis acht Integer- oder Float-Variablen konfigurieren. Archivmodi
+2. Eine bis 32 Integer- oder Float-Variablen konfigurieren. Archivmodi
    benötigen archivierte Quellen; `realtime` funktioniert auch ohne Archiv.
 3. Zeitraum, Beschriftung der Zeitachse, Datenmodus und Punktbudget wählen.
    Bei **Benutzerdefiniert** werden Zeitraumwert und -einheit verwendet.
@@ -193,6 +198,33 @@ werden versetzt dargestellt.
 `raw` bleibt immer eine echte Rohwertabfrage; `realtime` ist der ausdrücklich
 archivfreie Live-Modus und nur `auto` wählt selbstständig eine
 Verdichtungsstufe.
+
+## Viele Reihen und Reihenauswahl
+
+**Anfangs sichtbar** ist ohne abweichende Einstellung aktiviert. Die Legende
+blättert bei Platzmangel; ein Klick schaltet die betreffende Reihe um.
+**Alle** blendet alle Reihen ein, **Umkehren** kehrt die Auswahl um. Nach
+**Alle** und **Umkehren** sind alle ausgeblendet. Auswahl, Legendenposition
+und Zeitzoom bleiben bei Datenaktualisierung, Umsortierung und Größenänderung
+anhand der Variablen-IDs erhalten. Ein Neuladen verwendet wieder die
+konfigurierten Anfangswerte. Die Auswahl wird nicht in der Instanz gespeichert.
+Achsen und Referenzmarkierungen ausgeblendeter Reihen werden ebenfalls
+ausgeblendet; gemeinsam verwendete Achsen bleiben für sichtbare Reihen erhalten.
+
+Das Gesamtpunktbudget wird gleichmäßig auf **alle konfigurierten Reihen**
+verteilt und je Reihe auf höchstens 2.000 begrenzt. Ausgeblendete Reihen werden
+weiter gelesen und aktualisiert; ihre Punkte werden nicht auf andere Reihen
+umverteilt. Bei 32 Reihen und Standardbudget 2.000 stehen höchstens 62 Punkte
+je Reihe bereit, bei Budget 32.000 höchstens 1.000. Ein höheres Budget erhöht
+Ladezeit und Ressourcenbedarf; es garantiert keine bestimmte Archivdichte.
+
+Zusätzlich gelten 900.000 Bytes für das serialisierte Modell und 1 MiB für
+das vollständige HTML-Dokument. Lange Texte, komplexe SVG-Muster und hohe
+Zahlenpräzision können diese Grenze vor dem Punktbudget erreichen. In diesem
+Fall fordert eine Fehlermeldung ein kleineres Punktbudget oder einfachere
+Muster an; Werte werden nicht stillschweigend gerundet oder entfernt. Große
+Startzustände werden verlustfrei komprimiert. Dafür benötigt der Browser
+Unterstützung für die native gzip-Dekomprimierung (`DecompressionStream`).
 
 ## Variablen
 

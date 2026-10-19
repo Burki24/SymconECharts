@@ -177,7 +177,9 @@ können unabhängig davon individuell vergeben werden.
   Design- und SVG-Konfiguration wie beim Tacho zur Verfügung.
 
 - __EChartsTimeSeries__ ([Dokumentation](EChartsTimeSeries/README.md))
-  Erste historische Chartfamilie für 1 bis 8 archivierte numerische Quellen.
+  Historische Chartfamilie für 1 bis 32 numerische Quellen, mit scrollbarer
+  Reihenauswahl und anfänglicher Sichtbarkeit je Quelle. Das gemeinsame
+  Punktbudget ist bis 32.000 einstellbar (Standard 2.000, maximal 2.000 je Reihe).
   Rohwerte bleiben ausdrücklich wählbar; alternativ stehen automatische oder
   feste Symcon-Aggregationsstufen, Linien und Flächen, bis zu acht automatisch
   oder explizit links/rechts angeordnete Einheitengruppen, Punktbudget,

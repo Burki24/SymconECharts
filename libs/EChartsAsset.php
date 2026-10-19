@@ -538,6 +538,16 @@ final class EChartsAsset
         if ($content === false || $content === '') {
             throw new RuntimeException('The shared Graph utilities could not be loaded.');
         }
+        return self::StartupJavaScript() . "\n" . self::NormalizeLineEndings($content);
+    }
+
+    /** Loads lossless startup decoding for families with compressed initial states. */
+    public static function StartupJavaScript(): string
+    {
+        $content = @file_get_contents(__DIR__ . '/echarts-startup.js');
+        if ($content === false || $content === '') {
+            throw new RuntimeException('The shared startup utilities could not be loaded.');
+        }
         return self::NormalizeLineEndings($content);
     }
 

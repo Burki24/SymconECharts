@@ -9,6 +9,14 @@
 
 ## Neu
 
+- EChartsTimeSeries unterstützt bis zu 32 Reihen und ein einstellbares
+  Gesamtpunktbudget bis 32.000 bei unverändertem Standard von 2.000 Punkten.
+  Die scrollbare Legende bietet Einzel-, Gesamt- und Umkehrauswahl; jede Quelle
+  kann anfangs ausgeblendet werden. Reihenauswahl und Zeitzoom bleiben bei
+  Aktualisierung erhalten. Ausgeblendete Quellen bleiben im Datenbudget;
+  bestehende Konfigurationen funktionieren unverändert. Große Startzustände
+  werden verlustfrei komprimiert und übergroße Ausgaben ausdrücklich gemeldet.
+
 - EChartsGraph unterstützt bis zu 300 Knoten und 1.000 ungerichtete
   Verbindungen. Große Vorschauen zeigen einen gekennzeichneten echten
   Ausschnitt. Graph und GraphZ2M erhalten Zoom und Verschiebung bei Updates

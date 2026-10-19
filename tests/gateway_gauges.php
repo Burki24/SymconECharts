@@ -830,6 +830,16 @@ final class TestableEChartsTimeSeries extends EChartsTimeSeries
     {
         return $this->currentTimestamp;
     }
+
+    protected function LoadConfigurationForm(): array
+    {
+        return json_decode(file_get_contents(dirname(__DIR__) . '/EChartsTimeSeries/form.json'), true, 512, JSON_THROW_ON_ERROR);
+    }
+
+    protected function VisualizationAsset(string $filename): string
+    {
+        return (string) file_get_contents(dirname(__DIR__) . '/EChartsTimeSeries/visualization/' . $filename);
+    }
 }
 
 final class TestableEChartsBarHistory extends EChartsBarHistory
@@ -962,6 +972,12 @@ assertGatewayGauge(
     'The Gateway must own the shared SymconECharts WebHook.'
 );
 IPSModuleStrict::$ParentResponder = static fn (string $json): string => $gateway->ForwardData($json);
+
+if (array_slice($argv, 1) === ['--time-series-many']) {
+    require __DIR__ . '/time_series_many.php';
+    echo "TimeSeries 32-source integration verified.\n";
+    exit(0);
+}
 
 if (array_slice($argv, 1) === ['--graph-large']) {
     require __DIR__ . '/graph_large.php';

@@ -8,7 +8,8 @@ const zlib = require('node:zlib');
 
 const source = fs.readFileSync(path.join(__dirname, '..', 'EChartsGraph', 'visualization', 'app.js'), 'utf8');
 const designSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-design.js'), 'utf8');
-const graphSupportSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-graph.js'), 'utf8');
+const graphSupportSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-startup.js'), 'utf8') + '\n'
+    + fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-graph.js'), 'utf8');
 const zigbeeSource = fs.readFileSync(path.join(__dirname, '..', 'EChartsGraphZ2M', 'visualization', 'app.js'), 'utf8');
 const palette = {
     background: '#101114', text: '#f4f5f7', muted: '#969aa2',

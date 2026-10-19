@@ -34,7 +34,9 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   allgemeine Mehrquellenmodelle sowie `EChartsGaugeTacho` und
   `EChartsGaugeChronograph` für individuell gestaltbare Instrumentenpanels
   aufgeteilt. Historische Linien- und Flächendiagramme liegen im eigenen
-  Gerätemodul `EChartsTimeSeries`. Aktuelle Kategorienvergleiche liegen im
+  Gerätemodul `EChartsTimeSeries`, gemäß ADR 0067 mit bis zu 32 Reihen,
+  Reihenauswahl und einem gemeinsamen Punktbudget bis 32000.
+  Aktuelle Kategorienvergleiche liegen im
   eigenen Gerätemodul `EChartsBarCategory`; historische Balken liegen im
   eigenen Gerätemodul `EChartsBarHistory`. Waterfall-Balken mit aktuellem
   Startwert, signierten Änderungen und berechneter Endsumme liegen im eigenen

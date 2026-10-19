@@ -800,6 +800,40 @@ zeigt 16 Stufen mit großen Schriften/Abständen; `/chart?mode=ipsview&theme=lig
 prüft den hellen Hintergrund. Die reale neue MCP-Kachelvorschau und Live-Tests
 in Symcon beziehungsweise IPSView bleiben nach Installation erforderlich.
 
+## TimeSeries: 32 Reihen und Reihenauswahl
+
+`php tests/gateway_gauges.php --time-series-many` verwendet echte Gateway-
+Operationen mit synthetischen Kernel-Archiven. Geprüft werden 32/33 Quellen,
+32000/32001 Budget, acht/neun Einheitengruppen, unveränderte Altlisten und
+Defaults, versteckte Abonnements/Append-Punkte, Rohwerte und Reducer,
+ID-bezogene Annotationen und vollständig ausgeblendete Modelle. Beide
+Startdokumente werden entpackt und mit dem vollständigen Modell verglichen.
+Große gültige SVG-Muster bleiben im Live-Modell, während beide Vorschauen
+ihre Vereinfachung ausdrücklich kennzeichnen. Modell- und HTML-Byteguards
+werden getrennt geprüft; die gespeicherte Konfiguration bleibt unverändert.
+Der Test bleibt beim gemeinsamen 128-MiB-Speicherlimit und protokolliert nur
+Archiv-/Current-Anfragen statt sämtliche vollständigen Renderer-Pushes.
+
+Gemessen am 19.10.2026: 32000-Punkte-Modell 590044 Bytes, Kachel 897755 Bytes,
+IPSView 901043 Bytes. Ein fast 256 KiB großes SVG-Muster ergibt 724159/727447
+Bytes HTML und 343137 Bytes Formular einschließlich beider Vorschauen.
+Diese Beispiele sind keine Zusage für beliebig komplexe Modelle am Bytebudget.
+
+`node tests/time_series_layout.js` prüft native ECharts-Legenden und Auswahl
+in beiden Ausgabearten, gleiche sichtbare Namen bei verschiedenen IDs,
+Alle/Umkehren/keine Reihe, Legendenanker, Reorder/Entfernung/Resize und
+unabhängigen Zeitzoom. Weitere Regressionen sichern komprimierte Starts,
+fehlende/defekte gzip-Unterstützung, neuere Vollzustände, Unload und während
+der Dekomprimierung eintreffende Append-Punkte ab. Graph-/Z2M-Layouttests
+sichern die extrahierte gemeinsame Startlogik zusätzlich ab.
+
+`node tests/time_series_browser.mjs` startet eine lokale synthetische
+Canvas-Fixture auf Port 8816. Am 19.10.2026 wurden 32 Reihen mit 32000 Punkten
+im schmalen Kachel- und breiten IPSView-Ausgabeweg visuell geprüft, einschließlich
+gleichnamiger Legendenwahl und erhaltener Auswahl/Zoom nach Umsortierung.
+Die neue Live-Abnahme in Symcon und IPSView nach Modulupdate steht noch aus;
+Live-Konfigurationen und Archive wurden bei dieser Erweiterung nicht geändert.
+
 ## Calendar
 
 `calendar_data.php` prüft Jahresgrenzen, Schaltjahre, Zeitumstellungen,

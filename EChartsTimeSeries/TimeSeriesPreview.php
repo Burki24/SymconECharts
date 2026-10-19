@@ -27,7 +27,8 @@ final class EChartsTimeSeriesPreview
         int $backgroundOpacityPercent = 35,
         array $annotations = [],
         string $timeAxisLabelFormat = 'auto',
-        string $sourceCountCaption = 'Preview shows %d of %d sources'
+        string $sourceCountCaption = 'Preview shows %d of %d sources',
+        string $patternNoticeCaption = 'Large SVG patterns are simplified in the preview.'
     ): string {
         $palette = EChartsAsset::ThemePreviewPalette($theme);
         $allSeries = $series !== [] ? $series : [
@@ -51,8 +52,17 @@ final class EChartsTimeSeriesPreview
             unset($axisSource);
             $axisModel = EChartsUnitAxes::Build($axisSources);
         }
-        $series = array_slice($allSeries, 0, 4);
+        foreach ($allSeries as $index => &$item) {
+            $item['previewPaletteIndex'] = $index;
+        }
+        unset($item);
+        $series = array_slice(array_values(array_filter(
+            $allSeries,
+            static fn (array $item): bool => ($item['initiallyVisible'] ?? true) !== false
+        )), 0, 4);
         $visibleUnits = [];
+        $previewPatternBytes = 0;
+        $simplifiedPatterns = false;
         foreach ($series as $index => $item) {
             $visibleUnits[(string) ($item['unit'] ?? '')] ??= $index;
         }
@@ -61,7 +71,7 @@ final class EChartsTimeSeriesPreview
         foreach ($series as $index => $item) {
             $effectiveColors[] = preg_match('/^#[0-9A-F]{6}$/i', $item['color']) === 1
                 ? $item['color']
-                : $fallbackColors[$index % count($fallbackColors)];
+                : $fallbackColors[$item['previewPaletteIndex'] % count($fallbackColors)];
         }
         $legendPosition = (string) ($design['legendPosition'] ?? 'top');
         $lineWidth = 2.5 * max(50, min(200, (int) ($design['lineWidthPercent'] ?? 100))) / 100;
@@ -233,16 +243,22 @@ final class EChartsTimeSeriesPreview
                     $fill = 'url(#' . $gradientID . ')';
                 } elseif ($fillMode === 'svg'
                     && str_starts_with((string) ($sourceDesign['areaPatternImage'] ?? ''), 'data:image/svg+xml;base64,')) {
-                    $patternID = 'area-pattern-' . $index;
-                    $patternWidth = 64.0 * max(25, min(400, (int) ($sourceDesign['areaSVGSizePercent'] ?? 100))) / 100;
-                    $aspectRatio = max(0.05, min(20.0, (float) ($sourceDesign['areaPatternAspectRatio'] ?? 1.0)));
-                    $patternHeight = $patternWidth / $aspectRatio;
-                    $definitions .= '<pattern id="' . $patternID . '" width="' . self::N($patternWidth)
-                        . '" height="' . self::N($patternHeight) . '" patternUnits="userSpaceOnUse">'
-                        . '<image href="' . SVGPreviewHelper::escape((string) $sourceDesign['areaPatternImage'])
-                        . '" width="' . self::N($patternWidth) . '" height="' . self::N($patternHeight)
-                        . '" preserveAspectRatio="xMidYMid meet"/></pattern>';
-                    $fill = 'url(#' . $patternID . ')';
+                    $patternBytes = strlen($sourceDesign['areaPatternImage']);
+                    if ($patternBytes > 12000 || $previewPatternBytes + $patternBytes > 24000) {
+                        $simplifiedPatterns = true;
+                    } else {
+                        $previewPatternBytes += $patternBytes;
+                        $patternID = 'area-pattern-' . $index;
+                        $patternWidth = 64.0 * max(25, min(400, (int) ($sourceDesign['areaSVGSizePercent'] ?? 100))) / 100;
+                        $aspectRatio = max(0.05, min(20.0, (float) ($sourceDesign['areaPatternAspectRatio'] ?? 1.0)));
+                        $patternHeight = $patternWidth / $aspectRatio;
+                        $definitions .= '<pattern id="' . $patternID . '" width="' . self::N($patternWidth)
+                            . '" height="' . self::N($patternHeight) . '" patternUnits="userSpaceOnUse">'
+                            . '<image href="' . SVGPreviewHelper::escape((string) $sourceDesign['areaPatternImage'])
+                            . '" width="' . self::N($patternWidth) . '" height="' . self::N($patternHeight)
+                            . '" preserveAspectRatio="xMidYMid meet"/></pattern>';
+                        $fill = 'url(#' . $patternID . ')';
+                    }
                 }
                 $content .= '<path d="' . $path . ' L 680 ' . self::N($plotBottom) . ' L 70 '
                     . self::N($plotBottom) . ' Z" fill="' . SVGPreviewHelper::escape($fill)
@@ -317,6 +333,11 @@ final class EChartsTimeSeriesPreview
             . SVGPreviewHelper::escape(trim($title) !== '' ? $title : 'Time Series') . '</text>'
             . $content . '</svg>';
 
+        if ($simplifiedPatterns) {
+            $svg = substr($svg, 0, -strlen('</svg>'))
+                . '<text x="20" y="365" font-size="11" fill="' . SVGPreviewHelper::escape($palette['muted'])
+                . '" data-preview-patterns-simplified="true">' . SVGPreviewHelper::escape($patternNoticeCaption) . '</text></svg>';
+        }
         return EChartsPreviewSourceCount::Append(
             $svg,
             count($series),

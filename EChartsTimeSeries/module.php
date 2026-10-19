@@ -22,6 +22,7 @@ use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsLabelDesign;
 use SymconECharts\EChartsSourceIdentity;
+use SymconECharts\EChartsStartupState;
 use SymconECharts\EChartsTimeSeriesDesign;
 use SymconECharts\EChartsTimeSeriesPreview;
 use SymconECharts\EChartsTransientRefresh;
@@ -46,6 +47,7 @@ require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
 require_once __DIR__ . '/../libs/EChartsTransientRefresh.php';
 require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
+require_once __DIR__ . '/../libs/EChartsStartupState.php';
 require_once __DIR__ . '/../libs/EChartsTimeSeriesDesign.php';
 require_once __DIR__ . '/../libs/EChartsUnitAxes.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
@@ -71,7 +73,10 @@ class EChartsTimeSeries extends IPSModuleStrict
     private const DATA_ID_TO_PARENT = '{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}';
     private const DATA_ID_FROM_PARENT = '{E4749B72-912B-E3E3-1C57-D19019FFDD84}';
     private const MINIMUM_SOURCE_COUNT = 1;
-    private const MAXIMUM_SOURCE_COUNT = 8;
+    private const MAXIMUM_SOURCE_COUNT = 32;
+    private const MAXIMUM_POINT_BUDGET = 32000;
+    private const MAXIMUM_MODEL_BYTES = 900000;
+    private const MODEL_TOO_LARGE_MESSAGE = 'The time series model is too large. Reduce the point budget or simplify source patterns.';
     private const MAXIMUM_ANNOTATION_COUNT = 32;
     private const IPSVIEW_OUTPUT_IDENT = 'IPSViewTimeSeries';
     private const STATUS_SOURCE_INVALID = 201;
@@ -341,7 +346,8 @@ class EChartsTimeSeries extends IPSModuleStrict
                     $this->ReadTimeSeriesDesign(),
                     annotations: $this->PreviewAnnotations(),
                     timeAxisLabelFormat: $this->ReadPropertyString('TimeAxisLabelFormat'),
-                    sourceCountCaption: $this->Translate('Preview shows %d of %d sources')
+                    sourceCountCaption: $this->Translate('Preview shows %d of %d sources'),
+                    patternNoticeCaption: $this->Translate('Large SVG patterns are simplified in the preview.')
                 )
             );
             $form = SVGPreviewHelper::withImage(
@@ -357,7 +363,8 @@ class EChartsTimeSeries extends IPSModuleStrict
                     $this->ReadPropertyInteger('IPSViewBackgroundOpacityPercent'),
                     $this->PreviewAnnotations(),
                     $this->EffectiveTimeAxisLabelFormat(true),
-                    $this->Translate('Preview shows %d of %d sources')
+                    $this->Translate('Preview shows %d of %d sources'),
+                    $this->Translate('Large SVG patterns are simplified in the preview.')
                 )
             );
 
@@ -429,7 +436,8 @@ class EChartsTimeSeries extends IPSModuleStrict
                     ),
                     timeAxisLabelFormat: (string) ($values['TimeAxisLabelFormat']
                         ?? $this->ReadPropertyString('TimeAxisLabelFormat')),
-                    sourceCountCaption: $this->Translate('Preview shows %d of %d sources')
+                    sourceCountCaption: $this->Translate('Preview shows %d of %d sources'),
+                    patternNoticeCaption: $this->Translate('Large SVG patterns are simplified in the preview.')
                 )
             ));
 
@@ -459,7 +467,8 @@ class EChartsTimeSeries extends IPSModuleStrict
                             ?? $this->ReadPropertyString('TimeAxisLabelFormat'))
                         : (string) ($values['IPSViewTimeAxisLabelFormat']
                             ?? $this->ReadPropertyString('IPSViewTimeAxisLabelFormat')),
-                    $this->Translate('Preview shows %d of %d sources')
+                    $this->Translate('Preview shows %d of %d sources'),
+                    $this->Translate('Large SVG patterns are simplified in the preview.')
                 )
             ));
         } catch (\Throwable $debugFlowException) {
@@ -823,6 +832,7 @@ class EChartsTimeSeries extends IPSModuleStrict
                 'id'                     => 'variable-' . $source['VariableID'],
                 'variableID'             => $source['VariableID'],
                 'label'                  => $labels[$source['VariableID']],
+                'initiallyVisible'       => $source['InitiallyVisible'],
                 'unit'                   => $source['Unit'],
                 'decimals'               => $source['Decimals'],
                 'color'                  => $source['Color'],
@@ -839,7 +849,7 @@ class EChartsTimeSeries extends IPSModuleStrict
         $this->WriteAttributeString('LastError', '');
         $this->DebugEChartsSetStatus(IS_ACTIVE);
 
-        return json_encode([
+        $json = json_encode([
             'schemaVersion' => 1,
             'family'        => 'time-series',
             'theme'         => $this->ReadPropertyString('EChartsTheme'),
@@ -868,6 +878,12 @@ class EChartsTimeSeries extends IPSModuleStrict
             'annotations'   => $annotations,
             'truncated'     => $truncated
         ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
+        if (strlen($json) > self::MAXIMUM_MODEL_BYTES) {
+            $this->WriteAttributeString('LastError', self::MODEL_TOO_LARGE_MESSAGE);
+            $this->DebugEChartsSetStatus(self::STATUS_CONFIGURATION_INVALID);
+            throw new UnexpectedValueException(self::MODEL_TOO_LARGE_MESSAGE, self::STATUS_CONFIGURATION_INVALID);
+        }
+        return $json;
     }
 
     private function RenderTimeSeriesHTMLPage(bool $ipsView): string
@@ -877,7 +893,8 @@ class EChartsTimeSeries extends IPSModuleStrict
             $hiddenTileTitle = (bool) (IPS_GetObject($this->InstanceID)['ObjectIsHiddenTitle'] ?? false);
         }
 
-        return $this->RenderVisualizationHTMLPage($ipsView, [
+        $startup = EChartsStartupState::Startup($this->BuildVisualizationState($ipsView));
+        $configuration = [
             'language'           => $this->NormalizeHelperTranslationLanguage(
                 $this->ResolveHelperTranslationLanguage()
             ),
@@ -886,8 +903,11 @@ class EChartsTimeSeries extends IPSModuleStrict
                 . "\n\n"
                 . $this->ResponsiveVisualizationCSS('#echarts-timeseries-root', 'echarts-timeseries'),
             'ipsViewStyle'       => $ipsView ? $this->IPSViewThemeCSS() : '',
-            'state'              => $this->BuildVisualizationState($ipsView),
+            'state'              => $startup['state'],
             'translations'       => [
+                'All'                                                       => $this->Translate('All'),
+                'Invert'                                                    => $this->Translate('Invert'),
+                self::MODEL_TOO_LARGE_MESSAGE                               => $this->Translate(self::MODEL_TOO_LARGE_MESSAGE),
                 'The selected raw range was truncated by the point budget.' => $this->Translate(
                     'The selected raw range was truncated by the point budget.'
                 ),
@@ -899,21 +919,32 @@ class EChartsTimeSeries extends IPSModuleStrict
                 )
             ],
             'options'            => [
-                'echartsVersion'    => EChartsAsset::VERSION,
-                'echartsThemes'     => EChartsAsset::ThemePalettes(),
-                'tileHeaderVisible' => !$hiddenTileTitle,
-                'adaptToBackground' => $ipsView && $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
-                'ipsViewTransport'  => $ipsView ? $this->EChartsIPSViewTransportOptions() : null
+                'echartsVersion'            => EChartsAsset::VERSION,
+                'echartsThemes'             => EChartsAsset::ThemePalettes(),
+                'tileHeaderVisible'         => !$hiddenTileTitle,
+                'adaptToBackground'         => $ipsView && $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
+                'ipsViewTransport'          => $ipsView ? $this->EChartsIPSViewTransportOptions() : null,
+                'compressedStateGzipBase64' => $startup['compressedStateGzipBase64']
             ],
             'replacements'       => [
                 '{{ECHARTS_SCRIPT}}'           => EChartsAsset::TimeSeriesJavaScript(),
                 '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
-                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript(),
+                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript() . "\n" . EChartsAsset::StartupJavaScript(),
                 '{{ECHARTS_ZOOM_SCRIPT}}'      => EChartsAsset::ZoomJavaScript(),
                 '{{ECHARTS_PATTERN_SCRIPT}}'   => EChartsAsset::PatternJavaScript(),
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
-        ]);
+        ];
+        $html = $this->RenderVisualizationHTMLPage($ipsView, $configuration);
+        if (strlen($html) > 1048576) {
+            $this->WriteAttributeString('LastError', self::MODEL_TOO_LARGE_MESSAGE);
+            $this->DebugEChartsSetStatus(self::STATUS_CONFIGURATION_INVALID);
+            $configuration['state'] = ['schemaVersion' => 1, 'family' => 'time-series',
+                'status'                               => 'error', 'chart' => null, 'error' => self::MODEL_TOO_LARGE_MESSAGE];
+            $configuration['options']['compressedStateGzipBase64'] = null;
+            return $this->RenderVisualizationHTMLPage($ipsView, $configuration);
+        }
+        return $html;
     }
 
     private function Initialize(): void
@@ -966,7 +997,7 @@ class EChartsTimeSeries extends IPSModuleStrict
                 true
             )
             || $this->ReadPropertyInteger('PointBudget') < 200
-            || $this->ReadPropertyInteger('PointBudget') > 8000
+            || $this->ReadPropertyInteger('PointBudget') > self::MAXIMUM_POINT_BUDGET
             || !in_array($this->ReadPropertyString('GapDetectionMode'), self::GAP_DETECTION_MODES, true)
             || ($this->ReadPropertyString('GapDetectionMode') === 'custom'
                 && ($this->ReadPropertyInteger('GapThresholdMinutes') < 1
@@ -1047,7 +1078,7 @@ class EChartsTimeSeries extends IPSModuleStrict
             || count($sources) < self::MINIMUM_SOURCE_COUNT
             || count($sources) > self::MAXIMUM_SOURCE_COUNT
         ) {
-            throw new UnexpectedValueException('Configure between 1 and 8 time series sources.', 201);
+            throw new UnexpectedValueException('Configure between 1 and 32 time series sources.', 201);
         }
 
         $result = [];
@@ -1075,11 +1106,13 @@ class EChartsTimeSeries extends IPSModuleStrict
             $axisMaximum = $source['AxisMaximum'] ?? 100.0;
             $usePresentation = $source['UseVariablePresentation'] ?? true;
             $useIndividualDesign = $source['UseIndividualDesign'] ?? false;
+            $initiallyVisible = $source['InitiallyVisible'] ?? true;
             $normalizedColor = self::NormalizeSourceColor($color);
             if (!is_string($label) || !is_string($unit) || !is_int($decimals)
                 || $normalizedColor === null || !is_string($style) || !is_string($reducer) || !is_string($axisPosition)
                 || !is_string($axisRangeMode)
-                || !is_bool($usePresentation) || !is_bool($useIndividualDesign) || $decimals < 0 || $decimals > 6
+                || !is_bool($usePresentation) || !is_bool($useIndividualDesign) || !is_bool($initiallyVisible)
+                || $decimals < 0 || $decimals > 6
                 || !in_array($style, self::STYLES, true) || !in_array($reducer, self::REDUCERS, true)
                 || !in_array($axisPosition, self::AXIS_POSITIONS, true)
                 || !in_array($axisRangeMode, EChartsTimeSeriesDesign::AXIS_RANGE_MODES, true)
@@ -1137,16 +1170,17 @@ class EChartsTimeSeries extends IPSModuleStrict
             }
             $variableIDs[$variableID] = true;
             $result[] = [
-                'VariableID'   => $variableID,
-                'Label'        => trim($label),
-                'Unit'         => $effectiveUnit,
-                'Decimals'     => $presentation['decimals'],
-                'Color'        => $normalizedColor,
-                'Style'        => $style,
-                'Reducer'      => $reducer,
-                'AxisPosition' => $axisPosition,
-                'AxisRange'    => $axisRange,
-                'Design'       => $sourceDesign
+                'VariableID'       => $variableID,
+                'InitiallyVisible' => $initiallyVisible,
+                'Label'            => trim($label),
+                'Unit'             => $effectiveUnit,
+                'Decimals'         => $presentation['decimals'],
+                'Color'            => $normalizedColor,
+                'Style'            => $style,
+                'Reducer'          => $reducer,
+                'AxisPosition'     => $axisPosition,
+                'AxisRange'        => $axisRange,
+                'Design'           => $sourceDesign
             ];
         }
 
@@ -1162,7 +1196,11 @@ class EChartsTimeSeries extends IPSModuleStrict
     private function BuildAxisModel(array $sources): array
     {
         try {
-            return EChartsUnitAxes::Build($sources);
+            $model = EChartsUnitAxes::Build($sources);
+            if (count($model['Axes']) > 8) {
+                throw new InvalidArgumentException('Configure no more than 8 time series unit groups.');
+            }
+            return $model;
         } catch (InvalidArgumentException $exception) {
             throw new UnexpectedValueException(
                 $exception->getMessage(),
@@ -1370,6 +1408,7 @@ class EChartsTimeSeries extends IPSModuleStrict
                 || !is_string($archive['ArchiveAggregationType'] ?? null)
                 || !is_string($archive['EffectiveReducer'] ?? null)
                 || !is_array($archive['Points'] ?? null)
+                || count($archive['Points']) > $query['Limit']
                 || !is_bool($archive['Truncated'] ?? null)
             ) {
                 throw new RuntimeException('The gateway returned invalid time series data.');
@@ -1451,7 +1490,7 @@ class EChartsTimeSeries extends IPSModuleStrict
                 'family'        => 'time-series',
                 'status'        => 'error',
                 'chart'         => null,
-                'error'         => 'Configure 1 to 8 unique numeric sources.'
+                'error'         => 'Configure 1 to 32 unique numeric sources.'
             ];
         }
         if (!$this->HasActiveParent()) {
@@ -1477,7 +1516,8 @@ class EChartsTimeSeries extends IPSModuleStrict
                 'family'        => 'time-series',
                 'status'        => 'error',
                 'chart'         => null,
-                'error'         => 'The time series could not be loaded.'
+                'error'         => $exception->getMessage() === self::MODEL_TOO_LARGE_MESSAGE
+                    ? self::MODEL_TOO_LARGE_MESSAGE : 'The time series could not be loaded.'
             ];
         }
 
@@ -1775,13 +1815,14 @@ class EChartsTimeSeries extends IPSModuleStrict
                 }
             }
             $result[] = [
-                'variableID'   => is_int($variableID) ? $variableID : 0,
-                'label'        => $labels[$variableID] ?? ($label !== '' ? $label : 'Series ' . ($index + 1)),
-                'color'        => $color ?? '',
-                'style'        => $style,
-                'unit'         => $presentation['unit'],
-                'axisPosition' => $axisPosition,
-                'design'       => $sourceDesign
+                'variableID'       => is_int($variableID) ? $variableID : 0,
+                'initiallyVisible' => ($source['InitiallyVisible'] ?? true) !== false,
+                'label'            => $labels[$variableID] ?? ($label !== '' ? $label : 'Series ' . ($index + 1)),
+                'color'            => $color ?? '',
+                'style'            => $style,
+                'unit'             => $presentation['unit'],
+                'axisPosition'     => $axisPosition,
+                'design'           => $sourceDesign
             ];
         }
 
@@ -1804,10 +1845,19 @@ class EChartsTimeSeries extends IPSModuleStrict
         }
 
         try {
-            return array_values(array_filter(
-                $this->NormalizeAnnotations($annotations, $sources),
-                static fn (array $annotation): bool => $annotation['seriesIndex'] < 4
-            ));
+            $visible = array_slice(array_values(array_filter(
+                $this->PreviewSeries($sources),
+                static fn (array $source): bool => $source['initiallyVisible']
+            )), 0, 4);
+            $indexes = array_flip(array_column($visible, 'variableID'));
+            $result = [];
+            foreach ($this->NormalizeAnnotations($annotations, $sources) as $annotation) {
+                if (isset($indexes[$annotation['variableID']])) {
+                    $annotation['seriesIndex'] = $indexes[$annotation['variableID']];
+                    $result[] = $annotation;
+                }
+            }
+            return $result;
         } catch (UnexpectedValueException) {
             return [];
         }
@@ -1841,7 +1891,10 @@ class EChartsTimeSeries extends IPSModuleStrict
     {
         foreach ($items as &$item) {
             if (($item['type'] ?? '') === 'List' && ($item['name'] ?? '') === 'Sources') {
-                $item['form'] = EChartsTimeSeriesDesign::SourceEditorForm();
+                $item['form'] = [
+                    ['type' => 'CheckBox', 'name' => 'InitiallyVisible', 'caption' => 'Initially visible'],
+                    ...EChartsTimeSeriesDesign::SourceEditorForm()
+                ];
                 $item['columns'] = array_merge(
                     is_array($item['columns'] ?? null) ? $item['columns'] : [],
                     EChartsTimeSeriesDesign::AxisRangeColumns(),
