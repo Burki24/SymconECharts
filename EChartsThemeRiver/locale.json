@@ -1,6 +1,18 @@
 {
     "translations": {
         "de": {
+            "Initially visible": "Anfangs sichtbar",
+            "Enable band selection": "Bandauswahl aktivieren",
+            "All": "Alle",
+            "Invert": "Umkehren",
+            "No bands selected.": "Keine Bänder ausgewählt.",
+            "All selected interval means are zero.": "Alle ausgewählten Intervallmittelwerte sind 0.",
+            "Preview shows %d of %d sources": "Vorschau zeigt %d von %d Quellen",
+            "The ThemeRiver model is too large. Choose a shorter range.": "Das ThemeRiver-Modell ist zu groß. Bitte einen kürzeren Zeitraum wählen.",
+            "The ThemeRiver archive load budget was exceeded.": "Das gemeinsame ThemeRiver-Ladebudget wurde überschritten.",
+            "Configure 1 to 16 unique numeric ThemeRiver variables.": "1 bis 16 eindeutige numerische ThemeRiver-Variablen konfigurieren.",
+            "Choose 1 to 16 standard archive variables of the same unit. Only nonnegative completed interval means are supported. Intervals missing on any source remain blank.": "1 bis 16 Standard-Archivvariablen derselben Einheit wählen. Nur nichtnegative Mittelwerte abgeschlossener Intervalle werden unterstützt. Fehlt eine Quelle, bleibt das gesamte Intervall leer.",
+            "Initial visibility applies only when band selection is enabled. Hidden sources remain in the shared 16000-aggregate load budget and common gap checks.": "Anfangssichtbarkeit gilt nur bei aktivierter Bandauswahl. Ausgeblendete Quellen zählen weiterhin zum gemeinsamen Ladebudget von 16000 Aggregaten und zur gemeinsamen Lückenprüfung.",
             "Band height": "Bandhöhe",
             "Band border type": "Bandkonturart",
             "Solid": "Durchgezogen",

@@ -52,6 +52,7 @@ $tests = [
 ];
 
 $commands = [
+    ['Test 16-source ThemeRiver integration', 'php tests/gateway_gauges.php --theme-river-many'],
     ['Test 32-source Historical Bar integration', 'php tests/gateway_gauges.php --bar-history-many'],
     ['Test 32-source TimeSeries integration', 'php tests/gateway_gauges.php --time-series-many'],
     ['Test 300-node Graph integration', 'php tests/gateway_gauges.php --graph-large'],

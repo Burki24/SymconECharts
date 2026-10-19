@@ -83,9 +83,11 @@ ohne Leerzeichen, etwa `EChartsPictorialBar`. Namen vorhandener Instanzen
 können unabhängig davon individuell vergeben werden.
 
 - __EChartsThemeRiver__ ([Dokumentation](EChartsThemeRiver/README.md))
-  Nichtnegative Stunden- oder Tagesmittelwerte von 1–8 Standard-Archivvariablen
+  Nichtnegative Stunden- oder Tagesmittelwerte von 1–16 Standard-Archivvariablen
   derselben Einheit als farbige Bänder. Archivlücken bleiben sichtbar;
   Kachel und IPSView besitzen getrennte Designer und Vorschauen.
+  Eine optionale Bandauswahl erhält die Quell-IDs und ursprünglichen
+  Archivlücken; das gemeinsame Ladebudget beträgt 16.000 Aggregate.
 
 - __EChartsPictorialBar__ ([Dokumentation](EChartsPictorialBar/README.md))
   Aktuelle Werte aus 1–100 Variablen derselben Einheit als einzelne oder

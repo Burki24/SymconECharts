@@ -9,7 +9,7 @@ in Watt. Es werden keine Energieverbräuche aus Leistungswerten berechnet.
 
 1. Eine Instanz `EChartsThemeRiver` anlegen und mit dem vorhandenen
    `EChartsGateway` verbinden.
-2. Unter **ThemeRiver-Quellen** ein bis acht unterschiedliche Integer- oder
+2. Unter **ThemeRiver-Quellen** ein bis 16 unterschiedliche Integer- oder
    Float-Variablen hinzufügen, die im Archiv als Standardvariablen aufgezeichnet
    werden. Alle Quellen müssen dieselbe Einheit haben. Zählerarchive werden
    nicht unterstützt.
@@ -18,6 +18,9 @@ in Watt. Es werden keine Energieverbräuche aus Leistungswerten berechnet.
    zulässig. Automatische Farben folgen dem gewählten Theme.
 4. Den Titel, Zeitraum und das Intervall wählen. Standardmäßig werden die
    letzten sieben Tage in Stundenintervallen angezeigt.
+5. Optional **Bandauswahl aktivieren** einschalten und pro Quelle
+   **Anfangs sichtbar** festlegen. Ohne Aktivierung werden weiterhin alle
+   konfigurierten Bänder dargestellt.
 
 Die Einheit und Nachkommastellen stammen aus der Variablendarstellung oder
 einem kompatiblen Profil. Die Einheit muss fachlich vergleichbar sein:
@@ -50,7 +53,7 @@ Nur **nichtnegative, endliche Mittelwerte** sind zulässig. Echte Nullwerte
 bleiben gültig; negative Mittelwerte führen zu einer sichtbaren Fehlermeldung.
 Die Darstellung ist weder eine Prozentnormierung noch eine Qualitätsbewertung.
 
-Ein Intervall wird nur dargestellt, wenn **alle gewählten Quellen** dafür
+Ein Intervall wird nur dargestellt, wenn **alle konfigurierten Quellen** dafür
 einen Archivwert liefern. Fehlt eine Quelle, bleibt das ganze Intervall leer;
 ein Hinweis erklärt die Lücke. Das gilt auch für Archive, deren Aufzeichnung
 erst innerhalb des gewählten Zeitraums begonnen hat. Zusammenhängende gültige
@@ -63,13 +66,51 @@ Der Tooltip nennt das tatsächliche Intervall mit Zeitzonenoffset und die
 Originalmittelwerte aller Quellen. Bestehen alle vorhandenen Mittelwerte aus
 Null, bleiben Zeitachse, Legende und ein erläuternder Hinweis sichtbar.
 
+Das gemeinsame Ladebudget beträgt höchstens **16.000 Aggregate pro
+Aktualisierung**, maximal 1.000 je Quelle. Auch ausgeblendete Quellen zählen
+dazu. Die Grenze von 720 abgeschlossenen Intervallen je Quelle bleibt
+unverändert; bei 16 vollständigen Quellen sind das höchstens 11.520
+Intervallwerte. Gekürzte oder übergroße Antworten werden als Fehler gemeldet,
+nicht als vollständige Teilansicht ausgegeben. Kürzere Zeiträume oder
+Tagesintervalle helfen bei zu großen Abfragen.
+
+## Optionale Bandauswahl
+
+Standardmäßig ist **Bandauswahl aktivieren** aus. Vorhandene Konfigurationen
+zeigen damit unverändert alle Bänder; gespeicherte Anfangssichtbarkeit wird
+erst nach Aktivierung wirksam. Fehlende Angaben gelten als sichtbar.
+
+Bei aktivierter Auswahl schaltet ein Klick auf einen Legendeneintrag dieses
+Band um. **Alle** wählt sämtliche Bänder, **Umkehren** kehrt die Auswahl um.
+Nach **Alle** und **Umkehren** ist keines gewählt; ein Hinweis unterscheidet
+diesen Zustand von echten Nullwerten. Die Legende bleibt bei aktiver
+Bandauswahl auch dann sichtbar, wenn sie im Designer ausgeschaltet wurde,
+damit sich ausgeblendete Bänder wieder einblenden lassen.
+
+Auswahl und Legendenposition bleiben bei Datenaktualisierung, Umsortierung
+und Größenänderung anhand der Quell-IDs erhalten. Gleichnamige Quellen bleiben
+getrennt. Die Browserauswahl wird nicht in die Instanz geschrieben; Neuladen
+verwendet wieder die konfigurierten Anfangswerte.
+
+Die Auswahl verändert nur die gezeichneten Bänder und deren gemeinsamen
+Darstellungsmaßstab. Originalwerte und Einheiten bleiben im Tooltip erhalten.
+Alle konfigurierten Quellen werden weiter geladen und gemeinsam auf Lücken
+geprüft. Das Ausblenden einer Quelle kann deshalb **keine Archivlücke schließen**.
+
+Zusätzlich gelten 900.000 Bytes für das serialisierte Modell und 1 MiB für
+das vollständige HTML-Dokument. Wird diese Grenze erreicht, fordert eine
+Fehlermeldung einen kürzeren Zeitraum; es werden keine Werte heimlich gerundet
+oder entfernt. Große Startzustände werden verlustfrei komprimiert. Dafür
+benötigt der Browser die native gzip-Dekomprimierung (`DecompressionStream`).
+
 ## Kachel und IPSView gestalten
 
 Beide Designer bieten Theme, Tooltip, Banddeckkraft (0–100 %, Standard 85 %),
 Konturbreite/-farbe, Legende, optionale Bandbeschriftungen, Zeitbeschriftungen,
 Teilstriche sowie Schriftgrößen und Farben für Titel, Achse, Bänder und Legende.
 Bandbeschriftungen sind zunächst aus; die Legende zeigt die Quellen auch bei
-kleinen Flächen. Sie kann geblättert werden, blendet aber keine Quellen aus.
+kleinen Flächen. Sie kann geblättert werden; ohne aktivierte Bandauswahl
+blendet sie keine Quellen aus.
 Animationen einschließlich Dauer und Bewegungskurve sind einstellbar.
 Die Zeitachse zeigt bei kurzen Stundenfenstern Uhrzeiten, bei mehrtägigen
 Zeiträumen und Tageswerten das Datum. Die Beschriftungsdichte passt sich der
@@ -113,6 +154,10 @@ Die Formularvorschauen verwenden ausdrücklich gekennzeichnete Beispieldaten
 einschließlich einer Lücke. Änderungen werden vor dem Speichern sichtbar,
 ohne Archivabfragen auszulösen. Kachel und IPSView passen sich ihrer Größe an;
 der Diagrammtitel steht in der Kachel unter dem Symcon-Kachelkopf.
+Die Vorschau zeichnet höchstens acht anfangs sichtbare Bänder und nennt bei
+einem Ausschnitt die gezeichnete und konfigurierte Anzahl. Bei deaktivierter
+Bandauswahl werden Anfangssichtbarkeiten ignoriert. Vollständig ausgeblendet
+bedeutet keine erfundenen Beispielbänder; die Legende bleibt verfügbar.
 
 Unter **IPSView-Design** lässt sich eine eigenständige WebContent-Variable
 aktivieren (`IPSViewThemeRiver`, String, nur lesend). Standardmäßig erbt sie

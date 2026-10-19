@@ -101,6 +101,9 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Nichtnegative Stunden- oder Tagesmittelwerte gleicher Einheit liegen als
   Archivbänder im eigenständigen `EChartsThemeRiver` gemäß ADR 0058;
   fehlende Quellen unterbrechen ein Intervall ohne Nullauffüllung.
+  Gemäß ADR 0069 sind bis zu 16 Quellen mit optionaler Bandauswahl und einem
+  gemeinsamen Ladebudget von 16000 Aggregaten zulässig. Auch versteckte
+  Quellen bleiben in Ladebudget und vollständiger Lückenprüfung enthalten.
 - Das Gateway stellt ausschließlich familienübergreifende Infrastruktur wie
   Archivzugriff, begrenztes Caching, gemeinsame Ressourcen und gegebenenfalls
   abgesicherte IPSView-Kommunikation bereit. Familienbezogene Properties,

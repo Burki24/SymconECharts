@@ -21,6 +21,20 @@ IPSView nur den Diagrammtitel benötigt.
 
 ## Aktueller Stand und Zielarchitektur
 
+ThemeRiver erweitert gemäß [ADR 0069](adr/0069-theme-river-band-selection.md)
+auf 16 Quellen. `EnableBandSelection` ist standardmäßig aus; das optionale
+Quellenfeld `InitiallyVisible` wirkt nur bei Aktivierung. Die flüchtige
+ID-Auswahl und Legendenanker nutzen den vorhandenen
+`echarts-series-selection.js`-Baustein, große Starts `EChartsStartupState`
+und `echarts-startup.js`. Die Geometrie projiziert lediglich sichtbare Werte
+aus dem vollständig verbundenen Zeilenmodell; ursprüngliche Nullzeilen bleiben
+Lücken. `ThemeRiverData` zentralisiert Quellen- und Ladegrenzen einschließlich
+`CountLoadedAggregates`: 16000 empfangene Aggregate, höchstens 1000 je Quelle,
+vor dem Join gezählt. 720 vollständige Intervalle bleiben die Darstellungsgrenze.
+Modell- und HTML-Guards liegen bei 900000 Bytes beziehungsweise 1 MiB.
+Die Vorschau zeigt höchstens acht wirksam anfangs sichtbare Bänder mit
+Original-Farbindizes und gekennzeichneten Gesamtzahlen ohne Archivzugriff.
+
 EChartsBarHistory erweitert gemäß
 [ADR 0068](adr/0068-historical-bar-series-selection.md) auf 32 Quellen und
 200–32000 Gesamtpunkte, behält aber Default 1000, 2000 je Abfrage/Reihe und

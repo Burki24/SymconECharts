@@ -10,6 +10,8 @@
     var chart = null;
     var currentState = bootstrap.state || null;
     var currentTheme = null;
+    var seriesSelection = window.SYMC_ECHARTS_SERIES_SELECTION.create();
+    var selectionEnabled = null;
 
     function translate(text) { return (bootstrap.translations || {})[text] || text; }
     var retainOnTransientError = design.createTransientFailureRetainer(
@@ -91,6 +93,20 @@
         var style = river.style || {};
         var sources = river.sources || [];
         var rows = river.rows || [];
+        var selectable = river.enableBandSelection === true;
+        if (selectionEnabled !== selectable) {
+            seriesSelection = window.SYMC_ECHARTS_SERIES_SELECTION.create();
+            selectionEnabled = selectable;
+        }
+        var showLegend = style.showLegend !== false || selectable;
+        var selected = seriesSelection.reconcile(sources.map(function (source) {
+            return selectable ? source : Object.assign({}, source, {initiallyVisible: true});
+        }));
+        var bandIndices = sources.map(function (_, index) { return index; }).filter(function (index) {
+            return !selectable || selected[sources[index].id];
+        });
+        var bandSources = bandIndices.map(function (index) { return sources[index]; });
+        function bandValues(row) { return bandIndices.map(function (index) { return row.values[index]; }); }
         pointerRow = null;
         var width = Math.max(1, chartElement.clientWidth || 1);
         var height = Math.max(1, chartElement.clientHeight || 1);
@@ -108,11 +124,11 @@
         var legendLineHeight = Math.ceil(legendFont * 1.25);
         var axisMargin = style.axisLabelMargin === undefined ? 12 : Number(style.axisLabelMargin);
         var legendHeight = Math.max(16, Number(style.legendItemHeight) || 14, legendLineHeight) + 10;
-        var legendAtTop = style.showLegend !== false && style.legendPosition === 'top';
+        var legendAtTop = showLegend && style.legendPosition === 'top';
         var legendBottom = 10 + (river.missingIntervals > 0 ? 36 : 0);
         var axisExtent = style.showAxisLabels !== false ? axisMargin + axisLineHeight * (dateTime ? 2 : 1) : (style.showAxisTicks !== false ? 5 : 0);
         // Separate footer bands: labels, breathing room, scroll legend, optional archive warning.
-        var bottom = legendBottom + axisExtent + (style.showLegend !== false && !legendAtTop ? legendHeight + 20 : 4);
+        var bottom = legendBottom + axisExtent + (showLegend && !legendAtTop ? legendHeight + 20 : 4);
         var top = Math.min(titleBottom + (legendAtTop ? legendHeight + 16 : 0), Math.max(12, height - bottom - 20));
         var actualBottom = Math.max(top + 8, height - bottom);
         var left = compact ? 22 : 46, right = compact ? 22 : 46;
@@ -121,9 +137,13 @@
         plotBounds = {left: left, right: width - right, top: top, bottom: actualBottom};
         var colorList = palette(theme).seriesColors || ['#5070DD', '#B6D634', '#FF994D', '#FB628B', '#55CBB5', '#B693E8', '#D0A662', '#6C9EA8'];
         var sourceColors = sources.map(function (source, index) { return source.color || colorList[index % colorList.length]; });
-        // Normalize before summing: even eight finite values near Number.MAX_VALUE must remain drawable.
+        var bandColors = bandIndices.map(function (index) { return sourceColors[index]; });
+        // Projection affects geometry only. Original null rows always remain common archive gaps.
+        // Normalize before summing so finite values near Number.MAX_VALUE remain drawable.
         var maximum = 0;
-        rows.forEach(function (row) { (row.values || []).forEach(function (value) { maximum = Math.max(maximum, value); }); });
+        rows.forEach(function (row) { if (Array.isArray(row.values)) {
+            bandValues(row).forEach(function (value) { maximum = Math.max(maximum, value); });
+        } });
         var runs = [], run = [];
         rows.forEach(function (row) {
             if (!Array.isArray(row.values)) { if (run.length) { runs.push(run); run = []; } return; }
@@ -133,14 +153,14 @@
         var globalTotal = 0;
         runs.forEach(function (segment) {
             segment.forEach(function (row) {
-                globalTotal = Math.max(globalTotal, row.values.reduce(function (sum, value) { return sum + (maximum ? value / maximum : 0); }, 0));
+                globalTotal = Math.max(globalTotal, bandValues(row).reduce(function (sum, value) { return sum + (maximum ? value / maximum : 0); }, 0));
             });
         });
         var series = [], labels = [];
         runs.forEach(function (segment, index) {
             var localTotal = 0;
             segment.forEach(function (row) {
-                localTotal = Math.max(localTotal, row.values.reduce(function (sum, value) { return sum + (maximum ? value / maximum : 0); }, 0));
+                localTotal = Math.max(localTotal, bandValues(row).reduce(function (sum, value) { return sum + (maximum ? value / maximum : 0); }, 0));
             });
             // Native ThemeRiver divides by the local maximum: never hand it an all-zero run.
             if (!(localTotal > 0)) { return; }
@@ -148,15 +168,15 @@
             if (style.showLabels === true && series.length === 0) {
                 // ECharts 6.1 ThemeRiver omits labelFetcher, so its label.formatter cannot replace internal IDs.
                 // Draw bounded source names as public Graphic elements; never change the upstream renderer.
-                var first = segment[0], total = first.values.reduce(function (sum, value) {return sum + value / maximum;}, 0);
+                var first = segment[0], total = bandValues(first).reduce(function (sum, value) {return sum + value / maximum;}, 0);
                 var scale = bandFraction * (actualBottom - top) / globalTotal;
                 var y = top + padding / 100 * (actualBottom - top) + (localTotal - total) / 2 * scale;
                 var labelFont = design.fontSizePercent(style.labelFontSizePercent, compact ? 10 : 12);
                 var duration = model.range.endTimestamp + 1 - model.range.startTimestamp;
                 var x = left + (first.startTimestamp - model.range.startTimestamp) / duration * (width - left - right) + 6;
                 var labelWidth = Math.min(160, (segment[segment.length - 1].endTimestamp + 1 - first.startTimestamp) / duration * (width - left - right) - 12);
-                sources.forEach(function (source, sourceIndex) {
-                    var bandHeight = first.values[sourceIndex] / maximum * scale;
+                bandSources.forEach(function (source, sourceIndex) {
+                    var bandHeight = first.values[bandIndices[sourceIndex]] / maximum * scale;
                     if (bandHeight >= labelFont + 4 && labelWidth >= 24) {
                         labels.push({type: 'text', silent: true, z: 20, x: x, y: y + bandHeight / 2,
                             style: {text: source.label, fill: style.labelColor || colors.text, fontSize: labelFont,
@@ -167,9 +187,9 @@
                 });
             }
             var data = [];
-            sources.forEach(function (source, sourceIndex) {
+            bandSources.forEach(function (source, sourceIndex) {
                 function point(time, row) {
-                    data.push([time, row.values[sourceIndex] / maximum, source.id, rows.indexOf(row)]);
+                    data.push([time, row.values[bandIndices[sourceIndex]] / maximum, source.id, rows.indexOf(row)]);
                 }
                 point(segment[0].startTimestamp * 1000, segment[0]);
                 segment.forEach(function (row) {
@@ -179,7 +199,7 @@
             });
             series.push({
                 id: 'river-run-' + index, type: 'themeRiver', singleAxisIndex: 0,
-                color: sourceColors, colorBy: 'data', boundaryGap: [padding + '%', padding + '%'],
+                color: bandColors, colorBy: 'data', boundaryGap: [padding + '%', padding + '%'],
                 label: {show: false},
                 emphasis: {disabled: style.emphasisEnabled === false, focus: style.emphasisFocus || 'self', label: {show: false}},
                 blur: {itemStyle: {opacity: opacity * Number(style.blurOpacityPercent === undefined ? 10 : style.blurOpacityPercent) / 100}},
@@ -197,6 +217,14 @@
                 return {id: 'zero-source-' + index, name: source.id, type: 'themeRiver', singleAxisIndex: 0,
                     data: [], itemStyle: {color: sourceColors[index]}, label: {show: false}};
             });
+        } else if (selectable) {
+            // Hidden bands need named, empty series to keep native legend toggles available.
+            sources.forEach(function (source, index) {
+                if (!selected[source.id]) {
+                    series.push({id: 'hidden-' + source.id, name: source.id, type: 'themeRiver', singleAxisIndex: 0,
+                        data: [], itemStyle: {color: sourceColors[index]}, label: {show: false}});
+                }
+            });
         }
         return {
             backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true ? 'transparent' : colors.background,
@@ -210,7 +238,10 @@
             title: {show: titleLayout.show, text: String(river.title || ''), left: 'center', top: titleLayout.top,
                 textStyle: {color: style.titleColor || colors.text, fontSize: titleSize, fontFamily: fontFamily,
                     fontWeight: style.titleBold === false ? 'normal' : 'bold', fontStyle: style.titleItalic ? 'italic' : 'normal'}},
-            legend: {show: style.showLegend !== false, type: 'scroll', selectedMode: false,
+            legend: {show: showLegend, type: 'scroll', selectedMode: selectable,
+                selected: Object.assign({}, selected), scrollDataIndex: seriesSelection.scrollDataIndex(),
+                selector: selectable ? [{type: 'all', title: translate('All')}, {type: 'inverse', title: translate('Invert')}] : [],
+                selectorLabel: {color: style.legendColor || colors.text, fontSize: legendFont},
                 left: style.legendAlignment === 'right' ? undefined : style.legendAlignment === 'center' ? 'center' : 12,
                 right: style.legendAlignment === 'center' ? undefined : 12,
                 top: legendAtTop ? titleBottom : undefined, bottom: legendAtTop ? undefined : legendBottom,
@@ -264,6 +295,7 @@
     }
     function render(state) {
         if (retainOnTransientError(state, currentState, chart)) { return; }
+        seriesSelection.capture(chart);
         currentState = state;
         if (!state || state.status !== 'ready' || !state.chart) {
             displayError(state && state.error);
@@ -296,29 +328,39 @@
             chart = window.echarts.init(chartElement, theme === 'auto' ? null : theme, { renderer: 'canvas' });
             currentTheme = theme;
             bindPointer();
+            ['legendselectchanged', 'legendselectall', 'legendinverseselect'].forEach(function (eventName) {
+                chart.on(eventName, function () { if (currentState) { render(currentState); } });
+            });
         } else if (wasHidden) {
             chart.resize();
         }
         chart.setOption(buildOption(model, theme), true);
         chart.dispatchAction({type: 'hideTip'});
-        emptyElement.textContent = translate('All completed interval means are zero.');
-        emptyElement.hidden = themeRiver.rows.some(function (row) { return Array.isArray(row.values) && row.values.some(function (v) { return v > 0; }); });
+        var selected = chart.getOption().legend[0].selected || {};
+        var anySelected = themeRiver.enableBandSelection !== true || themeRiver.sources.some(function (source) { return selected[source.id] !== false; });
+        var positiveOriginal = themeRiver.rows.some(function (row) {
+            return Array.isArray(row.values) && row.values.some(function (value) { return value > 0; });
+        });
+        emptyElement.textContent = translate(!anySelected ? 'No bands selected.' :
+            themeRiver.enableBandSelection === true && positiveOriginal ? 'All selected interval means are zero.' : 'All completed interval means are zero.');
+        emptyElement.hidden = hasBands;
     }
     window.handleMessage = function (message) {
         var state = design.parseVisualizationState(message);
-        if (state) { render(state); }
+        if (state) { if (cancelStartup) { cancelStartup(); } render(state); }
     };
-    if (window.ResizeObserver) {
-        new ResizeObserver(function () {
-            if (!design.resizeChartIfNeeded(chart, chartElement)) { return; }
-            if (currentState && currentState.status === 'ready') {
-                chart.setOption(buildOption(currentState.chart, currentTheme || 'auto'), true);
-                chart.dispatchAction({type: 'hideTip'});
-            }
-        }).observe(chartElement);
-    } else {
-        window.addEventListener('resize', function () { if (chart) { chart.resize(); } });
+    function resize() {
+        if (!design.resizeChartIfNeeded(chart, chartElement)) { return; }
+        if (currentState && currentState.status === 'ready') {
+            seriesSelection.capture(chart);
+            chart.setOption(buildOption(currentState.chart, currentTheme || 'auto'), true);
+            chart.dispatchAction({type: 'hideTip'});
+        }
     }
-    window.addEventListener('beforeunload', function () { if (chart) { chart.dispose(); } });
-    render(currentState);
+    if (window.ResizeObserver) { new ResizeObserver(resize).observe(chartElement); }
+    else { window.addEventListener('resize', resize); }
+    window.addEventListener('beforeunload', function () { if (cancelStartup) { cancelStartup(); } if (chart) { chart.dispose(); } });
+    var cancelStartup = window.SYMC_ECHARTS_STARTUP(bootstrap, render, function () {
+        displayError('The ThemeRiver values could not be loaded.');
+    });
 }());

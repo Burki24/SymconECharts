@@ -4,27 +4,57 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
+const zlib = require('node:zlib');
 const root = path.join(__dirname, '..');
 const source = fs.readFileSync(path.join(root, 'EChartsThemeRiver/visualization/app.js'), 'utf8');
 const designSource = fs.readFileSync(path.join(root, 'libs/echarts-design.js'), 'utf8');
+const selectionSource = fs.readFileSync(path.join(root, 'libs/echarts-series-selection.js'), 'utf8');
+const startupSource = fs.readFileSync(path.join(root, 'libs/echarts-startup.js'), 'utf8');
 const palette = {background: '#101114', text: '#f4f5f7', muted: '#969aa2', border: '#737780', accent: '#55cbb5', seriesColors: ['#5070DD', '#B6D634']};
-function render(model, mode = 'symcon', width = 900, height = 500, headerVisible = true) {
+function render(model, mode = 'symcon', width = 900, height = 500, headerVisible = true, createEngine = null, startup = null) {
     const elements = Object.fromEntries(['chart', 'error', 'empty', 'warning'].map(name => [name,
         {hidden: name !== 'chart', textContent: '', clientWidth: width, clientHeight: height}]));
     let option;
+    let resolveStartup, startupJSON;
+    let resizeCallback;
     const events = {}, actions = [];
-    const chart = {setOption: next => {option = next;}, clear: () => {}, resize: () => {}, dispose: () => {},
+    const chart = createEngine ? createEngine() : {setOption: next => {option = next;}, clear: () => {}, resize: () => {}, dispose: () => {},
+        on: (event, handler) => {events[event] = handler;},
+        getOption: () => ({...option, legend: [option.legend]}),
         getZr: () => ({on: (event, handler) => {events[event] = handler;}}),
         convertFromPixel: () => model.range.startTimestamp * 1000,
         dispatchAction: action => actions.push(action)};
     const window = {SYMC_VISUALIZATION: {mode, language: 'de', state: {status: 'ready', chart: model}, translations: {},
         options: {echartsThemes: {auto: palette, dark: palette}, tileHeaderVisible: headerVisible, adaptToBackground: mode === 'ipsview'}},
-        echarts: {init: () => chart}, addEventListener: () => {}, getComputedStyle: () => ({color: ''})};
+        echarts: {init: () => chart}, addEventListener: (event, handler) => {events[event] = handler;}, getComputedStyle: () => ({color: ''}),
+        ResizeObserver: createEngine ? class {constructor(callback) {resizeCallback = callback;} observe() {}} : undefined};
+    if (startup === true) {
+        startupJSON = JSON.stringify(window.SYMC_VISUALIZATION.state);
+        window.SYMC_VISUALIZATION.options.compressedStateGzipBase64 = zlib.gzipSync(startupJSON).toString('base64');
+        window.SYMC_VISUALIZATION.state = null;
+        window.atob = value => Buffer.from(value, 'base64').toString('binary');
+        window.Blob = class {constructor(parts) {this.bytes = parts[0];}
+            stream() {return {pipeThrough: () => this.bytes};}};
+        window.DecompressionStream = class {constructor(format) {assert.equal(format, 'gzip');}};
+        window.Response = class {constructor(bytes) {startupJSON = zlib.gunzipSync(Buffer.from(bytes)).toString('utf8');}
+            text() {return new Promise(resolve => {resolveStartup = resolve;});}};
+    } else if (startup) {Object.assign(window, startup);}
+    if (createEngine) {
+        const setOption = chart.setOption.bind(chart);
+        chart.setOption = (next, ...args) => {option = next; setOption(next, ...args);};
+        const nativeResize = chart.resize.bind(chart);
+        // SSR has no DOM from which to measure the new dimensions. Supply that genuine boundary explicitly.
+        chart.resize = options => nativeResize(options || {width: elements.chart.clientWidth, height: elements.chart.clientHeight});
+    }
     const document = {body: {appendChild: () => {}}, createElement: () => ({style: {}, remove: () => {}}),
         getElementById: id => elements[id.replace('echarts-theme-river-', '')]};
     vm.runInNewContext(designSource, {window});
-    vm.runInNewContext(source, {window, document});
-    return {get option() {return option;}, ...elements, window, engine: chart, events, actions};
+    vm.runInNewContext(selectionSource, {window});
+    vm.runInNewContext(startupSource, {window});
+    vm.runInNewContext(source, {window, document, ResizeObserver: window.ResizeObserver});
+    return {get option() {return option;}, ...elements, window, engine: chart, events, actions,
+        resolveStartup: () => resolveStartup(startupJSON),
+        resize: (nextWidth, nextHeight) => {elements.chart.clientWidth = nextWidth; elements.chart.clientHeight = nextHeight; resizeCallback();}};
 }
 const start = 1792144800;
 const row = (index, values) => ({startTimestamp: start + index * 3600, endTimestamp: start + (index + 1) * 3600 - 1,
@@ -261,4 +291,112 @@ const fragmentedEngine = echarts.init(null, null, {renderer: 'svg', ssr: true, w
 fragmentedEngine.setOption(fragmented.option);
 assert.ok(!fragmentedEngine.renderToSVGString().includes('NaN'), 'The maximal fragmented window must remain finite in the real engine.');
 fragmentedEngine.dispose();
-console.log('ThemeRiver options, time labels, footer spacing, pointers, gaps, identity, scaling and real ECharts geometry verified.');
+const sixteen = {...model, range: {...model.range, endTimestamp: start + 720 * 3600 - 1}, themeRiver: {...model.themeRiver,
+    enableBandSelection: true, missingIntervals: 2,
+    sources: Array.from({length: 16}, (_, i) => ({id: 'variable-' + (10000 + i), label: i < 2 ? '<Same>' : 'Source ' + i,
+        unit: 'W', decimals: 2, initiallyVisible: i !== 1, color: i === 0 ? '#ABCDEF' : ''})),
+    rows: Array.from({length: 720}, (_, i) => row(i, i === 200 || i === 500 ? null : Array.from({length: 16}, (_, j) => (i % 10 + 1) * (j + 1))))}};
+const originalSixteen = JSON.stringify(sixteen);
+function assertNativeFinite(engine) {
+    assert.doesNotMatch(engine.renderToSVGString(), /NaN|Infinity|>variable-\d+</);
+}
+for (const mode of ['symcon', 'ipsview']) {
+    const engine = echarts.init(null, null, {renderer: 'svg', ssr: true, width: 400, height: 500});
+    const output = render(sixteen, mode, 400, 500, true, () => engine);
+    assert.equal(output.option.legend.data.length, 16);
+    assert.equal(output.option.legend.selectedMode, true);
+    assert.equal(output.option.legend.selected['variable-10001'], false);
+    assert.equal(output.option.series.filter(s => s.data.length).length, 3, 'Original null rows split three runs despite the hidden source.');
+    assert.ok(output.option.series.filter(s => s.data.length).every(s => s.data.length % 15 === 0));
+    assert.match(output.option.tooltip.formatter({data: output.option.series[0].data[0]}), /&lt;Same&gt;: 2 W/,
+        'The tooltip retains hidden original values and units.');
+    assertNativeFinite(engine);
+    engine.dispatchAction({type: 'legendToggleSelect', name: 'variable-10000'});
+    assert.equal(output.option.legend.selected['variable-10000'], false);
+    assert.equal(output.option.legend.selected['variable-10001'], false, 'Same labels do not merge independent source identities.');
+    engine.dispatchAction({type: 'legendScroll', scrollDataIndex: 8});
+    const reversed = {...sixteen, themeRiver: {...sixteen.themeRiver,
+        sources: [...sixteen.themeRiver.sources].reverse(),
+        rows: sixteen.themeRiver.rows.map(r => ({...r, values: r.values && [...r.values].reverse()}))}};
+    output.window.handleMessage({status: 'ready', chart: reversed});
+    assert.equal(output.option.legend.selected['variable-10000'], false);
+    assert.equal(output.option.legend.scrollDataIndex, 7, 'Legend scroll follows its source ID after reorder.');
+    let unitScale;
+    for (const series of engine.getModel().getSeries().filter(s => s.getData().count())) {
+        const data = series.getData();
+        const point = data.getItemLayout(0);
+        const value = output.option.series.find(s => s.id === series.id).data[0][1];
+        if (unitScale === undefined) {unitScale = point.y / value;}
+        else {assert.ok(Math.abs(point.y / value - unitScale) < 1e-9, 'Selected bands retain a common scale over all gap-separated runs.');}
+        assert.ok(Array.from({length: data.count()}, (_, i) => data.getItemLayout(i)).every(p => Number.isFinite(p.x) && Number.isFinite(p.y)));
+    }
+    engine.dispatchAction({type: 'legendAllSelect'});
+    assert.ok(Object.values(output.option.legend.selected).every(Boolean));
+    engine.dispatchAction({type: 'legendInverseSelect'});
+    assert.ok(Object.values(output.option.legend.selected).every(v => v === false));
+    assert.equal(output.empty.textContent, 'No bands selected.');
+    assert.equal(output.empty.hidden, false);
+    assert.ok(output.option.series.every(s => s.data.length === 0));
+    assertNativeFinite(engine);
+    engine.dispatchAction({type: 'legendToggleSelect', name: 'variable-10001'});
+    assert.equal(output.empty.hidden, true, 'An all-hidden band remains selectable through its empty legend series.');
+    assert.ok(output.option.series.filter(s => s.data.length).every(s => s.data.every(p => p[2] === 'variable-10001')));
+    output.resize(650, 500);
+    assert.equal(engine.getWidth(), 650);
+    assert.equal(output.option.legend.selected['variable-10001'], true, 'ResizeObserver preserves selection without needing a new full state.');
+    assert.equal(output.option.legend.selected['variable-10000'], false);
+    output.window.handleMessage({status: 'ready', chart: reversed});
+    assert.equal(output.option.legend.selected['variable-10001'], true);
+    assert.equal(output.option.legend.selected['variable-10000'], false);
+    const removed = {...reversed, themeRiver: {...reversed.themeRiver, sources: reversed.themeRiver.sources.slice(1),
+        rows: reversed.themeRiver.rows.map(r => ({...r, values: r.values && r.values.slice(1)}))}};
+    output.window.handleMessage({status: 'ready', chart: removed});
+    assert.equal(Object.keys(output.option.legend.selected).length, 15);
+    assert.equal(output.option.legend.selected['variable-10015'], undefined);
+    const disabled = {...sixteen, themeRiver: {...sixteen.themeRiver, enableBandSelection: false}};
+    output.window.handleMessage({status: 'ready', chart: disabled});
+    assert.equal(output.option.legend.selectedMode, false);
+    assert.ok(Object.values(output.option.legend.selected).every(Boolean), 'Disabling optional selection restores every source, ignoring initial flags.');
+    assert.ok(output.option.series.every(s => s.data.length % 16 === 0));
+    assertNativeFinite(engine);
+    engine.dispose();
+}
+const allInitiallyHidden = render({...sixteen, themeRiver: {...sixteen.themeRiver,
+    sources: sixteen.themeRiver.sources.map(s => ({...s, initiallyVisible: false})), style: {...sixteen.themeRiver.style, showLegend: false}}});
+assert.equal(allInitiallyHidden.option.legend.show, true, 'Enabled selection keeps a visible way to restore hidden bands.');
+assert.equal(allInitiallyHidden.empty.textContent, 'No bands selected.');
+const zeroSelected = render({...model, themeRiver: {...model.themeRiver, enableBandSelection: true,
+    rows: [row(0, [0, 100])], sources: model.themeRiver.sources.map((s, i) => ({...s, initiallyVisible: i === 0}))}});
+assert.equal(zeroSelected.empty.textContent, 'All selected interval means are zero.');
+assert.equal(zeroSelected.empty.hidden, false);
+assert.equal(JSON.stringify(sixteen), originalSixteen, 'Selection cannot mutate any full original model values or gaps.');
+const manyGaps = render({...sixteen, themeRiver: {...sixteen.themeRiver,
+    missingIntervals: 360, rows: sixteen.themeRiver.rows.map((r, i) => ({...r,
+        values: i % 2 ? null : Array.from({length: 16}, (_, j) => j + 1)}))}});
+assert.equal(manyGaps.option.series.filter(s => s.data.length).length, 360);
+const nativeManyGaps = echarts.init(null, null, {renderer: 'svg', ssr: true, width: 400, height: 500});
+nativeManyGaps.setOption(manyGaps.option);
+for (const series of nativeManyGaps.getModel().getSeries().filter(s => s.getData().count())) {
+    assert.equal(series.getData().count(), 45, 'Each isolated interval contains three endpoints per visible source, with no native zero filling.');
+}
+assertNativeFinite(nativeManyGaps);
+nativeManyGaps.dispose();
+async function verifyCompressedStartup() {
+    const delayed = render(sixteen, 'symcon', 400, 500, true, null, true);
+    assert.equal(delayed.option, undefined);
+    delayed.resolveStartup();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(delayed.option.legend.data.length, 16);
+    const superseded = render(sixteen, 'ipsview', 400, 500, true, null, true);
+    superseded.window.handleMessage({status: 'ready', chart: model});
+    superseded.resolveStartup();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(superseded.option.legend.data.length, 2, 'A delayed compressed startup never overwrites a newer full state.');
+    const unloaded = render(sixteen, 'symcon', 400, 500, true, null, true);
+    unloaded.events.beforeunload();
+    unloaded.resolveStartup();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(unloaded.option, undefined, 'Unloading cancels asynchronous startup.');
+}
+verifyCompressedStartup().then(() => console.log('ThemeRiver options, 16-band selection, identity, refresh, scaling, gaps, compressed startup and real ECharts geometry verified.'))
+    .catch(error => {console.error(error); process.exitCode = 1;});

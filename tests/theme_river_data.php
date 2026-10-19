@@ -54,4 +54,26 @@ try {
 } catch (InvalidArgumentException $exception) {
     assertRiver(str_contains($exception->getMessage(), 'shorter range or a longer interval'), 'Interval limits must explain the available choices.');
 }
+$sixteen = array_fill(0, 16, [[$t[0], 1.0]]);
+assertRiver(
+    count(ThemeRiverData::Join($sixteen, $slots)['rows'][0]['values']) === 16,
+    'Sixteen configured bands must retain all original interval means.'
+);
+$loaded = 0;
+for ($source = 0; $source < 16; ++$source) {
+    $loaded = ThemeRiverData::CountLoadedAggregates($loaded, 1000);
+}
+assertRiver($loaded === 16000, 'The common load budget must admit exactly 16000 aggregates.');
+foreach ([[16000, 1], [0, 1001]] as [$loaded, $next]) {
+    try {
+        ThemeRiverData::CountLoadedAggregates($loaded, $next);
+        throw new LogicException('Excessive aggregate load accepted.');
+    } catch (InvalidArgumentException) {
+    }
+}
+try {
+    ThemeRiverData::Join([...$sixteen, $sixteen[0]], $slots);
+    throw new LogicException('Seventeen river bands accepted.');
+} catch (InvalidArgumentException) {
+}
 echo "ThemeRiver data verified.\n";

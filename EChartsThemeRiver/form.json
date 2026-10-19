@@ -20,6 +20,15 @@
             "changeOrder": true,
             "columns": [
                 {
+                    "caption": "Initially visible",
+                    "name": "InitiallyVisible",
+                    "width": "120px",
+                    "add": true,
+                    "edit": {
+                        "type": "CheckBox"
+                    }
+                },
+                {
                     "caption": "Variable",
                     "name": "VariableID",
                     "width": "320px",
@@ -54,6 +63,11 @@
             ],
             "form": [
                 {
+                    "type": "CheckBox",
+                    "name": "InitiallyVisible",
+                    "caption": "Initially visible"
+                },
+                {
                     "type": "SelectVariable",
                     "name": "VariableID",
                     "caption": "Variable",
@@ -78,7 +92,16 @@
         },
         {
             "type": "Label",
-            "caption": "Choose 1 to 8 standard archive variables of the same unit. Only nonnegative completed interval means are supported. Intervals missing on any source remain blank."
+            "caption": "Choose 1 to 16 standard archive variables of the same unit. Only nonnegative completed interval means are supported. Intervals missing on any source remain blank."
+        },
+        {
+            "type": "CheckBox",
+            "name": "EnableBandSelection",
+            "caption": "Enable band selection"
+        },
+        {
+            "type": "Label",
+            "caption": "Initial visibility applies only when band selection is enabled. Hidden sources remain in the shared 16000-aggregate load budget and common gap checks."
         },
         {
             "type": "RowLayout",

@@ -1,5 +1,41 @@
 # Tests
 
+## ThemeRiver: 16 Quellen und optionale Bandauswahl
+
+`php tests/theme_river_data.php` prüft 16/17 Reihen und den zentralen
+Ladezähler exakt bei 16000/16001 Aggregaten und 1000/1001 je Quelle.
+`php tests/gateway_gauges.php --theme-river-many` nutzt echte Gateway-Operationen
+mit synthetischen Kernel-Archiven: 16×720 Originalwerte, unveränderte 8er-Listen,
+deaktivierter Default, boolesche Anfangssichtbarkeit und IDs trotz gleicher
+Namen. Versteckte Quellen bleiben in Referenzen, Abfragen, Ladezähler und
+vollständigem gemeinsamen Join. Eine Lücke der versteckten Quelle bleibt
+`null`; echte Nullwerte werden nicht als fehlend behandelt. Negative Werte,
+Zählerarchive und übergroße Antworten werden ohne Teilmodell abgewiesen.
+
+Die Prüfung entpackt beide großen Startzustände und vergleicht alle Quellen,
+Zeilen und Originalwerte exakt. Gemessen am 19.10.2026: Modell 352320 Bytes,
+Kachel 607527 Bytes und IPSView 610814 Bytes. Getrennte Regressionen prüfen
+900000-Byte-Modellgrenze und finalen HTML-Guard, klare Fehler und Wiederanlauf.
+Das Test-Speicherlimit bleibt 128 MiB. Vorschauen decken 4/16, 0/16, spät
+sichtbare Originalfarben und deaktivierte Auswahl mit 8/16 ab; Entwürfe lösen
+keine Archivabfragen oder gespeicherten Konfigurationsänderungen aus.
+
+`node tests/theme_river_layout.js` verwendet die echte gepinnte ECharts-Runtime
+für beide Ausgabearten mit 16 Quellen und 720 Intervallen. Geprüft werden
+Einzel-/Alle-/Umkehrauswahl, vollständiges Ausblenden/Wiederherstellen,
+Legendenanker, Update/Reorder/Removal/Resize, gleiche Namen und Originaltooltips.
+Die ursprünglichen Lücken bleiben bei jeder Auswahl erhalten, einschließlich
+360 getrennter Abschnitte und gemeinsamem ausgewähltem Darstellungsmaßstab.
+Nullarchive, ausgewählte Nullbänder und keine Auswahl sind unterscheidbar.
+Verzögerte komprimierte Starts, neuere Vollzustände und Unload sind abgesichert.
+
+`node tests/theme_river_browser.mjs` bietet eine lokale synthetische
+Canvas-Fixture auf Port 8802. Am 19.10.2026 wurden beide Ausgabearten mit
+16 Quellen/720 Intervallen visuell geprüft: native Legende, Auswahl, Refresh
+und Umsortierung sowie vollständiges Ausblenden und Wiederherstellen.
+Die neue Live-Abnahme in Symcon/IPSView nach Modulupdate bleibt offen;
+Live-Konfigurationen und Archive wurden nicht verändert.
+
 ## BarHistory: 32 Reihen mit gemeinsamer Reihenauswahl
 
 `php tests/gateway_gauges.php --bar-history-many` prüft echte Gateway-

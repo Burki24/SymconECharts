@@ -9,6 +9,13 @@
 
 ## Neu
 
+- EChartsThemeRiver unterstützt bis zu 16 Quellen und ein gemeinsames
+  Ladebudget von 16.000 Aggregaten. Die optionale, standardmäßig deaktivierte
+  Bandauswahl bietet Anfangssichtbarkeit, Alle/Umkehren und erhaltene Auswahl
+  bei Aktualisierungen. Ausgeblendete Quellen werden weiter geladen und
+  schließen keine Archivlücken. Bestehende Konfigurationen bleiben nutzbar;
+  Vorschauausschnitte und übergroße Ausgaben werden ausdrücklich gekennzeichnet.
+
 - EChartsBarHistory unterstützt bis zu 32 Quellen und 32.000 Gesamtpunkte
   bei unverändertem Standardbudget von 1.000. Scrollbare Reihenauswahl mit
   Alle/Umkehren und Anfangssichtbarkeit erhält Auswahl und Zeitzoom bei

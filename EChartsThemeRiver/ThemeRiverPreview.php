@@ -25,11 +25,18 @@ trait ThemeRiverPreview
         $textStyle = fn (string $prefix): string => ' font-weight="' . ($this->BarPreviewValue($values, $prefix . 'Bold', 'boolean', $ipsView) ? 'bold' : 'normal')
             . '" font-style="' . ($this->BarPreviewValue($values, $prefix . 'Italic', 'boolean', $ipsView) ? 'italic' : 'normal') . '"';
         $svg = str_replace('<text x="24"', '<text' . $textStyle('Title') . ' x="24"', $svg);
-        $items = array_slice(EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values, 'Label', false)['items'], 0, 8);
+        $allItems = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values, 'Label', false, ThemeRiverData::MAXIMUM_SOURCE_COUNT)['items'];
+        $selectionEnabled = (bool) ($values['EnableBandSelection'] ?? $this->ReadPropertyBoolean('EnableBandSelection'));
+        foreach ($allItems as $index => &$item) {
+            $item['previewPaletteIndex'] = $index;
+            $item['previewSelected'] = !$selectionEnabled || ($item['InitiallyVisible'] ?? true) !== false;
+        }
+        unset($item);
+        $items = array_slice(array_values(array_filter($allItems, static fn (array $item): bool => $item['previewSelected'])), 0, 8);
         $count = count($items);
         $n = EChartsBarPreview::N(...);
         $e = EChartsBarPreview::E(...);
-        $legend = $this->BarPreviewValue($values, 'ShowLegend', 'boolean', $ipsView);
+        $legend = $selectionEnabled || $this->BarPreviewValue($values, 'ShowLegend', 'boolean', $ipsView);
         $legendAtTop = $this->BarPreviewValue($values, 'LegendPosition', 'string', $ipsView) === 'top';
         $legendWidth = max(6, min(40, $this->BarPreviewValue($values, 'LegendItemWidth', 'integer', $ipsView)));
         $legendItemHeight = max(6, min(30, $this->BarPreviewValue($values, 'LegendItemHeight', 'integer', $ipsView)));
@@ -41,10 +48,11 @@ trait ThemeRiverPreview
         $axisFont = max(6, min(24, 11 * $this->BarPreviewValue($values, 'AxisFontSizePercent', 'integer', $ipsView) / 100));
         $legendFont = max(6, min(24, 11 * $this->BarPreviewValue($values, 'LegendFontSizePercent', 'integer', $ipsView) / 100));
         $legendHeight = max(16, $legendItemHeight, ceil($legendFont * 1.25)) + 10;
-        $legendTop = $legendAtTop ? 60 : 360 - 14 - $legendHeight;
+        $footerInset = $count < count($allItems) ? 18 : 0;
+        $legendTop = $legendAtTop ? 60 : 360 - 14 - $legendHeight - $footerInset;
         $top = $legend && $legendAtTop ? $legendTop + $legendHeight + 16 : 86;
         $axisExtent = $axisLabels ? $axisMargin + ceil($axisFont * 1.25) * ($dateTime ? 2 : 1) : ($axisTicks ? 5 : 0);
-        $axisY = ($legend && !$legendAtTop ? $legendTop - 20 : 342) - $axisExtent;
+        $axisY = ($legend && !$legendAtTop ? $legendTop - 20 : 342 - $footerInset) - $axisExtent;
         $bottom = $axisY - 16;
         $bandOpacity = max(0, min(100, $this->BarPreviewValue($values, 'BandOpacityPercent', 'integer', $ipsView))) / 100;
         $border = EChartsBarPreview::Color($this->BarPreviewValue($values, 'BorderColor', 'integer', $ipsView), $palette['border']);
@@ -77,7 +85,7 @@ trait ThemeRiverPreview
                 for ($source = 0; $source < $count; ++$source) {
                     $parts[] = 10 + 8 * (1 + sin($point * 0.7 + $source * 1.3));
                 }
-                $scale = ($bottom - $top) / ($count * 26) * max(20, min(100, $this->BarPreviewValue($values, 'BandHeightPercent', 'integer', $ipsView))) / 100;
+                $scale = ($bottom - $top) / (max(1, $count) * 26) * max(20, min(100, $this->BarPreviewValue($values, 'BandHeightPercent', 'integer', $ipsView))) / 100;
                 $y = ($top + $bottom - array_sum($parts) * $scale) / 2;
                 foreach ($parts as $source => $value) {
                     $edges[$source][] = [$left + ($right - $left) * $point / 8, $y, $y + $value * $scale];
@@ -85,7 +93,7 @@ trait ThemeRiverPreview
                 }
             }
             foreach ($items as $source => $item) {
-                $color = $item['color'] ?: $palette['seriesColors'][$source % count($palette['seriesColors'])];
+                $color = $item['color'] ?: $palette['seriesColors'][$item['previewPaletteIndex'] % count($palette['seriesColors'])];
                 $upper = array_map(static fn (array $p): string => $n($p[0]) . ',' . $n($p[1]), $edges[$source]);
                 $lower = array_map(static fn (array $p): string => $n($p[0]) . ',' . $n($p[2]), array_reverse($edges[$source]));
                 $svg .= '<polygon data-band="' . $source . '" points="' . implode(' ', [...$upper, ...$lower])
@@ -121,21 +129,25 @@ trait ThemeRiverPreview
             }
         }
         if ($legend) {
+            $legendItemsSource = $allItems;
+            $legendCount = count($legendItemsSource);
             $legendColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'LegendColor', 'integer', $ipsView), $palette['text']);
             // A scroll legend occupies one row; show a bounded first page rather than squeezing eight large labels.
-            $visible = min($count, max(1, (int) floor((648 + $legendGap) / ($legendWidth + 6 + $legendFont * 3 * 0.65 + $legendGap))));
-            $available = $visible < $count ? 648 : 672;
+            $visible = min($legendCount, max(1, (int) floor((648 + $legendGap) / ($legendWidth + 6 + $legendFont * 3 * 0.65 + $legendGap))));
+            $available = $visible < $legendCount ? 648 : 672;
             $slot = ($available - ($visible - 1) * $legendGap) / $visible;
             $legendItems = [];
-            foreach (array_slice($items, 0, $visible) as $item) {
+            foreach (array_slice($legendItemsSource, 0, $visible) as $item) {
                 $label = mb_strimwidth($item['label'], 0, max(3, (int) (($slot - $legendWidth - 6) / ($legendFont * 0.65))), '…');
                 $legendItems[] = ['label' => $label, 'width' => $legendWidth + 6 + mb_strwidth($label) * $legendFont * 0.65];
             }
             $totalWidth = array_sum(array_column($legendItems, 'width')) + ($visible - 1) * $legendGap;
             $alignment = $this->BarPreviewValue($values, 'LegendAlignment', 'string', $ipsView);
             $x = $alignment === 'center' ? (720 - $totalWidth) / 2 : ($alignment === 'right' ? 696 - $totalWidth : 24);
-            foreach (array_slice($items, 0, $visible) as $index => $item) {
-                $color = $item['color'] ?: $palette['seriesColors'][$index % count($palette['seriesColors'])];
+            foreach (array_slice($legendItemsSource, 0, $visible) as $index => $item) {
+                $color = $item['previewSelected']
+                    ? ($item['color'] ?: $palette['seriesColors'][$item['previewPaletteIndex'] % count($palette['seriesColors'])])
+                    : $palette['muted'];
                 $icon = $this->BarPreviewValue($values, 'LegendIcon', 'string', $ipsView);
                 $scaleX = $icon === 'circle' ? min($legendWidth, $legendItemHeight) / 2 : $legendWidth / 2;
                 $scaleY = $icon === 'circle' ? $scaleX : $legendItemHeight / 2;
@@ -145,10 +157,22 @@ trait ThemeRiverPreview
                     . $e($legendItems[$index]['label']) . '</text>';
                 $x += $legendItems[$index]['width'] + $legendGap;
             }
-            if ($visible < $count) {
+            if ($visible < $legendCount) {
                 $svg .= '<text x="696" y="' . $n($legendTop + $legendHeight / 2 + 4) . '" text-anchor="end" font-size="12" fill="' . $e($legendColor) . '">…</text>';
             }
         }
-        return $svg . '</svg>';
+        if ($selectionEnabled && $count === 0) {
+            $svg .= '<text x="360" y="' . $n(($top + $bottom) / 2) . '" text-anchor="middle" font-size="14" fill="'
+                . $e($palette['muted']) . '">' . $e($this->Translate('No bands selected.')) . '</text>';
+        }
+        return EChartsPreviewSourceCount::Append(
+            $svg . '</svg>',
+            $count,
+            count($allItems),
+            $this->Translate('Preview shows %d of %d sources'),
+            $palette['muted'],
+            696,
+            351
+        );
     }
 }

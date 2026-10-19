@@ -26,6 +26,8 @@ TreeSystemHealth erlauben zwölf Nachkommensebenen. EChartsGraph unterstützt
 TimeSeries bietet 32 Reihen mit Reihenauswahl und bis zu 32000 Gesamtpunkten.
 BarHistory bietet ebenfalls 32 Reihen mit Reihenauswahl und bis zu 32000
 Gesamtpunkten bei unverändertem Default von 1000.
+ThemeRiver unterstützt 16 Quellen mit optionaler Bandauswahl und einem
+gemeinsamen Ladebudget von 16000 Aggregaten bei unveränderten Lückenregeln.
 Die übrigen
 Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
 
@@ -43,6 +45,7 @@ Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
 | Erledigt | Graph: 300 Knoten und 1000 Verbindungen | ID-stabile Pan-/Zoom-Ansicht, weiterverwendete Kräftepositionen, begrenzter echter Vorschauausschnitt und Ausgabeprüfungen. Z2M-Budgets bleiben getrennt. |
 | Erledigt | TimeSeries: 32 Reihen mit Reihenauswahl | Scrollbare Legende, anfangs sichtbare Reihen, ID-stabile Auswahl/Zoom und höchstens 32000 Gesamtpunkte bei weiterhin höchstens 2000 je Reihe. |
 | Erledigt | BarHistory: 32 Reihen mit Reihenauswahl | Gemeinsame Auswahl-/Startlogik, tatsächliche Archivzeitstempel, bis 16 Einheitengruppen und 32000 Gesamtpunkte; Default 1000 bleibt erhalten. |
+| Erledigt | ThemeRiver: 16 Quellen mit optionaler Bandauswahl | 16000 Aggregate Ladebudget, höchstens 1000 je Quelle und weiterhin 720 Intervalle; versteckte Quellen bleiben in der gemeinsamen Lückenprüfung. |
 | Danach | Weitere Archiv- und Vergleichsreihen | Nur zusammen mit Navigation, Vorschaukennzeichnung und messbaren Ressourcenbudgets. |
 
 Normalisierung ist keine allgemeine Lösung für unterschiedliche Einheiten:
@@ -106,7 +109,7 @@ Candlestick-Anfangswert ausgegeben werden.
 | EChartsCalendarPie | Je nach Modus 1–5 numerische Quellen oder eine diskrete Zustandsquelle; Tagesmittel, Zählerverbrauch oder Zustandsdauer. Bis 32 Zustände. Optionale Min/Max-Normalisierung samt Originaleinheiten bereits vorhanden; Monatsmodell höchstens 250000 Bytes. | 1–5 ist die ausdrückliche aktuelle Produktentscheidung, keine sofort aufzuhebende Grenze. Optional verfügbare Teilquellen eines Tages anzeigen, aber nur mit deutlichem Unvollständigkeitshinweis; strenger Standard bleibt sinnvoll. |
 | EChartsBoxplot | Jetzt 1–32 Standard-Archivquellen gleicher Einheit; 24 h / 7 d / 30 d oder Custom; bis 1000 abgeschlossene Stundenmittel je Quelle, insgesamt 10000. R7-Quartile und Min/Max-Whisker, nicht Rohwertverteilung oder 1,5-IQR-Ausreißermodell. | Umgesetzt: responsive Kategoriennavigation mit vollständiger Skala und ID-stabilem Ausschnitt. Budgetüberschreitung verlangt einen kürzeren Zeitraum ohne Teilstatistik. Relative Custom-Zeitfenster umgesetzt; absolute Zeitfenster und IQR/Ausreißer bleiben gesonderte Erweiterungen; unterschiedliche Einheiten nur normalisiert oder in getrennten Panels vergleichen. |
 | EChartsCandlestick | Eine numerische Standard-Archivquelle; Stunde/Tag in 24 h / 7 d / 30 d oder Custom (höchstens 720 Intervalle). Tatsächliche Rohwerte für ersten/letzten Wert und Minimum/Maximum; leere Intervalle bleiben leer. Bis 63 Abfragen/64000 Rohänderungen pro Aktualisierung. | Relative Custom-Zeitfenster umgesetzt; absolute Fenster, weitere Intervalle und Zeitzoom bleiben offen. Mehrere benannte Panels später; Rohwert- und Abfragebudgets behalten. Einzelmessungen ergeben flache Kerzen, keine erfundenen Endpunkte. |
-| EChartsThemeRiver | 1–8 nichtnegative Standard-Archivmittel gleicher Einheit; Stunde/Tag, 24 h / 7 d / 30 d oder Custom; höchstens 720 Intervalle und 1000 geladene Aggregate je Quelle. Fehlende Quelle unterbricht den gemeinsamen Abschnitt. | Relative Custom-Zeitfenster umgesetzt. Zählerverbrauch und anschließend 16–20 Bänder mit Gesamtbudget prüfen. Optional normalisierte relative Gewichte; keine negativen Flussbreiten und keine stillschweigende Nullfüllung von Archivlücken. |
+| EChartsThemeRiver | 1–16 nichtnegative Standard-Archivmittel gleicher Einheit; Stunde/Tag, 24 h / 7 d / 30 d oder Custom; höchstens 720 Intervalle, 1000 geladene Aggregate je Quelle und 16000 gemeinsam. Modell höchstens 900000 Bytes, HTML höchstens 1 MiB. | Umgesetzt: optionale ID-stabile Bandauswahl, gemeinsame Auswahl-/Startlogik, gekennzeichnete Vorschau. Versteckte Quellen schließen keine Lücken und behalten ihre Archivabfragen. Zählerverbrauch bleibt ein getrennter späterer Vertrag; keine negativen Breiten oder Nullfüllung. |
 | EChartsStateTimeline | Jetzt 1–32 Boolean-/Integer-Standardarchive, bis 32 Zustandsdefinitionen je Quelle; 24 h / 7 d / 30 d oder Custom; bis 2000 Rohwerte je Quelle plus Vorgänger, insgesamt 16000 Rohwerte; Modell höchstens 250000 Bytes. Unbekannte Zustände sichtbar. | Umgesetzt: unabhängige Zeilennavigation ab neun Quellen und Gesamtbudget ohne stille Kürzung. Relative Custom-Zeitfenster ebenfalls umgesetzt. Später nach Lastprüfung bis 100 Quellen und absolute Zeitfenster. Float-/String-Zustände erst mit ausdrücklichem Gleichheits-/Zuordnungsvertrag. |
 
 Maßgebliche Implementierungen:
@@ -162,6 +165,15 @@ größtmögliche Imports und beide Ausgabewege abdecken. Eine Auswahl/Navigation
 darf keine Daten verändern oder unsichtbar aus dem fachlichen Modell entfernen.
 
 ## Nachweise dieses Änderungsschritts und verbleibende Lücken
+
+ThemeRiver prüft 16×720 Originalwerte, 16/17 Quellen und das gemeinsame
+16000-Ladebudget einschließlich ausgeblendeter Quellen. Native Tests
+bestätigen ID-stabile Auswahl, ursprüngliche Lücken und Nullwerte, während
+Vorschauen ihre maximal acht gezeichneten Bänder kennzeichnen. Beide
+verlustfrei komprimierten Ausgaben passen im gemessenen Szenario unter 1 MiB;
+übermäßige Modell-/HTML-Größen werden ausdrücklich abgewiesen. Die lokale
+Canvas-Prüfung für Auswahl, Wiederherstellung und Aktualisierung ist positiv.
+Die neue Live-Abnahme nach Modulupdate bleibt offen.
 
 BarHistory prüft 32 Quellen/32000 Punkte samt unverändertem Standardbudget,
 16 Einheitengruppen, versteckten Quellen, tatsächlichen Zeitstempeln und

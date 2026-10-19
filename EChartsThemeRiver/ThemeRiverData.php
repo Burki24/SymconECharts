@@ -11,6 +11,20 @@ require_once __DIR__ . '/../libs/EChartsArchiveQuery.php';
 /** Completed local archive intervals and strict, nonnegative common means. */
 final class ThemeRiverData
 {
+    public const MAXIMUM_SOURCE_COUNT = 16;
+    public const MAXIMUM_AGGREGATES_PER_SOURCE = 1000;
+    public const MAXIMUM_LOADED_AGGREGATES = 16000;
+
+    /** Count received aggregates before joining or discarding any missing intervals. */
+    public static function CountLoadedAggregates(int $loaded, int $next): int
+    {
+        if ($loaded < 0 || $next < 0 || $next > self::MAXIMUM_AGGREGATES_PER_SOURCE
+            || $loaded > self::MAXIMUM_LOADED_AGGREGATES - $next) {
+            throw new InvalidArgumentException('The ThemeRiver archive load budget was exceeded.');
+        }
+        return $loaded + $next;
+    }
+
     public static function Window(string $range, string $interval, int $now, string $timezone, int $customRangeValue = 7, string $customRangeUnit = 'day'): array
     {
         return EChartsArchiveQuery::CompletedIntervals($range, $customRangeValue, $customRangeUnit, $interval, $now, $timezone);
@@ -19,7 +33,7 @@ final class ThemeRiverData
     /** A missing value on any source makes the whole interval unavailable, never zero. */
     public static function Join(array $series, array $intervals): array
     {
-        if (!array_is_list($series) || count($series) < 1 || count($series) > 8
+        if (!array_is_list($series) || count($series) < 1 || count($series) > self::MAXIMUM_SOURCE_COUNT
             || !array_is_list($intervals) || count($intervals) > 720) {
             throw new InvalidArgumentException('Invalid ThemeRiver data size.');
         }
