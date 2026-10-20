@@ -104,6 +104,8 @@ class EChartsStateTimeline extends IPSModuleStrict
             $this->RegisterPropertyString('Range', '7d');
             $this->RegisterPropertyInteger('CustomRangeValue', 7);
             $this->RegisterPropertyString('CustomRangeUnit', 'day');
+            $this->RegisterPropertyString('AbsoluteStart', '{}');
+            $this->RegisterPropertyString('AbsoluteEnd', '{}');
             foreach (['', 'IPSView'] as $prefix) {
                 foreach (self::DESIGN_DEFAULTS as $name => $default) {
                     match (gettype($default)) {
@@ -181,6 +183,17 @@ class EChartsStateTimeline extends IPSModuleStrict
                 ['CustomRangeValue', 'CustomRangeUnit'],
                 $this->ReadPropertyString('Range') === 'custom'
             );
+            $form['elements'] = $this->SetFormFieldVisibility(
+                $form['elements'],
+                ['AbsoluteStart', 'AbsoluteEnd', 'AbsoluteRangeHint', 'AbsoluteTimeZone'],
+                $this->ReadPropertyString('Range') === 'absolute'
+            );
+            foreach ($form['elements'] as &$element) {
+                if (($element['name'] ?? '') === 'AbsoluteTimeZone') {
+                    $element['caption'] = sprintf($this->Translate('Symcon time zone: %s'), date_default_timezone_get());
+                }
+            }
+            unset($element);
             $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
             $form['elements'] = $this->WithAnimationFormControls($form['elements']);
             $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
@@ -193,7 +206,7 @@ class EChartsStateTimeline extends IPSModuleStrict
                 ['caption' => 'Axes and grid', 'start' => 'ShowTimeLabels'],
                 ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
             ]);
-            $fields = ['Title', 'Sources', 'Range', 'CustomRangeValue', 'CustomRangeUnit',
+            $fields = ['Title', 'Sources', 'Range', 'CustomRangeValue', 'CustomRangeUnit', 'AbsoluteStart', 'AbsoluteEnd',
                 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
                 'IPSViewBackgroundOpacityPercent', ...array_keys(self::DESIGN_DEFAULTS),
                 ...array_map(static fn (string $name): string => 'IPSView' . $name, array_keys(self::DESIGN_DEFAULTS))];
@@ -237,6 +250,9 @@ class EChartsStateTimeline extends IPSModuleStrict
         $debugFlowFailed = false;
         $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
+            foreach (['AbsoluteStart', 'AbsoluteEnd', 'AbsoluteRangeHint', 'AbsoluteTimeZone'] as $name) {
+                $this->UpdateFormField($name, 'visible', $Range === 'absolute');
+            }
             foreach (['CustomRangeValue', 'CustomRangeUnit'] as $name) {
                 $this->UpdateFormField($name, 'visible', $Range === 'custom');
             }
@@ -449,12 +465,7 @@ class EChartsStateTimeline extends IPSModuleStrict
             throw new RuntimeException('No active EChartsGateway is connected.');
         }
         $sources = $this->GetValidatedSources();
-        $query = StateTimelineData::Window(
-            $this->ReadPropertyString('Range'),
-            $this->CurrentTimestamp(),
-            $this->ReadPropertyInteger('CustomRangeValue'),
-            $this->ReadPropertyString('CustomRangeUnit')
-        );
+        $query = $this->ResolveTimeQuery();
         $rows = [];
         $pointCount = 0;
         $encodedRowBytes = 0;
@@ -495,13 +506,16 @@ class EChartsStateTimeline extends IPSModuleStrict
         }
         $this->WriteAttributeString('LastError', '');
         $this->DebugEChartsSetStatus(IS_ACTIVE);
+        $range = ['key'    => $this->ReadPropertyString('Range'), 'startTimestamp' => $query['StartTimestamp'],
+            'endTimestamp' => $query['EndTimestamp'], 'timezone' => date_default_timezone_get()];
+        if ($range['key'] === 'absolute') {
+            $range += ['requestedStartTimestamp' => $query['StartTimestamp'], 'requestedEndTimestamp' => $query['EndTimestamp']];
+        }
         $encoded = $this->EncodeVisualizationHTMLJSON([
             'schemaVersion' => 1, 'family' => 'stateTimeline', 'theme' => $this->EffectiveTheme($ipsView),
             'stateTimeline' => ['title' => $this->ReadPropertyString('Title'), 'rows' => $rows,
                 'style'                 => $this->ReadDesignStyle($ipsView)],
-            'range' => ['key'    => $this->ReadPropertyString('Range'),
-                'startTimestamp' => $query['StartTimestamp'], 'endTimestamp' => $query['EndTimestamp'],
-                'timezone'       => date_default_timezone_get()]
+            'range' => $range
         ]);
         if (strlen($encoded) > 250000) {
             $this->FailArchiveBudget();
@@ -571,12 +585,12 @@ class EChartsStateTimeline extends IPSModuleStrict
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => $exception->getMessage()];
         }
         if (mb_strlen($this->ReadPropertyString('Title')) > 200
-            || !in_array($this->ReadPropertyString('Range'), ['24h', '7d', '30d', 'custom'], true)
-            || !EChartsArchiveQuery::IsValidRange(
+            || !in_array($this->ReadPropertyString('Range'), ['24h', '7d', '30d', 'custom', 'absolute'], true)
+            || ($this->ReadPropertyString('Range') !== 'absolute' && !EChartsArchiveQuery::IsValidRange(
                 $this->ReadPropertyString('Range'),
                 $this->ReadPropertyInteger('CustomRangeValue'),
                 $this->ReadPropertyString('CustomRangeUnit')
-            )
+            ))
             || !$this->IsValidDesign('')
             || (!$this->ReadPropertyBoolean('IPSViewUseTileDesign') && !$this->IsValidDesign('IPSView'))
             || !EChartsIPSViewBackground::IsValid(
@@ -585,7 +599,37 @@ class EChartsStateTimeline extends IPSModuleStrict
             )) {
             return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => 'The StateTimeline settings are invalid.'];
         }
+        if ($this->ReadPropertyString('Range') === 'absolute') {
+            try {
+                $this->ResolveTimeQuery();
+            } catch (InvalidArgumentException $exception) {
+                return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => $this->Translate($exception->getMessage())];
+            }
+        }
         return null;
+    }
+
+    /** Pure exact-window planning; no aggregation, predecessor lookup or writes. */
+    private function ResolveTimeQuery(array $values = []): array
+    {
+        $range = $values['Range'] ?? $this->ReadPropertyString('Range');
+        if ($range === 'absolute') {
+            $zone = date_default_timezone_get();
+            return EChartsArchiveQuery::ResolveAbsoluteWindow(
+                EChartsArchiveQuery::ParseLocalDateTime(array_key_exists('AbsoluteStart', $values)
+                    ? $values['AbsoluteStart'] : $this->ReadPropertyString('AbsoluteStart'), $zone),
+                EChartsArchiveQuery::ParseLocalDateTime(array_key_exists('AbsoluteEnd', $values)
+                    ? $values['AbsoluteEnd'] : $this->ReadPropertyString('AbsoluteEnd'), $zone),
+                $this->CurrentTimestamp(),
+                $zone
+            );
+        }
+        return StateTimelineData::Window(
+            $range,
+            $this->CurrentTimestamp(),
+            (int) ($values['CustomRangeValue'] ?? $this->ReadPropertyInteger('CustomRangeValue')),
+            $values['CustomRangeUnit'] ?? $this->ReadPropertyString('CustomRangeUnit')
+        );
     }
 
     /** @return list<array{VariableID:int,Label:string,States:array<int,array<string,mixed>>}> */
@@ -718,6 +762,9 @@ class EChartsStateTimeline extends IPSModuleStrict
         if ($configurationError !== null) {
             $this->WriteAttributeString('LastError', $configurationError['Message']);
             $this->DebugEChartsSetStatus($configurationError['Status']);
+            if ($this->ReadPropertyString('Range') === 'absolute' && $configurationError['Status'] === self::STATUS_CONFIGURATION_INVALID) {
+                return $this->ErrorState($configurationError['Message']);
+            }
             return $this->ErrorState('Configure valid StateTimeline archive variables.');
         }
         if (!$this->HasActiveParent()) {

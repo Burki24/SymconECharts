@@ -1092,6 +1092,11 @@ if (array_slice($argv, 1) === ['--archive-states']) {
     require __DIR__ . '/archive_states_gateway.php';
     exit(0);
 }
+if (array_slice($argv, 1) === ['--state-timeline-absolute']) {
+    require __DIR__ . '/state_timeline_integration.php';
+    require __DIR__ . '/state_timeline_absolute_ranges.php';
+    exit(0);
+}
 if (array_slice($argv, 1) === ['--state-timeline']) {
     require __DIR__ . '/state_timeline_integration.php';
     exit(0);

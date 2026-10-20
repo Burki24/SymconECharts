@@ -1,6 +1,17 @@
 {
     "translations": {
         "de": {
+            "Fixed historical period": "Fester historischer Zeitraum",
+            "From (inclusive)": "Von (einschließlich)",
+            "Until (exclusive)": "Bis (ausschließlich)",
+            "Start is included, end is excluded. State windows retain exact seconds and predecessors. The end must not be in the future.": "Der Beginn ist eingeschlossen, das Ende ausgeschlossen. Zustandsfenster bleiben sekundengenau und berücksichtigen Vorgängerwerte. Das Ende darf nicht in der Zukunft liegen.",
+            "Dates use the Symcon time zone.": "Datumsangaben verwenden die Symcon-Zeitzone.",
+            "Symcon time zone: %s": "Symcon-Zeitzone: %s",
+            "The historical date and time selection is invalid.": "Die historische Datums- und Zeitauswahl ist ungültig. Beginn und Ende vollständig und gültig angeben.",
+            "The historical date and time is ambiguous in the selected timezone.": "Die historische Uhrzeit kommt bei der Zeitumstellung zweimal vor. Einen eindeutigen Zeitpunkt wählen.",
+            "The historical date and time does not exist in the selected timezone.": "Die historische Uhrzeit existiert wegen der Zeitumstellung nicht. Einen anderen Zeitpunkt wählen.",
+            "The absolute archive query settings are invalid.": "Der feste Archivzeitraum ist ungültig. Der Beginn muss vor dem Ende liegen und das Ende darf nicht in der Zukunft liegen.",
+            "Fixed period": "Fester Zeitraum",
             "Custom": "Benutzerdefiniert",
             "Range value": "Zeitraumwert",
             "Range unit": "Zeitraumeinheit",

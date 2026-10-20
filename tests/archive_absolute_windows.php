@@ -257,4 +257,22 @@ assertAbsoluteArchive(count(EChartsArchiveQuery::AbsoluteIntervals(
     'UTC'
 )['Intervals']) === 720, 'The existing 720-interval budget remains inclusive.');
 
-echo "Absolute archive windows, strict local date/time parsing, bounded interval lists and DST semantics verified.\n";
+// Exact state durations reuse the same bounds validation, without aggregate rounding.
+$exactStart = strtotime('2026-10-12T08:30:17+02:00');
+assertAbsoluteArchive(EChartsArchiveQuery::ResolveAbsoluteWindow($exactStart, $exactStart + 1, $listNow, $berlin)
+    === ['StartTimestamp' => $exactStart, 'EndTimestamp' => $exactStart + 1], 'A one-second exact historical window must not lose its final second.');
+$halfHourStart = strtotime('2026-10-04T01:45:17+10:30');
+$halfHourEnd = strtotime('2026-10-04T03:00:29+11:00');
+assertAbsoluteArchive(EChartsArchiveQuery::ResolveAbsoluteWindow($halfHourStart, $halfHourEnd, $listNow, 'Australia/Lord_Howe')
+    === ['StartTimestamp' => $halfHourStart, 'EndTimestamp' => $halfHourEnd], 'Exact raw durations do not inherit the hourly-aggregate offset restriction.');
+foreach ([[0, $exactStart, $listNow, $berlin], [$exactStart, $exactStart, $listNow, $berlin],
+    [$exactStart + 1, $exactStart, $listNow, $berlin], [$exactStart, $listNow + 1, $listNow, $berlin],
+    [$exactStart, $exactStart + 1, 0, $berlin], [$exactStart, $exactStart + 1, $listNow, 'Invalid/Zone'],
+    [PHP_INT_MAX - 1, PHP_INT_MAX, PHP_INT_MAX, 'UTC']] as $args) {
+    rejectAbsoluteArchive(
+        static fn () => EChartsArchiveQuery::ResolveAbsoluteWindow(...$args),
+        'Invalid exact historical bounds must fail before any archive access.'
+    );
+}
+
+echo "Absolute archive windows, strict local date/time parsing, exact bounds, bounded interval lists and DST semantics verified.\n";

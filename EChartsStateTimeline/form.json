@@ -140,6 +140,10 @@
                         {
                             "caption": "Custom",
                             "value": "custom"
+                        },
+                        {
+                            "caption": "Fixed historical period",
+                            "value": "absolute"
                         }
                     ]
                 },
@@ -178,6 +182,30 @@
                     ]
                 }
             ]
+        },
+        {
+            "type": "SelectDateTime",
+            "name": "AbsoluteStart",
+            "caption": "From (inclusive)",
+            "visible": false
+        },
+        {
+            "type": "SelectDateTime",
+            "name": "AbsoluteEnd",
+            "caption": "Until (exclusive)",
+            "visible": false
+        },
+        {
+            "type": "Label",
+            "name": "AbsoluteRangeHint",
+            "caption": "Start is included, end is excluded. State windows retain exact seconds and predecessors. The end must not be in the future.",
+            "visible": false
+        },
+        {
+            "type": "Label",
+            "name": "AbsoluteTimeZone",
+            "caption": "Dates use the Symcon time zone.",
+            "visible": false
         },
         {
             "type": "ExpansionPanel",

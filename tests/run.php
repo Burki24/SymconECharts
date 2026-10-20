@@ -56,6 +56,7 @@ $tests = [
 ];
 
 $commands = [
+    ['Test fixed historical StateTimeline periods', 'php tests/gateway_gauges.php --state-timeline-absolute'],
     ['Test fixed historical ThemeRiver periods', 'php tests/gateway_gauges.php --theme-river-absolute'],
     ['Test fixed historical Candlestick periods', 'php tests/gateway_gauges.php --candlestick-absolute'],
     ['Test fixed historical Parallel periods', 'php tests/gateway_gauges.php --parallel-absolute'],

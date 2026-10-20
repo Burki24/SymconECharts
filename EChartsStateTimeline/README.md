@@ -46,6 +46,25 @@ Abschnitt ohne Dauer.
 Die Zeiträume umfassen verstrichene Zeit bis zum aktuellen Abfragezeitpunkt;
 ein Tag entspricht 24 Stunden, eine Woche sieben Tagen, auch bei einer
 Zeitumstellung. Die Beschriftung verwendet die Symcon-Zeitzone.
+Zusätzlich ist **Fester historischer Zeitraum** mit eigenen Von-/Bis-Daten
+in der angezeigten Symcon-Zeitzone wählbar. Der Beginn ist eingeschlossen,
+das Ende ausgeschlossen und darf nicht in der Zukunft liegen. Der Beginn
+muss vor dem Ende liegen. Die Grenzen bleiben bei Aktualisierungen fest.
+
+Anders als bei Stunden-/Tagesdiagrammen werden diese Zustandsfenster nicht
+gerundet: 12.10.2026 08:30:17 bis 09:45:29 zeigt genau diesen Zeitabschnitt.
+Auch ein nur eine Sekunde langes Fenster ist möglich. Ein Vorgänger vor dem
+Beginn initialisiert weiterhin den ersten Zustand; ohne ihn bleibt der Anfang
+unbekannt. Ein Ereignis genau am Beginn hat Vorrang, eines genau am Ende
+erzeugt weiterhin keinen Abschnitt ohne Dauer.
+
+Fehlende oder ungültige Daten sowie nicht existierende und doppeldeutige
+Uhrzeiten beim Zeitwechsel werden abgewiesen. Bitte eindeutige Grenzen wählen.
+Ein Fenster über einen Zeitwechsel ist möglich, auch bei nicht ganzstündigen
+Offsetänderungen; seine Dauer entspricht der tatsächlich verstrichenen Zeit.
+Beide Ausgabewege und Vorschauen verwenden dieselben Grenzen. Bestehende
+Zeiträume, Zustandszuordnungen, Designs und alle Archivbudgets bleiben erhalten.
+
 Aktualisiert wird minütlich. Der Tooltip nennt Quelle, Zustand, Wert, Beginn,
 Ende und Dauer des angezeigten Abschnitts. Am Fensterrand abgeschnittene
 Abschnitte zeigen entsprechend nur die Dauer innerhalb des Fensters.

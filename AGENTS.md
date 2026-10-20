@@ -203,6 +203,9 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   `{581AD0EF-4E14-4796-902B-08381E299232}` gemäß ADR 0059. Archivierte
   Boolean-/Integer-Zustandswechsel werden als Zeitabschnitte dargestellt,
   ohne Aggregation oder Ersetzung durch aktuelle Werte.
+  ADR 0081 ergänzt feste historische Von-/Bis-Zeiträume über zentrale strikte
+  Datumsprüfung und ungerundete Grenzen. Vorgänger, halboffene Zustandsabschnitte
+  sowie 32 Quellen, 2000 Rohpunkte je Quelle und 16000 insgesamt bleiben erhalten.
 
 - `ECRV` ist `EChartsThemeRiver` zugeordnet (`RV` = River), GUID
   `{6767D036-5E2B-4D33-B7F1-C9F1B4376C04}` gemäß ADR 0058.

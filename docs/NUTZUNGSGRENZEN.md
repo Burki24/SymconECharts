@@ -48,6 +48,10 @@ Boxplot, Parallel, Candlestick und ThemeRiver bieten zusätzlich feste historisc
 mit gemeinsamer strikter Datumsprüfung und unveränderten Archivbudgets.
 Parallel, Candlestick und ThemeRiver unterstützen dabei vollständig enthaltene Stunden und Kalendertage;
 andere Familien behalten ihre bisherigen Zeitmodelle.
+StateTimeline bietet ebenfalls feste Von-/Bis-Grenzen, jedoch sekundengenau
+ohne Aggregatrundung bei unveränderten Zustands- und Vorgängerregeln.
+Der geplante Archivzeiträume-Block ist technisch umgesetzt; seine gemeinsame
+Live-Abnahme steht weiterhin aus.
 Die übrigen
 Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
 
@@ -77,7 +81,8 @@ Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
 | Erledigt | Parallel: feste historische Von-/Bis-Zeiträume | Gemeinsame Stunden-/Tagesintervalle, Mittelwerte oder Zählerverbrauch je Achse; zentrale Planung aus Boxplot, unveränderte 2–10 Achsen und Linien-/Ladebudgets. |
 | Erledigt | Candlestick: feste historische Von-/Bis-Zeiträume | Zentrale vollständige Stunden-/Tagesintervalle bei unveränderten echten Rohwert-Endpunkten; weiterhin 720 Intervalle, 63 Abfragen und 64000 Rohwerte. |
 | Erledigt | ThemeRiver: feste historische Von-/Bis-Zeiträume | Zentrale vollständige Stunden-/Tagesintervalle für Mittelwert und Verbrauch; unveränderte gemeinsame Lücken, Bandauswahl und 720/1000/16000-Budgets. |
-| Danach | Feste Zeiträume in StateTimeline | Die zentrale Planung unter Beibehaltung exakter Zustandsgrenzen, Vorgänger- und Rohwertregeln integrieren. Anschließend gebündelte Live-Abnahme des Archivzeiträume-Blocks. |
+| Erledigt | StateTimeline: feste historische Von-/Bis-Zeiträume | Zentrale strikte Grenzprüfung ohne Stunden-/Tagesrundung; sekundengenaue Zustände, Vorgänger und alle Rohwert-/Ausgabebudgets bleiben erhalten. |
+| Als Nächstes prüfen | Gemeinsame Live-Abnahme des Archivzeiträume-Blocks | Boxplot, Parallel, Candlestick, ThemeRiver und StateTimeline mit relativen/festen Fenstern, Zeitwechseln, Teilarchiven, Fehlern und Budgets in Kachel und IPSView prüfen. Technische Umsetzung ist keine Live-Abnahme. |
 | Danach | Weitere Archiv- und Vergleichsreihen | Nur zusammen mit Navigation, Vorschaukennzeichnung und messbaren Ressourcenbudgets. |
 
 Normalisierung ist keine allgemeine Lösung für unterschiedliche Einheiten:
@@ -142,7 +147,7 @@ Candlestick-Anfangswert ausgegeben werden.
 | EChartsBoxplot | Jetzt 1–32 Standard-Archivquellen gleicher Einheit; 24 h / 7 d / 30 d, Custom oder feste historische Von-/Bis-Daten; bis 1000 abgeschlossene Stundenmittel je Quelle, insgesamt 10000. R7-Quartile und Min/Max-Whisker, nicht Rohwertverteilung oder 1,5-IQR-Ausreißermodell. | Umgesetzt: Kategoriennavigation, relative Custom-Zeitfenster und absolute historische Zeitgrenzen mit vollständigen Stunden. Budgetüberschreitung verlangt einen kürzeren Zeitraum ohne Teilstatistik. IQR/Ausreißer bleiben gesonderte Erweiterungen; unterschiedliche Einheiten nur normalisiert oder in getrennten Panels vergleichen. |
 | EChartsCandlestick | Eine numerische Standard-Archivquelle; Stunde/Tag in 24 h / 7 d / 30 d, Custom oder festen historischen Von-/Bis-Daten (höchstens 720 Intervalle). Tatsächliche Rohwerte für ersten/letzten Wert und Minimum/Maximum; leere Intervalle bleiben leer. Bis 63 Abfragen/64000 Rohänderungen pro Aktualisierung. | Relative und feste historische Zeitfenster umgesetzt; weitere Intervalle und Zeitzoom bleiben offen. Mehrere benannte Panels später; Rohwert- und Abfragebudgets behalten. Einzelmessungen ergeben flache Kerzen, keine erfundenen Endpunkte. |
 | EChartsThemeRiver | 1–16 nichtnegative Standard-Archivmittel oder ausdrücklich gewählter Zählerverbrauch gleicher Einheit; Stunde/Tag, 24 h / 7 d / 30 d, Custom oder feste historische Von-/Bis-Daten; höchstens 720 Intervalle, 1000 geladene Aggregate je Quelle und 16000 gemeinsam. Modell höchstens 900000 Bytes, HTML höchstens 1 MiB. | Umgesetzt: relative und feste historische Zeitfenster, optionale ID-stabile Bandauswahl, gemeinsame Auswahl-/Startlogik, gekennzeichnete Vorschau und auswählbarer Verbrauch über den vorhandenen Gateway-Reducer. Versteckte Quellen schließen keine Lücken und behalten ihre Archivabfragen. Keine negativen Breiten, Nullfüllung oder eigene Zählerdifferenzbildung. |
-| EChartsStateTimeline | Jetzt 1–32 Boolean-/Integer-Standardarchive, bis 32 Zustandsdefinitionen je Quelle; 24 h / 7 d / 30 d oder Custom; bis 2000 Rohwerte je Quelle plus Vorgänger, insgesamt 16000 Rohwerte; Modell höchstens 250000 Bytes. Unbekannte Zustände sichtbar. | Umgesetzt: unabhängige Zeilennavigation ab neun Quellen und Gesamtbudget ohne stille Kürzung. Relative Custom-Zeitfenster ebenfalls umgesetzt. Später nach Lastprüfung bis 100 Quellen und absolute Zeitfenster. Float-/String-Zustände erst mit ausdrücklichem Gleichheits-/Zuordnungsvertrag. |
+| EChartsStateTimeline | Jetzt 1–32 Boolean-/Integer-Standardarchive, bis 32 Zustandsdefinitionen je Quelle; 24 h / 7 d / 30 d, Custom oder feste historische Von-/Bis-Daten; bis 2000 Rohwerte je Quelle plus Vorgänger, insgesamt 16000 Rohwerte; Modell höchstens 250000 Bytes. Unbekannte Zustände sichtbar. | Umgesetzt: unabhängige Zeilennavigation ab neun Quellen und Gesamtbudget ohne stille Kürzung, relative Custom-Zeitfenster und sekundengenaue historische Grenzen mit unveränderten Vorgängern. Später nach Lastprüfung bis 100 Quellen. Float-/String-Zustände erst mit ausdrücklichem Gleichheits-/Zuordnungsvertrag. |
 
 Maßgebliche Implementierungen:
 

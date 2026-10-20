@@ -1,5 +1,29 @@
 # Tests
 
+## StateTimeline: feste historische Zeiträume
+
+`php tests/gateway_gauges.php --state-timeline-absolute` verwendet die vorhandene
+Testklasse mit steuerbarer Uhr und das reale Modul/Gateway mit Kernel-Doppeln.
+Erster Lauf RED wegen fehlendem absoluten Modus. Geprüft werden ungerundete
+Sekunden, 1-Sekunden-Fenster, Vorgänger, beide Ränder, Wiederholungen, unbekannte
+Anfänge/leere Archive, stabile Grenzen, DST und nicht ganzstündige Offsetwechsel.
+Die Date-Fixture bewahrt rohe lokale Uhrfelder, damit PHP nicht schon vor dem
+Test nicht existierende Sommerzeitstunden still normalisiert.
+
+Ungültige Dates müssen vor Rohwert-/Vorgängerabfragen scheitern. Beide Ausgaben,
+native Date-Felder, tatsächliche Vorschauachsen, Zustandsnamen/-farben und reine
+Entwürfe ohne Konfigurations-/Statusänderung bleiben abgesichert. 32×500 Punkte
+prüfen das volle 16000er-Budget mit Restlimits 1500/1000/500; gekürzte, übergroße,
+konfliktbehaftete oder vorgängerfalsche Antworten der letzten Quelle dürfen kein
+Teilmodell liefern. Alte Zeitmodelle und die bestehenden 2000er-/Ausgabeguards
+bleiben in `state_timeline_integration.php` aktiv.
+
+`php tests/archive_absolute_windows.php` prüft die gemeinsame exakte Grenzplanung
+und unveränderte Vollintervallpläne. Gesamtlauf: `php tests/quality.php --fix`.
+Die technische Archivzeiträume-Roadmap ist umgesetzt; die gemeinsame Live-Matrix
+für alle fünf Familien und beide Ausgabewege bleibt offen (ADR 0081).
+Es werden keine laufenden Instanzen, Zustandszuordnungen oder Archive verändert.
+
 ## ThemeRiver: feste historische Zeiträume
 
 `php tests/gateway_gauges.php --theme-river-absolute` verwendet die bestehende

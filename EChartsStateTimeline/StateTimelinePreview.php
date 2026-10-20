@@ -34,6 +34,26 @@ trait StateTimelinePreview
             . ($this->BarPreviewValue($values, $prefix . 'Bold', 'boolean', $ipsView) ? 'bold' : 'normal')
             . '" font-style="' . ($this->BarPreviewValue($values, $prefix . 'Italic', 'boolean', $ipsView) ? 'italic' : 'normal') . '"';
         $svg = str_replace('<text x="24"', '<text' . $textStyle('Title') . ' x="24"', $svg);
+        $absolute = ($values['Range'] ?? $this->ReadPropertyString('Range')) === 'absolute';
+        $window = null;
+        if ($absolute) {
+            try {
+                $window = $this->ResolveTimeQuery($values);
+                $zone = new \DateTimeZone(date_default_timezone_get());
+                $format = static fn (int $timestamp): string => (new \DateTimeImmutable('@' . $timestamp))->setTimezone($zone)->format('Y-m-d H:i:s P');
+                $svg = str_replace('<svg ', '<svg data-range="absolute" data-requested-start="' . $window['StartTimestamp']
+                    . '" data-requested-end="' . $window['EndTimestamp'] . '" ', $svg);
+                $svg .= '<text x="24" y="62" font-size="10" fill="' . $e($palette['muted']) . '">'
+                    . $e($this->Translate('Fixed period') . ': ' . $format($window['StartTimestamp'])
+                        . ' → ' . $format($window['EndTimestamp']) . ' (' . $zone->getName() . ')') . '</text>';
+            } catch (\Throwable $exception) {
+                $svg .= '<text x="24" y="100" font-size="12" fill="' . $e($palette['text']) . '">';
+                foreach (explode("\n", wordwrap($this->Translate($exception->getMessage()), 90, "\n")) as $index => $line) {
+                    $svg .= '<tspan x="24" dy="' . ($index === 0 ? '0' : '1.4em') . '">' . $e($line) . '</tspan>';
+                }
+                return $svg . '</text></svg>';
+            }
+        }
         $number = fn (string $name, int $min, int $max): int => max($min, min($max, $this->BarPreviewValue($values, $name, 'integer', $ipsView)));
         $dash = static fn (string $type, int $width): string => $type === 'dashed' ? ' stroke-dasharray="' . max(1, $width) * 4 . ' ' . max(1, $width) * 2 . '"'
             : ($type === 'dotted' ? ' stroke-dasharray="' . max(1, $width) . ' ' . max(1, $width) . '"' : '');
@@ -125,7 +145,7 @@ trait StateTimelinePreview
         }
         $range = $values['Range'] ?? $this->ReadPropertyString('Range');
         try {
-            $window = StateTimelineData::Window(
+            $window ??= StateTimelineData::Window(
                 (string) $range,
                 $this->CurrentTimestamp(),
                 (int) ($values['CustomRangeValue'] ?? $this->ReadPropertyInteger('CustomRangeValue')),
@@ -149,10 +169,11 @@ trait StateTimelinePreview
             if (!$this->BarPreviewValue($values, 'ShowTimeLabels', 'boolean', $ipsView)) {
                 continue;
             }
-            $exampleTimestamp = 1790812800 + (int) round($duration * $index / 4);
-            $date = gmdate('d.m.', $exampleTimestamp);
+            $exampleTimestamp = ($absolute ? $window['StartTimestamp'] : 1790812800) + (int) round($duration * $index / 4);
+            $local = $absolute ? (new \DateTimeImmutable('@' . $exampleTimestamp))->setTimezone($zone) : null;
+            $date = $local === null ? gmdate('d.m.', $exampleTimestamp) : $local->format('d.m.');
             $time = $range === '24h' && $timeFormat !== 'dateTime' && $index === 4
-                ? '24:00' : gmdate('H:i', $exampleTimestamp);
+                ? '24:00' : ($local === null ? gmdate('H:i', $exampleTimestamp) : $local->format('H:i'));
             $label = $timeFormat === 'time' || ($timeFormat === 'auto' && $duration <= 172800) ? $time : $date;
             $anchor = $index === 0 ? 'start' : ($index === 4 ? 'end' : 'middle');
             $svg .= '<text data-time-label="true"' . $textStyle('AxisLabel') . ' x="' . $n($x) . '" y="' . $n($bottom + $margin + $axisFont)

@@ -29,6 +29,16 @@ Canvas-Zeichenaufrufe für Kachel und IPSView statt nur vorhandener Titeloptione
 
 ## Aktueller Stand und Zielarchitektur
 
+StateTimeline integriert gemäß [ADR 0081](adr/0081-fixed-historical-state-timeline-periods.md)
+feste historische Von-/Bis-Zeiträume. `ParseLocalDateTime` wird wiederverwendet;
+`ResolveAbsoluteWindow` extrahiert die gemeinsame strikte Grenzprüfung aus
+`ResolveAbsolute` und liefert ungerundete Zeitstempel. Aggregatfamilien behalten
+ihre vollständigen Stunden-/Tagesintervalle und bisherigen Ergebnisformen.
+StateTimeline behält `archive.states.read` einschließlich Ereignis am Endrand,
+Vorgängersuche und halboffener Segmentbildung unverändert. Auch 1-Sekunden-
+Fenster und nicht ganzstündige Offsetwechsel sind ohne Aggregationsannahmen
+möglich. Alle Rohwert-, Modell- und Ausgabebudgets bleiben erhalten.
+
 ThemeRiver integriert gemäß [ADR 0080](adr/0080-fixed-historical-theme-river-periods.md)
 feste historische Von-/Bis-Zeiträume. `ParseLocalDateTime` und `AbsoluteIntervals`
 werden ohne Änderungen wiederverwendet. Die gemeinsame vollständige Stunden-/
@@ -56,8 +66,9 @@ Stunden und lokale Kalendertage. `Range=absolute`, `AbsoluteStart` und
 unverändert. Ausschließlich identische Zeitstempel aller Achsen bilden Linien;
 `auto`-Reducer, Kürzungshinweis und maximal 10×1000 Aggregate bleiben erhalten.
 Kachel, IPSView und reine Entwurfsvorschau nutzen dieselben Zeitgrenzen.
-Die Integration in StateTimeline bleibt offen. Nach diesem
-Schritt folgt die gebündelte Live-Matrix für den gesamten Archivzeiträume-Block;
+Die fünf geplanten Familien Boxplot, Parallel, Candlestick, ThemeRiver und
+StateTimeline sind damit technisch um feste historische Zeiträume erweitert.
+Die gebündelte Live-Matrix für den gesamten Archivzeiträume-Block bleibt offen;
 lokale automatisierte Modul- und Gesamttests laufen weiterhin je Änderung.
 
 Boxplot bietet gemäß [ADR 0077](adr/0077-fixed-historical-boxplot-periods.md)

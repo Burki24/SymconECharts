@@ -10,6 +10,8 @@ require_once dirname(__DIR__) . '/EChartsStateTimeline/module.php';
 
 final class TestableEChartsStateTimeline extends EChartsStateTimeline
 {
+    public int $now = 1792238400;
+
     protected function LoadConfigurationForm(): array
     {
         return json_decode((string) file_get_contents(dirname(__DIR__) . '/EChartsStateTimeline/form.json'), true, 512, JSON_THROW_ON_ERROR);
@@ -22,7 +24,7 @@ final class TestableEChartsStateTimeline extends EChartsStateTimeline
 
     protected function CurrentTimestamp(): int
     {
-        return 1792238400;
+        return $this->now;
     }
 }
 
@@ -137,6 +139,9 @@ $verifyCaptions = static function (array $entries) use (&$verifyCaptions, $trans
 {
     foreach ($entries as $key => $entry) {
         if (in_array($key, ['caption', 'transparentCaption'], true) && is_string($entry)) {
+            if ($entry === sprintf('Symcon time zone: %s', date_default_timezone_get())) {
+                $entry = 'Symcon time zone: %s';
+            }
             assertGatewayGauge(isset($translations[$entry]) || $entry === '', 'Missing German StateTimeline caption: ' . $entry);
         } elseif (is_array($entry)) {
             $verifyCaptions($entry);

@@ -9,6 +9,11 @@
 
 ## Neu
 
+- EChartsStateTimeline bietet feste historische Von-/Bis-Zeiträume mit
+  sekundengenauen Grenzen. Zustandszuordnungen, Vorgänger und unbekannte
+  Anfänge bleiben ebenso erhalten wie bisherige Zeiträume, Designs und
+  Archivbudgets. Kachel, IPSView und beide Vorschauen verwenden dieselben Datumsgrenzen.
+
 - EChartsThemeRiver bietet feste historische Von-/Bis-Zeiträume für vollständig
   enthaltene Stunden oder Kalendertage. Mittelwert und Zählerverbrauch verwenden
   dieselbe Datumswahl. Bestehende Zeiträume, gemeinsame Lücken, Bandauswahl,

@@ -173,21 +173,19 @@ final class EChartsArchiveQuery
     }
 
     /**
-     * Inclusive start/exclusive end; only fully contained completed local intervals are queried.
-     * @return array{DurationSeconds:int,StartTimestamp:int,EndTimestamp:int,Mode:string,AggregationLevel:int,Limit:int,CalendarAligned:bool,AcceptLiveUpdates:bool,Empty:bool}
+     * Exact historical bounds before any family-specific interval rounding.
+     * EndTimestamp is exclusive for a duration model; archive adapters keep their own boundary contract.
+     * @return array{StartTimestamp:int,EndTimestamp:int}
      */
-    public static function ResolveAbsolute(
+    public static function ResolveAbsoluteWindow(
         int $startTimestamp,
         int $endExclusiveTimestamp,
-        string $interval,
-        int $pointBudget,
-        int $sourceCount,
         int $now,
         string $timezone
     ): array {
         $invalid = 'The absolute archive query settings are invalid.';
         if ($startTimestamp < 1 || $startTimestamp >= $endExclusiveTimestamp || $endExclusiveTimestamp > $now
-            || $pointBudget < 1 || $sourceCount < 1 || $now < 1 || !in_array($interval, ['hour', 'day'], true)) {
+            || $now < 1) {
             throw new InvalidArgumentException($invalid);
         }
         try {
@@ -202,6 +200,29 @@ final class EChartsArchiveQuery
                 throw new InvalidArgumentException($invalid);
             }
         }
+        return ['StartTimestamp' => $startTimestamp, 'EndTimestamp' => $endExclusiveTimestamp];
+    }
+
+    /**
+     * Inclusive start/exclusive end; only fully contained completed local intervals are queried.
+     * @return array{DurationSeconds:int,StartTimestamp:int,EndTimestamp:int,Mode:string,AggregationLevel:int,Limit:int,CalendarAligned:bool,AcceptLiveUpdates:bool,Empty:bool}
+     */
+    public static function ResolveAbsolute(
+        int $startTimestamp,
+        int $endExclusiveTimestamp,
+        string $interval,
+        int $pointBudget,
+        int $sourceCount,
+        int $now,
+        string $timezone
+    ): array {
+        if ($pointBudget < 1 || $sourceCount < 1 || !in_array($interval, ['hour', 'day'], true)) {
+            throw new InvalidArgumentException('The absolute archive query settings are invalid.');
+        }
+        $window = self::ResolveAbsoluteWindow($startTimestamp, $endExclusiveTimestamp, $now, $timezone);
+        $zone = new DateTimeZone($timezone);
+        $startLocal = (new DateTimeImmutable('@' . $window['StartTimestamp']))->setTimezone($zone);
+        $endLocal = (new DateTimeImmutable('@' . $window['EndTimestamp']))->setTimezone($zone);
         // Elapsed subtraction keeps both actual offsets of the repeated autumn hour distinct.
         if ($interval === 'hour') {
             $start = $startTimestamp - (int) $startLocal->format('i') * 60 - (int) $startLocal->format('s');

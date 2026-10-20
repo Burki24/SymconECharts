@@ -46,6 +46,8 @@ und Maximum abgeschlossener Archiv-Stunden oder -Tage, wahlweise auch in
 festen historischen Von-/Bis-Zeiträumen mit unveränderten Rohwertbudgets.
 StateTimeline zeigt archivierte Boolean-/Integer-Zustände als farbige
 Zeitabschnitte mit eigenen Zustandsnamen und ausdrücklich unbekannten Anfängen.
+Zusätzlich sind feste historische Von-/Bis-Zeiträume mit sekundengenauen
+Grenzen und unveränderten Vorgängerregeln wählbar.
 Graph verbindet bis zu 300 manuell ausgewählte Symcon-Objekte mit bis zu
 1.000 ungerichteten Kanten. Große Graphen lassen sich zoomen und verschieben;
 die Ansicht bleibt bei Datenaktualisierungen erhalten.
