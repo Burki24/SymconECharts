@@ -1186,6 +1186,11 @@ if (($argv[1] ?? '') === '--waterfall-preview') {
     echo base64_decode(substr($previewUpdate['Value'], strlen('data:image/svg+xml;base64,')));
     exit(0);
 }
+if (array_slice($argv, 1) === ['--theme-river-absolute']) {
+    require __DIR__ . '/theme_river_consumption.php';
+    require __DIR__ . '/theme_river_absolute_ranges.php';
+    exit(0);
+}
 if (array_slice($argv, 1) === ['--theme-river-consumption']) {
     require __DIR__ . '/theme_river_consumption.php';
     exit(0);

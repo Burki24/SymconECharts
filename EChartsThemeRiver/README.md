@@ -64,6 +64,24 @@ Kalendertage. Beim Herbstwechsel passt deshalb kein vollständiger
 25-Stunden-Tag in eine benutzerdefinierte Dauer von einem Tag.
 Die Zeitkonfiguration gilt gemeinsam für Kachel und IPSView.
 
+Zusätzlich bietet **Fester historischer Zeitraum** eigene Von-/Bis-Daten in
+der angezeigten Symcon-Zeitzone. Der Beginn ist eingeschlossen, das Ende
+ausgeschlossen und darf nicht in der Zukunft liegen. Nur vollständig enthaltene
+abgeschlossene Stunden oder Kalendertage werden ausgewertet. Beispielsweise
+enthält 12.10.2026 08:30 bis 13:30 im Stundenmodus vier Intervalle von 09:00 bis
+einschließlich 12:59:59; im Tagesmodus keinen vollständigen Tag und bleibt leer.
+Die Grenzen bleiben bei Aktualisierungen fest, anders als eine rollierende Dauer.
+
+Fehlende oder ungültige Daten sowie nicht existierende oder doppeldeutige
+Uhrzeiten beim Zeitwechsel werden abgewiesen. Bitte eindeutige Grenzen vor
+oder nach dem Wechsel wählen. Ein Fenster über den Sommer-/Winterzeitwechsel
+ist möglich und enthält die tatsächlichen Stunden beziehungsweise lokale
+23-/25-Stunden-Tage. Historische Stundenfenster über Zeitzonenwechsel mit
+nicht ganzstündiger Verschiebung werden nicht unterstützt.
+Die Auswahl gilt für Mittelwert und Zählerverbrauch; Vorschauen zeigen die
+Grenzen mit gekennzeichneten Beispieldaten. Bestehende Zeiträume, Designs,
+Lückenregeln und alle Ladegrenzen bleiben unverändert.
+
 Nur **nichtnegative, endliche Intervallwerte** sind zulässig. Echte Nullwerte
 bleiben gültig; negative Mittelwerte oder Verbräuche führen zu einer sichtbaren Fehlermeldung.
 Die Darstellung ist weder eine Prozentnormierung noch eine Qualitätsbewertung.

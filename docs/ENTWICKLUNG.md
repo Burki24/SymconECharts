@@ -29,6 +29,16 @@ Canvas-Zeichenaufrufe für Kachel und IPSView statt nur vorhandener Titeloptione
 
 ## Aktueller Stand und Zielarchitektur
 
+ThemeRiver integriert gemäß [ADR 0080](adr/0080-fixed-historical-theme-river-periods.md)
+feste historische Von-/Bis-Zeiträume. `ParseLocalDateTime` und `AbsoluteIntervals`
+werden ohne Änderungen wiederverwendet. Die gemeinsame vollständige Stunden-/
+Tagesliste gilt für Standardmittel (`average`) und Zählerverbrauch (`sum`);
+`ThemeRiverData`, Quellenprüfung, strenger Join und Ladebudgets bleiben unverändert.
+Auch ausgeblendete Quellen bestimmen weiterhin Lücken und Ladeverbrauch.
+Native Date-Felder und reine Entwurfsvorschauen folgen den vorhandenen Familien.
+Bei oben liegender Vorschaulegende reserviert der absolute Modus Platz unter
+seiner Datumskopfzeile; bestehende Vorschaugeometrie bleibt unverändert.
+
 Candlestick integriert gemäß [ADR 0079](adr/0079-fixed-historical-candlestick-periods.md)
 feste historische Von-/Bis-Zeiträume. Die zentralen `ParseLocalDateTime`- und
 `ResolveAbsolute`-Verträge werden wiederverwendet; `AbsoluteIntervals` liefert
@@ -46,8 +56,8 @@ Stunden und lokale Kalendertage. `Range=absolute`, `AbsoluteStart` und
 unverändert. Ausschließlich identische Zeitstempel aller Achsen bilden Linien;
 `auto`-Reducer, Kürzungshinweis und maximal 10×1000 Aggregate bleiben erhalten.
 Kachel, IPSView und reine Entwurfsvorschau nutzen dieselben Zeitgrenzen.
-Die Integration in ThemeRiver und StateTimeline bleibt offen. Nach diesen
-Schritten folgt die gebündelte Live-Matrix für den gesamten Archivzeiträume-Block;
+Die Integration in StateTimeline bleibt offen. Nach diesem
+Schritt folgt die gebündelte Live-Matrix für den gesamten Archivzeiträume-Block;
 lokale automatisierte Modul- und Gesamttests laufen weiterhin je Änderung.
 
 Boxplot bietet gemäß [ADR 0077](adr/0077-fixed-historical-boxplot-periods.md)

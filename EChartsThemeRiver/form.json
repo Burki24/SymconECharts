@@ -142,6 +142,10 @@
                         {
                             "caption": "Custom duration",
                             "value": "custom"
+                        },
+                        {
+                            "caption": "Fixed historical period",
+                            "value": "absolute"
                         }
                     ]
                 },
@@ -204,6 +208,30 @@
         {
             "type": "Label",
             "caption": "Custom durations end at the last completed interval. Only whole intervals are included, up to 720. Short durations may contain none."
+        },
+        {
+            "type": "SelectDateTime",
+            "name": "AbsoluteStart",
+            "caption": "From (inclusive)",
+            "visible": false
+        },
+        {
+            "type": "SelectDateTime",
+            "name": "AbsoluteEnd",
+            "caption": "Until (exclusive)",
+            "visible": false
+        },
+        {
+            "type": "Label",
+            "name": "AbsoluteRangeHint",
+            "caption": "Start is included, end is excluded. Only fully contained completed intervals are evaluated. The end must not be in the future.",
+            "visible": false
+        },
+        {
+            "type": "Label",
+            "name": "AbsoluteTimeZone",
+            "caption": "Dates use the Symcon time zone.",
+            "visible": false
         },
         {
             "type": "ExpansionPanel",

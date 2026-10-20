@@ -1,5 +1,29 @@
 # Tests
 
+## ThemeRiver: feste historische Zeiträume
+
+`php tests/gateway_gauges.php --theme-river-absolute` verwendet die bestehende
+Verbrauchs-Testklasse und den realen Modul-/Gateway-Pfad mit Kernel-Doppeln.
+Der erste Lauf war RED, weil `absolute` noch nicht unterstützt wurde.
+Geprüft sind absolute Mittelwerte und Zählerverbräuche, echte Nullwerte,
+gemeinsame Lücken versteckter Quellen, stabile Grenzen, vollständig enthaltene
+Stunden/Tage, leere Fenster ohne Query, DST und ungültige Date-Eingaben.
+Native Formularfelder und beide SVG-Entwürfe bleiben ohne Gateway-/Archivzugriff,
+Property- oder Statusänderung; obere Legenden dürfen die Dates nicht überdecken.
+
+Beide Kennzahlen werden mit 16×720 Werten und unveränderten 1000/16000-Ladegrenzen
+geprüft; 721 Intervalle scheitern vor dem ersten Laden. Trunkierte, übergroße,
+negative oder archivtypfalsche Antworten einer versteckten Quelle dürfen kein
+Teilmodell liefern. Die begrenzten, verlustfrei komprimierten Ausgaben und
+unabhängige Designs bleiben abgesichert. Alte Zeitmodelle ignorieren neue
+inaktive Dates; der absolute Modus ignoriert inaktive Custom-Felder.
+
+Die zentrale Regression `archive_absolute_windows.php` und die bestehenden
+ThemeRiver-Daten-/Verbrauchs-/16-Quellen- und Rendererprüfungen sichern die
+unveränderten Verträge. Gesamtlauf: `php tests/quality.php --fix`.
+Keine Live-Instanzen oder Archive werden verändert. Nach StateTimeline folgt
+die gebündelte Live-Abnahme des gesamten Archivzeiträume-Blocks.
+
 ## Candlestick: feste historische Zeiträume
 
 `php tests/gateway_gauges.php --candlestick-absolute` verwendet die bestehende

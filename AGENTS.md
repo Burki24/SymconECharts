@@ -143,6 +143,9 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   ADR 0070 ergänzt ausdrücklich wählbaren Zählerverbrauch je abgeschlossenem
   Stunden-/Tagesintervall über den bestehenden Gateway-Reducer `sum`.
   Der Standard `average` bleibt unverändert; Archivtypen werden nicht gemischt.
+  ADR 0080 ergänzt feste historische Von-/Bis-Zeiträume über die zentrale
+  Datumsprüfung und `AbsoluteIntervals`. Beide Kennzahlen, gemeinsame Lücken
+  einschließlich versteckter Quellen sowie 720/1000/16000-Budgets bleiben erhalten.
 - Das Gateway stellt ausschließlich familienübergreifende Infrastruktur wie
   Archivzugriff, begrenztes Caching, gemeinsame Ressourcen und gegebenenfalls
   abgesicherte IPSView-Kommunikation bereit. Familienbezogene Properties,

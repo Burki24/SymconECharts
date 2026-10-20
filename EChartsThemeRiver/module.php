@@ -12,6 +12,7 @@ use Burki24\SymconModuleHelper\ResponsiveVisualizationHelper;
 use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
 use SymconECharts\EChartsAnimationDesign;
+use SymconECharts\EChartsArchiveQuery;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsBarPreview;
 use SymconECharts\EChartsBarPreviewForm;
@@ -116,6 +117,8 @@ class EChartsThemeRiver extends IPSModuleStrict
             $this->RegisterPropertyString('Range', '7d');
             $this->RegisterPropertyInteger('CustomRangeValue', 7);
             $this->RegisterPropertyString('CustomRangeUnit', 'day');
+            $this->RegisterPropertyString('AbsoluteStart', '{}');
+            $this->RegisterPropertyString('AbsoluteEnd', '{}');
             $this->RegisterPropertyString('Aggregation', 'hour');
             foreach (['', 'IPSView'] as $prefix) {
                 foreach (self::DESIGN_DEFAULTS as $name => $default) {
@@ -194,6 +197,17 @@ class EChartsThemeRiver extends IPSModuleStrict
                 ['CustomRangeValue', 'CustomRangeUnit'],
                 $this->ReadPropertyString('Range') === 'custom'
             );
+            $form['elements'] = $this->SetFormFieldVisibility(
+                $form['elements'],
+                ['AbsoluteStart', 'AbsoluteEnd', 'AbsoluteRangeHint', 'AbsoluteTimeZone'],
+                $this->ReadPropertyString('Range') === 'absolute'
+            );
+            foreach ($form['elements'] as &$element) {
+                if (($element['name'] ?? '') === 'AbsoluteTimeZone') {
+                    $element['caption'] = sprintf($this->Translate('Symcon time zone: %s'), date_default_timezone_get());
+                }
+            }
+            unset($element);
             $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
             $form['elements'] = $this->WithAnimationFormControls($form['elements']);
             $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
@@ -207,7 +221,7 @@ class EChartsThemeRiver extends IPSModuleStrict
                 ['caption' => 'Legend', 'start' => 'LegendPosition'],
                 ['caption' => 'Typography and colors', 'start' => 'FontFamily']
             ]);
-            $fields = ['Title', 'Sources', 'Metric', 'EnableBandSelection', 'Range', 'CustomRangeValue', 'CustomRangeUnit', 'Aggregation',
+            $fields = ['Title', 'Sources', 'Metric', 'EnableBandSelection', 'Range', 'CustomRangeValue', 'CustomRangeUnit', 'AbsoluteStart', 'AbsoluteEnd', 'Aggregation',
                 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
                 'IPSViewBackgroundOpacityPercent', ...array_keys(self::DESIGN_DEFAULTS),
                 ...array_map(static fn (string $name): string => 'IPSView' . $name, array_keys(self::DESIGN_DEFAULTS))];
@@ -233,6 +247,9 @@ class EChartsThemeRiver extends IPSModuleStrict
         $debugFlowFailed = false;
         $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
+            foreach (['AbsoluteStart', 'AbsoluteEnd', 'AbsoluteRangeHint', 'AbsoluteTimeZone'] as $name) {
+                $this->UpdateFormField($name, 'visible', $Range === 'absolute');
+            }
             $custom = $Range === 'custom';
             $this->UpdateFormField('CustomRangeValue', 'visible', $custom);
             $this->UpdateFormField('CustomRangeUnit', 'visible', $custom);
@@ -463,14 +480,7 @@ class EChartsThemeRiver extends IPSModuleStrict
             throw new RuntimeException('No active EChartsGateway is connected.');
         }
         $sources = $this->GetValidatedSources();
-        $query = ThemeRiverData::Window(
-            $this->ReadPropertyString('Range'),
-            $this->ReadPropertyString('Aggregation'),
-            $this->CurrentTimestamp(),
-            date_default_timezone_get(),
-            $this->ReadPropertyInteger('CustomRangeValue'),
-            $this->ReadPropertyString('CustomRangeUnit')
-        );
+        $query = $this->ResolveTimeQuery();
         $series = [];
         $descriptors = [];
         $loadedAggregates = 0;
@@ -498,6 +508,14 @@ class EChartsThemeRiver extends IPSModuleStrict
         }
         $this->WriteAttributeString('LastError', '');
         $this->DebugEChartsSetStatus(IS_ACTIVE);
+        $range = ['key'    => $this->ReadPropertyString('Range'), 'startTimestamp' => $query['StartTimestamp'],
+            'endTimestamp' => $query['EndTimestamp'], 'aggregationLevel' => $query['AggregationLevel'],
+            'timezone'     => date_default_timezone_get(), 'loadedAggregates' => $loadedAggregates,
+            'loadBudget'   => ThemeRiverData::MAXIMUM_LOADED_AGGREGATES];
+        if ($range['key'] === 'absolute') {
+            $range += ['requestedStartTimestamp' => $query['RequestedStartTimestamp'],
+                'requestedEndTimestamp'          => $query['RequestedEndTimestamp']];
+        }
         $json = json_encode([
             'schemaVersion' => 1, 'family' => 'themeRiver', 'theme' => $this->EffectiveTheme($ipsView),
             'themeRiver'    => ['title' => $this->ReadPropertyString('Title'), 'unit' => $sources[0]['Unit'],
@@ -505,11 +523,7 @@ class EChartsThemeRiver extends IPSModuleStrict
                 'enableBandSelection'   => $this->ReadPropertyBoolean('EnableBandSelection'),
                 'aggregation'           => $this->ReadPropertyString('Aggregation'), 'sources' => $descriptors,
                 ...$data, 'style'       => $this->ReadDesignStyle($ipsView)],
-            'range' => ['key'      => $this->ReadPropertyString('Range'), 'startTimestamp' => $query['StartTimestamp'],
-                'endTimestamp'     => $query['EndTimestamp'], 'aggregationLevel' => $query['AggregationLevel'],
-                'timezone'         => date_default_timezone_get(),
-                'loadedAggregates' => $loadedAggregates,
-                'loadBudget'       => ThemeRiverData::MAXIMUM_LOADED_AGGREGATES]
+            'range' => $range
         ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
         if (strlen($json) > self::MAXIMUM_MODEL_BYTES) {
             $this->WriteAttributeString('LastError', 'MODEL_TOO_LARGE');
@@ -623,7 +637,7 @@ class EChartsThemeRiver extends IPSModuleStrict
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => $exception->getMessage()];
         }
         if (mb_strlen($this->ReadPropertyString('Title')) > 200
-            || !in_array($this->ReadPropertyString('Range'), ['24h', '7d', '30d', 'custom'], true)
+            || !in_array($this->ReadPropertyString('Range'), ['24h', '7d', '30d', 'custom', 'absolute'], true)
             || !in_array($this->ReadPropertyString('Aggregation'), ['hour', 'day'], true)
             || !$this->IsValidDesign('')
             || (!$this->ReadPropertyBoolean('IPSViewUseTileDesign') && !$this->IsValidDesign('IPSView'))
@@ -634,18 +648,40 @@ class EChartsThemeRiver extends IPSModuleStrict
             return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => 'The ThemeRiver settings are invalid.'];
         }
         try {
-            ThemeRiverData::Window(
-                $this->ReadPropertyString('Range'),
-                $this->ReadPropertyString('Aggregation'),
-                $this->CurrentTimestamp(),
-                date_default_timezone_get(),
-                $this->ReadPropertyInteger('CustomRangeValue'),
-                $this->ReadPropertyString('CustomRangeUnit')
-            );
+            $this->ResolveTimeQuery();
         } catch (InvalidArgumentException $exception) {
-            return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => $exception->getMessage()];
+            return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => $this->ReadPropertyString('Range') === 'absolute'
+                ? $this->Translate($exception->getMessage()) : $exception->getMessage()];
         }
         return null;
+    }
+
+    /** Pure planning shared by saved settings and read-only preview drafts. */
+    private function ResolveTimeQuery(array $values = []): array
+    {
+        $range = $values['Range'] ?? $this->ReadPropertyString('Range');
+        $interval = $values['Aggregation'] ?? $this->ReadPropertyString('Aggregation');
+        $timezone = date_default_timezone_get();
+        if ($range === 'absolute') {
+            $start = EChartsArchiveQuery::ParseLocalDateTime(
+                array_key_exists('AbsoluteStart', $values) ? $values['AbsoluteStart'] : $this->ReadPropertyString('AbsoluteStart'),
+                $timezone
+            );
+            $end = EChartsArchiveQuery::ParseLocalDateTime(
+                array_key_exists('AbsoluteEnd', $values) ? $values['AbsoluteEnd'] : $this->ReadPropertyString('AbsoluteEnd'),
+                $timezone
+            );
+            return EChartsArchiveQuery::AbsoluteIntervals($start, $end, $interval, $this->CurrentTimestamp(), $timezone)
+                + ['RequestedStartTimestamp' => $start, 'RequestedEndTimestamp' => $end];
+        }
+        return ThemeRiverData::Window(
+            $range,
+            $interval,
+            $this->CurrentTimestamp(),
+            $timezone,
+            (int) ($values['CustomRangeValue'] ?? $this->ReadPropertyInteger('CustomRangeValue')),
+            $values['CustomRangeUnit'] ?? $this->ReadPropertyString('CustomRangeUnit')
+        );
     }
 
     /** @return list<array{VariableID:int,Label:string,Color:int,Unit:string,Decimals:int}> */
@@ -803,6 +839,9 @@ class EChartsThemeRiver extends IPSModuleStrict
         if ($configurationError !== null) {
             $this->WriteAttributeString('LastError', $configurationError['Message']);
             $this->DebugEChartsSetStatus($configurationError['Status']);
+            if ($this->ReadPropertyString('Range') === 'absolute' && $configurationError['Status'] === self::STATUS_CONFIGURATION_INVALID) {
+                return $this->ErrorState($configurationError['Message']);
+            }
             return $this->ErrorState(in_array($configurationError['Message'], [
                 'Too many archive intervals. Choose a shorter range or a longer interval.', 'The archive interval settings are invalid.',
                 'The ThemeRiver metric is invalid.'

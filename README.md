@@ -101,6 +101,7 @@ können unabhängig davon individuell vergeben werden.
   Kachel und IPSView besitzen getrennte Designer und Vorschauen.
   Eine optionale Bandauswahl erhält die Quell-IDs und ursprünglichen
   Archivlücken; das gemeinsame Ladebudget beträgt 16.000 Aggregate.
+  Neben rollierenden Dauern sind feste historische Von-/Bis-Zeiträume wählbar.
 
 - __EChartsPictorialBar__ ([Dokumentation](EChartsPictorialBar/README.md))
   Aktuelle Werte aus 1–100 Variablen derselben Einheit als einzelne oder

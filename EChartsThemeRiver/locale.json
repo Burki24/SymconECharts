@@ -1,6 +1,18 @@
 {
     "translations": {
         "de": {
+            "Fixed historical period": "Fester historischer Zeitraum",
+            "From (inclusive)": "Von (einschließlich)",
+            "Until (exclusive)": "Bis (ausschließlich)",
+            "Start is included, end is excluded. Only fully contained completed intervals are evaluated. The end must not be in the future.": "Der Beginn ist eingeschlossen, das Ende ausgeschlossen. Nur vollständig enthaltene abgeschlossene Intervalle werden ausgewertet. Das Ende darf nicht in der Zukunft liegen.",
+            "Dates use the Symcon time zone.": "Datumsangaben verwenden die Symcon-Zeitzone.",
+            "Symcon time zone: %s": "Symcon-Zeitzone: %s",
+            "The historical date and time selection is invalid.": "Die historische Datums- und Zeitauswahl ist ungültig. Beginn und Ende vollständig und gültig angeben.",
+            "The historical date and time is ambiguous in the selected timezone.": "Die historische Uhrzeit kommt bei der Zeitumstellung zweimal vor. Einen eindeutigen Zeitpunkt wählen.",
+            "The historical date and time does not exist in the selected timezone.": "Die historische Uhrzeit existiert wegen der Zeitumstellung nicht. Einen anderen Zeitpunkt wählen.",
+            "The absolute archive query settings are invalid.": "Der feste Archivzeitraum ist ungültig. Der Beginn muss vor dem Ende liegen und das Ende darf nicht in der Zukunft liegen.",
+            "Hourly historical periods across non-hour timezone changes are not supported.": "Historische Stundenzeiträume über Zeitzonenwechsel mit nicht ganzstündiger Verschiebung werden nicht unterstützt. Einen Zeitraum vor oder nach dem Wechsel wählen.",
+            "Fixed period": "Fester Zeitraum",
             "Data basis": "Datengrundlage",
             "Interval mean (standard archive)": "Intervallmittelwert (Standardarchiv)",
             "Counter consumption per interval": "Zählerverbrauch je Intervall",

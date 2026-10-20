@@ -9,6 +9,11 @@
 
 ## Neu
 
+- EChartsThemeRiver bietet feste historische Von-/Bis-Zeiträume für vollständig
+  enthaltene Stunden oder Kalendertage. Mittelwert und Zählerverbrauch verwenden
+  dieselbe Datumswahl. Bestehende Zeiträume, gemeinsame Lücken, Bandauswahl,
+  Designs und Archivbudgets bleiben erhalten; beide Vorschauen zeigen die Grenzen.
+
 - EChartsCandlestick bietet feste historische Von-/Bis-Zeiträume in der
   Symcon-Zeitzone. Nur vollständig enthaltene Stunden oder Kalendertage
   werden aus echten Rohwerten gebildet. Bestehende Zeiträume, Lückenregeln,

@@ -27,6 +27,25 @@ trait ThemeRiverPreview
         $textStyle = fn (string $prefix): string => ' font-weight="' . ($this->BarPreviewValue($values, $prefix . 'Bold', 'boolean', $ipsView) ? 'bold' : 'normal')
             . '" font-style="' . ($this->BarPreviewValue($values, $prefix . 'Italic', 'boolean', $ipsView) ? 'italic' : 'normal') . '"';
         $svg = str_replace('<text x="24"', '<text' . $textStyle('Title') . ' x="24"', $svg);
+        $absolute = ($values['Range'] ?? $this->ReadPropertyString('Range')) === 'absolute';
+        if ($absolute) {
+            try {
+                $query = $this->ResolveTimeQuery($values);
+                $zone = new \DateTimeZone(date_default_timezone_get());
+                $format = static fn (int $timestamp): string => (new \DateTimeImmutable('@' . $timestamp))->setTimezone($zone)->format('Y-m-d H:i:s P');
+                $svg = str_replace('<svg ', '<svg data-range="absolute" data-requested-start="' . $query['RequestedStartTimestamp']
+                    . '" data-requested-end="' . $query['RequestedEndTimestamp'] . '" ', $svg);
+                $svg .= '<text x="24" y="62" font-size="10" fill="' . EChartsBarPreview::E($palette['muted']) . '">'
+                    . EChartsBarPreview::E($this->Translate('Fixed period') . ': ' . $format($query['RequestedStartTimestamp'])
+                        . ' → ' . $format($query['RequestedEndTimestamp']) . ' (' . $zone->getName() . ')') . '</text>';
+            } catch (\Throwable $exception) {
+                $svg .= '<text x="24" y="100" font-size="12" fill="' . EChartsBarPreview::E($palette['text']) . '">';
+                foreach (explode("\n", wordwrap($this->Translate($exception->getMessage()), 90, "\n")) as $index => $line) {
+                    $svg .= '<tspan x="24" dy="' . ($index === 0 ? '0' : '1.4em') . '">' . EChartsBarPreview::E($line) . '</tspan>';
+                }
+                return $svg . '</text></svg>';
+            }
+        }
         $allItems = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values, 'Label', false, ThemeRiverData::MAXIMUM_SOURCE_COUNT)['items'];
         $selectionEnabled = (bool) ($values['EnableBandSelection'] ?? $this->ReadPropertyBoolean('EnableBandSelection'));
         foreach ($allItems as $index => &$item) {
@@ -51,7 +70,7 @@ trait ThemeRiverPreview
         $legendFont = max(6, min(24, 11 * $this->BarPreviewValue($values, 'LegendFontSizePercent', 'integer', $ipsView) / 100));
         $legendHeight = max(16, $legendItemHeight, ceil($legendFont * 1.25)) + 10;
         $footerInset = $count < count($allItems) ? 18 : 0;
-        $legendTop = $legendAtTop ? 60 : 360 - 14 - $legendHeight - $footerInset;
+        $legendTop = $legendAtTop ? ($absolute ? 80 : 60) : 360 - 14 - $legendHeight - $footerInset;
         $top = $legend && $legendAtTop ? $legendTop + $legendHeight + 16 : 86;
         $axisExtent = $axisLabels ? $axisMargin + ceil($axisFont * 1.25) * ($dateTime ? 2 : 1) : ($axisTicks ? 5 : 0);
         $axisY = ($legend && !$legendAtTop ? $legendTop - 20 : 342 - $footerInset) - $axisExtent;
