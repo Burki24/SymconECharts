@@ -12,6 +12,7 @@ und optional als eigenes IPSView-WebContent-Widget.
    unterschiedliche Variablen dürfen denselben Namen haben.
 3. Den Zeitraum wählen: letzte 24 Stunden, 7 Tage oder 30 Tage. Alternativ
    „Benutzerdefiniert“ wählen und 1–1000 Minuten, Stunden, Tage oder Wochen angeben.
+   Für feste Anfangs-/Enddaten „Fester historischer Zeitraum“ wählen.
 4. Optional Titel und Design einstellen und Änderungen übernehmen.
 
 Einheit und Nachkommastellen stammen aus der Variablendarstellung beziehungsweise
@@ -31,6 +32,38 @@ reichen 90 Minuten bei letzter abgeschlossener Stunde um 12:00 Uhr von 10:30 bis
 11:59:59 Uhr; verwendet wird darin nur der Stundenwert ab 11:00 Uhr. Sehr kurze
 Zeiträume können deshalb ohne Stichproben bleiben. Ein Tag entspricht 24 Stunden,
 eine Woche sieben solchen Tagen, auch bei einer Zeitumstellung.
+
+### Fester historischer Zeitraum
+
+Unter **Von (einschließlich)** und **Bis (ausschließlich)** Datum und Uhrzeit
+auswählen. Es gilt die im Formular angezeigte Symcon-Zeitzone, nicht die
+Zeitzone des Browsers. Beginn und Ende müssen gültig sein; der Beginn muss
+vor dem Ende liegen und das Ende darf nicht in der Zukunft liegen.
+
+Beispiel: **01.10.2026 00:00 bis 08.10.2026 00:00** umfasst den 1. bis
+einschließlich 7. Oktober. Der Zeitraum wandert beim Aktualisieren nicht mit.
+Nur vollständig enthaltene, abgeschlossene Stunden werden ausgewertet:
+**08:30 bis 13:30** verwendet die vier Stunden ab 09:00, 10:00, 11:00 und
+12:00. Eine Auswahl ohne vollständige Stunde bleibt ohne Daten; sie erzeugt
+keine Archivabfrage und keine Nullwerte. Die laufende Stunde bleibt auch dann
+ausgeschlossen, wenn das gewählte Ende dem aktuellen Zeitpunkt entspricht.
+
+Bei der Umstellung auf Winterzeit werden beide tatsächlich vorhandenen
+Stunden berücksichtigt, wenn sie vollständig im Zeitraum liegen. Ein
+ausgewählter Grenzzeitpunkt innerhalb einer doppeldeutigen Stunde wird dagegen
+mit Hinweis abgewiesen, ebenso eine bei der Sommerzeitumstellung nicht
+existierende Uhrzeit. Wählen Sie dann einen eindeutigen Grenzzeitpunkt,
+beispielsweise Mitternacht.
+Seltene Zeitzonenwechsel mit einer nicht ganzstündigen Verschiebung, etwa
+30 Minuten, werden für betroffene historische Stundenfenster ausdrücklich
+abgewiesen. Zeiträume davor oder danach sowie die üblichen ganzstündigen
+Sommer-/Winterzeitwechsel bleiben unterstützt.
+
+Kachel und IPSView verwenden denselben festen Zeitraum; ihre Designs bleiben
+unabhängig. Die Formularvorschau zeigt die gewählten Grenzen samt UTC-Offset
+und Zeitzone, aber weiterhin ausdrücklich Beispieldaten. Ungültige Datumsentwürfe
+werden in der Vorschau erklärt, ohne Archive zu lesen. Die bisherigen
+Voreinstellungen und rollierenden benutzerdefinierten Zeiträume bleiben erhalten.
 
 Die Box reicht vom ersten zum dritten Quartil; die Linie darin ist der Median.
 Die beiden Enden zeigen Minimum und Maximum der Stundenmittelwerte. Quartile
@@ -52,6 +85,7 @@ kürzerer Zeitraum erforderlich sein; das Diagramm meldet dies ausdrücklich,
 statt Quartile aus abgeschnittenen Daten zu berechnen.
 Dieselbe Begrenzung gilt auch bei benutzerdefinierten langen Zeiträumen;
 eine größere Zeiteinheit erhöht das Archivbudget nicht.
+Auch ein fester historischer Zeitraum erhöht diese Budgets nicht.
 
 ## Gestaltung und IPSView
 

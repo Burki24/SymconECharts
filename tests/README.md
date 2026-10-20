@@ -1,5 +1,37 @@
 # Tests
 
+## Boxplot: feste historische Zeiträume
+
+`php tests/archive_absolute_windows.php` prüft die neuen ausdrücklich opt-in
+verwendeten Planungsmethoden ohne Symcon-I/O. Native SelectDateTime-Objekte
+erfordern sechs Integer-Felder und gültige eindeutige lokale Zeitpunkte.
+Ungültige Daten, DST-Lücken und doppeldeutige Herbstgrenzen werden abgewiesen.
+Start eingeschlossen/Ende ausgeschlossen, vollständig enthaltene Stunden/Tage,
+leere Fenster, Fortschreiten der Uhr, Zukunft, UTC, nicht ganzstündige
+Zonenoffsets und 23-/25-Stunden-Tage sind abgedeckt. Das erste RED war die noch
+fehlende Methode; `archive_windows.php` erhält die bisherigen Planungsverträge.
+Ein zusätzlicher RED-Fall für Lord Howe verhinderte eine fälschliche 02:30-
+Stundengrenze. Betroffene Stundenfenster mit nicht ganzstündigem Offsetwechsel
+werden jetzt ausdrücklich abgewiesen; übliche DST-Wechsel bleiben unterstützt.
+
+`php tests/gateway_gauges.php --boxplot-absolute` verwendet den echten Gateway
+mit Kernel-Doppeln. 08:30–13:30 liefert genau die Stunden ab 09/10/11/12 Uhr;
+angefragte und effektive Grenzen werden getrennt geprüft. R7-Statistik,
+Nullwerte, Lücken, leere Kategorien, unveränderte Alt-Properties und unabhängige
+Ausgabedesigns bleiben erhalten. Leere Fenster lesen keine Archive. Ungültige
+aktive Dates scheitern vor Abfragen; inaktive Daten werden ignoriert.
+Quellenlimit 32/33, 1000 pro Abfrage, gemeinsames 10000-Budget, Trunkierung und
+Wiederherstellung sind separat geprüft. Die Quelldaten der AC-Doppel liegen
+wie in Symcon absteigend vor; ein zunächst falsch sortiertes Fixture wurde
+berichtigt, ohne die Produktions-Validierung zu lockern.
+
+Formularsichtbarkeit und vollständige Entwurfs-Callbacks enthalten beide
+Datumsfelder. Gültige Vorschauen zeigen Entwurfsgrenzen mit Offset/Zeitzone und
+gekennzeichneten Beispielen; ungültige Entwürfe melden das Problem ohne Boxen.
+Properties, Status und Archivzugriffe bleiben unverändert. Die JavaScript-
+Geometrie bleibt unverändert und wird mit `node tests/boxplot_layout.js` geprüft.
+Eine neue reale Formular-/Kachel-/IPSView-Prüfung nach Modulupdate bleibt offen.
+
 ## Radar: 16 Gruppen mit optionaler Gruppenauswahl
 
 `php tests/radar_model.php` erhält Originalwerte, Variablen-IDs, Achsenreihenfolge

@@ -29,6 +29,18 @@ Canvas-Zeichenaufrufe für Kachel und IPSView statt nur vorhandener Titeloptione
 
 ## Aktueller Stand und Zielarchitektur
 
+Boxplot bietet gemäß [ADR 0077](adr/0077-fixed-historical-boxplot-periods.md)
+zusätzlich `Range=absolute` und die additiven String-Properties `AbsoluteStart`
+und `AbsoluteEnd` für native SelectDateTime-Objekte. Die gemeinsame reine
+Zeitplanung ergänzt `ParseLocalDateTime` und `ResolveAbsolute`; bestehende
+Methoden und Consumer bleiben unverändert. Lokale Daten werden streng geprüft,
+DST-Lücken und doppeldeutige Grenzen ausdrücklich abgewiesen, vollständige
+Stunden aufgerundet/abgerundet und zukünftige Enden nicht still gekappt.
+32 Quellen, 1000 Stundenmittel je Quelle und 10000 insgesamt bleiben erhalten.
+Vorschauen validieren Entwurfsdaten ohne Archivzugriff oder Zustandsänderung.
+Die zentrale Planung ist für weitere Familien vorbereitet; deren Formulare
+und Datenmodelle sind in diesem Schritt nicht erweitert.
+
 Radar erweitert gemäß [ADR 0076](adr/0076-radar-group-selection.md) auf
 16 vollständige Gruppen mit weiterhin 3–10 expliziten Achsen (höchstens 160
 Zuordnungen). Die globalen additiven Properties `EnableGroupSelection=false`

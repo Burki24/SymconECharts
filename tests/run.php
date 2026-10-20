@@ -14,6 +14,7 @@ $tests = [
     __DIR__ . '/symcon_strict.php',
     __DIR__ . '/data_protocol.php',
     __DIR__ . '/archive_windows.php',
+    __DIR__ . '/archive_absolute_windows.php',
     __DIR__ . '/archive_states_gateway.php',
     __DIR__ . '/calendar_pie_data.php',
     __DIR__ . '/calendar_pie_integration.php',
@@ -55,6 +56,7 @@ $tests = [
 ];
 
 $commands = [
+    ['Test fixed historical Boxplot periods', 'php tests/gateway_gauges.php --boxplot-absolute'],
     ['Test 16-group Radar integration', 'php tests/gateway_gauges.php --radar-many'],
     ['Test 32-source Funnel integration', 'php tests/gateway_gauges.php --funnel-many'],
     ['Test 32-source Gauge Multi integration', 'php tests/gateway_gauges.php --gauge-multi-many'],

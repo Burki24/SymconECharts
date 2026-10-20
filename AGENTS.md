@@ -124,6 +124,10 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Verteilungen abgeschlossener Stundenmittelwerte von Archivvariablen liegen
   in `EChartsBoxplot` gemäß ADR 0054; Quartile werden nicht aus Tagesaggregaten
   approximiert und fehlende Intervalle nicht als Null ergänzt.
+  Boxplot ergänzt gemäß ADR 0077 feste historische Von-/Bis-Zeiträume mit
+  eingeschlossenem Beginn und ausgeschlossenem Ende. Datumsprüfung und
+  Vollintervallplanung liegen zentral in `EChartsArchiveQuery`; andere Familien
+  behalten ihre bisherigen Zeitmodelle und alle Archivbudgets bleiben erhalten.
   Nichtnegative Stunden- oder Tagesmittelwerte gleicher Einheit liegen als
   Archivbänder im eigenständigen `EChartsThemeRiver` gemäß ADR 0058;
   fehlende Quellen unterbrechen ein Intervall ohne Nullauffüllung.

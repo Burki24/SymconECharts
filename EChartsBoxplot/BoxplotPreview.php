@@ -23,6 +23,25 @@ trait BoxplotPreview
         );
         $svg = str_replace('<svg xmlns', '<svg font-family="Arial, sans-serif" xmlns', $svg);
         $svg = str_replace('<text x="24"', '<text font-weight="' . ($this->BarPreviewValue($values, 'TitleBold', 'boolean', $ipsView) ? 'bold' : 'normal') . '" x="24"', $svg);
+        if (($values['Range'] ?? $this->ReadPropertyString('Range')) === 'absolute') {
+            try {
+                $query = $this->ResolveTimeQuery(1, $values);
+                $zone = new \DateTimeZone(date_default_timezone_get());
+                $format = static fn (int $timestamp): string => (new \DateTimeImmutable('@' . $timestamp))->setTimezone($zone)->format('Y-m-d H:i:s P');
+                $svg = str_replace('<svg ', '<svg data-range="absolute" data-requested-start="' . $query['RequestedStartTimestamp']
+                    . '" data-requested-end="' . $query['RequestedEndTimestamp'] . '" ', $svg);
+                $svg .= '<text x="24" y="62" font-size="10" fill="' . EChartsBarPreview::E($palette['muted']) . '">'
+                    . EChartsBarPreview::E($this->Translate('Fixed period') . ': ' . $format($query['RequestedStartTimestamp'])
+                        . ' → ' . $format($query['RequestedEndTimestamp']) . ' (' . $zone->getName() . ')') . '</text>';
+            } catch (\Throwable $exception) {
+                $lines = explode("\n", wordwrap($this->Translate($exception->getMessage()), 90, "\n"));
+                $svg .= '<text x="24" y="100" font-size="12" fill="' . EChartsBarPreview::E($palette['text']) . '">';
+                foreach ($lines as $index => $line) {
+                    $svg .= '<tspan x="24" dy="' . ($index === 0 ? '0' : '1.4em') . '">' . EChartsBarPreview::E($line) . '</tspan>';
+                }
+                return $svg . '</text></svg>';
+            }
+        }
         $allItems = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values, 'Label', false, 32)['items'];
         $horizontal = $this->BarPreviewValue($values, 'Orientation', 'string', $ipsView) === 'horizontal';
         $axis = EChartsBarPreview::Color($this->BarPreviewValue($values, 'AxisColor', 'integer', $ipsView), $palette['text']);

@@ -9,6 +9,12 @@
 
 ## Neu
 
+- EChartsBoxplot bietet feste historische Von-/Bis-Zeiträume zusätzlich zu
+  den bisherigen rollierenden Zeiträumen. Die Datumswahl verwendet die
+  Symcon-Zeitzone und wertet ausschließlich vollständig enthaltene abgeschlossene
+  Stunden aus. Vorschauen zeigen die gewählten Grenzen; Archivbudgets,
+  Statistik, bestehende Konfigurationen und unabhängige Designs bleiben erhalten.
+
 - EChartsRadar unterstützt bis zu 16 vollständige Vergleichsgruppen bei
   weiterhin 3–10 Achsen. Die optionale Gruppenauswahl bietet Anfangssichtbarkeit,
   Alle/Umkehren und eine bei Aktualisierung erhaltene Auswahl. Achsenbereiche,

@@ -105,6 +105,8 @@ class EChartsBoxplot extends IPSModuleStrict
             $this->RegisterPropertyString('Range', '7d');
             $this->RegisterPropertyInteger('CustomRangeValue', 7);
             $this->RegisterPropertyString('CustomRangeUnit', 'day');
+            $this->RegisterPropertyString('AbsoluteStart', '{}');
+            $this->RegisterPropertyString('AbsoluteEnd', '{}');
             foreach (['', 'IPSView'] as $prefix) {
                 foreach (self::DESIGN_DEFAULTS as $name => $default) {
                     match (gettype($default)) {
@@ -182,6 +184,17 @@ class EChartsBoxplot extends IPSModuleStrict
                 ['CustomRangeValue', 'CustomRangeUnit'],
                 $this->ReadPropertyString('Range') === 'custom'
             );
+            $form['elements'] = $this->SetFormFieldVisibility(
+                $form['elements'],
+                ['AbsoluteStart', 'AbsoluteEnd', 'AbsoluteRangeHint', 'AbsoluteTimeZone'],
+                $this->ReadPropertyString('Range') === 'absolute'
+            );
+            foreach ($form['elements'] as &$element) {
+                if (($element['name'] ?? '') === 'AbsoluteTimeZone') {
+                    $element['caption'] = sprintf($this->Translate('Symcon time zone: %s'), date_default_timezone_get());
+                }
+            }
+            unset($element);
             $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
             $form['elements'] = $this->WithAnimationFormControls($form['elements']);
             $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
@@ -194,7 +207,7 @@ class EChartsBoxplot extends IPSModuleStrict
                 ['caption' => 'Axes and grid', 'start' => 'ShowGrid'],
                 ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
             ]);
-            $fields = ['Title', 'Sources', 'Range', 'CustomRangeValue', 'CustomRangeUnit',
+            $fields = ['Title', 'Sources', 'Range', 'CustomRangeValue', 'CustomRangeUnit', 'AbsoluteStart', 'AbsoluteEnd',
                 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
                 'IPSViewBackgroundOpacityPercent', ...array_keys(self::DESIGN_DEFAULTS),
                 ...array_map(static fn (string $name): string => 'IPSView' . $name, array_keys(self::DESIGN_DEFAULTS))];
@@ -221,6 +234,9 @@ class EChartsBoxplot extends IPSModuleStrict
         $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
             $custom = $Range === 'custom';
+            foreach (['AbsoluteStart', 'AbsoluteEnd', 'AbsoluteRangeHint', 'AbsoluteTimeZone'] as $name) {
+                $this->UpdateFormField($name, 'visible', $Range === 'absolute');
+            }
             $this->UpdateFormField('CustomRangeValue', 'visible', $custom);
             $this->UpdateFormField('CustomRangeUnit', 'visible', $custom);
         } catch (\Throwable $debugFlowException) {
@@ -450,16 +466,13 @@ class EChartsBoxplot extends IPSModuleStrict
             throw new RuntimeException('No active EChartsGateway is connected.');
         }
         $sources = $this->GetValidatedSources();
-        $query = EChartsArchiveQuery::Resolve(
-            $this->ReadPropertyString('Range'),
-            $this->ReadPropertyInteger('CustomRangeValue'),
-            $this->ReadPropertyString('CustomRangeUnit'),
-            'hour',
-            1000 * count($sources),
-            count($sources),
-            $this->CurrentTimestamp(),
-            date_default_timezone_get()
-        );
+        $query = $this->ResolveTimeQuery(count($sources));
+        $range = ['key'    => $this->ReadPropertyString('Range'), 'startTimestamp' => $query['StartTimestamp'],
+            'endTimestamp' => $query['EndTimestamp'], 'aggregationLevel' => 0];
+        if ($range['key'] === 'absolute') {
+            $range += ['requestedStartTimestamp' => $query['RequestedStartTimestamp'],
+                'requestedEndTimestamp'          => $query['RequestedEndTimestamp'], 'timezone' => date_default_timezone_get()];
+        }
         $data = [];
         $pointCount = 0;
         foreach ($sources as $source) {
@@ -489,8 +502,7 @@ class EChartsBoxplot extends IPSModuleStrict
                 'boxplot'    => ['title' => $this->ReadPropertyString('Title'), 'unit' => $sources[0]['Unit'],
                     'sampling'           => 'completed-hourly-means', 'whiskers' => 'minmax', 'quantile' => 'R7',
                     'data'               => $data, 'style' => $this->ReadDesignStyle($ipsView)],
-                'range' => ['key'  => $this->ReadPropertyString('Range'), 'startTimestamp' => $query['StartTimestamp'],
-                    'endTimestamp' => $query['EndTimestamp'], 'aggregationLevel' => 0]],
+                'range' => $range],
             JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION
         );
     }
@@ -570,12 +582,12 @@ class EChartsBoxplot extends IPSModuleStrict
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => $exception->getMessage()];
         }
         if (mb_strlen($this->ReadPropertyString('Title')) > 200
-            || !in_array($this->ReadPropertyString('Range'), ['24h', '7d', '30d', 'custom'], true)
-            || !EChartsArchiveQuery::IsValidRange(
+            || !in_array($this->ReadPropertyString('Range'), ['24h', '7d', '30d', 'custom', 'absolute'], true)
+            || ($this->ReadPropertyString('Range') !== 'absolute' && !EChartsArchiveQuery::IsValidRange(
                 $this->ReadPropertyString('Range'),
                 $this->ReadPropertyInteger('CustomRangeValue'),
                 $this->ReadPropertyString('CustomRangeUnit')
-            )
+            ))
             || !$this->IsValidDesign('')
             || (!$this->ReadPropertyBoolean('IPSViewUseTileDesign') && !$this->IsValidDesign('IPSView'))
             || !EChartsIPSViewBackground::IsValid(
@@ -584,7 +596,50 @@ class EChartsBoxplot extends IPSModuleStrict
             )) {
             return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => 'The Boxplot settings are invalid.'];
         }
+        if ($this->ReadPropertyString('Range') === 'absolute') {
+            try {
+                $this->ResolveTimeQuery(1);
+            } catch (Throwable $exception) {
+                return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => $this->Translate($exception->getMessage())];
+            }
+        }
         return null;
+    }
+
+    /** Pure planning also used by draft previews; never accesses archives or changes state. */
+    private function ResolveTimeQuery(int $sourceCount, array $values = []): array
+    {
+        $range = $values['Range'] ?? $this->ReadPropertyString('Range');
+        $timezone = date_default_timezone_get();
+        if ($range === 'absolute') {
+            $start = EChartsArchiveQuery::ParseLocalDateTime(
+                array_key_exists('AbsoluteStart', $values) ? $values['AbsoluteStart'] : $this->ReadPropertyString('AbsoluteStart'),
+                $timezone
+            );
+            $end = EChartsArchiveQuery::ParseLocalDateTime(
+                array_key_exists('AbsoluteEnd', $values) ? $values['AbsoluteEnd'] : $this->ReadPropertyString('AbsoluteEnd'),
+                $timezone
+            );
+            return EChartsArchiveQuery::ResolveAbsolute(
+                $start,
+                $end,
+                'hour',
+                1000 * $sourceCount,
+                $sourceCount,
+                $this->CurrentTimestamp(),
+                $timezone
+            ) + ['RequestedStartTimestamp' => $start, 'RequestedEndTimestamp' => $end];
+        }
+        return EChartsArchiveQuery::Resolve(
+            (string) $range,
+            (int) ($values['CustomRangeValue'] ?? $this->ReadPropertyInteger('CustomRangeValue')),
+            (string) ($values['CustomRangeUnit'] ?? $this->ReadPropertyString('CustomRangeUnit')),
+            'hour',
+            1000 * $sourceCount,
+            $sourceCount,
+            $this->CurrentTimestamp(),
+            $timezone
+        );
     }
 
     /** @return list<array{VariableID:int,Label:string,Color:int,Unit:string,Decimals:int}> */
@@ -726,7 +781,11 @@ class EChartsBoxplot extends IPSModuleStrict
     /** @return array<string,mixed> */
     private function BuildVisualizationState(bool $ipsView = false): array
     {
-        if ($this->GetConfigurationError() !== null) {
+        $error = $this->GetConfigurationError();
+        if ($error !== null) {
+            if ($this->ReadPropertyString('Range') === 'absolute' && $error['Status'] === self::STATUS_CONFIGURATION_INVALID) {
+                return $this->ErrorState($error['Message']);
+            }
             return $this->ErrorState('Configure valid Boxplot archive variables.');
         }
         if (!$this->HasActiveParent()) {

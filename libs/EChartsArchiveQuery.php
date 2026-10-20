@@ -105,6 +105,147 @@ final class EChartsArchiveQuery
                     && array_key_exists($customRangeUnit, self::CUSTOM_RANGE_UNITS)));
     }
 
+    /** Resolve the six integer fields produced by the native SelectDateTime control. */
+    public static function ParseLocalDateTime(mixed $raw, string $timezone): int
+    {
+        $invalid = 'The historical date and time selection is invalid.';
+        if (is_string($raw)) {
+            if (strlen($raw) > 1024) {
+                throw new InvalidArgumentException($invalid);
+            }
+            try {
+                $raw = json_decode($raw, true, 8, JSON_THROW_ON_ERROR);
+            } catch (\JsonException) {
+                throw new InvalidArgumentException($invalid);
+            }
+        } elseif ($raw instanceof \stdClass) {
+            $raw = get_object_vars($raw);
+        }
+        $fields = ['year', 'month', 'day', 'hour', 'minute', 'second'];
+        if (!is_array($raw) || count($raw) !== count($fields)
+            || array_diff($fields, array_keys($raw)) !== []) {
+            throw new InvalidArgumentException($invalid);
+        }
+        foreach ($fields as $field) {
+            if (!is_int($raw[$field])) {
+                throw new InvalidArgumentException($invalid);
+            }
+        }
+        if ($raw['year'] < 1970 || $raw['year'] > 9999
+            || !checkdate($raw['month'], $raw['day'], $raw['year'])
+            || $raw['hour'] < 0 || $raw['hour'] > 23 || $raw['minute'] < 0 || $raw['minute'] > 59
+            || $raw['second'] < 0 || $raw['second'] > 59) {
+            throw new InvalidArgumentException($invalid);
+        }
+        try {
+            $zone = new DateTimeZone($timezone);
+        } catch (\Exception) {
+            throw new InvalidArgumentException($invalid);
+        }
+        $label = sprintf('%04d-%02d-%02d %02d:%02d:%02d', ...array_map(static fn (string $field): int => $raw[$field], $fields));
+        $naive = DateTimeImmutable::createFromFormat('!Y-m-d H:i:s', $label, new DateTimeZone('UTC'));
+        if ($naive === false) {
+            throw new InvalidArgumentException($invalid);
+        }
+        // Test every nearby UTC offset instead of accepting PHP's silent DST choice/normalization.
+        $transitions = $zone->getTransitions($naive->getTimestamp() - 172800, $naive->getTimestamp() + 172800);
+        $offsets = [$zone->getOffset($naive)];
+        if ($transitions !== false) {
+            $offsets = [...$offsets, ...array_column($transitions, 'offset')];
+        }
+        $matches = [];
+        foreach (array_unique($offsets) as $offset) {
+            $candidate = $naive->getTimestamp() - $offset;
+            if ((new DateTimeImmutable('@' . $candidate))->setTimezone($zone)->format('Y-m-d H:i:s') === $label) {
+                $matches[] = $candidate;
+            }
+        }
+        if (count($matches) > 1) {
+            throw new InvalidArgumentException('The historical date and time is ambiguous in the selected timezone.');
+        }
+        if ($matches === []) {
+            throw new InvalidArgumentException('The historical date and time does not exist in the selected timezone.');
+        }
+        if ($matches[0] < 1) {
+            throw new InvalidArgumentException($invalid);
+        }
+        return $matches[0];
+    }
+
+    /**
+     * Inclusive start/exclusive end; only fully contained completed local intervals are queried.
+     * @return array{DurationSeconds:int,StartTimestamp:int,EndTimestamp:int,Mode:string,AggregationLevel:int,Limit:int,CalendarAligned:bool,AcceptLiveUpdates:bool,Empty:bool}
+     */
+    public static function ResolveAbsolute(
+        int $startTimestamp,
+        int $endExclusiveTimestamp,
+        string $interval,
+        int $pointBudget,
+        int $sourceCount,
+        int $now,
+        string $timezone
+    ): array {
+        $invalid = 'The absolute archive query settings are invalid.';
+        if ($startTimestamp < 1 || $startTimestamp >= $endExclusiveTimestamp || $endExclusiveTimestamp > $now
+            || $pointBudget < 1 || $sourceCount < 1 || $now < 1 || !in_array($interval, ['hour', 'day'], true)) {
+            throw new InvalidArgumentException($invalid);
+        }
+        try {
+            $zone = new DateTimeZone($timezone);
+            $startLocal = (new DateTimeImmutable('@' . $startTimestamp))->setTimezone($zone);
+            $endLocal = (new DateTimeImmutable('@' . $endExclusiveTimestamp))->setTimezone($zone);
+        } catch (\Exception) {
+            throw new InvalidArgumentException($invalid);
+        }
+        foreach ([$startLocal, $endLocal] as $local) {
+            if ((int) $local->format('Y') < 1970 || (int) $local->format('Y') > 9999) {
+                throw new InvalidArgumentException($invalid);
+            }
+        }
+        // Elapsed subtraction keeps both actual offsets of the repeated autumn hour distinct.
+        if ($interval === 'hour') {
+            $start = $startTimestamp - (int) $startLocal->format('i') * 60 - (int) $startLocal->format('s');
+            if ($start < $startTimestamp) {
+                $start += 3600;
+            }
+            $end = $endExclusiveTimestamp - (int) $endLocal->format('i') * 60 - (int) $endLocal->format('s');
+        } else {
+            $startBoundary = $startLocal->setTime(0, 0);
+            $start = ($startBoundary->getTimestamp() < $startTimestamp ? $startBoundary->modify('+1 day') : $startBoundary)->getTimestamp();
+            $end = $endLocal->setTime(0, 0)->getTimestamp();
+        }
+        $empty = $start >= $end;
+        if ($interval === 'hour' && !$empty) {
+            // Hour aggregates around non-hour offset changes have no established
+            // cross-platform contract. Never treat a shifted :30 boundary as :00.
+            $unsupported = 'Hourly historical periods across non-hour timezone changes are not supported.';
+            foreach ([$start, $end] as $boundary) {
+                if ((new DateTimeImmutable('@' . $boundary))->setTimezone($zone)->format('i:s') !== '00:00') {
+                    throw new InvalidArgumentException($unsupported);
+                }
+            }
+            $transitions = $zone->getTransitions($startTimestamp, $endExclusiveTimestamp + 1);
+            $previousOffset = null;
+            foreach ($transitions === false ? [] : $transitions as $transition) {
+                if ($previousOffset !== null && ($transition['offset'] - $previousOffset) % 3600 !== 0) {
+                    throw new InvalidArgumentException($unsupported);
+                }
+                $previousOffset = $transition['offset'];
+            }
+        }
+        return [
+            'DurationSeconds'   => $endExclusiveTimestamp - $startTimestamp,
+            'StartTimestamp'    => $empty ? $startTimestamp : $start,
+            'EndTimestamp'      => $empty ? $endExclusiveTimestamp - 1 : $end - 1,
+            'Mode'              => 'aggregated',
+            'AggregationLevel'  => $interval === 'day' ? 1 : 0,
+            'Limit'             => max(1, min(2000, intdiv($pointBudget, $sourceCount))),
+            'CalendarAligned'   => true,
+            'AcceptLiveUpdates' => false,
+            'Empty'             => $empty
+        ];
+    }
+
     /** Whole intervals for families which cannot summarize a partial leading interval. */
     public static function CompletedIntervals(
         string $range,

@@ -28,6 +28,8 @@ auf 3–10 gemeinsam festgelegten Achsen mit eigenen Wertebereichen und Einheite
 Eine optionale Gruppenauswahl erhält die Achsenskalen und die gewählte Ansicht
 bei Aktualisierungen.
 Boxplot vergleicht die Verteilung abgeschlossener Archiv-Stundenmittelwerte.
+Zusätzlich zu rollierenden Zeiträumen erlaubt Boxplot feste historische
+Von-/Bis-Zeiträume in der Symcon-Zeitzone bei unveränderten Archivbudgets.
 Funnel vergleicht aktuelle, nichtnegative Stufenwerte derselben Einheit.
 Bis zu 32 Quellen erhalten optional eine Quellenauswahl und responsive
 Stufennavigation; die vollständige Breitenskala bleibt auch auf Teilseiten erhalten.

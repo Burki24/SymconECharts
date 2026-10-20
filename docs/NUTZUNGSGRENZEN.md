@@ -44,6 +44,9 @@ Originalwerte bleiben unabhängig vom gewählten Ausschnitt verbindlich.
 Radar unterstützt 16 vollständige Vergleichsgruppen mit optionaler
 Gruppenauswahl auf unverändert 3–10 expliziten Achsen. Auswahl, Anfangssichtbarkeit
 und Legendenanker ändern weder Achsenbereiche noch die vollständige Werteprüfung.
+Boxplot bietet zusätzlich feste historische Von-/Bis-Zeiträume mit strikter
+lokaler Datumsprüfung und unveränderten Stundenmittel-/Archivbudgets. Die
+gemeinsame Planung ist vorbereitet; andere Familien behalten ihre Zeitmodelle.
 Die übrigen
 Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
 
@@ -69,6 +72,8 @@ Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
 | Erledigt | GaugeMulti: 32 Quellen mit Auswahl und Seiten | Individuelle Skalen/Einheiten, ID-stabile Auswahl und Seiten für alle vier Vorlagen; DOM-Bedienung und CSS mit BarPolar geteilt, keine verkleinerten 32er-Instrumentenraster. |
 | Erledigt | Funnel: 32 Quellen mit Auswahl und Stufennavigation | ID-stabile Auswahl und Seiten in beiden Ausrichtungen; vollständiger Maximalwert einschließlich versteckter Quellen, unveränderte Altlisten und gekennzeichnete maßstabstreue Vorschau. |
 | Erledigt | Radar: 16 Gruppen mit optionaler Gruppenauswahl | Weiterhin 3–10 vollständige Achsen, bis 160 Zuordnungen, Anfangssichtbarkeit und Alle/Umkehren; gemeinsame flüchtige Auswahl-/Legendenlogik, unveränderte Skalen und Originalwerte. |
+| Erledigt | Boxplot: feste historische Von-/Bis-Zeiträume | Reproduzierbare historische Stundenmittel-Verteilungen; Beginn eingeschlossen, Ende ausgeschlossen, nur ganze abgeschlossene Stunden. Gemeinsame Planung für weitere Familien vorbereitet. |
+| Danach | Feste Zeiträume in weiteren Archivfamilien | Die zentrale Planung ausdrücklich in Parallel, Candlestick, ThemeRiver und StateTimeline integrieren, unter Beibehaltung ihrer unterschiedlichen Intervall-/Rohwertregeln. |
 | Danach | Weitere Archiv- und Vergleichsreihen | Nur zusammen mit Navigation, Vorschaukennzeichnung und messbaren Ressourcenbudgets. |
 
 Normalisierung ist keine allgemeine Lösung für unterschiedliche Einheiten:
@@ -130,7 +135,7 @@ Candlestick-Anfangswert ausgegeben werden.
 | EChartsParallel | 2–10 Achsen; 1–1000 gemeinsame Zeitlinien, Standard 750; 24 h / 7 d / 30 d oder benutzerdefinierte Dauer sowie Stunde/Tag. Standardarchive als Mittel, Zähler als Verbrauch; unterschiedliche Einheiten zulässig, nur gemeinsame Intervalle. | Relative Custom-Zeitfenster umgesetzt; Reduktion/Skala je Achse bleibt offen. 16–20 Achsen nur mit vergrößerbarer/verschiebbarer Achsenansicht. Mindestens zwei Achsen gehört zur Diagrammform. |
 | EChartsCalendar | Eine numerische Archivquelle; abgeschlossene Tageskennzahlen eines Jahres (1971 bis aktuelles Jahr), höchstens 366 Tage. Mittelwert/Minimum/Maximum erfordern Standardarchive, Verbrauch ein Zählerarchiv. Teilarchive und echte Nullwerte bleiben erhalten. | Tageskennzahlen umgesetzt, ohne Verbrauch aus Standardwerten zu erfinden. Monat/Quartal/freies Fenster bleibt offen. Mehrere Tageswerte gehören zu CalendarPie oder ausdrücklich getrennten Kalenderpanels. |
 | EChartsCalendarPie | Je nach Modus 1–5 numerische Quellen oder eine diskrete Zustandsquelle; Tagesmittel, Zählerverbrauch oder Zustandsdauer. Bis 32 Zustände. Optionale Min/Max-Normalisierung samt Originaleinheiten bereits vorhanden; Monatsmodell höchstens 250000 Bytes. | 1–5 ist die ausdrückliche aktuelle Produktentscheidung, keine sofort aufzuhebende Grenze. Optional verfügbare Teilquellen eines Tages anzeigen, aber nur mit deutlichem Unvollständigkeitshinweis; strenger Standard bleibt sinnvoll. |
-| EChartsBoxplot | Jetzt 1–32 Standard-Archivquellen gleicher Einheit; 24 h / 7 d / 30 d oder Custom; bis 1000 abgeschlossene Stundenmittel je Quelle, insgesamt 10000. R7-Quartile und Min/Max-Whisker, nicht Rohwertverteilung oder 1,5-IQR-Ausreißermodell. | Umgesetzt: responsive Kategoriennavigation mit vollständiger Skala und ID-stabilem Ausschnitt. Budgetüberschreitung verlangt einen kürzeren Zeitraum ohne Teilstatistik. Relative Custom-Zeitfenster umgesetzt; absolute Zeitfenster und IQR/Ausreißer bleiben gesonderte Erweiterungen; unterschiedliche Einheiten nur normalisiert oder in getrennten Panels vergleichen. |
+| EChartsBoxplot | Jetzt 1–32 Standard-Archivquellen gleicher Einheit; 24 h / 7 d / 30 d, Custom oder feste historische Von-/Bis-Daten; bis 1000 abgeschlossene Stundenmittel je Quelle, insgesamt 10000. R7-Quartile und Min/Max-Whisker, nicht Rohwertverteilung oder 1,5-IQR-Ausreißermodell. | Umgesetzt: Kategoriennavigation, relative Custom-Zeitfenster und absolute historische Zeitgrenzen mit vollständigen Stunden. Budgetüberschreitung verlangt einen kürzeren Zeitraum ohne Teilstatistik. IQR/Ausreißer bleiben gesonderte Erweiterungen; unterschiedliche Einheiten nur normalisiert oder in getrennten Panels vergleichen. |
 | EChartsCandlestick | Eine numerische Standard-Archivquelle; Stunde/Tag in 24 h / 7 d / 30 d oder Custom (höchstens 720 Intervalle). Tatsächliche Rohwerte für ersten/letzten Wert und Minimum/Maximum; leere Intervalle bleiben leer. Bis 63 Abfragen/64000 Rohänderungen pro Aktualisierung. | Relative Custom-Zeitfenster umgesetzt; absolute Fenster, weitere Intervalle und Zeitzoom bleiben offen. Mehrere benannte Panels später; Rohwert- und Abfragebudgets behalten. Einzelmessungen ergeben flache Kerzen, keine erfundenen Endpunkte. |
 | EChartsThemeRiver | 1–16 nichtnegative Standard-Archivmittel oder ausdrücklich gewählter Zählerverbrauch gleicher Einheit; Stunde/Tag, 24 h / 7 d / 30 d oder Custom; höchstens 720 Intervalle, 1000 geladene Aggregate je Quelle und 16000 gemeinsam. Modell höchstens 900000 Bytes, HTML höchstens 1 MiB. | Umgesetzt: optionale ID-stabile Bandauswahl, gemeinsame Auswahl-/Startlogik, gekennzeichnete Vorschau und auswählbarer Verbrauch über den vorhandenen Gateway-Reducer. Versteckte Quellen schließen keine Lücken und behalten ihre Archivabfragen. Keine negativen Breiten, Nullfüllung oder eigene Zählerdifferenzbildung. |
 | EChartsStateTimeline | Jetzt 1–32 Boolean-/Integer-Standardarchive, bis 32 Zustandsdefinitionen je Quelle; 24 h / 7 d / 30 d oder Custom; bis 2000 Rohwerte je Quelle plus Vorgänger, insgesamt 16000 Rohwerte; Modell höchstens 250000 Bytes. Unbekannte Zustände sichtbar. | Umgesetzt: unabhängige Zeilennavigation ab neun Quellen und Gesamtbudget ohne stille Kürzung. Relative Custom-Zeitfenster ebenfalls umgesetzt. Später nach Lastprüfung bis 100 Quellen und absolute Zeitfenster. Float-/String-Zustände erst mit ausdrücklichem Gleichheits-/Zuordnungsvertrag. |
@@ -189,6 +194,14 @@ größtmögliche Imports und beide Ausgabewege abdecken. Eine Auswahl/Navigation
 darf keine Daten verändern oder unsichtbar aus dem fachlichen Modell entfernen.
 
 ## Nachweise dieses Änderungsschritts und verbleibende Lücken
+
+Boxplot prüft feste historische Grenzen, leere Fenster ohne Archivzugriff,
+unveränderte Uhrfortschritts-/Altverträge und getrennte angefragte/effektive
+Zeitstempel. Native Datumseingaben werden einschließlich DST streng geprüft.
+Die zentralen Methoden verändern die bisherigen Consumer nicht. Beide Ausgaben,
+reine Entwurfsvorschauen und die bisherigen 32-/1000-/10000-Grenzen sind geprüft.
+Die neue Datumswahl und feste Archive in Kachel/IPSView bleiben nach Update live
+zu bestätigen.
 
 Radar prüft 16×10 Zuordnungen, 17×3 abgewiesene Gruppen, unveränderte Altlisten,
 Initialauswahl und Gruppenfarben beider Designer, vollständige Lesezugriffe,
