@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SymconECharts;
 
-/** Synthetic annual preview: draft changes never trigger archive queries. */
+/** Synthetic calendar preview: draft changes never trigger archive queries. */
 trait CalendarPreview
 {
     private function CalendarPreviewSvg(array $values, bool $ipsView): string
@@ -29,11 +29,17 @@ trait CalendarPreview
         );
         $svg = str_replace('<svg xmlns', '<svg font-family="Arial, sans-serif" xmlns', $svg);
         $svg .= '<desc>' . EChartsBarPreview::E($this->Translate($metricLabel)) . '</desc>';
-        $year = (int) ($values['Year'] ?? $this->ReadPropertyInteger('Year'));
         try {
-            $window = CalendarData::Resolve($year, 0, $this->CurrentTimestamp(), date_default_timezone_get());
-        } catch (\Throwable) {
-            return $svg . '</svg>';
+            $window = $this->ResolveCalendarWindow(0, $values);
+        } catch (\Throwable $exception) {
+            return $svg . '<text x="24" y="100" font-size="12" fill="' . EChartsBarPreview::E($palette['text']) . '">'
+                . EChartsBarPreview::E($this->Translate($exception->getMessage())) . '</text></svg>';
+        }
+        $svg = str_replace('<svg ', '<svg data-period="' . $window['Period'] . '" data-start="' . $window['StartDate']
+            . '" data-end="' . $window['EndDate'] . '" ', $svg);
+        if ($window['Period'] !== 'year') {
+            $svg .= '<text x="360" y="58" text-anchor="middle" font-size="11" fill="' . EChartsBarPreview::E($palette['text']) . '">'
+                . EChartsBarPreview::E($window['Label'] . ' · ' . date_default_timezone_get()) . '</text>';
         }
         $vertical = $get('Orientation', 'string') === 'vertical';
         $axisColor = $color('AxisColor', $palette['text']);
@@ -52,7 +58,7 @@ trait CalendarPreview
         $weekSpace = ($vertical ? $axisSize : $axisSize * 2.2) + $weekMargin + 8;
         $left = 20.0;
         $right = 20.0;
-        $top = 56.0;
+        $top = $window['Period'] === 'year' ? 56.0 : 76.0;
         $bottom = $get('ShowColorScale', 'boolean') ? 48.0 : 16.0;
         if ($get('ShowWeekdayLabels', 'boolean')) {
             if ($vertical) {
@@ -96,8 +102,8 @@ trait CalendarPreview
         $plotWidth = max(40, 720 - $left - $right);
         $plotHeight = max(40, 360 - $top - $bottom);
         $first = $get('FirstWeekday');
-        $offset = ($window['Days'][0]['weekday'] + 1 - $first + 7) % 7;
-        $weeks = (int) ceil((count($window['Days']) + $offset) / 7);
+        $offset = ($window['StartWeekday'] - $first + 7) % 7;
+        $weeks = (int) ceil(($window['DayCount'] + $offset) / 7);
         $width = $plotWidth / ($vertical ? 7 : $weeks);
         $height = $plotHeight / ($vertical ? $weeks : 7);
         $low = $get('LowColor') < 0 ? 0x5070DD : $get('LowColor');
@@ -117,9 +123,11 @@ trait CalendarPreview
             'dashed' => ' stroke-dasharray="6 4"', 'dotted' => ' stroke-dasharray="2 3"', default => ''
         };
         $monthRows = [];
+        $civilStart = new \DateTimeImmutable($window['StartDate'] . ' 12:00:00', new \DateTimeZone('UTC'));
         foreach ($window['Days'] as $index => $day) {
-            $week = intdiv($index + $offset, 7);
-            $weekday = ($index + $offset) % 7;
+            $position = (int) $civilStart->diff(new \DateTimeImmutable($day['date'] . ' 12:00:00', new \DateTimeZone('UTC')))->format('%a');
+            $week = intdiv($position + $offset, 7);
+            $weekday = ($position + $offset) % 7;
             $x = $left + ($vertical ? $weekday : $week) * $width;
             $y = $top + ($vertical ? $week : $weekday) * $height;
             $value = 20 + 10 * sin($index / 366 * 2 * M_PI - 1.5);
@@ -134,7 +142,7 @@ trait CalendarPreview
                 . '" fill="' . EChartsBarPreview::E($fill) . '" opacity="' . EChartsBarPreview::N($get('CellOpacityPercent') / 100)
                 . '" stroke="' . EChartsBarPreview::E($color('CellBorderColor', $palette['background']))
                 . '" stroke-width="' . $get('CellBorderWidth') . '"' . $dash($borderType) . '/>';
-            if (substr($day['date'], 8) === '01') {
+            if ($index === 0 || substr($day['date'], 8) === '01') {
                 $monthRows[] = [$index, $week, $weekday, $day];
             }
             if ($width >= $labelSize * 2 && $height >= $labelSize + 2 && $index % 17 !== 0) {
@@ -154,11 +162,11 @@ trait CalendarPreview
                     . '" stroke="' . EChartsBarPreview::E($color('MonthLineColor', $color('CellBorderColor', $palette['border'])))
                     . '" stroke-width="' . ($get('MonthLineWidth') ?: $get('CellBorderWidth')) . '"' . $dash($get('MonthLineType', 'string')) . '/>';
             }
-            $monthStep = max(1, (int) ceil($axisSize * ($vertical ? 1.2 : ($monthFormat === 'year-month' ? 7 : 3) * 0.65) / max(1, ($vertical ? $plotHeight : $plotWidth) / 12)));
+            $monthStep = max(1, (int) ceil($axisSize * ($vertical ? 1.2 : ($monthFormat === 'year-month' ? 7 : 3) * 0.65) / max(1, ($vertical ? $plotHeight : $plotWidth) / $window['MonthCount'])));
             if ($get('ShowMonthLabels', 'boolean') && $monthIndex % $monthStep === 0) {
                 $month = (int) substr($day['date'], 5, 2);
                 $name = match ($monthFormat) {
-                    'number' => sprintf('%02d', $month), 'year-month' => $window['Year'] . sprintf('-%02d', $month),
+                    'number' => sprintf('%02d', $month), 'year-month' => substr($day['date'], 0, 7),
                     default  => $this->Translate($months[$month - 1])
                 };
                 $endWeek = $monthRows[$monthIndex + 1][1] ?? $weeks;
@@ -208,9 +216,13 @@ trait CalendarPreview
             }
         }
         if ($get('ShowYearLabel', 'boolean')) {
-            $yearText = $text(0, 0, (string) $window['Year'], $color('YearColor', $axisColor), $yearSize, 'middle');
+            $yearLabel = substr($window['StartDate'], 0, 4);
+            if ($yearLabel !== substr($window['EndDate'], 0, 4)) {
+                $yearLabel .= '/' . substr($window['EndDate'], 0, 4);
+            }
+            $yearText = $text(0, 0, $yearLabel, $color('YearColor', $axisColor), $yearSize, 'middle');
             $svg .= match ($yearPosition) {
-                'top'    => '<g transform="translate(' . EChartsBarPreview::N($left + $plotWidth / 2) . ',' . EChartsBarPreview::N(56 + $yearSize) . ')">' . $yearText . '</g>',
+                'top'    => '<g transform="translate(' . EChartsBarPreview::N($left + $plotWidth / 2) . ',' . EChartsBarPreview::N(($window['Period'] === 'year' ? 56 : 76) + $yearSize) . ')">' . $yearText . '</g>',
                 'bottom' => '<g transform="translate(' . EChartsBarPreview::N($left + $plotWidth / 2) . ',' . ($get('ShowColorScale', 'boolean') ? '310' : '348') . ')">' . $yearText . '</g>',
                 'right'  => '<g transform="translate(700,' . EChartsBarPreview::N($top + $plotHeight / 2) . ') rotate(-90)">' . $yearText . '</g>',
                 default  => '<g transform="translate(20,' . EChartsBarPreview::N($top + $plotHeight / 2) . ') rotate(90)">' . $yearText . '</g>'

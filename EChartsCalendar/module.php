@@ -105,6 +105,11 @@ class EChartsCalendar extends IPSModuleStrict
             $this->RegisterTransientRefresh('ECCL');
             $this->RegisterPropertyInteger('SourceVariableID', 0);
             $this->RegisterPropertyInteger('Year', 0);
+            $this->RegisterPropertyString('Period', 'year');
+            $this->RegisterPropertyInteger('Month', 0);
+            $this->RegisterPropertyInteger('Quarter', 0);
+            $this->RegisterPropertyString('AbsoluteStart', '{}');
+            $this->RegisterPropertyString('AbsoluteEnd', '{}');
             $this->RegisterPropertyString('Metric', 'average');
             $this->RegisterPropertyBoolean('UseVariablePresentation', true);
             $this->RegisterPropertyString('Unit', '');
@@ -183,6 +188,17 @@ class EChartsCalendar extends IPSModuleStrict
         $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
             $form = $this->LoadConfigurationForm();
+            $period = $this->ReadPropertyString('Period');
+            foreach (['Year'    => $period !== 'absolute', 'Month' => $period === 'month', 'Quarter' => $period === 'quarter',
+                'AbsoluteStart' => $period === 'absolute', 'AbsoluteEnd' => $period === 'absolute', 'CalendarPeriodHint' => $period === 'absolute'] as $name => $visible) {
+                $form['elements'] = $this->SetFormFieldVisibility($form['elements'], [$name], $visible);
+            }
+            foreach ($form['elements'] as &$element) {
+                if (($element['name'] ?? '') === 'CalendarTimeZone') {
+                    $element['caption'] = sprintf($this->Translate('Symcon time zone: %s'), date_default_timezone_get());
+                }
+            }
+            unset($element);
             $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
             $form['elements'] = $this->WithAnimationFormControls($form['elements']);
             $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
@@ -195,7 +211,7 @@ class EChartsCalendar extends IPSModuleStrict
                 ['caption' => 'Color scale and cells', 'start' => 'LowColor'],
                 ['caption' => 'Labels and typography', 'start' => 'ShowDayNumbers']
             ]);
-            $fields = ['Title', 'SourceVariableID', 'Year', 'Metric', 'UseVariablePresentation', 'Unit', 'Decimals',
+            $fields = ['Title', 'SourceVariableID', 'Year', 'Period', 'Month', 'Quarter', 'AbsoluteStart', 'AbsoluteEnd', 'Metric', 'UseVariablePresentation', 'Unit', 'Decimals',
                 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
                 'IPSViewBackgroundOpacityPercent', ...array_keys(self::DESIGN_DEFAULTS),
                 ...array_map(static fn (string $name): string => 'IPSView' . $name, array_keys(self::DESIGN_DEFAULTS))];
@@ -212,6 +228,25 @@ class EChartsCalendar extends IPSModuleStrict
             throw $debugFlowException;
         } finally {
             $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, false);
+        }
+    }
+
+    public function UpdateCalendarPeriodForm(string $Period): void
+    {
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            foreach (['Year'    => $Period !== 'absolute', 'Month' => $Period === 'month', 'Quarter' => $Period === 'quarter',
+                'AbsoluteStart' => $Period === 'absolute', 'AbsoluteEnd' => $Period === 'absolute', 'CalendarPeriodHint' => $Period === 'absolute'] as $name => $visible) {
+                $this->UpdateFormField($name, 'visible', $visible);
+            }
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
     }
 
@@ -435,12 +470,7 @@ class EChartsCalendar extends IPSModuleStrict
             throw new RuntimeException('No active EChartsGateway is connected.');
         }
         $id = $this->ReadPropertyInteger('SourceVariableID');
-        $window = CalendarData::Resolve(
-            $this->ReadPropertyInteger('Year'),
-            $windowOffset,
-            $this->CurrentTimestamp(),
-            date_default_timezone_get()
-        );
+        $window = $this->ResolveCalendarWindow($windowOffset);
         $archive = $this->ReadArchiveSource(['VariableID' => $id], $window);
         try {
             $cells = CalendarData::Cells($archive['Points'], $window, $this->ReadPropertyString('Metric'));
@@ -460,6 +490,10 @@ class EChartsCalendar extends IPSModuleStrict
         $labels = EChartsSourceIdentity::LabelsForSources([['VariableID' => $id, 'Label' => '']]);
         $this->WriteAttributeString('LastError', '');
         $this->DebugEChartsSetStatus(IS_ACTIVE);
+        $style = $this->ReadDesignStyle($ipsView);
+        $viewKey = hash('sha256', json_encode([$id, $this->ReadPropertyString('Metric'), $window['Period'],
+            $window['BaseStartDate'], $window['BaseEndDate'], $window['Timezone'], $labels[$id], $presentation, $style, $this->EffectiveTheme($ipsView),
+            $this->ReadPropertyString('Title')], JSON_THROW_ON_ERROR));
         return json_encode(['schemaVersion' => 1, 'family' => 'calendar', 'theme' => $this->EffectiveTheme($ipsView),
             'calendar'                      => ['title' => $this->ReadPropertyString('Title'), 'sourceLabel' => $labels[$id],
                 'unit'                                  => $presentation['unit'], 'decimals' => $presentation['decimals'],
@@ -467,7 +501,11 @@ class EChartsCalendar extends IPSModuleStrict
                 'timezone'                              => $window['Timezone'], 'year' => $window['Year'], 'baseYear' => $window['BaseYear'],
                 'windowOffset'                          => $windowOffset, 'maxOffset' => $window['MaximumOffset'],
                 'startTimestamp'                        => $window['StartTimestamp'], 'endTimestamp' => $window['EndTimestamp'],
-                'data'                                  => $cells, 'style' => $this->ReadDesignStyle($ipsView)]
+                'period'                                => $window['Period'], 'periodLabel' => $window['Label'],
+                'calendarRange'                         => $window['CalendarRange'], 'startDate' => $window['StartDate'], 'endDate' => $window['EndDate'],
+                'dayCount'                              => $window['DayCount'], 'monthCount' => $window['MonthCount'],
+                'startWeekday'                          => $window['StartWeekday'], 'viewKey' => $viewKey,
+                'data'                                  => $cells, 'style' => $style]
         ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
     }
 
@@ -495,6 +533,10 @@ class EChartsCalendar extends IPSModuleStrict
                 'Calendar consumption requires a counter archive variable.'               => $this->Translate('Calendar consumption requires a counter archive variable.'),
                 'Previous year'                                                           => $this->Translate('Previous year'), 'Next year' => $this->Translate('Next year'),
                 'Selected year'                                                           => $this->Translate('Selected year'), 'Daily mean' => $this->Translate('Daily mean'),
+                'Previous month'                                                          => $this->Translate('Previous month'), 'Next month' => $this->Translate('Next month'), 'Selected month' => $this->Translate('Selected month'),
+                'Previous quarter'                                                        => $this->Translate('Previous quarter'), 'Next quarter' => $this->Translate('Next quarter'), 'Selected quarter' => $this->Translate('Selected quarter'),
+                'Previous period'                                                         => $this->Translate('Previous period'), 'Next period' => $this->Translate('Next period'), 'Selected period' => $this->Translate('Selected period'),
+                'No completed archive days in this period.'                               => $this->Translate('No completed archive days in this period.'),
                 'Calendar requires a standard archive variable, not a counter.'           => $this->Translate('Calendar requires a standard archive variable, not a counter.'),
                 'Mon'                                                                     => $this->Translate('Mon'), 'Tue' => $this->Translate('Tue'), 'Wed' => $this->Translate('Wed'),
                 'Thu'                                                                     => $this->Translate('Thu'), 'Fri' => $this->Translate('Fri'), 'Sat' => $this->Translate('Sat'), 'Sun' => $this->Translate('Sun'),
@@ -541,7 +583,8 @@ class EChartsCalendar extends IPSModuleStrict
             $this->DebugEChartsSetStatus(self::STATUS_PARENT_MISSING);
             return;
         }
-        $this->SetSummary($this->ReadPropertyInteger('Year') === 0 ? $this->Translate('Current year') : (string) $this->ReadPropertyInteger('Year'));
+        $this->SetSummary($this->ReadPropertyString('Period') === 'year' && $this->ReadPropertyInteger('Year') === 0
+            ? $this->Translate('Current year') : $this->ResolveCalendarWindow()['Label']);
         $this->WriteAttributeString('LastError', '');
         $this->DebugEChartsSetStatus(IS_ACTIVE);
         $this->SetTimerInterval('ArchiveRefresh', 60000);
@@ -555,9 +598,9 @@ class EChartsCalendar extends IPSModuleStrict
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => $this->Translate('Configure a numeric Calendar archive variable.')];
         }
         try {
-            CalendarData::Resolve($this->ReadPropertyInteger('Year'), 0, $this->CurrentTimestamp(), date_default_timezone_get());
-        } catch (Throwable) {
-            return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => $this->Translate('Choose the current year (0) or a year from 1971 through this year.')];
+            $this->ResolveCalendarWindow();
+        } catch (Throwable $exception) {
+            return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => $this->Translate($exception->getMessage())];
         }
         if (!in_array($this->ReadPropertyString('Metric'), ['average', 'minimum', 'maximum', 'consumption'], true)
             || $this->ReadPropertyInteger('Decimals') < 0 || $this->ReadPropertyInteger('Decimals') > 6
@@ -570,6 +613,19 @@ class EChartsCalendar extends IPSModuleStrict
             return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => $this->Translate('The Calendar settings are invalid.')];
         }
         return null;
+    }
+
+    /** Pure period planning shared by validation, output and draft previews. */
+    private function ResolveCalendarWindow(int $offset = 0, array $values = []): array
+    {
+        $settings = [];
+        foreach (['Period', 'AbsoluteStart', 'AbsoluteEnd'] as $name) {
+            $settings[$name] = array_key_exists($name, $values) ? $values[$name] : $this->ReadPropertyString($name);
+        }
+        foreach (['Year', 'Month', 'Quarter'] as $name) {
+            $settings[$name] = array_key_exists($name, $values) ? $values[$name] : $this->ReadPropertyInteger($name);
+        }
+        return CalendarData::ResolveView($settings, $offset, $this->CurrentTimestamp(), date_default_timezone_get());
     }
 
     /** @param array{VariableID:int} $source @param array<string,mixed> $query @return array<string,mixed> */
@@ -655,8 +711,9 @@ class EChartsCalendar extends IPSModuleStrict
     /** @return array<string,mixed> */
     private function BuildVisualizationState(bool $ipsView = false, int $windowOffset = 0): array
     {
-        if ($this->GetConfigurationError() !== null) {
-            return $this->ErrorState('Configure a numeric Calendar archive variable.');
+        $configurationError = $this->GetConfigurationError();
+        if ($configurationError !== null) {
+            return $this->ErrorState($configurationError['Message']);
         }
         if (!$this->HasActiveParent()) {
             return $this->ErrorState('Connect an active EChartsGateway.');

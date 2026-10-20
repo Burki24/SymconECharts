@@ -40,7 +40,7 @@ html, body {
     cursor: pointer;
 }
 .echarts-calendar-period button:disabled { opacity: 0.4; cursor: default; }
-.echarts-calendar-period-label { overflow: hidden; text-overflow: ellipsis; }
+#echarts-calendar-period-label { overflow: hidden; text-overflow: ellipsis; min-inline-size: 0; }
 .echarts-refresh-warning, .echarts-calendar-empty, .echarts-calendar-error {
     position: absolute;
     inset-inline: 0.75rem;

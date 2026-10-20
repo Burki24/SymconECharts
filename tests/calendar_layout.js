@@ -18,7 +18,7 @@ const model = { schemaVersion: 1, family: 'calendar', theme: 'dark', calendar: {
         emptyCellColor: '#222222', titleFontSizePercent: 100, axisFontSizePercent: 100,
         valueFontSizePercent: 100, animationEnabled: false }
 } };
-function harness(data = model, mode = 'symcon', width = 1100, height = 500, header = true) {
+function harness(data = model, mode = 'symcon', width = 1100, height = 500, header = true, responseForOffset) {
     const elements = {};
     function element(id) {
         if (!elements[id]) { elements[id] = { style: {}, clientWidth: width, clientHeight: height, hidden: false,
@@ -40,7 +40,7 @@ function harness(data = model, mode = 'symcon', width = 1100, height = 500, head
     const context = { window, document, fetch: async url => {
         requests.push(url);
         const offset = Number(new URL(url).searchParams.get('offset'));
-        return { ok: true, json: async () => ({ schemaVersion: 1, family: 'calendar', status: 'ready', chart: {
+        return { ok: true, json: async () => ({ schemaVersion: 1, family: 'calendar', status: 'ready', chart: responseForOffset ? responseForOffset(offset) : {
             ...data, calendar: { ...data.calendar, windowOffset: offset, year: data.calendar.baseYear - offset }
         } }) };
     } };
@@ -171,7 +171,76 @@ const crowded = harness({ ...decoratedModel, calendar: { ...decoratedModel.calen
         yearFontSizePercent: 200, monthLabelMargin: 40, weekdayLabelMargin: 40, yearLabelMargin: 60 } } }, 'ipsview', 300, 240);
 assert.ok(crowded.option.calendar.left + crowded.option.calendar.right < 300);
 assert.ok(crowded.option.calendar.top + crowded.option.calendar.bottom < 240);
+const views = [
+    ['month', '2024-02', ['2024-02-01', '2024-02-29'], 29, 1, 'Previous month', 'Selected month'],
+    ['quarter', '2024 Q1', ['2024-01-01', '2024-03-31'], 91, 3, 'Previous quarter', 'Selected quarter'],
+    ['absolute', '2023-12-20 – 2024-01-09', ['2023-12-20', '2024-01-09'], 21, 2, 'Previous period', 'Selected period'],
+    ['absolute', '2024-02-29 – 2024-02-29', ['2024-02-29', '2024-02-29'], 1, 1, 'Previous period', 'Selected period']
+];
+function viewModel(view, offset = 0) {
+    const [period, periodLabel, calendarRange, dayCount, monthCount] = view;
+    return { ...decoratedModel, calendar: { ...decoratedModel.calendar, period, periodLabel, calendarRange,
+        viewKey: 'selected-' + period + ':' + calendarRange.join(':'), dayCount, monthCount, windowOffset: offset,
+        startWeekday: new Date(calendarRange[0] + 'T12:00:00Z').getUTCDay(),
+        data: [{ date: calendarRange[0], value: 0 }, { date: calendarRange[1], value: 12.5 }] } };
+}
+for (const view of views) {
+    for (const mode of ['symcon', 'ipsview']) {
+        for (const [width, height, orientation] of [[420, 680, 'vertical'], [1100, 430, 'horizontal']]) {
+            const data = viewModel(view);
+            data.calendar.style = { ...data.calendar.style, orientation };
+            const h = harness(data, mode, width, height);
+            assert.deepEqual(JSON.parse(JSON.stringify(h.option.calendar.range)), view[2]);
+            assert.equal(h.elements['echarts-calendar-period-label'].textContent, view[1]);
+            assert.equal(h.elements['echarts-calendar-previous'].attributes['aria-label'], view[5]);
+            assert.equal(h.elements['echarts-calendar-selected'].textContent, view[6]);
+            const engine = echarts.init(null, null, { renderer: 'svg', ssr: true, width, height });
+            engine.setOption(h.option);
+            assert.match(engine.renderToSVGString(), /<svg/);
+            const points = engine.getModel().getSeriesByIndex(0).getData();
+            assert.equal(points.count(), 2, 'Cross-year and shorter views keep their actual dates and values.');
+            for (let i = 0; i < points.count(); i++) {
+                const shape = points.getItemGraphicEl(i).shape;
+                assert.ok(Number.isFinite(shape.x) && Number.isFinite(shape.y) && shape.width > 0 && shape.height > 0);
+            }
+            const calendarView = engine.getViewOfComponentModel(engine.getModel().getComponent('calendar'));
+            calendarView.group.traverse(element => {
+                if (element.type !== 'text' || element.ignore) { return; }
+                const box = element.getBoundingRect().clone();
+                box.applyTransform(element.getComputedTransform());
+                assert.ok(box.x >= -1 && box.y >= -1 && box.x + box.width <= width + 1 && box.y + box.height <= height + 1,
+                    'Short/cross-year calendar labels must remain in the viewport: ' + view[0] + '/' + element.style.text);
+            });
+            engine.dispose();
+        }
+    }
+}
+const shortNarrow = harness(viewModel(views[0]), 'ipsview', 420, 680);
+assert.equal(shortNarrow.option.series[0].label.show, true, 'Short views use actual week counts rather than annual cell density.');
 async function navigation() {
+    for (const view of views) {
+        for (const mode of ['symcon', 'ipsview']) {
+            const base = viewModel(view);
+            const past = { ...base, calendar: { ...base.calendar, calendarRange: ['2023-11-01', '2023-11-30'], periodLabel: 'historical', windowOffset: 1 } };
+            const h = harness(base, mode, 600, 600, true, offset => offset ? past : base);
+            h.elements['echarts-calendar-previous'].click();
+            await new Promise(resolve => setImmediate(resolve));
+            assert.deepEqual(JSON.parse(JSON.stringify(h.option.calendar.range)), past.calendar.calendarRange);
+            assert.match(h.requests[0], mode === 'symcon' ? /offset=1&output=tile$/ : /offset=1$/);
+            h.window.handleMessage({ schemaVersion: 1, family: 'calendar', status: 'ready', chart: base });
+            await new Promise(resolve => setImmediate(resolve));
+            assert.equal(h.elements['echarts-calendar-period-label'].textContent, 'historical', 'Refresh must preserve a browser-local period selection.');
+            h.elements['echarts-calendar-selected'].click();
+            await new Promise(resolve => setImmediate(resolve));
+            assert.equal(h.elements['echarts-calendar-period-label'].textContent, view[1]);
+            h.elements['echarts-calendar-previous'].click();
+            const changed = viewModel(views[(views.indexOf(view) + 1) % views.length]);
+            h.window.handleMessage({ schemaVersion: 1, family: 'calendar', status: 'ready', chart: changed });
+            await new Promise(resolve => setImmediate(resolve));
+            assert.equal(h.elements['echarts-calendar-period-label'].textContent, changed.calendar.periodLabel,
+                'In-flight responses from another configured source/period/design must not overwrite the new view.');
+        }
+    }
     wide.elements['echarts-calendar-previous'].click();
     await new Promise(resolve => setImmediate(resolve));
     assert.match(wide.requests[0], /offset=1&output=tile$/);

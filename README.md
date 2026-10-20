@@ -20,7 +20,9 @@ Symcon-Objektbaums; bestehende Tiefen- und Knoteneinstellungen bleiben erhalten.
 Parallelkoordinaten verbinden archivierte Variablenwerte je gemeinsamem
 Stunden- oder Tagesintervall, wahlweise auch in festen historischen Von-/Bis-Zeiträumen.
 Sankey zeigt aktuelle Mengenflüsse zwischen manuell angelegten Knoten.
-Calendar stellt archivierte Tageskennzahlen als farbigen Jahreskalender dar.
+Calendar stellt archivierte Tageskennzahlen als farbigen Jahres-, Quartals-
+oder Monatskalender sowie für feste historische Von-/Bis-Zeiträume dar,
+jeweils mit Navigation zu früheren Zeiträumen.
 Calendar und Heatmap bieten Mittelwert, Minimum und Maximum für Standardarchive
 oder ausdrücklich ausgewählten Zählerverbrauch für Zählerarchive.
 Radar vergleicht aktuelle Messwerte von bis zu 16 manuell angelegten Gruppen

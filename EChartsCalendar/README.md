@@ -1,7 +1,8 @@
 # EChartsCalendar
 
 Das Modul zeigt wählbare Tageskennzahlen einer archivierten Symcon-Variable als
-farbigen Jahreskalender. Jedes Feld steht für einen Kalendertag. Es kann als
+farbigen Kalender für ein Jahr, Quartal, einen Monat oder einen festen
+historischen Zeitraum. Jedes Feld steht für einen Kalendertag. Es kann als
 native Symcon-Kachel und optional als eigenständiges IPSView-HTML-Widget
 verwendet werden.
 
@@ -22,17 +23,39 @@ Das Modul verändert weder Archivierung noch Aggregation der Quelle.
 Ein aktives EChartsGateway wird
 benötigt; für weitere Diagramme genügt das bereits vorhandene Gateway.
 
-`Jahr = 0` zeigt immer das aktuelle Jahr. Alternativ lässt sich ein Jahr von
-1971 bis zum aktuellen Jahr auswählen. Die Pfeile in der Darstellung blättern
-zu früheren Jahren und zurück; „Ausgewähltes Jahr“ kehrt zum konfigurierten
-Jahr zurück. Die Navigation verändert die gespeicherte Konfiguration nicht.
+Der **Kalenderzeitraum** legt die Ansicht fest:
+
+- **Jahr** ist die unveränderte Voreinstellung. `Jahr = 0` folgt dem aktuellen
+  Jahr; alternativ ist ein Jahr ab 1971 bis zum aktuellen Jahr wählbar.
+- **Quartal** verwendet dieses Jahr und Quartal 1–4. `Quartal = 0` verwendet
+  die aktuelle Quartalsnummer, auch bei ausdrücklich gewähltem historischem Jahr.
+- **Monat** verwendet dieses Jahr und Monat 1–12. `Monat = 0` verwendet die
+  aktuelle Monatsnummer, auch bei historischem Jahr.
+- **Fester historischer Zeitraum** verwendet die Datumsfelder **Von
+  (einschließlich)** und **Bis (ausschließlich)** in der angezeigten
+  Symcon-Zeitzone. Beispiel: Von 01.02.2024 bis 01.03.2024 zeigt alle 29 Tage
+  des Februars. Auch jahresübergreifende Fenster sind möglich, insgesamt
+  höchstens 366 Kalendertage. Das Bis-Datum darf nicht in der Zukunft liegen.
+
+Die Pfeile blättern jeweils um ein Jahr, Quartal oder einen Monat. Beim festen
+Zeitraum verschieben sie das Fenster um dieselbe Anzahl Kalendertage, auch über
+Sommer-/Winterzeitwechsel hinweg. „Ausgewähltes Jahr/Quartal/Monat“ beziehungsweise
+„Ausgewählter Zeitraum“ kehrt zur gespeicherten Auswahl zurück. Es geht nur
+rückwärts und wieder bis zur konfigurierten Auswahl, nicht darüber hinaus in
+die Zukunft. Monat, Quartal und feste Fenster erlauben bis zu 120 Schritte
+zurück, niemals vor 1971; Jahresnavigation bleibt wie bisher bis 1971 möglich.
+Die Navigation gilt nur für die jeweilige Browseransicht und verändert weder
+gespeicherte Konfiguration noch die Ansicht anderer Benutzer. Vorhandene
+Instanzen bleiben ohne Umstellung bei ihrer Jahresansicht und ihrem Design.
 
 Es werden ausschließlich abgeschlossene Kalendertage in der Symcon-Zeitzone
 berücksichtigt. Der laufende Tag bleibt leer. Fehlende Archivtage bleiben
 ebenfalls leer und werden weder interpoliert noch als Null gewertet. Echte
 Nullwerte sowie negative Standard-Messwerte werden dargestellt; Verbrauchswerte
 müssen nichtnegativ sein. Die Farbskala richtet
-sich automatisch nach den vorhandenen Werten des angezeigten Jahres.
+sich automatisch nach den vorhandenen Werten des angezeigten Zeitraums.
+In einem aktuellen Jahr, Quartal oder Monat bleiben noch nicht abgeschlossene
+Tage leer; sie lösen keine Abfrage zukünftiger Archivwerte aus.
 Das Archiv muss kein vollständiges Jahr abdecken. Beginnt die Aufzeichnung
 erst im Tagesverlauf, wird auch der erste verfügbare Tageswert angezeigt;
 er bezieht sich auf die tatsächlich aufgezeichnete Zeit dieses Tages.
@@ -62,10 +85,10 @@ Bei zu wenig Platz werden nur einzelne Monats-/Wochentagsnamen beschriftet; die
 Kalendertage und ihre Werte bleiben vollständig erhalten.
 
 Die Farbreihenfolge kann umgekehrt werden. Ein optionaler fester Wertebereich
-mit Minimum und Maximum hält die Farbzuordnung beim Jahreswechsel konstant.
+mit Minimum und Maximum hält die Farbzuordnung beim Zeitraumwechsel konstant.
 Werte außerhalb dieses Bereichs verwenden die jeweilige Endfarbe; sie werden
 nicht aus den Daten entfernt. Ohne festen Bereich gilt weiterhin die
-automatische Skala des angezeigten Jahres.
+automatische Skala des angezeigten Zeitraums.
 
 Einheit und Nachkommastellen können aus der Variablendarstellung übernommen
 oder selbst festgelegt werden. IPSView erbt standardmäßig das Kacheldesign;
@@ -74,7 +97,7 @@ gekennzeichnete Beispieldaten und löst beim Bearbeiten keine Archivabfrage aus.
 
 Öffentliche Funktionen mit Instanz-ID als erstem Parameter:
 
-- `ECCL_GetCalendarData`: Datenmodell des konfigurierten Jahres als JSON.
+- `ECCL_GetCalendarData`: Datenmodell des konfigurierten Zeitraums als JSON.
 - `ECCL_GetCalendarDiagnostic`: Konfigurationsdiagnose als JSON.
 - `ECCL_GetIPSViewHTML`: eigenständiges HTML-Dokument für IPSView.
 - `ECCL_RefreshArchive`: Darstellung aus dem Archiv aktualisieren.

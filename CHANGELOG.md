@@ -15,6 +15,12 @@
 
 ## Neu
 
+- EChartsCalendar bietet Jahr, Quartal, Monat und feste historische Von-/Bis-
+  Zeiträume mit passender Navigation in Kachel und IPSView. Beide Vorschauen
+  folgen den gewählten Grenzen. Höchstens 366 Tage, bisherige Kennzahlen,
+  Teilarchive und unabhängige Designs bleiben erhalten; bestehende Instanzen
+  verwenden weiterhin ihre bisherige Jahresansicht.
+
 - EChartsStateTimeline bietet feste historische Von-/Bis-Zeiträume mit
   sekundengenauen Grenzen. Zustandszuordnungen, Vorgänger und unbekannte
   Anfänge bleiben ebenso erhalten wie bisherige Zeiträume, Designs und

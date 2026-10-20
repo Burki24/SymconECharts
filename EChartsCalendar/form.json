@@ -43,6 +43,69 @@
             ]
         },
         {
+            "type": "Select",
+            "name": "Period",
+            "caption": "Calendar period",
+            "onChange": "ECCL_UpdateCalendarPeriodForm($id, $Period);",
+            "options": [
+                {
+                    "caption": "Year",
+                    "value": "year"
+                },
+                {
+                    "caption": "Quarter",
+                    "value": "quarter"
+                },
+                {
+                    "caption": "Month",
+                    "value": "month"
+                },
+                {
+                    "caption": "Fixed historical period",
+                    "value": "absolute"
+                }
+            ]
+        },
+        {
+            "type": "NumberSpinner",
+            "name": "Month",
+            "caption": "Month (0 = current month)",
+            "minimum": 0,
+            "maximum": 12,
+            "visible": false
+        },
+        {
+            "type": "NumberSpinner",
+            "name": "Quarter",
+            "caption": "Quarter (0 = current quarter)",
+            "minimum": 0,
+            "maximum": 4,
+            "visible": false
+        },
+        {
+            "type": "SelectDate",
+            "name": "AbsoluteStart",
+            "caption": "From (included)",
+            "visible": false
+        },
+        {
+            "type": "SelectDate",
+            "name": "AbsoluteEnd",
+            "caption": "Until (excluded)",
+            "visible": false
+        },
+        {
+            "type": "Label",
+            "name": "CalendarPeriodHint",
+            "caption": "From is included, Until is excluded. Choose at most 366 calendar days; the end must not be in the future. Navigation moves by the same number of calendar days.",
+            "visible": false
+        },
+        {
+            "type": "Label",
+            "name": "CalendarTimeZone",
+            "caption": "Symcon time zone: %s"
+        },
+        {
             "type": "RowLayout",
             "items": [
                 {

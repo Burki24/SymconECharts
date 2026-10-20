@@ -27,7 +27,10 @@
     function metricLabel(metric) {
         return translate({ minimum: 'Daily minimum', maximum: 'Daily maximum', consumption: 'Daily consumption' }[metric] || 'Daily mean');
     }
-    function emptyLabel(metric) {
+    function emptyLabel(metric, period) {
+        if (period && period !== 'year') {
+            return translate('No completed archive days in this period.');
+        }
         return translate({ minimum: 'No completed daily minima in this year.', maximum: 'No completed daily maxima in this year.',
             consumption: 'No completed daily consumption in this year.' }[metric] || 'No completed daily means in this year.');
     }
@@ -125,10 +128,11 @@
             / Math.max(1, top - title.contentTop + bottom));
         top = title.contentTop + (top - title.contentTop) * verticalFit;
         bottom *= verticalFit;
-        var cellWidth = Math.max(1, width - left - right) / (vertical ? 7 : 54);
-        var cellHeight = Math.max(1, height - top - bottom) / (vertical ? 54 : 7);
+        var weeks = calendar.dayCount ? Math.ceil((calendar.dayCount + ((calendar.startWeekday - style.firstWeekday + 7) % 7)) / 7) : 54;
+        var cellWidth = Math.max(1, width - left - right) / (vertical ? 7 : weeks);
+        var cellHeight = Math.max(1, height - top - bottom) / (vertical ? weeks : 7);
         var monthStep = Math.max(1, Math.ceil(axisSize * (vertical ? 1.2 : (monthFormat === 'year-month' ? 7 : 3) * 0.65)
-            / Math.max(1, (vertical ? height - top - bottom : width - left - right) / 12)));
+            / Math.max(1, (vertical ? height - top - bottom : width - left - right) / (calendar.monthCount || 12))));
         var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map(translate);
         var weekdayStep = Math.max(1, Math.ceil(axisSize * (vertical ? 2 : 1.2)
             / Math.max(1, (vertical ? width - left - right : height - top - bottom) / 7)));
@@ -155,7 +159,7 @@
         return {
             backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground ? 'transparent' : colors.background,
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
-            aria: { enabled: true, description: calendar.sourceLabel + ': ' + calendar.year + ', ' + metricLabel(calendar.metric) },
+            aria: { enabled: true, description: calendar.sourceLabel + ': ' + (calendar.periodLabel || calendar.year) + ', ' + metricLabel(calendar.metric) },
             title: { show: title.show, text: calendar.title, left: 'center', top: title.top,
                 textStyle: { color: style.titleColor || colors.text, fontSize: titleSize } },
             tooltip: { show: style.showTooltip !== false, formatter: function (p) {
@@ -163,7 +167,7 @@
                 return escapeHTML(calendar.sourceLabel) + '<br>' + escapeHTML(value[0]) + '<br>'
                     + escapeHTML(metricLabel(calendar.metric)) + ': ' + escapeHTML(format(value[1], true));
             } },
-            calendar: { range: String(calendar.year), orient: vertical ? 'vertical' : 'horizontal',
+            calendar: { range: calendar.calendarRange || String(calendar.year), orient: vertical ? 'vertical' : 'horizontal',
                 left: left, right: right, top: top, bottom: bottom, cellSize: ['auto', 'auto'],
                 yearLabel: { show: style.showYearLabel === true, position: yearPosition, margin: yearMargin,
                     color: style.yearColor || style.axisColor || colors.text, fontSize: yearSize,
@@ -203,10 +207,13 @@
     }
     function updatePeriod(calendar) {
         period.hidden = false;
-        periodLabel.textContent = String(calendar.year);
-        previous.setAttribute('aria-label', translate('Previous year'));
-        next.setAttribute('aria-label', translate('Next year'));
-        selected.textContent = translate('Selected year');
+        periodLabel.textContent = String(calendar.periodLabel || calendar.year);
+        var periodNames = { year: ['Previous year', 'Next year', 'Selected year'], month: ['Previous month', 'Next month', 'Selected month'],
+            quarter: ['Previous quarter', 'Next quarter', 'Selected quarter'], absolute: ['Previous period', 'Next period', 'Selected period'] };
+        var names = periodNames[calendar.period || 'year'] || periodNames.year;
+        previous.setAttribute('aria-label', translate(names[0]));
+        next.setAttribute('aria-label', translate(names[1]));
+        selected.textContent = translate(names[2]);
         currentOffset = Number(calendar.windowOffset) || 0;
         previous.disabled = navigating || currentOffset >= calendar.maxOffset;
         next.disabled = navigating || currentOffset === 0;
@@ -230,7 +237,7 @@
         chartElement.hidden = false;
         error.hidden = true;
         warning.hidden = true;
-        empty.textContent = emptyLabel(state.chart.calendar.metric);
+        empty.textContent = emptyLabel(state.chart.calendar.metric, state.chart.calendar.period);
         empty.hidden = state.chart.calendar.data.length > 0;
         root.style.backgroundColor = bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground
             ? 'transparent' : colorsFor(nextTheme).background;
@@ -258,6 +265,11 @@
         return protocol + '//' + host + path + '?offset=' + offset
             + (bootstrap.mode === 'symcon' ? '&output=tile' : '');
     }
+    function sameView(a, b) {
+        if (!a || !b) { return false; }
+        if (a.viewKey || b.viewKey) { return a.viewKey === b.viewKey; }
+        return a.baseYear === b.baseYear && (a.metric || 'average') === (b.metric || 'average');
+    }
     function navigate(offset) {
         var calendar = currentState && currentState.chart && currentState.chart.calendar;
         if (navigating || !calendar || offset < 0 || offset > calendar.maxOffset) { return; }
@@ -271,13 +283,11 @@
             return response.json();
         }).then(function (state) {
             if (!state || state.status !== 'ready' || !state.chart || state.chart.family !== 'calendar'
-                || state.chart.calendar.baseYear !== calendar.baseYear || state.chart.calendar.windowOffset !== offset
-                || (state.chart.calendar.metric || 'average') !== (calendar.metric || 'average')) {
+                || !sameView(state.chart.calendar, calendar) || state.chart.calendar.windowOffset !== offset) {
                 throw new Error('Invalid Calendar response.');
             }
             // A configuration update may have arrived while the request was in flight.
-            if (currentState.chart.calendar.baseYear === calendar.baseYear
-                && (currentState.chart.calendar.metric || 'average') === (calendar.metric || 'average')) { render(state); }
+            if (sameView(currentState.chart.calendar, calendar)) { render(state); }
         }).catch(function () {
             warning.textContent = translate(loadError);
             warning.hidden = false;
@@ -294,8 +304,7 @@
         if (!state) { return; }
         var calendar = state.chart && state.chart.calendar;
         if (currentOffset > 0 && calendar && calendar.windowOffset === 0 && currentState && currentState.chart
-            && currentState.chart.calendar.baseYear === calendar.baseYear
-            && (currentState.chart.calendar.metric || 'average') === (calendar.metric || 'average')) { navigate(currentOffset); return; }
+            && sameView(currentState.chart.calendar, calendar)) { navigate(currentOffset); return; }
         render(state);
     };
     function resize() {

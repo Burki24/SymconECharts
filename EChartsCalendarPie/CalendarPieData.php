@@ -41,18 +41,11 @@ final class CalendarPieData
         $start = $midnight($civilStart);
         $next = $midnight($civilNext);
         $cutoff = min($next, $today);
-        $days = [];
-        for ($civil = $civilStart; $civil < $civilNext; $civil = $civil->modify('+1 day')) {
-            $day = $midnight($civil);
-            $following = $midnight($civil->modify('+1 day'));
-            // Date-line changes can remove an entire civil date. It has no
-            // elapsed interval and must not duplicate the normalized next date.
-            if ($day->format('Y-m-d') !== $civil->format('Y-m-d')) {
-                continue;
-            }
-            $days[] = ['date'  => $civil->format('Y-m-d'), 'startTimestamp' => $day->getTimestamp(),
-                'endTimestamp' => $following->getTimestamp(), 'completed' => $following <= $cutoff];
-        }
+        $days = array_map(static function (array $day): array
+        {
+            unset($day['weekday']);
+            return $day;
+        }, EChartsArchiveQuery::CalendarDays($civilStart->format('Y-m-d'), $civilNext->format('Y-m-d'), $cutoff->getTimestamp(), $timezone));
         return ['Month'     => $civilStart->format('Y-m'), 'BaseMonth' => $baseMonth, 'Offset' => $offset,
             'MaximumOffset' => $maximum, 'Timezone' => $timezone, 'StartTimestamp' => $start->getTimestamp(),
             'EndTimestamp'  => $cutoff->getTimestamp(), 'Empty' => $cutoff <= $start, 'Days' => $days];

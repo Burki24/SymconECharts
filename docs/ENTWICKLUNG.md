@@ -29,6 +29,20 @@ Canvas-Zeichenaufrufe für Kachel und IPSView statt nur vorhandener Titeloptione
 
 ## Aktueller Stand und Zielarchitektur
 
+Calendar bietet gemäß [ADR 0082](adr/0082-flexible-calendar-periods.md) Jahr,
+Quartal, Monat und feste historische Datumsfenster. `Period=year` erhält alle
+Altinstanzen; die neuen Month-/Quarter-/Date-Properties beeinflussen nur ihre
+aktive Ansicht. `CalendarData::ResolveView` teilt Validierung, Ausgabe und
+Entwurfsvorschau. `EChartsArchiveQuery::ParseLocalDate` ergänzt native SelectDate-
+Felder und verwendet die vorhandene strikte Datumsprüfung; Datumsauswahl folgt
+lokalen Kalendertagsgrenzen, ohne Uhrzeit-DST-Regeln anderer Familien zu ändern.
+Die begrenzte `CalendarDays`-Enumeration wird auch von CalendarPie verwendet,
+ohne dessen Datenmodell zu ändern. Maximal 366 Tage/Aggregate, alte Kennzahlen,
+Teilarchive und unabhängige Designs bleiben erhalten. Navigation speichert
+nichts und verschiebt freie Fenster um ihre zivilen Kalendertage. Ein
+Ansichtsschlüssel verwirft veraltete Antworten bei Konfigurationswechseln.
+Die neue Calendar-Live-Abnahme nach Modulupdate bleibt separat offen.
+
 StateTimeline integriert gemäß [ADR 0081](adr/0081-fixed-historical-state-timeline-periods.md)
 feste historische Von-/Bis-Zeiträume. `ParseLocalDateTime` wird wiederverwendet;
 `ResolveAbsoluteWindow` extrahiert die gemeinsame strikte Grenzprüfung aus
@@ -62,8 +76,13 @@ bleiben Fehler. Die bereits vor dem Join gezählten Ladebudgets bleiben erhalten
 synthetische Teilarchive für Mittelwert/Verbrauch, Stunde/Tag, feste/rollierende
 Fenster, versteckte Quellen, echte Nullen und beide unabhängigen Ausgaben.
 Die Regressionen reproduzierten vor der Korrektur den Intervallrasterfehler.
-Properties, Gateway und Renderer bleiben unverändert. Ein erneuter Live-Test
-der Korrektur nach Modulupdate sowie die tatsächliche IPSView-App bleiben offen.
+Properties, Gateway und Renderer bleiben unverändert. Die Korrektur wurde nach
+Modulupdate per MCP in einer temporären Testinstanz nachgeprüft: erster Teilslot
+bleibt Lücke, nachfolgende native Werte einschließlich Null bleiben erhalten,
+auch mit versteckten Quellen und in den bisherigen rollierenden Fenstern.
+Die ursprünglichen Instanzkonfigurationen und Archiveinstellungen blieben
+unverändert; Testobjekte wurden entfernt. Der Eigentümer bestätigt anschließend
+die tatsächliche Kachel und IPSView.
 
 Candlestick integriert gemäß [ADR 0079](adr/0079-fixed-historical-candlestick-periods.md)
 feste historische Von-/Bis-Zeiträume. Die zentralen `ParseLocalDateTime`- und
@@ -84,8 +103,11 @@ unverändert. Ausschließlich identische Zeitstempel aller Achsen bilden Linien;
 Kachel, IPSView und reine Entwurfsvorschau nutzen dieselben Zeitgrenzen.
 Die fünf geplanten Familien Boxplot, Parallel, Candlestick, ThemeRiver und
 StateTimeline sind damit technisch um feste historische Zeiträume erweitert.
-Die gebündelte Live-Matrix für den gesamten Archivzeiträume-Block bleibt offen;
-lokale automatisierte Modul- und Gesamttests laufen weiterhin je Änderung.
+Die gemeinsame funktionale Live-Abnahme aller fünf Familien wurde per MCP
+durchgeführt und nach ThemeRivers Teilarchivkorrektur vervollständigt.
+Vollständige Grenz-, Budget- und Fehlermatrizen sind weiterhin automatisiert
+abgesichert; daraus folgt keine Live-Lastfreigabe. Lokale Modul- und Gesamttests
+laufen weiterhin je Änderung.
 
 Boxplot bietet gemäß [ADR 0077](adr/0077-fixed-historical-boxplot-periods.md)
 zusätzlich `Range=absolute` und die additiven String-Properties `AbsoluteStart`

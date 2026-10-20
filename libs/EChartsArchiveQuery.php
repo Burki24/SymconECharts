@@ -105,6 +105,73 @@ final class EChartsArchiveQuery
                     && array_key_exists($customRangeUnit, self::CUSTOM_RANGE_UNITS)));
     }
 
+    /** Strict native date fields; local day boundaries follow the calendar's midnight-DST normalization. */
+    public static function ParseLocalDate(mixed $raw, string $timezone): int
+    {
+        if (is_string($raw) && strlen($raw) <= 1024) {
+            try {
+                $raw = json_decode($raw, true, 8, JSON_THROW_ON_ERROR);
+            } catch (\JsonException) {
+                $raw = null;
+            }
+        } elseif ($raw instanceof \stdClass) {
+            $raw = get_object_vars($raw);
+        }
+        if (!is_array($raw) || count($raw) !== 3 || array_diff(['year', 'month', 'day'], array_keys($raw)) !== []) {
+            throw new InvalidArgumentException('The historical date and time selection is invalid.');
+        }
+        try {
+            return self::ParseLocalDateTime($raw + ['hour' => 0, 'minute' => 0, 'second' => 0], $timezone);
+        } catch (InvalidArgumentException $exception) {
+            if (!in_array($exception->getMessage(), [
+                'The historical date and time is ambiguous in the selected timezone.',
+                'The historical date and time does not exist in the selected timezone.'
+            ], true)) {
+                throw $exception;
+            }
+            // Unlike a time-of-day selection, a date denotes the local calendar
+            // boundary. Normalize midnight DST, but never accept a removed date.
+            $date = sprintf('%04d-%02d-%02d', $raw['year'], $raw['month'], $raw['day']);
+            $boundary = new DateTimeImmutable($date . ' 00:00:00', new DateTimeZone($timezone));
+            if ($boundary->format('Y-m-d') !== $date) {
+                throw $exception;
+            }
+            return $boundary->getTimestamp();
+        }
+    }
+
+    /** Bounded civil-date enumeration, shared by calendar layouts; never carry a normalized DST time into the next date. */
+    public static function CalendarDays(string $from, string $until, int $cutoff, string $timezone, int $maximumDays = 366): array
+    {
+        $zone = new DateTimeZone($timezone);
+        $utc = new DateTimeZone('UTC');
+        $parse = static function (string $date) use ($utc): DateTimeImmutable
+        {
+            if (!preg_match('/^(\d{4})-(\d{2})-(\d{2})$/D', $date, $m)
+                || !checkdate((int) $m[2], (int) $m[3], (int) $m[1])) {
+                throw new InvalidArgumentException('The historical date and time selection is invalid.');
+            }
+            return new DateTimeImmutable($date . ' 12:00:00', $utc);
+        };
+        $start = $parse($from);
+        $end = $parse($until);
+        $count = (int) $start->diff($end)->format('%r%a');
+        if ($maximumDays < 1 || $maximumDays > 366 || $count < 1 || $count > $maximumDays) {
+            throw new InvalidArgumentException('Calendar periods support at most 366 calendar days.');
+        }
+        $days = [];
+        for ($civil = $start; $civil < $end; $civil = $civil->modify('+1 day')) {
+            $day = new DateTimeImmutable($civil->format('Y-m-d') . ' 00:00:00', $zone);
+            $next = new DateTimeImmutable($civil->modify('+1 day')->format('Y-m-d') . ' 00:00:00', $zone);
+            if ($day->format('Y-m-d') !== $civil->format('Y-m-d')) {
+                continue;
+            }
+            $days[] = ['date'    => $civil->format('Y-m-d'), 'weekday' => (int) $civil->format('N') - 1,
+                'startTimestamp' => $day->getTimestamp(), 'endTimestamp' => $next->getTimestamp(), 'completed' => $next->getTimestamp() <= $cutoff];
+        }
+        return $days;
+    }
+
     /** Resolve the six integer fields produced by the native SelectDateTime control. */
     public static function ParseLocalDateTime(mixed $raw, string $timezone): int
     {

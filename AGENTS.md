@@ -118,7 +118,9 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   eigenen Gerätemodul `EChartsCalendar`; Mittelwert, Minimum und Maximum
   erfordern Standardarchive, der ausdrücklich gewählte Zählerverbrauch ein
   Zählerarchiv gemäß ADR 0062. Laufende Tage bleiben ausgeschlossen.
-  Das Jahreslayout ist kein Modus der Stunden-Heatmap. Auch deren stündliche
+  Jahr (unveränderter Standard), Quartal, Monat und feste historische
+  Von-/Bis-Datumsfenster mit Navigation folgen ADR 0082; maximal 366 Tage und
+  unveränderte Kennzahlen-/Archivbudgets. Calendar ist kein Modus der Stunden-Heatmap. Auch deren stündliche
   Kennzahlen und Wochentag-/Stundenreduktion folgen ADR 0062.
   Aktuelle Vergleichsgruppen auf expliziten normierten Achsen liegen im eigenen
   Gerätemodul `EChartsRadar` gemäß ADR 0053; keine Archive oder automatische

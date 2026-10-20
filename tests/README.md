@@ -1,5 +1,47 @@
 # Tests
 
+## Calendar: Jahr, Quartal, Monat und feste Datumsfenster
+
+`php tests/calendar_data.php` prüft die unveränderten Jahrespläne sowie Monats-/
+Quartalswechsel, Schaltjahre, jahresübergreifende freie Fenster, 366/367 Tage,
+strikte native SelectDate-Felder, Zukunft und Navigation über DST. Fehlende
+Mitternacht wird zur realen lokalen Tagesgrenze; ein vollständig entferntes
+Datum bleibt ungültig. `calendar_pie_data.php` sichert das unveränderte
+CalendarPie-Modell nach Zentralisierung der begrenzten Tagesenumeration.
+
+`php tests/gateway_gauges.php` bindet `calendar_views_integration.php` ein:
+reales Calendar/Gateway mit Kernel-Doppeln, alle vier Kennzahlen in allen
+Ansichten, unveränderte 366-Aggregat-/Ausgabebudgets, Teilarchive, unabhängiges
+IPSView-Design, beide Ausgaben/WebContent, wiederholtes ApplyChanges,
+authentifizierte lesende Navigation und ungültige Fenster vor Archivzugriff.
+Native Formularfelder und beide Vorschauentwürfe verwenden dieselben Grenzen,
+ohne Archivzugriff, Property- oder Statusänderung. Der erste neue Datentest
+scheiterte vor der Implementierung an der fehlenden View-Methode.
+
+`node tests/calendar_layout.js` prüft mit dem gepinnten echten ECharts-Renderer
+kurze und jahresübergreifende Datumsarrays, endliche Zellgeometrie, tatsächliche
+Labelgrenzen in beiden Ausrichtungen/Ausgaben, angepasste Beschriftungsdichte,
+Navigation/Reset und verworfene Antworten einer alten Konfiguration.
+`node tests/calendar_browser.mjs` bietet unter Port 8796 synthetische Daten,
+`?period=year|quarter|month|absolute` und `/chart?mode=symcon|ipsview&period=…`.
+Am 20.10.2026 wurden kurze und jahresübergreifende Canvas-Ansichten auf schmaler
+Fläche sowie Navigation/Reset für Quartal und freie Fenster lokal geprüft;
+die breiten Ausrichtungen sind zusätzlich durch echte SVG-Geometrie geprüft.
+Keine Symcon-Daten verwendet. Live-Abnahme der neuen Calendar-Ansichten nach
+Modulupdate bleibt offen.
+
+## Abnahmestatus des vorherigen Archivzeiträume-Blocks
+
+Die gemeinsame funktionale MCP-Live-Abnahme von Boxplot, Parallel, Candlestick,
+ThemeRiver und StateTimeline ist abgeschlossen. Der gefundene ThemeRiver-
+Teilarchivfehler wurde korrigiert und nach Modulupdate erneut live geprüft;
+der Eigentümer bestätigt Kachel und tatsächliches IPSView. Bestehende
+Konfigurationen, Designs und Archiveinstellungen blieben unverändert;
+temporäre Testobjekte wurden entfernt. Die vollständigen Grenz-, Budget-
+und Fehlermatrizen bleiben automatisierte Nachweise, keine Live-Lastfreigabe.
+Die folgenden Detailabschnitte beschreiben die ursprünglichen Entwicklungs-
+und Testschritte; dieser Status ersetzt deren damalige offene Live-Hinweise.
+
 ## StateTimeline: feste historische Zeiträume
 
 `php tests/gateway_gauges.php --state-timeline-absolute` verwendet die vorhandene
@@ -20,8 +62,8 @@ bleiben in `state_timeline_integration.php` aktiv.
 
 `php tests/archive_absolute_windows.php` prüft die gemeinsame exakte Grenzplanung
 und unveränderte Vollintervallpläne. Gesamtlauf: `php tests/quality.php --fix`.
-Die technische Archivzeiträume-Roadmap ist umgesetzt; die gemeinsame Live-Matrix
-für alle fünf Familien und beide Ausgabewege bleibt offen (ADR 0081).
+Die gemeinsame funktionale Live-Abnahme aller fünf Familien ist inzwischen
+erfolgt; siehe aktuellen Abnahmestatus oben (ADR 0081/0082).
 Es werden keine laufenden Instanzen, Zustandszuordnungen oder Archive verändert.
 
 ## ThemeRiver: feste historische Zeiträume
@@ -45,8 +87,8 @@ inaktive Dates; der absolute Modus ignoriert inaktive Custom-Felder.
 Die zentrale Regression `archive_absolute_windows.php` und die bestehenden
 ThemeRiver-Daten-/Verbrauchs-/16-Quellen- und Rendererprüfungen sichern die
 unveränderten Verträge. Gesamtlauf: `php tests/quality.php --fix`.
-Keine Live-Instanzen oder Archive werden verändert. Nach StateTimeline folgt
-die gebündelte Live-Abnahme des gesamten Archivzeiträume-Blocks.
+Diese Tests ändern keine Live-Instanzen oder Archive. Die anschließend
+durchgeführte gemeinsame Live-Abnahme ist im Status oben dokumentiert.
 
 ## Candlestick: feste historische Zeiträume
 
@@ -69,9 +111,8 @@ SVG-Entwürfe in beiden Ausrichtungen werden geprüft. Die zentrale Regression
 der nun gemeinsam enumerierten Intervalle. Die gesamte Qualitätssuite läuft
 mit `php tests/quality.php --fix`.
 
-Keine Live-Instanz oder Archivierung wird geändert. Die native Datumswahl
-und tatsächliche Kachel/IPSView bleiben Teil der gebündelten Live-Abnahme
-des Archivzeiträume-Blocks nach ThemeRiver und StateTimeline.
+Diese Tests ändern keine Live-Instanz oder Archivierung. Die anschließende
+gemeinsame Live-Abnahme von Datumswahl und Ausgaben ist inzwischen erfolgt.
 
 ## Parallel: feste historische Zeiträume
 
@@ -91,10 +132,9 @@ Designs und zustandsneutrale native Formular-/SVG-Entwürfe. Zehn Achsen mit
 je 1001 vorhandenen Aggregaten liefern maximal 10×1000 geladene Werte und den
 bisherigen Kürzungshinweis; 11 Achsen beziehungsweise Budgets 0/1001 scheitern.
 
-Lokale Modul-/Rendererprüfungen laufen weiterhin je Änderung. Für den gesamten
-Roadmap-Punkt „Archivzeiträume“ ist nach Anbindung der übrigen Familien eine
-gemeinsame Live-Matrix sinnvoll; die neue native Datumswahl in Symcon und die
-tatsächliche IPSView-App sind durch diese Tests noch nicht live abgenommen.
+Lokale Modul-/Rendererprüfungen laufen weiterhin je Änderung. Diese Tests
+allein sind keine Live-Abnahme; der anschließend gemeinsam geprüfte Stand
+des Archivzeiträume-Blocks ist oben gesondert dokumentiert.
 
 ## Boxplot: kompakte Wertachsenbeschriftung
 
