@@ -900,6 +900,11 @@
 
 ## Fixes
 
+- Konfigurierte Diagrammtitel von EChartsGaugeMulti, EChartsGaugeTacho und
+  EChartsGaugeChronograph erscheinen in Kachel und IPSView – mit eingestellter
+  Schriftgröße, Farbe und Abstand zum Kachelkopf. Bestehende Konfigurationen
+  und individuelle Instrumentenskalen bleiben unverändert.
+
 - Kreisvorschauen mit nur einem positiven Anteil zeichnen vollständige Kreise
   und Donuts zuverlässig, ohne Rundungsfehler oder künstliche radiale Naht.
 

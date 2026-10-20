@@ -18,7 +18,7 @@ final class EChartsAsset
     public const PICTORIAL_BAR_SHA256 = 'ce03a142a661d6a32ee931a9e6efcb390c311220f1e53cdeb89a32f1bee9ef5d';
     public const CANDLESTICK_SHA256 = '99147592d9a85f19c776b0f6bfd49c8becaf872d825fd9dbe9553202384598bd';
     public const FUNNEL_SHA256 = 'da9750dd18363325d23b1bcd4ea3af7e1011620b80b994ad6c2d5e3ee819314d';
-    public const SHA256 = '37d8c9774f27fc12e048e269e8ec6a114782529fb85262a6be8c6b887207c07f';
+    public const SHA256 = '8c6216a27ffe06481fe81ae101cb17c2f39fafe9357c99adc110434f03dd9bbc';
     public const CARTESIAN_SHA256 = '92954fbddaa6b7c09f25819ab7b4743eb6afd5efa92351f129b14d298d2ab31a';
     public const BAR_CATEGORY_SHA256 = '2d0c0742e63d9a044183dc61db8981d57c3d4d2fa1134aa09e2bf0c56411c818';
     public const SCATTER_SHA256 = 'd759229d5b223da5b3badff736a732f978efc30c3e91d8913aa3e90d01b2974a';

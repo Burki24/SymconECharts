@@ -69,8 +69,16 @@ Der Gauge-Einstieg enthält:
 
 - ECharts Core;
 - Gauge Chart;
-- Aria, Tooltip und Graphic Component;
+- Aria, Titel, Tooltip und Graphic Component;
 - Canvas Renderer.
+
+Am 20.10.2026 wurde der fehlende `TitleComponent` über die offizielle
+Tree-Shaking-Schnittstelle ergänzt. `npm run build:runtime` erzeugt nur das
+Gauge-Bundle neu; ECharts bleibt unverändert bei 6.1.0 unter Apache-2.0.
+Offizielle Startseite, llms.txt, Import-Handbuch und npm-Metadaten wurden erneut
+geprüft. Bytezahl und SHA-256 stehen in `THIRD_PARTY_NOTICES.md`.
+`node tests/gauge_runtime_titles.js` vergleicht den Build bytegleich und prüft
+die tatsächlichen Canvas-Titelzeichenaufrufe aller Gauge-Verbraucher.
 
 Der kartesische Einstieg enthält Line Chart, Bar Chart, Scatter Chart, Grid, Legende, Titel,
 Tooltip, Data Zoom, Referenzlinien, Wertebereiche, Aria und Canvas Renderer.

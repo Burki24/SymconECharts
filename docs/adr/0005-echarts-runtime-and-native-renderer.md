@@ -5,7 +5,8 @@
 - Entscheider: Burki24
 - Ergänzt: ADR 0002 und ADR 0003
 - Ergänzt durch: ADR 0006 hinsichtlich des Gauge-Single-Kacheldesigners und
-  ADR 0007 hinsichtlich offizieller ECharts-Themes
+  ADR 0007 hinsichtlich offizieller ECharts-Themes; Runtime-Korrektur vom
+  20.10.2026 ergänzt den offiziellen TitleComponent ohne Versionswechsel
 - Ersetzt durch: –
 
 ## Kontext
@@ -29,15 +30,15 @@ Apache ECharts wird in Version **6.1.0** aus dem offiziellen npm-Paket
 `GetVisualizationTile()` auf 1.048.576 Byte begrenzt und der vollständige
 minimierte Browser-Build dieses Budget bereits allein überschreitet, wird die
 offizielle Tree-Shaking-Schnittstelle verwendet. Der Gauge-spezifische Build
-enthält ECharts Core, Gauge Chart, Aria, Tooltip, Graphic Component und Canvas
+enthält ECharts Core, Gauge Chart, Aria, Titel, Tooltip, Graphic Component und Canvas
 Renderer. Er wird
 mit den unter `.tools/echarts-runtime` festgeschriebenen Abhängigkeiten
 reproduzierbar erzeugt.
 
 Der Build liegt als `echarts.gauge.min.js` unter `libs/echarts/6.1.0`, ist
-486.506 Byte groß, wird nicht von einem CDN geladen und ist über den
+489.536 Byte groß, wird nicht von einem CDN geladen und ist über den
 SHA-256-Wert
-`37d8c9774f27fc12e048e269e8ec6a114782529fb85262a6be8c6b887207c07f`
+`8c6216a27ffe06481fe81ae101cb17c2f39fafe9357c99adc110434f03dd9bbc`
 festgeschrieben. `LICENSE.txt` und `NOTICE.txt` aus demselben ECharts-Paket
 werden mitgeliefert. Herkunft, Buildweg und Prüfsumme stehen zusätzlich in
 `THIRD_PARTY_NOTICES.md`.
@@ -104,6 +105,10 @@ Laufzeittestlücke.
 ## Nachweise
 
 - Asset- und Integritätsprüfung unter `tests/echarts_assets.php`
+- Reproduzierbarer Build und native Canvas-Titelzeichenaufrufe für Kachel und
+  IPSView unter `tests/gauge_runtime_titles.js`; TitleComponent wurde am
+  20.10.2026 nach bestätigtem fehlenden Titel ergänzt. Version, Herkunft,
+  Lieferartefakt und Apache-2.0-Lizenz wurden erneut offiziell geprüft.
 - HTML-SDK- und Update-Vertrag unter `tests/gateway_gauges.php`
 - Strict- und Strukturverträge unter `tests/symcon_strict.php` und
   `tests/validate_structure.php`

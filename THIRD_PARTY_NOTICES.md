@@ -63,8 +63,8 @@ Ausgelieferte Dateien:
 
 - `libs/echarts/6.1.0/echarts.gauge.min.js` – reproduzierbarer,
   Gauge-spezifischer Browser-Build aus ECharts Core, Gauge Chart, Aria,
-  Tooltip, Graphic Component und Canvas Renderer; 486.506 Byte; SHA-256
-  `37d8c9774f27fc12e048e269e8ec6a114782529fb85262a6be8c6b887207c07f`;
+  Titel, Tooltip, Graphic Component und Canvas Renderer; 489.536 Byte; SHA-256
+  `8c6216a27ffe06481fe81ae101cb17c2f39fafe9357c99adc110434f03dd9bbc`;
 - `libs/echarts/6.1.0/echarts.cartesian.min.js` – reproduzierbarer,
   kartesischer Browser-Build aus ECharts Core, Line Chart, Bar Chart, Scatter Chart, Grid,
   Legende, Titel, Tooltip, Data Zoom, Mark Line, Mark Area, Aria und Canvas

@@ -19,6 +19,14 @@ Diagrammtitel nicht; die fachlichen Renderer platzieren ihre Inhalte unterhalb
 beider Titel. Ein ausgeblendeter Kachelkopf gibt seinen Platz frei, während
 IPSView nur den Diagrammtitel benötigt.
 
+Die gemeinsame Gauge-Runtime registriert seit der Korrektur vom 20.10.2026
+auch den offiziellen `TitleComponent`. GaugeMulti, Tacho und Chronograph
+zeichnen damit die bereits konfigurierten äußeren Diagrammtitel. GaugeSingle
+behält seinen instrumenteigenen Titel. ECharts bleibt bei 6.1.0; der gezielte
+Gauge-Neubau verändert keine anderen Familien, Konfigurationen oder Skalen.
+`tests/gauge_runtime_titles.js` prüft bytegleiche Reproduzierbarkeit und echte
+Canvas-Zeichenaufrufe für Kachel und IPSView statt nur vorhandener Titeloptionen.
+
 ## Aktueller Stand und Zielarchitektur
 
 GaugeMulti erweitert gemäß [ADR 0074](adr/0074-gauge-multi-source-selection-and-pages.md)

@@ -1,5 +1,27 @@
 # Tests
 
+## Gauge-Runtime: konfigurierte Titel in beiden Ausgabewegen
+
+`node tests/gauge_runtime_titles.js` prüft das ausgelieferte Bundle unverändert
+mit seinem nativen CanvasRenderer. Nur die Browser-Zeichenfläche wird ersetzt;
+der Test registriert keine zusätzlichen ECharts-Komponenten. Tatsächliche
+`fillText`-Aufrufe und Display-Elemente müssen die äußeren Titel von GaugeMulti
+(alle vier Vorlagen), Tacho und Chronograph für Kachel und IPSView enthalten.
+Schriftgröße/Farbe, Kachelkopfabstand mit/ohne sichtbaren Kopf, Entfernen und
+Wiederherstellen eines Titels sowie unveränderte individuelle Skalen und Werte
+sind abgedeckt. GaugeSingles instrumenteigener Titel bleibt ebenfalls sichtbar.
+Der Test vergleicht zusätzlich den gepinnten Neubau bytegleich mit dem Bundle
+und ist in `tests/run.php` und damit in CI und der Gesamtprüfung eingebunden.
+
+Der anfängliche Regressionstest scheiterte gezielt am fehlenden TitleComponent
+im ausgelieferten Build. Die Korrektur ergänzt ausschließlich diesen offiziellen
+Baustein im Gauge-Einstieg von ECharts 6.1.0, ohne Änderung des Fremdkerns oder
+anderer Bundles. Integrität, Lizenzen und HTML-Budgets bleiben separat geprüft.
+Live-Abnahme nach Modulupdate in Symcon und IPSView bleibt erforderlich.
+Am 20.10.2026 zeigte die lokale Canvas-Browserprüfung mit synthetischen Daten
+die GaugeMulti-Diagrammtitel in beiden Ausgabewegen sichtbar nebeneinander;
+der Kacheltitel und Vergrößerungsbutton blieben oberhalb der Diagrammüberschrift.
+
 ## GaugeMulti: 32 Quellen, Auswahl und Instrumentenseiten
 
 `php tests/gateway_gauges.php --gauge-multi-many` prüft den realen Modul-/Gateway-
@@ -39,10 +61,9 @@ Bedienleiste behoben. Der erste vollständige Lauf fand zudem einen veralteten
 Formularindex im alten SVG-Test; die Prüfung adressiert nun den stabilen Feldnamen.
 Live-Abnahme nach Modulupdate bleibt separat, keine Live-Konfiguration geändert.
 
-Separater Bestandsbefund: Dem bereits zuvor ausgelieferten Gauge-Subset fehlt
-der TitleComponent; konfigurierte äußere Diagrammtitel werden nicht gezeichnet.
-Ein lokaler nativer Modellcheck bestätigt `getComponent('title')` als fehlend.
-Diese Runtime-Korrektur ist nicht Bestandteil des Quellen-/Seitenausbaus.
+Beim Quellen-/Seitenausbau wurde der fehlende TitleComponent als separater
+Bestandsbefund bestätigt. Die anschließende gesonderte Korrektur und ihre
+Regressionstests sind im vorhergehenden Abschnitt dokumentiert.
 
 ## Pie: 100 Quellen, Auswahl und vollständige Anteilsgrundlagen
 

@@ -80,6 +80,7 @@ $commands = [
     ['Test shared chart view state', 'node tests/chart_view_state.js'],
     ['Test Polar pages and selection', 'node tests/bar_polar_layout.js'],
     ['Test Gauge Multi pages and selection', 'node tests/gauge_multi_layout.js'],
+    ['Test shipped Gauge runtime titles', 'node tests/gauge_runtime_titles.js'],
     ['Test Historical Bar layout', 'node tests/bar_history_layout.js'],
     ['Test Scatter/Bubble layout', 'node tests/scatter_layout.js'],
     ['Test Heatmap layout', 'node tests/heatmap_layout.js'],
