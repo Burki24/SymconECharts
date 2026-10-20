@@ -41,6 +41,9 @@ responsiven Instrumentenseiten bei weiterhin individuellen Skalen und Einheiten.
 Funnel unterstützt 32 Quellen mit optionaler Quellenauswahl und responsiver
 Stufennavigation; vollständiger Maximalwert, gleiche Einheit und nichtnegative
 Originalwerte bleiben unabhängig vom gewählten Ausschnitt verbindlich.
+Radar unterstützt 16 vollständige Vergleichsgruppen mit optionaler
+Gruppenauswahl auf unverändert 3–10 expliziten Achsen. Auswahl, Anfangssichtbarkeit
+und Legendenanker ändern weder Achsenbereiche noch die vollständige Werteprüfung.
 Die übrigen
 Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
 
@@ -65,6 +68,7 @@ Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
 | Erledigt | BarPolar: 100 Quellen mit Auswahl und Seiten | ID-stabile Quellenauswahl und Seiten für radiale Balken und konzentrische Bögen, schrift-/platzabhängige Kapazität und vollständige Werteskala einschließlich versteckter Quellen. |
 | Erledigt | GaugeMulti: 32 Quellen mit Auswahl und Seiten | Individuelle Skalen/Einheiten, ID-stabile Auswahl und Seiten für alle vier Vorlagen; DOM-Bedienung und CSS mit BarPolar geteilt, keine verkleinerten 32er-Instrumentenraster. |
 | Erledigt | Funnel: 32 Quellen mit Auswahl und Stufennavigation | ID-stabile Auswahl und Seiten in beiden Ausrichtungen; vollständiger Maximalwert einschließlich versteckter Quellen, unveränderte Altlisten und gekennzeichnete maßstabstreue Vorschau. |
+| Erledigt | Radar: 16 Gruppen mit optionaler Gruppenauswahl | Weiterhin 3–10 vollständige Achsen, bis 160 Zuordnungen, Anfangssichtbarkeit und Alle/Umkehren; gemeinsame flüchtige Auswahl-/Legendenlogik, unveränderte Skalen und Originalwerte. |
 | Danach | Weitere Archiv- und Vergleichsreihen | Nur zusammen mit Navigation, Vorschaukennzeichnung und messbaren Ressourcenbudgets. |
 
 Normalisierung ist keine allgemeine Lösung für unterschiedliche Einheiten:
@@ -97,7 +101,7 @@ Schritte sind Planungsziele, keine implementierten oder lastgeprüften Zusagen.
 | EChartsTreemap | 1–100 nichtnegative Blätter, bis acht Ebenen einschließlich Blatt, höchstens 800 Knoten und 200000 HTML-sicher serialisierte Modellbytes. Optionale Gruppenpfade; alte Gruppe/Untergruppe bleibt unverändert gültig. Null besitzt keine Fläche; Anzeigeeinheit ist global. | Umgesetzt: rekursives gemeinsames Modell, native Navigation und gekennzeichnete vollständige Strukturvorschau. Optionale normalisierte Gewichte und Originalformat je Blatt bleiben offen. Fehlende Einheitenprüfung ist keine saubere Mehr-Einheiten-Unterstützung. |
 | EChartsSunburst | Dasselbe rekursive 1–100-Blatt-Modell und dieselben Tiefen-/Knoten-/Bytebudgets wie Treemap. Die ersten drei Ringdesigns bleiben erhalten; tiefere Ringe übernehmen das äußere Design. | Umgesetzt: native Navigation mit stabilem geöffnetem Zweig bei Aktualisierung und Resize. Originaleinheiten und optionale Gewichte bleiben gesonderte Erweiterungen. |
 | EChartsSankey | 2–100 Knoten, 1–200 gerichtete nichtnegative Flüsse; azyklisch, keine Selbstkanten/doppelten gerichteten Paare. Gleiche Variable an mehreren Kanten möglich. Gleiche Einheit dokumentiert, derzeit nicht je Quelle validiert. | Zunächst Einheitenmodell/Validierung sauber machen. Optional negative Werte durch ausdrücklich gewählte Kantenumkehr behandeln, danach erneut Zyklen prüfen. Rest-/Bilanzknoten können helfen. DAG und nichtnegative Breiten sind keine unnötigen Beschränkungen. |
-| EChartsRadar | 3–10 Achsen, 1–8 vollständige Vergleichsgruppen; je Achse eigener Min/Max-Bereich, Einheit und Präzision. Unterschiedliche Einheiten bereits sinnvoll skaliert. | Mindestens drei Achsen sind geometrisch erforderlich. 12–16 Achsen/16 Gruppen erst mit Filter-/Layoutkonzept. Unvollständige Gruppen optional auslassen und kennzeichnen, fehlende Werte nicht als null erfinden. Inverse Achsen wären eine gesondert beschriftete Erweiterung. |
+| EChartsRadar | 3–10 Achsen, 1–16 vollständige Vergleichsgruppen, höchstens 160 Zuordnungen; je Achse eigener Min/Max-Bereich, Einheit und Präzision. Modell höchstens 200000 Bytes, HTML höchstens 1 MiB. Unterschiedliche Einheiten bereits sinnvoll skaliert. | Umgesetzt: optionale Gruppenauswahl, Anfangssichtbarkeit, Alle/Umkehren und ID-stabile Auswahl/Legendenanker. Ausgeblendete Gruppen bleiben in Modell und Prüfung; Achsenbereiche bleiben vollständig. Mehr Achsen erst mit eigenem Layoutkonzept. Unvollständige Gruppen und inverse Achsen bleiben gesonderte fachliche Erweiterungen; fehlende Werte nicht als null erfinden. |
 
 Maßgebliche Implementierungen:
 
@@ -185,6 +189,16 @@ größtmögliche Imports und beide Ausgabewege abdecken. Eine Auswahl/Navigation
 darf keine Daten verändern oder unsichtbar aus dem fachlichen Modell entfernen.
 
 ## Nachweise dieses Änderungsschritts und verbleibende Lücken
+
+Radar prüft 16×10 Zuordnungen, 17×3 abgewiesene Gruppen, unveränderte Altlisten,
+Initialauswahl und Gruppenfarben beider Designer, vollständige Lesezugriffe,
+Referenzen und Updates einschließlich versteckter Fehler. SVG-Vorschauen prüfen
+alle Quellen vor dem höchstens achtteiligen Ausschnitt mit ursprünglicher Palette
+und vollständiger Clippingwarnung. Der native Engine-Test sichert Auswahl,
+leere Auswahl/Wiederherstellung, Anker, Theme/Resize und ARIA-Anzeigenamen ab.
+Die getrennten Modell-/HTML-Guards und das UTF-8-Maximalformular sind geprüft;
+die gemeinsame Vorschau-Callback-Erzeugung wird semantisch ausgeführt statt nur
+als Text geprüft. Neue Live-Abnahme nach Modulupdate bleibt offen.
 
 Funnel prüft 32/33 Quellen, unveränderte Altlisten, gleiche Namen bei getrennten
 IDs, Einheiten/Genauigkeit, negative/Null-/Gateway-Fehler auch versteckter Quellen,

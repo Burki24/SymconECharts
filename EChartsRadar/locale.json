@@ -1,6 +1,20 @@
 {
     "translations": {
         "de": {
+            "Enable group selection": "Gruppenauswahl aktivieren",
+            "Initial group visibility (optional)": "Anfängliche Gruppensichtbarkeit (optional)",
+            "Initially visible": "Anfangs sichtbar",
+            "Group selection changes visibility only. All groups keep their original axis scales and continue to update. Groups without an override are initially visible.": "Die Gruppenauswahl ändert nur die Sichtbarkeit. Alle Gruppen behalten ihre ursprünglichen Achsenskalen und werden weiter aktualisiert. Gruppen ohne Zuordnung sind anfangs sichtbar.",
+            "Configure 1 to 16 groups, each with exactly one numeric variable per axis. Values outside an axis range are visually limited; tooltips retain the original values.": "1 bis 16 Gruppen mit genau einer numerischen Variable je Achse anlegen. Werte außerhalb des Achsenbereichs werden nur optisch begrenzt; Tooltips behalten die Originalwerte.",
+            "Configure 3 to 10 axes and 1 to 16 complete comparison groups.": "3 bis 10 Achsen und 1 bis 16 vollständige Vergleichsgruppen konfigurieren.",
+            "Use at most 16 unique group colors.": "Höchstens 16 eindeutige Gruppenfarben verwenden.",
+            "Use at most 16 unique group visibility settings.": "Höchstens 16 eindeutige Einstellungen zur Gruppensichtbarkeit verwenden.",
+            "Group visibility %d: select a unique group and a boolean initial visibility.": "Gruppensichtbarkeit %d: Eine eindeutige Gruppe und einen booleschen Wert für die Anfangssichtbarkeit wählen.",
+            "All": "Alle",
+            "Inverse": "Umkehren",
+            "No groups selected": "Keine Gruppen ausgewählt",
+            "Showing %d of %d selected groups (%d configured).": "Vorschau zeigt %d von %d ausgewählten Gruppen (%d konfiguriert).",
+            "The Radar model is too large. Reduce the title or group metadata.": "Das Radar-Modell ist zu groß. Titel oder Gruppenangaben verkürzen.",
             "Hide overlapping value labels": "Überlappende Wertebeschriftungen ausblenden",
             "Show legend": "Legende anzeigen",
             "Line width": "Linienbreite",

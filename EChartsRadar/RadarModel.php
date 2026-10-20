@@ -13,8 +13,8 @@ final class RadarModel
     {
         $t = $translate ?? static fn (string $s): string => $s;
         if (!array_is_list($axes) || count($axes) < 3 || count($axes) > 10
-            || !array_is_list($sources) || count($sources) < 3 || count($sources) > 80) {
-            throw new InvalidArgumentException($t('Configure 3 to 10 axes and 1 to 8 complete comparison groups.'));
+            || !array_is_list($sources) || count($sources) < 3 || count($sources) > 160) {
+            throw new InvalidArgumentException($t('Configure 3 to 10 axes and 1 to 16 complete comparison groups.'));
         }
         $normalized = [];
         $keys = [];
@@ -49,8 +49,8 @@ final class RadarModel
             $groups[$group][$axis] = true;
             $rows[] = ['Group' => $group, 'Axis' => $axis, 'VariableID' => $id];
         }
-        if (count($groups) > 8) {
-            throw new InvalidArgumentException($t('Configure 3 to 10 axes and 1 to 8 complete comparison groups.'));
+        if (count($groups) > 16) {
+            throw new InvalidArgumentException($t('Configure 3 to 10 axes and 1 to 16 complete comparison groups.'));
         }
         foreach ($groups as $name => $mapped) {
             if (count($mapped) !== count($keys)) {
@@ -60,7 +60,7 @@ final class RadarModel
         return ['axes' => $normalized, 'sources' => $rows];
     }
 
-    public static function Build(array $axes, array $sources, array $values, ?callable $translate = null): array
+    public static function Build(array $axes, array $sources, array $values, ?callable $translate = null, array $visibility = []): array
     {
         $configuration = self::Validate($axes, $sources, $translate);
         $t = $translate ?? static fn (string $s): string => $s;
@@ -90,8 +90,9 @@ final class RadarModel
                 $ids[] = $current['VariableID'];
                 $times[] = $current['Timestamp'];
             }
-            $series[] = ['id' => 'group-' . hash('sha256', (string) $group), 'name' => (string) $group,
-                'values'      => $raw, 'percentValues' => $percent, 'variableIDs' => $ids, 'timestamps' => $times];
+            $series[] = ['id'      => 'group-' . hash('sha256', (string) $group), 'name' => (string) $group,
+                'initiallyVisible' => $visibility[$group] ?? true,
+                'values'           => $raw, 'percentValues' => $percent, 'variableIDs' => $ids, 'timestamps' => $times];
         }
         return ['axes' => $configuration['axes'], 'data' => $series, 'clippedCount' => $clipped];
     }

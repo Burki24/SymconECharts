@@ -35,4 +35,20 @@ try {
     throw new RuntimeException('Missing or nonfinite Radar values were accepted.');
 } catch (InvalidArgumentException) {
 }
+$manySources = [];
+for ($group = 0; $group < 16; ++$group) {
+    foreach ($sources as $source) {
+        $manySources[] = [...$source, 'Group' => 'Room ' . $group];
+    }
+}
+$many = RadarModel::Build($axes, $manySources, $values);
+if (count($many['data']) !== 16 || $many['clippedCount'] !== 16
+    || $many['data'][15]['values'] !== [-5.0, 0.0, 2500.0]) {
+    throw new RuntimeException('Sixteen complete groups must retain original values and full clipping counts.');
+}
+try {
+    RadarModel::Validate($axes, [...$manySources, ...array_map(static fn (array $row): array => [...$row, 'Group' => 'Room 16'], $sources)]);
+    throw new RuntimeException('A seventeenth Radar group was accepted.');
+} catch (InvalidArgumentException) {
+}
 echo "Radar current-value model verified.\n";

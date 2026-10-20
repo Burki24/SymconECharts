@@ -11,6 +11,11 @@
     var chart = null;
     var currentState = bootstrap.state || null;
     var currentTheme = null;
+    var groupSelection = window.SYMC_ECHARTS_SERIES_SELECTION.create();
+    var selectionEnabled = null;
+    var colorIndices = Object.create(null);
+    var nextColorIndex = 0;
+    var transientWarning = false;
 
     var tileHeaderInset = bootstrap.mode === 'symcon'
         && (!bootstrap.options || bootstrap.options.tileHeaderVisible !== false) ? 58 : 0;
@@ -63,17 +68,34 @@
         var radar = model.radar || {};
         var style = radar.style || {};
         var axes = radar.axes || [];
+        var groups = radar.data || [];
+        var selectable = radar.enableGroupSelection === true;
+        if (selectionEnabled !== selectable) {
+            groupSelection = window.SYMC_ECHARTS_SERIES_SELECTION.create();
+            selectionEnabled = selectable;
+        }
+        var selected = selectable ? groupSelection.reconcile(groups) : null;
+        var showLegend = style.showLegend !== false || selectable;
+        var expanded = selectable || groups.length > 8;
+        var seriesColors = palette(theme).seriesColors || ['#5070DD', '#B6D634', '#505372', '#FF994D', '#0CA8DF', '#FFD10A', '#FB628B', '#785DB0'];
+        groups.forEach(function (item) {
+            if (!Object.prototype.hasOwnProperty.call(colorIndices, item.id)) { colorIndices[item.id] = nextColorIndex++; }
+        });
         var compact = (chartElement.clientWidth || 1) < 430;
         var titleSize = design.fontSizePercent(style.titleFontSizePercent, 18);
         var titleLayout = design.chartTitleLayout(chartBootstrap, radar.title, titleSize);
         var axisSize = design.fontSizePercent(style.axisFontSizePercent, compact ? 10 : 12);
         var width = chartElement.clientWidth || 1;
         var height = chartElement.clientHeight || 1;
-        var legendRows = style.showLegend === false ? 0 : Math.ceil((radar.data || []).length / (compact ? 2 : 4));
+        var legendRows = !showLegend ? 0 : expanded ? 1 : Math.ceil(groups.length / (compact ? 2 : 4));
         var legendSize = design.fontSizePercent(style.legendFontSizePercent, 12);
         var legendTop = style.legendPosition === 'top';
-        var legendSpace = legendRows * (legendSize + 10);
-        var bottom = 22 + (legendTop ? 0 : legendSpace) + (radar.clippedCount > 0 ? 26 : 0);
+        var legendSpace = legendRows * (legendSize + 10) + (selectable ? legendSize + 12 : 0);
+        var warningVisible = radar.clippedCount > 0 || transientWarning;
+        // Group controls must remain reachable even when a multi-line warning is displayed.
+        warningElement.style.bottom = selectable && showLegend && !legendTop ? (legendSize + 26) + 'px' : '0.65rem';
+        var warningSpace = selectable && warningVisible ? Math.max(32, warningElement.offsetHeight || 0) + 12 : radar.clippedCount > 0 ? 26 : 0;
+        var bottom = 22 + (legendTop ? 0 : legendSpace) + warningSpace;
         var top = titleLayout.contentTop + axisSize * 2 + 20 + (legendTop ? legendSpace : 0);
         var axisWidth = Math.min(compact ? 90 : 150, Math.max(30, width / 4));
         var nameGap = style.axisNameGap == null ? 15 : style.axisNameGap;
@@ -83,21 +105,38 @@
                 + (axis.Unit ? ' ' + axis.Unit : '');
         }
         return {
-            color: palette(theme).seriesColors || ['#5070DD', '#B6D634', '#505372', '#FF994D', '#0CA8DF', '#FFD10A', '#FB628B', '#785DB0'],
+            color: seriesColors,
             backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
                 ? 'transparent' : colors.background,
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
-            aria: { enabled: true },
+            aria: { enabled: true, ...(selectable ? { label: { description: String(radar.title || 'Radar') + '. '
+                + (groups.some(function (item) { return selected[item.id] !== false; })
+                    ? groups.filter(function (item) { return selected[item.id] !== false; }).map(function (item) {
+                        return item.name + ': ' + axes.map(function (axis, index) {
+                            return axis.Label + ': ' + rawValue((item.values || [])[index], axis);
+                        }).join(', ');
+                    }).join('; ')
+                    : translate('No groups selected')) } } : {}) },
             title: { show: titleLayout.show, text: String(radar.title || ''), left: 'center', top: titleLayout.top,
                 textStyle: { color: style.titleColor || colors.text, fontSize: titleSize, fontWeight: style.titleBold === false ? 'normal' : 'bold' } },
-            legend: { show: style.showLegend !== false, type: 'scroll',
-                ...(legendTop ? { top: titleLayout.contentTop + 4 } : { bottom: radar.clippedCount > 0 ? 32 : 8 }),
-                left: 12, right: 12, textStyle: { color: style.legendColor || style.axisColor || colors.text, fontSize: legendSize, width: compact ? 100 : 160,
+            legend: { show: showLegend, type: 'scroll',
+                ...(selectable ? { selected: Object.assign({}, selected), scrollDataIndex: groupSelection.scrollDataIndex(),
+                    selector: [{ type: 'all', title: translate('All') }, { type: 'inverse', title: translate('Inverse') }],
+                    selectorPosition: 'start', selectorLabel: { color: style.legendColor || colors.text, fontSize: legendSize },
+                    data: groups.map(function (item) {
+                        return { name: item.id, tooltip: { formatter: function () { return escapeHTML(item.name); } } };
+                    }),
+                    formatter: function (id) { var item = groups.find(function (group) { return group.id === id; }); return item ? item.name : ''; }
+                } : {}),
+                ...(legendTop ? { top: titleLayout.contentTop + 4 } : { bottom: !selectable && radar.clippedCount > 0 ? 32 : 8 }),
+                left: 12, right: 12, pageTextStyle: { color: style.legendColor || colors.text, fontSize: legendSize },
+                pageIconColor: style.legendColor || colors.text,
+                textStyle: { color: style.legendColor || style.axisColor || colors.text, fontSize: legendSize, width: compact ? 100 : 160,
                     overflow: 'truncate' }, tooltip: { show: true } },
             tooltip: { show: style.showTooltip !== false, trigger: 'item', confine: true,
                 formatter: function (parameter) {
                     var item = parameter.data || {};
-                    return escapeHTML(item.name || '') + axes.map(function (axis, index) {
+                    return escapeHTML(item.displayName || item.name || '') + axes.map(function (axis, index) {
                         return '<br>' + escapeHTML(axis.Label) + ': ' + escapeHTML(rawValue((item.rawValues || [])[index], axis));
                     }).join('');
                 } },
@@ -141,10 +180,11 @@
                     shadowBlur: Number(style.areaShadowBlur) || 0, shadowColor: style.areaShadowColor || 'rgba(0,0,0,0.35)' },
                 emphasis: { focus: style.hoverFocus === 'none' ? 'none' : 'self', disabled: style.hoverFocus === 'none',
                     label: { show: style.showValues === true } },
-                data: (radar.data || []).map(function (item) {
+                data: groups.map(function (item) {
                     var overrides = style.groupColors || {};
                     var color = Object.prototype.hasOwnProperty.call(overrides, item.name) ? overrides[item.name] : '';
-                    return { id: item.id, name: item.name, value: item.percentValues, rawValues: item.values,
+                    if (!color && expanded) { color = seriesColors[colorIndices[item.id] % seriesColors.length]; }
+                    return { id: item.id, name: selectable ? item.id : item.name, displayName: item.name, value: item.percentValues, rawValues: item.values,
                         ...(color ? { itemStyle: { color: color }, lineStyle: { color: color }, areaStyle: { color: color } } : {}) };
                 }) }]
         };
@@ -157,8 +197,17 @@
         errorElement.textContent = translate(message || 'The Radar values could not be loaded.');
         errorElement.hidden = false;
     }
-    function render(state) {
-        if (retainOnTransientError(state, currentState, chart)) { return; }
+    function render(state, keepWarning) {
+        if (retainOnTransientError(state, currentState, chart)) {
+            transientWarning = true;
+            if (selectionEnabled && currentState && currentState.chart) {
+                groupSelection.capture(chart);
+                chart.setOption(buildOption(currentState.chart, currentTheme || 'auto'), true);
+            }
+            return;
+        }
+        if (!keepWarning) { transientWarning = false; }
+        if (selectionEnabled) { groupSelection.capture(chart); }
         currentState = state;
         if (!state || state.status !== 'ready' || !state.chart) {
             displayError(state && state.error);
@@ -173,7 +222,11 @@
         chartElement.hidden = false;
         errorElement.hidden = true;
         emptyElement.hidden = true;
-        warningElement.hidden = true;
+        warningElement.hidden = !transientWarning;
+        if ((model.radar || {}).clippedCount > 0 && !transientWarning) {
+            warningElement.textContent = translate('Some values exceed their axis range and are visually limited.');
+            warningElement.hidden = false;
+        }
         rootElement.style.backgroundColor = bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
             ? 'transparent' : colorsFor(normalizeTheme(model.theme || 'auto')).background;
         var theme = normalizeTheme(model.theme || 'auto');
@@ -181,28 +234,36 @@
         if (!chart) {
             chart = window.echarts.init(chartElement, theme === 'auto' ? null : theme, { renderer: 'canvas' });
             currentTheme = theme;
+            ['legendselectchanged', 'legendselectall', 'legendinverseselect'].forEach(function (eventName) {
+                chart.on(eventName, function () {
+                    if (selectionEnabled && currentState) { render(currentState, true); }
+                });
+            });
         } else if (wasHidden) {
             chart.resize();
         }
         chart.setOption(buildOption(model, theme), true);
-        if ((model.radar || {}).clippedCount > 0) {
-            warningElement.textContent = translate('Some values exceed their axis range and are visually limited.');
-            warningElement.hidden = false;
+        if ((model.radar || {}).enableGroupSelection === true) {
+            var selected = chart.getOption().legend[0].selected || {};
+            emptyElement.textContent = translate('No groups selected');
+            emptyElement.hidden = (model.radar.data || []).some(function (item) { return selected[item.id] !== false; });
         }
     }
     window.handleMessage = function (message) {
         var state = design.parseVisualizationState(message);
         if (state) { render(state); }
     };
+    function resize() {
+        if (!design.resizeChartIfNeeded(chart, chartElement)) { return; }
+        if (currentState && currentState.status === 'ready') {
+            if (selectionEnabled) { groupSelection.capture(chart); }
+            chart.setOption(buildOption(currentState.chart, currentTheme || 'auto'), true);
+        }
+    }
     if (window.ResizeObserver) {
-        new ResizeObserver(function () {
-            if (!design.resizeChartIfNeeded(chart, chartElement)) { return; }
-            if (currentState && currentState.status === 'ready') {
-                chart.setOption(buildOption(currentState.chart, currentTheme || 'auto'), true);
-            }
-        }).observe(chartElement);
+        new ResizeObserver(resize).observe(chartElement);
     } else {
-        window.addEventListener('resize', function () { if (chart) { chart.resize(); } });
+        window.addEventListener('resize', resize);
     }
     window.addEventListener('beforeunload', function () { if (chart) { chart.dispose(); } });
     render(currentState);

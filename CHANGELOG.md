@@ -9,6 +9,12 @@
 
 ## Neu
 
+- EChartsRadar unterstützt bis zu 16 vollständige Vergleichsgruppen bei
+  weiterhin 3–10 Achsen. Die optionale Gruppenauswahl bietet Anfangssichtbarkeit,
+  Alle/Umkehren und eine bei Aktualisierung erhaltene Auswahl. Achsenbereiche,
+  Originalwerte, bestehende Konfigurationen und unabhängige Designs bleiben
+  erhalten; größere Vorschauausschnitte werden ausdrücklich gekennzeichnet.
+
 - EChartsFunnel unterstützt bis zu 32 Quellen mit optionaler Quellenauswahl,
   Anfangssichtbarkeit und Stufennavigation in beiden Ausrichtungen. Versteckte
   Quellen und andere Seiten bleiben Teil der vollständigen Breitenskala.

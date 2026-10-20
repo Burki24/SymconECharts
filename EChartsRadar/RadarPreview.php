@@ -32,27 +32,42 @@ trait RadarPreview
                 // No gateway calls: previews must not mutate transport or instance status.
                 $current[$id] = ['Value' => GetValue($id), 'Timestamp' => 0];
             }
-            $model = RadarModel::Build($configuration['axes'], $configuration['sources'], $current, fn (string $text): string => $this->Translate($text));
+            $model = RadarModel::Build($configuration['axes'], $configuration['sources'], $current, fn (string $text): string => $this->Translate($text), $configuration['visibility']);
             $property = $ipsView && !($values['IPSViewUseTileDesign'] ?? $this->ReadPropertyBoolean('IPSViewUseTileDesign')) ? 'IPSViewGroupColors' : 'GroupColors';
             $groupColors = $this->ParseGroupColors($values[$property] ?? $this->ReadPropertyString($property));
         } catch (Throwable $exception) {
             return $svg . '<text x="24" y="100" font-size="12" fill="' . EChartsBarPreview::E($palette['text']) . '">'
                 . EChartsBarPreview::E(mb_strimwidth($exception->getMessage(), 0, 100, '…')) . '</text></svg>';
         }
+        $groupCount = count($model['data']);
+        $selection = (bool) ($values['EnableGroupSelection'] ?? $this->ReadPropertyBoolean('EnableGroupSelection'));
+        $groups = $selection ? array_filter($model['data'], static fn (array $group): bool => $group['initiallyVisible']) : $model['data'];
+        $selectedCount = count($groups);
+        $groups = array_slice($groups, 0, 8, true);
+        $projected = $selection || $groupCount > 8;
+        $svg = str_replace('<svg ', '<svg data-group-count="' . $groupCount . '" data-selected-count="' . $selectedCount
+            . '" data-rendered-count="' . count($groups) . '" ', $svg);
         $axisColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'AxisColor', 'integer', $ipsView), $palette['text']);
         $gridColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'GridColor', 'integer', $ipsView), $palette['border']);
         $legendTop = $this->BarPreviewValue($values, 'LegendPosition', 'string', $ipsView) === 'top';
         $centerY = $legendTop && $this->BarPreviewValue($values, 'ShowLegend', 'boolean', $ipsView) ? 205 : 185;
+        $radius = $projected ? 90 : 100;
+        if ($projected) {
+            $centerY = $legendTop && $this->BarPreviewValue($values, 'ShowLegend', 'boolean', $ipsView) ? 215 : 195;
+            $svg .= '<text x="24" y="' . ($legendTop && $this->BarPreviewValue($values, 'ShowLegend', 'boolean', $ipsView) ? 96 : 60)
+                . '" font-size="11" fill="' . EChartsBarPreview::E($axisColor) . '">'
+                . EChartsBarPreview::E(sprintf($this->Translate('Showing %d of %d selected groups (%d configured).'), count($groups), $selectedCount, $groupCount)) . '</text>';
+        }
         $n = EChartsBarPreview::N(...);
         $dash = static fn (string $type): string => match ($type) {
             'dashed' => ' stroke-dasharray="6 4"', 'dotted' => ' stroke-dasharray="2 3"', default => ''
         };
         $angle = deg2rad($this->BarPreviewValue($values, 'StartAngle', 'integer', $ipsView));
         $direction = $this->BarPreviewValue($values, 'Clockwise', 'boolean', $ipsView) ? -1 : 1;
-        $point = static function (int $index, float $fraction) use ($model, $angle, $direction, $centerY): array
+        $point = static function (int $index, float $fraction) use ($model, $angle, $direction, $centerY, $radius): array
         {
             $a = $angle + $direction * 2 * M_PI * $index / count($model['axes']);
-            return [360 + 100 * $fraction * cos($a), $centerY - 100 * $fraction * sin($a)];
+            return [360 + $radius * $fraction * cos($a), $centerY - $radius * $fraction * sin($a)];
         };
         $points = static function (float $fraction) use ($model, $point): string
         {
@@ -70,7 +85,7 @@ trait RadarPreview
                     $level % 2 === 0 ? 'rgba(128,128,128,0.09)' : 'rgba(128,128,128,0.03)'
                 ) : 'none';
             $geometry = $this->BarPreviewValue($values, 'Shape', 'string', $ipsView) === 'circle'
-                ? '<circle cx="360" cy="' . $centerY . '" r="' . EChartsBarPreview::N(100 * $level / $split) . '"'
+                ? '<circle cx="360" cy="' . $centerY . '" r="' . EChartsBarPreview::N($radius * $level / $split) . '"'
                 : '<polygon points="' . $points($level / $split) . '"';
             $svg .= $geometry . ' fill="' . EChartsBarPreview::E($fill) . '" fill-opacity="'
                 . $n(max(0, min(100, $this->BarPreviewValue($values, 'SplitAreaOpacityPercent', 'integer', $ipsView))) / 100)
@@ -107,7 +122,8 @@ trait RadarPreview
             }
         }
         $occupied = [];
-        foreach ($model['data'] as $index => $group) {
+        $renderIndex = 0;
+        foreach ($groups as $index => $group) {
             $color = $groupColors[$group['name']] ?? $palette['seriesColors'][$index % count($palette['seriesColors'])];
             $polygon = [];
             $symbols = '';
@@ -166,10 +182,15 @@ trait RadarPreview
                 . '"' . $dash($this->BarPreviewValue($values, 'LineType', 'string', $ipsView)) . '/>' . $symbols;
             if ($this->BarPreviewValue($values, 'ShowLegend', 'boolean', $ipsView)) {
                 $legendSize = 12 * max(50, min(200, $this->BarPreviewValue($values, 'LegendFontSizePercent', 'integer', $ipsView))) / 100;
-                $svg .= '<text x="' . (24 + ($index % 4) * 170) . '" y="' . (($legendTop ? 60 : 320) + (int) ($index / 4) * ($legendSize + 4))
+                $svg .= '<text x="' . (24 + ($renderIndex % 4) * 170) . '" y="' . (($legendTop ? 60 : 320) + (int) ($renderIndex / 4) * ($legendSize + 4))
                     . '" font-size="' . $n($legendSize) . '" fill="' . EChartsBarPreview::E(EChartsBarPreview::Color($this->BarPreviewValue($values, 'LegendColor', 'integer', $ipsView), $axisColor)) . '">'
                     . '<tspan fill="' . EChartsBarPreview::E($color) . '">■ </tspan>' . EChartsBarPreview::E(mb_strimwidth($group['name'], 0, 24, '…')) . '</text>';
             }
+            ++$renderIndex;
+        }
+        if ($selectedCount === 0) {
+            $svg .= '<text x="360" y="195" text-anchor="middle" font-size="12" fill="' . EChartsBarPreview::E($axisColor) . '">'
+                . EChartsBarPreview::E($this->Translate('No groups selected')) . '</text>';
         }
         if ($model['clippedCount'] > 0) {
             $svg .= '<text x="360" y="354" text-anchor="middle" font-size="10" fill="' . EChartsBarPreview::E($axisColor) . '">'

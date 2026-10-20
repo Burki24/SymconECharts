@@ -1119,6 +1119,10 @@ if (array_slice($argv, 1) === ['--gauge-multi-many']) {
     require __DIR__ . '/gauge_multi_many.php';
     exit(0);
 }
+if (array_slice($argv, 1) === ['--radar-many']) {
+    require __DIR__ . '/radar_many.php';
+    exit(0);
+}
 if (array_slice($argv, 1) === ['--funnel-many']) {
     require __DIR__ . '/funnel_many.php';
     exit(0);

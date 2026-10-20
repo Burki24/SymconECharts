@@ -55,6 +55,7 @@ $tests = [
 ];
 
 $commands = [
+    ['Test 16-group Radar integration', 'php tests/gateway_gauges.php --radar-many'],
     ['Test 32-source Funnel integration', 'php tests/gateway_gauges.php --funnel-many'],
     ['Test 32-source Gauge Multi integration', 'php tests/gateway_gauges.php --gauge-multi-many'],
     ['Test 100-source Polar integration', 'php tests/gateway_gauges.php --polar-many'],

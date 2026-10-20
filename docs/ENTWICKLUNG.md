@@ -29,6 +29,18 @@ Canvas-Zeichenaufrufe für Kachel und IPSView statt nur vorhandener Titeloptione
 
 ## Aktueller Stand und Zielarchitektur
 
+Radar erweitert gemäß [ADR 0076](adr/0076-radar-group-selection.md) auf
+16 vollständige Gruppen mit weiterhin 3–10 expliziten Achsen (höchstens 160
+Zuordnungen). Die globalen additiven Properties `EnableGroupSelection=false`
+und `GroupVisibility=[]` verändern keine gespeicherten Quellen oder Designs.
+Die bestehende Namensidentität der fachlichen Gruppe bleibt erhalten;
+Quellvariablen bleiben ID-basiert. `echarts-series-selection.js` verwaltet
+Auswahl und Legendenanker. Alle Gruppen bleiben im Modell, in aktuellen
+Gateway-Abfragen, Referenzen und Abonnements. Vorschauen validieren zuerst
+alle Quellen und zeichnen danach höchstens acht anfangs sichtbare Gruppen
+mit ausdrücklich genannten Gesamtzahlen und ursprünglichen Farben.
+Modell und finales HTML sind auf 200000 Bytes beziehungsweise 1 MiB begrenzt.
+
 Funnel erweitert gemäß [ADR 0075](adr/0075-funnel-source-selection-and-pages.md)
 auf 1–32 aktuelle Quellen mit optionaler ID-stabiler Quellenauswahl und
 responsiven Stufenseiten. Alle Quellen bleiben in Modell, Validierung,
@@ -305,7 +317,7 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 | Gerät | EChartsParallel | Gemeinsame abgeschlossene Archivintervalle von 2–10 Variablen als Parallelkoordinaten in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsSankey | Aktuelle nichtnegative Mengenflüsse zwischen manuellen Knoten und Verbindungen in Kachel und optionalem IPSView-HTML |
 | Gerät | EChartsCalendar | Tagesmittel/-minimum/-maximum einer Standardvariable oder Tagesverbrauch eines Zählers als Jahreskalender mit lesender Jahresnavigation |
-| Gerät | EChartsRadar | Aktuelle Vergleichsgruppen auf 3–10 ausdrücklich begrenzten Achsen mit eigenen Einheiten |
+| Gerät | EChartsRadar | 1–16 aktuelle vollständige Vergleichsgruppen auf 3–10 ausdrücklich begrenzten Achsen mit eigenen Einheiten und optionaler Gruppenauswahl |
 | Gerät | EChartsBoxplot | Verteilungen abgeschlossener Stundenmittelwerte aus 1–32 Standard-Archivvariablen derselben Einheit mit Kategoriennavigation |
 | Gerät | EChartsFunnel | 1–32 manuell benannte Stufen mit aktuellen nichtnegativen Werten gleicher Einheit, optionaler Quellenauswahl und Stufennavigation |
 

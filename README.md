@@ -23,8 +23,10 @@ Sankey zeigt aktuelle Mengenflüsse zwischen manuell angelegten Knoten.
 Calendar stellt archivierte Tageskennzahlen als farbigen Jahreskalender dar.
 Calendar und Heatmap bieten Mittelwert, Minimum und Maximum für Standardarchive
 oder ausdrücklich ausgewählten Zählerverbrauch für Zählerarchive.
-Radar vergleicht aktuelle Messwerte manuell angelegter Gruppen auf gemeinsam
-festgelegten Achsen mit eigenen Wertebereichen und Einheiten.
+Radar vergleicht aktuelle Messwerte von bis zu 16 manuell angelegten Gruppen
+auf 3–10 gemeinsam festgelegten Achsen mit eigenen Wertebereichen und Einheiten.
+Eine optionale Gruppenauswahl erhält die Achsenskalen und die gewählte Ansicht
+bei Aktualisierungen.
 Boxplot vergleicht die Verteilung abgeschlossener Archiv-Stundenmittelwerte.
 Funnel vergleicht aktuelle, nichtnegative Stufenwerte derselben Einheit.
 Bis zu 32 Quellen erhalten optional eine Quellenauswahl und responsive

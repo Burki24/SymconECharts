@@ -7,6 +7,7 @@ const vm = require('node:vm');
 const root = path.join(__dirname, '..');
 const source = fs.readFileSync(path.join(root, 'EChartsRadar/visualization/app.js'), 'utf8');
 const designSource = fs.readFileSync(path.join(root, 'libs/echarts-design.js'), 'utf8');
+const selectionSource = fs.readFileSync(path.join(root, 'libs/echarts-series-selection.js'), 'utf8');
 const palette = { background: '#101114', text: '#f4f5f7', muted: '#969aa2', border: '#737780', accent: '#55cbb5' };
 
 function render(model, mode = 'symcon', headerVisible = true, width = 900) {
@@ -14,14 +15,19 @@ function render(model, mode = 'symcon', headerVisible = true, width = 900) {
     const rootElement = { style: {} };
     const errorElement = { hidden: true, textContent: '' };
     const emptyElement = { hidden: true, textContent: '' };
-    const warningElement = { hidden: true, textContent: '' };
+    const warningElement = { style: {}, hidden: true, textContent: '', offsetHeight: 32 };
     let option;
-    const chart = { setOption: next => { option = next; }, clear: () => {}, resize: () => {}, dispose: () => {} };
+    const events = {}, windowEvents = {};
+    let measuredWidth = width, measuredHeight = 500;
+    const chart = { setOption: next => { option = next; }, getOption: () => ({legend: [option.legend]}),
+        on: (name, callback) => { events[name] = callback; }, clear: () => {}, resize: () => {}, dispose: () => {},
+        getWidth: () => measuredWidth, getHeight: () => measuredHeight };
+    chart.resize = () => { measuredWidth = chartElement.clientWidth; measuredHeight = chartElement.clientHeight; };
     const window = {
         SYMC_VISUALIZATION: { mode, state: { status: 'ready', chart: model }, translations: {},
             options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: headerVisible,
                 adaptToBackground: mode === 'ipsview' } },
-        echarts: { init: () => chart }, addEventListener: () => {}, getComputedStyle: () => ({ color: '' })
+        echarts: { init: () => chart }, addEventListener: (name, callback) => { windowEvents[name] = callback; }, getComputedStyle: () => ({ color: '' })
     };
     const document = {
         body: { appendChild: () => {} }, createElement: () => ({ style: {}, remove: () => {} }),
@@ -30,8 +36,9 @@ function render(model, mode = 'symcon', headerVisible = true, width = 900) {
             'echarts-radar-warning': warningElement })[id]
     };
     vm.runInNewContext(designSource, { window });
+    vm.runInNewContext(selectionSource, { window });
     vm.runInNewContext(source, { window, document });
-    return { option, chartElement, errorElement, emptyElement, warningElement, window };
+    return { get option() { return option; }, chartElement, errorElement, emptyElement, warningElement, window, events, windowEvents };
 }
 
 const axes = [
@@ -169,6 +176,101 @@ for (const option of [render(model).option, custom.option, decorated]) {
         assert.equal(symbols.childAt(0).style.lineWidth, 2);
     }
     chart.dispose();
+}
+const many = { ...model, radar: { ...model.radar, clippedCount: 0, enableGroupSelection: true,
+    axes: Array.from({length: 10}, (_, i) => ({Key: 'axis' + i, Label: 'Axis ' + i, Minimum: -10, Maximum: 90, Unit: 'u' + i, Decimals: 1})),
+    data: Array.from({length: 16}, (_, i) => ({id: 'group-' + i, name: 'Group ' + i, initiallyVisible: i !== 15,
+        values: Array.from({length: 10}, (_, a) => i + a), percentValues: Array.from({length: 10}, (_, a) => i + a + 10)}))
+} };
+const selectable = render(many);
+assert.equal(selectable.option.legend.selected['group-15'], false, 'The optional group selector must honor initial visibility.');
+assert.equal(selectable.option.legend.selector.length, 2, 'All and inverse selectors must recover an empty selection.');
+assert.equal(selectable.option.series[0].data.length, 16, 'Hidden groups remain in the complete model.');
+assert.equal(selectable.option.radar.indicator.length, 10);
+const initialRadius = selectable.option.radar.radius;
+const firstColor = selectable.option.series[0].data[0].itemStyle.color;
+assert.equal(selectable.option.series[0].data[15].name, 'group-15');
+assert.equal(selectable.option.legend.formatter('group-15'), 'Group 15');
+assert.equal(selectable.option.legend.data[15].tooltip.formatter(), 'Group 15', 'The full native legend tooltip must show display names, never internal IDs.');
+assert.match(selectable.option.aria.label.description, /Group 0: Axis 0: 0 u0/);
+assert.doesNotMatch(selectable.option.aria.label.description, /group-\d+/i, 'Accessible descriptions must not disclose internal legend identities.');
+assert.match(selectable.option.tooltip.formatter({data: selectable.option.series[0].data[15]}), /^Group 15<br>Axis 0: 15 u0/);
+const selectedSnapshot = {...selectable.option.legend.selected, 'group-0': false, 'group-15': true};
+selectable.option.legend.selected = selectedSnapshot;
+selectable.option.legend.scrollDataIndex = 12;
+selectable.events.legendselectchanged();
+assert.equal(selectable.option.legend.selected['group-0'], false);
+selectable.window.handleMessage({status: 'ready', chart: {...many, theme: 'auto', radar: {...many.radar,
+    data: [...many.radar.data].reverse().map(item => ({...item, name: item.name + ' renamed'}))}}});
+assert.equal(selectable.option.legend.selected['group-0'], false, 'Selection survives data, name, order and theme changes by group identity.');
+assert.equal(selectable.option.legend.selected['group-15'], true);
+assert.equal(selectable.option.legend.scrollDataIndex, 3, 'Scroll position follows the anchored group, not its old index.');
+assert.equal(selectable.option.series[0].data.find(item => item.id === 'group-0').itemStyle.color, firstColor);
+assert.equal(selectable.option.radar.radius, initialRadius, 'Hidden groups never change axis geometry.');
+selectable.option.legend.selected = Object.fromEntries(many.radar.data.map(item => [item.id, false]));
+selectable.events.legendinverseselect();
+assert.equal(selectable.emptyElement.hidden, false);
+assert.equal(selectable.emptyElement.textContent, 'No groups selected');
+assert.match(selectable.option.aria.label.description, /No groups selected/);
+assert.equal(selectable.chartElement.hidden, false, 'Empty selection retains the legend and axes without invented data.');
+assert.equal(selectable.option.legend.selector.length, 2);
+selectable.option.legend.selected = Object.fromEntries(many.radar.data.map(item => [item.id, true]));
+selectable.events.legendselectall();
+assert.equal(selectable.emptyElement.hidden, true);
+selectable.option.legend.selected['group-15'] = false;
+selectable.events.legendselectchanged();
+const removed = {...many, radar: {...many.radar, data: many.radar.data.slice(1).map(item => ({...item, initiallyVisible: true}))}};
+selectable.window.handleMessage({status: 'ready', chart: removed});
+assert.equal(selectable.option.legend.selected['group-0'], undefined);
+assert.equal(selectable.option.legend.selected['group-15'], true, 'An explicit change of initial visibility supersedes the previous view state.');
+assert.equal(selectable.option.series[0].data.length, 15);
+selectable.chartElement.clientWidth = 350;
+selectable.chartElement.clientHeight = 600;
+selectable.windowEvents.resize();
+assert.equal(selectable.option.radar.center[0], 175, 'The window-resize fallback must recalculate geometry, not just resize the old option.');
+assert.equal(selectable.option.legend.selected['group-15'], true);
+selectable.window.handleMessage({status: 'error', error: 'The Radar values could not be loaded.'});
+assert.equal(selectable.chartElement.hidden, false);
+assert.equal(selectable.option.legend.selected['group-15'], true);
+assert.ok(Number.parseFloat(selectable.warningElement.style.bottom) > selectable.option.legend.bottom,
+    'A transient warning must sit above the recoverable group legend, not cover its controls.');
+selectable.events.legendselectchanged();
+assert.equal(selectable.warningElement.hidden, false, 'Changing selection must not dismiss a transport warning.');
+selectable.window.handleMessage({status: 'ready', chart: {...many, radar: {...many.radar, enableGroupSelection: false}}});
+assert.equal(selectable.option.legend.selected, undefined, 'Disabling enhanced selection restores the complete legacy view.');
+assert.equal(selectable.option.series[0].data[15].name, 'Group 15');
+for (const mode of ['symcon', 'ipsview']) {
+    for (const legendPosition of ['top', 'bottom']) {
+        const output = render({...many, radar: {...many.radar, style: {...many.radar.style,
+            showLegend: false, legendPosition, legendFontSizePercent: 150,
+            axisFontSizePercent: 150, titleFontSizePercent: 150, groupColors: {'Group 15': '#123abc'}}}}, mode, true, 400);
+        assert.equal(output.option.legend.show, true, 'Optional selection must remain recoverable when the designer hides the ordinary legend.');
+        assert.equal(output.option.legend.selector[0].type, 'all');
+        assert.equal(output.option.legend.selector[1].type, 'inverse');
+        assert.equal(output.option.series[0].data[15].itemStyle.color, '#123abc');
+        assert.equal(output.option.radar.indicator.every(axis => axis.min === 0 && axis.max === 100), true);
+        assert.ok(output.option.radar.radius > 20, 'A scroll legend must not reserve one plot row per configured group.');
+        assert.ok(output.option.radar.center[1] - output.option.radar.radius > output.option.title.top + output.option.title.textStyle.fontSize);
+        const engine = echarts.init(null, null, {renderer: 'svg', ssr: true, width: 400, height: 500});
+        engine.setOption(output.option);
+        const legend = engine.getModel().getComponent('legend');
+        assert.equal(legend.isSelected('group-15'), false);
+        assert.equal(engine.getModel().getSeriesByIndex(0).getData().count(), 15, 'The native legend must actually hide the initially excluded Radar group.');
+        engine.dispatchAction({type: 'legendInverseSelect'});
+        assert.equal(engine.getModel().getSeriesByIndex(0).getData().count(), 1);
+        assert.equal(engine.getModel().getSeriesByIndex(0).getData().getId(0), 'group-15');
+        engine.dispatchAction({type: 'legendAllSelect'});
+        const actual = engine.getModel().getSeriesByIndex(0).getData();
+        assert.equal(actual.count(), 16);
+        for (let index = 0; index < actual.count(); index++) {
+            assert.ok(actual.getItemLayout(index).every(point => point.every(Number.isFinite)));
+        }
+        engine.dispatchAction({type: 'legendInverseSelect'});
+        assert.equal(engine.getModel().getSeriesByIndex(0).getData().count(), 0);
+        engine.dispatchAction({type: 'legendAllSelect'});
+        assert.equal(engine.getModel().getSeriesByIndex(0).getData().count(), 16, 'All must recover the real engine from an empty selection.');
+        engine.dispose();
+    }
 }
 console.log('Radar layout and real ECharts geometry verified.');
 

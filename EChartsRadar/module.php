@@ -77,6 +77,8 @@ class EChartsRadar extends IPSModuleStrict
     private const STATUS_PARENT_MISSING = 203;
     private const STATUS_GATEWAY_FAILED = 204;
     private const STATUS_VALUE_INVALID = 205;
+    private const MAXIMUM_MODEL_BYTES = 200000;
+    private const MODEL_TOO_LARGE_MESSAGE = 'The Radar model is too large. Reduce the title or group metadata.';
     private const DESIGN_DEFAULTS = [
         'EChartsTheme'         => EChartsAsset::THEME_AUTO, 'Shape' => 'polygon', 'StartAngle' => 90, 'Clockwise' => false,
         'ShowLegend'           => true, 'ShowTooltip' => true, 'ShowAxisNames' => true, 'ShowAxisValues' => false,
@@ -108,6 +110,8 @@ class EChartsRadar extends IPSModuleStrict
             $this->RegisterPropertyString('Title', '');
             $this->RegisterPropertyString('Axes', '[]');
             $this->RegisterPropertyString('Sources', '[]');
+            $this->RegisterPropertyBoolean('EnableGroupSelection', false);
+            $this->RegisterPropertyString('GroupVisibility', '[]');
             foreach (['', 'IPSView'] as $prefix) {
                 foreach (self::DESIGN_DEFAULTS as $name => $default) {
                     match (gettype($default)) {
@@ -205,7 +209,7 @@ class EChartsRadar extends IPSModuleStrict
                 ['caption' => 'Labels and typography', 'start' => 'TitleFontSizePercent']
             ]);
             $fields = [
-                'Title', 'Axes', 'Sources', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
+                'Title', 'Axes', 'Sources', 'EnableGroupSelection', 'GroupVisibility', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
                 'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent',
                 ...array_keys(self::DESIGN_DEFAULTS),
                 ...array_map(static fn (string $name): string => 'IPSView' . $name, array_keys(self::DESIGN_DEFAULTS))
@@ -216,7 +220,7 @@ class EChartsRadar extends IPSModuleStrict
                     $fields[] = $prefix . $name;
                 }
             }
-            return $debugFlowResult = $this->EncodeConfigurationForm($this->WithBarPreviewForm($form, 'ECRA', $fields));
+            return $debugFlowResult = $this->EncodeConfigurationForm($this->WithBarPreviewForm($form, 'ECRA', $fields, true));
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
             $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
@@ -439,12 +443,13 @@ class EChartsRadar extends IPSModuleStrict
             $this->UpdateFormField('ConfigurationDiagnostics', 'caption', $message);
             if (isset($values['Sources']) && is_array($values['Sources'])) {
                 $options = $this->GroupOptions($values['Sources']);
-                foreach (['GroupColors', 'IPSViewGroupColors'] as $name) {
+                foreach (['GroupColors', 'IPSViewGroupColors', 'GroupVisibility'] as $name) {
                     $field = $this->WithGroupColorOptions($this->LoadConfigurationForm()['elements'], $options);
-                    $find = static function (array $items) use (&$find): ?array
+                    $target = $name === 'IPSViewGroupColors' ? 'GroupColors' : $name;
+                    $find = static function (array $items) use (&$find, $target): ?array
                     {
                         foreach ($items as $item) {
-                            if (($item['name'] ?? '') === 'GroupColors') {
+                            if (($item['name'] ?? '') === $target) {
                                 return $item;
                             }
                             if (isset($item['items']) && ($found = $find($item['items'])) !== null) {
@@ -554,11 +559,12 @@ class EChartsRadar extends IPSModuleStrict
         $configuration = $this->GetValidatedConfiguration();
         $sources = $configuration['sources'];
         $values = [];
+        $this->WriteAttributeString('LastError', '');
         foreach (array_unique(array_column($sources, 'VariableID')) as $id) {
             $values[$id] = $this->ReadCurrentSource($id);
         }
         try {
-            $model = RadarModel::Build($configuration['axes'], $sources, $values, fn (string $text): string => $this->Translate($text));
+            $model = RadarModel::Build($configuration['axes'], $sources, $values, fn (string $text): string => $this->Translate($text), $configuration['visibility']);
         } catch (InvalidArgumentException $exception) {
             $this->WriteAttributeString('LastError', $exception->getMessage());
             $this->DebugEChartsSetStatus(self::STATUS_VALUE_INVALID);
@@ -566,23 +572,30 @@ class EChartsRadar extends IPSModuleStrict
         }
         $this->WriteAttributeString('LastError', '');
         $this->DebugEChartsSetStatus(IS_ACTIVE);
-        return json_encode([
+        $json = json_encode([
             'schemaVersion' => 1,
             'family'        => 'radar',
             'theme'         => $this->EffectiveTheme($ipsView),
             'radar'         => [
-                'title' => $this->ReadPropertyString('Title'),
-                'style' => $this->ReadDesignStyle($ipsView),
+                'title'                => $this->ReadPropertyString('Title'),
+                'enableGroupSelection' => $this->ReadPropertyBoolean('EnableGroupSelection'),
+                'style'                => $this->ReadDesignStyle($ipsView),
                 ...$model
             ]
         ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
+        if (strlen($json) > self::MAXIMUM_MODEL_BYTES) {
+            $this->WriteAttributeString('LastError', 'MODEL_TOO_LARGE');
+            $this->DebugEChartsSetStatus(self::STATUS_DESIGN_INVALID);
+            throw new RuntimeException(self::MODEL_TOO_LARGE_MESSAGE);
+        }
+        return $json;
     }
 
     private function RenderRadarHTMLPage(bool $ipsView): string
     {
         $hiddenTitle = !$ipsView && function_exists('IPS_GetObject')
             && (bool) (IPS_GetObject($this->InstanceID)['ObjectIsHiddenTitle'] ?? false);
-        return $this->RenderVisualizationHTMLPage($ipsView, [
+        $configuration = [
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'ECharts Radar',
             'visualizationTheme' => $this->VisualizationThemeCSS() . "\n\n"
@@ -597,6 +610,10 @@ class EChartsRadar extends IPSModuleStrict
                 'Radar values must be finite numbers with timestamps.'                                                        => $this->Translate('Radar values must be finite numbers with timestamps.'),
                 'Some values exceed their axis range and are visually limited.'                                               => $this->Translate('Some values exceed their axis range and are visually limited.'),
                 'Apache ECharts could not be initialized.'                                                                    => $this->Translate('Apache ECharts could not be initialized.'),
+                'All'                                                                                                         => $this->Translate('All'),
+                'Inverse'                                                                                                     => $this->Translate('Inverse'),
+                'No groups selected'                                                                                          => $this->Translate('No groups selected'),
+                self::MODEL_TOO_LARGE_MESSAGE                                                                                 => $this->Translate(self::MODEL_TOO_LARGE_MESSAGE),
                 'Data could not be refreshed. Showing the last available values.'                                             => $this->Translate(
                     'Data could not be refreshed. Showing the last available values.'
                 )
@@ -611,10 +628,18 @@ class EChartsRadar extends IPSModuleStrict
             'replacements' => [
                 '{{ECHARTS_SCRIPT}}'           => EChartsAsset::RadarJavaScript(),
                 '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
-                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript(),
+                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript() . "\n" . EChartsAsset::SeriesSelectionJavaScript(),
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
-        ]);
+        ];
+        $html = $this->RenderVisualizationHTMLPage($ipsView, $configuration);
+        if (strlen($html) > 1048576) {
+            $this->WriteAttributeString('LastError', 'MODEL_TOO_LARGE');
+            $this->DebugEChartsSetStatus(self::STATUS_DESIGN_INVALID);
+            $configuration['state'] = $this->ErrorState(self::MODEL_TOO_LARGE_MESSAGE);
+            return $this->RenderVisualizationHTMLPage($ipsView, $configuration);
+        }
+        return $html;
     }
 
     private function Initialize(): void
@@ -663,6 +688,7 @@ class EChartsRadar extends IPSModuleStrict
         $axes = $this->DecodeRows($values['Axes'] ?? $this->ReadPropertyString('Axes'));
         $sources = $this->DecodeRows($values['Sources'] ?? $this->ReadPropertyString('Sources'));
         $configuration = RadarModel::Validate($axes, $sources, fn (string $text): string => $this->Translate($text));
+        $configuration['visibility'] = $this->ParseGroupVisibility($values['GroupVisibility'] ?? $this->ReadPropertyString('GroupVisibility'));
         foreach ($configuration['sources'] as $index => $source) {
             $id = $source['VariableID'];
             if (!IPS_VariableExists($id) || !in_array(IPS_GetVariable($id)['VariableType'] ?? null, [1, 2], true)) {
@@ -762,12 +788,12 @@ class EChartsRadar extends IPSModuleStrict
         return $style;
     }
 
-    /** Local design contract: at most eight unique group names, independent of source validity. */
+    /** Local design contract: at most sixteen unique group names, independent of source validity. */
     private function ParseGroupColors(mixed $raw): array
     {
         $rows = $this->DecodeRows($raw);
-        if (count($rows) > 8) {
-            throw new InvalidArgumentException($this->Translate('Use at most 8 unique group colors.'));
+        if (count($rows) > 16) {
+            throw new InvalidArgumentException($this->Translate('Use at most 16 unique group colors.'));
         }
         $colors = [];
         $seen = [];
@@ -785,10 +811,32 @@ class EChartsRadar extends IPSModuleStrict
         return $colors;
     }
 
+    /** Optional initial view overrides; stale named groups remain harmless, like group colors. */
+    private function ParseGroupVisibility(mixed $raw): array
+    {
+        if (is_string($raw) && !str_starts_with(ltrim($raw), '[')) {
+            throw new InvalidArgumentException($this->Translate('Radar axes and values must be lists.'));
+        }
+        $rows = $this->DecodeRows($raw);
+        if (count($rows) > 16) {
+            throw new InvalidArgumentException($this->Translate('Use at most 16 unique group visibility settings.'));
+        }
+        $visibility = [];
+        foreach ($rows as $index => $row) {
+            $group = is_array($row) && is_string($row['Group'] ?? null) ? trim($row['Group']) : '';
+            $visible = is_array($row) ? ($row['InitiallyVisible'] ?? true) : null;
+            if ($group === '' || mb_strlen($group) > 80 || array_key_exists($group, $visibility) || !is_bool($visible)) {
+                throw new InvalidArgumentException(sprintf($this->Translate('Group visibility %d: select a unique group and a boolean initial visibility.'), $index + 1));
+            }
+            $visibility[$group] = $visible;
+        }
+        return $visibility;
+    }
+
     private function GroupOptions(mixed $sources): array
     {
         $groups = [];
-        foreach (is_array($sources) ? array_slice($sources, 0, 80) : [] as $row) {
+        foreach (is_array($sources) ? array_slice($sources, 0, 160) : [] as $row) {
             if (is_array($row) && is_string($row['Group'] ?? null)) {
                 $name = trim($row['Group']);
                 if ($name !== '' && mb_strlen($name) <= 80) {
@@ -806,7 +854,7 @@ class EChartsRadar extends IPSModuleStrict
     private function WithGroupColorOptions(array $fields, array $options): array
     {
         foreach ($fields as &$field) {
-            if (in_array($field['name'] ?? '', ['GroupColors', 'IPSViewGroupColors'], true)) {
+            if (in_array($field['name'] ?? '', ['GroupColors', 'IPSViewGroupColors', 'GroupVisibility'], true)) {
                 $field['columns'][0]['edit']['options'] = $options;
                 $field['form'][0]['options'] = $options;
             }
@@ -841,6 +889,9 @@ class EChartsRadar extends IPSModuleStrict
             return $this->ErrorState('Radar values must be finite numbers with timestamps.');
         } catch (Throwable $exception) {
             $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
+            if ($this->ReadAttributeString('LastError') === 'MODEL_TOO_LARGE') {
+                return $this->ErrorState(self::MODEL_TOO_LARGE_MESSAGE);
+            }
             return $this->ErrorState('The Radar values could not be loaded.');
         }
         return ['schemaVersion' => 1, 'family' => 'radar', 'status' => 'ready', 'chart' => $chart, 'error' => null];

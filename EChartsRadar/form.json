@@ -196,7 +196,68 @@
         },
         {
             "type": "Label",
-            "caption": "Configure 1 to 8 groups, each with exactly one numeric variable per axis. Values outside an axis range are visually limited; tooltips retain the original values."
+            "caption": "Configure 1 to 16 groups, each with exactly one numeric variable per axis. Values outside an axis range are visually limited; tooltips retain the original values."
+        },
+        {
+            "type": "CheckBox",
+            "name": "EnableGroupSelection",
+            "caption": "Enable group selection"
+        },
+        {
+            "type": "Label",
+            "caption": "Group selection changes visibility only. All groups keep their original axis scales and continue to update. Groups without an override are initially visible."
+        },
+        {
+            "type": "List",
+            "name": "GroupVisibility",
+            "caption": "Initial group visibility (optional)",
+            "rowCount": 4,
+            "add": true,
+            "delete": true,
+            "columns": [
+                {
+                    "name": "Group",
+                    "caption": "Comparison group",
+                    "width": "300px",
+                    "add": "",
+                    "edit": {
+                        "type": "Select",
+                        "options": [
+                            {
+                                "caption": "Select group",
+                                "value": ""
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "InitiallyVisible",
+                    "caption": "Initially visible",
+                    "width": "180px",
+                    "add": true,
+                    "edit": {
+                        "type": "CheckBox"
+                    }
+                }
+            ],
+            "form": [
+                {
+                    "type": "Select",
+                    "name": "Group",
+                    "caption": "Comparison group",
+                    "options": [
+                        {
+                            "caption": "Select group",
+                            "value": ""
+                        }
+                    ]
+                },
+                {
+                    "type": "CheckBox",
+                    "name": "InitiallyVisible",
+                    "caption": "Initially visible"
+                }
+            ]
         },
         {
             "type": "ExpansionPanel",
@@ -907,4 +968,3 @@
         }
     ]
 }
-

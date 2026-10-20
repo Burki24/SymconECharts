@@ -1,5 +1,43 @@
 # Tests
 
+## Radar: 16 Gruppen mit optionaler Gruppenauswahl
+
+`php tests/radar_model.php` erhält Originalwerte, Variablen-IDs, Achsenreihenfolge
+und explizite Bereiche bei 16 Gruppen. Die erste neue Probe scheiterte gezielt
+an der bisherigen Acht-Gruppen-Grenze, bevor die Modellgrenze erhöht wurde.
+
+`php tests/gateway_gauges.php --radar-many` prüft isoliert 16×10 Zuordnungen und
+17×3 abgewiesene Gruppen, 3–10 Achsen, vollständige Reads/Referenzen/Abonnements
+und versteckte Updates/Fehler. Initialsichtbarkeit ist ein optionaler globaler
+Gruppenvertrag, kein Farb- oder Designerfeld. Alt-Konfigurationen und unabhängige
+IPSView-Designs bleiben erhalten. Vorschauen lesen alle tatsächlichen Werte,
+filtern danach und zeichnen höchstens acht anfangs sichtbare Gruppen mit
+korrekten Zahlen und vollständiger Palette/Clippingwarnung. Sie schreiben weder
+Properties noch Status und kontaktieren weder Gateway noch Archiv.
+
+Die generierten List-Callbacks werden mit sparsamen `ArrayIterator`-Listen
+tatsächlich ausgeführt; sämtliche Listeneinträge sowie false, Nullwert und
+unabhängige Designparameter müssen im Entwurf ankommen. Das UTF-8-Maximalformular
+überschritt zuerst mit 1094274 Bytes den Symcon-Puffer. Die gemeinsame
+Callback-Kompaktierung beseitigt die Wiederholung skalarer Feldnamen, nicht
+deren Übertragung. Radar aktiviert die Kompaktierung ausdrücklich, während
+andere Familien und insbesondere der spezialisierte TreeSystemHealth-Regeladapter
+ihre bisherigen Callback-Verträge behalten. Keine synchronisierte Helperdatei
+wurde verändert.
+Modellbudget 200000 Bytes und finales 1-MiB-HTML-Limit haben getrennte
+Fehler-/Wiederherstellungsfälle ohne Quellenkürzung oder Propertyänderung.
+
+`node tests/radar_layout.js` verwendet die gepinnte echte Engine für beide
+Ausgaben, 10 Achsen, Alle/Umkehren, leere Auswahl und Wiederherstellung,
+stabile Auswahl/Farben/Legendenanker, Initialänderungen und Resize/Themewechsel.
+Tooltips und ARIA behalten Originalwerte/Einheiten und zeigen keine technischen
+Gruppen-IDs. Mehrzeilige Warnungen überdecken die Auswahl nicht.
+
+`node tests/radar_browser.mjs` bietet auf Port 8797 synthetische Canvas-Beispiele;
+`/chart?mode=ipsview&axes=10&font=150` prüft die Maximalachsen mit größerer Schrift,
+`legacy=1` erhält das ursprüngliche Beispiel. Lokale Browsernachweise ersetzen
+keine neue Live-Abnahme in Symcon-Kachel oder IPSView nach Modulupdate.
+
 ## Funnel: 32 Quellen, Auswahl und Stufenseiten
 
 `php tests/gateway_gauges.php --funnel-many` prüft isoliert den echten Modul-/

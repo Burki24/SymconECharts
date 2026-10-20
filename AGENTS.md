@@ -117,6 +117,10 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Aktuelle Vergleichsgruppen auf expliziten normierten Achsen liegen im eigenen
   Gerätemodul `EChartsRadar` gemäß ADR 0053; keine Archive oder automatische
   Qualitätsbewertung. Werte außerhalb des Bereichs werden nur optisch begrenzt.
+  Gemäß ADR 0076 erlaubt Radar bis zu 16 vollständige Gruppen auf unverändert
+  3–10 Achsen. Optionale Gruppenauswahl und Anfangssichtbarkeit sind reine
+  Ansichten; alle Werte bleiben in Validierung, Gateway und Abonnements.
+  Flüchtige Auswahl-/Legendenankerlogik wird mit anderen Familien geteilt.
   Verteilungen abgeschlossener Stundenmittelwerte von Archivvariablen liegen
   in `EChartsBoxplot` gemäß ADR 0054; Quartile werden nicht aus Tagesaggregaten
   approximiert und fehlende Intervalle nicht als Null ergänzt.
