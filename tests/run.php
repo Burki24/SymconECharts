@@ -56,6 +56,7 @@ $tests = [
 ];
 
 $commands = [
+    ['Test fixed historical Parallel periods', 'php tests/gateway_gauges.php --parallel-absolute'],
     ['Test fixed historical Boxplot periods', 'php tests/gateway_gauges.php --boxplot-absolute'],
     ['Test 16-group Radar integration', 'php tests/gateway_gauges.php --radar-many'],
     ['Test 32-source Funnel integration', 'php tests/gateway_gauges.php --funnel-many'],

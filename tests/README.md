@@ -1,5 +1,28 @@
 # Tests
 
+## Parallel: feste historische Zeiträume
+
+`php tests/gateway_gauges.php --parallel-absolute` prüft den echten Modul-/Gateway-
+Pfad mit Kernel-Doppeln. Der erste Lauf war RED, weil Parallel `absolute` noch
+nicht akzeptierte. Stunden und lokale Kalendertage verwenden die zentrale Planung
+aus Boxplot: inklusive/exklusive Grenzen, Auf-/Abrundung, leere Fenster ohne
+Abfragen, abgeschlossene Intervalle bis jetzt und zeitstabile historische Daten.
+Standardmittel und Zählerverbrauch bleiben per `auto`-Reducer getrennt;
+ausschließlich identische Zeitstempel aller Achsen bilden Linien. Nullwerte,
+negative Standardwerte und unterschiedliche Einheiten bleiben erhalten.
+
+Die Regression enthält 23-/25-Stunden-Tage, tatsächliche Herbststunden, einen
+Viertelstunden-Zonenoffset, kontrolliert abgewiesene nicht ganzstündige Wechsel,
+fehlende/ungültige/mehrdeutige Dates, unveränderte Altmodellfelder, unabhängige
+Designs und zustandsneutrale native Formular-/SVG-Entwürfe. Zehn Achsen mit
+je 1001 vorhandenen Aggregaten liefern maximal 10×1000 geladene Werte und den
+bisherigen Kürzungshinweis; 11 Achsen beziehungsweise Budgets 0/1001 scheitern.
+
+Lokale Modul-/Rendererprüfungen laufen weiterhin je Änderung. Für den gesamten
+Roadmap-Punkt „Archivzeiträume“ ist nach Anbindung der übrigen Familien eine
+gemeinsame Live-Matrix sinnvoll; die neue native Datumswahl in Symcon und die
+tatsächliche IPSView-App sind durch diese Tests noch nicht live abgenommen.
+
 ## Boxplot: kompakte Wertachsenbeschriftung
 
 `node tests/boxplot_layout.js` reproduziert mit synthetischen gebrochenen

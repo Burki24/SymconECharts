@@ -9,6 +9,11 @@
 
 ## Neu
 
+- EChartsParallel bietet feste historische Von-/Bis-Zeiträume für vollständig
+  enthaltene Stunden oder Kalendertage in der Symcon-Zeitzone. Gemeinsame
+  Intervallregeln, Mittelwerte/Zählerverbräuche, bestehende Zeiträume und
+  Archivbudgets bleiben erhalten; beide Designer zeigen die gewählten Grenzen.
+
 - EChartsBoxplot bietet feste historische Von-/Bis-Zeiträume zusätzlich zu
   den bisherigen rollierenden Zeiträumen. Die Datumswahl verwendet die
   Symcon-Zeitzone und wertet ausschließlich vollständig enthaltene abgeschlossene

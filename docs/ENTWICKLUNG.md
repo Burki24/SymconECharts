@@ -29,6 +29,15 @@ Canvas-Zeichenaufrufe für Kachel und IPSView statt nur vorhandener Titeloptione
 
 ## Aktueller Stand und Zielarchitektur
 
+Parallel integriert gemäß [ADR 0078](adr/0078-fixed-historical-parallel-periods.md)
+die zentrale `ParseLocalDateTime`-/`ResolveAbsolute`-Planung aus Boxplot für
+Stunden und lokale Kalendertage. `Range=absolute`, `AbsoluteStart` und
+`AbsoluteEnd` sind additive Properties; Altzeiträume und deren Modellform bleiben
+unverändert. Ausschließlich identische Zeitstempel aller Achsen bilden Linien;
+`auto`-Reducer, Kürzungshinweis und maximal 10×1000 Aggregate bleiben erhalten.
+Kachel, IPSView und reine Entwurfsvorschau nutzen dieselben Zeitgrenzen.
+Die Integration in Candlestick, ThemeRiver und StateTimeline bleibt offen.
+
 Boxplot bietet gemäß [ADR 0077](adr/0077-fixed-historical-boxplot-periods.md)
 zusätzlich `Range=absolute` und die additiven String-Properties `AbsoluteStart`
 und `AbsoluteEnd` für native SelectDateTime-Objekte. Die gemeinsame reine

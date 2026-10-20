@@ -98,6 +98,8 @@ class EChartsParallel extends IPSModuleStrict
             $this->RegisterPropertyString('Range', '24h');
             $this->RegisterPropertyInteger('CustomRangeValue', 7);
             $this->RegisterPropertyString('CustomRangeUnit', 'day');
+            $this->RegisterPropertyString('AbsoluteStart', '{}');
+            $this->RegisterPropertyString('AbsoluteEnd', '{}');
             $this->RegisterPropertyString('Aggregation', 'hour');
             $this->RegisterPropertyInteger('LineBudget', 750);
             foreach (['', 'IPSView'] as $prefix) {
@@ -177,6 +179,17 @@ class EChartsParallel extends IPSModuleStrict
                 ['CustomRangeValue', 'CustomRangeUnit'],
                 $this->ReadPropertyString('Range') === 'custom'
             );
+            $form['elements'] = $this->SetFormFieldVisibility(
+                $form['elements'],
+                ['AbsoluteStart', 'AbsoluteEnd', 'AbsoluteRangeHint', 'AbsoluteTimeZone'],
+                $this->ReadPropertyString('Range') === 'absolute'
+            );
+            foreach ($form['elements'] as &$element) {
+                if (($element['name'] ?? '') === 'AbsoluteTimeZone') {
+                    $element['caption'] = sprintf($this->Translate('Symcon time zone: %s'), date_default_timezone_get());
+                }
+            }
+            unset($element);
             $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
             $form['elements'] = $this->WithAnimationFormControls($form['elements']);
             $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
@@ -188,7 +201,7 @@ class EChartsParallel extends IPSModuleStrict
                 ['caption' => 'Axes', 'start' => 'ShowAxisLabels'],
                 ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
             ]);
-            $fields = ['Title', 'Sources', 'Range', 'CustomRangeValue', 'CustomRangeUnit', 'Aggregation', 'LineBudget',
+            $fields = ['Title', 'Sources', 'Range', 'CustomRangeValue', 'CustomRangeUnit', 'AbsoluteStart', 'AbsoluteEnd', 'Aggregation', 'LineBudget',
                 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
                 'IPSViewBackgroundOpacityPercent', ...array_keys(self::DESIGN_DEFAULTS),
                 ...array_map(static fn (string $name): string => 'IPSView' . $name, array_keys(self::DESIGN_DEFAULTS))];
@@ -214,6 +227,9 @@ class EChartsParallel extends IPSModuleStrict
         $debugFlowFailed = false;
         $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
+            foreach (['AbsoluteStart', 'AbsoluteEnd', 'AbsoluteRangeHint', 'AbsoluteTimeZone'] as $name) {
+                $this->UpdateFormField($name, 'visible', $Range === 'absolute');
+            }
             $this->UpdateFormField('CustomRangeValue', 'visible', $Range === 'custom');
             $this->UpdateFormField('CustomRangeUnit', 'visible', $Range === 'custom');
         } catch (\Throwable $debugFlowException) {
@@ -440,6 +456,24 @@ class EChartsParallel extends IPSModuleStrict
             EChartsBarPreview::Color($this->BarPreviewValue($values, 'TitleColor', 'integer', $ipsView), $palette['text']),
             $this->BarPreviewValue($values, 'TitleFontSizePercent', 'integer', $ipsView)
         );
+        if (($values['Range'] ?? $this->ReadPropertyString('Range')) === 'absolute') {
+            try {
+                $query = $this->ResolveTimeQuery(1, $values);
+                $zone = new DateTimeZone(date_default_timezone_get());
+                $format = static fn (int $timestamp): string => (new DateTimeImmutable('@' . $timestamp))->setTimezone($zone)->format('Y-m-d H:i:s P');
+                $svg = str_replace('<svg ', '<svg data-range="absolute" data-requested-start="' . $query['RequestedStartTimestamp']
+                    . '" data-requested-end="' . $query['RequestedEndTimestamp'] . '" ', $svg);
+                $svg .= '<text x="24" y="62" font-size="10" fill="' . EChartsBarPreview::E($palette['muted']) . '">'
+                    . EChartsBarPreview::E($this->Translate('Fixed period') . ': ' . $format($query['RequestedStartTimestamp'])
+                        . ' → ' . $format($query['RequestedEndTimestamp']) . ' (' . $zone->getName() . ')') . '</text>';
+            } catch (Throwable $exception) {
+                $svg .= '<text x="24" y="100" font-size="12" fill="' . EChartsBarPreview::E($palette['text']) . '">';
+                foreach (explode("\n", wordwrap($this->Translate($exception->getMessage()), 90, "\n")) as $index => $line) {
+                    $svg .= '<tspan x="24" dy="' . ($index === 0 ? '0' : '1.4em') . '">' . EChartsBarPreview::E($line) . '</tspan>';
+                }
+                return $svg . '</text></svg>';
+            }
+        }
         $sources = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values, 'Label', false)['items'];
         $sources = array_slice($sources, 0, 6);
         $count = count($sources);
@@ -507,16 +541,14 @@ class EChartsParallel extends IPSModuleStrict
         }
         $sources = $this->GetValidatedSources();
         $budget = $this->ReadPropertyInteger('LineBudget');
-        $query = EChartsArchiveQuery::Resolve(
-            $this->ReadPropertyString('Range'),
-            $this->ReadPropertyInteger('CustomRangeValue'),
-            $this->ReadPropertyString('CustomRangeUnit'),
-            $this->ReadPropertyString('Aggregation'),
-            $budget * count($sources),
-            count($sources),
-            $this->CurrentTimestamp(),
-            date_default_timezone_get()
-        );
+        $query = $this->ResolveTimeQuery(count($sources));
+        $range = ['key'        => $this->ReadPropertyString('Range'),
+            'startTimestamp'   => $query['StartTimestamp'], 'endTimestamp' => $query['EndTimestamp'],
+            'aggregationLevel' => $query['AggregationLevel'], 'lineBudget' => $budget];
+        if ($range['key'] === 'absolute') {
+            $range += ['requestedStartTimestamp' => $query['RequestedStartTimestamp'],
+                'requestedEndTimestamp'          => $query['RequestedEndTimestamp'], 'timezone' => date_default_timezone_get()];
+        }
         $series = [];
         $axes = [];
         $truncated = false;
@@ -538,9 +570,7 @@ class EChartsParallel extends IPSModuleStrict
                 'axes'        => $axes, 'rows' => $rows, 'truncated' => $truncated,
                 'style'       => $this->ReadDesignStyle($ipsView)
             ],
-            'range' => ['key'      => $this->ReadPropertyString('Range'),
-                'startTimestamp'   => $query['StartTimestamp'], 'endTimestamp' => $query['EndTimestamp'],
-                'aggregationLevel' => $query['AggregationLevel'], 'lineBudget' => $budget]
+            'range' => $range
         ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
     }
 
@@ -613,12 +643,12 @@ class EChartsParallel extends IPSModuleStrict
         } catch (Throwable $exception) {
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => $exception->getMessage()];
         }
-        if (!in_array($this->ReadPropertyString('Range'), ['24h', '7d', '30d', 'custom'], true)
-            || !EChartsArchiveQuery::IsValidRange(
+        if (!in_array($this->ReadPropertyString('Range'), ['24h', '7d', '30d', 'custom', 'absolute'], true)
+            || ($this->ReadPropertyString('Range') !== 'absolute' && !EChartsArchiveQuery::IsValidRange(
                 $this->ReadPropertyString('Range'),
                 $this->ReadPropertyInteger('CustomRangeValue'),
                 $this->ReadPropertyString('CustomRangeUnit')
-            )
+            ))
             || !in_array($this->ReadPropertyString('Aggregation'), ['hour', 'day'], true)
             || $this->ReadPropertyInteger('LineBudget') < 1 || $this->ReadPropertyInteger('LineBudget') > 1000
             || !$this->IsValidDesign('')
@@ -629,7 +659,52 @@ class EChartsParallel extends IPSModuleStrict
             )) {
             return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => 'The Parallel settings are invalid.'];
         }
+        if ($this->ReadPropertyString('Range') === 'absolute') {
+            try {
+                $this->ResolveTimeQuery(1);
+            } catch (Throwable $exception) {
+                return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => $this->Translate($exception->getMessage())];
+            }
+        }
         return null;
+    }
+
+    /** Pure planning for saved settings and read-only form drafts. */
+    private function ResolveTimeQuery(int $sourceCount, array $values = []): array
+    {
+        $range = $values['Range'] ?? $this->ReadPropertyString('Range');
+        $interval = $values['Aggregation'] ?? $this->ReadPropertyString('Aggregation');
+        $budget = (int) ($values['LineBudget'] ?? $this->ReadPropertyInteger('LineBudget'));
+        $timezone = date_default_timezone_get();
+        if ($range === 'absolute') {
+            $start = EChartsArchiveQuery::ParseLocalDateTime(
+                array_key_exists('AbsoluteStart', $values) ? $values['AbsoluteStart'] : $this->ReadPropertyString('AbsoluteStart'),
+                $timezone
+            );
+            $end = EChartsArchiveQuery::ParseLocalDateTime(
+                array_key_exists('AbsoluteEnd', $values) ? $values['AbsoluteEnd'] : $this->ReadPropertyString('AbsoluteEnd'),
+                $timezone
+            );
+            return EChartsArchiveQuery::ResolveAbsolute(
+                $start,
+                $end,
+                $interval,
+                $budget * $sourceCount,
+                $sourceCount,
+                $this->CurrentTimestamp(),
+                $timezone
+            ) + ['RequestedStartTimestamp' => $start, 'RequestedEndTimestamp' => $end];
+        }
+        return EChartsArchiveQuery::Resolve(
+            $range,
+            (int) ($values['CustomRangeValue'] ?? $this->ReadPropertyInteger('CustomRangeValue')),
+            (string) ($values['CustomRangeUnit'] ?? $this->ReadPropertyString('CustomRangeUnit')),
+            $interval,
+            $budget * $sourceCount,
+            $sourceCount,
+            $this->CurrentTimestamp(),
+            $timezone
+        );
     }
 
     /** @return list<array{VariableID:int,Label:string,Unit:string,Decimals:int}> */
@@ -741,7 +816,11 @@ class EChartsParallel extends IPSModuleStrict
     /** @return array<string,mixed> */
     private function BuildVisualizationState(bool $ipsView = false): array
     {
-        if ($this->GetConfigurationError() !== null) {
+        $error = $this->GetConfigurationError();
+        if ($error !== null) {
+            if ($this->ReadPropertyString('Range') === 'absolute' && $error['Status'] === self::STATUS_CONFIGURATION_INVALID) {
+                return $this->ErrorState($error['Message']);
+            }
             return $this->ErrorState('Configure valid Parallel archive axes.');
         }
         if (!$this->HasActiveParent()) {

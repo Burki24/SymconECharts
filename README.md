@@ -18,7 +18,7 @@ responsiven Seiten; individuelle Wertebereiche und Einheiten bleiben erhalten.
 Tree und TreeSystemHealth unterstützen bis zu zwölf Nachkommensebenen des
 Symcon-Objektbaums; bestehende Tiefen- und Knoteneinstellungen bleiben erhalten.
 Parallelkoordinaten verbinden archivierte Variablenwerte je gemeinsamem
-Stunden- oder Tagesintervall.
+Stunden- oder Tagesintervall, wahlweise auch in festen historischen Von-/Bis-Zeiträumen.
 Sankey zeigt aktuelle Mengenflüsse zwischen manuell angelegten Knoten.
 Calendar stellt archivierte Tageskennzahlen als farbigen Jahreskalender dar.
 Calendar und Heatmap bieten Mittelwert, Minimum und Maximum für Standardarchive

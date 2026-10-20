@@ -105,6 +105,9 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Archivierte Werte mehrerer Variablen werden als Parallelkoordinaten nach
   gemeinsamen abgeschlossenen Stunden- oder Tagesintervallen im eigenen
   Gerätemodul `EChartsParallel` dargestellt.
+  Parallel verwendet gemäß ADR 0078 für zusätzliche feste historische
+  Von-/Bis-Zeiträume die zentrale Planung aus `EChartsArchiveQuery`;
+  gemeinsame Zeitstempel, 2–10 Achsen und Linien-/Archivbudgets bleiben erhalten.
   Aktuelle Mengenflüsse zwischen manuell angelegten Knoten liegen im eigenen
   Gerätemodul `EChartsSankey`; Verbindungsbreiten folgen numerischen
   Quellvariablen, Zyklen und negative Werte sind unzulässig.
