@@ -1,5 +1,23 @@
 # Tests
 
+## Boxplot: kompakte Wertachsenbeschriftung
+
+`node tests/boxplot_layout.js` reproduziert mit synthetischen gebrochenen
+Extremwerten die langen Nachkommastellen der internen 5-%-Randgrenzen. Der
+ursprüngliche Renderer scheitert an der erwarteten Beschriftung `1.4` statt
+`1.4424994468192827`. Die ausgelieferte Runtime prüft formatierte Achsenlabels
+für Kachel/IPSView, beide Ausrichtungen, 350/900 Pixel und `de-DE`/`en-US`.
+Die volle gepinnte SVG-Runtime prüft zusätzlich tatsächlich gezeichnete Labels.
+Exakte vollständige Skala, unveränderte Statistiken, Scrolling, unterschiedliche
+Quellpräzision, enge Stundenmittelbereiche und negative Null bleiben abgesichert.
+Extrem kleine Zahlen verwenden wissenschaftliche Notation statt Nullwerte.
+
+Die lokale synthetische Canvas-Vorschau startet mit
+`node tests/boxplot_browser.mjs`; `/chart?mode=symcon&fractional=1` beziehungsweise
+`/chart?mode=ipsview&fractional=1` zeigen die korrigierten Grenzen. Es werden keine
+Installation oder Archive angesprochen. Die Live-Abnahme nach Modulupdate in
+Kachel und in der tatsächlichen IPSView-App bleibt davon getrennt.
+
 ## Boxplot: feste historische Zeiträume
 
 `php tests/archive_absolute_windows.php` prüft die neuen ausdrücklich opt-in

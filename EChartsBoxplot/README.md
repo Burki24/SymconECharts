@@ -102,6 +102,11 @@ bestimmen, wie viele Kategorien gleichzeitig lesbar sind. Der Ausschnitt bleibt
 bei Aktualisierungen und Größenänderungen an derselben Quelle verankert.
 Die Werteskala berücksichtigt weiterhin alle Quellen, nicht nur die sichtbaren.
 Leere Archive behalten ihren Kategorieplatz, ohne eine Null-Box zu erzeugen.
+Zahlen auf der Wertachse werden sprachgerecht und ohne lange Rechen-Nachkommastellen
+angezeigt. Die Genauigkeit richtet sich nach den Quellvariablen und wird bei
+sehr kleinen Wertebereichen erhöht, damit Teilstriche unterscheidbar bleiben.
+Skalengrenzen, Statistik und die quellenspezifische Formatierung im Tooltip
+bleiben davon unverändert.
 
 Der Designer bietet außerdem:
 

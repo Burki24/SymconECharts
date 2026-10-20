@@ -116,14 +116,27 @@
         var labels = Object.create(null);
         var sources = Object.create(null);
         var minimum = Infinity, maximum = -Infinity;
+        var axisDecimals = 0;
         items.forEach(function (item) {
             labels[item.id] = item.label;
             sources[item.id] = item;
             if (item.statistics) {
                 minimum = Math.min(minimum, item.statistics[0]);
                 maximum = Math.max(maximum, item.statistics[4]);
+                axisDecimals = Math.max(axisDecimals, item.decimals == null ? 2 : item.decimals);
             }
         });
+        var splitNumber = style.splitNumber == null ? 5 : style.splitNumber;
+        var step = (maximum > minimum ? maximum - minimum : Math.max(1, Math.abs(maximum)) * 0.1) / splitNumber;
+        if (Number.isFinite(step) && step > 0) {
+            // Preserve distinguishable ticks for narrow distributions of hourly means.
+            axisDecimals = Math.max(axisDecimals, 1 - Math.floor(Math.log10(step)));
+        }
+        var scientificAxis = axisDecimals > 20;
+        axisDecimals = Math.max(0, Math.min(20, axisDecimals));
+        var axisNumberFormat = new Intl.NumberFormat(bootstrap.language || undefined, scientificAxis
+            ? { notation: 'scientific', maximumSignificantDigits: 15 }
+            : { maximumFractionDigits: axisDecimals });
         function format(value, item) {
             return Number(value).toLocaleString(bootstrap.language || undefined, { maximumFractionDigits: item.decimals == null ? 2 : item.decimals })
                 + (item.unit ? ' ' + item.unit : '');
@@ -138,9 +151,14 @@
         var value = { type: 'value', scale: true, name: boxplot.unit || '', nameLocation: horizontal ? 'middle' : 'end',
             nameGap: horizontal ? font + 18 : 15,
             nameTextStyle: { color: style.axisColor || colors.text, fontSize: font },
-            splitNumber: style.splitNumber == null ? 5 : style.splitNumber,
+            splitNumber: splitNumber,
             axisLabel: { show: style.showAxisLabels !== false, color: style.axisColor || colors.text, fontSize: font, hideOverlap: true,
-                fontWeight: style.axisLabelBold === true ? 'bold' : 'normal' },
+                fontWeight: style.axisLabelBold === true ? 'bold' : 'normal',
+                formatter: function (value) {
+                    var number = Number(value);
+                    if (number === 0 || (!scientificAxis && Math.abs(number) < Math.pow(10, -axisDecimals) / 2)) { number = 0; }
+                    return axisNumberFormat.format(number);
+                } },
             splitLine: { show: style.showGrid !== false, lineStyle: { color: style.gridColor || colors.border,
                 type: style.gridLineType || 'solid', width: style.gridLineWidth == null ? 1 : style.gridLineWidth,
                 opacity: style.gridOpacityPercent == null ? 0.25 : style.gridOpacityPercent / 100 } } };

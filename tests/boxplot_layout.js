@@ -9,7 +9,7 @@ const source = fs.readFileSync(path.join(root, 'EChartsBoxplot/visualization/app
 const designSource = fs.readFileSync(path.join(root, 'libs/echarts-design.js'), 'utf8');
 const palette = { background: '#101114', text: '#f4f5f7', muted: '#969aa2', border: '#737780', accent: '#55cbb5' };
 
-function render(model, mode = 'symcon', headerVisible = true, width = 900, height = 500, engine = null) {
+function render(model, mode = 'symcon', headerVisible = true, width = 900, height = 500, engine = null, language = 'en') {
     const chartElement = { style: {}, hidden: false, clientWidth: width, clientHeight: height };
     const rootElement = { style: {} };
     const errorElement = { hidden: true, textContent: '' };
@@ -25,7 +25,7 @@ function render(model, mode = 'symcon', headerVisible = true, width = 900, heigh
         clear: () => { if (engine) { engine.clear(); } },
         resize: next => { if (engine) { engine.resize(next || { width: chartElement.clientWidth, height: chartElement.clientHeight }); } }, dispose: () => {} };
     const window = {
-        SYMC_VISUALIZATION: { mode, language: 'en', state: { status: 'ready', chart: model }, translations: {},
+        SYMC_VISUALIZATION: { mode, language, state: { status: 'ready', chart: model }, translations: {},
             options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: headerVisible,
                 adaptToBackground: mode === 'ipsview' } },
         echarts: { init: () => chart }, addEventListener: (name, callback) => { events[name] = callback; },
@@ -180,6 +180,73 @@ const nativeWindow = {};
 vm.runInNewContext(fs.readFileSync(path.join(root, 'libs/echarts/6.1.0/echarts.boxplot.min.js'), 'utf8'),
     { window: nativeWindow, navigator: { userAgent: 'Node.js' }, console, setTimeout, clearTimeout });
 nativeWindow.echarts.use(require('../.tools/echarts-runtime/node_modules/echarts/renderers').SVGRenderer);
+// Synthetic fractional extrema reproduce long padding labels in the shipped runtime.
+const fractionalModel = { ...manyModel, boxplot: { ...manyModel.boxplot,
+    data: manyModel.boxplot.data.map((item, index) => ({ ...item, decimals: 1,
+        statistics: [Math.PI, 10, 12, 15, index === 31 ? 37.123456789 : 20] })) } };
+const fractionalBefore = JSON.stringify(fractionalModel);
+for (const mode of ['symcon', 'ipsview']) {
+    for (const orientation of ['horizontal', 'vertical']) {
+        for (const language of ['en-US', 'de-DE']) {
+            for (const width of [350, 900]) {
+                const native = nativeWindow.echarts.init(null, null, { renderer: 'svg', ssr: true, width, height: 500 });
+                const input = { ...fractionalModel, boxplot: { ...fractionalModel.boxplot,
+                    style: { ...fractionalModel.boxplot.style, orientation } } };
+                const fixture = render(input, mode, true, width, 500, native, language);
+                const component = orientation === 'horizontal' ? 'xAxis' : 'yAxis';
+                const axis = native.getModel().getComponent(component).axis;
+                const labels = axis.getViewLabels();
+                assert.ok(labels.length > 2);
+                for (const label of labels) {
+                    assert.equal(label.formattedLabel,
+                        Number(label.rawLabel).toLocaleString(language, { maximumFractionDigits: 1 }),
+                        'Numeric axis labels must respect source precision and locale, not expose fractional padding artifacts.');
+                }
+                const option = orientation === 'horizontal' ? fixture.option.xAxis : fixture.option.yAxis;
+                const padding = (37.123456789 - Math.PI) * 0.05;
+                assert.equal(option.min, Math.PI - padding, 'Formatting must not round or move the full-population minimum.');
+                assert.equal(option.max, 37.123456789 + padding, 'Formatting must not round or move the offscreen maximum.');
+                const bounds = axis.scale.getExtent().slice();
+                native.dispatchAction({ type: 'dataZoom', dataZoomId: 'category-scroll', startValue: 27, endValue: 31 });
+                assert.deepEqual(axis.scale.getExtent(), bounds, 'Scrolling must preserve exact numeric bounds.');
+                assert.equal(option.axisLabel.formatter(-1e-12), '0', 'Do not render a negative zero after rounding.');
+                native.dispose();
+            }
+        }
+    }
+}
+assert.equal(JSON.stringify(fractionalModel), fractionalBefore, 'Axis formatting must not modify source statistics.');
+const formattedEngine = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 900, height: 500 });
+render(fractionalModel, 'ipsview', true, 900, 500, formattedEngine, 'de-DE');
+assert.match(formattedEngine.renderToSVGString(), />1,4<\/text>/, 'The full pinned SVG engine must draw the localized rounded bound.');
+assert.doesNotMatch(formattedEngine.renderToSVGString(), /1\.4424994468192827/, 'Internal padding digits must not leak into drawn labels.');
+formattedEngine.dispose();
+const fineModel = { ...fractionalModel, boxplot: { ...fractionalModel.boxplot,
+    data: fractionalModel.boxplot.data.map(item => ({ ...item, statistics: [20.00001, 20.00002, 20.00003, 20.00004, 20.00005] })) } };
+const fineNative = nativeWindow.echarts.init(null, null, { renderer: 'svg', ssr: true, width: 900, height: 500 });
+render(fineModel, 'ipsview', true, 900, 500, fineNative, 'de-DE');
+const fineLabels = fineNative.getModel().getComponent('yAxis').axis.getViewLabels().map(label => label.formattedLabel);
+assert.ok(fineLabels.length > 2);
+assert.equal(new Set(fineLabels).size, fineLabels.length, 'Fine hourly-mean ranges need extra precision to keep ticks distinct.');
+fineNative.dispose();
+const mixedPrecision = render({ ...fractionalModel, boxplot: { ...fractionalModel.boxplot,
+    data: fractionalModel.boxplot.data.map((item, index) => ({ ...item, decimals: index === 31 ? 3 : 1 })) } },
+'symcon', true, 350);
+assert.equal(mixedPrecision.option.yAxis.axisLabel.formatter(1.4424994468), '1.442',
+    'The most precise nonempty source, including offscreen sources, determines the common axis precision.');
+const missingPrecision = render({ ...fractionalModel, boxplot: { ...fractionalModel.boxplot,
+    data: fractionalModel.boxplot.data.map(item => ({ ...item, decimals: undefined })) } });
+assert.equal(missingPrecision.option.yAxis.axisLabel.formatter(1.4424994468), '1.44',
+    'Sources without display metadata keep the existing two-decimal fallback.');
+const tinyModel = { ...fractionalModel, boxplot: { ...fractionalModel.boxplot,
+    data: fractionalModel.boxplot.data.map(item => ({ ...item, statistics: [1e-25, 2e-25, 3e-25, 4e-25, 5e-25] })) } };
+const tiny = render(tinyModel).option.yAxis.axisLabel.formatter;
+assert.notEqual(tiny(1e-25), tiny(2e-25), 'Values smaller than fixed-fraction precision must not collapse to zero.');
+assert.match(tiny(1e-25), /E-25/);
+assert.doesNotMatch(tiny(-0), /^-/, 'Scientific formatting must not expose negative zero either.');
+const singleCategory = render(model).option.yAxis;
+assert.equal(singleCategory.min, undefined, 'Small non-navigated charts retain automatic numeric bounds.');
+assert.equal(singleCategory.max, undefined);
 for (const mode of ['symcon', 'ipsview']) {
     for (const orientation of ['horizontal', 'vertical']) {
         const dimensions = { width: 640, height: 500 };

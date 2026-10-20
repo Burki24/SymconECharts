@@ -918,6 +918,11 @@
 
 ## Fixes
 
+- EChartsBoxplot beschriftet die Wertachse in Kachel und IPSView ohne lange
+  Gleitkomma-Nachkommastellen an den Skalengrenzen. Die Zahlenformatierung
+  berücksichtigt Sprache, Quellgenauigkeit und kleine Wertebereiche; die
+  vollständige Skala, Statistik und Tooltipwerte bleiben unverändert.
+
 - Konfigurierte Diagrammtitel von EChartsGaugeMulti, EChartsGaugeTacho und
   EChartsGaugeChronograph erscheinen in Kachel und IPSView – mit eingestellter
   Schriftgröße, Farbe und Abstand zum Kachelkopf. Bestehende Konfigurationen
