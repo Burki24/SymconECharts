@@ -209,4 +209,52 @@ assertAbsoluteArchive(
     'A complete local hour after the non-hour transition remains usable.'
 );
 
-echo "Absolute archive windows, strict local date/time parsing, fixed budgets and DST semantics verified.\n";
+// Enumerated windows reuse absolute planning without widening rolling consumers.
+$listNow = strtotime('2026-11-01T12:00:00Z');
+$listStart = strtotime('2026-10-12T08:30:00+02:00');
+$listEnd = strtotime('2026-10-12T13:30:00+02:00');
+$list = EChartsArchiveQuery::AbsoluteIntervals($listStart, $listEnd, 'hour', $listNow, $berlin);
+assertAbsoluteArchive(
+    count($list['Intervals']) === 4
+    && $list['Intervals'][0] === ['startTimestamp' => strtotime('2026-10-12T09:00:00+02:00'),
+        'endTimestamp'                             => strtotime('2026-10-12T10:00:00+02:00') - 1, 'label' => '2026-10-12 09:00 +02:00']
+    && $list['Intervals'][3]['endTimestamp'] === strtotime('2026-10-12T13:00:00+02:00') - 1,
+    'Bounded interval lists must enumerate only fully contained hours.'
+);
+$emptyList = EChartsArchiveQuery::AbsoluteIntervals($listStart, $listEnd, 'day', $listNow, $berlin);
+assertAbsoluteArchive(
+    $emptyList['Empty'] && $emptyList['Intervals'] === []
+    && $emptyList['StartTimestamp'] === $listStart && $emptyList['EndTimestamp'] === $listEnd - 1,
+    'Empty historical lists preserve valid requested metadata without invented days.'
+);
+foreach ([['2026-03-29T00:00:00+01:00', '2026-03-30T00:00:00+02:00', 23],
+    ['2026-10-25T00:00:00+02:00', '2026-10-26T00:00:00+01:00', 25]] as [$from, $until, $hours]) {
+    foreach (['hour', 'day'] as $interval) {
+        $dstList = EChartsArchiveQuery::AbsoluteIntervals(strtotime($from), strtotime($until), $interval, $listNow, $berlin);
+        assertAbsoluteArchive(
+            count($dstList['Intervals']) === ($interval === 'hour' ? $hours : 1)
+            && count(array_unique(array_column($dstList['Intervals'], 'label'))) === count($dstList['Intervals'])
+            && $dstList['StartTimestamp'] === strtotime($from) && $dstList['EndTimestamp'] === strtotime($until) - 1,
+            'Shared interval enumeration preserves complete DST coverage and unique hour labels.'
+        );
+    }
+}
+foreach ([0, 720, 1001] as $maximum) {
+    rejectAbsoluteArchive(static fn () => EChartsArchiveQuery::AbsoluteIntervals(
+        strtotime('2026-09-01T00:00:00Z'),
+        strtotime('2026-10-01T01:00:00Z'),
+        'hour',
+        $listNow,
+        'UTC',
+        $maximum
+    ), 'Invalid budgets or excessive windows fail instead of truncating an interval list.');
+}
+assertAbsoluteArchive(count(EChartsArchiveQuery::AbsoluteIntervals(
+    strtotime('2026-09-01T00:00:00Z'),
+    strtotime('2026-10-01T00:00:00Z'),
+    'hour',
+    $listNow,
+    'UTC'
+)['Intervals']) === 720, 'The existing 720-interval budget remains inclusive.');
+
+echo "Absolute archive windows, strict local date/time parsing, bounded interval lists and DST semantics verified.\n";

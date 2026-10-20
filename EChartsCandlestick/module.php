@@ -13,6 +13,7 @@ use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 use Burki24\SymconModuleHelper\VisualizationThemeHelper;
 use SymconECharts\CandlestickData;
 use SymconECharts\EChartsAnimationDesign;
+use SymconECharts\EChartsArchiveQuery;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsBarPreview;
 use SymconECharts\EChartsBarPreviewForm;
@@ -106,6 +107,8 @@ class EChartsCandlestick extends IPSModuleStrict
             $this->RegisterPropertyString('Range', '7d');
             $this->RegisterPropertyInteger('CustomRangeValue', 7);
             $this->RegisterPropertyString('CustomRangeUnit', 'day');
+            $this->RegisterPropertyString('AbsoluteStart', '{}');
+            $this->RegisterPropertyString('AbsoluteEnd', '{}');
             foreach (['', 'IPSView'] as $prefix) {
                 foreach (self::DESIGN_DEFAULTS as $name => $default) {
                     match (gettype($default)) {
@@ -184,6 +187,17 @@ class EChartsCandlestick extends IPSModuleStrict
                 ['CustomRangeValue', 'CustomRangeUnit'],
                 $this->ReadPropertyString('Range') === 'custom'
             );
+            $form['elements'] = $this->SetFormFieldVisibility(
+                $form['elements'],
+                ['AbsoluteStart', 'AbsoluteEnd', 'AbsoluteRangeHint', 'AbsoluteTimeZone'],
+                $this->ReadPropertyString('Range') === 'absolute'
+            );
+            foreach ($form['elements'] as &$element) {
+                if (($element['name'] ?? '') === 'AbsoluteTimeZone') {
+                    $element['caption'] = sprintf($this->Translate('Symcon time zone: %s'), date_default_timezone_get());
+                }
+            }
+            unset($element);
             $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
             $form['elements'] = $this->WithAnimationFormControls($form['elements']);
             $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
@@ -196,7 +210,7 @@ class EChartsCandlestick extends IPSModuleStrict
                 ['caption' => 'Axes and grid', 'start' => 'ShowGrid'],
                 ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
             ]);
-            $fields = ['Title', 'VariableID', 'Range', 'CustomRangeValue', 'CustomRangeUnit', 'Interval',
+            $fields = ['Title', 'VariableID', 'Range', 'CustomRangeValue', 'CustomRangeUnit', 'AbsoluteStart', 'AbsoluteEnd', 'Interval',
                 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
                 'IPSViewBackgroundOpacityPercent', ...array_keys(self::DESIGN_DEFAULTS),
                 ...array_map(static fn (string $name): string => 'IPSView' . $name, array_keys(self::DESIGN_DEFAULTS))];
@@ -222,6 +236,9 @@ class EChartsCandlestick extends IPSModuleStrict
         $debugFlowFailed = false;
         $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
+            foreach (['AbsoluteStart', 'AbsoluteEnd', 'AbsoluteRangeHint', 'AbsoluteTimeZone'] as $name) {
+                $this->UpdateFormField($name, 'visible', $Range === 'absolute');
+            }
             $custom = $Range === 'custom';
             $this->UpdateFormField('CustomRangeValue', 'visible', $custom);
             $this->UpdateFormField('CustomRangeUnit', 'visible', $custom);
@@ -452,14 +469,13 @@ class EChartsCandlestick extends IPSModuleStrict
             throw new RuntimeException('No active EChartsGateway is connected.');
         }
         $sources = $this->GetValidatedSources();
-        $query = CandlestickData::Window(
-            $this->ReadPropertyString('Range'),
-            $this->ReadPropertyString('Interval'),
-            $this->CurrentTimestamp(),
-            date_default_timezone_get(),
-            $this->ReadPropertyInteger('CustomRangeValue'),
-            $this->ReadPropertyString('CustomRangeUnit')
-        );
+        $query = $this->ResolveTimeQuery();
+        $range = ['key'    => $this->ReadPropertyString('Range'), 'startTimestamp' => $query['StartTimestamp'],
+            'endTimestamp' => $query['EndTimestamp'], 'timezone' => date_default_timezone_get()];
+        if ($range['key'] === 'absolute') {
+            $range += ['requestedStartTimestamp' => $query['RequestedStartTimestamp'],
+                'requestedEndTimestamp'          => $query['RequestedEndTimestamp']];
+        }
         $key = $sources[0]['VariableID'] . ':' . $query['StartTimestamp'] . ':' . $query['EndTimestamp'] . ':' . $this->ReadPropertyString('Interval');
         $cache = json_decode($this->GetBuffer('CandlestickCache') ?: '{}', true);
         try {
@@ -493,8 +509,7 @@ class EChartsCandlestick extends IPSModuleStrict
                 'candlestick'    => ['title' => $this->ReadPropertyString('Title'), 'unit' => $sources[0]['Unit'],
                     'sampling'               => 'completed-raw-intervals', 'sourceLabel' => $sources[0]['Label'], 'interval' => $this->ReadPropertyString('Interval'),
                     'data'                   => $data, 'style' => $this->ReadDesignStyle($ipsView)],
-                'range' => ['key'  => $this->ReadPropertyString('Range'), 'startTimestamp' => $query['StartTimestamp'],
-                    'endTimestamp' => $query['EndTimestamp'], 'timezone' => date_default_timezone_get()]],
+                'range' => $range],
             JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION
         );
     }
@@ -576,7 +591,7 @@ class EChartsCandlestick extends IPSModuleStrict
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => $exception->getMessage()];
         }
         if (mb_strlen($this->ReadPropertyString('Title')) > 200
-            || !in_array($this->ReadPropertyString('Range'), ['24h', '7d', '30d', 'custom'], true)
+            || !in_array($this->ReadPropertyString('Range'), ['24h', '7d', '30d', 'custom', 'absolute'], true)
             || !in_array($this->ReadPropertyString('Interval'), ['hour', 'day'], true)
             || !$this->IsValidDesign('')
             || (!$this->ReadPropertyBoolean('IPSViewUseTileDesign') && !$this->IsValidDesign('IPSView'))
@@ -587,18 +602,40 @@ class EChartsCandlestick extends IPSModuleStrict
             return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => 'The Candlestick settings are invalid.'];
         }
         try {
-            CandlestickData::Window(
-                $this->ReadPropertyString('Range'),
-                $this->ReadPropertyString('Interval'),
-                $this->CurrentTimestamp(),
-                date_default_timezone_get(),
-                $this->ReadPropertyInteger('CustomRangeValue'),
-                $this->ReadPropertyString('CustomRangeUnit')
-            );
+            $this->ResolveTimeQuery();
         } catch (InvalidArgumentException $exception) {
-            return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => $exception->getMessage()];
+            return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => $this->ReadPropertyString('Range') === 'absolute'
+                ? $this->Translate($exception->getMessage()) : $exception->getMessage()];
         }
         return null;
+    }
+
+    /** Pure shared planning for saved settings and read-only preview drafts. */
+    private function ResolveTimeQuery(array $values = []): array
+    {
+        $range = $values['Range'] ?? $this->ReadPropertyString('Range');
+        $interval = $values['Interval'] ?? $this->ReadPropertyString('Interval');
+        $timezone = date_default_timezone_get();
+        if ($range === 'absolute') {
+            $start = EChartsArchiveQuery::ParseLocalDateTime(
+                array_key_exists('AbsoluteStart', $values) ? $values['AbsoluteStart'] : $this->ReadPropertyString('AbsoluteStart'),
+                $timezone
+            );
+            $end = EChartsArchiveQuery::ParseLocalDateTime(
+                array_key_exists('AbsoluteEnd', $values) ? $values['AbsoluteEnd'] : $this->ReadPropertyString('AbsoluteEnd'),
+                $timezone
+            );
+            return EChartsArchiveQuery::AbsoluteIntervals($start, $end, $interval, $this->CurrentTimestamp(), $timezone)
+                + ['RequestedStartTimestamp' => $start, 'RequestedEndTimestamp' => $end];
+        }
+        return CandlestickData::Window(
+            $range,
+            $interval,
+            $this->CurrentTimestamp(),
+            $timezone,
+            (int) ($values['CustomRangeValue'] ?? $this->ReadPropertyInteger('CustomRangeValue')),
+            $values['CustomRangeUnit'] ?? $this->ReadPropertyString('CustomRangeUnit')
+        );
     }
 
     /** @return list<array{VariableID:int,Label:string,Color:int,Unit:string,Decimals:int}> */
@@ -664,6 +701,9 @@ class EChartsCandlestick extends IPSModuleStrict
     {
         $configurationError = $this->GetConfigurationError();
         if ($configurationError !== null) {
+            if ($this->ReadPropertyString('Range') === 'absolute' && $configurationError['Status'] === self::STATUS_CONFIGURATION_INVALID) {
+                return $this->ErrorState($configurationError['Message']);
+            }
             return $this->ErrorState(in_array($configurationError['Message'], [
                 'Too many archive intervals. Choose a shorter range or a longer interval.', 'The archive interval settings are invalid.'
             ], true) ? $configurationError['Message'] : 'Configure valid Candlestick archive variables.');

@@ -1,5 +1,30 @@
 # Tests
 
+## Candlestick: feste historische Zeiträume
+
+`php tests/gateway_gauges.php --candlestick-absolute` verwendet die bestehende
+Candlestick-Testklasse und den realen Modul-/Gateway-Pfad mit Kernel-Doppeln.
+Der erste Lauf war RED, weil der absolute Modus noch abgewiesen wurde.
+Die Regression prüft echte OCLH-Rohwerte, partielle Stunden-/Tagesgrenzen,
+Lücken, Einzelwerte, Null-/Negativwerte, zeitstabile Fenster, leere Fenster ohne
+Abfragen und kontrolliert ungültige/fehlende/zukünftige/mehrdeutige Grenzen.
+DST umfasst 23-/25-Stunden-Tage, getrennte Herbststunden, Viertelstunden-Offsets
+und die Ablehnung nicht ganzstündiger Offsetwechsel. 720/721 Intervalle sichern
+die Planungsgrenze; 10000 Rohpunkte durchlaufen echte Gateway-Halbierung mit
+weiterhin höchstens 2000 Punkten je Abfrage und ohne Aggregatersatz.
+Bestehende Rohdatentests sichern außerdem die 63-Anfragen-Grenze.
+
+Beide begrenzten Ausgaben, unabhängiges Design, native Date-Felder und reine
+SVG-Entwürfe in beiden Ausrichtungen werden geprüft. Die zentrale Regression
+`php tests/archive_absolute_windows.php` prüft zusätzlich `AbsoluteIntervals`;
+`archive_windows.php` und `theme_river_data.php` sichern bestehende Consumer
+der nun gemeinsam enumerierten Intervalle. Die gesamte Qualitätssuite läuft
+mit `php tests/quality.php --fix`.
+
+Keine Live-Instanz oder Archivierung wird geändert. Die native Datumswahl
+und tatsächliche Kachel/IPSView bleiben Teil der gebündelten Live-Abnahme
+des Archivzeiträume-Blocks nach ThemeRiver und StateTimeline.
+
 ## Parallel: feste historische Zeiträume
 
 `php tests/gateway_gauges.php --parallel-absolute` prüft den echten Modul-/Gateway-

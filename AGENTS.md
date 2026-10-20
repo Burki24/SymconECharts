@@ -108,6 +108,9 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Parallel verwendet gemäß ADR 0078 für zusätzliche feste historische
   Von-/Bis-Zeiträume die zentrale Planung aus `EChartsArchiveQuery`;
   gemeinsame Zeitstempel, 2–10 Achsen und Linien-/Archivbudgets bleiben erhalten.
+  Candlestick verwendet gemäß ADR 0079 dieselbe absolute Zeitplanung und eine
+  zentrale begrenzte Intervallliste für Stunden/Tage. Echte Rohwert-Endpunkte,
+  höchstens 720 Intervalle, 63 Abfragen und 64000 Rohpunkte bleiben erhalten.
   Aktuelle Mengenflüsse zwischen manuell angelegten Knoten liegen im eigenen
   Gerätemodul `EChartsSankey`; Verbindungsbreiten folgen numerischen
   Quellvariablen, Zyklen und negative Werte sind unzulässig.

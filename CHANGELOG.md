@@ -9,6 +9,11 @@
 
 ## Neu
 
+- EChartsCandlestick bietet feste historische Von-/Bis-Zeiträume in der
+  Symcon-Zeitzone. Nur vollständig enthaltene Stunden oder Kalendertage
+  werden aus echten Rohwerten gebildet. Bestehende Zeiträume, Lückenregeln,
+  Archivbudgets und Designs bleiben erhalten; beide Vorschauen zeigen die Grenzen.
+
 - EChartsParallel bietet feste historische Von-/Bis-Zeiträume für vollständig
   enthaltene Stunden oder Kalendertage in der Symcon-Zeitzone. Gemeinsame
   Intervallregeln, Mittelwerte/Zählerverbräuche, bestehende Zeiträume und

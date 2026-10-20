@@ -29,6 +29,16 @@ Canvas-Zeichenaufrufe für Kachel und IPSView statt nur vorhandener Titeloptione
 
 ## Aktueller Stand und Zielarchitektur
 
+Candlestick integriert gemäß [ADR 0079](adr/0079-fixed-historical-candlestick-periods.md)
+feste historische Von-/Bis-Zeiträume. Die zentralen `ParseLocalDateTime`- und
+`ResolveAbsolute`-Verträge werden wiederverwendet; `AbsoluteIntervals` liefert
+die begrenzte vollständige Stunden-/Tagesliste. Deren Enumeration wird mit den
+bisherigen rollierenden `CompletedIntervals` geteilt, ohne deren Ergebnisform
+oder Zeitregeln zu ändern. `CandlestickData::Read` und `Summarize` bleiben
+unverändert: tatsächliche Rohwert-Endpunkte, kein Aggregatersatz und keine
+Fortschreibung. Maximal 720 Intervalle, 63 Anfragen und 64000 Rohwerte bleiben
+erhalten. Formular und zustandsneutrale Vorschauen folgen Boxplot/Parallel.
+
 Parallel integriert gemäß [ADR 0078](adr/0078-fixed-historical-parallel-periods.md)
 die zentrale `ParseLocalDateTime`-/`ResolveAbsolute`-Planung aus Boxplot für
 Stunden und lokale Kalendertage. `Range=absolute`, `AbsoluteStart` und
@@ -36,7 +46,9 @@ Stunden und lokale Kalendertage. `Range=absolute`, `AbsoluteStart` und
 unverändert. Ausschließlich identische Zeitstempel aller Achsen bilden Linien;
 `auto`-Reducer, Kürzungshinweis und maximal 10×1000 Aggregate bleiben erhalten.
 Kachel, IPSView und reine Entwurfsvorschau nutzen dieselben Zeitgrenzen.
-Die Integration in Candlestick, ThemeRiver und StateTimeline bleibt offen.
+Die Integration in ThemeRiver und StateTimeline bleibt offen. Nach diesen
+Schritten folgt die gebündelte Live-Matrix für den gesamten Archivzeiträume-Block;
+lokale automatisierte Modul- und Gesamttests laufen weiterhin je Änderung.
 
 Boxplot bietet gemäß [ADR 0077](adr/0077-fixed-historical-boxplot-periods.md)
 zusätzlich `Range=absolute` und die additiven String-Properties `AbsoluteStart`

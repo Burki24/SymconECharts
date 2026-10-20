@@ -1119,6 +1119,11 @@ if (array_slice($argv, 1) === ['--gauge-multi-many']) {
     require __DIR__ . '/gauge_multi_many.php';
     exit(0);
 }
+if (array_slice($argv, 1) === ['--candlestick-absolute']) {
+    require __DIR__ . '/candlestick_integration.php';
+    require __DIR__ . '/candlestick_absolute_ranges.php';
+    exit(0);
+}
 if (array_slice($argv, 1) === ['--parallel-absolute']) {
     require __DIR__ . '/parallel_absolute_ranges.php';
     exit(0);

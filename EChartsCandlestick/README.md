@@ -41,6 +41,23 @@ einem Tag im Tagesmodus beim Herbstwechsel keinen vollständigen 25-Stunden-Tag
 enthalten. Ein leerer Zeitraum löst keine Archivabfrage aus. Kachel und IPSView
 verwenden dieselbe Zeitkonfiguration; Designänderungen verändern sie nicht.
 
+„Fester historischer Zeitraum“ ergänzt eine Von-/Bis-Auswahl in der angezeigten
+Symcon-Zeitzone. Der Beginn ist eingeschlossen, das Ende ausgeschlossen und darf
+nicht in der Zukunft liegen. Nur vollständig enthaltene abgeschlossene Stunden
+oder Kalendertage werden berücksichtigt: Von 12.10.2026 08:30 bis 13:30 entstehen
+im Stundenmodus die Intervalle 09:00 bis einschließlich 12:59:59. Im Tagesmodus
+enthält dieses Fenster keinen vollständigen Tag und bleibt leer.
+
+Die Grenzen bleiben bei Aktualisierungen fest. Fehlende oder ungültige Daten,
+nicht existierende Uhrzeiten und doppeldeutige Uhrzeiten beim Herbstwechsel
+werden abgewiesen; bitte eindeutige Grenzen vor oder nach dem Wechsel wählen.
+Ein Fenster über den Wechsel ist möglich und enthält die tatsächlichen Stunden
+beziehungsweise lokale 23-/25-Stunden-Tage. Historische Stundenfenster über
+Zeitzonenwechsel mit nicht ganzstündiger Verschiebung werden nicht unterstützt.
+Auch im festen Zeitraum gelten höchstens 720 Intervalle und dieselben
+Rohwertbudgets. Die Vorschauen zeigen die gewählten Grenzen mit Beispieldaten;
+bestehende Zeiträume und Designs bleiben unverändert nutzbar.
+
 Die Werte sind keine Stunden-/Tagesmittelwerte und keine geschätzten Werte
 an den Intervallgrenzen. Symcon protokolliert Änderungen: Ein konstanter Wert
 ohne neues Archivereignis erzeugt keine neue Kerze. Fehlende Intervalle

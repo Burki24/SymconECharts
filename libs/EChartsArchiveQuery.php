@@ -283,20 +283,33 @@ final class EChartsArchiveQuery
                 $cursor = $midnight->getTimestamp() < $earliest ? $midnight->modify('+1 day') : $midnight;
             }
         }
-        $start = $cursor->getTimestamp();
-        $intervals = [];
-        while ($cursor < $end) {
-            if (count($intervals) >= $maximumIntervals) {
-                throw new InvalidArgumentException('Too many archive intervals. Choose a shorter range or a longer interval.');
-            }
-            $next = $interval === 'day' ? $cursor->modify('+1 day') : $cursor->setTimestamp($cursor->getTimestamp() + 3600);
-            $intervals[] = ['startTimestamp' => $cursor->getTimestamp(), 'endTimestamp' => $next->getTimestamp() - 1,
-                'label'                      => $cursor->format($interval === 'day' ? 'Y-m-d' : 'Y-m-d H:i P')];
-            $cursor = $next;
+        return self::IntervalList($cursor, $end, $interval, $maximumIntervals);
+    }
+
+    /** Same bounded whole-interval model, with an explicit historical window. */
+    public static function AbsoluteIntervals(
+        int $startTimestamp,
+        int $endExclusiveTimestamp,
+        string $interval,
+        int $now,
+        string $timezone,
+        int $maximumIntervals = 720
+    ): array {
+        if ($maximumIntervals < 1 || $maximumIntervals > 1000) {
+            throw new InvalidArgumentException('The archive interval settings are invalid.');
         }
-        return ['StartTimestamp' => $intervals === [] ? $end->getTimestamp() - 1 : $start,
-            'EndTimestamp'       => $end->getTimestamp() - 1, 'Intervals' => $intervals,
-            'AggregationLevel'   => $interval === 'day' ? 1 : 0, 'Limit' => 1000, 'Empty' => $intervals === []];
+        $query = self::ResolveAbsolute($startTimestamp, $endExclusiveTimestamp, $interval, $maximumIntervals, 1, $now, $timezone);
+        if ($query['Empty']) {
+            return ['StartTimestamp' => $query['StartTimestamp'], 'EndTimestamp' => $query['EndTimestamp'],
+                'Intervals'          => [], 'AggregationLevel' => $query['AggregationLevel'], 'Limit' => 1000, 'Empty' => true];
+        }
+        $zone = new DateTimeZone($timezone);
+        return self::IntervalList(
+            (new DateTimeImmutable('@' . $query['StartTimestamp']))->setTimezone($zone),
+            (new DateTimeImmutable('@' . ($query['EndTimestamp'] + 1)))->setTimezone($zone),
+            $interval,
+            $maximumIntervals
+        );
     }
 
     public static function AggregationWindowStart(int $level, int $timestamp, string $timezone): int
@@ -313,6 +326,25 @@ final class EChartsArchiveQuery
         $minute = intdiv((int) $local->format('i'), $minutes) * $minutes;
 
         return $local->setTime((int) $local->format('G'), $minute)->getTimestamp();
+    }
+
+    /** Shared enumeration keeps rolling and historical interval labels/budgets identical. */
+    private static function IntervalList(DateTimeImmutable $cursor, DateTimeImmutable $end, string $interval, int $maximumIntervals): array
+    {
+        $start = $cursor->getTimestamp();
+        $intervals = [];
+        while ($cursor < $end) {
+            if (count($intervals) >= $maximumIntervals) {
+                throw new InvalidArgumentException('Too many archive intervals. Choose a shorter range or a longer interval.');
+            }
+            $next = $interval === 'day' ? $cursor->modify('+1 day') : $cursor->setTimestamp($cursor->getTimestamp() + 3600);
+            $intervals[] = ['startTimestamp' => $cursor->getTimestamp(), 'endTimestamp' => $next->getTimestamp() - 1,
+                'label'                      => $cursor->format($interval === 'day' ? 'Y-m-d' : 'Y-m-d H:i P')];
+            $cursor = $next;
+        }
+        return ['StartTimestamp' => $intervals === [] ? $end->getTimestamp() - 1 : $start,
+            'EndTimestamp'       => $end->getTimestamp() - 1, 'Intervals' => $intervals,
+            'AggregationLevel'   => $interval === 'day' ? 1 : 0, 'Limit' => 1000, 'Empty' => $intervals === []];
     }
 
     /** @return array{DurationSeconds:int,StartTimestamp:int,EndTimestamp:int,CalendarAligned:bool,AcceptLiveUpdates:bool} */

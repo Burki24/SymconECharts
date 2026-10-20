@@ -42,7 +42,8 @@ Pie unterstützt bis zu 100 Quellen. Eine optionale erweiterte Quellenauswahl
 bietet Anfangssichtbarkeit, Alle/Umkehren und eine bei Aktualisierung erhaltene
 Auswahl. Tooltips unterscheiden Auswahlanteil und Anteil aller Quellen.
 Candlestick zeigt ersten und letzten protokollierten Wert sowie Minimum
-und Maximum abgeschlossener Archiv-Stunden oder -Tage.
+und Maximum abgeschlossener Archiv-Stunden oder -Tage, wahlweise auch in
+festen historischen Von-/Bis-Zeiträumen mit unveränderten Rohwertbudgets.
 StateTimeline zeigt archivierte Boolean-/Integer-Zustände als farbige
 Zeitabschnitte mit eigenen Zustandsnamen und ausdrücklich unbekannten Anfängen.
 Graph verbindet bis zu 300 manuell ausgewählte Symcon-Objekte mit bis zu
@@ -108,7 +109,8 @@ können unabhängig davon individuell vergeben werden.
 
 - __EChartsCandlestick__ ([Dokumentation](EChartsCandlestick/README.md))
   Eine Standard-Archivvariable als Stunden- oder Tageskerzen über 24 Stunden,
-  7 oder 30 Tage. Fehlende Intervalle bleiben leer; Kachel und IPSView
+  7 oder 30 Tage, eine benutzerdefinierte Dauer oder feste historische
+  Von-/Bis-Zeiträume. Fehlende Intervalle bleiben leer; Kachel und IPSView
   besitzen getrennte Designer.
 
 - __EChartsFunnel__ ([Dokumentation](EChartsFunnel/README.md))
