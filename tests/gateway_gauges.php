@@ -1119,6 +1119,10 @@ if (array_slice($argv, 1) === ['--gauge-multi-many']) {
     require __DIR__ . '/gauge_multi_many.php';
     exit(0);
 }
+if (array_slice($argv, 1) === ['--funnel-many']) {
+    require __DIR__ . '/funnel_many.php';
+    exit(0);
+}
 if (($argv[1] ?? '') === '--pie-preview') {
     $draft = json_decode($argv[2] ?? '{}', true, 512, JSON_THROW_ON_ERROR);
     $draft['EnableSourceSelection'] ??= true;

@@ -38,6 +38,11 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   ID-stabiler Quellenauswahl und responsiven Seiten für seine vier Vorlagen.
   Individuelle Skalen und Einheiten sowie kleine Altlisten bleiben erhalten.
   Auswahl-/Seiten-DOM und CSS werden mit BarPolar geteilt; Geometrie bleibt lokal.
+  `EChartsFunnel` erlaubt gemäß ADR 0075 bis zu 32 aktuelle nichtnegative
+  Quellen gleicher Einheit mit optionaler Quellenauswahl und Stufennavigation.
+  Die vollständige Quellenmenge bestimmt die Breitenskala; Auswahl/Seiten bleiben
+  reine Ansichten. Gemeinsame Auswahl-/Anker-/DOM-Bausteine werden wiederverwendet,
+  die native Funnel-Geometrie verbleibt in der Familie.
   Historische Linien- und Flächendiagramme liegen im eigenen
   Gerätemodul `EChartsTimeSeries`, gemäß ADR 0067 mit bis zu 32 Reihen,
   Reihenauswahl und einem gemeinsamen Punktbudget bis 32000.

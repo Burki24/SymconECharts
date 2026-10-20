@@ -1,60 +1,95 @@
-// Local browser fixture only; no connection to Symcon and no real variable data.
+// Synthetic local Canvas fixture. No Symcon connection or installation data.
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
-const read = p => fs.readFileSync(path.join(root, p), 'utf8');
-const style = { orientation: 'vertical', sortOrder: 'configured', alignment: 'center', gap: 4,
-    showLabels: true, showValues: true, showTooltip: true, labelPosition: 'inside',
-    borderWidth: 1, opacityPercent: 90, titleFontSizePercent: 100, labelFontSizePercent: 100, animationEnabled: false };
-function state() {
-    return { schemaVersion:1, family:'funnel', status:'ready', error:null, chart:{
-        schemaVersion:1, family:'funnel', theme:'auto', funnel:{title:'Leistung · Stufenvergleich',unit:'W',
-            data:['Gesamt','Büro','Küche','Wohnbereich','Nebenräume'].map((label,index)=>({
-                id:'variable-'+index,label,unit:'W',decimals:1,color:'',value:[400,230,170,90,30][index],order:index
-            })),style:{...style}}
-    }};
-}
-const variables = ':root{--symc-background:#303236;--symc-text:#f4f5f7;--symc-text-muted:#969aa2;--symc-border:#555860;--symc-surface:#25272b}';
-const translations = JSON.parse(read('EChartsFunnel/locale.json')).translations.de;
-function page(mode, extended = false, light = false, polished = false) {
-    const initialState = state();
-    if (mode === 'ipsview') {
-        Object.assign(initialState.chart.funnel.style,{orientation:'horizontal',labelPosition:'outside',labelColor:light ? '' : '#A9DCD2'});
+const read = file => fs.readFileSync(path.join(root, file), 'utf8');
+function page(query) {
+    const mode = query.get('mode') === 'ipsview' ? 'ipsview' : 'symcon';
+    const horizontal = query.get('orientation') === 'horizontal';
+    const count = Math.max(1, Math.min(32, Number(query.get('count')) || (query.get('design') === 'extended' ? 16 : 32)));
+    const font = Math.max(50, Math.min(200, Number(query.get('font')) || 100));
+    const light = query.get('theme') === 'light';
+    const palette = {background: light ? '#ffffff' : '#303236', text: light ? '#222222' : '#f4f5f7',
+        muted: light ? '#666666' : '#aeb1b8', border: light ? '#cccccc' : '#777b83',
+        accent: '#55cbb5', seriesColors: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#9a60b4']};
+    const data = Array.from({length: count}, (_, index) => ({id: 'fixture-stage-' + index,
+        label: 'Verbraucher ' + String(index + 1).padStart(2, '0'), value: index === 31 ? 100 : 12 + index * 2,
+        unit: 'W', decimals: 1, initiallyVisible: index !== 31, color: ''}));
+    const bootstrap = {mode, options: {tileHeaderVisible: true, echartsThemes: {auto: palette}, adaptToBackground: false},
+        translations: {'Sources': 'Quellen', 'All': 'Alle', 'Inverse': 'Umkehren',
+            'Previous page': 'Vorherige Seite', 'Next page': 'Nächste Seite',
+            'Category navigation': 'Stufennavigation', 'No sources selected': 'Keine Quellen ausgewählt',
+            'All selected stage values are zero.': 'Alle ausgewählten Stufenwerte sind null.'},
+        state: {status: 'ready', chart: {theme: 'auto', family: 'funnel', funnel: {
+            title: '32 Stufen · vollständige Breitenskala', data,
+            enableSourceSelection: query.get('selection') !== 'no', style: {animationEnabled: false,
+                orientation: horizontal ? 'horizontal' : 'vertical', gap: 3, sortOrder: 'descending',
+                labelPosition: query.get('labels') === 'outside' ? 'outside' : 'inside',
+                showLabels: true, showValues: true, labelFontSizePercent: font, titleFontSizePercent: 100}}}}};
+    if (query.get('design') === 'polished') {
+        Object.assign(bootstrap.state.chart.funnel.style, {minSizePercent: 20, maxSizePercent: 90,
+            borderType: 'dashed', borderColor: light ? '#555555' : '#CBD6E8', shadowBlur: 8,
+            shadowColor: '#000000', shadowOffsetX: 3, shadowOffsetY: 3, hoverFocus: 'self', blurOpacityPercent: 15,
+            labelMaxWidth: 130, labelPosition: 'outside', outsideLabelSide: 'start', labelLineLength: 24,
+            labelLineWidth: 2, labelLineType: 'dotted', labelLineColor: light ? '#555555' : '#CBD6E8',
+            labelLineOpacityPercent: 70, fontFamily: 'Georgia, serif'});
     }
-    if (extended) {
-        initialState.chart.funnel.data = Array.from({length:16},(_,i)=>({id:'variable-'+i,label:'Langer Stufenname '+(i+1),
-            unit:'W',decimals:1,color:'',value:160-i*10,order:i}));
-        Object.assign(initialState.chart.funnel.style,{labelFontSizePercent:150,gap:30});
+    if (query.get('design') === 'extended') {
+        Object.assign(bootstrap.state.chart.funnel.style, {labelFontSizePercent: 150, gap: 30});
+        if (!query.has('selection')) { bootstrap.state.chart.funnel.enableSourceSelection = false; }
     }
-    if (polished) {
-        Object.assign(initialState.chart.funnel.style, {
-            minSizePercent:20,maxSizePercent:90,borderType:'dashed',borderColor:light?'#555555':'#CBD6E8',
-            shadowBlur:8,shadowColor:'#000000',shadowOffsetX:3,shadowOffsetY:3,
-            hoverFocus:'self',blurOpacityPercent:15,labelMaxWidth:130,labelPosition:'outside',outsideLabelSide:'start',
-            labelLineLength:24,labelLineWidth:2,labelLineType:'dotted',labelLineColor:light?'#555555':'#CBD6E8',
-            labelLineOpacityPercent:70,fontFamily:'Georgia, serif',labelColor:''
-        });
-    }
-    const bootstrap = { mode, state: initialState, options: { tileHeaderVisible: true, echartsThemes: {auto: {background:'#303236',text:'#f4f5f7',muted:'#969aa2',border:'#777b83',accent:'#55CBB5',seriesColors:['#5070dd','#b6d634','#ff994d','#fb628b']}},
-        adaptToBackground: false,  }, translations };
-    const replacements = { HTML_LANGUAGE: 'de', HTML_CLASSES: '', ROOT_FONT_SIZE: '16px', VIEWPORT_CONTENT: 'width=device-width, initial-scale=1',
-        DOCUMENT_TITLE: 'Funnel browser fixture', VISUALIZATION_THEME: light ? ':root{--symc-background:#ffffff;--symc-text:#222222;--symc-text-muted:#666666;--symc-border:#cccccc;--symc-surface:#eeeeee}' : variables, MODULE_STYLE: read('EChartsFunnel/visualization/style.css'),
+    const replacements = {HTML_LANGUAGE: 'de', HTML_CLASSES: '', ROOT_FONT_SIZE: '16px',
+        VIEWPORT_CONTENT: 'width=device-width, initial-scale=1', DOCUMENT_TITLE: 'Funnel synthetic fixture',
+        VISUALIZATION_THEME: ':root{--symc-background:' + palette.background + ';--symc-text:' + palette.text
+            + ';--symc-text-muted:' + palette.muted + ';--symc-muted:' + palette.muted + ';--symc-border:'
+            + palette.border + ';--symc-surface:' + (light ? '#eeeeee' : '#44474d') + '}',
+        MODULE_STYLE: read('EChartsFunnel/visualization/style.css') + '\n' + read('libs/echarts-source-controls.css'),
         IPSVIEW_STYLE: '', ECHARTS_SCRIPT: read('libs/echarts/6.1.0/echarts.funnel.min.js'), ECHARTS_THEME_SCRIPT: '',
-        ECHARTS_DESIGN_SCRIPT: read('libs/echarts-design.js'), BOOTSTRAP_JSON: JSON.stringify(bootstrap),
-        MODULE_SCRIPT: read('EChartsFunnel/visualization/app.js'), IPSVIEW_TRANSPORT_SCRIPT: '' };
+        ECHARTS_DESIGN_SCRIPT: ['echarts-design.js', 'echarts-series-selection.js', 'echarts-category-navigation.js',
+            'echarts-source-controls.js'].map(file => read('libs/' + file)).join('\n'),
+        BOOTSTRAP_JSON: JSON.stringify(bootstrap), MODULE_SCRIPT: read('EChartsFunnel/visualization/app.js'),
+        IPSVIEW_TRANSPORT_SCRIPT: ''};
     let html = read('EChartsFunnel/visualization/index.html').replace(/\{\{([A-Z_]+)\}\}/g, (_, key) => replacements[key] ?? '');
-    if (mode === 'symcon') { html = html.replace('<body>', '<body><div style="position:absolute;top:16px;left:20px;font:18px Arial;z-index:4">EChartsFunnel <span style="position:fixed;right:18px">⤢</span></div>'); }
-    return html;
+    if (mode === 'symcon') {
+        html = html.replace('<body>', '<body><div style="position:absolute;top:16px;left:20px;font:18px Arial;z-index:4">EChartsFunnel <span style="position:fixed;right:18px">⤢</span></div>');
+    }
+    return html.replace('</body>', `<script>
+window.fixtureAction = function (action) {
+    var prefix = 'echarts-funnel-';
+    if (action === 'last') {
+        var next = document.getElementById(prefix + 'next');
+        for (var i = 0; i < 32 && !next.disabled; i++) { next.click(); }
+    }
+    if (action === 'refresh') {
+        SYMC_VISUALIZATION.state.chart.funnel.data.forEach(function (item) { item.value += 1; });
+        window.handleMessage(SYMC_VISUALIZATION.state);
+    }
+    if (action === 'inverse' || action === 'all') { document.getElementById(prefix + action).click(); }
+    if (action === 'error') { window.handleMessage({status: 'error', chart: null, error: 'The Funnel values could not be loaded.'}); }
+};
+</script></body>`);
 }
-http.createServer((req, res) => {
-    const url = new URL(req.url, 'http://127.0.0.1');
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    if (url.pathname === '/chart') { res.end(page(url.searchParams.get('mode') === 'ipsview' ? 'ipsview' : 'symcon', url.searchParams.get('design') === 'extended', url.searchParams.get('theme') === 'light', url.searchParams.get('design') === 'polished')); return; }
-    res.end('<!doctype html><html lang="de"><head><title>Funnel – lokale Browserprüfung</title></head><body style="background:#0b0c0e;color:white;font:16px Arial;margin:20px">'
-        + '<h1 style="font-size:20px">Funnel · synthetische Beispieldaten</h1><div style="display:flex;gap:16px;align-items:start;flex-wrap:wrap">'
-        + '<section><h2 style="font-size:16px">Kachel · hoch</h2><iframe title="Kachel" src="/chart?mode=symcon" style="border:0;width:400px;height:600px"></iframe></section>'
-        + '<section><h2 style="font-size:16px">IPSView · breit</h2><iframe title="IPSView" src="/chart?mode=ipsview" style="border:0;width:790px;height:440px"></iframe></section></div></body></html>');
-}).listen(8799, '127.0.0.1', () => console.log('Funnel browser fixture: http://127.0.0.1:8799'));
+const port = Number(process.env.PORT || 8799);
+http.createServer((request, response) => {
+    const url = new URL(request.url, 'http://localhost');
+    response.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'});
+    if (url.pathname === '/' && !url.searchParams.has('mode')) {
+        response.end('<!doctype html><html lang="de"><body style="margin:12px;background:#101114;color:white;font:16px Arial">'
+            + '<h1>Funnel · synthetische Beispieldaten</h1><div style="display:grid;grid-template-columns:'
+            + (url.searchParams.has('narrow') ? '240px' : '1fr 1fr') + ';gap:16px">'
+            + ['vertical', 'horizontal'].flatMap(orientation => ['symcon', 'ipsview'].map(mode => {
+                const id = orientation + '-' + mode;
+                return '<section style="min-width:0"><h2>' + mode + ' · ' + orientation + '</h2>'
+                    + [['all', 'Alle'], ['inverse', 'Umkehren'], ['last', 'Letzte Seite'], ['refresh', 'Aktualisieren'], ['error', 'Ladefehler']]
+                        .map(([action, label]) => '<button onclick="document.getElementById(\'' + id
+                            + '\').contentWindow.fixtureAction(\'' + action + '\')">' + label + '</button>').join('')
+                    + '<iframe id="' + id + '" style="border:0;width:100%;height:540px" src="/chart?mode='
+                    + mode + '&orientation=' + orientation + '&font=' + (url.searchParams.get('font') || 100) + '"></iframe></section>';
+            })).join('') + '</div></body></html>');
+        return;
+    }
+    response.end(page(url.searchParams));
+}).listen(port, '127.0.0.1', () => console.log('Funnel browser fixture: http://127.0.0.1:' + port));

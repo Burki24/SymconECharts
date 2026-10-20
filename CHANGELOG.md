@@ -9,6 +9,12 @@
 
 ## Neu
 
+- EChartsFunnel unterstützt bis zu 32 Quellen mit optionaler Quellenauswahl,
+  Anfangssichtbarkeit und Stufennavigation in beiden Ausrichtungen. Versteckte
+  Quellen und andere Seiten bleiben Teil der vollständigen Breitenskala.
+  Kleine Altlisten bleiben ohne aktivierte Auswahl unverändert; die Vorschau
+  kennzeichnet größere Ausschnitte und erhält deren vollständigen Maßstab.
+
 - EChartsGaugeMulti unterstützt bis zu 32 Quellen mit optionaler Quellenauswahl,
   Anfangssichtbarkeit und Alle/Umkehren. Responsive Seiten für die vier Vorlagen
   erhalten individuelle Wertebereiche, Einheiten und Genauigkeit. Bestehende

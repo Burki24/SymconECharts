@@ -1,6 +1,22 @@
 {
     "translations": {
         "de": {
+            "Sources": "Quellen",
+            "All": "Alle",
+            "Inverse": "Umkehren",
+            "Previous page": "Vorherige Seite",
+            "Next page": "Nächste Seite",
+            "Stage navigation": "Stufennavigation",
+            "No sources selected": "Keine Quellen ausgewählt",
+            "All selected stage values are zero.": "Alle ausgewählten Stufenwerte sind null.",
+            "Initially visible": "Anfangs sichtbar",
+            "Enable source selection": "Quellenauswahl aktivieren",
+            "Initially visible is used only when source selection is enabled. Large lists use stage navigation; all configured sources continue to be read.": "Anfangs sichtbar gilt nur bei aktivierter Quellenauswahl. Große Listen verwenden eine Stufennavigation; alle konfigurierten Quellen werden weiterhin gelesen.",
+            "Choose 1 to 32 distinct numeric variables with the same unit and non-negative current values. List order is used by default. Widths always use the largest configured value, including hidden stages, not percentages of a total.": "1 bis 32 unterschiedliche numerische Variablen derselben Einheit mit nichtnegativen aktuellen Werten wählen. Standard ist die Listenreihenfolge. Breiten beziehen sich immer auf den größten konfigurierten Wert, auch bei ausgeblendeten Stufen, nicht auf eine Gesamtsumme.",
+            "Configure 1 to 32 unique numeric Funnel variables.": "1 bis 32 unterschiedliche numerische Funnel-Variablen konfigurieren.",
+            "Funnel initial source visibility must be boolean.": "Die Anfangssichtbarkeit der Funnel-Quellen muss ein Wahrheitswert sein.",
+            "The Funnel model is too large. Reduce source labels or units.": "Das Funnel-Modell ist zu groß. Quellenbeschriftungen oder Einheiten verkürzen.",
+            "Showing %d of %d selected stages (%d configured).": "Vorschau zeigt %d von %d ausgewählten Stufen (%d konfiguriert).",
             "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts.": "Ein gemeinsames EChartsGateway genügt für alle ECharts-Diagramminstanzen. Bei weiteren Diagrammen das vorhandene Gateway auswählen.",
             "Title": "Titel",
             "Variable": "Variable",

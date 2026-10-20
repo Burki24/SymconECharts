@@ -29,6 +29,20 @@ Canvas-Zeichenaufrufe für Kachel und IPSView statt nur vorhandener Titeloptione
 
 ## Aktueller Stand und Zielarchitektur
 
+Funnel erweitert gemäß [ADR 0075](adr/0075-funnel-source-selection-and-pages.md)
+auf 1–32 aktuelle Quellen mit optionaler ID-stabiler Quellenauswahl und
+responsiven Stufenseiten. Alle Quellen bleiben in Modell, Validierung,
+Gateway-Zugriffen und Abonnements; der vollständige Maximalwert bestimmt die
+Breitenskala vor Filterung oder Navigation. `EnableSourceSelection=false`
+und fehlendes `InitiallyVisible=true` erhalten Altlisten; bis 16 Quellen ohne
+Auswahl bleibt die alte Ansicht unverändert. Quellenauswahl, Kategorieanker und
+DOM/CSS-Bedienung werden mit vorhandenen Familien geteilt. Der gemeinsame
+Quellenresolver validiert Sichtbarkeitsmetadaten ausdrücklich opt-in, ohne
+Grenzen oder persistierte Quellen anderer Verbraucher zu ändern.
+SVG-Vorschauen filtern/sortieren vor ihrem höchstens achtteiligen Ausschnitt
+und verwenden weiterhin den vollständigen Maximalwert. Modell und finales HTML
+sind getrennt auf 200000 Bytes und 1 MiB begrenzt; keine Runtime-Änderung.
+
 GaugeMulti erweitert gemäß [ADR 0074](adr/0074-gauge-multi-source-selection-and-pages.md)
 auf 2–32 Quellen mit optionaler Auswahl und responsiven Seiten für alle vier
 Vorlagen. Das Modell enthält weiterhin alle Quellen und individuelle Skalen;
@@ -293,7 +307,7 @@ ECharts-Integrität und den Gauge→Gateway→Visualisierungs-Datenweg unter PHP
 | Gerät | EChartsCalendar | Tagesmittel/-minimum/-maximum einer Standardvariable oder Tagesverbrauch eines Zählers als Jahreskalender mit lesender Jahresnavigation |
 | Gerät | EChartsRadar | Aktuelle Vergleichsgruppen auf 3–10 ausdrücklich begrenzten Achsen mit eigenen Einheiten |
 | Gerät | EChartsBoxplot | Verteilungen abgeschlossener Stundenmittelwerte aus 1–32 Standard-Archivvariablen derselben Einheit mit Kategoriennavigation |
-| Gerät | EChartsFunnel | 1–16 manuell benannte Stufen mit aktuellen nichtnegativen Werten derselben Einheit |
+| Gerät | EChartsFunnel | 1–32 manuell benannte Stufen mit aktuellen nichtnegativen Werten gleicher Einheit, optionaler Quellenauswahl und Stufennavigation |
 
 Eine eigene I/O-Instanz, ein Konfigurator und Discovery gehören nicht zum
 Anfangsumfang. Datenquellen sind Teil der jeweiligen Gauge-Konfiguration und

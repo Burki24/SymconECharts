@@ -27,6 +27,8 @@ Radar vergleicht aktuelle Messwerte manuell angelegter Gruppen auf gemeinsam
 festgelegten Achsen mit eigenen Wertebereichen und Einheiten.
 Boxplot vergleicht die Verteilung abgeschlossener Archiv-Stundenmittelwerte.
 Funnel vergleicht aktuelle, nichtnegative Stufenwerte derselben Einheit.
+Bis zu 32 Quellen erhalten optional eine Quellenauswahl und responsive
+Stufennavigation; die vollständige Breitenskala bleibt auch auf Teilseiten erhalten.
 PictorialBar vergleicht aktuelle, nichtnegative Werte als Symbolbalken.
 Pie, BarCategory, BarPolar und PictorialBar können Quellen optional anhand
 eigener Min/Max-Grenzen auf 0–100 normalisieren. So sind relative Vergleiche
@@ -106,7 +108,8 @@ können unabhängig davon individuell vergeben werden.
   besitzen getrennte Designer.
 
 - __EChartsFunnel__ ([Dokumentation](EChartsFunnel/README.md))
-  Manuell benannte Stufen aus 1–16 aktuellen Variablenwerten derselben Einheit.
+  Manuell benannte Stufen aus 1–32 aktuellen Variablenwerten derselben Einheit
+  mit optionaler Quellenauswahl und Stufennavigation.
   Listenreihenfolge oder Wertsortierung, getrennte Designer für Kachel und IPSView.
 
 - __EChartsBoxplot__ ([Dokumentation](EChartsBoxplot/README.md))

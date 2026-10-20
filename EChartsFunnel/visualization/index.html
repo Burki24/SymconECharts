@@ -13,6 +13,23 @@
 <body>
     <main id="echarts-funnel-root" class="echarts-funnel-root">
         <div id="echarts-funnel-chart" class="echarts-funnel-chart" role="img"></div>
+        <div id="echarts-funnel-controls" class="echarts-source-controls" hidden>
+            <details id="echarts-funnel-selection" hidden>
+                <summary id="echarts-funnel-selection-title"></summary>
+                <div class="echarts-source-picker">
+                    <div class="echarts-source-picker-actions">
+                        <button id="echarts-funnel-all" type="button"></button>
+                        <button id="echarts-funnel-inverse" type="button"></button>
+                    </div>
+                    <div id="echarts-funnel-sources" class="echarts-source-list"></div>
+                </div>
+            </details>
+            <nav id="echarts-funnel-pages" hidden>
+                <button id="echarts-funnel-previous" type="button">‹</button>
+                <output id="echarts-funnel-range" role="status" aria-live="polite"></output>
+                <button id="echarts-funnel-next" type="button">›</button>
+            </nav>
+        </div>
         <div id="echarts-funnel-warning" class="echarts-refresh-warning" role="status" hidden></div>
         <div id="echarts-funnel-empty" class="echarts-funnel-empty" role="status" hidden></div>
         <div id="echarts-funnel-error" class="echarts-funnel-error" role="alert" hidden></div>

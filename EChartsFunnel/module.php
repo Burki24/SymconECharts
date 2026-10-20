@@ -76,6 +76,8 @@ class EChartsFunnel extends IPSModuleStrict
     private const STATUS_PARENT_MISSING = 203;
     private const STATUS_GATEWAY_FAILED = 204;
     private const STATUS_VALUE_INVALID = 205;
+    private const MAXIMUM_MODEL_BYTES = 200000;
+    private const MODEL_TOO_LARGE_MESSAGE = 'The Funnel model is too large. Reduce source labels or units.';
     private const DESIGN_DEFAULTS = [
         'EChartsTheme'          => 'auto', 'Orientation' => 'vertical', 'SortOrder' => 'configured',
         'Alignment'             => 'center', 'Gap' => 3, 'ShowTooltip' => true,
@@ -102,6 +104,7 @@ class EChartsFunnel extends IPSModuleStrict
             $this->RegisterMessage(0, IPS_KERNELSTARTED);
             $this->RegisterTransientRefresh('ECFU');
             $this->RegisterPropertyString('Sources', '[]');
+            $this->RegisterPropertyBoolean('EnableSourceSelection', false);
             $this->RegisterPropertyString('Title', '');
             foreach (['', 'IPSView'] as $prefix) {
                 foreach (self::DESIGN_DEFAULTS as $name => $default) {
@@ -189,7 +192,7 @@ class EChartsFunnel extends IPSModuleStrict
                 ['caption' => 'Borders and shadows', 'start' => 'BorderWidth'],
                 ['caption' => 'Highlighting', 'start' => 'HoverFocus']
             ]);
-            $fields = ['Title', 'Sources',
+            $fields = ['Title', 'Sources', 'EnableSourceSelection',
                 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
                 'IPSViewBackgroundOpacityPercent', ...array_keys(self::DESIGN_DEFAULTS),
                 ...array_map(static fn (string $name): string => 'IPSView' . $name, array_keys(self::DESIGN_DEFAULTS))];
@@ -420,33 +423,50 @@ class EChartsFunnel extends IPSModuleStrict
                 $this->DebugEChartsSetStatus(self::STATUS_VALUE_INVALID);
                 throw new DomainException('Funnel requires non-negative values.');
             }
-            $data[] = ['id' => 'variable-' . $source['VariableID'], 'variableID' => $source['VariableID'],
-                'label'     => $source['Label'], 'unit' => $source['Unit'], 'decimals' => $source['Decimals'],
-                'value'     => $current['Value'], 'timestamp' => $current['Timestamp'], 'order' => $index,
-                'color'     => $source['Color'] < 0 ? '' : EChartsAsset::ColorToHex($source['Color'])];
+            $data[] = ['id'        => 'variable-' . $source['VariableID'], 'variableID' => $source['VariableID'],
+                'initiallyVisible' => $source['InitiallyVisible'],
+                'label'            => $source['Label'], 'unit' => $source['Unit'], 'decimals' => $source['Decimals'],
+                'value'            => $current['Value'], 'timestamp' => $current['Timestamp'], 'order' => $index,
+                'color'            => $source['Color'] < 0 ? '' : EChartsAsset::ColorToHex($source['Color'])];
         }
         $this->WriteAttributeString('LastError', '');
         $this->DebugEChartsSetStatus(IS_ACTIVE);
-        return json_encode(
+        $json = json_encode(
             ['schemaVersion' => 1, 'family' => 'funnel', 'theme' => $this->EffectiveTheme($ipsView),
-                'funnel'     => ['title' => $this->ReadPropertyString('Title'), 'unit' => $sources[0]['Unit'],
-                    'data'               => $data, 'style' => $this->ReadDesignStyle($ipsView)]],
+                'funnel'     => ['title'    => $this->ReadPropertyString('Title'), 'unit' => $sources[0]['Unit'],
+                    'enableSourceSelection' => $this->ReadPropertyBoolean('EnableSourceSelection'),
+                    'data'                  => $data, 'style' => $this->ReadDesignStyle($ipsView)]],
             JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION
         );
+        if (strlen($json) > self::MAXIMUM_MODEL_BYTES) {
+            $this->WriteAttributeString('LastError', 'MODEL_TOO_LARGE');
+            $this->DebugEChartsSetStatus(self::STATUS_CONFIGURATION_INVALID);
+            throw new RuntimeException(self::MODEL_TOO_LARGE_MESSAGE);
+        }
+        return $json;
     }
 
     private function RenderFunnelHTMLPage(bool $ipsView): string
     {
         $hiddenTitle = !$ipsView && function_exists('IPS_GetObject')
             && (bool) (IPS_GetObject($this->InstanceID)['ObjectIsHiddenTitle'] ?? false);
-        return $this->RenderVisualizationHTMLPage($ipsView, [
+        $configuration = [
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'ECharts Funnel',
-            'visualizationTheme' => $this->VisualizationThemeCSS() . "\n\n"
+            'visualizationTheme' => $this->VisualizationThemeCSS() . "\n" . EChartsAsset::SourceControlsCSS() . "\n\n"
                 . $this->ResponsiveVisualizationCSS('#echarts-funnel-root', 'echarts-funnel'),
             'ipsViewStyle' => $ipsView ? $this->IPSViewThemeCSS() : '',
             'state'        => $this->BuildVisualizationState($ipsView),
             'translations' => [
+                'Sources'                                                         => $this->Translate('Sources'),
+                'All'                                                             => $this->Translate('All'),
+                'Inverse'                                                         => $this->Translate('Inverse'),
+                'Previous page'                                                   => $this->Translate('Previous page'),
+                'Next page'                                                       => $this->Translate('Next page'),
+                'Category navigation'                                             => $this->Translate('Stage navigation'),
+                'No sources selected'                                             => $this->Translate('No sources selected'),
+                'All selected stage values are zero.'                             => $this->Translate('All selected stage values are zero.'),
+                self::MODEL_TOO_LARGE_MESSAGE                                     => $this->Translate(self::MODEL_TOO_LARGE_MESSAGE),
                 'Configure valid Funnel variables.'                               => $this->Translate('Configure valid Funnel variables.'),
                 'Connect an active EChartsGateway.'                               => $this->Translate('Connect an active EChartsGateway.'),
                 'The Funnel values could not be loaded.'                          => $this->Translate('The Funnel values could not be loaded.'),
@@ -463,10 +483,19 @@ class EChartsFunnel extends IPSModuleStrict
             'replacements' => [
                 '{{ECHARTS_SCRIPT}}'           => EChartsAsset::FunnelJavaScript(),
                 '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
-                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript(),
+                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript() . "\n" . EChartsAsset::SeriesSelectionJavaScript()
+                    . "\n" . EChartsAsset::CategoryNavigationJavaScript() . "\n" . EChartsAsset::SourceControlsJavaScript(),
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
-        ]);
+        ];
+        $html = $this->RenderVisualizationHTMLPage($ipsView, $configuration);
+        if (strlen($html) > 1048576) {
+            $this->WriteAttributeString('LastError', 'MODEL_TOO_LARGE');
+            $this->DebugEChartsSetStatus(self::STATUS_CONFIGURATION_INVALID);
+            $configuration['state'] = $this->ErrorState(self::MODEL_TOO_LARGE_MESSAGE);
+            return $this->RenderVisualizationHTMLPage($ipsView, $configuration);
+        }
+        return $html;
     }
 
     private function Initialize(): void
@@ -512,10 +541,10 @@ class EChartsFunnel extends IPSModuleStrict
         return null;
     }
 
-    /** @return list<array{VariableID:int,Label:string,Color:int,Unit:string,Decimals:int}> */
+    /** @return list<array{VariableID:int,Label:string,Color:int,Unit:string,Decimals:int,InitiallyVisible:bool}> */
     private function GetValidatedSources(?string $draft = null): array
     {
-        return EChartsCurrentComparisonSources::Resolve($draft ?? $this->ReadPropertyString('Sources'), 'Funnel');
+        return EChartsCurrentComparisonSources::Resolve($draft ?? $this->ReadPropertyString('Sources'), 'Funnel', 32, false, true);
     }
 
     /** @return array<string,mixed> */
@@ -531,6 +560,9 @@ class EChartsFunnel extends IPSModuleStrict
             $chart = json_decode($this->GetFunnelDataForOutput($ipsView), true, 512, JSON_THROW_ON_ERROR);
         } catch (Throwable $exception) {
             $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
+            if ($this->ReadAttributeString('LastError') === 'MODEL_TOO_LARGE') {
+                return $this->ErrorState(self::MODEL_TOO_LARGE_MESSAGE);
+            }
             return $this->ErrorState($this->ReadAttributeString('LastError') === 'Funnel requires non-negative values.'
                 ? 'Funnel requires non-negative values.' : 'The Funnel values could not be loaded.');
         }

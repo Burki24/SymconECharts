@@ -1,5 +1,43 @@
 # Tests
 
+## Funnel: 32 Quellen, Auswahl und Stufenseiten
+
+`php tests/gateway_gauges.php --funnel-many` prüft isoliert den echten Modul-/
+Gateway-Pfad mit synthetischen Kernel-Daten: 1/32/33 Quellen, Altlisten ohne
+Property-Umschreiben, gleiche Namen bei getrennten IDs, Einheiten/Genauigkeit,
+Anfangssichtbarkeit und unabhängige Designer. Versteckte Quellen werden weiterhin
+gelesen, referenziert und abonniert; ihre Updates und Fehler bleiben sichtbar.
+JSON-Budget von 200000 Bytes und tatsächliches finales 1-MiB-HTML-Budget haben
+getrennte Fehler-/Wiederherstellungsfälle. Der gemeinsame Resolver bleibt für
+andere Familien ohne explizite Freigabe beim bisherigen Quellenbudget.
+
+SVG-Drafts lesen keine Archive oder Gateway-Daten und ändern weder Status noch
+Properties. Filterung und Sortierung liegen vor dem höchstens achtteiligen
+Vorschauausschnitt; ein verborgenes Maximum bleibt die Bezugsgröße. Getestet
+sind ein spät allein sichtbarer Wert mit tatsächlicher 10-%-Breite, Original-
+Palette, Null-/Leerauswahl, vollständige Mengenhinweise und gültiges XML.
+
+`node tests/funnel_layout.js` misst echte Polygonbreiten im gepinnten ECharts
+für beide Ausgaben und Ausrichtungen und sichert die vollständige Skala auf
+allen Seiten ab. Legacy-Geometrie, Sortierung, Farben, ID-Anker, Schriftgröße,
+Resize, Entfernen, Nullseiten und Fehlerwiederholung sind abgedeckt. Ein
+zusätzlicher Fall setzt die DOM-Maße versteckter Diagramme auf null und sichert
+die sofortige Wiederherstellung nach leerer Auswahl ohne ResizeObserver ab.
+Die bisherige PHP-/ECharts-Polygonparität bleibt erhalten. Der anfängliche
+Frontendtest scheiterte gezielt an der fehlenden Auswahl-/Seitennavigation.
+
+`node tests/funnel_browser.mjs` stellt synthetische Canvas-Beispiele auf Port
+8799 bereit: Kachel/IPSView, horizontal/vertikal, Quellenaktionen und Seiten,
+`/?narrow=1&font=150` für schmale Ausgaben sowie die vorhandenen Stilvarianten.
+Am 20.10.2026 wurden lokal im Canvas-Browser Alle/Umkehren, leere Auswahl und
+sofortige Wiederherstellung sowie die letzte Seite 24–32/32 visuell bestätigt.
+Die horizontale Ausgabe mit 150-%-Schrift zeigt mehrere lesbare Stufen und
+behält beim Einzelzuschalten des Maximalwerts ihre Skala und ihren ID-Anker.
+Bei 240 px Breite bleibt der Ladefehlerhinweis über der zweizeiligen Bedienung;
+Aktualisieren entfernt den Hinweis und erhält die gewählte Ansicht.
+Die neue Funktion erfordert nach Modulupdate noch die Live-Abnahme in Symcon
+und der IPSView-App; lokale Tests ersetzen diese nicht.
+
 ## Gauge-Runtime: konfigurierte Titel in beiden Ausgabewegen
 
 `node tests/gauge_runtime_titles.js` prüft das ausgelieferte Bundle unverändert

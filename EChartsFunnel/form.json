@@ -42,6 +42,15 @@
                     }
                 },
                 {
+                    "caption": "Initially visible",
+                    "name": "InitiallyVisible",
+                    "width": "130px",
+                    "add": true,
+                    "edit": {
+                        "type": "CheckBox"
+                    }
+                },
+                {
                     "caption": "Stage color (optional)",
                     "name": "Color",
                     "width": "160px",
@@ -68,6 +77,11 @@
                     "caption": "Label (optional)"
                 },
                 {
+                    "type": "CheckBox",
+                    "name": "InitiallyVisible",
+                    "caption": "Initially visible"
+                },
+                {
                     "type": "SelectColor",
                     "name": "Color",
                     "caption": "Stage color (optional)",
@@ -78,7 +92,16 @@
         },
         {
             "type": "Label",
-            "caption": "Choose 1 to 16 distinct numeric variables with the same unit and non-negative current values. List order is used by default. Widths are relative to the largest value, not percentages of a total."
+            "caption": "Choose 1 to 32 distinct numeric variables with the same unit and non-negative current values. List order is used by default. Widths always use the largest configured value, including hidden stages, not percentages of a total."
+        },
+        {
+            "type": "CheckBox",
+            "name": "EnableSourceSelection",
+            "caption": "Enable source selection"
+        },
+        {
+            "type": "Label",
+            "caption": "Initially visible is used only when source selection is enabled. Large lists use stage navigation; all configured sources continue to be read."
         },
         {
             "type": "ExpansionPanel",

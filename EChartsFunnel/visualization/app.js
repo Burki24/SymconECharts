@@ -11,6 +11,26 @@
     var chart = null;
     var currentState = bootstrap.state || null;
     var currentTheme = null;
+    var selection = window.SYMC_ECHARTS_SERIES_SELECTION.create();
+    var navigation = window.SymconEChartsCategoryNavigation.create();
+    var selectedItems = [];
+    var pageItems = [];
+    var pageWindow = { first: 0, last: 0, visibleCount: 0 };
+    var paletteIndices = Object.create(null);
+    var nextPaletteIndex = 0;
+    var lastWidth = 0;
+    var lastHeight = 0;
+    var controls = window.SYMC_ECHARTS_SOURCE_CONTROLS.create({
+        prefix: 'echarts-funnel', translate: translate,
+        change: function (id, visible) { selection.select(id, visible); render(currentState); },
+        all: function () { selection.selectAll(true); render(currentState); },
+        inverse: function () { selection.invert(); render(currentState); },
+        move: function (direction) {
+            navigation.rememberWindow(selectedItems.map(function (item) { return item.id; }),
+                pageWindow.first + direction * pageWindow.visibleCount);
+            render(currentState);
+        }
+    });
 
     var tileHeaderInset = bootstrap.mode === 'symcon'
         && (!bootstrap.options || bootstrap.options.tileHeaderVisible !== false) ? 58 : 0;
@@ -64,6 +84,21 @@
         var funnel = model.funnel || {};
         var style = funnel.style || {};
         var items = funnel.data || [];
+        // Width always follows the complete validated model, never the current view.
+        var maximum = Math.max.apply(null, items.map(function (item) { return item.value; }));
+        var enabled = funnel.enableSourceSelection === true;
+        var projected = enabled || items.length > 16;
+        var selected = selection.reconcile(items.map(function (item) {
+            return { id: item.id, initiallyVisible: !enabled || item.initiallyVisible !== false };
+        }));
+        Object.keys(paletteIndices).forEach(function (id) {
+            if (!items.some(function (item) { return item.id === id; })) { delete paletteIndices[id]; }
+        });
+        items.forEach(function (item) {
+            if (!Object.prototype.hasOwnProperty.call(paletteIndices, item.id)) {
+                paletteIndices[item.id] = nextPaletteIndex++;
+            }
+        });
         var width = chartElement.clientWidth || 1;
         var height = chartElement.clientHeight || 1;
         var horizontal = style.orientation === 'horizontal';
@@ -81,16 +116,15 @@
         var left = outsideStart && !horizontal ? reserve : 18;
         var right = outside && !outsideStart && !horizontal ? reserve : 18;
         var bottom = outside && !outsideStart && horizontal ? reserve : 18;
+        if (projected) { bottom += width < 260 ? 96 : 48; }
         if (outsideStart && horizontal) { top += reserve; }
         top = Math.max(0, Math.min(top, height - 1));
         bottom = Math.min(bottom, Math.max(0, height - top - 1));
-        // Clamp design gaps to leave every stage with a nonnegative extent in small tiles.
         var extent = Math.max(1, horizontal ? width - left - right : height - top - bottom);
-        var gap = Math.min(style.gap == null ? 3 : style.gap, extent / Math.max(1, items.length * 2));
-        var maximum = Math.max.apply(null, items.map(function (item) { return item.value; }));
         var seriesColors = colors.seriesColors || [colors.accent];
         var ordered = items.map(function (item, index) {
-            return { ...item, originalIndex: index, stageColor: item.color || seriesColors[index % seriesColors.length] };
+            var paletteIndex = projected ? paletteIndices[item.id] : index;
+            return { ...item, originalIndex: index, stageColor: item.color || seriesColors[paletteIndex % seriesColors.length] };
         });
         if (style.sortOrder === 'ascending' || style.sortOrder === 'descending') {
             ordered.sort(function (a, b) {
@@ -99,13 +133,25 @@
                 return (a.value < b.value ? -direction : a.value > b.value ? direction : 0) || a.originalIndex - b.originalIndex;
             });
         }
+        selectedItems = ordered.filter(function (item) { return !enabled || selected[item.id] !== false; });
+        var requestedGap = style.gap == null ? 3 : style.gap;
+        var minimumExtent = horizontal ? Math.max(50, font * 7 + requestedGap)
+            : Math.max(18, font * (style.showValues === false ? 1.7 : 2.8) + requestedGap);
+        var capacity = projected ? Math.max(1, Math.min(16, Math.floor(extent / minimumExtent))) : selectedItems.length;
+        pageWindow = navigation.window(selectedItems.map(function (item) { return item.id; }), capacity);
+        pageItems = selectedItems.slice(pageWindow.first, pageWindow.last + 1);
+        navigation.rememberWindow(selectedItems.map(function (item) { return item.id; }), pageWindow.first);
+        controls.update({ items: items, selected: selected, enabled: enabled, visible: projected,
+            window: pageWindow, total: selectedItems.length });
+        // Clamp design gaps to leave every visible stage with a nonnegative extent.
+        var gap = Math.min(requestedGap, extent / Math.max(1, pageItems.length * 2));
         var align = style.alignment === 'start' ? (horizontal ? 'top' : 'left')
             : style.alignment === 'end' ? (horizontal ? 'bottom' : 'right') : 'center';
         function format(item) {
             return Number(item.value).toLocaleString(bootstrap.language || undefined, { maximumFractionDigits: item.decimals == null ? 2 : item.decimals })
                 + (item.unit ? ' ' + item.unit : '');
         }
-        var stageExtent = Math.max(1, (extent - gap * (items.length - 1)) / items.length);
+        var stageExtent = Math.max(1, (extent - gap * (pageItems.length - 1)) / Math.max(1, pageItems.length));
         var minimumSize = style.minSizePercent == null ? 0 : style.minSizePercent;
         var maximumSize = style.maxSizePercent == null ? 100 : style.maxSizePercent;
         return {
@@ -145,9 +191,9 @@
                 emphasis: { focus: style.hoverFocus === 'none' ? 'none' : 'self', disabled: style.hoverFocus === 'none',
                     label: { show: style.showLabels !== false } },
                 blur: { itemStyle: style.blurOpacityPercent == null || style.blurOpacityPercent < 0 ? {} : { opacity: style.blurOpacityPercent / 100 } },
-                data: ordered.map(function (item, index) {
-                    var next = ordered[index + 1];
-                    var meanWidth = (minimumSize + (item.value / maximum + (next ? next.value / maximum : 0)) / 2 * (maximumSize - minimumSize)) / 100;
+                data: pageItems.map(function (item, index) {
+                    var next = pageItems[index + 1];
+                    var meanWidth = (minimumSize + (maximum > 0 ? item.value / maximum + (next ? next.value / maximum : 0) : 0) / 2 * (maximumSize - minimumSize)) / 100;
                     var labelWidth = outside ? (horizontal ? stageExtent - 6 : reserve - lineLength - 12)
                         : horizontal ? stageExtent - 8 : (width - left - right) * meanWidth - 8;
                     if (style.labelMaxWidth > 0) { labelWidth = Math.min(labelWidth, style.labelMaxWidth); }
@@ -165,6 +211,7 @@
         warningElement.hidden = true;
         errorElement.textContent = translate(message || 'The Funnel values could not be loaded.');
         errorElement.hidden = false;
+        controls.hide();
     }
     function render(state) {
         if (retainOnTransientError(state, currentState, chart)) { return; }
@@ -178,23 +225,28 @@
             displayError('Apache ECharts could not be initialized.');
             return;
         }
-        if (!(model.funnel.data || []).some(function (item) { return item.value > 0; })) {
+        var theme = normalizeTheme(model.theme || 'auto');
+        // Restore measurable geometry before projecting an empty/zero selection.
+        // display:none otherwise reports 0px and would leave one tiny stage until a resize.
+        var wasHidden = chartElement.hidden;
+        chartElement.hidden = false;
+        var option = buildOption(model, theme);
+        rootElement.style.backgroundColor = bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
+            ? 'transparent' : colorsFor(theme).background;
+        if (!selectedItems.some(function (item) { return item.value > 0; })) {
             if (chart) { chart.clear(); }
             chartElement.hidden = true;
             errorElement.hidden = true;
             warningElement.hidden = true;
-            emptyElement.textContent = translate('All stage values are zero.');
+            emptyElement.textContent = translate(!selectedItems.length ? 'No sources selected'
+                : (model.funnel.data || []).some(function (item) { return item.value > 0; })
+                    ? 'All selected stage values are zero.' : 'All stage values are zero.');
             emptyElement.hidden = false;
             return;
         }
-        var wasHidden = chartElement.hidden;
-        chartElement.hidden = false;
         errorElement.hidden = true;
         emptyElement.hidden = true;
         warningElement.hidden = true;
-        rootElement.style.backgroundColor = bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
-            ? 'transparent' : colorsFor(normalizeTheme(model.theme || 'auto')).background;
-        var theme = normalizeTheme(model.theme || 'auto');
         if (chart && currentTheme !== theme) { chart.dispose(); chart = null; }
         if (!chart) {
             chart = window.echarts.init(chartElement, theme === 'auto' ? null : theme, { renderer: 'canvas' });
@@ -202,23 +254,23 @@
         } else if (wasHidden) {
             chart.resize();
         }
-        chart.setOption(buildOption(model, theme), true);
+        chart.setOption(option, true);
 
     }
     window.handleMessage = function (message) {
         var state = design.parseVisualizationState(message);
         if (state) { render(state); }
     };
-    if (window.ResizeObserver) {
-        new ResizeObserver(function () {
-            if (!design.resizeChartIfNeeded(chart, chartElement)) { return; }
-            if (currentState && currentState.status === 'ready') {
-                chart.setOption(buildOption(currentState.chart, currentTheme || 'auto'), true);
-            }
-        }).observe(chartElement);
-    } else {
-        window.addEventListener('resize', function () { if (chart) { chart.resize(); } });
+    function resizeChart() {
+        var width = chartElement.clientWidth;
+        var height = chartElement.clientHeight;
+        if (width === lastWidth && height === lastHeight) { return; }
+        lastWidth = width; lastHeight = height;
+        if (chart) { chart.resize(); }
+        if (currentState && currentState.status === 'ready') { render(currentState); }
     }
+    if (window.ResizeObserver) { new ResizeObserver(resizeChart).observe(chartElement); }
+    else { window.addEventListener('resize', resizeChart); }
     window.addEventListener('beforeunload', function () { if (chart) { chart.dispose(); } });
     render(currentState);
 }());

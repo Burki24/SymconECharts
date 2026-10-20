@@ -38,6 +38,9 @@ BarPolar unterstützt 100 Quellen mit optionaler Quellenauswahl und responsiven
 Seiten für beide Polarmodi; die Werteskala berücksichtigt auch versteckte Quellen.
 GaugeMulti unterstützt zwei bis 32 Quellen mit optionaler Quellenauswahl und
 responsiven Instrumentenseiten bei weiterhin individuellen Skalen und Einheiten.
+Funnel unterstützt 32 Quellen mit optionaler Quellenauswahl und responsiver
+Stufennavigation; vollständiger Maximalwert, gleiche Einheit und nichtnegative
+Originalwerte bleiben unabhängig vom gewählten Ausschnitt verbindlich.
 Die übrigen
 Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
 
@@ -61,6 +64,7 @@ Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
 | Erledigt | Pie: 100 Quellen mit optionaler Quellenauswahl | Anfangssichtbarkeit, Alle/Umkehren, ID-stabile Auswahl und Legendenposition; getrennte Nenner für sichtbare und vollständige Gewichte, korrekte Ausschnittsvorschau. |
 | Erledigt | BarPolar: 100 Quellen mit Auswahl und Seiten | ID-stabile Quellenauswahl und Seiten für radiale Balken und konzentrische Bögen, schrift-/platzabhängige Kapazität und vollständige Werteskala einschließlich versteckter Quellen. |
 | Erledigt | GaugeMulti: 32 Quellen mit Auswahl und Seiten | Individuelle Skalen/Einheiten, ID-stabile Auswahl und Seiten für alle vier Vorlagen; DOM-Bedienung und CSS mit BarPolar geteilt, keine verkleinerten 32er-Instrumentenraster. |
+| Erledigt | Funnel: 32 Quellen mit Auswahl und Stufennavigation | ID-stabile Auswahl und Seiten in beiden Ausrichtungen; vollständiger Maximalwert einschließlich versteckter Quellen, unveränderte Altlisten und gekennzeichnete maßstabstreue Vorschau. |
 | Danach | Weitere Archiv- und Vergleichsreihen | Nur zusammen mit Navigation, Vorschaukennzeichnung und messbaren Ressourcenbudgets. |
 
 Normalisierung ist keine allgemeine Lösung für unterschiedliche Einheiten:
@@ -84,7 +88,7 @@ Schritte sind Planungsziele, keine implementierten oder lastgeprüften Zusagen.
 | EChartsBarWaterfall | Startwert plus 1–99 signierte Änderungen, also 2–100 Quellen; gleiche Einheit; Endsumme zusätzlich berechnet. Modell höchstens 200000 Bytes, HTML höchstens 1 MiB. | Umgesetzt: responsive Kategoriennavigation, ID-stabiler Ausschnitt und unveränderte vollständige Bilanz/Skala. Vorschau zeichnet höchstens fünf Quellen, zeigt aber die echte Gesamtbilanz. Explizite Zwischensummen/Neustarts bleiben eine eigene fachliche Erweiterung. |
 | EChartsBarPolar | 1–100 Quellen gleicher Roh-Einheit oder ausdrücklich aktivierte Normalisierung je Quelle auf 0–100; negative Originalwerte bleiben erhalten. Modell höchstens 200000 Bytes, HTML höchstens 1 MiB. | Umgesetzt: optionale ID-stabile Quellenauswahl und responsive Seiten mit vollständiger Werteskala. Bestehende Listen bis 16 ohne Auswahl behalten ihre Geometrie; die Vorschau zeigt höchstens sechs anfangs sichtbare Quellen mit vollständig berechnetem Maßstab. |
 | EChartsPie | 1–100 nichtnegative Quellen gleicher Roh-Einheit oder optional normalisierte Gewichte mit beliebigen Originaleinheiten und eigenen Min/Max. Modell höchstens 200000 Bytes, HTML höchstens 1 MiB. | Umgesetzt: optionale erweiterte Quellenauswahl mit Anfangssichtbarkeit, Alle/Umkehren und ID-stabiler Legendenposition. Alle Quellen bleiben im Modell; Auswahl- und Gesamtanteil werden getrennt benannt. Keine automatische Restgruppe; eine Ausschnittsvorschau berechnet ihre Gewichte nicht neu. |
-| EChartsFunnel | 1–16 nichtnegative numerische Quellen gleicher Einheit. Null gültig; manuelle oder wertbezogene Reihenfolge, keine erzwungene Abnahme zwischen Stufen. | 16 ist eine Darstellungsgrenze. 32, später 100 nur mit Navigation und Beschriftungsprüfung. Negative Trichterbreiten sind keine sinnvolle Aufhebung. Der gemeinsame Resolver behält hier die Grenze 16. |
+| EChartsFunnel | 1–32 nichtnegative numerische Quellen gleicher Einheit; Modell höchstens 200000 Bytes, finales HTML höchstens 1 MiB. | Umgesetzt: optionale Quellenauswahl und schrift-/platzabhängige Stufenseiten, vollständige Breitenskala auch bei verstecktem Maximum. Altlisten bis 16 ohne Auswahl behalten ihre Ansicht. Keine Prozentanteile, negative Breiten oder Normalisierung; andere Verbraucher behalten ihre ausdrücklichen Quellenbudgets. |
 | EChartsPictorialBar | 1–100 nichtnegative Quellen gleicher Roh-Einheit oder optional normalisierte Quellen mit eigenen Min/Max und Originaleinheiten. Wertfarbe, interner Verlauf, Icons und eigene SVGs. | Umgesetzt: Normalisierung und responsive Kategoriennavigation ohne Datenverlust; Vorschau kennzeichnet ihren Acht-Quellen-Ausschnitt. Mehrfachauswahl nach Objektzweig/Filter weiterhin offen. |
 | EChartsTree | Objektwurzel Ebene 0, Kategorien/Instanzen/Variablen; 1–12 Nachkommensebenen; 10–3000 Knoten, Standard 80; gefiltertes Suchbudget 30000 Objekte. Startzustände ab 200000 Bytes werden komprimiert, nicht abgelehnt. | Umgesetzt: tiefere Zweige, getrennte Anfangstiefe, ID-stabile Aufklapp-/Pan-/Zoom-Ansicht und gemeinsame begrenzte Strukturvorschau. Links/Medien/Skripte bleiben ausgeschlossen. |
 | EChartsTreeSystemHealth | Dieselben Hierarchiegrenzen; bis 3000 ausdrückliche Boolean-/Zahlenregeln; Vorfahrenbewertung nur anhand des berücksichtigten Baums. | Umgesetzt: zwölf Nachkommensebenen und sichtbarer lokaler Bewertungsumfang einschließlich nicht enthaltener Regelvariablen. Keine zusätzliche Vollsuche oder Zustandsaussage außerhalb der ausgewählten Hierarchie. |
@@ -181,6 +185,15 @@ größtmögliche Imports und beide Ausgabewege abdecken. Eine Auswahl/Navigation
 darf keine Daten verändern oder unsichtbar aus dem fachlichen Modell entfernen.
 
 ## Nachweise dieses Änderungsschritts und verbleibende Lücken
+
+Funnel prüft 32/33 Quellen, unveränderte Altlisten, gleiche Namen bei getrennten
+IDs, Einheiten/Genauigkeit, negative/Null-/Gateway-Fehler auch versteckter Quellen,
+vollständige Lesezugriffe/Referenzen/Abonnements und beide Ausgabewege. Die
+Vorschau filtert/sortiert vor ihrem Ausschnitt und behält ein verborgenes Maximum.
+Native ECharts-Geometrie prüft die Breiten tatsächlicher Stufenpolygone für beide
+Ausrichtungen und weitere Seiten; Auswahl, leere Zustände und Anker bleiben bedienbar.
+200000 Modellbytes und finales 1-MiB-HTML-Limit sind getrennt abgesichert.
+Live-Abnahme nach Modulupdate bleibt beim Eigentümer.
 
 GaugeMulti prüft 32/33 Quellen, unveränderte Altlisten, gleiche Namen mit
 verschiedenen IDs, eigene Skalen/Einheiten, Darstellungsübernahme und

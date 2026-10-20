@@ -53,14 +53,29 @@ trait FunnelPreview
         $e = EChartsBarPreview::E(...);
         $n = EChartsBarPreview::N(...);
         $maximum = $items === [] ? 0 : max(array_column($items, 'value'));
-        if ($invalid || $maximum <= 0) {
-            return $svg . '<text x="360" y="190" text-anchor="middle" fill="' . $e($palette['text']) . '">'
-                . $e($this->Translate($invalid ? 'Preview requires valid non-negative stage values.' : 'All stage values are zero.')) . '</text></svg>';
+        $totalCount = count($items);
+        $sourceSelection = (bool) ($values['EnableSourceSelection'] ?? $this->ReadPropertyBoolean('EnableSourceSelection'));
+        $paged = $totalCount > 16 || $sourceSelection;
+        if ($sourceSelection) {
+            $items = array_values(array_filter($items, static fn (array $item): bool => ($item['InitiallyVisible'] ?? true) === true));
         }
         $sort = $this->BarPreviewValue($values, 'SortOrder', 'string', $ipsView);
         if (in_array($sort, ['ascending', 'descending'], true)) {
             usort($items, static fn (array $a, array $b): int => ($sort === 'ascending'
                 ? $a['value'] <=> $b['value'] : $b['value'] <=> $a['value']) ?: $a['order'] <=> $b['order']);
+        }
+        $selectedCount = count($items);
+        $selectedMaximum = $items === [] ? 0 : max(array_column($items, 'value'));
+        if ($paged) {
+            $items = array_slice($items, 0, 8);
+        }
+        $svg = str_replace('<svg ', '<svg data-source-count="' . $totalCount . '" data-selected-count="' . $selectedCount
+            . '" data-rendered-count="' . count($items) . '" data-maximum="' . $e((string) $maximum) . '" ', $svg);
+        if ($invalid || $items === [] || $maximum <= 0 || $selectedMaximum <= 0) {
+            $message = $invalid ? 'Preview requires valid non-negative stage values.'
+                : ($items === [] ? 'No sources selected' : ($maximum <= 0 ? 'All stage values are zero.' : 'All selected stage values are zero.'));
+            return $svg . '<text x="360" y="190" text-anchor="middle" fill="' . $e($palette['text']) . '">'
+                . $e($this->Translate($message)) . '</text></svg>';
         }
         $horizontal = $this->BarPreviewValue($values, 'Orientation', 'string', $ipsView) === 'horizontal';
         $outside = $this->BarPreviewValue($values, 'LabelPosition', 'string', $ipsView) === 'outside';
@@ -109,7 +124,8 @@ trait FunnelPreview
             $last = $line($items[$index + 1]['value'] ?? 0.0, $index * ($step + $gap) + $step);
             $points = [$first[0], $first[1], $last[1], $last[0]];
             $color = EChartsBarPreview::Color($item['Color'], $palette['seriesColors'][$item['order'] % count($palette['seriesColors'])]);
-            $svg .= '<polygon data-stage="' . $item['order'] . '" points="' . implode(' ', array_map(static fn (array $point): string => $n($point[0]) . ',' . $n($point[1]), $points))
+            $svg .= '<polygon data-stage="' . $item['order'] . '" data-source-id="variable-' . ($item['VariableID'] ?? $item['order'])
+                . '" data-value="' . $e((string) $item['value']) . '" points="' . implode(' ', array_map(static fn (array $point): string => $n($point[0]) . ',' . $n($point[1]), $points))
                 . '" fill="' . $e($color) . '" opacity="' . $n(max(0, min(100, $this->BarPreviewValue($values, 'OpacityPercent', 'integer', $ipsView))) / 100)
                 . '" stroke="' . $e(EChartsBarPreview::Color($this->BarPreviewValue($values, 'BorderColor', 'integer', $ipsView), $palette['background']))
                 . '" stroke-width="' . $n(max(0, min(8, $this->BarPreviewValue($values, 'BorderWidth', 'integer', $ipsView)))) . '"'
@@ -169,7 +185,8 @@ trait FunnelPreview
             $svg .= '</text>';
         }
         return $svg . '<text x="24" y="354" font-size="10" fill="' . $e($palette['muted']) . '">'
-            . $e($this->Translate('Hover effects are visible in the chart.')) . '</text></svg>';
+            . $e($paged ? sprintf($this->Translate('Showing %d of %d selected stages (%d configured).'), count($items), $selectedCount, $totalCount)
+                : $this->Translate('Hover effects are visible in the chart.')) . '</text></svg>';
     }
 
     /** Same white/#111111 luminance comparison as the shared JavaScript designer. */
