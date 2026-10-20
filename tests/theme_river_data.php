@@ -34,10 +34,23 @@ $data = ThemeRiverData::Join([
 assertRiver($data['rows'][0]['values'] === [0.0, 5.0] && $data['rows'][1]['values'] === [10.0, 20.0]
     && $data['rows'][2]['values'] === null && $data['rows'][3]['values'] === [30.0, 40.0]
     && $data['missingIntervals'] === 21, 'Join must preserve real zero, use exact common timestamps and mark gaps without zero filling.');
+$partial = ThemeRiverData::Join([
+    [[$t[0], 1], [$t[1], 2], [$t[2], 3], [$t[3], 4]],
+    [[$t[1] + 900, 9876], [$t[2], 0], [$t[3], 7]]
+], $slots);
+assertRiver(array_column(array_slice($partial['rows'], 0, 4), 'values') === [null, null, [3.0, 0.0], [4.0, 7.0]]
+    && $partial['missingIntervals'] === 22, 'The first partial archive interval must remain a shared gap while later complete values, including zero, survive.');
+assertRiver(
+    ThemeRiverData::Join([[[$slots[0]['endTimestamp'], 10]]], [$slots[0]])['rows'][0]['values'] === null,
+    'An archive beginning in the final second of its first interval still has no complete interval value.'
+);
 foreach ([
     [[[$t[0], -1]]], [[[$t[0], NAN]]], [[[$t[0], INF]]], [[[$t[0], '1']]],
-    [[[$t[0] + 1, 1]]], [[[$t[1], 1], [$t[0], 2]]], [[[$t[0], 1], [$t[0], 2]]],
-    [[[$t[0] - 3600, 1]]], [[[$t[0], 1, 2]]]
+    [[[$t[0], 1], [$t[1] + 1, 1]]], [[[$t[1], 1], [$t[0], 2]]], [[[$t[0], 1], [$t[0], 2]]],
+    [[[$t[0] - 3600, 1]]], [[[$t[0], 1, 2]]], [[[$t[0] + 1, -1]]],
+    [[[$t[0] + 1, NAN]]], [[[$t[0] + 1, INF]]], [[[$t[0] + 1, '1']]],
+    [[[$t[0] + 1, 1], [$t[1] + 1, 2]]], [[[$t[0] + 1, 1], [$t[0] + 1, 2]]],
+    [[[$t[0] + 1, 1], [$t[0], 2]]], [[[$slots[count($slots) - 1]['endTimestamp'] + 1, 1]]]
 ] as $bad) {
     try {
         ThemeRiverData::Join($bad, $slots);
@@ -48,6 +61,11 @@ foreach ([
 foreach (['2026-03-30T12:00:00+02:00' => 23, '2026-10-26T12:00:00+01:00' => 25] as $date => $hours) {
     $day = ThemeRiverData::Window('24h', 'day', strtotime($date), 'Europe/Berlin');
     assertRiver(count($day['Intervals']) === 1 && $day['EndTimestamp'] - $day['StartTimestamp'] + 1 === $hours * 3600, 'Local daily intervals must honor DST.');
+    $partialDay = ThemeRiverData::Join([[[$day['StartTimestamp'] + 3600, 10]]], $day['Intervals']);
+    assertRiver(
+        $partialDay['rows'][0]['values'] === null && $partialDay['missingIntervals'] === 1,
+        'A partial first calendar day remains a gap even on 23/25-hour days.'
+    );
 }
 $repeated = ThemeRiverData::Window('24h', 'hour', strtotime('2026-10-25T02:30:00+01:00'), 'Europe/Berlin');
 assertRiver($repeated['EndTimestamp'] === strtotime('2026-10-25T02:00:00+01:00') - 1, 'Repeated hour must retain the actual UTC offset.');

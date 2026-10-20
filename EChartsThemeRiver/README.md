@@ -93,6 +93,13 @@ erst innerhalb des gewählten Zeitraums begonnen hat. Zusammenhängende gültige
 Abschnitte bleiben sichtbar. Fehlende Werte werden weder mit Null aufgefüllt
 noch durch Verbindung über die Lücke verdeckt.
 
+Beginnt eine Quellaufzeichnung mitten in einer Stunde oder einem Kalendertag,
+bleibt auch dieses erste unvollständige Intervall eine gemeinsame Lücke.
+Sein Teilwert wird weder auf den Intervallbeginn verschoben noch als
+vollständiger Mittelwert oder Verbrauch verwendet. Nachfolgende vollständige
+Intervalle bleiben sichtbar, auch wenn die betreffende Quelle ausgeblendet ist.
+Das gilt für beide Datengrundlagen und alle auswählbaren Zeiträume.
+
 Alle Abschnitte verwenden denselben Maßstab. Die glatte Bandform verbindet
 vorhandene Intervallwerte grafisch, erzeugt aber keine zusätzlichen Messungen.
 Der Tooltip nennt das tatsächliche Intervall mit Zeitzonenoffset und die

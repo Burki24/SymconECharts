@@ -1,5 +1,11 @@
 # Unveröffentlicht
 
+- EChartsThemeRiver behandelt das erste unvollständige Stunden- oder
+  Tagesintervall eines später begonnenen Archivs als gemeinsame Lücke.
+  Nachfolgende gültige Mittelwerte oder Zählerverbräuche bleiben sichtbar,
+  statt das gesamte Diagramm mit einem Archivdatenfehler zu verwerfen.
+  Bestehende Konfigurationen und Designs bleiben unverändert.
+
 - EChartsTimeSeries reserviert bei mehreren Wertachsen auf derselben Seite
   mehr Abstand für längere Skalenbeschriftungen.
 

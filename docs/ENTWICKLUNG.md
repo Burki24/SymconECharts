@@ -49,6 +49,22 @@ Native Date-Felder und reine Entwurfsvorschauen folgen den vorhandenen Familien.
 Bei oben liegender Vorschaulegende reserviert der absolute Modus Platz unter
 seiner Datumskopfzeile; bestehende Vorschaugeometrie bleibt unverändert.
 
+Die anschließende Teilarchivkorrektur liegt ausschließlich im gemeinsamen
+`ThemeRiverData::Join`: Symcons erstes Aggregat kann bei Beginn der Aufzeichnung
+mitten in einem geplanten Intervall dessen tatsächlichen Startzeitstempel tragen.
+Nur ein solcher erster, innerhalb eines geplanten Intervalls liegender Punkt
+wird nach vollständiger Wertprüfung verworfen; der Slot bleibt eine gemeinsame
+Lücke. Es gibt keine Zeitstempelrundung, Nullfüllung oder Übernahme eines
+anfänglichen Zählerstands als Intervallverbrauch. Spätere versetzte Punkte,
+Reihenfolgefehler, Duplikate, ungültige Werte und Punkte außerhalb des Fensters
+bleiben Fehler. Die bereits vor dem Join gezählten Ladebudgets bleiben erhalten.
+`tests/theme_river_data.php` und die bestehende Consumption-Integration prüfen
+synthetische Teilarchive für Mittelwert/Verbrauch, Stunde/Tag, feste/rollierende
+Fenster, versteckte Quellen, echte Nullen und beide unabhängigen Ausgaben.
+Die Regressionen reproduzierten vor der Korrektur den Intervallrasterfehler.
+Properties, Gateway und Renderer bleiben unverändert. Ein erneuter Live-Test
+der Korrektur nach Modulupdate sowie die tatsächliche IPSView-App bleiben offen.
+
 Candlestick integriert gemäß [ADR 0079](adr/0079-fixed-historical-candlestick-periods.md)
 feste historische Von-/Bis-Zeiträume. Die zentralen `ParseLocalDateTime`- und
 `ResolveAbsolute`-Verträge werden wiederverwendet; `AbsoluteIntervals` liefert

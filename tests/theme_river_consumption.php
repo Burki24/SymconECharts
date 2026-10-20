@@ -281,6 +281,77 @@ final class TestableConsumptionThemeRiver extends EChartsThemeRiver
             'A custom elapsed 24-hour duration must not invent the 25-hour completed day or issue empty-window archive requests.'
         );
 
+        // A newly started archive reports its first aggregate at the actual start, not at the slot boundary.
+        foreach (['average' => 0, 'consumption' => 1] as $metric => $archiveType) {
+            foreach (['hour', 'day'] as $aggregation) {
+                $labels = $aggregation === 'hour'
+                    ? ['2026-08-14 08:00:00', '2026-08-14 09:00:00', '2026-08-14 10:00:00', '2026-08-14 11:00:00']
+                    : ['2026-08-10 00:00:00', '2026-08-11 00:00:00', '2026-08-12 00:00:00', '2026-08-13 00:00:00'];
+                $times = array_map('strtotime', $labels);
+                foreach ([98650, 98651] as $id) {
+                    $GLOBALS['symconTestVariables'][$id] = $GLOBALS['symconTestVariables'][98600];
+                    $GLOBALS['symconTestArchiveVariables'][$id] = ['AggregationType' => $archiveType, 'LoggedValues' => [],
+                        'AggregatedValues'                                           => $id === 98650 ? [
+                            ['TimeStamp' => $times[3], 'Avg' => 4.0], ['TimeStamp' => $times[2], 'Avg' => 3.0],
+                            ['TimeStamp' => $times[1], 'Avg' => 2.0], ['TimeStamp' => $times[0], 'Avg' => 1.0]
+                        ] : [
+                            ['TimeStamp' => $times[3], 'Avg' => 7.0], ['TimeStamp' => $times[2], 'Avg' => 0.0],
+                            ['TimeStamp' => $times[1] + 900, 'Avg' => 9876.0]
+                        ]];
+                }
+                $newGateway();
+                $partial = $configure([['VariableID' => 98650], ['VariableID' => 98651, 'InitiallyVisible' => false]], $metric);
+                $partial->now = strtotime('2026-08-14 12:34:56');
+                $partial->SetTestProperty('Aggregation', $aggregation);
+                $partial->SetTestProperty('Range', 'absolute');
+                foreach (['AbsoluteStart' => $times[0], 'AbsoluteEnd' => strtotime($aggregation === 'hour' ? '2026-08-14 12:00:00' : '2026-08-14 00:00:00')] as $property => $time) {
+                    $date = new DateTimeImmutable('@' . $time);
+                    $date = $date->setTimezone(new DateTimeZone('Europe/Berlin'));
+                    $partial->SetTestProperty($property, json_encode(['year' => (int) $date->format('Y'), 'month' => (int) $date->format('n'),
+                        'day'                                                => (int) $date->format('j'), 'hour' => (int) $date->format('G'), 'minute' => (int) $date->format('i'),
+                        'second'                                             => (int) $date->format('s')], JSON_THROW_ON_ERROR));
+                }
+                $partial->SetTestProperty('EnableBandSelection', true);
+                $partial->SetTestProperty('EnableIPSView', true);
+                $partial->SetTestProperty('IPSViewUseTileDesign', false);
+                $partial->SetTestProperty('BandOpacityPercent', 41);
+                $partial->SetTestProperty('IPSViewBandOpacityPercent', 37);
+                $properties = $partial->GetTestProperties();
+                $partial->ApplyChanges();
+                $partial->ApplyChanges();
+                $partialModel = $decode($partial);
+                $expected = [null, null, [3.0, 0.0], [4.0, 7.0]];
+                assertGatewayGauge(
+                    $partial->GetTestStatus() === IS_ACTIVE && array_column($partialModel['themeRiver']['rows'], 'values') === $expected
+                    && $partialModel['themeRiver']['missingIntervals'] === 2 && $partialModel['range']['loadedAggregates'] === 7
+                    && !$partialModel['themeRiver']['sources'][1]['initiallyVisible'] && $partialModel['range']['loadBudget'] === 16000,
+                    'A hidden source starting mid-interval must leave a shared gap, retain subsequent complete values and count its discarded aggregate: ' . $metric . '/' . $aggregation
+                );
+                foreach ([$partial->GetVisualizationTile(), $partial->GetIPSViewHTML(), $partial->GetTestVariableValue('IPSViewThemeRiver')] as $index => $html) {
+                    $state = $startup($html);
+                    assertGatewayGauge(
+                        $state['status'] === 'ready' && $state['chart']['range'] === $partialModel['range']
+                        && array_column($state['chart']['themeRiver']['rows'], 'values') === $expected
+                        && $state['chart']['themeRiver']['style']['bandOpacityPercent'] === ($index === 0 ? 41 : 37),
+                        'Tile, IPSView HTML and published WebContent must preserve partial-archive gaps and independent designs.'
+                    );
+                }
+                $partial->RefreshArchive();
+                assertGatewayGauge(
+                    $partial->GetTestProperties() === $properties && $decode($partial) === $partialModel,
+                    'Partial-archive refreshes and repeated ApplyChanges must not rewrite configuration or designs.'
+                );
+                $partial->SetTestProperty('Range', $aggregation === 'hour' ? '24h' : '7d');
+                $partial->ApplyChanges();
+                $rolling = $decode($partial);
+                assertGatewayGauge(
+                    array_column(array_slice($rolling['themeRiver']['rows'], -4), 'values') === $expected
+                    && $rolling['range']['loadedAggregates'] === 7 && $partial->GetTestStatus() === IS_ACTIVE,
+                    'Existing rolling windows must use the same partial-first-interval gap rule.'
+                );
+            }
+        }
+
         $locale = json_decode((string) file_get_contents(dirname(__DIR__) . '/EChartsThemeRiver/locale.json'), true, 512, JSON_THROW_ON_ERROR)['translations']['de'];
         foreach ([$control['caption'], ...array_column($control['options'], 'caption')] as $caption) {
             assertGatewayGauge(isset($locale[$caption]), 'New metric choices must have German translations: ' . $caption);
