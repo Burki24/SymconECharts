@@ -18,6 +18,12 @@ require_once $normalizer;
 require_once __DIR__ . '/../libs/EChartsCurrentComparisonSources.php';
 
 assertNormalization(EChartsNormalization::Range([]) === [0.0, 100.0], 'Old source rows retain additive 0–100 defaults.');
+assertNormalization(\SymconECharts\EChartsValueRange::IsValid(-10.5, 40)
+    && \SymconECharts\EChartsValueRange::IsValid(0.0001, 0.0002)
+    && !\SymconECharts\EChartsValueRange::IsValid(false, 100)
+    && !\SymconECharts\EChartsValueRange::IsValid('0', 100)
+    && !\SymconECharts\EChartsValueRange::IsValid(-INF, 100)
+    && !\SymconECharts\EChartsValueRange::IsValid(0, NAN), 'Shared range validation keeps numeric type, finite bounds and strict ordering.');
 $range = ['Minimum' => -20, 'Maximum' => 40];
 foreach ([-100 => 0.0, -20 => 0.0, -5 => 25.0, 10 => 50.0, 40 => 100.0, 90 => 100.0] as $raw => $expected) {
     assertNormalization(

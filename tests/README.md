@@ -1,5 +1,35 @@
 # Tests
 
+## Parallel: individuelle feste Min-/Max-Achsenbereiche
+
+`php tests/gateway_gauges.php --parallel-axis-ranges` begann RED an fehlenden
+Modellgrenzen. Der isolierte öffentliche Modul-/Gateway-Test prüft automatische
+Altzeilen, gemischte und gleichartige Achsen, unabhängige Designs, Originalwerte,
+vollständige gemeinsame Zeilen, exakte Grenzwerte und Überschreitungen auf der
+16. Achse. Umordnung folgt Variablen-IDs, nicht gleichen Namen. Ungültige Typen,
+fehlende Grenzen, null, zusammenfallende große Integer, überlaufende Differenzen
+und JSON-Zahlen `1e400` werden vor Archiv-I/O abgewiesen. Beide HTML-Ausgaben,
+veröffentlichter IPSView-WebContent und das 10000er-Budget bleiben abgesichert.
+Reine gespeicherte/ungespeicherte Vorschauen prüfen auch die ausgelassene 16. Achse;
+Wiederholung und Formularaufruf verändern keine Konfiguration.
+
+`node tests/parallel_layout.js` begann RED an fehlenden nativen `min`/`max`.
+Die echte gepinnte Runtime prüft tatsächliche feste Skalen, unveränderte native
+Werte, ehrliche Achsenmarkierung, Panning und Rückkehr zu automatisch. Die lokale
+Canvas-Prüfung zeigte überlaufende Linien in der Titelzone nach Entfernung des
+nativen Startclips. Ein dauerhafter Clip an der Serienwurzel über den offiziellen
+Post-Update-Hook begrenzt nur Linien, nicht Titel oder Daten. Der echte Runtime-Test
+sichert Cliprechteck, Panning und Entfernung beim Wechsel zu automatisch ab.
+Alte 16×625- und historische Zeitraumtests bleiben Regressionen;
+`php tests/normalization.php` prüft die zentrale numerische Bereichsprüfung samt
+unverändertem Normalisierungsvertrag.
+
+Die lokale Fixture `node tests/parallel_browser.mjs` unterstützt `&ranges=fixed`.
+Am 21.10.2026 wurden beide Ausgabeadapter bei 400×520/790×440, Warnung,
+Titelschutz und Verschieben bis zur letzten festen Achse mit synthetischen
+Daten geprüft. Neue Skalen nach Modulupdate und ein tatsächlicher IPSView-Client
+sind dabei nicht live geprüft. Keine Installation oder Archivierung verändert.
+
 ## Parallel: 16 Achsen mit verschiebbarer Ansicht
 
 `php tests/gateway_gauges.php --parallel-many` prüft echtes Modul, gemeinsame
@@ -26,8 +56,13 @@ liegt bei 17 statt elf Achsen.
 `node tests/parallel_browser.mjs` bietet unter Port 8803 ausschließlich
 synthetische Canvas-Daten (`?axes=2|3|10|16&font=100|200`). Am 21.10.2026 wurden
 400×520 und 790×440, Achsenknöpfe, Pos1/Ende und 200-%-Schrift lokal geprüft.
-Keine Installation oder Archivierung verändert. Live-Abnahme der neuen
-Ansicht nach Modulupdate und Live-Lastprüfung bleiben offen.
+Keine Installation oder Archivierung bei dieser lokalen Prüfung verändert.
+Die spätere funktionale MCP-Prüfung auf Symcon 9.1 mit temporärer Instanz
+bestätigt 16 Achsen/42 gemeinsame Stundenlinien mit unabhängigen Originalwerten,
+kleine Limits, feste Tagesintervalle, 17-Achsen-Ablehnung und beide Ausgaben.
+Der Eigentümer bestätigt Kachel und tatsächliches IPSView. Testobjekte wurden
+entfernt, Konfigurationen/Designs und Archivierung blieben unverändert.
+Ein voller 10000-Punkte-Live-Lasttest bleibt wegen kurzer Archive offen.
 
 ## Heatmap: benutzerdefinierte und feste historische Zeiträume
 

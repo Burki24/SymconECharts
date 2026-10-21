@@ -112,7 +112,10 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Alle Achsen bleiben im gemeinsamen Join und im unveränderten 10000er-Ladebudget;
   die gemeinsame Query-Planung verteilt es vor den Abfragen. Die ID-stabile
   Positionshaltung verwendet die vorhandene Kategorieankerlogik; Designs und
-  Altlisten bleiben erhalten, individuelle Skalen/Kennzahlen sind noch getrennt offen.
+  Altlisten bleiben erhalten. ADR 0085 ergänzt optionale feste Min-/Max-Skalen je
+  Quelle mit unveränderten Originalwerten und nativer Achsenmarkierung. Die rein
+  numerische Bereichsprüfung wird mit Normalisierung zentral geteilt; Parallel
+  normalisiert nicht. Individuelle Kennzahlen je Achse bleiben getrennt offen.
   Candlestick verwendet gemäß ADR 0079 dieselbe absolute Zeitplanung und eine
   zentrale begrenzte Intervallliste für Stunden/Tage. Echte Rohwert-Endpunkte,
   höchstens 720 Intervalle, 63 Abfragen und 64000 Rohpunkte bleiben erhalten.

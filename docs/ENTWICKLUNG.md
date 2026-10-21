@@ -29,6 +29,19 @@ Canvas-Zeichenaufrufe für Kachel und IPSView statt nur vorhandener Titeloptione
 
 ## Aktueller Stand und Zielarchitektur
 
+Parallel ergänzt gemäß [ADR 0085](adr/0085-parallel-fixed-axis-ranges.md) je
+Quellenzeile `AxisRangeMode` (Default `auto`), `AxisMinimum` und `AxisMaximum`.
+Nur `manual` wertet explizite endliche Grenzen aus. `EChartsValueRange` teilt die
+bisherige strikte Werte-/Spannenprüfung mit Normalisierung ohne deren Verhalten
+oder Meldungen zu ändern. Modellachsen erhalten nur im festen Modus additive
+`minimum`-/`maximum`-Felder. Originalzeilen und native Achsenmarkierungen bleiben
+unverändert, `outOfRangeCount` zählt Überschreitungen erst nach der gemeinsamen
+Paarung. Native feste Skalen begrenzen lediglich den Sichtbereich; Tooltip und
+Warnung nennen die unveränderten Originalwerte beziehungsweise Überschreitungen.
+Beide SVG-Vorschauen prüfen alle Grenzen einschließlich ausgelassener Achsen und
+verwenden ausschließlich Beispieldaten. Die Live-Abnahme dieser neuen Skalen
+nach Modulupdate bleibt offen; Kennzahlen je Achse sind der nächste Schritt.
+
 Parallel unterstützt gemäß [ADR 0084](adr/0084-sixteen-axis-parallel-viewport.md)
 2–16 Achsen. `EChartsArchiveQuery` erhält für jeden Zeitraum höchstens
 `min(LineBudget × Achsenanzahl, 10000)` als gemeinsames Punktbudget; daraus folgt
@@ -40,7 +53,12 @@ horizontaler DOM-Viewport statt Dimensionsauswahl verwendet die bestehende
 `SymconEChartsCategoryNavigation` für ID-stabile Anker. Titelupdates beim Scrollen
 ersetzen nur die Titelposition; native Achsenmarkierungen und Skalen bleiben
 erhalten. Reine SVG-Entwurfsvorschauen kennzeichnen ihren Sechs-Achsen-Ausschnitt.
-Die neue 16-Achsen-Ansicht ist lokal geprüft; ihre Live-Abnahme nach Update bleibt offen.
+Die 16-Achsen-Ansicht wurde funktional per MCP auf Symcon 9.1 mit temporärer
+Instanz geprüft. Der Eigentümer bestätigt anschließend Kachel und tatsächliches
+IPSView. 42 gemeinsame Stundenlinien, Originalwertvergleich, kleine Limits,
+Tagesintervalle und 17-Achsen-Ablehnung sind live geprüft; kein voller
+10000-Punkte-Live-Lasttest wegen kurzer Archive. Testobjekte wurden entfernt,
+bestehende Konfigurationen/Designs und Archivierung blieben unverändert.
 
 Heatmap ergänzt gemäß [ADR 0083](adr/0083-flexible-heatmap-periods.md) `custom`
 und `absolute`. `HeatmapWindow` verwendet die zentrale strikte Datumsauswahl,

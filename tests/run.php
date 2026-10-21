@@ -56,6 +56,7 @@ $tests = [
 ];
 
 $commands = [
+    ['Test fixed Parallel axis ranges', 'php tests/gateway_gauges.php --parallel-axis-ranges'],
     ['Test sixteen-axis Parallel and shared aggregate budget', 'php tests/gateway_gauges.php --parallel-many'],
     ['Test Heatmap custom and fixed historical periods', 'php tests/gateway_gauges.php --heatmap-periods'],
     ['Test fixed historical StateTimeline periods', 'php tests/gateway_gauges.php --state-timeline-absolute'],

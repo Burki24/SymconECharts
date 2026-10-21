@@ -15,6 +15,11 @@
 
 ## Neu
 
+- EChartsParallel bietet pro Quelle automatische oder feste Min-/Max-Achsenbereiche.
+  Bestehende Quellen bleiben automatisch skaliert. Kachel, IPSView und Vorschau
+  berücksichtigen die Grenzen; Originalwerte bleiben erhalten, Überschreitungen
+  werden gemeldet. Gemeinsame Intervalle und das 10000er-Archivbudget bleiben unverändert.
+
 - EChartsParallel unterstützt bis zu 16 Achsen mit horizontal verschiebbarer
   Ansicht für Kachel und IPSView. Scrollleiste, Achsenknöpfe und Tastatur halten
   den Diagrammtitel sichtbar; alle Achsen und gemeinsamen Linien bleiben erhalten.

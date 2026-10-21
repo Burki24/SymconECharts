@@ -6,6 +6,8 @@ namespace SymconECharts;
 
 use InvalidArgumentException;
 
+require_once __DIR__ . '/EChartsValueRange.php';
+
 /** Explicit source ranges project geometry only; original display metadata stays separate. */
 final class EChartsNormalization
 {
@@ -14,9 +16,7 @@ final class EChartsNormalization
     {
         $minimum = array_key_exists('Minimum', $source) ? $source['Minimum'] : 0;
         $maximum = array_key_exists('Maximum', $source) ? $source['Maximum'] : 100;
-        if ((!is_int($minimum) && !is_float($minimum)) || (!is_int($maximum) && !is_float($maximum))
-            || !is_finite((float) $minimum) || !is_finite((float) $maximum)
-            || (float) $minimum >= (float) $maximum || !is_finite((float) $maximum - (float) $minimum)) {
+        if (!EChartsValueRange::IsValid($minimum, $maximum)) {
             throw new InvalidArgumentException('Normalization requires finite source limits with minimum below maximum.');
         }
         return [(float) $minimum, (float) $maximum];

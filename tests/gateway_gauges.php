@@ -1153,6 +1153,10 @@ if (array_slice($argv, 1) === ['--parallel-many']) {
     echo "Parallel sixteen-axis limits, common intervals, drafts and output budgets verified.\n";
     exit(0);
 }
+if (array_slice($argv, 1) === ['--parallel-axis-ranges']) {
+    require __DIR__ . '/parallel_axis_ranges.php';
+    exit(0);
+}
 if (array_slice($argv, 1) === ['--boxplot-absolute']) {
     require __DIR__ . '/boxplot_absolute_ranges.php';
     exit(0);

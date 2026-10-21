@@ -47,6 +47,38 @@ Die Formularvorschauen verwenden weiterhin ausschließlich Beispieldaten.
 Bei mehr als sechs Achsen zeigen sie einen ausdrücklich gekennzeichneten
 Ausschnitt der ersten sechs, nicht eine verkürzte gespeicherte Quellenliste.
 
+## Individuelle Achsenbereiche
+
+Jede Quelle bietet **Achsenbereich: Automatisch / Fest**. Automatisch bleibt
+der Standard, auch für vorhandene Quellen ohne diese Felder. Bei **Fest**
+geben Sie im Quelleneditor **Achsenminimum** und **Achsenmaximum** an,
+beispielsweise −10 bis 40 °C oder 0 bis 100 %. Beide Grenzen müssen endliche
+Zahlen sein; das Minimum muss kleiner sein als das Maximum. Negative Grenzen
+und Nachkommastellen sind erlaubt. Gespeicherte Grenzen werden bei automatischer
+Skalierung nicht ausgewertet.
+
+Die Grenzen gehören zur jeweiligen Quelle, nicht zu einer Einheitengruppe.
+Auch zwei Temperaturachsen dürfen unterschiedliche feste Bereiche besitzen.
+Kachel und IPSView teilen diese fachlichen Bereiche, behalten aber ihre
+unabhängigen Designs. Feste Skalen ändern sich weder durch Aktualisierung,
+Zeitraumwechsel noch durch Verschieben der Achsenansicht.
+
+Dies ist **keine Normalisierung**: Archivwerte, Einheiten und gemeinsame
+Zeitlinien bleiben unverändert. Werte außerhalb einer festen Skala können
+im Diagramm abgeschnitten werden. Ein Hinweis zählt die Überschreitungen
+aller dargestellten Linien und aller Achsen, auch außerhalb des sichtbaren
+Ausschnitts. Der Tooltip behält die Originalwerte und kennzeichnet betroffene
+Achsenwerte. Werte genau auf den Grenzen sind keine Überschreitungen.
+Eine vollständig außerhalb liegende Linie kann unsichtbar sein; vergrößern
+Sie dann den Bereich oder wählen Sie wieder Automatisch.
+Falls extrem gewählte Grenzen die numerische Genauigkeit des Renderers
+überfordern, erscheint eine Fehlermeldung. Grenzen werden nicht stillschweigend
+erweitert; wählen Sie dann einen anderen Bereich oder Automatisch.
+
+Die Beispieldaten-Vorschauen zeigen die gewählten Grenzen ohne Archivabfrage;
+ungültige Grenzen werden auch bei noch nicht gespeicherten Änderungen gemeldet.
+Die Achsenwahl, Archivkennzahlen und das gemeinsame 10000er-Budget ändern sich nicht.
+
 ## Fester historischer Zeitraum
 
 Unter **Von (einschließlich)** und **Bis (ausschließlich)** Datum und Uhrzeit

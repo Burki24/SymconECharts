@@ -20,7 +20,8 @@ Symcon-Objektbaums; bestehende Tiefen- und Knoteneinstellungen bleiben erhalten.
 Parallelkoordinaten verbinden archivierte Variablenwerte je gemeinsamem
 Stunden- oder Tagesintervall, wahlweise auch in festen historischen Von-/Bis-Zeiträumen.
 Parallel unterstützt zwei bis 16 Achsen mit horizontal verschiebbarer Ansicht;
-alle Achsen teilen sich weiterhin höchstens 10000 Archivaggregate.
+jede Achse kann automatisch oder mit eigenen festen Min-/Max-Grenzen skalieren.
+Alle Achsen teilen sich weiterhin höchstens 10000 Archivaggregate.
 Sankey zeigt aktuelle Mengenflüsse zwischen manuell angelegten Knoten.
 Calendar stellt archivierte Tageskennzahlen als farbigen Jahres-, Quartals-
 oder Monatskalender sowie für feste historische Von-/Bis-Zeiträume dar,

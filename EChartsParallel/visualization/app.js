@@ -20,6 +20,28 @@
     var currentState = bootstrap.state || null;
     var currentTheme = null;
 
+    // Parallel's native introductory clip is removed after animation. Keep a
+    // separate series-root clip for fixed axes, without changing data or brushing.
+    if (window.echarts && typeof window.echarts.registerPostUpdate === 'function') {
+        window.echarts.registerPostUpdate(function (model, api) {
+            var fixed = false;
+            model.eachComponent('parallelAxis', function (axis) {
+                fixed = fixed || (Number.isFinite(axis.get('min')) && Number.isFinite(axis.get('max')));
+            });
+            model.eachSeriesByType('parallel', function (series) {
+                var view = api.getViewOfSeriesModel(series);
+                if (fixed) {
+                    var rect = series.coordinateSystem.getRect();
+                    view.group.setClipPath(new window.echarts.graphic.Rect({shape: {
+                        x: rect.x, y: rect.y, width: rect.width, height: rect.height
+                    }}));
+                } else {
+                    view.group.removeClipPath();
+                }
+            });
+        });
+    }
+
     function translate(text) { return (bootstrap.translations || {})[text] || text; }
     var retainOnTransientError = design.createTransientFailureRetainer(
         chartElement, warningElement, translate, 'The Parallel values could not be loaded.'
@@ -177,8 +199,11 @@
                     var values = Array.isArray(parameter.value) ? parameter.value : [];
                     var lines = [escapeHTML(parameter.name || '')];
                     axes.forEach(function (axis, index) {
+                        var outside = Number.isFinite(axis.minimum) && Number.isFinite(axis.maximum)
+                            && (Number(values[index]) < axis.minimum || Number(values[index]) > axis.maximum);
                         lines.push(escapeHTML(axis.label) + ': ' + escapeHTML(Number(values[index]).toLocaleString())
-                            + (axis.unit ? ' ' + escapeHTML(axis.unit) : ''));
+                            + (axis.unit ? ' ' + escapeHTML(axis.unit) : '')
+                            + (outside ? ' — ' + escapeHTML(translate('Outside fixed axis range')) : ''));
                     });
                     return lines.join('<br>');
                 }
@@ -186,7 +211,7 @@
             parallel: {
                 left: geometry.margin, right: geometry.margin,
                 top: titleLayout.headerInset + (showTitle ? titleSize + 42 : 40) + axisTopExtra,
-                bottom: parallel.truncated ? Math.max(68, (Number(warningElement.offsetHeight) || 0) + 32) : 38,
+                bottom: !warningElement.hidden ? Math.max(68, (Number(warningElement.offsetHeight) || 0) + 32) : 38,
                 parallelAxisDefault: {
                     type: 'value', nameLocation: 'end',
                     nameGap: axisNameGap,
@@ -199,10 +224,16 @@
                 }
             },
             parallelAxis: axes.map(function (axis, index) {
-                return { id: 'axis:' + (axis.variableID || index), dim: index,
+                var result = { id: 'axis:' + (axis.variableID || index), dim: index,
                     name: String(axis.label || '') + (axis.unit ? ' (' + axis.unit + ')' : ''),
                     nameTruncate: { maxWidth: Math.min(geometry.spacing - 12, 2 * geometry.margin - 12), ellipsis: '…' },
                     nameTextStyle: { align: 'center' } };
+                if (Number.isFinite(axis.minimum) && Number.isFinite(axis.maximum)) {
+                    result.min = axis.minimum;
+                    result.max = axis.maximum;
+                    result.scale = true;
+                }
+                return result;
             }),
             series: [{
                 id: 'parallel', type: 'parallel',
@@ -257,20 +288,36 @@
         layoutViewport(model);
         errorElement.hidden = true;
         emptyElement.hidden = true;
-        warningElement.textContent = translate('The selected range was truncated by the line budget.');
-        if (parallel.truncated && model.range && model.range.effectiveLineBudget < model.range.lineBudget) {
-            warningElement.textContent += ' ' + translate('Effective line limit: {count}').replace('{count}', model.range.effectiveLineBudget);
+        var warnings = [];
+        if (parallel.truncated) {
+            warnings.push(translate('The selected range was truncated by the line budget.'));
+            if (model.range && model.range.effectiveLineBudget < model.range.lineBudget) {
+                warnings.push(translate('Effective line limit: {count}').replace('{count}', model.range.effectiveLineBudget));
+            }
         }
+        if (Number(parallel.outOfRangeCount) > 0) {
+            warnings.push(translate('{count} values outside fixed axis ranges. Original values remain unchanged.')
+                .replace('{count}', parallel.outOfRangeCount));
+        }
+        warningElement.textContent = warnings.join(' ');
         warningElement.style.bottom = geometry.scrollable ? '38px' : '0.65rem';
-        warningElement.hidden = parallel.truncated !== true;
+        warningElement.hidden = warnings.length === 0;
         var theme = normalizeTheme(model.theme || 'auto');
         if (chart && currentTheme !== theme) { chart.dispose(); chart = null; }
         if (!chart) {
             chart = window.echarts.init(chartElement, theme === 'auto' ? null : theme, { renderer: 'canvas' });
             currentTheme = theme;
         }
-        chart.resize({ width: geometry.width, height: Math.max(1, viewport.clientHeight) });
-        chart.setOption(buildOption(model, theme), true);
+        try {
+            chart.resize({ width: geometry.width, height: Math.max(1, viewport.clientHeight) });
+            chart.setOption(buildOption(model, theme), true);
+        } catch (error) {
+            // Finite user limits can still exceed the pinned engine's numeric
+            // precision. Do not silently widen them or replace original values.
+            var fixed = parallel.axes.some(function (axis) { return Number.isFinite(axis.minimum); });
+            displayError(fixed ? 'The fixed axis ranges could not be rendered. Check the limits.'
+                : 'The Parallel values could not be loaded.');
+        }
     }
     window.handleMessage = function (message) {
         var state = design.parseVisualizationState(message);

@@ -40,6 +40,41 @@
                     "edit": {
                         "type": "ValidationTextBox"
                     }
+                },
+                {
+                    "caption": "Axis range",
+                    "name": "AxisRangeMode",
+                    "width": "130px",
+                    "add": "auto",
+                    "edit": {
+                        "type": "Select",
+                        "options": [
+                            {
+                                "caption": "Automatic",
+                                "value": "auto"
+                            },
+                            {
+                                "caption": "Fixed",
+                                "value": "manual"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "caption": "Axis minimum",
+                    "name": "AxisMinimum",
+                    "width": "1px",
+                    "visible": false,
+                    "save": true,
+                    "add": 0.0
+                },
+                {
+                    "caption": "Axis maximum",
+                    "name": "AxisMaximum",
+                    "width": "1px",
+                    "visible": false,
+                    "save": true,
+                    "add": 100.0
                 }
             ],
             "form": [
@@ -56,6 +91,37 @@
                     "type": "ValidationTextBox",
                     "name": "Label",
                     "caption": "Label (optional)"
+                },
+                {
+                    "type": "Select",
+                    "name": "AxisRangeMode",
+                    "caption": "Axis range",
+                    "options": [
+                        {
+                            "caption": "Automatic",
+                            "value": "auto"
+                        },
+                        {
+                            "caption": "Fixed",
+                            "value": "manual"
+                        }
+                    ]
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "AxisMinimum",
+                    "caption": "Axis minimum",
+                    "digits": 6
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "AxisMaximum",
+                    "caption": "Axis maximum",
+                    "digits": 6
+                },
+                {
+                    "type": "Label",
+                    "caption": "Limits apply only to fixed axes. Values are not normalized or replaced; values outside the visible range are reported."
                 }
             ]
         },
