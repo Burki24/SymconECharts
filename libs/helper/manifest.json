@@ -35,10 +35,16 @@
                 },
                 {
                     "name": "VisualizationAssetHelper",
-                    "version": "1.0.0",
-                    "sha256": "1693b2399bcf95d270a6d9a01df6534caad906497bd4ba9489916a951abaffcc",
+                    "version": "1.0.1",
+                    "sha256": "ef3adcd38be489ea129bf2e95ad15d32673879e90bf4da8f1272fbf958a0513c",
                     "path": "libs/helper/VisualizationAssetHelper.php",
-                    "source_sha": "8e3df7e07ede7a7e298a6d69f132bc4cb697ab91"
+                    "source_sha": "a724b8954e32a97c3446a78939a3108d4aaa5996",
+                    "assets": [
+                        {
+                            "path": "libs/helper/visualization/http-origin.js",
+                            "sha256": "2ae76879f0597414bc60511d9d36c93f1993aec336cb711067ee8925d560be58"
+                        }
+                    ]
                 }
             ]
         },
@@ -55,10 +61,16 @@
             "source_sha": "7a28a4d68fdb81d1c4edc492628ae2f2ae256940"
         },
         "VisualizationAssetHelper": {
-            "version": "1.0.0",
-            "sha256": "1693b2399bcf95d270a6d9a01df6534caad906497bd4ba9489916a951abaffcc",
+            "version": "1.0.1",
+            "sha256": "ef3adcd38be489ea129bf2e95ad15d32673879e90bf4da8f1272fbf958a0513c",
             "path": "libs/helper/VisualizationAssetHelper.php",
-            "source_sha": "8e3df7e07ede7a7e298a6d69f132bc4cb697ab91"
+            "source_sha": "a724b8954e32a97c3446a78939a3108d4aaa5996",
+            "assets": [
+                {
+                    "path": "libs/helper/visualization/http-origin.js",
+                    "sha256": "2ae76879f0597414bc60511d9d36c93f1993aec336cb711067ee8925d560be58"
+                }
+            ]
         },
         "VisualizationThemeHelper": {
             "version": "1.1.0",
