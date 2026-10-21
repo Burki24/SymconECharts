@@ -11,7 +11,7 @@ Die Dateien in diesem Verzeichnis stammen aus dem gemeinsamen Repository
 | `DebugHelper.php` | 1.0.2 | `3bc98238da59682b149d981e7641f1a1af8103047d05ce520dec0a2abcbe7d2b` |
 | `IPSViewHTMLPageHelper.php` | 1.5.2 | `cc29a1f8225dcdbc6c420b3f35851b7d5fb066567728aa34296261b8ae8fc86f` |
 | `HelperTranslationHelper.php` | 1.0.0 | `d3deee581eca9f8eb11e9adce060170227a2dc836ee898bd134f93d27604f639` |
-| `VisualizationAssetHelper.php` | 1.0.0 | `1693b2399bcf95d270a6d9a01df6534caad906497bd4ba9489916a951abaffcc` |
+| `VisualizationAssetHelper.php` | 1.0.1 | `ef3adcd38be489ea129bf2e95ad15d32673879e90bf4da8f1272fbf958a0513c` |
 | `ResponsiveVisualizationHelper.php` | 1.0.1 | `9b8f708fe4de4271310a50c1ac2f09166ba731f540eb829f46ad15b805f9f220` |
 | `SVGPreviewHelper.php` | 1.0.0 | `14313a55020df27931e1ffe071fa599a39152493c6305ab2ef5322922981817b` |
 | `VariableSearchHelper.php` | 1.0.0 | `f7f18b03a320578ecb2ffd816879df2e280e0d96c18cac27320198c73b564f22` |
