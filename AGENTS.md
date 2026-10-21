@@ -122,6 +122,10 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Von-/Bis-Datumsfenster mit Navigation folgen ADR 0082; maximal 366 Tage und
   unveränderte Kennzahlen-/Archivbudgets. Calendar ist kein Modus der Stunden-Heatmap. Auch deren stündliche
   Kennzahlen und Wochentag-/Stundenreduktion folgen ADR 0062.
+  Heatmap ergänzt gemäß ADR 0083 benutzerdefinierte Dauern und feste historische
+  Von-/Bis-Uhrzeitfenster mit lesender Navigation. Die zentrale strikte Datums-
+  und Vollstundenplanung wird wiederverwendet; neue Fenster umfassen höchstens
+  366 × 24 Stunden bei unveränderten Kennzahlen, Altzeiträumen und Ladebudgets.
   Aktuelle Vergleichsgruppen auf expliziten normierten Achsen liegen im eigenen
   Gerätemodul `EChartsRadar` gemäß ADR 0053; keine Archive oder automatische
   Qualitätsbewertung. Werte außerhalb des Bereichs werden nur optisch begrenzt.

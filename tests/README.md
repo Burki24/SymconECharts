@@ -1,5 +1,35 @@
 # Tests
 
+## Heatmap: benutzerdefinierte und feste historische Zeiträume
+
+`php tests/heatmap_window.php` prüft freie Dauern, strikte native Datumsfelder,
+angefangene Randstunden, leere Kurzfenster, gleich lange Navigationsschritte,
+stabile feste Grenzen, 23-/25-Stunden-Tage und 366/367 Tage. Alte Kalenderpläne
+bleiben auch mit ungültigen inaktiven neuen Feldern unverändert. Erster Lauf
+RED wegen des noch unbekannten benutzerdefinierten Modus.
+
+`php tests/gateway_gauges.php --heatmap-periods` nutzt echtes Modul/Gateway
+mit Kernel-Doppeln und ist auch im normalen Gateway-Test enthalten. Alle vier
+Kennzahlen, beide Ausgaben/WebContent, unabhängiges IPSView-Design, Wiederholung,
+authentifizierte Navigation/Reset und Refresh bleiben geprüft. Ungültige
+Grenzen scheitern vor Archivabfragen, gültige leere Fenster lesen kein Archiv.
+Ein dichtes Fenster mit 8784 Stunden benötigt genau sieben 60-Tage-Abfragen mit
+je höchstens 2000 Aggregaten; eine abgeschnittene oder übergroße letzte Antwort
+verhindert ein irreführendes Teilmodell. Native Formularfelder und beide
+Entwurfsvorschauen lesen keine Archive und ändern weder Konfiguration noch Status.
+
+`node tests/heatmap_layout.js` prüft beide neuen Modi und Ausgaben auf schmaler
+und breiter Fläche mit dem echten gepinnten ECharts-Renderer, unverfälschte
+Wochenzeilen, Uhrzeiten/Offsets und Navigation/Reset. Antworten einer alten
+Dauer, Grenze, Quelle oder Gestaltung dürfen die neue Ansicht nicht ersetzen.
+`node tests/heatmap_browser.mjs` liefert unter Port 8802 synthetische Daten:
+`?range=custom|absolute&metric=average|minimum|maximum|consumption`. Am 21.10.2026
+wurden feste Grenzen und freie Verbrauchsfenster in 400×600-/790×440-Canvas-
+Ansichten sowie Navigation und Reset lokal geprüft. Lange Zeitraumtexte werden
+zugunsten unverdrängter Knöpfe gekürzt und bleiben vollständig im Tooltip.
+Keine Symcon-Daten oder Instanzen verändert. Die tatsächliche Live-Abnahme nach
+Modulupdate und ein Live-Lasttest bleiben offen.
+
 ## Calendar: Jahr, Quartal, Monat und feste Datumsfenster
 
 `php tests/calendar_data.php` prüft die unveränderten Jahrespläne sowie Monats-/
@@ -27,8 +57,9 @@ Navigation/Reset und verworfene Antworten einer alten Konfiguration.
 Am 20.10.2026 wurden kurze und jahresübergreifende Canvas-Ansichten auf schmaler
 Fläche sowie Navigation/Reset für Quartal und freie Fenster lokal geprüft;
 die breiten Ausrichtungen sind zusätzlich durch echte SVG-Geometrie geprüft.
-Keine Symcon-Daten verwendet. Live-Abnahme der neuen Calendar-Ansichten nach
-Modulupdate bleibt offen.
+Keine Symcon-Daten verwendet. Die neuen Calendar-Ansichten wurden inzwischen
+per MCP geprüft; der Eigentümer bestätigt anschließend Kachel und tatsächliches
+IPSView. Das ist keine Live-Lastfreigabe.
 
 ## Abnahmestatus des vorherigen Archivzeiträume-Blocks
 

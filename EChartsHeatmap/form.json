@@ -49,6 +49,7 @@
                     "type": "Select",
                     "name": "Range",
                     "caption": "Time range",
+                    "onChange": "ECHM_UpdateTimeRangeForm($id, $Range);",
                     "options": [
                         {
                             "caption": "1 week",
@@ -73,6 +74,14 @@
                         {
                             "caption": "Since January 1",
                             "value": "ytd"
+                        },
+                        {
+                            "caption": "Custom",
+                            "value": "custom"
+                        },
+                        {
+                            "caption": "Fixed historical period",
+                            "value": "absolute"
                         }
                     ]
                 },
@@ -94,6 +103,73 @@
                     "maximum": 6
                 }
             ]
+        },
+        {
+            "type": "RowLayout",
+            "items": [
+                {
+                    "type": "NumberSpinner",
+                    "name": "CustomRangeValue",
+                    "caption": "Range value",
+                    "minimum": 1,
+                    "maximum": 1000,
+                    "visible": false,
+                    "width": "140px"
+                },
+                {
+                    "type": "Select",
+                    "name": "CustomRangeUnit",
+                    "caption": "Range unit",
+                    "visible": false,
+                    "width": "140px",
+                    "options": [
+                        {
+                            "caption": "Minutes",
+                            "value": "minute"
+                        },
+                        {
+                            "caption": "Hours",
+                            "value": "hour"
+                        },
+                        {
+                            "caption": "Days",
+                            "value": "day"
+                        },
+                        {
+                            "caption": "Weeks",
+                            "value": "week"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "SelectDateTime",
+            "name": "AbsoluteStart",
+            "caption": "From (inclusive)",
+            "visible": false
+        },
+        {
+            "type": "SelectDateTime",
+            "name": "AbsoluteEnd",
+            "caption": "Until (exclusive)",
+            "visible": false
+        },
+        {
+            "type": "Label",
+            "name": "AbsoluteRangeHint",
+            "caption": "Start is included, end is excluded. Only fully contained completed hours are evaluated. The end must not be in the future.",
+            "visible": false
+        },
+        {
+            "type": "Label",
+            "name": "AbsoluteTimeZone",
+            "caption": "Symcon time zone: %s",
+            "visible": false
+        },
+        {
+            "type": "Label",
+            "caption": "Custom and fixed periods support at most 366 days of elapsed time. Navigation shifts by the selected duration, not calendar months. Partial hours remain excluded."
         },
         {
             "type": "Label",

@@ -15,6 +15,12 @@
 
 ## Neu
 
+- EChartsHeatmap bietet benutzerdefinierte Dauern in Minuten, Stunden, Tagen
+  oder Wochen sowie feste historische Von-/Bis-Zeiträume mit Navigation.
+  Kachel, IPSView und beide Vorschauen verwenden dieselben Grenzen. Nur volle,
+  abgeschlossene Stunden werden ausgewertet, bis zu 366 × 24 Stunden je neuem
+  Fenster. Bisherige Zeiträume, Kennzahlen, Designs und Ladebudgets bleiben erhalten.
+
 - EChartsCalendar bietet Jahr, Quartal, Monat und feste historische Von-/Bis-
   Zeiträume mit passender Navigation in Kachel und IPSView. Beide Vorschauen
   folgen den gewählten Grenzen. Höchstens 366 Tage, bisherige Kennzahlen,

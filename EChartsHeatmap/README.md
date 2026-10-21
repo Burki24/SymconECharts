@@ -23,6 +23,29 @@ aus dem gesamten angezeigten Zeitraum – etwa der Montage um 08:00 Uhr.
 Der konkrete Datumsbereich und die Kennzahl stehen über
 dem Diagramm.
 
+Zusätzlich stehen **Benutzerdefiniert** und **Fester historischer Zeitraum**
+zur Wahl. Benutzerdefiniert verwendet eine Dauer von 1–1000 Minuten, Stunden,
+Tagen oder Wochen, insgesamt höchstens **366 × 24 Stunden**. Das Ende folgt
+dem Beginn der laufenden Archivstunde; die Dauer wird als verstrichene Zeit
+gerechnet, nicht als Anzahl lokaler Kalendertage. Beispielsweise sind zwei
+Wochen stets 336 Stunden, auch über eine Zeitumstellung hinweg.
+
+Im festen historischen Modus wählen Sie Datum und Uhrzeit für **Von
+(einschließlich)** und **Bis (ausschließlich)** in der Symcon-Zeitzone. Das Ende
+muss nach dem Beginn und spätestens jetzt liegen; auch hier gilt höchstens
+366 × 24 Stunden. Diese Grenzen bleiben bei Aktualisierung unverändert.
+Nicht existierende oder doppeldeutige Uhrzeiten einer Zeitumstellung sind
+keine gültigen Auswahlgrenzen; wählen Sie eine eindeutig zuordenbare Uhrzeit.
+
+Beide neuen Modi verwenden nur **vollständig enthaltene, abgeschlossene
+Archivstunden**. Bei 08:15 bis 12:45 werden beispielsweise die Stunden von
+09:00 bis 12:00 ausgewertet; die angeschnittenen Randstunden bleiben aus.
+Enthält ein gültiges Fenster keine volle Stunde, bleibt es leer. Die Anzeige
+bleibt bei sieben Wochentagzeilen und 24 Stundenspalten: Mehrere passende
+Archivstunden werden gemäß der gewählten Kennzahl zusammengefasst, nicht
+als zusätzliche datierte Zeilen eingefügt. Zeitraum und Tooltip nennen
+Grenzen mit Uhrzeit, UTC-Offset und Symcon-Zeitzone.
+
 „Kennzahl“ bietet vier ausdrücklich wählbare Datengrundlagen:
 
 - **Durchschnitt der Stundenmittelwerte** (Voreinstellung): arithmetischer
@@ -48,6 +71,13 @@ den 28. Februar begrenzt. „Heute“ führt zur aktuellen Ansicht zurück. Der
 Wechsel gilt für die gerade geöffnete
 Kachel beziehungsweise IPSView-Seite und wird nicht als Instanzeinstellung
 gespeichert. Nach dem erneuten Öffnen erscheint wieder der aktuelle Zeitraum.
+Bei benutzerdefinierten und festen Zeiträumen blättern die Pfeile um die
+exakte gewählte Dauer; anschließend werden erneut nur vollständig enthaltene
+Stunden berücksichtigt. Bis zu 120 Rückwärtsschritte sind möglich, niemals
+vor den unterstützten Archivbeginn. „Heute“ führt zur aktuellen freien Dauer
+zurück; **„Ausgewählter Zeitraum“** stellt im festen Modus die konfigurierten
+historischen Grenzen wieder her. Navigation verändert keine gespeicherten
+Datumsfelder, Designs oder Archivierung.
 Das Gateway liefert ausschließlich abgeschlossene stündliche Archivkennzahlen.
 Werte derselben lokalen Wochentag-Stunde-Kombination werden gemäß der gewählten
 Kennzahl zusammengefasst; der Tooltip nennt Kennzahl, Zeitraum und die Anzahl der tatsächlich

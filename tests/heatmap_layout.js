@@ -22,7 +22,7 @@ function render(model, width = 800, height = 420, mode = 'symcon', fetchImpl = n
     const classSegmentsElement = { innerHTML: '' };
     const classMaxElement = { textContent: '' };
     const periodElement = { hidden: false, style: {}, setAttribute: () => {} };
-    const periodLabelElement = { textContent: '' };
+    const periodLabelElement = { textContent: '', setAttribute: () => {} };
     const buttonListeners = {};
     const previousElement = { disabled: false, setAttribute: () => {},
         addEventListener: (_, listener) => { buttonListeners.previous = listener; } };
@@ -114,6 +114,39 @@ assert.match(month.periodLabelElement.textContent, /01\.09\.2026 – 30\.09\.202
 assert.match(month.option.tooltip.formatter({ data: month.option.series[0].data[1] }),
     /Average of 4 hourly intervals/,
     'A calendar-month cell must identify the averaging behind its displayed value.');
+const extendedModels = ['custom', 'absolute'].map(range => ({ ...model, heatmap: {
+    ...model.heatmap, range, viewKey: range + '-original', windowOffset: 0, maxOffset: 120,
+    startDate: '2026-09-28', endDate: '2026-10-13', days: [], timezone: 'Europe/Berlin',
+    requestedStartLabel: '2026-09-28 08:15:00 +02:00',
+    requestedEndLabel: '2026-10-13 12:45:00 +02:00'
+} }));
+for (const extended of extendedModels) {
+    for (const mode of ['symcon', 'ipsview']) {
+        for (const width of [360, 1400]) {
+            const view = render(extended, width, 520, mode);
+            assert.equal(view.option.yAxis.data.length, 7);
+            assert.equal(view.option.yAxis.data[0], 'Mon');
+            assert.equal(view.option.series[0].data.length, model.cells.length,
+                'Custom and fixed periods must not invent absent weekday/hour cells.');
+            assert.match(view.periodLabelElement.textContent, /2026-09-28 08:15:00 \+02:00/);
+            assert.match(view.periodLabelElement.textContent, /2026-10-13 12:45:00 \+02:00/);
+            assert.match(view.periodLabelElement.textContent, /Europe\/Berlin/);
+            assert.match(view.periodLabelElement.textContent, /Until \(exclusive\)/);
+            assert.match(view.option.aria.description, /2026-09-28 08:15:00/);
+            assert.match(view.option.tooltip.formatter({ data: view.option.series[0].data[1] }),
+                /2026-10-13 12:45:00 \+02:00/);
+            assert.equal(view.todayElement.textContent, extended.heatmap.range === 'absolute' ? 'Selected period' : 'Today');
+            if (fs.existsSync(path.join(__dirname, '..', '.tools', 'echarts-runtime', 'node_modules', 'echarts'))) {
+                const echarts = require('../.tools/echarts-runtime/node_modules/echarts');
+                const actual = echarts.init(null, null, { renderer: 'svg', ssr: true, width, height: 520 });
+                actual.setOption(view.option);
+                assert.match(actual.renderToSVGString(), /<svg/);
+                assert.equal(actual.getModel().getSeriesByIndex(0).getData().count(), 2);
+                actual.dispose();
+            }
+        }
+    }
+}
 for (const [metric, label, countLabel] of [
     ['minimum', 'Minimum of hourly minima', 'Minimum of 4 hourly intervals'],
     ['maximum', 'Maximum of hourly maxima', 'Maximum of 4 hourly intervals'],
@@ -377,6 +410,41 @@ async function verifyNavigation() {
     await new Promise(resolve => setImmediate(resolve));
     assert.ok(changing.periodLabelElement.textContent.includes('Maximum of hourly maxima'),
         'A delayed average navigation response must not overwrite a newly selected maximum metric.');
+    for (const extended of extendedModels) {
+        const oldPeriod = { ...extended, heatmap: { ...extended.heatmap, windowOffset: 1,
+            requestedStartLabel: '2026-09-13 03:45:00 +02:00',
+            requestedEndLabel: extended.heatmap.requestedStartLabel } };
+        let resolvePeriod;
+        const browsing = render(extended, 360, 520, 'ipsview', () => new Promise(resolve => { resolvePeriod = resolve; }));
+        browsing.click('previous');
+        resolvePeriod({ ok: true, json: () => Promise.resolve({ status: 'ready', chart: oldPeriod }) });
+        await new Promise(resolve => setImmediate(resolve));
+        assert.match(browsing.periodLabelElement.textContent, /2026-09-13 03:45:00/);
+        browsing.window.handleMessage({ status: 'ready', chart: extended });
+        assert.match(browsing.periodLabelElement.textContent, /2026-09-13 03:45:00/,
+            'A refresh with the same view identity must preserve historical browsing.');
+        resolvePeriod({ ok: true, json: () => Promise.resolve({ status: 'ready', chart: oldPeriod }) });
+        await new Promise(resolve => setImmediate(resolve));
+        browsing.click('today');
+        resolvePeriod({ ok: true, json: () => Promise.resolve({ status: 'ready', chart: extended }) });
+        await new Promise(resolve => setImmediate(resolve));
+        assert.equal(browsing.nextElement.disabled, true);
+        for (const changedSetting of ['duration', 'fixed-bounds', 'source', 'style']) {
+            let resolvePending;
+            const pending = render(extended, 600, 400, 'symcon', () => new Promise(resolve => { resolvePending = resolve; }));
+            pending.click('previous');
+            const changed = { ...extended, heatmap: { ...extended.heatmap,
+                viewKey: extended.heatmap.viewKey + '-' + changedSetting,
+                requestedStartLabel: '2026-10-01 00:00:00 +02:00' } };
+            pending.window.handleMessage({ status: 'ready', chart: changed });
+            resolvePending({ ok: true, json: () => Promise.resolve({ status: 'ready', chart: oldPeriod }) });
+            await new Promise(resolve => setImmediate(resolve));
+            assert.match(pending.periodLabelElement.textContent, /2026-10-01 00:00:00/,
+                'A changed ' + changedSetting + ' must reject an in-flight response for the previous view.');
+            assert.equal(pending.nextElement.disabled, true,
+                'A changed view must reset navigation even when the range name remains unchanged.');
+        }
+    }
 }
 
 verifyNavigation().then(() => console.log('Heatmap renderer layout verified.'))

@@ -86,6 +86,9 @@
     }
 
     function rangeLabel(range, metric) {
+        if (range === 'custom' || range === 'absolute') {
+            return translate(range === 'custom' ? 'Custom' : 'Fixed historical period');
+        }
         if (metric !== 'average') {
             return translate({ '1w': '1 week', '1m': '1 month', '3m': '3 months',
                 '6m': '6 months', '12m': '12 months', 'ytd': 'Since January 1' }[range] || range);
@@ -95,6 +98,20 @@
             '6m': '6-month average', '12m': '12-month average',
             'ytd': 'Since January 1 average'
         }[range] || range);
+    }
+
+    function periodText(heatmap) {
+        if (heatmap.requestedStartLabel && heatmap.requestedEndLabel) {
+            return heatmap.requestedStartLabel + ' – ' + heatmap.requestedEndLabel
+                + ' · ' + (heatmap.timezone || '') + ' · ' + translate('Until (exclusive)');
+        }
+        return dateLabel(heatmap.startDate) + ' – ' + dateLabel(heatmap.endDate);
+    }
+
+    function sameView(a, b) {
+        if (!a || !b) { return false; }
+        if (a.viewKey || b.viewKey) { return a.viewKey === b.viewKey; }
+        return a.range === b.range && metricOf(a) === metricOf(b);
     }
 
     function maxOffset(heatmap) {
@@ -109,10 +126,11 @@
         periodElement.setAttribute('aria-label', translate('Time range'));
         previousElement.setAttribute('aria-label', translate('Previous period'));
         nextElement.setAttribute('aria-label', translate('Next period'));
-        todayElement.textContent = translate('Today');
+        todayElement.textContent = translate(heatmap.range === 'absolute' ? 'Selected period' : 'Today');
         currentOffset = Math.max(0, Number(heatmap.windowOffset) || 0);
-        periodLabelElement.textContent = dateLabel(heatmap.startDate) + ' – ' + dateLabel(heatmap.endDate)
+        periodLabelElement.textContent = periodText(heatmap)
             + ' (' + rangeLabel(heatmap.range, metricOf(heatmap)) + ') · ' + metricLabel(metricOf(heatmap));
+        periodLabelElement.setAttribute('title', periodLabelElement.textContent);
         previousElement.disabled = navigating || currentOffset >= maxOffset(heatmap);
         nextElement.disabled = navigating || currentOffset === 0;
         todayElement.disabled = navigating || currentOffset === 0;
@@ -211,7 +229,7 @@
                 ? 'transparent' : colors.background,
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
             aria: { enabled: true, description: String(heatmap.title || translate('Heatmap'))
-                + ': ' + dateLabel(heatmap.startDate) + ' – ' + dateLabel(heatmap.endDate)
+                + ': ' + periodText(heatmap)
                 + ', ' + metricLabel(metricOf(heatmap)) },
             title: {
                 show: Boolean(heatmap.title), text: String(heatmap.title || ''), left: 'center', top: headerInset + 26,
@@ -236,7 +254,7 @@
                         + ':00<br>' + escapeHTML(formatValue(value[2], decimals, heatmap.unit || ''))
                         + '<br>' + escapeHTML(metricLabel(metricOf(heatmap)))
                         + '<br>' + escapeHTML(intervalInfo)
-                        + '<br>' + escapeHTML(dateLabel(heatmap.startDate) + ' – ' + dateLabel(heatmap.endDate));
+                        + '<br>' + escapeHTML(periodText(heatmap));
                 }
             },
             xAxis: {
@@ -370,8 +388,7 @@
         navigating = true;
         updatePeriod(currentState.chart.heatmap || {},
             bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8);
-        var range = currentState.chart.heatmap.range;
-        var metric = metricOf(currentState.chart.heatmap);
+        var requestedView = currentState.chart.heatmap;
         try {
             fetch(stateURL(offset), { method: 'GET', cache: 'no-store', credentials: 'same-origin',
                 headers: { Accept: 'application/json' } })
@@ -381,13 +398,11 @@
                 })
                 .then(function (state) {
                     if (!state || state.status !== 'ready' || !state.chart
-                        || state.chart.heatmap.range !== range
-                        || metricOf(state.chart.heatmap) !== metric
-                        || !currentState || !currentState.chart || metricOf(currentState.chart.heatmap) !== metric
+                        || !sameView(state.chart.heatmap, requestedView)
                         || state.chart.heatmap.windowOffset !== offset) {
                         throw new Error('Heatmap state response is invalid.');
                     }
-                    render(state);
+                    if (currentState && currentState.chart && sameView(currentState.chart.heatmap, requestedView)) { render(state); }
                 })
                 .catch(function () {
                     warningElement.textContent = translate(loadError);
@@ -418,8 +433,7 @@
         if (!state) { return; }
         if (currentOffset > 0 && state.chart && state.chart.heatmap
             && state.chart.heatmap.windowOffset === 0 && currentState && currentState.chart
-            && state.chart.heatmap.range === currentState.chart.heatmap.range
-            && metricOf(state.chart.heatmap) === metricOf(currentState.chart.heatmap)) {
+            && sameView(state.chart.heatmap, currentState.chart.heatmap)) {
             navigate(currentOffset);
             return;
         }

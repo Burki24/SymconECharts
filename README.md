@@ -25,6 +25,10 @@ oder Monatskalender sowie für feste historische Von-/Bis-Zeiträume dar,
 jeweils mit Navigation zu früheren Zeiträumen.
 Calendar und Heatmap bieten Mittelwert, Minimum und Maximum für Standardarchive
 oder ausdrücklich ausgewählten Zählerverbrauch für Zählerarchive.
+Heatmap ergänzt ihre bisherigen Kalenderzeiträume um benutzerdefinierte Dauern
+und feste historische Von-/Bis-Grenzen mit Navigation. Die neuen Fenster
+umfassen höchstens 366 × 24 Stunden und berücksichtigen nur vollständig
+enthaltene, abgeschlossene Archivstunden.
 Radar vergleicht aktuelle Messwerte von bis zu 16 manuell angelegten Gruppen
 auf 3–10 gemeinsam festgelegten Achsen mit eigenen Wertebereichen und Einheiten.
 Eine optionale Gruppenauswahl erhält die Achsenskalen und die gewählte Ansicht

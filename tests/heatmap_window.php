@@ -92,4 +92,93 @@ foreach ([['1w', -1], ['1w', 121], ['7d', 0], ['30d', 0], ['14d', 0]] as [$range
     }
 }
 
-echo "Heatmap calendar windows verified.\n";
+function checkHeatmapWindow(bool $ok, string $message): void
+{
+    if (!$ok) {
+        throw new RuntimeException($message);
+    }
+}
+
+$custom = ['CustomRangeValue' => 2, 'CustomRangeUnit' => 'week'];
+$window = HeatmapWindow::Resolve('custom', 0, $now, 'Europe/Berlin', $custom);
+checkHeatmapWindow(
+    $window['StartTimestamp'] === $timestamp('2026-09-29 12:00:00')
+    && $window['EndTimestamp'] === $timestamp('2026-10-13 12:00:00') - 1 && $window['Days'] === [],
+    'Custom periods end at the completed hour and preserve weekday/hour reduction.'
+);
+$previousCustom = HeatmapWindow::Resolve('custom', 1, $now, 'Europe/Berlin', $custom);
+checkHeatmapWindow(
+    $previousCustom['EndTimestamp'] === $window['StartTimestamp'] - 1,
+    'Custom navigation moves by the configured elapsed duration.'
+);
+$ninety = HeatmapWindow::Resolve('custom', 0, $now, 'Europe/Berlin', ['CustomRangeValue' => 90, 'CustomRangeUnit' => 'minute']);
+checkHeatmapWindow(
+    $ninety['StartTimestamp'] === $timestamp('2026-10-13 11:00:00')
+    && $ninety['RequestedStartTimestamp'] === $timestamp('2026-10-13 10:30:00'),
+    'Only wholly contained hours contribute; the requested custom start remains visible.'
+);
+checkHeatmapWindow(
+    HeatmapWindow::Resolve('custom', 0, $now, 'Europe/Berlin', ['CustomRangeValue' => 15, 'CustomRangeUnit' => 'minute'])['Empty'],
+    'Short custom periods remain empty, never inventing a partial hour.'
+);
+$native = static function (string $value): string
+{
+    $parts = preg_split('/[- :]/', $value);
+    return json_encode(array_combine(['year', 'month', 'day', 'hour', 'minute', 'second'], array_map('intval', $parts)), JSON_THROW_ON_ERROR);
+};
+$absolute = ['AbsoluteStart' => $native('2026-10-01 09:20:00'), 'AbsoluteEnd' => $native('2026-10-03 11:45:00')];
+$fixed = HeatmapWindow::Resolve('absolute', 0, $now, 'Europe/Berlin', $absolute);
+checkHeatmapWindow(
+    $fixed['StartTimestamp'] === $timestamp('2026-10-01 10:00:00')
+    && $fixed['EndTimestamp'] === $timestamp('2026-10-03 11:00:00') - 1
+    && $fixed['RequestedEndTimestamp'] === $timestamp('2026-10-03 11:45:00'),
+    'Fixed boundaries are inclusive/exclusive with complete-hour rounding, not day rounding.'
+);
+checkHeatmapWindow(
+    $fixed === HeatmapWindow::Resolve('absolute', 0, $now + 86400, 'Europe/Berlin', $absolute),
+    'Refreshing a fixed historical period must not move its dates.'
+);
+$priorFixed = HeatmapWindow::Resolve('absolute', 1, $now, 'Europe/Berlin', $absolute);
+checkHeatmapWindow(
+    $priorFixed['RequestedEndTimestamp'] === $fixed['RequestedStartTimestamp']
+    && $priorFixed['StartTimestamp'] === $timestamp('2026-09-29 07:00:00'),
+    'Fixed navigation uses the exact selected elapsed duration before full-hour rounding.'
+);
+foreach ([['2026-03-29 00:00:00', '2026-03-30 00:00:00', 23],
+    ['2025-10-26 00:00:00', '2025-10-27 00:00:00', 25]] as [$from, $until, $hours]) {
+    $w = HeatmapWindow::Resolve('absolute', 0, $now, 'Europe/Berlin', ['AbsoluteStart' => $native($from), 'AbsoluteEnd' => $native($until)]);
+    checkHeatmapWindow(
+        $w['EndTimestamp'] - $w['StartTimestamp'] + 1 === $hours * 3600,
+        'Fixed DST periods preserve distinct elapsed hours.'
+    );
+}
+$maximum = ['CustomRangeValue' => 366, 'CustomRangeUnit' => 'day'];
+$full = HeatmapWindow::Resolve('custom', 0, $now, 'Europe/Berlin', $maximum);
+checkHeatmapWindow(
+    count(HeatmapWindow::ArchiveChunks($full['StartTimestamp'], $full['EndTimestamp'])) === 7 && $full['Limit'] === 2000,
+    'The former twelve-month envelope retains seven bounded requests with 2000 points each.'
+);
+foreach ([['custom', ['CustomRangeValue' => 367, 'CustomRangeUnit' => 'day']],
+    ['custom', ['CustomRangeValue' => 0, 'CustomRangeUnit' => 'hour']],
+    ['custom', ['CustomRangeValue' => 1, 'CustomRangeUnit' => 'invalid']],
+    ['absolute', []], ['absolute', [...$absolute, 'AbsoluteEnd' => $absolute['AbsoluteStart']]],
+    ['absolute', [...$absolute, 'AbsoluteStart' => $native('2026-02-30 00:00:00')]],
+    ['absolute', [...$absolute, 'AbsoluteEnd' => $native('2027-01-01 00:00:00')]],
+    ['absolute', ['AbsoluteStart' => $native('2026-03-29 02:30:00'), 'AbsoluteEnd' => $native('2026-03-30 00:00:00')]],
+    ['absolute', ['AbsoluteStart' => $native('2025-10-26 02:30:00'), 'AbsoluteEnd' => $native('2025-10-27 00:00:00')]]] as [$range, $settings]) {
+    try {
+        HeatmapWindow::Resolve($range, 0, $now, 'Europe/Berlin', $settings);
+        throw new RuntimeException('Invalid extended Heatmap period was accepted.');
+    } catch (InvalidArgumentException) {
+    }
+}
+foreach (HeatmapWindow::RANGES as $range) {
+    if (in_array($range, ['custom', 'absolute'], true)) {
+        continue;
+    }
+    checkHeatmapWindow(
+        HeatmapWindow::Resolve($range, 0, $now, 'Europe/Berlin') === HeatmapWindow::Resolve($range, 0, $now, 'Europe/Berlin', ['AbsoluteStart' => 'bad', 'CustomRangeValue' => -1]),
+        'Inactive extended fields must not change any existing window.'
+    );
+}
+echo "Heatmap calendar, custom and fixed windows verified.\n";

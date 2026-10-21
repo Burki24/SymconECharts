@@ -29,6 +29,20 @@ Canvas-Zeichenaufrufe für Kachel und IPSView statt nur vorhandener Titeloptione
 
 ## Aktueller Stand und Zielarchitektur
 
+Heatmap ergänzt gemäß [ADR 0083](adr/0083-flexible-heatmap-periods.md) `custom`
+und `absolute`. `HeatmapWindow` verwendet die zentrale strikte Datumsauswahl,
+exakte Grenzprüfung und Vollstundenplanung aus `EChartsArchiveQuery`; alte
+Kalenderzeiträume bleiben unverändert. Neue Fenster sind auf 366 × 24 Stunden
+beschränkt; die bisherigen 60-Tage-Chunks mit je 2000 Aggregaten passen
+weiterhin in höchstens sieben Archivabfragen. Alle vier Kennzahlen und
+die Wochentag-/Stundenreduktion bleiben erhalten. Keine Gateway-Protokoll- oder
+Helper-Änderung ist erforderlich. Ausgabe und reine Entwurfsvorschauen verwenden
+dieselbe Modulplanung. Ein stabiler Ansichtsschlüssel schützt Navigation gegen
+veraltete Antworten, ohne einen laufenden relativen Zeitraum einzufrieren.
+Die lokale Canvas-Prüfung mit synthetischen Daten ergänzt automatisierte
+Modul-/Gateway-, Budget- und Rendererprüfungen; die Live-Abnahme nach Update
+bleibt offen.
+
 Calendar bietet gemäß [ADR 0082](adr/0082-flexible-calendar-periods.md) Jahr,
 Quartal, Monat und feste historische Datumsfenster. `Period=year` erhält alle
 Altinstanzen; die neuen Month-/Quarter-/Date-Properties beeinflussen nur ihre
@@ -41,7 +55,8 @@ ohne dessen Datenmodell zu ändern. Maximal 366 Tage/Aggregate, alte Kennzahlen,
 Teilarchive und unabhängige Designs bleiben erhalten. Navigation speichert
 nichts und verschiebt freie Fenster um ihre zivilen Kalendertage. Ein
 Ansichtsschlüssel verwirft veraltete Antworten bei Konfigurationswechseln.
-Die neue Calendar-Live-Abnahme nach Modulupdate bleibt separat offen.
+Die neue Calendar-Live-Abnahme erfolgte per MCP; der Eigentümer bestätigt
+anschließend Kachel und tatsächliches IPSView. Dies ist keine Live-Lastfreigabe.
 
 StateTimeline integriert gemäß [ADR 0081](adr/0081-fixed-historical-state-timeline-periods.md)
 feste historische Von-/Bis-Zeiträume. `ParseLocalDateTime` wird wiederverwendet;

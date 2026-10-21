@@ -916,6 +916,16 @@ final class TestableEChartsHeatmap extends EChartsHeatmap
         $this->currentTimestamp = $timestamp;
     }
 
+    protected function LoadConfigurationForm(): array
+    {
+        return json_decode((string) file_get_contents(dirname(__DIR__) . '/EChartsHeatmap/form.json'), true, 512, JSON_THROW_ON_ERROR);
+    }
+
+    protected function VisualizationAsset(string $filename): string
+    {
+        return (string) file_get_contents(dirname(__DIR__) . '/EChartsHeatmap/visualization/' . $filename);
+    }
+
     protected function CurrentTimestamp(): int
     {
         return $this->currentTimestamp;
@@ -1038,6 +1048,11 @@ if (array_slice($argv, 1) === ['--bar-category-normalization']) {
     exit(0);
 }
 
+if (array_slice($argv, 1) === ['--heatmap-periods']) {
+    require __DIR__ . '/heatmap_periods.php';
+    echo "Heatmap custom/fixed periods, metrics, navigation, drafts and unchanged archive budgets verified.\n";
+    exit(0);
+}
 if (($argv[1] ?? '') === '--calendar-pie-preview') {
     require_once dirname(__DIR__) . '/EChartsCalendarPie/module.php';
     $GLOBALS['symconTestVariables'][4800] = ['VariableType' => 2, 'VariableUpdated' => 1780000000, 'Value' => 8.0, 'Name' => 'Quelle A'];
@@ -2214,6 +2229,7 @@ for ($index = 0; $index < 16; $index++) {
 }
 
 require __DIR__ . '/heatmap_metrics.php';
+require __DIR__ . '/heatmap_periods.php';
 
 $heatmap = new TestableEChartsHeatmap();
 $heatmap->Create();
@@ -2382,8 +2398,8 @@ $heatmapForm = json_decode($heatmapOutput->GetConfigurationForm(), true, 512, JS
 $heatmapRangeSelect = findGaugeFormElement($heatmapForm['elements'], 'Range');
 assertGatewayGauge(
     is_array($heatmapRangeSelect)
-        && array_column($heatmapRangeSelect['options'], 'value') === ['1w', '1m', '3m', '6m', '12m', 'ytd'],
-    'The Heatmap form must offer exactly the six requested calendar ranges.'
+        && array_column($heatmapRangeSelect['options'], 'value') === ['1w', '1m', '3m', '6m', '12m', 'ytd', 'custom', 'absolute'],
+    'The Heatmap form must preserve six calendar ranges and add custom and fixed historical periods.'
 );
 $oldRangeHeatmap = new EChartsHeatmap();
 $oldRangeHeatmap->Create();

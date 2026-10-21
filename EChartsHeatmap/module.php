@@ -108,6 +108,10 @@ class EChartsHeatmap extends IPSModuleStrict
             $this->RegisterPropertyInteger('SourceVariableID', 0);
             $this->RegisterPropertyString('Title', '');
             $this->RegisterPropertyString('Range', '1m');
+            $this->RegisterPropertyInteger('CustomRangeValue', 7);
+            $this->RegisterPropertyString('CustomRangeUnit', 'day');
+            $this->RegisterPropertyString('AbsoluteStart', '{}');
+            $this->RegisterPropertyString('AbsoluteEnd', '{}');
             $this->RegisterPropertyString('Metric', 'average');
             $this->RegisterPropertyBoolean('UseVariablePresentation', true);
             $this->RegisterPropertyString('Unit', '');
@@ -185,6 +189,15 @@ class EChartsHeatmap extends IPSModuleStrict
         $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
             $form = $this->LoadConfigurationForm();
+            $range = $this->ReadPropertyString('Range');
+            $form['elements'] = $this->SetFormFieldVisibility($form['elements'], ['CustomRangeValue', 'CustomRangeUnit'], $range === 'custom');
+            $form['elements'] = $this->SetFormFieldVisibility($form['elements'], ['AbsoluteStart', 'AbsoluteEnd', 'AbsoluteRangeHint', 'AbsoluteTimeZone'], $range === 'absolute');
+            foreach ($form['elements'] as &$element) {
+                if (($element['name'] ?? '') === 'AbsoluteTimeZone') {
+                    $element['caption'] = sprintf($this->Translate('Symcon time zone: %s'), date_default_timezone_get());
+                }
+            }
+            unset($element);
             $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
             $form['elements'] = $this->WithAnimationFormControls($form['elements']);
             $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
@@ -195,7 +208,7 @@ class EChartsHeatmap extends IPSModuleStrict
                 ['caption' => 'Labels and typography', 'start' => 'ShowValues']
             ]);
             $fields = [
-                'Title', 'SourceVariableID', 'Range', 'Metric', 'UseVariablePresentation', 'Unit', 'Decimals',
+                'Title', 'SourceVariableID', 'Range', 'CustomRangeValue', 'CustomRangeUnit', 'AbsoluteStart', 'AbsoluteEnd', 'Metric', 'UseVariablePresentation', 'Unit', 'Decimals',
                 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
                 'IPSViewBackgroundOpacityPercent',
                 ...array_keys(self::DESIGN_DEFAULTS),
@@ -215,6 +228,27 @@ class EChartsHeatmap extends IPSModuleStrict
             throw $debugFlowException;
         } finally {
             $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, false);
+        }
+    }
+
+    public function UpdateTimeRangeForm(string $Range): void
+    {
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            foreach (['AbsoluteStart', 'AbsoluteEnd', 'AbsoluteRangeHint', 'AbsoluteTimeZone'] as $name) {
+                $this->UpdateFormField($name, 'visible', $Range === 'absolute');
+            }
+            foreach (['CustomRangeValue', 'CustomRangeUnit'] as $name) {
+                $this->UpdateFormField($name, 'visible', $Range === 'custom');
+            }
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
     }
 
@@ -454,37 +488,52 @@ class EChartsHeatmap extends IPSModuleStrict
             $titleColor,
             $this->BarPreviewValue($values, 'TitleFontSizePercent', 'integer', $ipsView)
         );
+        try {
+            $query = $this->ResolveHeatmapWindow(0, $values);
+        } catch (Throwable $exception) {
+            return $svg . '<text x="24" y="100" font-size="11" fill="' . EChartsBarPreview::E($palette['text']) . '">'
+                . EChartsBarPreview::E($this->Translate($exception->getMessage())) . '</text></svg>';
+        }
         $showValues = $this->BarPreviewValue($values, 'ShowValues', 'boolean', $ipsView);
         $showScale = $this->BarPreviewValue($values, 'ShowColorScale', 'boolean', $ipsView);
         $sourceID = (int) ($values['SourceVariableID'] ?? $this->ReadPropertyInteger('SourceVariableID'));
         $sourceName = $sourceID > 0 && IPS_VariableExists($sourceID) ? IPS_GetName($sourceID) : $this->Translate('No source selected');
         $range = (string) ($values['Range'] ?? $this->ReadPropertyString('Range'));
         $rangeLabel = $this->Translate(match ($range) {
-            '1w'    => '1 week', '1m' => '1 month', '3m' => '3 months',
-            '6m'    => '6 months', '12m' => '12 months', 'ytd' => 'Since January 1',
-            default => $range
+            '1w'     => '1 week', '1m' => '1 month', '3m' => '3 months',
+            '6m'     => '6 months', '12m' => '12 months', 'ytd' => 'Since January 1',
+            'custom' => 'Custom', 'absolute' => 'Fixed historical period',
+            default  => $range
         });
+        $svg = str_replace('<svg ', '<svg data-range="' . $range . '" data-start="' . $query['StartTimestamp']
+            . '" data-end="' . $query['EndTimestamp'] . '" ', $svg);
         $metric = (string) ($values['Metric'] ?? $this->ReadPropertyString('Metric'));
         $metricLabel = $this->Translate(self::MetricLabel($metric));
         $svg .= '<text x="54" y="53" fill="' . EChartsBarPreview::E($palette['muted'])
             . '" font-size="11">' . EChartsBarPreview::E($sourceName . ' · ' . $rangeLabel . ' · ' . $metricLabel) . '</text>';
+        $extended = isset($query['RequestedStartTimestamp']);
+        if ($extended) {
+            $svg .= '<text x="54" y="72" fill="' . EChartsBarPreview::E($palette['muted']) . '" font-size="9">'
+                . EChartsBarPreview::E($query['RequestedStartLabel'] . ' – ' . $query['RequestedEndLabel'] . ' · '
+                    . date_default_timezone_get() . ' · ' . $this->Translate('Until (exclusive)')) . '</text>';
+        }
+        $plotTop = $extended ? 88 : 64;
+        $rowHeight = $extended ? 30 : 34;
         $weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-        $datedDays = $range === '1w'
-            ? HeatmapWindow::Resolve($range, 0, $this->CurrentTimestamp(), date_default_timezone_get())['Days']
-            : [];
+        $datedDays = $query['Days'];
         foreach ($weekdays as $day => $name) {
             $label = $datedDays === [] ? $this->Translate($name)
                 : $this->Translate($weekdays[$datedDays[$day]['weekday']]) . ' '
                     . substr($datedDays[$day]['date'], 8, 2) . '.' . substr($datedDays[$day]['date'], 5, 2) . '.';
-            $svg .= '<text x="74" y="' . (82 + $day * 34) . '" text-anchor="end" fill="'
+            $svg .= '<text x="74" y="' . ($plotTop + 18 + $day * $rowHeight) . '" text-anchor="end" fill="'
                 . EChartsBarPreview::E($axisColor) . '" font-size="12">'
                 . EChartsBarPreview::E($label) . '</text>';
             for ($hour = 0; $hour < 24; $hour++) {
                 $ratio = (($hour * 11 + $day * 17) % 100) / 100;
                 $color = self::ScaleColor($scaleColors, $ratio, $classScale);
                 $x = 82 + $hour * 24;
-                $y = 64 + $day * 34;
-                $svg .= '<rect x="' . $x . '" y="' . $y . '" width="22" height="30" rx="2" fill="'
+                $y = $plotTop + $day * $rowHeight;
+                $svg .= '<rect x="' . $x . '" y="' . $y . '" width="22" height="' . ($rowHeight - 4) . '" rx="2" fill="'
                     . EChartsBarPreview::E($color) . '"/>';
                 if ($showValues && $hour % 3 === 0) {
                     $sample = $classScale
@@ -554,7 +603,8 @@ class EChartsHeatmap extends IPSModuleStrict
         $timezone = date_default_timezone_get();
         $range = $this->ReadPropertyString('Range');
         $now = $this->CurrentTimestamp();
-        $query = HeatmapWindow::Resolve($range, $windowOffset, $now, $timezone);
+        $settings = $this->HeatmapPeriodSettings();
+        $query = $this->ResolveHeatmapWindow($windowOffset);
         $archive = $this->ReadArchive($variableID, $query);
         try {
             $cells = HeatmapAggregation::ByWeekdayAndHour($archive['Points'], $timezone, $this->ReadPropertyString('Metric'));
@@ -564,7 +614,11 @@ class EChartsHeatmap extends IPSModuleStrict
         }
         $this->WriteAttributeString('LastError', '');
         $this->DebugEChartsSetStatus(IS_ACTIVE);
-
+        $style = $this->ReadDesignStyle($ipsView);
+        $viewKey = hash('sha256', json_encode([$variableID, $range, $this->ReadPropertyString('Metric'), $timezone,
+            $range === 'absolute' ? [$query['BaseStartTimestamp'], $query['BaseEndTimestamp']]
+                : ($range === 'custom' ? $query['DurationSeconds'] : null),
+            $presentation, $style, $this->EffectiveTheme($ipsView), $this->ReadPropertyString('Title')], JSON_THROW_ON_ERROR));
         return json_encode([
             'schemaVersion' => 1,
             'family'        => 'heatmap',
@@ -580,14 +634,40 @@ class EChartsHeatmap extends IPSModuleStrict
                 'startDate'      => $query['StartDate'],
                 'endDate'        => $query['EndDate'],
                 'days'           => $range === '1w' ? $query['Days'] : [],
-                'maxOffset'      => HeatmapWindow::MaximumOffset($range, $now, $timezone),
+                'maxOffset'      => HeatmapWindow::MaximumOffset($range, $now, $timezone, $settings),
                 'startTimestamp' => $query['StartTimestamp'],
                 'endTimestamp'   => $query['EndTimestamp'],
-                'style'          => $this->ReadDesignStyle($ipsView)
+                'style'          => $style,
+                'viewKey'        => $viewKey,
+                ...(isset($query['RequestedStartTimestamp']) ? [
+                    'requestedStartTimestamp' => $query['RequestedStartTimestamp'], 'requestedEndTimestamp' => $query['RequestedEndTimestamp'],
+                    'requestedStartLabel'     => $query['RequestedStartLabel'], 'requestedEndLabel' => $query['RequestedEndLabel'],
+                    'durationSeconds'         => $query['DurationSeconds']
+                ] : [])
             ],
             'cells'     => $cells,
             'truncated' => $archive['Truncated']
         ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
+    }
+
+    /** Pure draft/stored settings, shared by validation, navigation and both previews. */
+    private function HeatmapPeriodSettings(array $values = []): array
+    {
+        $settings = [];
+        foreach (['CustomRangeUnit', 'AbsoluteStart', 'AbsoluteEnd'] as $name) {
+            $settings[$name] = $values[$name] ?? $this->ReadPropertyString($name);
+        }
+        $settings['CustomRangeValue'] = $values['CustomRangeValue'] ?? $this->ReadPropertyInteger('CustomRangeValue');
+        return $settings;
+    }
+
+    private function ResolveHeatmapWindow(int $offset = 0, array $values = []): array
+    {
+        $range = $values['Range'] ?? $this->ReadPropertyString('Range');
+        if (!is_string($range)) {
+            throw new InvalidArgumentException('The Heatmap window is invalid.');
+        }
+        return HeatmapWindow::Resolve($range, $offset, $this->CurrentTimestamp(), date_default_timezone_get(), $this->HeatmapPeriodSettings($values));
     }
 
     /** @param array<string,mixed> $query @return array{Points:list<array{0:int,1:float}>,Truncated:bool} */
@@ -735,6 +815,11 @@ class EChartsHeatmap extends IPSModuleStrict
                 'Next period'                         => $this->Translate('Next period'),
                 'Time range'                          => $this->Translate('Time range'),
                 'Today'                               => $this->Translate('Today'),
+                'Selected period'                     => $this->Translate('Selected period'),
+                'Custom'                              => $this->Translate('Custom'),
+                'Fixed historical period'             => $this->Translate('Fixed historical period'),
+                'Until (exclusive)'                   => $this->Translate('Until (exclusive)'),
+                'From (inclusive)'                    => $this->Translate('From (inclusive)'),
                 '1 week'                              => $this->Translate('1 week'),
                 '1-month average'                     => $this->Translate('1-month average'),
                 '3-month average'                     => $this->Translate('3-month average'),
@@ -797,6 +882,11 @@ class EChartsHeatmap extends IPSModuleStrict
         if ($variableID <= 0 || !IPS_VariableExists($variableID)
             || !in_array(IPS_GetVariable($variableID)['VariableType'] ?? null, [1, 2], true)) {
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => 'Configure a numeric archive variable.'];
+        }
+        try {
+            $this->ResolveHeatmapWindow();
+        } catch (Throwable $exception) {
+            return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => $exception->getMessage()];
         }
         if (!in_array($this->ReadPropertyString('Range'), self::RANGES, true)
             || !in_array($this->ReadPropertyString('Metric'), ['average', 'minimum', 'maximum', 'consumption'], true)
