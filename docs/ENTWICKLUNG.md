@@ -29,6 +29,21 @@ Canvas-Zeichenaufrufe für Kachel und IPSView statt nur vorhandener Titeloptione
 
 ## Aktueller Stand und Zielarchitektur
 
+Parallel ergänzt gemäß [ADR 0086](adr/0086-parallel-axis-metrics.md) die additive
+Quellenzeilenauswahl `Metric`: `auto` (fehlendes Feld ebenso), `average`,
+`minimum`, `maximum`, `consumption`. Bestehende Auto-Modelle und Beschriftungen
+bleiben unverändert. Nur explizite Modellachsen erhalten `metric`; die Renderer
+kennzeichnen sie übersetzt an Achse und Tooltip. Ein reiner Quellenparser wird
+für gespeicherte Quellen und Vorschauentwürfe wiederverwendet. Vorschauen bleiben
+schematisch und archivfrei. Die bestehende gemeinsame Zeitraumplanung und
+Gateway-Reducer werden genutzt; `consumption` wird ausschließlich zu `sum` auf
+Zählerarchiven. Explizite Kennzahlen prüfen Typ, effektiven Reducer und Fenster
+der Gateway-Antwort. Gemeinsame Zeitstempel, Lücken und sämtliche Budgets bleiben
+erhalten; keine Änderung an Gateway, synchronisierten Helpern oder Runtime.
+Neue Modul-/Gateway- und Renderertests ergänzen die bestehenden 16×625-,
+Zeitraum- und Skalenregressionen. Die neue Kennzahlwahl benötigt nach Modulupdate
+noch eine funktionale MCP- und Kachel-/IPSView-Abnahme.
+
 Parallel ergänzt gemäß [ADR 0085](adr/0085-parallel-fixed-axis-ranges.md) je
 Quellenzeile `AxisRangeMode` (Default `auto`), `AxisMinimum` und `AxisMaximum`.
 Nur `manual` wertet explizite endliche Grenzen aus. `EChartsValueRange` teilt die
@@ -39,8 +54,12 @@ unverändert, `outOfRangeCount` zählt Überschreitungen erst nach der gemeinsam
 Paarung. Native feste Skalen begrenzen lediglich den Sichtbereich; Tooltip und
 Warnung nennen die unveränderten Originalwerte beziehungsweise Überschreitungen.
 Beide SVG-Vorschauen prüfen alle Grenzen einschließlich ausgelassener Achsen und
-verwenden ausschließlich Beispieldaten. Die Live-Abnahme dieser neuen Skalen
-nach Modulupdate bleibt offen; Kennzahlen je Achse sind der nächste Schritt.
+verwenden ausschließlich Beispieldaten. Die festen Skalen sind funktional per
+MCP mit 16 Achsen und 43 gemeinsamen Intervallen geprüft; alle 33 tatsächlichen
+Überschreitungen wurden korrekt gezählt, Originalwerte und Konfigurationen
+blieben unverändert. Temporäre Testobjekte wurden entfernt. Der Eigentümer
+bestätigt anschließend Kachel und tatsächliches IPSView. Keine volle
+10000-Aggregate-Live-Lastprüfung wegen der kurzen Archive.
 
 Parallel unterstützt gemäß [ADR 0084](adr/0084-sixteen-axis-parallel-viewport.md)
 2–16 Achsen. `EChartsArchiveQuery` erhält für jeden Zeitraum höchstens

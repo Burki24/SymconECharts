@@ -482,6 +482,7 @@ class EChartsParallel extends IPSModuleStrict
         try {
             foreach ($sources as &$source) {
                 $source['AxisRange'] = self::SourceAxisRange($source);
+                $source['Metric'] = self::SourceMetric($source);
             }
             unset($source);
         } catch (InvalidArgumentException $exception) {
@@ -515,7 +516,8 @@ class EChartsParallel extends IPSModuleStrict
         for ($axis = 0; $axis < $count; ++$axis) {
             $x = 72 + (int) round($axis * 576 / max(1, $count - 1));
             $fixedRange = $sources[$axis]['AxisRange'];
-            $svg .= '<g data-axis-variable-id="' . ($sources[$axis]['VariableID'] ?? 0) . '"'
+            $metric = $sources[$axis]['Metric'];
+            $svg .= '<g data-axis-variable-id="' . ($sources[$axis]['VariableID'] ?? 0) . '" data-axis-metric="' . $metric . '"'
                 . ($fixedRange === null ? '' : ' data-axis-minimum="' . json_encode($fixedRange['minimum'], JSON_THROW_ON_ERROR)
                     . '" data-axis-maximum="' . json_encode($fixedRange['maximum'], JSON_THROW_ON_ERROR) . '"') . '>';
             $svg .= '<path d="M ' . $x . ' 72 V ' . EChartsBarPreview::N($axisBottom) . '" stroke="'
@@ -539,7 +541,13 @@ class EChartsParallel extends IPSModuleStrict
             }
             $svg .= '<text x="' . $x . '" y="' . EChartsBarPreview::N($axisBottom + $axisNameGap + 2)
                 . '" text-anchor="middle" font-size="' . $axisFontSize . '" fill="'
-                . EChartsBarPreview::E($axisColor) . '">' . EChartsBarPreview::E(mb_strimwidth($sources[$axis]['label'], 0, 16, '…')) . '</text></g>';
+                . EChartsBarPreview::E($axisColor) . '">' . EChartsBarPreview::E(mb_strimwidth($sources[$axis]['label'], 0, 16, '…')) . '</text>';
+            if ($metric !== 'auto') {
+                $svg .= '<text x="' . $x . '" y="' . EChartsBarPreview::N($axisBottom + $axisNameGap + 17)
+                    . '" text-anchor="middle" font-size="10" fill="' . EChartsBarPreview::E($axisColor) . '">'
+                    . EChartsBarPreview::E($this->Translate(self::MetricLabel($metric))) . '</text>';
+            }
+            $svg .= '</g>';
         }
         for ($line = 0; $line < 8; ++$line) {
             $points = [];
@@ -587,7 +595,8 @@ class EChartsParallel extends IPSModuleStrict
             $response = $this->ReadArchiveSource($source, $query);
             $series[] = $response['Points'];
             $axes[] = ['variableID' => $source['VariableID'], 'label' => $source['Label'],
-                'unit'              => $source['Unit'], 'decimals' => $source['Decimals']] + ($source['AxisRange'] ?? []);
+                'unit'              => $source['Unit'], 'decimals' => $source['Decimals']] + ($source['AxisRange'] ?? [])
+                + ($source['Metric'] === 'auto' ? [] : ['metric' => $source['Metric']]);
             $truncated = $truncated || $response['Truncated'];
         }
         $rows = ParallelPairing::Pair($series, $query['Limit']);
@@ -640,6 +649,10 @@ class EChartsParallel extends IPSModuleStrict
                 'Axes {first}–{last} of {total}'                                               => $this->Translate('Axes {first}–{last} of {total}'),
                 'Effective line limit: {count}'                                                => $this->Translate('Effective line limit: {count}'),
                 'Outside fixed axis range'                                                     => $this->Translate('Outside fixed axis range'),
+                'Average'                                                                      => $this->Translate('Average'),
+                'Minimum'                                                                      => $this->Translate('Minimum'),
+                'Maximum'                                                                      => $this->Translate('Maximum'),
+                'Counter consumption'                                                          => $this->Translate('Counter consumption'),
                 'The fixed axis ranges could not be rendered. Check the limits.'               => $this->Translate('The fixed axis ranges could not be rendered. Check the limits.'),
                 '{count} values outside fixed axis ranges. Original values remain unchanged.'  => $this->Translate(
                     '{count} values outside fixed axis ranges. Original values remain unchanged.'
@@ -761,7 +774,7 @@ class EChartsParallel extends IPSModuleStrict
         );
     }
 
-    /** @return list<array{VariableID:int,Label:string,Unit:string,Decimals:int,AxisRange:?array{minimum:float,maximum:float}}> */
+    /** @return list<array{VariableID:int,Label:string,Unit:string,Decimals:int,Metric:string,AxisRange:?array{minimum:float,maximum:float}}> */
     private function GetValidatedSources(): array
     {
         try {
@@ -785,6 +798,7 @@ class EChartsParallel extends IPSModuleStrict
             $presentation = EChartsVariablePresentation::Resolve($id, 0.0, 100.0, '', 2, true);
             $sources[] = ['VariableID' => $id, 'Label' => trim($label),
                 'Unit'                 => $presentation['unit'], 'Decimals' => $presentation['decimals'],
+                'Metric'               => self::SourceMetric($entry),
                 'AxisRange'            => self::SourceAxisRange($entry)];
             $seen[$id] = true;
         }
@@ -794,6 +808,26 @@ class EChartsParallel extends IPSModuleStrict
         }
         unset($source);
         return $sources;
+    }
+
+    private static function SourceMetric(array $source): string
+    {
+        $metric = array_key_exists('Metric', $source) ? $source['Metric'] : 'auto';
+        if (!in_array($metric, ['auto', 'average', 'minimum', 'maximum', 'consumption'], true)) {
+            throw new InvalidArgumentException('Parallel metrics must be automatic, average, minimum, maximum or counter consumption.');
+        }
+        return $metric;
+    }
+
+    private static function MetricLabel(string $metric): string
+    {
+        return match ($metric) {
+            'average'     => 'Average',
+            'minimum'     => 'Minimum',
+            'maximum'     => 'Maximum',
+            'consumption' => 'Counter consumption',
+            default       => 'Automatic'
+        };
     }
 
     /** @return ?array{minimum:float,maximum:float} */
@@ -824,7 +858,7 @@ class EChartsParallel extends IPSModuleStrict
             $operation = EChartsDataProtocol::OPERATION_ARCHIVE_READ;
             $payload = ['VariableID' => $source['VariableID'],
                 'StartTimestamp'     => $query['StartTimestamp'], 'EndTimestamp' => $query['EndTimestamp'],
-                'Mode'               => 'aggregated', 'Reducer' => 'auto',
+                'Mode'               => 'aggregated', 'Reducer' => $source['Metric'] === 'consumption' ? 'sum' : $source['Metric'],
                 'Limit'              => $query['Limit'], 'AggregationLevel' => $query['AggregationLevel']];
             try {
                 $response = EChartsDataProtocol::DecodeResponse(
@@ -845,6 +879,22 @@ class EChartsParallel extends IPSModuleStrict
                 throw new RuntimeException('The gateway archive request failed: ' . $code);
             }
             $archive = $response['Payload'];
+            // Keep the legacy auto contract; explicit metrics must never silently
+            // become counter extrema or a standard-archive consumption total.
+            if ($source['Metric'] !== 'auto') {
+                $type = $source['Metric'] === 'consumption' ? 'counter' : 'standard';
+                if (($archive['ArchiveAggregationType'] ?? null) !== $type) {
+                    $this->WriteAttributeString('LastError', 'ARCHIVE_TYPE_MISMATCH');
+                    $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                    throw new RuntimeException('The Parallel axis metric does not match the archive aggregation type.');
+                }
+                if (($archive['EffectiveReducer'] ?? null) !== $payload['Reducer']
+                    || ($archive['StartTimestamp'] ?? null) !== $query['StartTimestamp']
+                    || ($archive['EndTimestamp'] ?? null) !== $query['EndTimestamp']) {
+                    $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
+                    throw new RuntimeException('The gateway returned invalid Parallel archive data.');
+                }
+            }
             if (($archive['VariableID'] ?? null) !== $source['VariableID']
                 || !is_array($archive['Points'] ?? null) || !array_is_list($archive['Points'])
                 || count($archive['Points']) > $query['Limit'] || !is_bool($archive['Truncated'] ?? null)) {

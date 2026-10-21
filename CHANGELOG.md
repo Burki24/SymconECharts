@@ -15,6 +15,12 @@
 
 ## Neu
 
+- EChartsParallel bietet je Achse Mittelwert, Minimum, Maximum oder ausdrücklich
+  Zählerverbrauch. Automatisch erhält die bisherigen Mittelwerte beziehungsweise
+  Zählerverbräuche. Kachel, IPSView, Tooltips und Vorschauen kennzeichnen explizite
+  Kennzahlen; Originalwerte, feste Achsengrenzen, gemeinsame Intervalle, Designs
+  und das 10000er-Archivbudget bleiben erhalten.
+
 - EChartsParallel bietet pro Quelle automatische oder feste Min-/Max-Achsenbereiche.
   Bestehende Quellen bleiben automatisch skaliert. Kachel, IPSView und Vorschau
   berücksichtigen die Grenzen; Originalwerte bleiben erhalten, Überschreitungen

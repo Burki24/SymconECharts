@@ -175,6 +175,34 @@ assert.ok(Math.abs(identity.viewport.scrollLeft / originalSpacing - 7) < 0.01,
 
 console.log('Parallel layout and sixteen-axis viewport verified.');
 
+const metrics = { ...many, parallel: { ...many.parallel, axes: many.parallel.axes.map((axis, index) => ({
+    ...axis, metric: ['average', 'minimum', 'maximum', 'consumption'][index % 4]
+})) } };
+for (const mode of ['symcon', 'ipsview']) {
+    const view = render(metrics, mode, 360, true);
+    const captions = ['Average', 'Minimum', 'Maximum', 'Counter consumption'];
+    for (let index = 0; index < 16; index++) {
+        assert.equal(view.option.parallelAxis[index].name,
+            metrics.parallel.axes[index].label + '\n' + captions[index % 4] + ' (' + metrics.parallel.axes[index].unit + ')');
+    }
+    const tip = view.option.tooltip.formatter({ name: '<Time>', value: metrics.parallel.rows[0].values });
+    assert.match(tip, /&lt;Last axis&gt; · Counter consumption: 7 %/);
+    assert.doesNotMatch(tip, /<Last axis>/);
+    assert.deepEqual(Array.from(view.option.series[0].data[0].value), metrics.parallel.rows[0].values,
+        'Metric labels must never recalculate or normalize the selected aggregate values.');
+    view.key('End');
+    const left = view.viewport.scrollLeft;
+    view.window.handleMessage({status: 'ready', chart: metrics});
+    assert.equal(view.viewport.scrollLeft, left, 'Metric-bearing refresh retains the same variable-ID anchor.');
+    view.window.handleMessage({status: 'ready', chart: many});
+    assert.equal(view.option.parallelAxis[0].name, 'Axis 1 (°C)', 'Automatic mode must remove explicit metric labels after refresh.');
+    view.window.SYMC_VISUALIZATION.translations = {Minimum: 'Minimum', Maximum: 'Maximum', Average: 'Mittelwert', 'Counter consumption': 'Zählerverbrauch'};
+    view.window.handleMessage({status: 'ready', chart: metrics});
+    assert.equal(view.option.parallelAxis[0].name, 'Axis 1\nMittelwert (°C)');
+    assert.match(view.option.tooltip.formatter({name: 'Time', value: metrics.parallel.rows[0].values}), /Zählerverbrauch/);
+}
+console.log('Parallel metrics retain original values, labels, translations and navigation in both outputs.');
+
 const fixed = { ...many, parallel: { ...many.parallel,
     axes: many.parallel.axes.map((axis, index) => index === 0 ? { ...axis, minimum: -10, maximum: 40 }
         : index === 15 ? { ...axis, minimum: 0, maximum: 100 } : axis),
@@ -250,6 +278,30 @@ if (fs.existsSync(localECharts)) {
         }
     }
     console.log('Pinned ECharts keeps full Parallel geometry, native selections, scales and visible titles while panning.');
+    for (const mode of ['symcon', 'ipsview']) {
+        for (const font of [100, 200]) {
+            const selected = {...metrics, parallel: {...metrics.parallel,
+                style: {...metrics.parallel.style, axisFontSizePercent: font}}};
+            const view = render(selected, mode, 360, true);
+            const actual = echarts.init(null, null, {renderer: 'svg', ssr: true,
+                width: parseFloat(view.chartElement.style.width), height: 400});
+            actual.setOption(view.option);
+            const svg = actual.renderToSVGString();
+            assert.match(svg, /Average/);
+            assert.match(svg, /Counter consumption/);
+            const axisView = actual.getViewOfComponentModel(actual.getModel().getComponent('parallelAxis', 0));
+            const axisBounds = axisView.group.getBoundingRect();
+            const titleView = actual.getViewOfComponentModel(actual.getModel().getComponent('title'));
+            const titleBounds = titleView.group.getBoundingRect();
+            assert.ok(axisBounds.y + axisView.group.y >= titleBounds.y + titleBounds.height + titleView.group.y + 4,
+                'Two-line metric axis names must clear the real native chart title, including large fonts: '
+                + JSON.stringify({mode,font,axisBounds,axisY:axisView.group.y,titleBounds,titleY:titleView.group.y}));
+            assert.equal(actual.getModel().getSeriesByIndex(0).getData().get('dim15', 0), 7,
+                'Native metric-bearing series must retain the exact selected original value.');
+            actual.dispose();
+        }
+    }
+    console.log('Pinned Parallel renders two-line metric labels below the chart title at normal and large fonts.');
     for (const mode of ['symcon', 'ipsview']) {
         const view = render(fixed, mode, 360, true);
         view.window.echarts.graphic = echarts.graphic;

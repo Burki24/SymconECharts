@@ -103,6 +103,14 @@
         previousButton.disabled = left < 1;
         nextButton.disabled = left >= geometry.width - geometry.viewportWidth - 1;
     }
+    function metricLabel(axis) {
+        var captions = { average: 'Average', minimum: 'Minimum', maximum: 'Maximum', consumption: 'Counter consumption' };
+        return Object.prototype.hasOwnProperty.call(captions, axis.metric) ? translate(captions[axis.metric]) : '';
+    }
+    function axisLabel(axis) {
+        var metric = metricLabel(axis);
+        return String(axis.label || '') + (metric ? ' · ' + metric : '');
+    }
     function layoutViewport(model) {
         if (geometry && viewport.clientWidth === geometry.viewportWidth && viewport.scrollLeft !== lastScrollLeft) {
             rememberPosition();
@@ -113,7 +121,7 @@
         var compact = width < 420 || viewport.clientHeight < 280;
         var size = design.fontSizePercent((model.parallel.style || {}).axisFontSizePercent, compact ? 10 : 12);
         var longest = axes.reduce(function (length, axis) {
-            return Math.max(length, String(axis.label || '').length + (axis.unit ? String(axis.unit).length + 3 : 0));
+            return Math.max(length, axisLabel(axis).length + (axis.unit ? String(axis.unit).length + 3 : 0));
         }, 0);
         var gap = Math.max(96, Math.min(280, Math.min(32, longest) * size * 0.6 + 24));
         var margin = Math.max(compact ? 28 : 64, Math.min(140, gap / 2));
@@ -172,7 +180,9 @@
         var axisColor = style.axisColor || colors.text;
         var axisTitleSize = design.fontSizePercent(style.axisFontSizePercent, compact ? 10 : 12);
         var axisNameGap = style.axisNameGap === undefined ? 20 : Number(style.axisNameGap);
-        var axisTopExtra = Math.max(0, axisTitleSize - (compact ? 10 : 12)) + Math.max(0, axisNameGap - 20);
+        var axisTopExtra = Math.max(0, axisTitleSize - (compact ? 10 : 12)) + Math.max(0, axisNameGap - 20)
+            // Reserve the second caption line plus clearance above its native text box.
+            + (axes.some(function (axis) { return metricLabel(axis) !== ''; }) ? Math.ceil(axisTitleSize * 1.2) + 8 : 0);
         return {
             backgroundColor: backgroundColor,
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
@@ -201,7 +211,7 @@
                     axes.forEach(function (axis, index) {
                         var outside = Number.isFinite(axis.minimum) && Number.isFinite(axis.maximum)
                             && (Number(values[index]) < axis.minimum || Number(values[index]) > axis.maximum);
-                        lines.push(escapeHTML(axis.label) + ': ' + escapeHTML(Number(values[index]).toLocaleString())
+                        lines.push(escapeHTML(axisLabel(axis)) + ': ' + escapeHTML(Number(values[index]).toLocaleString())
                             + (axis.unit ? ' ' + escapeHTML(axis.unit) : '')
                             + (outside ? ' — ' + escapeHTML(translate('Outside fixed axis range')) : ''));
                     });
@@ -224,10 +234,12 @@
                 }
             },
             parallelAxis: axes.map(function (axis, index) {
+                var metric = metricLabel(axis);
                 var result = { id: 'axis:' + (axis.variableID || index), dim: index,
-                    name: String(axis.label || '') + (axis.unit ? ' (' + axis.unit + ')' : ''),
+                    name: String(axis.label || '') + (metric ? '\n' + metric : '') + (axis.unit ? ' (' + axis.unit + ')' : ''),
                     nameTruncate: { maxWidth: Math.min(geometry.spacing - 12, 2 * geometry.margin - 12), ellipsis: '…' },
                     nameTextStyle: { align: 'center' } };
+                if (metric) { result.nameTextStyle.lineHeight = Math.ceil(axisTitleSize * 1.2); }
                 if (Number.isFinite(axis.minimum) && Number.isFinite(axis.maximum)) {
                     result.min = axis.minimum;
                     result.max = axis.maximum;

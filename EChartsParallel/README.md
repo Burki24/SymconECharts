@@ -14,8 +14,8 @@ Stunden, Tagen oder Wochen verfügbar. Das ist ein rollierendes Zeitfenster.
 Für feste Anfangs-/Enddaten ist **Fester historischer Zeitraum** verfügbar.
 Bei rollierenden Zeitfenstern entspricht ein Tag 24 Stunden,
 eine Woche sieben solchen Tagen. Kachel und IPSView verwenden denselben Zeitraum.
-Standardwerte werden als Intervallmittelwerte, Zähler als Intervallsummen
-abgerufen. Nur Intervalle mit Werten auf *allen* Achsen werden gezeichnet;
+Standardwerte werden ohne ausdrückliche Kennzahl als Intervallmittelwerte,
+Zähler als Intervallsummen abgerufen. Nur Intervalle mit Werten auf *allen* Achsen werden gezeichnet;
 fehlende Werte werden nicht interpoliert. Das aktuelle, noch nicht
 abgeschlossene Intervall ist ausgeschlossen.
 
@@ -23,6 +23,42 @@ Die maximale Linienzahl ist einstellbar (1–1000, Standard 750). Bei einer
 Kürzung zeigt die Darstellung einen Hinweis. Eine kurze oder leere Linie kann
 auch an fehlenden Archivwerten liegen. Verschiedene Einheiten werden auf
 getrennten Achsen dargestellt und nicht miteinander verrechnet.
+
+## Kennzahl je Achse
+
+Jede Quellenzeile bietet eine eigene **Kennzahl**:
+
+- **Automatisch (Mittelwert / Zählerverbrauch)** bleibt der Standard, auch für
+  vorhandene Quellen ohne diese Einstellung.
+- **Mittelwert**, **Minimum** und **Maximum** verwenden die entsprechende
+  Kennzahl des abgeschlossenen Stunden- beziehungsweise Tagesaggregats eines
+  Standardarchivs. Ein Tagesminimum ist das Minimum des Tages, nicht der
+  kleinste Stundenmittelwert.
+- **Zählerverbrauch** verwendet den Verbrauch des abgeschlossenen Intervalls
+  aus einem Zählerarchiv, nicht dessen Zählerstand. Standardarchive sind dafür
+  nicht geeignet. Zählerarchive sind nicht für die explizite Mittelwert-,
+  Minimum- oder Maximum-Auswahl zulässig.
+
+So können beispielsweise das Temperaturminimum einer Quelle, die maximale
+Luftfeuchtigkeit einer anderen und der Energieverbrauch eines Zählers je
+gemeinsamem Intervall verglichen werden. Jede Variable bleibt genau einmal
+in der Quellenliste; die Kennzahl gehört zu ihrer Variablen-ID. Verschiedene
+Einheiten bleiben auf getrennten Achsen erhalten.
+
+Explizite Kennzahlen werden am Achsentitel und im Tooltip genannt. Der Tooltip
+behält die vollständige Bezeichnung, den unveränderten gewählten Archivwert
+und seine Einheit. Automatische Altachsen behalten ihre bisherige Beschriftung.
+Feste Min-/Max-Skalen beziehen sich auf die ausgewählte Kennzahl; sie ändern
+oder normalisieren den Wert nicht. Fehlende Intervalle auf nur einer Achse
+entfernen weiterhin die ganze Zeitlinie, ohne Nullauffüllung oder Interpolation.
+
+Kachel und IPSView teilen die Kennzahlen, behalten aber unabhängige Designs.
+Beide Formularvorschauen zeigen die Auswahl mit gekennzeichneten Beispieldaten;
+sie laden keine Archive und prüfen den tatsächlichen Archivtyp erst beim Laden
+der echten Daten. Eine nicht passende Kennzahl erzeugt einen Ladefehler statt
+eines stillen Wechsels auf eine andere Kennzahl. Zeiträume, Linienlimit und
+das gemeinsame 10000-Aggregate-Budget bleiben unverändert; jede Achse benötigt
+weiterhin nur eine Archivabfrage.
 
 ## Verschiebbare Achsenansicht
 

@@ -21,6 +21,8 @@ Parallelkoordinaten verbinden archivierte Variablenwerte je gemeinsamem
 Stunden- oder Tagesintervall, wahlweise auch in festen historischen Von-/Bis-Zeiträumen.
 Parallel unterstützt zwei bis 16 Achsen mit horizontal verschiebbarer Ansicht;
 jede Achse kann automatisch oder mit eigenen festen Min-/Max-Grenzen skalieren.
+Zusätzlich ist je Quelle Automatisch, Mittelwert, Minimum, Maximum oder
+Zählerverbrauch wählbar. Explizite Kennzahlen müssen zum Archivtyp passen.
 Alle Achsen teilen sich weiterhin höchstens 10000 Archivaggregate.
 Sankey zeigt aktuelle Mengenflüsse zwischen manuell angelegten Knoten.
 Calendar stellt archivierte Tageskennzahlen als farbigen Jahres-, Quartals-

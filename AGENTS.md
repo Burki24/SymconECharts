@@ -115,7 +115,10 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Altlisten bleiben erhalten. ADR 0085 ergänzt optionale feste Min-/Max-Skalen je
   Quelle mit unveränderten Originalwerten und nativer Achsenmarkierung. Die rein
   numerische Bereichsprüfung wird mit Normalisierung zentral geteilt; Parallel
-  normalisiert nicht. Individuelle Kennzahlen je Achse bleiben getrennt offen.
+  normalisiert nicht. ADR 0086 ergänzt je Quelle die Kennzahl `Metric` mit
+  kompatiblem Default `auto`, expliziten Standardarchiv-Mittelwerten/-Extrema
+  oder getrenntem Zählerverbrauch. Gateway-Reducer und zentrale Zeitraumplanung
+  werden unverändert wiederverwendet; ein Archivtypwechsel wird nicht kaschiert.
   Candlestick verwendet gemäß ADR 0079 dieselbe absolute Zeitplanung und eine
   zentrale begrenzte Intervallliste für Stunden/Tage. Echte Rohwert-Endpunkte,
   höchstens 720 Intervalle, 63 Abfragen und 64000 Rohpunkte bleiben erhalten.

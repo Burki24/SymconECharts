@@ -42,6 +42,37 @@
                     }
                 },
                 {
+                    "caption": "Metric",
+                    "name": "Metric",
+                    "width": "180px",
+                    "add": "auto",
+                    "edit": {
+                        "type": "Select",
+                        "options": [
+                            {
+                                "caption": "Automatic (average / counter consumption)",
+                                "value": "auto"
+                            },
+                            {
+                                "caption": "Average",
+                                "value": "average"
+                            },
+                            {
+                                "caption": "Minimum",
+                                "value": "minimum"
+                            },
+                            {
+                                "caption": "Maximum",
+                                "value": "maximum"
+                            },
+                            {
+                                "caption": "Counter consumption",
+                                "value": "consumption"
+                            }
+                        ]
+                    }
+                },
+                {
                     "caption": "Axis range",
                     "name": "AxisRangeMode",
                     "width": "130px",
@@ -91,6 +122,37 @@
                     "type": "ValidationTextBox",
                     "name": "Label",
                     "caption": "Label (optional)"
+                },
+                {
+                    "type": "Select",
+                    "name": "Metric",
+                    "caption": "Metric",
+                    "options": [
+                        {
+                            "caption": "Automatic (average / counter consumption)",
+                            "value": "auto"
+                        },
+                        {
+                            "caption": "Average",
+                            "value": "average"
+                        },
+                        {
+                            "caption": "Minimum",
+                            "value": "minimum"
+                        },
+                        {
+                            "caption": "Maximum",
+                            "value": "maximum"
+                        },
+                        {
+                            "caption": "Counter consumption",
+                            "value": "consumption"
+                        }
+                    ]
+                },
+                {
+                    "type": "Label",
+                    "caption": "Average, minimum and maximum require standard archives. Counter consumption requires a counter archive. Automatic preserves the existing archive-dependent behavior."
                 },
                 {
                     "type": "Select",
