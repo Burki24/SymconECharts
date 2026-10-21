@@ -21,7 +21,7 @@ function page(query) {
     steps.push({id: 'total', label: 'Gesamt', kind: 'total', change: total, before: 0, after: total});
     const palette = {background: '#303236', text: '#f4f5f7', muted: '#969aa2', border: '#777b83',
         accent: '#55cbb5', surface: '#25272b', seriesColors: ['#5070dd', '#b6d634']};
-    const bootstrap = {mode, options: {tileHeaderVisible: true, echartsThemes: {auto: palette}}, translations: {},
+    const bootstrap = {mode, options: {tileHeaderVisible: mode === 'symcon', tileHeaderInset: mode === 'symcon' ? 58 : 0, echartsThemes: {auto: palette}}, translations: {},
         state: {status: 'ready', chart: {theme: 'auto', steps, bar: {
             title: 'Bilanz · ' + count + ' Quellen', unit: '', decimals: 0,
             style: {showValues: query.get('values') !== 'no', showGrid: true, animationEnabled: false,

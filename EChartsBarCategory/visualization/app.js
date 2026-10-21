@@ -181,7 +181,7 @@
         var multiSeries = chartData.mode !== 'simple';
         var stacked = chartData.mode === 'stacked';
         var titleVisible = Boolean(bar.title);
-        var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8;
+        var headerInset = ((bootstrap.options && bootstrap.options.tileHeaderInset) || 8);
         var titleColor = style.titleColor || colors.text;
         var legendColor = style.legendColor || colors.text;
         var axisColor = style.axisColor || colors.text;

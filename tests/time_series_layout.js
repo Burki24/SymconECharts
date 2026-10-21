@@ -131,7 +131,7 @@ function render(
             translations: {},
             options: {
                 echartsThemes: { auto: palette, dark: palette },
-                tileHeaderVisible: true,
+                tileHeaderVisible: mode === 'symcon', tileHeaderInset: mode === 'symcon' ? 58 : 0,
                 adaptToBackground
             }
         },

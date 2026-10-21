@@ -628,8 +628,6 @@ class EChartsParallel extends IPSModuleStrict
 
     private function RenderParallelHTMLPage(bool $ipsView): string
     {
-        $hiddenTitle = !$ipsView && function_exists('IPS_GetObject')
-            && (bool) (IPS_GetObject($this->InstanceID)['ObjectIsHiddenTitle'] ?? false);
         return $this->RenderVisualizationHTMLPage($ipsView, [
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'ECharts Parallel',
@@ -663,7 +661,7 @@ class EChartsParallel extends IPSModuleStrict
             ],
             'options' => [
                 'echartsVersion'    => EChartsAsset::VERSION, 'echartsThemes' => EChartsAsset::ThemePalettes(),
-                'tileHeaderVisible' => !$hiddenTitle,
+                ...$this->ResponsiveVisualizationLayoutOptions(!$ipsView),
                 'adaptToBackground' => $ipsView && $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
                 'ipsViewTransport'  => $ipsView ? $this->EChartsIPSViewTransportOptions() : null
             ],

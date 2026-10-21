@@ -43,7 +43,7 @@ function render(mode, width, height, count, title = '', preset = 'multi-title', 
                     }))
                 }
             },
-            options: { echartsThemes: { dark: palette, night: { ...palette, background: '#111111' } }, tileHeaderVisible }
+            options: { echartsThemes: { dark: palette, night: { ...palette, background: '#111111' } }, tileHeaderVisible: mode === 'symcon' && tileHeaderVisible, tileHeaderInset: mode === 'symcon' && tileHeaderVisible ? 58 : 0 }
         },
         echarts: {
             init: () => ({ setOption: next => { option = next; }, clear: () => { clearCount++; },

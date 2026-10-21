@@ -1,5 +1,9 @@
 # Unveröffentlicht
 
+- Alle Diagramme verwenden den zentralen Kachelkopf-Vertrag aus
+  Symcon_ModuleHelper. Sichtbare und ausgeblendete Kacheltitel sowie
+  IPSView behalten ihre bisherigen Abstände und Diagrammtitel.
+
 - EChartsThemeRiver behandelt das erste unvollständige Stunden- oder
   Tagesintervall eines später begonnenen Archivs als gemeinsame Lücke.
   Nachfolgende gültige Mittelwerte oder Zählerverbräuche bleiben sichtbar,

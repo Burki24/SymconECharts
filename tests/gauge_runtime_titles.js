@@ -61,7 +61,7 @@ function application(family, mode, preset, tileHeaderVisible) {
     let option;
     const window = {
         SYMC_VISUALIZATION: { mode, state: { status: 'ready', chart },
-            options: { tileHeaderVisible, echartsThemes: { dark: palette } } },
+            options: { tileHeaderVisible: mode === 'symcon' && tileHeaderVisible, tileHeaderInset: mode === 'symcon' && tileHeaderVisible ? 58 : 0, echartsThemes: { dark: palette } } },
         echarts: { init: () => ({ setOption: next => { option = next; }, clear() {}, dispose() {} }) },
         addEventListener() {}
     };

@@ -17,7 +17,7 @@ function page(query) {
         label: index === 99 ? 'Letzte Quelle · Maximum' : 'Gerät ' + String(index + 1).padStart(2, '0'),
         value: index === 99 ? 200 : index === 98 ? -50 : 10 + index % 80, order: index,
         initiallyVisible: index < 98, decimals: 0}));
-    const bootstrap = {mode, options: {tileHeaderVisible: true, echartsThemes: {auto: palette}},
+    const bootstrap = {mode, options: {tileHeaderVisible: mode === 'symcon', tileHeaderInset: mode === 'symcon' ? 58 : 0, echartsThemes: {auto: palette}},
         translations: {'Sources': 'Quellen', 'All': 'Alle', 'Inverse': 'Umkehren',
             'Previous page': 'Vorherige Seite', 'Next page': 'Nächste Seite',
             'Category navigation': 'Kategoriennavigation', 'No sources selected': 'Keine Quellen ausgewählt'},

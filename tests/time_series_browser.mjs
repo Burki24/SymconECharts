@@ -31,7 +31,7 @@ function page(mode) {
     const compressed = fs.existsSync(path.join(root, 'libs/echarts-startup.js'));
     const bootstrap = { mode, state: compressed ? null : state(),
         translations: JSON.parse(read(module + '/locale.json')).translations.de,
-        options: { tileHeaderVisible: true, echartsThemes: { auto: palette },
+        options: { tileHeaderVisible: mode === 'symcon', tileHeaderInset: mode === 'symcon' ? 58 : 0, echartsThemes: { auto: palette },
             ...(compressed ? { compressedStateGzipBase64: gzipSync(JSON.stringify(state())).toString('base64') } : {}) } };
     const replacements = { HTML_LANGUAGE: 'de', HTML_CLASSES: '', ROOT_FONT_SIZE: '16px',
         VIEWPORT_CONTENT: 'width=device-width, initial-scale=1', DOCUMENT_TITLE: 'TimeSeries synthetic browser fixture',

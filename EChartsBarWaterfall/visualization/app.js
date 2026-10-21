@@ -77,7 +77,7 @@
         var decimals = Math.max(0, Math.min(6, Number(bar.decimals) || 0));
         var unit = String(bar.unit || '');
         var titleVisible = Boolean(bar.title);
-        var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8;
+        var headerInset = ((bootstrap.options && bootstrap.options.tileHeaderInset) || 8);
         var titleColor = style.titleColor || colors.text;
         var axisColor = style.axisColor || colors.text;
         var axisLineColor = style.axisColor || colors.border;

@@ -43,7 +43,7 @@ function page(url) {
     const mode = url.searchParams.get('mode') === 'ipsview' ? 'ipsview' : 'symcon';
     const light = url.searchParams.get('theme') === 'light';
     const bootstrap = {mode, language: 'de', state: state(url),
-        options: {tileHeaderVisible: url.searchParams.get('header') !== 'hidden', adaptToBackground: false, echartsThemes: {auto: palette}},
+        options: {tileHeaderVisible: mode === 'symcon' && (url.searchParams.get('header') !== 'hidden'), tileHeaderInset: mode === 'symcon' && (url.searchParams.get('header') !== 'hidden') ? 58 : 0, adaptToBackground: false, echartsThemes: {auto: palette}},
         translations: {Start: 'Beginn', End: 'Ende', Duration: 'Dauer', Value: 'Wert'}};
     const variables = light
         ? ':root{--symc-background:#ffffff;--symc-text:#222222;--symc-text-muted:#666666;--symc-border:#cccccc;--symc-surface:#eeeeee}'

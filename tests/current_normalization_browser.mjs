@@ -22,7 +22,7 @@ function page(family, mode) {
     const chart = {schemaVersion:1,family:pie?'pie':'bar',theme:'auto',items,
         [key]:{normalized:true,title:'Relativer Vergleich · Originalwerte im Tooltip',unit:pie?'':'%',decimals:1,style}};
     const bootstrap = {mode,translations:JSON.parse(read(module+'/locale.json')).translations.de,
-        options:{tileHeaderVisible:true,echartsThemes:{auto:palette}},state:{status:'ready',chart}};
+        options:{tileHeaderVisible: mode === 'symcon', tileHeaderInset: mode === 'symcon' ? 58 : 0,echartsThemes:{auto:palette}},state:{status:'ready',chart}};
     const replacements = {HTML_LANGUAGE:'de',HTML_CLASSES:'',ROOT_FONT_SIZE:'16px',
         VIEWPORT_CONTENT:'width=device-width, initial-scale=1',DOCUMENT_TITLE:module+' normalized fixture',
         VISUALIZATION_THEME:':root{--symc-background:#303236;--symc-text:#f4f5f7;--symc-text-muted:#969aa2;--symc-border:#777b83;--symc-surface:#25272b}',

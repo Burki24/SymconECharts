@@ -9,7 +9,7 @@
     var previous = element('previous'), next = element('next'), selected = element('selected');
     var currentState = bootstrap.state || null, chart = null, theme = null, requestVersion = 0, navigating = false;
     var currentOffset = 0, desiredOffset = 0, disposed = false;
-    var header = bootstrap.mode === 'symcon' && options.tileHeaderVisible !== false ? 58 : 0;
+    var header = options.tileHeaderInset || 0;
     var chartBootstrap = {mode: bootstrap.mode, options: {tileHeaderVisible: false}};
     chartElement.style.top = header + 'px';
     chartElement.style.height = 'calc(100% - ' + header + 'px)';

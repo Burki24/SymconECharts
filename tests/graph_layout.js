@@ -49,7 +49,7 @@ function render(style, mode = 'symcon', width = 800, network = graph, height = 4
     const window = {
         SYMC_VISUALIZATION: {
             mode, state: compressed ? null : { status: 'ready', chart: model }, translations: {},
-            options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: true,
+            options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: mode === 'symcon', tileHeaderInset: mode === 'symcon' ? 58 : 0,
                 compressedStateGzipBase64: compressed ? (compressed === 'broken' ? 'not gzip'
                     : zlib.gzipSync(JSON.stringify({ status: 'ready', chart: model })).toString('base64')) : null }
         },

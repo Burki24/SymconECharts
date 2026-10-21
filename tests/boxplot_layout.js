@@ -26,7 +26,7 @@ function render(model, mode = 'symcon', headerVisible = true, width = 900, heigh
         resize: next => { if (engine) { engine.resize(next || { width: chartElement.clientWidth, height: chartElement.clientHeight }); } }, dispose: () => {} };
     const window = {
         SYMC_VISUALIZATION: { mode, language, state: { status: 'ready', chart: model }, translations: {},
-            options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: headerVisible,
+            options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: mode === 'symcon' && (headerVisible), tileHeaderInset: mode === 'symcon' && (headerVisible) ? 58 : 0,
                 adaptToBackground: mode === 'ipsview' } },
         echarts: { init: () => chart }, addEventListener: (name, callback) => { events[name] = callback; },
         ResizeObserver: class { constructor(callback) { resizeObserver = callback; } observe() {} },

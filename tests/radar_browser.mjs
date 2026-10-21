@@ -54,7 +54,7 @@ function page(mode, params) {
             areaShadowBlur: 8, areaShadowColor: '#000000'
         });
     }
-    const bootstrap = { mode, state: initialState, options: { tileHeaderVisible: true, echartsThemes: {},
+    const bootstrap = { mode, state: initialState, options: { tileHeaderVisible: mode === 'symcon', tileHeaderInset: mode === 'symcon' ? 58 : 0, echartsThemes: {},
         adaptToBackground: false,  }, translations };
     const replacements = { HTML_LANGUAGE: 'de', HTML_CLASSES: '', ROOT_FONT_SIZE: '16px', VIEWPORT_CONTENT: 'width=device-width, initial-scale=1',
         DOCUMENT_TITLE: 'Radar browser fixture', VISUALIZATION_THEME: variables, MODULE_STYLE: read('EChartsRadar/visualization/style.css'),

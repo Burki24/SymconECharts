@@ -32,7 +32,7 @@ function render(model, mode = 'symcon', width = 900, height = 500, headerVisible
         getOption: () => nativeEngine ? nativeEngine.getOption() : option, clear: () => {option = null;},
         resize: () => {}, dispose: () => {}, dispatchAction: action => actions.push(action)};
     const window = {SYMC_VISUALIZATION: {mode, language: 'de', state: {status: 'ready', chart: model}, translations: {},
-        options: {tileHeaderVisible: headerVisible, adaptToBackground: mode === 'ipsview', echartsThemes: {auto: palette, dark: palette}}},
+        options: {tileHeaderVisible: mode === 'symcon' && (headerVisible), tileHeaderInset: mode === 'symcon' && (headerVisible) ? 58 : 0, adaptToBackground: mode === 'ipsview', echartsThemes: {auto: palette, dark: palette}}},
         echarts: {init: () => chart, graphic: echarts.graphic}, addEventListener: (name, fn) => {events[name] = fn;}, getComputedStyle: () => ({color: ''})};
     const document = {body: {appendChild: () => {}}, createElement: () => ({style: {}, remove: () => {}}),
         getElementById: id => elements[id.replace('echarts-state-timeline-', '')]};

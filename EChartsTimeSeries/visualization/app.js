@@ -168,7 +168,7 @@
             });
             return seriesIndex >= 0 ? seriesColors[seriesIndex] : colors.border;
         });
-        var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 10;
+        var headerInset = ((bootstrap.options && bootstrap.options.tileHeaderInset) || 10);
         var zoom = model.chart && model.chart.enableZoom === true;
         var compact = chartElement.clientHeight < 280;
         var design = model.chart && model.chart.design || {};

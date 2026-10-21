@@ -26,7 +26,7 @@ function page(mode, family) {
     const module = family === 'sunburst' ? 'EChartsSunburst' : 'EChartsTreemap';
     const action = family === 'sunburst' ? 'sunburstRootToNode' : 'treemapRootToNode';
     const bootstrap = { mode, state: state(family), translations: JSON.parse(read(module + '/locale.json')).translations.de,
-        options: { tileHeaderVisible: true, adaptToBackground: false, echartsThemes: {} } };
+        options: { tileHeaderVisible: mode === 'symcon', tileHeaderInset: mode === 'symcon' ? 58 : 0, adaptToBackground: false, echartsThemes: {} } };
     const replacements = { HTML_LANGUAGE: 'de', HTML_CLASSES: '', ROOT_FONT_SIZE: '16px',
         VIEWPORT_CONTENT: 'width=device-width, initial-scale=1', DOCUMENT_TITLE: 'Hierarchy browser fixture',
         VISUALIZATION_THEME: ':root{--symc-background:#303236;--symc-text:#f4f5f7;--symc-text-muted:#969aa2;--symc-surface:#25272b}',

@@ -54,7 +54,7 @@ function render(style, data = root, width = 800, mode = 'symcon', height = 400, 
         SYMC_VISUALIZATION: {
             mode, state: compressed ? null : state, translations: {},
             options: {
-                echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: true,
+                echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: mode === 'symcon', tileHeaderInset: mode === 'symcon' ? 58 : 0,
                 compressedStateGzipBase64: compressed ? zlib.gzipSync(JSON.stringify(state)).toString('base64') : null
             }
         },

@@ -10,8 +10,7 @@
     var errorElement = document.getElementById('echarts-state-timeline-error');
     var warningElement = document.getElementById('echarts-state-timeline-warning');
     var chart = null, currentState = null, currentTheme = null, rowAnchor = null;
-    var tileHeaderInset = bootstrap.mode === 'symcon'
-        && (!bootstrap.options || bootstrap.options.tileHeaderVisible !== false) ? 58 : 0;
+    var tileHeaderInset = (bootstrap.options && bootstrap.options.tileHeaderInset) || 0;
     var chartBootstrap = tileHeaderInset ? {mode: 'symcon', options: {tileHeaderVisible: false}} : bootstrap;
     // A separate clipped viewport protects the native tile header even while panning.
     chartElement.style.top = tileHeaderInset + 'px';

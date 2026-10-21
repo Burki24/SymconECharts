@@ -19,7 +19,7 @@ function page(query) {
         value: 1, originalValue: normalized ? 1 : undefined, minimum: normalized ? 0 : undefined,
         maximum: normalized ? 100 : undefined, order: index, unit: normalized ? '%' : 'W', decimals: 1,
         initiallyVisible: index < 10}));
-    const bootstrap = {mode, options: {tileHeaderVisible: true, echartsThemes: {auto: palette, dark: palette}},
+    const bootstrap = {mode, options: {tileHeaderVisible: mode === 'symcon', tileHeaderInset: mode === 'symcon' ? 58 : 0, echartsThemes: {auto: palette, dark: palette}},
         translations: {'All': 'Alle', 'Invert': 'Umkehren', 'No sources selected.': 'Keine Quellen ausgewählt.',
             'No positive values': 'Keine positiven Werte',
             'No positive values in the selected sources.': 'Keine positiven Werte in der Auswahl.',

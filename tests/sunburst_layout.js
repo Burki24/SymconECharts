@@ -29,7 +29,7 @@ function render(model, width = 1000, mode = 'symcon', adaptToBackground = false,
     const window = {
         SYMC_VISUALIZATION: {
             mode, state: { status: 'ready', chart: model }, translations: {},
-            options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: true,
+            options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: mode === 'symcon', tileHeaderInset: mode === 'symcon' ? 58 : 0,
                 adaptToBackground }
         },
         echarts: { init: () => chart, format: echarts.format }, addEventListener: () => {}, getComputedStyle: () => ({ color: '' })

@@ -525,8 +525,6 @@ class EChartsStateTimeline extends IPSModuleStrict
 
     private function RenderStateTimelineHTMLPage(bool $ipsView): string
     {
-        $hiddenTitle = !$ipsView && function_exists('IPS_GetObject')
-            && (bool) (IPS_GetObject($this->InstanceID)['ObjectIsHiddenTitle'] ?? false);
         return $this->RenderVisualizationHTMLPage($ipsView, [
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'ECharts StateTimeline',
@@ -537,7 +535,7 @@ class EChartsStateTimeline extends IPSModuleStrict
             'translations' => $this->RendererTranslations(),
             'options'      => [
                 'echartsVersion'    => EChartsAsset::VERSION, 'echartsThemes' => EChartsAsset::ThemePalettes(),
-                'tileHeaderVisible' => !$hiddenTitle,
+                ...$this->ResponsiveVisualizationLayoutOptions(!$ipsView),
                 'adaptToBackground' => $ipsView && $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
                 'ipsViewTransport'  => $ipsView ? $this->EChartsIPSViewTransportOptions() : null
             ],

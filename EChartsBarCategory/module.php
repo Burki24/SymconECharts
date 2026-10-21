@@ -802,11 +802,6 @@ class EChartsBarCategory extends IPSModuleStrict
 
     private function RenderBarHTMLPage(bool $ipsView): string
     {
-        $hiddenTileTitle = false;
-        if (!$ipsView && function_exists('IPS_GetObject')) {
-            $hiddenTileTitle = (bool) (IPS_GetObject($this->InstanceID)['ObjectIsHiddenTitle'] ?? false);
-        }
-
         return $this->RenderVisualizationHTMLPage($ipsView, [
             'scriptAsset'        => 'app.min.js',
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
@@ -834,7 +829,7 @@ class EChartsBarCategory extends IPSModuleStrict
             'options'            => [
                 'echartsVersion'    => EChartsAsset::VERSION,
                 'echartsThemes'     => EChartsAsset::ThemePalettes(),
-                'tileHeaderVisible' => !$hiddenTileTitle,
+                ...$this->ResponsiveVisualizationLayoutOptions(!$ipsView),
                 'adaptToBackground' => $ipsView && $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
                 'ipsViewTransport'  => $ipsView ? $this->EChartsIPSViewTransportOptions() : null
             ],

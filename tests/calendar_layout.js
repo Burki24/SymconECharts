@@ -31,7 +31,7 @@ function harness(data = model, mode = 'symcon', width = 1100, height = 500, head
     const requests = [];
     const chart = { setOption: value => { option = value; }, clear() { clears++; }, resize() {}, dispose() {} };
     const window = { SYMC_VISUALIZATION: { mode, state: { schemaVersion: 1, family: 'calendar', status: 'ready', chart: data },
-        options: { tileHeaderVisible: header, adaptToBackground: mode === 'ipsview', echartsThemes: { dark: palette, auto: palette },
+        options: { tileHeaderVisible: mode === 'symcon' && (header), tileHeaderInset: mode === 'symcon' && (header) ? 58 : 0, adaptToBackground: mode === 'ipsview', echartsThemes: { dark: palette, auto: palette },
             calendarStatePath: '/hook/SymconECharts/state/5000/' + 'a'.repeat(32) }, translations: { 'Daily mean': 'Tagesmittelwert' } },
         echarts: { init: () => chart }, getComputedStyle: () => ({ color: '' }), addEventListener() {},
         location: { protocol: 'https:', host: 'symcon.example' } };

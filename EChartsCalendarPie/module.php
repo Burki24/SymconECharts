@@ -546,8 +546,6 @@ class EChartsCalendarPie extends IPSModuleStrict
 
     private function RenderCalendarPieHTMLPage(bool $ipsView): string
     {
-        $hiddenTitle = !$ipsView && function_exists('IPS_GetObject')
-            && (bool) (IPS_GetObject($this->InstanceID)['ObjectIsHiddenTitle'] ?? false);
         return $this->RenderVisualizationHTMLPage($ipsView, [
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'EChartsCalendarPie',
@@ -558,7 +556,7 @@ class EChartsCalendarPie extends IPSModuleStrict
             'translations' => $this->RendererTranslations(),
             'options'      => [
                 'echartsVersion'       => EChartsAsset::VERSION, 'echartsThemes' => EChartsAsset::ThemePalettes(),
-                'tileHeaderVisible'    => !$hiddenTitle,
+                ...$this->ResponsiveVisualizationLayoutOptions(!$ipsView),
                 'adaptToBackground'    => $ipsView && $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
                 'calendarPieStatePath' => $this->EChartsIPSViewTransportOptions()['statePath'],
                 'ipsViewTransport'     => $ipsView ? $this->EChartsIPSViewTransportOptions() : null

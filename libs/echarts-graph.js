@@ -127,8 +127,7 @@
     }
 
     function chartFrame(bootstrap, chartElement) {
-        var inset = bootstrap.mode === 'symcon'
-            && (!bootstrap.options || bootstrap.options.tileHeaderVisible !== false) ? 58 : 0;
+        var inset = (bootstrap.options && bootstrap.options.tileHeaderInset) || 0;
         chartElement.style.top = inset + 'px';
         chartElement.style.height = inset ? 'calc(100% - ' + inset + 'px)' : '100%';
         return inset ? { mode: 'symcon', options: { tileHeaderVisible: false } } : bootstrap;
@@ -136,8 +135,7 @@
 
     function chartTitle(bootstrap, chartBootstrap, chartElement, rootElement, title, size, color, design) {
         var layout = design.chartTitleLayout(chartBootstrap, title, size);
-        var header = bootstrap.mode === 'symcon'
-            && (!bootstrap.options || bootstrap.options.tileHeaderVisible !== false) ? 58 : 0;
+        var header = (bootstrap.options && bootstrap.options.tileHeaderInset) || 0;
         if (!rootElement.__symcGraphTitle) {
             var element = document.createElement('div');
             element.setAttribute('class', 'echarts-graph-chart-title');

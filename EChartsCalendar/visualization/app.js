@@ -17,7 +17,7 @@
     var currentState = bootstrap.state || null;
     var navigating = false;
     var currentOffset = 0;
-    var header = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 0;
+    var header = ((bootstrap.options && bootstrap.options.tileHeaderInset) || 0);
     var chartBootstrap = { mode: bootstrap.mode, options: { tileHeaderVisible: false } };
     chartElement.style.top = (header + 30) + 'px';
     chartElement.style.height = 'calc(100% - ' + (header + 30) + 'px)';

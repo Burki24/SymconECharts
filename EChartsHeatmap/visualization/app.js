@@ -150,7 +150,7 @@
         var width = Math.max(240, Number(chartElement.clientWidth) || 720);
         var height = Math.max(190, Number(chartElement.clientHeight) || 420);
         var compact = width < 550 || height < 290;
-        var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8;
+        var headerInset = ((bootstrap.options && bootstrap.options.tileHeaderInset) || 8);
         var titleSize = design.fontSizePercent(style.titleFontSizePercent, compact ? 14 : 18);
         var axisSize = design.fontSizePercent(style.axisFontSizePercent, compact ? 10 : 12);
         var valueSize = design.fontSizePercent(style.valueFontSizePercent, compact ? 9 : 11);
@@ -353,7 +353,7 @@
             theme = nextTheme;
         }
         updatePeriod(state.chart.heatmap || {},
-            bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8);
+            ((bootstrap.options && bootstrap.options.tileHeaderInset) || 8));
         var option = buildOption(state.chart, nextTheme);
         chart.setOption(option, true);
         updateClassLegend(option, state.chart);
@@ -387,7 +387,7 @@
             || !currentState || !currentState.chart) { return; }
         navigating = true;
         updatePeriod(currentState.chart.heatmap || {},
-            bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8);
+            ((bootstrap.options && bootstrap.options.tileHeaderInset) || 8));
         var requestedView = currentState.chart.heatmap;
         try {
             fetch(stateURL(offset), { method: 'GET', cache: 'no-store', credentials: 'same-origin',
@@ -412,7 +412,7 @@
                     navigating = false;
                     if (currentState && currentState.chart) {
                         updatePeriod(currentState.chart.heatmap || {},
-                            bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8);
+                            ((bootstrap.options && bootstrap.options.tileHeaderInset) || 8));
                     }
                 });
         } catch (error) {
@@ -420,7 +420,7 @@
             warningElement.textContent = translate(loadError);
             warningElement.hidden = false;
             updatePeriod(currentState.chart.heatmap || {},
-                bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8);
+                ((bootstrap.options && bootstrap.options.tileHeaderInset) || 8));
         }
     }
 

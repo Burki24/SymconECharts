@@ -39,7 +39,7 @@ function page(query) {
     }
     const palette = {background: '#303236', text: '#f4f5f7', muted: '#969aa2', border: '#777b83',
         accent: '#55cbb5', surface: '#25272b', seriesColors: ['#5070dd', '#b6d634', '#ff994d']};
-    const bootstrap = {mode, options: {tileHeaderVisible: true, echartsThemes: {auto: palette}},
+    const bootstrap = {mode, options: {tileHeaderVisible: mode === 'symcon', tileHeaderInset: mode === 'symcon' ? 58 : 0, echartsThemes: {auto: palette}},
         translations: JSON.parse(read('EChartsBarCategory/locale.json')).translations.de,
         state: {status: 'ready', chart: {theme: 'auto', bar: {
             title: 'Aktuelle Vergleichswerte · ' + count + ' Quellen', mode: barMode, orientation,

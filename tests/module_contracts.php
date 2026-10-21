@@ -372,6 +372,24 @@ foreach ([
     );
 }
 
+// Native title visibility and its dimensions have one canonical owner.
+foreach (glob($root . '/ECharts*/module.php') ?: [] as $modulePath) {
+    $source = (string) file_get_contents($modulePath);
+    if (!str_contains($source, 'use ResponsiveVisualizationHelper;')) {
+        continue;
+    }
+    requireContract(
+        str_contains($source, '...$this->ResponsiveVisualizationLayoutOptions(!$ipsView)'),
+        basename(dirname($modulePath)) . ' must use the shared native tile layout contract.',
+        $errors
+    );
+    requireContract(
+        !str_contains($source, 'ObjectIsHiddenTitle'),
+        basename(dirname($modulePath)) . ' must not duplicate native title detection.',
+        $errors
+    );
+}
+
 if ($errors !== []) {
     fwrite(STDERR, "SymconECharts module contract validation failed:\n - " . implode("\n - ", $errors) . "\n");
     exit(1);

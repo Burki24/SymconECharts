@@ -62,7 +62,7 @@ const window = {
                 ]
             }
         },
-        options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: true },
+        options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: true, tileHeaderInset: 58},
         translations: {}
     },
     echarts: { init: () => { initialized++; return chart; } },

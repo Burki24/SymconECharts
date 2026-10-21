@@ -32,7 +32,7 @@ function page(mode, layout, zigbee) {
     const chartID = zigbee ? 'echarts-zigbee-graph-chart' : 'echarts-graph-chart';
     const bootstrap = { mode, state: null,
         translations: JSON.parse(read(module + '/locale.json')).translations.de,
-        options: { tileHeaderVisible: true, echartsThemes: {},
+        options: { tileHeaderVisible: mode === 'symcon', tileHeaderInset: mode === 'symcon' ? 58 : 0, echartsThemes: {},
             compressedStateGzipBase64: gzipSync(JSON.stringify(state(layout, false, zigbee))).toString('base64') } };
     const replacements = { HTML_LANGUAGE: 'de', HTML_CLASSES: '', ROOT_FONT_SIZE: '16px',
         VIEWPORT_CONTENT: 'width=device-width, initial-scale=1', DOCUMENT_TITLE: 'Graph browser fixture',

@@ -52,7 +52,7 @@ const state = {
 const window = {
     SYMC_VISUALIZATION: {
         mode: 'symcon', state,
-        options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: true },
+        options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: true, tileHeaderInset: 58},
         translations: {}
     },
     echarts: { init: () => { initialized++; return chart; } },
@@ -964,7 +964,7 @@ if (fs.existsSync(localECharts)) {
     const livePolarWindow = {
         SYMC_VISUALIZATION: {
             mode: 'symcon', state: reportedState,
-            options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: true },
+            options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: true, tileHeaderInset: 58},
             translations: {}
         },
         echarts: { init: () => livePolarChart },
@@ -1349,6 +1349,7 @@ if (fs.existsSync(localECharts)) {
 
 for (const outputMode of ['symcon', 'ipsview']) {
     window.SYMC_VISUALIZATION.mode = outputMode;
+    window.SYMC_VISUALIZATION.options.tileHeaderInset = outputMode === 'symcon' ? 58 : 0;
     for (const polarMode of ['radial', 'tangential']) {
         window.handleMessage({ status: 'ready', chart: {
             ...state.chart,
@@ -1466,6 +1467,7 @@ assert.equal(control('selection').hidden, true);
 const nativeManyOptions = [];
 for (const outputMode of ['symcon', 'ipsview']) {
     window.SYMC_VISUALIZATION.mode = outputMode;
+    window.SYMC_VISUALIZATION.options.tileHeaderInset = outputMode === 'symcon' ? 58 : 0;
     for (const polarMode of ['radial', 'tangential']) {
         for (const size of [8, 16, 24]) {
             chartElement.clientWidth = 625;

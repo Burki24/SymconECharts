@@ -38,7 +38,7 @@ function render(style, items, width = 800, mode = 'symcon', height = 400, normal
         SYMC_VISUALIZATION: {
             mode, state: { status: 'ready', chart: model },
             translations: { 'No positive values': 'Keine positiven Werte', All: 'Alle', Invert: 'Umkehren' },
-            options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: true }
+            options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: mode === 'symcon', tileHeaderInset: mode === 'symcon' ? 58 : 0}
         },
         echarts: { init: () => chart },
         addEventListener: (name, handler) => { windowHandlers[name] = handler; },

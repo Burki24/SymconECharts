@@ -105,7 +105,7 @@
         var style = polar.style || {};
         var width = Math.max(1, chartElement.clientWidth || 1);
         var height = Math.max(1, chartElement.clientHeight || 1);
-        var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8;
+        var headerInset = ((bootstrap.options && bootstrap.options.tileHeaderInset) || 8);
         var labelWidth = Math.min(90, Math.max(36, Math.round(width * 0.13)));
         var labelMargin = Math.min(24, Math.max(16, Math.round(width * 0.05)));
         if (style.valueLabelPosition === 'outside') { labelMargin += 14; }
@@ -214,7 +214,7 @@
         }
         var swatches = colors.seriesColors || [colors.accent];
         var titleVisible = Boolean(polar.title);
-        var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8;
+        var headerInset = ((bootstrap.options && bootstrap.options.tileHeaderInset) || 8);
         var layout = polarLayout(polar, labels);
         var categoryFontSize = fontSize(style.categoryLabelFontSize, 10);
         var valueFontSize = fontSize(style.valueLabelFontSize, 10);

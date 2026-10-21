@@ -523,8 +523,6 @@ class EChartsGraphZ2M extends IPSModuleStrict
     private function RenderGraphHTMLPage(bool $ipsView): string
     {
         $startup = EChartsGraphOutput::Startup($this->BuildVisualizationState($ipsView));
-        $hiddenTitle = !$ipsView && function_exists('IPS_GetObject')
-            && (bool) (IPS_GetObject($this->InstanceID)['ObjectIsHiddenTitle'] ?? false);
         return $this->RenderVisualizationHTMLPage($ipsView, [
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'ECharts Zigbee Graph',
@@ -554,7 +552,7 @@ class EChartsGraphZ2M extends IPSModuleStrict
             'options' => [
                 'echartsVersion'            => EChartsAsset::VERSION,
                 'echartsThemes'             => EChartsAsset::ThemePalettes(),
-                'tileHeaderVisible'         => !$hiddenTitle,
+                ...$this->ResponsiveVisualizationLayoutOptions(!$ipsView),
                 'adaptToBackground'         => $ipsView && $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
                 'ipsViewTransport'          => $ipsView ? $this->EChartsIPSViewTransportOptions() : null,
                 'compressedStateGzipBase64' => $startup['compressedStateGzipBase64']

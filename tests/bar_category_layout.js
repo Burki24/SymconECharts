@@ -61,7 +61,7 @@ function render(orientation, sortOrder, outputMode = 'symcon', barMode = 'simple
                 }
             },
             translations: {},
-            options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: true }
+            options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: outputMode === 'symcon', tileHeaderInset: outputMode === 'symcon' ? 58 : 0}
         },
         echarts: { init: () => chart },
         Image: enableImages ? TestImage : undefined,

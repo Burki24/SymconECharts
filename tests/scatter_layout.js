@@ -36,7 +36,7 @@ function render(model, mode = 'symcon', width = 700, height = 410) {
     const window = {
         SYMC_VISUALIZATION: {
             mode, state: { status: 'ready', chart: model }, translations: {},
-            options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: true }
+            options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: mode === 'symcon', tileHeaderInset: mode === 'symcon' ? 58 : 0}
         },
         echarts: { init: () => chart },
         addEventListener: (name, listener) => { windowListeners[name] = listener; },

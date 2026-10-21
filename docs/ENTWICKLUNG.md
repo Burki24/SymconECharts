@@ -12,12 +12,23 @@ Ausgabeziele. Eine Chart-Instanz soll beide Ausgabewege gleichzeitig bedienen
 können. Die Anordnung mehrerer Charts übernimmt die jeweilige Visualisierung,
 nicht eine eigene große Dashboard-Seite des Moduls.
 
+Die native Kachelüberschrift wird zentral im `ResponsiveVisualizationHelper`
+aus `Symcon_ModuleHelper` ausgewertet. Alle 29 Diagrammmodule übernehmen mit
+`ResponsiveVisualizationLayoutOptions(!$ipsView)` die Bootstrap-Felder
+`tileHeaderVisible` und `tileHeaderInset`. Sichtbare native Kachelköpfe
+reservieren 58 Pixel; ausgeblendete Kachelköpfe und IPSView null Pixel.
+Die Renderer lesen ausschließlich den gelieferten Inset. Ihre eigenen
+Abstände für Diagrammtitel und Bedienelemente bleiben erhalten. Insbesondere
+behalten Multi-Gauges ihren zusätzlichen Abstand von sechs Pixeln.
 Die gemeinsame JavaScript-Designbasis `libs/echarts-design.js` liefert mit
-`chartTitleLayout()` den Abstand für den Symcon-Kachelkopf und den unabhängig
-konfigurierten Diagrammtitel. Ein sichtbarer Kachelname unterdrückt den
-Diagrammtitel nicht; die fachlichen Renderer platzieren ihre Inhalte unterhalb
-beider Titel. Ein ausgeblendeter Kachelkopf gibt seinen Platz frei, während
-IPSView nur den Diagrammtitel benötigt.
+`chartTitleLayout()` weiterhin die fachliche Position des Diagrammtitels.
+Ein sichtbarer Kachelname unterdrückt diesen nicht. Renderer mit eigenem
+Frame reichen keinen zweiten nativen Inset an die Titelberechnung weiter.
+Der optionale Helper-CSS-Frame ist hier nicht aktiviert, weil die Diagramme
+ihre bestehende Geometrie selbst verwalten.
+
+Die zentrale Zuständigkeit und die unveränderten Ausgabegeometrien stehen in
+[ADR 0087](adr/0087-shared-native-tile-layout-contract.md).
 
 Die gemeinsame Gauge-Runtime registriert seit der Korrektur vom 20.10.2026
 auch den offiziellen `TitleComponent`. GaugeMulti, Tacho und Chronograph

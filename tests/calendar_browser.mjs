@@ -72,7 +72,7 @@ function styleForMode(mode) {
 }
 function page(mode, metric, period) {
     const initialState = state(0, metric, period, mode);
-    const bootstrap = { mode, state: initialState, options: { tileHeaderVisible: true, echartsThemes: {},
+    const bootstrap = { mode, state: initialState, options: { tileHeaderVisible: mode === 'symcon', tileHeaderInset: mode === 'symcon' ? 58 : 0, echartsThemes: {},
         adaptToBackground: false, calendarStatePath: '/hook/SymconECharts/state/5000/' + 'a'.repeat(32) + '/metric/' + metric + '/period/' + period + '/mode/' + mode }, translations };
     const replacements = { HTML_LANGUAGE: 'de', HTML_CLASSES: '', ROOT_FONT_SIZE: '16px', VIEWPORT_CONTENT: 'width=device-width, initial-scale=1',
         DOCUMENT_TITLE: 'Calendar browser fixture', VISUALIZATION_THEME: variables, MODULE_STYLE: read('EChartsCalendar/visualization/style.css'),

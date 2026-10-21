@@ -48,7 +48,7 @@ function page(url) {
     const sourceCount = url.searchParams.get('count') === '16' ? 16 : null;
     const metric = url.searchParams.get('metric') === 'consumption' ? 'consumption' : 'average';
     const bootstrap = {mode, language: 'de', state: state(url.searchParams.get('case') || 'gaps', url.searchParams.get('design') === 'extended', days, font, selection, sourceCount, metric),
-        options: {tileHeaderVisible: url.searchParams.get('header') !== 'hidden', adaptToBackground: false, echartsThemes: {auto: palette}}, translations};
+        options: {tileHeaderVisible: mode === 'symcon' && (url.searchParams.get('header') !== 'hidden'), tileHeaderInset: mode === 'symcon' && (url.searchParams.get('header') !== 'hidden') ? 58 : 0, adaptToBackground: false, echartsThemes: {auto: palette}}, translations};
     if (['top', 'bottom'].includes(url.searchParams.get('legend'))) {
         bootstrap.state.chart.themeRiver.style.legendPosition = url.searchParams.get('legend');
     }

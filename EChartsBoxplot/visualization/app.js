@@ -14,8 +14,7 @@
     var categoryAnchor = null;
     var categoryStart = 0;
 
-    var tileHeaderInset = bootstrap.mode === 'symcon'
-        && (!bootstrap.options || bootstrap.options.tileHeaderVisible !== false) ? 58 : 0;
+    var tileHeaderInset = (bootstrap.options && bootstrap.options.tileHeaderInset) || 0;
     var chartBootstrap = tileHeaderInset ? { mode: 'symcon', options: { tileHeaderVisible: false } } : bootstrap;
     chartElement.style.top = tileHeaderInset + 'px';
     chartElement.style.height = tileHeaderInset ? 'calc(100% - ' + tileHeaderInset + 'px)' : '100%';

@@ -949,7 +949,7 @@
         var animation = echartsDesign.animationOptions(style, { enabled: true, initialDuration: 500, updateDuration: 500 });
         var width = Math.max(chartElement.clientWidth, 1);
         var height = Math.max(chartElement.clientHeight, 160);
-        var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 0;
+        var headerInset = ((bootstrap.options && bootstrap.options.tileHeaderInset) || 0);
         var layout = resolveGaugeLayout(preset, width, height, style, headerInset);
         var colors = resolveThemeColors(theme);
 

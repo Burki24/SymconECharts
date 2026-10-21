@@ -535,8 +535,6 @@ class EChartsThemeRiver extends IPSModuleStrict
 
     private function RenderThemeRiverHTMLPage(bool $ipsView): string
     {
-        $hiddenTitle = !$ipsView && function_exists('IPS_GetObject')
-            && (bool) (IPS_GetObject($this->InstanceID)['ObjectIsHiddenTitle'] ?? false);
         $startup = EChartsStartupState::Startup($this->BuildVisualizationState($ipsView));
         $configuration = [
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
@@ -574,7 +572,7 @@ class EChartsThemeRiver extends IPSModuleStrict
             ],
             'options' => [
                 'echartsVersion'            => EChartsAsset::VERSION, 'echartsThemes' => EChartsAsset::ThemePalettes(),
-                'tileHeaderVisible'         => !$hiddenTitle,
+                ...$this->ResponsiveVisualizationLayoutOptions(!$ipsView),
                 'adaptToBackground'         => $ipsView && $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
                 'ipsViewTransport'          => $ipsView ? $this->EChartsIPSViewTransportOptions() : null,
                 'compressedStateGzipBase64' => $startup['compressedStateGzipBase64']

@@ -59,7 +59,7 @@ function state(url) {
 function page(url) {
     const mode = url.searchParams.get('mode') === 'ipsview' ? 'ipsview' : 'symcon';
     const light = url.searchParams.get('theme') === 'light';
-    const bootstrap = {mode, language: 'de', state: state(url), options: {tileHeaderVisible: url.searchParams.get('header') !== 'hidden',
+    const bootstrap = {mode, language: 'de', state: state(url), options: {tileHeaderVisible: mode === 'symcon' && (url.searchParams.get('header') !== 'hidden'), tileHeaderInset: mode === 'symcon' && (url.searchParams.get('header') !== 'hidden') ? 58 : 0,
         adaptToBackground: false, echartsThemes: {auto: palette}, calendarPieStatePath: '/hook/SymconECharts/state/5000/' + 'a'.repeat(32)},
         translations: {'Daily means': 'Tagesmittelwerte', 'Daily consumption': 'Tagesverbrauch', 'State duration': 'Zustandsdauer',
             'Normalized comparison (0–100)': 'Normalisierter Vergleich (0–100)', Normalized: 'Normalisiert', Range: 'Bereich', 'Circle share': 'Kreisanteil',

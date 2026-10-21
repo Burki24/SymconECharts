@@ -111,7 +111,7 @@
         });
         var firstActiveAxis = activeAxes.indexOf(true);
         var zoom = style.enableZoom === true;
-        var headerInset = bootstrap.mode === 'symcon' && bootstrap.options.tileHeaderVisible !== false ? 58 : 8;
+        var headerInset = ((bootstrap.options && bootstrap.options.tileHeaderInset) || 8);
         var radius = style.roundedBars === true
             ? (style.barCornerRadius == null ? 6 : Number(style.barCornerRadius)) : 0;
         var paletteColors = Array.isArray(colors.seriesColors) && colors.seriesColors.length > 0

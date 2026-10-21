@@ -30,7 +30,7 @@ function page(mode) {
     const module = 'EChartsBarHistory';
     const bootstrap = { mode, state: null,
         translations: JSON.parse(read(module + '/locale.json')).translations.de,
-        options: { tileHeaderVisible: true, echartsThemes: { auto: palette },
+        options: { tileHeaderVisible: mode === 'symcon', tileHeaderInset: mode === 'symcon' ? 58 : 0, echartsThemes: { auto: palette },
             compressedStateGzipBase64: gzipSync(JSON.stringify(state())).toString('base64') } };
     const replacements = { HTML_LANGUAGE: 'de', HTML_CLASSES: '', ROOT_FONT_SIZE: '16px',
         VIEWPORT_CONTENT: 'width=device-width, initial-scale=1', DOCUMENT_TITLE: 'BarHistory synthetic browser fixture',

@@ -46,7 +46,7 @@ function page(mode, extended = false, query = new URLSearchParams()) {
             gridOpacityPercent: 50, gridColor: '#85929E'
         });
     }
-    const bootstrap = { mode, language: 'de-DE', state: initialState, options: { tileHeaderVisible: true, echartsThemes: {auto: {background:'#303236',text:'#f4f5f7',muted:'#969aa2',border:'#777b83',accent:'#55CBB5',seriesColors:['#5070dd','#b6d634','#ff994d','#fb628b']}},
+    const bootstrap = { mode, language: 'de-DE', state: initialState, options: { tileHeaderVisible: mode === 'symcon', tileHeaderInset: mode === 'symcon' ? 58 : 0, echartsThemes: {auto: {background:'#303236',text:'#f4f5f7',muted:'#969aa2',border:'#777b83',accent:'#55CBB5',seriesColors:['#5070dd','#b6d634','#ff994d','#fb628b']}},
         adaptToBackground: false,  }, translations };
     const replacements = { HTML_LANGUAGE: 'de', HTML_CLASSES: '', ROOT_FONT_SIZE: '16px', VIEWPORT_CONTENT: 'width=device-width, initial-scale=1',
         DOCUMENT_TITLE: 'Boxplot browser fixture', VISUALIZATION_THEME: variables, MODULE_STYLE: read('EChartsBoxplot/visualization/style.css'),

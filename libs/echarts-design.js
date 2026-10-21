@@ -190,9 +190,9 @@
     }
 
     function chartTitleLayout(bootstrap, title, fontSize, gap) {
-        var tileHeaderVisible = bootstrap.mode === 'symcon'
-            && (!bootstrap.options || bootstrap.options.tileHeaderVisible !== false);
-        var headerInset = tileHeaderVisible ? 58 : 8;
+        var tileHeaderInset = (bootstrap.options && bootstrap.options.tileHeaderInset) || 0;
+        var tileHeaderVisible = tileHeaderInset > 0;
+        var headerInset = tileHeaderInset || 8;
         var show = Boolean(title);
         return {
             show: show,

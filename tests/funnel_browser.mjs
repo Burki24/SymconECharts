@@ -18,7 +18,7 @@ function page(query) {
     const data = Array.from({length: count}, (_, index) => ({id: 'fixture-stage-' + index,
         label: 'Verbraucher ' + String(index + 1).padStart(2, '0'), value: index === 31 ? 100 : 12 + index * 2,
         unit: 'W', decimals: 1, initiallyVisible: index !== 31, color: ''}));
-    const bootstrap = {mode, options: {tileHeaderVisible: true, echartsThemes: {auto: palette}, adaptToBackground: false},
+    const bootstrap = {mode, options: {tileHeaderVisible: mode === 'symcon', tileHeaderInset: mode === 'symcon' ? 58 : 0, echartsThemes: {auto: palette}, adaptToBackground: false},
         translations: {'Sources': 'Quellen', 'All': 'Alle', 'Inverse': 'Umkehren',
             'Previous page': 'Vorherige Seite', 'Next page': 'Nächste Seite',
             'Category navigation': 'Stufennavigation', 'No sources selected': 'Keine Quellen ausgewählt',

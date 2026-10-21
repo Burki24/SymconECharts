@@ -19,7 +19,7 @@ function render(model, mode = 'symcon', headerVisible = true, width = 900) {
     const chart = { setOption: next => { option = next; }, clear: () => {}, resize: () => {}, dispose: () => {} };
     const window = {
         SYMC_VISUALIZATION: { mode, state: { status: 'ready', chart: model }, translations: {},
-            options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: headerVisible,
+            options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: mode === 'symcon' && (headerVisible), tileHeaderInset: mode === 'symcon' && (headerVisible) ? 58 : 0,
                 adaptToBackground: mode === 'ipsview' } },
         echarts: { init: () => chart }, addEventListener: () => {}, getComputedStyle: () => ({ color: '' })
     };

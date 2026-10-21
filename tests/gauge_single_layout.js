@@ -47,7 +47,7 @@ function render(mode, width, height, preset, style = {}, reducedMotion = false, 
                     gauge: { minimum: 0, maximum: 100, title: 'Wind speed', unit: 'm/s', decimals: 1, preset, style }
                 }
             },
-            options: { echartsThemes: { dark: palette }, tileHeaderVisible }
+            options: { echartsThemes: { dark: palette }, tileHeaderVisible: mode === 'symcon' && tileHeaderVisible, tileHeaderInset: mode === 'symcon' && tileHeaderVisible ? 58 : 0 }
         },
         echarts: { init: () => chart },
         ResizeObserver: observeResize ? class {

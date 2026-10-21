@@ -32,7 +32,7 @@ function render(model, mode = 'symcon', width = 900, adaptToBackground = false) 
     getWidth: () => chartWidth, getHeight: () => chartHeight, dispose: () => {}, dispatchAction: () => {} };
     const window = {
         SYMC_VISUALIZATION: { mode, state: { status: 'ready', chart: model }, translations: {},
-            options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: true,
+            options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: mode === 'symcon', tileHeaderInset: mode === 'symcon' ? 58 : 0,
                 adaptToBackground } },
         echarts: { init: () => chart, registerPostUpdate: callback => { postUpdate = callback; } },
         addEventListener: (name, listener) => { listeners[name] = listener; }, getComputedStyle: () => ({ color: '' })

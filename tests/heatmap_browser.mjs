@@ -36,7 +36,7 @@ function state(metric, offset = 0, range = '1m') {
 function page(mode, metric, range) {
     const bootstrap = { mode, state: state(metric, 0, range),
         translations: JSON.parse(read('EChartsHeatmap/locale.json')).translations.de,
-        options: { tileHeaderVisible: true, echartsThemes: {}, heatmapStatePath:
+        options: { tileHeaderVisible: mode === 'symcon', tileHeaderInset: mode === 'symcon' ? 58 : 0, echartsThemes: {}, heatmapStatePath:
             '/hook/SymconECharts/state/5000/' + 'a'.repeat(32) + '/metric/' + metric + '/range/' + range } };
     const replacements = { HTML_LANGUAGE: 'de', HTML_CLASSES: '', ROOT_FONT_SIZE: '16px',
         VIEWPORT_CONTENT: 'width=device-width, initial-scale=1', DOCUMENT_TITLE: 'Heatmap synthetic fixture',

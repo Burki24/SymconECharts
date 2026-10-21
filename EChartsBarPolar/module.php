@@ -812,11 +812,6 @@ class EChartsBarPolar extends IPSModuleStrict
 
     private function RenderPolarHTMLPage(bool $ipsView): string
     {
-        $hiddenTileTitle = false;
-        if (!$ipsView && function_exists('IPS_GetObject')) {
-            $hiddenTileTitle = (bool) (IPS_GetObject($this->InstanceID)['ObjectIsHiddenTitle'] ?? false);
-        }
-
         $configuration = [
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'ECharts Polar',
@@ -847,7 +842,7 @@ class EChartsBarPolar extends IPSModuleStrict
             'options'            => [
                 'echartsVersion'    => EChartsAsset::VERSION,
                 'echartsThemes'     => EChartsAsset::ThemePalettes(),
-                'tileHeaderVisible' => !$hiddenTileTitle,
+                ...$this->ResponsiveVisualizationLayoutOptions(!$ipsView),
                 'adaptToBackground' => $ipsView && $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
                 'ipsViewTransport'  => $ipsView ? $this->EChartsIPSViewTransportOptions() : null
             ],

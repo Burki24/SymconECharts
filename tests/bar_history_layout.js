@@ -94,7 +94,7 @@ function render(truncated = false, mode = 'symcon', adaptToBackground = false, e
             },
             translations: {},
             options: {
-                echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: true,
+                echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: mode === 'symcon', tileHeaderInset: mode === 'symcon' ? 58 : 0,
                 adaptToBackground
             }
         },

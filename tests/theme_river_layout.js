@@ -25,7 +25,7 @@ function render(model, mode = 'symcon', width = 900, height = 500, headerVisible
         convertFromPixel: () => model.range.startTimestamp * 1000,
         dispatchAction: action => actions.push(action)};
     const window = {SYMC_VISUALIZATION: {mode, language: 'de', state: {status: 'ready', chart: model}, translations: {},
-        options: {echartsThemes: {auto: palette, dark: palette}, tileHeaderVisible: headerVisible, adaptToBackground: mode === 'ipsview'}},
+        options: {echartsThemes: {auto: palette, dark: palette}, tileHeaderVisible: mode === 'symcon' && (headerVisible), tileHeaderInset: mode === 'symcon' && (headerVisible) ? 58 : 0, adaptToBackground: mode === 'ipsview'}},
         echarts: {init: () => chart}, addEventListener: (event, handler) => {events[event] = handler;}, getComputedStyle: () => ({color: ''}),
         ResizeObserver: createEngine ? class {constructor(callback) {resizeCallback = callback;} observe() {}} : undefined};
     if (startup === true) {

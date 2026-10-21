@@ -18,7 +18,7 @@ function page(query) {
         gauge: {label: 'Messpunkt ' + String(index + 1).padStart(2, '0'), minimum: index % 2 ? 0 : -20,
             maximum: index % 2 ? 100 : 40, unit: index % 2 ? '%' : '°C', decimals: index % 2 ? 0 : 1},
         value: index % 2 ? 20 + index * 2 : 8 + index / 2, initiallyVisible: index < 30}));
-    const bootstrap = {mode, options: {tileHeaderVisible: true, echartsThemes: {auto: palette}},
+    const bootstrap = {mode, options: {tileHeaderVisible: mode === 'symcon', tileHeaderInset: mode === 'symcon' ? 58 : 0, echartsThemes: {auto: palette}},
         translations: {'Sources': 'Quellen', 'All': 'Alle', 'Inverse': 'Umkehren',
             'Previous page': 'Vorherige Seite', 'Next page': 'Nächste Seite',
             'Category navigation': 'Seitennavigation', 'No sources selected': 'Keine Quellen ausgewählt'},
