@@ -107,7 +107,12 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Gerätemodul `EChartsParallel` dargestellt.
   Parallel verwendet gemäß ADR 0078 für zusätzliche feste historische
   Von-/Bis-Zeiträume die zentrale Planung aus `EChartsArchiveQuery`;
-  gemeinsame Zeitstempel, 2–10 Achsen und Linien-/Archivbudgets bleiben erhalten.
+  gemeinsame Zeitstempel und Stunden-/Tagesregeln bleiben erhalten.
+  ADR 0084 erweitert Parallel auf 2–16 Achsen mit horizontaler Ansichtsverschiebung.
+  Alle Achsen bleiben im gemeinsamen Join und im unveränderten 10000er-Ladebudget;
+  die gemeinsame Query-Planung verteilt es vor den Abfragen. Die ID-stabile
+  Positionshaltung verwendet die vorhandene Kategorieankerlogik; Designs und
+  Altlisten bleiben erhalten, individuelle Skalen/Kennzahlen sind noch getrennt offen.
   Candlestick verwendet gemäß ADR 0079 dieselbe absolute Zeitplanung und eine
   zentrale begrenzte Intervallliste für Stunden/Tage. Echte Rohwert-Endpunkte,
   höchstens 720 Intervalle, 63 Abfragen und 64000 Rohpunkte bleiben erhalten.

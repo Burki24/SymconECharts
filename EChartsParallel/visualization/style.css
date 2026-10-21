@@ -41,3 +41,39 @@ html, body {
 
 .echarts-refresh-warning { inset-block-end: 0.65rem; color: var(--symc-text); }
 [hidden] { display: none !important; }
+
+.echarts-parallel-viewport {
+    inline-size: 100%;
+    block-size: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scrollbar-color: var(--symc-border) var(--symc-surface);
+}
+.echarts-parallel-viewport:focus-visible { outline: 2px solid var(--symc-accent); outline-offset: -2px; }
+.echarts-parallel-chart canvas { touch-action: pan-x !important; }
+.echarts-parallel-navigation {
+    position: absolute;
+    inset-inline: 0.5rem;
+    inset-block-end: 0;
+    block-size: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: var(--symc-text);
+    font-size: 12px;
+}
+.echarts-parallel-navigation button {
+    flex: 0 0 auto;
+    min-inline-size: 28px;
+    min-block-size: 24px;
+    border: 1px solid var(--symc-border);
+    border-radius: 4px;
+    color: inherit;
+    background: var(--symc-surface);
+    font: inherit;
+    cursor: pointer;
+}
+.echarts-parallel-navigation button:disabled { opacity: 0.4; cursor: default; }
+.echarts-parallel-navigation span { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

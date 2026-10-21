@@ -15,6 +15,13 @@
 
 ## Neu
 
+- EChartsParallel unterstützt bis zu 16 Achsen mit horizontal verschiebbarer
+  Ansicht für Kachel und IPSView. Scrollleiste, Achsenknöpfe und Tastatur halten
+  den Diagrammtitel sichtbar; alle Achsen und gemeinsamen Linien bleiben erhalten.
+  Das Gesamtbudget bleibt bei 10000 Archivaggregaten, bei 16 Achsen höchstens
+  625 je Achse. Bestehende Konfigurationen und Designs bleiben nutzbar;
+  die Vorschauen kennzeichnen ihren Sechs-Achsen-Ausschnitt.
+
 - EChartsHeatmap bietet benutzerdefinierte Dauern in Minuten, Stunden, Tagen
   oder Wochen sowie feste historische Von-/Bis-Zeiträume mit Navigation.
   Kachel, IPSView und beide Vorschauen verwenden dieselben Grenzen. Nur volle,

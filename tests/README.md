@@ -1,5 +1,34 @@
 # Tests
 
+## Parallel: 16 Achsen mit verschiebbarer Ansicht
+
+`php tests/gateway_gauges.php --parallel-many` prüft echtes Modul, gemeinsame
+Query-Planung, Join und Gateway mit Kernel-Doppeln. Der Lasttest läuft über
+`tests/run.php` in einem eigenen Prozess innerhalb des bisherigen PHP-Speicherlimits.
+Erster Lauf RED wegen der
+alten Zehn-Achsen-Grenze. Die Matrix deckt 2/10/11/13/15/16 Achsen, feste,
+eigene und bisherige Zeiträume sowie kleinere Linienbudgets ab. 16×625 Aggregate
+belegen das unveränderte 10000er-Budget; die Lücke der letzten Achse reduziert
+die gemeinsame Linienzahl. Gemischte Einheiten, Zähler, Tagesintervalle,
+17/1/doppelte Achsen und eine übergroße sechzehnte Antwort sind enthalten.
+Unicode-Labels maximaler Länge und 10000 große endliche Zahlen passen in beide
+HTML-Budgets. Reine Vorschauen kennzeichnen den Ausschnitt ohne Archivzugriff;
+Refresh/Öffnen verändern weder gespeicherte Quellen noch Designs/Budgets.
+
+`node tests/parallel_layout.js` begann mit fehlender breiter Ansicht RED und
+prüft alle Dimensionen/Werte, Steuerknöpfe, Tastatur, Größen-/Schriftänderung,
+ID-stabile Umordnung, Rückkehr aus einer voll sichtbaren Ansicht und Fehler.
+Der echte gepinnte Renderer sichert native Koordinaten, Skalen, Achsenmarkierung,
+sichtbaren Titel und Tooltip-Grenzen für beide Ausgaben ab. Alte absolute
+Zeitraumtests behalten die Zehn-Achsen-Budgetmatrix; ihre neue Negativgrenze
+liegt bei 17 statt elf Achsen.
+
+`node tests/parallel_browser.mjs` bietet unter Port 8803 ausschließlich
+synthetische Canvas-Daten (`?axes=2|3|10|16&font=100|200`). Am 21.10.2026 wurden
+400×520 und 790×440, Achsenknöpfe, Pos1/Ende und 200-%-Schrift lokal geprüft.
+Keine Installation oder Archivierung verändert. Live-Abnahme der neuen
+Ansicht nach Modulupdate und Live-Lastprüfung bleiben offen.
+
 ## Heatmap: benutzerdefinierte und feste historische Zeiträume
 
 `php tests/heatmap_window.php` prüft freie Dauern, strikte native Datumsfelder,
@@ -27,8 +56,10 @@ Dauer, Grenze, Quelle oder Gestaltung dürfen die neue Ansicht nicht ersetzen.
 wurden feste Grenzen und freie Verbrauchsfenster in 400×600-/790×440-Canvas-
 Ansichten sowie Navigation und Reset lokal geprüft. Lange Zeitraumtexte werden
 zugunsten unverdrängter Knöpfe gekürzt und bleiben vollständig im Tooltip.
-Keine Symcon-Daten oder Instanzen verändert. Die tatsächliche Live-Abnahme nach
-Modulupdate und ein Live-Lasttest bleiben offen.
+Keine Symcon-Daten oder Instanzen bei dieser lokalen Prüfung verändert.
+Die spätere funktionale MCP-Abnahme auf Symcon 9.1 ist erfolgt; der Eigentümer
+bestätigt Kachel und tatsächliches IPSView. Temporäre Testobjekte wurden entfernt,
+bestehende Konfigurationen/Designs blieben identisch. Ein Live-Lasttest bleibt offen.
 
 ## Calendar: Jahr, Quartal, Monat und feste Datumsfenster
 

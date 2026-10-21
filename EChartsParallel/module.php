@@ -73,6 +73,8 @@ class EChartsParallel extends IPSModuleStrict
     private const STATUS_CONFIGURATION_INVALID = 202;
     private const STATUS_PARENT_MISSING = 203;
     private const STATUS_GATEWAY_FAILED = 204;
+    private const MAX_AXES = 16;
+    private const MAX_ARCHIVE_AGGREGATES = 10000;
     private const DESIGN_DEFAULTS = [
         'EChartsTheme'         => 'auto', 'ShowTooltip' => true, 'Smooth' => false,
         'LineWidth'            => 2, 'LineOpacityPercent' => 45, 'LineColor' => -1,
@@ -475,14 +477,20 @@ class EChartsParallel extends IPSModuleStrict
             }
         }
         $sources = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values, 'Label', false)['items'];
+        $totalAxes = count($sources);
         $sources = array_slice($sources, 0, 6);
         $count = count($sources);
+        $svg = str_replace('<svg ', '<svg data-axis-count="' . $totalAxes . '" data-preview-axis-count="' . $count . '" ', $svg);
+        if ($totalAxes > $count) {
+            $svg .= '<text x="24" y="350" font-size="10" fill="' . EChartsBarPreview::E($palette['muted']) . '">'
+                . EChartsBarPreview::E(sprintf($this->Translate('Axis excerpt: 1–%d of %d. Scroll horizontally in the chart.'), $count, $totalAxes)) . '</text>';
+        }
         $color = EChartsBarPreview::Color($this->BarPreviewValue($values, 'LineColor', 'integer', $ipsView), $palette['accent']);
         $axisColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'AxisColor', 'integer', $ipsView), $palette['text']);
         $lineWidth = max(1, min(8, $this->BarPreviewValue($values, 'LineWidth', 'integer', $ipsView)));
         $axisLineWidth = max(1, min(5, $this->BarPreviewValue($values, 'AxisLineWidth', 'integer', $ipsView)));
         $axisNameGap = max(0, min(60, $this->BarPreviewValue($values, 'AxisNameGap', 'integer', $ipsView)));
-        $axisBottom = 300 - max(0, $axisNameGap - 20) / 2;
+        $axisBottom = ($totalAxes > $count ? 280 : 300) - max(0, $axisNameGap - 20) / 2;
         $axisFontSize = max(6, min(22, (int) round(11 * $this->BarPreviewValue($values, 'AxisFontSizePercent', 'integer', $ipsView) / 100)));
         $showAxisLabels = $this->BarPreviewValue($values, 'ShowAxisLabels', 'boolean', $ipsView);
         $showAxisTicks = $this->BarPreviewValue($values, 'ShowAxisTicks', 'boolean', $ipsView);
@@ -517,8 +525,9 @@ class EChartsParallel extends IPSModuleStrict
         for ($line = 0; $line < 8; ++$line) {
             $points = [];
             for ($axis = 0; $axis < $count; ++$axis) {
+                $sample = ($line * 27 + $axis * 43 + $line * $axis * 11) % 175;
                 $points[] = (72 + (int) round($axis * 576 / max(1, $count - 1))) . ','
-                    . (105 + (($line * 27 + $axis * 43 + $line * $axis * 11) % 175));
+                    . EChartsBarPreview::N(105 + ($totalAxes > $count ? $sample * ($axisBottom - 110) / 175 : $sample));
             }
             $svg .= '<polyline points="' . implode(' ', $points) . '" fill="none" stroke="'
                 . EChartsBarPreview::E($color) . '" stroke-width="' . $lineWidth . '"' . $dashArray . ' stroke-opacity="'
@@ -545,6 +554,9 @@ class EChartsParallel extends IPSModuleStrict
         $range = ['key'        => $this->ReadPropertyString('Range'),
             'startTimestamp'   => $query['StartTimestamp'], 'endTimestamp' => $query['EndTimestamp'],
             'aggregationLevel' => $query['AggregationLevel'], 'lineBudget' => $budget];
+        if (count($sources) > 10) {
+            $range += ['effectiveLineBudget' => $query['Limit'], 'aggregateBudget' => self::MAX_ARCHIVE_AGGREGATES];
+        }
         if ($range['key'] === 'absolute') {
             $range += ['requestedStartTimestamp' => $query['RequestedStartTimestamp'],
                 'requestedEndTimestamp'          => $query['RequestedEndTimestamp'], 'timezone' => date_default_timezone_get()];
@@ -559,7 +571,7 @@ class EChartsParallel extends IPSModuleStrict
                 'unit'              => $source['Unit'], 'decimals' => $source['Decimals']];
             $truncated = $truncated || $response['Truncated'];
         }
-        $rows = ParallelPairing::Pair($series, $budget);
+        $rows = ParallelPairing::Pair($series, $query['Limit']);
         $this->WriteAttributeString('LastError', '');
         $this->DebugEChartsSetStatus(IS_ACTIVE);
         return json_encode([
@@ -591,6 +603,11 @@ class EChartsParallel extends IPSModuleStrict
                 'The Parallel values could not be loaded.'                        => $this->Translate('The Parallel values could not be loaded.'),
                 'No common completed archive intervals.'                          => $this->Translate('No common completed archive intervals.'),
                 'The selected range was truncated by the line budget.'            => $this->Translate('The selected range was truncated by the line budget.'),
+                'Parallel axes'                                                   => $this->Translate('Parallel axes'),
+                'Previous axis'                                                   => $this->Translate('Previous axis'),
+                'Next axis'                                                       => $this->Translate('Next axis'),
+                'Axes {first}–{last} of {total}'                                  => $this->Translate('Axes {first}–{last} of {total}'),
+                'Effective line limit: {count}'                                   => $this->Translate('Effective line limit: {count}'),
                 'Data could not be refreshed. Showing the last available values.' => $this->Translate(
                     'Data could not be refreshed. Showing the last available values.'
                 )
@@ -604,7 +621,7 @@ class EChartsParallel extends IPSModuleStrict
             'replacements' => [
                 '{{ECHARTS_SCRIPT}}'           => EChartsAsset::ParallelJavaScript(),
                 '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
-                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript(),
+                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript() . "\n" . EChartsAsset::CategoryNavigationJavaScript(),
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
         ]);
@@ -675,6 +692,7 @@ class EChartsParallel extends IPSModuleStrict
         $range = $values['Range'] ?? $this->ReadPropertyString('Range');
         $interval = $values['Aggregation'] ?? $this->ReadPropertyString('Aggregation');
         $budget = (int) ($values['LineBudget'] ?? $this->ReadPropertyInteger('LineBudget'));
+        $pointBudget = min(self::MAX_ARCHIVE_AGGREGATES, $budget * $sourceCount);
         $timezone = date_default_timezone_get();
         if ($range === 'absolute') {
             $start = EChartsArchiveQuery::ParseLocalDateTime(
@@ -689,7 +707,7 @@ class EChartsParallel extends IPSModuleStrict
                 $start,
                 $end,
                 $interval,
-                $budget * $sourceCount,
+                $pointBudget,
                 $sourceCount,
                 $this->CurrentTimestamp(),
                 $timezone
@@ -700,7 +718,7 @@ class EChartsParallel extends IPSModuleStrict
             (int) ($values['CustomRangeValue'] ?? $this->ReadPropertyInteger('CustomRangeValue')),
             (string) ($values['CustomRangeUnit'] ?? $this->ReadPropertyString('CustomRangeUnit')),
             $interval,
-            $budget * $sourceCount,
+            $pointBudget,
             $sourceCount,
             $this->CurrentTimestamp(),
             $timezone
@@ -715,8 +733,8 @@ class EChartsParallel extends IPSModuleStrict
         } catch (JsonException $exception) {
             throw new InvalidArgumentException('Parallel sources must contain valid JSON.', 0, $exception);
         }
-        if (!is_array($raw) || !array_is_list($raw) || count($raw) < 2 || count($raw) > 10) {
-            throw new InvalidArgumentException('Configure 2 to 10 unique numeric Parallel variables.');
+        if (!is_array($raw) || !array_is_list($raw) || count($raw) < 2 || count($raw) > self::MAX_AXES) {
+            throw new InvalidArgumentException('Configure 2 to 16 unique numeric Parallel variables.');
         }
         $sources = [];
         $seen = [];
@@ -776,7 +794,8 @@ class EChartsParallel extends IPSModuleStrict
             }
             $archive = $response['Payload'];
             if (($archive['VariableID'] ?? null) !== $source['VariableID']
-                || !is_array($archive['Points'] ?? null) || !is_bool($archive['Truncated'] ?? null)) {
+                || !is_array($archive['Points'] ?? null) || !array_is_list($archive['Points'])
+                || count($archive['Points']) > $query['Limit'] || !is_bool($archive['Truncated'] ?? null)) {
                 $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
                 throw new RuntimeException('The gateway returned invalid Parallel archive data.');
             }

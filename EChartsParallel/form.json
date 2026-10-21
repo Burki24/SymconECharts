@@ -61,7 +61,11 @@
         },
         {
             "type": "Label",
-            "caption": "Choose 2 to 10 unique numeric archive variables. Each line joins only completed intervals present for every axis; standard values use interval averages, counters use interval sums."
+            "caption": "Choose 2 to 16 unique numeric archive variables. Each line joins only completed intervals present for every axis; standard values use interval averages, counters use interval sums."
+        },
+        {
+            "type": "Label",
+            "caption": "All axes share at most 10000 archive aggregates. At 16 axes the effective limit is at most 625 lines. Narrow charts scroll horizontally; all axes still determine common intervals."
         },
         {
             "type": "RowLayout",

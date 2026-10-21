@@ -29,6 +29,19 @@ Canvas-Zeichenaufrufe für Kachel und IPSView statt nur vorhandener Titeloptione
 
 ## Aktueller Stand und Zielarchitektur
 
+Parallel unterstützt gemäß [ADR 0084](adr/0084-sixteen-axis-parallel-viewport.md)
+2–16 Achsen. `EChartsArchiveQuery` erhält für jeden Zeitraum höchstens
+`min(LineBudget × Achsenanzahl, 10000)` als gemeinsames Punktbudget; daraus folgt
+bei 16 Achsen ein Limit von höchstens 625 je Achse. Alte Listen bis zehn behalten
+ihre Ladelimits und bisherigen Range-Felder; neue effektive Budgetfelder sind
+additiv für größere Listen. Zu große Antworten werden vor dem Join abgewiesen.
+Alle Achsen und Zeilen bleiben in der nativen Parallel-Koordinate. Ein echter
+horizontaler DOM-Viewport statt Dimensionsauswahl verwendet die bestehende
+`SymconEChartsCategoryNavigation` für ID-stabile Anker. Titelupdates beim Scrollen
+ersetzen nur die Titelposition; native Achsenmarkierungen und Skalen bleiben
+erhalten. Reine SVG-Entwurfsvorschauen kennzeichnen ihren Sechs-Achsen-Ausschnitt.
+Die neue 16-Achsen-Ansicht ist lokal geprüft; ihre Live-Abnahme nach Update bleibt offen.
+
 Heatmap ergänzt gemäß [ADR 0083](adr/0083-flexible-heatmap-periods.md) `custom`
 und `absolute`. `HeatmapWindow` verwendet die zentrale strikte Datumsauswahl,
 exakte Grenzprüfung und Vollstundenplanung aus `EChartsArchiveQuery`; alte
@@ -40,8 +53,10 @@ Helper-Änderung ist erforderlich. Ausgabe und reine Entwurfsvorschauen verwende
 dieselbe Modulplanung. Ein stabiler Ansichtsschlüssel schützt Navigation gegen
 veraltete Antworten, ohne einen laufenden relativen Zeitraum einzufrieren.
 Die lokale Canvas-Prüfung mit synthetischen Daten ergänzt automatisierte
-Modul-/Gateway-, Budget- und Rendererprüfungen; die Live-Abnahme nach Update
-bleibt offen.
+Modul-/Gateway-, Budget- und Rendererprüfungen. Die funktionale MCP-Abnahme
+erfolgte auf Symcon 9.1 mit temporärer Testinstanz; der Eigentümer bestätigt
+anschließend Kachel und tatsächliches IPSView. Bestehende Konfigurationen/
+Designs blieben unverändert, Testobjekte wurden entfernt. Kein Live-Lasttest.
 
 Calendar bietet gemäß [ADR 0082](adr/0082-flexible-calendar-periods.md) Jahr,
 Quartal, Monat und feste historische Datumsfenster. `Period=year` erhält alle

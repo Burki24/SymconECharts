@@ -5,7 +5,7 @@ Jede Linie verbindet die Werte eines gemeinsamen abgeschlossenen Zeitintervalls.
 Es ist eine eigenständige Diagramminstanz für Kacheln und optional für ein
 IPSView-HTML-Widget.
 
-Wählen Sie zwei bis zehn verschiedene Integer- oder Float-Variablen, die im
+Wählen Sie zwei bis 16 verschiedene Integer- oder Float-Variablen, die im
 Archiv aufgezeichnet werden. Ihre Reihenfolge bestimmt die Achsenfolge; der
 Achsentitel kann pro Variable überschrieben werden. Wählen Sie einen Zeitraum
 von 24 Stunden, sieben oder 30 Tagen sowie Stunden- oder Tagesintervalle.
@@ -23,6 +23,29 @@ Die maximale Linienzahl ist einstellbar (1–1000, Standard 750). Bei einer
 Kürzung zeigt die Darstellung einen Hinweis. Eine kurze oder leere Linie kann
 auch an fehlenden Archivwerten liegen. Verschiedene Einheiten werden auf
 getrennten Achsen dargestellt und nicht miteinander verrechnet.
+
+## Verschiebbare Achsenansicht
+
+Wenn mehr als zwei Achsen nicht lesbar nebeneinander passen, wird das Diagramm
+breiter als seine Kachel beziehungsweise sein HTML-Widget. Verschieben Sie es
+mit der horizontalen Scrollleiste, einer horizontalen Wischgeste oder den
+Knöpfen **Vorherige Achse / Nächste Achse**. Die Anzeige darunter nennt die
+gerade sichtbaren Achsen. Der fokussierte Diagrammbereich unterstützt außerdem
+Links/Rechts, Bild auf/ab und Pos1/Ende. Zwei Achsen bleiben gemeinsam sichtbar.
+
+Abstände berücksichtigen Achsentitel und Schriftgröße; lange Titel können
+abgekürzt werden. Der Tooltip behält alle vollständigen Achsentitel, Werte
+und Einheiten. Der Diagrammtitel bleibt im sichtbaren Bereich zentriert.
+Verschieben ist keine Quellenauswahl: **Alle Achsen und vollständigen Linien
+bleiben vorhanden**, und auch gerade nicht sichtbare Achsen bestimmen weiterhin
+die gemeinsamen Archivintervalle. Native Achsenmarkierungen bleiben beim
+Verschieben erhalten. Bei Datenaktualisierung und Größenänderung bleibt die
+Position anhand der Quellvariablen-ID erhalten; sie wird nicht als Konfiguration
+gespeichert und gilt nur für diese geöffnete Ansicht.
+
+Die Formularvorschauen verwenden weiterhin ausschließlich Beispieldaten.
+Bei mehr als sechs Achsen zeigen sie einen ausdrücklich gekennzeichneten
+Ausschnitt der ersten sechs, nicht eine verkürzte gespeicherte Quellenliste.
 
 ## Fester historischer Zeitraum
 
@@ -45,8 +68,16 @@ Stundenfenster über seltene nicht ganzstündige Zeitzonenwechsel, etwa um
 30 Minuten, sind wie bei Boxplot ausgeschlossen; wählen Sie Grenzen davor
 oder danach.
 
-Das Linienbudget bleibt unverändert: höchstens 1000 Aggregate je Achse,
-bei zehn Achsen höchstens 10000 insgesamt. Längere Zeiträume erhöhen es nicht.
+Das gemeinsame Ladebudget bleibt bei höchstens **10000 Archivaggregaten**.
+Jede Achse erhält höchstens die konfigurierte Linienzahl und maximal den
+abgerundeten Anteil `10000 / Achsenanzahl`: Bei zehn Achsen bleiben bis zu 1000,
+bei elf bis zu 909 und bei 16 bis zu **625 Aggregate je Achse** möglich.
+Ein kleineres eingestelltes Linienlimit bleibt erhalten. `Maximale Linien`
+(Default 750) wird dabei nicht in der Konfiguration überschrieben; bei mehr
+als zehn Achsen kann das gemeinsame Budget die wirksame Grenze reduzieren.
+Diese Grenze steht auch im Hinweis an der Achsenpositionsanzeige.
+Die Grenze betrifft geladene Aggregate aller Achsen, nicht nur die am Ende
+gemeinsamen Linien oder den sichtbaren Ausschnitt. Längere Zeiträume erhöhen sie nicht.
 Bei Kürzung bleiben der Hinweis und die jüngsten gemeinsamen Intervalle
 erhalten. Kachel und IPSView teilen den Zeitraum, aber nicht zwingend das Design.
 Die Entwurfsvorschau zeigt die gewählten Grenzen und weiterhin ausschließlich

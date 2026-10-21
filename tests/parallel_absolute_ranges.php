@@ -26,7 +26,7 @@ declare(strict_types=1);
     };
     try {
         $sources = [];
-        foreach (range(0, 10) as $index) {
+        foreach (range(0, 16) as $index) {
             $id = 99400 + $index;
             $sources[] = ['VariableID' => $id, 'Label' => 'Same name'];
             $GLOBALS['symconTestVariables'][$id] = ['VariableType' => 2, 'VariableUpdated' => 1780000000,
@@ -284,11 +284,11 @@ declare(strict_types=1);
         $chart->SetTestProperty('Sources', json_encode($sources, JSON_THROW_ON_ERROR));
         $queries = [];
         $chart->ApplyChanges();
-        assertGatewayGauge($chart->GetTestStatus() === 201 && $queries === [], 'Absolute periods do not widen the ten-axis bound.');
+        assertGatewayGauge($chart->GetTestStatus() === 201 && $queries === [], 'Absolute periods do not widen the sixteen-axis bound.');
     } finally {
         IPSModuleStrict::$ParentResponder = $previousParent;
         date_default_timezone_set($previousZone);
-        foreach (range(99400, 99410) as $id) {
+        foreach (range(99400, 99416) as $id) {
             unset($GLOBALS['symconTestVariables'][$id], $GLOBALS['symconTestArchiveVariables'][$id]);
         }
     }

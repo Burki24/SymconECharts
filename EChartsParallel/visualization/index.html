@@ -12,7 +12,14 @@
 </head>
 <body>
     <main id="echarts-parallel-root" class="echarts-parallel-root">
-        <div id="echarts-parallel-chart" class="echarts-parallel-chart" role="img"></div>
+        <div id="echarts-parallel-viewport" class="echarts-parallel-viewport" role="region" tabindex="0">
+            <div id="echarts-parallel-chart" class="echarts-parallel-chart" role="img"></div>
+        </div>
+        <nav id="echarts-parallel-navigation" class="echarts-parallel-navigation" hidden>
+            <button id="echarts-parallel-previous" type="button">‹</button>
+            <span id="echarts-parallel-position" role="status"></span>
+            <button id="echarts-parallel-next" type="button">›</button>
+        </nav>
         <div id="echarts-parallel-warning" class="echarts-refresh-warning" role="status" hidden></div>
         <div id="echarts-parallel-empty" class="echarts-parallel-empty" role="status" hidden></div>
         <div id="echarts-parallel-error" class="echarts-parallel-error" role="alert" hidden></div>

@@ -7,35 +7,57 @@ const vm = require('node:vm');
 
 const source = fs.readFileSync(path.join(__dirname, '..', 'EChartsParallel', 'visualization', 'app.js'), 'utf8');
 const designSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-design.js'), 'utf8');
+const navigationSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-category-navigation.js'), 'utf8');
 const palette = { background: '#101114', text: '#f4f5f7', muted: '#969aa2',
     border: '#737780', accent: '#55cbb5' };
 
 function render(model, mode = 'symcon', width = 900, adaptToBackground = false) {
-    const chartElement = { hidden: false, clientWidth: width, clientHeight: 400 };
+    const chartElement = { hidden: false, style: {}, clientWidth: width, clientHeight: 400 };
+    const viewportListeners = {}, listeners = {}, buttonListeners = {};
+    const viewport = { hidden: false, style: {}, clientWidth: width, clientHeight: 400, scrollLeft: 0,
+        setAttribute: () => {}, addEventListener: (name, listener) => { viewportListeners[name] = listener; } };
+    const navigation = { hidden: true, setAttribute: () => {} };
+    const position = { textContent: '', setAttribute: () => {} };
+    const previous = { disabled: false, setAttribute: () => {}, addEventListener: (_, listener) => { buttonListeners.previous = listener; } };
+    const next = { disabled: false, setAttribute: () => {}, addEventListener: (_, listener) => { buttonListeners.next = listener; } };
     const errorElement = { hidden: true, textContent: '' };
     const emptyElement = { hidden: true, textContent: '' };
-    const warningElement = { hidden: true, textContent: '' };
+    const warningElement = { hidden: true, style: {}, textContent: '' };
     let option;
-    const chart = { setOption: next => { option = next; }, clear: () => {}, resize: () => {}, dispose: () => {} };
+    let chartWidth = width, chartHeight = 400;
+    const chart = { setOption: (value, replace) => {
+        option = replace || !option ? value : { ...option, ...value, title: { ...option.title, ...value.title } };
+    }, clear: () => {}, resize: options => { chartWidth = options?.width || chartWidth; chartHeight = options?.height || chartHeight; },
+    getWidth: () => chartWidth, getHeight: () => chartHeight, dispose: () => {}, dispatchAction: () => {} };
     const window = {
         SYMC_VISUALIZATION: { mode, state: { status: 'ready', chart: model }, translations: {},
             options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: true,
                 adaptToBackground } },
-        echarts: { init: () => chart }, addEventListener: () => {}, getComputedStyle: () => ({ color: '' })
+        echarts: { init: () => chart }, addEventListener: (name, listener) => { listeners[name] = listener; }, getComputedStyle: () => ({ color: '' })
     };
     const document = {
         body: { appendChild: () => {} },
         createElement: () => ({ style: {}, remove: () => {} }),
         getElementById: id => ({
             'echarts-parallel-chart': chartElement,
+            'echarts-parallel-viewport': viewport,
+            'echarts-parallel-navigation': navigation,
+            'echarts-parallel-position': position,
+            'echarts-parallel-previous': previous,
+            'echarts-parallel-next': next,
             'echarts-parallel-error': errorElement,
             'echarts-parallel-empty': emptyElement,
             'echarts-parallel-warning': warningElement
         })[id]
     };
     vm.runInNewContext(designSource, { window });
+    vm.runInNewContext(navigationSource, { window });
     vm.runInNewContext(source, { window, document });
-    return { option, chartElement, errorElement, emptyElement, warningElement };
+    return { get option() { return option; }, chartElement, errorElement, emptyElement, warningElement,
+        window, viewport, navigation, position, previous, next,
+        click: name => buttonListeners[name](), scroll: left => { viewport.scrollLeft = left; viewportListeners.scroll(); },
+        key: key => viewportListeners.keydown({ key, target: viewport, preventDefault() {} }),
+        resize: (width, height = 400) => { viewport.clientWidth = width; viewport.clientHeight = height; listeners.resize(); } };
 }
 
 const model = { family: 'parallel', theme: 'dark', parallel: {
@@ -84,13 +106,108 @@ assert.doesNotMatch(result.option.tooltip.formatter({ name: '<Now>', value: [18.
 const ipsView = render(model, 'ipsview', 320, true);
 assert.equal(ipsView.option.title.show, true);
 assert.equal(ipsView.option.backgroundColor, 'transparent');
-assert.equal(ipsView.option.parallel.left, 28);
+assert.ok(ipsView.option.parallel.left >= 28, 'Compact viewports must reserve enough room for centered end-axis names.');
 
 const empty = render({ ...model, parallel: { ...model.parallel, rows: [] } });
 assert.equal(empty.option, undefined);
 assert.equal(empty.emptyElement.hidden, false);
+const twoAxes = render({ ...model, parallel: { ...model.parallel, axes: model.parallel.axes.slice(0, 2),
+    rows: [{ timestamp: 1780000100, values: [18.5, 42] }], style: { ...model.parallel.style, axisFontSizePercent: 200 } } }, 'symcon', 320);
+assert.equal(parseFloat(twoAxes.chartElement.style.width), 320, 'Two-axis comparisons must still show both axes together, even with large names.');
+assert.equal(twoAxes.navigation.hidden, true);
 
 const truncated = render({ ...model, parallel: { ...model.parallel, truncated: true } });
 assert.equal(truncated.warningElement.hidden, false);
 
-console.log('Parallel layout verified.');
+const many = { ...model, range: { lineBudget: 1000, effectiveLineBudget: 625, aggregateBudget: 10000 }, parallel: {
+    ...model.parallel, axes: Array.from({ length: 16 }, (_, index) => ({ variableID: 10000 + index,
+        label: index === 15 ? '<Last axis>' : 'Axis ' + (index + 1), unit: index % 2 ? '%' : '°C' })),
+    rows: [{ timestamp: 1780000100, values: Array.from({ length: 16 }, (_, i) => i - 8) }]
+} };
+for (const mode of ['symcon', 'ipsview']) {
+    const view = render(many, mode, 360, true);
+    assert.ok(parseFloat(view.chartElement.style.width) > view.viewport.clientWidth,
+        'Sixteen axes need a genuinely wider chart, not compressed labels or removed dimensions.');
+    assert.equal(view.navigation.hidden, false);
+    assert.equal(view.option.parallelAxis.length, 16);
+    assert.equal(view.option.series[0].data[0].value.length, 16);
+    assert.match(view.option.tooltip.formatter({ name: '<Now>', value: many.parallel.rows[0].values }), /&lt;Last axis&gt;/);
+    const data = JSON.stringify(view.option.series[0].data);
+    view.click('next');
+    assert.ok(view.viewport.scrollLeft > 0);
+    assert.equal(JSON.stringify(view.option.series[0].data), data, 'Panning must retain every line and dimension.');
+    assert.equal(view.option.title.left, view.viewport.scrollLeft + 180, 'The chart title stays centered in the visible viewport.');
+    view.key('End');
+    assert.equal(view.next.disabled, true);
+    assert.match(view.position.textContent, /16/);
+    view.key('Home');
+    assert.equal(view.previous.disabled, true);
+    view.scroll(450);
+    const priorLeft = view.viewport.scrollLeft;
+    view.window.handleMessage({ status: 'ready', chart: { ...many,
+        parallel: { ...many.parallel, rows: [{ timestamp: 1780003700, values: many.parallel.rows[0].values }] } } });
+    assert.ok(Math.abs(view.viewport.scrollLeft - priorLeft) < 0.01, 'Data refresh must not jump back to the first axis.');
+    view.resize(500);
+    assert.ok(view.viewport.scrollLeft > 0, 'Resize must retain the axis anchor.');
+    const allFitWidth = parseFloat(view.chartElement.style.width) + 500;
+    view.resize(allFitWidth);
+    assert.equal(view.navigation.hidden, true, 'A fitting chart needs no artificial scroll controls.');
+    view.resize(500);
+    assert.ok(view.viewport.scrollLeft > 0, 'Returning from an all-visible layout must restore the former axis anchor.');
+    view.window.handleMessage({ status: 'ready', chart: { ...many, parallel: { ...many.parallel,
+        style: { ...many.parallel.style, axisFontSizePercent: 200 } } } });
+    assert.ok(parseFloat(view.chartElement.style.width) > 16 * 90, 'Large axis fonts must reserve real horizontal space.');
+    const before = view.option;
+    view.window.handleMessage({ status: 'error', error: 'offline' });
+    assert.equal(view.option, before, 'A transient error must preserve the navigated chart.');
+}
+
+const identity = render(many, 'symcon', 360);
+const originalSpacing = (parseFloat(identity.chartElement.style.width) - 2 * identity.option.parallel.left) / 15;
+identity.scroll(originalSpacing * 3);
+const reorderedAxes = many.parallel.axes.slice();
+[reorderedAxes[3], reorderedAxes[7]] = [reorderedAxes[7], reorderedAxes[3]];
+identity.window.handleMessage({ status: 'ready', chart: { ...many, parallel: { ...many.parallel, axes: reorderedAxes } } });
+assert.ok(Math.abs(identity.viewport.scrollLeft / originalSpacing - 7) < 0.01,
+    'Changing source order must keep the viewport anchored to the variable ID, not its old index or duplicate name.');
+
+console.log('Parallel layout and sixteen-axis viewport verified.');
+
+const localECharts = path.join(__dirname, '..', '.tools', 'echarts-runtime', 'node_modules', 'echarts');
+if (fs.existsSync(localECharts)) {
+    const echarts = require(localECharts);
+    for (const mode of ['symcon', 'ipsview']) {
+        for (const width of [320, 1100]) {
+            const view = render(many, mode, width);
+            const actual = echarts.init(null, null, { renderer: 'svg', ssr: true,
+                width: parseFloat(view.chartElement.style.width), height: 400 });
+            actual.setOption(view.option);
+            const series = actual.getModel().getSeriesByIndex(0);
+            const coord = series.coordinateSystem;
+            const beforeExtent = coord.getAxis('dim15').scale.getExtent().slice();
+            assert.equal(series.getData().count(), 1);
+            assert.equal(coord.dimensions.length, 16, 'The actual renderer must retain all sixteen dimensions.');
+            for (let index = 1; index < 16; index++) {
+                assert.ok(coord.getAxisLayout('dim' + index).position[0] - coord.getAxisLayout('dim' + (index - 1)).position[0] >= 95,
+                    'The actual native coordinate system must have readable axis separation.');
+            }
+            actual.dispatchAction({ type: 'axisAreaSelect', parallelAxisIndex: 15, intervals: [[6, 8]] });
+            assert.equal(actual.getModel().getComponent('parallelAxis', 15).getActiveState(7), 'active');
+            view.key('End');
+            actual.setOption({ title: view.option.title });
+            assert.deepEqual(coord.getAxis('dim15').scale.getExtent(), beforeExtent, 'Panning must not recalculate the scale from an excerpt.');
+            assert.equal(actual.getModel().getComponent('parallelAxis', 15).getActiveState(7), 'active',
+                'Title-only panning updates must preserve native selections, including off-screen axes.');
+            const title = actual.getViewOfComponentModel(actual.getModel().getComponent('title'));
+            const bounds = title.group.getBoundingRect();
+            const screenCenter = title.group.x + bounds.x + bounds.width / 2 - view.viewport.scrollLeft;
+            assert.ok(Math.abs(screenCenter - width / 2) < 8, 'The actual diagram title must stay centered inside the visible viewport.');
+            assert.match(actual.renderToSVGString(), /<svg/);
+            const p = view.option.tooltip.position([99999, 99999], null, null, null, { contentSize: [150, 200] });
+            assert.ok(p[0] >= view.viewport.scrollLeft && p[0] + 150 <= view.viewport.scrollLeft + width,
+                'All sixteen original tooltip values must remain inside the scrolled viewport.');
+            actual.dispose();
+        }
+    }
+    console.log('Pinned ECharts keeps full Parallel geometry, native selections, scales and visible titles while panning.');
+}
