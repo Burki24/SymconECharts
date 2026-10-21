@@ -218,8 +218,15 @@ crowded.dispose();
 // Evaluate the actual shipped Canvas bundle, not just the full development
 // package: an omitted bundled feature must not be hidden by the SSR tests above.
 const runtimeWindow = {};
+// Control only the bundled test engine's force seeds, not production randomness.
+let forceSeed = 1;
+const seededMath = Object.create(Math);
+seededMath.random = () => {
+    forceSeed = (Math.imul(1664525, forceSeed) + 1013904223) >>> 0;
+    return forceSeed / 4294967296;
+};
 vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts', '6.1.0',
-    'echarts.graph.min.js'), 'utf8'), { window: runtimeWindow, navigator: { userAgent: 'Node.js' },
+    'echarts.graph.min.js'), 'utf8'), { Math: seededMath, window: runtimeWindow, navigator: { userAgent: 'Node.js' },
     console, setTimeout, clearTimeout });
 const bundled = runtimeWindow.echarts;
 assert.equal(bundled.version, '6.1.0');
@@ -261,12 +268,22 @@ const settledSeries = bundledChart.getModel().getSeriesByIndex(0);
 assert.equal(bundledChart.__symcGraphNeedsLabels, false);
 assert.equal(bundledChart.__symcGraphOverviewDone, true);
 assert.equal(bundledChart.__symcGraphUserRoamed, false, 'Automatic fitting must not look like user navigation.');
-settledSeries.getData().each(index => {
-    const point = settledSeries.coordinateSystem.dataToPoint(settledSeries.getData().getItemLayout(index));
+function assertOverviewPoint(point) {
+    assert.ok(point.every(Number.isFinite), 'Overview coordinates must remain finite.');
     assert.ok(point[0] >= 23 && point[0] <= 777 && point[1] >= 23 && point[1] <= 477,
         'The initial dense-force overview must fit every node inside the physical plot.');
-    assert.ok(point[1] <= 416,
-        'The shared overview must respect the family-specific 60px footer and 24px safety margin.');
+    // Native affine transforms may round the exact boundary one ULP upwards.
+    // A billionth of a pixel absorbs arithmetic noise, not visible overflow.
+    assert.ok(point[1] <= 416 + 1e-9,
+        'The shared overview must respect the family-specific 60px footer and 24px safety margin; y=' + point[1]);
+}
+assert.doesNotThrow(() => assertOverviewPoint([400, 416.00000000000006]));
+assert.throws(() => assertOverviewPoint([400, 416 + 1e-6]), /60px footer/,
+    'The tolerance must still reject a genuine one-millionth-pixel footer violation.');
+assert.throws(() => assertOverviewPoint([400, NaN]), /finite/);
+assert.throws(() => assertOverviewPoint([Infinity, 100]), /finite/);
+settledSeries.getData().each(index => {
+    assertOverviewPoint(settledSeries.coordinateSystem.dataToPoint(settledSeries.getData().getItemLayout(index)));
 });
 const fittedZoom = settledSeries.get('zoom');
 support.finishLayout(bundledChart);
@@ -282,6 +299,27 @@ bundledChart.__symcGraphNeedsLabels = true;
 assert.doesNotThrow(() => support.finishLayout(bundledChart),
     'A late rendered callback must not touch an already disposed chart.');
 assert.ok(Number.isFinite(settledTime));
+
+// Exact fixed positions reproduce the native affine-rounding boundary without
+// depending on a random force layout. The last y becomes 416.00000000000006.
+const boundaryChart = bundled.init(canvas(), null, { renderer: 'canvas', ssr: true, width: 800, height: 500 });
+try {
+    const boundaryOption = render({ ...baseStyle, animationEnabled: false }, 'ipsview', 800, dense, 500).option;
+    boundaryOption.series[0].bottom = 60;
+    boundaryOption.series[0].force.layoutAnimation = false;
+    boundaryOption.series[0].data = Array.from({ length: 81 }, (_, index) => ({
+        id: 'boundary-' + index, name: 'Boundary ' + index, fixed: true, x: index * 13.17, y: index * 7.35
+    }));
+    boundaryOption.series[0].links = [];
+    support.updateChart(boundaryChart, boundaryOption);
+    support.finishLayout(boundaryChart);
+    const boundarySeries = boundaryChart.getModel().getSeriesByIndex(0);
+    boundarySeries.getData().each(index => {
+        assertOverviewPoint(boundarySeries.coordinateSystem.dataToPoint(boundarySeries.getData().getItemLayout(index)));
+    });
+} finally {
+    boundaryChart.dispose();
+}
 if (process.env.GRAPH_BENCHMARK) {
     console.log('Test-only synchronous 300-node/1000-link settle: ' + Math.round(settledTime) + ' ms');
     const maximum = { ...dense, nodes: Array.from({ length: 500 }, (_, i) => ({

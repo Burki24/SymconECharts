@@ -29,6 +29,14 @@ Canvas-Zeichenaufrufe für Kachel und IPSView statt nur vorhandener Titeloptione
 
 ## Aktueller Stand und Zielarchitektur
 
+Der native Canvas-Graph-Layouttest verwendet reproduzierbare Force-Zufallswerte
+und einen zusätzlichen Randfall mit 81 explizit positionierten festen Knoten.
+Dieser reproduziert eine native affine Rundung auf `416.00000000000006` statt
+exakt `416` Pixel. Nur der numerische Footer-Grenzvergleich erlaubt deshalb
+`1e-9` Pixel Toleranz; bereits `1e-6` Pixel tatsächlicher Überlauf wird weiterhin
+abgewiesen, ebenso nicht endliche Koordinaten. Renderer, Footerabstände,
+Konfigurationen, Designs und Fremdkomponenten bleiben unverändert.
+
 Parallel ergänzt gemäß [ADR 0086](adr/0086-parallel-axis-metrics.md) die additive
 Quellenzeilenauswahl `Metric`: `auto` (fehlendes Feld ebenso), `average`,
 `minimum`, `maximum`, `consumption`. Bestehende Auto-Modelle und Beschriftungen
