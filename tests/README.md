@@ -1,5 +1,23 @@
 # Tests
 
+## GraphZ2M: Verbindungsauswahl
+
+`php tests/zigbee_graph_model.php` begann RED bei „schwächste zuerst“.
+Es prüft die inklusive Auswahl nach höchstem LQI je gerichteter Dublette,
+stabile Gleichstände, Gegenrichtungen, Null, nicht endliche Werte, leere
+Bereiche und unveränderte Roh-/Anzeigebudgets. Der echte Modul-/Exportpfad
+unter `php tests/gateway_gauges.php --zigbee-link-selection` verwendet nur
+temporäre synthetische Exportdateien. Geprüft werden Altdefaults, reine
+Entwürfe, Feldsichtbarkeit, unabhängige Designer und beide HTML-Ausgaben
+auch bei 500 Knoten/10000 Meldungen/2000 ausgewählten Verbindungen.
+`node tests/zigbee_graph_layout.js` prüft beide Adapter/Layouts, absolute
+Farben und Statusangaben auch bei leeren Treffern. `node tests/graph_browser.mjs`
+bietet unter `/?family=z2m` synthetische Exportauswahl über das echte PHP-Modell.
+Die lokale verschachtelte Canvas-Prüfung bestätigte beide Layouts/Adapter,
+leere Trefferlisten und erhaltenen Zoom nach Auswahlwechsel/Refresh;
+die Browserkonsole blieb ohne Warnungen oder Fehler.
+Diese lokalen Tests ersetzen keine neue Live-Abnahme in Symcon/IPSView.
+
 ## Candlestick: Minuten- und Wochenintervalle
 
 `php tests/candlestick_intervals.php` begann RED an der fehlenden Minutenart.
@@ -14,8 +32,9 @@ ergänzt native Geometrie-/Label-/Tooltip-/Zoomprüfungen für alle drei neuen
 Intervallarten, beide Ausrichtungen und Adapter. `node tests/candlestick_browser.mjs`
 bietet auswählbare synthetische Intervallansichten; lokale verschachtelte
 Canvas-Prüfungen bestätigten echtes Mausrad in beide Richtungen bei stabiler
-Werteskala und erhaltenen Ansichten nach Refresh. Die neuen Intervalle bleiben
-nach Modulupdate in Kachel und tatsächlichem IPSView live abzunehmen.
+Werteskala und erhaltenen Ansichten nach Refresh. Die neuen Intervalle wurden
+nach Modulupdate per MCP funktional geprüft; der Eigentümer bestätigt Kachel
+und tatsächliches IPSView. Echte Touchgeräte bleiben ungeprüft.
 
 ## Treemap/Sunburst: normalisierte Gewichte und Blattformatierung
 

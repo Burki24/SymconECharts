@@ -10,9 +10,14 @@ use InvalidArgumentException;
 final class ZigbeeGraphModel
 {
     /** @param array<string,mixed> $topology @return array<string,mixed> */
-    public static function Build(array $topology, int $minimumLQI, int $maximumLinks): array
-    {
-        if ($minimumLQI < 0 || $minimumLQI > 255 || $maximumLinks < 1 || $maximumLinks > 2000) {
+    public static function Build(
+        array $topology,
+        int $minimumLQI,
+        int $maximumLinks,
+        string $linkSelection = 'strongest',
+        int $maximumLQI = 255
+    ): array {
+        if (!self::IsValidFilter($minimumLQI, $maximumLinks, $linkSelection, $maximumLQI)) {
             throw new InvalidArgumentException('The Zigbee connection filter is invalid.');
         }
         $rawNodes = $topology['nodes'] ?? null;
@@ -60,21 +65,22 @@ final class ZigbeeGraphModel
                 continue;
             }
             $lqi = $link['lqi'] ?? $link['linkquality'] ?? null;
-            if ((!is_int($lqi) && !is_float($lqi) && !is_numeric($lqi)) || (float) $lqi < 0 || (float) $lqi > 255) {
+            if ((!is_int($lqi) && !is_float($lqi) && !is_numeric($lqi))
+                || !is_finite((float) $lqi) || (float) $lqi < 0 || (float) $lqi > 255) {
                 continue;
             }
             $lqi = (int) $lqi;
-            if ($lqi < $minimumLQI) {
-                continue;
-            }
             $key = $source . '>' . $target;
             if (isset($pairs[$key]) && $pairs[$key]['lqi'] >= $lqi) {
                 continue;
             }
             $pairs[$key] = ['source' => $identities[$source], 'target' => $identities[$target], 'lqi' => $lqi];
         }
-        $links = array_values($pairs);
-        usort($links, static fn (array $a, array $b): int => ($b['lqi'] <=> $a['lqi'])
+        // A range must never revive a weaker duplicate of an excluded directed pair.
+        $maximumLQI = $linkSelection === 'range' ? $maximumLQI : 255;
+        $links = array_values(array_filter($pairs, static fn (array $link): bool => $link['lqi'] >= $minimumLQI && $link['lqi'] <= $maximumLQI));
+        usort($links, static fn (array $a, array $b): int => ($linkSelection === 'weakest'
+            ? $a['lqi'] <=> $b['lqi'] : $b['lqi'] <=> $a['lqi'])
             ?: strcmp($a['source'] . $a['target'], $b['source'] . $b['target']));
         $filteredCount = count($links);
         $links = array_slice($links, 0, $maximumLinks);
@@ -86,8 +92,18 @@ final class ZigbeeGraphModel
             'capturedAt'     => is_int($capturedAt) && $capturedAt > 0 ? $capturedAt : 0,
             'routesIncluded' => ($topology['routes_included'] ?? false) === true,
             'totalLinks'     => count($rawLinks),
-            'filteredLinks'  => $filteredCount
+            'filteredLinks'  => $filteredCount,
+            'linkSelection'  => $linkSelection,
+            'minimumLQI'     => $minimumLQI,
+            'maximumLQI'     => $maximumLQI
         ];
+    }
+
+    public static function IsValidFilter(int $minimumLQI, int $maximumLinks, string $linkSelection, int $maximumLQI): bool
+    {
+        return $minimumLQI >= 0 && $minimumLQI <= 255 && $maximumLinks >= 1 && $maximumLinks <= 2000
+            && in_array($linkSelection, ['strongest', 'weakest', 'range'], true)
+            && ($linkSelection !== 'range' || ($maximumLQI >= $minimumLQI && $maximumLQI <= 255));
     }
 
     private static function Address(mixed $address): string

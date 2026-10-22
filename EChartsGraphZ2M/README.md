@@ -40,9 +40,37 @@ zuvor eingestellte einheitliche Verbindungsfarbe wird nicht mehr verwendet.
 Der LQI stammt aus dem letzten Export und ist keine Live-Messung.
 
 Mit Mindest-LQI und maximal angezeigten Verbindungen lässt sich ein großes
-Netz übersichtlich halten. Standardmäßig werden die 300 stärksten Verbindungen
-angezeigt; Knoten ohne ausgewählte Verbindung bleiben sichtbar. Der Grenzwert
-kann bis 2.000 erhöht werden. Der kleine Kachelmodus blendet Beschriftungen
+Netz übersichtlich halten. Die Verbindungsauswahl bietet:
+
+- **Stärkste Verbindungen zuerst**: bisheriger Standard, absteigend nach LQI.
+- **Schwächste Verbindungen zuerst**: aufsteigend nach LQI, um schwache
+  gemeldete Verbindungen gezielt zu betrachten.
+- **LQI-Bereich**: Mindest- und Höchst-LQI einschließlich beider Grenzen.
+  Bei zu vielen Treffern werden die stärksten passenden Verbindungen angezeigt.
+
+Der Mindest-LQI gilt in allen drei Modi. Standardmäßig bleibt er 0, das
+Anzeigebudget 300; das Budget lässt sich weiterhin auf 1–2.000 einstellen.
+Ein einzelner LQI ist als Bereich mit gleichen Grenzen wählbar. Der Höchst-LQI
+wird nur im Bereichsmodus ausgewertet. Doppelte Meldungen derselben gerichteten
+Verbindung werden **vor** der Filterung auf ihren höchsten LQI zusammengefasst.
+Ein schwächerer Doppelwert wird nicht als Ersatz eingeblendet, wenn der höchste
+Wert außerhalb des Bereichs liegt. Gleiche LQI werden stabil nach Geräteidentität
+geordnet. Gegenrichtungen bleiben getrennt.
+
+Alle Geräte bleiben auch ohne ausgewählte Verbindung sichtbar; eine leere
+Trefferliste ist kein Datenfehler. Die Statuszeile nennt Auswahl, LQI-Grenzen
+und passende Verbindungen vor dem Anzeigebudget sowie die Rohzahl aller
+gemeldeten Verbindungen. Die Farbskala bleibt unabhängig von der Auswahl 0–255.
+Ein exportierter LQI von 0 ist zulässig und bedeutet hier nicht automatisch
+„offline“. Schutzgrenzen bleiben 500 Rohknoten, 10.000 Rohverbindungen und
+16 MiB je Exportdatei.
+
+Beide Live-Vorschauen wenden dieselbe Auswahl auf ein ausdrücklich benanntes
+Beispielnetzwerk mit LQI 0, 128 und 255 an. Sie lesen keine echten Exportdaten;
+ein Bereich dazwischen kann deshalb eine leere Beispielauswahl zeigen, obwohl
+das tatsächliche Netzwerk passende Verbindungen besitzt.
+
+Der kleine Kachelmodus blendet Beschriftungen
 bei großen Netzen aus; über den Tooltip sind die Gerätenamen weiterhin
 abrufbar. In größeren Ansichten werden überlappende Knotennamen automatisch
 ausgedünnt und beim Zoomen erneut angeordnet. Berührte Knoten heben ihre

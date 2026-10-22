@@ -40,13 +40,25 @@ Canvas-Zeichenaufrufe für Kachel und IPSView statt nur vorhandener Titeloptione
 
 ## Aktueller Stand und Zielarchitektur
 
+GraphZ2M ergänzt gemäß [ADR 0094](adr/0094-zigbee-link-selection.md) die
+additive Verbindungsauswahl `strongest`, `weakest` und `range`.
+`ZigbeeGraphModel` prüft Auswahl und Grenzen, löst gerichtete Dubletten auf,
+filtert danach einschließlich und wendet erst zuletzt das unveränderte
+Anzeigebudget an. Live-Ausgaben und schematische, exportfreie SVG-Entwürfe
+verwenden denselben Baustein. Formularsichtbarkeit nutzt den vorhandenen
+ConfigurationFormHelper; Graph-Ansichtserhaltung bleibt in `echarts-graph.js`.
+Keine Änderung an Gateway, Fremdruntime, synchronisierten Helpern oder Exportleser.
+Alle Geräte, unabhängige Designer, absolute LQI-Farben und 500/10000/2000-/16-MiB-
+Schutzgrenzen bleiben erhalten. Funktionale MCP- und tatsächliche
+Kachel-/IPSView-Abnahme der neuen Auswahl bleiben nach Modulupdate offen.
+
 Candlestick ergänzt gemäß [ADR 0093](adr/0093-candlestick-minute-week-intervals.md)
 15-/30-Minuten- und lokale ISO-Wochenintervalle. `EChartsArchiveQuery` teilt
 die begrenzte Enumeration mit den bisherigen Stunden-/Tagesfenstern;
 zusätzliche Rohintervalle erweitern nicht die Symcon-Aggregatmodi anderer
 Familien. Rohwertleser, Cache, Renderer und 720/63/64000-Budgets bleiben erhalten.
-Die neuen Intervallansichten sind lokal geprüft; die Live-Abnahme nach
-Modulupdate in Kachel und tatsächlichem IPSView bleibt offen.
+Die neuen Intervallansichten sind per MCP funktional geprüft; der Eigentümer
+bestätigt Kachel und tatsächliches IPSView. Echte Touchgeräte bleiben ungeprüft.
 
 Candlestick ergänzt gemäß [ADR 0092](adr/0092-candlestick-time-zoom.md)
 optionalen Zeitzoom als reine Ansicht. `libs/echarts-zoom.js` ergänzt additive

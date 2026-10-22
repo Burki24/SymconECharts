@@ -303,8 +303,9 @@ können unabhängig davon individuell vergeben werden.
 
 - __EChartsGraphZ2M__ ([Dokumentation](EChartsGraphZ2M/README.md))
   Zeigt die zuletzt exportierte Zigbee2MQTT-Netzwerkkarte mit gerichteten
-  Verbindungen und LQI. Die Instanz startet keinen Scan; Mindest-LQI und
-  Verbindungsbudget halten auch große Netze übersichtlich.
+  Verbindungen und LQI. Stärkste, schwächste oder nach LQI-Bereich gefilterte
+  Verbindungen sind auswählbar; alle Geräte bleiben sichtbar. Die Instanz
+  startet keinen Scan und behält ihre Export- und Verbindungsbudgets.
 
 - __EChartsTreemap__ ([Dokumentation](EChartsTreemap/README.md))
   Ordnet bis zu 100 aktuelle Integer- und Float-Variablen manuell benannten

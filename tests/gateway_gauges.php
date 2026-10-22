@@ -212,6 +212,9 @@ function IPS_VariableExists(int $variableID): bool
 /** @return list<int> */
 function IPS_GetInstanceListByModuleID(string $moduleID): array
 {
+    if (isset($GLOBALS['symconTestModuleInstances'][$moduleID])) {
+        return $GLOBALS['symconTestModuleInstances'][$moduleID];
+    }
     if ($moduleID === '{015A6EB8-D6E5-4B93-B496-0D3F77AE9FE1}') {
         return $GLOBALS['symconTestWebHookInstances'];
     }
@@ -1176,6 +1179,11 @@ if (array_slice($argv, 1) === ['--state-timeline']) {
 }
 
 // Reuse the real Gateway and Kernel doubles without retaining every previous family's HTML fixtures.
+if (array_slice($argv, 1) === ['--zigbee-link-selection']) {
+    require __DIR__ . '/zigbee_link_selection.php';
+    exit(0);
+}
+
 if (($argv[1] ?? '') === '--theme-river-preview') {
     require_once dirname(__DIR__) . '/EChartsThemeRiver/module.php';
     $riverPreview = new EChartsThemeRiver();

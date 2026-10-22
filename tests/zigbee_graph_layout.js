@@ -151,6 +151,32 @@ const customLqiColors = render({
 assert.deepEqual(Array.from(customLqiColors.option.series[0].links, link => link.lineStyle.color),
     ['#102030', '#405060', '#708090']);
 assert.match(customLqiColors.legendElement.innerHTML, /#102030,#405060,#708090/);
+for (const mode of ['symcon', 'ipsview']) {
+    for (const layout of ['force', 'circular']) {
+        for (const selection of ['strongest', 'weakest', 'range']) {
+            const network = { ...graph, linkSelection: selection, minimumLQI: 75, maximumLQI: 128,
+                filteredLinks: 7, links: [{ source: 'device-b', target: 'device-c', lqi: 75 }] };
+            const snapshot = JSON.stringify(network);
+            const selected = render({ ...style, graphLayout: layout }, 400, network, mode);
+            assert.equal(selected.option.series[0].data.length, 3);
+            assert.equal(selected.option.series[0].links.length, 1);
+            assert.equal(selected.option.series[0].links[0].lineStyle.color, large.option.series[0].links[1].lineStyle.color,
+                'Selection must not rescale LQI colors to the displayed range.');
+            assert.match(selected.metaElement.textContent, /1\/4 links/);
+            assert.match(selected.metaElement.textContent, /\[75–128\] · 7 matching links/);
+            assert.match(selected.metaElement.textContent, new RegExp(selection === 'range' ? 'LQI range'
+                : selection === 'weakest' ? 'Weakest links first' : 'Strongest links first'));
+            assert.equal(selected.metaElement.title, selected.metaElement.textContent,
+                'The complete filter/count/snapshot metadata must remain accessible when visually clipped.');
+            assert.match(selected.legendElement.innerHTML, /LQI 0–255/);
+            const empty = render({ ...style, graphLayout: layout }, 400, { ...network, links: [], filteredLinks: 0 }, mode);
+            assert.equal(empty.option.series[0].data.length, 3);
+            assert.equal(empty.option.series[0].links.length, 0);
+            assert.equal(empty.chartElement.hidden, false, 'No eligible edges is a valid device graph, not a transport error.');
+            assert.equal(JSON.stringify(network), snapshot, 'Rendering must not mutate exported data or configuration.');
+        }
+    }
+}
 const unknown = render(style, 1000, {
     ...graph, nodes: [{ id: 'device-x', name: 'Unknown device', kind: 'Unknown' }], links: []
 });

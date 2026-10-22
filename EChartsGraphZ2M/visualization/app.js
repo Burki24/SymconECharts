@@ -204,7 +204,16 @@
             ? new Date(Number(graph.capturedAt) * 1000).toLocaleString() : '–';
         metaElement.textContent = (graph.nodes || []).length + ' ' + translate('devices') + ' · '
             + (graph.links || []).length + '/' + (Number(graph.totalLinks) || 0) + ' '
-            + translate('links') + ' · ' + translate('snapshot') + ': ' + captured;
+            + translate('links');
+        if (graph.linkSelection) {
+            var selection = graph.linkSelection === 'weakest' ? 'Weakest links first'
+                : (graph.linkSelection === 'range' ? 'LQI range' : 'Strongest links first');
+            metaElement.textContent += ' · ' + translate(selection) + ' [' + Number(graph.minimumLQI || 0)
+                + '–' + Number(graph.maximumLQI === undefined ? 255 : graph.maximumLQI) + ']'
+                + ' · ' + Number(graph.filteredLinks || 0) + ' ' + translate('matching links');
+        }
+        metaElement.textContent += ' · ' + translate('snapshot') + ': ' + captured;
+        metaElement.title = metaElement.textContent;
         metaElement.hidden = false;
         var colors = colorsFor(normalizeTheme(state.chart.theme || 'auto'));
         rootElement.style.backgroundColor = bootstrap.mode === 'ipsview'

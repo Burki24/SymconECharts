@@ -76,6 +76,7 @@ Fixture-Refresh; im Browserprotokoll erschienen keine Warnungen/Fehler.
 Diese synthetischen Frames ersetzen nicht den tatsächlichen Symcon-/IPSView-Host.
 
 Der bisherige Zeitzoom ist vom Eigentümer in Kachel/nativer App und IPSView
-einschließlich Mausrad bestätigt. Die neuen Intervallarten sind nach
-Modulupdate separat live abzunehmen; echte Touchgeräte bleiben ungeprüft.
+einschließlich Mausrad bestätigt. Die neuen Intervallarten wurden nach
+Modulupdate per MCP funktional geprüft; der Eigentümer bestätigt sie ebenfalls
+in Kachel und tatsächlichem IPSView. Echte Touchgeräte bleiben ungeprüft.
 Keine laufende Instanz, kein Design und keine Archivierung wurde geändert.

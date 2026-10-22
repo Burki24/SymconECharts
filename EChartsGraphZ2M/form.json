@@ -16,6 +16,26 @@
             "caption": "Zigbee2MQTT Network Map instance"
         },
         {
+            "type": "Select",
+            "name": "LinkSelection",
+            "caption": "Link selection",
+            "onChange": "ECGZ_UpdateLinkSelectionForm($id, $LinkSelection);",
+            "options": [
+                {
+                    "caption": "Strongest links first",
+                    "value": "strongest"
+                },
+                {
+                    "caption": "Weakest links first",
+                    "value": "weakest"
+                },
+                {
+                    "caption": "LQI range",
+                    "value": "range"
+                }
+            ]
+        },
+        {
             "type": "RowLayout",
             "items": [
                 {
@@ -27,12 +47,24 @@
                 },
                 {
                     "type": "NumberSpinner",
+                    "name": "MaximumLQI",
+                    "caption": "Maximum LQI",
+                    "visible": false,
+                    "minimum": 0,
+                    "maximum": 255
+                },
+                {
+                    "type": "NumberSpinner",
                     "name": "MaximumLinks",
                     "caption": "Maximum displayed links",
                     "minimum": 1,
                     "maximum": 2000
                 }
             ]
+        },
+        {
+            "type": "Label",
+            "caption": "Minimum LQI applies in every mode. Range endpoints are inclusive; the strongest matching links are shown first."
         },
         {
             "type": "Label",

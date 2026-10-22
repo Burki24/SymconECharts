@@ -4,10 +4,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
+import { execFileSync } from 'node:child_process';
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
-function state(layout, updated = false, zigbee = false) {
+function state(layout, updated = false, zigbee = false, selection = 'strongest') {
     const nodes = Array.from({ length: 300 }, (_, index) => ({
         id: 'object-' + (1000 + index), name: 'Sensor mit langem Namen ' + (index % 50),
         kind: zigbee ? (index === 0 ? 'Coordinator' : index % 3 === 0 ? 'EndDevice' : 'Router') : 'variable',
@@ -20,9 +21,23 @@ function state(layout, updated = false, zigbee = false) {
                 lqi: (index * 13) % 256 });
         }
     }
-    return { status: 'ready', chart: { family: 'graph', theme: 'auto', graph: {
-        title: '300 Knoten · 1.000 Verbindungen', nodes, links,
-        totalLinks: 1000, capturedAt: 1800000000,
+    let model = { nodes, links, totalLinks: 1000, capturedAt: 1800000000 };
+    if (zigbee) {
+        const addresses = new Map(nodes.map((node, index) => [node.id, '0x' + (index + 1).toString(16).padStart(16, '0')]));
+        const raw = { captured_at: 1800000000,
+            nodes: nodes.map(node => ({ ieeeAddr: addresses.get(node.id), friendlyName: node.name, type: node.kind })),
+            links: links.map(link => ({ sourceIeeeAddr: addresses.get(link.source), targetIeeeAddr: addresses.get(link.target), lqi: link.lqi })) };
+        const input = { topology: raw, selection: selection === 'empty' ? 'range' : selection,
+            minimum: selection === 'range' ? 64 : selection === 'empty' ? 256 : 0, maximum: selection === 'range' ? 128 : 255 };
+        // Empty fixture uses a real valid range, but no matching saved links.
+        if (selection === 'empty') { input.minimum = 1; input.maximum = 1;
+            input.topology.links = input.topology.links.filter(link => link.lqi !== 1); }
+        model = JSON.parse(execFileSync('php', ['-r',
+            'require $argv[1]; $v=json_decode(stream_get_contents(STDIN),true,512,JSON_THROW_ON_ERROR); echo json_encode(\\SymconECharts\\ZigbeeGraphModel::Build($v["topology"],$v["minimum"],300,$v["selection"],$v["maximum"]),JSON_THROW_ON_ERROR);',
+            path.join(root, 'libs/ZigbeeGraphModel.php')], { input: JSON.stringify(input), encoding: 'utf8' }));
+    }
+    return { status: 'ready', chart: { family: zigbee ? 'zigbee-graph' : 'graph', theme: 'auto', graph: {
+        title: '300 Knoten · ' + model.links.length + ' Verbindungen', ...model,
         style: { graphLayout: layout, nodeSize: 12, roamEnabled: true,
             showLabels: true, showValues: true, animationEnabled: false }
     } } };
@@ -49,10 +64,16 @@ function page(mode, layout, zigbee) {
         document.getElementById('result').textContent='Zoom '+Number(s.get('zoom')||1).toFixed(2)+' · '+s.getData().count()+' Knoten · '+s.getEdgeData().count()+' Kanten';}
         function roam(){graphChart().dispatchAction({type:'graphRoam',seriesId:'graph',dx:20,dy:10});
         graphChart().dispatchAction({type:'graphRoam',seriesId:'graph',zoom:1.5,originX:200,originY:200});report();}
-        function refresh(){window.handleMessage(${JSON.stringify(state(layout, true, zigbee))});report();}`;
+        const samples=${JSON.stringify(Object.fromEntries((zigbee ? ['strongest', 'weakest', 'range', 'empty'] : ['strongest'])
+            .map(selection => [selection, state(layout, true, zigbee, selection)])))};
+        let selection='strongest';
+        function selectLinks(next){selection=next;refresh();}
+        function refresh(){window.handleMessage(samples[selection]);report();}`;
     html = html.replace('</head>', '<style>.echarts-graph-root,.echarts-zigbee-graph-root{height:calc(100% - 36px)}</style></head>');
     html = html.replace('</body>', '<div style="position:absolute;left:12px;bottom:4px;z-index:5;font:10px Arial">'
         + '<button onclick="roam()">Verschieben / Zoom</button><button onclick="refresh()">Werte aktualisieren</button>'
+        + (zigbee ? '<button onclick="selectLinks(\'strongest\')">Stärkste</button><button onclick="selectLinks(\'weakest\')">Schwächste</button>'
+            + '<button onclick="selectLinks(\'range\')">LQI 64–128</button><button onclick="selectLinks(\'empty\')">Ohne Treffer</button>' : '')
         + '<span id="result"></span></div><script>' + script + '</script></body>');
     if (mode === 'symcon') {
         html = html.replace('<body>', '<body><div style="position:absolute;top:16px;left:20px;font:18px Arial;z-index:4">' + module + '</div>');

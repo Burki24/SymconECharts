@@ -57,6 +57,7 @@ $tests = [
 ];
 
 $commands = [
+    ['Test Zigbee link selections and previews', 'php tests/gateway_gauges.php --zigbee-link-selection'],
     ['Test Candlestick minute and week intervals', 'php tests/gateway_gauges.php --candlestick-intervals'],
     ['Test optional Boxplot IQR whiskers and outliers', 'php tests/gateway_gauges.php --boxplot-iqr'],
     ['Test named Scatter comparison groups', 'php tests/gateway_gauges.php --scatter-groups'],

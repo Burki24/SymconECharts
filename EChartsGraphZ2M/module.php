@@ -103,6 +103,8 @@ class EChartsGraphZ2M extends IPSModuleStrict
             $this->RegisterPropertyString('Title', '');
             $this->RegisterPropertyInteger('NetworkMapInstanceID', 0);
             $this->RegisterPropertyInteger('MinimumLQI', 0);
+            $this->RegisterPropertyString('LinkSelection', 'strongest');
+            $this->RegisterPropertyInteger('MaximumLQI', 255);
             $this->RegisterPropertyInteger('MaximumLinks', 300);
             foreach (['', 'IPSView'] as $prefix) {
                 foreach (self::DESIGN_DEFAULTS as $name => $default) {
@@ -176,6 +178,11 @@ class EChartsGraphZ2M extends IPSModuleStrict
         $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
             $form = $this->LoadConfigurationForm();
+            $form['elements'] = $this->SetFormFieldVisibility(
+                $form['elements'],
+                ['MaximumLQI'],
+                $this->ReadPropertyString('LinkSelection') === 'range'
+            );
             $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
             $form['elements'] = $this->WithAnimationFormControls($form['elements']);
             $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
@@ -187,7 +194,7 @@ class EChartsGraphZ2M extends IPSModuleStrict
                 ['caption' => 'Node and line colors', 'start' => 'NodeColor']
             ]);
             $fields = [
-                'Title', 'NetworkMapInstanceID', 'MinimumLQI', 'MaximumLinks',
+                'Title', 'NetworkMapInstanceID', 'MinimumLQI', 'MaximumLQI', 'MaximumLinks', 'LinkSelection',
                 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
                 'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent',
                 ...array_keys(self::DESIGN_DEFAULTS),
@@ -206,6 +213,22 @@ class EChartsGraphZ2M extends IPSModuleStrict
             throw $debugFlowException;
         } finally {
             $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, false);
+        }
+    }
+
+    public function UpdateLinkSelectionForm(string $Selection): void
+    {
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            $this->UpdateFormField('MaximumLQI', 'visible', $Selection === 'range');
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
     }
 
@@ -435,10 +458,39 @@ class EChartsGraphZ2M extends IPSModuleStrict
         $positions = $this->BarPreviewValue($values, 'GraphLayout', 'string', $ipsView) === 'circular'
             ? [[360, 75], [505, 185], [360, 295], [215, 185]]
             : [[210, 190], [380, 120], [390, 250], [560, 180]];
-        $links = [[0, 1], [0, 2], [1, 3], [2, 3]];
+        $previewNodes = [];
+        foreach (['Coordinator', 'Router A', 'Router B', 'Sensor'] as $index => $name) {
+            $previewNodes[] = [
+                'ieeeAddr' => sprintf('0x%016x', $index + 1), 'friendlyName' => $name,
+                'type'     => $index === 0 ? 'Coordinator' : ($index === 3 ? 'EndDevice' : 'Router')
+            ];
+        }
+        $previewLinks = [];
+        foreach ([[0, 1, 0], [0, 2, 128], [1, 3, 255], [2, 3, 128]] as [$from, $to, $lqi]) {
+            $previewLinks[] = [
+                'sourceIeeeAddr' => $previewNodes[$from]['ieeeAddr'],
+                'targetIeeeAddr' => $previewNodes[$to]['ieeeAddr'], 'lqi' => $lqi
+            ];
+        }
+        try {
+            $preview = ZigbeeGraphModel::Build(
+                ['nodes' => $previewNodes, 'links' => $previewLinks],
+                $values['MinimumLQI'] ?? $this->ReadPropertyInteger('MinimumLQI'),
+                $values['MaximumLinks'] ?? $this->ReadPropertyInteger('MaximumLinks'),
+                $values['LinkSelection'] ?? $this->ReadPropertyString('LinkSelection'),
+                $values['MaximumLQI'] ?? $this->ReadPropertyInteger('MaximumLQI')
+            );
+        } catch (InvalidArgumentException | TypeError) {
+            return $svg . '<text x="360" y="180" text-anchor="middle" fill="' . EChartsBarPreview::E($labelColor)
+                . '">' . EChartsBarPreview::E($this->Translate('The Zigbee connection filter is invalid.')) . '</text></svg>';
+        }
+        $indices = array_flip(array_column($preview['nodes'], 'id'));
+        $links = array_map(static fn (array $link): array => [$indices[$link['source']], $indices[$link['target']]], $preview['links']);
         $arrows = $this->BarPreviewValue($values, 'ShowLinkArrows', 'boolean', $ipsView);
         $markerID = $ipsView ? 'ecgz-preview-arrow-ipsview' : 'ecgz-preview-arrow-tile';
-        $lineColors = [$lqiColors[0], $lqiColors[1], $lqiColors[2], $lqiColors[1]];
+        $lineColors = array_map(static fn (array $link): string => $lqiColors[match ($link['lqi']) {
+            0 => 0, 255 => 2, default => 1
+        }], $preview['links']);
         if ($arrows) {
             $svg .= '<defs>';
             foreach ($lineColors as $index => $lineColor) {
@@ -455,6 +507,10 @@ class EChartsGraphZ2M extends IPSModuleStrict
             $svg .= '<line x1="' . $x1 . '" y1="' . $y1 . '" x2="' . $x2 . '" y2="' . $y2
                 . '" stroke="' . EChartsBarPreview::E($lineColors[$index]) . '" stroke-width="2"'
                 . ($arrows ? ' marker-end="url(#' . $markerID . '-' . $index . ')"' : '') . '/>';
+        }
+        if ($links === []) {
+            $svg .= '<text x="360" y="325" text-anchor="middle" fill="' . EChartsBarPreview::E($labelColor)
+                . '">' . EChartsBarPreview::E($this->Translate('No matching links in the example network.')) . '</text>';
         }
         $nodeSize = max(6, min(40, $this->BarPreviewValue($values, 'NodeSize', 'integer', $ipsView)));
         $labelSize = max(8, min(20, (int) round(11 * $this->BarPreviewValue($values, 'LabelFontSizePercent', 'integer', $ipsView) / 100)));
@@ -483,7 +539,9 @@ class EChartsGraphZ2M extends IPSModuleStrict
         return ZigbeeGraphModel::Build(
             $topology,
             $this->ReadPropertyInteger('MinimumLQI'),
-            $this->ReadPropertyInteger('MaximumLinks')
+            $this->ReadPropertyInteger('MaximumLinks'),
+            $this->ReadPropertyString('LinkSelection'),
+            $this->ReadPropertyInteger('MaximumLQI')
         );
     }
 
@@ -540,14 +598,18 @@ class EChartsGraphZ2M extends IPSModuleStrict
                 'Data could not be refreshed. Showing the last available values.'  => $this->Translate(
                     'Data could not be refreshed. Showing the last available values.'
                 ),
-                'devices'     => $this->Translate('devices'),
-                'links'       => $this->Translate('links'),
-                'snapshot'    => $this->Translate('snapshot'),
-                'Coordinator' => $this->Translate('Coordinator'),
-                'Router'      => $this->Translate('Router'),
-                'EndDevice'   => $this->Translate('EndDevice'),
-                'End device'  => $this->Translate('End device'),
-                'Unknown'     => $this->Translate('Unknown')
+                'devices'               => $this->Translate('devices'),
+                'links'                 => $this->Translate('links'),
+                'snapshot'              => $this->Translate('snapshot'),
+                'Strongest links first' => $this->Translate('Strongest links first'),
+                'Weakest links first'   => $this->Translate('Weakest links first'),
+                'LQI range'             => $this->Translate('LQI range'),
+                'matching links'        => $this->Translate('matching links'),
+                'Coordinator'           => $this->Translate('Coordinator'),
+                'Router'                => $this->Translate('Router'),
+                'EndDevice'             => $this->Translate('EndDevice'),
+                'End device'            => $this->Translate('End device'),
+                'Unknown'               => $this->Translate('Unknown')
             ],
             'options' => [
                 'echartsVersion'            => EChartsAsset::VERSION,
@@ -596,7 +658,12 @@ class EChartsGraphZ2M extends IPSModuleStrict
         $sourceID = $this->ReadPropertyInteger('NetworkMapInstanceID');
         $minimumLQI = $this->ReadPropertyInteger('MinimumLQI');
         $maximumLinks = $this->ReadPropertyInteger('MaximumLinks');
-        if ($sourceID < 1 || $minimumLQI < 0 || $minimumLQI > 255 || $maximumLinks < 1 || $maximumLinks > 2000) {
+        if ($sourceID < 1 || !ZigbeeGraphModel::IsValidFilter(
+            $minimumLQI,
+            $maximumLinks,
+            $this->ReadPropertyString('LinkSelection'),
+            $this->ReadPropertyInteger('MaximumLQI')
+        )) {
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => 'Select a Zigbee2MQTT Network Map and valid connection filters.'];
         }
         try {

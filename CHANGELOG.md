@@ -27,6 +27,12 @@
 
 ## Neu
 
+- EChartsGraphZ2M bietet stärkste oder schwächste Verbindungen zuerst sowie
+  einen einschließlich begrenzten LQI-Bereich. Kachel, IPSView und beide
+  Vorschauen nutzen dieselbe Auswahl nach gerichteter Dublettenauflösung.
+  Alle Geräte, die feste LQI-Farbskala, bestehende Designs und Schutzbudgets
+  bleiben erhalten; stärkste Verbindungen bleiben Standard. Kein Scan wird ausgelöst.
+
 - Candlestick unterstützt zusätzlich 15-Minuten-, 30-Minuten- und lokale
   Kalenderwochenintervalle (Montag bis Montag), auch für feste historische
   Zeiträume. Kachel, IPSView und Vorschauen verwenden die neuen Intervalle;

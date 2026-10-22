@@ -98,6 +98,12 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Der allgemeine Graph erlaubt gemäß ADR 0066 300 Knoten und 1000 ungerichtete
   Kanten. Gemeinsame flüchtige Ansichtsverwaltung und Beschriftungsgrundlagen
   liegen unter `libs`; Z2M-Export, LQI, Identitäten und Budgets bleiben getrennt.
+  ADR 0094 ergänzt für GraphZ2M `LinkSelection=strongest|weakest|range`.
+  Default `strongest`, bestehender Mindest-LQI und alle Schutzbudgets bleiben
+  erhalten. Nur `range` wertet den zusätzlichen Höchst-LQI einschließlich aus;
+  nach höchstem LQI je gerichteter Dublette wird gefiltert und dann begrenzt.
+  Alle Knoten und die absolute Farbskala 0–255 bleiben erhalten. Live-Modell und
+  synthetische Vorschauen teilen `ZigbeeGraphModel`; kein Netzwerkscan.
   Eine Treemap aus manuell gewählten Gruppen und aktuellen numerischen
   Symcon-Variablenwerten liegt im eigenen Gerätemodul `EChartsTreemap`.
   Ein Sunburst mit derselben manuell benannten Hierarchie und aktuellen
