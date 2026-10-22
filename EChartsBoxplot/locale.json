@@ -1,6 +1,16 @@
 {
     "translations": {
         "de": {
+            "Whisker model": "Whisker-Modell",
+            "The Boxplot settings are invalid.": "Die Boxplot-Einstellungen sind ungültig.",
+            "Minimum and maximum (default)": "Minimum und Maximum (Standard)",
+            "1.5 IQR with separate outliers": "1,5 IQR mit separaten Ausreißern",
+            "IQR mode uses the outermost observed hourly means within Q1 - 1.5 IQR and Q3 + 1.5 IQR. Values outside are separate points, not raw measurement spikes.": "Im IQR-Modus enden die Whisker an den äußersten vorhandenen Stundenmitteln innerhalb von Q1 − 1,5 IQR und Q3 + 1,5 IQR. Werte außerhalb erscheinen als separate Punkte, nicht als Rohwertspitzen.",
+            "Outliers": "Ausreißer",
+            "Outlier": "Ausreißer",
+            "Lower whisker": "Unterer Whisker",
+            "Upper whisker": "Oberer Whisker",
+            "Completed hourly means · whiskers: 1.5 IQR": "Abgeschlossene Stundenmittelwerte · Whisker: 1,5 IQR",
             "Hourly historical periods across non-hour timezone changes are not supported.": "Historische Stundenzeiträume über Zeitzonenwechsel mit nicht ganzstündiger Verschiebung werden nicht unterstützt. Einen Zeitraum vor oder nach dem Wechsel wählen.",
             "Fixed historical period": "Fester historischer Zeitraum",
             "From (inclusive)": "Von (einschließlich)",
@@ -30,7 +40,7 @@
             "Label (optional)": "Beschriftung (optional)",
             "Box color (optional)": "Boxfarbe (optional)",
             "Automatic (theme)": "Automatisch (Theme)",
-            "Choose 1 to 32 numeric standard archive variables with the same unit. Each box shows completed hourly means: minimum, Q1, median, Q3 and maximum. Missing hours remain missing; counters are not supported.": "1 bis 32 numerische Standard-Archivvariablen derselben Einheit wählen. Jede Box zeigt abgeschlossene Stundenmittelwerte: Minimum, Q1, Median, Q3 und Maximum. Fehlende Stunden bleiben leer; Zähler werden nicht unterstützt.",
+            "Choose 1 to 32 numeric standard archive variables with the same unit. By default, each box shows completed hourly means: minimum, Q1, median, Q3 and maximum. Missing hours remain missing; counters are not supported.": "1 bis 32 numerische Standard-Archivvariablen derselben Einheit wählen. Standardmäßig zeigt jede Box abgeschlossene Stundenmittelwerte: Minimum, Q1, Median, Q3 und Maximum. Fehlende Stunden bleiben leer; Zähler werden nicht unterstützt.",
             "Time range": "Zeitraum",
             "Custom": "Benutzerdefiniert",
             "Range value": "Zeitraumwert",

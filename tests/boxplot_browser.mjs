@@ -25,6 +25,14 @@ const variables = ':root{--symc-background:#303236;--symc-text:#f4f5f7;--symc-te
 const translations = JSON.parse(read('EChartsBoxplot/locale.json')).translations.de;
 function page(mode, extended = false, query = new URLSearchParams()) {
     const initialState = state(Math.max(1, Math.min(32, Number(query.get('count')) || 32)));
+    if (query.get('whiskers') === 'iqr') {
+        initialState.chart.boxplot.whiskers = 'iqr';
+        initialState.chart.boxplot.data.forEach((item, index) => {
+            if (!item.statistics) { Object.assign(item, {outliers: [], outlierCount: 0, sampleMinimum: null, sampleMaximum: null}); return; }
+            Object.assign(item, {statistics: [16, 17.5, 20, 22.5, 24], sampleMinimum: 5, sampleMaximum: index === 31 ? 35 : 32,
+                count: 8, outlierCount: 2, outliers: [[1791504000, 5], [1792108800, index === 31 ? 35 : 32]]});
+        });
+    }
     if (query.get('fractional') === '1') {
         initialState.chart.boxplot.data.forEach((item, index) => {
             if (item.statistics) { item.statistics = [Math.PI, 10, 12, 15, index === initialState.chart.boxplot.data.length - 1 ? 37.123456789 : 20]; }
@@ -50,10 +58,32 @@ function page(mode, extended = false, query = new URLSearchParams()) {
         adaptToBackground: false,  }, translations };
     const replacements = { HTML_LANGUAGE: 'de', HTML_CLASSES: '', ROOT_FONT_SIZE: '16px', VIEWPORT_CONTENT: 'width=device-width, initial-scale=1',
         DOCUMENT_TITLE: 'Boxplot browser fixture', VISUALIZATION_THEME: variables, MODULE_STYLE: read('EChartsBoxplot/visualization/style.css'),
+        INTERACTION_SCRIPT: '<script>' + read('libs/helper/visualization/interaction.min.js') + '</script>',
         IPSVIEW_STYLE: '', ECHARTS_SCRIPT: read('libs/echarts/6.1.0/echarts.boxplot.min.js'), ECHARTS_THEME_SCRIPT: '',
         ECHARTS_DESIGN_SCRIPT: read('libs/echarts-design.js'), BOOTSTRAP_JSON: JSON.stringify(bootstrap),
         MODULE_SCRIPT: read('EChartsBoxplot/visualization/app.js'), IPSVIEW_TRANSPORT_SCRIPT: '' };
     let html = read('EChartsBoxplot/visualization/index.html').replace(/\{\{([A-Z_]+)\}\}/g, (_, key) => replacements[key] ?? '');
+    // Fixture-only DOM evidence: real browser wheel receipt and the resulting native viewport.
+    html = html.replace('</body>', `<script>
+        document.addEventListener('wheel', function (event) {
+            document.body.dataset.wheelCount = String(Number(document.body.dataset.wheelCount || 0) + 1);
+            document.body.dataset.wheelDelta = String(event.deltaY);
+            document.body.dataset.wheelTarget = String(event.target.tagName);
+            document.body.dataset.wheelPoint = event.clientX + ',' + event.clientY;
+        }, {capture:true, passive:true});
+        var navigationChart = echarts.getInstanceByDom(document.getElementById('echarts-boxplot-chart'));
+        navigationChart.getZr().on('mousewheel', function(event) {
+            document.body.dataset.chartWheelCount = String(Number(document.body.dataset.chartWheelCount || 0) + 1);
+            document.body.dataset.chartWheelPoint = event.offsetX + ',' + event.offsetY;
+            document.body.dataset.chartWheelDelta = String(event.wheelDelta);
+        });
+        function recordWindow() {
+            var zoom = navigationChart.getOption().dataZoom[0];
+            document.body.dataset.categoryStart = String(zoom ? zoom.startValue : 0);
+            document.body.dataset.categoryEnd = String(zoom ? zoom.endValue : ${initialState.chart.boxplot.data.length - 1});
+        }
+        navigationChart.on('datazoom', recordWindow); recordWindow();
+    </script></body>`);
     if (mode === 'symcon') { html = html.replace('<body>', '<body><div style="position:absolute;top:16px;left:20px;font:18px Arial;z-index:4">EChartsBoxplot <span style="position:fixed;right:18px">⤢</span></div>'); }
     if (query.get('tail') === '1') {
         html = html.replace('</body>', '<script>var fixtureChart=echarts.getInstanceByDom(document.getElementById("echarts-boxplot-chart"));'

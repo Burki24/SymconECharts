@@ -80,6 +80,7 @@
         var boxplot = model.boxplot || {};
         var style = boxplot.style || {};
         var items = boxplot.data || [];
+        var iqr = boxplot.whiskers === 'iqr';
         var width = chartElement.clientWidth || 1;
         var height = chartElement.clientHeight || 1;
         var horizontal = style.orientation === 'horizontal';
@@ -120,8 +121,8 @@
             labels[item.id] = item.label;
             sources[item.id] = item;
             if (item.statistics) {
-                minimum = Math.min(minimum, item.statistics[0]);
-                maximum = Math.max(maximum, item.statistics[4]);
+                minimum = Math.min(minimum, iqr ? item.sampleMinimum : item.statistics[0]);
+                maximum = Math.max(maximum, iqr ? item.sampleMaximum : item.statistics[4]);
                 axisDecimals = Math.max(axisDecimals, item.decimals == null ? 2 : item.decimals);
             }
         });
@@ -179,25 +180,40 @@
                 { id: 'category-scroll', type: 'slider',
                     ...(horizontal ? { yAxisIndex: 0, orient: 'vertical', right: 6, width: 12, top: top, bottom: bottom }
                         : { xAxisIndex: 0, orient: 'horizontal', bottom: 4, height: 12, left: left, right: right }),
-                    startValue: first, endValue: first + visibleCount - 1, filterMode: 'filter', zoomLock: true,
+                    startValue: first, endValue: first + visibleCount - 1, filterMode: 'filter',
+                    zoomLock: true,
                     showDetail: false, showDataShadow: false, brushSelect: false },
                 { id: 'category-scroll-inside', type: 'inside',
                     ...(horizontal ? { yAxisIndex: 0 } : { xAxisIndex: 0 }),
-                    startValue: first, endValue: first + visibleCount - 1, filterMode: 'filter', zoomLock: true,
+                    startValue: first, endValue: first + visibleCount - 1, filterMode: 'filter',
+                    // ECharts 6.1 disables wheel listeners with zoomLock. Lock the span instead.
+                    zoomLock: false, minValueSpan: visibleCount - 1, maxValueSpan: visibleCount - 1,
                     zoomOnMouseWheel: false, moveOnMouseWheel: true, moveOnMouseMove: true }
             ] : [],
             tooltip: { show: style.showTooltip !== false, trigger: 'item', confine: true,
                 extraCssText: 'max-width:' + Math.max(120, width - 24) + 'px;white-space:normal;overflow-wrap:anywhere;',
                 formatter: function (parameter) {
-                    var item = parameter.data && sources[parameter.data.id];
+                    var point = parameter.data || {};
+                    var item = sources[point.sourceID || point.id];
                     if (!item || !item.statistics) { return ''; }
-                    var names = ['Minimum', 'Q1', 'Median', 'Q3', 'Maximum'];
+                    if (point.sourceID) {
+                        return escapeHTML(item.label) + '<br>' + escapeHTML(translate('Outlier') + ': ' + format(point.value[1], item))
+                            + '<br>' + escapeHTML(new Date(point.timestamp * 1000).toLocaleString(bootstrap.language || undefined))
+                            + '<br>' + escapeHTML(translate('Hourly samples') + ': ' + item.count)
+                            + '<br>' + escapeHTML(translate('Outliers') + ': ' + item.outlierCount)
+                            + '<br>' + escapeHTML(translate('Completed hourly means · whiskers: 1.5 IQR'));
+                    }
+                    var names = iqr ? ['Lower whisker', 'Q1', 'Median', 'Q3', 'Upper whisker'] : ['Minimum', 'Q1', 'Median', 'Q3', 'Maximum'];
                     return escapeHTML(item.label) + '<br>' + item.statistics.map(function (value, index) {
                         return escapeHTML(translate(names[index]) + ': ' + format(value, item));
-                    }).join('<br>') + '<br>' + escapeHTML(translate('Hourly samples') + ': ' + item.count)
+                    }).join('<br>') + (iqr ? '<br>' + escapeHTML(translate('Minimum') + ': ' + format(item.sampleMinimum, item))
+                        + '<br>' + escapeHTML(translate('Maximum') + ': ' + format(item.sampleMaximum, item))
+                        + '<br>' + escapeHTML(translate('Outliers') + ': ' + item.outlierCount) : '')
+                        + '<br>' + escapeHTML(translate('Hourly samples') + ': ' + item.count)
                         + '<br>' + escapeHTML(new Date(item.firstTimestamp * 1000).toLocaleString(bootstrap.language || undefined))
                         + ' – ' + escapeHTML(new Date(item.lastTimestamp * 1000).toLocaleString(bootstrap.language || undefined))
-                        + '<br>' + escapeHTML(translate('Completed hourly means · whiskers: minimum and maximum'));
+                        + '<br>' + escapeHTML(translate(iqr ? 'Completed hourly means · whiskers: 1.5 IQR'
+                            : 'Completed hourly means · whiskers: minimum and maximum'));
                 } },
             series: [{ type: 'boxplot', boxWidth: [minimumBoxWidth, boxWidth],
                 itemStyle: { borderWidth: style.borderWidth == null ? 2 : style.borderWidth,
@@ -210,7 +226,18 @@
                 data: items.map(function (item, index) {
                     return { id: item.id, name: item.label, value: item.statistics || [null, null, null, null, null],
                         itemStyle: { color: item.color || (colors.seriesColors || [colors.accent])[index % (colors.seriesColors || [colors.accent]).length] } };
-                }) }]
+                }) }, ...(iqr ? [{ id: 'boxplot-outliers', type: 'scatter',
+                    dimensions: ['category', 'value'], encode: horizontal ? { x: 1, y: 0 } : { x: 0, y: 1 },
+                    symbolSize: Math.max(4, Math.min(10, font * 0.55)), clip: true,
+                    emphasis: { disabled: style.hoverFocus === 'none', scale: false },
+                    data: items.flatMap(function (item, index) {
+                        var color = item.color || (colors.seriesColors || [colors.accent])[index % (colors.seriesColors || [colors.accent]).length];
+                        return (item.outliers || []).map(function (point) {
+                            return { id: item.id + '-outlier-' + point[0], sourceID: item.id, timestamp: point[0],
+                                name: item.label, value: [item.id, point[1]], itemStyle: { color: color } };
+                        });
+                    })
+                }] : [])]
         };
     }
     function displayError(message) {

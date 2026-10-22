@@ -1075,6 +1075,12 @@ if (array_slice($argv, 1) === ['--hierarchy-normalization']) {
     exit(0);
 }
 
+if (array_slice($argv, 1) === ['--boxplot-iqr']) {
+    require __DIR__ . '/boxplot_integration.php';
+    require __DIR__ . '/boxplot_iqr.php';
+    exit(0);
+}
+
 if (array_slice($argv, 1) === ['--treemap-hierarchy']) {
     require __DIR__ . '/treemap_hierarchy.php';
     echo "Treemap deep hierarchy integration verified.\n";

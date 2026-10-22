@@ -292,6 +292,30 @@ des Archivzeiträume-Blocks ist oben gesondert dokumentiert.
 
 ## Boxplot: kompakte Wertachsenbeschriftung
 
+### Optionales IQR-Modell
+
+`php tests/boxplot_statistics.php` prüft beobachtete 1,5-IQR-Whisker,
+R7-Erhalt, Fence-Gleichheit, Null-IQR, leere/einzelne/negative und extreme
+endliche Stichproben. `php tests/gateway_gauges.php --boxplot-iqr` prüft mit
+echtem Gateway und Kernel-Doppeln unveränderte Min/Max-Altdaten, gemeinsame
+Modellauswahl bei unabhängigen Designs, veröffentlichte HTML-Variable,
+neutral bleibende Entwürfe ohne Archivzugriff und beide Ausgabe-/Formularbudgets
+mit 32 Quellen, 9984 Stundenmitteln und 4864 einzeln erhaltenen Ausreißern.
+
+`node tests/boxplot_layout.js` verwendet die echte ausgelieferte Boxplot-/Scatter-
+Runtime für horizontale und vertikale Punkte, doppelte Werte mit separaten
+Zeitstempeln, Offscreen-Extrema, IDs nach DataZoom, Refresh/Resize und Entfernung
+der Scatter-Serie bei Rückkehr zum Min/Max-Modell. Lokale Canvas-Beispiele:
+`node tests/boxplot_browser.mjs`, anschließend `/chart?mode=symcon&whiskers=iqr`
+und `/chart?mode=ipsview&whiskers=iqr`. Echte native Kachel und tatsächlicher
+IPSView-Client einschließlich Mausradbedienung bleiben nach Update zu prüfen.
+Die Fixture bindet denselben zentralen Interaktions-Helper wie die echten
+Ausgaben ein und stellt Wheel-Empfang und Kategorienfenster als DOM-Datenattribute
+bereit. Der Engine-Test reproduziert den Wheel-Stillstand mit `zoomLock=true`
+und prüft die Korrektur mit unveränderlicher Wertespanne.
+
+### Werteachsenformatierung
+
 `node tests/boxplot_layout.js` reproduziert mit synthetischen gebrochenen
 Extremwerten die langen Nachkommastellen der internen 5-%-Randgrenzen. Der
 ursprüngliche Renderer scheitert an der erwarteten Beschriftung `1.4` statt

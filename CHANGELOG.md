@@ -21,6 +21,12 @@
 
 ## Neu
 
+- Boxplot bietet optional 1,5-IQR-Whisker mit separaten, zeitgestempelten
+  Ausreißerpunkten. Kachel, IPSView und Vorschauen verwenden dasselbe Modell;
+  Originaleinheiten, Designs und Archivbudgets bleiben erhalten. Bestehende
+  Instanzen zeigen weiterhin Minimum und Maximum.
+  Die Mausrad-Kategoriennavigation bleibt bei festem Ausschnitt jetzt auch
+  mit der gepinnten ECharts-Runtime bedienbar.
 
 - Treemap und Sunburst bieten optionale Min/Max-normalisierte Blattgewichte
   und eigene Originaleinheiten sowie Nachkommastellen je Quelle. Beschriftungen,

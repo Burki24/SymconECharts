@@ -102,6 +102,7 @@ class EChartsBoxplot extends IPSModuleStrict
             $this->RegisterTransientRefresh('ECBX');
             $this->RegisterPropertyString('Sources', '[]');
             $this->RegisterPropertyString('Title', '');
+            $this->RegisterPropertyString('WhiskerMode', 'minmax');
             $this->RegisterPropertyString('Range', '7d');
             $this->RegisterPropertyInteger('CustomRangeValue', 7);
             $this->RegisterPropertyString('CustomRangeUnit', 'day');
@@ -207,7 +208,7 @@ class EChartsBoxplot extends IPSModuleStrict
                 ['caption' => 'Axes and grid', 'start' => 'ShowGrid'],
                 ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
             ]);
-            $fields = ['Title', 'Sources', 'Range', 'CustomRangeValue', 'CustomRangeUnit', 'AbsoluteStart', 'AbsoluteEnd',
+            $fields = ['Title', 'Sources', 'WhiskerMode', 'Range', 'CustomRangeValue', 'CustomRangeUnit', 'AbsoluteStart', 'AbsoluteEnd',
                 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
                 'IPSViewBackgroundOpacityPercent', ...array_keys(self::DESIGN_DEFAULTS),
                 ...array_map(static fn (string $name): string => 'IPSView' . $name, array_keys(self::DESIGN_DEFAULTS))];
@@ -483,7 +484,7 @@ class EChartsBoxplot extends IPSModuleStrict
                 }
                 $archive = $this->ReadArchiveSource($source, $query, min($query['Limit'], $remaining));
                 $pointCount += count($archive['Points']);
-                $summary = BoxplotStatistics::Summarize($archive['Points'], $query['StartTimestamp'], $query['EndTimestamp']);
+                $summary = BoxplotStatistics::Summarize($archive['Points'], $query['StartTimestamp'], $query['EndTimestamp'], $this->ReadPropertyString('WhiskerMode'));
             } catch (Throwable $exception) {
                 if ($this->ReadAttributeString('LastError') === '') {
                     $this->WriteAttributeString('LastError', 'INVALID_ARCHIVE_SAMPLES');
@@ -500,7 +501,7 @@ class EChartsBoxplot extends IPSModuleStrict
         return json_encode(
             ['schemaVersion' => 1, 'family' => 'boxplot', 'theme' => $this->EffectiveTheme($ipsView),
                 'boxplot'    => ['title' => $this->ReadPropertyString('Title'), 'unit' => $sources[0]['Unit'],
-                    'sampling'           => 'completed-hourly-means', 'whiskers' => 'minmax', 'quantile' => 'R7',
+                    'sampling'           => 'completed-hourly-means', 'whiskers' => $this->ReadPropertyString('WhiskerMode'), 'quantile' => 'R7',
                     'data'               => $data, 'style' => $this->ReadDesignStyle($ipsView)],
                 'range' => $range],
             JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION
@@ -517,17 +518,22 @@ class EChartsBoxplot extends IPSModuleStrict
             'ipsViewStyle' => $ipsView ? $this->IPSViewThemeCSS() : '',
             'state'        => $this->BuildVisualizationState($ipsView),
             'translations' => [
-                'Configure valid Boxplot archive variables.'                          => $this->Translate('Configure valid Boxplot archive variables.'),
-                'Connect an active EChartsGateway.'                                   => $this->Translate('Connect an active EChartsGateway.'),
-                'The Boxplot values could not be loaded.'                             => $this->Translate('The Boxplot values could not be loaded.'),
-                'Too many Boxplot archive samples. Choose a shorter time range.'      => $this->Translate('Too many Boxplot archive samples. Choose a shorter time range.'),
-                'Boxplot requires standard archive variables, not counters.'          => $this->Translate('Boxplot requires standard archive variables, not counters.'),
-                'Hourly samples'                                                      => $this->Translate('Hourly samples'),
-                'Minimum'                                                             => $this->Translate('Minimum'), 'Q1' => $this->Translate('Q1'), 'Median' => $this->Translate('Median'),
-                'Q3'                                                                  => $this->Translate('Q3'), 'Maximum' => $this->Translate('Maximum'),
-                'No completed hourly archive values.'                                 => $this->Translate('No completed hourly archive values.'),
-                'Completed hourly means · whiskers: minimum and maximum'              => $this->Translate('Completed hourly means · whiskers: minimum and maximum'),
-                'Data could not be refreshed. Showing the last available values.'     => $this->Translate(
+                'Configure valid Boxplot archive variables.'                           => $this->Translate('Configure valid Boxplot archive variables.'),
+                'Connect an active EChartsGateway.'                                    => $this->Translate('Connect an active EChartsGateway.'),
+                'The Boxplot values could not be loaded.'                              => $this->Translate('The Boxplot values could not be loaded.'),
+                'Too many Boxplot archive samples. Choose a shorter time range.'       => $this->Translate('Too many Boxplot archive samples. Choose a shorter time range.'),
+                'Boxplot requires standard archive variables, not counters.'           => $this->Translate('Boxplot requires standard archive variables, not counters.'),
+                'Hourly samples'                                                       => $this->Translate('Hourly samples'),
+                'Outliers'                                                             => $this->Translate('Outliers'),
+                'Outlier'                                                              => $this->Translate('Outlier'),
+                'Lower whisker'                                                        => $this->Translate('Lower whisker'),
+                'Upper whisker'                                                        => $this->Translate('Upper whisker'),
+                'Completed hourly means · whiskers: 1.5 IQR'                           => $this->Translate('Completed hourly means · whiskers: 1.5 IQR'),
+                'Minimum'                                                              => $this->Translate('Minimum'), 'Q1' => $this->Translate('Q1'), 'Median' => $this->Translate('Median'),
+                'Q3'                                                                   => $this->Translate('Q3'), 'Maximum' => $this->Translate('Maximum'),
+                'No completed hourly archive values.'                                  => $this->Translate('No completed hourly archive values.'),
+                'Completed hourly means · whiskers: minimum and maximum'               => $this->Translate('Completed hourly means · whiskers: minimum and maximum'),
+                'Data could not be refreshed. Showing the last available values.'      => $this->Translate(
                     'Data could not be refreshed. Showing the last available values.'
                 )
             ],
@@ -580,6 +586,7 @@ class EChartsBoxplot extends IPSModuleStrict
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => $exception->getMessage()];
         }
         if (mb_strlen($this->ReadPropertyString('Title')) > 200
+            || !in_array($this->ReadPropertyString('WhiskerMode'), ['minmax', 'iqr'], true)
             || !in_array($this->ReadPropertyString('Range'), ['24h', '7d', '30d', 'custom', 'absolute'], true)
             || ($this->ReadPropertyString('Range') !== 'absolute' && !EChartsArchiveQuery::IsValidRange(
                 $this->ReadPropertyString('Range'),

@@ -155,6 +155,10 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Verteilungen abgeschlossener Stundenmittelwerte von Archivvariablen liegen
   in `EChartsBoxplot` gemäß ADR 0054; Quartile werden nicht aus Tagesaggregaten
   approximiert und fehlende Intervalle nicht als Null ergänzt.
+  ADR 0091 ergänzt optional `WhiskerMode=iqr`: R7-Quartile aller Stundenmittel,
+  beobachtete Enden innerhalb der 1,5-IQR-Grenzen und separate Ausreißer mit
+  Stundenzeitstempel. Default `minmax`, Designs und Archivbudgets bleiben erhalten;
+  Live- und Vorschau-Statistik nutzen denselben familienlokalen Baustein.
   Boxplot ergänzt gemäß ADR 0077 feste historische Von-/Bis-Zeiträume mit
   eingeschlossenem Beginn und ausgeschlossenem Ende. Datumsprüfung und
   Vollintervallplanung liegen zentral in `EChartsArchiveQuery`; andere Familien

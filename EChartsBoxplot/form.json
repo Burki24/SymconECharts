@@ -78,7 +78,26 @@
         },
         {
             "type": "Label",
-            "caption": "Choose 1 to 32 numeric standard archive variables with the same unit. Each box shows completed hourly means: minimum, Q1, median, Q3 and maximum. Missing hours remain missing; counters are not supported."
+            "caption": "Choose 1 to 32 numeric standard archive variables with the same unit. By default, each box shows completed hourly means: minimum, Q1, median, Q3 and maximum. Missing hours remain missing; counters are not supported."
+        },
+        {
+            "type": "Select",
+            "name": "WhiskerMode",
+            "caption": "Whisker model",
+            "options": [
+                {
+                    "caption": "Minimum and maximum (default)",
+                    "value": "minmax"
+                },
+                {
+                    "caption": "1.5 IQR with separate outliers",
+                    "value": "iqr"
+                }
+            ]
+        },
+        {
+            "type": "Label",
+            "caption": "IQR mode uses the outermost observed hourly means within Q1 - 1.5 IQR and Q3 + 1.5 IQR. Values outside are separate points, not raw measurement spikes."
         },
         {
             "type": "RowLayout",

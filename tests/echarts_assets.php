@@ -57,10 +57,10 @@ assertEChartsAsset(hash_file('sha256', $root . '/libs/echarts/' . EChartsAsset::
 $boxplotRuntime = EChartsAsset::BoxplotJavaScript();
 assertEChartsAsset(
     hash_file('sha256', $root . '/libs/echarts/' . EChartsAsset::VERSION . '/echarts.boxplot.min.js') === EChartsAsset::BOXPLOT_SHA256
-        && strlen($boxplotRuntime) < 550000 && str_contains($boxplotRuntime, 'window.echarts')
+        && strlen($boxplotRuntime) < 560000 && str_contains($boxplotRuntime, 'window.echarts')
         && str_contains((string) file_get_contents($root . '/.tools/echarts-runtime/src/boxplot-runtime.js'), 'BoxplotChart')
         && str_contains((string) file_get_contents($root . '/.tools/echarts-runtime/src/boxplot-runtime.js'), 'DataZoomComponent'),
-    'The Boxplot runtime must be pinned and remain below 550 KB.'
+    'The Boxplot/Scatter runtime must be pinned and remain below 560 KB.'
 );
 $radarRuntime = EChartsAsset::RadarJavaScript();
 assertEChartsAsset(

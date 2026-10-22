@@ -57,9 +57,9 @@ Ausgelieferte Dateien:
   `da9750dd18363325d23b1bcd4ea3af7e1011620b80b994ad6c2d5e3ee819314d`;
 
 - `libs/echarts/6.1.0/echarts.boxplot.min.js` – reproduzierbarer
-  Boxplot-Browser-Build aus ECharts Core, Boxplot Chart, Grid, Titel, Tooltip,
-  Aria, Data Zoom und Canvas Renderer; 534.648 Byte; SHA-256
-  `038eb0193d14ee23fd322c6ceca283cac531308135814b5cc1786d5b1f0c6470`;
+  Boxplot-Browser-Build aus ECharts Core, Boxplot und Scatter Chart, Grid, Titel, Tooltip,
+  Aria, Data Zoom und Canvas Renderer; 550.841 Byte; SHA-256
+  `485a64860d8f254bdfb18c230fc38ec996c96dea6af29ef0d7830d346fe0d9a6`;
 
 - `libs/echarts/6.1.0/echarts.gauge.min.js` – reproduzierbarer,
   Gauge-spezifischer Browser-Build aus ECharts Core, Gauge Chart, Aria,

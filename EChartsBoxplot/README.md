@@ -13,7 +13,9 @@ und optional als eigenes IPSView-WebContent-Widget.
 3. Den Zeitraum wählen: letzte 24 Stunden, 7 Tage oder 30 Tage. Alternativ
    „Benutzerdefiniert“ wählen und 1–1000 Minuten, Stunden, Tage oder Wochen angeben.
    Für feste Anfangs-/Enddaten „Fester historischer Zeitraum“ wählen.
-4. Optional Titel und Design einstellen und Änderungen übernehmen.
+4. Optional das „Whisker-Modell“ wählen: Minimum/Maximum (Standard) oder
+   „1,5 IQR mit separaten Ausreißern“.
+5. Optional Titel und Design einstellen und Änderungen übernehmen.
 
 Einheit und Nachkommastellen stammen aus der Variablendarstellung beziehungsweise
 einem kompatiblen Profil. Zählervariablen werden nicht unterstützt.
@@ -66,10 +68,26 @@ werden in der Vorschau erklärt, ohne Archive zu lesen. Die bisherigen
 Voreinstellungen und rollierenden benutzerdefinierten Zeiträume bleiben erhalten.
 
 Die Box reicht vom ersten zum dritten Quartil; die Linie darin ist der Median.
-Die beiden Enden zeigen Minimum und Maximum der Stundenmittelwerte. Quartile
-werden linear interpoliert (R7). Es handelt sich nicht um 1,5-IQR-Grenzen;
-Ausreißer werden nicht gesondert klassifiziert. Kurzzeitige Rohwertspitzen sind
-in dieser Verteilung der Stundenmittelwerte nicht als solche sichtbar.
+Quartile werden linear interpoliert (R7). Das Whisker-Modell gilt gemeinsam
+für Kachel und IPSView und verändert keine Gestaltungseinstellungen:
+
+- **Minimum und Maximum (Standard):** Die Enden zeigen wie bisher das kleinste
+  und größte Stundenmittel. Bestehende Instanzen behalten dieses Modell.
+- **1,5 IQR mit separaten Ausreißern:** Der Interquartilsabstand ist `IQR = Q3 − Q1`.
+  Die Enden reichen bis zum kleinsten beziehungsweise größten tatsächlich
+  vorhandenen Stundenmittel innerhalb von `Q1 − 1,5 × IQR` und `Q3 + 1,5 × IQR`.
+  Werte genau auf den Grenzen gehören dazu. Werte außerhalb erscheinen als
+  einzelne Punkte in der jeweiligen Quellfarbe. Auch bei gleichem Wert bleiben
+  unterschiedliche Stunden als eigene Stichproben erhalten; Punkte können
+  optisch übereinanderliegen. Bei IQR = 0 sind vom Quartil abweichende Werte Ausreißer.
+
+Das neue Modell klassifiziert **Stundenmittelwerte**, keine kurzzeitigen
+Rohwertspitzen. Quartile, Median und Stichprobenanzahl beziehen sich weiterhin
+auf sämtliche geladenen Stunden, einschließlich der Ausreißer. Im IQR-Modus
+zeigt der Box-Tooltip zusätzlich echte Minimum-/Maximumwerte und die
+Ausreißeranzahl. Ein Punkt-Tooltip zeigt Originalwert, Einheit und Zeitpunkt
+des Stundenintervalls. Ausreißer sind eine statistische Einordnung, keine
+automatische Fehler- oder Alarmbewertung.
 
 Fehlende Stunden bleiben fehlend und werden weder interpoliert noch durch Null
 ersetzt. Die Quellen müssen keine gemeinsamen Stunden besitzen. Eine einzelne
@@ -86,6 +104,8 @@ statt Quartile aus abgeschnittenen Daten zu berechnen.
 Dieselbe Begrenzung gilt auch bei benutzerdefinierten langen Zeiträumen;
 eine größere Zeiteinheit erhöht das Archivbudget nicht.
 Auch ein fester historischer Zeitraum erhöht diese Budgets nicht.
+Das IQR-Modell verwendet dieselben bereits geladenen Stundenmittelwerte,
+ohne zusätzliche Archivabfragen, Ausdünnung oder ein gesondertes Ausreißerbudget.
 
 ## Gestaltung und IPSView
 
@@ -101,6 +121,7 @@ oder Mausrad. Das gilt horizontal und vertikal. Boxbreite und Schriftgröße
 bestimmen, wie viele Kategorien gleichzeitig lesbar sind. Der Ausschnitt bleibt
 bei Aktualisierungen und Größenänderungen an derselben Quelle verankert.
 Die Werteskala berücksichtigt weiterhin alle Quellen, nicht nur die sichtbaren.
+Im IQR-Modus umfasst sie auch sämtliche Ausreißer außerhalb des Ausschnitts.
 Leere Archive behalten ihren Kategorieplatz, ohne eine Null-Box zu erzeugen.
 Zahlen auf der Wertachse werden sprachgerecht und ohne lange Rechen-Nachkommastellen
 angezeigt. Die Genauigkeit richtet sich nach den Quellvariablen und wird bei

@@ -673,6 +673,11 @@ Runtime-Build enthält nur die benötigten Komponenten. Die Erweiterung auf
 und vollständiger Werteskala. Das gemeinsame Budget von 10000 Stundenmitteln
 ergänzt das bisherige Limit von 1000 je Quelle; überschrittene oder gekürzte
 Antworten führen ausdrücklich zum Fehler statt zu verfälschten Quartilen.
+Gemäß [ADR 0091](adr/0091-boxplot-iqr-outliers.md) erlaubt die gemeinsame
+Datenproperty `WhiskerMode` zusätzlich `iqr`. Live- und Vorschauwerte verwenden
+denselben `BoxplotStatistics`-Baustein; Whisker enden an beobachteten Inliern,
+zeitgestempelte Ausreißer werden verlustfrei als Scatter-Punkte ausgegeben.
+Die Min/Max-Standardeinstellung und alle Archiv-/Ausgabegrenzen bleiben erhalten.
 
 Benutzerdefinierte rollierende Zeiträume für Boxplot, Parallel, Candlestick,
 ThemeRiver und StateTimeline folgen [ADR 0061](adr/0061-custom-archive-durations.md).

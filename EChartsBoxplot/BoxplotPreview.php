@@ -23,6 +23,16 @@ trait BoxplotPreview
         );
         $svg = str_replace('<svg xmlns', '<svg font-family="Arial, sans-serif" xmlns', $svg);
         $svg = str_replace('<text x="24"', '<text font-weight="' . ($this->BarPreviewValue($values, 'TitleBold', 'boolean', $ipsView) ? 'bold' : 'normal') . '" x="24"', $svg);
+        $whiskers = $values['WhiskerMode'] ?? $this->ReadPropertyString('WhiskerMode');
+        if (!in_array($whiskers, ['minmax', 'iqr'], true)) {
+            return $svg . '<text x="24" y="100" fill="' . EChartsBarPreview::E($palette['text']) . '">'
+                . EChartsBarPreview::E($this->Translate('The Boxplot settings are invalid.')) . '</text></svg>';
+        }
+        $svg = str_replace('<svg ', '<svg data-whiskers="' . $whiskers . '" ', $svg);
+        if ($whiskers === 'iqr') {
+            $svg .= '<text x="24" y="51" font-size="10" fill="' . EChartsBarPreview::E($palette['muted']) . '">'
+                . EChartsBarPreview::E($this->Translate('Completed hourly means · whiskers: 1.5 IQR')) . '</text>';
+        }
         if (($values['Range'] ?? $this->ReadPropertyString('Range')) === 'absolute') {
             try {
                 $query = $this->ResolveTimeQuery(1, $values);
@@ -103,7 +113,17 @@ trait BoxplotPreview
         foreach ($items as $index => $item) {
             $center = ($horizontal ? 75 : 80) + $slot * ($horizontal ? count($items) - $index - 0.5 : $index + 0.5);
             $offset = ($index % 4) * 0.07;
-            $stats = array_map(static fn ($v): float => $horizontal ? 160 + 520 * ($v + $offset) : $bottom - ($bottom - 75) * ($v + $offset), [0.10, 0.30, 0.45, 0.60, 0.75]);
+            $position = static fn ($v): float => $horizontal ? 160 + 520 * $v : $bottom - ($bottom - 75) * $v;
+            $sampleSummary = null;
+            if ($whiskers === 'iqr') {
+                $points = [];
+                foreach ([0.01, 0.20, 0.24, 0.28, 0.32, 0.36, 0.40, 0.72] as $i => $v) {
+                    $points[] = [$i + 1, ($v + $offset) * 40];
+                }
+                $sampleSummary = BoxplotStatistics::Summarize($points, 1, 8, $whiskers);
+            }
+            $stats = $sampleSummary !== null ? array_map(static fn ($v): float => $position($v / 40), $sampleSummary['statistics'])
+                : array_map(static fn ($v): float => $position($v + $offset), [0.10, 0.30, 0.45, 0.60, 0.75]);
             $color = $item['color'] ?: $palette['seriesColors'][$index % count($palette['seriesColors'])];
             $stroke = max(0, min(8, $this->BarPreviewValue($values, 'BorderWidth', 'integer', $ipsView)));
             $svg .= '<g data-box="' . $index . '" opacity="' . $n(max(0, min(100, $this->BarPreviewValue($values, 'BoxOpacityPercent', 'integer', $ipsView))) / 100)
@@ -125,6 +145,12 @@ trait BoxplotPreview
             $svg .= $horizontal ? $line($stats[2], $center - $width / 2, $stats[2], $center + $width / 2, $border, $stroke)
                 : $line($center - $width / 2, $stats[2], $center + $width / 2, $stats[2], $border, $stroke);
             $svg .= '</g>';
+            foreach ($sampleSummary['outliers'] ?? [] as [$timestamp, $outlier]) {
+                $p = $position($outlier / 40);
+                $svg .= '<circle data-outlier="' . $index . '-' . $timestamp . '" cx="' . $n($horizontal ? $p : $center)
+                    . '" cy="' . $n($horizontal ? $center : $p) . '" r="3" fill="' . $e($color) . '"><title>'
+                    . $e($item['label'] . ' · ' . $this->Translate('Outlier') . ': ' . $n($outlier)) . '</title></circle>';
+            }
             if ($this->BarPreviewValue($values, 'ShowAxisTicks', 'boolean', $ipsView)) {
                 $svg .= $horizontal ? $line(155, $center, 160, $center, $palette['border'], 1) : $line($center, $bottom, $center, $bottom + 5, $palette['border'], 1);
             }

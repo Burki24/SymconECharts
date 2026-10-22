@@ -332,4 +332,73 @@ for (const mode of ['symcon', 'ipsview']) {
             'Large fonts impose a readable minimum category spacing.');
     }
 }
-console.log('Boxplot renderer, 32-source native navigation, sparse identities, stable scales and responsive geometry verified.');
+const iqrModel = { ...manyModel, boxplot: { ...manyModel.boxplot, whiskers: 'iqr',
+    data: manyModel.boxplot.data.map((item, i) => ({ ...item,
+        statistics: i === 9 ? null : [1, 1.75, 3.5, 5.25, 6], count: i === 9 ? 0 : 8,
+        sampleMinimum: i === 31 ? -5000 : -10, sampleMaximum: i === 31 ? 10000 : 20,
+        outlierCount: i === 9 ? 0 : 3,
+        outliers: i === 9 ? [] : [[1792101600, i === 31 ? -5000 : -10], [1792105200, i === 31 ? 10000 : 20], [1792108800, i === 31 ? 10000 : 20]]
+    })) } };
+const iqrBefore = JSON.stringify(iqrModel);
+for (const mode of ['symcon', 'ipsview']) {
+    for (const orientation of ['horizontal', 'vertical']) {
+        for (const width of [350, 900]) {
+            const native = nativeWindow.echarts.init(null, null, { renderer: 'svg', ssr: true, width, height: 500 });
+            const input = { ...iqrModel, boxplot: { ...iqrModel.boxplot, style: { ...iqrModel.boxplot.style, orientation } } };
+            const fixture = render(input, mode, true, width, 500, native, 'en-US');
+            assert.equal(native.getModel().getSeriesByIndex(1).subType, 'scatter', 'The shipped runtime must include real Scatter geometry.');
+            assert.equal(fixture.option.series[1].data.length, 93, 'Every timestamped outlier, including equal values, is retained.');
+            const count = fixture.option.dataZoom[0].endValue + 1;
+            assert.equal(fixture.option.dataZoom[1].zoomLock, false, 'Inside zoomLock would disable ECharts 6.1 wheel listeners.');
+            assert.equal(fixture.option.dataZoom[1].minValueSpan, count - 1);
+            assert.equal(fixture.option.dataZoom[1].maxValueSpan, count - 1, 'Span limits preserve the category count without disabling wheel input.');
+            const wheelEvent = { offsetX: (fixture.option.grid.left + width - fixture.option.grid.right) / 2,
+                offsetY: (fixture.option.grid.top + 500 - fixture.option.grid.bottom) / 2,
+                event: { preventDefault() {}, stopPropagation() {} }, wheelDelta: orientation === 'horizontal' ? 4 : -4 };
+            if (mode === 'symcon' && orientation === 'horizontal' && width === 350) {
+                native.setOption({ ...fixture.option, dataZoom: fixture.option.dataZoom.map(zoom => ({ ...zoom, zoomLock: true })) }, true);
+                native.getZr().trigger('mousewheel', { ...wheelEvent });
+                assert.equal(native.getOption().dataZoom[0].startValue, 0, 'Reproduce the pinned runtime regression before verifying its fix.');
+                native.setOption(fixture.option, true);
+            }
+            native.getZr().trigger('mousewheel', wheelEvent);
+            const movedZoom = native.getOption().dataZoom[0];
+            assert.ok(movedZoom.startValue > 0, 'A native-engine wheel event must shift categories: ' + JSON.stringify({mode, orientation, width, zoom: movedZoom.startValue, span: movedZoom.endValue}));
+            assert.equal(movedZoom.endValue - movedZoom.startValue, count - 1, 'Wheel movement cannot zoom the category span.');
+            const axis = native.getModel().getComponent(orientation === 'horizontal' ? 'xAxis' : 'yAxis').axis;
+            const bounds = axis.scale.getExtent().slice();
+            assert.ok(bounds[0] < -5000 && bounds[1] > 10000, 'Offscreen outliers, not shortened whiskers, determine the global scale.');
+            native.dispatchAction({ type: 'dataZoom', dataZoomId: 'category-scroll', startValue: 32 - count, endValue: 31 });
+            const points = native.getModel().getSeriesByIndex(1).getData();
+            const tail = points.count() - 1;
+            const parameters = native.getModel().getSeriesByIndex(1).getDataParams(tail);
+            assert.equal(parameters.data.sourceID, 'source-31', 'Filtered scatter tooltips resolve the original source ID.');
+            assert.deepEqual(Array.from(parameters.data.value), ['source-31', 10000]);
+            assert.ok(points.getItemLayout(tail).every(Number.isFinite), 'Both orientations require finite real outlier coordinates.');
+            const coords = points.getItemLayout(tail);
+            assert.ok(coords[0] >= fixture.option.grid.left && coords[0] <= width - fixture.option.grid.right
+                && coords[1] >= fixture.option.grid.top && coords[1] <= 500 - fixture.option.grid.bottom, 'Outliers stay within their native plot bounds.');
+            assert.match(fixture.option.tooltip.formatter({ ...parameters, dataIndex: 0 }), /&lt;Duplicate&gt;.*Outlier: 10,000 °C.*Hourly samples: 8.*Outliers: 3/);
+            const box = native.getModel().getSeriesByIndex(0).getData();
+            const boxTip = fixture.option.tooltip.formatter(native.getModel().getSeriesByIndex(0).getDataParams(box.count() - 1));
+            assert.match(boxTip, /Lower whisker: 1 °C.*Upper whisker: 6 °C.*Minimum: -5,000 °C.*Maximum: 10,000 °C.*Outliers: 3/);
+            assert.deepEqual(axis.scale.getExtent(), bounds);
+            fixture.window.handleMessage({ status: 'ready', chart: input });
+            assert.equal(fixture.option.dataZoom[0].startValue, 32 - count, 'IQR refresh preserves the category window.');
+            fixture.resize(width + 40, 520);
+            assert.ok(fixture.option.dataZoom[0].startValue > 0, 'IQR resize must retain the tail view.');
+            const emptyInput = { ...input, boxplot: { ...input.boxplot, data: input.boxplot.data.map(item => ({
+                ...item, statistics: null, outliers: [], outlierCount: 0, count: 0
+            })) } };
+            fixture.window.handleMessage({ status: 'ready', chart: emptyInput });
+            assert.equal(fixture.emptyElement.hidden, false);
+            fixture.window.handleMessage({ status: 'ready', chart: input });
+            assert.equal(native.getModel().getSeriesCount(), 2);
+            fixture.window.handleMessage({ status: 'ready', chart: manyModel });
+            assert.equal(native.getModel().getSeriesCount(), 1, 'Returning to Min/Max removes stale scatter points.');
+            native.dispose();
+        }
+    }
+}
+assert.equal(JSON.stringify(iqrModel), iqrBefore, 'Rendering/navigation must never rewrite hourly samples or statistics.');
+console.log('Boxplot renderer, IQR/outlier geometry, 32-source native navigation, sparse identities and stable scales verified.');
