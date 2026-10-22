@@ -19,6 +19,11 @@
 
 ## Neu
 
+- EChartsScatter unterstützt bis zu 16 benannte X/Y-Vergleichsgruppen mit
+  optionaler Größenquelle je Gruppe. Gemeinsame Legendenansicht, unabhängige
+  Intervallverknüpfungen, Original-Tooltips und gekennzeichnete Vorschauen
+  erhalten bestehende Konfigurationen und das gemeinsame 200–2000er-Archivbudget.
+
 - EChartsScatter bietet optionale feste Min-/Max-Bezüge für die Blasengröße,
   getrennt für Kachel und IPSView einschließlich Live-Vorschau und Designkopie.
   Originalwerte und Einheiten bleiben im Tooltip erhalten. Die bisherige

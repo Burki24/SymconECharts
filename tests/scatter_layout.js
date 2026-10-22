@@ -8,9 +8,10 @@ const vm = require('node:vm');
 const source = fs.readFileSync(path.join(__dirname, '..', 'EChartsScatter', 'visualization', 'app.js'), 'utf8');
 const designSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-design.js'), 'utf8');
 const zoomSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-zoom.js'), 'utf8');
+const selectionSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-series-selection.js'), 'utf8');
 const palette = {
     background: '#101114', text: '#f4f5f7', muted: '#969aa2', border: '#999999',
-    track: '#34363b', accent: '#55cbb5', seriesColors: ['#5588cc']
+    track: '#34363b', accent: '#55cbb5', seriesColors: ['#5588cc', '#dd8844']
 };
 
 function render(model, mode = 'symcon', width = 700, height = 410) {
@@ -55,6 +56,7 @@ function render(model, mode = 'symcon', width = 700, height = 410) {
     };
     vm.runInNewContext(designSource, { window });
     vm.runInNewContext(zoomSource, { window });
+    vm.runInNewContext(selectionSource, { window });
     vm.runInNewContext(source, { window, document });
     return { option, window, chartElement, emptyElement, warningElement, selectionElement, errorElement,
         emit: (name, event) => listeners[name](event),
@@ -80,6 +82,64 @@ const model = {
     points: [[100, 10, 50, 1], [200, 20, 55, 3]], truncated: false
 };
 const bubble = render(model);
+const groupedModel = { ...model, scatter: { ...model.scatter, style: { ...model.scatter.style, pointColor: '' } }, variant: 'groups', points: undefined, groups: [
+    { id: 'group-a', label: 'Same <name>', colorIndex: 0, roles: model.roles, points: model.points },
+    { id: 'group-b', label: 'Same <name>', colorIndex: 1, roles: { x: { ...model.roles.x, label: 'Other X' }, y: model.roles.y },
+        points: [[100, 30, 60], [300, 40, 70]] }
+] };
+for (const mode of ['symcon', 'ipsview']) {
+    const grouped = render(groupedModel, mode);
+    assert.equal(grouped.option.series.length, 2, 'Every comparison group needs its own native series.');
+    assert.equal(grouped.option.legend.formatter('group-b'), 'Same <name>');
+    assert.equal(grouped.option.series[0].name, 'group-a');
+    assert.equal(grouped.option.series[1].name, 'group-b', 'Equal labels must not merge legend identities.');
+    assert.notEqual(grouped.option.series[0].itemStyle.color, grouped.option.series[1].itemStyle.color);
+    assert.equal(grouped.option.series[1].symbolSize([30, 60, null, 100]), 10);
+    const tooltip = grouped.option.tooltip.formatter({ seriesIndex: 1, value: [30, 60, null, 100] });
+    assert.match(tooltip, /Same &lt;name&gt;/);
+    assert.match(tooltip, /Other X/);
+    assert.doesNotMatch(tooltip, /Wind/);
+    grouped.emit('brushselected', { batch: [{ areas: [{}], selected: [
+        { seriesIndex: 0, dataIndex: [1] }, { seriesIndex: 1, dataIndex: [0] }
+    ] }] });
+    assert.match(grouped.selectionElement.textContent, /Selected points: 2/);
+    assert.match(grouped.selectionElement.textContent, /20.*30/);
+    grouped.option.legend.selected['group-b'] = false;
+    grouped.window.handleMessage({ status: 'ready', chart: { ...groupedModel,
+        groups: groupedModel.groups.slice().reverse() } });
+    assert.equal(grouped.currentOption().legend.selected['group-b'], false,
+        'The shared selection state must keep a hidden group after reorder and refresh.');
+    assert.ok(grouped.currentOption().grid.bottom > bubble.option.grid.bottom,
+        'Group navigation must reserve space without changing legacy layouts.');
+    const engine = require('../.tools/echarts-runtime/node_modules/echarts').init(null, null,
+        { renderer: 'svg', ssr: true, width: 700, height: 520 });
+    try {
+        engine.setOption({ ...grouped.currentOption(), animation: false });
+        assert.equal(engine.getModel().getSeriesCount(), 2);
+        assert.match(engine.renderToSVGString(), /Same &lt;name&gt;/);
+        assert.doesNotMatch(engine.renderToSVGString(), />group-[ab]</);
+        engine.dispatchAction({ type: 'legendSelect', name: 'group-b' });
+        assert.equal(engine.getModel().getSeriesByIndex(1).getData().count(), 2);
+    } finally { engine.dispose(); }
+}
+const globalSizes = { ...groupedModel, groups: groupedModel.groups.map((g, i) => ({ ...g, roles: model.roles,
+    points: i === 0 ? [[100, 10, 50, 1], [200, 20, 55, 3]] : [[100, 30, 60, 5], [200, 40, 70, 7]] })) };
+const scale = render(globalSizes);
+assert.equal(scale.option.series[0].symbolSize([20, 55, 3, 200]), 20,
+    'Automatic Bubble scales use the complete size population across groups.');
+scale.option.legend.selected['group-b'] = false;
+scale.window.handleMessage({ status: 'ready', chart: globalSizes });
+assert.equal(scale.currentOption().series[0].symbolSize([20, 55, 3, 200]), 20,
+    'Hiding a group must not rescale the remaining Bubble sizes.');
+const globalColors = render({ ...globalSizes, scatter: { ...globalSizes.scatter, style: {
+    ...globalSizes.scatter.style, colorMapEnabled: true, colorMapDimension: 'size' } } });
+assert.deepEqual(Array.from(globalColors.option.visualMap.seriesIndex), [0, 1]);
+assert.equal(globalColors.option.visualMap.min, 1);
+assert.equal(globalColors.option.visualMap.max, 7);
+const extremes = render({ ...globalSizes, groups: globalSizes.groups.map((g, i) => ({ ...g,
+    points: [[100, 10, 50, i === 0 ? -1e308 : 1e308]] })) });
+assert.equal(extremes.option.series[0].symbolSize([10, 50, 0, 100]), 25,
+    'Opposite finite group extrema must not overflow the shared automatic Bubble scale.');
 const visibleBubbleOption = bubble.currentOption();
 bubble.window.handleMessage({ type: 'click' });
 assert.equal(bubble.currentOption(), visibleBubbleOption,

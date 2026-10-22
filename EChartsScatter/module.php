@@ -27,6 +27,7 @@ use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsTransientRefresh;
 use SymconECharts\EChartsValueRange;
 use SymconECharts\EChartsVariablePresentation;
+use SymconECharts\ScatterGroups;
 use SymconECharts\ScatterPairing;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
@@ -53,6 +54,7 @@ require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
 require_once __DIR__ . '/../libs/EChartsTransientRefresh.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 require_once __DIR__ . '/ScatterPairing.php';
+require_once __DIR__ . '/ScatterGroups.php';
 
 class EChartsScatter extends IPSModuleStrict
 {
@@ -633,15 +635,40 @@ class EChartsScatter extends IPSModuleStrict
     protected function BarPreviewSvg(array $values, bool $ipsView): string
     {
         $palette = EChartsBarPreview::Palette($this->BarPreviewValue($values, 'EChartsTheme', 'string', $ipsView));
-        $sources = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values, 'Label', false);
+        $raw = $values['Sources'] ?? json_decode($this->ReadPropertyString('Sources'), true);
+        $named = is_array($raw) && (count($raw) > 3 || array_filter($raw, static fn (mixed $r): bool => is_array($r) && ($r['Group'] ?? '') !== '') !== []);
+        $previewGroups = [];
+        $previewError = null;
+        if ($named) {
+            try {
+                $allGroups = $this->GetValidatedGroups($raw);
+                foreach (array_slice($allGroups, 0, 6) as $group) {
+                    $roles = [];
+                    foreach ($group['sources'] as $role => $source) {
+                        $roles[$role] = ['label' => $source['Label'], 'unit' => $source['Unit'], 'decimals' => $source['Decimals']];
+                    }
+                    $previewGroups[] = $group + ['roles' => $roles];
+                }
+            } catch (Throwable $exception) {
+                $previewError = $exception->getMessage();
+            }
+        }
+        $sources = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values, 'Label', false, 48);
         $byRole = [];
         foreach ($sources['items'] as $source) {
             if (in_array($source['Role'] ?? null, self::ROLES, true)) {
                 $byRole[$source['Role']] = $source;
             }
         }
+        if ($previewGroups !== []) {
+            $byRole = $previewGroups[0]['roles'];
+        }
         $xLabel = ($byRole['x']['label'] ?? 'X') . (empty($byRole['x']['unit']) ? '' : ' (' . $byRole['x']['unit'] . ')');
         $yLabel = ($byRole['y']['label'] ?? 'Y') . (empty($byRole['y']['unit']) ? '' : ' (' . $byRole['y']['unit'] . ')');
+        if (count($previewGroups) > 1) {
+            $xLabel = $this->Translate('X axis') . (empty($byRole['x']['unit']) ? '' : ' (' . $byRole['x']['unit'] . ')');
+            $yLabel = $this->Translate('Y axis') . (empty($byRole['y']['unit']) ? '' : ' (' . $byRole['y']['unit'] . ')');
+        }
         $themeColor = $palette['seriesColors'][0] ?? $palette['accent'];
         $pointColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'PointColor', 'integer', $ipsView), $themeColor);
         $colorMapEnabled = $this->BarPreviewValue($values, 'ColorMapEnabled', 'boolean', $ipsView);
@@ -687,6 +714,13 @@ class EChartsScatter extends IPSModuleStrict
             $this->BarPreviewValue($values, 'TitleFontSizePercent', 'integer', $ipsView)
         );
         $svg .= '<style>text{font-family:Arial,sans-serif}</style>';
+        if ($previewError !== null) {
+            return $svg . '<text x="24" y="100" font-size="11" fill="' . EChartsBarPreview::E($palette['text']) . '">'
+                . EChartsBarPreview::E($this->Translate($previewError)) . '</text></svg>';
+        }
+        if ($named) {
+            $svg = str_replace(['height="360"', 'viewBox="0 0 720 360"'], ['height="410"', 'viewBox="0 0 720 410"'], $svg);
+        }
         if ($this->BarPreviewValue($values, 'EnableBrush', 'boolean', $ipsView)) {
             $svg .= '<rect x="640" y="37" width="18" height="14" fill="none" stroke="'
                 . EChartsBarPreview::E($palette['accent']) . '" stroke-width="1.5" stroke-dasharray="3 2"/>';
@@ -789,57 +823,82 @@ class EChartsScatter extends IPSModuleStrict
         $position = $this->BarPreviewValue($values, 'ValueLabelPosition', 'string', $ipsView);
         $distance = $this->BarPreviewValue($values, 'ValueLabelDistance', 'integer', $ipsView);
         $content = $this->BarPreviewValue($values, 'ValueLabelContent', 'string', $ipsView);
-        for ($i = 0; $i < 13; $i++) {
-            $xValue = 1.8 + $i;
-            $yValue = 92 - $i * 2.7 + sin($i * 0.8) * 6;
-            if ($xValue < $xRange[0] || $xValue > $xRange[1]
-                || $yValue < $yRange[0] || $yValue > $yRange[1]) {
-                continue;
+        foreach ($previewGroups === [] ? [['roles' => $byRole, 'colorIndex' => 0]] : $previewGroups as $groupIndex => $previewGroup) {
+            $byRole = $previewGroup['roles'];
+            $groupColor = $this->BarPreviewValue($values, 'PointColor', 'integer', $ipsView) < 0 && $named
+                ? ($palette['seriesColors'][$previewGroup['colorIndex'] % count($palette['seriesColors'])] ?? $pointColor) : $pointColor;
+            if ($named) {
+                $svg .= '<g data-comparison-id="' . EChartsBarPreview::E($previewGroup['id']) . '">';
             }
-            $x = $left + ($xValue - $xRange[0]) / ($xRange[1] - $xRange[0]) * ($right - $left);
-            $y = $bottom - ($yValue - $yRange[0]) / ($yRange[1] - $yRange[0]) * ($bottom - $top);
-            $radius = isset($byRole['size'])
-                ? ($size + ($maxBubble - $size) * EChartsNormalization::Value((float) $i, $bubbleBounds) / 100) / 2
-                : $size / 2;
-            $sampleColor = $colorMapEnabled ? self::PreviewInterpolatedColor(
-                $colorMapLow,
-                $colorMapHigh,
-                ($colorMapSamples[$i] - $colorMapMinimum) / max(0.000001, $colorMapMaximum - $colorMapMinimum)
-            ) : $pointColor;
-            $svg .= '<circle cx="' . EChartsBarPreview::N($x) . '" cy="' . EChartsBarPreview::N($y)
-                . '" r="' . EChartsBarPreview::N($radius) . '" clip-path="url(#scatter-preview-plot)" fill="'
-                . EChartsBarPreview::E($sampleColor) . '" fill-opacity="0.8"/>';
-            if ($showValues && $i % ($adaptiveLabels ? 6 : 4) === 1) {
-                $label = EChartsLabelDesign::PreviewRect(
-                    $x - $radius,
-                    $y - $radius,
-                    $radius * 2,
-                    $radius * 2,
-                    $position,
-                    $distance
-                );
-                $formattedX = EChartsBarPreview::FormatValue(
-                    $xValue,
-                    (int) ($byRole['x']['decimals'] ?? 0),
-                    (string) ($byRole['x']['unit'] ?? ''),
-                    $this->ResolveHelperTranslationLanguage()
-                );
-                $formattedY = EChartsBarPreview::FormatValue(
-                    $yValue,
-                    (int) ($byRole['y']['decimals'] ?? 0),
-                    (string) ($byRole['y']['unit'] ?? ''),
-                    $this->ResolveHelperTranslationLanguage()
-                );
-                $formatted = match ($content) {
-                    'x'     => $formattedX,
-                    'both'  => $formattedX . ' / ' . $formattedY,
-                    default => $formattedY
-                };
-                $svg .= '<text x="' . EChartsBarPreview::N($label['x']) . '" y="'
-                    . EChartsBarPreview::N($label['y']) . '" text-anchor="' . $label['anchor']
-                    . '" font-size="' . $valueFontSize . '" fill="' . EChartsBarPreview::E($valueColor)
-                    . '">' . EChartsBarPreview::E($formatted) . '</text>';
+            for ($i = 0; $i < 13; $i++) {
+                $xValue = 1.8 + $i + $groupIndex * 0.1;
+                $yValue = 92 - $i * 2.7 + sin($i * 0.8) * 6 - $groupIndex * 3;
+                if ($xValue < $xRange[0] || $xValue > $xRange[1]
+                    || $yValue < $yRange[0] || $yValue > $yRange[1]) {
+                    continue;
+                }
+                $x = $left + ($xValue - $xRange[0]) / ($xRange[1] - $xRange[0]) * ($right - $left);
+                $y = $bottom - ($yValue - $yRange[0]) / ($yRange[1] - $yRange[0]) * ($bottom - $top);
+                $radius = isset($byRole['size'])
+                    ? ($size + ($maxBubble - $size) * EChartsNormalization::Value((float) $i, $bubbleBounds) / 100) / 2
+                    : $size / 2;
+                $sampleColor = $colorMapEnabled ? self::PreviewInterpolatedColor(
+                    $colorMapLow,
+                    $colorMapHigh,
+                    ($colorMapSamples[$i] - $colorMapMinimum) / max(0.000001, $colorMapMaximum - $colorMapMinimum)
+                ) : $groupColor;
+                $svg .= '<circle cx="' . EChartsBarPreview::N($x) . '" cy="' . EChartsBarPreview::N($y)
+                    . '" r="' . EChartsBarPreview::N($radius) . '" clip-path="url(#scatter-preview-plot)" fill="'
+                    . EChartsBarPreview::E($sampleColor) . '" fill-opacity="0.8"/>';
+                if ($showValues && $i % ($adaptiveLabels ? 6 : 4) === 1) {
+                    $label = EChartsLabelDesign::PreviewRect(
+                        $x - $radius,
+                        $y - $radius,
+                        $radius * 2,
+                        $radius * 2,
+                        $position,
+                        $distance
+                    );
+                    $formattedX = EChartsBarPreview::FormatValue(
+                        $xValue,
+                        (int) ($byRole['x']['decimals'] ?? 0),
+                        (string) ($byRole['x']['unit'] ?? ''),
+                        $this->ResolveHelperTranslationLanguage()
+                    );
+                    $formattedY = EChartsBarPreview::FormatValue(
+                        $yValue,
+                        (int) ($byRole['y']['decimals'] ?? 0),
+                        (string) ($byRole['y']['unit'] ?? ''),
+                        $this->ResolveHelperTranslationLanguage()
+                    );
+                    $formatted = match ($content) {
+                        'x'     => $formattedX,
+                        'both'  => $formattedX . ' / ' . $formattedY,
+                        default => $formattedY
+                    };
+                    $svg .= '<text x="' . EChartsBarPreview::N($label['x']) . '" y="'
+                        . EChartsBarPreview::N($label['y']) . '" text-anchor="' . $label['anchor']
+                        . '" font-size="' . $valueFontSize . '" fill="' . EChartsBarPreview::E($valueColor)
+                        . '">' . EChartsBarPreview::E($formatted) . '</text>';
+                }
             }
+            if ($named) {
+                $svg .= '</g><text x="' . (24 + $groupIndex * 114) . '" y="375" font-size="11" fill="'
+                    . EChartsBarPreview::E($groupColor) . '">' . EChartsBarPreview::E(mb_strimwidth(
+                        $previewGroup['label'] !== '' ? $previewGroup['label'] : $this->Translate('Comparison'),
+                        0,
+                        16,
+                        '…'
+                    )) . '</text>';
+            }
+        }
+        if ($named) {
+            $svg .= '<text x="24" y="400" font-size="11" fill="' . EChartsBarPreview::E($palette['text']) . '">'
+                . EChartsBarPreview::E(sprintf(
+                    $this->Translate('Groups shown: %d of %d. Example points, not archive values.'),
+                    count($previewGroups),
+                    count($allGroups)
+                )) . '</text>';
         }
         $svg .= '<text x="387" y="340" text-anchor="middle" font-size="' . ($axisFontSize + 2)
             . '" fill="' . EChartsBarPreview::E($axisColor) . '">'
@@ -892,40 +951,56 @@ class EChartsScatter extends IPSModuleStrict
             $this->DebugEChartsSetStatus(self::STATUS_PARENT_MISSING);
             throw new RuntimeException('No active EChartsGateway is connected.');
         }
-        $sources = $this->GetValidatedSources();
+        $groups = $this->GetValidatedGroups();
+        $sourceCount = array_sum(array_map(static fn (array $g): int => count($g['sources']), $groups));
         $query = EChartsArchiveQuery::Resolve(
             $this->EffectiveRange($ipsView),
             $this->EffectiveCustomRangeValue($ipsView),
             $this->EffectiveCustomRangeUnit($ipsView),
             $this->ReadPropertyString('DataMode'),
             $this->ReadPropertyInteger('PointBudget'),
-            count($sources),
+            $sourceCount,
             $this->CurrentTimestamp(),
             date_default_timezone_get()
         );
         if ($query['Mode'] !== 'aggregated') {
             throw new RuntimeException('Scatter pairing requires completed archive intervals.');
         }
-        $archive = [];
-        $metadata = [];
+        $models = [];
         $truncated = false;
-        foreach ($sources as $role => $source) {
-            $response = $this->ReadArchiveSource($source, $query);
-            $archive[$role] = $response['Points'];
-            $metadata[$role] = [
-                'variableID' => $source['VariableID'], 'label' => $source['Label'],
-                'unit'       => $source['Unit'], 'decimals' => $source['Decimals']
-            ];
-            $truncated = $truncated || $response['Truncated'];
+        foreach ($groups as $group) {
+            $archive = [];
+            $metadata = [];
+            $groupTruncated = false;
+            foreach ($group['sources'] as $role => $source) {
+                $response = $this->ReadArchiveSource($source, $query);
+                $archive[$role] = $response['Points'];
+                $metadata[$role] = [
+                    'variableID' => $source['VariableID'], 'label' => $source['Label'],
+                    'unit'       => $source['Unit'], 'decimals' => $source['Decimals']
+                ];
+                $groupTruncated = $groupTruncated || $response['Truncated'];
+            }
+            $models[] = ['id' => $group['id'], 'label' => $group['label'], 'colorIndex' => $group['colorIndex'],
+                'roles'       => $metadata, 'points' => ScatterPairing::Pair($archive['x'], $archive['y'], $archive['size'] ?? null),
+                'truncated'   => $groupTruncated];
+            $truncated = $truncated || $groupTruncated;
         }
-        $points = ScatterPairing::Pair($archive['x'], $archive['y'], $archive['size'] ?? null);
+        $named = count($groups) > 1 || $groups[0]['label'] !== '';
+        $metadata = $models[0]['roles'];
+        if ($named && count($groups) > 1) {
+            foreach (['x', 'y'] as $role) {
+                $metadata[$role] = ['label' => $this->Translate($role === 'x' ? 'X axis' : 'Y axis'),
+                    'unit'                  => $metadata[$role]['unit'], 'decimals' => $metadata[$role]['decimals']];
+            }
+        }
         $this->WriteAttributeString('LastError', '');
         $this->DebugEChartsSetStatus(IS_ACTIVE);
 
-        return json_encode([
+        $json = json_encode([
             'schemaVersion' => 1,
             'family'        => 'scatter',
-            'variant'       => isset($sources['size']) ? 'bubble' : 'scatter',
+            'variant'       => $named ? 'groups' : (isset($groups[0]['sources']['size']) ? 'bubble' : 'scatter'),
             'theme'         => $this->EffectiveTheme($ipsView),
             'scatter'       => ['title' => $this->ReadPropertyString('Title'), 'style' => $this->ReadDesignStyle($ipsView)],
             'roles'         => $metadata,
@@ -936,9 +1011,13 @@ class EChartsScatter extends IPSModuleStrict
                 'aggregationLevel' => $query['AggregationLevel'],
                 'pointBudget'      => $this->ReadPropertyInteger('PointBudget')
             ],
-            'points'    => $points,
-            'truncated' => $truncated
-        ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
+        ] + ($named ? ['groups' => $models] : ['points' => $models[0]['points']]) + ['truncated' => $truncated], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
+        if ($named && strlen($json) > 200000) {
+            $this->WriteAttributeString('LastError', 'SCATTER_MODEL_TOO_LARGE');
+            $this->DebugEChartsSetStatus(self::STATUS_CONFIGURATION_INVALID);
+            throw new RuntimeException('The Scatter comparison model exceeds its output budget.');
+        }
+        return $json;
     }
 
     private function RenderScatterHTMLPage(bool $ipsView): string
@@ -952,6 +1031,7 @@ class EChartsScatter extends IPSModuleStrict
             'ipsViewStyle' => $ipsView ? $this->IPSViewThemeCSS() : '',
             'state'        => $this->BuildVisualizationState($ipsView),
             'translations' => [
+                'Comparison'                                                                 => $this->Translate('Comparison'),
                 'Configure X and Y archive sources.'                                         => $this->Translate('Configure X and Y archive sources.'),
                 'Connect an active EChartsGateway.'                                          => $this->Translate('Connect an active EChartsGateway.'),
                 'The Scatter values could not be loaded.'                                    => $this->Translate('The Scatter values could not be loaded.'),
@@ -976,7 +1056,7 @@ class EChartsScatter extends IPSModuleStrict
             'replacements' => [
                 '{{ECHARTS_SCRIPT}}'           => EChartsAsset::ScatterJavaScript(),
                 '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
-                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript(),
+                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript() . "\n" . EChartsAsset::SeriesSelectionJavaScript(),
                 '{{ECHARTS_ZOOM_SCRIPT}}'      => EChartsAsset::ZoomJavaScript(),
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
@@ -1012,7 +1092,7 @@ class EChartsScatter extends IPSModuleStrict
     private function GetConfigurationError(): ?array
     {
         try {
-            $sources = $this->GetValidatedSources();
+            $groups = $this->GetValidatedGroups();
         } catch (Throwable $exception) {
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => $exception->getMessage()];
         }
@@ -1035,7 +1115,7 @@ class EChartsScatter extends IPSModuleStrict
             || ($this->IsIPSViewHTMLPageEnabled() && !$this->ReadPropertyBoolean('IPSViewUseTileDesign')
                 && $this->ReadPropertyBoolean('IPSViewColorMapEnabled')
                 && $this->ReadPropertyString('IPSViewColorMapDimension') === 'size')) {
-            if (!isset($sources['size'])) {
+            if (array_filter($groups, static fn (array $g): bool => !isset($g['sources']['size'])) !== []) {
                 return ['Status' => self::STATUS_CONFIGURATION_INVALID,
                     'Message'    => 'A bubble-size source is required for size-based colors.'];
             }
@@ -1058,14 +1138,46 @@ class EChartsScatter extends IPSModuleStrict
         return null;
     }
 
-    /** @return array<string,array{VariableID:int,Label:string,Unit:string,Decimals:int,Reducer:string}> */
-    private function GetValidatedSources(): array
+    /** Returns complete groups; old ungrouped lists remain a single anonymous comparison. */
+    private function GetValidatedGroups(?array $draft = null): array
     {
         try {
-            $raw = json_decode($this->ReadPropertyString('Sources'), true, 32, JSON_THROW_ON_ERROR);
+            $raw = $draft ?? json_decode($this->ReadPropertyString('Sources'), true, 32, JSON_THROW_ON_ERROR);
         } catch (JsonException $exception) {
             throw new InvalidArgumentException('Scatter sources must contain valid JSON.', 0, $exception);
         }
+        if (!is_array($raw)) {
+            throw new InvalidArgumentException('Scatter sources must contain valid JSON.');
+        }
+        $groups = [];
+        $units = [];
+        $ids = [];
+        foreach (ScatterGroups::Split($raw) as $group) {
+            $sources = $this->ValidateSourceGroup($group['rows']);
+            $id = ScatterGroups::ID($sources);
+            if (isset($ids[$id])) {
+                throw new InvalidArgumentException('Comparison groups must use distinct role assignments.');
+            }
+            $ids[$id] = true;
+            foreach ($sources as $role => $source) {
+                if (isset($units[$role]) && $units[$role] !== $source['Unit']) {
+                    throw new InvalidArgumentException('Comparison groups require the same unit for each shared role.');
+                }
+                $units[$role] = $source['Unit'];
+            }
+            $groups[] = ['id' => $id, 'label' => $group['label'], 'sources' => $sources];
+        }
+        $sorted = array_keys($ids);
+        sort($sorted, SORT_STRING);
+        foreach ($groups as &$group) {
+            $group['colorIndex'] = array_search($group['id'], $sorted, true);
+        }
+        unset($group);
+        return $groups;
+    }
+
+    private function ValidateSourceGroup(array $raw): array
+    {
         if (!is_array($raw) || !array_is_list($raw) || count($raw) < 2 || count($raw) > 3) {
             throw new InvalidArgumentException('Configure one X and one Y source, optionally one size source.');
         }

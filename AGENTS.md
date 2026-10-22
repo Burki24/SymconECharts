@@ -77,6 +77,10 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Historische X/Y-Vergleiche und optionale Bubble-Größen liegen im eigenen
   Gerätemodul `EChartsScatter` und werden ohne Interpolation nach gemeinsamen
   abgeschlossenen Archivintervallen verbunden.
+  ADR 0089 ergänzt bis zu 16 benannte X/Y-Gruppen mit optionaler Größenquelle,
+  getrennten Intervallschnitten und insgesamt höchstens 48 Zuordnungen.
+  Das gemeinsame 200–2000er-Archivbudget, alte ungruppierte Quellen und Designs
+  bleiben erhalten; gemeinsame Auswahl- und Zeitraumlogik wird wiederverwendet.
   Eine archivbasierte Tages- beziehungsweise Wochentag-Stunden-Heatmap liegt im eigenen Gerätemodul
   `EChartsHeatmap`. Sie ist kein Kalenderdiagramm und kein Scatter-Modus.
   Eine begrenzte, lesende IP-Symcon-Objekthierarchie liegt im eigenen

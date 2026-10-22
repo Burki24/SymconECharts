@@ -13,6 +13,7 @@
     var currentState = bootstrap.state || null;
     var currentTheme = null;
     var refreshFailures = 0;
+    var groupSelection = window.SYMC_ECHARTS_SERIES_SELECTION.create();
     var loadError = 'The Scatter values could not be loaded.';
 
     function translate(text) {
@@ -66,7 +67,11 @@
 
     function pointSize(value, minimum, maximum, base, large) {
         if (!Number.isFinite(value) || maximum <= minimum) { return base; }
-        return base + (large - base) * Math.max(0, Math.min(1, (value - minimum) / (maximum - minimum)));
+        value = Math.max(minimum, Math.min(maximum, value));
+        var span = maximum - minimum;
+        var ratio = Number.isFinite(span) ? (value - minimum) / span
+            : (value / 2 - minimum / 2) / (maximum / 2 - minimum / 2);
+        return base + (large - base) * Math.max(0, Math.min(1, ratio));
     }
 
     function colorMapOptions(style, roles, points, colors, top, compact, hasTitle) {
@@ -108,7 +113,10 @@
         var previousStyle = previous.scatter && previous.scatter.style || {};
         var nextStyle = next.scatter && next.scatter.style || {};
         return axisKeys.every(function (key) { return previousStyle[key] === nextStyle[key]; })
-            && JSON.stringify(previous.roles || {}) === JSON.stringify(next.roles || {})
+            && (Array.isArray(previous.groups) && Array.isArray(next.groups)
+                ? JSON.stringify(previous.groups.map(function (g) { return g.id; }).sort())
+                    === JSON.stringify(next.groups.map(function (g) { return g.id; }).sort())
+                : JSON.stringify(previous.roles || {}) === JSON.stringify(next.roles || {}))
             && (!previous.range || !next.range || (previous.range.aggregationLevel === next.range.aggregationLevel
                 && previous.range.pointBudget === next.range.pointBudget));
     }
@@ -177,7 +185,7 @@
         });
     }
 
-    function buildOption(model, theme) {
+    function buildSingleOption(model, theme) {
         var colors = colorsFor(theme);
         var scatter = model.scatter || {};
         var style = scatter.style || {};
@@ -194,7 +202,7 @@
         var brushEnabled = style.enableBrush === true;
         var base = Math.max(4, Math.min(60, Number(style.pointSize) || 12));
         var large = Math.max(base, Math.min(100, Number(style.bubbleMaxSize) || 48));
-        var sizeValues = sizeRole ? points.map(function (point) { return Number(point[3]); }) : [];
+        var sizeValues = sizeRole ? points.map(function (point) { return Number(point[3]); }).filter(Number.isFinite) : [];
         var minimum = sizeValues.length ? Math.min.apply(null, sizeValues) : 0;
         var maximum = sizeValues.length ? Math.max.apply(null, sizeValues) : 0;
         if (style.bubbleRangeMode === 'manual') {
@@ -321,6 +329,68 @@
         };
     }
 
+    function buildOption(model, theme) {
+        if (!Array.isArray(model.groups)) { return buildSingleOption(model, theme); }
+        var groups = model.groups;
+        var points = groups.reduce(function (all, g) { return all.concat(g.points); }, []);
+        var roles = Object.assign({}, model.roles);
+        var sized = groups.find(function (g) { return g.roles.size; });
+        if (sized) { roles.size = sized.roles.size; }
+        var common = buildSingleOption(Object.assign({}, model, { points: points, roles: roles }), theme);
+        var style = model.scatter.style || {};
+        var colors = colorsFor(theme);
+        var selected = groupSelection.reconcile(groups);
+        var fontSize = design.fontSizePercent(style.axisFontSizePercent, 12);
+        var reserve = Math.ceil(fontSize * 1.5 + 16);
+        common.grid.bottom += reserve;
+        common.dataZoom.forEach(function (entry) {
+            if (entry.id === 'x-slider') { entry.bottom += reserve; }
+        });
+        var options = groups.map(function (g) {
+            return buildSingleOption(Object.assign({}, model, { points: g.points, roles: g.roles }), theme);
+        });
+        common.aria.description += '. ' + groups.map(function (g) { return g.label || translate('Comparison'); }).join(', ');
+        var bubbleSize = common.series[0].symbolSize;
+        var visibility = style.showValues === true && style.adaptiveValueLabels === true
+            ? adaptiveLabelVisibility(points, style, roles.x, roles.y, common.grid, common.series[0].label,
+                design.fontSizePercent(style.valueFontSizePercent, 11), Math.max(4, Math.min(60, Number(style.pointSize) || 12))) : null;
+        var offset = 0;
+        common.series = options.map(function (option, index) {
+            var group = groups[index];
+            var series = option.series[0];
+            series.id = group.id;
+            series.name = group.id;
+            if (group.roles.size) { series.symbolSize = bubbleSize; }
+            if (visibility) {
+                series.data.forEach(function (item, i) { item.label = { show: visibility[offset + i] }; });
+            }
+            offset += group.points.length;
+            if (!common.visualMap) {
+                series.itemStyle.color = style.pointColor || colors.seriesColors[group.colorIndex % colors.seriesColors.length] || colors.accent;
+            }
+            return series;
+        });
+        common.tooltip.formatter = function (parameters) {
+            var index = Number.isInteger(parameters.seriesIndex) ? parameters.seriesIndex : 0;
+            var group = groups[index];
+            return group ? escapeHTML(group.label || translate('Comparison')) + '<br>'
+                + options[index].tooltip.formatter(parameters) : '';
+        };
+        if (common.visualMap) { common.visualMap.seriesIndex = groups.map(function (_, i) { return i; }); }
+        common.legend = { type: 'scroll', bottom: 4, left: 12, right: 12,
+            selected: Object.assign({}, selected), scrollDataIndex: groupSelection.scrollDataIndex(),
+            data: groups.map(function (g) { return g.id; }),
+            formatter: function (id) {
+                var group = groups.find(function (g) { return g.id === id; });
+                return group ? group.label || translate('Comparison') : '';
+            },
+            textStyle: { color: style.axisColor || colors.text, fontSize: fontSize,
+                width: Math.max(50, Math.min(180, chartElement.clientWidth / 3)), overflow: 'truncate' },
+            pageTextStyle: { color: colors.text, fontSize: fontSize }
+        };
+        return common;
+    }
+
     function displayError(message) {
         if (chart) { chart.clear(); }
         selectionElement.hidden = true;
@@ -333,15 +403,21 @@
 
     function updateSelection(event) {
         var batch = event && event.batch && event.batch[0];
-        var selected = batch && batch.selected && batch.selected[0];
-        var points = currentState && currentState.chart && currentState.chart.points;
+        var model = currentState && currentState.chart;
+        var groups = model && (model.groups || [{ points: model.points }]);
         if (!batch || !Array.isArray(batch.areas) || batch.areas.length === 0
-            || !selected || !Array.isArray(selected.dataIndex) || !Array.isArray(points)) {
+            || !Array.isArray(batch.selected) || !groups) {
             selectionElement.hidden = true;
             return;
         }
-        var matching = selected.dataIndex.map(function (index) { return points[index]; })
-            .filter(function (point) { return Array.isArray(point); });
+        var matching = [];
+        batch.selected.forEach(function (selected) {
+            var group = groups[selected.seriesIndex || 0];
+            if (!group || !Array.isArray(selected.dataIndex) || !Array.isArray(group.points)) { return; }
+            selected.dataIndex.forEach(function (index) {
+                if (Array.isArray(group.points[index])) { matching.push(group.points[index]); }
+            });
+        });
         if (matching.length === 0) {
             selectionElement.hidden = true;
             return;
@@ -383,7 +459,9 @@
             return;
         }
         errorElement.hidden = true;
-        var points = Array.isArray(state.chart.points) ? state.chart.points : [];
+        var points = Array.isArray(state.chart.groups)
+            ? state.chart.groups.reduce(function (all, g) { return all.concat(g.points); }, [])
+            : (Array.isArray(state.chart.points) ? state.chart.points : []);
         selectionElement.hidden = true;
         emptyElement.hidden = points.length > 0;
         emptyElement.textContent = translate('No common completed archive intervals.');
@@ -397,6 +475,7 @@
         var savedZoom = chart && currentTheme === theme && previousState
             && sameZoomContext(previousState.chart, state.chart)
             ? zoom.captureCartesian(chart, previousState.chart && previousState.chart.range, state.chart.range) : null;
+        if (chart) { groupSelection.capture(chart); }
         if (chart && currentTheme !== theme) { chart.dispose(); chart = null; }
         if (!chart) {
             chart = window.echarts.init(chartElement, theme === 'auto' ? null : theme, { renderer: 'canvas' });

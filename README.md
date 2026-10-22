@@ -15,6 +15,11 @@ Treemap und Sunburst erlauben optionale Gruppenpfade mit bis zu acht Ebenen
 einschließlich Quellvariable; bestehende Gruppe-/Untergruppe-Zuordnungen bleiben nutzbar.
 GaugeMulti unterstützt bis zu 32 Quellen mit optionaler Quellenauswahl und
 responsiven Seiten; individuelle Wertebereiche und Einheiten bleiben erhalten.
+Scatter/Bubble unterstützt bis zu 16 benannte X/Y-Vergleichsgruppen mit
+optionaler Größenquelle je Gruppe. Alle Gruppen teilen sich das vorhandene
+Archivbudget; bestehende einzelne Punktwolken bleiben unverändert nutzbar.
+Feste Min-/Max-Bezüge für Bubble-Größen und Originalwerte im Tooltip erlauben
+stabile Größenvergleiche über verschiedene Zeiträume.
 Tree und TreeSystemHealth unterstützen bis zu zwölf Nachkommensebenen des
 Symcon-Objektbaums; bestehende Tiefen- und Knoteneinstellungen bleiben erhalten.
 Parallelkoordinaten verbinden archivierte Variablenwerte je gemeinsamem

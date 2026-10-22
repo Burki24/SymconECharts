@@ -56,6 +56,7 @@ $tests = [
 ];
 
 $commands = [
+    ['Test named Scatter comparison groups', 'php tests/gateway_gauges.php --scatter-groups'],
     ['Test fixed Bubble size references', 'php tests/gateway_gauges.php --scatter-bubble-range'],
     ['Test per-axis Parallel metrics', 'php tests/gateway_gauges.php --parallel-metrics'],
     ['Test fixed Parallel axis ranges', 'php tests/gateway_gauges.php --parallel-axis-ranges'],

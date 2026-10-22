@@ -1,5 +1,27 @@
 # Tests
 
+## Scatter/Bubble: benannte Vergleichsgruppen
+
+`php tests/gateway_gauges.php --scatter-groups` begann RED an den fehlenden
+Vergleichsgruppen. Der echte Modul-/Gateway-Pfad prüft bis zu 16 Gruppen und
+48 Zuordnungen, unabhängige Joins bei Lücken, mehrfach genutzte Variablen mit
+eigenen Kennzahlen, umbenannte/umgeordnete Gruppen, Einheiten, späte Fehler,
+alle Quellenreferenzen, Designvererbung und beide Vorschauen. Alte Quellen ohne
+`Group` und explizit leere Gruppen erhalten dasselbe unveränderte Modell.
+17 Gruppen, 49 Zuordnungen, doppelte Rollen und unpassende Einheiten werden
+vor Archiv-I/O abgewiesen. Alle 200/1000/2000-Budgets bleiben gemeinsam.
+Der Stressfall 16 × 2 × 62 geladene Aggregate ergibt höchstens 992 Punkte;
+beide endgültigen HTML-Ausgaben mit UTF-8-Beschriftungen bleiben unter 1 MiB.
+Der 200000-Byte-Guard für neue Gruppenmodelle wird getrennt geprüft.
+
+`node tests/scatter_layout.js` prüft mehrere native Serien, gemischte
+Scatter-/Bubble-Gruppen, gleiche Anzeigenamen, escaped Original-Tooltips,
+gruppenübergreifende Bereichsauswahl, globale Größen-/Farbskalen und die
+gemeinsame ID-stabile Auswahl bei Refresh/Umordnung. Die gepinnte ECharts-Engine
+prüft echte Mehrserien-/Legendengeometrie. `node tests/scatter_browser.mjs`
+bietet eine rein synthetische lokale Canvas-Prüfansicht für beide Adapter.
+Live-Abnahme nach Modulupdate und tatsächlicher IPSView-Client bleiben separat.
+
 ## Scatter/Bubble: feste Größenbezüge
 
 `php tests/gateway_gauges.php --scatter-bubble-range` prüft den echten

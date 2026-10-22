@@ -14,11 +14,20 @@
             "type": "List",
             "name": "Sources",
             "caption": "Scatter plot (optional bubble size)",
-            "rowCount": 3,
+            "rowCount": 6,
             "add": true,
             "delete": true,
             "changeOrder": false,
             "columns": [
+                {
+                    "caption": "Comparison group (optional)",
+                    "name": "Group",
+                    "width": "180px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
                 {
                     "caption": "Variable",
                     "name": "VariableID",
@@ -126,6 +135,11 @@
                 }
             ],
             "form": [
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Group",
+                    "caption": "Comparison group (optional)"
+                },
                 {
                     "type": "SelectVariable",
                     "name": "VariableID",

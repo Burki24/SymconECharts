@@ -620,6 +620,11 @@ Optionale feste Größenbezüge für Bubble folgen
 Min/Max-Prüfungen und die Vorschauprojektion werden wiederverwendet; die
 Durchmesserberechnung bleibt lokal in Scatter. Quellen, Archivabfragen,
 Originalwerte und unabhängige Designs bleiben unverändert.
+Bis zu 16 benannte Vergleichsgruppen aus X/Y und optional Größe folgen
+[ADR 0089](adr/0089-scatter-comparison-groups.md). Alle Zuordnungen teilen die
+bisherige zentrale Zeitraumplanung und das 200–2000er-Budget. Der bestehende
+Intervall-Join wird je Gruppe wiederverwendet, die flüchtige Legendenansicht
+verwendet `echarts-series-selection.js`. Alte Quellenlisten werden nicht migriert.
 Die eigene Tages-/Wochentag-Stunden-Heatmap und die Abgrenzung zum Kalenderlayout
 legt [`ADR 0041`](adr/0041-heatmap-weekday-hour-family.md) fest; ihre
 gleitenden Zeitfenster regelt [`ADR 0043`](adr/0043-heatmap-rolling-windows-and-navigation.md).

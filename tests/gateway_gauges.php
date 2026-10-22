@@ -1003,6 +1003,12 @@ assertGatewayGauge(
 );
 IPSModuleStrict::$ParentResponder = static fn (string $json): string => $gateway->ForwardData($json);
 
+if (array_slice($argv, 1) === ['--scatter-groups']) {
+    require __DIR__ . '/scatter_groups.php';
+    echo "Named Scatter/Bubble groups, per-group joins, shared budgets and compatibility verified.\n";
+    exit(0);
+}
+
 if (array_slice($argv, 1) === ['--scatter-bubble-range']) {
     require __DIR__ . '/scatter_bubble_range.php';
     echo "Scatter fixed Bubble ranges, compatibility, previews and unchanged archive budgets verified.\n";

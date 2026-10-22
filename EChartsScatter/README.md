@@ -7,21 +7,46 @@ ECharts-Instanzen.
 
 ## Quellen und Daten
 
-Im Abschnitt **Streudiagramm (optional mit Blasengröße)** genau eine Variable
-für **X-Achse** und eine für **Y-Achse** wählen. **Blasengröße** ist optional.
-Jede Rolle benötigt eine andere Variablen-ID; gleiche angezeigte Namen sind
+Im Abschnitt **Streudiagramm (optional mit Blasengröße)** pro Vergleich genau
+eine Variable für **X-Achse** und eine für **Y-Achse** wählen. **Blasengröße** ist
+optional. Ohne **Vergleichsgruppe** bleibt die bisherige einzelne Punktwolke
+unverändert nutzbar. Für mehrere Vergleiche denselben Gruppennamen an den
+zugehörigen X-/Y- und gegebenenfalls Größenzeilen eintragen. Bis zu 16 Gruppen
+mit insgesamt höchstens 48 Zuordnungen sind möglich. Beispielsweise:
+
+| Vergleichsgruppe | Rolle | Quelle |
+| --- | --- | --- |
+| Wohnzimmer | X-Achse | Temperatur im Wohnzimmer |
+| Wohnzimmer | Y-Achse | Luftfeuchtigkeit im Wohnzimmer |
+| Bad | X-Achse | Temperatur im Bad |
+| Bad | Y-Achse | Luftfeuchtigkeit im Bad |
+
+Eine leere Gruppe kann zusätzlich zu benannten Gruppen als **Vergleich** bestehen.
+Gruppennamen dürfen bis zu 80 Zeichen enthalten. Innerhalb eines Vergleichs
+benötigt jede Rolle eine andere Variablen-ID; gleiche angezeigte Namen sind
 zulässig. Ein ausdrücklich konfigurierter Name hat Vorrang, andernfalls
 erscheint der aktuelle Symcon-Name. IDs werden in der Grafik nicht angezeigt.
 Einheit und Nachkommastellen können aus der Variablendarstellung stammen oder
 je Quelle gesetzt werden.
+Dieselbe Variable darf in mehreren Gruppen wiederverwendet werden, auch mit
+unterschiedlichen Archivkennzahlen. Vollständig identische Rollenzuordnungen
+einschließlich Kennzahlen sind keine zusätzlichen Vergleiche.
+Pro gemeinsamer Rolle müssen die Einheiten der Gruppen übereinstimmen:
+beispielsweise alle X-Werte in °C, alle Y-Werte in % und alle Größenwerte in m/s.
+X, Y und Größe untereinander dürfen weiterhin unterschiedliche Einheiten haben.
 
 Das Modul liest ausschließlich abgeschlossene, aggregierte Archivintervalle.
 Ein Punkt entsteht nur, wenn X und Y für **denselben Intervall-Zeitstempel**
 vorliegen. Im Bubble-Modus muss auch die Größenquelle in diesem Intervall
 vorliegen. Fehlende Werte werden weder interpoliert noch mit einem älteren
-Wert aufgefüllt. Der Tooltip nennt Intervallzeit und die zugehörigen Werte.
+Wert aufgefüllt. Gruppen werden unabhängig verknüpft: Eine fehlende Stunde im
+Bad entfernt keine gültige Stunde des Wohnzimmers. Der Tooltip nennt Gruppe,
+Intervallzeit und die Originalwerte mit ihren jeweiligen Einheiten.
 Die Blasengröße wird standardmäßig zwischen der kleinsten und größten
 vorhandenen Größe skaliert; bei lauter gleichen Größen gilt die normale Punktgröße.
+Bei mehreren Bubble-Gruppen berücksichtigt die automatische Größenskala alle
+Gruppen gemeinsam, auch über die Legende ausgeblendete. Normale Scatter-Gruppen
+ohne Größenquelle können daneben bestehen und behalten ihre feste Punktgröße.
 Optional verwendet **Bezugsbereich der Blasengröße → Feste Grenzen** ein eigenes
 Minimum und Maximum in der Einheit der Größenquelle, beispielsweise 0–100 %.
 Das Minimum entspricht der eingestellten **Punktgröße**, das Maximum der
@@ -38,8 +63,22 @@ Zeitraum, automatische oder feste Archiv-Verdichtung und Punktbudget sind
 einstellbar. Ein abgeschnittener Archivbereich wird in der Grafik kenntlich
 gemacht. Die Anzahl sichtbarer Punkte kann durch fehlende gemeinsame
 Intervalle kleiner sein als das Punktbudget.
+Die 200–2000 Archivwerte werden weiterhin auf **alle Quellenzuordnungen zusammen**
+verteilt, nicht je Gruppe neu bereitgestellt. Eine häufig verwendete Quelle
+beansprucht je Zuordnung ihren Budgetanteil. Bei 16 Gruppen aus X und Y und
+Budget 2000 werden je Zuordnung höchstens 62 Aggregate geladen; nach Verknüpfung
+sind damit höchstens 16 × 62 Vergleichspunkte möglich. Weniger Gruppen oder
+ein gröberes Archivintervall ermöglichen längere vollständige Ausschnitte.
 
 ## Design und Ausgabe
+
+Benannte Vergleiche erhalten eine scrollbare Legende zum Ein-/Ausblenden.
+Auswahl und Legendenposition bleiben bei Aktualisierung und Umordnung erhalten;
+Umbenennen ändert die interne Zuordnung nicht. Ohne ausdrückliche Punktfarbe
+unterscheiden Theme-Farben die Gruppen. Eine gesetzte Punktfarbe bleibt für alle
+Gruppen gültig. Wertabhängige Farben verwenden eine gemeinsame Farbskala;
+für Größenfarben benötigen alle Gruppen eine Größenquelle. Bereichsauswahl
+und Tooltips berücksichtigen die tatsächlich ausgewählte Gruppe.
 
 Der Kacheldesigner bietet Theme, Raster, Punkt- und maximale Blasengröße,
 optionale Wertebeschriftungen, Schriftgrößen, Farben und Animation. X- und
@@ -80,6 +119,8 @@ IPSView-Design können das Werkzeug getrennt aktivieren.
 Die SVG-Live-Vorschau zeigt die Gestaltung schematisch mit Beispieldaten und
 berücksichtigt auch die gewählten Achsenbereiche; sie liest beim Ändern des
 Formulars keine Archivdaten.
+Bei vielen Gruppen zeigt sie einen ausdrücklich bezeichneten Ausschnitt von
+höchstens sechs Gruppen, prüft aber zuvor sämtliche konfigurierten Zuordnungen.
 
 Optional erstellt das Modul eine WebContent-Variable `IPSViewScatter` für
 IPSView. Dort kann das Kacheldesign geerbt oder unabhängig gestaltet werden;
