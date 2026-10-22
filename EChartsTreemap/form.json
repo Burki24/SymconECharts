@@ -11,6 +11,15 @@
             "caption": "Title"
         },
         {
+            "type": "CheckBox",
+            "name": "NormalizeValues",
+            "caption": "Normalize leaf weights using source Min/Max"
+        },
+        {
+            "type": "Label",
+            "caption": "Normalization changes areas or angles only. Original values keep their own unit and decimals; normalized group weights are not physical totals."
+        },
+        {
             "type": "List",
             "name": "Sources",
             "caption": "Treemap variables",
@@ -67,6 +76,55 @@
                     "edit": {
                         "type": "ValidationTextBox"
                     }
+                },
+                {
+                    "caption": "Minimum (normalization)",
+                    "name": "Minimum",
+                    "width": "110px",
+                    "add": 0,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "digits": 3
+                    }
+                },
+                {
+                    "caption": "Maximum (normalization)",
+                    "name": "Maximum",
+                    "width": "110px",
+                    "add": 100,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "digits": 3
+                    }
+                },
+                {
+                    "caption": "Use variable presentation",
+                    "name": "UseVariablePresentation",
+                    "width": "130px",
+                    "add": true,
+                    "edit": {
+                        "type": "CheckBox"
+                    }
+                },
+                {
+                    "caption": "Unit",
+                    "name": "Unit",
+                    "width": "100px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "caption": "Decimals",
+                    "name": "Decimals",
+                    "width": "90px",
+                    "add": 1,
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "minimum": 0,
+                        "maximum": 6
+                    }
                 }
             ],
             "form": [
@@ -102,6 +160,35 @@
                     "type": "ValidationTextBox",
                     "name": "Label",
                     "caption": "Label (optional)"
+                },
+                {
+                    "type": "NumberSpinner",
+                    "digits": 3,
+                    "name": "Minimum",
+                    "caption": "Minimum (normalization)"
+                },
+                {
+                    "type": "NumberSpinner",
+                    "digits": 3,
+                    "name": "Maximum",
+                    "caption": "Maximum (normalization)"
+                },
+                {
+                    "type": "CheckBox",
+                    "name": "UseVariablePresentation",
+                    "caption": "Use variable presentation"
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Unit",
+                    "caption": "Unit"
+                },
+                {
+                    "type": "NumberSpinner",
+                    "minimum": 0,
+                    "maximum": 6,
+                    "name": "Decimals",
+                    "caption": "Decimals"
                 }
             ]
         },

@@ -6,7 +6,8 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 const source = fs.readFileSync(path.join(__dirname, '..', 'EChartsTreemap', 'visualization', 'app.js'), 'utf8');
-const designSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-design.js'), 'utf8');
+const designSource = fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-design.js'), 'utf8')
+    + '\n' + fs.readFileSync(path.join(__dirname, '..', 'libs', 'echarts-hierarchy-values.js'), 'utf8');
 const palette = {
     background: '#101114', text: '#f4f5f7', muted: '#969aa2', accent: '#55cbb5',
     seriesColors: ['#5070dd', '#b6d634']
@@ -258,4 +259,34 @@ const zeros = render({ ...model, treemap: { ...model.treemap, positiveCount: 0 }
 assert.equal(zeros.option, undefined);
 assert.equal(zeros.emptyElement.hidden, false);
 
+const normalizedHierarchy = { ...model, treemap: { ...model.treemap, normalized: true, total: 130,
+    style: { ...model.treemap.style, showValues: true },
+    data: [{ id: 'group-climate', name: 'Climate <unsafe>', value: 130, children: [
+        { id: 'variable-1', name: 'Temperature', value: 50, originalValue: 20, unit: '°C', decimals: 1, minimum: -20, maximum: 60 },
+        { id: 'variable-2', name: 'Humidity', value: 80, originalValue: 80, unit: '%', decimals: 0, minimum: 0, maximum: 100 }
+    ] }] } };
+for (const mode of ['symcon', 'ipsview']) {
+    const normalizedOption = render(normalizedHierarchy, 1000, mode).option;
+    assert.match(normalizedOption.title.subtext || '', /Normalized weights/);
+    const leaf = normalizedOption.series[0].data[0].children[0];
+    const parameters = { name: leaf.name, value: leaf.value, data: leaf, treePathInfo: [{ name: 'Climate <unsafe>' }, { name: leaf.name }] };
+    const label = leaf.label.formatter(parameters);
+    assert.match(label, /20[.,]0 °C/, 'Visible leaf labels must show original values with their precision, not the projected weight.');
+    const tooltip = normalizedOption.tooltip.formatter(parameters);
+    assert.match(tooltip, /20[.,]0 °C/);
+    assert.match(tooltip, /50/);
+    assert.match(tooltip, /Normalized weight/);
+    assert.match(tooltip, /&lt;unsafe&gt;/);
+    assert.doesNotMatch(tooltip, /<unsafe>/);
+    const parentTip = normalizedOption.tooltip.formatter({ name: 'Climate', value: 130, data: normalizedOption.series[0].data[0] });
+    assert.match(parentTip, /Sum of normalized weights/);
+    assert.doesNotMatch(parentTip, /°C|130\s*%/, 'Mixed original units must never become a physical parent sum or percentage.');
+    const emptyTitle = render({ ...normalizedHierarchy, treemap: { ...normalizedHierarchy.treemap, title: '' } }, 1000, mode).option;
+    assert.equal(emptyTitle.title.show, true, 'The weight notice remains visible even without a configured diagram title.');
+    const pinned = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 1000, height: 400 });
+    pinned.setOption({ ...normalizedOption, animation: false }, true);
+    assert.match(pinned.renderToSVGString(), /Normalized weights/);
+    assert.equal(pinned.getModel().getSeriesByIndex(0).getData().tree.getNodeById('variable-1').getValue(), 50);
+    pinned.dispose();
+}
 console.log('Treemap layout verified.');

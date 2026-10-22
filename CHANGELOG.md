@@ -19,6 +19,12 @@
 
 ## Neu
 
+- Treemap und Sunburst bieten optionale Min/Max-normalisierte Blattgewichte
+  und eigene Originaleinheiten sowie Nachkommastellen je Quelle. Beschriftungen,
+  Tooltips und beide Vorschauen erhalten Originalwerte; normalisierte Gruppen
+  werden ausdrücklich als Gewichte statt physikalischer Summen gekennzeichnet.
+  Bestehende Konfigurationen, Designs und Schutzgrenzen bleiben erhalten.
+
 - EChartsScatter unterstützt bis zu 16 benannte X/Y-Vergleichsgruppen mit
   optionaler Größenquelle je Gruppe. Gemeinsame Legendenansicht, unabhängige
   Intervallverknüpfungen, Original-Tooltips und gekennzeichnete Vorschauen

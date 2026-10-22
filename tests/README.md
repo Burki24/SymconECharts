@@ -1,5 +1,22 @@
 # Tests
 
+## Treemap/Sunburst: normalisierte Gewichte und Blattformatierung
+
+`php tests/treemap_model.php` begann RED an der fehlenden Projektion und prüft
+Gewichte, Originale, Bereiche und unveränderte Altmodelle.
+`php tests/gateway_gauges.php --hierarchy-normalization` prüft den echten
+Modul-/Gateway-Pfad mit synthetischem Kernel, native und manuelle Formate,
+negative/außerhalb liegende Originale, ungültige späte Quellen, Entwürfe,
+wiederholtes ApplyChanges sowie beide Designer, Vorschauen und Ausgaben.
+100 Quellen mit acht Ebenen und 800 Knoten bleiben innerhalb der Budgets;
+101 Quellen werden abgewiesen. Es werden keine Live-Daten oder Archivregeln geändert.
+
+`node tests/treemap_layout.js` und `node tests/sunburst_layout.js` prüfen
+Originalbeschriftungen, escaped Tooltips, Gewichtshinweise, Gruppensummen ohne
+falsche Einheiten und die gepinnte native ECharts-Geometrie in beiden Adaptern.
+Alte Navigation und Designer bleiben in den bestehenden Prüfungen enthalten.
+Live-Abnahme nach Modulupdate und tatsächlicher IPSView-Client bleiben separat.
+
 ## Scatter/Bubble: benannte Vergleichsgruppen
 
 `php tests/gateway_gauges.php --scatter-groups` begann RED an den fehlenden

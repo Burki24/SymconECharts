@@ -1,6 +1,21 @@
 {
     "translations": {
         "de": {
+            "Normalize leaf weights using source Min/Max": "Blattgewichte anhand Quellen-Min/Max normalisieren",
+            "Normalization changes areas or angles only. Original values keep their own unit and decimals; normalized group weights are not physical totals.": "Die Normalisierung verändert nur Flächen oder Winkel. Originalwerte behalten ihre eigene Einheit und Nachkommastellen; normalisierte Gruppengewichte sind keine physikalischen Summen.",
+            "Minimum (normalization)": "Minimum (Normalisierung)",
+            "Maximum (normalization)": "Maximum (Normalisierung)",
+            "Use variable presentation": "Variablendarstellung verwenden",
+            "Unit": "Einheit",
+            "Decimals": "Nachkommastellen",
+            "Normalized weights, not physical totals.": "Normalisierte Gewichte, keine Mengensummen.",
+            "Normalized weights, not physical totals. Example data.": "Normalisierte Gewichte, keine Mengensummen. Beispieldaten.",
+            "Sum of normalized weights": "Summe normalisierter Gewichte",
+            "Normalized weight (0–100)": "Normalisiertes Gewicht (0–100)",
+            "Normalization range": "Normalisierungsbereich",
+            "Hierarchy leaf formatting requires a unit of at most 80 characters and 0 to 6 decimals.": "Die Blattformatierung erfordert eine Einheit mit höchstens 80 Zeichen und 0 bis 6 Nachkommastellen.",
+            "Normalization requires finite source limits with minimum below maximum.": "Die Normalisierung erfordert endliche Quellengrenzen mit Minimum kleiner Maximum.",
+            "Invalid hierarchy preview sources.": "Ungültige Hierarchiequellen für die Vorschau.",
             "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts.": "Ein gemeinsames EChartsGateway genügt für alle ECharts-Diagramminstanzen. Bei weiteren Diagrammen das vorhandene Gateway auswählen.",
             "Title": "Titel",
             "Treemap for IPSView": "Treemap für IPSView",

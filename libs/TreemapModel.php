@@ -6,6 +6,8 @@ namespace SymconECharts;
 
 use InvalidArgumentException;
 
+require_once __DIR__ . '/EChartsNormalization.php';
+
 /** Builds bounded, user-grouped hierarchy data from current numeric Symcon values. */
 final class TreemapModel
 {
@@ -77,9 +79,9 @@ final class TreemapModel
     /**
      * @param list<array<string,mixed>> $sources
      * @param array<int,array{Value:float,Timestamp:int,Name:string}> $values
-     * @return array{data:list<array<string,mixed>>,positiveCount:int,total:float,depth:int,nodeCount:int}
+     * @return array{data:list<array<string,mixed>>,positiveCount:int,total:float,depth:int,nodeCount:int,normalized?:bool}
      */
-    public static function Build(array $sources, array $values, string $family = 'Treemap'): array
+    public static function Build(array $sources, array $values, string $family = 'Treemap', bool $normalized = false): array
     {
         if (!in_array($family, ['Treemap', 'Sunburst'], true)) {
             throw new InvalidArgumentException('Unsupported hierarchy family.');
@@ -107,10 +109,11 @@ final class TreemapModel
             $path = self::Path($source);
             $depth = max($depth, count($path) + 1);
             $value = $values[$id]['Value'] ?? null;
-            if ((!is_int($value) && !is_float($value)) || !is_finite((float) $value) || $value < 0) {
+            if ((!is_int($value) && !is_float($value)) || !is_finite((float) $value) || (!$normalized && $value < 0)) {
                 throw new InvalidArgumentException($family . ' weights must be finite and non-negative.');
             }
-            $value = (float) $value;
+            $originalValue = (float) $value;
+            $value = $normalized ? EChartsNormalization::Value($originalValue, $source) : $originalValue;
             $label = $source['Label'] ?? '';
             if (!is_string($label)) {
                 throw new InvalidArgumentException($family . ' labels must be text.');
@@ -132,6 +135,17 @@ final class TreemapModel
                 'value'     => $value,
                 'timestamp' => $values[$id]['Timestamp']
             ];
+            if ($normalized || array_key_exists('Unit', $source) || array_key_exists('Decimals', $source)) {
+                $unit = $source['Unit'] ?? '';
+                $decimals = $source['Decimals'] ?? 1;
+                if (!is_string($unit) || mb_strlen($unit) > 80 || !is_int($decimals) || $decimals < 0 || $decimals > 6) {
+                    throw new InvalidArgumentException('Hierarchy leaf formatting requires a unit of at most 80 characters and 0 to 6 decimals.');
+                }
+                $leaf += ['originalValue' => $originalValue, 'unit' => $unit, 'decimals' => $decimals];
+            }
+            if ($normalized) {
+                $leaf += EChartsNormalization::Metadata($originalValue, $source);
+            }
             $siblings = &$groups;
             $prefix = [];
             foreach ($path as $level => $groupName) {
@@ -161,6 +175,9 @@ final class TreemapModel
         }
         $result = ['data' => $groups, 'positiveCount' => $positiveCount, 'total' => $total,
             'depth'       => $depth, 'nodeCount' => $nodeCount];
+        if ($normalized) {
+            $result['normalized'] = true;
+        }
         $encoded = json_encode($result, JSON_THROW_ON_ERROR | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
         if (strlen($encoded) > self::MAXIMUM_MODEL_BYTES) {
             throw new InvalidArgumentException('The hierarchy exceeds the 200000-byte model budget.');

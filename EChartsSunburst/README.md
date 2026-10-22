@@ -23,7 +23,7 @@ Pfadbestandteile sind unzulässig. Gruppennamen dürfen bis zu 80 Zeichen,
 Blattbeschriftungen bis zu 120 Zeichen enthalten. Maximal 100 Variablen und
 800 Knoten sind zulässig; ein zu großes Datenmodell wird sichtbar abgelehnt.
 
-Verwendet wird ausschließlich der aktuelle Rohwert. Negative oder nicht
+Standardmäßig wird der aktuelle Rohwert verwendet. Negative oder nicht
 endliche Werte werden abgewiesen. Nullwerte sind zulässig, haben aber keinen
 sichtbaren Winkel; bei ausschließlich Nullwerten erscheint ein Hinweis.
 Für sinnvolle Winkel sollten die Werte vergleichbare Einheiten besitzen.
@@ -51,6 +51,36 @@ aus einer vergrößerten Gruppenansicht zur übergeordneten Gruppe zurück.
 Die gewählte Gruppenansicht bleibt bei Werteaktualisierung und
 Größenänderung erhalten, solange diese Gruppe noch vorhanden ist und die
 Klicknavigation aktiviert bleibt.
+
+## Optionale Gewichte und Originalformatierung
+
+Mit **Blattgewichte anhand Quellen-Min/Max normalisieren** erhält jede Quelle
+ein eigenes **Minimum** und **Maximum** (Standard 0/100). Der aktuelle Wert wird
+auf ein Gewicht von 0 bis 100 abgebildet. Minimum muss kleiner Maximum sein;
+Grenzen und Differenz müssen endlich sein. Grenzen werden nicht aus aktuellen
+Extrema oder Variablendarstellungen abgeleitet. Beispielsweise erhalten
+20 °C bei −20 bis 60 °C und 50 % bei 0 bis 100 % beide Gewicht 50.
+Negative Originalwerte sind in diesem Modus zulässig; außerhalb der Grenzen
+wird nur das Gewicht begrenzt, nicht der Originalwert verändert.
+
+Die Winkel verwenden diese Gewichte. Elternsegmente summieren Kindergewichte,
+nicht unterschiedliche Originaleinheiten; ihre Summe darf über 100 liegen.
+Ein sichtbarer Hinweis und Gruppentooltips kennzeichnen:
+**Normalisierte Gewichte sind keine physikalischen Mengensummen.** Bei lauter
+Nullgewichten bleibt das Diagramm leer statt eine Gleichverteilung zu erfinden.
+
+**Variablendarstellung verwenden** übernimmt je Quellenzeile Einheit und
+Nachkommastellen der Symcon-Variable. Andernfalls gelten die eigene **Einheit**
+(bis 80 Zeichen) und **Nachkommastellen** (0–6). Die Formatierung kann unabhängig
+von der Normalisierung verwendet werden. Blattbeschriftung und Tooltip zeigen
+Originalwerte; der normalisierte Tooltip ergänzt Gewicht und Bereich.
+Die Vorschau zeichnet nur Beispieldaten, bei Normalisierung jeweils die
+Bereichsmitte, und bleibt ausdrücklich von aktuellen Werten getrennt.
+
+Alte Quellen ohne Formatfelder behalten ihre bisherige unitlose Darstellung
+mit bis zu drei Nachkommastellen. Normalisierung ist standardmäßig aus;
+Konfigurationen, Designs und sämtliche Hierarchie-/Ausgabegrenzen bleiben
+unverändert. Eigene Einheiten allein rechnen Rohwerte nicht ineinander um.
 
 Öffentliche PHP-Funktionen: `ECSB_GetSunburstData($id)` liefert das
 aktuelle hierarchische Datenmodell als JSON.

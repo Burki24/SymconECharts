@@ -570,6 +570,16 @@ final class EChartsAsset
         return self::StartupJavaScript() . "\n" . self::NormalizeLineEndings($content);
     }
 
+    /** Loads original-value formatting only for the two manual hierarchy families. */
+    public static function HierarchyValuesJavaScript(): string
+    {
+        $content = @file_get_contents(__DIR__ . '/echarts-hierarchy-values.js');
+        if ($content === false || $content === '') {
+            throw new RuntimeException('The hierarchy value formatting script could not be loaded.');
+        }
+        return self::NormalizeLineEndings($content);
+    }
+
     /** Loads ID-stable selection and legend navigation shared by chart families. */
     public static function SeriesSelectionJavaScript(): string
     {

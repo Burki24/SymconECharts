@@ -1045,6 +1045,11 @@ if (array_slice($argv, 1) === ['--tree-health-depth']) {
     exit(0);
 }
 
+if (array_slice($argv, 1) === ['--hierarchy-normalization']) {
+    require __DIR__ . '/hierarchy_normalization.php';
+    exit(0);
+}
+
 if (array_slice($argv, 1) === ['--treemap-hierarchy']) {
     require __DIR__ . '/treemap_hierarchy.php';
     echo "Treemap deep hierarchy integration verified.\n";

@@ -106,6 +106,10 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   optionalen Gruppenpfaden, höchstens acht Ebenen einschließlich Blatt,
   100 Quellen und 800 Knoten. Alte Group-/Subgroup-Quellen bleiben unverändert
   verwendbar; gemeinsame Quellenprüfung und Modellbildung liegen unter `libs`.
+  ADR 0090 ergänzt für beide Familien optionale Min/Max-Gewichte auf 0–100
+  und eigene Originaleinheiten/-präzision je Blatt. Alte Rohwertmodelle und
+  Designs bleiben unverändert. Gemeinsame Quellen-/Modell-/Formatlogik wird
+  wiederverwendet; Gruppensummen normalisierter Gewichte sind keine Mengensummen.
   Archivierte Werte mehrerer Variablen werden als Parallelkoordinaten nach
   gemeinsamen abgeschlossenen Stunden- oder Tagesintervallen im eigenen
   Gerätemodul `EChartsParallel` dargestellt.

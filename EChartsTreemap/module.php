@@ -109,6 +109,7 @@ class EChartsTreemap extends IPSModuleStrict
             $this->RegisterTransientRefresh('ECTM');
             $this->RegisterPropertyString('Title', '');
             $this->RegisterPropertyString('Sources', '[]');
+            $this->RegisterPropertyBoolean('NormalizeValues', false);
             foreach (['', 'IPSView'] as $prefix) {
                 foreach (self::DESIGN_DEFAULTS as $name => $default) {
                     match (gettype($default)) {
@@ -193,7 +194,7 @@ class EChartsTreemap extends IPSModuleStrict
                 ['caption' => 'Frames and navigation', 'start' => 'GroupGapWidth']
             ]);
             $fields = [
-                'Title', 'Sources', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
+                'Title', 'Sources', 'NormalizeValues', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
                 'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent',
                 ...array_keys(self::DESIGN_DEFAULTS),
                 ...array_map(static fn (string $name): string => 'IPSView' . $name, array_keys(self::DESIGN_DEFAULTS))
@@ -415,14 +416,15 @@ class EChartsTreemap extends IPSModuleStrict
             $this->BarPreviewValue($values, 'TitleFontSizePercent', 'integer', $ipsView)
         );
         $rows = $values['Sources'] ?? json_decode($this->ReadPropertyString('Sources'), true);
+        $normalized = (bool) ($values['NormalizeValues'] ?? $this->ReadPropertyBoolean('NormalizeValues'));
         try {
-            $model = EChartsHierarchySources::Preview($rows, 'Treemap');
-        } catch (InvalidArgumentException) {
+            $model = EChartsHierarchySources::Preview($rows, 'Treemap', $normalized);
+        } catch (InvalidArgumentException $exception) {
             return $svg . '<text x="32" y="100" fill="' . EChartsBarPreview::E($palette['text']) . '">'
-                . EChartsBarPreview::E($this->Translate('Configure a valid hierarchy path with up to seven groups.')) . '</text></svg>';
+                . EChartsBarPreview::E($this->Translate($exception->getMessage())) . '</text></svg>';
         }
         $svg = str_replace('role="img"', 'role="img" data-preview-sources="' . $model['sourceCount']
-            . '" data-preview-depth="' . $model['depth'] . '"', $svg);
+            . '" data-preview-depth="' . $model['depth'] . '"' . ($normalized ? ' data-normalized="true"' : ''), $svg);
         $labelColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'LabelColor', 'integer', $ipsView), $palette['text']);
         $groupLabelColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'GroupLabelColor', 'integer', $ipsView), $labelColor);
         $groupColorsProperty = $ipsView && !($values['IPSViewUseTileDesign']
@@ -486,12 +488,13 @@ class EChartsTreemap extends IPSModuleStrict
                     . '" x="' . EChartsBarPreview::N($nodeX) . '" y="' . EChartsBarPreview::N($nodeY)
                     . '" width="' . EChartsBarPreview::N($nodeWidth) . '" height="' . EChartsBarPreview::N($nodeHeight)
                     . '" fill="' . EChartsBarPreview::E($fill) . '" stroke="' . EChartsBarPreview::E($frameColor)
-                    . '" stroke-width="' . $border . '"><title>' . EChartsBarPreview::E($node['name']) . '</title></rect>';
+                    . '" stroke-width="' . $border . '"><title>' . EChartsBarPreview::E($node['name']
+                        . (!$isGroup && isset($node['decimals']) ? ': ' . EChartsHierarchySources::PreviewValue($node, $this->ResolveHelperTranslationLanguage()) : '')) . '</title></rect>';
                 $font = $isGroup ? ($depth === 1 ? $labelSize : $subgroupSize) : $valueSize;
                 $textColor = $isGroup ? ($depth === 1 ? $groupLabelColor : $subgroupColor) : $labelColor;
                 $header = $isGroup ? min($nodeHeight, $font + 5) : 0;
                 if ($showLabels && $nodeWidth >= 30 && $nodeHeight >= $font + 3) {
-                    $text = $node['name'] . (!$isGroup && $showValues ? ' ' . $node['value'] : '');
+                    $text = $node['name'] . (!$isGroup && $showValues ? ' ' . EChartsHierarchySources::PreviewValue($node, $this->ResolveHelperTranslationLanguage()) : '');
                     $svg .= '<text x="' . EChartsBarPreview::N($nodeX + 3) . '" y="'
                         . EChartsBarPreview::N($nodeY + $font + 1) . '" font-size="' . $font . '" fill="'
                         . EChartsBarPreview::E($textColor) . '">'
@@ -514,7 +517,8 @@ class EChartsTreemap extends IPSModuleStrict
         };
         $draw($model['data'], 32, 78, 656, 240, 1);
         $svg .= '<text x="32" y="58" font-size="10" fill="' . EChartsBarPreview::E($palette['muted']) . '">'
-            . EChartsBarPreview::E($this->Translate('Schematic hierarchy; zoom in the chart to inspect small nodes.')) . '</text>';
+            . EChartsBarPreview::E($this->Translate($normalized ? 'Normalized weights, not physical totals. Example data.'
+                : 'Schematic hierarchy; zoom in the chart to inspect small nodes.')) . '</text>';
         if ($this->BarPreviewValue($values, 'ShowBreadcrumb', 'boolean', $ipsView)) {
             $svg .= '<text x="32" y="341" font-size="11" fill="' . EChartsBarPreview::E($palette['muted'])
                 . '">' . EChartsBarPreview::E($this->Translate('Navigation path')) . '</text>';
@@ -541,7 +545,7 @@ class EChartsTreemap extends IPSModuleStrict
             $values[$id] = [...$this->ReadCurrentSource($id), 'Name' => IPS_GetName($id)];
         }
         try {
-            $model = TreemapModel::Build($sources, $values);
+            $model = TreemapModel::Build($sources, $values, 'Treemap', $this->ReadPropertyBoolean('NormalizeValues'));
         } catch (InvalidArgumentException $exception) {
             $this->WriteAttributeString('LastError', $exception->getMessage());
             $this->DebugEChartsSetStatus(self::STATUS_VALUE_INVALID);
@@ -571,6 +575,10 @@ class EChartsTreemap extends IPSModuleStrict
             'ipsViewStyle' => $ipsView ? $this->IPSViewThemeCSS() : '',
             'state'        => $this->BuildVisualizationState($ipsView),
             'translations' => [
+                'Normalized weights, not physical totals.'                        => $this->Translate('Normalized weights, not physical totals.'),
+                'Sum of normalized weights'                                       => $this->Translate('Sum of normalized weights'),
+                'Normalized weight (0–100)'                                       => $this->Translate('Normalized weight (0–100)'),
+                'Normalization range'                                             => $this->Translate('Normalization range'),
                 'Configure valid Treemap variables.'                              => $this->Translate('Configure valid Treemap variables.'),
                 'Connect an active EChartsGateway.'                               => $this->Translate('Connect an active EChartsGateway.'),
                 'The Treemap values could not be loaded.'                         => $this->Translate('The Treemap values could not be loaded.'),
@@ -590,7 +598,7 @@ class EChartsTreemap extends IPSModuleStrict
             'replacements' => [
                 '{{ECHARTS_SCRIPT}}'           => EChartsAsset::TreemapJavaScript(),
                 '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
-                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript(),
+                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript() . "\n" . EChartsAsset::HierarchyValuesJavaScript(),
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
         ]);
@@ -640,7 +648,7 @@ class EChartsTreemap extends IPSModuleStrict
     /** @return list<array<string,mixed>> */
     private function GetValidatedSources(): array
     {
-        return EChartsHierarchySources::Resolve($this->ReadPropertyString('Sources'), 'Treemap');
+        return EChartsHierarchySources::Resolve($this->ReadPropertyString('Sources'), 'Treemap', $this->ReadPropertyBoolean('NormalizeValues'));
     }
 
     private function IsValidDesign(string $prefix): bool

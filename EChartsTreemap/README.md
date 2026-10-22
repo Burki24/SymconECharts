@@ -24,7 +24,7 @@ unzulässig. Jeder Gruppenname darf bis zu 80 Zeichen, die Blattbeschriftung
 bis zu 120 Zeichen enthalten. Insgesamt gelten maximal 100 Variablen und
 800 Knoten; ein zu großes Datenmodell wird sichtbar abgelehnt.
 
-Die Fläche verwendet ausschließlich den aktuellen Rohwert der Variable.
+Standardmäßig verwendet die Fläche den aktuellen Rohwert der Variable.
 Negative Werte sind für Flächen nicht zulässig und führen zu einem Fehler.
 Nullwerte sind zulässig, haben aber keine sichtbare Fläche. Wenn alle Werte
 null sind, erscheint ein entsprechender Hinweis. Wählen Sie daher Variablen
@@ -75,6 +75,37 @@ bei mehr als drei Ebenen zeigt die klickbare Ansicht zunächst drei Ebenen
 und erschließt weitere Gruppen durch Hineinklicken.
 Die gewählte Gruppenansicht bleibt bei Werteaktualisierungen erhalten,
 solange diese Gruppe noch vorhanden ist.
+
+## Optionale Gewichte und Originalformatierung
+
+Mit **Blattgewichte anhand Quellen-Min/Max normalisieren** berechnet jede Quelle
+ihr Gewicht von 0 bis 100 anhand ihres eigenen **Minimums** und **Maximums**.
+Diese Grenzen sind ausdrücklich festgelegt (Standard 0/100), nicht automatisch
+aus Messwerten oder Variablendarstellungen abgeleitet. Minimum muss kleiner
+Maximum sein; beide und ihre Differenz müssen endlich sein. Beispielsweise
+ergeben 20 °C bei −20 bis 60 °C sowie 50 % bei 0 bis 100 % beide Gewicht 50.
+Im aktivierten Modus sind auch negative Originalwerte zulässig. Werte außerhalb
+der Grenzen werden nur im Gewicht begrenzt; das Original bleibt erhalten.
+
+Die Fläche folgt dem Gewicht, nicht einer Summe verschiedener Originaleinheiten.
+Gruppen summieren die Gewichte ihrer Blätter und dürfen über 100 liegen.
+Der sichtbare Hinweis und die Gruppentooltips kennzeichnen ausdrücklich:
+**Normalisierte Gewichte sind keine physikalischen Mengensummen.** Bei lauter
+Nullgewichten entsteht keine künstliche gleichmäßige Verteilung.
+
+Je Quellenzeile kann **Variablendarstellung verwenden** Einheit und
+Nachkommastellen der Symcon-Variable übernehmen. Ohne diese Auswahl gelten
+die eigene **Einheit** (bis 80 Zeichen) und **Nachkommastellen** (0–6).
+Diese Originalformatierung ist auch ohne Normalisierung nutzbar. Zahlen im
+Blatt und Tooltip zeigen Originalwerte; der normalisierte Tooltip ergänzt
+Gewicht und Bereich. Die SVG-Vorschau verwendet ausdrücklich Beispieldaten,
+im normalisierten Modus die Mitte des jeweiligen Bereichs, keine Live-Werte.
+
+Alte Quellen ohne neue Formatfelder bleiben unverändert unitlos mit bis zu
+drei Nachkommastellen. Normalisierung bleibt standardmäßig aus; Quellenlisten,
+Designs, Hierarchietiefe, Knotenanzahl und Ausgabebudgets werden nicht geändert.
+Ohne Normalisierung sollten weiterhin sinnvoll vergleichbare Rohwerte gewählt
+werden; eigene Einheiten rechnen diese nicht automatisch ineinander um.
 
 Öffentliche PHP-Funktionen: `ECTM_GetTreemapData($id)` liefert das aktuelle
 hierarchische Datenmodell als JSON. `ECTM_GetTreemapDiagnostic($id)` liefert

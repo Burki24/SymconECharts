@@ -113,6 +113,7 @@ class EChartsSunburst extends IPSModuleStrict
             $this->RegisterTransientRefresh('ECSB');
             $this->RegisterPropertyString('Title', '');
             $this->RegisterPropertyString('Sources', '[]');
+            $this->RegisterPropertyBoolean('NormalizeValues', false);
             foreach (['', 'IPSView'] as $prefix) {
                 foreach (self::DESIGN_DEFAULTS as $name => $default) {
                     match (gettype($default)) {
@@ -197,7 +198,7 @@ class EChartsSunburst extends IPSModuleStrict
                 ['caption' => 'Rings and navigation', 'start' => 'InnerRadiusPercent']
             ]);
             $fields = [
-                'Title', 'Sources', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
+                'Title', 'Sources', 'NormalizeValues', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
                 'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent',
                 ...array_keys(self::DESIGN_DEFAULTS),
                 ...array_map(static fn (string $name): string => 'IPSView' . $name, array_keys(self::DESIGN_DEFAULTS))
@@ -419,14 +420,15 @@ class EChartsSunburst extends IPSModuleStrict
             $this->BarPreviewValue($values, 'TitleFontSizePercent', 'integer', $ipsView)
         );
         $rows = $values['Sources'] ?? json_decode($this->ReadPropertyString('Sources'), true);
+        $normalized = (bool) ($values['NormalizeValues'] ?? $this->ReadPropertyBoolean('NormalizeValues'));
         try {
-            $model = EChartsHierarchySources::Preview($rows, 'Sunburst');
-        } catch (InvalidArgumentException) {
+            $model = EChartsHierarchySources::Preview($rows, 'Sunburst', $normalized);
+        } catch (InvalidArgumentException $exception) {
             return $svg . '<text x="32" y="100" fill="' . EChartsBarPreview::E($palette['text']) . '">'
-                . EChartsBarPreview::E($this->Translate('Configure a valid hierarchy path with up to seven groups.')) . '</text></svg>';
+                . EChartsBarPreview::E($this->Translate($exception->getMessage())) . '</text></svg>';
         }
         $svg = str_replace('role="img"', 'role="img" data-preview-sources="' . $model['sourceCount']
-            . '" data-preview-depth="' . $model['depth'] . '"', $svg);
+            . '" data-preview-depth="' . $model['depth'] . '"' . ($normalized ? ' data-normalized="true"' : ''), $svg);
         $sortMode = $this->BarPreviewValue($values, 'SortMode', 'string', $ipsView);
         $total = $model['total'];
         $groupColorsProperty = $ipsView && !($values['IPSViewUseTileDesign']
@@ -506,7 +508,9 @@ class EChartsSunburst extends IPSModuleStrict
                     . '" stroke-width="' . EChartsBarPreview::N(max(1, $ringWidth))
                     . '" pathLength="100" stroke-dasharray="' . EChartsBarPreview::N(max(0, $share - 0.25))
                     . ' 100" stroke-dashoffset="' . EChartsBarPreview::N($clockwise ? -$offset : $offset + $share)
-                    . '" transform="rotate(-' . $startAngle . ' ' . $cx . ' ' . $cy . ')"/>';
+                    . '" transform="rotate(-' . $startAngle . ' ' . $cx . ' ' . $cy . ')"'
+                    . (isset($node['decimals']) ? '><title>' . EChartsBarPreview::E($node['name'] . ': '
+                        . EChartsHierarchySources::PreviewValue($node, $this->ResolveHelperTranslationLanguage())) . '</title></circle>' : '/>');
                 if ($showLabels && $ringLabels[$level] && 3.6 * $share >= $labelMinAngle && $share >= 3 && $ringWidth >= 8) {
                     $angle = -$startAngle + ($clockwise ? 1 : -1) * 3.6 * ($offset + $share / 2);
                     $radians = deg2rad($angle);
@@ -519,7 +523,7 @@ class EChartsSunburst extends IPSModuleStrict
                         'tangential' => $angle + 90,
                         default      => 0
                     };
-                    $text = $node['name'] . ($showValues && !isset($node['children']) ? ' ' . $node['value'] : '');
+                    $text = $node['name'] . ($showValues && !isset($node['children']) ? ' ' . EChartsHierarchySources::PreviewValue($node, $this->ResolveHelperTranslationLanguage()) : '');
                     $svg .= '<text x="' . EChartsBarPreview::N($x) . '" y="' . EChartsBarPreview::N($y)
                         . '" text-anchor="middle" dominant-baseline="middle" font-size="' . $size
                         . '" fill="' . EChartsBarPreview::E($labelColor) . '" transform="rotate('
@@ -543,7 +547,8 @@ class EChartsSunburst extends IPSModuleStrict
             }
         }
         $svg .= '<text x="32" y="352" font-size="10" fill="' . EChartsBarPreview::E($palette['muted']) . '">'
-            . EChartsBarPreview::E($this->Translate('Schematic hierarchy; zoom in the chart to inspect small nodes.')) . '</text>';
+            . EChartsBarPreview::E($this->Translate($normalized ? 'Normalized weights, not physical totals. Example data.'
+                : 'Schematic hierarchy; zoom in the chart to inspect small nodes.')) . '</text>';
         return $svg . '</svg>';
     }
 
@@ -566,7 +571,7 @@ class EChartsSunburst extends IPSModuleStrict
             $values[$id] = [...$this->ReadCurrentSource($id), 'Name' => IPS_GetName($id)];
         }
         try {
-            $model = TreemapModel::Build($sources, $values, 'Sunburst');
+            $model = TreemapModel::Build($sources, $values, 'Sunburst', $this->ReadPropertyBoolean('NormalizeValues'));
         } catch (InvalidArgumentException $exception) {
             $this->WriteAttributeString('LastError', $exception->getMessage());
             $this->DebugEChartsSetStatus(self::STATUS_VALUE_INVALID);
@@ -596,6 +601,10 @@ class EChartsSunburst extends IPSModuleStrict
             'ipsViewStyle' => $ipsView ? $this->IPSViewThemeCSS() : '',
             'state'        => $this->BuildVisualizationState($ipsView),
             'translations' => [
+                'Normalized weights, not physical totals.'                         => $this->Translate('Normalized weights, not physical totals.'),
+                'Sum of normalized weights'                                        => $this->Translate('Sum of normalized weights'),
+                'Normalized weight (0–100)'                                        => $this->Translate('Normalized weight (0–100)'),
+                'Normalization range'                                              => $this->Translate('Normalization range'),
                 'Configure valid Sunburst variables.'                              => $this->Translate('Configure valid Sunburst variables.'),
                 'Connect an active EChartsGateway.'                                => $this->Translate('Connect an active EChartsGateway.'),
                 'The Sunburst values could not be loaded.'                         => $this->Translate('The Sunburst values could not be loaded.'),
@@ -615,7 +624,7 @@ class EChartsSunburst extends IPSModuleStrict
             'replacements' => [
                 '{{ECHARTS_SCRIPT}}'           => EChartsAsset::SunburstJavaScript(),
                 '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
-                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript(),
+                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript() . "\n" . EChartsAsset::HierarchyValuesJavaScript(),
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
         ]);
@@ -662,10 +671,10 @@ class EChartsSunburst extends IPSModuleStrict
         return null;
     }
 
-    /** @return list<array{VariableID:int,Group:string,Subgroup:string,Label:string,Path:list<string>}> */
+    /** @return list<array<string,mixed>> */
     private function GetValidatedSources(): array
     {
-        return EChartsHierarchySources::Resolve($this->ReadPropertyString('Sources'), 'Sunburst');
+        return EChartsHierarchySources::Resolve($this->ReadPropertyString('Sources'), 'Sunburst', $this->ReadPropertyBoolean('NormalizeValues'));
     }
 
     private function IsValidDesign(string $prefix): bool

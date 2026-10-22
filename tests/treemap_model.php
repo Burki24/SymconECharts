@@ -132,3 +132,56 @@ try {
 } catch (InvalidArgumentException) {
 }
 echo "Eight-level hierarchy paths, stable legacy IDs and resource budgets verified.\n";
+
+$weightedSources = [
+    ['VariableID' => 10, 'Group' => 'Climate', 'Label' => 'Same', 'Minimum' => -20, 'Maximum' => 60, 'Unit' => '°C', 'Decimals' => 1],
+    ['VariableID' => 11, 'Group' => 'Climate', 'Label' => 'Same', 'Minimum' => 0, 'Maximum' => 40, 'Unit' => '%', 'Decimals' => 0]
+];
+foreach (['Treemap', 'Sunburst'] as $family) {
+    $normalized = TreemapModel::Build($weightedSources, $values, $family, true);
+    $leaves = $normalized['data'][0]['children'];
+    if (($normalized['normalized'] ?? false) !== true || $normalized['total'] !== 75.0
+        || $leaves[0]['value'] !== 50.0 || $leaves[1]['value'] !== 25.0
+        || $leaves[0]['originalValue'] !== 20.0 || $leaves[1]['originalValue'] !== 10.0
+        || $leaves[0]['unit'] !== '°C' || $leaves[0]['decimals'] !== 1
+        || $leaves[1]['unit'] !== '%' || $leaves[0]['id'] === $leaves[1]['id']) {
+        throw new RuntimeException('Hierarchy weights must normalize per source, retaining original display metadata and identities.');
+    }
+    foreach ([-1000.0 => 0.0, 1000.0 => 100.0] as $original => $weight) {
+        $outside = $values;
+        $outside[10]['Value'] = (float) $original;
+        $node = TreemapModel::Build([$weightedSources[0]], $outside, $family, true)['data'][0]['children'][0];
+        if ($node['value'] !== $weight || $node['originalValue'] !== (float) $original) {
+            throw new RuntimeException('Hierarchy clamping must affect geometry only, not original values.');
+        }
+    }
+    foreach ([[1, 1], [2, 1], [0, INF], ['0', 100], [-1.0e308, 1.0e308]] as [$minimum, $maximum]) {
+        $invalid = $weightedSources;
+        $invalid[1]['Minimum'] = $minimum;
+        $invalid[1]['Maximum'] = $maximum;
+        try {
+            TreemapModel::Build($invalid, $values, $family, true);
+            throw new LogicException('Invalid hierarchy normalization limits must fail, including late sources.');
+        } catch (InvalidArgumentException) {
+        }
+    }
+    if (TreemapModel::Build($sources, $values, $family, false) !== TreemapModel::Build($sources, $values, $family)) {
+        throw new RuntimeException('Disabled hierarchy normalization must preserve legacy models exactly.');
+    }
+    $zeroWeights = $weightedSources;
+    foreach ($zeroWeights as &$source) {
+        $source['Minimum'] = 100;
+        $source['Maximum'] = 200;
+    }
+    unset($source);
+    $zero = TreemapModel::Build($zeroWeights, $values, $family, true);
+    if ($zero['positiveCount'] !== 0 || $zero['total'] !== 0.0 || count($zero['data'][0]['children']) !== 2) {
+        throw new RuntimeException('Zero normalized weights retain source identities without inventing positive areas.');
+    }
+    try {
+        TreemapModel::Build($manySources, $manyValues, $family, true);
+        throw new LogicException('Normalized models must keep the same HTML-safe byte guard.');
+    } catch (InvalidArgumentException) {
+    }
+}
+echo "Hierarchy normalized weights and original values verified.\n";

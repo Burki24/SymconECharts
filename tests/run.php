@@ -80,6 +80,7 @@ $commands = [
     ['Test 300-node Graph integration', 'php tests/gateway_gauges.php --graph-large'],
     ['Test twelve-level Tree integration', 'php tests/gateway_gauges.php --tree-depth'],
     ['Test twelve-level Tree System Health integration', 'php tests/gateway_gauges.php --tree-health-depth'],
+    ['Test normalized hierarchy weights and leaf formats', 'php tests/gateway_gauges.php --hierarchy-normalization'],
     ['Test deep Treemap hierarchies', 'php tests/gateway_gauges.php --treemap-hierarchy'],
     ['Test deep Sunburst hierarchies', 'php tests/gateway_gauges.php --sunburst-hierarchy'],
     ['Test normalized current comparisons', 'php tests/gateway_gauges.php --current-normalization'],

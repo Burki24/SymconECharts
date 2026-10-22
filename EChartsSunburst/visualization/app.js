@@ -7,6 +7,7 @@
     var emptyElement = document.getElementById('echarts-sunburst-empty');
     var warningElement = document.getElementById('echarts-sunburst-warning');
     var design = window.SYMC_ECHARTS_DESIGN;
+    var hierarchyValues = window.SYMC_ECHARTS_HIERARCHY_VALUES;
     var chart = null;
     var currentTheme = null;
     var currentState = bootstrap.state || null;
@@ -51,12 +52,6 @@
         };
     }
 
-    function escapeHTML(value) {
-        return String(value).replace(/[&<>"']/g, function (character) {
-            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character];
-        });
-    }
-
     function nodesFor(data, colors, style) {
         var seriesColors = colors.seriesColors && colors.seriesColors.length ? colors.seriesColors : [colors.accent];
         return (Array.isArray(data) ? data : []).map(function (group, index) {
@@ -83,6 +78,9 @@
         var compact = width < 350 || height < 260;
         var titleSize = design.fontSizePercent(style.titleFontSizePercent, 18);
         var titleLayout = design.chartTitleLayout(bootstrap, sunburst.title, titleSize);
+        var notice = sunburst.normalized === true ? translate('Normalized weights, not physical totals.') : '';
+        var noticeSize = design.fontSizePercent(style.titleFontSizePercent, 12);
+        if (notice) { titleLayout.contentTop += Math.ceil(notice.length * noticeSize * 0.65 / Math.max(80, width - 32)) * (noticeSize + 3) + 8; }
         var showTitle = titleLayout.show;
         var contentTop = titleLayout.contentTop;
         var contentHeight = Math.max(1, height - contentTop - 8);
@@ -118,7 +116,9 @@
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
             aria: { enabled: true, decal: { show: false } },
             title: {
-                show: showTitle, text: String(sunburst.title || ''), left: 'center', top: titleLayout.top,
+                show: showTitle || Boolean(notice), text: String(sunburst.title || ''), left: 'center', top: titleLayout.top,
+                subtext: notice, subtextStyle: { color: colors.text, fontSize: noticeSize, lineHeight: noticeSize + 3,
+                    width: Math.max(80, width - 32), overflow: 'break' },
                 textStyle: { color: style.titleColor || colors.text, fontSize: titleSize }
             },
             tooltip: {
@@ -126,11 +126,7 @@
                 trigger: 'item', confine: true,
                 extraCssText: 'max-width:min(520px,80vw);white-space:normal;overflow-wrap:anywhere',
                 formatter: function (parameter) {
-                    var path = (parameter.treePathInfo || []).map(function (part) { return part.name; })
-                        .filter(Boolean).join(' / ');
-                    var value = Number(parameter.value);
-                    return escapeHTML(path || parameter.name) + ': '
-                        + escapeHTML(value.toLocaleString(undefined, { maximumFractionDigits: 3 }));
+                    return hierarchyValues.tooltip(parameter, sunburst.normalized === true, translate);
                 }
             },
             series: [{
@@ -160,7 +156,7 @@
                         var name = String(parameter.name || '');
                         var text = name;
                         if (style.showValues === true && !(parameter.data && Array.isArray(parameter.data.children))) {
-                            text += '\n' + Number(parameter.value).toLocaleString(undefined, { maximumFractionDigits: 3 });
+                            text += '\n' + hierarchyValues.valueText(Object.assign({ value: parameter.value }, parameter.data || {}));
                         }
                         // Sunburst's bundle has no LabelLayout feature. Bound deep labels using
                         // the native node geometry, which also changes after a root-to-node action.

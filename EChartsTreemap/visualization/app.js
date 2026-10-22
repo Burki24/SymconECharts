@@ -7,6 +7,7 @@
     var emptyElement = document.getElementById('echarts-treemap-empty');
     var warningElement = document.getElementById('echarts-treemap-warning');
     var design = window.SYMC_ECHARTS_DESIGN;
+    var hierarchyValues = window.SYMC_ECHARTS_HIERARCHY_VALUES;
     var chart = null;
     var currentTheme = null;
     var currentState = bootstrap.state || null;
@@ -51,12 +52,6 @@
         };
     }
 
-    function escapeHTML(value) {
-        return String(value).replace(/[&<>"']/g, function (character) {
-            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character];
-        });
-    }
-
     function nodesFor(data, colors, style) {
         var seriesColors = colors.seriesColors && colors.seriesColors.length ? colors.seriesColors : [colors.accent];
         var frameColor = style.frameColor || '';
@@ -77,8 +72,7 @@
                         fontSize: isSubgroup ? subgroupSize : valueSize };
                     if (!isSubgroup && style.showValues === true) {
                         label.formatter = function (params) {
-                            return params.name + '\n' + Number(params.value).toLocaleString(undefined,
-                                { maximumFractionDigits: 3 });
+                            return params.name + '\n' + hierarchyValues.valueText(Object.assign({ value: params.value }, params.data || {}));
                         };
                     }
                     return Object.assign({}, child, isSubgroup || frameColor
@@ -109,6 +103,9 @@
         var compact = width < 420 || height < 260;
         var titleSize = design.fontSizePercent(style.titleFontSizePercent, 18);
         var titleLayout = design.chartTitleLayout(bootstrap, treemap.title, titleSize);
+        var notice = treemap.normalized === true ? translate('Normalized weights, not physical totals.') : '';
+        var noticeSize = design.fontSizePercent(style.titleFontSizePercent, 12);
+        if (notice) { titleLayout.contentTop += Math.ceil(notice.length * noticeSize * 0.65 / Math.max(80, width - 32)) * (noticeSize + 3) + 8; }
         var showTitle = titleLayout.show;
         var labelSize = design.fontSizePercent(style.labelFontSizePercent, 12);
         var textColor = style.labelColor || colors.text;
@@ -119,18 +116,16 @@
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
             aria: { enabled: true, decal: { show: false } },
             title: {
-                show: showTitle, text: String(treemap.title || ''), left: 'center', top: titleLayout.top,
+                show: showTitle || Boolean(notice), text: String(treemap.title || ''), left: 'center', top: titleLayout.top,
+                subtext: notice, subtextStyle: { color: colors.text, fontSize: noticeSize, lineHeight: noticeSize + 3,
+                    width: Math.max(80, width - 32), overflow: 'break' },
                 textStyle: { color: style.titleColor || colors.text, fontSize: titleSize }
             },
             tooltip: {
                 trigger: 'item', confine: true,
                 extraCssText: 'max-width:min(520px,80vw);white-space:normal;overflow-wrap:anywhere',
                 formatter: function (parameter) {
-                    var path = (parameter.treePathInfo || []).map(function (part) { return part.name; })
-                        .filter(Boolean).join(' / ');
-                    var value = Number(parameter.value);
-                    return escapeHTML(path || parameter.name) + ': '
-                        + escapeHTML(value.toLocaleString(undefined, { maximumFractionDigits: 3 }));
+                    return hierarchyValues.tooltip(parameter, treemap.normalized === true, translate);
                 }
             },
             series: [{

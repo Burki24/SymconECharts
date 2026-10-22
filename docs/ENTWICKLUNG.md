@@ -40,6 +40,14 @@ Canvas-Zeichenaufrufe für Kachel und IPSView statt nur vorhandener Titeloptione
 
 ## Aktueller Stand und Zielarchitektur
 
+Treemap und Sunburst teilen gemäß [ADR 0090](adr/0090-normalized-hierarchy-weights.md)
+optionale normalisierte Gewichte und Originalformatierung je Blatt.
+`EChartsHierarchySources`, `TreemapModel`, `EChartsNormalization` und
+`EChartsVariablePresentation` übernehmen Prüfung und Modellbildung; nur beide
+Hierarchiefamilien laden `echarts-hierarchy-values.js` für Formatierung/Tooltips.
+Ihre Geometrien und Designer bleiben lokal. Alte Feldabwesenheit erhält das
+alte Rohwertmodell, alle Quellen-/Tiefen-/Knoten-/Bytebudgets gelten unverändert.
+
 Der native Canvas-Graph-Layouttest verwendet reproduzierbare Force-Zufallswerte
 und einen zusätzlichen Randfall mit 81 explizit positionierten festen Knoten.
 Dieser reproduziert eine native affine Rundung auf `416.00000000000006` statt

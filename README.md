@@ -13,6 +13,9 @@ für exportierte Zigbee2MQTT-Netzwerkkarten sowie Treemap und Sunburst mit
 manuell festgelegten Gruppen und aktuellen numerischen Variablenwerten.
 Treemap und Sunburst erlauben optionale Gruppenpfade mit bis zu acht Ebenen
 einschließlich Quellvariable; bestehende Gruppe-/Untergruppe-Zuordnungen bleiben nutzbar.
+Beide Familien bieten außerdem optionale Min/Max-normalisierte Blattgewichte
+und eigene Originaleinheiten sowie Nachkommastellen je Quelle. Originalwerte
+bleiben sichtbar; normalisierte Gruppengewichte sind keine physikalischen Summen.
 GaugeMulti unterstützt bis zu 32 Quellen mit optionaler Quellenauswahl und
 responsiven Seiten; individuelle Wertebereiche und Einheiten bleiben erhalten.
 Scatter/Bubble unterstützt bis zu 16 benannte X/Y-Vergleichsgruppen mit
