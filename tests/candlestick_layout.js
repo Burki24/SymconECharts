@@ -7,21 +7,32 @@ const vm = require('node:vm');
 const root = path.join(__dirname, '..');
 const source = fs.readFileSync(path.join(root, 'EChartsCandlestick/visualization/app.js'), 'utf8');
 const designSource = fs.readFileSync(path.join(root, 'libs/echarts-design.js'), 'utf8');
+const zoomSource = fs.readFileSync(path.join(root, 'libs/echarts-zoom.js'), 'utf8');
 const palette = { background: '#101114', text: '#f4f5f7', muted: '#969aa2', border: '#737780', accent: '#55cbb5' };
 
-function render(model, mode = 'symcon', headerVisible = true, width = 900) {
-    const chartElement = { style: {}, hidden: false, clientWidth: width, clientHeight: 500 };
+function render(model, mode = 'symcon', headerVisible = true, width = 900, engine = null) {
+    const chartElement = { style: {}, hidden: false, clientWidth: width, clientHeight: 500, addEventListener: () => {} };
     const rootElement = { style: {} };
     const errorElement = { hidden: true, textContent: '' };
     const emptyElement = { hidden: true, textContent: '' };
     const warningElement = { hidden: true, textContent: '' };
     let option;
-    const chart = { setOption: next => { option = next; }, clear: () => {}, resize: () => {}, dispose: () => {} };
+    let wheel;
+    const events = {};
+    chartElement.addEventListener = (name, callback) => { if (name === 'wheel') { wheel = callback; } };
+    chartElement.getBoundingClientRect = () => ({left:0,top:0,width:chartElement.clientWidth,height:chartElement.clientHeight});
+    const chart = { setOption: (next, replace) => { if (replace) {option = next;} if (engine) { engine.setOption(next, replace); } },
+        on: (name, listener) => { if (engine) { engine.on(name, listener); } },
+        getOption: () => engine ? engine.getOption() : option,
+        getModel: engine ? () => engine.getModel() : undefined,
+        dispatchAction: action => { if (engine) { engine.dispatchAction(action); } },
+        clear: () => { if (engine) { engine.clear(); } },
+        resize: () => { if (engine) { engine.resize({width:chartElement.clientWidth,height:chartElement.clientHeight}); } }, dispose: () => {} };
     const window = {
         SYMC_VISUALIZATION: { mode, state: { status: 'ready', chart: model }, translations: {},
             options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: mode === 'symcon' && (headerVisible), tileHeaderInset: mode === 'symcon' && (headerVisible) ? 58 : 0,
                 adaptToBackground: mode === 'ipsview' } },
-        echarts: { init: () => chart }, addEventListener: () => {}, getComputedStyle: () => ({ color: '' })
+        echarts: { init: () => chart }, addEventListener: (name, callback) => { events[name]=callback; }, getComputedStyle: () => ({ color: '' })
     };
     const document = {
         body: { appendChild: () => {} }, createElement: () => ({ style: {}, remove: () => {} }),
@@ -30,8 +41,10 @@ function render(model, mode = 'symcon', headerVisible = true, width = 900) {
             'echarts-candlestick-warning': warningElement })[id]
     };
     vm.runInNewContext(designSource, { window });
+    vm.runInNewContext(zoomSource, { window });
     vm.runInNewContext(source, { window, document });
-    return { option, chartElement, errorElement, emptyElement, warningElement, window };
+    return { get option() { return option; }, chartElement, errorElement, emptyElement, warningElement, window, events,
+        wheel: event => wheel(event), resize: width => { chartElement.clientWidth=width;events.resize(); } };
 }
 
 
@@ -164,3 +177,90 @@ for(const orientation of ['horizontal','vertical']){
     engine.dispose();
 }
 console.log('Extended Candlestick design verified.');
+
+const nativeWindow = {};
+vm.runInNewContext(fs.readFileSync(path.join(root,'libs/echarts/6.1.0/echarts.candlestick.min.js'),'utf8'),
+    {window:nativeWindow,navigator:{userAgent:'Node.js'},console,setTimeout,clearTimeout});
+nativeWindow.echarts.use(require('../.tools/echarts-runtime/node_modules/echarts/renderers').SVGRenderer);
+for (const orientation of ['vertical', 'horizontal']) {
+    const data = Array.from({length: 100}, (_, i) => ({...model.candlestick.data[i % 4], id: String(i),
+        statistics: i === 0 ? [-20, 60, -30, 80] : (i % 4 === 3 ? null : [10, 15, 8, 18])}));
+    const zoomModel = {...model, range: {key:'7d',startTimestamp:1000,endTimestamp:2000},
+        candlestick: {...model.candlestick, variableID: 12345, interval:'hour', data,
+            style: {...model.candlestick.style, enableZoom:true, orientation}}};
+    const engine = nativeWindow.echarts.init(null, null, {renderer:'svg',ssr:true,width:900,height:500});
+    const rendered = render(zoomModel, 'ipsview', true, 900, engine);
+    assert.equal(rendered.option.dataZoom.length, 2, 'Optional time zoom must have inside and slider controls.');
+    assert.equal(rendered.option.dataZoom[0][orientation === 'horizontal' ? 'yAxisIndex' : 'xAxisIndex'], 0);
+    assert.equal(rendered.option.dataZoom[0].filterMode, 'none');
+    const axis = orientation === 'horizontal' ? 'xAxis' : 'yAxis';
+    const fullExtent = engine.getModel().getComponent(axis).axis.scale.getExtent().slice();
+    engine.dispatchAction({type:'dataZoom',dataZoomIndex:0,start:30,end:70});
+    assert.deepEqual(engine.getModel().getComponent(axis).axis.scale.getExtent(), fullExtent,
+        'Offscreen candles must continue to determine the complete value scale.');
+    assert.equal(engine.getModel().getSeriesByIndex(0).getData().count(), 100);
+    assert.equal(engine.getModel().getSeriesByIndex(0).getData().hasValue(3), false);
+    assert.ok(engine.getModel().getComponent(orientation === 'horizontal' ? 'yAxis' : 'xAxis').axis.scale.getExtent()[0] > 0);
+    rendered.window.handleMessage({status:'ready',chart:zoomModel});
+    assert.equal(rendered.option.dataZoom[0].start, 30, 'Public refresh preserves the selected view.');
+    assert.equal(rendered.option.dataZoom[0].end, 70);
+    rendered.resize(640);
+    assert.equal(rendered.option.dataZoom[0].start, 30, 'Responsive resize preserves the view.');
+    rendered.window.handleMessage({status:'ready',chart:{...zoomModel,theme:'auto'}});
+    assert.equal(rendered.option.dataZoom[0].start,30,'Theme recreation preserves the relative view.');
+    rendered.window.handleMessage({status:'error',error:'The Candlestick values could not be loaded.'});
+    rendered.window.handleMessage({status:'ready',chart:zoomModel});
+    assert.equal(rendered.option.dataZoom[0].start, 30, 'Transient failures must not reset the view.');
+    rendered.window.handleMessage({status:'ready',chart:{...zoomModel,candlestick:{...zoomModel.candlestick,variableID:54321}}});
+    assert.equal(rendered.option.dataZoom[0].start, 0, 'Different source IDs reset the view, not source labels.');
+    rendered.window.handleMessage({status:'ready',chart:zoomModel});
+    engine.dispatchAction({type:'dataZoom',dataZoomIndex:0,start:20,end:60});
+    rendered.window.handleMessage({status:'ready',chart:{...zoomModel,candlestick:{...zoomModel.candlestick,interval:'day'}}});
+    assert.equal(rendered.option.dataZoom[0].start,0,'Interval changes reset the view.');
+    rendered.window.handleMessage({status:'ready',chart:zoomModel});
+    engine.dispatchAction({type:'dataZoom',dataZoomIndex:0,start:20,end:60});
+    rendered.window.handleMessage({status:'ready',chart:{...zoomModel,range:{...zoomModel.range,startTimestamp:3000,endTimestamp:4000}}});
+    assert.equal(rendered.option.dataZoom[0].start,0,'Non-overlapping windows reset the view.');
+    rendered.window.handleMessage({status:'ready',chart:zoomModel});
+    engine.dispatchAction({type:'dataZoom',dataZoomIndex:0,start:20,end:60});
+    rendered.window.handleMessage({status:'ready',chart:{...zoomModel,candlestick:{...zoomModel.candlestick,data:[]}}});
+    rendered.window.handleMessage({status:'ready',chart:zoomModel});
+    assert.equal(rendered.option.dataZoom[0].start,0,'An empty model clears stale zoom state.');
+    rendered.window.handleMessage({status:'ready',chart:model});
+    assert.equal(engine.getModel().queryComponents({mainType:'dataZoom'}).length, 0, 'Disabling removes old zoom controls.');
+    engine.dispose();
+}
+assert.equal(render(model).option.dataZoom.length,0,'Legacy designs keep zoom disabled.');
+for (const orientation of ['vertical','horizontal']) {
+    for (const inverse of [false,true]) {
+        for (const mode of ['symcon','ipsview']) {
+            const input = {...model,range:{key:'30d',startTimestamp:1000,endTimestamp:3000},candlestick:{...model.candlestick,
+                variableID:12345,interval:'hour',data:Array.from({length:720},(_,i)=>({...model.candlestick.data[0],id:String(i)})),
+                style:{...model.candlestick.style,enableZoom:true,orientation,reverseTimeAxis:inverse}}};
+            const before = JSON.stringify(input);
+            const engine = nativeWindow.echarts.init(null,null,{renderer:'svg',ssr:true,width:900,height:500});
+            const fixture = render(input,mode,true,900,engine);
+            const rect = engine.getModel().getComponent('grid').coordinateSystem.getRect();
+            const initialGrid = [rect.x,rect.y,rect.width,rect.height];
+            let prevented = 0;
+            const event = deltaY => ({deltaY,clientX:rect.x+rect.width/2,clientY:rect.y+rect.height/2,
+                preventDefault(){prevented++;},stopPropagation(){}});
+            const widthBefore = engine.getModel().getSeriesByIndex(0).getData().getLayout('candleWidth');
+            for(let i=0;i<10;i++){fixture.wheel(event(-100));}
+            const selected = engine.getOption().dataZoom[0];
+            const afterGrid = engine.getModel().getComponent('grid').coordinateSystem.getRect();
+            assert.deepEqual([afterGrid.x,afterGrid.y,afterGrid.width,afterGrid.height], initialGrid, 'Zoom must not displace the chart grid.');
+            assert.ok(selected.end-selected.start<20,'Wheel must zoom with the shipped runtime in both outputs/orientations.');
+            assert.ok(engine.getModel().getSeriesByIndex(0).getData().getLayout('candleWidth')>widthBefore,'Zoom must widen dense candles.');
+            for(let i=0;i<10;i++){fixture.wheel(event(100));}
+            assert.ok(engine.getOption().dataZoom[0].end-engine.getOption().dataZoom[0].start>99.9);
+            assert.equal(prevented,20,'Exactly one zoom handler must consume each chart wheel.');
+            fixture.wheel({...event(-100),clientX:1,clientY:1});
+            assert.equal(prevented,20,'Title and slider margins must not trigger chart zoom.');
+            fixture.window.handleMessage({status:'ready',chart:input});
+            assert.equal(JSON.stringify(input),before,'View changes never mutate raw statistics or metadata.');
+            engine.dispose();
+        }
+    }
+}
+console.log('Optional Candlestick time zoom, shipped runtime, refresh/resize, complete scales and wheel routing verified.');

@@ -61,6 +61,39 @@ assertGatewayGauge(
 );
 $candleForm = json_decode($candle->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
+    $candleData['candlestick']['style']['enableZoom'] === false
+    && $candleData['candlestick']['variableID'] === 88500
+    && findGaugeFormElement($candleForm['elements'], 'EnableZoom') !== null
+    && str_contains(findGaugeFormElement($candleForm['elements'], 'IPSViewEnableZoom')['onChange'], 'ECCA_UpdateBarPreviewFromForm'),
+    'Legacy designs disable time zoom; both designer controls must update previews.'
+);
+$zoomQueries = $GLOBALS['symconTestArchiveQueryCount'];
+$candle->SetTestProperty('IPSViewEnableZoom', true);
+$zoomIPS = $candle->GetIPSViewHTML();
+$zoomTile = json_decode($candle->GetCandlestickData(), true);
+assertGatewayGauge(
+    str_contains($zoomIPS, '"enableZoom":true') && $zoomTile['candlestick']['style']['enableZoom'] === false
+    && $zoomTile['candlestick']['data'] === $candleData['candlestick']['data']
+    && $GLOBALS['symconTestArchiveQueryCount'] === $zoomQueries
+    && str_contains($zoomIPS, 'SymconEChartsZoom') && !str_contains($zoomIPS, '{{ECHARTS_ZOOM_SCRIPT}}'),
+    'Independent zoom must reuse the same data/cache and embed the shared controller.'
+);
+$candle->UpdateBarPreviewFromForm('{"EnableZoom":true,"IPSViewEnableZoom":true,"IPSViewOrientation":"horizontal"}');
+foreach (array_slice($candle->GetTestFormUpdates(), -2) as $update) {
+    $zoomSVG = base64_decode(substr($update['Value'], strlen('data:image/svg+xml;base64,')), true);
+    $zoomDocument = new DOMDocument();
+    assertGatewayGauge(
+        $zoomDocument->loadXML($zoomSVG, LIBXML_NONET) && str_contains($zoomSVG, 'data-time-slider="true"'),
+        'Both pure synthetic SVG previews indicate the selected zoom setting.'
+    );
+}
+assertGatewayGauge(
+    $GLOBALS['symconTestArchiveQueryCount'] === $zoomQueries
+    && json_decode($candle->GetCandlestickData(), true)['candlestick']['style']['enableZoom'] === false,
+    'Preview drafts must not load archives or persist the zoom setting.'
+);
+$candle->SetTestProperty('IPSViewEnableZoom', false);
+assertGatewayGauge(
     str_contains(findGaugeFormElement($candleForm['elements'], 'VariableID')['onChange'], 'ECCA_UpdateBarPreviewFromForm')
     && findGaugeFormElement($candleForm['elements'], 'IPSViewRiseColor')['enabled'] === true,
     'Source and independent design changes must update initialized previews.'

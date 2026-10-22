@@ -130,6 +130,10 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Candlestick verwendet gemäß ADR 0079 dieselbe absolute Zeitplanung und eine
   zentrale begrenzte Intervallliste für Stunden/Tage. Echte Rohwert-Endpunkte,
   höchstens 720 Intervalle, 63 Abfragen und 64000 Rohpunkte bleiben erhalten.
+  ADR 0092 ergänzt optionalen rein visuellen Zeitzoom mit unabhängigem
+  `EnableZoom` je Designer (Default false). Die gesamte geladene Datenmenge
+  bestimmt weiterhin die Werteskala; zentrale ECharts-Zoomlogik und die
+  bestehende Helper-Frame-/Mausradunterstützung werden wiederverwendet.
   Aktuelle Mengenflüsse zwischen manuell angelegten Knoten liegen im eigenen
   Gerätemodul `EChartsSankey`; Verbindungsbreiten folgen numerischen
   Quellvariablen, Zyklen und negative Werte sind unzulässig.

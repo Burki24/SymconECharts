@@ -501,6 +501,11 @@
                         },
                         {
                             "type": "CheckBox",
+                            "name": "EnableZoom",
+                            "caption": "Enable time zoom"
+                        },
+                        {
+                            "type": "CheckBox",
                             "name": "IncludeZero",
                             "caption": "Include zero in value axis"
                         }

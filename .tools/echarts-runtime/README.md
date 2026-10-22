@@ -55,11 +55,15 @@ sowie npm-Metadaten bestätigen weiterhin Version 6.1.0 und Apache-2.0; die
 konkreten Zoom-Optionen wurden zusätzlich am gepinnten Originalpaket geprüft.
 
 Der Candlestick-Einstieg enthält Candlestick Chart, Grid, Titel, Tooltip,
-Aria und Canvas Renderer aus demselben unveränderten ECharts 6.1.0.
+Aria, DataZoom und Canvas Renderer aus demselben unveränderten ECharts 6.1.0.
 `npm run build:candlestick` erzeugt ausschließlich
 `../../libs/echarts/6.1.0/echarts.candlestick.min.js`.
-Die offiziellen Einstiege Startseite und llms.txt sowie die Candlestick-
-Dokumentation wurden am 17.10.2026 geprüft.
+Die offiziellen Einstiege Startseite und llms.txt sowie npm-Version und
+Apache-2.0-Lizenz wurden am 22.10.2026 erneut geprüft. Die vom Markdown-Index
+verlinkten DataZoom-Seiten waren nicht abrufbar; die offizielle Originaldoku
+unter `apache/echarts-doc` sowie die APIs des gepinnten Pakets wurden geprüft.
+Die Runtime ergänzt nur die offiziellen DataZoom-Komponenten; der ECharts-Kern
+und alle anderen Familien-Builds bleiben unverändert.
 
 Die native Symcon-Kachel darf das Output-Buffer-Limit von 1.048.576 Byte nicht
 überschreiten. Deshalb verwenden Gauge und kartesische Diagramme nicht den vollständigen

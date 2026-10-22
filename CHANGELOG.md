@@ -1,5 +1,11 @@
 # Unveröffentlicht
 
+- Candlestick bietet optionalen Zeitzoom mit Zeitbereichsregler und
+  Mausrad-/Touchbedienung in beiden Ausrichtungen. Kachel und IPSView können
+  ihn unabhängig aktivieren; die Vorschauen zeigen den Regler schematisch.
+  Aktualisierungen erhalten den Ausschnitt, die vollständige Werteskala und
+  alle Archivbudgets bleiben unverändert. Bestehende Designs starten ohne Zoom.
+
 - Gemeinsame Mausrad-, Scroll- und Frame-Unterstützung aus Symcon_ModuleHelper eingebunden; IPSView-Ereignisse mit umadressiertem Ziel werden zentral behandelt.
 
 - Alle Diagramme verwenden den zentralen Kachelkopf-Vertrag aus

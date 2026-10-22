@@ -159,7 +159,9 @@
             "Georgia": "Georgia",
             "Monospace": "Nichtproportional",
             "Italic title": "Titel kursiv",
-            "Italic axis labels": "Achsenbeschriftungen kursiv"
+            "Italic axis labels": "Achsenbeschriftungen kursiv",
+            "Enable time zoom": "Zeitzoom aktivieren",
+            "Time zoom is interactive in the chart.": "Zeitzoom ist im Diagramm interaktiv bedienbar."
         }
     }
 }

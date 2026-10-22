@@ -29,6 +29,35 @@
         return result;
     }
 
+    // Category-time charts keep every loaded value in the numeric-axis scale.
+    // The existing time-axis consumers retain their previous filtering contract.
+    function categoryTimeOptions(enabled, compact, vertical, sliderBottom) {
+        var result = timeAxisOptions(enabled, 'ipsview', sliderBottom, compact);
+        result.forEach(function (entry) {
+            entry.filterMode = 'none';
+            entry.minSpan = 1;
+            if (vertical) {
+                delete entry.xAxisIndex;
+                entry.yAxisIndex = 0;
+                entry.orient = 'vertical';
+            }
+        });
+        if (result[1]) {
+            result[1].showDataShadow = false;
+            result[1].showDetail = false;
+            result[1].handleSize = 14;
+            if (vertical) {
+                delete result[1].bottom;
+                delete result[1].height;
+                result[1].right = compact ? 8 : 12;
+                result[1].width = sliderThickness(compact);
+                result[1].top = 20;
+                result[1].bottom = 20;
+            }
+        }
+        return result;
+    }
+
     function capture(chart, previousRange, nextRange) {
         if (!chart || typeof chart.getOption !== 'function') { return null; }
         if (previousRange || nextRange) {
@@ -151,7 +180,7 @@
         });
     }
 
-    function attachIPSViewWheel(element, getChart, isEnabled) {
+    function attachIPSViewWheel(element, getChart, isEnabled, getDirection) {
         const listen = window.SymconVisualizationInteraction
             ? (handler) => window.SymconVisualizationInteraction.registerWheelRegion(element, handler)
             : (handler) => element.addEventListener('wheel', handler, { passive: false });
@@ -162,29 +191,33 @@
             if (!Number.isFinite(delta) || delta === 0) { return; }
             var current = capture(chart, null, null);
             if (!current) { return; }
-            var span = current.end - current.start;
-            var nextSpan = Math.max(1, Math.min(100, span * (delta < 0 ? 0.8 : 1.25)));
             var bounds = element.getBoundingClientRect();
-            var anchor = bounds.width > 0 ? (Number(event.clientX) - bounds.left) / bounds.width : 0.5;
-            anchor = Math.max(0, Math.min(1, Number.isFinite(anchor) ? anchor : 0.5));
-            var anchorValue = current.start + span * anchor;
-            var nextStart = anchorValue - nextSpan * anchor;
-            var nextEnd = anchorValue + nextSpan * (1 - anchor);
-            if (nextStart < 0) {
-                nextEnd -= nextStart;
-                nextStart = 0;
+            var direction = getDirection ? getDirection() : {};
+            var anchor;
+            if (getDirection && typeof chart.getModel === 'function') {
+                var grid = chart.getModel().getComponent('grid');
+                var rect = grid && grid.coordinateSystem && grid.coordinateSystem.getRect();
+                if (rect) {
+                    var x = Number(event.clientX) - bounds.left;
+                    var y = Number(event.clientY) - bounds.top;
+                    if (x < rect.x || x > rect.x + rect.width || y < rect.y || y > rect.y + rect.height) { return; }
+                    anchor = direction.vertical ? 1 - (y - rect.y) / rect.height : (x - rect.x) / rect.width;
+                }
             }
-            if (nextEnd > 100) {
-                nextStart -= nextEnd - 100;
-                nextEnd = 100;
+            if (anchor === undefined) {
+                anchor = direction.vertical
+                    ? (bounds.height > 0 ? 1 - (Number(event.clientY) - bounds.top) / bounds.height : 0.5)
+                    : (bounds.width > 0 ? (Number(event.clientX) - bounds.left) / bounds.width : 0.5);
             }
+            if (direction.inverse) { anchor = 1 - anchor; }
+            var next = zoomWindow(current, delta, anchor);
             event.preventDefault();
             event.stopPropagation();
             chart.dispatchAction({
                 type: 'dataZoom',
                 dataZoomIndex: 0,
-                start: Math.max(0, nextStart),
-                end: Math.min(100, nextEnd)
+                start: next.start,
+                end: next.end
             });
         });
     }
@@ -193,6 +226,7 @@
         options: options,
         sliderThickness: sliderThickness,
         timeAxisOptions: timeAxisOptions,
+        categoryTimeOptions: categoryTimeOptions,
         capture: capture,
         apply: apply,
         attachIPSViewWheel: attachIPSViewWheel,

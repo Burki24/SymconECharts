@@ -48,8 +48,8 @@ Ausgelieferte Dateien:
 
 - `libs/echarts/6.1.0/echarts.candlestick.min.js` – reproduzierbarer
   Candlestick-Browser-Build aus ECharts Core, Candlestick Chart, Grid, Titel,
-  Tooltip, Aria und Canvas Renderer; 501.568 Byte; SHA-256
-  `99147592d9a85f19c776b0f6bfd49c8becaf872d825fd9dbe9553202384598bd`;
+  Tooltip, Aria, DataZoom und Canvas Renderer; 537.955 Byte; SHA-256
+  `22dfd0a2530eabfb1b2ca3e6cfb16c77b7e5462b66c8ca72c884a3a590a5633e`;
 
 - `libs/echarts/6.1.0/echarts.funnel.min.js` – reproduzierbarer
   Funnel-Browser-Build aus ECharts Core, Funnel Chart, Titel, Tooltip,

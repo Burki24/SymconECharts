@@ -129,3 +129,24 @@ assert.equal(action, null, 'Ctrl-wheel must remain with the host.');
 routedInteraction.dispose();
 
 console.log('Shared ECharts zoom behavior verified.');
+
+assert.equal(zoom.categoryTimeOptions(false,true,false,10).length,0);
+const categoryZoom=zoom.categoryTimeOptions(true,true,true,10);
+assert.equal(categoryZoom[0].yAxisIndex,0);
+assert.equal(categoryZoom[0].xAxisIndex,undefined);
+assert.equal(categoryZoom[0].filterMode,'none');
+assert.equal(categoryZoom[0].zoomOnMouseWheel,false,'The shared router exclusively owns wheel zoom.');
+assert.equal(categoryZoom[1].orient,'vertical');
+assert.equal(categoryZoom[1].width,8);
+delete window.SymconVisualizationInteraction;
+for(const inverse of [false,true]){
+    let orientedListener;
+    let orientedAction;
+    zoom.attachIPSViewWheel({
+        addEventListener:(name,listener)=>{orientedListener=listener;},
+        getBoundingClientRect:()=>({left:0,top:0,width:800,height:400})
+    },()=>({...chart,dispatchAction:value=>{orientedAction=value;}}),()=>true,()=>({vertical:true,inverse}));
+    orientedListener({deltaY:-100,clientX:400,clientY:100,preventDefault(){},stopPropagation(){}});
+    assert.deepEqual([orientedAction.start,orientedAction.end],inverse?[22,54]:[26,58],
+        'The wheel anchor follows the vertical axis and its inverse direction.');
+}

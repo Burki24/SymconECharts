@@ -16,7 +16,7 @@ final class EChartsAsset
     public const STATE_TIMELINE_SHA256 = 'ff7da41ec7d669f7daf7ef2346ee06e4af1b341dcf307a538500184af63c9d39';
     public const THEME_RIVER_SHA256 = 'd4739d560c4fc4ce0ac1ad3f81334aa7c8e10d7143cb86d89853a6008955d8dc';
     public const PICTORIAL_BAR_SHA256 = 'ce03a142a661d6a32ee931a9e6efcb390c311220f1e53cdeb89a32f1bee9ef5d';
-    public const CANDLESTICK_SHA256 = '99147592d9a85f19c776b0f6bfd49c8becaf872d825fd9dbe9553202384598bd';
+    public const CANDLESTICK_SHA256 = '22dfd0a2530eabfb1b2ca3e6cfb16c77b7e5462b66c8ca72c884a3a590a5633e';
     public const FUNNEL_SHA256 = 'da9750dd18363325d23b1bcd4ea3af7e1011620b80b994ad6c2d5e3ee819314d';
     public const SHA256 = '8c6216a27ffe06481fe81ae101cb17c2f39fafe9357c99adc110434f03dd9bbc';
     public const CARTESIAN_SHA256 = '92954fbddaa6b7c09f25819ab7b4743eb6afd5efa92351f129b14d298d2ab31a';

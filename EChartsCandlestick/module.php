@@ -87,7 +87,7 @@ class EChartsCandlestick extends IPSModuleStrict
         'HoverBorderWidth'         => 2, 'HoverBorderColor' => -1, 'HoverOpacityPercent' => -1,
         'AxisLineColor'            => -1, 'AxisLineType' => 'solid', 'AxisLabelMargin' => 8,
         'ReverseTimeAxis'          => false, 'IncludeZero' => false, 'FontFamily' => 'Arial, sans-serif',
-        'TitleItalic'              => false, 'AxisLabelItalic' => false
+        'TitleItalic'              => false, 'AxisLabelItalic' => false, 'EnableZoom' => false
     ];
 
     public function Create(): void
@@ -507,7 +507,7 @@ class EChartsCandlestick extends IPSModuleStrict
         return json_encode(
             ['schemaVersion'     => 1, 'family' => 'candlestick', 'theme' => $this->EffectiveTheme($ipsView),
                 'candlestick'    => ['title' => $this->ReadPropertyString('Title'), 'unit' => $sources[0]['Unit'],
-                    'sampling'               => 'completed-raw-intervals', 'sourceLabel' => $sources[0]['Label'], 'interval' => $this->ReadPropertyString('Interval'),
+                    'sampling'               => 'completed-raw-intervals', 'sourceLabel' => $sources[0]['Label'], 'variableID' => $sources[0]['VariableID'], 'interval' => $this->ReadPropertyString('Interval'),
                     'data'                   => $data, 'style' => $this->ReadDesignStyle($ipsView)],
                 'range' => $range],
             JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION
@@ -550,6 +550,7 @@ class EChartsCandlestick extends IPSModuleStrict
                 '{{ECHARTS_SCRIPT}}'           => EChartsAsset::CandlestickJavaScript(),
                 '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
                 '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript(),
+                '{{ECHARTS_ZOOM_SCRIPT}}'      => EChartsAsset::ZoomJavaScript(),
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
         ]);

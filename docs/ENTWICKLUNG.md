@@ -40,6 +40,15 @@ Canvas-Zeichenaufrufe für Kachel und IPSView statt nur vorhandener Titeloptione
 
 ## Aktueller Stand und Zielarchitektur
 
+Candlestick ergänzt gemäß [ADR 0092](adr/0092-candlestick-time-zoom.md)
+optionalen Zeitzoom als reine Ansicht. `libs/echarts-zoom.js` ergänzt additive
+kategoriezeitbasierte Optionen mit `filterMode=none` und nutzt die bestehende
+Erfassung/Wiederherstellung sowie die zentrale Wheel-Router-Anbindung.
+Die vorhandenen TimeSeries-/BarHistory-/Scatter-Verträge bleiben erhalten.
+ECharts-spezifische Optionen bleiben im Projekt; allgemeine Frame- und
+Eventnormalisierung bleibt unverändert im Symcon_ModuleHelper.
+Kachel-/IPSView-Live-Abnahme nach Update und echte Touchprüfung bleiben offen.
+
 Treemap und Sunburst teilen gemäß [ADR 0090](adr/0090-normalized-hierarchy-weights.md)
 optionale normalisierte Gewichte und Originalformatierung je Blatt.
 `EChartsHierarchySources`, `TreemapModel`, `EChartsNormalization` und

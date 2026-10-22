@@ -44,6 +44,8 @@ trait CandlestickPreview
         }
         $items = array_map(static fn (int $day): array => ['label' => '10-' . $day], range(10, 16));
         $horizontal = $this->BarPreviewValue($values, 'Orientation', 'string', $ipsView) === 'horizontal';
+        $zoom = $this->BarPreviewValue($values, 'EnableZoom', 'boolean', $ipsView);
+        $svg = str_replace('<svg ', '<svg data-time-zoom="' . ($zoom ? 'true' : 'false') . '" ', $svg);
         $axis = EChartsBarPreview::Color($this->BarPreviewValue($values, 'AxisColor', 'integer', $ipsView), $palette['text']);
         $axisLine = EChartsBarPreview::Color($this->BarPreviewValue($values, 'AxisLineColor', 'integer', $ipsView), $palette['border']);
         $font = max(6, min(24, 12 * $this->BarPreviewValue($values, 'AxisFontSizePercent', 'integer', $ipsView) / 100));
@@ -65,7 +67,7 @@ trait CandlestickPreview
         if ($rotation !== 0) {
             $labelWidth = min($labelWidth, max(12, ($horizontal ? $slot * 0.7 : 90) / $sine));
         }
-        $bottom = 295 - (!$horizontal && $this->BarPreviewValue($values, 'ShowAxisLabels', 'boolean', $ipsView) ? $labelWidth * $sine : 0);
+        $bottom = 295 - ($zoom && !$horizontal ? 24 : 0) - (!$horizontal && $this->BarPreviewValue($values, 'ShowAxisLabels', 'boolean', $ipsView) ? $labelWidth * $sine : 0);
         $shadow = max(0, min(20, $this->BarPreviewValue($values, 'ShadowBlur', 'integer', $ipsView)));
         $offsetX = max(-20, min(20, $this->BarPreviewValue($values, 'ShadowOffsetX', 'integer', $ipsView)));
         $offsetY = max(-20, min(20, $this->BarPreviewValue($values, 'ShadowOffsetY', 'integer', $ipsView)));
@@ -150,7 +152,12 @@ trait CandlestickPreview
                     . $e(mb_strimwidth($item['label'], 0, max(3, (int) ($labelWidth / ($font * 0.55))), '…')) . '</text>';
             }
         }
-        // Hover effects cannot be triggered inside the static SVG; explain that boundary.
+        if ($zoom) {
+            $svg .= '<rect data-time-slider="true" x="' . ($horizontal ? '700' : '80') . '" y="' . ($horizontal ? '75' : '311')
+                . '" width="' . ($horizontal ? '8' : '600') . '" height="' . ($horizontal ? $n($bottom - 75) : '8')
+                . '" rx="2" fill="' . $e($palette['accent']) . '" fill-opacity="0.35" stroke="' . $e($palette['border']) . '"/>';
+        }
+        // Hover and zoom cannot be triggered inside the static SVG.
         $id = $values['VariableID'] ?? $this->ReadPropertyInteger('VariableID');
         if (is_int($id) && $id > 0 && IPS_VariableExists($id)) {
             $label = EChartsSourceIdentity::LabelsForSources([['VariableID' => $id, 'Label' => '']])[$id];
@@ -158,6 +165,6 @@ trait CandlestickPreview
                 . $e(mb_strimwidth($label, 0, 95, '…')) . '</text>';
         }
         return $svg . '<text x="24" y="350" font-size="10" fill="' . $e($palette['muted']) . '">'
-            . $e($this->Translate('Hover effects are visible in the chart.')) . '</text></svg>';
+            . $e($this->Translate($zoom ? 'Time zoom is interactive in the chart.' : 'Hover effects are visible in the chart.')) . '</text></svg>';
     }
 }

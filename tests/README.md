@@ -1231,6 +1231,18 @@ breite Wiederholungsansichten sowie helle LQI-Einzelformen wurden am
 17.10.2026 lokal visuell geprüft. Die neue Live-Kachel-/IPSView-Abnahme nach
 Modulupdate bleibt offen.
 
+Candlestick-Zeitzoom: `node tests/candlestick_layout.js` prüft zusätzlich den
+ausgelieferten Candlestick-Build mit nativen DataZoom-Komponenten, beide
+Ausrichtungen und inverse Zeitachsen, Zoom per zentralem Wheel-Router,
+unveränderte Skalen und Grids, passende Kerzenbreiten, Update/Resize und
+Abschalten. Die PHP-Integration prüft ausgeschaltete Defaults, getrennte
+Designer, Vorschauentwürfe ohne Archivzugriff und unveränderte Daten/Budgets.
+`node tests/candlestick_browser.mjs` stellt zwei lokale verschachtelte Frames
+mit 168 synthetischen Stunden, sichtbarem Zoomnachweis und Refresh-Schaltfläche
+bereit. Echte lokale Mausradaktionen und Regler werden dort geprüft;
+die Abnahme in Symcon und dem tatsächlichen IPSView-Client nach Update sowie
+auf Touchgeräten bleibt separat offen.
+
 Candlestick: `php tests/candlestick_data.php` prüft abgeschlossene Stunden/
 Tage, Sommerzeit, erste/letzte Rohpunkte, Extrema, Lücken, Einzelwerte,
 Trunkierung und Abfragelimits. `candlestick_integration.php` wird im

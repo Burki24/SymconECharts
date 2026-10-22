@@ -3,6 +3,7 @@
 
     var bootstrap = window.SYMC_VISUALIZATION || {};
     var design = window.SYMC_ECHARTS_DESIGN;
+    var zoomController = window.SymconEChartsZoom;
     var rootElement = document.getElementById('echarts-candlestick-root');
     var chartElement = document.getElementById('echarts-candlestick-chart');
     var emptyElement = document.getElementById('echarts-candlestick-empty');
@@ -11,6 +12,22 @@
     var chart = null;
     var currentState = bootstrap.state || null;
     var currentTheme = null;
+    var renderedModel = null;
+
+    function zoomRange(model) {
+        if (!model) { return null; }
+        var range = model.range || {};
+        var candle = model.candlestick || {};
+        return Object.assign({}, range, { key: [range.key, candle.variableID, candle.interval,
+            range.key === 'custom' ? range.endTimestamp - range.startTimestamp : '',
+            range.key === 'absolute' ? range.requestedStartTimestamp : '',
+            range.key === 'absolute' ? range.requestedEndTimestamp : ''].join(':') });
+    }
+    function savedZoom(model) {
+        return renderedModel && renderedModel.candlestick.style.enableZoom === true
+            && model.candlestick.style.enableZoom === true
+            ? zoomController.capture(chart, zoomRange(renderedModel), zoomRange(model)) : null;
+    }
 
     var tileHeaderInset = (bootstrap.options && bootstrap.options.tileHeaderInset) || 0;
     var chartBootstrap = tileHeaderInset ? { mode: 'symcon', options: { tileHeaderVisible: false } } : bootstrap;
@@ -58,7 +75,7 @@
             seriesColors: colors.seriesColors
         };
     }
-    function buildOption(model, theme) {
+    function buildOption(model, theme, viewport) {
         var colors = colorsFor(theme);
         var candlestick = model.candlestick || {};
         var style = candlestick.style || {};
@@ -76,10 +93,15 @@
         var fontStyle = style.axisLabelItalic === true ? 'italic' : 'normal';
         var left = (horizontal ? Math.min(width * 0.35, Math.max(60, font * 12)) : Math.min(width * 0.25, Math.max(45, font * 5))) + Math.max(0, margin - 8);
         var bottom = horizontal ? font * 3 + 24 : font * 2 + 22;
+        var zoom = style.enableZoom === true;
+        var zoomSpace = zoom ? zoomController.sliderThickness(compact) + 22 : 0;
+        if (!horizontal) { bottom += zoomSpace; }
+        var right = (horizontal ? Math.max(30, font * 3) : 22) + (horizontal ? zoomSpace : 0);
         bottom += Math.max(0, margin - 8);
         var rotation = Number(style.axisLabelRotate) || 0;
         var requestedLabelWidth = Number(style.axisLabelMaxWidth) || 0;
-        var slot = (horizontal ? height - top - bottom : width - left - 22) / Math.max(1, items.length);
+        var visibleCount = zoom && viewport ? Math.max(1, Math.ceil(items.length * (viewport.end - viewport.start) / 100)) : items.length;
+        var slot = (horizontal ? height - top - bottom : width - left - right) / Math.max(1, visibleCount);
         var autoLabelWidth = Math.max(12, horizontal ? left - 15 : Math.max(60, slot - 8));
         var labelWidth = requestedLabelWidth > 0 ? Math.min(requestedLabelWidth, horizontal ? left - 15 : width - 30) : autoLabelWidth;
         if (rotation) {
@@ -117,6 +139,8 @@
             splitLine: { show: style.showGrid !== false, lineStyle: { color: style.gridColor || colors.border,
                 type: style.gridLineType || 'solid', width: style.gridLineWidth == null ? 1 : style.gridLineWidth,
                 opacity: style.gridOpacityPercent == null ? 0.25 : style.gridOpacityPercent / 100 } } };
+        var dataZoom = zoomController.categoryTimeOptions(zoom, compact, horizontal, compact ? 10 : 14);
+        if (horizontal && dataZoom[1]) { dataZoom[1].top = top; dataZoom[1].bottom = bottom; }
         return {
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
             backgroundColor: 'transparent', color: colors.seriesColors || [colors.accent],
@@ -125,7 +149,9 @@
                 textStyle: { color: style.titleColor || colors.text, fontSize: titleSize, fontFamily: fontFamily,
                     fontStyle: style.titleItalic === true ? 'italic' : 'normal', fontWeight: style.titleBold === false ? 'normal' : 'bold',
                     overflow: 'truncate', width: Math.max(1, width - 36) } },
-            grid: { top: top, left: left, right: horizontal ? Math.max(30, font * 3) : 22, bottom: bottom, containLabel: false },
+            grid: { top: top, left: left, right: right, bottom: bottom, containLabel: false,
+                ...(zoom ? { outerBoundsMode: 'none' } : {}) },
+            dataZoom: dataZoom,
             xAxis: horizontal ? value : category, yAxis: horizontal ? category : value,
             tooltip: { show: style.showTooltip !== false, trigger: 'item', confine: true,
                 textStyle: { fontFamily: fontFamily },
@@ -160,6 +186,7 @@
         };
     }
     function displayError(message) {
+        renderedModel = null;
         if (chart) { chart.clear(); }
         chartElement.hidden = true;
         emptyElement.hidden = true;
@@ -180,6 +207,7 @@
             return;
         }
         if (!(model.candlestick.data || []).some(function (item) { return item.statistics !== null; })) {
+            renderedModel = null;
             if (chart) { chart.clear(); }
             chartElement.hidden = true;
             errorElement.hidden = true;
@@ -196,14 +224,22 @@
         rootElement.style.backgroundColor = bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
             ? 'transparent' : colorsFor(normalizeTheme(model.theme || 'auto')).background;
         var theme = normalizeTheme(model.theme || 'auto');
+        var saved = savedZoom(model);
         if (chart && currentTheme !== theme) { chart.dispose(); chart = null; }
         if (!chart) {
             chart = window.echarts.init(chartElement, theme === 'auto' ? null : theme, { renderer: 'canvas' });
             currentTheme = theme;
+            chart.on('datazoom', function () {
+                if (!renderedModel) { return; }
+                var series = buildOption(renderedModel, currentTheme, savedZoom(renderedModel)).series[0];
+                // Refit only geometry, not data, controls or the user's zoom window.
+                chart.setOption({ series: [{ barWidth: series.barWidth, barMinWidth: series.barMinWidth, barMaxWidth: series.barMaxWidth }] });
+            });
         } else if (wasHidden) {
             chart.resize();
         }
-        chart.setOption(buildOption(model, theme), true);
+        zoomController.apply(chart, buildOption(model, theme, saved), saved);
+        renderedModel = model;
 
     }
     window.handleMessage = function (message) {
@@ -214,12 +250,26 @@
         new ResizeObserver(function () {
             if (!design.resizeChartIfNeeded(chart, chartElement)) { return; }
             if (currentState && currentState.status === 'ready') {
-                chart.setOption(buildOption(currentState.chart, currentTheme || 'auto'), true);
+                var saved = savedZoom(currentState.chart);
+                zoomController.apply(chart, buildOption(currentState.chart, currentTheme || 'auto', saved), saved);
             }
         }).observe(chartElement);
     } else {
-        window.addEventListener('resize', function () { if (chart) { chart.resize(); } });
+        window.addEventListener('resize', function () {
+            if (chart && renderedModel) {
+                chart.resize();
+                var saved = savedZoom(renderedModel);
+                zoomController.apply(chart, buildOption(renderedModel, currentTheme || 'auto', saved), saved);
+            }
+        });
     }
+    // Shared host-aware wheel routing; native inside controls still own drag/pinch.
+    zoomController.attachIPSViewWheel(chartElement, function () { return chart; }, function () {
+        return !!renderedModel && renderedModel.candlestick.style.enableZoom === true;
+    }, function () {
+        var style = renderedModel.candlestick.style;
+        return { vertical: style.orientation === 'horizontal', inverse: style.reverseTimeAxis === true };
+    });
     window.addEventListener('beforeunload', function () { if (chart) { chart.dispose(); } });
     render(currentState);
 }());

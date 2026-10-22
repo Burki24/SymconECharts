@@ -93,6 +93,24 @@ Hover-Hervorhebung werden diese Hover-Einstellungen nicht angewendet.
 
 Die Zeitachse kann umgekehrt und ihre Linienfarbe/-art angepasst werden.
 Die Werteachse kann den Nullpunkt einschließen, ohne Messwerte zu ändern.
+
+„Zeitzoom aktivieren“ ergänzt einen Zeitbereichsregler und Zoom per Mausrad
+über der Zeichenfläche. Im Diagramm kann der Ausschnitt außerdem gezogen
+und auf Touchgeräten mit zwei Fingern gezoomt werden. Bei horizontalen Kerzen
+steht der Regler rechts, sonst unten. Beide Designer können die Option
+unabhängig verwenden; standardmäßig ist sie ausgeschaltet.
+
+Der Zoom ist ausschließlich eine flüchtige Ansicht der bereits geladenen
+Intervalle. Die vollständigen Kerzen bestimmen weiterhin die Werteskala;
+Archivabfragen, Datenlücken, Tooltips und Ladebudgets ändern sich nicht.
+Auch die Kerzenbreiten passen sich an den sichtbaren Ausschnitt an.
+Aktualisierungen, Größen- und Themewechsel erhalten den prozentualen
+Ausschnitt bei derselben Quelle und überlappenden Zeitfenstern. Eine andere
+Quelle, Intervallart, Zeitraumvorgabe oder feste Von-/Bis-Auswahl setzt ihn
+zurück; ebenso ein leeres Fenster oder das Ausschalten der Option.
+Neuladen der Seite startet mit dem vollständigen Zeitraum. Die statische
+Vorschau zeigt den Regler schematisch; interaktiv ist er im echten Diagramm.
+
 Abstände der Achsenbeschriftungen, lokale Schriftart sowie Kursivschrift für
 Titel und Achsen sind in beiden Designern getrennt wählbar. Es werden keine
 Schriftdateien aus dem Internet geladen. Interaktive Hover-Effekte werden
