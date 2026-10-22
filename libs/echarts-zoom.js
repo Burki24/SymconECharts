@@ -129,7 +129,10 @@
     }
 
     function attachIPSViewWheelCartesian(element, getChart, isEnabled) {
-        element.addEventListener('wheel', function (event) {
+        const listen = window.SymconVisualizationInteraction
+            ? (handler) => window.SymconVisualizationInteraction.registerWheelRegion(element, handler)
+            : (handler) => element.addEventListener('wheel', handler, { passive: false });
+        listen(function (event) {
             var chart = getChart();
             if (!chart || !isEnabled()) { return; }
             var delta = Number(event.deltaY);
@@ -145,11 +148,14 @@
             event.stopPropagation();
             chart.dispatchAction({ type: 'dataZoom', dataZoomId: 'x-inside', start: x.start, end: x.end });
             chart.dispatchAction({ type: 'dataZoom', dataZoomId: 'y-inside', start: y.start, end: y.end });
-        }, { passive: false });
+        });
     }
 
     function attachIPSViewWheel(element, getChart, isEnabled) {
-        element.addEventListener('wheel', function (event) {
+        const listen = window.SymconVisualizationInteraction
+            ? (handler) => window.SymconVisualizationInteraction.registerWheelRegion(element, handler)
+            : (handler) => element.addEventListener('wheel', handler, { passive: false });
+        listen(function (event) {
             var chart = getChart();
             if (!chart || !isEnabled()) { return; }
             var delta = Number(event.deltaY);
@@ -180,7 +186,7 @@
                 start: Math.max(0, nextStart),
                 end: Math.min(100, nextEnd)
             });
-        }, { passive: false });
+        });
     }
 
     window.SymconEChartsZoom = {

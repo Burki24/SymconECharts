@@ -416,3 +416,7 @@ und Lizenz der eingebundenen Apache-ECharts-Runtime stehen in
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 SymconECharts ist kein offizielles Projekt der Apache Software Foundation.
+
+### Mausradbedienung in IPSView
+
+Kachel und IPSView-Ausgabe nutzen die gemeinsame Eingabebehandlung aus `Symcon_ModuleHelper`. Sie normalisiert Mausrad-Deltas und ermittelt bei von IPSView umadressierten Ereignissen den Bereich unter der letzten tatsächlichen Mausposition. Listen und Dialoginhalte scrollen innerhalb ihres Bereichs; vorhandener Karten-/Diagrammzoom bleibt komponentenspezifisch. Verschachtelte teilnehmende HTML-Frames geben ausschließlich UI-Eingaben über den zentralen Vertrag weiter. Ctrl-/Meta-Mausrad bleibt beim Host. Eine vollständige Funktionsprüfung unterscheidet den IPSView-Webclient von der nativen IPSView-App.

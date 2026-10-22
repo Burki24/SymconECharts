@@ -21,6 +21,12 @@ trait EChartsIPSViewTransport
         $this->RegisterAttributeString(self::ECHARTS_IPSVIEW_CHANNEL_ATTRIBUTE, '');
     }
 
+    /** Keeps the common interaction code outside large chart HTML payloads. */
+    protected function VisualizationInteractionScriptURL(): string
+    {
+        return self::ECHARTS_IPSVIEW_HOOK . '/assets/interaction.js';
+    }
+
     /** @return array{statePath:string,socketPath:string} */
     protected function EChartsIPSViewTransportOptions(): array
     {

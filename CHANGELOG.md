@@ -1,5 +1,7 @@
 # Unveröffentlicht
 
+- Gemeinsame Mausrad-, Scroll- und Frame-Unterstützung aus Symcon_ModuleHelper eingebunden; IPSView-Ereignisse mit umadressiertem Ziel werden zentral behandelt.
+
 - Alle Diagramme verwenden den zentralen Kachelkopf-Vertrag aus
   Symcon_ModuleHelper. Sichtbare und ausgeblendete Kacheltitel sowie
   IPSView behalten ihre bisherigen Abstände und Diagrammtitel.
@@ -18,6 +20,7 @@
   Achsengrenzen bleiben unverändert.
 
 ## Neu
+
 
 - Treemap und Sunburst bieten optionale Min/Max-normalisierte Blattgewichte
   und eigene Originaleinheiten sowie Nachkommastellen je Quelle. Beschriftungen,

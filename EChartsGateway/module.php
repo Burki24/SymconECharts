@@ -9,6 +9,7 @@ use Burki24\SymconModuleHelper\DataFlowHelper;
 use SymconECharts\EChartsDataProtocol;
 
 require_once __DIR__ . '/../libs/helper/DataFlowHelper.php';
+require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 
 class EChartsGateway extends IPSModuleStrict
@@ -17,6 +18,7 @@ class EChartsGateway extends IPSModuleStrict
     use \SymconECharts\EChartsDebugFlow;
 
     use DataFlowHelper;
+    use \Burki24\SymconModuleHelper\VisualizationAssetHelper;
 
     private const ARCHIVE_CACHE_BUFFER = 'ArchiveReadCache';
     private const ARCHIVE_CACHE_MAX_ENTRIES = 32;
@@ -123,6 +125,11 @@ class EChartsGateway extends IPSModuleStrict
         $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
             $path = (string) ($_SERVER['SCRIPT_NAME'] ?? '');
+            if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET' && $path === '/hook/SymconECharts/assets/interaction.js') {
+                $this->SendHookResponse(200, $this->VisualizationInteractionScript(), 'application/javascript; charset=utf-8');
+                return;
+            }
+
             if (preg_match('#^/hook/SymconECharts/WS/[1-9][0-9]*/[a-f0-9]{32}$#D', $path) === 1) {
                 return;
             }

@@ -107,4 +107,25 @@ wheelCartesian({ deltaY: -100, clientX: 400, clientY: 200,
 assert.deepEqual(actions.map(value => [value.dataZoomId, value.start, value.end]),
     [['x-inside', 24, 56], ['y-inside', 35, 75]]);
 
+// Exercise the real shared router used by rendered IPSView pages, not only the fallback listener.
+const {createRouter} = require('../libs/helper/visualization/interaction.min.js');
+const routedElement = {
+    tagName: 'DIV', clientWidth: 800, clientHeight: 400,
+    getBoundingClientRect: () => ({left: 0, top: 0, width: 800, height: 400}),
+    addEventListener: () => { throw new Error('Shared interaction must own wheel registration.'); }
+};
+const routedDocument = {elementFromPoint: () => routedElement};
+const routedInteraction = createRouter({document: routedDocument, getComputedStyle: () => ({overflowY: 'visible', overflowX: 'visible'})});
+window.SymconVisualizationInteraction = routedInteraction;
+enabled = true;
+action = null;
+zoom.attachIPSViewWheel(routedElement, () => chart, () => enabled);
+routedInteraction.rememberPointer({clientX: 400, clientY: 200});
+assert.equal(routedInteraction.handle({target: routedDocument, clientX: 0, clientY: 0, deltaY: -100}), true);
+assert.deepEqual([action.start, action.end], [24, 56], 'Retargeted native wheel must reach chart zoom through the central router.');
+action = null;
+assert.equal(routedInteraction.handle({target: routedElement, clientX: 400, clientY: 200, deltaY: -100, ctrlKey: true}), false);
+assert.equal(action, null, 'Ctrl-wheel must remain with the host.');
+routedInteraction.dispose();
+
 console.log('Shared ECharts zoom behavior verified.');

@@ -994,6 +994,31 @@ function findGaugeFormElement(array $items, string $name): ?array
     return null;
 }
 
+$interactionTemplates = glob(dirname(__DIR__) . '/ECharts*/visualization/index.html');
+assertGatewayGauge(count($interactionTemplates) === 29, 'Every chart module must participate in shared interaction delivery.');
+foreach ($interactionTemplates as $interactionTemplate) {
+    $interactionHTML = file_get_contents($interactionTemplate);
+    $interactionOffset = strpos($interactionHTML, '{{INTERACTION_SCRIPT}}');
+    $moduleOffset = strpos($interactionHTML, '{{MODULE_SCRIPT}}');
+    assertGatewayGauge($interactionOffset !== false && $moduleOffset !== false && $interactionOffset < $moduleOffset, 'Shared interaction must load before chart startup in every template.');
+}
+$assetGateway = new TestableEChartsGateway();
+$assetGateway->Create();
+$assetServer = $_SERVER;
+$_SERVER['REQUEST_METHOD'] = 'GET';
+$_SERVER['SCRIPT_NAME'] = '/hook/SymconECharts/assets/interaction.js';
+assertGatewayGauge(
+    $assetGateway->ProcessTestHook() === file_get_contents(dirname(__DIR__) . '/libs/helper/visualization/interaction.min.js') && http_response_code() === 200,
+    'The public interaction endpoint must serve exactly the bundled shared library.'
+);
+foreach ([['POST', '/hook/SymconECharts/assets/interaction.js'], ['GET', '/hook/SymconECharts/assets/interaction.js/extra'], ['GET', '/hook/SymconECharts/assets/../interaction.js']] as [$assetMethod, $assetPath]) {
+    $_SERVER['REQUEST_METHOD'] = $assetMethod;
+    $_SERVER['SCRIPT_NAME'] = $assetPath;
+    assertGatewayGauge($assetGateway->ProcessTestHook() === '' && http_response_code() === 404, 'The interaction endpoint must reject other methods and paths.');
+}
+$_SERVER = $assetServer;
+http_response_code(200);
+
 $gateway = new EChartsGateway();
 $gateway->Create();
 $gateway->ApplyChanges();
