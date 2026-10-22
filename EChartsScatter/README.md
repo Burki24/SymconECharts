@@ -20,8 +20,19 @@ Ein Punkt entsteht nur, wenn X und Y für **denselben Intervall-Zeitstempel**
 vorliegen. Im Bubble-Modus muss auch die Größenquelle in diesem Intervall
 vorliegen. Fehlende Werte werden weder interpoliert noch mit einem älteren
 Wert aufgefüllt. Der Tooltip nennt Intervallzeit und die zugehörigen Werte.
-Die Punktgröße wird zwischen der kleinsten und größten vorhandenen Größe
-skaliert; bei lauter gleichen Größen gilt die normale Punktgröße.
+Die Blasengröße wird standardmäßig zwischen der kleinsten und größten
+vorhandenen Größe skaliert; bei lauter gleichen Größen gilt die normale Punktgröße.
+Optional verwendet **Bezugsbereich der Blasengröße → Feste Grenzen** ein eigenes
+Minimum und Maximum in der Einheit der Größenquelle, beispielsweise 0–100 %.
+Das Minimum entspricht der eingestellten **Punktgröße**, das Maximum der
+**maximalen Blasengröße**; der Durchmesser wird dazwischen linear skaliert.
+So erhält derselbe Wert bei unverändertem Design über verschiedene Zeiträume
+und Aktualisierungen hinweg dieselbe Blasengröße, auch bei nur einem Punkt.
+Werte außerhalb der Grenzen werden nur in ihrer dargestellten Größe begrenzt.
+Die Originalwerte samt Einheit bleiben im Tooltip erhalten.
+Die Grenzen müssen endlich sein und das Minimum muss unter dem Maximum liegen.
+Negative Grenzen sind zulässig. Ohne Größenquelle bleibt es bei normalen
+Scatter-Punkten. Die Einstellung verändert weder X/Y-Achsen noch Farbbereich.
 
 Zeitraum, automatische oder feste Archiv-Verdichtung und Punktbudget sind
 einstellbar. Ein abgeschnittener Archivbereich wird in der Grafik kenntlich
@@ -74,6 +85,9 @@ Optional erstellt das Modul eine WebContent-Variable `IPSViewScatter` für
 IPSView. Dort kann das Kacheldesign geerbt oder unabhängig gestaltet werden;
 auch ein eigener Zeitraum ist möglich. Die Vorschau und Hintergrundanpassung
 stehen in beiden Designern zur Verfügung.
+Auch die festen Größenbezüge lassen sich unabhängig für IPSView einstellen
+oder mit dem Kacheldesign übernehmen. Beide Vorschauen zeigen die gewählten
+Bezüge anhand derselben Beispieldaten, ohne Archive zu lesen.
 
 Bei einem vorübergehenden Ladefehler bleibt eine zuletzt gültige Grafik zunächst
 stehen. Nach wiederholtem Fehler erscheint ein Hinweis und das Modul versucht

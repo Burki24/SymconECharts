@@ -90,6 +90,46 @@ assert.equal(bubble.option.series[0].type, 'scatter');
 assert.equal(bubble.option.series[0].data.length, 2);
 assert.equal(bubble.option.series[0].symbolSize([10, 50, 1, 100]), 10);
 assert.equal(bubble.option.series[0].symbolSize([20, 55, 3, 200]), 40);
+for (const mode of ['symcon', 'ipsview']) {
+    const fixedModel = { ...model, scatter: { ...model.scatter, style: {
+        ...model.scatter.style, bubbleRangeMode: 'manual', bubbleMinimum: 0, bubbleMaximum: 100
+    } } };
+    const fixed = render(fixedModel, mode);
+    assert.equal(fixed.option.series[0].symbolSize([10, 50, 50, 100]), 25,
+        'Fixed Bubble bounds must map the same original value to the same diameter.');
+    assert.equal(fixed.option.series[0].symbolSize([10, 50, -10, 100]), 10);
+    assert.equal(fixed.option.series[0].symbolSize([10, 50, 150, 100]), 40);
+    const otherWindow = render({ ...fixedModel, points: [[300, 10, 50, 50]] }, mode);
+    assert.equal(otherWindow.option.series[0].symbolSize([10, 50, 50, 300]), 25,
+        'A single equal-size sample must still use its fixed range, not the automatic fallback.');
+    assert.equal(otherWindow.option.series[0].data[0].value[2], 50);
+    assert.match(otherWindow.option.tooltip.formatter({ value: [10, 50, 150, 300] }), /150[.,]0 m\/s/,
+        'Clipping geometry must not clip the original value or unit in the tooltip.');
+    fixed.window.handleMessage({ status: 'ready', chart: { ...fixedModel,
+        points: [[400, 10, 50, 50], [500, 20, 55, 90]] } });
+    assert.equal(fixed.currentOption().series[0].symbolSize([10, 50, 50, 400]), 25);
+    const fixedScatter = render({ ...fixedModel, roles: { x: model.roles.x, y: model.roles.y } }, mode);
+    assert.equal(fixedScatter.option.series[0].symbolSize([10, 50, null, 100]), 10,
+        'A fixed Bubble range must not change ordinary Scatter points.');
+}
+assert.equal(render({ ...model, points: [[100, 10, 50, 3]] }).option.series[0].symbolSize([10, 50, 3, 100]), 10,
+    'Automatic equal-size samples must retain the existing base-size fallback.');
+const echarts = require('../.tools/echarts-runtime/node_modules/echarts');
+for (const mode of ['symcon', 'ipsview']) {
+    const fixed = render({ ...model, points: [-10, 0, 50, 100, 150].map((size, i) => [100 + i, 10 + i, 50, size]),
+        scatter: { ...model.scatter, style: { ...model.scatter.style, animationEnabled: false,
+            bubbleRangeMode: 'manual', bubbleMinimum: 0, bubbleMaximum: 100 } } }, mode);
+    const engine = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 700, height: 410 });
+    try {
+        engine.setOption(fixed.option);
+        const data = engine.getModel().getSeriesByIndex(0).getData();
+        for (const [index, diameter] of [10, 10, 25, 40, 40].entries()) {
+            assert.equal(data.getItemVisual(index, 'symbolSize'), diameter,
+                'The pinned native ECharts engine must receive the fixed, bounded Bubble diameters.');
+        }
+        assert.match(engine.renderToSVGString(), /<svg/);
+    } finally { engine.dispose(); }
+}
 assert.equal(bubble.option.series[0].label.position, 'right');
 assert.equal(bubble.option.series[0].label.distance, 8);
 assert.equal(bubble.option.series[0].label.formatter({ value: [10, 50, 1, 100] }), '50 %');

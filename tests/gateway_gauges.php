@@ -876,6 +876,16 @@ final class TestableEChartsScatter extends EChartsScatter
         $this->currentTimestamp = $timestamp;
     }
 
+    protected function LoadConfigurationForm(): array
+    {
+        return json_decode(file_get_contents(dirname(__DIR__) . '/EChartsScatter/form.json'), true, 512, JSON_THROW_ON_ERROR);
+    }
+
+    protected function VisualizationAsset(string $filename): string
+    {
+        return (string) file_get_contents(dirname(__DIR__) . '/EChartsScatter/visualization/' . $filename);
+    }
+
     protected function CurrentTimestamp(): int
     {
         return $this->currentTimestamp;
@@ -992,6 +1002,12 @@ assertGatewayGauge(
     'The Gateway must own the shared SymconECharts WebHook.'
 );
 IPSModuleStrict::$ParentResponder = static fn (string $json): string => $gateway->ForwardData($json);
+
+if (array_slice($argv, 1) === ['--scatter-bubble-range']) {
+    require __DIR__ . '/scatter_bubble_range.php';
+    echo "Scatter fixed Bubble ranges, compatibility, previews and unchanged archive budgets verified.\n";
+    exit(0);
+}
 
 if (array_slice($argv, 1) === ['--bar-history-many']) {
     require __DIR__ . '/bar_history_many.php';

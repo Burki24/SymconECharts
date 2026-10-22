@@ -481,6 +481,39 @@
                     "items": [
                         {
                             "type": "Select",
+                            "name": "BubbleRangeMode",
+                            "caption": "Bubble size reference",
+                            "onChange": "ECSC_UpdateBubbleRangeForm($id, false, $BubbleRangeMode);",
+                            "options": [
+                                {
+                                    "caption": "Fit to data",
+                                    "value": "data"
+                                },
+                                {
+                                    "caption": "Fixed limits",
+                                    "value": "manual"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "BubbleMinimum",
+                            "caption": "Bubble source minimum",
+                            "digits": 6
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "BubbleMaximum",
+                            "caption": "Bubble source maximum",
+                            "digits": 6
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
                             "name": "XAxisRangeMode",
                             "caption": "X axis range",
                             "onChange": "ECSC_UpdateAxisRangeForm($id, false, $XAxisRangeMode, $YAxisRangeMode);",

@@ -19,6 +19,11 @@
 
 ## Neu
 
+- EChartsScatter bietet optionale feste Min-/Max-Bezüge für die Blasengröße,
+  getrennt für Kachel und IPSView einschließlich Live-Vorschau und Designkopie.
+  Originalwerte und Einheiten bleiben im Tooltip erhalten. Die bisherige
+  automatische Skalierung sowie alle Archivbudgets bleiben unverändert.
+
 - EChartsParallel bietet je Achse Mittelwert, Minimum, Maximum oder ausdrücklich
   Zählerverbrauch. Automatisch erhält die bisherigen Mittelwerte beziehungsweise
   Zählerverbräuche. Kachel, IPSView, Tooltips und Vorschauen kennzeichnen explizite

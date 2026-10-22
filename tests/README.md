@@ -1,5 +1,23 @@
 # Tests
 
+## Scatter/Bubble: feste Größenbezüge
+
+`php tests/gateway_gauges.php --scatter-bubble-range` prüft den echten
+Modul-/Gateway-Pfad mit synthetischem Kernelarchiv: automatische Altmodelle,
+unveränderte Originalwerte und Einheiten, getrennte Designer, Formularcallbacks,
+reine Entwurfsvorschauen, Designkopie und die unveränderten 200/1000/2000-Budgets.
+Ungültige Modi, gleiche/vertauschte/nichtendliche oder überlaufende Grenzen
+werden vor Archiv-I/O abgewiesen. Wiederholung und Refresh verändern keine
+Properties. Beide vollständigen HTML-Ausgaben bleiben unter 1 MiB.
+
+`node tests/scatter_layout.js` begann RED an der fehlenden festen Skalierung.
+Der Test prüft beide Ausgabeadapter, unveränderte automatische Einzelpunkte,
+Begrenzung nur der Geometrie, Originaltooltip und Größenstabilität bei
+Aktualisierung sowie anderem Datenfenster. Die gepinnte echte ECharts-Engine
+bestätigt die Durchmesser 10/10/25/40/40 für Werte -10/0/50/100/150 bei 0–100.
+Die neue Funktion bleibt nach Modulupdate in Kachel und tatsächlichem
+IPSView live abzunehmen; lokale Tests sind keine Live-Lastfreigabe.
+
 ## Parallel: individuelle feste Min-/Max-Achsenbereiche
 
 `php tests/gateway_gauges.php --parallel-axis-ranges` begann RED an fehlenden

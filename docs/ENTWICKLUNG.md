@@ -615,6 +615,11 @@ Kreis, Donut und Nightingale-Rose legt
 Die Verknüpfung historischer X/Y- und optionaler Größenwerte nur über
 identische abgeschlossene Archivintervalle ohne Interpolation legt
 [`ADR 0040`](adr/0040-scatter-archive-interval-pairing.md) fest.
+Optionale feste Größenbezüge für Bubble folgen
+[ADR 0088](adr/0088-fixed-bubble-size-references.md). Die bestehenden
+Min/Max-Prüfungen und die Vorschauprojektion werden wiederverwendet; die
+Durchmesserberechnung bleibt lokal in Scatter. Quellen, Archivabfragen,
+Originalwerte und unabhängige Designs bleiben unverändert.
 Die eigene Tages-/Wochentag-Stunden-Heatmap und die Abgrenzung zum Kalenderlayout
 legt [`ADR 0041`](adr/0041-heatmap-weekday-hour-family.md) fest; ihre
 gleitenden Zeitfenster regelt [`ADR 0043`](adr/0043-heatmap-rolling-windows-and-navigation.md).

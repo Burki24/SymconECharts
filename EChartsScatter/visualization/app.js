@@ -197,6 +197,10 @@
         var sizeValues = sizeRole ? points.map(function (point) { return Number(point[3]); }) : [];
         var minimum = sizeValues.length ? Math.min.apply(null, sizeValues) : 0;
         var maximum = sizeValues.length ? Math.max.apply(null, sizeValues) : 0;
+        if (style.bubbleRangeMode === 'manual') {
+            minimum = Number(style.bubbleMinimum);
+            maximum = Number(style.bubbleMaximum);
+        }
         var pointColor = style.pointColor || colors.seriesColors[0] || colors.accent;
         var axisColor = style.axisColor || colors.muted;
         var gridColor = style.gridColor || colors.track;

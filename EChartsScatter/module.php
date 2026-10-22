@@ -22,8 +22,10 @@ use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsLabelDesign;
+use SymconECharts\EChartsNormalization;
 use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsTransientRefresh;
+use SymconECharts\EChartsValueRange;
 use SymconECharts\EChartsVariablePresentation;
 use SymconECharts\ScatterPairing;
 
@@ -45,6 +47,8 @@ require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
 require_once __DIR__ . '/../libs/EChartsLabelDesign.php';
+require_once __DIR__ . '/../libs/EChartsNormalization.php';
+require_once __DIR__ . '/../libs/EChartsValueRange.php';
 require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
 require_once __DIR__ . '/../libs/EChartsTransientRefresh.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
@@ -89,6 +93,9 @@ class EChartsScatter extends IPSModuleStrict
         'ValueLabelDistance'      => 'integer',
         'PointSize'               => 'integer',
         'BubbleMaxSize'           => 'integer',
+        'BubbleRangeMode'         => 'string',
+        'BubbleMinimum'           => 'float',
+        'BubbleMaximum'           => 'float',
         'ColorMapEnabled'         => 'boolean',
         'ColorMapDimension'       => 'string',
         'ColorMapRangeMode'       => 'string',
@@ -149,6 +156,9 @@ class EChartsScatter extends IPSModuleStrict
             $this->RegisterPropertyInteger('ValueLabelDistance', 5);
             $this->RegisterPropertyInteger('PointSize', 12);
             $this->RegisterPropertyInteger('BubbleMaxSize', 48);
+            $this->RegisterPropertyString('BubbleRangeMode', 'data');
+            $this->RegisterPropertyFloat('BubbleMinimum', 0.0);
+            $this->RegisterPropertyFloat('BubbleMaximum', 100.0);
             $this->RegisterPropertyBoolean('ColorMapEnabled', false);
             $this->RegisterPropertyString('ColorMapDimension', 'y');
             $this->RegisterPropertyString('ColorMapRangeMode', 'data');
@@ -184,15 +194,15 @@ class EChartsScatter extends IPSModuleStrict
                     'EChartsTheme'                                                                              => EChartsAsset::THEME_AUTO,
                     'ValueLabelPosition'                                                                        => 'auto',
                     'ValueLabelContent'                                                                         => 'y',
-                    'XAxisRangeMode', 'YAxisRangeMode', 'ColorMapRangeMode'                                     => 'data',
+                    'XAxisRangeMode', 'YAxisRangeMode', 'ColorMapRangeMode', 'BubbleRangeMode'                  => 'data',
                     'ColorMapDimension'                                                                         => 'y',
                     'AnimationEasing', 'AnimationEasingUpdate'                                                  => 'cubicInOut',
                     'ShowGrid', 'EnableZoom', 'AnimationEnabled'                                                => true,
                     'ShowValues', 'AdaptiveValueLabels', 'EnableBrush', 'ColorMapEnabled', 'ColorMapShowLegend' => false,
                     'PointSize'                                                                                 => 12, 'BubbleMaxSize' => 48,
                     'ValueLabelDistance'                                                                        => 5,
-                    'XAxisMinimum', 'YAxisMinimum', 'ColorMapMinimum'                                           => 0.0,
-                    'XAxisMaximum', 'YAxisMaximum', 'ColorMapMaximum'                                           => 100.0,
+                    'XAxisMinimum', 'YAxisMinimum', 'ColorMapMinimum', 'BubbleMinimum'                          => 0.0,
+                    'XAxisMaximum', 'YAxisMaximum', 'ColorMapMaximum', 'BubbleMaximum'                          => 100.0,
                     'TitleFontSizePercent', 'AxisFontSizePercent', 'ValueFontSizePercent'                       => 100,
                     'AnimationDuration'                                                                         => 350, 'AnimationDurationUpdate' => 500,
                     'AnimationDelay', 'AnimationDelayUpdate'                                                    => 0,
@@ -300,6 +310,13 @@ class EChartsScatter extends IPSModuleStrict
                 $this->ReadPropertyString('IPSViewColorMapRangeMode') === 'manual'
             );
             $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
+            foreach (['', 'IPSView'] as $prefix) {
+                $form['elements'] = $this->SetFormFieldVisibility(
+                    $form['elements'],
+                    [$prefix . 'BubbleMinimum', $prefix . 'BubbleMaximum'],
+                    $this->ReadPropertyString($prefix . 'BubbleRangeMode') === 'manual'
+                );
+            }
             $form['elements'] = $this->WithAnimationFormCallbacks($form['elements'], 'ECSC');
             $form = $this->WithIPSViewDesignFormState($form, 'ECSC');
             $form = EChartsDesignerSections::Group($form, [
@@ -375,6 +392,25 @@ class EChartsScatter extends IPSModuleStrict
                 foreach (['Minimum', 'Maximum'] as $bound) {
                     $this->UpdateFormField($prefix . $axis . 'Axis' . $bound, 'visible', $mode === 'manual');
                 }
+            }
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
+        }
+    }
+
+    public function UpdateBubbleRangeForm(bool $IPSView, string $BubbleRangeMode): void
+    {
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            $prefix = $IPSView ? 'IPSView' : '';
+            foreach (['Minimum', 'Maximum'] as $bound) {
+                $this->UpdateFormField($prefix . 'Bubble' . $bound, 'visible', $BubbleRangeMode === 'manual');
             }
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
@@ -726,7 +762,18 @@ class EChartsScatter extends IPSModuleStrict
         $svg .= '<defs><clipPath id="scatter-preview-plot"><rect x="' . $left . '" y="' . $top
             . '" width="' . ($right - $left) . '" height="' . ($bottom - $top) . '"/></clipPath></defs>';
         $size = max(4, min(60, $this->BarPreviewValue($values, 'PointSize', 'integer', $ipsView)));
-        $maxBubble = max(8, min(100, $this->BarPreviewValue($values, 'BubbleMaxSize', 'integer', $ipsView)));
+        $maxBubble = max($size, min(100, $this->BarPreviewValue($values, 'BubbleMaxSize', 'integer', $ipsView)));
+        $bubbleBounds = ['Minimum' => 0.0, 'Maximum' => 12.0];
+        if ($this->BarPreviewValue($values, 'BubbleRangeMode', 'string', $ipsView) === 'manual') {
+            $bubbleBounds = [
+                'Minimum' => $this->BarPreviewValue($values, 'BubbleMinimum', 'float', $ipsView),
+                'Maximum' => $this->BarPreviewValue($values, 'BubbleMaximum', 'float', $ipsView)
+            ];
+            if (!EChartsValueRange::IsValid($bubbleBounds['Minimum'], $bubbleBounds['Maximum'])) {
+                return $svg . '<text x="24" y="100" font-size="12" fill="' . EChartsBarPreview::E($palette['text'])
+                    . '">' . EChartsBarPreview::E($this->Translate('Bubble limits must be finite with minimum below maximum.')) . '</text></svg>';
+            }
+        }
         $showValues = $this->BarPreviewValue($values, 'ShowValues', 'boolean', $ipsView);
         $adaptiveLabels = $this->BarPreviewValue($values, 'AdaptiveValueLabels', 'boolean', $ipsView);
         $valueColor = EChartsBarPreview::Color(
@@ -751,7 +798,9 @@ class EChartsScatter extends IPSModuleStrict
             }
             $x = $left + ($xValue - $xRange[0]) / ($xRange[1] - $xRange[0]) * ($right - $left);
             $y = $bottom - ($yValue - $yRange[0]) / ($yRange[1] - $yRange[0]) * ($bottom - $top);
-            $radius = isset($byRole['size']) ? ($size + ($maxBubble - $size) * $i / 12) / 2 : $size / 2;
+            $radius = isset($byRole['size'])
+                ? ($size + ($maxBubble - $size) * EChartsNormalization::Value((float) $i, $bubbleBounds) / 100) / 2
+                : $size / 2;
             $sampleColor = $colorMapEnabled ? self::PreviewInterpolatedColor(
                 $colorMapLow,
                 $colorMapHigh,
@@ -1226,6 +1275,16 @@ class EChartsScatter extends IPSModuleStrict
 
     private function IsValidDesign(string $prefix): bool
     {
+        if (!in_array($this->ReadPropertyString($prefix . 'BubbleRangeMode'), ['data', 'manual'], true)
+            || !is_finite($this->ReadPropertyFloat($prefix . 'BubbleMinimum'))
+            || !is_finite($this->ReadPropertyFloat($prefix . 'BubbleMaximum'))
+            || ($this->ReadPropertyString($prefix . 'BubbleRangeMode') === 'manual'
+                && !EChartsValueRange::IsValid(
+                    $this->ReadPropertyFloat($prefix . 'BubbleMinimum'),
+                    $this->ReadPropertyFloat($prefix . 'BubbleMaximum')
+                ))) {
+            return false;
+        }
         if (!$this->AnimationIsValid($prefix)
             || !EChartsAsset::IsSupportedTheme($this->ReadPropertyString($prefix . 'EChartsTheme'))
             || !in_array($this->ReadPropertyString($prefix . 'ValueLabelContent'), ['x', 'y', 'both'], true)
@@ -1312,6 +1371,9 @@ class EChartsScatter extends IPSModuleStrict
         }
         $style['valueLabelPosition'] = $this->ReadPropertyString($prefix . 'ValueLabelPosition');
         $style['valueLabelContent'] = $this->ReadPropertyString($prefix . 'ValueLabelContent');
+        $style['bubbleRangeMode'] = $this->ReadPropertyString($prefix . 'BubbleRangeMode');
+        $style['bubbleMinimum'] = $this->ReadPropertyFloat($prefix . 'BubbleMinimum');
+        $style['bubbleMaximum'] = $this->ReadPropertyFloat($prefix . 'BubbleMaximum');
         $style['colorMapDimension'] = $this->ReadPropertyString($prefix . 'ColorMapDimension');
         $style['colorMapRangeMode'] = $this->ReadPropertyString($prefix . 'ColorMapRangeMode');
         $style['colorMapMinimum'] = $this->ReadPropertyFloat($prefix . 'ColorMapMinimum');
@@ -1416,6 +1478,8 @@ class EChartsScatter extends IPSModuleStrict
                         . '$IPSViewXAxisRangeMode, $IPSViewYAxisRangeMode);';
                 } elseif ($name === 'ColorMapRangeMode') {
                     $item['onChange'] = 'ECSC_UpdateColorMapRangeForm($id, true, $IPSViewColorMapRangeMode);';
+                } elseif ($name === 'BubbleRangeMode') {
+                    $item['onChange'] = 'ECSC_UpdateBubbleRangeForm($id, true, $IPSViewBubbleRangeMode);';
                 }
                 $items[] = $item;
             }
