@@ -27,6 +27,11 @@
 
 ## Neu
 
+- Candlestick unterstützt zusätzlich 15-Minuten-, 30-Minuten- und lokale
+  Kalenderwochenintervalle (Montag bis Montag), auch für feste historische
+  Zeiträume. Kachel, IPSView und Vorschauen verwenden die neuen Intervalle;
+  bestehende Konfigurationen, Designs und Archivbudgets bleiben erhalten.
+
 - Boxplot bietet optional 1,5-IQR-Whisker mit separaten, zeitgestempelten
   Ausreißerpunkten. Kachel, IPSView und Vorschauen verwenden dasselbe Modell;
   Originaleinheiten, Designs und Archivbudgets bleiben erhalten. Bestehende

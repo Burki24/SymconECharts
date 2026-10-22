@@ -60,12 +60,24 @@
                     "caption": "Interval",
                     "options": [
                         {
+                            "caption": "15 minutes",
+                            "value": "fifteen-minutes"
+                        },
+                        {
+                            "caption": "30 minutes",
+                            "value": "thirty-minutes"
+                        },
+                        {
                             "caption": "Hours",
                             "value": "hour"
                         },
                         {
                             "caption": "Days",
                             "value": "day"
+                        },
+                        {
+                            "caption": "Calendar weeks (Monday to Monday)",
+                            "value": "week"
                         }
                     ]
                 }

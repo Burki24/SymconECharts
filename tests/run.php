@@ -50,12 +50,14 @@ $tests = [
     __DIR__ . '/radar_model.php',
     __DIR__ . '/boxplot_statistics.php',
     __DIR__ . '/candlestick_data.php',
+    __DIR__ . '/candlestick_intervals.php',
     __DIR__ . '/calendar_data.php',
     __DIR__ . '/zigbee_graph_export_reader.php',
     __DIR__ . '/gateway_gauges.php'
 ];
 
 $commands = [
+    ['Test Candlestick minute and week intervals', 'php tests/gateway_gauges.php --candlestick-intervals'],
     ['Test optional Boxplot IQR whiskers and outliers', 'php tests/gateway_gauges.php --boxplot-iqr'],
     ['Test named Scatter comparison groups', 'php tests/gateway_gauges.php --scatter-groups'],
     ['Test fixed Bubble size references', 'php tests/gateway_gauges.php --scatter-bubble-range'],

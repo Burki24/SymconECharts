@@ -63,7 +63,8 @@ Pie unterstützt bis zu 100 Quellen. Eine optionale erweiterte Quellenauswahl
 bietet Anfangssichtbarkeit, Alle/Umkehren und eine bei Aktualisierung erhaltene
 Auswahl. Tooltips unterscheiden Auswahlanteil und Anteil aller Quellen.
 Candlestick zeigt ersten und letzten protokollierten Wert sowie Minimum
-und Maximum abgeschlossener Archiv-Stunden oder -Tage, wahlweise auch in
+und Maximum abgeschlossener 15-/30-Minuten-, Stunden-, Tages- oder
+Kalenderwochenintervalle, wahlweise auch in
 festen historischen Von-/Bis-Zeiträumen mit unveränderten Rohwertbudgets.
 StateTimeline zeigt archivierte Boolean-/Integer-Zustände als farbige
 Zeitabschnitte mit eigenen Zustandsnamen und ausdrücklich unbekannten Anfängen.

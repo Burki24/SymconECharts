@@ -591,7 +591,7 @@ class EChartsCandlestick extends IPSModuleStrict
         }
         if (mb_strlen($this->ReadPropertyString('Title')) > 200
             || !in_array($this->ReadPropertyString('Range'), ['24h', '7d', '30d', 'custom', 'absolute'], true)
-            || !in_array($this->ReadPropertyString('Interval'), ['hour', 'day'], true)
+            || !in_array($this->ReadPropertyString('Interval'), EChartsArchiveQuery::RAW_INTERVALS, true)
             || !$this->IsValidDesign('')
             || (!$this->ReadPropertyBoolean('IPSViewUseTileDesign') && !$this->IsValidDesign('IPSView'))
             || !EChartsIPSViewBackground::IsValid(

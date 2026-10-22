@@ -8,8 +8,8 @@ const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const read = p => fs.readFileSync(path.join(root, p), 'utf8');
 const style = { orientation: 'vertical', showGrid: true, showAxisLabels: true, showTooltip: true,
     candleWidth: 40, riseColor:'#3FBE95', fallColor:'#E66B6B', borderWidth: 2, candleOpacityPercent: 70, titleFontSizePercent: 100, axisFontSizePercent: 100, animationEnabled: false, enableZoom: true };
-function state() {
-    return { schemaVersion: 1, family: 'candlestick', status: 'ready', error: null, chart: {
+function state(interval = 'hour') {
+    const value = { schemaVersion: 1, family: 'candlestick', status: 'ready', error: null, chart: {
         schemaVersion: 1, family: 'candlestick', theme: 'auto', range: {key:'7d',startTimestamp:1791504000,endTimestamp:1792108800}, candlestick: { title: 'Temperatur · Archivintervalle', unit: '°C', variableID:12345, interval:'hour',
             sourceLabel: 'Außentemperatur',
             data: Array.from({length:168},(_,index) => ({
@@ -18,11 +18,26 @@ function state() {
                 count: 168 - index * 5, firstTimestamp: 1791504000, lastTimestamp: 1792108800
             })), style: { ...style } }
     } };
+    if (['fifteen-minutes','thirty-minutes','week'].includes(interval)) {
+        const step = {'fifteen-minutes':900,'thirty-minutes':1800,week:604800}[interval];
+        const count = interval === 'week' ? 12 : 96;
+        const start = Date.parse('2026-07-06T00:00:00Z') / 1000;
+        value.chart.range = {key:'absolute',timezone:'UTC',startTimestamp:start,endTimestamp:start+count*step-1};
+        value.chart.candlestick.interval = interval;
+        value.chart.candlestick.title = 'Synthetische Rohwertkerzen · ' + interval;
+        value.chart.candlestick.data = Array.from({length:count},(_,i)=>({
+            ...value.chart.candlestick.data[i%168],id:String(start+i*step),count:3+i%7,
+            label:interval==='week' ? '2026-W'+String(28+i).padStart(2,'0')
+                : new Date((start+i*step)*1000).toISOString().slice(0,16).replace('T',' ')+' +00:00',
+            firstTimestamp:start+i*step,lastTimestamp:start+(i+1)*step-1
+        }));
+    }
+    return value;
 }
 const variables = ':root{--symc-background:#303236;--symc-text:#f4f5f7;--symc-text-muted:#969aa2;--symc-border:#555860;--symc-surface:#25272b}';
 const translations = JSON.parse(read('EChartsCandlestick/locale.json')).translations.de;
-function page(mode, extended = false, light = false) {
-    const initialState = state();
+function page(mode, extended = false, light = false, interval = 'hour') {
+    const initialState = state(interval);
     if (mode === 'ipsview') {
         initialState.chart.candlestick.style.orientation = 'horizontal';
         initialState.chart.candlestick.style.axisColor = light ? '#333333' : '#A9DCD2';
@@ -60,9 +75,12 @@ function page(mode, extended = false, light = false) {
 http.createServer((req, res) => {
     const url = new URL(req.url, 'http://127.0.0.1');
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    if (url.pathname === '/chart') { res.end(page(url.searchParams.get('mode') === 'ipsview' ? 'ipsview' : 'symcon', url.searchParams.get('design') === 'extended', url.searchParams.get('theme') === 'light')); return; }
+    const interval = ['fifteen-minutes','thirty-minutes','week'].includes(url.searchParams.get('interval')) ? url.searchParams.get('interval') : 'hour';
+    if (url.pathname === '/chart') { res.end(page(url.searchParams.get('mode') === 'ipsview' ? 'ipsview' : 'symcon', url.searchParams.get('design') === 'extended', url.searchParams.get('theme') === 'light', interval)); return; }
     res.end('<!doctype html><html lang="de"><head><title>Candlestick – lokale Browserprüfung</title></head><body style="background:#0b0c0e;color:white;font:16px Arial;margin:20px">'
-        + '<h1 style="font-size:20px">Candlestick · synthetische Beispieldaten</h1><div style="display:flex;gap:16px;align-items:start;flex-wrap:wrap">'
-        + '<section><h2 style="font-size:16px">Kachel · hoch</h2><iframe title="Kachel" src="/chart?mode=symcon&design=extended" style="border:0;width:400px;height:600px"></iframe></section>'
-        + '<section><h2 style="font-size:16px">IPSView · breit</h2><iframe title="IPSView" src="/chart?mode=ipsview&design=extended" style="border:0;width:790px;height:440px"></iframe></section></div></body></html>');
+        + '<h1 style="font-size:20px">Candlestick · synthetische Beispieldaten</h1><nav>'
+        + ['fifteen-minutes','thirty-minutes','week'].map(item=>'<a style="color:#aaddff;margin-right:18px" href="/?interval='+item+'">'+item+'</a>').join('')
+        + '</nav><div style="display:flex;gap:16px;align-items:start;flex-wrap:wrap">'
+        + '<section><h2 style="font-size:16px">Kachel · hoch</h2><iframe title="Kachel" src="/chart?mode=symcon&design=extended&interval='+interval+'" style="border:0;width:400px;height:600px"></iframe></section>'
+        + '<section><h2 style="font-size:16px">IPSView · breit</h2><iframe title="IPSView" src="/chart?mode=ipsview&design=extended&interval='+interval+'" style="border:0;width:790px;height:440px"></iframe></section></div></body></html>');
 }).listen(8800, '127.0.0.1', () => console.log('Candlestick browser fixture: http://127.0.0.1:8800'));

@@ -24,16 +24,25 @@ trait CandlestickPreview
         $svg = str_replace('<svg xmlns', '<svg font-family="' . EChartsBarPreview::E($this->BarPreviewValue($values, 'FontFamily', 'string', $ipsView)) . '" xmlns', $svg);
         $svg = str_replace('<text x="24"', '<text font-style="' . ($this->BarPreviewValue($values, 'TitleItalic', 'boolean', $ipsView) ? 'italic' : 'normal')
             . '" font-weight="' . ($this->BarPreviewValue($values, 'TitleBold', 'boolean', $ipsView) ? 'bold' : 'normal') . '" x="24"', $svg);
-        if (($values['Range'] ?? $this->ReadPropertyString('Range')) === 'absolute') {
+        $absolute = ($values['Range'] ?? $this->ReadPropertyString('Range')) === 'absolute';
+        $interval = $values['Interval'] ?? $this->ReadPropertyString('Interval');
+        $extended = in_array($interval, ['fifteen-minutes', 'thirty-minutes', 'week'], true);
+        if ($absolute || $extended) {
             try {
                 $query = $this->ResolveTimeQuery($values);
                 $zone = new \DateTimeZone(date_default_timezone_get());
                 $format = static fn (int $timestamp): string => (new \DateTimeImmutable('@' . $timestamp))->setTimezone($zone)->format('Y-m-d H:i:s P');
-                $svg = str_replace('<svg ', '<svg data-range="absolute" data-requested-start="' . $query['RequestedStartTimestamp']
-                    . '" data-requested-end="' . $query['RequestedEndTimestamp'] . '" ', $svg);
-                $svg .= '<text x="24" y="62" font-size="10" fill="' . EChartsBarPreview::E($palette['muted']) . '">'
-                    . EChartsBarPreview::E($this->Translate('Fixed period') . ': ' . $format($query['RequestedStartTimestamp'])
-                        . ' → ' . $format($query['RequestedEndTimestamp']) . ' (' . $zone->getName() . ')') . '</text>';
+                if ($absolute) {
+                    $svg = str_replace('<svg ', '<svg data-range="absolute" data-requested-start="' . $query['RequestedStartTimestamp']
+                        . '" data-requested-end="' . $query['RequestedEndTimestamp'] . '" ', $svg);
+                    $svg .= '<text x="24" y="62" font-size="10" fill="' . EChartsBarPreview::E($palette['muted']) . '">'
+                        . EChartsBarPreview::E($this->Translate('Fixed period') . ': ' . $format($query['RequestedStartTimestamp'])
+                            . ' → ' . $format($query['RequestedEndTimestamp']) . ' (' . $zone->getName() . ')') . '</text>';
+                }
+                if ($extended && $query['Empty']) {
+                    return $svg . '<text x="24" y="100" font-size="12" fill="' . EChartsBarPreview::E($palette['text']) . '">'
+                        . EChartsBarPreview::E($this->Translate('The selected period contains no complete interval.')) . '</text></svg>';
+                }
             } catch (\Throwable $exception) {
                 $svg .= '<text x="24" y="100" font-size="12" fill="' . EChartsBarPreview::E($palette['text']) . '">';
                 foreach (explode("\n", wordwrap($this->Translate($exception->getMessage()), 90, "\n")) as $index => $line) {
@@ -43,6 +52,10 @@ trait CandlestickPreview
             }
         }
         $items = array_map(static fn (int $day): array => ['label' => '10-' . $day], range(10, 16));
+        if ($extended) {
+            $items = array_map(static fn (array $item): array => ['label' => $interval === 'week' ? $item['label'] : substr($item['label'], 11)], array_slice($query['Intervals'], 0, 7));
+            $svg = str_replace('<svg ', '<svg data-interval="' . $interval . '" data-total-intervals="' . count($query['Intervals']) . '" ', $svg);
+        }
         $horizontal = $this->BarPreviewValue($values, 'Orientation', 'string', $ipsView) === 'horizontal';
         $zoom = $this->BarPreviewValue($values, 'EnableZoom', 'boolean', $ipsView);
         $svg = str_replace('<svg ', '<svg data-time-zoom="' . ($zoom ? 'true' : 'false') . '" ', $svg);

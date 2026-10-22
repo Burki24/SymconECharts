@@ -134,6 +134,10 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   `EnableZoom` je Designer (Default false). Die gesamte geladene Datenmenge
   bestimmt weiterhin die Werteskala; zentrale ECharts-Zoomlogik und die
   bestehende Helper-Frame-/Mausradunterstützung werden wiederverwendet.
+  ADR 0093 ergänzt `fifteen-minutes`, `thirty-minutes` und lokale ISO-Wochen
+  (`week`, Montag bis Montag) über die zentrale begrenzte Rohintervallplanung.
+  Vorhandene Stunden-/Tagesverträge, Designs und 720/63/64000-Budgets bleiben
+  erhalten; die Aggregatmodi anderer Familien werden nicht erweitert.
   Aktuelle Mengenflüsse zwischen manuell angelegten Knoten liegen im eigenen
   Gerätemodul `EChartsSankey`; Verbindungsbreiten folgen numerischen
   Quellvariablen, Zyklen und negative Werte sind unzulässig.

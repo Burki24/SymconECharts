@@ -146,7 +146,7 @@ assertGatewayGauge(
     'Counter archives must be rejected visibly.'
 );
 $candle->SetTestProperty('VariableID', 88500);
-foreach ([['Interval', 'week', 'hour'], ['Range', '1h', '30d'], ['RiseColor', -2, 0x3FBE95],
+foreach ([['Interval', 'month', 'hour'], ['Range', '1h', '30d'], ['RiseColor', -2, 0x3FBE95],
     ['CandleWidth', 0, 40], ['MinCandleWidth', 81, 1], ['Orientation', 'invalid', 'vertical']] as [$field, $bad, $restore]) {
     $candle->SetTestProperty($field, $bad);
     $candle->ApplyChanges();

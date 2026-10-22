@@ -1,5 +1,22 @@
 # Tests
 
+## Candlestick: Minuten- und Wochenintervalle
+
+`php tests/candlestick_intervals.php` begann RED an der fehlenden Minutenart.
+Es prüft zentrale vollständige Minuten-/ISO-Wochenintervalle, relative und
+absolute Grenzen, lokale DST-/Offsetwechsel, ISO-Jahreswechsel, Custom-Dauern
+und die unveränderte 720/721-Grenze. Die bisherigen Stunden-/Tagesprüfungen
+bleiben unverändert aktiv. `php tests/gateway_gauges.php --candlestick-intervals`
+prüft echte Modul-/Gateway-Zusammenarbeit mit synthetischen Kernelarchiven,
+OCLH statt Aggregate, Lücken, Cache, unabhängige Designer, reine SVG-Entwürfe,
+Zoom und beide begrenzten HTML-Ausgaben. `node tests/candlestick_layout.js`
+ergänzt native Geometrie-/Label-/Tooltip-/Zoomprüfungen für alle drei neuen
+Intervallarten, beide Ausrichtungen und Adapter. `node tests/candlestick_browser.mjs`
+bietet auswählbare synthetische Intervallansichten; lokale verschachtelte
+Canvas-Prüfungen bestätigten echtes Mausrad in beide Richtungen bei stabiler
+Werteskala und erhaltenen Ansichten nach Refresh. Die neuen Intervalle bleiben
+nach Modulupdate in Kachel und tatsächlichem IPSView live abzunehmen.
+
 ## Treemap/Sunburst: normalisierte Gewichte und Blattformatierung
 
 `php tests/treemap_model.php` begann RED an der fehlenden Projektion und prüft

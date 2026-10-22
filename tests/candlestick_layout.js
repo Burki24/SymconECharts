@@ -231,6 +231,31 @@ for (const orientation of ['vertical', 'horizontal']) {
     engine.dispose();
 }
 assert.equal(render(model).option.dataZoom.length,0,'Legacy designs keep zoom disabled.');
+for (const interval of ['fifteen-minutes','thirty-minutes','week']) {
+    for (const orientation of ['vertical','horizontal']) {
+        for (const mode of ['symcon','ipsview']) {
+            const labels = interval === 'week' ? ['2026-W41','2026-W42','2026-W43','2026-W44']
+                : ['2026-10-25 02:00 +02:00','2026-10-25 02:30 +02:00','2026-10-25 02:00 +01:00','2026-10-25 02:30 +01:00'];
+            const input = {...model,range:{key:'7d',startTimestamp:1000,endTimestamp:3000},candlestick:{...model.candlestick,
+                variableID:12345,interval,data:model.candlestick.data.map((item,i)=>({...item,label:labels[i]})),
+                style:{...model.candlestick.style,enableZoom:true,orientation}}};
+            const engine = nativeWindow.echarts.init(null,null,{renderer:'svg',ssr:true,width:900,height:500});
+            const fixture = render(input,mode,true,900,engine);
+            const axis = orientation === 'horizontal' ? fixture.option.yAxis : fixture.option.xAxis;
+            assert.equal(axis.axisLabel.formatter('1'),labels[0],'New interval labels keep ISO weeks and real offsets.');
+            assert.ok(fixture.option.tooltip.formatter({dataIndex:0}).includes(labels[0]));
+            assert.equal(engine.getModel().getSeriesByIndex(0).getData().hasValue(3),false);
+            assert.ok(engine.getModel().getSeriesByIndex(0).getData().getItemLayout(0).ends.every(point=>point.every(Number.isFinite)),
+                'The shipped runtime must compute finite candle geometry for every new interval.');
+            engine.dispatchAction({type:'dataZoom',dataZoomIndex:0,start:20,end:70});
+            fixture.window.handleMessage({status:'ready',chart:input});
+            assert.equal(fixture.option.dataZoom[0].start,20,'New intervals preserve compatible zoom on refresh.');
+            fixture.window.handleMessage({status:'ready',chart:{...input,candlestick:{...input.candlestick,interval:'day'}}});
+            assert.equal(fixture.option.dataZoom[0].start,0,'Changing from a new interval resets the old view.');
+            engine.dispose();
+        }
+    }
+}
 for (const orientation of ['vertical','horizontal']) {
     for (const inverse of [false,true]) {
         for (const mode of ['symcon','ipsview']) {

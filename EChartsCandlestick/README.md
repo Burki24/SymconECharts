@@ -8,7 +8,8 @@ Es verwendet das gemeinsame EChartsGateway.
 
 1. Instanz anlegen und das vorhandene EChartsGateway auswählen.
 2. Eine archivierte Integer- oder Float-Variable auswählen, etwa Temperatur.
-3. Titel, Zeitraum und Stunden- oder Tagesintervall festlegen.
+3. Titel, Zeitraum und Intervall (15 Minuten, 30 Minuten, Stunde, Tag oder
+   Kalenderwoche) festlegen.
 4. Kacheldesign einstellen; für IPSView die Ausgabe einschalten und bei
    Bedarf ein unabhängiges Design verwenden.
 
@@ -24,27 +25,43 @@ Gut-/Schlechtbewertung der Messwerte.
 Es werden ausschließlich abgeschlossene Intervalle angezeigt. Zur Auswahl
 stehen 24 Stunden, 7 oder 30 Tage. Im Stundenmodus sind das 24, 168 oder 720
 reale Stunden; im Tagesmodus 1, 7 oder 30 lokale Kalendertage.
+
+15-Minuten-Intervalle beginnen lokal bei :00, :15, :30 und :45,
+30-Minuten-Intervalle bei :00 und :30. Ein 24-Stunden-Fenster enthält damit
+96 beziehungsweise 48 vollständige Intervalle, sieben Tage 672 beziehungsweise
+336. Die Vorgabe „30 Tage“ überschreitet in beiden Minutenmodi das unveränderte
+720er-Limit und wird mit einem Hinweis abgewiesen, nicht still gekürzt.
+
+Kalenderwochen beginnen montags um 00:00 Uhr und enden am folgenden Montag.
+Die laufende Woche bleibt ausgeschlossen. „7 Tage“ zeigt eine vollständige
+Vorwoche, „30 Tage“ vier vollständige Wochen und „24 Stunden“ keine vollständige
+Woche. Die Beschriftung verwendet ISO-Wochen einschließlich ISO-Jahr, etwa
+`2026-W01`, auch wenn die Woche bereits im Dezember des Vorjahres beginnt.
+
 Zusätzlich lässt sich eine **benutzerdefinierte Dauer** von 1–1000 Minuten,
 Stunden, Tagen oder Wochen wählen. Sie endet an der letzten abgeschlossenen
-Intervallgrenze. Nur ganze Stunden beziehungsweise lokale Tage innerhalb
-dieser verstrichenen Dauer werden berücksichtigt; ein kurzer Zeitraum kann
+Intervallgrenze. Nur ganze Intervalle innerhalb dieser verstrichenen Dauer
+werden berücksichtigt; ein kurzer Zeitraum kann
 deshalb leer sein. Höchstens 720 Intervalle sind erlaubt. Bei Überschreitung
-bitte die Dauer verkürzen oder Tagesintervalle wählen.
+bitte die Dauer verkürzen oder ein längeres Intervall wählen.
 Die Zeitzone der Symcon-Installation gilt, einschließlich Sommerzeit.
-Stundenbeschriftungen enthalten den UTC-Offset, damit doppelte Stunden beim
-Herbstwechsel unterscheidbar bleiben.
+Minuten- und Stundenbeschriftungen enthalten den UTC-Offset, damit doppelte
+Uhrzeiten beim Herbstwechsel unterscheidbar bleiben.
 
 Bei benutzerdefinierten Angaben entspricht ein Tag 24 verstrichenen Stunden,
 eine Woche sieben solchen Tagen. Die festen Tages-Vorgaben zählen dagegen
 weiterhin lokale Kalendertage. Deshalb kann eine benutzerdefinierte Dauer von
 einem Tag im Tagesmodus beim Herbstwechsel keinen vollständigen 25-Stunden-Tag
-enthalten. Ein leerer Zeitraum löst keine Archivabfrage aus. Kachel und IPSView
+enthalten. Ebenso kann eine eigene Dauer von einer Woche (168 Stunden) eine
+vollständige 169-Stunden-Kalenderwoche beim Herbstwechsel nicht enthalten.
+Die festen Wochenvorgaben zählen lokale Daten und erhalten die ganze Vorwoche.
+Ein leerer Zeitraum löst keine Archivabfrage aus. Kachel und IPSView
 verwenden dieselbe Zeitkonfiguration; Designänderungen verändern sie nicht.
 
 „Fester historischer Zeitraum“ ergänzt eine Von-/Bis-Auswahl in der angezeigten
 Symcon-Zeitzone. Der Beginn ist eingeschlossen, das Ende ausgeschlossen und darf
-nicht in der Zukunft liegen. Nur vollständig enthaltene abgeschlossene Stunden
-oder Kalendertage werden berücksichtigt: Von 12.10.2026 08:30 bis 13:30 entstehen
+nicht in der Zukunft liegen. Nur vollständig enthaltene abgeschlossene Intervalle
+werden berücksichtigt: Von 12.10.2026 08:30 bis 13:30 entstehen
 im Stundenmodus die Intervalle 09:00 bis einschließlich 12:59:59. Im Tagesmodus
 enthält dieses Fenster keinen vollständigen Tag und bleibt leer.
 
@@ -52,8 +69,11 @@ Die Grenzen bleiben bei Aktualisierungen fest. Fehlende oder ungültige Daten,
 nicht existierende Uhrzeiten und doppeldeutige Uhrzeiten beim Herbstwechsel
 werden abgewiesen; bitte eindeutige Grenzen vor oder nach dem Wechsel wählen.
 Ein Fenster über den Wechsel ist möglich und enthält die tatsächlichen Stunden
-beziehungsweise lokale 23-/25-Stunden-Tage. Historische Stundenfenster über
-Zeitzonenwechsel mit nicht ganzstündiger Verschiebung werden nicht unterstützt.
+beziehungsweise lokale 23-/25-Stunden-Tage und 167-/169-Stunden-Wochen.
+Historische Stundenfenster über Zeitzonenwechsel mit nicht ganzstündiger
+Verschiebung werden nicht unterstützt.
+Minutenintervalle erlauben nur zum Raster passende Offsetwechsel (etwa
+30 Minuten); andere historische Verschiebungen werden sichtbar abgewiesen.
 Auch im festen Zeitraum gelten höchstens 720 Intervalle und dieselben
 Rohwertbudgets. Die Vorschauen zeigen die gewählten Grenzen mit Beispieldaten;
 bestehende Zeiträume und Designs bleiben unverändert nutzbar.

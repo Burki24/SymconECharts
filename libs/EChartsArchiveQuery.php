@@ -35,6 +35,9 @@ final class EChartsArchiveQuery
         'day'             => 1
     ];
     public const AGGREGATION_SECONDS = [6 => 60, 5 => 300, 8 => 900, 0 => 3600, 1 => 86400];
+    // Explicit raw-value interval lists, not additional Symcon aggregation modes.
+    public const RAW_INTERVALS = ['fifteen-minutes', 'thirty-minutes', 'hour', 'day', 'week'];
+    private const MINUTE_INTERVAL_SECONDS = ['fifteen-minutes' => 900, 'thirty-minutes' => 1800];
 
     /**
      * @return array{DurationSeconds:int,StartTimestamp:int,EndTimestamp:int,Mode:string,AggregationLevel:int|null,Limit:int,CalendarAligned:bool,AcceptLiveUpdates:bool,Empty:bool}
@@ -346,11 +349,22 @@ final class EChartsArchiveQuery
     ): array {
         if (!in_array($range, ['24h', '7d', '30d', 'custom'], true)
             || !self::IsValidRange($range, $customRangeValue, $customRangeUnit)
-            || !in_array($interval, ['hour', 'day'], true) || $now < 1 || $maximumIntervals < 1 || $maximumIntervals > 1000) {
+            || !in_array($interval, self::RAW_INTERVALS, true) || $now < 1 || $maximumIntervals < 1 || $maximumIntervals > 1000) {
             throw new InvalidArgumentException('The archive interval settings are invalid.');
         }
         $zone = new DateTimeZone($timezone);
         $local = (new DateTimeImmutable('@' . $now))->setTimezone($zone);
+        if (isset(self::MINUTE_INTERVAL_SECONDS[$interval]) || $interval === 'week') {
+            $end = self::RawIntervalStart($local, $interval);
+            $duration = $range === 'custom' ? $customRangeValue * self::CUSTOM_RANGE_UNITS[$customRangeUnit]
+                : self::RANGE_SECONDS[$range];
+            // Like daily presets, weekly presets count local dates. Custom units
+            // retain their existing elapsed-seconds contract, including DST.
+            $earliest = $interval === 'week' && $range !== 'custom'
+                ? $end->modify('-' . intdiv($duration, 86400) . ' days')->getTimestamp()
+                : max(1, $end->getTimestamp() - $duration);
+            return self::RawIntervalList($earliest, $end->getTimestamp(), $interval, $zone, $maximumIntervals);
+        }
         // Elapsed subtraction preserves the actual offset of a repeated autumn hour.
         $end = $interval === 'day' ? $local->setTime(0, 0)
             : $local->setTimestamp($now - (int) $local->format('i') * 60 - (int) $local->format('s'));
@@ -385,6 +399,10 @@ final class EChartsArchiveQuery
     ): array {
         if ($maximumIntervals < 1 || $maximumIntervals > 1000) {
             throw new InvalidArgumentException('The archive interval settings are invalid.');
+        }
+        if (isset(self::MINUTE_INTERVAL_SECONDS[$interval]) || $interval === 'week') {
+            self::ResolveAbsoluteWindow($startTimestamp, $endExclusiveTimestamp, $now, $timezone);
+            return self::RawIntervalList($startTimestamp, $endExclusiveTimestamp, $interval, new DateTimeZone($timezone), $maximumIntervals);
         }
         $query = self::ResolveAbsolute($startTimestamp, $endExclusiveTimestamp, $interval, $maximumIntervals, 1, $now, $timezone);
         if ($query['Empty']) {
@@ -425,14 +443,64 @@ final class EChartsArchiveQuery
             if (count($intervals) >= $maximumIntervals) {
                 throw new InvalidArgumentException('Too many archive intervals. Choose a shorter range or a longer interval.');
             }
-            $next = $interval === 'day' ? $cursor->modify('+1 day') : $cursor->setTimestamp($cursor->getTimestamp() + 3600);
+            $next = self::NextInterval($cursor, $interval);
             $intervals[] = ['startTimestamp' => $cursor->getTimestamp(), 'endTimestamp' => $next->getTimestamp() - 1,
-                'label'                      => $cursor->format($interval === 'day' ? 'Y-m-d' : 'Y-m-d H:i P')];
+                'label'                      => $cursor->format(match ($interval) {
+                    'day' => 'Y-m-d', 'week' => 'o-\\WW', default => 'Y-m-d H:i P'
+                })];
             $cursor = $next;
         }
         return ['StartTimestamp' => $intervals === [] ? $end->getTimestamp() - 1 : $start,
             'EndTimestamp'       => $end->getTimestamp() - 1, 'Intervals' => $intervals,
-            'AggregationLevel'   => $interval === 'day' ? 1 : 0, 'Limit' => 1000, 'Empty' => $intervals === []];
+            'AggregationLevel'   => match ($interval) {
+                'day' => 1, 'hour' => 0, default => null
+            },
+            'Limit'              => 1000, 'Empty' => $intervals === []];
+    }
+
+    /** Minute slots preserve elapsed offsets; weeks use local ISO-Monday boundaries. */
+    private static function RawIntervalStart(DateTimeImmutable $local, string $interval): DateTimeImmutable
+    {
+        if ($interval === 'week') {
+            return new DateTimeImmutable($local->modify('monday this week')->format('Y-m-d') . ' 00:00:00', $local->getTimezone());
+        }
+        $seconds = self::MINUTE_INTERVAL_SECONDS[$interval];
+        return $local->setTimestamp($local->getTimestamp() - ((int) $local->format('i') * 60 + (int) $local->format('s')) % $seconds);
+    }
+
+    private static function NextInterval(DateTimeImmutable $cursor, string $interval): DateTimeImmutable
+    {
+        return match ($interval) {
+            'day'   => $cursor->modify('+1 day'),
+            'week'  => new DateTimeImmutable($cursor->modify('+7 days')->format('Y-m-d') . ' 00:00:00', $cursor->getTimezone()),
+            default => $cursor->setTimestamp($cursor->getTimestamp() + (self::MINUTE_INTERVAL_SECONDS[$interval] ?? 3600))
+        };
+    }
+
+    /** Whole raw intervals only; keep aggregate-query consumers and their hour/day contracts unchanged. */
+    private static function RawIntervalList(int $from, int $until, string $interval, DateTimeZone $zone, int $maximumIntervals): array
+    {
+        $cursor = self::RawIntervalStart((new DateTimeImmutable('@' . $from))->setTimezone($zone), $interval);
+        if ($cursor->getTimestamp() < $from) {
+            $cursor = self::NextInterval($cursor, $interval);
+        }
+        $end = self::RawIntervalStart((new DateTimeImmutable('@' . $until))->setTimezone($zone), $interval);
+        if ($cursor >= $end) {
+            return ['StartTimestamp' => $from, 'EndTimestamp' => $until - 1,
+                'Intervals'          => [], 'AggregationLevel' => null, 'Limit' => 1000, 'Empty' => true];
+        }
+        if (isset(self::MINUTE_INTERVAL_SECONDS[$interval])) {
+            $seconds = self::MINUTE_INTERVAL_SECONDS[$interval];
+            $transitions = $zone->getTransitions($cursor->getTimestamp(), $end->getTimestamp() + 1);
+            $previousOffset = null;
+            foreach ($transitions === false ? [] : $transitions as $transition) {
+                if ($previousOffset !== null && ($transition['offset'] - $previousOffset) % $seconds !== 0) {
+                    throw new InvalidArgumentException('Minute historical periods across non-aligned timezone changes are not supported.');
+                }
+                $previousOffset = $transition['offset'];
+            }
+        }
+        return self::IntervalList($cursor, $end, $interval, $maximumIntervals);
     }
 
     /** @return array{DurationSeconds:int,StartTimestamp:int,EndTimestamp:int,CalendarAligned:bool,AcceptLiveUpdates:bool} */

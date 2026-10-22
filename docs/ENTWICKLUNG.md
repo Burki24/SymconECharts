@@ -40,6 +40,14 @@ Canvas-Zeichenaufrufe für Kachel und IPSView statt nur vorhandener Titeloptione
 
 ## Aktueller Stand und Zielarchitektur
 
+Candlestick ergänzt gemäß [ADR 0093](adr/0093-candlestick-minute-week-intervals.md)
+15-/30-Minuten- und lokale ISO-Wochenintervalle. `EChartsArchiveQuery` teilt
+die begrenzte Enumeration mit den bisherigen Stunden-/Tagesfenstern;
+zusätzliche Rohintervalle erweitern nicht die Symcon-Aggregatmodi anderer
+Familien. Rohwertleser, Cache, Renderer und 720/63/64000-Budgets bleiben erhalten.
+Die neuen Intervallansichten sind lokal geprüft; die Live-Abnahme nach
+Modulupdate in Kachel und tatsächlichem IPSView bleibt offen.
+
 Candlestick ergänzt gemäß [ADR 0092](adr/0092-candlestick-time-zoom.md)
 optionalen Zeitzoom als reine Ansicht. `libs/echarts-zoom.js` ergänzt additive
 kategoriezeitbasierte Optionen mit `filterMode=none` und nutzt die bestehende
@@ -47,7 +55,8 @@ Erfassung/Wiederherstellung sowie die zentrale Wheel-Router-Anbindung.
 Die vorhandenen TimeSeries-/BarHistory-/Scatter-Verträge bleiben erhalten.
 ECharts-spezifische Optionen bleiben im Projekt; allgemeine Frame- und
 Eventnormalisierung bleibt unverändert im Symcon_ModuleHelper.
-Kachel-/IPSView-Live-Abnahme nach Update und echte Touchprüfung bleiben offen.
+Der Eigentümer bestätigt den Zeitzoom einschließlich Mausrad in der nativen
+App und im tatsächlichen IPSView-Client. Echte Touchprüfung bleibt offen.
 
 Treemap und Sunburst teilen gemäß [ADR 0090](adr/0090-normalized-hierarchy-weights.md)
 optionale normalisierte Gewichte und Originalformatierung je Blatt.
