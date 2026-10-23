@@ -1282,6 +1282,10 @@ if (($argv[1] ?? '') === '--pie-preview') {
     echo base64_decode(substr($previewUpdate['Value'], strlen('data:image/svg+xml;base64,')));
     exit(0);
 }
+if (($argv[1] ?? '') === '--waterfall-sections') {
+    require __DIR__ . '/waterfall_sections.php';
+    exit(0);
+}
 if (array_slice($argv, 1) === ['--waterfall-many']) {
     require __DIR__ . '/bar_waterfall_many.php';
     exit(0);
@@ -9273,7 +9277,8 @@ try {
             count($negativeTotalBars) === 3
                 && ($negativeTotalLabels['-50.0'] ?? -INF) > $negativeTotalBars[1]['bottom']
                 && ($negativeTotalLabels['-7.5'] ?? -INF) > $negativeTotalBars[2]['bottom']
-                && ($negativeTotalLabels['Gesamt'] ?? -INF) > ($negativeTotalLabels['-7.5'] ?? INF) + 20,
+                // Kernel doubles use English; preview and live model now share the translated final label.
+                && ($negativeTotalLabels['Total'] ?? -INF) > ($negativeTotalLabels['-7.5'] ?? INF) + 20,
             'Waterfall Tile and independent IPSView previews must place negative values without label collisions.'
         );
     }

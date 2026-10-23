@@ -155,6 +155,7 @@ assert.equal(option.dataZoom && option.dataZoom.length, 2,
 
 function waterfallHarness(mode, steps, style = {}, observer = true, width = 800) {
     const element = { clientWidth: width, clientHeight: 500, hidden: false };
+    const sectionNote = {hidden: true, textContent: ''};
     const handlers = {};
     let nextOption, nativeChart, observed, actualWidth = width, actualHeight = 500;
     let state = { status: 'ready', chart: { theme: 'dark', steps,
@@ -167,12 +168,14 @@ function waterfallHarness(mode, steps, style = {}, observer = true, width = 800)
     const host = {SYMC_VISUALIZATION: {mode, state, options: {echartsThemes: {auto: palette, dark: palette, light: palette}}},
         echarts: {init: () => adapter}, addEventListener: (name, callback) => { handlers[name] = callback; }};
     if (observer) { host.ResizeObserver = class {constructor(callback) {observed = callback;} observe() {}}; }
-    const dom = {getElementById: id => id === 'echarts-bar-waterfall-chart' ? element : {hidden: true},
+    const dom = {getElementById: id => id === 'echarts-bar-waterfall-chart' ? element
+        : id === 'echarts-waterfall-sections' ? sectionNote : {hidden: true},
         createElement: () => ({style: {}, remove() {}}), body: {appendChild() {}}};
     vm.runInNewContext(designSource, {window: host});
     vm.runInNewContext(navigationSource, {window: host});
     vm.runInNewContext(source, {window: host, document: dom, ResizeObserver: host.ResizeObserver});
-    return {get option() {return nextOption;}, useNative: engine => {nativeChart = engine;},
+    return {get option() {return nextOption;}, sectionNote, useNative: engine => {nativeChart = engine;},
+        error: () => host.handleMessage({status: 'error', error: 'Configure valid Waterfall sources.'}),
         update: (newSteps = state.chart.steps, patch = {}, theme = state.chart.theme) => {
             state = {status: 'ready', chart: {...state.chart, theme, steps: newSteps,
                 bar: {...state.chart.bar, style: {...state.chart.bar.style, ...patch}}}};
@@ -284,4 +287,68 @@ window.handleMessage({ status: 'error', error: 'Configure valid Waterfall source
 assert.equal(chartElement.hidden, true);
 assert.equal(errorElement.hidden, false);
 
-console.log('Waterfall layout verified.');
+const sectionSteps = [
+    {id:'v1',label:'<Start>',kind:'start',change:10,before:0,after:10,section:1,sectionLabel:'<Start>'},
+    {id:'v2',label:'Drop',kind:'change',change:-15,before:10,after:-5,section:1,sectionLabel:'<Start>'},
+    {id:'subtotal-v2',label:'Subtotal: Drop',kind:'subtotal',change:-5,before:0,after:-5,calculated:true,section:1,sectionLabel:'<Start>'},
+    {id:'v3',label:'Restart: Other',kind:'restart',change:-20,before:0,after:-20,previousTotal:-5,section:2,sectionLabel:'Other'},
+    {id:'subtotal-v3',label:'Subtotal: Other',kind:'subtotal',change:-20,before:0,after:-20,calculated:true,section:2,sectionLabel:'Other'},
+    {id:'v4',label:'Change',kind:'change',change:30,before:-20,after:10,section:2,sectionLabel:'Other'},
+    {id:'total',label:'Final section total',kind:'total',change:10,before:0,after:10,section:2,sectionLabel:'Other'}
+];
+for (const mode of ['symcon', 'ipsview']) {
+    const before = JSON.stringify(sectionSteps);
+    const h = waterfallHarness(mode, sectionSteps, {colors:{startColor:'#123456',totalColor:'#654321'}}, true, 1200);
+    assert.equal(h.sectionNote.hidden, false);
+    assert.match(h.sectionNote.textContent, /last section/);
+    assert.equal(h.option.grid.bottom, 80, 'A section note must have reserved space without changing old chart layouts.');
+    assert.equal(h.option.series[3].data[2].value, -5, 'The subtotal is an absolute negative bar, not another negative delta.');
+    assert.equal(h.option.series[3].data[3].value, -20, 'A reset starts from zero, never from the previous closing balance.');
+    assert.equal(h.option.series[2].data[3], 0);
+    assert.equal(h.option.series[3].data[3].itemStyle.color, '#123456');
+    assert.equal(h.option.series[3].data[2].itemStyle.color, '#654321');
+    assert.match(h.option.tooltip.formatter([{data:{id:'subtotal-v2'}}]), /not added again.*&lt;Start&gt;/);
+    assert.match(h.option.tooltip.formatter([{data:{id:'v3'}}]), /absolute start.*Previous section ended at: -5.*Balance section 2: Other/);
+    assert.match(h.option.tooltip.formatter([{data:{id:'total'}}]), /sections are not added together/);
+    const engine = shipped.echarts.init(null,null,{renderer:'svg',ssr:true,width:1200,height:500});
+    engine.setOption(h.option);
+    const restartRect = engine.getModel().getSeriesByIndex(3).getData().getItemLayout(3);
+    const subtotalRect = engine.getModel().getSeriesByIndex(3).getData().getItemLayout(2);
+    assert.ok(Math.abs(restartRect.height / subtotalRect.height - 4) < 1e-8,
+        'Pinned-engine absolute -20 restart must be four times the -5 subtotal, not the -15 transition.');
+    engine.dispose();
+    h.update(sectionSteps, {showValues:false});
+    assert.equal(h.sectionNote.hidden,false, 'Hidden value labels must not hide section semantics.');
+    h.error();
+    assert.equal(h.sectionNote.hidden,true, 'Error states must not show stale section notes.');
+    h.update(sectionSteps);
+    h.update(sectionSteps.filter(s=>s.kind!=='restart'));
+    assert.equal(h.sectionNote.hidden,true);
+    assert.equal(JSON.stringify(sectionSteps), before, 'Rendering must not mutate arithmetic, row identity or labels.');
+
+    const manySections = [];
+    for(let i=0;i<100;i++) {
+        manySections.push({id:'variable-'+i,label:'Same',kind:i?'restart':'start',change:i+1,before:0,after:i+1,
+            ...(i?{previousTotal:i}:{}), section:i+1,sectionLabel:'Same'});
+        manySections.push({id:'subtotal-variable-'+i,label:'Subtotal: Same',kind:'subtotal',change:i+1,before:0,after:i+1,
+            calculated:true,section:i+1,sectionLabel:'Same'});
+    }
+    manySections.push({id:'total',label:'Final section total',kind:'total',change:100,before:0,after:100,section:100,sectionLabel:'Same'});
+    const nav = waterfallHarness(mode, manySections, {}, true, 460);
+    assert.equal(nav.option.xAxis.data.length,201);
+    assert.deepEqual([nav.option.yAxis.min,nav.option.yAxis.max],[0,100], 'Earlier sections and hidden values determine the full scale.');
+    assert.equal(nav.option.dataZoom[0].bottom,36, 'Navigation must leave room for the permanent section note.');
+    const full = shipped.echarts.init(null,null,{renderer:'svg',ssr:true,width:460,height:500});
+    nav.useNative(full); full.setOption(nav.option);
+    full.dispatchAction({type:'dataZoom',dataZoomId:'category-scroll',startValue:198,endValue:200});
+    const lastData = full.getModel().getSeriesByIndex(1).getData();
+    const parameter = full.getModel().getSeriesByIndex(1).getDataParams(lastData.count()-1);
+    assert.equal(parameter.data.id,'total');
+    assert.match(nav.option.tooltip.formatter([parameter]),/Final section total.*100.*sections are not added together/);
+    nav.update();
+    const anchor = nav.option.xAxis.data[nav.option.dataZoom[0].startValue];
+    nav.resize(350);
+    assert.equal(nav.option.xAxis.data[nav.option.dataZoom[0].startValue],anchor);
+    nav.useNative(null); full.dispose();
+}
+console.log('Waterfall layout, calculated subtotals, absolute sections, global scales and navigation verified.');

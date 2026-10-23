@@ -266,6 +266,9 @@ können unabhängig davon individuell vergeben werden.
   Vorzeichen als Waterfall-Diagramm. Die Endsumme wird berechnet; ein Archiv
   ist nicht erforderlich. Responsive Kategoriennavigation erhält die vollständige
   Bilanz und Werteskala. Kachel und IPSView können getrennt gestaltet werden.
+  Optional lassen sich berechnete Zwischensummen und ausdrücklich unabhängige
+  Bilanzabschnitte durch absolute Neustartwerte ergänzen. Bei Neustarts wird
+  die Endsumme klar als Abschluss des letzten Abschnitts gekennzeichnet.
 
 - __EChartsBarPolar__ ([Dokumentation](EChartsBarPolar/README.md))
   Vergleicht 1 bis 100 aktuelle numerische Werte als radiale Balken oder

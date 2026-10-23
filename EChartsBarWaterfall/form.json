@@ -13,7 +13,7 @@
         {
             "type": "List",
             "name": "Sources",
-            "caption": "Waterfall sources (first row: start value; following rows: signed changes)",
+            "caption": "Waterfall sources (first row: start value; changes or explicit restarts)",
             "rowCount": 8,
             "add": true,
             "delete": true,
@@ -69,6 +69,24 @@
                         "minimum": 0,
                         "maximum": 6
                     }
+                },
+                {
+                    "name": "SubtotalAfter",
+                    "caption": "Calculated subtotal after this source",
+                    "width": "190px",
+                    "add": false,
+                    "edit": {
+                        "type": "CheckBox"
+                    }
+                },
+                {
+                    "name": "Restart",
+                    "caption": "Restart with this absolute value",
+                    "width": "190px",
+                    "add": false,
+                    "edit": {
+                        "type": "CheckBox"
+                    }
                 }
             ],
             "form": [
@@ -102,12 +120,26 @@
                     "caption": "Decimals",
                     "minimum": 0,
                     "maximum": 6
+                },
+                {
+                    "type": "CheckBox",
+                    "name": "SubtotalAfter",
+                    "caption": "Calculated subtotal after this source"
+                },
+                {
+                    "type": "CheckBox",
+                    "name": "Restart",
+                    "caption": "Restart with this absolute value"
                 }
             ]
         },
         {
             "type": "Label",
-            "caption": "Use 2 to 100 unique numeric variables with one unit: one start value and up to 99 signed changes. The final total uses all sources; category navigation changes only the visible window. Empty step labels use the current variable name."
+            "caption": "Subtotals do not change the balance. A restart begins a separate section with the selected variable as its absolute start; the final total belongs to the last section, not the sum of sections. The first row is already the initial start."
+        },
+        {
+            "type": "Label",
+            "caption": "Use 2 to 100 unique numeric variables with one unit. Later rows are signed changes unless explicitly selected as restarts. All sources remain checked; category navigation changes only the visible window. Empty labels use the current variable name."
         },
         {
             "type": "ValidationTextBox",

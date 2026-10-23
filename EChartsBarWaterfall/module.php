@@ -282,37 +282,21 @@ class EChartsBarWaterfall extends IPSModuleStrict
 
             $sources = $this->GetValidatedSources();
             $labels = EChartsSourceIdentity::LabelsForSources($sources);
-            $steps = [];
             $currents = array_map(fn (array $source): array => $this->ReadCurrentSource($source['VariableID']), $sources);
             try {
-                $totals = WaterfallData::Totals(array_column($currents, 'Value'));
+                $steps = WaterfallData::Steps(
+                    $sources,
+                    $currents,
+                    $labels,
+                    trim($this->ReadPropertyString('TotalLabel')) !== ''
+                        ? trim($this->ReadPropertyString('TotalLabel')) : $this->Translate('Total'),
+                    fn (string $text): string => $this->Translate($text)
+                );
             } catch (Throwable $exception) {
                 $this->WriteAttributeString('LastError', $exception->getMessage());
                 $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
                 throw $exception;
             }
-            foreach ($sources as $index => $source) {
-                $current = $currents[$index];
-                $steps[] = [
-                    'id'        => 'variable-' . $source['VariableID'],
-                    'label'     => $labels[$source['VariableID']],
-                    'kind'      => $index === 0 ? 'start' : 'change',
-                    'change'    => $current['Value'],
-                    'before'    => $index === 0 ? 0.0 : $totals[$index - 1],
-                    'after'     => $totals[$index],
-                    'timestamp' => $current['Timestamp']
-                ];
-            }
-            $total = $totals[count($totals) - 1];
-            $steps[] = [
-                'id'     => 'total',
-                'label'  => trim($this->ReadPropertyString('TotalLabel')) !== ''
-                    ? trim($this->ReadPropertyString('TotalLabel')) : $this->Translate('Total'),
-                'kind'   => 'total',
-                'change' => $total,
-                'before' => 0.0,
-                'after'  => $total
-            ];
 
             $this->WriteAttributeString('LastError', '');
             $this->DebugEChartsSetStatus(IS_ACTIVE);
@@ -440,26 +424,14 @@ class EChartsBarWaterfall extends IPSModuleStrict
         }
     }
 
-    /** @param array<string,mixed> $values */
+    /** Bounded geometric projection of the same complete step plan as live output. */
     protected function BarPreviewSvg(array $values, bool $ipsView): string
     {
         $palette = EChartsBarPreview::Palette($this->BarPreviewValue($values, 'EChartsTheme', 'string', $ipsView));
         $data = EChartsBarPreview::Sources($this->ReadPropertyString('Sources'), $values, 'Label', true, WaterfallData::MAXIMUM_SOURCE_COUNT);
         $previewDecimals = max(array_column($data['items'], 'decimals'));
         $previewUnit = $data['items'][0]['unit'];
-        $previewLanguage = $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage());
-        if ($data['sample']) {
-            $data['items'][0]['value'] = 18.0;
-            $data['items'][1]['value'] = -5.5;
-            $data['items'][2]['value'] = 8.0;
-        }
-        $items = array_slice($data['items'], 0, 5);
-        $totals = WaterfallData::Totals(array_column($data['items'], 'value'));
-        $levels = [0.0, ...$totals];
-        $total = $totals[count($totals) - 1];
-        $minimum = min(0.0, ...$levels);
-        $maximum = max(1.0, ...$levels);
-        $omitted = count($items) < count($data['items']);
+        $language = $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage());
         $svg = EChartsBarPreview::Open(
             $palette,
             (string) ($values['Title'] ?? $this->ReadPropertyString('Title')),
@@ -471,23 +443,53 @@ class EChartsBarWaterfall extends IPSModuleStrict
             EChartsBarPreview::Color($this->BarPreviewValue($values, 'TitleColor', 'integer', $ipsView), $palette['text']),
             $this->BarPreviewValue($values, 'TitleFontSizePercent', 'integer', $ipsView)
         );
-        $axisColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'AxisColor', 'integer', $ipsView), $palette['text']);
-        $svg = str_replace('<svg xmlns', '<svg data-waterfall-total="' . json_encode($total, JSON_THROW_ON_ERROR | JSON_PRESERVE_ZERO_FRACTION)
+        $sources = $currents = $labels = [];
+        foreach ($data['items'] as $index => $item) {
+            $id = $item['VariableID'] ?? ($index + 1);
+            $sources[] = [...$item, 'VariableID' => $id];
+            $labels[$id] = $item['label'];
+            $currents[] = ['Value' => $data['sample'] && $index < 3 ? [18.0, -5.5, 8.0][$index] : $item['value'], 'Timestamp' => 0];
+        }
+        try {
+            $label = trim((string) ($values['TotalLabel'] ?? $this->ReadPropertyString('TotalLabel')));
+            $steps = WaterfallData::Steps(
+                $sources,
+                $currents,
+                $labels,
+                $label !== '' ? $label : $this->Translate('Total'),
+                fn (string $text): string => $this->Translate($text)
+            );
+        } catch (Throwable $exception) {
+            return $svg . '<text x="40" y="170" fill="' . EChartsBarPreview::E($palette['text'])
+                . '" font-size="12">' . EChartsBarPreview::E($exception->getMessage()) . '</text></svg>';
+        }
+        $end = $steps[count($steps) - 1];
+        if (($end['section'] ?? 1) > 1) {
+            $svg .= '<text x="360" y="68" text-anchor="middle" fill="' . EChartsBarPreview::E($palette['muted'])
+                . '" font-size="11">' . EChartsBarPreview::E($this->Translate('Separate sections; final total belongs to the last section.')) . '</text>';
+        }
+        $items = array_slice($steps, 0, min(5, count($steps) - 1));
+        $shownSources = count(array_filter($items, static fn (array $step): bool => !($step['calculated'] ?? false)));
+        $omitted = count($items) < count($steps) - 1;
+        $levels = [0.0, ...array_column($steps, 'before'), ...array_column($steps, 'after')];
+        $minimum = min(...$levels);
+        $maximum = max(1.0, ...$levels);
+        $svg = str_replace('<svg xmlns', '<svg data-waterfall-total="' . json_encode($end['after'], JSON_THROW_ON_ERROR | JSON_PRESERVE_ZERO_FRACTION)
             . '" data-waterfall-min="' . json_encode($minimum, JSON_THROW_ON_ERROR | JSON_PRESERVE_ZERO_FRACTION)
             . '" data-waterfall-max="' . json_encode($maximum, JSON_THROW_ON_ERROR | JSON_PRESERVE_ZERO_FRACTION) . '" xmlns', $svg);
+        $axisColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'AxisColor', 'integer', $ipsView), $palette['text']);
         $valueColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'ValueColor', 'integer', $ipsView), $palette['text']);
         $gridColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'GridColor', 'integer', $ipsView), $palette['track']);
         $axisSize = max(6, min(22, (int) round(11 * $this->BarPreviewValue($values, 'AxisFontSizePercent', 'integer', $ipsView) / 100)));
         $valueSize = max(6, min(22, (int) round(11 * $this->BarPreviewValue($values, 'ValueFontSizePercent', 'integer', $ipsView) / 100)));
-        // Normalize coordinates, not values: a finite signed range can exceed PHP_FLOAT_MAX.
+        // Normalize geometry only; the signed range can exceed PHP_FLOAT_MAX.
         $magnitude = max(1.0, abs($minimum), abs($maximum));
         $normalizedMinimum = $minimum / $magnitude;
-        $normalizedRange = max(1.0 / $magnitude, $maximum / $magnitude - $normalizedMinimum);
-        $y = static fn (float $value): float => 285 - ($value / $magnitude - $normalizedMinimum) / $normalizedRange * 205;
+        $range = max(1.0 / $magnitude, $maximum / $magnitude - $normalizedMinimum);
+        $y = static fn (float $value): float => 285 - ($value / $magnitude - $normalizedMinimum) / $range * 205;
         if ($this->BarPreviewValue($values, 'ShowGrid', 'boolean', $ipsView)) {
-            for ($step = 0; $step <= 4; ++$step) {
-                $lineY = 80 + $step * 51;
-                $svg .= '<line x1="70" y1="' . $lineY . '" x2="680" y2="' . $lineY
+            for ($i = 0; $i <= 4; ++$i) {
+                $svg .= '<line x1="70" y1="' . (80 + $i * 51) . '" x2="680" y2="' . (80 + $i * 51)
                     . '" stroke="' . EChartsBarPreview::E($gridColor) . '"/>';
             }
         }
@@ -496,104 +498,71 @@ class EChartsBarWaterfall extends IPSModuleStrict
         $width = 580 / (count($items) + 1 + ($omitted ? 1 : 0));
         $barWidth = $width * max(20, min(100, $this->BarPreviewValue($values, 'BarWidthPercent', 'integer', $ipsView))) / 100;
         $showValues = $this->BarPreviewValue($values, 'ShowValues', 'boolean', $ipsView);
-        $valueLabelPosition = $this->BarPreviewValue($values, 'ValueLabelPosition', 'string', $ipsView);
-        $valueLabelDistance = $this->BarPreviewValue($values, 'ValueLabelDistance', 'integer', $ipsView);
-        $categoryLabelY = $showValues && $minimum < 0 ? 337 : 309;
-        foreach ($items as $index => $item) {
-            $from = $index === 0 ? 0.0 : $levels[$index];
-            $to = $levels[$index + 1];
-            $top = min($y($from), $y($to));
-            $height = max(2, abs($y($from) - $y($to)));
-            $colorName = $index === 0 ? 'StartColor' : ($item['value'] >= 0 ? 'IncreaseColor' : 'DecreaseColor');
-            $fallback = $palette['seriesColors'][($index + 1) % count($palette['seriesColors'])];
+        $position = $this->BarPreviewValue($values, 'ValueLabelPosition', 'string', $ipsView);
+        $distance = $this->BarPreviewValue($values, 'ValueLabelDistance', 'integer', $ipsView);
+        $categoryY = $showValues && $minimum < 0 ? 337 : 309;
+        if ($omitted) {
+            $svg .= '<text data-omitted-steps="true" x="' . EChartsBarPreview::N(90 + count($items) * $width + $barWidth / 2)
+                . '" y="' . $categoryY . '" text-anchor="middle" fill="' . EChartsBarPreview::E($axisColor) . '" font-size="' . $axisSize . '">…</text>';
+        }
+        $items[] = $end;
+        foreach ($items as $index => $step) {
+            $final = $step['kind'] === 'total';
+            $x = 90 + ($index + ($final && $omitted ? 1 : 0)) * $width;
+            $top = min($y($step['before']), $y($step['after']));
+            $height = max(2, abs($y($step['before']) - $y($step['after'])));
+            $value = $step['kind'] === 'change' ? $step['change'] : $step['after'];
+            $colorName = match ($step['kind']) {
+                'start', 'restart' => 'StartColor', 'subtotal', 'total' => 'TotalColor',
+                default            => $step['change'] >= 0 ? 'IncreaseColor' : 'DecreaseColor'
+            };
+            $fallback = in_array($step['kind'], ['subtotal', 'total'], true)
+                ? $palette['accent'] : $palette['seriesColors'][($index + 1) % count($palette['seriesColors'])];
             $color = EChartsBarPreview::Color($this->BarPreviewValue($values, $colorName, 'integer', $ipsView), $fallback);
-            $x = 90 + $index * $width;
-            $svg .= '<rect x="' . EChartsBarPreview::N($x) . '" y="' . EChartsBarPreview::N($top)
+            $description = $step['label'] . ': ' . EChartsBarPreview::FormatValue($value, $previewDecimals, $previewUnit, $language);
+            if ($step['kind'] === 'subtotal') {
+                $description .= "\n" . $this->Translate('Calculated subtotal; not added again.');
+            } elseif ($step['kind'] === 'restart') {
+                $description .= "\n" . $this->Translate('New section: absolute start, not a change.') . "\n"
+                    . $this->Translate('Previous section ended at') . ': '
+                    . EChartsBarPreview::FormatValue($step['previousTotal'], $previewDecimals, $previewUnit, $language);
+            }
+            if (isset($step['section'])) {
+                $description .= "\n" . $this->Translate('Balance section') . ' ' . $step['section'] . ': ' . $step['sectionLabel'];
+            }
+            $svg .= '<rect data-step-id="' . EChartsBarPreview::E($step['id']) . '" data-step-kind="' . $step['kind']
+                . '" data-step-before="' . EChartsBarPreview::N($step['before']) . '" data-step-after="' . EChartsBarPreview::N($step['after'])
+                . '" x="' . EChartsBarPreview::N($x) . '" y="' . EChartsBarPreview::N($top)
                 . '" width="' . EChartsBarPreview::N($barWidth) . '" height="' . EChartsBarPreview::N($height)
-                . '" fill="' . EChartsBarPreview::E($color) . '"/>';
-            $svg .= '<text x="' . EChartsBarPreview::N($x + $barWidth / 2) . '" y="' . $categoryLabelY
-                . '" text-anchor="middle" fill="'
-                . EChartsBarPreview::E($axisColor) . '" font-size="' . $axisSize . '">'
-                . EChartsBarPreview::E(mb_strimwidth($item['label'], 0, 13, '…')) . '</text>';
+                . '" fill="' . EChartsBarPreview::E($color) . '"><title>' . EChartsBarPreview::E($description) . '</title></rect>';
+            $svg .= '<text x="' . EChartsBarPreview::N($x + $barWidth / 2) . '" y="' . $categoryY
+                . '" text-anchor="middle" fill="' . EChartsBarPreview::E($axisColor) . '" font-size="' . $axisSize . '">'
+                . EChartsBarPreview::E(mb_strimwidth($step['label'], 0, 13, '…')) . '</text>';
             if ($showValues) {
-                $valueY = $item['value'] >= 0 ? $top - 5 : $top + $height + $valueSize + 2;
                 $valueX = $x + $barWidth / 2;
+                $valueY = $value >= 0 ? $top - 5 : $top + $height + $valueSize + 2;
                 $anchor = 'middle';
-                if ($valueLabelPosition !== 'auto' || $valueLabelDistance !== 5) {
+                if ($position !== 'auto' || $distance !== 5) {
                     $placement = EChartsLabelDesign::PreviewRect(
                         $x,
                         $top,
                         $barWidth,
                         $height,
-                        $valueLabelPosition === 'auto' ? ($item['value'] >= 0 ? 'top' : 'bottom') : $valueLabelPosition,
-                        $valueLabelDistance
+                        $position === 'auto' ? ($value >= 0 ? 'top' : 'bottom') : $position,
+                        $distance
                     );
                     $valueX = $placement['x'];
                     $valueY = $placement['y'];
                     $anchor = $placement['anchor'];
                 }
-                $svg .= '<text x="' . EChartsBarPreview::N($valueX) . '" y="'
-                    . EChartsBarPreview::N($valueY) . '" text-anchor="' . $anchor . '" fill="'
-                    . EChartsBarPreview::E($valueColor) . '" font-size="' . $valueSize . '">'
-                    . EChartsBarPreview::E(EChartsBarPreview::FormatValue(
-                        $item['value'],
-                        $previewDecimals,
-                        $previewUnit,
-                        $previewLanguage
-                    )) . '</text>';
+                $svg .= '<text x="' . EChartsBarPreview::N($valueX) . '" y="' . EChartsBarPreview::N($valueY)
+                    . '" text-anchor="' . $anchor . '" fill="' . EChartsBarPreview::E($valueColor) . '" font-size="' . $valueSize . '">'
+                    . EChartsBarPreview::E(EChartsBarPreview::FormatValue($value, $previewDecimals, $previewUnit, $language)) . '</text>';
             }
         }
-        if ($omitted) {
-            $svg .= '<text data-omitted-steps="true" x="' . EChartsBarPreview::N(90 + count($items) * $width + $barWidth / 2)
-                . '" y="' . $categoryLabelY . '" text-anchor="middle" fill="' . EChartsBarPreview::E($axisColor)
-                . '" font-size="' . $axisSize . '">…</text>';
-        }
-        $x = 90 + (count($items) + ($omitted ? 1 : 0)) * $width;
-        $top = min($y(0), $y($total));
-        $height = max(2, abs($y(0) - $y($total)));
-        $color = EChartsBarPreview::Color(
-            $this->BarPreviewValue($values, 'TotalColor', 'integer', $ipsView),
-            $palette['accent']
-        );
-        $svg .= '<rect x="' . EChartsBarPreview::N($x) . '" y="' . EChartsBarPreview::N($top)
-            . '" width="' . EChartsBarPreview::N($barWidth) . '" height="' . EChartsBarPreview::N($height)
-            . '" fill="' . EChartsBarPreview::E($color) . '"/>';
-        $label = (string) ($values['TotalLabel'] ?? $this->ReadPropertyString('TotalLabel'));
-        $svg .= '<text x="' . EChartsBarPreview::N($x + $barWidth / 2) . '" y="' . $categoryLabelY
-            . '" text-anchor="middle" fill="'
-            . EChartsBarPreview::E($axisColor) . '" font-size="' . $axisSize . '">'
-            . EChartsBarPreview::E($label !== '' ? $label : 'Gesamt') . '</text>';
-        if ($showValues) {
-            $valueY = $total >= 0 ? $top - 5 : $top + $height + $valueSize + 2;
-            $valueX = $x + $barWidth / 2;
-            $anchor = 'middle';
-            if ($valueLabelPosition !== 'auto' || $valueLabelDistance !== 5) {
-                $placement = EChartsLabelDesign::PreviewRect(
-                    $x,
-                    $top,
-                    $barWidth,
-                    $height,
-                    $valueLabelPosition === 'auto' ? ($total >= 0 ? 'top' : 'bottom') : $valueLabelPosition,
-                    $valueLabelDistance
-                );
-                $valueX = $placement['x'];
-                $valueY = $placement['y'];
-                $anchor = $placement['anchor'];
-            }
-            $svg .= '<text x="' . EChartsBarPreview::N($valueX) . '" y="'
-                . EChartsBarPreview::N($valueY) . '" text-anchor="' . $anchor . '" fill="'
-                . EChartsBarPreview::E($valueColor) . '" font-size="' . $valueSize . '">'
-                . EChartsBarPreview::E(EChartsBarPreview::FormatValue(
-                    $total,
-                    $previewDecimals,
-                    $previewUnit,
-                    $previewLanguage
-                )) . '</text>';
-        }
-
         return EChartsPreviewSourceCount::Append(
             $svg . '</svg>',
-            count($items),
+            $shownSources,
             count($data['items']),
             $this->Translate('Preview shows %d of %d sources'),
             $palette['muted'],
@@ -613,6 +582,12 @@ class EChartsBarWaterfall extends IPSModuleStrict
             'ipsViewStyle'       => $ipsView ? $this->IPSViewThemeCSS() : '',
             'state'              => $this->BuildVisualizationState($ipsView),
             'translations'       => [
+                'Calculated subtotal; not added again.'                           => $this->Translate('Calculated subtotal; not added again.'),
+                'New section: absolute start, not a change.'                      => $this->Translate('New section: absolute start, not a change.'),
+                'Previous section ended at'                                       => $this->Translate('Previous section ended at'),
+                'Final section total; sections are not added together.'           => $this->Translate('Final section total; sections are not added together.'),
+                'Balance section'                                                 => $this->Translate('Balance section'),
+                'Separate sections; final total belongs to the last section.'     => $this->Translate('Separate sections; final total belongs to the last section.'),
                 self::MODEL_TOO_LARGE_MESSAGE                                     => $this->Translate(self::MODEL_TOO_LARGE_MESSAGE),
                 'Configure valid Waterfall sources.'                              => $this->Translate('Configure valid Waterfall sources.'),
                 'Connect an active EChartsGateway.'                               => $this->Translate('Connect an active EChartsGateway.'),
@@ -705,7 +680,7 @@ class EChartsBarWaterfall extends IPSModuleStrict
         $validated = [];
         $variableIDs = [];
         $commonUnit = null;
-        foreach ($sources as $source) {
+        foreach ($sources as $index => $source) {
             if (!is_array($source)) {
                 throw new InvalidArgumentException('Every Waterfall source must be an object.');
             }
@@ -744,7 +719,8 @@ class EChartsBarWaterfall extends IPSModuleStrict
                 'VariableID' => $variableID,
                 'Label'      => trim($label),
                 'Unit'       => $presentation['unit'],
-                'Decimals'   => $presentation['decimals']
+                'Decimals'   => $presentation['decimals'],
+                ...WaterfallData::SourceOptions($source, $index, fn (string $text): string => $this->Translate($text))
             ];
         }
 

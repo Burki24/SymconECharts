@@ -83,4 +83,9 @@ HTML-/SVG-Kennzeichnung, exakte Bilanz ohne Zusätze und kontrollierte
 Budgetdiagnose. Berechnete Tooltips bleiben innerhalb der eingebetteten Breite
 mit Umbruch lesbar. Die Konsole blieb fehlerfrei; echte Mausradaktionen scrollten
 den Testhost über beiden Adaptern abwärts/aufwärts (0 → 637 → 0), ohne Chartzoom.
-MCP-/Host-Abnahme nach Modulupdate ist ein separater noch offener Nachweis.
+Die anschließende MCP-Prüfung auf Symcon 9.1 bestätigte die Differenzrichtungen,
+Null/exakte Bilanz, Umkehr, benachbarte Bilanzen, Einheiten und 100-/200-Grenzen.
+Kachelvorschau und veröffentlichte IPSView-WebContent-Updates wurden im Browser
+geprüft. Alle 32 bestehenden Konfigurationen/Datenflussverbindungen blieben
+unverändert, alle Testobjekte wurden entfernt. Der Eigentümer bestätigte danach
+Rest-/Bilanzknoten in tatsächlicher Kachel und IPSView.

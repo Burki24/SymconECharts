@@ -63,6 +63,13 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   zusätzlich die berechnete Endsumme. Kategoriennavigation ändert niemals die
   vollständige Bilanz oder Skala; gemeinsamer flüchtiger Kategorieanker mit
   BarCategory liegt in `libs/echarts-category-navigation.js`.
+  ADR 0098 ergänzt `Sources[].SubtotalAfter` und `Sources[].Restart` als optionale
+  Boolean-Felder mit Default false. Zwischensummen ändern keine laufende Summe;
+  Neustarts beginnen absolute unabhängige Abschnitte, deren letzte Endsumme
+  ausdrücklich keine Summe aller Abschnitte ist. Derselbe `WaterfallData`-
+  Schrittplan versorgt Live-Ausgaben und SVG-Vorschauen. Weiterhin 2–100 Quellen,
+  höchstens 201 Schritte einschließlich berechneter Säulen, 200000 Modellbytes
+  und 1 MiB HTML; vollständige Prüfung/Skala auch außerhalb des Ausschnitts.
   Kreis-, Donut- und Nightingale-Diagramme für aktuelle Anteile liegen im
   eigenen Gerätemodul `EChartsPie` und sind kein Balkenmodus.
   Pie erlaubt gemäß ADR 0072 bis zu 100 Quellen mit optionaler erweiterter

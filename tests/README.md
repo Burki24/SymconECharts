@@ -1,5 +1,31 @@
 # Tests
 
+## Waterfall: berechnete Zwischensummen und unabhängige Neustarts
+
+`php tests/waterfall_data.php` begann für Zwischensummen am fehlenden Schrittplan
+RED und danach für Neustarts an der falschen Addition. Geprüft sind exakte
+Altmodelle, Subtotals ohne erneute Addition, negative/null und maximale endliche
+Starts, Überläufe vor späteren Neustarts, fehlerhafte Flags, stabile Quell-/
+Subtotal-IDs und maximal 201 Schritte aus 100 Quellen.
+`php tests/gateway_gauges.php --waterfall-sections` nutzt echte Module/Gateway
+und synthetische Kernelwerte. Beide HTML-Ausgaben und SVGs, unabhängige Designs,
+Originalmetadaten/Einheiten, alle Quellabfragen/Abonnements, späte Updates,
+ausgeführte Listen-Entwurfscallbacks ohne Persistenz/Statusänderung sowie maximale
+UTF-8-Listen und unveränderte Byteguards werden geprüft. Der bestehende
+negative SVG-Layouttest erwartet nun den übersetzten Standardtext des gemeinsamen
+Modells statt des zuvor fest auf Deutsch gesetzten „Gesamt“ in englischer Testsitzung.
+`node tests/bar_waterfall_layout.js` prüft echte gepinnte Geometrie für absolute
+Neustarts und Zwischensummen, vollständige Skalen früherer Abschnitte, Tooltips,
+dauerhafte Hinweise, letzte Kategorie und Ansichtserhalt beim Resize in beiden
+Adaptern. `node tests/bar_waterfall_browser.mjs` bietet unter `/?sections=1`
+dieselben echten PHP-Ausgaben mit synthetischen Quellen und ohne Live-Transport.
+Die lokale Browserprüfung bestätigt Zwischensumme/Neustart/Endsumme, Tooltip,
+Navigation und Ansichtserhalt nach Aktualisierung sowie beide SVG-Rollen.
+Echte Mausradaktionen scrollten den äußeren Testhost über Kachel und IPSView-
+Testframe abwärts/aufwärts (0 → 451 → 0), ohne Skalenzoom oder ungewollte
+Änderung der Kategorienansicht. Die Konsole blieb fehlerfrei.
+Eine MCP-/Symcon-/tatsächliche IPSView-Client-Abnahme bleibt nach Update offen.
+
 ## Sankey: berechnete Rest-/Bilanzflüsse
 
 `php tests/sankey_balance.php` begann RED am fehlenden Restfluss. Es prüft
@@ -23,7 +49,14 @@ Budgetdiagnose ohne Teilgeometrie. Berechnete Tooltips bleiben durch Begrenzung
 und Umbruch auch in schmalen eingebetteten Ansichten lesbar. Echte Mausradaktionen
 scrollten den Testhost über beiden Diagrammadaptern in beide Richtungen
 (0 → 637 → 0), ohne Diagrammzoom. Die Konsole blieb ohne Warnungen/Fehler.
-MCP und tatsächliche Host-Abnahme der Bilanzfunktion bleiben nach Update offen.
+Die anschließende funktionale MCP-Prüfung auf Symcon 9.1 bestätigt beide
+Differenzrichtungen, exakte Bilanz, Nullwerte, Kantenumkehr, unabhängige benachbarte
+Bilanzen, Einheitenprüfung einschließlich unsichtbarer Quellen und unveränderte
+100-/200-Grenzen. Die Browserprüfung zeigte beide SVGs, Kennzeichnung und echte
+IPSView-WebContent-Updates. Alle 32 bestehenden ECharts-Konfigurationen und
+Datenflussverbindungen blieben anhand der Prüfsummen unverändert; sämtliche
+temporären Testobjekte wurden entfernt. Der Eigentümer bestätigt anschließend
+Rest-/Bilanzknoten in tatsächlicher Kachel und IPSView.
 
 ## Sankey: optionale Umkehr negativer Flüsse
 

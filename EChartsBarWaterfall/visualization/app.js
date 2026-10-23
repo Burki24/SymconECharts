@@ -5,6 +5,7 @@
     var chartElement = document.getElementById('echarts-bar-waterfall-chart');
     var errorElement = document.getElementById('echarts-bar-waterfall-error');
     var warningElement = document.getElementById('echarts-bar-waterfall-warning');
+    var sectionNote = document.getElementById('echarts-waterfall-sections');
     var chart = null;
     var currentState = bootstrap.state || null;
     var currentTheme = null;
@@ -74,6 +75,7 @@
         var style = bar.style || {};
         var configured = style.colors || {};
         var steps = Array.isArray(model.steps) ? model.steps : [];
+        var hasSections = steps.some(function (step) { return step.kind === 'restart'; });
         var decimals = Math.max(0, Math.min(6, Number(bar.decimals) || 0));
         var unit = String(bar.unit || '');
         var titleVisible = Boolean(bar.title);
@@ -103,7 +105,7 @@
         var first = viewport.first;
         var stepsByID = Object.create(null);
         steps.forEach(function (step, index) { stepsByID[keys[index]] = step; });
-        var bottom = 48 + (scroll ? 28 : 0);
+        var bottom = 48 + (scroll ? 28 : 0) + (hasSections ? 32 : 0);
         var minimum = 0, maximum = 0;
         var helpersPositive = [];
         var helpersNegative = [];
@@ -121,7 +123,8 @@
             var positiveHeight = Math.max(0, high) - positiveBase;
             var negativeBase = Math.min(0, high);
             var negativeHeight = Math.min(0, low) - negativeBase;
-            var kind = step.kind === 'change' ? (Number(step.change) >= 0 ? 'increase' : 'decrease') : step.kind;
+            var kind = step.kind === 'change' ? (Number(step.change) >= 0 ? 'increase' : 'decrease')
+                : step.kind === 'restart' ? 'start' : step.kind === 'subtotal' ? 'total' : step.kind;
             var fallback = {
                 start: colors.accent,
                 increase: '#4CAF50',
@@ -193,7 +196,7 @@
                 containLabel: true },
             dataZoom: scroll ? [
                 { id: 'category-scroll', type: 'slider', xAxisIndex: 0, orient: 'horizontal',
-                    bottom: 4, height: 12, left: 52, right: 24,
+                    bottom: hasSections ? 36 : 4, height: 12, left: 52, right: 24,
                     startValue: first, endValue: viewport.last, filterMode: 'filter', zoomLock: true,
                     showDetail: false, showDataShadow: false, brushSelect: false },
                 { id: 'category-scroll-inside', type: 'inside', xAxisIndex: 0,
@@ -216,6 +219,19 @@
                             + escapeHtml(formatValue(step.after, decimals, unit)));
                     } else {
                         lines.push(escapeHtml(formatValue(step.after, decimals, unit)));
+                    }
+                    if (step.kind === 'subtotal') {
+                        lines.push(escapeHtml(translate('Calculated subtotal; not added again.')));
+                    } else if (step.kind === 'restart') {
+                        lines.push(escapeHtml(translate('New section: absolute start, not a change.')));
+                        lines.push(escapeHtml(translate('Previous section ended at')) + ': '
+                            + escapeHtml(formatValue(step.previousTotal, decimals, unit)));
+                    } else if (step.kind === 'total' && hasSections) {
+                        lines.push(escapeHtml(translate('Final section total; sections are not added together.')));
+                    }
+                    if (step.section) {
+                        lines.push(escapeHtml(translate('Balance section')) + ' ' + escapeHtml(step.section)
+                            + ': ' + escapeHtml(step.sectionLabel || ''));
                     }
                     return lines.join('<br>');
                 }
@@ -251,6 +267,7 @@
     function displayError(message) {
         if (chart) { chart.clear(); }
         chartElement.hidden = true;
+        sectionNote.hidden = true;
         errorElement.textContent = translate(message || 'The Waterfall values could not be loaded.');
         errorElement.hidden = false;
     }
@@ -268,6 +285,8 @@
         }
         errorElement.hidden = true;
         chartElement.hidden = false;
+        sectionNote.textContent = translate('Separate sections; final total belongs to the last section.');
+        sectionNote.hidden = !(state.chart.steps || []).some(function (step) { return step.kind === 'restart'; });
         var theme = normalizeTheme(state.chart.theme || 'auto');
         categoryNavigation.remember(chart);
         if (chart && currentTheme !== theme) {

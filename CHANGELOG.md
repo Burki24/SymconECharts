@@ -1,5 +1,13 @@
 # Unveröffentlicht
 
+- BarWaterfall ergänzt optional berechnete Zwischensummen nach ausgewählten
+  Quellen und absolute Neustarts für unabhängige Bilanzabschnitte. Zwischensummen
+  werden nicht erneut addiert; bei Neustarts gehört die klar gekennzeichnete
+  Endsumme zum letzten Abschnitt. Kachel, IPSView und Vorschauen verwenden
+  denselben Schrittplan. Bestehende Quellenlisten, Designs, 100-Quellen- und
+  Ausgabegrenzen bleiben erhalten. Die Standard-Endbeschriftung der Vorschau
+  wird wie im Diagramm in der jeweiligen Sitzungssprache angezeigt.
+
 - Sankey ergänzt auf Wunsch je Knoten berechnete Rest-/Bilanzflüsse aus der
   Differenz gemessener Zu- und Abflüsse nach einer möglichen Kantenumkehr.
   Zusätzliche Knoten, Tooltips und ein dauerhafter Hinweis unterscheiden sie

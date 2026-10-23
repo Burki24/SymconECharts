@@ -40,6 +40,25 @@ Canvas-Zeichenaufrufe für Kachel und IPSView statt nur vorhandener Titeloptione
 
 ## Aktueller Stand und Zielarchitektur
 
+BarWaterfall ergänzt gemäß [ADR 0098](adr/0098-waterfall-subtotals-and-restarts.md)
+`SubtotalAfter` und `Restart` je Quellenzeile mit Default false. Der vorhandene
+familienlokale `WaterfallData` bildet jetzt den vollständigen, ID-stabilen
+Schrittplan statt nur einer Summenliste. Live-Modell und beide SVG-Entwürfe
+teilen diese Planung; die bisher doppelte Modellbildung wurde entfernt.
+Zwischensummen sind berechnete Nullbasis-Säulen ohne neue Quellen/Zeitstempel.
+Neustarts ersetzen den lokalen Abschnittsstand durch den ausgewählten Rohwert;
+vorherige Abschlüsse bleiben erhalten, die letzte Summe wird ausdrücklich
+abschnittsbezogen gekennzeichnet. Alle Quellen bleiben in Prüfung, Gateway,
+Referenzen und VM_UPDATE-Abonnements. Die vollständige Skala umfasst frühere
+Abschnitte; der bestehende Kategorieanker wird unverändert wiederverwendet.
+2–100 Quellen, maximal 201 Schritte und 200000 Modellbytes/1 MiB HTML bleiben
+begrenzt. Neue Säulen erben vorhandene Start-/Summenfarben. Die geprüften
+Upstream-Helper besitzen keinen Waterfall-Bilanzvertrag; deren Formular-/SVG-
+Infrastruktur bleibt unverändert in Gebrauch. Keine Helper-Kopie oder neue
+Fremdabhängigkeit. Die Vorschau projiziert höchstens fünf Schritte plus
+Endsumme aus dem vollständigen Plan und zählt tatsächlich gezeigte Quellen.
+MCP-/Host-Abnahme dieses Folgeschritts nach Modulupdate bleibt offen.
+
 Sankey ergänzt gemäß [ADR 0097](adr/0097-sankey-calculated-balances.md)
 `Nodes[].Balance` als ausdrückliches Opt-in mit kompatiblem Default false.
 Der bestehende `SankeyModel` berechnet ausschließlich aus gemessenen effektiven
@@ -54,8 +73,9 @@ Live-Ausgaben und beide SVG-Vorschauen teilen dieselbe Modellbildung und
 statusfreie Entwurfsleselogik. Gemeinsame Formular-/SVG-Bausteine werden
 wiederverwendet; neue fachfremde Abstraktionen oder Helper-Kopien sind unnötig.
 Bestehende Designs bleiben unverändert; nur bei berechneten Flüssen wird Raum
-für einen dauerhaften Kennzeichnungshinweis reserviert. MCP-/Host-Abnahme nach
-Modulupdate bleibt separat offen.
+für einen dauerhaften Kennzeichnungshinweis reserviert. Die anschließende
+funktionale MCP-Prüfung auf Symcon 9.1 ist bestanden; der Eigentümer bestätigt
+Rest-/Bilanzknoten in tatsächlicher Kachel und IPSView.
 
 Sankey ergänzt gemäß [ADR 0096](adr/0096-sankey-negative-flow-reversal.md)
 das optionale Boolean-Feld `ReverseNegative` je Quellenzeile (Default false).

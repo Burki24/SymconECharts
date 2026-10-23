@@ -9,6 +9,14 @@ const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 function page(query) {
     const mode = query.get('mode') === 'ipsview' ? 'ipsview' : 'symcon';
+    if (query.has('sections')) {
+        let html = execFileSync('php', ['tests/gateway_gauges.php', '--waterfall-sections', 'browser', mode],
+            {cwd: root, windowsHide: true, encoding: 'utf8', maxBuffer: 2097152});
+        if (mode === 'symcon') {
+            html = html.replace('<body>', '<body><div style="position:absolute;top:16px;left:20px;z-index:4;color:white">EChartsBarWaterfall · Test</div>');
+        }
+        return controls(html, mode);
+    }
     const count = Math.max(2, Math.min(100, Number(query.get('count')) || 100));
     let total = 0;
     const steps = Array.from({length: count}, (_, index) => {
@@ -41,17 +49,25 @@ function page(query) {
     if (mode === 'symcon') {
         html = html.replace('<body>', '<body><div style="position:absolute;top:16px;left:20px;font:18px Arial;z-index:4">EChartsBarWaterfall <span style="position:fixed;right:18px">⤢</span></div>');
     }
-    html = html.replace('</body>', '<div style="position:fixed;right:24px;top:' + (mode === 'symcon' ? 85 : 35)
+    return controls(html, mode);
+}
+function controls(html, mode) {
+    return html.replace('</body>', '<div style="position:fixed;right:24px;top:' + (mode === 'symcon' ? 85 : 35)
         + 'px;z-index:5;font:11px Arial"><button onclick="var c=echarts.getInstanceByDom(document.getElementById(\'echarts-bar-waterfall-chart\'));var o=c.getOption();var z=o.dataZoom[0];if(z){var n=z.endValue-z.startValue+1;var e=SYMC_VISUALIZATION.state.chart.steps.length-1;c.dispatchAction({type:\'dataZoom\',dataZoomId:\'category-scroll\',startValue:Math.max(0,e-n+1),endValue:e});}">Letzte Schritte</button>'
         + '<button onclick="window.handleMessage(SYMC_VISUALIZATION.state)">Werte aktualisieren</button></div></body>');
-    return html;
 }
 const port = Number(process.env.PORT || 8805);
 http.createServer((request, response) => {
     const url = new URL(request.url, 'http://localhost');
+    if (url.pathname === '/hook/SymconECharts/assets/interaction.js') {
+        response.writeHead(200, {'Content-Type': 'application/javascript; charset=utf-8'});
+        response.end(read('libs/helper/visualization/interaction.min.js')); return;
+    }
     if (url.pathname === '/preview.svg') {
         response.writeHead(200, {'Content-Type': 'image/svg+xml; charset=utf-8'});
-        response.end(execFileSync('php', ['tests/gateway_gauges.php', '--waterfall-preview', JSON.stringify({
+        response.end(execFileSync('php', url.searchParams.has('sections')
+            ? ['tests/gateway_gauges.php', '--waterfall-sections', 'browser', 'preview']
+            : ['tests/gateway_gauges.php', '--waterfall-preview', JSON.stringify({
             BarWidthPercent: Number(url.searchParams.get('width')) || 60,
             AxisFontSizePercent: Number(url.searchParams.get('font')) || 100,
             ValueFontSizePercent: Number(url.searchParams.get('font')) || 100
@@ -60,9 +76,10 @@ http.createServer((request, response) => {
     }
     response.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'});
     if (url.pathname === '/' && !url.searchParams.has('mode')) {
+        const sections = url.searchParams.has('sections') ? '&sections=1' : '';
         response.end('<!doctype html><html><body style="margin:12px;background:#101114;color:white;font:16px Arial"><h1>Waterfall · synthetische Beispieldaten</h1><div style="display:flex;gap:16px">'
-            + ['symcon', 'ipsview'].map(mode => '<section style="width:50%"><h2>' + mode + '</h2><iframe style="border:0;width:100%;height:570px" src="/chart?mode=' + mode + '"></iframe></section>').join('')
-            + '</div><h2>PHP-Vorschau mit vollständiger Endsumme</h2><img style="width:720px;max-width:100%" src="/preview.svg"></body></html>');
+            + ['symcon', 'ipsview'].map(mode => '<section style="width:50%"><h2>' + mode + '</h2><iframe title="' + mode + '" style="border:0;width:100%;height:570px" src="/chart?mode=' + mode + sections + '"></iframe></section>').join('')
+            + '</div><h2>PHP-Vorschau mit vollständiger Endsumme</h2><img style="width:720px;max-width:100%" src="/preview.svg?' + sections + '"></body></html>');
         return;
     }
     response.end(page(url.searchParams));
