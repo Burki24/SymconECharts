@@ -1,6 +1,14 @@
 {
     "translations": {
         "de": {
+            "Reverse negative flow": "Negative Flüsse umkehren",
+            "Negative values are rejected unless reversal is enabled for that connection. Reversed flows use the absolute width and retain the signed original value in the tooltip. Effective directions must remain acyclic and unique, including zero flows.": "Negative Werte werden nur bei ausdrücklich aktivierter Umkehr dieser Verbindung zugelassen. Die Breite entspricht dem Betrag; der Tooltip behält den Originalwert mit Vorzeichen. Tatsächliche Richtungen müssen einschließlich Nullflüssen kreisfrei und eindeutig bleiben.",
+            "Connection %d: negative-flow reversal must be enabled or disabled.": "Verbindung %d: Die Umkehr negativer Flüsse muss ein- oder ausgeschaltet sein.",
+            "Connection %d: the current value must be finite.": "Verbindung %d: Der aktuelle Wert muss endlich sein.",
+            "Connection %d: flow directions create a duplicate directed pair after reversing negative values.": "Verbindung %d: Durch die Umkehr negativer Werte entsteht ein doppeltes gerichtetes Knotenpaar.",
+            "Sankey flow directions contain a cycle after reversing negative values.": "Die tatsächlichen Flussrichtungen enthalten nach der Umkehr negativer Werte einen Kreis.",
+            "Original value": "Originalwert",
+            "Configured connection": "Konfigurierte Verbindung",
             "One shared EChartsGateway is sufficient for all ECharts chart instances. Select the existing gateway when adding further charts.": "Ein gemeinsames EChartsGateway genügt für alle ECharts-Diagramminstanzen. Bei weiteren Diagrammen das vorhandene Gateway auswählen, anstatt ein neues anzulegen.",
             "Title": "Titel",
             "Sankey nodes": "Sankey-Knoten",

@@ -99,9 +99,17 @@
                 formatter: function (parameter) {
                     var data = parameter.data || {};
                     if (parameter.dataType === 'edge') {
-                        return escapeHTML(labels.get(data.source) || '') + ' → '
+                        var text = escapeHTML(labels.get(data.source) || '') + ' → '
                             + escapeHTML(labels.get(data.target) || '') + '<br>'
                             + escapeHTML(formatValue(data.value));
+                        if (data.reversed === true) {
+                            text += '<br>' + escapeHTML(translate('Original value')) + ': '
+                                + escapeHTML(formatValue(data.originalValue))
+                                + '<br>' + escapeHTML(translate('Configured connection')) + ': '
+                                + escapeHTML(labels.get(data.configuredSource) || '') + ' → '
+                                + escapeHTML(labels.get(data.configuredTarget) || '');
+                        }
+                        return text;
                     }
                     return escapeHTML(data.displayName || '') + '<br>' + escapeHTML(formatValue(data.value));
                 }
@@ -122,7 +130,9 @@
                         label: { position: labelPosition(node.name) } };
                 }),
                 links: links.map(function (link) {
-                    return { source: link.source, target: link.target, value: link.value, timestamp: link.timestamp };
+                    return { source: link.source, target: link.target, value: link.value, timestamp: link.timestamp,
+                        originalValue: link.originalValue, configuredSource: link.configuredSource,
+                        configuredTarget: link.configuredTarget, reversed: link.reversed === true };
                 }),
                 label: { show: style.showLabels !== false, color: style.labelColor || colors.text,
                     fontSize: labelSize,

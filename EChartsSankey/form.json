@@ -106,6 +106,15 @@
                             2
                         ]
                     }
+                },
+                {
+                    "name": "ReverseNegative",
+                    "caption": "Reverse negative flow",
+                    "width": "210px",
+                    "add": false,
+                    "edit": {
+                        "type": "CheckBox"
+                    }
                 }
             ],
             "form": [
@@ -139,12 +148,21 @@
                         1,
                         2
                     ]
+                },
+                {
+                    "type": "CheckBox",
+                    "name": "ReverseNegative",
+                    "caption": "Reverse negative flow"
                 }
             ]
         },
         {
             "type": "Label",
             "caption": "Choose a current numeric variable for each directed connection. All flows must use the same quantity and unit. Cycles and duplicate directed pairs are invalid; zero flows are hidden."
+        },
+        {
+            "type": "Label",
+            "caption": "Negative values are rejected unless reversal is enabled for that connection. Reversed flows use the absolute width and retain the signed original value in the tooltip. Effective directions must remain acyclic and unique, including zero flows."
         },
         {
             "type": "Select",

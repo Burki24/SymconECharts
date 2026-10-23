@@ -58,6 +58,7 @@ $tests = [
 ];
 
 $commands = [
+    ['Test optional Sankey negative-flow reversal', 'php tests/gateway_gauges.php --sankey-reversal'],
     ['Test optional Sankey source unit validation', 'php tests/gateway_gauges.php --sankey-units'],
     ['Test Zigbee link selections and previews', 'php tests/gateway_gauges.php --zigbee-link-selection'],
     ['Test Candlestick minute and week intervals', 'php tests/gateway_gauges.php --candlestick-intervals'],

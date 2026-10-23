@@ -1182,6 +1182,11 @@ if (array_slice($argv, 1) === ['--state-timeline']) {
 }
 
 // Reuse the real Gateway and Kernel doubles without retaining every previous family's HTML fixtures.
+if (($argv[1] ?? '') === '--sankey-reversal') {
+    require __DIR__ . '/sankey_reversal_integration.php';
+    exit(0);
+}
+
 if (($argv[1] ?? '') === '--sankey-units') {
     require __DIR__ . '/sankey_unit_integration.php';
     exit(0);

@@ -1,5 +1,11 @@
 # Unveröffentlicht
 
+- Sankey kann negative Werte je Verbindung optional als umgekehrte Flüsse
+  darstellen. Die Breite entspricht dem Betrag; Originalwert und konfigurierte
+  Richtung bleiben im Tooltip erhalten. Tatsächliche Richtungen werden erneut
+  auf Kreise und doppelte Verbindungen geprüft, auch bei Nullflüssen.
+  Standardverhalten, Einheitenprüfung, Designs und Schutzbudgets bleiben erhalten.
+
 - Candlestick bietet optionalen Zeitzoom mit Zeitbereichsregler und
   Mausrad-/Touchbedienung in beiden Ausrichtungen. Kachel und IPSView können
   ihn unabhängig aktivieren; die Vorschauen zeigen den Regler schematisch.

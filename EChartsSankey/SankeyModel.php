@@ -56,7 +56,7 @@ final class SankeyModel
         return $expected ?? '';
     }
 
-    /** @return array{nodes:list<array{Key:string,Label:string}>,sources:list<array{Source:string,Target:string,VariableID:int}>} */
+    /** @return array{nodes:list<array{Key:string,Label:string}>,sources:list<array{Source:string,Target:string,VariableID:int,ReverseNegative?:bool}>} */
     public static function Validate(array $nodes, array $sources, ?callable $translate = null): array
     {
         $t = $translate ?? static fn (string $text): string => $text;
@@ -78,8 +78,6 @@ final class SankeyModel
         }
         $edges = [];
         $pairs = [];
-        $incoming = array_fill_keys(array_keys($positions), 0);
-        $outgoing = array_fill_keys(array_keys($positions), []);
         foreach ($sources as $index => $edge) {
             $source = is_array($edge) && is_string($edge['Source'] ?? null) ? trim($edge['Source']) : '';
             $target = is_array($edge) && is_string($edge['Target'] ?? null) ? trim($edge['Target']) : '';
@@ -90,9 +88,85 @@ final class SankeyModel
                 throw new InvalidArgumentException(sprintf($t('Connection %d: select distinct existing nodes, a variable and a unique directed pair.'), $index + 1));
             }
             $pairs[$pair] = true;
+            if (array_key_exists('ReverseNegative', $edge) && !is_bool($edge['ReverseNegative'])) {
+                throw new InvalidArgumentException(sprintf($t('Connection %d: negative-flow reversal must be enabled or disabled.'), $index + 1));
+            }
+            $edges[] = ['Source' => $source, 'Target' => $target, 'VariableID' => $id,
+                ...(($edge['ReverseNegative'] ?? false) ? ['ReverseNegative' => true] : [])];
+        }
+        self::AssertDirections(array_keys($positions), $edges, $t, false);
+        return ['nodes' => $normalized, 'sources' => $edges];
+    }
+
+    /** @param array<int,array{Value:float,Timestamp:int}> $values @return array{data:list<array<string,mixed>>,links:list<array<string,mixed>>,positiveCount:int} */
+    public static function Build(array $nodes, array $sources, array $values, ?callable $translate = null): array
+    {
+        $configuration = self::Validate($nodes, $sources, $translate);
+        $t = $translate ?? static fn (string $text): string => $text;
+        $links = [];
+        $directions = [];
+        $incoming = [];
+        $outgoing = [];
+        $sum = 0.0;
+        foreach ($configuration['sources'] as $index => $edge) {
+            $id = $edge['VariableID'];
+            $value = $values[$id]['Value'] ?? null;
+            $timestamp = $values[$id]['Timestamp'] ?? null;
+            $reverse = $edge['ReverseNegative'] ?? false;
+            if ((!is_float($value) && !is_int($value)) || !is_finite((float) $value) || ($value < 0 && !$reverse)
+                || !is_int($timestamp)) {
+                throw new InvalidArgumentException(sprintf($t($reverse
+                    ? 'Connection %d: the current value must be finite.'
+                    : 'Connection %d: the current value must be finite and non-negative.'), $index + 1));
+            }
+            $reversed = $value < 0;
+            $source = $reversed ? $edge['Target'] : $edge['Source'];
+            $target = $reversed ? $edge['Source'] : $edge['Target'];
+            $directions[] = ['Source' => $source, 'Target' => $target];
+            if ($value == 0) {
+                continue;
+            }
+            $originalValue = (float) $value;
+            $value = abs((float) $value);
+            $outgoing[$source] = ($outgoing[$source] ?? 0.0) + $value;
+            $incoming[$target] = ($incoming[$target] ?? 0.0) + $value;
+            $sum += $value;
+            if (!is_finite($sum) || !is_finite($outgoing[$source]) || !is_finite($incoming[$target])) {
+                throw new InvalidArgumentException($t('Sankey flow totals exceed the numeric range.'));
+            }
+            $links[] = ['source' => $source, 'target' => $target, 'value' => (float) $value,
+                'variableID'     => $id, 'timestamp' => $timestamp,
+                ...($reversed ? ['originalValue' => $originalValue, 'configuredSource' => $edge['Source'],
+                    'configuredTarget'           => $edge['Target'], 'reversed' => true] : [])];
+        }
+        self::AssertDirections(array_column($configuration['nodes'], 'Key'), $directions, $t, true);
+        $data = [];
+        foreach ($configuration['nodes'] as $node) {
+            $key = $node['Key'];
+            if (isset($incoming[$key]) || isset($outgoing[$key])) {
+                $data[] = ['name' => $key, 'label' => $node['Label'],
+                    'value'       => max($incoming[$key] ?? 0.0, $outgoing[$key] ?? 0.0)];
+            }
+        }
+        return ['data' => $data, 'links' => $links, 'positiveCount' => count($links)];
+    }
+
+    /** Shared configured/effective topology check, including invisible zero flows. */
+    private static function AssertDirections(array $keys, array $edges, callable $t, bool $effective): void
+    {
+        $incoming = array_fill_keys($keys, 0);
+        $outgoing = array_fill_keys($keys, []);
+        $pairs = [];
+        foreach ($edges as $index => $edge) {
+            $source = $edge['Source'];
+            $target = $edge['Target'];
+            $pair = $source . "\0" . $target;
+            if (isset($pairs[$pair])) {
+                throw new InvalidArgumentException(sprintf($t('Connection %d: flow directions create a duplicate directed pair after reversing negative values.'), $index + 1));
+            }
+            $pairs[$pair] = true;
             ++$incoming[$target];
             $outgoing[$source][] = $target;
-            $edges[] = ['Source' => $source, 'Target' => $target, 'VariableID' => $id];
         }
         $queue = array_keys(array_filter($incoming, static fn (int $count): bool => $count === 0));
         $visited = 0;
@@ -104,51 +178,10 @@ final class SankeyModel
                 }
             }
         }
-        if ($visited !== count($normalized)) {
-            throw new InvalidArgumentException($t('Sankey connections contain a cycle.'));
+        if ($visited !== count($keys)) {
+            throw new InvalidArgumentException($t($effective
+                ? 'Sankey flow directions contain a cycle after reversing negative values.'
+                : 'Sankey connections contain a cycle.'));
         }
-        return ['nodes' => $normalized, 'sources' => $edges];
-    }
-
-    /** @param array<int,array{Value:float,Timestamp:int}> $values @return array{data:list<array<string,mixed>>,links:list<array<string,mixed>>,positiveCount:int} */
-    public static function Build(array $nodes, array $sources, array $values, ?callable $translate = null): array
-    {
-        $configuration = self::Validate($nodes, $sources, $translate);
-        $t = $translate ?? static fn (string $text): string => $text;
-        $links = [];
-        $incoming = [];
-        $outgoing = [];
-        $sum = 0.0;
-        foreach ($configuration['sources'] as $index => $edge) {
-            $id = $edge['VariableID'];
-            $value = $values[$id]['Value'] ?? null;
-            $timestamp = $values[$id]['Timestamp'] ?? null;
-            if ((!is_float($value) && !is_int($value)) || !is_finite((float) $value) || $value < 0
-                || !is_int($timestamp)) {
-                throw new InvalidArgumentException(sprintf($t('Connection %d: the current value must be finite and non-negative.'), $index + 1));
-            }
-            if ($value == 0) {
-                continue;
-            }
-            $source = $edge['Source'];
-            $target = $edge['Target'];
-            $outgoing[$source] = ($outgoing[$source] ?? 0.0) + $value;
-            $incoming[$target] = ($incoming[$target] ?? 0.0) + $value;
-            $sum += $value;
-            if (!is_finite($sum) || !is_finite($outgoing[$source]) || !is_finite($incoming[$target])) {
-                throw new InvalidArgumentException($t('Sankey flow totals exceed the numeric range.'));
-            }
-            $links[] = ['source' => $source, 'target' => $target, 'value' => (float) $value,
-                'variableID'     => $id, 'timestamp' => $timestamp];
-        }
-        $data = [];
-        foreach ($configuration['nodes'] as $node) {
-            $key = $node['Key'];
-            if (isset($incoming[$key]) || isset($outgoing[$key])) {
-                $data[] = ['name' => $key, 'label' => $node['Label'],
-                    'value'       => max($incoming[$key] ?? 0.0, $outgoing[$key] ?? 0.0)];
-            }
-        }
-        return ['data' => $data, 'links' => $links, 'positiveCount' => count($links)];
     }
 }

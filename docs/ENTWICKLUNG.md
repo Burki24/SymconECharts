@@ -40,6 +40,17 @@ Canvas-Zeichenaufrufe für Kachel und IPSView statt nur vorhandener Titeloptione
 
 ## Aktueller Stand und Zielarchitektur
 
+Sankey ergänzt gemäß [ADR 0096](adr/0096-sankey-negative-flow-reversal.md)
+das optionale Boolean-Feld `ReverseNegative` je Quellenzeile (Default false).
+`SankeyModel` bildet Betragsbreiten und tatsächliche Richtungen; konfigurierte
+und effektive Topologie teilen dieselbe begrenzte DAG-Prüfung. Negative
+Originalwerte, IDs, Zeitstempel und konfigurierte Endpunkte bleiben erhalten.
+Live-Ausgaben und beide SVG-Vorschauen verwenden denselben Modellbauer;
+Formdiagnose und Vorschauen teilen einen statusfreien Momentanwertleser.
+Die vorhandene kompakte Callback-Erzeugung verhindert bei maximalen signierten
+Modellen ein zu großes Formular. Keine Helper-Kopie, keine Änderung an Gateway,
+Runtime, Designs oder Schutzgrenzen. Neue MCP-/Host-Abnahme nach Update offen.
+
 Sankey ergänzt gemäß [ADR 0095](adr/0095-sankey-source-unit-validation.md)
 `UnitMode=manual|automatic|checked`. `manual` ist unveränderter Default;
 `Unit` bleibt gespeichert und wird automatisch nur als inaktives Feld verborgen.
@@ -53,7 +64,7 @@ Gateway und gepinnte Runtime bleiben unverändert.
 Alle Quellen einschließlich Nullflüssen werden geprüft; IDs, Rohwerte,
 Abonnements und 100-/200-/65536-/1-MiB-Schutzgrenzen bleiben erhalten.
 Gemeinsame Formular-/SVG-/Rendererbausteine bleiben in Gebrauch. Die neue
-Auswahl benötigt nach Modulupdate noch MCP- und echte Kachel-/IPSView-Abnahme.
+Auswahl ist auf Symcon 9.1 per MCP geprüft; der Eigentümer bestätigt Kachel und IPSView.
 
 GraphZ2M ergänzt gemäß [ADR 0094](adr/0094-zigbee-link-selection.md) die
 additive Verbindungsauswahl `strongest`, `weakest` und `range`.

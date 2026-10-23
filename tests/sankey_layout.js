@@ -5,6 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const root = path.join(__dirname, '..');
+const echarts = require(path.join(root, '.tools/echarts-runtime/node_modules/echarts'));
 const source = fs.readFileSync(path.join(root, 'EChartsSankey/visualization/app.js'), 'utf8');
 const designSource = fs.readFileSync(path.join(root, 'libs/echarts-design.js'), 'utf8');
 const palette = { background: '#101114', text: '#f4f5f7', muted: '#969aa2', border: '#737780', accent: '#55cbb5' };
@@ -96,6 +97,32 @@ assert.equal(independent.option.series[0].draggable, false);
 assert.equal(render(model, 'symcon', false).chartElement.style.top, '0px');
 assert.equal(render({ ...model, sankey: { ...model.sankey, links: [] } }).emptyElement.hidden, false);
 
+for (const adapter of ['symcon', 'ipsview']) {
+    for (const orientation of ['horizontal', 'vertical']) {
+        const signed = render({ ...model, sankey: { ...model.sankey,
+            style: { ...model.sankey.style, orientation, showEdgeValues: true },
+            links: [{ source: 'b', target: 'a', value: 20.5, originalValue: -20.5,
+                configuredSource: 'a', configuredTarget: 'b', reversed: true, timestamp: 123 },
+            { source: 'a', target: 'c', value: 10 }] } }, adapter).option;
+        const reversed = signed.series[0].links[0];
+        assert.equal(reversed.value, 20.5, 'The engine must receive only positive widths.');
+        assert.equal(reversed.originalValue, -20.5, 'Signed source metadata must survive adapter projection.');
+        const tooltip = signed.tooltip.formatter({ dataType: 'edge', data: reversed });
+        assert.match(tooltip, /^Load → &lt;Supply&gt;<br>20[.,]5 W/);
+        assert.match(tooltip, /Original value: -20[.,]5 W/);
+        assert.match(tooltip, /Configured connection: &lt;Supply&gt; → Load/);
+        assert.equal(signed.series[0].edgeLabel.formatter({ data: reversed }), (20.5).toLocaleString() + ' W');
+        const engine = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 900, height: 500 });
+        engine.setOption(signed);
+        const actual = engine.getModel().getSeriesByIndex(0).getData();
+        const a = actual.getItemLayout(0), b = actual.getItemLayout(1);
+        assert.ok(orientation === 'horizontal' ? b.x < a.x : b.y < a.y,
+            'Real ECharts geometry must follow the reversed flow, not the configured direction.');
+        assert.match(engine.renderToSVGString(), /<path/);
+        engine.dispose();
+    }
+}
+
 const decoratedModel = { ...model, sankey: { ...model.sankey, style: { ...model.sankey.style,
     layoutIterations: 0, labelPosition: 'inside', labelDistance: 0, labelMaxWidth: 72,
     labelOverflow: 'breakAll', labelBold: true, hideOverlappingLabels: true,
@@ -136,7 +163,6 @@ assert.equal(noHover.emphasis.disabled, true);
 assert.equal(noHover.emphasis.focus, 'none');
 assert.equal(noHover.itemStyle.opacity, 0);
 
-const echarts = require(path.join(root, '.tools/echarts-runtime/node_modules/echarts'));
 // Reproduce one source feeding many unequal consumers, without enabling hideOverlap in saved design.
 const crowdedWeights = [500, 250, 120, 60, 30, 15, ...Array(18).fill(1)];
 const crowdedNodes = [{ name: 'root', label: 'All consumers', value: crowdedWeights.reduce((sum, value) => sum + value, 0) },

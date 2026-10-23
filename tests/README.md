@@ -1,5 +1,31 @@
 # Tests
 
+## Sankey: optionale Umkehr negativer Flüsse
+
+`php tests/sankey_model.php` begann für den Opt-in-Fall RED an der bisherigen
+Negativablehnung. Es prüft Betragsbreiten, Originalwerte, Null/Extrema, alte
+Modelle und effektive Kreise einschließlich Nullflüssen.
+`php tests/gateway_gauges.php --sankey-reversal` prüft echte Module/Gateway mit
+synthetischem Kernel: je Kante explizite Auswahl, unveränderte IDs/Abonnements,
+Mehrfachverwendung, beide HTML-Ausgaben, veröffentlichte WebContent-Dokumente,
+SVG-Richtungen/-Originale, präzise Fehler und Erholung nach Vorzeichenwechsel.
+Der tatsächliche kompakte Formcallback wird ausgeführt; Diagnose und beide
+Vorschauen bleiben statusfrei und speichern keine Entwürfe. Maximale
+100-/200-Modelle mit langen Schlüsseln sowie der 65536-Byte-Guard sind geprüft;
+HTML und Formular bleiben unter 1 MiB. Die kompakte gemeinsame Callback-
+Erzeugung ersetzt wiederholte Skalarnamen, nicht die Schutzgrenze.
+`node tests/sankey_layout.js` prüft die effektive Richtung und sichere Tooltips
+mit Originalwerten in beiden Ausrichtungen/Adaptern mit echter ECharts-Geometrie.
+`node tests/sankey_units_browser.mjs` bietet zusätzlich `reverse` und
+`reverse-cycle` als ausschließlich synthetische Browserfälle.
+Der lokale Canvas-Browserlauf bestätigt den Originalwert mit Vorzeichen im
+Tooltip, beide Ausrichtungen und die gleiche Kreisdiagnose in beiden HTML-
+Ausgaben und SVG. Echte Mausradaktionen scrollten den Testhost über Kachel
+und IPSView-Frame in beide Richtungen (0 → 637 → 0), ohne Diagrammzoom;
+die Browserkonsole blieb ohne Warnungen/Fehler. Testtab und lokaler Server
+wurden anschließend geschlossen.
+MCP und tatsächliche Symcon-/IPSView-Host-Abnahme bleiben nach Update offen.
+
 ## Sankey: Einheitenmodell und Quellenprüfung
 
 `php tests/sankey_units.php` begann RED an der fehlenden Unit-Policy. Es prüft
@@ -18,8 +44,13 @@ einheitenlose Ausgabe und die präzise Diagnose eines Nullflusses mit kWh statt 
 Die endgültige Fixture liefert das normale Interaktionsasset aus; ihre frische
 Browserkonsole blieb fehlerfrei. Echte Mausradaktionen scrollten den äußeren
 Testhost über dem Diagramm abwärts/aufwärts (0 → 637 → 0), ohne Sankey-Zoom.
-Es wird keine Symcon-Installation angesprochen. MCP und tatsächliche
-Kachel-/IPSView-Laufzeitprüfung bleiben nach Modulupdate separat offen.
+Die lokale Fixture spricht keine Symcon-Installation an. Die spätere MCP-Abnahme
+des Einheitenmodells auf Symcon 9.1 prüfte getrennt alle drei Modi, native/Legacy-
+Quellen, Nullflüsse und 24-/25-Zeichen-Grenzen mit temporärer Testinstanz.
+WebContent aktualisierte sich im Browser live; alle 32 vorhandenen Konfigurationen
+blieben unverändert, sämtliche Testobjekte wurden entfernt. Der Eigentümer
+bestätigt anschließend tatsächliche Kachel und IPSView. Die neue Umkehrfunktion
+ist von diesem älteren Live-Nachweis ausdrücklich nicht umfasst.
 
 ## GraphZ2M: Verbindungsauswahl
 

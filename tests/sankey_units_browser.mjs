@@ -6,7 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
-const cases = ['manual', 'automatic', 'checked', 'mismatch', 'unitless'];
+const cases = ['manual', 'automatic', 'checked', 'mismatch', 'unitless', 'reverse', 'reverse-cycle'];
 http.createServer((req, res) => {
     const url = new URL(req.url, 'http://127.0.0.1');
     if (url.pathname === '/hook/SymconECharts/assets/interaction.js') {
@@ -16,7 +16,7 @@ http.createServer((req, res) => {
     const selected = cases.includes(url.searchParams.get('case')) ? url.searchParams.get('case') : 'automatic';
     if (url.pathname === '/chart') {
         const adapter = ['ipsview', 'preview'].includes(url.searchParams.get('adapter')) ? url.searchParams.get('adapter') : 'symcon';
-        let output = execFileSync('php', ['tests/gateway_gauges.php', '--sankey-units', 'browser', selected, adapter],
+        let output = execFileSync('php', ['tests/gateway_gauges.php', selected.startsWith('reverse') ? '--sankey-reversal' : '--sankey-units', 'browser', selected, adapter],
             { cwd: root, encoding: 'utf8', maxBuffer: 2 * 1024 * 1024 });
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
         if (adapter === 'preview') {

@@ -146,7 +146,13 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   erhalten; die Aggregatmodi anderer Familien werden nicht erweitert.
   Aktuelle Mengenflüsse zwischen manuell angelegten Knoten liegen im eigenen
   Gerätemodul `EChartsSankey`; Verbindungsbreiten folgen numerischen
-  Quellvariablen, Zyklen und negative Werte sind unzulässig.
+  Quellvariablen, Zyklen und standardmäßig negative Werte sind unzulässig.
+  ADR 0096 ergänzt `ReverseNegative` je Verbindung mit kompatiblem Default false.
+  Nur ausdrücklich freigegebene negative Werte kehren die tatsächliche Richtung
+  um; Breiten verwenden den Betrag, Originalwert und konfigurierte Endpunkte
+  bleiben als Tooltip-Metadaten erhalten. Konfigurierte und tatsächliche Struktur
+  bleiben kreisfrei/eindeutig einschließlich Nullflüssen. Dieselbe familienlokale
+  Topologieprüfung wird für Live-Modell und beide Vorschauen wiederverwendet.
   ADR 0095 ergänzt das optionale Einheitenmodell `UnitMode=manual|automatic|checked`.
   `manual` erhält die bisherige ungeprüfte Anzeigeeinheit. Geprüfte Modi
   verwenden die gemeinsame native/Legacy-Metadatenauflösung strikt und prüfen

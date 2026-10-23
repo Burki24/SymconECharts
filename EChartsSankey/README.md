@@ -33,11 +33,45 @@ müssen vom Anwender sinnvoll gewählt werden. Unterschiede werden nicht
 automatisch ausgeglichen. Ein Knotenwert entspricht der größeren dieser
 beiden Summen, nicht einem zusätzlichen Messwert.
 
-Negative Werte, Kreise, Selbstverbindungen und doppelte gerichtete Knotenpaare
-sind unzulässig. Die Diagnose nennt bei fehlerhaften Einträgen die Zeile.
+Negative Werte sind standardmäßig unzulässig. Kreise, Selbstverbindungen und
+doppelte gerichtete Knotenpaare sind weiterhin unzulässig. Die Diagnose nennt
+bei fehlerhaften Einträgen nach Möglichkeit die Zeile.
 Nullflüsse und Knoten ohne positive Verbindung bleiben unsichtbar. Sind alle
 Werte null, erscheint ein entsprechender Hinweis. Wertänderungen aktualisieren
 das vorhandene Diagramm automatisch.
+
+## Optionale Umkehr negativer Flüsse
+
+Aktivieren Sie in einer Verbindung **„Negative Flüsse umkehren“**, wenn deren
+Quellvariable bewusst beide Richtungen beschreibt, zum Beispiel Netzbezug und
+Einspeisung. Ohne diese Auswahl bleibt die bisherige Ablehnung negativer Werte.
+Die Auswahl gilt je Verbindung, auch wenn dieselbe Variable mehrfach verwendet wird.
+
+- Positive Werte fließen weiterhin vom eingetragenen Start zum Ziel.
+- Negative Werte vertauschen nur für die Darstellung Start und Ziel. Die
+  Verbindungsbreite und Knotensummen verwenden den positiven Betrag.
+- Nullflüsse bleiben unsichtbar; sie werden nicht umgekehrt.
+
+Beispiel: `Netz → Haus` mit `500 W` zeigt Netzbezug. Bei aktivierter Umkehr
+zeigt `−200 W` einen Fluss `Haus → Netz` mit Breite `200 W`. Der Tooltip nennt
+die tatsächliche Richtung, den Originalwert `−200 W` und die konfigurierte
+Verbindung. Dauerhafte Verbindungsbeschriftungen zeigen wie bisher die Breite.
+Knotenwerte sind Flussbeträge, keine vorzeichenbehaftete Nettobilanz.
+
+Die konfigurierte Struktur muss weiterhin kreisfrei und eindeutig sein –
+auch wenn eine Umkehr aktuell einen konfigurierten Kreis auflösen würde.
+Zusätzlich werden alle tatsächlichen Richtungen nach der Umkehr geprüft,
+einschließlich der unveränderten Richtung unsichtbarer Nullflüsse. Ein dabei
+entstehender Kreis oder ein doppeltes gerichtetes Paar wird abgewiesen;
+das Diagramm zeigt einen Hinweis statt einer Teilmenge oder veralteter Flüsse.
+Ein Vorzeichenwechsel kann daher eine gültige Darstellung ungültig machen;
+ein später wieder gültiger Wert stellt sie automatisch wieder her.
+
+Kachel, IPSView und beide Vorschauen verwenden dieselbe Richtungsprüfung.
+Die Vorschau erhält den Originalwert im SVG-Titel der umgekehrten Verbindung.
+Gespeicherte Knoten, Verbindungen, Quellwerte und Designs werden nicht verändert.
+Einheitenprüfung, Schutzgrenzen und Ablehnung nichtendlicher Werte bleiben
+erhalten. Es gibt weder Umrechnung noch Rest-/Bilanzknoten.
 
 ## Einheitenmodell und optionale Quellenprüfung
 

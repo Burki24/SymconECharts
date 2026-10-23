@@ -96,7 +96,7 @@ use SymconECharts\EChartsVariablePresentation;
         assertGatewayGauge(
             findGaugeFormElement($form['elements'], 'Unit')['visible'] === false
             && str_contains(findGaugeFormElement($form['elements'], 'UnitMode')['onChange'], 'ECSA_UpdateUnitModeForm')
-            && str_contains(findGaugeFormElement($form['elements'], 'UnitMode')['onChange'], "'UnitMode' => \$UnitMode"),
+            && str_contains(findGaugeFormElement($form['elements'], 'UnitMode')['onChange'], "'UnitMode'"),
             'Mode controls must update visibility and both draft previews.'
         );
         $module->UpdateUnitModeForm('checked');

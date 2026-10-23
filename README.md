@@ -33,6 +33,8 @@ Zusätzlich ist je Quelle Automatisch, Mittelwert, Minimum, Maximum oder
 Zählerverbrauch wählbar. Explizite Kennzahlen müssen zum Archivtyp passen.
 Alle Achsen teilen sich weiterhin höchstens 10000 Archivaggregate.
 Sankey zeigt aktuelle Mengenflüsse zwischen manuell angelegten Knoten.
+Je Verbindung lassen sich negative Werte ausdrücklich als umgekehrte Flüsse
+darstellen; Originalwerte bleiben im Tooltip erhalten und die Struktur bleibt kreisfrei.
 Calendar stellt archivierte Tageskennzahlen als farbigen Jahres-, Quartals-
 oder Monatskalender sowie für feste historische Von-/Bis-Zeiträume dar,
 jeweils mit Navigation zu früheren Zeiträumen.

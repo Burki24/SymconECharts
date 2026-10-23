@@ -219,7 +219,7 @@ class EChartsSankey extends IPSModuleStrict
                     $fields[] = $prefix . $name;
                 }
             }
-            return $debugFlowResult = $this->EncodeConfigurationForm($this->WithBarPreviewForm($form, 'ECSA', $fields));
+            return $debugFlowResult = $this->EncodeConfigurationForm($this->WithBarPreviewForm($form, 'ECSA', $fields, true));
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
             $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
@@ -443,7 +443,7 @@ class EChartsSankey extends IPSModuleStrict
                 if (isset($values['Nodes']) && is_array($values['Nodes'])) {
                     $this->UpdateNodeOptions(json_encode($values['Nodes'], JSON_THROW_ON_ERROR));
                 }
-                $this->GetValidatedConfiguration($values);
+                $this->ReadSankeyPreviewModel($values);
                 foreach (['NodeColors', 'IPSViewNodeColors'] as $name) {
                     if (array_key_exists($name, $values)
                         && ($name === 'NodeColors' || !($values['IPSViewUseTileDesign'] ?? $this->ReadPropertyBoolean('IPSViewUseTileDesign')))) {
@@ -626,6 +626,8 @@ class EChartsSankey extends IPSModuleStrict
                 'Connect an active EChartsGateway.'                               => $this->Translate('Connect an active EChartsGateway.'),
                 'The Sankey values could not be loaded.'                          => $this->Translate('The Sankey values could not be loaded.'),
                 'Sankey values must be finite and non-negative.'                  => $this->Translate('Sankey values must be finite and non-negative.'),
+                'Original value'                                                  => $this->Translate('Original value'),
+                'Configured connection'                                           => $this->Translate('Configured connection'),
                 'No positive flows'                                               => $this->Translate('No positive flows'),
                 'Apache ECharts could not be initialized.'                        => $this->Translate('Apache ECharts could not be initialized.'),
                 'Data could not be refreshed. Showing the last available values.' => $this->Translate(
@@ -843,8 +845,12 @@ class EChartsSankey extends IPSModuleStrict
         }
         try {
             $chart = json_decode($this->GetSankeyDataForOutput($ipsView), true, 512, JSON_THROW_ON_ERROR);
-        } catch (InvalidArgumentException) {
-            return $this->ErrorState('Sankey values must be finite and non-negative.');
+        } catch (InvalidArgumentException $exception) {
+            $reversible = array_any(
+                json_decode($this->ReadPropertyString('Sources'), true) ?? [],
+                static fn (array $source): bool => ($source['ReverseNegative'] ?? false) === true
+            );
+            return $this->ErrorState($reversible ? $exception->getMessage() : 'Sankey values must be finite and non-negative.');
         } catch (Throwable $exception) {
             $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
             return $this->ErrorState('The Sankey values could not be loaded.');

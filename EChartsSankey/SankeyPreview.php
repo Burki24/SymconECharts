@@ -9,6 +9,23 @@ use Throwable;
 /** Read-only current-value SVG preview of the complete (possibly unsaved) flow configuration. */
 trait SankeyPreview
 {
+    /** Same read-only draft model for diagnostics and both previews; never changes status. */
+    private function ReadSankeyPreviewModel(array $values): array
+    {
+        $configuration = $this->GetValidatedConfiguration($values);
+        $current = [];
+        // ReadCurrentSource() changes status on transport failures and is not a draft reader.
+        foreach (array_unique(array_column($configuration['sources'], 'VariableID')) as $id) {
+            $current[$id] = ['Value' => GetValue($id), 'Timestamp' => 0];
+        }
+        return [$configuration, SankeyModel::Build(
+            $configuration['nodes'],
+            $configuration['sources'],
+            $current,
+            fn (string $text): string => $this->Translate($text)
+        )];
+    }
+
     private function SankeyPreviewSvg(array $values, bool $ipsView): string
     {
         $palette = EChartsBarPreview::Palette($this->BarPreviewValue($values, 'EChartsTheme', 'string', $ipsView));
@@ -25,18 +42,7 @@ trait SankeyPreview
         );
         $svg = str_replace('<svg xmlns', '<svg font-family="Arial, sans-serif" color="' . EChartsBarPreview::E($palette['text']) . '" xmlns', $svg);
         try {
-            $configuration = $this->GetValidatedConfiguration($values);
-            $current = [];
-            // Form previews must not call ReadCurrentSource(): transport failures there change instance status.
-            foreach (array_unique(array_column($configuration['sources'], 'VariableID')) as $id) {
-                $current[$id] = ['Value' => GetValue($id), 'Timestamp' => 0];
-            }
-            $model = SankeyModel::Build(
-                $configuration['nodes'],
-                $configuration['sources'],
-                $current,
-                fn (string $text): string => $this->Translate($text)
-            );
+            [$configuration, $model] = $this->ReadSankeyPreviewModel($values);
         } catch (Throwable $exception) {
             return $this->SankeyPreviewStatus($svg, $exception->getMessage());
         }
@@ -154,7 +160,16 @@ trait SankeyPreview
                 . '"><stop stop-color="' . EChartsBarPreview::E($colors[$source]) . '"/><stop offset="1" stop-color="'
                 . EChartsBarPreview::E($colors[$target]) . '"/></linearGradient></defs>';
             $svg .= '<path data-source="' . EChartsBarPreview::E($source) . '" data-target="' . EChartsBarPreview::E($target)
-                . '" d="' . $path . '" fill="' . EChartsBarPreview::E($color) . '" fill-opacity="' . EChartsBarPreview::N($opacity) . '"/>';
+                . '" d="' . $path . '" fill="' . EChartsBarPreview::E($color) . '" fill-opacity="' . EChartsBarPreview::N($opacity) . '">';
+            if ($link['reversed'] ?? false) {
+                $labels = array_column($configuration['nodes'], 'Label', 'Key');
+                $svg .= '<title>' . EChartsBarPreview::E($labels[$source] . ' → ' . $labels[$target] . ': '
+                    . $this->SankeyPreviewFormatValue($link['value'], $unit) . "\n"
+                    . $this->Translate('Original value') . ': ' . $this->SankeyPreviewFormatValue($link['originalValue'], $unit) . "\n"
+                    . $this->Translate('Configured connection') . ': ' . $labels[$link['configuredSource']] . ' → '
+                    . $labels[$link['configuredTarget']]) . '</title>';
+            }
+            $svg .= '</path>';
             if ($this->BarPreviewValue($values, 'ShowEdgeValues', 'boolean', $ipsView)) {
                 $edgeColor = EChartsBarPreview::Color(
                     $this->BarPreviewValue($values, 'EdgeLabelColor', 'integer', $ipsView),
