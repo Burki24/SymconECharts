@@ -165,6 +165,9 @@ können unabhängig davon individuell vergeben werden.
   Aktuelle Mengenflüsse zwischen manuellen Knoten und Verbindungen. Die
   Verbindungsbreite folgt einer numerischen Symcon-Variable. Kachel und
   IPSView bieten getrennte Designer.
+  Optional sind eine automatische gemeinsame Quelleinheit oder eine geprüfte
+  manuelle Einheit aus nativen Symcon-Darstellungen und Legacy-Profilen wählbar.
+  Die bisherige ungeprüfte Anzeigeeinheit bleibt Standard; Werte werden nicht umgerechnet.
 
 - __EChartsGateway__ ([Dokumentation](EChartsGateway/README.md))
   Gemeinsame Zentrale als Splitter. Sie stellt den Chartfamilien aktuell den

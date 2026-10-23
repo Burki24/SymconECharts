@@ -5,10 +5,57 @@ declare(strict_types=1);
 namespace SymconECharts;
 
 use InvalidArgumentException;
+use Throwable;
 
 /** Bounded acyclic flow configuration; display labels never identify nodes or sources. */
 final class SankeyModel
 {
+    /** Resolve a common raw-value unit without converting or normalizing flows. */
+    public static function ResolveUnit(array $sources, string $mode, string $unit, ?callable $readUnit = null, ?callable $translate = null): string
+    {
+        $t = $translate ?? static fn (string $text): string => $text;
+        if (!in_array($mode, ['manual', 'automatic', 'checked'], true)) {
+            throw new InvalidArgumentException($t('The Sankey unit mode is invalid.'));
+        }
+        $unit = trim($unit);
+        if ($mode !== 'automatic' && mb_strlen($unit) > 24) {
+            throw new InvalidArgumentException($t('The Sankey unit must not exceed 24 characters.'));
+        }
+        if ($mode === 'manual') {
+            return $unit;
+        }
+        $units = [];
+        $expected = $mode === 'checked' ? $unit : null;
+        foreach ($sources as $index => $source) {
+            $id = $source['VariableID'];
+            if (!array_key_exists($id, $units)) {
+                try {
+                    $resolved = $readUnit !== null ? $readUnit($id) : null;
+                    if (!is_string($resolved)) {
+                        throw new InvalidArgumentException('Invalid source unit.');
+                    }
+                    $units[$id] = trim($resolved);
+                } catch (Throwable) {
+                    throw new InvalidArgumentException(sprintf($t('Connection %d: the source unit could not be read.'), $index + 1));
+                }
+            }
+            $actual = $units[$id];
+            if (mb_strlen($actual) > 24) {
+                throw new InvalidArgumentException(sprintf($t('Connection %d: the source unit must not exceed 24 characters.'), $index + 1));
+            }
+            $expected ??= $actual;
+            if ($actual !== $expected) {
+                throw new InvalidArgumentException(sprintf(
+                    $t('Connection %d: source unit "%s" does not match "%s". Values are not converted.'),
+                    $index + 1,
+                    $actual !== '' ? $actual : $t('(unitless)'),
+                    $expected !== '' ? $expected : $t('(unitless)')
+                ));
+            }
+        }
+        return $expected ?? '';
+    }
+
     /** @return array{nodes:list<array{Key:string,Label:string}>,sources:list<array{Source:string,Target:string,VariableID:int}>} */
     public static function Validate(array $nodes, array $sources, ?callable $translate = null): array
     {

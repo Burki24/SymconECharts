@@ -21,6 +21,7 @@ use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsTransientRefresh;
+use SymconECharts\EChartsVariablePresentation;
 use SymconECharts\SankeyModel;
 use SymconECharts\SankeyPreview;
 
@@ -43,6 +44,7 @@ require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
 require_once __DIR__ . '/../libs/EChartsLabelDesign.php';
 require_once __DIR__ . '/../libs/EChartsTransientRefresh.php';
+require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 require_once __DIR__ . '/SankeyModel.php';
 require_once __DIR__ . '/SankeyPreview.php';
 
@@ -108,6 +110,7 @@ class EChartsSankey extends IPSModuleStrict
             $this->RegisterPropertyString('Nodes', '[]');
             $this->RegisterPropertyString('Sources', '[]');
             $this->RegisterPropertyString('Unit', '');
+            $this->RegisterPropertyString('UnitMode', 'manual');
             foreach (['', 'IPSView'] as $prefix) {
                 foreach (self::DESIGN_DEFAULTS as $name => $default) {
                     match (gettype($default)) {
@@ -181,6 +184,7 @@ class EChartsSankey extends IPSModuleStrict
         $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
             $form = $this->LoadConfigurationForm();
+            $form['elements'] = $this->SetFormFieldVisibility($form['elements'], ['Unit'], $this->ReadPropertyString('UnitMode') !== 'automatic');
             $connectionFields = $this->ConnectionFields(json_decode($this->ReadPropertyString('Nodes'), true));
             foreach ($form['elements'] as &$element) {
                 if (($element['name'] ?? '') === 'Sources') {
@@ -204,7 +208,7 @@ class EChartsSankey extends IPSModuleStrict
                 ['caption' => 'Flow appearance', 'start' => 'EdgeColorMode']
             ]);
             $fields = [
-                'Title', 'Nodes', 'Sources', 'Unit', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
+                'Title', 'Nodes', 'Sources', 'Unit', 'UnitMode', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
                 'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent',
                 ...array_keys(self::DESIGN_DEFAULTS),
                 ...array_map(static fn (string $name): string => 'IPSView' . $name, array_keys(self::DESIGN_DEFAULTS))
@@ -222,6 +226,22 @@ class EChartsSankey extends IPSModuleStrict
             throw $debugFlowException;
         } finally {
             $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, false);
+        }
+    }
+
+    public function UpdateUnitModeForm(string $Mode): void
+    {
+        $debugFlowResult = null;
+        $debugFlowFailed = false;
+        $this->DebugFlowStart(__FUNCTION__, __LINE__);
+        try {
+            $this->UpdateFormField('Unit', 'visible', $Mode !== 'automatic');
+        } catch (\Throwable $debugFlowException) {
+            $debugFlowFailed = true;
+            $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
+            throw $debugFlowException;
+        } finally {
+            $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
     }
 
@@ -584,7 +604,7 @@ class EChartsSankey extends IPSModuleStrict
             'theme'         => $this->EffectiveTheme($ipsView),
             'sankey'        => [
                 'title' => $this->ReadPropertyString('Title'),
-                'unit'  => trim($this->ReadPropertyString('Unit')),
+                'unit'  => $configuration['unit'],
                 'style' => $this->ReadDesignStyle($ipsView),
                 ...$model
             ]
@@ -688,9 +708,17 @@ class EChartsSankey extends IPSModuleStrict
                 throw new InvalidArgumentException(sprintf($this->Translate('Connection %d: select an existing Integer or Float variable.'), $index + 1));
             }
         }
-        if (mb_strlen(trim((string) ($values['Unit'] ?? $this->ReadPropertyString('Unit')))) > 24) {
-            throw new InvalidArgumentException($this->Translate('The Sankey unit must not exceed 24 characters.'));
+        $mode = $values['UnitMode'] ?? $this->ReadPropertyString('UnitMode');
+        if (!is_string($mode)) {
+            throw new InvalidArgumentException($this->Translate('The Sankey unit mode is invalid.'));
         }
+        $configuration['unit'] = SankeyModel::ResolveUnit(
+            $configuration['sources'],
+            $mode,
+            (string) ($values['Unit'] ?? $this->ReadPropertyString('Unit')),
+            static fn (int $id): string => EChartsVariablePresentation::Resolve($id, 0.0, 100.0, '', 2, true, true)['unit'],
+            fn (string $text): string => $this->Translate($text)
+        );
         return $configuration;
     }
 
@@ -807,7 +835,8 @@ class EChartsSankey extends IPSModuleStrict
         $error = $this->GetConfigurationError();
         if ($error !== null) {
             return $this->ErrorState($error['Status'] === self::STATUS_DESIGN_INVALID
-                ? 'The Sankey design is invalid.' : 'Configure valid Sankey nodes and connections.');
+                ? 'The Sankey design is invalid.' : ($this->ReadPropertyString('UnitMode') === 'manual'
+                    ? 'Configure valid Sankey nodes and connections.' : $error['Message']));
         }
         if (!$this->HasActiveParent()) {
             return $this->ErrorState('Connect an active EChartsGateway.');

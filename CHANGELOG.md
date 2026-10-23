@@ -27,6 +27,13 @@
 
 ## Neu
 
+- EChartsSankey ergänzt automatische gemeinsame Quelleinheiten und eine
+  optionale Prüfung gegen eine manuelle erwartete Einheit. Native Darstellungen,
+  Legacy-Profile und Nullflüsse werden berücksichtigt; Kachel, IPSView und beide
+  Vorschauen verwenden dieselbe Prüfung. Bestehende Konfigurationen bleiben im
+  bisherigen manuellen Anzeigemodus, Designs und Schutzbudgets unverändert.
+  Es erfolgt keine Umrechnung oder Normalisierung.
+
 - EChartsGraphZ2M bietet stärkste oder schwächste Verbindungen zuerst sowie
   einen einschließlich begrenzten LQI-Bereich. Kachel, IPSView und beide
   Vorschauen nutzen dieselbe Auswahl nach gerichteter Dublettenauflösung.

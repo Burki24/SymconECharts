@@ -65,6 +65,20 @@ assert.equal(tile.chartElement.style.top, '58px', 'The canvas viewport must prot
 assert.ok(series.top > tile.option.title.top + tile.option.title.textStyle.fontSize);
 assert.match(tile.option.tooltip.formatter({ dataType: 'edge', data: series.links[0] }), /&lt;Supply&gt; → Load<br>20 W/);
 assert.equal(series.label.formatter({ data: series.data[1] }), 'Load\n20 W');
+for (const adapter of ['symcon', 'ipsview']) {
+    for (const unit of ['kWh', 'µg/m³', '', '<W&>']) {
+        const resolved = render({ ...model, sankey: { ...model.sankey, unit,
+            style: { ...model.sankey.style, showEdgeValues: true } } }, adapter);
+        const flow = resolved.option.series[0];
+        const suffix = unit ? ' ' + unit : '';
+        assert.equal(flow.links[0].value, 20, 'Resolved units must not convert or normalize widths.');
+        assert.equal(flow.edgeLabel.formatter({ data: flow.links[0] }), '20' + suffix);
+        assert.equal(flow.label.formatter({ data: flow.data[1] }), 'Load\n20' + suffix);
+        const tooltip = resolved.option.tooltip.formatter({ dataType: 'edge', data: flow.links[0] });
+        assert.ok(tooltip.endsWith('20' + (unit === '<W&>' ? ' &lt;W&amp;&gt;' : suffix)),
+            'Effective units must remain escaped in tooltips and readable in native labels.');
+    }
+}
 
 const independent = render({ ...model, sankey: { ...model.sankey, style: { ...model.sankey.style,
     orientation: 'vertical', nodeColor: '#abcdef', edgeColorMode: 'fixed', edgeColor: '#123456',

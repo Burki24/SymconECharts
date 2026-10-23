@@ -1,5 +1,26 @@
 # Tests
 
+## Sankey: Einheitenmodell und Quellenprüfung
+
+`php tests/sankey_units.php` begann RED an der fehlenden Unit-Policy. Es prüft
+manuellen Altmodus, automatische/erwartete Einheiten, ID-stabile Auflösung,
+exakte Kennzeichen, einheitenlose Mengen und Zeilendiagnosen.
+`php tests/gateway_gauges.php --sankey-units` prüft echte Module/Gateway und den
+gemeinsamen Metadatenleser mit synthetischem Kernel. Native/Legacy-Vorrang,
+Metadatenfehler, Nullflüsse, unveränderte Altmodelle/Quellwerte, Abonnements,
+Ausgaben, gespeicherte Designs und reine SVG-Entwürfe sind abgedeckt.
+Maximale 100-/200-Modelle bleiben samt Formular unter den bisherigen Budgets.
+`node tests/sankey_layout.js` prüft effektive Einheiten, Originalbreiten und
+HTML-sichere Tooltips in beiden Adaptern. `node tests/sankey_units_browser.mjs`
+stellt synthetische Fälle und beide echten HTML-Ausgaben plus SVG bereit.
+Der lokale Browserlauf bestätigt automatische/geprüfte und manuelle Einheiten,
+einheitenlose Ausgabe und die präzise Diagnose eines Nullflusses mit kWh statt W.
+Die endgültige Fixture liefert das normale Interaktionsasset aus; ihre frische
+Browserkonsole blieb fehlerfrei. Echte Mausradaktionen scrollten den äußeren
+Testhost über dem Diagramm abwärts/aufwärts (0 → 637 → 0), ohne Sankey-Zoom.
+Es wird keine Symcon-Installation angesprochen. MCP und tatsächliche
+Kachel-/IPSView-Laufzeitprüfung bleiben nach Modulupdate separat offen.
+
 ## GraphZ2M: Verbindungsauswahl
 
 `php tests/zigbee_graph_model.php` begann RED bei „schwächste zuerst“.

@@ -40,6 +40,21 @@ Canvas-Zeichenaufrufe für Kachel und IPSView statt nur vorhandener Titeloptione
 
 ## Aktueller Stand und Zielarchitektur
 
+Sankey ergänzt gemäß [ADR 0095](adr/0095-sankey-source-unit-validation.md)
+`UnitMode=manual|automatic|checked`. `manual` ist unveränderter Default;
+`Unit` bleibt gespeichert und wird automatisch nur als inaktives Feld verborgen.
+Die familienlokale Unit-Policy in `SankeyModel` und `GetValidatedConfiguration`
+werden für Live-Ausgaben, Diagnosen und beide echten Momentanwertvorschauen
+verwendet. `EChartsVariablePresentation::Resolve` erhält einen optionalen
+strikten Zugriff; bestehende Consumer behalten den bisherigen toleranten
+Default. Der geprüfte Symcon_ModuleHelper erzeugt Darstellungsarrays, bietet
+aber keine solche lesende ECharts-Metadatenauflösung. Synchronisierte Helper,
+Gateway und gepinnte Runtime bleiben unverändert.
+Alle Quellen einschließlich Nullflüssen werden geprüft; IDs, Rohwerte,
+Abonnements und 100-/200-/65536-/1-MiB-Schutzgrenzen bleiben erhalten.
+Gemeinsame Formular-/SVG-/Rendererbausteine bleiben in Gebrauch. Die neue
+Auswahl benötigt nach Modulupdate noch MCP- und echte Kachel-/IPSView-Abnahme.
+
 GraphZ2M ergänzt gemäß [ADR 0094](adr/0094-zigbee-link-selection.md) die
 additive Verbindungsauswahl `strongest`, `weakest` und `range`.
 `ZigbeeGraphModel` prüft Auswahl und Grenzen, löst gerichtete Dubletten auf,
@@ -49,8 +64,8 @@ verwenden denselben Baustein. Formularsichtbarkeit nutzt den vorhandenen
 ConfigurationFormHelper; Graph-Ansichtserhaltung bleibt in `echarts-graph.js`.
 Keine Änderung an Gateway, Fremdruntime, synchronisierten Helpern oder Exportleser.
 Alle Geräte, unabhängige Designer, absolute LQI-Farben und 500/10000/2000-/16-MiB-
-Schutzgrenzen bleiben erhalten. Funktionale MCP- und tatsächliche
-Kachel-/IPSView-Abnahme der neuen Auswahl bleiben nach Modulupdate offen.
+Schutzgrenzen bleiben erhalten. Die funktionale MCP-Abnahme auf Symcon 9.1
+liegt vor; der Eigentümer bestätigt die Auswahl in Kachel und tatsächlichem IPSView.
 
 Candlestick ergänzt gemäß [ADR 0093](adr/0093-candlestick-minute-week-intervals.md)
 15-/30-Minuten- und lokale ISO-Wochenintervalle. `EChartsArchiveQuery` teilt

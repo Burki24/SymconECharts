@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SymconECharts;
 
+use RuntimeException;
 use Throwable;
 
 /**
@@ -12,6 +13,9 @@ use Throwable;
 final class EChartsVariablePresentation
 {
     /**
+     * Strict access rejects unreadable or malformed unit metadata instead of
+     * silently falling back. Existing callers retain lenient resolution.
+     *
      * @return array{minimum: float, maximum: float, unit: string, decimals: int}
      */
     public static function Resolve(
@@ -20,7 +24,8 @@ final class EChartsVariablePresentation
         float $maximum,
         string $unit,
         int $decimals,
-        bool $useVariablePresentation
+        bool $useVariablePresentation,
+        bool $strict = false
     ): array {
         $configuration = [
             'minimum'  => $minimum,
@@ -29,18 +34,31 @@ final class EChartsVariablePresentation
             'decimals' => $decimals
         ];
         if (!$useVariablePresentation || $variableID <= 0 || !IPS_VariableExists($variableID)) {
+            if ($strict && $useVariablePresentation) {
+                throw new RuntimeException('Variable presentation is unavailable.');
+            }
             return $configuration;
         }
 
         try {
             $presentation = IPS_GetVariablePresentation($variableID);
             if (!is_array($presentation)) {
+                if ($strict) {
+                    throw new RuntimeException('Variable presentation is invalid.');
+                }
                 return $configuration;
             }
 
             $profileName = $presentation['PROFILE'] ?? null;
+            if ($strict && (($profileName !== null && !is_string($profileName))
+                || (array_key_exists('SUFFIX', $presentation) && !is_string($presentation['SUFFIX'])))) {
+                throw new RuntimeException('Variable unit metadata is invalid.');
+            }
             if (is_string($profileName) && $profileName !== '') {
                 $profile = IPS_GetVariableProfile($profileName);
+                if ($strict && (!is_array($profile) || (array_key_exists('Suffix', $profile) && !is_string($profile['Suffix'])))) {
+                    throw new RuntimeException('Variable profile unit metadata is invalid.');
+                }
                 if (is_array($profile)) {
                     $configuration = self::ApplyValues($configuration, [
                         'MIN'    => $profile['MinValue'] ?? null,
@@ -52,7 +70,10 @@ final class EChartsVariablePresentation
             }
 
             return self::ApplyValues($configuration, $presentation);
-        } catch (Throwable) {
+        } catch (Throwable $exception) {
+            if ($strict) {
+                throw new RuntimeException('Variable presentation could not be resolved.', 0, $exception);
+            }
             return $configuration;
         }
     }

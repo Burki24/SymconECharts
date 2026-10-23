@@ -47,6 +47,7 @@ $tests = [
     __DIR__ . '/treemap_model.php',
     __DIR__ . '/hierarchy_sources.php',
     __DIR__ . '/sankey_model.php',
+    __DIR__ . '/sankey_units.php',
     __DIR__ . '/radar_model.php',
     __DIR__ . '/boxplot_statistics.php',
     __DIR__ . '/candlestick_data.php',
@@ -57,6 +58,7 @@ $tests = [
 ];
 
 $commands = [
+    ['Test optional Sankey source unit validation', 'php tests/gateway_gauges.php --sankey-units'],
     ['Test Zigbee link selections and previews', 'php tests/gateway_gauges.php --zigbee-link-selection'],
     ['Test Candlestick minute and week intervals', 'php tests/gateway_gauges.php --candlestick-intervals'],
     ['Test optional Boxplot IQR whiskers and outliers', 'php tests/gateway_gauges.php --boxplot-iqr'],

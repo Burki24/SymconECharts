@@ -39,6 +39,39 @@ Nullflüsse und Knoten ohne positive Verbindung bleiben unsichtbar. Sind alle
 Werte null, erscheint ein entsprechender Hinweis. Wertänderungen aktualisieren
 das vorhandene Diagramm automatisch.
 
+## Einheitenmodell und optionale Quellenprüfung
+
+Das gemeinsame Einheitenmodell gilt für Kachel, IPSView und beide Vorschauen:
+
+| Modus | Verhalten |
+| --- | --- |
+| Manuelle Anzeigeeinheit (Standard) | Verwendet wie bisher Ihre optionale Einheit, ohne die Quelleinheiten zu prüfen. Bestehende Konfigurationen bleiben unverändert nutzbar. |
+| Automatische gemeinsame Quelleinheit (geprüft) | Ermittelt die Einheit aller Verbindungsquellen aus deren Symcon-Darstellung beziehungsweise Legacy-Profil. Alle müssen übereinstimmen; diese Einheit wird angezeigt. Das manuelle Feld wird ausgeblendet, aber nicht gelöscht. |
+| Manuelle erwartete Einheit (geprüft) | Vergleicht jede Quelleinheit mit Ihrer eingetragenen Einheit. Leer erwartet ausdrücklich einheitenlose Quellen. |
+
+Native `SUFFIX`-Angaben haben Vorrang vor dem Suffix eines referenzierten
+Legacy-Profils. Äußere Leerzeichen werden entfernt; Groß-/Kleinschreibung und
+Einheitenpräfixe bleiben relevant: `W`, `kW` und `kWh` sind verschieden.
+Ein leeres oder fehlendes Suffix bedeutet einheitenlos. Automatisch ist eine
+vollständig einheitenlose Quellenmenge gültig; eine Mischung aus `W` und leer
+wird abgewiesen. Nicht lesbare oder fehlerhafte Metadaten sind dagegen ein
+Prüffehler, kein Ersatz für eine einheitenlose Quelle.
+
+Geprüft werden alle konfigurierten Verbindungen, auch aktuell ausgeblendete
+Nullflüsse. Eine mehrfach verwendete Variable behält ihre ID und ihren vollen
+Wert an jeder Verbindung. Die Diagnose nennt die betroffene Verbindungszeile.
+Fehlerhafte geprüfte Modelle werden nicht teilweise gezeichnet. Einheitentexte
+sind weiterhin auf 24 Zeichen begrenzt.
+
+Die Prüfung vergleicht Einheitenkennzeichen, nicht physikalische Dimensionen
+oder die Richtigkeit der Variablenbeschriftung. Alle Flüsse müssen weiterhin
+dieselbe fachliche Größe und Rohwertbasis darstellen. Es erfolgen **keine
+Umrechnung, Skalierung oder Normalisierung** und kein automatischer
+Bilanzausgleich. Eine geänderte Variablendarstellung wird bei der nächsten
+Modellprüfung beziehungsweise Datenaktualisierung erneut berücksichtigt.
+
+## Darstellung
+
 Die Designer bieten waagerechte oder senkrechte Anordnung, Knotenausrichtung,
 Knotenbreite und -abstand, Verschieben der Knoten, Beschriftungen, Werte,
 Schriftgrößen, Farben, Tooltip und Animation. Flüsse erhalten die Farbe ihres

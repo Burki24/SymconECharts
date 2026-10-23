@@ -147,9 +147,33 @@
             "caption": "Choose a current numeric variable for each directed connection. All flows must use the same quantity and unit. Cycles and duplicate directed pairs are invalid; zero flows are hidden."
         },
         {
+            "type": "Select",
+            "name": "UnitMode",
+            "caption": "Unit model and source validation",
+            "onChange": "ECSA_UpdateUnitModeForm($id, $UnitMode);",
+            "options": [
+                {
+                    "caption": "Manual display unit (no source unit validation)",
+                    "value": "manual"
+                },
+                {
+                    "caption": "Automatic common source unit (validated)",
+                    "value": "automatic"
+                },
+                {
+                    "caption": "Manual expected unit (validated)",
+                    "value": "checked"
+                }
+            ]
+        },
+        {
             "type": "ValidationTextBox",
             "name": "Unit",
             "caption": "Unit (optional)"
+        },
+        {
+            "type": "Label",
+            "caption": "Validated modes compare all source suffixes, including zero flows. Empty means unitless; W and kW differ. No conversion or normalization is performed."
         },
         {
             "type": "ExpansionPanel",

@@ -315,6 +315,9 @@ function IPS_GetVariable(int $variableID): array
 /** @return array<string, mixed> */
 function IPS_GetVariablePresentation(int $variableID): array
 {
+    if ($GLOBALS['symconTestPresentationFailures'][$variableID] ?? false) {
+        throw new RuntimeException('Synthetic unavailable presentation.');
+    }
     return $GLOBALS['symconTestVariables'][$variableID]['Presentation'] ?? [];
 }
 
@@ -1179,6 +1182,11 @@ if (array_slice($argv, 1) === ['--state-timeline']) {
 }
 
 // Reuse the real Gateway and Kernel doubles without retaining every previous family's HTML fixtures.
+if (($argv[1] ?? '') === '--sankey-units') {
+    require __DIR__ . '/sankey_unit_integration.php';
+    exit(0);
+}
+
 if (array_slice($argv, 1) === ['--zigbee-link-selection']) {
     require __DIR__ . '/zigbee_link_selection.php';
     exit(0);

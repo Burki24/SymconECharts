@@ -120,7 +120,7 @@ trait SankeyPreview
         $curve = max(0, min(100, $this->BarPreviewValue($values, 'EdgeCurvenessPercent', 'integer', $ipsView))) / 100;
         $svg .= '<g transform="translate(70 85)">';
         $edgeLabels = '';
-        $unit = trim((string) ($values['Unit'] ?? $this->ReadPropertyString('Unit')));
+        $unit = $configuration['unit'];
         foreach ($model['links'] as $index => $link) {
             $source = $link['source'];
             $target = $link['target'];

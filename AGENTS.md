@@ -147,6 +147,12 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Aktuelle Mengenflüsse zwischen manuell angelegten Knoten liegen im eigenen
   Gerätemodul `EChartsSankey`; Verbindungsbreiten folgen numerischen
   Quellvariablen, Zyklen und negative Werte sind unzulässig.
+  ADR 0095 ergänzt das optionale Einheitenmodell `UnitMode=manual|automatic|checked`.
+  `manual` erhält die bisherige ungeprüfte Anzeigeeinheit. Geprüfte Modi
+  verwenden die gemeinsame native/Legacy-Metadatenauflösung strikt und prüfen
+  auch Nullflüsse; fehlende Suffixe bedeuten einheitenlos, Lesefehler nicht.
+  Die Sankey-Policy und alle Ausgabe-/Vorschaupfade teilen dieselbe Prüfung;
+  keine Umrechnung, Normalisierung oder Änderung der 100-/200-Grenzen.
   Archivierte Tageskennzahlen einer einzelnen numerischen Variable liegen im
   eigenen Gerätemodul `EChartsCalendar`; Mittelwert, Minimum und Maximum
   erfordern Standardarchive, der ausdrücklich gewählte Zählerverbrauch ein
