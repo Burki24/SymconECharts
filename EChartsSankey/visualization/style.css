@@ -40,4 +40,14 @@ html, body {
 }
 
 .echarts-refresh-warning { inset-block-end: 0.65rem; color: var(--symc-text); }
+.echarts-sankey-balance-note {
+    position: absolute;
+    inset-inline: 0.5rem;
+    inset-block-end: 0.3rem;
+    color: var(--symc-text-muted);
+    font-size: 0.8rem;
+    line-height: 1.2;
+    text-align: center;
+    pointer-events: none;
+}
 [hidden] { display: none !important; }

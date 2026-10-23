@@ -47,6 +47,7 @@ $tests = [
     __DIR__ . '/treemap_model.php',
     __DIR__ . '/hierarchy_sources.php',
     __DIR__ . '/sankey_model.php',
+    __DIR__ . '/sankey_balance.php',
     __DIR__ . '/sankey_units.php',
     __DIR__ . '/radar_model.php',
     __DIR__ . '/boxplot_statistics.php',
@@ -58,6 +59,7 @@ $tests = [
 ];
 
 $commands = [
+    ['Test optional Sankey calculated balances', 'php tests/gateway_gauges.php --sankey-balance'],
     ['Test optional Sankey negative-flow reversal', 'php tests/gateway_gauges.php --sankey-reversal'],
     ['Test optional Sankey source unit validation', 'php tests/gateway_gauges.php --sankey-units'],
     ['Test Zigbee link selections and previews', 'php tests/gateway_gauges.php --zigbee-link-selection'],

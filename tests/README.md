@@ -1,5 +1,30 @@
 # Tests
 
+## Sankey: berechnete Rest-/Bilanzflüsse
+
+`php tests/sankey_balance.php` begann RED am fehlenden Restfluss. Es prüft
+Opt-in je Knoten, beide Differenzrichtungen, exakte Altmodelle, Umkehr vor
+Bilanz, keine Kaskaden, Rundungsreste und endliche Extrema sowie 100-/200-Grenzen
+einschließlich unsichtbarer Konfiguration. `php tests/gateway_gauges.php
+--sankey-balance` prüft echte Module/Gateway mit synthetischen Kernelwerten:
+keine erfundenen Quellen oder Zeitstempel, erhaltene Designs und Abonnements,
+beide HTML-Ausgaben/WebContent und SVGs, Updates und Fehler/Erholung.
+Der tatsächliche kompakte Node-Entwurfscallback wird ausgeführt, ohne
+Persistenz oder Statusänderung. Auch die größten ergänzten Modelle samt
+Formularen halten die bestehenden 1-MiB-Grenzen ein.
+`node tests/sankey_layout.js` prüft die echte ECharts-Verzweigungsgeometrie,
+Kennzeichnung und sichere Tooltips in beiden Adaptern/Ausrichtungen und bei
+ausgeschalteten Labels/Tooltips. `node tests/sankey_units_browser.mjs` bietet
+die synthetischen Fälle `balance`, `balance-inflow`, `balance-equal` und
+`balance-budget`. Die Fixture spricht keine Symcon-Installation an.
+Die lokale Canvas-Browserprüfung bestätigt beide Differenzrichtungen, die
+Kennzeichnung in HTML und SVG, keinen Zusatz bei exakter Bilanz und dieselbe
+Budgetdiagnose ohne Teilgeometrie. Berechnete Tooltips bleiben durch Begrenzung
+und Umbruch auch in schmalen eingebetteten Ansichten lesbar. Echte Mausradaktionen
+scrollten den Testhost über beiden Diagrammadaptern in beide Richtungen
+(0 → 637 → 0), ohne Diagrammzoom. Die Konsole blieb ohne Warnungen/Fehler.
+MCP und tatsächliche Host-Abnahme der Bilanzfunktion bleiben nach Update offen.
+
 ## Sankey: optionale Umkehr negativer Flüsse
 
 `php tests/sankey_model.php` begann für den Opt-in-Fall RED an der bisherigen
@@ -24,7 +49,8 @@ Ausgaben und SVG. Echte Mausradaktionen scrollten den Testhost über Kachel
 und IPSView-Frame in beide Richtungen (0 → 637 → 0), ohne Diagrammzoom;
 die Browserkonsole blieb ohne Warnungen/Fehler. Testtab und lokaler Server
 wurden anschließend geschlossen.
-MCP und tatsächliche Symcon-/IPSView-Host-Abnahme bleiben nach Update offen.
+Die spätere MCP-Prüfung und Eigentümerbestätigung für tatsächliche Kachel und
+IPSView liegen für die Kantenumkehr vor; die Bilanzfunktion ist separat abzunehmen.
 
 ## Sankey: Einheitenmodell und Quellenprüfung
 

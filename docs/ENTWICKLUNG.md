@@ -40,6 +40,23 @@ Canvas-Zeichenaufrufe für Kachel und IPSView statt nur vorhandener Titeloptione
 
 ## Aktueller Stand und Zielarchitektur
 
+Sankey ergänzt gemäß [ADR 0097](adr/0097-sankey-calculated-balances.md)
+`Nodes[].Balance` als ausdrückliches Opt-in mit kompatiblem Default false.
+Der bestehende `SankeyModel` berechnet ausschließlich aus gemessenen effektiven
+Flüssen je ausgewähltem Knoten eine Differenz und hängt höchstens einen
+Terminalknoten samt Verbindung an. Abgeleitete Flüsse besitzen keine Variablen-ID
+oder Messzeitstempel; ihre Grundlage bleibt als Metadatum erhalten. Kein
+generierter Fluss beeinflusst die Berechnung benachbarter Knoten. Die bestehenden
+100-/200-Grenzen umfassen konfigurierte und zusätzliche Elemente gemeinsam;
+zu große Modelle erhalten Diagnose statt Teilgeometrie. Relative Rundungsreste
+bis 1e-12 der größeren Knotensumme erzeugen keinen Zusatzfluss.
+Live-Ausgaben und beide SVG-Vorschauen teilen dieselbe Modellbildung und
+statusfreie Entwurfsleselogik. Gemeinsame Formular-/SVG-Bausteine werden
+wiederverwendet; neue fachfremde Abstraktionen oder Helper-Kopien sind unnötig.
+Bestehende Designs bleiben unverändert; nur bei berechneten Flüssen wird Raum
+für einen dauerhaften Kennzeichnungshinweis reserviert. MCP-/Host-Abnahme nach
+Modulupdate bleibt separat offen.
+
 Sankey ergänzt gemäß [ADR 0096](adr/0096-sankey-negative-flow-reversal.md)
 das optionale Boolean-Feld `ReverseNegative` je Quellenzeile (Default false).
 `SankeyModel` bildet Betragsbreiten und tatsächliche Richtungen; konfigurierte
@@ -49,7 +66,8 @@ Live-Ausgaben und beide SVG-Vorschauen verwenden denselben Modellbauer;
 Formdiagnose und Vorschauen teilen einen statusfreien Momentanwertleser.
 Die vorhandene kompakte Callback-Erzeugung verhindert bei maximalen signierten
 Modellen ein zu großes Formular. Keine Helper-Kopie, keine Änderung an Gateway,
-Runtime, Designs oder Schutzgrenzen. Neue MCP-/Host-Abnahme nach Update offen.
+Runtime, Designs oder Schutzgrenzen. Die MCP-Prüfung und Eigentümerbestätigung
+für tatsächliche Kachel und IPSView liegen für die Kantenumkehr vor.
 
 Sankey ergänzt gemäß [ADR 0095](adr/0095-sankey-source-unit-validation.md)
 `UnitMode=manual|automatic|checked`. `manual` ist unveränderter Default;

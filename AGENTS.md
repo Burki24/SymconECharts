@@ -153,6 +153,13 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   bleiben als Tooltip-Metadaten erhalten. Konfigurierte und tatsächliche Struktur
   bleiben kreisfrei/eindeutig einschließlich Nullflüssen. Dieselbe familienlokale
   Topologieprüfung wird für Live-Modell und beide Vorschauen wiederverwendet.
+  ADR 0097 ergänzt das optionale Boolean-Feld `Nodes[].Balance` (Default false).
+  Je ausgewähltem Knoten erzeugt die gemessene Zu-/Abflussdifferenz nach Umkehr
+  höchstens einen klar berechneten Terminalknoten und Fluss, ohne Quellen-ID
+  oder erfundenen Messzeitpunkt. Keine Rückkopplung zwischen Bilanzknoten;
+  relative Rundungsreste bis 1e-12 bleiben ohne Zusatzfluss. Alle konfigurierten
+  und berechneten Elemente teilen unverändert die 100-/200-Gesamtgrenzen.
+  Modellbauer, Live-Ausgaben und SVG-Vorschauen teilen die familienlokale Logik.
   ADR 0095 ergänzt das optionale Einheitenmodell `UnitMode=manual|automatic|checked`.
   `manual` erhält die bisherige ungeprüfte Anzeigeeinheit. Geprüfte Modi
   verwenden die gemeinsame native/Legacy-Metadatenauflösung strikt und prüfen

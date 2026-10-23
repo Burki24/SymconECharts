@@ -71,7 +71,54 @@ Kachel, IPSView und beide Vorschauen verwenden dieselbe Richtungsprüfung.
 Die Vorschau erhält den Originalwert im SVG-Titel der umgekehrten Verbindung.
 Gespeicherte Knoten, Verbindungen, Quellwerte und Designs werden nicht verändert.
 Einheitenprüfung, Schutzgrenzen und Ablehnung nichtendlicher Werte bleiben
-erhalten. Es gibt weder Umrechnung noch Rest-/Bilanzknoten.
+erhalten. Eine Umrechnung findet nicht statt; berechnete Bilanzflüsse lassen
+sich unabhängig davon je Knoten ausdrücklich aktivieren.
+
+## Optionale Rest-/Bilanzknoten
+
+Aktivieren Sie bei einem Knoten **„Berechneten Bilanzfluss ergänzen“**, wenn
+dessen nicht zugeordnete Differenz sichtbar werden soll. Standardmäßig bleibt
+die Auswahl aus; bestehende Modelle werden nicht automatisch ausgeglichen.
+Die Berechnung verwendet ausschließlich die gemessenen Verbindungen nach
+einer gegebenenfalls aktivierten Kantenumkehr:
+
+- Mehr Zufluss als Abfluss: Ein zusätzlicher Fluss führt zu
+  **„Nicht zugeordnet (berechnet)“**. Beispiel: `1000 W` hinein und `750 W`
+  hinaus ergeben `250 W` nicht zugeordneten Abfluss.
+- Mehr Abfluss als Zufluss: Ein zusätzlicher Fluss kommt von
+  **„Ungeklärter Zufluss (berechnet)“**. Bei `1000 W` hinein und `1200 W`
+  hinaus sind dies `200 W`.
+- Gleiche Summen erzeugen keinen zusätzlichen Knoten oder Nullfluss.
+
+Die Auswahl gilt nur für den jeweiligen Knoten, auch für einen ausdrücklich
+gewählten Anfangs- oder Endknoten. Berechnete Verbindungen fließen nicht erneut
+in die Berechnung benachbarter Knoten ein. Es handelt sich um lokale
+Differenzen, nicht um eine zusätzlich gemessene Gesamtbilanz.
+
+Berechnete Knoten sind im Namen gekennzeichnet. Ein dauerhafter Hinweis
+**„Berechnete Flüsse · keine Messwerte“** bleibt auch bei ausgeschalteten
+Beschriftungen und Tooltips sichtbar. Der Tooltip nennt außerdem den
+zugehörigen Knoten sowie dessen gemessenen Zu- und Abfluss mit Einheit.
+Die Vorschau verwendet dieselben Werte und kennzeichnet die Berechnung
+im SVG-Titel und unter dem Diagramm.
+
+Eine Differenz ist **kein nachgewiesener Verlust und keine Messung**.
+Unvollständige Gerätezuordnung, verschiedene Aktualisierungszeitpunkte und
+Messabweichungen können ebenfalls Differenzen erzeugen. Die aktuellen
+Quellwerte sind keine zeitlich synchronisierte Messaufnahme. Es werden weder
+Variablen angelegt noch Quellwerte, Einheiten oder gespeicherte Designs geändert.
+Reine Gleitkomma-Rundungsreste bis zu einem relativen Anteil von `10⁻¹²` an
+der größeren Knotensumme erzeugen keinen Bilanzfluss. Das ist keine einstellbare
+Messtoleranz; die gemessenen Werte selbst bleiben unverändert.
+
+Jede von null verschiedene Differenz benötigt einen zusätzlichen Knoten und
+eine zusätzliche Verbindung. Diese zählen **innerhalb** der bisherigen Grenzen
+von insgesamt 100 Knoten und 200 Verbindungen, einschließlich konfigurierter
+unsichtbarer Einträge. Planen Sie daher Reserven ein: Bei 100 angelegten Knoten
+ist kein weiterer berechneter Knoten möglich. Überschreitet eine aktuelle
+Differenz das Budget, erscheint eine Diagnose statt eines unvollständigen
+Diagramms. Einheitenprüfung, Kreisfreiheit und alle weiteren Schutzregeln
+bleiben erhalten.
 
 ## Einheitenmodell und optionale Quellenprüfung
 

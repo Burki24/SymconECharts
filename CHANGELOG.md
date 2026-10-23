@@ -1,5 +1,12 @@
 # Unveröffentlicht
 
+- Sankey ergänzt auf Wunsch je Knoten berechnete Rest-/Bilanzflüsse aus der
+  Differenz gemessener Zu- und Abflüsse nach einer möglichen Kantenumkehr.
+  Zusätzliche Knoten, Tooltips und ein dauerhafter Hinweis unterscheiden sie
+  ausdrücklich von Messungen und nachgewiesenen Verlusten. Kachel, IPSView und
+  beide Vorschauen teilen dieselbe Berechnung; bestehende Konfigurationen,
+  Designs und die Gesamtgrenzen von 100 Knoten und 200 Verbindungen bleiben erhalten.
+
 - Sankey kann negative Werte je Verbindung optional als umgekehrte Flüsse
   darstellen. Die Breite entspricht dem Betrag; Originalwert und konfigurierte
   Richtung bleiben im Tooltip erhalten. Tatsächliche Richtungen werden erneut

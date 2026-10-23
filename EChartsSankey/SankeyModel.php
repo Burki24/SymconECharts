@@ -10,6 +10,7 @@ use Throwable;
 /** Bounded acyclic flow configuration; display labels never identify nodes or sources. */
 final class SankeyModel
 {
+    private const BALANCE_RELATIVE_TOLERANCE = 1.0e-12;
     /** Resolve a common raw-value unit without converting or normalizing flows. */
     public static function ResolveUnit(array $sources, string $mode, string $unit, ?callable $readUnit = null, ?callable $translate = null): string
     {
@@ -56,7 +57,7 @@ final class SankeyModel
         return $expected ?? '';
     }
 
-    /** @return array{nodes:list<array{Key:string,Label:string}>,sources:list<array{Source:string,Target:string,VariableID:int,ReverseNegative?:bool}>} */
+    /** @return array{nodes:list<array{Key:string,Label:string,Balance?:bool}>,sources:list<array{Source:string,Target:string,VariableID:int,ReverseNegative?:bool}>} */
     public static function Validate(array $nodes, array $sources, ?callable $translate = null): array
     {
         $t = $translate ?? static fn (string $text): string => $text;
@@ -73,8 +74,12 @@ final class SankeyModel
                 || $label === '' || mb_strlen($label) > 80) {
                 throw new InvalidArgumentException(sprintf($t('Node %d: enter a unique key and a label of 1 to 80 characters.'), $index + 1));
             }
+            if (array_key_exists('Balance', $node) && !is_bool($node['Balance'])) {
+                throw new InvalidArgumentException(sprintf($t('Node %d: balance must be enabled or disabled.'), $index + 1));
+            }
             $positions[$key] = count($normalized);
-            $normalized[] = ['Key' => $key, 'Label' => $label];
+            $normalized[] = ['Key' => $key, 'Label' => $label,
+                ...(($node['Balance'] ?? false) ? ['Balance' => true] : [])];
         }
         $edges = [];
         $pairs = [];
@@ -147,6 +152,47 @@ final class SankeyModel
                 $data[] = ['name' => $key, 'label' => $node['Label'],
                     'value'       => max($incoming[$key] ?? 0.0, $outgoing[$key] ?? 0.0)];
             }
+        }
+        return self::AppendBalances($configuration, $data, $links, $incoming, $outgoing, $directions, $t);
+    }
+
+    /** Derive terminals only from measured totals; never feed generated values into another balance. */
+    private static function AppendBalances(array $configuration, array $data, array $links, array $incoming, array $outgoing, array $directions, callable $t): array
+    {
+        $keys = array_column($configuration['nodes'], 'Key');
+        $generated = 0;
+        foreach ($configuration['nodes'] as $index => $node) {
+            if (!($node['Balance'] ?? false)) {
+                continue;
+            }
+            $key = $node['Key'];
+            $in = $incoming[$key] ?? 0.0;
+            $out = $outgoing[$key] ?? 0.0;
+            $difference = $in - $out;
+            $scale = max($in, $out);
+            if ($scale == 0.0 || abs($difference) / $scale <= self::BALANCE_RELATIVE_TOLERANCE) {
+                continue;
+            }
+            if (count($configuration['nodes']) + $generated + 1 > 100
+                || count($configuration['sources']) + $generated + 1 > 200) {
+                throw new InvalidArgumentException(sprintf($t('Node %d: calculated balances must fit the total limit of 100 nodes and 200 connections.'), $index + 1));
+            }
+            // Configured keys start with a letter, so this namespace cannot collide.
+            $virtual = '@balance:' . $key;
+            $source = $difference > 0 ? $key : $virtual;
+            $target = $difference > 0 ? $virtual : $key;
+            $metadata = ['calculated' => true, 'balanceFor' => $key,
+                'balanceIncoming'     => $in, 'balanceOutgoing' => $out];
+            $data[] = ['name' => $virtual,
+                'label'       => $t($difference > 0 ? 'Unassigned (calculated)' : 'Unexplained inflow (calculated)'),
+                'value'       => abs($difference), ...$metadata];
+            $links[] = ['source' => $source, 'target' => $target, 'value' => abs($difference), ...$metadata];
+            $keys[] = $virtual;
+            $directions[] = ['Source' => $source, 'Target' => $target];
+            ++$generated;
+        }
+        if ($generated > 0) {
+            self::AssertDirections($keys, $directions, $t, true);
         }
         return ['data' => $data, 'links' => $links, 'positiveCount' => count($links)];
     }

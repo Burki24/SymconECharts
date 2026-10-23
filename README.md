@@ -35,6 +35,8 @@ Alle Achsen teilen sich weiterhin höchstens 10000 Archivaggregate.
 Sankey zeigt aktuelle Mengenflüsse zwischen manuell angelegten Knoten.
 Je Verbindung lassen sich negative Werte ausdrücklich als umgekehrte Flüsse
 darstellen; Originalwerte bleiben im Tooltip erhalten und die Struktur bleibt kreisfrei.
+Optional ergänzen ausdrücklich ausgewählte Knoten ihre Zu-/Abflussdifferenz
+als klar gekennzeichneten berechneten Fluss, nicht als Messung oder bewiesenen Verlust.
 Calendar stellt archivierte Tageskennzahlen als farbigen Jahres-, Quartals-
 oder Monatskalender sowie für feste historische Von-/Bis-Zeiträume dar,
 jeweils mit Navigation zu früheren Zeiträumen.

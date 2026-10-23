@@ -36,6 +36,15 @@
                     "edit": {
                         "type": "ValidationTextBox"
                     }
+                },
+                {
+                    "name": "Balance",
+                    "caption": "Add calculated balance flow",
+                    "width": "240px",
+                    "add": false,
+                    "edit": {
+                        "type": "CheckBox"
+                    }
                 }
             ],
             "form": [
@@ -48,12 +57,21 @@
                     "type": "ValidationTextBox",
                     "name": "Label",
                     "caption": "Node label"
+                },
+                {
+                    "type": "CheckBox",
+                    "name": "Balance",
+                    "caption": "Add calculated balance flow"
                 }
             ]
         },
         {
             "type": "Label",
             "caption": "Create nodes first. Keys start with a letter and contain up to 40 letters, digits, underscores or hyphens. Labels may be repeated."
+        },
+        {
+            "type": "Label",
+            "caption": "Balance is optional per node: measured inflow minus measured outflow after reversal. Differences are calculated, not measurements or proven losses. Additional terminals count toward the 100-node and 200-connection limits."
         },
         {
             "type": "List",

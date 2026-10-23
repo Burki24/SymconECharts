@@ -16,6 +16,7 @@ function render(model, mode = 'symcon', headerVisible = true, width = 900) {
     const errorElement = { hidden: true, textContent: '' };
     const emptyElement = { hidden: true, textContent: '' };
     const warningElement = { hidden: true, textContent: '' };
+    const balanceNote = { hidden: true, textContent: '' };
     let option;
     const chart = { setOption: next => { option = next; }, clear: () => {}, resize: () => {}, dispose: () => {} };
     const window = {
@@ -28,11 +29,11 @@ function render(model, mode = 'symcon', headerVisible = true, width = 900) {
         body: { appendChild: () => {} }, createElement: () => ({ style: {}, remove: () => {} }),
         getElementById: id => ({ 'echarts-sankey-root': rootElement, 'echarts-sankey-chart': chartElement,
             'echarts-sankey-error': errorElement, 'echarts-sankey-empty': emptyElement,
-            'echarts-sankey-warning': warningElement })[id]
+            'echarts-sankey-warning': warningElement, 'echarts-sankey-balance-note': balanceNote })[id]
     };
     vm.runInNewContext(designSource, { window });
     vm.runInNewContext(source, { window, document });
-    return { option, chartElement, errorElement, emptyElement };
+    return { option, chartElement, errorElement, emptyElement, balanceNote, handleMessage:window.handleMessage };
 }
 
 const model = { family: 'sankey', theme: 'dark', sankey: {
@@ -162,6 +163,56 @@ const noHover = render({ ...decoratedModel, sankey: { ...decoratedModel.sankey,
 assert.equal(noHover.emphasis.disabled, true);
 assert.equal(noHover.emphasis.focus, 'none');
 assert.equal(noHover.itemStyle.opacity, 0);
+
+const computedMetadata = { calculated: true, balanceFor: 'b', balanceIncoming: 1000, balanceOutgoing: 750 };
+const balancedModel = { ...model, sankey: { ...model.sankey, data: [
+    { name: 'a', label: 'Grid', value: 1000 }, { name: 'b', label: '<House>', value: 1000 },
+    { name: 'c', label: 'Load', value: 750 },
+    { name: '@balance:b', label: 'Unassigned (calculated)', value: 250, ...computedMetadata }
+], links: [{ source: 'a', target: 'b', value: 1000 }, { source: 'b', target: 'c', value: 750 },
+    { source: 'b', target: '@balance:b', value: 250, ...computedMetadata }] } };
+for (const adapter of ['symcon', 'ipsview']) {
+    for (const orientation of ['horizontal', 'vertical']) {
+        for (const width of [350, 900]) {
+            const before = JSON.stringify(balancedModel);
+            const live = render({ ...balancedModel, sankey: { ...balancedModel.sankey,
+                style: { ...balancedModel.sankey.style, orientation } } }, adapter, true, width);
+            const flow = live.option.series[0];
+            assert.equal(live.balanceNote.hidden, false);
+            assert.equal(live.balanceNote.textContent, 'Calculated flows · not measured');
+            assert.equal(live.option.tooltip.confine, true, 'Calculated details must remain inside the embedded chart.');
+            assert.equal(live.option.tooltip.extraCssText, 'max-width:' + (width - 24) + 'px;white-space:normal;overflow-wrap:anywhere;');
+            assert.ok(flow.bottom >= 64, 'Calculated badges must have their own reserved space.');
+            const tooltip = live.option.tooltip.formatter({ dataType: 'edge', data: flow.links[2] });
+            assert.match(tooltip, /250 W/);
+            assert.match(tooltip, /Calculated difference, not a measurement or proven loss/);
+            assert.match(tooltip, /Balance node: &lt;House&gt;/);
+            assert.match(tooltip, /Measured inflow: 1[,.\s]?000 W/);
+            assert.match(tooltip, /Measured outflow: 750 W/);
+            assert.match(live.option.tooltip.formatter({ dataType: 'node', data: flow.data[3] }), /not a measurement/);
+            assert.doesNotMatch(live.option.tooltip.formatter({ dataType: 'edge', data: flow.links[0] }), /not a measurement/);
+            assert.equal(flow.label.formatter({ data: flow.data[3] }), 'Unassigned (calculated)\n250 W');
+            const engine = echarts.init(null, null, { renderer: 'svg', ssr: true, width, height: 500 });
+            engine.setOption(live.option);
+            const data = engine.getModel().getSeriesByIndex(0).getData();
+            const measured = data.getItemGraphicEl(2).shape;
+            const calculated = data.getItemGraphicEl(3).shape;
+            const ratio = orientation === 'horizontal' ? calculated.height / measured.height : calculated.width / measured.width;
+            assert.ok(Math.abs(ratio - 1 / 3) < 1e-8, 'Real residual geometry must keep the 250:750 measured proportion.');
+            engine.dispose();
+            assert.equal(JSON.stringify(balancedModel), before, 'View construction must not mutate the measured model or design.');
+            live.handleMessage({ status: 'error', chart: null, error: 'Balance budget exceeded.' });
+            assert.equal(live.balanceNote.hidden, true);
+            assert.equal(live.chartElement.hidden, true);
+            live.handleMessage({ status: 'ready', chart: model });
+            assert.equal(live.balanceNote.hidden, true, 'Removed balances must not leave stale computed badges.');
+            assert.equal(live.chartElement.hidden, false);
+        }
+    }
+}
+const hiddenBalanced = render({ ...balancedModel, sankey: { ...balancedModel.sankey,
+    style: { ...balancedModel.sankey.style, showLabels: false, showTooltip: false } } });
+assert.equal(hiddenBalanced.balanceNote.hidden, false, 'Computed origin must remain visible even when users hide labels and tooltips.');
 
 // Reproduce one source feeding many unequal consumers, without enabling hideOverlap in saved design.
 const crowdedWeights = [500, 250, 120, 60, 30, 15, ...Array(18).fill(1)];

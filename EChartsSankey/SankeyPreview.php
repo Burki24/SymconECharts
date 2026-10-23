@@ -127,6 +127,8 @@ trait SankeyPreview
         $svg .= '<g transform="translate(70 85)">';
         $edgeLabels = '';
         $unit = $configuration['unit'];
+        $labels = array_column($model['data'], 'label', 'name');
+        $hasCalculated = false;
         foreach ($model['links'] as $index => $link) {
             $source = $link['source'];
             $target = $link['target'];
@@ -160,14 +162,23 @@ trait SankeyPreview
                 . '"><stop stop-color="' . EChartsBarPreview::E($colors[$source]) . '"/><stop offset="1" stop-color="'
                 . EChartsBarPreview::E($colors[$target]) . '"/></linearGradient></defs>';
             $svg .= '<path data-source="' . EChartsBarPreview::E($source) . '" data-target="' . EChartsBarPreview::E($target)
-                . '" d="' . $path . '" fill="' . EChartsBarPreview::E($color) . '" fill-opacity="' . EChartsBarPreview::N($opacity) . '">';
+                . '"' . (($link['calculated'] ?? false) ? ' data-calculated="true"' : '')
+                . ' d="' . $path . '" fill="' . EChartsBarPreview::E($color) . '" fill-opacity="' . EChartsBarPreview::N($opacity) . '">';
             if ($link['reversed'] ?? false) {
-                $labels = array_column($configuration['nodes'], 'Label', 'Key');
                 $svg .= '<title>' . EChartsBarPreview::E($labels[$source] . ' → ' . $labels[$target] . ': '
                     . $this->SankeyPreviewFormatValue($link['value'], $unit) . "\n"
                     . $this->Translate('Original value') . ': ' . $this->SankeyPreviewFormatValue($link['originalValue'], $unit) . "\n"
                     . $this->Translate('Configured connection') . ': ' . $labels[$link['configuredSource']] . ' → '
                     . $labels[$link['configuredTarget']]) . '</title>';
+            }
+            if ($link['calculated'] ?? false) {
+                $hasCalculated = true;
+                $svg .= '<title>' . EChartsBarPreview::E($labels[$source] . ' → ' . $labels[$target] . ': '
+                    . $this->SankeyPreviewFormatValue($link['value'], $unit) . "\n"
+                    . $this->Translate('Calculated difference, not a measurement or proven loss.') . "\n"
+                    . $this->Translate('Balance node') . ': ' . $labels[$link['balanceFor']] . "\n"
+                    . $this->Translate('Measured inflow') . ': ' . $this->SankeyPreviewFormatValue($link['balanceIncoming'], $unit) . "\n"
+                    . $this->Translate('Measured outflow') . ': ' . $this->SankeyPreviewFormatValue($link['balanceOutgoing'], $unit)) . '</title>';
             }
             $svg .= '</path>';
             if ($this->BarPreviewValue($values, 'ShowEdgeValues', 'boolean', $ipsView)) {
@@ -268,7 +279,12 @@ trait SankeyPreview
                 $svg .= '</text>';
             }
         }
-        return $svg . '</g></svg>';
+        $svg .= '</g>';
+        if ($hasCalculated) {
+            $svg .= '<text x="360" y="345" text-anchor="middle" font-size="11" fill="currentColor">'
+                . EChartsBarPreview::E($this->Translate('Calculated flows · not measured')) . '</text>';
+        }
+        return $svg . '</svg>';
     }
 
     private function SankeyPreviewStatus(string $svg, string $message): string

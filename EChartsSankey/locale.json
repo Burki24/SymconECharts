@@ -1,6 +1,17 @@
 {
     "translations": {
         "de": {
+            "Add calculated balance flow": "Berechneten Bilanzfluss ergänzen",
+            "Balance is optional per node: measured inflow minus measured outflow after reversal. Differences are calculated, not measurements or proven losses. Additional terminals count toward the 100-node and 200-connection limits.": "Bilanzierung ist je Knoten optional: gemessener Zufluss minus gemessener Abfluss nach einer Umkehr. Differenzen sind berechnet, keine Messwerte oder nachgewiesenen Verluste. Zusätzliche Endknoten zählen zu den Grenzen von 100 Knoten und 200 Verbindungen.",
+            "Node %d: balance must be enabled or disabled.": "Knoten %d: Die Bilanzierung muss ein- oder ausgeschaltet sein.",
+            "Node %d: calculated balances must fit the total limit of 100 nodes and 200 connections.": "Knoten %d: Berechnete Bilanzen müssen innerhalb der Gesamtgrenze von 100 Knoten und 200 Verbindungen liegen.",
+            "Unassigned (calculated)": "Nicht zugeordnet (berechnet)",
+            "Unexplained inflow (calculated)": "Ungeklärter Zufluss (berechnet)",
+            "Calculated flows · not measured": "Berechnete Flüsse · keine Messwerte",
+            "Calculated difference, not a measurement or proven loss.": "Berechnete Differenz, kein Messwert oder nachgewiesener Verlust.",
+            "Balance node": "Bilanzknoten",
+            "Measured inflow": "Gemessener Zufluss",
+            "Measured outflow": "Gemessener Abfluss",
             "Reverse negative flow": "Negative Flüsse umkehren",
             "Negative values are rejected unless reversal is enabled for that connection. Reversed flows use the absolute width and retain the signed original value in the tooltip. Effective directions must remain acyclic and unique, including zero flows.": "Negative Werte werden nur bei ausdrücklich aktivierter Umkehr dieser Verbindung zugelassen. Die Breite entspricht dem Betrag; der Tooltip behält den Originalwert mit Vorzeichen. Tatsächliche Richtungen müssen einschließlich Nullflüssen kreisfrei und eindeutig bleiben.",
             "Connection %d: negative-flow reversal must be enabled or disabled.": "Verbindung %d: Die Umkehr negativer Flüsse muss ein- oder ausgeschaltet sein.",

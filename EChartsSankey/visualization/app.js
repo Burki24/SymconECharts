@@ -8,6 +8,7 @@
     var emptyElement = document.getElementById('echarts-sankey-empty');
     var errorElement = document.getElementById('echarts-sankey-error');
     var warningElement = document.getElementById('echarts-sankey-warning');
+    var balanceNote = document.getElementById('echarts-sankey-balance-note');
     var chart = null;
     var currentState = bootstrap.state || null;
     var currentTheme = null;
@@ -63,12 +64,14 @@
         var style = flow.style || {};
         var nodes = Array.isArray(flow.data) ? flow.data : [];
         var links = Array.isArray(flow.links) ? flow.links : [];
+        var hasCalculated = links.some(function (link) { return link.calculated === true; });
         var compact = (chartElement.clientWidth || 1) < 430;
         var titleSize = design.fontSizePercent(style.titleFontSizePercent, 18);
         var titleLayout = design.chartTitleLayout(chartBootstrap, flow.title, titleSize);
         var vertical = style.orientation === 'vertical';
         var top = titleLayout.contentTop + 18;
         var bottom = vertical ? 45 : 24;
+        if (hasCalculated) { bottom += 40; }
         var margin = compact ? 30 : 90;
         var crossSize = vertical ? (chartElement.clientWidth || 1) - 2 * margin
             : (chartElement.clientHeight || 1) - top - bottom;
@@ -86,6 +89,13 @@
             return Number(value).toLocaleString(undefined, { maximumFractionDigits: 3 })
                 + (flow.unit ? ' ' + String(flow.unit) : '');
         }
+        function calculationDetails(data) {
+            if (data.calculated !== true) { return ''; }
+            return '<br>' + escapeHTML(translate('Calculated difference, not a measurement or proven loss.'))
+                + '<br>' + escapeHTML(translate('Balance node')) + ': ' + escapeHTML(labels.get(data.balanceFor) || '')
+                + '<br>' + escapeHTML(translate('Measured inflow')) + ': ' + escapeHTML(formatValue(data.balanceIncoming))
+                + '<br>' + escapeHTML(translate('Measured outflow')) + ': ' + escapeHTML(formatValue(data.balanceOutgoing));
+        }
         return {
             backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
                 ? 'transparent' : colors.background,
@@ -96,6 +106,9 @@
                 textStyle: { color: style.titleColor || colors.text, fontSize: titleSize } },
             tooltip: {
                 show: style.showTooltip !== false, trigger: 'item',
+                confine: hasCalculated,
+                extraCssText: hasCalculated ? 'max-width:' + Math.max(1, (chartElement.clientWidth || 1) - 24)
+                    + 'px;white-space:normal;overflow-wrap:anywhere;' : '',
                 formatter: function (parameter) {
                     var data = parameter.data || {};
                     if (parameter.dataType === 'edge') {
@@ -109,9 +122,9 @@
                                 + escapeHTML(labels.get(data.configuredSource) || '') + ' → '
                                 + escapeHTML(labels.get(data.configuredTarget) || '');
                         }
-                        return text;
+                        return text + calculationDetails(data);
                     }
-                    return escapeHTML(data.displayName || '') + '<br>' + escapeHTML(formatValue(data.value));
+                    return escapeHTML(data.displayName || '') + '<br>' + escapeHTML(formatValue(data.value)) + calculationDetails(data);
                 }
             },
             series: [{
@@ -126,13 +139,17 @@
                     var nodeColors = style.nodeColors || {};
                     var color = Object.prototype.hasOwnProperty.call(nodeColors, node.name) ? nodeColors[node.name] : style.nodeColor;
                     return { name: node.name, displayName: node.label, value: node.value,
+                        calculated: node.calculated === true, balanceFor: node.balanceFor,
+                        balanceIncoming: node.balanceIncoming, balanceOutgoing: node.balanceOutgoing,
                         itemStyle: color ? { color: color } : {},
                         label: { position: labelPosition(node.name) } };
                 }),
                 links: links.map(function (link) {
                     return { source: link.source, target: link.target, value: link.value, timestamp: link.timestamp,
                         originalValue: link.originalValue, configuredSource: link.configuredSource,
-                        configuredTarget: link.configuredTarget, reversed: link.reversed === true };
+                        configuredTarget: link.configuredTarget, reversed: link.reversed === true,
+                        calculated: link.calculated === true, balanceFor: link.balanceFor,
+                        balanceIncoming: link.balanceIncoming, balanceOutgoing: link.balanceOutgoing };
                 }),
                 label: { show: style.showLabels !== false, color: style.labelColor || colors.text,
                     fontSize: labelSize,
@@ -186,6 +203,7 @@
         chartElement.hidden = true;
         emptyElement.hidden = true;
         warningElement.hidden = true;
+        balanceNote.hidden = true;
         errorElement.textContent = translate(message || 'The Sankey values could not be loaded.');
         errorElement.hidden = false;
     }
@@ -203,6 +221,7 @@
             chartElement.hidden = true;
             errorElement.hidden = true;
             warningElement.hidden = true;
+            balanceNote.hidden = true;
             emptyElement.textContent = translate('No positive flows');
             emptyElement.hidden = false;
             return;
@@ -216,6 +235,8 @@
         errorElement.hidden = true;
         emptyElement.hidden = true;
         warningElement.hidden = true;
+        balanceNote.textContent = translate('Calculated flows · not measured');
+        balanceNote.hidden = !sankey.links.some(function (link) { return link.calculated === true; });
         rootElement.style.backgroundColor = bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
             ? 'transparent' : colorsFor(normalizeTheme(model.theme || 'auto')).background;
         var theme = normalizeTheme(model.theme || 'auto');
