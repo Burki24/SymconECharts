@@ -105,6 +105,14 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Der allgemeine Graph erlaubt gemäß ADR 0066 300 Knoten und 1000 ungerichtete
   Kanten. Gemeinsame flüchtige Ansichtsverwaltung und Beschriftungsgrundlagen
   liegen unter `libs`; Z2M-Export, LQI, Identitäten und Budgets bleiben getrennt.
+  ADR 0102 ergänzt optional `DirectedEdges=false`. Nur im gerichteten Modell
+  dürfen Gegenrichtungen gleichzeitig bestehen; gleiche geordnete Paare bleiben
+  ungültig. `GraphModel` prüft beide Modelle und kennzeichnet Gegenrichtungen
+  gemeinsam für Renderer und Vorschauen. Pfeile folgen Von nach Nach; gerichtete
+  Kreise sind erlaubt. 300/1000, 64 KiB je Liste, 1 MiB Ausgabe und Designs bleiben
+  unverändert. Die native Graph-Runtime und geteilte Ansichtsverwaltung bleiben
+  erhalten; nur gerichtetes Kreislayout projiziert Kreispositionen explizit,
+  damit native einfache Kurven Gegenrichtungen auch bei zwei Knoten trennen.
   ADR 0094 ergänzt für GraphZ2M `LinkSelection=strongest|weakest|range`.
   Default `strongest`, bestehender Mindest-LQI und alle Schutzbudgets bleiben
   erhalten. Nur `range` wertet den zusätzlichen Höchst-LQI einschließlich aus;

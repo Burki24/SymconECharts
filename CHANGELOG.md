@@ -2,6 +2,11 @@
 
 ## Neu
 
+- Graph bietet optional gerichtete Verbindungen von Quelle zu Ziel, mit
+  Pfeilen, Richtungstooltip und getrennten Kurven für Gegenrichtungen in
+  Kachel, IPSView und beiden Vorschauen. Ungerichtet bleibt der Standard;
+  bestehende Konfigurationen, Designs und Schutzbudgets bleiben erhalten.
+
 - Radar kann optional unvollständige Vergleichsgruppen anzeigen. Fehlende
   Zuordnungen werden mit Fragezeichen, Legendenzusatz, Tooltip und dauerhaftem
   Hinweis gekennzeichnet. Vorhandene Punkte und direkt benachbarte Werte bleiben

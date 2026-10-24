@@ -6,7 +6,7 @@ namespace SymconECharts;
 
 use InvalidArgumentException;
 
-/** Projects explicitly chosen Symcon objects and undirected connections. */
+/** Projects explicitly chosen Symcon objects and connections, optionally directed. */
 final class GraphModel
 {
     public const MAXIMUM_NODES = 300;
@@ -15,7 +15,7 @@ final class GraphModel
     public const PREVIEW_EDGES = 80;
 
     /** @param list<array<string,mixed>> $nodeRows @param list<array<string,mixed>> $edgeRows */
-    public static function ValidateRows(array $nodeRows, array $edgeRows): void
+    public static function ValidateRows(array $nodeRows, array $edgeRows, bool $directed = false): void
     {
         if (count($nodeRows) < 2 || count($nodeRows) > self::MAXIMUM_NODES
             || count($edgeRows) < 1 || count($edgeRows) > self::MAXIMUM_EDGES) {
@@ -45,7 +45,7 @@ final class GraphModel
                 || $source === $target) {
                 throw new InvalidArgumentException('Every connection needs two different configured nodes.');
             }
-            $pair = min($source, $target) . ':' . max($source, $target);
+            $pair = $directed ? $source . ':' . $target : min($source, $target) . ':' . max($source, $target);
             if (isset($pairs[$pair])) {
                 throw new InvalidArgumentException('Duplicate Graph connections are not allowed.');
             }
@@ -58,11 +58,11 @@ final class GraphModel
      * @param list<array<string,mixed>> $edgeRows
      * @param callable(int):array<string,mixed> $getObject
      * @param callable(int):string $getFormattedValue
-     * @return array{nodes:list<array<string,mixed>>,links:list<array<string,string>>}
+     * @return array{directed:bool,nodes:list<array<string,mixed>>,links:list<array<string,mixed>>}
      */
-    public static function Build(array $nodeRows, array $edgeRows, callable $getObject, callable $getFormattedValue): array
+    public static function Build(array $nodeRows, array $edgeRows, callable $getObject, callable $getFormattedValue, bool $directed = false): array
     {
-        self::ValidateRows($nodeRows, $edgeRows);
+        self::ValidateRows($nodeRows, $edgeRows, $directed);
         $nodes = [];
         foreach ($nodeRows as $row) {
             $id = $row['ObjectID'];
@@ -82,11 +82,21 @@ final class GraphModel
             ];
         }
         $links = [];
+        $pairs = [];
+        if ($directed) {
+            foreach ($edgeRows as $row) {
+                $pairs[$row['SourceObjectID'] . ':' . $row['TargetObjectID']] = true;
+            }
+        }
         foreach ($edgeRows as $row) {
             $source = $row['SourceObjectID'];
             $target = $row['TargetObjectID'];
-            $links[] = ['source' => 'object-' . $source, 'target' => 'object-' . $target];
+            $link = ['source' => 'object-' . $source, 'target' => 'object-' . $target];
+            if ($directed) {
+                $link['reciprocal'] = isset($pairs[$target . ':' . $source]);
+            }
+            $links[] = $link;
         }
-        return ['nodes' => $nodes, 'links' => $links];
+        return ['directed' => $directed, 'nodes' => $nodes, 'links' => $links];
     }
 }

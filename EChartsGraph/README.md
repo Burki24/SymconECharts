@@ -7,8 +7,16 @@ Ein Archiv ist nicht erforderlich.
 
 Wählen Sie 2 bis 300 Kategorien, Instanzen oder Variablen als Knoten aus und
 verbinden Sie diese mit 1 bis 1.000 Kanten. Beide Enden einer Kante müssen in
-der Knotenliste stehen. Selbstverbindungen und doppelte Verbindungen – auch
-in umgekehrter Reihenfolge – sind ungültig. Die Kanten sind ungerichtet;
+der Knotenliste stehen. Standardmäßig sind die Kanten ungerichtet;
+Selbstverbindungen und doppelte Verbindungen – auch in umgekehrter Reihenfolge –
+sind ungültig. Mit **Gerichtete Verbindungen** folgen Pfeile ausdrücklich
+**Von → Nach**. Dann dürfen A → B und B → A gleichzeitig bestehen;
+dieselbe Richtung darf weiterhin nur einmal vorkommen. Gegenrichtungen werden
+mit getrennten Kurven dargestellt. Auch gerichtete Kreise sind zulässig;
+die Verbindungen stellen Beziehungen ohne automatische Flussbilanz dar.
+Die Richtung erscheint zusätzlich im Verbindungstooltip und in beiden Vorschauen.
+Die Einstellung gilt gemeinsam für Kachel und IPSView; vorhandene Designs,
+Knoten und Kanten bleiben beim Aktivieren unverändert.
 Symcon-Objektbeziehungen werden nicht automatisch zu Verbindungen. Der
 optionale Anzeigename eines Knotens überschreibt dessen aktuellen
 Symcon-Namen. Die Objekt-ID bleibt der technische Schlüssel, sodass

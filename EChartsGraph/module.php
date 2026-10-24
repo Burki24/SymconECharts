@@ -96,6 +96,7 @@ class EChartsGraph extends IPSModuleStrict
             $this->RegisterPropertyString('Title', '');
             $this->RegisterPropertyString('Nodes', '[]');
             $this->RegisterPropertyString('Edges', '[]');
+            $this->RegisterPropertyBoolean('DirectedEdges', false);
             foreach (['', 'IPSView'] as $prefix) {
                 foreach (self::DESIGN_DEFAULTS as $name => $default) {
                     match (gettype($default)) {
@@ -179,7 +180,7 @@ class EChartsGraph extends IPSModuleStrict
                 ['caption' => 'Node and line colors', 'start' => 'NodeColor']
             ]);
             $fields = [
-                'Title', 'Nodes', 'Edges', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
+                'Title', 'Nodes', 'Edges', 'DirectedEdges', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
                 'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent',
                 ...array_keys(self::DESIGN_DEFAULTS),
                 ...array_map(static fn (string $name): string => 'IPSView' . $name, array_keys(self::DESIGN_DEFAULTS))
@@ -416,11 +417,12 @@ class EChartsGraph extends IPSModuleStrict
             ['source' => 'sample-2', 'target' => 'sample-4']
         ];
         $sample = true;
+        $directed = (bool) ($values['DirectedEdges'] ?? $this->ReadPropertyBoolean('DirectedEdges'));
         $previewSummary = '';
         try {
             $nodeRows = $this->DecodeRows($values['Nodes'] ?? $this->ReadPropertyString('Nodes'));
             $edgeRows = $this->DecodeRows($values['Edges'] ?? $this->ReadPropertyString('Edges'));
-            $model = $this->ReadGraph($nodeRows, $edgeRows);
+            $model = $this->ReadGraph($nodeRows, $edgeRows, $directed);
             $nodes = array_slice($model['nodes'], 0, GraphModel::PREVIEW_NODES);
             $known = array_fill_keys(array_column($nodes, 'id'), true);
             $links = array_slice(
@@ -472,9 +474,34 @@ class EChartsGraph extends IPSModuleStrict
                     80 + intdiv($index, $columns) * 210 / max(1, $rows - 1)];
             }
         }
+        $markerID = $ipsView ? 'ecgr-arrow-ipsview' : 'ecgr-arrow-tile';
+        if ($directed) {
+            $svg .= '<defs><marker id="' . $markerID . '" viewBox="0 0 6 6" refX="6" refY="3"'
+                . ' markerWidth="6" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto">'
+                . '<path d="M 0 0 L 6 3 L 0 6 z" fill="' . EChartsBarPreview::E($edgeColor) . '"/>'
+                . '</marker></defs>';
+        }
         foreach ($links as $link) {
             [$x1, $y1] = $positions[$link['source']];
             [$x2, $y2] = $positions[$link['target']];
+            if ($directed) {
+                // Match native reciprocal curvature. Trim the target along its tangent
+                // so the arrow remains outside the node instead of hidden underneath it.
+                $curve = ($link['reciprocal'] ?? false) ? 0.16 : 0;
+                $cx = ($x1 + $x2) / 2 - ($y1 - $y2) * $curve;
+                $cy = ($y1 + $y2) / 2 - ($x2 - $x1) * $curve;
+                $length = max(1, hypot($x2 - $cx, $y2 - $cy));
+                $endX = $x2 - ($x2 - $cx) / $length * $nodeSize / 2;
+                $endY = $y2 - ($y2 - $cy) / $length * $nodeSize / 2;
+                $svg .= '<path data-edge-source="' . EChartsBarPreview::E($link['source'])
+                    . '" data-edge-target="' . EChartsBarPreview::E($link['target'])
+                    . '" d="M ' . EChartsBarPreview::N($x1) . ' ' . EChartsBarPreview::N($y1)
+                    . ' Q ' . EChartsBarPreview::N($cx) . ' ' . EChartsBarPreview::N($cy)
+                    . ' ' . EChartsBarPreview::N($endX) . ' ' . EChartsBarPreview::N($endY)
+                    . '" fill="none" stroke="' . EChartsBarPreview::E($edgeColor)
+                    . '" stroke-width="2" marker-end="url(#' . $markerID . ')"/>';
+                continue;
+            }
             $svg .= '<line x1="' . EChartsBarPreview::N($x1) . '" y1="' . EChartsBarPreview::N($y1)
                 . '" x2="' . EChartsBarPreview::N($x2) . '" y2="' . EChartsBarPreview::N($y2)
                 . '" stroke="' . EChartsBarPreview::E($edgeColor) . '" stroke-width="2"/>';
@@ -517,13 +544,14 @@ class EChartsGraph extends IPSModuleStrict
     }
 
     /** @param list<array<string,mixed>> $nodes @param list<array<string,mixed>> $edges @return array<string,mixed> */
-    private function ReadGraph(array $nodes, array $edges): array
+    private function ReadGraph(array $nodes, array $edges, bool $directed): array
     {
         return GraphModel::Build(
             $nodes,
             $edges,
             static fn (int $id): array => IPS_GetObject($id),
-            static fn (int $id): string => (string) GetValueFormatted($id)
+            static fn (int $id): string => (string) GetValueFormatted($id),
+            $directed
         );
     }
 
@@ -542,7 +570,8 @@ class EChartsGraph extends IPSModuleStrict
         try {
             $graph = $this->ReadGraph(
                 $this->DecodeRows($this->ReadPropertyString('Nodes')),
-                $this->DecodeRows($this->ReadPropertyString('Edges'))
+                $this->DecodeRows($this->ReadPropertyString('Edges')),
+                $this->ReadPropertyBoolean('DirectedEdges')
             );
         } catch (Throwable $exception) {
             $this->WriteAttributeString('LastError', $exception->getMessage());
@@ -578,6 +607,7 @@ class EChartsGraph extends IPSModuleStrict
                 'The Graph design is invalid.'                                    => $this->Translate('The Graph design is invalid.'),
                 'Connect an active EChartsGateway.'                               => $this->Translate('Connect an active EChartsGateway.'),
                 'The Graph could not be loaded.'                                  => $this->Translate('The Graph could not be loaded.'),
+                'Directed connections'                                            => $this->Translate('Directed connections'),
                 'Data could not be refreshed. Showing the last available values.' => $this->Translate(
                     'Data could not be refreshed. Showing the last available values.'
                 )
@@ -629,7 +659,8 @@ class EChartsGraph extends IPSModuleStrict
         try {
             GraphModel::ValidateRows(
                 $this->DecodeRows($this->ReadPropertyString('Nodes')),
-                $this->DecodeRows($this->ReadPropertyString('Edges'))
+                $this->DecodeRows($this->ReadPropertyString('Edges')),
+                $this->ReadPropertyBoolean('DirectedEdges')
             );
         } catch (Throwable) {
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => 'Configure at least two valid Graph nodes and one connection.'];

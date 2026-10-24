@@ -940,6 +940,41 @@ Legendenwahl und Zeitzoom blieben nach Refresh und Umsortierung erhalten.
 Die Live-Abnahme dieser Erweiterung nach Modulupdate steht noch aus;
 Symcon-Konfigurationen und Archive wurden nicht verändert.
 
+## Gerichtete manuelle Graph-Beziehungen
+
+`php tests/graph_model.php` begann RED an der bisherigen Ablehnung einer
+Gegenrichtung. Der Test prüft beide Dublettenverträge, IDs, Metadaten für
+Gegenrichtungen und unveränderte N/N+1-Grenzen. `php tests/gateway_gauges.php
+--graph-directed` prüft Default false, wiederholtes Apply ohne Umschreiben,
+Richtungswechsel, zulässige Kreise, unzulässige Endpunkte/Selbstkanten/Dubletten,
+unabhängige Designs und beide SVG-Entwürfe einschließlich ungespeichertem false.
+`--graph-large` ergänzt 300 Knoten/1000 gerichtete Kanten mit Gegenrichtungen,
+beide HTML-Ausgaben und das Formular unter 1 MiB sowie beide 64-KiB-Listengrenzen.
+
+`node tests/graph_layout.js` begann RED an fehlenden Pfeilen. Die tatsächlich
+ausgelieferte 6.1.0-Runtime prüft beide Layouts und Adapter mit zwei/drei Knoten:
+erhaltene Gegenrichtungen, unterschiedliche native Kontrollpunkte und wirklich
+angelegte Zielpfeile, Zoomerhalt und erneutes Entfernen von Pfeilen. Zusätzlich
+sichert ein gezielter RED/Green-Fall die ausreichend große native Roam-Fläche
+bei zwei Kreispositionen ab; ein horizontaler Durchmesser hatte diese zunächst
+auf eine dünne Linie reduziert. Keine Änderung der Runtime-Datei.
+
+Die lokale Browserfixierung `node tests/graph_browser.mjs` verwendet bei
+`/?directed=1` den PHP-GraphModel mit 300 Knoten/1000 Kanten, bei zusätzlichem
+`&small=1` zwei Knoten mit Gegenrichtungen. `&layout=circular` wählt den Kreis.
+Am 24.10.2026 wurden Richtungspfeile und getrennte Kurven im Browser in beiden
+verschachtelten Ausgabe-Frames und Layouts geprüft. Echte Mausradaktionen
+ergaben je Frame 1,00 → 0,91 → 1,00 bei Wheel-Zähler 0 → 1 → 2. Zusätzlich
+blieb 1,10 nach Werteaktualisierung erhalten; sichtbare Originalwerte änderten
+sich von 25 auf 26 %. Maximale Kreis- und Kräftegraphen enthielten in beiden
+Frames 300/1000; die automatische Kräfte-Gesamtansicht blieb erhalten.
+Dies sind lokale HTTP-/Frame-Nachweise, keine neue Abnahme im echten
+Symcon-/IPSView-Client. Diese bleibt nach Modulupdate offen.
+
+`php tests/quality.php --fix` besteht einschließlich Modell-, Modul-,
+Vertrags-, Syntax-, Style- und sämtlicher Layoutprüfungen. Bestehende
+Installationskonfigurationen und Designs wurden nicht verändert.
+
 ## Größere manuelle Graphen
 
 `php tests/graph_model.php` prüft 300 Knoten/1000 Kanten, N+1, gleiche Namen

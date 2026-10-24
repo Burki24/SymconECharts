@@ -52,6 +52,11 @@
             ]
         },
         {
+            "type": "CheckBox",
+            "name": "DirectedEdges",
+            "caption": "Directed connections"
+        },
+        {
             "type": "List",
             "name": "Edges",
             "caption": "Connections",
@@ -94,7 +99,7 @@
         },
         {
             "type": "Label",
-            "caption": "Select 2–300 categories, instances or variables and connect them with 1–1000 undirected edges. Both endpoints must be selected nodes. Duplicate and self connections are invalid."
+            "caption": "Select 2–300 categories, instances or variables and connect them with 1–1000 edges. Both endpoints must be selected nodes. Self connections are invalid. Directed connections follow From to To and allow the reverse direction once; otherwise reversed pairs are duplicates."
         },
         {
             "type": "ExpansionPanel",

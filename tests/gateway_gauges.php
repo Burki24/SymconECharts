@@ -1058,6 +1058,12 @@ if (array_slice($argv, 1) === ['--time-series-many']) {
     exit(0);
 }
 
+if (array_slice($argv, 1) === ['--graph-directed']) {
+    require __DIR__ . '/graph_directed.php';
+    echo "Directed Graph integration verified.\n";
+    exit(0);
+}
+
 if (array_slice($argv, 1) === ['--graph-large']) {
     require __DIR__ . '/graph_large.php';
     echo "Large Graph integration verified.\n";

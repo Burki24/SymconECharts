@@ -68,6 +68,6 @@ echtes Modul/Gateway, tatsächlich ausgeführte Checkbox-Callbacks und native
 ECharts-Engine prüfen Nullplätze, Originalmetadaten, Nachbarschaft und Umkehr,
 einzelne Werte, strengen Default, Fehler statt Best-Effort, beide Designs/SVGs,
 Auswahl und alle bestehenden Byteguards. Browser- und Qualitätssuitennachweise
-stehen im Testdokument. Neue MCP-/Kachel- und tatsächliche IPSView-Client-Abnahme
-nach Modulupdate bleiben offen; bestehende Live-Konfigurationen werden nicht
-verändert.
+stehen im Testdokument. Die funktionale MCP-Prüfung ist bestanden; der Eigentümer
+bestätigt Teilgruppen in Kachel und tatsächlichem IPSView. Bestehende
+Live-Konfigurationen wurden nicht verändert.

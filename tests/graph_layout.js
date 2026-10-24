@@ -116,6 +116,26 @@ assert.match(circular.option.series[0].label.formatter({ data: circular.option.s
 assert.ok(circular.option.series[0].label.fontSize > force.option.series[0].label.fontSize);
 assert.ok(circular.option.series[0].symbolSize < force.option.series[0].symbolSize);
 
+for (const layout of ['force', 'circular']) {
+    for (const mode of ['symcon', 'ipsview']) {
+        const directed = render({ ...baseStyle, graphLayout: layout }, mode, 800, {
+            ...graph, directed: true, links: [
+                { ...graph.links[0], reciprocal: true },
+                { source: 'object-102', target: 'object-101', reciprocal: true },
+                { ...graph.links[1], reciprocal: false }
+            ]
+        });
+        const edges = directed.option.series[0].links;
+        assert.deepEqual(Array.from(directed.option.series[0].edgeSymbol), ['none', 'arrow']);
+        assert.ok(edges[0].lineStyle.curveness > 0 && edges[0].lineStyle.curveness === edges[1].lineStyle.curveness,
+            'Opposite directions must bend to opposite physical sides.');
+        assert.equal(edges[2].lineStyle.curveness, 0);
+        assert.equal(directed.option.tooltip.formatter({ dataType: 'edge', data: edges[1] }), 'Sensor → Room');
+        assert.match(directed.option.aria.description, /Directed connections/);
+    }
+}
+assert.deepEqual(Array.from(force.option.series[0].edgeSymbol), ['none', 'none'], 'Old models remain undirected.');
+
 const tooltip = force.option.tooltip.formatter({ data: { name: '<script>', displayValue: '<b>' } });
 assert.equal(tooltip, '&lt;script&gt;<br>&lt;b&gt;');
 assert.equal(force.option.tooltip.confine, true);
@@ -240,6 +260,48 @@ function canvas() {
     return element;
 }
 bundled.setPlatformAPI({ createCanvas: canvas });
+// Check the shipped engine's geometry and actual arrow symbols, including
+// diametric endpoints where native circular curvature would collapse.
+for (const graphLayout of ['force', 'circular']) {
+    for (const mode of ['symcon', 'ipsview']) {
+        for (const count of [2, 3]) {
+            const native = bundled.init(canvas(), null, { renderer: 'canvas', ssr: true, width: 800, height: 500 });
+            const instance = render({ ...baseStyle, graphLayout, animationEnabled: false }, mode, 800, {
+                ...graph, directed: true, nodes: graph.nodes.slice(0, count), links: [
+                    { source: 'object-101', target: 'object-102', reciprocal: true },
+                    { source: 'object-102', target: 'object-101', reciprocal: true }
+                ]
+            }, 500, native);
+            let series = native.getModel().getSeriesByIndex(0);
+            const roamRect = series.coordinateSystem.getViewRect();
+            assert.ok(Math.min(roamRect.width, roamRect.height) > 200,
+                'The usable native roam area must not collapse to a thin line for two nodes.');
+            const edges = series.getEdgeData();
+            assert.equal(edges.count(), 2, 'Native engine must retain both directions.');
+            const curves = [0, 1].map(i => edges.getItemLayout(i));
+            assert.ok(curves.flat(2).every(Number.isFinite));
+            assert.notDeepEqual(Array.from(curves[0][2]), Array.from(curves[1][2]),
+                'Reciprocal native control points must be physically distinct.');
+            for (const index of [0, 1]) {
+                assert.equal(edges.getItemVisual(index, 'toSymbol'), 'arrow');
+                const el = edges.getItemGraphicEl(index);
+                assert.ok(el.childOfName('toSymbol'), 'The shipped runtime must actually paint each target arrow.');
+            }
+            native.dispatchAction({ type: 'graphRoam', seriesIndex: 0, zoom: 1.3, originX: 400, originY: 250 });
+            const zoom = series.get('zoom');
+            instance.refresh({ ...instance.model, graph: { ...instance.model.graph,
+                nodes: instance.model.graph.nodes.map(n => ({ ...n, displayValue: '24 °C' })) } });
+            series = native.getModel().getSeriesByIndex(0);
+            assert.equal(series.get('zoom'), zoom);
+            assert.equal(series.getEdgeData().count(), 2);
+            // Explicit arrow removal must survive a compatible setOption merge.
+            instance.refresh({ ...instance.model, graph: { ...instance.model.graph, directed: false,
+                links: [graph.links[0]] } });
+            assert.equal(native.getModel().getSeriesByIndex(0).getEdgeData().getItemVisual(0, 'toSymbol'), 'none');
+            native.dispose();
+        }
+    }
+}
 const bundledChart = bundled.init(canvas(), null, { renderer: 'canvas', ssr: true, width: 800, height: 500 });
 const sharedWindow = {};
 vm.runInNewContext(graphSupportSource, { window: sharedWindow });

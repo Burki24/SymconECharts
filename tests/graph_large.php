@@ -129,6 +129,30 @@ declare(strict_types=1);
             findGaugeFormElement($zigbeeForm['elements'], 'MaximumLinks')['maximum'] === 2000,
             'Z2M must retain its separate 2000-link protection.'
         );
+        $module->SetTestProperty('Nodes', json_encode($nodes, JSON_THROW_ON_ERROR));
+        $module->SetTestProperty('Edges', json_encode([...array_slice($edges, 0, 999),
+            ['SourceObjectID' => 94001, 'TargetObjectID' => 94000]
+        ], JSON_THROW_ON_ERROR));
+        $module->SetTestProperty('DirectedEdges', true);
+        $directedSaved = $module->GetTestProperties();
+        $module->ApplyChanges();
+        $module->ApplyChanges();
+        $directed = json_decode($module->GetGraphData(), true, 512, JSON_THROW_ON_ERROR)['graph'];
+        assertGatewayGauge(
+            $module->GetTestStatus() === IS_ACTIVE && $directed['directed']
+            && count($directed['nodes']) === 300 && count($directed['links']) === 1000
+            && $directed['links'][999]['reciprocal'] && $module->GetTestProperties() === $directedSaved,
+            'Maximum directed Graphs must retain budgets and configuration without migration.'
+        );
+        foreach ([$module->GetVisualizationTile(), $module->GetIPSViewHTML(), $module->GetConfigurationForm()] as $output) {
+            assertGatewayGauge(
+                strlen($output) < SYMCON_OUTPUT_BUFFER_LIMIT,
+                'Directed metadata and arrow previews must remain within all existing output budgets.'
+            );
+        }
+        $module->SetTestProperty('Edges', str_repeat(' ', 65537));
+        $module->ApplyChanges();
+        assertGatewayGauge($module->GetTestStatus() === 201, 'Directed edges retain the 64-KiB list guard.');
         $module->SetTestProperty('Nodes', str_repeat(' ', 65537));
         $module->ApplyChanges();
         assertGatewayGauge($module->GetTestStatus() === 201, 'The existing per-list 64-KiB guard must remain active.');

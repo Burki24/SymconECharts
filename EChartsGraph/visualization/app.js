@@ -75,20 +75,34 @@
         var labelSize = design.fontSizePercent(style.labelFontSizePercent, compact ? 10 : 12);
         var nodeSize = Math.max(6, Math.min(40, Number(style.nodeSize) || 16));
         var nodeColor = style.nodeColor || colors.seriesColors[0] || colors.accent;
-        var nodes = (graph.nodes || []).map(function (node) {
+        var directed = graph.directed === true;
+        var directedCircular = directed && style.graphLayout === 'circular';
+        var nodeNames = Object.create(null);
+        var nodes = (graph.nodes || []).map(function (node, index, all) {
+            nodeNames[String(node.id)] = String(node.name || '');
+            // Native circular edges bend radially and coincide for reciprocal
+            // pairs (even with signed curvature at diametric endpoints). Keep
+            // a circular projection, using native simple edge layout instead.
+            // A diagonal diameter also keeps the native view/roam rectangle
+            // two-dimensional for the smallest valid, two-node graph.
+            var angle = 2 * Math.PI * index / all.length + Math.PI / 4;
             return {
                 id: String(node.id), name: String(node.name || ''), kind: String(node.kind || ''),
-                displayValue: String(node.displayValue || ''), itemStyle: { color: nodeColor }
+                displayValue: String(node.displayValue || ''), itemStyle: { color: nodeColor },
+                ...(directedCircular ? { x: Math.round(Math.cos(angle) * 1000000) / 10000,
+                    y: Math.round(Math.sin(angle) * 1000000) / 10000 } : {})
             };
         });
         var links = (graph.links || []).map(function (link) {
-            return { source: String(link.source), target: String(link.target) };
+            return { source: String(link.source), target: String(link.target),
+                lineStyle: { curveness: directed && link.reciprocal === true ? 0.16 : 0 } };
         });
         return {
             backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
                 ? 'transparent' : colors.background,
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
-            aria: { enabled: true, decal: { show: false }, description: nodes.length + ' Graph nodes' },
+            aria: { enabled: true, decal: { show: false }, description: nodes.length + ' Graph nodes'
+                + (directed ? '. ' + translate('Directed connections') : '') },
             title: {
                 show: false, text: String(graph.title || ''), left: 'center', top: 0,
                 textStyle: { color: style.titleColor || colors.text, fontSize: titleSize }
@@ -97,16 +111,23 @@
                 ...graphSupport.tooltipOptions(),
                 formatter: function (parameter) {
                     var data = parameter.data || {};
-                    if (parameter.dataType === 'edge') { return ''; }
+                    if (parameter.dataType === 'edge') {
+                        return directed ? escapeHTML(nodeNames[data.source] || data.source) + ' → '
+                            + escapeHTML(nodeNames[data.target] || data.target) : '';
+                    }
                     return escapeHTML(data.name || '') + (data.displayValue
                         ? '<br>' + escapeHTML(data.displayValue) : '');
                 }
             },
             series: [{
-                id: 'graph', type: 'graph', layout: style.graphLayout === 'circular' ? 'circular' : 'force',
+                id: 'graph', type: 'graph', layout: directedCircular ? 'none'
+                    : style.graphLayout === 'circular' ? 'circular' : 'force',
+                preserveAspect: directedCircular ? 'contain' : false,
                 roam: style.roamEnabled === true, draggable: style.roamEnabled === true,
                 left: '6%', right: '6%', top: 12, bottom: 20,
                 symbol: 'circle', symbolSize: compact ? Math.max(6, nodeSize * 0.8) : nodeSize,
+                edgeSymbol: directed ? ['none', 'arrow'] : ['none', 'none'],
+                edgeSymbolSize: [0, Math.max(5, Math.min(10, nodeSize * 0.7))],
                 force: { repulsion: Math.max(80, Math.min(600, 160 + nodes.length * 4)), edgeLength: compact ? 65 : 100 },
                 circular: { rotateLabel: false },
                 data: nodes, links: links,

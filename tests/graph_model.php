@@ -30,6 +30,26 @@ assertGraph($graph['nodes'][1]['name'] === 'Sensor A' && $graph['nodes'][2]['nam
 assertGraph($graph['nodes'][1]['displayValue'] === '40 %', 'Variable value is missing.');
 assertGraph($graph['links'][0]['source'] === 'object-101' && $graph['links'][0]['target'] === 'object-102', 'Configured edges changed.');
 
+$reciprocalEdges = [...$edges, ['SourceObjectID' => 102, 'TargetObjectID' => 101]];
+$directed = GraphModel::Build($nodes, $reciprocalEdges, $readObject, $readValue, true);
+assertGraph($directed['directed'] === true && count($directed['links']) === 3, 'Directed Graph must preserve both directions.');
+assertGraph($directed['links'][0]['reciprocal'] && $directed['links'][2]['reciprocal']
+    && !$directed['links'][1]['reciprocal'], 'Only actual reciprocal pairs need separated curves.');
+assertGraph($directed['links'][2]['source'] === 'object-102'
+    && $directed['links'][2]['target'] === 'object-101', 'Direction must follow configured endpoints, not node order.');
+assertGraph($directed['nodes'] === $graph['nodes'], 'Direction must not change node identities, labels or values.');
+foreach ([
+    [...$reciprocalEdges, $edges[0]],
+    [['SourceObjectID' => 101, 'TargetObjectID' => 101]],
+    [['SourceObjectID' => 101, 'TargetObjectID' => 999]]
+] as $badEdges) {
+    try {
+        GraphModel::ValidateRows($nodes, $badEdges, true);
+        throw new RuntimeException('Directed Graph accepted a duplicate, self edge or unknown endpoint.');
+    } catch (InvalidArgumentException) {
+    }
+}
+
 foreach ([
     [$nodes, [['SourceObjectID' => 101, 'TargetObjectID' => 999]], 'unknown endpoint'],
     [$nodes, [['SourceObjectID' => 101, 'TargetObjectID' => 101]], 'self edge'],
@@ -75,6 +95,26 @@ $large = GraphModel::Build(
 );
 assertGraph(count($large['nodes']) === 300 && count($large['links']) === 1000, 'All 300 nodes and 1000 edges must survive.');
 assertGraph(count(array_unique(array_column($large['nodes'], 'id'))) === 300, 'Equal names must not merge nodes.');
+$largeDirectedEdges = [...array_slice($largeEdges, 0, 999), ['SourceObjectID' => 1001, 'TargetObjectID' => 1000]];
+$largeDirected = GraphModel::Build(
+    $largeNodes,
+    $largeDirectedEdges,
+    static fn (int $id): array => ['ObjectType' => 2, 'ObjectName' => 'Same name'],
+    $readValue,
+    true
+);
+assertGraph(count($largeDirected['nodes']) === 300 && count($largeDirected['links']) === 1000
+    && $largeDirected['links'][999]['reciprocal'], 'Directed maximum must preserve every node and reciprocal edge.');
+foreach ([
+    [[...$largeNodes, ['ObjectID' => 1300]], $largeDirectedEdges],
+    [$largeNodes, [...$largeDirectedEdges, ['SourceObjectID' => 1004, 'TargetObjectID' => 1005]]]
+] as [$badNodes, $badEdges]) {
+    try {
+        GraphModel::ValidateRows($badNodes, $badEdges, true);
+        throw new RuntimeException('Directed mode bypassed the existing N+1 protection.');
+    } catch (InvalidArgumentException) {
+    }
+}
 foreach ([
     [[...$largeNodes, ['ObjectID' => 1300]], $largeEdges],
     [$largeNodes, [...$largeEdges, ['SourceObjectID' => 1004, 'TargetObjectID' => 1005]]],

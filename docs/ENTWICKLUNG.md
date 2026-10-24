@@ -40,6 +40,18 @@ Canvas-Zeichenaufrufe für Kachel und IPSView statt nur vorhandener Titeloptione
 
 ## Aktueller Stand und Zielarchitektur
 
+Graph ergänzt gemäß [ADR 0102](adr/0102-directed-graph-relationships.md)
+`DirectedEdges=false`. Dieselbe `GraphModel`-Prüfung versorgt gespeicherte
+Modelle und Entwurfsvorschauen: ungeordnete Dubletten im Altmodus, geordnete
+Dubletten im gerichteten Modus, Selbstkanten und unbekannte Endpunkte bleiben
+ungültig. Gegenrichtungen erhalten gemeinsam berechnete Metadaten; native Pfeile,
+getrennte Kurven und Richtungstooltips ändern weder Knotenschlüssel noch Designs.
+Die geteilte Graph-/Z2M-Ansichtsverwaltung bleibt unverändert. Gerichtetes
+Kreislayout verwendet explizite Kreispositionen mit nativer einfacher
+Kantenprojektion, da ECharts' radiale Kreis-Kurven antipodische Gegenrichtungen
+nicht trennen können. Runtime-Version/-Datei und sämtliche Budgets bleiben
+erhalten. Neue MCP-/Kachel- und tatsächliche IPSView-Abnahme nach Update offen.
+
 Radar ergänzt gemäß [ADR 0101](adr/0101-radar-incomplete-groups.md)
 `AllowIncompleteGroups=false`. Nur nicht konfigurierte Gruppe-Achse-Zuordnungen
 werden optional. Alle konfigurierten Quellen bleiben in Validierung, Gateway,
@@ -50,7 +62,8 @@ Gruppen erhalten; Teilgruppen nutzen den offiziellen CustomChart ohne Fläche.
 Fragezeichen, Legendenzusatz, Tooltip/ARIA und dauerhafter Hinweis erklären
 die Lücken. Keine Änderungen gespeicherter Designs oder der Schutzbudgets.
 Die gezielt neu gebaute Radar-Runtime bleibt bei ECharts 6.1.0 und unter
-550000 Bytes. Live-Abnahme der Teilgruppen nach Modulupdate bleibt offen.
+550000 Bytes. Die funktionale MCP-Prüfung ist bestanden; der Eigentümer
+bestätigt die Teilgruppen in Kachel und tatsächlichem IPSView.
 
 Radar ergänzt gemäß [ADR 0100](adr/0100-radar-inverse-axes.md) das optionale
 Boolean-Feld `Axes[].Inverse` mit Default false. `RadarModel` projiziert allein
