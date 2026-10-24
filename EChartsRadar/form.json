@@ -11,6 +11,15 @@
             "caption": "Title"
         },
         {
+            "type": "CheckBox",
+            "name": "AllowIncompleteGroups",
+            "caption": "Allow incomplete comparison groups"
+        },
+        {
+            "type": "Label",
+            "caption": "Optional: omit unneeded group-axis assignments. Missing axes are marked with ?, without zero values or filled areas. Every configured source must remain valid."
+        },
+        {
             "type": "List",
             "name": "Axes",
             "caption": "Radar axes",
@@ -214,7 +223,7 @@
         },
         {
             "type": "Label",
-            "caption": "Configure 1 to 16 groups, each with exactly one numeric variable per axis. Values outside an axis range are visually limited; tooltips retain the original values."
+            "caption": "Configure 1 to 16 groups with at most one numeric variable per axis. Every axis needs a source unless incomplete groups are allowed. Values outside the range are visually limited; tooltips retain originals."
         },
         {
             "type": "CheckBox",

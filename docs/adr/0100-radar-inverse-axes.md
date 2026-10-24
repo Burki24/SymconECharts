@@ -62,5 +62,11 @@ ausgeführte Entwurfscallbacks ohne Persistenz/Gatewayzugriff und die letzte Ach
 ARIA und tatsächliche native Punktkoordinaten in beiden Formen und Ausgaben.
 
 Die lokale Browserprüfung und vollständige Qualitätssuite werden im
-Testdokument festgehalten. Neue MCP-/Symcon-Kachel- und tatsächliche
-IPSView-Client-Abnahme nach Modulupdate bleibt offen.
+Testdokument festgehalten. Die spätere funktionale MCP-Abnahme auf Symcon 9.1
+prüfte reale Quellen und temporäre Grenzwerte, beide SVGs, tatsächlichen
+IPSView-WebContent-Push und 16×10 Zuordnungen innerhalb der Ausgabegrenzen.
+Die temporären Testobjekte wurden entfernt, die bestehende Konfiguration
+einschließlich Designs blieb hashgleich. Der Eigentümer bestätigt anschließend
+die inversen Achsen in Kachel und tatsächlichem IPSView. Die kombinierte
+MCP-Vorschauseite meldete einen MutationObserver-Fehler; die direkte Radar-
+Ausgabe blieb fehlerfrei. Dies ist kein belegter Fehler des Radar-Renderers.

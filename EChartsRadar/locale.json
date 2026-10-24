@@ -1,6 +1,13 @@
 {
     "translations": {
         "de": {
+            "Configure 1 to 16 groups with at most one numeric variable per axis. Every axis needs a source unless incomplete groups are allowed. Values outside the range are visually limited; tooltips retain originals.": "1 bis 16 Gruppen mit höchstens einer numerischen Variable je Achse anlegen. Ohne Freigabe unvollständiger Gruppen benötigt jede Achse eine Quelle. Werte außerhalb des Bereichs werden nur optisch begrenzt; Tooltips behalten die Originalwerte.",
+            "Allow incomplete comparison groups": "Unvollständige Vergleichsgruppen zulassen",
+            "Optional: omit unneeded group-axis assignments. Missing axes are marked with ?, without zero values or filled areas. Every configured source must remain valid.": "Optional: Nicht benötigte Gruppe-Achse-Zuordnungen weglassen. Fehlende Achsen werden mit ? gekennzeichnet, ohne Nullwerte oder gefüllte Flächen. Jede konfigurierte Quelle muss weiterhin gültig sein.",
+            "Allow incomplete groups must be a boolean.": "Die Freigabe unvollständiger Gruppen muss ein boolescher Wert sein.",
+            "Not configured": "Nicht zugeordnet",
+            "(incomplete)": "(unvollständig)",
+            "Incomplete groups: ? marks unassigned axes. No area is drawn.": "Unvollständige Gruppen: ? kennzeichnet nicht zugeordnete Achsen. Es wird keine Fläche gezeichnet.",
             "Inverse axis (minimum outside)": "Inverse Achse (Minimum außen)",
             "Inverse axes place the maximum in the center and the minimum outside. Percent labels describe the radius; original values remain unchanged.": "Inverse Achsen zeigen das Maximum in der Mitte und das Minimum außen. Prozentbeschriftungen beschreiben den Radius; Originalwerte bleiben unverändert.",
             "Axis %d: inverse must be a boolean.": "Achse %d: Die Achsenumkehr muss ein boolescher Wert sein.",

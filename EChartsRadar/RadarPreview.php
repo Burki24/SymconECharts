@@ -32,7 +32,7 @@ trait RadarPreview
                 // No gateway calls: previews must not mutate transport or instance status.
                 $current[$id] = ['Value' => GetValue($id), 'Timestamp' => 0];
             }
-            $model = RadarModel::Build($configuration['axes'], $configuration['sources'], $current, fn (string $text): string => $this->Translate($text), $configuration['visibility']);
+            $model = RadarModel::Build($configuration['axes'], $configuration['sources'], $current, fn (string $text): string => $this->Translate($text), $configuration['visibility'], $configuration['allowIncomplete']);
             $property = $ipsView && !($values['IPSViewUseTileDesign'] ?? $this->ReadPropertyBoolean('IPSViewUseTileDesign')) ? 'IPSViewGroupColors' : 'GroupColors';
             $groupColors = $this->ParseGroupColors($values[$property] ?? $this->ReadPropertyString($property));
         } catch (Throwable $exception) {
@@ -57,6 +57,10 @@ trait RadarPreview
             $svg .= '<text x="24" y="' . ($legendTop && $this->BarPreviewValue($values, 'ShowLegend', 'boolean', $ipsView) ? 96 : 60)
                 . '" font-size="11" fill="' . EChartsBarPreview::E($axisColor) . '">'
                 . EChartsBarPreview::E(sprintf($this->Translate('Showing %d of %d selected groups (%d configured).'), count($groups), $selectedCount, $groupCount)) . '</text>';
+        }
+        if ($model['incompleteGroupCount'] > 0) {
+            $radius = 80;
+            $centerY = $legendTop ? 215 : 180;
         }
         $n = EChartsBarPreview::N(...);
         $dash = static fn (string $type): string => match ($type) {
@@ -124,14 +128,25 @@ trait RadarPreview
         $occupied = [];
         $renderIndex = 0;
         foreach ($groups as $index => $group) {
+            $partial = !empty($group['missingAxes']);
             $color = $groupColors[$group['name']] ?? $palette['seriesColors'][$index % count($palette['seriesColors'])];
             $polygon = [];
             $symbols = '';
             foreach ($group['percentValues'] as $axis => $value) {
+                if ($value === null) {
+                    [$x, $y] = $point($axis, 1);
+                    $symbols .= '<text data-missing-axis="' . EChartsBarPreview::E($model['axes'][$axis]['Key']) . '" x="' . $n($x) . '" y="' . $n($y)
+                        . '" text-anchor="middle" font-size="14" fill="' . EChartsBarPreview::E($color) . '">?</text>';
+                    continue;
+                }
                 [$x, $y] = $point($axis, $value / 100);
                 $polygon[] = EChartsBarPreview::N($x) . ',' . EChartsBarPreview::N($y);
                 $symbol = $this->BarPreviewValue($values, 'Symbol', 'string', $ipsView);
                 $radius = max(0, min(16, $this->BarPreviewValue($values, 'SymbolSize', 'integer', $ipsView))) / 2;
+                if ($partial && ($symbol === 'none' || $radius === 0)) {
+                    $symbol = 'emptyCircle';
+                    $radius = 2;
+                }
                 $symbols .= EChartsPreviewSymbol::Symbol($symbol, $x, $y, $radius, $color, [
                     'borderWidth'    => $this->BarPreviewValue($values, 'SymbolBorderWidth', 'integer', $ipsView),
                     'borderColor'    => EChartsBarPreview::Color($this->BarPreviewValue($values, 'SymbolBorderColor', 'integer', $ipsView), $color),
@@ -173,18 +188,31 @@ trait RadarPreview
             $svg .= '<defs><filter id="area-shadow-' . $index . '" x="-100%" y="-100%" width="300%" height="300%"><feDropShadow dx="0" dy="0" stdDeviation="'
                 . $n($shadow / 2) . '" flood-color="' . EChartsBarPreview::E(EChartsBarPreview::Color($this->BarPreviewValue($values, 'AreaShadowColor', 'integer', $ipsView), '#000000'))
                 . '" flood-opacity="' . ($this->BarPreviewValue($values, 'AreaShadowColor', 'integer', $ipsView) < 0 ? '0.35' : '1') . '"/></filter></defs>';
-            $svg .= '<polygon data-group="' . EChartsBarPreview::E($group['name']) . '" points="' . implode(' ', $polygon) . '" fill="'
+            if ($partial) {
+                $svg .= '<g data-group="' . EChartsBarPreview::E($group['name']) . '" data-incomplete="true">';
+                foreach ($group['segments'] as [$from, $to]) {
+                    [$x1, $y1] = $point($from, $group['percentValues'][$from] / 100);
+                    [$x2, $y2] = $point($to, $group['percentValues'][$to] / 100);
+                    $svg .= '<path data-edge="' . $from . '-' . $to . '" d="M' . $n($x1) . ' ' . $n($y1) . ' L' . $n($x2) . ' ' . $n($y2)
+                        . '" fill="none" stroke="' . EChartsBarPreview::E($color) . '" stroke-width="' . $this->BarPreviewValue($values, 'LineWidth', 'integer', $ipsView)
+                        . '" stroke-opacity="' . $n($this->BarPreviewValue($values, 'LineOpacityPercent', 'integer', $ipsView) / 100)
+                        . '"' . $dash($this->BarPreviewValue($values, 'LineType', 'string', $ipsView)) . '/>';
+                }
+                $svg .= $symbols . '</g>';
+            } else {
+                $svg .= '<polygon data-group="' . EChartsBarPreview::E($group['name']) . '" points="' . implode(' ', $polygon) . '" fill="'
                 . EChartsBarPreview::E($color) . '" fill-opacity="' . $n(max(0, min(100, $this->BarPreviewValue($values, 'AreaOpacityPercent', 'integer', $ipsView))) / 100)
                 . '"' . ($shadow > 0 ? ' filter="url(#area-shadow-' . $index . ')"' : '') . '/>';
-            $svg .= '<polygon points="' . implode(' ', $polygon) . '" fill="none" stroke="' . EChartsBarPreview::E($color)
-                . '" stroke-width="' . max(0, min(8, $this->BarPreviewValue($values, 'LineWidth', 'integer', $ipsView)))
-                . '" stroke-opacity="' . $n(max(0, min(100, $this->BarPreviewValue($values, 'LineOpacityPercent', 'integer', $ipsView))) / 100)
-                . '"' . $dash($this->BarPreviewValue($values, 'LineType', 'string', $ipsView)) . '/>' . $symbols;
+                $svg .= '<polygon points="' . implode(' ', $polygon) . '" fill="none" stroke="' . EChartsBarPreview::E($color)
+                    . '" stroke-width="' . max(0, min(8, $this->BarPreviewValue($values, 'LineWidth', 'integer', $ipsView)))
+                    . '" stroke-opacity="' . $n(max(0, min(100, $this->BarPreviewValue($values, 'LineOpacityPercent', 'integer', $ipsView))) / 100)
+                    . '"' . $dash($this->BarPreviewValue($values, 'LineType', 'string', $ipsView)) . '/>' . $symbols;
+            }
             if ($this->BarPreviewValue($values, 'ShowLegend', 'boolean', $ipsView)) {
                 $legendSize = 12 * max(50, min(200, $this->BarPreviewValue($values, 'LegendFontSizePercent', 'integer', $ipsView))) / 100;
-                $svg .= '<text x="' . (24 + ($renderIndex % 4) * 170) . '" y="' . (($legendTop ? 60 : 320) + (int) ($renderIndex / 4) * ($legendSize + 4))
+                $svg .= '<text x="' . (24 + ($renderIndex % 4) * 170) . '" y="' . (($legendTop ? 60 : ($model['incompleteGroupCount'] > 0 ? 296 : 320)) + (int) ($renderIndex / 4) * ($legendSize + 4))
                     . '" font-size="' . $n($legendSize) . '" fill="' . EChartsBarPreview::E(EChartsBarPreview::Color($this->BarPreviewValue($values, 'LegendColor', 'integer', $ipsView), $axisColor)) . '">'
-                    . '<tspan fill="' . EChartsBarPreview::E($color) . '">■ </tspan>' . EChartsBarPreview::E(mb_strimwidth($group['name'], 0, 24, '…')) . '</text>';
+                    . '<tspan fill="' . EChartsBarPreview::E($color) . '">■ </tspan>' . EChartsBarPreview::E(($partial ? '? ' : '') . mb_strimwidth($group['name'], 0, 24, '…')) . '</text>';
             }
             ++$renderIndex;
         }
@@ -195,6 +223,10 @@ trait RadarPreview
         if ($model['clippedCount'] > 0) {
             $svg .= '<text x="360" y="354" text-anchor="middle" font-size="10" fill="' . EChartsBarPreview::E($axisColor) . '">'
                 . EChartsBarPreview::E($this->Translate('Some values exceed their axis range and are visually limited.')) . '</text>';
+        }
+        if ($model['incompleteGroupCount'] > 0) {
+            $svg .= '<text x="360" y="338" text-anchor="middle" font-size="10" fill="' . EChartsBarPreview::E($axisColor) . '">'
+                . EChartsBarPreview::E($this->Translate('Incomplete groups: ? marks unassigned axes. No area is drawn.')) . '</text>';
         }
         return $svg . '</svg>';
     }

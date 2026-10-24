@@ -16,7 +16,7 @@ gemeinsamen Radar-Achsen. Es wird kein Archiv benötigt.
 3. Unter **Vergleichswerte** für jede benannte Gruppe eine numerische Variable
    je Achse auswählen. Beispielsweise erhält „Büro“ je eine Temperatur-,
    Feuchtigkeits- und CO₂-Variable; „Küche“ erhält dieselben Achsen mit eigenen
-   Variablen. 1–16 vollständige Gruppen sind möglich. Gruppennamen müssen genau
+   Variablen. Standardmäßig sind 1–16 vollständige Gruppen möglich. Gruppennamen müssen genau
    übereinstimmen. Fehlende Werte werden nicht als Null ergänzt.
 4. Änderungen übernehmen. Änderungen der Quellwerte aktualisieren das Diagramm.
 
@@ -35,6 +35,33 @@ Der angezeigte Bereich verläuft von innen nach außen, bei inversen Achsen also
 vom Maximum zum Minimum. Optionale Prozentmarkierungen beschreiben immer den
 Radius, nicht den unveränderten Originalwert. Es entsteht keine automatische
 Bewertung. Beide Ausgabewege und die Vorschauen verwenden dieselbe Achsenrichtung.
+
+## Unvollständige Vergleichsgruppen
+
+**Unvollständige Vergleichsgruppen zulassen** ist standardmäßig ausgeschaltet.
+Bei Aktivierung dürfen nicht benötigte Zuordnungen unter **Vergleichswerte**
+weggelassen werden, etwa die Batterieachse für Räume ohne Batteriesensor.
+Jede Gruppe benötigt mindestens eine zugeordnete Quelle. Die 3–10 gemeinsamen
+Achsen, höchstens 16 Gruppen und insgesamt 160 Zuordnungen bleiben erhalten.
+
+Vorhandene Werte behalten ihre Originalwerte, Einheiten und Achsenrichtung.
+Fehlende Zuordnungen erscheinen im Tooltip als **Nicht zugeordnet**, am äußeren
+Achsenschnitt als **?** und in der Legende als **(unvollständig)**. Ein dauerhafter
+Hinweis erklärt die Darstellung auch bei ausgeschaltetem Tooltip oder Legende.
+Unvollständige Gruppen erhalten keine gefüllte Fläche; nur direkt benachbarte
+belegte Achsen werden verbunden. Einzelwerte bleiben einzelne Punkte.
+Eine vorhandene Null ist weiterhin ein echter Messwert, kein fehlender Wert.
+
+Linien- und Punktsymboldesigns bleiben wirksam. Sind Punktsymbole ausgeschaltet
+oder auf Größe 0 gesetzt, kennzeichnet bei unvollständigen Gruppen ein kleiner
+leerer Kreis die vorhandenen Werte. Damit bleibt auch ein einzelner Wert
+sichtbar. Flächenfüllung und Flächenschatten entfallen ausschließlich für die
+unvollständigen Gruppen. Kachel, IPSView und Vorschauen folgen derselben Regel.
+
+Die Option gilt nur für ausdrücklich ausgelassene Zuordnungen. Jede konfigurierte
+Variable muss weiterhin vorhanden und numerisch lesbar sein; Fehler werden
+nicht als fehlende Achsenwerte verborgen. Nach dem Ausschalten müssen alle
+Gruppen wieder vollständig sein. Gespeicherte Zuordnungen werden nicht gelöscht.
 
 ## Gruppenauswahl
 
@@ -105,7 +132,7 @@ aktuellen Stand einmalig. Datenquellen bleiben für beide Ausgabewege gleich.
 
 ## Grenzen und Hinweise
 
-Unvollständige Gruppen, doppelte Gruppe-Achse-Zuordnungen, unbekannte Achsen,
+Unvollständige Gruppen ohne ausdrückliche Freigabe, doppelte Gruppe-Achse-Zuordnungen, unbekannte Achsen,
 ungültige Bereiche und nichtnumerische Variablen werden mit Diagnose abgewiesen.
 Variablennamen dürfen gleich sein; die Zuordnung verwendet die Objekt-ID.
 Eine Variable kann mehrfach verwendet werden, wird aber nur einmal abonniert.

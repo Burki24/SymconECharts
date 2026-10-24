@@ -111,6 +111,7 @@ class EChartsRadar extends IPSModuleStrict
             $this->RegisterPropertyString('Axes', '[]');
             $this->RegisterPropertyString('Sources', '[]');
             $this->RegisterPropertyBoolean('EnableGroupSelection', false);
+            $this->RegisterPropertyBoolean('AllowIncompleteGroups', false);
             $this->RegisterPropertyString('GroupVisibility', '[]');
             foreach (['', 'IPSView'] as $prefix) {
                 foreach (self::DESIGN_DEFAULTS as $name => $default) {
@@ -209,7 +210,7 @@ class EChartsRadar extends IPSModuleStrict
                 ['caption' => 'Labels and typography', 'start' => 'TitleFontSizePercent']
             ]);
             $fields = [
-                'Title', 'Axes', 'Sources', 'EnableGroupSelection', 'GroupVisibility', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
+                'Title', 'Axes', 'Sources', 'EnableGroupSelection', 'AllowIncompleteGroups', 'GroupVisibility', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
                 'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent',
                 ...array_keys(self::DESIGN_DEFAULTS),
                 ...array_map(static fn (string $name): string => 'IPSView' . $name, array_keys(self::DESIGN_DEFAULTS))
@@ -564,7 +565,7 @@ class EChartsRadar extends IPSModuleStrict
             $values[$id] = $this->ReadCurrentSource($id);
         }
         try {
-            $model = RadarModel::Build($configuration['axes'], $sources, $values, fn (string $text): string => $this->Translate($text), $configuration['visibility']);
+            $model = RadarModel::Build($configuration['axes'], $sources, $values, fn (string $text): string => $this->Translate($text), $configuration['visibility'], $configuration['allowIncomplete']);
         } catch (InvalidArgumentException $exception) {
             $this->WriteAttributeString('LastError', $exception->getMessage());
             $this->DebugEChartsSetStatus(self::STATUS_VALUE_INVALID);
@@ -601,19 +602,22 @@ class EChartsRadar extends IPSModuleStrict
             'ipsViewStyle' => $ipsView ? $this->IPSViewThemeCSS() : '',
             'state'        => $this->BuildVisualizationState($ipsView),
             'translations' => [
-                'Configure valid Radar axes and comparison values.'                                                           => $this->Translate('Configure valid Radar axes and comparison values.'),
-                'The Radar design is invalid.'                                                                                => $this->Translate('The Radar design is invalid.'),
-                'Connect an active EChartsGateway.'                                                                           => $this->Translate('Connect an active EChartsGateway.'),
-                'The Radar values could not be loaded.'                                                                       => $this->Translate('The Radar values could not be loaded.'),
-                'Radar values must be finite numbers with timestamps.'                                                        => $this->Translate('Radar values must be finite numbers with timestamps.'),
-                'Some values exceed their axis range and are visually limited.'                                               => $this->Translate('Some values exceed their axis range and are visually limited.'),
-                'Apache ECharts could not be initialized.'                                                                    => $this->Translate('Apache ECharts could not be initialized.'),
-                'All'                                                                                                         => $this->Translate('All'),
-                'Inverse'                                                                                                     => $this->Translate('Inverse'),
-                '(inverse)'                                                                                                   => $this->Translate('(inverse)'),
-                'No groups selected'                                                                                          => $this->Translate('No groups selected'),
-                self::MODEL_TOO_LARGE_MESSAGE                                                                                 => $this->Translate(self::MODEL_TOO_LARGE_MESSAGE),
-                'Data could not be refreshed. Showing the last available values.'                                             => $this->Translate(
+                'Configure valid Radar axes and comparison values.'                                                            => $this->Translate('Configure valid Radar axes and comparison values.'),
+                'The Radar design is invalid.'                                                                                 => $this->Translate('The Radar design is invalid.'),
+                'Connect an active EChartsGateway.'                                                                            => $this->Translate('Connect an active EChartsGateway.'),
+                'The Radar values could not be loaded.'                                                                        => $this->Translate('The Radar values could not be loaded.'),
+                'Radar values must be finite numbers with timestamps.'                                                         => $this->Translate('Radar values must be finite numbers with timestamps.'),
+                'Some values exceed their axis range and are visually limited.'                                                => $this->Translate('Some values exceed their axis range and are visually limited.'),
+                'Apache ECharts could not be initialized.'                                                                     => $this->Translate('Apache ECharts could not be initialized.'),
+                'All'                                                                                                          => $this->Translate('All'),
+                'Inverse'                                                                                                      => $this->Translate('Inverse'),
+                '(inverse)'                                                                                                    => $this->Translate('(inverse)'),
+                '(incomplete)'                                                                                                 => $this->Translate('(incomplete)'),
+                'Not configured'                                                                                               => $this->Translate('Not configured'),
+                'Incomplete groups: ? marks unassigned axes. No area is drawn.'                                                => $this->Translate('Incomplete groups: ? marks unassigned axes. No area is drawn.'),
+                'No groups selected'                                                                                           => $this->Translate('No groups selected'),
+                self::MODEL_TOO_LARGE_MESSAGE                                                                                  => $this->Translate(self::MODEL_TOO_LARGE_MESSAGE),
+                'Data could not be refreshed. Showing the last available values.'                                              => $this->Translate(
                     'Data could not be refreshed. Showing the last available values.'
                 )
             ],
@@ -686,7 +690,12 @@ class EChartsRadar extends IPSModuleStrict
     {
         $axes = $this->DecodeRows($values['Axes'] ?? $this->ReadPropertyString('Axes'));
         $sources = $this->DecodeRows($values['Sources'] ?? $this->ReadPropertyString('Sources'));
-        $configuration = RadarModel::Validate($axes, $sources, fn (string $text): string => $this->Translate($text));
+        $allowIncomplete = $values['AllowIncompleteGroups'] ?? $this->ReadPropertyBoolean('AllowIncompleteGroups');
+        if (!is_bool($allowIncomplete)) {
+            throw new InvalidArgumentException($this->Translate('Allow incomplete groups must be a boolean.'));
+        }
+        $configuration = RadarModel::Validate($axes, $sources, fn (string $text): string => $this->Translate($text), $allowIncomplete);
+        $configuration['allowIncomplete'] = $allowIncomplete;
         $configuration['visibility'] = $this->ParseGroupVisibility($values['GroupVisibility'] ?? $this->ReadPropertyString('GroupVisibility'));
         foreach ($configuration['sources'] as $index => $source) {
             $id = $source['VariableID'];

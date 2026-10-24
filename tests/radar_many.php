@@ -180,6 +180,96 @@ require_once dirname(__DIR__) . '/EChartsRadar/module.php';
         $inverseModule->SetTestProperty('Axes', json_encode($malformedAxes, JSON_THROW_ON_ERROR));
         $inverseModule->ApplyChanges();
         assertGatewayGauge($inverseModule->GetTestStatus() === 201, 'Malformed inversion on the last axis must fail validation.');
+        $partialAxes = array_slice($axes, 0, 3);
+        $partialAxes[2]['Inverse'] = true;
+        $partialRows = [$rows[0], $rows[2], $rows[10], $rows[11], $rows[12]];
+        $partialModule = $configure($partialAxes, $partialRows);
+        $partialModule->SetTestProperty('EnableIPSView', true);
+        $partialModule->SetTestProperty('IPSViewUseTileDesign', false);
+        $partialModule->SetTestProperty('IPSViewShape', 'circle');
+        $partialModule->ApplyChanges();
+        assertGatewayGauge($partialModule->GetTestStatus() === 201
+            && $partialModule->GetTestProperties()['AllowIncompleteGroups'] === false, 'Partial groups must remain invalid without explicit opt-in.');
+        $partialModule->SetTestProperty('AllowIncompleteGroups', true);
+        $partialProperties = $partialModule->GetTestProperties();
+        $partialModule->ApplyChanges();
+        $requests = [];
+        $partialData = $decode($partialModule);
+        $first = $partialData['radar']['data'][0];
+        assertGatewayGauge($partialModule->GetTestStatus() === IS_ACTIVE && $partialData['radar']['incompleteGroupCount'] === 1
+            && $first['values'] === [0.0, null, 0.2] && $first['percentValues'][1] === null
+            && abs($first['percentValues'][2] - 79.8) < 1e-9 && $first['missingAxes'] === ['axis1'] && $first['segments'] === [[2, 0]]
+            && $first['variableIDs'] === [98000, null, 98002] && $first['timestamps'][1] === null
+            && $requests === [98000, 98002, 98010, 98011, 98012], 'Opt-in must preserve actual zeroes, inverse projection, null metadata and read only assigned variable IDs through the Gateway.');
+        foreach ([$partialModule->GetVisualizationTile(), $partialModule->GetIPSViewHTML()] as $html) {
+            assertGatewayGauge($startup($html)['chart']['radar']['data'] === $partialData['radar']['data'], 'Both output adapters must share incomplete group metadata and edges.');
+        }
+        $partialForm = json_decode($partialModule->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+        foreach (['BarPreview', 'IPSViewBarPreview'] as $previewName) {
+            $svg = base64_decode(substr(findGaugeFormElement($partialForm['elements'], $previewName)['image'], strlen('data:image/svg+xml;base64,')), true);
+            $document = new DOMDocument();
+            assertGatewayGauge($document->loadXML($svg, LIBXML_NONET), 'Incomplete Radar previews must be valid XML.');
+            $xpath = new DOMXPath($document);
+            assertGatewayGauge($xpath->query('//*[@data-incomplete="true"]')->length === 1
+                && $xpath->query('//*[@data-incomplete="true"]//*[local-name()="polygon"]')->length === 0
+                && $xpath->query('//*[@data-incomplete="true"]//*[@data-edge="2-0"]')->length === 1
+                && $xpath->query('//*[@data-missing-axis="axis1"]')->length === 1
+                && $xpath->query('//*[local-name()="polygon" and @data-group]')->length === 1
+                && str_contains($svg, 'Incomplete groups:'), 'Both previews must draw open adjacent edges, real points and missing-axis markers, never a partial area.');
+        }
+        $callbackValues = $partialProperties;
+        foreach (['Axes' => $partialAxes, 'Sources' => $partialRows, 'GroupColors' => [], 'IPSViewGroupColors' => [], 'GroupVisibility' => []] as $key => $list) {
+            $callbackValues[$key] = new ArrayIterator($list);
+        }
+        $callbackValues['AllowIncompleteGroups'] = false;
+        $draft = (static function (array $formValues, string $script, int $instanceID): array
+        {
+            extract($formValues, EXTR_SKIP);
+            $id = $instanceID;
+            $received = [];
+            $capture = static function (int $target, string $payload) use (&$received): void
+            {
+                $received = json_decode($payload, true, 512, JSON_THROW_ON_ERROR);
+            };
+            eval(str_replace('ECRA_UpdateBarPreviewFromForm(', '$capture(', $script));
+            return $received;
+        })($callbackValues, findGaugeFormElement($partialForm['elements'], 'AllowIncompleteGroups')['onChange'], $partialModule->InstanceID);
+        assertGatewayGauge($draft['AllowIncompleteGroups'] === false, 'The generated checkbox callback must retain false instead of falling back to saved true.');
+        IPSModuleStrict::$ParentResponder = static function (string $json): string
+        {
+            throw new RuntimeException('Partial-group drafts must not request Gateway data.');
+        };
+        try {
+            $partialModule->UpdateBarPreviewFromForm(json_encode($draft, JSON_THROW_ON_ERROR));
+            foreach ($previews($partialModule) as $document) {
+                assertGatewayGauge(str_contains($document->textContent, 'needs exactly one variable'), 'Disabling opt-in in a draft must restore the strict validation in both previews.');
+            }
+            $draft['AllowIncompleteGroups'] = true;
+            $draft['Sources'] = [$partialRows[0]];
+            $draft['Symbol'] = $draft['IPSViewSymbol'] = 'none';
+            $partialModule->UpdateBarPreviewFromForm(json_encode($draft, JSON_THROW_ON_ERROR));
+            foreach ($previews($partialModule) as $document) {
+                $xpath = new DOMXPath($document);
+                assertGatewayGauge(
+                    $xpath->query('//*[@data-incomplete="true"]//*[local-name()="circle"]')->length === 1
+                    && $xpath->query('//*[@data-missing-axis]')->length === 2 && $xpath->query('//*[@data-edge]')->length === 0,
+                    'A single partial value must remain a visible isolated fallback marker even with symbols disabled.'
+                );
+            }
+        } finally {
+            IPSModuleStrict::$ParentResponder = $responder;
+        }
+        assertGatewayGauge($partialModule->GetTestProperties() === $partialProperties && $partialModule->GetTestStatus() === IS_ACTIVE, 'Draft partial policies must preserve all saved properties, independent designs and status.');
+        $GLOBALS['symconTestVariables'][98002]['Value'] = 'invalid';
+        $rejected = false;
+        try {
+            $partialModule->GetRadarData();
+        } catch (RuntimeException $exception) {
+            $rejected = str_contains($exception->getMessage(), 'INVALID_VARIABLE_VALUE');
+        } finally {
+            $GLOBALS['symconTestVariables'][98002]['Value'] = 0.2;
+        }
+        assertGatewayGauge($rejected, 'Configured invalid partial-source values must remain explicit Gateway errors.');
         foreach (range(98000, 98159) as $id) {
             assertGatewayGauge(in_array(['SenderID' => $id, 'Message' => VM_UPDATE], $module->GetTestMessages(), true), 'All Radar variables must remain subscribed by ID: ' . $id);
         }

@@ -1,5 +1,13 @@
 # Diagrammfamilienspezifische ECharts-Runtimes erzeugen
 
+Die Radar-Runtime ergänzt am 24.10.2026 den offiziellen CustomChart für offene
+Teilgruppen. Die native Radar-Serie bleibt für vollständige Gruppen erhalten.
+`npm run build:radar` baut ausschließlich das Radar-Artefakt; ECharts bleibt
+unverändert bei 6.1.0. Startseite, llms.txt, offizielle Custom-Series-API,
+npm-Metadaten und Apache-2.0-Lizenz wurden erneut geprüft. Der Build umfasst
+539843 Bytes und bleibt unter dem bestehenden 550000-Byte-Limit. Herkunft,
+Lieferartefakt und neuer SHA-256 stehen in `THIRD_PARTY_NOTICES.md`.
+
 `npm run build:bar-category-app` erzeugt zusätzlich das eigene BarCategory-
 Anwendungsskript `EChartsBarCategory/visualization/app.min.js` aus der lesbaren
 `app.js`. Es wird ausschließlich mit dem bereits festgeschriebenen esbuild

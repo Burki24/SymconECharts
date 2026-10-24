@@ -39,26 +39,30 @@ function state(large = true, tenAxes = false) {
 }
 const variables = ':root{--symc-background:#303236;--symc-text:#f4f5f7;--symc-text-muted:#969aa2;--symc-border:#555860;--symc-surface:#25272b}';
 const translations = JSON.parse(read('EChartsRadar/locale.json')).translations.de;
-function page(mode, params) {
-    const initialState = state(params.get('legacy') !== '1', params.get('axes') === '10');
-    if (params.get('inverse') === '1') {
+function project(initialState, params) {
         const radar = initialState.chart.radar;
-        const axes = radar.axes.map((axis, i) => ({...axis, Inverse: i === 2}));
+        const axes = radar.axes.map((axis, i) => ({...axis, Inverse: (params.get('inverse') === '1' || params.get('partial') === '1') && i === 2}));
         const sources = [], values = {};
         radar.data.forEach((group, g) => axes.forEach((axis, a) => {
+            if (params.get('partial') === '1' && ((g === 0 && a === 1) || (g === 1 && a !== 0))) { return; }
             const id = 1000 + g * 10 + a;
             sources.push({Group: group.name, Axis: axis.Key, VariableID: id});
             values[id] = {Value: group.values[a], Timestamp: 1792800000};
         }));
         // Use the actual PHP projection, never a second browser-fixture implementation.
         const projected = JSON.parse(execFileSync('php', ['-r',
-            'require "EChartsRadar/RadarModel.php"; $v=json_decode(stream_get_contents(STDIN),true,512,JSON_THROW_ON_ERROR); echo json_encode(SymconECharts\\RadarModel::Build($v[0],$v[1],$v[2]), JSON_THROW_ON_ERROR);'],
+            'require "EChartsRadar/RadarModel.php"; $v=json_decode(stream_get_contents(STDIN),true,512,JSON_THROW_ON_ERROR); echo json_encode(SymconECharts\\RadarModel::Build($v[0],$v[1],$v[2],null,[],true), JSON_THROW_ON_ERROR);'],
             {cwd: root, input: JSON.stringify([axes, sources, values]), encoding: 'utf8'}));
         radar.axes = projected.axes;
         radar.data = projected.data.map((group, i) => ({...group, initiallyVisible: i < 4}));
         radar.clippedCount = projected.clippedCount;
-        radar.title = 'Raumvergleich · inverse CO₂-Achse';
-    }
+        radar.incompleteGroupCount = projected.incompleteGroupCount;
+        if (params.get('partial') === '1') { radar.title = 'Raumvergleich · unvollständige Gruppen'; }
+        else if (params.get('inverse') === '1') { radar.title = 'Raumvergleich · inverse CO₂-Achse'; }
+}
+function page(mode, params) {
+    const initialState = state(params.get('legacy') !== '1', params.get('axes') === '10');
+    project(initialState, params);
     const font = Number(params.get('font')) || 100;
     initialState.chart.radar.style = {...style, titleFontSizePercent: font, axisFontSizePercent: font, legendFontSizePercent: font};
     if (mode === 'ipsview') {
@@ -75,6 +79,9 @@ function page(mode, params) {
     }
     const bootstrap = { mode, state: initialState, options: { tileHeaderVisible: mode === 'symcon', tileHeaderInset: mode === 'symcon' ? 58 : 0, echartsThemes: {},
         adaptToBackground: false,  }, translations };
+    const refreshed = JSON.parse(JSON.stringify(initialState));
+    refreshed.chart.radar.data.forEach(group => {group.values = group.values.map(value => value === null ? null : value + 1);});
+    project(refreshed, params);
     const replacements = { HTML_LANGUAGE: 'de', HTML_CLASSES: '', ROOT_FONT_SIZE: '16px', VIEWPORT_CONTENT: 'width=device-width, initial-scale=1',
         DOCUMENT_TITLE: 'Radar browser fixture', VISUALIZATION_THEME: variables, MODULE_STYLE: read('EChartsRadar/visualization/style.css'),
         IPSVIEW_STYLE: '', ECHARTS_SCRIPT: read('libs/echarts/6.1.0/echarts.radar.min.js'), ECHARTS_THEME_SCRIPT: '',
@@ -87,7 +94,7 @@ function page(mode, params) {
             var state = JSON.parse(JSON.stringify(window.SYMC_VISUALIZATION.state));
             if (action === 'error') { window.handleMessage({status:'error',error:'The Radar values could not be loaded.'}); return; }
             if (action === 'reorder') { state.chart.radar.data.reverse(); }
-            if (action === 'refresh') { state.chart.radar.data.forEach(function(group) {group.values = group.values.map(function(value) {return value + 1;});}); }
+            if (action === 'refresh') { state = ${JSON.stringify(refreshed)}; }
             window.SYMC_VISUALIZATION.state = state; window.handleMessage(state);
         };
     </script></body>`);
@@ -100,8 +107,8 @@ http.createServer((req, res) => {
     res.end('<!doctype html><html lang="de"><head><title>Radar – lokale Browserprüfung</title></head><body style="background:#0b0c0e;color:white;font:16px Arial;margin:20px">'
         + '<h1 style="font-size:20px">Radar · 16 synthetische Gruppen</h1><div style="margin-bottom:12px">'
         + ['refresh', 'reorder', 'error'].map(action => '<button onclick="document.querySelectorAll(\'iframe\').forEach(frame=>frame.contentWindow.fixtureUpdate(\'' + action + '\'))">' + action + '</button>').join(' ') + '</div><div style="display:flex;gap:16px;align-items:start;flex-wrap:wrap">'
-        + '<section><h2 style="font-size:16px">Kachel · hoch</h2><iframe title="Kachel" src="/chart?mode=symcon' + (url.searchParams.get('inverse') === '1' ? '&inverse=1' : '') + '" style="border:0;width:400px;height:600px"></iframe></section>'
-        + '<section><h2 style="font-size:16px">IPSView · breit</h2><iframe title="IPSView" src="/chart?mode=ipsview' + (url.searchParams.get('inverse') === '1' ? '&inverse=1' : '') + '" style="border:0;width:790px;height:440px"></iframe></section></div><div style="height:900px"></div></body></html>');
+        + '<section><h2 style="font-size:16px">Kachel · hoch</h2><iframe title="Kachel" src="/chart?mode=symcon' + (url.searchParams.get('inverse') === '1' ? '&inverse=1' : '') + (url.searchParams.get('partial') === '1' ? '&partial=1' : '') + '" style="border:0;width:400px;height:600px"></iframe></section>'
+        + '<section><h2 style="font-size:16px">IPSView · breit</h2><iframe title="IPSView" src="/chart?mode=ipsview' + (url.searchParams.get('inverse') === '1' ? '&inverse=1' : '') + (url.searchParams.get('partial') === '1' ? '&partial=1' : '') + '" style="border:0;width:790px;height:440px"></iframe></section></div><div style="height:900px"></div></body></html>');
 }).listen(Number(process.env.PORT) || 8797, '127.0.0.1', () => console.log('Radar browser fixture: http://127.0.0.1:' + (Number(process.env.PORT) || 8797)));
 
 

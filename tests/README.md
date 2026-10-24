@@ -1,5 +1,48 @@
 # Tests
 
+## Radar: optionale unvollständige Vergleichsgruppen
+
+`php tests/radar_model.php` begann RED an der noch strengen Ablehnung einer
+Teilgruppe. Der Test prüft strikten Default, Opt-in ab einer Zuordnung,
+achsenparallele Nullplätze ohne erfundene IDs/Zeitstempel, vorhandene Nullwerte,
+Nachbarschaft einschließlich letzter → erster Achse sowie 16/17 Gruppen,
+leere/doppelte/unbekannte Zuordnungen und Fehler konfigurierter Quellen.
+`php tests/gateway_gauges.php --radar-many` ergänzt echte Modul-/Gateway-Pfade,
+zugeordnete Lesezugriffe, unabhängige Designs und beide SVGs mit Fragezeichen,
+offenen Kanten und isoliertem Punkt. Der tatsächliche Checkbox-Callback wird
+ausgeführt und behält false bei gespeichertem true. Entwürfe verändern weder
+Properties/Status noch Gateway/Archive. Die bisherigen Byteguards bleiben aktiv.
+
+`node tests/radar_layout.js` prüft mit der nativen gepinnten Engine, dass nur
+vollständige Gruppen in der geschlossenen Radar-Serie liegen. Teilgruppen
+haben ausschließlich geplante Kanten, reale Punkte und Fehlstellenmarker;
+der Mittelpunkt erhält keinen erfundenen Messwert. Original-Tooltips, sichere
+Texte, ARIA, globale Warnung, Auswahl/Alle und Warnung bei Transportfehlern sind
+für beide Ausgabewege geprüft. Der echte Browser verwendet das ausgelieferte
+Radar-Artefakt unter `node tests/radar_browser.mjs`, `/?partial=1`; die PHP-
+Projektion liefert auch Aktualisierungsfixtures ohne Umwandlung von null in 0.
+
+Die lokale Canvas-Browserprüfung bestätigt offene Linien, Fragezeichen, isolierte
+Punkte und unveränderte Originaleinheiten in schmaler Kachel und breiter IPSView-
+Testeinbettung. Ausgeblendete Teilgruppen bleiben nach Refresh und Umordnung
+ausgeblendet; echte Mausradaktionen scrollen über beiden Diagrammen den äußeren
+Host jeweils 0 → 144 → 0, ohne Auswahl-/Zoomänderung. Der dabei gefundene erste
+Transientfehler blendete zunächst die permanente Fehlstellenwarnung aus. Ein
+gezielt ergänzter Test begann RED; nach Korrektur bleiben beim ersten Fehler
+der Lückenhinweis und ab dem zweiten zusätzlich die Transportwarnung sichtbar.
+Die erneute Browserprüfung bestätigt dies in beiden Ausgaben ohne Konsolenfehler.
+Beim anfänglichen direkten Öffnen der Fixture erschien ein MutationObserver-
+Fehler; getrenntes Öffnen eines leeren Tabs und anschließende Navigation waren
+fehlerfrei. Daraus wird kein Radar-Modulfehler abgeleitet.
+
+Die vollständige Qualitätssuite `php tests/quality.php --fix` ist bestanden,
+einschließlich Formatierung, Syntax, Verträgen und sämtlichen Integrations-/
+Layouttests. Der Radar-Build wird zusätzlich im Speicher neu erzeugt und
+bytegleich mit dem ausgelieferten Artefakt verglichen; sein bisheriges
+550000-Byte-Limit bleibt eingehalten.
+Neue MCP-/Symcon-Kachel- und tatsächliche IPSView-App-Abnahme der Teilgruppen
+nach Modulupdate bleiben offen. Keine Live-Konfigurationen werden verändert.
+
 ## Radar: inverse Achsen je Messgröße
 
 `php tests/radar_model.php` begann RED an der noch unveränderten Radiusprojektion.
@@ -27,8 +70,11 @@ jeweils 0 → 144 → 0, ohne Diagrammzoom oder Auswahländerung.
 Die vollständige Qualitätsprüfung `php tests/quality.php --fix` ist bestanden:
 Formatierung, Syntax, Verträge, alle Integrations- und Layouttests.
 Lokale Browserfixtures ersetzen keine Symcon-Kachel-/Konsolen- oder tatsächliche
-IPSView-Client-Abnahme. Diese bleibt für inverse Achsen nach Modulupdate offen;
-keine Live-Konfigurationen wurden geändert.
+IPSView-Client-Abnahme. Die spätere funktionale MCP-Prüfung auf Symcon 9.1 und
+Eigentümerbestätigung für Kachel/IPSView liegen inzwischen vor (ADR 0100).
+Temporäre Testobjekte wurden entfernt; bestehende Konfiguration und Designs
+blieben hashgleich. Die kombinierte MCP-Vorschauseite meldete einen
+MutationObserver-Fehler, die direkte Radar-Ausgabe blieb fehlerfrei.
 
 ## CalendarPie: optionale unvollständige Tage
 

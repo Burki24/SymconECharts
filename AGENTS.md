@@ -197,6 +197,13 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   außen); aufsteigende Min/Max, Originalwerte und Metadaten bleiben erhalten.
   Live-Ausgaben und SVGs teilen `RadarModel`, die numerische Bereichsprüfung
   verwendet `EChartsValueRange`. Designs und sämtliche Schutzbudgets bleiben gleich.
+  ADR 0101 ergänzt `AllowIncompleteGroups=false`: nur ausgelassene Zuordnungen
+  sind optional. Konfigurierte Quellen bleiben strikt geprüft, jede Gruppe
+  benötigt mindestens eine Quelle. `RadarModel` liefert achsenparallele Nullplätze
+  ohne erfundene IDs/Zeitstempel und ausschließlich benachbarte belegte Kanten
+  für beide Renderer und SVGs. Teilgruppen zeigen Punkte, offene Linien und
+  Fehlstellenmarker, keine Fläche. Native vollständige Radar-Gruppen sowie
+  alle 3–10-/16-/160-/Bytebudgets bleiben erhalten.
   Verteilungen abgeschlossener Stundenmittelwerte von Archivvariablen liegen
   in `EChartsBoxplot` gemäß ADR 0054; Quartile werden nicht aus Tagesaggregaten
   approximiert und fehlende Intervalle nicht als Null ergänzt.

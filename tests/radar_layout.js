@@ -8,6 +8,12 @@ const root = path.join(__dirname, '..');
 const source = fs.readFileSync(path.join(root, 'EChartsRadar/visualization/app.js'), 'utf8');
 const designSource = fs.readFileSync(path.join(root, 'libs/echarts-design.js'), 'utf8');
 const selectionSource = fs.readFileSync(path.join(root, 'libs/echarts-series-selection.js'), 'utf8');
+const bundledRadar = require(path.join(root, '.tools/echarts-runtime/node_modules/esbuild')).buildSync({
+    absWorkingDir: path.join(root, '.tools/echarts-runtime'), entryPoints: ['src/radar-runtime.js'],
+    bundle: true, minify: true, format: 'iife', target: 'es2018', legalComments: 'inline', write: false
+}).outputFiles[0].text;
+assert.equal(bundledRadar, fs.readFileSync(path.join(root, 'libs/echarts/6.1.0/echarts.radar.min.js'), 'utf8').replace(/\r\n/g, '\n'),
+    'The shipped Radar/Custom runtime must reproduce byte-for-byte from the pinned package.');
 const palette = { background: '#101114', text: '#f4f5f7', muted: '#969aa2', border: '#737780', accent: '#55cbb5' };
 
 function render(model, mode = 'symcon', headerVisible = true, width = 900) {
@@ -101,6 +107,69 @@ tile.window.handleMessage({ status: 'error', error: 'Configure valid Radar axes 
 assert.equal(tile.errorElement.hidden, false);
 assert.equal(tile.chartElement.hidden, true, 'Configuration errors must not retain misleading data.');
 const echarts = require(path.join(root, '.tools/echarts-runtime/node_modules/echarts'));
+const partialModel = {...model, radar: {...model.radar, clippedCount: 0, incompleteGroupCount: 1,
+    data: [{...model.radar.data[0], values: [-5, null, 1000], percentValues: [25, null, 50],
+        missingAxes: ['humidity'], segments: [[2, 0]]}, model.radar.data[1]]}};
+for (const mode of ['symcon', 'ipsview']) {
+    for (const selectable of [true, false]) {
+        const output = render({...partialModel, radar: {...partialModel.radar, enableGroupSelection: selectable}}, mode);
+        const option = output.option;
+        assert.equal(option.series[0].data.length, 1, 'Only complete groups may enter the native closed Radar renderer.');
+        assert.equal(option.series[1].type, 'custom');
+        assert.equal(option.series[1].data[0].rawValues[1], null);
+        assert.match(option.legend.formatter(selectable ? 'first' : '<Room>'), /\(incomplete\)/);
+        assert.equal(option.legend.data[0].tooltip.formatter(), '&lt;Room&gt; (incomplete)', 'Partial legend tooltips must show escaped display names rather than internal identities.');
+        assert.match(option.tooltip.formatter({data: option.series[1].data[0]}), /Humidity: Not configured/);
+        assert.match(option.tooltip.formatter({data: option.series[1].data[0]}), /&lt;Room&gt; \(incomplete\)/);
+        assert.match(option.aria.label.description, /Humidity: Not configured/);
+        assert.equal(output.warningElement.hidden, false, 'The partial-data warning must survive disabled tooltips and legends.');
+        const engine = echarts.init(null, null, {renderer: 'svg', ssr: true, width: 900, height: 500});
+        engine.setOption(option);
+        const root = engine.getModel().getSeriesByIndex(1).getData().getItemGraphicEl(0);
+        let paths = 0, points = 0, missing = 0;
+        root.traverse(element => {
+            if (element.name === 'edge-2-0') { paths++; }
+            if (/^value-/.test(element.name || '')) { points++; }
+            if (element.name === 'missing-1') { missing++; assert.equal(element.style.text, '?'); }
+            assert.notEqual(element.type, 'polygon', 'Default circle symbols must never create a filled area for incomplete groups.');
+        });
+        assert.equal(paths, 1);
+        assert.equal(points, 2, 'Missing values must not create a point in the center.');
+        assert.equal(missing, 1);
+        engine.dispatchAction({type: 'legendToggleSelect', name: selectable ? 'first' : '<Room>'});
+        assert.equal(engine.getModel().isSeriesFiltered(engine.getModel().getSeriesByIndex(1)), true, 'Native legend filtering must also hide partial custom series.');
+        engine.dispatchAction({type: 'legendAllSelect'});
+        assert.equal(engine.getModel().isSeriesFiltered(engine.getModel().getSeriesByIndex(1)), false);
+        engine.dispose();
+    }
+}
+const retainedPartial = render(partialModel);
+retainedPartial.window.handleMessage({status: 'error', error: 'The Radar values could not be loaded.'});
+assert.match(retainedPartial.warningElement.textContent, /Incomplete groups:/, 'The missing-data disclosure must remain visible during a transient transport failure.');
+assert.equal(retainedPartial.warningElement.hidden, false, 'The first transient error must not hide the existing permanent incomplete-data warning.');
+assert.equal(retainedPartial.chartElement.hidden, false);
+retainedPartial.window.handleMessage({status: 'error', error: 'The Radar values could not be loaded.'});
+assert.match(retainedPartial.warningElement.textContent, /Data could not be refreshed/);
+assert.match(retainedPartial.warningElement.textContent, /Incomplete groups:/);
+const partialSelection = render({...partialModel, radar: {...partialModel.radar, enableGroupSelection: true}});
+partialSelection.option.legend.selected = {...partialSelection.option.legend.selected, first: false};
+partialSelection.events.legendselectchanged();
+partialSelection.window.handleMessage({status: 'ready', chart: {...model, radar: {...model.radar, enableGroupSelection: true}}});
+assert.equal(partialSelection.option.legend.selected.first, false, 'A partial group becoming complete must retain its ID-based selection.');
+assert.equal(partialSelection.option.series.length, 1, 'Completed groups must return to the native renderer.');
+const singlePartial = {...partialModel, radar: {...partialModel.radar,
+    data: [{...partialModel.radar.data[0], values: [-5, null, null], percentValues: [25, null, null], missingAxes: ['humidity', 'co2'], segments: []}],
+    style: {...model.radar.style, showLegend: false, showTooltip: false, symbol: 'none', symbolSize: 0}}};
+const singleOption = render(singlePartial).option;
+const singleElement = singleOption.series[1].renderItem();
+assert.equal(singleOption.legend.show, false);
+assert.equal(singleOption.tooltip.show, false);
+assert.equal(singleElement.children.filter(child => child.type === 'line').length, 0);
+assert.equal(singleElement.children.filter(child => child.type === 'group').length, 1, 'A partial single point requires a minimal visible fallback marker.');
+assert.equal(singleElement.children.filter(child => child.name?.startsWith('missing-')).length, 2);
+const namedLikePrototype = render({...singlePartial, radar: {...singlePartial.radar,
+    data: [{...singlePartial.radar.data[0], name: 'constructor'}]}}).option;
+assert.equal(typeof namedLikePrototype.series[1].itemStyle.color, 'string', 'Group names must never resolve inherited object properties as colors.');
 const invertedModel = { ...model, radar: { ...model.radar,
     axes: axes.map((axis, i) => ({...axis, Inverse: i !== 1})),
     data: [{...model.radar.data[0], percentValues: [75, 0, 0]}]

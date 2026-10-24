@@ -19,6 +19,30 @@ $sources = [
 $values = [1001 => ['Value' => -5, 'Timestamp' => 100], 1002 => ['Value' => 0, 'Timestamp' => 101],
     1003        => ['Value' => 2500, 'Timestamp' => 102]];
 $model = RadarModel::Build($axes, $sources, $values);
+$partialSources = array_values(array_filter($sources, static fn (array $source): bool => $source['Axis'] !== 'humidity'));
+$partial = RadarModel::Build($axes, $partialSources, $values, null, [], true);
+if ($partial['data'][0]['values'] !== [-5.0, null, 2500.0]
+    || $partial['data'][0]['percentValues'] !== [25.0, null, 100.0]
+    || $partial['data'][0]['variableIDs'] !== [1001, null, 1003]
+    || $partial['data'][0]['timestamps'] !== [100, null, 102]
+    || $partial['data'][0]['missingAxes'] !== ['humidity']
+    || $partial['data'][0]['segments'] !== [[2, 0]] || $partial['incompleteGroupCount'] !== 1) {
+    throw new RuntimeException('Opt-in Radar groups must retain aligned nulls and only join adjacent present axes, including wrap-around.');
+}
+$single = RadarModel::Build($axes, [$sources[1]], $values, null, [], true);
+if ($single['data'][0]['segments'] !== [] || $single['data'][0]['values'] !== [-5.0, null, null]) {
+    throw new RuntimeException('A single measured axis must remain an isolated point, never a filled or closed shape.');
+}
+try {
+    RadarModel::Build($axes, $partialSources, $values);
+    throw new RuntimeException('Strict Radar default accepted an incomplete group.');
+} catch (InvalidArgumentException) {
+}
+try {
+    RadarModel::Build($axes, $partialSources, [1001 => ['Value' => -5, 'Timestamp' => 100]], null, [], true);
+    throw new RuntimeException('Opt-in Radar must not disguise an invalid configured source as an unassigned axis.');
+} catch (InvalidArgumentException) {
+}
 $inverseAxes = $axes;
 $inverseAxes[0]['Inverse'] = true;
 $inverseAxes[2]['Inverse'] = true;
@@ -83,5 +107,17 @@ try {
     RadarModel::Validate($axes, [...$manySources, ...array_map(static fn (array $row): array => [...$row, 'Group' => 'Room 16'], $sources)]);
     throw new RuntimeException('A seventeenth Radar group was accepted.');
 } catch (InvalidArgumentException) {
+}
+$sparseGroups = array_map(static fn (int $index): array => [...$sources[1], 'Group' => 'Room ' . $index], range(0, 15));
+if (count(RadarModel::Build($axes, $sparseGroups, $values, null, [], true)['data']) !== 16) {
+    throw new RuntimeException('Sixteen partial groups must remain available within the existing group budget.');
+}
+foreach ([[], [...$sparseGroups, [...$sources[1], 'Group'           => 'Room 16']], [...$partialSources, $partialSources[0]],
+    [[...$sources[1], 'VariableID' => 0]], [[...$sources[1], 'Axis' => 'unknown']]] as $invalid) {
+    try {
+        RadarModel::Validate($axes, $invalid, null, true);
+        throw new RuntimeException('Opt-in must retain nonempty/group/identity/duplicate validation.');
+    } catch (InvalidArgumentException) {
+    }
 }
 echo "Radar current-value model verified.\n";

@@ -2,6 +2,13 @@
 
 ## Neu
 
+- Radar kann optional unvollständige Vergleichsgruppen anzeigen. Fehlende
+  Zuordnungen werden mit Fragezeichen, Legendenzusatz, Tooltip und dauerhaftem
+  Hinweis gekennzeichnet. Vorhandene Punkte und direkt benachbarte Werte bleiben
+  sichtbar, ohne erfundene Nullwerte oder gefüllte Flächen über Lücken.
+  Der strenge Standard, bestehende Designs und Schutzbudgets bleiben erhalten.
+  Kachel, IPSView und beide Vorschauen verwenden dieselben Zuordnungsregeln.
+
 - Radar bietet je Messgröße optional eine inverse Achse mit Maximum innen und
   Minimum außen. Kachel, IPSView und Vorschauen verwenden dieselbe Richtung;
   Achsentexte und Tooltips kennzeichnen die Umkehr. Originalwerte, Einheiten,

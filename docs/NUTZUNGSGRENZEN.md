@@ -56,7 +56,12 @@ Gruppenauswahl auf unverändert 3–10 expliziten Achsen. Auswahl, Anfangssichtb
 und Legendenanker ändern weder Achsenbereiche noch die vollständige Werteprüfung.
 Zusätzlich lässt sich je Messgröße der Radius ausdrücklich invertieren:
 Maximum innen, Minimum außen. Originalwerte und aufsteigende Bereiche bleiben
-erhalten. Lokale Prüfung ist umgesetzt; die neue Live-Abnahme bleibt offen.
+erhalten. Inverse Achsen sind per MCP funktional geprüft und vom Eigentümer
+in Kachel und IPSView bestätigt. Optional unvollständige Vergleichsgruppen sind
+nun ebenfalls umgesetzt: fehlende Zuordnungen bleiben null, Fragezeichen und
+dauerhafter Hinweis kennzeichnen Teilgruppen ohne geschlossene Fläche. Strenger
+Default, konfigurierte Quellenprüfung, Designs und Schutzbudgets bleiben erhalten;
+die neue Live-Abnahme der Teilgruppen bleibt offen.
 Boxplot, Parallel, Candlestick und ThemeRiver bieten zusätzlich feste historische Von-/Bis-Zeiträume
 mit gemeinsamer strikter Datumsprüfung und unveränderten Archivbudgets.
 Parallel, Candlestick und ThemeRiver unterstützen dabei vollständig enthaltene Stunden und Kalendertage;
@@ -174,7 +179,22 @@ Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
 | Erledigt | Waterfall: explizite Zwischensummen | Option `SubtotalAfter` je Quelle, Default false. Eigene berechnete Nullbasis-Säule ohne erneute Addition, neue Quellen oder erfundene Messzeitstempel. Gemeinsamer Schrittplan für Live-Ausgaben und beide SVGs; ID-stabile Kategoriennavigation und alte Designs bleiben erhalten. MCP geprüft; Kachel/IPSView durch Eigentümer bestätigt. |
 | Erledigt | Waterfall: unabhängige Neustarts | Option `Restart` ab zweiter Quelle, Default false. Absoluter neuer Abschnitt, bewahrter vorheriger Abschluss und ausdrücklich abschnittsbezogene Endsumme. Keine Addition unabhängiger Abschnitte; dauerhafter Hinweis. Weiterhin 100 Quellen, bis 201 Schritte einschließlich Zwischensummen/Endsumme, 200000 Modellbytes und 1 MiB HTML; alle Quellen/Abschnitte bleiben in Prüfung und Skala. MCP geprüft; Kachel/IPSView durch Eigentümer bestätigt. |
 | Erledigt | CalendarPie: optionale unvollständige Tage | `ShowIncompleteDays` mit Default false zeichnet ausschließlich vorhandene positive Tagesgewichte. Fehlende Quell-IDs, Normalisierung und Originalformate bleiben erhalten; Raute, dauerhafter Hinweis und Tooltip erklären den eingeschränkten Nenner. Zustandsdauer, Designs und Archivbudgets bleiben unverändert. MCP funktional geprüft; Kachel und IPSView durch Eigentümer bestätigt. |
-| Umgesetzt, Live-Test offen | Radar: optionale inverse Achsen | `Axes[].Inverse` mit Default false kehrt nur die begrenzte Radiusprojektion um: Maximum innen, Minimum außen. Gemeinsames Modell für beide Ausgaben und SVGs, Originalwerte/-formate und Quellenmetadaten bleiben erhalten. Bestehende Designs sowie 3–10 Achsen, 16 vollständige Gruppen, 160 Zuordnungen und Bytebudgets bleiben unverändert. |
+| Erledigt | Radar: optionale inverse Achsen | `Axes[].Inverse` mit Default false kehrt nur die begrenzte Radiusprojektion um: Maximum innen, Minimum außen. Gemeinsames Modell für beide Ausgaben und SVGs, Originalwerte/-formate und Quellenmetadaten bleiben erhalten. Bestehende Designs sowie 3–10 Achsen, 16 Gruppen, 160 Zuordnungen und Bytebudgets bleiben unverändert. MCP funktional geprüft; Eigentümer bestätigt Kachel und tatsächliches IPSView. |
+| Umgesetzt, Live-Test offen | Radar: optionale unvollständige Vergleichsgruppen | `AllowIncompleteGroups=false` erhält den strengen Standard. Nur ausgelassene Zuordnungen werden optional; konfigurierte Quellen bleiben Fehler bei ungültigen Werten. Gemeinsame Nullplätze und Nachbarschaftskanten für Live-Ausgaben/SVGs; einzelne Punkte, offene Linien, Fragezeichen, Tooltip/ARIA und dauerhafter Hinweis ohne Flächen über Lücken. Designs und Schutzbudgets bleiben erhalten. |
+
+Noch nicht umgesetzte fachliche Roadmap-Punkte in empfohlener Reihenfolge:
+
+| Reihenfolge | Erweiterung |
+| --- | --- |
+| 1 | Graph: gerichtete Beziehungen mit eindeutigen Richtungs-/Dublettenkontrakten. |
+| 2 | Graph: gewichtete Beziehungen mit ausdrücklichem Breiten-/Skalenmodell. |
+| 3 | PictorialBar: Mehrfachübernahme von Quellen nach Objektzweig oder Filter. |
+| 4 | Candlestick: mehrere benannte Vergleichspanels mit gemeinsamer Zeitnavigation. |
+| 5 | Heatmap: getrennte Vergleichsansichten für Quellen oder Zeiträume; bislang als mögliche Erweiterung vorgesehen. |
+
+Weitere Grenzerhöhungen wie StateTimeline/GaugeMulti auf 100 Quellen oder mehr
+Radar-Achsen bleiben bedarfsabhängig und benötigen Lastprüfung beziehungsweise
+ein Layoutkonzept. Es sind keine bereits umgesetzten Fähigkeiten.
 
 Normalisierung ist keine allgemeine Lösung für unterschiedliche Einheiten:
 Sie kann relative Vergleiche sinnvoll machen, ersetzt aber keine physikalische
@@ -206,7 +226,7 @@ Schritte sind Planungsziele, keine implementierten oder lastgeprüften Zusagen.
 | EChartsTreemap | 1–100 Blätter, bis acht Ebenen einschließlich Blatt, höchstens 800 Knoten und 200000 HTML-sicher serialisierte Modellbytes. Standardmäßig nichtnegative Rohwerte; optional normierte Gewichte mit eigenen Min/Max. Eigene Originaleinheiten/Präzision je Blatt. | Umgesetzt: rekursives gemeinsames Modell, native Navigation, vollständige Strukturvorschau und ausdrücklich aktivierte Gewichte. Alte Gruppe/Untergruppe, Rohwertmodelle und Designs bleiben unverändert. Normalisierte Gruppen sind Gewichtssummen, keine physikalischen Summen. Neue Live-Abnahme offen. |
 | EChartsSunburst | Dasselbe rekursive Modell und dieselben unveränderten Quellen-/Tiefen-/Knoten-/Bytebudgets wie Treemap, einschließlich optionaler Gewichte und Originalformate. Die ersten drei Ringdesigns bleiben erhalten; tiefere Ringe übernehmen das äußere Design. | Umgesetzt: native stabile Zweignavigation sowie gemeinsame Quellenprüfung, Modellbildung und Originalformatierung mit Treemap. Normalisierte Winkel und Gruppensummen werden ausdrücklich gekennzeichnet. Neue Live-Abnahme offen. |
 | EChartsSankey | 2–100 Knoten, 1–200 gerichtete Flüsse insgesamt, einschließlich berechneter Bilanzterminals/-verbindungen; nichtnegative Breiten, optional `ReverseNegative` je Verbindung und `Balance` je Knoten. Konfigurierte und tatsächliche Topologie azyklisch/eindeutig, keine Selbstkanten. Gleiche Variable an mehreren Kanten möglich. Manueller Altmodus oder optionale automatische/manuell erwartete gemeinsame Einheit, höchstens 24 Zeichen. | Einheitenprüfung, Kantenumkehr und Rest-/Bilanzknoten per MCP und Eigentümer bestätigt. Betragsbreite, signierter Originalwert und konfigurierte Richtung bleiben getrennt. Berechnete lokale Rest-/Bilanzflüsse sind optional und klar von Messungen unterschieden; gemeinsame Modellbildung ohne Kaskaden. Keine Umrechnung/Normalisierung. DAG, nichtnegative Breiten und bisherige Bytebudgets bleiben Schutzregeln. |
-| EChartsRadar | 3–10 Achsen, 1–16 vollständige Vergleichsgruppen, höchstens 160 Zuordnungen; je Achse eigener Min/Max-Bereich, Einheit und Präzision. Modell höchstens 200000 Bytes, HTML höchstens 1 MiB. Unterschiedliche Einheiten bereits sinnvoll skaliert. | Umgesetzt: optionale Gruppenauswahl, Anfangssichtbarkeit, Alle/Umkehren und ID-stabile Auswahl/Legendenanker sowie optionale inverse Radiusrichtung je Achse. Ausgeblendete Gruppen bleiben in Modell und Prüfung; Achsenbereiche und Originalwerte bleiben vollständig. Inverse Achsen lokal geprüft, Live-Abnahme offen. Mehr Achsen erst mit eigenem Layoutkonzept. Unvollständige Gruppen bleiben eine gesonderte fachliche Erweiterung; fehlende Werte nicht als null erfinden. |
+| EChartsRadar | 3–10 Achsen, 1–16 Vergleichsgruppen, höchstens 160 Zuordnungen; je Achse eigener Min/Max-Bereich, Einheit und Präzision. Vollständigkeit bleibt Standard; optional mindestens eine Quelle je Gruppe. Modell höchstens 200000 Bytes, HTML höchstens 1 MiB. Unterschiedliche Einheiten bereits sinnvoll skaliert. | Umgesetzt: optionale Gruppenauswahl, Anfangssichtbarkeit, ID-stabile Auswahl/Legendenanker und inverse Achsen (MCP und Eigentümer bestätigt). Teilgruppen zusätzlich optional mit offenen Nachbarschaftskanten, expliziten Fehlstellen und unveränderten Originalwerten; hierfür Live-Abnahme offen. Alle konfigurierten Quellen bleiben in Prüfung und Aktualisierung. Mehr Achsen erst mit eigenem Layoutkonzept. |
 
 Maßgebliche Implementierungen:
 
@@ -315,7 +335,10 @@ als Text geprüft. Inverse Achsen sind zusätzlich mit Enden/Mitte, Clipping,
 unveränderten Originalmetadaten, echten SVG-/ECharts-Koordinaten und ausgeführten
 Achsen-Callbacks geprüft. Die vollständige Qualitätssuite ist bestanden;
 lokale Canvas- und echte Mausradprüfungen ergänzen die Modelle. Die neue
-Live-Abnahme inverser Achsen nach Modulupdate bleibt offen.
+MCP-Abnahme inverser Achsen ist bestanden; der Eigentümer bestätigt Kachel und
+tatsächliches IPSView. Teilgruppen sind mit 1/2 vorhandenen Werten, Nullplätzen,
+Fehlermatrizen, echten offenen ECharts-Geometrien und beiden SVGs geprüft.
+Ihre eigene neue Live-Abnahme nach Modulupdate bleibt offen.
 
 Funnel prüft 32/33 Quellen, unveränderte Altlisten, gleiche Namen bei getrennten
 IDs, Einheiten/Genauigkeit, negative/Null-/Gateway-Fehler auch versteckter Quellen,

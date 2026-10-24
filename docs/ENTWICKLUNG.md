@@ -40,6 +40,18 @@ Canvas-Zeichenaufrufe für Kachel und IPSView statt nur vorhandener Titeloptione
 
 ## Aktueller Stand und Zielarchitektur
 
+Radar ergänzt gemäß [ADR 0101](adr/0101-radar-incomplete-groups.md)
+`AllowIncompleteGroups=false`. Nur nicht konfigurierte Gruppe-Achse-Zuordnungen
+werden optional. Alle konfigurierten Quellen bleiben in Validierung, Gateway,
+Abonnements und Fehlermeldungen erhalten. `RadarModel` liefert gemeinsam für
+Live-Ausgaben und SVGs ausgerichtete Nullplätze, fehlende Achsenschlüssel und
+benachbarte belegte Kanten. Die native Radar-Serie bleibt für vollständige
+Gruppen erhalten; Teilgruppen nutzen den offiziellen CustomChart ohne Fläche.
+Fragezeichen, Legendenzusatz, Tooltip/ARIA und dauerhafter Hinweis erklären
+die Lücken. Keine Änderungen gespeicherter Designs oder der Schutzbudgets.
+Die gezielt neu gebaute Radar-Runtime bleibt bei ECharts 6.1.0 und unter
+550000 Bytes. Live-Abnahme der Teilgruppen nach Modulupdate bleibt offen.
+
 Radar ergänzt gemäß [ADR 0100](adr/0100-radar-inverse-axes.md) das optionale
 Boolean-Feld `Axes[].Inverse` mit Default false. `RadarModel` projiziert allein
 den begrenzten Radius invers; Originalwerte, Min/Max, Einheiten, Präzision,
@@ -48,7 +60,8 @@ verwendet jetzt den vorhandenen `EChartsValueRange`, die fachliche Projektion
 bleibt familienlokal und versorgt beide Live-Ausgaben und SVGs. Achsennamen,
 Tooltip und ARIA kennzeichnen die Umkehr; Bereichstexte laufen innen nach außen.
 Bestehende Designer und 3–10-/16-/160-/Bytebudgets ändern sich nicht.
-Neue MCP-/Host-Abnahme nach Modulupdate bleibt offen.
+Die funktionale MCP-Abnahme auf Symcon 9.1 ist bestanden; der Eigentümer
+bestätigt inverse Achsen in Kachel und tatsächlichem IPSView.
 
 CalendarPie ergänzt gemäß [ADR 0099](adr/0099-calendar-pie-incomplete-days.md)
 `ShowIncompleteDays` mit kompatiblem Default false. Die familienlokale

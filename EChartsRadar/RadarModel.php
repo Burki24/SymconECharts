@@ -8,14 +8,14 @@ use InvalidArgumentException;
 
 require_once __DIR__ . '/../libs/EChartsValueRange.php';
 
-/** Explicit axes and complete current-value comparison groups; no archive or implicit zeros. */
+/** Explicit axes and current-value groups; unassigned axes never become measured zeros. */
 final class RadarModel
 {
-    public static function Validate(array $axes, array $sources, ?callable $translate = null): array
+    public static function Validate(array $axes, array $sources, ?callable $translate = null, bool $allowIncomplete = false): array
     {
         $t = $translate ?? static fn (string $s): string => $s;
         if (!array_is_list($axes) || count($axes) < 3 || count($axes) > 10
-            || !array_is_list($sources) || count($sources) < 3 || count($sources) > 160) {
+            || !array_is_list($sources) || count($sources) < ($allowIncomplete ? 1 : 3) || count($sources) > 160) {
             throw new InvalidArgumentException($t('Configure 3 to 10 axes and 1 to 16 complete comparison groups.'));
         }
         $normalized = [];
@@ -58,16 +58,16 @@ final class RadarModel
             throw new InvalidArgumentException($t('Configure 3 to 10 axes and 1 to 16 complete comparison groups.'));
         }
         foreach ($groups as $name => $mapped) {
-            if (count($mapped) !== count($keys)) {
+            if (!$allowIncomplete && count($mapped) !== count($keys)) {
                 throw new InvalidArgumentException(sprintf($t('Group "%s" needs exactly one variable for every axis.'), $name));
             }
         }
         return ['axes' => $normalized, 'sources' => $rows];
     }
 
-    public static function Build(array $axes, array $sources, array $values, ?callable $translate = null, array $visibility = []): array
+    public static function Build(array $axes, array $sources, array $values, ?callable $translate = null, array $visibility = [], bool $allowIncomplete = false): array
     {
-        $configuration = self::Validate($axes, $sources, $translate);
+        $configuration = self::Validate($axes, $sources, $translate, $allowIncomplete);
         $t = $translate ?? static fn (string $s): string => $s;
         $mapped = [];
         foreach ($configuration['sources'] as $source) {
@@ -80,12 +80,19 @@ final class RadarModel
         }
         $series = [];
         $clipped = 0;
+        $incomplete = 0;
         foreach ($mapped as $group => $items) {
             $raw = [];
             $percent = [];
             $ids = [];
             $times = [];
+            $missing = [];
             foreach ($configuration['axes'] as $axis) {
+                if (!isset($items[$axis['Key']])) {
+                    $raw[] = $percent[] = $ids[] = $times[] = null;
+                    $missing[] = $axis['Key'];
+                    continue;
+                }
                 $current = $items[$axis['Key']];
                 $value = (float) $current['Value'];
                 $bounded = max($axis['Minimum'], min($axis['Maximum'], $value));
@@ -99,8 +106,23 @@ final class RadarModel
             }
             $series[] = ['id'      => 'group-' . hash('sha256', (string) $group), 'name' => (string) $group,
                 'initiallyVisible' => $visibility[$group] ?? true,
-                'values'           => $raw, 'percentValues' => $percent, 'variableIDs' => $ids, 'timestamps' => $times];
+                'values'           => $raw, 'percentValues' => $percent, 'variableIDs' => $ids, 'timestamps' => $times,
+                ...($missing !== [] ? ['missingAxes' => $missing, 'segments' => self::Segments($percent)] : [])];
+            $incomplete += $missing !== [] ? 1 : 0;
         }
-        return ['axes' => $configuration['axes'], 'data' => $series, 'clippedCount' => $clipped];
+        return ['axes' => $configuration['axes'], 'data' => $series, 'clippedCount' => $clipped, 'incompleteGroupCount' => $incomplete];
+    }
+
+    /** Only adjacent measured axes may connect; never bridge a missing measurement. */
+    private static function Segments(array $positions): array
+    {
+        $edges = [];
+        foreach ($positions as $index => $position) {
+            $next = ($index + 1) % count($positions);
+            if ($position !== null && $positions[$next] !== null) {
+                $edges[] = [$index, $next];
+            }
+        }
+        return $edges;
     }
 }
