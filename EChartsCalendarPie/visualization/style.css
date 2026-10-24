@@ -44,6 +44,15 @@ html, body {
     cursor: pointer;
 }
 .echarts-calendar-pie-period button:disabled { opacity: 0.4; cursor: default; }
+.echarts-calendar-pie-incomplete {
+    position: absolute;
+    inset-inline: 10px;
+    z-index: 3;
+    font: 12px/1.35 Arial, sans-serif;
+    text-align: center;
+    overflow-wrap: anywhere;
+    pointer-events: none;
+}
 #echarts-calendar-pie-period-label { overflow: hidden; text-overflow: ellipsis; }
 .echarts-refresh-warning, .echarts-calendar-pie-error {
     position: absolute;

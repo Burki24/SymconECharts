@@ -111,6 +111,8 @@ Folgende Module sind enthalten:
   Tagesmittelwerte mehrerer Archivvariablen, Tagesverbrauch von Zählern oder
   Zeitanteile archivierter Zustände. Fehlende Daten und unbekannte Zeiten
   bleiben erkennbar; Kachel und IPSView besitzen eigene Designer und Vorschauen.
+  Numerische Teilarchive lassen sich optional als klar gekennzeichnete
+  Teilkreise darstellen; der strenge Standard bleibt erhalten.
 
 - __EChartsStateTimeline__ ([Dokumentation](EChartsStateTimeline/README.md))
   Archivierte Boolean-/Integer-Zustände von bis zu 32 Quellen als farbige

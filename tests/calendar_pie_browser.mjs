@@ -13,6 +13,7 @@ const sourceCount = url => Math.min(5, Math.max(1, Math.trunc(Number(url.searchP
 function state(url) {
     const mode = ['average', 'counter', 'states'].includes(url.searchParams.get('data')) ? url.searchParams.get('data') : 'average';
     const normalized = mode !== 'states' && url.searchParams.get('normalize') === 'yes';
+    const showIncompleteDays = mode !== 'states' && url.searchParams.get('incomplete') === 'yes';
     const offset = Math.min(120, Math.max(0, Number(url.searchParams.get('offset')) || 0));
     const date = new Date(Date.UTC(2024, 9 - offset, 1));
     const month = date.toISOString().slice(0, 7);
@@ -42,12 +43,15 @@ function state(url) {
                 unit: i % 2 ? '%' : '°C', decimals: i % 2 ? 0 : 1, minimum: 0, maximum: i % 2 ? 100 : 40,
                 value: Math.max(0, Math.min(i % 2 ? 100 : 40, slice.value)) / (i % 2 ? 100 : 40) * 100}));
         }
-        return {date: day, status: mode === 'states' && status === 'zero' ? 'complete' : status, slices,
+        const effectiveStatus = mode === 'states' && status === 'zero' ? 'complete' : status;
+        return {date: day, status: effectiveStatus, slices,
+            showPie: slices.some(s => s.value > 0) && (mode === 'states' ? effectiveStatus !== 'pending'
+                : effectiveStatus === 'complete' || showIncompleteDays && effectiveStatus === 'partial'),
             missing: status === 'partial' ? [mode === 'states' ? 'unknown' : categories.at(-1).id] : [], daySeconds};
     });
     return {status: 'ready', chart: {schemaVersion: 1, family: 'calendarPie', theme: 'auto', calendarPie: {
         title: mode === 'states' ? 'Betriebszeiten · Tagesanteile' : mode === 'counter' ? 'Tagesverbrauch nach Bereich' : 'Tagesmittelwerte nach Bereich',
-        mode, normalized, month, baseMonth: '2024-10', windowOffset: offset, maxOffset: 120, timezone: 'Europe/Berlin',
+        mode, normalized, showIncompleteDays, month, baseMonth: '2024-10', windowOffset: offset, maxOffset: 120, timezone: 'Europe/Berlin',
         unit: mode === 'states' ? 'h' : mode === 'counter' ? 'kWh' : 'W', decimals: mode === 'states' ? 2 : 1,
         categories, days, style: {showTooltip: true, showLegend: true, showDayNumbers: true,
             showValues: url.searchParams.get('values') === 'yes', firstWeekday: 1, pieRadiusPercent: 70,
@@ -63,6 +67,8 @@ function page(url) {
         adaptToBackground: false, echartsThemes: {auto: palette}, calendarPieStatePath: '/hook/SymconECharts/state/5000/' + 'a'.repeat(32)},
         translations: {'Daily means': 'Tagesmittelwerte', 'Daily consumption': 'Tagesverbrauch', 'State duration': 'Zustandsdauer',
             'Normalized comparison (0–100)': 'Normalisierter Vergleich (0–100)', Normalized: 'Normalisiert', Range: 'Bereich', 'Circle share': 'Kreisanteil',
+            'Shares refer only to available sources.': 'Anteile beziehen sich nur auf vorhandene Quellen.',
+            'Incomplete days are marked ◆. Shares refer only to available sources.': 'Unvollständige Tage sind mit ◆ markiert. Anteile beziehen sich nur auf vorhandene Quellen.',
             'Missing data': 'Fehlende Daten', 'Incomplete data': 'Unvollständige Daten', 'No positive values': 'Keine positiven Werte',
             'Not completed': 'Nicht abgeschlossen', Unknown: 'Unbekannt', 'Previous month': 'Voriger Monat', 'Next month': 'Nächster Monat',
             'Selected month': 'Ausgewählter Monat', October: 'Oktober', September: 'September', August: 'August', July: 'Juli',
@@ -85,7 +91,7 @@ http.createServer((req, res) => {
     if (url.pathname.startsWith('/hook/SymconECharts/state/')) {
         // Keep the selected fixture data model across local navigation.
         const referer = new URL(req.headers.referer || 'http://127.0.0.1');
-        for (const key of ['data', 'sources', 'normalize']) {
+        for (const key of ['data', 'sources', 'normalize', 'incomplete']) {
             if (referer.searchParams.has(key)) {url.searchParams.set(key, referer.searchParams.get(key));}
         }
         res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify(state(url))); return;
@@ -93,6 +99,7 @@ http.createServer((req, res) => {
     if (url.pathname === '/preview.svg') {
         const values = {Title: 'Kalenderanteile · Vorschau', DataMode: url.searchParams.get('data') || 'average',
             NormalizeValues: url.searchParams.get('normalize') === 'yes',
+            ShowIncompleteDays: url.searchParams.get('incomplete') === 'yes',
             Sources: [4800, 4801, 4803, 4804, 4805].slice(0, sourceCount(url))
                 .map((id, i) => ({VariableID: id, Label: 'Bereich ' + String.fromCharCode(65 + i), Color: -1, Minimum: 0, Maximum: i % 2 ? 100 : 40})),
             StateVariableID: 4802, States: [{Value: 0, Label: 'Aus', Color: 0xFF994D}, {Value: 1, Label: 'Ein', Color: 0x5070DD}]};
@@ -105,6 +112,15 @@ http.createServer((req, res) => {
     }
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     if (url.pathname === '/chart') {res.end(page(url)); return;}
+    if (url.pathname === '/incomplete') {
+        res.end('<!doctype html><html lang="de"><head><title>CalendarPie · unvollständige Tage</title></head>'
+            + '<body style="background:#0b0c0e;color:white;font:16px Arial;margin:20px"><h1>Teilarchive · synthetische Daten</h1>'
+            + '<iframe title="Kachel streng" src="/chart?sources=3" style="border:0;width:400px;height:520px"></iframe>'
+            + '<iframe title="Kachel Teilarchive" src="/chart?sources=3&incomplete=yes" style="border:0;width:400px;height:520px"></iframe>'
+            + '<iframe title="IPSView Teilarchive" src="/chart?mode=ipsview&sources=3&normalize=yes&incomplete=yes&theme=light" style="border:0;width:790px;height:500px"></iframe>'
+            + '<img alt="Teilarchiv-Vorschau" src="/preview.svg?sources=3&normalize=yes&incomplete=yes" style="width:720px">'
+            + '<p style="height:500px">Scrollprüfung des äußeren Hosts, kein Diagrammzoom.</p></body></html>'); return;
+    }
     if (url.pathname === '/normalized') {
         res.end('<!doctype html><html lang="de"><head><title>Normalisierte CalendarPie-Prüfung</title></head>'
             + '<body style="background:#0b0c0e;color:white;font:16px Arial;margin:20px"><h1>Normalisierte Beispieldaten</h1>'

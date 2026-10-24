@@ -148,6 +148,35 @@ foreach ($requests as $request) {
 }
 IPSModuleStrict::$ParentResponder = $parent;
 
+$strictChart = $chart;
+assertGatewayGauge($chart['showIncompleteDays'] === false && !$days['2026-10-16']['showPie'], 'Old configurations must retain strict partial-day display.');
+$stored = $calendarPie->GetTestProperties();
+$calendarPie->SetTestProperty('ShowIncompleteDays', true);
+$calendarPie->ApplyChanges();
+$partialChart = json_decode($calendarPie->GetCalendarPieData(), true, 512, JSON_THROW_ON_ERROR)['calendarPie'];
+$partialDays = array_column($partialChart['days'], null, 'date');
+assertGatewayGauge(
+    $partialChart['showIncompleteDays'] === true && $partialDays['2026-10-16']['showPie']
+    && !$partialDays['2026-10-17']['showPie'] && !$partialDays['2026-10-18']['showPie']
+    && $partialDays['2026-10-16']['missing'] === $days['2026-10-16']['missing']
+    && $partialDays['2026-10-16']['slices'] === $days['2026-10-16']['slices']
+    && $partialChart['style'] === $chart['style'] && $calendarPie->GetTestReferences() === $ids,
+    'Opt-in must change display only, retaining missing IDs, archive values, designs and references.'
+);
+foreach ([$calendarPie->GetVisualizationTile(), $calendarPie->GetIPSViewHTML(), $calendarPie->GetTestVariableValue('IPSViewCalendarPie')] as $html) {
+    preg_match('~window.SYMC_VISUALIZATION = (.*?);</script>~s', $html, $match);
+    $bootstrap = json_decode($match[1], true, 512, JSON_THROW_ON_ERROR);
+    assertGatewayGauge($bootstrap['state']['chart']['calendarPie']['days'] === $partialChart['days']
+        && strlen($html) < SYMCON_OUTPUT_BUFFER_LIMIT, 'Both real adapters and published WebContent must carry the same partial-day policy.');
+}
+$calendarPie->SetTestProperty('ShowIncompleteDays', false);
+$calendarPie->ApplyChanges();
+assertGatewayGauge(
+    $calendarPie->GetTestProperties() === $stored
+    && json_decode($calendarPie->GetCalendarPieData(), true)['calendarPie'] === $strictChart,
+    'Disabling opt-in must restore the exact strict model without resetting design.'
+);
+
 $tile = $calendarPie->GetVisualizationTile();
 $ipsView = $calendarPie->GetIPSViewHTML();
 assertGatewayGauge(strlen($tile) < SYMCON_OUTPUT_BUFFER_LIMIT && strlen($ipsView) < SYMCON_OUTPUT_BUFFER_LIMIT
@@ -220,9 +249,9 @@ assertGatewayGauge(
 $properties = (new ReflectionProperty(IPSModuleStrict::class, 'properties'))->getValue($calendarPie);
 $queries = $GLOBALS['symconTestArchiveQueryCount'];
 $calendarPie->UpdateDataMode('states');
-$visibility = array_slice($calendarPie->GetTestFormUpdates(), -8);
+$visibility = array_slice($calendarPie->GetTestFormUpdates(), -10);
 assertGatewayGauge(
-    count($visibility) === 8 && $visibility[0]['Value'] === false && $visibility[7]['Value'] === true,
+    count($visibility) === 10 && $visibility[0]['Value'] === false && $visibility[9]['Value'] === true,
     'Mode changes must only update active-control visibility.'
 );
 foreach (['average', 'counter', 'states'] as $mode) {
@@ -682,14 +711,121 @@ $normalization->SetTestProperty('Sources', json_encode($badRange, JSON_THROW_ON_
 $normalization->ApplyChanges();
 assertGatewayGauge($normalization->GetTestStatus() === 201, 'Invalid enabled normalization limits must fail source validation.');
 $normalization->SetTestProperty('DataMode', 'states');
+$normalization->SetTestProperty('ShowIncompleteDays', true);
 $normalization->SetTestProperty('StateVariableID', $stateID);
 $normalization->SetTestProperty('States', json_encode($definitions, JSON_THROW_ON_ERROR));
 $normalization->ApplyChanges();
 assertGatewayGauge(
     $normalization->GetTestStatus() === 102
-    && json_decode($normalization->GetCalendarPieData(), true)['calendarPie']['normalized'] === false,
-    'State durations ignore inactive normalization and numeric source limits without changing their model.'
+    && json_decode($normalization->GetCalendarPieData(), true)['calendarPie']['normalized'] === false
+    && json_decode($normalization->GetCalendarPieData(), true)['calendarPie']['showIncompleteDays'] === false,
+    'State durations ignore inactive normalization, partial-day option and numeric source limits without changing their denominator.'
 );
+
+// Execute the actual checkbox callback: both draft SVGs change, not stored properties or archive reads.
+$draftForm = json_decode($calendarPie->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+$checkbox = findGaugeFormElement($draftForm['elements'], 'ShowIncompleteDays');
+assertGatewayGauge(
+    $checkbox['visible'] === false && str_contains($checkbox['onChange'], 'ECCP_UpdateBarPreviewFromForm'),
+    'Numeric partial-day control must hide in state mode and participate in shared preview wiring.'
+);
+$draftProperties = $calendarPie->GetTestProperties();
+$draftStatus = $calendarPie->GetTestStatus();
+$draftQueries = $GLOBALS['symconTestArchiveQueryCount'];
+foreach ([false, true] as $enabled) {
+    (static function () use ($calendarPie, $checkbox, $sources, $enabled): void
+    {
+        foreach ($calendarPie->GetTestProperties() as $name => $value) {
+            ${$name} = $value;
+        }
+        $DataMode = 'average';
+        $Month = '2026-09';
+        $Sources = $sources;
+        $States = [];
+        $ShowIncompleteDays = $enabled;
+        eval(str_replace('ECCP_UpdateBarPreviewFromForm($id, ', '$calendarPie->UpdateBarPreviewFromForm(', $checkbox['onChange']));
+    })();
+    foreach (array_slice($calendarPie->GetTestFormUpdates(), -2) as $update) {
+        $svg = base64_decode(substr($update['Value'], strlen('data:image/svg+xml;base64,')), true);
+        $doc = new DOMDocument();
+        assertGatewayGauge($doc->loadXML($svg, LIBXML_NONET), 'Partial-day draft must remain valid SVG.');
+        $xp = new DOMXPath($doc);
+        $xp->registerNamespace('s', 'http://www.w3.org/2000/svg');
+        $cell = '//s:g[@data-calendar-date="2026-09-04"]';
+        assertGatewayGauge(
+            $xp->query($cell . '/s:path[@data-calendar-pie]')->length === ($enabled ? 1 : 0)
+            && $xp->query($cell . '/s:path[@data-marker="partial"]')->length === 1
+            && str_contains($svg, 'data-incomplete-notice') === $enabled,
+            'Both previews must draw only the available category and retain the incomplete marker and warning.'
+        );
+    }
+}
+assertGatewayGauge($calendarPie->GetTestProperties() === $draftProperties && $calendarPie->GetTestStatus() === $draftStatus
+    && $GLOBALS['symconTestArchiveQueryCount'] === $draftQueries, 'Partial-day checkbox drafts must not persist, read archives or change status.');
+foreach (['average' => $ids, 'counter' => $counterIDs] as $mode => $selectedIDs) {
+    $partialModule = new TestableEChartsCalendarPie();
+    $partialModule->Create();
+    $partialModule->SetTestProperty('DataMode', $mode);
+    $partialModule->SetTestProperty('Sources', json_encode(array_map(static fn (int $id): array => ['VariableID' => $id, 'Label' => 'Same <name>', 'Color' => -1], $selectedIDs)));
+    $partialModule->SetTestProperty('ShowIncompleteDays', true);
+    $partialModule->ApplyChanges();
+    $d = json_decode($partialModule->GetCalendarPieData(), true)['calendarPie']['days'][15];
+    assertGatewayGauge(
+        $d['status'] === 'partial' && $d['showPie'] && count($d['slices']) === 1
+        && $d['slices'][0]['value'] === 4.0 && $d['missing'] === ['variable-' . $selectedIDs[1]],
+        'Both numeric reducers must preserve available archive values without zero filling or current-value fallback.'
+    );
+}
+IPSModuleStrict::$ParentResponder = static function (string $json) use ($parent): string
+{
+    $response = json_decode($parent($json), true, 512, JSON_THROW_ON_ERROR);
+    if (($response['Operation'] ?? '') === 'archive.read' && ($response['Success'] ?? false)) {
+        $response['Payload']['Truncated'] = true;
+    }
+    return json_encode($response, JSON_THROW_ON_ERROR);
+};
+$partialModule->ApplyChanges();
+assertGatewayGauge($partialModule->GetTestStatus() === 204, 'Opt-in must not turn truncated/invalid archive responses into partial-day success.');
+IPSModuleStrict::$ParentResponder = $parent;
+
+$partialNormalized = new TestableEChartsCalendarPie();
+$partialNormalized->Create();
+$selected = [];
+foreach ([88801 => ['°C', 1, 20.0, 40], 88802 => ['%', 0, 60.0, 100], 88803 => ['W', 2, null, 1000]] as $id => [$unit, $digits, $value, $maximum]) {
+    $GLOBALS['symconTestVariables'][$id] = ['VariableType' => 2, 'Value' => 999999.0, 'VariableUpdated' => 1792317600,
+        'Name'                                             => 'Same <source>', 'Presentation' => ['SUFFIX' => ' ' . $unit, 'DIGITS' => $digits]];
+    $GLOBALS['symconTestArchiveVariables'][$id] = ['AggregationType' => 0, 'LoggedValues' => [], 'AggregatedValues' => $value === null ? []
+        : [['TimeStamp' => strtotime('2026-10-15'), 'Avg' => $value, 'Min' => $value, 'Max' => $value],
+            ...($id === 88801 ? [['TimeStamp' => strtotime('2026-10-16'), 'Avg' => -10.0, 'Min' => -10.0, 'Max' => -10.0]] : [])]];
+    // The real archive returns descending order.
+    usort($GLOBALS['symconTestArchiveVariables'][$id]['AggregatedValues'], static fn (array $a, array $b): int => $b['TimeStamp'] <=> $a['TimeStamp']);
+    $selected[] = ['VariableID' => $id, 'Label' => '', 'Color' => -1, 'Minimum' => 0, 'Maximum' => $maximum];
+}
+$partialNormalized->SetTestProperty('Sources', json_encode($selected));
+$partialNormalized->SetTestProperty('NormalizeValues', true);
+$partialNormalized->SetTestProperty('ShowIncompleteDays', true);
+$partialNormalized->ApplyChanges();
+$numeric = json_decode($partialNormalized->GetCalendarPieData(), true)['calendarPie'];
+$available = $numeric['days'][14];
+$clipped = $numeric['days'][15];
+assertGatewayGauge($available['status'] === 'partial' && $available['showPie'] && $available['missing'] === ['variable-88803']
+    && array_column($available['slices'], 'value') === [50.0, 60.0]
+    && array_column($available['slices'], 'originalValue') === [20.0, 60.0]
+    && array_column($available['slices'], 'unit') === ['°C', '%'] && array_column($available['slices'], 'decimals') === [1, 0]
+    && $clipped['status'] === 'partial' && !$clipped['showPie'] && $clipped['slices'][0]['originalValue'] === -10.0
+    && $clipped['slices'][0]['value'] === 0.0, 'Partial normalized days must retain original units/precision and zero weights, never substitute missing sources.');
+$partialNormalized->UpdateBarPreviewFromForm(json_encode(['Sources' => $selected, 'ShowIncompleteDays' => true, 'NormalizeValues' => true, 'Month' => '2026-09']));
+foreach (array_slice($partialNormalized->GetTestFormUpdates(), -2) as $update) {
+    $svg = base64_decode(substr($update['Value'], strlen('data:image/svg+xml;base64,')), true);
+    $doc = new DOMDocument();
+    assertGatewayGauge($doc->loadXML($svg, LIBXML_NONET), 'Normalized partial preview must remain valid XML.');
+    $xp = new DOMXPath($doc);
+    $xp->registerNamespace('s', 'http://www.w3.org/2000/svg');
+    assertGatewayGauge(
+        $xp->query('//s:g[@data-calendar-date="2026-09-04"]/s:path[@data-calendar-pie and @data-original-value and @data-weight]')->length === 2,
+        'Both normalized draft previews must omit the missing third source but keep original data and weights.'
+    );
+}
 
 date_default_timezone_set($savedTimezone);
 echo "CalendarPie modes, Gateway, forms, previews and outputs verified.\n";

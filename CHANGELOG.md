@@ -1,5 +1,12 @@
 # Unveröffentlicht
 
+- CalendarPie kann unvollständige Tage optional mit den vorhandenen Quellen
+  darstellen. Raute, dauerhafter Hinweis und Tooltip kennzeichnen fehlende
+  Quellen; Kreisanteile beziehen sich ausdrücklich nur auf vorhandene Werte
+  beziehungsweise normalisierte Gewichte. Keine Nullauffüllung oder Ersatzkreise.
+  Der strenge Standard, Originalformate, Zustandsdauern, Designs und Archivbudgets
+  bleiben erhalten. Kachel, IPSView und beide Vorschauen folgen derselben Auswahl.
+
 - BarWaterfall ergänzt optional berechnete Zwischensummen nach ausgewählten
   Quellen und absolute Neustarts für unabhängige Bilanzabschnitte. Zwischensummen
   werden nicht erneut addiert; bei Neustarts gehört die klar gekennzeichnete

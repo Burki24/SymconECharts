@@ -1,5 +1,35 @@
 # Tests
 
+## CalendarPie: optionale unvollständige Tage
+
+`php tests/calendar_pie_data.php` und `node tests/calendar_pie_layout.js`
+begannen RED an fehlender Tagespolicy beziehungsweise fehlendem Teilkreis.
+Die familienlokale Policy wird mit striktem Default, Opt-in, Nullgewichten,
+fehlenden/laufenden Tagen und unveränderter unbekannter Zustandsdauer geprüft.
+`php tests/calendar_pie_integration.php` verwendet echte Module/Gateway mit
+synthetischen Kernelarchiven: Tagesmittel und Zählerverbrauch, Originalformate
+bei Normalisierung, fehlende IDs, Erhaltung von Designs/Referenzen und beiden
+Ausgaben einschließlich WebContent. Gekürzte Antworten bleiben Fehler. Der echte
+Checkbox-Entwurfscallback wird ausgeführt; beide SVGs folgen der Auswahl ohne
+Property-, Status- oder Archivänderung. Alle vorhandenen Schutztests bleiben aktiv.
+
+Der native Engine-Test prüft Teilkreise auch in der Größen-/Font-/Donutmatrix,
+Markierungen, sichere begrenzte Tooltips, explizite Prozentnenner und Warnungen
+ohne Tooltip/Legende. Die Innenlabel-Prüfung berücksichtigt den 3-Pixel-Versatz
+der gepinnten Pie-Runtime. Ihr vorheriger 500-Pixel-Überlappungsfall ließ nach
+dieser korrekten Platzprüfung keine Werte mehr zu; bei 600 Pixeln prüft derselbe
+Fall weiterhin echte LabelLayout-Unterdrückung mit tatsächlich sichtbaren Zahlen.
+
+`node tests/calendar_pie_browser.mjs` liefert unter `/incomplete` einen lokalen
+synthetischen Vergleich: strenger Kalender, Teilkreise, normalisierte IPSView-
+Ausgabe und echte PHP-SVG-Vorschau. Die Browserprüfung bestätigt Kennzeichnung,
+fehlende Quellen, Originalwerte, eingeschränkte Anteile und Monatsnavigation.
+Echte Mausradaktionen scrollen den äußeren Testhost über Kachel in beide
+Richtungen (0 → 144 → 0) sowie über IPSView-Testframe (504 → 648 → 504), ohne
+Diagrammzoom oder Monatswechsel. Keine Browserfehler beobachtet. Diese lokalen
+Testeinbettungen sind keine Symcon-/native IPSView-App-Abnahme; diese bleibt
+nach Modulupdate offen. Live-Konfigurationen oder Archive wurden nicht verändert.
+
 ## Waterfall: berechnete Zwischensummen und unabhängige Neustarts
 
 `php tests/waterfall_data.php` begann für Zwischensummen am fehlenden Schrittplan
@@ -24,7 +54,10 @@ Navigation und Ansichtserhalt nach Aktualisierung sowie beide SVG-Rollen.
 Echte Mausradaktionen scrollten den äußeren Testhost über Kachel und IPSView-
 Testframe abwärts/aufwärts (0 → 451 → 0), ohne Skalenzoom oder ungewollte
 Änderung der Kategorienansicht. Die Konsole blieb fehlerfrei.
-Eine MCP-/Symcon-/tatsächliche IPSView-Client-Abnahme bleibt nach Update offen.
+Die funktionale MCP-Prüfung ist inzwischen bestanden; der Eigentümer bestätigt
+Kachel und tatsächliches IPSView. Im Vorschauhost wurde eine ungeklärte
+MutationObserver-Meldung ohne beobachteten Waterfall-Ausfall protokolliert.
+Alle bestehenden Konfigurationen/Designs blieben erhalten, Testobjekte wurden entfernt.
 
 ## Sankey: berechnete Rest-/Bilanzflüsse
 

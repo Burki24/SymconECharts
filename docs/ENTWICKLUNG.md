@@ -40,6 +40,17 @@ Canvas-Zeichenaufrufe für Kachel und IPSView statt nur vorhandener Titeloptione
 
 ## Aktueller Stand und Zielarchitektur
 
+CalendarPie ergänzt gemäß [ADR 0099](adr/0099-calendar-pie-incomplete-days.md)
+`ShowIncompleteDays` mit kompatiblem Default false. Die familienlokale
+Tagespolicy versorgt Live-Modell und beide synthetischen SVGs; der Renderer
+verwendet das additive `showPie` und erhält für alte Modelle einen strengen
+Fallback. Teilkreise behalten Status, fehlende Quell-IDs und Originalformate.
+Raute und dauerhafter Hinweis markieren den nur auf verfügbare Quellen
+bezogenen Nenner auch ohne Tooltip/Legende. Keine Nullauffüllung oder Änderung
+an Archivprüfung, Zustandsdauern, Designs oder Budgets. Die vorhandene zentrale
+Formular-/SVG-Infrastruktur wird ohne lokale Helper-Änderungen weiterverwendet.
+MCP-/Host-Abnahme nach Modulupdate bleibt offen.
+
 BarWaterfall ergänzt gemäß [ADR 0098](adr/0098-waterfall-subtotals-and-restarts.md)
 `SubtotalAfter` und `Restart` je Quellenzeile mit Default false. Der vorhandene
 familienlokale `WaterfallData` bildet jetzt den vollständigen, ID-stabilen
@@ -57,7 +68,8 @@ Upstream-Helper besitzen keinen Waterfall-Bilanzvertrag; deren Formular-/SVG-
 Infrastruktur bleibt unverändert in Gebrauch. Keine Helper-Kopie oder neue
 Fremdabhängigkeit. Die Vorschau projiziert höchstens fünf Schritte plus
 Endsumme aus dem vollständigen Plan und zählt tatsächlich gezeigte Quellen.
-MCP-/Host-Abnahme dieses Folgeschritts nach Modulupdate bleibt offen.
+Die funktionale MCP-Prüfung ist bestanden; der Eigentümer bestätigt
+Zwischensummen und Neustarts in Kachel und tatsächlichem IPSView.
 
 Sankey ergänzt gemäß [ADR 0097](adr/0097-sankey-calculated-balances.md)
 `Nodes[].Balance` als ausdrückliches Opt-in mit kompatiblem Default false.

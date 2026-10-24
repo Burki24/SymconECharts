@@ -257,4 +257,19 @@ for ($index = 0; $index < 33; $index++) {
 }
 calendarPieReject(static fn () => CalendarPieData::StateDays($manyStates, null, false, [], $leap), 'More than 32 visible states accepted.');
 
+// Display is a policy only: partial days keep their missing IDs and original slices.
+$partialDay = ['status' => 'partial', 'slices' => [['value' => 2.0]], 'missing' => ['variable-2']];
+calendarPieAssert(!CalendarPieData::ShowsPie($partialDay, 'average'), 'Strict numeric default must not draw partial days.');
+foreach (['average', 'counter'] as $mode) {
+    calendarPieAssert(CalendarPieData::ShowsPie($partialDay, $mode, true), 'Opt-in must draw available positive slices.');
+    calendarPieAssert(!CalendarPieData::ShowsPie([...$partialDay, 'slices' => [['value' => 0.0]]], $mode, true), 'Partial zero weights must not invent a circle.');
+    foreach (['missing', 'pending', 'zero'] as $status) {
+        calendarPieAssert(!CalendarPieData::ShowsPie([...$partialDay, 'status' => $status], $mode, true), 'Opt-in must not draw missing, pending or zero days.');
+    }
+}
+foreach ([$unknown[0], $emptyStates[0]] as $day) {
+    calendarPieAssert(CalendarPieData::ShowsPie($day, 'states') === CalendarPieData::ShowsPie($day, 'states', true)
+        && CalendarPieData::ShowsPie($day, 'states'), 'Unknown state duration keeps the actual daily denominator regardless of the numeric option.');
+}
+
 echo "CalendarPie completed months, numeric slices and state durations verified.\n";

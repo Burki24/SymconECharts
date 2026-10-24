@@ -6,6 +6,7 @@
     function element(name) { return document.getElementById('echarts-calendar-pie-' + name); }
     var root = element('root'), chartElement = element('chart'), warning = element('warning'), error = element('error');
     var period = element('period'), periodLabel = element('period-label');
+    var incomplete = element('incomplete');
     var previous = element('previous'), next = element('next'), selected = element('selected');
     var currentState = bootstrap.state || null, chart = null, theme = null, requestVersion = 0, navigating = false;
     var currentOffset = 0, desiredOffset = 0, disposed = false;
@@ -49,6 +50,12 @@
     function buildOption(model, id) {
         var calendar = model.calendarPie, style = calendar.style || {}, colors = colorsFor(id);
         var days = calendar.days || [], categories = calendar.categories || [];
+        var partialEnabled = calendar.mode !== 'states' && calendar.showIncompleteDays === true;
+        function showsPie(day) {
+            // New models carry the PHP policy; retain the strict legacy renderer contract for older documents.
+            return typeof day.showPie === 'boolean' ? day.showPie
+                : (calendar.mode === 'states' ? day.status !== 'pending' : day.status === 'complete');
+        }
         var colorByID = Object.create(null), labelByID = Object.create(null), dayByDate = Object.create(null);
         categories.forEach(function (category, index) {
             colorByID[category.id] = category.id === 'unknown' ? style.unknownColor || colors.muted
@@ -63,13 +70,19 @@
         var axisSize = design.fontSizePercent(style.axisFontSizePercent, width < 450 ? 10 : 12);
         var valueSize = design.fontSizePercent(style.valueFontSizePercent, 10);
         var title = design.chartTitleLayout(chartBootstrap, calendar.title, titleSize);
+        var incompleteText = translate('Incomplete days are marked ◆. Shares refer only to available sources.');
+        incomplete.hidden = !partialEnabled || !days.some(function (day) { return day.status === 'partial'; });
+        incomplete.textContent = incompleteText;
+        incomplete.style.top = (header + title.contentTop + 32) + 'px';
+        incomplete.style.color = style.axisColor || colors.text;
+        var noticeHeight = incomplete.hidden ? 0 : (incomplete.offsetHeight || 32) + 8;
         period.style.top = (header + title.contentTop) + 'px';
         period.style.color = style.axisColor || colors.text;
         var firstDay = bound(style.firstWeekday, 0, 6, 1);
         var monthStart = new Date(calendar.month + '-01T12:00:00Z');
         var dayCount = new Date(Date.UTC(monthStart.getUTCFullYear(), monthStart.getUTCMonth() + 1, 0)).getUTCDate();
         var weekCount = Math.ceil((((monthStart.getUTCDay() - firstDay + 7) % 7) + dayCount) / 7);
-        var top = title.contentTop + 36 + axisSize + 10;
+        var top = title.contentTop + 36 + noticeHeight + axisSize + 10;
         var bottom = style.showLegend === false ? 12 : axisSize + 32;
         top = Math.min(top, Math.max(1, height - bottom - 7));
         var left = 10, right = 10;
@@ -105,9 +118,12 @@
             var result = escapeHTML(day.date) + '<br>' + escapeHTML(translate(modeText[calendar.mode]));
             if (calendar.normalized && calendar.mode !== 'states') { result += '<br>' + escapeHTML(translate('Normalized comparison (0–100)')); }
             if (statusText[day.status]) { result += '<br>' + escapeHTML(translate(statusText[day.status])); }
+            if (partialEnabled && day.status === 'partial') {
+                result += '<br>' + escapeHTML(translate('Shares refer only to available sources.'));
+            }
             var total = calendar.mode === 'states' ? day.daySeconds : (day.slices || []).reduce(function (sum, slice) { return sum + slice.value; }, 0);
             (day.slices || []).forEach(function (slice) {
-                var percentage = total > 0 && (day.status === 'complete' || calendar.mode === 'states')
+                var percentage = total > 0 && (day.status === 'complete' || calendar.mode === 'states' || partialEnabled && showsPie(day))
                     ? ' (' + (slice.value / total * 100).toLocaleString(bootstrap.language || undefined, {maximumFractionDigits: 1}) + ' %)' : '';
                 result += '<br>' + escapeHTML(label(slice)) + ': ' + escapeHTML(formattedSlice(slice)
                     + (calendar.normalized && calendar.mode !== 'states' ? '' : percentage));
@@ -132,11 +148,10 @@
                 stillShowZeroSum: false, showEmptyCircle: false,
                 data: categories.map(function (category) { return {name: category.id, value: 0, itemStyle: {color: colorByID[category.id]}}; })});
         }
-        // Zero, absent, incomplete numeric and unfinished days never become synthetic equal slices.
+        // Missing and zero weights never become synthetic slices; opt-in does not change the stored day status.
         days.forEach(function (day) {
             var positive = (day.slices || []).filter(function (slice) { return Number.isFinite(slice.value) && slice.value > 0; });
-            if (!positive.length || day.status === 'pending'
-                || (calendar.mode !== 'states' && day.status !== 'complete')) { return; }
+            if (!positive.length || !showsPie(day)) { return; }
             var innerRadius = radius * bound(style.innerRadiusPercent, 0, 80, 0) / 100;
             var total = positive.reduce(function (sum, slice) { return sum + slice.value; }, 0);
             var previousValue = 0;
@@ -146,7 +161,8 @@
                 var angle = -bound(style.startAngle, 0, 360, 90) / 180 * Math.PI
                     + (style.clockwise === false ? -1 : 1) * (previousValue + slice.value / 2) / total * Math.PI * 2;
                 previousValue += slice.value;
-                var labelRadius = (radius + innerRadius) / 2;
+                // ECharts 6.1 Pie adds three pixels along the sector bisector for inside labels.
+                var labelRadius = (radius + innerRadius) / 2 + 3;
                 var x = Math.cos(angle) * labelRadius, y = Math.sin(angle) * labelRadius;
                 var halfWidth = measurement.width / 2 + 1, halfHeight = measurement.height / 2 + 1;
                 var nearestX = Math.max(0, Math.abs(x) - halfWidth), nearestY = Math.max(0, Math.abs(y) - halfHeight);
@@ -179,6 +195,9 @@
             symbolSize: Math.max(2, Math.min(10, Math.min(cellWidth, cellHeight) * 0.22)),
             data: markers.map(function (day) {
                 return {value: [day.date, 0], date: day.date,
+                    // Keep the incomplete marker outside the pie even without tooltip, labels or legend.
+                    symbolOffset: showsPie(day) && day.status === 'partial'
+                        ? [Math.max(0, cellWidth / 2 - 7), Math.min(0, -cellHeight / 2 + 7)] : [0, 0],
                     symbol: {zero: 'emptyCircle', partial: 'diamond', missing: 'rect', pending: 'triangle'}[day.status] || 'rect',
                     itemStyle: {color: day.status === 'partial' ? '#FF994D' : colors.muted, opacity: day.status === 'pending' ? 0.4 : 0.8}};
             })});
@@ -190,11 +209,12 @@
         return {backgroundColor: bootstrap.mode === 'ipsview' && options.adaptToBackground ? 'transparent' : colors.background,
             ...design.animationOptions(style, {enabled: true, initialDuration: 350, updateDuration: 500}),
             aria: {enabled: true, label: {description: calendar.title + ': ' + monthName(calendar.month) + ', ' + translate(modeText[calendar.mode])
-                + (calendar.normalized && calendar.mode !== 'states' ? ', ' + translate('Normalized comparison (0–100)') : '')}},
+                + (calendar.normalized && calendar.mode !== 'states' ? ', ' + translate('Normalized comparison (0–100)') : '')
+                + (!incomplete.hidden ? ', ' + incompleteText : '')}},
             title: {show: title.show, text: calendar.title, left: 'center', top: title.top,
                 textStyle: {color: style.titleColor || colors.text, fontSize: titleSize, width: Math.max(1, width - 24), overflow: 'truncate'}},
             tooltip: {show: style.showTooltip !== false, confine: true, formatter: tooltip,
-                extraCssText: calendar.normalized && calendar.mode !== 'states'
+                extraCssText: partialEnabled || calendar.normalized && calendar.mode !== 'states'
                     ? 'max-width:' + Math.max(80, width - 16) + 'px;white-space:normal;overflow-wrap:anywhere;box-sizing:border-box;' : ''},
             legend: {show: style.showLegend !== false, type: 'scroll', bottom: 8, left: 10, right: 10,
                 selectedMode: false, itemWidth: 12, itemHeight: 9, itemGap: 10,
@@ -230,6 +250,7 @@
             if (chart) { chart.clear(); }
             chartElement.hidden = true;
             period.hidden = true;
+            incomplete.hidden = true;
             warning.hidden = true;
             error.textContent = translate(state && state.error || loadError);
             error.hidden = false;

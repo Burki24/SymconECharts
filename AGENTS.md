@@ -267,6 +267,12 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   `{8F3D4E67-A52E-46AB-976E-25EC4F37FB52}` gemäß ADR 0060. Das eigene
   Monatskalendermodul bietet Tagesmittelwerte, Zähler-Tagesverbrauch und
   Zustandsdauer als auswählbare Datengrundlagen, nicht als getrennte Module.
+  ADR 0099 ergänzt `ShowIncompleteDays` (Default false) ausschließlich für
+  numerische Tagesquellen. Die gemeinsame familienlokale Tagespolicy steuert
+  Live-Modell und SVGs. Fehlende IDs und Originalwerte bleiben erhalten;
+  Teilkreise beziehen ihre Anteile nur auf vorhandene Gewichte und tragen
+  dauerhafte Kennzeichnung. Zustandsdauern, Designs und Archivbudgets bleiben
+  unverändert; gekürzte/fehlerhafte Archivantworten bleiben Fehler.
 
 - `ECST` ist `EChartsStateTimeline` zugeordnet (`ST` = State Timeline), GUID
   `{581AD0EF-4E14-4796-902B-08381E299232}` gemäß ADR 0059. Archivierte

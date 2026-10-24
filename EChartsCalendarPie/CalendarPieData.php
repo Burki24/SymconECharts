@@ -14,6 +14,22 @@ use InvalidArgumentException;
 /** Completed local month days with no interpolation, current-value fallback or zero filling. */
 final class CalendarPieData
 {
+    /** Shared display policy for live models and synthetic SVGs; never changes missing IDs or weights. */
+    public static function ShowsPie(array $day, string $mode, bool $showIncompleteDays = false): bool
+    {
+        $status = $day['status'];
+        if ($mode === 'states' ? $status === 'pending'
+            : ($status !== 'complete' && !($showIncompleteDays && $status === 'partial'))) {
+            return false;
+        }
+        foreach ($day['slices'] as $slice) {
+            if (is_finite((float) $slice['value']) && $slice['value'] > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /** EndTimestamp is exclusive; Days also includes explicitly pending calendar cells. */
     public static function Resolve(string $month, int $offset, int $now, string $timezone): array
     {

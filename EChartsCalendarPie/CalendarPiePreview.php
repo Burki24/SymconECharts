@@ -28,6 +28,7 @@ trait CalendarPiePreview
         $svg = str_replace('<svg xmlns', '<svg font-family="Arial, sans-serif" xmlns', $svg);
         $mode = $values['DataMode'] ?? $this->ReadPropertyString('DataMode');
         $normalize = $mode !== 'states' && (bool) ($values['NormalizeValues'] ?? $this->ReadPropertyBoolean('NormalizeValues'));
+        $showIncompleteDays = $mode !== 'states' && (bool) ($values['ShowIncompleteDays'] ?? $this->ReadPropertyBoolean('ShowIncompleteDays'));
         try {
             $window = CalendarPieData::Resolve(
                 (string) ($values['Month'] ?? $this->ReadPropertyString('Month')),
@@ -95,7 +96,7 @@ trait CalendarPiePreview
         $offset = ($weekday - $firstDay + 7) % 7;
         $weeks = (int) ceil(($offset + (int) $civilMonth->format('t')) / 7);
         $left = 16;
-        $top = 88;
+        $top = $showIncompleteDays ? 112 : 88;
         $cellWidth = 688 / 7;
         $cellHeight = (($this->BarPreviewValue($values, 'ShowLegend', 'boolean', $ipsView) ? 310 : 342) - $top) / $weeks;
         $showDays = $this->BarPreviewValue($values, 'ShowDayNumbers', 'boolean', $ipsView)
@@ -107,9 +108,13 @@ trait CalendarPiePreview
         $inner = $radius * $number('InnerRadiusPercent', 0, 80) / 100;
         $svg .= '<text x="360" y="58" text-anchor="middle" font-size="' . $n($axisFont) . '" fill="' . $e($axisColor) . '">'
             . $e($window['Month'] . ($normalize ? ' · ' . $this->Translate('Normalized comparison (0–100)') : '')) . '</text>';
+        if ($showIncompleteDays) {
+            $svg .= '<text data-incomplete-notice="true" x="360" y="78" text-anchor="middle" font-size="9" fill="' . $e($axisColor) . '">'
+                . $e($this->Translate('Incomplete days are marked ◆. Shares refer only to available sources.')) . '</text>';
+        }
         $weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         for ($index = 0; $index < 7; ++$index) {
-            $svg .= '<text x="' . $n($left + ($index + 0.5) * $cellWidth) . '" y="80" text-anchor="middle" font-size="'
+            $svg .= '<text x="' . $n($left + ($index + 0.5) * $cellWidth) . '" y="' . ($top - 8) . '" text-anchor="middle" font-size="'
                 . $n($axisFont) . '" fill="' . $e($axisColor) . '">' . $e($this->Translate($weekdays[($index + $firstDay) % 7])) . '</text>';
         }
         foreach ($window['Days'] as $index => $day) {
@@ -120,16 +125,34 @@ trait CalendarPiePreview
             $cx = $x + $cellWidth / 2;
             $cy = $y + $cellHeight / 2;
             $status = !$day['completed'] ? 'pending' : ($index % 11 === 5 ? 'missing' : ($index % 13 === 4 ? 'zero' : ($index % 7 === 3 ? 'partial' : 'complete')));
+            if ($mode !== 'states' && $status === 'partial' && count($categories) === 1) {
+                $status = 'missing';
+            }
             $weights = [];
             $originals = [];
-            if ($normalize && $status === 'complete') {
-                foreach ($categories as $part => $category) {
+            foreach ($categories as $part => $category) {
+                $available = $status === 'complete' || ($status === 'partial' && $part < count($categories) - 1);
+                if ($normalize && $available) {
                     $originals[$part] = $category['sample'] + ($index % 5) - 2;
                     $weights[] = CalendarPieData::NormalizedValue($originals[$part], $category['range']);
+                } elseif ($mode === 'states' && $status !== 'pending') {
+                    $unknown = $part === count($categories) - 1;
+                    $weights[] = $unknown ? ($status === 'missing' ? 24 : ($status === 'partial' ? 6 : 0))
+                        : ($status === 'missing' ? 0 : 1 + ($part + $index) % 5);
+                } else {
+                    $weights[] = !$normalize && $available ? 1 + ($part + $index) % 5 : 0;
                 }
-                if (array_sum($weights) === 0.0) {
-                    $status = 'zero';
-                }
+            }
+            if ($normalize && $status === 'complete' && array_sum($weights) === 0.0) {
+                $status = 'zero';
+            }
+            $showPie = CalendarPieData::ShowsPie(['status' => $status,
+                'slices'                                   => array_map(static fn (float $weight): array => ['value' => $weight], $weights)], $mode, $showIncompleteDays);
+            $svg .= '<g data-calendar-date="' . $e($day['date']) . '" data-show-pie="' . ($showPie ? 'true' : 'false') . '">';
+            if ($status === 'partial' && $mode !== 'states') {
+                $svg .= '<title>' . $e($day['date'] . ' · ' . $this->Translate('Incomplete data') . ' · '
+                    . $this->Translate('Missing data') . ': ' . $categories[array_key_last($categories)]['label']
+                    . ($showIncompleteDays ? ' · ' . $this->Translate('Shares refer only to available sources.') : '')) . '</title>';
             }
             $svg .= '<rect data-calendar-day="' . $e($day['date']) . '" data-status="' . $status . '" x="' . $n($x) . '" y="' . $n($y)
                 . '" width="' . $n($cellWidth) . '" height="' . $n($cellHeight) . '" fill="' . $e($color('EmptyCellColor', $palette['surface']))
@@ -139,15 +162,7 @@ trait CalendarPiePreview
                 $svg .= '<text x="' . $n($x + 4) . '" y="' . $n($y + $valueFont + 3) . '" font-size="' . $n($valueFont)
                     . '" fill="' . $e($axisColor) . '">' . $calendarDay . '</text>';
             }
-            if ($status === 'complete' || ($mode === 'states' && $status !== 'pending')) {
-                foreach ($categories as $part => $category) {
-                    if ($normalize) {
-                        continue;
-                    }
-                    $unknown = $mode === 'states' && $part === count($categories) - 1;
-                    $weights[] = $unknown ? ($status === 'missing' ? 24 : ($status === 'partial' ? 6 : 0))
-                        : ($mode === 'states' && $status === 'missing' ? 0 : 1 + ($part + $index) % 5);
-                }
+            if ($showPie) {
                 $total = array_sum($weights);
                 $start = -$number('StartAngle', 0, 360) * M_PI / 180;
                 $clockwise = $this->BarPreviewValue($values, 'Clockwise', 'boolean', $ipsView);
@@ -158,7 +173,7 @@ trait CalendarPiePreview
                     }
                     $span = $weights[$part] / $total * 2 * M_PI;
                     $end = $start + ($clockwise ? 1 : -1) * $span;
-                    $svg .= '<path data-calendar-pie="true"' . ($normalize ? ' data-weight="' . $n($weights[$part]) . '" data-original-value="' . $n($originals[$part]) . '"' : '')
+                    $svg .= '<path data-calendar-pie="true" data-source-index="' . $part . '"' . ($normalize ? ' data-weight="' . $n($weights[$part]) . '" data-original-value="' . $n($originals[$part]) . '"' : '')
                         . ' d="' . EChartsBarPreview::Sector($cx, $cy, $inner, $radius, $start, $end, $clockwise)
                         . '" fill="' . $e($category['color']) . '" stroke="' . $e($color('SliceBorderColor', $palette['surface']))
                         . '" stroke-width="' . $number('SliceBorderWidth', 0, 5) . '"/>';
@@ -193,6 +208,10 @@ trait CalendarPiePreview
                     }
                     $start = $end;
                 }
+                if ($status === 'partial' && $mode !== 'states') {
+                    $svg .= '<path data-marker="partial" d="M' . $n($x + $cellWidth - 7) . ' ' . $n($y + 3)
+                        . 'l4 4 -4 4 -4 -4Z" fill="#FF994D"/>';
+                }
             } else {
                 $stroke = $status === 'partial' ? '#FF994D' : $palette['muted'];
                 $svg .= match ($status) {
@@ -202,6 +221,7 @@ trait CalendarPiePreview
                     default   => '<rect data-marker="missing" x="' . $n($cx - 3) . '" y="' . $n($cy - 3) . '" width="6" height="6" fill="' . $e($stroke) . '"/>'
                 };
             }
+            $svg .= '</g>';
         }
         if ($this->BarPreviewValue($values, 'ShowLegend', 'boolean', $ipsView)) {
             foreach (array_slice($categories, 0, 8) as $index => $category) {

@@ -99,6 +99,7 @@ class EChartsCalendarPie extends IPSModuleStrict
             $this->RegisterPropertyString('Title', '');
             $this->RegisterPropertyString('DataMode', 'average');
             $this->RegisterPropertyBoolean('NormalizeValues', false);
+            $this->RegisterPropertyBoolean('ShowIncompleteDays', false);
             $this->RegisterPropertyString('Month', '');
             $this->RegisterPropertyInteger('StateVariableID', 0);
             $this->RegisterPropertyString('States', '[]');
@@ -188,7 +189,7 @@ class EChartsCalendarPie extends IPSModuleStrict
                 ['caption' => 'Calendar and circles', 'start' => 'ShowTooltip'],
                 ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
             ]);
-            $fields = ['Title', 'Sources', 'DataMode', 'NormalizeValues', 'Month', 'StateVariableID', 'States',
+            $fields = ['Title', 'Sources', 'DataMode', 'NormalizeValues', 'ShowIncompleteDays', 'Month', 'StateVariableID', 'States',
                 'UseVariablePresentation', 'Unit', 'Decimals',
                 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
                 'IPSViewBackgroundOpacityPercent', ...array_keys(self::DESIGN_DEFAULTS),
@@ -413,7 +414,7 @@ class EChartsCalendarPie extends IPSModuleStrict
         $debugFlowFailed = false;
         $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
-            foreach (['Sources', 'NormalizeValues', 'NormalizationHint', 'UseVariablePresentation', 'Unit', 'Decimals'] as $name) {
+            foreach (['Sources', 'NormalizeValues', 'NormalizationHint', 'ShowIncompleteDays', 'IncompleteDaysHint', 'UseVariablePresentation', 'Unit', 'Decimals'] as $name) {
                 $this->UpdateFormField($name, 'visible', $Mode !== 'states');
             }
             foreach (['StateVariableID', 'States'] as $name) {
@@ -518,10 +519,16 @@ class EChartsCalendarPie extends IPSModuleStrict
                 $unit = $sources[0]['Unit'];
                 $decimals = max(array_column($sources, 'Decimals'));
             }
+            $showIncompleteDays = $mode !== 'states' && $this->ReadPropertyBoolean('ShowIncompleteDays');
+            foreach ($days as &$day) {
+                $day['showPie'] = CalendarPieData::ShowsPie($day, $mode, $showIncompleteDays);
+            }
+            unset($day);
             $encoded = $this->EncodeVisualizationHTMLJSON([
                 'schemaVersion' => 1, 'family' => 'calendarPie', 'theme' => $this->EffectiveTheme($ipsView),
                 'calendarPie'   => ['title' => $this->ReadPropertyString('Title'), 'mode' => $mode,
                     'normalized'            => $mode !== 'states' && $this->ReadPropertyBoolean('NormalizeValues'),
+                    'showIncompleteDays'    => $showIncompleteDays,
                     'month'                 => $window['Month'], 'baseMonth' => $window['BaseMonth'], 'windowOffset' => $windowOffset,
                     'maxOffset'             => $window['MaximumOffset'], 'timezone' => $window['Timezone'],
                     'startTimestamp'        => $window['StartTimestamp'], 'endTimestamp' => $window['EndTimestamp'],
@@ -991,6 +998,7 @@ class EChartsCalendarPie extends IPSModuleStrict
             'Apache ECharts could not be initialized.', 'Unknown', 'Previous month', 'Next month', 'Selected month',
             'Daily means', 'Daily consumption', 'State duration', 'No positive values', 'Incomplete data',
             'Normalized comparison (0–100)', 'Normalized', 'Range', 'Circle share',
+            'Shares refer only to available sources.', 'Incomplete days are marked ◆. Shares refer only to available sources.',
             'Missing data', 'Not completed', 'January', 'February', 'March', 'April', 'May', 'June',
             'July', 'August', 'September', 'October', 'November', 'December', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         return array_combine($keys, array_map(fn (string $key): string => $this->Translate($key), $keys));
@@ -999,7 +1007,7 @@ class EChartsCalendarPie extends IPSModuleStrict
     private function SetDataModeVisibility(array &$elements, string $mode): void
     {
         foreach ($elements as &$element) {
-            if (in_array($element['name'] ?? null, ['Sources', 'NormalizeValues', 'NormalizationHint', 'UseVariablePresentation', 'Unit', 'Decimals'], true)) {
+            if (in_array($element['name'] ?? null, ['Sources', 'NormalizeValues', 'NormalizationHint', 'ShowIncompleteDays', 'IncompleteDaysHint', 'UseVariablePresentation', 'Unit', 'Decimals'], true)) {
                 $element['visible'] = $mode !== 'states';
                 if (in_array($element['name'] ?? null, ['UseVariablePresentation', 'Unit', 'Decimals'], true)) {
                     $element['enabled'] = !$this->ReadPropertyBoolean('NormalizeValues');

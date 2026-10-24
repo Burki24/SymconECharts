@@ -110,12 +110,33 @@ Der laufende Tag und zukünftige Tage bleiben als nicht abgeschlossen markiert.
 Ein vollständiges Monatsarchiv ist nicht erforderlich.
 
 Bei Mittelwerten und Verbrauch wird ein Kreis nur gezeichnet, wenn alle
-konfigurierten Quellen für diesen Tag vorliegen. Eine Raute markiert einen
+konfigurierten Quellen für diesen Tag vorliegen (unveränderter Standard). Eine Raute markiert einen
 unvollständigen Tag; verfügbare Werte und fehlende Quellen stehen im Tooltip.
 Ein Quadrat kennzeichnet vollständig fehlende Daten, ein leerer Kreis einen
 vollständigen Tag mit ausschließlich echten Nullwerten. Es werden keine
 gleich großen Ersatzsegmente erzeugt. Nicht abgeschlossene Tage tragen ein
 abgeschwächtes Dreieck.
+
+Mit **Vorhandene Quellen an unvollständigen Tagen anzeigen** können Sie für
+Mittelwerte und Verbrauch ausdrücklich auch Teilkreise aktivieren. Gezeichnet
+werden nur vorhandene positive Werte beziehungsweise normalisierte Gewichte.
+Die fehlenden Quellen bleiben im Tooltip genannt; sie erhalten keinen
+erfundenen Nullwert oder Ersatzanteil. Eine orange Raute am Zellrand und ein
+dauerhafter Hinweis kennzeichnen unvollständige Tage auch bei ausgeschalteter
+Legende, Wertanzeige oder Tooltip.
+
+Die Kreisanteile beziehen sich dann **nur auf die an diesem Tag vorhandenen
+Quellen**, nicht auf eine vollständige Gesamtmenge. Eine allein verfügbare
+positive Quelle ergibt daher 100 % des gezeigten Kreises. Bei aktiver
+Normalisierung bleiben Min/Max unverändert: Nur der Kreisanteil bezieht sich
+auf die vorhandenen Gewichte; Originalwerte, Einheiten und Präzision bleiben
+im Tooltip erhalten. Sind alle vorhandenen Gewichte null, bleibt die Raute
+ohne Kreis. Vollständig fehlende und nicht abgeschlossene Tage werden auch
+mit dieser Option nicht als Kreise dargestellt.
+
+Die Auswahl gilt gemeinsam für Kachel, IPSView und beide Vorschauen. Sie ist
+standardmäßig ausgeschaltet und wird im Zustandsmodus nicht ausgewertet;
+dessen unbekannter Zeitanteil und tatsächliche Tageslänge bleiben erhalten.
 
 Ein vorhandenes Tagesaggregat kann sich auch auf einen erst im Tagesverlauf
 begonnenen Aufzeichnungszeitraum beziehen. Es wird unverändert übernommen;

@@ -1,6 +1,10 @@
 {
     "translations": {
         "de": {
+            "Show available sources on incomplete days": "Vorhandene Quellen an unvollständigen Tagen anzeigen",
+            "Optional for numeric sources only: missing sources remain marked and are never replaced by zero. Circle shares refer only to available sources.": "Optional nur für numerische Quellen: Fehlende Quellen bleiben gekennzeichnet und werden niemals durch Null ersetzt. Kreisanteile beziehen sich nur auf vorhandene Quellen.",
+            "Shares refer only to available sources.": "Anteile beziehen sich nur auf vorhandene Quellen.",
+            "Incomplete days are marked ◆. Shares refer only to available sources.": "Unvollständige Tage sind mit ◆ markiert. Anteile beziehen sich nur auf vorhandene Quellen.",
             "Normalize numeric sources using their Min/Max": "Numerische Quellen anhand ihres Min/Max normalisieren",
             "Normalization maps each source range to 0–100 and clips only the circle weights. Original units and precision come from each variable presentation; global formatting applies only without normalization.": "Normalisierung bildet jeden Quellbereich auf 0–100 ab und begrenzt nur die Kreisgewichte. Originaleinheiten und Nachkommastellen stammen aus der jeweiligen Variablendarstellung; die globale Formatierung gilt nur ohne Normalisierung.",
             "Min (normalization)": "Min (Normalisierung)",

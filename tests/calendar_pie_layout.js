@@ -75,6 +75,16 @@ const partialTip = tile.option.tooltip.formatter({data: partial});
 assert.match(partialTip, /Incomplete data/);
 assert.match(partialTip, /&lt;Same&gt;/);
 assert.doesNotMatch(partialTip, /<Same>|variable-[12]| %/);
+const partialEnabledModel = {...model, calendarPie: {...model.calendarPie, showIncompleteDays: true,
+    days: model.calendarPie.days.map(day => ({...day, showPie: day.status === 'complete' || day.status === 'partial'}))}};
+const partialEnabled = harness(partialEnabledModel);
+const availablePie = partialEnabled.option.series.find(series => series.id === 'day-2024-02-03');
+assert.ok(availablePie, 'Explicit partial-day opt-in must display the available source.');
+assert.equal(availablePie.data.length, 1, 'Never fabricate missing slices or duplicate source names.');
+assert.match(partialEnabled.option.tooltip.formatter({data: availablePie.data[0]}), /100 %/);
+assert.match(partialEnabled.option.tooltip.formatter({data: availablePie.data[0]}), /Shares refer only to available sources/);
+assert.equal(partialEnabled.elements.incomplete.hidden, false, 'Warning must remain visible without tooltip or legend.');
+assert.match(partialEnabled.option.tooltip.extraCssText, /overflow-wrap:anywhere/, 'Long missing-source names must wrap inside narrow tiles.');
 const completeTip = tile.option.tooltip.formatter({data: pies[0].data[0]});
 assert.match(completeTip, /40 %/);
 assert.match(completeTip, /60 %/);
@@ -181,7 +191,8 @@ function geometry(data, mode, width, height, header, firstWeekday, fontSize, inn
                 box.applyTransform(text.getComputedTransform());
                 for (const [x, y] of [[box.x, box.y], [box.x + box.width, box.y], [box.x, box.y + box.height], [box.x + box.width, box.y + box.height]]) {
                     assert.ok(Math.hypot(x - shape.cx, y - shape.cy) <= shape.r + 0.01,
-                        'Every visible native value label must fit completely inside its own daily pie.');
+                        'Every visible native value label must fit completely inside its own daily pie: '
+                            + JSON.stringify({mode, width, height, firstWeekday, fontSize, innerRadiusPercent, id: series.id, shape, box}));
                 }
                 const nearestX = Math.max(box.x - shape.cx, shape.cx - box.x - box.width, 0);
                 const nearestY = Math.max(box.y - shape.cy, shape.cy - box.y - box.height, 0);
@@ -203,7 +214,7 @@ function geometry(data, mode, width, height, header, firstWeekday, fontSize, inn
     assert.ok(svg.includes('<path'));
     engine.dispose();
 }
-for (const data of [model, stateModel]) {
+for (const data of [model, stateModel, partialEnabledModel]) {
     for (const mode of ['symcon', 'ipsview']) {
         for (const [width, height] of [[300, 300], [400, 500], [900, 460], [1600, 900]]) {
             for (const firstWeekday of [0, 1, 6]) {
@@ -222,7 +233,7 @@ for (const ring of [0, 50, 80]) {geometry(crowded, 'ipsview', 1600, 900, false, 
 const overlapCase = {...crowded, calendarPie: {...crowded.calendarPie, style: {...crowded.calendarPie.style, showDayNumbers: false},
     days: [{...crowded.calendarPie.days[0], slices: crowded.calendarPie.days[0].slices.map(slice => ({...slice, value: 111}))}]}};
 const beforeOverlap = visibleValueLabelCount;
-geometry(overlapCase, 'ipsview', 900, 500, false, 1, 100, 0);
+geometry(overlapCase, 'ipsview', 900, 600, false, 1, 100, 0);
 assert.ok(visibleValueLabelCount - beforeOverlap > 0 && visibleValueLabelCount - beforeOverlap < 8,
     'Native LabelLayout must actually suppress conflicting labels while retaining readable values.');
 assert.ok(visibleValueLabelCount > 0, 'Geometry checks must exercise actually visible native value text, not only hidden labels.');
@@ -261,6 +272,36 @@ assert.match(normalizedZero.option.tooltip.formatter({data: {date: '2024-02-01'}
 const normalizedPartial = harness({...normalizedModel, calendarPie: {...normalizedModel.calendarPie,
     days: [{...normalizedModel.calendarPie.days[0], status: 'partial', missing: ['variable-2'], slices: [normalizedModel.calendarPie.days[0].slices[0]]}]}});
 assert.doesNotMatch(normalizedPartial.option.tooltip.formatter({data: {date: '2024-02-01'}}), /Circle share/);
+for (const output of ['symcon', 'ipsview']) {
+    const available = {...normalizedModel, calendarPie: {...normalizedModel.calendarPie, showIncompleteDays: true,
+        style: {...normalizedModel.calendarPie.style, showTooltip: false, showLegend: false, showValues: false},
+        days: [{...normalizedModel.calendarPie.days[0], showPie: true, status: 'partial', missing: ['variable-2'],
+            slices: [normalizedModel.calendarPie.days[0].slices[0]]}]}};
+    const h = harness(available, output);
+    const tip = h.option.tooltip.formatter({data: {date: '2024-02-01'}});
+    assert.match(tip, /20,0 °C/);
+    assert.match(tip, /Normalized: 50 \/ 100/);
+    assert.match(tip, /Circle share: 100 %/);
+    assert.match(tip, /Missing data: &lt;Same&gt;/);
+    assert.doesNotMatch(tip, /variable-[12]|<Same>/);
+    assert.equal(h.elements.incomplete.hidden, false);
+    assert.match(h.option.aria.label.description, /Incomplete days are marked/);
+    const badge = h.option.series.find(s => s.id === 'day-status').data[0];
+    assert.equal(badge.symbol, 'diamond');
+    assert.ok(badge.symbolOffset[0] > 0 && badge.symbolOffset[1] < 0);
+    const zero = {...available, calendarPie: {...available.calendarPie,
+        days: [{...available.calendarPie.days[0], showPie: false, slices: [{...available.calendarPie.days[0].slices[0], value: 0, originalValue: -10}]}]}};
+    const z = harness(zero, output);
+    assert.ok(!z.option.series.some(s => s.id === 'day-2024-02-01'));
+    assert.match(z.option.tooltip.formatter({data: {date: '2024-02-01'}}), /-10,0 °C/);
+    assert.doesNotMatch(z.option.tooltip.formatter({data: {date: '2024-02-01'}}), /Circle share/);
+    h.window.handleMessage({status: 'ready', chart: model});
+    assert.equal(h.elements.incomplete.hidden, true, 'Returning to strict policy must clear the persistent warning.');
+    h.window.handleMessage({status: 'ready', chart: available});
+    assert.equal(h.elements.incomplete.hidden, false);
+    h.window.handleMessage({status: 'error', chart: null, error: 'INVALID_ARCHIVE_DATA'});
+    assert.equal(h.elements.incomplete.hidden, true, 'Invalid archive data must not leave an orphaned partial-day notice.');
+}
 const escapedUnit = harness({...normalizedModel, calendarPie: {...normalizedModel.calendarPie,
     days: [{...normalizedModel.calendarPie.days[0], slices: [{...normalizedModel.calendarPie.days[0].slices[0], unit: '<img src=x>'}]}]}});
 assert.doesNotMatch(escapedUnit.option.tooltip.formatter({data: {date: '2024-02-01'}}), /<img/);

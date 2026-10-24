@@ -32,6 +32,16 @@
         },
         {
             "type": "CheckBox",
+            "name": "ShowIncompleteDays",
+            "caption": "Show available sources on incomplete days"
+        },
+        {
+            "type": "Label",
+            "name": "IncompleteDaysHint",
+            "caption": "Optional for numeric sources only: missing sources remain marked and are never replaced by zero. Circle shares refer only to available sources."
+        },
+        {
+            "type": "CheckBox",
             "name": "NormalizeValues",
             "caption": "Normalize numeric sources using their Min/Max",
             "onChange": "ECCP_UpdateNormalizationForm($id, $NormalizeValues);"
