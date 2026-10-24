@@ -1,5 +1,13 @@
 # Unveröffentlicht
 
+## Neu
+
+- Radar bietet je Messgröße optional eine inverse Achse mit Maximum innen und
+  Minimum außen. Kachel, IPSView und Vorschauen verwenden dieselbe Richtung;
+  Achsentexte und Tooltips kennzeichnen die Umkehr. Originalwerte, Einheiten,
+  bestehende Designs und Schutzgrenzen bleiben erhalten. Alte Achsen bleiben
+  ohne Aktivierung unverändert ausgerichtet.
+
 - CalendarPie kann unvollständige Tage optional mit den vorhandenen Quellen
   darstellen. Raute, dauerhafter Hinweis und Tooltip kennzeichnen fehlende
   Quellen; Kreisanteile beziehen sich ausdrücklich nur auf vorhandene Werte

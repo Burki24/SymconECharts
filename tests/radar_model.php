@@ -19,6 +19,39 @@ $sources = [
 $values = [1001 => ['Value' => -5, 'Timestamp' => 100], 1002 => ['Value' => 0, 'Timestamp' => 101],
     1003        => ['Value' => 2500, 'Timestamp' => 102]];
 $model = RadarModel::Build($axes, $sources, $values);
+$inverseAxes = $axes;
+$inverseAxes[0]['Inverse'] = true;
+$inverseAxes[2]['Inverse'] = true;
+$inverse = RadarModel::Build($inverseAxes, $sources, $values);
+if ($inverse['data'][0]['percentValues'] !== [75.0, 0.0, 0.0]
+    || $inverse['data'][0]['values'] !== $model['data'][0]['values']
+    || $inverse['data'][0]['variableIDs'] !== $model['data'][0]['variableIDs']
+    || $inverse['data'][0]['timestamps'] !== $model['data'][0]['timestamps']
+    || $inverse['data'][0]['id'] !== $model['data'][0]['id'] || $inverse['clippedCount'] !== 1) {
+    throw new RuntimeException('Inverse Radar axes must reverse only the bounded radius, retaining raw values, identities, timestamps and clipping.');
+}
+$explicitNormal = array_map(static fn (array $axis): array => [...$axis, 'Inverse' => false], $axes);
+if (RadarModel::Build($explicitNormal, $sources, $values) !== $model) {
+    throw new RuntimeException('Legacy axes and explicit false must produce identical Radar models.');
+}
+foreach ([[-30, 100.0, 1], [-20, 100.0, 0], [10, 50.0, 0], [40, 0.0, 0], [50, 0.0, 1]] as [$value, $radius, $clipped]) {
+    $case = $values;
+    $case[1001]['Value'] = $value;
+    $case[1003]['Value'] = 1000;
+    $actual = RadarModel::Build($inverseAxes, $sources, $case);
+    if ($actual['data'][0]['percentValues'][0] !== $radius || $actual['clippedCount'] !== $clipped) {
+        throw new RuntimeException('Inverse Radar must place minimum outside, maximum inside and clip after preserving raw values.');
+    }
+}
+foreach ([null, 0, 1, 'true', 'false', [], new stdClass()] as $invalid) {
+    $badAxes = $axes;
+    $badAxes[2]['Inverse'] = $invalid;
+    try {
+        RadarModel::Validate($badAxes, $sources);
+        throw new RuntimeException('Nonboolean Radar inversion was accepted.');
+    } catch (InvalidArgumentException) {
+    }
+}
 if ($model['data'][0]['values'] !== [-5.0, 0.0, 2500.0] || $model['data'][0]['percentValues'] !== [25.0, 0.0, 100.0]
     || $model['clippedCount'] !== 1 || $model['data'][0]['variableIDs'] !== [1001, 1002, 1003]) {
     throw new RuntimeException('Radar must preserve raw values and IDs, align axes and bound only visual percentages.');

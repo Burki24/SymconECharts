@@ -11,6 +11,8 @@ gemeinsamen Radar-Achsen. Es wird kein Archiv benötigt.
    einem Buchstaben und enthalten höchstens 40 Buchstaben, Ziffern, Unterstriche
    oder Bindestriche. Je Achse Beschriftung, Minimum, Maximum, optional Einheit
    und 0–6 Nachkommastellen festlegen. Das Maximum muss größer sein als das Minimum.
+   **Inverse Achse (Minimum außen)** kehrt bei Bedarf die Richtung dieser
+   Messgröße für alle Gruppen um; standardmäßig ist die Option ausgeschaltet.
 3. Unter **Vergleichswerte** für jede benannte Gruppe eine numerische Variable
    je Achse auswählen. Beispielsweise erhält „Büro“ je eine Temperatur-,
    Feuchtigkeits- und CO₂-Variable; „Küche“ erhält dieselben Achsen mit eigenen
@@ -23,6 +25,16 @@ Der Radius zeigt den relativen Stand zwischen Minimum (Mitte, 0 %) und Maximum
 Radius ist nicht automatisch besser oder schlechter. Werte außerhalb des
 Bereichs werden nur optisch begrenzt; ein Hinweis erscheint und der Tooltip
 zeigt weiterhin die Originalwerte mit der jeweiligen Einheit.
+
+Auf einer inversen Achse liegt das Maximum in der Mitte und das Minimum außen.
+Beispielsweise liegt bei einem Verbrauchsbereich von 0–100 W ein Wert von
+20 W bei 80 % des Radius. Eine normale Batterieachse von 0–100 % kann daneben
+weiterhin hohe Ladestände außen zeigen. Min/Max bleiben aufsteigend konfiguriert;
+Achsenbeschriftung und Tooltip kennzeichnen inverse Achsen mit „(invers)“.
+Der angezeigte Bereich verläuft von innen nach außen, bei inversen Achsen also
+vom Maximum zum Minimum. Optionale Prozentmarkierungen beschreiben immer den
+Radius, nicht den unveränderten Originalwert. Es entsteht keine automatische
+Bewertung. Beide Ausgabewege und die Vorschauen verwenden dieselbe Achsenrichtung.
 
 ## Gruppenauswahl
 

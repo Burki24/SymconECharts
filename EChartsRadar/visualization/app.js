@@ -103,16 +103,20 @@
             return Number(value).toLocaleString(bootstrap.language || undefined, { maximumFractionDigits: axis.Decimals })
                 + (axis.Unit ? ' ' + axis.Unit : '');
         }
+        function axisName(axis) {
+            // Put the direction first so truncated names still disclose inversion.
+            return (axis.Inverse === true ? translate('(inverse)') + ' ' : '') + axis.Label;
+        }
         return {
             color: seriesColors,
             backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
                 ? 'transparent' : colors.background,
             ...design.animationOptions(style, { enabled: true, initialDuration: 350, updateDuration: 500 }),
-            aria: { enabled: true, ...(selectable ? { label: { description: String(radar.title || 'Radar') + '. '
-                + (groups.some(function (item) { return selected[item.id] !== false; })
-                    ? groups.filter(function (item) { return selected[item.id] !== false; }).map(function (item) {
+            aria: { enabled: true, ...(selectable || axes.some(function (axis) { return axis.Inverse === true; }) ? { label: { description: String(radar.title || 'Radar') + '. '
+                + (groups.some(function (item) { return !selectable || selected[item.id] !== false; })
+                    ? groups.filter(function (item) { return !selectable || selected[item.id] !== false; }).map(function (item) {
                         return item.name + ': ' + axes.map(function (axis, index) {
-                            return axis.Label + ': ' + rawValue((item.values || [])[index], axis);
+                            return axisName(axis) + ': ' + rawValue((item.values || [])[index], axis);
                         }).join(', ');
                     }).join('; ')
                     : translate('No groups selected')) } } : {}) },
@@ -136,7 +140,7 @@
                 formatter: function (parameter) {
                     var item = parameter.data || {};
                     return escapeHTML(item.displayName || item.name || '') + axes.map(function (axis, index) {
-                        return '<br>' + escapeHTML(axis.Label) + ': ' + escapeHTML(rawValue((item.rawValues || [])[index], axis));
+                        return '<br>' + escapeHTML(axisName(axis)) + ': ' + escapeHTML(rawValue((item.rawValues || [])[index], axis));
                     }).join('');
                 } },
             radar: { center: [width / 2, top + (height - top - bottom) / 2], radius: radius,
@@ -156,7 +160,9 @@
                     color: [style.splitAreaColor1 || 'rgba(128,128,128,0.03)', style.splitAreaColor2 || 'rgba(128,128,128,0.09)'],
                     opacity: style.splitAreaOpacityPercent == null ? 1 : style.splitAreaOpacityPercent / 100 } },
                 indicator: axes.map(function (axis) {
-                    return { name: axis.Label + (style.showAxisRange === false ? '' : '\n' + rawValue(axis.Minimum, axis) + ' … ' + rawValue(axis.Maximum, axis)), min: 0, max: 100 };
+                    var inner = axis.Inverse === true ? axis.Maximum : axis.Minimum;
+                    var outer = axis.Inverse === true ? axis.Minimum : axis.Maximum;
+                    return { name: axisName(axis) + (style.showAxisRange === false ? '' : '\n' + rawValue(inner, axis) + ' … ' + rawValue(outer, axis)), min: 0, max: 100 };
                 }) },
             series: [{ id: 'radar', type: 'radar', symbol: style.symbol || 'circle', symbolSize: style.symbolSize == null ? 4 : style.symbolSize,
                 symbolRotate: Number(style.symbolRotate) || 0,

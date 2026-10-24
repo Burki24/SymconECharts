@@ -58,6 +58,15 @@
                     }
                 },
                 {
+                    "name": "Inverse",
+                    "caption": "Inverse axis (minimum outside)",
+                    "width": "220px",
+                    "add": false,
+                    "edit": {
+                        "type": "CheckBox"
+                    }
+                },
+                {
                     "name": "Unit",
                     "caption": "Unit",
                     "width": "180px",
@@ -102,6 +111,11 @@
                     "caption": "Maximum"
                 },
                 {
+                    "type": "CheckBox",
+                    "name": "Inverse",
+                    "caption": "Inverse axis (minimum outside)"
+                },
+                {
                     "type": "ValidationTextBox",
                     "name": "Unit",
                     "caption": "Unit"
@@ -114,6 +128,10 @@
                     "caption": "Decimals"
                 }
             ]
+        },
+        {
+            "type": "Label",
+            "caption": "Inverse axes place the maximum in the center and the minimum outside. Percent labels describe the radius; original values remain unchanged."
         },
         {
             "type": "Label",

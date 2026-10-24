@@ -40,6 +40,16 @@ Canvas-Zeichenaufrufe für Kachel und IPSView statt nur vorhandener Titeloptione
 
 ## Aktueller Stand und Zielarchitektur
 
+Radar ergänzt gemäß [ADR 0100](adr/0100-radar-inverse-axes.md) das optionale
+Boolean-Feld `Axes[].Inverse` mit Default false. `RadarModel` projiziert allein
+den begrenzten Radius invers; Originalwerte, Min/Max, Einheiten, Präzision,
+Quell-IDs und Zeitstempel bleiben erhalten. Die numerische Bereichsprüfung
+verwendet jetzt den vorhandenen `EChartsValueRange`, die fachliche Projektion
+bleibt familienlokal und versorgt beide Live-Ausgaben und SVGs. Achsennamen,
+Tooltip und ARIA kennzeichnen die Umkehr; Bereichstexte laufen innen nach außen.
+Bestehende Designer und 3–10-/16-/160-/Bytebudgets ändern sich nicht.
+Neue MCP-/Host-Abnahme nach Modulupdate bleibt offen.
+
 CalendarPie ergänzt gemäß [ADR 0099](adr/0099-calendar-pie-incomplete-days.md)
 `ShowIncompleteDays` mit kompatiblem Default false. Die familienlokale
 Tagespolicy versorgt Live-Modell und beide synthetischen SVGs; der Renderer
@@ -49,7 +59,8 @@ Raute und dauerhafter Hinweis markieren den nur auf verfügbare Quellen
 bezogenen Nenner auch ohne Tooltip/Legende. Keine Nullauffüllung oder Änderung
 an Archivprüfung, Zustandsdauern, Designs oder Budgets. Die vorhandene zentrale
 Formular-/SVG-Infrastruktur wird ohne lokale Helper-Änderungen weiterverwendet.
-MCP-/Host-Abnahme nach Modulupdate bleibt offen.
+Die funktionale MCP-Prüfung wurde bestanden; der Eigentümer bestätigt die
+optionalen Teilquellen in Kachel und IPSView.
 
 BarWaterfall ergänzt gemäß [ADR 0098](adr/0098-waterfall-subtotals-and-restarts.md)
 `SubtotalAfter` und `Restart` je Quellenzeile mit Default false. Der vorhandene

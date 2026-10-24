@@ -610,6 +610,7 @@ class EChartsRadar extends IPSModuleStrict
                 'Apache ECharts could not be initialized.'                                                                    => $this->Translate('Apache ECharts could not be initialized.'),
                 'All'                                                                                                         => $this->Translate('All'),
                 'Inverse'                                                                                                     => $this->Translate('Inverse'),
+                '(inverse)'                                                                                                   => $this->Translate('(inverse)'),
                 'No groups selected'                                                                                          => $this->Translate('No groups selected'),
                 self::MODEL_TOO_LARGE_MESSAGE                                                                                 => $this->Translate(self::MODEL_TOO_LARGE_MESSAGE),
                 'Data could not be refreshed. Showing the last available values.'                                             => $this->Translate(

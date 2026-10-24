@@ -192,6 +192,11 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   3–10 Achsen. Optionale Gruppenauswahl und Anfangssichtbarkeit sind reine
   Ansichten; alle Werte bleiben in Validierung, Gateway und Abonnements.
   Flüchtige Auswahl-/Legendenankerlogik wird mit anderen Familien geteilt.
+  ADR 0100 ergänzt `Axes[].Inverse` als optionalen Boolean mit Default false.
+  Nur die begrenzte Radiusprojektion wird umgekehrt (Maximum innen, Minimum
+  außen); aufsteigende Min/Max, Originalwerte und Metadaten bleiben erhalten.
+  Live-Ausgaben und SVGs teilen `RadarModel`, die numerische Bereichsprüfung
+  verwendet `EChartsValueRange`. Designs und sämtliche Schutzbudgets bleiben gleich.
   Verteilungen abgeschlossener Stundenmittelwerte von Archivvariablen liegen
   in `EChartsBoxplot` gemäß ADR 0054; Quartile werden nicht aus Tagesaggregaten
   approximiert und fehlende Intervalle nicht als Null ergänzt.

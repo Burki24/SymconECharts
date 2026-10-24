@@ -111,12 +111,12 @@ trait RadarPreview
             if ($this->BarPreviewValue($values, 'ShowAxisNames', 'boolean', $ipsView)) {
                 [$x, $y] = $point($index, 1 + max(0, min(40, $this->BarPreviewValue($values, 'AxisNameGap', 'integer', $ipsView))) / 100);
                 $anchor = abs($x - 360) < 1 ? 'middle' : ($x < 360 ? 'end' : 'start');
-                $range = EChartsBarPreview::FormatValue($axis['Minimum'], $axis['Decimals'], $axis['Unit'], $language)
-                    . ' … ' . EChartsBarPreview::FormatValue($axis['Maximum'], $axis['Decimals'], $axis['Unit'], $language);
+                $range = EChartsBarPreview::FormatValue($axis['Inverse'] ? $axis['Maximum'] : $axis['Minimum'], $axis['Decimals'], $axis['Unit'], $language)
+                    . ' … ' . EChartsBarPreview::FormatValue($axis['Inverse'] ? $axis['Minimum'] : $axis['Maximum'], $axis['Decimals'], $axis['Unit'], $language);
                 $svg .= '<text x="' . EChartsBarPreview::N($x) . '" y="' . EChartsBarPreview::N($y)
                     . '" text-anchor="' . $anchor . '" font-size="' . EChartsBarPreview::N($font) . '" fill="' . EChartsBarPreview::E($axisColor)
                     . '" font-weight="' . ($this->BarPreviewValue($values, 'AxisLabelBold', 'boolean', $ipsView) ? 'bold' : 'normal') . '">'
-                    . EChartsBarPreview::E(mb_strimwidth($axis['Label'], 0, 25, '…'))
+                    . EChartsBarPreview::E(($axis['Inverse'] ? $this->Translate('(inverse)') . ' ' : '') . mb_strimwidth($axis['Label'], 0, 25, '…'))
                     . ($this->BarPreviewValue($values, 'ShowAxisRange', 'boolean', $ipsView) ? '<tspan x="' . $n($x)
                         . '" dy="1.25em">' . EChartsBarPreview::E(mb_strimwidth($range, 0, 30, '…')) . '</tspan>' : '') . '</text>';
             }

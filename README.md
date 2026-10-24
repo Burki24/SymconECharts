@@ -48,6 +48,7 @@ umfassen höchstens 366 × 24 Stunden und berücksichtigen nur vollständig
 enthaltene, abgeschlossene Archivstunden.
 Radar vergleicht aktuelle Messwerte von bis zu 16 manuell angelegten Gruppen
 auf 3–10 gemeinsam festgelegten Achsen mit eigenen Wertebereichen und Einheiten.
+Jede Messgröße lässt sich optional invers darstellen: Maximum innen, Minimum außen.
 Eine optionale Gruppenauswahl erhält die Achsenskalen und die gewählte Ansicht
 bei Aktualisierungen.
 Boxplot vergleicht die Verteilung abgeschlossener Archiv-Stundenmittelwerte.

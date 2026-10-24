@@ -1,5 +1,35 @@
 # Tests
 
+## Radar: inverse Achsen je Messgröße
+
+`php tests/radar_model.php` begann RED an der noch unveränderten Radiusprojektion.
+Geprüft sind identische Altachsen/false, unabhängige Umkehr mehrerer Achsen,
+negative Wertebereiche, Min/Max/Mitte, Begrenzung außerhalb des Bereichs,
+unveränderte Originalwerte/IDs/Zeitstempel und strikt abgewiesene Flags.
+`php tests/gateway_gauges.php --radar-many` ergänzt 16×10 gemischte Achsen,
+unveränderte Properties und Abonnements, beide HTML-Ausgaben und geometrisch
+geprüfte PHP-SVGs. Der tatsächliche Achsen-Callback wird ausgeführt und übergibt
+true/false in ungespeicherten Listen; beide Vorschauen bleiben ohne Persistenz,
+Statusänderung oder Gatewayzugriff. Fehler auf der letzten Achse werden abgewiesen.
+Die bestehenden Modell-, HTML- und Formulargrenztests bleiben aktiv.
+
+`node tests/radar_layout.js` prüft echte Koordinaten der gepinnten ECharts-Engine
+in Kreis/Vieleck und beiden Ausgabewegen: keine doppelte Umkehr, Originalwerte
+in Tooltip und Punktlabels, sichere Texte und ARIA auch ohne Gruppenauswahl oder
+sichtbare Achsennamen. `node tests/radar_browser.mjs` bietet unter `/?inverse=1`
+synthetische Gruppen mit tatsächlicher PHP-Projektion. Die lokale Canvas-
+Browserprüfung bestätigt inverse Beschriftung/Bereich, ARIA und erhaltene
+Gruppenauswahl nach Reihenfolgeänderung in schmaler Kachel und breiter IPSView-
+Testeinbettung. Keine Browserwarnungen oder -fehler beobachtet. Echte Mausradaktionen
+über beiden Diagrammen scrollen den äußeren Host in beide Richtungen
+jeweils 0 → 144 → 0, ohne Diagrammzoom oder Auswahländerung.
+
+Die vollständige Qualitätsprüfung `php tests/quality.php --fix` ist bestanden:
+Formatierung, Syntax, Verträge, alle Integrations- und Layouttests.
+Lokale Browserfixtures ersetzen keine Symcon-Kachel-/Konsolen- oder tatsächliche
+IPSView-Client-Abnahme. Diese bleibt für inverse Achsen nach Modulupdate offen;
+keine Live-Konfigurationen wurden geändert.
+
 ## CalendarPie: optionale unvollständige Tage
 
 `php tests/calendar_pie_data.php` und `node tests/calendar_pie_layout.js`
@@ -27,8 +57,11 @@ fehlende Quellen, Originalwerte, eingeschränkte Anteile und Monatsnavigation.
 Echte Mausradaktionen scrollen den äußeren Testhost über Kachel in beide
 Richtungen (0 → 144 → 0) sowie über IPSView-Testframe (504 → 648 → 504), ohne
 Diagrammzoom oder Monatswechsel. Keine Browserfehler beobachtet. Diese lokalen
-Testeinbettungen sind keine Symcon-/native IPSView-App-Abnahme; diese bleibt
-nach Modulupdate offen. Live-Konfigurationen oder Archive wurden nicht verändert.
+Testeinbettungen ersetzen keine Symcon-/native IPSView-App-Abnahme. Die spätere
+funktionale MCP-Prüfung ist bestanden; der Eigentümer bestätigt die optionalen
+Teilquellen in Kachel und IPSView. Diese Benutzerbestätigung ist vom lokalen
+Browsernachweis getrennt. Live-Konfigurationen oder Archive wurden bei der
+lokalen Prüfung nicht verändert.
 
 ## Waterfall: berechnete Zwischensummen und unabhängige Neustarts
 

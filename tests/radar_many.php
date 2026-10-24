@@ -94,6 +94,92 @@ require_once dirname(__DIR__) . '/EChartsRadar/module.php';
             }
         }
         assertGatewayGauge($requests === range(98000, 98159) && $module->GetTestReferences() === range(98000, 98159), 'All 160 assignments must be read through the real Gateway and referenced.');
+        $inverseAxes = $axes;
+        $inverseAxes[0]['Inverse'] = true;
+        $inverseAxes[9]['Inverse'] = true;
+        $inverseModule = $configure($inverseAxes, $rows);
+        $inverseModule->SetTestProperty('EnableIPSView', true);
+        $inverseModule->SetTestProperty('IPSViewUseTileDesign', false);
+        $inverseModule->SetTestProperty('IPSViewShape', 'circle');
+        $inverseProperties = $inverseModule->GetTestProperties();
+        $inverseModule->ApplyChanges();
+        $inverseModule->ApplyChanges();
+        $inverseData = $decode($inverseModule);
+        assertGatewayGauge($inverseModule->GetTestStatus() === IS_ACTIVE
+            && $inverseModule->GetTestProperties() === $inverseProperties
+            && $inverseModule->GetTestReferences() === range(98000, 98159), 'Inversion must not rewrite saved axes, sources or independent designs, even at 16 x 10.');
+        foreach ($inverseData['radar']['data'] as $group => $item) {
+            foreach (['values', 'variableIDs', 'timestamps', 'id', 'initiallyVisible'] as $key) {
+                assertGatewayGauge($item[$key] === $model['radar']['data'][$group][$key], 'Inversion must preserve group and source metadata: ' . $key);
+            }
+            foreach ($item['percentValues'] as $axis => $position) {
+                $expected = in_array($axis, [0, 9], true) ? 80 - $group - $axis / 10 : $group + $axis / 10 + 20;
+                assertGatewayGauge(abs($position - $expected) < 1e-10, 'Only explicitly inverted axes must reverse their radius.');
+            }
+        }
+        foreach ([$inverseModule->GetVisualizationTile(), $inverseModule->GetIPSViewHTML()] as $html) {
+            assertGatewayGauge($startup($html)['chart']['radar']['data'] === $inverseData['radar']['data']
+                && $startup($html)['chart']['radar']['axes'][9]['Inverse'] === true, 'Both adapters must transport the same canonical inversion, including the last axis.');
+        }
+        $inverseForm = json_decode($inverseModule->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
+        $inverseField = findGaugeFormElement($inverseForm['elements'], 'Axes');
+        foreach (['BarPreview', 'IPSViewBarPreview'] as $previewName) {
+            $svg = base64_decode(substr(findGaugeFormElement($inverseForm['elements'], $previewName)['image'], strlen('data:image/svg+xml;base64,')), true);
+            $document = new DOMDocument();
+            assertGatewayGauge($document->loadXML($svg, LIBXML_NONET), 'Saved inverse previews must remain valid SVG.');
+            $points = (new DOMXPath($document))->query('//*[local-name()="polygon" and @data-group]')->item(0)->getAttribute('points');
+            assertGatewayGauge(str_starts_with($points, '360,123 '), 'Both saved previews must invert the first radius exactly once.');
+        }
+        assertGatewayGauge(
+            findGaugeFormElement($inverseField['form'], 'Inverse')['type'] === 'CheckBox'
+            && array_values(array_filter($inverseField['columns'], static fn (array $column): bool => $column['name'] === 'Inverse'))[0]['add'] === false,
+            'Axis editing must expose a compatible opt-in checkbox.'
+        );
+        // Execute the generated Axes callback, with false retained in an unsaved iterable row.
+        $draftAxes = $axes;
+        $draftAxes[0]['Inverse'] = false;
+        $draftAxes[1]['Inverse'] = true;
+        $formValues = $inverseProperties;
+        foreach (['Axes' => $draftAxes, 'Sources' => $rows, 'GroupColors' => [], 'IPSViewGroupColors' => [], 'GroupVisibility' => []] as $key => $list) {
+            $formValues[$key] = new ArrayIterator($list);
+        }
+        $draft = (static function (array $formValues, string $script, int $instanceID): array
+        {
+            extract($formValues, EXTR_SKIP);
+            $id = $instanceID;
+            $received = [];
+            $capture = static function (int $target, string $payload) use (&$received): void
+            {
+                $received = json_decode($payload, true, 512, JSON_THROW_ON_ERROR);
+            };
+            eval(str_replace('ECRA_UpdateBarPreviewFromForm(', '$capture(', $script));
+            return $received;
+        })($formValues, $inverseField['onEdit'], $inverseModule->InstanceID);
+        assertGatewayGauge($draft['Axes'][0]['Inverse'] === false && $draft['Axes'][1]['Inverse'] === true, 'The executed axis callback must retain false and true inversion flags.');
+        IPSModuleStrict::$ParentResponder = static function (string $json): string
+        {
+            throw new RuntimeException('Inverse Radar previews must not request Gateway data.');
+        };
+        try {
+            $inverseModule->UpdateBarPreviewFromForm(json_encode($draft, JSON_THROW_ON_ERROR));
+            foreach ($previews($inverseModule) as $document) {
+                $xpath = new DOMXPath($document);
+                $polygon = $xpath->query('//*[local-name()="polygon" and @data-group]')->item(0);
+                $points = explode(' ', $polygon->getAttribute('points'));
+                // Default 90px preview radius, center y=195; first normal 20% lies at y=177.
+                assertGatewayGauge($points[0] === '360,177'
+                    && str_contains($document->textContent, '(inverse) Synthetic axis 1')
+                    && str_contains($document->textContent, '80.0 % … -20.0 %'), 'Both draft SVGs must use the canonical geometry and reversed original range.');
+            }
+        } finally {
+            IPSModuleStrict::$ParentResponder = $responder;
+        }
+        assertGatewayGauge($inverseModule->GetTestProperties() === $inverseProperties && $inverseModule->GetTestStatus() === IS_ACTIVE, 'Inversion drafts must leave all saved properties and status unchanged.');
+        $malformedAxes = $inverseAxes;
+        $malformedAxes[9]['Inverse'] = 'false';
+        $inverseModule->SetTestProperty('Axes', json_encode($malformedAxes, JSON_THROW_ON_ERROR));
+        $inverseModule->ApplyChanges();
+        assertGatewayGauge($inverseModule->GetTestStatus() === 201, 'Malformed inversion on the last axis must fail validation.');
         foreach (range(98000, 98159) as $id) {
             assertGatewayGauge(in_array(['SenderID' => $id, 'Message' => VM_UPDATE], $module->GetTestMessages(), true), 'All Radar variables must remain subscribed by ID: ' . $id);
         }

@@ -1,6 +1,10 @@
 {
     "translations": {
         "de": {
+            "Inverse axis (minimum outside)": "Inverse Achse (Minimum außen)",
+            "Inverse axes place the maximum in the center and the minimum outside. Percent labels describe the radius; original values remain unchanged.": "Inverse Achsen zeigen das Maximum in der Mitte und das Minimum außen. Prozentbeschriftungen beschreiben den Radius; Originalwerte bleiben unverändert.",
+            "Axis %d: inverse must be a boolean.": "Achse %d: Die Achsenumkehr muss ein boolescher Wert sein.",
+            "(inverse)": "(invers)",
             "Enable group selection": "Gruppenauswahl aktivieren",
             "Initial group visibility (optional)": "Anfängliche Gruppensichtbarkeit (optional)",
             "Initially visible": "Anfangs sichtbar",

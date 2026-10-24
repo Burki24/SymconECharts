@@ -101,6 +101,35 @@ tile.window.handleMessage({ status: 'error', error: 'Configure valid Radar axes 
 assert.equal(tile.errorElement.hidden, false);
 assert.equal(tile.chartElement.hidden, true, 'Configuration errors must not retain misleading data.');
 const echarts = require(path.join(root, '.tools/echarts-runtime/node_modules/echarts'));
+const invertedModel = { ...model, radar: { ...model.radar,
+    axes: axes.map((axis, i) => ({...axis, Inverse: i !== 1})),
+    data: [{...model.radar.data[0], percentValues: [75, 0, 0]}]
+} };
+for (const mode of ['symcon', 'ipsview']) {
+    for (const shape of ['polygon', 'circle']) {
+        const inverse = render({...invertedModel, radar: {...invertedModel.radar,
+            style: {...model.radar.style, shape, showValues: true}}}, mode).option;
+        assert.match(inverse.radar.indicator[0].name, /\(inverse\) <Temperature>\n40 °C … -20 °C/);
+        assert.match(inverse.radar.indicator[2].name, /2[,.]000 ppm … 0 ppm/);
+        assert.equal(inverse.radar.indicator[1].name, render(model).option.radar.indicator[1].name);
+        assert.match(inverse.tooltip.formatter({data: inverse.series[0].data[0]}), /\(inverse\) &lt;Temperature&gt;: -5 °C/);
+        assert.match(inverse.tooltip.formatter({data: inverse.series[0].data[0]}), /\(inverse\) CO2: 2[,.]500 ppm/);
+        assert.match(inverse.aria.label.description, /\(inverse\) <Temperature>: -5 °C/);
+        assert.equal(inverse.series[0].label.formatter({data: inverse.series[0].data[0], dimensionIndex: 0}), '-5 °C');
+        const engine = echarts.init(null, null, {renderer: 'svg', ssr: true, width: 900, height: 500});
+        engine.setOption(inverse);
+        const points = engine.getModel().getSeriesByIndex(0).getData().getItemLayout(0);
+        const [cx, cy] = inverse.radar.center;
+        assert.ok(Math.abs(points[0][0] - cx) < 1e-9);
+        assert.ok(Math.abs(points[0][1] - (cy - inverse.radar.radius * 0.75)) < 1e-9, 'The real engine must invert the radius once, not invert the raw value or flip twice.');
+        assert.ok(Math.hypot(points[2][0] - cx, points[2][1] - cy) < 1e-9, 'A clipped inverse maximum lies in the center.');
+        engine.dispose();
+    }
+}
+const hiddenNames = render({...invertedModel, radar: {...invertedModel.radar,
+    style: {...model.radar.style, showAxisNames: false, showAxisRange: false}}}).option;
+assert.equal(hiddenNames.radar.indicator[0].name, '(inverse) <Temperature>');
+assert.match(hiddenNames.aria.label.description, /\(inverse\)/, 'Axis direction remains accessible when names/ranges are hidden.');
 const decorated = render({ ...model, radar: { ...model.radar, style: { ...model.radar.style,
     groupColors: { '<Room>': '#ff0000' }, lineType: 'dashed', symbol: 'diamond', symbolRotate: 30,
     symbolBorderWidth: 2, symbolBorderColor: '#00ff00', symbolOpacityPercent: 60,

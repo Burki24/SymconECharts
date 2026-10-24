@@ -6,6 +6,8 @@ namespace SymconECharts;
 
 use InvalidArgumentException;
 
+require_once __DIR__ . '/../libs/EChartsValueRange.php';
+
 /** Explicit axes and complete current-value comparison groups; no archive or implicit zeros. */
 final class RadarModel
 {
@@ -27,14 +29,17 @@ final class RadarModel
             $digits = is_array($axis) ? ($axis['Decimals'] ?? 1) : null;
             if (!preg_match('/^[A-Za-z][A-Za-z0-9_-]{0,39}$/D', $key) || isset($keys[$key])
                 || $label === '' || mb_strlen($label) > 80 || $unit === null || mb_strlen($unit) > 24
-                || (!is_int($min) && !is_float($min)) || (!is_int($max) && !is_float($max))
-                || !is_finite((float) $min) || !is_finite((float) $max) || $min >= $max || !is_finite($max - $min)
+                || !EChartsValueRange::IsValid($min, $max)
                 || !is_int($digits) || $digits < 0 || $digits > 6) {
                 throw new InvalidArgumentException(sprintf($t('Axis %d: enter a unique key, label and a finite increasing range.'), $index + 1));
             }
+            $inverse = array_key_exists('Inverse', $axis) ? $axis['Inverse'] : false;
+            if (!is_bool($inverse)) {
+                throw new InvalidArgumentException(sprintf($t('Axis %d: inverse must be a boolean.'), $index + 1));
+            }
             $keys[$key] = true;
             $normalized[] = ['Key' => $key, 'Label' => $label, 'Minimum' => (float) $min,
-                'Maximum'          => (float) $max, 'Unit' => $unit, 'Decimals' => $digits];
+                'Maximum'          => (float) $max, 'Unit' => $unit, 'Decimals' => $digits, 'Inverse' => $inverse];
         }
         $rows = [];
         $groups = [];
@@ -86,7 +91,9 @@ final class RadarModel
                 $bounded = max($axis['Minimum'], min($axis['Maximum'], $value));
                 $clipped += $bounded !== $value ? 1 : 0;
                 $raw[] = $value;
-                $percent[] = ($bounded - $axis['Minimum']) / ($axis['Maximum'] - $axis['Minimum']) * 100;
+                // One display projection for native output and SVG; raw values/ranges remain untouched.
+                $position = ($bounded - $axis['Minimum']) / ($axis['Maximum'] - $axis['Minimum']) * 100;
+                $percent[] = $axis['Inverse'] ? 100.0 - $position : $position;
                 $ids[] = $current['VariableID'];
                 $times[] = $current['Timestamp'];
             }
