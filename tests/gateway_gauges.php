@@ -1058,6 +1058,12 @@ if (array_slice($argv, 1) === ['--time-series-many']) {
     exit(0);
 }
 
+if (array_slice($argv, 1) === ['--graph-weighted']) {
+    require __DIR__ . '/graph_weighted.php';
+    echo "Weighted Graph integration verified.\n";
+    exit(0);
+}
+
 if (array_slice($argv, 1) === ['--graph-directed']) {
     require __DIR__ . '/graph_directed.php';
     echo "Directed Graph integration verified.\n";
@@ -8681,6 +8687,13 @@ assertGatewayGauge(
 $graph->SetTestProperty('Edges', json_encode([['SourceObjectID' => 9002, 'TargetObjectID' => 9002]], JSON_THROW_ON_ERROR));
 $graph->ApplyChanges();
 assertGatewayGauge($graph->GetTestStatus() === 201, 'Graph must reject self connections on ApplyChanges.');
+
+// Graph assertions (including the last generic Graph designer) are complete.
+// Release their expanded forms before the subsequent chart integration fixtures;
+// keep the existing 128-MiB test-process budget instead of increasing it.
+unset($graph, $graphForm, $graphUpdates, $draftSvg, $designModule, $designForm,
+    $matchingDesigners, $sectionPanels, $baseForm, $baseTileDesigner, $actualTileDesigner);
+gc_collect_cycles();
 
 foreach ([
     EChartsGaugeSingle::class, EChartsGaugeMulti::class, EChartsGaugeTacho::class,

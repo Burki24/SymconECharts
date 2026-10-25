@@ -6,6 +6,9 @@ namespace SymconECharts;
 
 use InvalidArgumentException;
 
+require_once __DIR__ . '/EChartsNormalization.php';
+require_once __DIR__ . '/EChartsBarPreview.php';
+
 /** Projects explicitly chosen Symcon objects and connections, optionally directed. */
 final class GraphModel
 {
@@ -50,6 +53,59 @@ final class GraphModel
                 throw new InvalidArgumentException('Duplicate Graph connections are not allowed.');
             }
             $pairs[$pair] = true;
+            $mode = $row['WeightMode'] ?? 'none';
+            if (!in_array($mode, ['none', 'manual', 'variable'], true)) {
+                throw new InvalidArgumentException('Graph weight mode is invalid.');
+            }
+            if ($mode === 'manual') {
+                $weight = $row['Weight'] ?? 1;
+                $unit = $row['WeightUnit'] ?? '';
+                $decimals = $row['WeightDecimals'] ?? 2;
+                if ((!is_int($weight) && !is_float($weight)) || !is_finite((float) $weight) || $weight < 0
+                    || !is_string($unit) || mb_strlen($unit) > 24 || !is_int($decimals) || $decimals < 0 || $decimals > 6) {
+                    throw new InvalidArgumentException('Manual Graph weights require a finite nonnegative value, a short unit and 0–6 decimals.');
+                }
+            } elseif ($mode === 'variable' && (!is_int($row['WeightVariableID'] ?? null) || $row['WeightVariableID'] <= 0)) {
+                throw new InvalidArgumentException('Graph weights require a valid numeric variable ID.');
+            }
+        }
+    }
+
+    /** @param list<array<string,mixed>> $edges @return list<int> */
+    public static function WeightVariableIDs(array $edges): array
+    {
+        $ids = [];
+        foreach ($edges as $edge) {
+            if (is_array($edge) && ($edge['WeightMode'] ?? 'none') === 'variable' && is_int($edge['WeightVariableID'] ?? null) && $edge['WeightVariableID'] > 0) {
+                $ids[$edge['WeightVariableID']] = true;
+            }
+        }
+        $result = array_keys($ids);
+        sort($result);
+        return $result;
+    }
+
+    /** Validate only active weight scales; dormant defaults never invalidate legacy Graphs. */
+    public static function ValidateWeights(array $edges, array $options): void
+    {
+        foreach ($edges as $edge) {
+            if (($edge['WeightMode'] ?? 'none') === 'none') {
+                continue;
+            }
+            if (!EChartsValueRange::IsValid($options['minimum'] ?? null, $options['maximum'] ?? null)
+                || $options['minimum'] < 0) {
+                throw new InvalidArgumentException('Graph weights require finite fixed limits with 0 <= minimum < maximum.');
+            }
+            foreach (['minimumWidth', 'maximumWidth'] as $key) {
+                $value = $options[$key] ?? null;
+                if ((!is_int($value) && !is_float($value)) || !is_finite((float) $value) || $value < 1 || $value > 20) {
+                    throw new InvalidArgumentException('Graph weight widths must be between 1 and 20 pixels.');
+                }
+            }
+            if ($options['minimumWidth'] > $options['maximumWidth']) {
+                throw new InvalidArgumentException('Minimum Graph width must not exceed maximum width.');
+            }
+            return;
         }
     }
 
@@ -60,9 +116,10 @@ final class GraphModel
      * @param callable(int):string $getFormattedValue
      * @return array{directed:bool,nodes:list<array<string,mixed>>,links:list<array<string,mixed>>}
      */
-    public static function Build(array $nodeRows, array $edgeRows, callable $getObject, callable $getFormattedValue, bool $directed = false): array
+    public static function Build(array $nodeRows, array $edgeRows, callable $getObject, callable $getFormattedValue, bool $directed = false, array $weightOptions = [], ?callable $readWeight = null): array
     {
         self::ValidateRows($nodeRows, $edgeRows, $directed);
+        self::ValidateWeights($edgeRows, $weightOptions);
         $nodes = [];
         foreach ($nodeRows as $row) {
             $id = $row['ObjectID'];
@@ -94,6 +151,35 @@ final class GraphModel
             $link = ['source' => 'object-' . $source, 'target' => 'object-' . $target];
             if ($directed) {
                 $link['reciprocal'] = isset($pairs[$target . ':' . $source]);
+            }
+            $mode = $row['WeightMode'] ?? 'none';
+            if ($mode !== 'none') {
+                $weight = $mode === 'manual' ? [
+                    'value'        => (float) ($row['Weight'] ?? 1),
+                    'displayValue' => EChartsBarPreview::FormatValue(
+                        (float) ($row['Weight'] ?? 1),
+                        $row['WeightDecimals'] ?? 2,
+                        trim($row['WeightUnit'] ?? ''),
+                        $weightOptions['language'] ?? 'de'
+                    ),
+                    'unit' => trim($row['WeightUnit'] ?? ''), 'timestamp' => null
+                ] : ($readWeight !== null ? $readWeight($row['WeightVariableID']) : throw new InvalidArgumentException('Graph weight reader is unavailable.'));
+                $value = $weight['value'] ?? null;
+                if ((!is_int($value) && !is_float($value)) || !is_finite((float) $value) || $value < 0
+                    || !is_string($weight['displayValue'] ?? null) || !is_string($weight['unit'] ?? null)
+                    || ($mode === 'variable' && (!is_int($weight['timestamp'] ?? null) || $weight['timestamp'] < 0))) {
+                    throw new InvalidArgumentException('Graph weight sources must provide finite nonnegative numbers and valid display metadata.');
+                }
+                $weight['value'] = (float) $value;
+                $weight['variableID'] = $mode === 'variable' ? $row['WeightVariableID'] : null;
+                $weight['minimum'] = (float) $weightOptions['minimum'];
+                $weight['maximum'] = (float) $weightOptions['maximum'];
+                $percent = EChartsNormalization::Value(
+                    (float) $value,
+                    ['Minimum' => $weightOptions['minimum'], 'Maximum' => $weightOptions['maximum']]
+                );
+                $link['width'] = (float) ($weightOptions['minimumWidth'] + $percent / 100 * ($weightOptions['maximumWidth'] - $weightOptions['minimumWidth']));
+                $link['weight'] = $weight;
             }
             $links[] = $link;
         }

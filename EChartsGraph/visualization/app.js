@@ -94,8 +94,14 @@
             };
         });
         var links = (graph.links || []).map(function (link) {
+            var weighted = link.weight && Number.isFinite(link.width) && link.width >= 1 && link.width <= 20;
+            var width = weighted ? link.width : 1.5;
+            var arrowSize = Math.max(5, Math.min(10, nodeSize * 0.7));
             return { source: String(link.source), target: String(link.target),
-                lineStyle: { curveness: directed && link.reciprocal === true ? 0.16 : 0 } };
+                weight: weighted ? link.weight : null,
+                symbolSize: [0, weighted ? Math.max(arrowSize, Math.min(30, width * 1.5 + 3)) : arrowSize],
+                lineStyle: { width: width, curveness: directed && link.reciprocal === true ? 0.16 : 0 },
+                emphasis: { lineStyle: { width: weighted ? width : 2 } } };
         });
         return {
             backgroundColor: bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
@@ -112,8 +118,11 @@
                 formatter: function (parameter) {
                     var data = parameter.data || {};
                     if (parameter.dataType === 'edge') {
-                        return directed ? escapeHTML(nodeNames[data.source] || data.source) + ' → '
-                            + escapeHTML(nodeNames[data.target] || data.target) : '';
+                        if (!directed && !data.weight) { return ''; }
+                        return escapeHTML(nodeNames[data.source] || data.source) + (directed ? ' → ' : ' — ')
+                            + escapeHTML(nodeNames[data.target] || data.target)
+                            + (data.weight ? '<br>' + escapeHTML(translate('Weight')) + ': '
+                                + escapeHTML(data.weight.displayValue) : '');
                     }
                     return escapeHTML(data.name || '') + (data.displayValue
                         ? '<br>' + escapeHTML(data.displayValue) : '');

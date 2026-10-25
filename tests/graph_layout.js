@@ -135,6 +135,17 @@ for (const layout of ['force', 'circular']) {
     }
 }
 assert.deepEqual(Array.from(force.option.series[0].edgeSymbol), ['none', 'none'], 'Old models remain undirected.');
+const weightedNetwork = { ...graph, directed: true, links: [
+    { ...graph.links[0], width: 9, weight: { value: 150, displayValue: '150 <W>', variableID: 987 } },
+    { ...graph.links[1], width: 1, weight: { value: 0, displayValue: '0 W', variableID: null } }
+] };
+const weightedRender = render(baseStyle, 'symcon', 800, weightedNetwork);
+assert.equal(weightedRender.option.series[0].links[0].lineStyle.width, 9);
+assert.equal(weightedRender.option.series[0].links[1].lineStyle.width, 1, 'Zero weights retain a visible minimum-width connection.');
+assert.equal(weightedRender.option.series[0].links[0].emphasis.lineStyle.width, 9,
+    'Highlighting must preserve the quantitative line width.');
+assert.match(weightedRender.option.tooltip.formatter({ dataType: 'edge', data: weightedRender.option.series[0].links[0] }), /Weight: 150 &lt;W&gt;/);
+assert.ok(!Object.hasOwn(weightedRender.option.series[0].links[0], 'value'), 'Graph weights must not feed native force edge values.');
 
 const tooltip = force.option.tooltip.formatter({ data: { name: '<script>', displayValue: '<b>' } });
 assert.equal(tooltip, '&lt;script&gt;<br>&lt;b&gt;');
@@ -260,6 +271,31 @@ function canvas() {
     return element;
 }
 bundled.setPlatformAPI({ createCanvas: canvas });
+for (const graphLayout of ['force', 'circular']) {
+    for (const mode of ['symcon', 'ipsview']) {
+        const native = bundled.init(canvas(), null, { renderer: 'canvas', ssr: true, width: 800, height: 500 });
+        const instance = render({ ...baseStyle, graphLayout, animationEnabled: false }, mode, 800, weightedNetwork, 500, native);
+        let series = native.getModel().getSeriesByIndex(0);
+        assert.equal(series.getEdgeData().getItemVisual(0, 'style').lineWidth, 9);
+        assert.equal(series.getEdgeData().getItemGraphicEl(0).childOfName('line').style.lineWidth, 9,
+            'The shipped engine must actually draw the computed width.');
+        assert.ok(series.getEdgeData().getItemVisual(0, 'toSymbolSize') >= 16,
+            'A thick weighted connection needs a visible target arrow.');
+        native.dispatchAction({ type: 'graphRoam', seriesIndex: 0, zoom: 1.3, originX: 400, originY: 250 });
+        const zoom = series.get('zoom');
+        instance.refresh({ ...instance.model, graph: { ...instance.model.graph,
+            links: weightedNetwork.links.map(link => ({ ...link, width: 5 })) } });
+        series = native.getModel().getSeriesByIndex(0);
+        assert.equal(series.get('zoom'), zoom);
+        assert.equal(series.getEdgeData().getItemVisual(0, 'style').lineWidth, 5);
+        instance.refresh({ ...instance.model, graph: { ...instance.model.graph, links: graph.links } });
+        series = native.getModel().getSeriesByIndex(0);
+        assert.equal(series.getEdgeData().getItemVisual(0, 'style').lineWidth, 1.5,
+            'Disabling weights must remove previously merged quantitative widths.');
+        assert.equal(series.getEdgeData().getRawDataItem(0).weight, null);
+        native.dispose();
+    }
+}
 // Check the shipped engine's geometry and actual arrow symbols, including
 // diametric endpoints where native circular curvature would collapse.
 for (const graphLayout of ['force', 'circular']) {

@@ -61,5 +61,7 @@ und fehlenden Pfeilen. Tests prüfen beide Dublettenmodelle, Rückkehr zum Stand
 Zyklen, N/N+1, IDs, unabhängige Designs, echte Vorschauen, beide Ausgabeadapter
 und die ausgelieferte native Runtime einschließlich geometrisch getrennter
 Gegenrichtungen bei zwei Knoten. Lokale Browser- und Qualitätsnachweise stehen
-im Testdokument. Neue MCP-/Kachel- und tatsächliche IPSView-Client-Abnahme nach
-Modulupdate bleibt offen; bestehende Installationskonfigurationen werden nicht geändert.
+im Testdokument. Die funktionale MCP-Prüfung ist bestanden; der Eigentümer bestätigt gerichtete
+Beziehungen in Kachel und tatsächlichem IPSView. Bestehende Konfigurationen und
+Designs wurden bei der MCP-Prüfung unverändert belassen. Ein laufender Live-Push
+war in der statischen MCP-Vorschau separat nicht nachweisbar.

@@ -144,6 +144,11 @@ declare(strict_types=1);
             && $directed['links'][999]['reciprocal'] && $module->GetTestProperties() === $directedSaved,
             'Maximum directed Graphs must retain budgets and configuration without migration.'
         );
+        $weightedEdges = [...array_slice($edges, 0, 999), ['SourceObjectID' => 94001, 'TargetObjectID' => 94000]];
+        $weightedEdges[0] += ['WeightMode' => 'manual', 'Weight' => 50];
+        $module->SetTestProperty('Edges', json_encode($weightedEdges, JSON_THROW_ON_ERROR));
+        $module->ApplyChanges();
+        assertGatewayGauge($module->GetTestStatus() === IS_ACTIVE, 'A weight must not reduce existing count budgets.');
         foreach ([$module->GetVisualizationTile(), $module->GetIPSViewHTML(), $module->GetConfigurationForm()] as $output) {
             assertGatewayGauge(
                 strlen($output) < SYMCON_OUTPUT_BUFFER_LIMIT,

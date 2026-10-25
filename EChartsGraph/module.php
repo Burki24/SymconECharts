@@ -15,12 +15,14 @@ use SymconECharts\EChartsAnimationDesign;
 use SymconECharts\EChartsAsset;
 use SymconECharts\EChartsBarPreview;
 use SymconECharts\EChartsBarPreviewForm;
+use SymconECharts\EChartsCurrentSources;
 use SymconECharts\EChartsDesignerSections;
 use SymconECharts\EChartsGraphOutput;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsTransientRefresh;
+use SymconECharts\EChartsVariablePresentation;
 use SymconECharts\GraphModel;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
@@ -34,6 +36,8 @@ require_once __DIR__ . '/../libs/EChartsAnimationDesign.php';
 require_once __DIR__ . '/../libs/EChartsAsset.php';
 require_once __DIR__ . '/../libs/EChartsBarPreview.php';
 require_once __DIR__ . '/../libs/EChartsBarPreviewForm.php';
+require_once __DIR__ . '/../libs/EChartsCurrentSources.php';
+require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsDesignerSections.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
@@ -52,6 +56,7 @@ class EChartsGraph extends IPSModuleStrict
     use DataFlowHelper;
     use EChartsAnimationDesign;
     use EChartsBarPreviewForm;
+    use EChartsCurrentSources;
     use EChartsIPSViewDesignForm;
     use EChartsIPSViewTransport;
     use EChartsTransientRefresh;
@@ -62,11 +67,13 @@ class EChartsGraph extends IPSModuleStrict
 
     private const GATEWAY_MODULE_ID = '{33C9DF44-6F6D-5916-4AAE-CCB24BD6928D}';
     private const DATA_ID_FROM_PARENT = '{E4749B72-912B-E3E3-1C57-D19019FFDD84}';
+    private const DATA_ID_TO_PARENT = '{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}';
     private const IPSVIEW_OUTPUT_IDENT = 'IPSViewGraph';
     private const STATUS_SOURCE_INVALID = 201;
     private const STATUS_DESIGN_INVALID = 202;
     private const STATUS_PARENT_MISSING = 203;
     private const STATUS_READ_FAILED = 204;
+    private const STATUS_GATEWAY_FAILED = self::STATUS_READ_FAILED;
     private const DESIGN_DEFAULTS = [
         'EChartsTheme'         => EChartsAsset::THEME_AUTO,
         'GraphLayout'          => 'force',
@@ -79,7 +86,9 @@ class EChartsGraph extends IPSModuleStrict
         'TitleColor'           => -1,
         'LabelColor'           => -1,
         'NodeColor'            => -1,
-        'EdgeColor'            => -1
+        'EdgeColor'            => -1,
+        'MinimumEdgeWidth'     => 1,
+        'MaximumEdgeWidth'     => 8
     ];
 
     public function Create(): void
@@ -97,6 +106,9 @@ class EChartsGraph extends IPSModuleStrict
             $this->RegisterPropertyString('Nodes', '[]');
             $this->RegisterPropertyString('Edges', '[]');
             $this->RegisterPropertyBoolean('DirectedEdges', false);
+            $this->RegisterPropertyFloat('WeightMinimum', 0.0);
+            $this->RegisterPropertyFloat('WeightMaximum', 100.0);
+            $this->RegisterAttributeString('RegisteredSourceVariableIDs', '[]');
             foreach (['', 'IPSView'] as $prefix) {
                 foreach (self::DESIGN_DEFAULTS as $name => $default) {
                     match (gettype($default)) {
@@ -169,6 +181,27 @@ class EChartsGraph extends IPSModuleStrict
         $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
             $form = $this->LoadConfigurationForm();
+            foreach ($form['elements'] as &$element) {
+                if (($element['name'] ?? '') === 'Edges') {
+                    // Static row dialogs retain prior field values when a legacy row
+                    // has no weight fields. Initialize each edit without expanding
+                    // every saved legacy edge (which would exhaust its byte budget).
+                    $fields = $element['form'];
+                    foreach ($fields as &$field) {
+                        $field['caption'] = $this->Translate($field['caption']);
+                        foreach ($field['options'] ?? [] as $index => $option) {
+                            $field['options'][$index]['caption'] = $this->Translate($option['caption']);
+                        }
+                    }
+                    unset($field);
+                    $defaults = array_column($element['columns'], 'add', 'name');
+                    $element['form'] = '$fields = json_decode(' . var_export(json_encode($fields, JSON_THROW_ON_ERROR), true) . ', true); '
+                        . '$defaults = json_decode(' . var_export(json_encode($defaults, JSON_THROW_ON_ERROR), true) . ', true); '
+                        . 'foreach ($fields as &$field) { $name = $field["name"]; $field["value"] = $Edges[$name] ?? $defaults[$name]; } '
+                        . 'unset($field); return $fields;';
+                }
+            }
+            unset($element);
             $form['elements'][] = $this->BuildIPSViewDesigner($form['elements']);
             $form['elements'] = $this->WithAnimationFormControls($form['elements']);
             $form['elements'] = $this->WithAnimationFormVisibility($form['elements']);
@@ -180,7 +213,7 @@ class EChartsGraph extends IPSModuleStrict
                 ['caption' => 'Node and line colors', 'start' => 'NodeColor']
             ]);
             $fields = [
-                'Title', 'Nodes', 'Edges', 'DirectedEdges', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
+                'Title', 'Nodes', 'Edges', 'DirectedEdges', 'WeightMinimum', 'WeightMaximum', 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground',
                 'IPSViewBackgroundColor', 'IPSViewBackgroundOpacityPercent',
                 ...array_keys(self::DESIGN_DEFAULTS),
                 ...array_map(static fn (string $name): string => 'IPSView' . $name, array_keys(self::DESIGN_DEFAULTS))
@@ -385,6 +418,10 @@ class EChartsGraph extends IPSModuleStrict
                 $this->Initialize();
                 $this->PublishVisualizationState();
                 $this->PublishIPSViewHTML();
+                return;
+            }
+            if ($Message === VM_UPDATE && in_array($SenderID, $this->ConfiguredVariableIDs(), true)) {
+                $this->PublishVisualizationState();
             }
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
@@ -422,7 +459,7 @@ class EChartsGraph extends IPSModuleStrict
         try {
             $nodeRows = $this->DecodeRows($values['Nodes'] ?? $this->ReadPropertyString('Nodes'));
             $edgeRows = $this->DecodeRows($values['Edges'] ?? $this->ReadPropertyString('Edges'));
-            $model = $this->ReadGraph($nodeRows, $edgeRows, $directed);
+            $model = $this->ReadGraph($nodeRows, $edgeRows, $directed, $this->WeightOptions($ipsView, $values), true);
             $nodes = array_slice($model['nodes'], 0, GraphModel::PREVIEW_NODES);
             $known = array_fill_keys(array_column($nodes, 'id'), true);
             $links = array_slice(
@@ -481,10 +518,19 @@ class EChartsGraph extends IPSModuleStrict
                 . '<path d="M 0 0 L 6 3 L 0 6 z" fill="' . EChartsBarPreview::E($edgeColor) . '"/>'
                 . '</marker></defs>';
         }
-        foreach ($links as $link) {
+        foreach ($links as $index => $link) {
+            $lineWidth = EChartsBarPreview::N($link['width'] ?? 2);
             [$x1, $y1] = $positions[$link['source']];
             [$x2, $y2] = $positions[$link['target']];
             if ($directed) {
+                $edgeMarkerID = $markerID;
+                if (isset($link['width'])) {
+                    $edgeMarkerID .= '-' . $index;
+                    $arrowSize = EChartsBarPreview::N(max(6, min(30, $link['width'] * 1.5 + 3)));
+                    $svg .= '<defs><marker id="' . $edgeMarkerID . '" viewBox="0 0 6 6" refX="6" refY="3"'
+                        . ' markerWidth="' . $arrowSize . '" markerHeight="' . $arrowSize . '" markerUnits="userSpaceOnUse" orient="auto">'
+                        . '<path d="M 0 0 L 6 3 L 0 6 z" fill="' . EChartsBarPreview::E($edgeColor) . '"/></marker></defs>';
+                }
                 // Match native reciprocal curvature. Trim the target along its tangent
                 // so the arrow remains outside the node instead of hidden underneath it.
                 $curve = ($link['reciprocal'] ?? false) ? 0.16 : 0;
@@ -499,12 +545,12 @@ class EChartsGraph extends IPSModuleStrict
                     . ' Q ' . EChartsBarPreview::N($cx) . ' ' . EChartsBarPreview::N($cy)
                     . ' ' . EChartsBarPreview::N($endX) . ' ' . EChartsBarPreview::N($endY)
                     . '" fill="none" stroke="' . EChartsBarPreview::E($edgeColor)
-                    . '" stroke-width="2" marker-end="url(#' . $markerID . ')"/>';
+                    . '" stroke-width="' . $lineWidth . '" marker-end="url(#' . $edgeMarkerID . ')"/>';
                 continue;
             }
             $svg .= '<line x1="' . EChartsBarPreview::N($x1) . '" y1="' . EChartsBarPreview::N($y1)
                 . '" x2="' . EChartsBarPreview::N($x2) . '" y2="' . EChartsBarPreview::N($y2)
-                . '" stroke="' . EChartsBarPreview::E($edgeColor) . '" stroke-width="2"/>';
+                . '" stroke="' . EChartsBarPreview::E($edgeColor) . '" stroke-width="' . $lineWidth . '"/>';
         }
         $svg .= '<g data-preview-nodes="' . count($nodes) . '" data-preview-edges="' . count($links) . '">';
         foreach ($nodes as $index => $node) {
@@ -544,14 +590,36 @@ class EChartsGraph extends IPSModuleStrict
     }
 
     /** @param list<array<string,mixed>> $nodes @param list<array<string,mixed>> $edges @return array<string,mixed> */
-    private function ReadGraph(array $nodes, array $edges, bool $directed): array
+    private function ReadGraph(array $nodes, array $edges, bool $directed, array $weights, bool $preview = false): array
     {
+        $cache = [];
         return GraphModel::Build(
             $nodes,
             $edges,
             static fn (int $id): array => IPS_GetObject($id),
             static fn (int $id): string => (string) GetValueFormatted($id),
-            $directed
+            $directed,
+            $weights,
+            function (int $id) use (&$cache, $preview, $weights): array
+            {
+                if (isset($cache[$id])) {
+                    return $cache[$id];
+                }
+                if (!IPS_VariableExists($id) || !in_array(IPS_GetVariable($id)['VariableType'] ?? null, [1, 2], true)) {
+                    throw new InvalidArgumentException('Select an existing Integer or Float weight variable.');
+                }
+                // Preview reads must not set module status through a failed Gateway request.
+                $current = $preview ? ['Value' => GetValue($id), 'Timestamp' => IPS_GetVariable($id)['VariableUpdated']]
+                    : $this->ReadCurrentSource($id);
+                $presentation = EChartsVariablePresentation::Resolve($id, 0.0, 100.0, '', 2, true, true);
+                return $cache[$id] = ['value' => $current['Value'], 'timestamp' => $current['Timestamp'],
+                    'displayValue'            => EChartsBarPreview::FormatValue(
+                        $current['Value'],
+                        $presentation['decimals'],
+                        $presentation['unit'],
+                        $weights['language']
+                    ), 'unit' => $presentation['unit']];
+            }
         );
     }
 
@@ -571,7 +639,8 @@ class EChartsGraph extends IPSModuleStrict
             $graph = $this->ReadGraph(
                 $this->DecodeRows($this->ReadPropertyString('Nodes')),
                 $this->DecodeRows($this->ReadPropertyString('Edges')),
-                $this->ReadPropertyBoolean('DirectedEdges')
+                $this->ReadPropertyBoolean('DirectedEdges'),
+                $this->WeightOptions($ipsView)
             );
         } catch (Throwable $exception) {
             $this->WriteAttributeString('LastError', $exception->getMessage());
@@ -603,12 +672,14 @@ class EChartsGraph extends IPSModuleStrict
             'ipsViewStyle' => $ipsView ? $this->IPSViewThemeCSS() : '',
             'state'        => $startup['state'],
             'translations' => [
-                'Configure at least two valid Graph nodes and one connection.'    => $this->Translate('Configure at least two valid Graph nodes and one connection.'),
-                'The Graph design is invalid.'                                    => $this->Translate('The Graph design is invalid.'),
-                'Connect an active EChartsGateway.'                               => $this->Translate('Connect an active EChartsGateway.'),
-                'The Graph could not be loaded.'                                  => $this->Translate('The Graph could not be loaded.'),
-                'Directed connections'                                            => $this->Translate('Directed connections'),
-                'Data could not be refreshed. Showing the last available values.' => $this->Translate(
+                'Configure at least two valid Graph nodes and one connection.'     => $this->Translate('Configure at least two valid Graph nodes and one connection.'),
+                'The Graph design is invalid.'                                     => $this->Translate('The Graph design is invalid.'),
+                'Connect an active EChartsGateway.'                                => $this->Translate('Connect an active EChartsGateway.'),
+                'The Graph could not be loaded.'                                   => $this->Translate('The Graph could not be loaded.'),
+                'Directed connections'                                             => $this->Translate('Directed connections'),
+                'Weight'                                                           => $this->Translate('Weight'),
+                'Configure valid Graph weights and fixed limits.'                  => $this->Translate('Configure valid Graph weights and fixed limits.'),
+                'Data could not be refreshed. Showing the last available values.'  => $this->Translate(
                     'Data could not be refreshed. Showing the last available values.'
                 )
             ],
@@ -637,6 +708,7 @@ class EChartsGraph extends IPSModuleStrict
         if (IPS_GetKernelRunlevel() !== KR_READY) {
             return;
         }
+        $this->SynchronizeSourceReferences();
         $error = $this->GetConfigurationError();
         if ($error !== null) {
             $this->WriteAttributeString('LastError', $error['Message']);
@@ -664,6 +736,18 @@ class EChartsGraph extends IPSModuleStrict
             );
         } catch (Throwable) {
             return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => 'Configure at least two valid Graph nodes and one connection.'];
+        }
+        try {
+            $edges = $this->DecodeRows($this->ReadPropertyString('Edges'));
+            GraphModel::ValidateWeights($edges, $this->WeightOptions(false));
+            GraphModel::ValidateWeights($edges, $this->WeightOptions(true));
+            foreach (GraphModel::WeightVariableIDs($edges) as $id) {
+                if (!IPS_VariableExists($id) || !in_array(IPS_GetVariable($id)['VariableType'] ?? null, [1, 2], true)) {
+                    throw new InvalidArgumentException('Invalid weight source.');
+                }
+            }
+        } catch (Throwable) {
+            return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => 'Configure valid Graph weights and fixed limits.'];
         }
         if (!$this->IsValidDesign('')
             || (!$this->ReadPropertyBoolean('IPSViewUseTileDesign') && !$this->IsValidDesign('IPSView'))
@@ -720,6 +804,27 @@ class EChartsGraph extends IPSModuleStrict
             }
         }
         return $style;
+    }
+
+    /** @return list<int> */
+    private function ConfiguredVariableIDs(): array
+    {
+        try {
+            return GraphModel::WeightVariableIDs($this->DecodeRows($this->ReadPropertyString('Edges')));
+        } catch (Throwable) {
+            return [];
+        }
+    }
+
+    private function WeightOptions(bool $ipsView, array $values = []): array
+    {
+        return [
+            'minimum'      => $values['WeightMinimum'] ?? $this->ReadPropertyFloat('WeightMinimum'),
+            'maximum'      => $values['WeightMaximum'] ?? $this->ReadPropertyFloat('WeightMaximum'),
+            'minimumWidth' => $this->BarPreviewValue($values, 'MinimumEdgeWidth', 'integer', $ipsView),
+            'maximumWidth' => $this->BarPreviewValue($values, 'MaximumEdgeWidth', 'integer', $ipsView),
+            'language'     => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage())
+        ];
     }
 
     private function EffectiveTheme(bool $ipsView): string

@@ -40,6 +40,24 @@ Canvas-Zeichenaufrufe für Kachel und IPSView statt nur vorhandener Titeloptione
 
 ## Aktueller Stand und Zielarchitektur
 
+Graph ergänzt gemäß [ADR 0103](adr/0103-weighted-graph-relationships.md)
+optionale Gewichte je Verbindung aus manuellen Zahlen oder aktuellen Quellen.
+Die gemeinsame `GraphModel`-Berechnung verwendet den bestehenden numerischen
+Bereichsvertrag und die Min/Max-Projektion; Originale und Metadaten bleiben
+getrennt. `EChartsCurrentSources` liefert Gateway-Lesezugriff und Referenzen/
+VM_UPDATE; dieselbe ID darf mehrere Kanten versorgen und wird je Modell nur
+einmal gelesen. Die Quellen-ID muss kein Graph-Knoten sein. Vorschauen lesen
+die aktuellen Kernelwerte ohne statusändernde Gateway-Aufrufe. Beide Pfade
+verwenden dasselbe Modell und die gemeinsame Metadaten-/Zahlenformatierung.
+Formatierte Gewichtswerte entstehen aus dem gelesenen Snapshot, nicht aus
+einem zweiten möglicherweise bereits geänderten Variablenwert.
+Kachel/IPSView besitzen unabhängige Pixelbreiten bei gemeinsamem festen
+Gewichtsbezug. Die native Runtime erhält diese Breiten, keine fachlichen
+Kräftewerte. Ein pro Zeile neu initialisiertes Formular vermeidet alte
+Dialogwerte bei bisher ungewichteten Altzeilen, ohne ganze Listen mit neuen
+Defaultfeldern aufzublähen. Runtime, bestehende Designs und Schutzbudgets
+bleiben erhalten. Neue MCP-/Client-Abnahme nach Modulupdate offen.
+
 Graph ergänzt gemäß [ADR 0102](adr/0102-directed-graph-relationships.md)
 `DirectedEdges=false`. Dieselbe `GraphModel`-Prüfung versorgt gespeicherte
 Modelle und Entwurfsvorschauen: ungeordnete Dubletten im Altmodus, geordnete
@@ -50,7 +68,9 @@ Die geteilte Graph-/Z2M-Ansichtsverwaltung bleibt unverändert. Gerichtetes
 Kreislayout verwendet explizite Kreispositionen mit nativer einfacher
 Kantenprojektion, da ECharts' radiale Kreis-Kurven antipodische Gegenrichtungen
 nicht trennen können. Runtime-Version/-Datei und sämtliche Budgets bleiben
-erhalten. Neue MCP-/Kachel- und tatsächliche IPSView-Abnahme nach Update offen.
+erhalten. MCP funktional geprüft; der Eigentümer bestätigt gerichtete
+Beziehungen in Kachel und tatsächlichem IPSView. Live-Push war in der statischen
+MCP-Vorschau separat nicht nachweisbar und gilt damit nicht als dort geprüft.
 
 Radar ergänzt gemäß [ADR 0101](adr/0101-radar-incomplete-groups.md)
 `AllowIncompleteGroups=false`. Nur nicht konfigurierte Gruppe-Achse-Zuordnungen

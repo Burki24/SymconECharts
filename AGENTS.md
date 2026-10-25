@@ -113,6 +113,15 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   unverändert. Die native Graph-Runtime und geteilte Ansichtsverwaltung bleiben
   erhalten; nur gerichtetes Kreislayout projiziert Kreispositionen explizit,
   damit native einfache Kurven Gegenrichtungen auch bei zwei Knoten trennen.
+  ADR 0103 ergänzt `Edges[].WeightMode=none|manual|variable` mit Default `none`.
+  Gewichte sind nichtnegativ, null bleibt als minimale Breite sichtbar. Feste
+  gemeinsame `WeightMinimum`/`WeightMaximum` begrenzen ausschließlich die
+  Breitenprojektion, Originalwerte/Einheiten/IDs/Zeitstempel bleiben erhalten.
+  `MinimumEdgeWidth`/`MaximumEdgeWidth` sind unabhängige Designwerte (1–20 px).
+  `GraphModel` teilt Prüfung und Breitenberechnung mit den SVGs; aktuelle Quellen
+  nutzen `EChartsCurrentSources` und ID-stabile Referenzen/VM_UPDATE-Abonnements.
+  Gewichtsdaten werden nicht als native Kräftewerte verwendet. Keine Umrechnung,
+  Bilanz oder Änderung der 300/1000-, 64-KiB- und 1-MiB-Schutzgrenzen.
   ADR 0094 ergänzt für GraphZ2M `LinkSelection=strongest|weakest|range`.
   Default `strongest`, bestehender Mindest-LQI und alle Schutzbudgets bleiben
   erhalten. Nur `range` wertet den zusätzlichen Höchst-LQI einschließlich aus;

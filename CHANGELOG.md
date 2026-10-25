@@ -2,6 +2,13 @@
 
 ## Neu
 
+- Graph kann Verbindungen optional durch feste Gewichte oder aktuelle numerische
+  Variablenwerte gewichten. Ein gemeinsamer fester Min/Max-Bezug bestimmt zusammen
+  mit unabhängig gestaltbaren Linienbreiten die Darstellung. Originalwerte und
+  Einheiten bleiben im Tooltip erhalten, Null bleibt sichtbar. Richtung, Kräfte-
+  Layout, ungewichteter Standard und Schutzbudgets bleiben erhalten. Kachel,
+  IPSView und beide Vorschauen teilen dieselbe Breitenberechnung.
+
 - Graph bietet optional gerichtete Verbindungen von Quelle zu Ziel, mit
   Pfeilen, Richtungstooltip und getrennten Kurven für Gegenrichtungen in
   Kachel, IPSView und beiden Vorschauen. Ungerichtet bleibt der Standard;

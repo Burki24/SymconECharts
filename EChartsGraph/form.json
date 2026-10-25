@@ -82,6 +82,53 @@
                     "edit": {
                         "type": "SelectObject"
                     }
+                },
+                {
+                    "caption": "Weight source",
+                    "name": "WeightMode",
+                    "width": "150px",
+                    "add": "none",
+                    "edit": {
+                        "type": "Select",
+                        "options": [
+                            {
+                                "caption": "Unweighted",
+                                "value": "none"
+                            },
+                            {
+                                "caption": "Fixed weight",
+                                "value": "manual"
+                            },
+                            {
+                                "caption": "Current variable value",
+                                "value": "variable"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "Weight",
+                    "visible": false,
+                    "add": 1.0,
+                    "save": true
+                },
+                {
+                    "name": "WeightVariableID",
+                    "visible": false,
+                    "add": 0,
+                    "save": true
+                },
+                {
+                    "name": "WeightUnit",
+                    "visible": false,
+                    "add": "",
+                    "save": true
+                },
+                {
+                    "name": "WeightDecimals",
+                    "visible": false,
+                    "add": 2,
+                    "save": true
                 }
             ],
             "form": [
@@ -94,8 +141,78 @@
                     "type": "SelectObject",
                     "name": "TargetObjectID",
                     "caption": "To"
+                },
+                {
+                    "type": "Select",
+                    "name": "WeightMode",
+                    "caption": "Weight source",
+                    "options": [
+                        {
+                            "caption": "Unweighted",
+                            "value": "none"
+                        },
+                        {
+                            "caption": "Fixed weight",
+                            "value": "manual"
+                        },
+                        {
+                            "caption": "Current variable value",
+                            "value": "variable"
+                        }
+                    ]
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "Weight",
+                    "caption": "Fixed weight (manual mode)",
+                    "minimum": 0,
+                    "digits": 2
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "WeightUnit",
+                    "caption": "Weight unit (manual mode)"
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "WeightDecimals",
+                    "caption": "Weight decimals (manual mode)",
+                    "minimum": 0,
+                    "maximum": 6
+                },
+                {
+                    "type": "SelectVariable",
+                    "name": "WeightVariableID",
+                    "caption": "Weight variable (variable mode)",
+                    "validVariableTypes": [
+                        1,
+                        2
+                    ]
                 }
             ]
+        },
+        {
+            "type": "RowLayout",
+            "items": [
+                {
+                    "type": "NumberSpinner",
+                    "name": "WeightMinimum",
+                    "caption": "Weight reference minimum",
+                    "minimum": 0,
+                    "digits": 3
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "WeightMaximum",
+                    "caption": "Weight reference maximum",
+                    "minimum": 0,
+                    "digits": 3
+                }
+            ]
+        },
+        {
+            "type": "Label",
+            "caption": "Weights affect line width only. Fixed limits apply to every weighted connection; values are clipped only visually. Zero remains visible. Unweighted connections retain their original width. Variable values and units remain original."
         },
         {
             "type": "Label",
@@ -202,6 +319,27 @@
                             "type": "CheckBox",
                             "name": "RoamEnabled",
                             "caption": "Pan and zoom"
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "MinimumEdgeWidth",
+                            "caption": "Minimum weighted line width",
+                            "minimum": 1,
+                            "maximum": 20,
+                            "suffix": "px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "MaximumEdgeWidth",
+                            "caption": "Maximum weighted line width",
+                            "minimum": 1,
+                            "maximum": 20,
+                            "suffix": "px"
                         }
                     ]
                 },

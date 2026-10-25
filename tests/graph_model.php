@@ -23,6 +23,82 @@ $readValue = static fn (int $id): string => $id === 102 ? '40 %' : '30 %';
 $nodes = [['ObjectID' => 101, 'Label' => ''], ['ObjectID' => 102, 'Label' => 'Sensor A'], ['ObjectID' => 103, 'Label' => '']];
 $edges = [['SourceObjectID' => 101, 'TargetObjectID' => 102], ['SourceObjectID' => 101, 'TargetObjectID' => 103]];
 $graph = GraphModel::Build($nodes, $edges, $readObject, $readValue);
+$weightedEdges = [
+    [...$edges[0], 'WeightMode' => 'manual', 'Weight' => 25, 'WeightUnit' => 'W'],
+    [...$edges[1], 'WeightMode' => 'variable', 'WeightVariableID' => 987]
+];
+$weightOptions = ['minimum' => 0, 'maximum' => 100, 'minimumWidth' => 1, 'maximumWidth' => 9];
+$weighted = GraphModel::Build(
+    $nodes,
+    $weightedEdges,
+    $readObject,
+    $readValue,
+    false,
+    $weightOptions,
+    static fn (int $id): array => ['value' => 150.0, 'displayValue' => '150 W', 'unit' => 'W', 'timestamp' => 123]
+);
+assertGraph(
+    $weighted['links'][0]['width'] === 3.0 && $weighted['links'][1]['width'] === 9.0,
+    'Weights must use the fixed range, independent of the current minimum and maximum values.'
+);
+assertGraph($weighted['links'][1]['weight']['value'] === 150.0
+    && $weighted['links'][1]['weight']['variableID'] === 987
+    && $weighted['links'][0]['weight']['timestamp'] === null, 'Clipping must retain original values and source metadata without invented manual timestamps.');
+assertGraph($weighted['nodes'] === $graph['nodes'], 'Weights must not change node identity, values or layout input.');
+foreach ([0 => 1.0, 50 => 5.0, 100 => 9.0, 1000 => 9.0] as $value => $width) {
+    $result = GraphModel::Build(
+        $nodes,
+        [[...$edges[0], 'WeightMode' => 'manual', 'Weight' => $value]],
+        $readObject,
+        $readValue,
+        false,
+        $weightOptions
+    );
+    assertGraph(
+        $result['links'][0]['width'] === $width && $result['links'][0]['weight']['value'] === (float) $value,
+        'Fixed weight width or original value changed.'
+    );
+}
+foreach ([
+    ['WeightMode' => 'manual', 'Weight' => -1], ['WeightMode'            => 'manual', 'Weight' => INF],
+    ['WeightMode' => 'manual', 'Weight' => '25'], ['WeightMode'          => 'manual', 'Weight' => false],
+    ['WeightMode' => 'variable', 'WeightVariableID' => 0], ['WeightMode' => 'variable', 'WeightVariableID' => '987'],
+    ['WeightMode' => 'manual', 'WeightUnit' => str_repeat('W', 25)],
+    ['WeightMode' => 'manual', 'WeightDecimals' => 7], ['WeightMode' => 'unknown']
+] as $bad) {
+    try {
+        GraphModel::Build($nodes, [[...$edges[0], ...$bad]], $readObject, $readValue, false, $weightOptions);
+        throw new RuntimeException('Invalid Graph weight configuration accepted.');
+    } catch (InvalidArgumentException) {
+    }
+}
+foreach ([['minimum' => 100, 'maximum' => 100], ['minimum' => -1], ['maximum' => INF],
+    ['maximumWidth' => 21], ['minimumWidth'                => 10, 'maximumWidth' => 9]] as $bad) {
+    try {
+        GraphModel::Build($nodes, $weightedEdges, $readObject, $readValue, false, array_replace($weightOptions, $bad));
+        throw new RuntimeException('Invalid fixed Graph weight scale accepted.');
+    } catch (InvalidArgumentException) {
+    }
+}
+foreach ([-1, NAN, '42', false] as $invalidValue) {
+    try {
+        GraphModel::Build(
+            $nodes,
+            [$weightedEdges[1]],
+            $readObject,
+            $readValue,
+            false,
+            $weightOptions,
+            static fn (int $id): array => ['value' => $invalidValue, 'displayValue' => 'bad', 'unit' => '', 'timestamp' => 123]
+        );
+        throw new RuntimeException('Invalid current Graph weight accepted.');
+    } catch (InvalidArgumentException) {
+    }
+}
+assertGraph(
+    GraphModel::WeightVariableIDs([$weightedEdges[1], $weightedEdges[1], $weightedEdges[0]]) === [987],
+    'Weight sources are ID-deduplicated independently of node membership.'
+);
 GraphModel::ValidateRows($nodes, $edges);
 assertGraph(count($graph['nodes']) === 3 && count($graph['links']) === 2, 'Graph model size is wrong.');
 assertGraph($graph['nodes'][1]['id'] === 'object-102' && $graph['nodes'][2]['id'] === 'object-103', 'Object IDs must distinguish equal names.');

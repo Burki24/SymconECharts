@@ -22,10 +22,36 @@ optionale Anzeigename eines Knotens überschreibt dessen aktuellen
 Symcon-Namen. Die Objekt-ID bleibt der technische Schlüssel, sodass
 gleichnamige Objekte getrennte Knoten bleiben.
 
+Jede Verbindung kann außerdem eine **Gewichtsquelle** erhalten:
+**Ungewichtet** bleibt der Standard. **Festes Gewicht** verwendet den manuell
+eingetragenen Wert mit eigener Einheit und Nachkommastellen. **Aktueller
+Variablenwert** liest eine Integer- oder Float-Variable anhand ihrer ID;
+diese muss selbst kein Graph-Knoten sein. Dieselbe Variable darf mehrere
+Verbindungen gewichten. Die jeweils anderen Eingabefelder bleiben ohne Wirkung.
+
+**Minimaler/Maximaler Gewichtsbezug** legen einen gemeinsamen festen Zahlenbereich
+fest, beispielsweise 0–100 oder 0–255. Dieser Bereich muss endlich, nichtnegativ
+und aufsteigend sein. Innerhalb des Bereichs wächst die Breite linear zwischen
+**Minimale/Maximale gewichtete Linienbreite** im jeweiligen Designer (1–20 Pixel).
+Die Grenzen werden nicht automatisch aus den aktuellen Werten bestimmt.
+Null bleibt als dünne Verbindung sichtbar; Werte außerhalb des Bereichs werden
+nur bei der Breite begrenzt. Negative oder ungültige Werte werden abgewiesen.
+Ungewichtete Verbindungen behalten ihre bisherige Breite.
+
+Im Verbindungstooltip bleiben Originalgewicht und Einheit erhalten; bei
+Variablen werden deren Nachkommastellen und Einheit verwendet. Gewichte ändern
+weder die Richtung noch die Kräfteparameter und bilden keine Flussbilanz.
+Die Zahlenbereiche gelten für sämtliche gewichteten Kanten; eine automatische
+Einheitenumrechnung findet nicht statt. Kachel und IPSView können unabhängige
+Breiten verwenden, während der Gewichtsbezug gemeinsam bleibt. Beide Vorschauen
+zeigen dieselbe Berechnung. Die bisherige 64-KiB-Grenze je Liste gilt weiterhin;
+umfangreichere Gewichtseinstellungen können sie vor der maximalen Kantenzahl erreichen.
+
 Der Tooltip einer Variablen zeigt ihren aktuellen formatierten Wert. Auf
 Wunsch erscheint er zusätzlich an der Knotenbeschriftung. Namen und Werte
 werden mindestens alle 60 Sekunden neu gelesen. Das Modul liest lediglich
 Objekte und Werte; es ändert sie nicht.
+Änderungen aktiver Gewichtsvariablen aktualisieren zusätzlich unmittelbar den Graphen.
 
 Für Kachel und optionales IPSView-HTML-Widget stehen getrennte Designer mit
 kräftebasierter oder kreisförmiger Anordnung, Verschieben/Zoomen,

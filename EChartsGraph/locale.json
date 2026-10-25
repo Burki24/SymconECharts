@@ -70,7 +70,22 @@
             "Data could not be refreshed. Showing the last available values.": "Die Daten konnten nicht aktualisiert werden. Die zuletzt verfügbaren Werte bleiben sichtbar.",
             "Example network": "Beispielnetzwerk",
             "Graph preview": "Graph-Vorschau",
-            "Tile design copied to IPSView.": "Kacheldesign nach IPSView kopiert."
+            "Tile design copied to IPSView.": "Kacheldesign nach IPSView kopiert.",
+            "Weight": "Gewicht",
+            "Weight source": "Gewichtsquelle",
+            "Unweighted": "Ungewichtet",
+            "Fixed weight": "Festes Gewicht",
+            "Current variable value": "Aktueller Variablenwert",
+            "Fixed weight (manual mode)": "Festes Gewicht (manueller Modus)",
+            "Weight unit (manual mode)": "Gewichtseinheit (manueller Modus)",
+            "Weight decimals (manual mode)": "Gewichtsnachkommastellen (manueller Modus)",
+            "Weight variable (variable mode)": "Gewichtsvariable (Variablenmodus)",
+            "Weight reference minimum": "Minimaler Gewichtsbezug",
+            "Weight reference maximum": "Maximaler Gewichtsbezug",
+            "Minimum weighted line width": "Minimale gewichtete Linienbreite",
+            "Maximum weighted line width": "Maximale gewichtete Linienbreite",
+            "Configure valid Graph weights and fixed limits.": "Gültige Graph-Gewichte und feste Bezugsgrenzen konfigurieren.",
+            "Weights affect line width only. Fixed limits apply to every weighted connection; values are clipped only visually. Zero remains visible. Unweighted connections retain their original width. Variable values and units remain original.": "Gewichte beeinflussen nur die Linienbreite. Feste Bezugsgrenzen gelten für jede gewichtete Verbindung; Werte werden nur optisch begrenzt. Null bleibt sichtbar. Ungewichtete Verbindungen behalten ihre bisherige Breite. Variablenwerte und Einheiten bleiben im Original erhalten."
         }
     }
 }

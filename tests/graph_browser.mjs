@@ -8,7 +8,7 @@ import { execFileSync } from 'node:child_process';
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
-function state(layout, updated = false, zigbee = false, selection = 'strongest', directed = false, count = 300) {
+function state(layout, updated = false, zigbee = false, selection = 'strongest', directed = false, count = 300, weighted = false, maximumWidth = 9) {
     const nodes = Array.from({ length: count }, (_, index) => ({
         id: 'object-' + (1000 + index), name: 'Sensor mit langem Namen ' + (index % 50),
         kind: zigbee ? (index === 0 ? 'Coordinator' : index % 3 === 0 ? 'EndDevice' : 'Router') : 'variable',
@@ -23,16 +23,21 @@ function state(layout, updated = false, zigbee = false, selection = 'strongest',
         }
     }
     let model = { nodes, links, totalLinks: 1000, capturedAt: 1800000000 };
-    if (directed && !zigbee) {
-        const pairs = count === 300 ? links.slice(0, 500) : links.slice(0, 1);
-        const edgeRows = pairs.flatMap(link => [
+    if ((directed || weighted) && !zigbee) {
+        const pairs = count === 300 ? links.slice(0, 500) : links.slice(0, count === 2 ? 1 : 2);
+        const edgeRows = directed ? pairs.flatMap(link => [
             { SourceObjectID: Number(link.source.slice(7)), TargetObjectID: Number(link.target.slice(7)) },
             { SourceObjectID: Number(link.target.slice(7)), TargetObjectID: Number(link.source.slice(7)) }
-        ]);
+        ]) : links.map(link => ({ SourceObjectID: Number(link.source.slice(7)), TargetObjectID: Number(link.target.slice(7)) }));
+        if (weighted) { edgeRows.forEach((edge, index) => {
+            if (index % 4 !== 3) { Object.assign(edge, { WeightMode: 'manual',
+                Weight: [updated ? 50 : 25, 75, 0][index % 4], WeightUnit: 'W', WeightDecimals: 0 }); }
+        }); }
         model = JSON.parse(execFileSync('php', ['-r',
-            'require $argv[1]; $v=json_decode(stream_get_contents(STDIN),true,512,JSON_THROW_ON_ERROR); echo json_encode(\\SymconECharts\\GraphModel::Build($v["nodes"],$v["edges"],static fn(int $id):array=>["ObjectType"=>2,"ObjectName"=>"Same name"],static fn(int $id):string=>"25 %",true),JSON_THROW_ON_ERROR);',
+            'require $argv[1]; $v=json_decode(stream_get_contents(STDIN),true,512,JSON_THROW_ON_ERROR); echo json_encode(\\SymconECharts\\GraphModel::Build($v["nodes"],$v["edges"],static fn(int $id):array=>["ObjectType"=>2,"ObjectName"=>"Same name"],static fn(int $id):string=>"25 %",$v["directed"],$v["weights"]),JSON_THROW_ON_ERROR);',
             path.join(root, 'libs/GraphModel.php')], { input: JSON.stringify({
-                nodes: nodes.map(node => ({ ObjectID: Number(node.id.slice(7)), Label: node.name })), edges: edgeRows
+                nodes: nodes.map(node => ({ ObjectID: Number(node.id.slice(7)), Label: node.name })), edges: edgeRows, directed,
+                weights: { minimum: 0, maximum: 100, minimumWidth: 1, maximumWidth }
             }), encoding: 'utf8' }));
         if (updated) { model.nodes.forEach(node => { node.displayValue = '26 %'; }); }
     }
@@ -56,13 +61,13 @@ function state(layout, updated = false, zigbee = false, selection = 'strongest',
             showLabels: true, showValues: true, animationEnabled: false }
     } } };
 }
-function page(mode, layout, zigbee, directed = false, count = 300) {
+function page(mode, layout, zigbee, directed = false, count = 300, weighted = false) {
     const module = zigbee ? 'EChartsGraphZ2M' : 'EChartsGraph';
     const chartID = zigbee ? 'echarts-zigbee-graph-chart' : 'echarts-graph-chart';
     const bootstrap = { mode, state: null,
         translations: JSON.parse(read(module + '/locale.json')).translations.de,
         options: { tileHeaderVisible: mode === 'symcon', tileHeaderInset: mode === 'symcon' ? 58 : 0, echartsThemes: {},
-            compressedStateGzipBase64: gzipSync(JSON.stringify(state(layout, false, zigbee, 'strongest', directed, count))).toString('base64') } };
+            compressedStateGzipBase64: gzipSync(JSON.stringify(state(layout, false, zigbee, 'strongest', directed, count, weighted, mode === 'ipsview' ? 17 : 9))).toString('base64') } };
     const replacements = { HTML_LANGUAGE: 'de', HTML_CLASSES: '', ROOT_FONT_SIZE: '16px',
         VIEWPORT_CONTENT: 'width=device-width, initial-scale=1', DOCUMENT_TITLE: 'Graph browser fixture',
         VISUALIZATION_THEME: ':root{--symc-background:#303236;--symc-text:#f4f5f7;--symc-text-muted:#969aa2}',
@@ -76,20 +81,24 @@ function page(mode, layout, zigbee, directed = false, count = 300) {
     const script = `let wheelCount=0;
         function graphChart(){return echarts.getInstanceByDom(document.getElementById('${chartID}'));}
         function report(){const s=graphChart().getModel().getSeriesByIndex(0);
-        document.getElementById('result').textContent='Zoom '+Number(s.get('zoom')||1).toFixed(2)+' · '+s.getData().count()+' Knoten · '+s.getEdgeData().count()+' Kanten · Wheel '+wheelCount;}
+        document.getElementById('result').textContent='Zoom '+Number(s.get('zoom')||1).toFixed(2)+' · '+s.getData().count()+' Knoten · '+s.getEdgeData().count()+' Kanten · Wheel '+wheelCount
+        + (${weighted} ? ' · Breiten '+Array.from({length:Math.min(4,s.getEdgeData().count())},(_,i)=>s.getEdgeData().getItemVisual(i,'style').lineWidth).join('/') : '');}
         function observe(){if(!graphChart()){requestAnimationFrame(observe);return;}
         graphChart().on('graphRoam',report);
         document.getElementById('${chartID}').addEventListener('wheel',()=>{wheelCount++;requestAnimationFrame(report);},{passive:true,capture:true});report();}observe();
         function roam(){graphChart().dispatchAction({type:'graphRoam',seriesId:'graph',dx:20,dy:10});
         graphChart().dispatchAction({type:'graphRoam',seriesId:'graph',zoom:1.5,originX:200,originY:200});report();}
         const samples=${JSON.stringify(Object.fromEntries((zigbee ? ['strongest', 'weakest', 'range', 'empty'] : ['strongest'])
-            .map(selection => [selection, state(layout, true, zigbee, selection, directed, count)])))};
+            .map(selection => [selection, state(layout, true, zigbee, selection, directed, count, weighted, mode === 'ipsview' ? 17 : 9)])))};
         let selection='strongest';
         function selectLinks(next){selection=next;refresh();}
-        function refresh(){window.handleMessage(samples[selection]);report();}`;
+        function refresh(){window.handleMessage(samples[selection]);report();}
+        function unweight(){const v=samples[selection];window.handleMessage({...v,chart:{...v.chart,graph:{...v.chart.graph,
+        links:v.chart.graph.links.map(({weight,width,...link})=>link)}}});report();}`;
     html = html.replace('</head>', '<style>.echarts-graph-root,.echarts-zigbee-graph-root{height:calc(100% - 36px)}</style></head>');
     html = html.replace('</body>', '<div style="position:absolute;left:12px;bottom:4px;z-index:5;font:10px Arial">'
         + '<button onclick="roam()">Verschieben / Zoom</button><button onclick="refresh()">Werte aktualisieren</button>'
+        + (weighted ? '<button onclick="unweight()">Gewichtung aus</button>' : '')
         + (zigbee ? '<button onclick="selectLinks(\'strongest\')">Stärkste</button><button onclick="selectLinks(\'weakest\')">Schwächste</button>'
             + '<button onclick="selectLinks(\'range\')">LQI 64–128</button><button onclick="selectLinks(\'empty\')">Ohne Treffer</button>' : '')
         + '<span id="result"></span></div><script>' + script + '</script></body>');
@@ -104,11 +113,12 @@ http.createServer((req, res) => {
     const zigbee = url.searchParams.get('family') === 'z2m';
     const family = zigbee ? 'z2m' : 'manual';
     const directed = !zigbee && url.searchParams.get('directed') === '1';
-    const count = directed && url.searchParams.get('small') === '1' ? 2 : 300;
-    const suffix = '&directed=' + (directed ? '1' : '0') + '&small=' + (count === 2 ? '1' : '0');
+    const weighted = !zigbee && url.searchParams.get('weighted') === '1';
+    const count = (directed || weighted) && url.searchParams.get('small') === '1' ? (weighted ? 3 : 2) : 300;
+    const suffix = '&directed=' + (directed ? '1' : '0') + '&small=' + (count < 300 ? '1' : '0') + '&weighted=' + (weighted ? '1' : '0');
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     if (url.pathname === '/chart') {
-        res.end(page(url.searchParams.get('mode') === 'ipsview' ? 'ipsview' : 'symcon', layout, zigbee, directed, count)); return;
+        res.end(page(url.searchParams.get('mode') === 'ipsview' ? 'ipsview' : 'symcon', layout, zigbee, directed, count, weighted)); return;
     }
     res.end('<!doctype html><html lang="de"><head><title>Graph · lokale Browserprüfung</title></head>'
         + '<body style="background:#101114;color:white;font:16px Arial;margin:18px"><h1 style="font-size:20px">'

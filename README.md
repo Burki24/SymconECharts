@@ -11,6 +11,8 @@ eine lesende IP-Symcon-Objekthierarchie als Tree, einen allgemeinen Graphen
 für ausdrücklich verbundene Symcon-Objekte sowie einen separaten Graphen
 für exportierte Zigbee2MQTT-Netzwerkkarten sowie Treemap und Sunburst mit
 manuell festgelegten Gruppen und aktuellen numerischen Variablenwerten.
+Der allgemeine Graph bietet optional gerichtete Beziehungen und Gewichte aus
+festen Zahlen oder aktuellen Variablenwerten mit festem Bezug für die Linienbreite.
 Treemap und Sunburst erlauben optionale Gruppenpfade mit bis zu acht Ebenen
 einschließlich Quellvariable; bestehende Gruppe-/Untergruppe-Zuordnungen bleiben nutzbar.
 Beide Familien bieten außerdem optionale Min/Max-normalisierte Blattgewichte

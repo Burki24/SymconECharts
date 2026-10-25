@@ -940,6 +940,54 @@ Legendenwahl und Zeitzoom blieben nach Refresh und Umsortierung erhalten.
 Die Live-Abnahme dieser Erweiterung nach Modulupdate steht noch aus;
 Symcon-Konfigurationen und Archive wurden nicht verändert.
 
+## Gewichtete manuelle Graph-Beziehungen
+
+`php tests/graph_model.php` begann RED an der fehlenden festen Gewichtsprojektion.
+Die Fälle prüfen feste Min/Max-Bezüge, Null, Begrenzung außerhalb des Bereichs,
+Originalmetadaten, manuelle Zeitstempel/IDs als null, ungültige Zahlen, Modi,
+Bereiche und Breiten. `php tests/gateway_gauges.php --graph-weighted` verwendet
+echte Modul-/Gateway-Instanzen mit synthetischen Kernelgrenzen: ID-deduplizierte
+Lesezugriffe außerhalb der Knotenliste, Originaleinheit/-präzision und Zeitstempel,
+unabhängige Designer, unmittelbares VM_UPDATE und spätere Abmeldung. Eine
+abweichende zweite formatierte Wertlesung darf nicht den Gateway-Snapshot
+überschreiben. Fehlender Metadatenzugriff bleibt ein Fehler. Vorschauen funktionieren
+auch ohne Gateway ohne gespeicherte Konfiguration, Status oder Referenzen zu ändern.
+Ausgeführter Zeilenformular-Code setzt fehlende Felder einer Altzeile auf
+ungewichtet zurück; versteckte Werte besitzen add/save. Altlisten werden nicht
+automatisch mit Defaultfeldern vergrößert.
+
+`node tests/graph_layout.js` begann RED an der fehlenden nativen Linienbreite.
+Die wirklich ausgelieferte Canvas-Runtime zeichnet berechnete Breiten und
+ausreichend große Zielpfeile in beiden Layouts und Adaptern. Tests prüfen
+Tooltip-Escaping, sichtbare Nullbreiten, unveränderte Hervorhebungsbreiten,
+keine nativen Kräftewerte, Zoomerhalt bei Gewichtsänderung sowie Entfernung
+vorheriger Gewichte ohne alte setOption-Breiten. `--graph-large` erhält 300
+Knoten/1000 Verbindungen mit Gewicht, beide HTML-Ausgaben/Formular unter 1 MiB
+und die bisherigen Listengrenzen; reichhaltige Listen können die Bytegrenze
+weiterhin vor der Count-Grenze erreichen.
+
+Die bestehende Browserfixierung erhält `/?directed=1&weighted=1&small=1`,
+wahlweise `&layout=circular`. Sie erzeugt ihre Breiten durch den PHP-Modellbauer.
+Am 25.10.2026 wurden beide Layouts lokal in verschachtelten Kachel-/IPSView-
+Testframes geprüft. Initiale Breiten waren 3/7/1/1,5 px beziehungsweise
+5/13/1/1,5 px; die Nullverbindung blieb sichtbar. Der echte Verbindungstooltip
+zeigte „Gewicht: 75 W“. Echte Mausradaktionen lieferten in beiden Frames
+und Layouts 1,00 → 0,91 → 1,00 mit gezähltem Empfang. Nach einer Gewichtsänderung
+blieb 1,10 erhalten und die erste Breite wurde 5 bzw. 9 px. Abschalten der
+Gewichtung stellte sämtliche bisherigen 1,5-px-Breiten ohne Zoomverlust wieder her.
+Eine zusätzliche ungerichtete Kreisvariante zeigte dieselben Gewichtsbreiten
+ohne Richtungspfeile. Die geprüften Browserseiten meldeten keine Warnungen/Fehler.
+Dies sind lokale Browser-/HTTP-Frame-Nachweise; MCP und echte native Kachel/
+IPSView-App bleiben nach Modulupdate offen. Bestehende Live-Konfigurationen
+wurden nicht geändert. `php tests/quality.php --fix` ist auf dem abschließenden
+Stand vollständig bestanden, einschließlich sämtlicher Layoutprüfungen.
+Beim Gesamtlauf erreichte der große gemeinsame PHP-Testprozess mit den
+erweiterten Formularen zunächst seine bisherigen 128 MiB in einer späteren
+PictorialBar-Fixture. Die abgeschlossenen Graph-/Designer-Formulare werden
+jetzt nach ihren letzten Assertions freigegeben. Der gemeinsame Prozess besteht
+damit wieder ohne angehobenes Speicherlimit; keine Produktions- oder Testgrenze
+wurde erweitert. Sämtliche PictorialBar-Prüfungen bleiben enthalten.
+
 ## Gerichtete manuelle Graph-Beziehungen
 
 `php tests/graph_model.php` begann RED an der bisherigen Ablehnung einer
