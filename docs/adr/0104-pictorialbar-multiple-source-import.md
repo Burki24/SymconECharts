@@ -1,7 +1,7 @@
 # ADR 0104: Mehrfachübernahme von PictorialBar-Quellen
 
-Status: angenommen, funktional per MCP geprüft; Live-Abnahme der korrigierten
-Formularrückmeldung ausstehend.
+Status: angenommen, Mehrfachübernahme und Fehlermeldungen per MCP live geprüft;
+kosmetische Bereinigung der Erfolgsbestätigung lokal umgesetzt.
 
 ## Kontext
 
@@ -67,5 +67,14 @@ Die dabei fehlende Formularrückmeldung wird im Callback mit `echo` statt `retur
 ausgegeben. Der Modulfunktionsvertrag bleibt ein stiller String-Rückgabewert,
 erfolgreiche Such-/Auswahlaktionen liefern weiterhin einen leeren Text. Der
 Regressionstest prüft tatsächliche Skriptausgabe einschließlich Fehlern ohne
-Teilübernahme. Die neue Rückmeldung bleibt nach Update live zu prüfen; diese
-funktionale Abnahme ersetzt keinen separaten Test im tatsächlichen IPSView-Client.
+Teilübernahme. Diese funktionale Abnahme ersetzt keinen separaten Test im
+tatsächlichen IPSView-Client.
+
+Die korrigierten Fehlermeldungen sind inzwischen auch als echte deutsche
+Konsolendialoge bestätigt, einschließlich leerer Auswahl und der 100er-Grenze.
+Erfolgsbestätigungen erscheinen ebenfalls, enthielten aber sichtbar den bisherigen
+Marker `MESSAGE:`. Ausschließlich der Formularadapter entfernt diesen führenden
+Marker vor der Ausgabe; der veröffentlichte String-Rückgabevertrag bleibt
+unverändert. Regressionen prüfen den exakten sichtbaren Text bei einer neuen und
+einer wiederholten Auswahl sowie unveränderte Fehlertexte und stille Aktionen.
+Die kosmetische Bereinigung bleibt nach dem nächsten Update live zu bestätigen.

@@ -50,7 +50,11 @@ bisherige vollständige Quellenvalidierung schützen bestehende Listen und Desig
 Die funktionale MCP-Prüfung mit Speicherung von 100 Quellen ist bestanden.
 Der dabei gefundene Rückmeldefehler wird durch `echo` in den Buttoncallbacks
 korrigiert; Tests prüfen nun die tatsächliche Skriptausgabe statt `eval`-Returns.
-Die korrigierten Meldungen bleiben nach Modulupdate live zu prüfen.
+Die korrigierten Fehlermeldungen sind inzwischen als echte Konsolendialoge
+bestätigt. Der verbliebene Erfolgspräfix `MESSAGE:` wird ausschließlich bei der
+Formularausgabe entfernt; der Modulfunktionsvertrag bleibt gleich. Exakte
+Textregressionen sichern neue und wiederholte Auswahlen ab. Nur diese kosmetische
+Bereinigung bleibt nach dem nächsten Modulupdate live zu bestätigen.
 Graph-Gewichte sind inzwischen per MCP funktional geprüft und vom
 Eigentümer in Kachel und tatsächlichem IPSView bestätigt.
 

@@ -100,10 +100,11 @@ trait EChartsSourceImportForm
         // Symcon displays script output, not PHP return values, as form messages.
         foreach (['search' => 'Search variables', 'all' => 'Select all new matches', 'none' => 'Clear selection', 'append' => 'Add selected sources'] as $action => $caption) {
             $buttons[] = ['type' => 'Button', 'caption' => $caption, 'name' => 'SourceImport' . ucfirst($action),
-                'onClick'        => $setup . 'echo ' . $prefix . '_UpdateSourceImportFromForm($id, json_encode(['
+                'onClick'        => $setup . '$sourceImportMessage = ' . $prefix . '_UpdateSourceImportFromForm($id, json_encode(['
                     . "'Action' => " . var_export($action, true) . ', ' . implode(', ', $pairs)
                     . ", 'Candidates' => \$sourceImportCandidates, 'Preview' => ['Sources' => \$sourceImportSources] + compact("
-                    . implode(', ', array_map(static fn (string $name): string => var_export($name, true), $previewFields)) . ')]));'];
+                    . implode(', ', array_map(static fn (string $name): string => var_export($name, true), $previewFields))
+                    . ')])); echo str_starts_with($sourceImportMessage, "MESSAGE:") ? substr($sourceImportMessage, 8) : $sourceImportMessage;'];
         }
         $columns = [['name' => 'Selected', 'caption' => 'Add', 'width' => '70px', 'edit' => ['type' => 'CheckBox']],
             ['name' => 'Name', 'caption' => 'Variable', 'width' => '200px', 'save' => true],

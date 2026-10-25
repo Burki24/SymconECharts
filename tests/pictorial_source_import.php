@@ -209,8 +209,16 @@ assertGatewayGauge(
 );
 $fields['SourceImportCandidates'] = new ArrayIterator([['VariableID' => 9111, 'Selected' => true]]);
 assertGatewayGauge(
-    str_starts_with($execute(findGaugeFormElement($form['elements'], 'SourceImportAppend')['onClick'], $fields), 'MESSAGE:1'),
-    'The actual Add-selected callback must print its success message for the console, not merely return it.'
+    $execute(findGaugeFormElement($form['elements'], 'SourceImportAppend')['onClick'], $fields)
+        === '1 sources added. Review labels and Min/Max, then apply the form to save.',
+    'The callback must print a readable success confirmation without the internal MESSAGE marker.'
+);
+$repeatFields = $fields;
+$repeatFields['Sources'] = new ArrayIterator($merged);
+assertGatewayGauge(
+    $execute(findGaugeFormElement($form['elements'], 'SourceImportAppend')['onClick'], $repeatFields)
+        === '0 sources added. Review labels and Min/Max, then apply the form to save.',
+    'A repeated selection must also have a clean confirmation while retaining the ID-based no-op behavior.'
 );
 $updates = $importer->GetTestFormUpdates();
 $images = array_values(array_filter(array_slice($updates, -5), static fn ($u) => $u['Parameter'] === 'image'));

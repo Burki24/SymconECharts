@@ -2,6 +2,10 @@
 
 ## Behoben
 
+- PictorialBar zeigt Erfolgsbestätigungen der Mehrfachübernahme ohne den
+  technischen Präfix `MESSAGE:` an. Der Rückgabewert der Modulfunktion,
+  Fehlermeldungen, Quellen, Designs und Schutzgrenzen bleiben unverändert.
+
 - PictorialBar zeigt Fehler und Bestätigungen der Mehrfachübernahme im Formular
   an. Die Buttoncallbacks geben die Meldungen jetzt aus, statt sie nur als
   PHP-Rückgabewert zu liefern. Quellen, Designs und Schutzgrenzen bleiben erhalten.

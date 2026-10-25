@@ -2,6 +2,16 @@
 
 ## PictorialBar: Mehrfachübernahme von Quellen
 
+Die anschließende MCP-Abnahme bestätigt echte deutsche Fehlerdialoge und eine
+sichtbare Erfolgsbestätigung; Originalkonfiguration und Design blieben gleich.
+Der sichtbare Erfolgsmarker `MESSAGE:` wird nun ausschließlich im generierten
+Formularcallback entfernt. Der Test erwartet exakt lesbare Bestätigungen für
+eine neue sowie eine wiederholte Auswahl ohne zusätzliche Quelle. Die direkten
+Modulaufrufe behalten ihren bisherigen String-Rückgabewert mit Marker; Fehlertexte
+und stille Aktionen bleiben unverändert. Der gezielte Test begann RED am noch
+sichtbaren Marker und besteht nach der Adapterkorrektur. Die kosmetische
+Änderung ist nach Modulupdate separat live zu bestätigen.
+
 `php tests/gateway_gauges.php --pictorial-source-import` begann RED an der
 fehlenden Modulaktion. Geprüft sind begrenzte zentrale Baumsuche, direkte und
 rekursive Kinder, verborgene Objekte, numerische Typen, genaue Einheiten, ID-
@@ -27,8 +37,8 @@ Entwürfe und persistierter Properties bei Fehlern.
 Der Renderer bleibt unverändert; seine bestehenden Layout-/Navigationsprüfungen
 laufen in der vollständigen Qualitätssuite weiter. Der abschließende Lauf von
 `php tests/quality.php --fix` ist einschließlich aller Integrations- und nativen
-Layoutprüfungen bestanden. Die korrigierte Formularrückmeldung nach erneutem
-Modulupdate bleibt als eigener Live-Nachweis offen. Echte IPSView-App-Abnahme
+Layoutprüfungen bestanden. Nur die kosmetische Bereinigung des Erfolgspräfixes
+bleibt nach Modulupdate als eigener Live-Nachweis offen. Echte IPSView-App-Abnahme
 der neuen Übernahme und browserseitige Mausradnavigation im Diagramm sind
 hiermit nicht nachgewiesen. Keine Installation wird für diese lokale Korrektur geändert.
 
