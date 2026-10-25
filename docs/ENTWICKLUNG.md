@@ -40,6 +40,17 @@ Canvas-Zeichenaufrufe für Kachel und IPSView statt nur vorhandener Titeloptione
 
 ## Aktueller Stand und Zielarchitektur
 
+PictorialBar ergänzt gemäß [ADR 0104](adr/0104-pictorialbar-multiple-source-import.md)
+die formulargebundene Mehrfachübernahme nach Objektzweig, Name und genauer Einheit.
+Die vorhandene zentrale `VariableSearchHelper`-Suche und native/Legacy-Metadaten
+werden wiederverwendet; gemeinsame Library-Adapter liegen in `EChartsSourceImport`
+und `EChartsSourceImportForm`. Frische ID-Prüfung, append-only Entwürfe und die
+bisherige vollständige Quellenvalidierung schützen bestehende Listen und Designs.
+100 Quellen/64 KiB, begrenzte Suche sowie Renderer und Archive bleiben unverändert.
+Lokale Modul-/Callbacktests sind vorhanden; die neue Formularabnahme nach Update
+bleibt offen. Graph-Gewichte sind inzwischen per MCP funktional geprüft und vom
+Eigentümer in Kachel und tatsächlichem IPSView bestätigt.
+
 Graph ergänzt gemäß [ADR 0103](adr/0103-weighted-graph-relationships.md)
 optionale Gewichte je Verbindung aus manuellen Zahlen oder aktuellen Quellen.
 Die gemeinsame `GraphModel`-Berechnung verwendet den bestehenden numerischen
@@ -56,7 +67,8 @@ Gewichtsbezug. Die native Runtime erhält diese Breiten, keine fachlichen
 Kräftewerte. Ein pro Zeile neu initialisiertes Formular vermeidet alte
 Dialogwerte bei bisher ungewichteten Altzeilen, ohne ganze Listen mit neuen
 Defaultfeldern aufzublähen. Runtime, bestehende Designs und Schutzbudgets
-bleiben erhalten. Neue MCP-/Client-Abnahme nach Modulupdate offen.
+bleiben erhalten. MCP-Abnahme ist bestanden; der Eigentümer bestätigt die
+gewichteten Beziehungen in Kachel und tatsächlichem IPSView.
 
 Graph ergänzt gemäß [ADR 0102](adr/0102-directed-graph-relationships.md)
 `DirectedEdges=false`. Dieselbe `GraphModel`-Prüfung versorgt gespeicherte

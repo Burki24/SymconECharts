@@ -64,6 +64,8 @@ Funnel vergleicht aktuelle, nichtnegative Stufenwerte derselben Einheit.
 Bis zu 32 Quellen erhalten optional eine Quellenauswahl und responsive
 Stufennavigation; die vollständige Breitenskala bleibt auch auf Teilseiten erhalten.
 PictorialBar vergleicht aktuelle, nichtnegative Werte als Symbolbalken.
+Quellen lassen sich dort auch gesammelt nach Objektzweig, Variablenname und
+Einheit suchen, auswählen und zur bestehenden Liste hinzufügen.
 Pie, BarCategory, BarPolar und PictorialBar können Quellen optional anhand
 eigener Min/Max-Grenzen auf 0–100 normalisieren. So sind relative Vergleiche
 unterschiedlicher Messgrößen möglich; Originalwerte und Einheiten bleiben

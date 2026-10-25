@@ -59,6 +59,7 @@ $tests = [
 ];
 
 $commands = [
+    ['Test PictorialBar source import drafts', 'php tests/gateway_gauges.php --pictorial-source-import'],
     ['Test Waterfall subtotals and independent restarts', 'php tests/gateway_gauges.php --waterfall-sections'],
     ['Test optional Sankey calculated balances', 'php tests/gateway_gauges.php --sankey-balance'],
     ['Test optional Sankey negative-flow reversal', 'php tests/gateway_gauges.php --sankey-reversal'],

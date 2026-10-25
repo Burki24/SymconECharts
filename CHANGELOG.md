@@ -2,6 +2,12 @@
 
 ## Neu
 
+- PictorialBar bietet eine Mehrfachübernahme numerischer Quellen nach Objektzweig,
+  Namensbestandteil oder genauer Einheit. Eine auswählbare Trefferliste zeigt
+  bereits vorhandene Quellen; die ID-basierte Übernahme ergänzt ausschließlich
+  den Formularentwurf und aktualisiert beide Vorschauen. Bestehende Quellen,
+  Designs, Normalisierung sowie Quellen- und Bytegrenzen bleiben erhalten.
+
 - Graph kann Verbindungen optional durch feste Gewichte oder aktuelle numerische
   Variablenwerte gewichten. Ein gemeinsamer fester Min/Max-Bezug bestimmt zusammen
   mit unabhängig gestaltbaren Linienbreiten die Darstellung. Originalwerte und

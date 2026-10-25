@@ -1,5 +1,25 @@
 # Tests
 
+## PictorialBar: Mehrfachübernahme von Quellen
+
+`php tests/gateway_gauges.php --pictorial-source-import` begann RED an der
+fehlenden Modulaktion. Geprüft sind begrenzte zentrale Baumsuche, direkte und
+rekursive Kinder, verborgene Objekte, numerische Typen, genaue Einheiten, ID-
+Dublettenerkennung bei gleichen Namen, frische Auswahlprüfung, 100/101 Quellen,
+64-KiB-Quellenlisten sowie 5000/500-Suchbudgets. Keine stille Teilübernahme.
+Die generierten echten Callback-Skripte werden mit Listeniteratoren ausgeführt;
+ungespeicherte unabhängige Designs und false-Werte bleiben enthalten. Zwei SVG-
+Vorschauen aktualisieren sich nach Übernahme, gespeicherte Properties und Archive
+bleiben unverändert. Alle Importbeschriftungen sind auf Deutsch vorhanden.
+
+Der Renderer bleibt unverändert; seine bestehenden Layout-/Navigationsprüfungen
+laufen in der vollständigen Qualitätssuite weiter. Der abschließende Lauf von
+`php tests/quality.php --fix` ist einschließlich aller Integrations- und nativen
+Layoutprüfungen bestanden. Die neue Formularbedienung
+einschließlich Mausrad in der Trefferliste sowie Kachel/IPSView nach Übernahme
+bleiben bis zum Modulupdate als eigener Live-Nachweis offen. Keine Installation
+wird für diese lokale Implementierung geändert.
+
 ## Radar: optionale unvollständige Vergleichsgruppen
 
 `php tests/radar_model.php` begann RED an der noch strengen Ablehnung einer

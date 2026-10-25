@@ -18,6 +18,44 @@ Symbolbalken. Negative Werte und ungeeignete Quellen werden sichtbar gemeldet.
 Gleiche Anzeigenamen sind erlaubt; jede Variable bleibt separat erhalten.
 Änderungen der Quellen aktualisieren die Anzeige automatisch.
 
+## Mehrere Quellen übernehmen
+
+Unter **Mehrere Quellen übernehmen** lassen sich numerische Variablen gesammelt
+zur Quellenliste hinzufügen, etwa alle Batterievariablen mit der Einheit `%`.
+
+1. Einen **Suchzweig** (Kategorie oder Instanz) wählen; **0 = Symcon** sucht ab
+   der Wurzel. Unterobjekte und ausgeblendete Objekte lassen sich getrennt einbeziehen.
+2. Optional einen Bestandteil des **Variablennamens** und eine **genaue Einheit**
+   angeben. Namen werden ohne Beachtung der Groß-/Kleinschreibung gesucht.
+   Einheiten stammen aus der Variablendarstellung beziehungsweise dem Legacy-Profil;
+   beispielsweise `%`, `V` oder `LQI`. Leer bedeutet alle Einheiten.
+3. **Variablen suchen** anklicken. Name, Pfad und Einheit helfen bei der Auswahl;
+   bereits eingerichtete Variablen sind gekennzeichnet. Zunächst ist nichts ausgewählt.
+   Einzelne Treffer oder **Alle neuen Treffer auswählen** verwenden.
+4. **Ausgewählte Quellen hinzufügen** ergänzt die noch ungespeicherte Quellenliste
+   und aktualisiert beide Vorschauen. Beschriftungen sowie gegebenenfalls
+   Normalisierungsbereiche prüfen und anschließend mit **Übernehmen** speichern.
+
+Bestehende Reihenfolge, Beschriftungen, Farben, Min/Max und beide Designs bleiben
+erhalten. Bereits vorhandene Variablen werden anhand ihrer ID erkannt; gleiche
+Namen sind erlaubt. Neue Einträge erhalten eine leere individuelle Beschriftung
+(Anzeige des Variablennamens), automatische Farbe und Normalisierungsgrenzen
+0–100. Andere Bereiche müssen vor dem Speichern angepasst werden.
+Ohne aktivierte Normalisierung müssen alle Quellen weiterhin dieselbe Einheit haben.
+
+Die Suche umfasst höchstens 5000 Objekte, 500 numerische Treffer vor dem
+Einheitenfilter und bei Unterobjekten bis zu 100 Ebenen. Bei Erreichen einer
+Objekt-/Treffergrenze wird keine gekürzte Trefferliste angeboten: Suchzweig oder
+Namensfilter enger wählen. Ausgeblendete Zweige sind standardmäßig ausgeschlossen;
+Verknüpfungen werden nicht verfolgt. Die Suche wird vor der Übernahme wiederholt.
+Geänderte Filter leeren die Trefferliste; veraltete Auswahlen werden abgewiesen.
+Auch bei der Übernahme gelten maximal 100 Quellen und 64 KiB für die Quellenliste;
+bei Überschreitung wird die gesamte Auswahl abgewiesen und nichts teilweise ergänzt.
+
+Suche und Auswahl sind nur für das geöffnete Formular bestimmt. Das Formular
+zum Bearbeiten möglichst nur einmal gleichzeitig öffnen, da Symcon dynamische
+Formularaktualisierungen an alle geöffneten Konfigurationen derselben Instanz sendet.
+
 ## Optionale Min/Max-Normalisierung
 
 **Werte anhand Quellen-Min/Max normalisieren** erlaubt Quellen mit

@@ -1088,6 +1088,11 @@ if (array_slice($argv, 1) === ['--tree-health-depth']) {
     exit(0);
 }
 
+if (array_slice($argv, 1) === ['--pictorial-source-import']) {
+    require __DIR__ . '/pictorial_source_import.php';
+    exit(0);
+}
+
 if (array_slice($argv, 1) === ['--hierarchy-normalization']) {
     require __DIR__ . '/hierarchy_normalization.php';
     exit(0);

@@ -323,6 +323,13 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Anzeige-Aliase entstehen. Individuelle Instanznamen bleiben Benutzerentscheidungen.
 
 - `ECPB` ist `EChartsPictorialBar` zugeordnet (PB = Pictorial Bar), GUID `{CF6B1F8C-7219-4D59-94EA-19CF7570637F}` gemäß ADR 0057.
+  ADR 0104 ergänzt die formulargebundene Mehrfachübernahme nach Objektzweig,
+  Namensbestandteil und genauer Einheit. `VariableSearchHelper` bleibt die zentrale
+  Baumsuche; `EChartsSourceImport` ergänzt Metadatenfilter und ID-stabiles Anhängen,
+  `EChartsSourceImportForm` die Entwurfs-/Vorschauadapter. Keine persistierten
+  Sucheinstellungen oder direkten Konfigurationsschreibzugriffe. Frische Prüfung
+  vor Übernahme, 5000 Objekte/500 numerische Treffer, 100 Quellen/64 KiB und
+  unveränderte fachliche Quellenprüfung; keine Änderung von Designs oder Runtime.
 
 - `ECFU` ist `EChartsFunnel` zugeordnet (`FU` = Funnel), siehe ADR 0055.
 

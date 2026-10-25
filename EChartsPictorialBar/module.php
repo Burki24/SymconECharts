@@ -23,6 +23,7 @@ use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsNormalization;
 use SymconECharts\EChartsSourceIdentity;
+use SymconECharts\EChartsSourceImportForm;
 use SymconECharts\EChartsTransientRefresh;
 use SymconECharts\EChartsVariablePresentation;
 use SymconECharts\PictorialBarIcon;
@@ -45,6 +46,7 @@ require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
 require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
+require_once __DIR__ . '/../libs/EChartsSourceImportForm.php';
 require_once __DIR__ . '/../libs/EChartsTransientRefresh.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 require_once __DIR__ . '/../libs/EChartsCurrentSources.php';
@@ -63,6 +65,7 @@ class EChartsPictorialBar extends IPSModuleStrict
     use EChartsAnimationDesign;
     use EChartsBarPreviewForm;
     use EChartsCurrentSources;
+    use EChartsSourceImportForm;
     use SymconECharts\PictorialBarPreview;
     use EChartsIPSViewDesignForm;
     use EChartsIPSViewTransport;
@@ -248,6 +251,7 @@ class EChartsPictorialBar extends IPSModuleStrict
                     $fields[] = $prefix . $name;
                 }
             }
+            $form = $this->WithSourceImportForm($form, 'ECPB', $fields);
             return $debugFlowResult = $this->EncodeConfigurationForm($this->WithBarPreviewForm($form, 'ECPB', $fields));
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
@@ -451,6 +455,11 @@ class EChartsPictorialBar extends IPSModuleStrict
     protected function ReadSymconIcon(string $name): array
     {
         return PictorialBarIcon::Resolve($name);
+    }
+
+    protected function ValidateSourceImport(string $sources, bool $normalize): void
+    {
+        $this->GetValidatedSources($sources, $normalize);
     }
 
     private function GetPictorialBarDataForOutput(bool $ipsView): string
