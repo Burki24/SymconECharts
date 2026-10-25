@@ -1,5 +1,24 @@
 # Tests
 
+## Heatmap: getrennte Vergleichsansichten
+
+`php tests/heatmap_comparison_plan.php` begann mit dem noch fehlenden Planer
+und prüft vier Ansichten, ID-/Periodenidentität, identische Abfragen, gemeinsame
+Navigation, eigene historische Grenzen und das gemeinsame Sieben-Abfragen-Budget.
+`php tests/gateway_gauges.php --heatmap-comparisons` prüft alle vier Kennzahlen,
+Originalwerte/-einheiten, gemeinsame/getrennte Skalen, Referenzwechsel, reine
+Formularentwürfe/SVGs, authentifizierte Navigation und beide HTML-Ausgaben.
+`node tests/heatmap_comparison_layout.js` prüft native ECharts-Heatmaps,
+Optionsgeometrie, getrennte Skalen, leere Ansichten, Refresh/Resize, veraltete
+Antworten und den Erhalt zuletzt gültiger Werte bei Transportfehlern.
+
+`node tests/heatmap_browser.mjs` stellt mit `/?panels=4` vier synthetische
+Vergleichsansichten bereit. Vertikales Mausrad wurde in beiden Richtungen in
+Kachel-/IPSView-Ausgaben lokal geprüft, horizontale Bewegung per Pfeiltasten.
+Die automatisierten horizontalen Radaktionen bewegten den IAB nicht; echte
+Host-/Touch- und horizontale Mausradprüfung bleiben bei der Live-Abnahme offen.
+Die verbundenen Symcon-Installationen wurden dafür nicht verändert.
+
 ## Candlestick: benannte Vergleichspanels
 
 `php tests/gateway_gauges.php --candlestick-panels` begann RED am fehlenden

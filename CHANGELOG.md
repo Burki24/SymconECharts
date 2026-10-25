@@ -12,6 +12,12 @@
 
 ## Neu
 
+- Heatmap bietet optional bis zu vier benannte Vergleichsansichten für mehrere
+  Archivquellen oder Zeiträume, mit gemeinsamer Navigation und gemeinsamer oder
+  getrennter Farbskala. Eigene historische Grenzen und frühere Basiszeiträume
+  sind je Ansicht wählbar. Kachel, IPSView und Vorschauen unterstützen das Modell;
+  Einzelansicht, Designs, Kennzahlen und das gemeinsame Archivbudget bleiben erhalten.
+
 - Candlestick bietet optional ein bis vier benannte Vergleichspanels mit eigenen
   Werteskalen und Originaleinheiten sowie gemeinsamem Zeitzoom. Kachel, IPSView
   und Vorschauen unterstützen das Modell; kleine Flächen erhalten eine

@@ -1,5 +1,14 @@
 # Entwicklung von SymconECharts
 
+Heatmap ergänzt gemäß [ADR 0106](adr/0106-heatmap-comparison-views.md) optionale
+1–4-Vergleichsansichten. Ein familienlokaler Plan kombiniert die bestehende
+globale oder eigene absolute Zeitraumplanung mit flüchtiger Navigation.
+Identische Abfragen werden geteilt; sieben Chunks bleiben ein Gesamtbudget.
+Beide Ausgaben teilen die bisherige native Heatmap-Optionsfunktion, beide SVGs
+die bisherige synthetische Geometrie. Gemeinsame oder getrennte Farbskalen ändern
+keine Originalwerte. Lokale Prüfungen sind beschrieben; Live-Abnahme nach
+Modulupdate bleibt offen.
+
 Candlestick ergänzt gemäß [ADR 0105](adr/0105-candlestick-comparison-panels.md)
 einen ausdrücklich aktivierten 1–4-Panel-Vertrag. Quellenidentität und Metadaten,
 zentrale Zeitplanung, bestehender Rohwertleser mit gemeinsamem 63-/64000-Budget,

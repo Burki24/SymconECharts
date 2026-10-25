@@ -208,6 +208,16 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   Von-/Bis-Uhrzeitfenster mit lesender Navigation. Die zentrale strikte Datums-
   und Vollstundenplanung wird wiederverwendet; neue Fenster umfassen höchstens
   366 × 24 Stunden bei unveränderten Kennzahlen, Altzeiträumen und Ladebudgets.
+  ADR 0106 ergänzt optional `UseComparisonPanels=false` und ein bis vier
+  `Sources`-Ansichten mit benannter ID-Quelle, `PeriodOffset` sowie optionalen
+  eigenen absoluten Grenzen. Dieselbe ID darf verschiedene Zeiträume vergleichen.
+  `HeatmapComparison` plant alle Ansichten und dedupliziert exakte Abfragen vor
+  dem Laden; sieben 60-Tage-/2000er-Abfragen gelten gemeinsam. Vorhandene zentrale
+  Zeitplanung, Reduktion und Vorschaugeometrie werden wiederverwendet.
+  `SharedColorScale=true` verlangt gleiche streng aufgelöste Einheiten; getrennte
+  Skalen erhalten verschiedene Originaleinheiten. Celsius-Vorlagen bleiben fest.
+  Scrollbare native Flächen teilen die Optionsfunktion; Altquelle/Designs und
+  366-Tage-Grenze je Fenster bleiben erhalten.
   Aktuelle Vergleichsgruppen auf expliziten normierten Achsen liegen im eigenen
   Gerätemodul `EChartsRadar` gemäß ADR 0053; keine Archive oder automatische
   Qualitätsbewertung. Werte außerhalb des Bereichs werden nur optisch begrenzt.

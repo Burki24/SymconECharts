@@ -20,6 +20,129 @@
             ]
         },
         {
+            "type": "CheckBox",
+            "name": "UseComparisonPanels",
+            "caption": "Use comparison views"
+        },
+        {
+            "type": "List",
+            "name": "Sources",
+            "caption": "Comparison views",
+            "rowCount": 4,
+            "add": true,
+            "delete": true,
+            "changeOrder": true,
+            "columns": [
+                {
+                    "name": "VariableID",
+                    "caption": "Archive variable",
+                    "add": 0,
+                    "save": true,
+                    "width": "220px",
+                    "edit": {
+                        "type": "SelectVariable",
+                        "validVariableTypes": [
+                            1,
+                            2
+                        ]
+                    }
+                },
+                {
+                    "name": "Label",
+                    "caption": "View name (optional)",
+                    "add": "",
+                    "save": true,
+                    "width": "220px",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                },
+                {
+                    "name": "PeriodOffset",
+                    "caption": "Earlier periods",
+                    "add": 0,
+                    "save": true,
+                    "width": "220px",
+                    "edit": {
+                        "type": "NumberSpinner",
+                        "minimum": 0,
+                        "maximum": 120
+                    }
+                },
+                {
+                    "name": "UseOwnPeriod",
+                    "caption": "Use own fixed period",
+                    "add": false,
+                    "save": true,
+                    "width": "220px",
+                    "edit": {
+                        "type": "CheckBox"
+                    }
+                },
+                {
+                    "name": "AbsoluteStart",
+                    "caption": "From (inclusive)",
+                    "add": "{}",
+                    "save": true,
+                    "visible": false
+                },
+                {
+                    "name": "AbsoluteEnd",
+                    "caption": "Until (exclusive)",
+                    "add": "{}",
+                    "save": true,
+                    "visible": false
+                }
+            ],
+            "form": [
+                {
+                    "type": "SelectVariable",
+                    "validVariableTypes": [
+                        1,
+                        2
+                    ],
+                    "name": "VariableID",
+                    "caption": "Archive variable"
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Label",
+                    "caption": "View name (optional)"
+                },
+                {
+                    "type": "NumberSpinner",
+                    "minimum": 0,
+                    "maximum": 120,
+                    "name": "PeriodOffset",
+                    "caption": "Earlier periods"
+                },
+                {
+                    "type": "CheckBox",
+                    "name": "UseOwnPeriod",
+                    "caption": "Use own fixed period"
+                },
+                {
+                    "type": "SelectDateTime",
+                    "name": "AbsoluteStart",
+                    "caption": "From (inclusive)"
+                },
+                {
+                    "type": "SelectDateTime",
+                    "name": "AbsoluteEnd",
+                    "caption": "Until (exclusive)"
+                }
+            ]
+        },
+        {
+            "type": "CheckBox",
+            "name": "SharedColorScale",
+            "caption": "Shared color scale"
+        },
+        {
+            "type": "Label",
+            "caption": "One to four views share the metric and seven archive queries. Earlier periods shift the base period; own fixed periods replace it. Shared colors require identical units."
+        },
+        {
             "type": "Select",
             "name": "Metric",
             "caption": "Metric",

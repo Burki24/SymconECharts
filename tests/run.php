@@ -38,6 +38,7 @@ $tests = [
     __DIR__ . '/polar_data.php',
     __DIR__ . '/heatmap_aggregation.php',
     __DIR__ . '/heatmap_window.php',
+    __DIR__ . '/heatmap_comparison_plan.php',
     __DIR__ . '/tree_hierarchy.php',
     __DIR__ . '/tree_preview.php',
     __DIR__ . '/tree_health.php',
@@ -59,6 +60,8 @@ $tests = [
 ];
 
 $commands = [
+    ['Test Heatmap comparison layout and runtime', 'node tests/heatmap_comparison_layout.js'],
+    ['Test Heatmap comparison views and shared budgets', 'php tests/gateway_gauges.php --heatmap-comparisons'],
     ['Test named Candlestick panels and shared budgets', 'php tests/gateway_gauges.php --candlestick-panels'],
     ['Test PictorialBar source import drafts', 'php tests/gateway_gauges.php --pictorial-source-import'],
     ['Test Waterfall subtotals and independent restarts', 'php tests/gateway_gauges.php --waterfall-sections'],

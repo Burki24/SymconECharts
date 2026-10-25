@@ -302,6 +302,8 @@ können unabhängig davon individuell vergeben werden.
   Zeigt abgeschlossene stündliche Archivwerte einer numerischen Variable als
   sieben datierte Tage oder über längere Kalenderzeiträume zusammengefasste
   Wochentage. Wählbar sind Mittelwert, Minimum, Maximum und Zählerverbrauch.
+  Optional vergleichen bis zu vier benannte Ansichten mehrere Quellen oder
+  Zeiträume mit gemeinsamer Navigation und gemeinsamer oder getrennter Farbskala.
   Kachel und optionales IPSView-Widget besitzen Zeitraum-Navigation,
   getrennte Designer und Live-Vorschauen.
 

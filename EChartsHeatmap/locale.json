@@ -138,7 +138,24 @@
             "Connect an active EChartsGateway.": "Aktives EChartsGateway verbinden.",
             "The Heatmap values could not be loaded.": "Die Heatmap-Werte konnten nicht geladen werden.",
             "Data could not be refreshed. Showing the last available values.": "Die Daten konnten nicht aktualisiert werden. Die zuletzt verfügbaren Werte bleiben sichtbar.",
-            "The selected range was truncated.": "Der gewählte Zeitraum wurde abgeschnitten."
+            "The selected range was truncated.": "Der gewählte Zeitraum wurde abgeschnitten.",
+            "Use comparison views": "Vergleichsansichten verwenden",
+            "Comparison views": "Vergleichsansichten",
+            "View name (optional)": "Ansichtsname (optional)",
+            "Earlier periods": "Frühere Zeiträume",
+            "Use own fixed period": "Eigenen festen Zeitraum verwenden",
+            "Shared color scale": "Gemeinsame Farbskala",
+            "Separate color scale": "Getrennte Farbskala",
+            "One to four views share the metric and seven archive queries. Earlier periods shift the base period; own fixed periods replace it. Shared colors require identical units.": "Ein bis vier Ansichten teilen Kennzahl und sieben Archivabfragen. Frühere Zeiträume verschieben den Basiszeitraum; eigene feste Zeiträume ersetzen ihn. Gemeinsame Farben benötigen gleiche Einheiten.",
+            "Configure one to four valid Heatmap comparison views.": "Konfigurieren Sie ein bis vier gültige Heatmap-Vergleichsansichten.",
+            "Heatmap comparison views share at most seven archive queries. Choose shorter periods or fewer views.": "Heatmap-Vergleichsansichten teilen höchstens sieben Archivabfragen. Wählen Sie kürzere Zeiträume oder weniger Ansichten.",
+            "A shared Heatmap color scale requires identical units. Disable the shared color scale for different units.": "Eine gemeinsame Heatmap-Farbskala benötigt gleiche Einheiten. Deaktivieren Sie die gemeinsame Farbskala bei unterschiedlichen Einheiten.",
+            "Temperature color presets require Celsius in every Heatmap comparison view.": "Temperatur-Farbvorlagen benötigen Celsius in jeder Heatmap-Vergleichsansicht.",
+            "Variable presentation is unavailable.": "Die Variablendarstellung ist nicht verfügbar.",
+            "Variable presentation is invalid.": "Die Variablendarstellung ist ungültig.",
+            "Variable unit metadata is invalid.": "Die Einheitenmetadaten der Variable sind ungültig.",
+            "Archive variable": "Archivvariable",
+            "Variable profile unit metadata is invalid.": "Die Einheitenmetadaten des Variablenprofils sind ungültig."
         }
     }
 }

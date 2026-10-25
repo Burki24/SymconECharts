@@ -20,10 +20,12 @@ use SymconECharts\EChartsDesignerSections;
 use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
+use SymconECharts\EChartsSourceIdentity;
 use SymconECharts\EChartsTransientRefresh;
 use SymconECharts\EChartsVariablePresentation;
 use SymconECharts\HeatmapAggregation;
 use SymconECharts\HeatmapColorScales;
+use SymconECharts\HeatmapComparison;
 use SymconECharts\HeatmapWindow;
 
 require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
@@ -45,6 +47,8 @@ require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
 require_once __DIR__ . '/../libs/EChartsTransientRefresh.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
+require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
+require_once __DIR__ . '/HeatmapComparison.php';
 require_once __DIR__ . '/HeatmapAggregation.php';
 require_once __DIR__ . '/HeatmapColorScales.php';
 require_once __DIR__ . '/HeatmapWindow.php';
@@ -106,6 +110,9 @@ class EChartsHeatmap extends IPSModuleStrict
             $this->RegisterTimer('ArchiveRefresh', 0, 'ECHM_RefreshArchive($_IPS["TARGET"]);');
             $this->RegisterTransientRefresh('ECHM');
             $this->RegisterPropertyInteger('SourceVariableID', 0);
+            $this->RegisterPropertyBoolean('UseComparisonPanels', false);
+            $this->RegisterPropertyString('Sources', '[]');
+            $this->RegisterPropertyBoolean('SharedColorScale', true);
             $this->RegisterPropertyString('Title', '');
             $this->RegisterPropertyString('Range', '1m');
             $this->RegisterPropertyInteger('CustomRangeValue', 7);
@@ -133,6 +140,7 @@ class EChartsHeatmap extends IPSModuleStrict
             $this->RegisterPropertyInteger('IPSViewBackgroundColor', EChartsIPSViewBackground::DEFAULT_COLOR);
             $this->RegisterPropertyInteger('IPSViewBackgroundOpacityPercent', EChartsIPSViewBackground::DEFAULT_OPACITY_PERCENT);
             $this->RegisterAttributeInteger('RegisteredSourceVariableID', 0);
+            $this->RegisterAttributeString('RegisteredSourceVariableIDs', '[]');
             $this->RegisterAttributeString('LastError', '');
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
@@ -208,7 +216,7 @@ class EChartsHeatmap extends IPSModuleStrict
                 ['caption' => 'Labels and typography', 'start' => 'ShowValues']
             ]);
             $fields = [
-                'Title', 'SourceVariableID', 'Range', 'CustomRangeValue', 'CustomRangeUnit', 'AbsoluteStart', 'AbsoluteEnd', 'Metric', 'UseVariablePresentation', 'Unit', 'Decimals',
+                'Title', 'SourceVariableID', 'UseComparisonPanels', 'Sources', 'SharedColorScale', 'Range', 'CustomRangeValue', 'CustomRangeUnit', 'AbsoluteStart', 'AbsoluteEnd', 'Metric', 'UseVariablePresentation', 'Unit', 'Decimals',
                 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
                 'IPSViewBackgroundOpacityPercent',
                 ...array_keys(self::DESIGN_DEFAULTS),
@@ -453,6 +461,9 @@ class EChartsHeatmap extends IPSModuleStrict
     /** @param array<string,mixed> $values */
     protected function BarPreviewSvg(array $values, bool $ipsView): string
     {
+        if (($values['UseComparisonPanels'] ?? $this->ReadPropertyBoolean('UseComparisonPanels')) === true) {
+            return $this->ComparisonPreviewSvg($values, $ipsView);
+        }
         $theme = $this->BarPreviewValue($values, 'EChartsTheme', 'string', $ipsView);
         $palette = EChartsBarPreview::Palette($theme);
         $title = (string) ($values['Title'] ?? $this->ReadPropertyString('Title'));
@@ -489,7 +500,7 @@ class EChartsHeatmap extends IPSModuleStrict
             $this->BarPreviewValue($values, 'TitleFontSizePercent', 'integer', $ipsView)
         );
         try {
-            $query = $this->ResolveHeatmapWindow(0, $values);
+            $query = $values['_HeatmapQuery'] ?? $this->ResolveHeatmapWindow(0, $values);
         } catch (Throwable $exception) {
             return $svg . '<text x="24" y="100" font-size="11" fill="' . EChartsBarPreview::E($palette['text']) . '">'
                 . EChartsBarPreview::E($this->Translate($exception->getMessage())) . '</text></svg>';
@@ -511,11 +522,11 @@ class EChartsHeatmap extends IPSModuleStrict
         $metricLabel = $this->Translate(self::MetricLabel($metric));
         $svg .= '<text x="54" y="53" fill="' . EChartsBarPreview::E($palette['muted'])
             . '" font-size="11">' . EChartsBarPreview::E($sourceName . ' · ' . $rangeLabel . ' · ' . $metricLabel) . '</text>';
-        $extended = isset($query['RequestedStartTimestamp']);
+        $extended = isset($query['RequestedStartTimestamp']) || isset($values['_HeatmapQuery']);
         if ($extended) {
             $svg .= '<text x="54" y="72" fill="' . EChartsBarPreview::E($palette['muted']) . '" font-size="9">'
-                . EChartsBarPreview::E($query['RequestedStartLabel'] . ' – ' . $query['RequestedEndLabel'] . ' · '
-                    . date_default_timezone_get() . ' · ' . $this->Translate('Until (exclusive)')) . '</text>';
+                . EChartsBarPreview::E(($query['RequestedStartLabel'] ?? $query['StartDate']) . ' – ' . ($query['RequestedEndLabel'] ?? $query['EndDate']) . ' · '
+                    . date_default_timezone_get() . (isset($query['RequestedEndLabel']) ? ' · ' . $this->Translate('Until (exclusive)') : '')) . '</text>';
         }
         $plotTop = $extended ? 88 : 64;
         $rowHeight = $extended ? 30 : 34;
@@ -579,6 +590,64 @@ class EChartsHeatmap extends IPSModuleStrict
         return time();
     }
 
+    private function ComparisonPreviewSvg(array $values, bool $ipsView): string
+    {
+        try {
+            $rows = $values['Sources'] ?? $this->ReadPropertyString('Sources');
+            if (is_array($rows)) {
+                foreach ($rows as &$row) {
+                    if (is_array($row)) {
+                        foreach (['AbsoluteStart', 'AbsoluteEnd'] as $name) {
+                            if (is_array($row[$name] ?? null)) {
+                                $row[$name] = json_encode($row[$name], JSON_THROW_ON_ERROR);
+                            }
+                        }
+                    }
+                }
+                unset($row);
+            }
+            $sources = HeatmapComparison::Sources(is_string($rows) ? $rows : json_encode($rows, JSON_THROW_ON_ERROR));
+            $plan = HeatmapComparison::Plan(
+                $sources,
+                $values['Range'] ?? $this->ReadPropertyString('Range'),
+                $this->HeatmapPeriodSettings($values),
+                0,
+                $this->CurrentTimestamp(),
+                date_default_timezone_get()
+            );
+            $parts = [];
+            foreach ($plan['Panels'] as $index => $panel) {
+                $source = $panel['Source'];
+                $label = $source['Label'] !== '' ? $source['Label']
+                    : (IPS_VariableExists($source['VariableID']) ? IPS_GetName($source['VariableID']) : $this->Translate('No source selected'));
+                $draft = array_replace($values, ['UseComparisonPanels' => false, 'SourceVariableID' => $source['VariableID'],
+                    'Title'                                            => $label, 'Range' => $panel['Range'], '_HeatmapQuery' => $panel['Query']]);
+                $svg = $this->BarPreviewSvg($draft, $ipsView);
+                $svg = str_replace(['id="scale"', 'url(#scale)'], ['id="scale-' . $index . '"', 'url(#scale-' . $index . ')'], $svg);
+                $parts[] = '<g transform="translate(0 ' . (70 + $index * 360) . ')">' . $svg . '</g>';
+            }
+            $palette = EChartsBarPreview::Palette($this->BarPreviewValue($values, 'EChartsTheme', 'string', $ipsView));
+            $titleColor = EChartsBarPreview::Color($this->BarPreviewValue($values, 'TitleColor', 'integer', $ipsView), $palette['text']);
+            $fontSize = (int) round(18 * $this->BarPreviewValue($values, 'TitleFontSizePercent', 'integer', $ipsView) / 100);
+            return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 ' . (70 + count($parts) * 360) . '">'
+                . '<text x="360" y="30" text-anchor="middle" font-size="' . $fontSize . '" fill="' . EChartsBarPreview::E($titleColor) . '">'
+                . EChartsBarPreview::E((string) ($values['Title'] ?? $this->ReadPropertyString('Title'))) . '</text>'
+                . '<text x="360" y="55" text-anchor="middle" fill="' . EChartsBarPreview::E($palette['muted']) . '" font-size="12">'
+                . EChartsBarPreview::E($this->Translate(($values['SharedColorScale'] ?? $this->ReadPropertyBoolean('SharedColorScale'))
+                    ? 'Shared color scale' : 'Separate color scale')) . '</text>'
+                . implode('', $parts) . '</svg>';
+        } catch (Throwable $exception) {
+            $palette = EChartsBarPreview::Palette($this->BarPreviewValue($values, 'EChartsTheme', 'string', $ipsView));
+            $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 100"><rect width="720" height="100" fill="'
+                . EChartsBarPreview::E($palette['background']) . '"/>';
+            foreach (explode("\n", wordwrap($this->Translate($exception->getMessage()), 90)) as $index => $line) {
+                $svg .= '<text x="12" y="' . (28 + $index * 18) . '" font-size="12" fill="' . EChartsBarPreview::E($palette['text']) . '">'
+                    . EChartsBarPreview::E($line) . '</text>';
+            }
+            return $svg . '</svg>';
+        }
+    }
+
     private function GetHeatmapDataForOutput(bool $ipsView, int $windowOffset = 0): string
     {
         $error = $this->GetConfigurationError();
@@ -590,6 +659,9 @@ class EChartsHeatmap extends IPSModuleStrict
         if (!$this->HasActiveParent()) {
             $this->DebugEChartsSetStatus(self::STATUS_PARENT_MISSING);
             throw new RuntimeException('No active EChartsGateway is connected.');
+        }
+        if ($this->ReadPropertyBoolean('UseComparisonPanels')) {
+            return $this->ComparisonData($ipsView, $windowOffset);
         }
         $variableID = $this->ReadPropertyInteger('SourceVariableID');
         $presentation = EChartsVariablePresentation::Resolve(
@@ -614,12 +686,140 @@ class EChartsHeatmap extends IPSModuleStrict
         }
         $this->WriteAttributeString('LastError', '');
         $this->DebugEChartsSetStatus(IS_ACTIVE);
+        return json_encode(
+            $this->HeatmapModel(
+                $ipsView,
+                $variableID,
+                $presentation,
+                $range,
+                $query,
+                $cells,
+                $windowOffset,
+                HeatmapWindow::MaximumOffset($range, $now, $timezone, $settings)
+            ),
+            JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION
+        );
+    }
+
+    private function ActiveHeatmapSources(): array
+    {
+        return $this->ReadPropertyBoolean('UseComparisonPanels')
+            ? HeatmapComparison::Sources($this->ReadPropertyString('Sources'))
+            : [['VariableID' => $this->ReadPropertyInteger('SourceVariableID'), 'Label' => '']];
+    }
+
+    private function ComparisonPlan(int $offset = 0): array
+    {
+        return HeatmapComparison::Plan(
+            $this->ActiveHeatmapSources(),
+            $this->ReadPropertyString('Range'),
+            $this->HeatmapPeriodSettings(),
+            $offset,
+            $this->CurrentTimestamp(),
+            date_default_timezone_get()
+        );
+    }
+
+    private function ComparisonPresentations(array $sources): array
+    {
+        $presentations = array_map(fn (array $source): array => EChartsVariablePresentation::Resolve(
+            $source['VariableID'],
+            0.0,
+            100.0,
+            $this->ReadPropertyString('Unit'),
+            $this->ReadPropertyInteger('Decimals'),
+            $this->ReadPropertyBoolean('UseVariablePresentation'),
+            true
+        ), $sources);
+        if ($this->ReadPropertyBoolean('SharedColorScale')
+            && count(array_unique(array_column($presentations, 'unit'))) > 1) {
+            throw new InvalidArgumentException('A shared Heatmap color scale requires identical units. Disable the shared color scale for different units.');
+        }
+        $presets = [$this->ReadPropertyString('ColorScalePreset')];
+        if ($this->IsIPSViewHTMLPageEnabled() && !$this->ReadPropertyBoolean('IPSViewUseTileDesign')) {
+            $presets[] = $this->ReadPropertyString('IPSViewColorScalePreset');
+        }
+        if (array_diff($presets, [HeatmapColorScales::CUSTOM]) !== []
+            && array_diff(array_column($presentations, 'unit'), ['°C']) !== []) {
+            throw new InvalidArgumentException('Temperature color presets require Celsius in every Heatmap comparison view.');
+        }
+        return $presentations;
+    }
+
+    private function ComparisonData(bool $ipsView, int $offset): string
+    {
+        // Build and validate the complete plan and presentations before the first archive request.
+        $plan = $this->ComparisonPlan($offset);
+        $sources = $this->ActiveHeatmapSources();
+        $presentations = $this->ComparisonPresentations($sources);
+        $responses = [];
+        foreach ($plan['Requests'] as $key => $request) {
+            $responses[$key] = $this->ReadArchiveChunk($request['VariableID'], $request['Chunk'], $request['Limit'])['Points'];
+        }
+        $panels = [];
+        foreach ($plan['Panels'] as $index => $panel) {
+            $points = [];
+            foreach ($panel['RequestKeys'] as $key) {
+                array_push($points, ...$responses[$key]);
+            }
+            $cells = HeatmapAggregation::ByWeekdayAndHour($points, date_default_timezone_get(), $this->ReadPropertyString('Metric'));
+            $source = $panel['Source'];
+            $model = $this->HeatmapModel(
+                $ipsView,
+                $source['VariableID'],
+                $presentations[$index],
+                $panel['Range'],
+                $panel['Query'],
+                $cells,
+                $offset,
+                $plan['MaximumOffset']
+            );
+            $model['heatmap']['title'] = EChartsSourceIdentity::LabelsForSources([$source])[$source['VariableID']];
+            $model['heatmap']['variableID'] = $source['VariableID'];
+            $identity = $source;
+            unset($identity['Label']);
+            $model['heatmap']['sourceKey'] = hash('sha256', json_encode($identity, JSON_THROW_ON_ERROR));
+            $panels[] = $model;
+        }
+        $model = $panels[0];
+        $model['cells'] = [];
+        $model['heatmap']['title'] = $this->ReadPropertyString('Title');
+        $model['heatmap']['comparisonPanels'] = true;
+        $model['heatmap']['sharedColorScale'] = $this->ReadPropertyBoolean('SharedColorScale');
+        $model['heatmap']['viewKey'] = hash('sha256', json_encode([
+            $sources, array_column(array_column($panels, 'heatmap'), 'viewKey'),
+            $model['heatmap']['sharedColorScale']
+        ], JSON_THROW_ON_ERROR));
+        $model['panels'] = $panels;
+        $values = array_merge(...array_map(static fn (array $panel): array => array_column($panel['cells'], 'value'), $panels));
+        if ($this->ReadPropertyBoolean('SharedColorScale') && $values !== []) {
+            foreach ($model['panels'] as &$panel) {
+                $panel['heatmap']['valueRange'] = ['min' => min($values), 'max' => max($values)];
+            }
+            unset($panel);
+        }
+        $this->WriteAttributeString('LastError', '');
+        $this->DebugEChartsSetStatus(IS_ACTIVE);
+        return json_encode($model, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
+    }
+
+    private function HeatmapModel(
+        bool $ipsView,
+        int $variableID,
+        array $presentation,
+        string $range,
+        array $query,
+        array $cells,
+        int $windowOffset,
+        int $maximumOffset
+    ): array {
+        $timezone = date_default_timezone_get();
         $style = $this->ReadDesignStyle($ipsView);
         $viewKey = hash('sha256', json_encode([$variableID, $range, $this->ReadPropertyString('Metric'), $timezone,
             $range === 'absolute' ? [$query['BaseStartTimestamp'], $query['BaseEndTimestamp']]
                 : ($range === 'custom' ? $query['DurationSeconds'] : null),
             $presentation, $style, $this->EffectiveTheme($ipsView), $this->ReadPropertyString('Title')], JSON_THROW_ON_ERROR));
-        return json_encode([
+        return [
             'schemaVersion' => 1,
             'family'        => 'heatmap',
             'theme'         => $this->EffectiveTheme($ipsView),
@@ -634,7 +834,7 @@ class EChartsHeatmap extends IPSModuleStrict
                 'startDate'      => $query['StartDate'],
                 'endDate'        => $query['EndDate'],
                 'days'           => $range === '1w' ? $query['Days'] : [],
-                'maxOffset'      => HeatmapWindow::MaximumOffset($range, $now, $timezone, $settings),
+                'maxOffset'      => $maximumOffset,
                 'startTimestamp' => $query['StartTimestamp'],
                 'endTimestamp'   => $query['EndTimestamp'],
                 'style'          => $style,
@@ -646,8 +846,8 @@ class EChartsHeatmap extends IPSModuleStrict
                 ] : [])
             ],
             'cells'     => $cells,
-            'truncated' => $archive['Truncated']
-        ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
+            'truncated' => false
+        ];
     }
 
     /** Pure draft/stored settings, shared by validation, navigation and both previews. */
@@ -806,6 +1006,9 @@ class EChartsHeatmap extends IPSModuleStrict
                 'No completed archive hours in the selected range.'   => $this->Translate(
                     'No completed archive hours in the selected range.'
                 ),
+                'Comparison views'                    => $this->Translate('Comparison views'),
+                'Shared color scale'                  => $this->Translate('Shared color scale'),
+                'Separate color scale'                => $this->Translate('Separate color scale'),
                 'Previous period'                     => $this->Translate('Previous period'),
                 'Next period'                         => $this->Translate('Next period'),
                 'Time range'                          => $this->Translate('Time range'),
@@ -873,13 +1076,21 @@ class EChartsHeatmap extends IPSModuleStrict
     /** @return array{Status:int,Message:string}|null */
     private function GetConfigurationError(): ?array
     {
-        $variableID = $this->ReadPropertyInteger('SourceVariableID');
-        if ($variableID <= 0 || !IPS_VariableExists($variableID)
-            || !in_array(IPS_GetVariable($variableID)['VariableType'] ?? null, [1, 2], true)) {
-            return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => 'Configure a numeric archive variable.'];
-        }
         try {
-            $this->ResolveHeatmapWindow();
+            $sources = $this->ActiveHeatmapSources();
+            foreach ($sources as $source) {
+                $id = $source['VariableID'];
+                if ($id <= 0 || !IPS_VariableExists($id)
+                    || !in_array(IPS_GetVariable($id)['VariableType'] ?? null, [1, 2], true)) {
+                    return ['Status' => self::STATUS_SOURCE_INVALID, 'Message' => 'Configure a numeric archive variable.'];
+                }
+            }
+            if ($this->ReadPropertyBoolean('UseComparisonPanels')) {
+                $this->ComparisonPlan();
+                $this->ComparisonPresentations($sources);
+            } else {
+                $this->ResolveHeatmapWindow();
+            }
         } catch (Throwable $exception) {
             return ['Status' => self::STATUS_CONFIGURATION_INVALID, 'Message' => $exception->getMessage()];
         }
@@ -926,18 +1137,25 @@ class EChartsHeatmap extends IPSModuleStrict
 
     private function SynchronizeSourceReference(): void
     {
-        $previous = $this->ReadAttributeInteger('RegisteredSourceVariableID');
-        $current = $this->ReadPropertyInteger('SourceVariableID');
-        if ($previous === $current) {
-            return;
+        $previous = json_decode($this->ReadAttributeString('RegisteredSourceVariableIDs'), true) ?: [];
+        $legacy = $this->ReadAttributeInteger('RegisteredSourceVariableID');
+        if ($legacy > 0) {
+            $previous[] = $legacy;
         }
-        if ($previous > 0) {
-            $this->UnregisterReference($previous);
+        try {
+            $current = array_values(array_unique(array_column($this->ActiveHeatmapSources(), 'VariableID')));
+            $current = array_values(array_filter($current, static fn (int $id): bool => $id > 0 && IPS_VariableExists($id)));
+        } catch (Throwable) {
+            $current = [];
         }
-        if ($current > 0 && IPS_VariableExists($current)) {
-            $this->RegisterReference($current);
+        foreach (array_diff(array_unique($previous), $current) as $id) {
+            $this->UnregisterReference($id);
         }
-        $this->WriteAttributeInteger('RegisteredSourceVariableID', $current);
+        foreach ($current as $id) {
+            $this->RegisterReference($id);
+        }
+        $this->WriteAttributeString('RegisteredSourceVariableIDs', json_encode($current, JSON_THROW_ON_ERROR));
+        $this->WriteAttributeInteger('RegisteredSourceVariableID', $this->ReadPropertyBoolean('UseComparisonPanels') ? 0 : ($current[0] ?? 0));
     }
 
     /** @return array<string,mixed> */

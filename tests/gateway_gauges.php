@@ -1129,6 +1129,11 @@ if (array_slice($argv, 1) === ['--bar-category-normalization']) {
     exit(0);
 }
 
+if (array_slice($argv, 1) === ['--heatmap-comparisons']) {
+    require __DIR__ . '/heatmap_comparisons.php';
+    echo "Heatmap comparison views, scales, shared budgets, navigation and drafts verified.\n";
+    exit(0);
+}
 if (array_slice($argv, 1) === ['--heatmap-periods']) {
     require __DIR__ . '/heatmap_periods.php';
     echo "Heatmap custom/fixed periods, metrics, navigation, drafts and unchanged archive budgets verified.\n";
@@ -2580,8 +2585,9 @@ assertGatewayGauge(
 $heatmapTitleAction = (string) (findGaugeFormElement($heatmapForm['elements'], 'Title')['onChange'] ?? '');
 assertGatewayGauge(
     str_contains($heatmapTitleAction, 'ECHM_UpdateBarPreviewFromForm')
-        && !str_contains($heatmapTitleAction, '$Sources'),
-    'A single-source Heatmap preview action must not reference a non-existent Sources list.'
+        && str_contains($heatmapTitleAction, 'foreach ($Sources')
+        && (findGaugeFormElement($heatmapForm['elements'], 'Sources')['type'] ?? null) === 'List',
+    'Heatmap preview actions must copy the optional native comparison list without changing the legacy single-source mode.'
 );
 $heatmapOutput->UpdateBarPreviewFromForm(json_encode([
     'Title' => 'Draft Heatmap', 'SourceVariableID' => 4713, 'Range' => '1w'

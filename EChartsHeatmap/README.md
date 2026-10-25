@@ -7,6 +7,40 @@ gemeinsame `EChartsGateway`-Instanz genügt auch für diese Diagrammfamilie.
 
 ## Voraussetzungen und Daten
 
+Optional lassen sich **Vergleichsansichten verwenden**: ein bis vier benannte
+Ansichten zeigen mehrere Quellen oder dieselbe Quelle in verschiedenen
+Zeiträumen. Die bisherige Einzelquelle bleibt beim Ausschalten erhalten.
+In jeder Zeile wählen Sie die Archivvariable und optional einen Namen.
+**Frühere Zeiträume** verschiebt die Ansicht um die entsprechende Anzahl
+Basiszeiträume: Bei „1 Monat“ zeigt 0 den letzten abgeschlossenen Monat und 1
+den Monat davor. **Eigenen festen Zeitraum verwenden** ersetzt den Basiszeitraum
+durch die Von-/Bis-Grenzen dieser Zeile. Auch dort ist die Verschiebung möglich.
+Alle Ansichten verwenden dieselbe Kennzahl; die Archivierungsart wird nicht geändert.
+
+**Gemeinsame Farbskala** ist standardmäßig eingeschaltet und verwendet die
+kleinsten/größten vorhandenen Zellwerte aller Ansichten. Dazu müssen alle
+Quellen dieselbe Einheit haben. Schalten Sie die gemeinsame Skala aus, um
+beispielsweise Temperatur und Luftfeuchtigkeit mit **getrennten Farbskalen**
+getrennt zu betrachten. Die Beschriftung jeder Ansicht zeigt den Farbbezug;
+gleiche Farben bedeuten bei getrennten Skalen nicht denselben Zahlenwert.
+Temperatur-Farbvorlagen behalten ihre festen Celsius-Grenzen und benötigen
+im Vergleichsmodus °C in jeder Ansicht. Tooltip und Zellen behalten die
+Originalwerte, Einheiten und Nachkommastellen.
+
+Die Pfeile verschieben alle Ansichten gemeinsam um jeweils ihren Zeitraum.
+„Ausgewählter Zeitraum“ stellt die konfigurierte Ausgangskombination wieder
+her. Kleine Kacheln und IPSView-Flächen lassen sich vertikal scrollen, bei
+großer Schrift zusätzlich horizontal. Fehlende Archivstunden bleiben leer;
+eine leere Ansicht erhält einen eigenen Hinweis.
+
+Alle Ansichten teilen weiterhin **höchstens sieben Archivabfragen** mit je
+höchstens 2000 Stundenwerten. Exakt identische Abfragen werden wiederverwendet.
+Vier Monatsansichten passen üblicherweise; mehrere vollständige Jahresansichten
+überschreiten das Budget. Das Modul fordert dann kürzere Zeiträume oder weniger
+Ansichten, statt Teilwerte als vollständige Ergebnisse zu zeigen. Jeder einzelne
+Zeitraum bleibt auf höchstens 366 × 24 Stunden begrenzt. Die Vorschauen zeigen
+synthetische Beispieldaten für die gewählte Ansichtenaufteilung.
+
 Benötigt werden IP-Symcon 9.0/9.1, eine numerische Integer- oder
 Float-Variable mit aktiviertem Archiv und das verbundene EChartsGateway.
 Die Variable wird über ihre ID zugeordnet; ihr Name ist kein technischer

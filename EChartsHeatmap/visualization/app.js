@@ -16,6 +16,10 @@
     var previousElement = document.getElementById('echarts-heatmap-previous');
     var nextElement = document.getElementById('echarts-heatmap-next');
     var todayElement = document.getElementById('echarts-heatmap-today');
+    var comparisonElement = document.getElementById('echarts-heatmap-comparisons');
+    var comparisonTitleElement = document.getElementById('echarts-heatmap-comparison-title');
+    var comparisonListElement = document.getElementById('echarts-heatmap-comparison-list');
+    var panelCharts = [];
     var chart = null;
     var theme = null;
     var currentState = bootstrap.state || null;
@@ -23,7 +27,8 @@
     var navigating = false;
     var loadError = 'The Heatmap values could not be loaded.';
     var retainOnTransientError = design.createTransientFailureRetainer(
-        chartElement, warningElement, translate, loadError
+        { get hidden() { return chartElement.hidden && (!comparisonElement || comparisonElement.hidden); } },
+        warningElement, translate, loadError
     );
 
     function translate(text) {
@@ -126,17 +131,19 @@
         periodElement.setAttribute('aria-label', translate('Time range'));
         previousElement.setAttribute('aria-label', translate('Previous period'));
         nextElement.setAttribute('aria-label', translate('Next period'));
-        todayElement.textContent = translate(heatmap.range === 'absolute' ? 'Selected period' : 'Today');
+        todayElement.textContent = translate(heatmap.comparisonPanels === true || heatmap.range === 'absolute' ? 'Selected period' : 'Today');
         currentOffset = Math.max(0, Number(heatmap.windowOffset) || 0);
-        periodLabelElement.textContent = periodText(heatmap)
-            + ' (' + rangeLabel(heatmap.range, metricOf(heatmap)) + ') · ' + metricLabel(metricOf(heatmap));
+        periodLabelElement.textContent = heatmap.comparisonPanels === true
+            ? translate('Comparison views') + ' · ' + metricLabel(metricOf(heatmap))
+            : periodText(heatmap) + ' (' + rangeLabel(heatmap.range, metricOf(heatmap)) + ') · ' + metricLabel(metricOf(heatmap));
         periodLabelElement.setAttribute('title', periodLabelElement.textContent);
         previousElement.disabled = navigating || currentOffset >= maxOffset(heatmap);
         nextElement.disabled = navigating || currentOffset === 0;
         todayElement.disabled = navigating || currentOffset === 0;
     }
 
-    function buildOption(model, themeId) {
+    function buildOption(model, themeId, surface, panel) {
+        surface = surface || chartElement;
         var colors = colorsFor(themeId);
         var heatmap = model.heatmap || {};
         var style = heatmap.style || {};
@@ -145,12 +152,16 @@
             .filter(function (value) { return Number.isFinite(value); });
         var minimum = values.length ? Math.min.apply(null, values) : 0;
         var maximum = values.length ? Math.max.apply(null, values) : 1;
+        if (heatmap.valueRange && Number.isFinite(heatmap.valueRange.min)
+            && Number.isFinite(heatmap.valueRange.max) && heatmap.valueRange.min <= heatmap.valueRange.max) {
+            minimum = heatmap.valueRange.min; maximum = heatmap.valueRange.max;
+        }
         var displayedMaximum = maximum;
         if (minimum === maximum) { maximum = minimum + 1; }
-        var width = Math.max(240, Number(chartElement.clientWidth) || 720);
-        var height = Math.max(190, Number(chartElement.clientHeight) || 420);
+        var width = Math.max(240, Number(surface.clientWidth) || 720);
+        var height = Math.max(190, Number(surface.clientHeight) || 420);
         var compact = width < 550 || height < 290;
-        var headerInset = ((bootstrap.options && bootstrap.options.tileHeaderInset) || 8);
+        var headerInset = panel ? 0 : ((bootstrap.options && bootstrap.options.tileHeaderInset) || 8);
         var titleSize = design.fontSizePercent(style.titleFontSizePercent, compact ? 14 : 18);
         var axisSize = design.fontSizePercent(style.axisFontSizePercent, compact ? 10 : 12);
         var valueSize = design.fontSizePercent(style.valueFontSizePercent, compact ? 9 : 11);
@@ -250,7 +261,7 @@
                         minimum: 'Minimum of {count} hourly intervals', maximum: 'Maximum of {count} hourly intervals',
                         consumption: 'Consumption total of {count} hourly intervals' }[metricOf(heatmap)]
                         || 'Average of {count} hourly intervals').replace('{count}', intervalCount);
-                    return escapeHTML(dayLabel) + ', ' + escapeHTML(String(value[0]).padStart(2, '0'))
+                    return (panel ? escapeHTML(heatmap.title || '') + '<br>' : '') + escapeHTML(dayLabel) + ', ' + escapeHTML(String(value[0]).padStart(2, '0'))
                         + ':00<br>' + escapeHTML(formatValue(value[2], decimals, heatmap.unit || ''))
                         + '<br>' + escapeHTML(metricLabel(metricOf(heatmap)))
                         + '<br>' + escapeHTML(intervalInfo)
@@ -294,6 +305,8 @@
     function displayError(message) {
         if (chart) { chart.clear(); }
         chartElement.hidden = true;
+        if (comparisonElement) { comparisonElement.hidden = true; }
+        panelCharts.forEach(function (item) { item.chart.clear(); });
         periodElement.hidden = true;
         classLegendElement.hidden = true;
         warningElement.hidden = true;
@@ -302,32 +315,110 @@
         errorElement.hidden = false;
     }
 
-    function updateClassLegend(option, model) {
+    function updateClassLegend(option, model, legend, surface) {
+        legend = legend || { element: classLegendElement, min: classMinElement,
+            segments: classSegmentsElement, max: classMaxElement };
+        surface = surface || chartElement;
         // ECharts' piecewise legend would allocate one label per class in a narrow tile.
         var heatmap = model.heatmap || {};
         var style = heatmap.style || {};
         var values = Array.isArray(model.cells) ? model.cells.map(function (cell) { return Number(cell.value); })
             .filter(function (value) { return Number.isFinite(value); }) : [];
         if (option.visualMap.type !== 'piecewise' || style.showColorScale !== true || values.length === 0) {
-            classLegendElement.hidden = true;
+            legend.element.hidden = true;
             return;
         }
         var decimals = Math.max(0, Math.min(6, Number(heatmap.decimals) || 0));
-        classMinElement.textContent = formatValue(style.colorScaleRange.min, decimals, '°C');
-        classMaxElement.textContent = formatValue(style.colorScaleRange.max, decimals, '°C');
-        classSegmentsElement.innerHTML = option.visualMap.pieces.map(function (piece) {
+        legend.min.textContent = formatValue(style.colorScaleRange.min, decimals, '°C');
+        legend.max.textContent = formatValue(style.colorScaleRange.max, decimals, '°C');
+        legend.segments.innerHTML = option.visualMap.pieces.map(function (piece) {
             return '<span style="background-color:' + piece.color + '"></span>';
         }).join('');
-        classLegendElement.style.color = option.visualMap.textStyle.color;
-        classLegendElement.style.fontSize = Math.min(option.visualMap.textStyle.fontSize,
-            Math.max(10, (Number(chartElement.clientWidth) || 240) / 24)) + 'px';
-        classLegendElement.setAttribute('aria-label', classMinElement.textContent + ' – '
-            + classMaxElement.textContent);
-        classLegendElement.hidden = false;
+        legend.element.style.color = option.visualMap.textStyle.color;
+        legend.element.style.fontSize = Math.min(option.visualMap.textStyle.fontSize,
+            Math.max(10, (Number(surface.clientWidth) || 240) / 24)) + 'px';
+        legend.element.setAttribute('aria-label', legend.min.textContent + ' – '
+            + legend.max.textContent);
+        legend.element.hidden = false;
+    }
+
+    function disposePanels() {
+        panelCharts.forEach(function (item) { item.chart.dispose(); item.section.remove(); });
+        panelCharts = [];
+    }
+
+    function panelElement(tag, className, parent) {
+        var node = document.createElement(tag);
+        node.className = className;
+        parent.appendChild(node);
+        return node;
+    }
+
+    function createPanel(themeId) {
+        var section = panelElement('section', 'echarts-heatmap-panel', comparisonListElement);
+        var caption = panelElement('p', 'echarts-heatmap-panel-caption', section);
+        var surface = panelElement('div', 'echarts-heatmap-panel-surface', section);
+        var empty = panelElement('p', 'echarts-heatmap-panel-empty', section);
+        var element = panelElement('div', 'echarts-heatmap-class-legend', section);
+        element.setAttribute('role', 'img');
+        var legend = { element: element,
+            min: panelElement('span', '', element),
+            segments: panelElement('span', 'echarts-heatmap-class-segments', element),
+            max: panelElement('span', '', element) };
+        // Set usable dimensions before ECharts initializes, including in a narrow tile.
+        surface.style.height = '320px';
+        surface.setAttribute('role', 'img');
+        return { section: section, caption: caption, surface: surface, empty: empty, legend: legend,
+            chart: window.echarts.init(surface, themeId === 'auto' ? null : themeId, { renderer: 'canvas' }) };
+    }
+
+    function renderComparisons(model) {
+        if (chart) { chart.dispose(); chart = null; }
+        chartElement.hidden = true;
+        classLegendElement.hidden = true;
+        errorElement.hidden = true;
+        emptyElement.hidden = true;
+        comparisonElement.hidden = false;
+        var headerInset = ((bootstrap.options && bootstrap.options.tileHeaderInset) || 8);
+        comparisonElement.style.top = (headerInset + 30) + 'px';
+        updatePeriod(model.heatmap, headerInset);
+        var nextTheme = model.theme || 'auto';
+        if (theme !== nextTheme || panelCharts.length !== model.panels.length) { disposePanels(); }
+        theme = nextTheme;
+        var colors = colorsFor(nextTheme);
+        var style = model.heatmap.style || {};
+        comparisonElement.style.background = bootstrap.mode === 'ipsview' && bootstrap.options.adaptToBackground === true
+            ? 'transparent' : colors.background;
+        comparisonTitleElement.textContent = model.heatmap.title || '';
+        comparisonTitleElement.hidden = !model.heatmap.title;
+        comparisonTitleElement.style.color = style.titleColor || colors.text;
+        comparisonTitleElement.style.fontSize = design.fontSizePercent(style.titleFontSizePercent, 18) + 'px';
+        model.panels.forEach(function (panel, index) {
+            var item = panelCharts[index];
+            if (!item) { item = createPanel(nextTheme); panelCharts.push(item); }
+            var panelStyle = panel.heatmap.style || {};
+            var axisSize = design.fontSizePercent(panelStyle.axisFontSizePercent, 12);
+            var titleSize = design.fontSizePercent(panelStyle.titleFontSizePercent, 18);
+            item.section.style.minWidth = Math.max(320, axisSize * 30) + 'px';
+            item.surface.style.height = Math.max(320, 7 * axisSize * 2 + titleSize + 130) + 'px';
+            item.caption.textContent = periodText(panel.heatmap) + ' · ' + (panel.heatmap.timezone || '')
+                + ' · ' + metricLabel(metricOf(panel.heatmap)) + ' · '
+                + translate(model.heatmap.sharedColorScale ? 'Shared color scale' : 'Separate color scale');
+            item.caption.style.color = panelStyle.axisColor || colors.text;
+            item.empty.textContent = translate('No completed archive hours in the selected range.');
+            item.empty.style.color = colors.text;
+            item.empty.hidden = panel.cells.length > 0;
+            var option = buildOption(panel, nextTheme, item.surface, true);
+            item.surface.setAttribute('aria-label', option.aria.description);
+            item.chart.resize();
+            item.chart.setOption(option, true);
+            updateClassLegend(option, panel, item.legend, item.surface);
+        });
+        warningElement.hidden = true;
     }
 
     function render(state) {
-        if (retainOnTransientError(state, currentState, chart)) {
+        if (retainOnTransientError(state, currentState, chart || (panelCharts[0] && panelCharts[0].chart))) {
             return;
         }
         currentState = state;
@@ -339,6 +430,12 @@
             displayError('Apache ECharts could not be initialized.');
             return;
         }
+        if (Array.isArray(state.chart.panels) && state.chart.heatmap.comparisonPanels === true) {
+            renderComparisons(state.chart);
+            return;
+        }
+        disposePanels();
+        if (comparisonElement) { comparisonElement.hidden = true; }
         chartElement.hidden = false;
         errorElement.hidden = true;
         emptyElement.textContent = translate('No completed archive hours in the selected range.');
@@ -439,15 +536,21 @@
         }
         render(state);
     };
-    if (window.ResizeObserver) {
-        new ResizeObserver(function () {
-            if (design.resizeChartIfNeeded(chart, chartElement)) { render(currentState); }
-        }).observe(chartElement);
-    } else {
-        window.addEventListener('resize', function () {
-            if (design.resizeChartIfNeeded(chart, chartElement)) { render(currentState); }
+    function resize() {
+        var changed = design.resizeChartIfNeeded(chart, chartElement);
+        panelCharts.forEach(function (item) {
+            changed = design.resizeChartIfNeeded(item.chart, item.surface) || changed;
         });
+        if (changed) { render(currentState); }
     }
-    window.addEventListener('beforeunload', function () { if (chart) { chart.dispose(); } });
+    if (window.ResizeObserver) {
+        new ResizeObserver(resize).observe(document.getElementById('echarts-heatmap-root') || chartElement);
+    } else {
+        window.addEventListener('resize', resize);
+    }
+    window.addEventListener('beforeunload', function () {
+        if (chart) { chart.dispose(); }
+        disposePanels();
+    });
     render(currentState);
 }());
