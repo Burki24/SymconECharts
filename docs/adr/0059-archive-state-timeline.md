@@ -76,7 +76,8 @@ Prüfungen umfassen Datenfenster und Zeitzonen, Vorgänger, unbekannte Anfänge,
 Werteidentität, doppelte Namen, Limit-/Fehlerfälle, Gateway, beide Designer,
 Vorschauentwürfe ohne Persistenz, Transport, Ausgabegrößen und tatsächliche
 ECharts-Geometrie. Lokale Browserprüfungen ersetzen keine Live-Abnahme nach
-Modulupdate in Symcon und IPSView.
+Modulupdate in Symcon und IPSView. Die anschließende funktionale Abnahme
+ist durch den Eigentümer für beide Ausgaben bestätigt.
 
 ## Erweiterte Gestaltung (18.10.2026)
 

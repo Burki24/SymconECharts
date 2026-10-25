@@ -23,8 +23,10 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   implementierte Funktionen, Store-Freigaben oder nicht real geprüfte
   Laufzeitkompatibilität dürfen nicht als vorhanden dargestellt werden.
 - Native Symcon-Kacheln und einzelne IPSView-HTML-Widgets sind vorgesehene
-  Ausgabewege. IPSView-Laufzeittests sind auf der vorhandenen Testebene mangels
-  Lizenz nicht möglich und bleiben ausdrücklich als Lücke dokumentiert.
+  Ausgabewege. Die vereinbarten Nutzungsgrenzen-Erweiterungen sind auf der
+  erreichbaren Testebene per MCP geprüft und vom Eigentümer in Kachel und
+  IPSView funktional bestätigt. Nicht geprüfte Versions-, Geräte-, Last- und
+  Fehlerszenarien bleiben getrennt als Testlücken dokumentiert.
 
 ## Architekturgrenzen
 

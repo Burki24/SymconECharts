@@ -1,6 +1,6 @@
 # ADR 0106: Getrennte Heatmap-Vergleichsansichten
 
-Status: Angenommen, lokal umgesetzt; Live-Abnahme nach Modulupdate offen.
+Status: Angenommen; funktional in Kachel und IPSView abgenommen.
 
 ## Vertrag
 
@@ -56,4 +56,7 @@ Einzelquellen-Property und ihr Attribut bleiben kompatibel erhalten.
 
 Plan-, Modul-/Gateway-, Formular-, SVG- und native Rendererprüfungen decken
 die neuen Verträge ab. Lokale Browser-Frames verwenden synthetische Daten.
-Echte Kachel-/IPSView-Hosts und Touch benötigen die separate Live-Abnahme.
+Die nachfolgende MCP-Abnahme ist erfolgt; der Eigentümer bestätigt die
+Vergleichsansichten in echter Kachel und tatsächlichem IPSView. Echte Touchgeräte,
+gesonderte horizontale Mausradprüfung und eine allgemeine Live-Lastfreigabe
+bleiben davon getrennt und sind nicht nachgewiesen.

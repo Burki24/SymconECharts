@@ -98,7 +98,8 @@ Ansichten sowie Navigation und Reset wurden geprüft; lange Zeitraumtexte dürfe
 die Bedienelemente nicht verdrängen. Das ersetzt keinen realen Kachel-/IPSView-Test.
 
 Calendar ist nach MCP-Prüfung und Eigentümerbestätigung in Kachel/IPSView
-abgenommen. Heatmap ist implementiert, die funktionale Live-Abnahme nach
-Modulupdate bleibt offen. Vergleichspanels sind eine spätere eigene Erweiterung;
-der nächste Roadmap-Bereich betrifft Parallel und weitere Vergleichsmodelle.
+abgenommen. Auch Heatmap ist inzwischen funktional per MCP geprüft und vom Eigentümer in
+Kachel/IPSView bestätigt. Die separaten Vergleichsansichten folgen ADR 0106 und
+sind ebenfalls abgenommen. Den Gesamtstatus führt die
+[abgeschlossene Roadmap](../NUTZUNGSGRENZEN.md).
 Automatisierte Budgetprüfungen sind keine Live-Lastfreigabe.

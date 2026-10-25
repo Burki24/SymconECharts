@@ -69,5 +69,5 @@ Symcon-Objektbaum und nimmt keine Aktor-Schreibaktionen vor. Für fachliche
 Gruppen außerhalb des Objektbaums, Querverbindungen, gewichtete Flächen und
 Flüsse sind eigene Entscheidungen erforderlich. Tests prüfen beide
 Schwellenrichtungen, gleichnamige Variablen, Nullregeln, Aggregation,
-ungültige Regeln, Ausgabe und Renderer. Reale Kachel- und IPSView-Darstellung
-bleiben bis zur Prüfung auf der Testinstallation offen.
+ungültige Regeln, Ausgabe und Renderer. Die spätere reale Kachel- und IPSView-Darstellung ist durch den Eigentümer
+funktional bestätigt.

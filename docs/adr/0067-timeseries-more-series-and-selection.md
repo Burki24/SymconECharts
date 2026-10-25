@@ -65,5 +65,5 @@ Archive, große SVGs, beide Ausgabegrenzen und exakte entpackte Startzustände.
 Native Rendererprüfungen decken gleichnamige Reihen, Auswahl, All/Invert,
 Legendenanker, Update/Resize/Reorder, Annotationen und asynchronen Start ab.
 Eine lokale Canvas-Browserprüfung mit 32 Reihen und 32000 synthetischen
-Punkten ergänzt diese Tests. Die Live-Abnahme nach Modulupdate in Symcon-Kachel
-und IPSView bleibt offen; bestehende Installationen wurden nicht geändert.
+Punkten ergänzt diese Tests. Die nachfolgende Live-Abnahme in Symcon-Kachel
+und IPSView ist durch den Eigentümer bestätigt; bestehende Installationen wurden nicht geändert.

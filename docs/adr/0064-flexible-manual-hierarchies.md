@@ -100,5 +100,5 @@ leere und zu tiefe Pfade, gleiche Anzeigenamen, richtige Summen/Reihenfolge,
 100 Quellen/800 Knoten, HTML-sichere Größenlimits und schreibfreie Entwürfe.
 Echte ECharts-Tests prüfen tiefe Geometrie und Navigation einschließlich
 Aktualisierung, Resize, Entfernen des geöffneten Knotens und Zurücknavigation.
-Lokale synthetische Browserprüfungen ergänzen beide Ausgabewege. Die echte
-Symcon-/IPSView-Abnahme nach Modulupdate bleibt eine separate Prüfung.
+Lokale synthetische Browserprüfungen ergänzen beide Ausgabewege. Die nachfolgende echte
+Symcon-/IPSView-Abnahme ist durch den Eigentümer bestätigt.

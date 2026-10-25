@@ -70,5 +70,5 @@ Vorschauen lesen keine Archive und persistieren keine Entwürfe.
 
 Grenz-, Budget-, Altlisten-, Lücken-, Null-/Fehler-, Ausgabe- und ID-Tests sowie
 native ECharts-Rendererprüfungen sichern den Vertrag. Eine lokale Canvas-Prüfung
-ergänzt die Tests; eine erneute Live-Abnahme in Symcon-Kachel und IPSView nach
-Modulupdate bleibt erforderlich. Live-Konfigurationen und Archive bleiben unangetastet.
+ergänzt die Tests; die nachfolgende erneute Live-Abnahme in Symcon-Kachel und IPSView ist
+durch den Eigentümer bestätigt. Live-Konfigurationen und Archive bleiben unangetastet.

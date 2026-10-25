@@ -88,6 +88,6 @@ prüfen Entwürfe ohne Archivzugriff oder persistierende Seiteneffekte.
 
 Die Library nutzt dieselben ECharts-Runtimes; neue Komponenten oder veränderte
 Fremdartefakte sind nicht erforderlich. Lokale Browserprüfungen mit synthetischen
-Daten ergänzen die Tests. Die Live-Abnahme der neuen Kennzahlen in Symcon-Kachel
-und IPSView erfolgt nach Modulupdate durch den Eigentümer. Bei dieser
+Daten ergänzen die Tests. Die nachfolgende Live-Abnahme der neuen Kennzahlen in Symcon-Kachel
+und IPSView ist durch den Eigentümer bestätigt. Bei dieser
 Implementierung werden weder Live-Instanzen noch Archivkonfigurationen geändert.

@@ -6,8 +6,8 @@ globale oder eigene absolute Zeitraumplanung mit flüchtiger Navigation.
 Identische Abfragen werden geteilt; sieben Chunks bleiben ein Gesamtbudget.
 Beide Ausgaben teilen die bisherige native Heatmap-Optionsfunktion, beide SVGs
 die bisherige synthetische Geometrie. Gemeinsame oder getrennte Farbskalen ändern
-keine Originalwerte. Lokale Prüfungen sind beschrieben; Live-Abnahme nach
-Modulupdate bleibt offen.
+keine Originalwerte. Lokale Prüfungen und die funktionale MCP-Abnahme sind beschrieben; der
+Eigentümer bestätigt die Vergleichsansichten in Kachel und tatsächlichem IPSView.
 
 Candlestick ergänzt gemäß [ADR 0105](adr/0105-candlestick-comparison-panels.md)
 einen ausdrücklich aktivierten 1–4-Panel-Vertrag. Quellenidentität und Metadaten,
@@ -17,7 +17,8 @@ Jedes Panel behält eigene Werteskala, Einheit, Rohwertstatistik und Lücken. Be
 Ausgabeadapter teilen die native Mehrfach-Grid-Runtime; beide reinen SVG-Entwürfe
 komponieren dieselbe vorhandene Kerzengeometrie. Kleine Flächen scrollen, das
 Mausrad zoomt über jedem Koordinatensystem. Lokale Tests und synthetische Frames
-sind geprüft; Modulupdate/MCP, echte Kachel-/IPSView-Hosts und Touch bleiben offen.
+sind geprüft; MCP-Abnahme und Eigentümerbestätigung in Kachel/IPSView liegen vor.
+Echte Touchgeräte bleiben ungeprüft.
 
 ## Ziel und Abgrenzung
 
@@ -269,8 +270,8 @@ Zählerarchiven. Explizite Kennzahlen prüfen Typ, effektiven Reducer und Fenste
 der Gateway-Antwort. Gemeinsame Zeitstempel, Lücken und sämtliche Budgets bleiben
 erhalten; keine Änderung an Gateway, synchronisierten Helpern oder Runtime.
 Neue Modul-/Gateway- und Renderertests ergänzen die bestehenden 16×625-,
-Zeitraum- und Skalenregressionen. Die neue Kennzahlwahl benötigt nach Modulupdate
-noch eine funktionale MCP- und Kachel-/IPSView-Abnahme.
+Zeitraum- und Skalenregressionen. Die neue Kennzahlwahl ist per MCP funktional geprüft
+und vom Eigentümer in Kachel und tatsächlichem IPSView bestätigt.
 
 Parallel ergänzt gemäß [ADR 0085](adr/0085-parallel-fixed-axis-ranges.md) je
 Quellenzeile `AxisRangeMode` (Default `auto`), `AxisMinimum` und `AxisMaximum`.
@@ -603,7 +604,7 @@ ThemeRiver (`ECRV`) ergänzt abgeschlossene Standard-Archivmittelwerte gemäß
 Unterbrechung vollständiger Abschnitte verhindern ECharts-Nullauffüllung.
 Gemeinsame Quellen-, Designer-, Vorschau- und Transportbausteine bleiben
 unverändert. Die Modul-GUID ist `{6767D036-5E2B-4D33-B7F1-C9F1B4376C04}`.
-Live-Abnahmen in Symcon und IPSView sind nach dem Modulupdate erforderlich.
+Die nachfolgende Live-Abnahme in Kachel und IPSView ist durch den Eigentümer bestätigt.
 
 PictorialBar ergänzt aktuelle Vergleiche als eigene Symbolbalkenfamilie.
 Der Quellenvertrag wurde mit Funnel in
@@ -617,8 +618,8 @@ Rohmesswerte und Extrema abgeschlossener Intervalle. Identität, Grenzen und
 Wiederverwendung stehen in [ADR 0056](adr/0056-archive-candlestick.md).
 Die Gateway-Operation bleibt unverändert; Aggregatmittelwerte ersetzen keine
 Kerzen-Endpunkte. Die lokale Prüfung umfasst Datenberechnung, Integration,
-beide Designer und echte ECharts-Geometrie. Die installierte Symcon-Kachel
-und IPSView sind nach dem nächsten Modulupdate gesondert abzunehmen.
+beide Designer und echte ECharts-Geometrie. Die nachfolgende Abnahme in installierter Symcon-Kachel
+und tatsächlichem IPSView ist durch den Eigentümer bestätigt.
 
 Die Library besitzt mit Gateway und eigenständigen Diagrammmodulen eine technische
 Modulstruktur. Alle Module

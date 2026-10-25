@@ -77,3 +77,4 @@ Reine Grenz-/Projektionsprüfungen, isolierte Gateway-/Ausgabeintegration,
 Altlisten, Vorschau/Palette/Skala, Fehler und Bytebudgets sowie echte native
 Polar-Layouttests sichern die Änderung ab. Lokale synthetische Browserprüfungen
 ersetzen nicht die Live-Abnahme nach Modulupdate in Symcon-Kachel und IPSView.
+Die anschließende funktionale Eigentümerbestätigung liegt inzwischen vor.

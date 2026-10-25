@@ -116,4 +116,5 @@ Renderer sie nicht allein durch die allgemeine Text-Property umsetzt.
 Nachweise: Gateway-/Formular-/Budgettests, Validierung beider Designer,
 Übernahme/Kopie aller Optionen, schreibfreie ungespeicherte Vorschau,
 echte ECharts-Styles und Polygonpunkte sowie direkter PHP-SVG-Vergleich.
-Der erneute Live-Test nach Installation bleibt für diese Erweiterung offen.
+Der nachfolgende Live-Test dieser Erweiterung in Kachel und IPSView ist durch
+den Eigentümer bestätigt.

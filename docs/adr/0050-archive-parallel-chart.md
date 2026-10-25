@@ -45,5 +45,5 @@ Automatisches Aktualisieren erfolgt per Timer; das Modul löst keine
 Schreiboperation auf Archiv oder Variablen aus.
 
 Lokale Prüfungen decken Modul- und Asset-Verträge, Zeitstempelverknüpfung,
-Gateway-Integration, Optionsaufbau und Ausgabelimit ab. Eine reale
-Laufzeitprüfung in Symcon-Kachel und IPSView steht noch aus.
+Gateway-Integration, Optionsaufbau und Ausgabelimit ab. Die spätere reale
+Laufzeitprüfung in Symcon-Kachel und IPSView ist durch den Eigentümer bestätigt.

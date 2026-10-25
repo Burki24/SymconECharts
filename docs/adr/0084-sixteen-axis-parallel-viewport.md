@@ -94,7 +94,7 @@ Die lokale Canvas-Fixture prüft beide Ausgabeadapter bei 400×520/790×440 sowi
 200-%-Schrift, Achsenknöpfe und Pos1/Ende. Das ist keine reale IPSView-Abnahme.
 
 Heatmap ist inzwischen per MCP funktional geprüft und durch den Eigentümer in
-Kachel/IPSView bestätigt. Die neue Parallel-Ansicht ist implementiert; ihre
-eigene Live-Abnahme nach Modulupdate bleibt offen. Nächster Roadmap-Schritt sind
-explizite individuelle Achsenbereiche und danach Kennzahlen je Achse. Bestehende
+Kachel/IPSView bestätigt. Auch die 16-Achsen-Ansicht ist inzwischen funktional per MCP geprüft und vom
+Eigentümer in Kachel/IPSView bestätigt. Die später ergänzten individuellen
+Achsenbereiche und Kennzahlen je Achse sind ebenfalls umgesetzt und abgenommen. Bestehende
 gemeinsame Intervalle und Ressourcenbudgets bleiben dafür Voraussetzung.

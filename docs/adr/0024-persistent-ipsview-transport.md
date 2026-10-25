@@ -86,5 +86,6 @@ anschließend den vollständigen Zustand.
 
 Lokale PHP- und JavaScript-Tests prüfen Routing, Kanaltrennung, unveränderte
 WebContent-Dokumente bei Wertänderungen sowie Zustands- und
-WebSocket-Nachrichten. Ein realer IPSView-Laufzeittest der neuen
-Transportimplementierung bleibt auf der vorhandenen Testebene offen.
+WebSocket-Nachrichten. Der Eigentümer bestätigt den regulären Betrieb im tatsächlichen IPSView.
+Das belegt nicht jede Transportfehler- oder Wiederverbindungsmatrix; deren
+Nachweise bleiben nach Testebene getrennt.

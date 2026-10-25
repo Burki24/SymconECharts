@@ -75,4 +75,4 @@ Grenz-/Altlisten-/Identitäts-, Gateway-/Update-, Vorschau-/Nenner-,
 Normalisierungs-/Null-/Überlauf- und finale Ausgabeprüfungen sichern beide
 Ausgabewege ab. Native Tests verwenden die ausgelieferte Pie-Runtime.
 Lokale synthetische Browserprüfungen ersetzen keine Live-Abnahme nach Update
-in Symcon-Kachel und IPSView; diese bleibt beim Eigentümer.
+in Symcon-Kachel und IPSView; die nachfolgende Abnahme ist durch den Eigentümer bestätigt.

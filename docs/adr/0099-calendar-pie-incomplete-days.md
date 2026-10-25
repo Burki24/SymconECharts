@@ -46,7 +46,7 @@ Die gepinnte ECharts-Runtime bleibt unverändert. Die Textgrenzenprüfung
 berücksichtigt ihren internen 3-Pixel-Versatz für Innenlabels, damit kleine
 Teilkreise und Ringe keine überstehenden Zahlen erhalten.
 
-## Nachweise und offene Abnahme
+## Nachweise und Abnahme
 
 Fokussierte Tests begannen RED an fehlender Tagespolicy und fehlendem Teilkreis.
 Reine Policy-, echte Modul-/Gateway-Integration sowie native Engine-Tests
@@ -54,5 +54,6 @@ prüfen Standard/Opt-in, beide numerischen Modi, Normalisierung, Originalformate
 Null-/Fehl-/Zukunftstage, Zustandsdauer, fehlende IDs, unabhängige Designs,
 beide SVGs und ausgeführte Entwurfscallbacks ohne Schreibzugriff. Kleine und
 große Geometrien, sichere Tooltips und Monatsnavigation bleiben abgesichert.
-Die MCP-/Symcon- und tatsächliche IPSView-Client-Abnahme nach Modulupdate ist
-separat offen; lokale Browserprüfungen sind kein Live-Nachweis.
+Die nachfolgende MCP-/Symcon-Abnahme und die Eigentümerbestätigung im
+tatsächlichen Kachel-/IPSView-Client liegen vor. Lokale Browserprüfungen
+bleiben davon getrennte Nachweise.

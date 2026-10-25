@@ -99,8 +99,8 @@ Formatter, Muster-/Gradientenimporte und persistente Auswahlaktionen. Das sind
 zusätzliche fachliche oder interaktive Verträge, keine fehlenden Basis-Styles.
 
 Die Erweiterung wird mit Renderer-/ECharts-Geometrie-, Formular-/Validierungs-,
-Vorschau- und Integrationsprüfungen abgesichert. Der erneute Live-Test der
-Designer-Erweiterung in Symcon/IPSView bleibt nach Modulupdate offen.
+Vorschau- und Integrationsprüfungen abgesichert. Der nachfolgende Live-Test der
+Designer-Erweiterung in Kachel/IPSView ist durch den Eigentümer bestätigt.
 
 ## Erweiterung auf 32 Quellen vom 18.10.2026
 
@@ -139,4 +139,4 @@ Budgetabbruch und Erholung, lange HTML-expandierende Namen unter 1 MiB,
 Vorschauen ohne Archivzugriff, vollständige Skala, gefilterte Tooltips und
 ID-stabile Navigation bei Refresh/Umordnung/Resize. Die echte ausgelieferte
 Runtime wird verwendet. Lokale Canvas-Sichtprüfung ergänzt die automatischen
-Tests; die Live-Abnahme in Kachel und IPSView nach Modulupdate bleibt offen.
+Tests; die nachfolgende Live-Abnahme in Kachel und IPSView ist durch den Eigentümer bestätigt.

@@ -63,4 +63,4 @@ geschützte Kantenregeln, sichere Vorschauen und Ausgabegrößen ab. Native
 ECharts-Tests prüfen beide Layouts und Ausgabearten, Aktualisierungen,
 Größenänderung und entfernte IDs. Browserprüfungen verwenden ausschließlich
 synthetische Daten. Eine lokale Lastmessung ist keine Freigabe für beliebige
-Clienthardware; die echte Symcon-/IPSView-Abnahme nach Modulupdate bleibt separat.
+Clienthardware; die nachfolgende echte Symcon-/IPSView-Abnahme ist durch den Eigentümer bestätigt.

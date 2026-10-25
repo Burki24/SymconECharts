@@ -1,6 +1,6 @@
 # ADR 0091: Optionales IQR-Statistikmodell für Boxplot
 
-- Status: Angenommen; Live-Abnahme nach Modulupdate offen
+- Status: Angenommen; funktional in Kachel und IPSView abgenommen
 - Datum: 2026-10-22
 - Entscheider: Burki24
 - Ergänzt: ADR 0054, 0061 und 0077

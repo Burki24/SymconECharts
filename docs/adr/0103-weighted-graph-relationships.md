@@ -79,5 +79,5 @@ Bereichsbegrenzung, Originalmetadaten, wiederverwendete Quellen, unabhängige
 Designer, unmittelbare Wertänderungen, Abmeldung, alte Zeilenformulare,
 readonly Vorschauen und unveränderte Count-/Bytebudgets. Native Tests verwenden
 die wirklich ausgelieferte Runtime. Lokale Browser- und Gesamtsuitennachweise
-stehen im Testdokument. Neue MCP-/Kachel- und tatsächliche IPSView-Abnahme nach
-Modulupdate bleibt offen. Es werden keine Live-Konfigurationen geändert.
+stehen im Testdokument. Die anschließende MCP-Prüfung und Eigentümerbestätigung in Kachel und
+tatsächlichem IPSView liegen vor. Es werden keine Live-Konfigurationen geändert.

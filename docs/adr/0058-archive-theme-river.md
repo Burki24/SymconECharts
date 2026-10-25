@@ -99,4 +99,4 @@ Geprüft werden Datenfenster einschließlich DST, negative/ungültige Daten,
 Lücken, Nullwerte, gleiche Namen, Transport, Vererbung, Vorschauentwürfe,
 Output-Limit sowie echter ECharts-Optionsaufbau und Bandgeometrie.
 Lokale Browserprüfungen ersetzen keine Live-Abnahme in Symcon und IPSView.
-Diese Live-Abnahme erfolgt erst nach dem Modulupdate durch den Eigentümer.
+Die nachfolgende Live-Abnahme ist durch den Eigentümer für beide Ausgaben bestätigt.

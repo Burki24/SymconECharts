@@ -85,5 +85,5 @@ ausgeführte Entwurfscallbacks ohne Persistenz/Statusänderung, beide SVGs,
 Fehler/Erholung sowie maximale Listen und Byteguards. Gepinnte native
 Renderer-Tests prüfen absolute Geometrie, vollständige Skalen, sichere
 Tooltips und Navigation/Resize in beiden Ausgabeadaptern.
-Lokale Browserprüfungen sind keine Symcon-/IPSView-Host-Abnahme; diese bleibt
-nach Modulupdate separat offen.
+Lokale Browserprüfungen bleiben von der Host-Abnahme getrennt. Der Eigentümer
+hat die Erweiterung inzwischen in Symcon-Kachel und tatsächlichem IPSView bestätigt.

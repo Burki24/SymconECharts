@@ -99,8 +99,9 @@ Gauge Multi erhält einen eigenen Renderer auf Basis seines Mehrquellenmodells.
 
 Der PHP-Test prüft Assets, Integrität, HTML-Erzeugung und Zustandsupdates gegen
 Symcon-Test-Doppel. Eine reale Symcon- und Browserprüfung ist dadurch nicht
-ersetzt. IPSView bleibt mangels verfügbarer Lizenz eine dokumentierte
-Laufzeittestlücke.
+ersetzt. Die damalige lokale IPSView-Lizenzlücke ist durch die spätere funktionale
+Eigentümerabnahme in Kachel/IPSView überholt. Nicht geprüfte Plattform- und
+Gerätevarianten bleiben davon getrennt.
 
 ## Nachweise
 

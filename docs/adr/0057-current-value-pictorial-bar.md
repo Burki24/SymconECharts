@@ -139,8 +139,8 @@ Werte, Quellidentität, Einheiten, Abonnements, Aktualisierung, Fehlererholung,
 Designvererbung und Output-Limit. Renderer-Tests verwenden die echte
 ECharts-Engine für Formen, Wiederholung, beide Ausrichtungen, Nullwerte,
 Sortierung und optische Begrenzung. Lokale Browserprüfungen verwenden
-synthetische Daten. Live-Kachel und IPSView bleiben nach dem Modulupdate
-durch den Eigentümer separat abzunehmen.
+synthetische Daten. Die nachfolgende Live-Abnahme in Kachel und IPSView ist durch den Eigentümer
+bestätigt.
 
 ### Installierte Symcon-Icons vom 17.10.2026
 
@@ -186,8 +186,8 @@ Grundlagen: [SelectIcon](https://www.symcon.de/en/service/documentation/develope
 [Symcon-Icons](https://www.symcon.de/de/service/dokumentation/komponenten/icons/).
 Der interne Adapter wurde lesend an der vorhandenen Windows-Installation
 geprüft; andere Installationslayouts und Symcon-Versionen bleiben Testlücken.
-Die native Iconauswahl und die neue Live-Kachel-/IPSView-Ausgabe bleiben nach
-dem Modulupdate durch den Eigentümer abzunehmen.
+Die native Iconauswahl und die neue Live-Kachel-/IPSView-Ausgabe wurden nach
+dem Modulupdate durch den Eigentümer bestätigt.
 
 ### Eigene SVG-Pfadformen vom 17.10.2026
 

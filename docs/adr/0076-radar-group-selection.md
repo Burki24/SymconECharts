@@ -92,7 +92,7 @@ Runtime, ECharts-Version, Gateway und Lieferartefakte bleiben unverändert.
   Anker, Palette, Initialänderung, Refresh/Reorder/Resize/Theme, Raw-Tooltips,
   ARIA und mehrzeilige Warnungen außerhalb der Auswahl.
 - Lokale Canvas-Browserprüfung mit synthetischen Daten ergänzt diese Tests.
-  Neue Live-Abnahme in Symcon-Kachel und IPSView nach Modulupdate bleibt offen.
+  Die nachfolgende Live-Abnahme in Symcon-Kachel und IPSView ist durch den Eigentümer bestätigt.
 
 Die erste 16-Gruppen-Probe scheiterte nachweisbar an der früheren Acht-Gruppen-
 Grenze. Der Formular-Stresstest zeigte zunächst 1094274 Bytes; erst die

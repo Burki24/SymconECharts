@@ -62,5 +62,5 @@ mit Beispielpunkten ohne Archivzugriff.
 
 Öffentliche Modul-/Gateway-Tests prüfen Grenzen, Budgets, Lücken, Metadaten,
 Altlisten, Entwürfe und beide Ausgaben. Native Engine-Tests ergänzen Auswahl,
-Tooltip, Skalen und Legendengeometrie. Neue Live-Abnahme nach Modulupdate,
-tatsächlicher IPSView-Client und eine reale Lastfreigabe bleiben separat.
+Tooltip, Skalen und Legendengeometrie. Die nachfolgende Live-Abnahme in Kachel und tatsächlichem IPSView ist
+durch den Eigentümer bestätigt. Eine reale Lastfreigabe bleibt separat.

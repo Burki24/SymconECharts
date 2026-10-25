@@ -73,5 +73,5 @@ HTML-Adaptern und SVG. Die Fixture liefert das unveränderte Interaktionsasset
 am normalen Gateway-Pfad aus. Echte Mausradaktionen scrollten die Testseite
 über den Sankey-Frames in beide Richtungen (0 → 637 → 0), ohne Diagrammzoom;
 die abschließende frische Browserkonsole blieb ohne Warnungen/Fehler.
-Neue MCP-Abnahme und tatsächliche Symcon-Kachel-/IPSView-Prüfung bleiben nach
-Modulupdate offen. Keine laufende Instanz, Quelle oder Archivierung wird geändert.
+Die nachfolgende MCP-Abnahme und die Eigentümerbestätigung in Symcon-Kachel
+und tatsächlichem IPSView liegen vor. Keine laufende Instanz, Quelle oder Archivierung wird geändert.

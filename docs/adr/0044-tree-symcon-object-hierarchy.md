@@ -84,5 +84,5 @@ Graph-, Treemap- oder Sunburst-Datenmodellierung. Frei gewählte Einzelknoten,
 Links als Quellauflösung und weitere fachliche Gewichtungen benötigen eigene
 Entscheidungen. Tests prüfen Tiefe, Begrenzung, ausgeblendete Zweige,
 gleichnamige Variablen, Modell und Ausgabegrenze, Designvererbung, sichere
-Tooltips und die ECharts-Optionen. Symcon- und IPSView-Laufzeitdarstellung
-bleiben bis zur Prüfung auf der Testinstallation offen.
+Tooltips und die ECharts-Optionen. Die spätere Symcon-Kachel- und IPSView-Laufzeitdarstellung ist durch den
+Eigentümer funktional bestätigt.

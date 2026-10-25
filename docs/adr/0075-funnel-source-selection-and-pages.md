@@ -80,4 +80,5 @@ Identitäten, versteckte Fehler, Vorschau und getrennte Ressourcenlimits.
 Renderer-Tests messen tatsächliche Polygonbreiten im gepinnten ECharts und
 prüfen Navigation, leere Zustände, Farben und beide Ausrichtungen/Ausgaben.
 Lokale synthetische Canvas-Browserprüfungen ersetzen keine Live-Abnahme nach
-Modulupdate in Symcon-Kachel oder der IPSView-App.
+Modulupdate in Symcon-Kachel oder der IPSView-App. Die anschließende
+funktionale Eigentümerbestätigung liegt inzwischen für beide Ausgaben vor.

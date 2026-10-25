@@ -24,7 +24,7 @@ Der bestehende kartesische Build wird nicht verändert. Ein zusätzlicher, lokal
 
 Category Bar, BarHistory und Waterfall behalten GUIDs, Präfixe, Properties und Laufzeitdateien. Polar wird nicht als Modus eines dieser Module eingeführt. Die ersten Versionen umfassen keine Archivwerte, gestapelten Polar-Serien, mehrere Einheitenachsen oder importierte SVG-Balkenmuster. Solche Erweiterungen benötigen jeweils eine fachliche Prüfung innerhalb des Polar-Vertrags.
 
-Vertrags-, Integrations-, Asset- und Layouttests sichern die erste Umsetzung. Ein installierter Symcon-9.0/9.1-Laufzeittest sowie ein IPSView-Clienttest sind dadurch nicht ersetzt und bleiben bis zu ihrer tatsächlichen Durchführung als Lücke benannt.
+Vertrags-, Integrations-, Asset- und Layouttests sichern die erste Umsetzung. Die spätere funktionale Kachel-/IPSView-Abnahme wurde vom Eigentümer bestätigt. Eine vollständige Symcon-9.0/9.1-Versionsmatrix oder Live-Lastfreigabe folgt daraus nicht.
 
 ## Quellen
 

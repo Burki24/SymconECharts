@@ -84,7 +84,7 @@ schematisch; weder aktuelle Werte noch Archive werden dafür geladen.
 Ungültige Entwürfe zeigen eine Meldung und keine scheinbar gültigen Kurven.
 Formularänderungen aktualisieren Bilder, nicht gespeicherte Konfigurationen.
 
-## Nachweise und verbleibende Abnahme
+## Nachweise und Abnahme
 
 Der neue öffentliche Modul-/Gateway-Test begann RED an den fehlenden
 Grenzfeldern. Er prüft Altmodelle, gemischte Modi, gleichnamige/gleichartige
@@ -103,4 +103,5 @@ Symcon-/IPSView-Live-Abnahme der neuen Skalen nach Modulupdate.
 Die 16-Achsen-Ansicht selbst ist inzwischen per MCP funktional geprüft und
 vom Eigentümer in Kachel und IPSView bestätigt. Ein voller 10000-Punkte-
 Live-Lasttest liegt wegen der kurzen vorhandenen Archive nicht vor.
-Nächster Roadmap-Punkt bleiben Kennzahlen je Achse, nicht weitere Grenzerhöhungen.
+Die damalige Folgeerweiterung um Kennzahlen je Achse ist gemäß ADR 0086
+ebenfalls umgesetzt und funktional abgenommen.

@@ -79,4 +79,6 @@ Nullwerte, außerhalb liegende Originale, verschiedene Einheiten, gleiche Namen,
 inaktive Altmodelle und Fehlererholung. Modul-/Gatewaytests sichern beide
 Ausgaben, schreibfreie Entwürfe und Budgets; Rendererprüfungen Geometrie,
 Labels, Tooltips und Navigation. Lokale synthetische Browserprüfungen ersetzen
-keine Live-Abnahme in Symcon 9.0/9.1 und IPSView nach dem Update.
+keine Live-Abnahme in Symcon 9.0/9.1 und IPSView nach dem Update. Die
+anschließende funktionale Kachel-/IPSView-Abnahme ist durch den Eigentümer
+bestätigt; eine vollständige Versionsmatrix folgt daraus nicht.

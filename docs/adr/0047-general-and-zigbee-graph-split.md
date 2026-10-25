@@ -67,9 +67,9 @@ beider Graph-Module zentralisiert.
 ## Nachweise und Grenzen
 
 Tests prüfen Knoten-/Kantenvalidierung, gleichnamige Objekte, das allgemeine
-Graph-Modell sowie die Z2M-Projektion und den Z2M-Renderer. Eine tatsächliche
-Symcon-Kachel- und IPSView-Abnahme des neuen Z2M-Moduls folgt nach einem
-Modulupdate und ist durch Repositorytests nicht ersetzt. Der Scan ohne Routen
+Graph-Modell sowie die Z2M-Projektion und den Z2M-Renderer. Die anschließende tatsächliche
+Symcon-Kachel- und IPSView-Abnahme des Z2M-Moduls ist durch den Eigentümer
+bestätigt und bleibt von Repositorytests getrennt. Der Scan ohne Routen
 lieferte am 15.10.2026 eine gespeicherte Momentaufnahme mit 98 Geräten und
 1.907 Link-Einträgen; diese installationsbezogenen Rohdaten sind kein
 Repository-Testfixture.

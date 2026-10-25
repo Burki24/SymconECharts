@@ -83,10 +83,12 @@ Bei der Browserprüfung wurde der bereits im Ausgangsstand fehlende
 `TitleComponent` im gepinnten Gauge-Subset bestätigt: Die konfigurierte äußere
 Diagrammüberschrift wird trotz vorhandener Option nicht gezeichnet. Dieser
 Bestandsfehler wird durch Quellen/Seiten weder verursacht noch korrigiert;
-eine gesonderte Runtime-Korrektur und Prüfung aller Gauge-Verbraucher bleibt offen.
+Die nachfolgende gesonderte Runtime-Korrektur und Prüfung der Gauge-Verbraucher
+sind im untenstehenden Nachtrag dokumentiert.
 
 Nachtrag 20.10.2026: Der separat beauftragte Fix ergänzt den offiziellen
 TitleComponent im unveränderten ECharts 6.1.0 und baut ausschließlich das
 Gauge-Bundle neu. `tests/gauge_runtime_titles.js` sichert den reproduzierbaren
 Build und die tatsächliche Canvas-Titelausgabe für beide Ausgabewege ab.
-Der Befund ist damit lokal korrigiert; die Live-Abnahme nach Update bleibt separat.
+Der Befund ist korrigiert; die nachfolgende Live-Abnahme in Kachel und IPSView
+ist durch den Eigentümer bestätigt.

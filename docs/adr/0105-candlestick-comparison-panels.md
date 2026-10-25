@@ -1,6 +1,6 @@
 # ADR 0105: Benannte Candlestick-Vergleichspanels
 
-- Status: Angenommen, lokal geprüft; Live-Abnahme nach Modulupdate offen
+- Status: Angenommen; funktional in Kachel und IPSView abgenommen
 - Datum: 2026-10-25
 - Ergänzt: ADR 0056, 0079, 0092 und 0093
 
@@ -85,7 +85,7 @@ Panels, stabile Einzelwerteskalen und Ansichtserhalt nach Fixture-Refresh.
 Die Scrollprüfung erreicht auch das vierte Panel; der feste Kachelkopf bleibt
 ausgespart. IAB meldete außerdem nicht zugeordnete `MutationObserver`-Fehler;
 ein fehlerfreies Browserprotokoll wird nicht behauptet.
-Die echte Symcon-Kachel, das Modulformular und der tatsächliche IPSView-Client
-sind erst nach Modulupdate zu prüfen. Ein synthetischer Frame bestätigt keinen
-dieser Hosts; echte Touchgeräte bleiben offen. Keine bestehende Installation,
+Die nachfolgende funktionale MCP-Prüfung und Eigentümerbestätigung in echter
+Symcon-Kachel und tatsächlichem IPSView liegen vor. Diese Live-Abnahme ist von
+den synthetischen Frames getrennt; echte Touchgeräte bleiben offen. Keine bestehende Installation,
 Quelle, Archivierung oder Designkonfiguration wurde geändert.

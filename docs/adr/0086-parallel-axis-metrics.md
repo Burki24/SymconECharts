@@ -61,7 +61,7 @@ Metadaten. Die Prüfung umfasst alle Achsen vor dem Sechs-Achsen-Ausschnitt;
 Beispielkurven bleiben ausdrücklich schematisch. Ungültige Entwürfe erzeugen
 eine Meldung statt plausibler Kurven. Entwürfe speichern nichts.
 
-## Nachweise und verbleibende Abnahme
+## Nachweise und Abnahme
 
 Ein neuer öffentlicher Modul-/Gateway-Test begann RED an den fehlenden Min-/
 Max-Ergebnissen. Er prüft echte Gateway-Reduktion mit synthetischen Kernel-
@@ -73,6 +73,6 @@ Kennzahltexte, Originaldaten, Escaping, Übersetzung und ID-stabile Navigation.
 Bestehende Zeit-, Skalen- und Budgetprüfungen bleiben Regressionen.
 
 Feste Achsenbereiche selbst sind inzwischen per MCP geprüft und durch den
-Eigentümer in Kachel/IPSView bestätigt. Die neue Kennzahlwahl benötigt nach
-Modulupdate noch eine reale funktionale MCP- und Kachel-/IPSView-Abnahme;
+Eigentümer in Kachel/IPSView bestätigt. Auch die neue Kennzahlwahl ist inzwischen funktional per MCP geprüft und
+vom Eigentümer in Kachel/IPSView bestätigt;
 synthetische Tests sind keine Live-Lastfreigabe.

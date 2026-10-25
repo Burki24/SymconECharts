@@ -62,5 +62,5 @@ Layouts und Adapter bestätigt Auswahlwechsel, leere Trefferlisten sowie
 Zoomerhalt nach Wechsel und Refresh; die Browserkonsole blieb ohne Warnungen
 oder Fehler. Diese Canvas-Frames sind keine tatsächlichen Symcon-/IPSView-Hosts.
 Keine laufende Symcon-Instanz,
-kein Export und kein Design wird geändert. Funktionale MCP-Abnahme und tatsächliche
-Kachel-/IPSView-Prüfung bleiben nach Modulupdate offen; kein Live-Lastnachweis.
+kein Export und kein Design wird geändert. Die nachfolgende funktionale MCP-Abnahme und die Eigentümerbestätigung
+in Kachel/IPSView liegen vor; kein Live-Lastnachweis.

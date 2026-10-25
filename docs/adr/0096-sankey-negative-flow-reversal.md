@@ -81,4 +81,5 @@ Ausgaben, den negativen Originalwert im Tooltip, die umgekehrten SVG-Flüsse
 und die übereinstimmende Kreisdiagnose statt Teilgeometrie. Echte Mausradaktionen
 scrollten über der Kachel abwärts und über dem IPSView-Testframe aufwärts
 (scrollTop 0 → 637 → 0), ohne Diagrammzoom. Die Browserkonsole blieb fehlerfrei.
-MCP-/Host-Abnahme der neuen Umkehr bleibt nach Modulupdate separat offen.
+Die nachfolgende MCP-Abnahme und Eigentümerbestätigung der neuen Umkehr in
+Kachel und IPSView liegen vor.

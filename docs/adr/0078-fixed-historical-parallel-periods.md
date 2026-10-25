@@ -70,5 +70,7 @@ Die manuelle Live-Abnahme kann nach Fertigstellung als gemeinsame Matrix über
 alle Familien und beide Ausgabewege erfolgen, statt jedes Zwischenmodul einzeln
 zu installieren. Dabei sind relative/feste Fenster, Stunde/Tag beziehungsweise
 exakte Zustandsgrenzen, DST, Teilarchive, Lücken, Fehler und Budgets zu prüfen.
-Diese gemeinsame Live-Abnahme ist geplant, nicht durch lokale Tests ersetzt.
+Die gemeinsame funktionale Live-Abnahme ist inzwischen per MCP erfolgt; der
+Eigentümer bestätigt Kachel und tatsächliches IPSView. Lokale Tests bleiben
+davon getrennt und sichern die vollständige Grenz-/Fehlermatrix.
 Es wurden keine laufenden Instanzen, Konfigurationen oder Archive geändert.

@@ -72,6 +72,6 @@ ThemeRiver-Fenstertests sichern den gemeinsamen Enumerationsbaustein.
 
 ThemeRiver und StateTimeline sind noch nicht auf absolute Fenster umgestellt.
 Die automatisierte Qualitätssicherung erfolgt je Änderung; die gemeinsame
-Live-Matrix des gesamten Archivzeiträume-Blocks folgt nach dessen Fertigstellung.
-Die neue Datumswahl und tatsächliche Kachel/IPSView sind noch nicht live abgenommen.
+Die gemeinsame funktionale Live-Matrix des Archivzeiträume-Blocks ist inzwischen
+per MCP geprüft; der Eigentümer bestätigt die neuen Zeiträume in Kachel/IPSView.
 Es wurden keine laufenden Instanzen, Designs oder Archive verändert.

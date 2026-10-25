@@ -50,7 +50,7 @@ fehlende Intervalle, Einzelwerte, negative Werte und Sommerzeit. Integrations-
 tests prüfen Gateway, Formular, Referenzen, beide Ausgabewege und Fehlerfälle.
 Die echte ECharts-Engine prüft die erzeugten Optionen. Lokale Browserprüfung
 ersetzt keine Abnahme der installierten Symcon-Kachel und des IPSView-Widgets;
-diese folgen nach Modulupdate und Instanzanlage durch den Eigentümer.
+die nachfolgende Abnahme ist durch den Eigentümer für beide Ausgaben bestätigt.
 
 ## Designer-Erweiterung vom 17.10.2026
 
@@ -96,5 +96,5 @@ Quellen des Abgleichs:
 [Schriftgestaltung](https://github.com/apache/echarts-doc/blob/master/en/option/partial/text-style.md)
 sowie die unveränderten Achsen-Typverträge der gepinnten ECharts-6.1.0-Abhängigkeit.
 PHP-Integration, echte ECharts-Geometrie und lokale Browserdarstellung werden
-für die Ergänzung erneut geprüft. Der Live-Test der neuen Optionen nach dem
-Modulupdate bleibt separat offen; die Bestätigung der Basisversion ersetzt ihn nicht.
+für die Ergänzung erneut geprüft. Die nachfolgende Live-Abnahme der neuen Optionen in Kachel und IPSView ist
+durch den Eigentümer bestätigt, zusätzlich zur früheren Abnahme der Basisversion.

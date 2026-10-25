@@ -1,12 +1,15 @@
-# Prüfung der Nutzungsgrenzen
+# Roadmap zur Erweiterung der Nutzungsgrenzen
 
 Stand: 25.10.2026. Geprüft wurden alle 29 Diagrammfamilien und das Gateway:
 Quellenvalidierung, Datenaufbereitung, Renderer, Vorschau, Benutzerdokumentation
 und vorhandene Tests. Das leere Altverzeichnis `EChartsGauge` ist kein Modul.
-Diese Bestandsaufnahme ist keine Performancefreigabe für die vorgeschlagenen
-größeren Modelle und keine erneute Live-Abnahme sämtlicher Familien.
+Die vereinbarte Roadmap ist seit 25.10.2026 vollständig abgeschlossen: Alle
+vereinbarten Erweiterungen sind umgesetzt und vom Eigentümer in Kachel und
+IPSView funktional bestätigt, zuletzt die Heatmap-Vergleichsansichten.
+Diese funktionale Abnahme ist keine Performancefreigabe größerer Modelle
+und kein Nachweis sämtlicher Geräte-, Versions- oder Fehlerszenarien.
 
-## Ergebnis und Reihenfolge
+## Ergebnis und Abschluss
 
 Viele Obergrenzen stammen aus der ersten gut prüfbaren Vertikale, nicht aus
 einer fachlichen ECharts-Grenze. Andere Beschränkungen verhindern hingegen
@@ -66,7 +69,7 @@ in Kachel und IPSView bestätigt. Optional unvollständige Vergleichsgruppen sin
 nun ebenfalls umgesetzt: fehlende Zuordnungen bleiben null, Fragezeichen und
 dauerhafter Hinweis kennzeichnen Teilgruppen ohne geschlossene Fläche. Strenger
 Default, konfigurierte Quellenprüfung, Designs und Schutzbudgets bleiben erhalten;
-die neue Live-Abnahme der Teilgruppen bleibt offen.
+der Eigentümer bestätigt auch die Teilgruppen in Kachel und IPSView.
 Boxplot, Parallel, Candlestick und ThemeRiver bieten zusätzlich feste historische Von-/Bis-Zeiträume
 mit gemeinsamer strikter Datumsprüfung und unveränderten Archivbudgets.
 Parallel, Candlestick und ThemeRiver unterstützen dabei vollständig enthaltene Stunden und Kalendertage;
@@ -115,8 +118,8 @@ Eigentümerbestätigung für Kachel/native App und tatsächliches IPSView
 einschließlich Mausrad liegen vor; echte Touchgeräte bleiben ungeprüft.
 Zusätzlich sind 15-/30-Minuten- und lokale Kalenderwochenintervalle über die
 zentrale Rohintervallplanung umgesetzt und per MCP funktional geprüft.
-Der Eigentümer bestätigt Kachel und tatsächliches IPSView; mehrere
-Optionale benannte Vergleichspanels sind gemäß ADR 0105 lokal umgesetzt; ihre Live-Abnahme ist offen.
+Der Eigentümer bestätigt Kachel und tatsächliches IPSView, einschließlich der
+optionalen benannten Vergleichspanels gemäß ADR 0105.
 GraphZ2M bietet nun stärkste, schwächste und einschließlich nach LQI-Bereich
 gefilterte Verbindungen. Gerichtete Dubletten behalten vor der Auswahl ihren
 höchsten LQI; alle Knoten und Schutzbudgets bleiben erhalten. Die MCP-Prüfung
@@ -135,10 +138,11 @@ effektiven Flüssen eine klar als berechnet markierte Differenz. Zusätzliche
 Terminals teilen die unveränderten 100-/200-Gesamtgrenzen; Quellwerte und
 Designs bleiben erhalten. Die funktionale MCP-Prüfung auf Symcon 9.1 ist bestanden;
 der Eigentümer bestätigt Rest-/Bilanzknoten in tatsächlicher Kachel und IPSView.
-Die übrigen
-Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
+Die folgende Tabelle dokumentiert die abgeschlossenen vereinbarten Schritte.
+Weitere bedarfsabhängige Ideen sind davon getrennt und erweitern die Roadmap
+nicht nachträglich. Die bestehenden Verträge bleiben unverändert.
 
-| Reihenfolge | Empfohlener nächster Schritt | Nutzen und Voraussetzung |
+| Status | Abgeschlossene Erweiterung | Nutzen und Voraussetzung |
 | --- | --- | --- |
 | Erledigt | PictorialBar: 1–100 Quellen, Kategoriennavigation | Alle 72 Batterievariablen passen in eine Instanz; lesbarer Ausschnitt statt 100 zusammengedrängter Zeilen. |
 | Erledigt | BarCategory: bis 100 Quellenzuordnungen, Kategoriennavigation | Breiten-/fontabhängige Dichte statt festem 16-Kategorien-Fenster; die Obergrenze gilt für sämtliche Zuordnungen zusammen, nicht je Kategorie oder Reihe. |
@@ -176,7 +180,7 @@ Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
 | Erledigt | Treemap/Sunburst: normalisierte Blattgewichte und Originalformate | Optionale explizite Min/Max-Projektion auf 0–100, Originaleinheiten und Präzision je Blatt; Gruppensummen als Gewichte gekennzeichnet. MCP funktional geprüft und Kachel/IPSView durch Eigentümer bestätigt; Altlisten, Designs und Budgets bleiben erhalten. |
 | Erledigt | Boxplot: optionale 1,5-IQR-Whisker und Ausreißer | R7-Quartile aller Stundenmittel, beobachtete Inlier-Enden, separate Punkte mit Originaleinheit und Stundenzeitstempel. Min/Max bleibt Standard; 32 Quellen, 1000/10000-Stundenmittelbudgets und unabhängige Designs bleiben unverändert. MCP sowie Kachel/IPSView durch Eigentümer bestätigt. |
 | Erledigt | Candlestick: optionaler Zeitzoom | Zeitbereichsregler und Mausrad, Ansichtserhalt bei kompatiblen Updates, vollständige Werteskala und 720/63/64000-Budgets. MCP funktional geprüft; Kachel/native App und tatsächliches IPSView einschließlich Mausrad durch Eigentümer bestätigt. Echte Touchprüfung bleibt offen. |
-| Erledigt | Candlestick: 15-/30-Minuten- und Wochenintervalle | Lokale Minutenraster und ISO-Kalenderwochen von Montag bis Montag, relative und feste historische Fenster über zentrale Planung. Echte Rohwert-Endpunkte, Designs, Lücken und 720/63/64000-Budgets bleiben erhalten. MCP funktional geprüft; Kachel und tatsächliches IPSView durch Eigentümer bestätigt. Mehrere benannte Vergleichspanels bleiben ein getrennter späterer Schritt. |
+| Erledigt | Candlestick: 15-/30-Minuten- und Wochenintervalle | Lokale Minutenraster und ISO-Kalenderwochen von Montag bis Montag, relative und feste historische Fenster über zentrale Planung. Echte Rohwert-Endpunkte, Designs, Lücken und 720/63/64000-Budgets bleiben erhalten. MCP funktional geprüft; Kachel und tatsächliches IPSView durch Eigentümer bestätigt. Auch die benannten Vergleichspanels sind inzwischen abgenommen (ADR 0105). |
 | Erledigt | GraphZ2M: stärkste, schwächste und LQI-Bereich | Bestehender Standard stärkste zuerst; inklusive Min/Max-Auswahl nach höchstem LQI je gerichteter Dublette, stabile Gleichstände und unveränderte Geräteidentitäten. Live-Modell und synthetische Vorschauen teilen Auswahl/Prüfung; feste Farbskala sowie 500/10000/2000-/16-MiB-Budgets bleiben erhalten. MCP funktional geprüft; Kachel und tatsächliches IPSView durch Eigentümer bestätigt. |
 | Erledigt | Sankey: Einheitenmodell und optionale Quellenprüfung | Manueller Altmodus bleibt Default; automatische gemeinsame oder manuell erwartete Quelleinheit aus nativer Darstellung/Legacy-Profil. Alle Verbindungen einschließlich Nullflüssen werden geprüft, Metadatenfehler nicht als einheitenlos kaschiert. Gemeinsamer Metadatenleser und identische Live-/SVG-Policy; keine Umrechnung/Normalisierung, unveränderte 100-/200-/Ausgabebudgets. MCP funktional geprüft; Kachel und tatsächliches IPSView durch Eigentümer bestätigt. |
 | Erledigt | Sankey: optionale Kantenumkehr bei negativen Werten | Opt-in je Verbindung, Default false; positive Betragsbreiten und tatsächliche Richtung mit signierten Originalen im Tooltip. Konfigurierte und effektive Topologie bleiben einschließlich Nullflüssen kreisfrei/eindeutig. Gemeinsamer Modellbauer und kompakte Vorschauverdrahtung; Designs, Einheitenprüfung und Schutzbudgets bleiben erhalten. Per MCP funktional geprüft; Eigentümer bestätigt Kachel und tatsächliches IPSView. |
@@ -190,10 +194,11 @@ Punkte sind Vorschläge; ihre Verträge bleiben unverändert.
 | Erledigt | Graph: gewichtete Beziehungen | Optional je Kante `WeightMode=none|manual|variable`, mit ungewichtetem Standard. Fester gemeinsamer Min/Max-Bezug und unabhängige Pixelbreiten; Null bleibt sichtbar, Originalgewichte/-einheiten und Quellenmetadaten bleiben erhalten. Gemeinsames Modell für Renderer/SVGs, Gateway-/Referenzlogik wiederverwendet. Keine Änderung von Richtung, Kräfteparametern oder Schutzbudgets. MCP funktional geprüft; Eigentümer bestätigt Kachel und tatsächliches IPSView. |
 | Erledigt | PictorialBar: Mehrfachübernahme von Quellen | Objektzweig, optionale Unterobjekte/ausgeblendete Zweige, Namensbestandteil und genaue native/Legacy-Einheit. Explizite Auswahl mit ID-stabiler Ergänzung des ungespeicherten Entwurfs und beiden Vorschauen; bestehende Quellen/Designs und 100-/64-KiB-Grenzen bleiben erhalten. Zentrale VariableSearchHelper-Suche und Library-Adapter, 5000 Objekte/500 numerische Treffer ohne stille Kürzung. MCP funktional einschließlich Speicherung von 100 Quellen und sichtbarer Fehlerdialoge geprüft. Auch die bereinigte Erfolgsbestätigung ist nach Modulupdate per MCP und als sichtbarer Konsolendialog bestätigt. |
 | Erledigt | Candlestick: benannte Vergleichspanels | Optional ein bis vier ID-stabile Quellen mit getrennten Originalskalen/-einheiten, gemeinsamer Zeitachse und gemeinsamem Zoom. Alte Einzelquelle/Designs bleiben Standard. Zentraler Zeitraumplan, Quellidentität, Zoom und Startzustands-Komprimierung werden wiederverwendet; 720/63/64000 gelten gemeinsam. Lokale Modul-/Gateway-, Budget-, SVG- und native Geometrieprüfungen sowie synthetische Browserprüfung; nach Modulupdate per MCP funktional geprüft und vom Eigentümer für Kachel/IPSView bestätigt. |
-| Umgesetzt, Live-Abnahme offen | Heatmap: getrennte Vergleichsansichten | Optional ein bis vier benannte Ansichten für unterschiedliche ID-Quellen oder Perioden, eigene feste Grenzen und frühere Basiszeiträume. Gemeinsame oder getrennte Farbskalen, Originalwerte/-einheiten, gemeinsame Navigation. Sieben Archivabfragen gelten insgesamt; identische Abfragen werden geteilt. Altquelle und Designs bleiben erhalten. Lokale Plan-/Gateway-/Form-/SVG-/native Layoutprüfungen und synthetische Browserprüfung; echte Hosts nach Modulupdate offen. |
+| Erledigt | Heatmap: getrennte Vergleichsansichten | Optional ein bis vier benannte Ansichten für unterschiedliche ID-Quellen oder Perioden, eigene feste Grenzen und frühere Basiszeiträume. Gemeinsame oder getrennte Farbskalen, Originalwerte/-einheiten, gemeinsame Navigation. Sieben Archivabfragen gelten insgesamt; identische Abfragen werden geteilt. Altquelle und Designs bleiben erhalten. Lokale Plan-/Gateway-/Form-/SVG-/native Layoutprüfungen und synthetische Browserprüfung; nach Modulupdate per MCP geprüft und vom Eigentümer in Kachel und tatsächlichem IPSView bestätigt. |
 
-Alle bislang konkret vereinbarten fachlichen Roadmap-Punkte sind damit lokal
-umgesetzt. Die Live-Abnahme der Heatmap-Vergleichsansichten steht noch aus.
+Alle konkret vereinbarten fachlichen Roadmap-Punkte sind umgesetzt und
+vom Eigentümer für Kachel und IPSView funktional abgenommen.
+Die Roadmap zur Erweiterung der Nutzungsgrenzen ist damit abgeschlossen.
 Weitere fachliche Erweiterungen werden erst bei einem neuen Bedarf vereinbart.
 
 Weitere Grenzerhöhungen wie StateTimeline/GaugeMulti auf 100 Quellen oder mehr
@@ -204,6 +209,23 @@ Normalisierung ist keine allgemeine Lösung für unterschiedliche Einheiten:
 Sie kann relative Vergleiche sinnvoll machen, ersetzt aber keine physikalische
 Summe. Waterfall-Änderungen und Sankey-Flüsse dürfen nicht unabhängig voneinander
 normalisiert und anschließend als unveränderte Mengenbilanz ausgegeben werden.
+
+## Verbleibende Testlücken außerhalb des Roadmap-Abschlusses
+
+Die funktionalen Eigentümerbestätigungen schließen die vereinbarten
+Erweiterungen ab. Folgende Nachweise sind damit nicht automatisch erbracht:
+
+- Echte Touchgeräte und gesonderte horizontale Mausradbedienung ohne bisherigen
+  Wirkungsnachweis; die allgemeine Kachel-/IPSView-Abnahme bleibt bestätigt.
+- Vollständige Archiv-/Modellbudgets und längere Lastläufe auf realer
+  Clienthardware. Kurze vorhandene Archive ersetzen keine Live-Lastfreigabe.
+- Nicht geprüfte Symcon-Versionen, Installationslayouts und Gerätevarianten;
+  insbesondere ist kein eigener vollständiger Symcon-9.0-Nachweis abgeleitet.
+- Spezielle Fehler-/Wiederverbindungs- und Größenwechselmatrizen, soweit der
+  jeweilige Testbericht dafür keinen gesonderten Praxisnachweis enthält.
+- Die [Debug-Praxismatrix](DEBUG_OUTPUT.md) und die gesonderte native
+  WoIst-/Helper-Mausradabnahme aus der [Entwicklungsdokumentation](ENTWICKLUNG.md).
+  Beide sind keine offenen Funktionspunkte dieser Roadmap.
 
 ## Aktuelle Werte und Strukturen
 
@@ -218,7 +240,7 @@ Schritte sind Planungsziele, keine implementierten oder lastgeprüften Zusagen.
 | EChartsGaugeTacho | 2–5 Quellen mit unabhängigen Skalen; festgelegte Instrumentenanordnung. | Fünf ist durch die besondere Geometrie begründet. Neue Anordnungen wären Voraussetzung für mehr; reine Grenzerhöhung nicht empfohlen. |
 | EChartsGaugeChronograph | 2–5 Quellen als Hauptinstrument mit Nebeninstrumenten. | Ebenso Geometrievertrag. Optional ein einzelnes Hauptinstrument erst nach ausdrücklicher Produktentscheidung; kein allgemeiner 100-Quellen-Kandidat. |
 | EChartsBarCategory | 1–100 numerische Quellenzuordnungen, gleiche Roh-Einheit oder ausdrücklich normalisierte Vergleiche mit eigenen Min/Max; auch negative Originale. Kategorien und Reihen, gruppiert/gestapelt/einfach. | Umgesetzt: responsive Kategoriennavigation, viewportstabile Updates und optionale Normalisierung. Stapel addieren normierte Einzelwerte, sind aber keine physikalischen Summen oder 100-Prozent-Stapel. |
-| EChartsBarWaterfall | 2–100 Quellen gleicher Einheit, erster Wert absolut; spätere Werte signierte Änderungen oder explizite absolute Neustarts. Optional eine berechnete Zwischensumme nach jeder Quelle; Endsumme zusätzlich, höchstens 201 Schritte. Modell höchstens 200000 Bytes, HTML höchstens 1 MiB. | Umgesetzt: responsive ID-stabile Kategoriennavigation, explizite Zwischensummen ohne erneute Addition und unabhängige Bilanzabschnitte. Vollständige Skala aller Abschnitte, Endsumme bei Neustarts klar dem letzten Abschnitt zugeordnet. Gemeinsamer Schrittplan für Live und maximal fünf gezeichnete Vorschauschritte plus Endsumme; Quellwerte/Designs/Budgets bleiben erhalten. Neue Live-Abnahme offen. |
+| EChartsBarWaterfall | 2–100 Quellen gleicher Einheit, erster Wert absolut; spätere Werte signierte Änderungen oder explizite absolute Neustarts. Optional eine berechnete Zwischensumme nach jeder Quelle; Endsumme zusätzlich, höchstens 201 Schritte. Modell höchstens 200000 Bytes, HTML höchstens 1 MiB. | Umgesetzt: responsive ID-stabile Kategoriennavigation, explizite Zwischensummen ohne erneute Addition und unabhängige Bilanzabschnitte. Vollständige Skala aller Abschnitte, Endsumme bei Neustarts klar dem letzten Abschnitt zugeordnet. Gemeinsamer Schrittplan für Live und maximal fünf gezeichnete Vorschauschritte plus Endsumme; Quellwerte/Designs/Budgets bleiben erhalten. Funktionale Abnahme in Kachel und IPSView durch den Eigentümer bestätigt. |
 | EChartsBarPolar | 1–100 Quellen gleicher Roh-Einheit oder ausdrücklich aktivierte Normalisierung je Quelle auf 0–100; negative Originalwerte bleiben erhalten. Modell höchstens 200000 Bytes, HTML höchstens 1 MiB. | Umgesetzt: optionale ID-stabile Quellenauswahl und responsive Seiten mit vollständiger Werteskala. Bestehende Listen bis 16 ohne Auswahl behalten ihre Geometrie; die Vorschau zeigt höchstens sechs anfangs sichtbare Quellen mit vollständig berechnetem Maßstab. |
 | EChartsPie | 1–100 nichtnegative Quellen gleicher Roh-Einheit oder optional normalisierte Gewichte mit beliebigen Originaleinheiten und eigenen Min/Max. Modell höchstens 200000 Bytes, HTML höchstens 1 MiB. | Umgesetzt: optionale erweiterte Quellenauswahl mit Anfangssichtbarkeit, Alle/Umkehren und ID-stabiler Legendenposition. Alle Quellen bleiben im Modell; Auswahl- und Gesamtanteil werden getrennt benannt. Keine automatische Restgruppe; eine Ausschnittsvorschau berechnet ihre Gewichte nicht neu. |
 | EChartsFunnel | 1–32 nichtnegative numerische Quellen gleicher Einheit; Modell höchstens 200000 Bytes, finales HTML höchstens 1 MiB. | Umgesetzt: optionale Quellenauswahl und schrift-/platzabhängige Stufenseiten, vollständige Breitenskala auch bei verstecktem Maximum. Altlisten bis 16 ohne Auswahl behalten ihre Ansicht. Keine Prozentanteile, negative Breiten oder Normalisierung; andere Verbraucher behalten ihre ausdrücklichen Quellenbudgets. |
@@ -227,8 +249,8 @@ Schritte sind Planungsziele, keine implementierten oder lastgeprüften Zusagen.
 | EChartsTreeSystemHealth | Dieselben Hierarchiegrenzen; bis 3000 ausdrückliche Boolean-/Zahlenregeln; Vorfahrenbewertung nur anhand des berücksichtigten Baums. | Umgesetzt: zwölf Nachkommensebenen und sichtbarer lokaler Bewertungsumfang einschließlich nicht enthaltener Regelvariablen. Keine zusätzliche Vollsuche oder Zustandsaussage außerhalb der ausgewählten Hierarchie. |
 | EChartsGraph | 2–300 Objektknoten, 1–1000 Kanten; keine Selbstkanten. Standard ungerichtet mit eindeutigen ungeordneten Paaren, optional gerichtet mit eindeutigen geordneten Paaren und erlaubten Gegenrichtungen. Isolierte Knoten, getrennte Komponenten und gerichtete Kreise sind erlaubt. | Umgesetzt: größere Modelle, gemeinsam mit Z2M erhaltene Pan-/Zoom-Ansicht und Kräfte-Ausgangspositionen sowie begrenzter echter Vorschauausschnitt. Gerichtetes Modell mit nativen Pfeilen und getrennten Kurven (MCP funktional geprüft, Eigentümer bestätigt). Zusätzlich optionale feste/aktuelle Gewichte mit gemeinsamem festem Bezug, Originalmetadaten und unabhängigen Breiten; Gewichtung per MCP geprüft und vom Eigentümer in Kachel/IPSView bestätigt. |
 | EChartsGraphZ2M | Nur gespeicherter Export, kein Scan; bis 500 Rohknoten/10000 Rohkanten. Sichtbare Verbindungen 1–2000, Standard 300; LQI 0–255; Export höchstens 16 MiB. | Umgesetzt und live bestätigt: stärkste/schwächste zuerst und einschließlich begrenzter LQI-Bereich. Alle Geräte und absolute Farbskala bleiben erhalten. Schutzgrenzen und eindeutiger Exportproduzent bleiben verbindlich; kein versteckter Scan. |
-| EChartsTreemap | 1–100 Blätter, bis acht Ebenen einschließlich Blatt, höchstens 800 Knoten und 200000 HTML-sicher serialisierte Modellbytes. Standardmäßig nichtnegative Rohwerte; optional normierte Gewichte mit eigenen Min/Max. Eigene Originaleinheiten/Präzision je Blatt. | Umgesetzt: rekursives gemeinsames Modell, native Navigation, vollständige Strukturvorschau und ausdrücklich aktivierte Gewichte. Alte Gruppe/Untergruppe, Rohwertmodelle und Designs bleiben unverändert. Normalisierte Gruppen sind Gewichtssummen, keine physikalischen Summen. Neue Live-Abnahme offen. |
-| EChartsSunburst | Dasselbe rekursive Modell und dieselben unveränderten Quellen-/Tiefen-/Knoten-/Bytebudgets wie Treemap, einschließlich optionaler Gewichte und Originalformate. Die ersten drei Ringdesigns bleiben erhalten; tiefere Ringe übernehmen das äußere Design. | Umgesetzt: native stabile Zweignavigation sowie gemeinsame Quellenprüfung, Modellbildung und Originalformatierung mit Treemap. Normalisierte Winkel und Gruppensummen werden ausdrücklich gekennzeichnet. Neue Live-Abnahme offen. |
+| EChartsTreemap | 1–100 Blätter, bis acht Ebenen einschließlich Blatt, höchstens 800 Knoten und 200000 HTML-sicher serialisierte Modellbytes. Standardmäßig nichtnegative Rohwerte; optional normierte Gewichte mit eigenen Min/Max. Eigene Originaleinheiten/Präzision je Blatt. | Umgesetzt: rekursives gemeinsames Modell, native Navigation, vollständige Strukturvorschau und ausdrücklich aktivierte Gewichte. Alte Gruppe/Untergruppe, Rohwertmodelle und Designs bleiben unverändert. Normalisierte Gruppen sind Gewichtssummen, keine physikalischen Summen. Funktionale Abnahme in Kachel und IPSView durch den Eigentümer bestätigt. |
+| EChartsSunburst | Dasselbe rekursive Modell und dieselben unveränderten Quellen-/Tiefen-/Knoten-/Bytebudgets wie Treemap, einschließlich optionaler Gewichte und Originalformate. Die ersten drei Ringdesigns bleiben erhalten; tiefere Ringe übernehmen das äußere Design. | Umgesetzt: native stabile Zweignavigation sowie gemeinsame Quellenprüfung, Modellbildung und Originalformatierung mit Treemap. Normalisierte Winkel und Gruppensummen werden ausdrücklich gekennzeichnet. Funktionale Abnahme in Kachel und IPSView durch den Eigentümer bestätigt. |
 | EChartsSankey | 2–100 Knoten, 1–200 gerichtete Flüsse insgesamt, einschließlich berechneter Bilanzterminals/-verbindungen; nichtnegative Breiten, optional `ReverseNegative` je Verbindung und `Balance` je Knoten. Konfigurierte und tatsächliche Topologie azyklisch/eindeutig, keine Selbstkanten. Gleiche Variable an mehreren Kanten möglich. Manueller Altmodus oder optionale automatische/manuell erwartete gemeinsame Einheit, höchstens 24 Zeichen. | Einheitenprüfung, Kantenumkehr und Rest-/Bilanzknoten per MCP und Eigentümer bestätigt. Betragsbreite, signierter Originalwert und konfigurierte Richtung bleiben getrennt. Berechnete lokale Rest-/Bilanzflüsse sind optional und klar von Messungen unterschieden; gemeinsame Modellbildung ohne Kaskaden. Keine Umrechnung/Normalisierung. DAG, nichtnegative Breiten und bisherige Bytebudgets bleiben Schutzregeln. |
 | EChartsRadar | 3–10 Achsen, 1–16 Vergleichsgruppen, höchstens 160 Zuordnungen; je Achse eigener Min/Max-Bereich, Einheit und Präzision. Vollständigkeit bleibt Standard; optional mindestens eine Quelle je Gruppe. Modell höchstens 200000 Bytes, HTML höchstens 1 MiB. Unterschiedliche Einheiten bereits sinnvoll skaliert. | Umgesetzt: optionale Gruppenauswahl, Anfangssichtbarkeit, ID-stabile Auswahl/Legendenanker und inverse Achsen (MCP und Eigentümer bestätigt). Teilgruppen zusätzlich optional mit offenen Nachbarschaftskanten, expliziten Fehlstellen und unveränderten Originalwerten; MCP funktional geprüft und Kachel/IPSView durch Eigentümer bestätigt. Alle konfigurierten Quellen bleiben in Prüfung und Aktualisierung. Mehr Achsen erst mit eigenem Layoutkonzept. |
 
@@ -255,7 +277,7 @@ Candlestick-Anfangswert ausgegeben werden.
 | EChartsTimeSeries | 1–32 Integer-/Float-Quellen; insgesamt 200–32000 Punkte (Default 2000), höchstens 2000 je Quelle; bis acht effektive Einheitengruppen und 32 Annotationen. Modell höchstens 900000 JSON-Bytes, HTML höchstens 1 MiB. Roh-/Realtime-/Auto- und feste Aggregationen bleiben erhalten. | Umgesetzt: scrollbare Reihenauswahl mit Anfangssichtbarkeit und ID-stabiler Ansicht. Versteckte Reihen bleiben im vollständigen Modell, Archivbudget und Live-Abonnement. Kompression ist verlustfrei; das Bytebudget kann vor dem Punktbudget greifen. |
 | EChartsBarHistory | 1–32 Quellen, insgesamt 200–32000 Punkte (Default 1000), höchstens 2000 je Quelle und 16 Einheitengruppen; Modell höchstens 900000 Bytes, HTML höchstens 1 MiB. Roh-/Auto-/feste Aggregationen bleiben erhalten. | Umgesetzt: gemeinsame ID-stabile Reihenauswahl, scrollbare Legende, Anfangssichtbarkeit und erhaltene Zeitansicht. Versteckte Reihen werden weiterhin gelesen und budgetiert. Tatsächliche Zeitstempel bleiben unabhängig; das Bytebudget kann vor dem Punktbudget greifen. |
 | EChartsScatter | Bis zu 16 benannte Vergleiche mit je 2–3 Rollen, insgesamt höchstens 48 Zuordnungen. Pro gemeinsamer Rolle gleiche Einheit, X/Y/Größe untereinander weiterhin verschieden. Abgeschlossene Intervalle werden je Gruppe exakt verbunden. Insgesamt 200–2000 geladene Aggregate über alle Zuordnungen verteilt. | Feste Min/Max-Größenbezüge und Gruppenmodell sind per MCP funktional geprüft und vom Eigentümer in Kachel/IPSView bestätigt. Alte ungruppierte Listen bleiben ohne Migration erhalten. Gemeinsame Bubble-/Farbskalen und flüchtige Legende verändern keine Quellenwerte oder Ladebudgets. |
-| EChartsHeatmap | Eine numerische Quelle oder optional 1–4 getrennte Vergleichsansichten; datierte Woche oder Wochentag × Stunde; bisherige Kalenderzeiträume sowie benutzerdefinierte Dauern/feste historische Grenzen bis 366 × 24 Stunden. Abgeschlossene, vollständig enthaltene Stundenaggregate; je Chunk höchstens 2000, insgesamt höchstens sieben 60-Tage-Abfragen. | Umgesetzt und funktional abgenommen: vier Kennzahlen, passende Wochentag-/Stundenreduktion und neue Zeitfenster mit Navigation bei unveränderten Altzeiträumen/Budgets. Optionale 1–4-Vergleichsansichten sind lokal umgesetzt; gemeinsame oder getrennte Farbskalen, eigene Perioden und geteiltes Sieben-Abfragen-Budget. Live-Abnahme nach Modulupdate offen. Ansichten bleiben getrennt, Quellen werden nicht in dieselbe Zelle gemischt. |
+| EChartsHeatmap | Eine numerische Quelle oder optional 1–4 getrennte Vergleichsansichten; datierte Woche oder Wochentag × Stunde; bisherige Kalenderzeiträume sowie benutzerdefinierte Dauern/feste historische Grenzen bis 366 × 24 Stunden. Abgeschlossene, vollständig enthaltene Stundenaggregate; je Chunk höchstens 2000, insgesamt höchstens sieben 60-Tage-Abfragen. | Umgesetzt und funktional abgenommen: vier Kennzahlen, passende Wochentag-/Stundenreduktion und neue Zeitfenster mit Navigation bei unveränderten Altzeiträumen/Budgets. Optionale 1–4-Vergleichsansichten sind umgesetzt und funktional abgenommen; gemeinsame oder getrennte Farbskalen, eigene Perioden und geteiltes Sieben-Abfragen-Budget. MCP-Prüfung und Eigentümerbestätigung in Kachel/IPSView liegen vor. Ansichten bleiben getrennt, Quellen werden nicht in dieselbe Zelle gemischt. |
 | EChartsParallel | 2–16 Achsen; LineBudget 1–1000, Default 750; effektives Ladelimit je Achse höchstens abgerundet 10000/Achsenanzahl. 24 h / 7 d / 30 d, eigene Dauer oder feste historische Grenzen, Stunde/Tag. Auto oder explizit Mittelwert/Minimum/Maximum für Standardarchive, Zählerverbrauch für Zählerarchive; verschiedene Einheiten, nur gemeinsame Intervalle. | 16-Achsen-Ansicht, feste Min-/Max-Skalen und Kennzahlen je Achse funktional per MCP geprüft, Kachel/IPSView durch Eigentümer bestätigt. Automatische Altachsen, Originalwerte und alle Ladebudgets bleiben erhalten, Überschreitungen werden gemeldet. Mindestens zwei Achsen gehört zur Diagrammform. |
 | EChartsCalendar | Eine numerische Archivquelle; Jahr, Quartal, Monat oder festes historisches Datumsfenster ab 1971, höchstens 366 Tage/Aggregate. Mittelwert/Minimum/Maximum erfordern Standardarchive, Verbrauch ein Zählerarchiv. Teilarchive und echte Nullwerte bleiben erhalten. | Umgesetzt: passende Navigation, freie Fenster auch über Jahresgrenzen, Beginn eingeschlossen/Ende ausgeschlossen; höchstens 120 Rückwärtsschritte für neue Ansichten, Jahresnavigation unverändert. Alte Designs/Jahre bleiben nutzbar. Funktionale MCP-Abnahme und Kachel/IPSView bestätigt. Mehrere Tageswerte gehören zu CalendarPie oder getrennten Kalenderpanels. |
 | EChartsCalendarPie | Je nach Modus 1–5 numerische Quellen oder eine diskrete Zustandsquelle; Tagesmittel, Zählerverbrauch oder Zustandsdauer. Bis 32 Zustände. Optionale Min/Max-Normalisierung samt Originaleinheiten; Monatsmodell höchstens 250000 Bytes. | Umgesetzt: Teilkreise ausdrücklich optional mit fehlenden IDs, Raute und dauerhaftem Hinweis auf nur vorhandene Gewichte. Strenger Default, Zustandsdauer und alle Budgets bleiben erhalten. 1–5 bleibt die ausdrückliche Produktentscheidung. MCP funktional geprüft; Kachel/IPSView durch Eigentümer bestätigt. |
@@ -324,8 +346,8 @@ unveränderte Uhrfortschritts-/Altverträge und getrennte angefragte/effektive
 Zeitstempel. Native Datumseingaben werden einschließlich DST streng geprüft.
 Die zentralen Methoden verändern die bisherigen Consumer nicht. Beide Ausgaben,
 reine Entwurfsvorschauen und die bisherigen 32-/1000-/10000-Grenzen sind geprüft.
-Die neue Datumswahl und feste Archive in Kachel/IPSView bleiben nach Update live
-zu bestätigen.
+Die neue Datumswahl und feste Archive sind per MCP geprüft und vom Eigentümer
+in Kachel/IPSView bestätigt.
 
 Radar prüft 16×10 Zuordnungen, 17×3 abgewiesene Gruppen, unveränderte Altlisten,
 Initialauswahl und Gruppenfarben beider Designer, vollständige Lesezugriffe,
@@ -342,7 +364,7 @@ lokale Canvas- und echte Mausradprüfungen ergänzen die Modelle. Die neue
 MCP-Abnahme inverser Achsen ist bestanden; der Eigentümer bestätigt Kachel und
 tatsächliches IPSView. Teilgruppen sind mit 1/2 vorhandenen Werten, Nullplätzen,
 Fehlermatrizen, echten offenen ECharts-Geometrien und beiden SVGs geprüft.
-Ihre eigene neue Live-Abnahme nach Modulupdate bleibt offen.
+Der Eigentümer bestätigt auch diese Erweiterung in Kachel und IPSView.
 
 Funnel prüft 32/33 Quellen, unveränderte Altlisten, gleiche Namen bei getrennten
 IDs, Einheiten/Genauigkeit, negative/Null-/Gateway-Fehler auch versteckter Quellen,
@@ -351,7 +373,7 @@ Vorschau filtert/sortiert vor ihrem Ausschnitt und behält ein verborgenes Maxim
 Native ECharts-Geometrie prüft die Breiten tatsächlicher Stufenpolygone für beide
 Ausrichtungen und weitere Seiten; Auswahl, leere Zustände und Anker bleiben bedienbar.
 200000 Modellbytes und finales 1-MiB-HTML-Limit sind getrennt abgesichert.
-Live-Abnahme nach Modulupdate bleibt beim Eigentümer.
+Die nachfolgende Kachel-/IPSView-Abnahme ist durch den Eigentümer bestätigt.
 
 GaugeMulti prüft 32/33 Quellen, unveränderte Altlisten, gleiche Namen mit
 verschiedenen IDs, eigene Skalen/Einheiten, Darstellungsübernahme und
@@ -360,7 +382,7 @@ Updates. Alle vier Vorlagen und unabhängiges IPSView-Design werden geprüft,
 ebenso leere/späte Anfangsauswahl und korrekte Vorschauzahlen/Geometrie.
 Native Layoutprüfungen sichern Seiten, Identitäten und große Designimporte ab.
 900000 Modellbytes und 1 MiB finaler HTML-Puffer besitzen getrennte Fehlertests.
-Die Live-Abnahme nach Modulupdate bleibt beim Eigentümer.
+Die nachfolgende Kachel-/IPSView-Abnahme ist durch den Eigentümer bestätigt.
 
 BarPolar prüft 100/101 Quellen, Altlisten, vollständige Lesezugriffe/Abonnements,
 versteckte Aktualisierungen und Fehler, Normalisierung, unabhängige Designer,
@@ -368,7 +390,7 @@ vollständige Vorschau-Extrema und Palettenidentität. Native Polar-Tests prüfe
 Seiten/ID-Auswahl, alle 100 erreichbaren Quellen, manuelle und vollständige
 automatische Skalen sowie Anker bei Sortierung/Resize/Refresh/Entfernung.
 Modell- und HTML-Budgets werden unabhängig geprüft. Lokale synthetische
-Canvas-Prüfungen bestätigen Auswahl/Seiten; Live-Abnahme nach Update bleibt offen.
+Canvas-Prüfungen bestätigen Auswahl/Seiten; Kachel-/IPSView-Abnahme durch den Eigentümer bestätigt.
 Die gemeinsame Navigation bleibt auch im Category-Normalisierungsstresstest
 unter 1 MiB (IPSView 1047188 Bytes, 1388 Bytes Reserve).
 
@@ -379,7 +401,7 @@ und subnormaler Zahlen geprüft. Vorschauen behalten den Nenner des gesamten
 Anfangskollektivs. Native Tests sichern ID-Auswahl, Legendennavigation,
 responsive Textbegrenzung und breite Legendenspalten bei 100/200 % Schrift ab.
 Modell- und abschließender HTML-Guard werden separat geprüft. Lokale Canvas-
-Prüfungen beider Ausgabewege sind positiv; Live-Abnahme nach Update steht aus.
+Prüfungen beider Ausgabewege sind positiv; Kachel-/IPSView-Abnahme durch den Eigentümer bestätigt.
 
 Waterfall prüft 100/101 Quellen, 101 modellierte Schritte, späte Aktualisierungen,
 Referenzen/Abonnements, Altlisten, Originaleinheiten und signed Kumulierung.
@@ -401,7 +423,7 @@ Vorschauen ihre maximal acht gezeichneten Bänder kennzeichnen. Beide
 verlustfrei komprimierten Ausgaben passen im gemessenen Szenario unter 1 MiB;
 übermäßige Modell-/HTML-Größen werden ausdrücklich abgewiesen. Die lokale
 Canvas-Prüfung für Auswahl, Wiederherstellung und Aktualisierung ist positiv.
-Die neue Live-Abnahme nach Modulupdate bleibt offen.
+Die funktionale Live-Abnahme in Kachel und IPSView ist bestätigt.
 
 Der zusätzliche Verbrauchstest verwendet den echten Gateway-Pfad mit bis zu
 16×720 Zähleraggregaten, nicht aktuellen Werten oder Rohwertdifferenzen.
@@ -413,8 +435,8 @@ BarHistory prüft 32 Quellen/32000 Punkte samt unverändertem Standardbudget,
 beiden komprimierten Ausgaben. Native Auswahl-/Zoom-Tests sichern gemeinsam
 mit TimeSeries die zentralisierte Ansichtslogik ab. Vorschauen mit nur spät
 sichtbaren Einheitengruppen erhalten kompakte Achsen statt versteckter Offsets.
-Die lokale Canvas-Prüfung beider Ausgabewege ist positiv; Live-Abnahme nach
-Modulupdate bleibt offen. Konfigurationen und Archive wurden nicht verändert.
+Die lokale Canvas-Prüfung beider Ausgabewege ist positiv; die anschließende Live-Abnahme in
+Kachel und IPSView ist durch den Eigentümer bestätigt. Konfigurationen und Archive wurden nicht verändert.
 
 TimeSeries prüft 32 Reihen mit 32000 Archivpunkten gegen den echten Gateway
 mit Kernel-Doppeln. Modell (590044 Bytes), Kachel (897755 Bytes) und IPSView
@@ -423,7 +445,7 @@ Byteguards weisen komplexere übergroße Modelle explizit zurück. Native
 Engine-Tests und eine lokale Canvas-Prüfung belegen ID-stabile Auswahl,
 Legendenanker und Zeitzoom bei Aktualisierung/Umsortierung in beiden
 Ausgabewegen. Große SVG-Muster und versteckte Quellen sind separat geprüft.
-Die neue Live-Abnahme nach Modulupdate bleibt offen; vorhandene
+Die funktionale Live-Abnahme in Kachel und IPSView ist bestätigt; vorhandene
 Konfigurationen und Archive wurden nicht verändert.
 
 PictorialBar hat Regressionen für 72/100 gültige Quellen und 101 abgewiesene
@@ -449,12 +471,13 @@ anschließend in Kachel und IPSView live bestätigt, ebenso inzwischen BarCatego
 mit 72 Variablen. Die nachfolgende Erweiterung um Balkenverläufe und 32
 Timeline-Zeilen wurde lokal mit synthetischen Daten in den beiden Ausgabe-
 Varianten im Browser geprüft, einschließlich Navigation bis zur letzten Zeile.
-Ihre Live-Abnahme nach Modulupdate steht noch aus. Regressionsprüfungen sichern
+Ihre Live-Abnahme in Kachel und IPSView ist durch den Eigentümer bestätigt. Regressionsprüfungen sichern
 die 32/33-Grenze, unbekannte Archive, ID-stabile Zeilen bei Updates/Resize,
 unabhängigen Zeitzoom und das gemeinsame 16000-Rohwerte-Budget ab.
 Live-Konfigurationen, Archivaufzeichnung und Quellwerte wurden bei
-dieser Folgeänderung nicht verändert. Die übrigen vorgeschlagenen
-Erweiterungen anderer Familien sind noch nicht umgesetzt oder lastgeprüft.
+dieser Folgeänderung nicht verändert. Die vereinbarten
+Erweiterungen der anderen Familien sind ebenfalls umgesetzt und funktional
+abgenommen; daraus folgt keine allgemeine Live-Lastfreigabe.
 
 Boxplot prüft nun ebenfalls 32/33 Quellen, gleiche Anzeigenamen mit eigener ID,
 leere/negative Quellen, unveränderte R7-Statistik und beide Ausgaben unter 1 MiB.
@@ -463,4 +486,4 @@ dichte 30-Tage-Archive werden ohne Teilstatistik mit Zeitraumhinweis abgewiesen.
 Native Engine-Tests decken beide Ausrichtungen, Fonts/Boxbreiten, letzte Kategorie,
 Tooltips nach Filterung sowie Ansichtsanker bei Aktualisierung und Resize ab.
 Eine lokale Canvas-Browserprüfung mit synthetischen Daten ergänzt diese Tests;
-die Live-Abnahme der Boxplot-Erweiterung nach Modulupdate bleibt offen.
+die Live-Abnahme der Boxplot-Erweiterung in Kachel und IPSView ist bestätigt.

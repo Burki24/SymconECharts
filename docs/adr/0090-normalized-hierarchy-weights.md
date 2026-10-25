@@ -70,5 +70,5 @@ Funktion. Tests prüfen Projektion, Originalmetadaten, native/manuelle Formate,
 negative und außerhalb liegende Originale, Null, Altlisten, späte Fehler,
 Entwürfe, beide Designer/Ausgaben und 100 Quellen mit 800 Knoten.
 Native ECharts-Prüfungen sichern gezeichnete Gewichte, Originalbeschriftung,
-Tooltips, Titelabstände und bestehende Navigation. Live-Abnahme nach Update
-auf Symcon sowie im tatsächlichen IPSView-Client bleibt eine eigene Prüfung.
+Tooltips, Titelabstände und bestehende Navigation. Die nachfolgende Live-Abnahme
+in Symcon-Kachel und tatsächlichem IPSView ist durch den Eigentümer bestätigt.

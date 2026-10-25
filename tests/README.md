@@ -1,5 +1,21 @@
 # Tests
 
+## Abnahmestand der Nutzungsgrenzen-Roadmap
+
+Stand 25.10.2026: Alle vereinbarten Erweiterungen sind umgesetzt und vom
+Eigentümer in Kachel und tatsächlichem IPSView funktional bestätigt, zuletzt
+Heatmap mit getrennten Vergleichsansichten. Die [Roadmap](../docs/NUTZUNGSGRENZEN.md)
+ist abgeschlossen. Die folgenden lokalen Testberichte bleiben Nachweise ihrer
+jeweiligen Testebene; die spätere Eigentümerbestätigung macht daraus keine
+Live-Last-, Touch-, Versions- oder vollständigen Fehlermatrixtests.
+
+Offen bleiben insbesondere echte Touchgeräte, gesonderte horizontale
+Mausradprüfungen ohne bisherigen Wirkungsnachweis, volle Archiv-/Modellbudgets
+auf realen Installationen, nicht geprüfte Symcon-Versionen/Installationslayouts
+und besondere Host-/Fehler-/Transportfälle. Konkrete Lücken bleiben in den
+jeweiligen Abschnitten bestehen. Die spezielle Debug-Praxismatrix und die
+WoIst-/Helper-Mausradabnahme gehören nicht zur abgeschlossenen Funktionsroadmap.
+
 ## Heatmap: getrennte Vergleichsansichten
 
 `php tests/heatmap_comparison_plan.php` begann mit dem noch fehlenden Planer
@@ -16,7 +32,8 @@ Antworten und den Erhalt zuletzt gültiger Werte bei Transportfehlern.
 Vergleichsansichten bereit. Vertikales Mausrad wurde in beiden Richtungen in
 Kachel-/IPSView-Ausgaben lokal geprüft, horizontale Bewegung per Pfeiltasten.
 Die automatisierten horizontalen Radaktionen bewegten den IAB nicht; echte
-Host-/Touch- und horizontale Mausradprüfung bleiben bei der Live-Abnahme offen.
+Kachel und tatsächliches IPSView sind inzwischen durch den Eigentümer bestätigt.
+Touch- und gesonderte horizontale Mausradprüfung bleiben als Testlücken bestehen.
 Die verbundenen Symcon-Installationen wurden dafür nicht verändert.
 
 ## Candlestick: benannte Vergleichspanels
@@ -44,8 +61,8 @@ beiden Richtungen geprüft; die vollständigen Einzelwerteskalen blieben stabil,
 ein Fixture-Refresh erhielt das Zoomfenster. Die erste Radaktion ohne vorherigen
 Zeigeranker änderte keinen Zoom; nach eindeutigem Klickanker waren Empfang und
 Wirkung sichtbar. Diese Instrumentierung ersetzt weder Symcon noch die native
-IPSView-App. Live-Abnahme von Formular, Kachel und IPSView nach Update sowie echte
-Touchbedienung bleiben offen.
+IPSView-App. Die nachfolgende funktionale MCP-Prüfung und Eigentümerbestätigung
+in Kachel/IPSView liegen inzwischen vor; echte Touchbedienung bleibt ungeprüft.
 
 Die Scrollprüfung erreichte auch das vierte Panel in beiden Ausrichtungen;
 der Kachelkopf blieb dabei frei. Im IAB-Protokoll erschienen drei
@@ -64,7 +81,7 @@ eine neue sowie eine wiederholte Auswahl ohne zusätzliche Quelle. Die direkten
 Modulaufrufe behalten ihren bisherigen String-Rückgabewert mit Marker; Fehlertexte
 und stille Aktionen bleiben unverändert. Der gezielte Test begann RED am noch
 sichtbaren Marker und besteht nach der Adapterkorrektur. Die kosmetische
-Änderung ist nach Modulupdate separat live zu bestätigen.
+Änderung wurde nach Modulupdate per MCP als sichtbarer Konsolendialog bestätigt.
 
 `php tests/gateway_gauges.php --pictorial-source-import` begann RED an der
 fehlenden Modulaktion. Geprüft sind begrenzte zentrale Baumsuche, direkte und
@@ -91,10 +108,10 @@ Entwürfe und persistierter Properties bei Fehlern.
 Der Renderer bleibt unverändert; seine bestehenden Layout-/Navigationsprüfungen
 laufen in der vollständigen Qualitätssuite weiter. Der abschließende Lauf von
 `php tests/quality.php --fix` ist einschließlich aller Integrations- und nativen
-Layoutprüfungen bestanden. Nur die kosmetische Bereinigung des Erfolgspräfixes
-bleibt nach Modulupdate als eigener Live-Nachweis offen. Echte IPSView-App-Abnahme
-der neuen Übernahme und browserseitige Mausradnavigation im Diagramm sind
-hiermit nicht nachgewiesen. Keine Installation wird für diese lokale Korrektur geändert.
+Layoutprüfungen bestanden. Auch die kosmetische Bereinigung des Erfolgspräfixes
+ist inzwischen per MCP als sichtbarer Konsolendialog bestätigt. Die allgemeine
+Kachel-/IPSView-Abnahme ist abgeschlossen; diese lokalen Tests allein belegen
+keine browserseitige Mausradnavigation im Diagramm. Keine Installation wird für diese lokale Korrektur geändert.
 
 ## Radar: optionale unvollständige Vergleichsgruppen
 
@@ -136,8 +153,8 @@ einschließlich Formatierung, Syntax, Verträgen und sämtlichen Integrations-/
 Layouttests. Der Radar-Build wird zusätzlich im Speicher neu erzeugt und
 bytegleich mit dem ausgelieferten Artefakt verglichen; sein bisheriges
 550000-Byte-Limit bleibt eingehalten.
-Neue MCP-/Symcon-Kachel- und tatsächliche IPSView-App-Abnahme der Teilgruppen
-nach Modulupdate bleiben offen. Keine Live-Konfigurationen werden verändert.
+Die anschließende MCP-Prüfung und Eigentümerbestätigung der Teilgruppen in
+Symcon-Kachel und tatsächlicher IPSView-App sind erfolgt. Keine Live-Konfigurationen werden verändert.
 
 ## Radar: inverse Achsen je Messgröße
 
@@ -291,7 +308,8 @@ und IPSView-Frame in beide Richtungen (0 → 637 → 0), ohne Diagrammzoom;
 die Browserkonsole blieb ohne Warnungen/Fehler. Testtab und lokaler Server
 wurden anschließend geschlossen.
 Die spätere MCP-Prüfung und Eigentümerbestätigung für tatsächliche Kachel und
-IPSView liegen für die Kantenumkehr vor; die Bilanzfunktion ist separat abzunehmen.
+IPSView liegen für die Kantenumkehr vor; auch die Bilanzfunktion wurde
+inzwischen separat per MCP geprüft und vom Eigentümer bestätigt.
 
 ## Sankey: Einheitenmodell und Quellenprüfung
 
@@ -370,7 +388,8 @@ wiederholtes ApplyChanges sowie beide Designer, Vorschauen und Ausgaben.
 Originalbeschriftungen, escaped Tooltips, Gewichtshinweise, Gruppensummen ohne
 falsche Einheiten und die gepinnte native ECharts-Geometrie in beiden Adaptern.
 Alte Navigation und Designer bleiben in den bestehenden Prüfungen enthalten.
-Live-Abnahme nach Modulupdate und tatsächlicher IPSView-Client bleiben separat.
+Die nachfolgende funktionale Abnahme in Kachel und tatsächlichem IPSView
+ist durch den Eigentümer bestätigt.
 
 ## Scatter/Bubble: benannte Vergleichsgruppen
 
@@ -392,7 +411,8 @@ gruppenübergreifende Bereichsauswahl, globale Größen-/Farbskalen und die
 gemeinsame ID-stabile Auswahl bei Refresh/Umordnung. Die gepinnte ECharts-Engine
 prüft echte Mehrserien-/Legendengeometrie. `node tests/scatter_browser.mjs`
 bietet eine rein synthetische lokale Canvas-Prüfansicht für beide Adapter.
-Live-Abnahme nach Modulupdate und tatsächlicher IPSView-Client bleiben separat.
+Die nachfolgende funktionale Abnahme in Kachel und tatsächlichem IPSView
+ist durch den Eigentümer bestätigt.
 
 ## Scatter/Bubble: feste Größenbezüge
 
@@ -409,8 +429,8 @@ Der Test prüft beide Ausgabeadapter, unveränderte automatische Einzelpunkte,
 Begrenzung nur der Geometrie, Originaltooltip und Größenstabilität bei
 Aktualisierung sowie anderem Datenfenster. Die gepinnte echte ECharts-Engine
 bestätigt die Durchmesser 10/10/25/40/40 für Werte -10/0/50/100/150 bei 0–100.
-Die neue Funktion bleibt nach Modulupdate in Kachel und tatsächlichem
-IPSView live abzunehmen; lokale Tests sind keine Live-Lastfreigabe.
+Die neue Funktion ist nach Modulupdate in Kachel und tatsächlichem
+IPSView durch den Eigentümer bestätigt; lokale Tests sind keine Live-Lastfreigabe.
 
 ## Parallel: individuelle feste Min-/Max-Achsenbereiche
 
@@ -684,8 +704,8 @@ Extrem kleine Zahlen verwenden wissenschaftliche Notation statt Nullwerte.
 Die lokale synthetische Canvas-Vorschau startet mit
 `node tests/boxplot_browser.mjs`; `/chart?mode=symcon&fractional=1` beziehungsweise
 `/chart?mode=ipsview&fractional=1` zeigen die korrigierten Grenzen. Es werden keine
-Installation oder Archive angesprochen. Die Live-Abnahme nach Modulupdate in
-Kachel und in der tatsächlichen IPSView-App bleibt davon getrennt.
+Installation oder Archive angesprochen. Die nachfolgende Live-Abnahme in
+Kachel und tatsächlicher IPSView-App ist durch den Eigentümer bestätigt.
 
 ## Boxplot: feste historische Zeiträume
 
@@ -717,7 +737,7 @@ Datumsfelder. Gültige Vorschauen zeigen Entwurfsgrenzen mit Offset/Zeitzone und
 gekennzeichneten Beispielen; ungültige Entwürfe melden das Problem ohne Boxen.
 Properties, Status und Archivzugriffe bleiben unverändert. Die JavaScript-
 Geometrie bleibt unverändert und wird mit `node tests/boxplot_layout.js` geprüft.
-Eine neue reale Formular-/Kachel-/IPSView-Prüfung nach Modulupdate bleibt offen.
+Die nachfolgende funktionale Live-Abnahme in Kachel und IPSView ist bestätigt.
 
 ## Radar: 16 Gruppen mit optionaler Gruppenauswahl
 
@@ -754,8 +774,8 @@ Gruppen-IDs. Mehrzeilige Warnungen überdecken die Auswahl nicht.
 
 `node tests/radar_browser.mjs` bietet auf Port 8797 synthetische Canvas-Beispiele;
 `/chart?mode=ipsview&axes=10&font=150` prüft die Maximalachsen mit größerer Schrift,
-`legacy=1` erhält das ursprüngliche Beispiel. Lokale Browsernachweise ersetzen
-keine neue Live-Abnahme in Symcon-Kachel oder IPSView nach Modulupdate.
+`legacy=1` erhält das ursprüngliche Beispiel. Lokale Browsernachweise bleiben von der nachfolgenden Live-Abnahme
+getrennt; der Eigentümer bestätigt die Erweiterung in Kachel und IPSView.
 
 ## Funnel: 32 Quellen, Auswahl und Stufenseiten
 
@@ -792,8 +812,8 @@ Die horizontale Ausgabe mit 150-%-Schrift zeigt mehrere lesbare Stufen und
 behält beim Einzelzuschalten des Maximalwerts ihre Skala und ihren ID-Anker.
 Bei 240 px Breite bleibt der Ladefehlerhinweis über der zweizeiligen Bedienung;
 Aktualisieren entfernt den Hinweis und erhält die gewählte Ansicht.
-Die neue Funktion erfordert nach Modulupdate noch die Live-Abnahme in Symcon
-und der IPSView-App; lokale Tests ersetzen diese nicht.
+Die nachfolgende Live-Abnahme in Symcon-Kachel und der IPSView-App ist durch
+den Eigentümer bestätigt; lokale Tests allein ersetzen diesen Nachweis nicht.
 
 ## Gauge-Runtime: konfigurierte Titel in beiden Ausgabewegen
 
@@ -812,7 +832,7 @@ Der anfängliche Regressionstest scheiterte gezielt am fehlenden TitleComponent
 im ausgelieferten Build. Die Korrektur ergänzt ausschließlich diesen offiziellen
 Baustein im Gauge-Einstieg von ECharts 6.1.0, ohne Änderung des Fremdkerns oder
 anderer Bundles. Integrität, Lizenzen und HTML-Budgets bleiben separat geprüft.
-Live-Abnahme nach Modulupdate in Symcon und IPSView bleibt erforderlich.
+Die nachfolgende Live-Abnahme in Symcon-Kachel und IPSView ist bestätigt.
 Am 20.10.2026 zeigte die lokale Canvas-Browserprüfung mit synthetischen Daten
 die GaugeMulti-Diagrammtitel in beiden Ausgabewegen sichtbar nebeneinander;
 der Kacheltitel und Vergrößerungsbutton blieben oberhalb der Diagrammüberschrift.
@@ -854,7 +874,8 @@ mit Originaleinheiten. Die schmale Warnüberlagerung wurde vor Korrektur
 reproduziert und durch einen gemeinsamen 92-px-Abstand über der zweizeiligen
 Bedienleiste behoben. Der erste vollständige Lauf fand zudem einen veralteten
 Formularindex im alten SVG-Test; die Prüfung adressiert nun den stabilen Feldnamen.
-Live-Abnahme nach Modulupdate bleibt separat, keine Live-Konfiguration geändert.
+Die nachfolgende Live-Abnahme ist durch den Eigentümer bestätigt; bei der
+lokalen Entwicklung wurde keine Live-Konfiguration geändert.
 
 Beim Quellen-/Seitenausbau wurde der fehlende TitleComponent als separater
 Bestandsbefund bestätigt. Die anschließende gesonderte Korrektur und ihre
@@ -894,8 +915,8 @@ Auswahl-/Gesamttooltip, Alle/Umkehren, leerer Auswahl und Wiederherstellung
 gezeichneter Quelle trotz Ausschnitt. Eine breite normalisierte Nightingale-
 Ansicht mit 200 % Schrift bestätigt die Trennung von Außenbeschriftung und
 Legendenspalte einschließlich vollständig sichtbarer Auswahlknöpfe.
-Die Live-Abnahme
-nach Modulupdate in Symcon/IPSView bleibt erforderlich; Live-Konfigurationen
+Die nachfolgende Live-Abnahme
+in Symcon-Kachel/IPSView ist durch den Eigentümer bestätigt; Live-Konfigurationen
 und Werte werden bei dieser Erweiterung nicht verändert.
 
 ## Waterfall: 100 Quellen und vollständige Bilanz
@@ -934,7 +955,7 @@ vollständigen Endsumme, erhaltener Skala und erhaltener Position nach erneuter
 Zustandsübertragung visuell geprüft. Die PHP-Vorschau zeigt dieselbe Endsumme
 bei ausdrücklich gekürzter Darstellung. Ein zusätzlicher Regressionstest
 sichert den Abstand negativer Wertbeschriftungen zu den Kategoriennamen ab.
-Die erneute Live-Abnahme nach Modulupdate in Symcon/IPSView bleibt beim Eigentümer;
+Die erneute Live-Abnahme in Symcon-Kachel/IPSView ist durch den Eigentümer bestätigt;
 Live-Konfigurationen und Variablenwerte werden nicht verändert.
 
 ## ThemeRiver: Zählerverbrauch als Datengrundlage
@@ -961,8 +982,8 @@ wurden beide Canvas-Ausgaben mit 16 Quellen/720 Intervallen visuell geprüft:
 Verbrauchstitel/Aria, originale kWh-Tooltips, Auswahl mit erhaltenem ID-Anker
 nach Umsortierung, vollständiges Ausblenden/Wiederherstellen und die gekennzeichnete
 PHP-Vorschau. Es traten keine Überlappungen mit Kachelkopf oder Fußbereich auf.
-Live-Konfigurationen/Archive bleiben unverändert; die Abnahme nach Modulupdate
-in Symcon und IPSView bleibt dem Eigentümer vorbehalten.
+Live-Konfigurationen/Archive bleiben unverändert; die nachfolgende Abnahme
+in Symcon und IPSView ist durch den Eigentümer bestätigt.
 
 ## ThemeRiver: 16 Quellen und optionale Bandauswahl
 
@@ -997,7 +1018,7 @@ Verzögerte komprimierte Starts, neuere Vollzustände und Unload sind abgesicher
 Canvas-Fixture auf Port 8802. Am 19.10.2026 wurden beide Ausgabearten mit
 16 Quellen/720 Intervallen visuell geprüft: native Legende, Auswahl, Refresh
 und Umsortierung sowie vollständiges Ausblenden und Wiederherstellen.
-Die neue Live-Abnahme in Symcon/IPSView nach Modulupdate bleibt offen;
+Die nachfolgende Live-Abnahme in Symcon-Kachel und IPSView ist bestätigt;
 Live-Konfigurationen und Archive wurden nicht verändert.
 
 ## BarHistory: 32 Reihen mit gemeinsamer Reihenauswahl
@@ -1033,7 +1054,7 @@ neueren Vollzuständen und Unload. Die vollständigen Daten bleiben erhalten.
 Canvas-Fixture auf Port 8817. Am 19.10.2026 wurden schmale Kachel und breite
 IPSView-Ausgabe mit 32 Reihen/32000 Punkten visuell geprüft. Native
 Legendenwahl und Zeitzoom blieben nach Refresh und Umsortierung erhalten.
-Die Live-Abnahme dieser Erweiterung nach Modulupdate steht noch aus;
+Die nachfolgende Live-Abnahme dieser Erweiterung in Kachel und IPSView ist bestätigt;
 Symcon-Konfigurationen und Archive wurden nicht verändert.
 
 ## Gewichtete manuelle Graph-Beziehungen
@@ -1073,8 +1094,8 @@ blieb 1,10 erhalten und die erste Breite wurde 5 bzw. 9 px. Abschalten der
 Gewichtung stellte sämtliche bisherigen 1,5-px-Breiten ohne Zoomverlust wieder her.
 Eine zusätzliche ungerichtete Kreisvariante zeigte dieselben Gewichtsbreiten
 ohne Richtungspfeile. Die geprüften Browserseiten meldeten keine Warnungen/Fehler.
-Dies sind lokale Browser-/HTTP-Frame-Nachweise; MCP und echte native Kachel/
-IPSView-App bleiben nach Modulupdate offen. Bestehende Live-Konfigurationen
+Dies sind lokale Browser-/HTTP-Frame-Nachweise; die zusätzliche funktionale
+MCP-Prüfung und Eigentümerbestätigung in Kachel/IPSView sind inzwischen erfolgt. Bestehende Live-Konfigurationen
 wurden nicht geändert. `php tests/quality.php --fix` ist auf dem abschließenden
 Stand vollständig bestanden, einschließlich sämtlicher Layoutprüfungen.
 Beim Gesamtlauf erreichte der große gemeinsame PHP-Testprozess mit den
@@ -1112,8 +1133,9 @@ ergaben je Frame 1,00 → 0,91 → 1,00 bei Wheel-Zähler 0 → 1 → 2. Zusätz
 blieb 1,10 nach Werteaktualisierung erhalten; sichtbare Originalwerte änderten
 sich von 25 auf 26 %. Maximale Kreis- und Kräftegraphen enthielten in beiden
 Frames 300/1000; die automatische Kräfte-Gesamtansicht blieb erhalten.
-Dies sind lokale HTTP-/Frame-Nachweise, keine neue Abnahme im echten
-Symcon-/IPSView-Client. Diese bleibt nach Modulupdate offen.
+Diese lokalen HTTP-/Frame-Nachweise bleiben von der späteren Live-Abnahme
+getrennt. Der Eigentümer hat die Erweiterung im echten Kachel-/IPSView-Client
+inzwischen bestätigt.
 
 `php tests/quality.php --fix` besteht einschließlich Modell-, Modul-,
 Vertrags-, Syntax-, Style- und sämtlicher Layoutprüfungen. Bestehende
@@ -1137,8 +1159,8 @@ die Renderer und gemeinsame Ansichtsverwaltung: Kräfte-/Kreislayout,
 Kachel-/IPSView-Ausgabe, ID-stabile Aktualisierung, Resize, entfernte Knoten,
 Layoutwechsel, sichere Tooltips und dichte Beschriftungen. Die Runtime bleibt
 lokal festgeschrieben. `node tests/graph_browser.mjs` stellt synthetische
-300/1000-Canvas-Ansichten auf `127.0.0.1:8814` bereit. Die echte Abnahme in
-Symcon und IPSView nach Modulupdate ist dadurch nicht ersetzt.
+300/1000-Canvas-Ansichten auf `127.0.0.1:8814` bereit. Die nachfolgende echte
+Abnahme in Symcon-Kachel und IPSView ist durch den Eigentümer bestätigt.
 
 Am 19.10.2026 wurden beide Layouts des manuellen Graphen lokal mit komprimiertem
 Startzustand als 400-px-Kachel und 720-px-IPSView-Variante visuell geprüft.
@@ -1174,7 +1196,7 @@ Die erweiterte `tree_layout.js` verwendet echte native Tree-Aktionen für beide
 Renderer, fünf Anordnungen und Ausgabearten. Aufklappen, Pan/Zoom, Aktualisierung,
 Resize, neue Wurzel/Anfangstiefe und entfernte Objekt-IDs werden überprüft.
 Die zusätzliche gemeinsame Tree-JavaScriptdatei wird nur in diesen Familien
-geladen. Die Live-Abnahme nach Modulupdate in Symcon und IPSView bleibt separat.
+geladen. Die nachfolgende Live-Abnahme in Symcon und IPSView ist bestätigt.
 
 `node tests/tree_browser.mjs` bietet auf `127.0.0.1:8812` synthetische Canvas-
 Ansichten und SVG-Vorschauen. Am 19.10.2026 wurden Tree horizontal/vertikal
@@ -1204,8 +1226,8 @@ tiefe Navigation, Rückweg, Aktualisierung/Resize und entfernte Gruppen.
 Treemap hält bei tiefer Hierarchie den Navigationspfad auch kompakt sichtbar.
 
 `node tests/hierarchy_browser.mjs` stellt auf `127.0.0.1:8804` rein synthetische
-Vergleiche bereit; `/?family=treemap|sunburst` wählt die Familie. Nach Modulupdate
-bleibt die tatsächliche Symcon-/IPSView-Abnahme separat erforderlich.
+Vergleiche bereit; `/?family=treemap|sunburst` wählt die Familie. Die nachfolgende tatsächliche Symcon-/IPSView-Abnahme
+ist durch den Eigentümer bestätigt.
 
 Am 19.10.2026 wurden beide Familien lokal mit nativer Canvas-Ausgabe als
 400-px-Kachel und 650-px-IPSView-Variante visuell geprüft: tiefe Gruppen öffnen,
@@ -1257,8 +1279,8 @@ unlesbare Labels; ihre Originale bleiben im Tooltip. Direkter PictorialBar-
 Aufruf blieb ohne Konsolenwarnung/-fehler; Frame-Vergleichsseiten können den
 bereits bekannten, nicht dem Modul zugeordneten MutationObserver-Fehler zeigen.
 
-Nach Modulupdate bleiben die neue Formularbedienung und die neuen Vergleiche
-in tatsächlichen Symcon-/IPSView-Clients separat abzunehmen. Bei diesen
+Die nachfolgende funktionale Live-Abnahme und Eigentümerbestätigung der
+neuen Vergleiche in tatsächlichen Symcon-/IPSView-Clients liegen vor. Bei diesen
 Entwicklungsprüfungen werden keine Live-Einstellungen oder Variablenwerte geändert.
 
 ## BarPolar: 100 Quellen, Auswahl und Seiten
@@ -1290,7 +1312,7 @@ Am 19.10.2026 wurden radiale Kachel-/IPSView-Ansichten sowie konzentrische Böge
 mit 24 px, Quellen-Popup, Alle/Umkehren, leere Auswahl, Wiederherstellung und
 Seitenwechsel lokal visuell geprüft. Die letzte radiale Seite erschloss Quelle
 100; versteckte Extrema blieben im Maßstab. Keine Live-Konfiguration geändert.
-Live-Abnahme nach Modulupdate in Kachel und IPSView bleibt beim Eigentümer.
+Die nachfolgende Live-Abnahme in Kachel und IPSView ist durch den Eigentümer bestätigt.
 
 ## Calendar- und Heatmap-Kennzahlen
 
@@ -1315,8 +1337,8 @@ Die lokalen Browserfixtures `calendar_browser.mjs` (Port 8796) und
 `heatmap_browser.mjs` (Port 8802) verwenden ausschließlich synthetische Daten.
 `/chart?mode=symcon|ipsview&metric=average|minimum|maximum|consumption` wählt
 Ausgabe und Kennzahl; Navigation behält die Kennzahl bei. Die neuen
-Formularfelder und Kennzahlen benötigen nach Modulupdate noch eine echte
-Symcon-/IPSView-Abnahme; Live-Einstellungen werden nicht geändert.
+Formularfelder und Kennzahlen sind inzwischen per MCP geprüft und
+vom Eigentümer in Kachel/IPSView bestätigt; Live-Einstellungen werden nicht geändert.
 
 Am 19.10.2026 wurden Calendar-Tagesminima und -verbrauch sowie Heatmap-
 Stundenmaxima und -verbrauch lokal im Canvas-Renderer visuell geprüft.
@@ -1345,8 +1367,8 @@ Die erste neue Prüfung jedes Familienpfads schlug vor der Implementierung
 wegen fehlender Custom-Unterstützung fehl.
 
 Die ECharts-Runtimes und Renderer bleiben unverändert; vorhandene Layouttests
-werden erneut ausgeführt. Ein realer Symcon-Formulartest und die Live-Abnahme
-der neuen Zeitbereiche in Kachel/IPSView nach Modulupdate bleiben offen.
+werden erneut ausgeführt. Die neuen Zeitbereiche sind inzwischen per MCP funktional geprüft
+und vom Eigentümer in Kachel und tatsächlichem IPSView bestätigt.
 
 ## Breitenabhängige Kategorienabstände in BarCategory
 
@@ -1371,7 +1393,8 @@ Die lokale Browserfixture unterstützt `compare=1`, `width=20|100`, `font=200`
 und `/preview.svg?width=20&orientation=vertical`. Am 18.10.2026 wurden synthetische
 72-Quellen-Vergleiche in Kachel-/IPSView-Varianten, beide Ausrichtungen und
 SVG-Vorschauen visuell geprüft, einschließlich der Dichtebegrenzung durch
-große Schrift. Live-Symcon-/IPSView-Tests nach Modulupdate bleiben offen.
+große Schrift. Die nachfolgende Kachel-/IPSView-Abnahme ist durch den
+Eigentümer bestätigt.
 
 ## BarCategory-Verlauf und StateTimeline bis 32 Quellen
 
@@ -1402,8 +1425,8 @@ gekennzeichnete Vorschauausschnitte und das gemeinsame 16000-Rohwerte-Budget.
 `state_timeline_layout.js` prüft den nativen Zeilenfilter bis Quelle 32,
 gleichzeitigen Zeitzoom und Zeilennavigation, ID-Anker bei Aktualisierung,
 Umordnung und Resize. Die Browserfixture `rows=32` wurde in Kachel-/IPSView-
-Varianten bis zur letzten Quelle visuell geprüft. Das ersetzt keine Live-
-Abnahme im tatsächlichen Symcon-/IPSView-Client nach dem Modulupdate.
+Varianten bis zur letzten Quelle visuell geprüft. Die nachfolgende Live-Abnahme im tatsächlichen Symcon-/IPSView-Client
+ist durch den Eigentümer bestätigt.
 
 ## PictorialBar-Spaltenbreite und BarCategory bis 100 Quellen
 
@@ -1432,8 +1455,8 @@ prüft jede Ausgabe gegen das 1-MiB-Limit.
 `node tests/bar_category_browser.mjs` stellt synthetische Canvas-Beispiele auf
 `http://127.0.0.1:8802` bereit. Parameter: `count=100`, `bar=simple|grouped|stacked`,
 `orientation=horizontal|vertical`, `mode=symcon|ipsview`.
-Diese lokalen Nachweise ersetzen nicht die Live-Abnahme nach dem Modulupdate
-in den tatsächlichen Symcon- und IPSView-Clients. Live-Einstellungen werden
+Diese lokalen Nachweise bleiben von der späteren Live-Abnahme getrennt; der
+Eigentümer bestätigt die Erweiterung in den tatsächlichen Kachel-/IPSView-Clients. Live-Einstellungen werden
 von den Entwicklungsprüfungen nicht geändert.
 
 ## PictorialBar: große Quellenlisten
@@ -1524,8 +1547,9 @@ am 18.10.2026 zusätzlich lokal visuell geprüft.
 Diese Ansichten, dunkle Kachel, helles IPSView, unbekannte Anteile,
 Monatsnavigation und die korrigierten Innenwerte wurden am 18.10.2026 lokal
 visuell geprüft. Ein direkt geöffneter Renderer blieb ohne Konsolenwarnung
-oder -fehler. Die Live-Abnahme aller drei Modi sowie der neuen Formularfelder
-in Symcon 9.0/9.1 und IPSView steht nach Modulupdate noch aus.
+oder -fehler. Die funktionale Live-Abnahme nach Modulupdate und die Bestätigung in Kachel/IPSView
+sind inzwischen erfolgt. Ein eigener vollständiger Versionsnachweis für
+Symcon 9.0 ist damit nicht erbracht.
 Es wurden keine Live-Konfigurationen, Variablenwerte oder Archive verändert.
 
 StateTimeline wird durch `php tests/state_timeline_data.php`,
@@ -1552,8 +1576,9 @@ prüft große Achsenschrift und Tooltips; `/preview.svg` zeigt die echte PHP-
 Formularvorschau, optional mit `?mode=ipsview&independent=yes`.
 Am 17.10.2026 wurden diese Ansichten und beide PHP-Vorschauen lokal visuell
 geprüft; ein direkter Rendereraufruf blieb ohne Konsolenwarnung/-fehler.
-Lokale Browserprüfung und vollständige Qualitätssuite ersetzen keine Live-
-Abnahme des neuen Moduls nach Update in Symcon 9.0/9.1 und IPSView.
+Die nachfolgende funktionale Live-Abnahme des neuen Moduls in Kachel und IPSView
+ist durch den Eigentümer bestätigt. Eine eigene vollständige Symcon-9.0/9.1-
+Versionsmatrix ist damit nicht belegt.
 Es wurden keine Live-Konfigurationen oder Archive verändert.
 
 Die Designer-Erweiterung vom 18.10.2026 sichert alle neuen Felder in beiden
@@ -1571,8 +1596,8 @@ IPSView-Ansicht, helles IPSView mit rechtsbündigen Labels, 200 % Achsenschrift
 und die erweiterte PHP-SVG-Vorschau lokal visuell geprüft. Ein frisch direkt
 geöffneter Renderer blieb ohne Konsolenwarnungen/-fehler; die Vergleichsseite
 mit Frames zeigte einen nicht dem Modul zugeordneten MutationObserver-Fehler.
-Die neue Gestaltung und ihre Formularbedienung sind nach Modulupdate noch
-in der echten Symcon-Kachel und IPSView abzunehmen; keine Live-Schreibzugriffe.
+Die nachfolgende funktionale Abnahme der neuen Gestaltung in echter
+Symcon-Kachel und IPSView ist durch den Eigentümer bestätigt; keine Live-Schreibzugriffe.
 
 `node tests/ipsview_transport.js` prüft die zentrale Adressauflösung für
 opake `data:`-/`about:`-Einbettungen bei verbotenem Top-Zugriff: Basisadresse,
@@ -1592,7 +1617,7 @@ und drei WebSocket-Nachrichten müssen zur sichtbaren Meldung
 Nachricht trifft während der Zustandssynchronisierung ein.
 `?encoding=uri`, `?referrer=none` und `?base=yes` prüfen weitere Einbettungen.
 Diese Varianten wurden am 17.10.2026 lokal im Chromium-Browser geprüft.
-Die Live-Abnahme nach Modulupdate in Kachel und IPSView bleibt separat offen;
+Die nachfolgende Live-Abnahme in Kachel und IPSView ist bestätigt;
 Live-Konfigurationen und Archivdaten wurden nicht verändert.
 
 `pictorial_bar_svg.php` prüft eigene SVG-Formen über den tatsächlichen
@@ -1609,8 +1634,8 @@ Symbolmodi und Farbmodi; verschobene und nullbasierte Geometrien sind gleich.
 Browserfixture: `?shape=svg`, auch für `/preview.svg`; `&symbols=single`
 prüft Einzelformen. Am 17.10.2026 wurden hohe/breite dunkle Ansichten,
 helle Einzelformen sowie horizontale und vertikale PHP-Vorschauen lokal
-visuell geprüft. Neue native Dateiauswahl und Live-Ausgaben nach Modulupdate
-bleiben offen. Es wurden keine Live-Konfigurationen geändert.
+visuell geprüft. Der Eigentümer bestätigt inzwischen den SVG-Import und seine Live-Ausgaben
+in Kachel und IPSView. Es wurden keine Live-Konfigurationen geändert.
 
 `module_contracts.php` sichert für alle Module das Namensschema ohne
 Leerzeichen und eine leere Aliasliste ab. Die fünf früheren Anzeige-Aliase
@@ -1632,8 +1657,9 @@ PHP-Vorschau mit rein synthetischen Beispielen (über die lokale Integrationssui
 Am 17.10.2026 wurden hohe Kachel, breite IPSView-Ansicht sowie horizontale und
 vertikale SVG-Vorschau lokal visuell geprüft. Ausgewählte Light-/Brands-Pfade
 der installierten Symcon-Bibliothek wurden zusätzlich rein lesend aufgelöst.
-Native Iconauswahl und neue Live-Ausgaben nach Modulupdate sowie andere
-Installationslayouts/Versionen bleiben ausdrücklich Testlücken.
+Native Iconauswahl und Live-Ausgaben sind inzwischen vom Eigentümer in Kachel
+und IPSView bestätigt. Andere Installationslayouts/Versionen bleiben
+ausdrücklich Testlücken.
 
 PictorialBar: `pictorial_bar_integration.php` wird in der Gateway-Suite
 ausgeführt und prüft Quellen, Nullwerte, Einheiten, ID-Identität, negative
@@ -1643,7 +1669,8 @@ Originalwert-Erhaltung, Clipping und alle fünf Formen mit der echten Engine
 in beiden Ausrichtungen. Die Funnel-Suite sichert den gemeinsam verwendeten
 Quellenvertrag weiter ab. Lokale Browserfixture:
 `node tests/pictorial_bar_browser.mjs` (127.0.0.1:8801), ausschließlich
-synthetische Werte. Live-Kachel und IPSView sind nach Modulupdate separat offen.
+synthetische Werte. Die anschließende Live-Abnahme in Kachel und IPSView
+ist durch den Eigentümer bestätigt.
 
 Die PictorialBar-Designerweiterung prüft kontinuierliche RGB-Interpolation an
 den Rand-/Zwischenwerten, unabhängige Farbbereiche, Nachkommastellen,
@@ -1653,8 +1680,8 @@ sowie deutsche Formulare sind abgesichert. Die echte ECharts-Engine prüft
 die vier Wertepositionen in beiden Ausrichtungen und Symbolmodi.
 Die Browserfixture `?design=extended` zeigt die wertabhängigen Farben und
 neuen Text-/Raster-/Schattenstile, `?symbols=single` einzelne Formen und
-`?theme=light` einen hellen Hintergrund. Diese lokale Prüfung ersetzt keine
-Live-Abnahme der Erweiterung nach Modulupdate.
+`?theme=light` einen hellen Hintergrund. Diese lokale Prüfung bleibt von der nachfolgenden
+Live-Abnahme getrennt; der Eigentümer bestätigt die Erweiterung in Kachel/IPSView.
 
 Der zusätzliche räumliche Verlauf wird für 0–100 %, 0–255 LQI, nichtnullige
 Minima, automatische Zeichenskalen und optisch begrenzte Werte geprüft.
@@ -1666,8 +1693,8 @@ SVG-Vorschau, unabhängige Modi, Kopieren und unveränderte Entwurfs-Properties
 sind im Integrationstest abgedeckt. Browserfixture: `?color=gradient`,
 optional `&range=lqi`, `&symbols=single` oder `&theme=light`. Dunkle hohe und
 breite Wiederholungsansichten sowie helle LQI-Einzelformen wurden am
-17.10.2026 lokal visuell geprüft. Die neue Live-Kachel-/IPSView-Abnahme nach
-Modulupdate bleibt offen.
+17.10.2026 lokal visuell geprüft. Die nachfolgende Live-Abnahme in Kachel/IPSView
+ist durch den Eigentümer bestätigt.
 
 Candlestick-Zeitzoom: `node tests/candlestick_layout.js` prüft zusätzlich den
 ausgelieferten Candlestick-Build mit nativen DataZoom-Komponenten, beide
@@ -1678,8 +1705,9 @@ Designer, Vorschauentwürfe ohne Archivzugriff und unveränderte Daten/Budgets.
 `node tests/candlestick_browser.mjs` stellt zwei lokale verschachtelte Frames
 mit 168 synthetischen Stunden, sichtbarem Zoomnachweis und Refresh-Schaltfläche
 bereit. Echte lokale Mausradaktionen und Regler werden dort geprüft;
-die Abnahme in Symcon und dem tatsächlichen IPSView-Client nach Update sowie
-auf Touchgeräten bleibt separat offen.
+die anschließende Abnahme in Symcon und dem tatsächlichen IPSView-Client
+einschließlich Mausrad ist durch den Eigentümer bestätigt. Touchgeräte
+bleiben separat ungeprüft.
 
 Candlestick: `php tests/candlestick_data.php` prüft abgeschlossene Stunden/
 Tage, Sommerzeit, erste/letzte Rohpunkte, Extrema, Lücken, Einzelwerte,
@@ -1720,7 +1748,8 @@ vollständige signierte Skala, Tooltips nach Filterung und ID-stabile Ansichten
 bei Refresh, Umordnung und Resize in beiden Ausrichtungen getestet.
 Die Browserfixture bietet `count=32`, `orientation=horizontal|vertical`,
 `tail=1`, `font=200` und `box=10` für ergänzende Canvas-Sichtprüfungen.
-Die 32-Quellen-Erweiterung benötigt nach Modulupdate noch die Live-Abnahme.
+Die 32-Quellen-Erweiterung ist nach Modulupdate vom Eigentümer in Kachel
+und IPSView live bestätigt.
 
 Sankey wird durch `php tests/sankey_model.php` und
 `node tests/sankey_layout.js` geprüft. Abgedeckt sind manuelle Knotenschlüssel,
@@ -1924,12 +1953,12 @@ Lücken und Tooltipausblendung sowie die Nullanzeige visuell geprüft.
 Die Grundfunktion wurde anschließend vom Eigentümer in Kachel und IPSView
 bestätigt. Die überarbeitete Zeitachse und der Legendenabstand wurden lokal
 im Canvas-Renderer und in der SVG-Vorschau auch bei 200 % Schrift geprüft;
-ihre erneute Live-Abnahme steht nach dem Modulupdate noch aus.
+ihre nachfolgende Live-Abnahme in Kachel und IPSView ist bestätigt.
 Die erweiterten Designoptionen wurden zusätzlich im dunklen Kachelformat,
 in breiter IPSView-Ausgabe mit 200 % Schrift, im hellen Design sowie in der
 SVG-Vorschau visuell geprüft. Bandhover mit reduzierter Restdeckkraft wurde
-im Canvas-Renderer bestätigt. Die Live-Abnahme dieser Erweiterung und der
-neuen Formularfelder in Symcon/IPSView bleibt Aufgabe des Eigentümers.
+im Canvas-Renderer bestätigt. Die nachfolgende funktionale Abnahme dieser Erweiterung in Kachel/IPSView
+ist durch den Eigentümer bestätigt.
 
 ## Funnel
 
@@ -1959,8 +1988,8 @@ ECharts-Punkten bei gleicher Zeichenfläche verglichen.
 Canvas-Fixture unter `http://127.0.0.1:8799`. Hohe Kachel und breite IPSView-
 Darstellung wurden am 17.10.2026 visuell geprüft. `/chart?mode=symcon&design=extended`
 zeigt 16 Stufen mit großen Schriften/Abständen; `/chart?mode=ipsview&theme=light`
-prüft den hellen Hintergrund. Die reale neue MCP-Kachelvorschau und Live-Tests
-in Symcon beziehungsweise IPSView bleiben nach Installation erforderlich.
+prüft den hellen Hintergrund. Die nachfolgende funktionale MCP-Prüfung und Eigentümerbestätigung
+in Symcon-Kachel beziehungsweise tatsächlichem IPSView liegen inzwischen vor.
 
 ## TimeSeries: 32 Reihen und Reihenauswahl
 
@@ -1993,7 +2022,7 @@ sichern die extrahierte gemeinsame Startlogik zusätzlich ab.
 Canvas-Fixture auf Port 8816. Am 19.10.2026 wurden 32 Reihen mit 32000 Punkten
 im schmalen Kachel- und breiten IPSView-Ausgabeweg visuell geprüft, einschließlich
 gleichnamiger Legendenwahl und erhaltener Auswahl/Zoom nach Umsortierung.
-Die neue Live-Abnahme in Symcon und IPSView nach Modulupdate steht noch aus;
+Die nachfolgende Live-Abnahme in Symcon-Kachel und IPSView ist bestätigt;
 Live-Konfigurationen und Archive wurden bei dieser Erweiterung nicht geändert.
 
 ## Calendar

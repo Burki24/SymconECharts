@@ -34,5 +34,6 @@ lassen.
 Alle vorhandenen ECharts-Familien bieten dieselbe IPSView-Hintergrundsteuerung
 und sofort aktualisierte Formularvorschauen. Bestehende Instanzen behalten mit
 `false`, automatischer Theme-Farbe und 35 Prozent Deckkraft ihr bisheriges
-Erscheinungsbild, solange die Anpassung nicht aktiviert wird. Ein realer
-IPSView-Laufzeittest bleibt mangels Lizenz eine dokumentierte Testlücke.
+Erscheinungsbild, solange die Anpassung nicht aktiviert wird. Die spätere funktionale
+Kachel-/IPSView-Abnahme ist durch den Eigentümer bestätigt; die damalige lokale
+Lizenzlücke ist kein aktueller Abnahmerückstand.

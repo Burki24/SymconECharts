@@ -74,6 +74,6 @@ Die bestehenden zentralen Fenster- und ThemeRiver-Rendererprüfungen bleiben akt
 
 Im Roadmap-Block „Archivzeiträume“ fehlt noch StateTimeline. Danach folgt die
 gebündelte manuelle Live-Matrix; lokale automatische Prüfungen erfolgen weiter
-je Änderung. Native Datumswahl und tatsächliche Symcon-Kachel/IPSView sind in
-diesem Schritt noch nicht live abgenommen. Laufende Instanzen und Archive
+je Änderung. Die neuen Zeiträume sind inzwischen im gemeinsamen Archivzeiträume-Block
+per MCP geprüft und vom Eigentümer in Symcon-Kachel/IPSView bestätigt. Laufende Instanzen und Archive
 werden nicht geändert oder neu berechnet.

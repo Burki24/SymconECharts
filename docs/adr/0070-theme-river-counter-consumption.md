@@ -61,5 +61,5 @@ Fehler und Wiederanlauf, negative/Nullwerte, versteckte Lücken, Budgets,
 Stunden-/Tages-/DST-/Custom-Grenzen sowie Entwürfe ohne Schreibzugriffe.
 Die native gepinnte ECharts-Runtime prüft beide Ausgaben und Originaltooltips.
 Neue Fremdkomponenten oder geänderte Runtimeartefakte sind nicht notwendig.
-Live-Abnahme in Symcon und IPSView erfolgt nach Modulupdate durch den Eigentümer;
+Die nachfolgende Live-Abnahme in Symcon-Kachel und IPSView ist durch den Eigentümer bestätigt;
 Live-Instanzen und Archive werden bei dieser Umsetzung nicht verändert.

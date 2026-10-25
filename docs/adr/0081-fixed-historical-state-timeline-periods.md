@@ -78,9 +78,10 @@ Zustands-/Gateway-/Ausgabetests bleiben aktiv; die zentrale Regression sichert
 ungerundete Grenzen und die unveränderte Aggregatplanung.
 
 Alle fünf geplanten Familien unterstützen damit feste historische Zeiträume.
-Die technische Umsetzung und automatischen Tests ersetzen keine gemeinsame
-Live-Abnahme. Nach Modulupdate ist die Matrix aus Boxplot, Parallel, Candlestick,
-ThemeRiver und StateTimeline in Kachel und tatsächlicher IPSView-App zu prüfen:
+Die gemeinsame funktionale Live-Abnahme von Boxplot, Parallel, Candlestick,
+ThemeRiver und StateTimeline ist inzwischen per MCP erfolgt und vom Eigentümer
+in Kachel und tatsächlicher IPSView-App bestätigt. Die vollständige automatisierte
+Grenz-/Fehlermatrix bleibt von dieser funktionalen Live-Abnahme getrennt:
 relative/feste Fenster, Stunde/Tag oder exakte Zustände, Zeitwechsel, Teilarchive,
 unbekannte Anfänge/Lücken, ungültige Dates und Ressourcenfehler. Neue feste Fenster
 vorzugsweise in ausdrücklich freigegebenen temporären Testinstanzen prüfen;

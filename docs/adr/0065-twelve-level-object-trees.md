@@ -80,4 +80,4 @@ Statuspropagation nur sichtbarer Regeln sowie die bisherigen Ressourcenbudgets.
 Echte ECharts-Prüfungen und lokale synthetische Canvas-Browserprüfungen ergänzen
 Optionstests: beide Ausgabearten, LR/RL/TB/BT und radial, Auf-/Zuklappen,
 Aktualisierung, Resize, Ansichtsanker und entfernte Objekte.
-Die tatsächliche Symcon-/IPSView-Abnahme nach Modulupdate bleibt separat.
+Die nachfolgende tatsächliche Symcon-/IPSView-Abnahme ist durch den Eigentümer bestätigt.

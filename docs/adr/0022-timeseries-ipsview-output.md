@@ -60,5 +60,5 @@ Der persistente Vertrag wächst additiv um IPSView-Properties. Bestehende
 Instanzen bleiben kompatibel, weil die Ausgabe standardmäßig deaktiviert ist
 und das IPSView-Design bei Aktivierung zunächst das Kacheldesign erbt. Die
 lokalen Integrationstests prüfen WebContent-Erzeugung, Vererbung, unabhängiges
-Design und beide Formularvorschauen. Ein realer IPSView-Laufzeittest bleibt
-mangels Lizenz als Testlücke dokumentiert.
+Design und beide Formularvorschauen. Die spätere funktionale IPSView-Abnahme ist durch den Eigentümer bestätigt;
+die ursprüngliche lokale Lizenzlücke ist kein aktueller Abnahmerückstand.

@@ -88,7 +88,7 @@ synthetische Canvas-Prüfung ohne Installation oder Archivdaten.
 
 Die gemeinsame funktionale Live-Abnahme des vorherigen Fünf-Familien-
 Archivzeiträume-Blocks einschließlich ThemeRiver-Teilarchivkorrektur ist erfolgt;
-Eigentümer bestätigt Kachel/IPSView. Diese Änderung markiert Calendar als
-implementiert, mit eigener Live-Abnahme nach Modulupdate noch offen.
-Nächster Roadmap-Punkt ist Heatmap mit benutzerdefinierten/festen Zeiträumen,
-noch nicht umgesetzt. Ressourcen-Stresstests sind keine Live-Lastfreigabe.
+Eigentümer bestätigt Kachel/IPSView. Auch Calendar ist inzwischen per MCP funktional geprüft und vom Eigentümer
+in Kachel/IPSView bestätigt. Der damalige Folgeschritt Heatmap ist ebenfalls
+umgesetzt und abgenommen; den aktuellen Gesamtstatus führt die
+[abgeschlossene Roadmap](../NUTZUNGSGRENZEN.md). Ressourcen-Stresstests sind keine Live-Lastfreigabe.

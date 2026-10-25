@@ -67,5 +67,5 @@ gepinnt-runtimebasierte Tests prüfen Navigation, letzte Kategorie/Tooltip,
 vollständige Skala, Reorder/Resize sowie beide Ausgabearten. BarCategory erhält
 Regressionsprüfungen des gemeinsamen Bausteins einschließlich maximaler Ausgaben.
 Lokale synthetische Browserprüfungen ersetzen keine erneute Live-Abnahme in
-Symcon-Kachel und IPSView. Diese bleibt nach Modulupdate beim Eigentümer;
+Symcon-Kachel und IPSView. Die nachfolgende Abnahme ist inzwischen durch den Eigentümer bestätigt;
 Live-Konfigurationen und Quellwerte werden bei der Umsetzung nicht verändert.

@@ -67,8 +67,8 @@ Die dabei fehlende Formularrückmeldung wird im Callback mit `echo` statt `retur
 ausgegeben. Der Modulfunktionsvertrag bleibt ein stiller String-Rückgabewert,
 erfolgreiche Such-/Auswahlaktionen liefern weiterhin einen leeren Text. Der
 Regressionstest prüft tatsächliche Skriptausgabe einschließlich Fehlern ohne
-Teilübernahme. Diese funktionale Abnahme ersetzt keinen separaten Test im
-tatsächlichen IPSView-Client.
+Teilübernahme. Diese funktionale Abnahme bleibt von der zusätzlichen Eigentümerbestätigung
+im tatsächlichen Kachel-/IPSView-Client getrennt; beide liegen inzwischen vor.
 
 Die korrigierten Fehlermeldungen sind inzwischen auch als echte deutsche
 Konsolendialoge bestätigt, einschließlich leerer Auswahl und der 100er-Grenze.

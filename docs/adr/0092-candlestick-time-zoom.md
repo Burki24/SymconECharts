@@ -60,8 +60,8 @@ Update/Resize, Fehler und Abschalten. Der native SVG-Renderer wird nur im
 Test zusätzlich aus derselben gepinnten Runtime registriert.
 
 Lokale verschachtelte Browser-Fixtures prüfen echte Mausradaktionen in beide
-Richtungen und Ansichtserhalt. Das ersetzt nicht die noch offene Live-Abnahme
-im echten Symcon-Host und tatsächlichen IPSView-Client nach Modulupdate.
+Richtungen und Ansichtserhalt. Die anschließende Live-Abnahme im echten Symcon-Host und tatsächlichen
+IPSView-Client ist durch den Eigentümer einschließlich Mausrad bestätigt.
 Echte Touchgeräte wurden nicht geprüft. Bestehende Instanzen, Designs,
 Variablenwerte und Archive wurden nicht geändert.
 

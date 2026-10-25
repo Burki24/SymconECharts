@@ -93,8 +93,8 @@ Kachelkopf bleibt geschützt. Die gepinnte unveränderte ECharts-6.1.0-Runtime
 enthält Calendar und Pie sowie benötigte Komponenten, keine externen CDNs.
 Schema-v1 und bestehende Datenfluss-IDs bleiben kompatibel.
 
-Die neue Instanz benötigt eine erneute Live-Abnahme nach dem Modulupdate in
-Symcon und IPSView. Lokale Tests ersetzen diese nicht.
+Die nachfolgende funktionale Live-Abnahme und Eigentümerbestätigung in
+Symcon-Kachel und IPSView liegen vor; lokale Tests bleiben davon getrennt.
 
 Der Zählervertrag wurde über die versionsbezogene MCP-Dokumentation
 `AC_GetAggregatedValues` anhand der

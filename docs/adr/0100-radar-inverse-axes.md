@@ -50,7 +50,7 @@ Weiterhin 3–10 Achsen, 1–16 vollständige Gruppen, 160 Zuordnungen, höchste
 Versteckte Gruppen bleiben in Prüfung und Aktualisierung. Unvollständige
 Gruppen bleiben ein getrennter Roadmap-Punkt. Keine Archive werden benötigt.
 
-## Nachweise und offene Abnahme
+## Nachweise und Abnahme
 
 `php tests/radar_model.php` begann RED an der fehlenden inversen Projektion.
 Der Test prüft Altstandard/false, negative Bereiche, Enden, Mitte, Clipping,

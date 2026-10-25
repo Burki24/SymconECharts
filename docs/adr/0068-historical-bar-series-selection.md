@@ -70,5 +70,6 @@ Zeitstempel, Reducer sowie beide komprimierten Ausgaben werden integriert
 geprüft. Native ECharts-Tests sichern Auswahl, gleiche Namen, Navigation,
 Zeitzoom, Update/Reorder/Resize, Achsen und Start-Rennen. Große SVGs und
 explizite Größenfehler ergänzen die Lastfälle. Eine lokale Canvas-Prüfung
-ersetzt keine erneute Live-Abnahme in Symcon und IPSView nach Modulupdate.
+ersetzt keine erneute Live-Abnahme in Symcon und IPSView nach Modulupdate. Die
+anschließende funktionale Abnahme ist durch den Eigentümer bestätigt.
 Live-Konfigurationen, Quellwerte und Archive werden nicht verändert.
