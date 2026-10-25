@@ -128,10 +128,16 @@ function ECPB_UpdateSourceImportFromForm(int $id, string $configuration): string
     return $GLOBALS['importCallbackModule']->UpdateSourceImportFromForm($configuration);
 }
 $GLOBALS['importCallbackModule'] = $importer;
-$execute = static function (string $script, array $fields): mixed
+$execute = static function (string $script, array $fields): string
 {
     extract($fields);
-    return eval($script);
+    ob_start();
+    try {
+        eval($script);
+        return (string) ob_get_contents();
+    } finally {
+        ob_end_clean();
+    }
 };
 $fields = ['id' => 5000];
 $collect = static function (array $elements) use (&$collect, &$fields): void
@@ -159,17 +165,52 @@ $fields['IPSViewUseTileDesign'] = false;
 $fields['IPSViewSymbol'] = 'circle';
 $fields['TitleColor'] = 0x123456;
 $fields['IPSViewTitleColor'] = 0xABCDEF;
-$execute(findGaugeFormElement($form['elements'], 'SourceImportSearch')['onClick'], $fields);
+assertGatewayGauge(
+    $execute(findGaugeFormElement($form['elements'], 'SourceImportSearch')['onClick'], $fields) === '',
+    'A successful search must remain silent instead of opening an empty dialog.'
+);
 $payload = $GLOBALS['importCallbackPayload'];
 assertGatewayGauge(
     $payload['Preview']['Sources'] === $old && $payload['Preview']['IPSViewSymbol'] === 'circle'
     && $payload['Preview']['Title'] === 'Unsaved <&> title' && $payload['Preview']['IPSViewUseTileDesign'] === false,
     'Callbacks must copy iterable rows and every unsaved independent designer field, including false.'
 );
+$before = count($importer->GetTestFormUpdates());
+assertGatewayGauge(
+    $execute(findGaugeFormElement($form['elements'], 'SourceImportAppend')['onClick'], $fields)
+        === 'Select at least one matching variable.'
+    && count($importer->GetTestFormUpdates()) === $before,
+    'The generated callback must print the empty-selection error without partially changing the draft.'
+);
+foreach (['SourceImportAll', 'SourceImportNone'] as $button) {
+    assertGatewayGauge(
+        $execute(findGaugeFormElement($form['elements'], $button)['onClick'], $fields) === '',
+        'Successful selection actions must not print empty dialogs.'
+    );
+}
+$invalidSearch = $fields;
+$invalidSearch['SourceImportNameFilter'] = str_repeat('x', 121);
+foreach (['SourceImportSearch', 'SourceImportAll', 'SourceImportNone'] as $button) {
+    assertGatewayGauge(
+        $execute(findGaugeFormElement($form['elements'], $button)['onClick'], $invalidSearch)
+            === 'The variable-name search may contain at most 120 characters.',
+        'Every generated search/selection callback must print its validation error.'
+    );
+}
+$mixedFields = $fields;
+$mixedFields['SourceImportUnitFilter'] = '';
+$mixedFields['SourceImportCandidates'] = new ArrayIterator([['VariableID' => 9112, 'Selected' => true]]);
+$before = count($importer->GetTestFormUpdates());
+assertGatewayGauge(
+    $execute(findGaugeFormElement($form['elements'], 'SourceImportAppend')['onClick'], $mixedFields)
+        === 'PictorialBar variables must use the same unit.'
+    && count($importer->GetTestFormUpdates()) === $before,
+    'Unit validation must reach the console output without changing sources or previews.'
+);
 $fields['SourceImportCandidates'] = new ArrayIterator([['VariableID' => 9111, 'Selected' => true]]);
 assertGatewayGauge(
     str_starts_with($execute(findGaugeFormElement($form['elements'], 'SourceImportAppend')['onClick'], $fields), 'MESSAGE:1'),
-    'The actual Add-selected callback must append to the current iterable draft.'
+    'The actual Add-selected callback must print its success message for the console, not merely return it.'
 );
 $updates = $importer->GetTestFormUpdates();
 $images = array_values(array_filter(array_slice($updates, -5), static fn ($u) => $u['Parameter'] === 'image'));
@@ -180,7 +221,10 @@ assertGatewayGauge(
     && str_contains($tileSvg, 'Unsaved &lt;&amp;&gt; title') && str_contains($ipsSvg, 'Unsaved &lt;&amp;&gt; title'),
     'Both SVGs must retain the current unsaved title and independent designer colors during import.'
 );
-$execute(findGaugeFormElement($form['elements'], 'SourceImportRootID')['onChange'], $fields);
+assertGatewayGauge(
+    $execute(findGaugeFormElement($form['elements'], 'SourceImportRootID')['onChange'], $fields) === '',
+    'Reset callbacks must invalidate candidates without printing a dialog.'
+);
 assertGatewayGauge($GLOBALS['importCallbackPayload'] === ['Action' => 'reset'], 'Filter edits must invalidate stale candidates.');
 $locale = json_decode((string) file_get_contents(dirname(__DIR__) . '/EChartsPictorialBar/locale.json'), true)['translations']['de'];
 $checkCaptions = static function (array $elements) use (&$checkCaptions, $locale): void
@@ -213,6 +257,16 @@ for ($i = 0; $i < 101; ++$i) {
     $hundred[] = ['VariableID' => $id, 'Label' => ''];
     $selected[] = ['VariableID' => $id, 'Selected' => true];
 }
+$limitFields = $fields;
+$limitFields['Sources'] = new ArrayIterator(array_slice($hundred, 0, 100));
+$limitFields['SourceImportCandidates'] = new ArrayIterator([end($selected)]);
+$before = count($importer->GetTestFormUpdates());
+assertGatewayGauge(
+    $execute(findGaugeFormElement($form['elements'], 'SourceImportAppend')['onClick'], $limitFields)
+        === 'The selection exceeds the source limit. Select fewer variables.'
+    && count($importer->GetTestFormUpdates()) === $before,
+    'The live-reproduced 101-source failure must be printed and must retain the complete existing draft.'
+);
 $request['Preview'] = ['Sources' => [], 'NormalizeValues' => false];
 $request['Candidates'] = array_slice($selected, 0, 100);
 $request['UnitFilter'] = '%';

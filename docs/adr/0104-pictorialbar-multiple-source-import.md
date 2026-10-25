@@ -1,6 +1,7 @@
 # ADR 0104: Mehrfachübernahme von PictorialBar-Quellen
 
-Status: angenommen, lokal umgesetzt; neue Symcon-Formularabnahme ausstehend.
+Status: angenommen, funktional per MCP geprüft; Live-Abnahme der korrigierten
+Formularrückmeldung ausstehend.
 
 ## Kontext
 
@@ -59,6 +60,12 @@ ist keine isolierte Mehrbenutzersitzung und wird in der Benutzeranleitung benann
 erzeugte Callbacks mit echten Iteratoren, Entwurfserhalt, zwei Vorschauen,
 IDs/gleiche Namen, Einheiten, Normalisierung, veraltete Auswahl und alle Budgets.
 Die initiale Prüfung begann RED an der fehlenden Modulaktion. Die vollständige
-Qualitätssuite `php tests/quality.php --fix` ist bestanden. Die neue
-Formularbedienung auf Symcon nach Modulupdate und die anschließende Anzeige der
-übernommenen Quellen in Kachel/IPSView bleiben als eigener Live-Nachweis offen.
+Qualitätssuite `php tests/quality.php --fix` ist bestanden. Die funktionale
+MCP-Prüfung auf Symcon 9.1 bestätigte Speicherung von genau 100 Quellen, Bestand,
+Designs, Vorschauen und beide HTML-Ausgaben; temporäre Testobjekte wurden entfernt.
+Die dabei fehlende Formularrückmeldung wird im Callback mit `echo` statt `return`
+ausgegeben. Der Modulfunktionsvertrag bleibt ein stiller String-Rückgabewert,
+erfolgreiche Such-/Auswahlaktionen liefern weiterhin einen leeren Text. Der
+Regressionstest prüft tatsächliche Skriptausgabe einschließlich Fehlern ohne
+Teilübernahme. Die neue Rückmeldung bleibt nach Update live zu prüfen; diese
+funktionale Abnahme ersetzt keinen separaten Test im tatsächlichen IPSView-Client.

@@ -47,8 +47,11 @@ werden wiederverwendet; gemeinsame Library-Adapter liegen in `EChartsSourceImpor
 und `EChartsSourceImportForm`. Frische ID-Prüfung, append-only Entwürfe und die
 bisherige vollständige Quellenvalidierung schützen bestehende Listen und Designs.
 100 Quellen/64 KiB, begrenzte Suche sowie Renderer und Archive bleiben unverändert.
-Lokale Modul-/Callbacktests sind vorhanden; die neue Formularabnahme nach Update
-bleibt offen. Graph-Gewichte sind inzwischen per MCP funktional geprüft und vom
+Die funktionale MCP-Prüfung mit Speicherung von 100 Quellen ist bestanden.
+Der dabei gefundene Rückmeldefehler wird durch `echo` in den Buttoncallbacks
+korrigiert; Tests prüfen nun die tatsächliche Skriptausgabe statt `eval`-Returns.
+Die korrigierten Meldungen bleiben nach Modulupdate live zu prüfen.
+Graph-Gewichte sind inzwischen per MCP funktional geprüft und vom
 Eigentümer in Kachel und tatsächlichem IPSView bestätigt.
 
 Graph ergänzt gemäß [ADR 0103](adr/0103-weighted-graph-relationships.md)

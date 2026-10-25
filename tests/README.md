@@ -12,13 +12,25 @@ ungespeicherte unabhängige Designs und false-Werte bleiben enthalten. Zwei SVG-
 Vorschauen aktualisieren sich nach Übernahme, gespeicherte Properties und Archive
 bleiben unverändert. Alle Importbeschriftungen sind auf Deutsch vorhanden.
 
+Die funktionale MCP-Prüfung auf Symcon 9.1 bestätigte Suche, Checkbox-Auswahl,
+Mausrad in der Trefferliste, Speicherung von genau 100 Quellen, ID-Dubletten,
+beide Vorschauen und HTML-Ausgaben bei unverändertem Bestand und Design. Dabei
+fehlten die Formularmeldungen: Die Skripte lieferten nur einen PHP-Rückgabewert.
+Der Regressionstest erfasst nun mit Output-Buffering ausschließlich die echte
+Ausgabe der erzeugten Buttonskripte und ignoriert deren Rückgabewert. Er begann
+RED an der leeren Ausgabe einer abgewiesenen Auswahl. Mit `echo` sind Fehler bei
+leerer Auswahl, falscher Einheit, zu langem Suchbegriff und 101 Quellen sichtbar;
+erfolgreiche Suche, Alle/Keine und Filter-Reset bleiben still. Die Erfolgsmeldung
+der Übernahme wird ebenfalls geprüft, einschließlich unveränderter Vorschauen,
+Entwürfe und persistierter Properties bei Fehlern.
+
 Der Renderer bleibt unverändert; seine bestehenden Layout-/Navigationsprüfungen
 laufen in der vollständigen Qualitätssuite weiter. Der abschließende Lauf von
 `php tests/quality.php --fix` ist einschließlich aller Integrations- und nativen
-Layoutprüfungen bestanden. Die neue Formularbedienung
-einschließlich Mausrad in der Trefferliste sowie Kachel/IPSView nach Übernahme
-bleiben bis zum Modulupdate als eigener Live-Nachweis offen. Keine Installation
-wird für diese lokale Implementierung geändert.
+Layoutprüfungen bestanden. Die korrigierte Formularrückmeldung nach erneutem
+Modulupdate bleibt als eigener Live-Nachweis offen. Echte IPSView-App-Abnahme
+der neuen Übernahme und browserseitige Mausradnavigation im Diagramm sind
+hiermit nicht nachgewiesen. Keine Installation wird für diese lokale Korrektur geändert.
 
 ## Radar: optionale unvollständige Vergleichsgruppen
 

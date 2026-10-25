@@ -97,9 +97,10 @@ trait EChartsSourceImportForm
         $setup = '$sourceImportSources = []; foreach ($Sources as $sourceImportRow) { $sourceImportSources[] = $sourceImportRow; } '
             . '$sourceImportCandidates = []; foreach ($SourceImportCandidates as $sourceImportRow) { $sourceImportCandidates[] = $sourceImportRow; } ';
         $buttons = [];
+        // Symcon displays script output, not PHP return values, as form messages.
         foreach (['search' => 'Search variables', 'all' => 'Select all new matches', 'none' => 'Clear selection', 'append' => 'Add selected sources'] as $action => $caption) {
             $buttons[] = ['type' => 'Button', 'caption' => $caption, 'name' => 'SourceImport' . ucfirst($action),
-                'onClick'        => $setup . 'return ' . $prefix . '_UpdateSourceImportFromForm($id, json_encode(['
+                'onClick'        => $setup . 'echo ' . $prefix . '_UpdateSourceImportFromForm($id, json_encode(['
                     . "'Action' => " . var_export($action, true) . ', ' . implode(', ', $pairs)
                     . ", 'Candidates' => \$sourceImportCandidates, 'Preview' => ['Sources' => \$sourceImportSources] + compact("
                     . implode(', ', array_map(static fn (string $name): string => var_export($name, true), $previewFields)) . ')]));'];

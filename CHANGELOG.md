@@ -1,5 +1,11 @@
 # Unveröffentlicht
 
+## Behoben
+
+- PictorialBar zeigt Fehler und Bestätigungen der Mehrfachübernahme im Formular
+  an. Die Buttoncallbacks geben die Meldungen jetzt aus, statt sie nur als
+  PHP-Rückgabewert zu liefern. Quellen, Designs und Schutzgrenzen bleiben erhalten.
+
 ## Neu
 
 - PictorialBar bietet eine Mehrfachübernahme numerischer Quellen nach Objektzweig,

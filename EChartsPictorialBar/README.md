@@ -51,6 +51,7 @@ Verknüpfungen werden nicht verfolgt. Die Suche wird vor der Übernahme wiederho
 Geänderte Filter leeren die Trefferliste; veraltete Auswahlen werden abgewiesen.
 Auch bei der Übernahme gelten maximal 100 Quellen und 64 KiB für die Quellenliste;
 bei Überschreitung wird die gesamte Auswahl abgewiesen und nichts teilweise ergänzt.
+Eine abgewiesene Suche oder Auswahl zeigt eine Meldung im Formular.
 
 Suche und Auswahl sind nur für das geöffnete Formular bestimmt. Das Formular
 zum Bearbeiten möglichst nur einmal gleichzeitig öffnen, da Symcon dynamische
