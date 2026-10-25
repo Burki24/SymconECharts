@@ -20,6 +20,48 @@
             ]
         },
         {
+            "type": "CheckBox",
+            "name": "UseComparisonPanels",
+            "caption": "Use named comparison panels"
+        },
+        {
+            "type": "Label",
+            "caption": "When enabled, one to four panels replace the single archive variable. All panels share the period and archive budgets; value scales and units remain independent."
+        },
+        {
+            "type": "List",
+            "name": "Sources",
+            "caption": "Comparison panels",
+            "rowCount": 4,
+            "add": true,
+            "delete": true,
+            "changeOrder": true,
+            "columns": [
+                {
+                    "name": "VariableID",
+                    "caption": "Archive variable",
+                    "width": "360px",
+                    "add": 0,
+                    "edit": {
+                        "type": "SelectVariable",
+                        "validVariableTypes": [
+                            1,
+                            2
+                        ]
+                    }
+                },
+                {
+                    "name": "Label",
+                    "caption": "Panel name (optional)",
+                    "width": "240px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox"
+                    }
+                }
+            ]
+        },
+        {
             "type": "Label",
             "caption": "Each candle shows the first and last logged value plus minimum and maximum of a completed interval. Missing intervals stay empty; counters are not supported."
         },

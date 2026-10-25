@@ -166,7 +166,13 @@
             "Italic title": "Titel kursiv",
             "Italic axis labels": "Achsenbeschriftungen kursiv",
             "Enable time zoom": "Zeitzoom aktivieren",
-            "Time zoom is interactive in the chart.": "Zeitzoom ist im Diagramm interaktiv bedienbar."
+            "Time zoom is interactive in the chart.": "Zeitzoom ist im Diagramm interaktiv bedienbar.",
+            "Use named comparison panels": "Benannte Vergleichspanels verwenden",
+            "Comparison panels": "Vergleichspanels",
+            "Panel name (optional)": "Panelname (optional)",
+            "When enabled, one to four panels replace the single archive variable. All panels share the period and archive budgets; value scales and units remain independent.": "Bei Aktivierung ersetzen ein bis vier Panels die einzelne Archivvariable. Alle Panels teilen Zeitraum und Archivbudgets; Werteskalen und Einheiten bleiben unabhängig.",
+            "Configure one to four unique numeric Candlestick panel variables.": "Eine bis vier unterschiedliche numerische Archivvariablen für die Vergleichspanels wählen.",
+            "The Candlestick panel settings are invalid.": "Die Vergleichspanel-Einstellungen sind ungültig."
         }
     }
 }

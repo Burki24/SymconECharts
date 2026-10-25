@@ -23,6 +23,7 @@ use SymconECharts\EChartsIPSViewBackground;
 use SymconECharts\EChartsIPSViewDesignForm;
 use SymconECharts\EChartsIPSViewTransport;
 use SymconECharts\EChartsSourceIdentity;
+use SymconECharts\EChartsStartupState;
 use SymconECharts\EChartsTransientRefresh;
 use SymconECharts\EChartsVariablePresentation;
 
@@ -43,6 +44,7 @@ require_once __DIR__ . '/../libs/EChartsIPSViewBackground.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewDesignForm.php';
 require_once __DIR__ . '/../libs/EChartsIPSViewTransport.php';
 require_once __DIR__ . '/../libs/EChartsSourceIdentity.php';
+require_once __DIR__ . '/../libs/EChartsStartupState.php';
 require_once __DIR__ . '/../libs/EChartsTransientRefresh.php';
 require_once __DIR__ . '/../libs/EChartsVariablePresentation.php';
 require_once __DIR__ . '/CandlestickData.php';
@@ -102,6 +104,8 @@ class EChartsCandlestick extends IPSModuleStrict
             $this->RegisterTimer('ArchiveRefresh', 0, 'ECCA_RefreshArchive($_IPS["TARGET"]);');
             $this->RegisterTransientRefresh('ECCA');
             $this->RegisterPropertyInteger('VariableID', 0);
+            $this->RegisterPropertyBoolean('UseComparisonPanels', false);
+            $this->RegisterPropertyString('Sources', '[]');
             $this->RegisterPropertyString('Interval', 'day');
             $this->RegisterPropertyString('Title', '');
             $this->RegisterPropertyString('Range', '7d');
@@ -210,7 +214,7 @@ class EChartsCandlestick extends IPSModuleStrict
                 ['caption' => 'Axes and grid', 'start' => 'ShowGrid'],
                 ['caption' => 'Typography and colors', 'start' => 'TitleFontSizePercent']
             ]);
-            $fields = ['Title', 'VariableID', 'Range', 'CustomRangeValue', 'CustomRangeUnit', 'AbsoluteStart', 'AbsoluteEnd', 'Interval',
+            $fields = ['Title', 'VariableID', 'UseComparisonPanels', 'Sources', 'Range', 'CustomRangeValue', 'CustomRangeUnit', 'AbsoluteStart', 'AbsoluteEnd', 'Interval',
                 'IPSViewUseTileDesign', 'IPSViewAdaptToBackground', 'IPSViewBackgroundColor',
                 'IPSViewBackgroundOpacityPercent', ...array_keys(self::DESIGN_DEFAULTS),
                 ...array_map(static fn (string $name): string => 'IPSView' . $name, array_keys(self::DESIGN_DEFAULTS))];
@@ -476,19 +480,22 @@ class EChartsCandlestick extends IPSModuleStrict
             $range += ['requestedStartTimestamp' => $query['RequestedStartTimestamp'],
                 'requestedEndTimestamp'          => $query['RequestedEndTimestamp']];
         }
-        $key = $sources[0]['VariableID'] . ':' . $query['StartTimestamp'] . ':' . $query['EndTimestamp'] . ':' . $this->ReadPropertyString('Interval');
+        $key = 'panels:' . implode(',', array_column($sources, 'VariableID')) . ':' . $query['StartTimestamp'] . ':' . $query['EndTimestamp'] . ':' . $this->ReadPropertyString('Interval');
         $cache = json_decode($this->GetBuffer('CandlestickCache') ?: '{}', true);
         try {
             if (($cache['key'] ?? null) === $key && ($cache['expires'] ?? 0) > $this->CurrentTimestamp()) {
                 $data = $cache['data'];
             } else {
-                $points = $query['Empty'] ? [] : CandlestickData::Read(
-                    $sources[0]['VariableID'],
+                $points = $query['Empty'] ? [] : CandlestickData::ReadMany(
+                    array_column($sources, 'VariableID'),
                     $query['StartTimestamp'],
                     $query['EndTimestamp'],
                     fn (array $request): array => $this->ReadArchiveSource($request)
                 );
-                $data = CandlestickData::Summarize($points, $query);
+                $data = [];
+                foreach ($sources as $source) {
+                    $data[$source['VariableID']] = CandlestickData::Summarize($points[$source['VariableID']] ?? [], $query);
+                }
                 $this->SetBuffer('CandlestickCache', json_encode(['key' => $key, 'expires' => $this->CurrentTimestamp() + 60,
                     'data'                                              => $data], JSON_THROW_ON_ERROR | JSON_PRESERVE_ZERO_FRACTION));
             }
@@ -497,18 +504,26 @@ class EChartsCandlestick extends IPSModuleStrict
             $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
             throw $exception;
         }
-        foreach ($data as &$item) {
-            $item['unit'] = $sources[0]['Unit'];
-            $item['decimals'] = $sources[0]['Decimals'];
+        $panels = [];
+        foreach ($sources as $source) {
+            $items = $data[$source['VariableID']];
+            foreach ($items as &$item) {
+                $item['unit'] = $source['Unit'];
+                $item['decimals'] = $source['Decimals'];
+            }
+            unset($item);
+            $panels[] = ['id' => (string) $source['VariableID'], 'variableID' => $source['VariableID'],
+                'sourceLabel' => $source['Label'], 'unit' => $source['Unit'], 'data' => $items];
         }
-        unset($item);
         $this->WriteAttributeString('LastError', '');
         $this->DebugEChartsSetStatus(IS_ACTIVE);
         return json_encode(
             ['schemaVersion'     => 1, 'family' => 'candlestick', 'theme' => $this->EffectiveTheme($ipsView),
                 'candlestick'    => ['title' => $this->ReadPropertyString('Title'), 'unit' => $sources[0]['Unit'],
                     'sampling'               => 'completed-raw-intervals', 'sourceLabel' => $sources[0]['Label'], 'variableID' => $sources[0]['VariableID'], 'interval' => $this->ReadPropertyString('Interval'),
-                    'data'                   => $data, 'style' => $this->ReadDesignStyle($ipsView)],
+                    'data'                   => $this->ReadPropertyBoolean('UseComparisonPanels') ? [] : $panels[0]['data'],
+                    ...($this->ReadPropertyBoolean('UseComparisonPanels') ? ['panels' => $panels] : []),
+                    'style' => $this->ReadDesignStyle($ipsView)],
                 'range' => $range],
             JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION
         );
@@ -516,13 +531,14 @@ class EChartsCandlestick extends IPSModuleStrict
 
     private function RenderCandlestickHTMLPage(bool $ipsView): string
     {
+        $startup = EChartsStartupState::Startup($this->BuildVisualizationState($ipsView));
         return $this->RenderVisualizationHTMLPage($ipsView, [
             'language'           => $this->NormalizeHelperTranslationLanguage($this->ResolveHelperTranslationLanguage()),
             'title'              => 'ECharts Candlestick',
             'visualizationTheme' => $this->VisualizationThemeCSS() . "\n\n"
                 . $this->ResponsiveVisualizationCSS('#echarts-candlestick-root', 'echarts-candlestick'),
             'ipsViewStyle' => $ipsView ? $this->IPSViewThemeCSS() : '',
-            'state'        => $this->BuildVisualizationState($ipsView),
+            'state'        => $startup['state'],
             'translations' => [
                 'Too many archive intervals. Choose a shorter range or a longer interval.'  => $this->Translate('Too many archive intervals. Choose a shorter range or a longer interval.'),
                 'The archive interval settings are invalid.'                                => $this->Translate('The archive interval settings are invalid.'),
@@ -543,13 +559,14 @@ class EChartsCandlestick extends IPSModuleStrict
             'options' => [
                 'echartsVersion'    => EChartsAsset::VERSION, 'echartsThemes' => EChartsAsset::ThemePalettes(),
                 ...$this->ResponsiveVisualizationLayoutOptions(!$ipsView),
-                'adaptToBackground' => $ipsView && $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
-                'ipsViewTransport'  => $ipsView ? $this->EChartsIPSViewTransportOptions() : null
+                'adaptToBackground'         => $ipsView && $this->ReadPropertyBoolean('IPSViewAdaptToBackground'),
+                'ipsViewTransport'          => $ipsView ? $this->EChartsIPSViewTransportOptions() : null,
+                'compressedStateGzipBase64' => $startup['compressedStateGzipBase64']
             ],
             'replacements' => [
                 '{{ECHARTS_SCRIPT}}'           => EChartsAsset::CandlestickJavaScript(),
                 '{{ECHARTS_THEME_SCRIPT}}'     => EChartsAsset::ThemeJavaScript(),
-                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript(),
+                '{{ECHARTS_DESIGN_SCRIPT}}'    => EChartsAsset::DesignJavaScript() . "\n" . EChartsAsset::StartupJavaScript(),
                 '{{ECHARTS_ZOOM_SCRIPT}}'      => EChartsAsset::ZoomJavaScript(),
                 '{{IPSVIEW_TRANSPORT_SCRIPT}}' => $ipsView ? $this->EChartsIPSViewTransportJavaScript() : ''
             ]
@@ -640,14 +657,42 @@ class EChartsCandlestick extends IPSModuleStrict
     /** @return list<array{VariableID:int,Label:string,Color:int,Unit:string,Decimals:int}> */
     private function GetValidatedSources(): array
     {
-        $id = $this->ReadPropertyInteger('VariableID');
-        if ($id <= 0 || !IPS_VariableExists($id) || !in_array(IPS_GetVariable($id)['VariableType'] ?? null, [1, 2], true)) {
-            throw new InvalidArgumentException('Configure a numeric Candlestick archive variable.');
+        $raw = $this->ReadPropertyBoolean('UseComparisonPanels')
+            ? (strlen($this->ReadPropertyString('Sources')) <= 65536
+                ? json_decode($this->ReadPropertyString('Sources'), true, 32, JSON_THROW_ON_ERROR) : null)
+            : [['VariableID' => $this->ReadPropertyInteger('VariableID'), 'Label' => '']];
+        return $this->ValidatePanelSources($raw);
+    }
+
+    /** Same ID/label contract for saved sources and archive-free preview drafts. */
+    private function ValidatePanelSources(mixed $raw): array
+    {
+        if (!is_array($raw) || !array_is_list($raw) || count($raw) < 1 || count($raw) > 4
+            || strlen(json_encode($raw, JSON_THROW_ON_ERROR)) > 65536) {
+            throw new InvalidArgumentException('Configure one to four unique numeric Candlestick panel variables.');
         }
-        $presentation = EChartsVariablePresentation::Resolve($id, 0.0, 100.0, '', 2, true);
-        $source = ['VariableID' => $id, 'Label' => '', 'Color' => -1, 'Unit' => $presentation['unit'], 'Decimals' => $presentation['decimals']];
-        $source['Label'] = EChartsSourceIdentity::LabelsForSources([$source])[$id];
-        return [$source];
+        $sources = [];
+        foreach ($raw as $row) {
+            if (!is_array($row)) {
+                throw new InvalidArgumentException('The Candlestick panel settings are invalid.');
+            }
+            $id = $row['VariableID'] ?? null;
+            $label = $row['Label'] ?? '';
+            if (!is_string($label) || mb_strlen($label) > 120 || !is_int($id)) {
+                throw new InvalidArgumentException('The Candlestick panel settings are invalid.');
+            }
+            if ($id <= 0 || !IPS_VariableExists($id) || !in_array(IPS_GetVariable($id)['VariableType'] ?? null, [1, 2], true)) {
+                throw new InvalidArgumentException('Configure a numeric Candlestick archive variable.');
+            }
+            $presentation = EChartsVariablePresentation::Resolve($id, 0.0, 100.0, '', 2, true);
+            $sources[] = ['VariableID' => $id, 'Label' => trim($label), 'Color' => -1, 'Unit' => $presentation['unit'], 'Decimals' => $presentation['decimals']];
+        }
+        $labels = EChartsSourceIdentity::LabelsForSources($sources);
+        foreach ($sources as &$source) {
+            $source['Label'] = $labels[$source['VariableID']];
+        }
+        unset($source);
+        return $sources;
     }
 
     /** @param array<string,mixed> $payload @return array<string,mixed> */
@@ -682,8 +727,16 @@ class EChartsCandlestick extends IPSModuleStrict
     {
         $previous = json_decode($this->ReadAttributeString('RegisteredSourceVariableIDs'), true);
         $previous = is_array($previous) ? array_values(array_filter($previous, is_int(...))) : [];
-        $id = $this->ReadPropertyInteger('VariableID');
-        $current = $id > 0 && IPS_VariableExists($id) ? [$id] : [];
+        $raw = $this->ReadPropertyBoolean('UseComparisonPanels') ? (strlen($this->ReadPropertyString('Sources')) <= 65536
+            ? json_decode($this->ReadPropertyString('Sources'), true) : null)
+            : [['VariableID' => $this->ReadPropertyInteger('VariableID')]];
+        $current = [];
+        foreach (is_array($raw) ? array_slice($raw, 0, 4) : [] as $row) {
+            $id = $row['VariableID'] ?? null;
+            if (is_int($id) && $id > 0 && IPS_VariableExists($id) && !in_array($id, $current, true)) {
+                $current[] = $id;
+            }
+        }
         foreach (array_diff($previous, $current) as $id) {
             $this->UnregisterReference($id);
         }

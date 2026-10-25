@@ -20,43 +20,60 @@ final class CandlestickData
     /** Discard truncated fragments; bisect disjoint inclusive windows instead. */
     public static function Read(int $variableID, int $start, int $end, callable $fetch): array
     {
+        return self::ReadMany([$variableID], $start, $end, $fetch)[$variableID];
+    }
+
+    /** All panels share one query/retained-sample budget; no partial model escapes. */
+    public static function ReadMany(array $variableIDs, int $start, int $end, callable $fetch): array
+    {
+        if (!array_is_list($variableIDs) || count($variableIDs) < 1 || count($variableIDs) > 4
+            || count(array_unique($variableIDs, SORT_REGULAR)) !== count($variableIDs)
+            || array_filter($variableIDs, static fn ($id): bool => !is_int($id) || $id <= 0) !== []) {
+            throw new InvalidArgumentException('Configure one to four unique numeric Candlestick panel variables.');
+        }
         $calls = 0;
-        $points = [];
-        $read = static function (int $from, int $to) use (&$read, &$calls, &$points, $variableID, $fetch): void
-        {
-            if (++$calls > 63) {
-                throw new RuntimeException('Candlestick archive is too dense; choose a shorter range.');
-            }
-            $request = ['VariableID' => $variableID, 'StartTimestamp' => $from, 'EndTimestamp' => $to,
-                'Mode'               => 'raw', 'Reducer' => 'auto', 'Limit' => 2000];
-            $data = $fetch($request);
-            if (($data['ArchiveAggregationType'] ?? null) === 'counter') {
-                throw new RuntimeException('Candlestick requires standard archive variables, not counters.');
-            }
-            if (($data['VariableID'] ?? null) !== $variableID || !in_array($data['VariableType'] ?? null, [1, 2], true)
-                || ($data['StartTimestamp'] ?? null) !== $from || ($data['EndTimestamp'] ?? null) !== $to
-                || ($data['EffectiveReducer'] ?? null) !== 'raw' || ($data['ArchiveAggregationType'] ?? null) !== 'standard'
-                || !is_bool($data['Truncated'] ?? null) || !is_array($data['Points'] ?? null)
-                || !array_is_list($data['Points']) || count($data['Points']) > 2000) {
-                throw new RuntimeException('Invalid Candlestick raw archive response.');
-            }
-            self::ValidatePoints($data['Points'], $from, $to);
-            if ($data['Truncated']) {
-                if ($to - $from < 3) {
+        $retained = 0;
+        $result = [];
+        foreach ($variableIDs as $variableID) {
+            $points = [];
+            $read = static function (int $from, int $to) use (&$read, &$calls, &$retained, &$points, $variableID, $fetch): void
+            {
+                if (++$calls > 63) {
                     throw new RuntimeException('Candlestick archive is too dense; choose a shorter range.');
                 }
-                $middle = $from + intdiv($to - $from, 2);
-                $read($from, $middle);
-                $read($middle + 1, $to);
-                return;
-            }
-            if (count($points) + count($data['Points']) > 64000) {
-                throw new RuntimeException('Candlestick archive is too dense; choose a shorter range.');
-            }
-            array_push($points, ...$data['Points']);
-        };
-        $read($start, $end);
-        return $points;
+                $request = ['VariableID' => $variableID, 'StartTimestamp' => $from, 'EndTimestamp' => $to,
+                    'Mode'               => 'raw', 'Reducer' => 'auto', 'Limit' => 2000];
+                $data = $fetch($request);
+                if (($data['ArchiveAggregationType'] ?? null) === 'counter') {
+                    throw new RuntimeException('Candlestick requires standard archive variables, not counters.');
+                }
+                if (($data['VariableID'] ?? null) !== $variableID || !in_array($data['VariableType'] ?? null, [1, 2], true)
+                    || ($data['StartTimestamp'] ?? null) !== $from || ($data['EndTimestamp'] ?? null) !== $to
+                    || ($data['EffectiveReducer'] ?? null) !== 'raw' || ($data['ArchiveAggregationType'] ?? null) !== 'standard'
+                    || !is_bool($data['Truncated'] ?? null) || !is_array($data['Points'] ?? null)
+                    || !array_is_list($data['Points']) || count($data['Points']) > 2000) {
+                    throw new RuntimeException('Invalid Candlestick raw archive response.');
+                }
+                self::ValidatePoints($data['Points'], $from, $to);
+                if ($data['Truncated']) {
+                    if ($to - $from < 3) {
+                        throw new RuntimeException('Candlestick archive is too dense; choose a shorter range.');
+                    }
+                    $middle = $from + intdiv($to - $from, 2);
+                    $read($from, $middle);
+                    $read($middle + 1, $to);
+                    return;
+                }
+                if ($retained + count($data['Points']) > 64000) {
+                    throw new RuntimeException('Candlestick archive is too dense; choose a shorter range.');
+                }
+                $retained += count($data['Points']);
+                array_push($points, ...$data['Points']);
+            };
+            $read($start, $end);
+            $result[$variableID] = $points;
+        }
+        return $result;
     }
 
     public static function Summarize(array $points, array $window): array

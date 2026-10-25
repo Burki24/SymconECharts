@@ -18,7 +18,7 @@
         if (!model) { return null; }
         var range = model.range || {};
         var candle = model.candlestick || {};
-        return Object.assign({}, range, { key: [range.key, candle.variableID, candle.interval,
+        return Object.assign({}, range, { key: [range.key, (candle.panels || [candle]).map(function (panel) { return panel.variableID; }).join(','), candle.interval,
             range.key === 'custom' ? range.endTimestamp - range.startTimestamp : '',
             range.key === 'absolute' ? range.requestedStartTimestamp : '',
             range.key === 'absolute' ? range.requestedEndTimestamp : ''].join(':') });
@@ -75,13 +75,13 @@
             seriesColors: colors.seriesColors
         };
     }
-    function buildOption(model, theme, viewport) {
+    function buildSingleOption(model, theme, viewport, size) {
         var colors = colorsFor(theme);
         var candlestick = model.candlestick || {};
         var style = candlestick.style || {};
         var items = candlestick.data || [];
-        var width = chartElement.clientWidth || 1;
-        var height = chartElement.clientHeight || 1;
+        var width = size ? size.width : chartElement.clientWidth || 1;
+        var height = size ? size.height : chartElement.clientHeight || 1;
         var horizontal = style.orientation === 'horizontal';
         var compact = width < 430;
         var font = design.fontSizePercent(style.axisFontSizePercent, compact ? 10 : 12);
@@ -100,7 +100,7 @@
         bottom += Math.max(0, margin - 8);
         var rotation = Number(style.axisLabelRotate) || 0;
         var requestedLabelWidth = Number(style.axisLabelMaxWidth) || 0;
-        var visibleCount = zoom && viewport ? Math.max(1, Math.ceil(items.length * (viewport.end - viewport.start) / 100)) : items.length;
+        var visibleCount = (zoom || size && size.zoom) && viewport ? Math.max(1, Math.ceil(items.length * (viewport.end - viewport.start) / 100)) : items.length;
         var slot = (horizontal ? height - top - bottom : width - left - right) / Math.max(1, visibleCount);
         var autoLabelWidth = Math.max(12, horizontal ? left - 15 : Math.max(60, slot - 8));
         var labelWidth = requestedLabelWidth > 0 ? Math.min(requestedLabelWidth, horizontal ? left - 15 : width - 30) : autoLabelWidth;
@@ -185,6 +185,85 @@
                 }) }]
         };
     }
+    // One native chart: all category axes share one zoom, numeric axes stay independent.
+    function buildOption(model, theme, viewport) {
+        var candle = model.candlestick;
+        if (!candle.panels) { return buildSingleOption(model, theme, viewport); }
+        var style = candle.style;
+        var panels = candle.panels;
+        var horizontal = style.orientation === 'horizontal';
+        var width = chartElement.clientWidth || 1;
+        var height = chartElement.clientHeight || 1;
+        var font = design.fontSizePercent(style.axisFontSizePercent, width < 430 ? 10 : 12);
+        var titleSize = design.fontSizePercent(style.titleFontSizePercent, 18);
+        var titleLayout = design.chartTitleLayout(chartBootstrap, candle.title, titleSize);
+        var top = titleLayout.contentTop + 8;
+        var zoomSpace = style.enableZoom ? zoomController.sliderThickness(width < 430) + 28 : 10;
+        var cell = { width: (width - (horizontal ? zoomSpace : 0)) / (horizontal ? panels.length : 1),
+            height: (height - top - (horizontal ? 0 : zoomSpace)) / (horizontal ? 1 : panels.length), zoom: style.enableZoom === true };
+        var children = panels.map(function (panel) {
+            return buildSingleOption(Object.assign({}, model, { candlestick: Object.assign({}, candle, panel, {
+                title: panel.sourceLabel, style: Object.assign({}, style, { enableZoom: false,
+                    titleFontSizePercent: font / 18 * 100 }) }) }), theme, viewport, cell);
+        });
+        var option = Object.assign({}, children[0]);
+        var main = buildSingleOption(model, theme, viewport).title;
+        option.title = [main];
+        option.grid = [];
+        option.xAxis = [];
+        option.yAxis = [];
+        option.series = [];
+        var formatters = children.map(function (child) { return child.tooltip.formatter; });
+        panels.forEach(function (panel, index) {
+            var child = children[index];
+            var x = horizontal ? index * cell.width : 0;
+            var y = top + (horizontal ? 0 : index * cell.height);
+            var grid = child.grid;
+            option.grid.push({ left: x + grid.left, top: y + grid.top,
+                width: Math.max(1, cell.width - grid.left - grid.right),
+                height: Math.max(1, cell.height - grid.top - grid.bottom), outerBoundsMode: 'none' });
+            option.title.push(Object.assign({}, child.title, { top: y + child.title.top, left: x + cell.width / 2,
+                textAlign: 'center', textStyle: Object.assign({}, child.title.textStyle, { width: Math.max(1,cell.width - 30) }),
+                subtext: panel.data.some(function (item) { return item.statistics !== null; }) ? '' : translate('No logged values in completed intervals.'),
+                subtextStyle: { color: colorsFor(theme).muted, fontSize: Math.max(8, font * 0.8),
+                    width: Math.max(1,cell.width - 30), overflow: 'truncate' } }));
+            child.xAxis.gridIndex = index;
+            child.yAxis.gridIndex = index;
+            option.xAxis.push(child.xAxis);
+            option.yAxis.push(child.yAxis);
+            var series = child.series[0];
+            series.id = 'panel-' + panel.variableID;
+            series.name = panel.sourceLabel;
+            series.xAxisIndex = index;
+            series.yAxisIndex = index;
+            option.series.push(series);
+        });
+        option.tooltip = Object.assign({}, option.tooltip, { formatter: function (parameter) {
+            return formatters[parameter.seriesIndex](parameter);
+        } });
+        option.dataZoom = zoomController.categoryTimeOptions(style.enableZoom === true, width < 430, horizontal, width < 430 ? 10 : 14,
+            panels.map(function (_, index) { return index; }));
+        if (horizontal && option.dataZoom[1]) {
+            option.dataZoom[1].top = option.grid[0].top;
+            option.dataZoom[1].bottom = height - option.grid[0].top - option.grid[0].height;
+        }
+        return option;
+    }
+
+    function fitPanelCanvas(model) {
+        var candle = model.candlestick;
+        var count = candle.panels ? candle.panels.length : 0;
+        var font = design.fontSizePercent(candle.style.axisFontSizePercent, 12);
+        var horizontal = candle.style.orientation === 'horizontal';
+        // Clip scrolling content below the host's fixed tile header.
+        rootElement.style.top = count ? tileHeaderInset + 'px' : '';
+        rootElement.style.height = count && tileHeaderInset ? 'calc(100% - ' + tileHeaderInset + 'px)' : '';
+        chartElement.style.top = (count ? 0 : tileHeaderInset) + 'px';
+        chartElement.style.height = !count && tileHeaderInset ? 'calc(100% - ' + tileHeaderInset + 'px)' : '100%';
+        rootElement.style.overflow = count ? 'auto' : 'hidden';
+        chartElement.style.minHeight = count && !horizontal ? (count * (font * 16 + 80) + 100) + 'px' : '';
+        chartElement.style.minWidth = count && horizontal ? (count * (font * 15 + 90) + 50) + 'px' : '';
+    }
     function displayError(message) {
         renderedModel = null;
         if (chart) { chart.clear(); }
@@ -206,7 +285,9 @@
             displayError('Apache ECharts could not be initialized.');
             return;
         }
-        if (!(model.candlestick.data || []).some(function (item) { return item.statistics !== null; })) {
+        if (!(model.candlestick.panels || [model.candlestick]).some(function (panel) {
+            return (panel.data || []).some(function (item) { return item.statistics !== null; });
+        })) {
             renderedModel = null;
             if (chart) { chart.clear(); }
             chartElement.hidden = true;
@@ -217,6 +298,7 @@
             return;
         }
         var wasHidden = chartElement.hidden;
+        fitPanelCanvas(model);
         chartElement.hidden = false;
         errorElement.hidden = true;
         emptyElement.hidden = true;
@@ -231,9 +313,11 @@
             currentTheme = theme;
             chart.on('datazoom', function () {
                 if (!renderedModel) { return; }
-                var series = buildOption(renderedModel, currentTheme, savedZoom(renderedModel)).series[0];
+                var series = buildOption(renderedModel, currentTheme, savedZoom(renderedModel)).series;
                 // Refit only geometry, not data, controls or the user's zoom window.
-                chart.setOption({ series: [{ barWidth: series.barWidth, barMinWidth: series.barMinWidth, barMaxWidth: series.barMaxWidth }] });
+                chart.setOption({ series: series.map(function (entry) { return {
+                    barWidth: entry.barWidth, barMinWidth: entry.barMinWidth, barMaxWidth: entry.barMaxWidth
+                }; }) });
             });
         } else if (wasHidden) {
             chart.resize();
@@ -244,7 +328,7 @@
     }
     window.handleMessage = function (message) {
         var state = design.parseVisualizationState(message);
-        if (state) { render(state); }
+        if (state) { if (cancelStartup) { cancelStartup(); } render(state); }
     };
     if (window.ResizeObserver) {
         new ResizeObserver(function () {
@@ -268,8 +352,11 @@
         return !!renderedModel && renderedModel.candlestick.style.enableZoom === true;
     }, function () {
         var style = renderedModel.candlestick.style;
-        return { vertical: style.orientation === 'horizontal', inverse: style.reverseTimeAxis === true };
+        return { vertical: style.orientation === 'horizontal', inverse: style.reverseTimeAxis === true,
+            gridCount: renderedModel.candlestick.panels ? renderedModel.candlestick.panels.length : 1 };
     });
-    window.addEventListener('beforeunload', function () { if (chart) { chart.dispose(); } });
-    render(currentState);
+    window.addEventListener('beforeunload', function () { if (cancelStartup) { cancelStartup(); } if (chart) { chart.dispose(); } });
+    var cancelStartup = window.SYMC_ECHARTS_STARTUP(bootstrap, render, function () {
+        displayError('The Candlestick values could not be loaded.');
+    });
 }());

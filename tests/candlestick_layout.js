@@ -10,7 +10,7 @@ const designSource = fs.readFileSync(path.join(root, 'libs/echarts-design.js'), 
 const zoomSource = fs.readFileSync(path.join(root, 'libs/echarts-zoom.js'), 'utf8');
 const palette = { background: '#101114', text: '#f4f5f7', muted: '#969aa2', border: '#737780', accent: '#55cbb5' };
 
-function render(model, mode = 'symcon', headerVisible = true, width = 900, engine = null) {
+function render(model, mode = 'symcon', headerVisible = true, width = 900, engine = null, startup = false) {
     const chartElement = { style: {}, hidden: false, clientWidth: width, clientHeight: 500, addEventListener: () => {} };
     const rootElement = { style: {} };
     const errorElement = { hidden: true, textContent: '' };
@@ -28,12 +28,24 @@ function render(model, mode = 'symcon', headerVisible = true, width = 900, engin
         dispatchAction: action => { if (engine) { engine.dispatchAction(action); } },
         clear: () => { if (engine) { engine.clear(); } },
         resize: () => { if (engine) { engine.resize({width:chartElement.clientWidth,height:chartElement.clientHeight}); } }, dispose: () => {} };
+    let resolveStartup, startupJSON;
     const window = {
         SYMC_VISUALIZATION: { mode, state: { status: 'ready', chart: model }, translations: {},
             options: { echartsThemes: { auto: palette, dark: palette }, tileHeaderVisible: mode === 'symcon' && (headerVisible), tileHeaderInset: mode === 'symcon' && (headerVisible) ? 58 : 0,
                 adaptToBackground: mode === 'ipsview' } },
         echarts: { init: () => chart }, addEventListener: (name, callback) => { events[name]=callback; }, getComputedStyle: () => ({ color: '' })
     };
+    if (startup) {
+        const zlib=require('node:zlib');
+        startupJSON=JSON.stringify(window.SYMC_VISUALIZATION.state);
+        window.SYMC_VISUALIZATION.state=null;
+        window.SYMC_VISUALIZATION.options.compressedStateGzipBase64=zlib.gzipSync(startupJSON).toString('base64');
+        window.atob=value=>Buffer.from(value,'base64').toString('binary');
+        window.Blob=class {constructor(parts){this.bytes=parts[0];}stream(){return {pipeThrough:()=>this.bytes};}};
+        window.DecompressionStream=class {};
+        window.Response=class {constructor(bytes){startupJSON=zlib.gunzipSync(Buffer.from(bytes)).toString('utf8');}
+            text(){return new Promise(resolve=>{resolveStartup=resolve;});}};
+    }
     const document = {
         body: { appendChild: () => {} }, createElement: () => ({ style: {}, remove: () => {} }),
         getElementById: id => ({ 'echarts-candlestick-root': rootElement, 'echarts-candlestick-chart': chartElement,
@@ -42,9 +54,10 @@ function render(model, mode = 'symcon', headerVisible = true, width = 900, engin
     };
     vm.runInNewContext(designSource, { window });
     vm.runInNewContext(zoomSource, { window });
+    vm.runInNewContext(fs.readFileSync(path.join(root, 'libs/echarts-startup.js'),'utf8'), { window });
     vm.runInNewContext(source, { window, document });
-    return { get option() { return option; }, chartElement, errorElement, emptyElement, warningElement, window, events,
-        wheel: event => wheel(event), resize: width => { chartElement.clientWidth=width;events.resize(); } };
+    return { get option() { return option; }, chartElement, rootElement, errorElement, emptyElement, warningElement, window, events,
+        resolveStartup:()=>resolveStartup(startupJSON), wheel: event => wheel(event), resize: width => { chartElement.clientWidth=width;events.resize(); } };
 }
 
 
@@ -289,3 +302,83 @@ for (const orientation of ['vertical','horizontal']) {
     }
 }
 console.log('Optional Candlestick time zoom, shipped runtime, refresh/resize, complete scales and wheel routing verified.');
+
+// Native multi-grid panels share time axes, never value scales or tooltip metadata.
+function panelModel(count, orientation = 'vertical') {
+    return {...model,range:{key:'7d',startTimestamp:100,endTimestamp:200},candlestick:{...model.candlestick,
+        data:[],panels:Array.from({length:count},(_,i)=>({variableID:900+i,id:String(900+i),sourceLabel:i===1?'Humidity <room>':'Panel '+i,
+            unit:i===1?'%':'°C',data:model.candlestick.data.map(item=>({...item,unit:i===1?'%':'°C',
+                statistics:item.statistics?item.statistics.map(v=>v*(i+1)*10):null}))})),
+        style:{...model.candlestick.style,orientation,enableZoom:true}}};
+}
+for (const mode of ['symcon','ipsview']) {
+    for (const orientation of ['vertical','horizontal']) {
+        for (const count of [2,4]) {
+            const comparison=panelModel(count,orientation);
+            const rendered=render(comparison,mode,true,1400);
+            assert.equal(rendered.rootElement.style.top,mode==='symcon'?'58px':'0px');
+            assert.equal(rendered.chartElement.style.top,'0px','Panel scrolling is clipped below the fixed tile header.');
+            assert.equal(rendered.option.grid.length,count);
+            assert.equal(rendered.option.series.length,count);
+            assert.equal(rendered.option.title.length,count+1);
+            for(const control of rendered.option.dataZoom) {
+                assert.deepEqual(Array.from(control[orientation==='horizontal'?'yAxisIndex':'xAxisIndex']),Array.from({length:count},(_,i)=>i));
+                assert.equal(control.filterMode,'none');
+            }
+            assert.match(rendered.option.tooltip.formatter({seriesIndex:1,dataIndex:0}),/Humidity &lt;room&gt;/);
+            assert.match(rendered.option.tooltip.formatter({seriesIndex:1,dataIndex:0}),/%/);
+            const engine=echarts.init(null,null,{renderer:'svg',ssr:true,width:1400,height:500});
+            engine.setOption(rendered.option);
+            const extents=[];
+            for(let p=0;p<count;p++) {
+                const values=engine.getModel().getSeriesByIndex(p).getData();
+                assert.equal(values.hasValue(3),false);
+                assert.ok(values.getItemLayout(0).ends.every(point=>point.every(Number.isFinite)));
+                extents.push(engine.getModel().getComponent(orientation==='horizontal'?'xAxis':'yAxis',p).axis.scale.getExtent());
+            }
+            assert.notDeepEqual(extents[0],extents[1],'Numeric domains belong to each panel.');
+            engine.dispatchAction({type:'dataZoom',dataZoomIndex:0,start:30,end:70});
+            for(let p=0;p<count;p++) {
+                const time=engine.getModel().getComponent(orientation==='horizontal'?'yAxis':'xAxis',p).axis.scale.getExtent();
+                assert.deepEqual(time,engine.getModel().getComponent(orientation==='horizontal'?'yAxis':'xAxis',0).axis.scale.getExtent());
+                assert.deepEqual(extents[p],engine.getModel().getComponent(orientation==='horizontal'?'xAxis':'yAxis',p).axis.scale.getExtent());
+            }
+            engine.dispose();
+        }
+    }
+}
+const multiEngine=echarts.init(null,null,{renderer:'svg',ssr:true,width:900,height:500});
+const multiRuntime=render(panelModel(2),'ipsview',true,900,multiEngine);
+const secondGrid=multiEngine.getModel().getComponent('grid',1).coordinateSystem.getRect();
+let prevented=false;
+multiRuntime.wheel({deltaY:-120,clientX:secondGrid.x+secondGrid.width/2,clientY:secondGrid.y+secondGrid.height/2,
+    preventDefault(){prevented=true;},stopPropagation(){}});
+assert.ok(prevented,'Host-aware wheel routing accepts the second panel, not only grid zero.');
+assert.ok(multiEngine.getOption().dataZoom[0].end-multiEngine.getOption().dataZoom[0].start<100);
+const multiSaved=multiEngine.getOption().dataZoom[0];
+multiRuntime.window.handleMessage({status:'ready',chart:panelModel(2)});
+assert.equal(multiEngine.getOption().dataZoom[0].start,multiSaved.start);
+assert.equal(multiEngine.getOption().dataZoom[0].end,multiSaved.end);
+multiRuntime.resize(1000);
+assert.equal(multiEngine.getOption().dataZoom[0].start,multiSaved.start);
+const oneEmpty=panelModel(2);oneEmpty.candlestick.panels[0].data=oneEmpty.candlestick.panels[0].data.map(v=>({...v,statistics:null}));
+assert.equal(render(oneEmpty).chartElement.hidden,false,'An empty panel does not hide a populated comparison.');
+const allEmpty=panelModel(2);for(const p of allEmpty.candlestick.panels){p.data=[];}
+assert.equal(render(allEmpty).emptyElement.hidden,false);
+multiEngine.dispose();
+console.log('Named Candlestick panels, independent scales, shared zoom and all-grid wheel routing verified.');
+
+async function verifyPanelStartup() {
+    const delayed=render(panelModel(4),'symcon',true,900,null,true);
+    assert.equal(delayed.option,undefined);
+    delayed.resolveStartup();await Promise.resolve();
+    assert.equal(delayed.option.series.length,4,'Lossless startup restores every panel.');
+    const superseded=render(panelModel(4),'symcon',true,900,null,true);
+    superseded.window.handleMessage({status:'ready',chart:panelModel(2)});
+    superseded.resolveStartup();await Promise.resolve();
+    assert.equal(superseded.option.series.length,2,'A delayed startup never replaces a newer full state.');
+    const unloaded=render(panelModel(4),'symcon',true,900,null,true);
+    unloaded.events.beforeunload();unloaded.resolveStartup();await Promise.resolve();
+    assert.equal(unloaded.option,undefined,'Unload cancels panel startup.');
+}
+verifyPanelStartup().then(()=>console.log('Candlestick compressed startup and cancellation verified.')).catch(error=>{console.error(error);process.exitCode=1;});

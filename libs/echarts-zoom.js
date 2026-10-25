@@ -31,7 +31,7 @@
 
     // Category-time charts keep every loaded value in the numeric-axis scale.
     // The existing time-axis consumers retain their previous filtering contract.
-    function categoryTimeOptions(enabled, compact, vertical, sliderBottom) {
+    function categoryTimeOptions(enabled, compact, vertical, sliderBottom, axisIndexes) {
         var result = timeAxisOptions(enabled, 'ipsview', sliderBottom, compact);
         result.forEach(function (entry) {
             entry.filterMode = 'none';
@@ -41,6 +41,7 @@
                 entry.yAxisIndex = 0;
                 entry.orient = 'vertical';
             }
+            if (axisIndexes) { entry[vertical ? 'yAxisIndex' : 'xAxisIndex'] = axisIndexes; }
         });
         if (result[1]) {
             result[1].showDataShadow = false;
@@ -195,8 +196,16 @@
             var direction = getDirection ? getDirection() : {};
             var anchor;
             if (getDirection && typeof chart.getModel === 'function') {
-                var grid = chart.getModel().getComponent('grid');
-                var rect = grid && grid.coordinateSystem && grid.coordinateSystem.getRect();
+                var rect = null;
+                for (var index = 0; index < (direction.gridCount || 1); index += 1) {
+                    var grid = chart.getModel().getComponent('grid', index);
+                    var candidate = grid && grid.coordinateSystem && grid.coordinateSystem.getRect();
+                    var pointerX = Number(event.clientX) - bounds.left;
+                    var pointerY = Number(event.clientY) - bounds.top;
+                    if (candidate && pointerX >= candidate.x && pointerX <= candidate.x + candidate.width
+                        && pointerY >= candidate.y && pointerY <= candidate.y + candidate.height) { rect = candidate; break; }
+                }
+                if (!rect) { return; }
                 if (rect) {
                     var x = Number(event.clientX) - bounds.left;
                     var y = Number(event.clientY) - bounds.top;

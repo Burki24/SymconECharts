@@ -85,4 +85,56 @@ try {
 } catch (RuntimeException $exception) {
     candleAssert($calls === 63 && str_contains($exception->getMessage(), 'dense'), 'Exactly 63 gateway calls maximum.');
 }
+
+// Two dense sources fit exactly under the unchanged shared budgets (31 calls each).
+$panelFetchCalls = 0;
+$panelFetch = static function (array $r) use (&$panelFetchCalls): array
+{
+    ++$panelFetchCalls;
+    $values = [];
+    if ($r['VariableID'] <= 2) {
+        for ($t = $r['StartTimestamp']; $t <= $r['EndTimestamp']; ++$t) {
+            $values[] = [$t, 1.0];
+        }
+    } else {
+        $values[] = [$r['StartTimestamp'], 3.0];
+    }
+    return ['VariableID'         => $r['VariableID'], 'VariableType' => 2,
+        'StartTimestamp'         => $r['StartTimestamp'], 'EndTimestamp' => $r['EndTimestamp'],
+        'ArchiveAggregationType' => 'standard', 'EffectiveReducer' => 'raw',
+        'Truncated'              => count($values) > 2000, 'Points' => array_slice($values, -2000)];
+};
+$two = CandlestickData::ReadMany([1, 2], 100, 32099, $panelFetch);
+candleAssert(
+    count($two[1]) + count($two[2]) === 64000 && $panelFetchCalls === 62,
+    'Two panels share exactly 64000 retained samples and 62 raw requests.'
+);
+$panelFetchCalls = 0;
+try {
+    CandlestickData::ReadMany([1, 2, 3], 100, 32099, $panelFetch);
+    throw new LogicException('Per-panel raw budgets multiplied.');
+} catch (RuntimeException $exception) {
+    candleAssert(
+        $panelFetchCalls === 63 && str_contains($exception->getMessage(), 'dense'),
+        'A third source must not exceed the shared sample budget.'
+    );
+}
+$panelFetchCalls = 0;
+try {
+    CandlestickData::ReadMany([1, 2, 4], 100, 32099, static function ($r) use ($panelFetch): array
+    {
+        $id = $r['VariableID'];
+        $r['VariableID'] = $id === 4 ? 2 : $id;
+        $response = $panelFetch($r);
+        $response['VariableID'] = $id;
+        return $response;
+    });
+    throw new LogicException('Per-panel query budgets multiplied.');
+} catch (RuntimeException $exception) {
+    candleAssert(
+        $panelFetchCalls === 63 && str_contains($exception->getMessage(), 'dense'),
+        'No more than 63 gateway calls across all panels, including discarded fragments.'
+    );
+}
+
 echo "Candlestick data tests passed.\n";

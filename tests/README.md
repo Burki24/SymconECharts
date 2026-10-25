@@ -1,5 +1,40 @@
 # Tests
 
+## Candlestick: benannte Vergleichspanels
+
+`php tests/gateway_gauges.php --candlestick-panels` begann RED am fehlenden
+Quellenlistenfeld und prüft bis zu vier Panelquellen über den realen
+Modul-/Gateway-Pfad mit Kernel-Doppeln. Gleiche Namen und verschiedene Einheiten
+bleiben ID-getrennt; Originalstatistiken, Cache, Referenzen, reine Entwürfe,
+Fehlerfälle, leere Fenster und Rückkehr zum Altmodell werden geprüft. Der
+Viermal-720-Test überschritt zunächst 1 MiB; die vorhandene Startkomprimierung
+hält nun beide HTML-Dokumente vollständig innerhalb der bestehenden Grenze.
+`php tests/candlestick_data.php` prüft gemeinsame 63-/64000-Budgets, ohne gekürzte
+Fragmente als vollständige Daten zu verwenden.
+
+`node tests/candlestick_layout.js` prüft beide Adapter/Ausrichtungen mit dem
+lokalen ECharts-Build, eigene Werteskalen, gemeinsame Zoomachsen, Originaltooltips,
+Lücken und Ansichtserhalt bei Resize/Refresh. Der gemeinsame Mausradadapter wird
+über dem zweiten Grid geprüft. Komprimierter Start, ein neuer Vollzustand während
+der Dekodierung und Unload-Abbruch sind ebenfalls abgedeckt.
+
+`node tests/candlestick_browser.mjs` bietet mit `/?panels=4` vier synthetische
+Panels in getrennten Frames und komprimierte Startzustände. Echte Browser-
+Mausradaktionen wurden in beiden Ausrichtungen über nachfolgenden Panels und in
+beiden Richtungen geprüft; die vollständigen Einzelwerteskalen blieben stabil,
+ein Fixture-Refresh erhielt das Zoomfenster. Die erste Radaktion ohne vorherigen
+Zeigeranker änderte keinen Zoom; nach eindeutigem Klickanker waren Empfang und
+Wirkung sichtbar. Diese Instrumentierung ersetzt weder Symcon noch die native
+IPSView-App. Live-Abnahme von Formular, Kachel und IPSView nach Update sowie echte
+Touchbedienung bleiben offen.
+
+Die Scrollprüfung erreichte auch das vierte Panel in beiden Ausrichtungen;
+der Kachelkopf blieb dabei frei. Im IAB-Protokoll erschienen drei
+`MutationObserver.observe`-Fehler ohne zuordenbaren Modul-Stack. Die betroffenen
+Modul-/Zoom-/Start-/Interaktionsdateien enthalten diesen Aufruf nicht; die
+Meldungen werden nicht als nachgewiesener Modulfehler gewertet. Ein fehlerfreies
+Browserprotokoll ist damit ausdrücklich nicht belegt.
+
 ## PictorialBar: Mehrfachübernahme von Quellen
 
 Die anschließende MCP-Abnahme bestätigt echte deutsche Fehlerdialoge und eine

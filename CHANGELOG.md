@@ -12,6 +12,13 @@
 
 ## Neu
 
+- Candlestick bietet optional ein bis vier benannte Vergleichspanels mit eigenen
+  Werteskalen und Originaleinheiten sowie gemeinsamem Zeitzoom. Kachel, IPSView
+  und Vorschauen unterstützen das Modell; kleine Flächen erhalten eine
+  Scrollansicht. Einzelquellen und Designs bleiben erhalten. Alle Panels teilen
+  unverändert höchstens 720 Zeitintervalle, 63 Archivabfragen und 64000 Rohwerte.
+  Große HTML-Startzustände nutzen die vorhandene verlustfreie Komprimierung.
+
 - PictorialBar bietet eine Mehrfachübernahme numerischer Quellen nach Objektzweig,
   Namensbestandteil oder genauer Einheit. Eine auswählbare Trefferliste zeigt
   bereits vorhandene Quellen; die ID-basierte Übernahme ergänzt ausschließlich

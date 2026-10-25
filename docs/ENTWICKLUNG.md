@@ -1,5 +1,15 @@
 # Entwicklung von SymconECharts
 
+Candlestick ergänzt gemäß [ADR 0105](adr/0105-candlestick-comparison-panels.md)
+einen ausdrücklich aktivierten 1–4-Panel-Vertrag. Quellenidentität und Metadaten,
+zentrale Zeitplanung, bestehender Rohwertleser mit gemeinsamem 63-/64000-Budget,
+Zoomsteuerung und verlustfreie Startzustands-Komprimierung werden wiederverwendet.
+Jedes Panel behält eigene Werteskala, Einheit, Rohwertstatistik und Lücken. Beide
+Ausgabeadapter teilen die native Mehrfach-Grid-Runtime; beide reinen SVG-Entwürfe
+komponieren dieselbe vorhandene Kerzengeometrie. Kleine Flächen scrollen, das
+Mausrad zoomt über jedem Koordinatensystem. Lokale Tests und synthetische Frames
+sind geprüft; Modulupdate/MCP, echte Kachel-/IPSView-Hosts und Touch bleiben offen.
+
 ## Ziel und Abgrenzung
 
 Symcon-Variablen und Archivdaten sollen ohne eigene JavaScript-Programmierung

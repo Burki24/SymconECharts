@@ -9,6 +9,9 @@ trait CandlestickPreview
 {
     private function CandlestickPreviewSvg(array $values, bool $ipsView): string
     {
+        if ($values['UseComparisonPanels'] ?? $this->ReadPropertyBoolean('UseComparisonPanels')) {
+            return $this->CandlestickPanelsPreviewSvg($values, $ipsView);
+        }
         $palette = EChartsBarPreview::Palette($this->BarPreviewValue($values, 'EChartsTheme', 'string', $ipsView));
         $svg = EChartsBarPreview::Open(
             $palette,
@@ -179,5 +182,57 @@ trait CandlestickPreview
         }
         return $svg . '<text x="24" y="350" font-size="10" fill="' . $e($palette['muted']) . '">'
             . $e($this->Translate($zoom ? 'Time zoom is interactive in the chart.' : 'Hover effects are visible in the chart.')) . '</text></svg>';
+    }
+
+    /** Compose the existing pure candle preview; no second candle geometry or archive reads. */
+    private function CandlestickPanelsPreviewSvg(array $values, bool $ipsView): string
+    {
+        $palette = EChartsBarPreview::Palette($this->BarPreviewValue($values, 'EChartsTheme', 'string', $ipsView));
+        $svg = EChartsBarPreview::Open(
+            $palette,
+            (string) ($values['Title'] ?? $this->ReadPropertyString('Title')),
+            true,
+            $ipsView,
+            $values,
+            $this->Translate('Example data'),
+            $this->Translate('Candlestick preview'),
+            EChartsBarPreview::Color($this->BarPreviewValue($values, 'TitleColor', 'integer', $ipsView), $palette['text']),
+            $this->BarPreviewValue($values, 'TitleFontSizePercent', 'integer', $ipsView)
+        );
+        $svg = str_replace('<svg xmlns', '<svg font-family="' . EChartsBarPreview::E($this->BarPreviewValue($values, 'FontFamily', 'string', $ipsView)) . '" xmlns', $svg);
+        $svg = str_replace('<text x="24"', '<text font-style="' . ($this->BarPreviewValue($values, 'TitleItalic', 'boolean', $ipsView) ? 'italic' : 'normal')
+            . '" font-weight="' . ($this->BarPreviewValue($values, 'TitleBold', 'boolean', $ipsView) ? 'bold' : 'normal') . '" x="24"', $svg);
+        try {
+            $sources = $this->ValidatePanelSources($values['Sources'] ?? json_decode($this->ReadPropertyString('Sources'), true));
+        } catch (\Throwable $exception) {
+            return $svg . '<text x="24" y="100" font-size="12" fill="' . EChartsBarPreview::E($palette['text']) . '">'
+                . EChartsBarPreview::E($this->Translate('Configure one to four unique numeric Candlestick panel variables.')) . '</text></svg>';
+        }
+        $horizontal = $this->BarPreviewValue($values, 'Orientation', 'string', $ipsView) === 'horizontal';
+        $width = $horizontal ? 720 * count($sources) : 720;
+        $height = $horizontal ? 450 : 80 + 360 * count($sources);
+        $svg = str_replace(
+            ['width="720" height="360" viewBox="0 0 720 360"', '<rect width="720" height="360"'],
+            ['width="' . $width . '" height="' . $height . '" viewBox="0 0 ' . $width . ' ' . $height . '" data-panel-count="' . count($sources) . '"',
+                '<rect width="' . $width . '" height="' . $height . '"'],
+            $svg
+        );
+        foreach ($sources as $index => $source) {
+            $draft = $values;
+            $draft['UseComparisonPanels'] = false;
+            $draft['EnableZoom'] = false;
+            $draft['IPSViewEnableZoom'] = false;
+            $draft['VariableID'] = $source['VariableID'];
+            $draft['Title'] = $source['Label'] . ($source['Unit'] !== '' ? ' (' . $source['Unit'] . ')' : '');
+            $child = $this->CandlestickPreviewSvg($draft, $ipsView);
+            $child = str_replace('candle-shadow', 'candle-shadow-' . $index, $child);
+            $child = preg_replace('/<svg /', '<svg x="' . ($horizontal ? 720 * $index : 0) . '" y="' . (70 + ($horizontal ? 0 : 360 * $index)) . '" ', $child, 1);
+            $svg .= $child;
+        }
+        if ($this->BarPreviewValue($values, 'EnableZoom', 'boolean', $ipsView)) {
+            $svg .= '<rect data-time-slider="true" x="' . ($horizontal ? $width - 15 : 80) . '" y="' . ($horizontal ? 110 : $height - 12)
+                . '" width="' . ($horizontal ? 8 : 600) . '" height="' . ($horizontal ? 220 : 8) . '" fill="' . EChartsBarPreview::E($palette['accent']) . '"/>';
+        }
+        return $svg . '</svg>';
     }
 }

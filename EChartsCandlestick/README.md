@@ -20,6 +20,45 @@ Standardmäßig bedeutet Grün einen Anstieg, Rot einen Abfall und die
 neutrale Farbe einen gleichen Anfangs- und Endwert. Das ist keine
 Gut-/Schlechtbewertung der Messwerte.
 
+## Benannte Vergleichspanels
+
+Mit „Benannte Vergleichspanels verwenden“ lassen sich **ein bis vier** numerische
+Standard-Archivvariablen in einer Instanz vergleichen. Die Liste „Vergleichspanels“
+legt Quellen, optionale Panelnamen und Reihenfolge fest. Ohne eigenen Namen wird
+der aktuelle Variablenname angezeigt. Gleiche Namen sind erlaubt; jede Variable
+wird durch ihre ID identifiziert und kann nur einmal vorkommen.
+
+Jedes Panel besitzt eine eigene Werteskala und verwendet die Einheit sowie
+Nachkommastellen seiner Quelle. Beispielsweise können Temperatur, Luftfeuchtigkeit
+und Luftdruck gemeinsam betrachtet werden. Werte werden weder normalisiert noch
+addiert. Der Tooltip enthält die originalen ersten/letzten Werte, Extrema und
+Messzeitpunkte des jeweiligen Panels. Ein leeres Panel bleibt als solches sichtbar;
+fehlende Intervalle werden nicht mit Nullen aufgefüllt.
+
+Zeitraum und Intervall gelten für alle Panels. Bei eingeschaltetem Zeitzoom
+steuert ein gemeinsamer Regler alle Zeitachsen; das Mausrad funktioniert über
+jedem Panel. Die vollständigen geladenen Werte bestimmen weiterhin jede einzelne
+Werteskala. Ein kompatibles Datenupdate oder Größenwechsel erhält das Zoomfenster.
+Der vorhandene Zoomschalter bleibt je Designer unabhängig und standardmäßig aus.
+
+Vertikale Kerzen stehen in Panels untereinander, horizontale Kerzen nebeneinander.
+Kleine Kacheln können deshalb innerhalb der Diagrammfläche gescrollt werden:
+über freie Bereiche, Überschriften oder mit der Scrollleiste. Über dem eigentlichen
+Koordinatensystem bedient das Mausrad bei aktivem Zeitzoom die Zeitachse.
+Der gemeinsame Zeitregler liegt unter beziehungsweise rechts neben den Panels.
+Schriftgrößen und die übrigen Designoptionen gelten wie bisher für beide Ausgaben.
+Die gekennzeichneten Vorschauen zeigen synthetische Beispiele aller Panels.
+
+Alle Panels teilen sich **insgesamt** 63 Archivabfragen und 64000 protokollierte
+Rohwerte je Aktualisierung. Die gemeinsame Zeitplanung erlaubt weiterhin höchstens
+720 Intervalle. Bei einem zu dichten Archiv wird die gesamte Aktualisierung
+abgewiesen; es werden keine Panels oder Daten stillschweigend weggelassen.
+Dann einen kürzeren Zeitraum oder weniger Quellen wählen.
+
+Die bisherige „Archivvariable“ bleibt gespeichert und wird bei aktivierten Panels
+nicht verwendet. Beim Ausschalten der Paneloption ist sie wieder maßgeblich.
+Bestehende Instanzen ändern ihr Verhalten durch das Modulupdate nicht.
+
 ## Zeit und fehlende Werte
 
 Es werden ausschließlich abgeschlossene Intervalle angezeigt. Zur Auswahl

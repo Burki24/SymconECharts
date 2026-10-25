@@ -168,6 +168,12 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   (`week`, Montag bis Montag) über die zentrale begrenzte Rohintervallplanung.
   Vorhandene Stunden-/Tagesverträge, Designs und 720/63/64000-Budgets bleiben
   erhalten; die Aggregatmodi anderer Familien werden nicht erweitert.
+  ADR 0105 ergänzt optional `UseComparisonPanels=false` und `Sources` mit ein bis
+  vier benannten, ID-eindeutigen Archivquellen. Die alte Einzel-`VariableID` bleibt
+  erhalten. Eigene Originalskalen/-einheiten je Panel, gemeinsamer Zeitraum und
+  Zeitzoom; 720 Zeitintervalle sowie insgesamt 63 Abfragen/64000 Rohwerte bleiben
+  erhalten. Rohwertleser, Zeitplanung, Vorschauverkabelung, Zoom und verlustfreie
+  Startzustands-Komprimierung werden wiederverwendet. Kleine Ausgaben scrollen.
   Aktuelle Mengenflüsse zwischen manuell angelegten Knoten liegen im eigenen
   Gerätemodul `EChartsSankey`; Verbindungsbreiten folgen numerischen
   Quellvariablen, Zyklen und standardmäßig negative Werte sind unzulässig.

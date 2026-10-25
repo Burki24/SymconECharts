@@ -23,6 +23,8 @@ responsiven Seiten; individuelle Wertebereiche und Einheiten bleiben erhalten.
 Scatter/Bubble unterstützt bis zu 16 benannte X/Y-Vergleichsgruppen mit
 optionaler Größenquelle je Gruppe. Alle Gruppen teilen sich das vorhandene
 Archivbudget; bestehende einzelne Punktwolken bleiben unverändert nutzbar.
+Candlestick bietet optional ein bis vier benannte Archiv-Vergleichspanels mit
+getrennten Werteskalen und gemeinsamem Zeitzoom; Einzelquellen bleiben nutzbar.
 Feste Min-/Max-Bezüge für Bubble-Größen und Originalwerte im Tooltip erlauben
 stabile Größenvergleiche über verschiedene Zeiträume.
 Tree und TreeSystemHealth unterstützen bis zu zwölf Nachkommensebenen des
