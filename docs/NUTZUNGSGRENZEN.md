@@ -212,20 +212,29 @@ normalisiert und anschließend als unveränderte Mengenbilanz ausgegeben werden.
 
 ## Verbleibende Testlücken außerhalb des Roadmap-Abschlusses
 
+Die [gemeinsame Systemprüfung vom 26.10.2026](SYSTEMPRUEFUNG-2026-10-26.md)
+ergänzt volle Budgets für TimeSeries, Parallel und eine Heatmap sowie gezielte
+Fehler-/Wiederanlaufnachweise. Der Mehr-Gateway-Hookfehler und ein bestehender
+StateTimeline-Archivdatenkonflikt sind dort als Befunde dokumentiert.
+
 Die funktionalen Eigentümerbestätigungen schließen die vereinbarten
 Erweiterungen ab. Folgende Nachweise sind damit nicht automatisch erbracht:
 
 - Echte Touchgeräte und gesonderte horizontale Mausradbedienung ohne bisherigen
   Wirkungsnachweis; die allgemeine Kachel-/IPSView-Abnahme bleibt bestätigt.
-- Vollständige Archiv-/Modellbudgets und längere Lastläufe auf realer
-  Clienthardware. Kurze vorhandene Archive ersetzen keine Live-Lastfreigabe.
+- Weitere volle Archiv-/Modellbudgets, gleichzeitige Clients und längere Lastläufe
+  auf realer Clienthardware. Die drei nachgeholten Grenzlastfälle ersetzen keine
+  Lastfreigabe aller Familien und Geräte.
 - Nicht geprüfte Symcon-Versionen, Installationslayouts und Gerätevarianten;
   insbesondere ist kein eigener vollständiger Symcon-9.0-Nachweis abgeleitet.
 - Spezielle Fehler-/Wiederverbindungs- und Größenwechselmatrizen, soweit der
   jeweilige Testbericht dafür keinen gesonderten Praxisnachweis enthält.
-- Die [Debug-Praxismatrix](DEBUG_OUTPUT.md) und die gesonderte native
-  WoIst-/Helper-Mausradabnahme aus der [Entwicklungsdokumentation](ENTWICKLUNG.md).
-  Beide sind keine offenen Funktionspunkte dieser Roadmap.
+- Die spezielle [Debug-Praxismatrix](DEBUG_OUTPUT.md). Sie ist kein offener
+  Funktionspunkt dieser Roadmap.
+
+Die native WoIst-/Helper-Mausradprüfung wurde bereits vom Eigentümer durchgeführt
+und bestätigt. Sie ist keine verbleibende Testlücke; der Nachweis ist in der
+[Entwicklungsdokumentation](ENTWICKLUNG.md) festgehalten.
 
 ## Aktuelle Werte und Strukturen
 

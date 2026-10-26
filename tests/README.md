@@ -2,6 +2,12 @@
 
 ## Abnahmestand der Nutzungsgrenzen-Roadmap
 
+Die zusammenhängende [Systemprüfung vom 26.10.2026](../docs/SYSTEMPRUEFUNG-2026-10-26.md)
+ergänzt diese Abnahmen um einen Rundlauf aller Familien, volle TimeSeries-/
+Parallel-/Heatmap-Budgets und gezielte Fehler-/Wiederanlauftests. Sie dokumentiert
+auch den Mehr-Gateway-Hookfehler, einen StateTimeline-Archivdatenkonflikt sowie
+die weiterhin offenen Geräte-, Dauerlast- und Hostprüfungen.
+
 Stand 25.10.2026: Alle vereinbarten Erweiterungen sind umgesetzt und vom
 Eigentümer in Kachel und tatsächlichem IPSView funktional bestätigt, zuletzt
 Heatmap mit getrennten Vergleichsansichten. Die [Roadmap](../docs/NUTZUNGSGRENZEN.md)
@@ -13,8 +19,10 @@ Offen bleiben insbesondere echte Touchgeräte, gesonderte horizontale
 Mausradprüfungen ohne bisherigen Wirkungsnachweis, volle Archiv-/Modellbudgets
 auf realen Installationen, nicht geprüfte Symcon-Versionen/Installationslayouts
 und besondere Host-/Fehler-/Transportfälle. Konkrete Lücken bleiben in den
-jeweiligen Abschnitten bestehen. Die spezielle Debug-Praxismatrix und die
-WoIst-/Helper-Mausradabnahme gehören nicht zur abgeschlossenen Funktionsroadmap.
+jeweiligen Abschnitten bestehen. Die spezielle Debug-Praxismatrix gehört nicht
+zur abgeschlossenen Funktionsroadmap. Die native WoIst-/Helper-Mausradprüfung
+ist durch den Eigentümer bereits durchgeführt und bestätigt; sie ist keine
+verbleibende Testlücke.
 
 ## Heatmap: getrennte Vergleichsansichten
 
@@ -494,7 +502,10 @@ bestätigt 16 Achsen/42 gemeinsame Stundenlinien mit unabhängigen Originalwerte
 kleine Limits, feste Tagesintervalle, 17-Achsen-Ablehnung und beide Ausgaben.
 Der Eigentümer bestätigt Kachel und tatsächliches IPSView. Testobjekte wurden
 entfernt, Konfigurationen/Designs und Archivierung blieben unverändert.
-Ein voller 10000-Punkte-Live-Lasttest bleibt wegen kurzer Archive offen.
+Der volle 10000-Aggregate-Live-Test wurde am 26.10.2026 mit temporären
+synthetischen Archiven auf echtem Archive Control nachgeholt; siehe
+[Gesamtbericht](../docs/SYSTEMPRUEFUNG-2026-10-26.md). Dauerlast auf Clienthardware
+bleibt davon getrennt.
 
 ## Heatmap: benutzerdefinierte und feste historische Zeiträume
 
@@ -526,7 +537,10 @@ zugunsten unverdrängter Knöpfe gekürzt und bleiben vollständig im Tooltip.
 Keine Symcon-Daten oder Instanzen bei dieser lokalen Prüfung verändert.
 Die spätere funktionale MCP-Abnahme auf Symcon 9.1 ist erfolgt; der Eigentümer
 bestätigt Kachel und tatsächliches IPSView. Temporäre Testobjekte wurden entfernt,
-bestehende Konfigurationen/Designs blieben identisch. Ein Live-Lasttest bleibt offen.
+bestehende Konfigurationen/Designs blieben identisch. Der volle einzelne
+8784-Stunden-Live-Test wurde am 26.10.2026 nachgeholt; siehe
+[Gesamtbericht](../docs/SYSTEMPRUEFUNG-2026-10-26.md). Maximale Mehrpanel- und
+Dauerlastprüfungen bleiben offen.
 
 ## Calendar: Jahr, Quartal, Monat und feste Datumsfenster
 

@@ -18,4 +18,17 @@ Komplette Diagramme, Objektbäume, Netzwerkkarten, Freitext, JSON, SVG, HTML, Bi
 
 `tests/debug_output.php` läuft innerhalb der bestehenden Gateway-/Diagrammintegration. Es prüft für alle 30 Module ausgeglichene Lebenszyklus-Aufrufe, automatische Quellstellen, neue Vorgangskennungen, Gateway-Ablehnungen, Schutz synthetischer Dokumentinhalte und unverändertes Verhalten bei ausgefallenem Debug-Kanal. Bestehende Daten-, Formular-, Ausgabe-, Layout- und Integrationsprüfungen bleiben Bestandteil von `php tests/quality.php --fix`.
 
-Die spezielle Debug-Praxismatrix bleibt als eigener Testnachweis offen: je eine aktuelle und historische Quelle ändern, ungültige/fehlende Quellen und Gateway-/Archivfehler auslösen, Kachel und IPSView aktualisieren, HTTP-Ablehnung und deaktivierten Transport prüfen. Meldungsmenge, Verständlichkeit und Laufzeit müssen in Symcon geprüft werden. Die bestätigte funktionale Kachel-/IPSView-Abnahme der Diagramme belegt diese spezielle Debug-Fehlermatrix nicht; die frühere allgemeine Lizenzlücke ist dagegen überholt. Bei den beschriebenen lokalen Tests wurden keine Live-Systeme geändert.
+Die [Systemprüfung vom 26.10.2026](SYSTEMPRUEFUNG-2026-10-26.md) ergänzt einen
+gezielten Live-Teilnachweis: aktuelle Testwerte, ungültige Quellen,
+Gatewaytrennung, Archivtypfehler und Erholung wurden mit temporären Instanzen
+geprüft. Dateibasierte Diagnosen enthalten ausgeglichene START-/ENDE-Paare,
+deutsche Ursachen und geschützte Dokumentergebnisse. HTTP-Ablehnungen und
+deaktivierter Transport wurden außerdem funktional geprüft.
+
+Der gemeinsame flüchtige Diagnosepuffer verlor bei aktiver Gateway-Diagnose
+Meldungen; seine Ausschnitte belegen keinen vollständigen Ablauf. Vollständige
+Mengen-/Langzeitmessungen und die ganze spezielle Matrix in den nativen Kachel-
+und IPSView-Hosts bleiben offen. Die bestätigte funktionale Eigentümerabnahme
+ersetzt diese besonderen Nachweise nicht. Bestehende Quellen und Konfigurationen
+blieben im Live-Test unverändert; nur eigene synthetische Testobjekte wurden
+erzeugt, verändert und wieder entfernt.
