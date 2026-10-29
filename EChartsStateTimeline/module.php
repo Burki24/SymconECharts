@@ -475,7 +475,7 @@ class EChartsStateTimeline extends IPSModuleStrict
                 $this->FailArchiveBudget();
             }
             $archive = $this->ReadArchiveSource($source, $query, min(2000, $remaining));
-            $pointCount += count($archive['Points']);
+            $pointCount += $archive['RawPointCount'];
             try {
                 $segments = StateTimelineData::Segments(
                     $archive['Points'],
@@ -698,11 +698,15 @@ class EChartsStateTimeline extends IPSModuleStrict
                 throw new RuntimeException('The gateway archive request failed: ' . $code);
             }
             $archive = $response['Payload'];
-            if (($archive['Truncated'] ?? null) === true || (is_array($archive['Points'] ?? null) && count($archive['Points']) > $limit)) {
+            $rawPointCount = array_key_exists('RawPointCount', $archive) ? $archive['RawPointCount']
+                : (is_array($archive['Points'] ?? null) ? count($archive['Points']) : 0);
+            if (($archive['Truncated'] ?? null) === true || (is_array($archive['Points'] ?? null) && count($archive['Points']) > $limit)
+                || (is_int($rawPointCount) && $rawPointCount > $limit)) {
                 $this->FailArchiveBudget();
             }
             if (($archive['VariableID'] ?? null) !== $source['VariableID']
                 || !is_array($archive['Points'] ?? null) || ($archive['Truncated'] ?? null) !== false
+                || !is_int($rawPointCount) || $rawPointCount < count($archive['Points'])
                 || !array_key_exists('PreviousPoint', $archive)
                 || (!is_array($archive['PreviousPoint']) && $archive['PreviousPoint'] !== null)
                 || ($archive['StartTimestamp'] ?? null) !== $query['StartTimestamp']
@@ -713,6 +717,7 @@ class EChartsStateTimeline extends IPSModuleStrict
                 $this->DebugEChartsSetStatus(self::STATUS_GATEWAY_FAILED);
                 throw new RuntimeException('The gateway returned invalid StateTimeline archive data.');
             }
+            $archive['RawPointCount'] = $rawPointCount;
             return $debugFlowResult = $archive;
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;

@@ -70,6 +70,54 @@ assertGatewayGauge(
     'Sample exactly at right boundary must not create a zero-width segment.'
 );
 
+$originalDurationRows = $GLOBALS['symconTestArchiveVariables'][$ids[0]]['LoggedValues'];
+try {
+    $GLOBALS['symconTestArchiveVariables'][$ids[0]]['LoggedValues'][1]['Duration'] = $end - ($start + 1000);
+    $GLOBALS['symconTestArchiveVariables'][$ids[0]]['LoggedValues'][] = ['TimeStamp' => $start + 1000, 'Value' => false, 'Duration' => 0];
+    $gateway->ApplyChanges();
+    $timeline->ApplyChanges();
+    $durationTimeline = json_decode($timeline->GetStateTimelineData(), true, 512, JSON_THROW_ON_ERROR);
+    assertGatewayGauge(
+        $timeline->GetTestStatus() === IS_ACTIVE && $durationTimeline['stateTimeline']['rows'] === $rows,
+        'Zero-duration switches must not change exact StateTimeline segments, predecessor, unknown states, labels or source identities.'
+    );
+} finally {
+    $GLOBALS['symconTestArchiveVariables'][$ids[0]]['LoggedValues'] = $originalDurationRows;
+    $gateway->ApplyChanges();
+    $timeline->ApplyChanges();
+}
+
+// Identical or duration-resolved rows still consume the shared raw-read budget.
+$durationBudgetIDs = range(88910, 88918);
+try {
+    $budgetSources = [];
+    foreach ($durationBudgetIDs as $id) {
+        $GLOBALS['symconTestVariables'][$id] = ['VariableType' => 0, 'VariableUpdated' => $end, 'Value' => true, 'Name' => 'Budget source'];
+        $GLOBALS['symconTestArchiveVariables'][$id] = ['AggregationType' => 0,
+            'LoggedValues'                                               => array_fill(0, 2000, ['TimeStamp' => $start + 1, 'Value' => true, 'Duration' => 0])];
+        $budgetSources[] = ['VariableID' => $id, 'Label' => '', 'States' => []];
+    }
+    $timeline->SetTestProperty('Sources', json_encode($budgetSources, JSON_THROW_ON_ERROR));
+    $gateway->ApplyChanges();
+    $timeline->ApplyChanges();
+    try {
+        $timeline->GetStateTimelineData();
+        throw new LogicException('Collapsed rows bypassed the 16000 raw-point budget.');
+    } catch (RuntimeException $exception) {
+        assertGatewayGauge(
+            $exception->getMessage() === 'Too many state changes. Choose a shorter time range.',
+            'The ninth 2000-row source must exceed the common raw budget despite only one normalized point per source.'
+        );
+    }
+} finally {
+    foreach ($durationBudgetIDs as $id) {
+        unset($GLOBALS['symconTestVariables'][$id], $GLOBALS['symconTestArchiveVariables'][$id]);
+    }
+    $timeline->SetTestProperty('Sources', json_encode($timelineSources, JSON_THROW_ON_ERROR));
+    $gateway->ApplyChanges();
+    $timeline->ApplyChanges();
+}
+
 $html = $timeline->GetVisualizationTile();
 $ipsHtml = $timeline->GetIPSViewHTML();
 assertGatewayGauge(strlen($html) < SYMCON_OUTPUT_BUFFER_LIMIT && strlen($ipsHtml) < SYMCON_OUTPUT_BUFFER_LIMIT
@@ -242,6 +290,11 @@ unset($GLOBALS['symconTestCopyTarget']);
 $parent = IPSModuleStrict::$ParentResponder;
 foreach ([
     static fn (array $data): array => array_replace($data, ['VariableID' => 99999]),
+    static fn (array $data): array => array_replace($data, ['RawPointCount' => null]),
+    static fn (array $data): array => array_replace($data, ['RawPointCount' => -1]),
+    static fn (array $data): array => array_replace($data, ['RawPointCount' => 0]),
+    static fn (array $data): array => array_replace($data, ['RawPointCount' => '3']),
+    static fn (array $data): array => array_replace($data, ['RawPointCount' => 2001]),
     static fn (array $data): array => array_replace($data, ['Truncated' => true]),
     static fn (array $data): array => array_replace($data, ['Points' => [[$start + 1, 1], [$start + 1, 0]]]),
     static fn (array $data): array => array_replace($data, ['Points' => [[$start, 2]]]),

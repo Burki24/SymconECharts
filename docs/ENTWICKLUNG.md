@@ -1,5 +1,12 @@
 # Entwicklung von SymconECharts
 
+Die zentrale Gateway-Zustandsnormalisierung nutzt gemäß
+[ADR 0108](adr/0108-duration-aware-archive-states.md) die native Archiv-Dauer,
+um mehrere Wechsel derselben Sekunde ausschließlich bei genau einem positiven
+Dauereintrag aufzulösen. StateTimeline und CalendarPie teilen diese Prüfung;
+unaufgelöste Widersprüche bleiben Fehler. Rohbudgets, Protokoll, Vorgänger,
+Abschnittsbildung und Designs bleiben erhalten. Archive werden nicht bereinigt.
+
 Der gemeinsame Gateway-Hook wird gemäß [ADR 0107](adr/0107-shared-gateway-hook-ownership.md)
 koordiniert und routet zum tatsächlichen Datenflussparent. Peer-Aufrufe erfolgen
 nur bei aktiven Schnittstellen, damit ein Bibliotheksreload keine noch nicht

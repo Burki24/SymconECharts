@@ -43,11 +43,16 @@ ausgeschaltet zu erscheinen. Bekannte Teile eines unvollständigen Archivs
 bleiben sichtbar. Ein Punkt genau am Fensterende erzeugt keinen weiteren
 Abschnitt ohne Dauer.
 
-Enthält das Archiv unterschiedliche Zustände mit demselben Sekundenzeitstempel,
-ist deren Reihenfolge nicht eindeutig. Die betroffene Datenabfrage wird deshalb
-abgewiesen, statt einen Zustand auszuwählen oder eine Reihenfolge zu erfinden.
-Die Quelldaten müssen in diesem Fall geprüft werden. Das Modul verändert oder
-bereinigt solche Archiveinträge nicht automatisch.
+Mehrere Wechsel innerhalb derselben Sekunde können im Archiv denselben
+Sekundenzeitstempel tragen. Hat genau ein Eintrag eine positive ganzzahlige
+Archiv-Dauer und haben alle übrigen Dauer 0, gilt der Eintrag mit positiver Dauer
+für den folgenden Zeitabschnitt. Wechsel mit Dauer 0 erzeugen keinen Abschnitt.
+Die Reihenfolge der gelieferten Einträge entscheidet dabei nicht über den Zustand.
+
+Fehlende oder ungültige Dauerangaben, mehrere Einträge mit positiver Dauer oder
+ausschließlich Dauer 0 lassen unterschiedliche Zustände mehrdeutig bleiben.
+Solche Abfragen werden weiterhin abgewiesen. Gleiche doppelte Zustände bleiben
+zulässig. Das Modul verändert oder bereinigt keine Archiveinträge automatisch.
 
 Die Zeiträume umfassen verstrichene Zeit bis zum aktuellen Abfragezeitpunkt;
 ein Tag entspricht 24 Stunden, eine Woche sieben Tagen, auch bei einer

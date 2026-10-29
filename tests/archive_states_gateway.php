@@ -149,6 +149,62 @@ $GLOBALS['symconTestArchiveVariables'][4800]['LoggedValues'][1]['Value'] = true;
 $gateway->ApplyChanges();
 $duplicate = stateArchiveRequest($gateway);
 assertGatewayGauge($duplicate['Payload']['Points'] === [[1780000300, 1]], 'Identical duplicate rows may be safely collapsed.');
+
+// Native Archive Control can report sub-second changes as zero-duration rows.
+// Only one positive duration can identify the state that actually follows that second.
+$durationRows = [
+    ['TimeStamp' => 1780000400, 'Value' => true, 'Duration' => 100],
+    ['TimeStamp' => 1780000300, 'Value' => false, 'Duration' => 100],
+    ['TimeStamp' => 1780000300, 'Value' => true, 'Duration' => 0],
+    ['TimeStamp' => 1780000300, 'Value' => false, 'Duration' => 0],
+    ['TimeStamp' => 1780000300, 'Value' => true, 'Duration' => 0],
+    ['TimeStamp' => 1780000100, 'Value' => true, 'Duration' => 200]
+];
+foreach ([$durationRows, array_reverse($durationRows), [$durationRows[2], $durationRows[5], $durationRows[1], $durationRows[0], $durationRows[3], $durationRows[4]]] as $rows) {
+    $GLOBALS['symconTestArchiveVariables'] = $fixture;
+    $GLOBALS['symconTestArchiveVariables'][4800]['LoggedValues'] = $rows;
+    $beforeRows = $GLOBALS['symconTestArchiveVariables'][4800]['LoggedValues'];
+    $gateway->ApplyChanges();
+    $durationResult = stateArchiveRequest($gateway);
+    assertGatewayGauge(
+        $durationResult['Success'] === true
+        && $durationResult['Payload']['Points'] === [[1780000100, 1], [1780000300, 0], [1780000400, 1]]
+        && ($durationResult['Payload']['RawPointCount'] ?? null) === count($rows)
+        && $GLOBALS['symconTestArchiveVariables'][4800]['LoggedValues'] === $beforeRows,
+        'A unique positive archive duration must resolve zero-duration changes independently of row order without modifying archive rows.'
+    );
+}
+foreach ([[0, 0], [1, 1], [null, 1], [1, null], [-1, 1], [1, -1], ['0', 1], [0, '1'], [0, 1.0], [true, 0]] as [$firstDuration, $secondDuration]) {
+    $GLOBALS['symconTestArchiveVariables'][4800]['LoggedValues'] = [
+        ['TimeStamp' => 1780000300, 'Value' => true, 'Duration' => $firstDuration],
+        ['TimeStamp' => 1780000300, 'Value' => false, 'Duration' => $secondDuration]
+    ];
+    $gateway->ApplyChanges();
+    $ambiguous = stateArchiveRequest($gateway);
+    assertGatewayGauge(
+        $ambiguous['Success'] === false && $ambiguous['Error']['Code'] === 'INVALID_ARCHIVE_DATA',
+        'Missing, invalid, zero-only or competing positive duration metadata must not invent a state ordering.'
+    );
+}
+$GLOBALS['symconTestArchiveVariables'][4800]['LoggedValues'] = $durationRows;
+$gateway->ApplyChanges();
+$durationLimited = stateArchiveRequest($gateway, ['Limit' => 2]);
+assertGatewayGauge(
+    $durationLimited['Success'] === true && $durationLimited['Payload']['Truncated'] === true,
+    'Collapsing same-second rows must never conceal an exceeded raw-row budget.'
+);
+$GLOBALS['symconTestArchiveVariables'] = $fixture;
+$GLOBALS['symconTestArchiveVariables'][4801]['LoggedValues'] = [
+    ['TimeStamp' => 1780000300, 'Value' => 2, 'Duration' => 0],
+    ['TimeStamp' => 1780000300, 'Value' => -4.0, 'Duration' => 1]
+];
+$gateway->ApplyChanges();
+$integerDuration = stateArchiveRequest($gateway, ['VariableID' => 4801]);
+assertGatewayGauge(
+    $integerDuration['Success'] === true && $integerDuration['Payload']['Points'] === [[1780000300, -4]],
+    'The same duration policy must preserve original signed Integer state values.'
+);
+$GLOBALS['symconTestArchiveVariables'] = $fixture;
 $GLOBALS['symconTestArchiveVariables'][4801]['LoggedValues'] = [
     ['TimeStamp' => 1780000100, 'Value' => 0],
     ['TimeStamp' => 1780000400, 'Value' => 2],

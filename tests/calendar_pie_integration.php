@@ -437,6 +437,29 @@ assertGatewayGauge(
     && $stateChart['days'][17]['status'] === 'pending',
     'State durations must preserve unknown prefixes, exact seconds and mapped states without filling from the current value.'
 );
+$originalDurationRows = $GLOBALS['symconTestArchiveVariables'][$stateID]['LoggedValues'];
+try {
+    foreach ($GLOBALS['symconTestArchiveVariables'][$stateID]['LoggedValues'] as &$durationRow) {
+        if ($durationRow['TimeStamp'] === strtotime('2026-10-01 12:00:00')) {
+            $durationRow['Duration'] = 43200;
+        }
+    }
+    unset($durationRow);
+    $GLOBALS['symconTestArchiveVariables'][$stateID]['LoggedValues'][] = [
+        'TimeStamp' => strtotime('2026-10-01 12:00:00'), 'Value' => false, 'Duration' => 0
+    ];
+    $gateway->ApplyChanges();
+    $calendarPie->ApplyChanges();
+    $durationCalendar = json_decode($calendarPie->GetCalendarPieData(), true, 512, JSON_THROW_ON_ERROR);
+    assertGatewayGauge(
+        $calendarPie->GetTestStatus() === IS_ACTIVE && $durationCalendar['calendarPie']['days'][0] === $firstDay,
+        'CalendarPie must share duration-aware gateway states without adding zero-duration slices or changing exact daily seconds.'
+    );
+} finally {
+    $GLOBALS['symconTestArchiveVariables'][$stateID]['LoggedValues'] = $originalDurationRows;
+    $gateway->ApplyChanges();
+    $calendarPie->ApplyChanges();
+}
 $stateForm = json_decode($calendarPie->GetConfigurationForm(), true, 512, JSON_THROW_ON_ERROR);
 assertGatewayGauge(
     findGaugeFormElement($stateForm['elements'], 'Sources')['visible'] === false

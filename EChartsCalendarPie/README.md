@@ -73,6 +73,12 @@ Zwischenwerte oder deaktivierte Aufzeichnung nicht zuverlässig als Ausfall
 erkennen: Ein bekannter Zustand wird bis zum nächsten protokollierten Wechsel
 fortgeführt.
 
+Bei mehreren Zustandswechseln derselben Sekunde gilt dieselbe zentrale Regel
+wie bei StateTimeline: Genau ein Eintrag mit positiver ganzzahliger Archiv-Dauer
+und sonst ausschließlich Dauer 0 bestimmen den danach geltenden Zustand.
+Wechsel mit Dauer 0 erhalten keinen Zeitanteil. Mehrdeutige Dauerangaben bleiben
+ein Fehler; das Archiv wird nicht verändert.
+
 ### Optionale Normalisierung für unterschiedliche Messgrößen
 
 Für **Tagesmittelwerte** und **Tagesverbrauch** kann **Numerische Quellen anhand

@@ -1,5 +1,11 @@
 # Gemeinsame Beta-Abnahme am 28.10.2026
 
+Nachtrag 29.10.2026: Der unten historisch beschriebene StateTimeline-Archivfall
+ist inzwischen durch Auswertung eindeutiger nativer Archiv-Dauern korrigiert
+und per MCP nachgeprüft. Es wurden keine Archivdaten bereinigt. Die damalige
+Einordnung als bloßer Datenkonflikt war zu pauschal; siehe
+[neuer Nachweis](STATE_TIMELINE_ARCHIVPRUEFUNG-2026-10-29.md).
+
 ## Umfang und Entscheidung
 
 Geprüft ist das gemeinsame Arbeitspaket auf `dev`, ausgehend von

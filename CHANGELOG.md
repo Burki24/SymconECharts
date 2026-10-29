@@ -860,6 +860,12 @@ steht noch aus.
 
 ## Fixes
 
+- StateTimeline und die Zustandsdauer-Auswertung von CalendarPie berücksichtigen
+  schnelle Zustandswechsel innerhalb derselben Sekunde, wenn genau ein Eintrag
+  durch seine positive Archiv-Dauer eindeutig den folgenden Zustand bestimmt.
+  Wirklich mehrdeutige Daten bleiben Fehler. Archivdaten, Konfigurationen,
+  Designs und Ladebudgets bleiben unverändert.
+
 - Zusätzliche Gateways unterbrechen die Zustandsabfragen vorhandener Diagramme
   nicht mehr. Der gemeinsame HTTP-Zugang leitet Anfragen an das tatsächlich
   verbundene Gateway weiter. Nach dem Löschen seines Eigentümers übernimmt ein

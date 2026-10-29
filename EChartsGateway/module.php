@@ -805,6 +805,9 @@ class EChartsGateway extends IPSModuleStrict
                 'PreviousPoint'          => $previousPoints[0] ?? null,
                 'Truncated'              => count($rows) > $limit
             ];
+            if (count($rows) !== count($points)) {
+                $responsePayload['RawPointCount'] = count($rows);
+            }
             $this->WriteArchiveCache($cacheKey, $responsePayload);
 
             return $debugFlowResult = EChartsDataProtocol::EncodeSuccessResponse($operation, $responsePayload);
@@ -834,15 +837,29 @@ class EChartsGateway extends IPSModuleStrict
             ) {
                 throw new UnexpectedValueException('Invalid archive state row.');
             }
-            $normalized = (int) $value;
-            if (isset($points[$timestamp]) && $points[$timestamp] !== $normalized) {
-                throw new UnexpectedValueException('Conflicting archive states at one timestamp.');
-            }
-            $points[$timestamp] = $normalized;
+            $points[$timestamp][] = ['value' => (int) $value, 'duration' => $row['Duration'] ?? null];
         }
         ksort($points, SORT_NUMERIC);
         $result = [];
-        foreach ($points as $timestamp => $value) {
+        foreach ($points as $timestamp => $group) {
+            $value = $group[0]['value'];
+            if (count(array_unique(array_column($group, 'value'), SORT_NUMERIC)) > 1) {
+                $positive = [];
+                foreach ($group as $entry) {
+                    if (!is_int($entry['duration']) || $entry['duration'] < 0) {
+                        throw new UnexpectedValueException('Conflicting archive states have invalid duration metadata.');
+                    }
+                    if ($entry['duration'] > 0) {
+                        $positive[] = $entry['value'];
+                    }
+                }
+                if (count($positive) !== 1) {
+                    throw new UnexpectedValueException('Conflicting archive states at one timestamp.');
+                }
+                // Zero-duration transitions occupy no displayed time. Only the
+                // unique positive native duration identifies the following state.
+                $value = $positive[0];
+            }
             $result[] = [$timestamp, $value];
         }
 

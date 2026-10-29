@@ -1,5 +1,17 @@
 # Tests
 
+## Mehrere Zustandswechsel innerhalb einer Sekunde
+
+`php tests/gateway_gauges.php --archive-states` reproduzierte RED die bisherige
+Ablehnung eines eindeutigen positiven Dauereintrags. Der korrigierte Lauf prüft
+Boolean-/Integer-Werte, beliebige Eingangsreihenfolge, unveränderte Rohdaten,
+ungültige und mehrdeutige Dauern sowie weiterhin gemeldete Rohzeilenkürzung.
+Die optionale Rohzeilenzahl schützt auch nach einer Reduktion das gemeinsame
+16000er-Budget; neunmal 2000 gleiche Rohzeilen werden kontrolliert abgewiesen.
+`--state-timeline` erhält die exakten Abschnitte, Vorgänger und unbekannten
+Anfänge; `--calendar-pie` erhält die Tagessekunden ohne Dauer-0-Anteile.
+Die vorhandene gemeinsame Integration führt alle drei Prüfungen mit aus.
+
 ## Vorbereiteter Beta-Changelog und Versionsmetadaten
 
 `python tests/test_update_library_metadata.py` prüft den vorhandenen

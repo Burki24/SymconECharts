@@ -52,19 +52,20 @@ Touchgeräte, weitere Plattformvarianten und längere Lastläufe sind nicht
 vollständig abgenommen. Die jeweiligen Modul-READMEs beschreiben Datenmodelle,
 Voraussetzungen und Nutzungsgrenzen.
 
-StateTimeline weist widersprüchliche Zustände am selben Sekundenzeitstempel
-kontrolliert ab. Betroffene Quelldaten müssen geprüft werden; es findet keine
-automatische Archivbereinigung statt.
+StateTimeline und CalendarPie erkennen schnelle Wechsel derselben Sekunde,
+wenn genau ein Eintrag durch seine positive Archiv-Dauer eindeutig den
+folgenden Zustand bestimmt. Wirklich mehrdeutige Fälle bleiben Fehler;
+es findet keine automatische Archivbereinigung statt.
 ```
 
 ## Einordnung der verbleibenden Hinweise
 
 | Hinweis | Stand für die Beta |
 | --- | --- |
-| StateTimeline-Archivkonflikt | Bestätigter Konflikt vorhandener Quelldaten, kein allgemeiner Beta-Blocker und kein nachgewiesener Rendererfehler. Eindeutige Zustandsarchive sind geprüft. Reale Archivdaten bleiben unverändert. Das Verhalten ist in der Modul-README und oben in der Versionsinformation beschrieben. |
+| StateTimeline-Archivkonflikt | Am 29.10.2026 genauer untersucht und korrigiert: neun Gruppen schneller Wechsel besitzen jeweils genau einen positiven Dauereintrag. Die frühere pauschale Einordnung als Datenfehler war zu weitgehend. Die gemeinsame Gateway-Auswertung berücksichtigt diese eindeutige Information; alle neun Fälle sind auf der Testinstallation per MCP geprüft. Archive bleiben unverändert. Echte Mehrdeutigkeit bleibt ein Fehler. [Nachweis](STATE_TIMELINE_ARCHIVPRUEFUNG-2026-10-29.md). |
 | Weitere Testvarianten | Echte Touchgeräte, längere Last-/Speicherläufe, weitere Plattform-/Installationsvarianten und horizontale Mausradfälle ohne Wirkungsnachweis bleiben als Testlücken sichtbar. Daraus folgt keine neue Funktionsentwicklung und keine Behauptung, diese Varianten seien geprüft. Kachel, IPSView und die bereits bestätigte WoIst-/Helper-Mausradprüfung bleiben abgenommen. |
 | README-Badges | Alle fünf Pflicht-Badges sind bereits vorhanden: Symcon/PHPModul, Mindestversion 9.0, tatsächliche PolyForm-Lizenz sowie dynamische Style-/Test-Badges für dieses Repository und `dev`. |
-| Changelog | Sämtliche bisherigen Einträge sind verlustfrei der vorbereiteten Beta vom `29.10.2026` zugeordnet und unter `Neu`/`Fixes` zusammengefasst. Die Version folgt über die markierte vorbereitete Überschrift gemeinsam mit `library.json` dem Metadatenworkflow. Historische Releases bleiben unverändert. |
+| Changelog | Die bisherigen Beta-Einträge sind erhalten; die neue Dauerkorrektur ist nach erfolgreicher lokaler und MCP-Prüfung in den bereits beauftragten vorbereiteten Beta-Abschnitt übernommen. Die markierte Versionsüberschrift folgt gemeinsam mit `library.json` dem Metadatenworkflow. Historische Releases bleiben unverändert. |
 
 Die [gemeinsame Beta-Abnahme](BETA_ABNAHME-2026-10-28.md) und die
 [Systemprüfung](SYSTEMPRUEFUNG-2026-10-26.md) bleiben die Nachweise ihrer
@@ -73,7 +74,7 @@ Geräte-, Last- oder Produktivtest. Bekannte Grenzen bleiben erhalten.
 
 ## Geprüfter Push und Versionsmetadaten
 
-Am 29.10.2026 liefern GitHub und der lokale Branch `dev` denselben HEAD:
+Beim damaligen CI-Abgleich am 29.10.2026 lieferten GitHub und der lokale Branch `dev` denselben HEAD:
 `4b36c637f23a2f1aa89d33db4f43f4450d6069ee`. Der Metadatencommit enthält
 Version `1.352`, Build `226068802` und `date=1793255814`.
 Build und Datum stammen korrekt aus dem Quellcommit

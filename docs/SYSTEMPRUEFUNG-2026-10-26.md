@@ -108,6 +108,12 @@ konkret nachgewiesene Auslöseszenario nicht.
 
 ### StateTimeline: widersprüchliche Archiveinträge
 
+Nachtrag 29.10.2026: Die genauere Prüfung zeigt schnelle Wechsel mit eindeutigem
+positivem Dauereintrag. Die pauschale Einordnung als Datenfehler ist damit
+korrigiert; die gemeinsame Auswertung und alle neun Fälle sind nachgeprüft,
+ohne Archive zu verändern. Siehe [aktueller Nachweis](STATE_TIMELINE_ARCHIVPRUEFUNG-2026-10-29.md).
+Der folgende Absatz bleibt als historischer Befund des damaligen Laufs erhalten.
+
 Eine bestehende Boolean-Quelle besitzt an einem Sekundenzeitpunkt unterschiedliche
 archivierte Zustände. Die gemeinsame Archivprüfung verwirft solche Daten
 absichtlich, statt eine Reihenfolge zu erfinden. Die Instanz meldet Status 204
