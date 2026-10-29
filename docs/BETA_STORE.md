@@ -11,7 +11,8 @@ existiert, und hat Bundle-ID und Deutsch als erste Store-Sprache festgelegt.
 | --- | --- |
 | Bundle-ID | `de.burki24.symconecharts` |
 | Kanal | Beta |
-| Vorbereiteter Versionsstand | `1.350`, geplantes Veröffentlichungsdatum `29.10.2026`, vom Eigentümer bestätigt. Noch keine Veröffentlichung. |
+| Versionsstand | Aus `library.json` genau des im Store ausgewählten Commits übernehmen. CI-Prüfstand dieses Berichts: `1.352`; Nachweis unten. |
+| Geplantes Veröffentlichungsdatum | `29.10.2026`, vom Eigentümer bestätigt. Noch keine Veröffentlichung. |
 | Git-URL | `https://github.com/Burki24/SymconECharts` |
 | Sprache | Deutsch (`de`) |
 | Name | SymconECharts |
@@ -46,7 +47,6 @@ Archiv- und Transportfälle. Mehrere Gateways verwenden einen koordinierten
 HTTP-Zugang; nach dem Entfernen eines Eigentümers wird dieser automatisch
 wiederhergestellt. Bestehende URLs, Kanäle, Quellen und Designs bleiben erhalten.
 
-Vorbereiteter Beta-Stand: Version 1.350 vom 29.10.2026.
 Mindestversion Symcon 9.0; praktisch geprüft mit Symcon 9.1 und PHP 8.5.
 Touchgeräte, weitere Plattformvarianten und längere Lastläufe sind nicht
 vollständig abgenommen. Die jeweiligen Modul-READMEs beschreiben Datenmodelle,
@@ -64,56 +64,81 @@ automatische Archivbereinigung statt.
 | StateTimeline-Archivkonflikt | Bestätigter Konflikt vorhandener Quelldaten, kein allgemeiner Beta-Blocker und kein nachgewiesener Rendererfehler. Eindeutige Zustandsarchive sind geprüft. Reale Archivdaten bleiben unverändert. Das Verhalten ist in der Modul-README und oben in der Versionsinformation beschrieben. |
 | Weitere Testvarianten | Echte Touchgeräte, längere Last-/Speicherläufe, weitere Plattform-/Installationsvarianten und horizontale Mausradfälle ohne Wirkungsnachweis bleiben als Testlücken sichtbar. Daraus folgt keine neue Funktionsentwicklung und keine Behauptung, diese Varianten seien geprüft. Kachel, IPSView und die bereits bestätigte WoIst-/Helper-Mausradprüfung bleiben abgenommen. |
 | README-Badges | Alle fünf Pflicht-Badges sind bereits vorhanden: Symcon/PHPModul, Mindestversion 9.0, tatsächliche PolyForm-Lizenz sowie dynamische Style-/Test-Badges für dieses Repository und `dev`. |
-| Changelog | Sämtliche bisherigen Einträge sind verlustfrei der vorbereiteten Beta `1.350` vom `29.10.2026` zugeordnet und unter `Neu`/`Fixes` zusammengefasst. Der leere Abschnitt `Unveröffentlicht` bleibt für spätere Änderungen bestehen. |
+| Changelog | Sämtliche bisherigen Einträge sind verlustfrei der vorbereiteten Beta vom `29.10.2026` zugeordnet und unter `Neu`/`Fixes` zusammengefasst. Die Version folgt über die markierte vorbereitete Überschrift gemeinsam mit `library.json` dem Metadatenworkflow. Historische Releases bleiben unverändert. |
 
 Die [gemeinsame Beta-Abnahme](BETA_ABNAHME-2026-10-28.md) und die
 [Systemprüfung](SYSTEMPRUEFUNG-2026-10-26.md) bleiben die Nachweise ihrer
 jeweiligen Testebenen. Die redaktionelle Release-Vorbereitung ist kein neuer
 Geräte-, Last- oder Produktivtest. Bekannte Grenzen bleiben erhalten.
 
-## Freigabe-Commit und Versionsbindung
+## Geprüfter Push und Versionsmetadaten
 
-Der Stand `fa06401` enthält die Gateway-Hookkorrektur und den Bericht der
-gemeinsamen Abnahme. Die jetzige Release-Dokumentation ergänzt diesen Stand.
-Der Changelog ist mit ausdrücklicher Eigentümerbestätigung für Version `1.350`
-und den `29.10.2026` vorbereitet. Er bezeichnet eine geplante Veröffentlichung,
-keine bereits erfolgte Store-Einreichung.
+Am 29.10.2026 liefern GitHub und der lokale Branch `dev` denselben HEAD:
+`4b36c637f23a2f1aa89d33db4f43f4450d6069ee`. Der Metadatencommit enthält
+Version `1.352`, Build `226068802` und `date=1793255814`.
+Build und Datum stammen korrekt aus dem Quellcommit
+`d798942879b35f1949304f6a133b5055bb1927f5`: dessen sieben führende Hexzeichen
+ergeben den Build; dessen Commit-Zeit ist 29.10.2026, 07:36:54 Uhr Europe/Berlin.
+Das Metadatendatum ist der Quellcommit-Zeitpunkt, kein Veröffentlichungsnachweis.
 
-Der endgültige Commit entsteht erst nach dem manuellen Commit/Push durch den
-Eigentümer und dem regulären Metadatenworkflow. Deshalb werden hier weder ein
-noch nicht existierender SHA noch eine künftige Versionsnummer erfunden.
-`library.json` wird in dieser Vorbereitung nicht manuell überschrieben.
-Ein normaler Push auf `dev` kann die Version durch den Metadatenworkflow erhöhen.
-Dann müssen tatsächliche Metadaten, Changelog-Kopf und Store-Versionsinformation
-vor der Einreichung erneut auf denselben bestätigten Release-Stand gebracht
-werden. Die vorbereitete `1.350` darf nicht trotz abweichender Metadaten als
-tatsächliche Release-Version übernommen werden.
+| Nachweis | Ergebnis |
+| --- | --- |
+| [Check Style auf 4b36c63](https://github.com/Burki24/SymconECharts/actions/runs/40830651356) | Erfolgreich, exakt auf dem Metadatencommit. |
+| [Tests auf 4b36c63](https://github.com/Burki24/SymconECharts/actions/runs/40830651428) | Erfolgreich, exakt auf dem Metadatencommit. |
+| [Metadatenlauf des Quellcommits d798942](https://github.com/Burki24/SymconECharts/actions/runs/40830284824) | Erfolgreich; erzeugte 4b36c63 und Version 1.352. Auch Style und Tests des Quellcommits sind erfolgreich. |
+| [Metadatenlauf auf 4b36c63](https://github.com/Burki24/SymconECharts/actions/runs/40830651441) | Absichtlich übersprungen: Bot-Commit löst keine weitere Erhöhung aus. Kein fehlgeschlagener Check. |
 
-Vor der Einreichung gehört genau dieser abschließende Stand in die Store-
-Auswahl: vollständiger SHA, zugehörige Version aus `library.json` und grüne
-Style-/Testläufe desselben SHA. Bei einem weiteren Commit gelten dessen alte
-Prüfergebnisse nicht automatisch als Freigabe für den neuen Stand.
+Dieser Nachweis gilt für den bereits gepushten Commit. Er enthält noch den
+alten Changelog-Kopf `1.350` und ist deshalb **kein fertig abgeglichener
+Einreichungsstand**. Die jetzige Korrektur setzt ihn lokal auf `1.352` und
+ergänzt den ausdrücklich beauftragten automatischen Abgleich. Die CI des erst
+noch zu pushenden Änderungspakets wird nicht als bereits bestanden ausgegeben.
+
+## Automatischer Abgleich der vorbereiteten Beta
+
+`<!-- symconecharts:prepared-beta -->` unmittelbar vor der datierten
+Beta-Überschrift aktiviert den Abgleich für genau diese Überschrift.
+Der vorhandene Metadatenworkflow übergibt `--prepared-beta-changelog CHANGELOG.md`
+an seinen Versionsplaner und nimmt `library.json` sowie `CHANGELOG.md` in
+denselben Bot-Commit auf. So erzeugt der Changelog-Abgleich keinen zusätzlichen
+Versionslauf. Das bestätigte Datum und alle Änderungseinträge bleiben erhalten.
+Fehlt die Markierung, wird keine Versionsüberschrift verändert. Mehrdeutige
+oder ungültige Markierungen stoppen den Lauf vor dem Schreiben beider Dateien.
+
+Die freie Store-Versionsinformation oben wiederholt keine manuell gepflegte
+Library-Version. Maßgeblich sind die Metadaten des ausgewählten unveränderlichen
+Commits. Nach tatsächlich erfolgter Veröffentlichung die Vorbereitungsmarkierung
+und den Hinweis auf die noch ausstehende Veröffentlichung im folgenden
+Entwicklungsstand entfernen; die veröffentlichte Versionsüberschrift bleibt
+dadurch bei späteren Metadatenläufen unverändert. Ändert sich das geplante
+Veröffentlichungsdatum, muss der Eigentümer es vor der Einreichung berichtigen.
+
+`library.json` wurde für diesen Abgleich nicht manuell verändert. Es wird keine
+zukünftige Version oder noch nicht existierende Commit-ID vorweggenommen.
+Die neue Automatik ist lokal durch den erweiterten CLI-Regressionstest und
+`php tests/quality.php --fix` mit Exit 0 geprüft. Diese lokalen Nachweise ersetzen
+nicht die noch ausstehende GitHub-CI des nächsten Eigentümer-Pushs.
 
 Die ausstehenden Eigentümerschritte sind:
 
-1. Das gemeinsame Änderungspaket manuell committen und pushen; den vorgesehenen
+1. Das jetzige Abgleichpaket manuell committen und pushen; den vorgesehenen
    Release-Zweig gemäß Projektworkflow verwenden.
-2. Den Metadatenlauf abwarten und den tatsächlichen abschließenden SHA, seine
-   Version und seine CI-Ergebnisse prüfen.
-3. Die vorbereitete Changelog-Überschrift `29.10.2026 - Version 1.350 (Beta)`
-   und den Store-Text mit genau diesen Metadaten abgleichen. Bei geändertem
-   Veröffentlichungsdatum oder einer erhöhten Version beide Texte vor der
-   Einreichung passend berichtigen; ein weiterer Commit/Metadatenlauf muss
-   wiederum berücksichtigt werden. Neue fachliche Änderungen gehören unter
-   `Unveröffentlicht`, bis ihr Release ausdrücklich festgelegt wird.
+2. Den Metadatenlauf abwarten und den tatsächlichen abschließenden SHA wählen.
+   Für genau diesen SHA erfolgreiche Style-/Testläufe prüfen. Der übersprungene
+   Metadatenlauf auf dessen Bot-Commit ist weiterhin beabsichtigt.
+3. Im selben Commit `library.json` und die markierte Beta-Überschrift auf gleiche
+   Version prüfen. Alle Änderungseinträge sowie das bestätigte Datum bleiben
+   erhalten. Neue fachliche Änderungen gehören unter `Unveröffentlicht`, bis
+   ihr Release ausdrücklich festgelegt wird. Nicht allein den früher geprüften
+   SHA 4b36c63 aus der Tabelle übernehmen.
 4. Im Entwicklerbereich Bundle-ID, Beta-Kanal, Commit, Deutsch, Name,
    Beschreibung, Versionsinformation, Dokumentationslink und die tatsächlich
    angebotene passende Kategorie abgleichen. Keine Stable-Freigabe behaupten.
 5. Die vollständige Vorlage kontrollieren. **Einreichen** veröffentlicht Beta
    unmittelbar und bleibt eine ausdrückliche Eigentümeraktion.
 
-H02 ist damit inhaltlich vorbereitet. Die Kontoabnahme, konkrete Kategorien-ID
-und Bindung an den erst noch entstehenden Freigabe-Commit sind ausdrücklich
-offene formale Schritte und werden nicht als bereits erledigt dargestellt.
+H02 ist inhaltlich vorbereitet; die CI und Metadaten des erfolgten Pushs sind
+belegt. Kontoabnahme, konkrete Kategorien-ID und CI des neu angepassten
+Einreichungsstands bleiben ausdrücklich offen.
 
 Offizielle Grundlage: [Symcon: Einreichen](https://www.symcon.de/de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/store/einreichen/).

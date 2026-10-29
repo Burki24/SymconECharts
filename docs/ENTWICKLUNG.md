@@ -1110,6 +1110,15 @@ Quellcommit ab und setzt `date` auf dessen Commit-Zeit. Der getrennte
 Metadatencommit löst keine weitere Erhöhung aus. Tags, Releases und
 Veröffentlichungen bleiben manuelle, ausdrücklich freizugebende Schritte.
 
+Die ausdrücklich mit `<!-- symconecharts:prepared-beta -->` markierte
+Beta-Überschrift im Changelog folgt über `--prepared-beta-changelog` derselben
+berechneten Version. Der Bot committet beide Dateien gemeinsam; Datum und
+Inhalte bleiben erhalten. Ohne Markierung bleiben historische Überschriften
+unverändert. Nach erfolgter Veröffentlichung die Markierung im folgenden
+Entwicklungsstand entfernen. Die Store-Unterlagen wiederholen keine feste
+Versionsnummer im kopierbaren Freitext; der genaue Store-Commit bestimmt sie.
+Aktuelle CI-Nachweise und der Freigabeablauf stehen unter [Beta-Store](BETA_STORE.md).
+
 Für die technische Projektbasis sind Struktur- und JSON-Prüfungen,
 PHP-Syntaxprüfungen, Modultests und der gemeinsame StylePHP-/CI-Ablauf
 eingerichtet. Änderungen an den Visualisierungen benötigen zusätzlich

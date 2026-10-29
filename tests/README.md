@@ -1,5 +1,17 @@
 # Tests
 
+## Vorbereiteter Beta-Changelog und Versionsmetadaten
+
+`python tests/test_update_library_metadata.py` prüft den vorhandenen
+CLI-Versionsplaner einschließlich des optionalen `--prepared-beta-changelog`:
+Versionsfortschreibung nur an der ausdrücklichen Markierung, unverändertes
+Datum, Unicode-Inhalte, zukünftige Einträge und historische Releases sowie
+wiederholbare Pläne. Ungültige oder doppelte Markierungen dürfen keine der
+beiden Dateien verändern. Ohne Markierung bleibt der veröffentlichte Abschnitt
+unverändert. Der Workflow-Vertrag umfasst den gemeinsamen Bot-Commit beider
+Dateien und die bestehende Schleifenvermeidung. Die Prüfung läuft bereits über
+`tests/run.php`; ein echter GitHub-Schreiblauf erfolgt erst nach Eigentümer-Push.
+
 ## Gateway-Hook und gemeinsame Beta-Abnahme
 
 `php tests/gateway_gauges.php --gateway-transport` prüft den tatsächlichen

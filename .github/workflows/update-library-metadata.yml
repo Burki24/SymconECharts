@@ -90,7 +90,7 @@ jobs:
           echo "commit_date=$commit_date" >> "$GITHUB_OUTPUT"
           echo "short_sha=$short_sha" >> "$GITHUB_OUTPUT"
 
-      - name: Update library.json
+      - name: Update library.json and prepared beta changelog
         shell: bash
         run: |
           python3 .github/scripts/update_library_metadata.py \
@@ -98,7 +98,8 @@ jobs:
             --sha "${{ github.sha }}" \
             --date "${{ steps.source.outputs.commit_date }}" \
             --increment "${{ steps.source.outputs.increment }}" \
-            --base-version "${{ steps.source.outputs.base_version }}"
+            --base-version "${{ steps.source.outputs.base_version }}" \
+            --prepared-beta-changelog CHANGELOG.md
 
       - name: Commit and push metadata
         shell: bash
@@ -109,8 +110,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          if git diff --quiet -- library.json; then
-            echo "library.json is already up to date."
+          if git diff --quiet -- library.json CHANGELOG.md; then
+            echo "Library metadata and prepared beta changelog are already up to date."
             exit 0
           fi
 
@@ -121,6 +122,6 @@ jobs:
             python3 -c 'import json; print(json.load(open("library.json", encoding="utf-8"))["version"])'
           )
 
-          git add library.json
+          git add library.json CHANGELOG.md
           git commit -m "CHORE: Update library metadata to v${version} (${SHORT_SHA})"
           git push origin "HEAD:${GITHUB_REF_NAME}"
