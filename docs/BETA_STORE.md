@@ -1,6 +1,6 @@
 # Erste Beta: vorbereitete Store-Unterlagen
 
-Stand: 28.10.2026. Die folgenden Inhalte sind zur manuellen Übernahme in den
+Stand: 29.10.2026. Die folgenden Inhalte sind zur manuellen Übernahme in den
 Symcon-Entwicklerbereich vorbereitet. Es wurde keine Store-Vorlage gespeichert
 und keine Version eingereicht. Der Eigentümer bestätigt, dass noch kein Eintrag
 existiert, und hat Bundle-ID und Deutsch als erste Store-Sprache festgelegt.
@@ -11,6 +11,7 @@ existiert, und hat Bundle-ID und Deutsch als erste Store-Sprache festgelegt.
 | --- | --- |
 | Bundle-ID | `de.burki24.symconecharts` |
 | Kanal | Beta |
+| Vorbereiteter Versionsstand | `1.350`, geplantes Veröffentlichungsdatum `29.10.2026`, vom Eigentümer bestätigt. Noch keine Veröffentlichung. |
 | Git-URL | `https://github.com/Burki24/SymconECharts` |
 | Sprache | Deutsch (`de`) |
 | Name | SymconECharts |
@@ -45,21 +46,48 @@ Archiv- und Transportfälle. Mehrere Gateways verwenden einen koordinierten
 HTTP-Zugang; nach dem Entfernen eines Eigentümers wird dieser automatisch
 wiederhergestellt. Bestehende URLs, Kanäle, Quellen und Designs bleiben erhalten.
 
+Vorbereiteter Beta-Stand: Version 1.350 vom 29.10.2026.
 Mindestversion Symcon 9.0; praktisch geprüft mit Symcon 9.1 und PHP 8.5.
 Touchgeräte, weitere Plattformvarianten und längere Lastläufe sind nicht
 vollständig abgenommen. Die jeweiligen Modul-READMEs beschreiben Datenmodelle,
 Voraussetzungen und Nutzungsgrenzen.
+
+StateTimeline weist widersprüchliche Zustände am selben Sekundenzeitstempel
+kontrolliert ab. Betroffene Quelldaten müssen geprüft werden; es findet keine
+automatische Archivbereinigung statt.
 ```
+
+## Einordnung der verbleibenden Hinweise
+
+| Hinweis | Stand für die Beta |
+| --- | --- |
+| StateTimeline-Archivkonflikt | Bestätigter Konflikt vorhandener Quelldaten, kein allgemeiner Beta-Blocker und kein nachgewiesener Rendererfehler. Eindeutige Zustandsarchive sind geprüft. Reale Archivdaten bleiben unverändert. Das Verhalten ist in der Modul-README und oben in der Versionsinformation beschrieben. |
+| Weitere Testvarianten | Echte Touchgeräte, längere Last-/Speicherläufe, weitere Plattform-/Installationsvarianten und horizontale Mausradfälle ohne Wirkungsnachweis bleiben als Testlücken sichtbar. Daraus folgt keine neue Funktionsentwicklung und keine Behauptung, diese Varianten seien geprüft. Kachel, IPSView und die bereits bestätigte WoIst-/Helper-Mausradprüfung bleiben abgenommen. |
+| README-Badges | Alle fünf Pflicht-Badges sind bereits vorhanden: Symcon/PHPModul, Mindestversion 9.0, tatsächliche PolyForm-Lizenz sowie dynamische Style-/Test-Badges für dieses Repository und `dev`. |
+| Changelog | Sämtliche bisherigen Einträge sind verlustfrei der vorbereiteten Beta `1.350` vom `29.10.2026` zugeordnet und unter `Neu`/`Fixes` zusammengefasst. Der leere Abschnitt `Unveröffentlicht` bleibt für spätere Änderungen bestehen. |
+
+Die [gemeinsame Beta-Abnahme](BETA_ABNAHME-2026-10-28.md) und die
+[Systemprüfung](SYSTEMPRUEFUNG-2026-10-26.md) bleiben die Nachweise ihrer
+jeweiligen Testebenen. Die redaktionelle Release-Vorbereitung ist kein neuer
+Geräte-, Last- oder Produktivtest. Bekannte Grenzen bleiben erhalten.
 
 ## Freigabe-Commit und Versionsbindung
 
-Der geprüfte Ausgangscommit ist `1a881d2` mit Version `1.350`. Er enthält die
-Hookkorrektur noch nicht und ist **kein freigegebener Beta-Kandidat**.
+Der Stand `fa06401` enthält die Gateway-Hookkorrektur und den Bericht der
+gemeinsamen Abnahme. Die jetzige Release-Dokumentation ergänzt diesen Stand.
+Der Changelog ist mit ausdrücklicher Eigentümerbestätigung für Version `1.350`
+und den `29.10.2026` vorbereitet. Er bezeichnet eine geplante Veröffentlichung,
+keine bereits erfolgte Store-Einreichung.
 
 Der endgültige Commit entsteht erst nach dem manuellen Commit/Push durch den
 Eigentümer und dem regulären Metadatenworkflow. Deshalb werden hier weder ein
 noch nicht existierender SHA noch eine künftige Versionsnummer erfunden.
 `library.json` wird in dieser Vorbereitung nicht manuell überschrieben.
+Ein normaler Push auf `dev` kann die Version durch den Metadatenworkflow erhöhen.
+Dann müssen tatsächliche Metadaten, Changelog-Kopf und Store-Versionsinformation
+vor der Einreichung erneut auf denselben bestätigten Release-Stand gebracht
+werden. Die vorbereitete `1.350` darf nicht trotz abweichender Metadaten als
+tatsächliche Release-Version übernommen werden.
 
 Vor der Einreichung gehört genau dieser abschließende Stand in die Store-
 Auswahl: vollständiger SHA, zugehörige Version aus `library.json` und grüne
@@ -72,12 +100,12 @@ Die ausstehenden Eigentümerschritte sind:
    Release-Zweig gemäß Projektworkflow verwenden.
 2. Den Metadatenlauf abwarten und den tatsächlichen abschließenden SHA, seine
    Version und seine CI-Ergebnisse prüfen.
-3. Erst dann den Changelog unter Beibehaltung des tatsächlichen Inhalts mit
-   `# <Datum> - Version <Version> (Beta)` diesem Stand zuordnen. Ein dadurch
-   entstehender neuer Commit und Metadatenlauf muss erneut abgeglichen werden.
-   Alternativ bleibt die noch nicht veröffentlichte Historie bis zum ausdrücklich
-   beauftragten letzten Release-Schritt unter `Unveröffentlicht`; der Store erhält
-   den vorbereiteten Text oben.
+3. Die vorbereitete Changelog-Überschrift `29.10.2026 - Version 1.350 (Beta)`
+   und den Store-Text mit genau diesen Metadaten abgleichen. Bei geändertem
+   Veröffentlichungsdatum oder einer erhöhten Version beide Texte vor der
+   Einreichung passend berichtigen; ein weiterer Commit/Metadatenlauf muss
+   wiederum berücksichtigt werden. Neue fachliche Änderungen gehören unter
+   `Unveröffentlicht`, bis ihr Release ausdrücklich festgelegt wird.
 4. Im Entwicklerbereich Bundle-ID, Beta-Kanal, Commit, Deutsch, Name,
    Beschreibung, Versionsinformation, Dokumentationslink und die tatsächlich
    angebotene passende Kategorie abgleichen. Keine Stable-Freigabe behaupten.
@@ -88,5 +116,4 @@ H02 ist damit inhaltlich vorbereitet. Die Kontoabnahme, konkrete Kategorien-ID
 und Bindung an den erst noch entstehenden Freigabe-Commit sind ausdrücklich
 offene formale Schritte und werden nicht als bereits erledigt dargestellt.
 
-Offizielle Grundlage:
-https://www.symcon.de/de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/store/einreichen/
+Offizielle Grundlage: [Symcon: Einreichen](https://www.symcon.de/de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/store/einreichen/).

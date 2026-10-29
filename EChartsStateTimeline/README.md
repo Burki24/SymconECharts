@@ -43,6 +43,12 @@ ausgeschaltet zu erscheinen. Bekannte Teile eines unvollständigen Archivs
 bleiben sichtbar. Ein Punkt genau am Fensterende erzeugt keinen weiteren
 Abschnitt ohne Dauer.
 
+Enthält das Archiv unterschiedliche Zustände mit demselben Sekundenzeitstempel,
+ist deren Reihenfolge nicht eindeutig. Die betroffene Datenabfrage wird deshalb
+abgewiesen, statt einen Zustand auszuwählen oder eine Reihenfolge zu erfinden.
+Die Quelldaten müssen in diesem Fall geprüft werden. Das Modul verändert oder
+bereinigt solche Archiveinträge nicht automatisch.
+
 Die Zeiträume umfassen verstrichene Zeit bis zum aktuellen Abfragezeitpunkt;
 ein Tag entspricht 24 Stunden, eine Woche sieben Tagen, auch bei einer
 Zeitumstellung. Die Beschriftung verwendet die Symcon-Zeitzone.

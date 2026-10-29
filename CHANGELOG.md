@@ -1,20 +1,9 @@
 # Unveröffentlicht
 
-## Behoben
+# 29.10.2026 - Version 1.350 (Beta)
 
-- Zusätzliche Gateways unterbrechen die Zustandsabfragen vorhandener Diagramme
-  nicht mehr. Der gemeinsame HTTP-Zugang leitet Anfragen an das tatsächlich
-  verbundene Gateway weiter. Nach dem Löschen seines Eigentümers übernimmt ein
-  verbleibendes Gateway automatisch. Bestehende URLs, Kanäle, Quellen und
-  Designs bleiben erhalten.
-
-- PictorialBar zeigt Erfolgsbestätigungen der Mehrfachübernahme ohne den
-  technischen Präfix `MESSAGE:` an. Der Rückgabewert der Modulfunktion,
-  Fehlermeldungen, Quellen, Designs und Schutzgrenzen bleiben unverändert.
-
-- PictorialBar zeigt Fehler und Bestätigungen der Mehrfachübernahme im Formular
-  an. Die Buttoncallbacks geben die Meldungen jetzt aus, statt sie nur als
-  PHP-Rückgabewert zu liefern. Quellen, Designs und Schutzgrenzen bleiben erhalten.
+Vorbereiteter Stand für die erste Beta; die Veröffentlichung im Module Store
+steht noch aus.
 
 ## Neu
 
@@ -114,8 +103,6 @@
 - EChartsTimeSeries skaliert automatische Wertachsen anhand der dargestellten
   Daten mit Randabstand statt einen Nullpunkt zu erzwingen. Explizite
   Achsengrenzen bleiben unverändert.
-
-## Neu
 
 - EChartsSankey ergänzt automatische gemeinsame Quelleinheiten und eine
   optionale Prüfung gegen eine manuelle erwartete Einheit. Native Darstellungen,
@@ -437,8 +424,6 @@
   Hover-Fokus sind in Kachel und IPSView unabhängig einstellbar.
   Vorschauen zeigen die neuen Stile; bestehende Konfigurationen bleiben erhalten.
 
-## Hinzugefügt
-
 - `EChartsPictorialBar` (`ECPB`) zeigt aktuelle, nichtnegative Werte von
   1–16 Variablen derselben Einheit als Symbolbalken. Grundformen,
   Wiederholung, Skala, Sortierung, Ausrichtung, Schriftgrößen und Farben
@@ -602,99 +587,6 @@
   Schwellen in die bestehende Regelliste übernehmen. Vorhandene Regeln bleiben
   erhalten; gespeichert wird weiterhin erst beim Übernehmen des Formulars.
 
-## Behoben
-
-- Calendar zeigt auch Teilarchive, deren erster Tagesdatensatz erst im
-  Tagesverlauf beginnt. Eine zu strenge Mitternachtsprüfung hatte in diesem
-  Fall sämtliche Kalenderwerte verworfen. Fehlende Tage bleiben leer;
-  gespeicherte Konfiguration und Archivwerte werden nicht verändert.
-
-- Sankey-Vorschauen zeigen auch größere Konfigurationen vollständig mit
-  aktuellen Variablenwerten statt eines Ersatz-Beispielnetzes. Geschlossene
-  Flussflächen verhindern Überstände an engen Kurven. Fehler- und
-  Nullwertzustände werden ausdrücklich angezeigt. Beschriftungen in Kachel,
-  IPSView und Vorschau passen sich dem verfügbaren Knotenplatz an; schmale
-  Verbraucher verursachen keinen überlappenden Textblock mehr. Gespeicherte
-  Konfigurationen werden dabei nicht verändert.
-
-- Die neuen Linien-, Achsen- und Animationsfelder im Parallel-Designer sind
-  auch in der deutschen Symcon-Konsole vollständig übersetzt.
-
-- Der Zigbee-Graph hält die Kopfzeile der Symcon-Kachel auch bei großen
-  Force-Layouts und ohne eigenen Diagrammtitel frei. Knoten und Verbindungen
-  werden nur unterhalb des Kachelnamens gezeichnet.
-
-- Diagrammtitel in Kacheln von Parallel, Pie, Scatter/Bubble, Tree,
-  Anlagenzustandsbaum, Graph, Zigbee-Graph, Treemap und Sunburst bleiben
-  sichtbar und liegen mit ihren Diagramminhalten unter dem Symcon-Kachelkopf.
-  IPSView behält seinen eigenen Titelbereich.
-
-- Der weiße Streifen über Treemap-Gruppen übernimmt nun den gewählten
-  Diagrammhintergrund oder die ausdrücklich festgelegte Rahmenfarbe. Das gilt
-  für Kachel und IPSView, auch bei transparentem IPSView-Hintergrund.
-
-- Treemap-Gruppenüberschriften stehen nun auf der jeweiligen Gruppenfarbe
-  statt auf einem kontrastarmen hellen Feld. Eine manuell gewählte
-  Beschriftungsfarbe wirkt jetzt auch auf Gruppen, Untergruppen und Werte;
-  die automatische Farbe bleibt kontrastabhängig. Achtung: Die bisherigen
-  automatisch gefärbten Überschriften können nach dem Update anders aussehen.
-
-- Der Zigbee2MQTT-Graph liest große Netzwerkkarten aus dem serverseitigen
-  JSON-Export statt über die auf 1 MiB begrenzte Modulrückgabe. Achtung: Nach
-  jedem neuen Netzwerkscan müssen die Exportdateien erneut erstellt werden;
-  mehrere Netzwerkkarteninstanzen mit gemeinsamem Exportordner werden nicht
-  unterstützt.
-
-- Die Health-Tree-Suche nach Zustandsvariablen verarbeitet auch leere oder noch nicht
-  gespeicherte Regellisten korrekt. Im Suchdialog werden vorhandene Regeln und
-  ausgewählte Treffer als Listenzeilen statt als Formularobjekte übergeben.
-
-- Ungültige Health-Tree-Zustandsregeln nennen im Formular jetzt die betroffenen
-  Regelzeilen sowie Sensorname und Variablen-ID. Doppelte Einträge werden markiert; die
-  Kritisch-Schwelle lässt sich im Bearbeitungsdialog nur in der zur
-  Alarmrichtung passenden Reihenfolge bestätigen.
-
-- Die 30-Tage-Heatmap kennzeichnet ihren Mo–So/Stunden-Durchschnitt nun im
-  Diagramm, im Tooltip und im Formular ausdrücklich. Sie berücksichtigt
-  weiterhin alle vorhandenen Stundenwerte des gewählten 30-Tage-Zeitraums;
-  Datenaggregation und gespeicherte Einstellungen ändern sich nicht.
-
-- Die Heatmap zählt sieben Tage jetzt als sieben datierte lokale Tage bis heute
-  statt als 168 Stunden mit zwei vermischten Randtagen. Achtung: Dadurch
-  können bisherige 7-Tage-Zellenwerte nach dem Modulupdate anders aussehen.
-
-- Die automatische Wertbeschriftungsfarbe der Heatmap passt sich nun je
-  Zelle an helle und dunkle Füllfarben an. Eine manuell gewählte Farbe
-  bleibt unverändert. Achtung: Die bisherige automatische Schriftfarbe kann
-  sich nach dem Modulupdate sichtbar ändern.
-
-- Die Temperatur-Vorlagen der Heatmap färben Zellen jetzt nach festen
-  Celsius-Klassen statt den aktuellen Archivwertebereich auf alle Farben
-  zu strecken. Die Legende zeigt die festen Vorlagengrenzen. Achtung:
-  Bereits ausgewählte Vorlagen ändern dadurch nach dem Modulupdate ihre
-  Darstellung; die individuelle Zwei-Farben-Skala bleibt unverändert.
-
-- Die Heatmap-Farbskala zeigt in Kachel und IPSView ihren kleinsten und größten
-  Archivwert mit der konfigurierten Einheit an.
-
-- Die beiden Scatter-Werkzeuge für Rechteckauswahl und Zurücksetzen sind in
-  Kachel und IPSView kontrastreicher und wachsen mit der verfügbaren
-  Diagrammfläche. Die Plotfläche hält dafür ausreichend Abstand frei.
-
-- Alle Diagrammkacheln übernehmen nur noch vollständige Visualisierungszustände
-  als Datenaktualisierung. Andere oder unvollständige Nachrichten ersetzen
-  die Darstellung nicht mehr durch eine irreführende Ladefehlermeldung.
-
-- Ausstehende Größenänderungen greifen nach dem Verlassen oder Neuaufbau einer
-  Kachel nicht mehr auf bereits freigegebene ECharts-Instanzen zu.
-
-- Die Scatter-Farbskala verwendet nun die ECharts-Abmessungen korrekt:
-  eine flache, an die Kachel- oder IPSView-Breite angepasste horizontale
-  Legende statt eines schmalen senkrechten Streifens. Die Formularvorschau
-  zeigt ebenfalls eine breitere Skala.
-
-## Hinzugefügt
-
 - `EChartsTree` kann Variablen über einen Namensbestandteil filtern, etwa
   „Batterie“. Kategorien und Instanzen auf dem Weg zu passenden Variablen
   bleiben erhalten. Ohne Filter ändert sich die bestehende Ansicht nicht.
@@ -791,156 +683,6 @@
   Nightingale-Rose in Kachel und IPSView. Beide Designer bieten Live-Vorschauen,
   unabhängige Gestaltung und Animation. Negative Werte und Nullsummen werden
   verständlich gemeldet; Quellen bleiben auch bei gleichen Namen ID-getrennt.
-
-## Behoben
-
-- Die horizontalen und vertikalen Scatter-Zoomregler haben jetzt dieselbe
-  zentral definierte Stärke wie die Zoomleisten von TimeSeries und BarHistory:
-  12 px, in kompakten Ansichten 8 px.
-
-- Die Zoomleiste von TimeSeries ist in Kachel und IPSView nun genauso schlank
-  wie bei BarHistory; auch kurze Ansichten erhalten den kompakten Regler.
-
-- Das Scatter-Instanzformular bezeichnet die Darstellung verständlich als
-  „Streudiagramm (optional mit Blasengröße)“; technische Modulnamen bleiben
-  unverändert.
-
-- Scatter/Bubble nutzt die Diagrammfläche mit datenangepassten X- und
-  Y-Achsen statt beide Skalen unnötig bei null beginnen zu lassen. Beide
-  Achsen können unabhängig null einschließen oder manuell begrenzt werden.
-  Bei dichten Punktwolken werden kollidierende Wertbeschriftungen verborgen;
-  der Tooltip zeigt weiterhin alle Messwerte. Die Formularvorschau platziert
-  Beispielpunkte, Skalen und Y-Achsentitel nun innerhalb einer konsistenten
-  Diagrammgeometrie und reagiert auf die Achsen- und Beschriftungsoptionen.
-
-- `EChartsPie` passt Kreisgröße und Beschriftungen an die tatsächlich freie
-  Fläche an. In mittelgroßen Kacheln steht die Legende unter dem Diagramm,
-  statt mit Außenbeschriftungen zu kollidieren; der Kachelkopf bleibt frei.
-
-- Die deutschen Instanzformulare zeigen in BarCategory, BarHistory,
-  BarWaterfall und BarPolar die Schrift- und Farboptionen nun vollständig
-  übersetzt. Auch die individuellen Designs von Gauge Tacho und Gauge
-  Chronograph enthalten keine englischen Feldnamen oder internen
-  Farbbezeichner mehr; ihre Auswahlwerte für Nabe, SVG-Ankerpunkt und
-  Theme-Farben sind ebenfalls deutsch. In den Quellenlisten von Gauge Tacho,
-  Gauge Chronograph und TimeSeries erscheint „Individuelles Design“ nun als
-  Ankreuzfeld statt als `true`/`false`.
-
-- Begrenzte Formularvorschauen von TimeSeries, BarCategory, BarHistory,
-  BarWaterfall und BarPolar nennen jetzt die Zahl der gezeigten und insgesamt
-  konfigurierten Quellen. Die Kachel und das IPSView-Widget verarbeiten
-  weiterhin alle Quellen; Gauge Multi nutzt für denselben Hinweis nun den
-  gemeinsamen Vorschau-Baustein. BarCategory und BarPolar wählen die
-  Vorschauquellen bei aktiver Sortierung jetzt in derselben Reihenfolge wie
-  die Kachel aus.
-
-- Gauge Multi kennzeichnet in beiden Formularvorschauen jetzt, wie viele der
-  konfigurierten Quellen die jeweilige Vorlage exemplarisch zeigt. Zuvor
-  verschwanden weitere Quellen dort ohne Hinweis, obwohl Kachel und IPSView
-  alle Quellen darstellten. Neue, noch unkonfigurierte Instanzen zeigen statt
-  unmarkierter Beispielinstrumente einen Konfigurationshinweis.
-
-- Die Kachel- und IPSView-Designer aller Diagrammmodule nutzen nun die
-  verfügbare Breite der Instanzkonfiguration, statt auf 700–760 px begrenzt
-  zu sein.
-
-- Die Polar-Formularvorschau kennzeichnet den Winkelverlauf nun mit
-  0°/360°, 90°, 180° und 270° ab dem eingestellten Startpunkt. Die Marken
-  folgen der gewählten Laufrichtung in Kachel- und IPSView-Designer.
-
-- Die Polar-Formularvorschau verwendet für Startwinkel und Drehrichtung nun
-  dieselbe Winkelkonvention wie die ECharts-Kachel. Teilkreise und Balken
-  erscheinen dadurch im Kachel- und unabhängigen IPSView-Designer an der
-  richtigen Position.
-
-- Das Raster der Polar-Formularvorschau folgt bei Teilkreisen nun dem
-  eingestellten Winkelumfang und der Drehrichtung, auch bei unabhängigem
-  IPSView-Design; 360° bleiben vollständige Kreise.
-
-- Die TimeSeries-Formularvorschauen zeigen jetzt für unterschiedliche
-  effektive Einheiten getrennte Wertachsen mit richtiger Seite und Farbe,
-  statt nur einer neutralen Y-Achse ohne Einheiten.
-
-- Die BarHistory-Formularvorschauen zeigen bei mehreren Einheiten die
-  zugehörigen Wertachsen auf der konfigurierten Seite und in der wirksamen
-  Achsenfarbe statt einer einzigen neutralen Skizzenachse.
-
-- Die BarHistory-Formularvorschau formatiert Beispielwert-Beschriftungen jetzt
-  mit der wirksamen Einheit und Nachkommastellen jeder Quelle statt mit einer
-  festen Dezimaldarstellung, getrennt für Kachel und unabhängiges IPSView.
-
-- Die Formularvorschauen von BarCategory, BarPolar und BarWaterfall übernehmen
-  jetzt wirksame Einheiten und Nachkommastellen aus der Variablendarstellung;
-  Waterfall formatiert damit auch Änderungen und Endsumme wie die Kachel.
-
-- Die BarHistory-Formularvorschau zeigt jetzt auch 0–9 % Balkendeckkraft
-  korrekt, getrennt für Kachel und unabhängiges IPSView.
-
-- Die Waterfall-Formularvorschau setzt Werte fallender Balken und negativer
-  Endsummen wie die Kachel unter die Säule; bei negativen Wertebereichen bleiben
-  Kategorie- und Wertbeschriftungen getrennt.
-
-- Die BarHistory-Formularvorschau zeigt Änderungen der SVG-Mustergröße jetzt
-  getrennt für Kachel und unabhängiges IPSView statt eines festen Musterrasters.
-
-- Die BarHistory-Formularvorschau berücksichtigt jetzt den eingestellten
-  Eckradius abgerundeter Balken getrennt für Kachel und unabhängiges IPSView.
-
-- Vorübergehende Ladefehler lassen auch bei Gauge Single, Multi, Tacho,
-  Chronograph, TimeSeries, BarCategory, BarWaterfall und BarPolar die letzte
-  gültige Kachel- oder IPSView-Grafik stehen. Bei wiederholtem Fehler erscheint
-  ein Hinweis; die Module versuchen nach 60 Sekunden erneut zu laden.
-  Ungültige Konfigurationen bleiben weiterhin als Fehler sichtbar.
-
-- Gauge Multi aktualisiert beide Formularvorschauen jetzt auch bei noch nicht
-  gespeicherten Änderungen der Quellenliste (Hinzufügen, Bearbeiten, Löschen und
-  Umsortieren). Unvollständige Listen zeigen einen Hinweis statt veralteter Gauges.
-
-- Die Diagramm-Instanzformulare beginnen einheitlich mit Titel und Quellen;
-  Waterfall ordnet die Beschriftung der Endsumme danach ein, Polar zeigt die
-  Animation am Anfang beider Designer. Alle Diagrammmodule erklären die
-  IPSView-Designvererbung direkt am Schalter und verwenden gleiche
-  IPSView-Hilfetexte. Der bislang englische Gauge-Multi-Hinweis ist wieder
-  deutsch übersetzt.
-
-- Ein vorübergehend fehlgeschlagenes Archiv-Update lässt BarHistory-Kachel
-  und IPSView nicht mehr verschwinden: Diagramm und Zoom bleiben erhalten.
-  Wiederholte Fehler werden als Hinweis angezeigt, bis neue Daten eintreffen.
-
-- Kurze BarHistory-Kacheln reservieren wieder Platz für Balken und reduzieren
-  überlappende Zeit- und Wertachsenbeschriftungen. Die Zoom-Leiste ist in
-  normalen Ansichten flacher, in kompakten Kacheln nochmals schmaler und mit
-  Abstand zum unteren Kachelrand platziert.
-
-- Unveränderte Größenmeldungen unterbrechen auch bei Gauges, TimeSeries und
-  den übrigen Balkendiagrammen keine laufenden Chart-Animationen mehr. Echte
-  Größenänderungen bleiben wirksam.
-
-- Start- und Aktualisierungsanimationen der Polar-Balken werden in Kachel und
-  IPSView nicht mehr durch Größenmeldungen ohne tatsächliche Größenänderung abgebrochen.
-
-- Kategoriebeschriftungen im Polar-IPSView nutzen bei ausreichend Platz die
-  verfügbare Breite auch bei größerer Schrift, statt schon nach wenigen
-  Zeichen abgeschnitten zu werden. Schmale Widgets behalten Platz für den Kreis.
-
-- Hintergrundspuren konzentrischer Polar-Bögen bleiben bei einem begrenzten
-  Winkelumfang innerhalb des gewählten Teilkreises, auch nach Größenänderungen.
-
-- Beim Verkleinern einer Polar-Kachel werden Kategoriebeschriftungen nicht
-  mehr durch das automatische Achsenintervall übersprungen, solange sie
-  tatsächlich Platz haben.
-
-- Bei konzentrischen Polar-Bögen bleiben Kategoriebeschriftungen vor den
-  Balken und Hintergrundspuren sichtbar. Werte an abgerundeten Bogenenden
-  rücken in die farbige Fläche, damit die automatische Schriftfarbe dort passt.
-
-- Bei Polar-Teilkreisen folgen Raster und Hintergrundspuren nun demselben
-  Winkelbereich und derselben Drehrichtung wie die Balken; der Vollkreisrand
-  erscheint außerhalb des gewählten Ausschnitts nicht mehr.
-
-- Polar-Balken und konzentrische Bögen beginnen bei einer festen Werteskala am eingestellten Minimum statt am ECharts-Standardwert 0.
-
-## Neu
 
 - Gauge Multi, Tacho und Chronograph bieten in Kachel und unabhängigem
   IPSView-Design eine eigene Rubrik für Farbe und Größe des äußeren
@@ -1116,6 +858,255 @@
   nach einem festgelegten maximalen Zeitabstand sichtbar unterbrechen.
 
 ## Fixes
+
+- Zusätzliche Gateways unterbrechen die Zustandsabfragen vorhandener Diagramme
+  nicht mehr. Der gemeinsame HTTP-Zugang leitet Anfragen an das tatsächlich
+  verbundene Gateway weiter. Nach dem Löschen seines Eigentümers übernimmt ein
+  verbleibendes Gateway automatisch. Bestehende URLs, Kanäle, Quellen und
+  Designs bleiben erhalten.
+
+- PictorialBar zeigt Erfolgsbestätigungen der Mehrfachübernahme ohne den
+  technischen Präfix `MESSAGE:` an. Der Rückgabewert der Modulfunktion,
+  Fehlermeldungen, Quellen, Designs und Schutzgrenzen bleiben unverändert.
+
+- PictorialBar zeigt Fehler und Bestätigungen der Mehrfachübernahme im Formular
+  an. Die Buttoncallbacks geben die Meldungen jetzt aus, statt sie nur als
+  PHP-Rückgabewert zu liefern. Quellen, Designs und Schutzgrenzen bleiben erhalten.
+
+- Calendar zeigt auch Teilarchive, deren erster Tagesdatensatz erst im
+  Tagesverlauf beginnt. Eine zu strenge Mitternachtsprüfung hatte in diesem
+  Fall sämtliche Kalenderwerte verworfen. Fehlende Tage bleiben leer;
+  gespeicherte Konfiguration und Archivwerte werden nicht verändert.
+
+- Sankey-Vorschauen zeigen auch größere Konfigurationen vollständig mit
+  aktuellen Variablenwerten statt eines Ersatz-Beispielnetzes. Geschlossene
+  Flussflächen verhindern Überstände an engen Kurven. Fehler- und
+  Nullwertzustände werden ausdrücklich angezeigt. Beschriftungen in Kachel,
+  IPSView und Vorschau passen sich dem verfügbaren Knotenplatz an; schmale
+  Verbraucher verursachen keinen überlappenden Textblock mehr. Gespeicherte
+  Konfigurationen werden dabei nicht verändert.
+
+- Die neuen Linien-, Achsen- und Animationsfelder im Parallel-Designer sind
+  auch in der deutschen Symcon-Konsole vollständig übersetzt.
+
+- Der Zigbee-Graph hält die Kopfzeile der Symcon-Kachel auch bei großen
+  Force-Layouts und ohne eigenen Diagrammtitel frei. Knoten und Verbindungen
+  werden nur unterhalb des Kachelnamens gezeichnet.
+
+- Diagrammtitel in Kacheln von Parallel, Pie, Scatter/Bubble, Tree,
+  Anlagenzustandsbaum, Graph, Zigbee-Graph, Treemap und Sunburst bleiben
+  sichtbar und liegen mit ihren Diagramminhalten unter dem Symcon-Kachelkopf.
+  IPSView behält seinen eigenen Titelbereich.
+
+- Der weiße Streifen über Treemap-Gruppen übernimmt nun den gewählten
+  Diagrammhintergrund oder die ausdrücklich festgelegte Rahmenfarbe. Das gilt
+  für Kachel und IPSView, auch bei transparentem IPSView-Hintergrund.
+
+- Treemap-Gruppenüberschriften stehen nun auf der jeweiligen Gruppenfarbe
+  statt auf einem kontrastarmen hellen Feld. Eine manuell gewählte
+  Beschriftungsfarbe wirkt jetzt auch auf Gruppen, Untergruppen und Werte;
+  die automatische Farbe bleibt kontrastabhängig. Achtung: Die bisherigen
+  automatisch gefärbten Überschriften können nach dem Update anders aussehen.
+
+- Der Zigbee2MQTT-Graph liest große Netzwerkkarten aus dem serverseitigen
+  JSON-Export statt über die auf 1 MiB begrenzte Modulrückgabe. Achtung: Nach
+  jedem neuen Netzwerkscan müssen die Exportdateien erneut erstellt werden;
+  mehrere Netzwerkkarteninstanzen mit gemeinsamem Exportordner werden nicht
+  unterstützt.
+
+- Die Health-Tree-Suche nach Zustandsvariablen verarbeitet auch leere oder noch nicht
+  gespeicherte Regellisten korrekt. Im Suchdialog werden vorhandene Regeln und
+  ausgewählte Treffer als Listenzeilen statt als Formularobjekte übergeben.
+
+- Ungültige Health-Tree-Zustandsregeln nennen im Formular jetzt die betroffenen
+  Regelzeilen sowie Sensorname und Variablen-ID. Doppelte Einträge werden markiert; die
+  Kritisch-Schwelle lässt sich im Bearbeitungsdialog nur in der zur
+  Alarmrichtung passenden Reihenfolge bestätigen.
+
+- Die 30-Tage-Heatmap kennzeichnet ihren Mo–So/Stunden-Durchschnitt nun im
+  Diagramm, im Tooltip und im Formular ausdrücklich. Sie berücksichtigt
+  weiterhin alle vorhandenen Stundenwerte des gewählten 30-Tage-Zeitraums;
+  Datenaggregation und gespeicherte Einstellungen ändern sich nicht.
+
+- Die Heatmap zählt sieben Tage jetzt als sieben datierte lokale Tage bis heute
+  statt als 168 Stunden mit zwei vermischten Randtagen. Achtung: Dadurch
+  können bisherige 7-Tage-Zellenwerte nach dem Modulupdate anders aussehen.
+
+- Die automatische Wertbeschriftungsfarbe der Heatmap passt sich nun je
+  Zelle an helle und dunkle Füllfarben an. Eine manuell gewählte Farbe
+  bleibt unverändert. Achtung: Die bisherige automatische Schriftfarbe kann
+  sich nach dem Modulupdate sichtbar ändern.
+
+- Die Temperatur-Vorlagen der Heatmap färben Zellen jetzt nach festen
+  Celsius-Klassen statt den aktuellen Archivwertebereich auf alle Farben
+  zu strecken. Die Legende zeigt die festen Vorlagengrenzen. Achtung:
+  Bereits ausgewählte Vorlagen ändern dadurch nach dem Modulupdate ihre
+  Darstellung; die individuelle Zwei-Farben-Skala bleibt unverändert.
+
+- Die Heatmap-Farbskala zeigt in Kachel und IPSView ihren kleinsten und größten
+  Archivwert mit der konfigurierten Einheit an.
+
+- Die beiden Scatter-Werkzeuge für Rechteckauswahl und Zurücksetzen sind in
+  Kachel und IPSView kontrastreicher und wachsen mit der verfügbaren
+  Diagrammfläche. Die Plotfläche hält dafür ausreichend Abstand frei.
+
+- Alle Diagrammkacheln übernehmen nur noch vollständige Visualisierungszustände
+  als Datenaktualisierung. Andere oder unvollständige Nachrichten ersetzen
+  die Darstellung nicht mehr durch eine irreführende Ladefehlermeldung.
+
+- Ausstehende Größenänderungen greifen nach dem Verlassen oder Neuaufbau einer
+  Kachel nicht mehr auf bereits freigegebene ECharts-Instanzen zu.
+
+- Die Scatter-Farbskala verwendet nun die ECharts-Abmessungen korrekt:
+  eine flache, an die Kachel- oder IPSView-Breite angepasste horizontale
+  Legende statt eines schmalen senkrechten Streifens. Die Formularvorschau
+  zeigt ebenfalls eine breitere Skala.
+
+- Die horizontalen und vertikalen Scatter-Zoomregler haben jetzt dieselbe
+  zentral definierte Stärke wie die Zoomleisten von TimeSeries und BarHistory:
+  12 px, in kompakten Ansichten 8 px.
+
+- Die Zoomleiste von TimeSeries ist in Kachel und IPSView nun genauso schlank
+  wie bei BarHistory; auch kurze Ansichten erhalten den kompakten Regler.
+
+- Das Scatter-Instanzformular bezeichnet die Darstellung verständlich als
+  „Streudiagramm (optional mit Blasengröße)“; technische Modulnamen bleiben
+  unverändert.
+
+- Scatter/Bubble nutzt die Diagrammfläche mit datenangepassten X- und
+  Y-Achsen statt beide Skalen unnötig bei null beginnen zu lassen. Beide
+  Achsen können unabhängig null einschließen oder manuell begrenzt werden.
+  Bei dichten Punktwolken werden kollidierende Wertbeschriftungen verborgen;
+  der Tooltip zeigt weiterhin alle Messwerte. Die Formularvorschau platziert
+  Beispielpunkte, Skalen und Y-Achsentitel nun innerhalb einer konsistenten
+  Diagrammgeometrie und reagiert auf die Achsen- und Beschriftungsoptionen.
+
+- `EChartsPie` passt Kreisgröße und Beschriftungen an die tatsächlich freie
+  Fläche an. In mittelgroßen Kacheln steht die Legende unter dem Diagramm,
+  statt mit Außenbeschriftungen zu kollidieren; der Kachelkopf bleibt frei.
+
+- Die deutschen Instanzformulare zeigen in BarCategory, BarHistory,
+  BarWaterfall und BarPolar die Schrift- und Farboptionen nun vollständig
+  übersetzt. Auch die individuellen Designs von Gauge Tacho und Gauge
+  Chronograph enthalten keine englischen Feldnamen oder internen
+  Farbbezeichner mehr; ihre Auswahlwerte für Nabe, SVG-Ankerpunkt und
+  Theme-Farben sind ebenfalls deutsch. In den Quellenlisten von Gauge Tacho,
+  Gauge Chronograph und TimeSeries erscheint „Individuelles Design“ nun als
+  Ankreuzfeld statt als `true`/`false`.
+
+- Begrenzte Formularvorschauen von TimeSeries, BarCategory, BarHistory,
+  BarWaterfall und BarPolar nennen jetzt die Zahl der gezeigten und insgesamt
+  konfigurierten Quellen. Die Kachel und das IPSView-Widget verarbeiten
+  weiterhin alle Quellen; Gauge Multi nutzt für denselben Hinweis nun den
+  gemeinsamen Vorschau-Baustein. BarCategory und BarPolar wählen die
+  Vorschauquellen bei aktiver Sortierung jetzt in derselben Reihenfolge wie
+  die Kachel aus.
+
+- Gauge Multi kennzeichnet in beiden Formularvorschauen jetzt, wie viele der
+  konfigurierten Quellen die jeweilige Vorlage exemplarisch zeigt. Zuvor
+  verschwanden weitere Quellen dort ohne Hinweis, obwohl Kachel und IPSView
+  alle Quellen darstellten. Neue, noch unkonfigurierte Instanzen zeigen statt
+  unmarkierter Beispielinstrumente einen Konfigurationshinweis.
+
+- Die Kachel- und IPSView-Designer aller Diagrammmodule nutzen nun die
+  verfügbare Breite der Instanzkonfiguration, statt auf 700–760 px begrenzt
+  zu sein.
+
+- Die Polar-Formularvorschau kennzeichnet den Winkelverlauf nun mit
+  0°/360°, 90°, 180° und 270° ab dem eingestellten Startpunkt. Die Marken
+  folgen der gewählten Laufrichtung in Kachel- und IPSView-Designer.
+
+- Die Polar-Formularvorschau verwendet für Startwinkel und Drehrichtung nun
+  dieselbe Winkelkonvention wie die ECharts-Kachel. Teilkreise und Balken
+  erscheinen dadurch im Kachel- und unabhängigen IPSView-Designer an der
+  richtigen Position.
+
+- Das Raster der Polar-Formularvorschau folgt bei Teilkreisen nun dem
+  eingestellten Winkelumfang und der Drehrichtung, auch bei unabhängigem
+  IPSView-Design; 360° bleiben vollständige Kreise.
+
+- Die TimeSeries-Formularvorschauen zeigen jetzt für unterschiedliche
+  effektive Einheiten getrennte Wertachsen mit richtiger Seite und Farbe,
+  statt nur einer neutralen Y-Achse ohne Einheiten.
+
+- Die BarHistory-Formularvorschauen zeigen bei mehreren Einheiten die
+  zugehörigen Wertachsen auf der konfigurierten Seite und in der wirksamen
+  Achsenfarbe statt einer einzigen neutralen Skizzenachse.
+
+- Die BarHistory-Formularvorschau formatiert Beispielwert-Beschriftungen jetzt
+  mit der wirksamen Einheit und Nachkommastellen jeder Quelle statt mit einer
+  festen Dezimaldarstellung, getrennt für Kachel und unabhängiges IPSView.
+
+- Die Formularvorschauen von BarCategory, BarPolar und BarWaterfall übernehmen
+  jetzt wirksame Einheiten und Nachkommastellen aus der Variablendarstellung;
+  Waterfall formatiert damit auch Änderungen und Endsumme wie die Kachel.
+
+- Die BarHistory-Formularvorschau zeigt jetzt auch 0–9 % Balkendeckkraft
+  korrekt, getrennt für Kachel und unabhängiges IPSView.
+
+- Die Waterfall-Formularvorschau setzt Werte fallender Balken und negativer
+  Endsummen wie die Kachel unter die Säule; bei negativen Wertebereichen bleiben
+  Kategorie- und Wertbeschriftungen getrennt.
+
+- Die BarHistory-Formularvorschau zeigt Änderungen der SVG-Mustergröße jetzt
+  getrennt für Kachel und unabhängiges IPSView statt eines festen Musterrasters.
+
+- Die BarHistory-Formularvorschau berücksichtigt jetzt den eingestellten
+  Eckradius abgerundeter Balken getrennt für Kachel und unabhängiges IPSView.
+
+- Vorübergehende Ladefehler lassen auch bei Gauge Single, Multi, Tacho,
+  Chronograph, TimeSeries, BarCategory, BarWaterfall und BarPolar die letzte
+  gültige Kachel- oder IPSView-Grafik stehen. Bei wiederholtem Fehler erscheint
+  ein Hinweis; die Module versuchen nach 60 Sekunden erneut zu laden.
+  Ungültige Konfigurationen bleiben weiterhin als Fehler sichtbar.
+
+- Gauge Multi aktualisiert beide Formularvorschauen jetzt auch bei noch nicht
+  gespeicherten Änderungen der Quellenliste (Hinzufügen, Bearbeiten, Löschen und
+  Umsortieren). Unvollständige Listen zeigen einen Hinweis statt veralteter Gauges.
+
+- Die Diagramm-Instanzformulare beginnen einheitlich mit Titel und Quellen;
+  Waterfall ordnet die Beschriftung der Endsumme danach ein, Polar zeigt die
+  Animation am Anfang beider Designer. Alle Diagrammmodule erklären die
+  IPSView-Designvererbung direkt am Schalter und verwenden gleiche
+  IPSView-Hilfetexte. Der bislang englische Gauge-Multi-Hinweis ist wieder
+  deutsch übersetzt.
+
+- Ein vorübergehend fehlgeschlagenes Archiv-Update lässt BarHistory-Kachel
+  und IPSView nicht mehr verschwinden: Diagramm und Zoom bleiben erhalten.
+  Wiederholte Fehler werden als Hinweis angezeigt, bis neue Daten eintreffen.
+
+- Kurze BarHistory-Kacheln reservieren wieder Platz für Balken und reduzieren
+  überlappende Zeit- und Wertachsenbeschriftungen. Die Zoom-Leiste ist in
+  normalen Ansichten flacher, in kompakten Kacheln nochmals schmaler und mit
+  Abstand zum unteren Kachelrand platziert.
+
+- Unveränderte Größenmeldungen unterbrechen auch bei Gauges, TimeSeries und
+  den übrigen Balkendiagrammen keine laufenden Chart-Animationen mehr. Echte
+  Größenänderungen bleiben wirksam.
+
+- Start- und Aktualisierungsanimationen der Polar-Balken werden in Kachel und
+  IPSView nicht mehr durch Größenmeldungen ohne tatsächliche Größenänderung abgebrochen.
+
+- Kategoriebeschriftungen im Polar-IPSView nutzen bei ausreichend Platz die
+  verfügbare Breite auch bei größerer Schrift, statt schon nach wenigen
+  Zeichen abgeschnitten zu werden. Schmale Widgets behalten Platz für den Kreis.
+
+- Hintergrundspuren konzentrischer Polar-Bögen bleiben bei einem begrenzten
+  Winkelumfang innerhalb des gewählten Teilkreises, auch nach Größenänderungen.
+
+- Beim Verkleinern einer Polar-Kachel werden Kategoriebeschriftungen nicht
+  mehr durch das automatische Achsenintervall übersprungen, solange sie
+  tatsächlich Platz haben.
+
+- Bei konzentrischen Polar-Bögen bleiben Kategoriebeschriftungen vor den
+  Balken und Hintergrundspuren sichtbar. Werte an abgerundeten Bogenenden
+  rücken in die farbige Fläche, damit die automatische Schriftfarbe dort passt.
+
+- Bei Polar-Teilkreisen folgen Raster und Hintergrundspuren nun demselben
+  Winkelbereich und derselben Drehrichtung wie die Balken; der Vollkreisrand
+  erscheint außerhalb des gewählten Ausschnitts nicht mehr.
+
+- Polar-Balken und konzentrische Bögen beginnen bei einer festen Werteskala am eingestellten Minimum statt am ECharts-Standardwert 0.
 
 - EChartsBoxplot beschriftet die Wertachse in Kachel und IPSView ohne lange
   Gleitkomma-Nachkommastellen an den Skalengrenzen. Die Zahlenformatierung
