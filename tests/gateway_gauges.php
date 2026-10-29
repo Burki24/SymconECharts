@@ -7,6 +7,8 @@ use SymconECharts\EChartsDataProtocol;
 const IPS_KERNELSTARTED = 10001;
 const VM_UPDATE = 10603;
 const KR_READY = 10103;
+const IM_DELETE = 10502;
+const IS_DELETING = 103;
 const IS_ACTIVE = 102;
 const IS_INACTIVE = 104;
 const SYMCON_OUTPUT_BUFFER_LIMIT = 1048576;
@@ -223,6 +225,39 @@ function IPS_GetInstanceListByModuleID(string $moduleID): array
     }
 
     return $GLOBALS['symconTestArchiveInstances'];
+}
+
+function IPS_InstanceExists(int $instanceID): bool
+{
+    return $instanceID === 5000 || isset($GLOBALS['symconTestInstances'][$instanceID]);
+}
+
+function IPS_GetInstance(int $instanceID): array
+{
+    if (isset($GLOBALS['symconTestInstances'][$instanceID])) {
+        return $GLOBALS['symconTestInstances'][$instanceID];
+    }
+    if ($instanceID !== 5000) {
+        throw new RuntimeException('Unknown synthetic instance.');
+    }
+    return [
+        'InstanceID' => $instanceID, 'ConnectionID' => 5000, 'InstanceStatus' => IS_ACTIVE,
+        'ModuleInfo' => ['ModuleID' => '{33C9DF44-6F6D-5916-4AAE-CCB24BD6928D}']
+    ];
+}
+
+function ECGW_RefreshTransport(int $instanceID): void
+{
+    $GLOBALS['symconTestTransportRefreshCalls'][] = $instanceID;
+    if (!isset($GLOBALS['symconTestGatewayObjects'][$instanceID])) {
+        throw new RuntimeException('Synthetic gateway interface is not yet available.');
+    }
+    $GLOBALS['symconTestGatewayObjects'][$instanceID]->RefreshTransport();
+}
+
+function ECGW_GetTransportState(int $instanceID, int $deviceID, string $channel, int $offset, string $output): string
+{
+    return $GLOBALS['symconTestGatewayObjects'][$instanceID]->GetTransportState($deviceID, $channel, $offset, $output);
 }
 
 function WC_PushMessage(int $instanceID, string $path, string $message): void
@@ -767,15 +802,17 @@ abstract class IPSModuleStrict
     {
         return array_map(
             static fn (callable $responder): string => $responder($data),
-            self::$ChildResponders
+            $GLOBALS['symconTestGatewayResponders'][$this->InstanceID] ?? self::$ChildResponders
         );
     }
 
-    protected function RegisterHook(string $hook): void
+    protected function RegisterHook(string $hook): bool
     {
         if (!in_array($hook, $this->hooks, true)) {
             $this->hooks[] = $hook;
         }
+        $GLOBALS['symconTestHookOwners'][$hook] = $this->InstanceID;
+        return true;
     }
 
     protected function SendDebug(string $message, string $data, int $format): bool
@@ -1033,6 +1070,11 @@ assertGatewayGauge(
     'The Gateway must own the shared SymconECharts WebHook.'
 );
 IPSModuleStrict::$ParentResponder = static fn (string $json): string => $gateway->ForwardData($json);
+
+require __DIR__ . '/gateway_transport.php';
+if (array_slice($argv, 1) === ['--gateway-transport']) {
+    exit(0);
+}
 
 if (array_slice($argv, 1) === ['--scatter-groups']) {
     require __DIR__ . '/scatter_groups.php';

@@ -3,14 +3,6 @@
 declare(strict_types=1);
 
 // Real module/export-reader path; Kernel and saved exports are entirely synthetic.
-function IPS_GetInstance(int $instanceID): array
-{
-    if ($instanceID !== 99700) {
-        throw new RuntimeException('Unknown synthetic Network Map.');
-    }
-    return ['ModuleInfo' => ['ModuleID' => '{C07834E7-9821-218C-C3EC-A4A87FFB8D7D}']];
-}
-
 function IPS_GetKernelDir(): string
 {
     return $GLOBALS['symconTestZigbeeKernel'];
@@ -24,6 +16,7 @@ function IPS_GetKernelDir(): string
     $file = $directory . '/zigbee-network-map-20261023-120000.json';
     $GLOBALS['symconTestZigbeeKernel'] = $kernel;
     $GLOBALS['symconTestModuleInstances']['{C07834E7-9821-218C-C3EC-A4A87FFB8D7D}'] = [99700];
+    $GLOBALS['symconTestInstances'][99700] = ['ModuleInfo' => ['ModuleID' => '{C07834E7-9821-218C-C3EC-A4A87FFB8D7D}']];
     $a = '0x0000000000000001';
     $b = '0x0000000000000002';
     $c = '0x0000000000000003';
@@ -180,6 +173,6 @@ function IPS_GetKernelDir(): string
         rmdir(dirname($directory));
         rmdir($kernel . '/user');
         rmdir($kernel);
-        unset($GLOBALS['symconTestZigbeeKernel'], $GLOBALS['symconTestModuleInstances']);
+        unset($GLOBALS['symconTestZigbeeKernel'], $GLOBALS['symconTestModuleInstances'], $GLOBALS['symconTestInstances'][99700]);
     }
 })();

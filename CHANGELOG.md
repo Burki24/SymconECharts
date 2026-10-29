@@ -2,6 +2,12 @@
 
 ## Behoben
 
+- Zusätzliche Gateways unterbrechen die Zustandsabfragen vorhandener Diagramme
+  nicht mehr. Der gemeinsame HTTP-Zugang leitet Anfragen an das tatsächlich
+  verbundene Gateway weiter. Nach dem Löschen seines Eigentümers übernimmt ein
+  verbleibendes Gateway automatisch. Bestehende URLs, Kanäle, Quellen und
+  Designs bleiben erhalten.
+
 - PictorialBar zeigt Erfolgsbestätigungen der Mehrfachübernahme ohne den
   technischen Präfix `MESSAGE:` an. Der Rückgabewert der Modulfunktion,
   Fehlermeldungen, Quellen, Designs und Schutzgrenzen bleiben unverändert.

@@ -1,5 +1,19 @@
 # Tests
 
+## Gateway-Hook und gemeinsame Beta-Abnahme
+
+`php tests/gateway_gauges.php --gateway-transport` prüft den tatsächlichen
+Gateway-Handler mit exklusiver Hookregistrierung im Kernel-Doppel: mehrere
+Gateway-IDs in unterschiedlicher Reihenfolge, Dispatch zum wirklichen Parent,
+geschützte Kanäle und native Navigation, wiederholte Eigentümerlöschung,
+Kernelstart und bei Reload noch nicht verfügbare Peer-Schnittstellen. Die
+Prüfung läuft außerdem in der gemeinsamen Gateway-Integration.
+
+Die [Beta-Abnahme vom 28.10.2026](../docs/BETA_ABNAHME-2026-10-28.md) ergänzt
+Neuinstanzen aller Module, Reload, HTTP-Rundlauf aller Diagrammfamilien und
+automatische Hookübernahme auf Symcon 9.1. Die bestehende Kachel-/IPSView-Abnahme
+des Eigentümers bleibt gültig; weitere Geräte- und Dauerlastlücken bleiben getrennt.
+
 ## Abnahmestand der Nutzungsgrenzen-Roadmap
 
 Die zusammenhängende [Systemprüfung vom 26.10.2026](../docs/SYSTEMPRUEFUNG-2026-10-26.md)

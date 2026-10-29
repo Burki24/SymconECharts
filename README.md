@@ -1,5 +1,11 @@
 # SymconECharts
 
+[![Symcon](https://img.shields.io/badge/Symcon-PHPModul-brown.svg)](https://www.symcon.de)
+[![Symcon Version](https://img.shields.io/badge/Symcon%20Version-9.0%2B-blue.svg)](library.json)
+[![License](https://img.shields.io/badge/License-PolyForm--Noncommercial--1.0.0-brightgreen.svg)](LICENSE)
+[![Check Style](https://github.com/Burki24/SymconECharts/actions/workflows/style.yml/badge.svg?branch=dev)](https://github.com/Burki24/SymconECharts/actions/workflows/style.yml?query=branch%3Adev)
+[![Tests](https://github.com/Burki24/SymconECharts/actions/workflows/tests.yml/badge.svg?branch=dev)](https://github.com/Burki24/SymconECharts/actions/workflows/tests.yml?query=branch%3Adev)
+
 SymconECharts stellt Symcon-Werte und ausgewählte Objektbeziehungen als
 responsive Apache-ECharts-Diagramme in nativen Symcon-Kacheln und optionalen
 IPSView-HTML-Widgets dar.

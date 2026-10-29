@@ -68,6 +68,13 @@ weiterhin die Erstellung eines zusätzlichen Gateways an. Mehrere Gateways sind
 zulässig, bilden aber getrennte Infrastruktur und sind nicht der vorgesehene
 Standard.
 
+Der gemeinsame HTTP-Zugang bleibt auch bei mehreren Gateways derselbe.
+Zustandsabfragen erreichen das Gateway, mit dem das jeweilige Diagramm
+verbunden ist. Beim Entfernen des zuständigen Gateways übernimmt ein
+verbleibendes Gateway automatisch; während der kurzen Übergabe kann eine
+Verbindung vorübergehend neu aufgebaut werden. Bestehende Diagramm-URLs,
+Quellen und Designs müssen dafür nicht angepasst werden.
+
 Beide Gauge-Module bieten über `GetCompatibleParents()` vorhandene kompatible
 Gateway-Instanzen zur Verbindung an. Mehrere Chart-Instanzen können dadurch
 bewusst dasselbe Gateway verwenden; die Geräte erzeugen nicht über

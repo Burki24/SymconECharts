@@ -1,5 +1,12 @@
 # Entwicklung von SymconECharts
 
+Der gemeinsame Gateway-Hook wird gemäß [ADR 0107](adr/0107-shared-gateway-hook-ownership.md)
+koordiniert und routet zum tatsächlichen Datenflussparent. Peer-Aufrufe erfolgen
+nur bei aktiven Schnittstellen, damit ein Bibliotheksreload keine noch nicht
+verfügbaren Modulinterfaces anspricht. Die gemeinsame Beta-Abnahme steht im
+[Bericht vom 28.10.2026](BETA_ABNAHME-2026-10-28.md), die vorbereiteten deutschen
+Store-Texte und verbleibenden Eigentümerschritte unter [Beta-Store](BETA_STORE.md).
+
 Heatmap ergänzt gemäß [ADR 0106](adr/0106-heatmap-comparison-views.md) optionale
 1–4-Vergleichsansichten. Ein familienlokaler Plan kombiniert die bestehende
 globale oder eigene absolute Zeitraumplanung mit flüchtiger Navigation.

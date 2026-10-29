@@ -1,5 +1,11 @@
 # Gemeinsame Systemprüfung am 26.10.2026
 
+Nachtrag 28.10.2026: Der hier historisch beschriebene Mehr-Gateway-Hookfehler
+ist mit Regressionstest korrigiert und live nachgeprüft; siehe
+[gemeinsame Beta-Abnahme](BETA_ABNAHME-2026-10-28.md). Der Archivdatenkonflikt und
+die tatsächlich nicht geprüften Varianten bleiben davon unberührt. Die bereits
+bestätigten IPSView-Darstellungen wurden vom Eigentümer nochmals bestätigt.
+
 ## Auftrag und Urteil
 
 Zusammenhängende Prüfung der erreichbaren Testlücken mit einem Gesamt-Fazit,

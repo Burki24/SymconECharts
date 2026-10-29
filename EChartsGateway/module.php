@@ -29,6 +29,7 @@ class EChartsGateway extends IPSModuleStrict
     private const DATA_ID_TO_CHILD = '{E4749B72-912B-E3E3-1C57-D19019FFDD84}';
     private const WEBHOOK_CONTROL_MODULE_ID = '{015A6EB8-D6E5-4B93-B496-0D3F77AE9FE1}';
     private const WEBHOOK_NAME = 'SymconECharts';
+    private const GATEWAY_MODULE_ID = '{33C9DF44-6F6D-5916-4AAE-CCB24BD6928D}';
 
     /** @var list<int> */
     private const ARCHIVE_AGGREGATION_LEVELS = [0, 1, 5, 6, 8];
@@ -44,7 +45,8 @@ class EChartsGateway extends IPSModuleStrict
         try {
             parent::Create();
 
-            $this->RegisterHook(self::WEBHOOK_NAME);
+            $this->RegisterMessage(0, IPS_KERNELSTARTED);
+            $this->RefreshGatewayTransports();
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
             $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
@@ -64,6 +66,7 @@ class EChartsGateway extends IPSModuleStrict
             parent::ApplyChanges();
 
             $this->SetBuffer(self::ARCHIVE_CACHE_BUFFER, '');
+            $this->RefreshGatewayTransports();
             $this->DebugEChartsSetStatus(IS_ACTIVE);
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
@@ -118,6 +121,63 @@ class EChartsGateway extends IPSModuleStrict
         }
     }
 
+    /** Refresh only volatile hook ownership and peer subscriptions, never user configuration. */
+    public function RefreshTransport(): void
+    {
+        $this->DebugFlowCall(__FUNCTION__, __LINE__, function (): void
+        {
+            $this->UpdateTransportRegistration();
+        }, true);
+    }
+
+    public function MessageSink(int $TimeStamp, int $SenderID, int $Message, array $Data): void
+    {
+        $this->DebugFlowCall(__FUNCTION__, __LINE__, function () use ($SenderID, $Message): void
+        {
+            if ($Message === IPS_KERNELSTARTED && $SenderID === 0) {
+                $this->RefreshGatewayTransports();
+            } elseif ($Message === IM_DELETE) {
+                $this->UpdateTransportRegistration($SenderID);
+            }
+        }, true);
+    }
+
+    /** A shared HTTP handler delegates to the child's real parent; the child still authorizes its channel. */
+    public function GetTransportState(int $DeviceID, string $Channel, int $WindowOffset, string $Output): string
+    {
+        return $this->DebugFlowCall(__FUNCTION__, __LINE__, function () use ($DeviceID, $Channel, $WindowOffset, $Output): string
+        {
+            if (!IPS_InstanceExists($DeviceID)
+                || IPS_GetInstance($DeviceID)['ConnectionID'] !== $this->InstanceID
+                || preg_match('/^[a-f0-9]{32}$/D', $Channel) !== 1
+                || $WindowOffset < 0 || $WindowOffset > EChartsDataProtocol::MAX_STATE_WINDOW_OFFSET
+                || !in_array($Output, ['tile', 'ipsview'], true)) {
+                return '';
+            }
+            $request = EChartsDataProtocol::CreateRequest(EChartsDataProtocol::OPERATION_IPSVIEW_STATE, [
+                'InstanceID'   => $DeviceID, 'Channel' => $Channel,
+                'WindowOffset' => $WindowOffset, 'Output' => $Output
+            ]);
+            $this->DebugFlowEvent(__FUNCTION__, __LINE__, 'SENDEN', 'Zustandsanfrage an verbundene Diagramminstanzen weitergegeben; Zugriffskanal bleibt geschützt.', ['Zielinstanz' => $DeviceID]);
+            $responses = $this->SendDataToChildren($this->EncodeDataFlowMessage(self::DATA_ID_TO_CHILD, $request));
+            foreach (is_array($responses) ? $responses : [] as $response) {
+                if (!is_string($response) || $response === '') {
+                    continue;
+                }
+                try {
+                    $decoded = EChartsDataProtocol::DecodeResponse($response, EChartsDataProtocol::OPERATION_IPSVIEW_STATE);
+                    $state = $decoded['Payload']['State'] ?? null;
+                    if (($decoded['Success'] ?? false) === true && is_array($state)) {
+                        return json_encode($state, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                    }
+                } catch (Throwable $exception) {
+                    $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
+                }
+            }
+            return '';
+        });
+    }
+
     protected function ProcessHookData(): void
     {
         $debugFlowResult = null;
@@ -156,45 +216,8 @@ class EChartsGateway extends IPSModuleStrict
                 return;
             }
 
-            $request = EChartsDataProtocol::CreateRequest(EChartsDataProtocol::OPERATION_IPSVIEW_STATE, [
-                'InstanceID'   => (int) $matches[1],
-                'Channel'      => $matches[2],
-                'WindowOffset' => (int) $offset,
-                'Output'       => $output
-            ]);
-            $this->DebugFlowEvent(__FUNCTION__, __LINE__, 'SENDEN', 'Zustandsanfrage an Diagramminstanzen weitergegeben; Zugriffskanal bleibt geschützt.', ['Zielinstanz' => (int) $matches[1]]);
-            $responses = $this->SendDataToChildren($this->EncodeDataFlowMessage(self::DATA_ID_TO_CHILD, $request));
-            if (!is_array($responses)) {
-                $this->SendHookResponse(404, '');
-
-                return;
-            }
-
-            foreach ($responses as $response) {
-                if (!is_string($response) || $response === '') {
-                    continue;
-                }
-                try {
-                    $decoded = EChartsDataProtocol::DecodeResponse(
-                        $response,
-                        EChartsDataProtocol::OPERATION_IPSVIEW_STATE
-                    );
-                    $state = $decoded['Payload']['State'] ?? null;
-                    if (($decoded['Success'] ?? false) === true && is_array($state)) {
-                        $this->SendHookResponse(200, json_encode(
-                            $state,
-                            JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
-                        ), 'application/json; charset=utf-8');
-
-                        return;
-                    }
-                } catch (Throwable $exception) {
-                    $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
-                    continue;
-                }
-            }
-
-            $this->SendHookResponse(404, '');
+            $body = $this->RouteTransportState((int) $matches[1], $matches[2], (int) $offset, $output);
+            $this->SendHookResponse($body === '' ? 404 : 200, $body, 'application/json; charset=utf-8');
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
             $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
@@ -203,6 +226,68 @@ class EChartsGateway extends IPSModuleStrict
             $this->DebugEChartsProtocolResult($debugFlowResult, __FUNCTION__, __LINE__);
             $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
+    }
+
+    /** @return list<int> */
+    private function TransportGatewayIDs(int $removedID = 0): array
+    {
+        $ids = IPS_GetInstanceListByModuleID(self::GATEWAY_MODULE_ID);
+        if ($this->InstanceID !== $removedID && !in_array($this->InstanceID, $ids, true)) {
+            $ids[] = $this->InstanceID;
+        }
+        $ids = array_values(array_filter($ids, static fn (int $id): bool => $id !== $removedID
+            && IPS_InstanceExists($id) && IPS_GetInstance($id)['InstanceStatus'] !== IS_DELETING));
+        sort($ids, SORT_NUMERIC);
+        return $ids;
+    }
+
+    private function UpdateTransportRegistration(int $removedID = 0): void
+    {
+        $ids = $this->TransportGatewayIDs($removedID);
+        $peers = array_values(array_diff($ids, [$this->InstanceID]));
+        $oldPeers = json_decode($this->GetBuffer('TransportPeers') ?: '[]', true, 512, JSON_THROW_ON_ERROR);
+        foreach (array_diff($oldPeers, $peers) as $id) {
+            $this->UnregisterMessage($id, IM_DELETE);
+        }
+        foreach ($peers as $id) {
+            $this->RegisterMessage($id, IM_DELETE);
+        }
+        $this->SetBuffer('TransportPeers', json_encode($peers, JSON_THROW_ON_ERROR));
+        if (($ids[0] ?? 0) === $this->InstanceID) {
+            $this->RegisterHook(self::WEBHOOK_NAME);
+        }
+    }
+
+    private function RefreshGatewayTransports(): void
+    {
+        $this->RefreshTransport();
+        foreach ($this->TransportGatewayIDs() as $id) {
+            // Kernel objects outlive their PHP interfaces during a library reload.
+            if ($id === $this->InstanceID || !function_exists('ECGW_RefreshTransport')
+                || IPS_GetInstance($id)['InstanceStatus'] !== IS_ACTIVE) {
+                continue;
+            }
+            try {
+                ECGW_RefreshTransport($id);
+            } catch (Throwable $exception) {
+                $this->DebugFlowException(__FUNCTION__, __LINE__, $exception);
+            }
+        }
+    }
+
+    private function RouteTransportState(int $deviceID, string $channel, int $offset, string $output): string
+    {
+        if (!IPS_InstanceExists($deviceID)) {
+            return '';
+        }
+        $parentID = IPS_GetInstance($deviceID)['ConnectionID'];
+        if (!IPS_InstanceExists($parentID)
+            || IPS_GetInstance($parentID)['ModuleInfo']['ModuleID'] !== self::GATEWAY_MODULE_ID) {
+            return '';
+        }
+        return $parentID === $this->InstanceID
+            ? $this->GetTransportState($deviceID, $channel, $offset, $output)
+            : ECGW_GetTransportState($parentID, $deviceID, $channel, $offset, $output);
     }
 
     /** @param array<string, mixed> $payload */

@@ -437,6 +437,12 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
 
 ## Umsetzung, Prüfung und Git
 
+- Vor jedem Zugriff auf das Produktivsystem den Eigentümer ausdrücklich über
+  Zweck und Umfang informieren, auch bei lesenden Zugriffen oder beim Öffnen
+  einer produktiv verbundenen Visualisierung. Die Erreichbarkeit ist keine
+  Testfreigabe; Entwicklungsprüfungen erfolgen auf der freigegebenen Testinstanz.
+- Bereits vom Eigentümer bestätigte Kachel-/IPSView-Prüfungen als solche
+  übernehmen. Eine erneute native Abnahme nicht ohne konkreten Prüfgrund verlangen.
 - Vor Änderungen sind Arbeitsbaum, vorhandene Architektur, öffentliche
   Verträge, relevante Dokumentation, vergleichbare Implementierungen und die
   verfügbaren Tests zu prüfen. Fremde oder nicht zur Aufgabe gehörende
