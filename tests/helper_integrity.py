@@ -33,6 +33,7 @@ def main() -> None:
         "ResponsiveVisualizationHelper",
         "SVGPreviewHelper",
         "VariableSearchHelper",
+        "VariablePresentationNormalizationHelper",
         "VisualizationAssetHelper",
         "VisualizationThemeHelper",
     }

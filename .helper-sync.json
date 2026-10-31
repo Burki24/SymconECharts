@@ -30,6 +30,9 @@
         },
         "DebugFlowHelper": {
             "target": "libs/helper/DebugFlowHelper.php"
+        },
+        "VariablePresentationNormalizationHelper": {
+            "target": "libs/helper/VariablePresentationNormalizationHelper.php"
         }
     }
 }
