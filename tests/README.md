@@ -1,5 +1,17 @@
 # Tests
 
+## Lebensdauer der Gateway-Fixtures
+
+`php -d memory_limit=128M tests/gateway_gauges.php` prüft auch die vollständige
+gemeinsame Gateway-Fixture ohne erhöhtes Speicherlimit. Die abschließenden
+Calendar-, Radar-, Boxplot-, Candlestick-, Funnel- und PictorialBar-Dateien
+laufen jeweils in einem lokalen Gültigkeitsbereich. Kernel-Doppel, Klassen
+und alle Assertions bleiben gemeinsam verfügbar; abgeschlossene Formular- und
+HTML-Snapshots bleiben nicht bis zum Prozessende in globalen Variablen liegen.
+Nach jeder Familie werden außerdem selbstreferenzierende Caption-Callbacks
+durch die zyklische Garbage Collection freigegeben. Produktivcode und sämtliche
+Quellen-, Archiv-, Modell- und Ausgabegrenzen bleiben unverändert.
+
 ## Mehrere Zustandswechsel innerhalb einer Sekunde
 
 `php tests/gateway_gauges.php --archive-states` reproduzierte RED die bisherige

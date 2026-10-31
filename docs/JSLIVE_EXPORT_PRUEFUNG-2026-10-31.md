@@ -43,7 +43,7 @@ Quellen, unsichere Schriftpfade, Konfigurationsbudgets nach Ausschluss alter
 Importdaten und die unveränderte Konfiguration. Sie ist kein realer HTTP-Test.
 Die ursprünglichen 20 Chart-Exportfälle und 108 ReceiveData-Fälle laufen weiter.
 
-## Nachprüfung mit regulären Helpern
+## Erste Nachprüfung mit regulären Helpern
 
 Am 31.10.2026 wurden die gepullten Consumer-Stände erneut geprüft:
 SymconECharts `bc5786ad7f8fe094440394ff54706c70a512af93` zuzüglich der
@@ -69,11 +69,36 @@ Es wurden keine Helper-Testkopien oder veränderten Vendor-Manifeste verwendet.
 Der Gesamtabbruch trat unter Windows/PHP 8.5.10 ZTS in
 `IPSViewHTMLPageHelper::RenderVisualizationHTMLPage()` beim Rendern der
 PictorialBar-Testausgabe auf (`tests/pictorial_bar_normalization.php:36`).
-Die isolierte Prüfung besteht; der kumulierte Speicherbedarf der großen
-Gateway-Fixture bleibt als separates offenes Testergebnis bestehen. Weder
-Speicherlimit noch Quellen-, Modell- oder Ausgabebudgets wurden angehoben.
-Damit sind Export und Snapshot lokal mit der regulären Abhängigkeit geprüft;
-eine vollständig grüne ECharts-Gesamtsuite wird nicht behauptet.
+Die isolierte Prüfung bestand; der kumulierte Speicherbedarf der großen
+Gateway-Fixture blieb zu diesem Zeitpunkt als separates Testergebnis offen.
+Export und Snapshot waren lokal mit der regulären Abhängigkeit geprüft,
+die ECharts-Gesamtsuite war noch nicht vollständig grün.
+
+## Korrektur und vollständige Nachprüfung der Gateway-Fixture
+
+Ausgangsstand: `0c4679759b759ec7d2e4098ad92efa4415324fae` vor der Fixture-Korrektur,
+PHP 8.5.10 ZTS unter Windows. Eine temporäre diagnostische Kopie reproduzierte
+den Abbruch mit Exit 255 bei ausdrücklich gesetzten 128 MiB. Vor dem letzten
+PictorialBar-Block waren bereits 124 MiB reserviert; unter anderem blieben
+Formular- und HTML-Snapshots vorheriger Familien im globalen Scope erhalten.
+Die diagnostische Kopie wurde anschließend entfernt.
+
+Die sechs abschließenden Familientests laufen nun nacheinander in lokalen
+Gültigkeitsbereichen. Nach jeder Familie werden zyklische Caption-Callbacks
+freigegeben. Alle bisherigen Testdateien, Assertions, Kernel-Doppel und die
+Reihenfolge bleiben erhalten. Es wurde kein Test ausgelassen und kein
+zusätzlicher Testprozess als Ersatz für die gemeinsame Fixture eingeführt.
+
+| Prüfung nach der Korrektur | Ergebnis |
+| --- | --- |
+| `php -d memory_limit=128M tests/gateway_gauges.php` | Vollständig erfolgreich, Exit 0; einschließlich PictorialBar-Normalisierung und abschließender Debug-Prüfungen aller 30 Module. |
+| `php tests/quality.php --fix` | Vollständig erfolgreich, Exit 0; Style, JSON, Syntax aller 227 PHP-Dateien, gesamte Vertrags-/Integrationssuite, alle 74 nachgelagerten Befehle und zusätzliche Layoutprüfungen. Die normale CLI-Konfiguration blieb `memory_limit=128M`. |
+| `git diff --check`, UTF-8/LF, Dokumentverweise und Änderungsumfang | Geprüft; ausschließlich Testfixture und interne Testdokumentation geändert. |
+
+Damit ist der zuvor dokumentierte Speicherfehler behoben. Produktivmodule,
+regulär verteilte Helper, Versionsmetadaten sowie alle Quellen-, Archiv-,
+Modell- und Ausgabebudgets bleiben unverändert. Diese lokale Gesamtabnahme
+ersetzt keinen realen Formular-/HTTP-Export oder eine Symcon-Laufzeitprüfung.
 
 ## Noch nicht nachgewiesen oder vorhanden
 
@@ -84,8 +109,7 @@ eine vollständig grüne ECharts-Gesamtsuite wird nicht behauptet.
   kontrolliert blockiert, keine behauptete verlustfreie Konvertierung.
 - Ein nativer SDK-Farb-/Darstellungsrundlauf an der Zielinstallation und die
   eigentliche ECharts-Importvorschau, Zielmodelle, Bestätigung und Journal.
-- Erneute CI nach dem Eigentümer-Commit/Push der Style-Korrektur und der
-  erfolgreiche monolithische ECharts-Gesamtlauf unter Windows bei 128 MiB.
+- Erneute CI nach dem Eigentümer-Commit/Push der Fixture-Korrektur.
   Bestandsabnahmen bleiben gültig.
 
 ## Lieferzustand

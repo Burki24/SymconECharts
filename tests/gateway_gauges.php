@@ -10742,12 +10742,15 @@ assertGatewayGauge(
     'Sankey must deduplicate shared source subscriptions and fit the output limit at maximum configuration size.'
 );
 
-require __DIR__ . '/calendar_integration.php';
-require __DIR__ . '/radar_integration.php';
-require __DIR__ . '/boxplot_integration.php';
-require __DIR__ . '/candlestick_integration.php';
-require __DIR__ . '/funnel_integration.php';
-require __DIR__ . '/pictorial_bar_integration.php';
+// Each family shares the offline kernel, but its completed HTML/form snapshots
+// must not stay in the global scope while the following family is exercised.
+foreach (['calendar', 'radar', 'boxplot', 'candlestick', 'funnel', 'pictorial_bar'] as $family) {
+    (static function (string $fixture): void
+    {
+        require $fixture;
+    })(__DIR__ . '/' . $family . '_integration.php');
+    gc_collect_cycles();
+}
 
 echo "Gateway and Gauge module integration verified.\n";
 
