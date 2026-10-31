@@ -1,5 +1,15 @@
 # Unveröffentlicht
 
+## Neu
+
+- Das Gateway bietet eine lesende JSLive-Importvorschau für Exportpakete 1.0:
+  Paket-/Ressourcenprüfung, ausdrückliche Variablen-/Archivzuordnung,
+  Zielfamilienkandidaten und vollständiger herunterladbarer Übernahme- und
+  Abweichungsbericht. Native Darstellungen werden unabhängig neu geprüft.
+  Bestehende Instanzen, Quellen, Actions, Designs und Archivwerte bleiben
+  unverändert. Teilentwürfe und fehlende Zielregeln werden ausdrücklich
+  gekennzeichnet; tatsächliche Importanlage und Bildvergleich folgen separat.
+
 <!-- symconecharts:prepared-beta -->
 # 31.10.2026 - Version 1.366 (Beta)
 

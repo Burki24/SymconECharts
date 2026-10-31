@@ -1,14 +1,22 @@
 # Entwicklung von SymconECharts
 
-Der erste Implementierungsschritt der Migration ergänzt den zentralen
-`VariablePresentationNormalizationHelper` in Symcon_ModuleHelper und den vollständigen
-JSLive-Producer. `EChartsVariablePresentation::Snapshot()` verwendet denselben
-lesenden Konverter, ohne die bisherige numerische Chart-Auflösung zu verändern.
-Beide Subscriptions sind vorbereitet; vor Nutzung ist die reguläre Verteilung
-des neuen Helpers erforderlich. Lokale Testbundles sind keine veröffentlichte
-Abhängigkeit. Details und verbleibende Konvertierungs-/Live-Grenzen stehen im
-[JSLive-Exportbericht](../../JSLive/docs/ECHARTS_EXPORT.md). Der ECharts-Importer
-und die gemeinsame Migrationsabnahme sind noch offen.
+Die Migration verwendet den regulär verteilten
+`VariablePresentationNormalizationHelper` 1.0.2 (Bundle 3.30.2).
+`EChartsVariablePresentation::Snapshot()` verwendet denselben lesenden Konverter,
+ohne die numerische Chart-Auflösung zu verändern. Der Eigentümer bestätigt alle
+40 MCP-Exporte unter JSLive 0.111 / Symcon 9.1 / PHP 8.5.8 ohne Blocker:
+2366 Konfigurationsfelder, 64 Bindungen und 112 Ressourceneinträge erhalten,
+Wiederholungsexporte fachlich identisch und Testobjekte unverändert.
+
+Gemäß [ADR 0110](adr/0110-jslive-import-preview.md) bietet das Gateway jetzt
+eine lesende Importvorschau: Paketprüfung, explizite Quellen-/Archivzuordnung,
+Zielfamilienkandidaten, unabhängige native Neuableitung sowie vollständige
+Feldbilanz und herunterladbaren Übernahme-/Abweichungsbericht. Paket-, Revisions-
+und Planhash trennen Exportidentität von fachlichen Änderungen. Die Vorschau
+verändert keine Properties, Instanzen, Quellen oder Archive. Ihre Formulardaten
+bleiben flüchtig. Die native Formular-Live-Abnahme nach Update steht aus.
+Vollständige Zielmapper, fehlende Fachmodelle, Archiv-/Darstellungsvergleich,
+bestätigte Anlage und Journal bleiben offen; die Vorschau nennt sie als Sperren.
 
 Der gemeinsame [JSLive-Export-/Importvertrag 1.0](JSLIVE_MIGRATION_CONTRACT.md)
 ist gemäß [ADR 0109](adr/0109-jslive-migration-contract.md) und JSLive ADR 0007
@@ -19,7 +27,7 @@ Darstellung und Ressourcen. Profile werden vollständig in profilunabhängige
 native Darstellungen und Chart-Metadaten übersetzt. Bestehende Quellen, Actions,
 Archive und Designs bleiben erhalten. Feldbilanz, Vorschau, ausdrückliche
 Bestätigung und wiederaufnehmbares Importjournal gehören zur Implementierung.
-Eine Spezifikation belegt noch keine vorhandene Importfunktion. Die abgeschlossene
+Die Konfigurationsvorschau belegt noch keine vorhandene Importanlage. Die abgeschlossene
 Nutzungsgrenzen-Roadmap wird dadurch nicht rückwirkend wieder geöffnet.
 
 Die zentrale Gateway-Zustandsnormalisierung nutzt gemäß

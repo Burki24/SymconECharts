@@ -23,6 +23,8 @@ $tests = [
     __DIR__ . '/source_identity.php',
     __DIR__ . '/normalization.php',
     __DIR__ . '/presentation_snapshot.php',
+    __DIR__ . '/jslive_import.php',
+    __DIR__ . '/jslive_import_form.php',
     __DIR__ . '/echarts_assets.php',
     __DIR__ . '/svg_path.php',
     __DIR__ . '/svg_image.php',

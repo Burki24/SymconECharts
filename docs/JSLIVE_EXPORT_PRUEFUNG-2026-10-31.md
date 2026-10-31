@@ -102,13 +102,25 @@ ersetzt keinen realen Formular-/HTTP-Export oder eine Symcon-Laufzeitprüfung.
 
 ## Noch nicht nachgewiesen oder vorhanden
 
-- Der reale Download aus den fünf Symcon-Formularen nach regulärer
-  Helper-Verteilung und Modulupdate; noch keine neue MCP-/UI-Abnahme.
+Nachtrag des Eigentümers: Die wiederholte MCP-Exportabnahme unter JSLive 0.111,
+Symcon 9.1 und PHP 8.5.8 ist für 40/40 Testinstanzen bestanden: Chart 6,
+Pie/Doughnut 4, Radar 4, Gauges 8 und Progressbar 18. Alle 2366 Konfigurations-
+felder, 64 Bindungen und 112 Ressourcen sind erhalten, keine Exportblocker,
+fachlich identische Wiederholungen und unveränderte Testobjekte. Die native
+Normalisierung unterstützt inzwischen auch `CONTENT_COLOR`, `DISPLAY_TYPE`,
+`PREVIEW_STYLE` und `SHOW_PREVIEW`. Die reguläre Helper-Abhängigkeit ist erfüllt.
+Dies ist ein Exportnachweis, keine ECharts-Ziel-/Bildabnahme.
+
+- Ein gesonderter Download-/HTTP-Nachweis der fünf nativen JSLive-Formulare
+  über die bestätigten MCP-Exporte hinaus bleibt hier nicht dokumentiert.
 - Weitere spezielle native/Legacy-Darstellungsarten, dynamische printf-Texte,
   problematische Bereiche und kombinierte Prozent-/Assoziationssemantik sind
   kontrolliert blockiert, keine behauptete verlustfreie Konvertierung.
-- Ein nativer SDK-Farb-/Darstellungsrundlauf an der Zielinstallation und die
-  eigentliche ECharts-Importvorschau, Zielmodelle, Bestätigung und Journal.
+- Ein nativer SDK-Farb-/Darstellungsrundlauf an der Zielinstallation,
+  vollständige ECharts-Zielmapper, Bestätigung und Journal. Die lesende
+  Konfigurationsvorschau ist inzwischen gemäß
+  [ADR 0110](adr/0110-jslive-import-preview.md) lokal implementiert und geprüft;
+  ihre native Formular-Live-Abnahme nach Modulupdate bleibt offen.
 - Erneute CI nach dem Eigentümer-Commit/Push der Fixture-Korrektur.
   Bestandsabnahmen bleiben gültig.
 
@@ -120,3 +132,26 @@ den oben genannten Consumer-Ständen enthalten. `libs/helper` bleibt bei der
 Nachprüfung unverändert; die bisher offene reguläre Abhängigkeit ist erfüllt.
 Der ursprüngliche Lieferablauf samt vorbereitenden Abo-Commit-Texten steht unter
 [Verteilung und Abnahme](../../JSLive/docs/ECHARTS_EXPORT.md#verteilung-und-abnahme).
+
+## Lesende ECharts-Importvorschau: lokale Nachprüfung
+
+Der Consumer-Schritt gemäß [ADR 0110](adr/0110-jslive-import-preview.md) wurde
+unter PHP 8.5.10 auf Windows mit den unveränderten regulären Helpern geprüft.
+Die neue Vorschau erstellt ausschließlich Konfigurationspläne und Berichte;
+sie bietet keine Anlagefunktion. Keine Symcon-Installation wurde dafür
+geändert oder zur Laufzeitprüfung verwendet. Die obige Eigentümerabnahme
+der 40 MCP-Exporte bleibt ein getrennter Nachweis.
+
+| Prüfung | Ergebnis |
+| --- | --- |
+| `php -d memory_limit=128M tests/jslive_import.php` | Erfolgreich: JSON-Typen/-Grenzen, doppelte Schlüssel, Identitäten, Original-/Abfragebezüge, Hashes, Ressourcenintegrität, explizite Zuordnungen, aktuelle Metadatenänderungen, Profil-/Native-Neuableitung, ausgeblendete Bindungen, unabhängige Feldbilanz und Zielgrenzen. Zu große Berichte werden vor Speichererschöpfung abgelehnt; keine Kürzung. |
+| `php -d memory_limit=128M tests/jslive_import_form.php` | Erfolgreich: echte Gateway-Methoden und unveränderte native Callbackskripte gegen lesende Offline-APIs, sichtbare Fehlerrückgaben, Seiten, vollständiger Download aus demselben Plan, verworfene Ansichten nach Fehlern und geschützte Debugausgaben. |
+| Fünf reale JSLive-Export-Einstiege mit synthetischen Kernel-APIs | Pakete unter Verwendung der tatsächlichen Modul-GUIDs aus den JSLive-Manifesten vom Consumer akzeptiert; Quellen-/Präsentationsmetadaten unabhängig normalisiert. Chart 547, Pie 599, Gauge 177, Radar 530, Progressbar 184 Feldbewertungen. Ungestützte Modelle und Designs bleiben gesperrt. Die lokalen Pakete/Standardressourcen wurden nicht als Fremdartefakte in ECharts übernommen. |
+| `php tests/quality.php --fix` am abschließenden Consumer-Stand | Vollständig erfolgreich, Exit 0: PHP-/JSON-Style, Syntax aller 235 PHP-Dateien, gesamte Vertrags-/Integrationssuite, Helper-/Assetintegrität sowie Renderer-/Layoutprüfungen. CLI-Limit unverändert 128 MiB. |
+| Änderungsumfang | Library-Version, Build, Datum, verteilte Helper, bestehende Chartmodule, Quellen-/Archivverträge und beide Referenz-Repositories unverändert. UTF-8/LF, lokale Dokumentverweise und `git diff --check` geprüft. |
+
+Noch offen sind die native Dateiauswahl, Tabellenbedienung und der Download
+nach Modulupdate sowie große Grenzkombinationen im realen Client. Vollständige
+Mapper, Archiv-/Darstellungstreue, neue Fachmodelle und bestätigte Anlage mit
+Journal gehören weiterhin zu den folgenden Migrationsschritten. Eine positive
+Paket- oder Metadatenprüfung ist kein Nachweis ihrer Implementierung.

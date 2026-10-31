@@ -11,11 +11,13 @@ use SymconECharts\EChartsDataProtocol;
 require_once __DIR__ . '/../libs/helper/DataFlowHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
+require_once __DIR__ . '/../libs/EChartsJSLiveImportForm.php';
 
 class EChartsGateway extends IPSModuleStrict
 {
     use \Burki24\SymconModuleHelper\DebugFlowHelper;
     use \SymconECharts\EChartsDebugFlow;
+    use \SymconECharts\EChartsJSLiveImportForm;
 
     use DataFlowHelper;
     use \Burki24\SymconModuleHelper\VisualizationAssetHelper;

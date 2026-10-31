@@ -434,6 +434,12 @@ bleiben im jeweiligen Modul unterschiedlich.
 
 ## Änderungen
 
+Das [Gateway](EChartsGateway/README.md#4-einrichten-der-instanzen-in-symcon)
+bietet eine lesende JSLive-Importvorschau für Exportpakete 1.0 mit
+Quellenzuordnung, möglichen Zielfamilien und vollständigem Abweichungsbericht.
+Bestehende Instanzen und Archive bleiben unverändert. Die Vorschau erzeugt
+noch keine Zieldiagramme und ersetzt keinen Darstellungsvergleich.
+
 Die Versionshistorie steht in der [CHANGELOG.md](CHANGELOG.md).
 
 ## Lizenz

@@ -2,10 +2,12 @@
 
 - Vertragskennung: `de.burki24.jslive-echarts`
 - Formatversion: `1.0`
-- Status: spezifiziert am 31.10.2026; erster JSLive-Producer und gemeinsame
-  Darstellungsnormalisierung lokal implementiert. Reguläre Helper-Verteilung,
-  reale Exportabnahme, weitere Konvertierungsregeln, Importer und neue Zielmodelle
-  sind noch offen.
+- Status: spezifiziert am 31.10.2026. Reguläre Helper-Verteilung erfolgt;
+  der Eigentümer bestätigt 40 erfolgreiche MCP-Exporte mit JSLive 0.111.
+  Lesende ECharts-Paketprüfung, Konfigurationsplan und vollständiger Bericht
+  sind gemäß [ADR 0110](adr/0110-jslive-import-preview.md) implementiert.
+  Gerenderter Vergleich, vollständige Familienmapper, neue Zielmodelle und
+  bestätigte Anlage mit Journal bleiben offen.
 - Entscheidungen: [ECharts ADR 0109](adr/0109-jslive-migration-contract.md) und
   [JSLive ADR 0007](https://github.com/Burki24/JSLive/blob/dev/docs/adr/0007-echarts-migration-contract.md).
 - Kanonische Quelle ist dieses Dokument im Repository SymconECharts. JSLive
@@ -289,13 +291,15 @@ Verwendete offizielle Einstiege, geprüft am 31.10.2026:
 - [Enumeration im SDK](https://www.symcon.de/en/service/documentation/developer-area/sdk-tools/sdk-php/presentations/enumeration/)
 - [Slider im SDK](https://www.symcon.de/en/service/documentation/developer-area/sdk-tools/sdk-php/presentations/slider/)
 
-Die aktuelle `EChartsVariablePresentation`-Auflösung deckt nur Min/Max,
-Suffix und Genauigkeit ab. Der bestehende `VariablePresentationHelper` bietet
-native Bausteine, ist aber kein vollständiger Profilkonverter. Insbesondere
-SDK-/Helper-Abweichungen bei Intervallfarbfeldern (`Color`/`ColorValue`) müssen
-vor Nutzung am tatsächlichen Ziel-SDK geprüft und zentral geklärt werden.
-Die Quellen belegen die nativen Mechanismen, nicht eine bereits vollständige
-Migration aller Profilvarianten. Diese bleibt Implementierungs-/Abnahmeumfang.
+Die normale numerische `EChartsVariablePresentation::Resolve()`-Auflösung bleibt
+unverändert. `Snapshot()` und die Importvorschau verwenden dagegen den regulär
+verteilten `VariablePresentationNormalizationHelper` 1.0.2 (Bundle 3.30.2).
+Die Vorschau berechnet native und wirksame Darstellung unabhängig aus den
+Originalen neu; ein exportiertes `conversion.status=exact` genügt nicht.
+`CONTENT_COLOR`, `DISPLAY_TYPE`, `PREVIEW_STYLE` und `SHOW_PREVIEW` werden
+typgetreu erhalten. Nicht unterstützte Sonderprofile bleiben blockiert.
+Ein erfolgreicher Export-/Konvertertest belegt keine bereits gleichwertige
+Formatierung aller Werte im ECharts-Zielrenderer.
 
 Die [synthetischen Präsentationsbeispiele](jslive-migration/presentation-examples.v1.json)
 konkretisieren Präfix-/Leerzeichenerhalt, typisierte Boolean-Zustände mit Farben
@@ -523,13 +527,17 @@ Kantenglättung von verschobener Geometrie, fehlenden Reihen oder falschen Farbe
 
 1. Vertrag und beidseitige ADRs: mit diesem Schritt spezifiziert.
 2. Gemeinsame Profil-/Darstellungsnormalisierung und vollständiger JSLive-Export:
-   erster Producer für die fünf Chartfamilien und gemeinsame Snapshots lokal
-   implementiert; konkrete öffentliche APIs und Prüfgrenzen stehen im
-   [Exportbericht](../../JSLive/docs/ECHARTS_EXPORT.md). Jeder Aufruf erzeugt ein
-   vollständiges Einzelchart-Paket. Weitere Konvertierungsregeln (insbesondere
-   Sonderprofile und dynamische Assoziationstexte), reguläre Helper-Verteilung
-   und reale Formular-/HTTP-Abnahme bleiben offen.
-3. Lesender ECharts-Parser, Vollständigkeitsbericht und konkrete Vorschau: offen.
+   regulär verteilt. Der Eigentümer bestätigt unter JSLive 0.111 / Symcon 9.1 /
+   PHP 8.5.8 alle 40 MCP-Exporte ohne Blocker: 2366 Konfigurationsfelder,
+   64 Bindungen und 112 Ressourceneinträge. Wiederholungsexporte fachlich
+   identisch, Testobjekte unverändert. Diese Exportabnahme umfasst keine
+   ECharts-Zielabbildung. Sonderregeln und native Formular-/HTTP-Nachweise sind
+   weiterhin nur im tatsächlich geprüften Umfang abgedeckt.
+3. Lesender ECharts-Parser, Vollständigkeitsbericht und Konfigurationsvorschau:
+   implementiert. Das Gateway bietet Dateiauswahl, explizite ID-Zuordnung,
+   Zielfamilienkandidaten, getrennte Urteile und einen vollständigen JSON-Bericht.
+   Die native Formular-Live-Abnahme nach Modulupdate bleibt offen. Kein
+   gerenderter Original-/Zielvergleich und keine Importausführung in diesem Schritt.
 4. Fehlende Ziel-Fachmodelle und familienweise geprüfte Mapper: offen.
 5. Bestätigte Anlage, Importjournal, Wiederanlauf und gemeinsame Live-Abnahme:
    offen.
@@ -539,3 +547,22 @@ SymconECharts-Beta bleibt auf Eigentümerentscheidung bis zur vereinbarten
 Migrationsabdeckung zurückgestellt. Vor Einreichung sind tatsächlicher Umfang,
 offene Varianten und Release-Metadaten erneut abzugleichen. Es gibt durch diese
 Spezifikation keine neue Library-Version, keinen Termin und keine Veröffentlichung.
+
+### Grenzen der lesenden Vorschau
+
+Die Transportgrenzen aus Abschnitt 3 bleiben bestehen. Zusätzlich schützt die
+erste Vorschau den Analyseprozess mit höchstens 100000 JSON-Werten je geprüftem
+Dokument, 32 Ebenen einschließlich verschachtelter Property-JSONs sowie 8 MiB
+für den vollständigen Bericht. Überschreitungen ergeben `LIMIT_EXCEEDED` und
+keinen gekürzten Plan; große Pakete müssen verteilt werden. Die nativen Tabellen
+zeigen 100 Einträge je Seite. Der Download und `ECGW_PreviewJSLiveImport`
+liefern den vollständigen Bericht einschließlich Original-Snapshot,
+Quellen-/Formatplan, Hashes, Regeln, Feldbilanz und Abweichungen. In eingebetteten
+JSON-Propertystrings benennt `pointer` das Originalfeld und `elementPointer`
+den logischen Pfad innerhalb des dekodierten Inhalts.
+
+Vorhandene Familien sind ausdrücklich Kandidaten. Ein direkter Teilentwurf
+einzelner Gauge-Eigenschaften oder eine geprüfte native Darstellung bedeutet
+keine vollständige Zielkonfiguration. Ungeprüfte Designs, laufende Altintervalle,
+Fallbacks, Offsets und fehlende Fachmodelle sperren weiterhin die Übernahme.
+Es gibt keine pauschale Bestätigung von Abweichungen und keine Anlagefunktion.

@@ -80,8 +80,33 @@ Gateway-Instanzen zur Verbindung an. Mehrere Chart-Instanzen können dadurch
 bewusst dasselbe Gateway verwenden; die Geräte erzeugen nicht über
 `RequireParent()` automatisch ein weiteres Gateway.
 
-**Konfigurationsseite:** Das Gateway benötigt aktuell keine eigenen
-Einstellungen. Die Seite zeigt seinen Bereitschaftsstatus.
+**Konfigurationsseite:** Das Gateway benötigt keine eigenen dauerhaften
+Einstellungen. Unter **JSLive-Importvorschau** lässt sich ein JSLive-Exportpaket
+im Format 1.0 prüfen:
+
+1. Die Datei mit der Endung `.jslive-echarts.json` auswählen.
+2. Quellen und mögliche Zielfamilien prüfen. Bei fremder oder unbestätigter
+   Installation vorhandene Variablen und Archive ausdrücklich per ID zuordnen.
+3. Nach Zuordnungsänderungen **Paket und Zuordnungen erneut prüfen** wählen.
+4. Mit Diagrammnummer und Berichtsseite die vollständige Feldbilanz sowie
+   Abweichungen durchsehen; **Vollständigen Bericht herunterladen** sichert den
+   gesamten Konfigurationsplan als JSON.
+
+Die Vorschau legt keine Diagramme an und verändert keine bestehenden
+Instanzen, Quellen, Darstellungen oder Archivwerte. Dateien und Zuordnungen
+werden nur im geöffneten Formular gehalten. Die Tabellen zeigen 100 Einträge
+je Seite; der Download enthält den vollständigen Bericht.
+
+Zielfamilien und einzelne Zieleigenschaften sind zunächst ein **Teilentwurf**.
+Quellen-/Archivprüfung, native Formatierung und Chartgestaltung werden getrennt
+bewertet. Fehlende Modelle, ungeprüfte Altberechnungen oder Designabweichungen
+bleiben sichtbar gesperrt. Ein vollständiger Import und ein gerenderter
+Original-/Zielvergleich sind noch nicht verfügbar. Eigene Vorlagen und SVGs
+werden dabei nicht ausgeführt oder installiert.
+
+Pakete sind auf 16 MiB begrenzt. Überschreitet die Analyse 100000 JSON-Werte,
+32 Verschachtelungsebenen oder 8 MiB vollständigen Bericht, wird sie mit einer
+Grenzmeldung abgebrochen. Große Bestände auf mehrere Pakete verteilen.
 
 ### 5. Statusvariablen und Profile
 
@@ -110,7 +135,20 @@ Diagrammmodell und seine Darstellung verbleiben im Gerät.
 
 ### 7. PHP-Befehlsreferenz
 
-Das Gateway besitzt keine öffentlichen PHP-Funktionen für Anwender. Es wird
-über die verbundenen ECharts-Diagramminstanzen verwendet.
+`ECGW_PreviewJSLiveImport(int $InstanzID, string $Package, string $Options = '{}'): string`
+prüft ein JSLive-Paket 1.0 und liefert den vollständigen JSON-Bericht.
+`$Package` ist der UTF-8-Dateiinhalt, kein Dateipfad und kein Base64-String.
+Ungültige Pakete werden mit einer Ausnahme abgelehnt. Der Bericht enthält
+technische Regelkennungen und englische Detailtexte; das Formular ist lokalisiert.
+
+`$Options` enthält bei Bedarf ausdrückliche ID-Zuordnungen, zum Beispiel für
+ein synthetisches Paket:
+
+```json
+{"sourceMapping":{"variable:13000":14000},"archiveMapping":{"archive:20000":21000}}
+```
+
+Der interne Formularadapter `ECGW_PreviewJSLiveImportFromForm` verarbeitet die
+Dateiauswahl und aktualisiert ausschließlich die Formularansicht.
 
 Lizenz der eigenen Beiträge: [PolyForm Noncommercial License 1.0.0](../LICENSE).

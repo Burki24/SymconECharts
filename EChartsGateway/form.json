@@ -6,7 +6,268 @@
             "caption": "The gateway provides shared data access for ECharts chart families."
         }
     ],
-    "actions": [],
+    "actions": [
+        {
+            "type": "ExpansionPanel",
+            "caption": "JSLive import preview",
+            "expanded": false,
+            "items": [
+                {
+                    "type": "Label",
+                    "caption": "Analyze a JSLive export 1.0 without changing existing objects. This is a configuration plan, not a rendered comparison or an import."
+                },
+                {
+                    "type": "SelectFile",
+                    "name": "JSLiveImportFile",
+                    "caption": "JSLive export package",
+                    "extensions": ".json",
+                    "value": "",
+                    "onChange": "echo ECGW_PreviewJSLiveImportFromForm($id, $JSLiveImportFile);"
+                },
+                {
+                    "type": "Label",
+                    "name": "JSLiveImportSummary",
+                    "caption": "Select an export package. Package contents and mappings are not saved as instance settings."
+                },
+                {
+                    "type": "List",
+                    "name": "JSLiveImportCharts",
+                    "caption": "Charts and candidate target families",
+                    "rowCount": 6,
+                    "add": false,
+                    "delete": false,
+                    "values": [],
+                    "columns": [
+                        {
+                            "name": "Index",
+                            "caption": "Index",
+                            "width": "65px",
+                            "save": true
+                        },
+                        {
+                            "name": "Name",
+                            "caption": "Name",
+                            "width": "240px",
+                            "save": true
+                        },
+                        {
+                            "name": "Family",
+                            "caption": "Source family",
+                            "width": "150px",
+                            "save": true
+                        },
+                        {
+                            "name": "Target",
+                            "caption": "Candidate target",
+                            "width": "200px",
+                            "save": true
+                        },
+                        {
+                            "name": "Status",
+                            "caption": "Result",
+                            "width": "200px",
+                            "save": true
+                        },
+                        {
+                            "name": "Sources",
+                            "caption": "Sources/archive",
+                            "width": "150px",
+                            "save": true
+                        },
+                        {
+                            "name": "Formats",
+                            "caption": "Native formatting",
+                            "width": "150px",
+                            "save": true
+                        },
+                        {
+                            "name": "Design",
+                            "caption": "Chart design",
+                            "width": "auto",
+                            "save": true
+                        }
+                    ]
+                },
+                {
+                    "type": "Label",
+                    "caption": "Foreign or unconfirmed installations require explicit variable and archive IDs. Names are never matched automatically. Recheck after editing mappings."
+                },
+                {
+                    "type": "List",
+                    "name": "JSLiveImportSources",
+                    "caption": "Variable mapping",
+                    "rowCount": 6,
+                    "add": false,
+                    "delete": false,
+                    "values": [],
+                    "columns": [
+                        {
+                            "name": "SourceKey",
+                            "caption": "Source identity",
+                            "width": "160px",
+                            "save": true
+                        },
+                        {
+                            "name": "Label",
+                            "caption": "Source label",
+                            "width": "auto",
+                            "save": true
+                        },
+                        {
+                            "name": "TargetID",
+                            "caption": "Existing target variable",
+                            "width": "250px",
+                            "save": true,
+                            "edit": {
+                                "type": "SelectVariable"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "List",
+                    "name": "JSLiveImportArchives",
+                    "caption": "Archive mapping",
+                    "rowCount": 3,
+                    "add": false,
+                    "delete": false,
+                    "values": [],
+                    "columns": [
+                        {
+                            "name": "SourceKey",
+                            "caption": "Source identity",
+                            "width": "auto",
+                            "save": true
+                        },
+                        {
+                            "name": "TargetID",
+                            "caption": "Existing Archive Control",
+                            "width": "250px",
+                            "save": true,
+                            "edit": {
+                                "type": "SelectInstance",
+                                "moduleID": "{43192F0B-135B-4CE7-A0A7-1475603F3060}"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "JSLiveImportChart",
+                    "caption": "Chart number (starting at 1)",
+                    "minimum": 1,
+                    "maximum": 100,
+                    "value": 1,
+                    "onChange": "$sourceMapping = []; foreach ($JSLiveImportSources as $row) { if ($row['TargetID'] > 0) { $sourceMapping[$row['SourceKey']] = $row['TargetID']; } } $archiveMapping = []; foreach ($JSLiveImportArchives as $row) { if ($row['TargetID'] > 0) { $archiveMapping[$row['SourceKey']] = $row['TargetID']; } } $mapping = json_encode(['sourceMapping' => (object) $sourceMapping, 'archiveMapping' => (object) $archiveMapping]); echo ECGW_PreviewJSLiveImportFromForm($id, $JSLiveImportFile, $mapping, $JSLiveImportChart - 1, $JSLiveImportPage - 1);"
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "JSLiveImportPage",
+                    "caption": "Report page (100 entries per table)",
+                    "minimum": 1,
+                    "maximum": 1000,
+                    "value": 1,
+                    "onChange": "$sourceMapping = []; foreach ($JSLiveImportSources as $row) { if ($row['TargetID'] > 0) { $sourceMapping[$row['SourceKey']] = $row['TargetID']; } } $archiveMapping = []; foreach ($JSLiveImportArchives as $row) { if ($row['TargetID'] > 0) { $archiveMapping[$row['SourceKey']] = $row['TargetID']; } } $mapping = json_encode(['sourceMapping' => (object) $sourceMapping, 'archiveMapping' => (object) $archiveMapping]); echo ECGW_PreviewJSLiveImportFromForm($id, $JSLiveImportFile, $mapping, $JSLiveImportChart - 1, $JSLiveImportPage - 1);"
+                },
+                {
+                    "type": "Button",
+                    "caption": "Recheck package and mappings",
+                    "onClick": "$sourceMapping = []; foreach ($JSLiveImportSources as $row) { if ($row['TargetID'] > 0) { $sourceMapping[$row['SourceKey']] = $row['TargetID']; } } $archiveMapping = []; foreach ($JSLiveImportArchives as $row) { if ($row['TargetID'] > 0) { $archiveMapping[$row['SourceKey']] = $row['TargetID']; } } $mapping = json_encode(['sourceMapping' => (object) $sourceMapping, 'archiveMapping' => (object) $archiveMapping]); echo ECGW_PreviewJSLiveImportFromForm($id, $JSLiveImportFile, $mapping, $JSLiveImportChart - 1, $JSLiveImportPage - 1);"
+                },
+                {
+                    "type": "Button",
+                    "caption": "Download complete report",
+                    "download": "symconecharts-import-preview.json",
+                    "onClick": "$sourceMapping = []; foreach ($JSLiveImportSources as $row) { if ($row['TargetID'] > 0) { $sourceMapping[$row['SourceKey']] = $row['TargetID']; } } $archiveMapping = []; foreach ($JSLiveImportArchives as $row) { if ($row['TargetID'] > 0) { $archiveMapping[$row['SourceKey']] = $row['TargetID']; } } $mapping = json_encode(['sourceMapping' => (object) $sourceMapping, 'archiveMapping' => (object) $archiveMapping]); echo ECGW_PreviewJSLiveImportFromForm($id, $JSLiveImportFile, $mapping, $JSLiveImportChart - 1, $JSLiveImportPage - 1, true);"
+                },
+                {
+                    "type": "List",
+                    "name": "JSLiveImportFields",
+                    "caption": "Complete field ledger (selected page)",
+                    "rowCount": 10,
+                    "add": false,
+                    "delete": false,
+                    "values": [],
+                    "columns": [
+                        {
+                            "name": "Pointer",
+                            "caption": "Original pointer",
+                            "width": "260px",
+                            "save": true
+                        },
+                        {
+                            "name": "Status",
+                            "caption": "Verdict",
+                            "width": "140px",
+                            "save": true
+                        },
+                        {
+                            "name": "Target",
+                            "caption": "Target pointer",
+                            "width": "200px",
+                            "save": true
+                        },
+                        {
+                            "name": "Rule",
+                            "caption": "Rule",
+                            "width": "160px",
+                            "save": true
+                        },
+                        {
+                            "name": "Reason",
+                            "caption": "Reason",
+                            "width": "auto",
+                            "save": true
+                        }
+                    ]
+                },
+                {
+                    "type": "List",
+                    "name": "JSLiveImportIssues",
+                    "caption": "Differences and blockers (selected page)",
+                    "rowCount": 6,
+                    "add": false,
+                    "delete": false,
+                    "values": [],
+                    "columns": [
+                        {
+                            "name": "Code",
+                            "caption": "Code",
+                            "width": "200px",
+                            "save": true
+                        },
+                        {
+                            "name": "Pointer",
+                            "caption": "Original pointer",
+                            "width": "220px",
+                            "save": true
+                        },
+                        {
+                            "name": "Message",
+                            "caption": "Difference",
+                            "width": "auto",
+                            "save": true
+                        },
+                        {
+                            "name": "Resolution",
+                            "caption": "Required action",
+                            "width": "300px",
+                            "save": true
+                        }
+                    ]
+                },
+                {
+                    "type": "Label",
+                    "caption": "Partial target properties (up to 4000 characters; complete plan in the report). Source bindings and native formats are listed in the complete report. No creation is available."
+                },
+                {
+                    "type": "Label",
+                    "name": "JSLiveImportDraft",
+                    "caption": ""
+                }
+            ]
+        }
+    ],
     "status": [
         {
             "code": 102,
