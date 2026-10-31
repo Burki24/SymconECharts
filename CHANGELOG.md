@@ -10,6 +10,13 @@
   unverändert. Teilentwürfe und fehlende Zielregeln werden ausdrücklich
   gekennzeichnet; tatsächliche Importanlage und Bildvergleich folgen separat.
 
+## Fixes
+
+- Dateiauswahl, erneutes Prüfen sowie Diagramm- und Seitenauswahl der
+  JSLive-Importvorschau übergeben alle von Symcon verlangten Argumente.
+  Dadurch brechen die Formularaktionen nicht mehr mit „Wrong parameter count“
+  ab. Bestehende Instanzen, Quellen und Archivwerte bleiben unverändert.
+
 <!-- symconecharts:prepared-beta -->
 # 31.10.2026 - Version 1.367 (Beta)
 

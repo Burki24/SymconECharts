@@ -25,17 +25,25 @@ Der Parser hat derzeit nur diese Library als Nutzer und verbleibt hier.
 
 ## Öffentliche und interne Schnittstellen
 
-- `ECGW_PreviewJSLiveImport(int $id, string $Package, string $Options = '{}')`:
+- `ECGW_PreviewJSLiveImport(int $id, string $Package, string $Options)`:
   vollständiger deterministischer JSON-Bericht, ungültige Pakete als Ausnahme.
   `$Package` enthält unverändertes UTF-8-JSON. `$Options` ist ein Objekt mit
   optionalen `sourceMapping`-/`archiveMapping`-Objekten: `variable:ID` bzw.
   `archive:ID` auf positive vorhandene Ziel-IDs. Keine Namenssuche.
 - `ECGW_PreviewJSLiveImportFromForm(int $id, string $FileData,
-  string $Mappings = '{}', int $Chart = 0, int $Page = 0, bool $Download = false)`:
+  string $Mappings, int $Chart, int $Page, bool $Download)`:
   interner Formularadapter mit Base64-Upload und nullbasierten Indizes;
   Erfolgsrückgabe leer, Fehlerrückgabe wird vom Callback mit `echo` angezeigt.
   `$Download=true` liefert nach derselben Ansichtserneuerung eine JSON-Daten-URL
   des gerade berechneten vollständigen Berichts statt einer zweiten Analyse.
+
+Die MCP-Live-Prüfung hat bestätigt, dass Symcon für die exportierten Funktionen
+alle drei beziehungsweise sechs Argumente verlangt. Die PHP-Standardwerte
+der Modulmethoden bleiben für direkte Methodenaufrufe bestehen, sind aber kein
+Vertrag der Kernel-Funktionen. Dateiauswahl übergibt ausdrücklich `'{}', 0, 0,
+false`; Diagramm-/Seitenauswahl und erneutes Prüfen erhalten die Entwurfswerte
+mit `false`, der Download dieselben Werte mit `true`. Keine Signaturänderung,
+Migration oder zusätzliche persistente Konfiguration.
 
 Die gemeinsame vorhandene JSLive-Installationskennung erlaubt ID-Vorschläge,
 ersetzt aber keine aktuelle Metadatenprüfung. Fehlende/uneindeutige Herkunft
@@ -83,7 +91,25 @@ Feldbilanz, deterministische Wiederholung und Zielgrenzen ohne Schreibzugriff.
 `tests/jslive_import_form.php` führt die echten Gateway-Methoden und exakten
 Formularcallbacks mit einem lesenden Offline-Kernel aus. Geprüft werden
 Download, Seiten, Meldungen, veraltete Pläne nach Fehlern und geschützte Logs.
+Die Funktionsadapter benötigen wie Symcon alle sechs beziehungsweise drei
+Argumente und lehnen abweichende Anzahlen ab. Der Test führt alle fünf
+Callbackskripte aus und prüft Rücksetzungen bei neuer Datei, explizite
+ID-Zuordnungen, nullbasierte Indizes und den Download-Schalter. Die alten
+verkürzten Aufrufe scheitern mit dieser Fixture reproduzierbar.
 Beide laufen im regulären Test-Runner; das 128-MiB-Limit bleibt erhalten.
+
+Die korrigierten fünf Callbackskripte aus dem Repository wurden zusätzlich per
+MCP gegen das unveränderte Gateway aus SymconECharts 1.367 ausgeführt
+(Symcon 9.1, PHP 8.5.8, 64 MiB). Dateiauswahl, Diagramm-/Seitenauswahl,
+erneutes Prüfen und Download bestehen mit sechs Pflichtargumenten; der Download
+enthält den vollständigen Bericht und exakte Quellen-/Präsentationsmetadaten.
+Ein ungültiger Upload meldet den Paketfehler. Konfigurationen, Quellwerte,
+Darstellungen, Archivbestände und Objektmenge blieben im Vergleich unverändert.
+Dabei wurden keine Moduldateien bereitgestellt. Die native Editorbedienung des
+aktualisierten Formulars nach Modulupdate bleibt als eigene Abnahme offen.
+Die vollständige lokale Qualitätssuite `php tests/quality.php --fix` besteht
+nach der Korrektur mit Exit 0, einschließlich Style, Syntax, Vertrags-,
+Integrations- und Layouttests; das CLI-Speicherlimit bleibt 128 MiB.
 
 Zusätzlich wurden lokal synthetische Pakete aus den fünf echten JSLive-
 Export-Einstiegspunkten gegen den Parser geprüft. Dies ersetzt nicht die

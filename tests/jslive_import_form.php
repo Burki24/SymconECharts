@@ -103,19 +103,46 @@ function AC_GetLoggedValues(int $archive, int $id, int $from, int $until, int $l
 
 require_once __DIR__ . '/../EChartsGateway/module.php';
 $gateway = new EChartsGateway(21000);
-function ECGW_PreviewJSLiveImportFromForm(int $id, string $file, string $mapping = '{}', int $chart = 0, int $page = 0, bool $download = false): string
+// Symcon registers every argument as required, even when the module method has defaults.
+function ECGW_PreviewJSLiveImportFromForm(int $InstanceID, string $FileData, string $Mappings, int $Chart, int $Page, bool $Download): string
 {
-    return $GLOBALS['gateway']->PreviewJSLiveImportFromForm($file, $mapping, $chart, $page, $download);
+    if (func_num_args() !== 6) {
+        throw new ArgumentCountError('Wrong parameter count for ECGW_PreviewJSLiveImportFromForm().');
+    }
+    $GLOBALS['importFormCalls'][] = compact('InstanceID', 'FileData', 'Mappings', 'Chart', 'Page', 'Download');
+    return $GLOBALS['gateway']->PreviewJSLiveImportFromForm($FileData, $Mappings, $Chart, $Page, $Download);
 }
-function ECGW_PreviewJSLiveImport(int $id, string $package, string $mapping = '{}'): string
+function ECGW_PreviewJSLiveImport(int $InstanceID, string $Package, string $Options): string
 {
-    return $GLOBALS['gateway']->PreviewJSLiveImport($package, $mapping);
+    if (func_num_args() !== 3) {
+        throw new ArgumentCountError('Wrong parameter count for ECGW_PreviewJSLiveImport().');
+    }
+    return $GLOBALS['gateway']->PreviewJSLiveImport($Package, $Options);
 }
 function assertImportForm(bool $condition, string $message): void
 {
     if (!$condition) {
         throw new RuntimeException($message);
     }
+}
+
+foreach (['ECGW_PreviewJSLiveImportFromForm' => 6, 'ECGW_PreviewJSLiveImport' => 3] as $function => $required) {
+    assertImportForm(
+        (new ReflectionFunction($function))->getNumberOfRequiredParameters() === $required,
+        'The native Symcon wrapper fixture must require every registered argument.'
+    );
+}
+foreach ([[21000, ''], [21000, '', '{}', 0, 0], [21000, '', '{}', 0, 0, false, false]] as $arguments) {
+    try {
+        ECGW_PreviewJSLiveImportFromForm(...$arguments);
+        throw new LogicException('The native form wrapper accepted a parameter count other than six.');
+    } catch (ArgumentCountError) {
+    }
+}
+try {
+    ECGW_PreviewJSLiveImport(21000, '{}');
+    throw new LogicException('The native preview API wrapper accepted missing options.');
+} catch (ArgumentCountError) {
 }
 
 $stateBefore = $GLOBALS['previewSourceState'];
@@ -144,21 +171,57 @@ assertImportForm($seen === count($allFields), 'Native ledger pagination omitted 
 // Execute the exact native callbacks, including their message-output contract.
 $id = 21000;
 $JSLiveImportFile = $upload;
-$JSLiveImportChart = 1;
-$JSLiveImportPage = 1;
+$JSLiveImportChart = 2;
+$JSLiveImportPage = 2;
 $JSLiveImportSources = json_decode($gateway->fields['JSLiveImportSources']['values'], true, 32, JSON_THROW_ON_ERROR);
+$JSLiveImportSources[0]['TargetID'] = 14000;
 $JSLiveImportArchives = json_decode($gateway->fields['JSLiveImportArchives']['values'], true, 32, JSON_THROW_ON_ERROR);
-ob_start();
-eval($inputs['JSLiveImportFile']['onChange']);
-$output = ob_get_clean();
-assertImportForm($output === '', 'Successful preview should update tables without a redundant dialog.');
-$download = array_values(array_filter($items, static fn (array $item): bool => isset($item['download'])))[0];
-ob_start();
-eval($download['onClick']);
-$output = ob_get_clean();
-assertImportForm(str_starts_with($output, 'data:application/json;base64,'), 'Complete report download is not a native data URL.');
-$downloaded = json_decode(base64_decode(substr($output, strlen('data:application/json;base64,')), true), true, 64, JSON_THROW_ON_ERROR);
-assertImportForm(count($downloaded['charts'][0]['fieldCoverage']) === count($full['charts'][0]['fieldCoverage']), 'Downloaded report is silently truncated to the visible table page.');
+$callbacks = [];
+foreach ($items as $item) {
+    $script = $item['onChange'] ?? $item['onClick'] ?? '';
+    if (str_contains($script, 'ECGW_PreviewJSLiveImportFromForm(')) {
+        $callbacks[$item['name'] ?? $item['caption']] = $item;
+    }
+}
+assertImportForm(
+    array_keys($callbacks) === ['JSLiveImportFile', 'JSLiveImportChart', 'JSLiveImportPage', 'Recheck package and mappings', 'Download complete report'],
+    'Every import-preview action must be exercised through its exact native callback.'
+);
+$GLOBALS['importFormCalls'] = [];
+foreach ($callbacks as $name => $item) {
+    $isFile = $name === 'JSLiveImportFile';
+    $isDownload = isset($item['download']);
+    $beforeCalls = count($GLOBALS['importFormCalls']);
+    ob_start();
+    try {
+        eval($item['onChange'] ?? $item['onClick']);
+    } finally {
+        $output = ob_get_clean();
+    }
+    assertImportForm(count($GLOBALS['importFormCalls']) === $beforeCalls + 1, 'Each callback must invoke the native wrapper exactly once.');
+    $call = end($GLOBALS['importFormCalls']);
+    assertImportForm($call['InstanceID'] === $id && $call['FileData'] === $upload
+        && $call['Chart'] === ($isFile ? 0 : 1) && $call['Page'] === ($isFile ? 0 : 1)
+        && $call['Download'] === $isDownload, 'Native callback arguments lost their order, page offset or download flag: ' . $name);
+    assertImportForm(
+        $isFile ? $call['Mappings'] === '{}' : json_decode($call['Mappings'], true, 32, JSON_THROW_ON_ERROR)
+        === ['sourceMapping' => ['variable:13000' => 14000], 'archiveMapping' => ['archive:2' => 2]],
+        'New files must reset mappings; the other callbacks must preserve the explicit draft mapping.'
+    );
+    $mapped = json_decode($gateway->fields['JSLiveImportSources']['values'], true, 32, JSON_THROW_ON_ERROR);
+    assertImportForm($mapped[0]['TargetID'] === ($isFile ? 13000 : 14000), 'The callback failed to populate the native source mapping table.');
+    if ($isDownload) {
+        assertImportForm(str_starts_with($output, 'data:application/json;base64,'), 'Complete report download is not a native data URL.');
+        $downloaded = json_decode(base64_decode(substr($output, strlen('data:application/json;base64,')), true), true, 64, JSON_THROW_ON_ERROR);
+        assertImportForm(
+            count($downloaded['charts'][0]['fieldCoverage']) === count($full['charts'][0]['fieldCoverage'])
+            && str_contains($gateway->fields['JSLiveImportSummary']['caption'], $downloaded['planHash']),
+            'Downloaded report is truncated or differs from the displayed plan.'
+        );
+    } else {
+        assertImportForm($output === '', 'Successful preview should update tables without a redundant dialog.');
+    }
+}
 $JSLiveImportFile = base64_encode('{"format":1,"format":2}');
 ob_start();
 eval($inputs['JSLiveImportFile']['onChange']);

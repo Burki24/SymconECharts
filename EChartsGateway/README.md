@@ -135,11 +135,13 @@ Diagrammmodell und seine Darstellung verbleiben im Gerät.
 
 ### 7. PHP-Befehlsreferenz
 
-`ECGW_PreviewJSLiveImport(int $InstanzID, string $Package, string $Options = '{}'): string`
+`ECGW_PreviewJSLiveImport(int $InstanzID, string $Package, string $Options): string`
 prüft ein JSLive-Paket 1.0 und liefert den vollständigen JSON-Bericht.
 `$Package` ist der UTF-8-Dateiinhalt, kein Dateipfad und kein Base64-String.
 Ungültige Pakete werden mit einer Ausnahme abgelehnt. Der Bericht enthält
 technische Regelkennungen und englische Detailtexte; das Formular ist lokalisiert.
+Alle drei Argumente sind beim Symcon-Funktionsaufruf erforderlich. Ohne eigene
+Zuordnungen wird für `$Options` ausdrücklich `'{}'` übergeben.
 
 `$Options` enthält bei Bedarf ausdrückliche ID-Zuordnungen, zum Beispiel für
 ein synthetisches Paket:
@@ -149,6 +151,10 @@ ein synthetisches Paket:
 ```
 
 Der interne Formularadapter `ECGW_PreviewJSLiveImportFromForm` verarbeitet die
-Dateiauswahl und aktualisiert ausschließlich die Formularansicht.
+Dateiauswahl und aktualisiert ausschließlich die Formularansicht. Seine sechs
+Argumente (Instanz-ID, Base64-Dateiinhalt, Zuordnungen, Diagrammindex,
+Seitenindex und Download-Schalter) werden von allen Formularaktionen
+ausdrücklich übergeben. PHP-Standardwerte der Modulmethoden ersetzen keine
+Argumente der von Symcon bereitgestellten Funktionen.
 
 Lizenz der eigenen Beiträge: [PolyForm Noncommercial License 1.0.0](../LICENSE).
