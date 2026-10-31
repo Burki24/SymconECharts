@@ -114,6 +114,12 @@
                     "source_sha": "68aef587ee458e0155ec04ba19c3e20855209b86"
                 }
             ]
+        },
+        "VariablePresentationNormalizationHelper": {
+            "version": "1.0.0",
+            "sha256": "1385757d6c2b2190c6c11c01a0d8c1a44af789ca4132fbd3ac9d3ec39c052db9",
+            "path": "libs/helper/VariablePresentationNormalizationHelper.php",
+            "source_sha": "c2690313db70d2c2c9fd7d2549461f43a50384e9"
         }
     }
 }
