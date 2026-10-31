@@ -12,6 +12,17 @@ use Throwable;
  */
 final class EChartsVariablePresentation
 {
+    /** Complete, loss-aware migration snapshot; ordinary chart resolution is unchanged. */
+    public static function Snapshot(int $variableID): array
+    {
+        $helper = __DIR__ . '/helper/VariablePresentationNormalizationHelper.php';
+        if (!is_file($helper)) {
+            throw new RuntimeException('Complete the VariablePresentationNormalizationHelper helper sync before migration.');
+        }
+        require_once $helper;
+        return \Burki24\SymconModuleHelper\VariablePresentationNormalizationHelper::Capture($variableID);
+    }
+
     /**
      * Strict access rejects unreadable or malformed unit metadata instead of
      * silently falling back. Existing callers retain lenient resolution.

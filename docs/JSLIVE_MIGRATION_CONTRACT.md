@@ -2,8 +2,10 @@
 
 - Vertragskennung: `de.burki24.jslive-echarts`
 - Formatversion: `1.0`
-- Status: spezifiziert am 31.10.2026; Exporter, Importer und neue Zielmodelle
-  sind noch nicht implementiert oder abgenommen.
+- Status: spezifiziert am 31.10.2026; erster JSLive-Producer und gemeinsame
+  Darstellungsnormalisierung lokal implementiert. Reguläre Helper-Verteilung,
+  reale Exportabnahme, weitere Konvertierungsregeln, Importer und neue Zielmodelle
+  sind noch offen.
 - Entscheidungen: [ECharts ADR 0109](adr/0109-jslive-migration-contract.md) und
   [JSLive ADR 0007](https://github.com/Burki24/JSLive/blob/dev/docs/adr/0007-echarts-migration-contract.md).
 - Kanonische Quelle ist dieses Dokument im Repository SymconECharts. JSLive
@@ -154,6 +156,13 @@ Chart sind dies mindestens `Period`, `Now`, `Relativ`, `Offset`, `StartDate`,
 bei Radar mindestens `Period` und `Relativ`. Ein fehlender benötigter Wert
 erzeugt einen blockierenden Erfassungsfehler. Exportzeitpunkt, aufgelöste
 Fenstergrenzen und Zeitzone werden zusammen erfasst.
+
+`original.globalConfiguration` und `appearance.global` erhalten zusätzlich die
+wirksamen Parentfelder `DataMode`, `RefreshTime`, `EnableViewport`,
+`viewport_content` und `CreateIPSView`. Diese Auswahl wird vor/nach der Erfassung
+verglichen; Transportkennwörter und Adressen werden niemals mitkopiert.
+Explizite Ausgabe-/Sichtbarkeitsflags des Kindes bleiben in der fachlichen
+Originalkonfiguration erhalten.
 
 Erfassung erfolgt ohne Ausführen eigener Templates/Skripte. Der Exporter liest
 fachliche Konfiguration und Steuerzustand vor und nach der Erfassung erneut.
@@ -513,8 +522,13 @@ Kantenglättung von verschobener Geometrie, fehlenden Reihen oder falschen Farbe
 ## 12. Umsetzungsfolge und Freigabestatus
 
 1. Vertrag und beidseitige ADRs: mit diesem Schritt spezifiziert.
-2. Gemeinsame Profil-/Darstellungsnormalisierung und vollständiger JSLive-Export
-   samt anonymisierten Fixtures: offen.
+2. Gemeinsame Profil-/Darstellungsnormalisierung und vollständiger JSLive-Export:
+   erster Producer für die fünf Chartfamilien und gemeinsame Snapshots lokal
+   implementiert; konkrete öffentliche APIs und Prüfgrenzen stehen im
+   [Exportbericht](../../JSLive/docs/ECHARTS_EXPORT.md). Jeder Aufruf erzeugt ein
+   vollständiges Einzelchart-Paket. Weitere Konvertierungsregeln (insbesondere
+   Sonderprofile und dynamische Assoziationstexte), reguläre Helper-Verteilung
+   und reale Formular-/HTTP-Abnahme bleiben offen.
 3. Lesender ECharts-Parser, Vollständigkeitsbericht und konkrete Vorschau: offen.
 4. Fehlende Ziel-Fachmodelle und familienweise geprüfte Mapper: offen.
 5. Bestätigte Anlage, Importjournal, Wiederanlauf und gemeinsame Live-Abnahme:

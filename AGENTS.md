@@ -425,7 +425,9 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   versionierter Austauschvertrag zu spezifizieren.
 - Der gemeinsame Vertrag `de.burki24.jslive-echarts` 1.0 steht kanonisch in
   `docs/JSLIVE_MIGRATION_CONTRACT.md` gemäß ADR 0109 und JSLive ADR 0007.
-  Er ist spezifiziert, noch nicht implementiert. Profilinformationen werden
+  Ein erster JSLive-Producer und gemeinsame Darstellungsnormalisierung sind
+  lokal implementiert; Helper-Verteilung, weitere Sonderregeln, Importer und
+  gemeinsame Live-Abnahme bleiben offen. Profilinformationen werden
   vollständig in profilunabhängige native Darstellungen und Chart-Metadaten
   übersetzt; der Import stellt bestehende Quellvariablen nicht um. Vollständige
   Feldbilanz, Vorschau, Bestätigung und wiederaufnehmbares Journal sind Pflicht.

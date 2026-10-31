@@ -1,5 +1,15 @@
 # Entwicklung von SymconECharts
 
+Der erste Implementierungsschritt der Migration ergänzt den zentralen
+`VariablePresentationNormalizationHelper` in Symcon_ModuleHelper und den vollständigen
+JSLive-Producer. `EChartsVariablePresentation::Snapshot()` verwendet denselben
+lesenden Konverter, ohne die bisherige numerische Chart-Auflösung zu verändern.
+Beide Subscriptions sind vorbereitet; vor Nutzung ist die reguläre Verteilung
+des neuen Helpers erforderlich. Lokale Testbundles sind keine veröffentlichte
+Abhängigkeit. Details und verbleibende Konvertierungs-/Live-Grenzen stehen im
+[JSLive-Exportbericht](../../JSLive/docs/ECHARTS_EXPORT.md). Der ECharts-Importer
+und die gemeinsame Migrationsabnahme sind noch offen.
+
 Der gemeinsame [JSLive-Export-/Importvertrag 1.0](JSLIVE_MIGRATION_CONTRACT.md)
 ist gemäß [ADR 0109](adr/0109-jslive-migration-contract.md) und JSLive ADR 0007
 spezifiziert. Die öffentliche Übernahmezusage bleibt bis zur Implementierung
