@@ -479,15 +479,15 @@ if ($helperSync !== null) {
         $errors[] = '.helper-sync.json must generate German helper documentation.';
     }
     if (($helperSync['helpers'] ?? null) !== [
-        'ConfigurationFormHelper'        => ['target' => 'libs/helper/ConfigurationFormHelper.php'],
-        'DataFlowHelper'                 => ['target' => 'libs/helper/DataFlowHelper.php'],
-        'IPSViewHTMLPageHelper'          => ['target' => 'libs/helper/IPSViewHTMLPageHelper.php'],
-        'ResponsiveVisualizationHelper'  => ['target' => 'libs/helper/ResponsiveVisualizationHelper.php'],
-        'SVGPreviewHelper'               => ['target' => 'libs/helper/SVGPreviewHelper.php'],
-        'VariableSearchHelper'           => ['target' => 'libs/helper/VariableSearchHelper.php'],
-        'VisualizationAssetHelper'       => ['target' => 'libs/helper/VisualizationAssetHelper.php'],
-        'VisualizationThemeHelper'       => ['target' => 'libs/helper/VisualizationThemeHelper.php'],
-        'DebugFlowHelper'                => ['target' => 'libs/helper/DebugFlowHelper.php'],
+        'ConfigurationFormHelper'                 => ['target' => 'libs/helper/ConfigurationFormHelper.php'],
+        'DataFlowHelper'                          => ['target' => 'libs/helper/DataFlowHelper.php'],
+        'IPSViewHTMLPageHelper'                   => ['target' => 'libs/helper/IPSViewHTMLPageHelper.php'],
+        'ResponsiveVisualizationHelper'           => ['target' => 'libs/helper/ResponsiveVisualizationHelper.php'],
+        'SVGPreviewHelper'                        => ['target' => 'libs/helper/SVGPreviewHelper.php'],
+        'VariableSearchHelper'                    => ['target' => 'libs/helper/VariableSearchHelper.php'],
+        'VisualizationAssetHelper'                => ['target' => 'libs/helper/VisualizationAssetHelper.php'],
+        'VisualizationThemeHelper'                => ['target' => 'libs/helper/VisualizationThemeHelper.php'],
+        'DebugFlowHelper'                         => ['target' => 'libs/helper/DebugFlowHelper.php'],
         'VariablePresentationNormalizationHelper' => ['target' => 'libs/helper/VariablePresentationNormalizationHelper.php']
     ]) {
         $errors[] = '.helper-sync.json does not contain the required visualization helper subscriptions.';
