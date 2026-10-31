@@ -1,5 +1,17 @@
 # Entwicklung von SymconECharts
 
+Der gemeinsame [JSLive-Export-/Importvertrag 1.0](JSLIVE_MIGRATION_CONTRACT.md)
+ist gemäß [ADR 0109](adr/0109-jslive-migration-contract.md) und JSLive ADR 0007
+spezifiziert. Die öffentliche Übernahmezusage bleibt bis zur Implementierung
+und gemeinsamen Abnahme offen; die erste Beta ist dafür zurückgestellt.
+JSLive erfasst fachliche Konfiguration, Steuerzustände, Quellen, Archivregeln,
+Darstellung und Ressourcen. Profile werden vollständig in profilunabhängige
+native Darstellungen und Chart-Metadaten übersetzt. Bestehende Quellen, Actions,
+Archive und Designs bleiben erhalten. Feldbilanz, Vorschau, ausdrückliche
+Bestätigung und wiederaufnehmbares Importjournal gehören zur Implementierung.
+Eine Spezifikation belegt noch keine vorhandene Importfunktion. Die abgeschlossene
+Nutzungsgrenzen-Roadmap wird dadurch nicht rückwirkend wieder geöffnet.
+
 Die zentrale Gateway-Zustandsnormalisierung nutzt gemäß
 [ADR 0108](adr/0108-duration-aware-archive-states.md) die native Archiv-Dauer,
 um mehrere Wechsel derselben Sekunde ausschließlich bei genau einem positiven

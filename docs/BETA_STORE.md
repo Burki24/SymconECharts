@@ -1,5 +1,13 @@
 # Erste Beta: vorbereitete Store-Unterlagen
 
+**Aktuelle Freigabesperre vom 31.10.2026:** Der Eigentümer hat die erste Beta
+bis zur zugesagten JSLive-Übernahme zurückgestellt. Der gemeinsame
+[Export-/Importvertrag](JSLIVE_MIGRATION_CONTRACT.md) ist spezifiziert;
+Implementierung und gemeinsame Abnahme stehen aus. Die folgenden Release-Texte
+und das bisher geplante Datum sind Vorbereitung, keine Einreichungsfreigabe.
+Nach Abschluss der Migration sind Umfang, Versionsmetadaten und Termin erneut
+mit dem Eigentümer abzugleichen. Die bisherige Diagrammabnahme bleibt gültig.
+
 Stand: 31.10.2026. Die folgenden Inhalte sind zur manuellen Übernahme in den
 Symcon-Entwicklerbereich vorbereitet. Durch diese Vorbereitung wurde keine
 Store-Vorlage gespeichert und keine Version eingereicht. Bundle-ID und Deutsch
