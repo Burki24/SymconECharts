@@ -23,6 +23,7 @@ interface EChartsJSLiveImportKernel
     public function Create(string $moduleID): int;
     public function Mark(int $id, string $marker): void;
     public function Change(int $id, string $field, mixed $value): void;
+    public function HasChanges(int $id): bool;
     public function Apply(int $id): void;
     public function Verify(int $id): array;
     public function Revalidate(array $plan): void;
@@ -93,7 +94,8 @@ final class EChartsJSLiveJournal
                     }
                     $old = $previous[$entryID];
                     try {
-                        $unchanged = EChartsImportJson::Hash($this->kernel->Inspect($old['targetID'])) === EChartsImportJson::Hash($old['snapshot']);
+                        $unchanged = EChartsImportJson::Hash($this->kernel->Inspect($old['targetID'])) === EChartsImportJson::Hash($old['snapshot'])
+                            && !$this->kernel->HasChanges($old['targetID']);
                     }
                     catch (Throwable) {
                         $unchanged = false;
@@ -182,7 +184,7 @@ final class EChartsJSLiveJournal
                 $snapshot = $this->kernel->Inspect($targetID);
                 if ($snapshot['moduleID'] !== $entry['moduleID'] || in_array($targetID, $entry['creationIntent']['before'], true)
                     || ($snapshot['info'] !== '' && $snapshot['info'] !== $entry['marker'])
-                    || !EChartsJSLiveTargetSnapshot::IsUnchangedCreation($snapshot)) {
+                    || !EChartsJSLiveTargetSnapshot::IsUnchangedCreation($snapshot) || $this->kernel->HasChanges($targetID)) {
                     throw new RuntimeException('RECOVERY_REQUIRED: selected object is not an unclaimed creation candidate.');
                 }
                 $entry['targetID'] = $targetID;
@@ -262,7 +264,7 @@ final class EChartsJSLiveJournal
             $id = $this->kernel->Create($entry['moduleID']);
             $snapshot = $this->kernel->Inspect($id);
             if ($snapshot['moduleID'] !== $entry['moduleID'] || $snapshot['info'] !== ''
-                || !EChartsJSLiveTargetSnapshot::IsUnchangedCreation($snapshot)) {
+                || !EChartsJSLiveTargetSnapshot::IsUnchangedCreation($snapshot) || $this->kernel->HasChanges($id)) {
                 throw new RuntimeException('TARGET_CHANGED: ownership or module differs.');
             }
             $entry['targetID'] = $id;
@@ -273,17 +275,15 @@ final class EChartsJSLiveJournal
         }
         $id = $entry['targetID'];
         $current = $this->kernel->Inspect($id);
-        if ($entry['phase'] === 'configured' && $entry['applyIntent'] && $entry['snapshot'] !== null) {
-            $beforeCore = $entry['snapshot'];
-            $afterCore = $current;
-            unset($beforeCore['children'], $afterCore['children']);
-            // Inspect has verified durable output guards. Only the expected module-created children may differ.
-            if (EChartsImportJson::Hash($beforeCore) === EChartsImportJson::Hash($afterCore)) {
-                $entry['snapshot'] = $current;
-                $this->Persist($journal);
-            }
+        if ($entry['phase'] === 'created' && $entry['pending'] !== null
+            && $this->IsConfigurationIntent($entry, $target)) {
+            // Version-1 journals could fail immediately after staging: the active snapshot is still the old one.
+            // Preserve the target ID, marker, revision and creation guard; no re-creation or live journal rewrite.
+            $entry['phase'] = $entry['status'] = 'configured';
+            $entry['applyIntent'] = true;
+            $this->Persist($journal);
         }
-        if ($entry['pending'] !== null) {
+        if ($entry['phase'] === 'created' && $entry['pending'] !== null) {
             if (EChartsImportJson::Hash($current) === EChartsImportJson::Hash($entry['pending'])) {
                 $entry['snapshot'] = $current;
                 $entry['pending'] = null;
@@ -300,39 +300,68 @@ final class EChartsJSLiveJournal
                 $this->Persist($journal);
             }
         }
-        $this->AssertSnapshot($entry, $current);
         if ($entry['phase'] === 'created') {
+            $this->AssertSnapshot($entry, $current);
+            if ($this->kernel->HasChanges($id)) {
+                throw new RuntimeException('TARGET_CHANGED: refusing to replace unrecorded planned settings.');
+            }
             // A disconnect and a connect are separate durable steps, never one hidden compound mutation.
             if ($entry['snapshot']['connectionID'] !== 0 && $entry['snapshot']['connectionID'] !== $target['gatewayID']) {
                 $this->ChangeField($entry, $journal, 'connectionID', 0);
             }
-            $desired = ['name'  => $target['name'], 'parentID' => $target['parentID'], 'connectionID' => $target['gatewayID'],
-                'configuration' => array_replace($entry['snapshot']['configuration'], $target['configuration'])];
+            $desired = ['name' => $target['name'], 'parentID' => $target['parentID'], 'connectionID' => $target['gatewayID']];
             foreach ($desired as $field => $value) {
                 if (EChartsImportJson::Hash($entry['snapshot'][$field]) === EChartsImportJson::Hash($value)) {
                     continue;
                 }
                 $this->ChangeField($entry, $journal, $field, $value);
             }
+            if ($this->kernel->HasChanges($id)) {
+                throw new RuntimeException('TARGET_CHANGED: target acquired unrecorded planned settings before configuration.');
+            }
+            // SetConfiguration stages settings; it does not change the active configuration returned by Inspect.
+            // Persist both the active baseline and expected activated result before either native call.
+            $entry['pending'] = $this->ExpectedConfiguration($entry, $target);
+            $entry['applyIntent'] = true;
             $entry['phase'] = $entry['status'] = 'configured';
             $this->Persist($journal);
         }
         if ($entry['phase'] === 'configured') {
-            $this->AssertSnapshot($entry, $this->kernel->Inspect($id));
+            $expected = $this->ExpectedConfiguration($entry, $target);
+            if ($entry['pending'] !== null && !$this->IsConfigurationIntent($entry, $target)) {
+                throw new RuntimeException('JOURNAL_INVALID: recorded configuration intent differs from the reviewed target.');
+            }
+            $current = $this->kernel->Inspect($id);
+            $atBaseline = EChartsImportJson::Hash($current) === EChartsImportJson::Hash($entry['snapshot']);
+            $alreadyActive = $this->SameAppliedCore($current, $expected);
+            if (!$atBaseline && !$alreadyActive) {
+                throw new RuntimeException('TARGET_CHANGED: active settings or target metadata changed.');
+            }
+            $hasChanges = $this->kernel->HasChanges($id);
+            if ($hasChanges && ($entry['pending'] === null || $alreadyActive || !$entry['applyIntent'])) {
+                throw new RuntimeException('TARGET_CHANGED: unrecorded planned settings must not be applied.');
+            }
             if (!$entry['applyIntent']) {
                 $entry['applyIntent'] = true;
                 $this->Persist($journal);
             }
-            // May repeat after a crash; ApplyChanges is idempotent only on this owned unchanged new target.
+            if (!$alreadyActive && !$hasChanges) {
+                $this->kernel->Change($id, 'configuration', $expected['configuration']);
+                $this->AssertSnapshot($entry, $this->kernel->Inspect($id));
+                if (!$this->kernel->HasChanges($id)) {
+                    throw new RuntimeException('IMPORT_FAILED: the reviewed configuration was not staged.');
+                }
+            }
+            // Do not overwrite an existing recorded draft on retry. Apply it, then compare the full active result.
+            // Public getters cannot read planned settings. A divergent activation is retained and fails closed;
+            // no corrective SetConfiguration replaces it. Apply may repeat only for this incomplete owned target.
             $this->kernel->Apply($id);
             $after = $this->kernel->Inspect($id);
-            $beforeCore = $entry['snapshot'];
-            $afterCore = $after;
-            unset($beforeCore['children'], $afterCore['children']);
-            if (EChartsImportJson::Hash($beforeCore) !== EChartsImportJson::Hash($afterCore)) {
+            if (!$this->SameAppliedCore($after, $expected) || $this->kernel->HasChanges($id)) {
                 throw new RuntimeException('TARGET_CHANGED: target configuration changed during application.');
             }
             $entry['snapshot'] = $after;
+            $entry['pending'] = null;
             $this->Persist($journal);
             $entry['receipt'] = $this->kernel->Verify($id);
             $entry['phase'] = $entry['status'] = 'verified';
@@ -340,12 +369,32 @@ final class EChartsJSLiveJournal
         }
         if ($entry['phase'] === 'verified' || $entry['phase'] === 'complete') {
             $this->AssertSnapshot($entry, $this->kernel->Inspect($id));
+            if ($this->kernel->HasChanges($id)) {
+                throw new RuntimeException('TARGET_CHANGED: completed target has unreviewed planned settings.');
+            }
             if (EChartsImportJson::Hash($this->kernel->Verify($id)) !== EChartsImportJson::Hash($entry['receipt'])) {
                 throw new RuntimeException('TARGET_CHANGED: output identities changed.');
             }
             $entry['phase'] = $entry['status'] = 'complete';
             $this->Persist($journal);
         }
+    }
+
+    private function ExpectedConfiguration(array $entry, array $target): array
+    {
+        return array_replace($entry['snapshot'], ['configuration' => array_replace($entry['snapshot']['configuration'], $target['configuration'])]);
+    }
+
+    private function IsConfigurationIntent(array $entry, array $target): bool
+    {
+        return EChartsImportJson::Hash($entry['pending']) === EChartsImportJson::Hash($this->ExpectedConfiguration($entry, $target));
+    }
+
+    private function SameAppliedCore(array $actual, array $expected): bool
+    {
+        // Inspect validates protected ownership metadata for every newly created output first.
+        unset($actual['children'], $expected['children']);
+        return EChartsImportJson::Hash($actual) === EChartsImportJson::Hash($expected);
     }
 
     private function ChangeField(array &$entry, array &$journal, string $field, mixed $value): void

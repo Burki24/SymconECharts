@@ -17,15 +17,23 @@ Die reguläre Suite enthält jetzt folgende unabhängige Grenzen:
   Profile, Actions und Archive. Native Acht-Argumente-Formularscripts werden
   tatsächlich ausgeführt. Fehlende und veränderte Ausgabe-Besitznachweise
   verhindern Schreibzugriffe.
-- `php tests/jslive_journal.php`: 26 Unterbrechungspunkte einschließlich neuer
+- `php tests/jslive_journal.php`: 23 Unterbrechungspunkte einschließlich neuer
   Apply-Kinder, kanonische Persistenz, Reihenfolge mehrerer Revisionen,
   Erzeugungs-/Markierungslücke, explizite Zuordnung, Teilfehler und fremde
   Reservierungen. Kein automatisches Löschen oder blindes Neuerzeugen.
+  Geplante und aktive Einstellungen sind im Kernel-Doppel getrennt. Sechs
+  Szenarien bilden alte Version-1-Fehlerstände mit noch geplantem, verlorenem
+  oder beim Update aktiviertem Stand sowie aktive/fremde Entwürfe nach.
+  Ziel-/Journal-ID, Marker und Erzeugungsnachweis bleiben erhalten. Ein
+  abweichender protokollierter Entwurf wird nach Aktivierung abgewiesen,
+  ohne ihn durch den erwarteten Plan zu überschreiben; aktive Änderungen
+  und neue Entwürfe nach Aktivierung stoppen bereits vor Set/Apply.
 - `php tests/gateway_gauges.php --jslive-targets`: die echten sechs Modulklassen
   für alle 40 Varianten, Create/Apply, Gateway-Snapshottransport, Referenzen,
   geschützte Ausgangs-/Ausgabenachweise, beide HTML-Ausgaben sowie ausgeführte
   native Designvorschau-/Downloadcallbacks. Der unveränderte Standardlauf prüft
   zusätzlich die bisherigen Modelle unter dem bisherigen 128-MiB-Limit.
+
 - `php tests/jslive_safety.php`: unbekannte Einstellungen, aktive Fremdtemplates,
   Ressourcenintegrität, Profilabhängigkeit, Pfadgrammatik, gekürzte Archive,
   geänderte Archivtypen/Zählerpolitik und deduplizierte 63-/32000-Budgets.
@@ -36,6 +44,20 @@ Die reguläre Suite enthält jetzt folgende unabhängige Grenzen:
 - `node tests/jslive_format.js` und `node tests/jslive_renderers.js`: native
   Darstellung, Prozent/LQI/Boolean/Intervallgrenzen, Escaping sowie 120 echte
   ECharts-SSR-Renderings aller 40 Modelle in drei Größen, ohne NaN/Infinity.
+
+Der native Importadapter-Test unterbricht zusätzlich nach SetConfiguration und
+vor ApplyChanges und bestätigt die unveränderte aktive Konfiguration sowie
+`IPS_HasChanges=true`. Er lädt die historische Version-1-Fehlerform und setzt
+dieselbe Instanz ohne erneutes SetConfiguration über die öffentlichen APIs fort.
+Die realistische Trennung in den beiden Kernel-Doppeln erzeugte vor dem Fix RED:
+`TARGET_CHANGED` unmittelbar nach dem ersten SetConfiguration. Nach dem Fix
+bestehen Wiederaufnahme und alle 40 Importfälle auch unter 64 MiB.
+
+Der tatsächlich gesicherte Fehlerzustand wurde zusätzlich lokal außerhalb des
+Repositorys gegen den korrigierten Journalcode wiederaufgenommen. Alle drei
+Updatevarianten behalten die vorhandene Ziel-ID ohne weitere Anlage. Private
+Originaldaten sind keine eingecheckte Fixture. Die reale fortgesetzte Anwendung
+auf der Testinstallation bleibt nach Eigentümer-Modulupdate gesondert zu prüfen.
 
 Die Fixture-Herkunft und Anonymisierung stehen unter
 [`fixtures/jslive-packages`](fixtures/jslive-packages/README.md). Unveränderte

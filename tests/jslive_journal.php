@@ -15,6 +15,9 @@ final class ImportJournalKernel implements EChartsJSLiveImportKernel
 {
     public array $journal = ['version' => 1, 'entries' => []];
     public array $objects = [];
+    public array $plannedConfiguration = [];
+    public int $stages = 0;
+    public bool $interruptAfterStage = false;
     public int $creates = 0;
     public int $applies = 0;
     public int $calls = 0;
@@ -80,12 +83,29 @@ final class ImportJournalKernel implements EChartsJSLiveImportKernel
     }
     public function Change(int $id, string $field, mixed $value): void
     {
-        $this->objects[$id][$field] = $value;
+        if ($field === 'configuration') {
+            ++$this->stages;
+            $this->plannedConfiguration[$id] = $value;
+        } else {
+            $this->objects[$id][$field] = $value;
+        }
         $this->Checkpoint();
+        if ($field === 'configuration' && $this->interruptAfterStage) {
+            throw new RuntimeException('Simulated interruption after staging and before activation');
+        }
+    }
+    public function HasChanges(int $id): bool
+    {
+        return isset($this->plannedConfiguration[$id])
+            && EChartsImportJson::Hash($this->plannedConfiguration[$id]) !== EChartsImportJson::Hash($this->objects[$id]['configuration']);
     }
     public function Apply(int $id): void
     {
         ++$this->applies;
+        if (isset($this->plannedConfiguration[$id])) {
+            $this->objects[$id]['configuration'] = $this->plannedConfiguration[$id];
+            unset($this->plannedConfiguration[$id]);
+        }
         $this->objects[$id]['children'] = [$id + 10000];
         $this->Checkpoint();
     }
@@ -145,6 +165,84 @@ journalThrows(fn () => $engine->Execute($plan, $bad), 'PLAN_CHANGED:');
 $kernel->busy = true;
 journalThrows(fn () => $engine->Execute($plan, $confirm), 'IMPORT_BUSY:');
 $kernel->busy = false;
+
+// The actual version-1 failure shape: phase created, desired pending snapshot, unchanged active defaults.
+// Synthetic identities only; the retained installation's target ID or journal contents must not enter fixtures.
+foreach (['staged', 'stage-lost', 'activated-on-update', 'activated-new-draft', 'active-edited', 'draft-edited'] as $mode) {
+    $legacy = new ImportJournalKernel();
+    $legacy->interruptAfterStage = true;
+    $failed = (new EChartsJSLiveJournal($legacy))->Execute($plan, $confirm)['charts']['instance:12000'];
+    $legacyID = $failed['targetID'];
+    $legacyEntryID = $failed['journalID'];
+    journalAssert(
+        $failed['status'] === 'failed' && $legacy->HasChanges($legacyID)
+        && $legacy->objects[$legacyID]['configuration']['Title'] === '' && $legacy->applies === 0,
+        'SetConfiguration must leave active settings unchanged before ApplyChanges.'
+    );
+    $legacy->journal['entries'][$legacyEntryID]['phase'] = 'created';
+    $legacy->journal['entries'][$legacyEntryID]['applyIntent'] = false;
+    $legacy->journal['entries'][$legacyEntryID]['error'] = 'TARGET_CHANGED';
+    $legacy->interruptAfterStage = false;
+    $guard = $legacy->objects[$legacyID]['creationGuard'];
+    if ($mode === 'stage-lost') {
+        unset($legacy->plannedConfiguration[$legacyID]);
+    }
+    if (in_array($mode, ['activated-on-update', 'activated-new-draft'], true)) {
+        $legacy->Apply($legacyID);
+    }
+    if ($mode === 'activated-new-draft') {
+        $legacy->plannedConfiguration[$legacyID] = $legacy->objects[$legacyID]['configuration'];
+        $legacy->plannedConfiguration[$legacyID]['Title'] = 'Owner draft after activation';
+    }
+    if ($mode === 'active-edited') {
+        $legacy->objects[$legacyID]['configuration']['Title'] = 'Owner active title';
+    }
+    if ($mode === 'draft-edited') {
+        $legacy->plannedConfiguration[$legacyID]['Title'] = 'Owner planned title';
+    }
+    $stages = $legacy->stages;
+    $applies = $legacy->applies;
+    $resumed = (new EChartsJSLiveJournal($legacy))->Execute($plan, $confirm)['charts']['instance:12000'];
+    journalAssert(
+        $resumed['targetID'] === $legacyID && $resumed['journalID'] === $legacyEntryID && $legacy->creates === 1
+        && $legacy->objects[$legacyID]['creationGuard'] === $guard && $legacy->journal['version'] === 1,
+        'Compatible recovery must keep the existing identity, target, guard and journal format.'
+    );
+    if ($mode === 'activated-new-draft') {
+        journalAssert($resumed['error'] === 'TARGET_CHANGED' && $legacy->stages === $stages && $legacy->applies === $applies
+            && $legacy->plannedConfiguration[$legacyID]['Title'] === 'Owner draft after activation', 'A fresh draft after activation must remain unapplied.');
+    } elseif ($mode === 'active-edited') {
+        journalAssert($resumed['error'] === 'TARGET_CHANGED' && $legacy->stages === $stages && $legacy->applies === $applies
+            && $legacy->objects[$legacyID]['configuration']['Title'] === 'Owner active title', 'Active owner changes must stop before any configuration write or apply.');
+    } elseif ($mode === 'draft-edited') {
+        journalAssert($resumed['error'] === 'TARGET_CHANGED' && $legacy->stages === $stages
+            && $legacy->objects[$legacyID]['configuration']['Title'] === 'Owner planned title', 'A divergent recorded draft must never be overwritten by restaging or corrective writes.');
+        $again = (new EChartsJSLiveJournal($legacy))->Execute($plan, $confirm)['charts']['instance:12000'];
+        journalAssert($again['error'] === 'TARGET_CHANGED' && $legacy->applies === $applies + 1, 'A mismatching activation must not be retried against changed active settings.');
+    } else {
+        journalAssert($resumed['status'] === 'complete' && !$legacy->HasChanges($legacyID)
+            && EChartsImportJson::Hash($legacy->objects[$legacyID]['configuration']) === EChartsImportJson::Hash($chart['target']['configuration']), 'Version-1 recovery failed: ' . $mode);
+        journalAssert($legacy->stages === $stages + ($mode === 'stage-lost' ? 1 : 0), 'Recovery must reuse a staged or already active configuration.');
+        $applies = $legacy->applies;
+        (new EChartsJSLiveJournal($legacy))->Execute($plan, $confirm);
+        journalAssert($legacy->applies === $applies && $legacy->creates === 1, 'Completed recovery must stay idempotent.');
+    }
+}
+
+$draftKernel = new ImportJournalKernel();
+$draftEngine = new EChartsJSLiveJournal($draftKernel);
+$completed = $draftEngine->Execute($plan, $confirm)['charts']['instance:12000'];
+$draftID = $completed['targetID'];
+$draftKernel->plannedConfiguration[$draftID] = $draftKernel->objects[$draftID]['configuration'];
+$draftKernel->plannedConfiguration[$draftID]['Title'] = 'Unapplied owner customization';
+$draftBefore = $draftKernel->plannedConfiguration;
+$applies = $draftKernel->applies;
+$draftResult = $draftEngine->Execute($plan, $confirm)['charts']['instance:12000'];
+journalAssert(
+    $draftResult['error'] === 'TARGET_CHANGED' && $draftKernel->plannedConfiguration === $draftBefore
+    && $draftKernel->applies === $applies && $draftKernel->objects[$draftID]['configuration']['Title'] === 'Kept',
+    'A new draft on a completed target must stay unmodified and unapplied.'
+);
 $new = $plan;
 $new['charts']['instance:12000']['revision'] = str_repeat('c', 64);
 journalThrows(fn () => $engine->Execute($new, $confirm), 'TARGET_CHANGED:');
@@ -241,4 +339,4 @@ $candidates = array_keys($partialKernel->objects);
 $partialEngine->Resolve($gap['journalID'], $candidates[1], $partialChart['revision']);
 $partial = $partialEngine->Execute($partialPlan, $partialChoice);
 journalAssert($partial['charts']['instance:12001']['status'] === 'complete' && $partialKernel->creates === 2, 'Partial batch must resume at its own journal entry.');
-echo 'JSLive journal: confirmed creation, drift protection, explicit revision and ' . $checkpoints . " interruption checkpoints passed.\n";
+echo 'JSLive journal: pending/active settings, compatible version-1 recovery, draft/active drift protection and ' . $checkpoints . " interruption checkpoints passed.\n";

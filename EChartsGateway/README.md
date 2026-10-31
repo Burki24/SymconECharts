@@ -123,6 +123,15 @@ Zielinstanz wird nicht überschrieben. Für eine neue Exportrevision oder eine
 bewusst getrennte Kopie den zugehörigen bisherigen Journaleintrag ausdrücklich
 als Ausgangspunkt angeben; die alte Instanz bleibt erhalten.
 
+Auch vor dem Anwenden unterbrochene Konfigurationsschritte werden mit derselben
+Zielinstanz fortgesetzt. Datei erneut auswählen, Plan prüfen und bestätigen;
+das Journal muss dafür nicht zurückgesetzt werden. Bereits vorgemerkte
+Importeinstellungen werden beim Fortsetzen nicht blind neu geschrieben. Der
+aktivierte Stand wird vollständig mit dem bestätigten Ziel verglichen. Bei
+einer Abweichung stoppt der Import und schreibt keine Korrektur darüber.
+Ein eigener neuer Einstellungsentwurf auf einem bereits fertigen Ziel bleibt
+unverändert und wird durch eine Importwiederholung nicht angewendet.
+
 War ein Absturz genau während der Erzeugung möglich, wird keine weitere Instanz
 automatisch erzeugt. Die Wiederanlaufaktion verlangt den Journaleintrag, seine
 Revision und eine ausdrücklich bestätigte Ziel-ID. Nur eine unveränderte,

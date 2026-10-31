@@ -26,6 +26,12 @@
 
 ## Fixes
 
+- Das JSLive-Importjournal unterscheidet geplante und aktive Symcon-
+  Konfigurationen. Neue Übernahmen brechen nicht mehr vor dem Anwenden mit
+  einem fälschlichen `TARGET_CHANGED` ab. Bereits an dieser Stelle unterbrochene
+  Importe lassen sich nach erneuter Planprüfung mit derselben Zielinstanz und
+  Journal-ID fortsetzen. Bestehende Quellen, Archivwerte und Designs bleiben erhalten.
+
 - Dateiauswahl, erneutes Prüfen sowie Diagramm- und Seitenauswahl der
   JSLive-Importvorschau übergeben alle von Symcon verlangten Argumente.
   Dadurch brechen die Formularaktionen nicht mehr mit „Wrong parameter count“

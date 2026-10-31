@@ -37,7 +37,34 @@ mehrdeutig: Der Wiederanlauf erzeugt kein weiteres Objekt. Eine eigene Aktion
 muss das Restobjekt zuordnen oder dessen geprüfte Abwesenheit bestätigen.
 Gleiche Namen reichen niemals als Zuordnungsgrund.
 
-Vor Apply wird dessen Absicht persistiert. Ausschließlich moduleigene neue
+Vor SetConfiguration und Apply wird die Aktivierungsabsicht persistiert.
+`IPS_SetConfiguration()` setzt ausschließlich geplante Einstellungen;
+`IPS_GetConfiguration()` und die Snapshot-Prüfung lesen weiterhin den aktiven
+Stand. Das Journal hält deshalb den aktiven Ausgangszustand in `snapshot` und
+den erwarteten aktivierten Zustand in `pending`. `configured` bezeichnet diese
+dauerhafte Absicht, noch keinen Erfolg. Erst nach Apply müssen alle aktiven
+Konfigurations- und Objektfelder mit dem erwarteten Ergebnis übereinstimmen.
+
+Ein bereits vorgemerkter Entwurf wird beim Wiederanlauf nicht erneut gesetzt.
+Öffentliche Getter liefern keine vollständige geplante Konfiguration. Der
+Wiederanlauf aktiviert daher einen protokollierten offenen Schritt ohne
+Korrekturschreiben und prüft danach das vollständige aktive Ergebnis. Eine
+abweichende Aktivierung wird beibehalten und mit `TARGET_CHANGED` gesperrt,
+niemals durch den Importplan überschrieben. Ein neuer Entwurf nach erfolgter
+Aktivierung, ein nicht protokollierter Entwurf oder fremde aktive Änderungen
+werden bereits vor Set/Apply abgewiesen. Abgeschlossene Ziele erhalten bei
+Wiederholung weder SetConfiguration noch ApplyChanges.
+
+Version 1 des Journalformats bleibt erhalten. Alte Fehlerstände mit
+`phase=created`, `applyIntent=false`, unverändertem aktivem Snapshot und dem
+erwarteten Konfigurations-Snapshot in `pending` werden erst beim ausdrücklich
+bestätigten Wiederanlauf kompatibel fortgesetzt. Ziel-/Journal-ID, Marker,
+Revision, Zielhash und Erzeugungsnachweis bleiben unverändert. Das gilt auch,
+wenn ein Modulupdate die vorgemerkten Einstellungen bereits aktiviert oder
+verworfen hat. Kein Journal-Reset und keine Migration beim bloßen Bibliotheks-
+Update; unbekannte oder geänderte Zustände bleiben gesperrt.
+
+Ausschließlich moduleigene neue
 IPSView-Ausgaben erhalten im Ziel geschützte Eigentumsnachweise einschließlich
 stabiler Objekt-/Variablenmetadaten. Sie erlauben nach unterbrochenem Apply die
 Übernahme erwarteter neuer Kinder. Fehlender Nachweis oder nachträgliche Änderung
@@ -114,6 +141,14 @@ und Geometriebudgets. Es werden keine alten Rendering-Engines ausgeliefert.
 Der isolierte Journaltest prüft bestätigte Neuanlage, Wiederholung ohne erneutes
 Anwenden, Zieländerungen, getrennte Revisionen, Sperren und Unterbrechungen nach
 jedem Persistenz-/Kernelaufruf, einschließlich bei Apply erzeugter Ausgaben.
+Die Kernel-Doppel bilden getrennte geplante und aktive Konfigurationen ab;
+das frühere sofortige Aktivieren in SetConfiguration verdeckte den Live-Fehler.
+Die Regression reproduzierte vor dem Fix denselben `TARGET_CHANGED`-Abbruch
+im konkreten Kerneladapter. Sechs historische Wiederaufnahmeszenarien und
+23 Unterbrechungspunkte prüfen jetzt den korrigierten Ablauf. Der reale
+gesicherte Fehlerdatensatz wurde zusätzlich außerhalb des Repositorys lokal
+mit noch geplantem, verworfenem und bereits aktiviertem Stand wiederaufgenommen;
+dies ist kein erneuter Live-Schreiblauf.
 40 anonymisierte Pakete bestehen native Modelle und beide HTML-Ausgaben,
 vollständige Feldpläne, den konkreten Kerneladapter und die tatsächlichen sechs
 Modulklassen mit ausgeführten nativen Formularcallbacks. 520 unabhängige

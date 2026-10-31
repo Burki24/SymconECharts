@@ -165,7 +165,7 @@ final class EChartsJSLiveCreationRuntime implements EChartsJSLiveImportKernel
     public function Mark(int $id, string $marker): void
     {
         $snapshot = $this->Inspect($id);
-        if ($snapshot['info'] !== '' || !EChartsJSLiveTargetSnapshot::IsUnchangedCreation($snapshot)
+        if ($snapshot['info'] !== '' || !EChartsJSLiveTargetSnapshot::IsUnchangedCreation($snapshot) || $this->HasChanges($id)
             || preg_match('/^SymconECharts:JSLive:1:[a-f0-9]{64}:[a-f0-9]{32}$/D', $marker) !== 1) {
             throw new RuntimeException('TARGET_CHANGED: refusing to claim a changed or previously owned target.');
         }
@@ -194,6 +194,11 @@ final class EChartsJSLiveCreationRuntime implements EChartsJSLiveImportKernel
         if (!IPS_ApplyChanges($id)) {
             throw new RuntimeException('IMPORT_FAILED: target configuration failed.');
         }
+    }
+
+    public function HasChanges(int $id): bool
+    {
+        return IPS_HasChanges($id);
     }
 
     public function Verify(int $id): array

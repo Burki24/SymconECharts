@@ -18,7 +18,7 @@ const VARIABLE_PRESENTATION_WEB_CONTENT = '{00000000-0000-4000-8000-000000000001
 set_error_handler(static function (int $severity, string $message): never
 { throw new RuntimeException($message); });
 $GLOBALS['nativeImport'] = ['objects' => [], 'instances' => [], 'variables' => [], 'profiles' => [], 'templates' => [], 'outputGuards' => [],
-    'configuration'                   => [], 'guard' => [], 'archives' => [], 'created' => [], 'mutations' => [], 'locked' => false, 'next' => 20000, 'children' => []];
+    'configuration'                   => [], 'plannedConfiguration' => [], 'guard' => [], 'archives' => [], 'created' => [], 'mutations' => [], 'locked' => false, 'next' => 20000, 'children' => []];
 function nativeObject(int $id, string $name, int $type = 1, int $parent = 0): array
 {
     return ['ObjectID' => $id, 'ObjectName' => $name, 'ObjectType' => $type, 'ParentID' => $parent, 'ObjectIdent' => '', 'ObjectInfo' => '',
@@ -47,6 +47,10 @@ function IPS_GetInstance(int $id): array
 function IPS_GetConfiguration(int $id): string
 {
     return EChartsImportJson::Canonical($GLOBALS['nativeImport']['configuration'][$id]);
+}
+function IPS_GetProperty(int $id, string $name): mixed
+{
+    return $GLOBALS['nativeImport']['configuration'][$id][$name];
 }
 function IPS_GetVariable(int $id): array
 {
@@ -172,8 +176,17 @@ function IPS_DisconnectInstance(int $id): bool
 function IPS_SetConfiguration(int $id, string $value): bool
 {
     nativeMutation($id, 'configuration');
-    $GLOBALS['nativeImport']['configuration'][$id] = json_decode($value, true, 64, JSON_THROW_ON_ERROR);
+    $GLOBALS['nativeImport']['plannedConfiguration'][$id] = json_decode($value, true, 64, JSON_THROW_ON_ERROR);
+    if ($GLOBALS['nativeImport']['interruptAfterStage'] ?? false) {
+        $GLOBALS['nativeImport']['interruptAfterStage'] = false;
+        throw new RuntimeException('Simulated native interruption after SetConfiguration');
+    }
     return true;
+}
+function IPS_HasChanges(int $id): bool
+{
+    return isset($GLOBALS['nativeImport']['plannedConfiguration'][$id])
+        && EChartsImportJson::Hash($GLOBALS['nativeImport']['plannedConfiguration'][$id]) !== EChartsImportJson::Hash($GLOBALS['nativeImport']['configuration'][$id]);
 }
 function nativeState(int $id): array
 {
@@ -189,6 +202,10 @@ function nativeHTML(int $id, bool $ipsView): string
 function IPS_ApplyChanges(int $id): bool
 {
     nativeMutation($id, 'apply');
+    if (isset($GLOBALS['nativeImport']['plannedConfiguration'][$id])) {
+        $GLOBALS['nativeImport']['configuration'][$id] = $GLOBALS['nativeImport']['plannedConfiguration'][$id];
+        unset($GLOBALS['nativeImport']['plannedConfiguration'][$id]);
+    }
     if ($GLOBALS['nativeImport']['configuration'][$id]['EnableIPSView']) {
         $child = $GLOBALS['nativeImport']['children'][$id][0] ?? ($id + 10000);
         $GLOBALS['nativeImport']['children'][$id] = [$child];
@@ -312,6 +329,10 @@ final class NativeImportGateway
     {
         $this->RegisterJSLiveImportJournal();
     }
+    public function RestoreTestJournal(array $journal): void
+    {
+        $this->attributes['JSLiveImportJournal'] = EChartsImportJson::Canonical($journal);
+    }
     protected function RegisterAttributeString(string $name, string $default): void
     {
         $this->attributes[$name] ??= $default;
@@ -411,9 +432,35 @@ foreach (glob(__DIR__ . '/fixtures/jslive-packages/*.json') as $file) {
     $unconfirmed = $confirmation;
     $unconfirmed['confirmedNewInstances'] = false;
     nativeThrows(fn () => $gateway->ExecuteJSLiveImport($json, '{}', 15000, EChartsImportJson::Canonical($unconfirmed)), 'IMPORT_BLOCKED:');
+    if ($count === 0) {
+        $kernel['interruptAfterStage'] = true;
+        $firstAttempt = json_decode($gateway->ExecuteJSLiveImport($json, '{}', 15000, EChartsImportJson::Canonical($confirmation)), true, 64, JSON_THROW_ON_ERROR)['charts'][$row['chartKey']];
+        $retainedID = $firstAttempt['targetID'];
+        $retainedEntryID = $firstAttempt['journalID'];
+        nativeAssert(
+            $firstAttempt['status'] === 'failed' && IPS_HasChanges($retainedID)
+            && json_decode(IPS_GetConfiguration($retainedID), true)['JSLiveImportModel'] === ''
+            && IPS_GetProperty($retainedID, 'Title') === ''
+            && $kernel['plannedConfiguration'][$retainedID]['JSLiveImportModel'] !== '',
+            'Native staging must not alter the active configuration before ApplyChanges.'
+        );
+        $oldJournal = json_decode($gateway->GetJSLiveImportJournal(), true, 64, JSON_THROW_ON_ERROR);
+        $oldJournal['entries'][$retainedEntryID]['phase'] = 'created';
+        $oldJournal['entries'][$retainedEntryID]['applyIntent'] = false;
+        $oldJournal['entries'][$retainedEntryID]['error'] = 'TARGET_CHANGED';
+        $gateway->RestoreTestJournal($oldJournal);
+        $stageCount = count(array_filter($kernel['mutations'], static fn (array $call): bool => $call === [$retainedID, 'configuration']));
+    }
     $result = json_decode($gateway->ExecuteJSLiveImport($json, '{}', 15000, EChartsImportJson::Canonical($confirmation)), true, 64, JSON_THROW_ON_ERROR);
     $result = $result['charts'][$row['chartKey']];
     nativeAssert($result['status'] === 'complete', basename($file) . ': ' . EChartsImportJson::Canonical($result));
+    if ($count === 0) {
+        nativeAssert(
+            $result['targetID'] === $retainedID && $result['journalID'] === $retainedEntryID && !IPS_HasChanges($retainedID)
+            && count(array_filter($kernel['mutations'], static fn (array $call): bool => $call === [$retainedID, 'configuration'])) === $stageCount,
+            'The retained version-1 target must resume through the public API without a duplicate or replacement of its recorded draft.'
+        );
+    }
     $mutations = count($kernel['mutations']);
     $again = json_decode($gateway->ExecuteJSLiveImport($json, '{}', 15000, EChartsImportJson::Canonical($confirmation)), true, 64, JSON_THROW_ON_ERROR);
     nativeAssert($again['charts'][$row['chartKey']]['targetID'] === $result['targetID'] && count($kernel['mutations']) === $mutations, 'Completed retry must not reapply configuration.');
