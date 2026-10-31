@@ -310,6 +310,13 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
 
 ## Modulpräfixe
 
+- `ECRH` ist `EChartsRadarHistory` zugeordnet (Radar History), GUID
+  `{A1ABAD81-1878-4F35-A6EE-29B1DE1BCF2D}` gemäß ADR 0111. Historische
+  Klassenhäufigkeiten und Referenzzuordnung sind vom aktuellen Radar getrennt.
+- `ECPG` ist `EChartsProgress` zugeordnet (Progress), GUID
+  `{FEF19240-5D04-4DE0-9AE9-D55DECBC2BD2}` gemäß ADR 0111. Füll- und
+  Pfadfortschritt sind vom Symbolbalkenmodell PictorialBar getrennt.
+
 - `ECCP` ist `EChartsCalendarPie` zugeordnet (`CP` = Calendar Pie), GUID
   `{8F3D4E67-A52E-46AB-976E-25EC4F37FB52}` gemäß ADR 0060. Das eigene
   Monatskalendermodul bietet Tagesmittelwerte, Zähler-Tagesverbrauch und
@@ -429,9 +436,13 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   verteilt; 40 Exporte wurden vom Eigentümer per MCP bestätigt. Die lesende
   Gateway-Importvorschau gemäß ADR 0110 prüft Pakete, ID-Zuordnungen und native
   Formate unabhängig und liefert vollständige Pläne/Abweichungsberichte.
-  Ihre Eingaben sind ausschließlich flüchtige Formularaktionen; es gibt keine
-  Importanlage, kein Journal und keine vorgetäuschte Renderinggleichheit.
-  Vollständige Mapper, Sonderregeln und gemeinsame Zielabnahme bleiben offen.
+  Ihre Eingaben bleiben flüchtige Formularaktionen. ADR 0111 ergänzt native
+  Vollpläne für die 40 Exportvarianten, einzeln bestätigte Unterschiede,
+  ausschließlich neue Ziele und ein persistentes wiederaufnehmbares Journal.
+  `EChartsRadarHistory` und `EChartsProgress` erhalten eigene Fachmodelle.
+  Quellen/Archive bleiben nur lesbar; reguläre Modelle und Schutzgrenzen bleiben
+  erhalten. Gemeinsame MCP-Zielabnahme und Original-/Ziel-Bildvergleich nach
+  Eigentümer-Update stehen aus; es wird keine Renderinggleichheit vorgetäuscht.
   Profilinformationen werden
   vollständig in profilunabhängige native Darstellungen und Chart-Metadaten
   übersetzt; der Import stellt bestehende Quellvariablen nicht um. Vollständige

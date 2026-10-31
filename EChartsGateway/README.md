@@ -80,33 +80,64 @@ Gateway-Instanzen zur Verbindung an. Mehrere Chart-Instanzen können dadurch
 bewusst dasselbe Gateway verwenden; die Geräte erzeugen nicht über
 `RequireParent()` automatisch ein weiteres Gateway.
 
-**Konfigurationsseite:** Das Gateway benötigt keine eigenen dauerhaften
-Einstellungen. Unter **JSLive-Importvorschau** lässt sich ein JSLive-Exportpaket
-im Format 1.0 prüfen:
+**Konfigurationsseite:** Unter **JSLive-Export und Metadatenprüfung** die Datei
+`.jslive-echarts.json` auswählen. Die erste Ansicht prüft nur Paket und Metadaten;
+ihre Zielfamilien sind technische Kandidaten. Maßgeblich für eine Neuanlage ist
+anschließend der **vollständige native Übernahmeplan** im nächsten Abschnitt.
 
-1. Die Datei mit der Endung `.jslive-echarts.json` auswählen.
-2. Quellen und mögliche Zielfamilien prüfen. Bei fremder oder unbestätigter
-   Installation vorhandene Variablen und Archive ausdrücklich per ID zuordnen.
-3. Nach Zuordnungsänderungen **Paket und Zuordnungen erneut prüfen** wählen.
-4. Mit Diagrammnummer und Berichtsseite die vollständige Feldbilanz sowie
-   Abweichungen durchsehen; **Vollständigen Bericht herunterladen** sichert den
-   gesamten Konfigurationsplan als JSON.
+1. Bei fremder oder unbestätigter Installation vorhandene Variablen und Archive
+   ausdrücklich per ID zuordnen. Es gibt keine automatische Namenszuordnung.
+2. Im Abschnitt zur bestätigten Übernahme eine bestehende Zielkategorie wählen
+   (0 bedeutet Wurzel), die Diagrammnummer auswählen und den Plan vorbereiten.
+3. Den vollständigen Bericht herunterladen und die nativen Vorschauen für
+   Kachel und IPSView mit dem Original vergleichen. Der Bericht enthält für
+   jedes Feld eine Zuordnung, Abweichung oder begründete Nichtanwendbarkeit.
+4. Die konkret aufgeführten Abweichungen **einzeln** bestätigen. Fehlerhafte
+   Quellen, nicht unterstützte Darstellungen, eigene ausführbare Vorlagen oder
+   überschrittene Budgets bleiben gesperrt.
+5. **Neue Instanz anlegen** ausdrücklich bestätigen und die Übernahme ausführen.
+   Bei mehreren Diagrammen wird jeweils das ausgewählte Diagramm bestätigt.
+   Paket oder Zuordnungen nach Änderungen erneut vorbereiten.
+6. Ergebnis und Importjournal prüfen. Eine Wiederholung desselben Plans liefert
+   die bereits angelegte Instanz, ohne deren Konfiguration erneut anzuwenden.
 
-Die Vorschau legt keine Diagramme an und verändert keine bestehenden
-Instanzen, Quellen, Darstellungen oder Archivwerte. Dateien und Zuordnungen
-werden nur im geöffneten Formular gehalten. Die Tabellen zeigen 100 Einträge
-je Seite; der Download enthält den vollständigen Bericht.
+TimeSeries/BarHistory übernehmen Linien, Balken und Mischbilder; Pie übernimmt
+auch mehrere unabhängige Ringe. GaugeSingle bildet radiale, lineare und
+Kompass-Instrumente ab. Historische Radar- und Fortschrittsmodelle liegen in
+[EChartsRadarHistory](../EChartsRadarHistory/README.md) und
+[EChartsProgress](../EChartsProgress/README.md). Eigene sichere SVG-Füllformen
+und Pfade werden geprüft; Skripte und fremde Vorlagen werden nicht ausgeführt.
+Es wird keine beliebige oder pixelgleiche 1:1-Migration versprochen.
 
-Zielfamilien und einzelne Zieleigenschaften sind zunächst ein **Teilentwurf**.
-Quellen-/Archivprüfung, native Formatierung und Chartgestaltung werden getrennt
-bewertet. Fehlende Modelle, ungeprüfte Altberechnungen oder Designabweichungen
-bleiben sichtbar gesperrt. Ein vollständiger Import und ein gerenderter
-Original-/Zielvergleich sind noch nicht verfügbar. Eigene Vorlagen und SVGs
-werden dabei nicht ausgeführt oder installiert.
+Nur neue, durch das Importjournal eindeutig zugeordnete Ziele werden geschrieben.
+Originalinstanzen, Quellwerte, Actions, Darstellungen und Archive bleiben
+unverändert. Native Formatierung wird aus dem Export übernommen und benötigt
+keine Legacy-Profile. Zeitsteuerungen werden als Einstellungen der neuen Instanz
+übernommen; vorhandene JSLive-Steuervariablen werden nicht weitergesteuert.
 
-Pakete sind auf 16 MiB begrenzt. Überschreitet die Analyse 100000 JSON-Werte,
-32 Verschachtelungsebenen oder 8 MiB vollständigen Bericht, wird sie mit einer
-Grenzmeldung abgebrochen. Große Bestände auf mehrere Pakete verteilen.
+### Unterbrechungen und geänderte Exporte
+
+Datei und Zuordnungen erneut auswählen und denselben Plan vorbereiten. Das
+Gateway setzt einen eindeutig dokumentierten Teilimport fort. Eine geänderte
+Zielinstanz wird nicht überschrieben. Für eine neue Exportrevision oder eine
+bewusst getrennte Kopie den zugehörigen bisherigen Journaleintrag ausdrücklich
+als Ausgangspunkt angeben; die alte Instanz bleibt erhalten.
+
+War ein Absturz genau während der Erzeugung möglich, wird keine weitere Instanz
+automatisch erzeugt. Die Wiederanlaufaktion verlangt den Journaleintrag, seine
+Revision und eine ausdrücklich bestätigte Ziel-ID. Nur eine unveränderte,
+passende Neuinstanz kann zugeordnet werden. Ziel-ID 0 bestätigt ausschließlich
+eine vom Gateway nachgeprüfte Abwesenheit. Unklare oder nachträglich veränderte
+Ausgaben stoppen den Import. Es gibt keine automatische Löschung oder Bereinigung.
+
+Pakete bleiben auf 16 MiB, 100000 JSON-Werte und 32 Ebenen begrenzt. Der
+vollständige Bericht ist auf 8 MiB begrenzt und wird niemals still gekürzt;
+große Bestände auf kleinere Pakete verteilen. Das Journal enthält höchstens
+1000 Einträge und 4 MiB. Ressourcen werden lokal aus dem geprüften Paket
+übernommen; eigene Skripte und Templates sind keine ausführbaren Importziele.
+Technische Regeln und Detailtexte des Berichts sind englisch, das Formular ist
+lokalisiert. Dateien und Zuordnungen bleiben im geöffneten Formular; das Journal
+speichert Zuordnung und Prüfnachweise, nicht noch einmal das gesamte Exportpaket.
 
 ### 5. Statusvariablen und Profile
 
@@ -158,3 +189,32 @@ ausdrücklich übergeben. PHP-Standardwerte der Modulmethoden ersetzen keine
 Argumente der von Symcon bereitgestellten Funktionen.
 
 Lizenz der eigenen Beiträge: [PolyForm Noncommercial License 1.0.0](../LICENSE).
+
+### Bestätigte Übernahme per PHP
+
+`ECGW_PrepareJSLiveImport(int $InstanzID, string $Package, string $Options,
+int $ParentID): string` liefert den vollständigen nativen Plan als JSON.
+`$Package` enthält die UTF-8-Datei, `$Options` ohne Zuordnungen ausdrücklich
+`'{}'`, `$ParentID` die vorhandene Kategorie oder 0.
+
+`ECGW_ExecuteJSLiveImport(int $InstanzID, string $Package, string $Options,
+int $ParentID, string $Confirmation): string` führt ausschließlich bestätigte
+Neuanlagen aus. Die Bestätigung bindet den aktuellen `planHash`, die ausgewählten
+`chartKey`-Einträge und ihre einzelnen Abweichungs-IDs:
+
+```json
+{"confirmedNewInstances":true,"planHash":"<aus dem vorbereiteten Plan>","charts":[{"chartKey":"<aus dem Plan>","accept":["<jede einzeln geprüfte Abweichungs-ID>"]}]}
+```
+
+Für eine getrennte Neuanlage kann der jeweilige Chart-Eintrag zusätzlich
+`"separateFrom":"<bisherige Journal-ID>"` enthalten.
+`ECGW_GetJSLiveImportJournal(int $InstanzID): string` liest das Journal.
+`ECGW_ResolveJSLiveImport(int $InstanzID, string $EntryID, int $TargetID,
+string $Revision, bool $Confirmed): void` ordnet einen mehrdeutigen
+Erzeugungsvorgang ausdrücklich zu oder bestätigt seine nachgeprüfte Abwesenheit.
+Keine dieser Aktionen ist über einen Import-HTTP-Endpunkt verfügbar.
+
+Der neue Formularadapter `ECGW_JSLiveImportFromForm` verlangt alle acht
+Argumente: Instanz-ID, Base64-Dateiinhalt, Zuordnungen, Zielkategorie, Aktion,
+Bestätigungs-JSON, Diagrammindex und IPSView-Schalter. Der ältere lesende
+Sechs-Argumente-Adapter bleibt unverändert verfügbar.

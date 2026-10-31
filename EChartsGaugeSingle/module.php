@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../libs/helper/DebugFlowHelper.php';
 require_once __DIR__ . '/../libs/EChartsDebugFlow.php';
+require_once __DIR__ . '/../libs/EChartsJSLiveTarget.php';
 
 use Burki24\SymconModuleHelper\ConfigurationFormHelper;
 use Burki24\SymconModuleHelper\DataFlowHelper;
@@ -47,6 +48,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
 {
     use \Burki24\SymconModuleHelper\DebugFlowHelper;
     use \SymconECharts\EChartsDebugFlow;
+    use \SymconECharts\EChartsJSLiveTarget;
 
     use ConfigurationFormHelper;
     use EChartsAnimationDesign;
@@ -215,6 +217,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
         $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
             parent::Create();
+            $this->RegisterJSLiveTarget();
             $this->RegisterTransientRefresh('ECGS');
 
             $this->SetVisualizationType(1);
@@ -338,6 +341,7 @@ class EChartsGaugeSingle extends IPSModuleStrict
             }
             $this->RegisterAttributeInteger('RegisteredSourceVariableID', 0);
             $this->RegisterAttributeString('LastError', '');
+            $this->SealJSLiveCreationDefaults();
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
             $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
@@ -400,6 +404,9 @@ class EChartsGaugeSingle extends IPSModuleStrict
         $debugFlowFailed = false;
         $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
+            if ($this->HasJSLiveImport()) {
+                return $this->JSLiveConfigurationForm();
+            }
             $form = $this->LoadConfigurationForm();
             if (isset($form['elements']) && is_array($form['elements'])) {
                 $form['elements'] = $this->WithAnimationFormControls($form['elements']);
@@ -933,6 +940,10 @@ class EChartsGaugeSingle extends IPSModuleStrict
         $debugFlowFailed = false;
         $this->DebugFlowStart(__FUNCTION__, __LINE__, ['Quelle' => $SenderID, 'Nachricht' => $Message]);
         try {
+            if ($this->HasJSLiveImport()) {
+                $this->HandleJSLiveImportMessage($SenderID, $Message);
+                return;
+            }
             if ($SenderID === 0 && $Message === IPS_KERNELSTARTED) {
                 $this->Initialize();
                 $this->PublishVisualizationState();
@@ -955,6 +966,9 @@ class EChartsGaugeSingle extends IPSModuleStrict
 
     private function RenderGaugeHTMLPage(bool $ipsView): string
     {
+        if ($this->HasJSLiveImport()) {
+            return $this->RenderJSLiveImportPage($ipsView);
+        }
         return $this->RenderVisualizationHTMLPage($ipsView, [
             'language'           => $this->NormalizeHelperTranslationLanguage(
                 $this->ResolveHelperTranslationLanguage()
@@ -1286,6 +1300,11 @@ class EChartsGaugeSingle extends IPSModuleStrict
 
     private function Initialize(): void
     {
+        if ($this->HasJSLiveImport()) {
+            $this->InitializeJSLiveImport();
+            return;
+        }
+        $this->SetTimerInterval('JSLiveImportRefresh', 0);
         $this->DebugEChartsSetStatus(IS_INACTIVE);
         if (IPS_GetKernelRunlevel() !== KR_READY) {
             return;
@@ -2327,6 +2346,9 @@ class EChartsGaugeSingle extends IPSModuleStrict
     /** @return array<string, mixed> */
     private function BuildVisualizationState(bool $ipsView = false): array
     {
+        if ($this->HasJSLiveImport()) {
+            return $this->BuildJSLiveImportState($ipsView);
+        }
         $configurationError = $this->GetConfigurationError();
         if ($configurationError !== null) {
             return [

@@ -1,0 +1,1337 @@
+{
+    "format": "de.burki24.jslive-echarts",
+    "formatVersion": "1.0",
+    "exportId": "11111111-1111-4111-8111-000000000020",
+    "createdAt": "2026-10-31T12:00:00Z",
+    "producer": {
+        "libraryId": "{1189E095-5FC2-22A5-12DF-2B177A36DB8C}",
+        "libraryVersion": "0.111",
+        "build": 5073965,
+        "exporterVersion": "1.0.0",
+        "symconVersion": "9.1",
+        "phpVersion": "8.5.8"
+    },
+    "sourceInstallation": {
+        "id": "22222222-2222-4222-8222-222222222222"
+    },
+    "charts": [
+        {
+            "chartKey": "instance:12020",
+            "origin": {
+                "instanceId": 12020,
+                "moduleId": "{71B93700-9659-97C6-AD83-984C2B44139F}",
+                "moduleName": "SymconJSLiveGauge",
+                "instanceName": "Synthetic text 65",
+                "family": "gauge",
+                "templateVariant": "CanvasGauges-Linear(vertical)"
+            },
+            "original": {
+                "configuration": {
+                    "AutoConvertHighlight": false,
+                    "AutoConvertValue": false,
+                    "CreateIPSView": true,
+                    "CreateOutput": true,
+                    "EnableViewport": true,
+                    "Highlights": "[{\"From\":-20,\"To\":10,\"HighlightColor\":2278750,\"HighlightColor_Alpha\":0.3},{\"From\":10,\"To\":40,\"HighlightColor\":16347926,\"HighlightColor_Alpha\":0.55}]",
+                    "IFrameHeight": 0,
+                    "ShowDefault": true,
+                    "TemplateScriptID": 0,
+                    "Ticks": "[{\"Value\":-20},{\"Value\":-10},{\"Value\":0},{\"Value\":5},{\"Value\":15},{\"Value\":30},{\"Value\":40}]",
+                    "Variable": 13000,
+                    "ViewLevel": 2,
+                    "animation_duration": 500,
+                    "animation_rule": "elastic",
+                    "animation_target": "needle",
+                    "linear_needleSide": "both",
+                    "linear_numberSide": "right",
+                    "linear_tickSide": "left",
+                    "max": 40.0,
+                    "min": -20.0,
+                    "needle_CircleOuter": false,
+                    "needle_CircleSize": 15,
+                    "needle_Type": "line",
+                    "needle_colorNeedle": 16020150,
+                    "needle_colorNeedleCircleInner": 16777215,
+                    "needle_colorNeedleCircleInnerEnd": 16777215,
+                    "needle_colorNeedleCircleInnerEnd_Alpha": 1.0,
+                    "needle_colorNeedleCircleInner_Alpha": 1.0,
+                    "needle_colorNeedleCircleOuter": 16777215,
+                    "needle_colorNeedleCircleOuterEnd": 16777215,
+                    "needle_colorNeedleCircleOuterEnd_Alpha": 1.0,
+                    "needle_colorNeedleCircleOuter_Alpha": 1.0,
+                    "needle_colorNeedleEnd": 16436245,
+                    "needle_colorNeedleEnd_Alpha": 1.0,
+                    "needle_colorNeedle_Alpha": 1.0,
+                    "needle_colorShadowDown": 0,
+                    "needle_colorShadowDown_Alpha": 0.5,
+                    "needle_colorShadowUp": 0,
+                    "needle_colorShadowUp_Alpha": 0.05,
+                    "needle_display": true,
+                    "needle_end": 80,
+                    "needle_start": 0,
+                    "needle_width": 2,
+                    "overrideHeight": 0,
+                    "overrideWidth": 0,
+                    "plate_colorPlate": 988970,
+                    "plate_colorPlateEnd": 3223169,
+                    "plate_colorPlateEnd_Alpha": 1.0,
+                    "plate_colorPlate_Alpha": 1.0,
+                    "plate_display": true,
+                    "plate_unit": "°C",
+                    "plate_unit_fontColor": 16317180,
+                    "plate_unit_fontFamily": "",
+                    "plate_unit_fontSize": 14,
+                    "precision": 1,
+                    "progressbar_barShadow": 1,
+                    "progressbar_barStartPosition": "left",
+                    "progressbar_barWidth": 5,
+                    "progressbar_colorBar": 13358561,
+                    "progressbar_colorBarProgress": 2282478,
+                    "progressbar_colorBarProgress_Alpha": 1.0,
+                    "progressbar_colorBar_Alpha": 1.0,
+                    "progressbar_display": true,
+                    "radial_startAngle": 90,
+                    "radial_ticksAngle": 180,
+                    "template": "CanvasGauges-Linear(vertical)",
+                    "ticks_colorMajorTick": 16317180,
+                    "ticks_colorMinorTicks": 9741240,
+                    "ticks_colorNumbers": 14870768,
+                    "ticks_exactTicks": true,
+                    "ticks_fontFamily": "",
+                    "ticks_fontSize": 12,
+                    "ticks_highlightsWidth": 5,
+                    "ticks_minorTicks": 5,
+                    "ticks_strokeTicks": false,
+                    "title_display": true,
+                    "title_fontColor": 2282478,
+                    "title_fontFamily": "Orbitron",
+                    "title_fontSize": 16,
+                    "title_text": "Synthetic text 2",
+                    "valuebox_colorValueBoxBackground": 1976635,
+                    "valuebox_colorValueBoxBackground_Alpha": 1.0,
+                    "valuebox_display": true,
+                    "valuebox_fontColor": 2282478,
+                    "valuebox_fontFamily": "",
+                    "valuebox_fontSize": 14,
+                    "valuebox_separator": false
+                },
+                "globalConfiguration": {
+                    "CreateIPSView": true,
+                    "DataMode": 1,
+                    "EnableViewport": true,
+                    "RefreshTime": 3,
+                    "viewport_content": "width=device-width, initial-scale=1, maximum-scale=1.0, minimum-scale=1, user-scalable=no"
+                },
+                "runtimeState": {},
+                "excluded": [
+                    {
+                        "pointer": "/LastUploadedConfig",
+                        "reason": "Operational state, not chart configuration."
+                    },
+                    {
+                        "pointer": "/Debug",
+                        "reason": "Operational state, not chart configuration."
+                    },
+                    {
+                        "pointer": "/EnableCache",
+                        "reason": "Operational state, not chart configuration."
+                    }
+                ]
+            },
+            "sources": [
+                {
+                    "sourceKey": "variable:13000",
+                    "variableId": 13000,
+                    "variableType": 2,
+                    "label": "Synthetic text 5",
+                    "presentation": {
+                        "original": {
+                            "presentation": {
+                                "PRESENTATION": "{4153A8D4-5C33-C65F-C1F3-7B61AAF99B1C}",
+                                "PROFILE": "~Temperature"
+                            },
+                            "profiles": {
+                                "~Temperature": {
+                                    "Associations": [],
+                                    "Digits": 1,
+                                    "Icon": "Temperature",
+                                    "IsReadOnly": true,
+                                    "MaxValue": 70.0,
+                                    "MinValue": -30.0,
+                                    "Prefix": "",
+                                    "ProfileName": "~Temperature",
+                                    "ProfileType": 2,
+                                    "StepSize": 5.0,
+                                    "Suffix": " °C"
+                                }
+                            },
+                            "variable": {
+                                "VariableAction": 0,
+                                "VariableCustomAction": 0,
+                                "VariableCustomPresentation": {
+                                    "PRESENTATION": "{4153A8D4-5C33-C65F-C1F3-7B61AAF99B1C}",
+                                    "PROFILE": "~Temperature"
+                                },
+                                "VariableCustomProfile": "~Temperature",
+                                "VariablePresentation": [],
+                                "VariableProfile": "",
+                                "VariableType": 2
+                            },
+                            "templates": {},
+                            "objectIcon": ""
+                        },
+                        "effective": {
+                            "kind": "value",
+                            "prefix": "",
+                            "suffix": " °C",
+                            "digits": 1,
+                            "minimum": -30.0,
+                            "maximum": 70.0,
+                            "stepSize": 5.0,
+                            "icon": "Temperature",
+                            "color": null,
+                            "contentColor": null,
+                            "displayType": null,
+                            "previewStyle": null,
+                            "showPreview": null,
+                            "percentage": false,
+                            "usageType": 1,
+                            "decimalSeparator": null,
+                            "thousandsSeparator": null,
+                            "options": [],
+                            "intervals": [],
+                            "extra": {}
+                        },
+                        "native": {
+                            "presentationId": "{3319437D-7CDE-699D-750A-3C6A3841FA75}",
+                            "parameters": {
+                                "PREFIX": "",
+                                "SUFFIX": " °C",
+                                "ICON": "Temperature",
+                                "MIN": -30.0,
+                                "MAX": 70.0,
+                                "DIGITS": 1,
+                                "PERCENTAGE": false,
+                                "USAGE_TYPE": 1
+                            }
+                        },
+                        "conversion": {
+                            "status": "exact",
+                            "ruleVersion": "1.0",
+                            "fieldCoverage": [
+                                {
+                                    "source": "/original/profiles/~0Temperature/Prefix",
+                                    "target": "/native/parameters/PREFIX",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/profiles/~0Temperature/Suffix",
+                                    "target": "/native/parameters/SUFFIX",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/profiles/~0Temperature/Icon",
+                                    "target": "/native/parameters/ICON",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/profiles/~0Temperature/MinValue",
+                                    "target": "/native/parameters/MIN",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/profiles/~0Temperature/MaxValue",
+                                    "target": "/native/parameters/MAX",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/profiles/~0Temperature/Digits",
+                                    "target": "/native/parameters/DIGITS",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/profiles/~0Temperature/Suffix",
+                                    "target": "/native/parameters/PERCENTAGE",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/profiles/~0Temperature/ProfileName",
+                                    "target": "/native/parameters/USAGE_TYPE",
+                                    "status": "exact"
+                                },
+                                {
+                                    "source": "/original/profiles/~0Temperature/StepSize",
+                                    "target": "/effective/stepSize",
+                                    "status": "exact"
+                                }
+                            ],
+                            "issues": []
+                        }
+                    },
+                    "archive": {
+                        "archiveId": 2,
+                        "logging": true,
+                        "aggregationType": 0,
+                        "counterSettings": null,
+                        "availability": "metadata-only"
+                    }
+                }
+            ],
+            "bindings": [
+                {
+                    "bindingKey": "instance:12020#/Variable",
+                    "sourceKey": "variable:13000",
+                    "role": "value",
+                    "enabled": true,
+                    "settings": {
+                        "AutoConvertHighlight": false,
+                        "AutoConvertValue": false,
+                        "CreateIPSView": true,
+                        "CreateOutput": true,
+                        "EnableViewport": true,
+                        "Highlights": "[{\"From\":-20,\"To\":10,\"HighlightColor\":2278750,\"HighlightColor_Alpha\":0.3},{\"From\":10,\"To\":40,\"HighlightColor\":16347926,\"HighlightColor_Alpha\":0.55}]",
+                        "IFrameHeight": 0,
+                        "ShowDefault": true,
+                        "TemplateScriptID": 0,
+                        "Ticks": "[{\"Value\":-20},{\"Value\":-10},{\"Value\":0},{\"Value\":5},{\"Value\":15},{\"Value\":30},{\"Value\":40}]",
+                        "Variable": 13000,
+                        "ViewLevel": 2,
+                        "animation_duration": 500,
+                        "animation_rule": "elastic",
+                        "animation_target": "needle",
+                        "linear_needleSide": "both",
+                        "linear_numberSide": "right",
+                        "linear_tickSide": "left",
+                        "max": 40.0,
+                        "min": -20.0,
+                        "needle_CircleOuter": false,
+                        "needle_CircleSize": 15,
+                        "needle_Type": "line",
+                        "needle_colorNeedle": 16020150,
+                        "needle_colorNeedleCircleInner": 16777215,
+                        "needle_colorNeedleCircleInnerEnd": 16777215,
+                        "needle_colorNeedleCircleInnerEnd_Alpha": 1.0,
+                        "needle_colorNeedleCircleInner_Alpha": 1.0,
+                        "needle_colorNeedleCircleOuter": 16777215,
+                        "needle_colorNeedleCircleOuterEnd": 16777215,
+                        "needle_colorNeedleCircleOuterEnd_Alpha": 1.0,
+                        "needle_colorNeedleCircleOuter_Alpha": 1.0,
+                        "needle_colorNeedleEnd": 16436245,
+                        "needle_colorNeedleEnd_Alpha": 1.0,
+                        "needle_colorNeedle_Alpha": 1.0,
+                        "needle_colorShadowDown": 0,
+                        "needle_colorShadowDown_Alpha": 0.5,
+                        "needle_colorShadowUp": 0,
+                        "needle_colorShadowUp_Alpha": 0.05,
+                        "needle_display": true,
+                        "needle_end": 80,
+                        "needle_start": 0,
+                        "needle_width": 2,
+                        "overrideHeight": 0,
+                        "overrideWidth": 0,
+                        "plate_colorPlate": 988970,
+                        "plate_colorPlateEnd": 3223169,
+                        "plate_colorPlateEnd_Alpha": 1.0,
+                        "plate_colorPlate_Alpha": 1.0,
+                        "plate_display": true,
+                        "plate_unit": "°C",
+                        "plate_unit_fontColor": 16317180,
+                        "plate_unit_fontFamily": "",
+                        "plate_unit_fontSize": 14,
+                        "precision": 1,
+                        "progressbar_barShadow": 1,
+                        "progressbar_barStartPosition": "left",
+                        "progressbar_barWidth": 5,
+                        "progressbar_colorBar": 13358561,
+                        "progressbar_colorBarProgress": 2282478,
+                        "progressbar_colorBarProgress_Alpha": 1.0,
+                        "progressbar_colorBar_Alpha": 1.0,
+                        "progressbar_display": true,
+                        "radial_startAngle": 90,
+                        "radial_ticksAngle": 180,
+                        "template": "CanvasGauges-Linear(vertical)",
+                        "ticks_colorMajorTick": 16317180,
+                        "ticks_colorMinorTicks": 9741240,
+                        "ticks_colorNumbers": 14870768,
+                        "ticks_exactTicks": true,
+                        "ticks_fontFamily": "",
+                        "ticks_fontSize": 12,
+                        "ticks_highlightsWidth": 5,
+                        "ticks_minorTicks": 5,
+                        "ticks_strokeTicks": false,
+                        "title_display": true,
+                        "title_fontColor": 2282478,
+                        "title_fontFamily": "Orbitron",
+                        "title_fontSize": 16,
+                        "title_text": "Synthetic text 2",
+                        "valuebox_colorValueBoxBackground": 1976635,
+                        "valuebox_colorValueBoxBackground_Alpha": 1.0,
+                        "valuebox_display": true,
+                        "valuebox_fontColor": 2282478,
+                        "valuebox_fontFamily": "",
+                        "valuebox_fontSize": 14,
+                        "valuebox_separator": false
+                    },
+                    "appearance": {
+                        "AutoConvertHighlight": false,
+                        "AutoConvertValue": false,
+                        "CreateIPSView": true,
+                        "CreateOutput": true,
+                        "EnableViewport": true,
+                        "Highlights": "[{\"From\":-20,\"To\":10,\"HighlightColor\":2278750,\"HighlightColor_Alpha\":0.3},{\"From\":10,\"To\":40,\"HighlightColor\":16347926,\"HighlightColor_Alpha\":0.55}]",
+                        "IFrameHeight": 0,
+                        "ShowDefault": true,
+                        "TemplateScriptID": 0,
+                        "Ticks": "[{\"Value\":-20},{\"Value\":-10},{\"Value\":0},{\"Value\":5},{\"Value\":15},{\"Value\":30},{\"Value\":40}]",
+                        "Variable": 13000,
+                        "ViewLevel": 2,
+                        "animation_duration": 500,
+                        "animation_rule": "elastic",
+                        "animation_target": "needle",
+                        "linear_needleSide": "both",
+                        "linear_numberSide": "right",
+                        "linear_tickSide": "left",
+                        "max": 40.0,
+                        "min": -20.0,
+                        "needle_CircleOuter": false,
+                        "needle_CircleSize": 15,
+                        "needle_Type": "line",
+                        "needle_colorNeedle": 16020150,
+                        "needle_colorNeedleCircleInner": 16777215,
+                        "needle_colorNeedleCircleInnerEnd": 16777215,
+                        "needle_colorNeedleCircleInnerEnd_Alpha": 1.0,
+                        "needle_colorNeedleCircleInner_Alpha": 1.0,
+                        "needle_colorNeedleCircleOuter": 16777215,
+                        "needle_colorNeedleCircleOuterEnd": 16777215,
+                        "needle_colorNeedleCircleOuterEnd_Alpha": 1.0,
+                        "needle_colorNeedleCircleOuter_Alpha": 1.0,
+                        "needle_colorNeedleEnd": 16436245,
+                        "needle_colorNeedleEnd_Alpha": 1.0,
+                        "needle_colorNeedle_Alpha": 1.0,
+                        "needle_colorShadowDown": 0,
+                        "needle_colorShadowDown_Alpha": 0.5,
+                        "needle_colorShadowUp": 0,
+                        "needle_colorShadowUp_Alpha": 0.05,
+                        "needle_display": true,
+                        "needle_end": 80,
+                        "needle_start": 0,
+                        "needle_width": 2,
+                        "overrideHeight": 0,
+                        "overrideWidth": 0,
+                        "plate_colorPlate": 988970,
+                        "plate_colorPlateEnd": 3223169,
+                        "plate_colorPlateEnd_Alpha": 1.0,
+                        "plate_colorPlate_Alpha": 1.0,
+                        "plate_display": true,
+                        "plate_unit": "°C",
+                        "plate_unit_fontColor": 16317180,
+                        "plate_unit_fontFamily": "",
+                        "plate_unit_fontSize": 14,
+                        "precision": 1,
+                        "progressbar_barShadow": 1,
+                        "progressbar_barStartPosition": "left",
+                        "progressbar_barWidth": 5,
+                        "progressbar_colorBar": 13358561,
+                        "progressbar_colorBarProgress": 2282478,
+                        "progressbar_colorBarProgress_Alpha": 1.0,
+                        "progressbar_colorBar_Alpha": 1.0,
+                        "progressbar_display": true,
+                        "radial_startAngle": 90,
+                        "radial_ticksAngle": 180,
+                        "template": "CanvasGauges-Linear(vertical)",
+                        "ticks_colorMajorTick": 16317180,
+                        "ticks_colorMinorTicks": 9741240,
+                        "ticks_colorNumbers": 14870768,
+                        "ticks_exactTicks": true,
+                        "ticks_fontFamily": "",
+                        "ticks_fontSize": 12,
+                        "ticks_highlightsWidth": 5,
+                        "ticks_minorTicks": 5,
+                        "ticks_strokeTicks": false,
+                        "title_display": true,
+                        "title_fontColor": 2282478,
+                        "title_fontFamily": "Orbitron",
+                        "title_fontSize": 16,
+                        "title_text": "Synthetic text 2",
+                        "valuebox_colorValueBoxBackground": 1976635,
+                        "valuebox_colorValueBoxBackground_Alpha": 1.0,
+                        "valuebox_display": true,
+                        "valuebox_fontColor": 2282478,
+                        "valuebox_fontFamily": "",
+                        "valuebox_fontSize": 14,
+                        "valuebox_separator": false
+                    },
+                    "originalPointer": "/Variable"
+                }
+            ],
+            "axes": [],
+            "time": null,
+            "appearance": {
+                "settings": {
+                    "AutoConvertHighlight": false,
+                    "AutoConvertValue": false,
+                    "CreateIPSView": true,
+                    "CreateOutput": true,
+                    "EnableViewport": true,
+                    "Highlights": "[{\"From\":-20,\"To\":10,\"HighlightColor\":2278750,\"HighlightColor_Alpha\":0.3},{\"From\":10,\"To\":40,\"HighlightColor\":16347926,\"HighlightColor_Alpha\":0.55}]",
+                    "IFrameHeight": 0,
+                    "ShowDefault": true,
+                    "TemplateScriptID": 0,
+                    "Ticks": "[{\"Value\":-20},{\"Value\":-10},{\"Value\":0},{\"Value\":5},{\"Value\":15},{\"Value\":30},{\"Value\":40}]",
+                    "Variable": 13000,
+                    "ViewLevel": 2,
+                    "animation_duration": 500,
+                    "animation_rule": "elastic",
+                    "animation_target": "needle",
+                    "linear_needleSide": "both",
+                    "linear_numberSide": "right",
+                    "linear_tickSide": "left",
+                    "max": 40.0,
+                    "min": -20.0,
+                    "needle_CircleOuter": false,
+                    "needle_CircleSize": 15,
+                    "needle_Type": "line",
+                    "needle_colorNeedle": 16020150,
+                    "needle_colorNeedleCircleInner": 16777215,
+                    "needle_colorNeedleCircleInnerEnd": 16777215,
+                    "needle_colorNeedleCircleInnerEnd_Alpha": 1.0,
+                    "needle_colorNeedleCircleInner_Alpha": 1.0,
+                    "needle_colorNeedleCircleOuter": 16777215,
+                    "needle_colorNeedleCircleOuterEnd": 16777215,
+                    "needle_colorNeedleCircleOuterEnd_Alpha": 1.0,
+                    "needle_colorNeedleCircleOuter_Alpha": 1.0,
+                    "needle_colorNeedleEnd": 16436245,
+                    "needle_colorNeedleEnd_Alpha": 1.0,
+                    "needle_colorNeedle_Alpha": 1.0,
+                    "needle_colorShadowDown": 0,
+                    "needle_colorShadowDown_Alpha": 0.5,
+                    "needle_colorShadowUp": 0,
+                    "needle_colorShadowUp_Alpha": 0.05,
+                    "needle_display": true,
+                    "needle_end": 80,
+                    "needle_start": 0,
+                    "needle_width": 2,
+                    "overrideHeight": 0,
+                    "overrideWidth": 0,
+                    "plate_colorPlate": 988970,
+                    "plate_colorPlateEnd": 3223169,
+                    "plate_colorPlateEnd_Alpha": 1.0,
+                    "plate_colorPlate_Alpha": 1.0,
+                    "plate_display": true,
+                    "plate_unit": "°C",
+                    "plate_unit_fontColor": 16317180,
+                    "plate_unit_fontFamily": "",
+                    "plate_unit_fontSize": 14,
+                    "precision": 1,
+                    "progressbar_barShadow": 1,
+                    "progressbar_barStartPosition": "left",
+                    "progressbar_barWidth": 5,
+                    "progressbar_colorBar": 13358561,
+                    "progressbar_colorBarProgress": 2282478,
+                    "progressbar_colorBarProgress_Alpha": 1.0,
+                    "progressbar_colorBar_Alpha": 1.0,
+                    "progressbar_display": true,
+                    "radial_startAngle": 90,
+                    "radial_ticksAngle": 180,
+                    "template": "CanvasGauges-Linear(vertical)",
+                    "ticks_colorMajorTick": 16317180,
+                    "ticks_colorMinorTicks": 9741240,
+                    "ticks_colorNumbers": 14870768,
+                    "ticks_exactTicks": true,
+                    "ticks_fontFamily": "",
+                    "ticks_fontSize": 12,
+                    "ticks_highlightsWidth": 5,
+                    "ticks_minorTicks": 5,
+                    "ticks_strokeTicks": false,
+                    "title_display": true,
+                    "title_fontColor": 2282478,
+                    "title_fontFamily": "Orbitron",
+                    "title_fontSize": 16,
+                    "title_text": "Synthetic text 2",
+                    "valuebox_colorValueBoxBackground": 1976635,
+                    "valuebox_colorValueBoxBackground_Alpha": 1.0,
+                    "valuebox_display": true,
+                    "valuebox_fontColor": 2282478,
+                    "valuebox_fontFamily": "",
+                    "valuebox_fontSize": 14,
+                    "valuebox_separator": false
+                },
+                "global": {
+                    "CreateIPSView": true,
+                    "DataMode": 1,
+                    "EnableViewport": true,
+                    "RefreshTime": 3,
+                    "viewport_content": "width=device-width, initial-scale=1, maximum-scale=1.0, minimum-scale=1, user-scalable=no"
+                },
+                "rings": [],
+                "contexts": [
+                    "tile",
+                    "ipsview"
+                ],
+                "resolved": {
+                    "GetConfigurationData": {
+                        "AutoConvertHighlight": false,
+                        "AutoConvertValue": false,
+                        "CreateIPSView": true,
+                        "CreateOutput": true,
+                        "Debug": false,
+                        "EnableCache": true,
+                        "EnableViewport": true,
+                        "IFrameHeight": 0,
+                        "LastUploadedConfig": "",
+                        "ShowDefault": true,
+                        "TemplateScriptID": 0,
+                        "Variable": 13000,
+                        "ViewLevel": 2,
+                        "animation_duration": 500,
+                        "animation_rule": "elastic",
+                        "animation_target": "needle",
+                        "linear_needleSide": "both",
+                        "linear_numberSide": "right",
+                        "linear_tickSide": "left",
+                        "max": 40.0,
+                        "min": -20.0,
+                        "needle_CircleOuter": false,
+                        "needle_CircleSize": 15,
+                        "needle_Type": "line",
+                        "needle_colorNeedle": "rgba(244, 114, 182, 1.00)",
+                        "needle_colorNeedleCircleInner": "rgba(255, 255, 255, 1.00)",
+                        "needle_colorNeedleCircleInnerEnd": "rgba(255, 255, 255, 1.00)",
+                        "needle_colorNeedleCircleInnerEnd_Alpha": 1.0,
+                        "needle_colorNeedleCircleInner_Alpha": 1.0,
+                        "needle_colorNeedleCircleOuter": "rgba(255, 255, 255, 1.00)",
+                        "needle_colorNeedleCircleOuterEnd": "rgba(255, 255, 255, 1.00)",
+                        "needle_colorNeedleCircleOuterEnd_Alpha": 1.0,
+                        "needle_colorNeedleCircleOuter_Alpha": 1.0,
+                        "needle_colorNeedleEnd": "rgba(250, 204, 21, 1.00)",
+                        "needle_colorNeedleEnd_Alpha": 1.0,
+                        "needle_colorNeedle_Alpha": 1.0,
+                        "needle_colorShadowDown": "rgba(0, 0, 0, 0.50)",
+                        "needle_colorShadowDown_Alpha": 0.5,
+                        "needle_colorShadowUp": "rgba(0, 0, 0, 0.05)",
+                        "needle_colorShadowUp_Alpha": 0.05,
+                        "needle_display": true,
+                        "needle_end": 80,
+                        "needle_start": 0,
+                        "needle_width": 2,
+                        "overrideHeight": 0,
+                        "overrideWidth": 0,
+                        "plate_colorPlate": "rgba(15, 23, 42, 1.00)",
+                        "plate_colorPlateEnd": "rgba(49, 46, 129, 1.00)",
+                        "plate_colorPlateEnd_Alpha": 1.0,
+                        "plate_colorPlate_Alpha": 1.0,
+                        "plate_display": true,
+                        "plate_unit": "°C",
+                        "plate_unit_fontColor": "rgb(248, 250, 252)",
+                        "plate_unit_fontFamily": "",
+                        "plate_unit_fontSize": 14,
+                        "precision": 1,
+                        "progressbar_barShadow": 1,
+                        "progressbar_barStartPosition": "left",
+                        "progressbar_barWidth": 5,
+                        "progressbar_colorBar": "rgba(203, 213, 225, 1.00)",
+                        "progressbar_colorBarProgress": "rgba(34, 211, 238, 1.00)",
+                        "progressbar_colorBarProgress_Alpha": 1.0,
+                        "progressbar_colorBar_Alpha": 1.0,
+                        "progressbar_display": true,
+                        "radial_startAngle": 90,
+                        "radial_ticksAngle": 180,
+                        "template": "CanvasGauges-Linear(vertical)",
+                        "ticks_colorMajorTick": "rgb(248, 250, 252)",
+                        "ticks_colorMinorTicks": "rgb(148, 163, 184)",
+                        "ticks_colorNumbers": "rgb(226, 232, 240)",
+                        "ticks_exactTicks": true,
+                        "ticks_fontFamily": "",
+                        "ticks_fontSize": 12,
+                        "ticks_highlightsWidth": 5,
+                        "ticks_minorTicks": 5,
+                        "ticks_strokeTicks": false,
+                        "title_display": true,
+                        "title_fontColor": "rgb(34, 211, 238)",
+                        "title_fontFamily": "Orbitron",
+                        "title_fontSize": 16,
+                        "title_text": "Synthetic text 2",
+                        "valuebox_colorValueBoxBackground": "rgba(30, 41, 59, 1.00)",
+                        "valuebox_colorValueBoxBackground_Alpha": 1.0,
+                        "valuebox_display": true,
+                        "valuebox_fontColor": "rgb(34, 211, 238)",
+                        "valuebox_fontFamily": "",
+                        "valuebox_fontSize": 14,
+                        "valuebox_separator": false,
+                        "InstanceID": 12020,
+                        "font_isSet": true
+                    },
+                    "GenerateTicks": [
+                        "-20.0",
+                        "-20.0",
+                        "-10.0",
+                        "0.0",
+                        "5.0",
+                        "15.0",
+                        "30.0",
+                        "40.0",
+                        "40.0"
+                    ],
+                    "GenerateHighlights": [
+                        {
+                            "from": "-20.0",
+                            "to": "10.0",
+                            "color": "rgba(34, 197, 94, 0.30)"
+                        },
+                        {
+                            "from": "10.0",
+                            "to": "40.0",
+                            "color": "rgba(249, 115, 22, 0.55)"
+                        }
+                    ]
+                }
+            },
+            "assetRefs": [
+                "sha256:cbc1ddab2a392a2ce03de0a874ff40f946495fdab3e1d8663cae7a6ef957fe8d",
+                "sha256:22efd84231b24e24897ff718310bfcd0ba3d16c2edf14d345b477db3281a439e"
+            ],
+            "coverage": [
+                {
+                    "pointer": "/AutoConvertHighlight",
+                    "status": "exact",
+                    "target": "/original/configuration/AutoConvertHighlight",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/AutoConvertValue",
+                    "status": "exact",
+                    "target": "/original/configuration/AutoConvertValue",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/CreateIPSView",
+                    "status": "exact",
+                    "target": "/original/configuration/CreateIPSView",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/CreateOutput",
+                    "status": "exact",
+                    "target": "/original/configuration/CreateOutput",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/EnableViewport",
+                    "status": "exact",
+                    "target": "/original/configuration/EnableViewport",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/Highlights",
+                    "status": "exact",
+                    "target": "/original/configuration/Highlights",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/IFrameHeight",
+                    "status": "exact",
+                    "target": "/original/configuration/IFrameHeight",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/ShowDefault",
+                    "status": "exact",
+                    "target": "/original/configuration/ShowDefault",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/TemplateScriptID",
+                    "status": "exact",
+                    "target": "/original/configuration/TemplateScriptID",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/Ticks",
+                    "status": "exact",
+                    "target": "/original/configuration/Ticks",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/Variable",
+                    "status": "exact",
+                    "target": "/original/configuration/Variable",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/ViewLevel",
+                    "status": "exact",
+                    "target": "/original/configuration/ViewLevel",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/animation_duration",
+                    "status": "exact",
+                    "target": "/original/configuration/animation_duration",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/animation_rule",
+                    "status": "exact",
+                    "target": "/original/configuration/animation_rule",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/animation_target",
+                    "status": "exact",
+                    "target": "/original/configuration/animation_target",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/linear_needleSide",
+                    "status": "exact",
+                    "target": "/original/configuration/linear_needleSide",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/linear_numberSide",
+                    "status": "exact",
+                    "target": "/original/configuration/linear_numberSide",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/linear_tickSide",
+                    "status": "exact",
+                    "target": "/original/configuration/linear_tickSide",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/max",
+                    "status": "exact",
+                    "target": "/original/configuration/max",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/min",
+                    "status": "exact",
+                    "target": "/original/configuration/min",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/needle_CircleOuter",
+                    "status": "exact",
+                    "target": "/original/configuration/needle_CircleOuter",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/needle_CircleSize",
+                    "status": "exact",
+                    "target": "/original/configuration/needle_CircleSize",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/needle_Type",
+                    "status": "exact",
+                    "target": "/original/configuration/needle_Type",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/needle_colorNeedle",
+                    "status": "exact",
+                    "target": "/original/configuration/needle_colorNeedle",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/needle_colorNeedleCircleInner",
+                    "status": "exact",
+                    "target": "/original/configuration/needle_colorNeedleCircleInner",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/needle_colorNeedleCircleInnerEnd",
+                    "status": "exact",
+                    "target": "/original/configuration/needle_colorNeedleCircleInnerEnd",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/needle_colorNeedleCircleInnerEnd_Alpha",
+                    "status": "exact",
+                    "target": "/original/configuration/needle_colorNeedleCircleInnerEnd_Alpha",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/needle_colorNeedleCircleInner_Alpha",
+                    "status": "exact",
+                    "target": "/original/configuration/needle_colorNeedleCircleInner_Alpha",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/needle_colorNeedleCircleOuter",
+                    "status": "exact",
+                    "target": "/original/configuration/needle_colorNeedleCircleOuter",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/needle_colorNeedleCircleOuterEnd",
+                    "status": "exact",
+                    "target": "/original/configuration/needle_colorNeedleCircleOuterEnd",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/needle_colorNeedleCircleOuterEnd_Alpha",
+                    "status": "exact",
+                    "target": "/original/configuration/needle_colorNeedleCircleOuterEnd_Alpha",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/needle_colorNeedleCircleOuter_Alpha",
+                    "status": "exact",
+                    "target": "/original/configuration/needle_colorNeedleCircleOuter_Alpha",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/needle_colorNeedleEnd",
+                    "status": "exact",
+                    "target": "/original/configuration/needle_colorNeedleEnd",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/needle_colorNeedleEnd_Alpha",
+                    "status": "exact",
+                    "target": "/original/configuration/needle_colorNeedleEnd_Alpha",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/needle_colorNeedle_Alpha",
+                    "status": "exact",
+                    "target": "/original/configuration/needle_colorNeedle_Alpha",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/needle_colorShadowDown",
+                    "status": "exact",
+                    "target": "/original/configuration/needle_colorShadowDown",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/needle_colorShadowDown_Alpha",
+                    "status": "exact",
+                    "target": "/original/configuration/needle_colorShadowDown_Alpha",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/needle_colorShadowUp",
+                    "status": "exact",
+                    "target": "/original/configuration/needle_colorShadowUp",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/needle_colorShadowUp_Alpha",
+                    "status": "exact",
+                    "target": "/original/configuration/needle_colorShadowUp_Alpha",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/needle_display",
+                    "status": "exact",
+                    "target": "/original/configuration/needle_display",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/needle_end",
+                    "status": "exact",
+                    "target": "/original/configuration/needle_end",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/needle_start",
+                    "status": "exact",
+                    "target": "/original/configuration/needle_start",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/needle_width",
+                    "status": "exact",
+                    "target": "/original/configuration/needle_width",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/overrideHeight",
+                    "status": "exact",
+                    "target": "/original/configuration/overrideHeight",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/overrideWidth",
+                    "status": "exact",
+                    "target": "/original/configuration/overrideWidth",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/plate_colorPlate",
+                    "status": "exact",
+                    "target": "/original/configuration/plate_colorPlate",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/plate_colorPlateEnd",
+                    "status": "exact",
+                    "target": "/original/configuration/plate_colorPlateEnd",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/plate_colorPlateEnd_Alpha",
+                    "status": "exact",
+                    "target": "/original/configuration/plate_colorPlateEnd_Alpha",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/plate_colorPlate_Alpha",
+                    "status": "exact",
+                    "target": "/original/configuration/plate_colorPlate_Alpha",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/plate_display",
+                    "status": "exact",
+                    "target": "/original/configuration/plate_display",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/plate_unit",
+                    "status": "exact",
+                    "target": "/original/configuration/plate_unit",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/plate_unit_fontColor",
+                    "status": "exact",
+                    "target": "/original/configuration/plate_unit_fontColor",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/plate_unit_fontFamily",
+                    "status": "exact",
+                    "target": "/original/configuration/plate_unit_fontFamily",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/plate_unit_fontSize",
+                    "status": "exact",
+                    "target": "/original/configuration/plate_unit_fontSize",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/precision",
+                    "status": "exact",
+                    "target": "/original/configuration/precision",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/progressbar_barShadow",
+                    "status": "exact",
+                    "target": "/original/configuration/progressbar_barShadow",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/progressbar_barStartPosition",
+                    "status": "exact",
+                    "target": "/original/configuration/progressbar_barStartPosition",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/progressbar_barWidth",
+                    "status": "exact",
+                    "target": "/original/configuration/progressbar_barWidth",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/progressbar_colorBar",
+                    "status": "exact",
+                    "target": "/original/configuration/progressbar_colorBar",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/progressbar_colorBarProgress",
+                    "status": "exact",
+                    "target": "/original/configuration/progressbar_colorBarProgress",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/progressbar_colorBarProgress_Alpha",
+                    "status": "exact",
+                    "target": "/original/configuration/progressbar_colorBarProgress_Alpha",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/progressbar_colorBar_Alpha",
+                    "status": "exact",
+                    "target": "/original/configuration/progressbar_colorBar_Alpha",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/progressbar_display",
+                    "status": "exact",
+                    "target": "/original/configuration/progressbar_display",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/radial_startAngle",
+                    "status": "exact",
+                    "target": "/original/configuration/radial_startAngle",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/radial_ticksAngle",
+                    "status": "exact",
+                    "target": "/original/configuration/radial_ticksAngle",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/template",
+                    "status": "exact",
+                    "target": "/original/configuration/template",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/ticks_colorMajorTick",
+                    "status": "exact",
+                    "target": "/original/configuration/ticks_colorMajorTick",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/ticks_colorMinorTicks",
+                    "status": "exact",
+                    "target": "/original/configuration/ticks_colorMinorTicks",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/ticks_colorNumbers",
+                    "status": "exact",
+                    "target": "/original/configuration/ticks_colorNumbers",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/ticks_exactTicks",
+                    "status": "exact",
+                    "target": "/original/configuration/ticks_exactTicks",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/ticks_fontFamily",
+                    "status": "exact",
+                    "target": "/original/configuration/ticks_fontFamily",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/ticks_fontSize",
+                    "status": "exact",
+                    "target": "/original/configuration/ticks_fontSize",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/ticks_highlightsWidth",
+                    "status": "exact",
+                    "target": "/original/configuration/ticks_highlightsWidth",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/ticks_minorTicks",
+                    "status": "exact",
+                    "target": "/original/configuration/ticks_minorTicks",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/ticks_strokeTicks",
+                    "status": "exact",
+                    "target": "/original/configuration/ticks_strokeTicks",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/title_display",
+                    "status": "exact",
+                    "target": "/original/configuration/title_display",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/title_fontColor",
+                    "status": "exact",
+                    "target": "/original/configuration/title_fontColor",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/title_fontFamily",
+                    "status": "exact",
+                    "target": "/original/configuration/title_fontFamily",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/title_fontSize",
+                    "status": "exact",
+                    "target": "/original/configuration/title_fontSize",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/title_text",
+                    "status": "exact",
+                    "target": "/original/configuration/title_text",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/valuebox_colorValueBoxBackground",
+                    "status": "exact",
+                    "target": "/original/configuration/valuebox_colorValueBoxBackground",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/valuebox_colorValueBoxBackground_Alpha",
+                    "status": "exact",
+                    "target": "/original/configuration/valuebox_colorValueBoxBackground_Alpha",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/valuebox_display",
+                    "status": "exact",
+                    "target": "/original/configuration/valuebox_display",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/valuebox_fontColor",
+                    "status": "exact",
+                    "target": "/original/configuration/valuebox_fontColor",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/valuebox_fontFamily",
+                    "status": "exact",
+                    "target": "/original/configuration/valuebox_fontFamily",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/valuebox_fontSize",
+                    "status": "exact",
+                    "target": "/original/configuration/valuebox_fontSize",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                },
+                {
+                    "pointer": "/valuebox_separator",
+                    "status": "exact",
+                    "target": "/original/configuration/valuebox_separator",
+                    "rule": "export-original-1",
+                    "reason": "Complete original field preserved; target mapping is separately validated."
+                }
+            ],
+            "reference": null
+        }
+    ],
+    "assets": [
+        {
+            "assetId": "sha256:cbc1ddab2a392a2ce03de0a874ff40f946495fdab3e1d8663cae7a6ef957fe8d",
+            "kind": "font",
+            "mediaType": "font/woff2",
+            "byteLength": 11444,
+            "sha256": "cbc1ddab2a392a2ce03de0a874ff40f946495fdab3e1d8663cae7a6ef957fe8d",
+            "contentBase64": "@fixture-font:cbc1ddab2a392a2ce03de0a874ff40f946495fdab3e1d8663cae7a6ef957fe8d",
+            "origin": {
+                "font": "Orbitron",
+                "resource": "/hook/JSLive/js/fonts/yMJMMIlzdpvBhQQL_SC3X9yhF25-T1nyGy6BoWgz.woff2",
+                "license": "not-inferred"
+            }
+        },
+        {
+            "assetId": "sha256:22efd84231b24e24897ff718310bfcd0ba3d16c2edf14d345b477db3281a439e",
+            "kind": "inert-standard-template",
+            "mediaType": "text/plain",
+            "byteLength": 12370,
+            "sha256": "22efd84231b24e24897ff718310bfcd0ba3d16c2edf14d345b477db3281a439e",
+            "contentBase64": "@fixture-template:22efd84231b24e24897ff718310bfcd0ba3d16c2edf14d345b477db3281a439e",
+            "origin": {
+                "template": "CanvasGauges-Linear(vertical)",
+                "license": "GPL-3.0",
+                "resource": "templates/CanvasGauges-Linear(vertical).html"
+            }
+        }
+    ],
+    "issues": [],
+    "extensions": {}
+}

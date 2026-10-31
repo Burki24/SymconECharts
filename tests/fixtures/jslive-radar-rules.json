@@ -1,0 +1,1154 @@
+[
+    {
+        "labels": [
+            -20,
+            -10,
+            0,
+            10,
+            20,
+            40
+        ],
+        "values": [
+            {
+                "TimeStamp": 400,
+                "Value": 2.2,
+                "Avg": 2.2
+            },
+            {
+                "TimeStamp": 300,
+                "Value": -1.0,
+                "Avg": -1.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": 15.0,
+                "Avg": 15.0
+            }
+        ],
+        "references": [
+            {
+                "TimeStamp": 400,
+                "Value": 100.0,
+                "Avg": 100.0
+            },
+            {
+                "TimeStamp": 300,
+                "Value": 5.0,
+                "Avg": 5.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": -10.0,
+                "Avg": -10.0
+            }
+        ],
+        "mode": "raw",
+        "reducer": "counter",
+        "useReference": false,
+        "type": 1,
+        "settings": {
+            "data_minValue": -20,
+            "data_maxValue": 40,
+            "data_sections": 12,
+            "data_precision": 1
+        },
+        "expected": [
+            0,
+            0,
+            3,
+            0,
+            1,
+            0
+        ]
+    },
+    {
+        "labels": [
+            -20,
+            -10,
+            0,
+            10,
+            20,
+            40
+        ],
+        "values": [
+            {
+                "TimeStamp": 400,
+                "Value": 2.2,
+                "Avg": 2.2
+            },
+            {
+                "TimeStamp": 300,
+                "Value": -1.0,
+                "Avg": -1.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": 15.0,
+                "Avg": 15.0
+            }
+        ],
+        "references": [
+            {
+                "TimeStamp": 400,
+                "Value": 100.0,
+                "Avg": 100.0
+            },
+            {
+                "TimeStamp": 300,
+                "Value": 5.0,
+                "Avg": 5.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": -10.0,
+                "Avg": -10.0
+            }
+        ],
+        "mode": "aggregated",
+        "reducer": "counter",
+        "useReference": false,
+        "type": 1,
+        "settings": {
+            "data_minValue": -20,
+            "data_maxValue": 40,
+            "data_sections": 12,
+            "data_precision": 1
+        },
+        "expected": [
+            0,
+            0,
+            3,
+            0,
+            1,
+            0
+        ]
+    },
+    {
+        "labels": [
+            -20,
+            -10,
+            0,
+            10,
+            20,
+            40
+        ],
+        "values": [
+            {
+                "TimeStamp": 400,
+                "Value": 2.2,
+                "Avg": 2.2
+            },
+            {
+                "TimeStamp": 300,
+                "Value": -1.0,
+                "Avg": -1.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": 15.0,
+                "Avg": 15.0
+            }
+        ],
+        "references": [
+            {
+                "TimeStamp": 400,
+                "Value": 100.0,
+                "Avg": 100.0
+            },
+            {
+                "TimeStamp": 300,
+                "Value": 5.0,
+                "Avg": 5.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": -10.0,
+                "Avg": -10.0
+            }
+        ],
+        "mode": "raw",
+        "reducer": "average",
+        "useReference": false,
+        "type": 1,
+        "settings": {
+            "data_minValue": -20,
+            "data_maxValue": 40,
+            "data_sections": 12,
+            "data_precision": 1
+        },
+        "expected": [
+            0,
+            0,
+            2.2,
+            0,
+            15.0,
+            0
+        ]
+    },
+    {
+        "labels": [
+            -20,
+            -10,
+            0,
+            10,
+            20,
+            40
+        ],
+        "values": [
+            {
+                "TimeStamp": 400,
+                "Value": 2.2,
+                "Avg": 2.2
+            },
+            {
+                "TimeStamp": 300,
+                "Value": -1.0,
+                "Avg": -1.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": 15.0,
+                "Avg": 15.0
+            }
+        ],
+        "references": [
+            {
+                "TimeStamp": 400,
+                "Value": 100.0,
+                "Avg": 100.0
+            },
+            {
+                "TimeStamp": 300,
+                "Value": 5.0,
+                "Avg": 5.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": -10.0,
+                "Avg": -10.0
+            }
+        ],
+        "mode": "aggregated",
+        "reducer": "average",
+        "useReference": false,
+        "type": 1,
+        "settings": {
+            "data_minValue": -20,
+            "data_maxValue": 40,
+            "data_sections": 12,
+            "data_precision": 1
+        },
+        "expected": [
+            0,
+            0,
+            2.2,
+            0,
+            15.0,
+            0
+        ]
+    },
+    {
+        "labels": [
+            -20,
+            -10,
+            0,
+            10,
+            20,
+            40
+        ],
+        "values": [
+            {
+                "TimeStamp": 400,
+                "Value": 2.2,
+                "Avg": 2.2
+            },
+            {
+                "TimeStamp": 300,
+                "Value": -1.0,
+                "Avg": -1.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": 15.0,
+                "Avg": 15.0
+            }
+        ],
+        "references": [
+            {
+                "TimeStamp": 400,
+                "Value": 100.0,
+                "Avg": 100.0
+            },
+            {
+                "TimeStamp": 300,
+                "Value": 5.0,
+                "Avg": 5.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": -10.0,
+                "Avg": -10.0
+            }
+        ],
+        "mode": "raw",
+        "reducer": "counter",
+        "useReference": true,
+        "type": 1,
+        "settings": {
+            "data_minValue": -20,
+            "data_maxValue": 40,
+            "data_sections": 12,
+            "data_precision": 1
+        },
+        "expected": [
+            0,
+            2,
+            2,
+            2,
+            0,
+            0
+        ]
+    },
+    {
+        "labels": [
+            -20,
+            -10,
+            0,
+            10,
+            20,
+            40
+        ],
+        "values": [
+            {
+                "TimeStamp": 400,
+                "Value": 2.2,
+                "Avg": 2.2
+            },
+            {
+                "TimeStamp": 300,
+                "Value": -1.0,
+                "Avg": -1.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": 15.0,
+                "Avg": 15.0
+            }
+        ],
+        "references": [
+            {
+                "TimeStamp": 400,
+                "Value": 100.0,
+                "Avg": 100.0
+            },
+            {
+                "TimeStamp": 300,
+                "Value": 5.0,
+                "Avg": 5.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": -10.0,
+                "Avg": -10.0
+            }
+        ],
+        "mode": "aggregated",
+        "reducer": "counter",
+        "useReference": true,
+        "type": 1,
+        "settings": {
+            "data_minValue": -20,
+            "data_maxValue": 40,
+            "data_sections": 12,
+            "data_precision": 1
+        },
+        "expected": [
+            0,
+            2,
+            2,
+            2,
+            0,
+            0
+        ]
+    },
+    {
+        "labels": [
+            -20,
+            -10,
+            0,
+            10,
+            20,
+            40
+        ],
+        "values": [
+            {
+                "TimeStamp": 400,
+                "Value": 2.2,
+                "Avg": 2.2
+            },
+            {
+                "TimeStamp": 300,
+                "Value": -1.0,
+                "Avg": -1.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": 15.0,
+                "Avg": 15.0
+            }
+        ],
+        "references": [
+            {
+                "TimeStamp": 400,
+                "Value": 100.0,
+                "Avg": 100.0
+            },
+            {
+                "TimeStamp": 300,
+                "Value": 5.0,
+                "Avg": 5.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": -10.0,
+                "Avg": -10.0
+            }
+        ],
+        "mode": "raw",
+        "reducer": "average",
+        "useReference": true,
+        "type": 1,
+        "settings": {
+            "data_minValue": -20,
+            "data_maxValue": 40,
+            "data_sections": 12,
+            "data_precision": 1
+        },
+        "expected": [
+            0,
+            7.5,
+            -0.5,
+            0.6,
+            0,
+            0
+        ]
+    },
+    {
+        "labels": [
+            -20,
+            -10,
+            0,
+            10,
+            20,
+            40
+        ],
+        "values": [
+            {
+                "TimeStamp": 400,
+                "Value": 2.2,
+                "Avg": 2.2
+            },
+            {
+                "TimeStamp": 300,
+                "Value": -1.0,
+                "Avg": -1.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": 15.0,
+                "Avg": 15.0
+            }
+        ],
+        "references": [
+            {
+                "TimeStamp": 400,
+                "Value": 100.0,
+                "Avg": 100.0
+            },
+            {
+                "TimeStamp": 300,
+                "Value": 5.0,
+                "Avg": 5.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": -10.0,
+                "Avg": -10.0
+            }
+        ],
+        "mode": "aggregated",
+        "reducer": "average",
+        "useReference": true,
+        "type": 1,
+        "settings": {
+            "data_minValue": -20,
+            "data_maxValue": 40,
+            "data_sections": 12,
+            "data_precision": 1
+        },
+        "expected": [
+            0,
+            7.5,
+            -0.5,
+            0.6,
+            0,
+            0
+        ]
+    },
+    {
+        "labels": [
+            -20,
+            -10,
+            0,
+            10,
+            20,
+            40
+        ],
+        "values": [
+            {
+                "TimeStamp": 400,
+                "Value": 2.2,
+                "Avg": 2.2
+            },
+            {
+                "TimeStamp": 300,
+                "Value": -1.0,
+                "Avg": -1.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": 15.0,
+                "Avg": 15.0
+            }
+        ],
+        "references": [
+            {
+                "TimeStamp": 400,
+                "Value": 100.0,
+                "Avg": 100.0
+            },
+            {
+                "TimeStamp": 300,
+                "Value": 5.0,
+                "Avg": 5.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": -10.0,
+                "Avg": -10.0
+            }
+        ],
+        "mode": "raw",
+        "reducer": "counter",
+        "useReference": false,
+        "type": 2,
+        "settings": {
+            "data_minValue": -20,
+            "data_maxValue": 40,
+            "data_sections": 12,
+            "data_precision": 1
+        },
+        "expected": [
+            0,
+            0,
+            3,
+            0,
+            1,
+            0
+        ]
+    },
+    {
+        "labels": [
+            -20,
+            -10,
+            0,
+            10,
+            20,
+            40
+        ],
+        "values": [
+            {
+                "TimeStamp": 400,
+                "Value": 2.2,
+                "Avg": 2.2
+            },
+            {
+                "TimeStamp": 300,
+                "Value": -1.0,
+                "Avg": -1.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": 15.0,
+                "Avg": 15.0
+            }
+        ],
+        "references": [
+            {
+                "TimeStamp": 400,
+                "Value": 100.0,
+                "Avg": 100.0
+            },
+            {
+                "TimeStamp": 300,
+                "Value": 5.0,
+                "Avg": 5.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": -10.0,
+                "Avg": -10.0
+            }
+        ],
+        "mode": "aggregated",
+        "reducer": "counter",
+        "useReference": false,
+        "type": 2,
+        "settings": {
+            "data_minValue": -20,
+            "data_maxValue": 40,
+            "data_sections": 12,
+            "data_precision": 1
+        },
+        "expected": [
+            0,
+            0,
+            3,
+            0,
+            1,
+            0
+        ]
+    },
+    {
+        "labels": [
+            -20,
+            -10,
+            0,
+            10,
+            20,
+            40
+        ],
+        "values": [
+            {
+                "TimeStamp": 400,
+                "Value": 2.2,
+                "Avg": 2.2
+            },
+            {
+                "TimeStamp": 300,
+                "Value": -1.0,
+                "Avg": -1.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": 15.0,
+                "Avg": 15.0
+            }
+        ],
+        "references": [
+            {
+                "TimeStamp": 400,
+                "Value": 100.0,
+                "Avg": 100.0
+            },
+            {
+                "TimeStamp": 300,
+                "Value": 5.0,
+                "Avg": 5.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": -10.0,
+                "Avg": -10.0
+            }
+        ],
+        "mode": "raw",
+        "reducer": "average",
+        "useReference": false,
+        "type": 2,
+        "settings": {
+            "data_minValue": -20,
+            "data_maxValue": 40,
+            "data_sections": 12,
+            "data_precision": 1
+        },
+        "expected": [
+            0,
+            0,
+            2.2,
+            0,
+            15.0,
+            0
+        ]
+    },
+    {
+        "labels": [
+            -20,
+            -10,
+            0,
+            10,
+            20,
+            40
+        ],
+        "values": [
+            {
+                "TimeStamp": 400,
+                "Value": 2.2,
+                "Avg": 2.2
+            },
+            {
+                "TimeStamp": 300,
+                "Value": -1.0,
+                "Avg": -1.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": 15.0,
+                "Avg": 15.0
+            }
+        ],
+        "references": [
+            {
+                "TimeStamp": 400,
+                "Value": 100.0,
+                "Avg": 100.0
+            },
+            {
+                "TimeStamp": 300,
+                "Value": 5.0,
+                "Avg": 5.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": -10.0,
+                "Avg": -10.0
+            }
+        ],
+        "mode": "aggregated",
+        "reducer": "average",
+        "useReference": false,
+        "type": 2,
+        "settings": {
+            "data_minValue": -20,
+            "data_maxValue": 40,
+            "data_sections": 12,
+            "data_precision": 1
+        },
+        "expected": [
+            0,
+            0,
+            2.2,
+            0,
+            15.0,
+            0
+        ]
+    },
+    {
+        "labels": [
+            -20,
+            -10,
+            0,
+            10,
+            20,
+            40
+        ],
+        "values": [
+            {
+                "TimeStamp": 400,
+                "Value": 2.2,
+                "Avg": 2.2
+            },
+            {
+                "TimeStamp": 300,
+                "Value": -1.0,
+                "Avg": -1.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": 15.0,
+                "Avg": 15.0
+            }
+        ],
+        "references": [
+            {
+                "TimeStamp": 400,
+                "Value": 100.0,
+                "Avg": 100.0
+            },
+            {
+                "TimeStamp": 300,
+                "Value": 5.0,
+                "Avg": 5.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": -10.0,
+                "Avg": -10.0
+            }
+        ],
+        "mode": "raw",
+        "reducer": "counter",
+        "useReference": true,
+        "type": 2,
+        "settings": {
+            "data_minValue": -20,
+            "data_maxValue": 40,
+            "data_sections": 12,
+            "data_precision": 1
+        },
+        "expected": [
+            0,
+            2,
+            2,
+            2,
+            0,
+            0
+        ]
+    },
+    {
+        "labels": [
+            -20,
+            -10,
+            0,
+            10,
+            20,
+            40
+        ],
+        "values": [
+            {
+                "TimeStamp": 400,
+                "Value": 2.2,
+                "Avg": 2.2
+            },
+            {
+                "TimeStamp": 300,
+                "Value": -1.0,
+                "Avg": -1.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": 15.0,
+                "Avg": 15.0
+            }
+        ],
+        "references": [
+            {
+                "TimeStamp": 400,
+                "Value": 100.0,
+                "Avg": 100.0
+            },
+            {
+                "TimeStamp": 300,
+                "Value": 5.0,
+                "Avg": 5.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": -10.0,
+                "Avg": -10.0
+            }
+        ],
+        "mode": "aggregated",
+        "reducer": "counter",
+        "useReference": true,
+        "type": 2,
+        "settings": {
+            "data_minValue": -20,
+            "data_maxValue": 40,
+            "data_sections": 12,
+            "data_precision": 1
+        },
+        "expected": [
+            0,
+            2,
+            2,
+            2,
+            0,
+            0
+        ]
+    },
+    {
+        "labels": [
+            -20,
+            -10,
+            0,
+            10,
+            20,
+            40
+        ],
+        "values": [
+            {
+                "TimeStamp": 400,
+                "Value": 2.2,
+                "Avg": 2.2
+            },
+            {
+                "TimeStamp": 300,
+                "Value": -1.0,
+                "Avg": -1.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": 15.0,
+                "Avg": 15.0
+            }
+        ],
+        "references": [
+            {
+                "TimeStamp": 400,
+                "Value": 100.0,
+                "Avg": 100.0
+            },
+            {
+                "TimeStamp": 300,
+                "Value": 5.0,
+                "Avg": 5.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": -10.0,
+                "Avg": -10.0
+            }
+        ],
+        "mode": "raw",
+        "reducer": "average",
+        "useReference": true,
+        "type": 2,
+        "settings": {
+            "data_minValue": -20,
+            "data_maxValue": 40,
+            "data_sections": 12,
+            "data_precision": 1
+        },
+        "expected": [
+            0,
+            7.5,
+            -0.5,
+            0.6,
+            0,
+            0
+        ]
+    },
+    {
+        "labels": [
+            -20,
+            -10,
+            0,
+            10,
+            20,
+            40
+        ],
+        "values": [
+            {
+                "TimeStamp": 400,
+                "Value": 2.2,
+                "Avg": 2.2
+            },
+            {
+                "TimeStamp": 300,
+                "Value": -1.0,
+                "Avg": -1.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": 15.0,
+                "Avg": 15.0
+            }
+        ],
+        "references": [
+            {
+                "TimeStamp": 400,
+                "Value": 100.0,
+                "Avg": 100.0
+            },
+            {
+                "TimeStamp": 300,
+                "Value": 5.0,
+                "Avg": 5.0
+            },
+            {
+                "TimeStamp": 200,
+                "Value": 0.0,
+                "Avg": 0.0
+            },
+            {
+                "TimeStamp": 100,
+                "Value": -10.0,
+                "Avg": -10.0
+            }
+        ],
+        "mode": "aggregated",
+        "reducer": "average",
+        "useReference": true,
+        "type": 2,
+        "settings": {
+            "data_minValue": -20,
+            "data_maxValue": 40,
+            "data_sections": 12,
+            "data_precision": 1
+        },
+        "expected": [
+            0,
+            7.5,
+            -0.5,
+            0.6,
+            0,
+            0
+        ]
+    }
+]

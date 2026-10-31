@@ -62,6 +62,22 @@ requireContract(
 );
 
 $expectedModules = [
+    'EChartsProgress' => [
+        'id'                 => '{FEF19240-5D04-4DE0-9AE9-D55DECBC2BD2}',
+        'type'               => 3,
+        'prefix'             => 'ECPG',
+        'parentRequirements' => ['{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}'],
+        'childRequirements'  => [],
+        'implemented'        => ['{E4749B72-912B-E3E3-1C57-D19019FFDD84}']
+    ],
+    'EChartsRadarHistory' => [
+        'id'                 => '{A1ABAD81-1878-4F35-A6EE-29B1DE1BCF2D}',
+        'type'               => 3,
+        'prefix'             => 'ECRH',
+        'parentRequirements' => ['{4CB9F933-7B16-CC7E-D7C4-572C811AC8CC}'],
+        'childRequirements'  => [],
+        'implemented'        => ['{E4749B72-912B-E3E3-1C57-D19019FFDD84}']
+    ],
     'EChartsCalendarPie' => [
         'id'                 => '{8F3D4E67-A52E-46AB-976E-25EC4F37FB52}',
         'type'               => 3,

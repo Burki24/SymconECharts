@@ -98,7 +98,7 @@ ihren festen Zeiträumen auch rollierende Zeitspannen mit 1–1000 Minuten,
 Stunden, Tagen oder Wochen. Die jeweiligen Archiv- und Intervallgrenzen bleiben
 wirksam; Einzelheiten stehen in den Modulbeschreibungen.
 
-Alle Diagrammformulare zeigen eine unmittelbar aktualisierte SVG-Vorschau
+Regulär eingerichtete Diagrammformulare zeigen eine unmittelbar aktualisierte SVG-Vorschau
 im Kachel- und IPSView-Designer. Sie reagiert auf noch nicht gespeicherte
 Titel-, Quellen- und Designänderungen; die endgültige responsive Darstellung
 prüfen Sie in der Kachel beziehungsweise im IPSView-Widget. Historische
@@ -119,6 +119,14 @@ Diagrammtitel ohne diesen Kachel-Kopfbereich.
 ## Enthaltene Module
 
 Folgende Module sind enthalten:
+
+- __EChartsRadarHistory__ ([Dokumentation](EChartsRadarHistory/README.md))
+  Übernommene historische JSLive-Radarmodelle mit Klassen-/Referenzregeln,
+  bestehenden Archivquellen und nativen Kachel-/IPSView-Ausgaben.
+
+- __EChartsProgress__ ([Dokumentation](EChartsProgress/README.md))
+  Übernommene JSLive-Pfad- und SVG-Fortschrittsmodelle mit eigenen Wertebereichen,
+  Farben und nativen Vorschauen. Die Einrichtung erfolgt über das Gateway.
 
 - __EChartsCalendarPie__ ([Dokumentation](EChartsCalendarPie/README.md))
 
@@ -435,10 +443,14 @@ bleiben im jeweiligen Modul unterschiedlich.
 ## Änderungen
 
 Das [Gateway](EChartsGateway/README.md#4-einrichten-der-instanzen-in-symcon)
-bietet eine lesende JSLive-Importvorschau für Exportpakete 1.0 mit
-Quellenzuordnung, möglichen Zielfamilien und vollständigem Abweichungsbericht.
-Bestehende Instanzen und Archive bleiben unverändert. Die Vorschau erzeugt
-noch keine Zieldiagramme und ersetzt keinen Darstellungsvergleich.
+bietet eine lesende JSLive-Paketprüfung und die ausdrücklich bestätigte
+Neuanlage aus Exportpaketen 1.0. Vollständige Berichte nennen Quellenzuordnungen,
+native Zielfamilien und einzeln zu bestätigende Unterschiede. Importjournal und
+kontrollierter Wiederanlauf erhalten Originalinstanzen und Archivwerte.
+Importierte Modelle bieten eine schematische Farbkarte und herunterladbare
+native HTML-Vorschauen auch für noch nicht gespeicherte Formularanpassungen.
+Fremde Vorlagen werden nicht ausgeführt; pixelgleiche 1:1-Migration wird nicht
+versprochen.
 
 Die Versionshistorie steht in der [CHANGELOG.md](CHANGELOG.md).
 

@@ -12,12 +12,15 @@ require_once __DIR__ . '/../libs/helper/DataFlowHelper.php';
 require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
 require_once __DIR__ . '/../libs/EChartsDataProtocol.php';
 require_once __DIR__ . '/../libs/EChartsJSLiveImportForm.php';
+require_once __DIR__ . '/../libs/EChartsJSLiveArchive.php';
+require_once __DIR__ . '/../libs/EChartsJSLiveCreationForm.php';
 
 class EChartsGateway extends IPSModuleStrict
 {
     use \Burki24\SymconModuleHelper\DebugFlowHelper;
     use \SymconECharts\EChartsDebugFlow;
     use \SymconECharts\EChartsJSLiveImportForm;
+    use \SymconECharts\EChartsJSLiveCreationForm;
 
     use DataFlowHelper;
     use \Burki24\SymconModuleHelper\VisualizationAssetHelper;
@@ -46,6 +49,7 @@ class EChartsGateway extends IPSModuleStrict
         $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
             parent::Create();
+            $this->RegisterJSLiveImportJournal();
 
             $this->RegisterMessage(0, IPS_KERNELSTARTED);
             $this->RefreshGatewayTransports();
@@ -103,11 +107,12 @@ class EChartsGateway extends IPSModuleStrict
             }
 
             return $debugFlowResult = match ($operation) {
-                EChartsDataProtocol::OPERATION_CURRENT_READ        => $this->ReadCurrentValue($request['Payload']),
-                EChartsDataProtocol::OPERATION_ARCHIVE_READ        => $this->ReadArchiveValues($request['Payload']),
-                EChartsDataProtocol::OPERATION_ARCHIVE_STATES_READ => $this->ReadArchiveStates($request['Payload']),
-                EChartsDataProtocol::OPERATION_IPSVIEW_PUSH        => $this->PushIPSViewMessage($request['Payload']),
-                default                                            => EChartsDataProtocol::EncodeErrorResponse(
+                EChartsDataProtocol::OPERATION_CURRENT_READ          => $this->ReadCurrentValue($request['Payload']),
+                EChartsDataProtocol::OPERATION_ARCHIVE_READ          => $this->ReadArchiveValues($request['Payload']),
+                EChartsDataProtocol::OPERATION_ARCHIVE_STATES_READ   => $this->ReadArchiveStates($request['Payload']),
+                EChartsDataProtocol::OPERATION_IPSVIEW_PUSH          => $this->PushIPSViewMessage($request['Payload']),
+                \SymconECharts\EChartsJSLiveArchive::OPERATION       => $this->ReadJSLiveSnapshot($request['Payload']),
+                default                                              => EChartsDataProtocol::EncodeErrorResponse(
                     $operation,
                     'UNSUPPORTED_OPERATION',
                     'The gateway operation is not supported.'
@@ -228,6 +233,19 @@ class EChartsGateway extends IPSModuleStrict
             $this->DebugEChartsProtocolResult($debugFlowResult, __FUNCTION__, __LINE__);
             $this->DebugFlowEnd(__FUNCTION__, __LINE__, $debugFlowResult, $debugFlowFailed, true);
         }
+    }
+
+    private function ReadJSLiveSnapshot(array $payload): string
+    {
+        return $this->DebugFlowCall(__FUNCTION__, __LINE__, function () use ($payload): string
+        {
+            $operation = \SymconECharts\EChartsJSLiveArchive::OPERATION;
+            try {
+                return EChartsDataProtocol::EncodeSuccessResponse($operation, \SymconECharts\EChartsJSLiveArchive::Read($payload));
+            } catch (\Throwable) {
+                return EChartsDataProtocol::EncodeErrorResponse($operation, 'SNAPSHOT_UNAVAILABLE', 'The bounded source/archive snapshot could not be read.');
+            }
+        });
     }
 
     /** @return list<int> */

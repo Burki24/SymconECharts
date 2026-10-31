@@ -180,3 +180,28 @@ Vorhandene Copyright- und Lizenzhinweise bleiben erhalten. Fremdcode wird nicht
 pauschal mit dem PolyForm-Lizenzkopf des Projekts versehen.
 
 Vorhandene Copyright-, Lizenz- und Herkunftshinweise werden nicht entfernt.
+
+## JSLive-Übernahme: Referenzdaten und Schriften
+
+Die neuen Adapter sind eigenständige native ECharts-Implementierungen.
+Chart.js, CanvasGauges und progressbar.js werden nicht als neue Laufzeitabhängigkeiten
+mitgeliefert. Die unterstützten Quellverträge wurden anhand von
+[Burki24/JSLive](https://github.com/Burki24/JSLive), Version 0.111,
+Commit `286e5e9de39190178f510191f0911ee82f74271d`, geprüft.
+
+`tests/fixtures/jslive-templates` enthält acht unveränderte Standard-HTML-
+Vorlagen ausschließlich als inerte Hash-/Vertragsreferenz unter der dort
+beigefügten ursprünglichen GPL-3.0-Lizenz. Sie werden weder ausgeführt noch in
+Zielvisualisierungen eingebunden. Produktion liefert lediglich das
+Prüfsummenmanifest `libs/jslive/templates.json`. Die Fremdbytes bleiben durch
+`.gitattributes` unverändert.
+
+`libs/jslive/fonts.json` verzeichnet für jede erlaubte Schrift Familie,
+Quelldatei/-URL, SHA-256 und OFL-1.1 beziehungsweise Apache-2.0-Lizenz. Unveränderte
+Lizenztexte stehen in `libs/jslive/licenses`. Produktionsausgaben verwenden nur
+die geprüften Schriftbytes des vom Anwender ausgewählten Exportpakets und laden
+keine externen Font-URLs. Drei WOFF2-Dateien in `tests/fixtures/jslive-assets`
+dienen ausschließlich den anonymisierten Migrationstests und behalten ihre
+jeweiligen Font-Lizenzen. Der Anonymisierungsumfang und die genaue Herkunft stehen
+in `tests/fixtures/jslive-packages/README.md`. Diese Fremdartefakte fallen nicht
+unter die PolyForm-Lizenz der eigenen Beiträge.

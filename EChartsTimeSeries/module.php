@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../libs/helper/DebugFlowHelper.php';
 require_once __DIR__ . '/../libs/EChartsDebugFlow.php';
+require_once __DIR__ . '/../libs/EChartsJSLiveTarget.php';
 
 use Burki24\SymconModuleHelper\ConfigurationFormHelper;
 use Burki24\SymconModuleHelper\DataFlowHelper;
@@ -57,6 +58,7 @@ class EChartsTimeSeries extends IPSModuleStrict
 {
     use \Burki24\SymconModuleHelper\DebugFlowHelper;
     use \SymconECharts\EChartsDebugFlow;
+    use \SymconECharts\EChartsJSLiveTarget;
 
     use ConfigurationFormHelper;
     use EChartsAnimationDesign;
@@ -161,6 +163,7 @@ class EChartsTimeSeries extends IPSModuleStrict
         $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
             parent::Create();
+            $this->RegisterJSLiveTarget();
             $this->RegisterTransientRefresh('ECTS');
 
             $this->SetVisualizationType(1);
@@ -238,6 +241,7 @@ class EChartsTimeSeries extends IPSModuleStrict
             }
             $this->RegisterAttributeString('RegisteredSourceVariableIDs', '[]');
             $this->RegisterAttributeString('LastError', '');
+            $this->SealJSLiveCreationDefaults();
         } catch (\Throwable $debugFlowException) {
             $debugFlowFailed = true;
             $this->DebugFlowException(__FUNCTION__, __LINE__, $debugFlowException);
@@ -300,6 +304,9 @@ class EChartsTimeSeries extends IPSModuleStrict
         $debugFlowFailed = false;
         $this->DebugFlowStart(__FUNCTION__, __LINE__);
         try {
+            if ($this->HasJSLiveImport()) {
+                return $this->JSLiveConfigurationForm();
+            }
             $form = $this->LoadConfigurationForm();
             if (isset($form['elements']) && is_array($form['elements'])) {
                 $form['elements'] = $this->WithAnimationFormControls($form['elements']);
@@ -721,6 +728,10 @@ class EChartsTimeSeries extends IPSModuleStrict
         $debugFlowFailed = false;
         $this->DebugFlowStart(__FUNCTION__, __LINE__, ['Quelle' => $SenderID, 'Nachricht' => $Message]);
         try {
+            if ($this->HasJSLiveImport()) {
+                $this->HandleJSLiveImportMessage($SenderID, $Message);
+                return;
+            }
             if ($SenderID === 0 && $Message === IPS_KERNELSTARTED) {
                 $this->Initialize();
                 $this->PublishVisualizationState();
@@ -888,6 +899,9 @@ class EChartsTimeSeries extends IPSModuleStrict
 
     private function RenderTimeSeriesHTMLPage(bool $ipsView): string
     {
+        if ($this->HasJSLiveImport()) {
+            return $this->RenderJSLiveImportPage($ipsView);
+        }
         $startup = EChartsStartupState::Startup($this->BuildVisualizationState($ipsView));
         $configuration = [
             'language'           => $this->NormalizeHelperTranslationLanguage(
@@ -945,6 +959,11 @@ class EChartsTimeSeries extends IPSModuleStrict
 
     private function Initialize(): void
     {
+        if ($this->HasJSLiveImport()) {
+            $this->InitializeJSLiveImport();
+            return;
+        }
+        $this->SetTimerInterval('JSLiveImportRefresh', 0);
         $this->DebugEChartsSetStatus(IS_INACTIVE);
         $this->SetTimerInterval('ArchiveRefresh', 0);
         if (IPS_GetKernelRunlevel() !== KR_READY) {
@@ -1479,6 +1498,9 @@ class EChartsTimeSeries extends IPSModuleStrict
     /** @return array<string,mixed> */
     private function BuildVisualizationState(bool $ipsView = false): array
     {
+        if ($this->HasJSLiveImport()) {
+            return $this->BuildJSLiveImportState($ipsView);
+        }
         $error = $this->GetConfigurationError();
         if ($error !== null) {
             return [

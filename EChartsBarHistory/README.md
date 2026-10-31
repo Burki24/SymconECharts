@@ -155,3 +155,22 @@ Save changes to the Tile designer before copying.
 
 The source limit is 32. Saved one- to sixteen-source configurations and their
 point budgets are not rewritten by the update.
+
+## Übernommene JSLive-Modelle
+
+Das [EChartsGateway](../EChartsGateway/README.md) kann geprüfte JSLive-Pakete
+nach ausdrücklicher Bestätigung als **neue** Instanzen übernehmen. Bestehende
+Diagramme und Quellen bleiben erhalten. Die importierte Variante erhält ein
+eigenes, aus dem Export gebildetes Modell; die reguläre Einrichtung dieses
+Moduls bleibt unverändert. Quellen- und Archiv-IDs sowie native Formatierungen
+werden erhalten, ohne Legacy-Profile anzulegen. Der Importbericht nennt
+Darstellungs- und Verarbeitungsunterschiede einzeln.
+
+Importierte Modelle bieten Titel, Zeitsteuerung bei historischen Modellen,
+Hintergrund-/Schriftanpassungen und Sichtbarkeitseinstellungen für Kachel und
+IPSView. Die Farbkarte ist schematisch; **Native Vorschau herunterladen** zeigt
+die tatsächliche ECharts-Ausgabe mit noch nicht gespeicherten Entwurfswerten.
+Quellen und vollständige ursprüngliche Stile stammen aus dem Importmodell;
+sie werden nicht in die reguläre Quellen-/Designerstruktur zurückübersetzt.
+Bei einer neuen Übernahme eines geänderten Exports ist ausdrücklich eine
+separate Neuanlage erforderlich. Das bisherige Ziel wird nicht überschrieben.

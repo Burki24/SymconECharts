@@ -13,6 +13,60 @@ require_once __DIR__ . '/EChartsJSLivePackage.php';
 /** Only existing metadata is read; archive values, instances and source settings are untouched. */
 final class EChartsJSLiveRuntime
 {
+    public static function Context(int $gatewayID, int $parentID): array
+    {
+        if (!IPS_InstanceExists($gatewayID) || IPS_GetInstance($gatewayID)['ModuleInfo']['ModuleID'] !== '{33C9DF44-6F6D-5916-4AAE-CCB24BD6928D}'
+            || IPS_GetInstance($gatewayID)['InstanceStatus'] !== 102) {
+            throw new RuntimeException('PARENT_MISSING: the selected gateway is not active.');
+        }
+        $parent = $parentID === 0 ? null : IPS_GetObject($parentID);
+        if ($parent !== null && $parent['ObjectType'] !== 0) {
+            throw new RuntimeException('PACKAGE_INVALID: target parent must be an existing category.');
+        }
+        if ($parent !== null) {
+            $parent = array_intersect_key($parent, array_flip(['ObjectID', 'ObjectType', 'ParentID', 'ObjectIdent', 'ObjectName', 'ObjectInfo',
+                'ObjectIcon', 'ObjectPosition', 'ObjectIsHidden', 'ObjectIsDisabled', 'ObjectIsReadOnly', 'ObjectIsLocked']));
+        }
+        return ['gatewayID' => $gatewayID, 'parentID' => $parentID,
+            'fingerprint'   => EChartsImportJson::Hash([EChartsJSLiveTargetSnapshot::Read($gatewayID), $parent])];
+    }
+
+    /** Compare original configuration and controls only on the positively identified same installation. */
+    public static function OriginalGuard(array $guards, bool $same): void
+    {
+        if (!$same) {
+            return;
+        }
+        foreach ($guards as $chart) {
+            $id = $chart['instanceID'];
+            if (!IPS_InstanceExists($id) || IPS_GetInstance($id)['ModuleInfo']['ModuleID'] !== $chart['moduleID']
+                || IPS_GetObject($id)['ObjectName'] !== $chart['name']) {
+                throw new RuntimeException('SOURCE_CHANGED: the original chart identity changed; export again.');
+            }
+            $current = json_decode(IPS_GetConfiguration($id), false, 32, JSON_THROW_ON_ERROR);
+            foreach ($chart['configuration'] as $key => $hash) {
+                if (!property_exists($current, $key) || EChartsImportJson::Hash($current->{$key}) !== $hash) {
+                    throw new RuntimeException('SOURCE_CHANGED: the original chart configuration changed; export again.');
+                }
+            }
+            $connection = IPS_GetInstance($id)['ConnectionID'];
+            if ($connection === 0) {
+                throw new RuntimeException('SOURCE_CHANGED: the original chart gateway is missing.');
+            }
+            $global = json_decode(IPS_GetConfiguration($connection), false, 32, JSON_THROW_ON_ERROR);
+            foreach ($chart['global'] as $key => $hash) {
+                if (!property_exists($global, $key) || EChartsImportJson::Hash($global->{$key}) !== $hash) {
+                    throw new RuntimeException('SOURCE_CHANGED: original global configuration changed; export again.');
+                }
+            }
+            foreach ($chart['controls'] as $control) {
+                if (!IPS_VariableExists($control['id']) || EChartsImportJson::Hash(GetValue($control['id'])) !== $control['hash']) {
+                    throw new RuntimeException('SOURCE_CHANGED: original control values changed; export again.');
+                }
+            }
+        }
+    }
+
     public static function InstallationID(): ?string
     {
         if (!function_exists('SymconJSLive_GetMigrationInstallationID')) {

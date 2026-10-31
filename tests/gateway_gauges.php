@@ -297,6 +297,16 @@ function AC_GetAggregationType(int $archiveID, int $variableID): int
     return $GLOBALS['symconTestArchiveVariables'][$variableID]['AggregationType'];
 }
 
+function AC_GetLoggingStatus(int $archiveID, int $variableID): bool
+{
+    return isset($GLOBALS['symconTestArchiveVariables'][$variableID]);
+}
+
+function AC_GetCounterIgnoreZeros(int $archiveID, int $variableID): bool
+{
+    return $GLOBALS['symconTestArchiveVariables'][$variableID]['CounterIgnoreZeros'] ?? false;
+}
+
 /** @return list<array<string, int|float>> */
 function AC_GetLoggedValues(
     int $archiveID,
@@ -382,7 +392,24 @@ function IPS_GetObject(int $objectID): array
         return $GLOBALS['symconTestTreeObjects'][$objectID];
     }
 
-    return ['ObjectIsHiddenTitle' => $GLOBALS['symconTestHiddenTitles'][$objectID] ?? false];
+    return ['ObjectIsHiddenTitle' => $GLOBALS['symconTestHiddenTitles'][$objectID] ?? false,
+        'ObjectName'              => 'Synthetic instance', 'ParentID' => 0, 'ObjectInfo' => '', 'ObjectIdent' => '', 'ObjectIcon' => '',
+        'ObjectPosition'          => 0, 'ObjectIsHidden' => false, 'ObjectIsDisabled' => false];
+}
+
+function IPS_GetConfiguration(int $instanceID): string
+{
+    $module = $GLOBALS['symconTestModuleObjects'][$instanceID] ?? throw new RuntimeException('Unknown synthetic module configuration.');
+    return json_encode($module->GetTestProperties(), JSON_THROW_ON_ERROR | JSON_PRESERVE_ZERO_FRACTION);
+}
+
+function IPS_SetInfo(int $objectID, string $info): bool
+{
+    if (!isset($GLOBALS['symconTestTreeObjects'][$objectID])) {
+        throw new RuntimeException('Unknown synthetic metadata target.');
+    }
+    $GLOBALS['symconTestTreeObjects'][$objectID]['ObjectInfo'] = $info;
+    return true;
 }
 
 function IPS_ObjectExists(int $objectID): bool
@@ -456,6 +483,7 @@ abstract class IPSModuleStrict
 
     public function Create(): void
     {
+        $GLOBALS['symconTestModuleObjects'][$this->InstanceID] = $this;
     }
 
     public function ApplyChanges(): void
@@ -589,6 +617,12 @@ abstract class IPSModuleStrict
             'Position'        => $position,
             'Keep'            => $keep
         ];
+        if ($GLOBALS['symconTestLinkOutputObjects'] ?? false) {
+            $GLOBALS['symconTestTreeObjects'][$variableID] = ['ObjectID' => $variableID, 'ObjectType' => 2, 'ParentID' => $this->InstanceID,
+                'ObjectIdent'                                            => $ident, 'ObjectName' => $name, 'ObjectInfo' => '', 'ObjectIcon' => '', 'ObjectPosition' => $position,
+                'ObjectIsHidden'                                         => false, 'ObjectIsDisabled' => false];
+            $GLOBALS['symconTestTreeChildren'][$this->InstanceID][] = $variableID;
+        }
 
         return true;
     }
@@ -1072,6 +1106,10 @@ assertGatewayGauge(
 IPSModuleStrict::$ParentResponder = static fn (string $json): string => $gateway->ForwardData($json);
 
 require __DIR__ . '/gateway_transport.php';
+if (array_slice($argv, 1) === ['--jslive-targets']) {
+    require __DIR__ . '/jslive_targets.php';
+    exit(0);
+}
 if (array_slice($argv, 1) === ['--gateway-transport']) {
     exit(0);
 }

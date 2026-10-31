@@ -1,0 +1,74 @@
+{
+    "Chart": {
+        "sha256": [
+            "e63c4861ac883a811b22b8eb63f1c332577a1537215d393fb56d8c03d2a250e0",
+            "c78585ac6f01747a3918d8a772552f1dd9a727dfad9f0060be14a34d5f2b6f64"
+        ],
+        "sourceVersion": "JSLive 0.111",
+        "license": "GPL-3.0",
+        "usage": "inert-reference-only"
+    },
+    "Doughnut-PIE": {
+        "sha256": [
+            "6862ab1e33ec78545c79077fa86615b3a9be020cdfcdfb5d642698286705a11c",
+            "dc212655cf823967c04467a9c22ff16fb55f2a2f24bacc9ea4867739bc2876cf"
+        ],
+        "sourceVersion": "JSLive 0.111",
+        "license": "GPL-3.0",
+        "usage": "inert-reference-only"
+    },
+    "RadarChart": {
+        "sha256": [
+            "993cec3846f650d1e5788c572bd80266c403471a066df3bf637cab1054f90681",
+            "697d55b0f9e2c32922c8b11db5f3f2bb91f5ea1e1eddca84e3354d2109f03c80"
+        ],
+        "sourceVersion": "JSLive 0.111",
+        "license": "GPL-3.0",
+        "usage": "inert-reference-only"
+    },
+    "Progressbar": {
+        "sha256": [
+            "b9c5b9fc0d1d382d8b65e57681b2035508d9f6cd4616fa25b383146aec54f7c6",
+            "258dc58b619641e3a8719adfeaaa9beee386dbf702b0f845369dafba476f4f29"
+        ],
+        "sourceVersion": "JSLive 0.111",
+        "license": "GPL-3.0",
+        "usage": "inert-reference-only"
+    },
+    "CanvasGauges-Radial": {
+        "sha256": [
+            "b5e71fb9e42f201fb302e0710a950918156386700e1472572106085d6286c279",
+            "9c1b675982d7d681b39026fc31f260fc394aa173b526ac465f2cfdf42d2cf5ca"
+        ],
+        "sourceVersion": "JSLive 0.111",
+        "license": "GPL-3.0",
+        "usage": "inert-reference-only"
+    },
+    "CanvasGauges-Linear": {
+        "sha256": [
+            "eae6ee101aba8d17e2de8c01a1b8bcc8993760f8b552d554df845b1390ab45a1",
+            "c976a9dec76ac1f4490795cec47f7c41a6bcd91cf75d3d4506208898cd772ee0"
+        ],
+        "sourceVersion": "JSLive 0.111",
+        "license": "GPL-3.0",
+        "usage": "inert-reference-only"
+    },
+    "CanvasGauges-Linear(vertical)": {
+        "sha256": [
+            "36f973709c0f410f81c0654f0fd0a27d85bf27f869a0412072910b03d402fd5b",
+            "22efd84231b24e24897ff718310bfcd0ba3d16c2edf14d345b477db3281a439e"
+        ],
+        "sourceVersion": "JSLive 0.111",
+        "license": "GPL-3.0",
+        "usage": "inert-reference-only"
+    },
+    "CanvasGauges-Compass": {
+        "sha256": [
+            "bcbc5c4959e05e8b37ba97213a7ebf2b012377cbd8c6a8801cc790b0be2134ef",
+            "267038b655a54b4f7ef783801106e904fc30335e9ebfcc0e8807e5b8b2dde811"
+        ],
+        "sourceVersion": "JSLive 0.111",
+        "license": "GPL-3.0",
+        "usage": "inert-reference-only"
+    }
+}

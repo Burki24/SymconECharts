@@ -3,7 +3,9 @@
 **Aktuelle Freigabesperre vom 31.10.2026:** Der Eigentümer hat die erste Beta
 bis zur zugesagten JSLive-Übernahme zurückgestellt. Der gemeinsame
 [Export-/Importvertrag](JSLIVE_MIGRATION_CONTRACT.md) ist spezifiziert;
-Implementierung und gemeinsame Abnahme stehen aus. Die folgenden Release-Texte
+Die bestätigte Importanlage einschließlich der 40 Zielvarianten ist lokal
+implementiert und geprüft; gemeinsame MCP-Übernahme und Original-/Ziel-
+Darstellungsabnahme nach Modulupdate stehen aus. Die folgenden Release-Texte
 und das bisher geplante Datum sind Vorbereitung, keine Einreichungsfreigabe.
 Nach Abschluss der Migration sind Umfang, Versionsmetadaten und Termin erneut
 mit dem Eigentümer abzugleichen. Die bisherige Diagrammabnahme bleibt gültig.
@@ -36,7 +38,7 @@ ungeprüft. Geplantes Veröffentlichungsdatum ist ausdrücklich der 31.10.2026.
 ```text
 SymconECharts stellt aktuelle Variablenwerte, Archivdaten und ausgewählte
 Objektbeziehungen als responsive Apache-ECharts-Diagramme dar. Die Library
-bietet 29 Diagrammfamilien, darunter Gauges, Zeitreihen, Balken, Kreisdiagramme,
+bietet 31 Diagrammfamilien, darunter Gauges, Zeitreihen, Balken, Kreisdiagramme,
 Heatmaps, Kalender, Graphen und Zustandszeitdiagramme. Native Symcon-Kacheln
 und optionale IPSView-HTML-Widgets besitzen anpassbare Designs und Vorschauen.
 Historische Zeiträume, Quellenauswahl und Schutzbudgets werden je Diagramm
@@ -47,7 +49,7 @@ weitere Geräte-, Touch- und Langzeitprüfungen sind noch nicht vollständig.
 ## Versionsinformation für die erste Beta
 
 ```text
-Erste öffentliche Beta von SymconECharts mit 29 Diagrammfamilien für aktuelle
+Erste öffentliche Beta von SymconECharts mit 31 Diagrammfamilien für aktuelle
 Werte, Archive und Objektbeziehungen. Die Ausgabe unterstützt native Kacheln
 und IPSView, getrennte Designer, Vorschauen und Live-Aktualisierungen.
 

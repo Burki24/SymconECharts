@@ -1,0 +1,6242 @@
+[
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 0,
+        "offset": 0,
+        "expected": [
+            1577833200,
+            1861916400,
+            0,
+            4
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 0,
+        "offset": 1,
+        "expected": [
+            1262300400,
+            1577833200,
+            311040000,
+            4
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 0,
+        "offset": 2,
+        "expected": [
+            946681200,
+            1262300400,
+            622080000,
+            4
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 1,
+        "offset": 0,
+        "expected": [
+            1704063600,
+            1733007600,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 1,
+        "offset": 1,
+        "expected": [
+            1672527600,
+            1704063600,
+            31104000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 1,
+        "offset": 2,
+        "expected": [
+            1640991600,
+            1672527600,
+            62208000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 2,
+        "offset": 0,
+        "expected": [
+            1704063600,
+            1709247600,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 2,
+        "offset": 1,
+        "expected": [
+            1696111200,
+            1704063600,
+            7776000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 2,
+        "offset": 2,
+        "expected": [
+            1688162400,
+            1696111200,
+            15552000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 3,
+        "offset": 0,
+        "expected": [
+            1706742000,
+            1709247600,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 3,
+        "offset": 1,
+        "expected": [
+            1704063600,
+            1706742000,
+            2592000,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 3,
+        "offset": 2,
+        "expected": [
+            1701385200,
+            1704063600,
+            5184000,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 4,
+        "offset": 0,
+        "expected": [
+            1708902000,
+            1709420400,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 4,
+        "offset": 1,
+        "expected": [
+            1708297200,
+            1708902000,
+            604800,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 4,
+        "offset": 2,
+        "expected": [
+            1707692400,
+            1708297200,
+            1209600,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 5,
+        "offset": 0,
+        "expected": [
+            1709161200,
+            1709247600,
+            0,
+            0
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 5,
+        "offset": 1,
+        "expected": [
+            1709074800,
+            1709161200,
+            86400,
+            0
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 5,
+        "offset": 2,
+        "expected": [
+            1708988400,
+            1709074800,
+            172800,
+            0
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 6,
+        "offset": 0,
+        "expected": [
+            1709204400,
+            1709208000,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 6,
+        "offset": 1,
+        "expected": [
+            1709200800,
+            1709204400,
+            3600,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 6,
+        "offset": 2,
+        "expected": [
+            1709197200,
+            1709200800,
+            7200,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 7,
+        "offset": 0,
+        "expected": [
+            1709206440,
+            1709206500,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 7,
+        "offset": 1,
+        "expected": [
+            1709206380,
+            1709206440,
+            60,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 7,
+        "offset": 2,
+        "expected": [
+            1709206320,
+            1709206380,
+            120,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 0,
+        "offset": 0,
+        "expected": [
+            1420066800,
+            1704063601,
+            0,
+            4
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 0,
+        "offset": 1,
+        "expected": [
+            1104534000,
+            1388530801,
+            311040000,
+            4
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 0,
+        "offset": 2,
+        "expected": [
+            788914800,
+            1072911601,
+            622080000,
+            4
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 1,
+        "offset": 0,
+        "expected": [
+            1677625200,
+            1706742001,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 1,
+        "offset": 1,
+        "expected": [
+            1646089200,
+            1675206001,
+            31104000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 1,
+        "offset": 2,
+        "expected": [
+            1614553200,
+            1643670001,
+            62208000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 2,
+        "offset": 0,
+        "expected": [
+            1701385200,
+            1706742001,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 2,
+        "offset": 1,
+        "expected": [
+            1693519200,
+            1698793201,
+            7776000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 2,
+        "offset": 2,
+        "expected": [
+            1685570400,
+            1690840801,
+            15552000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 3,
+        "offset": 0,
+        "expected": [
+            1706569200,
+            1709161201,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 3,
+        "offset": 1,
+        "expected": [
+            1703890800,
+            1706482801,
+            2592000,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 3,
+        "offset": 2,
+        "expected": [
+            1701298800,
+            1703804401,
+            5184000,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 4,
+        "offset": 0,
+        "expected": [
+            1708642800,
+            1709161201,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 4,
+        "offset": 1,
+        "expected": [
+            1708038000,
+            1708556401,
+            604800,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 4,
+        "offset": 2,
+        "expected": [
+            1707433200,
+            1707951601,
+            1209600,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 5,
+        "offset": 0,
+        "expected": [
+            1709121600,
+            1709204401,
+            0,
+            0
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 5,
+        "offset": 1,
+        "expected": [
+            1709035200,
+            1709118001,
+            86400,
+            0
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 5,
+        "offset": 2,
+        "expected": [
+            1708948800,
+            1709031601,
+            172800,
+            0
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 6,
+        "offset": 0,
+        "expected": [
+            1709202900,
+            1709206441,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 6,
+        "offset": 1,
+        "expected": [
+            1709199300,
+            1709202841,
+            3600,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 6,
+        "offset": 2,
+        "expected": [
+            1709195700,
+            1709199241,
+            7200,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 7,
+        "offset": 0,
+        "expected": [
+            1709206437,
+            1709206497,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 7,
+        "offset": 1,
+        "expected": [
+            1709206377,
+            1709206437,
+            60,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 7,
+        "offset": 2,
+        "expected": [
+            1709206317,
+            1709206377,
+            120,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 0,
+        "offset": 0,
+        "expected": [
+            1577833200,
+            1861916400,
+            0,
+            4
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 0,
+        "offset": 1,
+        "expected": [
+            1262300400,
+            1577833200,
+            311040000,
+            4
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 0,
+        "offset": 2,
+        "expected": [
+            946681200,
+            1262300400,
+            622080000,
+            4
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 1,
+        "offset": 0,
+        "expected": [
+            1767222000,
+            1796079600,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 1,
+        "offset": 1,
+        "expected": [
+            1735686000,
+            1767222000,
+            31104000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 1,
+        "offset": 2,
+        "expected": [
+            1704063600,
+            1735686000,
+            62208000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 2,
+        "offset": 0,
+        "expected": [
+            1767222000,
+            1772319600,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 2,
+        "offset": 1,
+        "expected": [
+            1759269600,
+            1767222000,
+            7776000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 2,
+        "offset": 2,
+        "expected": [
+            1751320800,
+            1759269600,
+            15552000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 3,
+        "offset": 0,
+        "expected": [
+            1772319600,
+            1774994400,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 3,
+        "offset": 1,
+        "expected": [
+            1769900400,
+            1772319600,
+            2592000,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 3,
+        "offset": 2,
+        "expected": [
+            1767222000,
+            1769900400,
+            5184000,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 4,
+        "offset": 0,
+        "expected": [
+            1774220400,
+            1774738800,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 4,
+        "offset": 1,
+        "expected": [
+            1773615600,
+            1774220400,
+            604800,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 4,
+        "offset": 2,
+        "expected": [
+            1773010800,
+            1773615600,
+            1209600,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 5,
+        "offset": 0,
+        "expected": [
+            1774738800,
+            1774821600,
+            0,
+            0
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 5,
+        "offset": 1,
+        "expected": [
+            1774652400,
+            1774738800,
+            86400,
+            0
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 5,
+        "offset": 2,
+        "expected": [
+            1774566000,
+            1774652400,
+            172800,
+            0
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 6,
+        "offset": 0,
+        "expected": [
+            1774746000,
+            1774749600,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 6,
+        "offset": 1,
+        "expected": [
+            1774742400,
+            1774746000,
+            3600,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 6,
+        "offset": 2,
+        "expected": [
+            1774738800,
+            1774742400,
+            7200,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 7,
+        "offset": 0,
+        "expected": [
+            1774748040,
+            1774748100,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 7,
+        "offset": 1,
+        "expected": [
+            1774747980,
+            1774748040,
+            60,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 7,
+        "offset": 2,
+        "expected": [
+            1774747920,
+            1774747980,
+            120,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 0,
+        "offset": 0,
+        "expected": [
+            1483225200,
+            1767222001,
+            0,
+            4
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 0,
+        "offset": 1,
+        "expected": [
+            1167606000,
+            1451602801,
+            311040000,
+            4
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 0,
+        "offset": 2,
+        "expected": [
+            852073200,
+            1136070001,
+            622080000,
+            4
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 1,
+        "offset": 0,
+        "expected": [
+            1743458400,
+            1772319601,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 1,
+        "offset": 1,
+        "expected": [
+            1711922400,
+            1740783601,
+            31104000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 1,
+        "offset": 2,
+        "expected": [
+            1680300000,
+            1709247601,
+            62208000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 2,
+        "offset": 0,
+        "expected": [
+            1767222000,
+            1772319601,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 2,
+        "offset": 1,
+        "expected": [
+            1759269600,
+            1764543601,
+            7776000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 2,
+        "offset": 2,
+        "expected": [
+            1751320800,
+            1756677601,
+            15552000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 3,
+        "offset": 0,
+        "expected": [
+            1772406000,
+            1774738801,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 3,
+        "offset": 1,
+        "expected": [
+            1769986800,
+            1772319601,
+            2592000,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 3,
+        "offset": 2,
+        "expected": [
+            1767308400,
+            1769641201,
+            5184000,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 4,
+        "offset": 0,
+        "expected": [
+            1774220400,
+            1774738801,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 4,
+        "offset": 1,
+        "expected": [
+            1773615600,
+            1774134001,
+            604800,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 4,
+        "offset": 2,
+        "expected": [
+            1773010800,
+            1773529201,
+            1209600,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 5,
+        "offset": 0,
+        "expected": [
+            1774666800,
+            1774746001,
+            0,
+            0
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 5,
+        "offset": 1,
+        "expected": [
+            1774580400,
+            1774663201,
+            86400,
+            0
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 5,
+        "offset": 2,
+        "expected": [
+            1774494000,
+            1774576801,
+            172800,
+            0
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 6,
+        "offset": 0,
+        "expected": [
+            1774748100,
+            1774748041,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 6,
+        "offset": 1,
+        "expected": [
+            1774744500,
+            1774744441,
+            3600,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 6,
+        "offset": 2,
+        "expected": [
+            1774740900,
+            1774740841,
+            7200,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 7,
+        "offset": 0,
+        "expected": [
+            1774748037,
+            1774748097,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 7,
+        "offset": 1,
+        "expected": [
+            1774747977,
+            1774748037,
+            60,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 7,
+        "offset": 2,
+        "expected": [
+            1774747917,
+            1774747977,
+            120,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 0,
+        "offset": 0,
+        "expected": [
+            1577833200,
+            1861916400,
+            0,
+            4
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 0,
+        "offset": 1,
+        "expected": [
+            1262300400,
+            1577833200,
+            311040000,
+            4
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 0,
+        "offset": 2,
+        "expected": [
+            946681200,
+            1262300400,
+            622080000,
+            4
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 1,
+        "offset": 0,
+        "expected": [
+            1767222000,
+            1796079600,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 1,
+        "offset": 1,
+        "expected": [
+            1735686000,
+            1767222000,
+            31104000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 1,
+        "offset": 2,
+        "expected": [
+            1704063600,
+            1735686000,
+            62208000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 2,
+        "offset": 0,
+        "expected": [
+            1790805600,
+            1796079600,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 2,
+        "offset": 1,
+        "expected": [
+            1782856800,
+            1790805600,
+            7776000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 2,
+        "offset": 2,
+        "expected": [
+            1774994400,
+            1782856800,
+            15552000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 3,
+        "offset": 0,
+        "expected": [
+            1790805600,
+            1793487600,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 3,
+        "offset": 1,
+        "expected": [
+            1788213600,
+            1790805600,
+            2592000,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 3,
+        "offset": 2,
+        "expected": [
+            1785535200,
+            1788213600,
+            5184000,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 4,
+        "offset": 0,
+        "expected": [
+            1792360800,
+            1792879200,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 4,
+        "offset": 1,
+        "expected": [
+            1791756000,
+            1792360800,
+            604800,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 4,
+        "offset": 2,
+        "expected": [
+            1791151200,
+            1791756000,
+            1209600,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 5,
+        "offset": 0,
+        "expected": [
+            1792879200,
+            1792969200,
+            0,
+            0
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 5,
+        "offset": 1,
+        "expected": [
+            1792792800,
+            1792879200,
+            86400,
+            0
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 5,
+        "offset": 2,
+        "expected": [
+            1792706400,
+            1792792800,
+            172800,
+            0
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 6,
+        "offset": 0,
+        "expected": [
+            1792893600,
+            1792897200,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 6,
+        "offset": 1,
+        "expected": [
+            1792890000,
+            1792893600,
+            3600,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 6,
+        "offset": 2,
+        "expected": [
+            1792886400,
+            1792893600,
+            7200,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 7,
+        "offset": 0,
+        "expected": [
+            1792895640,
+            1792895700,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 7,
+        "offset": 1,
+        "expected": [
+            1792895580,
+            1792895640,
+            60,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 7,
+        "offset": 2,
+        "expected": [
+            1792895520,
+            1792895580,
+            120,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 0,
+        "offset": 0,
+        "expected": [
+            1483225200,
+            1767222001,
+            0,
+            4
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 0,
+        "offset": 1,
+        "expected": [
+            1167606000,
+            1451602801,
+            311040000,
+            4
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 0,
+        "offset": 2,
+        "expected": [
+            852073200,
+            1136070001,
+            622080000,
+            4
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 1,
+        "offset": 0,
+        "expected": [
+            1761951600,
+            1790805601,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 1,
+        "offset": 1,
+        "expected": [
+            1730415600,
+            1759269601,
+            31104000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 1,
+        "offset": 2,
+        "expected": [
+            1698793200,
+            1727733601,
+            62208000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 2,
+        "offset": 0,
+        "expected": [
+            1785535200,
+            1790805601,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 2,
+        "offset": 1,
+        "expected": [
+            1777586400,
+            1782856801,
+            7776000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 2,
+        "offset": 2,
+        "expected": [
+            1769900400,
+            1774994401,
+            15552000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 3,
+        "offset": 0,
+        "expected": [
+            1790373600,
+            1792879201,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 3,
+        "offset": 1,
+        "expected": [
+            1787695200,
+            1790287201,
+            2592000,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 3,
+        "offset": 2,
+        "expected": [
+            1785016800,
+            1787608801,
+            5184000,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 4,
+        "offset": 0,
+        "expected": [
+            1792360800,
+            1792879201,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 4,
+        "offset": 1,
+        "expected": [
+            1791756000,
+            1792274401,
+            604800,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 4,
+        "offset": 2,
+        "expected": [
+            1791151200,
+            1791669601,
+            1209600,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 5,
+        "offset": 0,
+        "expected": [
+            1792807200,
+            1792893601,
+            0,
+            0
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 5,
+        "offset": 1,
+        "expected": [
+            1792720800,
+            1792803601,
+            86400,
+            0
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 5,
+        "offset": 2,
+        "expected": [
+            1792634400,
+            1792717201,
+            172800,
+            0
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 6,
+        "offset": 0,
+        "expected": [
+            1792892100,
+            1792895641,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 6,
+        "offset": 1,
+        "expected": [
+            1792888500,
+            1792892041,
+            3600,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 6,
+        "offset": 2,
+        "expected": [
+            1792884900,
+            1792888441,
+            7200,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 7,
+        "offset": 0,
+        "expected": [
+            1792895637,
+            1792895697,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 7,
+        "offset": 1,
+        "expected": [
+            1792895577,
+            1792895637,
+            60,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 7,
+        "offset": 2,
+        "expected": [
+            1792895517,
+            1792895577,
+            120,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 0,
+        "offset": 0,
+        "expected": [
+            1577833200,
+            1861916400,
+            0,
+            4
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 0,
+        "offset": 1,
+        "expected": [
+            1262300400,
+            1577833200,
+            311040000,
+            4
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 0,
+        "offset": 2,
+        "expected": [
+            946681200,
+            1262300400,
+            622080000,
+            4
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 1,
+        "offset": 0,
+        "expected": [
+            1735686000,
+            1764543600,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 1,
+        "offset": 1,
+        "expected": [
+            1704063600,
+            1735686000,
+            31104000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 1,
+        "offset": 2,
+        "expected": [
+            1672527600,
+            1704063600,
+            62208000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 2,
+        "offset": 0,
+        "expected": [
+            1735686000,
+            1740783600,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 2,
+        "offset": 1,
+        "expected": [
+            1727733600,
+            1735686000,
+            7776000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 2,
+        "offset": 2,
+        "expected": [
+            1719784800,
+            1727733600,
+            15552000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 3,
+        "offset": 0,
+        "expected": [
+            1735686000,
+            1738364400,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 3,
+        "offset": 1,
+        "expected": [
+            1733007600,
+            1735686000,
+            2592000,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 3,
+        "offset": 2,
+        "expected": [
+            1730415600,
+            1733007600,
+            5184000,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 4,
+        "offset": 0,
+        "expected": [
+            1767049200,
+            1767567600,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 4,
+        "offset": 1,
+        "expected": [
+            1766444400,
+            1767049200,
+            604800,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 4,
+        "offset": 2,
+        "expected": [
+            1765839600,
+            1766444400,
+            1209600,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 5,
+        "offset": 0,
+        "expected": [
+            1735686000,
+            1735772400,
+            0,
+            0
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 5,
+        "offset": 1,
+        "expected": [
+            1735599600,
+            1735686000,
+            86400,
+            0
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 5,
+        "offset": 2,
+        "expected": [
+            1735513200,
+            1735599600,
+            172800,
+            0
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 6,
+        "offset": 0,
+        "expected": [
+            1735729200,
+            1735732800,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 6,
+        "offset": 1,
+        "expected": [
+            1735725600,
+            1735729200,
+            3600,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 6,
+        "offset": 2,
+        "expected": [
+            1735722000,
+            1735725600,
+            7200,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 7,
+        "offset": 0,
+        "expected": [
+            1735731240,
+            1735731300,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 7,
+        "offset": 1,
+        "expected": [
+            1735731180,
+            1735731240,
+            60,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 7,
+        "offset": 2,
+        "expected": [
+            1735731120,
+            1735731180,
+            120,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 0,
+        "offset": 0,
+        "expected": [
+            1451602800,
+            1735686001,
+            0,
+            4
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 0,
+        "offset": 1,
+        "expected": [
+            1136070000,
+            1420066801,
+            311040000,
+            4
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 0,
+        "offset": 2,
+        "expected": [
+            820450800,
+            1104534001,
+            622080000,
+            4
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 1,
+        "offset": 0,
+        "expected": [
+            1706742000,
+            1735686001,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 1,
+        "offset": 1,
+        "expected": [
+            1675206000,
+            1704063601,
+            31104000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 1,
+        "offset": 2,
+        "expected": [
+            1643670000,
+            1672527601,
+            62208000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 2,
+        "offset": 0,
+        "expected": [
+            1730415600,
+            1735686001,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 2,
+        "offset": 1,
+        "expected": [
+            1722463200,
+            1727733601,
+            7776000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 2,
+        "offset": 2,
+        "expected": [
+            1714514400,
+            1719784801,
+            15552000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 3,
+        "offset": 0,
+        "expected": [
+            1733094000,
+            1735686001,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 3,
+        "offset": 1,
+        "expected": [
+            1730502000,
+            1733007601,
+            2592000,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 3,
+        "offset": 2,
+        "expected": [
+            1727820000,
+            1730415601,
+            5184000,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 4,
+        "offset": 0,
+        "expected": [
+            1735167600,
+            1735686001,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 4,
+        "offset": 1,
+        "expected": [
+            1734562800,
+            1735081201,
+            604800,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 4,
+        "offset": 2,
+        "expected": [
+            1733958000,
+            1734476401,
+            1209600,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 5,
+        "offset": 0,
+        "expected": [
+            1735646400,
+            1735729201,
+            0,
+            0
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 5,
+        "offset": 1,
+        "expected": [
+            1735560000,
+            1735642801,
+            86400,
+            0
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 5,
+        "offset": 2,
+        "expected": [
+            1735473600,
+            1735556401,
+            172800,
+            0
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 6,
+        "offset": 0,
+        "expected": [
+            1735727700,
+            1735731241,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 6,
+        "offset": 1,
+        "expected": [
+            1735724100,
+            1735727641,
+            3600,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 6,
+        "offset": 2,
+        "expected": [
+            1735720500,
+            1735724041,
+            7200,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 7,
+        "offset": 0,
+        "expected": [
+            1735731237,
+            1735731297,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 7,
+        "offset": 1,
+        "expected": [
+            1735731177,
+            1735731237,
+            60,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 7,
+        "offset": 2,
+        "expected": [
+            1735731117,
+            1735731177,
+            120,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 0,
+        "offset": 0,
+        "expected": [
+            1577833200,
+            1861916400,
+            0,
+            4
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 0,
+        "offset": 1,
+        "expected": [
+            1262300400,
+            1577833200,
+            311040000,
+            4
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 0,
+        "offset": 2,
+        "expected": [
+            946681200,
+            1262300400,
+            622080000,
+            4
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 1,
+        "offset": 0,
+        "expected": [
+            1767222000,
+            1796079600,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 1,
+        "offset": 1,
+        "expected": [
+            1735686000,
+            1767222000,
+            31104000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 1,
+        "offset": 2,
+        "expected": [
+            1704063600,
+            1735686000,
+            62208000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 2,
+        "offset": 0,
+        "expected": [
+            1790805600,
+            1796079600,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 2,
+        "offset": 1,
+        "expected": [
+            1782856800,
+            1790805600,
+            7776000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 2,
+        "offset": 2,
+        "expected": [
+            1774994400,
+            1782856800,
+            15552000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 3,
+        "offset": 0,
+        "expected": [
+            1796079600,
+            1798758000,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 3,
+        "offset": 1,
+        "expected": [
+            1793487600,
+            1796079600,
+            2592000,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 3,
+        "offset": 2,
+        "expected": [
+            1790805600,
+            1793487600,
+            5184000,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 4,
+        "offset": 0,
+        "expected": [
+            1798412400,
+            1798930800,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 4,
+        "offset": 1,
+        "expected": [
+            1797807600,
+            1798412400,
+            604800,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 4,
+        "offset": 2,
+        "expected": [
+            1797202800,
+            1797807600,
+            1209600,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 5,
+        "offset": 0,
+        "expected": [
+            1798671600,
+            1798758000,
+            0,
+            0
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 5,
+        "offset": 1,
+        "expected": [
+            1798585200,
+            1798671600,
+            86400,
+            0
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 5,
+        "offset": 2,
+        "expected": [
+            1798498800,
+            1798585200,
+            172800,
+            0
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 6,
+        "offset": 0,
+        "expected": [
+            1798754400,
+            1798758000,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 6,
+        "offset": 1,
+        "expected": [
+            1798750800,
+            1798754400,
+            3600,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 6,
+        "offset": 2,
+        "expected": [
+            1798747200,
+            1798750800,
+            7200,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 7,
+        "offset": 0,
+        "expected": [
+            1798757940,
+            1798758000,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 7,
+        "offset": 1,
+        "expected": [
+            1798757880,
+            1798757940,
+            60,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 7,
+        "offset": 2,
+        "expected": [
+            1798757820,
+            1798757880,
+            120,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 0,
+        "offset": 0,
+        "expected": [
+            1483225200,
+            1767222001,
+            0,
+            4
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 0,
+        "offset": 1,
+        "expected": [
+            1167606000,
+            1451602801,
+            311040000,
+            4
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 0,
+        "offset": 2,
+        "expected": [
+            852073200,
+            1136070001,
+            622080000,
+            4
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 1,
+        "offset": 0,
+        "expected": [
+            1767222000,
+            1796079601,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 1,
+        "offset": 1,
+        "expected": [
+            1735686000,
+            1764543601,
+            31104000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 1,
+        "offset": 2,
+        "expected": [
+            1704063600,
+            1733007601,
+            62208000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 2,
+        "offset": 0,
+        "expected": [
+            1790805600,
+            1796079601,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 2,
+        "offset": 1,
+        "expected": [
+            1782856800,
+            1788213601,
+            7776000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 2,
+        "offset": 2,
+        "expected": [
+            1774994400,
+            1780264801,
+            15552000,
+            3
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 3,
+        "offset": 0,
+        "expected": [
+            1796166000,
+            1798671601,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 3,
+        "offset": 1,
+        "expected": [
+            1793574000,
+            1796079601,
+            2592000,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 3,
+        "offset": 2,
+        "expected": [
+            1790892000,
+            1793401201,
+            5184000,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 4,
+        "offset": 0,
+        "expected": [
+            1798153200,
+            1798671601,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 4,
+        "offset": 1,
+        "expected": [
+            1797548400,
+            1798066801,
+            604800,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 4,
+        "offset": 2,
+        "expected": [
+            1796943600,
+            1797462001,
+            1209600,
+            1
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 5,
+        "offset": 0,
+        "expected": [
+            1798671600,
+            1798754401,
+            0,
+            0
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 5,
+        "offset": 1,
+        "expected": [
+            1798585200,
+            1798668001,
+            86400,
+            0
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 5,
+        "offset": 2,
+        "expected": [
+            1798498800,
+            1798581601,
+            172800,
+            0
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 6,
+        "offset": 0,
+        "expected": [
+            1798754400,
+            1798757941,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 6,
+        "offset": 1,
+        "expected": [
+            1798750800,
+            1798754341,
+            3600,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 6,
+        "offset": 2,
+        "expected": [
+            1798747200,
+            1798750741,
+            7200,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 7,
+        "offset": 0,
+        "expected": [
+            1798757940,
+            1798758000,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 7,
+        "offset": 1,
+        "expected": [
+            1798757880,
+            1798757940,
+            60,
+            6
+        ]
+    },
+    {
+        "family": "cartesian-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 7,
+        "offset": 2,
+        "expected": [
+            1798757820,
+            1798757880,
+            120,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 0,
+        "offset": 0,
+        "expected": [
+            1577833200,
+            1893452400,
+            0,
+            4
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 0,
+        "offset": 1,
+        "expected": [
+            1262300400,
+            1577833200,
+            311040000,
+            4
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 0,
+        "offset": 2,
+        "expected": [
+            946681200,
+            1262300400,
+            622080000,
+            4
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 1,
+        "offset": 0,
+        "expected": [
+            1704063600,
+            1735686000,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 1,
+        "offset": 1,
+        "expected": [
+            1672527600,
+            1704063600,
+            31104000,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 1,
+        "offset": 2,
+        "expected": [
+            1640991600,
+            1672527600,
+            62208000,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 2,
+        "offset": 0,
+        "expected": [
+            1704063600,
+            1711922400,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 2,
+        "offset": 1,
+        "expected": [
+            1696111200,
+            1704063600,
+            7776000,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 2,
+        "offset": 2,
+        "expected": [
+            1688162400,
+            1696111200,
+            15552000,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 3,
+        "offset": 0,
+        "expected": [
+            1706742000,
+            1709247600,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 3,
+        "offset": 1,
+        "expected": [
+            1704063600,
+            1706742000,
+            2592000,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 3,
+        "offset": 2,
+        "expected": [
+            1701385200,
+            1704063600,
+            5184000,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 4,
+        "offset": 0,
+        "expected": [
+            1708902000,
+            1709506800,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 4,
+        "offset": 1,
+        "expected": [
+            1708297200,
+            1708902000,
+            604800,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 4,
+        "offset": 2,
+        "expected": [
+            1707692400,
+            1708297200,
+            1209600,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 5,
+        "offset": 0,
+        "expected": [
+            1709161200,
+            1709247600,
+            0,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 5,
+        "offset": 1,
+        "expected": [
+            1709074800,
+            1709161200,
+            86400,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 5,
+        "offset": 2,
+        "expected": [
+            1708988400,
+            1709074800,
+            172800,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 6,
+        "offset": 0,
+        "expected": [
+            1709204400,
+            1709208000,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 6,
+        "offset": 1,
+        "expected": [
+            1709200800,
+            1709204400,
+            3600,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 6,
+        "offset": 2,
+        "expected": [
+            1709197200,
+            1709200800,
+            7200,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 7,
+        "offset": 0,
+        "expected": [
+            1709206440,
+            1709206500,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 7,
+        "offset": 1,
+        "expected": [
+            1709206380,
+            1709206440,
+            60,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": false,
+        "period": 7,
+        "offset": 2,
+        "expected": [
+            1709206320,
+            1709206380,
+            120,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 0,
+        "offset": 0,
+        "expected": [
+            1420066800,
+            1704063601,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 0,
+        "offset": 1,
+        "expected": [
+            1104534000,
+            1388530801,
+            311040000,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 0,
+        "offset": 2,
+        "expected": [
+            788914800,
+            1072911601,
+            622080000,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 1,
+        "offset": 0,
+        "expected": [
+            1677625200,
+            1706742001,
+            0,
+            2
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 1,
+        "offset": 1,
+        "expected": [
+            1646089200,
+            1675206001,
+            31104000,
+            2
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 1,
+        "offset": 2,
+        "expected": [
+            1614553200,
+            1643670001,
+            62208000,
+            2
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 2,
+        "offset": 0,
+        "expected": [
+            1701385200,
+            1706742001,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 2,
+        "offset": 1,
+        "expected": [
+            1693519200,
+            1698793201,
+            7776000,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 2,
+        "offset": 2,
+        "expected": [
+            1685570400,
+            1690840801,
+            15552000,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 3,
+        "offset": 0,
+        "expected": [
+            1706569200,
+            1709161201,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 3,
+        "offset": 1,
+        "expected": [
+            1703890800,
+            1706482801,
+            2592000,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 3,
+        "offset": 2,
+        "expected": [
+            1701298800,
+            1703804401,
+            5184000,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 4,
+        "offset": 0,
+        "expected": [
+            1708642800,
+            1709161201,
+            0,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 4,
+        "offset": 1,
+        "expected": [
+            1708038000,
+            1708556401,
+            604800,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 4,
+        "offset": 2,
+        "expected": [
+            1707433200,
+            1707951601,
+            1209600,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 5,
+        "offset": 0,
+        "expected": [
+            1709121600,
+            1709204401,
+            0,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 5,
+        "offset": 1,
+        "expected": [
+            1709035200,
+            1709118001,
+            86400,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 5,
+        "offset": 2,
+        "expected": [
+            1708948800,
+            1709031601,
+            172800,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 6,
+        "offset": 0,
+        "expected": [
+            1709202900,
+            1709206441,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 6,
+        "offset": 1,
+        "expected": [
+            1709199300,
+            1709202841,
+            3600,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 6,
+        "offset": 2,
+        "expected": [
+            1709195700,
+            1709199241,
+            7200,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 7,
+        "offset": 0,
+        "expected": [
+            1709206437,
+            1709206497,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 7,
+        "offset": 1,
+        "expected": [
+            1709206377,
+            1709206437,
+            60,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2024-02-29 12:34:56",
+        "relative": true,
+        "period": 7,
+        "offset": 2,
+        "expected": [
+            1709206317,
+            1709206377,
+            120,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 0,
+        "offset": 0,
+        "expected": [
+            1577833200,
+            1893452400,
+            0,
+            4
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 0,
+        "offset": 1,
+        "expected": [
+            1262300400,
+            1577833200,
+            311040000,
+            4
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 0,
+        "offset": 2,
+        "expected": [
+            946681200,
+            1262300400,
+            622080000,
+            4
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 1,
+        "offset": 0,
+        "expected": [
+            1767222000,
+            1798758000,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 1,
+        "offset": 1,
+        "expected": [
+            1735686000,
+            1767222000,
+            31104000,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 1,
+        "offset": 2,
+        "expected": [
+            1704063600,
+            1735686000,
+            62208000,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 2,
+        "offset": 0,
+        "expected": [
+            1767222000,
+            1774994400,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 2,
+        "offset": 1,
+        "expected": [
+            1759269600,
+            1767222000,
+            7776000,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 2,
+        "offset": 2,
+        "expected": [
+            1751320800,
+            1759269600,
+            15552000,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 3,
+        "offset": 0,
+        "expected": [
+            1772319600,
+            1774994400,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 3,
+        "offset": 1,
+        "expected": [
+            1769900400,
+            1772319600,
+            2592000,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 3,
+        "offset": 2,
+        "expected": [
+            1767222000,
+            1769900400,
+            5184000,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 4,
+        "offset": 0,
+        "expected": [
+            1774220400,
+            1774821600,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 4,
+        "offset": 1,
+        "expected": [
+            1773615600,
+            1774220400,
+            604800,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 4,
+        "offset": 2,
+        "expected": [
+            1773010800,
+            1773615600,
+            1209600,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 5,
+        "offset": 0,
+        "expected": [
+            1774738800,
+            1774821600,
+            0,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 5,
+        "offset": 1,
+        "expected": [
+            1774652400,
+            1774738800,
+            86400,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 5,
+        "offset": 2,
+        "expected": [
+            1774566000,
+            1774652400,
+            172800,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 6,
+        "offset": 0,
+        "expected": [
+            1774746000,
+            1774749600,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 6,
+        "offset": 1,
+        "expected": [
+            1774742400,
+            1774746000,
+            3600,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 6,
+        "offset": 2,
+        "expected": [
+            1774738800,
+            1774742400,
+            7200,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 7,
+        "offset": 0,
+        "expected": [
+            1774748040,
+            1774748100,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 7,
+        "offset": 1,
+        "expected": [
+            1774747980,
+            1774748040,
+            60,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": false,
+        "period": 7,
+        "offset": 2,
+        "expected": [
+            1774747920,
+            1774747980,
+            120,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 0,
+        "offset": 0,
+        "expected": [
+            1483225200,
+            1767222001,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 0,
+        "offset": 1,
+        "expected": [
+            1167606000,
+            1451602801,
+            311040000,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 0,
+        "offset": 2,
+        "expected": [
+            852073200,
+            1136070001,
+            622080000,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 1,
+        "offset": 0,
+        "expected": [
+            1743458400,
+            1772319601,
+            0,
+            2
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 1,
+        "offset": 1,
+        "expected": [
+            1711922400,
+            1740783601,
+            31104000,
+            2
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 1,
+        "offset": 2,
+        "expected": [
+            1680300000,
+            1709247601,
+            62208000,
+            2
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 2,
+        "offset": 0,
+        "expected": [
+            1767222000,
+            1772319601,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 2,
+        "offset": 1,
+        "expected": [
+            1759269600,
+            1764543601,
+            7776000,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 2,
+        "offset": 2,
+        "expected": [
+            1751320800,
+            1756677601,
+            15552000,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 3,
+        "offset": 0,
+        "expected": [
+            1772406000,
+            1774738801,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 3,
+        "offset": 1,
+        "expected": [
+            1769986800,
+            1772319601,
+            2592000,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 3,
+        "offset": 2,
+        "expected": [
+            1767308400,
+            1769641201,
+            5184000,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 4,
+        "offset": 0,
+        "expected": [
+            1774220400,
+            1774738801,
+            0,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 4,
+        "offset": 1,
+        "expected": [
+            1773615600,
+            1774134001,
+            604800,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 4,
+        "offset": 2,
+        "expected": [
+            1773010800,
+            1773529201,
+            1209600,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 5,
+        "offset": 0,
+        "expected": [
+            1774666800,
+            1774746001,
+            0,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 5,
+        "offset": 1,
+        "expected": [
+            1774580400,
+            1774663201,
+            86400,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 5,
+        "offset": 2,
+        "expected": [
+            1774494000,
+            1774576801,
+            172800,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 6,
+        "offset": 0,
+        "expected": [
+            1774748100,
+            1774748041,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 6,
+        "offset": 1,
+        "expected": [
+            1774744500,
+            1774744441,
+            3600,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 6,
+        "offset": 2,
+        "expected": [
+            1774740900,
+            1774740841,
+            7200,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 7,
+        "offset": 0,
+        "expected": [
+            1774748037,
+            1774748097,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 7,
+        "offset": 1,
+        "expected": [
+            1774747977,
+            1774748037,
+            60,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-03-29 03:34:56",
+        "relative": true,
+        "period": 7,
+        "offset": 2,
+        "expected": [
+            1774747917,
+            1774747977,
+            120,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 0,
+        "offset": 0,
+        "expected": [
+            1577833200,
+            1893452400,
+            0,
+            4
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 0,
+        "offset": 1,
+        "expected": [
+            1262300400,
+            1577833200,
+            311040000,
+            4
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 0,
+        "offset": 2,
+        "expected": [
+            946681200,
+            1262300400,
+            622080000,
+            4
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 1,
+        "offset": 0,
+        "expected": [
+            1767222000,
+            1798758000,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 1,
+        "offset": 1,
+        "expected": [
+            1735686000,
+            1767222000,
+            31104000,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 1,
+        "offset": 2,
+        "expected": [
+            1704063600,
+            1735686000,
+            62208000,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 2,
+        "offset": 0,
+        "expected": [
+            1790805600,
+            1798758000,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 2,
+        "offset": 1,
+        "expected": [
+            1782856800,
+            1790805600,
+            7776000,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 2,
+        "offset": 2,
+        "expected": [
+            1774994400,
+            1782856800,
+            15552000,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 3,
+        "offset": 0,
+        "expected": [
+            1790805600,
+            1793487600,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 3,
+        "offset": 1,
+        "expected": [
+            1788213600,
+            1790805600,
+            2592000,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 3,
+        "offset": 2,
+        "expected": [
+            1785535200,
+            1788213600,
+            5184000,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 4,
+        "offset": 0,
+        "expected": [
+            1792360800,
+            1792969200,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 4,
+        "offset": 1,
+        "expected": [
+            1791756000,
+            1792360800,
+            604800,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 4,
+        "offset": 2,
+        "expected": [
+            1791151200,
+            1791756000,
+            1209600,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 5,
+        "offset": 0,
+        "expected": [
+            1792879200,
+            1792969200,
+            0,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 5,
+        "offset": 1,
+        "expected": [
+            1792792800,
+            1792879200,
+            86400,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 5,
+        "offset": 2,
+        "expected": [
+            1792706400,
+            1792792800,
+            172800,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 6,
+        "offset": 0,
+        "expected": [
+            1792893600,
+            1792897200,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 6,
+        "offset": 1,
+        "expected": [
+            1792890000,
+            1792893600,
+            3600,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 6,
+        "offset": 2,
+        "expected": [
+            1792886400,
+            1792893600,
+            7200,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 7,
+        "offset": 0,
+        "expected": [
+            1792895640,
+            1792895700,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 7,
+        "offset": 1,
+        "expected": [
+            1792895580,
+            1792895640,
+            60,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": false,
+        "period": 7,
+        "offset": 2,
+        "expected": [
+            1792895520,
+            1792895580,
+            120,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 0,
+        "offset": 0,
+        "expected": [
+            1483225200,
+            1767222001,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 0,
+        "offset": 1,
+        "expected": [
+            1167606000,
+            1451602801,
+            311040000,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 0,
+        "offset": 2,
+        "expected": [
+            852073200,
+            1136070001,
+            622080000,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 1,
+        "offset": 0,
+        "expected": [
+            1761951600,
+            1790805601,
+            0,
+            2
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 1,
+        "offset": 1,
+        "expected": [
+            1730415600,
+            1759269601,
+            31104000,
+            2
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 1,
+        "offset": 2,
+        "expected": [
+            1698793200,
+            1727733601,
+            62208000,
+            2
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 2,
+        "offset": 0,
+        "expected": [
+            1785535200,
+            1790805601,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 2,
+        "offset": 1,
+        "expected": [
+            1777586400,
+            1782856801,
+            7776000,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 2,
+        "offset": 2,
+        "expected": [
+            1769900400,
+            1774994401,
+            15552000,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 3,
+        "offset": 0,
+        "expected": [
+            1790373600,
+            1792879201,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 3,
+        "offset": 1,
+        "expected": [
+            1787695200,
+            1790287201,
+            2592000,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 3,
+        "offset": 2,
+        "expected": [
+            1785016800,
+            1787608801,
+            5184000,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 4,
+        "offset": 0,
+        "expected": [
+            1792360800,
+            1792879201,
+            0,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 4,
+        "offset": 1,
+        "expected": [
+            1791756000,
+            1792274401,
+            604800,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 4,
+        "offset": 2,
+        "expected": [
+            1791151200,
+            1791669601,
+            1209600,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 5,
+        "offset": 0,
+        "expected": [
+            1792807200,
+            1792893601,
+            0,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 5,
+        "offset": 1,
+        "expected": [
+            1792720800,
+            1792803601,
+            86400,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 5,
+        "offset": 2,
+        "expected": [
+            1792634400,
+            1792717201,
+            172800,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 6,
+        "offset": 0,
+        "expected": [
+            1792892100,
+            1792895641,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 6,
+        "offset": 1,
+        "expected": [
+            1792888500,
+            1792892041,
+            3600,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 6,
+        "offset": 2,
+        "expected": [
+            1792884900,
+            1792888441,
+            7200,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 7,
+        "offset": 0,
+        "expected": [
+            1792895637,
+            1792895697,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 7,
+        "offset": 1,
+        "expected": [
+            1792895577,
+            1792895637,
+            60,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-10-25 03:34:56",
+        "relative": true,
+        "period": 7,
+        "offset": 2,
+        "expected": [
+            1792895517,
+            1792895577,
+            120,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 0,
+        "offset": 0,
+        "expected": [
+            1577833200,
+            1893452400,
+            0,
+            4
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 0,
+        "offset": 1,
+        "expected": [
+            1262300400,
+            1577833200,
+            311040000,
+            4
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 0,
+        "offset": 2,
+        "expected": [
+            946681200,
+            1262300400,
+            622080000,
+            4
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 1,
+        "offset": 0,
+        "expected": [
+            1735686000,
+            1767222000,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 1,
+        "offset": 1,
+        "expected": [
+            1704063600,
+            1735686000,
+            31104000,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 1,
+        "offset": 2,
+        "expected": [
+            1672527600,
+            1704063600,
+            62208000,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 2,
+        "offset": 0,
+        "expected": [
+            1735686000,
+            1743458400,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 2,
+        "offset": 1,
+        "expected": [
+            1727733600,
+            1735686000,
+            7776000,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 2,
+        "offset": 2,
+        "expected": [
+            1719784800,
+            1727733600,
+            15552000,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 3,
+        "offset": 0,
+        "expected": [
+            1735686000,
+            1738364400,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 3,
+        "offset": 1,
+        "expected": [
+            1733007600,
+            1735686000,
+            2592000,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 3,
+        "offset": 2,
+        "expected": [
+            1730415600,
+            1733007600,
+            5184000,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 4,
+        "offset": 0,
+        "expected": [
+            1767049200,
+            1767654000,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 4,
+        "offset": 1,
+        "expected": [
+            1766444400,
+            1767049200,
+            604800,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 4,
+        "offset": 2,
+        "expected": [
+            1765839600,
+            1766444400,
+            1209600,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 5,
+        "offset": 0,
+        "expected": [
+            1735686000,
+            1735772400,
+            0,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 5,
+        "offset": 1,
+        "expected": [
+            1735599600,
+            1735686000,
+            86400,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 5,
+        "offset": 2,
+        "expected": [
+            1735513200,
+            1735599600,
+            172800,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 6,
+        "offset": 0,
+        "expected": [
+            1735729200,
+            1735732800,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 6,
+        "offset": 1,
+        "expected": [
+            1735725600,
+            1735729200,
+            3600,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 6,
+        "offset": 2,
+        "expected": [
+            1735722000,
+            1735725600,
+            7200,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 7,
+        "offset": 0,
+        "expected": [
+            1735731240,
+            1735731300,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 7,
+        "offset": 1,
+        "expected": [
+            1735731180,
+            1735731240,
+            60,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": false,
+        "period": 7,
+        "offset": 2,
+        "expected": [
+            1735731120,
+            1735731180,
+            120,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 0,
+        "offset": 0,
+        "expected": [
+            1451602800,
+            1735686001,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 0,
+        "offset": 1,
+        "expected": [
+            1136070000,
+            1420066801,
+            311040000,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 0,
+        "offset": 2,
+        "expected": [
+            820450800,
+            1104534001,
+            622080000,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 1,
+        "offset": 0,
+        "expected": [
+            1706742000,
+            1735686001,
+            0,
+            2
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 1,
+        "offset": 1,
+        "expected": [
+            1675206000,
+            1704063601,
+            31104000,
+            2
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 1,
+        "offset": 2,
+        "expected": [
+            1643670000,
+            1672527601,
+            62208000,
+            2
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 2,
+        "offset": 0,
+        "expected": [
+            1730415600,
+            1735686001,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 2,
+        "offset": 1,
+        "expected": [
+            1722463200,
+            1727733601,
+            7776000,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 2,
+        "offset": 2,
+        "expected": [
+            1714514400,
+            1719784801,
+            15552000,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 3,
+        "offset": 0,
+        "expected": [
+            1733094000,
+            1735686001,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 3,
+        "offset": 1,
+        "expected": [
+            1730502000,
+            1733007601,
+            2592000,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 3,
+        "offset": 2,
+        "expected": [
+            1727820000,
+            1730415601,
+            5184000,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 4,
+        "offset": 0,
+        "expected": [
+            1735167600,
+            1735686001,
+            0,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 4,
+        "offset": 1,
+        "expected": [
+            1734562800,
+            1735081201,
+            604800,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 4,
+        "offset": 2,
+        "expected": [
+            1733958000,
+            1734476401,
+            1209600,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 5,
+        "offset": 0,
+        "expected": [
+            1735646400,
+            1735729201,
+            0,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 5,
+        "offset": 1,
+        "expected": [
+            1735560000,
+            1735642801,
+            86400,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 5,
+        "offset": 2,
+        "expected": [
+            1735473600,
+            1735556401,
+            172800,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 6,
+        "offset": 0,
+        "expected": [
+            1735727700,
+            1735731241,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 6,
+        "offset": 1,
+        "expected": [
+            1735724100,
+            1735727641,
+            3600,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 6,
+        "offset": 2,
+        "expected": [
+            1735720500,
+            1735724041,
+            7200,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 7,
+        "offset": 0,
+        "expected": [
+            1735731237,
+            1735731297,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 7,
+        "offset": 1,
+        "expected": [
+            1735731177,
+            1735731237,
+            60,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2025-01-01 12:34:56",
+        "relative": true,
+        "period": 7,
+        "offset": 2,
+        "expected": [
+            1735731117,
+            1735731177,
+            120,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 0,
+        "offset": 0,
+        "expected": [
+            1577833200,
+            1893452400,
+            0,
+            4
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 0,
+        "offset": 1,
+        "expected": [
+            1262300400,
+            1577833200,
+            311040000,
+            4
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 0,
+        "offset": 2,
+        "expected": [
+            946681200,
+            1262300400,
+            622080000,
+            4
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 1,
+        "offset": 0,
+        "expected": [
+            1767222000,
+            1798758000,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 1,
+        "offset": 1,
+        "expected": [
+            1735686000,
+            1767222000,
+            31104000,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 1,
+        "offset": 2,
+        "expected": [
+            1704063600,
+            1735686000,
+            62208000,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 2,
+        "offset": 0,
+        "expected": [
+            1790805600,
+            1798758000,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 2,
+        "offset": 1,
+        "expected": [
+            1782856800,
+            1790805600,
+            7776000,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 2,
+        "offset": 2,
+        "expected": [
+            1774994400,
+            1782856800,
+            15552000,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 3,
+        "offset": 0,
+        "expected": [
+            1796079600,
+            1798758000,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 3,
+        "offset": 1,
+        "expected": [
+            1793487600,
+            1796079600,
+            2592000,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 3,
+        "offset": 2,
+        "expected": [
+            1790805600,
+            1793487600,
+            5184000,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 4,
+        "offset": 0,
+        "expected": [
+            1798412400,
+            1799017200,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 4,
+        "offset": 1,
+        "expected": [
+            1797807600,
+            1798412400,
+            604800,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 4,
+        "offset": 2,
+        "expected": [
+            1797202800,
+            1797807600,
+            1209600,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 5,
+        "offset": 0,
+        "expected": [
+            1798671600,
+            1798758000,
+            0,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 5,
+        "offset": 1,
+        "expected": [
+            1798585200,
+            1798671600,
+            86400,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 5,
+        "offset": 2,
+        "expected": [
+            1798498800,
+            1798585200,
+            172800,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 6,
+        "offset": 0,
+        "expected": [
+            1798754400,
+            1798758000,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 6,
+        "offset": 1,
+        "expected": [
+            1798750800,
+            1798754400,
+            3600,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 6,
+        "offset": 2,
+        "expected": [
+            1798747200,
+            1798750800,
+            7200,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 7,
+        "offset": 0,
+        "expected": [
+            1798757940,
+            1798758000,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 7,
+        "offset": 1,
+        "expected": [
+            1798757880,
+            1798757940,
+            60,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": false,
+        "period": 7,
+        "offset": 2,
+        "expected": [
+            1798757820,
+            1798757880,
+            120,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 0,
+        "offset": 0,
+        "expected": [
+            1483225200,
+            1767222001,
+            0,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 0,
+        "offset": 1,
+        "expected": [
+            1167606000,
+            1451602801,
+            311040000,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 0,
+        "offset": 2,
+        "expected": [
+            852073200,
+            1136070001,
+            622080000,
+            3
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 1,
+        "offset": 0,
+        "expected": [
+            1767222000,
+            1796079601,
+            0,
+            2
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 1,
+        "offset": 1,
+        "expected": [
+            1735686000,
+            1764543601,
+            31104000,
+            2
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 1,
+        "offset": 2,
+        "expected": [
+            1704063600,
+            1733007601,
+            62208000,
+            2
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 2,
+        "offset": 0,
+        "expected": [
+            1790805600,
+            1796079601,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 2,
+        "offset": 1,
+        "expected": [
+            1782856800,
+            1788213601,
+            7776000,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 2,
+        "offset": 2,
+        "expected": [
+            1774994400,
+            1780264801,
+            15552000,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 3,
+        "offset": 0,
+        "expected": [
+            1796166000,
+            1798671601,
+            0,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 3,
+        "offset": 1,
+        "expected": [
+            1793574000,
+            1796079601,
+            2592000,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 3,
+        "offset": 2,
+        "expected": [
+            1790892000,
+            1793401201,
+            5184000,
+            1
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 4,
+        "offset": 0,
+        "expected": [
+            1798153200,
+            1798671601,
+            0,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 4,
+        "offset": 1,
+        "expected": [
+            1797548400,
+            1798066801,
+            604800,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 4,
+        "offset": 2,
+        "expected": [
+            1796943600,
+            1797462001,
+            1209600,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 5,
+        "offset": 0,
+        "expected": [
+            1798671600,
+            1798754401,
+            0,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 5,
+        "offset": 1,
+        "expected": [
+            1798585200,
+            1798668001,
+            86400,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 5,
+        "offset": 2,
+        "expected": [
+            1798498800,
+            1798581601,
+            172800,
+            0
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 6,
+        "offset": 0,
+        "expected": [
+            1798754400,
+            1798757941,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 6,
+        "offset": 1,
+        "expected": [
+            1798750800,
+            1798754341,
+            3600,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 6,
+        "offset": 2,
+        "expected": [
+            1798747200,
+            1798750741,
+            7200,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 7,
+        "offset": 0,
+        "expected": [
+            1798757940,
+            1798758000,
+            0,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 7,
+        "offset": 1,
+        "expected": [
+            1798757880,
+            1798757940,
+            60,
+            6
+        ]
+    },
+    {
+        "family": "radar-history",
+        "date": "2026-12-31 23:59:59",
+        "relative": true,
+        "period": 7,
+        "offset": 2,
+        "expected": [
+            1798757820,
+            1798757880,
+            120,
+            6
+        ]
+    }
+]

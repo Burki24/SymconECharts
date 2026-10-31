@@ -8,27 +8,31 @@ ohne die numerische Chart-Auflösung zu verändern. Der Eigentümer bestätigt a
 2366 Konfigurationsfelder, 64 Bindungen und 112 Ressourceneinträge erhalten,
 Wiederholungsexporte fachlich identisch und Testobjekte unverändert.
 
-Gemäß [ADR 0110](adr/0110-jslive-import-preview.md) bietet das Gateway jetzt
-eine lesende Importvorschau: Paketprüfung, explizite Quellen-/Archivzuordnung,
-Zielfamilienkandidaten, unabhängige native Neuableitung sowie vollständige
-Feldbilanz und herunterladbaren Übernahme-/Abweichungsbericht. Paket-, Revisions-
-und Planhash trennen Exportidentität von fachlichen Änderungen. Die Vorschau
-verändert keine Properties, Instanzen, Quellen oder Archive. Ihre Formulardaten
-bleiben flüchtig. Die native Formular-Live-Abnahme nach Update steht aus.
-Vollständige Zielmapper, fehlende Fachmodelle, Archiv-/Darstellungsvergleich,
-bestätigte Anlage und Journal bleiben offen; die Vorschau nennt sie als Sperren.
+Gemäß [ADR 0110](adr/0110-jslive-import-preview.md) bleibt die erste lesende
+Metadatenvorschau verfügbar. [ADR 0111](adr/0111-confirmed-jslive-import.md)
+ergänzt vollständige native Pläne, individuelle Abweichungsbestätigung,
+bestätigte Neuanlage, ein persistentes Journal und kontrollierten Wiederanlauf.
+Die 40 anonymisierten Varianten werden auf sechs Zielfamilien abgebildet;
+EChartsRadarHistory und EChartsProgress ergänzen die fehlenden Fachmodelle.
+Zeit-, Archiv-, Darstellungs- und Ressourcenregeln sind versioniert; vorhandene
+Familienverträge bleiben bei leerem Importmodell unverändert.
+
+Die lokale Prüfung umfasst alle 40 Modelle/Pläne, echte Modulklassen und
+Formularsignaturen, den konkreten Kerneladapter mit Schreibschutz-Doppeln,
+Unterbrechungen, 64-MiB-Berichtsgrenzen, native ECharts-Renderer sowie isolierte
+Chromium-Dokumente. Details und Befehle stehen in [tests/README](../tests/README.md).
+Diese Nachweise sind keine Live-Übernahme oder Original-/Ziel-Bildabnahme in
+Symcon: Nach Eigentümer-Update bleiben die gemeinsame MCP-Anlage-/Wiederanlauf-
+prüfung und die tatsächlichen Kachel-/IPSView-Vergleiche offen. Die Beta bleibt
+bis zur vereinbarten Migrationsabnahme zurückgestellt. Die bereits abgeschlossene
+Nutzungsgrenzen-Roadmap und die Eigentümerabnahmen bestehender Modelle bleiben gültig.
 
 Der gemeinsame [JSLive-Export-/Importvertrag 1.0](JSLIVE_MIGRATION_CONTRACT.md)
-ist gemäß [ADR 0109](adr/0109-jslive-migration-contract.md) und JSLive ADR 0007
-spezifiziert. Die öffentliche Übernahmezusage bleibt bis zur Implementierung
-und gemeinsamen Abnahme offen; die erste Beta ist dafür zurückgestellt.
-JSLive erfasst fachliche Konfiguration, Steuerzustände, Quellen, Archivregeln,
-Darstellung und Ressourcen. Profile werden vollständig in profilunabhängige
-native Darstellungen und Chart-Metadaten übersetzt. Bestehende Quellen, Actions,
-Archive und Designs bleiben erhalten. Feldbilanz, Vorschau, ausdrückliche
-Bestätigung und wiederaufnehmbares Importjournal gehören zur Implementierung.
-Die Konfigurationsvorschau belegt noch keine vorhandene Importanlage. Die abgeschlossene
-Nutzungsgrenzen-Roadmap wird dadurch nicht rückwirkend wieder geöffnet.
+erhält Quellen, Archive, Designs und Steuervorgaben ohne Schreibzugriffe auf das
+Original. Native Darstellungen werden unabhängig aus dem vollständigen Snapshot
+abgeleitet. Fremdtemplates werden nur gegen bekannte unveränderte Standard-
+Hashes geprüft und nie ausgeführt. Native Zeitsteuerungen sind neue Properties,
+keine Actions auf bisherige Steuerungsvariablen.
 
 Die zentrale Gateway-Zustandsnormalisierung nutzt gemäß
 [ADR 0108](adr/0108-duration-aware-archive-states.md) die native Archiv-Dauer,
@@ -77,7 +81,7 @@ können. Die Anordnung mehrerer Charts übernimmt die jeweilige Visualisierung,
 nicht eine eigene große Dashboard-Seite des Moduls.
 
 Die native Kachelüberschrift wird zentral im `ResponsiveVisualizationHelper`
-aus `Symcon_ModuleHelper` ausgewertet. Alle 29 Diagrammmodule übernehmen mit
+aus `Symcon_ModuleHelper` ausgewertet. Die bisherigen 29 Diagrammmodule übernehmen mit
 `ResponsiveVisualizationLayoutOptions(!$ipsView)` die Bootstrap-Felder
 `tileHeaderVisible` und `tileHeaderInset`. Sichtbare native Kachelköpfe
 reservieren 58 Pixel; ausgeblendete Kachelköpfe und IPSView null Pixel.
@@ -612,7 +616,7 @@ das Blatt, aber nicht die künstliche Wurzel; alte Konfigurationen werden nicht
 umgeschrieben.
 
 Die [systematische Prüfung der Nutzungsgrenzen](NUTZUNGSGRENZEN.md) erfasst
-alle 29 Diagrammfamilien und das Gateway. Sie trennt fachliche Verträge und
+die bisherigen 29 Diagrammfamilien und das Gateway. Sie trennt fachliche Verträge und
 Ressourcenschutz von ausbaubaren Produktgrenzen. PictorialBar und BarCategory
 unterstützen jetzt 100 Quellen mit Kategoriennavigation; PictorialBar besitzt
 zusätzlich eine anpassbare Bezeichnungsspalte. BarCategory ergänzt einen

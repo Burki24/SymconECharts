@@ -1,0 +1,27 @@
+{
+    "$schema": "https://www.symcon.de/assets/files/validation/formSchema.json",
+    "elements": [
+        {
+            "type": "Label",
+            "caption": "Configure this chart through the confirmed JSLive import in EChartsGateway."
+        }
+    ],
+    "actions": [],
+    "status": [
+        {
+            "code": 102,
+            "icon": "active",
+            "caption": "Active"
+        },
+        {
+            "code": 202,
+            "icon": "error",
+            "caption": "Configure a valid imported model."
+        },
+        {
+            "code": 298,
+            "icon": "error",
+            "caption": "Imported model unavailable. Check sources, archive rules and budgets."
+        }
+    ]
+}

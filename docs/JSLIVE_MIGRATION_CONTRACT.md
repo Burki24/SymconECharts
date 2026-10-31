@@ -538,9 +538,15 @@ Kantenglättung von verschobener Geometrie, fehlenden Reihen oder falschen Farbe
    Zielfamilienkandidaten, getrennte Urteile und einen vollständigen JSON-Bericht.
    Die native Formular-Live-Abnahme nach Modulupdate bleibt offen. Kein
    gerenderter Original-/Zielvergleich und keine Importausführung in diesem Schritt.
-4. Fehlende Ziel-Fachmodelle und familienweise geprüfte Mapper: offen.
-5. Bestätigte Anlage, Importjournal, Wiederanlauf und gemeinsame Live-Abnahme:
-   offen.
+4. Ziel-Fachmodelle und familienweise Mapper: für die 40 Exportvarianten lokal
+   implementiert und geprüft. Native TimeSeries/BarHistory-, Mehrfach-Pie- und
+   Gauge-Modelle sowie EChartsRadarHistory und EChartsProgress ergänzen den
+   Vertrag gemäß ADR 0111. Native Formatierung bleibt profilunabhängig.
+5. Bestätigte Anlage, Importjournal und Wiederanlauf: implementiert. Vollständige
+   native Pläne binden Paket, aktuelle Quellen, Zielkontext und konkrete
+   Abweichungen; der Kerneladapter schreibt ausschließlich nachgewiesene
+   Neuziele. Die gemeinsame MCP-Übernahme-/Wiederanlaufabnahme und der direkte
+   Original-/Ziel-Darstellungsvergleich nach Eigentümer-Update bleiben offen.
 
 Die öffentliche Übernahmezusage ist damit noch nicht erfüllt. Die erste
 SymconECharts-Beta bleibt auf Eigentümerentscheidung bis zur vereinbarten
@@ -561,8 +567,12 @@ Quellen-/Formatplan, Hashes, Regeln, Feldbilanz und Abweichungen. In eingebettet
 JSON-Propertystrings benennt `pointer` das Originalfeld und `elementPointer`
 den logischen Pfad innerhalb des dekodierten Inhalts.
 
-Vorhandene Familien sind ausdrücklich Kandidaten. Ein direkter Teilentwurf
-einzelner Gauge-Eigenschaften oder eine geprüfte native Darstellung bedeutet
-keine vollständige Zielkonfiguration. Ungeprüfte Designs, laufende Altintervalle,
-Fallbacks, Offsets und fehlende Fachmodelle sperren weiterhin die Übernahme.
-Es gibt keine pauschale Bestätigung von Abweichungen und keine Anlagefunktion.
+In dieser ersten Metadatenvorschau sind Familien weiterhin ausdrücklich
+Kandidaten; ihr Teilentwurf ist keine vollständige Zielkonfiguration. Der
+zusätzliche vollständige native Plan aus ADR 0111 ist für die bestätigte
+Anlage maßgeblich. Er prüft tatsächliche Zielfamilien, Altintervalle, Fallbacks,
+Offsets, Ressourcen und beide nativen Ausgaben. Es gibt keine pauschale
+Bestätigung von Abweichungen: Jedes benannte Unterschiedsfeld benötigt seine
+eigene Bestätigung. Unbekannte oder nicht sicher abbildbare Modelle bleiben
+gesperrt. Abweichungen an eigenen Rendering-Engines sind keine pixelgleiche
+Übernahme und dürfen nicht als solche bezeichnet werden.

@@ -1,5 +1,7 @@
 # Keep repository text files consistent in the index and working tree.
 * text=auto eol=lf
+tests/fixtures/jslive-templates/*.html -text
+tests/fixtures/jslive-assets/*.woff2 -text
 
 # Vendored ECharts artifacts must retain the exact upstream bytes on checkout.
 /libs/echarts/** -text

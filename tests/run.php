@@ -25,6 +25,12 @@ $tests = [
     __DIR__ . '/presentation_snapshot.php',
     __DIR__ . '/jslive_import.php',
     __DIR__ . '/jslive_import_form.php',
+    __DIR__ . '/jslive_time.php',
+    __DIR__ . '/jslive_safety.php',
+    __DIR__ . '/jslive_models.php',
+    __DIR__ . '/jslive_plans.php',
+    __DIR__ . '/jslive_journal.php',
+    __DIR__ . '/jslive_execution.php',
     __DIR__ . '/echarts_assets.php',
     __DIR__ . '/svg_path.php',
     __DIR__ . '/svg_image.php',
@@ -63,6 +69,10 @@ $tests = [
 ];
 
 $commands = [
+    ['Test native JSLive formatting', 'node tests/jslive_format.js'],
+    ['Test all native JSLive renderers', 'node tests/jslive_renderers.js'],
+    ['Test real JSLive target module classes and native callbacks', 'php tests/gateway_gauges.php --jslive-targets'],
+    ['Test bounded JSLive batch planning at 64 MiB', 'php -d memory_limit=64M tests/jslive_plans.php --batch'],
     ['Test Heatmap comparison layout and runtime', 'node tests/heatmap_comparison_layout.js'],
     ['Test Heatmap comparison views and shared budgets', 'php tests/gateway_gauges.php --heatmap-comparisons'],
     ['Test named Candlestick panels and shared budgets', 'php tests/gateway_gauges.php --candlestick-panels'],

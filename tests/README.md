@@ -1,5 +1,63 @@
 # Tests
 
+## Bestätigte JSLive-Übernahme (ADR 0111)
+
+Die reguläre Suite enthält jetzt folgende unabhängige Grenzen:
+
+- `php tests/jslive_models.php`: 40 anonymisierte Pakete, typisierte Modelle und
+  beide vollständigen HTML-Ausgaben. Ohne Legacy-Engine oder Profilabhängigkeit.
+- `php tests/jslive_plans.php`: alle sechs Zielfamilien, vollständige Feldurteile,
+  individuelle Abweichungs-IDs, stabile fachliche Revisionen und Quelländerungen.
+  `php -d memory_limit=64M tests/jslive_plans.php --batch` prüft zusätzlich die
+  vollständige 40er-Berichtsmenge: kompletter Bericht oder ausdrückliche
+  8-MiB-Grenzmeldung, niemals stilles Kürzen. Keine Anhebung von Schutzbudgets.
+- `php tests/jslive_execution.php`: öffentliche Gateway-APIs und tatsächlicher
+  Kerneladapter mit kontrollierten Symcon-Doppeln. Genau 40 neue Ziele, beide
+  Ausgaben, erneute Bestätigung ohne Schreibaufrufe, unveränderte Originale,
+  Profile, Actions und Archive. Native Acht-Argumente-Formularscripts werden
+  tatsächlich ausgeführt. Fehlende und veränderte Ausgabe-Besitznachweise
+  verhindern Schreibzugriffe.
+- `php tests/jslive_journal.php`: 26 Unterbrechungspunkte einschließlich neuer
+  Apply-Kinder, kanonische Persistenz, Reihenfolge mehrerer Revisionen,
+  Erzeugungs-/Markierungslücke, explizite Zuordnung, Teilfehler und fremde
+  Reservierungen. Kein automatisches Löschen oder blindes Neuerzeugen.
+- `php tests/gateway_gauges.php --jslive-targets`: die echten sechs Modulklassen
+  für alle 40 Varianten, Create/Apply, Gateway-Snapshottransport, Referenzen,
+  geschützte Ausgangs-/Ausgabenachweise, beide HTML-Ausgaben sowie ausgeführte
+  native Designvorschau-/Downloadcallbacks. Der unveränderte Standardlauf prüft
+  zusätzlich die bisherigen Modelle unter dem bisherigen 128-MiB-Limit.
+- `php tests/jslive_safety.php`: unbekannte Einstellungen, aktive Fremdtemplates,
+  Ressourcenintegrität, Profilabhängigkeit, Pfadgrammatik, gekürzte Archive,
+  geänderte Archivtypen/Zählerpolitik und deduplizierte 63-/32000-Budgets.
+- `php tests/jslive_time.php`: eingefrorene Zeitfenster und Roh-/Zähler-/Boolregeln.
+  Optional `php tests/jslive_reference_parity.php ../JSLive
+  tests/fixtures/jslive-calendar-rules.json` vergleicht 520 Fälle unabhängig mit
+  dem unveränderten lesenden Quellcheckout; kein Geschwisterprojekt in CI nötig.
+- `node tests/jslive_format.js` und `node tests/jslive_renderers.js`: native
+  Darstellung, Prozent/LQI/Boolean/Intervallgrenzen, Escaping sowie 120 echte
+  ECharts-SSR-Renderings aller 40 Modelle in drei Größen, ohne NaN/Infinity.
+
+Die Fixture-Herkunft und Anonymisierung stehen unter
+[`fixtures/jslive-packages`](fixtures/jslive-packages/README.md). Unveränderte
+inerte Standardtemplates und WOFF2-Testbytes behalten ihre Fremdlizenzen.
+Private Originalpakete und Browserartefakte bleiben außerhalb des Repositorys.
+
+Zusätzlich lokal ausgeführt: 80 isolierte Chromium-Dokumente (40 × Kachel/IPSView)
+mit tatsächlichem Canvas, FontFace, geteiltem Nachrichtenparser, Refresh,
+Legendenhaltung, Fehler-/Wiederherstellungsweg und Mausrad-Smoke-Test. Erzeugung:
+`JSLIVE_HTML_OUTPUT=<absoluter temporärer Ordner> php tests/jslive_models.php`;
+danach `JSLIVE_BROWSER_ALL=1 node tests/jslive_browser.js <Chromium.exe>
+<absoluter temporärer Ordner>`. Unter PowerShell Umgebungsvariablen mit `$env:`
+setzen. Der Browser verwendet ein eigenes Headless-Profil, gesperrte DNS-Zugriffe
+und ausschließlich anonyme lokale HTML-Dateien. Dieser optionale Lauf verlangt
+eine vorhandene Chromium-Installation und wird nicht als CI-Voraussetzung ergänzt.
+
+Diese Nachweise ersetzen **nicht** die gemeinsame MCP-Neuanlage/-Fortsetzung
+nach Eigentümer-Modulupdate, den direkten Original-/Ziel-Bildvergleich und den
+Mausrad-/Scrollnachweis für importierte Modelle in der physischen nativen App.
+Eigentümerabnahmen der bisherigen Diagrammmodelle bleiben gültig. Touch,
+weitere Plattformen und Dauerlast bleiben die bestehenden getrennten Testlücken.
+
 ## Lebensdauer der Gateway-Fixtures
 
 `php -d memory_limit=128M tests/gateway_gauges.php` prüft auch die vollständige

@@ -1,0 +1,11 @@
+{
+    "translations": {
+        "de": {
+            "Configure this chart through the confirmed JSLive import in EChartsGateway.": "Dieses Diagramm wird über die bestätigte JSLive-Übernahme im EChartsGateway eingerichtet.",
+            "Active": "Aktiv",
+            "Configure a valid imported model.": "Ein gültiges Importmodell einrichten.",
+            "Imported model unavailable. Check sources, archive rules and budgets.": "Importmodell nicht verfügbar. Quellen, Archivregeln und Budgets prüfen.",
+            "Chart for IPSView": "Diagramm für IPSView"
+        }
+    }
+}

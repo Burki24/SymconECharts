@@ -2,13 +2,27 @@
 
 ## Neu
 
+- JSLive-Exportpakete 1.0 lassen sich nach Paket-, Quellen-, Archiv- und
+  Darstellungsprüfung mit einzeln bestätigten Abweichungen als neue ECharts-
+  Instanzen übernehmen. Importjournal, Besitznachweise und gesicherter Wiederanlauf
+  verhindern blindes Neuerzeugen und Überschreiben veränderter Ziele.
+- Native Übernahmemodelle unterstützen die 40 geprüften JSLive-Exportvarianten:
+  Linien-/Balkenmischbilder, mehrfache Pie-Ringe, radiale/lineare/Kompass-Gauges
+  sowie die neuen Module EChartsRadarHistory und EChartsProgress für historische
+  Radar- und Pfad-/SVG-Fortschrittsmodelle. Kachel, IPSView und herunterladbare
+  native Vorschauen teilen dieselben Daten- und Darstellungsregeln.
+- Profilinformationen werden als unabhängige native Formatierung übernommen.
+  Originalinstanzen, Quellen, Actions, Designs und Archivwerte bleiben erhalten.
+  Eigene ausführbare Templates und nicht geprüfte Ressourcen bleiben gesperrt;
+  konkrete Designabweichungen werden sichtbar gemeldet.
+
 - Das Gateway bietet eine lesende JSLive-Importvorschau für Exportpakete 1.0:
   Paket-/Ressourcenprüfung, ausdrückliche Variablen-/Archivzuordnung,
   Zielfamilienkandidaten und vollständiger herunterladbarer Übernahme- und
   Abweichungsbericht. Native Darstellungen werden unabhängig neu geprüft.
   Bestehende Instanzen, Quellen, Actions, Designs und Archivwerte bleiben
   unverändert. Teilentwürfe und fehlende Zielregeln werden ausdrücklich
-  gekennzeichnet; tatsächliche Importanlage und Bildvergleich folgen separat.
+  gekennzeichnet. Der vollständige native Übernahmeplan ergänzt diese Prüfung.
 
 ## Fixes
 
