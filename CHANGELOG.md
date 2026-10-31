@@ -11,7 +11,7 @@
   gekennzeichnet; tatsächliche Importanlage und Bildvergleich folgen separat.
 
 <!-- symconecharts:prepared-beta -->
-# 31.10.2026 - Version 1.366 (Beta)
+# 31.10.2026 - Version 1.367 (Beta)
 
 Vorbereiteter Stand für die erste Beta; die Veröffentlichung im Module Store
 steht noch aus.
