@@ -1,9 +1,10 @@
 # Erste Beta: vorbereitete Store-Unterlagen
 
-Stand: 29.10.2026. Die folgenden Inhalte sind zur manuellen Übernahme in den
-Symcon-Entwicklerbereich vorbereitet. Es wurde keine Store-Vorlage gespeichert
-und keine Version eingereicht. Der Eigentümer bestätigt, dass noch kein Eintrag
-existiert, und hat Bundle-ID und Deutsch als erste Store-Sprache festgelegt.
+Stand: 31.10.2026. Die folgenden Inhalte sind zur manuellen Übernahme in den
+Symcon-Entwicklerbereich vorbereitet. Durch diese Vorbereitung wurde keine
+Store-Vorlage gespeichert und keine Version eingereicht. Bundle-ID und Deutsch
+als erste Store-Sprache sind vom Eigentümer festgelegt; die Kontovorlage bleibt
+ungeprüft. Geplantes Veröffentlichungsdatum ist ausdrücklich der 31.10.2026.
 
 ## Einreichungsdaten
 
@@ -11,8 +12,8 @@ existiert, und hat Bundle-ID und Deutsch als erste Store-Sprache festgelegt.
 | --- | --- |
 | Bundle-ID | `de.burki24.symconecharts` |
 | Kanal | Beta |
-| Versionsstand | Aus `library.json` genau des im Store ausgewählten Commits übernehmen. CI-Prüfstand dieses Berichts: `1.352`; Nachweis unten. |
-| Geplantes Veröffentlichungsdatum | `29.10.2026`, vom Eigentümer bestätigt. Noch keine Veröffentlichung. |
+| Versionsstand | Aus `library.json` genau des im Store ausgewählten Commits übernehmen. CI-Prüfstand dieses Berichts: `1.356`; Nachweis unten. |
+| Geplantes Veröffentlichungsdatum | `31.10.2026`, vom Eigentümer bestätigt. Noch keine Veröffentlichung. |
 | Git-URL | `https://github.com/Burki24/SymconECharts` |
 | Sprache | Deutsch (`de`) |
 | Name | SymconECharts |
@@ -74,26 +75,30 @@ Geräte-, Last- oder Produktivtest. Bekannte Grenzen bleiben erhalten.
 
 ## Geprüfter Push und Versionsmetadaten
 
-Beim damaligen CI-Abgleich am 29.10.2026 lieferten GitHub und der lokale Branch `dev` denselben HEAD:
-`4b36c637f23a2f1aa89d33db4f43f4450d6069ee`. Der Metadatencommit enthält
-Version `1.352`, Build `226068802` und `date=1793255814`.
+Beim dokumentierten Abgleich am 31.10.2026 standen GitHub und der lokale Branch
+`dev` auf demselben HEAD: `8daade37edb98439b4c236ce8d72179285e851c3`. Der Metadatencommit enthält
+Version `1.356`, Build `205210267` und `date=1793290222`.
 Build und Datum stammen korrekt aus dem Quellcommit
-`d798942879b35f1949304f6a133b5055bb1927f5`: dessen sieben führende Hexzeichen
-ergeben den Build; dessen Commit-Zeit ist 29.10.2026, 07:36:54 Uhr Europe/Berlin.
+`c3b429b0b7af7bba3c35a8a46c87ef42124040bb`: dessen sieben führende Hexzeichen
+ergeben den Build; dessen Commit-Zeit ist 29.10.2026, 17:10:22 Uhr Europe/Berlin.
 Das Metadatendatum ist der Quellcommit-Zeitpunkt, kein Veröffentlichungsnachweis.
+Es wird nicht auf das geplante Veröffentlichungsdatum umgeschrieben.
 
 | Nachweis | Ergebnis |
 | --- | --- |
-| [Check Style auf 4b36c63](https://github.com/Burki24/SymconECharts/actions/runs/40830651356) | Erfolgreich, exakt auf dem Metadatencommit. |
-| [Tests auf 4b36c63](https://github.com/Burki24/SymconECharts/actions/runs/40830651428) | Erfolgreich, exakt auf dem Metadatencommit. |
-| [Metadatenlauf des Quellcommits d798942](https://github.com/Burki24/SymconECharts/actions/runs/40830284824) | Erfolgreich; erzeugte 4b36c63 und Version 1.352. Auch Style und Tests des Quellcommits sind erfolgreich. |
-| [Metadatenlauf auf 4b36c63](https://github.com/Burki24/SymconECharts/actions/runs/40830651441) | Absichtlich übersprungen: Bot-Commit löst keine weitere Erhöhung aus. Kein fehlgeschlagener Check. |
+| [Check Style auf 8daade3](https://github.com/Burki24/SymconECharts/actions/runs/40909319039) | Erfolgreich, exakt auf dem Metadatencommit. |
+| [Tests auf 8daade3](https://github.com/Burki24/SymconECharts/actions/runs/40909319104) | Erfolgreich, exakt auf dem Metadatencommit. |
+| [Metadatenlauf des Quellcommits c3b429b](https://github.com/Burki24/SymconECharts/actions/runs/40908926284) | Erfolgreich; erzeugte 8daade3 und Version 1.356. Auch Style und Tests des Quellcommits sind erfolgreich. |
+| [Metadatenlauf auf 8daade3](https://github.com/Burki24/SymconECharts/actions/runs/40909319107) | Absichtlich übersprungen: Bot-Commit löst keine weitere Erhöhung aus. Kein fehlgeschlagener Check. |
 
-Dieser Nachweis gilt für den bereits gepushten Commit. Er enthält noch den
-alten Changelog-Kopf `1.350` und ist deshalb **kein fertig abgeglichener
-Einreichungsstand**. Die jetzige Korrektur setzt ihn lokal auf `1.352` und
-ergänzt den ausdrücklich beauftragten automatischen Abgleich. Die CI des erst
-noch zu pushenden Änderungspakets wird nicht als bereits bestanden ausgegeben.
+Der gepushte Stand enthält die StateTimeline-Dauerkorrektur und HelperBundle
+3.29.3. Sein Changelog ist automatisch auf dieselbe Version `1.356` fortgeführt.
+Diese Dokumentationsänderung verschiebt ausschließlich das geplante
+Veröffentlichungsdatum auf den 31.10.2026 und aktualisiert die Release-Angaben.
+Die Versionsmetadaten wurden dabei nicht manuell verändert. Die obigen
+CI-Nachweise gelten ausschließlich für den genannten Commit. Spätere
+Dokumentations-/Metadatencommits benötigen eigene erfolgreiche CI-Läufe;
+ihre Commit-IDs und Ergebnisse werden hier nicht vorweggenommen.
 
 ## Automatischer Abgleich der vorbereiteten Beta
 
@@ -122,24 +127,27 @@ nicht die noch ausstehende GitHub-CI des nächsten Eigentümer-Pushs.
 
 Die ausstehenden Eigentümerschritte sind:
 
-1. Das jetzige Abgleichpaket manuell committen und pushen; den vorgesehenen
-   Release-Zweig gemäß Projektworkflow verwenden.
-2. Den Metadatenlauf abwarten und den tatsächlichen abschließenden SHA wählen.
-   Für genau diesen SHA erfolgreiche Style-/Testläufe prüfen. Der übersprungene
-   Metadatenlauf auf dessen Bot-Commit ist weiterhin beabsichtigt.
-3. Im selben Commit `library.json` und die markierte Beta-Überschrift auf gleiche
-   Version prüfen. Alle Änderungseinträge sowie das bestätigte Datum bleiben
-   erhalten. Neue fachliche Änderungen gehören unter `Unveröffentlicht`, bis
-   ihr Release ausdrücklich festgelegt wird. Nicht allein den früher geprüften
-   SHA 4b36c63 aus der Tabelle übernehmen.
-4. Im Entwicklerbereich Bundle-ID, Beta-Kanal, Commit, Deutsch, Name,
+1. Diese Release-Dokumentation selbst committen und auf `dev` pushen.
+   Die nächste Version wird regulär vom Metadatenworkflow bestimmt; sie wird
+   hier nicht vorweggenommen. Die Beta-Überschrift folgt automatisch derselben
+   Version und behält das bestätigte Datum 31.10.2026.
+2. Den Metadatenlauf abwarten und für dessen abschließenden Commit erfolgreiche
+   Style-/Testläufe prüfen. Der übersprungene Metadatenlauf auf dem Bot-Commit
+   ist weiterhin beabsichtigt.
+3. Den freigegebenen Stand gemäß Projektworkflow per Pull Request nach `main`
+   übernehmen. Für genau den zur Einreichung gewählten Release-Commit ebenfalls
+   erfolgreiche Style-/Testläufe sowie gleiche Version in `library.json` und
+   Beta-Überschrift prüfen. Der Kopf muss den 31.10.2026 tragen. Nicht einfach
+   den früher geprüften SHA 8daade3 aus der Nachweistabelle übernehmen.
+4. Im Entwicklerbereich Bundle-ID, Beta-Kanal, diesen Commit, Deutsch, Name,
    Beschreibung, Versionsinformation, Dokumentationslink und die tatsächlich
    angebotene passende Kategorie abgleichen. Keine Stable-Freigabe behaupten.
 5. Die vollständige Vorlage kontrollieren. **Einreichen** veröffentlicht Beta
    unmittelbar und bleibt eine ausdrückliche Eigentümeraktion.
 
-H02 ist inhaltlich vorbereitet; die CI und Metadaten des erfolgten Pushs sind
-belegt. Kontoabnahme, konkrete Kategorien-ID und CI des neu angepassten
-Einreichungsstands bleiben ausdrücklich offen.
+H02 ist inhaltlich vorbereitet; CI und Metadaten des geprüften Stands `1.356`
+sind belegt. Kontoabnahme, konkrete Kategorien-ID sowie die abschließende CI
+nach Eigentümer-Commit/Push und Übernahme des Einreichungsstands bleiben offen.
+Commit, Push, Merge und Einreichung führt ausschließlich der Eigentümer aus.
 
 Offizielle Grundlage: [Symcon: Einreichen](https://www.symcon.de/de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/store/einreichen/).
