@@ -1,7 +1,7 @@
 # Unveröffentlicht
 
 <!-- symconecharts:prepared-beta -->
-# 31.10.2026 - Version 1.360 (Beta)
+# 31.10.2026 - Version 1.362 (Beta)
 
 Vorbereiteter Stand für die erste Beta; die Veröffentlichung im Module Store
 steht noch aus.
