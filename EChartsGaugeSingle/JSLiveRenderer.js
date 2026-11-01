@@ -33,7 +33,11 @@
         if(linear){if(vertical){faceW=Math.max(1,Math.min(faceW,faceH/2));}else{faceH=Math.max(1,Math.min(faceH,faceW/4));}}
         const fx=(width-faceW)/2,fy=8,cx=width/2,cy=fy+faceH/2,r=Math.min(faceW,faceH)/2,fontScale=c.__fontScale||1;
         const ticks=compass?['N','NE','E','SE','S','SW','W','NW','N']:[c.min].concat(c.Ticks.slice().sort(function(a,b){return a.Value-b.Value;}).map(function(t){return t.Value;}),[c.max]);
-        const tickText=ticks.map(function(t){return compass?t:f.number(Number(t),c.precision,'.','');});
+        // GenerateTicks rounds to precision, but JSLive serializes numeric
+        // strings as numbers. Use ASCII wire digits, independent of the client
+        // locale, then paint 20 rather than "20.0". Value formatting stays local.
+        const tickFormat=new Intl.NumberFormat('en-US',{useGrouping:false,maximumFractionDigits:Math.min(20,Math.max(0,c.precision))});
+        const tickText=ticks.map(function(t){return compass?t:String(Number(tickFormat.format(Number(t))));});
         const ratio=function(value){return Math.max(0,Math.min(1,(Number(value)-minimum)/(maximum-minimum)));};
         function convert(value) {
             if(!c.AutoConvertValue || compass || value<=minimum || value>=maximum){return value;}
@@ -68,7 +72,8 @@
             rect('value-box',x-w/2,y-h/2,w,h,f.paint(c,'valuebox_colorValueBoxBackground'));
             text('value',value,x,y+h/2-glyph/3,size,f.paint(c,'valuebox_fontColor'),c.valuebox_fontFamily,'center',true);
         }
-        function polygon(id,points,fill,shadow){graphics.push({id:id,type:'polygon',shape:{points:points},style:Object.assign({fill:fill},shadow?{shadowColor:f.paint(c,'needle_colorShadowDown'),shadowBlur:10,shadowOffsetX:2,shadowOffsetY:2}:{})});}
+        function needleShadow(){return {shadowColor:f.paint(c,'needle_colorShadowDown'),shadowBlur:10,shadowOffsetX:2,shadowOffsetY:2};}
+        function polygon(id,points,fill,shadow){graphics.push({id:id,type:'polygon',shape:{points:points},style:Object.assign({fill:fill},shadow?needleShadow():{})});}
         const valueText=f.number(d.value,c.precision,',',c.valuebox_separator?'.':'');
         if(!linear){
             const plateR=Math.max(1,r-(compass?5:0)),start=(compass?180:c.radial_startAngle)*rad,sweep=(compass?360:c.radial_ticksAngle)*rad;
@@ -116,8 +121,8 @@
                 if(c.needle_Type!=='line'){polygon('needle-shade',[[-0.5,tip],[-1,tip],[-full,0],[-half,-tail],[half/2-2,-tail]].map(function(p){return transform(p[0],p[1]);}),f.paint(c,'needle_colorShadowUp'));}
                 if(c.needle_CircleSize>0){
                     const hub=plateR*c.needle_CircleSize/100;
-                    if(c.needle_CircleOuter){graphics.push({id:'hub-outer',type:'circle',shape:{cx:cx,cy:cy,r:hub},style:{fill:gradient('needle_colorNeedleCircleOuter')}});}
-                    graphics.push({id:'hub',type:'circle',shape:{cx:cx,cy:cy,r:hub*0.75},style:{fill:gradient('needle_colorNeedleCircleInner')}});
+                    if(c.needle_CircleOuter){graphics.push({id:'hub-outer',type:'circle',shape:{cx:cx,cy:cy,r:hub},style:Object.assign({fill:gradient('needle_colorNeedleCircleOuter')},needleShadow())});}
+                    graphics.push({id:'hub',type:'circle',shape:{cx:cx,cy:cy,r:hub*0.75},style:Object.assign({fill:gradient('needle_colorNeedleCircleInner')},needleShadow())});
                 }
             }
             if(c.title_display){text('title',c.title_text,cx,cy-r/4.25,c.title_fontSize*r/200*fontScale,f.paint(c,'title_fontColor'),c.title_fontFamily,'center',c.animation_target==='plate',r*0.8);}
@@ -142,11 +147,11 @@
             const shift=hasLeft&&hasRight?0:(hasRight?-1:1)*cross*0.1;
             const X=x+(vertical?shift:0),Y=y+(vertical?0:shift),near=(cross-barWidth)/2,padding=cross*0.05;
             const at=function(v){const t=ratio(v);return vertical?[X+cross/2,Y+length-margin-barLength*t]:[X+margin+barLength*t,Y+cross/2];};
-            const barFill=function(name){return {type:'linear',x:vertical?0:X,y:vertical?Y:0,x2:vertical?0:X+barLength,y2:vertical?Y+barLength:0,global:true,colorStops:[{offset:0,color:f.paint(c,name)},{offset:1,color:'rgba(255,0,0,0)'}]};};
             if(c.progressbar_display){
                 const from=at(minimum),to=at(convert(d.value));
-                rect('track',vertical?round(X+near):round(X+margin),vertical?round(Y+length-margin-barLength):round(Y+near),vertical?barWidth:barLength,vertical?barLength:barWidth,barFill('progressbar_colorBar'));
-                rect('progress',vertical?round(X+near):from[0],vertical?to[1]:round(Y+near),vertical?barWidth:to[0]-from[0],vertical?from[1]-to[1]:barWidth,barFill('progressbar_colorBarProgress'));
+                // Source templates set no bar end colors: both paints are solid.
+                rect('track',vertical?round(X+near):round(X+margin),vertical?round(Y+length-margin-barLength):round(Y+near),vertical?barWidth:barLength,vertical?barLength:barWidth,f.paint(c,'progressbar_colorBar'));
+                rect('progress',vertical?round(X+near):from[0],vertical?to[1]:round(Y+near),vertical?barWidth:to[0]-from[0],vertical?from[1]-to[1]:barWidth,f.paint(c,'progressbar_colorBarProgress'));
             }
             highlights.forEach(function(h,i){
                 const a=at(c.AutoConvertHighlight?convert(h.From):h.From),b=at(c.AutoConvertHighlight?convert(h.To):h.To),thick=cross*c.ticks_highlightsWidth/100;

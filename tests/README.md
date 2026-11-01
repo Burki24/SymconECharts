@@ -66,8 +66,9 @@ Die reguläre Suite enthält jetzt folgende unabhängige Grenzen:
   isolieren die beiden Regressionen. Beide reproduzierten den jeweiligen Fehler
   vor der Korrektur; bloß gültiges oder nicht leeres SVG genügt hier nicht.
 - `node tests/jslive_design_parity.js`: F03-/F04-Regressionen für die vier
-  Gauge-Vorlagen und Datenlabels. 459 eingefrorene Messwerte und 81 Schrift-
-  zuordnungen der ursprünglichen Canvas-Gauges-Engine prüfen Schriftgrößen,
+  Gauge-Vorlagen und Datenlabels. 459 eingefrorene Messwerte, 81 Text-/Schrift-
+  zuordnungen und 72 Farb-/Schattenprüfungen der ursprünglichen Canvas-Gauges-
+  Engine prüfen Schriftgrößen,
   wirksame leere Einheitenschriften, Textpositionen und Zeigerpunkte
   aller acht anonymisierten Gauge-Varianten in drei Größen. Zusätzliche Tests
   sichern Vorlagenproportionen, radiale Plattenverläufe, erhaltene Randtick-
@@ -77,11 +78,21 @@ Die reguläre Suite enthält jetzt folgende unabhängige Grenzen:
   Positionen für Start-/Mittel-/Endanker, Textausrichtungen, Legendenfilter und
   deren Rücknahme sowie Live-Wechsel auf null. Die ersten
   Läufe reproduzierten transparente statt geerbter Kästen sowie doppelt große
-  radiale Titelschriften. `--gauge` und `--labels` isolieren die beiden Bereiche.
+  radiale Titelschriften. Weitere RED-Nachweise erfassten transparente statt
+  vollfarbiger Grund-/Fortschrittsbalken, zusätzliche Skalen-Nachkommastellen
+  und fehlende Nabenschatten. Die ausgelieferte Canvas-Runtime prüft echte
+  Füll-/Schattenoperationen, Updates, null/volle Balken, Sichtbarkeit und Alpha
+  null; numerische Skalentexte lassen die Wertbox-Präzision unverändert und
+  bleiben auch bei lokalisierten Ziffern/Minuszeichen gültige Quellzahlen.
+  `--gauge` und `--labels` isolieren die beiden Bereiche; `--fill`, `--scale`
+  und `--hub` isolieren die drei F03-Restregressionen.
 - Optional `node tests/jslive_gauge_reference.js ../JSLive` vergleicht dieselben
-  459 Messungen und 81 Schriftzuordnungen direkt mit dem unveränderten
-  Referenzcheckout. Ausschließlich die Canvas-Zeichenfläche wird kontrolliert
+  459 Messungen, 81 Text-/Schriftzuordnungen und 72 Farb-/Schattenprüfungen direkt
+  mit dem unveränderten Referenzcheckout. Ausschließlich die Canvas-Zeichenfläche wird kontrolliert
   beobachtet; ihr Font-Setter ignoriert wie Canvas ungültige CSS-Schriften.
+  Die Tickliste bildet ausdrücklich `GenerateTicks` und die numerische
+  Serialisierung von `json_encode_advanced` ab; Festkommastrings als
+  Engine-Eingabe würden die tatsächliche Quellbeschriftung falsch nachweisen.
   Die Engine bleibt
   außerhalb dieses Repositorys; die reguläre CI verwendet nur
   `fixtures/jslive-gauge-geometry.json`. Das Referenzskript prüft den SHA-256-Wert
@@ -136,6 +147,13 @@ danach `JSLIVE_BROWSER_ALL=1 node tests/jslive_browser.js <Chromium.exe>
 setzen. Der Browser verwendet ein eigenes Headless-Profil, gesperrte DNS-Zugriffe
 und ausschließlich anonyme lokale HTML-Dateien. Dieser optionale Lauf verlangt
 eine vorhandene Chromium-Installation und wird nicht als CI-Voraussetzung ergänzt.
+
+Der gezielte F03-Restlauf mit der Standardauswahl umfasst 18 Kachel-/IPSView-
+Dokumente. Bei Gauges zeichnet der Browser zusätzlich isolierte horizontale und
+vertikale Vollfarbbalken und prüft deren tatsächliche Cyan-/Grundstreckenpixel.
+Radiale und Kompass-Naben müssen sichtbare Pixel in der konfigurierten
+Schattenfarbe erzeugen. Diese lokalen Rasterprüfungen ergänzen die reguläre
+Canvas-Beobachtung; die erneute MCP-/Client-Abnahme nach Modulupdate bleibt offen.
 
 Diese Nachweise ersetzen **nicht** die gemeinsame MCP-Neuanlage/-Fortsetzung
 nach Eigentümer-Modulupdate, den direkten Original-/Ziel-Bildvergleich und den

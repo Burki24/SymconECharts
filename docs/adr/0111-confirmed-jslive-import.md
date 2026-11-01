@@ -247,6 +247,18 @@ bleiben lokal im Gauge-Renderer. Die erforderlichen aus Canvas Gauges 2.1.7
 adaptierten Koordinatenregeln behalten ihren MIT-Hinweis; keine alte Engine
 wird ausgeliefert. Persistierte Modelle, Quellen und Designs ändern sich nicht.
 
+Die linearen Quellvorlagen setzen keine Endfarben für Grund-/Fortschrittsbalken;
+beide verwenden deshalb Vollfarben samt konfigurierter Transparenz. Ein
+zusätzlicher Verlauf ins Transparente wird nicht erzeugt. `GenerateTicks`
+rundet zunächst auf die Quellpräzision; `json_encode_advanced` schreibt diese
+numerischen Strings jedoch ohne Anführungszeichen als Zahlen. Nur die Skalentexte bilden
+diese Zahlenkonvertierung unabhängig von lokalisierten Client-Ziffern und
+Minuszeichen nach; Wertbox-Präzision und Originalwerte bleiben
+erhalten. Innere und äußere Nabenkreise teilen den vorhandenen Zeigerschatten
+(10 Pixel Unschärfe, je 2 Pixel Versatz und konfigurierte Farbe/Transparenz).
+Die familienlokale Schattenfunktion wird wiederverwendet; der zentrale
+Seiten-/Ressourcen-Helper bleibt unverändert.
+
 Die Quelle zeichnet bei ausdrücklich numerischen Exact-Ticks keine benannten
 Kompass-Hauptticks. Diese Abwesenheit bleibt ohne NaN-Geometrie erhalten.
 Minderstriche verwenden die ursprünglichen Schritte und bei extrem dichten
@@ -260,14 +272,23 @@ Pie-Anker und Textausrichtung sind getrennte radiale Größen; native Labelrahme
 erhalten Quellpadding und Zeilenhöhe. Nullsegmente zeigen keine leeren Kästen.
 
 `tests/jslive_design_parity.js` reproduzierte beide Fehler vor der Korrektur.
-Die 459 unabhängigen, eingefrorenen Messungen und 81 Schriftzuordnungen stammen
-aus dem unveränderten
-Original-Canvas-Gauges-Renderer für acht anonymisierte Varianten in drei Größen.
+Die 459 unabhängigen, eingefrorenen Messungen, 81 Text-/Schriftzuordnungen und
+72 Farb-/Schattenprüfungen stammen aus dem unveränderten Original-Canvas-Gauges-
+Renderer für acht anonymisierte Varianten in drei Größen.
 Der optionale Direktvergleich mit dem lesenden JSLive-Checkout besteht ebenfalls;
 die reguläre Suite benötigt diesen Checkout nicht. Native Datenlabelmodelle,
 tatsächlich gezeichnete Rahmen und Positionen sowie unveränderte Eingaben werden
-gesondert geprüft. Die Live-Abnahme von F03/F04 nach Eigentümer-Update bleibt
-offen; andere optische Befunde werden damit nicht als erledigt markiert.
+gesondert geprüft. Die korrigierte Referenz zeichnet die tatsächlich numerisch
+serialisierten Quellticks; vorher wurden an dieser Testgrenze fälschlich
+Festkommastrings übergeben. Die Restfehler reproduzierten getrennt RED:
+transparenter Verlauf statt Vollfarbe, `25.00` statt `25` und fehlende
+Schattenattribute. Canvas-Prüfungen umfassen Datenupdates, null/volle Balken,
+ausgeschaltete Balken/Zeiger und ausdrücklich transparente Farben. Der lokale
+Chromium-Lauf prüft die tatsächlichen Cyan-/Grundstreckenpixel in beiden
+linearen Ausrichtungen sowie sichtbare Schattenpixel radialer/Kompass-Naben.
+F04 ist unter 1.375 an allen vier Pie-Paaren live bestätigt. Die erneute
+Live-Abnahme der drei F03-Restkorrekturen nach Eigentümer-Update bleibt offen;
+andere optische Befunde werden damit nicht als erledigt markiert.
 
 ### Import und Wiederanlauf
 

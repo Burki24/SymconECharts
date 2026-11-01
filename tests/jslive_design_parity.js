@@ -109,9 +109,130 @@ function labels() {
     console.log('JSLive F04: native segment/series label fills, borders, alpha, multiple rings and unchanged models passed.');
 }
 
-function gauges() {
+// Observe the shipped Canvas painter, including gradients and shadow state.
+// Expected fills come from the source templates: neither linear bar end color
+// is set, so Canvas Gauges uses the configured solid paint. Hub circles use
+// the same drawNeedleShadow defaults as the needle (10px blur, 2px offsets).
+function gaugeSurface() {
+    const fills = [], stack = [];
+    let shapes = [];
+    const canvas = {nodeName: 'CANVAS', style: {}, width: 620, height: 500, setAttribute() {}};
+    const keys = ['fillStyle', 'shadowColor', 'shadowBlur', 'shadowOffsetX', 'shadowOffsetY'];
+    const gradient = () => ({stops: [], addColorStop(offset, color) { this.stops.push([offset, color]); }});
+    const target = {canvas, shadowColor: 'transparent', shadowBlur: 0, shadowOffsetX: 0, shadowOffsetY: 0,
+        save() { stack.push(Object.fromEntries(keys.map(k => [k, this[k]]))); },
+        restore() { Object.assign(this, stack.pop() || {}); },
+        beginPath() { shapes = []; },
+        rect(x, y, width, height) { shapes.push({type: 'rect', x, y, width, height}); },
+        arc(x, y, r) { shapes.push({type: 'circle', x, y, r}); },
+        fill() { fills.push({shapes: shapes.slice(), ...Object.fromEntries(keys.map(k => [k, this[k]]))}); },
+        measureText: text => ({width: String(text).length * 8}),
+        createLinearGradient: gradient, createRadialGradient: gradient
+    };
+    canvas.getContext = () => new Proxy(target, {get: (t, k) => k in t ? t[k] : () => {}});
+    return {canvas, fills};
+}
+
+function gaugeResiduals(w, states, only) {
+    const get = (o, id) => { const g = o.graphic.find(x => x.id === id); assert.ok(g, 'Missing ' + id); return g; };
+    if (!only || only === '--fill') {
+        for (const index of [16, 17, 18, 19]) {
+            const state = JSON.parse(JSON.stringify(states[index].chart));
+            Object.assign(state.settings, {__animate: false, progressbar_display: true, progressbar_barWidth: 8,
+                progressbar_colorBar: 0xcbd5e1, progressbar_colorBar_Alpha: 1,
+                progressbar_colorBarProgress: 0x22d3ee, progressbar_colorBarProgress_Alpha: 0.8});
+            const drawing = gaugeSurface();
+            w.echarts.setPlatformAPI({createCanvas: () => gaugeSurface().canvas});
+            const chart = w.echarts.init(drawing.canvas, null, {renderer: 'canvas', ssr: true, width: 620, height: 500});
+            try {
+                for (const ratio of [0.25, 0.75, 1, 0, 0.5]) {
+                    state.data.value = state.settings.min + ratio * (state.settings.max - state.settings.min);
+                    const before = JSON.stringify(state), o = w.SYMC_JSLIVE_OPTION(state, 620, 500);
+                    assert.equal(get(o, 'track').style.fill, 'rgba(203,213,225,1)', 'F03: linear tracks use the source solid color.');
+                    assert.equal(get(o, 'progress').style.fill, 'rgba(34,211,238,0.8)', 'F03: no invented transparent/red progress gradient.');
+                    drawing.fills.length = 0; chart.setOption(o, false); chart.getZr().flush();
+                    const progress = drawing.fills.find(f => f.fillStyle === 'rgba(34,211,238,0.8)');
+                    if (ratio > 0) { assert.ok(progress && progress.shapes.some(s => s.type === 'rect'), 'Native Canvas must paint the solid progress rectangle.'); }
+                    assert.equal(JSON.stringify(state), before, 'Paint updates preserve imported settings and raw values.');
+                }
+                state.settings.progressbar_colorBarProgress_Alpha = 0;
+                const transparent = w.SYMC_JSLIVE_OPTION(state, 620, 500);
+                assert.equal(get(transparent, 'progress').style.fill, 'rgba(34,211,238,0)', 'Preserve explicitly transparent progress.');
+                state.settings.progressbar_display = false;
+                assert.equal(w.SYMC_JSLIVE_OPTION(state, 620, 500).graphic.some(g => g.id === 'progress' || g.id === 'track'), false);
+            } finally { chart.dispose(); }
+        }
+        console.log('JSLive F03 solid progress: four linear variants, live updates, zero/full, alpha and visibility passed.');
+    }
+    if (!only || only === '--scale') {
+        for (const template of ['CanvasGauges-Radial', 'CanvasGauges-Linear', 'CanvasGauges-Linear(vertical)']) {
+            for (const exact of [false, true]) {
+                const state = JSON.parse(JSON.stringify(states[14].chart));
+                Object.assign(state.settings, {template, min: -0.001, max: 100, precision: 2, ticks_exactTicks: exact,
+                    Ticks: [0, 12.345, 25, 100].map(Value => ({Value})), linear_numberSide: 'both', __animate: false});
+                state.data.value = 12.3;
+                const before = JSON.stringify(state), o = w.SYMC_JSLIVE_OPTION(state, 620, 500);
+                const prefix = template.includes('Linear') ? 'number:left:' : 'number:';
+                // PHP GenerateTicks rounds first; JSLive's numeric serializer
+                // emits numbers, not quoted fixed-decimal strings. Canvas uses
+                // their ordinary text conversion, independently of the value box.
+                assert.deepEqual(Array.from(o.graphic.filter(g => g.id.startsWith(prefix)), g => g.style.text),
+                    ['0', '0', '12.35', '25', '100', '100'], 'F03: preserve the source numeric tick labels and duplicate endpoints.');
+                if (!template.endsWith('-Linear')) { assert.equal(get(o, 'value').style.text, '12,30', 'Value-box precision remains unchanged.'); }
+                assert.equal(JSON.stringify(state), before);
+            }
+        }
+        const compass = JSON.parse(JSON.stringify(states[20].chart));
+        assert.deepEqual(Array.from(w.SYMC_JSLIVE_OPTION(compass, 620, 500).graphic.filter(g => /^number:/.test(g.id)), g => g.style.text),
+            ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW', 'N'], 'Compass labels remain named directions.');
+        const localized = JSON.parse(JSON.stringify(states[14].chart));
+        Object.assign(localized.settings, {min: -20, max: 100, precision: 2, Ticks: [{Value: -1.005}, {Value: 12.345}]});
+        for (const locale of ['ar-EG', 'fi-FI']) {
+            w.SYMC_VISUALIZATION.options.locale = locale;
+            assert.deepEqual(Array.from(w.SYMC_JSLIVE_OPTION(localized, 620, 500).graphic.filter(g => /^number:/.test(g.id)), g => g.style.text),
+                ['-20', '-1.01', '12.35', '100'], 'Source numeric tick serialization is independent of client digits/minus signs.');
+        }
+        w.SYMC_VISUALIZATION.options.locale = 'de-DE';
+        console.log('JSLive F03 scale labels: numeric wire formatting, fractional ticks, exact scales, endpoints, compass and value precision passed.');
+    }
+    if (!only || only === '--hub') {
+        for (const template of ['CanvasGauges-Radial', 'CanvasGauges-Compass']) {
+            for (const outer of [false, true]) {
+                for (const alpha of [0.5, 0]) {
+                    const state = JSON.parse(JSON.stringify(states[14].chart));
+                    Object.assign(state.settings, {template, __animate: false, needle_display: true, needle_CircleOuter: outer,
+                        needle_CircleSize: 15, needle_colorShadowDown: 0x123456, needle_colorShadowDown_Alpha: alpha});
+                    const before = JSON.stringify(state), o = w.SYMC_JSLIVE_OPTION(state, 620, 500);
+                    for (const id of outer ? ['hub', 'hub-outer'] : ['hub']) {
+                        const style = get(o, id).style;
+                        assert.equal(style.shadowColor, 'rgba(18,52,86,' + alpha + ')', 'F03: each hub inherits the configured needle shadow.');
+                        assert.equal(style.shadowBlur, 10); assert.equal(style.shadowOffsetX, 2); assert.equal(style.shadowOffsetY, 2);
+                    }
+                    const drawing = gaugeSurface();
+                    w.echarts.setPlatformAPI({createCanvas: () => gaugeSurface().canvas});
+                    const chart = w.echarts.init(drawing.canvas, null, {renderer: 'canvas', ssr: true, width: 620, height: 500});
+                    try {
+                        chart.setOption(o, true); chart.getZr().flush();
+                        const hub = get(o, 'hub');
+                        const painted = drawing.fills.find(f => f.shapes.some(s => s.type === 'circle' && Math.abs(s.r - hub.shape.r) < 0.01));
+                        assert.ok(painted, 'The native Canvas must paint the hub.');
+                        assert.equal(painted.shadowColor, 'rgba(18,52,86,' + alpha + ')');
+                        assert.equal(painted.shadowBlur, 10);
+                    } finally { chart.dispose(); }
+                    assert.equal(JSON.stringify(state), before);
+                    state.settings.needle_display = false;
+                    assert.equal(w.SYMC_JSLIVE_OPTION(state, 620, 500).graphic.some(g => /^hub/.test(g.id)), false);
+                }
+            }
+        }
+        console.log('JSLive F03 hub shadows: radial/compass, inner/outer, configured alpha, native Canvas and hidden needles passed.');
+    }
+}
+
+function gauges(only) {
     const w = renderer('EChartsGaugeSingle/JSLiveRenderer.js', 'gauge');
     const states = JSON.parse(execFileSync(process.env.PHP_BINARY || 'php', ['tests/jslive_models.php', '--emit'], {cwd: root, encoding: 'utf8', maxBuffer: 8388608}));
+    if (only) { gaugeResiduals(w, states, only); return; }
     const input = JSON.parse(JSON.stringify(states[14].chart));
     Object.assign(input.settings, {title_display: true, title_text: 'Title', title_fontSize: 24, title_fontFamily: 'Arial',
         plate_unit: 'W', plate_unit_fontSize: 22, plate_unit_fontFamily: 'Arial', ticks_fontSize: 20, ticks_fontFamily: 'Arial',
@@ -180,12 +301,13 @@ function gauges() {
     close(get(w.SYMC_JSLIVE_OPTION(inheritedUnit, 620, 500), 'unit').style.fontSize, 10, 'A cached rotating plate starts with the canvas default font.');
     const frozen = JSON.parse(read('tests/fixtures/jslive-gauge-geometry.json'));
     assert.equal(frozen.cases.length, 24);
-    let referenceChecks = 0, fontChecks = 0;
+    let referenceChecks = 0, fontChecks = 0, paintChecks = 0;
     for (const ref of frozen.cases) {
         const state = states[ref.case - 1].chart, before = JSON.stringify(state);
         const option = w.SYMC_JSLIVE_OPTION(state, ref.width, ref.height);
         for (const [id, expected] of Object.entries(ref.texts)) {
             const actual = get(option, id).style;
+            assert.equal(actual.text, expected.text, 'Frozen source text ' + id);
             assert.equal(actual.fontFamily, expected.family, 'Frozen source font family ' + id); ++fontChecks;
             close(actual.fontSize, expected.fontSize, 'Frozen source font ' + id);
             assert.ok(Math.abs(actual.x - expected.x) <= 0.6, 'Frozen source x ' + id);
@@ -203,12 +325,24 @@ function gauges() {
                 ++referenceChecks;
             }); });
         }
+        for (const paint of ref.paints) {
+            const actual = get(option, paint.id).style;
+            if ('fill' in paint) { assert.equal(actual.fill, paint.fill, 'Frozen source solid paint ' + paint.id); ++paintChecks; }
+            for (const [key, value] of Object.entries(paint.shadow || {})) {
+                assert.equal(actual[key], value, 'Frozen source hub shadow ' + key); ++paintChecks;
+            }
+        }
         assert.equal(JSON.stringify(state), before);
     }
     assert.equal(referenceChecks, 459);
     assert.equal(fontChecks, 81);
-    console.log('JSLive F03: 459 frozen original-engine measurements, 81 font families, template dimensions, plate, needle and unchanged models passed.');
+    assert.equal(paintChecks, 72);
+    console.log('JSLive F03: 459 frozen original-engine measurements, 81 text/font checks, 72 paint/shadow checks and unchanged models passed.');
+    gaugeResiduals(w, states);
 }
 
-if (process.argv[2] !== '--gauge') { labels(); }
-if (process.argv[2] !== '--labels') { gauges(); }
+if (['--fill', '--scale', '--hub'].includes(process.argv[2])) { gauges(process.argv[2]); }
+else {
+    if (process.argv[2] !== '--gauge') { labels(); }
+    if (process.argv[2] !== '--labels') { gauges(); }
+}

@@ -43,11 +43,16 @@ Ziele ohne zusätzliches ApplyChanges per MCP bestätigt. Der anschließende
 Original-/Ziel-Kachelvergleich aller 40 Varianten zeigte unter anderem zu kurze
 Fortschrittsstrecken bei mehrteiligen Bögen (F01) und gespiegelte Radar-Klassen
 (F02). Beide Geometrien sind unter 1.374 an allen acht betroffenen Paaren
-live bestätigt. F03 (Gauge-Geometrie/Typografie) und F04 (Label-Farb-Fallback)
-sind anschließend lokal korrigiert: 459 eingefrorene Originalmessungen und
-native Labelprüfungen sichern sie ab. Details stehen in ADR 0111 und der
-Testdokumentation. Die Live-Abnahme von F03/F04 nach dem nächsten Update
-und weitere optische Unterschiede bleiben offen. Die Beta bleibt bis zur
+live bestätigt. Unter 1.375 wurden alle acht Gauge- und vier Pie-Paare lesend
+verglichen: F04 (Label-Farb-Fallback) ist bestätigt; F03 zeigte noch schwache
+lineare Fortschrittsfüllungen, zusätzliche Skalen-Nachkommastellen und fehlende
+Nabenschatten. Diese drei Restfehler sind lokal korrigiert. 459 eingefrorene
+Originalmessungen, 81 Text-/Schriftprüfungen, 72 Farb-/Schattenprüfungen sowie
+native Canvas- und Browser-Pixelprüfungen sichern die Korrektur ab. Die
+Referenz berücksichtigt jetzt auch die numerische Serialisierung der Quellticks.
+Details stehen in ADR 0111 und der Testdokumentation. Die erneute Live-Abnahme
+der F03-Restkorrektur nach Eigentümer-Update und weitere optische Unterschiede
+bleiben offen. Die Beta bleibt bis zur
 vereinbarten Migrationsabnahme zurückgestellt. Die bereits abgeschlossene
 Nutzungsgrenzen-Roadmap und die Eigentümerabnahmen bestehender Modelle bleiben gültig.
 

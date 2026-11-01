@@ -408,6 +408,10 @@ für radiale, horizontale, vertikale und Kompass-Anzeigen. Die gewählten Seiten
 für Skalen, Zahlen und Zeiger bleiben erhalten. Leere Einheitenschriften folgen
 dem wirksamen Schrift-Fallback der Quellvorlage. Die Wertbox folgt der jeweiligen
 Vorlage; die horizontale Quellvorlage zeigt keine zusätzliche Wertbox.
+Lineare Fortschrittsbalken und ihre Grundstrecke verwenden die gewählten
+Quellfarben samt Transparenz. Skalenbeschriftungen zeigen Zahlen wie `20`
+statt zusätzlich angehängter Nullen; die Wertbox behält ihre konfigurierte
+Präzision. Innere und äußere Zeigernaben berücksichtigen den Quellschatten.
 
 Übernommene Modelle nehmen die Aktualisierung nach Modulupdates automatisch
 wieder auf. Ist das Gateway zunächst noch nicht bereit, wird im bisherigen

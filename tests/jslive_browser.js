@@ -32,9 +32,41 @@ window.handleMessage(titled);progressTitle=JSON.stringify(c.getOption().graphic)
 }
 var before=document.scrollingElement.scrollTop;e.dispatchEvent(new WheelEvent('wheel',{deltaY:120,bubbles:true,cancelable:true}));
 if(first){c.dispatchAction({type:'legendSelect',name:first});}
+var gaugePaint=null;
+if(state.chart.family==='gauge'){
+gaugePaint={progress:[],track:[],hubShadow:[]};
+['CanvasGauges-Linear','CanvasGauges-Linear(vertical)','CanvasGauges-Radial','CanvasGauges-Compass'].forEach(function(template){
+var input=JSON.parse(JSON.stringify(state.chart)),s=input.settings;
+Object.assign(s,{template:template,__animate:false,min:0,max:100,precision:2,plate_display:false,title_display:false,plate_unit:'',valuebox_display:false,
+Highlights:[],Ticks:[{Value:0},{Value:50},{Value:100}],ticks_exactTicks:false,progressbar_display:true,progressbar_barWidth:10,
+progressbar_colorBar:0xcbd5e1,progressbar_colorBar_Alpha:1,progressbar_colorBarProgress:0x22d3ee,progressbar_colorBarProgress_Alpha:1,
+needle_display:template.indexOf('Linear')<0,needle_Type:'line',needle_start:0,needle_end:0,needle_width:0,needle_CircleSize:20,needle_CircleOuter:false,
+needle_colorNeedleCircleInner:0xffffff,needle_colorNeedleCircleInner_Alpha:1,needle_colorNeedleCircleInnerEnd:0xffffff,needle_colorNeedleCircleInnerEnd_Alpha:1,
+needle_colorShadowDown:0xff0000,needle_colorShadowDown_Alpha:1});
+input.data.value=50;input.background='#fff';
+var canvas=document.createElement('canvas'),test=window.echarts.init(canvas,null,{renderer:'canvas',width:300,height:400,devicePixelRatio:1});
+try{
+var option=fn(input,300,400);option.animation=false;test.setOption(option,true);test.getZr().flush();
+var ctx=canvas.getContext('2d'),get=function(id){return option.graphic.find(function(g){return g.id===id;});};
+var pixel=function(x,y){return Array.from(ctx.getImageData(Math.round(x),Math.round(y),1,1).data);};
+if(template.indexOf('Linear')>=0){
+var p=get('progress').shape,t=get('track').shape,vertical=template.indexOf('(vertical)')>=0;
+gaugePaint.progress.push(pixel(p.x+p.width/2,p.y+p.height/2));
+gaugePaint.track.push(pixel(t.x+t.width*(vertical?0.5:0.8),t.y+t.height*(vertical?0.2:0.5)));
+}else{
+var hub=get('hub').shape,red=0;
+for(var y=Math.floor(hub.cy-hub.r-10);y<=hub.cy+hub.r+10;y++)for(var x=Math.floor(hub.cx-hub.r-10);x<=hub.cx+hub.r+10;x++){
+var distance=Math.hypot(x-hub.cx,y-hub.cy);
+if(distance>hub.r+1&&distance<hub.r+8){var px=pixel(x,y);if(px[0]>px[1]+10&&px[0]>px[2]+10){red++;}}
+}
+gaugePaint.hubShadow.push(red);
+}
+}finally{test.dispose();}
+});
+}
 var pixels=0,ink=0,canvases=e.querySelectorAll('canvas'),pixelError='';
 try{Array.from(canvases).forEach(function(canvas){var p=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;for(var i=0;i<p.length;i+=16){if(p[i+3]>0&&Math.min(p[i],p[i+1],p[i+2])<230){ink++;}if(p[i+3]>0&&Math.max(p[i],p[i+1],p[i+2])-Math.min(p[i],p[i+1],p[i+2])>20){pixels++;}}});}catch(err){pixelError=String(err);}
-var result={errors:window.__jsliveErrors,canvas:canvases.length,pixels:pixels,ink:ink,pixelError:pixelError,updates:calls,legendRetained:retained,warningRetained:warningRetained,progressTitle:progressTitle,
+var result={errors:window.__jsliveErrors,canvas:canvases.length,pixels:pixels,ink:ink,pixelError:pixelError,gaugePaint:gaugePaint,updates:calls,legendRetained:retained,warningRetained:warningRetained,progressTitle:progressTitle,
 errorVisible:!document.getElementById('echarts-import-error').hidden,warningVisible:!document.getElementById('echarts-import-warning').hidden,
 fontFailures:Array.from(document.fonts).filter(function(f){return f.status!=='loaded';}).map(function(f){return f.family+':'+f.status;}),
 headerInset:parseFloat(getComputedStyle(r).paddingTop),scrollUnchanged:document.scrollingElement.scrollTop===before};
@@ -69,6 +101,12 @@ for(const index of cases){
         assert.equal(metrics.legendRetained,true,name+': native update reset the selected legend');
         assert.equal(metrics.warningRetained,true,name+': transient failure discarded the previous chart');
         assert.equal(metrics.progressTitle,true,name+': configured Progress title is missing');
+        if(index>=15&&index<=22){
+            assert.ok(metrics.gaugePaint,name+': gauge pixel probe did not run');
+            assert.deepEqual(metrics.gaugePaint.progress,[[34,211,238,255],[34,211,238,255]],name+': solid cyan progress pixels');
+            assert.deepEqual(metrics.gaugePaint.track,[[203,213,225,255],[203,213,225,255]],name+': solid track pixels');
+            assert.ok(metrics.gaugePaint.hubShadow.length===2&&metrics.gaugePaint.hubShadow.every(n=>n>20),name+': visible configured hub-shadow pixels');
+        }
         assert.equal(metrics.scrollUnchanged,true,name+': wheel moved the outer document');
         assert.ok(mode==='tile'?metrics.headerInset>=58:metrics.headerInset<58,name+': wrong native tile header inset');
         console.log(name+': native canvas, fonts, refresh, legend, transient error and wheel smoke passed.');

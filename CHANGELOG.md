@@ -26,6 +26,11 @@
 
 ## Fixes
 
+- Übernommene lineare JSLive-Gauges zeigen Fortschrittsbalken und Grundstrecke
+  in den konfigurierten Vollfarben samt Transparenz. Skalen zeigen die numerischen
+  Quellbeschriftungen ohne zusätzlich angehängte Nullen; die Präzision der Wertbox
+  bleibt erhalten. Innere und äußere Zeigernaben übernehmen den Quellschatten.
+
 - Übernommene JSLive-Gauges berücksichtigen die wirksamen Vorlagenmaße,
   Schriftmaßstäbe und Textbereiche für radiale, horizontale, vertikale und
   Kompass-Instrumente. Plattenverläufe, Skalen, Zeiger und Naben folgen der

@@ -8,6 +8,7 @@
             "height": 500,
             "texts": {
                 "title": {
+                    "text": "Synthetic text 23",
                     "fontSize": 19.2,
                     "family": "Comfortaa",
                     "x": 310,
@@ -15,6 +16,7 @@
                     "baseline": "middle"
                 },
                 "unit": {
+                    "text": "%",
                     "fontSize": 14.399999999999999,
                     "family": "Arial",
                     "x": 310,
@@ -22,13 +24,15 @@
                     "baseline": "middle"
                 },
                 "number:0": {
+                    "text": "0",
                     "fontSize": 14.399999999999999,
                     "family": "Arial",
-                    "x": 176.7451694596795,
-                    "baselineY": 324.934712283272,
+                    "x": 172.8466058992414,
+                    "baselineY": 327.18554900434384,
                     "baseline": "middle"
                 },
                 "value": {
+                    "text": "21,5",
                     "fontSize": 16.8,
                     "family": "Arial",
                     "x": 310,
@@ -65,7 +69,18 @@
                         250.11809015716082
                     ]
                 ]
-            }
+            },
+            "paints": [
+                {
+                    "id": "hub",
+                    "shadow": {
+                        "shadowColor": "rgba(0,0,0,0.5)",
+                        "shadowBlur": 10,
+                        "shadowOffsetX": 2,
+                        "shadowOffsetY": 2
+                    }
+                }
+            ]
         },
         {
             "case": 15,
@@ -73,6 +88,7 @@
             "height": 700,
             "texts": {
                 "title": {
+                    "text": "Synthetic text 23",
                     "fontSize": 27.2,
                     "family": "Comfortaa",
                     "x": 600,
@@ -80,6 +96,7 @@
                     "baseline": "middle"
                 },
                 "unit": {
+                    "text": "%",
                     "fontSize": 20.4,
                     "family": "Arial",
                     "x": 600,
@@ -87,13 +104,15 @@
                     "baseline": "middle"
                 },
                 "number:0": {
+                    "text": "0",
                     "fontSize": 20.4,
                     "family": "Arial",
-                    "x": 410.24456715393234,
-                    "baselineY": 457.55535023387114,
+                    "x": 404.00471431209974,
+                    "baselineY": 461.15793095180686,
                     "baseline": "middle"
                 },
                 "value": {
+                    "text": "21,5",
                     "fontSize": 23.8,
                     "family": "Arial",
                     "x": 600,
@@ -130,7 +149,18 @@
                         351.0006277226445
                     ]
                 ]
-            }
+            },
+            "paints": [
+                {
+                    "id": "hub",
+                    "shadow": {
+                        "shadowColor": "rgba(0,0,0,0.5)",
+                        "shadowBlur": 10,
+                        "shadowOffsetX": 2,
+                        "shadowOffsetY": 2
+                    }
+                }
+            ]
         },
         {
             "case": 15,
@@ -138,6 +168,7 @@
             "height": 242,
             "texts": {
                 "title": {
+                    "text": "Synthetic text 23",
                     "fontSize": 8.88,
                     "family": "Comfortaa",
                     "x": 150,
@@ -145,6 +176,7 @@
                     "baseline": "middle"
                 },
                 "unit": {
+                    "text": "%",
                     "fontSize": 6.66,
                     "family": "Arial",
                     "x": 150,
@@ -152,13 +184,15 @@
                     "baseline": "middle"
                 },
                 "number:0": {
+                    "text": "0",
                     "fontSize": 6.66,
                     "family": "Arial",
-                    "x": 90.25143977202856,
-                    "baselineY": 153.4958473313119,
+                    "x": 89.11244773426176,
+                    "baselineY": 154.1534446909214,
                     "baseline": "middle"
                 },
                 "value": {
+                    "text": "21,5",
                     "fontSize": 7.7700000000000005,
                     "family": "Arial",
                     "x": 150,
@@ -195,7 +229,18 @@
                         119.97961669768688
                     ]
                 ]
-            }
+            },
+            "paints": [
+                {
+                    "id": "hub",
+                    "shadow": {
+                        "shadowColor": "rgba(0,0,0,0.5)",
+                        "shadowBlur": 10,
+                        "shadowOffsetX": 2,
+                        "shadowOffsetY": 2
+                    }
+                }
+            ]
         },
         {
             "case": 16,
@@ -203,6 +248,7 @@
             "height": 500,
             "texts": {
                 "title": {
+                    "text": "Synthetic text 2",
                     "fontSize": 19.2,
                     "family": "Orbitron",
                     "x": 310,
@@ -210,6 +256,7 @@
                     "baseline": "middle"
                 },
                 "unit": {
+                    "text": "°C",
                     "fontSize": 14.399999999999999,
                     "family": "Arial",
                     "x": 310,
@@ -217,13 +264,15 @@
                     "baseline": "middle"
                 },
                 "number:0": {
+                    "text": "-20",
                     "fontSize": 14.399999999999999,
                     "family": "Arial",
-                    "x": 161.94577282424459,
+                    "x": 156.44132883032435,
                     "baselineY": 248,
                     "baseline": "middle"
                 },
                 "value": {
+                    "text": "21,5",
                     "fontSize": 16.8,
                     "family": "Arial",
                     "x": 310,
@@ -252,7 +301,18 @@
                         88.40839681595341
                     ]
                 ]
-            }
+            },
+            "paints": [
+                {
+                    "id": "hub",
+                    "shadow": {
+                        "shadowColor": "rgba(0,0,0,0.5)",
+                        "shadowBlur": 10,
+                        "shadowOffsetX": 2,
+                        "shadowOffsetY": 2
+                    }
+                }
+            ]
         },
         {
             "case": 16,
@@ -260,6 +320,7 @@
             "height": 700,
             "texts": {
                 "title": {
+                    "text": "Synthetic text 2",
                     "fontSize": 27.2,
                     "family": "Orbitron",
                     "x": 600,
@@ -267,6 +328,7 @@
                     "baseline": "middle"
                 },
                 "unit": {
+                    "text": "°C",
                     "fontSize": 20.4,
                     "family": "Arial",
                     "x": 600,
@@ -274,13 +336,15 @@
                     "baseline": "middle"
                 },
                 "number:0": {
+                    "text": "-20",
                     "fontSize": 20.4,
                     "family": "Arial",
-                    "x": 389.5163049408486,
+                    "x": 381.36070487165273,
                     "baselineY": 348,
                     "baseline": "middle"
                 },
                 "value": {
+                    "text": "21,5",
                     "fontSize": 23.8,
                     "family": "Arial",
                     "x": 600,
@@ -309,7 +373,18 @@
                         121.91189548926732
                     ]
                 ]
-            }
+            },
+            "paints": [
+                {
+                    "id": "hub",
+                    "shadow": {
+                        "shadowColor": "rgba(0,0,0,0.5)",
+                        "shadowBlur": 10,
+                        "shadowOffsetX": 2,
+                        "shadowOffsetY": 2
+                    }
+                }
+            ]
         },
         {
             "case": 16,
@@ -317,6 +392,7 @@
             "height": 242,
             "texts": {
                 "title": {
+                    "text": "Synthetic text 2",
                     "fontSize": 8.88,
                     "family": "Orbitron",
                     "x": 150,
@@ -324,6 +400,7 @@
                     "baseline": "middle"
                 },
                 "unit": {
+                    "text": "°C",
                     "fontSize": 6.66,
                     "family": "Arial",
                     "x": 150,
@@ -331,13 +408,15 @@
                     "baseline": "middle"
                 },
                 "number:0": {
+                    "text": "-20",
                     "fontSize": 6.66,
                     "family": "Arial",
-                    "x": 83.11315930457705,
+                    "x": 81.11158504789762,
                     "baselineY": 119,
                     "baseline": "middle"
                 },
                 "value": {
+                    "text": "21,5",
                     "fontSize": 7.7700000000000005,
                     "family": "Arial",
                     "x": 150,
@@ -366,7 +445,18 @@
                         45.18888352737844
                     ]
                 ]
-            }
+            },
+            "paints": [
+                {
+                    "id": "hub",
+                    "shadow": {
+                        "shadowColor": "rgba(0,0,0,0.5)",
+                        "shadowBlur": 10,
+                        "shadowOffsetX": 2,
+                        "shadowOffsetY": 2
+                    }
+                }
+            ]
         },
         {
             "case": 17,
@@ -374,6 +464,7 @@
             "height": 500,
             "texts": {
                 "title": {
+                    "text": "Synthetic text 23",
                     "fontSize": 8.32,
                     "family": "Comfortaa",
                     "x": 310,
@@ -381,6 +472,7 @@
                     "baseline": "alphabetic"
                 },
                 "unit": {
+                    "text": "%",
                     "fontSize": 8.32,
                     "family": "Comfortaa",
                     "x": 310,
@@ -388,6 +480,7 @@
                     "baseline": "alphabetic"
                 },
                 "number:left:0": {
+                    "text": "0",
                     "fontSize": 6.24,
                     "family": "Arial",
                     "x": 55,
@@ -426,7 +519,17 @@
                         65
                     ]
                 ]
-            }
+            },
+            "paints": [
+                {
+                    "id": "track",
+                    "fill": "rgba(203,213,225,1)"
+                },
+                {
+                    "id": "progress",
+                    "fill": "rgba(14,165,233,1)"
+                }
+            ]
         },
         {
             "case": 17,
@@ -434,6 +537,7 @@
             "height": 700,
             "texts": {
                 "title": {
+                    "text": "Synthetic text 23",
                     "fontSize": 16.56,
                     "family": "Comfortaa",
                     "x": 600,
@@ -441,6 +545,7 @@
                     "baseline": "alphabetic"
                 },
                 "unit": {
+                    "text": "%",
                     "fontSize": 16.56,
                     "family": "Comfortaa",
                     "x": 600,
@@ -448,6 +553,7 @@
                     "baseline": "alphabetic"
                 },
                 "number:left:0": {
+                    "text": "0",
                     "fontSize": 12.419999999999998,
                     "family": "Arial",
                     "x": 99,
@@ -486,7 +592,17 @@
                         119.5
                     ]
                 ]
-            }
+            },
+            "paints": [
+                {
+                    "id": "track",
+                    "fill": "rgba(203,213,225,1)"
+                },
+                {
+                    "id": "progress",
+                    "fill": "rgba(14,165,233,1)"
+                }
+            ]
         },
         {
             "case": 17,
@@ -494,6 +610,7 @@
             "height": 242,
             "texts": {
                 "title": {
+                    "text": "Synthetic text 23",
                     "fontSize": 3.84,
                     "family": "Comfortaa",
                     "x": 150,
@@ -501,6 +618,7 @@
                     "baseline": "alphabetic"
                 },
                 "unit": {
+                    "text": "%",
                     "fontSize": 3.84,
                     "family": "Comfortaa",
                     "x": 150,
@@ -508,6 +626,7 @@
                     "baseline": "alphabetic"
                 },
                 "number:left:0": {
+                    "text": "0",
                     "fontSize": 2.88,
                     "family": "Arial",
                     "x": 31,
@@ -546,7 +665,17 @@
                         35
                     ]
                 ]
-            }
+            },
+            "paints": [
+                {
+                    "id": "track",
+                    "fill": "rgba(203,213,225,1)"
+                },
+                {
+                    "id": "progress",
+                    "fill": "rgba(14,165,233,1)"
+                }
+            ]
         },
         {
             "case": 18,
@@ -554,6 +683,7 @@
             "height": 500,
             "texts": {
                 "title": {
+                    "text": "Synthetic text 2",
                     "fontSize": 8.32,
                     "family": "Orbitron",
                     "x": 310,
@@ -561,6 +691,7 @@
                     "baseline": "alphabetic"
                 },
                 "unit": {
+                    "text": "°C",
                     "fontSize": 8.32,
                     "family": "Orbitron",
                     "x": 310,
@@ -568,6 +699,7 @@
                     "baseline": "alphabetic"
                 },
                 "number:right:0": {
+                    "text": "-20",
                     "fontSize": 6.24,
                     "family": "Arial",
                     "x": 55,
@@ -590,7 +722,17 @@
                         79.48
                     ]
                 ]
-            }
+            },
+            "paints": [
+                {
+                    "id": "track",
+                    "fill": "rgba(203,213,225,1)"
+                },
+                {
+                    "id": "progress",
+                    "fill": "rgba(34,211,238,1)"
+                }
+            ]
         },
         {
             "case": 18,
@@ -598,6 +740,7 @@
             "height": 700,
             "texts": {
                 "title": {
+                    "text": "Synthetic text 2",
                     "fontSize": 16.56,
                     "family": "Orbitron",
                     "x": 600,
@@ -605,6 +748,7 @@
                     "baseline": "alphabetic"
                 },
                 "unit": {
+                    "text": "°C",
                     "fontSize": 16.56,
                     "family": "Orbitron",
                     "x": 600,
@@ -612,6 +756,7 @@
                     "baseline": "alphabetic"
                 },
                 "number:right:0": {
+                    "text": "-20",
                     "fontSize": 12.419999999999998,
                     "family": "Arial",
                     "x": 99,
@@ -634,7 +779,17 @@
                         148.34
                     ]
                 ]
-            }
+            },
+            "paints": [
+                {
+                    "id": "track",
+                    "fill": "rgba(203,213,225,1)"
+                },
+                {
+                    "id": "progress",
+                    "fill": "rgba(34,211,238,1)"
+                }
+            ]
         },
         {
             "case": 18,
@@ -642,6 +797,7 @@
             "height": 242,
             "texts": {
                 "title": {
+                    "text": "Synthetic text 2",
                     "fontSize": 3.84,
                     "family": "Orbitron",
                     "x": 150,
@@ -649,6 +805,7 @@
                     "baseline": "alphabetic"
                 },
                 "unit": {
+                    "text": "°C",
                     "fontSize": 3.84,
                     "family": "Orbitron",
                     "x": 150,
@@ -656,6 +813,7 @@
                     "baseline": "alphabetic"
                 },
                 "number:right:0": {
+                    "text": "-20",
                     "fontSize": 2.88,
                     "family": "Arial",
                     "x": 31,
@@ -678,7 +836,17 @@
                         41.56
                     ]
                 ]
-            }
+            },
+            "paints": [
+                {
+                    "id": "track",
+                    "fill": "rgba(203,213,225,1)"
+                },
+                {
+                    "id": "progress",
+                    "fill": "rgba(34,211,238,1)"
+                }
+            ]
         },
         {
             "case": 19,
@@ -686,6 +854,7 @@
             "height": 500,
             "texts": {
                 "title": {
+                    "text": "Synthetic text 23",
                     "fontSize": 16.32,
                     "family": "Comfortaa",
                     "x": 310,
@@ -693,6 +862,7 @@
                     "baseline": "alphabetic"
                 },
                 "unit": {
+                    "text": "%",
                     "fontSize": 16.32,
                     "family": "Comfortaa",
                     "x": 310,
@@ -700,6 +870,7 @@
                     "baseline": "alphabetic"
                 },
                 "number:left:0": {
+                    "text": "0",
                     "fontSize": 12.24,
                     "family": "Arial",
                     "x": 262.15999999999997,
@@ -707,6 +878,7 @@
                     "baseline": "alphabetic"
                 },
                 "value": {
+                    "text": "21,5",
                     "fontSize": 16.8,
                     "family": "Arial",
                     "x": 310,
@@ -743,7 +915,17 @@
                         315
                     ]
                 ]
-            }
+            },
+            "paints": [
+                {
+                    "id": "track",
+                    "fill": "rgba(203,213,225,1)"
+                },
+                {
+                    "id": "progress",
+                    "fill": "rgba(14,165,233,1)"
+                }
+            ]
         },
         {
             "case": 19,
@@ -751,6 +933,7 @@
             "height": 700,
             "texts": {
                 "title": {
+                    "text": "Synthetic text 23",
                     "fontSize": 23.12,
                     "family": "Comfortaa",
                     "x": 601,
@@ -758,6 +941,7 @@
                     "baseline": "alphabetic"
                 },
                 "unit": {
+                    "text": "%",
                     "fontSize": 23.12,
                     "family": "Comfortaa",
                     "x": 601,
@@ -765,6 +949,7 @@
                     "baseline": "alphabetic"
                 },
                 "number:left:0": {
+                    "text": "0",
                     "fontSize": 17.34,
                     "family": "Arial",
                     "x": 532.81,
@@ -772,6 +957,7 @@
                     "baseline": "alphabetic"
                 },
                 "value": {
+                    "text": "21,5",
                     "fontSize": 23.8,
                     "family": "Arial",
                     "x": 600,
@@ -808,7 +994,17 @@
                         444
                     ]
                 ]
-            }
+            },
+            "paints": [
+                {
+                    "id": "track",
+                    "fill": "rgba(203,213,225,1)"
+                },
+                {
+                    "id": "progress",
+                    "fill": "rgba(14,165,233,1)"
+                }
+            ]
         },
         {
             "case": 19,
@@ -816,6 +1012,7 @@
             "height": 242,
             "texts": {
                 "title": {
+                    "text": "Synthetic text 23",
                     "fontSize": 7.547999999999999,
                     "family": "Comfortaa",
                     "x": 150,
@@ -823,6 +1020,7 @@
                     "baseline": "alphabetic"
                 },
                 "unit": {
+                    "text": "%",
                     "fontSize": 7.547999999999999,
                     "family": "Comfortaa",
                     "x": 150,
@@ -830,6 +1028,7 @@
                     "baseline": "alphabetic"
                 },
                 "number:left:0": {
+                    "text": "0",
                     "fontSize": 5.661,
                     "family": "Arial",
                     "x": 127.86149999999999,
@@ -837,6 +1036,7 @@
                     "baseline": "alphabetic"
                 },
                 "value": {
+                    "text": "21,5",
                     "fontSize": 7.7700000000000005,
                     "family": "Arial",
                     "x": 150,
@@ -873,7 +1073,17 @@
                         150
                     ]
                 ]
-            }
+            },
+            "paints": [
+                {
+                    "id": "track",
+                    "fill": "rgba(203,213,225,1)"
+                },
+                {
+                    "id": "progress",
+                    "fill": "rgba(14,165,233,1)"
+                }
+            ]
         },
         {
             "case": 20,
@@ -881,6 +1091,7 @@
             "height": 500,
             "texts": {
                 "title": {
+                    "text": "Synthetic text 2",
                     "fontSize": 16.32,
                     "family": "Orbitron",
                     "x": 310,
@@ -888,6 +1099,7 @@
                     "baseline": "alphabetic"
                 },
                 "unit": {
+                    "text": "°C",
                     "fontSize": 16.32,
                     "family": "Orbitron",
                     "x": 310,
@@ -895,6 +1107,7 @@
                     "baseline": "alphabetic"
                 },
                 "number:right:0": {
+                    "text": "-20",
                     "fontSize": 12.24,
                     "family": "Arial",
                     "x": 357.84000000000003,
@@ -902,6 +1115,7 @@
                     "baseline": "alphabetic"
                 },
                 "value": {
+                    "text": "21,5",
                     "fontSize": 16.8,
                     "family": "Arial",
                     "x": 310,
@@ -922,7 +1136,17 @@
                         167
                     ]
                 ]
-            }
+            },
+            "paints": [
+                {
+                    "id": "track",
+                    "fill": "rgba(203,213,225,1)"
+                },
+                {
+                    "id": "progress",
+                    "fill": "rgba(34,211,238,1)"
+                }
+            ]
         },
         {
             "case": 20,
@@ -930,6 +1154,7 @@
             "height": 700,
             "texts": {
                 "title": {
+                    "text": "Synthetic text 2",
                     "fontSize": 23.12,
                     "family": "Orbitron",
                     "x": 601,
@@ -937,6 +1162,7 @@
                     "baseline": "alphabetic"
                 },
                 "unit": {
+                    "text": "°C",
                     "fontSize": 23.12,
                     "family": "Orbitron",
                     "x": 601,
@@ -944,6 +1170,7 @@
                     "baseline": "alphabetic"
                 },
                 "number:right:0": {
+                    "text": "-20",
                     "fontSize": 17.34,
                     "family": "Arial",
                     "x": 668.19,
@@ -951,6 +1178,7 @@
                     "baseline": "alphabetic"
                 },
                 "value": {
+                    "text": "21,5",
                     "fontSize": 23.8,
                     "family": "Arial",
                     "x": 600,
@@ -971,7 +1199,17 @@
                         234
                     ]
                 ]
-            }
+            },
+            "paints": [
+                {
+                    "id": "track",
+                    "fill": "rgba(203,213,225,1)"
+                },
+                {
+                    "id": "progress",
+                    "fill": "rgba(34,211,238,1)"
+                }
+            ]
         },
         {
             "case": 20,
@@ -979,6 +1217,7 @@
             "height": 242,
             "texts": {
                 "title": {
+                    "text": "Synthetic text 2",
                     "fontSize": 7.547999999999999,
                     "family": "Orbitron",
                     "x": 150,
@@ -986,6 +1225,7 @@
                     "baseline": "alphabetic"
                 },
                 "unit": {
+                    "text": "°C",
                     "fontSize": 7.547999999999999,
                     "family": "Orbitron",
                     "x": 150,
@@ -993,6 +1233,7 @@
                     "baseline": "alphabetic"
                 },
                 "number:right:0": {
+                    "text": "-20",
                     "fontSize": 5.661,
                     "family": "Arial",
                     "x": 172.4885,
@@ -1000,6 +1241,7 @@
                     "baseline": "alphabetic"
                 },
                 "value": {
+                    "text": "21,5",
                     "fontSize": 7.7700000000000005,
                     "family": "Arial",
                     "x": 150,
@@ -1020,7 +1262,17 @@
                         82
                     ]
                 ]
-            }
+            },
+            "paints": [
+                {
+                    "id": "track",
+                    "fill": "rgba(203,213,225,1)"
+                },
+                {
+                    "id": "progress",
+                    "fill": "rgba(34,211,238,1)"
+                }
+            ]
         },
         {
             "case": 21,
@@ -1028,6 +1280,7 @@
             "height": 500,
             "texts": {
                 "title": {
+                    "text": "Synthetic text 67",
                     "fontSize": 19.2,
                     "family": "Comfortaa",
                     "x": 310,
@@ -1035,6 +1288,7 @@
                     "baseline": "middle"
                 },
                 "unit": {
+                    "text": "°",
                     "fontSize": 14.399999999999999,
                     "family": "Arial",
                     "x": 310,
@@ -1042,6 +1296,7 @@
                     "baseline": "middle"
                 },
                 "number:0": {
+                    "text": "N",
                     "fontSize": 14.399999999999999,
                     "family": "Arial",
                     "x": 310,
@@ -1080,7 +1335,18 @@
                         247.13872211719791
                     ]
                 ]
-            }
+            },
+            "paints": [
+                {
+                    "id": "hub",
+                    "shadow": {
+                        "shadowColor": "rgba(0,0,0,0.5)",
+                        "shadowBlur": 10,
+                        "shadowOffsetX": 2,
+                        "shadowOffsetY": 2
+                    }
+                }
+            ]
         },
         {
             "case": 21,
@@ -1088,6 +1354,7 @@
             "height": 700,
             "texts": {
                 "title": {
+                    "text": "Synthetic text 67",
                     "fontSize": 27.2,
                     "family": "Comfortaa",
                     "x": 600,
@@ -1095,6 +1362,7 @@
                     "baseline": "middle"
                 },
                 "unit": {
+                    "text": "°",
                     "fontSize": 20.4,
                     "family": "Arial",
                     "x": 600,
@@ -1102,6 +1370,7 @@
                     "baseline": "middle"
                 },
                 "number:0": {
+                    "text": "N",
                     "fontSize": 20.4,
                     "family": "Arial",
                     "x": 600,
@@ -1140,7 +1409,18 @@
                         346.7722208904736
                     ]
                 ]
-            }
+            },
+            "paints": [
+                {
+                    "id": "hub",
+                    "shadow": {
+                        "shadowColor": "rgba(0,0,0,0.5)",
+                        "shadowBlur": 10,
+                        "shadowOffsetX": 2,
+                        "shadowOffsetY": 2
+                    }
+                }
+            ]
         },
         {
             "case": 21,
@@ -1148,6 +1428,7 @@
             "height": 242,
             "texts": {
                 "title": {
+                    "text": "Synthetic text 67",
                     "fontSize": 8.88,
                     "family": "Comfortaa",
                     "x": 150,
@@ -1155,6 +1436,7 @@
                     "baseline": "middle"
                 },
                 "unit": {
+                    "text": "°",
                     "fontSize": 6.66,
                     "family": "Arial",
                     "x": 150,
@@ -1162,6 +1444,7 @@
                     "baseline": "middle"
                 },
                 "number:0": {
+                    "text": "N",
                     "fontSize": 6.66,
                     "family": "Arial",
                     "x": 150,
@@ -1200,7 +1483,18 @@
                         118.61150869967224
                     ]
                 ]
-            }
+            },
+            "paints": [
+                {
+                    "id": "hub",
+                    "shadow": {
+                        "shadowColor": "rgba(0,0,0,0.5)",
+                        "shadowBlur": 10,
+                        "shadowOffsetX": 2,
+                        "shadowOffsetY": 2
+                    }
+                }
+            ]
         },
         {
             "case": 22,
@@ -1208,6 +1502,7 @@
             "height": 500,
             "texts": {
                 "title": {
+                    "text": "Synthetic text 67",
                     "fontSize": 19.2,
                     "family": "Orbitron",
                     "x": 310,
@@ -1215,6 +1510,7 @@
                     "baseline": "alphabetic"
                 },
                 "unit": {
+                    "text": "°",
                     "fontSize": 10,
                     "family": "sans-serif",
                     "x": 310,
@@ -1246,7 +1542,18 @@
                         60
                     ]
                 ]
-            }
+            },
+            "paints": [
+                {
+                    "id": "hub",
+                    "shadow": {
+                        "shadowColor": "rgba(0,0,0,0.5)",
+                        "shadowBlur": 10,
+                        "shadowOffsetX": 2,
+                        "shadowOffsetY": 2
+                    }
+                }
+            ]
         },
         {
             "case": 22,
@@ -1254,6 +1561,7 @@
             "height": 700,
             "texts": {
                 "title": {
+                    "text": "Synthetic text 67",
                     "fontSize": 27.2,
                     "family": "Orbitron",
                     "x": 600,
@@ -1261,6 +1569,7 @@
                     "baseline": "alphabetic"
                 },
                 "unit": {
+                    "text": "°",
                     "fontSize": 10,
                     "family": "sans-serif",
                     "x": 600,
@@ -1292,7 +1601,18 @@
                         80
                     ]
                 ]
-            }
+            },
+            "paints": [
+                {
+                    "id": "hub",
+                    "shadow": {
+                        "shadowColor": "rgba(0,0,0,0.5)",
+                        "shadowBlur": 10,
+                        "shadowOffsetX": 2,
+                        "shadowOffsetY": 2
+                    }
+                }
+            ]
         },
         {
             "case": 22,
@@ -1300,6 +1620,7 @@
             "height": 242,
             "texts": {
                 "title": {
+                    "text": "Synthetic text 67",
                     "fontSize": 8.88,
                     "family": "Orbitron",
                     "x": 150,
@@ -1307,6 +1628,7 @@
                     "baseline": "alphabetic"
                 },
                 "unit": {
+                    "text": "°",
                     "fontSize": 10,
                     "family": "sans-serif",
                     "x": 150,
@@ -1338,7 +1660,18 @@
                         34.19999999999999
                     ]
                 ]
-            }
+            },
+            "paints": [
+                {
+                    "id": "hub",
+                    "shadow": {
+                        "shadowColor": "rgba(0,0,0,0.5)",
+                        "shadowBlur": 10,
+                        "shadowOffsetX": 2,
+                        "shadowOffsetY": 2
+                    }
+                }
+            ]
         }
     ]
 }
