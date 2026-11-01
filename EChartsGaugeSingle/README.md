@@ -403,6 +403,12 @@ Moduls bleibt unverändert. Quellen- und Archiv-IDs sowie native Formatierungen
 werden erhalten, ohne Legacy-Profile anzulegen. Der Importbericht nennt
 Darstellungs- und Verarbeitungsunterschiede einzeln.
 
+Übernommene Instrumente berücksichtigen die Vorlagenmaße und Schriftmaßstäbe
+für radiale, horizontale, vertikale und Kompass-Anzeigen. Die gewählten Seiten
+für Skalen, Zahlen und Zeiger bleiben erhalten. Leere Einheitenschriften folgen
+dem wirksamen Schrift-Fallback der Quellvorlage. Die Wertbox folgt der jeweiligen
+Vorlage; die horizontale Quellvorlage zeigt keine zusätzliche Wertbox.
+
 Übernommene Modelle nehmen die Aktualisierung nach Modulupdates automatisch
 wieder auf. Ist das Gateway zunächst noch nicht bereit, wird im bisherigen
 Aktualisierungstakt erneut versucht. Ein erneutes Speichern ist nicht nötig;

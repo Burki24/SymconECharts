@@ -51,14 +51,16 @@
         });
         return map[value] || 'linear';
     }
-    function dataLabel(c,s) {
+    function dataLabel(c,s,source) {
+        source=source||s;
         const align=c.datalabels_align||'center';
         return {show:!!s.datalabels_enable,position:{center:'inside',start:'left',end:'right',top:'top',bottom:'bottom',left:'left',right:'right'}[align]||'inside',
             distance:c.datalabels_offset||0,align:'center',verticalAlign:'middle',
             color:color(s.datalabels_FontColor<0?c.datalabels_fontColor:s.datalabels_FontColor,1,'#000'),
-            fontFamily:c.datalabels_fontFamily||'Arial',fontSize:c.datalabels_fontSize*(c.__fontScale||1),
-            backgroundColor:paint(s,'datalabels_BackgroundColor'),borderColor:paint(s,'datalabels_BorderColor'),
-            borderWidth:c.datalabels_borderWidth||0,borderRadius:c.datalabels_borderRadius||0,padding:2};
+            fontFamily:c.datalabels_fontFamily||'Arial',fontSize:c.datalabels_fontSize*(c.__fontScale||1),lineHeight:c.datalabels_fontSize*(c.__fontScale||1)*1.2,
+            backgroundColor:paint(s,'datalabels_BackgroundColor',paint(source,'BackgroundColor')),
+            borderColor:paint(s,'datalabels_BorderColor',paint(source,'BorderColor')),
+            borderWidth:c.datalabels_borderWidth||0,borderRadius:c.datalabels_borderRadius||0,padding:4};
     }
     function dataLabelValue(value,native,c,s) {
         const p=native&&native.parameters||{};

@@ -26,6 +26,15 @@
 
 ## Fixes
 
+- Übernommene JSLive-Gauges berücksichtigen die wirksamen Vorlagenmaße,
+  Schriftmaßstäbe und Textbereiche für radiale, horizontale, vertikale und
+  Kompass-Instrumente. Plattenverläufe, Skalen, Zeiger und Naben folgen der
+  Quellprojektion; gespeicherte Einstellungen und Originalwerte bleiben erhalten.
+- Automatische Hintergründe und Rahmen importierter Datenlabels übernehmen
+  wieder die jeweilige Serien- beziehungsweise Segmentfarbe samt Transparenz.
+  Pie- und Mehrfachring-Beschriftungen berücksichtigen ihre radialen Anker und
+  Ausrichtungen; Nullsegmente erzeugen keine leeren Beschriftungskästen.
+
 - Übernommene JSLive-Fortschrittsanzeigen zeichnen den angezeigten Anteil auch
   auf Pfaden mit mehreren Bögen korrekt. Eigene Strichpfade, Strichmuster und
   umgekehrte Richtung bleiben erhalten; Werte, Quellen und Designs ändern sich

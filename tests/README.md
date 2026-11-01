@@ -65,6 +65,32 @@ Die reguläre Suite enthält jetzt folgende unabhängige Grenzen:
   Eingabemodelle bleiben unverändert. `--progress` beziehungsweise `--radar`
   isolieren die beiden Regressionen. Beide reproduzierten den jeweiligen Fehler
   vor der Korrektur; bloß gültiges oder nicht leeres SVG genügt hier nicht.
+- `node tests/jslive_design_parity.js`: F03-/F04-Regressionen für die vier
+  Gauge-Vorlagen und Datenlabels. 459 eingefrorene Messwerte und 81 Schrift-
+  zuordnungen der ursprünglichen Canvas-Gauges-Engine prüfen Schriftgrößen,
+  wirksame leere Einheitenschriften, Textpositionen und Zeigerpunkte
+  aller acht anonymisierten Gauge-Varianten in drei Größen. Zusätzliche Tests
+  sichern Vorlagenproportionen, radiale Plattenverläufe, erhaltene Randtick-
+  Dubletten, den rotierenden Kompass und unveränderte Eingabemodelle ab.
+  Pie-/Serienlabels prüfen automatische und ausdrückliche Farben einschließlich
+  Alpha null, segmentweise Rahmen, mehrere Ringe, Nullwerte sowie native
+  Positionen für Start-/Mittel-/Endanker, Textausrichtungen, Legendenfilter und
+  deren Rücknahme sowie Live-Wechsel auf null. Die ersten
+  Läufe reproduzierten transparente statt geerbter Kästen sowie doppelt große
+  radiale Titelschriften. `--gauge` und `--labels` isolieren die beiden Bereiche.
+- Optional `node tests/jslive_gauge_reference.js ../JSLive` vergleicht dieselben
+  459 Messungen und 81 Schriftzuordnungen direkt mit dem unveränderten
+  Referenzcheckout. Ausschließlich die Canvas-Zeichenfläche wird kontrolliert
+  beobachtet; ihr Font-Setter ignoriert wie Canvas ungültige CSS-Schriften.
+  Die Engine bleibt
+  außerhalb dieses Repositorys; die reguläre CI verwendet nur
+  `fixtures/jslive-gauge-geometry.json`. Das Referenzskript prüft den SHA-256-Wert
+  von Canvas Gauges 2.1.7 / JSLive `2.1.7-jslive.1` vor der Ausführung.
+  `--snapshot tests/fixtures/jslive-gauge-geometry.json` hinter dem Checkoutpfad
+  regeneriert die anonymen Messwerte erst nach bestandenem Direktvergleich.
+  Schriftgrößen sind exakt; Pixelrundungen an ungeraden Canvas-Abmessungen
+  dürfen höchstens 0,6 Pixel abweichen. Quellwerte und Einstellungen werden
+  nicht zurückgeschrieben.
 
 Der native Importadapter-Test unterbricht zusätzlich nach SetConfiguration und
 vor ApplyChanges und bestätigt die unveränderte aktive Konfiguration sowie

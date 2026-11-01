@@ -227,9 +227,47 @@ verglichen. Am 01.11.2026 bestehen 82 Fortschrittspfad-/Updatefälle, die Radar-
 Koordinatenprüfungen sowie alle 120 vorhandenen SSR-Renderings. Zusätzlich
 bestehen 80 isolierte Chromium-Prüfungen mit anonymen lokalen Dokumenten
 (40 Varianten je Kachel und IPSView), einschließlich Aktualisierung, Schriften,
-vorübergehender Datenfehler und Mausrad-Smoke. Die neue Live-Abnahme nach dem
-Eigentümer-Update bleibt offen; diese lokalen Nachweise schließen weitere
-optische Unterschiede nicht ab.
+vorübergehender Datenfehler und Mausrad-Smoke. Unter 1.374 wurden alle acht
+betroffenen Original-/Ziel-Kachelpaare visuell und alle 16 Kachel-/IPSView-
+Renderer per MCP bestätigt. Die 16 Konfigurationen, fünf Quellen und die
+Archivmetadaten/-anzahlen blieben unverändert. Eine erneute native IPSView-App-
+Prüfung wurde nicht ausgeführt; weitere optische Unterschiede bleiben offen.
+
+### Gauge- und Datenlabel-Regressionen F03 und F04
+
+Die Gauge-Familie projiziert die vier Quellvorlagen mit deren wirksamen Canvas-
+Maßen: vertikal maximal halbe Höhe als Breite, horizontal maximal ein Viertel
+der Breite als Höhe. Radiale Schriften beziehen sich auf Radius/200, lineare
+Skalenschriften auf die nach Titel-/Einheiten-/Wertzeilen verfügbare Querbreite.
+Bei leerer Einheitenschrift bleibt wie beim Canvas-Font-Setter die zuvor aktive
+Zahlen-/Titelschrift beziehungsweise die Standardschrift der gecachten Platte
+wirksam, ohne die gespeicherte Schriftangabe zu verändern.
+Platten-/Zeigergeometrie, Naben, Skalenseiten, Textbegrenzung und Verlaufsausrichtung
+bleiben lokal im Gauge-Renderer. Die erforderlichen aus Canvas Gauges 2.1.7
+adaptierten Koordinatenregeln behalten ihren MIT-Hinweis; keine alte Engine
+wird ausgeliefert. Persistierte Modelle, Quellen und Designs ändern sich nicht.
+
+Die Quelle zeichnet bei ausdrücklich numerischen Exact-Ticks keine benannten
+Kompass-Hauptticks. Diese Abwesenheit bleibt ohne NaN-Geometrie erhalten.
+Minderstriche verwenden die ursprünglichen Schritte und bei extrem dichten
+Skalen eine regelmäßige rein visuelle Ausdünnung auf höchstens 2000 Positionen
+über den vollständigen Bereich; Hauptticks und Werte werden nicht gekürzt.
+
+`format.dataLabel` löst den automatischen Hintergrund-/Rand-Fallback zentral
+auf. Pie übergibt dafür die Farben jedes einzelnen Segments, andere Familien
+verwenden ihre Serienfarben. Ausdrückliche Farben samt Alpha null haben Vorrang.
+Pie-Anker und Textausrichtung sind getrennte radiale Größen; native Labelrahmen
+erhalten Quellpadding und Zeilenhöhe. Nullsegmente zeigen keine leeren Kästen.
+
+`tests/jslive_design_parity.js` reproduzierte beide Fehler vor der Korrektur.
+Die 459 unabhängigen, eingefrorenen Messungen und 81 Schriftzuordnungen stammen
+aus dem unveränderten
+Original-Canvas-Gauges-Renderer für acht anonymisierte Varianten in drei Größen.
+Der optionale Direktvergleich mit dem lesenden JSLive-Checkout besteht ebenfalls;
+die reguläre Suite benötigt diesen Checkout nicht. Native Datenlabelmodelle,
+tatsächlich gezeichnete Rahmen und Positionen sowie unveränderte Eingaben werden
+gesondert geprüft. Die Live-Abnahme von F03/F04 nach Eigentümer-Update bleibt
+offen; andere optische Befunde werden damit nicht als erledigt markiert.
 
 ### Import und Wiederanlauf
 

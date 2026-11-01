@@ -189,6 +189,16 @@ mitgeliefert. Die unterstützten Quellverträge wurden anhand von
 [Burki24/JSLive](https://github.com/Burki24/JSLive), Version 0.111,
 Commit `286e5e9de39190178f510191f0911ee82f74271d`, geprüft.
 
+Die Koordinaten-Kompatibilität in `EChartsGaugeSingle/JSLiveRenderer.js`
+adaptiert die erforderlichen Geometrie- und Schriftmaßregeln aus Canvas Gauges
+2.1.7 (Copyright 2016 Mykhailo Stadnyk, MIT). Die vollständige ursprüngliche
+MIT-Erlaubnis steht im Dateikopf und bleibt damit auch in vollständigen
+HTML-Ausgaben enthalten. Es werden ausschließlich native ECharts-Primitiven
+erzeugt; Canvas Gauges wird nicht als Laufzeitbibliothek mitgeliefert.
+Die geprüfte Referenz ist JSLives Asset `2.1.7-jslive.1`, SHA-256
+`2cde1666441e112088cf3094f29e187f0d818ce4a2b9939091b890e9f132520e`.
+Die übrigen eigenen Bibliotheksbeiträge behalten ihre bestehende Lizenz.
+
 `tests/fixtures/jslive-templates` enthält acht unveränderte Standard-HTML-
 Vorlagen ausschließlich als inerte Hash-/Vertragsreferenz unter der dort
 beigefügten ursprünglichen GPL-3.0-Lizenz. Sie werden weder ausgeführt noch in

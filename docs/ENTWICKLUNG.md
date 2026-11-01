@@ -42,9 +42,11 @@ Unter 1.373 wurde der automatische Wiederanlauf der acht Gauge- und vier Pie-
 Ziele ohne zusätzliches ApplyChanges per MCP bestätigt. Der anschließende
 Original-/Ziel-Kachelvergleich aller 40 Varianten zeigte unter anderem zu kurze
 Fortschrittsstrecken bei mehrteiligen Bögen (F01) und gespiegelte Radar-Klassen
-(F02). Beide Geometrien sind lokal korrigiert und über die tatsächlich
-ausgelieferten Canvas-Runtimes regressionsgeprüft; Details stehen in ADR 0111
-und der Testdokumentation. Die erneute Live-Abnahme nach dem nächsten Update
+(F02). Beide Geometrien sind unter 1.374 an allen acht betroffenen Paaren
+live bestätigt. F03 (Gauge-Geometrie/Typografie) und F04 (Label-Farb-Fallback)
+sind anschließend lokal korrigiert: 459 eingefrorene Originalmessungen und
+native Labelprüfungen sichern sie ab. Details stehen in ADR 0111 und der
+Testdokumentation. Die Live-Abnahme von F03/F04 nach dem nächsten Update
 und weitere optische Unterschiede bleiben offen. Die Beta bleibt bis zur
 vereinbarten Migrationsabnahme zurückgestellt. Die bereits abgeschlossene
 Nutzungsgrenzen-Roadmap und die Eigentümerabnahmen bestehender Modelle bleiben gültig.

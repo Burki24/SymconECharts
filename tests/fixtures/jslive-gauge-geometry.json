@@ -1,0 +1,1344 @@
+{
+    "source": "Canvas Gauges 2.1.7 / JSLive 2.1.7-jslive.1",
+    "sha256": "2cde1666441e112088cf3094f29e187f0d818ce4a2b9939091b890e9f132520e",
+    "cases": [
+        {
+            "case": 15,
+            "width": 620,
+            "height": 500,
+            "texts": {
+                "title": {
+                    "fontSize": 19.2,
+                    "family": "Comfortaa",
+                    "x": 310,
+                    "baselineY": 191.52941176470588,
+                    "baseline": "middle"
+                },
+                "unit": {
+                    "fontSize": 14.399999999999999,
+                    "family": "Arial",
+                    "x": 310,
+                    "baselineY": 321.8461538461538,
+                    "baseline": "middle"
+                },
+                "number:0": {
+                    "fontSize": 14.399999999999999,
+                    "family": "Arial",
+                    "x": 176.7451694596795,
+                    "baselineY": 324.934712283272,
+                    "baseline": "middle"
+                },
+                "value": {
+                    "fontSize": 16.8,
+                    "family": "Arial",
+                    "x": 310,
+                    "baselineY": 415.192,
+                    "baseline": "alphabetic"
+                }
+            },
+            "absent": [],
+            "needle": {
+                "id": "needle",
+                "points": [
+                    [
+                        311.12858056253793,
+                        245.88190984283918
+                    ],
+                    [
+                        312.2571611250759,
+                        243.76381968567838
+                    ],
+                    [
+                        141.0230293281926,
+                        156.83101743147978
+                    ],
+                    [
+                        140.08254552607764,
+                        158.59609256244715
+                    ],
+                    [
+                        307.7428388749241,
+                        252.23618031432162
+                    ],
+                    [
+                        308.87141943746207,
+                        250.11809015716082
+                    ]
+                ]
+            }
+        },
+        {
+            "case": 15,
+            "width": 1200,
+            "height": 700,
+            "texts": {
+                "title": {
+                    "fontSize": 27.2,
+                    "family": "Comfortaa",
+                    "x": 600,
+                    "baselineY": 268,
+                    "baseline": "middle"
+                },
+                "unit": {
+                    "fontSize": 20.4,
+                    "family": "Arial",
+                    "x": 600,
+                    "baselineY": 452.61538461538464,
+                    "baseline": "middle"
+                },
+                "number:0": {
+                    "fontSize": 20.4,
+                    "family": "Arial",
+                    "x": 410.24456715393234,
+                    "baselineY": 457.55535023387114,
+                    "baseline": "middle"
+                },
+                "value": {
+                    "fontSize": 23.8,
+                    "family": "Arial",
+                    "x": 600,
+                    "baselineY": 584.8553333333333,
+                    "baseline": "alphabetic"
+                }
+            },
+            "absent": [],
+            "needle": {
+                "id": "needle",
+                "points": [
+                    [
+                        601.5988224635954,
+                        344.9993722773555
+                    ],
+                    [
+                        603.1976449271908,
+                        341.99874455471104
+                    ],
+                    [
+                        360.4200240894989,
+                        219.21166534688123
+                    ],
+                    [
+                        359.47954028738394,
+                        220.97674047784858
+                    ],
+                    [
+                        596.8023550728092,
+                        354.00125544528896
+                    ],
+                    [
+                        598.4011775364046,
+                        351.0006277226445
+                    ]
+                ]
+            }
+        },
+        {
+            "case": 15,
+            "width": 300,
+            "height": 242,
+            "texts": {
+                "title": {
+                    "fontSize": 8.88,
+                    "family": "Comfortaa",
+                    "x": 150,
+                    "baselineY": 92.88235294117646,
+                    "baseline": "middle"
+                },
+                "unit": {
+                    "fontSize": 6.66,
+                    "family": "Arial",
+                    "x": 150,
+                    "baselineY": 153.15384615384616,
+                    "baseline": "middle"
+                },
+                "number:0": {
+                    "fontSize": 6.66,
+                    "family": "Arial",
+                    "x": 90.25143977202856,
+                    "baselineY": 153.4958473313119,
+                    "baseline": "middle"
+                },
+                "value": {
+                    "fontSize": 7.7700000000000005,
+                    "family": "Arial",
+                    "x": 150,
+                    "baselineY": 196.3263,
+                    "baseline": "alphabetic"
+                }
+            },
+            "absent": [],
+            "needle": {
+                "id": "needle",
+                "points": [
+                    [
+                        150.5219685101738,
+                        118.02038330231312
+                    ],
+                    [
+                        151.0439370203476,
+                        117.04076660462626
+                    ],
+                    [
+                        72.10090608610746,
+                        76.35998162061192
+                    ],
+                    [
+                        71.1604222839925,
+                        78.12505675157927
+                    ],
+                    [
+                        148.9560629796524,
+                        120.95923339537374
+                    ],
+                    [
+                        149.4780314898262,
+                        119.97961669768688
+                    ]
+                ]
+            }
+        },
+        {
+            "case": 16,
+            "width": 620,
+            "height": 500,
+            "texts": {
+                "title": {
+                    "fontSize": 19.2,
+                    "family": "Orbitron",
+                    "x": 310,
+                    "baselineY": 191.52941176470588,
+                    "baseline": "middle"
+                },
+                "unit": {
+                    "fontSize": 14.399999999999999,
+                    "family": "Arial",
+                    "x": 310,
+                    "baselineY": 321.8461538461538,
+                    "baseline": "middle"
+                },
+                "number:0": {
+                    "fontSize": 14.399999999999999,
+                    "family": "Arial",
+                    "x": 161.94577282424459,
+                    "baselineY": 248,
+                    "baseline": "middle"
+                },
+                "value": {
+                    "fontSize": 16.8,
+                    "family": "Arial",
+                    "x": 310,
+                    "baselineY": 415.192,
+                    "baseline": "alphabetic"
+                }
+            },
+            "absent": [],
+            "needle": {
+                "id": "needle",
+                "points": [
+                    [
+                        420.7279003422608,
+                        91.12714675319259
+                    ],
+                    [
+                        311.97790285269286,
+                        249.3593749686196
+                    ],
+                    [
+                        308.02209714730714,
+                        246.6406250313804
+                    ],
+                    [
+                        416.77209463687507,
+                        88.40839681595341
+                    ]
+                ]
+            }
+        },
+        {
+            "case": 16,
+            "width": 1200,
+            "height": 700,
+            "texts": {
+                "title": {
+                    "fontSize": 27.2,
+                    "family": "Orbitron",
+                    "x": 600,
+                    "baselineY": 268,
+                    "baseline": "middle"
+                },
+                "unit": {
+                    "fontSize": 20.4,
+                    "family": "Arial",
+                    "x": 600,
+                    "baselineY": 452.61538461538464,
+                    "baseline": "middle"
+                },
+                "number:0": {
+                    "fontSize": 20.4,
+                    "family": "Arial",
+                    "x": 389.5163049408486,
+                    "baselineY": 348,
+                    "baseline": "middle"
+                },
+                "value": {
+                    "fontSize": 23.8,
+                    "family": "Arial",
+                    "x": 600,
+                    "baselineY": 584.8553333333333,
+                    "baseline": "alphabetic"
+                }
+            },
+            "absent": [],
+            "needle": {
+                "id": "needle",
+                "points": [
+                    [
+                        756.8645254848694,
+                        125.7634579003562
+                    ],
+                    [
+                        602.8020290413149,
+                        349.9257812055444
+                    ],
+                    [
+                        597.1979709586851,
+                        346.0742187944556
+                    ],
+                    [
+                        751.2604674022397,
+                        121.91189548926732
+                    ]
+                ]
+            }
+        },
+        {
+            "case": 16,
+            "width": 300,
+            "height": 242,
+            "texts": {
+                "title": {
+                    "fontSize": 8.88,
+                    "family": "Orbitron",
+                    "x": 150,
+                    "baselineY": 92.88235294117646,
+                    "baseline": "middle"
+                },
+                "unit": {
+                    "fontSize": 6.66,
+                    "family": "Arial",
+                    "x": 150,
+                    "baselineY": 153.15384615384616,
+                    "baseline": "middle"
+                },
+                "number:0": {
+                    "fontSize": 6.66,
+                    "family": "Arial",
+                    "x": 83.11315930457705,
+                    "baselineY": 119,
+                    "baseline": "middle"
+                },
+                "value": {
+                    "fontSize": 7.7700000000000005,
+                    "family": "Arial",
+                    "x": 150,
+                    "baselineY": 196.3263,
+                    "baseline": "alphabetic"
+                }
+            },
+            "absent": [],
+            "needle": {
+                "id": "needle",
+                "points": [
+                    [
+                        201.2116539082956,
+                        46.44630537335158
+                    ],
+                    [
+                        150.91478006937044,
+                        119.62871092298657
+                    ],
+                    [
+                        149.08521993062956,
+                        118.37128907701343
+                    ],
+                    [
+                        199.38209376955473,
+                        45.18888352737844
+                    ]
+                ]
+            }
+        },
+        {
+            "case": 17,
+            "width": 620,
+            "height": 500,
+            "texts": {
+                "title": {
+                    "fontSize": 8.32,
+                    "family": "Comfortaa",
+                    "x": 310,
+                    "baselineY": 36,
+                    "baseline": "alphabetic"
+                },
+                "unit": {
+                    "fontSize": 8.32,
+                    "family": "Comfortaa",
+                    "x": 310,
+                    "baselineY": 143,
+                    "baseline": "alphabetic"
+                },
+                "number:left:0": {
+                    "fontSize": 6.24,
+                    "family": "Arial",
+                    "x": 55,
+                    "baselineY": 58.66,
+                    "baseline": "alphabetic"
+                }
+            },
+            "absent": [
+                "value"
+            ],
+            "needle": {
+                "id": "needle:left",
+                "points": [
+                    [
+                        164,
+                        65
+                    ],
+                    [
+                        166,
+                        65
+                    ],
+                    [
+                        166,
+                        73.48
+                    ],
+                    [
+                        165,
+                        79.48
+                    ],
+                    [
+                        164,
+                        73.48
+                    ],
+                    [
+                        164,
+                        65
+                    ]
+                ]
+            }
+        },
+        {
+            "case": 17,
+            "width": 1200,
+            "height": 700,
+            "texts": {
+                "title": {
+                    "fontSize": 16.56,
+                    "family": "Comfortaa",
+                    "x": 600,
+                    "baselineY": 60.5,
+                    "baseline": "alphabetic"
+                },
+                "unit": {
+                    "fontSize": 16.56,
+                    "family": "Comfortaa",
+                    "x": 600,
+                    "baselineY": 273.5,
+                    "baseline": "alphabetic"
+                },
+                "number:left:0": {
+                    "fontSize": 12.419999999999998,
+                    "family": "Arial",
+                    "x": 99,
+                    "baselineY": 107.03,
+                    "baseline": "alphabetic"
+                }
+            },
+            "absent": [
+                "value"
+            ],
+            "needle": {
+                "id": "needle:left",
+                "points": [
+                    [
+                        314,
+                        119.5
+                    ],
+                    [
+                        316,
+                        119.5
+                    ],
+                    [
+                        316,
+                        136.34
+                    ],
+                    [
+                        315,
+                        148.34
+                    ],
+                    [
+                        314,
+                        136.34
+                    ],
+                    [
+                        314,
+                        119.5
+                    ]
+                ]
+            }
+        },
+        {
+            "case": 17,
+            "width": 300,
+            "height": 242,
+            "texts": {
+                "title": {
+                    "fontSize": 3.84,
+                    "family": "Comfortaa",
+                    "x": 150,
+                    "baselineY": 21,
+                    "baseline": "alphabetic"
+                },
+                "unit": {
+                    "fontSize": 3.84,
+                    "family": "Comfortaa",
+                    "x": 150,
+                    "baselineY": 71,
+                    "baseline": "alphabetic"
+                },
+                "number:left:0": {
+                    "fontSize": 2.88,
+                    "family": "Arial",
+                    "x": 31,
+                    "baselineY": 31.919999999999998,
+                    "baseline": "alphabetic"
+                }
+            },
+            "absent": [
+                "value"
+            ],
+            "needle": {
+                "id": "needle:left",
+                "points": [
+                    [
+                        81,
+                        35
+                    ],
+                    [
+                        83,
+                        35
+                    ],
+                    [
+                        83,
+                        38.56
+                    ],
+                    [
+                        82,
+                        41.56
+                    ],
+                    [
+                        81,
+                        38.56
+                    ],
+                    [
+                        81,
+                        35
+                    ]
+                ]
+            }
+        },
+        {
+            "case": 18,
+            "width": 620,
+            "height": 500,
+            "texts": {
+                "title": {
+                    "fontSize": 8.32,
+                    "family": "Orbitron",
+                    "x": 310,
+                    "baselineY": 36,
+                    "baseline": "alphabetic"
+                },
+                "unit": {
+                    "fontSize": 8.32,
+                    "family": "Orbitron",
+                    "x": 310,
+                    "baselineY": 143,
+                    "baseline": "alphabetic"
+                },
+                "number:right:0": {
+                    "fontSize": 6.24,
+                    "family": "Arial",
+                    "x": 55,
+                    "baselineY": 113.58,
+                    "baseline": "alphabetic"
+                }
+            },
+            "absent": [
+                "value"
+            ],
+            "needle": {
+                "id": "needle:left",
+                "points": [
+                    [
+                        408,
+                        65
+                    ],
+                    [
+                        408,
+                        79.48
+                    ]
+                ]
+            }
+        },
+        {
+            "case": 18,
+            "width": 1200,
+            "height": 700,
+            "texts": {
+                "title": {
+                    "fontSize": 16.56,
+                    "family": "Orbitron",
+                    "x": 600,
+                    "baselineY": 60.5,
+                    "baseline": "alphabetic"
+                },
+                "unit": {
+                    "fontSize": 16.56,
+                    "family": "Orbitron",
+                    "x": 600,
+                    "baselineY": 273.5,
+                    "baseline": "alphabetic"
+                },
+                "number:right:0": {
+                    "fontSize": 12.419999999999998,
+                    "family": "Arial",
+                    "x": 99,
+                    "baselineY": 216.39000000000001,
+                    "baseline": "alphabetic"
+                }
+            },
+            "absent": [
+                "value"
+            ],
+            "needle": {
+                "id": "needle:left",
+                "points": [
+                    [
+                        793,
+                        119.5
+                    ],
+                    [
+                        793,
+                        148.34
+                    ]
+                ]
+            }
+        },
+        {
+            "case": 18,
+            "width": 300,
+            "height": 242,
+            "texts": {
+                "title": {
+                    "fontSize": 3.84,
+                    "family": "Orbitron",
+                    "x": 150,
+                    "baselineY": 21,
+                    "baseline": "alphabetic"
+                },
+                "unit": {
+                    "fontSize": 3.84,
+                    "family": "Orbitron",
+                    "x": 150,
+                    "baselineY": 71,
+                    "baseline": "alphabetic"
+                },
+                "number:right:0": {
+                    "fontSize": 2.88,
+                    "family": "Arial",
+                    "x": 31,
+                    "baselineY": 56.96,
+                    "baseline": "alphabetic"
+                }
+            },
+            "absent": [
+                "value"
+            ],
+            "needle": {
+                "id": "needle:left",
+                "points": [
+                    [
+                        196,
+                        35
+                    ],
+                    [
+                        196,
+                        41.56
+                    ]
+                ]
+            }
+        },
+        {
+            "case": 19,
+            "width": 620,
+            "height": 500,
+            "texts": {
+                "title": {
+                    "fontSize": 16.32,
+                    "family": "Comfortaa",
+                    "x": 310,
+                    "baselineY": 37,
+                    "baseline": "alphabetic"
+                },
+                "unit": {
+                    "fontSize": 16.32,
+                    "family": "Comfortaa",
+                    "x": 310,
+                    "baselineY": 416,
+                    "baseline": "alphabetic"
+                },
+                "number:left:0": {
+                    "fontSize": 12.24,
+                    "family": "Arial",
+                    "x": 262.15999999999997,
+                    "baselineY": 387.08000000000004,
+                    "baseline": "alphabetic"
+                },
+                "value": {
+                    "fontSize": 16.8,
+                    "family": "Arial",
+                    "x": 310,
+                    "baselineY": 459.592,
+                    "baseline": "alphabetic"
+                }
+            },
+            "absent": [],
+            "needle": {
+                "id": "needle:left",
+                "points": [
+                    [
+                        274,
+                        315
+                    ],
+                    [
+                        274,
+                        317
+                    ],
+                    [
+                        291.48,
+                        317
+                    ],
+                    [
+                        302.48,
+                        316
+                    ],
+                    [
+                        291.48,
+                        315
+                    ],
+                    [
+                        274,
+                        315
+                    ]
+                ]
+            }
+        },
+        {
+            "case": 19,
+            "width": 1200,
+            "height": 700,
+            "texts": {
+                "title": {
+                    "fontSize": 23.12,
+                    "family": "Comfortaa",
+                    "x": 601,
+                    "baselineY": 48,
+                    "baseline": "alphabetic"
+                },
+                "unit": {
+                    "fontSize": 23.12,
+                    "family": "Comfortaa",
+                    "x": 601,
+                    "baselineY": 586,
+                    "baseline": "alphabetic"
+                },
+                "number:left:0": {
+                    "fontSize": 17.34,
+                    "family": "Arial",
+                    "x": 532.81,
+                    "baselineY": 545.78,
+                    "baseline": "alphabetic"
+                },
+                "value": {
+                    "fontSize": 23.8,
+                    "family": "Arial",
+                    "x": 600,
+                    "baselineY": 647.7553333333333,
+                    "baseline": "alphabetic"
+                }
+            },
+            "absent": [],
+            "needle": {
+                "id": "needle:left",
+                "points": [
+                    [
+                        550,
+                        444
+                    ],
+                    [
+                        550,
+                        446
+                    ],
+                    [
+                        574.28,
+                        446
+                    ],
+                    [
+                        590.28,
+                        445
+                    ],
+                    [
+                        574.28,
+                        444
+                    ],
+                    [
+                        550,
+                        444
+                    ]
+                ]
+            }
+        },
+        {
+            "case": 19,
+            "width": 300,
+            "height": 242,
+            "texts": {
+                "title": {
+                    "fontSize": 7.547999999999999,
+                    "family": "Comfortaa",
+                    "x": 150,
+                    "baselineY": 22,
+                    "baseline": "alphabetic"
+                },
+                "unit": {
+                    "fontSize": 7.547999999999999,
+                    "family": "Comfortaa",
+                    "x": 150,
+                    "baselineY": 197,
+                    "baseline": "alphabetic"
+                },
+                "number:left:0": {
+                    "fontSize": 5.661,
+                    "family": "Arial",
+                    "x": 127.86149999999999,
+                    "baselineY": 183.887,
+                    "baseline": "alphabetic"
+                },
+                "value": {
+                    "fontSize": 7.7700000000000005,
+                    "family": "Arial",
+                    "x": 150,
+                    "baselineY": 216.8613,
+                    "baseline": "alphabetic"
+                }
+            },
+            "absent": [],
+            "needle": {
+                "id": "needle:left",
+                "points": [
+                    [
+                        134,
+                        150
+                    ],
+                    [
+                        134,
+                        152
+                    ],
+                    [
+                        142.322,
+                        152
+                    ],
+                    [
+                        147.322,
+                        151
+                    ],
+                    [
+                        142.322,
+                        150
+                    ],
+                    [
+                        134,
+                        150
+                    ]
+                ]
+            }
+        },
+        {
+            "case": 20,
+            "width": 620,
+            "height": 500,
+            "texts": {
+                "title": {
+                    "fontSize": 16.32,
+                    "family": "Orbitron",
+                    "x": 310,
+                    "baselineY": 37,
+                    "baseline": "alphabetic"
+                },
+                "unit": {
+                    "fontSize": 16.32,
+                    "family": "Orbitron",
+                    "x": 310,
+                    "baselineY": 416,
+                    "baseline": "alphabetic"
+                },
+                "number:right:0": {
+                    "fontSize": 12.24,
+                    "family": "Arial",
+                    "x": 357.84000000000003,
+                    "baselineY": 387.08000000000004,
+                    "baseline": "alphabetic"
+                },
+                "value": {
+                    "fontSize": 16.8,
+                    "family": "Arial",
+                    "x": 310,
+                    "baselineY": 459.592,
+                    "baseline": "alphabetic"
+                }
+            },
+            "absent": [],
+            "needle": {
+                "id": "needle:left",
+                "points": [
+                    [
+                        274,
+                        167
+                    ],
+                    [
+                        302.48,
+                        167
+                    ]
+                ]
+            }
+        },
+        {
+            "case": 20,
+            "width": 1200,
+            "height": 700,
+            "texts": {
+                "title": {
+                    "fontSize": 23.12,
+                    "family": "Orbitron",
+                    "x": 601,
+                    "baselineY": 48,
+                    "baseline": "alphabetic"
+                },
+                "unit": {
+                    "fontSize": 23.12,
+                    "family": "Orbitron",
+                    "x": 601,
+                    "baselineY": 586,
+                    "baseline": "alphabetic"
+                },
+                "number:right:0": {
+                    "fontSize": 17.34,
+                    "family": "Arial",
+                    "x": 668.19,
+                    "baselineY": 545.78,
+                    "baseline": "alphabetic"
+                },
+                "value": {
+                    "fontSize": 23.8,
+                    "family": "Arial",
+                    "x": 600,
+                    "baselineY": 647.7553333333333,
+                    "baseline": "alphabetic"
+                }
+            },
+            "absent": [],
+            "needle": {
+                "id": "needle:left",
+                "points": [
+                    [
+                        550,
+                        234
+                    ],
+                    [
+                        590.28,
+                        234
+                    ]
+                ]
+            }
+        },
+        {
+            "case": 20,
+            "width": 300,
+            "height": 242,
+            "texts": {
+                "title": {
+                    "fontSize": 7.547999999999999,
+                    "family": "Orbitron",
+                    "x": 150,
+                    "baselineY": 22,
+                    "baseline": "alphabetic"
+                },
+                "unit": {
+                    "fontSize": 7.547999999999999,
+                    "family": "Orbitron",
+                    "x": 150,
+                    "baselineY": 197,
+                    "baseline": "alphabetic"
+                },
+                "number:right:0": {
+                    "fontSize": 5.661,
+                    "family": "Arial",
+                    "x": 172.4885,
+                    "baselineY": 183.887,
+                    "baseline": "alphabetic"
+                },
+                "value": {
+                    "fontSize": 7.7700000000000005,
+                    "family": "Arial",
+                    "x": 150,
+                    "baselineY": 216.8613,
+                    "baseline": "alphabetic"
+                }
+            },
+            "absent": [],
+            "needle": {
+                "id": "needle:left",
+                "points": [
+                    [
+                        134,
+                        82
+                    ],
+                    [
+                        147.322,
+                        82
+                    ]
+                ]
+            }
+        },
+        {
+            "case": 21,
+            "width": 620,
+            "height": 500,
+            "texts": {
+                "title": {
+                    "fontSize": 19.2,
+                    "family": "Comfortaa",
+                    "x": 310,
+                    "baselineY": 191.52941176470588,
+                    "baseline": "middle"
+                },
+                "unit": {
+                    "fontSize": 14.399999999999999,
+                    "family": "Arial",
+                    "x": 310,
+                    "baselineY": 321.8461538461538,
+                    "baseline": "middle"
+                },
+                "number:0": {
+                    "fontSize": 14.399999999999999,
+                    "family": "Arial",
+                    "x": 310,
+                    "baselineY": 71.3293036264227,
+                    "baseline": "middle"
+                }
+            },
+            "absent": [
+                "value"
+            ],
+            "needle": {
+                "id": "needle",
+                "points": [
+                    [
+                        312.18648128475775,
+                        248.86127788280209
+                    ],
+                    [
+                        314.3729625695155,
+                        249.7225557656042
+                    ],
+                    [
+                        379.8326481921498,
+                        73.44799844610367
+                    ],
+                    [
+                        377.9718130561858,
+                        72.71499599265508
+                    ],
+                    [
+                        305.6270374304845,
+                        246.2774442343958
+                    ],
+                    [
+                        307.81351871524225,
+                        247.13872211719791
+                    ]
+                ]
+            }
+        },
+        {
+            "case": 21,
+            "width": 1200,
+            "height": 700,
+            "texts": {
+                "title": {
+                    "fontSize": 27.2,
+                    "family": "Comfortaa",
+                    "x": 600,
+                    "baselineY": 268,
+                    "baseline": "middle"
+                },
+                "unit": {
+                    "fontSize": 20.4,
+                    "family": "Arial",
+                    "x": 600,
+                    "baselineY": 452.61538461538464,
+                    "baseline": "middle"
+                },
+                "number:0": {
+                    "fontSize": 20.4,
+                    "family": "Arial",
+                    "x": 600,
+                    "baselineY": 93.88337155235413,
+                    "baseline": "middle"
+                }
+            },
+            "absent": [
+                "value"
+            ],
+            "needle": {
+                "id": "needle",
+                "points": [
+                    [
+                        603.1168988527398,
+                        349.2277791095264
+                    ],
+                    [
+                        606.2337977054796,
+                        350.45555821905276
+                    ],
+                    [
+                        699.1527463300936,
+                        99.01459300754169
+                    ],
+                    [
+                        697.2919111941295,
+                        98.2815905540931
+                    ],
+                    [
+                        593.7662022945204,
+                        345.54444178094724
+                    ],
+                    [
+                        596.8831011472602,
+                        346.7722208904736
+                    ]
+                ]
+            }
+        },
+        {
+            "case": 21,
+            "width": 300,
+            "height": 242,
+            "texts": {
+                "title": {
+                    "fontSize": 8.88,
+                    "family": "Comfortaa",
+                    "x": 150,
+                    "baselineY": 92.88235294117646,
+                    "baseline": "middle"
+                },
+                "unit": {
+                    "fontSize": 6.66,
+                    "family": "Arial",
+                    "x": 150,
+                    "baselineY": 153.15384615384616,
+                    "baseline": "middle"
+                },
+                "number:0": {
+                    "fontSize": 6.66,
+                    "family": "Arial",
+                    "x": 150,
+                    "baselineY": 42.77130681518838,
+                    "baseline": "middle"
+                }
+            },
+            "absent": [
+                "value"
+            ],
+            "needle": {
+                "id": "needle",
+                "points": [
+                    [
+                        150.98624262206096,
+                        119.38849130032776
+                    ],
+                    [
+                        151.97248524412188,
+                        119.77698260065551
+                    ],
+                    [
+                        182.0097215942024,
+                        40.4670914618486
+                    ],
+                    [
+                        180.14888645823837,
+                        39.734089008400005
+                    ],
+                    [
+                        148.02751475587812,
+                        118.22301739934449
+                    ],
+                    [
+                        149.01375737793904,
+                        118.61150869967224
+                    ]
+                ]
+            }
+        },
+        {
+            "case": 22,
+            "width": 620,
+            "height": 500,
+            "texts": {
+                "title": {
+                    "fontSize": 19.2,
+                    "family": "Orbitron",
+                    "x": 310,
+                    "baselineY": 191.52941176470588,
+                    "baseline": "alphabetic"
+                },
+                "unit": {
+                    "fontSize": 10,
+                    "family": "sans-serif",
+                    "x": 310,
+                    "baselineY": 321.8461538461538,
+                    "baseline": "alphabetic"
+                }
+            },
+            "absent": [
+                "number:0",
+                "value"
+            ],
+            "needle": {
+                "id": "needle",
+                "points": [
+                    [
+                        312.34999999999997,
+                        60
+                    ],
+                    [
+                        312.35,
+                        248
+                    ],
+                    [
+                        307.65,
+                        248
+                    ],
+                    [
+                        307.65,
+                        60
+                    ]
+                ]
+            }
+        },
+        {
+            "case": 22,
+            "width": 1200,
+            "height": 700,
+            "texts": {
+                "title": {
+                    "fontSize": 27.2,
+                    "family": "Orbitron",
+                    "x": 600,
+                    "baselineY": 268,
+                    "baseline": "alphabetic"
+                },
+                "unit": {
+                    "fontSize": 10,
+                    "family": "sans-serif",
+                    "x": 600,
+                    "baselineY": 452.61538461538464,
+                    "baseline": "alphabetic"
+                }
+            },
+            "absent": [
+                "number:0",
+                "value"
+            ],
+            "needle": {
+                "id": "needle",
+                "points": [
+                    [
+                        603.35,
+                        80
+                    ],
+                    [
+                        603.35,
+                        348
+                    ],
+                    [
+                        596.65,
+                        348
+                    ],
+                    [
+                        596.65,
+                        80
+                    ]
+                ]
+            }
+        },
+        {
+            "case": 22,
+            "width": 300,
+            "height": 242,
+            "texts": {
+                "title": {
+                    "fontSize": 8.88,
+                    "family": "Orbitron",
+                    "x": 150,
+                    "baselineY": 92.88235294117646,
+                    "baseline": "alphabetic"
+                },
+                "unit": {
+                    "fontSize": 10,
+                    "family": "sans-serif",
+                    "x": 150,
+                    "baselineY": 153.15384615384616,
+                    "baseline": "alphabetic"
+                }
+            },
+            "absent": [
+                "number:0",
+                "value"
+            ],
+            "needle": {
+                "id": "needle",
+                "points": [
+                    [
+                        151.06,
+                        34.19999999999999
+                    ],
+                    [
+                        151.06,
+                        119
+                    ],
+                    [
+                        148.94,
+                        119
+                    ],
+                    [
+                        148.94,
+                        34.19999999999999
+                    ]
+                ]
+            }
+        }
+    ]
+}

@@ -130,6 +130,11 @@ Moduls bleibt unverändert. Quellen- und Archiv-IDs sowie native Formatierungen
 werden erhalten, ohne Legacy-Profile anzulegen. Der Importbericht nennt
 Darstellungs- und Verarbeitungsunterschiede einzeln.
 
+Automatische Beschriftungshintergründe und -rahmen folgen der jeweiligen
+Segmentfarbe samt Transparenz, auch bei mehreren Ringen. Ausdrücklich gewählte
+Farben, transparente Füllungen sowie radiale Anker und Textausrichtungen bleiben
+erhalten. Segmente mit dem Wert null hinterlassen keine leeren Labelkästen.
+
 Übernommene Modelle nehmen die Aktualisierung nach Modulupdates automatisch
 wieder auf. Ist das Gateway zunächst noch nicht bereit, wird im bisherigen
 Aktualisierungstakt erneut versucht. Ein erneutes Speichern ist nicht nötig;

@@ -30,13 +30,34 @@
             const ownCutout = c.type === 'pie' ? 0 : (r.cutout < 0 ? 0.5 : r.cutout / 100);
             const thickness = radius * (1 - ownCutout) / rings.length;
             const outer = radius - thickness * index;
+            const inner = Math.max(0, outer - thickness), total = ring.items.reduce(function(sum,item){return sum+item.value;},0);
+            let cursor = start;
+            const angles = ring.items.map(function(item){const arc=total?item.value/total*span*Math.PI/180:0,mid=cursor+arc/2;cursor+=arc;return mid;});
+            // The source anchor is a radius within this ring, independent of the
+            // text's alignment. Keep the original segment order and values.
+            function labelLayout(p) {
+                // The native inside-label rectangle follows filtered legend
+                // geometry. Use its direction, not the unfiltered value angles.
+                const x=p.labelRect.x+p.labelRect.width/2-center[0],y=p.labelRect.y+p.labelRect.height/2-center[1];
+                const angle=Number.isFinite(x)&&Number.isFinite(y)&&Math.hypot(x,y)>0?Math.atan2(y,x):angles[p.dataIndex],vx=Math.cos(angle),vy=Math.sin(angle);
+                const anchor=r.datalabels_anchoring||c.datalabels_anchoring||'center';
+                const distance=anchor==='start'?inner:anchor==='end'?outer:(inner+outer)/2;
+                let dx=0,dy=0;const align=c.datalabels_align||'center';
+                if(align==='start'||align==='end'){const sign=align==='start'?-1:1;dx=vx*sign;dy=vy*sign;}
+                else if(align==='top'){dy=-1;}else if(align==='bottom'){dy=1;}else if(align==='left'){dx=-1;}else if(align==='right'){dx=1;}
+                const scale=1/Math.max(Math.abs(dx),Math.abs(dy),1e-12),offset=c.datalabels_offset==null?4:c.datalabels_offset;
+                return {x:center[0]+vx*distance+dx*(p.labelRect.width/2*scale+offset),
+                    y:center[1]+vy*distance+dy*(p.labelRect.height/2*scale+offset),align:'center',verticalAlign:'middle',hideOverlap:true};
+            }
             return {id: 'ring:' + ring.key, type: 'pie', name: r.Title, radius: [Math.max(0, outer - thickness), outer], center: center,
                 startAngle: 90 - c.rotation_start, endAngle: 90 - c.rotation_start - span, clockwise: true,
-                stillShowZeroSum: false, avoidLabelOverlap: true, labelLayout: {hideOverlap: true},
+                stillShowZeroSum: false, avoidLabelOverlap: true, labelLayout: labelLayout,labelLine:{show:false},
                 label: Object.assign(f.dataLabel(c,r),{
+                    position:'inside',
                     formatter: function (p) { const item = sourceMap[p.data.id]; if (!item || item.value === 0) { return ''; }
                         return f.dataLabelValue(item.value,item.native,c,r); }}),
                 data: ring.items.map(function (item) { return {id: item.key, name: 'variable:' + item.variableID, value: item.value,
+                    label:Object.assign(f.dataLabel(c,r,item.settings),{position:'inside',show:!!r.datalabels_enable&&item.value!==0}),
                     itemStyle: {color: f.paint(item.settings, 'BackgroundColor'), borderColor: f.paint(item.settings, 'BorderColor'), borderWidth: item.settings.BorderWidth}}; })};
         });
         return option;
