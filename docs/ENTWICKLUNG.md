@@ -29,7 +29,16 @@ Create registriert den Nachweis ohne aktive Attributschreibzugriffe; die enge
 Altfallfortsetzung bewahrt den ursprünglichen Nachweis. Gemeinsame begrenzte
 Metadatenseiten versorgen öffentliche APIs, Formular und Peer-Prüfung mit
 revisionsgebundener Fortsetzung. Persistentes Journal und Schutzbudgets bleiben
-unverändert. Nach Eigentümer-Update bleiben die erneute MCP-Fortsetzung und die
+unverändert. Unter 1.372 sind die Fortsetzung des erhaltenen Ziels, alle 40
+Importe/Wiederholungen und der Journalabruf mit vier Seitengrößen per MCP
+bestätigt. Acht Gauge- und vier Pie-Ziele benötigten nach dem Modulupdate jedoch
+ein erneutes Anwenden ihres unveränderten Stands, um stillgelegte Timer zu
+reaktivieren. Dieser automatische Startpfad ist jetzt zentral korrigiert:
+Gültige Modelle behalten ihren bisherigen begrenzten Timer und wiederholen
+die offene Initialisierung ohne Konfigurationsänderungen. Fehler bleiben bis
+zum Erfolg sichtbar; ungültige Modelle starten keinen Timer. Alle 40 echten
+Modulvarianten bestehen den verzögerten Gateway-/Timer-Wiederanlauf lokal.
+Nach Eigentümer-Update bleiben diese automatische Live-Nachprüfung und die
 tatsächlichen Original-/Ziel-Kachel-/IPSView-Vergleiche offen. Die Beta bleibt
 bis zur vereinbarten Migrationsabnahme zurückgestellt. Die bereits abgeschlossene
 Nutzungsgrenzen-Roadmap und die Eigentümerabnahmen bestehender Modelle bleiben gültig.

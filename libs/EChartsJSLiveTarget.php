@@ -16,6 +16,7 @@ require_once __DIR__ . '/EChartsJSLivePreview.php';
 trait EChartsJSLiveTarget
 {
     use EChartsJSLiveTranslations;
+    private const JSLIVE_INITIALIZATION_BUFFER = 'JSLiveInitializationState';
     private const JSLIVE_MODULES = [
         'EChartsGaugeSingle'  => ['ECGS', 'gauge'], 'EChartsPie' => ['ECPI', 'pie'],
         'EChartsTimeSeries'   => ['ECTS', 'cartesian-history'], 'EChartsBarHistory' => ['ECBH', 'cartesian-history'],
@@ -90,7 +91,11 @@ trait EChartsJSLiveTarget
         {
             if (!$this->HasJSLiveImport()) {
                 $this->SetTimerInterval('JSLiveImportRefresh', 0);
+                $this->SetBuffer(self::JSLIVE_INITIALIZATION_BUFFER, 'pending');
                 return;
+            }
+            if ($this->GetBuffer(self::JSLIVE_INITIALIZATION_BUFFER) !== 'ready') {
+                $this->InitializeJSLiveImport();
             }
             $state = $this->BuildJSLiveImportState();
             $this->WriteAttributeString('LastError', $state['status'] === 'ready' ? '' : 'IMPORTED_SOURCE_OR_ARCHIVE_UNAVAILABLE');
@@ -152,10 +157,18 @@ trait EChartsJSLiveTarget
 
     protected function InitializeJSLiveImport(): void
     {
+        $this->SetBuffer(self::JSLIVE_INITIALIZATION_BUFFER, 'pending');
         $this->SetTimerInterval('JSLiveImportRefresh', 0);
         try {
-            $this->SealJSLiveOutputs();
             $model = $this->JSLiveModel();
+            if (IPS_GetKernelRunlevel() !== KR_READY) {
+                return;
+            }
+            // A valid model keeps its bounded cadence even while the gateway or sources are unavailable.
+            // The next existing timer callback retries initialization without ApplyChanges or config writes.
+            $refresh = max(1, min(300, (int) ($model['global']['RefreshTime'] ?? 3)));
+            $this->SetTimerInterval('JSLiveImportRefresh', $refresh * 1000);
+            $this->SealJSLiveOutputs();
             $ids = array_values(array_unique(array_column($model['sources'], 'variableID')));
             $previous = json_decode($this->ReadAttributeString('JSLiveSourceReferences'), true, 16, JSON_THROW_ON_ERROR);
             foreach (array_diff($previous, $ids) as $id) {
@@ -176,11 +189,8 @@ trait EChartsJSLiveTarget
             }
             $this->SetSummary($this->JSLiveText('Imported JSLive chart'));
             $this->WriteAttributeString('LastError', '');
+            $this->SetBuffer(self::JSLIVE_INITIALIZATION_BUFFER, 'ready');
             $this->DebugEChartsSetStatus(IS_ACTIVE);
-            if (IPS_GetKernelRunlevel() === KR_READY) {
-                $refresh = max(1, min(300, (int) ($model['global']['RefreshTime'] ?? 3)));
-                $this->SetTimerInterval('JSLiveImportRefresh', $refresh * 1000);
-            }
         } catch (Throwable) {
             $this->WriteAttributeString('LastError', 'IMPORTED_CONFIGURATION_INVALID');
             $this->DebugEChartsSetStatus(298);
@@ -189,7 +199,9 @@ trait EChartsJSLiveTarget
 
     protected function BuildJSLiveImportState(bool $ipsView = false): array
     {
-        $family = $this->JSLiveModule()[1];
+        if ($this->GetBuffer(self::JSLIVE_INITIALIZATION_BUFFER) !== 'ready') {
+            return $this->JSLiveImportErrorState();
+        }
         try {
             $model = $this->JSLiveModel();
             $prefix = $ipsView && !$this->ReadPropertyBoolean('IPSViewUseTileDesign') ? 'IPSView' : '';
@@ -211,8 +223,7 @@ trait EChartsJSLiveTarget
                 return $response['Payload'];
             }, method_exists($this, 'CurrentTimestamp') ? $this->CurrentTimestamp() : time(), $design);
         } catch (Throwable) {
-            return ['schemaVersion' => 1, 'chart' => ['family' => $family], 'status' => 'error',
-                'error'             => $this->JSLiveText('The imported source/archive model could not be loaded. Check source types, archive rules and budgets.')];
+            return $this->JSLiveImportErrorState();
         }
     }
 
@@ -334,6 +345,12 @@ trait EChartsJSLiveTarget
                 'onClick'                => $draft . 'echo ' . $prefix . '_PreviewJSLiveImportDesign($id, json_encode($draft), ' . ($ipsView ? 'true' : 'false') . ');'];
         }
         return $this->EncodeConfigurationForm($form);
+    }
+
+    private function JSLiveImportErrorState(): array
+    {
+        return ['schemaVersion' => 1, 'chart' => ['family' => $this->JSLiveModule()[1]], 'status' => 'error',
+            'error'             => $this->JSLiveText('The imported source/archive model could not be loaded. Check source types, archive rules and budgets.')];
     }
 
     private function JSLiveModule(): array

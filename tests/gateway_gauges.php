@@ -181,7 +181,7 @@ $GLOBALS['symconTestArchiveVariables'] = [
 
 function IPS_GetKernelRunlevel(): int
 {
-    return KR_READY;
+    return $GLOBALS['symconTestKernelRunlevel'] ?? KR_READY;
 }
 
 function IPS_SetProperty(int $instanceID, string $name, mixed $value): bool
@@ -474,6 +474,7 @@ abstract class IPSModuleStrict
 
     /** @var array<string,int> */
     private array $timers = [];
+    private array $timerScripts = [];
 
     private int $status = IS_INACTIVE;
     private bool $parentActive = true;
@@ -583,6 +584,11 @@ abstract class IPSModuleStrict
     public function GetTestTimerInterval(string $ident): ?int
     {
         return $this->timers[$ident] ?? null;
+    }
+
+    public function GetTestTimerScript(string $ident): string
+    {
+        return $this->timerScripts[$ident];
     }
 
     protected function RegisterPropertyInteger(string $name, int $default): bool
@@ -751,6 +757,7 @@ abstract class IPSModuleStrict
     protected function RegisterTimer(string $ident, int $interval, string $script): bool
     {
         $this->timers[$ident] = $interval;
+        $this->timerScripts[$ident] = $script;
 
         return true;
     }

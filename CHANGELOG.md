@@ -26,6 +26,13 @@
 
 ## Fixes
 
+- Übernommene Gauge- und Pie-Instanzen nehmen ihre Aktualisierung nach einem
+  Modulupdate automatisch wieder auf, sobald Gateway und Quellen bereit sind.
+  Der gemeinsame Import-Startpfad behält bei vorübergehend fehlgeschlagener
+  Initialisierung den begrenzten Aktualisierungstakt bei. Ein erneutes Speichern
+  ist nicht erforderlich; ungültige Modelle bleiben gesperrt. Quellen,
+  Archivwerte, Designs und bestehende Aktualisierungsintervalle bleiben erhalten.
+
 - JSLive-Erstellungsnachweise bleiben beim Modulupdate erhalten. Ein bereits
   durch den früheren Create-Ablauf neu gesiegelter Nachweis lässt sich nach
   erneuter Bestätigung mit derselben Zielinstanz fortsetzen, sofern Eigentum und

@@ -403,6 +403,11 @@ Moduls bleibt unverändert. Quellen- und Archiv-IDs sowie native Formatierungen
 werden erhalten, ohne Legacy-Profile anzulegen. Der Importbericht nennt
 Darstellungs- und Verarbeitungsunterschiede einzeln.
 
+Übernommene Modelle nehmen die Aktualisierung nach Modulupdates automatisch
+wieder auf. Ist das Gateway zunächst noch nicht bereit, wird im bisherigen
+Aktualisierungstakt erneut versucht. Ein erneutes Speichern ist nicht nötig;
+Quellen und Gestaltung bleiben erhalten. Ungültige Modelle bleiben gesperrt.
+
 Importierte Modelle bieten Titel, Zeitsteuerung bei historischen Modellen,
 Hintergrund-/Schriftanpassungen und Sichtbarkeitseinstellungen für Kachel und
 IPSView. Die Farbkarte ist schematisch; **Native Vorschau herunterladen** zeigt

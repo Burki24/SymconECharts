@@ -1,6 +1,6 @@
 # ADR 0111: Bestätigte JSLive-Neuanlage und familienbezogene Altmodelle
 
-- Status: Implementiert und lokal geprüft; gemeinsame Live-Abnahme offen
+- Status: Import-/Journalabnahme per MCP bestätigt; automatischer Update-Wiederanlauf lokal korrigiert, Live-Nachprüfung offen
 - Datum: 2026-10-31
 - Ergänzt: ADR 0109, ADR 0110 und Vertrag 1.0
 
@@ -129,6 +129,28 @@ Revision liefert dieselben IDs und wendet ihre Konfiguration nicht erneut an.
 
 ## Familienintegration
 
+### Automatischer Initialisierungs- und Timer-Wiederanlauf
+
+Alle sechs Import-Zielfamilien teilen den Startpfad in `EChartsJSLiveTarget`.
+Die Initialisierung hält nur einen flüchtigen Bereitschaftsmarker im Modulbuffer;
+Properties, persistierte Formate und Quellenverträge werden nicht ergänzt.
+Ein gültiges Modell plant bei bereitem Kernel bereits vor den Gateway-/Quell-
+Prüfungen den bestehenden `JSLiveImportRefresh`-Timer. Dessen bisheriger Takt
+aus `RefreshTime`, begrenzt auf 1–300 Sekunden, bleibt unverändert. Bei einem
+vorübergehenden Fehler bleibt Status 298 mit geplanter Wiederholung erhalten.
+Der tatsächliche Timer-Callback wiederholt zunächst die offene Initialisierung;
+bei Erfolg geht er ohne ApplyChanges in die normale Datenaktualisierung über.
+Gesunde Modelle initialisieren Referenzen nicht bei jeder Aktualisierung neu.
+
+Bis dahin melden Daten-, Kachel- und IPSView-Ausgaben denselben Fehlerzustand,
+ohne Live-/Archivdaten eines noch nicht initialisierten Modells zu lesen.
+Ungültige Modelle bleiben ohne Polling-Timer gesperrt; das Entfernen des Modells
+stoppt den Importtimer. Vor KR_READY bleibt der Timer aus, IPS_KERNELSTARTED
+übernimmt den regulären Start. Spätere reine Datenlesefehler behalten den bereits
+geplanten Takt und erholen sich beim nächsten erfolgreichen Abruf. Keine
+Konfigurationsschreibzugriffe, Profil-/Archivänderungen oder erneute Importe
+aus Timer oder ApplyChanges; Ausgabe-IDs und Erstellungsnachweise bleiben stabil.
+
 Die Importausführung bleibt gemeinsam; Berechnung und ECharts-Geometrie bleiben
 bei den Familien. Bestehende Konfigurationen behalten ihre bisherigen Defaults,
 Grenzen und Ausgabewege. Erweiterungen für Mehrfachbindungen, laufende
@@ -209,7 +231,24 @@ sind lokal reproduziert und korrigiert: Reload aller sechs echten Modulklassen,
 alte Neusiegelungen, öffentliche native APIs/Formularcallbacks und Peer-Konflikte
 auf späteren Seiten sind regressionsgeprüft. Der gesicherte reale Fehlerstand
 besteht die lokale Wiederaufnahme in drei Updatezuständen ohne neue Instanz.
-Die erneute MCP-Fortsetzung nach Eigentümer-Update, direkte Original-/Ziel-
-Bildabnahme und die physische native App-/Touchbedienung der importierten
-Modelle stehen aus. Frühere Eigentümerabnahmen normaler Modelle
+Die MCP-Prüfung unter 1.372 bestätigte die Fortsetzung des erhaltenen Ziels,
+40 vollständige Importe mit idempotenten Wiederholungen und 80 HTML-Ausgaben.
+Die Metadatenseiten mit Größen 1, 7, 25 und 50 waren vollständig, chronologisch
+und revisionsstabil; fehlerhafte oder veraltete Fortsetzungen wurden abgelehnt.
+Geschützte Bestände und Konfigurationen der fertigen Ziele blieben unverändert.
+Nach dem Update standen jedoch acht Gauge- und vier Pie-Instanzen mit Status
+298 und Timerintervall 0 still, obwohl Daten bereits verfügbar waren. Ein
+manueller Refresh korrigierte nur den Status; erst erneutes Anwenden des
+unveränderten Stands reaktivierte die Timer. Danach waren alle 40 Ziele und
+Timer aktiv. Diese Intervention ersetzt keine automatische Wiederanlaufabnahme.
+
+Die Regression reproduzierte den Stillstand lokal vor dem Fix. Alle 40 echten
+Modulvarianten durchlaufen jetzt einen Reload mit zunächst fehlendem Gateway,
+mehrere tatsächliche registrierte Timer-Callbacks und die Erholung ohne erneutes
+ApplyChanges. Kernelstart, ungültige/entfernte Modelle, korrigierte Quelltypen
+und spätere Datenflussfehler sind ebenfalls geprüft; Konfigurationen, Referenzen,
+Erstellungs-/Ausgabenachweise sowie Quell-/Archivdaten bleiben erhalten.
+Die automatische Timerfortsetzung nach Eigentümer-Update, direkte Original-/
+Ziel-Bildabnahme und die physische native App-/Touchbedienung der importierten
+Modelle stehen weiterhin aus. Frühere Eigentümerabnahmen normaler Modelle
 bleiben gültig. Diese ADR hebt die Beta-Sperre des Eigentümers nicht auf.

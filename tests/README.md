@@ -37,6 +37,14 @@ Die reguläre Suite enthält jetzt folgende unabhängige Grenzen:
   geschützte Ausgangs-/Ausgabenachweise, beide HTML-Ausgaben sowie ausgeführte
   native Designvorschau-/Downloadcallbacks. Der unveränderte Standardlauf prüft
   zusätzlich die bisherigen Modelle unter dem bisherigen 128-MiB-Limit.
+  Auch unter 64 MiB bestehen alle 40 Varianten mit Reload bei noch nicht
+  bereitem Gateway. Tatsächlich registrierte Timer-Scripts werden vor und nach
+  der Gateway-Wiederkehr ausgeführt; die Erholung benötigt kein erneutes Apply.
+  Kernelstart, ungültige/entfernte Modelle, spätere Datenflussfehler und korrigierte
+  Quelltypen werden getrennt geprüft. Fehlgeschlagene Initialisierung darf weder
+  Bereitschaft vortäuschen noch Live-/Archivleser aufrufen. Konfigurationen,
+  Referenzen, Ausgabe-IDs und Besitznachweise sowie Quell-/Archivdaten bleiben
+  erhalten. Der Test reproduzierte vor dem Fix den abgeschalteten Importtimer.
 
 - `php tests/jslive_safety.php`: unbekannte Einstellungen, aktive Fremdtemplates,
   Ressourcenintegrität, Profilabhängigkeit, Pfadgrammatik, gekürzte Archive,
@@ -74,8 +82,10 @@ bestehen Wiederaufnahme und alle 40 Importfälle auch unter 64 MiB.
 Der tatsächlich gesicherte Fehlerzustand wurde zusätzlich lokal außerhalb des
 Repositorys gegen den korrigierten Journalcode wiederaufgenommen. Alle drei
 Updatevarianten behalten die vorhandene Ziel-ID ohne weitere Anlage. Private
-Originaldaten sind keine eingecheckte Fixture. Die reale fortgesetzte Anwendung
-auf der Testinstallation bleibt nach Eigentümer-Modulupdate gesondert zu prüfen.
+Originaldaten sind keine eingecheckte Fixture. Die reale Fortsetzung, alle 40
+Importe/Wiederholungen und der paginierte Journalabruf sind unter 1.372 per MCP
+bestätigt. Der dabei gefundene automatische Timerstillstand nach Modulupdates
+ist lokal korrigiert; seine Live-Nachprüfung nach Eigentümer-Update steht aus.
 
 Die Fixture-Herkunft und Anonymisierung stehen unter
 [`fixtures/jslive-packages`](fixtures/jslive-packages/README.md). Unveränderte

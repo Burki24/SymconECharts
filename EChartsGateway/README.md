@@ -138,6 +138,13 @@ Wiederanlauf abgeglichen: Eigentumsmarker und vollständiger Zielzustand müssen
 weiterhin stimmen. Der ursprüngliche Nachweis bleibt im Journal dokumentiert.
 Es ist kein Zurücksetzen des Journals oder Neuerzeugen des Ziels nötig.
 
+Importierte Diagramme behalten ihren Aktualisierungstakt auch dann bei, wenn
+das Gateway nach einem Modulupdate vorübergehend noch nicht bereit ist. Sobald
+Gateway und Quellen wieder verfügbar sind, setzt der nächste Aktualisierungs-
+aufruf das Diagramm automatisch fort; erneutes Speichern oder Anwenden ist nicht
+nötig. Bis zur erfolgreichen Initialisierung wird ein Fehlerzustand angezeigt.
+Ungültige oder entfernte Importmodelle erhalten keinen laufenden Timer.
+
 Die Journalansicht zeigt jeweils bis zu 25 Einträge und bietet **Vorherige
 Journalseite** und **Nächste Journalseite**. Wird das Journal während des
 Blätterns geändert, die Ansicht mit **Importjournal aktualisieren** neu laden.

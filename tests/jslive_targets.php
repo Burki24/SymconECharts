@@ -23,6 +23,35 @@ function jsliveTargetModule(int $id): IPSModuleStrict
 {
     return $GLOBALS['symconTestModuleObjects'][$id];
 }
+function jsliveTargetTick(IPSModuleStrict $device): void
+{
+    $_IPS = ['TARGET' => $device->InstanceID];
+    eval($device->GetTestTimerScript('JSLiveImportRefresh'));
+}
+function ECGS_RefreshJSLiveImport(int $id): void
+{
+    jsliveTargetModule($id)->RefreshJSLiveImport();
+}
+function ECPI_RefreshJSLiveImport(int $id): void
+{
+    jsliveTargetModule($id)->RefreshJSLiveImport();
+}
+function ECTS_RefreshJSLiveImport(int $id): void
+{
+    jsliveTargetModule($id)->RefreshJSLiveImport();
+}
+function ECBH_RefreshJSLiveImport(int $id): void
+{
+    jsliveTargetModule($id)->RefreshJSLiveImport();
+}
+function ECRH_RefreshJSLiveImport(int $id): void
+{
+    jsliveTargetModule($id)->RefreshJSLiveImport();
+}
+function ECPG_RefreshJSLiveImport(int $id): void
+{
+    jsliveTargetModule($id)->RefreshJSLiveImport();
+}
 function ECGS_UpdateJSLiveImportColorKey(int $id, string $draft): void
 {
     jsliveTargetModule($id)->UpdateJSLiveImportColorKey($draft);
@@ -162,6 +191,82 @@ foreach (glob(__DIR__ . '/fixtures/jslive-packages/*.json') as $file) {
         count($children) === 1 && isset($guards[$children[0]]) && hash_equals($guards[$children[0]], EChartsImportJson::Hash(EChartsJSLiveTargetSnapshot::Output($children[0]))),
         'Output ownership was not sealed by the real module class.'
     );
+    // Reload while the gateway is not ready. Only the registered timer may recover; no second ApplyChanges.
+    $referencesBeforeRetry = $device->GetTestReferences();
+    $healthyResponder = IPSModuleStrict::$ParentResponder;
+    $readsBeforeInitialization = 0;
+    IPSModuleStrict::$ParentResponder = static function (string $request) use ($healthyResponder, &$readsBeforeInitialization): string
+    {
+        ++$readsBeforeInitialization;
+        return $healthyResponder($request);
+    };
+    $device->SetTestParentActive(false);
+    $device->ReloadTestModule();
+    $device->ApplyChanges();
+    $cadence = max(1, min(300, (int) ($model['global']['RefreshTime'] ?? 3))) * 1000;
+    jsliveTargetAssert(
+        $device->GetTestStatus() === 298 && $device->GetTestTimerInterval('JSLiveImportRefresh') === $cadence,
+        'A valid imported model lost its retry timer during gateway startup: ' . $name
+    );
+    for ($attempt = 0; $attempt < 2; ++$attempt) {
+        jsliveTargetTick($device);
+        jsliveTargetAssert($device->GetTestStatus() === 298 && $device->GetTestTimerInterval('JSLiveImportRefresh') === $cadence
+            && json_decode($device->GetJSLiveImportData(), true)['status'] === 'error', 'Failed initialization was incorrectly reported as ready.');
+    }
+    foreach ([false, true] as $ipsView) {
+        jsliveTargetAssert(str_starts_with($device->GetJSLiveImportHTML($ipsView), '<!doctype html>'), 'Pending import output is invalid.');
+    }
+    jsliveTargetAssert($readsBeforeInitialization === 0, 'A pending import read live/archive values through a not-yet-ready gateway.');
+    IPSModuleStrict::$ParentResponder = $healthyResponder;
+    $device->SetTestParentActive(true);
+    jsliveTargetTick($device);
+    jsliveTargetAssert($device->GetTestStatus() === 102 && $device->GetTestTimerInterval('JSLiveImportRefresh') === $cadence
+        && $device->GetTestReferences() === $referencesBeforeRetry && $device->GetTestProperties() === $propertiesBeforeReload
+        && IPS_GetChildrenIDs($id) === $children && $device->GetJSLiveOutputGuards() === $outputGuardsBeforeReload
+        && $device->GetJSLiveCreationGuard() === $creationGuard, 'Timer recovery changed configuration, references, outputs or ownership.');
+
+    // A later data-flow failure must also recover through the same timer at the unchanged cadence.
+    $healthyResponder = IPSModuleStrict::$ParentResponder;
+    IPSModuleStrict::$ParentResponder = static fn (string $request): string => throw new RuntimeException('Synthetic parent read outage');
+    jsliveTargetTick($device);
+    jsliveTargetAssert($device->GetTestStatus() === 298 && $device->GetTestTimerInterval('JSLiveImportRefresh') === $cadence, 'A failed read disabled regular recovery.');
+    IPSModuleStrict::$ParentResponder = $healthyResponder;
+    jsliveTargetTick($device);
+    jsliveTargetAssert($device->GetTestStatus() === 102, 'The restored data flow did not recover on the next timer callback.');
+
+    if (!isset($families[$name])) {
+        // Kernel startup remains deferred until IPS_KERNELSTARTED; invalid models never acquire a polling loop.
+        $GLOBALS['symconTestKernelRunlevel'] = KR_READY - 1;
+        $device->ReloadTestModule();
+        $device->ApplyChanges();
+        jsliveTargetAssert($device->GetTestTimerInterval('JSLiveImportRefresh') === 0, 'Import timer started before the kernel was ready.');
+        unset($GLOBALS['symconTestKernelRunlevel']);
+        $device->MessageSink(1793448000, 0, IPS_KERNELSTARTED, []);
+        jsliveTargetAssert($device->GetTestStatus() === 102 && $device->GetTestTimerInterval('JSLiveImportRefresh') === $cadence, 'Kernel startup did not restore the import timer.');
+        $device->SetTestProperty('JSLiveImportModel', 'invalid model');
+        $device->ApplyChanges();
+        $device->RefreshJSLiveImport();
+        jsliveTargetAssert($device->GetTestStatus() === 298 && $device->GetTestTimerInterval('JSLiveImportRefresh') === 0
+            && json_decode($device->GetJSLiveImportData(), true)['status'] === 'error', 'Invalid models must stay blocked without timer reads.');
+        $device->SetTestProperty('JSLiveImportModel', $propertiesBeforeReload['JSLiveImportModel']);
+        $device->ApplyChanges();
+        $device->SetTestProperty('JSLiveImportModel', '');
+        $device->RefreshJSLiveImport();
+        jsliveTargetAssert($device->GetTestTimerInterval('JSLiveImportRefresh') === 0, 'Removed import model kept its timer running.');
+        $device->SetTestProperty('JSLiveImportModel', $propertiesBeforeReload['JSLiveImportModel']);
+        $device->ApplyChanges();
+
+        $sourceID = array_values($model['sources'])[0]['variableID'];
+        $sourceType = $GLOBALS['symconTestVariables'][$sourceID]['VariableType'];
+        $GLOBALS['symconTestVariables'][$sourceID]['VariableType'] = 3;
+        $device->ApplyChanges();
+        jsliveTargetTick($device);
+        jsliveTargetAssert($device->GetTestStatus() === 298 && $device->GetTestTimerInterval('JSLiveImportRefresh') === $cadence
+            && json_decode($device->GetJSLiveImportData(), true)['status'] === 'error', 'Invalid source types were silently accepted during recovery.');
+        $GLOBALS['symconTestVariables'][$sourceID]['VariableType'] = $sourceType;
+        jsliveTargetTick($device);
+        jsliveTargetAssert($device->GetTestStatus() === 102, 'Corrected source metadata required a second ApplyChanges.');
+    }
     $state = json_decode($device->GetJSLiveImportData(), true, 64, JSON_THROW_ON_ERROR);
     jsliveTargetAssert($device->GetTestStatus() === 102 && $state['status'] === 'ready' && isset($state['chart']['data']), basename($file) . ': ' . EChartsImportJson::Canonical($state));
     jsliveTargetAssert(count($device->GetTestReferences()) >= count($model['sources']), 'Imported references were not registered.');
@@ -190,4 +295,4 @@ foreach (glob(__DIR__ . '/fixtures/jslive-packages/*.json') as $file) {
     gc_collect_cycles();
 }
 jsliveTargetAssert(count($families) === 6 && $count === 40, 'All native target families and variants must be covered.');
-echo "JSLive real module classes: 40 variants, six families, creation seals, Gateway snapshots, native outputs, references and full-arity draft callbacks verified.\n";
+echo "JSLive real module classes: 40 variants, six families, reload/startup timer recovery, creation seals, native outputs, references and full-arity draft callbacks verified.\n";
