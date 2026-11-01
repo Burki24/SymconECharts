@@ -56,6 +56,15 @@ Die reguläre Suite enthält jetzt folgende unabhängige Grenzen:
 - `node tests/jslive_format.js` und `node tests/jslive_renderers.js`: native
   Darstellung, Prozent/LQI/Boolean/Intervallgrenzen, Escaping sowie 120 echte
   ECharts-SSR-Renderings aller 40 Modelle in drei Größen, ohne NaN/Infinity.
+- `node tests/jslive_geometry.js`: die tatsächlich ausgelieferten Canvas-Runtimes
+  zeichnen gegen eine beobachtete Zeichenfläche. Analytische Kreis-/Kapsel- und
+  Linienlängen sowie unabhängig integrierte gedrehte Ellipsen prüfen die
+  Fortschrittsstrecke bei 0, 25, 50, 86,2 und 100 Prozent einschließlich Updates,
+  umgekehrter Richtung, eigener Pfade und Strichmuster. Native Radar-Koordinaten
+  prüfen N/O/S/W und benannte Klassen im Uhrzeigersinn; Tooltip-Reihenfolge und
+  Eingabemodelle bleiben unverändert. `--progress` beziehungsweise `--radar`
+  isolieren die beiden Regressionen. Beide reproduzierten den jeweiligen Fehler
+  vor der Korrektur; bloß gültiges oder nicht leeres SVG genügt hier nicht.
 
 Der native Importadapter-Test unterbricht zusätzlich nach SetConfiguration und
 vor ApplyChanges und bestätigt die unveränderte aktive Konfiguration sowie

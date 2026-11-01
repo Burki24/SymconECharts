@@ -38,9 +38,15 @@ Gültige Modelle behalten ihren bisherigen begrenzten Timer und wiederholen
 die offene Initialisierung ohne Konfigurationsänderungen. Fehler bleiben bis
 zum Erfolg sichtbar; ungültige Modelle starten keinen Timer. Alle 40 echten
 Modulvarianten bestehen den verzögerten Gateway-/Timer-Wiederanlauf lokal.
-Nach Eigentümer-Update bleiben diese automatische Live-Nachprüfung und die
-tatsächlichen Original-/Ziel-Kachel-/IPSView-Vergleiche offen. Die Beta bleibt
-bis zur vereinbarten Migrationsabnahme zurückgestellt. Die bereits abgeschlossene
+Unter 1.373 wurde der automatische Wiederanlauf der acht Gauge- und vier Pie-
+Ziele ohne zusätzliches ApplyChanges per MCP bestätigt. Der anschließende
+Original-/Ziel-Kachelvergleich aller 40 Varianten zeigte unter anderem zu kurze
+Fortschrittsstrecken bei mehrteiligen Bögen (F01) und gespiegelte Radar-Klassen
+(F02). Beide Geometrien sind lokal korrigiert und über die tatsächlich
+ausgelieferten Canvas-Runtimes regressionsgeprüft; Details stehen in ADR 0111
+und der Testdokumentation. Die erneute Live-Abnahme nach dem nächsten Update
+und weitere optische Unterschiede bleiben offen. Die Beta bleibt bis zur
+vereinbarten Migrationsabnahme zurückgestellt. Die bereits abgeschlossene
 Nutzungsgrenzen-Roadmap und die Eigentümerabnahmen bestehender Modelle bleiben gültig.
 
 Der gemeinsame [JSLive-Export-/Importvertrag 1.0](JSLIVE_MIGRATION_CONTRACT.md)

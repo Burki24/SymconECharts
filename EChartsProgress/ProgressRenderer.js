@@ -24,6 +24,34 @@
         const shape=root.echarts.graphic.makePath(path,{});shape.buildPath(ctx,shape.shape);
         if(!Number.isFinite(total)){throw new Error('Invalid progress path length');}lengths.set(path,total);return total;
     }
+    // The pinned runtime misreads arc records when measuring a partial stroke.
+    // Replay only stroked paths through the public Canvas interface, expressing
+    // each arc as at most sixteen cubic segments. This retains native strokePercent,
+    // dash patterns and transitions without patching ECharts or its path internals.
+    function strokePath(ctx,path){
+        const canvas={};
+        ['moveTo','lineTo','bezierCurveTo','quadraticCurveTo','rect','closePath'].forEach(function(name){
+            canvas[name]=function(){ctx[name].apply(ctx,arguments);};
+        });
+        canvas.ellipse=function(cx,cy,rx,ry,rotation,start,end,ccw){
+            let delta=end-start;
+            if(ccw&&delta>0){delta-=Math.PI*2;}else if(!ccw&&delta<0){delta+=Math.PI*2;}
+            delta=Math.max(-Math.PI*2,Math.min(Math.PI*2,delta));
+            const count=Math.max(1,Math.ceil(Math.abs(delta)/(Math.PI/8))),step=delta/count;
+            const cos=Math.cos(rotation),sin=Math.sin(rotation);
+            const point=function(a){return [cx+rx*Math.cos(a)*cos-ry*Math.sin(a)*sin,cy+rx*Math.cos(a)*sin+ry*Math.sin(a)*cos];};
+            const tangent=function(a){return [-rx*Math.sin(a)*cos-ry*Math.cos(a)*sin,-rx*Math.sin(a)*sin+ry*Math.cos(a)*cos];};
+            let p=point(start),v=tangent(start);
+            ctx.lineTo(p[0],p[1]);
+            for(let i=1;i<=count;i++){
+                const angle=start+step*i,q=point(angle),w=tangent(angle),k=4/3*Math.tan(step/4);
+                ctx.bezierCurveTo(p[0]+k*v[0],p[1]+k*v[1],q[0]-k*w[0],q[1]-k*w[1],q[0],q[1]);
+                p=q;v=w;
+            }
+        };
+        canvas.arc=function(cx,cy,r,start,end,ccw){canvas.ellipse(cx,cy,r,r,0,start,end,ccw);};
+        const shape=root.echarts.graphic.makePath(path,{});shape.buildPath(canvas,shape.shape);
+    }
     function build(state,width,height){
         const f=root.SYMC_JSLIVE_FORMAT,c=state.settings,d=state.data;
         const presets={line:{path:'M10 10L90 10',box:[10,5,80,10]},rainbow:{path:'M10 10L90 10',box:[10,5,80,10]},
@@ -46,9 +74,11 @@
         const x=(width-bodyW)/2-box[0]*scale,y=titleSpace+(height-titleSpace-labelSpace-bodyH)/2-box[1]*scale+10;
         const children=[];
         if(!root.echarts.graphic.getShapeClass('jsliveProgressPath')){
-            root.echarts.graphic.registerShape('jsliveProgressPath',root.echarts.graphic.extendShape({shape:{pathData:''},buildPath:function(ctx,shape){const p=root.echarts.graphic.makePath(shape.pathData,{});p.buildPath(ctx,p.shape);}}));
+            root.echarts.graphic.registerShape('jsliveProgressPath',root.echarts.graphic.extendShape({shape:{pathData:'',strokePath:false},buildPath:function(ctx,shape){
+                if(shape.strokePath){strokePath(ctx,shape.pathData);}else{const p=root.echarts.graphic.makePath(shape.pathData,{});p.buildPath(ctx,p.shape);}
+            }}));
         }
-        function pathElement(id,paint,isStroke){return {id:id,type:'jsliveProgressPath',shape:{pathData:path},style:{fill:isStroke?null:paint,stroke:isStroke?paint:null,lineWidth:isStroke?c.stroke_width:0,lineCap:c.stroke_lincap || 'butt',strokeNoScale:false}};}
+        function pathElement(id,paint,isStroke){return {id:id,type:'jsliveProgressPath',shape:{pathData:path,strokePath:isStroke},style:{fill:isStroke?null:paint,stroke:isStroke?paint:null,lineWidth:isStroke?c.stroke_width:0,lineCap:c.stroke_lincap || 'butt',strokeNoScale:false}};}
         function clip(){let x0=box[0],y0=box[1],w=box[2],h=box[3];
             if(c.fill_dir==='rtl'){x0+=w*(1-d.ratio);w*=d.ratio;}else if(c.fill_dir==='btt'){y0+=h*(1-d.ratio);h*=d.ratio;}
             else if(c.fill_dir==='ttb'){h*=d.ratio;}else{w*=d.ratio;}

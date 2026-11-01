@@ -26,6 +26,14 @@
 
 ## Fixes
 
+- Übernommene JSLive-Fortschrittsanzeigen zeichnen den angezeigten Anteil auch
+  auf Pfaden mit mehreren Bögen korrekt. Eigene Strichpfade, Strichmuster und
+  umgekehrte Richtung bleiben erhalten; Werte, Quellen und Designs ändern sich
+  nicht.
+- Historische JSLive-Radaranzeigen ordnen die Klassen wie das Original im
+  Uhrzeigersinn an. Bei Windrosen liegt Osten rechts und Westen links;
+  Klassen, Werte und Tooltip-Zuordnungen bleiben unverändert.
+
 - Übernommene Gauge- und Pie-Instanzen nehmen ihre Aktualisierung nach einem
   Modulupdate automatisch wieder auf, sobald Gateway und Quellen bereit sind.
   Der gemeinsame Import-Startpfad behält bei vorübergehend fehlgeschlagener

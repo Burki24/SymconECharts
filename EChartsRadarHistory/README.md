@@ -24,6 +24,8 @@ Klassen, Referenzquellen, Sortierung, Rundung, Zeitversatz und die ausgewählte
 Zeitperiode stammen aus dem Export. Es werden die bestehenden Variablen- und
 Archiv-IDs gelesen; das Modul aktiviert keine Archivierung und schreibt keine
 Quellwerte. Fehlende oder gekürzte Archivantworten werden als Fehler gemeldet.
+Die erste Klasse liegt oben, weitere Klassen folgen wie im Original im
+Uhrzeigersinn. Eine Windrose zeigt damit Osten rechts und Westen links.
 Alle Reihen teilen höchstens 63 Archivabfragen und 32000 Zeilen, eine Abfrage
 höchstens 2000 Zeilen. Ein zu großer Zeitraum muss verkleinert werden.
 

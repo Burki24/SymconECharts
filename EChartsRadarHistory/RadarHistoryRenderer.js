@@ -8,7 +8,7 @@
         const labels=data.alias.length?data.alias:data.labels;
         const labelMap={}; data.series.forEach(function (series) {labelMap[series.key]=series.label;});
         option.legend.data=data.series.map(function (series) {return series.key;});option.legend.formatter=function (key) {return labelMap[key] || key;};
-        option.radar={center:[(left+width-right)/2,(box.top+height-box.bottom)/2],radius:radius,shape:'polygon',
+        option.radar={center:[(left+width-right)/2,(box.top+height-box.bottom)/2],radius:radius,shape:'polygon',clockwise:true,
             indicator:labels.map(function (label) {return {name:String(label),max:maximum>0?maximum*1.05:1};}),
             axisName:{show:c.axes_display && c.axes_pointLabels_display,color:f.color(c.axes_pointLabels_color,1,'#000'),fontSize:c.axes_pointLabels_fontSize * (c.__fontScale||1),fontFamily:c.axes_pointLabels_fontFamily || 'Arial'},
             axisLine:{show:c.axes_display && c.axes_angleLines_display,lineStyle:{color:f.color(c.axes_angleLines_color,1,'#000'),width:c.axes_angleLines_lineWidth}},

@@ -1,6 +1,6 @@
 # ADR 0111: Bestätigte JSLive-Neuanlage und familienbezogene Altmodelle
 
-- Status: Import-/Journalabnahme per MCP bestätigt; automatischer Update-Wiederanlauf lokal korrigiert, Live-Nachprüfung offen
+- Status: Import-/Journalabnahme und automatischer Update-Wiederanlauf per MCP bestätigt; neue Pfad-/Radar-Geometriekorrektur lokal geprüft, Live-Nachprüfung offen
 - Datum: 2026-10-31
 - Ergänzt: ADR 0109, ADR 0110 und Vertrag 1.0
 
@@ -203,6 +203,36 @@ und Geometriebudgets. Es werden keine alten Rendering-Engines ausgeliefert.
 
 ## Nachweisstand
 
+### Geometrie-Regressionen F01 und F02
+
+Der Original-/Ziel-Kachelvergleich unter 1.373 zeigte eine zu kurze
+Fortschrittsstrecke bei mehrteiligen Bogenpfaden und eine gespiegelte
+Radar-Klassenfolge. Die Zahlenwerte waren korrekt. F01 liegt im Teilstrecken-
+Längenlauf für Bogenkommandos der festgeschriebenen Runtime. Der lokale
+Progress-Adapter spielt Strichpfade deshalb über die öffentliche Canvas-
+Schnittstelle mit höchstens 16 kubischen Segmenten je Bogen ab. So bleiben
+native Teilstrecken, Strichmuster und Übergänge nutzbar. Füllpfade und sichere
+SVG-Bilder behalten ihren bisherigen Zeichenpfad; Runtime, Ressourcen und
+2048-Segment-/8192-Koordinaten-Eingangsgrenzen werden nicht geändert.
+RadarHistory verwendet die vorhandene native Option `clockwise=true`, ohne
+Klassen, Werte oder deren Tooltip-Reihenfolge umzusortieren.
+
+`tests/jslive_geometry.js` reproduzierte F01 im echten ausgelieferten
+CanvasRenderer mit exakt halber Kreisstrecke bei 86,2 Prozent. Der getrennte
+F02-Lauf scheiterte am tatsächlich projizierten Ost-Punkt auf der Westseite.
+Analytische Längen/Endpunkte, gedrehte Ellipsen, Aktualisierungen, eigene
+Strichmuster, Umkehr sowie native Radar-Koordinaten sichern beide Korrekturen
+in der regulären Suite. Importmodelle und Designs werden vor/nach dem Rendern
+verglichen. Am 01.11.2026 bestehen 82 Fortschrittspfad-/Updatefälle, die Radar-
+Koordinatenprüfungen sowie alle 120 vorhandenen SSR-Renderings. Zusätzlich
+bestehen 80 isolierte Chromium-Prüfungen mit anonymen lokalen Dokumenten
+(40 Varianten je Kachel und IPSView), einschließlich Aktualisierung, Schriften,
+vorübergehender Datenfehler und Mausrad-Smoke. Die neue Live-Abnahme nach dem
+Eigentümer-Update bleibt offen; diese lokalen Nachweise schließen weitere
+optische Unterschiede nicht ab.
+
+### Import und Wiederanlauf
+
 Der isolierte Journaltest prüft bestätigte Neuanlage, Wiederholung ohne erneutes
 Anwenden, Zieländerungen, getrennte Revisionen, Sperren und Unterbrechungen nach
 jedem Persistenz-/Kernelaufruf, einschließlich bei Apply erzeugter Ausgaben.
@@ -248,7 +278,11 @@ mehrere tatsächliche registrierte Timer-Callbacks und die Erholung ohne erneute
 ApplyChanges. Kernelstart, ungültige/entfernte Modelle, korrigierte Quelltypen
 und spätere Datenflussfehler sind ebenfalls geprüft; Konfigurationen, Referenzen,
 Erstellungs-/Ausgabenachweise sowie Quell-/Archivdaten bleiben erhalten.
-Die automatische Timerfortsetzung nach Eigentümer-Update, direkte Original-/
-Ziel-Bildabnahme und die physische native App-/Touchbedienung der importierten
-Modelle stehen weiterhin aus. Frühere Eigentümerabnahmen normaler Modelle
-bleiben gültig. Diese ADR hebt die Beta-Sperre des Eigentümers nicht auf.
+Unter 1.373 wurde die automatische Timerfortsetzung aller acht Gauge- und vier
+Pie-Ziele nach dem Eigentümer-Update ohne zusätzliches ApplyChanges per MCP
+bestätigt. Alle 40 Ziele lieferten bereite Daten; Konfigurationen und geschützte
+Bestände blieben unverändert. Der anschließende Original-/Ziel-Kachelvergleich
+lieferte die oben beschriebenen F01-/F02-Befunde. Deren erneute Live-Bildabnahme
+nach dem nächsten Update, weitere optische Unterschiede sowie die physische
+native App-/Touchbedienung bleiben offen. Frühere Eigentümerabnahmen normaler
+Modelle bleiben gültig. Diese ADR hebt die Beta-Sperre des Eigentümers nicht auf.

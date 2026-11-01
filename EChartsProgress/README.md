@@ -22,6 +22,8 @@ Diese Version wird über die bestätigte JSLive-Übernahme eingerichtet.
 Der Export liefert Minimal-/Maximalwert, Rundung, Schrittweite, Farben und
 Form. Auch umgekehrte Bereiche bleiben erhalten. Die Füllung wird an den
 Bereich begrenzt; der Originalwert samt nativer Formatierung bleibt erhalten.
+Bei Strichformen entspricht die farbige Strecke dem Anteil an der gesamten
+Pfadlänge, auch bei mehreren Bögen und eigenen Strichmustern.
 Es wird genau eine numerische Quellvariable gelesen. Quellen, Darstellungen,
 Actions und Archivierung werden nicht verändert. Legacy-Profile sind nach der
 Übernahme nicht erforderlich.
