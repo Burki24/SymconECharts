@@ -147,6 +147,15 @@ foreach (glob(__DIR__ . '/fixtures/jslive-packages/*.json') as $file) {
     $sourceKeys = array_flip(array_column($model['sources'], 'variableID'));
     $before = EChartsImportJson::Hash([array_intersect_key($GLOBALS['symconTestVariables'], $sourceKeys), $GLOBALS['symconTestArchiveVariables']]);
     $device->ApplyChanges();
+    $creationGuard = $device->GetJSLiveCreationGuard();
+    $propertiesBeforeReload = $device->GetTestProperties();
+    $outputGuardsBeforeReload = $device->GetJSLiveOutputGuards();
+    $device->ReloadTestModule();
+    jsliveTargetAssert($device->GetJSLiveCreationGuard() === $creationGuard
+        && !isset($device->TestCreateAttributeWrites['JSLiveCreationGuard']), 'Module reload rewrote the persisted creation proof for ' . $name);
+    $device->ApplyChanges();
+    jsliveTargetAssert($device->GetTestProperties() === $propertiesBeforeReload
+        && $device->GetJSLiveOutputGuards() === $outputGuardsBeforeReload, 'Module reload changed imported settings or output ownership.');
     $guards = json_decode($device->GetJSLiveOutputGuards(), true, 16, JSON_THROW_ON_ERROR);
     $children = IPS_GetChildrenIDs($id);
     jsliveTargetAssert(

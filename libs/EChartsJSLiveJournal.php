@@ -224,6 +224,8 @@ final class EChartsJSLiveJournal
                 || !array_key_exists('pending', $entry) || !array_key_exists('creationIntent', $entry)
                 || !array_key_exists('receipt', $entry) || !array_key_exists('snapshot', $entry)
                 || !is_bool($entry['applyIntent'] ?? null)
+                || (isset($entry['originalCreationGuard']) && (!is_string($entry['originalCreationGuard'])
+                    || preg_match('/^[a-f0-9]{64}$/D', $entry['originalCreationGuard']) !== 1))
                 || ($entry['targetID'] !== null && !is_array($entry['snapshot']))
                 || ($entry['creationIntent'] !== null && (!is_array($entry['creationIntent']['before'] ?? null) || !array_is_list($entry['creationIntent']['before'])))
                 || ($entry['marker'] ?? '') !== self::Marker($entry['identity'], $id)) {
@@ -275,6 +277,7 @@ final class EChartsJSLiveJournal
         }
         $id = $entry['targetID'];
         $current = $this->kernel->Inspect($id);
+        $this->RecoverResealedCreationGuard($entry, $journal, $target, $current);
         if ($entry['phase'] === 'created' && $entry['pending'] !== null
             && $this->IsConfigurationIntent($entry, $target)) {
             // Version-1 journals could fail immediately after staging: the active snapshot is still the old one.
@@ -383,6 +386,33 @@ final class EChartsJSLiveJournal
     private function ExpectedConfiguration(array $entry, array $target): array
     {
         return array_replace($entry['snapshot'], ['configuration' => array_replace($entry['snapshot']['configuration'], $target['configuration'])]);
+    }
+
+    private function RecoverResealedCreationGuard(array &$entry, array &$journal, array $target, array $current): void
+    {
+        $previous = $entry['snapshot']['creationGuard'] ?? null;
+        $actual = $current['creationGuard'] ?? null;
+        if ($previous === $actual || !is_string($previous) || preg_match('/^[a-f0-9]{64}$/D', $previous) !== 1
+            || !is_string($actual) || !hash_equals(EChartsJSLiveTargetSnapshot::CreationHash($current), $actual)
+            || $entry['snapshot']['info'] !== $entry['marker'] || $current['info'] !== $entry['marker']
+            || ($entry['pending'] !== null && !$this->IsConfigurationIntent($entry, $target))) {
+            return;
+        }
+        // Only the known old Create reseal is recoverable. Every object/configuration field must still match.
+        // Inspect already checks ownership of each output. Unclaimed creations and arbitrary guard changes stay blocked.
+        $withRecordedGuard = array_replace($current, ['creationGuard' => $previous]);
+        $atBaseline = EChartsImportJson::Hash($withRecordedGuard) === EChartsImportJson::Hash($entry['snapshot']);
+        $applied = $entry['pending'] !== null && ($entry['applyIntent'] || $entry['phase'] === 'created')
+            && $this->SameAppliedCore($withRecordedGuard, $this->ExpectedConfiguration($entry, $target));
+        if (!$atBaseline && !$applied) {
+            return;
+        }
+        $entry['originalCreationGuard'] ??= $previous;
+        $entry['snapshot']['creationGuard'] = $actual;
+        if ($entry['pending'] !== null) {
+            $entry['pending']['creationGuard'] = $actual;
+        }
+        $this->Persist($journal);
     }
 
     private function IsConfigurationIntent(array $entry, array $target): bool

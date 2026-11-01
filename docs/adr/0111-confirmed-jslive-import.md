@@ -59,10 +59,53 @@ Version 1 des Journalformats bleibt erhalten. Alte Fehlerstände mit
 `phase=created`, `applyIntent=false`, unverändertem aktivem Snapshot und dem
 erwarteten Konfigurations-Snapshot in `pending` werden erst beim ausdrücklich
 bestätigten Wiederanlauf kompatibel fortgesetzt. Ziel-/Journal-ID, Marker,
-Revision, Zielhash und Erzeugungsnachweis bleiben unverändert. Das gilt auch,
+Revision und Zielhash bleiben unverändert; der ursprüngliche Erzeugungsnachweis
+bleibt dokumentiert. Das gilt auch,
 wenn ein Modulupdate die vorgemerkten Einstellungen bereits aktiviert oder
 verworfen hat. Kein Journal-Reset und keine Migration beim bloßen Bibliotheks-
 Update; unbekannte oder geänderte Zustände bleiben gesperrt.
+
+### Erstellungsnachweis und bestehende Neusiegelungen
+
+Create registriert `JSLiveCreationGuard` mit dem Hash des vollständigen
+Ausgangszustands als Standardwert. Es liest oder schreibt das Attribut dabei
+nicht aktiv. So übernimmt die native Attributwiederherstellung beim Modulreload
+den gespeicherten Nachweis, statt ihn durch den aktuellen Zustand zu ersetzen.
+Die Testlaufzeit bildet Registrierung und wiederhergestellte Attribute getrennt
+ab und lässt aktive Create-Schreibzugriffe die Wiederherstellung überlagern.
+
+Für bereits unter dem alten Ablauf neu gesiegelte Ziele gibt es eine enge
+Version-1-Kompatibilität ausschließlich im bestätigten, gesperrten Wiederanlauf:
+Der gespeicherte und der aktuelle Eigentumsmarker müssen zum Journaleintrag
+passen. Der neue Nachweis muss exakt dem alten Create-Neusiegelungsmuster
+entsprechen, also `CreationHash` des aktuellen vollständigen Snapshots sein.
+Alle Objekt-/Konfigurationsfelder müssen mit dem gespeicherten Ausgangszustand
+oder dem gültig protokollierten Aktivierungsziel übereinstimmen; neue Kinder
+benötigen weiterhin die geschützten Ausgabenachweise. Erst dann werden die
+Snapshot-Nachweise im Journal angeglichen. Das optionale Feld
+`originalCreationGuard` bewahrt den ursprünglichen Nachweis. Formatversion,
+Ziel-/Journal-ID, Revision, Zielhash und Marker bleiben erhalten. Keine Reparatur
+von Zielattributen, Konfigurationen oder Ausgaben; geänderte und unzugeordnete
+Objekte sowie beliebige andere Nachweisabweichungen bleiben gesperrt.
+
+### Begrenzte Journal-Leseansichten
+
+`EChartsJSLiveJournalView` liefert für öffentliche Aufrufe, Formular und
+Gateway-übergreifende Reservierungsprüfung dieselbe Metadatenprojektion.
+`GetJSLiveImportJournalPage(Offset, Limit, Revision)` verlangt alle Argumente,
+liefert höchstens 50 Einträge/128 KiB und chronologisch geordnete Listen mit
+expliziter `entryID`. Konfigurations-/Ressourcen-Snapshots bleiben intern.
+Ein Fingerabdruck des gesamten Journals bindet alle Seiten an einen konsistenten
+Stand; jede Änderung verlangt einen Neustart bei Offset 0. Gesamtzahl,
+Sequenzen und Folgeseiten werden vor einer Peer-Auswertung geprüft.
+Das Formular blättert in 25er-Seiten und zeigt veraltete Ansichten ausdrücklich
+an. Bei einem Konflikt auf einer späteren Peer-Seite bleibt die gesamte
+Neuanlage gesperrt. Die installationsweite Schreibsperre bleibt unverändert.
+
+Der alte parameterlose Vollabruf bleibt bis 256 KiB formgleich erhalten und
+meldet darüber `LIMIT_EXCEEDED` mit Verweis auf die Seitenfunktion. Das ist eine
+explizite Transportbegrenzung unter Symcons realer 1-MiB-Rückgabegrenze, keine
+Kürzung oder Verkleinerung des unveränderten 4-MiB-/1000-Einträge-Journals.
 
 Ausschließlich moduleigene neue
 IPSView-Ausgaben erhalten im Ziel geschützte Eigentumsnachweise einschließlich
@@ -157,7 +200,16 @@ isolierte Chromium-Dokumente prüfen die neue native Laufzeit. Begrenzte
 64-MiB-Berichtsprüfung, Quellen-/Ressourcenfehler und unvollständige Archivantworten
 sind gesondert abgesichert. Befehle und Grenzen stehen in tests/README.md.
 
-Gemeinsame MCP-Neuanlage/Wiederanlauf nach Eigentümer-Update, direkte
-Original-/Ziel-Bildabnahme und die physische native App-/Touchbedienung der
-importierten Modelle stehen aus. Frühere Eigentümerabnahmen normaler Modelle
+Die MCP-Prüfung unter 1.371 bestätigte 40 vollständige Export-/Importpläne,
+39 Neuanlagen mit jeweils idempotenter Wiederholung, verfügbare Daten und beide
+HTML-Ausgaben sowie unveränderte geschützte Bestände. Die verbliebene
+Wiederaufnahme scheiterte am neu gesiegelten Erstellungsnachweis; der große
+Journalabruf überschritt außerdem die native Rückgabegrenze. Beide Fehler
+sind lokal reproduziert und korrigiert: Reload aller sechs echten Modulklassen,
+alte Neusiegelungen, öffentliche native APIs/Formularcallbacks und Peer-Konflikte
+auf späteren Seiten sind regressionsgeprüft. Der gesicherte reale Fehlerstand
+besteht die lokale Wiederaufnahme in drei Updatezuständen ohne neue Instanz.
+Die erneute MCP-Fortsetzung nach Eigentümer-Update, direkte Original-/Ziel-
+Bildabnahme und die physische native App-/Touchbedienung der importierten
+Modelle stehen aus. Frühere Eigentümerabnahmen normaler Modelle
 bleiben gültig. Diese ADR hebt die Beta-Sperre des Eigentümers nicht auf.

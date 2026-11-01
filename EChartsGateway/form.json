@@ -445,6 +445,43 @@
                     "onClick": "ECGW_ShowJSLiveImportJournal($id);"
                 },
                 {
+                    "type": "ValidationTextBox",
+                    "name": "JSLiveJournalRevision",
+                    "visible": false,
+                    "value": ""
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "JSLiveJournalPreviousOffset",
+                    "visible": false,
+                    "value": 0
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "JSLiveJournalNextOffset",
+                    "visible": false,
+                    "value": 0
+                },
+                {
+                    "type": "Label",
+                    "name": "JSLiveJournalPageSummary",
+                    "caption": "Journal not loaded"
+                },
+                {
+                    "type": "Button",
+                    "name": "JSLiveJournalPrevious",
+                    "caption": "Previous journal page",
+                    "enabled": false,
+                    "onClick": "ECGW_ShowJSLiveImportJournalPage($id, $JSLiveJournalPreviousOffset, $JSLiveJournalRevision);"
+                },
+                {
+                    "type": "Button",
+                    "name": "JSLiveJournalNext",
+                    "caption": "Next journal page",
+                    "enabled": false,
+                    "onClick": "ECGW_ShowJSLiveImportJournalPage($id, $JSLiveJournalNextOffset, $JSLiveJournalRevision);"
+                },
+                {
                     "type": "List",
                     "name": "JSLiveReadyJournal",
                     "caption": "Durable import journal",

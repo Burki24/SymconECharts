@@ -1,6 +1,11 @@
 {
     "translations": {
         "de": {
+            "Journal not loaded": "Journal noch nicht geladen",
+            "Previous journal page": "Vorherige Journalseite",
+            "Next journal page": "Nächste Journalseite",
+            "Journal entries %d-%d of %d": "Journaleinträge %d–%d von %d",
+            "Refresh the import journal before continuing.": "Das Importjournal vor dem Fortsetzen erneut laden.",
             "The gateway provides shared data access for ECharts chart families.": "Das Gateway stellt den gemeinsamen Datenzugriff für ECharts-Chartfamilien bereit.",
             "Gateway is ready": "Gateway ist bereit",
             "JSLive import preview": "JSLive-Importvorschau",

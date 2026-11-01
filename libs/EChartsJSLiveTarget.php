@@ -120,7 +120,6 @@ trait EChartsJSLiveTarget
             }
         }
         $this->RegisterAttributeString('JSLiveSourceReferences', '[]');
-        $this->RegisterAttributeString('JSLiveCreationGuard', '');
         $this->RegisterAttributeString('JSLiveOutputGuards', '{}');
         $prefix = $this->JSLiveModule()[0];
         $this->RegisterTimer('JSLiveImportRefresh', 0, $prefix . '_RefreshJSLiveImport($_IPS["TARGET"]);');
@@ -133,9 +132,8 @@ trait EChartsJSLiveTarget
 
     protected function SealJSLiveCreationDefaults(): void
     {
-        if ($this->ReadAttributeString('JSLiveCreationGuard') === '') {
-            $this->WriteAttributeString('JSLiveCreationGuard', EChartsJSLiveTargetSnapshot::CreationHash(EChartsJSLiveTargetSnapshot::Read($this->InstanceID)));
-        }
+        // Create also runs on reload. Register a default; never write over the restored persistent proof.
+        $this->RegisterAttributeString('JSLiveCreationGuard', EChartsJSLiveTargetSnapshot::CreationHash(EChartsJSLiveTargetSnapshot::Read($this->InstanceID)));
     }
 
     protected function JSLiveModel(): array

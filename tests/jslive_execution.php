@@ -333,6 +333,10 @@ final class NativeImportGateway
     {
         $this->attributes['JSLiveImportJournal'] = EChartsImportJson::Canonical($journal);
     }
+    public function GetTestJournal(): array
+    {
+        return json_decode($this->attributes['JSLiveImportJournal'], true, 64, JSON_THROW_ON_ERROR);
+    }
     protected function RegisterAttributeString(string $name, string $default): void
     {
         $this->attributes[$name] ??= $default;
@@ -383,6 +387,23 @@ function ECGW_JSLiveImportFromForm(int $id, string $file, string $mapping, int $
     }
     ++$GLOBALS['nativeFormCalls'];
     return $GLOBALS['nativeGateway']->JSLiveImportFromForm($file, $mapping, $parent, $action, $confirmation, $chart, $ipsView);
+}
+function ECGW_GetJSLiveImportJournalPage(int $id, int $offset, int $limit, string $revision): string
+{
+    nativeAssert(func_num_args() === 4, 'Native journal page requires all four arguments.');
+    $GLOBALS['nativeJournalPageCalls'][] = [$id, $offset];
+    $gateway = $GLOBALS['nativeGateways'][$id] ?? $GLOBALS['nativeGateway'];
+    $result = $gateway->GetJSLiveImportJournalPage($offset, $limit, $revision);
+    nativeAssert(strlen(json_encode($result, JSON_THROW_ON_ERROR)) < 1048576, 'Native journal page exceeded the actual return limit.');
+    if (isset($GLOBALS['nativePageMutation'])) {
+        ($GLOBALS['nativePageMutation'])($id, $offset);
+    }
+    return $result;
+}
+function ECGW_ShowJSLiveImportJournalPage(int $id, int $offset, string $revision): void
+{
+    nativeAssert(func_num_args() === 3 && $id === 16000, 'Native journal form callback requires all three arguments.');
+    $GLOBALS['nativeGateway']->ShowJSLiveImportJournalPage($offset, $revision);
 }
 $kernel = &$GLOBALS['nativeImport'];
 $kernel['instances'][16000] = nativeInstance('{33C9DF44-6F6D-5916-4AAE-CCB24BD6928D}');
@@ -449,6 +470,10 @@ foreach (glob(__DIR__ . '/fixtures/jslive-packages/*.json') as $file) {
         $oldJournal['entries'][$retainedEntryID]['applyIntent'] = false;
         $oldJournal['entries'][$retainedEntryID]['error'] = 'TARGET_CHANGED';
         $gateway->RestoreTestJournal($oldJournal);
+        // Native module update cleared the pending settings and old Create resealed the changed object metadata.
+        $retainedGuard = $kernel['guard'][$retainedID];
+        $kernel['guard'][$retainedID] = EChartsJSLiveTargetSnapshot::CreationHash(EChartsJSLiveTargetSnapshot::Read($retainedID));
+        unset($kernel['plannedConfiguration'][$retainedID]);
         $stageCount = count(array_filter($kernel['mutations'], static fn (array $call): bool => $call === [$retainedID, 'configuration']));
     }
     $result = json_decode($gateway->ExecuteJSLiveImport($json, '{}', 15000, EChartsImportJson::Canonical($confirmation)), true, 64, JSON_THROW_ON_ERROR);
@@ -457,8 +482,9 @@ foreach (glob(__DIR__ . '/fixtures/jslive-packages/*.json') as $file) {
     if ($count === 0) {
         nativeAssert(
             $result['targetID'] === $retainedID && $result['journalID'] === $retainedEntryID && !IPS_HasChanges($retainedID)
-            && count(array_filter($kernel['mutations'], static fn (array $call): bool => $call === [$retainedID, 'configuration'])) === $stageCount,
-            'The retained version-1 target must resume through the public API without a duplicate or replacement of its recorded draft.'
+            && count(array_filter($kernel['mutations'], static fn (array $call): bool => $call === [$retainedID, 'configuration'])) === $stageCount + 1
+            && $gateway->GetTestJournal()['entries'][$retainedEntryID]['originalCreationGuard'] === $retainedGuard,
+            'The retained version-1 target must resume after module update without duplicates or losing its historical creation proof.'
         );
     }
     $mutations = count($kernel['mutations']);
@@ -471,6 +497,53 @@ foreach (glob(__DIR__ . '/fixtures/jslive-packages/*.json') as $file) {
     ++$count;
 }
 nativeAssert($count === 40 && count($kernel['created']) === 40, 'Exactly 40 new target instances expected.');
+
+// Public pagination and actual form callbacks must remain usable above the kernel's one-MiB return limit.
+$mainJournal = $gateway->GetTestJournal();
+$largeJournal = $mainJournal;
+foreach ($largeJournal['entries'] as &$entry) {
+    $entry['snapshot']['configuration']['SyntheticPrivatePayload'] = str_repeat('synthetic private snapshot ', 1500);
+}
+unset($entry);
+nativeAssert(strlen(EChartsImportJson::Canonical($largeJournal)) > 1048576, 'Large public-journal fixture is too small.');
+$gateway->RestoreTestJournal($largeJournal);
+nativeThrows(fn () => $gateway->GetJSLiveImportJournal(), 'LIMIT_EXCEEDED:');
+$offset = 0;
+$revision = '';
+$allRows = [];
+do {
+    $page = json_decode(ECGW_GetJSLiveImportJournalPage(16000, $offset, 7, $revision), true, 64, JSON_THROW_ON_ERROR);
+    nativeAssert(!str_contains(EChartsImportJson::Canonical($page), 'SyntheticPrivatePayload'), 'Public journal page leaked snapshot contents.');
+    $allRows = array_merge($allRows, $page['entries']);
+    $revision = $page['revision'];
+    $offset = $page['nextOffset'];
+} while ($offset !== null);
+nativeAssert(count($allRows) === 40, 'Public journal pagination lost entries.');
+$gateway->ShowJSLiveImportJournal();
+nativeAssert(count(json_decode($gateway->fields['JSLiveReadyJournal']['values'], true)) === 25
+    && $gateway->fields['JSLiveJournalNext']['enabled'] && !$gateway->fields['JSLiveJournalPrevious']['enabled'], 'First journal form page is invalid.');
+$form = json_decode(file_get_contents(__DIR__ . '/../EChartsGateway/form.json'), true, 64, JSON_THROW_ON_ERROR);
+$id = 16000;
+foreach (['JSLiveJournalNext', 'JSLiveJournalPrevious'] as $name) {
+    $button = array_values(array_filter($form['actions'][1]['items'], static fn (array $item): bool => ($item['name'] ?? '') === $name))[0];
+    $JSLiveJournalRevision = $gateway->fields['JSLiveJournalRevision']['value'];
+    $JSLiveJournalPreviousOffset = $gateway->fields['JSLiveJournalPreviousOffset']['value'];
+    $JSLiveJournalNextOffset = $gateway->fields['JSLiveJournalNextOffset']['value'];
+    eval($button['onClick']);
+    nativeAssert(
+        count(json_decode($gateway->fields['JSLiveReadyJournal']['values'], true)) === ($name === 'JSLiveJournalNext' ? 15 : 25),
+        'Native journal navigation callback failed: ' . $name
+    );
+}
+$staleRevision = $gateway->fields['JSLiveJournalRevision']['value'];
+$largeJournal['entries'][array_key_first($largeJournal['entries'])]['error'] = 'TARGET_CHANGED';
+$gateway->RestoreTestJournal($largeJournal);
+$gateway->ShowJSLiveImportJournalPage(25, $staleRevision);
+nativeAssert(str_starts_with($gateway->fields['JSLiveJournalPageSummary']['caption'], 'JOURNAL_CHANGED:')
+    && $gateway->fields['JSLiveReadyJournal']['values'] === '[]' && !$gateway->fields['JSLiveJournalNext']['enabled'], 'Stale form pages must fail visibly.');
+$gateway->RestoreTestJournal($mainJournal);
+unset($largeJournal, $allRows);
+
 // Execute actual form scripts against the complete required native signature; no callbacks are merely regex-counted.
 $lastNativeResult = $result;
 $lastNativeRow = $row;
@@ -513,6 +586,48 @@ $error = $gateway->JSLiveImportFromForm('invalid base64', '{}', 15000, 'prepare'
 nativeAssert(str_starts_with($error, 'PACKAGE_INVALID:') && $gateway->fields['JSLiveReadyHash']['value'] === ''
     && str_contains($gateway->fields['JSLiveReadySummary']['caption'], 'PACKAGE_INVALID'), 'Invalid upload must clear stale confirmation and show a visible error.');
 nativeAssert((new ReflectionMethod(NativeImportGateway::class, 'JSLiveImportFromForm'))->getNumberOfRequiredParameters() === 7, 'Native callback arguments must not depend on PHP defaults.');
+
+// Cross-gateway reservations must scan every bounded page, including conflicts on the last page.
+$peer = new NativeImportGateway();
+$peer->InstanceID = 16001;
+$kernel['instances'][16001] = nativeInstance('{33C9DF44-6F6D-5916-4AAE-CCB24BD6928D}');
+$kernel['objects'][16001] = nativeObject(16001, 'Synthetic peer gateway');
+$kernel['configuration'][16001] = [];
+$GLOBALS['nativeGateways'][16001] = $peer;
+$peerJournal = ['version' => 1, 'entries' => []];
+$template = array_values($mainJournal['entries'])[0];
+for ($n = 1; $n <= 75; ++$n) {
+    $entryID = substr(hash('sha256', 'synthetic-peer-' . $n), 0, 32);
+    $entry = $template;
+    $entry['sequence'] = $n;
+    $entry['identity'] = 'synthetic-peer:' . $n;
+    $entry['marker'] = \SymconECharts\EChartsJSLiveJournal::Marker($entry['identity'], $entryID);
+    $entry['snapshot'] = ['configuration' => ['SyntheticPrivatePayload' => str_repeat('synthetic ', 1800)]];
+    $entry['pending'] = null;
+    $peerJournal['entries'][$entryID] = $entry;
+}
+$peer->RestoreTestJournal($peerJournal);
+$GLOBALS['nativeJournalPageCalls'] = [];
+$gateway->ExecuteJSLiveImport($json, '{}', 15000, EChartsImportJson::Canonical($lastNativeConfirmation));
+nativeAssert($GLOBALS['nativeJournalPageCalls'] === [[16001, 0], [16001, 50]], 'Peer reservation scan skipped a journal page.');
+$lastPeerKey = array_key_last($peerJournal['entries']);
+$peerJournal['entries'][$lastPeerKey]['identity'] = $lastNativeRow['identity'];
+$peerJournal['entries'][$lastPeerKey]['marker'] = \SymconECharts\EChartsJSLiveJournal::Marker($lastNativeRow['identity'], $lastPeerKey);
+$peer->RestoreTestJournal($peerJournal);
+nativeThrows(fn () => $gateway->ExecuteJSLiveImport($json, '{}', 15000, EChartsImportJson::Canonical($lastNativeConfirmation)), 'TARGET_CHANGED:');
+nativeAssert(count($kernel['mutations']) === $mutations && count($kernel['created']) === 40, 'Peer conflict caused a native mutation.');
+unset($peerJournal['entries'][$lastPeerKey]);
+$peer->RestoreTestJournal($peerJournal);
+$GLOBALS['nativePageMutation'] = static function (int $gatewayID, int $offset) use ($peer, &$peerJournal): void
+{
+    if ($gatewayID === 16001 && $offset === 0) {
+        $peerJournal['entries'][array_key_first($peerJournal['entries'])]['error'] = 'TARGET_CHANGED';
+        $peer->RestoreTestJournal($peerJournal);
+    }
+};
+nativeThrows(fn () => $gateway->ExecuteJSLiveImport($json, '{}', 15000, EChartsImportJson::Canonical($lastNativeConfirmation)), 'JOURNAL_CHANGED:');
+unset($GLOBALS['nativePageMutation'], $kernel['instances'][16001], $kernel['objects'][16001], $kernel['configuration'][16001]);
+nativeAssert(count($kernel['mutations']) === $mutations, 'Changing peer journal caused a native mutation.');
 
 // The output guard participates in drift detection, even if the parent configuration remains unchanged.
 $lastTarget = $lastNativeResult['targetID'];

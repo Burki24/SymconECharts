@@ -229,6 +229,59 @@ foreach (['staged', 'stage-lost', 'activated-on-update', 'activated-new-draft', 
     }
 }
 
+// Old Create wrote a new creation hash on reload. Only that exact, owned, otherwise unchanged shape may recover.
+foreach (['staged', 'stage-lost', 'activated', 'legacy-stage-lost', 'legacy-activated', 'complete', 'owner-name', 'owner-design', 'owner-parent', 'owner-marker', 'random-guard'] as $mode) {
+    $reloaded = new ImportJournalKernel();
+    $reloaded->interruptAfterStage = $mode !== 'complete';
+    $row = (new EChartsJSLiveJournal($reloaded))->Execute($plan, $confirm)['charts']['instance:12000'];
+    $targetID = $row['targetID'];
+    $entryID = $row['journalID'];
+    $originalGuard = $reloaded->objects[$targetID]['creationGuard'];
+    $reloaded->interruptAfterStage = false;
+    if (str_starts_with($mode, 'legacy-')) {
+        $reloaded->journal['entries'][$entryID]['phase'] = 'created';
+        $reloaded->journal['entries'][$entryID]['applyIntent'] = false;
+    }
+    if (in_array($mode, ['stage-lost', 'legacy-stage-lost'], true)) {
+        unset($reloaded->plannedConfiguration[$targetID]);
+    }
+    if (in_array($mode, ['activated', 'legacy-activated'], true)) {
+        $reloaded->Apply($targetID);
+    }
+    if ($mode === 'owner-name') {
+        $reloaded->objects[$targetID]['name'] = 'Owner name';
+    }
+    if ($mode === 'owner-design') {
+        $reloaded->objects[$targetID]['configuration']['Title'] = 'Owner title';
+    }
+    if ($mode === 'owner-parent') {
+        $reloaded->objects[$targetID]['parentID'] = 15001;
+    }
+    if ($mode === 'owner-marker') {
+        $reloaded->objects[$targetID]['info'] = 'Owner info';
+    }
+    $reloaded->objects[$targetID]['creationGuard'] = $mode === 'random-guard' ? str_repeat('f', 64)
+        : \SymconECharts\EChartsJSLiveTargetSnapshot::CreationHash($reloaded->objects[$targetID]);
+    $beforeReload = $reloaded->objects;
+    $applies = $reloaded->applies;
+    $stages = $reloaded->stages;
+    $resumed = (new EChartsJSLiveJournal($reloaded))->Execute($plan, $confirm)['charts']['instance:12000'];
+    if (in_array($mode, ['staged', 'stage-lost', 'activated', 'legacy-stage-lost', 'legacy-activated', 'complete'], true)) {
+        journalAssert($resumed['status'] === 'complete' && $resumed['targetID'] === $targetID
+            && $resumed['journalID'] === $entryID && $reloaded->creates === 1, 'Reload recovery lost the retained target: ' . $mode);
+        journalAssert(
+            $reloaded->journal['entries'][$entryID]['originalCreationGuard'] === $originalGuard,
+            'Reload recovery must retain the historical creation proof.'
+        );
+        $applies = $reloaded->applies;
+        (new EChartsJSLiveJournal($reloaded))->Execute($plan, $confirm);
+        journalAssert($reloaded->applies === $applies, 'Reload recovery must remain idempotent.');
+    } else {
+        journalAssert($resumed['error'] === 'TARGET_CHANGED' && $reloaded->objects === $beforeReload
+            && $reloaded->stages === $stages && $reloaded->applies === $applies, 'Reload recovery masked owner changes: ' . $mode);
+    }
+}
+
 $draftKernel = new ImportJournalKernel();
 $draftEngine = new EChartsJSLiveJournal($draftKernel);
 $completed = $draftEngine->Execute($plan, $confirm)['charts']['instance:12000'];

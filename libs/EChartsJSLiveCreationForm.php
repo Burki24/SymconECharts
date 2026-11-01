@@ -9,6 +9,7 @@ use RuntimeException;
 use Throwable;
 
 require_once __DIR__ . '/EChartsJSLiveCreationRuntime.php';
+require_once __DIR__ . '/EChartsJSLiveJournalView.php';
 
 /** Prepared plans are transient. Only the journal is persistent; import never runs from ApplyChanges. */
 trait EChartsJSLiveCreationForm
@@ -17,24 +18,55 @@ trait EChartsJSLiveCreationForm
     {
         return $this->DebugFlowCall(__FUNCTION__, __LINE__, function (): string
         {
-            $journal = json_decode($this->ReadAttributeString('JSLiveImportJournal'), true, 64, JSON_THROW_ON_ERROR);
-            EChartsJSLiveJournal::Validate($journal);
-            return EChartsImportJson::Canonical($journal);
+            return EChartsJSLiveJournalView::Full($this->ReadJSLiveJournal());
         });
+    }
+
+    public function GetJSLiveImportJournalPage(int $Offset, int $Limit, string $Revision): string
+    {
+        return $this->DebugFlowCall(__FUNCTION__, __LINE__, fn (): string => EChartsImportJson::Canonical(
+            EChartsJSLiveJournalView::Page($this->ReadJSLiveJournal(), $Offset, $Limit, $Revision)
+        ));
     }
 
     public function ShowJSLiveImportJournal(): void
     {
-        $this->DebugFlowCall(__FUNCTION__, __LINE__, function (): void
+        $this->ShowJSLiveImportJournalPage(0, '');
+    }
+
+    public function ShowJSLiveImportJournalPage(int $Offset, string $Revision): void
+    {
+        $this->DebugFlowCall(__FUNCTION__, __LINE__, function () use ($Offset, $Revision): void
         {
+            try {
+                $page = EChartsJSLiveJournalView::Page($this->ReadJSLiveJournal(), $Offset, 25, $Revision);
+            } catch (Throwable $exception) {
+                $code = strstr($exception->getMessage(), ':', true);
+                $code = is_string($code) && preg_match('/^[A-Z_]{3,40}$/D', $code) === 1 ? $code : 'JOURNAL_INVALID';
+                $this->UpdateFormField('JSLiveReadyJournal', 'values', '[]');
+                $this->UpdateFormField('JSLiveJournalPageSummary', 'caption', $code . ': ' . $this->Translate('Refresh the import journal before continuing.'));
+                foreach (['Previous', 'Next'] as $direction) {
+                    $this->UpdateFormField('JSLiveJournal' . $direction, 'enabled', false);
+                }
+                return;
+            }
             $rows = [];
-            $entries = json_decode($this->GetJSLiveImportJournal(), true, 64, JSON_THROW_ON_ERROR)['entries'];
-            uasort($entries, static fn (array $a, array $b): int => $a['sequence'] <=> $b['sequence']);
-            foreach ($entries as $id => $entry) {
-                $rows[] = ['EntryID' => $id, 'Identity' => $entry['identity'], 'Revision' => $entry['revision'],
+            foreach ($page['entries'] as $entry) {
+                $rows[] = ['EntryID' => $entry['entryID'], 'Identity' => $entry['identity'], 'Revision' => $entry['revision'],
                     'TargetID'       => $entry['targetID'] ?? 0, 'Phase' => $entry['phase'], 'Status' => $entry['status'], 'Error' => $entry['error'] ?? ''];
             }
             $this->UpdateFormField('JSLiveReadyJournal', 'values', json_encode($rows, JSON_THROW_ON_ERROR));
+            $this->UpdateFormField('JSLiveJournalRevision', 'value', $page['revision']);
+            $this->UpdateFormField('JSLiveJournalPreviousOffset', 'value', max(0, $Offset - 25));
+            $this->UpdateFormField('JSLiveJournalNextOffset', 'value', $page['nextOffset'] ?? $Offset);
+            $this->UpdateFormField('JSLiveJournalPrevious', 'enabled', $Offset > 0);
+            $this->UpdateFormField('JSLiveJournalNext', 'enabled', $page['nextOffset'] !== null);
+            $this->UpdateFormField('JSLiveJournalPageSummary', 'caption', sprintf(
+                $this->Translate('Journal entries %d-%d of %d'),
+                $page['total'] === 0 ? 0 : $Offset + 1,
+                $Offset + count($rows),
+                $page['total']
+            ));
         }, true);
     }
 
@@ -180,6 +212,11 @@ trait EChartsJSLiveCreationForm
         $this->RegisterAttributeString('JSLiveImportJournal', '{"version":1,"entries":[]}');
     }
 
+    private function ReadJSLiveJournal(): array
+    {
+        return json_decode($this->ReadAttributeString('JSLiveImportJournal'), true, 64, JSON_THROW_ON_ERROR);
+    }
+
     private function PrepareJSLivePlan(string $package, string $options, int $parentID): array
     {
         $mapping = EChartsImportJson::Decode($options);
@@ -208,7 +245,7 @@ trait EChartsJSLiveCreationForm
     {
         return new EChartsJSLiveCreationRuntime(
             $this->InstanceID,
-            fn (): array => json_decode($this->ReadAttributeString('JSLiveImportJournal'), true, 64, JSON_THROW_ON_ERROR),
+            fn (): array => $this->ReadJSLiveJournal(),
             fn (array $journal) => $this->WriteAttributeString('JSLiveImportJournal', EChartsImportJson::Canonical($journal)),
             $prepare,
             $guard

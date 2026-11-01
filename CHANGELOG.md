@@ -26,6 +26,17 @@
 
 ## Fixes
 
+- JSLive-Erstellungsnachweise bleiben beim Modulupdate erhalten. Ein bereits
+  durch den früheren Create-Ablauf neu gesiegelter Nachweis lässt sich nach
+  erneuter Bestätigung mit derselben Zielinstanz fortsetzen, sofern Eigentum und
+  vollständiger Zielzustand weiterhin stimmen. Der ursprüngliche Nachweis bleibt
+  dokumentiert; geänderte Ziele werden weiterhin nicht überschrieben.
+- Das JSLive-Importjournal ist seitenweise abrufbar. Formular und Prüfungen
+  weiterer Gateways laden begrenzte Metadatenseiten statt großer Konfigurations-
+  Snapshots. Eine Änderung zwischen Seiten verlangt ein erneutes Laden. Der
+  bisherige Vollabruf bleibt für kleine Journale erhalten und verweist bei
+  größeren Journalen ausdrücklich auf die Seitenfunktion.
+
 - Das JSLive-Importjournal unterscheidet geplante und aktive Symcon-
   Konfigurationen. Neue Übernahmen brechen nicht mehr vor dem Anwenden mit
   einem fälschlichen `TARGET_CHANGED` ab. Bereits an dieser Stelle unterbrochene

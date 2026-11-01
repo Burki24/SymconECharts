@@ -10,6 +10,7 @@ use RuntimeException;
 require_once __DIR__ . '/EChartsJSLiveJournal.php';
 require_once __DIR__ . '/EChartsJSLivePlan.php';
 require_once __DIR__ . '/EChartsJSLiveRuntime.php';
+require_once __DIR__ . '/EChartsJSLiveJournalView.php';
 
 /** Explicit write boundary for newly created, marked target instances. No source/archive write API is used. */
 final class EChartsJSLiveCreationRuntime implements EChartsJSLiveImportKernel
@@ -101,16 +102,22 @@ final class EChartsJSLiveCreationRuntime implements EChartsJSLiveImportKernel
             if ($id === $this->gatewayID) {
                 continue;
             }
-            if (!function_exists('ECGW_GetJSLiveImportJournal')) {
+            if (!function_exists('ECGW_GetJSLiveImportJournalPage')) {
                 throw new RuntimeException('JOURNAL_INVALID: peer journal API is unavailable.');
             }
-            $journal = json_decode(ECGW_GetJSLiveImportJournal($id), true, 64, JSON_THROW_ON_ERROR);
-            EChartsJSLiveJournal::Validate($journal);
-            foreach ($journal['entries'] as $entry) {
-                if ($entry['identity'] === $identity) {
-                    throw new RuntimeException('TARGET_CHANGED: this origin is reserved by another gateway journal.');
+            $offset = 0;
+            $revision = '';
+            do {
+                $page = json_decode(ECGW_GetJSLiveImportJournalPage($id, $offset, 50, $revision), true, 64, JSON_THROW_ON_ERROR);
+                EChartsJSLiveJournalView::ValidatePage($page, $offset, 50, $revision);
+                foreach ($page['entries'] as $entry) {
+                    if ($entry['identity'] === $identity) {
+                        throw new RuntimeException('TARGET_CHANGED: this origin is reserved by another gateway journal.');
+                    }
                 }
-            }
+                $revision = $page['revision'];
+                $offset = $page['nextOffset'];
+            } while ($offset !== null);
         }
         $allowed = [];
         foreach ($entries as $entry) {

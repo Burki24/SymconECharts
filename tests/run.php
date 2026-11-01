@@ -30,6 +30,7 @@ $tests = [
     __DIR__ . '/jslive_models.php',
     __DIR__ . '/jslive_plans.php',
     __DIR__ . '/jslive_journal.php',
+    __DIR__ . '/jslive_journal_read.php',
     __DIR__ . '/jslive_execution.php',
     __DIR__ . '/echarts_assets.php',
     __DIR__ . '/svg_path.php',

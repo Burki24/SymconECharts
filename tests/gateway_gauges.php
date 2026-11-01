@@ -447,11 +447,15 @@ abstract class IPSModuleStrict
     /** @var list<callable(string): string> */
     public static array $ChildResponders = [];
 
+    /** Writes during Create override restored attributes in the native lifecycle. */
+    public array $TestCreateAttributeWrites = [];
+
     /** @var array<string, mixed> */
     private array $properties = [];
 
     /** @var array<string, mixed> */
     private array $attributes = [];
+    private bool $testRestoringAttributes = false;
 
     /** @var array<string, string> */
     private array $buffers = [];
@@ -480,6 +484,20 @@ abstract class IPSModuleStrict
     /** @var array<string, int> */
     private array $variableIDs = [];
     private static int $nextVariableID = 9000;
+
+    public function ReloadTestModule(): void
+    {
+        $persisted = $this->attributes;
+        $this->attributes = [];
+        $this->TestCreateAttributeWrites = [];
+        $this->testRestoringAttributes = true;
+        try {
+            $this->Create();
+        } finally {
+            $this->attributes = array_replace($this->attributes, $persisted, $this->TestCreateAttributeWrites);
+            $this->testRestoringAttributes = false;
+        }
+    }
 
     public function Create(): void
     {
@@ -697,6 +715,9 @@ abstract class IPSModuleStrict
 
     protected function WriteAttributeString(string $name, string $value): bool
     {
+        if ($this->testRestoringAttributes) {
+            $this->TestCreateAttributeWrites[$name] = $value;
+        }
         $this->attributes[$name] = $value;
 
         return true;

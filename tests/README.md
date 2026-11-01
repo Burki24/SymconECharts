@@ -28,6 +28,10 @@ Die reguläre Suite enthält jetzt folgende unabhängige Grenzen:
   abweichender protokollierter Entwurf wird nach Aktivierung abgewiesen,
   ohne ihn durch den erwarteten Plan zu überschreiben; aktive Änderungen
   und neue Entwürfe nach Aktivierung stoppen bereits vor Set/Apply.
+- `php tests/jslive_journal_read.php`: vollständige Metadatenfortsetzung eines
+  Journals oberhalb der realen 1-MiB-Rückgabegrenze und mit maximal 1000 Einträgen,
+  JSON-Rundlauf mit zufälligen IDs, Seiten-/Bytegrenzen, leere/letzte Seiten,
+  veraltete Revisionen, ungültige Fortsetzungen und explizite Vollabrufgrenze.
 - `php tests/gateway_gauges.php --jslive-targets`: die echten sechs Modulklassen
   für alle 40 Varianten, Create/Apply, Gateway-Snapshottransport, Referenzen,
   geschützte Ausgangs-/Ausgabenachweise, beide HTML-Ausgaben sowie ausgeführte
@@ -48,7 +52,21 @@ Die reguläre Suite enthält jetzt folgende unabhängige Grenzen:
 Der native Importadapter-Test unterbricht zusätzlich nach SetConfiguration und
 vor ApplyChanges und bestätigt die unveränderte aktive Konfiguration sowie
 `IPS_HasChanges=true`. Er lädt die historische Version-1-Fehlerform und setzt
-dieselbe Instanz ohne erneutes SetConfiguration über die öffentlichen APIs fort.
+dieselbe Instanz nach verlorener Vormerkung und altem Create-Neusiegeln über die
+öffentlichen APIs fort. Der noch vorhandene Entwurf wird in den isolierten
+Wiederaufnahmeszenarien ausdrücklich ohne erneutes SetConfiguration verwendet.
+Die ursprünglichen Nachweise bleiben dokumentiert; geänderte Ziele und beliebige
+Nachweisabweichungen stoppen weiterhin vor Schreibzugriffen. Alle 40 echten
+Modulvarianten werden zusätzlich mit getrennt registrierten und wiederhergestellten
+Attributen neu geladen. Der Test reproduzierte vor dem Fix das Überschreiben des
+Erstellungsnachweises durch Create.
+
+Der öffentliche Adapter prüft außerdem Seitenabruf und tatsächliche Vor-/Zurück-
+Formularcallbacks mit vollständiger nativer Signatur, sichtbare Meldungen bei
+veralteten Seiten und eine Gateway-übergreifende Reservierung erst auf Seite 2.
+Peer-Änderungen zwischen Seiten verhindern jede Zielmutation. Kein Seitenabruf
+transportiert Konfigurations- oder Ressourceninhalte; bestehende Budgets bleiben
+unverändert.
 Die realistische Trennung in den beiden Kernel-Doppeln erzeugte vor dem Fix RED:
 `TARGET_CHANGED` unmittelbar nach dem ersten SetConfiguration. Nach dem Fix
 bestehen Wiederaufnahme und alle 40 Importfälle auch unter 64 MiB.

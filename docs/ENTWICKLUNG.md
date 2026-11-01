@@ -21,9 +21,16 @@ Die lokale Prüfung umfasst alle 40 Modelle/Pläne, echte Modulklassen und
 Formularsignaturen, den konkreten Kerneladapter mit Schreibschutz-Doppeln,
 Unterbrechungen, 64-MiB-Berichtsgrenzen, native ECharts-Renderer sowie isolierte
 Chromium-Dokumente. Details und Befehle stehen in [tests/README](../tests/README.md).
-Diese Nachweise sind keine Live-Übernahme oder Original-/Ziel-Bildabnahme in
-Symcon: Nach Eigentümer-Update bleiben die gemeinsame MCP-Anlage-/Wiederanlauf-
-prüfung und die tatsächlichen Kachel-/IPSView-Vergleiche offen. Die Beta bleibt
+Die MCP-Prüfung unter 1.371 bestätigte 39 von 40 Neuanlagen einschließlich
+Wiederholungen, Daten-/HTML-Ausgaben und unveränderte geschützte Bestände.
+Der verbleibende Wiederanlauffall mit neu gesiegeltem Nachweis sowie die native
+Ausgabegrenze des Journalabrufs wurden lokal reproduziert und korrigiert.
+Create registriert den Nachweis ohne aktive Attributschreibzugriffe; die enge
+Altfallfortsetzung bewahrt den ursprünglichen Nachweis. Gemeinsame begrenzte
+Metadatenseiten versorgen öffentliche APIs, Formular und Peer-Prüfung mit
+revisionsgebundener Fortsetzung. Persistentes Journal und Schutzbudgets bleiben
+unverändert. Nach Eigentümer-Update bleiben die erneute MCP-Fortsetzung und die
+tatsächlichen Original-/Ziel-Kachel-/IPSView-Vergleiche offen. Die Beta bleibt
 bis zur vereinbarten Migrationsabnahme zurückgestellt. Die bereits abgeschlossene
 Nutzungsgrenzen-Roadmap und die Eigentümerabnahmen bestehender Modelle bleiben gültig.
 

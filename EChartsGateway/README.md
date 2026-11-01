@@ -132,6 +132,16 @@ einer Abweichung stoppt der Import und schreibt keine Korrektur darüber.
 Ein eigener neuer Einstellungsentwurf auf einem bereits fertigen Ziel bleibt
 unverändert und wird durch eine Importwiederholung nicht angewendet.
 
+Modulupdates erhalten den Erstellungsnachweis. Bereits durch einen früheren
+Modulstand neu gesiegelte Nachweise werden ausschließlich beim bestätigten
+Wiederanlauf abgeglichen: Eigentumsmarker und vollständiger Zielzustand müssen
+weiterhin stimmen. Der ursprüngliche Nachweis bleibt im Journal dokumentiert.
+Es ist kein Zurücksetzen des Journals oder Neuerzeugen des Ziels nötig.
+
+Die Journalansicht zeigt jeweils bis zu 25 Einträge und bietet **Vorherige
+Journalseite** und **Nächste Journalseite**. Wird das Journal während des
+Blätterns geändert, die Ansicht mit **Importjournal aktualisieren** neu laden.
+
 War ein Absturz genau während der Erzeugung möglich, wird keine weitere Instanz
 automatisch erzeugt. Die Wiederanlaufaktion verlangt den Journaleintrag, seine
 Revision und eine ausdrücklich bestätigte Ziel-ID. Nur eine unveränderte,
@@ -217,7 +227,25 @@ Neuanlagen aus. Die Bestätigung bindet den aktuellen `planHash`, die ausgewähl
 
 Für eine getrennte Neuanlage kann der jeweilige Chart-Eintrag zusätzlich
 `"separateFrom":"<bisherige Journal-ID>"` enthalten.
-`ECGW_GetJSLiveImportJournal(int $InstanzID): string` liest das Journal.
+`ECGW_GetJSLiveImportJournalPage(int $InstanzID, int $Offset, int $Limit,
+string $Revision): string` liest eine chronologisch geordnete Metadatenseite.
+Alle vier Argumente sind erforderlich. Mit `0, 25, ''` beginnen; weitere Seiten
+verwenden exakt `nextOffset` und dieselbe zurückgegebene `revision`. `nextOffset`
+gleich `null` bedeutet Ende. `Limit` muss zwischen 1 und 50 liegen. Bei
+`JOURNAL_CHANGED` wieder auf der ersten Seite beginnen.
+
+Das JSON enthält `version`, `view: "summary"`, `revision`, `total`, `offset`,
+`limit`, `nextOffset` sowie die geordnete Liste `entries`. Jeder Eintrag enthält
+`entryID`, Sequenz, Herkunftsidentität, Revision, Ziel-ID, Status, Phase und
+Prüfnachweise. Konfigurations-, Ressourcen- und Ausgabeinhalte werden nicht in
+die Seiten kopiert. Jede Antwort bleibt unter 128 KiB; das persistente Journal
+behält unverändert seine 1000-Einträge-/4-MiB-Grenzen.
+
+`ECGW_GetJSLiveImportJournal(int $InstanzID): string` erhält das bisherige
+Vollformat bis 256 KiB. Darüber meldet es `LIMIT_EXCEEDED` mit Verweis auf die
+Seitenfunktion, statt an der Symcon-Ausgabegrenze abzubrechen. Diese Funktion
+wird nicht entfernt; größere Journale werden niemals still gekürzt.
+
 `ECGW_ResolveJSLiveImport(int $InstanzID, string $EntryID, int $TargetID,
 string $Revision, bool $Confirmed): void` ordnet einen mehrdeutigen
 Erzeugungsvorgang ausdrücklich zu oder bestätigt seine nachgeprüfte Abwesenheit.
