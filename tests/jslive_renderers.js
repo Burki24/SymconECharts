@@ -14,7 +14,7 @@ let renders = 0;
 for (const [index, wire] of states.entries()) {
     const state=wire.chart;
     for (const [width, height] of [[620, 500], [1200, 700], [300, 242]]) {
-        const window = {echarts, btoa: value => Buffer.from(value, 'binary').toString('base64'), SYMC_VISUALIZATION:{options:{locale:'de-DE'}}};
+        const window = {echarts, btoa: value => Buffer.from(value, 'binary').toString('base64'), atob: value => Buffer.from(value, 'base64').toString('binary'), SYMC_VISUALIZATION:{options:{locale:'de-DE'}}};
         const context = vm.createContext({window});
         vm.runInContext(fs.readFileSync(path.join(root, 'libs/jslive/format.js'), 'utf8'), context);
         vm.runInContext(fs.readFileSync(path.join(root, files[state.family]), 'utf8'), context);

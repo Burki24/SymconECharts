@@ -26,6 +26,12 @@
 
 ## Fixes
 
+- Übernommene JSLive-Fortschrittsanzeigen behalten Originalfarben, Verläufe und
+  Transparenzen eigener SVGs sowie die ursprünglichen Glyphen der Textvorlage.
+  Einpassung, natürliche SVG-Bildmaße, Ränder, tatsächlich wirksame Linienenden
+  und Wertanzeigen folgen der Quellvorlage. Originalinstanzen, Quellen,
+  Archivwerte und gespeicherte Designs bleiben unverändert.
+
 - Übernommene lineare JSLive-Gauges zeigen Fortschrittsbalken und Grundstrecke
   in den konfigurierten Vollfarben samt Transparenz. Skalen zeigen die numerischen
   Quellbeschriftungen ohne zusätzlich angehängte Nullen; die Präzision der Wertbox

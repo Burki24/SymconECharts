@@ -102,6 +102,24 @@ Die reguläre Suite enthält jetzt folgende unabhängige Grenzen:
   Schriftgrößen sind exakt; Pixelrundungen an ungeraden Canvas-Abmessungen
   dürfen höchstens 0,6 Pixel abweichen. Quellwerte und Einstellungen werden
   nicht zurückgeschrieben.
+- `node tests/jslive_progress_parity.js`: F05/F06 für alle 18 Progressvarianten
+  mit 63 unabhängig gemessenen Quelllayouts in drei Größen und zusätzlichen
+  Grenzfällen. 24 Clipfälle sichern Originalfarben von SVG und Text sowie alle
+  Füllrichtungen und Endwerte ab. Geprüft werden unveränderte Eingaben, Preset-
+  und Nullhöhen-ViewBox, natürliche SVG-Größen samt physischer Einheiten,
+  unsichtbare/mittige/untere Labels, Schriftfallback, Titel und Schriftvergrößerung.
+  `--images` und `--layout` isolieren die getrennten RED-Reproduktionen. Der
+  vorhandene Test der ausgelieferten Canvas-Pfade prüft zusätzlich tatsächlich
+  flache Linienenden trotz wirkungsloser gespeicherter Auswahl „rund“.
+- Optional `node tests/jslive_progress_reference.js ../JSLive <Chromium.exe>`
+  vergleicht diese 63 Messwerte mit der echten ldBar-Engine, den Größen-/Label-
+  Funktionen der unveränderten Quellvorlage und deren CSS. Der isolierte lokale
+  Browser lädt die anonymen Testschriften und SVGs, keine Symcon-Installation.
+  Engine, Vorlage und CSS werden per SHA-256 gegen die eingefrorene Referenz
+  geprüft. `--snapshot tests/fixtures/jslive-progress-geometry.json` hinter dem
+  Browserpfad erneuert die Messwerte bei unveränderten Quellhashes. Der bereits
+  akzeptierte Stroke-zu-Text-Fill-Fall 37 wird ausdrücklich als solcher geprüft.
+  Die Engine bleibt außerhalb der Library; CI verwendet nur die Messwerte.
 
 Der native Importadapter-Test unterbricht zusätzlich nach SetConfiguration und
 vor ApplyChanges und bestätigt die unveränderte aktive Konfiguration sowie
@@ -148,12 +166,25 @@ setzen. Der Browser verwendet ein eigenes Headless-Profil, gesperrte DNS-Zugriff
 und ausschließlich anonyme lokale HTML-Dateien. Dieser optionale Lauf verlangt
 eine vorhandene Chromium-Installation und wird nicht als CI-Voraussetzung ergänzt.
 
-Der gezielte F03-Restlauf mit der Standardauswahl umfasst 18 Kachel-/IPSView-
+Der gezielte F03-Restlauf umfasste 18 Kachel-/IPSView-
 Dokumente. Bei Gauges zeichnet der Browser zusätzlich isolierte horizontale und
 vertikale Vollfarbbalken und prüft deren tatsächliche Cyan-/Grundstreckenpixel.
 Radiale und Kompass-Naben müssen sichtbare Pixel in der konfigurierten
 Schattenfarbe erzeugen. Diese lokalen Rasterprüfungen ergänzen die reguläre
-Canvas-Beobachtung; die erneute MCP-/Client-Abnahme nach Modulupdate bleibt offen.
+Canvas-Beobachtung; die erneute MCP-/Original-Ziel-Abnahme aller acht Gauge-
+Paare ist unter 1.376 bestätigt.
+
+Für F05/F06 erweitert `--progress` hinter dem Browser-/Ausgabepfad die Prüfung
+auf alle 36 Progress-Dokumente (18 × Kachel/IPSView). Dieser Lauf ist lokal
+bestanden. Text-/SVG-Fälle führen 96 zusätzliche echte Canvas-Rastervergleiche
+gegen direkt gezeichnete Originalbilder aus: vier Füllrichtungen, null/halb/voll,
+schwarze Quellglyphen sowie eigene Farben, Verlauf und Alpha. Die Hintergrund-
+Extrusion ist in den vollständigen Ausgaben aktiv; reine Vordergrundvergleiche
+schalten sie ausdrücklich transparent. Die Standardauswahl enthält nun auch
+Text-Fill-Fall 38 und umfasst 20 Dokumente. Nachweisdateien und Screenshots
+liegen ausschließlich im temporären Ausgabeordner. Die neue Live-Abnahme von
+F05/F06 nach Eigentümer-Modulupdate bleibt offen; synthetische Wheel-Events
+werden weiterhin nicht als physischer App-Nachweis ausgegeben.
 
 Diese Nachweise ersetzen **nicht** die gemeinsame MCP-Neuanlage/-Fortsetzung
 nach Eigentümer-Modulupdate, den direkten Original-/Ziel-Bildvergleich und den

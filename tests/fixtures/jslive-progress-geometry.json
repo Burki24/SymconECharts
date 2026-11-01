@@ -1,0 +1,2168 @@
+{
+    "source": "loading-bar 0.1.1 / JSLive 0.1.1-jslive.1; original Progressbar template and CSS",
+    "sourceHashes": {
+        "engine": "6e79d56f0c289cdebd4c0351451a8a28a431cacc18405241be4530df4f2a4a86",
+        "template": "b9c5b9fc0d1d382d8b65e57681b2035508d9f6cd4616fa25b383146aec54f7c6",
+        "css": "b42f3187ec8aa70fa17024cb5260ccd481bbaddf70ae0423b44c5c0fc2541131"
+    },
+    "records": [
+        {
+            "case": 23,
+            "width": 620,
+            "height": 500,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 580,
+                "height": 420
+            },
+            "viewBox": [
+                -2,
+                -2,
+                104,
+                104
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 80
+            },
+            "label": {
+                "x": 8,
+                "y": 433,
+                "width": 580,
+                "height": 23
+            },
+            "labelFont": "Comfortaa",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 23,
+            "width": 1200,
+            "height": 700,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 1160,
+                "height": 620
+            },
+            "viewBox": [
+                -2,
+                -2,
+                104,
+                104
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 80
+            },
+            "label": {
+                "x": 8,
+                "y": 633,
+                "width": 1160,
+                "height": 23
+            },
+            "labelFont": "Comfortaa",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 23,
+            "width": 300,
+            "height": 242,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 260,
+                "height": 162
+            },
+            "viewBox": [
+                -2,
+                -2,
+                104,
+                104
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 80
+            },
+            "label": {
+                "x": 8,
+                "y": 175,
+                "width": 260,
+                "height": 23
+            },
+            "labelFont": "Comfortaa",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 24,
+            "width": 620,
+            "height": 500,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 580,
+                "height": 420
+            },
+            "viewBox": [
+                -2,
+                -2,
+                104,
+                104
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 80
+            },
+            "label": {
+                "x": 8,
+                "y": 433,
+                "width": 580,
+                "height": 25
+            },
+            "labelFont": "Orbitron",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 24,
+            "width": 1200,
+            "height": 700,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 1160,
+                "height": 620
+            },
+            "viewBox": [
+                -2,
+                -2,
+                104,
+                104
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 80
+            },
+            "label": {
+                "x": 8,
+                "y": 633,
+                "width": 1160,
+                "height": 25
+            },
+            "labelFont": "Orbitron",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 24,
+            "width": 300,
+            "height": 242,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 260,
+                "height": 162
+            },
+            "viewBox": [
+                -2,
+                -2,
+                104,
+                104
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 80
+            },
+            "label": {
+                "x": 8,
+                "y": 175,
+                "width": 260,
+                "height": 25
+            },
+            "labelFont": "Orbitron",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 25,
+            "width": 620,
+            "height": 500,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 580,
+                "height": 420
+            },
+            "viewBox": [
+                -2,
+                -2,
+                104,
+                104
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 80
+            },
+            "label": {
+                "x": 8,
+                "y": 433,
+                "width": 580,
+                "height": 23
+            },
+            "labelFont": "Comfortaa",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 25,
+            "width": 1200,
+            "height": 700,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 1160,
+                "height": 620
+            },
+            "viewBox": [
+                -2,
+                -2,
+                104,
+                104
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 80
+            },
+            "label": {
+                "x": 8,
+                "y": 633,
+                "width": 1160,
+                "height": 23
+            },
+            "labelFont": "Comfortaa",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 25,
+            "width": 300,
+            "height": 242,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 260,
+                "height": 162
+            },
+            "viewBox": [
+                -2,
+                -2,
+                104,
+                104
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 80
+            },
+            "label": {
+                "x": 8,
+                "y": 175,
+                "width": 260,
+                "height": 23
+            },
+            "labelFont": "Comfortaa",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 26,
+            "width": 620,
+            "height": 500,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 580,
+                "height": 420
+            },
+            "viewBox": [
+                -2,
+                -2,
+                104,
+                104
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 80
+            },
+            "label": {
+                "x": 8,
+                "y": 433,
+                "width": 580,
+                "height": 25
+            },
+            "labelFont": "Orbitron",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 26,
+            "width": 1200,
+            "height": 700,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 1160,
+                "height": 620
+            },
+            "viewBox": [
+                -2,
+                -2,
+                104,
+                104
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 80
+            },
+            "label": {
+                "x": 8,
+                "y": 633,
+                "width": 1160,
+                "height": 25
+            },
+            "labelFont": "Orbitron",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 26,
+            "width": 300,
+            "height": 242,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 260,
+                "height": 162
+            },
+            "viewBox": [
+                -2,
+                -2,
+                104,
+                104
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 80
+            },
+            "label": {
+                "x": 8,
+                "y": 175,
+                "width": 260,
+                "height": 25
+            },
+            "labelFont": "Orbitron",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 27,
+            "width": 620,
+            "height": 500,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 580,
+                "height": 420
+            },
+            "viewBox": [
+                -2,
+                38,
+                104,
+                64
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 50,
+                "width": 80,
+                "height": 40
+            },
+            "label": {
+                "x": 8,
+                "y": 433,
+                "width": 580,
+                "height": 23
+            },
+            "labelFont": "Comfortaa",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 27,
+            "width": 1200,
+            "height": 700,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 1160,
+                "height": 620
+            },
+            "viewBox": [
+                -2,
+                38,
+                104,
+                64
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 50,
+                "width": 80,
+                "height": 40
+            },
+            "label": {
+                "x": 8,
+                "y": 633,
+                "width": 1160,
+                "height": 23
+            },
+            "labelFont": "Comfortaa",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 27,
+            "width": 300,
+            "height": 242,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 260,
+                "height": 162
+            },
+            "viewBox": [
+                -2,
+                38,
+                104,
+                64
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 50,
+                "width": 80,
+                "height": 40
+            },
+            "label": {
+                "x": 8,
+                "y": 175,
+                "width": 260,
+                "height": 23
+            },
+            "labelFont": "Comfortaa",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 28,
+            "width": 620,
+            "height": 500,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 580,
+                "height": 420
+            },
+            "viewBox": [
+                -2,
+                38,
+                104,
+                64
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 50,
+                "width": 80,
+                "height": 40
+            },
+            "label": {
+                "x": 8,
+                "y": 433,
+                "width": 580,
+                "height": 25
+            },
+            "labelFont": "Orbitron",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 28,
+            "width": 1200,
+            "height": 700,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 1160,
+                "height": 620
+            },
+            "viewBox": [
+                -2,
+                38,
+                104,
+                64
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 50,
+                "width": 80,
+                "height": 40
+            },
+            "label": {
+                "x": 8,
+                "y": 633,
+                "width": 1160,
+                "height": 25
+            },
+            "labelFont": "Orbitron",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 28,
+            "width": 300,
+            "height": 242,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 260,
+                "height": 162
+            },
+            "viewBox": [
+                -2,
+                38,
+                104,
+                64
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 50,
+                "width": 80,
+                "height": 40
+            },
+            "label": {
+                "x": 8,
+                "y": 175,
+                "width": 260,
+                "height": 25
+            },
+            "labelFont": "Orbitron",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 29,
+            "width": 620,
+            "height": 500,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 580,
+                "height": 420
+            },
+            "viewBox": [
+                -2,
+                -2,
+                104,
+                34
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 0
+            },
+            "label": {
+                "x": 8,
+                "y": 433,
+                "width": 580,
+                "height": 23
+            },
+            "labelFont": "Comfortaa",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 29,
+            "width": 1200,
+            "height": 700,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 1160,
+                "height": 620
+            },
+            "viewBox": [
+                -2,
+                -2,
+                104,
+                34
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 0
+            },
+            "label": {
+                "x": 8,
+                "y": 633,
+                "width": 1160,
+                "height": 23
+            },
+            "labelFont": "Comfortaa",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 29,
+            "width": 300,
+            "height": 242,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 260,
+                "height": 162
+            },
+            "viewBox": [
+                -2,
+                -2,
+                104,
+                34
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 0
+            },
+            "label": {
+                "x": 8,
+                "y": 175,
+                "width": 260,
+                "height": 23
+            },
+            "labelFont": "Comfortaa",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 30,
+            "width": 620,
+            "height": 500,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 580,
+                "height": 420
+            },
+            "viewBox": [
+                -2,
+                -2,
+                104,
+                34
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 0
+            },
+            "label": {
+                "x": 8,
+                "y": 433,
+                "width": 580,
+                "height": 25
+            },
+            "labelFont": "Orbitron",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 30,
+            "width": 1200,
+            "height": 700,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 1160,
+                "height": 620
+            },
+            "viewBox": [
+                -2,
+                -2,
+                104,
+                34
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 0
+            },
+            "label": {
+                "x": 8,
+                "y": 633,
+                "width": 1160,
+                "height": 25
+            },
+            "labelFont": "Orbitron",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 30,
+            "width": 300,
+            "height": 242,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 260,
+                "height": 162
+            },
+            "viewBox": [
+                -2,
+                -2,
+                104,
+                34
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 0
+            },
+            "label": {
+                "x": 8,
+                "y": 175,
+                "width": 260,
+                "height": 25
+            },
+            "labelFont": "Orbitron",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 31,
+            "width": 620,
+            "height": 500,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 580,
+                "height": 420
+            },
+            "viewBox": [
+                -2,
+                -2,
+                104,
+                34
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 0
+            },
+            "label": {
+                "x": 8,
+                "y": 433,
+                "width": 580,
+                "height": 23
+            },
+            "labelFont": "Comfortaa",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 31,
+            "width": 1200,
+            "height": 700,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 1160,
+                "height": 620
+            },
+            "viewBox": [
+                -2,
+                -2,
+                104,
+                34
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 0
+            },
+            "label": {
+                "x": 8,
+                "y": 633,
+                "width": 1160,
+                "height": 23
+            },
+            "labelFont": "Comfortaa",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 31,
+            "width": 300,
+            "height": 242,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 260,
+                "height": 162
+            },
+            "viewBox": [
+                -2,
+                -2,
+                104,
+                34
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 0
+            },
+            "label": {
+                "x": 8,
+                "y": 175,
+                "width": 260,
+                "height": 23
+            },
+            "labelFont": "Comfortaa",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 32,
+            "width": 620,
+            "height": 500,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 580,
+                "height": 420
+            },
+            "viewBox": [
+                -2,
+                -2,
+                104,
+                34
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 0
+            },
+            "label": {
+                "x": 8,
+                "y": 433,
+                "width": 580,
+                "height": 25
+            },
+            "labelFont": "Orbitron",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 32,
+            "width": 1200,
+            "height": 700,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 1160,
+                "height": 620
+            },
+            "viewBox": [
+                -2,
+                -2,
+                104,
+                34
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 0
+            },
+            "label": {
+                "x": 8,
+                "y": 633,
+                "width": 1160,
+                "height": 25
+            },
+            "labelFont": "Orbitron",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 32,
+            "width": 300,
+            "height": 242,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 260,
+                "height": 162
+            },
+            "viewBox": [
+                -2,
+                -2,
+                104,
+                34
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 0
+            },
+            "label": {
+                "x": 8,
+                "y": 175,
+                "width": 260,
+                "height": 25
+            },
+            "labelFont": "Orbitron",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 33,
+            "width": 620,
+            "height": 500,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 580,
+                "height": 420
+            },
+            "viewBox": [
+                -2,
+                -7,
+                104,
+                34
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 5,
+                "width": 80,
+                "height": 10
+            },
+            "label": {
+                "x": 8,
+                "y": 433,
+                "width": 580,
+                "height": 23
+            },
+            "labelFont": "Comfortaa",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 33,
+            "width": 1200,
+            "height": 700,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 1160,
+                "height": 620
+            },
+            "viewBox": [
+                -2,
+                -7,
+                104,
+                34
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 5,
+                "width": 80,
+                "height": 10
+            },
+            "label": {
+                "x": 8,
+                "y": 633,
+                "width": 1160,
+                "height": 23
+            },
+            "labelFont": "Comfortaa",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 33,
+            "width": 300,
+            "height": 242,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 260,
+                "height": 162
+            },
+            "viewBox": [
+                -2,
+                -7,
+                104,
+                34
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 5,
+                "width": 80,
+                "height": 10
+            },
+            "label": {
+                "x": 8,
+                "y": 175,
+                "width": 260,
+                "height": 23
+            },
+            "labelFont": "Comfortaa",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 34,
+            "width": 620,
+            "height": 500,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 580,
+                "height": 420
+            },
+            "viewBox": [
+                -2,
+                -7,
+                104,
+                34
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 5,
+                "width": 80,
+                "height": 10
+            },
+            "label": {
+                "x": 8,
+                "y": 433,
+                "width": 580,
+                "height": 25
+            },
+            "labelFont": "Orbitron",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 34,
+            "width": 1200,
+            "height": 700,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 1160,
+                "height": 620
+            },
+            "viewBox": [
+                -2,
+                -7,
+                104,
+                34
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 5,
+                "width": 80,
+                "height": 10
+            },
+            "label": {
+                "x": 8,
+                "y": 633,
+                "width": 1160,
+                "height": 25
+            },
+            "labelFont": "Orbitron",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 34,
+            "width": 300,
+            "height": 242,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 260,
+                "height": 162
+            },
+            "viewBox": [
+                -2,
+                -7,
+                104,
+                34
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 5,
+                "width": 80,
+                "height": 10
+            },
+            "label": {
+                "x": 8,
+                "y": 175,
+                "width": 260,
+                "height": 25
+            },
+            "labelFont": "Orbitron",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 35,
+            "width": 620,
+            "height": 500,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 580,
+                "height": 420
+            },
+            "viewBox": [
+                -2,
+                -7,
+                104,
+                34
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 5,
+                "width": 80,
+                "height": 10
+            },
+            "label": {
+                "x": 8,
+                "y": 433,
+                "width": 580,
+                "height": 23
+            },
+            "labelFont": "Comfortaa",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 35,
+            "width": 1200,
+            "height": 700,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 1160,
+                "height": 620
+            },
+            "viewBox": [
+                -2,
+                -7,
+                104,
+                34
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 5,
+                "width": 80,
+                "height": 10
+            },
+            "label": {
+                "x": 8,
+                "y": 633,
+                "width": 1160,
+                "height": 23
+            },
+            "labelFont": "Comfortaa",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 35,
+            "width": 300,
+            "height": 242,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 260,
+                "height": 162
+            },
+            "viewBox": [
+                -2,
+                -7,
+                104,
+                34
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 5,
+                "width": 80,
+                "height": 10
+            },
+            "label": {
+                "x": 8,
+                "y": 175,
+                "width": 260,
+                "height": 23
+            },
+            "labelFont": "Comfortaa",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 36,
+            "width": 620,
+            "height": 500,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 580,
+                "height": 420
+            },
+            "viewBox": [
+                -2,
+                -7,
+                104,
+                34
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 5,
+                "width": 80,
+                "height": 10
+            },
+            "label": {
+                "x": 8,
+                "y": 433,
+                "width": 580,
+                "height": 25
+            },
+            "labelFont": "Orbitron",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 36,
+            "width": 1200,
+            "height": 700,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 1160,
+                "height": 620
+            },
+            "viewBox": [
+                -2,
+                -7,
+                104,
+                34
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 5,
+                "width": 80,
+                "height": 10
+            },
+            "label": {
+                "x": 8,
+                "y": 633,
+                "width": 1160,
+                "height": 25
+            },
+            "labelFont": "Orbitron",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 36,
+            "width": 300,
+            "height": 242,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 260,
+                "height": 162
+            },
+            "viewBox": [
+                -2,
+                -7,
+                104,
+                34
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 5,
+                "width": 80,
+                "height": 10
+            },
+            "label": {
+                "x": 8,
+                "y": 175,
+                "width": 260,
+                "height": 25
+            },
+            "labelFont": "Orbitron",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 37,
+            "width": 620,
+            "height": 500,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 580,
+                "height": 420
+            },
+            "viewBox": [
+                -12,
+                -12,
+                94,
+                44
+            ],
+            "bounds": {
+                "x": 0,
+                "y": 0,
+                "width": 70,
+                "height": 20
+            },
+            "label": {
+                "x": 8,
+                "y": 433,
+                "width": 580,
+                "height": 23
+            },
+            "labelFont": "Comfortaa",
+            "lineCap": null,
+            "image": {
+                "width": 70,
+                "height": 20
+            }
+        },
+        {
+            "case": 37,
+            "width": 1200,
+            "height": 700,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 1160,
+                "height": 620
+            },
+            "viewBox": [
+                -12,
+                -12,
+                94,
+                44
+            ],
+            "bounds": {
+                "x": 0,
+                "y": 0,
+                "width": 70,
+                "height": 20
+            },
+            "label": {
+                "x": 8,
+                "y": 633,
+                "width": 1160,
+                "height": 23
+            },
+            "labelFont": "Comfortaa",
+            "lineCap": null,
+            "image": {
+                "width": 70,
+                "height": 20
+            }
+        },
+        {
+            "case": 37,
+            "width": 300,
+            "height": 242,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 260,
+                "height": 162
+            },
+            "viewBox": [
+                -12,
+                -12,
+                94,
+                44
+            ],
+            "bounds": {
+                "x": 0,
+                "y": 0,
+                "width": 70,
+                "height": 20
+            },
+            "label": {
+                "x": 8,
+                "y": 175,
+                "width": 260,
+                "height": 23
+            },
+            "labelFont": "Comfortaa",
+            "lineCap": null,
+            "image": {
+                "width": 70,
+                "height": 20
+            }
+        },
+        {
+            "case": 38,
+            "width": 620,
+            "height": 500,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 580,
+                "height": 420
+            },
+            "viewBox": [
+                -12,
+                -12,
+                94,
+                44
+            ],
+            "bounds": {
+                "x": 0,
+                "y": 0,
+                "width": 70,
+                "height": 20
+            },
+            "label": {
+                "x": 8,
+                "y": 433,
+                "width": 580,
+                "height": 25
+            },
+            "labelFont": "Orbitron",
+            "lineCap": null,
+            "image": {
+                "width": 70,
+                "height": 20
+            }
+        },
+        {
+            "case": 38,
+            "width": 1200,
+            "height": 700,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 1160,
+                "height": 620
+            },
+            "viewBox": [
+                -12,
+                -12,
+                94,
+                44
+            ],
+            "bounds": {
+                "x": 0,
+                "y": 0,
+                "width": 70,
+                "height": 20
+            },
+            "label": {
+                "x": 8,
+                "y": 633,
+                "width": 1160,
+                "height": 25
+            },
+            "labelFont": "Orbitron",
+            "lineCap": null,
+            "image": {
+                "width": 70,
+                "height": 20
+            }
+        },
+        {
+            "case": 38,
+            "width": 300,
+            "height": 242,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 260,
+                "height": 162
+            },
+            "viewBox": [
+                -12,
+                -12,
+                94,
+                44
+            ],
+            "bounds": {
+                "x": 0,
+                "y": 0,
+                "width": 70,
+                "height": 20
+            },
+            "label": {
+                "x": 8,
+                "y": 175,
+                "width": 260,
+                "height": 25
+            },
+            "labelFont": "Orbitron",
+            "lineCap": null,
+            "image": {
+                "width": 70,
+                "height": 20
+            }
+        },
+        {
+            "case": 39,
+            "width": 620,
+            "height": 500,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 580,
+                "height": 422
+            },
+            "viewBox": [
+                -2.5,
+                2.5,
+                115,
+                55
+            ],
+            "bounds": {
+                "x": 5,
+                "y": 10,
+                "width": 100,
+                "height": 40
+            },
+            "label": {
+                "x": 8,
+                "y": 435,
+                "width": 580,
+                "height": 21
+            },
+            "labelFont": "\"Times New Roman\"",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 39,
+            "width": 1200,
+            "height": 700,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 1160,
+                "height": 622
+            },
+            "viewBox": [
+                -2.5,
+                2.5,
+                115,
+                55
+            ],
+            "bounds": {
+                "x": 5,
+                "y": 10,
+                "width": 100,
+                "height": 40
+            },
+            "label": {
+                "x": 8,
+                "y": 635,
+                "width": 1160,
+                "height": 21
+            },
+            "labelFont": "\"Times New Roman\"",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 39,
+            "width": 300,
+            "height": 242,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 260,
+                "height": 164
+            },
+            "viewBox": [
+                -2.5,
+                2.5,
+                115,
+                55
+            ],
+            "bounds": {
+                "x": 5,
+                "y": 10,
+                "width": 100,
+                "height": 40
+            },
+            "label": {
+                "x": 8,
+                "y": 177,
+                "width": 260,
+                "height": 21
+            },
+            "labelFont": "\"Times New Roman\"",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 40,
+            "width": 620,
+            "height": 500,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 580,
+                "height": 422
+            },
+            "viewBox": [
+                -7.5,
+                -7.5,
+                315,
+                165
+            ],
+            "bounds": {
+                "x": 0,
+                "y": 0,
+                "width": 300,
+                "height": 150
+            },
+            "label": {
+                "x": 8,
+                "y": 435,
+                "width": 580,
+                "height": 21
+            },
+            "labelFont": "\"Times New Roman\"",
+            "lineCap": null,
+            "image": {
+                "width": 300,
+                "height": 150
+            }
+        },
+        {
+            "case": 40,
+            "width": 1200,
+            "height": 700,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 1160,
+                "height": 622
+            },
+            "viewBox": [
+                -7.5,
+                -7.5,
+                315,
+                165
+            ],
+            "bounds": {
+                "x": 0,
+                "y": 0,
+                "width": 300,
+                "height": 150
+            },
+            "label": {
+                "x": 8,
+                "y": 635,
+                "width": 1160,
+                "height": 21
+            },
+            "labelFont": "\"Times New Roman\"",
+            "lineCap": null,
+            "image": {
+                "width": 300,
+                "height": 150
+            }
+        },
+        {
+            "case": 40,
+            "width": 300,
+            "height": 242,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 260,
+                "height": 164
+            },
+            "viewBox": [
+                -7.5,
+                -7.5,
+                315,
+                165
+            ],
+            "bounds": {
+                "x": 0,
+                "y": 0,
+                "width": 300,
+                "height": 150
+            },
+            "label": {
+                "x": 8,
+                "y": 177,
+                "width": 260,
+                "height": 21
+            },
+            "labelFont": "\"Times New Roman\"",
+            "lineCap": null,
+            "image": {
+                "width": 300,
+                "height": 150
+            }
+        },
+        {
+            "case": 23,
+            "width": 620,
+            "height": 500,
+            "variant": {
+                "style_fontPosition": "center"
+            },
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 580,
+                "height": 460
+            },
+            "viewBox": [
+                -2,
+                -2,
+                104,
+                104
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 80
+            },
+            "label": {
+                "x": 279.5,
+                "y": 226.5,
+                "width": 37,
+                "height": 23
+            },
+            "labelFont": "Comfortaa",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 23,
+            "width": 620,
+            "height": 500,
+            "variant": {
+                "style_fontDisplay": false
+            },
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 580,
+                "height": 420
+            },
+            "viewBox": [
+                -2,
+                -2,
+                104,
+                104
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 80
+            },
+            "label": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0
+            },
+            "labelFont": "Comfortaa",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 23,
+            "width": 620,
+            "height": 500,
+            "variant": {
+                "shape_path": "M0 0L100 0"
+            },
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 580,
+                "height": 420
+            },
+            "viewBox": [
+                -12,
+                -12,
+                124,
+                124
+            ],
+            "bounds": {
+                "x": 0,
+                "y": 0,
+                "width": 100,
+                "height": 0
+            },
+            "label": {
+                "x": 8,
+                "y": 433,
+                "width": 580,
+                "height": 23
+            },
+            "labelFont": "Comfortaa",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 23,
+            "width": 620,
+            "height": 500,
+            "variant": {
+                "shape_path": "M0 0L0 100"
+            },
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 580,
+                "height": 420
+            },
+            "viewBox": [
+                -12,
+                -12,
+                124,
+                124
+            ],
+            "bounds": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 100
+            },
+            "label": {
+                "x": 8,
+                "y": 433,
+                "width": 580,
+                "height": 23
+            },
+            "labelFont": "Comfortaa",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 23,
+            "width": 620,
+            "height": 500,
+            "variant": {
+                "stroke_width": 2,
+                "stroke_trailWidth": 1,
+                "fill_backgroundExtrude": 12
+            },
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 580,
+                "height": 420
+            },
+            "viewBox": [
+                -8,
+                -8,
+                116,
+                116
+            ],
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 80
+            },
+            "label": {
+                "x": 8,
+                "y": 433,
+                "width": 580,
+                "height": 23
+            },
+            "labelFont": "Comfortaa",
+            "lineCap": "butt",
+            "image": null
+        },
+        {
+            "case": 40,
+            "width": 620,
+            "height": 500,
+            "variant": {
+                "shape_svg": {
+                    "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSI1MCIvPjwvc3ZnPg==",
+                    "width": 100,
+                    "height": 100,
+                    "viewBox": "0 0 100 100"
+                }
+            },
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 580,
+                "height": 422
+            },
+            "viewBox": [
+                -7.5,
+                -7.5,
+                165,
+                165
+            ],
+            "bounds": {
+                "x": 0,
+                "y": 0,
+                "width": 150,
+                "height": 150
+            },
+            "label": {
+                "x": 8,
+                "y": 435,
+                "width": 580,
+                "height": 21
+            },
+            "labelFont": "\"Times New Roman\"",
+            "lineCap": null,
+            "image": {
+                "width": 150,
+                "height": 150
+            }
+        },
+        {
+            "case": 40,
+            "width": 620,
+            "height": 500,
+            "variant": {
+                "shape_svg": {
+                    "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNDAwIDEwMCI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSI1MCIvPjwvc3ZnPg==",
+                    "width": 400,
+                    "height": 100,
+                    "viewBox": "0 0 400 100"
+                }
+            },
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 580,
+                "height": 422
+            },
+            "viewBox": [
+                -7.5,
+                -7.5,
+                315,
+                90
+            ],
+            "bounds": {
+                "x": 0,
+                "y": 0,
+                "width": 300,
+                "height": 75
+            },
+            "label": {
+                "x": 8,
+                "y": 435,
+                "width": 580,
+                "height": 21
+            },
+            "labelFont": "\"Times New Roman\"",
+            "lineCap": null,
+            "image": {
+                "width": 300,
+                "height": 75
+            }
+        },
+        {
+            "case": 40,
+            "width": 620,
+            "height": 500,
+            "variant": {
+                "shape_svg": {
+                    "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgdmlld0JveD0iMCAwIDEyMCA2MCI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSI1MCIvPjwvc3ZnPg==",
+                    "width": 120,
+                    "height": 60,
+                    "viewBox": "0 0 120 60"
+                }
+            },
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 580,
+                "height": 422
+            },
+            "viewBox": [
+                -7.5,
+                -7.5,
+                95,
+                55
+            ],
+            "bounds": {
+                "x": 0,
+                "y": 0,
+                "width": 80,
+                "height": 40
+            },
+            "label": {
+                "x": 8,
+                "y": 435,
+                "width": 580,
+                "height": 21
+            },
+            "labelFont": "\"Times New Roman\"",
+            "lineCap": null,
+            "image": {
+                "width": 80,
+                "height": 40
+            }
+        },
+        {
+            "case": 40,
+            "width": 620,
+            "height": 500,
+            "variant": {
+                "shape_svg": {
+                    "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyaW4iIGhlaWdodD0iMjUuNG1tIiB2aWV3Qm94PSIwIDAgMTIwIDYwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjUwIi8+PC9zdmc+",
+                    "width": 120,
+                    "height": 60,
+                    "viewBox": "0 0 120 60"
+                }
+            },
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 580,
+                "height": 422
+            },
+            "viewBox": [
+                -7.5,
+                -7.5,
+                207,
+                111
+            ],
+            "bounds": {
+                "x": 0,
+                "y": 0,
+                "width": 192,
+                "height": 96
+            },
+            "label": {
+                "x": 8,
+                "y": 435,
+                "width": 580,
+                "height": 21
+            },
+            "labelFont": "\"Times New Roman\"",
+            "lineCap": null,
+            "image": {
+                "width": 192,
+                "height": 96
+            }
+        }
+    ]
+}

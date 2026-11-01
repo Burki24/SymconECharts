@@ -49,6 +49,7 @@ assertSvgImage(
 );
 $sanitized = base64_decode(substr($imported['dataUri'], strlen('data:image/svg+xml;base64,')), true);
 assertSvgImage(is_string($sanitized), 'SVG image data URI must contain valid base64 data.');
+assertSvgImageRejected('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 20"><text x="35" y="10">LOADING</text></svg>', 'The trusted Progress text preset must not relax user SVG validation.');
 assertSvgImage(
     str_contains($sanitized, 'viewBox="0 0 320 180"')
         && !str_contains($sanitized, 'width="320"')

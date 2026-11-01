@@ -74,6 +74,7 @@ $commands = [
     ['Test all native JSLive renderers', 'node tests/jslive_renderers.js'],
     ['Test imported JSLive path and compass geometry', 'node tests/jslive_geometry.js'],
     ['Test imported JSLive gauge and data-label design parity', 'node tests/jslive_design_parity.js'],
+    ['Test imported JSLive SVG paints and Progress layout parity', 'node tests/jslive_progress_parity.js'],
     ['Test real JSLive target module classes and native callbacks', 'php tests/gateway_gauges.php --jslive-targets'],
     ['Test bounded JSLive batch planning at 64 MiB', 'php -d memory_limit=64M tests/jslive_plans.php --batch'],
     ['Test Heatmap comparison layout and runtime', 'node tests/heatmap_comparison_layout.js'],

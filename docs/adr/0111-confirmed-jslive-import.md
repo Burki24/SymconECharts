@@ -287,8 +287,63 @@ ausgeschaltete Balken/Zeiger und ausdrücklich transparente Farben. Der lokale
 Chromium-Lauf prüft die tatsächlichen Cyan-/Grundstreckenpixel in beiden
 linearen Ausrichtungen sowie sichtbare Schattenpixel radialer/Kompass-Naben.
 F04 ist unter 1.375 an allen vier Pie-Paaren live bestätigt. Die erneute
-Live-Abnahme der drei F03-Restkorrekturen nach Eigentümer-Update bleibt offen;
+Live-Abnahme der drei F03-Restkorrekturen ist unter 1.376 an allen acht Gauge-
+Paaren per MCP und Original-/Ziel-Bildvergleich bestätigt;
 andere optische Befunde werden damit nicht als erledigt markiert.
+
+### Progress-Farben und Quellgeometrie F05 und F06
+
+Die Quellengine färbt eigene SVG-Bilder und ihr festes Text-Preset nicht mit
+der Progress-Füllfarbe um. Der Renderer behält deshalb die geprüfte Original-
+SVG-URI als Vordergrund und begrenzt ausschließlich deren sichtbaren Ausschnitt.
+Die feste Textform verwendet das ursprüngliche inerte SVG mit Arial, zentraler
+Glyphen-Basislinie und standardmäßig schwarzer Schrift. Nur der Hintergrund
+wird aus dem Bildalpha, konfigurierter Hintergrundfarbe und Dilatation erzeugt.
+Benutzer-SVGs durchlaufen weiterhin unverändert `EChartsSvgImage`; insbesondere
+wird dessen Verbot von Text, Filtern, Bildern und aktiven Inhalten nicht gelockert.
+Der bereits ausdrücklich bestätigte Stroke-zu-Text-Fill-Fall 37 bleibt bestehen.
+
+Die familienlokale Einpassung teilt für alle Progressformen die wirksamen
+`ResizeProgressbar`-/SVG-Regeln: Widgetbreite minus 40, beschriftungsabhängige
+Höhe auch bei unsichtbarem Label, acht Pixel Quellrand, `xMidYMid meet` und
+1,5-mal größte Strich-/Trail-/Extrusionsbreite als ViewBox-Rand. Die
+Einpassung berücksichtigt, dass der gemeinsame HTML-Adapter den acht Pixel
+Quellrand bereits bereitstellt; er wird nicht ein zweites Mal abgezogen.
+Die zusätzliche Kachel-Kopfzeile bleibt unabhängig reserviert. Die Preset-
+ViewBox bleibt von den gezeichneten Pfadgrenzen getrennt; ein benutzerdefinierter
+Pfad mit Breite oder Höhe null erhält wie die Quelle den 100×100-Fit-Fallback.
+SVG-Bilder verwenden ihre natürlichen Bildmaße statt ViewBox-Einheiten; bei
+fehlenden Größen wird das Seitenverhältnis in den 300×150-Standard eingepasst.
+Explizite Maße und physische CSS-Einheiten werden berücksichtigt. Die Position
+der unteren Wertanzeige folgt dem vollständigen Widget und seinem SVG-
+Grundlinienabstand, die mittige Wertanzeige dessen Mitte. Leere Schriftfamilien
+behalten den Browser-Serif-Fallback. Native Titel-/Schriftanpassungen bleiben möglich.
+
+Das Quelltemplate übergibt den falsch geschriebenen Schlüssel `stroke-lincap`,
+den die Engine nicht auswertet. Die tatsächlich gezeichneten Linienenden bleiben
+deshalb flach, auch bei gespeicherter Auswahl „rund“. Die persistierte Auswahl
+wird nicht korrigiert oder neu angewendet. F01-Pfadlängen, Strichmuster, Umkehr,
+Werte, Ressourcen, Quellbezüge, Designs und Schutzbudgets bleiben erhalten.
+Es gibt keine neue gemeinsame Helper-Abstraktion ohne weiteren Nutzer: SVG-
+Prüfung, HTML-/Ressourcen-/Frameadapter und Übergänge werden weiterverwendet,
+Progress-Geometrie verbleibt im eigenen Renderer. Die adaptierten Regeln und
+die feste Textform behalten den ursprünglichen MIT-Hinweis von loading.io.
+
+`tests/jslive_progress_parity.js` reproduzierte F05 und F06 getrennt vor dem Fix.
+63 eingefrorene unabhängige Messungen aus dem unveränderten JSLive-Checkout
+decken alle 18 Varianten in drei Größen sowie zusätzliche Grenzfälle ab.
+Der optionale Referenzlauf führt die echte Engine, Größen-/Label-Funktionen
+des Quelltemplates und dessen CSS in einem isolierten lokalen Chromium aus;
+alle drei SHA-256-Werte werden vor dem Vergleich geprüft. Reguläre CI benötigt
+nur die anonymen Messwerte. 24 Clipfälle prüfen Originalbilder, beide Endwerte
+und vier Richtungen ohne Modelländerungen; die ausgelieferte Canvas-Runtime
+zeichnet weiterhin die 82 F01-Pfadfälle und jetzt auch überprüfte flache Enden.
+36 vollständige Kachel-/IPSView-Browserausgaben bestehen Fontladen, Refresh,
+Fehlererholung, Titel und synthetischen Mausrad-Smoke-Test. 96 zusätzliche
+Rastervergleiche prüfen schwarze Originalglyphen, eigene SVGs, Verläufe und
+Transparenz gegen direkt gezeichnete Originalbilder. Die Live-Abnahme von
+F05/F06 nach Eigentümer-Update und physische native App-Bediennachweise bleiben
+davon getrennt offen. Originalinstanzen und produktive Systeme wurden nicht verändert.
 
 ### Import und Wiederanlauf
 

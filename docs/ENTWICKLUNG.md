@@ -50,9 +50,17 @@ Nabenschatten. Diese drei Restfehler sind lokal korrigiert. 459 eingefrorene
 Originalmessungen, 81 Text-/Schriftprüfungen, 72 Farb-/Schattenprüfungen sowie
 native Canvas- und Browser-Pixelprüfungen sichern die Korrektur ab. Die
 Referenz berücksichtigt jetzt auch die numerische Serialisierung der Quellticks.
-Details stehen in ADR 0111 und der Testdokumentation. Die erneute Live-Abnahme
-der F03-Restkorrektur nach Eigentümer-Update und weitere optische Unterschiede
-bleiben offen. Die Beta bleibt bis zur
+Details stehen in ADR 0111 und der Testdokumentation. Die drei F03-Restkorrekturen
+sind unter 1.376 an allen acht Gauge-Paaren per MCP/Bildvergleich bestätigt.
+F05/F06 sind anschließend lokal korrigiert: Progress erhält Originalfarben
+eigener SVGs und die Glyphen der festen Textvorlage; Einpassung, natürliche
+Bildmaße, Ränder, wirksame flache Linienenden und Wertpositionen folgen der
+unveränderten Quellvorlage. 63 unabhängige Chromium-Quellmessungen, 24 Clipfälle
+und 36 echte Kachel-/IPSView-Browserausgaben einschließlich 96 Rastervergleichen
+sichern die Korrektur ab. Die gezielten Tests reproduzierten zuvor die
+umgefärbte Textform und die abweichende Einpassung. Die erneute Live-Abnahme
+von F05/F06 nach Eigentümer-Update und weitere optische Befunde bleiben offen.
+Die Beta bleibt bis zur
 vereinbarten Migrationsabnahme zurückgestellt. Die bereits abgeschlossene
 Nutzungsgrenzen-Roadmap und die Eigentümerabnahmen bestehender Modelle bleiben gültig.
 

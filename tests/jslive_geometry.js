@@ -57,7 +57,7 @@ function surface() {
                     cy + rx * Math.cos(a) * Math.sin(rotation) + ry * Math.sin(a) * Math.cos(rotation));
             }
         },
-        stroke() { strokes.push({color: this.strokeStyle, length, x, y, dash: Array.from(dash)}); },
+        stroke() { strokes.push({color: this.strokeStyle, length, x, y, dash: Array.from(dash), lineCap: this.lineCap}); },
         setLineDash(value) { dash = value; },
         getLineDash() { return dash; },
         measureText: text => ({width: String(text).length * 8}),
@@ -82,7 +82,7 @@ function progressTests() {
     const w = renderer('gauge', 'EChartsProgress/ProgressRenderer.js');
     const settings = {shape_preset: 'circle', shape_path: '', shape_svg: '', Type: 'stroke', stroke_dir: 'normal',
         stroke_color: 0x112233, stroke_trailColor: 0xdddddd, stroke_width: 5, stroke_trailWidth: 5,
-        stroke_lincap: 'butt', stroke_Dash1: 0, stroke_Dash2: 0, style_fontDisplay: false, __animate: false};
+        stroke_lincap: 'round', stroke_Dash1: 0, stroke_Dash2: 0, style_fontDisplay: false, __animate: false};
     const circleEnd = t => [50 + 40 * Math.sin(2 * Math.PI * t), 50 - 40 * Math.cos(2 * Math.PI * t)];
     const capsuleEnd = t => {
         let distance = (140 + 10 * Math.PI) * t;
@@ -136,6 +136,7 @@ function progressTests() {
                     near(foreground.x, point[0], 0.15, 'F01 painted endpoint x');
                     near(foreground.y, point[1], 0.15, 'F01 painted endpoint y');
                 }
+                if (foreground) { assert.equal(foreground.lineCap, 'butt', 'F06: actual Canvas strokes retain the effective source linecap.'); }
                 assert.equal(JSON.stringify(state), before, 'Rendering must not change imported values or designs.');
                 ++checked;
             }

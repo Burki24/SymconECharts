@@ -199,6 +199,16 @@ Die geprüfte Referenz ist JSLives Asset `2.1.7-jslive.1`, SHA-256
 `2cde1666441e112088cf3094f29e187f0d818ce4a2b9939091b890e9f132520e`.
 Die übrigen eigenen Bibliotheksbeiträge behalten ihre bestehende Lizenz.
 
+Die Preset- und Einpassungs-Kompatibilität in
+`EChartsProgress/ProgressRenderer.js` adaptiert die notwendigen SVG-Maßregeln
+und die feste Textform aus loading-bar 0.1.1 (Copyright 2017 loading.io, MIT),
+JSLives Asset `0.1.1-jslive.1`, SHA-256
+`6e79d56f0c289cdebd4c0351451a8a28a431cacc18405241be4530df4f2a4a86`.
+Der vollständige ursprüngliche MIT-Hinweis steht im Renderer und bleibt in den
+HTML-Ausgaben erhalten. Es werden native ECharts-Grafiken und inerte SVG-Bilder
+erzeugt; die loading-bar-Engine wird nicht mitgeliefert. Die optionale
+Quellreferenzprüfung liest sie nur aus einem separaten JSLive-Checkout.
+
 `tests/fixtures/jslive-templates` enthält acht unveränderte Standard-HTML-
 Vorlagen ausschließlich als inerte Hash-/Vertragsreferenz unter der dort
 beigefügten ursprünglichen GPL-3.0-Lizenz. Sie werden weder ausgeführt noch in

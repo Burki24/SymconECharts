@@ -33,6 +33,17 @@ SVG-Füllformen aus dem Export. Aktive SVG-Inhalte, fremde Skripte, eigene
 ausführbare Vorlagen und ungeprüfte Bild-/Farbeffekte werden abgewiesen. Eine
 Zustimmung zu Designabweichungen hebt solche Sperren nicht auf.
 
+SVG-Füllformen behalten ihre eigenen Farben, Verläufe und Transparenzen. Die
+Füllfarbe färbt diese Bilder nicht um; der Wert bestimmt den sichtbaren
+Ausschnitt. Auch die Textvorlage behält ihre ursprüngliche schwarze Schrift.
+Die separate Hintergrundfarbe und ihre Verbreiterung bleiben wirksam.
+
+Einpassung und Ränder folgen dem verfügbaren Bereich der Quellvorlage. Die
+untere Wertanzeige sitzt unter diesem Bereich; die mittige Anzeige bleibt in
+seiner Mitte. Linienenden entsprechen der tatsächlich sichtbaren Quellform.
+Eine dort wirkungslose gespeicherte Auswahl wird bei der Übernahme nicht
+nachträglich aktiviert.
+
 Apache ECharts zeichnet Pfade, Füllung, Verlauf und Text nativ. Schatten,
 Strichmuster, Textkonturen und Animationen können von den alten Engines
 abweichen; der Importbericht nennt die betroffenen Einstellungen einzeln.

@@ -1,3 +1,26 @@
+/*
+ * loading-bar 0.1.1 / JSLive 0.1.1-jslive.1 preset and SVG-fit compatibility,
+ * adapted to native ECharts graphics. No loading-bar runtime is included.
+ *
+ * The MIT License (MIT)
+ * Copyright (c) 2017, loading.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 (function(root){
     'use strict';
     const lengths=new Map();
@@ -52,49 +75,77 @@
         canvas.arc=function(cx,cy,r,start,end,ccw){canvas.ellipse(cx,cy,r,r,0,start,end,ccw);};
         const shape=root.echarts.graphic.makePath(path,{});shape.buildPath(canvas,shape.shape);
     }
+    // The source engine uses Image.width/height, not viewBox units. Reconstruct
+    // the intrinsic replaced-image size from the already validated inert SVG;
+    // no source markup is executed or added to the page DOM here.
+    function imageSize(image){
+        const tag=root.atob(image.dataUri.split(',')[1]).match(/<svg\b[^>]*>/i)[0];
+        function length(name){
+            const attr=new RegExp('\\s'+name+'="([^"]*)"').exec(tag);
+            const value=attr&&/^\s*(\d+(?:\.\d*)?|\.\d+)\s*(px|in|cm|mm|q|pt|pc)?\s*$/i.exec(attr[1]);
+            return value?Number(value[1])*({px:1,in:96,cm:96/2.54,mm:96/25.4,q:96/101.6,pt:96/72,pc:16}[(value[2]||'px').toLowerCase()]):0;
+        }
+        const ratio=image.width/image.height;let w=length('width'),h=length('height');
+        if(!w&&!h){w=Math.min(300,150*ratio);h=w/ratio;}
+        else if(!w){w=h*ratio;}else if(!h){h=w/ratio;}
+        w=Math.floor(w);h=Math.floor(h);return Number.isFinite(w)&&Number.isFinite(h)&&w>0&&h>0?[w,h]:[100,100];
+    }
+    function fit(c,box,width,height,titleSpace){
+        const fontSize=(Number.isFinite(c.style_fontSize)?c.style_fontSize:16)*(c.__fontScale||1);
+        // The shared HTML adapter already supplies the source body's 8px margin
+        // on each side. Reconstruct the window dimensions before applying
+        // ResizeProgressbar; a second local margin would shrink the SVG again.
+        const w=Math.max(1,width+16-40),h=Math.max(1,height+16-titleSpace-(c.style_fontPosition==='center'?40:60+fontSize));
+        const padding=Math.max(Number(c.stroke_width)||0,Number(c.stroke_trailWidth)||0,Number(c.fill_backgroundExtrude)||0)*1.5;
+        const vw=box[2]+padding*2,vh=box[3]+padding*2,scale=Math.max(1e-9,Math.min(w/vw,h/vh));
+        return {scale:scale,x:(w-vw*scale)/2-(box[0]-padding)*scale,
+            y:titleSpace+(h-vh*scale)/2-(box[1]-padding)*scale,
+            labelX:w/2,labelY:titleSpace+(c.style_fontPosition==='center'?h/2:h+5),fontSize:fontSize};
+    }
     function build(state,width,height){
         const f=root.SYMC_JSLIVE_FORMAT,c=state.settings,d=state.data;
-        const presets={line:{path:'M10 10L90 10',box:[10,5,80,10]},rainbow:{path:'M10 10L90 10',box:[10,5,80,10]},
+        const presets={line:{path:'M10 10L90 10',box:[10,10,80,10]},rainbow:{path:'M10 10L90 10',box:[10,10,80,10]},
             circle:{path:'M50 10A40 40 0 0 1 50 90A40 40 0 0 1 50 10',box:[10,10,80,80]},
             bubble:{path:'M50 10A40 40 0 0 1 50 90A40 40 0 0 1 50 10',box:[10,10,80,80]},
             fan:{path:'M10 90A40 40 0 0 1 90 90',box:[10,50,80,40]},
             energy:{path:'M15 5L85 5A5 5 0 0 1 85 15L15 15A5 5 0 0 1 15 5',box:[10,5,80,10]},
             stripe:{path:'M15 5L85 5A5 5 0 0 1 85 15L15 15A5 5 0 0 1 15 5',box:[10,5,80,10]},text:{box:[0,0,70,20]}};
-        const preset=presets[c.shape_preset],image=c.shape_svg && typeof c.shape_svg==='object'?c.shape_svg:null;
+        const preset=presets[c.shape_preset];let image=c.shape_svg && typeof c.shape_svg==='object'?c.shape_svg:null;
         let path=c.shape_path || preset.path,box=preset.box.slice();
-        if(image){box=[0,0,image.width,image.height];}
-        else if(c.shape_path && root.echarts && root.echarts.graphic){const b=root.echarts.graphic.makePath(path,{}).getBoundingRect();box=[b.x,b.y,Math.max(1,b.width),Math.max(1,b.height)];}
-        const textShape=!image&&!path;
-        const stroke=c.Type==='stroke'&&!image&&!textShape;
-        const labelSpace=c.style_fontDisplay?(c.style_fontPosition==='center'?40:60+c.style_fontSize):20;
+        if(image){const size=imageSize(image);box=[0,0,size[0],size[1]];}
+        else if(c.shape_path && root.echarts && root.echarts.graphic){const b=root.echarts.graphic.makePath(path,{}).getBoundingRect();box=b.width&&b.height?[b.x,b.y,b.width,b.height]:[0,0,100,100];}
+        else if(!path){
+            // This is a fixed trusted preset, not user SVG. Retain the source
+            // glyph baseline and default black paint without relaxing SVG imports.
+            image={dataUri:'data:image/svg+xml;base64,'+root.btoa('<svg xmlns="http://www.w3.org/2000/svg" width="70" height="20" viewBox="0 0 70 20"><text x="35" y="10" text-anchor="middle" dominant-baseline="central" font-family="arial">LOADING</text></svg>')};
+        }
+        const stroke=c.Type==='stroke'&&!image;
         const title=c.title_display?String(c.title_text||''):'',titleSize=18*(c.__fontScale||1),titleSpace=title?titleSize*1.7:0;
-        const padding=stroke?Math.max(c.stroke_width,c.stroke_trailWidth):Math.max(1,c.fill_backgroundExtrude);
-        const scale=Math.max(1e-9,Math.min(Math.max(1,width-40)/(box[2]+padding*2),Math.max(1,height-labelSpace-titleSpace-20)/(box[3]+padding*2)));
-        const bodyW=box[2]*scale,bodyH=box[3]*scale;
-        const x=(width-bodyW)/2-box[0]*scale,y=titleSpace+(height-titleSpace-labelSpace-bodyH)/2-box[1]*scale+10;
+        const layout=fit(c,box,width,height,titleSpace);
         const children=[];
         if(!root.echarts.graphic.getShapeClass('jsliveProgressPath')){
             root.echarts.graphic.registerShape('jsliveProgressPath',root.echarts.graphic.extendShape({shape:{pathData:'',strokePath:false},buildPath:function(ctx,shape){
                 if(shape.strokePath){strokePath(ctx,shape.pathData);}else{const p=root.echarts.graphic.makePath(shape.pathData,{});p.buildPath(ctx,p.shape);}
             }}));
         }
-        function pathElement(id,paint,isStroke){return {id:id,type:'jsliveProgressPath',shape:{pathData:path,strokePath:isStroke},style:{fill:isStroke?null:paint,stroke:isStroke?paint:null,lineWidth:isStroke?c.stroke_width:0,lineCap:c.stroke_lincap || 'butt',strokeNoScale:false}};}
+        // The original template sets "stroke-lincap", which the source engine
+        // never consumes. Preserve its effective SVG default, not that raw typo.
+        function pathElement(id,paint,isStroke){return {id:id,type:'jsliveProgressPath',shape:{pathData:path,strokePath:isStroke},style:{fill:isStroke?null:paint,stroke:isStroke?paint:null,lineWidth:isStroke?c.stroke_width:0,lineCap:'butt',strokeNoScale:false}};}
         function clip(){let x0=box[0],y0=box[1],w=box[2],h=box[3];
             if(c.fill_dir==='rtl'){x0+=w*(1-d.ratio);w*=d.ratio;}else if(c.fill_dir==='btt'){y0+=h*(1-d.ratio);h*=d.ratio;}
             else if(c.fill_dir==='ttb'){h*=d.ratio;}else{w*=d.ratio;}
             return {type:'rect',shape:{x:x0,y:y0,width:w,height:h}};
         }
-        function tintedImage(color){
-            const svg='<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 '+box[2]+' '+box[3]+'"><defs><mask id="m" mask-type="alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="'+box[2]+'" height="'+box[3]+'"><image xlink:href="'+image.dataUri+'" width="'+box[2]+'" height="'+box[3]+'"/></mask></defs><rect width="100%" height="100%" fill="'+color+'" mask="url(#m)"/></svg>';
+        function imageBackground(color){
+            const r=Math.abs(c.fill_backgroundExtrude),w=box[2]+r*2,h=box[3]+r*2;
+            const region=' x="'+(-r)+'" y="'+(-r)+'" width="'+w+'" height="'+h+'"';
+            const svg='<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="'+[-r,-r,w,h].join(' ')+'"><defs><filter id="d" filterUnits="userSpaceOnUse"'+region+'><feMorphology in="SourceAlpha" operator="dilate" radius="'+r+'"/></filter><mask id="m" mask-type="alpha" maskUnits="userSpaceOnUse"'+region+'><image xlink:href="'+image.dataUri+'" width="'+box[2]+'" height="'+box[3]+'" filter="url(#d)"/></mask></defs><rect'+region+' fill="'+color+'" mask="url(#m)"/></svg>';
             return 'data:image/svg+xml;base64,'+root.btoa(svg);
         }
         if(image){
-            children.push({id:'image-background',type:'image',style:{image:tintedImage(f.paint(c,'fill_backgroundColor')),x:0,y:0,width:box[2],height:box[3]}});
-            children.push({id:'image-progress',type:'image',clipPath:clip(),style:{image:tintedImage(f.paint(c,'fill_color')),x:0,y:0,width:box[2],height:box[3]}});
-        }else if(textShape){
-            const style={text:'LOADING',x:35,y:10,fontSize:16,fontFamily:'Arial',align:'center',verticalAlign:'middle'};
-            children.push({id:'text-background',type:'text',style:Object.assign({fill:f.paint(c,'fill_backgroundColor')},style)});
-            children.push({id:'text-progress',type:'text',clipPath:clip(),style:Object.assign({fill:f.paint(c,'fill_color')},style)});
+            const r=Math.abs(c.fill_backgroundExtrude);
+            children.push({id:'image-background',type:'image',style:{image:imageBackground(f.paint(c,'fill_backgroundColor')),x:-r,y:-r,width:box[2]+r*2,height:box[3]+r*2}});
+            children.push({id:'image-progress',type:'image',clipPath:clip(),style:{image:image.dataUri,x:0,y:0,width:box[2],height:box[3]}});
         }else if(stroke){
             const trail=pathElement('trail',f.paint(c,'stroke_trailColor'),true);trail.style.lineWidth=c.stroke_trailWidth;children.push(trail);
             const foreground=pathElement('progress',f.paint(c,'stroke_color'),true);
@@ -107,12 +158,13 @@
             background.style.stroke=f.paint(c,'fill_backgroundColor');background.style.lineWidth=c.fill_backgroundExtrude*2;children.push(background);
             const foreground=pathElement('progress',f.paint(c,'fill_color'),false);foreground.clipPath=clip();children.push(foreground);
         }
-        const graphics=[{id:'progress-body',type:'group',x:x,y:y,scaleX:scale,scaleY:scale,children:children}];
+        const graphics=[{id:'progress-body',type:'group',x:layout.x,y:layout.y,scaleX:layout.scale,scaleY:layout.scale,children:children}];
         if(title){graphics.push({id:'chart-title',type:'text',style:{text:title,x:width/2,y:4,fontSize:titleSize,
             fontFamily:c.style_fontFamily||'Arial',fill:f.paint(c,'style_fontColor','#000'),align:'center',verticalAlign:'top'}});}
         if(c.style_fontDisplay){graphics.push({id:'progress-label',type:'text',style:{text:(d.effective.prefix||'')+String(Number(d.displayValue.toPrecision(14)))+(d.effective.suffix||''),
-            x:width/2,y:c.style_fontPosition==='center'?y+(box[1]+box[3]/2)*scale:Math.min(height-16,y+(box[1]+box[3])*scale+30+c.style_fontSize/2),
-            fill:f.paint(c,'style_fontColor','#000'),fontFamily:c.style_fontFamily||'Arial',fontSize:c.style_fontSize*(c.__fontScale||1),align:'center',verticalAlign:'middle'}});}
+            x:layout.labelX,y:layout.labelY,
+            fill:f.paint(c,'style_fontColor','#000'),fontFamily:c.style_fontFamily||'Times New Roman',fontSize:layout.fontSize,align:'center',verticalAlign:c.style_fontPosition==='center'?'middle':'top',
+            textShadowColor:c.style_fontPosition==='center'?'#fff':'transparent',textShadowBlur:c.style_fontPosition==='center'?3:0}});}
         return {backgroundColor:state.background,animation:c.__animate!==false,animationDurationUpdate:c.data_animationDuration*1000,
             graphic:f.graphicTransitions(graphics,function(){return f.escape(f.format(d.value,d.native));}),
             tooltip:{show:c.tooltips_enabled!==false,confine:true,formatter:function(){return f.escape(f.format(d.value,d.native));}}};
