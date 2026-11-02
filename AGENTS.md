@@ -441,8 +441,11 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   ausschließlich neue Ziele und ein persistentes wiederaufnehmbares Journal.
   `EChartsRadarHistory` und `EChartsProgress` erhalten eigene Fachmodelle.
   Quellen/Archive bleiben nur lesbar; reguläre Modelle und Schutzgrenzen bleiben
-  erhalten. Gemeinsame MCP-Zielabnahme und Original-/Ziel-Bildvergleich nach
-  Eigentümer-Update stehen aus; es wird keine Renderinggleichheit vorgetäuscht.
+  erhalten. Gemeinsame MCP-Zielabnahme, Wiederanlauf und die vereinbarten
+  Original-/Ziel-Bildvergleiche sind bestätigt. Die gezielte Live-Abnahme frischer
+  0.113-Pakete nach Update der geprüften Vorlagenkennung steht noch aus; der
+  aktuelle Nachweis steht in `docs/JSLIVE_MIGRATION_ABNAHME.md`. Es wird keine
+  Renderinggleichheit vorgetäuscht.
   Profilinformationen werden
   vollständig in profilunabhängige native Darstellungen und Chart-Metadaten
   übersetzt; der Import stellt bestehende Quellvariablen nicht um. Vollständige

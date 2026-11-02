@@ -188,6 +188,10 @@ Chart.js, CanvasGauges und progressbar.js werden nicht als neue Laufzeitabhängi
 mitgeliefert. Die unterstützten Quellverträge wurden anhand von
 [Burki24/JSLive](https://github.com/Burki24/JSLive), Version 0.111,
 Commit `286e5e9de39190178f510191f0911ee82f74271d`, geprüft.
+Die Progressbar-Standardvorlage wurde zusätzlich für JSLive 0.113 anhand von
+Commit `909f0aea28a86a78ecfdc01e681a1fe354610790` geprüft. Inhaltlicher Unterschied,
+exakte LF-/CRLF-Prüfsummen und Prüfgrenzen stehen im
+[Migrationsnachweis](docs/JSLIVE_MIGRATION_ABNAHME.md#geprüfte-vorlagenänderung).
 
 Die Koordinaten-Kompatibilität in `EChartsGaugeSingle/JSLiveRenderer.js`
 adaptiert die erforderlichen Geometrie- und Schriftmaßregeln aus Canvas Gauges
@@ -209,8 +213,9 @@ HTML-Ausgaben erhalten. Es werden native ECharts-Grafiken und inerte SVG-Bilder
 erzeugt; die loading-bar-Engine wird nicht mitgeliefert. Die optionale
 Quellreferenzprüfung liest sie nur aus einem separaten JSLive-Checkout.
 
-`tests/fixtures/jslive-templates` enthält acht unveränderte Standard-HTML-
-Vorlagen ausschließlich als inerte Hash-/Vertragsreferenz unter der dort
+`tests/fixtures/jslive-templates` enthält unveränderte Standard-HTML-Vorlagen
+einschließlich der geprüften Progressbar-0.113-Bytevarianten ausschließlich als
+inerte Hash-/Vertragsreferenz unter der dort
 beigefügten ursprünglichen GPL-3.0-Lizenz. Sie werden weder ausgeführt noch in
 Zielvisualisierungen eingebunden. Produktion liefert lediglich das
 Prüfsummenmanifest `libs/jslive/templates.json`. Die Fremdbytes bleiben durch

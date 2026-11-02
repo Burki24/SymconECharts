@@ -6,8 +6,10 @@
   der Eigentümer bestätigt 40 erfolgreiche MCP-Exporte mit JSLive 0.111.
   Lesende ECharts-Paketprüfung, Konfigurationsplan und vollständiger Bericht
   sind gemäß [ADR 0110](adr/0110-jslive-import-preview.md) implementiert.
-  Gerenderter Vergleich, vollständige Familienmapper, neue Zielmodelle und
-  bestätigte Anlage mit Journal bleiben offen.
+  Familienmapper, neue Zielmodelle, bestätigte Anlage mit Journal und die
+  vereinbarten Darstellungsvergleiche sind inzwischen abgenommen. Der aktuelle
+  Stand und die noch ausstehende Live-Prüfung frischer 0.113-Pakete stehen in der
+  [Migrationsabnahme](JSLIVE_MIGRATION_ABNAHME.md).
 - Entscheidungen: [ECharts ADR 0109](adr/0109-jslive-migration-contract.md) und
   [JSLive ADR 0007](https://github.com/Burki24/JSLive/blob/dev/docs/adr/0007-echarts-migration-contract.md).
 - Kanonische Quelle ist dieses Dokument im Repository SymconECharts. JSLive
@@ -536,8 +538,10 @@ Kantenglättung von verschobener Geometrie, fehlenden Reihen oder falschen Farbe
 3. Lesender ECharts-Parser, Vollständigkeitsbericht und Konfigurationsvorschau:
    implementiert. Das Gateway bietet Dateiauswahl, explizite ID-Zuordnung,
    Zielfamilienkandidaten, getrennte Urteile und einen vollständigen JSON-Bericht.
-   Die native Formular-Live-Abnahme nach Modulupdate bleibt offen. Kein
-   gerenderter Original-/Zielvergleich und keine Importausführung in diesem Schritt.
+   Die korrigierten Formularcallbacks sind per MCP live geprüft. Dieser erste
+   Schritt führt weiterhin selbst keinen Import aus; dafür dient der bestätigte
+   Ablauf aus ADR 0111. Reale Dateiauswahl-/Download-Grenzbedienungen werden
+   getrennt von dieser Callback-Abnahme als Testlücke geführt.
 4. Ziel-Fachmodelle und familienweise Mapper: für die 40 Exportvarianten lokal
    implementiert und geprüft. Native TimeSeries/BarHistory-, Mehrfach-Pie- und
    Gauge-Modelle sowie EChartsRadarHistory und EChartsProgress ergänzen den
@@ -545,12 +549,14 @@ Kantenglättung von verschobener Geometrie, fehlenden Reihen oder falschen Farbe
 5. Bestätigte Anlage, Importjournal und Wiederanlauf: implementiert. Vollständige
    native Pläne binden Paket, aktuelle Quellen, Zielkontext und konkrete
    Abweichungen; der Kerneladapter schreibt ausschließlich nachgewiesene
-   Neuziele. Die gemeinsame MCP-Übernahme-/Wiederanlaufabnahme und der direkte
-   Original-/Ziel-Darstellungsvergleich nach Eigentümer-Update bleiben offen.
+   Neuziele. Die gemeinsame MCP-Übernahme-/Wiederanlaufabnahme und die vereinbarten
+   Original-/Ziel-Darstellungsvergleiche sind erfolgt. Für frische Pakete mit der
+   nun geprüften 0.113-Vorlagenkennung folgt eine gezielte Live-Abnahme nach Update.
 
-Die öffentliche Übernahmezusage ist damit noch nicht erfüllt. Die erste
-SymconECharts-Beta bleibt auf Eigentümerentscheidung bis zur vereinbarten
-Migrationsabdeckung zurückgestellt. Vor Einreichung sind tatsächlicher Umfang,
+Die grundsätzliche Übernahme ist damit implementiert und live bestätigt; die
+aktuelle Quellvorlagenfreigabe ist lokal geprüft. Die erste SymconECharts-Beta
+bleibt bis zu deren gezielter Live-Abnahme auf Eigentümerentscheidung
+zurückgestellt. Vor Einreichung sind tatsächlicher Umfang,
 offene Varianten und Release-Metadaten erneut abzugleichen. Es gibt durch diese
 Spezifikation keine neue Library-Version, keinen Termin und keine Veröffentlichung.
 

@@ -110,6 +110,8 @@ und Pfade werden geprüft; Skripte und fremde Vorlagen werden nicht ausgeführt.
 Progressbar-Verläufe und SVG-Füllbilder verwenden einen begrenzten lokalen
 Farbadapter. Zyklische Verlaufsbewegung übernimmt Richtung und Dauer nativ;
 getrennte Dokumente haben unabhängige Startphasen. Externe Bildadressen bleiben gesperrt.
+Die geprüften Standardvorlagen aus JSLive 0.111 und 0.113 werden anhand exakter
+Prüfsummen erkannt. Eine neuere Versionsnummer erlaubt keine ungeprüften Vorlagen.
 Die unterstützten Formate und Grenzen stehen bei
 [EChartsProgress](../EChartsProgress/README.md#verlaufsfarben-und-svg-füllbilder-aus-jslive).
 Es wird keine beliebige oder pixelgleiche 1:1-Migration versprochen.

@@ -3,9 +3,11 @@
 **Aktuelle Freigabesperre vom 31.10.2026:** Der Eigentümer hat die erste Beta
 bis zur zugesagten JSLive-Übernahme zurückgestellt. Der gemeinsame
 [Export-/Importvertrag](JSLIVE_MIGRATION_CONTRACT.md) ist spezifiziert;
-Die bestätigte Importanlage einschließlich der 40 Zielvarianten ist lokal
-implementiert und geprüft; gemeinsame MCP-Übernahme und Original-/Ziel-
-Darstellungsabnahme nach Modulupdate stehen aus. Die folgenden Release-Texte
+Die bestätigte Importanlage, Wiederanlauf und die vereinbarten Original-/Ziel-
+Darstellungsabnahmen sind inzwischen erfolgt. Für frische 0.113-Pakete fehlt
+noch die gezielte Live-Abnahme nach Update der geprüften Vorlagenkennung;
+Details stehen in der [Migrationsabnahme](JSLIVE_MIGRATION_ABNAHME.md).
+Die folgenden Release-Texte
 und das bisher geplante Datum sind Vorbereitung, keine Einreichungsfreigabe.
 Nach Abschluss der Migration sind Umfang, Versionsmetadaten und Termin erneut
 mit dem Eigentümer abzugleichen. Die bisherige Diagrammabnahme bleibt gültig.

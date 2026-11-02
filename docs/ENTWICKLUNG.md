@@ -22,9 +22,10 @@ prüfen außerdem Polling, Resize, Verdeckung, Disposal, Dauer null und deaktivi
 Animationen. Die Zahlenprüfung trennt originale Profiltexte vom nativen Tooltip.
 Der Gegenversuch ohne auflösungsangepasste SVG-Rasterung wird erkannt.
 
-Die Live-Abnahme dieses neuen Adapters nach Eigentümer-Modulupdate steht aus.
-Diese Umsetzung greift nicht auf die Installation zu und ändert dort keine
-Instanzen, Quellen, Designs oder Archive. Frühere Abnahmen bleiben erhalten.
+Die Live-Abnahme von zyklischem Verlauf und Zahlenbeschriftung ist unter 1.382
+vom Eigentümer bestätigt. Der aktuelle Gesamtstand einschließlich der noch
+ausstehenden Prüfung frischer JSLive-0.113-Pakete steht in der
+[Migrationsabnahme](JSLIVE_MIGRATION_ABNAHME.md). Frühere Abnahmen bleiben erhalten.
 
 ## Bisheriger JSLive-Export- und Importstand
 
@@ -104,9 +105,9 @@ wurde dabei nicht erneut geprüft. Weitere optische Befunde bleiben getrennt.
 Die anschließende Konsolendiagnose trennt den JSLive-Text-/Stroke-Abbruch vom
 Symcon-Vorschauempfänger, der fremde Wheel-Bridge-Arrays als eigene Nachrichten
 interpretiert. Der zentrale Helper begrenzt die Bridge nun auf ausdrücklich
-markierte eigene Frames; dessen reguläre Verteilung steht noch aus. Die
-Consumer-Integration wird mit einem temporären regulären Bundle geprüft und
-danach vollständig zurückgesetzt. Der JSLive-Vorlagenfix behält Engine und
+markierte eigene Frames. Der damalige temporäre Bundle-/Integrationslauf ist
+historisch; den aktuellen Abnahmestand führt der oben verlinkte Bericht.
+Der JSLive-Vorlagenfix behält Engine und
 persistierte Einstellungen; die unabhängigen Quellreferenzen bleiben gleich.
 Die Observer-Meldung tritt auch an einer reinen Symcon-Zahlenkachel auf und ist
 weiterhin kein nachgewiesener Chartfehler.

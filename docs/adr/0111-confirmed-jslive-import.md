@@ -1,10 +1,16 @@
 # ADR 0111: Bestätigte JSLive-Neuanlage und familienbezogene Altmodelle
 
-- Status: Bisherige Import-/Journalabnahme und automatischer Update-Wiederanlauf bestätigt; Farb-/SVG-Fülladapter lokal geprüft, Live-Abnahme nach Modulupdate offen
+- Status: Import/Journal, Update-Wiederanlauf und Farb-/SVG-Darstellung bestätigt; frische 0.113-Pakete lokal geprüft, deren gemeinsame Live-Abnahme nach Modulupdate offen
 - Datum: 2026-10-31
 - Ergänzt: ADR 0109, ADR 0110 und Vertrag 1.0
 
 ## Auftrag und Grenzen
+
+Der aktuelle, nach Prüfarten getrennte Gesamtstand steht in der
+[Migrationsabnahme](../JSLIVE_MIGRATION_ABNAHME.md). Die 0.113-Standardvorlage ist
+nach inhaltlichem Vergleich mit exakten LF-/CRLF-Hashes ergänzt; unbekannte
+Vorlagen bleiben gesperrt. Die Live-Abnahme von Verlauf und Zahlen unter 1.382
+ist erledigt und wird nicht erneut verlangt.
 
 ### Ergänzung: validierte Progressbar-Farben und SVG-Füllbilder
 

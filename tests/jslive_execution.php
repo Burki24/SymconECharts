@@ -420,6 +420,10 @@ $GLOBALS['nativeGateway'] = $gateway;
 $GLOBALS['nativeFormCalls'] = 0;
 foreach (glob(__DIR__ . '/fixtures/jslive-packages/*.json') as $file) {
     [$json, $package] = jsliveFamilyFixture($file);
+    if (($argv[1] ?? '') === '--current-templates') {
+        jsliveFixtureCurrentTemplate($package, 'dcbda0b9487f1afdc689091de5c4542f6c37a5032a4483684103f40c5f36cc66');
+        $json = EChartsImportJson::Canonical($package);
+    }
     $original = $package->charts[0];
     $originalID = $original->origin->instanceId;
     $kernel['instances'][$originalID] = nativeInstance($original->origin->moduleId, 17000);

@@ -1,5 +1,11 @@
 # JSLive-Producer und gemeinsame Normalisierung: lokale Prüfung
 
+Nachtrag 02.11.2026: Dieser Bericht dokumentiert historische Zwischenstände.
+Die später bestätigten Callback-, Übernahme-, Wiederanlauf- und Bildabnahmen
+sind in der [aktuellen Migrationsabnahme](JSLIVE_MIGRATION_ABNAHME.md)
+zusammengeführt. Tatsächlich nicht belegte Client-/Grenzbedienungen bleiben
+dort als Testlücken erhalten; frühere fehlende Familienmapper sind inzwischen umgesetzt.
+
 Stand: 31.10.2026, PHP 8.5.10 auf Windows. Drei getrennte Repositories:
 Symcon_ModuleHelper, JSLive und SymconECharts. Keine Bereitstellung, keine
 Installation geändert, keine Archivwerte oder Quellkonfigurationen geschrieben.

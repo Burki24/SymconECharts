@@ -2,6 +2,12 @@
 
 ## Neu
 
+- Der JSLive-Import erkennt die inhaltlich geprüfte Progressbar-Standardvorlage
+  aus JSLive 0.113 mit ihren exakten LF-/CRLF-Prüfsummen. Bisherige Vorlagen
+  bleiben verwendbar; unbekannte oder geänderte Templates bleiben gesperrt.
+  Native Modelle und Schutzbudgets ändern sich nicht. Der Migrationsbericht
+  trennt bestätigte Abnahmen von der noch ausstehenden gezielten Live-Prüfung.
+
 - Der JSLive-Progressbar-Import übernimmt validierte Hex-Farben, begrenzte
   Verlaufsressourcen und eingebettete SVG-Füllbilder einschließlich statischer
   Muster in Kachel, IPSView und Vorschau. Mustergröße und Quelleneinstellungen

@@ -29,9 +29,11 @@
     "Progressbar": {
         "sha256": [
             "b9c5b9fc0d1d382d8b65e57681b2035508d9f6cd4616fa25b383146aec54f7c6",
-            "258dc58b619641e3a8719adfeaaa9beee386dbf702b0f845369dafba476f4f29"
+            "258dc58b619641e3a8719adfeaaa9beee386dbf702b0f845369dafba476f4f29",
+            "6de5f11322b58a5a316941b020fccdd73b4f32beb92dfcc88e39970b49105fd1",
+            "dcbda0b9487f1afdc689091de5c4542f6c37a5032a4483684103f40c5f36cc66"
         ],
-        "sourceVersion": "JSLive 0.111",
+        "sourceVersion": "JSLive 0.111 / 0.113",
         "license": "GPL-3.0",
         "usage": "inert-reference-only"
     },

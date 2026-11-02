@@ -2,6 +2,16 @@
 
 ## Bestätigte JSLive-Übernahme (ADR 0111)
 
+`php tests/jslive_templates.php` prüft 80 Pläne mit den exakten aktuellen
+LF-/CRLF-Vorlagenbytes, unveränderten nativen Revisionen und weiter abgewiesenen
+unbekannten Templates. `php tests/jslive_execution.php --current-templates`
+führt die aktuellen Bytes zusätzlich durch bestätigte Neuanlage, Wiederanlauf
+und Wiederholung im lokalen Kernel-Testdoppel. Beide Prüfungen gehören zur Suite.
+Für private frische Exportmengen akzeptiert
+`php tests/jslive_models.php <Exportverzeichnis> <erwartete Anzahl>` eine explizite
+Anzahl von 1–100; ohne Anzahl gelten weiterhin 40. Diese Modell-/HTML-Prüfung
+verwendet lokale Lesedoppel und ersetzt keine Live-Archiv- oder MCP-Abnahme.
+
 Die reguläre Suite enthält jetzt folgende unabhängige Grenzen:
 
 - `php tests/jslive_models.php`: 40 anonymisierte Pakete, typisierte Modelle und

@@ -15,6 +15,10 @@ use SymconECharts\EChartsJSLiveRendering;
 $external = isset($argv[1]) && is_dir($argv[1]);
 $emit = ($argv[1] ?? '') === '--emit';
 $path = $external ? $argv[1] : (__DIR__ . '/fixtures/jslive-packages');
+$expectedCount = $external ? filter_var($argv[2] ?? '40', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 100]]) : 40;
+if ($expectedCount === false) {
+    throw new InvalidArgumentException('Expected external package count must be between 1 and 100.');
+}
 $count = 0;
 $states = [];
 $maximumHTML = 0;
@@ -86,7 +90,7 @@ foreach (glob($path . '/*.json') as $file) {
     }
     ++$count;
 }
-if ($count !== 40) {
-    throw new RuntimeException('Expected 40 family fixtures, got ' . $count);
+if ($count !== $expectedCount) {
+    throw new RuntimeException('Expected ' . $expectedCount . ' family fixtures, got ' . $count);
 }
 echo $emit ? EChartsImportJson::Canonical($states) : ('JSLive frozen native family models and both HTML outputs: ' . $count . ' passed; largest HTML ' . $maximumHTML . " bytes.\n");

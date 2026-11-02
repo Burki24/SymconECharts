@@ -4,6 +4,30 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../libs/EChartsJSLivePlan.php';
 
+/** Replace only reviewed inert bytes; no source code is executed. */
+function jsliveFixtureCurrentTemplate(stdClass $packet, string $hash): void
+{
+    $packet->producer->libraryVersion = '0.113';
+    $packet->producer->build = 1;
+    foreach ($packet->assets as $asset) {
+        if ($asset->kind !== 'inert-standard-template' || $asset->origin->template !== 'Progressbar') {
+            continue;
+        }
+        $bytes = file_get_contents(__DIR__ . '/fixtures/jslive-templates/' . $hash . '.html');
+        if (hash('sha256', $bytes) !== $hash) {
+            throw new RuntimeException('Reviewed template fixture integrity changed.');
+        }
+        $previous = $asset->assetId;
+        $asset->assetId = 'sha256:' . $hash;
+        $asset->sha256 = $hash;
+        $asset->byteLength = strlen($bytes);
+        $asset->contentBase64 = base64_encode($bytes);
+        foreach ($packet->charts as $chart) {
+            $chart->assetRefs = array_map(static fn (string $id): string => $id === $previous ? $asset->assetId : $id, $chart->assetRefs);
+        }
+    }
+}
+
 /** Anonymous packages, with exact inert resource bytes restored only at the package boundary. */
 function jsliveFamilyFixture(string $file): array
 {
