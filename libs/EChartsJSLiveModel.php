@@ -12,6 +12,7 @@ require_once __DIR__ . '/EChartsJSLiveTime.php';
 require_once __DIR__ . '/EChartsSvgImage.php';
 require_once __DIR__ . '/EChartsSvgPath.php';
 require_once __DIR__ . '/EChartsJSLivePath.php';
+require_once __DIR__ . '/../EChartsProgress/JSLivePaint.php';
 
 /** Typed, frozen, profile-independent inputs to the family-owned ECharts adapters. No arbitrary options/code. */
 final class EChartsJSLiveModel
@@ -103,6 +104,18 @@ final class EChartsJSLiveModel
             $model['settings']['shape_svg'] = EChartsSvgImage::Import($model['settings']['shape_svg']['dataUri']);
         }
         self::ValidateFamily($family, $model['settings'], $model['bindings'], $model['axes']);
+        if ($family === 'progress') {
+            $paints = JSLiveProgressPaint::Build($model['settings']);
+            if (isset($model['progressPaints']) && EChartsImportJson::Canonical($model['progressPaints']) !== EChartsImportJson::Canonical($paints)) {
+                throw new InvalidArgumentException('PACKAGE_INVALID: frozen paints differ from their validated settings.');
+            }
+            if ($paints !== []) {
+                $model['progressPaints'] = $paints;
+            }
+        }
+        if (strlen(EChartsImportJson::Canonical($model)) > self::MAX_BYTES) {
+            throw new InvalidArgumentException('LIMIT_EXCEEDED: imported paint model exceeds 512 KiB.');
+        }
         return $model;
     }
 
@@ -273,6 +286,9 @@ final class EChartsJSLiveModel
         $model = ['version' => self::VERSION, 'family' => $family, 'settings' => $settings, 'sources' => $sources,
             'bindings'      => $bindings, 'axes' => $axes, 'time' => $time, 'resources' => $resources,
             'global'        => EChartsJSLivePackage::ArrayValue($chart->original->globalConfiguration)];
+        if ($family === 'progress' && ($paints = JSLiveProgressPaint::Build($settings)) !== []) {
+            $model['progressPaints'] = $paints;
+        }
         if (strlen(EChartsImportJson::Canonical($model)) > self::MAX_BYTES) {
             throw new InvalidArgumentException('LIMIT_EXCEEDED: frozen family model exceeds 512 KiB.');
         }
@@ -386,9 +402,6 @@ final class EChartsJSLiveModel
             }
             if ($settings['shape_path'] !== '') {
                 EChartsJSLivePath::Validate($settings['shape_path']);
-            }
-            if ($settings['fill_backgroundFile'] !== '' || $settings['override_fill'] !== '' || $settings['override_stroke'] !== '') {
-                throw new InvalidArgumentException('FORMAT_UNSUPPORTED: image fills and arbitrary paint overrides require their own validated adapter.');
             }
         }
         if ($family === 'cartesian-history') {

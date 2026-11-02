@@ -127,6 +127,22 @@
         const title=c.title_display?String(c.title_text||''):'',titleSize=18*(c.__fontScale||1),titleSpace=title?titleSize*1.7:0;
         const layout=fit(c,box,width,height,titleSpace);
         const children=[];
+        function paint(name){
+            const value=state.paints&&state.paints[name];
+            if(!value){return f.paint(c,name+'_color');}
+            if(value.kind==='color'){return value.color;}
+            // CanvasPattern otherwise rasterizes SVG at its intrinsic size and
+            // enlarges that bitmap with the path. Render sufficient image pixels
+            // while retaining the source pattern's original coordinate period.
+            const factor=typeof root.DOMMatrix==='function'?Math.min(Math.floor(4096/Math.max(value.width,value.height)),
+                Math.max(1,Math.ceil(layout.scale*(root.devicePixelRatio||1)*2))):1;
+            if(factor===1){return {image:value.dataUri,repeat:'repeat'};}
+            const svg=root.atob(value.dataUri.split(',')[1]).replace(/<svg\b[^>]*>/,function(tag){
+                return tag.replace(/\swidth="[^"]*"/,' width="'+Math.ceil(value.width*factor)+'"')
+                    .replace(/\sheight="[^"]*"/,' height="'+Math.ceil(value.height*factor)+'"');
+            });
+            return {image:'data:image/svg+xml;base64,'+root.btoa(svg),repeat:'repeat',scaleX:value.width/Math.ceil(value.width*factor),scaleY:value.height/Math.ceil(value.height*factor)};
+        }
         if(!root.echarts.graphic.getShapeClass('jsliveProgressPath')){
             root.echarts.graphic.registerShape('jsliveProgressPath',root.echarts.graphic.extendShape({shape:{pathData:'',strokePath:false},buildPath:function(ctx,shape){
                 if(shape.strokePath){strokePath(ctx,shape.pathData);}else{const p=root.echarts.graphic.makePath(shape.pathData,{});p.buildPath(ctx,p.shape);}
@@ -157,7 +173,7 @@
             children.push({id:'image-progress',type:'image',clipPath:clip(),style:{image:image.dataUri,x:0,y:0,width:box[2],height:box[3]}});
         }else if(stroke){
             const trail=pathElement('trail',f.paint(c,'stroke_trailColor'),true);trail.style.lineWidth=c.stroke_trailWidth;children.push(trail);
-            const foreground=pathElement('progress',f.paint(c,'stroke_color'),true);
+            const foreground=pathElement('progress',paint('stroke'),true);
             if(c.stroke_dir==='reverse'){const total=pathLength(path);foreground.style.lineDash=[0,total*(1-d.ratio),total*d.ratio,0];}
             else{foreground.style.strokePercent=d.ratio;}
             if(c.shape_path&&c.stroke_Dash1>0&&c.stroke_Dash2>0&&c.stroke_dir!=='reverse'){foreground.style.lineDash=[c.stroke_Dash1,c.stroke_Dash2];}
@@ -166,7 +182,7 @@
             const empty=!pathBounds[2]||!pathBounds[3],rect=layout.viewBox;
             const background=maskedBackground('<path d="'+f.escape(path)+'" fill="#fff" stroke="#fff" filter="url(#d)"/>',rect,false);
             children.push({id:'background',type:'image',invisible:empty,style:{image:background,x:rect[0],y:rect[1],width:rect[2],height:rect[3]}});
-            const foreground=pathElement('progress',f.paint(c,'fill_color'),false);foreground.invisible=empty;foreground.clipPath=clip();children.push(foreground);
+            const foreground=pathElement('progress',paint('fill'),false);foreground.invisible=empty;foreground.clipPath=clip();children.push(foreground);
         }
         const graphics=[{id:'progress-body',type:'group',x:layout.x,y:layout.y,scaleX:layout.scale,scaleY:layout.scale,children:children}];
         if(title){graphics.push({id:'chart-title',type:'text',style:{text:title,x:width/2,y:4,fontSize:titleSize,

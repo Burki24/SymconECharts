@@ -1,5 +1,29 @@
 # Entwicklung von SymconECharts
 
+## Validierte Progressbar-Farben und SVG-Füllbilder
+
+Der neue Adapter aus ADR 0111 hebt die pauschale Importsperre ausschließlich
+für geprüfte Farb- und SVG-Ressourcen auf. Die anonymen Regressionen
+`php tests/jslive_progress_paints.php` und `node tests/jslive_progress_paints.js`
+prüfen vollständige Pläne, Feldbilanz, Modelldurchlauf, Vorrangregeln, feste
+Musterkoordinaten, beide HTML-Ausgaben und Angriffs-/Manipulationsfälle.
+Die bisherigen 40 Familienmodelle und Pläne bleiben Teil der Qualitätssuite.
+
+Der zusätzliche unabhängige Browservergleich wird mit
+`node tests/jslive_progress_paints_browser.js <JSLive-Checkout> <Chromium> [1|2|3]`
+ausgeführt. Er liest die unveränderte loading-bar-Engine nur als lokale Referenz,
+prüft ihren bekannten Hash und vergleicht sieben Modelle bei drei Füllständen.
+Die alte Ressourcenbewegung wird für den ausdrücklich gemeldeten Standbild-
+Vergleich eingefroren. Bei Pixeldichte 1 und 2 wurden jeweils 21 Vergleiche
+ohne Farbabweichungen außerhalb der definierten 1px-Kantentoleranz bestätigt.
+Der Gegenversuch ohne auflösungsangepasste SVG-Rasterung wird erkannt.
+
+Die Live-Abnahme dieses neuen Adapters nach Eigentümer-Modulupdate steht aus.
+Diese Umsetzung greift nicht auf die Installation zu und ändert dort keine
+Instanzen, Quellen, Designs oder Archive. Frühere Abnahmen bleiben erhalten.
+
+## Bisheriger JSLive-Export- und Importstand
+
 Die Migration verwendet den regulär verteilten
 `VariablePresentationNormalizationHelper` 1.0.2 (Bundle 3.30.2).
 `EChartsVariablePresentation::Snapshot()` verwendet denselben lesenden Konverter,

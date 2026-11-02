@@ -1,10 +1,46 @@
 # ADR 0111: Bestätigte JSLive-Neuanlage und familienbezogene Altmodelle
 
-- Status: Import-/Journalabnahme und automatischer Update-Wiederanlauf per MCP bestätigt; neue Pfad-/Radar-Geometriekorrektur lokal geprüft, Live-Nachprüfung offen
+- Status: Bisherige Import-/Journalabnahme und automatischer Update-Wiederanlauf bestätigt; Farb-/SVG-Fülladapter lokal geprüft, Live-Abnahme nach Modulupdate offen
 - Datum: 2026-10-31
 - Ergänzt: ADR 0109, ADR 0110 und Vertrag 1.0
 
 ## Auftrag und Grenzen
+
+### Ergänzung: validierte Progressbar-Farben und SVG-Füllbilder
+
+Der Importauftrag umfasst nun die zuvor gesperrten Fortschrittsfarben und
+SVG-Füllbilder. `EChartsProgress/JSLivePaint.php` ist der familienlokale Adapter:
+keine alte Ressourcenfunktion wird ausgeführt und keine URL nachgeladen.
+Der Vertrag 1.0 und alle veröffentlichten Settings bleiben unverändert.
+Neue Modelle enthalten zusätzlich `progressPaints`; beim Lesen wird dieser
+abgeleitete Inhalt vollständig aus den eingefrorenen Settings neu geprüft.
+Abweichende URI-, Typ- oder Geometriedaten werden abgewiesen. Alte Modelle ohne
+aktive Farb-Overrides bleiben unverändert nutzbar.
+
+Der Adapter akzeptiert Hex-Farben, die explizite loading-bar-Gradientgrammatik
+mit 2–16 Hex-Farben, 0–360° und 0–3600 Sekunden sowie eingebettete SVG-Bilder.
+Die mathematische Gradientgeometrie folgt der festgeschriebenen MIT-Ressource;
+deren Engine wird nicht ausgeliefert. Dauer und Originaltext bleiben erhalten,
+die Ausgabe ist jedoch ein statisches Anfangsbild. Der Plan verlangt dafür
+`native-progress-static-gradient-1` als einzelne Bestätigung. Er meldet außerdem
+mit `native-progress-svg-route-1`, wenn der alte, erweiterungslose SVG-Dateipfad
+schwarz rendern kann und das Ziel stattdessen das geprüfte Bild zeichnet.
+Explizites Füll-Override gewinnt vor dem Dateibild; eigene SVG-Formen behalten
+ihre eigenen Farben. Auch inaktive Angaben werden auf Zulässigkeit geprüft.
+
+`EChartsSvgImage::ImportPaint()` teilt die bestehende SVG-Prüfung, erlaubt
+zusätzlich statische lokale Muster und erhält begrenzte intrinsische Bildmaße.
+Der bisherige `Import()`-Vertrag wird nicht gelockert. Muster dürfen einander
+weder enthalten noch referenzieren; alle Farb-IDs müssen eindeutig und lokal
+auflösbar sein. Rotation und Translation sowie maximal 64 Kacheln je Achse
+begrenzen den neuen Teilvertrag. Datei 256 KiB, 512 Elemente, Tiefe 32, Modell
+512 KiB, Zustandsdaten 512 KiB und HTML 1 MiB gelten unverändert. Die neue
+Rasterauflösung ist auf 4096 Pixel je Achse begrenzt; die inverse Musterskalierung
+erhält deren ursprüngliche Koordinaten und Wertunabhängigkeit.
+
+Konfiguration, Bestätigung und Journal laufen unverändert durch den regulären
+Import. Originalinstanzen, Quellen, Darstellungen und Archive werden nicht
+geschrieben. Ein Modellupdate importiert gesperrte Fälle nicht automatisch.
 
 Der Eigentümer hat die vollständige Übernahme einschließlich der fehlenden
 Zielmodelle für die 40 JSLive-Testvarianten beauftragt. Die reine Vorschau aus

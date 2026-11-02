@@ -1441,13 +1441,13 @@
         },
         "fill_backgroundFile": {
             "status": "approximate",
-            "rule": "source-engine-option-without-native-effect-1",
-            "effect": "fill_backgroundFile: retained in the frozen settings for provenance; this engine-specific option has no active native effect. Compare the corresponding target detail before accepting."
+            "rule": "native-progress-validated-paint-1",
+            "effect": "fill_backgroundFile: embedded SVG paints and explicit hexadecimal colors or bounded loading-bar gradients use the validated local paint adapter. The original typed settings remain frozen. Fill overrides take precedence over the fill file; SVG shapes retain their own paints. Unsupported or external resources stay blocked. Cyclic gradient motion is reported separately."
         },
         "fill_backgroundFileType": {
             "status": "approximate",
-            "rule": "source-engine-option-without-native-effect-1",
-            "effect": "fill_backgroundFileType: retained in the frozen settings for provenance; this engine-specific option has no active native effect. Compare the corresponding target detail before accepting."
+            "rule": "native-progress-validated-paint-1",
+            "effect": "fill_backgroundFileType: embedded SVG paints and explicit hexadecimal colors or bounded loading-bar gradients use the validated local paint adapter. The original typed settings remain frozen. Fill overrides take precedence over the fill file; SVG shapes retain their own paints. Unsupported or external resources stay blocked. Cyclic gradient motion is reported separately."
         },
         "fill_color": {
             "status": "approximate",
@@ -1476,13 +1476,13 @@
         },
         "override_fill": {
             "status": "approximate",
-            "rule": "source-engine-option-without-native-effect-1",
-            "effect": "override_fill: retained in the frozen settings for provenance; this engine-specific option has no active native effect. Compare the corresponding target detail before accepting."
+            "rule": "native-progress-validated-paint-1",
+            "effect": "override_fill: embedded SVG paints and explicit hexadecimal colors or bounded loading-bar gradients use the validated local paint adapter. The original typed settings remain frozen. Fill overrides take precedence over the fill file; SVG shapes retain their own paints. Unsupported or external resources stay blocked. Cyclic gradient motion is reported separately."
         },
         "override_stroke": {
             "status": "approximate",
-            "rule": "source-engine-option-without-native-effect-1",
-            "effect": "override_stroke: retained in the frozen settings for provenance; this engine-specific option has no active native effect. Compare the corresponding target detail before accepting."
+            "rule": "native-progress-validated-paint-1",
+            "effect": "override_stroke: embedded SVG paints and explicit hexadecimal colors or bounded loading-bar gradients use the validated local paint adapter. The original typed settings remain frozen. Fill overrides take precedence over the fill file; SVG shapes retain their own paints. Unsupported or external resources stay blocked. Cyclic gradient motion is reported separately."
         },
         "shape_path": {
             "status": "approximate",

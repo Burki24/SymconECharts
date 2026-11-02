@@ -50,6 +50,9 @@ final class EChartsJSLiveRendering
         }
         $state = ['schemaVersion' => 1, 'status' => 'ready', 'chart' => ['family' => $model['family'], 'settings' => $settings, 'data' => $data,
             'resources'                                                           => $model['resources'], 'timezone' => $model['time']['timezone'] ?? 'UTC', 'background' => $background === -1 ? 'transparent' : sprintf('#%06X', $background)], 'error' => null];
+        if (isset($model['progressPaints'])) {
+            $state['chart']['paints'] = $model['progressPaints'];
+        }
         $limit = $model['family'] === 'cartesian-history' ? 900000 : 524288;
         if (strlen(EChartsImportJson::Canonical($state)) > $limit) {
             throw new RuntimeException('LIMIT_EXCEEDED: imported output model exceeds its byte budget.');

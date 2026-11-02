@@ -2,6 +2,13 @@
 
 ## Neu
 
+- Der JSLive-Progressbar-Import übernimmt validierte Hex-Farben, begrenzte
+  Verlaufsressourcen und eingebettete SVG-Füllbilder einschließlich statischer
+  Muster in Kachel, IPSView und Vorschau. Mustergröße und Quelleneinstellungen
+  bleiben erhalten; die Auflösung passt sich innerhalb der Schutzgrenzen an.
+  Zyklische Verlaufsbewegung bleibt ein ausdrücklich gemeldetes Standbild;
+  die abweichende Darstellung des fehlerhaften alten SVG-Dateipfads wird
+  ebenfalls vor der Neuanlage benannt. Externe und aktive Inhalte bleiben gesperrt.
 - JSLive-Exportpakete 1.0 lassen sich nach Paket-, Quellen-, Archiv- und
   Darstellungsprüfung mit einzeln bestätigten Abweichungen als neue ECharts-
   Instanzen übernehmen. Importjournal, Besitznachweise und gesicherter Wiederanlauf

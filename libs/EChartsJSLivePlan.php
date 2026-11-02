@@ -289,6 +289,31 @@ final class EChartsJSLivePlan
                 'native-text-preset-1'
             );
         }
+        if ($family === 'progress') {
+            $settings = $model['settings'];
+            $image = $settings['shape_svg'] !== '' || ($settings['shape_path'] === '' && $settings['shape_preset'] === 'text');
+            $activePaint = $image ? null : ($settings['Type'] === 'stroke' ? 'stroke' : 'fill');
+            foreach ($model['progressPaints'] ?? [] as $key => $paint) {
+                if ($key === $activePaint && $paint['kind'] === 'gradient' && $paint['duration'] > 0) {
+                    self::Difference(
+                        $row,
+                        '/appearance/paint/' . $key,
+                        $paint['duration'],
+                        'The validated loading-bar palette, direction and repeating image are retained as a static initial frame. Its independent cyclic resource movement is not replayed; native value transitions remain available.',
+                        'native-progress-static-gradient-1'
+                    );
+                }
+            }
+            if ($activePaint === 'fill' && $settings['fill_backgroundFile'] !== '' && $settings['override_fill'] === '') {
+                self::Difference(
+                    $row,
+                    '/appearance/svg-fill-route',
+                    null,
+                    'The source template supplies an extensionless relative getFillImg route which loading-bar can treat as an invalid paint and display black. The target uses the validated embedded SVG locally and may therefore show the intended image instead of that source defect.',
+                    'native-progress-svg-route-1'
+                );
+            }
+        }
     }
 
     private static function MetadataTarget(string $pointer, stdClass $chart, array $model): ?string

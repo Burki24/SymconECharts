@@ -133,6 +133,17 @@ final class EChartsSvgImage
     /** @return array{dataUri: string, viewBox: string, width: float, height: float} */
     public static function Import(string $fileData): array
     {
+        return self::ImportDocument($fileData, false);
+    }
+
+    /** Inert image paints additionally permit bounded, non-nested local patterns. */
+    public static function ImportPaint(string $fileData): array
+    {
+        return self::ImportDocument($fileData, true);
+    }
+
+    private static function ImportDocument(string $fileData, bool $paint): array
+    {
         $svg = self::DecodeFileData($fileData);
         if (strlen($svg) > self::MAX_FILE_BYTES) {
             throw new InvalidArgumentException('The SVG background exceeds the 256 KiB import limit.');
@@ -168,24 +179,31 @@ final class EChartsSvgImage
         }
         $viewBox = self::NormalizeViewBox($root->getAttribute('viewBox'));
         $viewBoxParts = array_map('floatval', explode(' ', $viewBox));
+        $pixels = $paint ? self::PaintDimensions($root, $viewBoxParts) : null;
         $root->setAttribute('xmlns', self::SVG_NAMESPACE);
         $root->setAttribute('viewBox', $viewBox);
         $root->removeAttribute('width');
         $root->removeAttribute('height');
 
         $elementCount = 0;
-        self::ValidateElement($root, 0, $elementCount);
+        self::ValidateElement($root, 0, $elementCount, $paint);
+        if ($paint) {
+            self::ValidatePatterns($document, $viewBoxParts);
+            $root->setAttribute('width', (string) $pixels[0]);
+            $root->setAttribute('height', (string) $pixels[1]);
+        }
         $sanitized = $document->saveXML($root);
         if (!is_string($sanitized) || $sanitized === '') {
             throw new InvalidArgumentException('The selected file does not contain readable SVG data.');
         }
 
-        return [
+        $result = [
             'dataUri' => 'data:image/svg+xml;base64,' . base64_encode($sanitized),
             'viewBox' => $viewBox,
             'width'   => $viewBoxParts[2],
             'height'  => $viewBoxParts[3]
         ];
+        return $pixels === null ? $result : $result + ['pixelWidth' => $pixels[0], 'pixelHeight' => $pixels[1]];
     }
 
     private static function DecodeFileData(string $fileData): string
@@ -210,19 +228,31 @@ final class EChartsSvgImage
         return $decoded;
     }
 
-    private static function ValidateElement(DOMElement $element, int $depth, int &$elementCount): void
+    private static function ValidateElement(DOMElement $element, int $depth, int &$elementCount, bool $paint): void
     {
         ++$elementCount;
         if ($depth > self::MAX_DEPTH || $elementCount > self::MAX_ELEMENTS) {
             throw new InvalidArgumentException('The SVG background is too complex.');
         }
-        if (!in_array($element->localName, self::ALLOWED_ELEMENTS, true)
+        if ((!in_array($element->localName, self::ALLOWED_ELEMENTS, true) && !($paint && $element->localName === 'pattern'))
             || !in_array($element->namespaceURI, [null, '', self::SVG_NAMESPACE], true)
             || ($depth > 0 && $element->localName === 'svg')) {
             throw new InvalidArgumentException('The SVG background contains unsupported elements.');
         }
 
         foreach (iterator_to_array($element->attributes) as $attribute) {
+            if ($paint && $element->localName === 'pattern' && $attribute->namespaceURI === null
+                && in_array($attribute->localName, ['patternUnits', 'patternContentUnits', 'patternTransform'], true)) {
+                if ($attribute->localName === 'patternTransform') {
+                    self::ValidateTransform($attribute->value);
+                    if (preg_match('/(?:matrix|scale|skewX|skewY)/', $attribute->value) === 1) {
+                        throw new InvalidArgumentException('SVG paint patterns support rotation and translation only.');
+                    }
+                } elseif (!in_array($attribute->value, ['objectBoundingBox', 'userSpaceOnUse'], true)) {
+                    throw new InvalidArgumentException('Invalid SVG paint pattern units.');
+                }
+                continue;
+            }
             if (!in_array($attribute->localName, self::ALLOWED_ATTRIBUTES, true)
                 || ($attribute->localName !== 'xmlns'
                     && $attribute->namespaceURI !== null
@@ -239,13 +269,125 @@ final class EChartsSvgImage
 
         foreach (iterator_to_array($element->childNodes) as $child) {
             if ($child instanceof DOMElement) {
-                self::ValidateElement($child, $depth + 1, $elementCount);
+                self::ValidateElement($child, $depth + 1, $elementCount, $paint);
             } elseif ($child->nodeType === XML_TEXT_NODE && trim($child->textContent) === '') {
                 continue;
             } elseif (in_array($child->nodeType, [XML_COMMENT_NODE], true)) {
                 $element->removeChild($child);
             } else {
                 throw new InvalidArgumentException('The SVG background contains unsupported content.');
+            }
+        }
+    }
+
+    private static function PaintDimensions(DOMElement $root, array $box): array
+    {
+        if ($box[2] <= 0 || $box[3] <= 0) {
+            throw new InvalidArgumentException('SVG paint requires a nonempty normalized viewBox.');
+        }
+        $size = [];
+        $units = ['' => 1, 'px' => 1, 'in' => 96, 'cm' => 96 / 2.54, 'mm' => 96 / 25.4, 'q' => 96 / 101.6, 'pt' => 96 / 72, 'pc' => 16];
+        foreach (['width', 'height'] as $name) {
+            $value = trim($root->getAttribute($name));
+            if ($value === '') {
+                $size[] = 0;
+            } elseif (preg_match('/^(\d+(?:\.\d*)?|\.\d+)\s*(px|in|cm|mm|q|pt|pc)?$/iD', $value, $match) === 1) {
+                if ((float) $match[1] <= 0) {
+                    throw new InvalidArgumentException('SVG paint image dimensions must be positive.');
+                }
+                $size[] = (float) $match[1] * $units[strtolower($match[2] ?? '')];
+            } else {
+                throw new InvalidArgumentException('SVG paint requires bounded absolute image dimensions.');
+            }
+        }
+        $ratio = $box[2] / $box[3];
+        [$w, $h] = $size;
+        if (!$w && !$h) {
+            $w = min(300, 150 * $ratio);
+            $h = $w / $ratio;
+        } elseif (!$w) {
+            $w = $h * $ratio;
+        } elseif (!$h) {
+            $h = $w / $ratio;
+        }
+        if (!is_finite($w) || !is_finite($h) || min($w, $h) < 1 || max($w, $h) > 4096) {
+            throw new InvalidArgumentException('SVG paint image dimensions must be between 1 and 4096 pixels.');
+        }
+        return [(int) floor($w), (int) floor($h)];
+    }
+
+    private static function ValidatePatterns(DOMDocument $document, array $box): void
+    {
+        $ids = [];
+        foreach ($document->getElementsByTagName('*') as $element) {
+            $id = $element->getAttribute('id');
+            if ($id !== '') {
+                if (isset($ids[$id])) {
+                    throw new InvalidArgumentException('SVG paint identifiers must be unique.');
+                }
+                $ids[$id] = $element->localName;
+            }
+            if ($element->localName === 'pattern') {
+                for ($parent = $element->parentNode; $parent instanceof DOMElement; $parent = $parent->parentNode) {
+                    if ($parent->localName === 'pattern') {
+                        throw new InvalidArgumentException('Nested SVG paint patterns are unsupported.');
+                    }
+                }
+                $userSpace = $element->getAttribute('patternUnits') === 'userSpaceOnUse';
+                foreach (['width' => $box[2], 'height' => $box[3]] as $key => $extent) {
+                    $value = $element->getAttribute($key);
+                    if (!is_numeric($value) || !is_finite((float) $value) || (float) $value < ($userSpace ? $extent : 1) / 64 || (float) $value > 100000) {
+                        throw new InvalidArgumentException('SVG paint pattern exceeds the bounded tile density.');
+                    }
+                }
+            }
+        }
+        foreach ($document->getElementsByTagName('*') as $element) {
+            foreach ($element->attributes as $attribute) {
+                preg_match_all('/url\(#([A-Za-z_][A-Za-z0-9_.:-]*)\)/', $attribute->value, $matches);
+                foreach ($matches[1] as $id) {
+                    if (!in_array($ids[$id] ?? '', ['linearGradient', 'radialGradient', 'pattern'], true)) {
+                        throw new InvalidArgumentException('SVG paint contains an unresolved local paint reference.');
+                    }
+                    if ($ids[$id] === 'pattern') {
+                        for ($parent = $element; $parent instanceof DOMElement; $parent = $parent->parentNode) {
+                            if ($parent->localName === 'pattern') {
+                                throw new InvalidArgumentException('Nested or recursive SVG paint patterns are unsupported.');
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        self::ValidateInheritedPatterns($document->documentElement, $ids, ['fill' => '#000', 'stroke' => 'none'], false);
+    }
+
+    private static function ValidateInheritedPatterns(DOMElement $element, array $ids, array $paints, bool $inside): void
+    {
+        $inside = $inside || $element->localName === 'pattern';
+        $styles = [];
+        foreach (explode(';', $element->getAttribute('style')) as $declaration) {
+            $parts = explode(':', $declaration, 2);
+            if (count($parts) === 2) {
+                $styles[trim($parts[0])] = trim($parts[1]);
+            }
+        }
+        foreach ($paints as $name => $value) {
+            $paint = $styles[$name] ?? trim($element->getAttribute($name));
+            if ($paint !== '' && !in_array(strtolower($paint), ['inherit', 'unset', 'revert', 'revert-layer'], true)) {
+                $paints[$name] = $paint;
+            }
+        }
+        if ($inside && in_array($element->localName, ['path', 'rect', 'circle', 'ellipse', 'line', 'polyline', 'polygon'], true)) {
+            foreach ($paints as $paint) {
+                if (preg_match('/^url\(#([^)]*)\)$/D', $paint, $match) === 1 && ($ids[$match[1]] ?? '') === 'pattern') {
+                    throw new InvalidArgumentException('Inherited nested SVG paint patterns are unsupported.');
+                }
+            }
+        }
+        foreach ($element->childNodes as $child) {
+            if ($child instanceof DOMElement) {
+                self::ValidateInheritedPatterns($child, $ids, $paints, $inside);
             }
         }
     }

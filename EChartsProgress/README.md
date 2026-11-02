@@ -38,6 +38,35 @@ Füllfarbe färbt diese Bilder nicht um; der Wert bestimmt den sichtbaren
 Ausschnitt. Auch die Textvorlage behält ihre ursprüngliche schwarze Schrift.
 Die separate Hintergrundfarbe und ihre Verbreiterung bleiben wirksam.
 
+### Verlaufsfarben und SVG-Füllbilder aus JSLive
+
+Zusätzlich werden die JSLive-Felder `override_fill`, `override_stroke` und
+`fill_backgroundFile` übernommen. Unterstützt sind explizite Hex-Farben,
+SVG-Bilder als Base64-Daten-URI in den Overrides und
+`data:ldbar/res,gradient(Winkel,Dauer,Farbe,...)`
+mit zwei bis 16 Hex-Farben, Winkel 0–360° und Dauer 0–3600 Sekunden. Der
+Verlauf behält Richtung und wiederholte Palette als statisches Anfangsbild.
+Die zyklische Bewegung dieser alten Bildressource wird im Importbericht
+gesondert als Abweichung ausgewiesen. Wertanimationen bleiben einstellbar.
+
+Das SVG-Füllbild muss als `image/svg+xml` eingebettet sein; ein explizites
+`override_fill` hat Vorrang. Eigene SVG-Formen behalten weiterhin ihre eigenen
+Farben. Die Bildgröße und Musterperiode folgen der Quelle und ändern sich
+nicht mit dem Wert. Die Rasterauflösung passt sich dem verfügbaren Platz und
+der Pixeldichte an, innerhalb von maximal 4096 × 4096 Bildpixeln.
+
+SVG-Muster dürfen nur lokale Farbverweise verwenden. Verschachtelte oder
+rekursive Muster, externe Bilder, Skripte und Animationselemente bleiben
+gesperrt. Muster unterstützen Drehung und Verschiebung; ihre Dichte ist auf
+höchstens 64 Wiederholungen je Achse begrenzt. Prozentuale Bildgrößen und
+externe Bildadressen werden nicht nachgeladen. Die vorhandenen Datei-,
+Komplexitäts-, Modell- und Ausgabegrenzen gelten gemeinsam weiter.
+
+Bei JSLive kann der native SVG-Dateipfad schwarz erscheinen, weil die alte
+Engine ihn nicht als Bildfarbe erkennt. ECharts verwendet die geprüften
+eingebetteten SVG-Daten. Diesen sichtbaren Unterschied nennt der Importbericht
+ausdrücklich, bevor eine neue Instanz angelegt werden kann.
+
 Einpassung und Ränder folgen dem verfügbaren Bereich der Quellvorlage. Die
 untere Wertanzeige sitzt unter diesem Bereich; die mittige Anzeige bleibt in
 seiner Mitte. Linienenden entsprechen der tatsächlich sichtbaren Quellform.
