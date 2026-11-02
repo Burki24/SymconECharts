@@ -241,6 +241,10 @@ Neuanlagen aus. Die Bestätigung bindet den aktuellen `planHash`, die ausgewähl
 
 Für eine getrennte Neuanlage kann der jeweilige Chart-Eintrag zusätzlich
 `"separateFrom":"<bisherige Journal-ID>"` enthalten.
+Auch diese Bestätigung darf unverändert erneut gesendet werden: Derselbe gültige
+Plan verwendet das nachgewiesene neue Ziel wieder oder setzt dessen unterbrochene
+Anlage fort. Bereits abgeschlossene Ziele werden nicht erneut konfiguriert.
+Zwischenzeitliche Zieländerungen und unpassende Vorgänger bleiben gesperrt.
 `ECGW_GetJSLiveImportJournalPage(int $InstanzID, int $Offset, int $Limit,
 string $Revision): string` liest eine chronologisch geordnete Metadatenseite.
 Alle vier Argumente sind erforderlich. Mit `0, 25, ''` beginnen; weitere Seiten

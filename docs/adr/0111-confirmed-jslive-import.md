@@ -1,6 +1,6 @@
 # ADR 0111: Bestätigte JSLive-Neuanlage und familienbezogene Altmodelle
 
-- Status: Import, Wiederanlauf und Farb-/SVG-Darstellung bestätigt; frische 0.113-Pakete unter 1.383 live übernommen, exakte Wiederholung getrennter Neuanlagen noch fehlerhaft (J01)
+- Status: Import, Wiederanlauf und Farb-/SVG-Darstellung bestätigt; frische 0.113-Pakete unter 1.383 live übernommen; J01 lokal korrigiert und regressionsgeprüft, gezielte Live-Nachprüfung ausstehend
 - Datum: 2026-10-31
 - Ergänzt: ADR 0109, ADR 0110 und Vertrag 1.0
 
@@ -180,6 +180,25 @@ und Erfassungszeit sind keine neue Identität. Eine neue Revision verlangt einen
 frischen Vergleich und eine ausdrückliche Entscheidung für eine separate
 Neuanlage. Das alte Ziel bleibt erhalten. Wiederholung einer abgeschlossenen
 Revision liefert dieselben IDs und wendet ihre Konfiguration nicht erneut an.
+
+Auch die unveränderte Bestätigung mit `separateFrom` muss dieselbe getrennte
+Neuanlage wiederfinden und nach einem Abbruch fortsetzen. Neue Journaleinträge
+speichern deshalb optional ihren bestätigten Vorgänger unter `separateFrom`;
+ohne getrennte Anlage ist der Wert `null`. Journalversion 1 bleibt erhalten.
+Ein Verweis muss auf einen früheren Eintrag derselben Herkunft zeigen. Bei
+vorhandenen Version-1-Einträgen ohne dieses Feld gilt ausschließlich der direkt
+vorhergehende Eintrag derselben Herkunft als kompatibler Nachweis. Der aktuelle
+Planfingerabdruck und sämtliche Ziel-/Eigentums-/Snapshot-Prüfungen bleiben
+erforderlich. Falsche oder veraltete Vorgänger schaffen keine weitere Kopie;
+Erzeugungslücken verlangen weiterhin eine ausdrückliche Zuordnung.
+
+Die J01-Regression prüft abgeschlossene und unterbrochene getrennte Anlagen
+mit gleicher und neuer Revision, neuen und alten Version-1-Journalen an allen
+23 dauerhaften Schritten (92 Fälle). Ungültige Vorgänger, andere Pläne und
+veränderte oder fehlende Ziele bleiben gesperrt. Der öffentliche Gateway-Test
+prüft zusätzlich Wiederaufnahme und identische Bestätigungswiederholung mit
+dem konkreten Kerneladapter; ein abgeschlossener Wiederaufruf schreibt keine
+nativen Einstellungen. Die Live-Nachprüfung nach Eigentümer-Update steht aus.
 
 ## Familienintegration
 

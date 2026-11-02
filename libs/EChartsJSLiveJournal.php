@@ -89,22 +89,27 @@ final class EChartsJSLiveJournal
                     }
                 }
                 if ($entryID !== null && isset($choice['separateFrom'])) {
-                    if ($choice['separateFrom'] !== $entryID || $previous[$entryID]['targetID'] === null) {
+                    if ($choice['separateFrom'] !== $entryID) {
+                        if (!$this->IsSeparateReplay($previous, $entryID, $choice['separateFrom'], $plan['planHash'])) {
+                            throw new RuntimeException('PLAN_CHANGED: separate creation must identify the reviewed previous target.');
+                        }
+                    } elseif ($previous[$entryID]['targetID'] === null) {
                         throw new RuntimeException('PLAN_CHANGED: separate creation must identify the reviewed previous target.');
+                    } else {
+                        $old = $previous[$entryID];
+                        try {
+                            $unchanged = EChartsImportJson::Hash($this->kernel->Inspect($old['targetID'])) === EChartsImportJson::Hash($old['snapshot'])
+                                && !$this->kernel->HasChanges($old['targetID']);
+                        }
+                        catch (Throwable) {
+                            $unchanged = false;
+                        }
+                        if ($unchanged) {
+                            throw new RuntimeException('PLAN_CHANGED: unchanged imports must reuse the existing target.');
+                        }
+                        $separateMatched = true;
+                        $entryID = null;
                     }
-                    $old = $previous[$entryID];
-                    try {
-                        $unchanged = EChartsImportJson::Hash($this->kernel->Inspect($old['targetID'])) === EChartsImportJson::Hash($old['snapshot'])
-                            && !$this->kernel->HasChanges($old['targetID']);
-                    }
-                    catch (Throwable) {
-                        $unchanged = false;
-                    }
-                    if ($unchanged) {
-                        throw new RuntimeException('PLAN_CHANGED: unchanged imports must reuse the existing target.');
-                    }
-                    $separateMatched = true;
-                    $entryID = null;
                 }
                 if ($entryID === null) {
                     foreach ($previous as $candidate) {
@@ -121,6 +126,7 @@ final class EChartsJSLiveJournal
                     $entryID = bin2hex(random_bytes(16));
                     $entry = ['sequence' => count($journal['entries']) + 1, 'identity' => $identity, 'revision' => $chart['revision'], 'chartKey' => $key,
                         'planHash'       => $plan['planHash'], 'moduleID' => $chart['target']['moduleId'],
+                        'separateFrom'   => $choice['separateFrom'] ?? null,
                         'targetHash'     => EChartsImportJson::Hash($chart['target']),
                         'marker'         => self::Marker($identity, $entryID),
                         'status'         => 'planned', 'phase' => 'planned', 'targetID' => null,
@@ -233,6 +239,14 @@ final class EChartsJSLiveJournal
             }
             $sequences[$entry['sequence']] = true;
         }
+        foreach ($journal['entries'] as $entry) {
+            if (isset($entry['separateFrom']) && (!is_string($entry['separateFrom'])
+                || !isset($journal['entries'][$entry['separateFrom']])
+                || $journal['entries'][$entry['separateFrom']]['identity'] !== $entry['identity']
+                || $journal['entries'][$entry['separateFrom']]['sequence'] >= $entry['sequence'])) {
+                throw new RuntimeException('JOURNAL_INVALID: invalid separate-creation predecessor.');
+            }
+        }
         if ($sequences !== []) {
             $numbers = array_keys($sequences);
             sort($numbers, SORT_NUMERIC);
@@ -251,6 +265,29 @@ final class EChartsJSLiveJournal
     {
         self::Validate($journal);
         $this->kernel->Save($journal);
+    }
+
+    private function IsSeparateReplay(array $previous, string $entryID, mixed $separateFrom, string $planHash): bool
+    {
+        $entry = $previous[$entryID];
+        if (!is_string($separateFrom) || !isset($previous[$separateFrom])
+            || $previous[$separateFrom]['targetID'] === null
+            || $previous[$separateFrom]['sequence'] >= $entry['sequence'] || $entry['planHash'] !== $planHash) {
+            return false;
+        }
+        if (array_key_exists('separateFrom', $entry)) {
+            return $entry['separateFrom'] === $separateFrom;
+        }
+        // Existing version-1 entries have no predecessor field. Only the immediately preceding
+        // import of this identity can prove their chronological separate-creation relationship.
+        $predecessor = null;
+        foreach ($previous as $id => $candidate) {
+            if ($id === $entryID) {
+                break;
+            }
+            $predecessor = $id;
+        }
+        return $predecessor === $separateFrom;
     }
 
     private function Continue(array &$entry, array &$journal, array $target): void

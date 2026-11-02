@@ -23,8 +23,9 @@ Animationen. Die Zahlenprüfung trennt originale Profiltexte vom nativen Tooltip
 Der Gegenversuch ohne auflösungsangepasste SVG-Rasterung wird erkannt.
 
 Die Live-Abnahme von zyklischem Verlauf und Zahlenbeschriftung ist unter 1.382
-vom Eigentümer bestätigt. Der aktuelle Gesamtstand einschließlich der noch
-offenen Journalabweichung J01 bei frischen JSLive-0.113-Paketen steht in der
+vom Eigentümer bestätigt. Die Journalabweichung J01 bei frischen
+JSLive-0.113-Paketen ist lokal korrigiert und regressionsgeprüft; die gezielte
+Live-Nachprüfung nach Eigentümer-Update steht aus. Der Gesamtstand steht in der
 [Migrationsabnahme](JSLIVE_MIGRATION_ABNAHME.md). Frühere Abnahmen bleiben erhalten.
 
 ## Bisheriger JSLive-Export- und Importstand

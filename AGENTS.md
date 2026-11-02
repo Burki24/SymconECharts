@@ -444,7 +444,8 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   erhalten. Gemeinsame MCP-Zielabnahme, Wiederanlauf und die vereinbarten
   Original-/Ziel-Bildvergleiche sind bestätigt. Frische 0.113-Pakete sind unter
   1.383 live übernommen. Die exakte Wiederholung getrennter Neuanlagen mit
-  `separateFrom` ist noch fehlerhaft (J01); der aktuelle Nachweis steht in
+  `separateFrom` ist lokal korrigiert und regressionsgeprüft (J01); die gezielte
+  Live-Nachprüfung nach Eigentümer-Update steht noch aus. Der aktuelle Nachweis steht in
   `docs/JSLIVE_MIGRATION_ABNAHME.md`. Es wird keine
   Renderinggleichheit vorgetäuscht.
   Profilinformationen werden

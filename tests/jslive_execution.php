@@ -647,8 +647,43 @@ $preserve = $kernel['objects'][$child];
 $changed = json_decode($gateway->ExecuteJSLiveImport($json, '{}', 15000, EChartsImportJson::Canonical($lastNativeConfirmation)), true, 64, JSON_THROW_ON_ERROR);
 nativeAssert($changed['charts'][$lastNativeRow['chartKey']]['error'] === 'TARGET_CHANGED' && $kernel['objects'][$child] === $preserve
     && count($kernel['mutations']) === $mutations, 'A changed output must never be overwritten on import retry.');
+
+// J01: the public API must accept the identical separate-copy confirmation after staging and on completed retries.
+$kernel['objects'][15001] = nativeObject(15001, 'Separate import category', 0);
+$separatePlan = json_decode($gateway->PrepareJSLiveImport($json, '{}', 15001), true, 64, JSON_THROW_ON_ERROR);
+$separateRow = array_values($separatePlan['charts'])[0];
+nativeAssert(!$separateRow['blocked'], 'Separate-copy plan must remain supported.');
+$separateConfirmation = EChartsImportJson::Canonical(['confirmedNewInstances' => true, 'planHash' => $separatePlan['planHash'],
+    'charts'                                                                  => [['chartKey' => $separateRow['chartKey'], 'accept' => $separateRow['differences'], 'separateFrom' => $lastNativeResult['journalID']]]]);
+$protectedVariables = $kernel['variables'];
+$protected = EChartsImportJson::Hash([$protectedVariables, $kernel['archives'], $kernel['profiles'],
+    $kernel['configuration'][$originalID], $kernel['configuration'][$lastTarget], $kernel['objects'][$child]]);
+$kernel['interruptAfterStage'] = true;
+$separateFailed = json_decode($gateway->ExecuteJSLiveImport($json, '{}', 15001, $separateConfirmation), true, 64, JSON_THROW_ON_ERROR)['charts'][$separateRow['chartKey']];
+nativeAssert($separateFailed['status'] === 'failed' && count($kernel['created']) === 41, 'Separate-copy staging interruption was not exercised.');
+$kernel['interruptAfterStage'] = false;
+$legacyJournal = $gateway->GetTestJournal();
+unset($legacyJournal['entries'][$separateFailed['journalID']]['separateFrom']);
+$gateway->RestoreTestJournal($legacyJournal);
+$separateComplete = json_decode($gateway->ExecuteJSLiveImport($json, '{}', 15001, $separateConfirmation), true, 64, JSON_THROW_ON_ERROR)['charts'][$separateRow['chartKey']];
+nativeAssert(
+    $separateComplete['status'] === 'complete' && $separateComplete['targetID'] === $separateFailed['targetID']
+    && $separateComplete['journalID'] === $separateFailed['journalID'] && count($kernel['created']) === 41,
+    'The public API must resume a legacy separate-copy entry using the original confirmation.'
+);
+$mutations = count($kernel['mutations']);
+$separateReplay = json_decode($gateway->ExecuteJSLiveImport($json, '{}', 15001, $separateConfirmation), true, 64, JSON_THROW_ON_ERROR)['charts'][$separateRow['chartKey']];
+nativeAssert(
+    $separateReplay === $separateComplete && count($kernel['mutations']) === $mutations && count($kernel['created']) === 41,
+    'An identical completed separate-copy confirmation must return the same IDs without native writes.'
+);
+nativeAssert(
+    $protected === EChartsImportJson::Hash([array_intersect_key($kernel['variables'], $protectedVariables), $kernel['archives'], $kernel['profiles'],
+        $kernel['configuration'][$originalID], $kernel['configuration'][$lastTarget], $kernel['objects'][$child]]),
+    'Separate creation/recovery/replay changed the original, previous target, output, sources, profiles or archives.'
+);
 nativeAssert(!str_contains(implode('\n', $gateway->debug), 'contentBase64') && !str_contains(implode('\n', $gateway->debug), 'JSLiveImportModel'), 'Private import contents leaked into debug.');
-echo "JSLive confirmed public API and native kernel adapter: 40 new targets, both HTML outputs, repeat without writes, unchanged originals/sources/profiles/archives verified.\n";
+echo "JSLive confirmed public API and native kernel adapter: 40 new targets plus separate-copy recovery/replay, both HTML outputs, repeat without writes, unchanged originals/sources/profiles/archives verified.\n";
 
 function EChartsJSLivePackageArray(mixed $value): mixed
 {

@@ -41,6 +41,12 @@
 
 ## Fixes
 
+- Identische Bestätigungen getrennter JSLive-Neuanlagen mit `separateFrom`
+  verwenden das nachgewiesene neue Ziel wieder und setzen unterbrochene Anlagen
+  fort, statt mit `PLAN_CHANGED` abzubrechen. Bestehende Journale bleiben nutzbar;
+  geänderte Ziele, fremde Vorgänger und uneindeutige Erzeugungslücken bleiben
+  geschützt. Quellen, Archive und Designs werden nicht verändert.
+
 - Übernommene JSLive-Pfadfüllungen zeichnen Hintergrundränder mit der
   ursprünglichen Maskenform. `line` und `rainbow` bleiben im Füllmodus wie im
   Original leer, ohne zusätzlichen grauen Strich. Wertanzeigen, Quellen,

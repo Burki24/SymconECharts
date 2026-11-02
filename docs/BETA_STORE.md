@@ -6,7 +6,8 @@ bis zur zugesagten JSLive-Übernahme zurückgestellt. Der gemeinsame
 Die bestätigte Importanlage, Wiederanlauf und die vereinbarten Original-/Ziel-
 Darstellungsabnahmen sind inzwischen erfolgt. Frische 0.113-Pakete sind unter
 1.383 live übernommen. Die exakte Bestätigungswiederholung getrennter Neuanlagen
-ist noch fehlerhaft (J01) und vor dem technischen Abschluss zu korrigieren;
+ist lokal korrigiert und regressionsgeprüft (J01); ihre gezielte Live-Nachprüfung
+nach Eigentümer-Update steht vor dem technischen Abschluss noch aus;
 Details stehen in der [Migrationsabnahme](JSLIVE_MIGRATION_ABNAHME.md).
 Die folgenden Release-Texte
 und das bisher geplante Datum sind Vorbereitung, keine Einreichungsfreigabe.

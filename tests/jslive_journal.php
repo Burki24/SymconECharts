@@ -303,6 +303,14 @@ $separate = $confirm;
 $separate['charts'][0]['separateFrom'] = $journalID;
 $result = $engine->Execute($new, $separate);
 journalAssert($kernel->creates === 2 && $kernel->objects[$id] === $edited[$id], 'Explicit separate creation must preserve old target.');
+$separateResult = $result['charts']['instance:12000'];
+$beforeReplay = [$kernel->objects, $kernel->plannedConfiguration, $kernel->creates, $kernel->stages, $kernel->applies];
+$replayed = (new EChartsJSLiveJournal($kernel))->Execute($new, $separate)['charts']['instance:12000'];
+journalAssert(
+    $replayed === $separateResult
+    && [$kernel->objects, $kernel->plannedConfiguration, $kernel->creates, $kernel->stages, $kernel->applies] === $beforeReplay,
+    'The exact separate-revision confirmation must reuse the completed target without native writes.'
+);
 
 // Interrupt after every durable write/kernel operation. Recover without duplicates or blind re-creation.
 $reference = new ImportJournalKernel();
@@ -364,12 +372,151 @@ $oldTarget = $separateKernel->objects[$first['targetID']];
 $newTarget = $separateEngine->Execute($plan, $separateChoice)['charts']['instance:12000'];
 journalAssert($newTarget['status'] === 'complete' && $newTarget['targetID'] !== $first['targetID']
     && $separateKernel->objects[$first['targetID']] === $oldTarget, 'Explicit separate creation for changed same-revision targets must preserve the old target.');
+$sameRevisionReplay = $separateEngine->Execute($plan, $separateChoice)['charts']['instance:12000'];
+journalAssert($sameRevisionReplay === $newTarget && $separateKernel->creates === 2, 'Same-revision separate confirmations must also be idempotent.');
 $nextRevision = $plan;
 $nextRevision['charts']['instance:12000']['revision'] = str_repeat('d', 64);
 $nextChoice = $confirm;
 $nextChoice['charts'][0]['separateFrom'] = $newTarget['journalID'];
 $nextTarget = $separateEngine->Execute($nextRevision, $nextChoice)['charts']['instance:12000'];
 journalAssert($nextTarget['status'] === 'complete' && $separateKernel->creates === 3, 'Chronological revision selection must survive canonical journal key sorting.');
+
+// The exact original confirmation must recover every durable step, including journals written before J01.
+$separateCheckpoints = 0;
+foreach (['same-revision', 'new-revision'] as $revisionMode) {
+    foreach (['recorded-predecessor', 'legacy-version-1'] as $journalMode) {
+        for ($stop = 1; $stop <= $checkpoints; ++$stop) {
+            $k = new ImportJournalKernel();
+            $e = new EChartsJSLiveJournal($k);
+            $original = $e->Execute($plan, $confirm)['charts']['instance:12000'];
+            $k->objects[$original['targetID']]['configuration']['Title'] = 'Owner customization';
+            $old = $k->objects[$original['targetID']];
+            $separatePlan = $revisionMode === 'same-revision' ? $plan : $new;
+            $choice = $confirm;
+            $choice['charts'][0]['separateFrom'] = $original['journalID'];
+            $k->calls = 0;
+            $k->crashAfter = $stop;
+            try {
+                $e->Execute($separatePlan, $choice);
+            } catch (RuntimeException $exception) {
+                journalAssert($exception->getMessage() === 'Simulated interruption', $exception->getMessage());
+            }
+            $k->crashAfter = null;
+            if ($journalMode === 'legacy-version-1') {
+                foreach ($k->journal['entries'] as &$legacyEntry) {
+                    unset($legacyEntry['separateFrom']);
+                }
+                unset($legacyEntry);
+            }
+            // Reconstruct the engine as after a new request or module update.
+            $e = new EChartsJSLiveJournal($k);
+            $row = $e->Execute($separatePlan, $choice)['charts']['instance:12000'];
+            $retainedEntryID = $row['journalID'];
+            if ($row['error'] === 'RECOVERY_REQUIRED') {
+                $entry = $k->journal['entries'][$retainedEntryID];
+                $candidates = array_diff(array_keys($k->objects), $entry['creationIntent']['before']);
+                journalAssert($k->creates <= 2, 'A separate creation gap must never cause a third object.');
+                $e->Resolve($retainedEntryID, array_values($candidates)[0] ?? 0, $entry['revision']);
+                $row = $e->Execute($separatePlan, $choice)['charts']['instance:12000'];
+            }
+            journalAssert(
+                $row['status'] === 'complete' && $row['journalID'] === $retainedEntryID
+                && $row['targetID'] !== $original['targetID'] && $k->creates === 2 && count($k->journal['entries']) === 2
+                && $k->objects[$original['targetID']] === $old && !$k->locked && $k->journal['version'] === 1,
+                'Separate recovery failed: ' . $revisionMode . '/' . $journalMode . '/' . $stop
+            );
+            $before = [$k->objects, $k->plannedConfiguration, $k->creates, $k->stages, $k->applies];
+            $replayed = $e->Execute($separatePlan, $choice)['charts']['instance:12000'];
+            journalAssert(
+                $replayed === $row
+                && [$k->objects, $k->plannedConfiguration, $k->creates, $k->stages, $k->applies] === $before,
+                'Exact separate replay must preserve target IDs, active/draft settings and mutation counts.'
+            );
+            ++$separateCheckpoints;
+        }
+    }
+}
+
+// Neither compatibility nor replay may bypass confirmation binding, ownership or owner changes.
+foreach (['recorded-predecessor', 'legacy-version-1'] as $journalMode) {
+    $k = new ImportJournalKernel();
+    $e = new EChartsJSLiveJournal($k);
+    $original = $e->Execute($plan, $confirm)['charts']['instance:12000'];
+    $k->objects[$original['targetID']]['configuration']['Title'] = 'Owner customization';
+    $choice = $confirm;
+    $choice['charts'][0]['separateFrom'] = $original['journalID'];
+    $copy = $e->Execute($plan, $choice)['charts']['instance:12000'];
+    $otherPlan = $plan;
+    $otherPlan['charts']['instance:12000']['identity'] = 'synthetic-installation:instance:12002';
+    $foreign = $e->Execute($otherPlan, $confirm)['charts']['instance:12000'];
+    if ($journalMode === 'legacy-version-1') {
+        foreach ($k->journal['entries'] as &$legacyEntry) {
+            unset($legacyEntry['separateFrom']);
+        }
+        unset($legacyEntry);
+    }
+    foreach ([str_repeat('0', 32), $foreign['journalID'], 42, ['unexpected']] as $badReference) {
+        $bad = $choice;
+        $bad['charts'][0]['separateFrom'] = $badReference;
+        $before = [$k->journal, $k->objects, $k->creates, $k->applies];
+        journalThrows(fn () => $e->Execute($plan, $bad), 'PLAN_CHANGED:');
+        journalAssert(
+            [$k->journal, $k->objects, $k->creates, $k->applies] === $before && !$k->locked,
+            'An invalid or foreign predecessor must fail before journal or native writes.'
+        );
+    }
+    $changedPlan = $plan;
+    $changedChoice = $choice;
+    $changedChoice['planHash'] = $changedPlan['planHash'] = str_repeat('f', 64);
+    journalThrows(fn () => $e->Execute($changedPlan, $changedChoice), 'PLAN_CHANGED:');
+    foreach (['configuration', 'name', 'info', 'children', 'draft', 'missing'] as $drift) {
+        $objects = $k->objects;
+        if ($drift === 'configuration') {
+            $k->objects[$copy['targetID']]['configuration']['Title'] = 'Owner design';
+        } elseif ($drift === 'draft') {
+            $k->plannedConfiguration[$copy['targetID']] = ['Title' => 'Owner draft'];
+        } elseif ($drift === 'missing') {
+            unset($k->objects[$copy['targetID']]);
+        } else {
+            $k->objects[$copy['targetID']][$drift] = $drift === 'children' ? [99999] : 'Owner metadata';
+        }
+        $before = [$k->objects, $k->plannedConfiguration, $k->creates, $k->stages, $k->applies];
+        $blocked = $e->Execute($plan, $choice)['charts']['instance:12000'];
+        journalAssert(
+            $blocked['status'] === 'failed' && $blocked['targetID'] === $copy['targetID']
+            && [$k->objects, $k->plannedConfiguration, $k->creates, $k->stages, $k->applies] === $before,
+            'Separate replay must preserve changed, missing or unowned targets: ' . $drift
+        );
+        $k->objects = $objects;
+        $k->plannedConfiguration = [];
+    }
+    $k->objects[$copy['targetID']]['configuration']['Title'] = 'Owner changes to second copy';
+    $thirdChoice = $confirm;
+    $thirdChoice['charts'][0]['separateFrom'] = $copy['journalID'];
+    $third = $e->Execute($plan, $thirdChoice)['charts']['instance:12000'];
+    $before = [$k->objects, $k->creates, $k->applies];
+    journalThrows(fn () => $e->Execute($plan, $choice), 'PLAN_CHANGED:');
+    journalAssert(
+        [$k->objects, $k->creates, $k->applies] === $before && $k->creates === 4,
+        'A stale confirmation must not select a later separate copy or allocate another target.'
+    );
+    $badJournal = $k->journal;
+    foreach ([$third['journalID'], $foreign['journalID'], str_repeat('0', 32), 42] as $badReference) {
+        $badJournal['entries'][$copy['journalID']]['separateFrom'] = $badReference;
+        journalThrows(fn () => EChartsJSLiveJournal::Validate($badJournal), 'JOURNAL_INVALID:');
+    }
+}
+
+// An explicit copy of an older revision may follow a different revision; new entries record the exact origin.
+$separateKernel->objects[$newTarget['targetID']]['configuration']['Title'] = 'Owner edit of older revision';
+$nonAdjacentChoice = $confirm;
+$nonAdjacentChoice['charts'][0]['separateFrom'] = $newTarget['journalID'];
+$nonAdjacent = $separateEngine->Execute($plan, $nonAdjacentChoice)['charts']['instance:12000'];
+$nonAdjacentReplay = $separateEngine->Execute($plan, $nonAdjacentChoice)['charts']['instance:12000'];
+journalAssert(
+    $nonAdjacentReplay === $nonAdjacent && $separateKernel->creates === 4,
+    'The recorded predecessor must support an explicitly reviewed copy of a nonadjacent revision.'
+);
 
 $partialPlan = $plan;
 $partialChart = $chart;
@@ -392,4 +539,5 @@ $candidates = array_keys($partialKernel->objects);
 $partialEngine->Resolve($gap['journalID'], $candidates[1], $partialChart['revision']);
 $partial = $partialEngine->Execute($partialPlan, $partialChoice);
 journalAssert($partial['charts']['instance:12001']['status'] === 'complete' && $partialKernel->creates === 2, 'Partial batch must resume at its own journal entry.');
-echo 'JSLive journal: pending/active settings, compatible version-1 recovery, draft/active drift protection and ' . $checkpoints . " interruption checkpoints passed.\n";
+echo 'JSLive journal: pending/active settings, compatible version-1 recovery, drift protection, ' . $checkpoints
+    . ' initial and ' . $separateCheckpoints . " separate-import interruption checkpoints passed.\n";

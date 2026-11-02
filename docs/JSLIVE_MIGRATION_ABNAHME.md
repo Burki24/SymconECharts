@@ -1,7 +1,8 @@
 # JSLive-Migrationsabnahme
 
 Stand: 02.11.2026. Dieser Bericht trennt bestätigte Funktionen, lokale Prüfungen
-und den offenen Wiederholungsfehler aus der Live-Abnahme aktueller Quellpakete. Er ersetzt veraltete
+und die lokal korrigierte, noch live nachzuprüfende Journalabweichung aktueller
+Quellpakete. Er ersetzt veraltete
 Offen-Vermerke früherer Zwischenstände, nicht deren historischen Prüfumfang.
 Eine beliebige oder pixelgleiche Chart.js-Migration wird nicht zugesagt.
 
@@ -23,7 +24,7 @@ Eine beliebige oder pixelgleiche Chart.js-Migration wird nicht zugesagt.
 | Live-Wiederanlauf 1.383 | Je ein neues Ziel aller sechs Familien wurde ohne Gateway-Verbindung initialisiert (Status 298). Nach Wiederverbinden erfolgte die Rückkehr über den bestehenden Timer zu Status 102/ready, ohne weiteres ApplyChanges. |
 | Normaler Live-Wiederaufruf | Alle 53 Importe liefern ohne den Neuanlagezusatz separateFrom dieselben Ziel-IDs; deren Konfigurationen bleiben gleich. |
 | Journal und Bestandsschutz | 106 vollständige Einträge in drei Metadatenseiten, 106 eindeutige Ziele; die vorherigen 53 Einträge sind unverändert. 108 geschützte Konfigurationen, zwölf Quellvariablen samt Werten/Darstellungen und vier Profile unverändert; enthalten ist auch die Archivkonfiguration. Die neuen Testziele bleiben zur Nachprüfung erhalten. |
-| J01 – exakte Bestätigungswiederholung | Die unveränderte erneute Übermittlung einer erfolgreichen getrennten Neuanlage mit separateFrom wird mit PLAN_CHANGED abgewiesen. In Progress und Gauge reproduziert; keine Duplikate oder Bestandsänderungen. Korrektur noch offen. |
+| J01 – exakte Bestätigungswiederholung | Unter 1.383 in Progress und Gauge mit PLAN_CHANGED reproduziert; keine Duplikate oder Bestandsänderungen. Lokal korrigiert und regressionsgeprüft. Gezielte Live-Nachprüfung nach Eigentümer-Update ausstehend. |
 
 ## Geprüfte Vorlagenänderung
 
@@ -69,18 +70,36 @@ Wiederaufruf gegen den inzwischen gefundenen neuen Eintrag geprüft, bevor desse
 vorhandener Zielnachweis wiederverwendet wird. Es entstanden keine zusätzlichen
 Ziele; alle 106 Journaleinträge blieben vollständig.
 
-Erwartet ist eine idempotente Wiederholung bei gleichem gültigem Plan und
-unverändert nachgewiesenem Ziel. Eine Korrektur muss die Bestands-, Identitäts-
-und Eigentumsprüfungen erhalten und vollständige sowie unterbrochene getrennte
-Importe mit Regressionen abdecken. Produktivcode wurde in dieser Live-Prüfung
-nicht verändert. Die anschließende gezielte Live-Nachprüfung bleibt offen.
+Die lokale Korrektur trennt die Wiederaufnahme einer getrennten Anlage von
+einer weiteren Neuanlage. Neue Journaleinträge speichern den ausdrücklich
+bestätigten Vorgänger; alte Version-1-Einträge ohne das Feld verwenden nur den
+direkten zeitlichen Vorgänger derselben Herkunft als kompatiblen Nachweis.
+Planfingerabdruck, Zieldefinition, Eigentum und Snapshots bleiben strikt geprüft.
+Eine unveränderte vollständige Anlage wird ohne native Schreibaufrufe erneut
+zurückgegeben; unterbrochene Anlagen verwenden dieselbe Journal-/Ziel-ID.
+
+`php tests/jslive_journal.php` reproduziert den alten Fehler und prüft jetzt
+zusätzlich 92 Abbruchszenarien getrennter Anlagen: gleiche/neue Revision und
+neue/alte Journale an jeweils 23 dauerhaften Schritten. Ungültige, fremde und
+veraltete Vorgänger, andere Pläne sowie Ziel-/Entwurfs-/Eigentumsänderungen
+bleiben gesperrt. Der öffentliche Gateway-Test in `tests/jslive_execution.php`
+prüft auch den konkreten Kerneladapter mit unterbrochener getrennter Anlage,
+altem Journal und identischer Bestätigungswiederholung ohne native Schreibaufrufe.
+Beide Vorlagenläufe (`php tests/jslive_execution.php` mit und ohne
+`--current-templates`), der paginierte Journaltest und die vollständige lokale
+Qualitätssuite `php tests/quality.php --fix` sind bestanden. Schutzbudgets und
+Versionsmetadaten wurden nicht erhöht.
+
+Die gezielte Live-Nachprüfung bleibt nach Eigentümer-Commit und Modulupdate
+offen. Die erhaltenen Testziele werden dafür wiederverwendet; Bestände oder
+Journale wurden für die lokale Korrektur nicht auf dem Server verändert.
 
 ## Beta-Entscheidung
 
 Die Nutzungsgrenzen-Roadmap bleibt abgeschlossen. Familienmapper, Importjournal
 und die oben bestätigten Bildvergleiche sind erledigt. Die aktuelle
 0.113-Herkunftserkennung und Neuanlage sind live bestätigt. Für den technischen
-Migrationsabschluss fehlen die Korrektur und gezielte Live-Nachprüfung von J01.
+Migrationsabschluss fehlt die gezielte Live-Nachprüfung der lokal korrigierten J01-Abweichung.
 
 Echte Restlücken bleiben sichtbar: nicht separat belegte native Dateiauswahl-,
 Tabellen-/Download-Grenzbedienungen, weitere Touch-/Gerätevarianten, längere Last-
