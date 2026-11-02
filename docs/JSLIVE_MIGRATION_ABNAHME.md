@@ -1,7 +1,7 @@
 # JSLive-Migrationsabnahme
 
 Stand: 02.11.2026. Dieser Bericht trennt bestätigte Funktionen, lokale Prüfungen
-und die noch ausstehende Live-Abnahme aktueller Quellpakete. Er ersetzt veraltete
+und den offenen Wiederholungsfehler aus der Live-Abnahme aktueller Quellpakete. Er ersetzt veraltete
 Offen-Vermerke früherer Zwischenstände, nicht deren historischen Prüfumfang.
 Eine beliebige oder pixelgleiche Chart.js-Migration wird nicht zugesagt.
 
@@ -18,6 +18,12 @@ Eine beliebige oder pixelgleiche Chart.js-Migration wird nicht zugesagt.
 | Neue Quellpakete | Alle 53 Testcharts frisch per MCP mit JSLive 0.113 exportiert, ohne Exportprobleme. |
 | Aktuelle native Modelle | Alle 53 frischen Pakete lokal geprüft und jeweils als Kachel-/IPSView-HTML erzeugt; größte Ausgabe 737869 Bytes. Die Quellen-/Archivleser dieser lokalen Modellprüfung sind Testdoppel, kein erneuter Live-Archivnachweis. |
 | Herkunftserkennung 0.113 | Lokal korrigiert. 80 Pläne prüfen die bisherigen 40 Varianten mit LF/CRLF-Vorlagenbytes und unveränderten nativen Revisionen. Der Kerneladapter prüft auch mit aktuellen Vorlagen bestätigte Neuanlage, Wiederanlauf und Wiederholung ohne Schreibzugriffe. |
+| Live-Planung und Neuanlage 1.383 | Alle 53 Pakete frisch aus JSLive 0.113 exportiert, ohne Blocker geplant und mit einzeln bestätigten Unterschieden in einer separaten Testkategorie übernommen. |
+| Live-Ausgaben 1.383 | Alle 53 Ziele aktiv und Datenstatus ready; 106 vollständige Kachel-/IPSView-HTML-Dokumente, größte Ausgabe 760280 Bytes. Das ist ein Daten-/HTML-Nachweis, kein erneuter Bildvergleich aller Paare. |
+| Live-Wiederanlauf 1.383 | Je ein neues Ziel aller sechs Familien wurde ohne Gateway-Verbindung initialisiert (Status 298). Nach Wiederverbinden erfolgte die Rückkehr über den bestehenden Timer zu Status 102/ready, ohne weiteres ApplyChanges. |
+| Normaler Live-Wiederaufruf | Alle 53 Importe liefern ohne den Neuanlagezusatz separateFrom dieselben Ziel-IDs; deren Konfigurationen bleiben gleich. |
+| Journal und Bestandsschutz | 106 vollständige Einträge in drei Metadatenseiten, 106 eindeutige Ziele; die vorherigen 53 Einträge sind unverändert. 108 geschützte Konfigurationen, zwölf Quellvariablen samt Werten/Darstellungen und vier Profile unverändert; enthalten ist auch die Archivkonfiguration. Die neuen Testziele bleiben zur Nachprüfung erhalten. |
+| J01 – exakte Bestätigungswiederholung | Die unveränderte erneute Übermittlung einer erfolgreichen getrennten Neuanlage mit separateFrom wird mit PLAN_CHANGED abgewiesen. In Progress und Gauge reproduziert; keine Duplikate oder Bestandsänderungen. Korrektur noch offen. |
 
 ## Geprüfte Vorlagenänderung
 
@@ -41,26 +47,40 @@ bleiben zugelassen. Weder eine Versionsnummer noch ein gültiger Paket-Hash
 ersetzt die konkrete Vorlagenprüfung. Andere veränderte Templates bleiben
 gesperrt, auch mit korrekt neu berechneten Integritätsdaten.
 
-## Noch offen vor dem technischen Migrationsabschluss
+## J01: Wiederholung einer getrennten Neuanlage
 
-Die Testinstallation verwendet beim letzten MCP-Lauf 1.382. Von 53 frischen
-Paketen bestehen dort 26 die vollständige lesende Planung; 27 Progressbar-Pakete
-werden ausschließlich wegen der unbekannten 0.113-Vorlagenkennung abgewiesen.
-Das ist der reproduzierte Ausgangszustand, keine Live-Abnahme der neuen Freigabe.
+Die frühere Vorlagensperre unter 1.382 ist mit 1.383 beseitigt. Der vollständige
+Live-Lauf zeigt jedoch einen eigenständigen Journalfehler:
 
-Nach Eigentümer-Commit/Push und regulärem Modulupdate sind die frischen Pakete
-erneut zu prüfen: Paketprüfung, vollständiger Plan, bestätigte Neuanlage in
-separaten Testzielen, Wiederanlauf, Wiederholung ohne Duplikate und Journal.
-Bestehende Originale, Zielinstanzen, Quellen, Darstellungen und Archive bleiben
-erhalten. Bestätigte optische Prüfungen werden nicht pauschal erneut verlangt;
-geprüft werden die Herkunftserkennung und der reguläre Importablauf.
+1. Ein bereits vorhandenes Original erhält einen neuen Plan mit separater
+   Zielkategorie. Die Bestätigung enthält `separateFrom` mit dem bisherigen
+   Journaleintrag; alle Planunterschiede sind einzeln akzeptiert.
+2. Die reguläre Ausführung legt genau ein neues Ziel an und meldet `complete`.
+3. Dieselbe Bestätigung wird unverändert erneut gesendet. Statt dasselbe Ziel
+   zurückzugeben, meldet der Journalpfad `PLAN_CHANGED: separate creation must
+   identify the reviewed previous target.`
+4. Wird ausschließlich `separateFrom` entfernt, liefert derselbe Plan das eben
+   erstellte Ziel ohne Konfigurationsänderung zurück. Dies wurde zur Abgrenzung
+   geprüft und ist keine Korrektur der identischen Bestätigungswiederholung.
+
+Der Befund ist mit Progress und Gauge unabhängig von der Vorlagenfamilie
+reproduziert. In `libs/EChartsJSLiveJournal.php` wird der Neuanlagezusatz beim
+Wiederaufruf gegen den inzwischen gefundenen neuen Eintrag geprüft, bevor dessen
+vorhandener Zielnachweis wiederverwendet wird. Es entstanden keine zusätzlichen
+Ziele; alle 106 Journaleinträge blieben vollständig.
+
+Erwartet ist eine idempotente Wiederholung bei gleichem gültigem Plan und
+unverändert nachgewiesenem Ziel. Eine Korrektur muss die Bestands-, Identitäts-
+und Eigentumsprüfungen erhalten und vollständige sowie unterbrochene getrennte
+Importe mit Regressionen abdecken. Produktivcode wurde in dieser Live-Prüfung
+nicht verändert. Die anschließende gezielte Live-Nachprüfung bleibt offen.
 
 ## Beta-Entscheidung
 
 Die Nutzungsgrenzen-Roadmap bleibt abgeschlossen. Familienmapper, Importjournal
-und die oben bestätigten Bildvergleiche sind erledigt. Für den technischen
-Migrationsabschluss fehlt aktuell die Live-Abnahme der frischen 0.113-Pakete
-nach dem nächsten Modulupdate.
+und die oben bestätigten Bildvergleiche sind erledigt. Die aktuelle
+0.113-Herkunftserkennung und Neuanlage sind live bestätigt. Für den technischen
+Migrationsabschluss fehlen die Korrektur und gezielte Live-Nachprüfung von J01.
 
 Echte Restlücken bleiben sichtbar: nicht separat belegte native Dateiauswahl-,
 Tabellen-/Download-Grenzbedienungen, weitere Touch-/Gerätevarianten, längere Last-

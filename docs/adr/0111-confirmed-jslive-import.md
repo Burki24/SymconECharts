@@ -1,6 +1,6 @@
 # ADR 0111: Bestätigte JSLive-Neuanlage und familienbezogene Altmodelle
 
-- Status: Import/Journal, Update-Wiederanlauf und Farb-/SVG-Darstellung bestätigt; frische 0.113-Pakete lokal geprüft, deren gemeinsame Live-Abnahme nach Modulupdate offen
+- Status: Import, Wiederanlauf und Farb-/SVG-Darstellung bestätigt; frische 0.113-Pakete unter 1.383 live übernommen, exakte Wiederholung getrennter Neuanlagen noch fehlerhaft (J01)
 - Datum: 2026-10-31
 - Ergänzt: ADR 0109, ADR 0110 und Vertrag 1.0
 

@@ -24,7 +24,7 @@ Der Gegenversuch ohne auflösungsangepasste SVG-Rasterung wird erkannt.
 
 Die Live-Abnahme von zyklischem Verlauf und Zahlenbeschriftung ist unter 1.382
 vom Eigentümer bestätigt. Der aktuelle Gesamtstand einschließlich der noch
-ausstehenden Prüfung frischer JSLive-0.113-Pakete steht in der
+offenen Journalabweichung J01 bei frischen JSLive-0.113-Paketen steht in der
 [Migrationsabnahme](JSLIVE_MIGRATION_ABNAHME.md). Frühere Abnahmen bleiben erhalten.
 
 ## Bisheriger JSLive-Export- und Importstand

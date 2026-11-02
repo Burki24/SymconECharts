@@ -4,8 +4,9 @@
 bis zur zugesagten JSLive-Übernahme zurückgestellt. Der gemeinsame
 [Export-/Importvertrag](JSLIVE_MIGRATION_CONTRACT.md) ist spezifiziert;
 Die bestätigte Importanlage, Wiederanlauf und die vereinbarten Original-/Ziel-
-Darstellungsabnahmen sind inzwischen erfolgt. Für frische 0.113-Pakete fehlt
-noch die gezielte Live-Abnahme nach Update der geprüften Vorlagenkennung;
+Darstellungsabnahmen sind inzwischen erfolgt. Frische 0.113-Pakete sind unter
+1.383 live übernommen. Die exakte Bestätigungswiederholung getrennter Neuanlagen
+ist noch fehlerhaft (J01) und vor dem technischen Abschluss zu korrigieren;
 Details stehen in der [Migrationsabnahme](JSLIVE_MIGRATION_ABNAHME.md).
 Die folgenden Release-Texte
 und das bisher geplante Datum sind Vorbereitung, keine Einreichungsfreigabe.
