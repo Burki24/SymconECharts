@@ -205,8 +205,12 @@ Text-Fill-Fall 38 und umfasst 20 Dokumente. Nachweisdateien und Screenshots
 liegen ausschließlich im temporären Ausgabeordner. F05 und die grundlegende
 F06-Einpassung sind unter 1.377 anhand der 18 Paare live bestätigt. Die dort
 gefundenen F06-Füllreste sind lokal korrigiert und mit den zusätzlichen
-Masken-/Canvas-/Rasterprüfungen abgesichert; deren neue Live-Abnahme nach
-Eigentümer-Modulupdate bleibt offen. Synthetische Wheel-Events
+Masken-/Canvas-/Rasterprüfungen abgesichert; deren lesende Live-Abnahme liegt
+unter 1.378 für Kachel und gerenderte IPSView-WebContent-Ausgaben vor. Der
+anschließende JSLive-Text-Fallback wird jetzt von der echten Quellvorlage
+aufgelöst; der Referenzlauf benötigt keine eigene Type-Umstellung mehr. Die
+63 Layout- und 24 Maskenreferenzen bleiben unverändert, nur der geprüfte
+Quellvorlagen-Hash ändert sich. Synthetische Wheel-Events
 werden weiterhin nicht als physischer App-Nachweis ausgegeben.
 
 Diese Nachweise ersetzen **nicht** die gemeinsame MCP-Neuanlage/-Fortsetzung

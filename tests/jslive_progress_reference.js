@@ -61,8 +61,7 @@ configuration.fill_color_rgb={R:configuration.fill_color>>16&255,G:configuration
 ['style_fontColor','stroke_trailColor','fill_backgroundColor'].forEach(function(k){configuration[k]='#'+configuration[k].toString(16).padStart(6,'0');});
 configuration.__safeSVG=configuration.shape_svg&&configuration.shape_svg.dataUri;configuration.shape_svg=!!configuration.shape_svg;
 configuration.data_animationTransitionIn=false;configuration.data_animationDuration=0;configuration.reverse=false;
-// Case 37 already has an explicitly accepted Stroke -> Text-Fill deviation.
-if(configuration.shape_preset==='text'&&!configuration.shape_path&&!configuration.shape_svg)configuration.Type='fill';
+// The source template itself resolves image-based text to its supported fill mode.
 activeWidth=input.width;activeHeight=input.height;bar=undefined;
 var container=document.createElement('div');container.id='Bar';container.className='myBar';container.style.cssText='position:absolute;left:8px;top:8px';document.body.appendChild(container);
 // Recreate the template's inert custom-dash node; masks do not affect measured bounds.

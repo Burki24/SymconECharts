@@ -68,8 +68,20 @@ Nullbreiten/-höhen bleiben ohne Formfarbe, auch nach einem Grafikupdate.
 24 eingefrorene Originalmasken, sieben echte leere Canvas-Zeichenläufe und
 24 unabhängige Browser-Rastervergleiche sichern die Korrektur ab. Beide
 Rastertests schlagen mit dem vorherigen Renderer getrennt fehl. Die erneute
-Live-Abnahme dieser F06-Restkorrektur nach Update und weitere optische Befunde
-bleiben offen.
+lesende Live-Abnahme der F06-Restkorrektur ist unter 1.378 an den betroffenen
+Vergleichspaaren und IPSView-WebContent-Ausgaben bestätigt. Alle 36 Original-/
+Zielkonfigurationen und die Quellen blieben unverändert; die native IPSView-App
+wurde dabei nicht erneut geprüft. Weitere optische Befunde bleiben getrennt.
+
+Die anschließende Konsolendiagnose trennt den JSLive-Text-/Stroke-Abbruch vom
+Symcon-Vorschauempfänger, der fremde Wheel-Bridge-Arrays als eigene Nachrichten
+interpretiert. Der zentrale Helper begrenzt die Bridge nun auf ausdrücklich
+markierte eigene Frames; dessen reguläre Verteilung steht noch aus. Die
+Consumer-Integration wird mit einem temporären regulären Bundle geprüft und
+danach vollständig zurückgesetzt. Der JSLive-Vorlagenfix behält Engine und
+persistierte Einstellungen; die unabhängigen Quellreferenzen bleiben gleich.
+Die Observer-Meldung tritt auch an einer reinen Symcon-Zahlenkachel auf und ist
+weiterhin kein nachgewiesener Chartfehler.
 Die Beta bleibt bis zur
 vereinbarten Migrationsabnahme zurückgestellt. Die bereits abgeschlossene
 Nutzungsgrenzen-Roadmap und die Eigentümerabnahmen bestehender Modelle bleiben gültig.

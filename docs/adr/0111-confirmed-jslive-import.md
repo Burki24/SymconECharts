@@ -373,8 +373,12 @@ Diagnosehintergrund macht auch kleine Randfehler sichtbar. Alle 24 Fälle besteh
 mit höchstens einem Pixel Antialiasing-Spielraum an der Kante. Der vorherige
 Renderer scheitert getrennt mit 1272 erfundenen Nullflächenpixeln beziehungsweise
 162 Randpixeln jenseits dieses Spielraums. Die gespeicherten Eingaben bleiben
-identisch. Die neue Live-Abnahme der F06-Restkorrekturen nach Eigentümer-Update
-und physische native App-Bediennachweise bleiben getrennt offen.
+identisch. Die neue lesende Live-Abnahme der F06-Restkorrekturen liegt unter
+1.378 an den betroffenen Vergleichspaaren vor; physische native App-
+Bediennachweise bleiben getrennt offen. Der anschließende JSLive-Vorlagenfix
+verwendet selbst den bestehenden Text-Fill-Fallback. Der unabhängige
+Referenzlauf entfernt deshalb seine bisher ausdrücklich gesetzte Type-
+Umstellung; alle eingefrorenen Layouts und Masken bleiben identisch.
 Originalinstanzen und produktive Systeme wurden nicht verändert.
 
 ### Import und Wiederanlauf
