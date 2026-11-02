@@ -25,6 +25,19 @@ for(const [attributes,viewBox] of [['','0 0 100 100'],['','0 0 400 100'],['width
     const shape_svg={dataUri:'data:image/svg+xml;base64,'+Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" '+attributes+' viewBox="'+viewBox+'"><rect width="100" height="50"/></svg>').toString('base64'),width:parts[2],height:parts[3],viewBox};
     chart.settings.shape_svg=shape_svg;inputs.push({case:40,width:620,height:500,variant:{shape_svg},chart});
 }
+const layoutCount=inputs.length;
+// Separate frozen fill oracles: serialize the actual original background mask,
+// filter and frame, with the foreground removed. No target formulas are used.
+for(const index of [23,25,27,29,31,33,35])for(const [width,height] of [[316,258],[636,516]]){
+    inputs.push({case:index+1,width,height,chart:states[index].chart});
+}
+for(const settings of [{fill_backgroundExtrude:0},{fill_backgroundExtrude:3},{fill_backgroundExtrude:-1},{fill_backgroundExtrude:12},
+    {shape_path:'M0 0L100 0'},{shape_path:'M0 0L0 100'},{shape_path:'M10 10'},
+    {shape_path:'M5 5L50 90L95 5Z'},{shape_path:'M0 50C0 0 100 0 100 50Z'},
+    {shape_path:'M0 0H40V40H0ZM60 60H100V100H60Z'}]){
+    const chart=structuredClone(states[33].chart);Object.assign(chart.settings,settings);
+    inputs.push({case:34,width:316,height:258,variant:settings,chart});
+}
 const functions=template.slice(template.indexOf('    function Load(){'),template.indexOf('    function connect()'))
     .replace('"/hook/JSLive/getSVG?Instance={INSTANCE}&pw={PASSWORD}"','configuration.__safeSVG')
     .replace("document.querySelectorAll('.ldBar-label')","item.querySelectorAll('.ldBar-label')")
@@ -36,7 +49,7 @@ var configuration,value,item,bar,Bar,activeWidth,activeHeight;
 function Get_WindowWidth(){return activeWidth;}function Get_WindowHeight(){return activeHeight;}
 function JSLiveObserveSize(){}function RGBAToHexA(r,g,b,a){return 'rgba('+[r,g,b,a].join(',')+')';}
 ${functions}
-var inputs=${JSON.stringify(inputs)},roots=[];
+var inputs=${JSON.stringify(inputs)},roots=[],layoutCount=${layoutCount};
 (async function(){
 var fonts=new Map();inputs.forEach(function(input){input.chart.resources.forEach(function(r){if(r.kind==='font')fonts.set(r.family,r.data);});});
 await Promise.all(Array.from(fonts,function(pair){var face=new FontFace(pair[0],'url(data:font/woff2;base64,'+pair[1]+')');document.fonts.add(face);return face.load();}));
@@ -54,16 +67,32 @@ activeWidth=input.width;activeHeight=input.height;bar=undefined;
 var container=document.createElement('div');container.id='Bar';container.className='myBar';container.style.cssText='position:absolute;left:8px;top:8px';document.body.appendChild(container);
 // Recreate the template's inert custom-dash node; masks do not affect measured bounds.
 var mask=document.createElementNS('http://www.w3.org/2000/svg','svg');mask.setAttribute('width','0');mask.setAttribute('height','0');mask.innerHTML='<mask id="mask"><path id="dash_path"/></mask>';document.body.appendChild(mask);
-Load();container.id='reference-'+index;container.classList.remove('myBar');mask.remove();roots.push(container);
+Load();container.id='reference-'+index;
+// Each real template has its own document. Scope its pseudo-label rules to
+// this root so added reference cases cannot change an earlier label's metrics.
+var labelStyle=document.head.querySelectorAll('style');labelStyle=labelStyle[labelStyle.length-1];
+labelStyle.textContent=labelStyle.textContent.replace(/\\.ldBar-label/g,'#reference-'+index+' .ldBar-label');
+container.classList.remove('myBar');mask.remove();roots.push(container);
 });
 setTimeout(function(){
+var fills=[];
 var records=inputs.map(function(input,index){var el=roots[index],svg=el.querySelector('svg'),label=el.querySelector('.ldBar-label'),group=svg.querySelectorAll(':scope > g')[1];
 function rect(r){return {x:r.x,y:r.y,width:r.width,height:r.height};}
+if(index>=layoutCount){
+var filter=svg.querySelector('defs > filter'),mask=svg.querySelector('defs > g > mask'),frame=svg.querySelector('rect.frame'),bounds=group.getBBox();
+var copy=document.createElementNS('http://www.w3.org/2000/svg','svg'),defs=document.createElementNS('http://www.w3.org/2000/svg','defs');
+copy.setAttribute('width',el.clientWidth);copy.setAttribute('height',el.clientHeight);copy.setAttribute('viewBox',svg.getAttribute('viewBox'));copy.setAttribute('preserveAspectRatio',svg.getAttribute('preserveAspectRatio'));
+defs.appendChild(filter.cloneNode(true));defs.appendChild(mask.cloneNode(true));copy.appendChild(defs);copy.appendChild(frame.cloneNode(true));
+var xml=new XMLSerializer().serializeToString(copy).replace(/ldBar-[a-f0-9]+-/g,'source-');
+fills.push({case:input.case,width:input.width,height:input.height,variant:input.variant||null,root:rect(el.getBoundingClientRect()),bounds:rect(bounds),
+    filter:{x:filter.getAttribute('x'),y:filter.getAttribute('y'),width:filter.getAttribute('width'),height:filter.getAttribute('height'),operator:filter.querySelector('feMorphology').getAttribute('operator'),radius:filter.querySelector('feMorphology').getAttribute('radius')},
+    maskStroke:getComputedStyle(mask.querySelector('path')).strokeWidth,backgroundSVG:xml});
+}
 return {case:input.case,width:input.width,height:input.height,variant:input.variant||null,root:rect(el.getBoundingClientRect()),viewBox:svg.getAttribute('viewBox').split(' ').map(Number),
     bounds:rect(group.getBBox()),label:rect(label.getBoundingClientRect()),labelFont:getComputedStyle(label).fontFamily,
     lineCap:group.querySelector('path')?getComputedStyle(group.querySelector('path')).strokeLinecap:null,
     image:group.querySelector('image')?{width:+group.querySelector('image').getAttribute('width'),height:+group.querySelector('image').getAttribute('height')}:null};});
-var out=document.createElement('pre');out.id='progress-reference';out.textContent=JSON.stringify({errors:window.errors,records:records});document.body.appendChild(out);
+var out=document.createElement('pre');out.id='progress-reference';out.textContent=JSON.stringify({errors:window.errors,records:records.slice(0,layoutCount),fills:fills});document.body.appendChild(out);
 },1000);
 })().catch(function(e){window.errors.push(String(e));});`;
 const directory=fs.mkdtempSync(path.join(os.tmpdir(),'SymconECharts-progress-reference-')),html=path.join(directory,'reference.html');
@@ -77,8 +106,9 @@ const match=/<pre id="progress-reference">(.*?)<\/pre>/s.exec(result.stdout||'')
 assert.ok(match,'Reference did not finish; see '+directory);
 const output=JSON.parse(match[1].replace(/&quot;/g,'"').replace(/&gt;/g,'>').replace(/&lt;/g,'<').replace(/&amp;/g,'&'));
 assert.deepEqual(output.errors,[]);assert.equal(output.records.length,63);
-const snapshot={source:'loading-bar 0.1.1 / JSLive 0.1.1-jslive.1; original Progressbar template and CSS',sourceHashes,records:output.records};
+assert.equal(output.fills.length,24);
+const snapshot={source:'loading-bar 0.1.1 / JSLive 0.1.1-jslive.1; original Progressbar template and CSS',sourceHashes,records:output.records,fills:output.fills};
 const snapshotArg=args.indexOf('--snapshot');
-if(snapshotArg>=0)fs.writeFileSync(args[snapshotArg+1],JSON.stringify(snapshot,null,2)+'\n');
+if(snapshotArg>=0)fs.writeFileSync(args[snapshotArg+1],JSON.stringify(snapshot,null,4)+'\n');
 else assert.deepEqual(snapshot,JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/jslive-progress-geometry.json'),'utf8')),'Independent source measurements changed.');
-console.log('JSLive Progress reference: '+output.records.length+' original browser viewboxes, bounds, labels, linecaps and images measured.');
+console.log('JSLive Progress reference: '+output.records.length+' original layouts and '+output.fills.length+' original fill masks measured.');

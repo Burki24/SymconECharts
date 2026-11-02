@@ -58,8 +58,18 @@ Bildmaße, Ränder, wirksame flache Linienenden und Wertpositionen folgen der
 unveränderten Quellvorlage. 63 unabhängige Chromium-Quellmessungen, 24 Clipfälle
 und 36 echte Kachel-/IPSView-Browserausgaben einschließlich 96 Rastervergleichen
 sichern die Korrektur ab. Die gezielten Tests reproduzierten zuvor die
-umgefärbte Textform und die abweichende Einpassung. Die erneute Live-Abnahme
-von F05/F06 nach Eigentümer-Update und weitere optische Befunde bleiben offen.
+umgefärbte Textform und die abweichende Einpassung. Die lesende Live-Abnahme
+unter 1.377 bestätigt F05 und die korrigierte Einpassung/Linienenden bei F06.
+Sie zeigte noch zusätzliche graue line-/rainbow-Füllstriche und zu schmale
+Füllränder. Diese Restfehler sind lokal korrigiert: Pfadhintergründe teilen mit
+SVG-Hintergründen einen familienlokalen Alpha-Maskenadapter; die originale
+1-Pixel-Maskenkontur und Morphologie ersetzen die vereinfachte native Kontur.
+Nullbreiten/-höhen bleiben ohne Formfarbe, auch nach einem Grafikupdate.
+24 eingefrorene Originalmasken, sieben echte leere Canvas-Zeichenläufe und
+24 unabhängige Browser-Rastervergleiche sichern die Korrektur ab. Beide
+Rastertests schlagen mit dem vorherigen Renderer getrennt fehl. Die erneute
+Live-Abnahme dieser F06-Restkorrektur nach Update und weitere optische Befunde
+bleiben offen.
 Die Beta bleibt bis zur
 vereinbarten Migrationsabnahme zurückgestellt. Die bereits abgeschlossene
 Nutzungsgrenzen-Roadmap und die Eigentümerabnahmen bestehender Modelle bleiben gültig.

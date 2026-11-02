@@ -44,6 +44,11 @@ seiner Mitte. Linienenden entsprechen der tatsächlich sichtbaren Quellform.
 Eine dort wirkungslose gespeicherte Auswahl wird bei der Übernahme nicht
 nachträglich aktiviert.
 
+Pfadfüllungen übernehmen auch die Hintergrundränder der Quellform. Pfade ohne
+Breite oder Höhe, darunter `line` und `rainbow`, bleiben im Füllmodus leer;
+eine aktivierte Wertanzeige bleibt sichtbar. Es wird kein zusätzlicher grauer
+Strich erzeugt.
+
 Apache ECharts zeichnet Pfade, Füllung, Verlauf und Text nativ. Schatten,
 Strichmuster, Textkonturen und Animationen können von den alten Engines
 abweichen; der Importbericht nennt die betroffenen Einstellungen einzeln.

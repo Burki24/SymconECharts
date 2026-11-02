@@ -111,6 +111,12 @@ Die reguläre Suite enthält jetzt folgende unabhängige Grenzen:
   `--images` und `--layout` isolieren die getrennten RED-Reproduktionen. Der
   vorhandene Test der ausgelieferten Canvas-Pfade prüft zusätzlich tatsächlich
   flache Linienenden trotz wirkungsloser gespeicherter Auswahl „rund“.
+  `--fills`, `--empty` und `--borders` isolieren die F06-Restregressionen:
+  24 unabhängige Quellmasken/-filter und sieben Nullflächen-Zeichenläufe mit
+  der ausgelieferten Canvas-Runtime. Der Wechsel von einer sichtbaren Füllung
+  zur Nullfläche und zurück hinterlässt keine alten Grafiken. Der 120er-
+  SSR-Lauf verlangt für die unabhängig bestätigten Nullflächen nur den
+  sichtbaren Werttext, keine erfundene Mindestmenge an Formmarkup.
 - Optional `node tests/jslive_progress_reference.js ../JSLive <Chromium.exe>`
   vergleicht diese 63 Messwerte mit der echten ldBar-Engine, den Größen-/Label-
   Funktionen der unveränderten Quellvorlage und deren CSS. Der isolierte lokale
@@ -119,7 +125,21 @@ Die reguläre Suite enthält jetzt folgende unabhängige Grenzen:
   geprüft. `--snapshot tests/fixtures/jslive-progress-geometry.json` hinter dem
   Browserpfad erneuert die Messwerte bei unveränderten Quellhashes. Der bereits
   akzeptierte Stroke-zu-Text-Fill-Fall 37 wird ausdrücklich als solcher geprüft.
-  Die Engine bleibt außerhalb der Library; CI verwendet nur die Messwerte.
+  Zusätzlich werden 24 Hintergrund-SVGs direkt aus Originalmaske, Filter und
+  Hintergrundrechteck serialisiert. Zufalls-IDs werden normalisiert; Vordergrund
+  und Label sind entfernt. Die Engine bleibt außerhalb der Library; CI
+  verwendet nur diese inerten Referenzen und Messwerte.
+- Optional `node tests/jslive_progress_fills_browser.js <Chromium.exe>` vergleicht
+  24 gefrorene Originalmasken als echte Rasterbilder mit dem ausgelieferten
+  Canvas-Renderer. `--empty` und `--borders` trennen die Fälle. Zwei Größen,
+  null/positive/negative Extrusion, eigene Kurven, Ecken, Teilpfade und Pfade mit
+  Nullbreite/-höhe sind enthalten. Nur die Diagnosefarbe wird auf Schwarz
+  gesetzt, damit der helle Standardhintergrund Fehler nicht verdeckt. Zulässig
+  ist höchstens ein Pixel Kantenspielraum durch Antialiasing; leere Referenzen
+  verlangen tatsächlich null Formpixel. Beide Bereiche reproduzieren mit dem
+  vorherigen Renderer RED (1272 erfundene Nullflächenpixel und 162 abweichende
+  Randpixel). Nach der Korrektur bestehen alle 24 Fälle. Eine temporäre lokale
+  Vergleichsgrafik und Messwerte bleiben außerhalb des Repositorys.
 
 Der native Importadapter-Test unterbricht zusätzlich nach SetConfiguration und
 vor ApplyChanges und bestätigt die unveränderte aktive Konfiguration sowie
@@ -182,8 +202,11 @@ schwarze Quellglyphen sowie eigene Farben, Verlauf und Alpha. Die Hintergrund-
 Extrusion ist in den vollständigen Ausgaben aktiv; reine Vordergrundvergleiche
 schalten sie ausdrücklich transparent. Die Standardauswahl enthält nun auch
 Text-Fill-Fall 38 und umfasst 20 Dokumente. Nachweisdateien und Screenshots
-liegen ausschließlich im temporären Ausgabeordner. Die neue Live-Abnahme von
-F05/F06 nach Eigentümer-Modulupdate bleibt offen; synthetische Wheel-Events
+liegen ausschließlich im temporären Ausgabeordner. F05 und die grundlegende
+F06-Einpassung sind unter 1.377 anhand der 18 Paare live bestätigt. Die dort
+gefundenen F06-Füllreste sind lokal korrigiert und mit den zusätzlichen
+Masken-/Canvas-/Rasterprüfungen abgesichert; deren neue Live-Abnahme nach
+Eigentümer-Modulupdate bleibt offen. Synthetische Wheel-Events
 werden weiterhin nicht als physischer App-Nachweis ausgegeben.
 
 Diese Nachweise ersetzen **nicht** die gemeinsame MCP-Neuanlage/-Fortsetzung

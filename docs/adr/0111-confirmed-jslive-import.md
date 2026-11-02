@@ -342,8 +342,40 @@ zeichnet weiterhin die 82 F01-Pfadfälle und jetzt auch überprüfte flache Ende
 Fehlererholung, Titel und synthetischen Mausrad-Smoke-Test. 96 zusätzliche
 Rastervergleiche prüfen schwarze Originalglyphen, eigene SVGs, Verläufe und
 Transparenz gegen direkt gezeichnete Originalbilder. Die Live-Abnahme von
-F05/F06 nach Eigentümer-Update und physische native App-Bediennachweise bleiben
-davon getrennt offen. Originalinstanzen und produktive Systeme wurden nicht verändert.
+F05 ist unter 1.377 an den Text-/SVG-Vergleichen live bestätigt. Die dortige
+lesende Prüfung aller 18 Progress-Paare bestätigt auch die korrigierte
+Einpassung und die flachen Linienenden. Sie zeigte jedoch noch zwei F06-
+Restfehler: graue Zusatzstriche für flächenlose line-/rainbow-Füllungen und zu
+schmale Hintergründe anderer Pfadfüllungen.
+
+Die Füllhintergründe verwenden jetzt denselben familienlokalen, fest erzeugten
+Alpha-Maskenadapter wie SVG-Hintergründe. Eine maskierte Hintergrundfläche
+ersetzt die bisherige native Kontur. Pfadmasken behalten den ursprünglichen
+weißen 1-Pixel-Strich vor der Morphologie sowie den Objektbereich des Filters
+(`x=y=-1`, `width=height=3`). Positive Extrusion erweitert, negative verkleinert
+die Maske. Pfade mit Breite oder Höhe null blenden beide Formgrafiken aus;
+die optionale Wertanzeige und der unveränderte Fit-Fallback bleiben erhalten.
+Die echten Pfadgrenzen steuern die Füll-Clips, Preset-/Fit-Grenzen weiterhin
+die Einpassung. Sichtbarkeit wird bei Grafikupdates ausdrücklich gesetzt,
+damit beim Wechsel zwischen gefüllten und leeren Formen nichts zurückbleibt.
+Eigene SVG-Farben, Pfad-/Strichmodelle, Originalwerte und Schutzgrenzen bleiben
+erhalten; der Importvalidator erlaubt weiterhin keine Benutzerfilter.
+
+Der Quellreferenzlauf friert zusätzlich 24 tatsächliche Hintergrund-SVGs aus
+der unveränderten Engine ein. Entfernt werden nur Vordergrund und Label;
+generierte Zufalls-IDs werden normalisiert. Die reguläre Suite vergleicht deren
+Masken-/Filter-/Flächengrenzen und zeichnet sieben Nullflächen mit der echten
+Canvas-Runtime einschließlich Hin-/Rückwechseln ohne erfundene Striche.
+`tests/jslive_progress_fills_browser.js` rastert Original-SVG und natives Ergebnis
+unabhängig in zwei Größen, mit leerer Fläche, Randbreiten null/positiv/negativ,
+starker Extrusion sowie eigenen Kurven, Ecken und Teilpfaden. Ein schwarzer
+Diagnosehintergrund macht auch kleine Randfehler sichtbar. Alle 24 Fälle bestehen
+mit höchstens einem Pixel Antialiasing-Spielraum an der Kante. Der vorherige
+Renderer scheitert getrennt mit 1272 erfundenen Nullflächenpixeln beziehungsweise
+162 Randpixeln jenseits dieses Spielraums. Die gespeicherten Eingaben bleiben
+identisch. Die neue Live-Abnahme der F06-Restkorrekturen nach Eigentümer-Update
+und physische native App-Bediennachweise bleiben getrennt offen.
+Originalinstanzen und produktive Systeme wurden nicht verändert.
 
 ### Import und Wiederanlauf
 

@@ -26,6 +26,11 @@
 
 ## Fixes
 
+- Übernommene JSLive-Pfadfüllungen zeichnen Hintergrundränder mit der
+  ursprünglichen Maskenform. `line` und `rainbow` bleiben im Füllmodus wie im
+  Original leer, ohne zusätzlichen grauen Strich. Wertanzeigen, Quellen,
+  Archivwerte und gespeicherte Designs bleiben erhalten.
+
 - Übernommene JSLive-Fortschrittsanzeigen behalten Originalfarben, Verläufe und
   Transparenzen eigener SVGs sowie die ursprünglichen Glyphen der Textvorlage.
   Einpassung, natürliche SVG-Bildmaße, Ränder, tatsächlich wirksame Linienenden

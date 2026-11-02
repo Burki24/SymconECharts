@@ -2164,5 +2164,699 @@
                 "height": 96
             }
         }
+    ],
+    "fills": [
+        {
+            "case": 24,
+            "width": 316,
+            "height": 258,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 276,
+                "height": 178
+            },
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 80
+            },
+            "filter": {
+                "x": "-1",
+                "y": "-1",
+                "width": "3",
+                "height": "3",
+                "operator": "dilate",
+                "radius": "1"
+            },
+            "maskStroke": "1px",
+            "backgroundSVG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"276\" height=\"178\" viewBox=\"-2 -2 104 104\" preserveAspectRatio=\"xMidYMid\"><defs><filter id=\"source-filter\" x=\"-1\" y=\"-1\" width=\"3\" height=\"3\"><feMorphology operator=\"dilate\" radius=\"1\"/><feColorMatrix values=\"0 0 0 0 1    0 0 0 0 1    0 0 0 0 1    0 0 0 1 0\" result=\"cm\"/></filter><mask id=\"source-mask-path\"><path d=\"M50 10A40 40 0 0 1 50 90A40 40 0 0 1 50 10\" fill=\"#fff\" stroke=\"#fff\" filter=\"url(#source-filter)\"/></mask></defs><rect x=\"-2\" y=\"-2\" width=\"104\" height=\"104\" mask=\"url(#source-mask-path)\" fill=\"#e2e8f0\" class=\"frame\"/></svg>"
+        },
+        {
+            "case": 24,
+            "width": 636,
+            "height": 516,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 596,
+                "height": 436
+            },
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 80
+            },
+            "filter": {
+                "x": "-1",
+                "y": "-1",
+                "width": "3",
+                "height": "3",
+                "operator": "dilate",
+                "radius": "1"
+            },
+            "maskStroke": "1px",
+            "backgroundSVG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"596\" height=\"436\" viewBox=\"-2 -2 104 104\" preserveAspectRatio=\"xMidYMid\"><defs><filter id=\"source-filter\" x=\"-1\" y=\"-1\" width=\"3\" height=\"3\"><feMorphology operator=\"dilate\" radius=\"1\"/><feColorMatrix values=\"0 0 0 0 1    0 0 0 0 1    0 0 0 0 1    0 0 0 1 0\" result=\"cm\"/></filter><mask id=\"source-mask-path\"><path d=\"M50 10A40 40 0 0 1 50 90A40 40 0 0 1 50 10\" fill=\"#fff\" stroke=\"#fff\" filter=\"url(#source-filter)\"/></mask></defs><rect x=\"-2\" y=\"-2\" width=\"104\" height=\"104\" mask=\"url(#source-mask-path)\" fill=\"#e2e8f0\" class=\"frame\"/></svg>"
+        },
+        {
+            "case": 26,
+            "width": 316,
+            "height": 258,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 276,
+                "height": 178
+            },
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 80
+            },
+            "filter": {
+                "x": "-1",
+                "y": "-1",
+                "width": "3",
+                "height": "3",
+                "operator": "dilate",
+                "radius": "1"
+            },
+            "maskStroke": "1px",
+            "backgroundSVG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"276\" height=\"178\" viewBox=\"-2 -2 104 104\" preserveAspectRatio=\"xMidYMid\"><defs><filter id=\"source-filter\" x=\"-1\" y=\"-1\" width=\"3\" height=\"3\"><feMorphology operator=\"dilate\" radius=\"1\"/><feColorMatrix values=\"0 0 0 0 1    0 0 0 0 1    0 0 0 0 1    0 0 0 1 0\" result=\"cm\"/></filter><mask id=\"source-mask-path\"><path d=\"M50 10A40 40 0 0 1 50 90A40 40 0 0 1 50 10\" fill=\"#fff\" stroke=\"#fff\" filter=\"url(#source-filter)\"/></mask></defs><rect x=\"-2\" y=\"-2\" width=\"104\" height=\"104\" mask=\"url(#source-mask-path)\" fill=\"#e2e8f0\" class=\"frame\"/></svg>"
+        },
+        {
+            "case": 26,
+            "width": 636,
+            "height": 516,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 596,
+                "height": 436
+            },
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 80
+            },
+            "filter": {
+                "x": "-1",
+                "y": "-1",
+                "width": "3",
+                "height": "3",
+                "operator": "dilate",
+                "radius": "1"
+            },
+            "maskStroke": "1px",
+            "backgroundSVG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"596\" height=\"436\" viewBox=\"-2 -2 104 104\" preserveAspectRatio=\"xMidYMid\"><defs><filter id=\"source-filter\" x=\"-1\" y=\"-1\" width=\"3\" height=\"3\"><feMorphology operator=\"dilate\" radius=\"1\"/><feColorMatrix values=\"0 0 0 0 1    0 0 0 0 1    0 0 0 0 1    0 0 0 1 0\" result=\"cm\"/></filter><mask id=\"source-mask-path\"><path d=\"M50 10A40 40 0 0 1 50 90A40 40 0 0 1 50 10\" fill=\"#fff\" stroke=\"#fff\" filter=\"url(#source-filter)\"/></mask></defs><rect x=\"-2\" y=\"-2\" width=\"104\" height=\"104\" mask=\"url(#source-mask-path)\" fill=\"#e2e8f0\" class=\"frame\"/></svg>"
+        },
+        {
+            "case": 28,
+            "width": 316,
+            "height": 258,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 276,
+                "height": 178
+            },
+            "bounds": {
+                "x": 10,
+                "y": 50,
+                "width": 80,
+                "height": 40
+            },
+            "filter": {
+                "x": "-1",
+                "y": "-1",
+                "width": "3",
+                "height": "3",
+                "operator": "dilate",
+                "radius": "1"
+            },
+            "maskStroke": "1px",
+            "backgroundSVG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"276\" height=\"178\" viewBox=\"-2 38 104 64\" preserveAspectRatio=\"xMidYMid\"><defs><filter id=\"source-filter\" x=\"-1\" y=\"-1\" width=\"3\" height=\"3\"><feMorphology operator=\"dilate\" radius=\"1\"/><feColorMatrix values=\"0 0 0 0 1    0 0 0 0 1    0 0 0 0 1    0 0 0 1 0\" result=\"cm\"/></filter><mask id=\"source-mask-path\"><path d=\"M10 90A40 40 0 0 1 90 90\" fill=\"#fff\" stroke=\"#fff\" filter=\"url(#source-filter)\"/></mask></defs><rect x=\"-2\" y=\"38\" width=\"104\" height=\"64\" mask=\"url(#source-mask-path)\" fill=\"#e2e8f0\" class=\"frame\"/></svg>"
+        },
+        {
+            "case": 28,
+            "width": 636,
+            "height": 516,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 596,
+                "height": 436
+            },
+            "bounds": {
+                "x": 10,
+                "y": 50,
+                "width": 80,
+                "height": 40
+            },
+            "filter": {
+                "x": "-1",
+                "y": "-1",
+                "width": "3",
+                "height": "3",
+                "operator": "dilate",
+                "radius": "1"
+            },
+            "maskStroke": "1px",
+            "backgroundSVG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"596\" height=\"436\" viewBox=\"-2 38 104 64\" preserveAspectRatio=\"xMidYMid\"><defs><filter id=\"source-filter\" x=\"-1\" y=\"-1\" width=\"3\" height=\"3\"><feMorphology operator=\"dilate\" radius=\"1\"/><feColorMatrix values=\"0 0 0 0 1    0 0 0 0 1    0 0 0 0 1    0 0 0 1 0\" result=\"cm\"/></filter><mask id=\"source-mask-path\"><path d=\"M10 90A40 40 0 0 1 90 90\" fill=\"#fff\" stroke=\"#fff\" filter=\"url(#source-filter)\"/></mask></defs><rect x=\"-2\" y=\"38\" width=\"104\" height=\"64\" mask=\"url(#source-mask-path)\" fill=\"#e2e8f0\" class=\"frame\"/></svg>"
+        },
+        {
+            "case": 30,
+            "width": 316,
+            "height": 258,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 276,
+                "height": 178
+            },
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 0
+            },
+            "filter": {
+                "x": "-1",
+                "y": "-1",
+                "width": "3",
+                "height": "3",
+                "operator": "dilate",
+                "radius": "1"
+            },
+            "maskStroke": "1px",
+            "backgroundSVG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"276\" height=\"178\" viewBox=\"-2 -2 104 34\" preserveAspectRatio=\"xMidYMid\"><defs><filter id=\"source-filter\" x=\"-1\" y=\"-1\" width=\"3\" height=\"3\"><feMorphology operator=\"dilate\" radius=\"1\"/><feColorMatrix values=\"0 0 0 0 1    0 0 0 0 1    0 0 0 0 1    0 0 0 1 0\" result=\"cm\"/></filter><mask id=\"source-mask-path\"><path d=\"M10 10L90 10\" fill=\"#fff\" stroke=\"#fff\" filter=\"url(#source-filter)\"/></mask></defs><rect x=\"-2\" y=\"-2\" width=\"104\" height=\"34\" mask=\"url(#source-mask-path)\" fill=\"#e2e8f0\" class=\"frame\"/></svg>"
+        },
+        {
+            "case": 30,
+            "width": 636,
+            "height": 516,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 596,
+                "height": 436
+            },
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 0
+            },
+            "filter": {
+                "x": "-1",
+                "y": "-1",
+                "width": "3",
+                "height": "3",
+                "operator": "dilate",
+                "radius": "1"
+            },
+            "maskStroke": "1px",
+            "backgroundSVG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"596\" height=\"436\" viewBox=\"-2 -2 104 34\" preserveAspectRatio=\"xMidYMid\"><defs><filter id=\"source-filter\" x=\"-1\" y=\"-1\" width=\"3\" height=\"3\"><feMorphology operator=\"dilate\" radius=\"1\"/><feColorMatrix values=\"0 0 0 0 1    0 0 0 0 1    0 0 0 0 1    0 0 0 1 0\" result=\"cm\"/></filter><mask id=\"source-mask-path\"><path d=\"M10 10L90 10\" fill=\"#fff\" stroke=\"#fff\" filter=\"url(#source-filter)\"/></mask></defs><rect x=\"-2\" y=\"-2\" width=\"104\" height=\"34\" mask=\"url(#source-mask-path)\" fill=\"#e2e8f0\" class=\"frame\"/></svg>"
+        },
+        {
+            "case": 32,
+            "width": 316,
+            "height": 258,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 276,
+                "height": 178
+            },
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 0
+            },
+            "filter": {
+                "x": "-1",
+                "y": "-1",
+                "width": "3",
+                "height": "3",
+                "operator": "dilate",
+                "radius": "1"
+            },
+            "maskStroke": "1px",
+            "backgroundSVG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"276\" height=\"178\" viewBox=\"-2 -2 104 34\" preserveAspectRatio=\"xMidYMid\"><defs><filter id=\"source-filter\" x=\"-1\" y=\"-1\" width=\"3\" height=\"3\"><feMorphology operator=\"dilate\" radius=\"1\"/><feColorMatrix values=\"0 0 0 0 1    0 0 0 0 1    0 0 0 0 1    0 0 0 1 0\" result=\"cm\"/></filter><mask id=\"source-mask-path\"><path d=\"M10 10L90 10\" fill=\"#fff\" stroke=\"#fff\" filter=\"url(#source-filter)\"/></mask></defs><rect x=\"-2\" y=\"-2\" width=\"104\" height=\"34\" mask=\"url(#source-mask-path)\" fill=\"#e2e8f0\" class=\"frame\"/></svg>"
+        },
+        {
+            "case": 32,
+            "width": 636,
+            "height": 516,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 596,
+                "height": 436
+            },
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 80,
+                "height": 0
+            },
+            "filter": {
+                "x": "-1",
+                "y": "-1",
+                "width": "3",
+                "height": "3",
+                "operator": "dilate",
+                "radius": "1"
+            },
+            "maskStroke": "1px",
+            "backgroundSVG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"596\" height=\"436\" viewBox=\"-2 -2 104 34\" preserveAspectRatio=\"xMidYMid\"><defs><filter id=\"source-filter\" x=\"-1\" y=\"-1\" width=\"3\" height=\"3\"><feMorphology operator=\"dilate\" radius=\"1\"/><feColorMatrix values=\"0 0 0 0 1    0 0 0 0 1    0 0 0 0 1    0 0 0 1 0\" result=\"cm\"/></filter><mask id=\"source-mask-path\"><path d=\"M10 10L90 10\" fill=\"#fff\" stroke=\"#fff\" filter=\"url(#source-filter)\"/></mask></defs><rect x=\"-2\" y=\"-2\" width=\"104\" height=\"34\" mask=\"url(#source-mask-path)\" fill=\"#e2e8f0\" class=\"frame\"/></svg>"
+        },
+        {
+            "case": 34,
+            "width": 316,
+            "height": 258,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 276,
+                "height": 178
+            },
+            "bounds": {
+                "x": 10,
+                "y": 5,
+                "width": 80,
+                "height": 10
+            },
+            "filter": {
+                "x": "-1",
+                "y": "-1",
+                "width": "3",
+                "height": "3",
+                "operator": "dilate",
+                "radius": "1"
+            },
+            "maskStroke": "1px",
+            "backgroundSVG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"276\" height=\"178\" viewBox=\"-2 -7 104 34\" preserveAspectRatio=\"xMidYMid\"><defs><filter id=\"source-filter\" x=\"-1\" y=\"-1\" width=\"3\" height=\"3\"><feMorphology operator=\"dilate\" radius=\"1\"/><feColorMatrix values=\"0 0 0 0 1    0 0 0 0 1    0 0 0 0 1    0 0 0 1 0\" result=\"cm\"/></filter><mask id=\"source-mask-path\"><path d=\"M15 5L85 5A5 5 0 0 1 85 15L15 15A5 5 0 0 1 15 5\" fill=\"#fff\" stroke=\"#fff\" filter=\"url(#source-filter)\"/></mask></defs><rect x=\"-2\" y=\"-7\" width=\"104\" height=\"34\" mask=\"url(#source-mask-path)\" fill=\"#e2e8f0\" class=\"frame\"/></svg>"
+        },
+        {
+            "case": 34,
+            "width": 636,
+            "height": 516,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 596,
+                "height": 436
+            },
+            "bounds": {
+                "x": 10,
+                "y": 5,
+                "width": 80,
+                "height": 10
+            },
+            "filter": {
+                "x": "-1",
+                "y": "-1",
+                "width": "3",
+                "height": "3",
+                "operator": "dilate",
+                "radius": "1"
+            },
+            "maskStroke": "1px",
+            "backgroundSVG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"596\" height=\"436\" viewBox=\"-2 -7 104 34\" preserveAspectRatio=\"xMidYMid\"><defs><filter id=\"source-filter\" x=\"-1\" y=\"-1\" width=\"3\" height=\"3\"><feMorphology operator=\"dilate\" radius=\"1\"/><feColorMatrix values=\"0 0 0 0 1    0 0 0 0 1    0 0 0 0 1    0 0 0 1 0\" result=\"cm\"/></filter><mask id=\"source-mask-path\"><path d=\"M15 5L85 5A5 5 0 0 1 85 15L15 15A5 5 0 0 1 15 5\" fill=\"#fff\" stroke=\"#fff\" filter=\"url(#source-filter)\"/></mask></defs><rect x=\"-2\" y=\"-7\" width=\"104\" height=\"34\" mask=\"url(#source-mask-path)\" fill=\"#e2e8f0\" class=\"frame\"/></svg>"
+        },
+        {
+            "case": 36,
+            "width": 316,
+            "height": 258,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 276,
+                "height": 178
+            },
+            "bounds": {
+                "x": 10,
+                "y": 5,
+                "width": 80,
+                "height": 10
+            },
+            "filter": {
+                "x": "-1",
+                "y": "-1",
+                "width": "3",
+                "height": "3",
+                "operator": "dilate",
+                "radius": "1"
+            },
+            "maskStroke": "1px",
+            "backgroundSVG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"276\" height=\"178\" viewBox=\"-2 -7 104 34\" preserveAspectRatio=\"xMidYMid\"><defs><filter id=\"source-filter\" x=\"-1\" y=\"-1\" width=\"3\" height=\"3\"><feMorphology operator=\"dilate\" radius=\"1\"/><feColorMatrix values=\"0 0 0 0 1    0 0 0 0 1    0 0 0 0 1    0 0 0 1 0\" result=\"cm\"/></filter><mask id=\"source-mask-path\"><path d=\"M15 5L85 5A5 5 0 0 1 85 15L15 15A5 5 0 0 1 15 5\" fill=\"#fff\" stroke=\"#fff\" filter=\"url(#source-filter)\"/></mask></defs><rect x=\"-2\" y=\"-7\" width=\"104\" height=\"34\" mask=\"url(#source-mask-path)\" fill=\"#e2e8f0\" class=\"frame\"/></svg>"
+        },
+        {
+            "case": 36,
+            "width": 636,
+            "height": 516,
+            "variant": null,
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 596,
+                "height": 436
+            },
+            "bounds": {
+                "x": 10,
+                "y": 5,
+                "width": 80,
+                "height": 10
+            },
+            "filter": {
+                "x": "-1",
+                "y": "-1",
+                "width": "3",
+                "height": "3",
+                "operator": "dilate",
+                "radius": "1"
+            },
+            "maskStroke": "1px",
+            "backgroundSVG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"596\" height=\"436\" viewBox=\"-2 -7 104 34\" preserveAspectRatio=\"xMidYMid\"><defs><filter id=\"source-filter\" x=\"-1\" y=\"-1\" width=\"3\" height=\"3\"><feMorphology operator=\"dilate\" radius=\"1\"/><feColorMatrix values=\"0 0 0 0 1    0 0 0 0 1    0 0 0 0 1    0 0 0 1 0\" result=\"cm\"/></filter><mask id=\"source-mask-path\"><path d=\"M15 5L85 5A5 5 0 0 1 85 15L15 15A5 5 0 0 1 15 5\" fill=\"#fff\" stroke=\"#fff\" filter=\"url(#source-filter)\"/></mask></defs><rect x=\"-2\" y=\"-7\" width=\"104\" height=\"34\" mask=\"url(#source-mask-path)\" fill=\"#e2e8f0\" class=\"frame\"/></svg>"
+        },
+        {
+            "case": 34,
+            "width": 316,
+            "height": 258,
+            "variant": {
+                "fill_backgroundExtrude": 0
+            },
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 276,
+                "height": 178
+            },
+            "bounds": {
+                "x": 10,
+                "y": 5,
+                "width": 80,
+                "height": 10
+            },
+            "filter": {
+                "x": "-1",
+                "y": "-1",
+                "width": "3",
+                "height": "3",
+                "operator": "dilate",
+                "radius": "0"
+            },
+            "maskStroke": "1px",
+            "backgroundSVG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"276\" height=\"178\" viewBox=\"-2 -7 104 34\" preserveAspectRatio=\"xMidYMid\"><defs><filter id=\"source-filter\" x=\"-1\" y=\"-1\" width=\"3\" height=\"3\"><feMorphology operator=\"dilate\" radius=\"0\"/><feColorMatrix values=\"0 0 0 0 1    0 0 0 0 1    0 0 0 0 1    0 0 0 1 0\" result=\"cm\"/></filter><mask id=\"source-mask-path\"><path d=\"M15 5L85 5A5 5 0 0 1 85 15L15 15A5 5 0 0 1 15 5\" fill=\"#fff\" stroke=\"#fff\" filter=\"url(#source-filter)\"/></mask></defs><rect x=\"-2\" y=\"-7\" width=\"104\" height=\"34\" mask=\"url(#source-mask-path)\" fill=\"#e2e8f0\" class=\"frame\"/></svg>"
+        },
+        {
+            "case": 34,
+            "width": 316,
+            "height": 258,
+            "variant": {
+                "fill_backgroundExtrude": 3
+            },
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 276,
+                "height": 178
+            },
+            "bounds": {
+                "x": 10,
+                "y": 5,
+                "width": 80,
+                "height": 10
+            },
+            "filter": {
+                "x": "-1",
+                "y": "-1",
+                "width": "3",
+                "height": "3",
+                "operator": "dilate",
+                "radius": "3"
+            },
+            "maskStroke": "1px",
+            "backgroundSVG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"276\" height=\"178\" viewBox=\"-2 -7 104 34\" preserveAspectRatio=\"xMidYMid\"><defs><filter id=\"source-filter\" x=\"-1\" y=\"-1\" width=\"3\" height=\"3\"><feMorphology operator=\"dilate\" radius=\"3\"/><feColorMatrix values=\"0 0 0 0 1    0 0 0 0 1    0 0 0 0 1    0 0 0 1 0\" result=\"cm\"/></filter><mask id=\"source-mask-path\"><path d=\"M15 5L85 5A5 5 0 0 1 85 15L15 15A5 5 0 0 1 15 5\" fill=\"#fff\" stroke=\"#fff\" filter=\"url(#source-filter)\"/></mask></defs><rect x=\"-2\" y=\"-7\" width=\"104\" height=\"34\" mask=\"url(#source-mask-path)\" fill=\"#e2e8f0\" class=\"frame\"/></svg>"
+        },
+        {
+            "case": 34,
+            "width": 316,
+            "height": 258,
+            "variant": {
+                "fill_backgroundExtrude": -1
+            },
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 276,
+                "height": 178
+            },
+            "bounds": {
+                "x": 10,
+                "y": 5,
+                "width": 80,
+                "height": 10
+            },
+            "filter": {
+                "x": "-1",
+                "y": "-1",
+                "width": "3",
+                "height": "3",
+                "operator": "erode",
+                "radius": "1"
+            },
+            "maskStroke": "1px",
+            "backgroundSVG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"276\" height=\"178\" viewBox=\"-2 -7 104 34\" preserveAspectRatio=\"xMidYMid\"><defs><filter id=\"source-filter\" x=\"-1\" y=\"-1\" width=\"3\" height=\"3\"><feMorphology operator=\"erode\" radius=\"1\"/><feColorMatrix values=\"0 0 0 0 1    0 0 0 0 1    0 0 0 0 1    0 0 0 1 0\" result=\"cm\"/></filter><mask id=\"source-mask-path\"><path d=\"M15 5L85 5A5 5 0 0 1 85 15L15 15A5 5 0 0 1 15 5\" fill=\"#fff\" stroke=\"#fff\" filter=\"url(#source-filter)\"/></mask></defs><rect x=\"-2\" y=\"-7\" width=\"104\" height=\"34\" mask=\"url(#source-mask-path)\" fill=\"#e2e8f0\" class=\"frame\"/></svg>"
+        },
+        {
+            "case": 34,
+            "width": 316,
+            "height": 258,
+            "variant": {
+                "fill_backgroundExtrude": 12
+            },
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 276,
+                "height": 178
+            },
+            "bounds": {
+                "x": 10,
+                "y": 5,
+                "width": 80,
+                "height": 10
+            },
+            "filter": {
+                "x": "-1",
+                "y": "-1",
+                "width": "3",
+                "height": "3",
+                "operator": "dilate",
+                "radius": "12"
+            },
+            "maskStroke": "1px",
+            "backgroundSVG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"276\" height=\"178\" viewBox=\"-8 -13 116 46\" preserveAspectRatio=\"xMidYMid\"><defs><filter id=\"source-filter\" x=\"-1\" y=\"-1\" width=\"3\" height=\"3\"><feMorphology operator=\"dilate\" radius=\"12\"/><feColorMatrix values=\"0 0 0 0 1    0 0 0 0 1    0 0 0 0 1    0 0 0 1 0\" result=\"cm\"/></filter><mask id=\"source-mask-path\"><path d=\"M15 5L85 5A5 5 0 0 1 85 15L15 15A5 5 0 0 1 15 5\" fill=\"#fff\" stroke=\"#fff\" filter=\"url(#source-filter)\"/></mask></defs><rect x=\"-8\" y=\"-13\" width=\"116\" height=\"46\" mask=\"url(#source-mask-path)\" fill=\"#e2e8f0\" class=\"frame\"/></svg>"
+        },
+        {
+            "case": 34,
+            "width": 316,
+            "height": 258,
+            "variant": {
+                "shape_path": "M0 0L100 0"
+            },
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 276,
+                "height": 178
+            },
+            "bounds": {
+                "x": 0,
+                "y": 0,
+                "width": 100,
+                "height": 0
+            },
+            "filter": {
+                "x": "-1",
+                "y": "-1",
+                "width": "3",
+                "height": "3",
+                "operator": "dilate",
+                "radius": "1"
+            },
+            "maskStroke": "1px",
+            "backgroundSVG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"276\" height=\"178\" viewBox=\"-12 -12 124 124\" preserveAspectRatio=\"xMidYMid\"><defs><filter id=\"source-filter\" x=\"-1\" y=\"-1\" width=\"3\" height=\"3\"><feMorphology operator=\"dilate\" radius=\"1\"/><feColorMatrix values=\"0 0 0 0 1    0 0 0 0 1    0 0 0 0 1    0 0 0 1 0\" result=\"cm\"/></filter><mask id=\"source-mask-path\"><path d=\"M0 0L100 0\" fill=\"#fff\" stroke=\"#fff\" filter=\"url(#source-filter)\"/></mask></defs><rect x=\"-12\" y=\"-12\" width=\"124\" height=\"124\" mask=\"url(#source-mask-path)\" fill=\"#e2e8f0\" class=\"frame\"/></svg>"
+        },
+        {
+            "case": 34,
+            "width": 316,
+            "height": 258,
+            "variant": {
+                "shape_path": "M0 0L0 100"
+            },
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 276,
+                "height": 178
+            },
+            "bounds": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 100
+            },
+            "filter": {
+                "x": "-1",
+                "y": "-1",
+                "width": "3",
+                "height": "3",
+                "operator": "dilate",
+                "radius": "1"
+            },
+            "maskStroke": "1px",
+            "backgroundSVG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"276\" height=\"178\" viewBox=\"-12 -12 124 124\" preserveAspectRatio=\"xMidYMid\"><defs><filter id=\"source-filter\" x=\"-1\" y=\"-1\" width=\"3\" height=\"3\"><feMorphology operator=\"dilate\" radius=\"1\"/><feColorMatrix values=\"0 0 0 0 1    0 0 0 0 1    0 0 0 0 1    0 0 0 1 0\" result=\"cm\"/></filter><mask id=\"source-mask-path\"><path d=\"M0 0L0 100\" fill=\"#fff\" stroke=\"#fff\" filter=\"url(#source-filter)\"/></mask></defs><rect x=\"-12\" y=\"-12\" width=\"124\" height=\"124\" mask=\"url(#source-mask-path)\" fill=\"#e2e8f0\" class=\"frame\"/></svg>"
+        },
+        {
+            "case": 34,
+            "width": 316,
+            "height": 258,
+            "variant": {
+                "shape_path": "M10 10"
+            },
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 276,
+                "height": 178
+            },
+            "bounds": {
+                "x": 10,
+                "y": 10,
+                "width": 0,
+                "height": 0
+            },
+            "filter": {
+                "x": "-1",
+                "y": "-1",
+                "width": "3",
+                "height": "3",
+                "operator": "dilate",
+                "radius": "1"
+            },
+            "maskStroke": "1px",
+            "backgroundSVG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"276\" height=\"178\" viewBox=\"-12 -12 124 124\" preserveAspectRatio=\"xMidYMid\"><defs><filter id=\"source-filter\" x=\"-1\" y=\"-1\" width=\"3\" height=\"3\"><feMorphology operator=\"dilate\" radius=\"1\"/><feColorMatrix values=\"0 0 0 0 1    0 0 0 0 1    0 0 0 0 1    0 0 0 1 0\" result=\"cm\"/></filter><mask id=\"source-mask-path\"><path d=\"M10 10\" fill=\"#fff\" stroke=\"#fff\" filter=\"url(#source-filter)\"/></mask></defs><rect x=\"-12\" y=\"-12\" width=\"124\" height=\"124\" mask=\"url(#source-mask-path)\" fill=\"#e2e8f0\" class=\"frame\"/></svg>"
+        },
+        {
+            "case": 34,
+            "width": 316,
+            "height": 258,
+            "variant": {
+                "shape_path": "M5 5L50 90L95 5Z"
+            },
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 276,
+                "height": 178
+            },
+            "bounds": {
+                "x": 5,
+                "y": 5,
+                "width": 90,
+                "height": 85
+            },
+            "filter": {
+                "x": "-1",
+                "y": "-1",
+                "width": "3",
+                "height": "3",
+                "operator": "dilate",
+                "radius": "1"
+            },
+            "maskStroke": "1px",
+            "backgroundSVG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"276\" height=\"178\" viewBox=\"-7 -7 114 109\" preserveAspectRatio=\"xMidYMid\"><defs><filter id=\"source-filter\" x=\"-1\" y=\"-1\" width=\"3\" height=\"3\"><feMorphology operator=\"dilate\" radius=\"1\"/><feColorMatrix values=\"0 0 0 0 1    0 0 0 0 1    0 0 0 0 1    0 0 0 1 0\" result=\"cm\"/></filter><mask id=\"source-mask-path\"><path d=\"M5 5L50 90L95 5Z\" fill=\"#fff\" stroke=\"#fff\" filter=\"url(#source-filter)\"/></mask></defs><rect x=\"-7\" y=\"-7\" width=\"114\" height=\"109\" mask=\"url(#source-mask-path)\" fill=\"#e2e8f0\" class=\"frame\"/></svg>"
+        },
+        {
+            "case": 34,
+            "width": 316,
+            "height": 258,
+            "variant": {
+                "shape_path": "M0 50C0 0 100 0 100 50Z"
+            },
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 276,
+                "height": 178
+            },
+            "bounds": {
+                "x": 0,
+                "y": 12.5,
+                "width": 100,
+                "height": 37.5
+            },
+            "filter": {
+                "x": "-1",
+                "y": "-1",
+                "width": "3",
+                "height": "3",
+                "operator": "dilate",
+                "radius": "1"
+            },
+            "maskStroke": "1px",
+            "backgroundSVG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"276\" height=\"178\" viewBox=\"-12 0.5 124 61.5\" preserveAspectRatio=\"xMidYMid\"><defs><filter id=\"source-filter\" x=\"-1\" y=\"-1\" width=\"3\" height=\"3\"><feMorphology operator=\"dilate\" radius=\"1\"/><feColorMatrix values=\"0 0 0 0 1    0 0 0 0 1    0 0 0 0 1    0 0 0 1 0\" result=\"cm\"/></filter><mask id=\"source-mask-path\"><path d=\"M0 50C0 0 100 0 100 50Z\" fill=\"#fff\" stroke=\"#fff\" filter=\"url(#source-filter)\"/></mask></defs><rect x=\"-12\" y=\"0.5\" width=\"124\" height=\"61.5\" mask=\"url(#source-mask-path)\" fill=\"#e2e8f0\" class=\"frame\"/></svg>"
+        },
+        {
+            "case": 34,
+            "width": 316,
+            "height": 258,
+            "variant": {
+                "shape_path": "M0 0H40V40H0ZM60 60H100V100H60Z"
+            },
+            "root": {
+                "x": 8,
+                "y": 8,
+                "width": 276,
+                "height": 178
+            },
+            "bounds": {
+                "x": 0,
+                "y": 0,
+                "width": 100,
+                "height": 100
+            },
+            "filter": {
+                "x": "-1",
+                "y": "-1",
+                "width": "3",
+                "height": "3",
+                "operator": "dilate",
+                "radius": "1"
+            },
+            "maskStroke": "1px",
+            "backgroundSVG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"276\" height=\"178\" viewBox=\"-12 -12 124 124\" preserveAspectRatio=\"xMidYMid\"><defs><filter id=\"source-filter\" x=\"-1\" y=\"-1\" width=\"3\" height=\"3\"><feMorphology operator=\"dilate\" radius=\"1\"/><feColorMatrix values=\"0 0 0 0 1    0 0 0 0 1    0 0 0 0 1    0 0 0 1 0\" result=\"cm\"/></filter><mask id=\"source-mask-path\"><path d=\"M0 0H40V40H0ZM60 60H100V100H60Z\" fill=\"#fff\" stroke=\"#fff\" filter=\"url(#source-filter)\"/></mask></defs><rect x=\"-12\" y=\"-12\" width=\"124\" height=\"124\" mask=\"url(#source-mask-path)\" fill=\"#e2e8f0\" class=\"frame\"/></svg>"
+        }
     ]
 }

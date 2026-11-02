@@ -8,8 +8,8 @@ const context=vm.createContext({window,navigator:{userAgent:'Node.js'},console,s
 for(const file of ['libs/echarts/6.1.0/echarts.gauge.min.js','libs/jslive/format.js','EChartsProgress/ProgressRenderer.js'])vm.runInContext(read(file),context);
 const build=(state,w=620,h=500)=>window.SYMC_JSLIVE_OPTION(state,w,h),byID=(option,id)=>option.graphic.find(g=>g.id===id);
 const near=(a,b,why,tolerance=0.001)=>assert.ok(Math.abs(a-b)<=tolerance,why+': '+a+' vs '+b);
-const choice=process.argv[2];let images=0,layouts=0;
-if(choice!=='--layout'){
+const choice=process.argv[2];let images=0,layouts=0,fills=0,emptyPaints=0;
+if(!['--layout','--fills','--empty','--borders'].includes(choice)){
     for(const index of [37,39]){
         const state=structuredClone(states[index].chart),before=JSON.stringify(state),option=build(state),body=byID(option,'progress-body');
         const image=body.children.find(g=>g.id==='image-progress');
@@ -39,7 +39,7 @@ if(choice!=='--layout'){
     const priority=structuredClone(states[39].chart);priority.settings.shape_path='M0 0L20 20';priority.settings.shape_preset='text';
     assert.equal(byID(build(priority),'progress-body').children.find(g=>g.id==='image-progress').style.image,priority.settings.shape_svg.dataUri);
 }
-if(choice!=='--images'){
+if(!['--images','--fills','--empty','--borders'].includes(choice)){
     // Frozen measurements come from the unchanged ldBar engine + real template/CSS
     // in Chromium. Neither its layout formulas nor implementation are invoked here.
     const fixture=JSON.parse(read('tests/fixtures/jslive-progress-geometry.json'));
@@ -71,4 +71,49 @@ if(choice!=='--images'){
     assert.ok(byID(option,'progress-body').y>byID(build(states[22].chart),'progress-body').y);
     assert.ok(label.style.y+label.style.fontSize<=500,'Scaled bottom text remains inside the widget.');
 }
-console.log('JSLive Progress F05/F06: '+images+' original-image clips and '+layouts+' independent source layouts passed.');
+if(!['--images','--layout'].includes(choice)){
+    const fixture=JSON.parse(read('tests/fixtures/jslive-progress-geometry.json'));
+    assert.equal(fixture.fills.length,24);
+    for(const record of fixture.fills){
+        const empty=!record.bounds.width||!record.bounds.height;
+        if(choice==='--empty'&&!empty||choice==='--borders'&&empty)continue;
+        const state=structuredClone(states[record.case-1].chart);Object.assign(state.settings,record.variant||{});
+        state.settings.style_fontDisplay=false;state.settings.__animate=false;state.background='transparent';state.data.ratio=0.5;
+        const before=JSON.stringify(state),option=build(state,record.width-16,record.height-16),body=byID(option,'progress-body');
+        const background=body.children.find(g=>g.id==='background');
+        if(empty){
+            const paints=[];const canvas={nodeName:'CANVAS',style:{},width:record.width-16,height:record.height-16,setAttribute(){}};
+            const ctx=new Proxy({canvas,fill(){paints.push('fill');},stroke(){paints.push('stroke');},drawImage(){paints.push('image');},
+                measureText:text=>({width:String(text).length*8})},{get:(target,key)=>key in target?target[key]:()=>{}});
+            canvas.getContext=()=>ctx;window.echarts.setPlatformAPI({createCanvas:()=>canvas});
+            const chart=window.echarts.init(canvas,null,{renderer:'canvas',ssr:true,width:canvas.width,height:canvas.height});
+            try{
+                const visible=structuredClone(states[23].chart);visible.settings.style_fontDisplay=false;visible.settings.__animate=false;visible.background='transparent';
+                const full=build(visible,canvas.width,canvas.height);
+                // A loaded public image object isolates native graphic merge and
+                // visibility updates; the browser test separately paints real SVGs.
+                byID(full,'progress-body').children.find(g=>g.id==='background').style.image={width:100,height:100};
+                full.animation=false;chart.setOption(full,true);chart.getZr().flush();assert.ok(paints.length>0,'Visible initial fill must paint.');
+                paints.length=0;option.animation=false;chart.setOption(option,false);chart.getZr().flush();
+                assert.deepEqual(paints,[],'F06: zero-width/height fill paths must paint neither a gray stroke nor a foreground (case '+record.case+').');
+                chart.setOption(full,false);chart.getZr().flush();assert.ok(paints.length>0,'Returning from an empty path must restore the fill.');
+            }finally{chart.dispose();}
+            ++emptyPaints;
+        }else{
+            assert.equal(background.type,'image','F06: fill margins use the original morphology mask, not an approximate stroked path.');
+            const svg=Buffer.from(background.style.image.split(',')[1],'base64').toString();
+            for(const key of ['x','y','width','height'])assert.ok(svg.includes(key+'="'+record.filter[key]+'"'),'Original filter region '+key);
+            assert.match(svg,new RegExp('operator="'+record.filter.operator+'"'));
+            assert.match(svg,new RegExp('radius="'+record.filter.radius+'"'));
+            assert.match(svg,/stroke="#fff"/,'Original masks include the default white 1px stroke before morphology.');
+            assert.ok(!background.style.stroke,'Do not simulate morphology with a second native stroke.');
+            const frame=record.backgroundSVG.match(/<rect\b[^>]+class="frame"[^>]*>/)?.[0];
+            assert.ok(frame,'Independent source frame must be present.');
+            for(const [key,actual] of [['x',background.style.x],['y',background.style.y],['width',background.style.width],['height',background.style.height]]){
+                const expected=Number(new RegExp('\\b'+key+'="([^"]+)"').exec(frame)[1]);near(actual,expected,'Original fill frame '+key);
+            }
+        }
+        assert.equal(JSON.stringify(state),before,'F06: filling must not alter original values, settings or source identities.');++fills;
+    }
+}
+console.log('JSLive Progress F05/F06: '+images+' original-image clips, '+layouts+' independent layouts, '+fills+' source fill masks and '+emptyPaints+' empty Canvas paints passed.');

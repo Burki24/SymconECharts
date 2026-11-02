@@ -100,6 +100,7 @@
         const vw=box[2]+padding*2,vh=box[3]+padding*2,scale=Math.max(1e-9,Math.min(w/vw,h/vh));
         return {scale:scale,x:(w-vw*scale)/2-(box[0]-padding)*scale,
             y:titleSpace+(h-vh*scale)/2-(box[1]-padding)*scale,
+            viewBox:[box[0]-padding,box[1]-padding,vw,vh],
             labelX:w/2,labelY:titleSpace+(c.style_fontPosition==='center'?h/2:h+5),fontSize:fontSize};
     }
     function build(state,width,height){
@@ -111,9 +112,12 @@
             energy:{path:'M15 5L85 5A5 5 0 0 1 85 15L15 15A5 5 0 0 1 15 5',box:[10,5,80,10]},
             stripe:{path:'M15 5L85 5A5 5 0 0 1 85 15L15 15A5 5 0 0 1 15 5',box:[10,5,80,10]},text:{box:[0,0,70,20]}};
         const preset=presets[c.shape_preset];let image=c.shape_svg && typeof c.shape_svg==='object'?c.shape_svg:null;
-        let path=c.shape_path || preset.path,box=preset.box.slice();
+        let path=c.shape_path || preset.path,box=preset.box.slice(),pathBounds=null;
         if(image){const size=imageSize(image);box=[0,0,size[0],size[1]];}
-        else if(c.shape_path && root.echarts && root.echarts.graphic){const b=root.echarts.graphic.makePath(path,{}).getBoundingRect();box=b.width&&b.height?[b.x,b.y,b.width,b.height]:[0,0,100,100];}
+        else if(path){
+            const b=root.echarts.graphic.makePath(path,{}).getBoundingRect();pathBounds=[b.x,b.y,b.width,b.height];
+            if(c.shape_path){box=b.width&&b.height?pathBounds.slice():[0,0,100,100];}
+        }
         else if(!path){
             // This is a fixed trusted preset, not user SVG. Retain the source
             // glyph baseline and default black paint without relaxing SVG imports.
@@ -131,20 +135,25 @@
         // The original template sets "stroke-lincap", which the source engine
         // never consumes. Preserve its effective SVG default, not that raw typo.
         function pathElement(id,paint,isStroke){return {id:id,type:'jsliveProgressPath',shape:{pathData:path,strokePath:isStroke},style:{fill:isStroke?null:paint,stroke:isStroke?paint:null,lineWidth:isStroke?c.stroke_width:0,lineCap:'butt',strokeNoScale:false}};}
-        function clip(){let x0=box[0],y0=box[1],w=box[2],h=box[3];
+        function clip(){const bounds=pathBounds&&!image?pathBounds:box;let x0=bounds[0],y0=bounds[1],w=bounds[2],h=bounds[3];
             if(c.fill_dir==='rtl'){x0+=w*(1-d.ratio);w*=d.ratio;}else if(c.fill_dir==='btt'){y0+=h*(1-d.ratio);h*=d.ratio;}
             else if(c.fill_dir==='ttb'){h*=d.ratio;}else{w*=d.ratio;}
             return {type:'rect',shape:{x:x0,y:y0,width:w,height:h}};
         }
-        function imageBackground(color){
-            const r=Math.abs(c.fill_backgroundExtrude),w=box[2]+r*2,h=box[3]+r*2;
-            const region=' x="'+(-r)+'" y="'+(-r)+'" width="'+w+'" height="'+h+'"';
-            const svg='<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="'+[-r,-r,w,h].join(' ')+'"><defs><filter id="d" filterUnits="userSpaceOnUse"'+region+'><feMorphology in="SourceAlpha" operator="dilate" radius="'+r+'"/></filter><mask id="m" mask-type="alpha" maskUnits="userSpaceOnUse"'+region+'><image xlink:href="'+image.dataUri+'" width="'+box[2]+'" height="'+box[3]+'" filter="url(#d)"/></mask></defs><rect'+region+' fill="'+color+'" mask="url(#m)"/></svg>';
+        // Images and path fills share the trusted alpha-mask adapter. Paths use
+        // the original object-bounds filter, including its default 1px white
+        // stroke before morphology. A native thick stroke is not equivalent.
+        function maskedBackground(content,rect,imageFilter){
+            const r=Math.abs(c.fill_backgroundExtrude),operator=c.fill_backgroundExtrude>=0?'dilate':'erode';
+            const region=' x="'+rect[0]+'" y="'+rect[1]+'" width="'+rect[2]+'" height="'+rect[3]+'"';
+            const filter=imageFilter?' filterUnits="userSpaceOnUse"'+region:' x="-1" y="-1" width="3" height="3"';
+            const svg='<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="'+rect.join(' ')+'"><defs><filter id="d"'+filter+'><feMorphology in="SourceAlpha" operator="'+operator+'" radius="'+r+'"/></filter><mask id="m" mask-type="alpha" maskUnits="userSpaceOnUse"'+region+'>'+content+'</mask></defs><rect'+region+' fill="'+f.paint(c,'fill_backgroundColor')+'" mask="url(#m)"/></svg>';
             return 'data:image/svg+xml;base64,'+root.btoa(svg);
         }
         if(image){
             const r=Math.abs(c.fill_backgroundExtrude);
-            children.push({id:'image-background',type:'image',style:{image:imageBackground(f.paint(c,'fill_backgroundColor')),x:-r,y:-r,width:box[2]+r*2,height:box[3]+r*2}});
+            const background=maskedBackground('<image xlink:href="'+image.dataUri+'" width="'+box[2]+'" height="'+box[3]+'" filter="url(#d)"/>',[-r,-r,box[2]+r*2,box[3]+r*2],true);
+            children.push({id:'image-background',type:'image',style:{image:background,x:-r,y:-r,width:box[2]+r*2,height:box[3]+r*2}});
             children.push({id:'image-progress',type:'image',clipPath:clip(),style:{image:image.dataUri,x:0,y:0,width:box[2],height:box[3]}});
         }else if(stroke){
             const trail=pathElement('trail',f.paint(c,'stroke_trailColor'),true);trail.style.lineWidth=c.stroke_trailWidth;children.push(trail);
@@ -154,9 +163,10 @@
             if(c.shape_path&&c.stroke_Dash1>0&&c.stroke_Dash2>0&&c.stroke_dir!=='reverse'){foreground.style.lineDash=[c.stroke_Dash1,c.stroke_Dash2];}
             children.push(foreground);
         }else{
-            const background=pathElement('background',f.paint(c,'fill_backgroundColor'),false);
-            background.style.stroke=f.paint(c,'fill_backgroundColor');background.style.lineWidth=c.fill_backgroundExtrude*2;children.push(background);
-            const foreground=pathElement('progress',f.paint(c,'fill_color'),false);foreground.clipPath=clip();children.push(foreground);
+            const empty=!pathBounds[2]||!pathBounds[3],rect=layout.viewBox;
+            const background=maskedBackground('<path d="'+f.escape(path)+'" fill="#fff" stroke="#fff" filter="url(#d)"/>',rect,false);
+            children.push({id:'background',type:'image',invisible:empty,style:{image:background,x:rect[0],y:rect[1],width:rect[2],height:rect[3]}});
+            const foreground=pathElement('progress',f.paint(c,'fill_color'),false);foreground.invisible=empty;foreground.clipPath=clip();children.push(foreground);
         }
         const graphics=[{id:'progress-body',type:'group',x:layout.x,y:layout.y,scaleX:layout.scale,scaleY:layout.scale,children:children}];
         if(title){graphics.push({id:'chart-title',type:'text',style:{text:title,x:width/2,y:4,fontSize:titleSize,
