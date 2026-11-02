@@ -662,14 +662,36 @@ $kernel['interruptAfterStage'] = true;
 $separateFailed = json_decode($gateway->ExecuteJSLiveImport($json, '{}', 15001, $separateConfirmation), true, 64, JSON_THROW_ON_ERROR)['charts'][$separateRow['chartKey']];
 nativeAssert($separateFailed['status'] === 'failed' && count($kernel['created']) === 41, 'Separate-copy staging interruption was not exercised.');
 $kernel['interruptAfterStage'] = false;
+// Synthetic pre-update snapshot: only the rule fingerprint differs from the real current public plan.
+// Recompute the complete historical plan hash instead of changing an opaque journal hash arbitrarily.
+$historicalPlan = $separatePlan;
+unset($historicalPlan['planHash']);
+$historicalPlan['ruleFingerprint'] = hash('sha256', 'synthetic previous import rule bytes');
+$historicalHash = EChartsImportJson::Hash($historicalPlan);
+nativeAssert($historicalPlan['ruleFingerprint'] !== EChartsJSLivePlan::RuleFingerprint()
+    && $historicalHash !== $separatePlan['planHash'], 'The update fixture must change both rule fingerprint and plan hash.');
+nativeThrows(fn () => EChartsJSLivePlan::Recheck($historicalPlan, EChartsJSLiveArchive::Read(...), time()), 'PLAN_CHANGED:');
 $legacyJournal = $gateway->GetTestJournal();
 unset($legacyJournal['entries'][$separateFailed['journalID']]['separateFrom']);
+$legacyJournal['entries'][$separateFailed['journalID']]['planHash'] = $historicalHash;
 $gateway->RestoreTestJournal($legacyJournal);
+$staleConfirmation = json_decode($separateConfirmation, true, 64, JSON_THROW_ON_ERROR);
+$staleConfirmation['planHash'] = $historicalHash;
+$beforeStale = count($kernel['mutations']);
+nativeThrows(fn () => $gateway->ExecuteJSLiveImport($json, '{}', 15001, EChartsImportJson::Canonical($staleConfirmation)), 'PLAN_CHANGED:');
+nativeAssert(
+    count($kernel['mutations']) === $beforeStale && $gateway->GetTestJournal() === $legacyJournal,
+    'A pre-update confirmation must fail without native or journal writes.'
+);
 $separateComplete = json_decode($gateway->ExecuteJSLiveImport($json, '{}', 15001, $separateConfirmation), true, 64, JSON_THROW_ON_ERROR)['charts'][$separateRow['chartKey']];
 nativeAssert(
     $separateComplete['status'] === 'complete' && $separateComplete['targetID'] === $separateFailed['targetID']
     && $separateComplete['journalID'] === $separateFailed['journalID'] && count($kernel['created']) === 41,
     'The public API must resume a legacy separate-copy entry using the original confirmation.'
+);
+nativeAssert(
+    $gateway->GetTestJournal()['entries'][$separateComplete['journalID']]['planHash'] === $historicalHash,
+    'Recovery under current rules must retain the historical plan evidence.'
 );
 $mutations = count($kernel['mutations']);
 $separateReplay = json_decode($gateway->ExecuteJSLiveImport($json, '{}', 15001, $separateConfirmation), true, 64, JSON_THROW_ON_ERROR)['charts'][$separateRow['chartKey']];

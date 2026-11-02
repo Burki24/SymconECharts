@@ -245,6 +245,11 @@ Auch diese Bestätigung darf unverändert erneut gesendet werden: Derselbe gült
 Plan verwendet das nachgewiesene neue Ziel wieder oder setzt dessen unterbrochene
 Anlage fort. Bereits abgeschlossene Ziele werden nicht erneut konfiguriert.
 Zwischenzeitliche Zieländerungen und unpassende Vorgänger bleiben gesperrt.
+Ändert ein Modulupdate die Importregeln, ist ein neuer Plan samt Bestätigung
+erforderlich. Bei unveränderter Zielrevision kann auch dieser Plan die vorhandene
+getrennte Anlage fortsetzen oder wiederverwenden. Die ursprünglichen
+Journalnachweise bleiben erhalten. Alte Bestätigungen bleiben gesperrt.
+
 `ECGW_GetJSLiveImportJournalPage(int $InstanzID, int $Offset, int $Limit,
 string $Revision): string` liest eine chronologisch geordnete Metadatenseite.
 Alle vier Argumente sind erforderlich. Mit `0, 25, ''` beginnen; weitere Seiten

@@ -408,31 +408,41 @@ foreach (['same-revision', 'new-revision'] as $revisionMode) {
                 }
                 unset($legacyEntry);
             }
-            // Reconstruct the engine as after a new request or module update.
-            $e = new EChartsJSLiveJournal($k);
-            $row = $e->Execute($separatePlan, $choice)['charts']['instance:12000'];
-            $retainedEntryID = $row['journalID'];
-            if ($row['error'] === 'RECOVERY_REQUIRED') {
-                $entry = $k->journal['entries'][$retainedEntryID];
-                $candidates = array_diff(array_keys($k->objects), $entry['creationIntent']['before']);
-                journalAssert($k->creates <= 2, 'A separate creation gap must never cause a third object.');
-                $e->Resolve($retainedEntryID, array_values($candidates)[0] ?? 0, $entry['revision']);
-                $row = $e->Execute($separatePlan, $choice)['charts']['instance:12000'];
+            $interrupted = $k;
+            foreach (['same-rules', 'updated-rules'] as $ruleMode) {
+                $k = clone $interrupted;
+                $resumePlan = $separatePlan;
+                $resumeChoice = $choice;
+                if ($ruleMode === 'updated-rules') {
+                    $resumeChoice['planHash'] = $resumePlan['planHash'] = str_repeat('f', 64);
+                }
+                // Reconstruct the engine; a code update requires a freshly confirmed current plan.
+                $e = new EChartsJSLiveJournal($k);
+                $row = $e->Execute($resumePlan, $resumeChoice)['charts']['instance:12000'];
+                $retainedEntryID = $row['journalID'];
+                if ($row['error'] === 'RECOVERY_REQUIRED') {
+                    $entry = $k->journal['entries'][$retainedEntryID];
+                    $candidates = array_diff(array_keys($k->objects), $entry['creationIntent']['before']);
+                    journalAssert($k->creates <= 2, 'A separate creation gap must never cause a third object.');
+                    $e->Resolve($retainedEntryID, array_values($candidates)[0] ?? 0, $entry['revision']);
+                    $row = $e->Execute($resumePlan, $resumeChoice)['charts']['instance:12000'];
+                }
+                journalAssert(
+                    $row['status'] === 'complete' && $row['journalID'] === $retainedEntryID
+                    && $row['targetID'] !== $original['targetID'] && $k->creates === 2 && count($k->journal['entries']) === 2
+                    && $k->objects[$original['targetID']] === $old && !$k->locked && $k->journal['version'] === 1
+                    && $k->journal['entries'][$retainedEntryID]['planHash'] === $separatePlan['planHash'],
+                    'Separate recovery failed: ' . $revisionMode . '/' . $journalMode . '/' . $ruleMode . '/' . $stop
+                );
+                $before = [$k->objects, $k->plannedConfiguration, $k->creates, $k->stages, $k->applies];
+                $replayed = $e->Execute($resumePlan, $resumeChoice)['charts']['instance:12000'];
+                journalAssert(
+                    $replayed === $row
+                    && [$k->objects, $k->plannedConfiguration, $k->creates, $k->stages, $k->applies] === $before,
+                    'Exact separate replay must preserve target IDs, active/draft settings and mutation counts.'
+                );
+                ++$separateCheckpoints;
             }
-            journalAssert(
-                $row['status'] === 'complete' && $row['journalID'] === $retainedEntryID
-                && $row['targetID'] !== $original['targetID'] && $k->creates === 2 && count($k->journal['entries']) === 2
-                && $k->objects[$original['targetID']] === $old && !$k->locked && $k->journal['version'] === 1,
-                'Separate recovery failed: ' . $revisionMode . '/' . $journalMode . '/' . $stop
-            );
-            $before = [$k->objects, $k->plannedConfiguration, $k->creates, $k->stages, $k->applies];
-            $replayed = $e->Execute($separatePlan, $choice)['charts']['instance:12000'];
-            journalAssert(
-                $replayed === $row
-                && [$k->objects, $k->plannedConfiguration, $k->creates, $k->stages, $k->applies] === $before,
-                'Exact separate replay must preserve target IDs, active/draft settings and mutation counts.'
-            );
-            ++$separateCheckpoints;
         }
     }
 }
@@ -468,7 +478,25 @@ foreach (['recorded-predecessor', 'legacy-version-1'] as $journalMode) {
     $changedPlan = $plan;
     $changedChoice = $choice;
     $changedChoice['planHash'] = $changedPlan['planHash'] = str_repeat('f', 64);
+    $before = [$k->objects, $k->plannedConfiguration, $k->creates, $k->stages, $k->applies];
+    journalThrows(fn () => $e->Execute($changedPlan, $choice), 'PLAN_CHANGED:');
+    $updatedReplay = $e->Execute($changedPlan, $changedChoice)['charts']['instance:12000'];
+    journalAssert(
+        $updatedReplay === $copy
+        && [$k->objects, $k->plannedConfiguration, $k->creates, $k->stages, $k->applies] === $before
+        && $k->journal['entries'][$copy['journalID']]['planHash'] === $plan['planHash'],
+        'A freshly confirmed plan after a rule update must reuse the same owned target and retain its historical plan hash.'
+    );
+    $changedTargetPlan = $changedPlan;
+    $changedTargetPlan['charts']['instance:12000']['target']['configuration']['Title'] = 'Different reviewed target';
+    journalThrows(fn () => $e->Execute($changedTargetPlan, $changedChoice), 'PLAN_CHANGED:');
+    $k->stale = true;
     journalThrows(fn () => $e->Execute($changedPlan, $changedChoice), 'PLAN_CHANGED:');
+    $k->stale = false;
+    journalAssert(
+        [$k->objects, $k->plannedConfiguration, $k->creates, $k->stages, $k->applies] === $before,
+        'Updated-rule replay must still revalidate under the lock and reject a different target without writes.'
+    );
     foreach (['configuration', 'name', 'info', 'children', 'draft', 'missing'] as $drift) {
         $objects = $k->objects;
         if ($drift === 'configuration') {
@@ -481,7 +509,7 @@ foreach (['recorded-predecessor', 'legacy-version-1'] as $journalMode) {
             $k->objects[$copy['targetID']][$drift] = $drift === 'children' ? [99999] : 'Owner metadata';
         }
         $before = [$k->objects, $k->plannedConfiguration, $k->creates, $k->stages, $k->applies];
-        $blocked = $e->Execute($plan, $choice)['charts']['instance:12000'];
+        $blocked = $e->Execute($changedPlan, $changedChoice)['charts']['instance:12000'];
         journalAssert(
             $blocked['status'] === 'failed' && $blocked['targetID'] === $copy['targetID']
             && [$k->objects, $k->plannedConfiguration, $k->creates, $k->stages, $k->applies] === $before,

@@ -1,6 +1,6 @@
 # ADR 0111: Bestätigte JSLive-Neuanlage und familienbezogene Altmodelle
 
-- Status: Import, Wiederanlauf und Farb-/SVG-Darstellung bestätigt; frische 0.113-Pakete unter 1.383 live übernommen; J01 lokal korrigiert und regressionsgeprüft, gezielte Live-Nachprüfung ausstehend
+- Status: Import, Wiederanlauf und Farb-/SVG-Darstellung bestätigt; J01-Updatefall unter 1.385 live bestätigt fehlerhaft, Restkorrektur lokal geprüft; erneute Live-Nachprüfung ausstehend
 - Datum: 2026-10-31
 - Ergänzt: ADR 0109, ADR 0110 und Vertrag 1.0
 
@@ -192,12 +192,24 @@ Planfingerabdruck und sämtliche Ziel-/Eigentums-/Snapshot-Prüfungen bleiben
 erforderlich. Falsche oder veraltete Vorgänger schaffen keine weitere Kopie;
 Erzeugungslücken verlangen weiterhin eine ausdrückliche Zuordnung.
 
+Ein Codeupdate verändert den über alle Importregeln gebildeten Fingerabdruck.
+Alte Bestätigungen werden weiterhin abgewiesen; der Anwender muss den aktuellen
+Plan prüfen und bestätigen. Die Journalzuordnung verlangt dagegen keinen
+historischen Plan-Hash als aktuellen Hash: Bei gleicher Herkunft und Revision,
+unveränderter vollständiger Zieldefinition und gültigem Vorgänger wird derselbe
+Eintrag fortgesetzt. Aktuelle Plan-/Quellenprüfung unter Sperre und sämtliche
+Eigentums-/Snapshot-Prüfungen bleiben erhalten. Der historische `planHash` wird
+nicht umgeschrieben; weder Journalversion noch Bestände benötigen eine Migration.
+
 Die J01-Regression prüft abgeschlossene und unterbrochene getrennte Anlagen
 mit gleicher und neuer Revision, neuen und alten Version-1-Journalen an allen
-23 dauerhaften Schritten (92 Fälle). Ungültige Vorgänger, andere Pläne und
+23 dauerhaften Schritten, mit gleichen und aktualisierten Regeln (184 Fälle).
+Ungültige Vorgänger, unbestätigte Pläne, geänderte Zieldefinitionen und
 veränderte oder fehlende Ziele bleiben gesperrt. Der öffentliche Gateway-Test
 prüft zusätzlich Wiederaufnahme und identische Bestätigungswiederholung mit
-dem konkreten Kerneladapter; ein abgeschlossener Wiederaufruf schreibt keine
+dem konkreten Kerneladapter und einem aus einem früheren Regel-Fingerabdruck
+berechneten historischen Plan; veraltete Regeln und Bestätigungen bleiben
+gesperrt. Ein abgeschlossener Wiederaufruf schreibt keine
 nativen Einstellungen. Die Live-Nachprüfung nach Eigentümer-Update steht aus.
 
 ## Familienintegration

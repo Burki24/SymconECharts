@@ -43,7 +43,10 @@
 
 - Identische Bestätigungen getrennter JSLive-Neuanlagen mit `separateFrom`
   verwenden das nachgewiesene neue Ziel wieder und setzen unterbrochene Anlagen
-  fort, statt mit `PLAN_CHANGED` abzubrechen. Bestehende Journale bleiben nutzbar;
+  fort, statt mit `PLAN_CHANGED` abzubrechen. Nach Modulupdates genügt ein frisch
+  geprüfter und bestätigter Plan bei unveränderter Zielrevision; historische
+  Plan-Hashes bleiben erhalten. Alte Bestätigungen bleiben ungültig.
+  Bestehende Journale bleiben nutzbar;
   geänderte Ziele, fremde Vorgänger und uneindeutige Erzeugungslücken bleiben
   geschützt. Quellen, Archive und Designs werden nicht verändert.
 

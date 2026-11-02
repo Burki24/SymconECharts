@@ -90,7 +90,7 @@ final class EChartsJSLiveJournal
                 }
                 if ($entryID !== null && isset($choice['separateFrom'])) {
                     if ($choice['separateFrom'] !== $entryID) {
-                        if (!$this->IsSeparateReplay($previous, $entryID, $choice['separateFrom'], $plan['planHash'])) {
+                        if (!$this->IsSeparateReplay($previous, $entryID, $choice['separateFrom'])) {
                             throw new RuntimeException('PLAN_CHANGED: separate creation must identify the reviewed previous target.');
                         }
                     } elseif ($previous[$entryID]['targetID'] === null) {
@@ -267,14 +267,16 @@ final class EChartsJSLiveJournal
         $this->kernel->Save($journal);
     }
 
-    private function IsSeparateReplay(array $previous, string $entryID, mixed $separateFrom, string $planHash): bool
+    private function IsSeparateReplay(array $previous, string $entryID, mixed $separateFrom): bool
     {
         $entry = $previous[$entryID];
         if (!is_string($separateFrom) || !isset($previous[$separateFrom])
             || $previous[$separateFrom]['targetID'] === null
-            || $previous[$separateFrom]['sequence'] >= $entry['sequence'] || $entry['planHash'] !== $planHash) {
+            || $previous[$separateFrom]['sequence'] >= $entry['sequence']) {
             return false;
         }
+        // Execute already confirms/revalidates today's plan and checks the unchanged revision/target.
+        // The recorded plan hash is historical evidence, not a requirement to keep old rule code loaded.
         if (array_key_exists('separateFrom', $entry)) {
             return $entry['separateFrom'] === $separateFrom;
         }

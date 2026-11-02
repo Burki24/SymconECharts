@@ -9,7 +9,7 @@
   Familienmapper, neue Zielmodelle, bestätigte Anlage mit Journal und die
   vereinbarten Darstellungsvergleiche sind inzwischen abgenommen. Der aktuelle
   Stand mit live übernommenen 0.113-Paketen und der lokal geprüften, noch live
-  nachzuprüfenden J01-Korrektur steht in der
+  nachzuprüfenden J01-Restkorrektur für Regelupdates steht in der
   [Migrationsabnahme](JSLIVE_MIGRATION_ABNAHME.md).
 - Entscheidungen: [ECharts ADR 0109](adr/0109-jslive-migration-contract.md) und
   [JSLive ADR 0007](https://github.com/Burki24/JSLive/blob/dev/docs/adr/0007-echarts-migration-contract.md).
@@ -554,8 +554,10 @@ Kantenglättung von verschobener Geometrie, fehlenden Reihen oder falschen Farbe
    Original-/Ziel-Darstellungsvergleiche sind erfolgt. Für frische Pakete mit der
    nun geprüften 0.113-Vorlagenkennung sind Planung und getrennte Neuanlage unter
    1.383 bestätigt. Die identische Bestätigungswiederholung mit separateFrom
-   ist lokal korrigiert und regressionsgeprüft (J01); die gezielte Live-Nachprüfung
-   steht aus. Normaler Wiederaufruf und Bestandsschutz sind bestätigt.
+   scheitert unter 1.385 noch nach einem Regelupdate. Die Restkorrektur ist lokal
+   regressionsgeprüft (J01); aktuelle Planbestätigung und Eigentumsprüfung bleiben
+   erforderlich. Die erneute Live-Nachprüfung steht aus. Normaler Wiederaufruf
+   und Bestandsschutz sind bestätigt.
 
 Die grundsätzliche Übernahme ist damit implementiert und live bestätigt; die
 aktuelle Quellvorlagenfreigabe ist live geprüft. Die erste SymconECharts-Beta
