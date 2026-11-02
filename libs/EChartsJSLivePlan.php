@@ -299,8 +299,8 @@ final class EChartsJSLivePlan
                         $row,
                         '/appearance/paint/' . $key,
                         $paint['duration'],
-                        'The validated loading-bar palette, direction and repeating image are retained as a static initial frame. Its independent cyclic resource movement is not replayed; native value transitions remain available.',
-                        'native-progress-static-gradient-1'
+                        'The validated palette and direction move cyclically with the original duration using a bounded native canvas. Each document has its own start phase; browser scheduling and disabled target animations can differ from the source.',
+                        'native-progress-cyclic-gradient-1'
                     );
                 }
             }

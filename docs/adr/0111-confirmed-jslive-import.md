@@ -20,9 +20,15 @@ aktive Farb-Overrides bleiben unverändert nutzbar.
 Der Adapter akzeptiert Hex-Farben, die explizite loading-bar-Gradientgrammatik
 mit 2–16 Hex-Farben, 0–360° und 0–3600 Sekunden sowie eingebettete SVG-Bilder.
 Die mathematische Gradientgeometrie folgt der festgeschriebenen MIT-Ressource;
-deren Engine wird nicht ausgeliefert. Dauer und Originaltext bleiben erhalten,
-die Ausgabe ist jedoch ein statisches Anfangsbild. Der Plan verlangt dafür
-`native-progress-static-gradient-1` als einzelne Bestätigung. Er meldet außerdem
+deren Engine wird nicht ausgeliefert. Dauer und Originaltext bleiben erhalten.
+Seit der Korrektur der zeitlichen Darstellung bewegt ein begrenzter nativer
+Canvas die Palette mit einem einzigen, auf 30 Zeichnungen pro Sekunde begrenzten
+Frame-Zyklus je Diagramm. Verdeckte Dokumente zeichnen nicht; Disposal beendet
+den Zyklus. Polling und Größenänderungen erhalten die Phase. Dauer null und
+ausgeschaltete Zielanimationen bleiben statisch. Der Plan verlangt für getrennte
+Startphasen und Browser-Timing `native-progress-cyclic-gradient-1` statt der
+bisherigen Standbild-Abweichung. Vorhandene Journalbestätigungen werden nicht
+umgeschrieben. Er meldet außerdem
 mit `native-progress-svg-route-1`, wenn der alte, erweiterungslose SVG-Dateipfad
 schwarz rendern kann und das Ziel stattdessen das geprüfte Bild zeichnet.
 Explizites Füll-Override gewinnt vor dem Dateibild; eigene SVG-Formen behalten
@@ -41,6 +47,12 @@ erhält deren ursprüngliche Koordinaten und Wertunabhängigkeit.
 Konfiguration, Bestätigung und Journal laufen unverändert durch den regulären
 Import. Originalinstanzen, Quellen, Darstellungen und Archive werden nicht
 geschrieben. Ein Modellupdate importiert gesperrte Fälle nicht automatisch.
+
+Die Quellvorlage liest ihre sichtbaren Präfix-/Suffix-Texte ausschließlich aus
+`VariableProfile`. Neue Modelle speichern diese Literale als `progressLabel`;
+native Formate und Custom-Profile bleiben vollständig für Tooltips erhalten.
+Altmodelle ohne dieses Feld lösen nur diese beiden Texte lesend zur Laufzeit
+auf. Dabei werden weder Modellproperties noch Quellprofile geschrieben.
 
 Der Eigentümer hat die vollständige Übernahme einschließlich der fehlenden
 Zielmodelle für die 40 JSLive-Testvarianten beauftragt. Die reine Vorschau aus

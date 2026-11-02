@@ -13,6 +13,7 @@ require_once __DIR__ . '/EChartsSvgImage.php';
 require_once __DIR__ . '/EChartsSvgPath.php';
 require_once __DIR__ . '/EChartsJSLivePath.php';
 require_once __DIR__ . '/../EChartsProgress/JSLivePaint.php';
+require_once __DIR__ . '/../EChartsProgress/ProgressData.php';
 
 /** Typed, frozen, profile-independent inputs to the family-owned ECharts adapters. No arbitrary options/code. */
 final class EChartsJSLiveModel
@@ -105,6 +106,11 @@ final class EChartsJSLiveModel
         }
         self::ValidateFamily($family, $model['settings'], $model['bindings'], $model['axes']);
         if ($family === 'progress') {
+            if (isset($model['progressLabel']) && (!is_array($model['progressLabel'])
+                || array_diff(array_keys($model['progressLabel']), ['prefix', 'suffix']) !== []
+                || !is_string($model['progressLabel']['prefix'] ?? null) || !is_string($model['progressLabel']['suffix'] ?? null))) {
+                throw new InvalidArgumentException('PACKAGE_INVALID: invalid frozen progress label.');
+            }
             $paints = JSLiveProgressPaint::Build($model['settings']);
             if (isset($model['progressPaints']) && EChartsImportJson::Canonical($model['progressPaints']) !== EChartsImportJson::Canonical($paints)) {
                 throw new InvalidArgumentException('PACKAGE_INVALID: frozen paints differ from their validated settings.');
@@ -286,6 +292,9 @@ final class EChartsJSLiveModel
         $model = ['version' => self::VERSION, 'family' => $family, 'settings' => $settings, 'sources' => $sources,
             'bindings'      => $bindings, 'axes' => $axes, 'time' => $time, 'resources' => $resources,
             'global'        => EChartsJSLivePackage::ArrayValue($chart->original->globalConfiguration)];
+        if ($family === 'progress') {
+            $model['progressLabel'] = ProgressData::SourceLabel(EChartsJSLivePackage::ArrayValue($chart->sources[0]->presentation->original));
+        }
         if ($family === 'progress' && ($paints = JSLiveProgressPaint::Build($settings)) !== []) {
             $model['progressPaints'] = $paints;
         }

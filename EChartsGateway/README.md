@@ -108,8 +108,8 @@ Kompass-Instrumente ab. Historische Radar- und Fortschrittsmodelle liegen in
 [EChartsProgress](../EChartsProgress/README.md). Eigene sichere SVG-Füllformen
 und Pfade werden geprüft; Skripte und fremde Vorlagen werden nicht ausgeführt.
 Progressbar-Verläufe und SVG-Füllbilder verwenden einen begrenzten lokalen
-Farbadapter. Zyklische Verlaufsbewegung wird als statisches Anfangsbild
-übernommen und gesondert gemeldet; externe Bildadressen bleiben gesperrt.
+Farbadapter. Zyklische Verlaufsbewegung übernimmt Richtung und Dauer nativ;
+getrennte Dokumente haben unabhängige Startphasen. Externe Bildadressen bleiben gesperrt.
 Die unterstützten Formate und Grenzen stehen bei
 [EChartsProgress](../EChartsProgress/README.md#verlaufsfarben-und-svg-füllbilder-aus-jslive).
 Es wird keine beliebige oder pixelgleiche 1:1-Migration versprochen.

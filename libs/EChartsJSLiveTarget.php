@@ -144,6 +144,9 @@ trait EChartsJSLiveTarget
     protected function JSLiveModel(): array
     {
         $model = EChartsJSLiveModel::Read($this->ReadPropertyString('JSLiveImportModel'), $this->JSLiveModule()[1]);
+        if ($model['family'] === 'progress' && !isset($model['progressLabel'])) {
+            $model['progressLabel'] = ProgressData::CaptureLabel($model['bindings'][0]['variableID']);
+        }
         if ($model['time'] !== null) {
             $model['time']['selection']['Period']['value'] = $this->ReadPropertyInteger('JSLivePeriod');
             $model['time']['selection']['Relativ']['value'] = $this->ReadPropertyBoolean('JSLiveRelative');

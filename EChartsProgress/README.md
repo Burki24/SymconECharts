@@ -45,9 +45,18 @@ Zusätzlich werden die JSLive-Felder `override_fill`, `override_stroke` und
 SVG-Bilder als Base64-Daten-URI in den Overrides und
 `data:ldbar/res,gradient(Winkel,Dauer,Farbe,...)`
 mit zwei bis 16 Hex-Farben, Winkel 0–360° und Dauer 0–3600 Sekunden. Der
-Verlauf behält Richtung und wiederholte Palette als statisches Anfangsbild.
-Die zyklische Bewegung dieser alten Bildressource wird im Importbericht
-gesondert als Abweichung ausgewiesen. Wertanimationen bleiben einstellbar.
+Verlauf bewegt die wiederholte Palette mit der ursprünglichen Richtung und Dauer.
+Eine Dauer von null oder ausgeschaltete Zielanimationen ergeben ein Standbild.
+Aktualisierungen und Größenänderungen behalten die Phase; getrennte Dokumente
+starten unabhängig. Der Importbericht benennt Unterschiede im Browser-Timing.
+Die Bewegung wird lokal und begrenzt gezeichnet, ohne alte Skripte auszuführen.
+
+Die Zahlenbeschriftung folgt der Quellvorlage: Präfix und Suffix stammen nur
+aus dem ursprünglichen Standardprofil, nicht aus einer nativen Darstellung
+oder einem benutzerdefinierten Profil. Neue Importe frieren diese Texte
+profilunabhängig ein. Bei älteren Importmodellen werden sie ausschließlich
+lesend aus der Quellvariable aufgelöst, ohne die Konfiguration zu ändern.
+Der Tooltip behält die vollständige native Formatierung mit Originaleinheit.
 
 Das SVG-Füllbild muss als `image/svg+xml` eingebettet sein; ein explizites
 `override_fill` hat Vorrang. Eigene SVG-Formen behalten weiterhin ihre eigenen

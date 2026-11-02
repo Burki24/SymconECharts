@@ -19,6 +19,10 @@ function jsliveTargetAssert(bool $ok, string $message): void
         throw new RuntimeException($message);
     }
 }
+function IPS_VariableProfileExists(string $name): bool
+{
+    return isset($GLOBALS['symconTestProfiles'][$name]);
+}
 function jsliveTargetModule(int $id): IPSModuleStrict
 {
     return $GLOBALS['symconTestModuleObjects'][$id];
@@ -165,6 +169,13 @@ foreach (glob(__DIR__ . '/fixtures/jslive-packages/*.json') as $file) {
         $binding['settings'] = $rebind($binding['settings']);
     }
     unset($binding, $rebind);
+    if (in_array($count, [23, 24], true)) {
+        unset($model['progressLabel']);
+        if ($count === 24) {
+            $GLOBALS['symconTestProfiles']['LegacyProgressLabel'] = ['Prefix' => 'legacy ', 'Suffix' => ' W'];
+            $GLOBALS['symconTestVariables'][$model['bindings'][0]['variableID']]['VariableProfile'] = 'LegacyProgressLabel';
+        }
+    }
     $device->SetTestProperty('JSLiveImportModel', EChartsImportJson::Canonical($model));
     $device->SetTestProperty('Title', $model['settings']['title_text'] ?? '');
     $device->SetTestProperty('EnableIPSView', true);
@@ -176,6 +187,12 @@ foreach (glob(__DIR__ . '/fixtures/jslive-packages/*.json') as $file) {
     $sourceKeys = array_flip(array_column($model['sources'], 'variableID'));
     $before = EChartsImportJson::Hash([array_intersect_key($GLOBALS['symconTestVariables'], $sourceKeys), $GLOBALS['symconTestArchiveVariables']]);
     $device->ApplyChanges();
+    if (in_array($count, [23, 24], true)) {
+        $legacyState = json_decode($device->GetJSLiveImportData(), true, 32, JSON_THROW_ON_ERROR);
+        jsliveTargetAssert(($legacyState['chart']['data']['label'] ?? null) === ($count === 24
+            ? ['prefix' => 'legacy ', 'suffix' => ' W'] : ['prefix' => '', 'suffix' => '']), 'Old models must resolve the original label without a reimport.');
+        jsliveTargetAssert(!isset(json_decode($device->GetTestProperties()['JSLiveImportModel'], true)['progressLabel']), 'Compatibility label resolution must not rewrite stored models.');
+    }
     $creationGuard = $device->GetJSLiveCreationGuard();
     $propertiesBeforeReload = $device->GetTestProperties();
     $outputGuardsBeforeReload = $device->GetJSLiveOutputGuards();

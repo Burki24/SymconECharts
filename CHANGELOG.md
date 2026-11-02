@@ -6,7 +6,9 @@
   Verlaufsressourcen und eingebettete SVG-Füllbilder einschließlich statischer
   Muster in Kachel, IPSView und Vorschau. Mustergröße und Quelleneinstellungen
   bleiben erhalten; die Auflösung passt sich innerhalb der Schutzgrenzen an.
-  Zyklische Verlaufsbewegung bleibt ein ausdrücklich gemeldetes Standbild;
+  Zyklische Verlaufsbewegung übernimmt Richtung und Dauer nativ; Aktualisierung
+  und Größenänderung erhalten die Phase. Die sichtbare Zahlenbeschriftung folgt
+  den ursprünglichen Profilregeln, der Tooltip behält die native Formatierung;
   die abweichende Darstellung des fehlerhaften alten SVG-Dateipfads wird
   ebenfalls vor der Neuanlage benannt. Externe und aktive Inhalte bleiben gesperrt.
 - JSLive-Exportpakete 1.0 lassen sich nach Paket-, Quellen-, Archiv- und

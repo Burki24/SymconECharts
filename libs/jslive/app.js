@@ -29,7 +29,7 @@
         if (!current || current.status !== 'ready') { return; }
         if (!chart) { chart = window.echarts.init(element, null, {renderer: 'canvas'}); }
         chart.resize();
-        const option = window.SYMC_JSLIVE_OPTION(current.chart, element.clientWidth, element.clientHeight);
+        const option = window.SYMC_JSLIVE_OPTION(current.chart, element.clientWidth, element.clientHeight, chart);
         if(option.legend){
             const previous=(chart.getOption()||{}).legend;
             if(previous&&previous[0]){option.legend.selected=previous[0].selected;}
@@ -40,6 +40,7 @@
             graphicIDs=ids;
         }
         chart.setOption(option, {notMerge:false,replaceMerge:option.series?['series']:[]});
+        if(window.SYMC_JSLIVE_AFTER_RENDER){window.SYMC_JSLIVE_AFTER_RENDER(chart);}
     }
     function render(state) {
         if (!state || state.status !== 'ready') {
@@ -61,7 +62,7 @@
     };
     if (window.ResizeObserver) { new ResizeObserver(redraw).observe(element); }
     else { window.addEventListener('resize', redraw); }
-    window.addEventListener('beforeunload', function () { if (chart) { chart.dispose(); } });
+    window.addEventListener('beforeunload', function () { if (chart) { if(window.SYMC_JSLIVE_DISPOSE){window.SYMC_JSLIVE_DISPOSE(chart);} chart.dispose(); } });
     const start = sequence;
     const cancelStartup = window.SYMC_ECHARTS_STARTUP(bootstrap, function (state) {
         if (start === sequence) { render(state); }

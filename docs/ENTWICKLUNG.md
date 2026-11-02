@@ -13,9 +13,13 @@ Der zusätzliche unabhängige Browservergleich wird mit
 `node tests/jslive_progress_paints_browser.js <JSLive-Checkout> <Chromium> [1|2|3]`
 ausgeführt. Er liest die unveränderte loading-bar-Engine nur als lokale Referenz,
 prüft ihren bekannten Hash und vergleicht sieben Modelle bei drei Füllständen.
-Die alte Ressourcenbewegung wird für den ausdrücklich gemeldeten Standbild-
-Vergleich eingefroren. Bei Pixeldichte 1 und 2 wurden jeweils 21 Vergleiche
-ohne Farbabweichungen außerhalb der definierten 1px-Kantentoleranz bestätigt.
+Zusätzlich zu 21 statischen Vergleichen prüft er 21 zeitliche Rastervergleiche
+an sieben Phasen einschließlich Zyklusübergang gegen die Translationen der
+unveränderten Originalressource. Drei gleichzeitige Wertanimationen dürfen
+dabei nicht unterbrochen werden. Diese Prüfungen bestehen bei Pixeldichte 1
+und 2 innerhalb der definierten 1px-Kantentoleranz. Deterministische Frame-Tests
+prüfen außerdem Polling, Resize, Verdeckung, Disposal, Dauer null und deaktivierte
+Animationen. Die Zahlenprüfung trennt originale Profiltexte vom nativen Tooltip.
 Der Gegenversuch ohne auflösungsangepasste SVG-Rasterung wird erkannt.
 
 Die Live-Abnahme dieses neuen Adapters nach Eigentümer-Modulupdate steht aus.

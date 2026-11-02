@@ -24,6 +24,58 @@
 (function(root){
     'use strict';
     const lengths=new Map();
+    const animations=new WeakMap();
+    // One bounded native canvas per active paint, one frame loop per chart.
+    // Never execute an SVG resource generator or insert animation markup.
+    function animatedPaint(chart,value,factor,channel){
+        let owner=animations.get(chart);
+        if(!owner){owner={paints:new Map(),active:new Set(),frame:null};animations.set(chart,owner);}
+        owner.active.add(channel);
+        const signature=JSON.stringify(value);
+        let record=owner.paints.get(channel);
+        if(!record||record.signature!==signature){
+            record={signature:signature,value:value,canvas:root.document.createElement('canvas'),start:root.performance.now()};
+            owner.paints.set(channel,record);
+        }
+        record.factor=factor;
+        function draw(now){
+            const p=record.value,canvas=record.canvas,w=Math.ceil(p.width*record.factor),h=Math.ceil(p.height*record.factor);
+            if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
+            const ctx=canvas.getContext('2d'),radians=p.angle*Math.PI/180;
+            let gx=Math.cos(radians)**2,gy=Math.sqrt(Math.max(0,gx-gx**2));
+            if(p.angle>45){gy=Math.sin(radians)**2;gx=Math.sqrt(Math.max(0,gy-gy**2));}
+            const phase=((now-record.start)/(p.duration*1000)%1+1)%1,shift=1-phase;
+            ctx.setTransform(w/100,0,0,h/100,0,0);ctx.clearRect(0,0,100,100);
+            const gradient=ctx.createLinearGradient(-gx*100*shift,-gy*100*shift,gx*(400-100*shift),gy*(400-100*shift));
+            const count=p.colors.length*4;
+            for(let i=0;i<=count;i++){gradient.addColorStop(i/count,p.colors[i%p.colors.length]);}
+            ctx.fillStyle=gradient;ctx.fillRect(0,0,100,100);
+            return {image:canvas,repeat:'repeat',scaleX:p.width/w,scaleY:p.height/h};
+        }
+        record.draw=draw;
+        return draw(root.performance.now());
+    }
+    function stop(chart){const owner=animations.get(chart);if(owner&&owner.frame!==null){root.cancelAnimationFrame(owner.frame);owner.frame=null;}}
+    root.SYMC_JSLIVE_DISPOSE=stop;
+    root.SYMC_JSLIVE_AFTER_RENDER=function(chart){
+        const owner=animations.get(chart);
+        if(!owner){return;}
+        if(!owner.active.size){stop(chart);return;}
+        if(owner.frame!==null){return;}
+        let last=-Infinity;
+        function frame(now){
+            owner.frame=null;
+            if(chart.isDisposed()){owner.paints.clear();return;}
+            if(!owner.active.size){return;}
+            if(!root.document.hidden&&now-last>=1000/30){
+                const style={};owner.active.forEach(function(channel){style[channel]=owner.paints.get(channel).draw(now);});
+                chart.setOption({graphic:[{id:'progress-body',children:[{id:'progress',transition:[],style:style}]}]},{lazyUpdate:false});
+                last=now;
+            }
+            owner.frame=root.requestAnimationFrame(frame);
+        }
+        owner.frame=root.requestAnimationFrame(frame);
+    };
     // Replay the public Canvas path interface to measure paths without depending on zrender private fields.
     function pathLength(path){
         if(lengths.has(path)){return lengths.get(path);}
@@ -103,7 +155,8 @@
             viewBox:[box[0]-padding,box[1]-padding,vw,vh],
             labelX:w/2,labelY:titleSpace+(c.style_fontPosition==='center'?h/2:h+5),fontSize:fontSize};
     }
-    function build(state,width,height){
+    function build(state,width,height,chart){
+        const owner=chart&&animations.get(chart);if(owner){owner.active.clear();}
         const f=root.SYMC_JSLIVE_FORMAT,c=state.settings,d=state.data;
         const presets={line:{path:'M10 10L90 10',box:[10,10,80,10]},rainbow:{path:'M10 10L90 10',box:[10,10,80,10]},
             circle:{path:'M50 10A40 40 0 0 1 50 90A40 40 0 0 1 50 10',box:[10,10,80,80]},
@@ -136,6 +189,7 @@
             // while retaining the source pattern's original coordinate period.
             const factor=typeof root.DOMMatrix==='function'?Math.min(Math.floor(4096/Math.max(value.width,value.height)),
                 Math.max(1,Math.ceil(layout.scale*(root.devicePixelRatio||1)*2))):1;
+            if(chart&&value.kind==='gradient'&&value.duration>0&&c.__animate!==false){return animatedPaint(chart,value,factor,name);}
             if(factor===1){return {image:value.dataUri,repeat:'repeat'};}
             const svg=root.atob(value.dataUri.split(',')[1]).replace(/<svg\b[^>]*>/,function(tag){
                 return tag.replace(/\swidth="[^"]*"/,' width="'+Math.ceil(value.width*factor)+'"')
@@ -187,7 +241,8 @@
         const graphics=[{id:'progress-body',type:'group',x:layout.x,y:layout.y,scaleX:layout.scale,scaleY:layout.scale,children:children}];
         if(title){graphics.push({id:'chart-title',type:'text',style:{text:title,x:width/2,y:4,fontSize:titleSize,
             fontFamily:c.style_fontFamily||'Arial',fill:f.paint(c,'style_fontColor','#000'),align:'center',verticalAlign:'top'}});}
-        if(c.style_fontDisplay){graphics.push({id:'progress-label',type:'text',style:{text:(d.effective.prefix||'')+String(Number(d.displayValue.toPrecision(14)))+(d.effective.suffix||''),
+        const label=d.label||{prefix:'',suffix:''};
+        if(c.style_fontDisplay){graphics.push({id:'progress-label',type:'text',style:{text:label.prefix+String(d.displayValue)+label.suffix,
             x:layout.labelX,y:layout.labelY,
             fill:f.paint(c,'style_fontColor','#000'),fontFamily:c.style_fontFamily||'Times New Roman',fontSize:layout.fontSize,align:'center',verticalAlign:c.style_fontPosition==='center'?'middle':'top',
             textShadowColor:c.style_fontPosition==='center'?'#fff':'transparent',textShadowBlur:c.style_fontPosition==='center'?3:0}});}

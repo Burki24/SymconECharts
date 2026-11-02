@@ -11,9 +11,16 @@ if (!browser || !directory || !path.isAbsolute(browser) || !path.isAbsolute(dire
     throw new Error('Usage: node tests/jslive_browser.js <absolute Chromium executable> <absolute local HTML output directory>');
 }
 const all = process.env.JSLIVE_BROWSER_ALL === '1';
-const cases = process.argv[4]==='--progress' ? Array.from({length:18}, (_,i)=>i+23) : all ? Array.from({length:40}, (_,i)=>i+1) : [6,10,12,16,20,22,28,38,39,40];
+const cases = process.argv[4]==='--paints' ? Array.from({length:7}, (_,i)=>i+23) : process.argv[4]==='--progress' ? Array.from({length:18}, (_,i)=>i+23) : all ? Array.from({length:40}, (_,i)=>i+1) : [6,10,12,16,20,22,28,38,39,40];
 let count=0;
-const instrumentation = `<script>window.__jsliveErrors=[];addEventListener('error',function(e){window.__jsliveErrors.push(String(e.message));});addEventListener('unhandledrejection',function(e){window.__jsliveErrors.push(String(e.reason));});</script>`;
+const instrumentation = `<script>window.__jsliveErrors=[];addEventListener('error',function(e){window.__jsliveErrors.push(String(e.message));});addEventListener('unhandledrejection',function(e){window.__jsliveErrors.push(String(e.reason));});
+// Chromium virtual-time timers do not guarantee compositor frames. Drive only
+// the family paint loop deterministically; leave ECharts' own scheduling real.
+var nativeRAF=requestAnimationFrame,nativeCancel=cancelAnimationFrame,paintID=0,paintFrames=new Map();
+window.requestAnimationFrame=function(callback){if(callback.name==='frame'){paintFrames.set(--paintID,callback);return paintID;}return nativeRAF(callback);};
+window.cancelAnimationFrame=function(id){if(id<0)paintFrames.delete(id);else nativeCancel(id);};
+window.__paintTick=function(now){if(paintFrames.size!==1)throw new Error('Expected one native paint loop, got '+paintFrames.size);var callbacks=Array.from(paintFrames.values());paintFrames.clear();callbacks.forEach(function(callback){callback(now);});};
+</script>`;
 const probe = `<script>setTimeout(function(){
 var b=window.SYMC_VISUALIZATION,e=document.getElementById('echarts-import-chart'),r=document.getElementById('echarts-import-root');
 window.SYMC_ECHARTS_STARTUP(b,async function(state){
@@ -26,6 +33,16 @@ window.handleMessage({status:'error',error:'Synthetic transient archive failure'
 var warningRetained=!document.getElementById('echarts-import-warning').hidden&&!!e.querySelector('canvas');
 window.handleMessage(state);
 var progressTitle=true;
+var paintMoves=true;
+if(state.chart.paints&&Object.values(state.chart.paints).some(function(p){return p.kind==='gradient'&&p.duration>0;})){
+    // Exercise the complete bootstrap/app hook, not just the options function.
+    var canvas=e.querySelector('canvas'),ctx=canvas.getContext('2d'),paintTime=performance.now();window.__paintTick(paintTime);c.getZr().flush();
+    var beforePaint=ctx.getImageData(0,0,canvas.width,canvas.height).data.slice();
+    window.__paintTick(paintTime+250);c.getZr().flush();
+    var afterPaint=ctx.getImageData(0,0,canvas.width,canvas.height).data,changedPixels=0;
+    for(var pi=0;pi<beforePaint.length;pi+=4)if(Math.max(Math.abs(beforePaint[pi]-afterPaint[pi]),Math.abs(beforePaint[pi+1]-afterPaint[pi+1]),Math.abs(beforePaint[pi+2]-afterPaint[pi+2]))>12)changedPixels++;
+    paintMoves=changedPixels>10;
+}
 if(state.chart.family==='progress'){
 var titled=JSON.parse(JSON.stringify(state));titled.chart.settings.title_display=true;titled.chart.settings.title_text='Imported progress title';
 window.handleMessage(titled);progressTitle=JSON.stringify(c.getOption().graphic).includes('Imported progress title');window.handleMessage(state);
@@ -95,7 +112,7 @@ progressPaint.push({dir:dir,ratio:ratio,ink:ink,mismatch:mismatch});
 var pixels=0,ink=0,canvases=e.querySelectorAll('canvas'),pixelError='';
 try{Array.from(canvases).forEach(function(canvas){var p=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;for(var i=0;i<p.length;i+=16){if(p[i+3]>0&&Math.min(p[i],p[i+1],p[i+2])<230){ink++;}if(p[i+3]>0&&Math.max(p[i],p[i+1],p[i+2])-Math.min(p[i],p[i+1],p[i+2])>20){pixels++;}}});}catch(err){pixelError=String(err);}
 var chartRect=e.getBoundingClientRect(),progressFrame=state.chart.family==='progress'?{left:chartRect.x,top:chartRect.y,width:innerWidth-e.clientWidth,height:innerHeight-e.clientHeight}:null;
-var result={errors:window.__jsliveErrors,canvas:canvases.length,pixels:pixels,ink:ink,pixelError:pixelError,gaugePaint:gaugePaint,progressPaint:progressPaint,progressFrame:progressFrame,updates:calls,legendRetained:retained,warningRetained:warningRetained,progressTitle:progressTitle,
+var result={errors:window.__jsliveErrors,canvas:canvases.length,pixels:pixels,ink:ink,pixelError:pixelError,gaugePaint:gaugePaint,progressPaint:progressPaint,progressFrame:progressFrame,updates:calls,legendRetained:retained,warningRetained:warningRetained,progressTitle:progressTitle,paintMoves:paintMoves,
 errorVisible:!document.getElementById('echarts-import-error').hidden,warningVisible:!document.getElementById('echarts-import-warning').hidden,
 fontFailures:Array.from(document.fonts).filter(function(f){return f.status!=='loaded';}).map(function(f){return f.family+':'+f.status;}),
 headerInset:parseFloat(getComputedStyle(r).paddingTop),scrollUnchanged:document.scrollingElement.scrollTop===before};
@@ -130,6 +147,7 @@ for(const index of cases){
         assert.equal(metrics.legendRetained,true,name+': native update reset the selected legend');
         assert.equal(metrics.warningRetained,true,name+': transient failure discarded the previous chart');
         assert.equal(metrics.progressTitle,true,name+': configured Progress title is missing');
+        assert.equal(metrics.paintMoves,true,name+': complete page did not animate its gradient');
         if(index>=15&&index<=22){
             assert.ok(metrics.gaugePaint,name+': gauge pixel probe did not run');
             assert.deepEqual(metrics.gaugePaint.progress,[[34,211,238,255],[34,211,238,255]],name+': solid cyan progress pixels');

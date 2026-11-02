@@ -94,9 +94,9 @@ final class JSLiveProgressPaint
                 throw new InvalidArgumentException('FORMAT_UNSUPPORTED: gradient colors must be explicit hexadecimal colors.');
             }
         }
-        // Reconstruct the pinned loading-bar resource's initial static image,
-        // including its four palette repetitions and default square image size.
-        // The original cyclic movement is reported as a separate approximation.
+        // Retain the initial image for static outputs and old model integrity.
+        // The native renderer animates the validated palette/direction/duration;
+        // the resource itself stays inert, including its four repetitions.
         $radians = deg2rad($angle);
         $gx = cos($radians) ** 2;
         $gy = sqrt(max(0, $gx - $gx ** 2));

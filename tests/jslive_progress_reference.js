@@ -55,7 +55,7 @@ var fonts=new Map();inputs.forEach(function(input){input.chart.resources.forEach
 await Promise.all(Array.from(fonts,function(pair){var face=new FontFace(pair[0],'url(data:font/woff2;base64,'+pair[1]+')');document.fonts.add(face);return face.load();}));
 inputs.forEach(function(input,index){
 configuration=JSON.parse(JSON.stringify(input.chart.settings));value=input.chart.data.displayValue;
-configuration.prefix=input.chart.data.effective.prefix||'';configuration.suffix=input.chart.data.effective.suffix||'';
+configuration.prefix=input.chart.data.label&&input.chart.data.label.prefix||'';configuration.suffix=input.chart.data.label&&input.chart.data.label.suffix||'';
 configuration.stroke_color_rgb={R:configuration.stroke_color>>16&255,G:configuration.stroke_color>>8&255,B:configuration.stroke_color&255};
 configuration.fill_color_rgb={R:configuration.fill_color>>16&255,G:configuration.fill_color>>8&255,B:configuration.fill_color&255};
 ['style_fontColor','stroke_trailColor','fill_backgroundColor'].forEach(function(k){configuration[k]='#'+configuration[k].toString(16).padStart(6,'0');});

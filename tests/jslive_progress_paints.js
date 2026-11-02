@@ -40,3 +40,54 @@ own.settings.shape_svg={dataUri:original,width:100,height:100,viewBox:'0 0 100 1
 const graphic=window.SYMC_JSLIVE_OPTION(own,620,500).graphic[0].children;
 assert.equal(graphic.find(g=>g.id==='image-progress').style.image,original,'Own SVG forms keep their paints instead of receiving a fill override.');
 console.log('JSLive validated paint renderer: '+count+' clipping/scale variants, stable colors and immutable settings passed.');
+
+// Deterministic frame clock: unchanged values must still move, polling/resize
+// must not restart the cycle, and a second render must not create another loop.
+let clock=0,next=0;const frames=new Map();
+window.performance={now:()=>clock};
+window.requestAnimationFrame=callback=>{frames.set(++next,callback);return next;};
+window.cancelAnimationFrame=id=>frames.delete(id);
+window.document={hidden:false,createElement:()=>{
+    const canvas={width:0,height:0};
+    canvas.getContext=()=>({setTransform(){},clearRect(){},fillRect(){},
+        createLinearGradient(...coordinates){canvas.coordinates=coordinates;return {addColorStop(){}};}});
+    return canvas;
+}};
+function tick(time){clock=time;const pending=Array.from(frames.values());frames.clear();pending.forEach(callback=>callback(time));}
+for(const [name,vector] of [['stroke-gradient',[100,0]],['fill-gradient',[0,100]],['reverse',[50,50]]]){
+    clock=0;const state=structuredClone(states[name].chart),before=JSON.stringify(state),channel=state.settings.Type==='stroke'?'stroke':'fill';
+    let disposed=false,latest;
+    const chart={isDisposed:()=>disposed,setOption:option=>{latest=option.graphic[0].children[0].style[channel];}};
+    const build=(w=620,h=500)=>window.SYMC_JSLIVE_OPTION(state,w,h,chart);
+    latest=build().graphic[0].children.find(g=>g.id==='progress').style[channel];
+    assert.equal(typeof latest.image,'object','A live chart needs a native animated canvas.');
+    window.SYMC_JSLIVE_AFTER_RENDER(chart);window.SYMC_JSLIVE_AFTER_RENDER(chart);
+    assert.equal(frames.size,1,'Only one frame loop per chart.');
+    const duration=state.paints[channel].duration*1000;
+    for(const fraction of [0,.25,.5,.75,.98,1,1.25]){
+        tick(duration*fraction);
+        const phase=fraction%1;
+        for(let axis=0;axis<2;axis++){
+            assert.ok(Math.abs(latest.image.coordinates[axis]+vector[axis]*(1-phase))<1e-8,'Original SMIL from=-vector, to=0, linear phase.');
+            assert.ok(Math.abs(latest.image.coordinates[axis+2]-vector[axis]*(3+phase))<1e-8);
+        }
+    }
+    const coordinates=latest.image.coordinates.slice();build(310,240);window.SYMC_JSLIVE_AFTER_RENDER(chart);
+    assert.deepEqual(latest.image.coordinates,coordinates,'Resize/polling retain phase.');
+    assert.equal(frames.size,1);assert.equal(JSON.stringify(state),before);
+    window.document.hidden=true;const old=latest;tick(duration*1.5);assert.equal(latest,old,'Hidden documents do no paint work.');
+    window.document.hidden=false;disposed=true;tick(duration*1.75);assert.equal(frames.size,0,'Disposal ends the loop.');
+}
+const disabled=structuredClone(states['stroke-gradient'].chart);disabled.settings.__animate=false;
+const chart={isDisposed:()=>false,setOption(){throw new Error('Disabled animations must not draw frames.');}};
+window.SYMC_JSLIVE_OPTION(disabled,620,500,chart);window.SYMC_JSLIVE_AFTER_RENDER(chart);assert.equal(frames.size,0);
+const zero=structuredClone(disabled);zero.settings.__animate=true;zero.paints.stroke.duration=0;
+window.SYMC_JSLIVE_OPTION(zero,620,500,chart);window.SYMC_JSLIVE_AFTER_RENDER(chart);assert.equal(frames.size,0);
+const labelState=structuredClone(states['stroke-gradient'].chart);labelState.settings.style_fontDisplay=true;
+labelState.data.displayValue=.3;labelState.data.effective={prefix:'native ',suffix:' %'};
+const label=()=>window.SYMC_JSLIVE_OPTION(labelState,620,500).graphic.find(g=>g.id==='progress-label').style.text;
+assert.equal(label(),'0.3','Native source affixes do not change the original visible number.');
+labelState.data.label={prefix:'legacy ',suffix:' W'};assert.equal(label(),'legacy 0.3 W');
+labelState.data.native.parameters.SUFFIX=' %';
+assert.match(window.SYMC_JSLIVE_OPTION(labelState,620,500).tooltip.formatter(),/%/,'Tooltip retains the full native unit independently of label affixes.');
+console.log('JSLive temporal paints: 21 phase checks, resize, polling, visibility, disposal, disabled/zero duration and original labels passed.');

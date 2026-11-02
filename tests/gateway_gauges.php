@@ -354,7 +354,7 @@ function IPS_GetVariable(int $variableID): array
     return [
         'VariableType'    => $variable['VariableType'],
         'VariableUpdated' => $variable['VariableUpdated']
-    ];
+    ] + array_intersect_key($variable, array_flip(['VariableProfile', 'VariableCustomProfile']));
 }
 
 /** @return array<string, mixed> */

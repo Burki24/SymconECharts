@@ -10,6 +10,7 @@ use SymconECharts\EChartsJSLiveModel;
 use SymconECharts\EChartsJSLivePage;
 use SymconECharts\EChartsJSLivePlan;
 use SymconECharts\EChartsJSLiveRendering;
+use SymconECharts\ProgressData;
 
 function paintAssert(bool $ok, string $message): void
 {
@@ -64,6 +65,28 @@ paintAssert(EChartsImportJson::Canonical($original) === $originalBytes, 'Compili
 paintAssert($states['override-precedence']['chart']['paints']['fill']['kind'] === 'gradient', 'Explicit fill override wins over the file.');
 paintAssert($states['reverse']['chart']['data']['ratio'] > 0.5, 'Signed scale projection remains intact.');
 
+// The template reads the default profile only. Native suffixes and a custom
+// profile must not silently change its visible label; tooltips keep both.
+$originalFormat = ['variable' => ['VariableProfile' => '', 'VariableCustomProfile' => 'Custom'],
+    'profiles'                => ['Custom' => ['Prefix' => 'custom ', 'Suffix' => ' %'], 'Default' => ['Prefix' => 'old ', 'Suffix' => ' W']]];
+paintAssert(ProgressData::SourceLabel($originalFormat) === ['prefix' => '', 'suffix' => ''], 'Custom/native formats do not supply original label affixes.');
+$originalFormat['variable']['VariableProfile'] = 'Default';
+paintAssert(ProgressData::SourceLabel($originalFormat) === ['prefix' => 'old ', 'suffix' => ' W'], 'Original default-profile affixes must be translated literally.');
+$rounding = $compile(['data_min' => -100.0, 'data_max' => 100.0, 'data_precisionCustom' => 0.1]);
+$rounded = ProgressData::Build($rounding, static function (array $query) use ($reader): array
+{
+    $answer = $reader($query);
+    $answer['Value'] = 0.3;
+    return $answer;
+});
+paintAssert($rounded['displayValue'] === 0.3, 'Original reciprocal rounding must not introduce 0.30000000000000004.');
+$oldModel = $rounding;
+unset($oldModel['progressLabel']);
+paintAssert(!isset(EChartsJSLiveModel::Read(EChartsImportJson::Canonical($oldModel), 'progress')['progressLabel']), 'Reading old models must not rewrite their frozen settings.');
+$longLabel = $rounding;
+$longLabel['progressLabel']['prefix'] = str_repeat('X', 8192);
+paintAssert(EChartsJSLiveModel::Read(EChartsImportJson::Canonical($longLabel), 'progress')['progressLabel'] === $longLabel['progressLabel'], 'Label texts share the existing total model budget, not an arbitrary new field limit.');
+
 foreach ([
     ['override_stroke' => 'https://invalid.example/paint.svg'],
     ['override_fill' => 'javascript:alert(1)'],
@@ -93,7 +116,7 @@ foreach ([
 }
 
 // The full native plan must report the new adapter, including the explicit
-// animation approximation and the source's broken extensionless image route.
+// native animation timing and the source's broken extensionless image route.
 foreach ($variants as $name => $changes) {
     $changed = unserialize(serialize($packet));
     foreach ($changes as $key => $value) {
@@ -114,7 +137,7 @@ foreach ($variants as $name => $changes) {
     paintAssert(!$row['blocked'], 'Paint must pass the full native plan: ' . $name);
     $rules = array_column($row['differenceDetails'], 'rule');
     paintAssert(in_array('native-progress-svg-route-1', $rules, true) === ($name === 'svg-file'), 'Only an active native SVG file route needs its source-defect warning.');
-    paintAssert(in_array('native-progress-static-gradient-1', $rules, true) === in_array($name, ['stroke-gradient', 'fill-gradient', 'reverse'], true), 'Independent gradient motion must be explicitly reported.');
+    paintAssert(in_array('native-progress-cyclic-gradient-1', $rules, true) === in_array($name, ['stroke-gradient', 'fill-gradient', 'reverse'], true), 'Independent native gradient timing must be explicitly reported.');
     paintAssert(in_array('native-progress-validated-paint-1', $rules, true), 'Paints must have an audited field mapping.');
 }
 $tampered = $compile($variants['svg-file']);
@@ -126,7 +149,22 @@ try {
     paintAssert(str_starts_with($exception->getMessage(), 'PACKAGE_INVALID:'), 'Unexpected derived-paint rejection.');
 }
 
-if (($argv[1] ?? '') === '--emit') {
+if (($argv[1] ?? '') === '--html') {
+    $directory = $argv[2] ?? '';
+    if (!is_dir($directory) && !mkdir($directory, 0700, true)) {
+        throw new RuntimeException('Unable to create paint HTML directory.');
+    }
+    $index = 23;
+    foreach ($states as $state) {
+        foreach ([false, true] as $ipsView) {
+            file_put_contents(
+                $directory . '/case-' . $index . ($ipsView ? '-ipsview' : '-tile') . '.html',
+                EChartsJSLivePage::Render($state, $ipsView, ['tileHeaderInset' => $ipsView ? 0 : 58])
+            );
+        }
+        ++$index;
+    }
+} elseif (($argv[1] ?? '') === '--emit') {
     echo EChartsImportJson::Canonical($states);
 } else {
     echo "JSLive progress paint validation, model reload, precedence, original preservation and both outputs passed.\n";
