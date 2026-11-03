@@ -2,6 +2,11 @@
 
 ## Neu
 
+- Die Migrationsanleitung zeigt 14 bereitgestellte JSLive-/ECharts-
+  Vergleichspaare und vier echte Formularausschnitte für Export, Paketprüfung,
+  Planvorbereitung und Bestätigung. Die Haupt-README enthält ausgewählte
+  Gegenüberstellungen und verlinkt die vollständige Galerie.
+
 - Alle Installationsanleitungen nennen den Symcon-Modulstore und den
   Eintragsnamen **SymconECharts** statt einer Installation über die Repository-URL.
 
