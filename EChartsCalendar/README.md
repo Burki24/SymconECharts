@@ -6,7 +6,8 @@ historischen Zeitraum. Jedes Feld steht für einen Kalendertag. Es kann als
 native Symcon-Kachel und optional als eigenständiges IPSView-HTML-Widget
 verwendet werden.
 
-Voraussetzungen und Installation: [SymconECharts](../README.md#voraussetzungen)
+Installation: Im **Symcon-Modulstore** nach **SymconECharts** suchen.
+[Voraussetzungen und Einrichtung](../README.md#installation-und-erstes-diagramm)
 (IP-Symcon 9.0/9.1, PHP 8.5, gemeinsames Gateway).
 Alle technischen Felder, Standardwerte und Quellenparameter stehen in der
 [Konfigurationsreferenz](../docs/KONFIGURATION.md#echartscalendar).

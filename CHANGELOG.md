@@ -2,6 +2,11 @@
 
 ## Neu
 
+- Alle Installationsanleitungen nennen den Symcon-Modulstore und den
+  Eintragsnamen **SymconECharts** statt einer Installation über die Repository-URL.
+
+- Die Haupt-README zeigt das bereitgestellte SymconECharts-Titelbild.
+
 - Die Benutzeranleitungen sind vereinheitlicht und um eine zentrale
   Konfigurationsreferenz mit Standardwerten, Quellenfeldern und vollständigen
   Skriptsignaturen ergänzt. Ein eigenes Migrationskapitel führt durch die

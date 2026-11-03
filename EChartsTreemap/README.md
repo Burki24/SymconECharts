@@ -4,7 +4,8 @@
 einer nativen Kachel und optional in einem IPSView-HTML-Widget. Große Werte
 erhalten größere Flächen.
 
-Voraussetzungen und Installation: [SymconECharts](../README.md#voraussetzungen)
+Installation: Im **Symcon-Modulstore** nach **SymconECharts** suchen.
+[Voraussetzungen und Einrichtung](../README.md#installation-und-erstes-diagramm)
 (IP-Symcon 9.0/9.1, PHP 8.5, gemeinsames Gateway).
 Alle technischen Felder, Standardwerte und Quellenparameter stehen in der
 [Konfigurationsreferenz](../docs/KONFIGURATION.md#echartstreemap).

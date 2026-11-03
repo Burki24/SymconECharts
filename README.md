@@ -6,6 +6,8 @@
 [![Check Style](https://github.com/Burki24/SymconECharts/actions/workflows/style.yml/badge.svg?branch=dev)](https://github.com/Burki24/SymconECharts/actions/workflows/style.yml?query=branch%3Adev)
 [![Tests](https://github.com/Burki24/SymconECharts/actions/workflows/tests.yml/badge.svg?branch=dev)](https://github.com/Burki24/SymconECharts/actions/workflows/tests.yml?query=branch%3Adev)
 
+![SymconECharts – Deine Daten. Dein Überblick. Diagramme für Symcon und IPSView.](docs/images/symconecharts-readme-hero.png)
+
 SymconECharts stellt aktuelle und archivierte Symcon-Werte sowie ausgewählte
 Objektbeziehungen als responsive Apache-ECharts-Diagramme dar. Die Library
 enthält **31 Diagrammmodule und ein gemeinsames Gateway**. Native Symcon-Kacheln
@@ -25,12 +27,8 @@ Design kann gemeinsam oder unabhängig eingestellt werden.
 
 ## Installation und erstes Diagramm
 
-1. Die Library in der Symcon-Modulverwaltung über diese Repository-URL hinzufügen:
-
-   ```text
-   https://github.com/Burki24/SymconECharts
-   ```
-
+1. Den **Symcon-Modulstore** öffnen, nach **SymconECharts** suchen und die
+   Library installieren. Sie enthält das Gateway und alle Diagrammmodule.
 2. Eine Instanz der gewünschten Diagrammfamilie anlegen. Beim ersten Diagramm
    ein `EChartsGateway` als Parent erstellen; weitere Diagramme mit diesem
    vorhandenen Gateway verbinden. Zusätzliche Gateways sind zulässig, im

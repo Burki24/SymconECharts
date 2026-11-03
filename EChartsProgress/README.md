@@ -10,7 +10,8 @@ verwenden Sie [EChartsPictorialBar](../EChartsPictorialBar/README.md).
 Aufnahme einer übernommenen JSLive-Testinstanz aus der nativen Kachelausgabe.
 Die Farben und die Form stammen aus dem geprüften Importmodell.
 
-Voraussetzungen und Installation: [SymconECharts](../README.md#voraussetzungen)
+Installation: Im **Symcon-Modulstore** nach **SymconECharts** suchen.
+[Voraussetzungen und Einrichtung](../README.md#installation-und-erstes-diagramm)
 (IP-Symcon 9.0/9.1, PHP 8.5, gemeinsames Gateway).
 Alle technischen Felder, Standardwerte und Quellenparameter stehen in der
 [Konfigurationsreferenz](../docs/KONFIGURATION.md#echartsprogress).

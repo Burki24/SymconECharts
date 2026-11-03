@@ -46,12 +46,8 @@ zusätzliche Archivinstanz oder eigene Datenbank ist nicht vorgesehen.
 Das Gateway ist Bestandteil der gemeinsamen Library **SymconECharts** und
 wird nicht als getrennte Library installiert.
 
-Die Library wird in der Modulverwaltung über folgende Repository-URL
-installiert:
-
-```text
-https://github.com/Burki24/SymconECharts
-```
+Im **Symcon-Modulstore** nach **SymconECharts** suchen und die Library
+installieren. Sie enthält das Gateway und alle Diagrammmodule.
 
 ## 4. Einrichten der Instanzen in Symcon
 

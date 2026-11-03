@@ -510,5 +510,11 @@ für SymconECharts. Projektspezifische Ziele und der vorhandene Stand stehen in
   `php tests/quality.php --fix` auszuführen. Der Befehl korrigiert ausschließlich
   mechanische PHP- und JSON-Formatierung und prüft danach jeden Style-, Syntax-,
   Vertrags-, Integrations- und Layoutschritt mit eigenem Fehlerstatus erneut.
+- Ausnahme gemäß Eigentümervorgabe: Bei reinen Änderungen der
+  Benutzerdokumentation einschließlich README-Bildern und begleitender
+  Changelogpflege entfällt die vollständige Qualitätssuite. Stattdessen werden
+  die betroffenen Verweise, Bilddateien, Dokumentstruktur, UTF-8/LF und
+  `git diff --check` gezielt geprüft. Änderungen an Code, Verträgen oder
+  Laufzeitkonfigurationen fallen nicht unter diese Ausnahme.
 - Bei commitbereiten Änderungen werden Commit-Betreff und Commit-Erläuterung
   immer auf Englisch und in zwei getrennten kopierbaren Textblöcken geliefert.

@@ -4,7 +4,8 @@
 einem gemeinsamen Chronographen. Die erste Quelle bildet das Hauptinstrument;
 bis zu vier weitere Quellen erscheinen als eingebettete Hilfszifferblätter.
 
-Voraussetzungen und Installation: [SymconECharts](../README.md#voraussetzungen)
+Installation: Im **Symcon-Modulstore** nach **SymconECharts** suchen.
+[Voraussetzungen und Einrichtung](../README.md#installation-und-erstes-diagramm)
 (IP-Symcon 9.0/9.1, PHP 8.5, gemeinsames Gateway).
 Alle technischen Felder, Standardwerte und Quellenparameter stehen in der
 [Konfigurationsreferenz](../docs/KONFIGURATION.md#echartsgaugechronograph).
@@ -50,8 +51,8 @@ Im Kachel- und unabhängigen IPSView-Designer steuern **Animation**, **Startanim
 
 ## Installation und Einrichtung
 
-Das Modul wird mit der Library **SymconECharts** installiert. Für jeden
-Chronographen wird eine EChartsGaugeChronograph-Instanz angelegt und mit dem
+Das Modul wird über den **Symcon-Modulstore** mit der Library **SymconECharts**
+installiert. Für jeden Chronographen wird eine EChartsGaugeChronograph-Instanz angelegt und mit dem
 gemeinsamen Gateway verbunden. Anschließend werden die Quellen in der
 gewünschten Anzeigereihenfolge hinzugefügt.
 

@@ -6,7 +6,8 @@ vier weitere Quellen werden als gleich große Nebeninstrumente angeordnet. Bei
 vier und fünf Quellen nutzt eine eigene Anordnung den verfügbaren Platz breiter
 Kacheln aus, ohne das Hauptinstrument zu verkleinern.
 
-Voraussetzungen und Installation: [SymconECharts](../README.md#voraussetzungen)
+Installation: Im **Symcon-Modulstore** nach **SymconECharts** suchen.
+[Voraussetzungen und Einrichtung](../README.md#installation-und-erstes-diagramm)
 (IP-Symcon 9.0/9.1, PHP 8.5, gemeinsames Gateway).
 Alle technischen Felder, Standardwerte und Quellenparameter stehen in der
 [Konfigurationsreferenz](../docs/KONFIGURATION.md#echartsgaugetacho).
@@ -52,8 +53,8 @@ Im Kachel- und unabhängigen IPSView-Designer steuern **Animation**, **Startanim
 
 ## Installation und Einrichtung
 
-Das Modul wird mit der Library **SymconECharts** installiert. Für jedes
-Tacho-Cockpit wird eine EChartsGaugeTacho-Instanz angelegt und mit dem
+Das Modul wird über den **Symcon-Modulstore** mit der Library **SymconECharts**
+installiert. Für jedes Tacho-Cockpit wird eine EChartsGaugeTacho-Instanz angelegt und mit dem
 gemeinsamen Gateway verbunden. Anschließend werden die Quellen in der
 gewünschten Anzeigereihenfolge hinzugefügt.
 

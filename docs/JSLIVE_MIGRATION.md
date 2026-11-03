@@ -63,7 +63,8 @@ das Paket macht sie nicht zu ausführbaren ECharts-Vorlagen.
 
 ## 2. Paket und Zuordnungen prüfen
 
-1. SymconECharts installieren beziehungsweise aktualisieren und das gemeinsame
+1. Im **Symcon-Modulstore** den Eintrag **SymconECharts** installieren
+   beziehungsweise aktualisieren und das gemeinsame
    [EChartsGateway](../EChartsGateway/README.md) öffnen.
 2. Unter **JSLive-Export und Metadatenprüfung** die Exportdatei auswählen.
    Diese erste Prüfung erzeugt noch keine Instanzen.

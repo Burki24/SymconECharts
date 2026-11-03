@@ -6,7 +6,8 @@ eindeutige numerische Symcon-Variablen mit derselben effektiven Einheit.
 Die erste Quelle ist der Startwert; bis zu 99 weitere Quellen sind standardmäßig Änderungen.
 Die berechnete Endsumme ist keine zusätzliche Quellvariable.
 
-Voraussetzungen und Installation: [SymconECharts](../README.md#voraussetzungen)
+Installation: Im **Symcon-Modulstore** nach **SymconECharts** suchen.
+[Voraussetzungen und Einrichtung](../README.md#installation-und-erstes-diagramm)
 (IP-Symcon 9.0/9.1, PHP 8.5, gemeinsames Gateway).
 Alle technischen Felder, Standardwerte und Quellenparameter stehen in der
 [Konfigurationsreferenz](../docs/KONFIGURATION.md#echartsbarwaterfall).

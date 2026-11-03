@@ -1,5 +1,13 @@
 # Dokumentationsbilder
 
+## Titelbild
+
+[symconecharts-readme-hero.png](symconecharts-readme-hero.png) ist das vom
+Eigentümer bereitgestellte Titelbild für die Haupt-README. Es wurde unverändert
+übernommen und ist eine gestaltete Produktillustration, kein reiner Screenshot.
+
+## Aufnahmen aus der Testinstallation
+
 Die JPEG-Aufnahmen vom 03.11.2026 stammen aus der per MCP verbundenen
 Testinstallation. Sie zeigen vorhandene, bereits übernommene JSLive-Testmodelle
 in der nativen ECharts-HTML-Kachelausgabe, gerendert durch die MCP-Kachelvorschau.
