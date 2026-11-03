@@ -119,7 +119,7 @@
   ab. Bestehende Instanzen, Quellen und Archivwerte bleiben unverändert.
 
 <!-- symconecharts:prepared-beta -->
-# 31.10.2026 - Version 1.387 (Beta)
+# 31.10.2026 - Version 1.388 (Beta)
 
 Vorbereiteter Stand für die erste Beta; die Veröffentlichung im Module Store
 steht noch aus.
